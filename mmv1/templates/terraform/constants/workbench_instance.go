@@ -55,6 +55,7 @@ var WorkbenchInstanceProvidedMetadata = []string{
 	"notebooks-api-version",
 	"notebooks-examples-location",
 	"notebooks-location",
+	"nvidia-driver-gcs-path",
 	"proxy-mode",
 	"proxy-status",
 	"proxy-url",
