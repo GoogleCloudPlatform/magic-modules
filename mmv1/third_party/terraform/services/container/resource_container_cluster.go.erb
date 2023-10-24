@@ -2043,9 +2043,7 @@ func ResourceContainerCluster() *schema.Resource {
 			"fleet": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Computed:    true,
 				MaxItems:    1,
-				ConfigMode: schema.SchemaConfigModeAttr,
 				Description: `Fleet configuration of the cluster.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -2053,7 +2051,6 @@ func ResourceContainerCluster() *schema.Resource {
 							Type:         schema.TypeString,
 							Optional:     true,
 							Computed:     true,
-							ConfigMode:   schema.SchemaConfigModeAttr,
 							Description:  `The Fleet host project of the cluster.`,
 						},
                                           	"membership": {
