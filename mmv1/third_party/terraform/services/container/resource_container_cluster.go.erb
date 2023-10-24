@@ -3938,21 +3938,19 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	}
 
 	if d.HasChange("fleet") {
-		if fleet, ok := d.GetOk("fleet"); ok {
-			req := &container.UpdateClusterRequest{
-				Update: &container.ClusterUpdate{
-					DesiredFleet: expandFleet(fleet),
-				},
-			}
-
-			updateF := updateFunc(req, "updating GKE fleet config")
-			// Call update serially.
-			if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
-				return err
-			}
-
-			log.Printf("[INFO] GKE cluster %s fleet config has been updated", d.Id())
+		req := &container.UpdateClusterRequest{
+			Update: &container.ClusterUpdate{
+				DesiredFleet: expandFleet(fleet),
+			},
 		}
+
+		updateF := updateFunc(req, "updating GKE fleet config")
+		// Call update serially.
+		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] GKE cluster %s fleet config has been updated", d.Id())
 	}
 
 	if d.HasChange("enable_k8s_beta_apis") {
