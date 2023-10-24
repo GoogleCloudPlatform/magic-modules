@@ -2045,13 +2045,15 @@ func ResourceContainerCluster() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 				MaxItems:    1,
+				ConfigMode: schema.SchemaConfigModeAttr,
 				Description: `Fleet configuration of the cluster.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"project": {
 							Type:         schema.TypeString,
-							Optional:    true,
-							Computed:    true,
+							Optional:     true,
+							Computed:     true,
+							ConfigMode:   schema.SchemaConfigModeAttr,
 							Description:  `The Fleet host project of the cluster.`,
 						},
                                           	"membership": {
