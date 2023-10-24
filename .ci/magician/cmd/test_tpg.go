@@ -45,10 +45,11 @@ func execTestTPG(version, commit, pr string, gh ttGithub) {
 	}
 
 	if err := gh.CreateWorkflowDispatchEvent("test-tpg.yml", map[string]any{
-		"owner":  "modular-magician",
-		"repo":   repo,
-		"branch": "auto-pr-" + pr,
-		"sha":    commit,
+		"owner":     "modular-magician",
+		"repo":      repo,
+		"branch":    "auto-pr-" + pr,
+		"sha":       commit,
+		"caller_id": os.Getenv("BUILD_ID"),
 	}); err != nil {
 		fmt.Printf("Error creating workflow dispatch event: %v\n", err)
 		os.Exit(1)
