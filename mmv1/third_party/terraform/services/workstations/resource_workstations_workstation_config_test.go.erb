@@ -28,7 +28,7 @@ func TestAccWorkstationsWorkstationConfig_basic(t *testing.T) {
 				ResourceName:            "google_workstations_workstation_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag"},
+				ImportStateVerifyIgnore: []string{"etag", "labels", "terraform_labels"},
 			},
 		},
 	})
@@ -95,7 +95,7 @@ func TestAccWorkstationsWorkstationConfig_displayName(t *testing.T) {
 				ResourceName:            "google_workstations_workstation_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag"},
+				ImportStateVerifyIgnore: []string{"etag", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccWorkstationsWorkstationConfig_displayName(context, "2"),
@@ -104,7 +104,7 @@ func TestAccWorkstationsWorkstationConfig_displayName(t *testing.T) {
 				ResourceName:            "google_workstations_workstation_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag"},
+				ImportStateVerifyIgnore: []string{"etag", "labels", "terraform_labels"},
 			},
 		},
 	})
@@ -172,7 +172,7 @@ func TestAccWorkstationsWorkstationConfig_persistentDirectories(t *testing.T) {
 				ResourceName:            "google_workstations_workstation_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag"},
+				ImportStateVerifyIgnore: []string{"etag", "labels", "terraform_labels"},
 			},
 		},
 	})
@@ -223,6 +223,81 @@ resource "google_workstations_workstation_config" "default" {
 `, context)
 }
 
+
+func TestAccWorkstationsWorkstationConfig_serviceAccount(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckWorkstationsWorkstationConfigDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccWorkstationsWorkstationConfig_serviceAccount(context),
+			},
+			{
+				ResourceName:            "google_workstations_workstation_cluster.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag"},
+			},
+		},
+	})
+}
+
+func testAccWorkstationsWorkstationConfig_serviceAccount(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+  resource "google_compute_network" "default" {
+    provider                = google-beta
+    name                    = "tf-test-workstation-cluster%{random_suffix}"
+    auto_create_subnetworks = false
+  }
+  
+  resource "google_compute_subnetwork" "default" {
+    provider      = google-beta
+    name          = "tf-test-workstation-cluster%{random_suffix}"
+    ip_cidr_range = "10.0.0.0/24"
+    region        = "us-central1"
+    network       = google_compute_network.default.name
+  }
+  
+  resource "google_workstations_workstation_cluster" "default" {
+    provider                   = google-beta
+    workstation_cluster_id     = "tf-test-workstation-cluster%{random_suffix}"
+    network                    = google_compute_network.default.id
+    subnetwork                 = google_compute_subnetwork.default.id
+    location                   = "us-central1"
+  }
+  
+  resource "google_service_account" "default" {
+    provider = google-beta
+  
+    account_id   = "tf-test-my-account%{random_suffix}"
+    display_name = "Service Account"
+  }
+  
+  resource "google_workstations_workstation_config" "default" {
+    provider               = google-beta
+    workstation_config_id  = "tf-test-workstation-config%{random_suffix}"
+    workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
+    location               = "us-central1"
+
+    enable_audit_agent     = true
+  
+    host {
+      gce_instance {  
+        service_account             = google_service_account.default.email
+        service_account_scopes      = ["https://www.googleapis.com/auth/cloud-platform"]
+      }
+    }
+  }
+`, context)
+}
+
 func TestAccWorkstationsWorkstationConfig_update(t *testing.T) {
 	t.Parallel()
 
@@ -242,7 +317,7 @@ func TestAccWorkstationsWorkstationConfig_update(t *testing.T) {
 				ResourceName:            "google_workstations_workstation_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag"},
+				ImportStateVerifyIgnore: []string{"etag", "annotations", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccWorkstationsWorkstationConfig_update(context),
@@ -251,7 +326,7 @@ func TestAccWorkstationsWorkstationConfig_update(t *testing.T) {
 				ResourceName:            "google_workstations_workstation_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag"},
+				ImportStateVerifyIgnore: []string{"etag", "annotations", "labels", "terraform_labels"},
 			},
       {
 				Config: testAccWorkstationsWorkstationConfig_workstationConfigBasicExample(context),
@@ -260,7 +335,7 @@ func TestAccWorkstationsWorkstationConfig_update(t *testing.T) {
 				ResourceName:            "google_workstations_workstation_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag"},
+				ImportStateVerifyIgnore: []string{"etag", "annotations", "labels", "terraform_labels"},
 			},
 		},
 	})
@@ -387,6 +462,13 @@ resource "google_workstations_workstation_cluster" "default" {
   location                   = "us-central1"
 }
 
+resource "google_service_account" "default" {
+  provider = google-beta
+
+  account_id   = "tf-test-my-account%{random_suffix}"
+  display_name = "Service Account"
+}
+
 resource "google_workstations_workstation_config" "default" {
   provider               = google-beta
   workstation_config_id  = "tf-test-workstation-config%{random_suffix}"
@@ -399,6 +481,7 @@ resource "google_workstations_workstation_config" "default" {
       boot_disk_size_gb           = 35
       pool_size                   = 0
 
+      service_account             = google_service_account.default.email
       disable_public_ip_addresses = false
 
       shielded_instance_config {

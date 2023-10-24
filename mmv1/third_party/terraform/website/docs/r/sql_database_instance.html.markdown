@@ -471,7 +471,7 @@ to work, cannot be updated, and supports:
 
 * `password` - (Optional) Password for the replication connection.
 
-* `sslCipher` - (Optional) Permissible ciphers for use in SSL encryption.
+* `ssl_cipher` - (Optional) Permissible ciphers for use in SSL encryption.
 
 * `username` - (Optional) Username for replication connection.
 
@@ -485,6 +485,8 @@ The optional `clone` block supports:
 * `point_in_time` -  (Optional) The timestamp of the point in time that should be restored.
 
     A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+
+* `preferred_zone` - (Optional) (Point-in-time recovery for PostgreSQL only) Clone to an instance in the specified zone. If no zone is specified, clone to the same zone as the source instance. [clone-unavailable-instance](https://cloud.google.com/sql/docs/postgres/clone-instance#clone-unavailable-instance)
 
 * `database_names` - (Optional) (SQL Server only, use with `point_in_time`) Clone only the specified databases from the source instance. Clone all databases if empty.
 
@@ -573,11 +575,25 @@ performing filtering in a Terraform config.
 
 Database instances can be imported using one of any of these accepted formats:
 
-```
-$ terraform import google_sql_database_instance.main projects/{{project}}/instances/{{name}}
-$ terraform import google_sql_database_instance.main {{project}}/{{name}}
-$ terraform import google_sql_database_instance.main {{name}}
+* `projects/{{project}}/instances/{{name}}`
+* `{{project}}/{{name}}`
+* `{{name}}`
 
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import Database instances using one of the formats above. For example:
+
+```tf
+import {
+  id = "projects/{{project}}/instances/{{name}}"
+  to = google_sql_database_instance.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), Database instances can be imported using one of the formats above. For example:
+
+```
+$ terraform import google_sql_database_instance.default projects/{{project}}/instances/{{name}}
+$ terraform import google_sql_database_instance.default {{project}}/{{name}}
+$ terraform import google_sql_database_instance.default {{name}}
 ```
 
 ~> **NOTE:** Some fields (such as `replica_configuration`) won't show a diff if they are unset in

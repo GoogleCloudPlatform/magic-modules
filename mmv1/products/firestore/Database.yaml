@@ -22,7 +22,9 @@ description: |
 
   If you wish to use Firestore with App Engine, use the
   [`google_app_engine_application`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/app_engine_application)
-  resource instead.
+  resource instead. If you were previously using the `google_app_engine_application` resource exclusively for managing a Firestore database
+  and would like to use the `google_firestore_database` resource instead, please follow the instructions
+  [here](https://cloud.google.com/firestore/docs/app-engine-requirement).
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/firestore/docs/'
@@ -99,6 +101,10 @@ examples:
       - etag
     vars:
       project_id: 'my-project'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'firestore_database_with_delete_protection'
+    primary_resource_id: 'database'
+    skip_test: true
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -117,7 +123,7 @@ properties:
     name: locationId
     required: true
     description: |
-      The location of the database. Available databases are listed at
+      The location of the database. Available locations are listed at
       https://cloud.google.com/firestore/docs/locations.
     immutable: true
   - !ruby/object:Api::Type::Enum
@@ -167,17 +173,36 @@ properties:
       that is returned from the Cloud Datastore APIs in Google App Engine first generation runtimes.
       This value may be empty in which case the appid to use for URL-encoded keys is the project_id (eg: foo instead of v~foo).
     output: true
+  - !ruby/object:Api::Type::Enum
+    name: deleteProtectionState
+    description: |
+      State of delete protection for the database.
+    values:
+      - :DELETE_PROTECTION_STATE_UNSPECIFIED
+      - :DELETE_PROTECTION_ENABLED
+      - :DELETE_PROTECTION_DISABLED
+    default_from_api: true
   - !ruby/object:Api::Type::Fingerprint
     name: etag
     description: |
-      This checksum is computed by the server based on the value of other fields,
+      Output only. This checksum is computed by the server based on the value of other fields,
       and may be sent on update and delete requests to ensure the client has an
       up-to-date value before proceeding.
     output: true
   - !ruby/object:Api::Type::String
     name: create_time
     description: |
-      The timestamp at which this database was created.
+      Output only. The timestamp at which this database was created.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: update_time
+    description: |
+      Output only. The timestamp at which this database was most recently updated.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: uid
+    description: |
+      Output only. The system-generated UUID4 for this Database.
     output: true
   - !ruby/object:Api::Type::String
     name: versionRetentionPeriod

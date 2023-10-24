@@ -57,12 +57,12 @@
           "labels": null,
           "name": "spanner-instance",
           "num_nodes": 1,
-          "timeouts": null
+          "timeouts": null,
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "id": true,
           "processing_units": true,
-          "project": true,
           "state": true
         },
         "before_sensitive": false,
@@ -82,12 +82,12 @@
         "before": null,
         "after": {
           "instance": "spanner-instance",
-          "policy_data": "{\"bindings\":[{\"members\":[\"user:jane@example.com\"],\"role\":\"roles/editor\"}]}"
+          "policy_data": "{\"bindings\":[{\"members\":[\"user:jane@example.com\"],\"role\":\"roles/editor\"}]}",
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "etag": true,
-          "id": true,
-          "project": true
+          "id": true
         },
         "before_sensitive": false,
         "after_sensitive": {}

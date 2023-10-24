@@ -28,7 +28,7 @@ func TestAccWorkstationsWorkstation_update(t *testing.T) {
 				ResourceName:            "google_workstations_workstation_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag"},
+				ImportStateVerifyIgnore: []string{"etag", "labels", "terraform_labels"},
 			},
       {
 				Config: testAccWorkstationsWorkstation_modified(context),
@@ -37,7 +37,7 @@ func TestAccWorkstationsWorkstation_update(t *testing.T) {
 				ResourceName:            "google_workstations_workstation_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag"},
+				ImportStateVerifyIgnore: []string{"etag", "labels", "terraform_labels"},
 			},
 		},
 	})
@@ -88,6 +88,10 @@ resource "google_workstations_workstation" "default" {
   labels = {
 	  foo = "bar"
   }
+
+  env = {
+    name = "bar"
+  }
 }
 `, context)
 }
@@ -136,6 +140,10 @@ resource "google_workstations_workstation" "default" {
 
   labels = {
 	  foo = "bar"
+  }
+
+  env = {
+    name = "test"
   }
 }
 `, context)

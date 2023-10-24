@@ -54,14 +54,14 @@
           "region": null,
           "timeouts": null,
           "topic": "my-topic",
-          "zone": "us-central1a"
+          "zone": "us-central1a",
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "delivery_config": [
             {}
           ],
-          "id": true,
-          "project": true
+          "id": true
         },
         "before_sensitive": false,
         "after_sensitive": {

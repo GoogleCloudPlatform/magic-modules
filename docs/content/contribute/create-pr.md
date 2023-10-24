@@ -23,8 +23,9 @@ weight: 10
 {{< hint info >}}
 **TIP:** Speeding up review:
 1. Resolve failed [status checks](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/about-status-checks) quickly
+   - [Run provider tests locally]({{< ref "/develop/run-tests" >}}) to iterate faster
    - Ask your reviewer for help if you get stuck.
-1. [Self-review your PR]({{< ref "/contribute/review-pr" >}}") or ask someone you know to review
+1. [Self-review your PR]({{< ref "/contribute/review-pr" >}}) or ask someone you know to review
 {{< /hint >}}
 
 

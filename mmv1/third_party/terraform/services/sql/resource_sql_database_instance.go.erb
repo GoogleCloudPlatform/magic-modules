@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"reflect"
 	"strings"
 	"time"
 
@@ -15,7 +16,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/hashicorp/terraform-provider-google/google/services/servicenetworking"
 	"github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/services/servicenetworking"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -42,6 +42,21 @@ var sqlDatabaseAuthorizedNetWorkSchemaElem *schema.Resource = &schema.Resource{
 		"value": {
 			Type:     schema.TypeString,
 			Required: true,
+		},
+	},
+}
+
+var sqlDatabaseFlagSchemaElem *schema.Resource = &schema.Resource{
+	Schema: map[string]*schema.Schema{
+		"value": {
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: `Value of the flag.`,
+		},
+		"name": {
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: `Name of the flag.`,
 		},
 	},
 }
@@ -119,6 +134,7 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 		},
 
 		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderProject,
 			customdiff.ForceNewIfChange("settings.0.disk_size", compute.IsDiskShrinkage),
 			customdiff.ForceNewIfChange("master_instance_name", isMasterInstanceNameSet),
 			customdiff.IfValueChange("instance_type", isReplicaPromoteRequested, checkPromoteConfigurationsAndUpdateDiff),
@@ -161,6 +177,7 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 						"edition": {
 							Type:         schema.TypeString,
 							Optional:     true,
+							Default:      "ENTERPRISE",
 							ValidateFunc: validation.StringInSlice([]string{"ENTERPRISE", "ENTERPRISE_PLUS"}, false),
 							Description:  `The edition of the instance, can be ENTERPRISE or ENTERPRISE_PLUS.`,
 						},
@@ -362,22 +379,10 @@ is set to true. Defaults to ZONAL.`,
 							Description:      `The name of server instance collation.`,
 						},
 						"database_flags": {
-							Type:     schema.TypeList,
+							Type:     schema.TypeSet,
 							Optional: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"value": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: `Value of the flag.`,
-									},
-									"name": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: `Name of the flag.`,
-									},
-								},
-							},
+							Set:      schema.HashResource(sqlDatabaseFlagSchemaElem),
+							Elem:     sqlDatabaseFlagSchemaElem,
 						},
 						"disk_autoresize": {
 							Type:             schema.TypeBool,
@@ -946,6 +951,11 @@ is set to true. Defaults to ZONAL.`,
 							DiffSuppressFunc: tpgresource.TimestampDiffSuppress(time.RFC3339Nano),
 							Description:      `The timestamp of the point in time that should be restored.`,
 						},
+						"preferred_zone": {
+    						Type:        	  schema.TypeString,
+    						Optional:         true,
+    						Description:      `(Point-in-time recovery for PostgreSQL only) Clone to an instance in the specified zone. If no zone is specified, clone to the same zone as the source instance.`,
+   						},
 						"database_names": {
 							Type:             schema.TypeList,
 							Optional:         true,
@@ -1261,7 +1271,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, databaseVersion
 		DeletionProtectionEnabled:  _settings["deletion_protection_enabled"].(bool),
 		UserLabels:                 tpgresource.ConvertStringMap(_settings["user_labels"].(map[string]interface{})),
 		BackupConfiguration:        expandBackupConfiguration(_settings["backup_configuration"].([]interface{})),
-		DatabaseFlags:              expandDatabaseFlags(_settings["database_flags"].([]interface{})),
+		DatabaseFlags:              expandDatabaseFlags(_settings["database_flags"].(*schema.Set).List()),
 		IpConfiguration:            expandIpConfiguration(_settings["ip_configuration"].([]interface{}), databaseVersion),
 		LocationPreference:         expandLocationPreference(_settings["location_preference"].([]interface{})),
 		MaintenanceWindow:          expandMaintenanceWindow(_settings["maintenance_window"].([]interface{})),
@@ -1317,6 +1327,7 @@ func expandCloneContext(configured []interface{}) (*sqladmin.CloneContext, strin
 
 	return &sqladmin.CloneContext{
 		PointInTime: _cloneConfiguration["point_in_time"].(string),
+		PreferredZone: _cloneConfiguration["preferred_zone"].(string),
 		DatabaseNames: databaseNames,
 		AllocatedIpRange: _cloneConfiguration["allocated_ip_range"].(string),
 	}, _cloneConfiguration["source_instance_name"].(string)
@@ -1995,7 +2006,7 @@ func flattenSettings(settings *sqladmin.Settings) []map[string]interface{} {
 	data := map[string]interface{}{
 		"version":                      settings.SettingsVersion,
 		"tier":                         settings.Tier,
-		"edition":                      settings.Edition,
+		"edition":                      flattenEdition(settings.Edition),
 		"activation_policy":            settings.ActivationPolicy,
 		"availability_type":            settings.AvailabilityType,
 		"collation":                    settings.Collation,
@@ -2324,6 +2335,13 @@ func flattenPasswordValidationPolicy(passwordValidationPolicy *sqladmin.Password
 	return []map[string]interface{}{data}
 }
 
+func flattenEdition(v interface{}) string {
+	if v == nil || tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
+		return "ENTERPRISE"
+	}
+
+	return v.(string)
+}
 
 func instanceMutexKey(project, instance_name string) string {
 	return fmt.Sprintf("google-sql-database-instance-%s-%s", project, instance_name)

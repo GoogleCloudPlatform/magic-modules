@@ -128,7 +128,7 @@ properties:
     description: |
       Time the AccessPolicy was updated in UTC.
     output: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: Set of label tags associated with the Gateway resource.
   - !ruby/object:Api::Type::String

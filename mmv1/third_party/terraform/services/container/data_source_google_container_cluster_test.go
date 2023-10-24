@@ -26,6 +26,7 @@ func TestAccContainerClusterDatasource_zonal(t *testing.T) {
 							"enable_autopilot":             {},
 							"enable_tpu":                   {},
 							"pod_security_policy_config.#": {},
+							"deletion_protection":          {},
 						},
 					),
 				),
@@ -52,6 +53,7 @@ func TestAccContainerClusterDatasource_regional(t *testing.T) {
 							"enable_autopilot":             {},
 							"enable_tpu":                   {},
 							"pod_security_policy_config.#": {},
+							"deletion_protection":          {},
 						},
 					),
 				),
@@ -66,6 +68,7 @@ resource "google_container_cluster" "kubes" {
   name               = "tf-test-cluster-%s"
   location           = "us-central1-a"
   initial_node_count = 1
+  deletion_protection = false
 }
 
 data "google_container_cluster" "kubes" {
@@ -81,6 +84,7 @@ resource "google_container_cluster" "kubes" {
   name               = "tf-test-cluster-%s"
   location           = "us-central1"
   initial_node_count = 1
+  deletion_protection = false
 }
 
 data "google_container_cluster" "kubes" {

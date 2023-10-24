@@ -2,6 +2,9 @@ resource "google_certificate_manager_certificate" "<%= ctx[:primary_resource_id]
   name        = "<%= ctx[:vars]['cert_name'] %>"
   description = "The default cert"
   scope       = "EDGE_CACHE"
+  labels = {
+    env = "test"
+  }
   managed {
     domains = [
       google_certificate_manager_dns_authorization.instance.domain,

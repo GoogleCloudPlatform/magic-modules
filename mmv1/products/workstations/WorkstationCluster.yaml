@@ -89,8 +89,8 @@ properties:
     output: true
     description: |
       The system-generated UID of the resource.
-  - !ruby/object:Api::Type::KeyValuePairs
-    name: "labels"
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: 'labels'
     description:
       "Client-specified labels that are applied to the resource and that are
       also propagated to the underlying Compute Engine resources."
@@ -118,8 +118,8 @@ properties:
       Whether this resource is in degraded mode, in which case it may require user action to restore full functionality.
       Details can be found in the conditions field.
     output: true
-  - !ruby/object:Api::Type::KeyValuePairs
-    name: "annotations"
+  - !ruby/object:Api::Type::KeyValueAnnotations
+    name: 'annotations'
     description: "Client-specified annotations. This is distinct from labels."
   - !ruby/object:Api::Type::Fingerprint
     name: "etag"

@@ -23,7 +23,7 @@ module Api
       include Api::Object::Named::Properties
 
       attr_reader :default_value
-      attr_reader :description
+      attr_accessor :description
       attr_reader :exclude
 
       # Add a deprecation message for a field that's been deprecated in the API
@@ -36,13 +36,25 @@ module Api
       # a different version.
       attr_reader :removed_message
 
-      attr_reader :output # If set value will not be sent to server on sync
-      attr_reader :immutable # If set to true value is used only on creation
+      # If set value will not be sent to server on sync.
+      # For nested fields, this also needs to be set on each descendant (ie. self,
+      # child, etc.).
+      attr_reader :output
+
+      # If set to true, changes in the field's value require recreating the
+      # resource.
+      # For nested fields, this only applies at the current level. This means
+      # it should be explicitly added to each field that needs the ForceNew
+      # behavior.
+      attr_reader :immutable
 
       # url_param_only will not send the field in the resource body and will
       # not attempt to read the field from the API response.
       # NOTE - this doesn't work for nested fields
       attr_reader :url_param_only
+
+      # For nested fields, this only applies within the parent.
+      # For example, an optional parent can contain a required child.
       attr_reader :required
 
       # [Additional query Parameters to append to GET calls.
@@ -121,6 +133,9 @@ module Api
       # if true, then we get the default value from the Google API if no value
       # is set in the terraform configuration for this field.
       # It translates to setting the field to Computed & Optional in the schema.
+      # For nested fields, this only applies at the current level. This means
+      # it should be explicitly added to each field that needs the defaulting
+      # behavior.
       attr_reader :default_from_api
 
       # https://github.com/hashicorp/terraform/pull/20837
@@ -264,6 +279,14 @@ module Api
       return name&.underscore if __parent.nil?
 
       "#{__parent.lineage}.#{name&.underscore}"
+    end
+
+    # Prints the access path of the field in the configration eg: metadata.0.labels
+    # The only intended purpose is to get the value of the labes field by calling d.Get().
+    def terraform_lineage
+      return name&.underscore if __parent.nil? || __parent.flatten_object
+
+      "#{__parent.terraform_lineage}.0.#{name&.underscore}"
     end
 
     def to_json(opts = nil)
@@ -728,6 +751,8 @@ module Api
         @properties.reject(&:exclude)
       end
 
+      attr_writer :properties
+
       def nested_properties
         properties
       end
@@ -755,6 +780,109 @@ module Api
     # simpler property to generate and means we can avoid conditional logic
     # in Map.
     class KeyValuePairs < Composite
+      # Ignore writing the "effective_labels" and "effective_annotations" fields to API.
+      attr_accessor :ignore_write
+
+      def initialize(name: nil, output: nil, api_name: nil, description: nil, min_version: nil,
+                     ignore_write: nil, update_verb: nil, update_url: nil, immutable: nil)
+        super()
+
+        @name = name
+        @output = output
+        @api_name = api_name
+        @description = description
+        @min_version = min_version
+        @ignore_write = ignore_write
+        @update_verb = update_verb
+        @update_url = update_url
+        @immutable = immutable
+      end
+
+      def validate
+        super
+        check :ignore_write, type: :boolean, default: false
+
+        return if @__resource.__product.nil?
+
+        product_name = @__resource.__product.name
+        resource_name = @__resource.name
+
+        if lineage == 'labels' || lineage == 'metadata.labels' ||
+           lineage == 'configuration.labels'
+          if !(is_a? Api::Type::KeyValueLabels) &&
+             # The label value must be empty string, so skip this resource
+             !(product_name == 'CloudIdentity' && resource_name == 'Group') &&
+
+             # The "labels" field has type Array, so skip this resource
+             !(product_name == 'DeploymentManager' && resource_name == 'Deployment') &&
+
+             # https://github.com/hashicorp/terraform-provider-google/issues/16219
+             !(product_name == 'Edgenetwork' && resource_name == 'Network') &&
+
+             # https://github.com/hashicorp/terraform-provider-google/issues/16219
+             !(product_name == 'Edgenetwork' && resource_name == 'Subnet') &&
+
+             # "userLabels" is the resource labels field
+             !(product_name == 'Monitoring' && resource_name == 'NotificationChannel') &&
+
+             # The "labels" field has type Array, so skip this resource
+             !(product_name == 'Monitoring' && resource_name == 'MetricDescriptor')
+            raise "Please use type KeyValueLabels for field #{lineage} " \
+                  "in resource #{product_name}/#{resource_name}"
+          end
+        elsif is_a? Api::Type::KeyValueLabels
+          raise "Please don't use type KeyValueLabels for field #{lineage} " \
+                "in resource #{product_name}/#{resource_name}"
+        end
+
+        if lineage == 'annotations' || lineage == 'metadata.annotations'
+          if !(is_a? Api::Type::KeyValueAnnotations) &&
+             # The "annotations" field has "ouput: true", so skip this eap resource
+             !(product_name == 'Gkeonprem' && resource_name == 'BareMetalAdminClusterEnrollment')
+            raise "Please use type KeyValueAnnotations for field #{lineage} " \
+                  "in resource #{product_name}/#{resource_name}"
+          end
+        elsif is_a? Api::Type::KeyValueAnnotations
+          raise "Please don't use type KeyValueAnnotations for field #{lineage} " \
+                "in resource #{product_name}/#{resource_name}"
+        end
+      end
+
+      def field_min_version
+        @min_version
+      end
+    end
+
+    # An array of string -> string key -> value pairs used specifically for the "labels" field.
+    # The field name with this type should be "labels" literally.
+    class KeyValueLabels < KeyValuePairs
+      def validate
+        super
+        return unless @name != 'labels'
+
+        raise "The field #{name} has the type KeyValueLabels, but the field name is not 'labels'!"
+      end
+    end
+
+    # An array of string -> string key -> value pairs used for the "terraform_labels" field.
+    class KeyValueTerraformLabels < KeyValuePairs
+    end
+
+    # An array of string -> string key -> value pairs used for the "effective_labels"
+    # and "effective_annotations" fields.
+    class KeyValueEffectiveLabels < KeyValuePairs
+    end
+
+    # An array of string -> string key -> value pairs used specifically for the "annotations" field.
+    # The field name with this type should be "annotations" literally.
+    class KeyValueAnnotations < KeyValuePairs
+      def validate
+        super
+        return unless @name != 'annotations'
+
+        raise "The field #{name} has the type KeyValueAnnotations,\
+ but the field name is not 'annotations'!"
+      end
     end
 
     # Map from string keys -> nested object entries

@@ -100,6 +100,7 @@ func TestAccComposerEnvironment_update(t *testing.T) {
 				ResourceName:			"google_composer_environment.test",
 				ImportState:			 true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			// This is a terrible clean-up step in order to get destroy to succeed,
 			// due to dangling firewall rules left by the Composer Environment blocking network deletion.
@@ -559,7 +560,6 @@ func TestAccComposerEnvironment_ComposerV2HighResilience(t *testing.T) {
 	})
 }
 
-<% unless version == "ga" -%>
 func TestAccComposerEnvironment_UpdateComposerV2WithTriggerer(t *testing.T) {
 	// TODO: This test was seemingly working, but then started to re-run on every gcbrun https://github.com/hashicorp/terraform-provider-google/issues/14160
 	acctest.SkipIfVcr(t)
@@ -597,7 +597,6 @@ func TestAccComposerEnvironment_UpdateComposerV2WithTriggerer(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccComposerEnvironment_UpdateComposerV2(t *testing.T) {
 	t.Parallel()
@@ -1675,13 +1674,11 @@ resource "google_composer_environment" "test" {
           min_count   = 2
           max_count   = 5
         }
-				<% unless version == "ga" -%>
-				triggerer {
-					cpu         = 0.5
-					memory_gb   = 2.0
-					count   		= 1
-				}
-				<% end -%>
+		triggerer {
+		  cpu         = 0.5
+		  memory_gb   = 2.0
+		  count   		= 1
+		}
       }
       environment_size = "ENVIRONMENT_SIZE_MEDIUM"
       private_environment_config {
@@ -2073,13 +2070,11 @@ resource "google_composer_environment" "test" {
           min_count   = 3
           max_count   = 6
         }
-				<% unless version == "ga" -%>
-				triggerer {
-					cpu         = 2.25
-					memory_gb   = 4
-					count   		= 1
-				}
-				<% end -%>
+		triggerer {
+		  cpu         = 0.75
+		  memory_gb   = 2
+		  count   	  = 1
+		}
       }
       environment_size = "ENVIRONMENT_SIZE_LARGE"
       private_environment_config {

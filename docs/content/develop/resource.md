@@ -223,6 +223,8 @@ For more information about types of resources and the generation process overall
 ```yaml
 # Supported types: String, Integer, Boolean, Double, Enum,
 # ResourceRef (link to a GCP resource), KeyValuePairs (string -> string map),
+# KeyValueLabels (for standard resource 'labels' field),
+# KeyValueAnnotations (for standard resource 'annotations' field)
 # Array, and NestedObject
 - !ruby/object:Api::Type::String
   name: 'API_FIELD_NAME'

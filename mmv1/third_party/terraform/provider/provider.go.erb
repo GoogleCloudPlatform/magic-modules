@@ -3,8 +3,10 @@ package provider
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -39,8 +41,6 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
-
-	googleoauth "golang.org/x/oauth2/google"
 )
 
 // Provider returns a *schema.Provider.
@@ -60,21 +60,23 @@ func Provider() *schema.Provider {
 	provider := &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"credentials": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ValidateFunc: ValidateCredentials,
+				Type:          schema.TypeString,
+				Optional:      true,
+				ValidateFunc:  ValidateCredentials,
 				ConflictsWith: []string{"access_token"},
 			},
 
 			"access_token": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				ValidateFunc:  ValidateEmptyStrings,
 				ConflictsWith: []string{"credentials"},
 			},
 
 			"impersonate_service_account": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: ValidateEmptyStrings,
 			},
 
 			"impersonate_service_account_delegates": {
@@ -84,29 +86,38 @@ func Provider() *schema.Provider {
 			},
 
 			"project": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: ValidateEmptyStrings,
 			},
 
 			"billing_project": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: ValidateEmptyStrings,
 			},
 
 			"region": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: ValidateEmptyStrings,
 			},
 
 			"zone": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: ValidateEmptyStrings,
 			},
 
 			"scopes": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+
+			"universe_domain": {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 
 			"batching": {
@@ -141,6 +152,12 @@ func Provider() *schema.Provider {
 			"request_reason": {
 				Type:     schema.TypeString,
 				Optional: true,
+			},
+
+			"default_labels": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
 			// Generated Products
@@ -213,6 +230,7 @@ func DatasourceMapWithErrors() (map[string]*schema.Resource, error) {
 		"google_beyondcorp_app_gateway":                    beyondcorp.DataSourceGoogleBeyondcorpAppGateway(),
 		"google_billing_account":                           billing.DataSourceGoogleBillingAccount(),
 		"google_bigquery_default_service_account":          bigquery.DataSourceGoogleBigqueryDefaultServiceAccount(),
+		"google_certificate_manager_certificate_map":       certificatemanager.DataSourceGoogleCertificateManagerCertificateMap(),
 		"google_cloudbuild_trigger":                        cloudbuild.DataSourceGoogleCloudBuildTrigger(),
 		"google_cloudfunctions_function":                   cloudfunctions.DataSourceGoogleCloudFunctionsFunction(),
 		"google_cloudfunctions2_function":                  cloudfunctions2.DataSourceGoogleCloudFunctions2Function(),
@@ -221,8 +239,11 @@ func DatasourceMapWithErrors() (map[string]*schema.Resource, error) {
 		<% end -%>
 		"google_cloud_identity_groups":                     cloudidentity.DataSourceGoogleCloudIdentityGroups(),
 		"google_cloud_identity_group_memberships":          cloudidentity.DataSourceGoogleCloudIdentityGroupMemberships(),
+		"google_cloud_identity_group_lookup":               cloudidentity.DataSourceGoogleCloudIdentityGroupLookup(),
 		"google_cloud_run_locations":                       cloudrun.DataSourceGoogleCloudRunLocations(),
 		"google_cloud_run_service":                         cloudrun.DataSourceGoogleCloudRunService(),
+		"google_cloud_run_v2_job":                          cloudrunv2.DataSourceGoogleCloudRunV2Job(),
+		"google_cloud_run_v2_service":                      cloudrunv2.DataSourceGoogleCloudRunV2Service(),
 		"google_composer_environment":                      composer.DataSourceGoogleComposerEnvironment(),
 		"google_composer_image_versions":                   composer.DataSourceGoogleComposerImageVersions(),
 		"google_compute_address":                           compute.DataSourceGoogleComputeAddress(),
@@ -244,6 +265,7 @@ func DatasourceMapWithErrors() (map[string]*schema.Resource, error) {
 		"google_compute_instance_template":                 compute.DataSourceGoogleComputeInstanceTemplate(),
 		"google_compute_lb_ip_ranges":                      compute.DataSourceGoogleComputeLbIpRanges(),
 		"google_compute_network":                           compute.DataSourceGoogleComputeNetwork(),
+		"google_compute_networks":                          compute.DataSourceGoogleComputeNetworks(),
 		"google_compute_network_endpoint_group":            compute.DataSourceGoogleComputeNetworkEndpointGroup(),
 		"google_compute_network_peering":                   compute.DataSourceComputeNetworkPeering(),
 		"google_compute_node_types":                        compute.DataSourceGoogleComputeNodeTypes(),
@@ -272,7 +294,6 @@ func DatasourceMapWithErrors() (map[string]*schema.Resource, error) {
 		"google_container_registry_repository":             containeranalysis.DataSourceGoogleContainerRepo(),
 		"google_dataproc_metastore_service":                dataprocmetastore.DataSourceDataprocMetastoreService(),
 		"google_datastream_static_ips":                     datastream.DataSourceGoogleDatastreamStaticIps(),
-		"google_game_services_game_server_deployment_rollout":  gameservices.DataSourceGameServicesGameServerDeploymentRollout(),
 		"google_iam_policy":                                resourcemanager.DataSourceGoogleIamPolicy(),
 		"google_iam_role":                                  resourcemanager.DataSourceGoogleIamRole(),
 		"google_iam_testable_permissions":                  resourcemanager.DataSourceGoogleIamTestablePermissions(),
@@ -318,6 +339,7 @@ func DatasourceMapWithErrors() (map[string]*schema.Resource, error) {
 		"google_runtimeconfig_variable":                    runtimeconfig.DataSourceGoogleRuntimeconfigVariable(),
 		<% end -%>
 		"google_secret_manager_secret":                     secretmanager.DataSourceSecretManagerSecret(),
+		"google_secret_manager_secrets":                    secretmanager.DataSourceSecretManagerSecrets(),
 		"google_secret_manager_secret_version":             secretmanager.DataSourceSecretManagerSecretVersion(),
 		"google_secret_manager_secret_version_access":      secretmanager.DataSourceSecretManagerSecretVersionAccess(),
 		"google_service_account":                           resourcemanager.DataSourceGoogleServiceAccount(),
@@ -345,6 +367,10 @@ func DatasourceMapWithErrors() (map[string]*schema.Resource, error) {
 		"google_tags_tag_key":                              tags.DataSourceGoogleTagsTagKey(),
 		"google_tags_tag_value":                            tags.DataSourceGoogleTagsTagValue(),
 		"google_tpu_tensorflow_versions":                   tpu.DataSourceTpuTensorflowVersions(),
+		<% unless version == 'ga' -%>
+		"google_tpu_v2_runtime_versions":                   tpuv2.DataSourceTpuV2RuntimeVersions(),
+		"google_tpu_v2_accelerator_types":                  tpuv2.DataSourceTpuV2AcceleratorTypes(),
+		<% end -%>
 		"google_vpc_access_connector":                      vpcaccess.DataSourceVPCAccessConnector(),
 		"google_redis_instance":                            redis.DataSourceGoogleRedisInstance(),
 		"google_vertex_ai_index":                           vertexai.DataSourceVertexAIIndex(),
@@ -508,8 +534,6 @@ end     # products.each do
 				<% end -%>
 				"google_dataproc_cluster":                      dataproc.ResourceDataprocCluster(),
 				"google_dataproc_job":                          dataproc.ResourceDataprocJob(),
-				"google_dialogflow_cx_version":                 dialogflowcx.ResourceDialogflowCXVersion(),
-                "google_dialogflow_cx_environment":             dialogflowcx.ResourceDialogflowCXEnvironment(),
 				"google_dns_record_set":                        dns.ResourceDnsRecordSet(),
 				"google_endpoints_service":                     servicemanagement.ResourceEndpointsService(),
 				"google_folder":                                resourcemanager.ResourceGoogleFolder(),
@@ -689,6 +713,43 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 			"GOOGLE_OAUTH_ACCESS_TOKEN",
 		})
 	}
+	
+	// set universe_domain based on the service account key file.
+	if config.Credentials != "" {
+		contents, _, err := verify.PathOrContents(config.Credentials)
+		if err != nil {
+			return nil, diag.FromErr(fmt.Errorf("error loading service account credentials: %s", err))
+		}
+		var content map[string]any
+
+		if err := json.Unmarshal([]byte(contents), &content); err != nil {
+			return nil, diag.FromErr(err)
+		}
+
+		if content["universe_domain"] != nil {
+			config.UniverseDomain = content["universe_domain"].(string)
+		}
+	}
+	
+	// Check if the user provided a value from the universe_domain field
+	if v, ok := d.GetOk("universe_domain"); ok {
+		if config.UniverseDomain == "" {
+			config.UniverseDomain = v.(string)
+		} else if  v.(string) != config.UniverseDomain {
+			if _, err := os.Stat(config.Credentials); err == nil {
+				return nil, diag.FromErr(fmt.Errorf("'%s' does not match the universe domain '%s' already set in the credential file '%s'. The 'universe_domain' provider configuration can not be used to override the universe domain that is defined in the active credential.  Set the 'universe_domain' provider configuration when universe domain information is not already available in the credential, e.g. when authenticating with a JWT token.", v, config.UniverseDomain, config.Credentials))
+			} else {
+				return nil, diag.FromErr(fmt.Errorf("'%s' does not match the universe domain '%s' supplied directly to Terraform. The 'universe_domain' provider configuration can not be used to override the universe domain that is defined in the active credential.  Set the 'universe_domain' provider configuration when universe domain information is not already available in the credential, e.g. when authenticating with a JWT token.", v, config.UniverseDomain))
+			}
+		}
+	}
+
+	// Replace hostname by the universe_domain field.
+	if config.UniverseDomain != "" && config.UniverseDomain != "googleapis.com" {
+		for key, basePath := range transport_tpg.DefaultBasePaths {
+			transport_tpg.DefaultBasePaths[key] = strings.ReplaceAll(basePath, "googleapis.com", config.UniverseDomain)
+		}
+	}
 
 	// Given that impersonate_service_account is a secondary auth method, it has
 	// no conflicts to worry about. We pull the env var in a DefaultFunc.
@@ -710,6 +771,13 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	}
 	for i, scope := range scopes {
 		config.Scopes[i] = scope.(string)
+	}
+
+	config.DefaultLabels = make(map[string]string)
+	defaultLabels := d.Get("default_labels").(map[string]interface{})
+
+	for k, v := range defaultLabels {
+		config.DefaultLabels[k] = v.(string)
 	}
 
 	batchCfg, err := transport_tpg.ExpandProviderBatchingConfig(d.Get("batching"))
@@ -752,23 +820,6 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	}
 
 	return transport_tpg.ProviderDCLConfigure(d, &config), nil
-}
-
-func ValidateCredentials(v interface{}, k string) (warnings []string, errors []error) {
-	if v == nil || v.(string) == "" {
-		return
-	}
-	creds := v.(string)
-	// if this is a path and we can stat it, assume it's ok
-	if _, err := os.Stat(creds); err == nil {
-		return
-	}
-	if _, err := googleoauth.CredentialsFromJSON(context.Background(), []byte(creds)); err != nil {
-		errors = append(errors,
-			fmt.Errorf("JSON credentials are not valid: %s", err))
-	}
-
-	return
 }
 
 func mergeResourceMaps(ms ...map[string]*schema.Resource) (map[string]*schema.Resource, error) {

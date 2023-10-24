@@ -53,6 +53,7 @@ func TestAccServiceDirectoryNamespace_serviceDirectoryNamespaceUpdateExample(t *
 				ResourceName:      "google_service_directory_namespace.example",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 		},
 	})

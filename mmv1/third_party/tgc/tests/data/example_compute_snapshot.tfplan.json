@@ -14,6 +14,7 @@
           "values": {
             "description": null,
             "disk_encryption_key": [],
+            "effective_labels": null,
             "image": "projects/debian-cloud/global/images/debian-8-jessie-v20170523",
             "labels": null,
             "name": "debian-disk",
@@ -22,6 +23,7 @@
             "snapshot": null,
             "source_image_encryption_key": [],
             "source_snapshot_encryption_key": [],
+            "terraform_labels": null,
             "timeouts": null,
             "type": "pd-ssd",
             "zone": "us-central1-a"
@@ -42,6 +44,9 @@
           "schema_version": 0,
           "values": {
             "description": null,
+            "effective_labels": {
+              "test-name": "test-value"
+            },
             "labels": {
               "test-name": "test-value"
             },
@@ -52,17 +57,22 @@
             "storage_locations": [
               "us-central1"
             ],
+            "terraform_labels": {
+              "test-name": "test-value"
+            },
             "timeouts": null,
             "zone": "us-central1-a"
           },
           "sensitive_values": {
+            "effective_labels": {},
             "labels": {},
             "licenses": [],
             "snapshot_encryption_key": [],
             "source_disk_encryption_key": [],
             "storage_locations": [
               false
-            ]
+            ],
+            "terraform_labels": {}
           }
         }
       ]
@@ -83,6 +93,7 @@
         "after": {
           "description": null,
           "disk_encryption_key": [],
+          "effective_labels": null,
           "image": "projects/debian-cloud/global/images/debian-8-jessie-v20170523",
           "labels": null,
           "name": "debian-disk",
@@ -91,9 +102,11 @@
           "snapshot": null,
           "source_image_encryption_key": [],
           "source_snapshot_encryption_key": [],
+          "terraform_labels": null,
           "timeouts": null,
           "type": "pd-ssd",
-          "zone": "us-central1-a"
+          "zone": "us-central1-a",
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "creation_timestamp": true,
@@ -103,7 +116,6 @@
           "last_attach_timestamp": true,
           "last_detach_timestamp": true,
           "physical_block_size_bytes": true,
-          "project": true,
           "self_link": true,
           "source_image_encryption_key": [],
           "source_image_id": true,
@@ -133,6 +145,9 @@
         "before": null,
         "after": {
           "description": null,
+          "effective_labels": {
+            "test-name": "test-value"
+          },
           "labels": {
             "test-name": "test-value"
           },
@@ -143,17 +158,21 @@
           "storage_locations": [
             "us-central1"
           ],
+          "terraform_labels": {
+            "test-name": "test-value"
+          },
           "timeouts": null,
-          "zone": "us-central1-a"
+          "zone": "us-central1-a",
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "creation_timestamp": true,
           "disk_size_gb": true,
+          "effective_labels": {},
           "id": true,
           "label_fingerprint": true,
           "labels": {},
           "licenses": true,
-          "project": true,
           "self_link": true,
           "snapshot_encryption_key": [],
           "snapshot_id": true,
@@ -161,17 +180,20 @@
           "storage_bytes": true,
           "storage_locations": [
             false
-          ]
+          ],
+          "terraform_labels": {}
         },
         "before_sensitive": false,
         "after_sensitive": {
+          "effective_labels": {},
           "labels": {},
           "licenses": [],
           "snapshot_encryption_key": [],
           "source_disk_encryption_key": [],
           "storage_locations": [
             false
-          ]
+          ],
+          "terraform_labels": {}
         }
       }
     }

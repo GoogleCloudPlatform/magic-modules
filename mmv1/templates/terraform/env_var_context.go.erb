@@ -25,5 +25,7 @@
 		"<%= var_name -%>": envvar.GetTestIdentityUserFromEnv(t),
 	<% elsif var_type == :PAP_DESCRIPTION  -%>
 		"<%= var_name -%>": envvar.GetTestPublicAdvertisedPrefixDescriptionFromEnv(t),
+	<% elsif var_type == :ZONE  -%>
+		"<%= var_name -%>": envvar.GetTestZoneFromEnv(),
 	<% end -%>
 <% end -%>

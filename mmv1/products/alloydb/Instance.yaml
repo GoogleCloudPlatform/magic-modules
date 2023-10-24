@@ -57,11 +57,23 @@ examples:
       alloydb_cluster_name: 'alloydb-cluster'
       alloydb_instance_name: 'alloydb-instance'
       network_name: 'alloydb-network'
-    test_vars_overrides:
-      network_name: 'acctest.BootstrapSharedTestNetwork(t, "alloydb-instance-basic")'
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
+    skip_test: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'alloydb_instance_basic_test'
+    primary_resource_id: 'default'
+    vars:
+      alloydb_cluster_name: 'alloydb-cluster'
+      alloydb_instance_name: 'alloydb-instance'
+      network_name: 'alloydb-network'
+    test_vars_overrides:
+      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1")'
+    ignore_read_extra:
+      - 'reconciling'
+      - 'update_time'
+    skip_docs: true
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'cluster'
@@ -101,10 +113,10 @@ properties:
     output: true
     description: |
       The system-generated UID of the resource.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: 'User-defined labels for the alloydb instance.'
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueAnnotations
     name: 'annotations'
     description:
       'Annotations to allow client tools to store small amount of arbitrary
@@ -165,6 +177,23 @@ properties:
     description: |
       The IP address for the Instance. This is the connection endpoint for an end-user application.
   - !ruby/object:Api::Type::NestedObject
+    name: 'queryInsightsConfig'
+    default_from_api: true
+    description: 'Configuration for query insights.'
+    properties:
+      - !ruby/object:Api::Type::Integer
+        name: 'queryStringLength'
+        description: 'Query string length. The default value is 1024. Any integer between 256 and 4500 is considered valid.'
+      - !ruby/object:Api::Type::Boolean
+        name: 'recordApplicationTags'
+        description: 'Record application tags for an instance. This flag is turned "on" by default.'
+      - !ruby/object:Api::Type::Boolean
+        name: 'recordClientAddress'
+        description: 'Record client address for an instance. Client address is PII information. This flag is turned "on" by default.'
+      - !ruby/object:Api::Type::Integer
+        name: 'queryPlansPerMinute'
+        description: 'Number of query execution plans captured by Insights per minute for all queries combined. The default value is 5. Any integer between 0 and 20 is considered valid.'
+  - !ruby/object:Api::Type::NestedObject
     name: 'readPoolConfig'
     description: 'Read pool specific config. If the instance type is READ_POOL, this configuration must be provided.'
     properties:
@@ -183,3 +212,26 @@ properties:
         description: "The number of CPU's in the VM instance."
 
         default_from_api: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'clientConnectionConfig'
+    default_from_api: true
+    description: |
+      Client connection specific configurations.
+    properties:
+      - !ruby/object:Api::Type::Boolean
+        name: requireConnectors
+        description: |
+          Configuration to enforce connectors only (ex: AuthProxy) connections to the database.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'sslConfig'
+        default_from_api: true
+        description: |
+          SSL config option for this instance.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'sslMode'
+            default_from_api: true
+            description: 'SSL mode. Specifies client-server SSL/TLS connection behavior.'
+            values:
+              - :ENCRYPTED_ONLY
+              - :ALLOW_UNENCRYPTED_AND_ENCRYPTED

@@ -17,7 +17,7 @@
 terraform {
   required_providers {
     google = {
-      source = "hashicorp/google"
+      source = "hashicorp/google-beta"
       version = "~> {{.Provider.version}}"
     }
   }
@@ -28,7 +28,7 @@ provider "google" {
 }
 
 resource "google_compute_forwarding_rule" "default" {
-  
+
   name                  = "test-forwarding-rule"
   load_balancing_scheme = "INTERNAL_MANAGED"
   ip_protocol           = "TCP"

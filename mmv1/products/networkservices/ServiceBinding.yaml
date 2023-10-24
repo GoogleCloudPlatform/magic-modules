@@ -72,7 +72,7 @@ properties:
     description: |
       Time the ServiceBinding was updated in UTC.
     output: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: Set of label tags associated with the ServiceBinding resource.
   - !ruby/object:Api::Type::String

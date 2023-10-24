@@ -56,9 +56,23 @@ examples:
       instance_name: 'my-instance'
       client_id: 'my-client-id'
       client_secret: 'my-client-secret'
+    skip_test: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'looker_instance_enterprise_full_test'
+    primary_resource_id: 'looker-instance'
+    vars:
+      network_name: 'looker-network'
+      kms_key_ring_name: 'looker-kms-ring'
+      kms_key_name: 'looker-kms-key'
+      address_name: 'looker-range'
+      instance_name: 'my-instance'
+      client_id: 'my-client-id'
+      client_secret: 'my-client-secret'
     test_vars_overrides:
-      network_name: 'acctest.BootstrapSharedTestNetwork(t, "looker-instance-enterprise")'
+      address_name: 'acctest.BootstrapSharedTestGlobalAddress(t, "looker-vpc-network-1", acctest.AddressWithPrefixLength(20))'
       kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "looker-vpc-network-1", acctest.AddressWithPrefixLength(20))'
+    skip_docs: true
 parameters:
   - !ruby/object:Api::Type::String
     name: 'region'
@@ -345,14 +359,12 @@ properties:
       - LOOKER_CORE_STANDARD_ANNUAL: subscription standard instance
       - LOOKER_CORE_ENTERPRISE_ANNUAL: subscription enterprise instance
       - LOOKER_CORE_EMBED_ANNUAL: subscription embed instance
-      - LOOKER_MODELER: standalone modeling service
     values:
       - :LOOKER_CORE_TRIAL
       - :LOOKER_CORE_STANDARD
       - :LOOKER_CORE_STANDARD_ANNUAL
       - :LOOKER_CORE_ENTERPRISE_ANNUAL
       - :LOOKER_CORE_EMBED_ANNUAL
-      - :LOOKER_MODELER
     default_value: :LOOKER_CORE_TRIAL
     immutable: true
   - !ruby/object:Api::Type::Boolean

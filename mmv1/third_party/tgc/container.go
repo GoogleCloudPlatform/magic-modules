@@ -47,10 +47,6 @@ func expandContainerClusterEnableLegacyAbac(v interface{}, d tpgresource.Terrafo
 	return expandContainerEnabledObject(v, d, config)
 }
 
-func expandContainerClusterEnableBinaryAuthorization(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-	return expandContainerEnabledObject(v, d, config)
-}
-
 func expandContainerMaxPodsConstraint(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	if val := reflect.ValueOf(v); !val.IsValid() || tpgresource.IsEmptyValue(val) {
 		return nil, nil
@@ -126,12 +122,6 @@ func GetContainerClusterCaiObject(d tpgresource.TerraformResourceData, config *t
 
 func GetContainerClusterApiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
 	obj := make(map[string]interface{})
-	binaryAuthorizationProp, err := expandContainerClusterEnableBinaryAuthorization(d.Get("enable_binary_authorization"), d, config)
-	if err != nil {
-		return nil, err
-	} else if v, ok := d.GetOkExists("enable_binary_authorization"); !tpgresource.IsEmptyValue(reflect.ValueOf(binaryAuthorizationProp)) && (ok || !reflect.DeepEqual(v, binaryAuthorizationProp)) {
-		obj["binaryAuthorization"] = binaryAuthorizationProp
-	}
 	enableKubernetesAlphaProp, err := expandContainerClusterEnableKubernetesAlpha(d.Get("enable_kubernetes_alpha"), d, config)
 	if err != nil {
 		return nil, err

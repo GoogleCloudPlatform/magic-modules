@@ -109,6 +109,20 @@ examples:
     vars:
       subnetwork_name: 'internal-ipv6-test-subnetwork'
       network_name: 'internal-ipv6-test-network'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'subnetwork_purpose_private_nat'
+    min_version: beta
+    primary_resource_id: 'subnetwork-purpose-private-nat'
+    vars:
+      subnetwork_name: 'subnet-purpose-test-subnetwork'
+      network_name: 'subnet-purpose-test-network'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'subnetwork_cidr_overlap'
+    min_version: beta
+    primary_resource_id: 'subnetwork-cidr-overlap'
+    vars:
+      subnetwork_name: 'subnet-cidr-overlap'
+      network_name: 'net-cidr-overlap'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -165,10 +179,11 @@ properties:
     name: 'purpose'
     immutable: true
     description: |
-      The purpose of the resource. This field can be either `PRIVATE_RFC_1918`, `REGIONAL_MANAGED_PROXY`, `GLOBAL_MANAGED_PROXY`, or `PRIVATE_SERVICE_CONNECT`.
+      The purpose of the resource. This field can be either `PRIVATE_RFC_1918`, `REGIONAL_MANAGED_PROXY`, `GLOBAL_MANAGED_PROXY`, `PRIVATE_SERVICE_CONNECT` or `PRIVATE_NAT`([Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
       A subnet with purpose set to `REGIONAL_MANAGED_PROXY` is a user-created subnetwork that is reserved for regional Envoy-based load balancers.
       A subnetwork in a given region with purpose set to `GLOBAL_MANAGED_PROXY` is a proxy-only subnet and is shared between all the cross-regional Envoy-based load balancers.
       A subnetwork with purpose set to `PRIVATE_SERVICE_CONNECT` reserves the subnet for hosting a Private Service Connect published service.
+      A subnetwork with purpose set to `PRIVATE_NAT` is used as source range for Private NAT gateways.
       Note that `REGIONAL_MANAGED_PROXY` is the preferred setting for all regional Envoy load balancers.
       If unspecified, the purpose defaults to `PRIVATE_RFC_1918`.
     default_from_api: true
@@ -371,7 +386,25 @@ properties:
     description: |
       The range of internal IPv6 addresses that are owned by this subnetwork.
   - !ruby/object:Api::Type::String
+    name: 'internalIpv6Prefix'
+    output: true
+    description: |
+      The internal IPv6 address range that is assigned to this subnetwork.
+  - !ruby/object:Api::Type::String
     name: 'externalIpv6Prefix'
     output: true
     description: |
       The range of external IPv6 addresses that are owned by this subnetwork.
+  - !ruby/object:Api::Type::Boolean
+    name: 'allowSubnetCidrRoutesOverlap'
+    default_from_api: true
+    update_verb: :PATCH
+    update_url: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+    fingerprint_name: 'fingerprint'
+    send_empty_value: true
+    min_version: beta
+    description: |
+      Typically packets destined to IPs within the subnetwork range that do not match
+      existing resources are dropped and prevented from leaving the VPC.
+      Setting this field to true will allow these packets to match dynamic routes injected
+      via BGP even if their destinations match existing subnet ranges.

@@ -12,6 +12,9 @@
           "provider_name": "registry.terraform.io/hashicorp/google",
           "schema_version": 0,
           "values": {
+            "effective_labels": {
+              "test-key": "test-value"
+            },
             "kms_key_name": "projects/{{.Provider.project}}/locations/australia-southeast1/keyRings/default_kms_keyring_name/cryptoKeys/default_kms_key_name",
             "labels": {
               "test-key": "test-value"
@@ -25,6 +28,9 @@
             ],
             "name": "test",
             "project": "{{.Provider.project}}",
+            "terraform_labels": {
+              "test-key": "test-value"
+            },
             "timeouts": null
           }
         }
@@ -44,6 +50,9 @@
         ],
         "before": null,
         "after": {
+          "effective_labels": {
+            "test-key": "test-value"
+          },
           "kms_key_name": "projects/{{.Provider.project}}/locations/australia-southeast1/keyRings/default_kms_keyring_name/cryptoKeys/default_kms_key_name",
           "labels": {
             "test-key": "test-value"
@@ -57,9 +66,13 @@
           ],
           "name": "test",
           "project": "{{.Provider.project}}",
+          "terraform_labels": {
+            "test-key": "test-value"
+          },
           "timeouts": null
         },
         "after_unknown": {
+          "effective_labels": {},
           "id": true,
           "labels": {},
           "message_storage_policy": [
@@ -68,7 +81,8 @@
                 false
               ]
             }
-          ]
+          ],
+          "terraform_labels": {}
         }
       }
     }

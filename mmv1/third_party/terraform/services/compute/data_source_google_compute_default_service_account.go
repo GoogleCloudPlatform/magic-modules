@@ -33,6 +33,10 @@ func DataSourceGoogleComputeDefaultServiceAccount() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"member": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -51,7 +55,7 @@ func dataSourceGoogleComputeDefaultServiceAccountRead(d *schema.ResourceData, me
 
 	projectCompResource, err := config.NewComputeClient(userAgent).Projects.Get(project).Do()
 	if err != nil {
-		return transport_tpg.HandleNotFoundError(err, d, "GCE default service account")
+		return transport_tpg.HandleDataSourceNotFoundError(err, d, "GCE default service account", fmt.Sprintf("%q GCE default service account", project))
 	}
 
 	serviceAccountName, err := tpgresource.ServiceAccountFQN(projectCompResource.DefaultServiceAccount, d, config)
@@ -61,7 +65,7 @@ func dataSourceGoogleComputeDefaultServiceAccountRead(d *schema.ResourceData, me
 
 	sa, err := config.NewIamClient(userAgent).Projects.ServiceAccounts.Get(serviceAccountName).Do()
 	if err != nil {
-		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Service Account %q", serviceAccountName))
+		return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("Service Account %q", serviceAccountName), serviceAccountName)
 	}
 
 	d.SetId(sa.Name)
@@ -79,6 +83,9 @@ func dataSourceGoogleComputeDefaultServiceAccountRead(d *schema.ResourceData, me
 	}
 	if err := d.Set("display_name", sa.DisplayName); err != nil {
 		return fmt.Errorf("Error setting display_name: %s", err)
+	}
+	if err := d.Set("member", "serviceAccount:"+sa.Email); err != nil {
+		return fmt.Errorf("Error setting member: %s", err)
 	}
 
 	return nil

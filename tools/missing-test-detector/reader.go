@@ -28,56 +28,66 @@ type Test struct {
 	Steps []Step
 }
 
-// Return a slice of tests as well as a map of file names to errors encountered.
+func (t *Test) String() string {
+	return fmt.Sprintf("%s: %#v", t.Name, t.Steps)
+}
+
+// Return a slice of tests as well as a map of file or test names to errors encountered.
 func readAllTests(servicesDir string) ([]*Test, map[string]error) {
 	dirs, err := os.ReadDir(servicesDir)
 	if err != nil {
 		return nil, map[string]error{servicesDir: err}
 	}
 	allTests := make([]*Test, 0)
-	errs := make(map[string]error, 0)
+	allErrs := make(map[string]error)
 	for _, dir := range dirs {
 		servicePath := filepath.Join(servicesDir, dir.Name())
 		files, err := os.ReadDir(servicePath)
 		if err != nil {
 			return nil, map[string]error{servicePath: err}
 		}
+		var testFileNames []string
 		for _, file := range files {
 			if strings.HasSuffix(file.Name(), "_test.go") {
-				filePath := filepath.Join(servicePath, file.Name())
-				tests, err := readTestFile(filePath)
-				if err != nil {
-					errs[filePath] = err
-				}
-				allTests = append(allTests, tests...)
+				testFileNames = append(testFileNames, filepath.Join(servicePath, file.Name()))
 			}
 		}
+		serviceTests, serviceErrs := readTestFiles(testFileNames)
+		for fileName, err := range serviceErrs {
+			allErrs[fileName] = err
+		}
+		allTests = append(allTests, serviceTests...)
 	}
-	if len(errs) > 0 {
-		return allTests, errs
+	if len(allErrs) > 0 {
+		return allTests, allErrs
 	}
 	return allTests, nil
 }
 
-func readTestFile(filename string) ([]*Test, error) {
-	fset := token.NewFileSet()
-	f, err := parser.ParseFile(fset, filename, nil, 0)
-	if err != nil {
-		return nil, err
-	}
+// Read all the test files in a service directory together to capture cross-file function usage.
+func readTestFiles(filenames []string) ([]*Test, map[string]error) {
 	funcDecls := make(map[string]*ast.FuncDecl) // map of function names to function declarations
 	varDecls := make(map[string]*ast.BasicLit)  // map of variable names to value expressions
-	for _, decl := range f.Decls {
-		if funcDecl, ok := decl.(*ast.FuncDecl); ok {
-			// This is a function declaration.
-			funcDecls[funcDecl.Name.Name] = funcDecl
-		} else if genDecl, ok := decl.(*ast.GenDecl); ok {
-			// This is an import, constant, type, or variable declaration
-			for _, spec := range genDecl.Specs {
-				if valueSpec, ok := spec.(*ast.ValueSpec); ok {
-					if len(valueSpec.Values) > 0 {
-						if basicLit, ok := valueSpec.Values[0].(*ast.BasicLit); ok {
-							varDecls[valueSpec.Names[0].Name] = basicLit
+	errs := make(map[string]error)              // map of file or test names to errors encountered parsing
+	fset := token.NewFileSet()
+	for _, filename := range filenames {
+		f, err := parser.ParseFile(fset, filename, nil, 0)
+		if err != nil {
+			errs[filename] = err
+			continue
+		}
+		for _, decl := range f.Decls {
+			if funcDecl, ok := decl.(*ast.FuncDecl); ok {
+				// This is a function declaration.
+				funcDecls[funcDecl.Name.Name] = funcDecl
+			} else if genDecl, ok := decl.(*ast.GenDecl); ok {
+				// This is an import, constant, type, or variable declaration
+				for _, spec := range genDecl.Specs {
+					if valueSpec, ok := spec.(*ast.ValueSpec); ok {
+						if len(valueSpec.Values) > 0 {
+							if basicLit, ok := valueSpec.Values[0].(*ast.BasicLit); ok {
+								varDecls[valueSpec.Names[0].Name] = basicLit
+							}
 						}
 					}
 				}
@@ -85,27 +95,26 @@ func readTestFile(filename string) ([]*Test, error) {
 		}
 	}
 	tests := make([]*Test, 0)
-	errs := make([]error, 0)
 	for name, funcDecl := range funcDecls {
 		if strings.HasPrefix(name, "TestAcc") {
-			test, err := readTestFunc(funcDecl, funcDecls, varDecls)
+			funcTests, err := readTestFunc(funcDecl, funcDecls, varDecls)
 			if err != nil {
-				errs = append(errs, err)
+				errs[name] = err
 			}
-			if test != nil {
-				test.Name = name
-				tests = append(tests, test)
-			}
+			tests = append(tests, funcTests...)
 		}
 	}
 	if len(errs) > 0 {
-		return tests, fmt.Errorf("errors encountered parsing test file: %v", errs)
+		return tests, errs
 	}
 	return tests, nil
 }
 
-func readTestFunc(testFunc *ast.FuncDecl, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) (*Test, error) {
+func readTestFunc(testFunc *ast.FuncDecl, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) ([]*Test, error) {
 	// This is an exported test function.
+	var tests []*Test
+	var errs []error
+	vars := make(map[string]*ast.CompositeLit, len(testFunc.Body.List)) // map of variable names to composite literal values in function body
 	for _, stmt := range testFunc.Body.List {
 		if exprStmt, ok := stmt.(*ast.ExprStmt); ok {
 			if callExpr, ok := exprStmt.X.(*ast.CallExpr); ok {
@@ -113,12 +122,64 @@ func readTestFunc(testFunc *ast.FuncDecl, funcDecls map[string]*ast.FuncDecl, va
 				ident, isIdent := callExpr.Fun.(*ast.Ident)
 				selExpr, isSelExpr := callExpr.Fun.(*ast.SelectorExpr)
 				if isIdent && ident.Name == "VcrTest" || isSelExpr && selExpr.Sel.Name == "VcrTest" {
-					return readVcrTestCall(callExpr, funcDecls, varDecls)
+					test, err := readVcrTestCall(callExpr, funcDecls, varDecls)
+					if err != nil {
+						errs = append(errs, err)
+					}
+					test.Name = testFunc.Name.Name
+					tests = append(tests, test)
+				}
+			}
+		} else if assignStmt, ok := stmt.(*ast.AssignStmt); ok {
+			if len(assignStmt.Lhs) == 1 && len(assignStmt.Rhs) == 1 {
+				// For now, only allow single assignment variables for serial test maps.
+				// e.g. testCases := map[string]func(t *testing.T) {...
+				if ident, ok := assignStmt.Lhs[0].(*ast.Ident); ok {
+					if rhsCompLit, ok := assignStmt.Rhs[0].(*ast.CompositeLit); ok {
+						vars[ident.Name] = rhsCompLit
+					}
+				}
+			}
+		} else if rangeStmt, ok := stmt.(*ast.RangeStmt); ok {
+			if ident, ok := rangeStmt.X.(*ast.Ident); ok {
+				if varCompLit, ok := vars[ident.Name]; ok {
+					serialTests, serialErrs := readSerialTestCompLit(varCompLit, funcDecls, varDecls)
+					errs = append(errs, serialErrs...)
+					tests = append(tests, serialTests...)
 				}
 			}
 		}
 	}
-	return nil, nil
+	if len(errs) > 0 {
+		return tests, fmt.Errorf("errors reading test func %s: %v", testFunc.Name.Name, errs)
+	}
+	return tests, nil
+}
+
+// Reads a composite literal which is either a slice or a map of serialized test functions.
+func readSerialTestCompLit(varCompLit *ast.CompositeLit, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) ([]*Test, []error) {
+	var tests []*Test
+	var errs []error
+	for _, elt := range varCompLit.Elts {
+		if eltKeyValueExpr, ok := elt.(*ast.KeyValueExpr); ok {
+			eltTests, err := readSerialTestEltKeyValueExpr(eltKeyValueExpr, funcDecls, varDecls)
+			if err != nil {
+				errs = append(errs, err)
+			}
+			tests = append(tests, eltTests...)
+		}
+	}
+	return tests, errs
+}
+
+func readSerialTestEltKeyValueExpr(eltKeyValueExpr *ast.KeyValueExpr, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) ([]*Test, error) {
+	if ident, ok := eltKeyValueExpr.Value.(*ast.Ident); ok {
+		if testFunc, ok := funcDecls[ident.Name]; ok {
+			return readTestFunc(testFunc, funcDecls, varDecls)
+		}
+		return nil, fmt.Errorf("failed to find function with name %s", ident.Name)
+	}
+	return nil, fmt.Errorf("element key value expression with key %+v had non-ident value %+v", eltKeyValueExpr.Key, eltKeyValueExpr.Value)
 }
 
 func readVcrTestCall(vcrTestCall *ast.CallExpr, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) (*Test, error) {
@@ -163,7 +224,11 @@ func readStepsCompLit(stepsCompLit *ast.CompositeLit, funcDecls map[string]*ast.
 							test.Steps = append(test.Steps, step)
 						} else if ident, ok := keyValueExpr.Value.(*ast.Ident); ok {
 							if configVar, ok := varDecls[ident.Name]; ok {
-								step, err := readConfigBasicLit(configVar)
+								configStr, err := strconv.Unquote(configVar.Value)
+								if err != nil {
+									errs = append(errs, err)
+								}
+								step, err := readConfigStr(configStr)
 								if err != nil {
 									errs = append(errs, err)
 								}
@@ -196,90 +261,109 @@ func readConfigFunc(configFunc *ast.FuncDecl) (Step, error) {
 	for _, stmt := range configFunc.Body.List {
 		if returnStmt, ok := stmt.(*ast.ReturnStmt); ok {
 			for _, result := range returnStmt.Results {
-				if basicLit, ok := result.(*ast.BasicLit); ok && basicLit.Kind == token.STRING {
-					return readConfigBasicLit(basicLit)
+				configStr, err := readConfigFuncResult(result)
+				if err != nil {
+					return nil, err
 				}
-				if callExpr, ok := result.(*ast.CallExpr); ok {
-					return readConfigFuncCallExpr(callExpr)
+				if configStr != "" {
+					return readConfigStr(configStr)
 				}
 			}
-			return nil, fmt.Errorf("failed to find a call expression in results %v", returnStmt.Results)
+			return nil, fmt.Errorf("failed to find a config string in results %v", returnStmt.Results)
 		}
 	}
 	return nil, fmt.Errorf("failed to find a return statement in %v", configFunc.Body.List)
 }
 
+// Read the return result of a config func and return the config string.
+func readConfigFuncResult(result ast.Expr) (string, error) {
+	if basicLit, ok := result.(*ast.BasicLit); ok && basicLit.Kind == token.STRING {
+		return strconv.Unquote(basicLit.Value)
+	} else if callExpr, ok := result.(*ast.CallExpr); ok {
+		return readConfigFuncCallExpr(callExpr)
+	} else if binaryExpr, ok := result.(*ast.BinaryExpr); ok {
+		xConfigStr, err := readConfigFuncResult(binaryExpr.X)
+		if err != nil {
+			return "", err
+		}
+		yConfigStr, err := readConfigFuncResult(binaryExpr.Y)
+		if err != nil {
+			return "", err
+		}
+		return xConfigStr + yConfigStr, nil
+	}
+	return "", fmt.Errorf("unknown config func result %v (%T)", result, result)
+}
+
 // Read the call expression in the config function that returns the config string.
 // The call expression can contain a nested call expression.
-func readConfigFuncCallExpr(configFuncCallExpr *ast.CallExpr) (Step, error) {
+// Return the config string.
+func readConfigFuncCallExpr(configFuncCallExpr *ast.CallExpr) (string, error) {
 	if len(configFuncCallExpr.Args) == 0 {
-		return nil, fmt.Errorf("no arguments found for call expression %v", configFuncCallExpr)
+		return "", fmt.Errorf("no arguments found for call expression %v", configFuncCallExpr)
 	}
 	if basicLit, ok := configFuncCallExpr.Args[0].(*ast.BasicLit); ok && basicLit.Kind == token.STRING {
-		return readConfigBasicLit(basicLit)
+		return strconv.Unquote(basicLit.Value)
 	} else if nestedCallExpr, ok := configFuncCallExpr.Args[0].(*ast.CallExpr); ok {
 		return readConfigFuncCallExpr(nestedCallExpr)
 	}
-	return nil, fmt.Errorf("no string literal found in arguments to call expression %v", configFuncCallExpr)
+	return "", fmt.Errorf("no string literal found in arguments to call expression %v", configFuncCallExpr)
 }
 
-func readConfigBasicLit(configBasicLit *ast.BasicLit) (Step, error) {
-	if configStr, err := strconv.Unquote(configBasicLit.Value); err != nil {
-		return nil, err
-	} else {
-		// Remove template variables because they interfere with hcl parsing.
-		pattern := regexp.MustCompile("%{[^{}]*}")
-		// Replace with a value that can be parsed outside quotation marks.
-		configStr = pattern.ReplaceAllString(configStr, "true")
-		parser := hclparse.NewParser()
-		file, diagnostics := parser.ParseHCL([]byte(configStr), "config.hcl")
-		if diagnostics.HasErrors() {
-			return nil, fmt.Errorf("errors parsing hcl: %v", diagnostics.Errs())
-		}
-		content, diagnostics := file.Body.Content(&hcl.BodySchema{
-			Blocks: []hcl.BlockHeaderSchema{
-				{
-					Type:       "resource",
-					LabelNames: []string{"type", "name"},
-				},
-				{
-					Type:       "data",
-					LabelNames: []string{"type", "name"},
-				},
-				{
-					Type:       "output",
-					LabelNames: []string{"name"},
-				},
-				{
-					Type: "locals",
-				},
-			},
-		})
-		if diagnostics.HasErrors() {
-			return nil, fmt.Errorf("errors getting hcl body content: %v", diagnostics.Errs())
-		}
-		m := make(map[string]Resources)
-		errs := make([]error, 0)
-		for _, block := range content.Blocks {
-			if len(block.Labels) != 2 {
-				continue
-			}
-			if _, ok := m[block.Labels[0]]; !ok {
-				// Create an empty map for this resource type.
-				m[block.Labels[0]] = make(Resources)
-			}
-			// Use the resource name as a key.
-			resourceConfig, err := readHCLBlockBody(block.Body, file.Bytes)
-			if err != nil {
-				errs = append(errs, err)
-			}
-			m[block.Labels[0]][block.Labels[1]] = resourceConfig
-		}
-		if len(errs) > 0 {
-			return m, fmt.Errorf("errors reading hcl blocks: %v", errs)
-		}
-		return m, nil
+// Read the config string and return a test step.
+func readConfigStr(configStr string) (Step, error) {
+	// Remove template variables because they interfere with hcl parsing.
+	pattern := regexp.MustCompile("%{[^{}]*}")
+	// Replace with a value that can be parsed outside quotation marks.
+	configStr = pattern.ReplaceAllString(configStr, "true")
+	parser := hclparse.NewParser()
+	file, diagnostics := parser.ParseHCL([]byte(configStr), "config.hcl")
+	if diagnostics.HasErrors() {
+		return nil, fmt.Errorf("errors parsing hcl: %v", diagnostics.Errs())
 	}
+	content, diagnostics := file.Body.Content(&hcl.BodySchema{
+		Blocks: []hcl.BlockHeaderSchema{
+			{
+				Type:       "resource",
+				LabelNames: []string{"type", "name"},
+			},
+			{
+				Type:       "data",
+				LabelNames: []string{"type", "name"},
+			},
+			{
+				Type:       "output",
+				LabelNames: []string{"name"},
+			},
+			{
+				Type: "locals",
+			},
+		},
+	})
+	if diagnostics.HasErrors() {
+		return nil, fmt.Errorf("errors getting hcl body content: %v", diagnostics.Errs())
+	}
+	m := make(map[string]Resources)
+	errs := make([]error, 0)
+	for _, block := range content.Blocks {
+		if len(block.Labels) != 2 {
+			continue
+		}
+		if _, ok := m[block.Labels[0]]; !ok {
+			// Create an empty map for this resource type.
+			m[block.Labels[0]] = make(Resources)
+		}
+		// Use the resource name as a key.
+		resourceConfig, err := readHCLBlockBody(block.Body, file.Bytes)
+		if err != nil {
+			errs = append(errs, err)
+		}
+		m[block.Labels[0]][block.Labels[1]] = resourceConfig
+	}
+	if len(errs) > 0 {
+		return m, fmt.Errorf("errors reading hcl blocks: %v", errs)
+	}
+	return m, nil
 }
 
 func readHCLBlockBody(body hcl.Body, fileBytes []byte) (Resource, error) {

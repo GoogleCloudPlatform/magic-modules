@@ -16,7 +16,6 @@ name: 'CustomConstraint'
 self_link: '{{parent}}/customConstraints/{{name}}'
 base_url: '{{parent}}/customConstraints'
 update_verb: :PATCH
-min_version: beta
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/resource-manager/docs/organization-policy/creating-managing-custom-constraints'
@@ -30,13 +29,11 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   update_encoder: 'templates/terraform/update_encoder/org_policy_custom_constraint.go.erb'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
     name: 'org_policy_custom_constraint_basic'
     primary_resource_id: 'constraint'
     test_env_vars:
       org_id: :ORG_ID
   - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
     name: 'org_policy_custom_constraint_full'
     primary_resource_id: 'constraint'
     test_env_vars:

@@ -29,10 +29,10 @@ resource "covered_resource" "resource" {
     field_five {
       field_six = "value-three"
     }
-  }
+  }`)) + acctest.Nprintf(`
   field_seven = %{bool}
 }
-`, context))
+`, context)
 }
 
 func testAccCoveredResource_update() string {

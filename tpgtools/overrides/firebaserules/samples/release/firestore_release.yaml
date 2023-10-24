@@ -18,8 +18,6 @@ versions:
 - ga
 - beta
 resource: ./firestore_release.tf.tmpl
-updates:
-- resource: ./firestore_release_update.tf.tmpl
 variables:
 - name: project
   type: project

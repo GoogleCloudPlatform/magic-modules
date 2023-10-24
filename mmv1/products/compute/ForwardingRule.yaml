@@ -216,6 +216,10 @@ examples:
       - "target"
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/labels.erb
+  constants: 'templates/terraform/constants/compute_forwarding_rule.go.erb'
+custom_diff: [
+  'forwardingRuleCustomizeDiff',
+]
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
@@ -503,7 +507,7 @@ properties:
     send_empty_value: true
     update_verb: :PATCH
     update_url: projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Labels to apply to this forwarding rule.  A list of key->value pairs.
@@ -650,3 +654,9 @@ properties:
       - :IPV6
     immutable: true
     default_from_api: true
+virtual_fields:
+  - !ruby/object:Api::Type::Boolean
+    name: recreate_closed_psc
+    description:
+      This is used in PSC consumer ForwardingRule to make terraform recreate the ForwardingRule when the status is closed
+    default_value: false

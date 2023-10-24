@@ -29,9 +29,9 @@ async: !ruby/object:Api::OpAsync
     base_url: '{{op_id}}'
     wait_ms: 1000
     timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 10
-      update_minutes: 10
-      delete_minutes: 10
+      insert_minutes: 30
+      update_minutes: 30
+      delete_minutes: 30
   result: !ruby/object:Api::OpAsync::Result
     path: 'response'
   status: !ruby/object:Api::OpAsync::Status
@@ -78,8 +78,27 @@ examples:
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'alloydb_secondary_cluster_basic'
+    primary_resource_id: 'secondary'
+    vars:
+      alloydb_primary_cluster_name: 'alloydb-primary-cluster'
+      alloydb_primary_instance_name: 'alloydb-primary-instance'
+      alloydb_secondary_cluster_name: 'alloydb-secondary-cluster'
+    skip_test: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'alloydb_secondary_cluster_basic_test'
+    primary_resource_id: 'secondary'
+    vars:
+      alloydb_primary_cluster_name: 'alloydb-primary-cluster'
+      alloydb_primary_instance_name: 'alloydb-primary-instance'
+      alloydb_secondary_cluster_name: 'alloydb-secondary-cluster'
+      network_name: 'alloydb-network'
+    test_vars_overrides:
+      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1")'
+    skip_docs: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  pre_create: templates/terraform/pre_create/alloydb_restore_cluster.go.erb
+  pre_create: templates/terraform/pre_create/alloydb_cluster.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: 'clusterId'
@@ -106,7 +125,7 @@ properties:
     output: true
     description: |
       The system-generated UID of the resource.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: 'User-defined labels for the alloydb cluster.'
   - !ruby/object:Api::Type::NestedObject
@@ -179,16 +198,60 @@ properties:
             output: true
   - !ruby/object:Api::Type::String
     name: 'network'
-    required: true
+    exactly_one_of:
+      - network
+      - network_config.0.network
+    default_from_api: true
+    deprecation_message: >-
+      `network` is deprecated and will be removed in a future major release. Instead, use `network_config` to define the network configuration.
     description: |
       The relative resource name of the VPC network on which the instance can be accessed. It is specified in the following form:
 
       "projects/{projectNumber}/global/networks/{network_id}".
     diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+  - !ruby/object:Api::Type::NestedObject
+    name: 'networkConfig'
+    description: |
+      Metadata related to network configuration.
+    default_from_api: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: network
+        exactly_one_of:
+          - network
+          - network_config.0.network
+        description: |
+          The resource link for the VPC network in which cluster resources are created and from which they are accessible via Private IP. The network must belong to the same project as the cluster.
+          It is specified in the form: "projects/{projectNumber}/global/networks/{network_id}".
+        diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+      - !ruby/object:Api::Type::String
+        name: allocatedIpRange
+        description: |
+          The name of the allocated IP range for the private IP AlloyDB cluster. For example: "google-managed-services-default".
+          If set, the instance IPs for this cluster will be created in the allocated range.
   - !ruby/object:Api::Type::String
     name: 'displayName'
     description: |
       User-settable and human-readable display name for the Cluster.
+  - !ruby/object:Api::Type::String
+    name: 'etag'
+    description: 'For Resource freshness validation (https://google.aip.dev/154)'
+  - !ruby/object:Api::Type::Boolean
+    name: 'reconciling'
+    output: true
+    description: |
+      Output only. Reconciling (https://google.aip.dev/128#reconciliation).
+      Set to true if the current state of Cluster does not match the user's intended state, and the service is actively updating the resource to reconcile them.
+      This can happen due to user-triggered updates or system actions like failover or maintenance.
+  - !ruby/object:Api::Type::String
+    name: 'state'
+    output: true
+    description: 'Output only. The current serving state of the cluster.'
+  - !ruby/object:Api::Type::KeyValueAnnotations
+    name: 'annotations'
+    description: |
+      Annotations to allow client tools to store small amount of arbitrary data. This is distinct from labels. https://google.aip.dev/128
+      An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
   - !ruby/object:Api::Type::String
     name: 'databaseVersion'
     output: true
@@ -318,13 +381,11 @@ properties:
           - !ruby/object:Api::Type::Array
             name: 'daysOfWeek'
             min_size: 1
-            description: |
-              The days of the week to perform a backup. At least one day of the week must be provided.
+            description: 'The days of the week to perform a backup. At least one day of the week must be provided.'
             item_type: !ruby/object:Api::Type::Enum
               name: 'daysOfWeek'
               required: true
-              description: |
-                The days of the week to perform a backup. At least one day of the week must be provided.
+              description: 'The days of the week to perform a backup. At least one day of the week must be provided.'
               values:
                 - :MONDAY
                 - :TUESDAY
@@ -410,3 +471,24 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'sourceType'
         description: 'Type of migration source.'
+  - !ruby/object:Api::Type::Enum
+    name: clusterType
+    values:
+      - :PRIMARY
+      - :SECONDARY
+    default_value: :PRIMARY
+    immutable: true
+    description: |
+      The type of cluster. If not set, defaults to PRIMARY.
+  - !ruby/object:Api::Type::NestedObject
+    name: "secondaryConfig"
+    description: |
+      Configuration of the secondary cluster for Cross Region Replication. This should be set if and only if the cluster is of type SECONDARY.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: "primaryClusterName"
+        immutable: true
+        required: true
+        description: |
+          Name of the primary cluster must be in the format
+          'projects/{project}/locations/{location}/clusters/{cluster_id}'
