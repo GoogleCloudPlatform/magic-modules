@@ -2040,6 +2040,28 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
+			"fleet": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				MaxItems:    1,
+				Description: `Fleet configuration of the cluster.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"project": {
+							Type:         schema.TypeString,
+							Optional:    true,
+							Computed:    true,
+							Description:  `The Fleet host project of the cluster.`,
+						},
+                                          	"membership": {
+                                                	Type:             schema.TypeString,
+                                                	Computed:         true,
+                                                	Description:      `Full resource name of the registered fleet membership of the cluster.`
+                                          	},
+					},
+				},
+			},
 		},
 	}
 }
@@ -2331,6 +2353,10 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 
 	if v, ok := d.GetOk("monitoring_config"); ok {
 		cluster.MonitoringConfig = expandMonitoringConfig(v)
+	}
+
+	if v, ok := d.GetOk("fleet"); ok {
+		cluster.Fleet = expandFleet(v)
 	}
 
 	if err := validateNodePoolAutoConfig(cluster); err != nil {
@@ -2786,6 +2812,9 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 	if err := d.Set("gateway_api_config", flattenGatewayApiConfig(cluster.NetworkConfig.GatewayApiConfig)); err != nil {
+		return err
+	}
+	if err := d.Set("fleet", flattenFleet(cluster.Fleet)); err != nil {
 		return err
 	}
 	if err := d.Set("enable_k8s_beta_apis", flattenEnableK8sBetaApis(cluster.EnableK8sBetaApis)); err != nil {
@@ -3905,6 +3934,24 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 			}
 
 			log.Printf("[INFO] GKE cluster %s Gateway API has been updated", d.Id())
+		}
+	}
+
+	if d.HasChange("fleet") {
+		if fleet, ok := d.GetOk("fleet"); ok {
+			req := &container.UpdateClusterRequest{
+				Update: &container.ClusterUpdate{
+					DesiredFleet: expandFleet(fleet),
+				},
+			}
+
+			updateF := updateFunc(req, "updating GKE fleet config")
+			// Call update serially.
+			if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+				return err
+			}
+
+			log.Printf("[INFO] GKE cluster %s fleet config has been updated", d.Id())
 		}
 	}
 
@@ -5102,6 +5149,18 @@ func expandGatewayApiConfig(configured interface{}) *container.GatewayAPIConfig 
 	}
 }
 
+func expandFleet(configured interface{}) *container.Fleet {
+        l := configured.([]interface{})
+        if len(l) == 0 || l[0] == nil {
+                return nil 
+        }       
+
+        config := l[0].(map[string]interface{})
+        return &container.Fleet{
+                Project: config["project"].(string),
+        }       
+}  
+
 func expandEnableK8sBetaApis(configured interface{}, enabledAPIs []string) *container.K8sBetaAPIConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -5925,6 +5984,18 @@ func flattenGatewayApiConfig(c *container.GatewayAPIConfig) []map[string]interfa
 			"channel":        c.Channel,
 		},
 	}
+}
+
+func flattenFleet(c *container.Fleet) []map[string]interface{} {
+      if c == nil {
+                return nil
+      }         
+      return []map[string]interface{}{
+                {
+                      "project": c.Project,
+                      "membership": c.Membership,
+                },
+        }       
 }
 
 func flattenEnableK8sBetaApis(c *container.K8sBetaAPIConfig) []map[string]interface{} {
