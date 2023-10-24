@@ -34,7 +34,7 @@ examples:
     vars:
       policy_name: 'custom.disableGkeAutoUpgrade'
     test_vars_overrides:
-      policy_name: 'custom.disableGkeAutoUpgrade-'
+      policy_name: '"tf-test-custom.disableGkeAutoUpgrade-" + acctest.RandString(t, 10)'
     test_env_vars:
       org_id: :ORG_ID
   - !ruby/object:Provider::Terraform::Examples
@@ -43,7 +43,7 @@ examples:
     vars:
       policy_name: 'custom.disableGkeAutoUpgrade'
     test_vars_overrides:
-      policy_name: 'custom.disableGkeAutoUpgrade-'
+      policy_name: '"tf-test-custom.disableGkeAutoUpgrade-" + acctest.RandString(t, 10)'
     test_env_vars:
       org_id: :ORG_TARGET
 parameters:
