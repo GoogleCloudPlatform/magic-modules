@@ -1,0 +1,70 @@
+package compute_test
+
+import (
+	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"testing"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+)
+
+func TestAccComputeRegionNetworkFirewallPolicy_RegionalHandWritten(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project_name":  envvar.GetTestProjectFromEnv(),
+		"region":        envvar.GetTestRegionFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRegionNetworkFirewallPolicyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionNetworkFirewallPolicy_RegionalHandWritten(context),
+			},
+			{
+				ResourceName:      "google_compute_region_network_firewall_policy.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionNetworkFirewallPolicy_RegionalHandWrittenUpdate0(context),
+			},
+			{
+				ResourceName:      "google_compute_region_network_firewall_policy.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccComputeRegionNetworkFirewallPolicy_RegionalHandWritten(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_region_network_firewall_policy" "primary" {
+  name = "tf-test-policy%{random_suffix}"
+  project = "%{project_name}"
+  description = "Sample regional network firewall policy"
+  region = "%{region}"
+}
+
+
+`, context)
+}
+
+func testAccComputeRegionNetworkFirewallPolicy_RegionalHandWrittenUpdate0(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_region_network_firewall_policy" "primary" {
+  name = "tf-test-policy%{random_suffix}"
+  project = "%{project_name}"
+  description = "Updated regional network firewall policy"
+  region = "%{region}"
+}
+
+
+`, context)
+}

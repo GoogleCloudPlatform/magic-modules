@@ -12,17 +12,17 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: RegionNetworkFirewallPolicy
-base_url: projects/{{project}}/regions/{{region}}/firewallPolicies
-create_url: projects/{{project}}/regions/{{region}}/firewallPolicies
-self_link: projects/{{project}}/regions/{{region}}/firewallPolicies/{{name}}
+name: NetworkFirewallPolicy
+base_url: projects/{{project}}/global/firewallPolicies
+create_url: projects/{{project}}/global/firewallPolicies
+self_link: projects/{{project}}/global/firewallPolicies/{{name}}
 update_verb: :PATCH
 description: ""
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'targetLink'
@@ -38,16 +38,10 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: 'region_network_firewall_policy_full'
+    name: 'network_firewall_policy_full'
     primary_resource_id: 'policy'
     vars:
       backend_bucket_name: 'image-backend-bucket'
-parameters:
-  - !ruby/object:Api::Type::String
-    name: region
-    description: The region of this resource.
-    url_param_only: true
-    immutable: true
 properties:
   - !ruby/object:Api::Type::String
     name: creationTimestamp
