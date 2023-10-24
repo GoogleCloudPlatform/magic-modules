@@ -350,3 +350,108 @@ func testAccDialogflowCXFlow_full(context map[string]interface{}) string {
   }
 `, context)
 }
+
+func TestAccDialogflowCXFlow_defaultStartFlow(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDialogflowCXFlow_defaultStartFlow(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_dialogflow_cx_flow.default_start_flow", "name", "00000000-0000-0000-0000-000000000000"),
+					resource.TestCheckResourceAttrPair(
+						"google_dialogflow_cx_flow.default_start_flow", "id",
+						"google_dialogflow_cx_agent.agent", "start_flow",
+					),
+				),
+			},
+		},
+	})
+}
+
+func testAccDialogflowCXFlow_defaultStartFlow(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_dialogflow_cx_agent" "agent" {
+  display_name          = "tf-test-dialogflowcx-agent%{random_suffix}"
+  location              = "global"
+  default_language_code = "en"
+  time_zone             = "America/New_York"
+}
+
+resource "google_dialogflow_cx_intent" "default_welcome_intent" {
+  parent                    = google_dialogflow_cx_agent.agent.id
+  is_default_welcome_intent = true
+  display_name              = "Default Welcome Intent"
+  priority                  = 1
+  training_phrases {
+    parts {
+      text = "Hello"
+    }
+    repeat_count = 1
+  }
+}
+
+
+resource "google_dialogflow_cx_flow" "default_start_flow" {
+  parent                = google_dialogflow_cx_agent.agent.id
+  is_default_start_flow = true
+  display_name          = "Default Start Flow"
+
+  nlu_settings {
+    classification_threshold = 0.3
+    model_type               = "MODEL_TYPE_STANDARD"
+  }
+
+  transition_routes {
+    intent = google_dialogflow_cx_intent.default_welcome_intent.id
+    trigger_fulfillment {
+      messages {
+        text {
+          text = ["Response to default welcome intent."]
+        }
+      }
+    }
+  }
+
+  event_handlers {
+    event = "custom-event"
+    trigger_fulfillment {
+      messages {
+        text {
+          text = ["This is a default flow."]
+        }
+      }
+    }
+  }
+
+  event_handlers {
+    event = "sys.no-match-default"
+    trigger_fulfillment {
+      messages {
+        text {
+          text = ["We've updated the default flow no-match response!"]
+        }
+      }
+    }
+  }
+
+  event_handlers {
+    event = "sys.no-input-default"
+    trigger_fulfillment {
+      messages {
+        text {
+          text = ["We've updated the default flow no-input response!"]
+        }
+      }
+    }
+  }
+}
+`, context)
+}
