@@ -1,0 +1,38 @@
+resource "google_bigquery_analytics_hub_data_exchange" "listing" {
+  location         = "US"
+  data_exchange_id = "<%= ctx[:vars]['data_exchange_id'] %>"
+  display_name     = "<%= ctx[:vars]['data_exchange_id'] %>"
+  description      = "<%= ctx[:vars]['exchange_description'] %>"
+}
+
+resource "google_bigquery_analytics_hub_listing" "listing" {
+  location         = "US"
+  data_exchange_id = google_bigquery_analytics_hub_data_exchange.listing.data_exchange_id
+  listing_id       = "<%= ctx[:vars]['listing_id'] %>"
+  display_name     = "<%= ctx[:vars]['listing_id'] %>"
+  description      = "<%= ctx[:vars]['exchange_description'] %>"
+
+  bigquery_dataset {
+    dataset = google_bigquery_dataset.listing.id
+  }
+}
+
+resource "google_bigquery_dataset" "listing" {
+  dataset_id       = "<%= ctx[:vars]['listing_id'] %>"
+  friendly_name    = "<%= ctx[:vars]['listing_id'] %>"
+  description      = "<%= ctx[:vars]['description'] %>"
+  location         = "US"
+}
+
+resource "google_bigquery_analytics_hub_subscription" "<%= ctx[:primary_resource_id] %>" {
+  location            = "US"
+  data_exchange_id    = google_bigquery_analytics_hub_data_exchange.listing.data_exchange_id
+  listing_id          = google_bigquery_analytics_hub_listing.listing.listing_id
+  destination_dataset {
+    dataset_reference {
+      dataset_id = "<%= ctx[:vars]['subscription_dataset_id'] %>"
+      project_id = "<%= ctx[:test_env_vars]['project'] %>"
+    }
+    location = "US"
+  }
+}
