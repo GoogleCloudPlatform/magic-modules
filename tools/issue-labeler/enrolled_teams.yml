@@ -1,3 +1,9 @@
+service/accessapproval:
+  resources:
+  - google_organization_access_approval_settings
+  - google_folder_access_approval_settings
+  - google_project_access_approval_settings
+  - google_access_approval_.*
 service/accesscontextmanager:
   resources:
   - google_access_context_manager_.*
@@ -58,6 +64,9 @@ service/binaryauthorization:
 service/certificatemanager:
   resources:
   - google_certificate_manager_.*
+  - google_compute_managed_ssl_certificate
+  - google_compute_region_ssl_certificate
+  - google_compute_ssl_certificate
 service/cloudasset:
   resources:
   - google_cloud_asset_.*
@@ -79,7 +88,7 @@ service/cloudfunctions:
   - google_cloudfunctions2_.*
 service/cloudidentity-groups:
   resources:
-  - google_cloud_identity_groups.*
+  - google_cloud_identity_group.*
 service/cloudkms:
   resources:
   - google_kms_.*
@@ -106,9 +115,58 @@ service/cloudtasks:
 service/composer:
   resources:
   - google_composer_.*
+service/compute-autoscaler:
+  resources:
+  - google_compute_autoscaler
+  - google_compute_region_autoscaler
+service/compute-commitment:
+  resources:
+  - google_compute_region_commitment.*
+service/compute-health:
+  resources:
+  - google_compute_health_check
+  - google_compute_http_health_check
+  - google_compute_https_health_check
+  - google_compute_region_health_check
+service/compute-instances:
+  resources:
+  - google_compute_instance
+  - google_compute_instance_from_.*
+  - google_compute_instance_iam.*
+  - google_compute_instance_template
+  - google_compute_region_instance_template
+  - google_compute_project_metadata.*
+  - google_compute_resource_policy
 service/compute-interconnect:
   resources:
   - google_compute_interconnect_.*
+service/compute-ipam:
+  resources:
+  - google_compute_address
+  - google_compute_global_address
+  - google_compute_public_advertised_prefix
+  - google_compute_public_delegated_prefix
+service/compute-l7-load-balancer:
+  resources:
+  - google_compute_backend_bucket
+  - google_compute_backend_bucket_signed_url_key
+  - google_compute_backend_service
+  - google_compute_backend_service_signed_url_key
+  - google_compute_region_backend_service
+  - google_compute_global_forwarding_rule
+  - google_compute_forwarding_rule
+  - google_compute_url_map
+  - google_compute_region_url_map
+  - google_compute_ssl_policy
+  - google_compute_region_ssl_policy
+  - google_compute_target_tcp_proxy
+  - google_compute_region_target_tcp_proxy
+  - google_compute_target_ssl_proxy
+  - google_compute_target_grpc_proxy
+  - google_compute_target_http_proxy
+  - google_compute_region_target_http_proxy
+  - google_compute_target_https_proxy
+  - google_compute_region_target_https_proxy
 service/compute-nat:
   resources:
   - google_compute_router_nat
@@ -120,13 +178,16 @@ service/compute-pd:
   - google_compute_image.*
   - google_compute_snapshot.*
   - google_compute_machine_image.*
+service/compute-private-service-connect-published-service:
+  resources:
+  - google_compute_service_attachment
 service/compute-projects:
   resources:
   - google_project_usage_export_bucket
-service/compute-regional-l7-load-balancer:
+service/compute-regional-pass-through-load-balancer:
   resources:
-  - google_compute_region_target_http_proxy
-  - google_compute_region_target_https_proxy
+  - google_compute_target_instance
+  - google_compute_target_pool
 service/compute-reservation:
   resources:
   - google_compute_reservation.*
@@ -138,7 +199,18 @@ service/compute-router:
   - google_compute_router_status
 service/compute-security-policy:
   resources:
+  - google_compute_network_edge_security_service
+  - google_compute_region_security_policy.*
   - google_compute_security_policy
+service/compute-sole-tenancy:
+  resources:
+  - google_compute_node_group
+  - google_compute_node_template
+service/compute-vpn:
+  resources:
+  - google_compute_ha_vpn_gateway
+  - google_compute_external_vpn_gateway
+  - google_compute_vpn_.*
 service/container:
   resources:
   - google_container_cluster
@@ -186,6 +258,9 @@ service/documentai:
 service/documentaiwarehouse:
   resources:
   - google_document_ai_warehouse_.*
+service/edgecontainer:
+  resources:
+  - google_edgecontainer_.*
 service/edgenetwork:
   resources:
   - google_edgenetwork_.*
@@ -207,6 +282,7 @@ service/firebase:
   - google_firebaserules_.*
 service/firestore-controlplane:
   resources:
+  - google_firestore_backup_schedule
   - google_firestore_database
 service/firestore-dataplane:
   resources:
@@ -314,13 +390,30 @@ service/network-security-distributed-firewall:
   - google_network_security_address_group
   - google_compute_firewall.*
   - google_compute_network_firewall_policy.*
+  - google_compute_organization_security_policy.*
   - google_compute_region_network_firewall_policy.*
+service/networkconnectivity-serviceautomation:
+  resources:
+  - google_network_connectivity_service_.*
 service/networkmanagement-connectivity-test:
   resources:
   - google_network_management_connectivity_test
 service/networkservices-media-cdn:
   resources:
   - google_network_services_edge_cache_.*
+service/networkservices-traffic-director:
+  resources:
+  - google_network_services_endpoint_policy
+  - google_network_services_gateway
+  - google_network_services_grpc_route
+  - google_network_services_http_route
+  - google_network_services_mesh
+  - google_network_services_service_binding
+  - google_network_services_tcp_route
+  - google_network_services_tls_route
+  - google_network_security_authorization_policy
+  - google_network_security_client_tls_policy
+  - google_network_security_server_tls_policy
 service/notebooks:
   resources:
   - google_notebooks_.*
@@ -336,6 +429,9 @@ service/osconfig:
 service/oslogin:
   resources:
   - google_os_login_.*
+service/private-service-connect-interfaces:
+  resources:
+  - google_compute_network_attachment
 service/privateca:
   resources:
   - google_privateca_.*
@@ -363,6 +459,13 @@ service/run:
 service/secretmanager:
   resources:
   - google_secret_manager_.*
+service/securitycenter:
+  resources:
+  - google_scc_.*
+service/service-networking:
+  resources:
+  - google_service_networking_connection
+  - google_service_networking_peered_dns_domain
 service/servicedirectory:
   resources:
   - google_service_directory_.*
@@ -386,6 +489,9 @@ service/vmwareengine:
   - google_vmwareengine_network
   - google_vmwareengine_private_cloud
   - google_vmwareengine_cluster
+service/vpcaccess:
+  resources:
+  - google_vpc_access_connector
 service/websecurityscanner:
   resources:
   - google_security_scanner_.*
