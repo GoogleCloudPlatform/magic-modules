@@ -41,7 +41,7 @@ examples:
     name: 'region_network_firewall_policy_full'
     primary_resource_id: 'policy'
     vars:
-      backend_bucket_name: 'image-backend-bucket'
+      policy_name: 'tf-test-policy'
 parameters:
   - !ruby/object:Api::Type::String
     name: region
