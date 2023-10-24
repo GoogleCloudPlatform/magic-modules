@@ -1,0 +1,4 @@
+resource "google_secure_source_manager_instance" "instance" {
+    name = "<%= ctx[:vars]['instance_name'] %>"
+    location = "us-central1"
+}
