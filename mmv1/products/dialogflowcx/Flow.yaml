@@ -40,11 +40,22 @@ virtual_fields:
       The Default Start Flow cannot be deleted; deleting the `google_dialogflow_cx_flow` resource does nothing to the underlying GCP resources.
 examples:
   - !ruby/object:Provider::Terraform::Examples
+    name: 'dialogflowcx_flow_basic'
+    primary_resource_id: 'basic_flow'
+    vars:
+      agent_name: 'dialogflowcx-agent'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'dialogflowcx_flow_full'
     primary_resource_id: 'basic_flow'
     vars:
       agent_name: 'dialogflowcx-agent'
       bucket_name: 'dialogflowcx-bucket'
+  - !ruby/object:Provider::Terraform::Examples
+    skip_docs: true
+    name: 'dialogflowcx_flow_default_start_flow'
+    primary_resource_id: 'default_start_flow'
+    vars:
+      agent_name: 'dialogflowcx-agent'
 skip_sweeper: true
 id_format: '{{parent}}/flows/{{name}}'
 import_format: ['{{parent}}/flows/{{name}}']

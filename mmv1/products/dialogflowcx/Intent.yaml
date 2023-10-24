@@ -50,6 +50,18 @@ examples:
     primary_resource_id: 'basic_intent'
     vars:
       agent_name: 'dialogflowcx-agent'
+  - !ruby/object:Provider::Terraform::Examples
+    skip_docs: true
+    name: 'dialogflowcx_intent_default_negative_intent'
+    primary_resource_id: 'default_negative_intent'
+    vars:
+      agent_name: 'dialogflowcx-agent'
+  - !ruby/object:Provider::Terraform::Examples
+    skip_docs: true
+    name: 'dialogflowcx_intent_default_welcome_intent'
+    primary_resource_id: 'default_welcome_intent'
+    vars:
+      agent_name: 'dialogflowcx-agent'
 skip_sweeper: true
 id_format: '{{parent}}/intents/{{name}}'
 import_format: ['{{parent}}/intents/{{name}}']
