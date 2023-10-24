@@ -25,6 +25,8 @@ on:
       sha:
         description: "The commit SHA in magic-modules repository where the status result will be posted"
         required: true
+      initiator_id:
+        description: "Metadata about the caller who initiated the dispatch event"
 
 concurrency:
   group: test-tpg-${{ github.event.inputs.owner }}-${{ github.event.inputs.repo }}-${{ github.event.inputs.branch }}
