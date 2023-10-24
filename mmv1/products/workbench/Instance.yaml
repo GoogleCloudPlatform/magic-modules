@@ -207,8 +207,6 @@ properties:
   - !ruby/object:Api::Type::Array
     name: dataDisks
     default_from_api: true
-    ignore_read: true
-    custom_flatten: templates/terraform/custom_flatten/workbench_instance_data_disk_flatten.go.erb
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
       - !ruby/object:Api::Type::String
@@ -219,7 +217,6 @@ properties:
           100.
       - !ruby/object:Api::Type::Enum
         name: diskType
-        ignore_read: true
         custom_flatten: templates/terraform/custom_flatten/workbench_instance_data_disk_type_flatten.go.erb
         values:
           - DISK_TYPE_UNSPECIFIED
@@ -232,7 +229,6 @@ properties:
       - !ruby/object:Api::Type::Enum
         name: diskEncryption
         default_from_api: true
-        ignore_read: true
         custom_flatten: templates/terraform/custom_flatten/workbench_instance_data_disk_encryption_flatten.go.erb
         values:
           - DISK_ENCRYPTION_UNSPECIFIED
@@ -247,7 +243,6 @@ properties:
           only applicable if disk_encryption is CMEK. Format: `projects/{project_id}/locations/{location}/keyRings/{key_ring_id}/cryptoKeys/{key_id}`
           Learn more about using your own encryption keys.'
         immutable: true
-        ignore_read: true
         custom_flatten: templates/terraform/custom_flatten/workbench_instance_data_disk_kms_flatten.go.erb
     description: Optional. Data disks attached to the VM instance. Currently supports
       only one data disk.
