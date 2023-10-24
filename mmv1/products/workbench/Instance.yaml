@@ -146,8 +146,6 @@ properties:
       description: |
           The name of the Google Cloud project that this VM image belongs to.
           Format: {project_id}
-      ignore_read: true
-      custom_flatten: templates/terraform/custom_flatten/workbench_instance_vm_image_project_flatten.go.erb
     - !ruby/object:Api::Type::String
       name: name
       description: Optional. Use VM image name to find the image.
@@ -163,7 +161,6 @@ properties:
       - vm_image.0.family
     name: vmImage
     default_from_api: true
-    ignore_read: true
     custom_flatten: templates/terraform/custom_flatten/workbench_instance_vm_image_flatten.go.erb
     description: Definition of a custom Compute Engine virtual machine image for starting
       a workbench instance with the environment installed directly on the VM.
@@ -178,7 +175,6 @@ properties:
     - !ruby/object:Api::Type::Enum
       name: diskType
       default_from_api: true
-      ignore_read: true
       custom_flatten: templates/terraform/custom_flatten/workbench_instance_boot_disk_type_flatten.go.erb
       values:
         - DISK_TYPE_UNSPECIFIED
@@ -190,7 +186,6 @@ properties:
     - !ruby/object:Api::Type::Enum
       name: diskEncryption
       default_from_api: true
-      ignore_read: true
       custom_flatten: templates/terraform/custom_flatten/workbench_instance_boot_disk_encryption_flatten.go.erb
       values:
         - DISK_ENCRYPTION_UNSPECIFIED
@@ -199,18 +194,15 @@ properties:
       description: Optional. Input only. Disk encryption method used on the boot and
         data disks, defaults to GMEK.
       immutable: true
-      ignore_read: true
-      custom_flatten: templates/terraform/custom_flatten/workbench_instance_boot_disk_kms_flatten.go.erb
     - !ruby/object:Api::Type::String
       name: kmsKey
       description: 'Optional. Input only. The KMS key used to encrypt the disks, only
         applicable if disk_encryption is CMEK. Format: `projects/{project_id}/locations/{location}/keyRings/{key_ring_id}/cryptoKeys/{key_id}`
         Learn more about using your own encryption keys.'
       immutable: true
+      custom_flatten: templates/terraform/custom_flatten/workbench_instance_boot_disk_kms_flatten.go.erb
     name: bootDisk
     default_from_api: true
-    ignore_read: true
-    custom_flatten: templates/terraform/custom_flatten/workbench_instance_boot_disk_flatten.go.erb
     description: The definition of a boot disk.
   - !ruby/object:Api::Type::Array
     name: dataDisks
