@@ -390,6 +390,9 @@ func resourceStorageBucketObjectUpdate(d *schema.ResourceData, meta interface{})
 	if hasRetentionChanges {
 		if v, ok := d.GetOk("retention"); ok {
 			res.Retention = expandObjectRetention(v)
+		} else {
+			res.Retention = nil
+			res.NullFields = append(res.NullFields, "Retention")
 		}
 	}
 

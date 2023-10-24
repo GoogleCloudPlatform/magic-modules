@@ -436,13 +436,13 @@ func TestAccStorageObject_retention(t *testing.T) {
 		CheckDestroy:             testAccStorageObjectDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleStorageBucketsObjectRetention(bucketName, "2040-01-01T02:03:04Z"),
+				Config: testGoogleStorageBucketsObjectRetention(bucketName, "2040-01-01T02:03:04.000Z"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleStorageObject(t, bucketName, objectName, dataMd5),
 				),
 			},
 			{
-				Config: testGoogleStorageBucketsObjectRetention(bucketName, "2040-01-02T02:03:04Z"),
+				Config: testGoogleStorageBucketsObjectRetention(bucketName, "2040-01-02T02:03:04.000Z"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleStorageObject(t, bucketName, objectName, dataMd5),
 				),
