@@ -484,7 +484,7 @@ is set to true. Defaults to ZONAL.`,
                                                                         "ssl_mode": {
                                                                                 Type:         schema.TypeString,
                                                                                 Optional:     true,
-                                                                                ValidateFunc: validation.StringInSlice([]string{"SSL_MODE_UNSPECIFIED", "ALLOW_UNENCRYPTED_AND_ENCRYPTED", "ENCRYPTED_ONLY", "TRUSTED_CLIENT_CERTIFICATE_REQUIRED"}, false),
+                                                                                ValidateFunc: validation.StringInSlice([]string{"ALLOW_UNENCRYPTED_AND_ENCRYPTED", "ENCRYPTED_ONLY", "TRUSTED_CLIENT_CERTIFICATE_REQUIRED"}, false),
                                                                                 Description:  `Specify how SSL connection should be enforced in DB connections.`,
 										AtLeastOneOf: ipConfigurationKeys,
                                                                         },
