@@ -25,6 +25,8 @@ on:
       sha:
         description: "The commit SHA in magic-modules repository where the status result will be posted"
         required: true
+      caller_id:
+        description: "Identity of the workflow dispatch caller"
 
 concurrency:
   group: test-tgc-${{ github.event.inputs.owner }}-${{ github.event.inputs.repo }}-${{ github.event.inputs.branch }}
