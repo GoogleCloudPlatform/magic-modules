@@ -3940,7 +3940,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	if d.HasChange("fleet") {
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
-				DesiredFleet: expandFleet(fleet),
+				DesiredFleet: expandFleet(d.Get("fleet")),
 			},
 		}
 
