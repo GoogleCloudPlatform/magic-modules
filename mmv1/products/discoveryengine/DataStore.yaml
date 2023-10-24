@@ -12,120 +12,60 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-# API resource name
-name: 'ResourceName'
-# Resource description for the provider documentation.
+name: 'DataStore'
+kind: 'discoveryEngine#dataStore'
 description: |
-  RESOURCE_DESCRIPTION
+  The DataStore resource is the Vertex AI Search and Conversation data store
+  that are used to find answers for end-user's questions. It is a collection of
+  websites and documents, each of which reference end-user's data.
+  
+  A data store can consist of different types of sources:
+  Web data collected from google search index;
+  Unstructured data uploaded through Cloud Storage bucket or BigQuery;
+  Structured data uploaded through Cloud Storage bucket or BigQuery.
+
+  For more information, please see
+  https://cloud.google.com/generative-ai-app-builder/docs/agent-data-store
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    # Link to quickstart in the API's Guides section. For example:
-    # 'Create and connect to a database': 'https://cloud.google.com/alloydb/docs/quickstart/create-and-connect'
-    'QUICKSTART_TITLE': 'QUICKSTART_URL'
-  # Link to the REST API reference for the resource. For example,
-  # https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.backups
-  api: 'API_REFERENCE_URL'
-# Marks the resource as beta-only. Ensure a beta version block is present in
-# provider.yaml.
-# min_version: beta
+    'Create a search data store': 'https://cloud.google.com/generative-ai-app-builder/docs/create-data-store-es'
+  api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1alpha/projects.locations.collections.dataStores'
 
-# Inserts styled markdown into the header of the resource's page in the
-# provider documentation.
-# docs: !ruby/object:Provider::Terraform::Docs
-#   warning: |
-#     MULTILINE_WARNING_MARKDOWN
-#   note: |
-#     MULTILINE_NOTE_MARKDOWN
-
-# URL for the resource's standard List method. https://google.aip.dev/132
-# Terraform field names enclosed in double curly braces are replaced with
-# the field values from the resource at runtime.
-base_url: 'projects/{{project}}/locations/{{location}}/resourcenames'
-# URL for the resource's standard Get method. https://google.aip.dev/131
-# Terraform field names enclosed in double curly braces are replaced with
-# the field values from the resource at runtime.
-self_link: 'projects/{{project}}/locations/{{location}}/resourcenames/{{name}}'
-
-# If true, the resource and all its fields are considered immutable - that is,
-# only creatable, not updatable. Individual fields can override this if they
-# have a custom update method in the API.
-# immutable: true
-
-# Overrides one or more timeouts, in minutes. All timeouts default to 20.
-# timeouts: !ruby/object:Api::Timeouts
-#   insert_minutes: 20
-#   update_minutes: 20
-#   delete_minutes: 20
-
-# URL for the resource's standard Create method, including query parameters.
-# https://google.aip.dev/133
-# Terraform field names enclosed in double curly braces are replaced with
-# the field values from the resource at runtime.
-create_url: 'projects/{{project}}/locations/{{location}}/resourcenames?resourceId={{name}}'
-# Overrides the HTTP verb used to create a new resource.
-# Allowed values: :POST, :PUT, :PATCH. Default: :POST
-# create_verb: :POST
-
-# Overrides the URL for the resource's standard Update method. (If unset, the
-# self_link URL is used by default.) https://google.aip.dev/134
-# Terraform field names enclosed in double curly braces are replaced with
-# the field values from the resource at runtime.
-# update_url: 'projects/{{project}}/locations/{{location}}/resourcenames/{{name}}'
-# The HTTP verb used to update a resource. Allowed values: :POST, :PUT, :PATCH. Default: :PUT.
+base_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataStores'
+self_link: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataStores/{{data_store_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/collections/{{collectionId}}/dataStores?dataStoreId={{data_store_id}}'
 update_verb: :PATCH
-# If true, the resource sets an `updateMask` query parameter listing modified
-# fields when updating the resource. If false, it does not.
-update_mask: true
-
-# Overrides the URL for the resource's standard Delete method. (If unset, the
-# self_link URL is used by default.) https://google.aip.dev/135
-# Terraform field names enclosed in double curly braces are replaced with
-# the field values from the resource at runtime.
-# delete_url: 'projects/{{project}}/locations/{{location}}/resourcenames/{{name}}'
-# Overrides the HTTP verb used to delete a resource.
-# Allowed values: :POST, :PUT, :PATCH, :DELETE. Default: :DELETE
-# delete_verb: :DELETE
-
-# If true, code for handling long-running operations is generated along with
-# the resource. If false, that code is not generated.
 autogen_async: true
-# Sets parameters for handling operations returned by the API.
-async: !ruby/object:Api::OpAsync
-  # Overrides which API calls return operations. Default: ['create',
-  # 'update', 'delete']
-  # actions: ['create', 'update', 'delete']
-  operation: !ruby/object:Api::OpAsync::Operation
-    base_url: '{{op_id}}'
-
-  # If true, the provider sets the resource's Terraform ID after the resource is created,
-  # taking into account values that are set by the API at create time. This is only possible
-  # when the completed operation's JSON includes the created resource in the "response" field.
-  # If false (or unset), the provider sets the resource's Terraform ID before the resource is
-  # created, based only on the resource configuration.
-  # result: !ruby/object:Api::OpAsync::Result
-  #   resource_inside_response: true
-
-# All resources (of all kinds) that share a mutex value block rather than
-# executing concurrent API requests.
-# Terraform field names enclosed in double curly braces are replaced with
-# the field values from the resource at runtime.
-# mutex: RESOURCE_NAME/{{name}}
 
 parameters:
-- !ruby/object:Api::Type::String
-  name: 'location'
-  required: true
-  immutable: true
-  url_param_only: true
-  description: |
-    LOCATION_DESCRIPTION
-- !ruby/object:Api::Type::String
-  name: 'name'
-  required: true
-  immutable: true
-  url_param_only: true
-  description: |
-    NAME_DESCRIPTION      
+  - !ruby/object:Api::Type::String
+    name: 'project'
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      A valid project identifier.
+  - !ruby/object:Api::Type::String
+    name: 'location'
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The geographic location where the data store reside.
+  - !ruby/object:Api::Type::String
+    name: 'collectionId'
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The collection id of the document.
+  - !ruby/object:Api::Type::String
+    name: 'dataStoreId'
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The unique id of the data store. This field must conform to [RFC-1034](https://tools.ietf.org/html/rfc1034) standard with a length limit of 63 characters.
 
 properties:
 # Fields go here
