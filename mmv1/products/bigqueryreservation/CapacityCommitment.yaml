@@ -15,7 +15,7 @@
 name: 'CapacityCommitment'
 base_url: projects/{{project}}/locations/{{location}}/capacityCommitments
 create_url: projects/{{project}}/locations/{{location}}/capacityCommitments?capacityCommitmentId={{capacity_commitment_id}}
-self_link: 'projects/{{project}}/locations/{{location}}/capacityCommitments/{{capacity_commitment_id}}'
+self_link: '{{name}}'
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -26,16 +26,22 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Introduction to Reservations': 'https://cloud.google.com/bigquery/docs/reservations-intro'
   api: 'https://cloud.google.com/bigquery/docs/reference/reservations/rest/v1/projects.locations.capacityCommitments'
-id_format: 'projects/{{project}}/locations/{{location}}/capacityCommitments/{{capacity_commitment_id}}'
+id_format: '{{name}}'
 import_format:
   [
     'projects/{{project}}/locations/{{location}}/capacityCommitments/{{capacity_commitment_id}}',
   ]
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/bigquery_reservation_capacity_commitment.go.erb
+  custom_import: templates/terraform/custom_import/bigquery_reservation_capacity_commitment_set_id.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_reservation_capacity_commitment_basic'
+    pull_external: true
+    skip_docs: true
+    primary_resource_id: 'commitment'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'bigquery_reservation_capacity_commitment_no_id'
     pull_external: true
     skip_docs: true
     primary_resource_id: 'commitment'
@@ -102,7 +108,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'renewalPlan'
     description: |
-      The plan this capacity commitment is converted to after commitmentEndTime passes. Once the plan is changed, committed period is extended according to commitment plan. Only applicable some commitment plans.
+      The plan this capacity commitment is converted to after commitmentEndTime passes. Once the plan is changed, committed period is extended according to commitment plan. Only applicable for some commitment plans.
   - !ruby/object:Api::Type::String
     name: 'edition'
     immutable: true
