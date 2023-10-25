@@ -3716,7 +3716,7 @@ func testAccContainerNodePool_withConfidentialNodes(clusterName, np, networkName
 	return fmt.Sprintf(`
 resource "google_container_cluster" "cluster" {
   name               = "%s"
-  location           = "asia-east1-c"
+  location           = "us-central1-a"
   initial_node_count = 1
   node_config {
     confidential_nodes {
@@ -3731,7 +3731,7 @@ resource "google_container_cluster" "cluster" {
 
 resource "google_container_node_pool" "np" {
   name               = "%s"
-  location           = "asia-east1-c"
+  location           = "us-central1-a"
   cluster            = google_container_cluster.cluster.name
   initial_node_count = 1
   node_config {
@@ -3748,7 +3748,7 @@ func testAccContainerNodePool_disableConfidentialNodes(clusterName, np, networkN
 	return fmt.Sprintf(`
 resource "google_container_cluster" "cluster" {
   name               = "%s"
-  location           = "asia-east1-c"
+  location           = "us-central1-a"
   initial_node_count = 1
   node_config {
     confidential_nodes {
@@ -3763,7 +3763,7 @@ resource "google_container_cluster" "cluster" {
 
 resource "google_container_node_pool" "np" {
   name               = "%s"
-  location           = "asia-east1-c"
+  location           = "us-central1-a"
   cluster            = google_container_cluster.cluster.name
   initial_node_count = 1
   node_config {
@@ -3813,7 +3813,7 @@ func testAccContainerNodePool_tpuTopology(cluster, np1, np2, tpuTopology, networ
 	return fmt.Sprintf(`
 resource "google_container_cluster" "cluster" {
   name               = "%s"
-  location           = "us-central2-b"
+  location           = "us-central1-a"
   initial_node_count = 1
   deletion_protection = false
   network    = "%s"
@@ -3822,7 +3822,7 @@ resource "google_container_cluster" "cluster" {
 
 resource "google_container_node_pool" "regular_pool" {
   name               = "%s"
-  location           = "us-central2-b"
+  location           = "us-central1-a"
   cluster            = google_container_cluster.cluster.name
   initial_node_count = 1
 
@@ -3833,7 +3833,7 @@ resource "google_container_node_pool" "regular_pool" {
 
 resource "google_container_node_pool" "with_tpu_topology" {
   name               = "%s"
-  location           = "us-central2-b"
+  location           = "us-central1-a"
   cluster            = google_container_cluster.cluster.name
   initial_node_count = 2
 
@@ -3879,7 +3879,7 @@ func testAccContainerNodePool_withHostMaintenancePolicy(cluster, np, networkName
 	return fmt.Sprintf(`
 resource "google_container_cluster" "cluster" {
   name               = "%s"
-  location           = "asia-east1-c"
+  location           = "us-central1-a"
   initial_node_count = 1
   node_config {
     host_maintenance_policy {
@@ -3894,7 +3894,7 @@ resource "google_container_cluster" "cluster" {
 
 resource "google_container_node_pool" "np" {
   name               = "%s"
-  location           = "asia-east1-c"
+  location           = "us-central1-a"
   cluster            = google_container_cluster.cluster.name
   initial_node_count = 1
   node_config {
