@@ -603,10 +603,6 @@ resource "google_alloydb_instance" "secondary" {
     test_label = "test-alloydb-label"
   }
 
-  annotations = {
-    test_annotation = "test-alloydb-annotation"
-  }
-
   query_insights_config {
       query_plans_per_minute = 10
       query_string_length = 2048
@@ -614,17 +610,7 @@ resource "google_alloydb_instance" "secondary" {
       record_client_address = true
   }
 
-  gce_zone = "us-east1-b"
-
   availability_type = "REGIONAL"
-
-  lifecycle {
-    ignore_changes = [
-      gce_zone,
-      annotations
-    ]
-  }
-
 }
 
 data "google_project" "project" {}
