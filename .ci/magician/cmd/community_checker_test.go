@@ -16,7 +16,7 @@ func TestExecCommunityChecker_CoreContributorFlow(t *testing.T) {
 		calledMethods: make(map[string][][]any),
 	}
 
-	execCommunityChecker("pr1", "sha1", "branch1", "url1", "head1", "base1", gh, cb)
+	execCommunityChecker("pr1", "sha1", "branch1", "url1", "head1", "base1", "buildId", gh, cb)
 
 	if _, ok := cb.calledMethods["TriggerMMPresubmitRuns"]; ok {
 		t.Fatal("Presubmit runs redundantly triggered for core contributor")
@@ -44,7 +44,7 @@ func TestExecCommunityChecker_GooglerFlow(t *testing.T) {
 		calledMethods: make(map[string][][]any),
 	}
 
-	execCommunityChecker("pr1", "sha1", "branch1", "url1", "head1", "base1", gh, cb)
+	execCommunityChecker("pr1", "sha1", "branch1", "url1", "head1", "base1", "buildId", gh, cb)
 
 	if _, ok := cb.calledMethods["TriggerMMPresubmitRuns"]; ok {
 		t.Fatal("Presubmit runs redundantly triggered for googler")
@@ -71,10 +71,10 @@ func TestExecCommunityChecker_AmbiguousUserFlow(t *testing.T) {
 		calledMethods: make(map[string][][]any),
 	}
 
-	execCommunityChecker("pr1", "sha1", "branch1", "url1", "head1", "base1", gh, cb)
+	execCommunityChecker("pr1", "sha1", "branch1", "url1", "head1", "base1", "buildId", gh, cb)
 
 	method := "TriggerMMPresubmitRuns"
-	expected := [][]any{{"sha1", map[string]string{"BRANCH_NAME": "branch1", "_BASE_BRANCH": "base1", "_HEAD_BRANCH": "head1", "_HEAD_REPO_URL": "url1", "_PR_NUMBER": "pr1"}}}
+	expected := [][]any{{"sha1", map[string]string{"BRANCH_NAME": "branch1", "_BASE_BRANCH": "base1", "_HEAD_BRANCH": "head1", "_HEAD_REPO_URL": "url1", "_PR_NUMBER": "pr1", "_CALLER_ID": "buildId"}}}
 	if calls, ok := cb.calledMethods[method]; !ok {
 		t.Fatal("Presubmit runs not triggered for ambiguous user")
 	} else if !reflect.DeepEqual(calls, expected) {

@@ -63,20 +63,23 @@ var communityApprovalCmd = &cobra.Command{
 		baseBranch := args[5]
 		fmt.Println("Base Branch: ", baseBranch)
 
+		callerId := os.Getenv("BUILD_ID")
+		fmt.Println("Caller ID: ", callerId)
+
 		gh := github.NewGithubService()
 		cb := cloudbuild.NewCloudBuildService()
-		execCommunityChecker(prNumber, commitSha, branchName, headRepoUrl, headBranch, baseBranch, gh, cb)
+		execCommunityChecker(prNumber, commitSha, branchName, headRepoUrl, headBranch, baseBranch, callerId, gh, cb)
 	},
 }
 
-func execCommunityChecker(prNumber, commitSha, branchName, headRepoUrl, headBranch, baseBranch string, gh ccGithub, cb ccCloudbuild) {
+func execCommunityChecker(prNumber, commitSha, branchName, headRepoUrl, headBranch, baseBranch, callerId string, gh ccGithub, cb ccCloudbuild) {
 	substitutions := map[string]string{
 		"BRANCH_NAME":    branchName,
 		"_PR_NUMBER":     prNumber,
 		"_HEAD_REPO_URL": headRepoUrl,
 		"_HEAD_BRANCH":   headBranch,
 		"_BASE_BRANCH":   baseBranch,
-		"_CALLER_ID":     os.Getenv("BUILD_ID"),
+		"_CALLER_ID":     callerId,
 	}
 
 	author, err := gh.GetPullRequestAuthor(prNumber)

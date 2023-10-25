@@ -10,10 +10,10 @@ func TestExecTestTPG(t *testing.T) {
 		calledMethods: make(map[string][][]any),
 	}
 
-	execTestTPG("beta", "sha1", "pr1", gh)
+	execTestTPG("beta", "sha1", "pr1", "buildId", gh)
 
 	method := "CreateWorkflowDispatchEvent"
-	expected := [][]any{{"test-tpg.yml", map[string]any{"branch": "auto-pr-pr1", "owner": "modular-magician", "repo": "terraform-provider-google-beta", "sha": "sha1"}}}
+	expected := [][]any{{"test-tpg.yml", map[string]any{"branch": "auto-pr-pr1", "owner": "modular-magician", "repo": "terraform-provider-google-beta", "sha": "sha1", "caller_id": "buildId"}}}
 	if calls, ok := gh.calledMethods[method]; !ok {
 		t.Fatal("Workflow dispatch event not created")
 	} else if !reflect.DeepEqual(calls, expected) {
@@ -22,10 +22,10 @@ func TestExecTestTPG(t *testing.T) {
 
 	gh.calledMethods = make(map[string][][]any)
 
-	execTestTPG("ga", "sha1", "pr1", gh)
+	execTestTPG("ga", "sha1", "pr1", "buildId", gh)
 
 	method = "CreateWorkflowDispatchEvent"
-	expected = [][]any{{"test-tpg.yml", map[string]any{"branch": "auto-pr-pr1", "owner": "modular-magician", "repo": "terraform-provider-google", "sha": "sha1"}}}
+	expected = [][]any{{"test-tpg.yml", map[string]any{"branch": "auto-pr-pr1", "owner": "modular-magician", "repo": "terraform-provider-google", "sha": "sha1", "caller_id": "buildId"}}}
 	if calls, ok := gh.calledMethods[method]; !ok {
 		t.Fatal("Workflow dispatch event not created")
 	} else if !reflect.DeepEqual(calls, expected) {

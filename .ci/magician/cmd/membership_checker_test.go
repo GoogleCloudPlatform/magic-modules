@@ -17,14 +17,14 @@ func TestExecMembershipChecker_CoreContributorFlow(t *testing.T) {
 		calledMethods: make(map[string][][]any),
 	}
 
-	execMembershipChecker("pr1", "sha1", "branch1", "url1", "head1", "base1", gh, cb)
+	execMembershipChecker("pr1", "sha1", "branch1", "url1", "head1", "base1", "buildId", gh, cb)
 
 	if _, ok := gh.calledMethods["RequestPullRequestReviewer"]; ok {
 		t.Fatal("Incorrectly requested review for core contributor")
 	}
 
 	method := "TriggerMMPresubmitRuns"
-	expected := [][]any{{"sha1", map[string]string{"BRANCH_NAME": "branch1", "_BASE_BRANCH": "base1", "_HEAD_BRANCH": "head1", "_HEAD_REPO_URL": "url1", "_PR_NUMBER": "pr1"}}}
+	expected := [][]any{{"sha1", map[string]string{"BRANCH_NAME": "branch1", "_BASE_BRANCH": "base1", "_HEAD_BRANCH": "head1", "_HEAD_REPO_URL": "url1", "_PR_NUMBER": "pr1", "_CALLER_ID": "buildId"}}}
 	if calls, ok := cb.calledMethods[method]; !ok {
 		t.Fatal("Presubmit runs not triggered for core author")
 	} else if !reflect.DeepEqual(calls, expected) {
@@ -53,7 +53,7 @@ func TestExecMembershipChecker_GooglerFlow(t *testing.T) {
 		calledMethods: make(map[string][][]any),
 	}
 
-	execMembershipChecker("pr1", "sha1", "branch1", "url1", "head1", "base1", gh, cb)
+	execMembershipChecker("pr1", "sha1", "branch1", "url1", "head1", "base1", "buildId", gh, cb)
 
 	method := "RequestPullRequestReviewer"
 	if calls, ok := gh.calledMethods[method]; !ok {
@@ -69,7 +69,7 @@ func TestExecMembershipChecker_GooglerFlow(t *testing.T) {
 	}
 
 	method = "TriggerMMPresubmitRuns"
-	expected := [][]any{{"sha1", map[string]string{"BRANCH_NAME": "branch1", "_BASE_BRANCH": "base1", "_HEAD_BRANCH": "head1", "_HEAD_REPO_URL": "url1", "_PR_NUMBER": "pr1"}}}
+	expected := [][]any{{"sha1", map[string]string{"BRANCH_NAME": "branch1", "_BASE_BRANCH": "base1", "_HEAD_BRANCH": "head1", "_HEAD_REPO_URL": "url1", "_PR_NUMBER": "pr1", "_CALLER_ID": "buildId"}}}
 	if calls, ok := cb.calledMethods[method]; !ok {
 		t.Fatal("Presubmit runs not triggered for googler")
 	} else if !reflect.DeepEqual(calls, expected) {
@@ -97,7 +97,7 @@ func TestExecMembershipChecker_AmbiguousUserFlow(t *testing.T) {
 		calledMethods: make(map[string][][]any),
 	}
 
-	execMembershipChecker("pr1", "sha1", "branch1", "url1", "head1", "base1", gh, cb)
+	execMembershipChecker("pr1", "sha1", "branch1", "url1", "head1", "base1", "buildId", gh, cb)
 
 	method := "RequestPullRequestReviewer"
 	if calls, ok := gh.calledMethods[method]; !ok {
@@ -149,7 +149,7 @@ func TestExecMembershipChecker_CommentForNewPrimaryReviewer(t *testing.T) {
 		calledMethods: make(map[string][][]any),
 	}
 
-	execMembershipChecker("pr1", "sha1", "branch1", "url1", "head1", "base1", gh, cb)
+	execMembershipChecker("pr1", "sha1", "branch1", "url1", "head1", "base1", "buildId", gh, cb)
 
 	method := "RequestPullRequestReviewer"
 	if calls, ok := gh.calledMethods[method]; !ok {

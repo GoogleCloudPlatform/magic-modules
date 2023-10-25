@@ -77,20 +77,23 @@ var membershipCheckerCmd = &cobra.Command{
 		baseBranch := args[5]
 		fmt.Println("Base Branch: ", baseBranch)
 
+		callerId := os.Getenv("BUILD_ID")
+		fmt.Println("Caller ID: ", callerId)
+
 		gh := github.NewGithubService()
 		cb := cloudbuild.NewCloudBuildService()
-		execMembershipChecker(prNumber, commitSha, branchName, headRepoUrl, headBranch, baseBranch, gh, cb)
+		execMembershipChecker(prNumber, commitSha, branchName, headRepoUrl, headBranch, baseBranch, callerId, gh, cb)
 	},
 }
 
-func execMembershipChecker(prNumber, commitSha, branchName, headRepoUrl, headBranch, baseBranch string, gh mcGithub, cb mcCloudbuild) {
+func execMembershipChecker(prNumber, commitSha, branchName, headRepoUrl, headBranch, baseBranch, callerId string, gh mcGithub, cb mcCloudbuild) {
 	substitutions := map[string]string{
 		"BRANCH_NAME":    branchName,
 		"_PR_NUMBER":     prNumber,
 		"_HEAD_REPO_URL": headRepoUrl,
 		"_HEAD_BRANCH":   headBranch,
 		"_BASE_BRANCH":   baseBranch,
-		"_CALLER_ID":     os.Getenv("BUILD_ID"),
+		"_CALLER_ID":     callerId,
 	}
 
 	author, err := gh.GetPullRequestAuthor(prNumber)

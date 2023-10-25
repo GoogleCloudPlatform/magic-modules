@@ -20,20 +20,21 @@ var testTGCCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		commit := os.Getenv("COMMIT_SHA")
 		pr := os.Getenv("PR_NUMBER")
+		callerId := os.Getenv("BUILD_ID")
 
 		gh := github.NewGithubService()
 
-		execTestTGC(commit, pr, gh)
+		execTestTGC(commit, pr, callerId, gh)
 	},
 }
 
-func execTestTGC(commit, pr string, gh ttGithub) {
+func execTestTGC(commit, pr, callerId string, gh ttGithub) {
 	if err := gh.CreateWorkflowDispatchEvent("test-tgc.yml", map[string]any{
 		"owner":     "modular-magician",
 		"repo":      "terraform-google-conversion",
 		"branch":    "auto-pr-" + pr,
 		"sha":       commit,
-		"caller_id": os.Getenv("BUILD_ID"),
+		"caller_id": callerId,
 	}); err != nil {
 		fmt.Printf("Error creating workflow dispatch event: %v\n", err)
 		os.Exit(1)
