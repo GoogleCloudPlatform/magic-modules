@@ -90,7 +90,7 @@ properties:
     name: 'description'
     description: |
       Description of the storage pool
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: labels
     description: |
       Labels as key value pairs.An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
