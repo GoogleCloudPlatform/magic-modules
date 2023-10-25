@@ -37,6 +37,17 @@ examples:
       instance_name: 'test-instance'
       network_name: 'test-network'
       address_name: 'address'
+    skip_test: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'memcache_instance_basic_test'
+    primary_resource_id: 'instance'
+    vars:
+      instance_name: 'test-instance'
+      network_name: 'test-network'
+      address_name: 'address'
+    test_vars_overrides:
+      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
+    skip_docs: true
 parameters:
   - !ruby/object:Api::Type::String
     name: 'region'

@@ -75,6 +75,9 @@ func terraformExec(t *testing.T, executable, dir string, args ...string) []byte 
 		"GOOGLE_FOLDER=" + data.FolderID,
 		"GOOGLE_ORG=" + data.OrgID,
 	}
+	if os.Getenv("TF_CLI_CONFIG_FILE") != "" {
+		cmd.Env = append(cmd.Env, "TF_CLI_CONFIG_FILE="+os.Getenv("TF_CLI_CONFIG_FILE"))
+	}
 	cmd.Dir = dir
 	wantError := false
 	payload, _ := run(t, cmd, wantError)
