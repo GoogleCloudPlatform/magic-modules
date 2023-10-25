@@ -28,7 +28,7 @@ resource "google_secret_manager_secret_iam_member" "secret_iam" {
 resource "google_integration_connectors_connection" "<%= ctx[:primary_resource_id] %>" {
     name     = "<%= ctx[:vars]['connection_name'] %>"
     description = "tf updated description"
-    service_account = "893437653600-compute@developer.gserviceaccount.com"
+    service_account = "${data.google_project.test_project.number}-compute@developer.gserviceaccount.com"
     connector_version = "projects/connectors-autopush-harsha/locations/global/providers/zendesk/connectors/zendesk/versions/1"
     config_variable {
         key = "proxy_enabled"
@@ -48,7 +48,7 @@ resource "google_integration_connectors_connection" "<%= ctx[:primary_resource_i
     destination_config {
       key = "url"
       destination {
-          host = "https://test6091.zendesk.com"
+          host = "https://google8882.zendesk.com"
       }
     }
     eventing_enablement_type = "EVENTING_AND_CONNECTION"
@@ -56,7 +56,7 @@ resource "google_integration_connectors_connection" "<%= ctx[:primary_resource_i
         registration_destination_config {
           key = "registration_destination_config"
           destinations {
-              host = "https://test6091.zendesk.com"
+              host = "https://google8882.zendesk.com"
             }
         }
         auth_config {
