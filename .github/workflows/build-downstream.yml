@@ -42,6 +42,9 @@ jobs:
       - name: Build terraform-provider-google-beta
         run: |
           set -e
+          set +x
+          # Set GOPATH to a directory the runner user has access to
+          export GOPATH=~/go
 
           function clone_repo() {
               UPSTREAM_OWNER=hashicorp
