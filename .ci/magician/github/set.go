@@ -98,7 +98,7 @@ func (gh *github) RemoveLabel(prNumber, label string) error {
 func (gh *github) CreateWorkflowDispatchEvent(workflowFileName string, inputs map[string]any) error {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/actions/workflows/%s/dispatches", workflowFileName)
 	resp, err := utils.RequestCall(url, "POST", gh.token, nil, map[string]any{
-		"ref":    "cache-build-test",
+		"ref":    "main",
 		"inputs": inputs,
 	})
 
