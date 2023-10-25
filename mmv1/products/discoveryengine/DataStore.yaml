@@ -37,6 +37,14 @@ create_url: 'projects/{{project}}/locations/{{location}}/collections/{{collectio
 update_verb: :PATCH
 autogen_async: true
 
+iam_policy: !ruby/object:Api::Resource::IamPolicy
+  parent_resource_attribute: 'data_store_id'
+  method_name_separator: ':'
+  fetch_iam_policy_verb: :POST
+  import_format: [
+    'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataStores/{{data_store_id}}',
+  ]
+
 parameters:
   - !ruby/object:Api::Type::String
     name: 'project'
