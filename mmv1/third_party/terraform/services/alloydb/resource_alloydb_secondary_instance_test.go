@@ -92,7 +92,7 @@ resource "google_alloydb_instance" "secondary" {
 
 data "google_project" "project" {}
 
-resource "google_compute_network" "default" {
+data resource "google_compute_network" "default" {
   name = "%{network_name}"
 }
 `, context)
@@ -147,7 +147,7 @@ resource "google_alloydb_instance" "secondary" {
 
 data "google_project" "project" {}
 
-resource "google_compute_network" "default" {
+data resource "google_compute_network" "default" {
   name = "%{network_name}"
 }
 `, context)
@@ -239,7 +239,7 @@ resource "google_alloydb_instance" "read_pool" {
 
 data "google_project" "project" {}
 
-resource "google_compute_network" "default" {
+data resource "google_compute_network" "default" {
   name = "%{network_name}"
 }
 `, context)
@@ -327,7 +327,7 @@ resource "google_alloydb_instance" "secondary" {
 
 data "google_project" "project" {}
 
-resource "google_compute_network" "default" {
+data resource "google_compute_network" "default" {
   name = "%{network_name}"
 }
 `, context)
@@ -422,7 +422,7 @@ resource "google_alloydb_instance" "secondary" {
 
 data "google_project" "project" {}
 
-resource "google_compute_network" "default" {
+data resource "google_compute_network" "default" {
   name = "%{network_name}"
 }
 `, context)
@@ -520,7 +520,7 @@ resource "google_alloydb_instance" "secondary" {
 
 data "google_project" "project" {}
 
-resource "google_compute_network" "default" {
+data resource "google_compute_network" "default" {
   name = "%{network_name}"
 }
 `, context)
@@ -629,7 +629,7 @@ resource "google_alloydb_instance" "secondary" {
 
 data "google_project" "project" {}
 
-resource "google_compute_network" "default" {
+data resource "google_compute_network" "default" {
   name = "%{network_name}"
 }
 `, context)
