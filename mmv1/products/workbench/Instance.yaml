@@ -52,6 +52,8 @@ examples:
     region_override: 'us-west1-a'
     vars:
       instance_name: 'workbench-instance'
+    ignore_read_extra:
+      - 'gce_setup.0.vm_image'
   - !ruby/object:Provider::Terraform::Examples
     name: 'workbench_instance_full'
     primary_resource_id: 'instance'
@@ -63,6 +65,14 @@ examples:
       instance_name: 'workbench-instance'
     test_env_vars:
       service_account: :SERVICE_ACCT
+    ignore_read_extra:
+      - 'gce_setup.0.vm_image'
+      - 'gce_setup.0.boot_disk.0.disk_encryption'
+      - 'gce_setup.0.boot_disk.0.disk_type'
+      - 'gce_setup.0.boot_disk.0.kms_key'
+      - 'gce_setup.0.data_disks.0.disk_encryption'
+      - 'gce_setup.0.data_disks.0.disk_type'
+      - 'gce_setup.0.data_disks.0.kms_key'
   - !ruby/object:Provider::Terraform::Examples
     name: 'workbench_instance_labels'
     primary_resource_id: 'instance'
