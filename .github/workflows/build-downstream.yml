@@ -21,7 +21,20 @@ jobs:
         uses: ruby/setup-ruby@ec02537da5712d66d4d50a0f33b7eb52773b5ed1
         with:
           ruby-version: '3.1'
-          bundler-cache: true
+
+      - name: Cache Bundler gems
+        uses: actions/cache@v2
+        with:
+          path: mmv1/vendor/bundle
+          key: ${{ runner.os }}-gems-${{ hashFiles('mmv1/**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-gems-
+
+      - name: Install Ruby dependencies
+        run: |
+          bundle config path mmv1/vendor/bundle
+          bundle install
+        working-directory: mmv1
 
       - name: Set up Go
         uses: actions/setup-go@v4
@@ -73,7 +86,6 @@ jobs:
           popd
 
           # Extracted build process from the script:
-          bundle install
           bundle exec compiler.rb -a -e terraform -o $LOCAL_PATH -v beta
           pushd ../
           make tpgtools OUTPUT_PATH=$LOCAL_PATH VERSION=beta
