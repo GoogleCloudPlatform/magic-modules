@@ -59,8 +59,6 @@ resource "google_alloydb_instance" "primary" {
   machine_config {
     cpu_count = 2
   }
-
-  depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 resource "google_alloydb_cluster" "secondary" {
@@ -90,28 +88,12 @@ resource "google_alloydb_instance" "secondary" {
   machine_config {
     cpu_count = 2
   }
-
-  depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 data "google_project" "project" {}
 
 resource "google_compute_network" "default" {
   name = "%{network_name}"
-}
-
-resource "google_compute_global_address" "private_ip_alloc" {
-  name          =  "tf-test-alloydb-secondary-cluster%{random_suffix}"
-  address_type  = "INTERNAL"
-  purpose       = "VPC_PEERING"
-  prefix_length = 16
-  network       = google_compute_network.default.id
-}
-
-resource "google_service_networking_connection" "vpc_connection" {
-  network                 = google_compute_network.default.id
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
 }
 `, context)
 }
@@ -132,8 +114,6 @@ resource "google_alloydb_instance" "primary" {
   machine_config {
     cpu_count = 2
   }
-
-  depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 resource "google_alloydb_cluster" "secondary" {
@@ -163,28 +143,12 @@ resource "google_alloydb_instance" "secondary" {
   machine_config {
     cpu_count = 4
   }
-
-  depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 data "google_project" "project" {}
 
 resource "google_compute_network" "default" {
   name = "%{network_name}"
-}
-
-resource "google_compute_global_address" "private_ip_alloc" {
-  name          =  "tf-test-alloydb-secondary-cluster%{random_suffix}"
-  address_type  = "INTERNAL"
-  purpose       = "VPC_PEERING"
-  prefix_length = 16
-  network       = google_compute_network.default.id
-}
-
-resource "google_service_networking_connection" "vpc_connection" {
-  network                 = google_compute_network.default.id
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
 }
 `, context)
 }
@@ -232,8 +196,6 @@ resource "google_alloydb_instance" "primary" {
   machine_config {
     cpu_count = 2
   }
-
-  depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 resource "google_alloydb_cluster" "secondary" {
@@ -263,8 +225,6 @@ resource "google_alloydb_instance" "secondary" {
   machine_config {
     cpu_count = 2
   }
-
-  depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 resource "google_alloydb_instance" "read_pool" {
@@ -281,20 +241,6 @@ data "google_project" "project" {}
 
 resource "google_compute_network" "default" {
   name = "%{network_name}"
-}
-
-resource "google_compute_global_address" "private_ip_alloc" {
-  name          =  "tf-test-alloydb-secondary-cluster%{random_suffix}"
-  address_type  = "INTERNAL"
-  purpose       = "VPC_PEERING"
-  prefix_length = 16
-  network       = google_compute_network.default.id
-}
-
-resource "google_service_networking_connection" "vpc_connection" {
-  network                 = google_compute_network.default.id
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
 }
 `, context)
 }
@@ -345,8 +291,6 @@ resource "google_alloydb_instance" "primary" {
   machine_config {
     cpu_count = 2
   }
-
-  depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 resource "google_alloydb_cluster" "secondary" {
@@ -379,28 +323,12 @@ resource "google_alloydb_instance" "secondary" {
   machine_config {
     cpu_count = 2
   }
-
-  depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 data "google_project" "project" {}
 
 resource "google_compute_network" "default" {
   name = "%{network_name}"
-}
-
-resource "google_compute_global_address" "private_ip_alloc" {
-  name          =  "tf-test-alloydb-secondary-cluster%{random_suffix}"
-  address_type  = "INTERNAL"
-  purpose       = "VPC_PEERING"
-  prefix_length = 16
-  network       = google_compute_network.default.id
-}
-
-resource "google_service_networking_connection" "vpc_connection" {
-  network                 = google_compute_network.default.id
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
 }
 `, context)
 }
@@ -457,8 +385,6 @@ resource "google_alloydb_instance" "primary" {
   machine_config {
     cpu_count = 2
   }
-
-  depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 resource "google_alloydb_cluster" "secondary" {
@@ -492,28 +418,12 @@ resource "google_alloydb_instance" "secondary" {
   database_flags = {
 	  "alloydb.enable_auto_explain" = "true"
   }
-
-  depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 data "google_project" "project" {}
 
 resource "google_compute_network" "default" {
   name = "%{network_name}"
-}
-
-resource "google_compute_global_address" "private_ip_alloc" {
-  name          =  "tf-test-alloydb-secondary-cluster%{random_suffix}"
-  address_type  = "INTERNAL"
-  purpose       = "VPC_PEERING"
-  prefix_length = 16
-  network       = google_compute_network.default.id
-}
-
-resource "google_service_networking_connection" "vpc_connection" {
-  network                 = google_compute_network.default.id
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
 }
 `, context)
 }
@@ -570,8 +480,6 @@ resource "google_alloydb_instance" "primary" {
   machine_config {
     cpu_count = 2
   }
-
-  depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 resource "google_alloydb_cluster" "secondary" {
@@ -608,28 +516,12 @@ resource "google_alloydb_instance" "secondary" {
       record_application_tags = true
       record_client_address = true
   }
-
-  depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 data "google_project" "project" {}
 
 resource "google_compute_network" "default" {
   name = "%{network_name}"
-}
-
-resource "google_compute_global_address" "private_ip_alloc" {
-  name          =  "tf-test-alloydb-secondary-cluster%{random_suffix}"
-  address_type  = "INTERNAL"
-  purpose       = "VPC_PEERING"
-  prefix_length = 16
-  network       = google_compute_network.default.id
-}
-
-resource "google_service_networking_connection" "vpc_connection" {
-  network                 = google_compute_network.default.id
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
 }
 `, context)
 }
@@ -677,8 +569,6 @@ resource "google_alloydb_instance" "primary" {
   machine_config {
     cpu_count = 2
   }
-
-  depends_on = [google_service_networking_connection.vpc_connection]
 }
 
 resource "google_alloydb_cluster" "secondary" {
@@ -728,8 +618,6 @@ resource "google_alloydb_instance" "secondary" {
 
   availability_type = "REGIONAL"
 
-  depends_on = [google_service_networking_connection.vpc_connection]
-
   lifecycle {
     ignore_changes = [
       gce_zone,
@@ -743,20 +631,6 @@ data "google_project" "project" {}
 
 resource "google_compute_network" "default" {
   name = "%{network_name}"
-}
-
-resource "google_compute_global_address" "private_ip_alloc" {
-  name          =  "tf-test-alloydb-secondary-cluster%{random_suffix}"
-  address_type  = "INTERNAL"
-  purpose       = "VPC_PEERING"
-  prefix_length = 16
-  network       = google_compute_network.default.id
-}
-
-resource "google_service_networking_connection" "vpc_connection" {
-  network                 = google_compute_network.default.id
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
 }
 `, context)
 }
