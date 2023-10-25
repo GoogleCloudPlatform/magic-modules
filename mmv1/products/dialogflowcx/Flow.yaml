@@ -27,17 +27,28 @@ timeouts: !ruby/object:Api::Timeouts
   update_minutes: 40
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/dialogflowcx_flow.go.erb
-  pre_create: templates/terraform/pre_create/dialogflow_set_location.go.erb
+  pre_create: templates/terraform/pre_create/dialogflowcx_set_location_skip_default_obj.go.erb
   pre_update: templates/terraform/pre_create/dialogflow_set_location.go.erb
-  pre_delete: templates/terraform/pre_create/dialogflow_set_location.go.erb
+  pre_delete: templates/terraform/pre_delete/dialogflowcx_set_location_skip_default_obj.go.erb
   pre_read: templates/terraform/pre_create/dialogflow_set_location.go.erb
 examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dialogflowcx_flow_basic'
+    primary_resource_id: 'basic_flow'
+    vars:
+      agent_name: 'dialogflowcx-agent'
   - !ruby/object:Provider::Terraform::Examples
     name: 'dialogflowcx_flow_full'
     primary_resource_id: 'basic_flow'
     vars:
       agent_name: 'dialogflowcx-agent'
       bucket_name: 'dialogflowcx-bucket'
+  - !ruby/object:Provider::Terraform::Examples
+    skip_docs: true
+    name: 'dialogflowcx_flow_default_start_flow'
+    primary_resource_id: 'default_start_flow'
+    vars:
+      agent_name: 'dialogflowcx-agent'
 skip_sweeper: true
 id_format: '{{parent}}/flows/{{name}}'
 import_format: ['{{parent}}/flows/{{name}}']
@@ -62,9 +73,11 @@ parameters:
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
-    output: true
+    default_from_api: true
+    immutable: true
     description: |
-      The unique identifier of the flow.
+      The unique identifier of the flow. You should not be setting it most of the time.
+      Setting it to the special value `00000000-0000-0000-0000-000000000000` marks this resource as the [Default Start Flow](https://cloud.google.com/dialogflow/cx/docs/concept/flow#start). When you create an agent, a Default Start Flow is created automatically. The Default Start Flow cannot be deleted; deleting the corresponding `google_dialogflow_cx_flow` resource does nothing to the underlying GCP resources.
       Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>.
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::String

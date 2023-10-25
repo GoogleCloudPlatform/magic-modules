@@ -1,0 +1,30 @@
+
+// extract location from the parent
+location := ""
+ 
+if parts := regexp.MustCompile(`locations\/([^\/]*)\/`).FindStringSubmatch(d.Get("parent").(string)); parts != nil {
+    location = parts[1]
+} else {
+    return fmt.Errorf(
+        "Saw %s when the parent is expected to contains location %s",
+        d.Get("parent"),
+        "projects/{{project}}/locations/{{location}}/...",
+    )
+}
+
+url = strings.Replace(url,"-dialogflow",fmt.Sprintf("%s-dialogflow",location),1)
+
+// if the user's set a name (e.g. for a default object) "Update" instead of "Create"
+objName, _ := d.Get("name").(string)
+if objName != "" {
+    // Store the ID
+    id, err := tpgresource.ReplaceVars(d, config, "<%= id_format(object) -%>")
+    if err != nil {
+        return fmt.Errorf("Error constructing id: %s", err)
+    }
+    d.SetId(id)
+
+    // and defer to the Update method:
+    log.Printf("[DEBUG] Updating default <%= resource_name -%>")
+    return resource<%= resource_name -%>Update(d, meta)
+}

@@ -27,14 +27,26 @@ timeouts: !ruby/object:Api::Timeouts
   update_minutes: 40
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/dialogflowcx_intent.go.erb
-  pre_create: templates/terraform/pre_create/dialogflow_set_location.go.erb
+  pre_create: templates/terraform/pre_create/dialogflowcx_set_location_skip_default_obj.go.erb
   pre_update: templates/terraform/pre_create/dialogflow_set_location.go.erb
-  pre_delete: templates/terraform/pre_create/dialogflow_set_location.go.erb
+  pre_delete: templates/terraform/pre_delete/dialogflowcx_set_location_skip_default_obj.go.erb
   pre_read: templates/terraform/pre_create/dialogflow_set_location.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dialogflowcx_intent_full'
     primary_resource_id: 'basic_intent'
+    vars:
+      agent_name: 'dialogflowcx-agent'
+  - !ruby/object:Provider::Terraform::Examples
+    skip_docs: true
+    name: 'dialogflowcx_intent_default_negative_intent'
+    primary_resource_id: 'default_negative_intent'
+    vars:
+      agent_name: 'dialogflowcx-agent'
+  - !ruby/object:Provider::Terraform::Examples
+    skip_docs: true
+    name: 'dialogflowcx_intent_default_welcome_intent'
+    primary_resource_id: 'default_welcome_intent'
     vars:
       agent_name: 'dialogflowcx-agent'
 skip_sweeper: true
@@ -58,9 +70,12 @@ parameters:
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
-    output: true
+    default_from_api: true
+    immutable: true
     description: |
-      The unique identifier of the intent.
+      The unique identifier of the intent. You should not be setting it most of the time.
+      Setting it to the special value `00000000-0000-0000-0000-000000000000` marks this resource as the [Default Welcome Intent](https://cloud.google.com/dialogflow/cx/docs/concept/intent#welcome). When you create an agent, a Default Welcome Intent is created automatically. The Default Welcome Intent cannot be deleted; deleting the corresponding `google_dialogflow_cx_intent` resource does nothing to the underlying GCP resources.
+      Setting it to the special value `00000000-0000-0000-0000-000000000001` marks this resource as the [Default Negative Intent](https://cloud.google.com/dialogflow/cx/docs/concept/intent#negative). When you create an agent, a Default Negative Intent is created automatically. The Default Negative Intent cannot be deleted; deleting the corresponding `google_dialogflow_cx_intent` resource does nothing to the underlying GCP resources.
       Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/intents/<Intent ID>.
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::String
@@ -141,9 +156,11 @@ properties:
       If the supplied value is negative, the intent is ignored in runtime detect intent requests.
   - !ruby/object:Api::Type::Boolean
     name: 'isFallback'
+    output: true
     description: |
       Indicates whether this is a fallback intent. Currently only default fallback intent is allowed in the agent, which is added upon agent creation.
       Adding training phrases to fallback intent is useful in the case of requests that are mistakenly matched, since training phrases assigned to fallback intents act as negative examples that triggers no-match event.
+      To manage the fallback intent, set `name = "00000000-0000-0000-0000-000000000001"`.
   - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |

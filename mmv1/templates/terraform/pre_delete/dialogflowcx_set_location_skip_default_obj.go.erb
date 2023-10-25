@@ -1,0 +1,23 @@
+
+// extract location from the parent
+location := ""
+ 
+if parts := regexp.MustCompile(`locations\/([^\/]*)\/`).FindStringSubmatch(d.Get("parent").(string)); parts != nil {
+    location = parts[1]
+} else {
+    return fmt.Errorf(
+        "Saw %s when the parent is expected to contains location %s",
+        d.Get("parent"),
+        "projects/{{project}}/locations/{{location}}/...",
+    )
+}
+
+url = strings.Replace(url,"-dialogflow",fmt.Sprintf("%s-dialogflow",location),1)
+
+// if it's a default object Dialogflow creates for you, skip deletion
+objName, _ := d.Get("name").(string)
+if objName == "00000000-0000-0000-0000-000000000000" || objName == "00000000-0000-0000-0000-000000000001" {
+    // we can't delete these resources so do nothing
+    log.Printf("[DEBUG] Not deleting default <%= resource_name -%>")
+    return nil
+}

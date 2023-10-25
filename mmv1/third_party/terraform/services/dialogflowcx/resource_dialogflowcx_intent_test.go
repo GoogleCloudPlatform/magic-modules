@@ -139,3 +139,60 @@ func testAccDialogflowCXIntent_full(context map[string]interface{}) string {
     } 
 	  `, context)
 }
+
+func TestAccDialogflowCXIntent_defaultIntents(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDialogflowCXIntent_defaultIntents(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_dialogflow_cx_intent.default_negative_intent", "name", "00000000-0000-0000-0000-000000000001"),
+					resource.TestCheckResourceAttr("google_dialogflow_cx_intent.default_welcome_intent", "name", "00000000-0000-0000-0000-000000000000"),
+				),
+			},
+		},
+	})
+}
+
+func testAccDialogflowCXIntent_defaultIntents(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_dialogflow_cx_agent" "agent" {
+  display_name          = "tf-test-dialogflowcx-agent%{random_suffix}"
+  location              = "global"
+  default_language_code = "en"
+  time_zone             = "America/New_York"
+}
+resource "google_dialogflow_cx_intent" "default_negative_intent" {
+  parent       = google_dialogflow_cx_agent.agent.id
+  name         = "00000000-0000-0000-0000-000000000001"
+  display_name = "Default Welcome Intent"
+  priority     = 1
+  training_phrases {
+     parts {
+         text = "Never match this phrase"
+     }
+     repeat_count = 1
+  }
+}
+resource "google_dialogflow_cx_intent" "default_welcome_intent" {
+  parent       = google_dialogflow_cx_agent.agent.id
+  name         = "00000000-0000-0000-0000-000000000000"
+  display_name = "Default Welcome Intent"
+  priority     = 1
+  training_phrases {
+     parts {
+         text = "Hello"
+     }
+     repeat_count = 1
+  }
+}
+`, context)
+}
