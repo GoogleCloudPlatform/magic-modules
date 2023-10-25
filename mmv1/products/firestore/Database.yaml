@@ -106,6 +106,19 @@ examples:
     skip_test: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_delete: templates/terraform/pre_delete/firestore_database.go.erb
+virtual_fields:
+  - !ruby/object:Api::Type::Enum
+    name: 'deletion_policy'
+    description: |
+      The deletion policy for the database. Setting `ABANDON` allows the resource
+      to be abandoned rather than deleted. Setting `DELETE` will delete the resource
+      on destroy. Default is `ABANDON`. Possible values are:
+        * DELETE
+        * ABANDON
+    values:
+      - :DELETE
+      - :ABANDON
+    default_value: :ABANDON
 properties:
   - !ruby/object:Api::Type::String
     name: name
