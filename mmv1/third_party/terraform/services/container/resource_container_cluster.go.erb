@@ -106,12 +106,12 @@ var (
 		return false
 	})
 
-	suppressDiffForExsitingFleet = schema.SchemaDiffSuppressFunc(func(k, oldValue, newValue string, d *schema.ResourceData) bool {
-		o, n := d.GetChange("fleet.0.pre_registered")
-                suppress := !o.(bool) && !n.(bool)
-                log.Printf("[DEBUG] fleet suppress pre_registered old: %v, new: %v\n", o, n)
-		return false
-	})
+	// suppressDiffForExsitingFleet = schema.SchemaDiffSuppressFunc(func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+		// o, n := d.GetChange("fleet.0.pre_registered")
+                // suppress := !o.(bool) && !n.(bool)
+                // log.Printf("[DEBUG] fleet suppress pre_registered old: %v, new: %v\n", o, n)
+		// return false
+	// })
 )
 
 // This uses the node pool nodeConfig schema but sets
@@ -2057,7 +2057,6 @@ func ResourceContainerCluster() *schema.Resource {
 						"project": {
 							Type:              schema.TypeString,
 							Optional:          true,
-							DiffSuppressFunc:  suppressDiffForExsitingFleet,
 							Description:       `The Fleet host project of the cluster.`,
 						},
                                           	"membership": {
@@ -3949,19 +3948,20 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	}
 
 	if d.HasChange("fleet") {
-		req := &container.UpdateClusterRequest{
-			Update: &container.ClusterUpdate{
-				DesiredFleet: expandFleet(d.Get("fleet")),
-			},
-		}
+		if fleet, ok := d.GetOk("fleet"); ok {
+			req := &container.UpdateClusterRequest{
+				Update: &container.ClusterUpdate{
+					DesiredFleet: expandFleet(fleet),
+				},
+			}
 
-		updateF := updateFunc(req, "updating GKE fleet config")
-		// Call update serially.
-		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
-			return err
+			updateF := updateFunc(req, "updating GKE fleet config")
+			// Call update serially.
+			if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+				return err
+			}
+			log.Printf("[INFO] GKE cluster %s fleet config has been updated", d.Id())
 		}
-
-		log.Printf("[INFO] GKE cluster %s fleet config has been updated", d.Id())
 	}
 
 	if d.HasChange("enable_k8s_beta_apis") {
@@ -6005,7 +6005,7 @@ func flattenFleet(c *container.Fleet) []map[string]interface{} {
                       "membership": c.Membership,
 		      "pre_registered": c.PreRegistered,
                 },
-        }       
+      }       
 }
 
 func flattenEnableK8sBetaApis(c *container.K8sBetaAPIConfig) []map[string]interface{} {
