@@ -1,0 +1,79 @@
+name: magic-modules
+
+permissions: read-all
+
+on:
+  pull_request:
+
+jobs:
+  lint-yaml:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          path: repo
+          fetch-depth: 0
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@ec02537da5712d66d4d50a0f33b7eb52773b5ed1
+        with:
+          ruby-version: '3.1'
+          bundler-cache: true
+
+      - run: bundle exec rake
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '^1.19'
+
+      # Cache Go modules
+      - name: Cache Go modules
+        uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - run: go install golang.org/x/tools/cmd/goimports@latest
+
+      - name: Build terraform-provider-google-beta
+        run: |
+          set -e
+
+          function clone_repo() {
+              UPSTREAM_OWNER=hashicorp
+              GH_REPO=terraform-provider-google-beta
+              LOCAL_PATH=$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
+              GITHUB_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/$UPSTREAM_OWNER/$GH_REPO
+              mkdir -p "$(dirname $LOCAL_PATH)"
+              git clone $GITHUB_PATH $LOCAL_PATH --branch $BASE_BRANCH
+          }
+
+          if [ -z "$GITHUB_TOKEN" ]; then
+              echo "GITHUB_TOKEN environment variable is missing."
+              exit 1
+          fi
+
+          clone_repo
+
+          git config --local user.name "Modular Magician"
+          git config --local user.email "magic-modules@google.com"
+
+          pushd mmv1
+
+          pushd $LOCAL_PATH
+          go mod download
+          find . -type f -not -wholename "./.git*" -not -wholename "./.changelog*" -not -name ".travis.yml" -not -name ".golangci.yml" -not -name "CHANGELOG.md" -not -name "CHANGELOG_v*.md" -not -name "GNUmakefile" -not -name "docscheck.sh" -not -name "LICENSE" -not -name "README.md" -not -wholename "./examples*" -not -name ".go-version" -not -name ".hashibot.hcl" -print0 | xargs -0 git rm
+          popd
+
+          # Extracted build process from the script:
+          bundle exec compiler.rb -a -e terraform -o $LOCAL_PATH -v beta
+          pushd ../
+          make tpgtools OUTPUT_PATH=$LOCAL_PATH VERSION=beta
+          make teamcity-servicemap-generate OUTPUT_PATH=$LOCAL_PATH VERSION=beta
+          popd
+
+          popd
