@@ -14,7 +14,13 @@
 -%>
 
 // start of customized code
+deletionPolicy := d.Get("deletion_policy");
+
+if deletionPolicy == "ABANDON" {
+	return nil
+}
+
 if d.Get("delete_protection_state").(string) == "DELETE_PROTECTION_ENABLED" {
-  return fmt.Errorf("Firestore Database %q has delete protection enabled, please disable delete protection first.", d.Id())
+	return fmt.Errorf("Firestore Database %q has delete protection enabled, please disable delete protection first.", d.Id())
 }
 // end of customized code
