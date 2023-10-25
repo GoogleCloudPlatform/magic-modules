@@ -1,0 +1,125 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'PostureDeployment'
+description: |
+  Represents a deployment of a security posture on a resource.  
+
+base_url: 'organizations/{{organization}}/locations/{{location}}/postureDeployments'
+self_link: 'organizations/{{organization}}/locations/{{location}}/postureDeployments/{{name}}'
+
+create_url: 'organizations/{{organization}}/locations/{{location}}/postureDeployments?postureDeploymentId={{name}}'
+update_verb: :PATCH
+update_mask: true
+
+autogen_async: true
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    base_url: '{{op_id}}'
+
+parameters:
+  - !ruby/object:Api::Type::String
+    name: 'location'
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      Location of the posture deployment instance.   
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    required: true
+    immutable: true
+    description: |
+      Name of the posture deployment instance.
+
+
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    required: true
+    immutable: true
+    description: |
+      Name of the posture deployment instance.
+  - !ruby/object:Api::Type::String
+    name: 'targetResource'
+    required: true
+    immutable: true
+    description: |
+      The resource on which the posture should be deployed.
+  - !ruby/object:Api::Type::Enum
+    name: 'state'
+    description: |
+      State of the posture deployment.
+    output: true    
+    default_value: :STATE_UNSPECIFIED
+    values:
+      - :STATE_UNSPECIFIED
+      - :CREATING
+      - :DELETING
+      - :UPDATING
+      - :ACTIVE
+      - :CREATE_FAILED
+      - :UPDATE_FAILED
+      - :DELETE_FAILED
+  - !ruby/object:Api::Type::String
+    name: 'postureId'
+    required: true
+    description: |
+      Full name of the posture which needs to be deployed.
+  - !ruby/object:Api::Type::String
+    name: 'postureRevisionId'
+    required: true
+    description: |
+      Revision_id the posture which needs to be deployed.
+  - !ruby/object:Api::Type::Time
+    name: 'createTime'
+    description: |
+      Time the posture deployment was created in UTC.
+    output: true
+  - !ruby/object:Api::Type::Time
+    name: 'updateTime'
+    description: |
+      Time the posture deployment was updated in UTC.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'description'
+    description: |
+      Description of the posture deployment.
+  - !ruby/object:Api::Type::String
+    name: 'etag'
+    description: 'For Resource freshness validation (https://google.aip.dev/154)'
+  - !ruby/object:Api::Type::KeyValueAnnotations
+    name: 'annotations'
+    description: |
+      Annotations is a key value map stored with a resource that
+      may be set by external tools to store and retrieve arbitrary metadata.
+  - !ruby/object:Api::Type::Boolean
+    name: reconciling
+    description: |
+      If set, there are currently changes in flight to the posture deployment.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'desiredPostureId'
+    description: |
+      This is a output only optional field which will be filled in case when
+      PostureDeployment state is UPDATE_FAILED or CREATE_FAILED or DELETE_FAILED.
+      It denotes the desired Posture to be deployed.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'desiredPostureRevisionId'
+    output: true
+    description: |
+      This is a output only optional field which will be filled in case when
+      PostureDeployment state is UPDATE_FAILED or CREATE_FAILED or DELETE_FAILED.
+      It denotes the desired Posture revision_id to be deployed.
