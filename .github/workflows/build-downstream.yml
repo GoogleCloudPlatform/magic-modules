@@ -8,6 +8,9 @@ on:
 jobs:
   terraform-provider-google:
     runs-on: ubuntu-22.04
+    env:
+      BASE_BRANCH: main
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
