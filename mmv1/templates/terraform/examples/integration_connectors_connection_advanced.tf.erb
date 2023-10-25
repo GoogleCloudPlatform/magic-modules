@@ -1,3 +1,32 @@
+data "google_project" "test_project" {
+  project_id = "connectors-autopush-harsha"
+}
+
+resource "google_secret_manager_secret" "secret-basic" {
+  secret_id = "secret-version"
+  project = "connectors-autopush-harsha"
+
+  replication {
+    user_managed {
+      replicas {
+        location = "us-central1"
+      }
+    }
+  }
+}
+
+
+resource "google_secret_manager_secret_version" "secret-version-basic" {
+  secret = google_secret_manager_secret.secret-basic.id
+  secret_data = "Google@123@"
+}
+
+resource "google_secret_manager_secret_iam_member" "secret_iam" {
+  secret_id  = google_secret_manager_secret.secret-basic.id
+  role       = "roles/secretmanager.admin"
+  member     = "serviceAccount:${data.google_project.test_project.number}-compute@developer.gserviceaccount.com"
+  depends_on = [google_secret_manager_secret_version.secret-version-basic]
+}
 
 resource "google_integration_connectors_connection" "<%= ctx[:primary_resource_id] %>" {
     name     = "<%= ctx[:vars]['connection_name'] %>"
@@ -14,7 +43,7 @@ resource "google_integration_connectors_connection" "<%= ctx[:primary_resource_i
       user_password {
         username = "brijeshpanara@google.com"
         password {
-          secret_version = "projects/893437653600/secrets/us-pass/versions/1"
+          secret_version = google_secret_manager_secret_version.secret-version-basic.name
         }
       }
     }
@@ -38,7 +67,7 @@ resource "google_integration_connectors_connection" "<%= ctx[:primary_resource_i
           user_password {
             username = "brijeshpanara@google.com"
             password {
-              secret_version = "projects/893437653600/secrets/us-pass/versions/1"
+              secret_version = google_secret_manager_secret_version.secret-version-basic.name
             }
           }
         }
