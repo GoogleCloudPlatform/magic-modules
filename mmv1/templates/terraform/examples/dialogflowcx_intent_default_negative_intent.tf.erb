@@ -11,6 +11,7 @@ resource "google_dialogflow_cx_intent" "<%= ctx[:primary_resource_id] %>" {
   is_default_negative_intent = true
   display_name               = "Default Negative Intent"
   priority                   = 1
+  is_fallback                = true
   training_phrases {
      parts {
          text = "Never match this phrase"
