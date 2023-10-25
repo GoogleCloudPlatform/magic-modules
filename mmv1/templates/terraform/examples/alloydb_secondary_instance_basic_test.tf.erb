@@ -45,6 +45,6 @@ resource "google_alloydb_instance" "<%= ctx[:primary_resource_id] %>" {
 
 data "google_project" "project" {}
 
-resource "google_compute_network" "default" {
+data "google_compute_network" "default" {
   name = "<%= ctx[:vars]['network_name'] %>"
 }
