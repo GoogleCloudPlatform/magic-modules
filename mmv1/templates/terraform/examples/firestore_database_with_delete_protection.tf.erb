@@ -9,5 +9,9 @@ resource "google_firestore_database" "<%= ctx[:primary_resource_id] %>" {
   # Then delete the database resource and apply the changes again.
   delete_protection_state           = "DELETE_PROTECTION_ENABLED"
 
+  # Enables deletion of the database on destory.
+  # By default the database is just abandoned and not deleted on destroy.
+  deletion_policy = "DELETE"
+
   depends_on = [google_project_service.firestore]
 }
