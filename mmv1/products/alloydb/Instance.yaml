@@ -68,6 +68,7 @@ examples:
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
+    skip_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'alloydb_secondary_instance_basic'
     primary_resource_id: 'secondary'
@@ -88,6 +89,21 @@ examples:
       alloydb_cluster_name: 'alloydb-cluster'
       alloydb_instance_name: 'alloydb-instance'
       network_name: 'alloydb-network'
+    test_vars_overrides:
+      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1")'
+    ignore_read_extra:
+      - 'reconciling'
+      - 'update_time'
+    skip_docs: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'alloydb_secondary_instance_basic_test'
+    primary_resource_id: 'secondary'
+    vars:
+      alloydb_primary_cluster_name: 'alloydb-primary-cluster'
+      alloydb_primary_instance_name: 'alloydb-primary-instance'
+      alloydb_secondary_cluster_name: 'alloydb-secondary-cluster'
+      alloydb_secondary_instance_name: 'alloydb-secondary-instance'
+      network_name: 'alloydb-secondary-network'
     test_vars_overrides:
       network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1")'
     ignore_read_extra:
