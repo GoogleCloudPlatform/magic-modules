@@ -1,5 +1,4 @@
 data "google_project" "test_project" {
-  project_id = "connectors-autopush-harsha"
 }
 
 resource "google_secret_manager_secret" "secret-basic" {
@@ -39,7 +38,7 @@ resource "google_integration_connectors_connection" "<%= ctx[:primary_resource_i
     auth_config {
       auth_type = "USER_PASSWORD"
       user_password {
-        username = "brijeshpanara@google.com"
+        username = "balanaguharsha@google.com"
         password {
           secret_version = google_secret_manager_secret_version.secret-version-basic.name
         }
@@ -63,7 +62,7 @@ resource "google_integration_connectors_connection" "<%= ctx[:primary_resource_i
         auth_config {
           auth_type = "USER_PASSWORD"
           user_password {
-            username = "brijeshpanara@google.com"
+            username = "balanaguharsha@google.com"
             password {
               secret_version = google_secret_manager_secret_version.secret-version-basic.name
             }
