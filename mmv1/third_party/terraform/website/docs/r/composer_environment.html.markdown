@@ -656,6 +656,11 @@ The following arguments are supported:
   (Optional) The ID of the project in which the resource belongs.
   If it is not provided, the provider project is used.
 
+* `storage_config` -
+  (Optional)
+  Configuration options for storage used by Composeer environment.
+
+
 The `config` block supports:
 
 * `node_config` -
@@ -708,10 +713,12 @@ The `config` block supports:
   Google Compute Engine Public IPs and Google Prod IPs. Structure is
   documented below.
 
-* `storage_config` -
-  (Optional)
-  Configuration options for storage used by Composeer environment.
-  [documented below](#nested_storage_config).
+The `storage_config` block supports:
+
+* `bucket` -
+  (Required)
+  Name of an existing Cloud Storage bucket to be used by the environment.
+
 
 The `node_config` block supports:
 
@@ -1034,12 +1041,6 @@ The `worker` block supports:
   The maximum number of Airflow workers that the environment can run. The number of workers in the
   environment does not go above this number, even if a higher number of workers is required to
   handle the load.
-
-<a name="nested_storage_config"></a>The `storage_config` supports:
-
-* `bucket_name` -
-  (Optional)
-  `bucket_name` Name of an existing Cloud Storage bucket to be used by the environment.
 
 ## Attributes Reference
 

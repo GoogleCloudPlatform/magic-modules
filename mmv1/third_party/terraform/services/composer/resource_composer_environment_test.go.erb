@@ -1094,7 +1094,7 @@ func TestAccComposerEnvironment_customBucket(t *testing.T) {
 	subnetwork := network + "-1"
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:		          func() { acctest.AccTestPreCheck(t) },
-		PreConfig:						TestAccComposerEnvironment_customBucket_bucketConfig(bucketName)
+		PreConfig:						TestAccComposerEnvironment_customBucket_bucketConfig(bucketName),
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -1147,10 +1147,10 @@ resource "google_composer_environment" "test" {
     software_config {
       image_version = "composer-2.4.2-airflow-2"
     }
-		storage_config {
-			bucket_name = "%s"
-		}
   }
+	storage_config {
+		bucket = "%s"
+	}
 }
 
 // use a separate network to avoid conflicts with other tests running in parallel
