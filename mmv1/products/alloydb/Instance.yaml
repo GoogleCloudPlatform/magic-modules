@@ -15,7 +15,7 @@
 name: 'Instance'
 docs: !ruby/object:Provider::Terraform::Docs
   warning: |
-    Deleting an instance with instanceType = SECONDARY does not delete the secondary instance but gives a warning asking to delete the associated secondary cluster as well.
+    Deleting an instance with instanceType = SECONDARY does not delete the secondary instance, and abandons it instead.
     Use deletion_policy = "FORCE" in the associated secondary cluster and delete the cluster forcefully to delete the secondary cluster as well its associated secondary instance.
     Users can undo the delete secondary instance action by importing the deleted secondary instance by calling terraform import.
 self_link: '{{cluster}}/instances/{{instance_id}}'
