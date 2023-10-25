@@ -175,6 +175,7 @@ resource "google_dialogflow_cx_intent" "default_negative_intent" {
   name         = "00000000-0000-0000-0000-000000000001"
   display_name = "Default Welcome Intent"
   priority     = 1
+  is_fallback  = true
   training_phrases {
      parts {
          text = "Never match this phrase"

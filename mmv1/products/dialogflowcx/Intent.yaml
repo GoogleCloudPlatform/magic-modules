@@ -156,7 +156,6 @@ properties:
       If the supplied value is negative, the intent is ignored in runtime detect intent requests.
   - !ruby/object:Api::Type::Boolean
     name: 'isFallback'
-    output: true
     description: |
       Indicates whether this is a fallback intent. Currently only default fallback intent is allowed in the agent, which is added upon agent creation.
       Adding training phrases to fallback intent is useful in the case of requests that are mistakenly matched, since training phrases assigned to fallback intents act as negative examples that triggers no-match event.
