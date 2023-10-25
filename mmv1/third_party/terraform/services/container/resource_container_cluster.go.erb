@@ -3953,7 +3953,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 				DesiredFleet: expandFleet(d.Get("fleet")),
 			},
 		}
-		log.Printf("[INFO] GKE cluster %s fleet config has been updated, fleet=%v, req=%v", fleet, req)
+		log.Printf("[INFO] GKE cluster %s fleet config has been updated, fleet=%v, req=%v", d.Get("fleet"), req)
 
 		updateF := updateFunc(req, "updating GKE fleet config")
 		// Call update serially.
