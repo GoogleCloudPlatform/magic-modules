@@ -42,7 +42,7 @@ jobs:
       - name: Build terraform-provider-google-beta
         run: |
           set -e
-          set +x
+          set -x
           # Set GOPATH to a directory the runner user has access to
           export GOPATH=~/go
 
@@ -73,6 +73,7 @@ jobs:
           popd
 
           # Extracted build process from the script:
+          bundle install
           bundle exec compiler.rb -a -e terraform -o $LOCAL_PATH -v beta
           pushd ../
           make tpgtools OUTPUT_PATH=$LOCAL_PATH VERSION=beta
