@@ -32,17 +32,6 @@ func TestAccSpannerInstance_basic(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			{
-				Config: testAccSpannerInstance_basicWithAutoscalerConfig(idName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("google_spanner_instance.basic", "state"),
-				),
-			},
-			{
-				ResourceName:      "google_spanner_instance.basic",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
 		},
 	})
 }
@@ -148,6 +137,32 @@ func TestAccSpannerInstance_virtualUpdate(t *testing.T) {
 			{
 				ResourceName: "google_spanner_instance.basic",
 				ImportState:  true,
+			},
+		},
+	})
+}
+
+func TestAccSpannerInstance_basicWithAutoscaler(t *testing.T) {
+	// Randomness
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	displayName := fmt.Sprintf("spanner-test-%s-dname", acctest.RandString(t, 10))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckSpannerInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSpannerInstance_basicWithAutoscalerConfig(displayName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_spanner_instance.basic", "state"),
+				),
+			},
+			{
+				ResourceName:      "google_spanner_instance.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
