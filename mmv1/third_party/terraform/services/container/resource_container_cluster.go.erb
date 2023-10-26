@@ -3948,17 +3948,20 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	}
 
 	if d.HasChange("fleet") {
-		req := &container.UpdateClusterRequest{
-			Update: &container.ClusterUpdate{
-				DesiredFleet: expandFleet(d.Get("fleet")),
-			},
-		}
-		log.Printf("[INFO] GKE cluster %s fleet config has been updated, fleet=%v, req=%v", d.Get("fleet"), req)
-
-		updateF := updateFunc(req, "updating GKE fleet config")
-		// Call update serially.
-		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
-			return err
+		// Because GKE uses a non-RESTful update function, when removing the
+		// feature you need to specify a fairly full request body or it fails:
+		// "update": {"desiredFleet": {"project": ""}}
+		req := &container.UpdateClusterRequest{}
+		if v, ok := d.GetOk("fleet"); !ok {
+			req.Update = &container.ClusterUpdate{
+				DesiredFleet: &container.Fleet{
+					Fleet: "",
+				},
+			}
+		} else {
+			req.Update = &container.ClusterUpdate{
+				DesiredWorkloadIdentityConfig:  expandFleet(v),
+			}
 		}
 		log.Printf("[INFO] GKE cluster %s fleet config has been updated", d.Id())
 	}
@@ -5159,11 +5162,14 @@ func expandGatewayApiConfig(configured interface{}) *container.GatewayAPIConfig 
 
 func expandFleet(configured interface{}) *container.Fleet {
 	l := configured.([]interface{})
-	v := &container.Fleet{}
+	if len(l) == 0 || l[0] == nil {
+		return nil
+	}
 
 	config := l[0].(map[string]interface{})
-	v.Project = config["project"].(string)
-	return v
+	return &container.Fleet{
+		Project: config["project"].(string),
+	}
 }  
 
 func expandEnableK8sBetaApis(configured interface{}, enabledAPIs []string) *container.K8sBetaAPIConfig {
