@@ -142,7 +142,7 @@ func TestAccSpannerInstance_virtualUpdate(t *testing.T) {
 	})
 }
 
-func TestAccSpannerInstance_basicWithAutoscaler(t *testing.T) {
+func TestAccSpannerInstance_basicWithAutoscalingUsingNodeConfig(t *testing.T) {
 	// Randomness
 	acctest.SkipIfVcr(t)
 	t.Parallel()
@@ -154,7 +154,33 @@ func TestAccSpannerInstance_basicWithAutoscaler(t *testing.T) {
 		CheckDestroy:             testAccCheckSpannerInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSpannerInstance_basicWithAutoscalerConfig(displayName),
+				Config: testAccSpannerInstance_basicWithAutoscalerConfigUsingNodeAsConfigs(displayName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_spanner_instance.basic", "state"),
+				),
+			},
+			{
+				ResourceName:      "google_spanner_instance.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccSpannerInstance_basicWithAutoscalingUsingProcessingUnitConfig(t *testing.T) {
+	// Randomness
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	displayName := fmt.Sprintf("spanner-test-%s-dname", acctest.RandString(t, 10))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckSpannerInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSpannerInstance_basicWithAutoscalerConfigUsingProcessingUnitsAsConfigs(displayName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("google_spanner_instance.basic", "state"),
 				),
@@ -230,7 +256,7 @@ resource "google_spanner_instance" "basic" {
 `, name, name, virtual)
 }
 
-func testAccSpannerInstance_basicWithAutoscalerConfig(name string) string {
+func testAccSpannerInstance_basicWithAutoscalerConfigUsingNodeAsConfigs(name string) string {
 	return fmt.Sprintf(`
 resource "google_spanner_instance" "basic" {
   name         = "%s"
@@ -244,6 +270,31 @@ resource "google_spanner_instance" "basic" {
       }
       min_limit {
         min_nodes            = 1
+      }
+    }
+    autoscaling_targets {
+      high_priority_cpu_utilization_percent = 65
+      storage_utilization_percent           = 95
+    }
+  }
+}
+`, name, name)
+}
+
+func testAccSpannerInstance_basicWithAutoscalerConfigUsingProcessingUnitsAsConfigs(name string) string {
+	return fmt.Sprintf(`
+resource "google_spanner_instance" "basic" {
+  name         = "%s"
+  config       = "regional-us-central1"
+  display_name = "%s-dname"
+  num_nodes    = 1
+  autoscaling_config {
+    autoscaling_limits {
+      max_limit {
+        max_processing_units            = 2000
+      }
+      min_limit {
+        min_processing_units            = 1000
       }
     }
     autoscaling_targets {
