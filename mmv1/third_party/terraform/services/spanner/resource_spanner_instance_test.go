@@ -32,6 +32,17 @@ func TestAccSpannerInstance_basic(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				Config: testAccSpannerInstance_basicWithAutoscalerConfig(idName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_spanner_instance.basic", "state"),
+				),
+			},
+			{
+				ResourceName:      "google_spanner_instance.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -202,4 +213,29 @@ resource "google_spanner_instance" "basic" {
   force_destroy    = "%s"
 }
 `, name, name, virtual)
+}
+
+func testAccSpannerInstance_basicWithAutoscalerConfig(name string) string {
+	return fmt.Sprintf(`
+resource "google_spanner_instance" "basic" {
+  name         = "%s"
+  config       = "regional-us-central1"
+  display_name = "%s-dname"
+  num_nodes    = 1
+  autoscaling_config {
+    autoscaling_limits {
+      max_limit {
+        max_nodes            = 2
+      }
+      min_limit {
+        min_nodes            = 1
+      }
+    }
+    autoscaling_targets {
+      high_priority_cpu_utilization_percent = 65
+      storage_utilization_percent           = 95
+    }
+  }
+}
+`, name, name)
 }
