@@ -14,7 +14,7 @@
 --- !ruby/object:Api::Resource
 name: 'PostureDeployment'
 description: |
-  Represents a deployment of a security posture on a resource.  
+  Represents a deployment of a security posture on a resource.
 
 base_url: 'organizations/{{organization}}/locations/{{location}}/postureDeployments'
 self_link: 'organizations/{{organization}}/locations/{{location}}/postureDeployments/{{name}}'
@@ -35,7 +35,7 @@ parameters:
     immutable: true
     url_param_only: true
     description: |
-      Location of the posture deployment instance.   
+      Location of the posture deployment instance.
   - !ruby/object:Api::Type::String
     name: 'name'
     required: true
@@ -61,7 +61,7 @@ properties:
     name: 'state'
     description: |
       State of the posture deployment.
-    output: true    
+    output: true
     default_value: :STATE_UNSPECIFIED
     values:
       - :STATE_UNSPECIFIED
