@@ -173,7 +173,7 @@ resource "google_dialogflow_cx_agent" "agent" {
 resource "google_dialogflow_cx_intent" "default_negative_intent" {
   parent       = google_dialogflow_cx_agent.agent.id
   name         = "00000000-0000-0000-0000-000000000001"
-  display_name = "Default Welcome Intent"
+  display_name = "Default Negative Intent"
   priority     = 1
   is_fallback  = true
   training_phrases {
