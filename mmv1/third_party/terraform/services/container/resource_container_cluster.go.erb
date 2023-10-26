@@ -3955,7 +3955,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		if v, ok := d.GetOk("fleet"); !ok {
 			req.Update = &container.ClusterUpdate{
 				DesiredFleet: &container.Fleet{
-					Fleet: "",
+					Project: "",
 				},
 			}
 		} else {
