@@ -3960,7 +3960,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 			}
 		} else {
 			req.Update = &container.ClusterUpdate{
-				DesiredWorkloadIdentityConfig:  expandFleet(v),
+				DesiredFleet:  expandFleet(v),
 			}
 		}
 		log.Printf("[INFO] GKE cluster %s fleet config has been updated", d.Id())
