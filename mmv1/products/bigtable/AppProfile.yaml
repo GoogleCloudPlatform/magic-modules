@@ -43,6 +43,8 @@ examples:
       deletion_protection: 'false'
     ignore_read_extra:
       - 'ignore_warnings'
+    # bigtable instance does not use the shared HTTP client, this test creates an instance
+    skip_vcr: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigtable_app_profile_singlecluster'
     primary_resource_id: 'ap'
@@ -56,6 +58,8 @@ examples:
       deletion_protection: 'false'
     ignore_read_extra:
       - 'ignore_warnings'
+    # bigtable instance does not use the shared HTTP client, this test creates an instance
+    skip_vcr: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigtable_app_profile_multicluster'
     primary_resource_id: 'ap'
@@ -69,6 +73,8 @@ examples:
       deletion_protection: 'false'
     ignore_read_extra:
       - 'ignore_warnings'
+    # bigtable instance does not use the shared HTTP client, this test creates an instance
+    skip_vcr: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/bigtable_app_profile.go.erb
   extra_schema_entry: templates/terraform/extra_schema_entry/bigtable_app_profile.go.erb
