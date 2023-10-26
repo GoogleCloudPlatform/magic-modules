@@ -3963,6 +3963,11 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 				DesiredFleet:  expandFleet(v),
 			}
 		}
+		updateF := updateFunc(req, "updating GKE cluster fleet config")
+		// Call update serially.
+		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+			return err
+		}
 		log.Printf("[INFO] GKE cluster %s fleet config has been updated", d.Id())
 	}
 
