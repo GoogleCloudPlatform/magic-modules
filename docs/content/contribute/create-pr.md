@@ -18,14 +18,16 @@ weight: 10
 
 1. A reviewer will automatically be assigned to your PR.
 1. Creating a new pull request or pushing a new commit automatically triggers our CI pipelines and workflows. After CI starts, downstream diff generation takes about 10 minutes; VCR tests can take up to 2 hours. If you are a community contributor, some tests will only run after approval from a reviewer.
+   - While convenient, relying on CI to test iterative changes to PRs often adds extreme latency to reviews if there are errors in test configurations or at runtime. We **strongly** recommend you [test your changes locally before pushing]({{< ref "/develop/run-tests" >}}) even after the initial change.
 1. If your assigned reviewer does not respond to changes on a pull request within two US business days, ping them on the pull request.
 
 {{< hint info >}}
 **TIP:** Speeding up review:
+1. [Test your changes locally before pushing]({{< ref "/develop/run-tests" >}}) to iterate faster.
+   - You can push them and test in parallel as well. New CI runs will preempt old ones where possible.
 1. Resolve failed [status checks](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/about-status-checks) quickly
-   - [Run provider tests locally]({{< ref "/develop/run-tests" >}}) to iterate faster
-   - Ask your reviewer for help if you get stuck.
-1. [Self-review your PR]({{< ref "/contribute/review-pr" >}}) or ask someone you know to review
+   - Directly ask your reviewer for help if you don't know how to proceed. If there are failed checks they may only check in if there's no progress after a couple days.
+1. [Self-review your PR]({{< ref "/contribute/review-pr" >}}) or ask someone else familiar with Terraform to review
 {{< /hint >}}
 
 
