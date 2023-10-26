@@ -186,8 +186,8 @@ properties:
               - !ruby/object:Api::Type::Integer
                 name: 'minProcessingUnits'
                 exactly_one_of:
-                  - autoscaling_config.0.autoscaling_limits.0.min_limit
-                  - autoscaling_config.0.autoscaling_limits.0.min_processing_units
+                  - autoscaling_config.0.autoscaling_limits.0.min_limit.0.min_nodes
+                  - autoscaling_config.0.autoscaling_limits.0.min_limit.0.min_processing_units
                 description: |
                   Specifies minimum number of processing units allocated to the instance.
                   If set, this number should be multiples of 1000.
@@ -200,16 +200,16 @@ properties:
               - !ruby/object:Api::Type::Integer
                 name: 'maxNodes'
                 exactly_one_of:
-                  - autoscaling_config.0.autoscaling_limits.0.min_limit.0.min_nodes
-                  - autoscaling_config.0.autoscaling_limits.0.min_limit.0.min_processing_units
+                  - autoscaling_config.0.autoscaling_limits.0.max_limit.0.max_nodes
+                  - autoscaling_config.0.autoscaling_limits.0.max_limit.0.max_processing_units
                 description: |
                   Specifies maximum number of nodes allocated to the instance.
                   If set, this number should be greater than or equal to min_nodes.
               - !ruby/object:Api::Type::Integer
                 name: 'maxProcessingUnits'
                 exactly_one_of:
-                  - autoscaling_config.0.autoscaling_limits.0.min_limit
-                  - autoscaling_config.0.autoscaling_limits.0.min_processing_units
+                  - autoscaling_config.0.autoscaling_limits.0.max_limit.0.max_nodes
+                  - autoscaling_config.0.autoscaling_limits.0.max_limit.0.max_processing_units
                 description: |
                   Specifies maximum number of processing units allocated to the instance.
                   If set, this number should be multiples of 1000 and be greater than or equal to
