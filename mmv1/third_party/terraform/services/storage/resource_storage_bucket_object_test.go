@@ -723,7 +723,7 @@ resource "google_storage_bucket_object" "object" {
   bucket    = google_storage_bucket.bucket.name
   content   = "%s" 
 }
-`, bucketName, objectName, content, retainUntil)
+`, bucketName, objectName, content)
 }
 
 func testGoogleStorageBucketsObjectHolds(bucketName string, eventBasedHold bool, temporaryHold bool) string {
