@@ -5158,15 +5158,12 @@ func expandGatewayApiConfig(configured interface{}) *container.GatewayAPIConfig 
 }
 
 func expandFleet(configured interface{}) *container.Fleet {
-        l := configured.([]interface{})
-        if len(l) == 0 || l[0] == nil {
-                return nil 
-        }       
+	l := configured.([]interface{})
+	v := &container.Fleet{}
 
-        config := l[0].(map[string]interface{})
-        return &container.Fleet{
-                Project: config["project"].(string),
-        }       
+	config := l[0].(map[string]interface{})
+	v.Project = config["project"].(string)
+	return v
 }  
 
 func expandEnableK8sBetaApis(configured interface{}, enabledAPIs []string) *container.K8sBetaAPIConfig {
