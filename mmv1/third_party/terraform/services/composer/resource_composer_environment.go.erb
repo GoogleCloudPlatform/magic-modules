@@ -1383,7 +1383,7 @@ func flattenComposerStorageConfig(storageConfig *composer.StorageConfig) interfa
 	}
 
 	transformed := make(map[string]interface{})
-	transformed["bucket"] = storageConfig.bucket
+	transformed["bucket"] = storageConfig.Bucket
 
 	return []interface{}{transformed}
 }
