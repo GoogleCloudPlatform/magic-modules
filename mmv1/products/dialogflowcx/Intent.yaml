@@ -28,6 +28,7 @@ timeouts: !ruby/object:Api::Timeouts
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/dialogflowcx_intent.go.erb
   pre_create: templates/terraform/pre_create/dialogflowcx_set_location_skip_default_obj.go.erb
+  post_create: templates/terraform/post_create/dialogflowcx_set_name_and_id.go.erb
   pre_update: templates/terraform/pre_create/dialogflow_set_location.go.erb
   pre_delete: templates/terraform/pre_delete/dialogflowcx_set_location_skip_default_obj.go.erb
   pre_read: templates/terraform/pre_create/dialogflow_set_location.go.erb
