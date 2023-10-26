@@ -33,9 +33,9 @@ async: !ruby/object:Api::OpAsync
     base_url: '{{op_id}}'
     wait_ms: 1000
     timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 80
-      update_minutes: 80
-      delete_minutes: 80
+      insert_minutes: 120
+      update_minutes: 120
+      delete_minutes: 120
   result: !ruby/object:Api::OpAsync::Result
     path: 'response'
   status: !ruby/object:Api::OpAsync::Status

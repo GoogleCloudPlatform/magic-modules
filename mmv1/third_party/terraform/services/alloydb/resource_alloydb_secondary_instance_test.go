@@ -278,7 +278,7 @@ resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
   location   = "us-central1"
   network_config {
-	network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+	network    = "projects/${data.google_project.project.number}/global/networks/${data.google_compute_network.default.name}"
 	allocated_ip_range = google_compute_global_address.private_ip_alloc.name
   }
 }
@@ -297,7 +297,7 @@ resource "google_alloydb_cluster" "secondary" {
   cluster_id   = "tf-test-alloydb-secondary-cluster%{random_suffix}"
   location     = "us-east1"
   network_config {
-	network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+	network    = "projects/${data.google_project.project.number}/global/networks/${data.google_compute_network.default.name}"
 	allocated_ip_range = google_compute_global_address.private_ip_alloc.name
   }
   cluster_type = "SECONDARY"
