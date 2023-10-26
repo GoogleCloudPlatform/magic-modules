@@ -35,6 +35,7 @@ func execTestTGC(commit, pr string, gh ttGithub) {
 		"sha":    commit,
 	}); err != nil {
 		fmt.Printf("Error creating workflow dispatch event: %v\n", err)
+		os.Exit(1)
 	}
 }
 

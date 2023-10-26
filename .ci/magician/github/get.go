@@ -63,8 +63,29 @@ func (gh *github) GetPullRequestPreviousAssignedReviewers(prNumber string) ([]st
 	}
 
 	result := []string{}
-	for key, _ := range previousAssignedReviewers {
+	for key := range previousAssignedReviewers {
 		result = append(result, key)
+	}
+
+	return result, nil
+}
+
+func (gh *github) GetPullRequestLabelIDs(prNumber string) (map[int]struct{}, error) {
+	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/%s/reviews", prNumber)
+
+	var labels []struct {
+		Label struct {
+			ID int `json:"id"`
+		} `json:"label"`
+	}
+
+	if _, err := utils.RequestCall(url, "GET", gh.token, &labels, nil); err != nil {
+		return nil, err
+	}
+
+	var result map[int]struct{}
+	for _, label := range labels {
+		result[label.Label.ID] = struct{}{}
 	}
 
 	return result, nil

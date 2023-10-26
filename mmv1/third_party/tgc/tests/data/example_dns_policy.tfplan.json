@@ -103,13 +103,14 @@
           "delete_default_routes_on_create": false,
           "description": null,
           "name": "network-1",
-          "timeouts": null
+          "timeouts": null,
+          "project": "{{.Provider.project}}",
+          "network_firewall_policy_enforcement_order": "AFTER_CLASSIC_FIREWALL"
         },
         "after_unknown": {
           "gateway_ipv4": true,
           "id": true,
           "mtu": true,
-          "project": true,
           "routing_mode": true,
           "self_link": true
         },
@@ -133,13 +134,14 @@
           "delete_default_routes_on_create": false,
           "description": null,
           "name": "network-2",
-          "timeouts": null
+          "timeouts": null,
+          "project": "{{.Provider.project}}",
+          "network_firewall_policy_enforcement_order": "AFTER_CLASSIC_FIREWALL"
         },
         "after_unknown": {
           "gateway_ipv4": true,
           "id": true,
           "mtu": true,
-          "project": true,
           "routing_mode": true,
           "self_link": true
         },
@@ -181,7 +183,8 @@
             {},
             {}
           ],
-          "timeouts": null
+          "timeouts": null,
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "alternative_name_server_config": [
@@ -200,8 +203,7 @@
             {
               "network_url": true
             }
-          ],
-          "project": true
+          ]
         },
         "before_sensitive": false,
         "after_sensitive": {

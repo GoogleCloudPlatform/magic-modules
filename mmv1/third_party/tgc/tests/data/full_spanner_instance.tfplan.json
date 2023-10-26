@@ -71,13 +71,13 @@
             "label2": "value2",
             "label3": "value3"
           },
-          "timeouts": null
+          "timeouts": null,
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "effective_labels": {},
           "id": true,
           "labels": {},
-          "project": true,
           "state": true,
           "terraform_labels": {}
         }

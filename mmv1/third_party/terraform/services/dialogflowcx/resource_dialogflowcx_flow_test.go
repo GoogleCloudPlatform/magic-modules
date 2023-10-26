@@ -43,18 +43,6 @@ func TestAccDialogflowCXFlow_update(t *testing.T) {
 
 func testAccDialogflowCXFlow_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-  data "google_project" "project" {}
-
-  resource "google_service_account" "dialogflowcx_service_account" {
-    account_id = "tf-test-dialogflow-%{random_suffix}"
-  }
-
-  resource "google_project_iam_member" "agent_create" {
-    project = data.google_project.project.project_id
-    role    = "roles/dialogflow.admin"
-    member  = "serviceAccount:${google_service_account.dialogflowcx_service_account.email}"
-  }
-
   resource "google_dialogflow_cx_agent" "agent_entity" {
     display_name             = "tf-test-%{random_suffix}"
     location                 = "global"
@@ -63,7 +51,6 @@ func testAccDialogflowCXFlow_basic(context map[string]interface{}) string {
     time_zone                = "America/New_York"
     description              = "Description 1."
     avatar_uri               = "https://storage.cloud.google.com/dialogflow-test-host-image/cloud-logo.png"
-    depends_on               = [google_project_iam_member.agent_create]
   }
 
   resource "google_dialogflow_cx_flow" "my_flow" {
@@ -80,18 +67,6 @@ func testAccDialogflowCXFlow_basic(context map[string]interface{}) string {
 
 func testAccDialogflowCXFlow_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-  data "google_project" "project" {}
-
-  resource "google_service_account" "dialogflowcx_service_account" {
-    account_id = "tf-test-dialogflow-%{random_suffix}"
-  }
-
-  resource "google_project_iam_member" "agent_create" {
-    project = data.google_project.project.project_id
-    role    = "roles/dialogflow.admin"
-    member  = "serviceAccount:${google_service_account.dialogflowcx_service_account.email}"
-  }
-
   resource "google_dialogflow_cx_agent" "agent_entity" {
     display_name               = "tf-test-dialogflowcx-agent%{random_suffix}update"
     location                   = "global"
@@ -105,7 +80,12 @@ func testAccDialogflowCXFlow_full(context map[string]interface{}) string {
     speech_to_text_settings {
       enable_speech_adaptation = true
     }
-    depends_on                 = [google_project_iam_member.agent_create]
+  }
+
+  resource "google_storage_bucket" "bucket" {
+    name                        = "tf-test-dialogflowcx-bucket%{random_suffix}"
+    location                    = "US"
+    uniform_bucket_level_access = true
   }
 
   resource "google_dialogflow_cx_flow" "my_flow" {
@@ -355,6 +335,17 @@ func testAccDialogflowCXFlow_full(context map[string]interface{}) string {
         }
       }
       target_flow = google_dialogflow_cx_agent.agent_entity.start_flow
+    }
+
+    advanced_settings {
+      audio_export_gcs_destination {
+        uri = "${google_storage_bucket.bucket.url}/prefix-"
+      }
+      dtmf_settings {
+        enabled      = true
+        max_digits   = 1
+        finish_digit = "#"
+      }
     }
   }
 `, context)

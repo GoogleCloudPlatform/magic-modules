@@ -792,7 +792,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
       billingProject = bp
     }
 
-<%      if object.update_mask && field_specific_update_methods(object.root_properties) -%>
+<%      if object.update_mask -%>
 // if updateMask is empty we are not updating anything so skip the post
 if len(updateMask) > 0 {
 <%      end -%>
@@ -838,7 +838,7 @@ if len(updateMask) > 0 {
     }
 <%        end -%>
 <%      end -%>
-<%      if object.update_mask && field_specific_update_methods(object.root_properties) -%>
+<%      if object.update_mask -%>
   }
 <%      end -%>
 <%    end # if !object.immutable -%>

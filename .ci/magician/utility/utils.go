@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 
 	"golang.org/x/exp/slices"
@@ -21,14 +22,29 @@ func RequestCall(url, method, credentials string, result any, body any) (int, er
 	}
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", credentials))
 	req.Header.Set("Content-Type", "application/json")
+	fmt.Println("")
+	fmt.Println("request url: ", url)
+	fmt.Println("request body: ", string(jsonBody)) // Convert to string
+	fmt.Println("")
+
 	resp, err := client.Do(req)
 	if err != nil {
 		return 3, err
 	}
 	defer resp.Body.Close()
 
+	respBodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return 5, err
+	}
+
+	fmt.Println("response status-code: ", resp.StatusCode)
+	fmt.Println("response body: ", string(respBodyBytes)) // Convert to string
+	fmt.Println("")
+
+	// Decode the response, if needed
 	if result != nil {
-		if err = json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		if err = json.Unmarshal(respBodyBytes, &result); err != nil {
 			return 4, err
 		}
 	}

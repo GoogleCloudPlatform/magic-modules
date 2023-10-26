@@ -46,13 +46,13 @@
           "network": null,
           "prefix_length": null,
           "purpose": null,
-          "timeouts": null
+          "timeouts": null,
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "address": true,
           "creation_timestamp": true,
           "id": true,
-          "project": true,
           "self_link": true
         },
         "before_sensitive": false,

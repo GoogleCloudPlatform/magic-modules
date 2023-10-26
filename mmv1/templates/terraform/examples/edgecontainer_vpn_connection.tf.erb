@@ -33,6 +33,11 @@ resource "google_edgecontainer_vpn_connection" "<%= ctx[:primary_resource_id] %>
   cluster = "projects/${data.google_project.project.number}/locations/us-east1/clusters/${google_edgecontainer_cluster.cluster.name}"
   vpc = google_compute_network.vpc.name
   enable_high_availability = true
+
+  labels = {
+    my_key    = "my_val"
+    other_key = "other_val"
+  }
 }
 
 resource "google_compute_network" "vpc" {

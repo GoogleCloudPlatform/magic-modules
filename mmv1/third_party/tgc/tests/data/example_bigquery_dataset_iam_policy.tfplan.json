@@ -99,12 +99,12 @@
 			"before": null,
 			"after": {
 				"dataset_id": "test-dataset",
-				"policy_data": "{\"bindings\":[{\"members\":[\"serviceAccount:998476993360@cloudservices.gserviceaccount.com\",\"allAuthenticatedUsers\"],\"role\":\"roles/editor\"}]}"
+				"policy_data": "{\"bindings\":[{\"members\":[\"serviceAccount:998476993360@cloudservices.gserviceaccount.com\",\"allAuthenticatedUsers\"],\"role\":\"roles/editor\"}]}",
+				"project": "{{.Provider.project}}"
 			},
 			"after_unknown": {
 				"etag": true,
-				"id": true,
-				"project": true
+				"id": true
 			}
 		}
 	}],

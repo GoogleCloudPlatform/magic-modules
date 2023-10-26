@@ -81,7 +81,8 @@
           "timeout": 60,
           "timeouts": null,
           "trigger_http": true,
-          "vpc_connector": null
+          "vpc_connector": null,
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "environment_variables": {},
@@ -89,7 +90,6 @@
           "https_trigger_url": true,
           "id": true,
           "labels": {},
-          "project": true,
           "service_account_email": true,
           "source_repository": [],
           "vpc_connector_egress_settings": true

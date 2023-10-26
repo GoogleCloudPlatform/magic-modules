@@ -12,7 +12,8 @@
         "ipCidrRange": "10.8.0.0/28",
         "maxThroughput": 300,
         "minThroughput": 200,
-        "network": "default"
+        "network": "default",
+        "machineType": "e2-micro"
       }
     }
   }

@@ -102,9 +102,8 @@ properties:
     description: |
       The time when the node pool was last updated.
     output: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: "labels"
-    default_from_api: true
     description: "Labels associated with this resource."
   - !ruby/object:Api::Type::String
     name: "nodeLocation"

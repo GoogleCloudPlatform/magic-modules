@@ -103,14 +103,14 @@
 				"condition": [],
 				"dataset_id": "test-dataset",
 				"members": ["allAuthenticatedUsers", "allUsers"],
-				"role": "roles/bigquery.dataViewer"
+				"role": "roles/bigquery.dataViewer",
+				"project": "{{.Provider.project}}"
 			},
 			"after_unknown": {
 				"condition": [],
 				"etag": true,
 				"id": true,
-				"members": [false, false],
-				"project": true
+				"members": [false, false]
 			}
 		}
 	}],
