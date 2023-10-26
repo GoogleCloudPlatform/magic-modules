@@ -200,7 +200,7 @@ resource "google_alloydb_instance" "primary" {
 
 resource "google_alloydb_cluster" "secondary" {
   cluster_id   = "tf-test-alloydb-secondary-cluster%{random_suffix}"
-  location     = "us-east1"
+  location     = "us-west1"
   network      = data.google_compute_network.default.id
   cluster_type = "SECONDARY"
 
@@ -252,6 +252,7 @@ func TestAccAlloydbCluster_secondaryInstanceWithNetworkConfigAndAllocatedIPRange
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"address_name":  acctest.BootstrapSharedTestGlobalAddress(t, "alloydbinstance-network-config-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -295,7 +296,7 @@ resource "google_alloydb_instance" "primary" {
 
 resource "google_alloydb_cluster" "secondary" {
   cluster_id   = "tf-test-alloydb-secondary-cluster%{random_suffix}"
-  location     = "us-east1"
+  location     = "us-west1"
   network_config {
     network    = data.google_compute_network.default.id
     allocated_ip_range = data.google_compute_global_address.private_ip_alloc.name
@@ -577,7 +578,7 @@ resource "google_alloydb_instance" "primary" {
 
 resource "google_alloydb_cluster" "secondary" {
   cluster_id   = "tf-test-alloydb-secondary-cluster%{random_suffix}"
-  location     = "us-east1"
+  location     = "us-west1"
   network      = data.google_compute_network.default.id
   cluster_type = "SECONDARY"
 
