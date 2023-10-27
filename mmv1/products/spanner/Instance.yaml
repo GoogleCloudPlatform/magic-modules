@@ -160,7 +160,7 @@ properties:
     name: 'autoscalingConfig'
     description: |
       The autoscaling configuration. Autoscaling is enabled if this field is set.
-      When autoscaling is enabled, node_count and processing_units are treated as,
+      When autoscaling is enabled, num_nodes and processing_units are treated as,
       OUTPUT_ONLY fields and reflect the current compute capacity allocated to
       the instance.
     properties:
