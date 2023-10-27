@@ -192,7 +192,6 @@ steps:
       env:
         - COMMIT_SHA=$COMMIT_SHA
         - PR_NUMBER=$_PR_NUMBER
-        - BUILD_ID=$BUILD_ID
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
       id: tgc-test-integration-0.12.31
@@ -246,7 +245,6 @@ steps:
         - VERSION=beta
         - COMMIT_SHA=$COMMIT_SHA
         - PR_NUMBER=$_PR_NUMBER
-        - BUILD_ID=$BUILD_ID
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
       id: tpg-test
@@ -260,8 +258,6 @@ steps:
         - VERSION=ga
         - COMMIT_SHA=$COMMIT_SHA
         - PR_NUMBER=$_PR_NUMBER
-        - BUILD_ID=$BUILD_ID
-
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
       id: gcb-tpg-vcr-test
