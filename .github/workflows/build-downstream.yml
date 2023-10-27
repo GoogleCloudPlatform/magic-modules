@@ -323,8 +323,8 @@ jobs:
           # Set GOPATH to a directory the runner user has access to
           export GOPATH=~/go
 
-          if [ "$UPSTREAM_BRANCH" == "main" ]; then
-            UPSTREAM_BRANCH=master
+          if [ "$BASE_BRANCH" == "main" ]; then
+            BASE_BRANCH=master
           fi
 
           function clone_repo() {
