@@ -146,9 +146,10 @@ properties:
       The major version of Memcached software. If not provided, latest supported version will be used.
       Currently the latest supported major version is MEMCACHE_1_5. The minor version will be automatically
       determined by our system based on the latest supported minor version.
-    default_value: :MEMCACHE_1_5
+    default_value: :MEMCACHE_1_6_15
     values:
       - :MEMCACHE_1_5
+      - :MEMCACHE_1_6_15
   - !ruby/object:Api::Type::NestedObject
     name: nodeConfig
     description: |
