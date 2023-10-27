@@ -32,6 +32,10 @@ resource "google_alloydb_cluster" "secondary" {
 
   deletion_policy = "FORCE"
 
+  lifecycle {
+    ignore_changes = [instance_type]
+  }
+
   depends_on = [google_alloydb_instance.primary]
 }
 
