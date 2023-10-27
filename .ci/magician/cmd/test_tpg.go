@@ -26,15 +26,14 @@ var testTPGCmd = &cobra.Command{
 		version := os.Getenv("VERSION")
 		commit := os.Getenv("COMMIT_SHA")
 		pr := os.Getenv("PR_NUMBER")
-		callerId := os.Getenv("BUILD_ID")
 
 		gh := github.NewGithubService()
 
-		execTestTPG(version, commit, pr, callerId, gh)
+		execTestTPG(version, commit, pr, gh)
 	},
 }
 
-func execTestTPG(version, commit, pr, callerId string, gh ttGithub) {
+func execTestTPG(version, commit, pr string, gh ttGithub) {
 	var repo string
 	if version == "ga" {
 		repo = "terraform-provider-google"
@@ -46,11 +45,10 @@ func execTestTPG(version, commit, pr, callerId string, gh ttGithub) {
 	}
 
 	if err := gh.CreateWorkflowDispatchEvent("test-tpg.yml", map[string]any{
-		"owner":     "modular-magician",
-		"repo":      repo,
-		"branch":    "auto-pr-" + pr,
-		"sha":       commit,
-		"caller_id": callerId,
+		"owner":  "modular-magician",
+		"repo":   repo,
+		"branch": "auto-pr-" + pr,
+		"sha":    commit,
 	}); err != nil {
 		fmt.Printf("Error creating workflow dispatch event: %v\n", err)
 		os.Exit(1)
