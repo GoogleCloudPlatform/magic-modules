@@ -221,6 +221,7 @@ properties:
     properties:
       - !ruby/object:Api::Type::Array
         name: 'upstreamPolicies'
+        is_set: true
         description: |-
           Policies that configure the upstream artifacts distributed by the Virtual
           Repository. Upstream policies cannot be set on a standard repository.
