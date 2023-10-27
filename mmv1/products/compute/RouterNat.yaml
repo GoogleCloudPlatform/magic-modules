@@ -436,3 +436,13 @@ properties:
       - :PUBLIC
       - :PRIVATE
     default_value: :PUBLIC
+  - !ruby/object:Api::Type::Enum
+    name: 'autoNetworkTier'
+    required: false
+    description: |
+      The network tier to use when automatically reserving NAT IP addresses.
+      Must be one of: PREMIUM, STANDARD. If not specified, then the current
+      project-level default tier is used.
+    values:
+      - :PREMIUN
+      - :STANDAR
