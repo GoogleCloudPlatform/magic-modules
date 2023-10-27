@@ -7,9 +7,14 @@ on:
 
 jobs:
   terraform-provider-google:
+    # name: ${{ matrix.repo }}
+    # strategy:
+    #   matrix:
+    #     repo: ['terraform-provider-google', 'terraform-provider-google-beta', 'terraform-google-conversion', 'docs-examples']
+    #     upstream-owner: ['hashicorp', 'hashicorp', 'GoogleCloudPlatform', 'terraform-google-modules']
     runs-on: ubuntu-22.04
     env:
-      BASE_BRANCH: main
+      BASE_BRANCH: ${{ github.event.pull_request.base.ref || github.ref }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout Repository
@@ -89,14 +94,14 @@ jobs:
           bundle exec compiler.rb -a -e terraform -o $LOCAL_PATH -v ga --no-docs
           bundle exec compiler.rb -a -e terraform -o $LOCAL_PATH -v ga --no-code
           pushd ../
-          make tpgtools OUTPUT_PATH=$LOCAL_PATH VERSION=beta
-          make teamcity-servicemap-generate OUTPUT_PATH=$LOCAL_PATH VERSION=beta
+          make tpgtools OUTPUT_PATH=$LOCAL_PATH VERSION=ga
+          make teamcity-servicemap-generate OUTPUT_PATH=$LOCAL_PATH VERSION=ga
           popd
           popd
   terraform-provider-google-beta:
     runs-on: ubuntu-22.04
     env:
-      BASE_BRANCH: main
+      BASE_BRANCH: ${{ github.event.pull_request.base.ref || github.ref }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout Repository
@@ -182,7 +187,7 @@ jobs:
   terraform-google-conversion:
     runs-on: ubuntu-22.04
     env:
-      BASE_BRANCH: main
+      BASE_BRANCH: ${{ github.event.pull_request.base.ref || github.ref }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout Repository
@@ -263,13 +268,13 @@ jobs:
           find ./tfplan2cai/test/** -type f -exec git rm {} \;
           popd
 
-          bundle exec compiler.rb -a -e terraform -f validator -o $LOCAL_PATH/tfplan2cai -v $VERSION
+          bundle exec compiler.rb -a -e terraform -f validator -o $LOCAL_PATH/tfplan2cai -v beta
 
           popd
   docs-examples:
     runs-on: ubuntu-22.04
     env:
-      BASE_BRANCH: main
+      BASE_BRANCH: ${{ github.event.pull_request.base.ref || github.ref }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout Repository
@@ -311,13 +316,16 @@ jobs:
             ${{ runner.os }}-go-
 
       - run: go install golang.org/x/tools/cmd/goimports@latest
-
       - name: Build docs-examples
         run: |
           set -e
           set -x
           # Set GOPATH to a directory the runner user has access to
           export GOPATH=~/go
+
+          if [ "$UPSTREAM_BRANCH" == "main" ]; then
+            UPSTREAM_BRANCH=master
+          fi
 
           function clone_repo() {
               UPSTREAM_OWNER=terraform-google-modules
