@@ -20,10 +20,10 @@ import (
 	cai2hcl_testing "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/cai2hcl/testing"
 )
 
-func TestComputeForwardingRule(t *testing.T) {
+func TestComputeBackendService(t *testing.T) {
 	cai2hcl_testing.AssertTestFiles(
 		t,
 		UberConverter,
 		"./testdata",
-		[]string{"compute_forwarding_rule"})
+		[]string{"compute_backend_service"})
 }
