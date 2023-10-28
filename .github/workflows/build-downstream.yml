@@ -67,8 +67,10 @@ jobs:
           set +x
           # Set GOPATH to a directory the runner user has access to
           export GOPATH=~/go
-          UPSTREAM_OWNER=${{ matrix.owner-repo }}%/*}
-          GH_REPO=${{ matrix.owner-repo }}#*/}
+          OWNER_REPO="${{ matrix.owner-repo }}"
+          UPSTREAM_OWNER=$(echo "${OWNER_REPO}" | sed 's/\/.*//')
+          REPO_NAME=$(echo "${OWNER_REPO}" | sed 's/.*\///')
+
 
           if [ "$GH_REPO" == "docs-examples" ] && [ "$BASE_BRANCH" == "main" ]; then
               BASE_BRANCH="master"
