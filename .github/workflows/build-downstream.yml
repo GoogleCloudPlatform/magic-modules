@@ -3,15 +3,148 @@ name: build-downstreams
 permissions: read-all
 
 on:
+  push:
+    branches:
+      - main
+      - 'FEATURE-BRANCH-*'
   pull_request:
 
 jobs:
+  build-downstreams:
+    name: ${{ matrix.owner-repo }}-${{ matrix.branch }}
+    strategy:
+      matrix:
+        owner-repo: ['hashicorp/terraform-provider-google', 'hashicorp/terraform-provider-google-beta', 'GoogleCloudPlatform/terraform-google-conversion', 'GoogleCloudPlatform/docs-examples']
+        branch: ['base-branch-name', 'new-branch-name']  # You will need to specify your base and new branch names here
+    runs-on: ubuntu-22.04
+    env:
+      BASE_BRANCH: ${{ github.event.pull_request.base.ref || github.ref }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@ec02537da5712d66d4d50a0f33b7eb52773b5ed1
+        with:
+          ruby-version: '3.1'
+
+      - name: Cache Bundler gems
+        uses: actions/cache@v2
+        with:
+          path: mmv1/vendor/bundle
+          key: ${{ runner.os }}-gems-${{ hashFiles('mmv1/**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-gems-
+
+      - name: Install Ruby dependencies
+        run: |
+          bundle config path mmv1/vendor/bundle
+          bundle install
+        working-directory: mmv1
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '^1.19'
+
+      # Cache Go modules
+      - name: Cache Go modules
+        uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - run: go install golang.org/x/tools/cmd/goimports@latest
+
+      - name: Build {{ matrix.owner-repo }}
+        run: |
+          set -e
+          set +x
+          # Set GOPATH to a directory the runner user has access to
+          export GOPATH=~/go
+          UPSTREAM_OWNER=${{ matrix.owner-repo }}%/*}
+          GH_REPO=${{ matrix.owner-repo }}#*/}
+
+          if [ "$GH_REPO" == "docs-examples" ] && [ "$BASE_BRANCH" == "main" ]; then
+              BASE_BRANCH="master"
+          fi
+
+          if [ -z "$GITHUB_TOKEN" ]; then
+              echo "GITHUB_TOKEN environment variable is missing."
+              exit 1
+          fi
+
+
+          LOCAL_PATH=$GOPATH/src/github.com/$UPSTREAM_OWNER/$GH_REPO
+          GITHUB_PATH=https://x-access-token:$GITHUB_TOKEN@github.com/$UPSTREAM_OWNER/$GH_REPO
+          mkdir -p "$(dirname $LOCAL_PATH)"
+          git clone $GITHUB_PATH $LOCAL_PATH --branch $BASE_BRANCH
+
+          if [[ "$name" == terraform-provider-google* ]]; then
+            pushd mmv1
+
+            pushd $LOCAL_PATH
+            go mod download
+            find . -type f -not -wholename "./.git*" -not -wholename "./.changelog*" -not -name ".travis.yml" -not -name ".golangci.yml" -not -name "CHANGELOG.md" -not -name "CHANGELOG_v*.md" -not -name "GNUmakefile" -not -name "docscheck.sh" -not -name "LICENSE" -not -name "README.md" -not -wholename "./examples*" -not -name ".go-version" -not -name ".hashibot.hcl" -print0 | xargs -0 git rm > /dev/null
+            popd
+
+            if [ "$GH_REPO" == "terraform-provider-google" ]; then
+                bundle exec compiler.rb -a -e $REPO -o $LOCAL_PATH -v ga --no-docs
+                bundle exec compiler.rb -a -e $REPO -o $LOCAL_PATH -v beta --no-code
+                VERSION=ga
+            else
+                bundle exec compiler.rb -a -e $REPO -o $LOCAL_PATH -v beta
+                VERSION=beta
+            fi
+            pushd ../
+            make tpgtools OUTPUT_PATH=$LOCAL_PATH VERSION=$VERSION
+
+            # Only generate TeamCity-related file for TPG and TPGB
+            make teamcity-servicemap-generate OUTPUT_PATH=$LOCAL_PATH VERSION=$VERSION
+            popd
+            popd
+          elif [ "$GH_REPO" == "GoogleCloudPlatform/terraform-google-conversion" ]; then
+            pushd mmv1
+
+            pushd $LOCAL_PATH
+            # clear out the templates as they are copied during
+            # generation from mmv1/third_party/validator/tests/data
+            rm -rf ./tfplan2cai/testdata/templates/
+            rm -rf ./tfplan2cai/testdata/generatedconvert/
+            rm -rf ./tfplan2cai/converters/google/provider
+            rm -rf ./tfplan2cai/converters/google/resources
+            find ./tfplan2cai/test/** -type f -print0 | xargs -0 git rm > /dev/null
+            popd
+
+            bundle exec compiler.rb -a -e terraform -f validator -o $LOCAL_PATH/tfplan2cai -v beta
+            popd
+
+          elif [ "$GH_REPO" == "docs-examples" ]; then
+            pushd mmv1
+
+            # Generate for tf-oics
+            echo "Generating for tf-oics..."
+            bundle exec compiler.rb -a -e terraform -f oics -o $LOCAL_PATH
+
+            popd
+            echo "Build completed!"
+          else
+              echo "case not supported"
+              exit 1
+          fi
   terraform-provider-google:
     # name: ${{ matrix.repo }}
     # strategy:
     #   matrix:
     #     repo: ['terraform-provider-google', 'terraform-provider-google-beta', 'terraform-google-conversion', 'docs-examples']
     #     upstream-owner: ['hashicorp', 'hashicorp', 'GoogleCloudPlatform', 'terraform-google-modules']
+    #       branch: ['base-branch-name', 'new-branch-name']  # You will need to specify your base and new branch names here
+
     runs-on: ubuntu-22.04
     env:
       BASE_BRANCH: ${{ github.event.pull_request.base.ref || github.ref }}
