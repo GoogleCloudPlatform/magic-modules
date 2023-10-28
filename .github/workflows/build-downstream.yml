@@ -65,7 +65,7 @@ jobs:
       - name: Build ${{ matrix.owner-repo }}
         run: |
           set -e
-          set +x
+          set -x
           # Set GOPATH to a directory the runner user has access to
           export GOPATH=~/go
           OWNER_REPO="${{ matrix.owner-repo }}"
