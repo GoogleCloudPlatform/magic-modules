@@ -13,6 +13,7 @@ jobs:
   build-downstreams:
     name: ${{ matrix.owner-repo }}-${{ matrix.branch }}
     strategy:
+      fail-fast: false
       matrix:
         owner-repo: ['hashicorp/terraform-provider-google', 'hashicorp/terraform-provider-google-beta', 'GoogleCloudPlatform/terraform-google-conversion', 'GoogleCloudPlatform/docs-examples']
         branch: ['base-branch-name', 'new-branch-name']  # You will need to specify your base and new branch names here
@@ -69,7 +70,7 @@ jobs:
           export GOPATH=~/go
           OWNER_REPO="${{ matrix.owner-repo }}"
           UPSTREAM_OWNER=$(echo "${OWNER_REPO}" | sed 's/\/.*//')
-          REPO_NAME=$(echo "${OWNER_REPO}" | sed 's/.*\///')
+          GH_REPO=$(echo "${OWNER_REPO}" | sed 's/.*\///')
 
 
           if [ "$GH_REPO" == "docs-examples" ] && [ "$BASE_BRANCH" == "main" ]; then
