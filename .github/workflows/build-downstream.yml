@@ -47,7 +47,7 @@ jobs:
         working-directory: mmv1
 
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v3
         with:
           go-version: '^1.19'
 
@@ -88,7 +88,7 @@ jobs:
           mkdir -p "$(dirname $LOCAL_PATH)"
           git clone $GITHUB_PATH $LOCAL_PATH --branch $BASE_BRANCH
 
-          if [[ "$name" == terraform-provider-google* ]]; then
+          if [[ "$GH_REPO" == terraform-provider-google* ]]; then
             pushd mmv1
 
             pushd $LOCAL_PATH
@@ -178,7 +178,7 @@ jobs:
         working-directory: mmv1
 
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v3
         with:
           go-version: '^1.19'
 
@@ -266,7 +266,7 @@ jobs:
         working-directory: mmv1
 
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v3
         with:
           go-version: '^1.19'
 
@@ -353,7 +353,7 @@ jobs:
         working-directory: mmv1
 
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v3
         with:
           go-version: '^1.19'
 
@@ -440,7 +440,7 @@ jobs:
         working-directory: mmv1
 
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v3
         with:
           go-version: '^1.19'
 
