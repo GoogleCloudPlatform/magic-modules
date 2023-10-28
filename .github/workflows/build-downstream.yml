@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        owner-repo: ['hashicorp/terraform-provider-google', 'hashicorp/terraform-provider-google-beta', 'GoogleCloudPlatform/terraform-google-conversion', 'GoogleCloudPlatform/docs-examples']
+        owner-repo: ['hashicorp/terraform-provider-google', 'hashicorp/terraform-provider-google-beta', 'GoogleCloudPlatform/terraform-google-conversion', 'terraform-google-modules/docs-examples']
         branch: ['base-branch-name', 'new-branch-name']  # You will need to specify your base and new branch names here
     runs-on: ubuntu-22.04
     env:
