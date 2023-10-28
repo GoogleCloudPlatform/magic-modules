@@ -855,8 +855,9 @@ func TestAccAlloydbCluster_secondaryClusterPromoteAndSimultaneousUpdate(t *testi
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"random_suffix":              acctest.RandString(t, 10),
+		"secondary_cluster_location": "us-east1",
+		"network_name":               acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -946,8 +947,9 @@ func TestAccAlloydbCluster_secondaryClusterPromoteAndDeleteOriginalPrimary(t *te
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"random_suffix":              acctest.RandString(t, 10),
+		"secondary_cluster_location": "us-east1",
+		"network_name":               acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1026,8 +1028,9 @@ func TestAccAlloydbCluster_secondaryClusterPromoteAndUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"random_suffix":              acctest.RandString(t, 10),
+		"secondary_cluster_location": "us-east1",
+		"network_name":               acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1379,7 +1382,7 @@ resource "google_alloydb_cluster" "secondary" {
   }
 
   automated_backup_policy {
-    location      = "us-east1"
+    location      = "%{secondary_cluster_location}"
     backup_window = "1800s"
     enabled       = true
 
@@ -1515,7 +1518,7 @@ resource "google_alloydb_cluster" "secondary" {
   }
 
   automated_backup_policy {
-    location      = "us-east1"
+    location      = "%{secondary_cluster_location}"
     backup_window = "1800s"
     enabled       = true
 
@@ -1596,7 +1599,7 @@ resource "google_alloydb_cluster" "secondary" {
   }
 
   automated_backup_policy {
-    location      = "us-east1"
+    location      = "%{secondary_cluster_location}"
     backup_window = "1800s"
     enabled       = true
 
