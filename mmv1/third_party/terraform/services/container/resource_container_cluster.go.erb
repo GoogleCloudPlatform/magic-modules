@@ -106,10 +106,12 @@ var (
 		return false
 	})
 
-	suppressDiffForExsitingFleet = schema.SchemaDiffSuppressFunc(func(k, oldValue, newValue string, d *schema.ResourceData) bool {
-		o, n := d.GetChange("fleet.0.pre_registered")
-                log.Printf("[DEBUG] fleet suppress pre_registered old: %v, new: %v\n", o, n)
-		return o.(bool)
+	suppressDiffForPreRegisteredFleet = schema.SchemaDiffSuppressFunc(func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+		if v, _ := d.Get("fleet.0.pre_registered").(bool); v {
+			log.Printf("[DEBUG] fleet suppress pre_registered: %v\n", v)
+			return true
+		}
+		return false
 	})
 )
 
