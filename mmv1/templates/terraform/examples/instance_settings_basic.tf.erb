@@ -2,7 +2,7 @@
 
 resource "google_compute_instance_settings" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
-  zone = "us-central1-a"
+  zone = "us-east7-b"
   update_mask = "metadata.items.foo"
   metadata {
     items = {
