@@ -1113,7 +1113,8 @@ func TestAccComposerEnvironment_customBucket(t *testing.T) {
 			{
 				PlanOnly:					 true,
 				ExpectNonEmptyPlan: false,
-				Config:						 testAccComposerEnvironment_customBucket(envName, bucketName, network, subnetwork),
+				Config:						 testAccComposerEnvironment_customBucket_bucketConfig(bucketName) +
+														testAccComposerEnvironment_customBucket(envName, bucketName, network, subnetwork),
 				Check:							testAccCheckClearComposerEnvironmentFirewalls(t, network),
 			},
 		},
