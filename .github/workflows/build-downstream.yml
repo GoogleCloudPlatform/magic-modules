@@ -102,6 +102,6 @@ jobs:
             clone_repo
             make tf-ocis
           else
-              echo "case not supported"
-              exit 1
+            echo "case not supported"
+            exit 1
           fi
