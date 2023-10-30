@@ -25,9 +25,9 @@ func WorkbenchInstanceLabelsDiffSuppress(k, old, new string, d *schema.ResourceD
 
 var WorkbenchInstanceProvidedMetadata = []string{
 	"disable-swap-binaries",
-  "enable-guest-attributes",
-  "proxy-backend-id",
-  "proxy-registration-url",
+	"enable-guest-attributes",
+	"proxy-backend-id",
+	"proxy-registration-url",
 	"agent-health-check-interval-seconds",
 	"agent-health-check-path",
 	"container",
@@ -95,7 +95,6 @@ var WorkbenchInstanceProvidedTags = []string{
 	"deeplearning-vm",
 	"notebook-instance",
 }
-
 
 func WorkbenchInstanceTagsDiffSuppress(_, _, _ string, d *schema.ResourceData) bool {
   old, new := d.GetChange("gce_setup.0.tags")
