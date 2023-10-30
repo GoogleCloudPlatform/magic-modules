@@ -40,7 +40,7 @@ jobs:
       with:
         repository: ${{ github.event.inputs.owner }}/${{ github.event.inputs.repo }}
         ref: ${{ github.event.inputs.branch }}
-        path: provider
+        path: repo
         fetch-depth: 2
     - name: Cache Go modules and build cache
       uses: actions/cache@v3
@@ -48,14 +48,14 @@ jobs:
         path: |
           ~/go/pkg/mod
           ~/.cache/go-build
-        key: ${{ runner.os }}-test-${{ github.event.inputs.repo }}-${{ hashFiles('**/go.sum', 'google-beta/transport/**', 'google-beta/tpgresource/**', 'google-beta/acctest/**', 'google-beta/envvar/**', 'google-beta/sweeper/**', 'google-beta/verify/**') }}
+        key: ${{ runner.os }}-test-${{ github.event.inputs.repo }}-${{ hashFiles('repo/go.sum', 'repo/google-beta/transport/**', 'repo/google-beta/tpgresource/**', 'repo/google-beta/acctest/**', 'repo/google-beta/envvar/**', 'repo/google-beta/sweeper/**', 'repo/google-beta/verify/**') }}
         restore-keys: |
-          ${{ runner.os }}-test-${{ github.event.inputs.repo }}-${{ hashFiles('**/go.sum') }}
+          ${{ runner.os }}-test-${{ github.event.inputs.repo }}-${{ hashFiles('repo/go.sum') }}
           ${{ runner.os }}-test-${{ github.event.inputs.repo }}-
     - name: Check for Code Changes
       id: pull_request
       run: |
-        cd provider
+        cd repo
         gofiles=$(git diff --name-only HEAD~1 | { grep -e "\.go$" -e "go.mod$" -e "go.sum$" || test $? = 1; })
         if [ -z "$gofiles" ]; then
           echo "has_changes=false" >> $GITHUB_OUTPUT
@@ -88,22 +88,22 @@ jobs:
     - name: Build Provider
       if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |
-        cd provider
+        cd repo
         go build
     - name: Run Unit Tests
       if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |
-        cd provider
+        cd repo
         make testnolint
     - name: Lint Check
       if: ${{ !cancelled() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |
-        cd provider
+        cd repo
         make lint
     - name: Documentation Check
       if: ${{ !cancelled() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |
-        cd provider
+        cd repo
         make docscheck
     - name: Post Result Status to Pull Request
       if: ${{ !cancelled() }}
