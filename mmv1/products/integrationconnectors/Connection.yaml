@@ -120,13 +120,11 @@ properties:
         output: true
         description: |
           Description of Status of Connection.
-        output: true
       - !ruby/object:Api::Type::String
         name: "status"
         output: true
         description: |
           Status of the Connection.
-        output: true
 
   - !ruby/object:Api::Type::Array
     name: "configVariable"
