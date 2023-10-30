@@ -106,12 +106,11 @@ var (
 		return false
 	})
 
-	// suppressDiffForExsitingFleet = schema.SchemaDiffSuppressFunc(func(k, oldValue, newValue string, d *schema.ResourceData) bool {
-		// o, n := d.GetChange("fleet.0.pre_registered")
-                // suppress := !o.(bool) && !n.(bool)
-                // log.Printf("[DEBUG] fleet suppress pre_registered old: %v, new: %v\n", o, n)
-		// return false
-	// })
+	suppressDiffForExsitingFleet = schema.SchemaDiffSuppressFunc(func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+		o, n := d.GetChange("fleet.0.pre_registered")
+                log.Printf("[DEBUG] fleet suppress pre_registered old: %v, new: %v\n", o, n)
+		return o.(bool)
+	})
 )
 
 // This uses the node pool nodeConfig schema but sets
@@ -2052,6 +2051,7 @@ func ResourceContainerCluster() *schema.Resource {
 				Optional:    true,
 				MaxItems:    1,
 				Description: `Fleet configuration of the cluster.`,
+				DiffSuppressFunc: suppressDiffForExsitingFleet,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"project": {
