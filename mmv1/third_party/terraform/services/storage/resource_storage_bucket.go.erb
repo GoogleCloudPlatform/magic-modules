@@ -256,7 +256,7 @@ func ResourceStorageBucket() *schema.Resource {
 				Description: `The bucket's Lifecycle Rules configuration.`,
 			},
 
-			"per_object_retention": {
+			"enable_object_retention": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				ForceNew:    true,
