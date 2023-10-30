@@ -104,7 +104,7 @@ tgc:
 tf-ocis:
 	cd mmv1;\
 		bundle;\
-  	bundle exec compiler.rb -a -e terraform -f oics -o $LOCAL_PATH;\
+  	bundle exec compiler.rb -a -e terraform -f oics -o $(OUTPUT_PATH);\
 
 test:
 	cd mmv1; \
