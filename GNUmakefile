@@ -99,7 +99,7 @@ clean-tgc:
 tgc:
 	cd mmv1;\
 		bundle;\
-		bundle exec compiler -e terraform -f tgc -v beta -o $(OUTPUT_PATH) $(mmv1_compile);\
+		bundle exec compiler -e terraform -f tgc -v beta -o $(OUTPUT_PATH)/tfplan2cai $(mmv1_compile);\
 
 tf-ocis:
 	cd mmv1;\
