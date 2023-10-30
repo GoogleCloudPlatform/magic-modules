@@ -235,6 +235,7 @@ func ResourceStorageBucketObject() *schema.Resource {
 			"event_based_hold": {
 				Type:        schema.TypeBool,
 				Optional:    true,
+				ConflictsWith: []string{"retention"},
 				Description: `Whether an object is under event-based hold. Event-based hold is a way to retain objects until an event occurs, which is signified by the hold's release (i.e. this value is set to false). After being released (set to false), such objects will be subject to bucket-level retention (if any).`,
 			},
 
