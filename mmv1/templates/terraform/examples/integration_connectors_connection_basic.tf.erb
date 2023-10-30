@@ -1,14 +1,14 @@
 resource "google_integration_connectors_connection" "<%= ctx[:primary_resource_id] %>" {
   name     = "<%= ctx[:vars]['connection_name'] %>"
-  connector_version = "projects/connectors-harsha/locations/global/providers/gcp/connectors/pubsub/versions/1"
+  location = "us-central1"
+  connector_version = "projects/connectors-example/locations/global/providers/gcp/connectors/pubsub/versions/1"
   description = "tf created description"
   config_variable {
       key = "project_id"
-      string_value = "connectors-autopush-harsha"
+      string_value = "connectors-example"
   }
   config_variable {
       key = "topic_id"
-      string_value = "testnew"
-      integer_value = 1
+      string_value = "test"
   }
 }

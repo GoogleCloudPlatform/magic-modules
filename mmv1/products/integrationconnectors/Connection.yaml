@@ -495,6 +495,7 @@ properties:
     name: "serviceAccount"
     description: |
       Service account needed for runtime plane to access Google Cloud resources.
+    default_from_api: true
   - !ruby/object:Api::Type::String
     name: "serviceDirectory"
     description: |

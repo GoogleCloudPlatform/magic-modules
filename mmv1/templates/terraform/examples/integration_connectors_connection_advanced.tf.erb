@@ -15,7 +15,7 @@ resource "google_secret_manager_secret" "secret-basic" {
 
 resource "google_secret_manager_secret_version" "secret-version-basic" {
   secret = google_secret_manager_secret.secret-basic.id
-  secret_data = "Google@123@"
+  secret_data = "dummypassword"
 }
 
 resource "google_secret_manager_secret_iam_member" "secret_iam" {
@@ -26,48 +26,153 @@ resource "google_secret_manager_secret_iam_member" "secret_iam" {
 }
 
 resource "google_integration_connectors_connection" "<%= ctx[:primary_resource_id] %>" {
-    name     = "<%= ctx[:vars]['connection_name'] %>"
-    description = "tf updated description"
-    service_account = "${data.google_project.test_project.number}-compute@developer.gserviceaccount.com"
-    connector_version = "projects/connectors-autopush-harsha/locations/global/providers/zendesk/connectors/zendesk/versions/1"
-    config_variable {
-        key = "proxy_enabled"
-        boolean_value = false
+  name     = "<%= ctx[:vars]['connection_name'] %>"
+  description = "tf updated description"
+  location = "us-central1"
+  service_account = "${data.google_project.test_project.number}-compute@developer.gserviceaccount.com"
+  connector_version = "projects/connectors-example/locations/global/providers/zendesk/connectors/zendesk/versions/1"
+  config_variable {
+      key = "proxy_enabled"
+      boolean_value = false
+  }
+  config_variable {
+    key = "sample_integer_value"
+    integer_value = 1
+  }
+
+  config_variable {
+      key = "sample_encryption_key_value"
+      encryption_key_value {
+        type = "GOOGLE_MANAGED"
+        kms_key_name = "sampleKMSKkey"
+      }
+  }
+
+  config_variable {
+    key = "sample_secret_value"
+    secret_value {
+      secret_version = google_secret_manager_secret_version.secret-version-basic.name
     }
-    suspended = false
+  }
+
+  suspended = false
+  auth_config {
+    auth_type = "USER_PASSWORD"
+    user_password {
+      username = "user@xyz.com"
+      password {
+        secret_version = google_secret_manager_secret_version.secret-version-basic.name
+      }
+    }
+  }
+
+  destination_config {
+    key = "url"
+    destination {
+        host = "https://test.zendesk.com"
+    }
+  }
+  lock_config {
+    locked = false
+    reason = "Its not locked"
+  }
+  log_config {
+    enabled = false
+  }
+  node_config {
+    min_node_count = 2
+    max_node_count = 50
+  }
+  labels = {
+    foo = "bar"
+  }
+  ssl_config {
+    additional_variable {
+      key = "sample_string"
+      string_value = "sampleString"
+    }
+    additional_variable {
+      key = "sample_boolean"
+      boolean_value = false
+    }
+    additional_variable {
+      key = "sample_integer"
+      integer_value = 1
+    }
+    additional_variable {
+      key = "sample_secret_value"
+      secret_value {
+        secret_version = google_secret_manager_secret_version.secret-version-basic.name
+      }
+    }
+    additional_variable {
+      key = "sample_encryption_key_value"
+      encryption_key_value {
+        type = "GOOGLE_MANAGED"
+        kms_key_name = "sampleKMSKkey"
+      }
+    }
+    client_cert_type = "PEM"
+    client_certificate {
+      secret_version = google_secret_manager_secret_version.secret-version-basic.name
+    }
+    client_private_key {
+      secret_version = google_secret_manager_secret_version.secret-version-basic.name
+    }
+    client_private_key_pass {
+      secret_version = google_secret_manager_secret_version.secret-version-basic.name
+    }
+    private_server_certificate {
+      secret_version = google_secret_manager_secret_version.secret-version-basic.name
+    }
+    server_cert_type = "PEM"
+    trust_model      = "PUBLIC"
+    type             = "TLS"
+    use_ssl          = true
+  }
+
+  eventing_enablement_type = "EVENTING_AND_CONNECTION"
+  eventing_config {
+    additional_variable {
+      key = "sample_string"
+      string_value = "sampleString"
+    }
+    additional_variable {
+      key = "sample_boolean"
+      boolean_value = false
+    }
+    additional_variable {
+      key = "sample_integer"
+      integer_value = 1
+    }
+    additional_variable {
+      key = "sample_secret_value"
+      secret_value {
+        secret_version = google_secret_manager_secret_version.secret-version-basic.name
+      }
+    }
+    additional_variable {
+      key = "sample_encryption_key_value"
+      encryption_key_value {
+        type = "GOOGLE_MANAGED"
+        kms_key_name = "sampleKMSKkey"
+      }
+    }
+    registration_destination_config {
+      key = "registration_destination_config"
+      destinations {
+          host = "https://test.zendesk.com"
+        }
+    }
     auth_config {
       auth_type = "USER_PASSWORD"
       user_password {
-        username = "balanaguharsha@google.com"
+        username = "user@xyz.com"
         password {
           secret_version = google_secret_manager_secret_version.secret-version-basic.name
         }
       }
     }
-
-    destination_config {
-      key = "url"
-      destination {
-          host = "https://google8882.zendesk.com"
-      }
-    }
-    eventing_enablement_type = "EVENTING_AND_CONNECTION"
-    eventing_config {
-        registration_destination_config {
-          key = "registration_destination_config"
-          destinations {
-              host = "https://google8882.zendesk.com"
-            }
-        }
-        auth_config {
-          auth_type = "USER_PASSWORD"
-          user_password {
-            username = "balanaguharsha@google.com"
-            password {
-              secret_version = google_secret_manager_secret_version.secret-version-basic.name
-            }
-          }
-        }
-        enrichment_enabled = true
-      }
+    enrichment_enabled = true
   }
+}
