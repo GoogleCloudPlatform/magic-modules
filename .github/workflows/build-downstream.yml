@@ -15,8 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        owner-repo: ['hashicorp/terraform-provider-google', 'hashicorp/terraform-provider-google-beta', 'GoogleCloudPlatform/terraform-google-conversion', 'terraform-google-modules/docs-examples']
-        branch: ['base-branch-name', 'new-branch-name']  # You will need to specify your base and new branch names here
+        owner-repo: ['terraform-provider-google', 'terraform-provider-google-beta', 'terraform-google-conversion', 'docs-examples']
     runs-on: ubuntu-22.04
     env:
       BASE_BRANCH: ${{ github.event.pull_request.base.ref || github.ref }}
@@ -68,74 +67,40 @@ jobs:
           set -x
           # Set GOPATH to a directory the runner user has access to
           export GOPATH=~/go
-          OWNER_REPO="${{ matrix.owner-repo }}"
-          UPSTREAM_OWNER=$(echo "${OWNER_REPO}" | sed 's/\/.*//')
-          GH_REPO=$(echo "${OWNER_REPO}" | sed 's/.*\///')
 
+          function clone_repo() {
+              GITHUB_PATH=https://x-access-token:$GITHUB_TOKEN@github.com/$UPSTREAM_OWNER/$GH_REPO
+              mkdir -p "$(dirname $OUTPUT_PATH)"
+              git clone $GITHUB_PATH $OUTPUT_PATH --branch $BASE_BRANCH
+          }
 
+          GH_REPO="${{ matrix.owner-repo }}"
           if [ "$GH_REPO" == "docs-examples" ] && [ "$BASE_BRANCH" == "main" ]; then
               BASE_BRANCH="master"
           fi
 
-          if [ -z "$GITHUB_TOKEN" ]; then
-              echo "GITHUB_TOKEN environment variable is missing."
-              exit 1
-          fi
-
-
-          LOCAL_PATH=$GOPATH/src/github.com/$UPSTREAM_OWNER/$GH_REPO
+          OUTPUT_PATH=$GOPATH/src/github.com/$UPSTREAM_OWNER/$GH_REPO
           GITHUB_PATH=https://x-access-token:$GITHUB_TOKEN@github.com/$UPSTREAM_OWNER/$GH_REPO
-          mkdir -p "$(dirname $LOCAL_PATH)"
-          git clone $GITHUB_PATH $LOCAL_PATH --branch $BASE_BRANCH
 
           if [[ "$GH_REPO" == terraform-provider-google* ]]; then
-            pushd mmv1
-
-            pushd $LOCAL_PATH
-            go mod download
-            find . -type f -not -wholename "./.git*" -not -wholename "./.changelog*" -not -name ".travis.yml" -not -name ".golangci.yml" -not -name "CHANGELOG.md" -not -name "CHANGELOG_v*.md" -not -name "GNUmakefile" -not -name "docscheck.sh" -not -name "LICENSE" -not -name "README.md" -not -wholename "./examples*" -not -name ".go-version" -not -name ".hashibot.hcl" -print0 | xargs -0 git rm > /dev/null
-            popd
-
-            if [ "$GH_REPO" == "terraform-provider-google" ]; then
-                bundle exec compiler.rb -a -e $REPO -o $LOCAL_PATH -v ga --no-docs
-                bundle exec compiler.rb -a -e $REPO -o $LOCAL_PATH -v beta --no-code
+            UPSTREAM_OWNER=hashicorp
+            clone_repo
+          if [ "$GH_REPO" == "terraform-provider-google" ]; then
                 VERSION=ga
             else
-                bundle exec compiler.rb -a -e $REPO -o $LOCAL_PATH -v beta
                 VERSION=beta
             fi
-            pushd ../
-            make tpgtools OUTPUT_PATH=$LOCAL_PATH VERSION=$VERSION
-
-            # Only generate TeamCity-related file for TPG and TPGB
-            make teamcity-servicemap-generate OUTPUT_PATH=$LOCAL_PATH VERSION=$VERSION
-            popd
-            popd
-          elif [ "$GH_REPO" == "GoogleCloudPlatform/terraform-google-conversion" ]; then
-            pushd mmv1
-
-            pushd $LOCAL_PATH
-            # clear out the templates as they are copied during
-            # generation from mmv1/third_party/validator/tests/data
-            rm -rf ./tfplan2cai/testdata/templates/
-            rm -rf ./tfplan2cai/testdata/generatedconvert/
-            rm -rf ./tfplan2cai/converters/google/provider
-            rm -rf ./tfplan2cai/converters/google/resources
-            find ./tfplan2cai/test/** -type f -print0 | xargs -0 git rm > /dev/null
-            popd
-
-            bundle exec compiler.rb -a -e terraform -f validator -o $LOCAL_PATH/tfplan2cai -v beta
-            popd
-
+            make clean-provider
+            make provider
+          elif [ "$GH_REPO" == "terraform-google-conversion" ]; then
+            UPSTREAM_OWNER=GoogleCloudPlatform
+            clone_repo
+            make clean-tgc
+            make tgc
           elif [ "$GH_REPO" == "docs-examples" ]; then
-            pushd mmv1
-
-            # Generate for tf-oics
-            echo "Generating for tf-oics..."
-            bundle exec compiler.rb -a -e terraform -f oics -o $LOCAL_PATH
-
-            popd
-            echo "Build completed!"
+            UPSTREAM_OWNER=terraform-google-modules
+            clone_repo
+            make tf-ocis
           else
               echo "case not supported"
               exit 1
@@ -394,18 +359,6 @@ jobs:
           git config --local user.name "Modular Magician"
           git config --local user.email "magic-modules@google.com"
 
-          pushd mmv1
-
-          pushd $LOCAL_PATH
-          # clear out the templates as they are copied during
-          # generation from mmv1/third_party/validator/tests/data
-          rm -rf ./tfplan2cai/testdata/templates/
-          rm -rf ./tfplan2cai/testdata/generatedconvert/
-          rm -rf ./tfplan2cai/converters/google/provider
-          rm -rf ./tfplan2cai/converters/google/resources
-          find ./tfplan2cai/test/** -type f -exec git rm {} \;
-          popd
-
           bundle exec compiler.rb -a -e terraform -f validator -o $LOCAL_PATH/tfplan2cai -v beta
 
           popd
@@ -483,12 +436,6 @@ jobs:
 
           git config --local user.name "Modular Magician"
           git config --local user.email "magic-modules@google.com"
-
-          pushd mmv1
-
-          # Generate for tf-oics
-          echo "Generating for tf-oics..."
-          bundle exec compiler.rb -a -e terraform -f oics -o $LOCAL_PATH
 
           popd
           echo "Build completed!"
