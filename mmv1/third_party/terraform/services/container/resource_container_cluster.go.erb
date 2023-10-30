@@ -819,6 +819,7 @@ func ResourceContainerCluster() *schema.Resource {
 									"evaluation_mode": {
 											Type:          schema.TypeString,
 											Optional:      true,
+                     									Computed:      true,
 											ValidateFunc:  validation.StringInSlice([]string{"DISABLED", "PROJECT_SINGLETON_POLICY_ENFORCE"}, false),
 											Description:   "Mode of operation for Binary Authorization policy evaluation.",
 											ConflictsWith: []string{"binary_authorization.0.enabled"},
