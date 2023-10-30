@@ -486,7 +486,7 @@ func resourceStorageBucketObjectRead(d *schema.ResourceData, meta interface{}) e
 		return fmt.Errorf("Error setting media_link: %s", err)
 	}
 	if err := d.Set("retention", flattenObjectRetention(res.Retention)); err != nil {
-		return fmt.Errorf("Error setting lifecycle_rule: %s", err)
+		return fmt.Errorf("Error setting retention: %s", err)
 	}
 	if err := d.Set("event_based_hold", res.EventBasedHold); err != nil {
 		return fmt.Errorf("Error setting event_based_hold: %s", err)
