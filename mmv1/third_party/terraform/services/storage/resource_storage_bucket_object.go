@@ -6,14 +6,12 @@ import (
 	"io"
 	"log"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"crypto/sha256"
 	"encoding/base64"
@@ -223,20 +221,19 @@ func ResourceStorageBucketObject() *schema.Resource {
 							Description: `Time in RFC 3339 (e.g. 2030-01-01T02:03:04Z) until which object retention protects this object.`,
 						},
 						"mode": {
-							Type:         schema.TypeString,
-							Required:     true,
-							Description:  `The object retention mode. Supported values include: "UNLOCKED", "LOCKED".`,
-							ValidateFunc: validation.StringInSlice([]string{"UNLOCKED", "LOCKED"}, false),
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: `The object retention mode. Supported values include: "Unlocked", "Locked".`,
 						},
 					},
 				},
 			},
 
 			"event_based_hold": {
-				Type:        schema.TypeBool,
-				Optional:    true,
+				Type:          schema.TypeBool,
+				Optional:      true,
 				ConflictsWith: []string{"retention"},
-				Description: `Whether an object is under event-based hold. Event-based hold is a way to retain objects until an event occurs, which is signified by the hold's release (i.e. this value is set to false). After being released (set to false), such objects will be subject to bucket-level retention (if any).`,
+				Description:   `Whether an object is under event-based hold. Event-based hold is a way to retain objects until an event occurs, which is signified by the hold's release (i.e. this value is set to false). After being released (set to false), such objects will be subject to bucket-level retention (if any).`,
 			},
 
 			"temporary_hold": {
@@ -567,13 +564,10 @@ func expandObjectRetention(configured interface{}) *storage.ObjectRetention {
 	}
 	retention := retentions[0].(map[string]interface{})
 
-	mode := "Unlocked"
-	if retention["mode"].(string) == "LOCKED" {
-		mode = "Locked"
-	}
+	mode := retention["mode"].(string)
 
 	objectRetention := &storage.ObjectRetention{
-		RetainUntilTime: retention["retain_until"].(string),
+		RetainUntilTime: retention["retain_until_time"].(string),
 		Mode:            mode,
 	}
 
@@ -588,8 +582,8 @@ func flattenObjectRetention(objectRetention *storage.ObjectRetention) []map[stri
 	}
 
 	retention := map[string]interface{}{
-		"mode":         strings.ToUpper(objectRetention.Mode),
-		"retain_until": objectRetention.RetainUntilTime,
+		"mode":              objectRetention.Mode,
+		"retain_until_time": objectRetention.RetainUntilTime,
 	}
 
 	retentions = append(retentions, retention)

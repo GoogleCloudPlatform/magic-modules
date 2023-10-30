@@ -602,7 +602,7 @@ func resourceStorageBucketCreate(d *schema.ResourceData, meta interface{}) error
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() error {
 			insertCall := config.NewStorageClient(userAgent).Buckets.Insert(project, sb)
-			if d.Get("per_object_retention").(bool) {
+			if d.Get("enable_object_retention").(bool) {
 				insertCall.EnableObjectRetention(true)
 			}
 			res, err = insertCall.Do()
@@ -1641,7 +1641,7 @@ func setStorageBucket(d *schema.ResourceData, config *transport_tpg.Config, res 
 	if err := d.Set("logging", flattenBucketLogging(res.Logging)); err != nil {
 		return fmt.Errorf("Error setting logging: %s", err)
 	}
-	if err := d.Set("per_object_retention", flattenBucketObjectRetention(res.ObjectRetention)); err != nil {
+	if err := d.Set("enable_object_retention", flattenBucketObjectRetention(res.ObjectRetention)); err != nil {
 		return fmt.Errorf("Error setting object retention: %s", err)
 	}
 	if err := d.Set("versioning", flattenBucketVersioning(res.Versioning)); err != nil {

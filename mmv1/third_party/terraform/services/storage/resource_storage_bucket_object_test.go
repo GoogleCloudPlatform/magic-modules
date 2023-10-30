@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
@@ -429,6 +430,8 @@ func TestAccStorageObject_retention(t *testing.T) {
 	if err := ioutil.WriteFile(testFile.Name(), data, 0644); err != nil {
 		t.Errorf("error writing file: %v", err)
 	}
+	expire2Days := time.Now().UTC().Add(time.Hour * 48).Round(time.Millisecond).Format(time.RFC3339Nano)
+	expire3Days := time.Now().UTC().Add(time.Hour * 72).Round(time.Millisecond).Format(time.RFC3339Nano)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -436,13 +439,13 @@ func TestAccStorageObject_retention(t *testing.T) {
 		CheckDestroy:             testAccStorageObjectDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleStorageBucketsObjectRetention(bucketName, "2040-01-01T02:03:04.000Z"),
+				Config: testGoogleStorageBucketsObjectRetention(bucketName, expire2Days),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleStorageObject(t, bucketName, objectName, dataMd5),
 				),
 			},
 			{
-				Config: testGoogleStorageBucketsObjectRetention(bucketName, "2040-01-02T02:03:04.000Z"),
+				Config: testGoogleStorageBucketsObjectRetention(bucketName, expire3Days),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleStorageObject(t, bucketName, objectName, dataMd5),
 				),
@@ -688,13 +691,13 @@ resource "google_storage_bucket_object" "object" {
 `, bucketName, objectName, content, customerEncryptionKey)
 }
 
-func testGoogleStorageBucketsObjectRetention(bucketName string, retainUntil string) string {
+func testGoogleStorageBucketsObjectRetention(bucketName string, retainUntilTime string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
-  name                 = "%s"
-  location             = "US"
-  force_destroy        = true
-  per_object_retention = true
+  name                    = "%s"
+  location                = "US"
+  force_destroy           = true
+  enable_object_retention = true
 }
 
 resource "google_storage_bucket_object" "object" {
@@ -702,20 +705,20 @@ resource "google_storage_bucket_object" "object" {
   bucket    = google_storage_bucket.bucket.name
   content   = "%s"
   retention {
-	mode         = "UNLOCKED"
-	retain_until = "%s"
+	mode              = "Unlocked"
+	retain_until_time = "%s"
   }      
 }
-`, bucketName, objectName, content, retainUntil)
+`, bucketName, objectName, content, retainUntilTime)
 }
 
 func testGoogleStorageBucketsObjectRetentionDisabled(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
-  name                 = "%s"
-  location             = "US"
-  force_destroy        = true
-  per_object_retention = true
+  name                    = "%s"
+  location                = "US"
+  force_destroy           = true
+  enable_object_retention = true
 }
 
 resource "google_storage_bucket_object" "object" {
