@@ -217,7 +217,7 @@ func ResourceStorageBucketObject() *schema.Resource {
 				Description:   `Object level retention configuration.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"retain_until": {
+						"retain_until_time": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: `Time in RFC 3339 (e.g. 2030-01-01T02:03:04Z) until which object retention protects this object.`,
