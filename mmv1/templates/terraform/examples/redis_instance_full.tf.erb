@@ -28,6 +28,10 @@ resource "google_redis_instance" "<%= ctx[:primary_resource_id] %>" {
       }
     }
   }
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 // This example assumes this network already exists.
