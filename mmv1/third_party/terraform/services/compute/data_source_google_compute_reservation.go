@@ -17,6 +17,8 @@ func DataSourceGoogleComputeReservation() *schema.Resource {
 	tpgresource.AddRequiredFieldsToSchema(dsSchema, "name")
 	tpgresource.AddRequiredFieldsToSchema(dsSchema, "zone")
 
+	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project")
+
 	return &schema.Resource{
 		Read:   dataSourceGoogleComputeReservationRead,
 		Schema: dsSchema,
@@ -30,7 +32,7 @@ func dataSourceGoogleComputeReservationRead(d *schema.ResourceData, meta interfa
 		return err
 	}
 
-	project, err := d.Get("project").(string)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
