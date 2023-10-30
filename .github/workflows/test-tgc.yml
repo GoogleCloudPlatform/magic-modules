@@ -48,7 +48,7 @@ jobs:
         path: |
           ~/go/pkg/mod
           ~/.cache/go-build
-        key: ${{ runner.os }}-test-${{ github.event.inputs.repo }}-${{ hashFiles('repo/go.sum', 'repo/google-beta/transport/**', 'repo/google-beta/tpgresource/**', 'repo/google-beta/acctest/**', 'repo/google-beta/envvar/**', 'repo/google-beta/sweeper/**', 'repo/google-beta/verify/**') }}
+        key: ${{ runner.os }}-test-${{ github.event.inputs.repo }}-${{ hashFiles('repo/go.sum') }}
         restore-keys: |
           ${{ runner.os }}-test-${{ github.event.inputs.repo }}-${{ hashFiles('repo/go.sum') }}
           ${{ runner.os }}-test-${{ github.event.inputs.repo }}-
