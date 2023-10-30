@@ -3,6 +3,11 @@ if d.HasChange("cluster_type") && d.Get("cluster_type") == "SECONDARY" {
     return fmt.Errorf("Can not convert a primary cluster to a secondary cluster.")
 }
 
+// Restrict setting secondary_config if cluster_type is PRIMARY
+if d.Get("cluster_type") == "PRIMARY" && d.Get("secondary_config") != nil {
+    return fmt.Errorf("Can not set secondary config for primary cluster.")
+}
+
 // Implementation for cluster promotion
 if d.HasChange("cluster_type") && d.Get("cluster_type") == "PRIMARY" {
 
