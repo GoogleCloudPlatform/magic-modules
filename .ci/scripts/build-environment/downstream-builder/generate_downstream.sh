@@ -181,7 +181,7 @@ else
     elif [ "$REPO" == "tf-oics" ]; then
         # use terraform generator with oics override
         make tf-ocis OUTPUT_PATH="$LOCAL_PATH"
-    else if [ "$REPO" == "terraform" ]; then
+    elif [ "$REPO" == "terraform" ]; then
         make clean-provider OUTPUT_PATH="$LOCAL_PATH"
         make provider OUTPUT_PATH="$LOCAL_PATH" VERSION=$VERSION
     fi
@@ -247,5 +247,3 @@ if [ "$COMMITTED" == "true" ] && [ "$COMMAND" == "downstream" ]; then
         -d '{"merge_method": "squash"}' \
         "https://api.github.com/repos/$UPSTREAM_OWNER/$GH_REPO/pulls/$NEW_PR_NUMBER/merge"
 fi
-
-popd
