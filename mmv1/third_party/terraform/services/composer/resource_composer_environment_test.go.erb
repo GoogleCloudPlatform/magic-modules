@@ -1092,12 +1092,15 @@ func TestAccComposerEnvironment_customBucket(t *testing.T) {
 	subnetwork := network + "-1"
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:		          func() { acctest.AccTestPreCheck(t) },
-		PreConfig:						TestAccComposerEnvironment_customBucket_bucketConfig(bucketName),
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComposerEnvironment_customBucket(envName, bucketName, network, subnetwork),
+				Config: testAccComposerEnvironment_customBucket_bucketConfig(bucketName),
+			},
+			{
+				Config: testAccComposerEnvironment_customBucket_bucketConfig(bucketName) +
+								testAccComposerEnvironment_customBucket(envName, bucketName, network, subnetwork),
 			},
 			{
 				ResourceName:			"google_composer_environment.test",
@@ -1110,7 +1113,7 @@ func TestAccComposerEnvironment_customBucket(t *testing.T) {
 			{
 				PlanOnly:					 true,
 				ExpectNonEmptyPlan: false,
-				Config:						 testAccComposerEnvironment_customBucket(envName, network, subnetwork),
+				Config:						 testAccComposerEnvironment_customBucket(envName, bucketName, network, subnetwork),
 				Check:							testAccCheckClearComposerEnvironmentFirewalls(t, network),
 			},
 		},
@@ -1122,6 +1125,7 @@ func testAccComposerEnvironment_customBucket_bucketConfig(bucketName string) str
 resource "google_storage_bucket" "test" {
   name   = "%s"
   location = "us-central1"
+	force_destroy = true
 }
 `, bucketName)
 }
@@ -1135,10 +1139,7 @@ resource "google_composer_environment" "test" {
     node_config {
       network        = google_compute_network.test.self_link
       subnetwork     = google_compute_subnetwork.test.self_link
-      zone           = "us-central1-a"
-      machine_type  = "n1-standard-1"
       ip_allocation_policy {
-        use_ip_aliases          = true
         cluster_ipv4_cidr_block = "10.0.0.0/16"
       }
     }
