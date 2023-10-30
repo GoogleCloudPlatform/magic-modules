@@ -72,21 +72,21 @@ resource "google_workbench_instance" "<%= ctx[:primary_resource_id] %>" {
 }
 
 data "google_compute_network" "my_network" {
-  name = "test-default"
+  name = "<%= ctx[:vars]['network_name'] %>"
 }
 
 data "google_compute_subnetwork" "my_subnetwork" {
-  name   = "test-default"
+  name   = "<%= ctx[:vars]['network_name'] %>"
   region = "us-central1"
 }
 
 data "google_kms_key_ring" "keyring" {
-  name = "tftest-shared-keyring-1"
+  name = "<%= ctx[:vars]['keyring_name'] %>"
   location = "global"
 }
 
 data "google_kms_crypto_key" "crypto-key" {
-  name     = "tftest-shared-key-1"
+  name     = "<%= ctx[:vars]['key_name'] %>"
   key_ring = data.google_kms_key_ring.keyring.id
 }
 

@@ -63,6 +63,9 @@ examples:
     region_override: 'us-west1-a'
     vars:
       instance_name: 'workbench-instance'
+      network_name: 'test-default'
+      keyring_name: 'tftest-shared-keyring-1'
+      key_name: 'tftest-shared-key-1'
     test_env_vars:
       service_account: :SERVICE_ACCT
     ignore_read_extra:
