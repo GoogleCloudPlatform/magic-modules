@@ -25,6 +25,8 @@ on:
       sha:
         description: "The commit SHA in magic-modules repository where the status result will be posted"
         required: true
+      caller_id:
+        description: "Identity of the workflow dispatch caller"
 
 concurrency:
   group: test-tpg-${{ github.event.inputs.owner }}-${{ github.event.inputs.repo }}-${{ github.event.inputs.branch }}
@@ -42,6 +44,15 @@ jobs:
         ref: ${{ github.event.inputs.branch }}
         path: provider
         fetch-depth: 2
+    - name: Cache Go modules and build cache
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/go/pkg/mod
+          ~/.cache/go-build
+        key: ${{ runner.os }}-test-${{ github.event.inputs.repo }}-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-test-${{ github.event.inputs.repo }}-
     - name: Check for Code Changes
       id: pull_request
       run: |
