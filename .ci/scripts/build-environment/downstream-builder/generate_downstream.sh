@@ -82,7 +82,23 @@ clone_repo
 git config --local user.name "Modular Magician"
 git config --local user.email "magic-modules@google.com"
 
-if [ "$COMMAND" != "base" ]; then
+if [ "$COMMAND" == "head" ]; then
+    BRANCH=auto-pr-$REFERENCE
+    COMMIT_MESSAGE="New generated code for MM PR $REFERENCE."
+elif [ "$COMMAND" == "base" ]; then
+    # In this case, there is guaranteed to be a merge commit,
+    # and the *left* side of it is the old main branch.
+    # the *right* side of it is the code to be merged.
+    git checkout HEAD~
+    BRANCH=auto-pr-$REFERENCE-old
+    COMMIT_MESSAGE="Old generated code for MM PR $REFERENCE."
+elif [ "$COMMAND" == "downstream" ]; then
+    BRANCH=downstream-pr-$REFERENCE
+    ORIGINAL_MESSAGE="$(git log -1 --pretty=%B "$REFERENCE")"
+    COMMIT_MESSAGE="$ORIGINAL_MESSAGE$NEWLINE[upstream:$REFERENCE]"
+fi
+
+if [ "$COMMAND" == "base" ]; then
     pushd mmv1
     if [ "$REPO" == "terraform" ]; then
         pushd $LOCAL_PATH
@@ -147,46 +163,28 @@ if [ "$COMMAND" != "base" ]; then
         fi
     fi
     popd
-fi
+else
+    if [ "$REPO" == "terraform-google-conversion" ]; then
+        make clean-tgc OUTPUT_PATH="$LOCAL_PATH"
+        make tgc OUTPUT_PATH="$LOCAL_PATH"
 
-
-if [ "$COMMAND" == "head" ]; then
-    BRANCH=auto-pr-$REFERENCE
-    COMMIT_MESSAGE="New generated code for MM PR $REFERENCE."
-elif [ "$COMMAND" == "base" ]; then
-    # In this case, there is guaranteed to be a merge commit,
-    # and the *left* side of it is the old main branch.
-    # the *right* side of it is the code to be merged.
-    git checkout HEAD~
-    BRANCH=auto-pr-$REFERENCE-old
-    COMMIT_MESSAGE="Old generated code for MM PR $REFERENCE."
-elif [ "$COMMAND" == "downstream" ]; then
-    BRANCH=downstream-pr-$REFERENCE
-    ORIGINAL_MESSAGE="$(git log -1 --pretty=%B "$REFERENCE")"
-    COMMIT_MESSAGE="$ORIGINAL_MESSAGE$NEWLINE[upstream:$REFERENCE]"
-fi
-
-if [ "$REPO" == "terraform-google-conversion" ]; then
-    make clean-tgc OUTPUT_PATH="$LOCAL_PATH"
-    make tgc OUTPUT_PATH="$LOCAL_PATH"
-
-    if [ "$COMMAND" == "downstream" ]; then
-      pushd $LOCAL_PATH
-      go get -d github.com/hashicorp/terraform-provider-google-beta@$BASE_BRANCH
-      go mod tidy
-      set +e
-      make build
-      set -e
-      popd
+        if [ "$COMMAND" == "downstream" ]; then
+          pushd $LOCAL_PATH
+          go get -d github.com/hashicorp/terraform-provider-google-beta@$BASE_BRANCH
+          go mod tidy
+          set +e
+          make build
+          set -e
+          popd
+        fi
+    elif [ "$REPO" == "tf-oics" ]; then
+        # use terraform generator with oics override
+        make tf-ocis OUTPUT_PATH="$LOCAL_PATH"
+    else if [ "$REPO" == "terraform" ]; then
+        make clean-provider OUTPUT_PATH="$LOCAL_PATH"
+        make provider OUTPUT_PATH="$LOCAL_PATH" VERSION=$VERSION
     fi
-elif [ "$REPO" == "tf-oics" ]; then
-    # use terraform generator with oics override
-    make tf-ocis OUTPUT_PATH="$LOCAL_PATH"
-else if [ "$REPO" == "terraform" ]; then
-    make clean-provider OUTPUT_PATH="$LOCAL_PATH"
-    make provider OUTPUT_PATH="$LOCAL_PATH" VERSION=$VERSION
 fi
-
 
 pushd $LOCAL_PATH
 
