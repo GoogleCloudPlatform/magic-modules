@@ -1,4 +1,5 @@
 # Copyright 2023 Google Inc.
+
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -109,27 +110,20 @@ properties:
       Status of the Integration Connector.
     output: true
     properties:
-      - !ruby/object:Api::Type::Enum
+      - !ruby/object:Api::Type::String
         name: "state"
         description: |
           State of the Integration Connector
         output: true
-        values:
-          - :STATE_UNSPECIFIED
-          - :CREATING
-          - :ACTIVE
-          - :INACTIVE
-          - :DELETING
-          - :UPDATING
-          - :ERROR
-          - :AUTHORIZATION_REQUIRED
       - !ruby/object:Api::Type::String
         name: "description"
+        output: true
         description: |
           Description of Status of Connection.
         output: true
       - !ruby/object:Api::Type::String
         name: "status"
+        output: true
         description: |
           Status of the Connection.
         output: true
@@ -177,6 +171,7 @@ properties:
           properties:
             - !ruby/object:Api::Type::Enum
               name: "type"
+              required: true
               description: |
                 Type of Encription Key
               values:
@@ -247,6 +242,7 @@ properties:
               properties:
                 - !ruby/object:Api::Type::Enum
                   name: "type"
+                  required: true
                   description: |
                     Type of Encription Key
                   values:
@@ -264,9 +260,12 @@ properties:
           The type of authentication configured.
       - !ruby/object:Api::Type::NestedObject
         name: "userPassword"
+        description: |
+          User password for Authentication.
         properties:
           - !ruby/object:Api::Type::String
             name: "username"
+            required: true
             description: |
               Username for Authentication.
           - !ruby/object:Api::Type::NestedObject
@@ -288,6 +287,8 @@ properties:
           - auth_config.0.oauth2_auth_code_flow
       - !ruby/object:Api::Type::NestedObject
         name: "oauth2JwtBearer"
+        description: |
+          OAuth2 JWT Bearer for Authentication.
         properties:
           - !ruby/object:Api::Type::NestedObject
             name: "clientKey"
@@ -327,9 +328,12 @@ properties:
           - auth_config.0.oauth2_auth_code_flow
       - !ruby/object:Api::Type::NestedObject
         name: "oauth2ClientCredentials"
+        description: |
+          OAuth3 Client Credentials for Authentication.
         properties:
           - !ruby/object:Api::Type::String
             name: "clientId"
+            required: true
             description: |
               Secret version of Password for Authentication.
           - !ruby/object:Api::Type::NestedObject
@@ -351,15 +355,18 @@ properties:
           - auth_config.0.oauth2_auth_code_flow
       - !ruby/object:Api::Type::NestedObject
         name: "sshPublicKey"
+        description: |
+          SSH Public Key for Authentication.
         properties:
           - !ruby/object:Api::Type::String
             name: "username"
+            required: true
             description: |
               The user account used to authenticate.
           - !ruby/object:Api::Type::NestedObject
             name: "sshClientCert"
             description: |
-              Secret version reference containing the client secret.
+              SSH Client Cert. It should contain both public and private key.
             properties:
               - !ruby/object:Api::Type::String
                 name: "secretVersion"
@@ -374,7 +381,7 @@ properties:
           - !ruby/object:Api::Type::NestedObject
             name: "sshClientCertPass"
             description: |
-              Secret version reference containing the client secret.
+              Password (passphrase) for ssh client certificate if it has one.
             properties:
               - !ruby/object:Api::Type::String
                 name: "secretVersion"
@@ -390,9 +397,12 @@ properties:
           - auth_config.0.oauth2_auth_code_flow
       - !ruby/object:Api::Type::NestedObject
         name: "oauth2AuthCodeFlow"
+        description: |
+          Parameters to support Oauth 2.0 Auth Code Grant Authentication.
         properties:
           - !ruby/object:Api::Type::String
             name: "authCode"
+            required: true
             description: |
               Authorization code to be exchanged for access and refresh tokens.
           - !ruby/object:Api::Type::String
@@ -505,11 +515,13 @@ properties:
     properties:
       - !ruby/object:Api::Type::Integer
         name: "minNodeCount"
+        required: true
         default_from_api: true
         description: |
           Minimum number of nodes in the runtime nodes.
       - !ruby/object:Api::Type::Integer
         name: "maxNodeCount"
+        required: true
         default_from_api: true
         description: |
           Minimum number of nodes in the runtime nodes.
@@ -654,15 +666,11 @@ properties:
                     The [KMS key name] with which the content of the Operation is encrypted. The expected
                     format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
                     Will be empty string if google managed.
-  - !ruby/object:Api::Type::Enum
+  - !ruby/object:Api::Type::String
     name: "subscriptionType"
     description: |
       This subscription type enum states the subscription type of the project.
     output: true
-    values:
-      - SUBSCRIPTION_TYPE_UNSPECIFIED
-      - PAY_G
-      - PAID
   - !ruby/object:Api::Type::String
     name: "connectionRevision"
     description: |
@@ -682,6 +690,7 @@ properties:
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: "registrationDestinationConfig"
+        required: true
         description: |
           registrationDestinationConfig
         properties:
@@ -782,6 +791,8 @@ properties:
               The type of authentication configured.
           - !ruby/object:Api::Type::NestedObject
             name: "userPassword"
+            description: |
+              User password for Authentication.
             properties:
               - !ruby/object:Api::Type::String
                 name: "username"
@@ -800,6 +811,8 @@ properties:
                       format as: projects/*/secrets/*/versions/*.
           - !ruby/object:Api::Type::NestedObject
             name: "oauth2JwtBearer"
+            description: |
+              OAuth2 JWT Bearer for Authentication.
             properties:
               - !ruby/object:Api::Type::NestedObject
                 name: "clientKey"
@@ -821,18 +834,23 @@ properties:
                 properties:
                   - !ruby/object:Api::Type::String
                     name: "issuer"
+                    required: true
                     description: |
                       Value for the "iss" claim.
                   - !ruby/object:Api::Type::String
                     name: "subject"
+                    required: true
                     description: |
                       Value for the "sub" claim.
                   - !ruby/object:Api::Type::String
                     name: "audience"
+                    required: true
                     description: |
                       Value for the "aud" claim.
           - !ruby/object:Api::Type::NestedObject
             name: "oauth2ClientCredentials"
+            description: |
+              OAuth3 Client Credentials for Authentication.
             properties:
               - !ruby/object:Api::Type::String
                 name: "clientId"
@@ -851,15 +869,18 @@ properties:
                       format as: projects/*/secrets/*/versions/*.
           - !ruby/object:Api::Type::NestedObject
             name: "sshPublicKey"
+            description: |
+              SSH Public Key for Authentication.
             properties:
               - !ruby/object:Api::Type::String
                 name: "username"
+                required: true
                 description: |
                   The user account used to authenticate.
               - !ruby/object:Api::Type::NestedObject
                 name: "sshClientCert"
                 description: |
-                  Secret version reference containing the client secret.
+                  SSH Client Cert. It should contain both public and private key.
                 properties:
                   - !ruby/object:Api::Type::String
                     name: "secretVersion"
@@ -874,7 +895,7 @@ properties:
               - !ruby/object:Api::Type::NestedObject
                 name: "sshClientCertPass"
                 description: |
-                  Secret version reference containing the client secret.
+                  Password (passphrase) for ssh client certificate if it has one.
                 properties:
                   - !ruby/object:Api::Type::String
                     name: "secretVersion"
@@ -884,9 +905,12 @@ properties:
                       format as: projects/*/secrets/*/versions/*.
           - !ruby/object:Api::Type::NestedObject
             name: "oauth2AuthCodeFlow"
+            description: |
+              Parameters to support Oauth 2.0 Auth Code Grant Authentication.
             properties:
               - !ruby/object:Api::Type::String
                 name: "authCode"
+                required: true
                 description: |
                   Authorization code to be exchanged for access and refresh tokens.
               - !ruby/object:Api::Type::String
@@ -1066,17 +1090,11 @@ properties:
                   The [KMS key name] with which the content of the Operation is encrypted. The expected
                   format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
                   Will be empty string if google managed.
-  - !ruby/object:Api::Type::Enum
+  - !ruby/object:Api::Type::String
     name: "connectorVersionLaunchStage"
     description: |
       Flag to mark the version indicating the launch stage.
     output: true
-    values:
-      - LAUNCH_STAGE_UNSPECIFIED
-      - PREVIEW
-      - GA
-      - DEPRECATED
-      - PRIVATE_PREVIEW
   - !ruby/object:Api::Type::NestedObject
     name: "eventingRuntimeData"
     description: |
@@ -1089,15 +1107,11 @@ properties:
           Current status of eventing.
         output: true
         properties:
-          - !ruby/object:Api::Type::Enum
+          - !ruby/object:Api::Type::String
             name: "state"
             description: |
               State of the Eventing
             output: true
-            values:
-              - :STATE_UNSPECIFIED
-              - :ACTIVE
-              - :ERROR
           - !ruby/object:Api::Type::String
             name: "description"
             description: |
