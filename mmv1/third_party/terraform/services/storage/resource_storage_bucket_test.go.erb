@@ -695,7 +695,7 @@ func TestAccStorageBucket_per_object_retention(t *testing.T) {
 	t.Parallel()
 
 	var bucket storage.Bucket
-	bucketName := fmt.Sprintf("tf-test-obloc-bucket-%d", acctest.RandInt(t))
+	bucketName := acctest.TestBucketName(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
