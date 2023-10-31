@@ -658,7 +658,7 @@ The following arguments are supported:
 
 * `storage_config` -
   (Optional)
-  Configuration options for storage used by Composer environment.
+  Configuration options for storage used by Composer environment. Structure is documented below.
 
 
 The `config` block supports:
