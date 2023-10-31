@@ -4,7 +4,7 @@ if d.HasChange("cluster_type") && d.Get("cluster_type") == "SECONDARY" {
 }
 
 // Restrict setting secondary_config if cluster_type is PRIMARY
-if d.Get("cluster_type") == "PRIMARY" && d.Get("secondary_config") != nil {
+if d.Get("cluster_type") == "PRIMARY" && !tpgresource.IsEmptyValue(reflect.ValueOf(d.Get("secondary_config"))) {
     return fmt.Errorf("Can not set secondary config for primary cluster.")
 }
 
