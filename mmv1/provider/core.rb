@@ -286,6 +286,14 @@ module Provider
       is_expected
     end
 
+    # Format the files with gofmt
+    def format_output_file(output_folder, target)
+      return unless target.end_with?('.go') && @go_format_enabled
+
+      output = %x(#{"gofmt -w -s #{output_folder}/#{target}"} 2>&1)
+      Google::LOGGER.error output unless $CHILD_STATUS.to_i.zero?
+    end
+
     def replace_import_path(output_folder, target)
       data = File.read("#{output_folder}/#{target}")
 
@@ -297,32 +305,34 @@ module Provider
               "#{TERRAFORM_PROVIDER_GA}/#{RESOURCE_DIRECTORY_GA}."
       end
 
-      return if @target_version_name == 'ga'
+      if @target_version_name != 'ga'
+        # Replace the import pathes in utility files
+        case @target_version_name
+        when 'beta'
+          tpg = TERRAFORM_PROVIDER_BETA
+          dir = RESOURCE_DIRECTORY_BETA
+        else
+          tpg = TERRAFORM_PROVIDER_PRIVATE
+          dir = RESOURCE_DIRECTORY_PRIVATE
+        end
 
-      # Replace the import pathes in utility files
-      case @target_version_name
-      when 'beta'
-        tpg = TERRAFORM_PROVIDER_BETA
-        dir = RESOURCE_DIRECTORY_BETA
-      else
-        tpg = TERRAFORM_PROVIDER_PRIVATE
-        dir = RESOURCE_DIRECTORY_PRIVATE
+        data = data.gsub(
+          "#{TERRAFORM_PROVIDER_GA}/#{RESOURCE_DIRECTORY_GA}",
+          "#{tpg}/#{dir}"
+        )
+        data = data.gsub(
+          "#{TERRAFORM_PROVIDER_GA}/version",
+          "#{tpg}/version"
+        )
+
+        data = data.gsub(
+          "module #{TERRAFORM_PROVIDER_GA}",
+          "module #{tpg}"
+        )
+        File.write("#{output_folder}/#{target}", data)
       end
 
-      data = data.gsub(
-        "#{TERRAFORM_PROVIDER_GA}/#{RESOURCE_DIRECTORY_GA}",
-        "#{tpg}/#{dir}"
-      )
-      data = data.gsub(
-        "#{TERRAFORM_PROVIDER_GA}/version",
-        "#{tpg}/version"
-      )
-
-      data = data.gsub(
-        "module #{TERRAFORM_PROVIDER_GA}",
-        "module #{tpg}"
-      )
-      File.write("#{output_folder}/#{target}", data)
+      format_output_file(output_folder, target)
     end
 
     def import_path
