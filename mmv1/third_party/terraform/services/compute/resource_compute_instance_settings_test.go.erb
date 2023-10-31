@@ -53,7 +53,7 @@ func testAccComputeInstanceSettings_basic(context map[string]interface{}) string
 
 resource "google_compute_instance_settings" "gce_instance_settings" {
   provider = google-beta
-  zone = "us-central1-a"
+  zone = "us-east7-b"
   update_mask = "metadata.items.foo"
   metadata {
     items = {
@@ -70,7 +70,7 @@ func testAccComputeInstanceSettings_update(context map[string]interface{}) strin
 
 resource "google_compute_instance_settings" "gce_instance_settings" {
   provider = google-beta
-  zone = "us-central1-a"
+  zone = "us-east7-b"
   update_mask = "metadata.items.foo,metadata.items.baz"
   metadata {
     items = {
