@@ -19,11 +19,9 @@ resource "google_redis_instance" "<%= ctx[:primary_resource_id] %>" {
     other_key = "other_val"
   }
 
-  <% if ctx[:vars]['prevent_destroy'] == 'true' -%>
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = <%= ctx[:vars]['prevent_destroy'] == 'true' %>
   }
-  <% end -%>
 }
 
 // This example assumes this network already exists.

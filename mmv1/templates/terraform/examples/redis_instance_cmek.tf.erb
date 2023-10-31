@@ -18,11 +18,9 @@ resource "google_redis_instance" "<%= ctx[:primary_resource_id] %>" {
   }
   customer_managed_key = google_kms_crypto_key.redis_key.id
 
-  <% if ctx[:vars]['prevent_destroy'] == 'true' %>
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = <%= ctx[:vars]['prevent_destroy'] == 'true' %>
   }
-  <% end -%>
 }
 
 resource "google_kms_key_ring" "redis_keyring" {

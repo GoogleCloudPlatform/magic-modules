@@ -40,9 +40,7 @@ resource "google_redis_instance" "<%= ctx[:primary_resource_id] %>" {
 
   depends_on = [google_service_networking_connection.private_service_connection]
 
-  <% if ctx[:vars]['prevent_destroy'] == 'true' -%>
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = <%= ctx[:vars]['prevent_destroy'] == 'true' %>
   }
-  <% end -%>
 }
