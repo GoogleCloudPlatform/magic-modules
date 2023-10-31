@@ -247,10 +247,13 @@ The breaking change detector crashed during execution. This is usually due to th
 }
 
 func cloneAndDiff(repoName, path, oldBranch, newBranch, diffTitle, githubToken string, r gcRunner) (string, error) {
+	// Clone the repo to the desired path.
 	url := fmt.Sprintf("https://modular-magician:%s@github.com/modular-magician/%s", githubToken, repoName)
 	if _, err := r.Run("git", []string{"clone", "-b", newBranch, url, path}, nil); err != nil {
 		return "", fmt.Errorf("error cloning %s: %v\n", repoName, err)
 	}
+
+	// Push dir to the newly cloned repo.
 	if err := r.PushDir(path); err != nil {
 		return "", err
 	}
@@ -258,6 +261,7 @@ func cloneAndDiff(repoName, path, oldBranch, newBranch, diffTitle, githubToken s
 		return "", fmt.Errorf("error fetching branch %s in repo %s: %v\n", oldBranch, repoName, err)
 	}
 
+	// Return summary, if any, and return to original directory.
 	if summary, err := r.Run("git", []string{"diff", "origin/" + oldBranch, "origin/" + newBranch, "--shortstat"}, nil); err != nil {
 		return "", fmt.Errorf("error diffing %s and %s: %v\n", oldBranch, newBranch, err)
 	} else if summary != "" {
