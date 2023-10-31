@@ -72,15 +72,15 @@ service/service2:
   - google_service2_resource2`),
 			expectedRegexpLabels: []regexpLabel{
 				{
-					Regexp: regexp.MustCompile("google_service1_.*"),
+					Regexp: regexp.MustCompile("^google_service1_.*$"),
 					Label:  "service/service1",
 				},
 				{
-					Regexp: regexp.MustCompile("google_service2_resource1"),
+					Regexp: regexp.MustCompile("^google_service2_resource1$"),
 					Label:  "service/service2",
 				},
 				{
-					Regexp: regexp.MustCompile("google_service2_resource2"),
+					Regexp: regexp.MustCompile("^google_service2_resource2$"),
 					Label:  "service/service2",
 				},
 			},
@@ -93,7 +93,7 @@ service/service1:
     - google_service1_resource1`),
 			expectedRegexpLabels: []regexpLabel{
 				{
-					Regexp: regexp.MustCompile("google_service1_resource1"),
+					Regexp: regexp.MustCompile("^google_service1_resource1$"),
 					Label:  "service/service1",
 				},
 			},
@@ -119,20 +119,24 @@ service/service1:
 func TestComputeLabels(t *testing.T) {
 	defaultRegexpLabels := []regexpLabel{
 		{
-			Regexp: regexp.MustCompile("google_service1_.*"),
+			Regexp: regexp.MustCompile("^google_service1_.*$"),
 			Label:  "service/service1",
 		},
 		{
-			Regexp: regexp.MustCompile("google_service2_resource1"),
+			Regexp: regexp.MustCompile("^google_service2_resource1$"),
 			Label:  "service/service2-subteam1",
 		},
 		{
-			Regexp: regexp.MustCompile("google_service2_resource2"),
+			Regexp: regexp.MustCompile("^google_service2_resource2$"),
 			Label:  "service/service2-subteam2",
 		},
 		{
-			Regexp: regexp.MustCompile("google_service1_resource5"),
+			Regexp: regexp.MustCompile("^google_service1_resource5$"),
 			Label:  "service/service1-subteam1",
+		},
+		{
+			Regexp: regexp.MustCompile("^google_resource6$"),
+			Label:  "service/service3",
 		},
 	}
 	cases := map[string]struct {
@@ -159,6 +163,16 @@ func TestComputeLabels(t *testing.T) {
 			resources:      []string{"google_service1_resource1"},
 			regexpLabels:   defaultRegexpLabels,
 			expectedLabels: []string{"service/service1"},
+		},
+		"exact resource match": {
+			resources:      []string{"google_resource6"},
+			regexpLabels:   defaultRegexpLabels,
+			expectedLabels: []string{"service/service3"},
+		},
+		"no partial match allowed": {
+			resources:      []string{"google_resource6_foo"},
+			regexpLabels:   defaultRegexpLabels,
+			expectedLabels: []string{},
 		},
 		"only return first label matching a resource": {
 			resources:      []string{"google_service1_resource5"},

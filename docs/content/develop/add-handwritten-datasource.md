@@ -22,6 +22,8 @@ a new datasource there are 5 steps to doing so.
 
 1. Create a new datasource declaration file and a corresponding test file
 1. Add Schema and Read operation implementation
+   - If there is `labels` field with type `KeyValueLabels` in the corresponding resource, in the datasource Read operation implementation, after the resource read method, call the function `tpgresource.SetDataSourceLabels(d)` to make `labels` and `terraform_labels` have all of the labels on the resource.
+   - If there is `annotations` field with type `KeyValueAnnotations` in the corresponding resource, in the datasource Read operation implementation, after the resource read method, call the function `tpgresource.SetDataSourceAnnotations(d)` to make `annotations` have all of the annotations on the resource.
 1. Add the datasource to the `provider.go.erb` index
 1. Implement a test which will create and resources and read the corresponding
   datasource

@@ -120,8 +120,5 @@ resource "google_apigee_environment" "<%= ctx[:primary_resource_id] %>" {
   name         = "tf-test%{random_suffix}"
   description  = "Apigee Environment"
   display_name = "tf-test%{random_suffix}"
-  node_config {
-    min_node_count = "3"
-    max_node_count = "5"
-  }
+  type         = "COMPREHENSIVE"
 }
