@@ -568,7 +568,7 @@ func expandObjectRetention(configured interface{}) *storage.ObjectRetention {
 
 	objectRetention := &storage.ObjectRetention{
 		RetainUntilTime: retention["retain_until_time"].(string),
-		Mode:            mode,
+		Mode:            retention["mode"].(string),
 	}
 
 	return objectRetention
