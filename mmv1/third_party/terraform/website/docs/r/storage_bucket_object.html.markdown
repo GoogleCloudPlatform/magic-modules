@@ -67,7 +67,7 @@ One of the following is required:
 * `content_type` - (Optional) [Content-Type](https://tools.ietf.org/html/rfc7231#section-3.1.1.5) of the object data. Defaults to "application/octet-stream" or "text/plain; charset=utf-8".
 
 * `customer_encryption` - (Optional) Enables object encryption with Customer-Supplied Encryption Key (CSEK). [Google [documentation about](#nested_customer_encryption) CSEK.](https://cloud.google.com/storage/docs/encryption/customer-supplied-keys)
-    Structure is documented below.
+    Structure is [documented below](#nested_customer_encryption).
 
 * `retention` - (Optional) The [object retention](http://cloud.google.com/storage/docs/object-lock) settings for the object. The retention settings allow an object to be retained until a provided date. Structure is [documented below](#nested_retention).
 
