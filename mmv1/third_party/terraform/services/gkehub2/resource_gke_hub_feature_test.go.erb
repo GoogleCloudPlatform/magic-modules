@@ -386,41 +386,6 @@ func TestAccGKEHubFeature_FleetDefaultMemberConfigServiceMesh(t *testing.T) {
 
 func testAccGKEHubFeature_FleetDefaultMemberConfigServiceMesh(context map[string]interface{}) string {
 	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
-resource "google_project_service" "test_mesh" {
-  service = "meshconfig.googleapis.com"
-}
-
-resource "google_project_service" "test_mci" {
-  service = "multiclusteringress.googleapis.com"
-}
-
-resource "google_project_service" "test_acm" {
-  service = "anthosconfigmanagement.googleapis.com"
-}
-
-resource "google_project_service" "test_mcsd" {
-  service = "multiclusterservicediscovery.googleapis.com"
-}
-
-resource "google_project_service" "test_compute" {
-  service = "compute.googleapis.com"
-  disable_on_destroy = false
-}
-
-resource "google_project_service" "test_container" {
-  service = "container.googleapis.com"
-  disable_on_destroy = false
-}
-
-resource "google_project_service" "test_gkehub" {
-  service = "gkehub.googleapis.com"
-  disable_on_destroy = false
-}
-
-resource "google_gke_hub_membership" "membership" {
-  membership_id = "tf-test%{random_suffix}"
-}
-
 resource "google_gke_hub_feature" "feature" {
   name = "servicemesh"
   location = "global"
@@ -429,48 +394,14 @@ resource "google_gke_hub_feature" "feature" {
       management = "MANAGEMENT_AUTOMATIC"
     }
   }
-  depends_on = [google_project_service.test_mesh]
+  project = google_project.project.project_id
+  depends_on = [google_project_service.mesh]
 }
 `, context)
 }
 
 func testAccGKEHubFeature_FleetDefaultMemberConfigServiceMeshUpdate(context map[string]interface{}) string {
 	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
-resource "google_project_service" "test_mesh" {
-  service = "meshconfig.googleapis.com"
-}
-
-resource "google_project_service" "test_mci" {
-  service = "multiclusteringress.googleapis.com"
-}
-
-resource "google_project_service" "test_acm" {
-  service = "anthosconfigmanagement.googleapis.com"
-}
-
-resource "google_project_service" "test_mcsd" {
-  service = "multiclusterservicediscovery.googleapis.com"
-}
-
-resource "google_project_service" "test_compute" {
-  service = "compute.googleapis.com"
-  disable_on_destroy = false
-}
-
-resource "google_project_service" "test_container" {
-  service = "container.googleapis.com"
-  disable_on_destroy = false
-}
-
-resource "google_project_service" "test_gkehub" {
-  service = "gkehub.googleapis.com"
-  disable_on_destroy = false
-}
-
-resource "google_gke_hub_membership" "membership" {
-  membership_id = "tf-test%{random_suffix}"
-}
-
 resource "google_gke_hub_feature" "feature" {
   name = "servicemesh"
   location = "global"
@@ -479,7 +410,8 @@ resource "google_gke_hub_feature" "feature" {
       management = "MANAGEMENT_MANUAL"
     }
   }
-  depends_on = [google_project_service.test_mesh]
+  project = google_project.project.project_id
+  depends_on = [google_project_service.mesh]
 }
 `, context)
 }
