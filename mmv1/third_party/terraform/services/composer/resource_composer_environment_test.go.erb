@@ -1091,7 +1091,7 @@ func TestAccComposerEnvironment_customBucket(t *testing.T) {
 	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, acctest.RandInt(t))
 	subnetwork := network + "-1"
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:		          func() { acctest.AccTestPreCheck(t) },
+		PreCheck:	                func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -1100,22 +1100,22 @@ func TestAccComposerEnvironment_customBucket(t *testing.T) {
 			},
 			{
 				Config: testAccComposerEnvironment_customBucket_bucketConfig(bucketName) +
-								testAccComposerEnvironment_customBucket(envName, bucketName, network, subnetwork),
+                testAccComposerEnvironment_customBucket(envName, network, subnetwork),
 			},
 			{
-				ResourceName:			"google_composer_environment.test",
-				ImportState:			 true,
+				ResourceName:      "google_composer_environment.test",
+				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			// This is a terrible clean-up step in order to get destroy to succeed,
 			// due to dangling firewall rules left by the Composer Environment blocking network deletion.
 			// TODO: Remove this check if firewall rules bug gets fixed by Composer.
 			{
-				PlanOnly:					 true,
+				PlanOnly:           true,
 				ExpectNonEmptyPlan: false,
-				Config:						 testAccComposerEnvironment_customBucket_bucketConfig(bucketName) +
-														testAccComposerEnvironment_customBucket(envName, bucketName, network, subnetwork),
-				Check:							testAccCheckClearComposerEnvironmentFirewalls(t, network),
+				Config:             testAccComposerEnvironment_customBucket_bucketConfig(bucketName) +
+                            testAccComposerEnvironment_customBucket(envName, network, subnetwork),
+				Check:              testAccCheckClearComposerEnvironmentFirewalls(t, network),
 			},
 		},
 	})
@@ -1126,12 +1126,12 @@ func testAccComposerEnvironment_customBucket_bucketConfig(bucketName string) str
 resource "google_storage_bucket" "test" {
   name   = "%s"
   location = "us-central1"
-	force_destroy = true
+  force_destroy = true
 }
 `, bucketName)
 }
 
-func testAccComposerEnvironment_customBucket(envName, bucketName, network, subnetwork string) string {
+func testAccComposerEnvironment_customBucket(envName, network, subnetwork string) string {
 	return fmt.Sprintf(`
 resource "google_composer_environment" "test" {
   name   = "%s"
@@ -1148,8 +1148,8 @@ resource "google_composer_environment" "test" {
       image_version = "composer-2.4.2-airflow-2"
     }
   }
-	storage_config {
-		bucket = "%s"
+  storage_config {
+		bucket = google_storage_bucket.test.name
 	}
 }
 
@@ -1166,7 +1166,7 @@ resource "google_compute_subnetwork" "test" {
   region        = "us-central1"
   network       = google_compute_network.test.self_link
 }
-`, envName, bucketName, network, subnetwork)
+`, envName, network, subnetwork)
 }
 
 func testAccComposerEnvironment_basic(name, network, subnetwork string) string {
