@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"testing"
-	"time"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
@@ -430,8 +429,6 @@ func TestAccStorageObject_retention(t *testing.T) {
 	if err := ioutil.WriteFile(testFile.Name(), data, 0644); err != nil {
 		t.Errorf("error writing file: %v", err)
 	}
-	expire2Days := time.Now().UTC().Add(time.Hour * 48).Round(time.Millisecond).Format(time.RFC3339Nano)
-	expire3Days := time.Now().UTC().Add(time.Hour * 72).Round(time.Millisecond).Format(time.RFC3339Nano)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -439,13 +436,13 @@ func TestAccStorageObject_retention(t *testing.T) {
 		CheckDestroy:             testAccStorageObjectDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleStorageBucketsObjectRetention(bucketName, expire2Days),
+				Config: testGoogleStorageBucketsObjectRetention(bucketName, "2040-01-01T02:03:04.000Z"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleStorageObject(t, bucketName, objectName, dataMd5),
 				),
 			},
 			{
-				Config: testGoogleStorageBucketsObjectRetention(bucketName, expire3Days),
+				Config: testGoogleStorageBucketsObjectRetention(bucketName, "2040-01-02T02:03:04.000Z"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleStorageObject(t, bucketName, objectName, dataMd5),
 				),
