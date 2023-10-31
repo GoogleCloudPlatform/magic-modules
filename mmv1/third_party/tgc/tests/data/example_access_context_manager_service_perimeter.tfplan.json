@@ -25,7 +25,13 @@
                     "egress_from": [
                       {
                         "identities": null,
-                        "identity_type": "ANY_USER_ACCOUNT"
+                        "identity_type": "ANY_USER_ACCOUNT",
+                        "sources": [
+                          {
+                            "access_level": "accessPolicies/987654/accessLevels/restrict_storage"
+                          }
+                        ],
+                        "source_restriction": "SOURCE_RESTRICTION_ENABLED"
                       }
                     ],
                     "egress_to": []
@@ -110,7 +116,13 @@
                   "egress_from": [
                     {
                       "identities": null,
-                      "identity_type": "ANY_USER_ACCOUNT"
+                      "identity_type": "ANY_USER_ACCOUNT",
+                      "sources": [
+                        {
+                          "access_level": "accessPolicies/987654/accessLevels/restrict_storage"
+                        }
+                      ],
+                      "source_restriction": "SOURCE_RESTRICTION_ENABLED"
                     }
                   ],
                   "egress_to": []
@@ -174,7 +186,11 @@
               "egress_policies": [
                 {
                   "egress_from": [
-                    {}
+                    {
+                      "sources": [
+                        {}
+                      ]
+                    }
                   ],
                   "egress_to": []
                 }
@@ -252,6 +268,16 @@
                       {
                         "identity_type": {
                           "constant_value": "ANY_USER_ACCOUNT"
+                        },
+                        "sources": [
+                          {
+                            "access_level":{
+                              "constant_value": "accessPolicies/987654/accessLevels/restrict_storage"
+                            }
+                          }
+                        ],
+                        "source_restriction": {
+                          "constant_value": "SOURCE_RESTRICTION_ENABLED"
                         }
                       }
                     ]
@@ -322,3 +348,4 @@
     }
   }
 }
+
