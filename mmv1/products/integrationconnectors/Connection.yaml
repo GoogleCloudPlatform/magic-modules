@@ -42,6 +42,7 @@ examples:
     primary_resource_id: "zendeskconnection"
     vars:
       connection_name: "test-zendesk"
+      secret_id: "test-secret"
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: "name"

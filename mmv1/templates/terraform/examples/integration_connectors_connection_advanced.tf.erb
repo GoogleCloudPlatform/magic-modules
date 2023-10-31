@@ -2,7 +2,7 @@ data "google_project" "test_project" {
 }
 
 resource "google_secret_manager_secret" "secret-basic" {
-  secret_id = "secret-version"
+  secret_id     = "<%= ctx[:vars]['secret_id'] %>"
   replication {
     user_managed {
       replicas {
@@ -57,6 +57,31 @@ resource "google_integration_connectors_connection" "<%= ctx[:primary_resource_i
 
   suspended = false
   auth_config {
+    additional_variable {
+      key = "sample_string"
+      string_value = "sampleString"
+    }
+    additional_variable {
+      key = "sample_boolean"
+      boolean_value = false
+    }
+    additional_variable {
+      key = "sample_integer"
+      integer_value = 1
+    }
+    additional_variable {
+      key = "sample_secret_value"
+      secret_value {
+        secret_version = google_secret_manager_secret_version.secret-version-basic.name
+      }
+    }
+    additional_variable {
+      key = "sample_encryption_key_value"
+      encryption_key_value {
+        type = "GOOGLE_MANAGED"
+        kms_key_name = "sampleKMSKkey"
+      }
+    }
     auth_type = "USER_PASSWORD"
     user_password {
       username = "user@xyz.com"
