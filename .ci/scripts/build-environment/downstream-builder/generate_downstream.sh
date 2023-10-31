@@ -1,7 +1,7 @@
 #! /bin/bash
 
 set -e
-set +x
+set -x
 NEWLINE=$'\n'
 
 function clone_repo() {

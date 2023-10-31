@@ -61,6 +61,22 @@ jobs:
 
       - run: go install golang.org/x/tools/cmd/goimports@latest
 
+      # - name: Build ${{ matrix.repo }}
+      #   run: |
+      #     GH_REPO="${{ matrix.repo }}"
+      #     if [[ "$GH_REPO" == terraform-provider-google* ]]; then
+      #       UPSTREAM_OWNER=hashicorp
+      #     elif [ "$GH_REPO" == "terraform-google-conversion" ]; then
+      #       UPSTREAM_OWNER=GoogleCloudPlatform
+      #     elif [ "$GH_REPO" == "docs-examples" ]; then
+      #       UPSTREAM_OWNER=terraform-google-modules
+      #     else
+      #       echo "case not supported"
+      #       exit 1
+      #     fi
+      #     echo "UPSTREAM_OWNER=$UPSTREAM_OWNER" >> $GITHUB_OUTPUT
+
+
       - name: Build ${{ matrix.repo }}
         run: |
           set -e
@@ -105,3 +121,22 @@ jobs:
             echo "case not supported"
             exit 1
           fi
+
+      # - name: Zip the directory
+      #   run: zip -r output.zip .
+
+      # - name: Upload artifact
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: zipped-repo
+      #     path: output.zip
+
+      # - name: Save PR number
+      #   run: |
+      #     mkdir -p ./pr
+      #     echo ${{ github.event.number }} > ./pr/NR
+
+      # - uses: actions/upload-artifact@v2
+      #   with:
+      #     name: pr
+      #     path: pr/

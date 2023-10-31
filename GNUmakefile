@@ -64,7 +64,7 @@ terraform build provider:
 mmv1:
 	cd mmv1;\
 		bundle; \
-		if [ "$(VERSION)" == "ga" ]; then \
+		if [ "$(VERSION)" = "ga" ]; then \
 			bundle exec compiler.rb -a -e terraform -o $(OUTPUT_PATH) -v ga --no-docs; \
 			bundle exec compiler.rb -a -e terraform -o $(OUTPUT_PATH) -v ga --no-code; \
 		else \
