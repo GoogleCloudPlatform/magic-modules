@@ -127,14 +127,14 @@ properties:
     output: true
     description: |
       Output only. Timestamp when the subscription was created.
-      
+
       A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
   - !ruby/object:Api::Type::Time
     name: 'lastModifyTime'
     output: true
     description: |
       Output only. Timestamp when the subscription was last modified.
-      
+
       A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
   - !ruby/object:Api::Type::String
     name: 'organizationId'
