@@ -4,10 +4,8 @@
     "dryRunSpec": {
         "rules": [
             {
+                "allowAll": true,
                 "enforce": true
-            },
-            {
-                "allowAll": true
             }
         ],
         "reset": false,
