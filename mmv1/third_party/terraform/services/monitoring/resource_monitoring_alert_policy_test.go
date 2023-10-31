@@ -41,6 +41,7 @@ func testAccMonitoringAlertPolicy_basic(t *testing.T) {
 	alertName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	conditionName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	filter := `metric.type=\"compute.googleapis.com/instance/disk/write_bytes_count\" AND resource.type=\"gce_instance\"`
+	subject := "tf-test subject"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -48,7 +49,7 @@ func testAccMonitoringAlertPolicy_basic(t *testing.T) {
 		CheckDestroy:             testAccCheckAlertPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccMonitoringAlertPolicy_basicCfg(alertName, conditionName, "ALIGN_RATE", filter),
+				Config: testAccMonitoringAlertPolicy_basicCfg(alertName, conditionName, "ALIGN_RATE", filter, subject),
 			},
 			{
 				ResourceName:      "google_monitoring_alert_policy.basic",
@@ -65,8 +66,10 @@ func testAccMonitoringAlertPolicy_update(t *testing.T) {
 	conditionName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	filter1 := `metric.type=\"compute.googleapis.com/instance/disk/write_bytes_count\" AND resource.type=\"gce_instance\"`
 	aligner1 := "ALIGN_RATE"
+	subject1 := "subject1"
 	filter2 := `metric.type=\"compute.googleapis.com/instance/cpu/utilization\" AND resource.type=\"gce_instance\"`
 	aligner2 := "ALIGN_MAX"
+	subject2 := "subject2"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -74,7 +77,7 @@ func testAccMonitoringAlertPolicy_update(t *testing.T) {
 		CheckDestroy:             testAccCheckAlertPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccMonitoringAlertPolicy_basicCfg(alertName, conditionName, aligner1, filter1),
+				Config: testAccMonitoringAlertPolicy_basicCfg(alertName, conditionName, aligner1, filter1, subject1),
 			},
 			{
 				ResourceName:      "google_monitoring_alert_policy.basic",
@@ -82,7 +85,7 @@ func testAccMonitoringAlertPolicy_update(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccMonitoringAlertPolicy_basicCfg(alertName, conditionName, aligner2, filter2),
+				Config: testAccMonitoringAlertPolicy_basicCfg(alertName, conditionName, aligner2, filter2, subject2),
 			},
 			{
 				ResourceName:      "google_monitoring_alert_policy.basic",
@@ -233,7 +236,7 @@ func testAccMonitoringAlertPolicy_promql(t *testing.T) {
 	})
 }
 
-func testAccMonitoringAlertPolicy_basicCfg(alertName, conditionName, aligner, filter string) string {
+func testAccMonitoringAlertPolicy_basicCfg(alertName, conditionName, aligner, filter string, documentationSubject string) string {
 	return fmt.Sprintf(`
 resource "google_monitoring_alert_policy" "basic" {
   display_name = "%s"
@@ -255,8 +258,14 @@ resource "google_monitoring_alert_policy" "basic" {
       threshold_value = "0.5"
     }
   }
+
+  documentation {
+    content   = "hello world"
+    subject   = "%s"
+    mime_type = "text/markdown"
+  }
 }
-`, alertName, conditionName, aligner, filter)
+`, alertName, conditionName, aligner, filter, documentationSubject)
 }
 
 func testAccMonitoringAlertPolicy_fullCfg(alertName, conditionName1, conditionName2 string) string {
