@@ -3,6 +3,6 @@ resource "google_redis_instance" "<%= ctx[:primary_resource_id] %>" {
   memory_size_gb = 1
 
   lifecycle {
-    prevent_destroy = <%= ctx[:vars]['prevent_destroy'] == 'true' %>
+    prevent_destroy = <%= ctx[:vars]['prevent_destroy'] %>
   }
 }

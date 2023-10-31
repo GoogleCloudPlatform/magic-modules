@@ -25,6 +25,6 @@ resource "google_redis_instance" "<%= ctx[:primary_resource_id] %>" {
   display_name      = "Terraform Test Instance"
 
   lifecycle {
-    prevent_destroy = <%= ctx[:vars]['prevent_destroy'] == 'true' %>
+    prevent_destroy = <%= ctx[:vars]['prevent_destroy'] %>
   }
 }

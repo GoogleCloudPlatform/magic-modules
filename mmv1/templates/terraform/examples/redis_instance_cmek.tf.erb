@@ -19,7 +19,7 @@ resource "google_redis_instance" "<%= ctx[:primary_resource_id] %>" {
   customer_managed_key = google_kms_crypto_key.redis_key.id
 
   lifecycle {
-    prevent_destroy = <%= ctx[:vars]['prevent_destroy'] == 'true' %>
+    prevent_destroy = <%= ctx[:vars]['prevent_destroy'] %>
   }
 }
 
