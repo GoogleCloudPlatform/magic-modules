@@ -20,6 +20,8 @@ immutable: false
 update_verb: :PATCH
 update_mask: true
 create_verb: :PATCH
+error_retry_predicates:
+  ["transport_tpg.FirestoreField409RetryUnderlyingDataChanged"]
 description: |
   Represents a single field in the database.
   Fields are grouped by their "Collection Group", which represent all collections
