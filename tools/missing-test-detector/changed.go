@@ -1,8 +1,8 @@
 package main
 
 import (
-	newProvider "google/provider/new/google-beta"
-	oldProvider "google/provider/old/google-beta"
+	newProvider "google/provider/new/google-beta/provider"
+	oldProvider "google/provider/old/google-beta/provider"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )

@@ -25,6 +25,8 @@ on:
       sha:
         description: "The commit SHA in magic-modules repository where the status result will be posted"
         required: true
+      caller_id:
+        description: "Identity of the workflow dispatch caller"
 
 concurrency:
   group: test-tgc-${{ github.event.inputs.owner }}-${{ github.event.inputs.repo }}-${{ github.event.inputs.branch }}
@@ -42,6 +44,15 @@ jobs:
         ref: ${{ github.event.inputs.branch }}
         path: tgc
         fetch-depth: 2
+    - name: Cache Go modules and build cache
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/go/pkg/mod
+          ~/.cache/go-build
+        key: ${{ runner.os }}-test-${{ github.event.inputs.repo }}-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-test-${{ github.event.inputs.repo }}-
     - name: Check for Code Changes
       id: pull_request
       run: |
@@ -79,7 +90,9 @@ jobs:
       if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |
         cd tgc
-        go build
+        go mod edit -replace github.com/hashicorp/terraform-provider-google-beta=github.com/${{ github.event.inputs.owner }}/terraform-provider-google-beta@${{ github.event.inputs.branch }}
+        go mod tidy
+        make build
     - name: Run Unit Tests
       if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |

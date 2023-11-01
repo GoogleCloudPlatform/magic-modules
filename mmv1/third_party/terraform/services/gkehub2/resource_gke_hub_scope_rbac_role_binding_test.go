@@ -28,7 +28,7 @@ func TestAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacRoleBindingBasicExample_u
 				ResourceName:            "google_gke_hub_scope_rbac_role_binding.scoperbacrolebinding",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"scope_rbac_role_binding_id", "scope_id"},
+				ImportStateVerifyIgnore: []string{"scope_rbac_role_binding_id", "scope_id", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacRoleBindingBasicExample_update(context),
@@ -37,7 +37,7 @@ func TestAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacRoleBindingBasicExample_u
 				ResourceName:            "google_gke_hub_scope_rbac_role_binding.scoperbacrolebinding",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"scope_rbac_role_binding_id", "scope_id"},
+				ImportStateVerifyIgnore: []string{"scope_rbac_role_binding_id", "scope_id", "labels", "terraform_labels"},
 			},
 		},
 	})
@@ -56,6 +56,9 @@ resource "google_gke_hub_scope_rbac_role_binding" "scoperbacrolebinding" {
   role {
     predefined_role = "ADMIN"
   }
+  labels = {
+      key = "value" 
+  }
   depends_on = [google_gke_hub_scope.scoperbacrolebinding]
 }
 `, context)
@@ -73,6 +76,9 @@ resource "google_gke_hub_scope_rbac_role_binding" "scoperbacrolebinding" {
   group = "test-email2@gmail.com"
   role {
     predefined_role = "VIEW"
+  }
+  labels = {
+      key = "updated_value" 
   }
   depends_on = [google_gke_hub_scope.scoperbacrolebinding]
 }

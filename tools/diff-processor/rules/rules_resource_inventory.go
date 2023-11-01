@@ -15,7 +15,7 @@ type ResourceInventoryRule struct {
 	definition  string
 	message     string
 	identifier  string
-	isRuleBreak func(old, new map[string]*schema.Resource) []string
+	isRuleBreak func(old, new *schema.Resource) bool
 }
 
 // ResourceInventoryRules is a list of ResourceInventoryRule
@@ -27,18 +27,11 @@ var resourceInventoryRule_RemovingAResource = ResourceInventoryRule{
 	definition:  "In terraform resources should be retained whenever possible. A removable of an resource will result in a configuration breakage wherever a dependency on that resource exists. Renaming or Removing a resources are functionally equivalent in terms of configuration breakages.",
 	message:     "Resource {{resource}} was either removed or renamed",
 	identifier:  "resource-map-resource-removal-or-rename",
-	isRuleBreak: resourceInventoryRule_RemovingAField_func,
+	isRuleBreak: resourceInventoryRule_RemovingAResource_func,
 }
 
-func resourceInventoryRule_RemovingAField_func(old, new map[string]*schema.Resource) []string {
-	keysNotPresent := []string{}
-	for key := range old {
-		_, exists := new[key]
-		if !exists {
-			keysNotPresent = append(keysNotPresent, key)
-		}
-	}
-	return keysNotPresent
+func resourceInventoryRule_RemovingAResource_func(old, new *schema.Resource) bool {
+	return new == nil && old != nil
 }
 
 func resourceInventoryRulesToRuleArray(rms []ResourceInventoryRule) []Rule {
@@ -71,15 +64,6 @@ func (rm ResourceInventoryRule) Message(resource string) string {
 	resource = fmt.Sprintf("`%s`", resource)
 	msg = strings.ReplaceAll(msg, "{{resource}}", resource)
 	return msg + documentationReference(rm.identifier)
-}
-
-// IsRuleBreak - compares resource entries and returns
-// a list of resources violating the rule
-func (rm ResourceInventoryRule) IsRuleBreak(old, new map[string]*schema.Resource) []string {
-	if rm.isRuleBreak == nil {
-		return []string{}
-	}
-	return rm.isRuleBreak(old, new)
 }
 
 // Undetectable - informs if there are functions in place

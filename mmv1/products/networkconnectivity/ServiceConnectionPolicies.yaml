@@ -167,6 +167,12 @@ properties:
             - !ruby/object:Api::Type::Integer
               name: code
               description: The status code, which should be an enum value of [google.rpc.Code][].
+            - !ruby/object:Api::Type::Array
+              name: details
+              description: |
+                A list of messages that carry the error details.
+              item_type: Api::Type::KeyValuePairs
+              output: true
         - !ruby/object:Api::Type::String
           name: gceOperation
           description: |
@@ -199,7 +205,7 @@ properties:
     output: true
     description: |
       The type of underlying resources used to create the connection.
-  - !ruby/object:Api::Type::KeyValuePairs
-    name: "labels"
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: 'labels'
     description: |
       User-defined labels.

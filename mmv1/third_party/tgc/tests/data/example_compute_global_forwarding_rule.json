@@ -14,7 +14,8 @@
         "loadBalancingScheme": "INTERNAL_SELF_MANAGED",
         "name": "test-global-rule",
         "portRange": "80",
-        "target": "target-id"
+        "target": "target-id",
+        "noAutomateDnsZone": false
       }
     }
   }

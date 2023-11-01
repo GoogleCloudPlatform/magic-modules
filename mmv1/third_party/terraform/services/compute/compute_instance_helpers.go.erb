@@ -305,6 +305,11 @@ func flattenAccessConfigs(accessConfigs []*compute.AccessConfig) ([]map[string]i
 		if natIP == "" {
 			natIP = ac.NatIP
 		}
+		<% unless version == 'ga' -%>
+		if ac.SecurityPolicy != "" {
+			flattened[i]["security_policy"] = ac.SecurityPolicy
+		}
+		<% end -%>
 	}
 	return flattened, natIP
 }
@@ -319,6 +324,11 @@ func flattenIpv6AccessConfigs(ipv6AccessConfigs []*compute.AccessConfig) []map[s
 		flattened[i]["external_ipv6"] = ac.ExternalIpv6
 		flattened[i]["external_ipv6_prefix_length"] = strconv.FormatInt(ac.ExternalIpv6PrefixLength, 10)
 		flattened[i]["name"] = ac.Name
+		<% unless version == 'ga' -%>
+		if ac.SecurityPolicy != "" {
+			flattened[i]["security_policy"] = ac.SecurityPolicy
+		}
+		<% end -%>
 	}
 	return flattened
 }
@@ -347,6 +357,7 @@ func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Conf
 			"nic_type":            iface.NicType,
 			"stack_type":          iface.StackType,
 			"ipv6_access_config": flattenIpv6AccessConfigs(iface.Ipv6AccessConfigs),
+			"ipv6_address":        iface.Ipv6Address,
 			"queue_count":         iface.QueueCount,
 		}
 		// Instance template interfaces never have names, so they're absent
@@ -367,6 +378,15 @@ func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Conf
 				return nil, "", "", "", err
 			}
 			flattened[i]["network_attachment"] = networkAttachment
+		}
+		<% end -%>
+
+		<% unless version == 'ga' -%>
+		// the security_policy for a network_interface is found in one of its accessConfigs.
+		if len(iface.AccessConfigs) > 0 && iface.AccessConfigs[0].SecurityPolicy != "" {
+			flattened[i]["security_policy"] = iface.AccessConfigs[0].SecurityPolicy
+		} else if len(iface.Ipv6AccessConfigs) > 0 && iface.Ipv6AccessConfigs[0].SecurityPolicy != "" {
+			flattened[i]["security_policy"] = iface.Ipv6AccessConfigs[0].SecurityPolicy
 		}
 		<% end -%>
 	}
@@ -439,15 +459,6 @@ func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transp
 			return nil, fmt.Errorf("exactly one of network, subnetwork, or network_attachment must be provided")
 		}
 
-
-		if networkAttachment != "" {
-			if network != "" {
-				return nil, fmt.Errorf("Cannot have a network provided with networkAttachment given that networkAttachment is associated with a network already")
-			}
-			if subnetwork != "" {
-				return nil, fmt.Errorf("Cannot have a subnetwork provided with networkAttachment given that networkAttachment is associated with a subnetwork already")
-			}
-		}
 		<% else -%>
 
 		network := data["network"].(string)
@@ -482,6 +493,7 @@ func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transp
 			StackType:         data["stack_type"].(string),
 			QueueCount:        int64(data["queue_count"].(int)),
 			Ipv6AccessConfigs: expandIpv6AccessConfigs(data["ipv6_access_config"].([]interface{})),
+			Ipv6Address:       data["ipv6_address"].(string),
 		}
 	}
 	return ifaces, nil

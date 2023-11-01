@@ -43,11 +43,12 @@
                     "name": "vpc-con",
                     "network": "default",
                     "region": "us-central1",
-                    "timeouts": null
+                    "timeouts": null,
+                    "project": "{{.Provider.project}}",
+                    "machine_type": "e2-micro"
                 },
                 "after_unknown": {
                     "id": true,
-                    "project": true,
                     "self_link": true,
                     "state": true,
                     "connected_projects": true

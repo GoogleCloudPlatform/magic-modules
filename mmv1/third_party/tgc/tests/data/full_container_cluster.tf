@@ -17,7 +17,7 @@
 terraform {
   required_providers {
     google = {
-      source = "hashicorp/google"
+      source = "hashicorp/google-beta"
       version = "~> {{.Provider.version}}"
     }
   }
@@ -36,7 +36,6 @@ resource "google_container_cluster" "full_list_default_1" {
   # authenticator_groups_config
   # cluster_autoscaling
   # database_encryption
-  # enable_binary_authorization
   # enable_intranode_visibility
   # enable_shielded_nodes
   # enable_tpu

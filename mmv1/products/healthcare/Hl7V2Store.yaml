@@ -129,8 +129,8 @@ properties:
           - :V1
           - :V2
           - :V3
-  - !ruby/object:Api::Type::KeyValuePairs
-    name: labels
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: 'labels'
     required: false
     description: |
       User-supplied key-value pairs used to organize HL7v2 stores.

@@ -65,6 +65,7 @@ import (
     client_name_lower = client_name.downcase
     has_project = object.base_url.include?('{{project}}') || (object.create_url && object.create_url.include?('{{project}}'))
     has_region = object.base_url.include?('{{region}}') && object.parameters.any?{ |p| p.name == 'region' && p.ignore_read }
+    has_zone = object.base_url.include?('{{zone}}') && object.parameters.any?{ |p| p.name == 'zone' && p.ignore_read }
     # In order of preference, use TF override,
     # general defined timeouts, or default Timeouts
     timeouts = object.timeouts
@@ -104,7 +105,7 @@ func Resource<%= resource_name -%>() *schema.Resource {
 <%  if object.state_upgraders -%>
 
         StateUpgraders: []schema.StateUpgrader{
-<%      for v in 0..object.schema_version-1 -%>
+<%      for v in object.state_upgrade_base_schema_version..object.schema_version-1 -%>
             {
                 Type: resource<%= "#{resource_name}ResourceV#{v}" -%>().CoreConfigSchema().ImpliedType(),
                 Upgrade: Resource<%= "#{resource_name}UpgradeV#{v}" -%>,
@@ -113,7 +114,7 @@ func Resource<%= resource_name -%>() *schema.Resource {
 <%      end -%>
         },
 <%  end -%>
-<%  if object.custom_diff.any? || object.settable_properties.any? {|p| p.unordered_list}-%>
+<% if ((has_project || has_region || has_zone) && !object.skip_default_cdiff) || object.custom_diff.any? || object.settable_properties.any? {|p| p.unordered_list}-%>
         CustomizeDiff: customdiff.All(
 <%      if object.settable_properties.any? {|p| p.unordered_list} -%>
         <%=
@@ -126,6 +127,15 @@ func Resource<%= resource_name -%>() *schema.Resource {
 <%          for cdiff in object.custom_diff-%>
         <%= cdiff%>,
 <%          end -%>
+<%      end -%>
+<%      if has_project && !object.skip_default_cdiff -%>
+            tpgresource.DefaultProviderProject,
+<%      end -%>
+<%      if has_region && !object.skip_default_cdiff  -%>
+            tpgresource.DefaultProviderRegion,
+<%      end -%>
+<%      if has_zone && !object.skip_default_cdiff  -%>
+            tpgresource.DefaultProviderZone,
 <%      end -%>
         ),
 <%  end -%>
@@ -640,6 +650,16 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
     }
 <%  end -%>
 
+<%  if has_zone -%>
+    zone, err := tpgresource.GetZone(d, config)
+    if err != nil {
+        return err
+    }
+    if err := d.Set("zone", zone); err != nil {
+        return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
+    }
+<%  end -%>
+
 <%  object.gettable_properties.reject{|p| p.ignore_read }.each do |prop| -%>
 <%    if prop.flatten_object -%>
 // Terraform must set the top level schema field, but since this object contains collapsed properties
@@ -772,7 +792,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
       billingProject = bp
     }
 
-<%      if object.update_mask && field_specific_update_methods(object.root_properties) -%>
+<%      if object.update_mask -%>
 // if updateMask is empty we are not updating anything so skip the post
 if len(updateMask) > 0 {
 <%      end -%>
@@ -818,7 +838,7 @@ if len(updateMask) > 0 {
     }
 <%        end -%>
 <%      end -%>
-<%      if object.update_mask && field_specific_update_methods(object.root_properties) -%>
+<%      if object.update_mask -%>
   }
 <%      end -%>
 <%    end # if !object.immutable -%>
@@ -1130,7 +1150,7 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
     config := meta.(*transport_tpg.Config)
     if err := tpgresource.ParseImportId([]string{
 <%      for import_id in import_id_formats_from_resource(object) -%>
-        "<%= format2regex(import_id) %>",
+        "^<%= format2regex(import_id) %>$",
 <%      end -%>
     }, d, config); err != nil {
       return nil, err

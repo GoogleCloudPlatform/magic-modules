@@ -25,17 +25,19 @@ func TestAccDialogflowCXIntent_update(t *testing.T) {
 				Config: testAccDialogflowCXIntent_basic(context),
 			},
 			{
-				ResourceName:      "google_dialogflow_cx_intent.my_intent",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_dialogflow_cx_intent.my_intent",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			{
 				Config: testAccDialogflowCXIntent_full(context),
 			},
 			{
-				ResourceName:      "google_dialogflow_cx_intent.my_intent",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_dialogflow_cx_intent.my_intent",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 		},
 	})
@@ -43,18 +45,6 @@ func TestAccDialogflowCXIntent_update(t *testing.T) {
 
 func testAccDialogflowCXIntent_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-	data "google_project" "project" {}
-
-	resource "google_service_account" "dialogflowcx_service_account" {
-		account_id = "tf-test-dialogflow-%{random_suffix}"
-	}
-
-	resource "google_project_iam_member" "agent_create" {
-		project = data.google_project.project.project_id
-		role    = "roles/dialogflow.admin"
-		member  = "serviceAccount:${google_service_account.dialogflowcx_service_account.email}"
-	}
-
 	resource "google_dialogflow_cx_agent" "agent_intent" {
 		display_name = "tf-test-%{random_suffix}"
 		location = "global"
@@ -63,7 +53,6 @@ func testAccDialogflowCXIntent_basic(context map[string]interface{}) string {
 		time_zone = "America/New_York"
 		description = "Description 1."
 		avatar_uri = "https://storage.cloud.google.com/dialogflow-test-host-image/cloud-logo.png"
-		depends_on = [google_project_iam_member.agent_create]
 	}
     
 	resource "google_dialogflow_cx_intent" "my_intent" {
@@ -102,18 +91,6 @@ func testAccDialogflowCXIntent_basic(context map[string]interface{}) string {
 
 func testAccDialogflowCXIntent_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-	data "google_project" "project" {}
-
-	resource "google_service_account" "dialogflowcx_service_account" {
-		account_id = "tf-test-dialogflow-%{random_suffix}"
-	}
-
-	resource "google_project_iam_member" "agent_create" {
-		project = data.google_project.project.project_id
-		role    = "roles/dialogflow.admin"
-		member  = "serviceAccount:${google_service_account.dialogflowcx_service_account.email}"
-	}
-
 	resource "google_dialogflow_cx_agent" "agent_intent" {
 		display_name = "tf-test-%{random_suffix}update"
 		location = "global"
@@ -127,7 +104,6 @@ func testAccDialogflowCXIntent_full(context map[string]interface{}) string {
 		speech_to_text_settings {
 			enable_speech_adaptation = true
 		}
-		depends_on = [google_project_iam_member.agent_create]
 	}
     
 	resource "google_dialogflow_cx_intent" "my_intent" {

@@ -141,6 +141,11 @@ properties:
 
             * `allAuthenticatedUsers`: All authenticated BigQuery users.
         - !ruby/object:Api::Type::String
+          name: 'iamMember'
+          description: |
+            Some other type of member that appears in the IAM Policy but isn't a user,
+            group, domain, or special group. For example: `allUsers`
+        - !ruby/object:Api::Type::String
           name: 'userByEmail'
           description: |
             An email address of a user to grant access to. For example:
@@ -290,12 +295,11 @@ properties:
     name: 'friendlyName'
     description: A descriptive name for the dataset
     send_empty_value: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       The labels associated with this dataset. You can use these to
-      organize and group your datasets
-    default_from_api: true
+      organize and group your datasets.
   - !ruby/object:Api::Type::Integer
     name: 'lastModifiedTime'
     description: |

@@ -13,7 +13,6 @@
           "schema_version": 1,
           "values": {
             "description": null,
-            "enable_binary_authorization": false,
             "enable_intranode_visibility": null,
             "enable_kubernetes_alpha": false,
             "enable_legacy_abac": false,
@@ -98,7 +97,6 @@
         "before": null,
         "after": {
           "description": null,
-          "enable_binary_authorization": false,
           "enable_intranode_visibility": null,
           "enable_kubernetes_alpha": false,
           "enable_legacy_abac": false,
@@ -119,7 +117,8 @@
           "resource_usage_export_config": [],
           "timeouts": null,
           "vertical_pod_autoscaling": [],
-          "workload_identity_config": []
+          "workload_identity_config": [],
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "addons_config": true,
@@ -147,7 +146,6 @@
           "operation": true,
           "pod_security_policy_config": [],
           "private_cluster_config": [],
-          "project": true,
           "release_channel": true,
           "resource_usage_export_config": [],
           "self_link": true,
@@ -189,7 +187,8 @@
             }
           ],
           "node_count": 1,
-          "timeouts": null
+          "timeouts": null,
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "autoscaling": [],
@@ -218,7 +217,6 @@
             }
           ],
           "node_locations": true,
-          "project": true,
           "upgrade_settings": true,
           "version": true
         }
@@ -239,13 +237,13 @@
           "account_id": "service-account-id",
           "description": null,
           "display_name": "Service Account",
-          "timeouts": null
+          "timeouts": null,
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "email": true,
           "id": true,
           "name": true,
-          "project": true,
           "unique_id": true
         }
       }

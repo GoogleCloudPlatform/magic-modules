@@ -195,7 +195,8 @@
             "foo"
           ],
           "timeouts": null,
-          "zone": "us-central1-a"
+          "zone": "us-central1-a",
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "advanced_machine_features": [],
@@ -243,7 +244,6 @@
               "subnetwork_project": true
             }
           ],
-          "project": true,
           "reservation_affinity": true,
           "scheduling": true,
           "scratch_disk": [
@@ -314,13 +314,13 @@
           "instance_name": "test",
           "member": "user:example-a@google.com",
           "role": "roles/compute.osLogin",
-          "zone": "us-central1-a"
+          "zone": "us-central1-a",
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "condition": [],
           "etag": true,
-          "id": true,
-          "project": true
+          "id": true
         },
         "before_sensitive": false,
         "after_sensitive": {

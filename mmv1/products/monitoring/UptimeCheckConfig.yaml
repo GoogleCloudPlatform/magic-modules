@@ -402,7 +402,7 @@ properties:
           resource types
           (https://cloud.google.com/logging/docs/api/v2/resource-list).
       - !ruby/object:Api::Type::KeyValuePairs
-        name: labels
+        name: 'labels'
         immutable: true
         required: true
         description:

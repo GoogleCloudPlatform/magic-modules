@@ -102,7 +102,7 @@ properties:
     description:
       The default API Gateway host name of the form
       {gatewayId}-{hash}.{region_code}.gateway.dev.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Resource labels to represent user-provided metadata.

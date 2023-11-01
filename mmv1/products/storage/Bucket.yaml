@@ -464,7 +464,7 @@ properties:
           object is missing, if applicable, the service will return the
           named object from this bucket as the content for a 404 Not Found
           result.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Labels applied to this bucket.  A list of key->value pairs.

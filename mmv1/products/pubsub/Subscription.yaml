@@ -107,7 +107,7 @@ properties:
     pattern: 'projects/{{project}}/topics/{{topic}}'
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     custom_expand: templates/terraform/custom_expand/computed_subscription_topic.erb
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       A set of key/value label pairs to assign to this Subscription.
@@ -262,6 +262,7 @@ properties:
         diff_suppress_func: 'tpgresource.IgnoreMissingKeyInMap("x-goog-version")'
       - !ruby/object:Api::Type::NestedObject
         name: 'noWrapper'
+        custom_flatten: 'templates/terraform/custom_flatten/pubsub_no_wrapper_write_metadata_flatten.go.erb'
         description: |
           When set, the payload to the push endpoint is not wrapped.Sets the
           `data` field as the HTTP body for delivery.
@@ -269,6 +270,7 @@ properties:
           - !ruby/object:Api::Type::Boolean
             name: 'writeMetadata'
             required: true
+            send_empty_value: true
             description: |
               When true, writes the Pub/Sub message metadata to
               `x-goog-pubsub-<KEY>:<VAL>` headers of the HTTP request. Writes the

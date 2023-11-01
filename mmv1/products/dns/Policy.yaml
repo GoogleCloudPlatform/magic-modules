@@ -32,6 +32,19 @@ examples:
       policy_name: 'example-policy'
       network_1_name: 'network-1'
       network_2_name: 'network-2'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dns_policy_multiproject'
+    skip_docs: true
+    primary_resource_id: 'example-policy-multiproject'
+    vars:
+      policy_name: 'example-policy-multiproject'
+      network_1_name: 'network-1'
+      network_2_name: 'network-2'
+      project_1_name: 'project-1'
+      project_2_name: 'project-2'
+    test_env_vars:
+      org_id: :ORG_ID
+      billing_account: :BILLING_ACCT
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_delete: templates/terraform/pre_delete/detach_network.erb
 properties:
@@ -120,7 +133,7 @@ properties:
       func(v interface{}) int {
         raw := v.(map[string]interface{})
         if url, ok := raw["network_url"]; ok {
-          return tpgresource.SelfLinkNameHash(url)
+          return tpgresource.SelfLinkRelativePathHash(url)
         }
         var buf bytes.Buffer
         schema.SerializeResourceForHash(&buf, raw, dnsPolicyNetworksSchema())

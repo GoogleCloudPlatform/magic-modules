@@ -76,6 +76,7 @@ properties:
   - !ruby/object:Api::Type::Enum
     name: 'routineType'
     immutable: true
+    required: true
     description: The type of routine.
     values:
       - :SCALAR_FUNCTION

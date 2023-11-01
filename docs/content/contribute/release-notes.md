@@ -1,6 +1,6 @@
 ---
 title: "Write release notes"
-weight: 10
+weight: 20
 ---
 
 # Write release notes

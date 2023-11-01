@@ -26,9 +26,13 @@ fi
 while true; do
     if [ "$BASE_BRANCH" != "main" ]; then
         SYNC_HEAD="$(git rev-parse --short origin/$SYNC_BRANCH)"
-        BASE_PARENT="$(git rev-parse --short origin/$BASE_BRANCH~)"
+        BASE_PARENT="$(git rev-parse --short $SHA~)"
         if [ "$SYNC_HEAD" == "$BASE_PARENT" ]; then
             break;
+        else
+            echo "sync branch is at: $SYNC_HEAD"
+            echo "current commit is $SHA"
+            git fetch origin $SYNC_BRANCH
         fi
     else 
         commits="$(git log --pretty=%H origin/$SYNC_BRANCH..origin/$BASE_BRANCH | tail -n 1)"
