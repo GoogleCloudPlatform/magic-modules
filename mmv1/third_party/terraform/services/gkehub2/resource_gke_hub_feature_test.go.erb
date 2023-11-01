@@ -398,7 +398,6 @@ resource "google_gke_hub_feature" "feature" {
       management = "MANAGEMENT_AUTOMATIC"
     }
   }
-  project = google_project.project.project_id
   depends_on = [google_project_service.test_mesh]
 }
 `, context)
@@ -418,7 +417,6 @@ resource "google_gke_hub_feature" "feature" {
       management = "MANAGEMENT_MANUAL"
     }
   }
-  project = google_project.project.project_id
   depends_on = [google_project_service.test_mesh]
 }
 `, context)
@@ -485,7 +483,6 @@ resource "google_gke_hub_feature" "feature" {
       }
     }
   }
-  project = google_project.project.project_id
   depends_on = [google_project_service.test_acm]
 }
 `, context)
@@ -514,7 +511,6 @@ resource "google_gke_hub_feature" "feature" {
       }
     }
   }
-  project = google_project.project.project_id
   depends_on = [google_project_service.test_acm]
 }
 `, context)
