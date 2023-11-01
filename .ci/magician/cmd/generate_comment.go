@@ -76,7 +76,7 @@ var generateCommentCmd = &cobra.Command{
 		gh := github.NewGithubService()
 		rnr, err := exec.NewRunner()
 		if err != nil {
-			fmt.Println("Could not get working directory to start runner")
+			fmt.Println("Error creating a runner: ", err)
 			os.Exit(1)
 		}
 		execGenerateComment(buildID, projectID, buildStep, commit, pr, githubToken, gh, rnr)
