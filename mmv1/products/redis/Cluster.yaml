@@ -57,6 +57,11 @@ examples:
       policy_name: "mypolicy"
       subnet_name: "mysubnet"
       network_name: "mynetwork"
+      prevent_destroy: 'true'
+    test_vars_overrides:
+      prevent_destroy: 'false'
+    oics_vars_overrides:
+      prevent_destroy: 'false'
 properties:
   - !ruby/object:Api::Type::Time
     name: createTime
