@@ -10,7 +10,7 @@ import (
 type mockRunner struct {
 	calledMethods map[string][][]any
 	cmdResults    map[string]string
-	cwd           string
+	curDir        string
 	dirStack      *list.List
 }
 
@@ -45,13 +45,13 @@ func NewMockRunner() *mockRunner {
 			"/mock/dir/tpgbold sed [-i.bak s|github.com/hashicorp/terraform-provider-google-beta|google/provider/old|g go.mod] []":                                   "",
 			"/mock/dir/tpgbold sed [-i.bak s|github.com/hashicorp/terraform-provider-google-beta|google/provider/old|g go.sum] []":                                   "",
 		},
-		cwd:      "/mock/dir/magic-modules/.ci/magician",
+		curDir:   "/mock/dir/magic-modules/.ci/magician",
 		dirStack: list.New(),
 	}
 }
 
-func (mr *mockRunner) Getwd() (string, error) {
-	return mr.cwd, nil
+func (mr *mockRunner) GetCurDir() string {
+	return mr.curDir
 }
 
 func (mr *mockRunner) Copy(src, dest string) error {
@@ -68,8 +68,8 @@ func (mr *mockRunner) PushDir(path string) error {
 	if mr.dirStack == nil {
 		mr.dirStack = list.New()
 	}
-	mr.dirStack.PushBack(mr.cwd)
-	mr.cwd = path
+	mr.dirStack.PushBack(mr.curDir)
+	mr.curDir = path
 	return nil
 }
 
@@ -82,13 +82,13 @@ func (mr *mockRunner) PopDir() error {
 	if !ok {
 		return fmt.Errorf("back value of dir stack was a %T, expected string", backVal)
 	}
-	mr.cwd = dir
+	mr.curDir = dir
 	return nil
 }
 
 func (mr *mockRunner) Run(name string, args, env []string) (string, error) {
-	mr.calledMethods["Run"] = append(mr.calledMethods["Run"], []any{mr.cwd, name, args, env})
-	cmd := fmt.Sprintf("%s %s %v %v", mr.cwd, name, args, env)
+	mr.calledMethods["Run"] = append(mr.calledMethods["Run"], []any{mr.curDir, name, args, env})
+	cmd := fmt.Sprintf("%s %s %v %v", mr.curDir, name, args, env)
 	if result, ok := mr.cmdResults[cmd]; ok {
 		return result, nil
 	}

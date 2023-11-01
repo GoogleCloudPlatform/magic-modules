@@ -12,11 +12,12 @@ import (
 )
 
 type actualRunner struct {
+	curDir   string
 	dirStack *list.List
 }
 
 type Runner interface {
-	Getwd() (string, error)
+	GetCurDir() string
 	Copy(src, dest string) error
 	RemoveAll(path string) error
 	PushDir(path string) error
@@ -26,12 +27,19 @@ type Runner interface {
 	MustRun(name string, args, env []string) string
 }
 
-func NewRunner() Runner {
-	return &actualRunner{dirStack: list.New()}
+func NewRunner() (Runner, error) {
+	wd, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+	return &actualRunner{
+		curDir:   wd,
+		dirStack: list.New(),
+	}, nil
 }
 
-func (ar *actualRunner) Getwd() (string, error) {
-	return os.Getwd()
+func (ar *actualRunner) GetCurDir() string {
+	return ar.curDir
 }
 
 func (ar *actualRunner) Copy(src, dest string) error {
@@ -47,11 +55,8 @@ func (ar *actualRunner) PushDir(path string) error {
 	if ar.dirStack == nil {
 		return errors.New("attempted to push dir, but stack was nil")
 	}
-	wd, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-	ar.dirStack.PushFront(wd)
+	ar.dirStack.PushFront(ar.curDir)
+	ar.curDir = path
 	return os.Chdir(path)
 }
 
@@ -65,14 +70,15 @@ func (ar *actualRunner) PopDir() error {
 	if !ok {
 		return fmt.Errorf("last element in dir stack was a %T, expected string", frontVal)
 	}
+	ar.curDir = dir
 	return os.Chdir(dir)
 }
 
-func (ar actualRunner) WriteFile(name, data string) error {
+func (ar *actualRunner) WriteFile(name, data string) error {
 	return os.WriteFile(name, []byte(data), 0644)
 }
 
-func (ar actualRunner) Run(name string, args, env []string) (string, error) {
+func (ar *actualRunner) Run(name string, args, env []string) (string, error) {
 	cmd := exec.Command(name, args...)
 	cmd.Env = append(os.Environ(), env...)
 	out, err := cmd.Output()
@@ -83,7 +89,7 @@ func (ar actualRunner) Run(name string, args, env []string) (string, error) {
 	return string(out), nil
 }
 
-func (ar actualRunner) MustRun(name string, args, env []string) string {
+func (ar *actualRunner) MustRun(name string, args, env []string) string {
 	out, err := ar.Run(name, args, env)
 	if err != nil {
 		log.Fatal(err)

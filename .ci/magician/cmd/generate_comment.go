@@ -21,7 +21,7 @@ type gcGithub interface {
 }
 
 type gcRunner interface {
-	Getwd() (string, error)
+	GetCurDir() string
 	Copy(src, dest string) error
 	RemoveAll(path string) error
 	PushDir(path string) error
@@ -74,18 +74,19 @@ var generateCommentCmd = &cobra.Command{
 		}
 
 		gh := github.NewGithubService()
-		execGenerateComment(buildID, projectID, buildStep, commit, pr, githubToken, gh, exec.NewRunner())
+		rnr, err := exec.NewRunner()
+		if err != nil {
+			fmt.Println("Could not get working directory to start runner")
+			os.Exit(1)
+		}
+		execGenerateComment(buildID, projectID, buildStep, commit, pr, githubToken, gh, rnr)
 	},
 }
 
 func execGenerateComment(buildID, projectID, buildStep, commit, pr, githubToken string, gh gcGithub, r gcRunner) {
 	newBranch := "auto-pr-" + pr
 	oldBranch := "auto-pr-" + pr + "-old"
-	wd, err := r.Getwd()
-	if err != nil {
-		fmt.Println("Failed to get current working directory: ", err)
-		os.Exit(1)
-	}
+	wd := r.GetCurDir()
 	mmLocalPath := filepath.Join(wd, "..", "..")
 	tpgRepoName := "terraform-provider-google"
 	tpgLocalPath := filepath.Join(mmLocalPath, "..", "tpg")
