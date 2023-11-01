@@ -58,7 +58,7 @@ module OpenAPIGenerate
       when 'object'
         if name == 'labels'
           # standard labels field handling
-          field = Api::Type::KeyValuePairs.new
+          field = Api::Type::KeyValueLabels.new
         else
           field = Api::Type::NestedObject.new
           required_props = obj.required || []
