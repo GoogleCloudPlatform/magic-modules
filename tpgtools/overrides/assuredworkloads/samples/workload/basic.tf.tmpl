@@ -9,7 +9,7 @@ resource "google_assured_workloads_workload" "primary" {
   organization = "{{org_id}}"
   location = "us-central1"
   resource_settings {
-    resource_type = "CONSUMER_FOLDER",
+    resource_type = "CONSUMER_FOLDER"
     display_name = "folder-display-name"
   }
   violation_notifications_enabled = true
