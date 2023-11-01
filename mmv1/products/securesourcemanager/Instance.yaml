@@ -14,8 +14,8 @@
 --- !ruby/object:Api::Resource
 name: 'Instance'
 kind: 'securesourcemanager#instance'
-base_url: 'projects/{{project}}/locations/{{location}}/instances?instance_id={{name}}'
-self_link: 'projects/{{project}}/locations/{{location}}/instances/{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/instances?instance_id={{instance_id}}'
+self_link: 'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}'
 update_verb: :PATCH
 update_mask: true
 description: 'An isolated set of resources (TODO need better description)'
@@ -28,14 +28,13 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ':'
   import_format:
     [
-      'projects/{{project}}/locations/{{location}}/instances/{{name}}',
+      'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}',
       '{{name}}',
     ]
-id_format: 'projects/{{project}}/locations/{{location}}/instances/{{name}}'
-import_format: ['projects/{{project}}/locations/{{location}}/instances/{{name}}']
+import_format: ['projects/{{project}}/locations/{{location}}/instances/{{instance_id}}', '{{name}}']
 autogen_async: true
 async: !ruby/object:Api::OpAsync
-  actions: ['create']
+  actions: ['create', 'delete']
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
     base_url: '{{op_id}}'
@@ -68,15 +67,29 @@ parameters:
     required: true
     immutable: true
     url_param_only: true
+  - !ruby/object:Api::Type::String
+    name: 'instance_id'
+    description: |
+      The name for the Instance.
+    required: true
+    immutable: true
+    url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
       The resource name for the Instance.
-    required: true
-    immutable: true
+    output: true
   - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
-      Labels as key value pairs.
+      User defined labels
 
+iam_policy: !ruby/object:Api::Resource::IamPolicy
+  parent_resource_attribute: 'instance'
+  method_name_separator: ':'
+  import_format:
+    [
+      'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}',
+      '{{name}}',
+    ]
