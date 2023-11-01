@@ -31,6 +31,7 @@ func flattenBackupDRManagementServerResourceResp(v interface{}, d *schema.Resour
 	fmt.Printf("Interface is : %s", v)
 	l := v.([]interface{})
 	for _, raw := range l {
+		// Management server is a singleton resource. It is only present in one location per project. Hence returning first resource present.
 		return flattenBackupDRManagementServerResource(raw, d, config)
 	}
 	return nil
@@ -75,7 +76,7 @@ func dataSourceGoogleCloudBackupDRServiceRead(d *schema.ResourceData, meta inter
 		UserAgent: userAgent,
 	})
 	if err != nil {
-		return fmt.Errorf("Error constructing id: %s", err)
+		return fmt.Errorf("Error reading ManagementServer: %s", err)
 	}
 	resourceResponse := flattenBackupDRManagementServerResourceResp(res["managementServers"], d, config)
 	if err := d.Set("project", project); err != nil {
