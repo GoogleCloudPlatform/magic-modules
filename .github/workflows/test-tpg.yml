@@ -104,7 +104,7 @@ jobs:
       if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |
         cd repo
-        make testnolint TEST_ARGS="-p 4"
+        make testnolint TESTARGS="-p 4"
     - name: Lint Check
       if: ${{ !cancelled() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |
