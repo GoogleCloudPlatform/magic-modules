@@ -58,6 +58,23 @@ func TestAccEndpointsService_grpc(t *testing.T) {
 	})
 }
 
+func TestAccEndpointsService_grpcNotPreComputeConfigId(t *testing.T) {
+	t.Parallel()
+	serviceId := "tf-test" + acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckEndpointServiceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccEndpointsService_grpcNotPreComputeConfigId(serviceId, envvar.GetTestProjectFromEnv()),
+				Check:  testAccCheckEndpointExistsByName(t, serviceId),
+			},
+		},
+	})
+}
+
 func testAccEndpointsService_basic(serviceId, project, rev string) string {
 	return fmt.Sprintf(`
 resource "google_endpoints_service" "endpoints_service" {
@@ -118,6 +135,32 @@ resource "google_endpoints_service" "endpoints_service" {
 type: google.api.Service
 config_version: 3
 name: %[1]s.endpoints.%[2]s.cloud.goog
+usage:
+  rules:
+  - selector: endpoints.examples.bookstore.Bookstore.ListShelves
+    allow_unregistered_calls: true
+EOF
+
+  protoc_output_base64 = filebase64("test-fixtures/test_api_descriptor.pb")
+}
+`, serviceId, project)
+}
+
+func testAccEndpointsService_grpcNotPreComputeConfigId(serviceId, project string) string {
+	return fmt.Sprintf(`
+resource "google_tags_tag_key" "key" {
+  parent = "organizations/123456789"
+  short_name = "endpoints-service-test"
+}
+
+resource "google_endpoints_service" "endpoints_service" {
+  service_name = "%[1]s.endpoints.%[2]s.cloud.goog"
+  project      = "%[2]s"
+  grpc_config  = <<EOF
+type: google.api.Service
+config_version: 3
+name: %[1]s.endpoints.%[2]s.cloud.goog
+title: Test ${google_tags_tag_key.key.name}
 usage:
   rules:
   - selector: endpoints.examples.bookstore.Bookstore.ListShelves
