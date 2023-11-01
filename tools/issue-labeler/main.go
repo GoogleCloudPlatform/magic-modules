@@ -7,8 +7,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/golang/glog"
 	"github.com/GoogleCloudPlatform/magic-modules/tools/issue-labeler/labeler"
+	"github.com/golang/glog"
 )
 
 var flagBackfillDate = flag.String("backfill-date", "", "run in backfill mode to apply labels to issues filed after given date")

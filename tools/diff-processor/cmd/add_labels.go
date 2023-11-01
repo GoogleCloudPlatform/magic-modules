@@ -35,8 +35,8 @@ func newAddLabelsCmd(rootOptions *rootOptions) *cobra.Command {
 			return diff.ComputeSchemaDiff(oldProvider.ResourceMap(), newProvider.ResourceMap())
 		},
 		enrolledTeamsYaml: labeler.EnrolledTeamsYaml,
-		getIssue: labels.GetIssue,
-		updateIssues: labeler.UpdateIssues,
+		getIssue:          labels.GetIssue,
+		updateIssues:      labeler.UpdateIssues,
 	}
 	cmd := &cobra.Command{
 		Use:   "add-labels PR_ID [--dry-run]",
@@ -103,8 +103,8 @@ func (o *addLabelsOptions) run() error {
 	// Only update the issue if new labels should be added
 	if len(newLabels) != len(oldLabels) {
 		issueUpdate := labeler.IssueUpdate{
-			Number: o.prId,
-			Labels: maps.Keys(newLabels),
+			Number:    o.prId,
+			Labels:    maps.Keys(newLabels),
 			OldLabels: maps.Keys(oldLabels),
 		}
 

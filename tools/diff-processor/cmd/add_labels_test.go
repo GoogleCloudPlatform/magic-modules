@@ -3,10 +3,10 @@ package cmd
 import (
 	_ "embed"
 	"errors"
-	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
 	"github.com/GoogleCloudPlatform/magic-modules/tools/issue-labeler/labeler"
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"testing"
 )
@@ -18,20 +18,20 @@ services/google-x:
 
 func TestAddLabelsCmd(t *testing.T) {
 	cases := map[string]struct {
-		oldResourceMap     map[string]*schema.Resource
-		newResourceMap     map[string]*schema.Resource
-		githubIssue		   *labeler.Issue
-		updateErrors       bool
-		expectedLabels 	   []string
-		expectError        bool
+		oldResourceMap map[string]*schema.Resource
+		newResourceMap map[string]*schema.Resource
+		githubIssue    *labeler.Issue
+		updateErrors   bool
+		expectedLabels []string
+		expectError    bool
 	}{
 		"empty resource map": {
 			oldResourceMap: map[string]*schema.Resource{},
 			newResourceMap: map[string]*schema.Resource{},
 			githubIssue: &labeler.Issue{
-				Number: 12345,
-				Body: "Unused",
-				Labels: []labeler.Label{},
+				Number:      12345,
+				Body:        "Unused",
+				Labels:      []labeler.Label{},
 				PullRequest: map[string]any{},
 			},
 			expectedLabels: nil,
@@ -53,9 +53,9 @@ func TestAddLabelsCmd(t *testing.T) {
 				},
 			},
 			githubIssue: &labeler.Issue{
-				Number: 12345,
-				Body: "Unused",
-				Labels: []labeler.Label{},
+				Number:      12345,
+				Body:        "Unused",
+				Labels:      []labeler.Label{},
 				PullRequest: map[string]any{},
 			},
 			expectedLabels: nil,
@@ -78,9 +78,9 @@ func TestAddLabelsCmd(t *testing.T) {
 				},
 			},
 			githubIssue: &labeler.Issue{
-				Number: 12345,
-				Body: "Unused",
-				Labels: []labeler.Label{},
+				Number:      12345,
+				Body:        "Unused",
+				Labels:      []labeler.Label{},
 				PullRequest: map[string]any{},
 			},
 			expectedLabels: nil,
@@ -102,9 +102,9 @@ func TestAddLabelsCmd(t *testing.T) {
 				},
 			},
 			githubIssue: &labeler.Issue{
-				Number: 12345,
-				Body: "Unused",
-				Labels: []labeler.Label{},
+				Number:      12345,
+				Body:        "Unused",
+				Labels:      []labeler.Label{},
 				PullRequest: map[string]any{},
 			},
 			expectedLabels: []string{"services/google-x"},
@@ -137,9 +137,9 @@ func TestAddLabelsCmd(t *testing.T) {
 				},
 			},
 			githubIssue: &labeler.Issue{
-				Number: 12345,
-				Body: "Unused",
-				Labels: []labeler.Label{},
+				Number:      12345,
+				Body:        "Unused",
+				Labels:      []labeler.Label{},
 				PullRequest: map[string]any{},
 			},
 			expectedLabels: []string{"services/google-x"},
@@ -161,9 +161,9 @@ func TestAddLabelsCmd(t *testing.T) {
 				},
 			},
 			githubIssue: &labeler.Issue{
-				Number: 12345,
-				Body: "Unused",
-				Labels: []labeler.Label{{Name: "override-breaking-change"}},
+				Number:      12345,
+				Body:        "Unused",
+				Labels:      []labeler.Label{{Name: "override-breaking-change"}},
 				PullRequest: map[string]any{},
 			},
 			expectedLabels: []string{"override-breaking-change", "services/google-x"},
@@ -185,9 +185,9 @@ func TestAddLabelsCmd(t *testing.T) {
 				},
 			},
 			githubIssue: &labeler.Issue{
-				Number: 12345,
-				Body: "Unused",
-				Labels: []labeler.Label{{Name: "services/google-z"}},
+				Number:      12345,
+				Body:        "Unused",
+				Labels:      []labeler.Label{{Name: "services/google-z"}},
 				PullRequest: map[string]any{},
 			},
 			// nil indicates that the issue won't be updated at all (preserving existing labels)
