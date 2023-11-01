@@ -3,6 +3,8 @@ package resourcemanager_test
 
 <% unless version == 'ga' -%>
 import (
+	"fmt"
+	"strings"
 	"testing"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
@@ -19,6 +21,13 @@ func TestAccProjectServiceIdentity_basic(t *testing.T) {
 			{
 				Config: testGoogleProjectServiceIdentity_basic(),
 				Check: resource.ComposeTestCheckFunc(
+					// Email field for healthcare service account should be non-empty and contain at least an "@".
+					resource.TestCheckResourceAttrWith("google_project_service_identity.hc_sa", "email", func(value string) error {
+						if strings.Contains(value, "@") {
+							return nil
+						}
+						return fmt.Errorf("hc_sa service identity email value was %s, expected a valid email", value)
+					}),
 					// Email field for logging service identity will be empty for as long as
 					// `gcloud beta services identity create --service=logging.googleapis.com` doesn't return an email address
 					resource.TestCheckNoResourceAttr("google_project_service_identity.log_sa", "email"),
@@ -36,12 +45,6 @@ data "google_project" "project" {}
 resource "google_project_service_identity" "hc_sa" {
   project = data.google_project.project.project_id
   service = "healthcare.googleapis.com"
-}
-
-resource "google_project_iam_member" "hc_sa_bq_jobuser" {
-  project = data.google_project.project.project_id
-  role    = "roles/bigquery.jobUser"
-  member  = "serviceAccount:${google_project_service_identity.hc_sa.email}"
 }
 
 # Service which does NOT have email returned from service identity API

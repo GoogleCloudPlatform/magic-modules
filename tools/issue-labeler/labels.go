@@ -6,6 +6,7 @@ import (
 	"sort"
 
 	_ "embed"
+
 	"github.com/golang/glog"
 	"gopkg.in/yaml.v2"
 )
@@ -38,8 +39,9 @@ func buildRegexLabels(teamsYaml []byte) ([]regexpLabel, error) {
 
 	for label, data := range enrolledTeams {
 		for _, resource := range data.Resources {
+			exactResource := fmt.Sprintf("^%s$", resource)
 			regexpLabels = append(regexpLabels, regexpLabel{
-				Regexp: regexp.MustCompile(resource),
+				Regexp: regexp.MustCompile(exactResource),
 				Label:  label,
 			})
 		}
@@ -76,8 +78,8 @@ func computeLabels(resources []string, regexpLabels []regexpLabel) []string {
 
 	var labels []string
 
-	for l, _ := range labelSet {
-		labels = append(labels, l)
+	for label := range labelSet {
+		labels = append(labels, label)
 	}
 	sort.Strings(labels)
 

@@ -1,7 +1,6 @@
 package diff
 
 import (
-	"fmt"
 	"testing"
 
 	newProvider "google/provider/new/google/provider"
@@ -11,8 +10,8 @@ import (
 	oldProvider "google/provider/old/google/provider"
 	oldVerify "google/provider/old/google/verify"
 
-	"github.com/google/go-cmp/cmp"
 	"github.com/davecgh/go-spew/spew"
+	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -601,6 +600,49 @@ func TestFieldChanged(t *testing.T) {
 			},
 			expectChanged: false,
 		},
+		"Elem DiffSuppressFunc added": {
+			oldField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			newField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type:             schema.TypeString,
+					DiffSuppressFunc: oldTpgresource.CaseDiffSuppress,
+				},
+			},
+			expectChanged: true,
+		},
+		"Elem DiffSuppressFunc removed": {
+			oldField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type:             schema.TypeString,
+					DiffSuppressFunc: newTpgresource.CaseDiffSuppress,
+				},
+			},
+			newField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			expectChanged: true,
+		},
+		"Elem DiffSuppressFunc remains set": {
+			oldField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type:             schema.TypeString,
+					DiffSuppressFunc: newTpgresource.CaseDiffSuppress,
+				},
+			},
+			newField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type:             schema.TypeString,
+					DiffSuppressFunc: oldTpgresource.CaseDiffSuppress,
+				},
+			},
+			expectChanged: false,
+		},
 
 		"DefaultFunc added": {
 			oldField: &schema.Schema{},
@@ -622,6 +664,49 @@ func TestFieldChanged(t *testing.T) {
 			},
 			newField: &schema.Schema{
 				DefaultFunc: testDefaultFunc2,
+			},
+			expectChanged: false,
+		},
+		"Elem DefaultFunc added": {
+			oldField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			newField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type:        schema.TypeString,
+					DefaultFunc: testDefaultFunc2,
+				},
+			},
+			expectChanged: true,
+		},
+		"Elem DefaultFunc removed": {
+			oldField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type:        schema.TypeString,
+					DefaultFunc: testDefaultFunc1,
+				},
+			},
+			newField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			expectChanged: true,
+		},
+		"Elem DefaultFunc remains set": {
+			oldField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type:        schema.TypeString,
+					DefaultFunc: testDefaultFunc1,
+				},
+			},
+			newField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type:        schema.TypeString,
+					DefaultFunc: testDefaultFunc2,
+				},
 			},
 			expectChanged: false,
 		},
@@ -649,6 +734,49 @@ func TestFieldChanged(t *testing.T) {
 			},
 			expectChanged: false,
 		},
+		"Elem StateFunc added": {
+			oldField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			newField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type:      schema.TypeString,
+					StateFunc: testStateFunc2,
+				},
+			},
+			expectChanged: true,
+		},
+		"Elem StateFunc removed": {
+			oldField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type:      schema.TypeString,
+					StateFunc: testStateFunc1,
+				},
+			},
+			newField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			expectChanged: true,
+		},
+		"Elem StateFunc remains set": {
+			oldField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type:      schema.TypeString,
+					StateFunc: testStateFunc1,
+				},
+			},
+			newField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type:      schema.TypeString,
+					StateFunc: testStateFunc2,
+				},
+			},
+			expectChanged: false,
+		},
 
 		"Set added": {
 			oldField: &schema.Schema{},
@@ -670,6 +798,49 @@ func TestFieldChanged(t *testing.T) {
 			},
 			newField: &schema.Schema{
 				Set: newTpgresource.SelfLinkRelativePathHash,
+			},
+			expectChanged: false,
+		},
+		"Elem Set added": {
+			oldField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			newField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+					Set:  newTpgresource.SelfLinkRelativePathHash,
+				},
+			},
+			expectChanged: true,
+		},
+		"Elem Set removed": {
+			oldField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+					Set:  oldTpgresource.SelfLinkRelativePathHash,
+				},
+			},
+			newField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			expectChanged: true,
+		},
+		"Elem Set remains set": {
+			oldField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+					Set:  oldTpgresource.SelfLinkRelativePathHash,
+				},
+			},
+			newField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+					Set:  newTpgresource.SelfLinkRelativePathHash,
+				},
 			},
 			expectChanged: false,
 		},
@@ -697,6 +868,49 @@ func TestFieldChanged(t *testing.T) {
 			},
 			expectChanged: false,
 		},
+		"Elem ValidateFunc added": {
+			oldField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			newField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: newVerify.ValidateBase64String,
+				},
+			},
+			expectChanged: true,
+		},
+		"Elem ValidateFunc removed": {
+			oldField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: oldVerify.ValidateBase64String,
+				},
+			},
+			newField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			expectChanged: true,
+		},
+		"Elem ValidateFunc remains set": {
+			oldField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: oldVerify.ValidateBase64String,
+				},
+			},
+			newField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: newVerify.ValidateBase64String,
+				},
+			},
+			expectChanged: false,
+		},
 
 		"ValidateDiagFunc added": {
 			oldField: &schema.Schema{},
@@ -721,6 +935,49 @@ func TestFieldChanged(t *testing.T) {
 			},
 			expectChanged: false,
 		},
+		"Elem ValidateDiagFunc added": {
+			oldField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			newField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type:             schema.TypeString,
+					ValidateDiagFunc: testValidateDiagFunc2,
+				},
+			},
+			expectChanged: true,
+		},
+		"Elem ValidateDiagFunc removed": {
+			oldField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type:             schema.TypeString,
+					ValidateDiagFunc: testValidateDiagFunc1,
+				},
+			},
+			newField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			expectChanged: true,
+		},
+		"Elem ValidateDiagFunc remains set": {
+			oldField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type:             schema.TypeString,
+					ValidateDiagFunc: testValidateDiagFunc1,
+				},
+			},
+			newField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type:             schema.TypeString,
+					ValidateDiagFunc: testValidateDiagFunc2,
+				},
+			},
+			expectChanged: false,
+		},
 	}
 
 	for tn, tc := range cases {
@@ -728,31 +985,35 @@ func TestFieldChanged(t *testing.T) {
 		t.Run(tn, func(t *testing.T) {
 			t.Parallel()
 			changed := fieldChanged(tc.oldField, tc.newField)
-			assert.Equal(
-				t,
-				tc.expectChanged,
-				changed,
-				fmt.Sprintf(
-					"want %t; got %t.\nOld field: %s\nNew field: %s\n",
-					tc.expectChanged,
-					changed,
-					spew.Sdump(tc.oldField),
-					spew.Sdump(tc.newField),
-				),
-			)
+			if changed != tc.expectChanged {
+				if diff := cmp.Diff(tc.oldField, tc.newField); diff != "" {
+					t.Errorf("want %t; got %t.\nField diff (-old, +new):\n%s",
+						tc.expectChanged,
+						changed,
+						diff,
+					)
+				} else {
+					t.Errorf("want %t; got %t. No field diff.\nOld field: %s\nNew field: %s\n",
+						tc.expectChanged,
+						changed,
+						spew.Sdump(tc.oldField),
+						spew.Sdump(tc.newField),
+					)
+				}
+			}
 		})
 	}
 }
 
 func TestComputeSchemaDiff(t *testing.T) {
 	cases := map[string]struct {
-		oldResourceMap   map[string]*schema.Resource
-		newResourceMap   map[string]*schema.Resource
+		oldResourceMap     map[string]*schema.Resource
+		newResourceMap     map[string]*schema.Resource
 		expectedSchemaDiff SchemaDiff
 	}{
 		"empty-maps": {
-			oldResourceMap:   map[string]*schema.Resource{},
-			newResourceMap:   map[string]*schema.Resource{},
+			oldResourceMap:     map[string]*schema.Resource{},
+			newResourceMap:     map[string]*schema.Resource{},
 			expectedSchemaDiff: SchemaDiff{},
 		},
 		"empty-resources": {
