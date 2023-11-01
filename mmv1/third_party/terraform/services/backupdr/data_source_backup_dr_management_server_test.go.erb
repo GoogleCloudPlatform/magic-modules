@@ -33,16 +33,16 @@ func TestAccDataSourceGoogleBackupDRManagementServer_basic(t *testing.T) {
 
 func testAccDataSourceGoogleBackupDRManagementServer_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_compute_network" "default" {
-  name = "vpc-network"
+data "google_compute_network" "default" {
+  name = "%{network_name}"
 }
 
 resource "google_backup_dr_management_server" "foo" {
  location = "us-central1"
-  name     = "management-server-1"
+  name     = "tf-test-management-server%{random_suffix}"
   type     = "BACKUP_RESTORE" 
   networks {
-    network      = google_compute_network.default.id
+    network      = data.google_compute_network.default.id
     peering_mode = "PRIVATE_SERVICE_ACCESS"
   }
 }
