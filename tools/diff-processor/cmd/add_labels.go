@@ -6,12 +6,9 @@ import (
 
 	"errors"
 	"fmt"
-	"io"
-	"os"
 	"strconv"
 	"strings"
 
-    "github.com/davecgh/go-spew/spew"
 	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
 	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/labels"
 	"github.com/GoogleCloudPlatform/magic-modules/tools/issue-labeler/labeler"
@@ -25,9 +22,9 @@ type addLabelsOptions struct {
 	rootOptions       *rootOptions
 	computeSchemaDiff func() diff.SchemaDiff
 	enrolledTeamsYaml []byte
-	stdout            io.Writer
 	prId              uint64
-	getIssue          func(id uint64) (labeler.Issue, error)
+	getIssue          func(repository string, id uint64) (labeler.Issue, error)
+	updateIssues      func(repository string, issueUpdates []labeler.IssueUpdate, dryRun bool)
 	dryRun            bool
 }
 
@@ -38,8 +35,8 @@ func newAddLabelsCmd(rootOptions *rootOptions) *cobra.Command {
 			return diff.ComputeSchemaDiff(oldProvider.ResourceMap(), newProvider.ResourceMap())
 		},
 		enrolledTeamsYaml: labeler.EnrolledTeamsYaml,
-		stdout: os.Stdout,
 		getIssue: labels.GetIssue,
+		updateIssues: labeler.UpdateIssues,
 	}
 	cmd := &cobra.Command{
 		Use:   "add-labels PR_ID [--dry-run]",
@@ -69,17 +66,18 @@ func newAddLabelsCmd(rootOptions *rootOptions) *cobra.Command {
 	return cmd
 }
 func (o *addLabelsOptions) run() error {
-	issue, err := o.getIssue(o.prId)
+	repository := "GoogleCloudPlatform/magic-modules"
+	issue, err := o.getIssue(repository, o.prId)
 
 	if err != nil {
 		return fmt.Errorf("Error retrieving PR data: %w", err)
 	}
 
 	hasServiceLabels := false
-	oldLabels := make([]string, len(issue.Labels))
+	oldLabels := make(map[string]struct{}, len(issue.Labels))
 	for _, label := range issue.Labels {
-		oldLabels = append(oldLabels, label.Name)
-		if strings.HasPrefix(label.Name, "service/") {
+		oldLabels[label.Name] = struct{}{}
+		if strings.HasPrefix(label.Name, "services/") {
 			hasServiceLabels = true
 		}
 	}
@@ -89,18 +87,29 @@ func (o *addLabelsOptions) run() error {
 
 	schemaDiff := o.computeSchemaDiff()
 	affectedResources := maps.Keys(schemaDiff)
-	spew.Dump(schemaDiff)
 	regexpLabels, err := labeler.BuildRegexLabels(o.enrolledTeamsYaml)
 	if err != nil {
 		return fmt.Errorf("Error building regex labels: %w", err)
 	}
 
-	issueUpdate := labeler.IssueUpdate{
-		Number: o.prId,
-		Labels: labeler.ComputeLabels(affectedResources, regexpLabels),
-		OldLabels: oldLabels,
+	newLabels := make(map[string]struct{}, len(oldLabels))
+	for label, _ := range oldLabels {
+		newLabels[label] = struct{}{}
 	}
-	labeler.UpdateIssues([]labeler.IssueUpdate{issueUpdate}, o.dryRun)
+	for _, label := range labeler.ComputeLabels(affectedResources, regexpLabels) {
+		newLabels[label] = struct{}{}
+	}
+
+	// Only update the issue if new labels should be added
+	if len(newLabels) != len(oldLabels) {
+		issueUpdate := labeler.IssueUpdate{
+			Number: o.prId,
+			Labels: maps.Keys(newLabels),
+			OldLabels: maps.Keys(oldLabels),
+		}
+
+		o.updateIssues(repository, []labeler.IssueUpdate{issueUpdate}, o.dryRun)
+	}
 
 	return nil
 }

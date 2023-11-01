@@ -33,8 +33,9 @@ func main() {
 			fmt.Println(`["` + strings.Join(labels, `", "`) + `"]`)
 		}
 	} else {
-		issues := labeler.GetIssues(*flagBackfillDate)
+		repository := "hashicorp/terraform-provider-google"
+		issues := labeler.GetIssues(repository, *flagBackfillDate)
 		issueUpdates := labeler.ComputeIssueUpdates(issues, regexpLabels)
-		labeler.UpdateIssues(issueUpdates, *flagDryRun)
+		labeler.UpdateIssues(repository, issueUpdates, *flagDryRun)
 	}
 }

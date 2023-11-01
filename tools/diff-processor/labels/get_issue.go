@@ -10,10 +10,10 @@ import (
 	labeler "github.com/GoogleCloudPlatform/magic-modules/tools/issue-labeler/labeler"
 )
 
-func GetIssue(id uint64) (labeler.Issue, error) {
+func GetIssue(repository string, id uint64) (labeler.Issue, error) {
 	var issue labeler.Issue
 	client := &http.Client{}
-	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/%d", id)
+	url := fmt.Sprintf("https://api.github.com/repos/%s/issues/%d", repository, id)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {

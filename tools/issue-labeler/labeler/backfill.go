@@ -37,13 +37,13 @@ type IssueUpdateBody struct {
 	Labels []string `json:"labels"`
 }
 
-func GetIssues(since string) []Issue {
+func GetIssues(repository, since string) []Issue {
 	client := &http.Client{}
 	done := false
 	page := 1
 	var issues []Issue
 	for !done {
-		url := fmt.Sprintf("https://api.github.com/repos/hashicorp/terraform-provider-google/issues?since=%s&per_page=100&page=%d", since, page)
+		url := fmt.Sprintf("https://api.github.com/repos/%s/issues?since=%s&per_page=100&page=%d", repository, since, page)
 		req, err := http.NewRequest("GET", url, nil)
 		if err != nil {
 			glog.Exitf("Error creating request: %v", err)
@@ -126,10 +126,10 @@ func ComputeIssueUpdates(issues []Issue, regexpLabels []RegexpLabel) []IssueUpda
 	return issueUpdates
 }
 
-func UpdateIssues(issueUpdates []IssueUpdate, dryRun bool) {
+func UpdateIssues(repository string, issueUpdates []IssueUpdate, dryRun bool) {
 	client := &http.Client{}
 	for _, issueUpdate := range issueUpdates {
-		url := fmt.Sprintf("https://api.github.com/repos/hashicorp/terraform-provider-google/issues/%d", issueUpdate.Number)
+		url := fmt.Sprintf("https://api.github.com/repos/%s/issues/%d", repository, issueUpdate.Number)
 		updateBody := IssueUpdateBody{Labels: issueUpdate.Labels}
 		body, err := json.Marshal(updateBody)
 		if err != nil {
@@ -146,7 +146,7 @@ func UpdateIssues(issueUpdates []IssueUpdate, dryRun bool) {
 		}
 		fmt.Printf("Existing labels: %v\n", issueUpdate.OldLabels)
 		fmt.Printf("New labels: %v\n", issueUpdate.Labels)
-		fmt.Printf("%s %s (https://github.com/hashicorp/terraform-provider-google/issues/%d)\n", req.Method, req.URL, issueUpdate.Number)
+		fmt.Printf("%s %s (https://github.com/%s/issues/%d)\n", repository, req.Method, req.URL, issueUpdate.Number)
 		b, err := json.MarshalIndent(updateBody, "", "  ")
 		if err != nil {
 			glog.Errorf("Error marshalling json: %v", err)
@@ -167,8 +167,9 @@ func UpdateIssues(issueUpdates []IssueUpdate, dryRun bool) {
 			var errResp ErrorResponse
 			json.Unmarshal(body, &errResp)
 			if errResp.Message != "" {
-				glog.Infof("API error: %s", errResp.Message)
+				glog.Errorf("API error: %s", errResp.Message)
 			}
+
 		}
 	}
 }
