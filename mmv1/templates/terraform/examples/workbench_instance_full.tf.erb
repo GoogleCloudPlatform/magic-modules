@@ -23,14 +23,14 @@ resource "google_workbench_instance" "<%= ctx[:primary_resource_id] %>" {
       disk_size_gb  = 110
       disk_type = "PD_SSD"
       disk_encryption = "GMEK"
-      kms_key = data.google_kms_crypto_key.crypto-key.id
+      kms_key = google_kms_crypto_key.crypto-key.id
     }
 
     data_disks {
       disk_size_gb  = 110
       disk_type = "PD_SSD"
       disk_encryption = "GMEK"
-      kms_key = data.google_kms_crypto_key.crypto-key.id
+      kms_key = google_kms_crypto_key.crypto-key.id
     }
 
     shielded_instance_config {
@@ -40,8 +40,8 @@ resource "google_workbench_instance" "<%= ctx[:primary_resource_id] %>" {
     }
 
     network_interfaces {
-      network = data.google_compute_network.my_network.id
-      subnet = data.google_compute_subnetwork.my_subnetwork.id
+      network = google_compute_network.my_network.id
+      subnet = google_compute_subnetwork.my_subnetwork.id
       nic_type = "GVNIC"
     }
 
@@ -71,22 +71,23 @@ resource "google_workbench_instance" "<%= ctx[:primary_resource_id] %>" {
 
 }
 
-data "google_compute_network" "my_network" {
+resource "google_compute_network" "my_network" {
   name = "<%= ctx[:vars]['network_name'] %>"
 }
 
-data "google_compute_subnetwork" "my_subnetwork" {
+resource "google_compute_subnetwork" "my_subnetwork" {
   name   = "<%= ctx[:vars]['network_name'] %>"
+  network = google_compute_network.my_network.id
   region = "us-central1"
+  ip_cidr_range = "10.0.1.0/24"
 }
 
-data "google_kms_key_ring" "keyring" {
+resource "google_kms_key_ring" "keyring" {
   name = "<%= ctx[:vars]['keyring_name'] %>"
   location = "global"
 }
 
-data "google_kms_crypto_key" "crypto-key" {
+resource "google_kms_crypto_key" "crypto-key" {
   name     = "<%= ctx[:vars]['key_name'] %>"
-  key_ring = data.google_kms_key_ring.keyring.id
+  key_ring = google_kms_key_ring.keyring.id
 }
-
