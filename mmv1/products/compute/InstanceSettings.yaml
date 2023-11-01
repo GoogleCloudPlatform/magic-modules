@@ -18,6 +18,10 @@ base_url: projects/{{project}}/zones/{{zone}}/instanceSettings
 self_link: projects/{{project}}/zones/{{zone}}/instanceSettings
 description: |
   Represents an Instance Settings resource. Instance settings are centralized configuration parameters that allow users to configure the default values for specific VM parameters that are normally set using GCE instance API methods.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Update Instance Settings': 'https://cloud.google.com/compute/docs/metadata/setting-custom-metadata#set-custom-project-zonal-metadata'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/beta/instanceSettings'
 create_verb: :PATCH
 create_url: 'projects/{{project}}/zones/{{zone}}/instanceSettings?update_mask={{update_mask}}'
 update_verb: :PATCH
