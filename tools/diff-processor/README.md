@@ -11,8 +11,9 @@ make clone OWNER_REPO=modular-magician/terraform-provider-google
 # build based on old / new dirs
 make build OLD_REF=branch_or_commit NEW_REF=branch_or_commit
 
-# Run the binary
-bin/diff-processor
+# Run the commands
+bin/diff-processor breaking-changes
+bin/diff-processor add-labels PR_ID [--dry-run]
 ```
 
 ## Test
