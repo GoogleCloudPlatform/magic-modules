@@ -382,9 +382,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 <%          end -%>
 
     // This may have caused the ID to update - update it if so.
-<%          if object.legacy_long_form_project -%>
-    id = strings.ReplaceAll(id, "projects/projects/", "projects/")
-<%          end -%>
+    id, err = tpgresource.ReplaceVars<% if object.legacy_long_form_project -%>ForId<% end -%>(d, config, "<%= id_format(object) -%>")
     if err != nil {
         return fmt.Errorf("Error constructing id: %s", err)
     }
