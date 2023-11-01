@@ -31,7 +31,7 @@ func flattenBackupDRManagementServerResourceResp(v interface{}, d *schema.Resour
 	fmt.Printf("Interface is : %s", v)
 	l := v.([]interface{})
 	for _, raw := range l {
-		// Management server is a singleton resource. It is only present in one location per project. Hence returning first resource present.
+		// Management server is a singleton resource. It is only present in one location per project. Hence returning only resource present.
 		return flattenBackupDRManagementServerResource(raw, d, config)
 	}
 	return nil
