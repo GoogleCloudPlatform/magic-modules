@@ -55,6 +55,17 @@ examples:
     primary_resource_id: 'tpu'
     vars:
       vm_name: 'test-tpu'
+    skip_test: true
+  # The purpose to have this test is to solve the issue
+  # "There is no more capacity in the zone"
+  # and not modify the documentation for the users
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'tpu_v2_vm_basic_test'
+    min_version: 'beta'
+    primary_resource_id: 'tpu'
+    vars:
+      vm_name: 'test-tpu'
+    skip_docs: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'tpu_v2_vm_full'
     min_version: 'beta'
