@@ -125,19 +125,25 @@ done
 
 test_exit_code=0
 
+affected_services_comment="None"
+
 if [[ "$run_full_VCR" = true ]]; then
   echo "run full VCR tests"
+  affected_services_comment="all service packages are affected"
   TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/replaying/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test $GOOGLE_TEST_DIRECTORY -parallel $ACCTEST_PARALLELISM -v -run=TestAcc -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" > replaying_test.log
 
   test_exit_code=$?
 else
   for service in "${!affected_services[@]}"
+  affected_services_comment="<ul>"
   do
     echo "run VCR tests in $service"
     TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/replaying/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta/services/$service -parallel $ACCTEST_PARALLELISM -v -run=TestAcc -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" >> replaying_test.log
 
     test_exit_code=$(($test_exit_code || $?))
+    affected_services_comment+="<li>$service</li>"
   done
+  affected_services_comment+="</ul>"
 fi
 
 # store replaying build log
@@ -187,6 +193,7 @@ comment+="Total tests: \`$(($FAILED_TESTS_COUNT+$PASSED_TESTS_COUNT+$SKIPPED_TES
 comment+="Passed tests \`$PASSED_TESTS_COUNT\` ${NEWLINE}"
 comment+="Skipped tests: \`$SKIPPED_TESTS_COUNT\` ${NEWLINE}"
 comment+="Affected tests: \`$FAILED_TESTS_COUNT\` ${NEWLINE}${NEWLINE}"
+comment+="<details><summary>Click here to see the affected service packages</summary><blockquote>$affected_services_comment</blockquote></details> ${NEWLINE}${NEWLINE}"
 
 if [[ -n $FAILED_TESTS_PATTERN ]]; then
   comment+="#### Action taken ${NEWLINE}"
