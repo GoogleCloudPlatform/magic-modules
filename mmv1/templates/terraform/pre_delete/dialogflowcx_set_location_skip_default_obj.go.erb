@@ -15,6 +15,7 @@ if parts := regexp.MustCompile(`locations\/([^\/]*)\/`).FindStringSubmatch(d.Get
 url = strings.Replace(url,"-dialogflow",fmt.Sprintf("%s-dialogflow",location),1)
 
 // if it's a default object Dialogflow creates for you, skip deletion
+// Note: below we try to access fields that aren't present in the resource, because this custom code is reused across multiple Dialogflow resources that contain different fields. When the field isn't present, we deliberately ignore the error and the boolean is false.
 isDefaultStartFlow, _ := d.Get("is_default_start_flow").(bool)
 isDefaultWelcomeIntent, _ := d.Get("is_default_welcome_intent").(bool)
 isDefaultNegativeIntent, _ := d.Get("is_default_negative_intent").(bool)
