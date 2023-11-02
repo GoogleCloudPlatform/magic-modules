@@ -16,8 +16,9 @@ services/google-x:
   resources:
   - google_x_resource`)
 
-func TestAddLabelsCmd(t *testing.T) {
+func TestAddLabelsCmdRun(t *testing.T) {
 	cases := map[string]struct {
+		args           []string
 		oldResourceMap map[string]*schema.Resource
 		newResourceMap map[string]*schema.Resource
 		githubIssue    *labeler.Issue
@@ -26,6 +27,7 @@ func TestAddLabelsCmd(t *testing.T) {
 		expectError    bool
 	}{
 		"empty resource map": {
+			args: []string{"12345"},
 			oldResourceMap: map[string]*schema.Resource{},
 			newResourceMap: map[string]*schema.Resource{},
 			githubIssue: &labeler.Issue{
@@ -37,6 +39,7 @@ func TestAddLabelsCmd(t *testing.T) {
 			expectedLabels: nil,
 		},
 		"resource changed that doesn't match mapping": {
+			args: []string{"12345"},
 			oldResourceMap: map[string]*schema.Resource{
 				"google_y_resource": {
 					Schema: map[string]*schema.Schema{
@@ -61,6 +64,7 @@ func TestAddLabelsCmd(t *testing.T) {
 			expectedLabels: nil,
 		},
 		"resource matches mapping but isn't changed": {
+			args: []string{"12345"},
 			oldResourceMap: map[string]*schema.Resource{
 				"google_x_resource": {
 					Schema: map[string]*schema.Schema{
@@ -86,6 +90,7 @@ func TestAddLabelsCmd(t *testing.T) {
 			expectedLabels: nil,
 		},
 		"resource changed that matches mapping": {
+			args: []string{"12345"},
 			oldResourceMap: map[string]*schema.Resource{
 				"google_x_resource": {
 					Schema: map[string]*schema.Schema{
@@ -110,6 +115,7 @@ func TestAddLabelsCmd(t *testing.T) {
 			expectedLabels: []string{"services/google-x"},
 		},
 		"service labels are deduped": {
+			args: []string{"12345"},
 			oldResourceMap: map[string]*schema.Resource{
 				"google_x_resource": {
 					Schema: map[string]*schema.Schema{
@@ -145,6 +151,7 @@ func TestAddLabelsCmd(t *testing.T) {
 			expectedLabels: []string{"services/google-x"},
 		},
 		"existing labels are preserved": {
+			args: []string{"12345"},
 			oldResourceMap: map[string]*schema.Resource{
 				"google_x_resource": {
 					Schema: map[string]*schema.Schema{
@@ -169,6 +176,7 @@ func TestAddLabelsCmd(t *testing.T) {
 			expectedLabels: []string{"override-breaking-change", "services/google-x"},
 		},
 		"existing service label prevents new service labels": {
+			args: []string{"12345"},
 			oldResourceMap: map[string]*schema.Resource{
 				"google_x_resource": {
 					Schema: map[string]*schema.Schema{
@@ -194,6 +202,7 @@ func TestAddLabelsCmd(t *testing.T) {
 			expectedLabels: nil,
 		},
 		"error fetching issue": {
+			args: []string{"12345"},
 			oldResourceMap: map[string]*schema.Resource{
 				"google_x_resource": {
 					Schema: map[string]*schema.Schema{
@@ -210,6 +219,31 @@ func TestAddLabelsCmd(t *testing.T) {
 				},
 			},
 			githubIssue: nil,
+			expectError: true,
+		},
+		"error parsing PR id": {
+			args: []string{"foobar"},
+			oldResourceMap: map[string]*schema.Resource{
+				"google_x_resource": {
+					Schema: map[string]*schema.Schema{
+						"field_a": {Description: "beep", Optional: true},
+						"field_b": {Description: "beep", Optional: true},
+					},
+				},
+			},
+			newResourceMap: map[string]*schema.Resource{
+				"google_x_resource": {
+					Schema: map[string]*schema.Schema{
+						"field_a": {Description: "beep", Required: true},
+					},
+				},
+			},
+			githubIssue: &labeler.Issue{
+				Number:      12345,
+				Body:        "Unused",
+				Labels:      []labeler.Label{{Name: "services/google-z"}},
+				PullRequest: map[string]any{},
+			},
 			expectError: true,
 		},
 	}
@@ -237,7 +271,7 @@ func TestAddLabelsCmd(t *testing.T) {
 				},
 			}
 
-			err := o.run()
+			err := o.run([]string{"1"})
 			if err != nil {
 				if tc.expectError {
 					return

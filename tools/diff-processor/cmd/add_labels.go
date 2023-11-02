@@ -4,7 +4,6 @@ import (
 	newProvider "google/provider/new/google/provider"
 	oldProvider "google/provider/old/google/provider"
 
-	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -22,7 +21,6 @@ type addLabelsOptions struct {
 	rootOptions       *rootOptions
 	computeSchemaDiff func() diff.SchemaDiff
 	enrolledTeamsYaml []byte
-	prId              uint64
 	getIssue          func(repository string, id uint64) (labeler.Issue, error)
 	updateIssues      func(repository string, issueUpdates []labeler.IssueUpdate, dryRun bool)
 	dryRun            bool
@@ -42,32 +40,22 @@ func newAddLabelsCmd(rootOptions *rootOptions) *cobra.Command {
 		Use:   "add-labels PR_ID [--dry-run]",
 		Short: addLabelsDesc,
 		Long:  addLabelsDesc,
-		Args: func(cmd *cobra.Command, args []string) error {
-			if len(args) != 1 {
-				return errors.New("Missing pull request ID.")
-			}
-
-			prId, err := strconv.ParseUint(args[0], 10, 0)
-
-			if err != nil {
-				return fmt.Errorf("PR_ID must be an unsigned integer: %w", err)
-			}
-
-			o.prId = prId
-
-			return nil
-
-		},
+		Args: cobra.ExactArgs(1),
 		RunE: func(c *cobra.Command, args []string) error {
-			return o.run()
+			return o.run(args)
 		},
 	}
 	cmd.Flags().BoolVar(&o.dryRun, "dry-run", false, "Do a dry run without updating labels")
 	return cmd
 }
-func (o *addLabelsOptions) run() error {
+func (o *addLabelsOptions) run(args []string) error {
+	prId, err := strconv.ParseUint(args[0], 10, 0)
+	if err != nil {
+		return fmt.Errorf("PR_ID must be an unsigned integer: %w", err)
+	}
+
 	repository := "GoogleCloudPlatform/magic-modules"
-	issue, err := o.getIssue(repository, o.prId)
+	issue, err := o.getIssue(repository, prId)
 
 	if err != nil {
 		return fmt.Errorf("Error retrieving PR data: %w", err)
@@ -103,7 +91,7 @@ func (o *addLabelsOptions) run() error {
 	// Only update the issue if new labels should be added
 	if len(newLabels) != len(oldLabels) {
 		issueUpdate := labeler.IssueUpdate{
-			Number:    o.prId,
+			Number:    prId,
 			Labels:    maps.Keys(newLabels),
 			OldLabels: maps.Keys(oldLabels),
 		}
