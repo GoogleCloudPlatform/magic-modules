@@ -40,22 +40,19 @@ jobs:
       with:
         repository: ${{ github.event.inputs.owner }}/${{ github.event.inputs.repo }}
         ref: ${{ github.event.inputs.branch }}
-        path: repo
         fetch-depth: 2
     - name: Cache Go modules and build cache
       uses: actions/cache@v3
       with:
         path: |
           ~/go/pkg/mod
-          ~/.cache/go-build
-        key: ${{ runner.os }}-test-${{ github.event.inputs.repo }}-${{ hashFiles('repo/go.sum') }}
+        key: ${{ runner.os }}-test-${{ github.event.inputs.repo }}-${{ hashFiles('go.sum') }}
         restore-keys: |
-          ${{ runner.os }}-test-${{ github.event.inputs.repo }}-${{ hashFiles('repo/go.sum') }}
+          ${{ runner.os }}-test-${{ github.event.inputs.repo }}-${{ hashFiles('go.sum') }}
           ${{ runner.os }}-test-${{ github.event.inputs.repo }}-
     - name: Check for Code Changes
       id: pull_request
       run: |
-        cd repo
         gofiles=$(git diff --name-only HEAD~1 | { grep -e "\.go$" -e "go.mod$" -e "go.sum$" || test $? = 1; })
         if [ -z "$gofiles" ]; then
           echo "has_changes=false" >> $GITHUB_OUTPUT
@@ -88,14 +85,12 @@ jobs:
     - name: Build Terraform Google Conversion
       if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |
-        cd repo
         go mod edit -replace github.com/hashicorp/terraform-provider-google-beta=github.com/${{ github.event.inputs.owner }}/terraform-provider-google-beta@${{ github.event.inputs.branch }}
         go mod tidy
         make build
     - name: Run Unit Tests
       if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |
-        cd repo
         make test
     - name: Post Result Status to Pull Request
       if: ${{ !cancelled() }}
