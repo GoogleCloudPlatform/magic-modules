@@ -21,7 +21,7 @@ type gcGithub interface {
 }
 
 type gcRunner interface {
-	GetCurDir() string
+	GetCWD() string
 	Copy(src, dest string) error
 	RemoveAll(path string) error
 	PushDir(path string) error
@@ -86,7 +86,7 @@ var generateCommentCmd = &cobra.Command{
 func execGenerateComment(buildID, projectID, buildStep, commit, pr, githubToken string, gh gcGithub, r gcRunner) {
 	newBranch := "auto-pr-" + pr
 	oldBranch := "auto-pr-" + pr + "-old"
-	wd := r.GetCurDir()
+	wd := r.GetCWD()
 	mmLocalPath := filepath.Join(wd, "..", "..")
 	tpgRepoName := "terraform-provider-google"
 	tpgLocalPath := filepath.Join(mmLocalPath, "..", "tpg")

@@ -12,12 +12,12 @@ import (
 )
 
 type actualRunner struct {
-	curDir   string
+	cwd      string
 	dirStack *list.List
 }
 
 type Runner interface {
-	GetCurDir() string
+	GetCWD() string
 	Copy(src, dest string) error
 	RemoveAll(path string) error
 	PushDir(path string) error
@@ -33,13 +33,13 @@ func NewRunner() (Runner, error) {
 		return nil, err
 	}
 	return &actualRunner{
-		curDir:   wd,
+		cwd:      wd,
 		dirStack: list.New(),
 	}, nil
 }
 
-func (ar *actualRunner) GetCurDir() string {
-	return ar.curDir
+func (ar *actualRunner) GetCWD() string {
+	return ar.cwd
 }
 
 func (ar *actualRunner) Copy(src, dest string) error {
@@ -55,22 +55,22 @@ func (ar *actualRunner) PushDir(path string) error {
 	if ar.dirStack == nil {
 		return errors.New("attempted to push dir, but stack was nil")
 	}
-	ar.dirStack.PushFront(ar.curDir)
-	ar.curDir = path
+	ar.dirStack.PushFront(ar.cwd)
+	ar.cwd = path
 	return os.Chdir(path)
 }
 
 // PopDir removes the most recently added directory from the stack and changes front to it.
 func (ar *actualRunner) PopDir() error {
-	if ar.dirStack == nil {
-		return errors.New("attempted to pop dir, but stack was nil")
+	if ar.dirStack == nil || ar.dirStack.Len() == 0 {
+		return errors.New("attempted to pop dir, but stack was nil or empty")
 	}
 	frontVal := ar.dirStack.Remove(ar.dirStack.Front())
 	dir, ok := frontVal.(string)
 	if !ok {
 		return fmt.Errorf("last element in dir stack was a %T, expected string", frontVal)
 	}
-	ar.curDir = dir
+	ar.cwd = dir
 	return os.Chdir(dir)
 }
 
