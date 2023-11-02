@@ -1,0 +1,213 @@
+name: downstreams
+permissions: read-all
+
+on:
+  push:
+    branches:
+      - main
+      - 'FEATURE-BRANCH-*'
+  pull_request:
+
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || format('commit-{0}', github.sha) }}
+  cancel-in-progress: true
+
+# concurrency:
+#   group: downstreams-${{ github.event.inputs.owner }}-${{ github.event.inputs.repo }}-${{ github.event.inputs.branch }}
+#   cancel-in-progress: true
+
+
+jobs:
+  build-downstreams:
+    name: ${{ matrix.repo }}
+    strategy:
+      fail-fast: false
+      matrix:
+        repo: ['terraform-provider-google', 'terraform-provider-google-beta', 'terraform-google-conversion', 'docs-examples']
+    runs-on: ubuntu-22.04
+    env:
+      BASE_BRANCH: ${{ github.event.pull_request.base.ref || github.ref }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@ec02537da5712d66d4d50a0f33b7eb52773b5ed1
+        with:
+          ruby-version: '3.1'
+
+      - name: Cache Bundler gems
+        uses: actions/cache@v2
+        with:
+          path: mmv1/vendor/bundle
+          key: ${{ runner.os }}-gems-${{ hashFiles('mmv1/**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-gems-
+
+      - name: Install Ruby dependencies
+        run: |
+          bundle config path mmv1/vendor/bundle
+          bundle install
+        working-directory: mmv1
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '^1.19'
+
+      # Cache Go modules
+      - name: Cache Go modules
+        uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - run: go install golang.org/x/tools/cmd/goimports@latest
+
+      - name: Build ${{ matrix.repo }}
+        run: |
+          set -e
+          set -x
+          # Set GOPATH to a directory the runner user has access to
+          export GOPATH=~/go
+
+          function clone_repo() {
+            export OUTPUT_PATH=$GOPATH/src/github.com/$UPSTREAM_OWNER/$GH_REPO
+            GITHUB_PATH=https://x-access-token:$GITHUB_TOKEN@github.com/$UPSTREAM_OWNER/$GH_REPO
+            mkdir -p "$(dirname $OUTPUT_PATH)"
+            git clone $GITHUB_PATH $OUTPUT_PATH --branch $BASE_BRANCH
+          }
+
+          GH_REPO="${{ matrix.repo }}"
+          if [ "$GH_REPO" == "docs-examples" ] && [ "$BASE_BRANCH" == "main" ]; then
+              BASE_BRANCH="master"
+          fi
+
+          GITHUB_PATH=https://x-access-token:$GITHUB_TOKEN@github.com/$UPSTREAM_OWNER/$GH_REPO
+
+          if [[ "$GH_REPO" == terraform-provider-google* ]]; then
+            UPSTREAM_OWNER=hashicorp
+            clone_repo
+          if [ "$GH_REPO" == "terraform-provider-google" ]; then
+              export VERSION=ga
+            else
+              export VERSION=beta
+            fi
+            make clean-provider
+            make provider
+          elif [ "$GH_REPO" == "terraform-google-conversion" ]; then
+            UPSTREAM_OWNER=GoogleCloudPlatform
+            clone_repo
+            make clean-tgc
+            make tgc
+          elif [ "$GH_REPO" == "docs-examples" ]; then
+            UPSTREAM_OWNER=terraform-google-modules
+            clone_repo
+            make tf-ocis
+          else
+            echo "case not supported"
+            exit 1
+          fi
+
+          zip -r output.zip $OUTPUT_PATH
+
+      - name: Upload built artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: artifact-${{ matrix.repo }}
+          path: output.zip
+
+  unit-test-terraform-provider-googele:
+    name: unit-test-${{ matrix.repo }}
+    strategy:
+      fail-fast: false
+      matrix:
+        repo: ['terraform-provider-google', 'terraform-provider-google-beta']
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Download built artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: artifact-${{ matrix.repo }}
+          path: artifacts
+
+      - name: Unzip the artifacts and delete the zip
+        run: |
+          unzip artifacts/output.zip -d ./
+          rm artifacts/output.zip
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '^1.19'
+
+      - name: Cache Go modules and build cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-test-${{ matrix.repo }}-${{hashFiles('go.sum','google-*/transport/**','google-*/tpgresource/**','google-*/acctest/**','google-*/envvar/**','google-*/sweeper/**','google-*/verify/**') }}
+          restore-keys: |
+            ${{ runner.os }}-test-${{ matrix.repo }}-${{ hashFiles('go.sum') }}
+            ${{ runner.os }}-test-${{ matrix.repo }}-
+
+      - name: Build Provider
+        run: |
+          go build
+
+      - name: Run Unit Tests
+        run: |
+          make testnolint
+
+      - name: Lint Check
+        run: |
+          make lint
+
+      - name: Documentation Check
+        run: |
+          make docscheck
+
+  unit-test-terraform-google-conversion:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Download built artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: artifact-${{ matrix.repo }}
+          path: artifacts
+
+      - name: Unzip the artifacts and delete the zip
+        run: |
+          unzip artifacts/output.zip -d ./
+          rm artifacts/output.zip
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '^1.19'
+
+      - name: Cache Go modules and build cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-test-terraform-google-conversion-${{ hashFiles('go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-test-terraform-google-conversion-${{ hashFiles('go.sum') }}
+            ${{ runner.os }}-test-terraform-google-conversion-
+
+      - name: Build Terraform Google Conversion
+        run: |
+          go mod edit -replace github.com/hashicorp/terraform-provider-google-beta=github.com/${{ github.event.inputs.owner }}/terraform-provider-google-beta@${{ github.event.inputs.branch }}
+          go mod tidy
+          make build
+
+      - name: Run Unit Tests
+        run: |
+          make test
