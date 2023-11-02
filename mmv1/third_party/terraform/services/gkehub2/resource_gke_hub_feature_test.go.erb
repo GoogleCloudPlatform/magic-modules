@@ -169,6 +169,12 @@ resource "google_project_service" "acm" {
   provider = google-beta
 }
 
+resource "google_project_service" "poco" {
+  project = google_project.project.project_id
+  service = "anthospolicycontroller.googleapis.com"
+  provider = google-beta
+}
+
 resource "google_project_service" "mcsd" {
   project = google_project.project.project_id
   service = "multiclusterservicediscovery.googleapis.com"
@@ -398,6 +404,10 @@ resource "google_project_service" "test_acm" {
   service = "anthosconfigmanagement.googleapis.com"
 }
 
+resource "google_project_service" "test_poco" {
+  service = "anthospolicycontroller.googleapis.com"
+}
+
 resource "google_project_service" "test_mcsd" {
   service = "multiclusterservicediscovery.googleapis.com"
 }
@@ -446,6 +456,10 @@ resource "google_project_service" "test_mci" {
 
 resource "google_project_service" "test_acm" {
   service = "anthosconfigmanagement.googleapis.com"
+}
+
+resource "google_project_service" "test_poco" {
+  service = "anthospolicycontroller.googleapis.com"
 }
 
 resource "google_project_service" "test_mcsd" {
@@ -573,6 +587,11 @@ resource "google_project_service" "mci" {
 resource "google_project_service" "acm" {
   project = google_project.project.project_id
   service = "anthosconfigmanagement.googleapis.com"
+}
+
+resource "google_project_service" "poco" {
+  project = google_project.project.project_id
+  service = "anthospolicycontroller.googleapis.com"
 }
 
 resource "google_project_service" "mcsd" {
