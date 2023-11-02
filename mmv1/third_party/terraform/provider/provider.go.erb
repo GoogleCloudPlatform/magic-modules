@@ -225,10 +225,14 @@ func DatasourceMapWithErrors() (map[string]*schema.Resource, error) {
 		"google_alloydb_supported_database_flags":          alloydb.DataSourceAlloydbSupportedDatabaseFlags(),
 		"google_artifact_registry_repository":              artifactregistry.DataSourceArtifactRegistryRepository(),
 		"google_app_engine_default_service_account":        appengine.DataSourceGoogleAppEngineDefaultServiceAccount(),
+		<% unless version == 'ga' -%>
+		"google_backup_dr_management_server":				backupdr.DataSourceGoogleCloudBackupDRService(),
+		<% end -%>
 		"google_beyondcorp_app_connection":                 beyondcorp.DataSourceGoogleBeyondcorpAppConnection(),
 		"google_beyondcorp_app_connector":                  beyondcorp.DataSourceGoogleBeyondcorpAppConnector(),
 		"google_beyondcorp_app_gateway":                    beyondcorp.DataSourceGoogleBeyondcorpAppGateway(),
 		"google_billing_account":                           billing.DataSourceGoogleBillingAccount(),
+		"google_bigquery_dataset":          								bigquery.DataSourceGoogleBigqueryDataset(),
 		"google_bigquery_default_service_account":          bigquery.DataSourceGoogleBigqueryDefaultServiceAccount(),
 		"google_certificate_manager_certificate_map":       certificatemanager.DataSourceGoogleCertificateManagerCertificateMap(),
 		"google_cloudbuild_trigger":                        cloudbuild.DataSourceGoogleCloudBuildTrigger(),
