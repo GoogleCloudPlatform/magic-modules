@@ -1096,11 +1096,7 @@ func TestAccComposerEnvironment_customBucket(t *testing.T) {
 		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComposerEnvironment_customBucket_bucketConfig(bucketName),
-			},
-			{
-				Config: testAccComposerEnvironment_customBucket_bucketConfig(bucketName) +
-                testAccComposerEnvironment_customBucket(envName, network, subnetwork),
+				Config: testAccComposerEnvironment_customBucket(bucketName, envName, network, subnetwork),
 			},
 			{
 				ResourceName:      "google_composer_environment.test",
@@ -1113,26 +1109,21 @@ func TestAccComposerEnvironment_customBucket(t *testing.T) {
 			{
 				PlanOnly:           true,
 				ExpectNonEmptyPlan: false,
-				Config:             testAccComposerEnvironment_customBucket_bucketConfig(bucketName) +
-                            testAccComposerEnvironment_customBucket(envName, network, subnetwork),
+				Config:             testAccComposerEnvironment_customBucket(bucketName, envName, network, subnetwork),
 				Check:              testAccCheckClearComposerEnvironmentFirewalls(t, network),
 			},
 		},
 	})
 }
 
-func testAccComposerEnvironment_customBucket_bucketConfig(bucketName string) string {
+func testAccComposerEnvironment_customBucket(bucketName, envName, network, subnetwork string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "test" {
   name   = "%s"
   location = "us-central1"
   force_destroy = true
 }
-`, bucketName)
-}
 
-func testAccComposerEnvironment_customBucket(envName, network, subnetwork string) string {
-	return fmt.Sprintf(`
 resource "google_composer_environment" "test" {
   name   = "%s"
   region = "us-central1"
@@ -1166,7 +1157,7 @@ resource "google_compute_subnetwork" "test" {
   region        = "us-central1"
   network       = google_compute_network.test.self_link
 }
-`, envName, network, subnetwork)
+`, bucketName, envName, network, subnetwork)
 }
 
 func testAccComposerEnvironment_basic(name, network, subnetwork string) string {
