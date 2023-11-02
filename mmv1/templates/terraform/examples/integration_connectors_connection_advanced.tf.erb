@@ -102,7 +102,7 @@ resource "google_integration_connectors_connection" "<%= ctx[:primary_resource_i
     reason = "Its not locked"
   }
   log_config {
-    enabled = false
+    enabled = true
   }
   node_config {
     min_node_count = 2
@@ -151,7 +151,7 @@ resource "google_integration_connectors_connection" "<%= ctx[:primary_resource_i
       secret_version = google_secret_manager_secret_version.secret-version-basic.name
     }
     server_cert_type = "PEM"
-    trust_model      = "PUBLIC"
+    trust_model      = "PRIVATE"
     type             = "TLS"
     use_ssl          = true
   }
