@@ -8,8 +8,8 @@ import (
 	"os"
 	"sort"
 
-	"github.com/GoogleCloudPlatform/magic-modules/.ci/diff-processor/diff"
-	"github.com/GoogleCloudPlatform/magic-modules/.ci/diff-processor/rules"
+	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
+	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/rules"
 	"github.com/spf13/cobra"
 )
 
