@@ -790,7 +790,7 @@ func resourceDataflowFlexJobTypeCustomizeDiff(_ context.Context, d *schema.Resou
 				continue
 			}
 
-			if field != "terraform_labels" && d.HasChange(field) {
+			if d.HasChange(field) {
 				if err := d.ForceNew(field); err != nil {
 					return err
 				}

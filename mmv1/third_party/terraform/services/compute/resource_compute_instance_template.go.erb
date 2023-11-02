@@ -932,6 +932,7 @@ be from 0 to 999,999,999 inclusive.`,
 			"terraform_labels": {
 				Type:        schema.TypeMap,
 				Computed:    true,
+				ForceNew:    true,
 				Set:         schema.HashString,
 				Description: `The combination of labels configured directly on the resource and default labels configured on the provider.`,
 				Elem:        &schema.Schema{Type: schema.TypeString},

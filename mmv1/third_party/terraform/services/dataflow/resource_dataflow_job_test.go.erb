@@ -378,6 +378,45 @@ func TestAccDataflowJob_withProviderDefaultLabels(t *testing.T) {
 	})
 }
 
+func TestAccDataflowJob_migration(t *testing.T) {
+	// Dataflow responses include serialized java classes and bash commands
+	// This makes body comparison infeasible
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	randStr := acctest.RandString(t, 10)
+	bucket := "tf-test-dataflow-gcs-" + randStr
+	job := "tf-test-dataflow-job-" + randStr
+	key := "my-label"
+	value := "my-value"
+
+	oldVersion := map[string]resource.ExternalProvider{
+		"google": {
+			VersionConstraint: "4.84.0", // a version that doesn't separate user defined labels and system labels
+			Source:            "registry.terraform.io/hashicorp/google",
+		},
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config:            testAccDataflowJob_labels(bucket, job, key, value),
+				ExternalProviders: oldVersion,
+			},
+			{
+				Config: testAccDataflowJob_labels(bucket, job, key, value),
+				ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+				Check: resource.ComposeTestCheckFunc(
+					testAccDataflowJobExists(t, "google_dataflow_job.big_data"),
+					testAccDataflowJobHasLabels(t, "google_dataflow_job.big_data", key),
+				),
+			},
+		},
+	})
+}
+
 func TestAccDataflowJob_withIpConfig(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible

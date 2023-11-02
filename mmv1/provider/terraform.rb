@@ -105,7 +105,8 @@ module Provider
     end
 
     def force_new?(property, resource)
-      (!property.output || property.is_a?(Api::Type::KeyValueEffectiveLabels)) &&
+      (!property.output || property.is_a?(Api::Type::KeyValueEffectiveLabels) ||
+       property.is_a?(Api::Type::KeyValueTerraformLabels)) &&
         (property.immutable || (resource.immutable && property.update_url.nil? &&
                               property.immutable.nil? &&
                             (property.parent.nil? ||

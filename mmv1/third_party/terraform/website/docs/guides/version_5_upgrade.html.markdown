@@ -98,8 +98,8 @@ immediately, with more details in dedicated headers below:
 `terraform plan` or `terraform apply` on Google provider `5.0.0` or later with
 an existing pre-`5.0.0` resource before an `apply`, the plan will show an
 update adding your current `labels` values to `terraform_labels`. This change
-may result in a no-op update call to the API depending on the resource
-implementation, but can otherwise be safely applied.
+may result in a no-op update call to the API or resource recreation depending
+on the resource implementation, but can otherwise be safely applied.
 
 !> This change introduced a regression we were unable to resolve, and labels
 with an empty value (`""`) should be avoided, as they will be ignored and not
