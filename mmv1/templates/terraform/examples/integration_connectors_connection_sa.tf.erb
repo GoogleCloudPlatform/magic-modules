@@ -95,8 +95,7 @@ resource "google_integration_connectors_connection" "<%= ctx[:primary_resource_i
   destination_config {
     key = "url"
     destination {
-        host = "https://test.zendesk.com"
-        port = 80
+      service_attachment = "projects/connectors-example/regions/us-central1/serviceAttachments/test"
     }
   }
   lock_config {
@@ -188,8 +187,7 @@ resource "google_integration_connectors_connection" "<%= ctx[:primary_resource_i
     registration_destination_config {
       key = "registration_destination_config"
       destination {
-          host = "https://test.zendesk.com"
-          port = 80
+          service_attachment = "projects/connectors-example/regions/us-central1/serviceAttachments/test"
         }
     }
     auth_config {
