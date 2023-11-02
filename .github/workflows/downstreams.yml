@@ -124,6 +124,7 @@ jobs:
 
   unit-test-terraform-provider-googele:
     name: unit-test-${{ matrix.repo }}
+    needs: build-downstreams
     strategy:
       fail-fast: false
       matrix:
@@ -174,6 +175,7 @@ jobs:
           make docscheck
 
   unit-test-terraform-google-conversion:
+    needs: build-downstreams
     runs-on: ubuntu-22.04
     steps:
       - name: Download built artifacts
