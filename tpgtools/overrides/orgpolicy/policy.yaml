@@ -7,3 +7,9 @@
   field: spec.rules.deny_all
 - type: ENUM_BOOL
   field: spec.rules.enforce
+- type: ENUM_BOOL
+  field: dry_run_spec.rules.allow_all
+- type: ENUM_BOOL
+  field: dry_run_spec.rules.deny_all
+- type: ENUM_BOOL
+  field: dry_run_spec.rules.enforce
