@@ -129,6 +129,7 @@ if [[ run_full_VCR ]]; then
   test_exit_code=$?
 else
   for service in "${!affected_services[@]}"
+  do
     TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/replaying/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta/services/$service -parallel $ACCTEST_PARALLELISM -v -run=TestAcc -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" >> replaying_test.log
 
     test_exit_code=$(($test_exit_code || $?))
