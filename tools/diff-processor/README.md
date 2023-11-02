@@ -11,9 +11,12 @@ make clone OWNER_REPO=modular-magician/terraform-provider-google
 # build based on old / new dirs
 make build OLD_REF=branch_or_commit NEW_REF=branch_or_commit
 
-# Run the commands
+# Run breaking change detection on the difference between OLD_REF and NEW_REF
 bin/diff-processor breaking-changes
-GITHUB_TOKEN=github_token bin/diff-processor add-labels PR_ID [--dry-run]  # Requires write access to issues
+
+# Add labels to a PR based on the resources changed between OLD_REF and NEW_REF
+# The token used must have write access to issues
+GITHUB_TOKEN=github_token bin/diff-processor add-labels PR_ID [--dry-run]
 ```
 
 ## Test
