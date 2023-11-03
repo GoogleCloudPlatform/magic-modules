@@ -1,3 +1,5 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
 package acctest
 
 import (
@@ -6,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -14,17 +17,18 @@ import (
 	"path/filepath"
 	"reflect"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 	"sync"
 	"testing"
 	"time"
 
-	"github.com/hashicorp/terraform-provider-google/google/fwmodels"
-	"github.com/hashicorp/terraform-provider-google/google/fwprovider"
-	tpgprovider "github.com/hashicorp/terraform-provider-google/google/provider"
-	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/fwmodels"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/fwprovider"
+	tpgprovider "github.com/hashicorp/terraform-provider-google-beta/google-beta/provider"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 
 	"github.com/dnaeon/go-vcr/cassette"
 	"github.com/dnaeon/go-vcr/recorder"
@@ -38,12 +42,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func IsVcrEnabled() bool {
 	envPath := os.Getenv("VCR_PATH")
 	vcrMode := os.Getenv("VCR_MODE")
 	return envPath != "" && vcrMode != ""
+}
+
+func IsRecordApiCreateGet() bool {
+	envPath := os.Getenv("RECORD_API")
+	return envPath != ""
 }
 
 var configsLock = sync.RWMutex{}
@@ -147,6 +157,12 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 	} else if isReleaseDiffEnabled() {
 		c = initializeReleaseDiffTest(c, t.Name())
 	}
+
+	if IsRecordApiCreateGet() {
+		clearLogsForTest(t.Name())
+		c = addLoggingPrestep(c, t.Name())
+	}
+
 	resource.Test(t, c)
 }
 
@@ -222,6 +238,285 @@ func closeRecorder(t *testing.T) {
 func isReleaseDiffEnabled() bool {
 	releaseDiff := os.Getenv("RELEASE_DIFF")
 	return releaseDiff != ""
+}
+
+// Ensure the specified directory exists
+func ensureDir(dirPath string) {
+	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
+		err := os.MkdirAll(dirPath, 0755)
+		if err != nil {
+			log.Fatalf("Failed to create directory: %v", err)
+		}
+	}
+}
+
+// In certain scenarios, multiple resource types may share the same read file.
+// In this specific case, we choose to output logs only for the resource types
+// that are actively used in the test.
+func logTestdataMultiple(testName, fileName, data string, resourceTypes ...string) {
+	testStep := fmt.Sprint(testMetaData[testName])
+	paths := []string{"testdata", testName, testStep}
+
+	// Iterate over the subdirectories and append them to the paths if they exist
+	for _, resourceType := range resourceTypes {
+		pathsResource := append(paths, resourceType)
+		dirPath := filepath.Join(pathsResource...)
+		if _, err := os.Stat(dirPath); err == nil {
+			logTestdata(testName, fileName, data, resourceType)
+		}
+	}
+}
+
+// Log to a file in the testdata directory based on the test name, step, and desired file name
+func logTestdata(testName, fileName, data string, subDirs ...string) {
+	testStep := fmt.Sprint(testMetaData[testName])
+	paths := []string{"testdata", testName, testStep}
+	paths = append(paths, subDirs...) // append subdirectories if any
+	dirPath := filepath.Join(paths...)
+	ensureDir(dirPath)
+
+	filePath := filepath.Join(dirPath, fileName)
+
+	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Fatalf("Failed to open log file: %v", err)
+	}
+	defer file.Close()
+
+	_, err = fmt.Fprintln(file, data)
+	if err != nil {
+		log.Fatalf("Failed to write to log file: %v", err)
+	}
+}
+
+func copyFile(src, testName string, subDirs ...string) error {
+	fileName := filepath.Base(src)
+
+	// Construct the directory path using testName and subDirs
+	testStep := fmt.Sprint(testMetaData[testName])
+	paths := []string{"testdata", testName, testStep}
+	paths = append(paths, subDirs...) // append subdirectories if any
+	dirPath := filepath.Join(paths...)
+	ensureDir(dirPath)
+
+	// Construct the full destination path for the file
+	destPath := filepath.Join(dirPath, fileName)
+
+	// Check if dest file already exists; if yes, just return
+	if _, err := os.Stat(destPath); err == nil {
+		return nil
+	} else if !os.IsNotExist(err) {
+		return err
+	}
+
+	// Open source file for reading
+	srcFile, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer srcFile.Close()
+
+	// Create and open dest file for writing
+	destFile, err := os.Create(destPath)
+	if err != nil {
+		return err
+	}
+	defer destFile.Close()
+
+	// Copy from src to dest
+	if _, err := io.Copy(destFile, srcFile); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Clear all logs from the testdata/<testname> directory
+func clearLogsForTest(testName string) {
+	dirPath := filepath.Join("testdata", testName)
+	err := os.RemoveAll(dirPath)
+	if err != nil {
+		log.Fatalf("Failed to clear logs for test %s: %v", testName, err)
+	}
+}
+
+var testMetaData = map[string]int{}
+
+func safeGetAttribute(is map[string]string, testName string, key string) string {
+	v, ok := is[key]
+
+	if !ok {
+		logTestdata(testName, "errors", fmt.Sprintf("%s: Attribute '%s' not found\n\n", key))
+
+		return ""
+	}
+
+	return v
+}
+
+func findValuesWithPrefix(input, prefix string) ([]string, error) {
+	// Prepare a regex pattern that matches the prefix followed by a dot and a valid Terraform variable name
+	fmt.Println("searching for prefix - ", prefix)
+	pattern := regexp.QuoteMeta(prefix) + `\.([a-zA-Z0-9_\-\.]+)`
+	re := regexp.MustCompile(pattern)
+
+	// Find all matches in the input string
+	matches := re.FindAllStringSubmatch(input, -1)
+
+	// Extract the variable names from the matches and eliminate duplicates
+	valuesMap := make(map[string]bool)
+	var values []string
+	for _, match := range matches {
+		if len(match) > 1 {
+			fmt.Printf("found match %v\n", match)
+			valuesMap[match[1]] = true
+		}
+	}
+
+	for key := range valuesMap {
+		values = append(values, key)
+	}
+
+	if len(values) == 0 {
+		return nil, fmt.Errorf("%s not found in input\n %s \n\n", prefix, input)
+	}
+
+	return values, nil
+}
+
+func splitResourcesAndData(hclContent string) map[string]string {
+	blocks := make(map[string]string)
+	blockStartPattern := `^(resource|data)\s+"([^"]+)"\s+"([^"]+)"`
+	re := regexp.MustCompile(blockStartPattern)
+
+	var currentBlockKey string
+	var currentBlock strings.Builder
+	insideBlock := false
+	lines := strings.Split(hclContent, "\n")
+
+	for i, line := range lines {
+		trimmedLine := strings.TrimSpace(line)
+
+		matches := re.FindStringSubmatch(trimmedLine)
+		if len(matches) == 4 {
+			if insideBlock { // Finish the current block if we're inside one
+				blocks[currentBlockKey] = currentBlock.String()
+				currentBlock.Reset()
+			}
+			insideBlock = true
+			if matches[1] == "resource" {
+				currentBlockKey = fmt.Sprintf("%s.%s", matches[2], matches[3])
+			} else {
+				currentBlockKey = fmt.Sprintf("%s.%s.%s", matches[1], matches[2], matches[3])
+
+			}
+			currentBlock.WriteString(line + "\n")
+		} else if insideBlock {
+			currentBlock.WriteString(line + "\n")
+		}
+
+		if i == len(lines)-1 && insideBlock { // If it's the last line and we're inside a block
+			blocks[currentBlockKey] = currentBlock.String()
+			currentBlock.Reset()
+		}
+	}
+
+	return blocks
+}
+
+func encapsulateInQuotes(s string) string {
+	return "\"" + s + "\""
+}
+
+func addLoggingPrestep(c resource.TestCase, testName string) resource.TestCase {
+	var replacementSteps []resource.TestStep
+
+	for _, testStep := range c.Steps {
+		config := testStep.Config
+		splitConfig := splitResourcesAndData(config)
+
+		oldSkipFunc := testStep.SkipFunc
+		oldTestCheckFunc := testStep.Check
+		testStep.Check = func(state *terraform.State) error {
+			if config == "" {
+				return oldTestCheckFunc(state)
+			}
+
+			for resourceName, v := range splitConfig {
+				resourceType := resourceName[:strings.LastIndex(resourceName, ".")]
+				if !strings.HasPrefix(resourceType, "data.") {
+					resourceReadSourceCode := resourceCreateSourceFileLocations[resourceType]
+					copyFile(resourceReadSourceCode, testName, resourceType)
+					resourceCreateSourceCode := resourceReadSourceFileLocations[resourceType]
+					copyFile(resourceCreateSourceCode, testName, resourceType)
+				}
+				logTestdata(testName, resourceName+".tf", v, resourceType, "rawtf")
+			}
+			// dependency data.google_compute_image.my_image needed for resource google_compute_instance.foobar
+			for _, m := range state.Modules {
+				for resourceName, r := range m.Resources {
+					resourceType := resourceName[:strings.LastIndex(resourceName, ".")]
+					for _, d := range r.Dependencies {
+						fmt.Printf("dependency %s needed for %s \n", d, resourceName)
+						resourceConfig, ok := splitConfig[resourceName]
+						if !ok {
+							logTestdata(testName, "errors", fmt.Sprintf("%s not found in resourceConfig map\n\n", resourceName), resourceType)
+							logTestdata(testName, "split-config-dump.log", fmt.Sprintf("%v+ \n\n", splitConfig), resourceType)
+						}
+
+						dependency, ok := m.Resources[d]
+						if !ok {
+							logTestdata(testName, "errors", fmt.Sprintf("%s not found in resource map\n\n", d), resourceType)
+							logTestdata(testName, "resources-dump.log", fmt.Sprintf("%v+ \n\n", m.Resources), resourceType)
+						}
+						dependencyLookupsNeeded, err := findValuesWithPrefix(resourceConfig, d)
+						if err != nil {
+							logTestdata(testName, "errors", fmt.Sprintf("%s\n\n", err), resourceType)
+						}
+						for _, dpl := range dependencyLookupsNeeded {
+							dependencyValue := safeGetAttribute(dependency.Primary.Attributes, testName, dpl)
+							dependencyValue = encapsulateInQuotes(dependencyValue)
+							resourceConfig = strings.ReplaceAll(resourceConfig, d+"."+dpl, dependencyValue)
+						}
+						splitConfig[resourceName] = resourceConfig
+					}
+				}
+			}
+
+			for resourceName, v := range splitConfig {
+				resourceType := resourceName[:strings.LastIndex(resourceName, ".")]
+				logTestdata(testName, resourceName+".split.tf", v, resourceType)
+			}
+
+			if oldTestCheckFunc != nil {
+				return oldTestCheckFunc(state)
+			}
+			return nil
+		}
+
+		testStep.SkipFunc = func() (bool, error) {
+			if val, ok := testMetaData[testName]; ok && val > 0 {
+				testMetaData[testName] = val + 1
+			} else {
+				testMetaData[testName] = 1
+			}
+
+			if oldSkipFunc != nil {
+				return oldSkipFunc()
+			}
+
+			if config != "" {
+				logTestdata(testName, "config.tf", config)
+			}
+			return false, nil
+		}
+
+		replacementSteps = append(replacementSteps, testStep)
+	}
+
+	c.Steps = replacementSteps
+
+	return c
 }
 
 func initializeReleaseDiffTest(c resource.TestCase, testName string) resource.TestCase {
@@ -436,7 +731,7 @@ func configureApiClient(ctx context.Context, p *fwprovider.FrameworkProvider, di
 // GetSDKProvider gets the SDK provider with an overwritten configure function to be called by MuxedProviders
 func GetSDKProvider(testName string) *schema.Provider {
 	prov := tpgprovider.Provider()
-	if IsVcrEnabled() {
+	if IsVcrEnabled() || IsRecordApiCreateGet() {
 		old := prov.ConfigureContextFunc
 		prov.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 			return getCachedConfig(ctx, d, old, testName)
@@ -445,6 +740,129 @@ func GetSDKProvider(testName string) *schema.Provider {
 		log.Print("[DEBUG] VCR_PATH or VCR_MODE not set, skipping VCR")
 	}
 	return prov
+}
+
+var resourceCreateSourceFileLocations map[string]string
+var resourceReadSourceFileLocations map[string]string
+var validReadFunctions map[string][]string
+
+func FunctionDetails(fn interface{}) (funcName, file string, ok bool) {
+	val := reflect.ValueOf(fn)
+
+	if val.Kind() != reflect.Func {
+		return "", "", false
+	}
+
+	fnPtr := val.Pointer()
+	fnVal := runtime.FuncForPC(fnPtr)
+	if fnVal == nil {
+		return "", "", false
+	}
+
+	funcName = fnVal.Name()
+	file, _ = fnVal.FileLine(fnPtr)
+
+	return funcName, file, true
+}
+
+func populateResourceDataMaps() {
+	validReadFunctions = map[string][]string{}
+	resourceCreateSourceFileLocations = map[string]string{}
+	resourceReadSourceFileLocations = map[string]string{}
+	prov := tpgprovider.Provider()
+	for resourceType, resource := range prov.ResourcesMap {
+		var funcName, file string
+		var ok bool
+		if resource.Read != nil {
+			funcName, file, ok = FunctionDetails(resource.Read)
+		} else if resource.ReadContext != nil {
+			funcName, file, ok = FunctionDetails(resource.ReadContext)
+		} else if resource.ReadWithoutTimeout != nil {
+			funcName, file, ok = FunctionDetails(resource.ReadWithoutTimeout)
+		}
+
+		var _, createFileSource string
+		var _ bool
+
+		if resource.Create != nil {
+			_, createFileSource, _ = FunctionDetails(resource.Create)
+		} else if resource.CreateContext != nil {
+			_, createFileSource, _ = FunctionDetails(resource.CreateContext)
+		} else if resource.CreateWithoutTimeout != nil {
+			_, createFileSource, _ = FunctionDetails(resource.CreateWithoutTimeout)
+		}
+
+		if ok {
+			fmt.Printf("%s - %s - %s \n", resourceType, funcName, file)
+		}
+		validReadFunctions[funcName] = append(validReadFunctions[funcName], resourceType)
+		resourceCreateSourceFileLocations[resourceType] = createFileSource
+		resourceReadSourceFileLocations[resourceType] = file
+	}
+}
+
+// Checks if the function is a read function, if so returns the resource
+// that this read function belongs to
+func isValidReadFunction(functionName string) ([]string, bool) {
+	if validReadFunctions == nil {
+		populateResourceDataMaps()
+	}
+	resourceTypes, exists := validReadFunctions[functionName]
+	return resourceTypes, exists
+}
+
+func findCallerWithSubstring() (resourceTypes []string, found bool) {
+	pc := make([]uintptr, 15)
+	n := runtime.Callers(0, pc)
+	if n == 0 {
+		return
+	}
+
+	pc = pc[:n]
+	frames := runtime.CallersFrames(pc)
+
+	// Loop over the frames to find the desired function name substring
+	for {
+		frame, more := frames.Next()
+		resourceTypes, validReadFunction := isValidReadFunction(frame.Function)
+		if validReadFunction {
+			// Check next immediate parent
+			frame2, more2 := frames.Next()
+			// There are two functions that will call read.
+			// One is the Create function, the next is the SDK to refresh state. We only care about the
+			// sdk refresh.
+			if more2 && strings.Contains(frame2.Function, "schema.(*Resource).read") {
+				return resourceTypes, true
+			}
+		}
+		if !more {
+			break
+		}
+	}
+
+	return nil, false
+}
+
+type loggingRoundTripper struct {
+	underlying http.RoundTripper
+	testName   string
+}
+
+// RoundTrip logs the request and then delegates to the underlying RoundTripper
+func (lrt *loggingRoundTripper) RoundTrip(r *http.Request) (*http.Response, error) {
+	startTime := time.Now()
+	resp, err := lrt.underlying.RoundTrip(r)
+	duration := time.Since(startTime)
+	resourceTypes, callerfound := findCallerWithSubstring()
+	if callerfound {
+		logTestdataMultiple(lrt.testName, "requests.log", fmt.Sprintf("%s", resourceTypes), resourceTypes...)
+		if err != nil {
+			logTestdataMultiple(lrt.testName, "requests.log", fmt.Sprintf("HTTP Request failed: %s %s. Duration: %v. Error: %s\n\n", r.Method, r.URL, duration, err), resourceTypes...)
+		} else {
+			logTestdataMultiple(lrt.testName, "requests.log", fmt.Sprintf("HTTP Request: %s %s. Duration: %v. Response status: %d\n%s\n\n", r.Method, r.URL, duration, resp.StatusCode, resp.Body), resourceTypes...)
+		}
+	}
+	return resp, err
 }
 
 // Returns a cached config if VCR testing is enabled. This enables us to use a single HTTP transport
@@ -467,7 +885,17 @@ func getCachedConfig(ctx context.Context, d *schema.ResourceData, configureFunc 
 
 	var fwD fwDiags.Diagnostics
 	config := c.(*transport_tpg.Config)
-	config.PollInterval, config.Client.Transport, fwD = HandleVCRConfiguration(ctx, testName, config.Client.Transport, config.PollInterval)
+	if IsVcrEnabled() {
+		config.PollInterval, config.Client.Transport, fwD = HandleVCRConfiguration(ctx, testName, config.Client.Transport, config.PollInterval)
+	}
+
+	if IsRecordApiCreateGet() {
+		tempClient := &http.Client{
+			Transport: &loggingRoundTripper{underlying: config.Client.Transport, testName: testName},
+		}
+		config.Client.Transport = tempClient.Transport
+	}
+
 	if fwD.HasError() {
 		diags = append(diags, *tpgresource.FrameworkDiagsToSdkDiags(fwD)...)
 		return nil, diags
