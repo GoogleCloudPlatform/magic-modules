@@ -86,7 +86,7 @@ func ParseComputeReservationId(id string, config *transport_tpg.Config) (*Comput
 	} else if len(parts) == 2 {
 		// Project is optional.
 		if config.Project == "" {
-			return nil, fmt.Errorf("The default project for the provider must be set when using the `{region}/{name}` id format.")
+			return nil, fmt.Errorf("The default project for the provider must be set when using the `{zone}/{name}` id format.")
 		}
 
 		return &ComputeReservationId{
@@ -95,20 +95,20 @@ func ParseComputeReservationId(id string, config *transport_tpg.Config) (*Comput
 			Name:    parts[1],
 		}, nil
 	} else if len(parts) == 1 {
-		// Project and region is optional
+		// Project and zone is optional
 		if config.Project == "" {
 			return nil, fmt.Errorf("The default project for the provider must be set when using the `{name}` id format.")
 		}
 		if config.Zone == "" {
-			return nil, fmt.Errorf("The default region for the provider must be set when using the `{name}` id format.")
+			return nil, fmt.Errorf("The default zone for the provider must be set when using the `{name}` id format.")
 		}
 
 		return &ComputeReservationId{
 			Project: config.Project,
-			Zone:    config.Region,
+			Zone:    config.Zone,
 			Name:    parts[0],
 		}, nil
 	}
 
-	return nil, fmt.Errorf("Invalid compute reservation id. Expecting resource link, `{project}/{region}/{name}`, `{region}/{name}` or `{name}` format.")
+	return nil, fmt.Errorf("Invalid compute reservation id. Expecting resource link, `{project}/{zone}/{name}`, `{zone}/{name}` or `{name}` format.")
 }
