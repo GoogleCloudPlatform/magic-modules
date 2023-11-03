@@ -51,5 +51,5 @@ jobs:
 
       - name: Run Unit Tests
         run: |
-          cdtgc
+          cd tgc
           make test
