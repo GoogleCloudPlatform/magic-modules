@@ -105,12 +105,13 @@ module Provider
     end
 
     def force_new?(property, resource)
-      (!property.output || property.is_a?(Api::Type::KeyValueEffectiveLabels) ||
-       property.is_a?(Api::Type::KeyValueTerraformLabels)) &&
+      ((!property.output || property.is_a?(Api::Type::KeyValueEffectiveLabels)) &&
         (property.immutable || (resource.immutable && property.update_url.nil? &&
                               property.immutable.nil? &&
                             (property.parent.nil? ||
-                             force_new?(property.parent, resource))))
+                             force_new?(property.parent, resource))))) ||
+        (property.is_a?(Api::Type::KeyValueTerraformLabels) &&
+          !updatable?(resource, resource.all_user_properties))
     end
 
     # Returns tuples of (fieldName, list of update masks) for
