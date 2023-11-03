@@ -95,7 +95,9 @@ popd
 set -e
 
 ## Add labels based on changed resources
-bin/diff-processor add-labels $PR_NUMBER
+set +e
+$MM_LOCAL_PATH/tools/diff-processor/bin/diff-processor add-labels $PR_NUMBER
+set -e
 
 ## Missing test setup and execution
 TPGB_LOCAL_PATH_OLD="${TPGB_LOCAL_PATH}old"
