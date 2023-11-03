@@ -337,3 +337,23 @@ properties:
         values:
           - :DISABLED
           - :PROJECT_SINGLETON_POLICY_ENFORCE
+  - !ruby/object:Api::Type::NestedObject
+    name: proxyConfig
+    description: |
+      Support for proxy configuration.
+    allow_empty_object: true
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: KubernetesSecret
+        description: |
+          The Kubernetes Secret resource that contains the HTTP(S) proxy configuration.
+        allow_empty_object: true
+        properties:
+          - !ruby/object:Api::Type::String
+            name: proxySecretName
+            description: |
+              Name of the kubernetes secret containing the proxy config.
+          - !ruby/object:Api::Type::String
+            name: proxySecretNamespace
+            description: |
+              Namespace of the kubernetes secret containing the proxy config.
