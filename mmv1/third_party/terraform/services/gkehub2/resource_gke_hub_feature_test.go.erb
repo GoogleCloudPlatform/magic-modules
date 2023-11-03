@@ -386,10 +386,6 @@ func TestAccGKEHubFeature_FleetDefaultMemberConfigServiceMesh(t *testing.T) {
 
 func testAccGKEHubFeature_FleetDefaultMemberConfigServiceMesh(context map[string]interface{}) string {
 	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
-resource "google_project_service" "test_mesh" {
-  service = "meshconfig.googleapis.com"
-}
-
 resource "google_gke_hub_feature" "feature" {
   name = "servicemesh"
   location = "global"
@@ -398,17 +394,14 @@ resource "google_gke_hub_feature" "feature" {
       management = "MANAGEMENT_AUTOMATIC"
     }
   }
-  depends_on = [google_project_service.test_mesh]
+  depends_on = [google_project_service.mesh]
+  project = google_project.project.project_id
 }
 `, context)
 }
 
 func testAccGKEHubFeature_FleetDefaultMemberConfigServiceMeshUpdate(context map[string]interface{}) string {
 	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
-resource "google_project_service" "test_mesh" {
-  service = "meshconfig.googleapis.com"
-}
-
 resource "google_gke_hub_feature" "feature" {
   name = "servicemesh"
   location = "global"
@@ -417,7 +410,8 @@ resource "google_gke_hub_feature" "feature" {
       management = "MANAGEMENT_MANUAL"
     }
   }
-  depends_on = [google_project_service.test_mesh]
+  depends_on = [google_project_service.mesh]
+  project = google_project.project.project_id
 }
 `, context)
 }
@@ -461,10 +455,6 @@ func TestAccGKEHubFeature_FleetDefaultMemberConfigConfigManagement(t *testing.T)
 
 func testAccGKEHubFeature_FleetDefaultMemberConfigConfigManagement(context map[string]interface{}) string {
 	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
-resource "google_project_service" "test_acm" {
-  service = "anthosconfigmanagement.googleapis.com"
-}
-
 resource "google_gke_hub_feature" "feature" {
   name = "configmanagement"
   location = "global"
@@ -483,17 +473,14 @@ resource "google_gke_hub_feature" "feature" {
       }
     }
   }
-  depends_on = [google_project_service.test_acm]
+  depends_on = [google_project_service.acm]
+  project = google_project.project.project_id
 }
 `, context)
 }
 
 func testAccGKEHubFeature_FleetDefaultMemberConfigConfigManagementUpdate(context map[string]interface{}) string {
 	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
-resource "google_project_service" "test_acm" {
-  service = "anthosconfigmanagement.googleapis.com"
-}
-
 resource "google_gke_hub_feature" "feature" {
   name = "configmanagement"
   location = "global"
@@ -511,7 +498,8 @@ resource "google_gke_hub_feature" "feature" {
       }
     }
   }
-  depends_on = [google_project_service.test_acm]
+  depends_on = [google_project_service.acm]
+  project = google_project.project.project_id
 }
 `, context)
 }
