@@ -1,4 +1,4 @@
-package main
+package labeler
 
 import (
 	"fmt"
@@ -17,7 +17,7 @@ var resourceRegexp = regexp.MustCompile(`google_[\w*.]+`)
 
 var (
 	//go:embed enrolled_teams.yml
-	enrolledTeamsYaml []byte
+	EnrolledTeamsYaml []byte
 )
 
 type labelData struct {
@@ -25,14 +25,14 @@ type labelData struct {
 	Resources []string `yaml:"resources"`
 }
 
-type regexpLabel struct {
+type RegexpLabel struct {
 	Regexp *regexp.Regexp
 	Label  string
 }
 
-func buildRegexLabels(teamsYaml []byte) ([]regexpLabel, error) {
+func BuildRegexLabels(teamsYaml []byte) ([]RegexpLabel, error) {
 	enrolledTeams := make(map[string]labelData)
-	regexpLabels := []regexpLabel{}
+	regexpLabels := []RegexpLabel{}
 	if err := yaml.Unmarshal(teamsYaml, &enrolledTeams); err != nil {
 		return regexpLabels, fmt.Errorf("Error unmarshalling enrolled teams yaml: %w", err)
 	}
@@ -40,7 +40,7 @@ func buildRegexLabels(teamsYaml []byte) ([]regexpLabel, error) {
 	for label, data := range enrolledTeams {
 		for _, resource := range data.Resources {
 			exactResource := fmt.Sprintf("^%s$", resource)
-			regexpLabels = append(regexpLabels, regexpLabel{
+			regexpLabels = append(regexpLabels, RegexpLabel{
 				Regexp: regexp.MustCompile(exactResource),
 				Label:  label,
 			})
@@ -54,7 +54,7 @@ func buildRegexLabels(teamsYaml []byte) ([]regexpLabel, error) {
 	return regexpLabels, nil
 }
 
-func extractAffectedResources(body string) []string {
+func ExtractAffectedResources(body string) []string {
 	section := sectionRegexp.FindString(body)
 	section = commentRegexp.ReplaceAllString(section, "")
 	if section != "" {
@@ -64,7 +64,7 @@ func extractAffectedResources(body string) []string {
 	return []string{}
 }
 
-func computeLabels(resources []string, regexpLabels []regexpLabel) []string {
+func ComputeLabels(resources []string, regexpLabels []RegexpLabel) []string {
 	labelSet := make(map[string]struct{})
 	for _, resource := range resources {
 		for _, rl := range regexpLabels {
