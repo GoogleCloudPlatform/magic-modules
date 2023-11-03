@@ -44,10 +44,12 @@ jobs:
 
       - name: Build Terraform Google Conversion
         run: |
+          cd tgc
           go mod edit -replace=github.com/hashicorp/terraform-provider-google-beta=../tpgb
           go mod tidy
           make build
 
       - name: Run Unit Tests
         run: |
+          cd tgc
           make test
