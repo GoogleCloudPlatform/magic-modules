@@ -73,7 +73,7 @@ if [ $retVal -ne 0 ]; then
 fi
 
 ### Add labels
-$MM_LOCAL_PATH/tools/diff-processor/bin/diff-processor add-labels $PR_NUMBER
+GITHUB_TOKEN=$GITHUB_TOKEN $MM_LOCAL_PATH/tools/diff-processor/bin/diff-processor add-labels $PR_NUMBER
 rm -rf ./old/ ./new/ ./bin/
 popd
 set -e
@@ -94,7 +94,7 @@ if [ $retVal -ne 0 ]; then
 fi
 
 ### Add labels
-$MM_LOCAL_PATH/tools/diff-processor/bin/diff-processor add-labels $PR_NUMBER
+GITHUB_TOKEN=$GITHUB_TOKEN $MM_LOCAL_PATH/tools/diff-processor/bin/diff-processor add-labels $PR_NUMBER
 rm -rf ./old/ ./new/ ./bin/
 popd
 set -e
