@@ -57,7 +57,7 @@ func (ar *actualRunner) PushDir(path string) error {
 	}
 	ar.dirStack.PushFront(ar.cwd)
 	ar.cwd = path
-	return os.Chdir(path)
+	return nil
 }
 
 // PopDir removes the most recently added directory from the stack and changes front to it.
@@ -71,7 +71,7 @@ func (ar *actualRunner) PopDir() error {
 		return fmt.Errorf("last element in dir stack was a %T, expected string", frontVal)
 	}
 	ar.cwd = dir
-	return os.Chdir(dir)
+	return nil
 }
 
 func (ar *actualRunner) WriteFile(name, data string) error {
@@ -80,6 +80,7 @@ func (ar *actualRunner) WriteFile(name, data string) error {
 
 func (ar *actualRunner) Run(name string, args, env []string) (string, error) {
 	cmd := exec.Command(name, args...)
+	cmd.Dir = ar.cwd
 	cmd.Env = append(os.Environ(), env...)
 	out, err := cmd.Output()
 	if err != nil {
