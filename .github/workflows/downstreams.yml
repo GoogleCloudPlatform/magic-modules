@@ -182,12 +182,20 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: artifact-terraform-google-conversion
-          path: artifacts
+          path: artifacts-tgc
+
+      - name: Download built artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: artifact-terraform-google-conversion
+          path: artifacts-tpgb
 
       - name: Unzip the artifacts and delete the zip
         run: |
-          unzip artifacts/output.zip -d ./
-          rm artifacts/output.zip
+          unzip artifacts-tgc/output.zip -d ./tgc
+          unzip artifacts-tpgb/output.zip -d ./tgc
+          rm artifacts-tgc/output.zip
+          rm artifacts-tpgb/output.zip
 
       - name: Set up Go
         uses: actions/setup-go@v3
@@ -199,14 +207,14 @@ jobs:
         with:
           path: |
             ~/go/pkg/mod
-          key: ${{ runner.os }}-test-terraform-google-conversion-${{ hashFiles('go.sum') }}
+          key: ${{ runner.os }}-test-terraform-google-conversion-${{ hashFiles('**/go.sum') }}
           restore-keys: |
-            ${{ runner.os }}-test-terraform-google-conversion-${{ hashFiles('go.sum') }}
+            ${{ runner.os }}-test-terraform-google-conversion-${{ hashFiles('**/go.sum') }}
             ${{ runner.os }}-test-terraform-google-conversion-
 
       - name: Build Terraform Google Conversion
         run: |
-          go mod edit -replace github.com/hashicorp/terraform-provider-google-beta=github.com/${{ github.event.inputs.owner }}/terraform-provider-google-beta@${{ github.event.inputs.branch }}
+          go mod edit -replace=github.com/hashicorp/terraform-provider-google-beta=../tpgb
           go mod tidy
           make build
 
