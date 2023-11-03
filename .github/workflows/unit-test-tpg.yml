@@ -1,4 +1,4 @@
-name: unit-test
+name: unit-test-tpg
 on:
   workflow_call:
     inputs:
@@ -8,7 +8,7 @@ on:
         type: string
 
 jobs:
-  unit-test-terraform-provider-google:
+  build-and-unit-tests:
     name: unit-test-${{ inputs.repo }}
     runs-on: ubuntu-22.04
     steps:

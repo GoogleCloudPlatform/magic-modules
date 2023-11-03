@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-downstreams:
+  build:
     runs-on: ubuntu-22.04
     env:
       BASE_BRANCH: ${{ github.event.pull_request.base.ref || github.ref }}

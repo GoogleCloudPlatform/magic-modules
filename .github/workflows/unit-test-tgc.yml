@@ -1,11 +1,11 @@
-name: unit-test
+name: unit-test-tgc
 permissions: read-all
 
 on:
   workflow_call:
 
 jobs:
-  unit-test-terraform-google-conversion:
+  build-and-unit-tests:
     runs-on: ubuntu-22.04
     steps:
       - name: Download built artifacts
