@@ -142,6 +142,7 @@ properties:
     exactly_one_of:
       - num_nodes
       - processing_units
+      - autoscaling_config
     default_from_api: true
   - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
