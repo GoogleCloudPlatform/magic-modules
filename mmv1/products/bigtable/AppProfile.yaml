@@ -129,7 +129,7 @@ properties:
       - single_cluster_routing
       - multi_cluster_routing_use_any
     description: |
-      Use a single-cluster routing policy.
+      Use a single-cluster routing policy.UPDATE
     properties:
       - !ruby/object:Api::Type::String
         name: 'clusterId'

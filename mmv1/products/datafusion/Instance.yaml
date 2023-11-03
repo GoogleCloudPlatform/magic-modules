@@ -256,7 +256,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'displayName'
     description: |
-      Display name for an instance.
+      Display name for an instance.UPDATE
     immutable: true
   - !ruby/object:Api::Type::String
     name: 'apiEndpoint'

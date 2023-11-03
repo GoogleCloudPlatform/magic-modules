@@ -150,7 +150,7 @@ func ResourceComputeInstance() *schema.Resource {
 							AtLeastOneOf: bootDiskKeys,
 							Default:      true,
 							ForceNew:     true,
-							Description:  `Whether the disk will be auto-deleted when the instance is deleted.UPDATE`,
+							Description:  `Whether the disk will be auto-deleted when the instance is deleted.`,
 						},
 
 						"device_name": {

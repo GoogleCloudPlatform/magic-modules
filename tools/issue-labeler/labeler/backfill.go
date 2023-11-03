@@ -167,7 +167,6 @@ func UpdateIssues(repository string, issueUpdates []IssueUpdate, dryRun bool) {
 			var errResp ErrorResponse
 			json.Unmarshal(body, &errResp)
 			if errResp.Message != "" {
-				glog.Errorf("API error: %s", errResp.Message)
 				fmt.Printf("API error: %s", errResp.Message)
 				continue
 			}
