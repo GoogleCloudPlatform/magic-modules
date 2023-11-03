@@ -134,6 +134,7 @@ properties:
     exactly_one_of:
       - num_nodes
       - processing_units
+      - autoscaling_config
   - !ruby/object:Api::Type::Integer
     name: 'processingUnits'
     description: |
@@ -164,6 +165,10 @@ properties:
       When autoscaling is enabled, num_nodes and processing_units are treated as,
       OUTPUT_ONLY fields and reflect the current compute capacity allocated to
       the instance.
+    exactly_one_of:
+      - num_nodes
+      - processing_units
+      - autoscaling_config
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'autoscalingLimits'
