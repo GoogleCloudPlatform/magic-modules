@@ -349,7 +349,7 @@ resource "google_gke_hub_feature" "feature" {
 
 func TestAccGKEHubFeature_FleetDefaultMemberConfigServiceMesh(t *testing.T) {
 	// VCR fails to handle batched project services
-	// acctest.SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -424,7 +424,7 @@ resource "google_gke_hub_feature" "feature" {
 
 func TestAccGKEHubFeature_FleetDefaultMemberConfigConfigManagement(t *testing.T) {
 	// VCR fails to handle batched project services
-	// acctest.SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
