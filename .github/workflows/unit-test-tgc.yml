@@ -5,7 +5,7 @@ on:
   workflow_call:
 
 jobs:
-  build-and-unit-tests:
+  compile-and-unit-tests:
     runs-on: ubuntu-22.04
     steps:
       - name: Download built artifacts

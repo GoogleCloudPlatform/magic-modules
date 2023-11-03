@@ -8,7 +8,7 @@ on:
         type: string
 
 jobs:
-  build-and-unit-tests:
+  compile-and-unit-tests:
     name: unit-test-${{ inputs.repo }}
     runs-on: ubuntu-22.04
     steps:
