@@ -38,7 +38,8 @@ jobs:
       - name: Unzip the artifacts and delete the zip
         run: |
           unzip artifacts-tgc/output.zip -d ./tgc
-          unzip artifacts-tpgb/output.zip -d ~/go/src/github.com/hashicorp/terraform-provider-google-beta/google-beta
+          mkdir -p ~/go/src/github.com/hashicorp/terraform-provider-google-beta
+          unzip artifacts-tpgb/output.zip -d ~/go/src/github.com/hashicorp/terraform-provider-google-beta
           rm artifacts-tgc/output.zip
           rm artifacts-tpgb/output.zip
 
@@ -46,7 +47,7 @@ jobs:
         run: |
           export GOPATH=~/go
           cd tgc
-          go mod edit -replace=github.com/hashicorp/terraform-provider-google-beta=$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta/google-beta
+          go mod edit -replace=github.com/hashicorp/terraform-provider-google-beta=$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
           go mod tidy
           make build
 
