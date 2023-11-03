@@ -114,7 +114,7 @@ jobs:
             exit 1
           fi
 
-          zip -r output.zip $OUTPUT_PATH
+          (current_dir=$(pwd) && cd $OUTPUT_PATH && zip -r "$current_dir/output.zip" .)
 
       - name: Upload built artifacts
         uses: actions/upload-artifact@v2
@@ -181,7 +181,7 @@ jobs:
       - name: Download built artifacts
         uses: actions/download-artifact@v2
         with:
-          name: artifact-${{ matrix.repo }}
+          name: artifact-terraform-google-conversion:
           path: artifacts
 
       - name: Unzip the artifacts and delete the zip
