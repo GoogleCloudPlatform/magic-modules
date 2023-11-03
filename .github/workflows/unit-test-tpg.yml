@@ -1,4 +1,4 @@
-name: Build & Test TPG
+name: unit-test
 on:
   workflow_call:
     inputs:

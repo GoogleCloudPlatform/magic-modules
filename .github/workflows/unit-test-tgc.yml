@@ -1,4 +1,4 @@
-name: Build & Test TGC
+name: unit-test
 permissions: read-all
 
 on:

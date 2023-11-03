@@ -1,4 +1,4 @@
-name: build-downstream
+name: build
 permissions: read-all
 
 on:

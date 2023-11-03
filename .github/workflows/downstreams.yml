@@ -32,17 +32,20 @@ jobs:
       repo: 'docs-examples'
 
   unit-test-terraform-provider-google:
+    name: terraform-provider-google
     needs: terraform-provider-google
     uses: ./.github/workflows/unit-test-tpg.yml
     with:
       repo: 'terraform-provider-google'
 
   unit-test-terraform-provider-googele-beta:
+    name: terraform-provider-google-beta
     needs: terraform-provider-google-beta
     uses: ./.github/workflows/unit-test-tpg.yml
     with:
       repo: 'terraform-provider-google-beta'
 
   unit-test-terraform-google-conversion:
+    name: terraform-google-conversion
     needs: [terraform-google-conversion, terraform-provider-google-beta]
     uses: ./.github/workflows/unit-test-tgc.yml
