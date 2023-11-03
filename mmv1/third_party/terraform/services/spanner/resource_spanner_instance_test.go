@@ -143,8 +143,6 @@ func TestAccSpannerInstance_virtualUpdate(t *testing.T) {
 }
 
 func TestAccSpannerInstance_basicWithAutoscalingUsingProcessingUnitConfig(t *testing.T) {
-	// Randomness
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	displayName := fmt.Sprintf("spanner-test-%s-dname", acctest.RandString(t, 10))
