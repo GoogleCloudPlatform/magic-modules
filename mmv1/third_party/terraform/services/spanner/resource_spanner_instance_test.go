@@ -234,7 +234,6 @@ resource "google_spanner_instance" "basic" {
   name         = "%s"
   config       = "regional-us-central1"
   display_name = "%s"
-  num_nodes    = 1
   autoscaling_config {
     autoscaling_limits {
       max_processing_units            = 2000
