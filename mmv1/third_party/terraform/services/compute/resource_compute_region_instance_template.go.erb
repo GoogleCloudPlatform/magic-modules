@@ -28,6 +28,7 @@ func ResourceComputeRegionInstanceTemplate() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceComputeRegionInstanceTemplateCreate,
 		Read:   resourceComputeRegionInstanceTemplateRead,
+		Update: resourceComputeRegionInstanceTemplateRead,
 		Delete: resourceComputeRegionInstanceTemplateDelete,
 		Importer: &schema.ResourceImporter{
 			State: resourceComputeRegionInstanceTemplateImportState,
@@ -875,7 +876,6 @@ be from 0 to 999,999,999 inclusive.`,
 			"labels": {
 				Type:        schema.TypeMap,
 				Optional:    true,
-				ForceNew:    true,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Set:         schema.HashString,
 				Description: `A set of key/value label pairs to assign to instances created from this template,
@@ -887,7 +887,6 @@ be from 0 to 999,999,999 inclusive.`,
 			"terraform_labels": {
 				Type:        schema.TypeMap,
 				Computed:    true,
-				ForceNew:    true,
 				Set:         schema.HashString,
 				Description: `The combination of labels configured directly on the resource and default labels configured on the provider.`,
 				Elem:        &schema.Schema{Type: schema.TypeString},
