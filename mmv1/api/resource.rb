@@ -17,6 +17,8 @@ require 'api/resource/nested_query'
 require 'api/resource/reference_links'
 require 'google/string_utils'
 
+require 'google/logger'
+
 module Api
   # An object available in the product
   class Resource < Api::Object::Named
@@ -554,6 +556,20 @@ module Api
       "**Note**: This field is non-authoritative, and will only manage the #{title} present " \
 "in your configuration.
 Please refer to the field `effective_#{title}` for all of the #{title} present on the resource."
+    end
+
+    # Check if the resource has terraform_labels field
+    def has_terraform_labels(props)
+      props.each do |p|
+        if (p.is_a? Api::Type::KeyValueTerraformLabels)
+          Google::LOGGER.info " has_terraform_labels"
+
+          return true
+        elsif (p.is_a? Api::Type::NestedObject) && !p.all_properties.nil?
+          has_terraform_labels(p.all_properties)
+        end
+      end
+      return false
     end
 
     # ====================

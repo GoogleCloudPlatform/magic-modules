@@ -58,6 +58,8 @@ examples:
       pbr_name: 'my-pbr'
       network_name: 'my-network'
       ilb_name: 'my-ilb'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  custom_update: 'templates/terraform/custom_update/network_connectivity_policy_basd_route.go.erb'
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'

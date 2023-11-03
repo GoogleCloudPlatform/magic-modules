@@ -52,7 +52,8 @@ examples:
       ca_name: 'ca-authority'
       pool_name: 'ca-pool'
       issuance_config_name: 'issuance-config'
-
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  custom_update: 'templates/terraform/custom_update/certificate_manager_certificate_issuance_config.go.erb'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'

@@ -54,6 +54,8 @@ examples:
       resource_name: 'my-service-binding'
       namespace_id: 'my-namespace'
       service_id: 'my-service'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  custom_update: 'templates/terraform/custom_update/network_services_service_binding.go.erb'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'

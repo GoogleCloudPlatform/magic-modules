@@ -23,6 +23,9 @@ require 'overrides/terraform/property_override'
 require 'provider/terraform/sub_template'
 require 'google/golang_utils'
 
+require 'google/logger'
+
+
 module Provider
   # Code generator for Terraform Resources that manage Google Cloud Platform
   # resources.
@@ -101,7 +104,11 @@ module Provider
     end
 
     def updatable?(resource, properties)
-      !resource.immutable || !properties.reject { |p| p.update_url.nil? }.empty?
+      update = !resource.immutable || !properties.reject { |p| p.update_url.nil? }.empty? ||
+      resource.has_terraform_labels(properties)
+      Google::LOGGER.info " #{update} updatable #{resource.name}"
+
+      return update
     end
 
     def force_new?(property, resource)

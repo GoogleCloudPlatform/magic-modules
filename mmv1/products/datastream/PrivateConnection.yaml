@@ -39,6 +39,7 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/private_connection.go.erb
   post_create: templates/terraform/post_create/private_connection.go.erb
   post_import: templates/terraform/post_import/private_connection.go.erb
+  custom_update: 'templates/terraform/custom_update/datastream_private_connection.go.erb'
 parameters:
   - !ruby/object:Api::Type::String
     name: privateConnectionId

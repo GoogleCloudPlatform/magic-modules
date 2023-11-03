@@ -147,6 +147,7 @@ examples:
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/bigquery_job.go
   encoder: templates/terraform/encoders/bigquery_job.go.erb
+  custom_update: 'templates/terraform/custom_update/bigquery_job.go.erb'
 properties:
   - !ruby/object:Api::Type::String
     name: 'user_email'

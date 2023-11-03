@@ -33,7 +33,7 @@ async: !ruby/object:Provider::Terraform::PollAsync
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloud_run_domain_mapping_basic'
-    primary_resource_id: 'default'
+    primary_resource_id: 'default'  
     vars:
       cloud_run_service_name: 'cloudrun-srv'
     test_env_vars:
@@ -42,6 +42,7 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: 'templates/terraform/encoders/cloud_run_domain_mapping.go.erb'
   decoder: 'templates/terraform/decoders/cloud_run.go.erb'
   constants: templates/terraform/constants/cloud_run_domain_mapping.go.erb
+  custom_update: 'templates/terraform/custom_update/cloud_run_domain_mapping.go.erb'
 custom_diff: [
   'hasMetadata',
 ]

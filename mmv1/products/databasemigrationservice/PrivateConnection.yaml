@@ -46,6 +46,8 @@ examples:
       network_name: 'my-network'
     test_vars_overrides:
       network_name: 'acctest.BootstrapSharedTestNetwork(t, "dbms-privateconnection")'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  custom_update: 'templates/terraform/custom_update/database_migration_servcie_private_connection.go.erb'
 parameters:
   - !ruby/object:Api::Type::String
     name: privateConnectionId

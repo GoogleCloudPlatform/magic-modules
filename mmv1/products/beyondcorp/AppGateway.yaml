@@ -64,6 +64,8 @@ examples:
     vars:
       app_gateway_name: 'my-app-gateway'
       display_name: 'some display name'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  custom_update: 'templates/terraform/custom_update/beyondcorp_app_gateway.go.erb'
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
