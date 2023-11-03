@@ -181,7 +181,7 @@ jobs:
       - name: Download built artifacts
         uses: actions/download-artifact@v2
         with:
-          name: artifact-terraform-google-conversion:
+          name: artifact-terraform-google-conversion
           path: artifacts
 
       - name: Unzip the artifacts and delete the zip
