@@ -134,8 +134,8 @@ func testAccDataSourceComputeReservationCheck(t *testing.T, data_source_name str
 			return fmt.Errorf("self link does not match: %s vs %s", ds_attr["self_link"], rs_attr["self_link"])
 		}
 
-		if ds_attr["status"] != "RESERVED" {
-			return fmt.Errorf("status is %s; want RESERVED", ds_attr["status"])
+		if ds_attr["status"] != "READY" {
+			return fmt.Errorf("status is %s; want READY", ds_attr["status"])
 		}
 
 		return nil

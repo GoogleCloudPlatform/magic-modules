@@ -34,7 +34,7 @@ func DataSourceGoogleComputeReservation() *schema.Resource {
 
 func dataSourceGoogleComputeReservationRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	err := resourceComputeReservationRead(d, meta)
 	if err != nil {
 		return err
 	}
@@ -48,13 +48,6 @@ func dataSourceGoogleComputeReservationRead(d *schema.ResourceData, meta interfa
 		return err
 	}
 	name := d.Get("name").(string)
-	_, err = config.NewComputeClient(userAgent).Reservations.Get(project, zone, name).Do()
-	if err != nil {
-		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Reservation Not Found : %s", name))
-	}
-	if err := d.Set("zone", zone); err != nil {
-		return fmt.Errorf("Error setting zone: %s", err)
-	}
 
 	d.SetId(fmt.Sprintf("projects/%s/zones/%s/reservations/%s", project, zone, name))
 	return nil
