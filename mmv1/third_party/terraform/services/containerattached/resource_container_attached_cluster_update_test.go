@@ -143,7 +143,10 @@ resource "google_container_attached_cluster" "primary" {
     evaluation_mode = "DISABLED"
   }
   proxy_config {
-    kubernetes_secret {}
+    kubernetes_secret {
+      name = "proxy-config"
+      namespace = "default"
+    }
   }
   lifecycle {
     prevent_destroy = true
@@ -193,7 +196,10 @@ resource "google_container_attached_cluster" "primary" {
     evaluation_mode = "DISABLED"
   }
   proxy_config {
-    kubernetes_secret {}
+    kubernetes_secret {
+      name = "proxy-config"
+      namespace = "default"
+    }
   }
 }
 `, context)
