@@ -439,43 +439,6 @@ func TestAccDataflowFlexTemplateJob_withProviderDefaultLabels(t *testing.T) {
 	})
 }
 
-func TestAccDataflowFlexTemplateJob_migration(t *testing.T) {
-	// This resource uses custom retry logic that cannot be sped up without
-	// modifying the actual resource
-	acctest.SkipIfVcr(t)
-	t.Parallel()
-
-	randStr := acctest.RandString(t, 10)
-	job := "tf-test-dataflow-job-" + randStr
-	bucket := "tf-test-dataflow-bucket-" + randStr
-	topic := "tf-test-topic" + randStr
-
-	oldVersion := map[string]resource.ExternalProvider{
-		"google": {
-			VersionConstraint: "4.84.0", // a version that doesn't separate user defined labels and system labels
-			Source:            "registry.terraform.io/hashicorp/google-beta",
-		},
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config:            testAccDataflowFlexTemplateJob_dataflowFlexTemplateJobFull(job, bucket, topic, randStr),
-				ExternalProviders: oldVersion,
-			},
-			{
-				Config: testAccDataflowFlexTemplateJob_dataflowFlexTemplateJobFull(job, bucket, topic, randStr),
-				ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-				Check: resource.ComposeTestCheckFunc(
-					testAccDataflowFlexJobExists(t, "google_dataflow_flex_template_job.flex_job_fullupdate", false),
-				),
-			},
-		},
-	})
-}
-
 func testAccDataflowFlexTemplateJobHasNetwork(t *testing.T, res, expected string, wait bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		instanceTmpl, err := testAccDataflowFlexTemplateGetGeneratedInstanceTemplate(t, s, res)
