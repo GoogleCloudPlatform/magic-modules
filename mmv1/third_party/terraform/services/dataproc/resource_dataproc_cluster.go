@@ -1546,6 +1546,7 @@ by Dataproc`,
 													Type:        schema.TypeList,
 													Description: `Node group roles.`,
 													Required:    true,
+													ForceNew:    true,
 													Elem: &schema.Schema{
 														Type:         schema.TypeString,
 														ValidateFunc: validation.StringInSlice([]string{"ROLE_UNSPECIFIED", "DRIVER"}, false),
@@ -1631,6 +1632,7 @@ by Dataproc`,
 									"node_group_id": {
 										Optional:    true,
 										Computed:    true,
+										ForceNew:    true,
 										Type:        schema.TypeString,
 										Description: `A node group ID. Generated if not specified. The ID must contain only letters (a-z, A-Z), numbers (0-9), underscores (_), and hyphens (-). Cannot begin or end with underscore or hyphen. Must consist of from 3 to 33 characters.`,
 									},
@@ -2814,6 +2816,15 @@ func flattenClusterConfig(d *schema.ResourceData, cfg *dataproc.ClusterConfig) (
 		}
 		data["initialization_action"] = val
 	}
+
+	if len(cfg.AuxiliaryNodeGroups) > 0 {
+		val, err := flattenAuxiliaryNodeGroups(cfg.AuxiliaryNodeGroups)
+		if err != nil {
+			return nil, err
+		}
+		data["auxiliary_node_groups"] = val
+	}
+
 	return []map[string]interface{}{data}, nil
 }
 
@@ -2976,6 +2987,63 @@ func flattenInitializationActions(nia []*dataproc.NodeInitializationAction) ([]m
 	}
 	return actions, nil
 
+}
+
+func flattenAuxiliaryNodeGroups(ang []*dataproc.AuxiliaryNodeGroup) ([]map[string]interface{}, error) {
+
+	auxiliaryNodeGroups := []map[string]interface{}{}
+	for _, v := range ang {
+		nodeGroup := map[string]interface{}{
+			"node_group": flatternNodeGroup(v.NodeGroup),
+		}
+		if len(v.NodeGroupId) > 0 {
+			nodeGroup["node_group_id"] = v.NodeGroupId
+		}
+
+		auxiliaryNodeGroups = append(auxiliaryNodeGroups, nodeGroup)
+	}
+	return auxiliaryNodeGroups, nil
+
+}
+
+func flatternNodeGroup(ng *dataproc.NodeGroup) []map[string]interface{} {
+	nodeGroup := map[string]interface{}{
+		"roles": ng.Roles,
+	}
+
+	if ng.Name != "" {
+		nodeGroup["name"] = ng.Name
+	}
+
+	if ng.NodeGroupConfig != nil {
+		nodeGroup["node_group_config"] = flattenNodeGroupConfig(ng.NodeGroupConfig)
+	}
+
+	return []map[string]interface{}{nodeGroup}
+
+}
+
+func flattenNodeGroupConfig(icg *dataproc.InstanceGroupConfig) []map[string]interface{} {
+	disk := map[string]interface{}{}
+	data := map[string]interface{}{}
+
+	if icg != nil {
+		data["num_instances"] = icg.NumInstances
+		data["machine_type"] = tpgresource.GetResourceNameFromSelfLink(icg.MachineTypeUri)
+		data["min_cpu_platform"] = icg.MinCpuPlatform
+		data["image_uri"] = icg.ImageUri
+		data["instance_names"] = icg.InstanceNames
+		if icg.DiskConfig != nil {
+			disk["boot_disk_size_gb"] = icg.DiskConfig.BootDiskSizeGb
+			disk["num_local_ssds"] = icg.DiskConfig.NumLocalSsds
+			disk["boot_disk_type"] = icg.DiskConfig.BootDiskType
+		}
+		data["accelerators"] = flattenAccelerators(icg.Accelerators)
+
+	}
+
+	data["disk_config"] = []map[string]interface{}{disk}
+	return []map[string]interface{}{data}
 }
 
 func flattenGceClusterConfig(d *schema.ResourceData, gcc *dataproc.GceClusterConfig) []map[string]interface{} {
