@@ -15,4 +15,12 @@
 	}
 	d.SetId(id)
 
+	// Set is_default_X if the resource is actually a Default Intent
+	if d.Get("name").(string) == "00000000-0000-0000-0000-000000000000" {
+		d.Set("is_default_welcome_intent", true)
+	}
+	if d.Get("name").(string) == "00000000-0000-0000-0000-000000000001" {
+		d.Set("is_default_negative_intent", true)
+	}
+
 	return []*schema.ResourceData{d}, nil

@@ -28,7 +28,7 @@ resource "google_secret_manager_secret_iam_member" "secret_iam" {
 resource "google_integration_connectors_connection" "<%= ctx[:primary_resource_id] %>" {
   name     = "<%= ctx[:vars]['connection_name'] %>"
   location = "us-central1"
-  connector_version = "projects/connectors-example/locations/global/providers/box/connectors/box/versions/1"
+  connector_version = "projects/${data.google_project.test_project.project_id}/locations/global/providers/box/connectors/box/versions/1"
   service_account = "${data.google_project.test_project.number}-compute@developer.gserviceaccount.com"
   description = "tf created description"
   config_variable {

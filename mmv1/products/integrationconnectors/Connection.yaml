@@ -54,30 +54,35 @@ examples:
     vars:
       connection_name: "test-zendesk"
       secret_id: "test-secret"
+    skip_docs: true
   - !ruby/object:Provider::Terraform::Examples
     name: "integration_connectors_connection_oauth"
     primary_resource_id: "boxconnection"
     vars:
       connection_name: "test-box"
       secret_id: "test-secret"
+    skip_docs: true
   - !ruby/object:Provider::Terraform::Examples
     name: "integration_connectors_connection_oauth_ssh"
     primary_resource_id: "boxconnection"
     vars:
       connection_name: "test-box"
       secret_id: "test-secret"
+    skip_docs: true
   - !ruby/object:Provider::Terraform::Examples
     name: "integration_connectors_connection_oauth_cc"
     primary_resource_id: "boxconnection"
     vars:
       connection_name: "test-box"
       secret_id: "test-secret"
+    skip_docs: true
   - !ruby/object:Provider::Terraform::Examples
     name: "integration_connectors_connection_oauth_jwt"
     primary_resource_id: "boxconnection"
     vars:
       connection_name: "test-box"
       secret_id: "test-secret"
+    skip_docs: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: "name"

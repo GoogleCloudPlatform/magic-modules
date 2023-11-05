@@ -76,7 +76,7 @@ func testAccIntegrationConnectorsConnection_full(context map[string]interface{})
     description = "tf description"
     location = "us-central1"
     service_account = "${data.google_project.test_project.number}-compute@developer.gserviceaccount.com"
-    connector_version = "projects/connectors-example/locations/global/providers/zendesk/connectors/zendesk/versions/1"
+    connector_version = "projects/${data.google_project.test_project.project_id}/locations/global/providers/zendesk/connectors/zendesk/versions/1"
     config_variable {
         key = "proxy_enabled"
         boolean_value = false
@@ -286,7 +286,7 @@ func testAccIntegrationConnectorsConnection_update(context map[string]interface{
     description = "tf updated description"
     location = "us-central1"
     service_account = "${data.google_project.test_project.number}-compute@developer.gserviceaccount.com"
-    connector_version = "projects/connectors-example/locations/global/providers/zendesk/connectors/zendesk/versions/1"
+    connector_version = "projects/${data.google_project.test_project.project_id}/locations/global/providers/zendesk/connectors/zendesk/versions/1"
     config_variable {
         key = "proxy_enabled"
         boolean_value = true
