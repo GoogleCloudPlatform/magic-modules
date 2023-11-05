@@ -66,7 +66,7 @@ func resourceLoggingProjectSinkAcquireOrCreate(d *schema.ResourceData, meta inte
 	uniqueWriterIdentity := d.Get("unique_writer_identity").(bool)
 	customWriterIdentity := d.Get("custom_writer_identity").(string)
 
-	log.Printf("[DEBUG] Fetching logging bucket config: %#v", id)
+	log.Printf("[DEBUG] Fetching logging sink config: %#v", id)
 
 	res, _ := config.NewLoggingClient(userAgent).Projects.Sinks.Get(id.canonicalId()).Do()
 	if res == nil {
@@ -186,7 +186,7 @@ func resourceLoggingProjectSinkDelete(d *schema.ResourceData, meta interface{}) 
 	name := d.Get("name")
 	for _, restrictedName := range []string{"_Required", "_Default"} {
 		if name == restrictedName {
-			log.Printf("[WARN] Default logging sinks cannot be deleted. Removing logging sinks config from state: %#v", d.Id())
+			log.Print("[WARN] Default logging sinks cannot be deleted.")
 			return nil
 		}
 	}
