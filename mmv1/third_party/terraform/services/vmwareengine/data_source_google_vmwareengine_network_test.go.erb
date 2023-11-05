@@ -1,6 +1,5 @@
 <% autogen_exception -%>
 package vmwareengine_test
-<% unless version == 'ga' -%>
 
 import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
@@ -43,7 +42,6 @@ func testAccDataSourceVmwareEngineNetworkConfig(context map[string]interface{}) 
  # there can be only 1 Legacy network per region for a given project, so creating new project to isolate tests.
 resource "google_project" "acceptance" {
   name            = "tf-test-%{random_suffix}"
-  provider        = google-beta
   project_id      = "tf-test-%{random_suffix}"
   org_id          = "%{organization}"
   billing_account = "%{billing_account}"
@@ -51,7 +49,6 @@ resource "google_project" "acceptance" {
 
 resource "google_project_service" "acceptance" {
   project  = google_project.acceptance.project_id
-  provider = google-beta
   service  = "vmwareengine.googleapis.com"
 
   # Needed for CI tests for permissions to propagate, should not be needed for actual usage
@@ -67,7 +64,6 @@ resource "time_sleep" "wait_60_seconds" {
 resource "google_vmwareengine_network" "nw" {
   project     = google_project_service.acceptance.project
   name        = "%{region}-default" #Legacy network IDs are in the format: {region-id}-default
-  provider    = google-beta
   location    = "%{region}"
   type        = "LEGACY"
   description = "VMwareEngine legacy network sample"
@@ -76,7 +72,6 @@ resource "google_vmwareengine_network" "nw" {
 data "google_vmwareengine_network" "ds" {
   name     = google_vmwareengine_network.nw.name
   project  = google_project_service.acceptance.project
-  provider = google-beta
   location = "%{region}"
   depends_on = [
     google_vmwareengine_network.nw,
@@ -84,4 +79,3 @@ data "google_vmwareengine_network" "ds" {
 }
 `, context)
 }
-<% end -%>
