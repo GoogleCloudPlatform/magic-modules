@@ -138,8 +138,9 @@ func execGenerateComment(buildID, projectID, buildStep, commit, pr, githubToken 
 		diffs += "\n" + repoDiffs
 	}
 
+	var showBreakingChangesFailed bool
+	var err error
 	// TPG diff processor
-	showBreakingChangesFailed := false
 	err = buildDiffProcessor(mmLocalPath, tpgLocalPath, oldBranch, newBranch, r)
 	if err != nil {
 		fmt.Println(err)
