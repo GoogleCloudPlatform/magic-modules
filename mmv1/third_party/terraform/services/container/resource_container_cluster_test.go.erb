@@ -4252,8 +4252,7 @@ func TestAccContainerCluster_withFleetConfig(t *testing.T) {
 			},
 			{
 				Config:		testAccContainerCluster_withFleetConfig(clusterName, "random-project"),
-				ExpectError: regexp.MustCompile(`(1) changing existing fleet host project is not supported
-				(2) changing existing fleet membership is not supported.`),
+				ExpectError: regexp.MustCompile(`\n\t(1) changing existing fleet host project is not supported\n\t(2) changing existing fleet membership is not supported`),
 			},
 			{
 				Config: testAccContainerCluster_DisableFleet(clusterName),
