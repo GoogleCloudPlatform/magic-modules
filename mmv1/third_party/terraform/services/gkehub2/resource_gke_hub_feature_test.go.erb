@@ -394,7 +394,7 @@ resource "google_gke_hub_feature" "feature" {
       management = "MANAGEMENT_AUTOMATIC"
     }
   }
-  depends_on = [google_project_service.mesh]
+  depends_on = [google_project_service.anthos, google_project_service.gkehub, google_project_service.mesh]
   project = google_project.project.project_id
 }
 `, context)
@@ -410,7 +410,7 @@ resource "google_gke_hub_feature" "feature" {
       management = "MANAGEMENT_MANUAL"
     }
   }
-  depends_on = [google_project_service.mesh]
+  depends_on = [google_project_service.anthos, google_project_service.gkehub, google_project_service.mesh]
   project = google_project.project.project_id
 }
 `, context)
@@ -473,7 +473,7 @@ resource "google_gke_hub_feature" "feature" {
       }
     }
   }
-  depends_on = [google_project_service.acm]
+  depends_on = [google_project_service.anthos, google_project_service.gkehub, google_project_service.acm]
   project = google_project.project.project_id
 }
 `, context)
@@ -498,7 +498,7 @@ resource "google_gke_hub_feature" "feature" {
       }
     }
   }
-  depends_on = [google_project_service.acm]
+  depends_on = [google_project_service.anthos, google_project_service.gkehub, google_project_service.acm]
   project = google_project.project.project_id
 }
 `, context)
@@ -610,6 +610,11 @@ resource "google_project_service" "container" {
   project = google_project.project.project_id
   service = "container.googleapis.com"
   disable_on_destroy = false
+}
+
+resource "google_project_service" "anthos" {
+  project = google_project.project.project_id
+  service = "anthos.googleapis.com"
 }
 
 resource "google_project_service" "gkehub" {
