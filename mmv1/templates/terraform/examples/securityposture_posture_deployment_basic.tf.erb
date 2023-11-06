@@ -1,0 +1,8 @@
+resource "google_securityposture_posture_deployment" "<%= ctx[:primary_resource_id] %>" {
+	name          = "posture_deployment_1"
+	parent = "organizations/<%= ctx[:test_env_vars]['org_id'] %>/locations/global"
+    description = "a new posture deployment"
+    target_resource = "folders/123456"
+    posture_id = "organizations/<%= ctx[:test_env_vars]['org_id'] %>/locations/global/postures/posture1"
+    posture_revision_id = "abcdef"
+}
