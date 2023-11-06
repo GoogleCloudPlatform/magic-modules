@@ -45,15 +45,8 @@ import_format:
 autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "vmware_engine_network_legacy"
-    pull_external: true
+    name: "vmware_engine_network_standard"
     primary_resource_id: "vmw-engine-network"
-    vars:
-      proj_id: "vmw-proj"
-    test_env_vars:
-      location: :REGION
-      org_id: :ORG_ID
-      billing_account: :BILLING_ACCT
 parameters:
   - !ruby/object:Api::Type::String
     name: "location"
@@ -117,6 +110,7 @@ properties:
       VMware Engine network type.
     values:
       - :LEGACY
+      - :STANDARD
 
   - !ruby/object:Api::Type::String
     name: "uid"
