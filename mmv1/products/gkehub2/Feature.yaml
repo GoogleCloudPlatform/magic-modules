@@ -83,6 +83,16 @@ examples:
     skip_test: true
     primary_resource_name: 'fmt.Sprint("fleetobservability")'
     primary_resource_id: 'feature'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'enable_fleet_default_member_config_service_mesh'
+    skip_test: true
+    primary_resource_name: 'fmt.Sprintf("servicemesh")'
+    primary_resource_id: 'feature'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'enable_fleet_default_member_config_configmanagement'
+    skip_test: true
+    primary_resource_name: 'fmt.Sprintf("configmanagement")'
+    primary_resource_id: 'feature'
 autogen_async: true
 # Skip sweeper gen since this is a child resource.
 skip_sweeper: true
@@ -170,6 +180,85 @@ properties:
                       - :MODE_UNSPECIFIED
                       - :COPY
                       - :MOVE
+  - !ruby/object:Api::Type::NestedObject
+    name: fleetDefaultMemberConfig
+    description: Optional. Fleet Default Membership Configuration.
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: mesh
+        description: Service Mesh spec
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: management
+            description: 'Whether to automatically manage Service Mesh'
+            values:
+              - :MANAGEMENT_UNSPECIFIED
+              - :MANAGEMENT_AUTOMATIC
+              - :MANAGEMENT_MANUAL
+            required: true
+      - !ruby/object:Api::Type::NestedObject
+        name: configmanagement
+        description: Config Management spec
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: configSync
+            description: 'ConfigSync configuration for the cluster'
+            properties:
+              - !ruby/object:Api::Type::String
+                name: sourceFormat
+                description: 'Specifies whether the Config Sync Repo is in hierarchical or unstructured mode'
+              - !ruby/object:Api::Type::NestedObject
+                name: git
+                description: 'Git repo configuration for the cluster'
+                properties:
+                  - !ruby/object:Api::Type::String
+                    name: syncRepo
+                    description: 'The URL of the Git repository to use as the source of truth'
+                  - !ruby/object:Api::Type::String
+                    name: syncBranch
+                    description: 'The branch of the repository to sync from. Default: master'
+                  - !ruby/object:Api::Type::String
+                    name: policyDir
+                    description: 'The path within the Git repository that represents the top level of the repo to sync'
+                  - !ruby/object:Api::Type::String
+                    name: syncRev
+                    description: 'Git revision (tag or hash) to check out. Default HEAD'
+                  - !ruby/object:Api::Type::String
+                    name: secretType
+                    description: 'Type of secret configured for access to the Git repo'
+                    required: true
+                  - !ruby/object:Api::Type::String
+                    name: httpsProxy
+                    description: 'URL for the HTTPS Proxy to be used when communicating with the Git repo'
+                  - !ruby/object:Api::Type::String
+                    name: gcpServiceAccountEmail
+                    description: 'The Google Cloud Service Account Email used for auth when secretType is gcpServiceAccount'
+                  - !ruby/object:Api::Type::String
+                    name: syncWaitSecs
+                    description: 'Period in seconds between consecutive syncs. Default: 15'
+              - !ruby/object:Api::Type::NestedObject
+                name: oci
+                description: 'OCI repo configuration for the cluster'
+                properties:
+                  - !ruby/object:Api::Type::String
+                    name: syncRepo
+                    description: 'The OCI image repository URL for the package to sync from'
+                  - !ruby/object:Api::Type::String
+                    name: policyDir
+                    description: 'The absolute path of the directory that contains the local resources. Default: the root directory of the image'
+                  - !ruby/object:Api::Type::String
+                    name: secretType
+                    description: 'Type of secret configured for access to the Git repo'
+                    required: true
+                  - !ruby/object:Api::Type::String
+                    name: gcpServiceAccountEmail
+                    description: 'The Google Cloud Service Account Email used for auth when secretType is gcpServiceAccount'
+                  - !ruby/object:Api::Type::String
+                    name: syncWaitSecs
+                    description: 'Period in seconds between consecutive syncs. Default: 15'
+                  - !ruby/object:Api::Type::String
+                    name: version
+                    description: 'Version of ACM installed'
   - !ruby/object:Api::Type::NestedObject
     name: state
     description: Output only. The Hub-wide Feature state

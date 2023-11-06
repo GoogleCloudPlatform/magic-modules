@@ -136,12 +136,58 @@ func execGenerateComment(buildID, projectID, buildStep, commit, pr, githubToken 
 		diffs += repoDiffs
 	}
 
-	breakingChanges, err := detectBreakingChanges(mmLocalPath, tpgLocalPath, tpgbLocalPath, oldBranch, newBranch, r)
+	// TPG diff processor
+	showBreakingChangesFailed := false
+	err = buildDiffProcessor(mmLocalPath, tpgLocalPath, oldBranch, newBranch, r)
 	if err != nil {
-		fmt.Println("Error setting up breaking change detector: ", err)
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	tpgBreaking, err := computeBreakingChanges(mmLocalPath, r)
+	if err != nil {
+		fmt.Println("Error computing TPG breaking changes: ", err)
+		showBreakingChangesFailed = true
+	}
+	err = addLabels(mmLocalPath, githubToken, pr, r)
+	if err != nil {
+		fmt.Println("Error adding TPG labels to PR: ", err)
+	}
+	err = cleanDiffProcessor(mmLocalPath, r)
+	if err != nil {
+		fmt.Println("Error cleaning up diff processor: ", err)
 		os.Exit(1)
 	}
 
+	// TPGB diff processor
+	err = buildDiffProcessor(mmLocalPath, tpgbLocalPath, oldBranch, newBranch, r)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	tpgbBreaking, err := computeBreakingChanges(mmLocalPath, r)
+	if err != nil {
+		fmt.Println("Error computing TPGB breaking changes: ", err)
+		showBreakingChangesFailed = true
+	}
+	err = addLabels(mmLocalPath, githubToken, pr, r)
+	if err != nil {
+		fmt.Println("Error adding TPGB labels to PR: ", err)
+	}
+	err = cleanDiffProcessor(mmLocalPath, r)
+	if err != nil {
+		fmt.Println("Error cleaning up diff processor: ", err)
+		os.Exit(1)
+	}
+
+	var breakingChanges string
+	if showBreakingChangesFailed {
+		breakingChanges = `## Breaking Change Detection Failed
+The breaking change detector crashed during execution. This is usually due to the downstream provider(s) failing to compile. Please investigate or follow up with your reviewer.`
+	} else {
+		breakingChanges = combineBreakingChanges(tpgBreaking, tpgbBreaking)
+	}
+
+	// Missing test detector
 	missingTests, err := detectMissingTests(mmLocalPath, tpgbLocalPath, oldBranch, r)
 	if err != nil {
 		fmt.Println("Error setting up missing test detector: ", err)
@@ -210,54 +256,51 @@ func cloneAndDiff(repoName, path, oldBranch, newBranch, diffTitle, githubToken s
 	return "", nil
 }
 
-// Run the breaking change detector and return the results.
-// Returns an empty string unless there are breaking changes or the detector failed.
-// Error will be nil unless an error occurs manipulating files.
-func detectBreakingChanges(mmLocalPath, tpgLocalPath, tpgbLocalPath, oldBranch, newBranch string, r gcRunner) (string, error) {
-	// Breaking change setup and execution
+// Build the diff processor for tpg or tpgb
+func buildDiffProcessor(mmLocalPath, providerLocalPath, oldBranch, newBranch string, r gcRunner) error {
 	diffProcessorPath := filepath.Join(mmLocalPath, "tools", "diff-processor")
-	for _, path := range []string{"old", "new"} {
-		if err := r.Copy(tpgLocalPath, filepath.Join(diffProcessorPath, path)); err != nil {
-			return "", err
-		}
-	}
-	var tpgBreaking, tpgbBreaking, breakingChanges string
-	var diffProccessorErr error
 	r.Chdir(diffProcessorPath)
-	if _, err := r.Run("make", []string{"build"}, []string{"OLD_REF=" + oldBranch, "NEW_REF=" + newBranch}); err != nil {
-		fmt.Printf("Error running make build in %s: %v\n", diffProcessorPath, err)
-		diffProccessorErr = err
-	} else {
-		tpgBreaking, err = r.Run("bin/diff-processor", []string{"breaking-changes"}, nil)
-		if err != nil {
-			fmt.Println("Diff processor error: ", err)
-			diffProccessorErr = err
-		}
-	}
-	for _, path := range []string{"old", "new", "bin"} {
-		if err := r.RemoveAll(filepath.Join(diffProcessorPath, path)); err != nil {
-			return "", err
-		}
-	}
 	for _, path := range []string{"old", "new"} {
-		if err := r.Copy(tpgbLocalPath, filepath.Join(diffProcessorPath, path)); err != nil {
-			return "", err
+		if err := r.Copy(providerLocalPath, filepath.Join(diffProcessorPath, path)); err != nil {
+			return err
 		}
 	}
+	if _, err := r.Run("make", []string{"build"}, []string{"OLD_REF=" + oldBranch, "NEW_REF=" + newBranch}); err != nil {
+		return fmt.Errorf("Error running make build in %s: %v\n", diffProcessorPath, err)
+	}
+	return nil
+}
 
-	if diffProccessorErr != nil {
-		fmt.Println("Breaking changes failed")
-		breakingChanges = `## Breaking Change Detection Failed
-The breaking change detector crashed during execution. This is usually due to the downstream provider(s) failing to compile. Please investigate or follow up with your reviewer.`
-	} else {
-		fmt.Println("Breaking changes succeeded")
-		breakingChanges = compareBreakingChanges(tpgBreaking, tpgbBreaking)
+func computeBreakingChanges(mmLocalPath string, r gcRunner) (string, error) {
+	diffProcessorPath := filepath.Join(mmLocalPath, "tools", "diff-processor")
+	r.Chdir(diffProcessorPath)
+	breakingChanges, err := r.Run("bin/diff-processor", []string{"breaking-changes"}, nil)
+	if err != nil {
+		return "", err
 	}
 	return breakingChanges, nil
 }
 
+func addLabels(mmLocalPath, githubToken, pr string, r gcRunner) error {
+	diffProcessorPath := filepath.Join(mmLocalPath, "tools", "diff-processor")
+	r.Chdir(diffProcessorPath)
+	output, err := r.Run("bin/diff-processor", []string{"add-labels", pr}, []string{fmt.Sprintf("GITHUB_TOKEN=%s", githubToken)})
+	fmt.Println(output)
+	return err
+}
+
+func cleanDiffProcessor(mmLocalPath string, r gcRunner) error {
+	diffProcessorPath := filepath.Join(mmLocalPath, "tools", "diff-processor")
+	for _, path := range []string{"old", "new", "bin"} {
+		if err := r.RemoveAll(filepath.Join(diffProcessorPath, path)); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // Get the breaking change message including the unique tpg messages and all tpgb messages.
-func compareBreakingChanges(tpgBreaking, tpgbBreaking string) string {
+func combineBreakingChanges(tpgBreaking, tpgbBreaking string) string {
 	var allMessages []string
 	if tpgBreaking == "" {
 		if tpgbBreaking == "" {

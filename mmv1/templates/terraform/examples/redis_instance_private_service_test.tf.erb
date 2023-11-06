@@ -23,4 +23,8 @@ resource "google_redis_instance" "<%= ctx[:primary_resource_id] %>" {
 
   redis_version     = "REDIS_4_0"
   display_name      = "Terraform Test Instance"
+
+  lifecycle {
+    prevent_destroy = <%= ctx[:vars]['prevent_destroy'] %>
+  }
 }
