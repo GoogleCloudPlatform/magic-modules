@@ -4251,6 +4251,11 @@ func TestAccContainerCluster_withFleetConfig(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
 			},
 			{
+				Config:		testAccContainerCluster_withFleetConfig(clusterName, "random-project"),
+				ExpectError: regexp.MustCompile(`(1) changing existing fleet host project is not supported
+				(2) changing existing fleet membership is not supported.`),
+			},
+			{
 				Config: testAccContainerCluster_DisableFleet(clusterName),
 			},
 			{
@@ -4281,7 +4286,7 @@ resource "google_container_cluster" "primary" {
 
 func testAccContainerCluster_DisableFleet(resource_name string) string {
 	return fmt.Sprintf(`
-resource "google_container_cluster" "with_security_posture_config" {
+resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
   initial_node_count = 1
