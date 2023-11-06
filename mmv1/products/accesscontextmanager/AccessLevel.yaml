@@ -80,6 +80,7 @@ properties:
       Human readable title. Must be unique within the Policy.
   - !ruby/object:Api::Type::String
     name: 'description'
+    required: true # for testing breaking change detector
     description: |
       Description of the AccessLevel and its use. Does not affect behavior.
   - !ruby/object:Api::Type::NestedObject
