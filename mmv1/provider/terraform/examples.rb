@@ -117,7 +117,7 @@ module Provider
       attr_reader :ignore_read_extra
 
       # Whether to skip running tests
-      # To be distinguished from exclude_test, this will still generate the tests 
+      # To be distinguished from exclude_test, this will still generate the tests
       # but add t.Skip() to prevent it from running in any environmnet
       attr_reader :skip_test
 

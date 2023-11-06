@@ -50,7 +50,7 @@ examples:
     name: 'apigee_instance_basic'
     vars:
       instance_name: 'my-instance-name'
-    skip_test:
+    exclude_test:
       true
       # This is a more verbose version of the above that creates all
       # the resources needed for the acceptance test.
@@ -68,7 +68,7 @@ examples:
     name: 'apigee_instance_cidr_range'
     vars:
       instance_name: 'my-instance-name'
-    skip_test:
+    exclude_test:
       true
       # This is a more verbose version of the above that creates all
       # the resources needed for the acceptance test.
@@ -86,7 +86,7 @@ examples:
     name: 'apigee_instance_ip_range'
     vars:
       instance_name: 'my-instance-name'
-    skip_test:
+    exclude_test:
       true
       # This is a more verbose version of the above that creates all
       # the resources needed for the acceptance test.
@@ -104,7 +104,7 @@ examples:
     name: 'apigee_instance_full'
     vars:
       instance_name: 'my-instance-name'
-    skip_test:
+    exclude_test:
       true
       # This is a more verbose version of the above that creates all
       # the resources needed for the acceptance test.
