@@ -16,22 +16,9 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
     transformed := make(map[string]interface{})
 
     if v == nil {
-        // Even when private_service_connect is set as false, API will not return object
-        enable_psc, ok := d.GetOkExists("private_service_connect_config.0.enable_private_service_connect")
-        if ok {
-            transformed["enable_private_service_connect"] = enable_psc
-        }
-
-        project_allowlist, ok := d.GetOkExists("private_service_connect_config.0.project_allowlist")
-        if ok {
-            transformed["project_allowlist"] = project_allowlist
-        }
-
-        if len(transformed) > 0 {
-            return []interface{}{transformed}
-        }
-
-        return nil
+        // Disabled by default, but API will not return object if value is false
+        transformed["enable_private_service_connect"] = false
+        return []interface{}{transformed}
     }
 
     original := v.(map[string]interface{})
