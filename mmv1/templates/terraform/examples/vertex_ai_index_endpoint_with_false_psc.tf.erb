@@ -8,10 +8,5 @@ resource "google_vertex_ai_index_endpoint" "<%= ctx[:primary_resource_id] %>" {
 
   private_service_connect_config {
     enable_private_service_connect = false
-    project_allowlist = [
-        data.google_project.project.number,
-    ]
   }
 }
-
-data "google_project" "project" {}
