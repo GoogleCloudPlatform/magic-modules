@@ -102,6 +102,7 @@ examples:
       repository_id: 'my-repository'
       description: 'example docker repository with cleanup policies'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/artifact_registry_repository.go.erb
   encoder: templates/terraform/encoders/location_from_region.go.erb
 properties:
   - !ruby/object:Api::Type::String
@@ -221,7 +222,9 @@ properties:
     properties:
       - !ruby/object:Api::Type::Array
         name: 'upstreamPolicies'
-        is_set: true
+        diff_suppress_func: 'upstreamPoliciesDiffSuppress'
+          # iterates over all fields. Just want the main func.
+        unordered_list: true
         description: |-
           Policies that configure the upstream artifacts distributed by the Virtual
           Repository. Upstream policies cannot be set on a standard repository.

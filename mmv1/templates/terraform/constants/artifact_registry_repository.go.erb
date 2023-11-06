@@ -1,0 +1,54 @@
+<%# The license inside this block applies to this file
+  # Copyright 2023 Google Inc.
+  # Licensed under the Apache License, Version 2.0 (the "License");
+  # you may not use this file except in compliance with the License.
+  # You may obtain a copy of the License at
+  #
+  #     http://www.apache.org/licenses/LICENSE-2.0
+  #
+  # Unless required by applicable law or agreed to in writing, software
+  # distributed under the License is distributed on an "AS IS" BASIS,
+  # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  # See the License for the specific language governing permissions and
+  # limitations under the License.
+-%>
+func upstreamPoliciesDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+  log.Printf("%v, %v, %v\n", k, old, new)
+  o, n := d.GetChange("virtual_repository_config.0.upstream_policies")
+  oMap, ok := o.([]any)
+  if !ok {
+    return false
+  }
+  nMap, ok := n.([]any)
+  if !ok {
+    return false
+  }
+  hashFunc := func(val any) string {
+    x := val.(map[string]any)
+    return fmt.Sprintf("[id:%v priority:%v repository:%v]", x["id"], x["priority"], x["repository"])
+  }
+
+  return arrayDiffSuppress(oMap, nMap, hashFunc)
+}
+
+func arrayDiffSuppress(old, new []any, hashFunc func(x any) string) bool {
+  oldMap := map[string]bool{}
+  newMap := map[string]bool{}
+  for _, x := range old {
+    key := hashFunc(x)
+    oldMap[key] = true
+  }
+  for _, y := range new {
+    key := hashFunc(y)
+    newMap[key] = true
+  }
+  if len(oldMap) != len(newMap) {
+    return false
+  }
+  for x := range oldMap {
+    if !newMap[x] {
+      return false
+    }
+  }
+  return true
+}
