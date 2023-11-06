@@ -223,8 +223,6 @@ properties:
       - !ruby/object:Api::Type::Array
         name: 'upstreamPolicies'
         diff_suppress_func: 'upstreamPoliciesDiffSuppress'
-          # iterates over all fields. Just want the main func.
-        unordered_list: true
         description: |-
           Policies that configure the upstream artifacts distributed by the Virtual
           Repository. Upstream policies cannot be set on a standard repository.
