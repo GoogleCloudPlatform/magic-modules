@@ -378,6 +378,9 @@ subnetwork in which the cluster's instances are launched.
 * `security_posture_config` - (Optional)
 Enable/Disable Security Posture API features for the cluster. Structure is [documented below](#nested_security_posture_config).
 
+* `fleet` - (Optional)
+Fleet configuration for the cluster. Structure is [documented below](#nested_fleet).
+
 <a name="nested_default_snat_status"></a>The `default_snat_status` block supports
 
 *  `disabled` - (Required) Whether the cluster disables default in-node sNAT rules. In-node sNAT rules will be disabled when defaultSnatStatus is disabled.When disabled is set to false, default IP masquerade rules will be applied to the nodes to prevent sNAT on cluster internal traffic
@@ -1282,7 +1285,7 @@ linux_node_config {
 
 * `vulnerability_mode` - (Optional) Sets the mode of the Kubernetes security posture API's workload vulnerability scanning. Available options include `VULNERABILITY_DISABLED`, `VULNERABILITY_BASIC` and `VULNERABILITY_ENTERPRISE`.
 
-<a name="nested_security_posture_config"></a>The `fleet` block supports:
+<a name="nested_fleet"></a>The `fleet` block supports:
 
 * `project` - (Optional) The name of the Fleet host project where this cluster will be registered.
 
@@ -1330,7 +1333,7 @@ exported:
 
 * `node_config.0.effective_taints` - List of kubernetes taints applied to each node. Structure is [documented above](#nested_taint).
 
-* `fleet.0.membership` - The resource name of the fleet Membership resource associated to this cluster with format `projects/{{project}}/locations/{{location}}/memberships/{{name}}`. See the official doc for [fleet management]((https://cloud.google.com/kubernetes-engine/docs/fleets-overview)). 
+* `fleet.0.membership` - The resource name of the fleet Membership resource associated to this cluster with format `//gkehub.googleapis.com/projects/{{project}}/locations/{{location}}/memberships/{{name}}`. See the official doc for [fleet management](https://cloud.google.com/kubernetes-engine/docs/fleets-overview). 
 
 ## Timeouts
 
