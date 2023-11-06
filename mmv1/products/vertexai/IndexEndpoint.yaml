@@ -48,7 +48,6 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "vertex_ai_index_endpoint"
     primary_resource_id: "index_endpoint"
-    skip_docs: true
     vars:
       address_name: "address-name"
       network_name: "network-name"
@@ -62,6 +61,7 @@ examples:
     primary_resource_id: "index_endpoint"
     # It's not distinguishable if the psc is false or not set, so we need to skip the test.
     skip_import_test: true
+    skip_docs: true
   - !ruby/object:Provider::Terraform::Examples
     name: "vertex_ai_index_endpoint_with_public_endpoint"
     primary_resource_id: "index_endpoint"
