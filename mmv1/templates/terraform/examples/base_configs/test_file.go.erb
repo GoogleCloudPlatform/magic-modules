@@ -58,7 +58,9 @@ object.examples
 -%>
 
 func TestAcc<%= test_slug -%>(t *testing.T) {
-<% if example.skip_vcr -%>
+<% if example.skip_test -%>
+	acctest.Skip(t)
+<% elsif example.skip_vcr -%>
 	acctest.SkipIfVcr(t)
 <% end -%>
   t.Parallel()

@@ -223,7 +223,7 @@ module Provider
 
     def generate_resource_tests(pwd, data)
       return if data.object.examples
-                    .reject(&:skip_test)
+                    .reject(&:exclude_test)
                     .reject do |e|
                   @api.version_obj_or_closest(data.version) \
                 < @api.version_obj_or_closest(e.min_version)

@@ -116,8 +116,14 @@ module Provider
       # These properties will likely be custom code.
       attr_reader :ignore_read_extra
 
-      # Whether to skip generating tests for this resource
+      # Whether to skip running tests
+      # To be distinguished from exclude_test, this will still generate the tests 
+      # but add t.Skip() to prevent it from running in any environmnet
       attr_reader :skip_test
+
+      # Whether to exclude generating tests for this resource
+      # This is the case where we need this example to generate docs
+      attr_reader :exclude_test
 
       # Whether to skip generating docs for this example
       attr_reader :skip_docs
@@ -306,6 +312,7 @@ module Provider
         check :ignore_read_extra, type: Array, item_type: String, default: []
         check :primary_resource_name, type: String
         check :skip_test, type: TrueClass
+        check :exclude_test, type: TrueClass
         check :skip_import_test, type: TrueClass
         check :skip_docs, type: TrueClass
         check :config_path, type: String, default: "templates/terraform/examples/#{name}.tf.erb"
