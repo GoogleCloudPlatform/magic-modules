@@ -13,6 +13,7 @@
 
 --- !ruby/object:Api::Resource
 name: 'Instance'
+min_version: 'beta'
 kind: 'securesourcemanager#instance'
 base_url: 'projects/{{project}}/locations/{{location}}/instances?instance_id={{instance_id}}'
 self_link: 'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}'
@@ -23,14 +24,6 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/secure-source-manager/'
   api: 'https://cloud.google.com/secure-source-manager/docs/reference/rest/v1/projects.locations.instances'
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  parent_resource_attribute: 'instance'
-  method_name_separator: ':'
-  import_format:
-    [
-      'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}',
-      '{{name}}',
-    ]
 import_format: ['projects/{{project}}/locations/{{location}}/instances/{{instance_id}}', '{{name}}']
 autogen_async: true
 async: !ruby/object:Api::OpAsync
@@ -56,9 +49,12 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
+    min_version: 'beta'
     name: 'secure_source_manager_instance_basic'
+    primary_resource_id: 'default'
+    primary_resource_name: '"instance1"'
     vars:
-      instance_name: 'test-instance1'
+      instance_id: 'instance1'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -80,11 +76,32 @@ properties:
     description: |
       The resource name for the Instance.
     output: true
+    immutable: true
+  - !ruby/object:Api::Type::Time
+    name: 'createTime'
+    description: |
+      Time the Instance was created in UTC.
+    output: true
+  - !ruby/object:Api::Type::Time
+    name: 'updateTime'
+    description: |
+      Time the Instance was updated in UTC.
+    output: true
   - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
-      User defined labels
-
+      Labels as key value pairs.
+  - !ruby/object:Api::Type::Enum
+    name: 'state'
+    description: |
+      The current state of the Instance.
+    output: true
+    values:
+      - :CREATING
+      - :ACTIVE
+      - :DELETING
+      - :PAUSED
+      - :UNKNOWN
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   parent_resource_attribute: 'instance'
   method_name_separator: ':'
@@ -93,3 +110,4 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
       'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}',
       '{{name}}',
     ]
+
