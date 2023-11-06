@@ -16,7 +16,7 @@ name: SecureSourceManager
 display_name: Secure Source Manager
 versions:
   - !ruby/object:Api::Product::Version
-    name: ga
+    name: beta
     base_url: https://securesourcemanager.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
