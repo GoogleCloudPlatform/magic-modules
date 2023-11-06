@@ -116,6 +116,7 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: privateServiceConnectConfig
     immutable: true
+    default_from_api: true
     description: |-
       Optional. Configuration for private service connect. `network` and `privateServiceConnectConfig` are mutually exclusive.
     conflicts:
