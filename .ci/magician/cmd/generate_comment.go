@@ -24,7 +24,8 @@ type gcRunner interface {
 	Getwd() (string, error)
 	Copy(src, dest string) error
 	RemoveAll(path string) error
-	Chdir(path string)
+	PushDir(path string) error
+	PopDir() error
 	Run(name string, args, env []string) (string, error)
 	MustRun(name string, args, env []string) string
 }
@@ -133,7 +134,7 @@ func execGenerateComment(buildID, projectID, buildStep, commit, pr, githubToken 
 				os.Exit(1)
 			}
 		}
-		diffs += repoDiffs
+		diffs += "\n" + repoDiffs
 	}
 
 	// TPG diff processor
@@ -228,13 +229,20 @@ The breaking change detector crashed during execution. This is usually due to th
 		os.Exit(1)
 	}
 
-	r.Chdir(mmLocalPath)
+	if err := r.PushDir(mmLocalPath); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 	if diffs := r.MustRun("git", []string{"diff", "HEAD", "origin/main", "tools/missing-test-detector"}, nil); diffs != "" {
 		fmt.Printf("Found diffs in missing test detector:\n%s\nRunning tests.\n", diffs)
 		if err := testTools(mmLocalPath, tpgbLocalPath, pr, commit, buildID, buildStep, projectID, gh, r); err != nil {
 			fmt.Printf("Error testing tools in %s: %v\n", mmLocalPath, err)
 			os.Exit(1)
 		}
+	}
+	if err := r.PopDir(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
 	}
 }
 
@@ -243,7 +251,9 @@ func cloneAndDiff(repoName, path, oldBranch, newBranch, diffTitle, githubToken s
 	if _, err := r.Run("git", []string{"clone", "-b", newBranch, url, path}, nil); err != nil {
 		return "", fmt.Errorf("error cloning %s: %v\n", repoName, err)
 	}
-	r.Chdir(path)
+	if err := r.PushDir(path); err != nil {
+		return "", err
+	}
 	if _, err := r.Run("git", []string{"fetch", "origin", oldBranch}, nil); err != nil {
 		return "", fmt.Errorf("error fetching branch %s in repo %s: %v\n", oldBranch, repoName, err)
 	}
@@ -251,15 +261,19 @@ func cloneAndDiff(repoName, path, oldBranch, newBranch, diffTitle, githubToken s
 	if summary, err := r.Run("git", []string{"diff", "origin/" + oldBranch, "origin/" + newBranch, "--shortstat"}, nil); err != nil {
 		return "", fmt.Errorf("error diffing %s and %s: %v\n", oldBranch, newBranch, err)
 	} else if summary != "" {
-		return fmt.Sprintf("\n%s: [Diff](https://github.com/modular-magician/%s/compare/%s..%s) (%s)", diffTitle, repoName, oldBranch, newBranch, strings.TrimSuffix(summary, "\n")), nil
+		summary = strings.TrimSuffix(summary, "\n")
+		return fmt.Sprintf("%s: [Diff](https://github.com/modular-magician/%s/compare/%s..%s) (%s)", diffTitle, repoName, oldBranch, newBranch, summary), r.PopDir()
 	}
-	return "", nil
+	return "", r.PopDir()
 }
 
+// TODO(trodge): move these five functions into a magician diff processor object
 // Build the diff processor for tpg or tpgb
 func buildDiffProcessor(mmLocalPath, providerLocalPath, oldBranch, newBranch string, r gcRunner) error {
 	diffProcessorPath := filepath.Join(mmLocalPath, "tools", "diff-processor")
-	r.Chdir(diffProcessorPath)
+	if err := r.PushDir(diffProcessorPath); err != nil {
+		return err
+	}
 	for _, path := range []string{"old", "new"} {
 		if err := r.Copy(providerLocalPath, filepath.Join(diffProcessorPath, path)); err != nil {
 			return err
@@ -268,25 +282,32 @@ func buildDiffProcessor(mmLocalPath, providerLocalPath, oldBranch, newBranch str
 	if _, err := r.Run("make", []string{"build"}, []string{"OLD_REF=" + oldBranch, "NEW_REF=" + newBranch}); err != nil {
 		return fmt.Errorf("Error running make build in %s: %v\n", diffProcessorPath, err)
 	}
-	return nil
+	return r.PopDir()
 }
 
 func computeBreakingChanges(mmLocalPath string, r gcRunner) (string, error) {
 	diffProcessorPath := filepath.Join(mmLocalPath, "tools", "diff-processor")
-	r.Chdir(diffProcessorPath)
+	if err := r.PushDir(diffProcessorPath); err != nil {
+		return "", err
+	}
 	breakingChanges, err := r.Run("bin/diff-processor", []string{"breaking-changes"}, nil)
 	if err != nil {
 		return "", err
 	}
-	return breakingChanges, nil
+	return breakingChanges, r.PopDir()
 }
 
 func addLabels(mmLocalPath, githubToken, pr string, r gcRunner) error {
 	diffProcessorPath := filepath.Join(mmLocalPath, "tools", "diff-processor")
-	r.Chdir(diffProcessorPath)
+	if err := r.PushDir(diffProcessorPath); err != nil {
+		return err
+	}
 	output, err := r.Run("bin/diff-processor", []string{"add-labels", pr}, []string{fmt.Sprintf("GITHUB_TOKEN=%s", githubToken)})
 	fmt.Println(output)
-	return err
+	if err != nil {
+		return err
+	}
+	return r.PopDir()
 }
 
 func cleanDiffProcessor(mmLocalPath string, r gcRunner) error {
@@ -346,15 +367,14 @@ An ` + "`override-breaking-change`" + `label can be added to allow merging.
 // Error will be nil unless an error occurs during setup.
 func detectMissingTests(mmLocalPath, tpgbLocalPath, oldBranch string, r gcRunner) (string, error) {
 	tpgbLocalPathOld := tpgbLocalPath + "old"
+
 	if err := r.Copy(tpgbLocalPath, tpgbLocalPathOld); err != nil {
 		return "", err
 	}
-	oldDir, err := r.Getwd()
-	if err != nil {
+
+	if err := r.PushDir(tpgbLocalPathOld); err != nil {
 		return "", err
 	}
-	defer r.Chdir(oldDir)
-	r.Chdir(tpgbLocalPathOld)
 	if _, err := r.Run("git", []string{"checkout", "origin/" + oldBranch}, nil); err != nil {
 		return "", err
 	}
@@ -365,9 +385,14 @@ func detectMissingTests(mmLocalPath, tpgbLocalPath, oldBranch string, r gcRunner
 	if err := updatePackageName("new", tpgbLocalPath, r); err != nil {
 		return "", err
 	}
+	if err := r.PopDir(); err != nil {
+		return "", err
+	}
 
 	missingTestDetectorPath := filepath.Join(mmLocalPath, "tools", "missing-test-detector")
-	r.Chdir(missingTestDetectorPath)
+	if err := r.PushDir(missingTestDetectorPath); err != nil {
+		return "", err
+	}
 	if _, err := r.Run("go", []string{"mod", "edit", "-replace", fmt.Sprintf("google/provider/%s=%s", "new", tpgbLocalPath)}, nil); err != nil {
 		fmt.Printf("Error running go mod edit: %v\n", err)
 	}
@@ -384,7 +409,7 @@ func detectMissingTests(mmLocalPath, tpgbLocalPath, oldBranch string, r gcRunner
 	} else {
 		fmt.Printf("Successfully ran missing test detector:\n%s\n", missingTests)
 	}
-	return missingTests, nil
+	return missingTests, r.PopDir()
 }
 
 // Update the provider package name to the given name in the given path.
@@ -393,12 +418,9 @@ func updatePackageName(name, path string, r gcRunner) error {
 	oldPackageName := "github.com/hashicorp/terraform-provider-google-beta"
 	newPackageName := "google/provider/" + name
 	fmt.Printf("Updating package name in %s from %s to %s\n", path, oldPackageName, newPackageName)
-	oldDir, err := r.Getwd()
-	if err != nil {
+	if err := r.PushDir(path); err != nil {
 		return err
 	}
-	defer r.Chdir(oldDir)
-	r.Chdir(path)
 	if _, err := r.Run("find", []string{".", "-type", "f", "-name", "*.go", "-exec", "sed", "-i.bak", fmt.Sprintf("s~%s~%s~g", oldPackageName, newPackageName), "{}", "+"}, nil); err != nil {
 		return fmt.Errorf("error running find: %v\n", err)
 	}
@@ -408,19 +430,14 @@ func updatePackageName(name, path string, r gcRunner) error {
 	if _, err := r.Run("sed", []string{"-i.bak", fmt.Sprintf("s|%s|%s|g", oldPackageName, newPackageName), "go.sum"}, nil); err != nil {
 		return fmt.Errorf("error running sed: %v\n", err)
 	}
-	return nil
+	return r.PopDir()
 }
 
 // Run unit tests for the missing test detector and diff processor.
 // Report results using Github API.
 func testTools(mmLocalPath, tpgbLocalPath, pr, commit, buildID, buildStep, projectID string, gh gcGithub, r gcRunner) error {
 	missingTestDetectorPath := filepath.Join(mmLocalPath, "tools", "missing-test-detector")
-	oldDir, err := r.Getwd()
-	if err != nil {
-		return err
-	}
-	defer r.Chdir(oldDir)
-	r.Chdir(missingTestDetectorPath)
+	r.PushDir(missingTestDetectorPath)
 	if _, err := r.Run("go", []string{"mod", "tidy"}, nil); err != nil {
 		fmt.Printf("error running go mod tidy in %s: %v\n", missingTestDetectorPath, err)
 	}
@@ -431,7 +448,10 @@ func testTools(mmLocalPath, tpgbLocalPath, pr, commit, buildID, buildStep, proje
 		state = "failure"
 	}
 	targetURL := fmt.Sprintf("https://console.cloud.google.com/cloud-build/builds;region=global/%s;step=%s?project=%s", buildID, buildStep, projectID)
-	return gh.PostBuildStatus(pr, "unit-tests-missing-test-detector", state, targetURL, commit)
+	if err := gh.PostBuildStatus(pr, "unit-tests-missing-test-detector", state, targetURL, commit); err != nil {
+		return err
+	}
+	return r.PopDir()
 }
 
 func init() {

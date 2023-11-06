@@ -1,6 +1,8 @@
 package exec
 
 import (
+	"container/list"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -9,7 +11,9 @@ import (
 	cp "github.com/otiai10/copy"
 )
 
-type actualRunner struct{}
+type actualRunner struct {
+	dirStack *list.List
+}
 
 func (ar *actualRunner) Getwd() (string, error) {
 	return os.Getwd()
@@ -23,8 +27,34 @@ func (ar *actualRunner) RemoveAll(path string) error {
 	return os.RemoveAll(path)
 }
 
-func (ar actualRunner) Chdir(path string) {
-	os.Chdir(path)
+// PushDir changes the directory for the runner to the desired path and saves the previous directory in the stack.
+func (ar *actualRunner) PushDir(path string) error {
+	if ar.dirStack == nil {
+		ar.dirStack = list.New()
+	}
+	wd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	ar.dirStack.PushBack(wd)
+	return os.Chdir(path)
+}
+
+// PopDir removes the most recently added directory from the stack and changes back to it.
+func (ar *actualRunner) PopDir() error {
+	if ar.dirStack == nil {
+		return errors.New("attempted to pop dir, but stack was nil")
+	}
+	backVal := ar.dirStack.Remove(ar.dirStack.Back())
+	dir, ok := backVal.(string)
+	if !ok {
+		return fmt.Errorf("last element in dir stack was a %T, expected string", backVal)
+	}
+	return os.Chdir(dir)
+}
+
+func (ar actualRunner) WriteFile(name, data string) error {
+	return os.WriteFile(name, []byte(data), 0644)
 }
 
 func (ar actualRunner) Run(name string, args, env []string) (string, error) {
@@ -50,7 +80,9 @@ type Runner interface {
 	Getwd() (string, error)
 	Copy(src, dest string) error
 	RemoveAll(path string) error
-	Chdir(path string)
+	PushDir(path string) error
+	PopDir() error
+	WriteFile(name, data string) error
 	Run(name string, args, env []string) (string, error)
 	MustRun(name string, args, env []string) string
 }
