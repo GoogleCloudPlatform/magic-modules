@@ -140,43 +140,44 @@ func execGenerateComment(buildID, projectID, buildStep, commit, pr, githubToken 
 
 	var showBreakingChangesFailed bool
 	var err error
+	diffProcessorPath := filepath.Join(mmLocalPath, "tools", "diff-processor")
 	// TPG diff processor
-	err = buildDiffProcessor(mmLocalPath, tpgLocalPath, oldBranch, newBranch, r)
+	err = buildDiffProcessor(diffProcessorPath, tpgLocalPath, oldBranch, newBranch, r)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	tpgBreaking, err := computeBreakingChanges(mmLocalPath, r)
+	tpgBreaking, err := computeBreakingChanges(diffProcessorPath, r)
 	if err != nil {
 		fmt.Println("Error computing TPG breaking changes: ", err)
 		showBreakingChangesFailed = true
 	}
-	err = addLabels(mmLocalPath, githubToken, pr, r)
+	err = addLabels(diffProcessorPath, githubToken, pr, r)
 	if err != nil {
 		fmt.Println("Error adding TPG labels to PR: ", err)
 	}
-	err = cleanDiffProcessor(mmLocalPath, r)
+	err = cleanDiffProcessor(diffProcessorPath, r)
 	if err != nil {
 		fmt.Println("Error cleaning up diff processor: ", err)
 		os.Exit(1)
 	}
 
 	// TPGB diff processor
-	err = buildDiffProcessor(mmLocalPath, tpgbLocalPath, oldBranch, newBranch, r)
+	err = buildDiffProcessor(diffProcessorPath, tpgbLocalPath, oldBranch, newBranch, r)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	tpgbBreaking, err := computeBreakingChanges(mmLocalPath, r)
+	tpgbBreaking, err := computeBreakingChanges(diffProcessorPath, r)
 	if err != nil {
 		fmt.Println("Error computing TPGB breaking changes: ", err)
 		showBreakingChangesFailed = true
 	}
-	err = addLabels(mmLocalPath, githubToken, pr, r)
+	err = addLabels(diffProcessorPath, githubToken, pr, r)
 	if err != nil {
 		fmt.Println("Error adding TPGB labels to PR: ", err)
 	}
-	err = cleanDiffProcessor(mmLocalPath, r)
+	err = cleanDiffProcessor(diffProcessorPath, r)
 	if err != nil {
 		fmt.Println("Error cleaning up diff processor: ", err)
 		os.Exit(1)
@@ -275,8 +276,7 @@ func cloneAndDiff(repoName, path, oldBranch, newBranch, diffTitle, githubToken s
 
 // TODO(trodge): move these five functions into a magician diff processor object
 // Build the diff processor for tpg or tpgb
-func buildDiffProcessor(mmLocalPath, providerLocalPath, oldBranch, newBranch string, r gcRunner) error {
-	diffProcessorPath := filepath.Join(mmLocalPath, "tools", "diff-processor")
+func buildDiffProcessor(diffProcessorPath, providerLocalPath, oldBranch, newBranch string, r gcRunner) error {
 	if err := r.PushDir(diffProcessorPath); err != nil {
 		return err
 	}
@@ -291,8 +291,7 @@ func buildDiffProcessor(mmLocalPath, providerLocalPath, oldBranch, newBranch str
 	return r.PopDir()
 }
 
-func computeBreakingChanges(mmLocalPath string, r gcRunner) (string, error) {
-	diffProcessorPath := filepath.Join(mmLocalPath, "tools", "diff-processor")
+func computeBreakingChanges(diffProcessorPath string, r gcRunner) (string, error) {
 	if err := r.PushDir(diffProcessorPath); err != nil {
 		return "", err
 	}
@@ -303,8 +302,7 @@ func computeBreakingChanges(mmLocalPath string, r gcRunner) (string, error) {
 	return breakingChanges, r.PopDir()
 }
 
-func addLabels(mmLocalPath, githubToken, pr string, r gcRunner) error {
-	diffProcessorPath := filepath.Join(mmLocalPath, "tools", "diff-processor")
+func addLabels(diffProcessorPath, githubToken, pr string, r gcRunner) error {
 	if err := r.PushDir(diffProcessorPath); err != nil {
 		return err
 	}
@@ -316,8 +314,7 @@ func addLabels(mmLocalPath, githubToken, pr string, r gcRunner) error {
 	return r.PopDir()
 }
 
-func cleanDiffProcessor(mmLocalPath string, r gcRunner) error {
-	diffProcessorPath := filepath.Join(mmLocalPath, "tools", "diff-processor")
+func cleanDiffProcessor(diffProcessorPath string, r gcRunner) error {
 	for _, path := range []string{"old", "new", "bin"} {
 		if err := r.RemoveAll(filepath.Join(diffProcessorPath, path)); err != nil {
 			return err
