@@ -146,7 +146,7 @@ func UpdateIssues(repository string, issueUpdates []IssueUpdate, dryRun bool) {
 		}
 		fmt.Printf("Existing labels: %v\n", issueUpdate.OldLabels)
 		fmt.Printf("New labels: %v\n", issueUpdate.Labels)
-		fmt.Printf("%s %s (https://github.com/%s/issues/%d)\n", repository, req.Method, req.URL, issueUpdate.Number)
+		fmt.Printf("%s %s (https://github.com/%s/issues/%d)\n", req.Method, req.URL, repository, issueUpdate.Number)
 		b, err := json.MarshalIndent(updateBody, "", "  ")
 		if err != nil {
 			glog.Errorf("Error marshalling json: %v", err)
@@ -167,9 +167,11 @@ func UpdateIssues(repository string, issueUpdates []IssueUpdate, dryRun bool) {
 			var errResp ErrorResponse
 			json.Unmarshal(body, &errResp)
 			if errResp.Message != "" {
-				glog.Errorf("API error: %s", errResp.Message)
+				fmt.Printf("API error: %s", errResp.Message)
+				continue
 			}
 
 		}
+		fmt.Printf("GitHub Issue %s %d updated successfully", repository, issueUpdate.Number)
 	}
 }
