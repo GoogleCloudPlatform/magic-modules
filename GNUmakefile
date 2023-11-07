@@ -94,12 +94,14 @@ clean-tgc:
 		rm -rf ./tfplan2cai/testdata/generatedconvert/;\
 		rm -rf ./tfplan2cai/converters/google/provider;\
 		rm -rf ./tfplan2cai/converters/google/resources;\
+		rm -rf ./cai2hcl/*;\
 		find ./tfplan2cai/test/** -type f -exec git rm {} \; > /dev/null;\
 
 tgc:
 	cd mmv1;\
 		bundle;\
 		bundle exec compiler -e terraform -f tgc -v beta -o $(OUTPUT_PATH)/tfplan2cai $(mmv1_compile);\
+		bundle exec compiler -a -e terraform -f tgc_cai2hcl -o $(OUTPUT_PATH)/cai2hcl -v beta;\
 
 tf-ocis:
 	cd mmv1;\
