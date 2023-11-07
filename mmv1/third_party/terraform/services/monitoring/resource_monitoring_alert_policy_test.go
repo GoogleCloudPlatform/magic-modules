@@ -322,6 +322,7 @@ resource "google_monitoring_alert_policy" "full" {
   documentation {
     content   = "test content"
     mime_type = "text/markdown"
+    subject = "test subject"
   }
 }
 `, alertName, conditionName1, conditionName2)
@@ -350,6 +351,7 @@ resource "google_monitoring_alert_policy" "mql" {
   documentation {
     content   = "test content"
     mime_type = "text/markdown"
+    subject = "test subject"
   }
 }
 `, alertName, conditionName)
@@ -383,6 +385,7 @@ resource "google_monitoring_alert_policy" "log" {
   documentation {
     content   = "test content"
     mime_type = "text/markdown"
+    subject = "test subject"    
   }
 }
 `, alertName, conditionName)
@@ -441,6 +444,7 @@ resource "google_monitoring_alert_policy" "promql" {
   documentation {
     content   = "test content"
     mime_type = "text/markdown"
+    subject = "test subject"
   }
 }
 `, alertName, conditionName)

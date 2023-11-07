@@ -355,7 +355,7 @@ resource "google_gke_hub_feature" "feature" {
 
 func TestAccGKEHubFeature_FleetDefaultMemberConfigServiceMesh(t *testing.T) {
 	// VCR fails to handle batched project services
-	// acctest.SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -392,45 +392,6 @@ func TestAccGKEHubFeature_FleetDefaultMemberConfigServiceMesh(t *testing.T) {
 
 func testAccGKEHubFeature_FleetDefaultMemberConfigServiceMesh(context map[string]interface{}) string {
 	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
-resource "google_project_service" "test_mesh" {
-  service = "meshconfig.googleapis.com"
-}
-
-resource "google_project_service" "test_mci" {
-  service = "multiclusteringress.googleapis.com"
-}
-
-resource "google_project_service" "test_acm" {
-  service = "anthosconfigmanagement.googleapis.com"
-}
-
-resource "google_project_service" "test_poco" {
-  service = "anthospolicycontroller.googleapis.com"
-}
-
-resource "google_project_service" "test_mcsd" {
-  service = "multiclusterservicediscovery.googleapis.com"
-}
-
-resource "google_project_service" "test_compute" {
-  service = "compute.googleapis.com"
-  disable_on_destroy = false
-}
-
-resource "google_project_service" "test_container" {
-  service = "container.googleapis.com"
-  disable_on_destroy = false
-}
-
-resource "google_project_service" "test_gkehub" {
-  service = "gkehub.googleapis.com"
-  disable_on_destroy = false
-}
-
-resource "google_gke_hub_membership" "membership" {
-  membership_id = "tf-test%{random_suffix}"
-}
-
 resource "google_gke_hub_feature" "feature" {
   name = "servicemesh"
   location = "global"
@@ -439,52 +400,14 @@ resource "google_gke_hub_feature" "feature" {
       management = "MANAGEMENT_AUTOMATIC"
     }
   }
-  depends_on = [google_project_service.test_mesh]
+  depends_on = [google_project_service.anthos, google_project_service.gkehub, google_project_service.mesh]
+  project = google_project.project.project_id
 }
 `, context)
 }
 
 func testAccGKEHubFeature_FleetDefaultMemberConfigServiceMeshUpdate(context map[string]interface{}) string {
 	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
-resource "google_project_service" "test_mesh" {
-  service = "meshconfig.googleapis.com"
-}
-
-resource "google_project_service" "test_mci" {
-  service = "multiclusteringress.googleapis.com"
-}
-
-resource "google_project_service" "test_acm" {
-  service = "anthosconfigmanagement.googleapis.com"
-}
-
-resource "google_project_service" "test_poco" {
-  service = "anthospolicycontroller.googleapis.com"
-}
-
-resource "google_project_service" "test_mcsd" {
-  service = "multiclusterservicediscovery.googleapis.com"
-}
-
-resource "google_project_service" "test_compute" {
-  service = "compute.googleapis.com"
-  disable_on_destroy = false
-}
-
-resource "google_project_service" "test_container" {
-  service = "container.googleapis.com"
-  disable_on_destroy = false
-}
-
-resource "google_project_service" "test_gkehub" {
-  service = "gkehub.googleapis.com"
-  disable_on_destroy = false
-}
-
-resource "google_gke_hub_membership" "membership" {
-  membership_id = "tf-test%{random_suffix}"
-}
-
 resource "google_gke_hub_feature" "feature" {
   name = "servicemesh"
   location = "global"
@@ -493,14 +416,15 @@ resource "google_gke_hub_feature" "feature" {
       management = "MANAGEMENT_MANUAL"
     }
   }
-  depends_on = [google_project_service.test_mesh]
+  depends_on = [google_project_service.anthos, google_project_service.gkehub, google_project_service.mesh]
+  project = google_project.project.project_id
 }
 `, context)
 }
 
 func TestAccGKEHubFeature_FleetDefaultMemberConfigConfigManagement(t *testing.T) {
 	// VCR fails to handle batched project services
-	// acctest.SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -537,10 +461,6 @@ func TestAccGKEHubFeature_FleetDefaultMemberConfigConfigManagement(t *testing.T)
 
 func testAccGKEHubFeature_FleetDefaultMemberConfigConfigManagement(context map[string]interface{}) string {
 	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
-resource "google_project_service" "test_acm" {
-  service = "anthosconfigmanagement.googleapis.com"
-}
-
 resource "google_gke_hub_feature" "feature" {
   name = "configmanagement"
   location = "global"
@@ -559,17 +479,14 @@ resource "google_gke_hub_feature" "feature" {
       }
     }
   }
-  depends_on = [google_project_service.test_acm]
+  depends_on = [google_project_service.anthos, google_project_service.gkehub, google_project_service.acm]
+  project = google_project.project.project_id
 }
 `, context)
 }
 
 func testAccGKEHubFeature_FleetDefaultMemberConfigConfigManagementUpdate(context map[string]interface{}) string {
 	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
-resource "google_project_service" "test_acm" {
-  service = "anthosconfigmanagement.googleapis.com"
-}
-
 resource "google_gke_hub_feature" "feature" {
   name = "configmanagement"
   location = "global"
@@ -587,7 +504,8 @@ resource "google_gke_hub_feature" "feature" {
       }
     }
   }
-  depends_on = [google_project_service.test_acm]
+  depends_on = [google_project_service.anthos, google_project_service.gkehub, google_project_service.acm]
+  project = google_project.project.project_id
 }
 `, context)
 }
@@ -631,10 +549,6 @@ func TestAccGKEHubFeature_FleetDefaultMemberConfigPolicyController(t *testing.T)
 
 func testAccGKEHubFeature_FleetDefaultMemberConfigPolicyController(context map[string]interface{}) string {
 	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
-resource "google_project_service" "test_poco" {
-  service = "anthospolicycontroller.googleapis.com"
-}
-
 resource "google_gke_hub_feature" "feature" {
   name = "policycontroller"
   location = "global"
@@ -657,17 +571,14 @@ resource "google_gke_hub_feature" "feature" {
       }
     }
   }
-  depends_on = [google_project_service.test_poco]
+  depends_on = [google_project_service.anthos, google_project_service.gkehub, google_project_service.poco]
+  project = google_project.project.project_id
 }
 `, context)
 }
 
 func testAccGKEHubFeature_FleetDefaultMemberConfigPolicyControllerUpdate(context map[string]interface{}) string {
 	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
-resource "google_project_service" "test_poco" {
-  service = "anthospolicycontroller.googleapis.com"
-}
-
 resource "google_gke_hub_feature" "feature" {
   name = "policycontroller"
   location = "global"
@@ -717,7 +628,8 @@ resource "google_gke_hub_feature" "feature" {
       }
     }
   }
-  depends_on = [google_project_service.test_poco]
+  depends_on = [google_project_service.anthos, google_project_service.gkehub, google_project_service.poco]
+  project = google_project.project.project_id
 }
 `, context)
 }
@@ -833,6 +745,11 @@ resource "google_project_service" "container" {
   project = google_project.project.project_id
   service = "container.googleapis.com"
   disable_on_destroy = false
+}
+
+resource "google_project_service" "anthos" {
+  project = google_project.project.project_id
+  service = "anthos.googleapis.com"
 }
 
 resource "google_project_service" "gkehub" {
