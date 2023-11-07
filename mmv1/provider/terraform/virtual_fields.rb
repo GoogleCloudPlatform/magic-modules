@@ -49,12 +49,17 @@ module Provider
       # The default value for the field (defaults to false)
       attr_reader :default_value
 
+      # If set to true, changes in the field's value require recreating the
+      # resource.
+      attr_reader :immutable
+
       def validate
         super
         check :name, type: String, required: true
         check :description, type: String, required: true
         check :type, type: Class, default: Api::Type::Boolean
         check :default_value, default: false
+        check :immutable, default: false
       end
     end
   end
