@@ -165,7 +165,7 @@ module OpenAPIGenerate
 
     def build_properties(properties, required)
       prop_objects = []
-      properties.each do |prop, i|
+      properties&.each do |prop, i|
         prop_object = write_object(prop, i, i.type, false)
         prop_object.instance_variable_set(:@required, true) if required.include?(prop)
 
