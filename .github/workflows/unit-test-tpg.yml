@@ -1,4 +1,6 @@
 name: unit-test-tpg
+permissions: read-all
+
 on:
   workflow_call:
     inputs:
