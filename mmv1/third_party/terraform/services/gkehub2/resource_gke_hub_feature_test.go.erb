@@ -625,6 +625,11 @@ resource "google_gke_hub_feature" "feature" {
             effect = "NoSchedule"
           }
         }
+        monitoring {
+          backends = [
+            :PROMETHEUS
+          ]
+        }
       }
     }
   }
