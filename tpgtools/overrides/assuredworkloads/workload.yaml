@@ -1,0 +1,6 @@
+- type: CUSTOM_SCHEMA_VALUES
+  field: violation_notifications_enabled
+  details:
+    required: false
+    optional: true
+    computed: true
