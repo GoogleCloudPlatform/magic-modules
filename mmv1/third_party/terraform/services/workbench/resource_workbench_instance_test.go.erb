@@ -7,16 +7,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
-
 
 func TestAccWorkbenchInstance_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"service_account": envvar.GetTestServiceAccountFromEnv(t),
-		"random_suffix":   acctest.RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -30,23 +27,23 @@ func TestAccWorkbenchInstance_update(t *testing.T) {
 				ResourceName:            "google_workbench_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "gce_setup.0.vm_image", "gce_setup.0.boot_disk.0.disk_encryption", "gce_setup.0.boot_disk.0.disk_type", "gce_setup.0.boot_disk.0.kms_key", "gce_setup.0.data_disks.0.disk_encryption", "gce_setup.0.data_disks.0.disk_type", "gce_setup.0.data_disks.0.kms_key", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels"},
 			},
-			{
+      {
 				Config: testAccWorkbenchInstance_update(context),
 			},
 			{
 				ResourceName:            "google_workbench_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "gce_setup.0.vm_image", "gce_setup.0.boot_disk.0.disk_encryption", "gce_setup.0.boot_disk.0.disk_type", "gce_setup.0.boot_disk.0.kms_key", "gce_setup.0.data_disks.0.disk_encryption", "gce_setup.0.data_disks.0.disk_type", "gce_setup.0.data_disks.0.kms_key", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels"},
 			},
 		},
 	})
 }
 
 func testAccWorkbenchInstance_basic(context map[string]interface{}) string {
-	        return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_workbench_instance" "instance" {
   name = "tf-test-workbench-instance%{random_suffix}"
   location = "us-central1-a"
@@ -55,40 +52,17 @@ resource "google_workbench_instance" "instance" {
 }
 
 func testAccWorkbenchInstance_update(context map[string]interface{}) string {
-	        return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_workbench_instance" "instance" {
   name = "tf-test-workbench-instance%{random_suffix}"
   location = "us-central1-a"
 
   gce_setup {
-    machine_type = "n1-standard-4"
+    machine_type = "n1-standard-16"
 
     accelerator_configs{
       type         = "NVIDIA_TESLA_T4"
       core_count   = 1
-    }
-
-    vm_image {
-      project      = "deeplearning-platform-release"
-      family       = "tf-latest-cpu"
-    }
-
-    service_accounts {
-      email = "%{service_account}"
-    }
-
-    boot_disk {
-      disk_size_gb  = 110
-      disk_type = "PD_SSD"
-      disk_encryption = "GMEK"
-      kms_key = data.google_kms_crypto_key.crypto-key.id
-    }
-
-    data_disks {
-      disk_size_gb  = 110
-      disk_type = "PD_SSD"
-      disk_encryption = "GMEK"
-      kms_key = data.google_kms_crypto_key.crypto-key.id
     }
 
     shielded_instance_config {
@@ -97,55 +71,20 @@ resource "google_workbench_instance" "instance" {
       enable_integrity_monitoring = true
     }
 
-    network_interfaces {
-      network = data.google_compute_network.my_network.id
-      subnet = data.google_compute_subnetwork.my_subnetwork.id
-      nic_type = "GVNIC"
-    }
-
-    disable_public_ip = true
-
-    tags = ["abc","def"]
-
     metadata = {
       terraform = "true"
     }
 
-    enable_ip_forwarding = true
-
     gpu_driver_config {
       enable_gpu_driver = true
-      custom_gpu_driver_path = "test_path"
+      custom_gpu_driver_path = "gs://wbi-test-bucket"
     }
   }
-
-  instance_owners  = [ "%{service_account}"]
-
-  disable_proxy_access = true
 
   labels = {
     k = "val"
   }
 
-}
-
-data "google_compute_network" "my_network" {
-  name = "test-default"
-}
-
-data "google_compute_subnetwork" "my_subnetwork" {
-  name   = "test-default"
-  region = "us-central1"
-}
-
-data "google_kms_key_ring" "keyring" {
-  name = "tftest-shared-keyring-1"
-  location = "global"
-}
-
-data "google_kms_crypto_key" "crypto-key" {
-  name     = "tftest-shared-key-1"
-  key_ring = data.google_kms_key_ring.keyring.id
 }
 `, context)
 }

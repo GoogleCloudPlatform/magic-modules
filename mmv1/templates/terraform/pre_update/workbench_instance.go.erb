@@ -1,0 +1,44 @@
+name := d.Get("name").(string)
+if d.HasChange("gce_setup.0.machine_type") || d.HasChange("gce_setup.0.accelerator_configs") || d.HasChange("gce_setup.0.shielded_instance_config") {
+  state := d.Get("state").(string)
+  if state != "STOPPED" {
+    stopURL, err := tpgresource.ReplaceVars(d, config, "{{WorkbenchBasePath}}projects/{{project}}/locations/{{location}}/instances/{{name}}:stop")
+	  if err != nil {
+		  return err
+	  }
+
+    log.Printf("[DEBUG] Stopping Workbench Instance: %q", name)
+
+    emptyReqBody := make(map[string]interface{})
+
+    dRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+                                            Config: config,
+                                            Method: "POST",
+                                            Project: billingProject,
+                                            RawURL: stopURL,
+                                            UserAgent: userAgent,
+                                            Body: emptyReqBody,
+                                          })
+    if err != nil {
+      return fmt.Errorf("Error Stopping Workbench Instance: %s", err)
+    }
+
+    var opRes map[string]interface{}
+    err = WorkbenchOperationWaitTimeWithResponse(
+      config, dRes, &opRes, project, "Stopping Workbench Instance", userAgent,
+      d.Timeout(schema.TimeoutUpdate))
+    if err != nil {
+      return fmt.Errorf("Error waiting to stop Workbench Instance: %s", err)
+    }
+
+  } else {
+    log.Printf("[DEBUG] Workbench Instance %q has state %q.", name, state)
+    return nil
+  }
+
+} else {
+  log.Printf("[DEBUG] Workbench Instance %q need not be stopped for the update.", name)
+  return nil
+}
+
+
