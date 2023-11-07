@@ -180,6 +180,21 @@ properties:
             - :OWNER
             - :MANAGER
             - :MEMBER
+        - !ruby/object:Api::Type::NestedObject
+          name: 'expiryDetail'
+          description: |
+            The MembershipRole expiry details, only supported for MEMBER role.
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'expireTime'
+              required: true
+              description: |
+                The time at which the MembershipRole will expire.
+
+                A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
+                resolution and up to nine fractional digits.
+
+                Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
   - !ruby/object:Api::Type::String
     name: 'type'
     output: true
