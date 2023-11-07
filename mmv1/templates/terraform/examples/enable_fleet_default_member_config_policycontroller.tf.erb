@@ -1,21 +1,22 @@
 resource "google_gke_hub_feature" "feature" {
   name = "policycontroller"
   location = "global"
-  fleetDefaultMemberConfig {
+  fleet_default_member_config {
     policycontroller {
-      hubConfig {
-        installSpec = "ENABLED"
-        policyContent {
-          bundles {
-            name = ""
-            # exemptedNamespaces = ["foo", "bar"]
+      policy_controller_hub_config {
+        install_spec = "INSTALL_SPEC_ENABLED"
+        exemptable_namespaces = ["foo"]
+        policy_content {
+          bundle {
+            name = "policy-essentials-v2022"
+            exempted_namespaces = ["foo", "bar"]
           }
-          templateLibrary {
+          template_library {
             installation = "ALL"
           }
         }
-        auditIntervalSeconds = 30
-        referentialRulesEnabled = true
+        audit_interval_seconds = 30
+        referential_rules_enabled = true
       }
     }
   }
