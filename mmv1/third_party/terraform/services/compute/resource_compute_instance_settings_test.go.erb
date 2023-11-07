@@ -32,7 +32,7 @@ func TestAccComputeInstanceSettings_update(t *testing.T) {
 				ResourceName:            "google_compute_instance_settings.gce_instance_settings",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zone", "update_mask"},
+				ImportStateVerifyIgnore: []string{"zone"},
 			},
 			{
 				Config: testAccComputeInstanceSettings_update(context),
@@ -41,7 +41,16 @@ func TestAccComputeInstanceSettings_update(t *testing.T) {
 				ResourceName:            "google_compute_instance_settings.gce_instance_settings",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zone", "update_mask"},
+				ImportStateVerifyIgnore: []string{"zone"},
+			},
+			{
+				Config: testAccComputeInstanceSettings_delete(context),
+			},
+			{
+				ResourceName:            "google_compute_instance_settings.gce_instance_settings",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"zone"},
 			},
 		},
 	})
@@ -73,7 +82,23 @@ resource "google_compute_instance_settings" "gce_instance_settings" {
   metadata {
     items = {
       foo = "bar"
-	  baz = "qux"
+      baz = "qux"
+    }
+  }
+}
+
+`, context)
+}
+
+func testAccComputeInstanceSettings_delete(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+
+resource "google_compute_instance_settings" "gce_instance_settings" {
+  provider = google-beta
+  zone = "us-east7-b"
+  metadata {
+    items = {
+      baz = "qux"
     }
   }
 }
