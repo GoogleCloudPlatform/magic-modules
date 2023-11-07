@@ -41,14 +41,6 @@ examples:
       name: 'workflow'
       account_id: 'my-account'
     skip_import_test: true
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'workflow_beta'
-    primary_resource_id: 'example_beta'
-    vars:
-      name: 'workflow_beta'
-      account_id: 'my-account'
-    skip_import_test: true
-    min_version: 'beta'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   extra_schema_entry: templates/terraform/extra_schema_entry/workflow.erb
   encoder: templates/terraform/encoders/workflow.go.erb
