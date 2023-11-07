@@ -1,7 +1,7 @@
 ---
 subcategory: "Compute Engine"
 description: |-
-  Get information about a Google Compute Persistent disks.
+  Get information about a Google Compute Regional Persistent disks.
 ---
 
 # google\_compute\_region\_disk
@@ -68,13 +68,6 @@ In addition to the arguments listed above, the following computed attributes are
   Links to the users of the disk (attached instances) in form:
   project/zones/zone/instances/instance
 
-* `source_image_id` -
-  The ID value of the image used to create this disk. This value
-  identifies the exact image that was used to create this persistent
-  disk. For example, if you created the persistent disk from an image
-  that was later deleted and recreated under the same name, the source
-  image ID would identify the exact version of the image that was used.
-
 * `source_snapshot_id` -
   The unique ID of the snapshot used to create this disk. This value
   identifies the exact snapshot that was used to create this persistent
@@ -98,14 +91,8 @@ In addition to the arguments listed above, the following computed attributes are
   URL of the disk type resource describing which disk type to use to
   create the disk.
 
-* `image` -
-  The image from which to initialize this disk.
-
 * `region` -
   A reference to the region where the disk resides.
-
-* `source_image_encryption_key` -
-  The customer-supplied encryption key of the source image.
 
 * `snapshot` -
   The source snapshot used to create this disk.
