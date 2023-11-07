@@ -1,0 +1,23 @@
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+  if v == nil {
+    return nil, nil
+  }
+
+  m, ok := v.([]interface{})
+  if !ok {
+    return nil, fmt.Errorf("unable to convert %v to []interface{}", v)
+  }
+  req := make(map[string]interface{})
+  for _, raw := range m {
+    if raw == nil {
+      continue
+    }
+
+    deploymentConfig := raw.(map[string]interface{})
+    componentName := deploymentConfig["component"].(string)
+    delete(deploymentConfig, "component")
+    req[componentName] = deploymentConfig
+  }
+
+  return req, nil
+}

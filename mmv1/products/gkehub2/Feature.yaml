@@ -322,6 +322,8 @@ properties:
                 name: deploymentConfig
                 api_name: deploymentConfigs
                 description: 'Specifies the deployment config to each of the deployments ("admission", "audit", "mutation").'
+                custom_expand: templates/terraform/custom_expand/gkehub2_feature_policycontroller_deployment_configs.go.erb
+                custom_flatten: templates/terraform/custom_flatten/gkehub2_feature_policycontroller_deployment_configs.go.erb
                 item_type: !ruby/object:Api::Type::NestedObject
                   name: 'required but unused'
                   description: 'required but unused'
@@ -389,6 +391,8 @@ properties:
                     name: bundle
                     api_name: bundles
                     description: 'Configures which bundles to install and their corresponding install specs.'
+                    custom_expand: templates/terraform/custom_expand/gkehub2_feature_policycontroller_policy_content_bundles.go.erb
+                    custom_flatten: templates/terraform/custom_flatten/gkehub2_feature_policycontroller_policy_content_bundles.go.erb
                     item_type: !ruby/object:Api::Type::NestedObject
                       name: 'required but unused'
                       description: 'required but unused'

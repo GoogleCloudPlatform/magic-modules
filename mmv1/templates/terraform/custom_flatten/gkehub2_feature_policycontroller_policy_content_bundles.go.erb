@@ -1,0 +1,17 @@
+func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+  if v == nil {
+    return nil
+  }
+
+  bundles := v.(map[string]interface{})
+  transformedBundles := make([]interface{}, 0, len(bundles))
+  for bundleName, raw := range bundles {
+    bundle := raw.(map[string]interface{})
+    bundle["name"] = bundleName
+    bundle["exempted_namespaces"] = bundle["exemptedNamespaces"]
+    delete(bundle, "exemptedNamespaces")
+    transformedBundles = append(transformedBundles, bundle)
+  }
+
+  return transformedBundles
+}

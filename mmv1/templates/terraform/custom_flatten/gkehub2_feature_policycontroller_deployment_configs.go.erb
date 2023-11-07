@@ -1,0 +1,33 @@
+func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+  if v == nil {
+    return nil
+  }
+
+  deploymentConfigs := v.(map[string]interface{})
+  transformedDeploymentConfigs := make([]interface{}, 0, len(deploymentConfigs))
+  for component, raw := range deploymentConfigs {
+    cfg := raw.(map[string]interface{})
+    transformedCfg := make(map[string]interface{})
+    transformedCfg["component"] = component
+
+    if v, ok := cfg["podAntiAffinity"]; ok {
+      transformedCfg["pod_anti_affinity"] = v
+    }
+    if v, ok := cfg["containerResources"]; ok {
+      transformedCfg["container_resources"] = v
+    }
+    if v, ok := cfg["podTolerations"]; ok {
+      transformedCfg["pod_tolerations"] = v
+    }
+    if v, ok := cfg["replicaCount"]; ok {
+      transformedCfg["replica_count"] = v
+    }
+    if v, ok := cfg["podAffinity"]; ok {
+      transformedCfg["pod_affinity"] = v
+    }
+
+    transformedDeploymentConfigs = append(transformedDeploymentConfigs, transformedCfg)
+  }
+
+  return transformedDeploymentConfigs
+}
