@@ -23,9 +23,9 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Update Instance Settings': 'https://cloud.google.com/compute/docs/metadata/setting-custom-metadata#set-custom-project-zonal-metadata'
   api: 'https://cloud.google.com/compute/docs/reference/rest/beta/instanceSettings'
 create_verb: :PATCH
-create_url: 'projects/{{project}}/zones/{{zone}}/instanceSettings?update_mask={{update_mask}}'
+create_url: 'projects/{{project}}/zones/{{zone}}/instanceSettings?update_mask=*'
 update_verb: :PATCH
-update_url: 'projects/{{project}}/zones/{{zone}}/instanceSettings?update_mask={{update_mask}}'
+update_url: 'projects/{{project}}/zones/{{zone}}/instanceSettings?update_mask=*'
 import_format: ['projects/{{project}}/zones/{{zone}}/instanceSettings']
 min_version: beta
 async: !ruby/object:Api::OpAsync
@@ -62,13 +62,13 @@ parameters:
     description: 'A reference to the zone where the machine resides.'
     required: true
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
-  - !ruby/object:Api::Type::String
-    name: 'update_mask'
-    required: true
-    immutable: true
-    description: |
-      The instance settings fields to be updated.
-    url_param_only: true
+  # - !ruby/object:Api::Type::String
+  #   name: 'update_mask'
+  #   required: true
+  #   immutable: true
+  #   description: |
+  #     The instance settings fields to be updated.
+  #   url_param_only: true
 properties:
   - !ruby/object:Api::Type::Fingerprint
     name: 'fingerprint'
