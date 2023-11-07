@@ -23,8 +23,8 @@ module Api
       include Comparable
 
       attr_reader :cai_base_url
-      attr_accessor :base_url
-      attr_accessor :name
+      attr_reader :base_url
+      attr_reader :name
 
       ORDER = %w[ga beta alpha private].freeze
 

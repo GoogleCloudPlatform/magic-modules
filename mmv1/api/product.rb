@@ -37,14 +37,14 @@ module Api
 
     # The list of permission scopes available for the service
     # For example: `https://www.googleapis.com/auth/compute`
-    attr_accessor :scopes
+    attr_reader :scopes
 
     # The API versions of this product
-    attr_accessor :versions
+    attr_reader :versions
 
     # The base URL for the service API endpoint
     # For example: `https://www.googleapis.com/compute/v1/`
-    attr_accessor :base_url
+    attr_reader :base_url
 
     # A function reference designed for the rare case where you
     # need to use retries in operation calls. Used for the service api
@@ -103,8 +103,6 @@ module Api
         @display_name
       end
     end
-
-    attr_writer :display_name
 
     # Most general version that exists for the product
     # If GA is present, use that, else beta, else alpha
