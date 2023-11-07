@@ -152,7 +152,18 @@ func TestAccSpannerInstance_basicWithAutoscalingUsingProcessingUnitConfig(t *tes
 		CheckDestroy:             testAccCheckSpannerInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSpannerInstance_basicWithAutoscalerConfigUsingProcessingUnitsAsConfigs(displayName),
+				Config: testAccSpannerInstance_basicWithAutoscalerConfigUsingProcessingUnitsAsConfigs(displayName, 2000, 1000, 65, 95),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_spanner_instance.basic", "state"),
+				),
+			},
+			{
+				ResourceName:      "google_spanner_instance.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccSpannerInstance_basicWithAutoscalerConfigUsingProcessingUnitsAsConfigs(displayName, 3000, 2000, 75, 90),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("google_spanner_instance.basic", "state"),
 				),
@@ -228,7 +239,7 @@ resource "google_spanner_instance" "basic" {
 `, name, name, virtual)
 }
 
-func testAccSpannerInstance_basicWithAutoscalerConfigUsingProcessingUnitsAsConfigs(name string) string {
+func testAccSpannerInstance_basicWithAutoscalerConfigUsingProcessingUnitsAsConfigs(name string, minProcessingUnits, maxProcessingUnits, cupUtilizationPercent, storageUtilizationPercent int) string {
 	return fmt.Sprintf(`
 resource "google_spanner_instance" "basic" {
   name         = "%s"
@@ -236,14 +247,14 @@ resource "google_spanner_instance" "basic" {
   display_name = "%s"
   autoscaling_config {
     autoscaling_limits {
-      max_processing_units            = 2000
-      min_processing_units            = 1000
+      max_processing_units            = %v
+      min_processing_units            = %v
     }
     autoscaling_targets {
-      high_priority_cpu_utilization_percent = 65
-      storage_utilization_percent           = 95
+      high_priority_cpu_utilization_percent = %v
+      storage_utilization_percent           = %v
     }
   }
 }
-`, name, name)
+`, name, name, maxProcessingUnits, minProcessingUnits, cupUtilizationPercent, storageUtilizationPercent)
 }
