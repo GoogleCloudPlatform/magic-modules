@@ -47,7 +47,6 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
-skip_delete: true
 autogen_async: true
 id_format: 'projects/{{project}}/databases/{{name}}'
 import_format:
@@ -59,52 +58,73 @@ examples:
     name: 'firestore_default_database'
     primary_resource_id: 'database'
     pull_external: true
+    vars:
+      delete_protection_state: "DELETE_PROTECTION_ENABLED"
     test_env_vars:
-      org_id: :ORG_ID
+      project_id: :PROJECT_NAME
+    test_vars_overrides:
+      delete_protection_state: '"DELETE_PROTECTION_DISABLED"'
     ignore_read_extra:
       - project
       - etag
-    vars:
-      project_id: 'my-project'
+      - deletion_policy
   - !ruby/object:Provider::Terraform::Examples
     name: 'firestore_database'
     primary_resource_id: 'database'
     vars:
       name: "example-database-id"
+      delete_protection_state: "DELETE_PROTECTION_ENABLED"
     test_env_vars:
       project_id: :PROJECT_NAME
+    test_vars_overrides:
+      delete_protection_state: '"DELETE_PROTECTION_DISABLED"'
     ignore_read_extra:
       - project
       - etag
+      - deletion_policy
   - !ruby/object:Provider::Terraform::Examples
     name: 'firestore_default_database_in_datastore_mode'
     primary_resource_id: 'datastore_mode_database'
-    pull_external: true
+    vars:
+      delete_protection_state: "DELETE_PROTECTION_ENABLED"
     test_env_vars:
-      org_id: :ORG_ID
+      project_id: :PROJECT_NAME
+    test_vars_overrides:
+      delete_protection_state: '"DELETE_PROTECTION_DISABLED"'
     ignore_read_extra:
       - project
       - etag
-    vars:
-      project_id: 'my-project'
+      - deletion_policy
+    skip_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'firestore_database_in_datastore_mode'
     primary_resource_id: 'datastore_mode_database'
     vars:
       name: "example-database-id"
+      delete_protection_state: "DELETE_PROTECTION_ENABLED"
     test_env_vars:
       project_id: :PROJECT_NAME
+    test_vars_overrides:
+      delete_protection_state: '"DELETE_PROTECTION_DISABLED"'
     ignore_read_extra:
       - project
       - etag
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'firestore_database_with_delete_protection'
-    primary_resource_id: 'database'
-    vars:
-      name: "example-database-id"
-    test_env_vars:
-      project_id: :PROJECT_NAME
-    skip_test: true
+      - deletion_policy
+virtual_fields:
+  - !ruby/object:Api::Type::Enum
+    name: 'deletion_policy'
+    description: |
+      Deletion behavior for this database.
+      If the deletion policy is `ABANDON`, the database will be removed from Terraform state but not deleted from Google Cloud upon destruction.
+      If the deletion policy is `DELETE`, the database will both be removed from Terraform state and deleted from Google Cloud upon destruction.
+      The default value is `ABANDON`.
+      See also `delete_protection`.
+    values:
+      - :ABANDON
+      - :DELETE
+    default_value: :ABANDON
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_delete: templates/terraform/pre_delete/firestore_database.go.erb
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -177,6 +197,9 @@ properties:
     name: deleteProtectionState
     description: |
       State of delete protection for the database.
+      When delete protection is enabled, this database cannot be deleted.
+      The default value is `DELETE_PROTECTION_STATE_UNSPECIFIED`, which is currently equivalent to `DELETE_PROTECTION_DISABLED`.
+      **Note:** Additionally, to delete this database using `terraform destroy`, `deletion_policy` must be set to `DELETE`.
     values:
       - :DELETE_PROTECTION_STATE_UNSPECIFIED
       - :DELETE_PROTECTION_ENABLED
