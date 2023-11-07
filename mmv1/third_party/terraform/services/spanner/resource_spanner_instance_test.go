@@ -152,7 +152,7 @@ func TestAccSpannerInstance_basicWithAutoscalingUsingProcessingUnitConfig(t *tes
 		CheckDestroy:             testAccCheckSpannerInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSpannerInstance_basicWithAutoscalerConfigUsingProcessingUnitsAsConfigs(displayName, 2000, 1000, 65, 95),
+				Config: testAccSpannerInstance_basicWithAutoscalerConfigUsingProcessingUnitsAsConfigs(displayName, 1000, 2000, 65, 95),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("google_spanner_instance.basic", "state"),
 				),
@@ -163,7 +163,7 @@ func TestAccSpannerInstance_basicWithAutoscalingUsingProcessingUnitConfig(t *tes
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccSpannerInstance_basicWithAutoscalerConfigUsingProcessingUnitsAsConfigs(displayName, 3000, 2000, 75, 90),
+				Config: testAccSpannerInstance_basicWithAutoscalerConfigUsingProcessingUnitsAsConfigs(displayName, 2000, 3000, 75, 90),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("google_spanner_instance.basic", "state"),
 				),
