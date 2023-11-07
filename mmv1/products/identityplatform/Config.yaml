@@ -277,6 +277,7 @@ properties:
         output: true
         description: |
           API key that can be used when making requests for this project.
+        sensitive: true
       - !ruby/object:Api::Type::String
         name: 'firebaseSubdomain'
         output: true
