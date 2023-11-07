@@ -62,13 +62,6 @@ parameters:
     description: 'A reference to the zone where the machine resides.'
     required: true
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
-  # - !ruby/object:Api::Type::String
-  #   name: 'update_mask'
-  #   required: true
-  #   immutable: true
-  #   description: |
-  #     The instance settings fields to be updated.
-  #   url_param_only: true
 properties:
   - !ruby/object:Api::Type::Fingerprint
     name: 'fingerprint'
