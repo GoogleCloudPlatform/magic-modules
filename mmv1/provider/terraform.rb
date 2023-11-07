@@ -292,7 +292,7 @@ module Provider
                       self)
 
         # Only generate test if testable examples exist.
-        unless data.object.examples.reject(&:skip_test).empty?
+        unless data.object.examples.reject(&:exclude_test).reject(&:skip_test).empty?
           data.generate(
             pwd,
             'templates/terraform/examples/base_configs/iam_test_file.go.erb',

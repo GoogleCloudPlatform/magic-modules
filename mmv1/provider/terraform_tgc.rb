@@ -319,7 +319,7 @@ module Provider
 
       return unless product_whitelist.include?(data.product.name.downcase)
       return if data.object.examples
-                    .reject(&:exclude_test)
+                    .reject(&:exclude_test).reject(&:skip_test)
                     .reject do |e|
                   @api.version_obj_or_closest(data.version) \
                 < @api.version_obj_or_closest(e.min_version)
