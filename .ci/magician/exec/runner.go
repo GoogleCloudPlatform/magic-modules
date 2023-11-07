@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 
 	cp "github.com/otiai10/copy"
 )
@@ -43,11 +44,11 @@ func (ar *actualRunner) GetCWD() string {
 }
 
 func (ar *actualRunner) Copy(src, dest string) error {
-	return cp.Copy(src, dest)
+	return cp.Copy(ar.abs(src), ar.abs(dest))
 }
 
 func (ar *actualRunner) RemoveAll(path string) error {
-	return os.RemoveAll(path)
+	return os.RemoveAll(ar.abs(path))
 }
 
 // PushDir changes the directory for the runner to the desired path and saves the previous directory in the stack.
@@ -56,7 +57,7 @@ func (ar *actualRunner) PushDir(path string) error {
 		return errors.New("attempted to push dir, but stack was nil")
 	}
 	ar.dirStack.PushFront(ar.cwd)
-	ar.cwd = path
+	ar.cwd = ar.abs(path)
 	return nil
 }
 
@@ -75,7 +76,7 @@ func (ar *actualRunner) PopDir() error {
 }
 
 func (ar *actualRunner) WriteFile(name, data string) error {
-	return os.WriteFile(name, []byte(data), 0644)
+	return os.WriteFile(ar.abs(name), []byte(data), 0644)
 }
 
 func (ar *actualRunner) Run(name string, args, env []string) (string, error) {
@@ -96,4 +97,11 @@ func (ar *actualRunner) MustRun(name string, args, env []string) string {
 		log.Fatal(err)
 	}
 	return out
+}
+
+func (ar *actualRunner) abs(path string) string {
+	if !filepath.IsAbs(path) {
+		return filepath.Join(ar.cwd, path)
+	}
+	return path
 }
