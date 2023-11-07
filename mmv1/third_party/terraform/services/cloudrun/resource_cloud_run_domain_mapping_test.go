@@ -131,11 +131,11 @@ func TestAccCloudRunDomainMapping_migration(t *testing.T) {
 		CheckDestroy: testAccCheckCloudRunDomainMappingDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config:            testAccCloudRunDomainMapping_cloudRunDomainMappingUpdated1(context),
+				Config:            testAccCloudRunDomainMapping_cloudRunDomainMappingUpdated2(context),
 				ExternalProviders: oldVersion,
 			},
 			{
-				Config:                   testAccCloudRunDomainMapping_cloudRunDomainMappingUpdated1(context),
+				Config:                   testAccCloudRunDomainMapping_cloudRunDomainMappingUpdated2(context),
 				ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 			},
 		},
