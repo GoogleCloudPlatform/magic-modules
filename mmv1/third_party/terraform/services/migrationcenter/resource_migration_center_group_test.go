@@ -67,7 +67,7 @@ resource "google_migration_center_group" "default" {
   description  = "Updated Terraform integration test description"
   display_name = "Updated  integration test display"
   labels       = {
-  	key2 = "value2"
+    key2 = "value2"
     key = "value"
   }
 }
