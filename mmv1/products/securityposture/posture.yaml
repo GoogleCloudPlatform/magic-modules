@@ -113,24 +113,18 @@ async: !ruby/object:Api::OpAsync
 
 parameters:
   - !ruby/object:Api::Type::String
-    name: 'location'
-    required: true
+    name: parent
+    description: |
+      The parent of the resource, an organization. Format should be `organizations/{organization_id}/locations/{location}`.
     immutable: true
     url_param_only: true
-    description: |
-      The geographic location where the posture should reside.      
+    required: true     
   - !ruby/object:Api::Type::String
     name: 'name'
     required: true
     immutable: true
     description: |
       Name of the posture.
-  - !ruby/object:Api::Type::String
-    name: 'revision_id'
-    required: false
-    immutable: true
-    description: |
-      Revision_ID of the posture.
 properties:
   # Fields go here
   - !ruby/object:Api::Type::String
@@ -143,7 +137,6 @@ properties:
     description: |
       State of the posture.    
     required: true
-    default_value: :STATE_UNSPECIFIED
     values:
       - :STATE_UNSPECIFIED
       - :DEPRECATED
@@ -200,45 +193,128 @@ properties:
           description: |
             Description of the policy set.
         - !ruby/object:Api::Type::Array
-          name: 'Policy'
+          name: 'policies'
           description: |
-            Represents a security policy.
-          properties:
-            - !ruby/object:Api::Type::String
-              name: 'policyId'
-              description: |
-                ID of the policy.
-            - !ruby/object:Api::Type::String
-              name: 'description'
-              description: |
-                Description of the policy.
-            - !ruby/object:Api::Type::Array
-              name: 'complianceStandards'
-              description: 'Mapping for policy to security standards and controls.'
-              item_type: !ruby/object:Api::Type::NestedObject
-                name: 'ComplianceStandard'
+            List of security policy
+          item_type: !ruby/object:Api::Type::NestedObject
+            name: 'Policy'
+            description: |
+              Description of a security policy.
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'policyId'
                 description: |
-                  Set of security policies.
-                properties:
-                  - !ruby/object:Api::Type::String
-                    name: 'standard'
-                    description: |
-                      Mapping for compliance standards to policy.
-                  - !ruby/object:Api::Type::String
-                    name: 'control'
-                    description: |
-                      Mapping for security controls to policy.
-            - !ruby/object:Api::Type::NestedObject
-              name: 'constraint'
-              description: 'Policy constraint definition.'
-              properties:
-                - !ruby/object:Api::Type::NestedObject
-                  name: 'orgPolicyCannedConstraint'
+                  ID of the policy.
+              - !ruby/object:Api::Type::String
+                name: 'description'
+                description: |
+                  Description of the policy.
+              - !ruby/object:Api::Type::Array
+                name: 'complianceStandards'
+                description: 'Mapping for policy to security standards and controls.'
+                item_type: !ruby/object:Api::Type::NestedObject
+                  name: 'ComplianceStandard'
                   description: |
-                    Organization policy canned constraint definition.
+                    Set of security controls corresponding to the policy.
                   properties:
                     - !ruby/object:Api::Type::String
-                      name: 'cannedContraintId'
-                      description: 'Organization policy canned constraint Id'
+                      name: 'standard'
+                      description: |
+                        Mapping of compliance standards for the policy.
+                    - !ruby/object:Api::Type::String
+                      name: 'control'
+                      description: |
+                        Mapping of security controls for the policy.
+              - !ruby/object:Api::Type::NestedObject
+                name: 'constraint'
+                description: 'Policy constraint definition.'
+                properties:
+                  - !ruby/object:Api::Type::NestedObject
+                    name: 'orgPolicyCannedConstraint'
+                    description: |
+                      Organization policy canned constraint definition.
+                    properties:
+                      - !ruby/object:Api::Type::String
+                        name: 'cannedContraintId'
+                        description: 'Organization policy canned constraint Id'
+                      - !ruby/object:Api::Type::Array
+                        name: 'policyRules'
+                        description: 'Definition of policy rules'
+                        item_type: !ruby/object:Api::Type::NestedObject
+                          name: 'PolicyRule'
+                          description: 'A message that holds specific allowed and denied values.'
+                          properties:
+                            - !ruby/object:Api::Type::NestedObject
+                              name: 'values'
+                              description: |
+                                List of values to be used for this policy rule. This field can be set only in policies for list constraints.
+                              exactly_one_of:
+                                - values
+                                - allow_all
+                                - deny_all
+                                - enforce
+                              properties:
+                                - !ruby/object:Api::Type::Array
+                                  name: 'allowedValues'
+                                  description: 'List of values allowed at this resource.'
+                                  item_type: !ruby/object:Api::Type::String
+                                - !ruby/object:Api::Type::Array
+                                  name: 'deniedValues'
+                                  description: 'List of values denied at this resource.'
+                                  item_type: !ruby/object:Api::Type::String
+                            - !ruby/object:Api::Type::Boolean
+                              name: 'allowAll'
+                              description: |
+                                Setting this to true means that all values are allowed. This field can be set only in policies for list constraints.
+                              exactly_one_of:
+                                - values
+                                - allow_all
+                                - deny_all
+                                - enforce
+                            - !ruby/object:Api::Type::Boolean
+                              name: 'denyAll'
+                              description: |
+                                Setting this to true means that all values are denied. This field can be set only in policies for list constraints.
+                              exactly_one_of:
+                                - values
+                                - allow_all
+                                - deny_all
+                                - enforce
+                            - !ruby/object:Api::Type::Boolean
+                              name: 'enforce'
+                              description: |
+                                If `true`, then the policy is enforced. If `false`, then any configuration is acceptable.
+                                This field can be set only in policies for boolean constraints.
+                              exactly_one_of:
+                                - values
+                                - allow_all
+                                - deny_all
+                                - enforce
+                    exactly_one_of:
+                      - org_policy_canned_constraint
+                      - org_policy_custom_constraint
+                      - security_health_analytics_module
+                      - security_health_analytics_custom_module
+                  - !ruby/object:Api::Type::NestedObject
+                    name: 'orgPolicyCustomConstraint'
+                    exactly_one_of:
+                      - org_policy_canned_constraint
+                      - org_policy_custom_constraint
+                      - security_health_analytics_module
+                      - security_health_analytics_custom_module
+                  - !ruby/object:Api::Type::NestedObject
+                    name: 'securityHealthAnalyticsModule'
+                    exactly_one_of:
+                      - org_policy_canned_constraint
+                      - org_policy_custom_constraint
+                      - security_health_analytics_module
+                      - security_health_analytics_custom_module
+                  - !ruby/object:Api::Type::NestedObject
+                    name: 'securityHealthAnalyticsCustomModule'
+                    exactly_one_of:
+                      - org_policy_canned_constraint
+                      - org_policy_custom_constraint
+                      - security_health_analytics_module
+                      - security_health_analytics_custom_module
 
 
