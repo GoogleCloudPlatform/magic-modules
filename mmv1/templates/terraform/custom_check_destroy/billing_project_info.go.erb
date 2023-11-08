@@ -3,7 +3,7 @@
 // project has no billing account linked after destroying the
 // google_billing_project_info resource
 
-config := GoogleProviderConfig(t)
+config := acctest.GoogleProviderConfig(t)
 
 url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{CoreBillingBasePath}}projects/{{project}}/billingInfo")
 if err != nil {

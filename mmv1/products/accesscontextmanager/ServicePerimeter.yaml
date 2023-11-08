@@ -157,6 +157,7 @@ properties:
           - status.0.access_levels
           - status.0.restricted_services
         item_type: Api::Type::String
+        is_set: true
       - !ruby/object:Api::Type::Array
         name: 'accessLevels'
         description: |
@@ -175,6 +176,7 @@ properties:
           - status.0.access_levels
           - status.0.restricted_services
         item_type: Api::Type::String
+        is_set: true
       - !ruby/object:Api::Type::Array
         name: 'restrictedServices'
         description: |
@@ -236,6 +238,7 @@ properties:
                 - !ruby/object:Api::Type::Array
                   name: 'identities'
                   item_type: Api::Type::String
+                  is_set: true
                   description: |
                     A list of identities that are allowed access through this ingress policy.
                     Should be in the format of email address. The email address should represent
@@ -275,6 +278,7 @@ properties:
                 - !ruby/object:Api::Type::Array
                   name: 'resources'
                   item_type: Api::Type::String
+                  is_set: true
                   description: |
                     A list of resources, currently only projects in the form
                     `projects/<projectnumber>`, protected by this `ServicePerimeter`
@@ -343,11 +347,27 @@ properties:
                     - :ANY_USER_ACCOUNT
                     - :ANY_SERVICE_ACCOUNT
                 - !ruby/object:Api::Type::Array
+                  name: 'sources'
+                  description: 'Sources that this EgressPolicy authorizes access from.'
+                  item_type: !ruby/object:Api::Type::NestedObject
+                    properties:
+                      - !ruby/object:Api::Type::String
+                        name: 'accessLevel'
+                        description: 'An AccessLevel resource name that allows resources outside the ServicePerimeter to be accessed from the inside.'
+                - !ruby/object:Api::Type::Enum
+                  name: 'sourceRestriction'
+                  description: 'Whether to enforce traffic restrictions based on `sources` field. If the `sources` field is non-empty, then this field must be set to `SOURCE_RESTRICTION_ENABLED`.'
+                  values:
+                    - :SOURCE_RESTRICTION_UNSPECIFIED
+                    - :SOURCE_RESTRICTION_ENABLED
+                    - :SOURCE_RESTRICTION_DISABLED
+                - !ruby/object:Api::Type::Array
                   name: 'identities'
                   description: |
                     A list of identities that are allowed access through this `EgressPolicy`.
                     Should be in the format of email address. The email address should
                     represent individual user or service account only.
+                  is_set: true
                   item_type: Api::Type::String
             - !ruby/object:Api::Type::NestedObject
               name: 'egressTo'
@@ -357,6 +377,7 @@ properties:
               properties:
                 - !ruby/object:Api::Type::Array
                   name: 'resources'
+                  is_set: true
                   item_type: Api::Type::String
                   description: |
                     A list of resources, currently only projects in the form
@@ -366,6 +387,7 @@ properties:
                     the perimeter.
                 - !ruby/object:Api::Type::Array
                   name: 'externalResources'
+                  is_set: true
                   item_type: Api::Type::String
                   description: |
                     A list of external resources that are allowed to be accessed. A request
@@ -423,6 +445,7 @@ properties:
           - spec.0.access_levels
           - spec.0.restricted_services
         item_type: Api::Type::String
+        is_set: true
       - !ruby/object:Api::Type::Array
         name: 'accessLevels'
         description: |
@@ -441,6 +464,7 @@ properties:
           - spec.0.access_levels
           - spec.0.restricted_services
         item_type: Api::Type::String
+        is_set: true
       - !ruby/object:Api::Type::Array
         name: 'restrictedServices'
         description: |
@@ -454,6 +478,7 @@ properties:
           - spec.0.access_levels
           - spec.0.restricted_services
         item_type: Api::Type::String
+        is_set: true
       - !ruby/object:Api::Type::NestedObject
         name: 'vpcAccessibleServices'
         description: |
@@ -471,6 +496,7 @@ properties:
               The list of APIs usable within the Service Perimeter.
               Must be empty unless `enableRestriction` is True.
             item_type: Api::Type::String
+            is_set: true
       - !ruby/object:Api::Type::Array
         name: 'ingressPolicies'
         description: |
@@ -500,6 +526,7 @@ properties:
                 - !ruby/object:Api::Type::Array
                   name: 'identities'
                   item_type: Api::Type::String
+                  is_set: true
                   description: |
                     A list of identities that are allowed access through this ingress policy.
                     Should be in the format of email address. The email address should represent
@@ -539,6 +566,7 @@ properties:
                 - !ruby/object:Api::Type::Array
                   name: 'resources'
                   item_type: Api::Type::String
+                  is_set: true
                   description: |
                     A list of resources, currently only projects in the form
                     `projects/<projectnumber>`, protected by this `ServicePerimeter`
@@ -607,12 +635,28 @@ properties:
                     - :ANY_USER_ACCOUNT
                     - :ANY_SERVICE_ACCOUNT
                 - !ruby/object:Api::Type::Array
+                  name: 'sources'
+                  description: 'Sources that this EgressPolicy authorizes access from.'
+                  item_type: !ruby/object:Api::Type::NestedObject
+                    properties:
+                      - !ruby/object:Api::Type::String
+                        name: 'accessLevel'
+                        description: 'An AccessLevel resource name that allows resources outside the ServicePerimeter to be accessed from the inside.'
+                - !ruby/object:Api::Type::Enum
+                  name: 'sourceRestriction'
+                  description: 'Whether to enforce traffic restrictions based on `sources` field. If the `sources` field is non-empty, then this field must be set to `SOURCE_RESTRICTION_ENABLED`.'
+                  values:
+                    - :SOURCE_RESTRICTION_UNSPECIFIED
+                    - :SOURCE_RESTRICTION_ENABLED
+                    - :SOURCE_RESTRICTION_DISABLED
+                - !ruby/object:Api::Type::Array
                   name: 'identities'
                   description: |
                     A list of identities that are allowed access through this `EgressPolicy`.
                     Should be in the format of email address. The email address should
                     represent individual user or service account only.
                   item_type: Api::Type::String
+                  is_set: true
             - !ruby/object:Api::Type::NestedObject
               name: 'egressTo'
               description: |
@@ -622,6 +666,7 @@ properties:
                 - !ruby/object:Api::Type::Array
                   name: 'resources'
                   item_type: Api::Type::String
+                  is_set: true
                   description: |
                     A list of resources, currently only projects in the form
                     `projects/<projectnumber>`, that match this to stanza. A request matches
@@ -631,6 +676,7 @@ properties:
                 - !ruby/object:Api::Type::Array
                   name: 'externalResources'
                   item_type: Api::Type::String
+                  is_set: true
                   description: |
                     A list of external resources that are allowed to be accessed. A request
                     matches if it contains an external resource in this list (Example:

@@ -49,8 +49,9 @@ examples:
     name: 'certificate_manager_certificate_issuance_config'
     primary_resource_id: 'default'
     vars:
-      ca_name: 'my-ca'
-      pool_name: 'my-ca-pool'
+      ca_name: 'ca-authority'
+      pool_name: 'ca-pool'
+      issuance_config_name: 'issuance-config'
 
 parameters:
   - !ruby/object:Api::Type::String
@@ -65,6 +66,7 @@ parameters:
     description: |
       The Certificate Manager location. If not specified, "global" is used.
     default_value: global
+    immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
@@ -107,7 +109,7 @@ properties:
       accurate to nanoseconds with up to nine fractional digits.
       Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
     output: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       'Set of label tags associated with the CertificateIssuanceConfig resource.

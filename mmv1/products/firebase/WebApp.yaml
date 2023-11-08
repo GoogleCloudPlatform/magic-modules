@@ -65,23 +65,36 @@ examples:
     vars:
       display_name: 'Display Name Basic'
       bucket_name: 'fb-webapp-'
-      project_name: "my-project"
     test_env_vars:
-      org_id: :ORG_ID
+      project_id: :PROJECT_NAME
     test_vars_overrides:
       display_name: '"tf-test Display Name Basic"'
     ignore_read_extra:
       - project
       - deletion_policy
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'firebase_web_app_custom_api_key'
+    min_version: 'beta'
+    primary_resource_id: 'default'
+    vars:
+      display_name: 'Display Name'
+      api_key_name: "api-key"
+    test_env_vars:
+      project_id: :PROJECT_NAME
+    ignore_read_extra:
+      - project
+      - deletion_policy
 virtual_fields:
-  # TODO: make this an enum in a future major version. If using this field as a reference, look at PerInstanceConfig's minimal_action field for enum configuration.
-  - !ruby/object:Api::Type::String
+  - !ruby/object:Api::Type::Enum
     name: 'deletion_policy'
     description: |
       Set to `ABANDON` to allow the WebApp to be untracked from terraform state
       rather than deleted upon `terraform destroy`. This is useful becaue the WebApp may be
-      serving traffic. Set to `DELETE` to delete the WebApp. Default to `ABANDON`
-    default_value: ABANDON
+      serving traffic. Set to `DELETE` to delete the WebApp. Default to `DELETE`
+    default_value: :DELETE
+    values:
+      - :DELETE
+      - :ABANDON
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_delete: templates/terraform/custom_delete/firebase_app_deletion_policy.erb
 properties:
@@ -108,3 +121,10 @@ properties:
     description: |
       The URLs where the `WebApp` is hosted.
     item_type: Api::Type::String
+  - !ruby/object:Api::Type::String
+    name: apiKeyId
+    default_from_api: true
+    description: |
+      The globally unique, Google-assigned identifier (UID) for the Firebase API key associated with the WebApp.
+      If apiKeyId is not set during creation, then Firebase automatically associates an apiKeyId with the WebApp.
+      This auto-associated key may be an existing valid key or, if no valid key exists, a new one will be provisioned.

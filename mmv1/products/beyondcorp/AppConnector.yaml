@@ -82,7 +82,7 @@ properties:
     name: 'displayName'
     description: |
       An arbitrary user-provided name for the AppConnector.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Resource labels to represent user provided metadata.

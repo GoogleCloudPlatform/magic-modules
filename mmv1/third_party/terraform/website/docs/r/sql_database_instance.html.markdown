@@ -173,6 +173,30 @@ resource "google_sql_database_instance" "main" {
 }
 ```
 
+### Cloud SQL Instance with PSC connectivity
+
+```hcl
+resource "google_sql_database_instance" "main" {
+  name             = "psc-enabled-main-instance"
+  database_version = "MYSQL_8_0"
+  settings {
+    tier    = "db-f1-micro"
+    ip_configuration {
+      psc_config {
+        psc_enabled = true
+        allowed_consumer_projects = ["allowed-consumer-project-name"]
+      }
+      ipv4_enabled = false
+    }
+    backup_configuration {
+      enabled = true
+      binary_log_enabled = true
+    }
+    availability_type = "REGIONAL"
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -293,8 +317,7 @@ The optional `settings.active_directory_config` subblock supports:
 
 The optional `settings.data_cache_config` subblock supports:
 
-* `data_cache_enabled` - (Optional) Whether data cache is enabled for the instance. Defaults to `false`
-    Can only be used with MYSQL.
+* `data_cache_enabled` - (Optional) Whether data cache is enabled for the instance. Defaults to `false`. Can be used with MYSQL and PostgreSQL only.
 
 The optional `settings.deny_maintenance_period` subblock supports:
 
@@ -325,7 +348,7 @@ The optional `settings.backup_configuration` subblock supports:
 
 * `location` - (Optional) The region where the backup will be stored
 
-* `transaction_log_retention_days` - (Optional) The number of days of transaction logs we retain for point in time restore, from 1-7. For PostgreSQL Enterprise Plus instances, the number of days of retained transaction logs can be set from 1 to 35. 
+* `transaction_log_retention_days` - (Optional) The number of days of transaction logs we retain for point in time restore, from 1-7. For PostgreSQL Enterprise Plus instances, the number of days of retained transaction logs can be set from 1 to 35.
 
 * `backup_retention_settings` - (Optional) Backup retention settings. The configuration is detailed below.
 
@@ -348,7 +371,12 @@ Specifying a network enables private IP.
 At least `ipv4_enabled` must be enabled or a `private_network` must be configured.
 This setting can be updated, but it cannot be removed after it is set.
 
-* `require_ssl` - (Optional) Whether SSL connections over IP are enforced or not.
+* `require_ssl` - (Optional) Whether SSL connections over IP are enforced or not. To change this field, also set the corresponding value in `ssl_mode`.
+
+* `ssl_mode` - (Optional) Specify how SSL connection should be enforced in DB connections. This field provides more SSL enforcment options compared to `require_ssl`. To change this field, also set the correspoding value in `require_ssl`.
+    * For PostgreSQL instances, the value pairs are listed in the [API reference doc](https://cloud.google.com/sql/docs/mysql/admin-api/rest/v1beta4/instances#ipconfiguration) for `ssl_mode` field.
+    * For MySQL instances, use the same value pairs as the PostgreSQL instances.
+    * For SQL Server instances, set it to `ALLOW_UNENCRYPTED_AND_ENCRYPTED` when `require_ssl=false` and `ENCRYPTED_ONLY` otherwise.
 
 * `allocated_ip_range` - (Optional) The name of the allocated ip range for the private ip CloudSQL instance. For example: "google-managed-services-default". If set, the instance ip will be created in the allocated range. The range name must comply with [RFC 1035](https://datatracker.ietf.org/doc/html/rfc1035). Specifically, the name must be 1-63 characters long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])?.
 
@@ -364,6 +392,12 @@ The optional `settings.ip_configuration.authorized_networks[]` sublist supports:
 * `value` - (Required) A CIDR notation IPv4 or IPv6 address that is allowed to
     access this instance. Must be set even if other two attributes are not for
     the whitelist to become active.
+
+The optional `settings.ip_configuration.psc_config` sublist supports:
+
+* `psc_enabled` - (Optional) Whether PSC connectivity is enabled for this instance.
+
+* `allowed_consumer_projects` - (Optional) List of consumer projects that are allow-listed for PSC connections to this instance. This instance can be connected to with PSC from any network in these projects. Each consumer project in this list may be represented by a project number (numeric) or by a project id (alphanumeric).
 
 The optional `settings.location_preference` subblock supports:
 
@@ -441,7 +475,7 @@ to work, cannot be updated, and supports:
 
 * `password` - (Optional) Password for the replication connection.
 
-* `sslCipher` - (Optional) Permissible ciphers for use in SSL encryption.
+* `ssl_cipher` - (Optional) Permissible ciphers for use in SSL encryption.
 
 * `username` - (Optional) Username for replication connection.
 
@@ -455,6 +489,8 @@ The optional `clone` block supports:
 * `point_in_time` -  (Optional) The timestamp of the point in time that should be restored.
 
     A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+
+* `preferred_zone` - (Optional) (Point-in-time recovery for PostgreSQL only) Clone to an instance in the specified zone. If no zone is specified, clone to the same zone as the source instance. [clone-unavailable-instance](https://cloud.google.com/sql/docs/postgres/clone-instance#clone-unavailable-instance)
 
 * `database_names` - (Optional) (SQL Server only, use with `point_in_time`) Clone only the specified databases from the source instance. Clone all databases if empty.
 
@@ -543,11 +579,25 @@ performing filtering in a Terraform config.
 
 Database instances can be imported using one of any of these accepted formats:
 
-```
-$ terraform import google_sql_database_instance.main projects/{{project}}/instances/{{name}}
-$ terraform import google_sql_database_instance.main {{project}}/{{name}}
-$ terraform import google_sql_database_instance.main {{name}}
+* `projects/{{project}}/instances/{{name}}`
+* `{{project}}/{{name}}`
+* `{{name}}`
 
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import Database instances using one of the formats above. For example:
+
+```tf
+import {
+  id = "projects/{{project}}/instances/{{name}}"
+  to = google_sql_database_instance.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), Database instances can be imported using one of the formats above. For example:
+
+```
+$ terraform import google_sql_database_instance.default projects/{{project}}/instances/{{name}}
+$ terraform import google_sql_database_instance.default {{project}}/{{name}}
+$ terraform import google_sql_database_instance.default {{name}}
 ```
 
 ~> **NOTE:** Some fields (such as `replica_configuration`) won't show a diff if they are unset in

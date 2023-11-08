@@ -53,7 +53,7 @@ async: !ruby/object:Api::OpAsync
     path: 'error/errors'
     message: 'message'
 exclude_import: true
-exclude_validator: true
+exclude_tgc: true
 mutex: signedUrlKey/{{project}}/backendBuckets/{{backend_bucket}}/
 examples:
   - !ruby/object:Provider::Terraform::Examples

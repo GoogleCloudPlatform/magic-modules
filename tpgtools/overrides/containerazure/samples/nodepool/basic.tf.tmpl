@@ -90,6 +90,10 @@ resource "google_container_azure_node_pool" "primary" {
     annotation-one = "value-one"
   }
 
+  management {
+    auto_repair = true
+  }
+
   project = "{{project}}"
 }
 

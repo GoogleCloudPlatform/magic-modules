@@ -31,6 +31,11 @@ examples:
       network_1_name: 'network-1'
       network_2_name: 'network-2'
       cluster_1_name: 'cluster-1'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      deletion_protection: 'false'
+    oics_vars_overrides:
+      deletion_protection: 'false'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_delete: templates/terraform/pre_delete/response_policy_detach_network_gke.erb
 properties:
@@ -54,6 +59,7 @@ properties:
       'The list of network names specifying networks to which this policy is
       applied.'
     update_verb: :PATCH
+    send_empty_value: true
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::String

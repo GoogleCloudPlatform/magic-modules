@@ -241,104 +241,6 @@ resource "google_compute_network" "prod" {
 }
 ```
 
-#### Primary-Backup with a regional L7 ILB
-
-```hcl
-resource "google_dns_record_set" "a" {
-  name         = "backend.${google_dns_managed_zone.prod.dns_name}"
-  managed_zone = google_dns_managed_zone.prod.name
-  type         = "A"
-  ttl          = 300
-
-  routing_policy {
-    primary_backup {
-      trickle_ratio = 0.1
-
-      primary {
-        internal_load_balancers {
-          load_balancer_type = "regionalL7ilb"
-          ip_address         = google_compute_forwarding_rule.prod.ip_address
-          port               = "80"
-          ip_protocol        = "tcp"
-          network_url        = google_compute_network.prod.id
-          project            = google_compute_forwarding_rule.prod.project
-          region             = google_compute_forwarding_rule.prod.region
-        }
-      }
-
-      backup_geo {
-        location = "asia-east1"
-        rrdatas  = ["10.128.1.1"]
-      }
-
-      backup_geo {
-        location = "us-west1"
-        rrdatas  = ["10.130.1.1"]
-      }
-    }
-  }
-}
-
-resource "google_dns_managed_zone" "prod" {
-  name     = "prod-zone"
-  dns_name = "prod.mydomain.com."
-}
-
-resource "google_compute_forwarding_rule" "prod" {
-  name                  = "prod-ilb"
-  region                = "us-central1"
-  depends_on            = [google_compute_subnetwork.prod_proxy]
-  load_balancing_scheme = "INTERNAL_MANAGED"
-  target                = google_compute_region_target_http_proxy.prod.id
-  port_range            = "80"
-  allow_global_access   = true
-  network               = google_compute_network.prod.name
-  ip_protocol           = "TCP"
-}
-
-resource "google_compute_region_target_http_proxy" "prod" {
-  name    = "prod-http-proxy"
-  region  = "us-central1"
-  url_map = google_compute_region_url_map.prod.id
-}
-
-resource "google_compute_region_url_map" "prod" {
-  name            = "prod-url-map"
-  region          = "us-central1"
-  default_service = google_compute_region_backend_service.prod.id
-}
-
-resource "google_compute_region_backend_service" "prod" {
-  name                  = "prod-backend"
-  region                = "us-central1"
-  load_balancing_scheme = "INTERNAL_MANAGED"
-  protocol              = "HTTP"
-  health_checks         = [google_compute_region_health_check.prod.id]
-}
-
-resource "google_compute_region_health_check" "prod" {
-  name               = "prod-http-health-check"
-  region             = "us-central1"
-
-  http_health_check {
-    port = 80
-  }
-}
-
-resource "google_compute_subnetwork" "prod_proxy" {
-  name          = "prod-proxy-subnet"
-  ip_cidr_range = "10.100.0.0/24"
-  region        = "us-central1"
-  purpose       = "INTERNAL_HTTPS_LOAD_BALANCER"
-  role          = "ACTIVE"
-  network       = google_compute_network.prod.id
-}
-
-resource "google_compute_network" "prod" {
-  name = "prod-network"
-}
-```
-
 ## Argument Reference
 
 The following arguments are supported:
@@ -414,7 +316,7 @@ The following arguments are supported:
 
 <a name="nested_internal_load_balancers"></a>The `internal_load_balancers` block supports:
 
-* `load_balancer_type` - (Required) The type of load balancer. This value is case-sensitive. Possible values: ["regionalL4ilb", "regionalL7ilb"]
+* `load_balancer_type` - (Required) The type of load balancer. This value is case-sensitive. Possible values: ["regionalL4ilb", "regionalL7ilb", "globalL7ilb"]
 
 * `ip_address` - (Required) The frontend IP address of the load balancer.
 
@@ -439,10 +341,25 @@ The following arguments are supported:
 
 DNS record sets can be imported using either of these accepted formats:
 
+* `projects/{{project}}/managedZones/{{zone}}/rrsets/{{name}}/{{type}}`
+* `{{project}}/{{zone}}/{{name}}/{{type}}`
+* `{{zone}}/{{name}}/{{type}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import DNS record sets using one of the formats above. For example:
+
+```tf
+import {
+  id = "projects/{{project}}/managedZones/{{zone}}/rrsets/{{name}}/{{type}}"
+  to = google_dns_record_set.default
+}
 ```
-$ terraform import google_dns_record_set.frontend projects/{{project}}/managedZones/{{zone}}/rrsets/{{name}}/{{type}}
-$ terraform import google_dns_record_set.frontend {{project}}/{{zone}}/{{name}}/{{type}}
-$ terraform import google_dns_record_set.frontend {{zone}}/{{name}}/{{type}}
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), DNS record sets can be imported using one of the formats above. For example:
+
+```
+$ terraform import google_dns_record_set.default projects/{{project}}/managedZones/{{zone}}/rrsets/{{name}}/{{type}}
+$ terraform import google_dns_record_set.default {{project}}/{{zone}}/{{name}}/{{type}}
+$ terraform import google_dns_record_set.default {{zone}}/{{name}}/{{type}}
 ```
 
 Note: The record name must include the trailing dot at the end.

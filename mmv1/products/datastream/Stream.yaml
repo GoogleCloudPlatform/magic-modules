@@ -157,7 +157,7 @@ properties:
     name: 'name'
     output: true
     description: The stream's name.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: Labels.
   - !ruby/object:Api::Type::String

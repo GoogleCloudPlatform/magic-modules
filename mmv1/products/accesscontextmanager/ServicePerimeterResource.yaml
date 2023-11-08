@@ -49,7 +49,7 @@ docs: !ruby/object:Provider::Terraform::Docs
     Your account must have the `serviceusage.services.use` permission on the
     `billing_project` you defined.
 autogen_async: true
-exclude_validator: true
+exclude_tgc: true
 # Skipping the sweeper due to the non-standard base_url and because this is fine-grained under ServicePerimeter
 skip_sweeper: true
 id_format: '{{perimeter_name}}/{{resource}}'

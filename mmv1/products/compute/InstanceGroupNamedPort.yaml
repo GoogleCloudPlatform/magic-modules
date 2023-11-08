@@ -71,6 +71,11 @@ examples:
       network_name: 'container-network'
       subnetwork_name: 'container-subnetwork'
       gke_cluster_name: 'my-cluster'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      deletion_protection: 'false'
+    oics_vars_overrides:
+      deletion_protection: 'false'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: 'templates/terraform/encoders/normalize_group.go.erb'
 parameters:

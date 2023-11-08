@@ -14,7 +14,6 @@ Creates a table resource in a dataset for Google BigQuery. For more information 
 (and run `terraform apply` to write the field to state) in order to destroy an instance.
 It is recommended to not set this field (or set it to true) until you're ready to destroy.
 
-
 ## Example Usage
 
 ```hcl
@@ -107,7 +106,10 @@ The following arguments are supported:
 
 * `friendly_name` - (Optional) A descriptive name for the table.
 
-* `max_staleness`: (Optional) The maximum staleness of data that could be returned when the table (or stale MV) is queried. Staleness encoded as a string encoding of sql IntervalValue type.
+* `max_staleness`: (Optional) The maximum staleness of data that could be
+  returned when the table (or stale MV) is queried. Staleness encoded as a
+  string encoding of [SQL IntervalValue
+  type](https://cloud.google.com/bigquery/docs/reference/standard-sql/data-types#interval_type).
 
 * `encryption_configuration` - (Optional) Specifies how the table should be encrypted.
     If left blank, the table will be encrypted with a Google-managed key; that process
@@ -115,7 +117,16 @@ The following arguments are supported:
 
 * `labels` - (Optional) A mapping of labels to assign to the resource.
 
-* `schema` - (Optional) A JSON schema for the table.
+    **Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
+    Please refer to the field 'effective_labels' for all of the labels present on the resource.
+
+* `terraform_labels` -
+  The combination of labels configured directly on the resource and default labels configured on the provider.
+
+* `effective_labels` -
+  All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.
+
+* <a name="schema"></a>`schema` - (Optional) A JSON schema for the table.
 
     ~>**NOTE:** Because this field expects a JSON string, any changes to the
     string will create a diff, even if the JSON itself hasn't changed.
@@ -124,14 +135,21 @@ The following arguments are supported:
     field type, we currently cannot suppress the recurring diff this causes.
     As a workaround, we recommend using the schema as returned by the API.
 
-    ~>**NOTE:**  When setting `schema` for `external_data_configuration`, please use
-    `external_data_configuration.schema` [documented below](#nested_external_data_configuration).
+    ~>**NOTE:**  If you use `external_data_configuration`
+    [documented below](#nested_external_data_configuration) and do **not** set
+    `external_data_configuration.connection_id`, schemas must be specified
+    with `external_data_configuration.schema`. Otherwise, schemas must be
+    specified with this top-level field.
 
 * `time_partitioning` - (Optional) If specified, configures time-based
     partitioning for this table. Structure is [documented below](#nested_time_partitioning).
 
 * `range_partitioning` - (Optional) If specified, configures range-based
     partitioning for this table. Structure is [documented below](#nested_range_partitioning).
+
+* `require_partition_filter` - (Optional) If set to true, queries over this table
+    require a partition filter that can be used for partition elimination to be
+    specified.
 
 * `clustering` - (Optional) Specifies column names to use for data clustering.
     Up to four top-level columns are allowed, and should be specified in
@@ -146,6 +164,9 @@ The following arguments are supported:
 * `deletion_protection` - (Optional) Whether or not to allow Terraform to destroy the instance. Unless this field is set to false
 in Terraform state, a `terraform destroy` or `terraform apply` that would delete the instance will fail.
 
+* `table_constraints` - (Optional) Defines the primary key and foreign keys. 
+    Structure is [documented below](#nested_table_constraints).
+
 <a name="nested_external_data_configuration"></a>The `external_data_configuration` block supports:
 
 * `autodetect` - (Required) - Let BigQuery try to autodetect the schema
@@ -158,6 +179,10 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
     external storage, such as Azure Blob, Cloud Storage, or S3. The `connection_id` can have
     the form `{{project}}.{{location}}.{{connection_id}}`
     or `projects/{{project}}/locations/{{location}}/connections/{{connection_id}}`.
+
+    ~>**NOTE:** If you set `external_data_configuration.connection_id`, the
+    table schema must be specified using the top-level `schema` field
+    [documented above](#schema).
 
 * `csv_options` (Optional) - Additional properties to set if
     `source_format` is set to "CSV". Structure is [documented below](#nested_csv_options).
@@ -177,7 +202,7 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
     partitioning on an unsupported format will lead to an error, as will providing
     an invalid specification. Structure is [documented below](#nested_hive_partitioning_options).
 
-* `avro_options` (Optional) - Additional options if `source_format` is set to  
+* `avro_options` (Optional) - Additional options if `source_format` is set to
     "AVRO".  Structure is [documented below](#nested_avro_options).
 
 * `ignore_unknown_values` (Optional) - Indicates if BigQuery should
@@ -201,6 +226,10 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
     This schema is effectively only applied when creating a table from an external
     datasource, after creation the computed schema will be stored in
     `google_bigquery_table.schema`
+
+    ~>**NOTE:** If you set `external_data_configuration.connection_id`, the
+    table schema must be specified using the top-level `schema` field
+    [documented above](#schema).
 
 * `source_format` (Optional) - The data format. Please see sourceFormat under
     [ExternalDataConfiguration](https://cloud.google.com/bigquery/docs/reference/rest/v2/tables#externaldataconfiguration)
@@ -286,8 +315,8 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
 
 <a name="nested_avro_options"></a>The `avro_options` block supports:
 
-* `use_avro_logical_types` (Optional) - If is set to true, indicates whether  
-    to interpret logical types as the corresponding BigQuery data type  
+* `use_avro_logical_types` (Optional) - If is set to true, indicates whether
+    to interpret logical types as the corresponding BigQuery data type
     (for example, TIMESTAMP), instead of using the raw type (for example, INTEGER).
 
 <a name="nested_parquet_options"></a>The `parquet_options` block supports:
@@ -310,7 +339,8 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
 
 * `require_partition_filter` - (Optional) If set to true, queries over this table
     require a partition filter that can be used for partition elimination to be
-    specified.
+    specified. `require_partition_filter` is deprecated and will be removed in
+    a future major release. Use the top level field with the same name instead.
 
 <a name="nested_range_partitioning"></a>The `range_partitioning` block supports:
 
@@ -345,6 +375,9 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
 * `refresh_interval_ms` - (Optional) The maximum frequency at which this materialized view will be refreshed.
     The default value is 1800000
 
+* `allow_non_incremental_definition` - (Optional) Allow non incremental materialized view definition.
+    The default value is false.
+
 <a name="nested_encryption_configuration"></a>The `encryption_configuration` block supports the following arguments:
 
 * `kms_key_name` - (Required) The self link or full name of a key which should be used to
@@ -352,6 +385,51 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
     encrypt/decrypt permissions on this key - you may want to see the
     `google_bigquery_default_service_account` datasource and the
     `google_kms_crypto_key_iam_binding` resource.
+
+<a name="nested_table_constraints"></a>The `table_constraints` block supports:
+
+* `primary_key` - (Optional) Represents the primary key constraint
+    on a table's columns. Present only if the table has a primary key.
+    The primary key is not enforced.
+    Structure is [documented below](#nested_primary_key).
+
+* `foreign_keys` - (Optional) Present only if the table has a foreign key.
+    The foreign key is not enforced.
+    Structure is [documented below](#nested_foreign_keys).
+
+<a name="nested_primary_key"></a>The `primary_key` block supports:
+
+* `columns`: (Required) The columns that are composed of the primary key constraint.
+
+<a name="nested_foreign_keys"></a>The `foreign_keys` block supports:
+
+* `name`: (Optional) Set only if the foreign key constraint is named.
+
+* `referenced_table`: (Required) The table that holds the primary key
+    and is referenced by this foreign key.
+    Structure is [documented below](#nested_referenced_table).
+
+* `column_references`: (Required) The pair of the foreign key column and primary key column.
+    Structure is [documented below](#nested_column_references).
+
+<a name="nested_referenced_table"></a>The `referenced_table` block supports:
+
+* `project_id`: (Required) The ID of the project containing this table.
+
+* `dataset_id`: (Required) The ID of the dataset containing this table.
+
+* `table_id`: (Required) The ID of the table. The ID must contain only
+	letters (a-z, A-Z), numbers (0-9), or underscores (_). The maximum
+	length is 1,024 characters. Certain operations allow suffixing of
+	the table ID with a partition decorator, such as
+	sample_table$20190123.
+
+<a name="nested_column_references"></a>The `column_references` block supports:
+
+* `referencing_column`: (Required) The column that composes the foreign key.
+
+* `referenced_column`: (Required) The column in the primary key that are
+    referenced by the referencingColumn
 
 ## Attributes Reference
 
@@ -382,7 +460,22 @@ exported:
 
 ## Import
 
-BigQuery tables imported using any of these accepted formats:
+BigQuery tables can be imported using any of these accepted formats:
+
+* `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}`
+* `{{project}}/{{dataset_id}}/{{table_id}}`
+* `{{dataset_id}}/{{table_id}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import BigQuery tables using one of the formats above. For example:
+
+```tf
+import {
+  id = "projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}"
+  to = google_bigquery_table.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), BigQuery tables can be imported using one of the formats above. For example:
 
 ```
 $ terraform import google_bigquery_table.default projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}

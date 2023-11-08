@@ -115,6 +115,22 @@ examples:
     primary_resource_id: 'telemetry'
     vars:
       metastore_service_name: 'telemetry'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dataproc_metastore_service_dpms2'
+    primary_resource_id: 'dpms2'
+    vars:
+      metastore_service_name: 'dpms2'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dataproc_metastore_service_dpms2_scaling_factor'
+    primary_resource_id: 'dpms2_scaling_factor'
+    vars:
+      metastore_service_name: 'dpms2sf'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dataproc_metastore_service_dpms2_scaling_factor_lt1'
+    skip_docs: true
+    primary_resource_id: 'dpms2_scaling_factor_lt1'
+    vars:
+      metastore_service_name: 'dpms2sflt1'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'serviceId'
@@ -139,7 +155,7 @@ properties:
     output: true
     description: |
       The relative resource name of the metastore service.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: 'User-defined labels for the metastore service.'
   # This is an x-product resource reference.
@@ -184,6 +200,35 @@ properties:
       - :DEVELOPER
       - :ENTERPRISE
     default_from_api: true
+    conflicts:
+      - scalingConfig
+
+  - !ruby/object:Api::Type::NestedObject
+    name: 'scalingConfig'
+    description: |
+      Represents the scaling configuration of a metastore service.
+    properties:
+      - !ruby/object:Api::Type::Enum
+        name: 'instanceSize'
+        description: |
+          Metastore instance sizes.
+        required: false
+        exactly_one_of:
+          - scaling_config.0.instance_size
+          - scaling_config.0.scaling_factor
+        conflicts:
+          - tier
+        values:
+          - :EXTRA_SMALL
+          - :SMALL
+          - :MEDIUM
+          - :LARGE
+          - :EXTRA_LARGE
+      - !ruby/object:Api::Type::Double
+        name: 'scalingFactor'
+        description: |
+          Scaling factor, in increments of 0.1 for values less than 1.0, and increments of 1.0 for values greater than 1.0.
+        required: false
   - !ruby/object:Api::Type::NestedObject
     name: 'maintenanceWindow'
     description: |

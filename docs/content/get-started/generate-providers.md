@@ -162,9 +162,9 @@ If you are familiar with Docker or Podman, you may want to use the experimental 
 
    ```bash
    cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
-   make testacc TEST=./google TESTARGS='-run=TestAccPubsubTopic_'
+   make testacc TEST=./google/services/pubsub TESTARGS='-run=TestAccPubsubTopic_'
    cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
-   make testacc TEST=./google-beta TESTARGS='-run=TestAccPubsubTopic_'
+   make testacc TEST=./google-beta/services/pubsub TESTARGS='-run=TestAccPubsubTopic_'
    ```
 
 ## Troubleshoot
@@ -192,5 +192,5 @@ gcloud auth revoke
 ## What's next
 
 - [Learn about Magic Modules]({{< ref "/get-started/how-magic-modules-works.md" >}})
-- [Learn about the contribution process]({{< ref "/get-started/contributing.md" >}})
+- [Learn about the contribution process]({{< ref "/get-started/contribution-process.md" >}})
 - [Learn about make commands]({{< ref "/reference/make-commands.md" >}})

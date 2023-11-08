@@ -12,9 +12,8 @@
 package <%= product_ns.downcase -%>
 
 import (
-<% if async.result.resource_inside_response -%>
   "encoding/json"
-<% end -%>
+  "errors"
   "fmt"
   "time"
 
@@ -83,7 +82,6 @@ func create<%= product_name %>Waiter(config *transport_tpg.Config, op map[string
   return w, nil
 }
 
-<% if async.result.resource_inside_response -%>
 <%# Not all APIs will need a WithResponse operation, but it's hard to check whether
     they will or not since it involves iterating over all resources.
     Might as well just nolint it so we can pass the linter checks.
@@ -97,9 +95,12 @@ func <%= product_name.camelize() -%>OperationWaitTimeWithResponse(config *transp
   if err := tpgresource.OperationWait(w, activity, timeout, config.PollInterval); err != nil {
       return err
   }
-  return json.Unmarshal([]byte(w.CommonOperationWaiter.Op.Response), response)
+  rawResponse := []byte(w.CommonOperationWaiter.Op.Response)
+  if len(rawResponse) == 0 {
+    return errors.New("`resource` not set in operation response")
+  }
+  return json.Unmarshal(rawResponse, response)
 }
-<% end -%>
 
 func <%= product_name.camelize() -%>OperationWaitTime(config *transport_tpg.Config, op map[string]interface{}, <% if has_project -%> project,<% end -%> activity, userAgent string, timeout time.Duration) error {
   if val, ok := op["name"]; !ok || val == "" {

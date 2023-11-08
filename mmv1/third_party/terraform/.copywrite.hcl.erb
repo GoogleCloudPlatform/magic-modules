@@ -17,11 +17,12 @@ project {
     "examples/**",
     "scripts/**",
 <% if version.nil? || version == 'ga' -%>
-    "google/test-fixtures/**",
+    "google/**/test-fixtures/**",
 <% else -%>
-    "google-<%= version -%>/test-fixtures/**",
+    "google-<%= version -%>/**/test-fixtures/**",
 <% end -%>
     "META.d/*.yml",
+    "META.d/*.yaml",
     ".golangci.yml",
     ".goreleaser.yml",
   ]

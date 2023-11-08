@@ -1,208 +1,218 @@
 ---
+majorVersion: "5.0.0"
+upgradeGuide: "version_5_upgrade.html.markdown"
 title: "Make a breaking change"
-summary: "Guidance on making a breaking change during a major release"
-weight: 95
+summary: "Guidance on making a breaking changes"
+weight: 100
 ---
 
-# How to make a breaking change
+# Make a breaking change
 
-{{< hint info >}}
-**Note:** This page covers the general requirements to make a breaking change
-and may not include exact, comprehensive details on making your change. Breaking
-changes are generally complicated and resource or field specific traits can
-drastically change how they need to be made.
-{{< /hint >}}
+A "breaking change" is any change that requires an end user to modify any
+previously-valid configuration after a provider upgrade. For more information,
+see [Types of breaking changes]({{< ref "/develop/breaking-changes" >}}).
 
-## When to (or not to) make a breaking change
+The `google` and `google-beta` providers are both considered "stable surfaces"
+for the purpose of releases, which means that neither provider allows breaking
+changes except during major releases, which are typically yearly.
 
-Within the Terraform ecosystem, there's a strong expectation of stability
-**including across major versions**. Ecosystem-wide, the community has had
-deeply negative reactions to provider changes with overly-broad impact, and
-too-large changes can delay customers upgrading to adopt new major versions.
+Terraform users rely on the stability of Terraform providers (including the GCP
+provider and other major providers.) Even as part of a major release, breaking
+changes that are overly broad and/or have little benefit to users can cause
+deeply negative reactions and significantly delay customers upgrading to the
+new major version.
 
-In general, we recommend avoiding breaking changes where possible. The
-provider's schema is an API surface relied on by many GCP customers, and users
-have responded negatively to instability in our surface and those of other
-providers.
+Breaking changes may cause significant churn for users by forcing them to
+update their configurations. It also causes churn in tooling built on top of
+the providers, such as:
 
-While the cost to make a change in the provider is relatively cheap, it has
-knock-on effects through the whole ecosystem:
+* Terraform modules that use `google` or `google-beta` resources
+* Policy tools like [`gcloud terraform vet`](https://cloud.google.com/docs/terraform/policy-validation/quickstart)
+  * There may also be churn in customer policies
+* [Config Connector](https://cloud.google.com/config-connector/docs/overview)
+* [Pulumi GCP Classic](https://www.pulumi.com/registry/packages/gcp/)
 
-* Modules need to update to adapt to the breaking changes
-* Customers need to update their provider version (and module versions)
-* Terraform assistive tools like [`gcloud terraform vet`](https://cloud.google.com/docs/terraform/policy-validation/quickstart)
-  and 3P tools with provider dependencies like
-  [Config Connector](https://cloud.google.com/config-connector/docs/overview)
-  and [Pulumi GCP Classic](https://www.pulumi.com/registry/packages/gcp/) need
-  to be updated
+This page covers the general process to make a breaking change. It does not
+include exact, comprehensive details on how to make every potential breaking
+change. Breaking changes are complicated; the exact process and implementation
+may vary drastically depending on the implementation of the impacted resource
+or field and the change being made.
 
-When breaking changes are made, they must be made within a major release
-(typically yearly) and meet the stringent ecosystem requirements for a breaking
-change, detailed below.
+## In minor releases
 
-## What counts as a breaking change?
+If a breaking change fixes a bug that impacts **all configurations** that
+include a field or resource, it is generally allowed in a minor release. For
+example:
 
-While the general versioning model for providers is captured
-in https://developer.hashicorp.com/terraform/plugin/best-practices/versioning,
-that documentation serves as a baseline for new provider development and not
-guidelines for mature providers like the major cloud providers.
+* Removing update support from a field if that field is not actually updatable
+  in the API.
+* Marking a field required if omitting the field always causes an API error.
 
-The standard our joint Google & HashiCorp team has developed is that any change
-that requires an end user to modify any previously-valid configuration after a
-provider upgrade is a breaking change, and must happen in a major release. In
-this context "valid" means that a configuration is syntactically correct
-(passes `terraform validate`) and runs in `terraform apply` without returning an
-error. This means that minor corrections are possible such as marking immutable
-fields as immutable if they previously weren't.
+The following types of changes can be made if the default behavior stays the
+same and new behavior can be enabled with a flag:
 
-There is a single exception to this rule- if a user has managed a resource
-out-of-band from Terraform to enable a new field with a non-default value,
-adding support for the field without handling that case is permissible.
-Terraform will generate a plan that reconciles their state with their live
-configuration.
+* Major resource-level or field-level behavioural changes
 
-For example, the following are (a non-exhaustive list of) breaking changes:
+## In the {{% param "majorVersion" %}} major release
 
-* Changing the output format of a field (i.e. from an integer to a string, or
-  the pattern of a structured value)
-* Adding a new required field or changing an existing non-required field to
-  required
-* Removing a field
-* Major behaviour changes to a resource (if configurable, if they are done by
-  default)
+The general process for contributing a breaking change to the
+`{{% param "majorVersion" %}}` major release is:
 
-Meanwhile, the following are allowed in a minor version:
+1. Make the `main` branch forwards-compatible with the major release
+2. Add deprecations and warnings to the `main` branch of `magic-modules`
+3. Add upgrade guide entries to the `main` branch of `magic-modules`
+4. Make the breaking change on `FEATURE-BRANCH-major-release-{{% param "majorVersion" %}}`
 
-* Adding a new field
-* Adding update support for a field
-* Removing update support from a field that returned an error in **all cases** a
-  user attempted to update it
-* Marking a field required if *all configurations** that did not specify the
-  field returned an error
-* Major behavioural changes guarded by a flag where the **previous** behaviour
-  is the default
+These are covered in more detail in the following sections. The upgrade guide
+and the actual breaking change will be merged only after both are completed.
 
-## Making a breaking change
+### Make the `main` branch forwards-compatible with the major release
 
-{{< hint info >}}
-**Note:** This section of the document refers to several release versions of the
-provider at once. Breaking changes are made in major releases such as 1.0.0,
-4.0.0, or 4.0.0 (referred to as the "major release" or `N` here)  while typical
-provider releases are minor versions, most notably the last minor release of the
-previous major release series such as `2.20.3` for `3.0.0` or `3.90.1`
-for `4.0.0` (referred to as the "last minor release" or `N-1.X` here).
-{{</hint >}}
+What forwards-compatibility means will vary depending on the breaking change. For example:
 
-The Terraform provider ecosystem follows the standard that deprecations or
-warnings must be resolvable by end users in the last minor release of the prior
-release series before their removal or change in a major release. Additionally,
-deprecation warnings must be actionable- at the time a deprecation is posted, a
-user must be able to remove the field.
-
-### Contributing to the next major release (`5.0.0`)
-
-For the `5.0.0` major release, the major release branch that you'll contribute to is [`FEATURE-BRANCH-major-release-5.0.0`](https://github.com/GoogleCloudPlatform/magic-modules/tree/FEATURE-BRANCH-major-release-5.0.0).
-All breaking changes targeting `5.0.0` must be committed to this branch.
-
-A downstream branch with the same name `FEATURE-BRANCH-major-release-5.0.0` will be used to track the generated `5.0.0` changes in both [`google`](https://github.com/hashicorp/terraform-provider-google/tree/FEATURE-BRANCH-major-release-5.0.0) and [`google-beta`](https://github.com/hashicorp/terraform-provider-google-beta/tree/FEATURE-BRANCH-major-release-5.0.0) provider repos.
-
-The process of contributing to the major release `5.0.0` follows most of the [General contributing steps]({{< ref "/get-started/contributing" >}}), with the following exceptions
-
-1. Use `FEATURE-BRANCH-major-release-5.0.0` branch instead of the `main` branch as the base branch when you
-   * checkout your working branch where you make your code changes.
-   * sync your working branch using `git rebase` or `git merge`.
-   * create a pull request in the magic-modules repo.
-2. Make sure that you checkout to the `FEATURE-BRANCH-major-release-5.0.0` branch in your downstream `google` and `google-beta` repos before generating the providers locally.
-3. If your change is a follow-up to a recent commit to main that is not yet contained in the released branch, it is strongly encouraged to wait until the branch sync and resolve any merge conflicts in the PR. 
-   For example, if you are removing a field that has been recently deprecated in main. 
-
-The release branch is synced with main on a weekly basis every Monday.
+* If a required field is being removed, make the field optional
+  on the `main` branch.
+* If a field is being renamed, the new field must be added to the `main` branch
 
 
-### Renaming a field
+### Add deprecations and warnings to the `main` branch of `magic-modules`
 
-The most common type of breaking change is a field rename, and most guidance is
-tuned around that. To perform one, a provider contributor must:
+Deprecations and warnings must be actionable at the time that they are added
+to the `main` branch, and they must be added prior to the `{{% param "majorVersion" %}}`
+major release. Every deprecation or warning should be surfaced to users of the
+provider at runtime as well as in documentation.
 
-1. Add support for the new field on or before the last minor release of the
-   preceding release series (i.e. version `N-1.X.0`) by contributing to
-   the `main` branch in the magic-modules repo
-2. Mark the old field deprecated on or before the last minor release of the
-   preceding release series (i.e. version `N-1.X.0`) by contributing to
-   the `main` branch in the magic-modules repo
-3. Write an upgrade guide entry in the major release's upgrade guide (such
-   as [this one](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/version_5_upgrade)
-   for `5.0.0`) by contributing to the `main` branch in the magic-modules repo
-4. Remove the old field from the major release (i.e. version `N`) in the major
-   release branch in the magic-modules repo
+#### Field deprecation (due to removal or rename)
 
-For example, if `google_foobar` has a field `baz` in version `3.80.0` that is
-being replaced by `qux` in `4.0.0`, `qux` must be added on or before `3.90.1`,
-and `baz` must be deprecated within the same window (either at the same time
-as `qux` is added, or afterwards (if added earlier than `3.90.1`), but not
-before).
+{{< tabs "Field deprecations" >}}
+{{< tab "MMv1" >}}
+Set `deprecation_message` on the field. For example:
 
-Example  (`google_storage_bucket.bucket_policy_only` -> `google_storage_bucket.uniform_bucket_level_access`)
-* https://github.com/GoogleCloudPlatform/magic-modules/pull/3916 introduced the new field and deprecated the original one in `3.38.0`
-* https://github.com/GoogleCloudPlatform/magic-modules/pull/5340 added the upgrade guide entry and removed the field in `4.0.0`
-* Note: In 4.0.0 the upgrade guide was split between main and the major release branch. Going forward, those changes will be made against main exclusively.
+```yaml
+- !ruby/object:Api::Type::String
+  name: 'apiFieldName'
+  description: |
+    MULTILINE_FIELD_DESCRIPTION
+  deprecation_message: api_field_name is deprecated and will be removed in a future major release. Use other_field_name instead.
+```
 
-### Removing a field
+Replace the second sentence with an appropriate short description of the replacement path and/or the reason for
+deprecation.
 
-Removing a field is similar to renaming one, except that a new field doesn't
-need to be introduced:
+The deprecation message will automatically show up in the resource documentation.
+{{< /tab >}}
+{{< tab "Handwritten" >}}
+1. Set `Deprecated` on the field. For example:
 
-1. Mark the field deprecated on or before the last minor release of the
-   preceding release series (i.e. version `N-1.X.0`) by contributing to
-   the `main` branch in the magic-modules repo
-2. Write an upgrade guide entry in the major release's upgrade guide (such
-   as [this one](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/version_5_upgrade)
-   for `5.0.0`) by contributing to the `main` branch in the magic-modules repo
-3. Remove the field from the major release (i.e. version `N`) in the major
-   release branch in the magic-modules repo
+   ```go
+   "api_field_name": {
+      Type:       schema.String,
+      Deprecated: "api_field_name is deprecated and will be removed in a future major release. Use other_field_name instead.",
+      ...
+   }
+   ```
+   Replace the second sentence with an appropriate short description of the replacement path and/or the reason for
+   deprecation.
+2. Update the [documentation for the field]({{< ref "/develop/resource#add-documentation" >}}) to include the deprecation notice. For example:
 
-Example (`google_container_cluster.instance_group_urls`)
-* https://github.com/GoogleCloudPlatform/magic-modules/pull/5261 deprecated `instance_group_urls` and filled out the upgrade guide
-* https://github.com/GoogleCloudPlatform/magic-modules/pull/5378 removed the field
+   ```markdown
+   * `api_field_name` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Deprecated) FIELD_DESCRIPTION. `api_field_name` is deprecated and will be removed in a future major release. Use `other_field_name` instead.
+   ```
+{{< /tab >}}
+{{< /tabs >}}
 
-### Marking optional fields required
+#### Resource deprecation (due to removal or rename)
 
-There is no way to message a change to users in advance at the moment, other
-than through the upgrade guide.
+{{< tabs "Resource deprecations" >}}
+{{< tab "MMv1" >}}
+Set `deprecation_message` on the resource. For example:
 
-1. Write an upgrade guide entry in the major release's upgrade guide (such
-   as [this one](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/version_5_upgrade)
-   for `5.0.0`) by contributing to the `main` branch in the magic-modules repo
-2. Mark the field as required in the major release (i.e. version `N`) in the major
-   release branch in the magic-modules repo
+```yaml
+deprecation_message: >-
+  `google_RESOURCE_NAME` is deprecated and will be removed in the next major release
+  of the provider. Use `google_OTHER_RESOURCE_NAME` instead.
+```
 
-Example (`google_app_engine_standard_app_version.entrypoint`)
-* https://github.com/GoogleCloudPlatform/magic-modules/pull/5318 marked the field required and added an upgrade guide entry
-* Note: In 4.0.0 the upgrade guide was split between main and the major release branch. Going forward, those changes will be made against main exclusively.
+Replace RESOURCE_NAME with the name of the resource (excluding the `google_` prefix). Replace the
+second sentence with an appropriate short description of the replacement path and/or the reason for
+deprecation.
 
-### Changing default values
+The deprecation message will automatically show up in the resource documentation.
+{{< /tab >}}
+{{< tab "Handwritten" >}}
+1. Set `DeprecationMessage` on the field. For example:
 
-Default values in Terraform are used to replace null values in configuration at
-plan/apply time and **do not** respect previously-configured values by the user.
-These changes are often undesirable, as their impact is extremely broad.
+   ```go
+   return &schema.Resource{
+      ...
+      DeprecationMessage: "`google_RESOURCE_NAME` is deprecated and will be removed in the next " +
+                          "major release of the provider. Use `google_OTHER_RESOURCE_NAME` instead.",
+      ...
+   }
+   ```
 
-When a default is changed, every user that has not specified an explicit value in their configuration will see Terraform propose changing the value of the field **including** if the change will destroy and recreate the resource due to changing an immutable value. Default changes in the provider are comparable in impact to default changes in an API, and modifying examples and modules may achieve the intended effect with a smaller blast radius.
+   Replace RESOURCE_NAME with the name of the resource (excluding the `google_` prefix). Replace the
+   second sentence with an appropriate short description of the replacement path and/or the reason for
+   deprecation.
+2. Add a warning to the resource documentation stating that the resource is deprecated. For example:
+   ```markdown
+   ~> **Warning:** `google_RESOURCE_NAME` is deprecated and will be removed in the next
+   major release of the provider. Use `google_OTHER_RESOURCE_NAME` instead.
+   ```
+{{< /tab >}}
+{{< /tabs >}}
 
-There is no way to message a change to users in advance at the moment, other
-than through the upgrade guide.
+#### Other breaking changes
 
-1. Write an upgrade guide entry in the major release's upgrade guide (such
-   as [this one](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/version_5_upgrade)
-   for `5.0.0`) by contributing to the `main` branch in the magic-modules repo
-2. Mark the new default in the major release (i.e. version `N`) in the major
-   release branch in the magic-modules repo
+Other breaking changes should be called out in the docs for the impacted field
+or resource. It is also great to log warnings at runtime if possible.
 
-Example (`google_container_cluster.enable_shielded_nodes`)
-* https://github.com/GoogleCloudPlatform/magic-modules/pull/5263 changed the default value for the field and added an upgrade guide entry
-* Note: In 4.0.0 the upgrade guide was split between main and the major release branch. Going forward, those changes will be made against main exclusively.
+### Add upgrade guide entries to the `main` branch of `magic-modules`
 
-## References
+Upgrade guide entries should be added to
+[{{< param upgradeGuide >}}](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/website/docs/guides/{{< param upgradeGuide >}}).
+Entries should focus on the changes that users need to make when upgrading
+to `{{% param "majorVersion" %}}`, rather than how to write configurations
+after upgrading.
 
-* Terraform (Provider) Plugin Development
-    * [Versioning and Changelog](https://developer.hashicorp.com/terraform/plugin/best-practices/versioning)
-    * [SDKv2 Deprecations, Removals, and Renames](https://developer.hashicorp.com/terraform/plugin/sdkv2/best-practices/deprecations)
+See [Terraform Google Provider 4.0.0 Upgrade Guide](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/version_4_upgrade)
+and other upgrade guides for examples.
+
+The upgrade guide and the actual breaking change will be merged only after both are completed.
+
+### Make the breaking change on `FEATURE-BRANCH-major-release-{{% param "majorVersion" %}}`
+
+When working on your breaking change, make sure that your base branch
+is `FEATURE-BRANCH-major-release-{{% param "majorVersion" %}}`. This
+means that you will follow the standard
+[contribution process]({{< ref "/get-started/contribution-process" >}})
+with the following changes:
+
+1. Before you start, check out and sync your local `magic-modules` and provider
+   repositories with the upstream major release branches.
+   ```bash
+   cd ~/magic-modules
+   git checkout FEATURE-BRANCH-major-release-{{% param "majorVersion" %}}
+   git pull --ff-only origin FEATURE-BRANCH-major-release-{{% param "majorVersion" %}}
+   cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
+   git checkout FEATURE-BRANCH-major-release-{{% param "majorVersion" %}}
+   git pull --ff-only origin FEATURE-BRANCH-major-release-{{% param "majorVersion" %}}
+   cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
+   git checkout FEATURE-BRANCH-major-release-{{% param "majorVersion" %}}
+   git pull --ff-only origin FEATURE-BRANCH-major-release-{{% param "majorVersion" %}}
+   ```
+1. Make sure that any deprecation notices and warnings that you added in previous sections
+   are present on the major release branch. Changes to the `main` branch will be
+   merged into the major release branch every Monday.
+1. Make the breaking change.
+1. Remove any deprecation notices and warnings (including in documentation) not already removed by the breaking change.
+1. When you create your pull request,
+   [change the base branch](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/changing-the-base-branch-of-a-pull-request)
+   to `FEATURE-BRANCH-major-release-{{% param "majorVersion" %}}`
+1. To resolve merge conflicts with `git rebase` or `git merge`, use `FEATURE-BRANCH-major-release-{{% param "majorVersion" %}}` instead of `main`.
+
+The upgrade guide and the actual breaking change will be merged only after both are completed.
+
+## What's next?
+
+- [Run tests]({{< ref "/develop/run-tests.md" >}})

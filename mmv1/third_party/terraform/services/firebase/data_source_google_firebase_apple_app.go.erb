@@ -37,6 +37,14 @@ func dataSourceGoogleFirebaseAppleAppRead(d *schema.ResourceData, meta interface
         if err := d.Set("name", name); err != nil {
                 return fmt.Errorf("Error setting name: %s", err)
         }
-        return resourceFirebaseAppleAppRead(d, meta)
+        err = resourceFirebaseAppleAppRead(d, meta)
+        if err != nil {
+                return err
+        }
+
+        if d.Id() == "" {
+                return fmt.Errorf("%s not found", name)
+        }
+        return nil
 }
 <% end -%>

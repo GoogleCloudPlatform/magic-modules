@@ -49,6 +49,7 @@ async: !ruby/object:Api::OpAsync
 id_format: 'projects/{{project}}/locations/{{location}}/functions/{{name}}'
 import_format:
   ['projects/{{project}}/locations/{{location}}/functions/{{name}}']
+taint_resource_on_failed_create: true
 autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
@@ -64,7 +65,7 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
     test_vars_overrides:
-      zip_path: '"./test-fixtures/cloudfunctions2/function-source.zip"'
+      zip_path: '"./test-fixtures/function-source.zip"'
       location:
         '"us-central1"'
         # ignore these fields during import step
@@ -83,7 +84,7 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
     test_vars_overrides:
-      zip_path: '"./test-fixtures/cloudfunctions2/function-source-pubsub.zip"'
+      zip_path: '"./test-fixtures/function-source-pubsub.zip"'
       primary_resource_id: '"terraform-test"'
       location:
         '"us-central1"'
@@ -102,7 +103,7 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
     test_vars_overrides:
-      zip_path: '"./test-fixtures/cloudfunctions2/function-source.zip"'
+      zip_path: '"./test-fixtures/function-source.zip"'
       primary_resource_id: '"terraform-test"'
       location:
         '"us-central1"'
@@ -123,7 +124,7 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
     test_vars_overrides:
-      zip_path: '"./test-fixtures/cloudfunctions2/function-source-eventarc-gcs.zip"'
+      zip_path: '"./test-fixtures/function-source-eventarc-gcs.zip"'
       primary_resource_id: '"terraform-test"'
       policyChanged:
         "acctest.BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\",
@@ -145,7 +146,7 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
     test_vars_overrides:
-      zip_path: '"./test-fixtures/cloudfunctions2/function-source-eventarc-gcs.zip"'
+      zip_path: '"./test-fixtures/function-source-eventarc-gcs.zip"'
       primary_resource_id: '"terraform-test"'
       policyChanged:
         "acctest.BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\",
@@ -166,7 +167,7 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
     test_vars_overrides:
-      zip_path: '"./test-fixtures/cloudfunctions2/function-source.zip"'
+      zip_path: '"./test-fixtures/function-source.zip"'
       location: '"us-central1"'
       policyChanged:
         "acctest.BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\",
@@ -187,7 +188,7 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
     test_vars_overrides:
-      zip_path: '"./test-fixtures/cloudfunctions2/function-source.zip"'
+      zip_path: '"./test-fixtures/function-source.zip"'
       location: '"us-central1"'
       policyChanged:
         "acctest.BootstrapPSARole(t, \"service-\", \"gcp-sa-pubsub\",
@@ -208,7 +209,7 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
     test_vars_overrides:
-      zip_path: '"./test-fixtures/cloudfunctions2/function-source.zip"'
+      zip_path: '"./test-fixtures/function-source.zip"'
       location:
         '"us-central1"'
         # ignore these fields during import step
@@ -230,8 +231,8 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
     test_vars_overrides:
-      kms_key_name: 'BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
-      zip_path: '"./test-fixtures/cloudfunctions2/function-source.zip"'
+      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      zip_path: '"./test-fixtures/function-source.zip"'
       location:
         '"us-central1"'
     # ignore these fields during import step
@@ -250,6 +251,7 @@ parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
     immutable: true
+    required: true
     url_param_only: true
     description: The location of this cloud function.
 properties:
@@ -628,7 +630,7 @@ properties:
     name: 'updateTime'
     output: true
     description: 'The last update timestamp of a Cloud Function.'
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       A set of key/value label pairs associated with this Cloud Function.

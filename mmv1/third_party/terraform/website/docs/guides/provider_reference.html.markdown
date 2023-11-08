@@ -240,13 +240,41 @@ following ordered by precedence.
     * GCLOUD_ZONE
     * CLOUDSDK_COMPUTE_ZONE
 
+---
+
+* `default_labels` (Optional) Labels that will be applied to all resources
+with a top level `labels` field or a `labels` field nested inside a top level
+`metadata` field. Setting the same key as a default label at the resource level
+will override the default value for that label. These values will be recorded in 
+individual resource plans through the `terraform_labels` and `effective_labels`
+fields.
+
+```
+provider "google" {
+  default_labels = {
+    my_global_key = "one"
+    my_default_key = "two"
+  }
+}
+
+resource "google_compute_address" "my_address" {
+  name     = "my-address"
+
+  labels = {
+    my_key = "three"
+    # overrides provider-wide setting
+    my_default_key = "four"
+  }
+}
+```
+
 ## Advanced Settings Configuration
 
 * `request_timeout` - (Optional) A duration string controlling the amount of time
 the provider should wait for individual HTTP requests. This will not adjust the
 amount of time the provider will wait for a logical operation - use the resource
 timeout blocks for that. This will adjust only the amount of time that a single
-synchronous request will wait for a response. The default is 30 seconds, and
+synchronous request will wait for a response. The default is 120 seconds, and
 that should be a suitable value in most cases. Many GCP APIs will cancel a
 request if no response is forthcoming within 30 seconds in any event. In
 limited cases, such as DNS record set creation, there is a synchronous request
@@ -284,6 +312,10 @@ and [config.go](https://github.com/hashicorp/terraform-provider-google-beta/blob
 Support for custom endpoints is on a best-effort basis. The underlying
 endpoint and default values for a resource can be changed at any time without
 being considered a breaking change.
+
+---
+
+* `universe_domain` - (Optional) Specify the GCP universe to deploy in.
 
 ---
 

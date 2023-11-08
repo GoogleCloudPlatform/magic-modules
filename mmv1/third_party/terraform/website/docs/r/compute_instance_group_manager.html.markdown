@@ -160,9 +160,9 @@ group. You can specify only one value. Structure is [documented below](#nested_a
 
 * `stateful_disk` - (Optional) Disks created on the instances that will be preserved on instance delete, update, etc. Structure is [documented below](#nested_stateful_disk). For more information see the [official documentation](https://cloud.google.com/compute/docs/instance-groups/configuring-stateful-disks-in-migs).
 
-* `stateful_internal_ip` - (Optional, [Beta](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_versions.html)) Internal network IPs assigned to the instances that will be preserved on instance delete, update, etc. This map is keyed with the network interface name. Structure is [documented below](#nested_stateful_internal_ip).
+* `stateful_internal_ip` - (Optional) Internal network IPs assigned to the instances that will be preserved on instance delete, update, etc. This map is keyed with the network interface name. Structure is [documented below](#nested_stateful_internal_ip).
 
-* `stateful_external_ip` - (Optional, [Beta](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_versions.html)) External network IPs assigned to the instances that will be preserved on instance delete, update, etc. This map is keyed with the network interface name. Structure is [documented below](#nested_stateful_external_ip).
+* `stateful_external_ip` - (Optional) External network IPs assigned to the instances that will be preserved on instance delete, update, etc. This map is keyed with the network interface name. Structure is [documented below](#nested_stateful_external_ip).
 
 * `update_policy` - (Optional) The update policy for this managed instance group. Structure is [documented below](#nested_update_policy). For more information, see the [official documentation](https://cloud.google.com/compute/docs/instance-groups/updating-managed-instance-groups) and [API](https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroupManagers/patch)
 
@@ -357,8 +357,25 @@ This resource provides the following
 Instance group managers can be imported using any of these accepted formats:
 
 ```
-$ terraform import google_compute_instance_group_manager.appserver projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{name}}
-$ terraform import google_compute_instance_group_manager.appserver {{project}}/{{zone}}/{{name}}
-$ terraform import google_compute_instance_group_manager.appserver {{project}}/{{name}}
-$ terraform import google_compute_instance_group_manager.appserver {{name}}
+* `projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{name}}`
+* `{{project}}/{{zone}}/{{name}}`
+* `{{project}}/{{name}}`
+* `{{name}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import instance group managers using one of the formats above. For example:
+
+```tf
+import {
+  id = "projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{name}}"
+  to = google_compute_instance_group_manager.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), instance group managers can be imported using one of the formats above. For example:
+
+```
+$ terraform import google_compute_instance_group_manager.default projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{name}}
+$ terraform import google_compute_instance_group_manager.default {{project}}/{{zone}}/{{name}}
+$ terraform import google_compute_instance_group_manager.default {{project}}/{{name}}
+$ terraform import google_compute_instance_group_manager.default {{name}}
 ```

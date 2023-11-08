@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-version"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -72,7 +73,7 @@ var (
 		"config.0.workloads_config",
 		"config.0.environment_size",
 		"config.0.master_authorized_networks_config",
-		"config.0.resilience_mode",	
+		"config.0.resilience_mode",
 	}
 
 	recoveryConfigKeys = []string{
@@ -81,14 +82,13 @@ var (
 
 	workloadsConfigKeys = []string{
 		"config.0.workloads_config.0.scheduler",
-		<% unless version == "ga" -%>
 		"config.0.workloads_config.0.triggerer",
-		<% end -%>
 		"config.0.workloads_config.0.web_server",
 		"config.0.workloads_config.0.worker",
 	}
 
 	composerPrivateEnvironmentConfig = []string{
+		"config.0.private_environment_config.0.connection_type",
 		"config.0.private_environment_config.0.enable_private_endpoint",
 		"config.0.private_environment_config.0.master_ipv4_cidr_block",
 		"config.0.private_environment_config.0.cloud_sql_ipv4_cidr_block",
@@ -154,6 +154,12 @@ func ResourceComposerEnvironment() *schema.Resource {
 			Update: schema.DefaultTimeout(120 * time.Minute),
 			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
+
+		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderProject,
+			tpgresource.DefaultProviderRegion,
+			tpgresource.SetLabelsDiff,
+		),
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -478,6 +484,15 @@ func ResourceComposerEnvironment() *schema.Resource {
 							Description:  `The configuration used for the Private IP Cloud Composer environment.`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
+									"connection_type": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Computed: true,
+										AtLeastOneOf: composerPrivateEnvironmentConfig,
+										ForceNew: true,
+										ValidateFunc: validation.StringInSlice([]string{"VPC_PEERING", "PRIVATE_SERVICE_CONNECT"}, false),
+										Description: `Mode of internal communication within the Composer environment. Must be one of "VPC_PEERING" or "PRIVATE_SERVICE_CONNECT".`,
+									},
 									"enable_private_endpoint": {
 										Type:     schema.TypeBool,
 										Optional: true,
@@ -688,7 +703,6 @@ func ResourceComposerEnvironment() *schema.Resource {
 											},
 										},
 									},
-									<% unless version == "ga" -%>
 									"triggerer": {
 										Type:        schema.TypeList,
 										Optional:    true,
@@ -718,7 +732,6 @@ func ResourceComposerEnvironment() *schema.Resource {
 											},
 										},
 									},
-									<% end -%>
 									"web_server": {
 										Type:        schema.TypeList,
 										Optional:    true,
@@ -864,7 +877,42 @@ func ResourceComposerEnvironment() *schema.Resource {
 				Type:        schema.TypeMap,
 				Optional:    true,
 				Elem:        &schema.Schema{Type: schema.TypeString},
-				Description: `User-defined labels for this environment. The labels map can contain no more than 64 entries. Entries of the labels map are UTF8 strings that comply with the following restrictions: Label keys must be between 1 and 63 characters long and must conform to the following regular expression: [a-z]([-a-z0-9]*[a-z0-9])?. Label values must be between 0 and 63 characters long and must conform to the regular expression ([a-z]([-a-z0-9]*[a-z0-9])?)?. No more than 64 labels can be associated with a given environment. Both keys and values must be <= 128 bytes in size.`,
+				Description: `User-defined labels for this environment. The labels map can contain no more than 64 entries. Entries of the labels map are UTF8 strings that comply with the following restrictions: Label keys must be between 1 and 63 characters long and must conform to the following regular expression: [a-z]([-a-z0-9]*[a-z0-9])?. Label values must be between 0 and 63 characters long and must conform to the regular expression ([a-z]([-a-z0-9]*[a-z0-9])?)?. No more than 64 labels can be associated with a given environment. Both keys and values must be <= 128 bytes in size.
+
+				**Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
+				Please refer to the field 'effective_labels' for all of the labels present on the resource.`,
+			},
+
+			"terraform_labels": {
+				Type:        schema.TypeMap,
+				Computed:    true,
+				Description: `The combination of labels configured directly on the resource and default labels configured on the provider.`,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+
+			"effective_labels": {
+				Type:        schema.TypeMap,
+				Computed:    true,
+				Description: `All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.`,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+
+			"storage_config": {
+				Type:         schema.TypeList,
+				Optional:     true,
+				Computed:     true,
+				MaxItems:     1,
+				Description:  `Configuration options for storage used by Composer environment.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"bucket": {
+							Type:         schema.TypeString,
+							Required:     true,
+							ForceNew:     true,
+							Description: `Optional. Name of an existing Cloud Storage bucket to be used by the environment.`,
+						},
+					},
+				},
 			},
 		},
 		UseJSONNumber: true,
@@ -888,10 +936,16 @@ func resourceComposerEnvironmentCreate(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
+	transformedStorageConfig, err := expandComposerStorageConfig(d.Get("storage_config"), d, config)
+	if err != nil {
+		return err
+	}
+
 	env := &composer.Environment{
 		Name:   envName.ResourceName(),
-		Labels: tpgresource.ExpandLabels(d),
+		Labels: tpgresource.ExpandEffectiveLabels(d),
 		Config: transformedConfig,
+		StorageConfig: transformedStorageConfig,
 	}
 
 	// Some fields cannot be specified during create and must be updated post-creation.
@@ -968,8 +1022,17 @@ func resourceComposerEnvironmentRead(d *schema.ResourceData, meta interface{}) e
 	if err := d.Set("config", flattenComposerEnvironmentConfig(res.Config)); err != nil {
 		return fmt.Errorf("Error setting Environment: %s", err)
 	}
-	if err := d.Set("labels", res.Labels); err != nil {
-		return fmt.Errorf("Error setting Environment: %s", err)
+	if err := tpgresource.SetLabels(res.Labels, d, "labels"); err != nil {
+		return fmt.Errorf("Error setting Environment labels: %s", err)
+	}
+	if err := tpgresource.SetLabels(res.Labels, d, "terraform_labels"); err != nil {
+		return fmt.Errorf("Error setting terraform_labels: %s", err)
+	}
+	if err := d.Set("effective_labels", res.Labels); err != nil {
+		return fmt.Errorf("Error setting Environment effective_labels: %s", err)
+	}
+	if err := d.Set("storage_config", flattenComposerStorageConfig(res.StorageConfig)); err != nil {
+		return fmt.Errorf("Error setting Storage: %s", err)
 	}
 	return nil
 }
@@ -1212,8 +1275,8 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 		}
 	}
 
-	if d.HasChange("labels") {
-		patchEnv := &composer.Environment{Labels: tpgresource.ExpandLabels(d)}
+	if d.HasChange("effective_labels") {
+		patchEnv := &composer.Environment{Labels: tpgresource.ExpandEffectiveLabels(d)}
 		err := resourceComposerEnvironmentPatchField("labels", userAgent, patchEnv, d, tfConfig)
 		if err != nil {
 			return err
@@ -1312,6 +1375,17 @@ func resourceComposerEnvironmentImport(d *schema.ResourceData, meta interface{})
 	d.SetId(id)
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func flattenComposerStorageConfig(storageConfig *composer.StorageConfig) interface{} {
+	if storageConfig == nil {
+		return nil
+	}
+
+	transformed := make(map[string]interface{})
+	transformed["bucket"] = storageConfig.Bucket
+
+	return []interface{}{transformed}
 }
 
 func flattenComposerEnvironmentConfig(envCfg *composer.EnvironmentConfig) interface{} {
@@ -1441,16 +1515,12 @@ func flattenComposerEnvironmentConfigWorkloadsConfig(workloadsConfig *composer.W
 
 	transformed := make(map[string]interface{})
 	transformedScheduler := make(map[string]interface{})
-	<% unless version == "ga" -%>
 	transformedTriggerer := make(map[string]interface{})
-	<% end -%>
 	transformedWebServer := make(map[string]interface{})
 	transformedWorker := make(map[string]interface{})
 
 	wlCfgScheduler := workloadsConfig.Scheduler
-	<% unless version == "ga" -%>
 	wlCfgTriggerer := workloadsConfig.Triggerer
-	<% end -%>
 	wlCfgWebServer := workloadsConfig.WebServer
 	wlCfgWorker := workloadsConfig.Worker
 
@@ -1463,7 +1533,6 @@ func flattenComposerEnvironmentConfigWorkloadsConfig(workloadsConfig *composer.W
 		transformedScheduler["count"] = wlCfgScheduler.Count
 	}
 
-	<% unless version == "ga" -%>
 	if wlCfgTriggerer == nil {
 		transformedTriggerer = nil
 	} else {
@@ -1471,7 +1540,6 @@ func flattenComposerEnvironmentConfigWorkloadsConfig(workloadsConfig *composer.W
 		transformedTriggerer["memory_gb"] = wlCfgTriggerer.MemoryGb
 		transformedTriggerer["count"] = wlCfgTriggerer.Count
 	}
-	<% end -%>
 
 	if wlCfgWebServer == nil {
 		transformedWebServer = nil
@@ -1492,11 +1560,9 @@ func flattenComposerEnvironmentConfigWorkloadsConfig(workloadsConfig *composer.W
 	}
 
 	transformed["scheduler"] = []interface{}{transformedScheduler}
-	<% unless version == "ga" -%>
 	if transformedTriggerer != nil {
 		transformed["triggerer"] = []interface{}{transformedTriggerer}
 	}
-	<% end -%>
 	transformed["web_server"] = []interface{}{transformedWebServer}
 	transformed["worker"] = []interface{}{transformedWorker}
 
@@ -1510,6 +1576,9 @@ func flattenComposerEnvironmentConfigPrivateEnvironmentConfig(envCfg *composer.P
 	}
 
 	transformed := make(map[string]interface{})
+	if envCfg.NetworkingConfig != nil{
+		transformed["connection_type"] = envCfg.NetworkingConfig.ConnectionType
+	}
 	transformed["enable_private_endpoint"] = envCfg.PrivateClusterConfig.EnablePrivateEndpoint
 	transformed["master_ipv4_cidr_block"] = envCfg.PrivateClusterConfig.MasterIpv4CidrBlock
 	transformed["cloud_sql_ipv4_cidr_block"] = envCfg.CloudSqlIpv4CidrBlock
@@ -1703,9 +1772,9 @@ func expandComposerEnvironmentConfig(v interface{}, d *schema.ResourceData, conf
 	if transformedResilienceMode == "STANDARD_RESILIENCE" {
 		transformed.ResilienceMode = "RESILIENCE_MODE_UNSPECIFIED"
 	} else {
-		transformed.ResilienceMode = transformedResilienceMode	
+		transformed.ResilienceMode = transformedResilienceMode
 	}
-  	
+
 
 	transformedMasterAuthorizedNetworksConfig, err := expandComposerEnvironmentConfigMasterAuthorizedNetworksConfig(original["master_authorized_networks_config"], d, config)
 	if err != nil {
@@ -1873,7 +1942,6 @@ func expandComposerEnvironmentConfigWorkloadsConfig(v interface{}, d *schema.Res
 		}
 	}
 
-	<% unless version == "ga" -%>
 	if v, ok := original["triggerer"]; ok {
 		if len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
 			transformedTriggerer := &composer.TriggererResource{}
@@ -1884,7 +1952,6 @@ func expandComposerEnvironmentConfigWorkloadsConfig(v interface{}, d *schema.Res
 			transformed.Triggerer = transformedTriggerer
 		}
 	}
-	<% end -%>
 
 	if v, ok := original["web_server"]; ok {
 		if len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
@@ -1963,6 +2030,11 @@ func expandComposerEnvironmentConfigPrivateEnvironmentConfig(v interface{}, d *s
 	}
 
 	subBlock := &composer.PrivateClusterConfig{}
+	networkConfig := &composer.NetworkingConfig{}
+
+	if v, ok := original["connection_type"]; ok {
+		networkConfig.ConnectionType = v.(string)
+	}
 
 	if v, ok := original["enable_private_endpoint"]; ok {
 		subBlock.EnablePrivateEndpoint = v.(bool)
@@ -1991,6 +2063,7 @@ func expandComposerEnvironmentConfigPrivateEnvironmentConfig(v interface{}, d *s
 	}
 
 	transformed.PrivateClusterConfig = subBlock
+	transformed.NetworkingConfig = networkConfig
 
 	return transformed, nil
 }
@@ -2108,7 +2181,22 @@ func expandComposerEnvironmentIPAllocationPolicy(v interface{}, d *schema.Resour
 		transformed.ServicesSecondaryRangeName = v.(string)
 	}
 	return transformed, nil
+}
 
+func expandComposerStorageConfig(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) (*composer.StorageConfig, error) {
+	l := v.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil, nil
+	}
+	raw := l[0]
+	original := raw.(map[string]interface{})
+	transformed := &composer.StorageConfig{}
+
+	if v, ok := original["bucket"]; ok {
+		transformed.Bucket = v.(string)
+	}
+
+	return transformed, nil
 }
 
 func expandComposerEnvironmentServiceAccount(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) (string, error) {

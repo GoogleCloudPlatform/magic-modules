@@ -111,6 +111,8 @@ resource "google_container_cluster" "primary" {
 * `autoscaling` - (Optional) Configuration required by cluster autoscaler to adjust
     the size of the node pool to the current cluster usage. Structure is [documented below](#nested_autoscaling).
 
+* `confidential_nodes` - (Optional) Configuration for Confidential Nodes feature. Structure is [documented below](#nested_confidential_nodes).
+
 * `initial_node_count` - (Optional) The initial number of nodes for the pool. In
     regional or multi-zonal clusters, this is the number of nodes per zone. Changing
     this will force recreation of the resource. WARNING: Resizing your node pool manually
@@ -192,11 +194,16 @@ cluster.
     * "ANY" - Instructs the cluster autoscaler to prioritize utilization of unused reservations,
       and reduce preemption risk for Spot VMs.
 
+<a name="nested_confidential_nodes"></a> The `confidential_nodes` block supports:
+
+* `enabled` (Required) - Enable Confidential GKE Nodes for this cluster, to
+    enforce encryption of data in-use.
+
 <a name="nested_management"></a>The `management` block supports:
 
-* `auto_repair` - (Optional) Whether the nodes will be automatically repaired.
+* `auto_repair` - (Optional) Whether the nodes will be automatically repaired. Enabled by default.
 
-* `auto_upgrade` - (Optional) Whether the nodes will be automatically upgraded.
+* `auto_upgrade` - (Optional) Whether the nodes will be automatically upgraded. Enabled by default.
 
 <a name="nested_network_config"></a>The `network_config` block supports:
 
@@ -266,7 +273,7 @@ cluster.
   The resource policy must be in the same project and region as the node pool.
   If not found, InvalidArgument error is returned.
 
-* `tpu_topology` - (Optional, Beta) The [TPU placement topology](https://cloud.google.com/tpu/docs/types-topologies#tpu_topologies) for pod slice node pool.
+* `tpu_topology` - (Optional) The [TPU placement topology](https://cloud.google.com/tpu/docs/types-topologies#tpu_topologies) for pod slice node pool.
 
 ## Attributes Reference
 
@@ -293,8 +300,22 @@ In addition to the arguments listed above, the following computed attributes are
 Node pools can be imported using the `project`, `location`, `cluster` and `name`. If
 the project is omitted, the project value in the provider configuration will be used. Examples:
 
-```
-$ terraform import google_container_node_pool.mainpool my-gcp-project/us-east1-a/my-cluster/main-pool
+* `{{project_id}}/{{location}}/{{cluster_id}}/{{pool_id}}`
+* `{{location}}/{{cluster_id}}/{{pool_id}}`
 
-$ terraform import google_container_node_pool.mainpool us-east1/my-cluster/main-pool
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import node pools using one of the formats above. For example:
+
+```tf
+import {
+  id = "{{project_id}}/{{location}}/{{cluster_id}}/{{pool_id}}"
+  to = google_container_node_pool.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), node pools can be imported using one of the formats above. For example:
+
+```
+$ terraform import google_container_node_pool.default {{project_id}}/{{location}}/{{cluster_id}}/{{pool_id}}
+
+$ terraform import google_container_node_pool.default {{location}}/{{cluster_id}}/{{pool_id}}
 ```

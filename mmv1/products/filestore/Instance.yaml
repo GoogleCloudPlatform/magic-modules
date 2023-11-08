@@ -44,7 +44,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'filestore_instance_enterprise'
     primary_resource_id: 'instance'
-    skip_test: true # https://github.com/GoogleCloudPlatform/magic-modules/pull/5875#discussion_r844285335
+    # https://github.com/GoogleCloudPlatform/magic-modules/pull/5875#discussion_r844285335
+    skip_test: true
     vars:
       instance_name: 'test-instance'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -55,7 +56,7 @@ parameters:
     name: 'zone'
     description: |
       The name of the Filestore zone of the instance.
-    deprecation_message: 'Deprecated in favor of location.'
+    deprecation_message: '`zone` is deprecated and will be removed in a future major release. Use `location` instead.'
     exactly_one_of:
       - 'zone'
       - 'location'
@@ -95,10 +96,10 @@ properties:
     name: 'tier'
     description: |
       The service tier of the instance.
-      Possible values include: STANDARD, PREMIUM, BASIC_HDD, BASIC_SSD, HIGH_SCALE_SSD and ENTERPRISE
+      Possible values include: STANDARD, PREMIUM, BASIC_HDD, BASIC_SSD, HIGH_SCALE_SSD, ZONAL and ENTERPRISE
     required: true
     immutable: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Resource labels to represent user-provided metadata.
@@ -213,6 +214,10 @@ properties:
             A /29 CIDR block that identifies the range of IP
             addresses reserved for this instance.
           default_from_api: true
+          # When using connectMode=PRIVATE_SERVICE_ACCESS, the returned value
+          # won't match the sent value as the returned value is an IP range
+          # from the provided named range.
+          custom_flatten: templates/terraform/custom_flatten/filestore_instance_networks_reserved_ip_range.go.erb
         - !ruby/object:Api::Type::Array
           name: 'ipAddresses'
           description: |

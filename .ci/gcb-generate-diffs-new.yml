@@ -64,15 +64,6 @@ steps:
           - --no-ff
           - head/$_HEAD_BRANCH
 
-    - name: 'gcr.io/graphite-docker-images/bash-plus'
-      id: pre-build-validate
-      entrypoint: '/workspace/.ci/scripts/bash-plus/pre-build-validator/validate.sh'
-      secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["merged"]
-      env:
-        - COMMIT_SHA=$COMMIT_SHA
-        - PR_NUMBER=$_PR_NUMBER
-
     - name: 'gcr.io/graphite-docker-images/build-environment'
       entrypoint: '/workspace/.ci/scripts/build-environment/downstream-builder/generate_downstream.sh'
       id: tpg-head
@@ -129,7 +120,7 @@ steps:
       entrypoint: '/workspace/.ci/scripts/build-environment/downstream-builder/generate_downstream.sh'
       id: tgc-head
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["merged", "tpg-head"]
+      waitFor: ["merged"]
       env:
         - BASE_BRANCH=$_BASE_BRANCH
       args:
@@ -142,7 +133,7 @@ steps:
       entrypoint: '/workspace/.ci/scripts/build-environment/downstream-builder/generate_downstream.sh'
       id: tgc-base
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["merged", "tpg-base"]
+      waitFor: ["merged"]
       env:
         - BASE_BRANCH=$_BASE_BRANCH
       args:
@@ -184,37 +175,30 @@ steps:
       env:
         - BUILD_ID=$BUILD_ID
         - PROJECT_ID=$PROJECT_ID
-        - BUILD_STEP="17"
+        - BUILD_STEP=17
         - COMMIT_SHA=$COMMIT_SHA
         - PR_NUMBER=$_PR_NUMBER
       args:
           - $_PR_NUMBER
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
-      entrypoint: '/workspace/.ci/scripts/go-plus/terraform-validator-tester/test_terraform_validator.sh'
       id: tgc-test
       allowFailure: true
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["tgc-head", "tgc-base"]
-      env:
-        - TEST_PROJECT=$_VALIDATOR_TEST_PROJECT
-        - TEST_FOLDER_ID=$_VALIDATOR_TEST_FOLDER
-        - TEST_ANCESTRY=$_VALIDATOR_TEST_ANCESTRY
-        - TEST_ORG_ID=$_VALIDATOR_TEST_ORG
+      waitFor: ["tpgb-head", "tpgb-base", "tgc-head", "tgc-base"]
       args:
-          - $_PR_NUMBER
-          - $COMMIT_SHA
-          - $BUILD_ID
-          - $PROJECT_ID
-          - "17"  # Build step
-          - terraform-google-conversion
+        - 'test-tgc'
+      env:
+        - COMMIT_SHA=$COMMIT_SHA
+        - PR_NUMBER=$_PR_NUMBER
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
       id: tgc-test-integration-0.12.31
-      entrypoint: '/workspace/.ci/scripts/go-plus/terraform-validator-tester-integration/test_terraform_validator_integration.sh'
+      entrypoint: '/workspace/.ci/scripts/go-plus/tgc-tester-integration/test_tgc_integration.sh'
       allowFailure: true
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["tgc-head", "tgc-base"]
+      waitFor: ["tpgb-head", "tpgb-base", "tgc-head", "tgc-base"]
       env:
         - TERRAFORM_VERSION=0.12.31
         - TEST_PROJECT=$_VALIDATOR_TEST_PROJECT
@@ -231,10 +215,10 @@ steps:
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
       id: tgc-test-integration-0.13.7
-      entrypoint: '/workspace/.ci/scripts/go-plus/terraform-validator-tester-integration/test_terraform_validator_integration.sh'
+      entrypoint: '/workspace/.ci/scripts/go-plus/tgc-tester-integration/test_tgc_integration.sh'
       allowFailure: true
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["tgc-head", "tgc-base"]
+      waitFor: ["tpgb-head", "tpgb-base", "tgc-head", "tgc-base"]
       env:
         - TERRAFORM_VERSION=0.13.7
         - TEST_PROJECT=$_VALIDATOR_TEST_PROJECT
@@ -249,29 +233,27 @@ steps:
           - "19"  # Build step
           - terraform-google-conversion
 
-    - name: 'gcr.io/graphite-docker-images/bash-plus'
+    - name: 'gcr.io/graphite-docker-images/go-plus'
       id: tpgb-test
-      entrypoint: '/workspace/.ci/scripts/bash-plus/terraform-tester/test_terraform.sh'
+      allowFailure: true
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["tpgb-head", "tpgb-base"]
+      args:
+        - 'test-tpg'
       env:
         - VERSION=beta
         - COMMIT_SHA=$COMMIT_SHA
         - PR_NUMBER=$_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/bash-plus'
+    - name: 'gcr.io/graphite-docker-images/go-plus'
       id: tpg-test
-      entrypoint: '/workspace/.ci/scripts/bash-plus/terraform-tester/test_terraform.sh'
+      allowFailure: true
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["tpg-head", "tpg-base"]
       args:
-          - 'ga'                               # remove after 07/2023
-          - $_PR_NUMBER                        # remove after 07/2023
-          - $COMMIT_SHA                        # remove after 07/2023
-          - $BUILD_ID                          # remove after 07/2023
-          - $PROJECT_ID                        # remove after 07/2023
-          - GoogleCloudPlatform/magic-modules  # remove after 07/2023
-          - "21"                               # remove after 07/2023
+        - 'test-tpg'
       env:
         - VERSION=ga
         - COMMIT_SHA=$COMMIT_SHA

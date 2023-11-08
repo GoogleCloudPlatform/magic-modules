@@ -65,7 +65,6 @@ examples:
       display_name: 'Display Name Basic'
       bundle_id: 'apple.app.12345'
     test_env_vars:
-      org_id: :ORG_ID
       project_id: :PROJECT_NAME
     test_vars_overrides:
       display_name: '"tf-test Display Name Basic"'
@@ -78,8 +77,8 @@ examples:
       bundle_id: 'apple.app.12345'
       app_store_id: '12345'
       team_id: '9987654321'  # Has to be a 10-digit number.
+      api_key_name: 'api-key'
     test_env_vars:
-      org_id: :ORG_ID
       project_id: :PROJECT_NAME
     test_vars_overrides:
       app_store_id: '12345'
@@ -89,14 +88,16 @@ examples:
       - project
       - deletion_policy
 virtual_fields:
-  # TODO: make this an enum in a future major version. If using this field as a reference, look at PerInstanceConfig's minimal_action field for enum configuration.
-  - !ruby/object:Api::Type::String
+  - !ruby/object:Api::Type::Enum
     name: 'deletion_policy'
     description: |
       (Optional) Set to `ABANDON` to allow the Apple to be untracked from terraform state
       rather than deleted upon `terraform destroy`. This is useful because the Apple may be
       serving traffic. Set to `DELETE` to delete the Apple. Defaults to `DELETE`.
-    default_value: DELETE
+    default_value: :DELETE
+    values:
+      - :DELETE
+      - :ABANDON
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_delete: templates/terraform/custom_delete/firebase_app_deletion_policy.erb
 properties:
@@ -131,3 +132,10 @@ properties:
     name: teamId
     description: |
       The Apple Developer Team ID associated with the App in the App Store.
+  - !ruby/object:Api::Type::String
+    name: apiKeyId
+    default_from_api: true
+    description: |
+      The globally unique, Google-assigned identifier (UID) for the Firebase API key associated with the AppleApp.
+      If apiKeyId is not set during creation, then Firebase automatically associates an apiKeyId with the AppleApp.
+      This auto-associated key may be an existing valid key or, if no valid key exists, a new one will be provisioned.

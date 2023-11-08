@@ -22,7 +22,7 @@ immutable: true
 skip_read: true
 skip_delete: true
 exclude_import: true
-exclude_validator: true
+exclude_tgc: true
 description: |
   A representation of an ExternalAccountKey used for external account binding within ACME.
 examples:

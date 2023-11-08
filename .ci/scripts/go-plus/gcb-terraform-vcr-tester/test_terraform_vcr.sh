@@ -13,6 +13,7 @@ gh_repo=terraform-provider-google-beta
 NEWLINE=$'\n'
 
 new_branch="auto-pr-$pr_number"
+old_branch="auto-pr-$pr_number-old"
 git_remote=https://github.com/$github_username/$gh_repo
 local_path=$GOPATH/src/github.com/hashicorp/$gh_repo
 mkdir -p "$(dirname $local_path)"
@@ -21,9 +22,13 @@ pushd $local_path
 
 # Only skip tests if we can tell for sure that no go files were changed
 echo "Checking for modified go files"
+# Fetch the latest commit in the old branch, associating them locally
+# This will let us compare the old and new branch by name on the next line
+git fetch origin $old_branch:$old_branch --depth 1
 # get the names of changed files and look for go files
 # (ignoring "no matches found" errors from grep)
-gofiles=$(git diff --name-only HEAD~1 | { grep -e "\.go$" -e "go.mod$" -e "go.sum$" || test $? = 1; })
+# If there was no code generated, this will always return nothing (because there's no diff)
+gofiles=$(git diff $new_branch $old_branch --name-only | { grep -e "\.go$" -e "go.mod$" -e "go.sum$" || test $? = 1; })
 if [[ -z $gofiles ]]; then
   echo "Skipping tests: No go files changed"
   exit 0
@@ -51,8 +56,6 @@ function update_status {
     "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/$mm_commit_sha" \
     -d "$post_body"
 }
-
-update_status "pending"
 
 # for backwards-compatibility
 if [ -z "$BASE_BRANCH" ]; then
@@ -97,6 +100,13 @@ export GOOGLE_TEST_DIRECTORY=$(go list ./... | grep -v github.com/hashicorp/terr
 echo "checking terraform version"
 terraform version
 
+go build $GOOGLE_TEST_DIRECTORY
+if [ $? != 0 ]; then
+  echo "Skipping tests: Build failure detected"
+  exit 1
+fi
+
+update_status "pending"
 
 TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/replaying/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test $GOOGLE_TEST_DIRECTORY -parallel $ACCTEST_PARALLELISM -v -run=TestAcc -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" > replaying_test.log
 
@@ -292,7 +302,7 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
       # check for any uncaught errors in RECORDING mode
       comment+="$\textcolor{red}{\textsf{Errors occurred during RECORDING mode. Please fix them to complete your PR.}}$ ${NEWLINE}"
     else
-      comment+="$\textcolor{green}{\textsf{All tests passed!}} ${NEWLINE}"
+      comment+="$\textcolor{green}{\textsf{All tests passed!}}$ ${NEWLINE}"
     fi
   fi
 

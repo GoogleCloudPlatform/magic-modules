@@ -1,7 +1,7 @@
 resource "google_dataplex_datascan" "<%= ctx[:primary_resource_id] %>" {
   location = "us-central1"
   display_name = "Full Datascan Quality"
-  data_scan_id = "tf-test-datascan%{random_suffix}"
+  data_scan_id = "<%= ctx[:vars]['datascan_name'] %>"
   description = "Example resource - Full Datascan Quality"
   labels = {
     author = "billing"

@@ -5,7 +5,7 @@
 # will be pulled or built during the exectuion of the script.
 set -e
 
-BUILDER_IMAGE="gcr.io/graphite-docker-images/downstream-builder:latest"
+BUILDER_IMAGE="gcr.io/graphite-docker-images/build-environment:latest"
 
 if [ -t 1 ]; then
     red=$'\e[1;31m'
@@ -54,7 +54,7 @@ main() {
         if ! ${CONTAINER_EXECUTABLE} images | grep "${BUILDER_IMAGE}" > /dev/null; then
             if ! ${CONTAINER_EXECUTABLE} pull "${BUILDER_IMAGE}"; then
                 ${CONTAINER_EXECUTABLE} build \
-                    .ci/containers/downstream-builder/ \
+                    .ci/containers/build-environment/ \
                     -t "${BUILDER_IMAGE}"
             fi
         fi

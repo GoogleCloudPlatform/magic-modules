@@ -54,7 +54,8 @@ func main() {
 	}
 
 	// Create a string of the map that should be created in .teamcity/components/generated/services.kt
-	serviceMap, err := createMap(serviceList)
+	relativeServicesDir := fmt.Sprintf("./%s/services", terraformResourceDirectory)
+	serviceMap, err := createMap(serviceList, relativeServicesDir)
 	if err != nil {
 		log.Fatalf("error creating service package map: %s", err)
 	}
@@ -87,7 +88,9 @@ func readAllServicePackages(providerDir string) ([]string, error) {
 	var services = make([]string, 0)
 
 	for _, p := range packages {
-		services = append(services, p.Name())
+		if p.IsDir() {
+			services = append(services, p.Name())
+		}
 	}
 	if len(services) == 0 {
 		return nil, fmt.Errorf("found 0 service packages in %s", providerDir)
@@ -95,10 +98,19 @@ func readAllServicePackages(providerDir string) ([]string, error) {
 	return services, nil
 }
 
-func createMap(packageNames []string) (string, error) {
+func createMap(packageNames []string, servicesDir string) (string, error) {
 
-	entryTemplate := "        \"%s\" to \"%s\",\n"
-	lastEntryTemplate := "        \"%s\" to \"%s\"\n" // No trailing comma
+	entryTemplate := `    "%s" to mapOf(
+        "name" to "%s",
+        "displayName" to "%s",
+        "path" to "%s"
+    ),
+`
+	lastEntryTemplate := `    "%s" to mapOf(
+        "name" to "%s",
+        "displayName" to "%s",
+        "path" to "%s"
+    )` // No trailing comma
 	caser := cases.Title(language.English)
 
 	var b strings.Builder
@@ -114,13 +126,13 @@ func createMap(packageNames []string) (string, error) {
 	// Add the map
 	b.WriteString("var services = mapOf(\n")
 	for i, p := range packageNames {
-
+		path := fmt.Sprintf("%s/%s", servicesDir, p)
 		var e string
 		if i < (len(packageNames) - 1) {
-			e = fmt.Sprintf(entryTemplate, p, caser.String(p))
+			e = fmt.Sprintf(entryTemplate, p, p, caser.String(p), path)
 		} else {
 			// Final entry in map doesn't have comma
-			e = fmt.Sprintf(lastEntryTemplate, p, caser.String(p))
+			e = fmt.Sprintf(lastEntryTemplate, p, p, caser.String(p), path)
 		}
 
 		_, err := fmt.Fprint(&b, e)
@@ -129,7 +141,7 @@ func createMap(packageNames []string) (string, error) {
 		}
 
 	}
-	b.WriteString(")\n")
+	b.WriteString("\n)\n")
 
 	return b.String(), nil
 }

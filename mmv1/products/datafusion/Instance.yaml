@@ -141,7 +141,7 @@ properties:
     name: 'enableRbac'
     description: |
       Option to enable granular role-based access control.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       The resource labels for instance to use to annotate any related underlying resources,
@@ -199,11 +199,11 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'serviceAccount'
     min_version: beta  # This field is deprecated and needs to be absent in GA provider.
-    deprecation_message:
-      Use `tenant_project_id` instead to extract the tenant project ID.
+    deprecation_message: >-
+      `service_account` is deprecated and will be removed in a future major release. Instead, use `tenant_project_id` to extract the tenant project ID.
     output: true
     description: |
-      Deprecated. Use `tenant_project_id` instead to extract the tenant project ID.
+      Service account which will be used to access resources in the customer project.
   - !ruby/object:Api::Type::Boolean
     name: 'privateInstance'
     description: |

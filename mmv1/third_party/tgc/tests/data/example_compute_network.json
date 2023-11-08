@@ -1,0 +1,18 @@
+[
+  {
+    "name": "//compute.googleapis.com/projects/{{.Provider.project}}/global/networks/test-network",
+    "asset_type": "compute.googleapis.com/Network",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "beta",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
+      "discovery_name": "Network",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "autoCreateSubnetworks": false,
+        "name": "test-network",
+        "networkFirewallPolicyEnforcementOrder": "AFTER_CLASSIC_FIREWALL"
+      }
+    }
+  }
+]

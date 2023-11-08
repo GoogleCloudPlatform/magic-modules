@@ -71,6 +71,7 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
                         path.MatchRoot("access_token"),
                     }...),
                     CredentialsValidator(),
+                    NonEmptyStringValidator(),
                 },
             },
             "access_token": schema.StringAttribute{
@@ -79,10 +80,14 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
                     stringvalidator.ConflictsWith(path.Expressions{
                         path.MatchRoot("credentials"),
                     }...),
+                    NonEmptyStringValidator(),
                 },
             },
             "impersonate_service_account": schema.StringAttribute{
                 Optional: true,
+                Validators: []validator.String{
+                    NonEmptyStringValidator(),
+                },
             },
             "impersonate_service_account_delegates": schema.ListAttribute{
                 Optional:    true,
@@ -90,15 +95,27 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
             },
             "project": schema.StringAttribute{
                 Optional: true,
+                Validators: []validator.String{
+                    NonEmptyStringValidator(),
+                },
             },
             "billing_project": schema.StringAttribute{
                 Optional: true,
+                Validators: []validator.String{
+                    NonEmptyStringValidator(),
+                },
             },
             "region": schema.StringAttribute{
                 Optional: true,
+                Validators: []validator.String{
+                    NonEmptyStringValidator(),
+                },
             },
             "zone": schema.StringAttribute{
                 Optional: true,
+                Validators: []validator.String{
+                    NonEmptyStringValidator(),
+                },
             },
             "scopes": schema.ListAttribute{
                 Optional:    true,
@@ -113,7 +130,13 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
             "request_reason": schema.StringAttribute{
                 Optional: true,
             },
-
+            "universe_domain": schema.StringAttribute{
+                Optional: true,
+            },
+            "default_labels": schema.MapAttribute{
+                Optional:    true,
+                ElementType: types.StringType,
+            },
             // Generated Products
             <% products.each do |product| -%>
             "<%= product[:definitions].name.underscore -%>_custom_endpoint": &schema.StringAttribute{
@@ -235,7 +258,7 @@ func (p *FrameworkProvider) Configure(ctx context.Context, req provider.Configur
     }
 
     // Configuration values are now available.
-    p.LoadAndValidateFramework(ctx, data, req.TerraformVersion, &resp.Diagnostics, p.Version)
+    p.LoadAndValidateFramework(ctx, &data, req.TerraformVersion, &resp.Diagnostics, p.Version)
     if resp.Diagnostics.HasError() {
         return
     }

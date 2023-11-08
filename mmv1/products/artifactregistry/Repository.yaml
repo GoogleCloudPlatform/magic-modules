@@ -82,6 +82,25 @@ examples:
     vars:
       repository_id: 'my-repository'
       description: 'example remote docker repository'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'artifact_registry_repository_remote_apt'
+    primary_resource_id: 'my-repo'
+    vars:
+      repository_id: 'debian-buster'
+      description: 'example remote apt repository'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'artifact_registry_repository_remote_yum'
+    primary_resource_id: 'my-repo'
+    vars:
+      repository_id: 'centos-8'
+      description: 'example remote yum repository'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'artifact_registry_repository_cleanup'
+    min_version: beta
+    primary_resource_id: 'my-repo'
+    vars:
+      repository_id: 'my-repository'
+      description: 'example docker repository with cleanup policies'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/location_from_region.go.erb
 properties:
@@ -124,7 +143,7 @@ properties:
     name: description
     description: |-
       The user-provided description of the repository.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Labels with user-defined metadata.
@@ -220,6 +239,94 @@ properties:
               name: 'priority'
               description: |-
                 Entries with a greater priority value take precedence in the pull order.
+  - !ruby/object:Api::Type::Map
+    name: 'cleanupPolicies'
+    min_version: beta
+    description: |-
+      Cleanup policies for this repository. Cleanup policies indicate when
+      certain package versions can be automatically deleted.
+      Map keys are policy IDs supplied by users during policy creation. They must
+      unique within a repository and be under 128 characters in length.
+    key_name: id
+    key_description: |-
+      The policy ID. Must be unique within a repository.
+    value_type: !ruby/object:Api::Type::NestedObject
+      min_version: beta
+      properties:
+        - !ruby/object:Api::Type::Enum
+          name: action
+          min_version: beta
+          description: |-
+            Policy action.
+          values:
+            - :DELETE
+            - :KEEP
+        - !ruby/object:Api::Type::NestedObject
+          name: condition
+          min_version: beta
+          description: |-
+            Policy condition for matching versions.
+          # TODO (jrsb): exactly_one_of: condition, mostRecentVersions
+          properties:
+            - !ruby/object:Api::Type::Enum
+              name: tagState
+              min_version: beta
+              description: |-
+                Match versions by tag status.
+              values:
+                - :TAGGED
+                - :UNTAGGED
+                - :ANY
+              default_value: :ANY
+            - !ruby/object:Api::Type::Array
+              name: tagPrefixes
+              min_version: beta
+              description: |-
+                Match versions by tag prefix. Applied on any prefix match.
+              item_type: Api::Type::String
+            - !ruby/object:Api::Type::Array
+              name: versionNamePrefixes
+              min_version: beta
+              description: |-
+                Match versions by version name prefix. Applied on any prefix match.
+              item_type: Api::Type::String
+            - !ruby/object:Api::Type::Array
+              name: packageNamePrefixes
+              min_version: beta
+              description: |-
+                Match versions by package prefix. Applied on any prefix match.
+              item_type: Api::Type::String
+            - !ruby/object:Api::Type::String
+              name: olderThan
+              min_version: beta
+              description: |-
+                Match versions older than a duration.
+              diff_suppress_func: 'tpgresource.DurationDiffSuppress'
+            - !ruby/object:Api::Type::String
+              name: newerThan
+              min_version: beta
+              description: |-
+                Match versions newer than a duration.
+              diff_suppress_func: 'tpgresource.DurationDiffSuppress'
+        - !ruby/object:Api::Type::NestedObject
+          name: mostRecentVersions
+          min_version: beta
+          description: |-
+            Policy condition for retaining a minimum number of versions. May only be
+            specified with a Keep action.
+          # TODO (jrsb): exactly_one_of: condition, mostRecentVersions
+          properties:
+            - !ruby/object:Api::Type::Array
+              name: packageNamePrefixes
+              min_version: beta
+              description: |-
+                Match versions by package prefix. Applied on any prefix match.
+              item_type: Api::Type::String
+            - !ruby/object:Api::Type::Integer
+              name: keepCount
+              min_version: beta
+              description: |-
+                Minimum number of versions to keep.
   - !ruby/object:Api::Type::NestedObject
     name: 'remoteRepositoryConfig'
     conflicts:
@@ -234,12 +341,48 @@ properties:
           The description of the remote source.
         immutable: true
       - !ruby/object:Api::Type::NestedObject
-        name: 'dockerRepository'
+        name: 'aptRepository'
         exactly_one_of:
+          - remoteRepositoryConfig.0.apt_repository
           - remoteRepositoryConfig.0.docker_repository
           - remoteRepositoryConfig.0.maven_repository
           - remoteRepositoryConfig.0.npm_repository
           - remoteRepositoryConfig.0.python_repository
+          - remoteRepositoryConfig.0.yum_repository
+        description: |-
+          Specific settings for an Apt remote repository.
+        immutable: true
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'publicRepository'
+            description: |-
+              One of the publicly available Apt repositories supported by Artifact Registry.
+            immutable: true
+            properties:
+              - !ruby/object:Api::Type::Enum
+                name: 'repositoryBase'
+                required: true
+                description: |-
+                  A common public repository base for Apt, e.g. `"debian/dists/buster"`
+                immutable: true
+                values:
+                  - :DEBIAN
+                  - :UBUNTU
+              - !ruby/object:Api::Type::String
+                name: 'repositoryPath'
+                required: true
+                description: |-
+                  Specific repository from the base.
+                immutable: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'dockerRepository'
+        exactly_one_of:
+          - remoteRepositoryConfig.0.apt_repository
+          - remoteRepositoryConfig.0.docker_repository
+          - remoteRepositoryConfig.0.maven_repository
+          - remoteRepositoryConfig.0.npm_repository
+          - remoteRepositoryConfig.0.python_repository
+          - remoteRepositoryConfig.0.yum_repository
         description: |-
           Specific settings for a Docker remote repository.
         immutable: true
@@ -257,10 +400,12 @@ properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'mavenRepository'
         exactly_one_of:
+          - remoteRepositoryConfig.0.apt_repository
           - remoteRepositoryConfig.0.docker_repository
           - remoteRepositoryConfig.0.maven_repository
           - remoteRepositoryConfig.0.npm_repository
           - remoteRepositoryConfig.0.python_repository
+          - remoteRepositoryConfig.0.yum_repository
         description: |-
           Specific settings for a Maven remote repository.
         immutable: true
@@ -278,10 +423,12 @@ properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'npmRepository'
         exactly_one_of:
+          - remoteRepositoryConfig.0.apt_repository
           - remoteRepositoryConfig.0.docker_repository
           - remoteRepositoryConfig.0.maven_repository
           - remoteRepositoryConfig.0.npm_repository
           - remoteRepositoryConfig.0.python_repository
+          - remoteRepositoryConfig.0.yum_repository
         description: |-
           Specific settings for an Npm remote repository.
         immutable: true
@@ -299,10 +446,12 @@ properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'pythonRepository'
         exactly_one_of:
+          - remoteRepositoryConfig.0.apt_repository
           - remoteRepositoryConfig.0.docker_repository
           - remoteRepositoryConfig.0.maven_repository
           - remoteRepositoryConfig.0.npm_repository
           - remoteRepositoryConfig.0.python_repository
+          - remoteRepositoryConfig.0.yum_repository
         description: |-
           Specific settings for a Python remote repository.
         immutable: true
@@ -317,3 +466,48 @@ properties:
             values:
               - :PYPI
             default_value: :PYPI
+      - !ruby/object:Api::Type::NestedObject
+        name: 'yumRepository'
+        exactly_one_of:
+          - remoteRepositoryConfig.0.apt_repository
+          - remoteRepositoryConfig.0.docker_repository
+          - remoteRepositoryConfig.0.maven_repository
+          - remoteRepositoryConfig.0.npm_repository
+          - remoteRepositoryConfig.0.python_repository
+          - remoteRepositoryConfig.0.yum_repository
+        description: |-
+          Specific settings for an Yum remote repository.
+        immutable: true
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'publicRepository'
+            description: |-
+              One of the publicly available Yum repositories supported by Artifact Registry.
+            immutable: true
+            properties:
+              - !ruby/object:Api::Type::Enum
+                name: 'repositoryBase'
+                required: true
+                description: |-
+                  A common public repository base for Yum.
+                immutable: true
+                values:
+                  - :CENTOS
+                  - :CENTOS_DEBUG
+                  - :CENTOS_VAULT
+                  - :CENTOS_STREAM
+                  - :ROCKY
+                  - :EPEL
+              - !ruby/object:Api::Type::String
+                name: 'repositoryPath'
+                required: true
+                description: |-
+                  Specific repository from the base, e.g. `"centos/8-stream/BaseOS/x86_64/os"`
+                immutable: true
+
+  - !ruby/object:Api::Type::Boolean
+    name: 'cleanupPolicyDryRun'
+    min_version: beta
+    description: |-
+      If true, the cleanup pipeline is prevented from deleting versions in this
+      repository.

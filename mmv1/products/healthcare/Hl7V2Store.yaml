@@ -129,8 +129,8 @@ properties:
           - :V1
           - :V2
           - :V3
-  - !ruby/object:Api::Type::KeyValuePairs
-    name: labels
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: 'labels'
     required: false
     description: |
       User-supplied key-value pairs used to organize HL7v2 stores.
@@ -198,7 +198,8 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: notificationConfig
     # This field is duplicated because beta and ga have different behaviors.
-    deprecation_message: This field has been replaced by notificationConfigs
+    deprecation_message: >-
+      `notification_config` is deprecated and will be removed in a future major release. Use `notification_configs` instead.
     exact_version: beta
     required: false
     properties:

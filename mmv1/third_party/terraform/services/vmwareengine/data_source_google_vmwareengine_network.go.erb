@@ -30,6 +30,14 @@ func dataSourceVmwareengineNetworkRead(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
 	d.SetId(id)
-	return resourceVmwareengineNetworkRead(d, meta)
+	err = resourceVmwareengineNetworkRead(d, meta)
+	if err != nil {
+		return err
+	}
+
+	if d.Id() == "" {
+		return fmt.Errorf("%s not found", id)
+	}
+	return nil
 }
 <% end -%>

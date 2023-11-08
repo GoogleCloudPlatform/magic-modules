@@ -132,7 +132,7 @@ properties:
     output: true
     description: |
       The timestamp of when the featurestore was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       A set of key/value label pairs to assign to this EntityType.
@@ -156,9 +156,8 @@ properties:
           - !ruby/object:Api::Type::String
             name: 'monitoringInterval'
             min_version: beta
-            deprecation_message:
-              This field is unavailable in the GA provider and will be removed
-              from the beta provider in a future release.
+            deprecation_message: >-
+              `monitoring_interval` is deprecated and will be removed in a future release.
             description: |
               Configuration of the snapshot analysis based monitoring pipeline running interval. The value is rolled up to full day.
 

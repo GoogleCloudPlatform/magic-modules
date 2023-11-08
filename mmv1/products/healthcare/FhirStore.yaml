@@ -166,8 +166,8 @@ properties:
       ** This property can be changed manually in the Google Cloud Healthcare admin console without recreating the FHIR store **
     required: false
     immutable: true
-  - !ruby/object:Api::Type::KeyValuePairs
-    name: labels
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: 'labels'
     required: false
     description: |
       User-supplied key-value pairs used to organize FHIR stores.
@@ -283,7 +283,12 @@ properties:
                       name: expirationMs
                       description: |
                         Number of milliseconds for which to keep the storage for a partition.
-
+  - !ruby/object:Api::Type::Boolean
+    name: defaultSearchHandlingStrict
+    description: |
+      If true, overrides the default search behavior for this FHIR store to handling=strict which returns an error for unrecognized search parameters.
+      If false, uses the FHIR specification default handling=lenient which ignores unrecognized search parameters.
+      The handling can always be changed from the default on an individual API call by setting the HTTP header Prefer: handling=strict or Prefer: handling=lenient.
   - !ruby/object:Api::Type::Array
     name: notificationConfigs
     description: |-

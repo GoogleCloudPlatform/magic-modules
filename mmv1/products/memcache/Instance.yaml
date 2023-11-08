@@ -30,17 +30,24 @@ timeouts: !ruby/object:Api::Timeouts
   delete_minutes: 20
 autogen_async: true
 examples:
-  # Temporary as CI has used up servicenetworking quota
   - !ruby/object:Provider::Terraform::Examples
-    skip_vcr: true
     name: 'memcache_instance_basic'
     primary_resource_id: 'instance'
     vars:
       instance_name: 'test-instance'
       network_name: 'test-network'
       address_name: 'address'
+    skip_test: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'memcache_instance_basic_test'
+    primary_resource_id: 'instance'
+    vars:
+      instance_name: 'test-instance'
+      network_name: 'test-network'
+      address_name: 'address'
     test_vars_overrides:
-      network_name: 'acctest.BootstrapSharedTestNetwork(t, "memcache-private")'
+      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
+    skip_docs: true
 parameters:
   - !ruby/object:Api::Type::String
     name: 'region'
@@ -103,7 +110,7 @@ properties:
     name: 'discoveryEndpoint'
     description: Endpoint for Discovery API
     output: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Resource labels to represent user-provided metadata.

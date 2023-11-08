@@ -26,7 +26,7 @@ module Api
       attr_reader :exclude
 
       # boolean of if this binding should be generated
-      attr_reader :exclude_validator
+      attr_reader :exclude_tgc
 
       # Boolean of if tests for IAM resources should exclude import test steps
       # Used to handle situations where typical generated IAM tests cannot import
@@ -118,7 +118,7 @@ module Api
         super
 
         check :exclude, type: :boolean, default: false
-        check :exclude_validator, type: :boolean, default: false
+        check :exclude_tgc, type: :boolean, default: false
         check :skip_import_test, type: :boolean, default: false
         check :method_name_separator, type: String, default: '/'
         check :parent_resource_type, type: String

@@ -63,8 +63,8 @@ examples:
     primary_resource_id: 'basic'
     vars:
       display_name: 'Display Name Basic'
+      package_name: 'android.package.app'
     test_env_vars:
-      org_id: :ORG_ID
       project_id: :PROJECT_NAME
     test_vars_overrides:
       package_name: '"android.package.app" + acctest.RandString(t, 4)'
@@ -72,15 +72,33 @@ examples:
     ignore_read_extra:
       - project
       - deletion_policy
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'firebase_android_app_custom_api_key'
+    min_version: 'beta'
+    primary_resource_id: 'default'
+    vars:
+      display_name: 'Display Name'
+      api_key_name: 'api-key'
+      package_name: 'android.package.app'
+    test_env_vars:
+      project_id: :PROJECT_NAME
+    test_vars_overrides:
+      package_name: '"android.package.app" + acctest.RandString(t, 4)'
+      display_name: '"tf-test Display Name"'
+    ignore_read_extra:
+      - project
+      - deletion_policy
 virtual_fields:
-  # TODO: make this an enum in a future major version. If using this field as a reference, look at PerInstanceConfig's minimal_action field for enum configuration.
-  - !ruby/object:Api::Type::String
+  - !ruby/object:Api::Type::Enum
     name: 'deletion_policy'
     description: |
       (Optional) Set to `ABANDON` to allow the AndroidApp to be untracked from terraform state
       rather than deleted upon `terraform destroy`. This is useful because the AndroidApp may be
       serving traffic. Set to `DELETE` to delete the AndroidApp. Defaults to `DELETE`.
-    default_value: DELETE
+    default_value: :DELETE
+    values:
+      - :DELETE
+      - :ABANDON
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_delete: templates/terraform/custom_delete/firebase_app_deletion_policy.erb
 properties:
@@ -116,6 +134,13 @@ properties:
     description: |
       The SHA256 certificate hashes for the AndroidApp.
     item_type: Api::Type::String
+  - !ruby/object:Api::Type::String
+    name: apiKeyId
+    default_from_api: true
+    description: |
+      The globally unique, Google-assigned identifier (UID) for the Firebase API key associated with the AndroidApp.
+      If apiKeyId is not set during creation, then Firebase automatically associates an apiKeyId with the AndroidApp.
+      This auto-associated key may be an existing valid key or, if no valid key exists, a new one will be provisioned.
   - !ruby/object:Api::Type::Fingerprint
     name: etag
     description: |

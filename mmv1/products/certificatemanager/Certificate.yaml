@@ -58,8 +58,9 @@ examples:
     primary_resource_id: 'default'
     vars:
       cert_name: 'issuance-config-cert'
-      ca_name: 'my-ca'
-      pool_name: 'my-ca-pool'
+      ca_name: 'ca-authority'
+      pool_name: 'ca-pool'
+      issuance_config_name: 'issuance-config'
   - !ruby/object:Provider::Terraform::Examples
     name: 'certificate_manager_self_managed_certificate'
     primary_resource_id: 'default'
@@ -70,6 +71,23 @@ examples:
     primary_resource_id: 'default'
     vars:
       cert_name: 'self-managed-cert'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'certificate_manager_google_managed_certificate_issuance_config_all_regions'
+    primary_resource_id: 'default'
+    vars:
+      cert_name: 'issuance-config-cert'
+      ca_name: 'ca-authority'
+      pool_name: 'ca-pool'
+      issuance_config_name: 'issuance-config'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'certificate_manager_google_managed_certificate_dns_all_regions'
+    primary_resource_id: 'default'
+    vars:
+      dns_auth_name: 'dns-auth'
+      dns_auth_subdomain: 'subdomain'
+      dns_auth_name2: 'dns-auth2'
+      dns_auth_subdomain2: 'subdomain2'
+      cert_name: 'dns-cert'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/cert_manager.erb
 parameters:
@@ -87,13 +105,14 @@ parameters:
     description: |
       The Certificate Manager location. If not specified, "global" is used.
     default_value: global
+    immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
       A human-readable description of the resource.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: 'Set of label tags associated with the Certificate resource.'
   - !ruby/object:Api::Type::String
@@ -105,9 +124,11 @@ properties:
       DEFAULT: Certificates with default scope are served from core Google data centers.
       If unsure, choose this option.
 
-      EDGE_CACHE: Certificates with scope EDGE_CACHE are special-purposed certificates,
-      served from non-core Google data centers.
-      Currently allowed only for managed certificates.
+      EDGE_CACHE: Certificates with scope EDGE_CACHE are special-purposed certificates, served from Edge Points of Presence.
+      See https://cloud.google.com/vpc/docs/edge-locations.
+
+      ALL_REGIONS: Certificates with ALL_REGIONS scope are served from all GCP regions (You can only use ALL_REGIONS with global certs).
+      See https://cloud.google.com/compute/docs/regions-zones
     default_value: DEFAULT
     diff_suppress_func: 'certManagerDefaultScopeDiffSuppress'
   - !ruby/object:Api::Type::NestedObject
@@ -128,9 +149,10 @@ properties:
         exactly_one_of:
           - self_managed.0.certificate_pem
           - self_managed.0.pem_certificate
-        deprecation_message: 'Deprecated in favor of `pem_certificate`'
+        deprecation_message: >-
+          `certificate_pem` is deprecated and will be removed in a future major release. Use `pem_certificate` instead.
         description: |
-          **Deprecated** The certificate chain in PEM-encoded form.
+          The certificate chain in PEM-encoded form.
 
           Leaf certificate comes first, followed by intermediate ones if any.
         sensitive: true
@@ -140,9 +162,10 @@ properties:
         exactly_one_of:
           - self_managed.0.private_key_pem
           - self_managed.0.pem_private_key
-        deprecation_message: 'Deprecated in favor of `pem_private_key`'
+        deprecation_message: >-
+          `private_key_pem` is deprecated and will be removed in a future major release. Use `pem_private_key` instead.
         description: |
-          **Deprecated** The private key of the leaf certificate in PEM-encoded form.
+          The private key of the leaf certificate in PEM-encoded form.
         sensitive: true
       - !ruby/object:Api::Type::String
         name: pemCertificate

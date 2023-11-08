@@ -57,7 +57,7 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 id_format: '{{project}}/{{global_network_endpoint_group}}/{{ip_address}}/{{fqdn}}/{{port}}'
 mutex: networkEndpoint/{{project}}/{{global_network_endpoint_group}}
-exclude_validator: true
+exclude_tgc: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'global_network_endpoint'
@@ -93,6 +93,8 @@ properties:
       Port number of the external endpoint.
     required: true
     custom_flatten: templates/terraform/custom_flatten/float64_to_int.go.erb
+    validation: !ruby/object:Provider::Terraform::Validation
+      function: 'validation.IntAtLeast(1)'
   - !ruby/object:Api::Type::String
     name: 'ipAddress'
     description: |

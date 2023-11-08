@@ -57,7 +57,7 @@ examples:
     test_env_vars:
       project_id: :PROJECT_NAME
     test_vars_overrides:
-      zip_path: '"./test-fixtures/cloudfunctions2/function-source.zip"'
+      zip_path: '"./test-fixtures/function-source.zip"'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   decoder: templates/terraform/decoders/firebasehosting_version.go.erb
   post_create: templates/terraform/post_create/firebasehosting_version_immediate_finalize.erb

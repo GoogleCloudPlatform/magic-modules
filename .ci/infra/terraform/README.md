@@ -58,6 +58,7 @@ Quotas that will need to be adjusted to support all tests:
 - VMWare Engine nodes across regions
 - Looker `EnterpriseSubscriptionInstancesPerProjectPerRegion`. This must be requested manually from their team, and can't be self-served in the Cloud Console.
 - aiplatform.googleapis.com/feature_store_online_serving_nodes (us-central1)
+- compute.googleapis.com/firewalls
 - compute.googleapis.com/global_in_use_addresses
 - compute.googleapis.com/instance_group_managers (us-central1)
 - compute.googleapis.com/networks
@@ -65,3 +66,4 @@ Quotas that will need to be adjusted to support all tests:
 - compute.googleapis.com/regional_in_use_addresses (us-central1)
 - compute.googleapis.com/regional_static_addresses (us-central1)
 - compute.googleapis.com/routers
+- compute.googleapis.com/c2_cpus (us-central1)

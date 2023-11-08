@@ -10,14 +10,14 @@ import (
 	"github.com/golang/glog"
 )
 
-var flagProviderDir = flag.String("provider-dir", "", "directory where test files are located")
+var flagServicesDir = flag.String("services-dir", "", "directory where service directories are located")
 
 func main() {
 	flag.Parse()
 
-	allTests, err := readAllTests(*flagProviderDir)
-	if err != nil {
-		glog.Errorf("error reading all test files: %v", err)
+	allTests, errs := readAllTests(*flagServicesDir)
+	for path, err := range errs {
+		glog.Infof("error reading path: %s, err: %v", path, err)
 	}
 
 	changedFields := changedResourceFields()
