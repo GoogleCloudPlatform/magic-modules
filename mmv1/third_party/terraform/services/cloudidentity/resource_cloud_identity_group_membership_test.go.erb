@@ -112,7 +112,7 @@ resource "google_cloud_identity_group_membership" "basic" {
 
   roles {
     name = "MEMBER"
-    expiry_detail = {
+    expiry_detail {
       expire_time = "2122-09-26T10:55:55.163240682Z"
     }
   }
@@ -174,7 +174,7 @@ resource "google_cloud_identity_group_membership" "basic" {
 
   roles {
     name = "MEMBER"
-    expiry_detail = {
+    expiry_detail {
       expire_time = "2122-09-26T10:55:55.163240682Z"
     }
   }
@@ -388,7 +388,7 @@ resource "google_cloud_identity_group_membership" "cloud_identity_group_membersh
 
   roles {
     name = "MEMBER"
-    expiry_detail = {
+    expiry_detail {
       expire_time = "2122-09-26T10:55:55.163240682Z"
     }
   }
@@ -521,7 +521,7 @@ resource "google_cloud_identity_group_membership" "cloud_identity_group_membersh
 
   roles {
     name = "MEMBER"
-    expiry_detail = {
+    expiry_detail {
       expire_time = "2122-09-26T10:55:55.163240682Z"
     }
   }
