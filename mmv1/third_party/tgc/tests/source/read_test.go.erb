@@ -52,7 +52,7 @@ func TestReadPlannedAssetsCoverage(t *testing.T) {
 			generateTestFiles(t, "../testdata/templates", dir, c.name+".json")
 			generateTestFiles(t, "../testdata/templates", dir, c.name+".tf")
 
-      // tfstat files are for cases testing updates, eg. project update.
+			// tfstat files are for cases testing updates, eg. project update.
 			// Uses glob matching to match generateTestFiles internals.
 			tfstateMatches, err := filepath.Glob(filepath.Join("../testdata/templates", c.name+".tfstate"))
 			if err != nil {
@@ -92,7 +92,7 @@ func TestReadPlannedAssetsCoverage(t *testing.T) {
 			got, err := tfplan2cai.Convert(ctx, jsonPlan, &tfplan2cai.Options{
 				ConvertUnchanged: false,
 				ErrorLogger:      zaptest.NewLogger(t),
-				Offline:          false,
+				Offline:          true,
 				DefaultProject:   data.Provider["project"],
 				DefaultRegion:    "",
 				DefaultZone:      "",
@@ -100,7 +100,7 @@ func TestReadPlannedAssetsCoverage(t *testing.T) {
 				AncestryCache:    ancestryCache,
 			})
 			if err != nil {
-				t.Fatalf("Convert(%s, %s, \"\", \"\", %s, online): %v", planfile, data.Provider["project"], ancestryCache, err)
+				t.Fatalf("Convert(%s, %s, \"\", \"\", %s, offline): %v", planfile, data.Provider["project"], ancestryCache, err)
 			}
 			expectedAssets := normalizeAssets(t, want, true)
 			actualAssets := normalizeAssets(t, got, true)
@@ -156,7 +156,7 @@ func TestReadPlannedAssetsCoverage_WithoutDefaultProject(t *testing.T) {
 			got, err := tfplan2cai.Convert(ctx, jsonPlan, &tfplan2cai.Options{
 				ConvertUnchanged: false,
 				ErrorLogger:      zaptest.NewLogger(t),
-				Offline:          false,
+				Offline:          true,
 				DefaultProject:   "",
 				DefaultRegion:    "",
 				DefaultZone:      "",
@@ -164,7 +164,7 @@ func TestReadPlannedAssetsCoverage_WithoutDefaultProject(t *testing.T) {
 				AncestryCache:    map[string]string{},
 			})
 			if err != nil {
-				t.Fatalf("WithoutProject: Convert(%s, online): %v", planfile, err)
+				t.Fatalf("WithoutProject: Convert(%s, offline): %v", planfile, err)
 			}
 			expectedAssets := normalizeAssets(t, want, true)
 			actualAssets := normalizeAssets(t, got, true)

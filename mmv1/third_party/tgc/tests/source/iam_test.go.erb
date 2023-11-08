@@ -70,7 +70,7 @@ func TestIAMFetchFullResource(t *testing.T) {
 
 			generateTestFiles(t, "../testdata/templates", dir, c.name+".tf")
 
-      // Run terraform init and terraform apply to generate tfplan.json files
+			// Run terraform init and terraform apply to generate tfplan.json files
 			terraformWorkflow(t, dir, c.name)
 
 			path := filepath.Join(dir, c.name+".tfplan.json")
