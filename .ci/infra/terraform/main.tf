@@ -201,6 +201,7 @@ module "project-services" {
     "cloudtrace.googleapis.com",
     "composer.googleapis.com",
     "compute.googleapis.com",
+    "connectors.googleapis.com",
     "container.googleapis.com",
     "containeranalysis.googleapis.com",
     "containerfilesystem.googleapis.com",
