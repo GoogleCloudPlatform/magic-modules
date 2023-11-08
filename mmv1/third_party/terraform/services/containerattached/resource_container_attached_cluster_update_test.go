@@ -144,8 +144,8 @@ resource "google_container_attached_cluster" "primary" {
   }
   proxy_config {
     kubernetes_secret {
-      name = "proxy-config"
-      namespace = "default"
+      name = "new-proxy-config"
+      namespace = "custom-ns"
     }
   }
   lifecycle {
@@ -197,8 +197,8 @@ resource "google_container_attached_cluster" "primary" {
   }
   proxy_config {
     kubernetes_secret {
-      name = "proxy-config"
-      namespace = "default"
+      name = "new-proxy-config"
+      namespace = "custom-ns"
     }
   }
 }
