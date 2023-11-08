@@ -13,3 +13,6 @@
   details:
     functions: 
     - tpgresource.DefaultProviderProject
+- type: STATE_UPGRADE
+  details:
+    schemaversion: 1
