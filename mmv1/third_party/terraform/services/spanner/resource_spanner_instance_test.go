@@ -182,9 +182,9 @@ func TestAccSpannerInstance_basicWithAutoscalingUsingProcessingUnitConfigUpdate(
 				),
 			},
 			{
-				ResourceName:      "google_spanner_instance.basic",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_spanner_instance.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			{
@@ -194,9 +194,9 @@ func TestAccSpannerInstance_basicWithAutoscalingUsingProcessingUnitConfigUpdate(
 				),
 			},
 			{
-				ResourceName:      "google_spanner_instance.basic",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_spanner_instance.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 		},
