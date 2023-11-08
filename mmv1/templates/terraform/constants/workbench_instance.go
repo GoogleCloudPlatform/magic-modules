@@ -120,6 +120,7 @@ func WorkbenchInstanceTagsDiffSuppress(_, _, _ string, d *schema.ResourceData) b
 	return false
 }
 
+<% unless compiler == "terraformgoogleconversion-codegen" -%>
 // waitForWorkbenchInstanceActive waits for an workbench instance to become "ACTIVE"
 func waitForWorkbenchInstanceActive(d *schema.ResourceData, config *transport_tpg.Config, timeout time.Duration) error {
 	return resource.Retry(timeout, func() *resource.RetryError {
@@ -138,4 +139,4 @@ func waitForWorkbenchInstanceActive(d *schema.ResourceData, config *transport_tp
 
 	})
 }
-
+<% end -%>
