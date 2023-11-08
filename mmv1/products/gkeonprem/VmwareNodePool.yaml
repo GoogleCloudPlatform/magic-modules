@@ -157,17 +157,14 @@ properties:
       - !ruby/object:Api::Type::NestedObject
         name: "vsphereConfig"
         description: Specifies the vSphere config for node pool.
-        output: true
         properties:
           - !ruby/object:Api::Type::String
             name: datastore
             description: The name of the vCenter datastore. Inherited from the user
               cluster.
-            output: true
           - !ruby/object:Api::Type::Array
             name: "tags"
             description: Tags to apply to VMs.
-            output: true
             item_type: !ruby/object:Api::Type::NestedObject
               properties:
                 - !ruby/object:Api::Type::String
@@ -178,6 +175,11 @@ properties:
                   name: "tag"
                   description: The Vsphere tag name.
                   output: true
+          - !ruby/object:Api::Type::Array
+            name: "hostGroups"
+            description: |
+              Vsphere host groups to apply to all VMs in the node pool
+            item_type: !ruby/object:Api::Type::String
       - !ruby/object:Api::Type::Boolean
         name: "enableLoadBalancer"
         description: |
