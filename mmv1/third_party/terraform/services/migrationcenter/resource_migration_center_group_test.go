@@ -63,7 +63,7 @@ func testAccMigrationCenterGroup_migrationGroupUpdate(context map[string]interfa
 	return acctest.Nprintf(`
 resource "google_migration_center_group" "default" {
   location     = "us-central1"
-  group_id     = "group%{random_suffix}"
+  group_id     = "tf-test-group-test%{random_suffix}"
   description  = "Updated Terraform integration test description"
   display_name = "Updated  integration test display"
   labels       = {

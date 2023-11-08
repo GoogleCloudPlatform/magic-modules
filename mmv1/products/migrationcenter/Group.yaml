@@ -28,7 +28,7 @@ examples:
     name: 'migration_group_basic'
     primary_resource_id: 'default'
     vars:
-      group_name: 'tf-test-group'
+      group_name: 'group-test'
 properties:
   - !ruby/object:Api::Type::String
     name: name
