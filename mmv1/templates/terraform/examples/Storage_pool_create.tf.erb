@@ -25,12 +25,7 @@ resource "google_netapp_storage_pool" "<%= ctx[:primary_resource_id] %>" {
   service_level = "PREMIUM"
   capacity_gib = "2048"
   network = google_compute_network.peering_network.id
-  active_directory      = ""
-  description           = ""
+  description           = "This is a test description"
   global_access_allowed = false
-  kms_config            = ""
-  labels                = {}
   ldap_enabled          = false
-  psa_range             = ""
-
 }
