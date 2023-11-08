@@ -44,6 +44,6 @@ type ExecRunner interface {
 	RemoveAll(path string) error
 	PushDir(path string) error
 	PopDir() error
-	Run(name string, args, env []string) (string, error)
-	MustRun(name string, args, env []string) string
+	Run(name string, args []string, env map[string]string) (string, error)
+	MustRun(name string, args []string, env map[string]string) string
 }
