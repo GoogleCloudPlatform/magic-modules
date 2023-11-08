@@ -38,11 +38,11 @@
           "name": "example-reservation",
           "region": "us-central1",
           "throughput_capacity": 2,
-          "timeouts": null
+          "timeouts": null,
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
-          "id": true,
-          "project": true
+          "id": true
         },
         "before_sensitive": false,
         "after_sensitive": {}

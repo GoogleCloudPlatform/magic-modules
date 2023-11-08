@@ -87,13 +87,13 @@
           "network": null,
           "prefix_length": null,
           "region": "us-central1",
-          "timeouts": null
+          "timeouts": null,
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "creation_timestamp": true,
           "id": true,
           "network_tier": true,
-          "project": true,
           "purpose": true,
           "self_link": true,
           "subnetwork": true,
@@ -121,13 +121,14 @@
           "delete_default_routes_on_create": false,
           "description": null,
           "name": "my-network",
-          "timeouts": null
+          "timeouts": null,
+          "project": "{{.Provider.project}}",
+          "network_firewall_policy_enforcement_order": "AFTER_CLASSIC_FIREWALL"
         },
         "after_unknown": {
           "gateway_ipv4": true,
           "id": true,
           "mtu": true,
-          "project": true,
           "routing_mode": true,
           "self_link": true
         },
@@ -155,7 +156,8 @@
           "private_ip_google_access": null,
           "region": "us-central1",
           "role": null,
-          "timeouts": null
+          "timeouts": null,
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "creation_timestamp": true,
@@ -167,7 +169,6 @@
           "log_config": [],
           "network": true,
           "private_ipv6_google_access": true,
-          "project": true,
           "purpose": true,
           "secondary_ip_range": true,
           "self_link": true,

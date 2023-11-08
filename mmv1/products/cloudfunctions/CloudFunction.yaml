@@ -129,7 +129,7 @@ properties:
     description: |
       The version identifier of the Cloud Function. Each deployment attempt
       results in a new version of a function being created.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       A set of key/value label pairs associated with this Cloud Function.

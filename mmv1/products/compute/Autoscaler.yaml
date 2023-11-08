@@ -84,6 +84,7 @@ parameters:
       URL of the zone where the instance group resides.
     required: false
     immutable: true
+    ignore_read: true
     default_from_api: true
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
@@ -363,6 +364,7 @@ properties:
                 TimeSeries are returned upon the query execution, the autoscaler
                 will sum their respective values to obtain its scaling value.
               min_version: beta
+              default_value: 'resource.type = gce_instance'
       - !ruby/object:Api::Type::NestedObject
         name: 'loadBalancingUtilization'
         description: |

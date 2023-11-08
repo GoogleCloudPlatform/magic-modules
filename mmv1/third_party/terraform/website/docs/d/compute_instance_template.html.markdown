@@ -78,8 +78,7 @@ The following arguments are supported:
 * `instance_description` - A brief description to use for instances
     created from this template.
 
-* `labels` - A set of key/value label pairs to assign to instances
-    created from this template,
+* `labels` - All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.
 
 * `metadata` - Metadata key/value pairs to make available from
     within instances created from this template.
@@ -139,6 +138,11 @@ The following arguments are supported:
 
 * `disk_name` - Name of the disk. When not provided, this defaults
     to the name of the instance.
+
+* `provisioned_iops` - Indicates how many IOPS to provision for the disk. This
+    sets the number of I/O operations per second that the disk can handle.
+    Values must be between 10,000 and 120,000. For more details, see the
+    [Extreme persistent disk documentation](https://cloud.google.com/compute/docs/disks/extreme-persistent-disk).
 
 * `source_image` - The image from which to
     initialize this disk. This can be one of: the image's `self_link`,

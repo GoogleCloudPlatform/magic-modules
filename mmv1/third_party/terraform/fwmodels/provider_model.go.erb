@@ -21,6 +21,8 @@ type ProviderModel struct {
 	UserProjectOverride                types.Bool   `tfsdk:"user_project_override"`
 	RequestTimeout                     types.String `tfsdk:"request_timeout"`
 	RequestReason                      types.String `tfsdk:"request_reason"`
+	UniverseDomain                     types.String `tfsdk:"universe_domain"`
+	DefaultLabels                      types.Map    `tfsdk:"default_labels"`
 
 	// Generated Products
 <% products.each do |product| -%>
@@ -53,9 +55,6 @@ type ProviderModel struct {
 	CloudResourceManagerCustomEndpoint types.String `tfsdk:"cloud_resource_manager_custom_endpoint"`
 	EventarcCustomEndpoint             types.String `tfsdk:"eventarc_custom_endpoint"`
 	FirebaserulesCustomEndpoint        types.String `tfsdk:"firebaserules_custom_endpoint"`
-<% if version == "ga" -%>
-	OrgPolicyCustomEndpoint            types.String `tfsdk:"org_policy_custom_endpoint"`
-<% end -%>
 	RecaptchaEnterpriseCustomEndpoint  types.String `tfsdk:"recaptcha_enterprise_custom_endpoint"`
 
 	GkehubFeatureCustomEndpoint        types.String `tfsdk:"gkehub_feature_custom_endpoint"`

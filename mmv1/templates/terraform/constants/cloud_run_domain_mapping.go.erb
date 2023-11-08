@@ -1,21 +1,9 @@
-var domainMappingGoogleProvidedLabels = []string{
-	"cloud.googleapis.com/location",
-	"run.googleapis.com/overrideAt",
-}
+func hasMetadata(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	newCount := diff.Get("metadata.#")
 
-func DomainMappingLabelDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
-	// Suppress diffs for the labels provided by Google
-	for _, label := range domainMappingGoogleProvidedLabels {
-		if strings.Contains(k, label) && new == "" {
-			return true
-		}
+	if newCount.(int) < 1 {
+		return fmt.Errorf("Insufficient \"metadata\" blocks. 1 \"metadata\" block is required.")
 	}
 
-	// Let diff be determined by labels (above)
-	if strings.Contains(k, "labels.%") {
-		return true
-	}
-
-	// For other keys, don't suppress diff.
-	return false
+	return nil
 }

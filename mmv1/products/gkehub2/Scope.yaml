@@ -115,7 +115,7 @@ properties:
           - :READY
           - :DELETING
           - :UPDATING
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Labels for this Scope.

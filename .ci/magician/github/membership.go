@@ -27,10 +27,14 @@ var (
 	}
 
 	// This is for new team members who are onboarding
-	trustedContributors = []string{}
+	trustedContributors = []string{
+		"BBBmau",
+	}
 
 	// This is for reviewers who are "on vacation": will not receive new review assignments but will still receive re-requests for assigned PRs.
 	onVacationReviewers = []string{
+		"hao-nan-li",
+		"roaks3",
 	}
 )
 
@@ -77,7 +81,7 @@ func isTeamMember(author, githubToken string) bool {
 	return slices.Contains(reviewerRotation, author) || slices.Contains(trustedContributors, author)
 }
 
-func isTeamReviewer(reviewer string) bool {
+func IsTeamReviewer(reviewer string) bool {
 	return slices.Contains(reviewerRotation, reviewer)
 }
 

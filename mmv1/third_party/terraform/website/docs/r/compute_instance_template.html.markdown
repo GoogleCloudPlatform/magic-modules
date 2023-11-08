@@ -288,7 +288,7 @@ The following arguments are supported:
 
 * `machine_type` - (Required) The machine type to create.
 
-    To create a machine with a [custom type][custom-vm-types] (such as extended memory), format the value like `custom-VCPUS-MEM_IN_MB` like `custom-6-20480` for 6 vCPU and 20GB of RAM.
+    To create a machine with a [custom type](https://cloud.google.com/dataproc/docs/concepts/compute/custom-machine-types) (such as extended memory), format the value like `custom-VCPUS-MEM_IN_MB` like `custom-6-20480` for 6 vCPU and 20GB of RAM.
 
 - - -
 * `name` - (Optional) The name of the instance template. If you leave
@@ -307,6 +307,15 @@ The following arguments are supported:
 
 * `labels` - (Optional) A set of key/value label pairs to assign to instances
     created from this template.
+
+    **Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
+    Please refer to the field 'effective_labels' for all of the labels present on the resource.
+
+* `terraform_labels` -
+  The combination of labels configured directly on the resource and default labels configured on the provider.
+
+* `effective_labels` -
+  All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.
 
 * `metadata` - (Optional) Metadata key/value pairs to make available from
     within instances created from this template.
@@ -377,6 +386,11 @@ The following arguments are supported:
 
 * `disk_name` - (Optional) Name of the disk. When not provided, this defaults
     to the name of the instance.
+
+* `provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk. This
+    sets the number of I/O operations per second that the disk can handle.
+    Values must be between 10,000 and 120,000. For more details, see the
+    [Extreme persistent disk documentation](https://cloud.google.com/compute/docs/disks/extreme-persistent-disk).
 
 * `source_image` - (Optional) The image from which to
     initialize this disk. This can be one of: the image's `self_link`,
@@ -471,8 +485,8 @@ The following arguments are supported:
 * `subnetwork` - (Optional) the name of the subnetwork to attach this interface
     to. The subnetwork must exist in the same `region` this instance will be
     created in. Either `network` or `subnetwork` must be provided.
-    
-* `network_interface` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The URL of the network attachment that this interface should connect to in the following format: projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}.  
+
+* `network_attachment` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The URL of the network attachment that this interface should connect to in the following format: projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}.
 
 * `subnetwork_project` - (Optional) The ID of the project in which the subnetwork belongs.
     If it is not provided, the provider project is used.
@@ -506,7 +520,7 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 * `nat_ip` - (Optional) The IP address that will be 1:1 mapped to the instance's
     network ip. If not given, one will be generated.
 
-* `network_tier` - (Optional) The [networking tier][network-tier] used for configuring
+* `network_tier` - (Optional) The [networking tier](https://cloud.google.com/network-tiers/docs/overview) used for configuring
     this instance template. This field can take the following values: PREMIUM,
     STANDARD or FIXED_STANDARD. If this field is not specified, it is assumed to be PREMIUM.
 
@@ -561,13 +575,13 @@ specified, then this instance will have no external IPv6 Internet access. Struct
    groups will use as host systems. Read more on sole-tenant node creation
    [here](https://cloud.google.com/compute/docs/nodes/create-nodes).
    Structure [documented below](#nested_node_affinities).
-   
-* `provisioning_model` - (Optional) Describe the type of preemptible VM. This field accepts the value `STANDARD` or `SPOT`. If the value is `STANDARD`, there will be no discount. If this   is set to `SPOT`, 
+
+* `provisioning_model` - (Optional) Describe the type of preemptible VM. This field accepts the value `STANDARD` or `SPOT`. If the value is `STANDARD`, there will be no discount. If this   is set to `SPOT`,
     `preemptible` should be `true` and `automatic_restart` should be
     `false`. For more info about
     `SPOT`, read [here](https://cloud.google.com/compute/docs/instances/spot)
-    
-* `instance_termination_action` - (Optional) Describe the type of termination action for `SPOT` VM. Can be `STOP` or `DELETE`.  Read more on [here](https://cloud.google.com/compute/docs/instances/create-use-spot) 
+
+* `instance_termination_action` - (Optional) Describe the type of termination action for `SPOT` VM. Can be `STOP` or `DELETE`.  Read more on [here](https://cloud.google.com/compute/docs/instances/create-use-spot)
 
 * `max_run_duration` -  (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) The duration of the instance. Instance will run and be terminated after then, the termination action could be defined in `instance_termination_action`. Only support `DELETE` `instance_termination_action` at this point. Structure is [documented below](#nested_max_run_duration).
 <a name="nested_max_run_duration"></a>The `max_run_duration` block supports:
@@ -581,7 +595,7 @@ specified, then this instance will have no external IPv6 Internet access. Struct
    315,576,000,000 inclusive. Note: these bounds are computed from: 60
    sec/min * 60 min/hr * 24 hr/day * 365.25 days/year * 10000 years.
 
-* `maintenance_interval` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) Specifies the frequency of planned maintenance events. The accepted values are: `PERIODIC`. 
+* `maintenance_interval` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) Specifies the frequency of planned maintenance events. The accepted values are: `PERIODIC`.
 <a name="nested_guest_accelerator"></a>The `guest_accelerator` block supports:
 
 * `local_ssd_recovery_timeout` -  (Optional) (https://terraform.io/docs/providers/google/guides/provider_versions.html) Specifies the maximum amount of time a Local Ssd Vm should wait while recovery of the Local Ssd state is attempted. Its value should be in between 0 and 168 hours with hour granularity and the default value being 1 hour. Structure is [documented below](#nested_local_ssd_recovery_timeout).
@@ -677,11 +691,23 @@ This resource provides the following
 
 Instance templates can be imported using any of these accepted formats:
 
+* `projects/{{project}}/global/instanceTemplates/{{name}}`
+* `{{project}}/{{name}}`
+* `{{name}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import instance templates using one of the formats above. For example:
+
+```tf
+import {
+  id = "projects/{{project}}/global/instanceTemplates/{{name}}"
+  to = google_compute_instance_template.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), instance templates can be imported using one of the formats above. For example:
+
 ```
 $ terraform import google_compute_instance_template.default projects/{{project}}/global/instanceTemplates/{{name}}
 $ terraform import google_compute_instance_template.default {{project}}/{{name}}
 $ terraform import google_compute_instance_template.default {{name}}
 ```
-
-[custom-vm-types]: https://cloud.google.com/dataproc/docs/concepts/compute/custom-machine-types
-[network-tier]: https://cloud.google.com/network-tiers/docs/overview

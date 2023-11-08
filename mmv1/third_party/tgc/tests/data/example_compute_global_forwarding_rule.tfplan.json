@@ -47,13 +47,14 @@
           "name": "test-global-rule",
           "port_range": "80",
           "target": "target-id",
-          "timeouts": null
+          "timeouts": null,
+          "project": "{{.Provider.project}}",
+          "no_automate_dns_zone": false
         },
         "after_unknown": {
           "id": true,
           "ip_address": true,
           "metadata_filters": [],
-          "project": true,
           "self_link": true
         }
       }

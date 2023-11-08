@@ -243,6 +243,23 @@ properties:
                 countries/regions.
                 Format: A valid ISO 3166-1 alpha-2 code.
               item_type: Api::Type::String
+            - !ruby/object:Api::Type::Array
+              name: 'vpcNetworkSources'
+              description: 'The request must originate from one of the provided VPC networks in Google Cloud. Cannot specify this field together with `ip_subnetworks`.'
+              item_type: !ruby/object:Api::Type::NestedObject
+                properties:
+                  - !ruby/object:Api::Type::NestedObject
+                    name: 'vpcSubnetwork'
+                    description: 'Sub networks within a VPC network.'
+                    properties:
+                      - !ruby/object:Api::Type::String
+                        name: 'network'
+                        required: true
+                        description: 'Required. Network name to be allowed by this Access Level. Networks of foreign organizations requires `compute.network.get` permission to be granted to caller.'
+                      - !ruby/object:Api::Type::Array
+                        name: 'vpcIpSubnetworks'
+                        description: 'CIDR block IP subnetwork specification. Must be IPv4.'
+                        item_type: Api::Type::String
   - !ruby/object:Api::Type::NestedObject
     name: 'custom'
     description: |

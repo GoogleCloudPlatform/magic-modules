@@ -19,6 +19,10 @@
 //      { username = "user1" },
 //      { username = "user2" }
 //    ]
+//    admin_groups [
+//      { group = "group1" },
+//      { group = "group2" },
+//    ]
 // }
 // The custom flattener transforms input back into something like this:
 // authorization {
@@ -26,6 +30,10 @@
 //      "user1",
 //      "user2"
 //    ]
+//    admin_groups = [
+//      "group1",
+//      "group2"
+//    ],
 // }
 func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
     if v == nil {
@@ -38,6 +46,13 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
 	for i, u := range orig {
 		if u != nil {
 			transformed["admin_users"][i] = u.(map[string]interface{})["username"].(string)
+		}
+	}
+	orig = v.(map[string]interface{})["adminGroups"].([]interface{})
+	transformed["admin_groups"] = make([]string, len(orig))
+	for i, u := range orig {
+		if u != nil {
+			transformed["admin_groups"][i] = u.(map[string]interface{})["group"].(string)
 		}
 	}
 

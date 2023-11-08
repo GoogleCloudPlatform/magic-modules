@@ -47,17 +47,25 @@ docs: !ruby/object:Provider::Terraform::Docs
   warning: |
     This resource creates a Firestore Index on a project that already has
     a Firestore database. If you haven't already created it, you may
-    create a `google_firestore_database` resource with `type` set to
-    `"FIRESTORE_NATIVE"` and `location_id` set to your chosen location.
-    If you wish to use App Engine, you may instead create a
-    `google_app_engine_application` resource with `database_type` set to
-    `"CLOUD_FIRESTORE"`. Your Firestore location will be the same as
-    the App Engine location specified.
+    create a `google_firestore_database` resource and `location_id` set
+    to your chosen location. If you wish to use App Engine, you may
+    instead create a `google_app_engine_application` resource with
+    `database_type` set to `"CLOUD_FIRESTORE"`. Your Firestore location
+    will be the same as the App Engine location specified.
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'firestore_index_basic'
     primary_resource_id:
       'my-index'
+      # This example relies on a well-known collection having been created and
+      # Firestore being enabled on the project. We can't do that automatically
+      # so we need a pre-created project.
+    test_env_vars:
+      project_id: :FIRESTORE_PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'firestore_index_datastore_mode'
+    primary_resource_id:
+      'my-datastore-mode-index'
       # This example relies on a well-known collection having been created and
       # Firestore being enabled on the project. We can't do that automatically
       # so we need a pre-created project.
@@ -95,6 +103,16 @@ properties:
     values:
       - :COLLECTION
       - :COLLECTION_GROUP
+      - :COLLECTION_RECURSIVE
+  - !ruby/object:Api::Type::Enum
+    name: apiScope
+    description: |
+      The API scope at which a query is run.
+    default_value: :ANY_API
+    values:
+      - :ANY_API
+      - :DATASTORE_MODE_API
+    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
   - !ruby/object:Api::Type::Array
     name: fields
     description: |

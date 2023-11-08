@@ -1,6 +1,7 @@
 package tpgresource
 
 import (
+	"context"
 	"crypto/md5"
 	"encoding/base64"
 	"errors"
@@ -18,6 +19,7 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/errwrap"
+	"github.com/hashicorp/go-cty/cty"
 	fwDiags "github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -82,6 +84,13 @@ func GetProject(d TerraformResourceData, config *transport_tpg.Config) (string, 
 	return GetProjectFromSchema("project", d, config)
 }
 
+// GetUniverse reads the "universe_domain" field from the given resource data and falls
+// back to the provider's value if not given. If the provider's value is not
+// given, an error is returned.
+func GetUniverseDomain(d TerraformResourceData, config *transport_tpg.Config) (string, error) {
+	return GetUniverseDomainFromSchema("universe_domain", d, config)
+}
+
 // GetBillingProject reads the "billing_project" field from the given resource data and falls
 // back to the provider's value if not given. If no value is found, an error is returned.
 func GetBillingProject(d TerraformResourceData, config *transport_tpg.Config) (string, error) {
@@ -96,10 +105,47 @@ func GetProjectFromDiff(d *schema.ResourceDiff, config *transport_tpg.Config) (s
 	if ok {
 		return res.(string), nil
 	}
+	if d.GetRawConfig().GetAttr("project") == cty.UnknownVal(cty.String) {
+		return res.(string), nil
+	}
 	if config.Project != "" {
 		return config.Project, nil
 	}
 	return "", fmt.Errorf("%s: required field is not set", "project")
+}
+
+// getRegionFromDiff reads the "region" field from the given diff and falls
+// back to the provider's value if not given. If the provider's value is not
+// given, an error is returned.
+func GetRegionFromDiff(d *schema.ResourceDiff, config *transport_tpg.Config) (string, error) {
+	res, ok := d.GetOk("region")
+	if ok {
+		return res.(string), nil
+	}
+	if d.GetRawConfig().GetAttr("region") == cty.UnknownVal(cty.String) {
+		return res.(string), nil
+	}
+	if config.Region != "" {
+		return config.Region, nil
+	}
+	return "", fmt.Errorf("%s: required field is not set", "region")
+}
+
+// getZoneFromDiff reads the "zone" field from the given diff and falls
+// back to the provider's value if not given. If the provider's value is not
+// given, an error is returned.
+func GetZoneFromDiff(d *schema.ResourceDiff, config *transport_tpg.Config) (string, error) {
+	res, ok := d.GetOk("zone")
+	if ok {
+		return res.(string), nil
+	}
+	if d.GetRawConfig().GetAttr("zone") == cty.UnknownVal(cty.String) {
+		return res.(string), nil
+	}
+	if config.Zone != "" {
+		return config.Zone, nil
+	}
+	return "", fmt.Errorf("%s: required field is not set", "zone")
 }
 
 func GetRouterLockName(region string, router string) string {
@@ -163,6 +209,11 @@ func IsNotFoundGrpcError(err error) bool {
 // ExpandLabels pulls the value of "labels" out of a TerraformResourceData as a map[string]string.
 func ExpandLabels(d TerraformResourceData) map[string]string {
 	return ExpandStringMap(d, "labels")
+}
+
+// ExpandEffectiveLabels pulls the value of "effective_labels" out of a TerraformResourceData as a map[string]string.
+func ExpandEffectiveLabels(d TerraformResourceData) map[string]string {
+	return ExpandStringMap(d, "effective_labels")
 }
 
 // ExpandEnvironmentVariables pulls the value of "environment_variables" out of a schema.ResourceData as a map[string]string.
@@ -698,4 +749,62 @@ func GetContentMd5Hash(content []byte) string {
 		log.Printf("[WARN] Failed to compute md5 hash for content: %v", err)
 	}
 	return base64.StdEncoding.EncodeToString(h.Sum(nil))
+}
+
+func DefaultProviderProject(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+
+	config := meta.(*transport_tpg.Config)
+
+	//project
+	if project := diff.Get("project"); project != nil {
+		project2, err := GetProjectFromDiff(diff, config)
+		if err != nil {
+			return fmt.Errorf("Failed to retrieve project, pid: %s, err: %s", project, err)
+		}
+		if CompareSelfLinkRelativePaths("", project.(string), project2, nil) {
+			return nil
+		}
+
+		err = diff.SetNew("project", project2)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func DefaultProviderRegion(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+
+	config := meta.(*transport_tpg.Config)
+	//region
+	if region := diff.Get("region"); region != nil {
+		region, err := GetRegionFromDiff(diff, config)
+		if err != nil {
+			return fmt.Errorf("Failed to retrieve region, pid: %s, err: %s", region, err)
+		}
+		err = diff.SetNew("region", region)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func DefaultProviderZone(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+
+	config := meta.(*transport_tpg.Config)
+	// zone
+	if zone := diff.Get("zone"); zone != nil {
+		zone, err := GetZoneFromDiff(diff, config)
+		if err != nil {
+			return fmt.Errorf("Failed to retrieve zone, pid: %s, err: %s", zone, err)
+		}
+		err = diff.SetNew("zone", zone)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

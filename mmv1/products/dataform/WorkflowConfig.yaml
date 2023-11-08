@@ -35,6 +35,7 @@ examples:
     vars:
       workflow_name: 'my_workflow'
       release_name: 'my_release'
+      service_account_name: 'dataform-sa'
       git_repository_name: 'my/repository'
       dataform_repository_name: 'dataform_repository'
       data: secret-data

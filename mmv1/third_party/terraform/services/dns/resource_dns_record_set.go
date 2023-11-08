@@ -8,6 +8,7 @@ import (
 
 	"net"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -80,6 +81,10 @@ func ResourceDnsRecordSet() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: resourceDnsRecordSetImportState,
 		},
+
+		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderProject,
+		),
 
 		Schema: map[string]*schema.Schema{
 			"managed_zone": {
@@ -425,15 +430,11 @@ func resourceDnsRecordSetRead(d *schema.ResourceData, meta interface{}) error {
 	if err := d.Set("ttl", rrset.Ttl); err != nil {
 		return fmt.Errorf("Error setting ttl: %s", err)
 	}
-	if len(rrset.Rrdatas) > 0 {
-		if err := d.Set("rrdatas", rrset.Rrdatas); err != nil {
-			return fmt.Errorf("Error setting rrdatas: %s", err)
-		}
+	if err := d.Set("rrdatas", rrset.Rrdatas); err != nil {
+		return fmt.Errorf("Error setting rrdatas: %s", err)
 	}
-	if rrset.RoutingPolicy != nil {
-		if err := d.Set("routing_policy", flattenDnsRecordSetRoutingPolicy(rrset.RoutingPolicy)); err != nil {
-			return fmt.Errorf("Error setting routing_policy: %s", err)
-		}
+	if err := d.Set("routing_policy", flattenDnsRecordSetRoutingPolicy(rrset.RoutingPolicy)); err != nil {
+		return fmt.Errorf("Error setting routing_policy: %s", err)
 	}
 	if err := d.Set("project", project); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)

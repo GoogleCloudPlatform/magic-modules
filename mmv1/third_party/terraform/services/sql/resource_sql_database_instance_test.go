@@ -178,8 +178,9 @@ func TestAccSqlDatabaseInstance_deleteDefaultUserBeforeSubsequentApiCalls(t *tes
 	t.Parallel()
 
 	databaseName := "tf-test-" + acctest.RandString(t, 10)
-	addressName := "tf-test-" + acctest.RandString(t, 10)
-	networkName := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private-network-clone-2")
+	testId := "sql-instance-clone-2"
+	addressName := acctest.BootstrapSharedTestGlobalAddress(t, testId)
+	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, testId)
 
 	// 1. Create an instance.
 	// 2. Add a root@'%' user.
@@ -191,7 +192,7 @@ func TestAccSqlDatabaseInstance_deleteDefaultUserBeforeSubsequentApiCalls(t *tes
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSqlDatabaseInstance_withPrivateNetwork_withoutAllocatedIpRange(databaseName, networkName, addressName, false, false),
+				Config: testAccSqlDatabaseInstance_withPrivateNetwork_withoutAllocatedIpRange(databaseName, networkName, false, false),
 			},
 			{
 				PreConfig: func() {
@@ -736,8 +737,7 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withoutAllocatedIpRange(t *te
 	t.Parallel()
 
 	databaseName := "tf-test-" + acctest.RandString(t, 10)
-	addressName := "tf-test-" + acctest.RandString(t, 10)
-	networkName := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private-network")
+	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, "sql-instance-1")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -745,7 +745,7 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withoutAllocatedIpRange(t *te
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSqlDatabaseInstance_withPrivateNetwork_withoutAllocatedIpRange(databaseName, networkName, addressName, false, false),
+				Config: testAccSqlDatabaseInstance_withPrivateNetwork_withoutAllocatedIpRange(databaseName, networkName, false, false),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -754,7 +754,7 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withoutAllocatedIpRange(t *te
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testAccSqlDatabaseInstance_withPrivateNetwork_withoutAllocatedIpRange(databaseName, networkName, addressName, true, false),
+				Config: testAccSqlDatabaseInstance_withPrivateNetwork_withoutAllocatedIpRange(databaseName, networkName, true, false),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -763,7 +763,7 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withoutAllocatedIpRange(t *te
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testAccSqlDatabaseInstance_withPrivateNetwork_withoutAllocatedIpRange(databaseName, networkName, addressName, true, true),
+				Config: testAccSqlDatabaseInstance_withPrivateNetwork_withoutAllocatedIpRange(databaseName, networkName, true, true),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -772,7 +772,7 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withoutAllocatedIpRange(t *te
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testAccSqlDatabaseInstance_withPrivateNetwork_withoutAllocatedIpRange(databaseName, networkName, addressName, true, false),
+				Config: testAccSqlDatabaseInstance_withPrivateNetwork_withoutAllocatedIpRange(databaseName, networkName, true, false),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -975,10 +975,14 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRange(t *testi
 	t.Parallel()
 
 	databaseName := "tf-test-" + acctest.RandString(t, 10)
-	addressName := "tf-test-" + acctest.RandString(t, 10)
-	networkName := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private-network-allocated")
-	addressName_update := "tf-test-" + acctest.RandString(t, 10) + "update"
-	networkName_update := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private-network-allocated-update")
+
+	testId := "sql-instance-allocated-1"
+	addressName := acctest.BootstrapSharedTestGlobalAddress(t, testId)
+	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, testId)
+
+	updateTestId := "sql-instance-allocated-update-1"
+	addressName_update := acctest.BootstrapSharedTestGlobalAddress(t, updateTestId)
+	networkName_update := acctest.BootstrapSharedServiceNetworkingConnection(t, updateTestId)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1012,8 +1016,10 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeReplica(t
 	t.Parallel()
 
 	databaseName := "tf-test-" + acctest.RandString(t, 10)
-	addressName := "tf-test-" + acctest.RandString(t, 10)
-	networkName := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private-network-replica")
+
+	testId := "sql-instance-replica-1"
+	addressName := acctest.BootstrapSharedTestGlobalAddress(t, testId)
+	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, testId)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1044,8 +1050,9 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeClone(t *
 	t.Parallel()
 
 	databaseName := "tf-test-" + acctest.RandString(t, 10)
-	addressName := "tf-test-" + acctest.RandString(t, 10)
-	networkName := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private-network-clone")
+	testId := "sql-instance-clone-1"
+	addressName := acctest.BootstrapSharedTestGlobalAddress(t, testId)
+	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, testId)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1445,8 +1452,7 @@ func TestAccSqlDatabaseInstance_ActiveDirectory(t *testing.T) {
 
 	t.Parallel()
 	databaseName := "tf-test-" + acctest.RandString(t, 10)
-	networkName := acctest.BootstrapSharedTestNetwork(t, "sql-instance-private-test-ad")
-	addressName := "tf-test-" + acctest.RandString(t, 10)
+	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, "sql-instance-ad-1")
 	rootPassword := acctest.RandString(t, 15)
 	adDomainName := acctest.BootstrapSharedTestADDomain(t, "test-domain", networkName)
 
@@ -1456,7 +1462,7 @@ func TestAccSqlDatabaseInstance_ActiveDirectory(t *testing.T) {
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleSqlDatabaseInstance_ActiveDirectoryConfig(databaseName, networkName, addressName, rootPassword, adDomainName),
+				Config: testGoogleSqlDatabaseInstance_ActiveDirectoryConfig(databaseName, networkName, rootPassword, adDomainName),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance-with-ad",
@@ -1498,13 +1504,17 @@ func TestAccSqlDatabaseInstance_Edition(t *testing.T) {
 	enterprisePlusTier := "db-perf-optimized-N-2"
 	enterpriseName := "tf-test-enterprise-" + acctest.RandString(t, 10)
 	enterpriseTier := "db-custom-2-13312"
+	noEditionName := "tf-test-enterprise-noedition-" + acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleSqlDatabaseInstance_EditionConfig(enterprisePlusName, enterprisePlusTier, "ENTERPRISE_PLUS"),
+				Config: testGoogleSqlDatabaseInstance_EditionConfig_noEdition(noEditionName, enterpriseTier),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.edition", "ENTERPRISE"),
+				),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -1512,8 +1522,25 @@ func TestAccSqlDatabaseInstance_Edition(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
+			// Delete and recreate (ForceNew) triggered by passing in a new `name` value
+			{
+				Config: testGoogleSqlDatabaseInstance_EditionConfig(enterprisePlusName, enterprisePlusTier, "ENTERPRISE_PLUS"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.edition", "ENTERPRISE_PLUS"),
+				),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			// Delete and recreate (ForceNew) triggered by passing in a new `name` value
 			{
 				Config: testGoogleSqlDatabaseInstance_EditionConfig(enterpriseName, enterpriseTier, "ENTERPRISE"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.edition", "ENTERPRISE"),
+				),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -1541,6 +1568,38 @@ func TestAccSQLDatabaseInstance_sqlMysqlDataCacheConfig(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func TestAccSQLDatabaseInstance_sqlPostgresDataCacheConfig(t *testing.T) {
+	t.Parallel()
+	enterprisePlusInstanceName := "tf-test-enterprise-plus" + acctest.RandString(t, 10)
+	enterprisePlusTier := "db-perf-optimized-N-2"
+	enterpriseInstanceName := "tf-test-enterprise-" + acctest.RandString(t, 10)
+	enterpriseTier := "db-custom-2-13312"
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlDatabaseInstance_sqlPostgresDataCacheConfig(enterprisePlusInstanceName, enterprisePlusTier, "ENTERPRISE_PLUS"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.data_cache_config.0.data_cache_enabled", "true"),
+				),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testGoogleSqlDatabaseInstance_sqlPostgresDataCacheConfig(enterpriseInstanceName, enterpriseTier, "ENTERPRISE"),
+				ExpectError: regexp.MustCompile(
+					fmt.Sprintf("Error, failed to create instance %s: googleapi: Error 400: Invalid request: Only ENTERPRISE PLUS edition supports data cache.., invalid", enterpriseInstanceName)),
 			},
 		},
 	})
@@ -1672,6 +1731,34 @@ func TestAccSqlDatabaseInstance_Timezone(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"root_password", "deletion_protection"},
+			},
+		},
+	})
+}
+
+func TestAccSqlDatabaseInstance_updateDifferentFlagOrder(t *testing.T) {
+	t.Parallel()
+
+	instance := "tf-test-" + acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlDatabaseInstance_flags(instance),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config:             testGoogleSqlDatabaseInstance_flags_update(instance),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: false,
 			},
 		},
 	})
@@ -2059,6 +2146,76 @@ func TestAccSqlDatabaseInstance_ReplicaPromoteSkippedWithNoMasterInstanceNameAnd
 	})
 }
 
+func TestAccSqlDatabaseInstance_updateSslOptionsForPostgreSQL(t *testing.T) {
+	t.Parallel()
+
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
+	databaseVersion := "POSTGRES_14"
+	resourceName := "google_sql_database_instance.instance"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName, databaseVersion, false, "ALLOW_UNENCRYPTED_AND_ENCRYPTED"),
+			},
+			{
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName, databaseVersion, false, "ENCRYPTED_ONLY"),
+			},
+			{
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName, databaseVersion, true, "TRUSTED_CLIENT_CERTIFICATE_REQUIRED"),
+			},
+			{
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName, databaseVersion, false, "ALLOW_UNENCRYPTED_AND_ENCRYPTED"),
+			},
+			{
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName string, databaseVersion string, requireSsl bool, sslMode string) string {
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "instance" {
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "%s"
+  deletion_protection = false
+  settings {
+    tier = "db-f1-micro"
+    ip_configuration {
+      ipv4_enabled = true
+      require_ssl = %t
+      ssl_mode = "%s"
+    }
+  }
+}`, databaseName, databaseVersion, requireSsl, sslMode)
+}
+
 func testAccSqlDatabaseInstance_sqlMysqlInstancePvpExample(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_sql_database_instance" "mysql_pvp_instance_name" {
@@ -2146,28 +2303,13 @@ resource "google_sql_database_instance" "instance" {
 }
 `
 
-func testGoogleSqlDatabaseInstance_ActiveDirectoryConfig(databaseName, networkName, addressRangeName, rootPassword, adDomainName string) string {
+func testGoogleSqlDatabaseInstance_ActiveDirectoryConfig(databaseName, networkName, rootPassword, adDomainName string) string {
 	return fmt.Sprintf(`
 data "google_compute_network" "servicenet" {
   name                    = "%s"
 }
 
-resource "google_compute_global_address" "foobar" {
-  name          = "%s"
-  purpose       = "VPC_PEERING"
-  address_type  = "INTERNAL"
-  prefix_length = 16
-  network       = data.google_compute_network.servicenet.self_link
-}
-
-resource "google_service_networking_connection" "foobar" {
-  network                 = data.google_compute_network.servicenet.self_link
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.foobar.name]
-}
-
 resource "google_sql_database_instance" "instance-with-ad" {
-  depends_on = [google_service_networking_connection.foobar]
   name             = "%s"
   region           = "us-central1"
   database_version = "SQLSERVER_2017_STANDARD"
@@ -2184,7 +2326,7 @@ resource "google_sql_database_instance" "instance-with-ad" {
       domain = "%s"
     }
   }
-}`, networkName, addressRangeName, databaseName, rootPassword, adDomainName)
+}`, networkName, databaseName, rootPassword, adDomainName)
 }
 
 func testGoogleSqlDatabaseInstance_DenyMaintenancePeriodConfig(databaseName, endDate, startDate, time string) string {
@@ -2204,6 +2346,20 @@ resource "google_sql_database_instance" "instance" {
     }
   }
 }`, databaseName, endDate, startDate, time)
+}
+
+func testGoogleSqlDatabaseInstance_EditionConfig_noEdition(databaseName, tier string) string {
+	return fmt.Sprintf(`
+
+resource "google_sql_database_instance" "instance" {
+  name             = "%s"
+  region           = "us-east1"
+  database_version    = "POSTGRES_14"
+  deletion_protection = false
+  settings {
+    tier = "%s"
+  }
+}`, databaseName, tier)
 }
 
 func testGoogleSqlDatabaseInstance_EditionConfig(databaseName, tier, edition string) string {
@@ -2237,6 +2393,24 @@ resource "google_sql_database_instance" "instance" {
     }
   }
 }`, instanceName)
+}
+
+func testGoogleSqlDatabaseInstance_sqlPostgresDataCacheConfig(instanceName, tier, edition string) string {
+	return fmt.Sprintf(`
+
+resource "google_sql_database_instance" "instance" {
+  name             = "%s"
+  region           = "us-east1"
+  database_version    = "POSTGRES_14"
+  deletion_protection = false
+  settings {
+    tier = "%s"
+    edition = "%s"
+    data_cache_config {
+        data_cache_enabled = true
+    }
+  }
+}`, instanceName, tier, edition)
 }
 
 func testGoogleSqlDatabaseInstance_SqlServerAuditConfig(databaseName, rootPassword, bucketName, uploadInterval, retentionInterval string) string {
@@ -2775,7 +2949,7 @@ func verifyPscOperation(resourceName string, isPscConfigExpected bool, expectedP
 	}
 }
 
-func testAccSqlDatabaseInstance_withPrivateNetwork_withoutAllocatedIpRange(databaseName, networkName, addressRangeName string, specifyPrivatePathOption bool, enablePrivatePath bool) string {
+func testAccSqlDatabaseInstance_withPrivateNetwork_withoutAllocatedIpRange(databaseName, networkName string, specifyPrivatePathOption bool, enablePrivatePath bool) string {
 	privatePathOption := ""
 	if specifyPrivatePathOption {
 		privatePathOption = fmt.Sprintf("enable_private_path_for_google_cloud_services = %t", enablePrivatePath)
@@ -2786,22 +2960,7 @@ data "google_compute_network" "servicenet" {
   name                    = "%s"
 }
 
-resource "google_compute_global_address" "foobar" {
-  name          = "%s"
-  purpose       = "VPC_PEERING"
-  address_type  = "INTERNAL"
-  prefix_length = 16
-  network       = data.google_compute_network.servicenet.self_link
-}
-
-resource "google_service_networking_connection" "foobar" {
-  network                 = data.google_compute_network.servicenet.self_link
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.foobar.name]
-}
-
 resource "google_sql_database_instance" "instance" {
-  depends_on = [google_service_networking_connection.foobar]
   name                = "%s"
   region              = "us-central1"
   database_version    = "MYSQL_5_7"
@@ -2815,7 +2974,7 @@ resource "google_sql_database_instance" "instance" {
     }
   }
 }
-`, networkName, addressRangeName, databaseName, privatePathOption)
+`, networkName, databaseName, privatePathOption)
 }
 
 func testAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRange(databaseName, networkName, addressRangeName string) string {
@@ -2824,22 +2983,7 @@ data "google_compute_network" "servicenet" {
   name                    = "%s"
 }
 
-resource "google_compute_global_address" "foobar" {
-  name          = "%s"
-  purpose       = "VPC_PEERING"
-  address_type  = "INTERNAL"
-  prefix_length = 16
-  network       = data.google_compute_network.servicenet.self_link
-}
-
-resource "google_service_networking_connection" "foobar" {
-  network                 = data.google_compute_network.servicenet.self_link
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.foobar.name]
-}
-
 resource "google_sql_database_instance" "instance" {
-  depends_on = [google_service_networking_connection.foobar]
   name                = "%s"
   region              = "us-central1"
   database_version    = "MYSQL_5_7"
@@ -2849,11 +2993,11 @@ resource "google_sql_database_instance" "instance" {
     ip_configuration {
       ipv4_enabled       = "false"
       private_network    = data.google_compute_network.servicenet.self_link
-      allocated_ip_range = google_compute_global_address.foobar.name
+      allocated_ip_range = "%s"
     }
   }
 }
-`, networkName, addressRangeName, databaseName)
+`, networkName, databaseName, addressRangeName)
 }
 
 func testAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeReplica(databaseName, networkName, addressRangeName string) string {
@@ -2862,22 +3006,7 @@ data "google_compute_network" "servicenet" {
   name                    = "%s"
 }
 
-resource "google_compute_global_address" "foobar" {
-  name          = "%s"
-  purpose       = "VPC_PEERING"
-  address_type  = "INTERNAL"
-  prefix_length = 16
-  network       = data.google_compute_network.servicenet.self_link
-}
-
-resource "google_service_networking_connection" "foobar" {
-  network                 = data.google_compute_network.servicenet.self_link
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.foobar.name]
-}
-
 resource "google_sql_database_instance" "instance" {
-  depends_on = [google_service_networking_connection.foobar]
   name                = "%s"
   region              = "us-central1"
   database_version    = "MYSQL_5_7"
@@ -2896,7 +3025,6 @@ resource "google_sql_database_instance" "instance" {
   }
 }
 resource "google_sql_database_instance" "replica1" {
-  depends_on = [google_service_networking_connection.foobar]
   name                = "%s-replica1"
   region              = "us-central1"
   database_version    = "MYSQL_5_7"
@@ -2906,7 +3034,7 @@ resource "google_sql_database_instance" "replica1" {
     ip_configuration {
       ipv4_enabled       = "false"
       private_network    = data.google_compute_network.servicenet.self_link
-      allocated_ip_range = google_compute_global_address.foobar.name
+      allocated_ip_range = "%s"
     }
   }
 
@@ -2921,7 +3049,7 @@ resource "google_sql_database_instance" "replica1" {
     verify_server_certificate = false
   }
 }
-`, networkName, addressRangeName, databaseName, databaseName)
+`, networkName, databaseName, databaseName, addressRangeName)
 }
 
 func testAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeClone(databaseName, networkName, addressRangeName string) string {
@@ -2930,22 +3058,7 @@ data "google_compute_network" "servicenet" {
   name                    = "%s"
 }
 
-resource "google_compute_global_address" "foobar" {
-  name          = "%s"
-  purpose       = "VPC_PEERING"
-  address_type  = "INTERNAL"
-  prefix_length = 16
-  network       = data.google_compute_network.servicenet.self_link
-}
-
-resource "google_service_networking_connection" "foobar" {
-  network                 = data.google_compute_network.servicenet.self_link
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.foobar.name]
-}
-
 resource "google_sql_database_instance" "instance" {
-  depends_on = [google_service_networking_connection.foobar]
   name                = "%s"
   region              = "us-central1"
   database_version    = "MYSQL_5_7"
@@ -2972,11 +3085,11 @@ resource "google_sql_database_instance" "clone1" {
 
   clone {
     source_instance_name = google_sql_database_instance.instance.name
-    allocated_ip_range   = google_compute_global_address.foobar.name
+    allocated_ip_range   = "%s"
   }
 
 }
-`, networkName, addressRangeName, databaseName, databaseName)
+`, networkName, databaseName, databaseName, addressRangeName)
 }
 
 func testAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeClone_withSettings(databaseName, networkName, addressRangeName string) string {
@@ -2985,22 +3098,7 @@ data "google_compute_network" "servicenet" {
   name                    = "%s"
 }
 
-resource "google_compute_global_address" "foobar" {
-  name          = "%s"
-  purpose       = "VPC_PEERING"
-  address_type  = "INTERNAL"
-  prefix_length = 16
-  network       = data.google_compute_network.servicenet.self_link
-}
-
-resource "google_service_networking_connection" "foobar" {
-  network                 = data.google_compute_network.servicenet.self_link
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.foobar.name]
-}
-
 resource "google_sql_database_instance" "instance" {
-  depends_on = [google_service_networking_connection.foobar]
   name                = "%s"
   region              = "us-central1"
   database_version    = "MYSQL_5_7"
@@ -3027,7 +3125,7 @@ resource "google_sql_database_instance" "clone1" {
 
   clone {
     source_instance_name = google_sql_database_instance.instance.name
-    allocated_ip_range   = google_compute_global_address.foobar.name
+    allocated_ip_range   = "%s"
   }
 
   settings {
@@ -3037,7 +3135,7 @@ resource "google_sql_database_instance" "clone1" {
     }
   }
 }
-`, networkName, addressRangeName, databaseName, databaseName)
+`, networkName, databaseName, databaseName, addressRangeName)
 }
 
 var testGoogleSqlDatabaseInstance_settings = `
@@ -3841,6 +3939,50 @@ func checkInstanceTypeIsPresent(resourceName string) func(*terraform.State) erro
 		}
 		return nil
 	}
+}
+
+func testGoogleSqlDatabaseInstance_flags(instance string) string {
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "instance" {
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "MYSQL_5_7"
+  deletion_protection = false
+  settings {
+    tier = "db-f1-micro"
+
+    database_flags {
+      name  = "character_set_server"
+      value = "utf8mb4"
+    }
+    database_flags {
+      name  = "auto_increment_increment"
+      value = "2"
+    }
+  }
+}`, instance)
+}
+
+func testGoogleSqlDatabaseInstance_flags_update(instance string) string {
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "instance" {
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "MYSQL_5_7"
+  deletion_protection = false
+  settings {
+    tier = "db-f1-micro"
+
+    database_flags {
+      name  = "auto_increment_increment"
+      value = "2"
+    }
+    database_flags {
+      name  = "character_set_server"
+      value = "utf8mb4"
+    }
+  }
+}`, instance)
 }
 
 func testGoogleSqlDatabaseInstance_readReplica(instance string) string {

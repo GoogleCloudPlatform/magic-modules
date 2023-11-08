@@ -1,9 +1,0 @@
-err = NetworkSecurityAddressGroupOperationWaitTime(
-    config, res, "Creating AddressGroup", userAgent,
-    d.Timeout(schema.TimeoutCreate))
-
-if err != nil {
-    // The resource didn't actually create
-    d.SetId("")
-    return fmt.Errorf("Error waiting to create AddressGroup: %s", err)
-}

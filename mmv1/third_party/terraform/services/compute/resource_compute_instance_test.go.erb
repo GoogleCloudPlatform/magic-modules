@@ -139,7 +139,7 @@ func TestAccComputeInstance_basic1(t *testing.T) {
 					testAccCheckComputeInstanceHasConfiguredDeletionProtection(&instance, false),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName, []string{"metadata.baz", "metadata.foo", "desired_status", "current_status"}),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{"metadata.baz", "metadata.foo", "desired_status", "current_status", "labels", "terraform_labels"}),
 		},
 	})
 }
@@ -838,7 +838,22 @@ func TestAccComputeInstance_with375GbScratchDisk(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
-					testAccCheckComputeInstanceScratchDisk(&instance, []string{"NVME", "SCSI"}),
+					testAccCheckComputeInstanceScratchDisk(&instance, []map[string]string{
+						map[string]string{
+							"interface": "NVME",
+						},
+						map[string]string{
+							"interface": "SCSI",
+						},
+						map[string]string{
+							"interface": "NVME",
+							"deviceName": "nvme-local-ssd",
+						},
+						map[string]string{
+							"interface": "SCSI",
+							"deviceName": "scsi-local-ssd",
+						},
+					}),
 				),
 			},
 			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
@@ -865,7 +880,26 @@ func TestAccComputeInstance_with18TbScratchDisk(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
-					testAccCheckComputeInstanceScratchDisk(&instance, []string{"NVME", "NVME", "NVME", "NVME", "NVME", "NVME"}),
+					testAccCheckComputeInstanceScratchDisk(&instance, []map[string]string{
+						map[string]string{
+							"interface": "NVME",
+						},
+						map[string]string{
+							"interface": "NVME",
+						},
+						map[string]string{
+							"interface": "NVME",
+						},
+						map[string]string{
+							"interface": "NVME",
+						},
+						map[string]string{
+							"interface": "NVME",
+						},
+						map[string]string{
+							"interface": "NVME",
+						},
+					}),
 				),
 			},
 			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
@@ -1426,7 +1460,7 @@ func TestAccComputeInstance_forceChangeMachineTypeManually(t *testing.T) {
 				),
 				ExpectNonEmptyPlan: true,
 			},
-			computeInstanceImportStep("us-central1-a", instanceName, []string{"metadata.baz", "metadata.foo", "desired_status", "current_status"}),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{"metadata.baz", "metadata.foo", "desired_status", "current_status", "labels", "terraform_labels"}),
 		},
 	})
 }
@@ -1750,6 +1784,48 @@ func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 		},
 	})
 }
+
+
+<% unless version == 'ga' -%>
+func TestAccComputeInstance_confidentialHyperDiskBootDisk(t *testing.T) {
+	t.Parallel()
+	kms := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-hyperdisk-key1")
+
+	context_1 := map[string]interface{}{
+		"instance_name":         fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+		"confidential_compute":  true,
+		"key_ring":              kms.KeyRing.Name,
+		"key_name":              kms.CryptoKey.Name,
+		"zone":                  "us-central1-a",
+
+	}
+
+	context_2 := map[string]interface{}{
+		"instance_name":         context_1["instance_name"],
+		"confidential_compute":  false,
+		"key_ring" :             context_1["key_ring"],
+		"key_name":              context_1["key_name"],
+		"zone":                  context_1["zone"],
+	}
+
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceConfidentialHyperDiskBootDisk(context_1),
+			},
+			computeInstanceImportStep(context_1["zone"].(string), context_1["instance_name"].(string), []string{"allow_stopping_for_update"}),
+			{
+				Config: testAccComputeInstanceConfidentialHyperDiskBootDisk(context_2),
+			},
+			computeInstanceImportStep(context_2["zone"].(string), context_2["instance_name"].(string), []string{"allow_stopping_for_update"}),
+		},
+	})
+}
+<% end -%>
 
 func TestAccComputeInstance_enableDisplay(t *testing.T) {
 	t.Parallel()
@@ -3310,7 +3386,7 @@ func testAccCheckComputeInstanceBootDiskType(t *testing.T, instanceName string, 
 	}
 }
 
-func testAccCheckComputeInstanceScratchDisk(instance *compute.Instance, interfaces []string) resource.TestCheckFunc {
+func testAccCheckComputeInstanceScratchDisk(instance *compute.Instance, interfaces []map[string]string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if instance.Disks == nil {
 			return fmt.Errorf("no disks")
@@ -3322,10 +3398,17 @@ func testAccCheckComputeInstanceScratchDisk(instance *compute.Instance, interfac
 				if i >= len(interfaces) {
 					return fmt.Errorf("Expected %d scratch disks, found more", len(interfaces))
 				}
-				if disk.Interface != interfaces[i] {
+				if disk.Interface != interfaces[i]["interface"] {
 					return fmt.Errorf("Mismatched interface on scratch disk #%d, expected: %q, found: %q",
 						i, interfaces[i], disk.Interface)
 				}
+				if deviceName, ok := interfaces[i]["deviceName"]; ok {
+					if disk.DeviceName != deviceName {
+						return fmt.Errorf("Mismatched device name on scratch disk #%d, expected: %q, found: %q",
+						i, deviceName, disk.DeviceName)
+					}
+				}
+				
 				i++
 			}
 		}
@@ -5275,6 +5358,16 @@ resource "google_compute_instance" "foobar" {
     interface = "SCSI"
   }
 
+  scratch_disk {
+    interface   = "NVME"
+	device_name = "nvme-local-ssd"
+  }
+
+  scratch_disk {
+    interface   = "SCSI"
+	device_name = "scsi-local-ssd"
+  }
+
   network_interface {
     network = "default"
   }
@@ -5933,9 +6026,12 @@ resource "google_compute_image" "foobar" {
   guest_os_features {
     type = "VIRTIO_SCSI_MULTIQUEUE"
   }
-	guest_os_features {
+  guest_os_features {
     type = "UEFI_COMPATIBLE"
-   }
+  }
+  guest_os_features {
+    type = "SEV_CAPABLE"
+  }
 }
 
 resource "google_compute_instance" "foobar" {
@@ -6451,7 +6547,7 @@ resource "google_compute_node_group" "nodes" {
   name = "%s"
   zone = "us-central1-a"
 
-  size          = 1
+  initial_size          = 1
   node_template = google_compute_node_template.nodetmpl.self_link
 }
 `, instance, nodeTemplate, nodeGroup)
@@ -6520,7 +6616,7 @@ resource "google_compute_node_group" "nodes" {
   name = "%s"
   zone = "us-central1-a"
 
-  size          = 1
+  initial_size          = 1
   node_template = google_compute_node_template.nodetmpl.self_link
 }
 `, instance, nodeTemplate, nodeGroup)
@@ -6589,7 +6685,7 @@ resource "google_compute_node_group" "nodes" {
   name = "%s"
   zone = "us-central1-a"
 
-  size          = 1
+  initial_size          = 1
   node_template = google_compute_node_template.nodetmpl.self_link
 }
 `, instance, nodeTemplate, nodeGroup)
@@ -6652,7 +6748,7 @@ resource "google_compute_node_group" "nodes" {
   name = "%s"
   zone = "us-central1-a"
 
-  size          = 1
+  initial_size          = 1
   node_template = google_compute_node_template.nodetmpl.self_link
 }
 `, instance, nodeTemplate, nodeGroup)
@@ -6798,6 +6894,50 @@ resource "google_compute_instance" "foobar" {
 }
 `, instance, enableConfidentialCompute)
 }
+
+<% unless version == 'ga' -%>
+func testAccComputeInstanceConfidentialHyperDiskBootDisk(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+  family    = "ubuntu-2204-lts"
+  project   = "ubuntu-os-cloud"
+}
+
+data "google_project" "project" {}
+
+resource "google_kms_crypto_key_iam_binding" "crypto_key" {
+  crypto_key_id = "%{key_name}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  members = [
+    "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com",
+  ]
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%{instance_name}"
+  machine_type = "n2-standard-2"
+  zone         = "%{zone}"
+
+  boot_disk {
+
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+      enable_confidential_compute = %{confidential_compute}
+      type  = "hyperdisk-balanced"
+    }
+
+    kms_key_self_link = "%{key_name}"
+  }
+
+  network_interface {
+    network = "default"
+  }
+  depends_on = [google_kms_crypto_key_iam_binding.crypto_key]
+
+}
+`, context)
+}
+<% end -%>
 
 func testAccComputeInstance_enableDisplay(instance string) string {
 	return fmt.Sprintf(`

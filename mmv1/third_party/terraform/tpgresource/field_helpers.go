@@ -245,6 +245,20 @@ func GetProjectFromSchema(projectSchemaField string, d TerraformResourceData, co
 	return "", fmt.Errorf("%s: required field is not set", projectSchemaField)
 }
 
+func GetUniverseDomainFromSchema(universeSchemaField string, d TerraformResourceData, config *transport_tpg.Config) (string, error) {
+	res, ok := d.GetOk(universeSchemaField)
+	if ok && universeSchemaField != "" {
+		return res.(string), nil
+	}
+	if config.UniverseDomain != "" {
+		return config.UniverseDomain, nil
+	}
+	if config.UniverseDomain == "" {
+		return "googleapis.com", nil
+	}
+	return "", fmt.Errorf("%s: Error getting the provider field ", universeSchemaField)
+}
+
 func GetBillingProjectFromSchema(billingProjectSchemaField string, d TerraformResourceData, config *transport_tpg.Config) (string, error) {
 	res, ok := d.GetOk(billingProjectSchemaField)
 	if ok && billingProjectSchemaField != "" {
@@ -387,7 +401,8 @@ func GetRegionFromSchema(regionSchemaField, zoneSchemaField string, d TerraformR
 		return GetResourceNameFromSelfLink(v.(string)), nil
 	}
 	if v, ok := d.GetOk(zoneSchemaField); ok && zoneSchemaField != "" {
-		return GetRegionFromZone(v.(string)), nil
+		zone := GetResourceNameFromSelfLink(v.(string))
+		return GetRegionFromZone(zone), nil
 	}
 	if config.Region != "" {
 		return config.Region, nil

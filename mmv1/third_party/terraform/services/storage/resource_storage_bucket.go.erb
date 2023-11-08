@@ -37,12 +37,22 @@ func ResourceStorageBucket() *schema.Resource {
 		},
 		CustomizeDiff: customdiff.All(
 			customdiff.ForceNewIfChange("retention_policy.0.is_locked", isPolicyLocked),
+			tpgresource.SetLabelsDiff,
 		),
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
 			Update: schema.DefaultTimeout(4 * time.Minute),
 			Read:   schema.DefaultTimeout(4 * time.Minute),
+		},
+
+		SchemaVersion: 1,
+		StateUpgraders: []schema.StateUpgrader{
+			{
+				Type:    resourceStorageBucketV0().CoreConfigSchema().ImpliedType(),
+				Upgrade: ResourceStorageBucketStateUpgradeV0,
+				Version: 0,
+			},
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -85,11 +95,22 @@ func ResourceStorageBucket() *schema.Resource {
 			"labels": {
 				Type:        schema.TypeMap,
 				Optional:    true,
-				Computed:    true,
-				// GCP (Dataplex) automatically adds labels
-				DiffSuppressFunc: resourceDataplexLabelDiffSuppress,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Description: `A set of key/value label pairs to assign to the bucket.`,
+			},
+
+			"terraform_labels": {
+				Type:        schema.TypeMap,
+				Computed:    true,
+				Description: `The combination of labels configured directly on the resource and default labels configured on the provider.`,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+
+			"effective_labels": {
+				Type:        schema.TypeMap,
+				Computed:    true,
+				Description: `All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.`,
+				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 
 			"location": {
@@ -235,6 +256,13 @@ func ResourceStorageBucket() *schema.Resource {
 				Description: `The bucket's Lifecycle Rules configuration.`,
 			},
 
+			"enable_object_retention": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				ForceNew:    true,
+				Description: `Enables each object in the bucket to have its own retention policy, which prevents deletion until stored for a specific length of time.`,
+			},
+
 			"versioning": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -262,6 +290,12 @@ func ResourceStorageBucket() *schema.Resource {
 							Type:        schema.TypeBool,
 							Required:    true,
 							Description: `While set to true, autoclass automatically transitions objects in your bucket to appropriate storage classes based on each object's access pattern.`,
+						},
+						"terminal_storage_class": {
+								Type:        schema.TypeString,
+								Optional:    true,
+								Computed:    true,
+								Description: `The storage class that objects in the bucket eventually transition to if they are not read for a certain length of time. Supported values include: NEARLINE, ARCHIVE.`,
 						},
 					},
 				},
@@ -442,7 +476,8 @@ func ResourceStorageBucket() *schema.Resource {
 	}
 }
 
-const resourceDataplexGoogleProvidedLabelPrefix = "labels.goog-dataplex"
+const resourceDataplexGoogleLabelPrefix = "goog-dataplex"
+const resourceDataplexGoogleProvidedLabelPrefix = "labels." + resourceDataplexGoogleLabelPrefix
 
 func resourceDataplexLabelDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	if strings.HasPrefix(k, resourceDataplexGoogleProvidedLabelPrefix) && new == "" {
@@ -494,7 +529,7 @@ func resourceStorageBucketCreate(d *schema.ResourceData, meta interface{}) error
 	// Create a bucket, setting the labels, location and name.
 	sb := &storage.Bucket{
 		Name:             bucket,
-		Labels:           tpgresource.ExpandLabels(d),
+		Labels:           tpgresource.ExpandEffectiveLabels(d),
 		Location:         location,
 		IamConfiguration: expandIamConfiguration(d),
 	}
@@ -566,7 +601,11 @@ func resourceStorageBucketCreate(d *schema.ResourceData, meta interface{}) error
 
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() error {
-			res, err = config.NewStorageClient(userAgent).Buckets.Insert(project, sb).Do()
+			insertCall := config.NewStorageClient(userAgent).Buckets.Insert(project, sb)
+			if d.Get("enable_object_retention").(bool) {
+				insertCall.EnableObjectRetention(true)
+			}
+			res, err = insertCall.Do()
 			return err
 		},
 	})
@@ -695,15 +734,15 @@ func resourceStorageBucketUpdate(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
-	if d.HasChange("labels") {
-		sb.Labels = tpgresource.ExpandLabels(d)
+	if d.HasChange("effective_labels") {
+		sb.Labels = tpgresource.ExpandEffectiveLabels(d)
 		if len(sb.Labels) == 0 {
 			sb.NullFields = append(sb.NullFields, "Labels")
 		}
 
 		// To delete a label using PATCH, we have to explicitly set its value
 		// to null.
-		old, _ := d.GetChange("labels")
+		old, _ := d.GetChange("effective_labels")
 		for k := range old.(map[string]interface{}) {
 			if _, ok := sb.Labels[k]; !ok {
 				sb.NullFields = append(sb.NullFields, fmt.Sprintf("Labels.%s", k))
@@ -1093,6 +1132,16 @@ func flattenBucketRetentionPolicy(bucketRetentionPolicy *storage.BucketRetention
 	return bucketRetentionPolicies
 }
 
+func flattenBucketObjectRetention(bucketObjectRetention *storage.BucketObjectRetention) bool {
+	if bucketObjectRetention == nil {
+		return false
+	}
+	if bucketObjectRetention.Mode == "Enabled" {
+		return true
+	}
+	return false
+}
+
 func expandBucketVersioning(configured interface{}) *storage.BucketVersioning {
 	versionings := configured.([]interface{})
 	if len(versionings) == 0 {
@@ -1120,6 +1169,9 @@ func expandBucketAutoclass(configured interface{}) *storage.BucketAutoclass {
 	bucketAutoclass := &storage.BucketAutoclass{}
 
 	bucketAutoclass.Enabled = autoclass["enabled"].(bool)
+	if autoclass["terminal_storage_class"] != "" {
+		bucketAutoclass.TerminalStorageClass = autoclass["terminal_storage_class"].(string)
+	}
 	bucketAutoclass.ForceSendFields = append(bucketAutoclass.ForceSendFields, "Enabled")
 
 	return bucketAutoclass
@@ -1147,7 +1199,8 @@ func flattenBucketAutoclass(bucketAutoclass *storage.BucketAutoclass) []map[stri
 	}
 
 	autoclass := map[string]interface{}{
-		"enabled": bucketAutoclass.Enabled,
+		"enabled":                bucketAutoclass.Enabled,
+		"terminal_storage_class": bucketAutoclass.TerminalStorageClass,
 	}
 	autoclassList = append(autoclassList, autoclass)
 	return autoclassList
@@ -1588,6 +1641,9 @@ func setStorageBucket(d *schema.ResourceData, config *transport_tpg.Config, res 
 	if err := d.Set("logging", flattenBucketLogging(res.Logging)); err != nil {
 		return fmt.Errorf("Error setting logging: %s", err)
 	}
+	if err := d.Set("enable_object_retention", flattenBucketObjectRetention(res.ObjectRetention)); err != nil {
+		return fmt.Errorf("Error setting object retention: %s", err)
+	}
 	if err := d.Set("versioning", flattenBucketVersioning(res.Versioning)); err != nil {
 		return fmt.Errorf("Error setting versioning: %s", err)
 	}
@@ -1597,7 +1653,13 @@ func setStorageBucket(d *schema.ResourceData, config *transport_tpg.Config, res 
 	if err := d.Set("lifecycle_rule", flattenBucketLifecycle(res.Lifecycle)); err != nil {
 		return fmt.Errorf("Error setting lifecycle_rule: %s", err)
 	}
-	if err := d.Set("labels", res.Labels); err != nil {
+	if err := tpgresource.SetLabels(res.Labels, d, "labels"); err != nil {
+		return fmt.Errorf("Error setting labels: %s", err)
+	}
+	if err := tpgresource.SetLabels(res.Labels, d, "terraform_labels"); err != nil {
+		return fmt.Errorf("Error setting terraform_labels: %s", err)
+	}
+	if err := d.Set("effective_labels", res.Labels); err != nil {
 		return fmt.Errorf("Error setting labels: %s", err)
 	}
 	if err := d.Set("website", flattenBucketWebsite(res.Website)); err != nil {

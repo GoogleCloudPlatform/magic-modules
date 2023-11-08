@@ -102,6 +102,14 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
 
 * `labels` - (Optional) A set of key/value label pairs to assign to the resource. Label keys must follow the requirements at https://cloud.google.com/resource-manager/docs/creating-managing-labels#requirements.
 
+  **Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
+  Please refer to the field 'effective_labels' for all of the labels present on the resource.
+
+* `terraform_labels` -
+  The combination of labels configured directly on the resource and default labels configured on the provider.
+
+* `effective_labels` -
+  All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.
 
 -----
 
@@ -158,6 +166,21 @@ Adding clusters to existing instances can take a long time. Consider setting a h
 ## Import
 
 Bigtable Instances can be imported using any of these accepted formats:
+
+* `projects/{{project}}/instances/{{name}}`
+* `{{project}}/{{name}}`
+* `{{name}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to Bigtable Instances using one of the formats above. For example:
+
+```tf
+import {
+  id = "projects/{{project}}/instances/{{name}}"
+  to = google_bigtable_instance.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), Bigtable Instances can be imported using one of the formats above. For example:
 
 ```
 $ terraform import google_bigtable_instance.default projects/{{project}}/instances/{{name}}

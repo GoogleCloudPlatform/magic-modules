@@ -36,6 +36,14 @@ examples:
       git_repository_name: 'my/repository'
       dataform_repository_name: 'dataform_repository'
       data: secret-data
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dataform_repository_ssh'
+    primary_resource_id: dataform_respository
+    min_version: beta
+    vars:
+      git_repository_name: 'my/repository'
+      dataform_repository_name: 'dataform_repository'
+      data: secret-data
 parameters:
   - !ruby/object:Api::Type::String
     name: 'region'
@@ -64,11 +72,28 @@ properties:
         description: The Git remote's default branch name.
       - !ruby/object:Api::Type::String
         name: 'authenticationTokenSecretVersion'
-        required: true
+        exactly_one_of:
+          - gitRemoteSettings.0.authenticationTokenSecretVersion
+          - gitRemoteSettings.0.sshAuthenticationConfig
         description:
           The name of the Secret Manager secret version to use as an
-          authentication token for Git operations. Must be in the format
+          authentication token for Git operations. This secret is for assigning with HTTPS only(for SSH use `ssh_authentication_config`). Must be in the format
           projects/*/secrets/*/versions/*.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'sshAuthenticationConfig'
+        exactly_one_of:
+          - gitRemoteSettings.0.authenticationTokenSecretVersion
+          - gitRemoteSettings.0.sshAuthenticationConfig
+        description: Authentication fields for remote uris using SSH protocol.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: userPrivateKeySecretVersion
+            required: true
+            description: The name of the Secret Manager secret version to use as a ssh private key for Git operations. Must be in the format projects/*/secrets/*/versions/*.
+          - !ruby/object:Api::Type::String
+            name: hostPublicKey
+            required: true
+            description: Content of a public SSH key to verify an identity of a remote Git host.
       - !ruby/object:Api::Type::String
         name: 'tokenStatus'
         output: true
@@ -76,14 +101,17 @@ properties:
           Indicates the status of the Git access token. https://cloud.google.com/dataform/reference/rest/v1beta1/projects.locations.repositories#TokenStatus
   - !ruby/object:Api::Type::NestedObject
     name: 'workspaceCompilationOverrides'
-    description: Optional. If set, fields of workspaceCompilationOverrides override the default compilation settings that are specified in dataform.json when creating workspace-scoped compilation results.
+    description: If set, fields of workspaceCompilationOverrides override the default compilation settings that are specified in dataform.json when creating workspace-scoped compilation results.
     properties:
       - !ruby/object:Api::Type::String
         name: defaultDatabase
-        description: Optional. The default database (Google Cloud project ID).
+        description: The default database (Google Cloud project ID).
       - !ruby/object:Api::Type::String
         name: 'schemaSuffix'
-        description: Optional. The suffix that should be appended to all schema (BigQuery dataset ID) names.
+        description: The suffix that should be appended to all schema (BigQuery dataset ID) names.
       - !ruby/object:Api::Type::String
         name: 'tablePrefix'
-        description: Optional. The prefix that should be prepended to all table names.
+        description: The prefix that should be prepended to all table names.
+  - !ruby/object:Api::Type::String
+    name: 'serviceAccount'
+    description: The service account to run workflow invocations under.

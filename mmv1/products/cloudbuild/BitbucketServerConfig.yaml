@@ -64,8 +64,6 @@ examples:
       config_id: 'bbs-config'
       network_name: 'vpc-network'
       global_address_name: 'private-ip-alloc'
-    test_vars_overrides:
-      network_name: 'acctest.BootstrapSharedTestNetwork(t, "peered-network")'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/cloudbuild_bitbucketserver_config.go.erb
   post_create: templates/terraform/post_create/cloudbuild_bitbucketserver_config.go.erb

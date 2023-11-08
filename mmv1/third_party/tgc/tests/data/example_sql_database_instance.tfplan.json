@@ -93,7 +93,8 @@
               "tier": "db-f1-micro"
             }
           ],
-          "timeouts": null
+          "timeouts": null,
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "clone": [],
@@ -103,7 +104,6 @@
           "ip_address": true,
           "master_instance_name": true,
           "private_ip_address": true,
-          "project": true,
           "public_ip_address": true,
           "replica_configuration": true,
           "restore_backup_context": [],
