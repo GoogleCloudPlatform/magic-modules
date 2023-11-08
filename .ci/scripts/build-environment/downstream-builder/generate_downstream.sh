@@ -122,16 +122,12 @@ if [ "$REPO" == "terraform-google-conversion" ]; then
 
     bundle exec compiler.rb -a -e terraform -f validator -o $LOCAL_PATH/tfplan2cai -v $VERSION
 
-    # Ignore 'tgc-base' step, because this is a new provider.
-    # TODO: remove this condition on next cai2hcl-related PR.
-    if [ "$COMMAND" != "base" ]; then
     # Generate cai2hcl
-        pushd $LOCAL_PATH
-        rm -rf ./cai2hcl/*
-        popd
+    pushd $LOCAL_PATH
+    rm -rf ./cai2hcl/*
+    popd
 
-        bundle exec compiler.rb -a -e terraform -f tgc_cai2hcl -o $LOCAL_PATH/cai2hcl -v $VERSION
-    fi
+    bundle exec compiler.rb -a -e terraform -f tgc_cai2hcl -o $LOCAL_PATH/cai2hcl -v $VERSION
 
     if [ "$COMMAND" == "downstream" ]; then
       pushd $LOCAL_PATH
