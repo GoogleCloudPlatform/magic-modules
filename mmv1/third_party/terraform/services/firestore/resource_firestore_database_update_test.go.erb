@@ -183,6 +183,7 @@ resource "google_firestore_database" "default" {
   type                    = "DATASTORE_MODE"
   location_id             = "nam5"
   delete_protection_state = "%s"
+  deletion_policy         = "DELETE"
 
   project = google_project.default.project_id
 
