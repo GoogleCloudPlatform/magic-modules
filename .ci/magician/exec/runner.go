@@ -4,6 +4,7 @@ import (
 	"container/list"
 	"errors"
 	"fmt"
+	"io/fs"
 	"log"
 	"os"
 	"os/exec"
@@ -20,10 +21,12 @@ type actualRunner struct {
 type Runner interface {
 	GetCWD() string
 	Copy(src, dest string) error
+	Mkdir(path string) error
 	RemoveAll(path string) error
 	PushDir(path string) error
 	PopDir() error
 	WriteFile(name, data string) error
+	ReadFile(name string) (string, error)
 	Run(name string, args, env []string) (string, error)
 	MustRun(name string, args, env []string) string
 }
@@ -45,6 +48,10 @@ func (ar *actualRunner) GetCWD() string {
 
 func (ar *actualRunner) Copy(src, dest string) error {
 	return cp.Copy(ar.abs(src), ar.abs(dest))
+}
+
+func (ar *actualRunner) Mkdir(path string) error {
+	return os.MkdirAll(ar.abs(path), 0777)
 }
 
 func (ar *actualRunner) RemoveAll(path string) error {
@@ -79,18 +86,31 @@ func (ar *actualRunner) WriteFile(name, data string) error {
 	return os.WriteFile(ar.abs(name), []byte(data), 0644)
 }
 
+func (ar *actualRunner) ReadFile(name string) (string, error) {
+	data, err := os.ReadFile(ar.abs(name))
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
+}
+
+// Run the given command with the given args and env, return output and error if any
 func (ar *actualRunner) Run(name string, args, env []string) (string, error) {
 	cmd := exec.Command(name, args...)
 	cmd.Dir = ar.cwd
 	cmd.Env = append(os.Environ(), env...)
 	out, err := cmd.Output()
-	if err != nil {
-		exitErr := err.(*exec.ExitError)
-		return string(out), fmt.Errorf("error running %s: %v\nstdout:\n%sstderr:\n%s", name, err, out, exitErr.Stderr)
+	switch typedErr := err.(type) {
+	case *exec.ExitError:
+		return string(out), fmt.Errorf("error running %s: %v\nstdout:\n%sstderr:\n%s", name, err, out, typedErr.Stderr)
+	case *fs.PathError:
+		return "", fmt.Errorf("path error running %s: %v", name, typedErr)
+
 	}
 	return string(out), nil
 }
 
+// Run the command and exit if there's an error.
 func (ar *actualRunner) MustRun(name string, args, env []string) string {
 	out, err := ar.Run(name, args, env)
 	if err != nil {

@@ -7,16 +7,23 @@ import (
 	"log"
 )
 
+type ParameterList []any
+
+type MockGCRunner interface {
+	gcRunner
+	Calls(method string) ([]ParameterList, bool)
+}
+
 type mockRunner struct {
-	calledMethods map[string][][]any
+	calledMethods map[string][]ParameterList
 	cmdResults    map[string]string
 	cwd           string
 	dirStack      *list.List
 }
 
-func NewMockRunner() *mockRunner {
+func NewMockRunner() MockGCRunner {
 	return &mockRunner{
-		calledMethods: make(map[string][][]any),
+		calledMethods: make(map[string][]ParameterList),
 		cmdResults: map[string]string{
 			"/mock/dir/tfc git [clone -b auto-pr-pr1 https://modular-magician:*******@github.com/modular-magician/docs-examples /mock/dir/tfoics] []":                "",
 			"/mock/dir/tpgb git [clone -b auto-pr-pr1 https://modular-magician:*******@github.com/modular-magician/terraform-google-conversion /mock/dir/tfc] []":    "",
@@ -54,13 +61,25 @@ func (mr *mockRunner) GetCWD() string {
 	return mr.cwd
 }
 
+func (mr *mockRunner) Mkdir(path string) error {
+	return nil
+}
+
+func (mr *mockRunner) ReadFile(name string) (string, error) {
+	return "", nil
+}
+
+func (mr *mockRunner) WriteFile(name, data string) error {
+	return nil
+}
+
 func (mr *mockRunner) Copy(src, dest string) error {
-	mr.calledMethods["Copy"] = append(mr.calledMethods["Copy"], []any{src, dest})
+	mr.calledMethods["Copy"] = append(mr.calledMethods["Copy"], ParameterList{src, dest})
 	return nil
 }
 
 func (mr *mockRunner) RemoveAll(path string) error {
-	mr.calledMethods["RemoveAll"] = append(mr.calledMethods["RemoveAll"], []any{path})
+	mr.calledMethods["RemoveAll"] = append(mr.calledMethods["RemoveAll"], ParameterList{path})
 	return nil
 }
 
@@ -87,7 +106,7 @@ func (mr *mockRunner) PopDir() error {
 }
 
 func (mr *mockRunner) Run(name string, args, env []string) (string, error) {
-	mr.calledMethods["Run"] = append(mr.calledMethods["Run"], []any{mr.cwd, name, args, env})
+	mr.calledMethods["Run"] = append(mr.calledMethods["Run"], ParameterList{mr.cwd, name, args, env})
 	cmd := fmt.Sprintf("%s %s %v %v", mr.cwd, name, args, env)
 	if result, ok := mr.cmdResults[cmd]; ok {
 		return result, nil
@@ -102,4 +121,9 @@ func (mr *mockRunner) MustRun(name string, args, env []string) string {
 		log.Fatal(err)
 	}
 	return out
+}
+
+func (mr *mockRunner) Calls(method string) ([]ParameterList, bool) {
+	calls, ok := mr.calledMethods[method]
+	return calls, ok
 }

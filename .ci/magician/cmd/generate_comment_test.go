@@ -12,7 +12,7 @@ func TestExecGenerateComment(t *testing.T) {
 	}
 	execGenerateComment("build1", "project1", "17", "sha1", "pr1", "*******", gh, mr)
 
-	for method, expectedCalls := range map[string][][]any{
+	for method, expectedCalls := range map[string][]ParameterList{
 		"Copy": {
 			{"/mock/dir/tpg", "/mock/dir/magic-modules/tools/diff-processor/old"},
 			{"/mock/dir/tpg", "/mock/dir/magic-modules/tools/diff-processor/new"},
@@ -60,7 +60,7 @@ func TestExecGenerateComment(t *testing.T) {
 			{"/mock/dir/magic-modules/tools/missing-test-detector", "go", []string{"run", ".", "-services-dir=/mock/dir/tpgb/google-beta/services"}, []string(nil)},
 			{"/mock/dir/magic-modules", "git", []string{"diff", "HEAD", "origin/main", "tools/missing-test-detector"}, []string(nil)}},
 	} {
-		if actualCalls, ok := mr.calledMethods[method]; !ok {
+		if actualCalls, ok := mr.Calls(method); !ok {
 			t.Fatalf("Found no calls for %s", method)
 		} else if len(actualCalls) != len(expectedCalls) {
 			t.Fatalf("Unexpected number of calls for %s, got %d, expected %d", method, len(actualCalls), len(expectedCalls))
