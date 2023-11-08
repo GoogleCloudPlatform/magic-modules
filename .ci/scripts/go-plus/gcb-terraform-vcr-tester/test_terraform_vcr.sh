@@ -113,14 +113,16 @@ declare -A affected_services
 
 for file in $gofiles
 do
-  if [[ $file = google-beta/acctest* ]] || [[ $file = google-beta/tpg* ]]; then
+  if [[ $file = google-beta/services* ]]; then
+    affected_services[$(echo "$file" | awk -F / '{ print $3 }')]=1
+  elif [[ $file = google-beta/provider/provider_mmv1_resources.go ]] || [[ $file = google-beta/provider/provider_dcl_resources.go ]]; then
+    echo "ignore changes in $file"
+  else
     run_full_VCR=true
     echo "run full tests $file"
     break
   fi
-  if [[ $file = google-beta/services* ]]; then
-    affected_services[$(echo "$file" | awk -F / '{ print $3 }')]=1
-  fi
+
 done
 
 test_exit_code=0
