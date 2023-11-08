@@ -121,7 +121,6 @@ func TestAccComputeAttachedDisk_count(t *testing.T) {
 }
 
 func TestAccComputeAttachedDisk_zoneless(t *testing.T) {
-	acctest.SkipIfVcr(t)
 	t.Setenv("GOOGLE_ZONE", "")
 
 	diskName := fmt.Sprintf("tf-test-disk-%d", acctest.RandInt(t))
