@@ -408,4 +408,3 @@ properties:
       existing resources are dropped and prevented from leaving the VPC.
       Setting this field to true will allow these packets to match dynamic routes injected
       via BGP even if their destinations match existing subnet ranges.
-
