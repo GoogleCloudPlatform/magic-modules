@@ -75,7 +75,7 @@ resource "google_workbench_instance" "<%= ctx[:primary_resource_id] %>" {
 
   }
 
-  disable_proxy_access = "true"
+  disable_proxy_access = "false"
 
   instance_owners  = [ "<%= ctx[:test_env_vars]["service_account"] %>"]
 
