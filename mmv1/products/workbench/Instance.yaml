@@ -112,8 +112,11 @@ properties:
     update_mask_fields:
       - 'gceSetup.machineType'
       - 'gceSetup.metadata'
-      - 'gceSetup.acceleratorConfigs'
-      - 'gceSetup.shieldedInstanceConfig'
+      - 'gceSetup.acceleratorConfigs.type'
+      - 'gceSetup.acceleratorConfigs.coreCount'
+      - 'gceSetup.shieldedInstanceConfig.enableSecureBoot'
+      - 'gceSetup.shieldedInstanceConfig.enableVtpm'
+      - 'gceSetup.shieldedInstanceConfig.enableIntegrityMonitoring'
     properties:
       - !ruby/object:Api::Type::String
         name: machineType
@@ -326,6 +329,7 @@ properties:
         name: networkInterfaces
         description: The network interfaces for the VM. Supports only one interface.
         default_from_api: true
+        immutable: true
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::String
@@ -333,10 +337,12 @@ properties:
               description: 'Optional. The name of the VPC that this VM instance is in.'
               custom_expand: templates/terraform/custom_expand/network_full_url.erb
               diff_suppress_func: tpgresource.CompareSelfLinkRelativePaths
+              default_from_api: true
             - !ruby/object:Api::Type::String
               name: subnet
               description: 'Optional. The name of the subnet that this VM instance is in.'
               diff_suppress_func: tpgresource.CompareSelfLinkRelativePaths
+              default_from_api: true
             - !ruby/object:Api::Type::Enum
               name: nicType
               description: |

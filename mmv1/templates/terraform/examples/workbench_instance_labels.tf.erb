@@ -1,15 +1,3 @@
-resource "google_compute_network" "my_network" {
-  name = "<%= ctx[:vars]['network_name'] %>"
-  auto_create_subnetworks = false
-}
-
-resource "google_compute_subnetwork" "my_subnetwork" {
-  name   = "<%= ctx[:vars]['network_name'] %>"
-  network = google_compute_network.my_network.id
-  region = "us-central1"
-  ip_cidr_range = "10.0.1.0/24"
-}
-
 resource "google_workbench_instance" "<%= ctx[:primary_resource_id] %>" {
   name = "<%= ctx[:vars]['instance_name'] %>"
   location = "us-central1-a"
@@ -28,9 +16,6 @@ resource "google_workbench_instance" "<%= ctx[:primary_resource_id] %>" {
     }
 
     network_interfaces {
-      network = google_compute_network.my_network.id
-      subnet = google_compute_subnetwork.my_subnetwork.id
-      nic_type = "GVNIC"
     }
 
     metadata = {
