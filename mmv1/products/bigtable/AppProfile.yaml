@@ -164,6 +164,7 @@ properties:
     properties:
       - !ruby/object:Api::Type::Enum
         name: 'priority'
+        required: true
         description: |
           The priority of requests sent using this app profile.
         values:
