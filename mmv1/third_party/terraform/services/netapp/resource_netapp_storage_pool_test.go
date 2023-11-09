@@ -42,7 +42,7 @@ func TestAccNetappstoragePool_storagePoolCreateExample_update(t *testing.T) {
 				ResourceName:            "google_netapp_storage_pool.test_pool",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "storage_pool_id"},
+				ImportStateVerifyIgnore: []string{"location", "name"},
 			},
 			{
 				Config: testAccNetappstoragePool_storagePoolCreateExample_update(context),
@@ -51,7 +51,7 @@ func TestAccNetappstoragePool_storagePoolCreateExample_update(t *testing.T) {
 				ResourceName:            "google_netapp_storage_pool.test_pool",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "storage_pool_id"},
+				ImportStateVerifyIgnore: []string{"location", "name"},
 			},
 		},
 	})
@@ -81,7 +81,7 @@ resource "google_service_networking_connection" "default" {
 }
 
 resource "google_netapp_storage_pool" "test_pool" {
-  storage_pool_id = "tf-test-test-pool%{random_suffix}"
+  name = "tf-test-test-pool%{random_suffix}"
   location = "us-central1"
   service_level = "PREMIUM"
   capacity_gib = "2048"
@@ -122,7 +122,7 @@ resource "google_service_networking_connection" "default" {
 }
 
 resource "google_netapp_storage_pool" "test_pool" {
-  storage_pool_id = "tf-test-test-pool%{random_suffix}"
+  name = "tf-test-test-pool%{random_suffix}"
   location = "us-central1"
   service_level = "PREMIUM"
   capacity_gib = "4096"

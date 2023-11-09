@@ -20,7 +20,7 @@ resource "google_service_networking_connection" "default" {
 }
 
 resource "google_netapp_storage_pool" "<%= ctx[:primary_resource_id] %>" {
-  storage_pool_id = "<%= ctx[:vars]['pool_name'] %>"
+  name = "<%= ctx[:vars]['pool_name'] %>"
   location = "us-central1"
   service_level = "PREMIUM"
   capacity_gib = "2048"

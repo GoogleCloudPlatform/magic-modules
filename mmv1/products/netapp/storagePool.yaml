@@ -21,18 +21,18 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'QUICKSTART_TITLE': 'https://cloud.google.com/netapp/volumes/docs/reference/rest/v1/projects.locations.storagePools'
   api: 'https://cloud.google.com/netapp/volumes/docs/reference/rest/v1/projects.locations.storagePools'
 base_url: projects/{{project}}/locations/{{location}}/storagePools
-self_link: projects/{{project}}/locations/{{location}}/storagePools/{{storage_pool_id}}
-create_url: projects/{{project}}/locations/{{location}}/storagePools?storagePoolId={{storage_pool_id}}
-update_url: projects/{{project}}/locations/{{location}}/storagePools/{{storage_pool_id}}
+self_link: projects/{{project}}/locations/{{location}}/storagePools/{{name}}
+create_url: projects/{{project}}/locations/{{location}}/storagePools?storagePoolId={{name}}
+update_url: projects/{{project}}/locations/{{location}}/storagePools/{{name}}
 update_verb: :PATCH
 update_mask: true
-delete_url: projects/{{project}}/locations/{{location}}/storagePools/{{storage_pool_id}}
+delete_url: projects/{{project}}/locations/{{location}}/storagePools/{{name}}
 autogen_async: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     base_url: '{{op_id}}'
-id_format: 'projects/{{project}}/locations/{{location}}/storagePools/{{storage_pool_id}}'
-import_format: ['projects/{{project}}/locations/{{location}}/storagePools/{{storage_pool_id}}']
+id_format: 'projects/{{project}}/locations/{{location}}/storagePools/{{name}}'
+import_format: ['projects/{{project}}/locations/{{location}}/storagePools/{{name}}']
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -42,7 +42,7 @@ parameters:
     description: |
       LOCATION_DESCRIPTION
   - !ruby/object:Api::Type::String
-    name: 'storage_pool_id'
+    name: 'name'
     description:
       'The unique name of the storage pool
       `[_a-zA-Z0-9][-_.a-zA-Z0-9]*`.'
@@ -59,11 +59,6 @@ examples:
       global_name: 'test-address'
 properties:
   # Fields go here
-  - !ruby/object:Api::Type::String
-    name: name
-    output: true
-    description: |
-      Name of the storage pool
   - !ruby/object:Api::Type::Enum
     name: 'serviceLevel'
     description: |
@@ -72,10 +67,13 @@ properties:
       - :PREMIUM
       - :EXTREME
       - :STANDARD
+    required: true
+    immutable: true
   - !ruby/object:Api::Type::String
     name: 'capacityGib'
     description: |
       Capacity in GIB of the pool
+    required: true
   - !ruby/object:Api::Type::String
     name: 'volumeCapacityGib'
     description: |
@@ -98,6 +96,8 @@ properties:
     name: 'network'
     description: |
       VPC Network name. Format: projects/{project}/global/networks/{network}
+    required: true
+    immutable: true
     diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
   - !ruby/object:Api::Type::String
     name: 'activeDirectory'
