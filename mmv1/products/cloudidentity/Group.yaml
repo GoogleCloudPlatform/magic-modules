@@ -50,6 +50,15 @@ examples:
     test_env_vars:
       org_domain: :ORG_DOMAIN
       cust_id: :CUST_ID
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloud_identity_groups_dynamic'
+    skip_test: true
+    primary_resource_id: 'cloud_identity_groups_dynamic'
+    vars:
+      id_group: 'my-identity-dynamic-group'
+    test_env_vars:
+      org_domain: :ORG_DOMAIN
+      cust_id: :CUST_ID
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/set_computed_name.erb
   custom_import: templates/terraform/custom_import/cloud_identity_group_import.go.erb
@@ -179,6 +188,74 @@ properties:
 
       Existing Google Groups can have an additional label with a key of cloudidentity.googleapis.com/groups.security and an empty value added to them. This is an immutable change and the security label cannot be removed once added.
 
-      Dynamic groups have a label with a key of cloudidentity.googleapis.com/groups.dynamic.
+      Dynamic groups have a label with a key of cloudidentity.googleapis.com/groups.dynamic automatically added by the API when creating a group with 'dynamicGroupMetadata'.
 
       Identity-mapped groups for Cloud Search have a label with a key of system/groups/external and an empty value.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'dynamicGroupMetadata'
+    description: |
+      Dynamic group metadata like queries and status.
+    properties:
+      - !ruby/object:Api::Type::Array
+        name: 'queries'
+        description: |
+          Memberships will be the union of all queries. Only one entry with USER resource is currently supported. Customers can create up to 100 dynamic groups.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::Enum
+              name: 'resourceType'
+              required: true
+              description: |
+                Resource type for the Dynamic Group Query.
+              values:
+                - :USER
+            - !ruby/object:Api::Type::String
+              name: 'query'
+              required: true
+              description: |
+                Query that determines the memberships of the dynamic group.
+                Examples:
+                  * All users with at least one organizations.department of engineering.
+                    ```
+                    user.organizations.exists(org, org.department=='engineering')
+                    ```
+                  * All users with at least one location that has area of foo and building_id of bar.
+                    ```
+                    user.locations.exists(loc, loc.area=='foo' && loc.building_id=='bar')
+                    ```
+                  * All users with any variation of the name John Doe (case-insensitive queries add
+                    equalsIgnoreCase() to the value being queried).
+                    ```
+                    user.name.value.equalsIgnoreCase('jOhn DoE')
+                    ```
+                **Note:** When using this field, Identity API will add
+                `"cloudidentity.googleapis.com/groups.dynamic"` to this group's labels.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'status'
+        output: true
+        description: |
+          The current status of a dynamic group along with timestamp.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'status'
+            output: true
+            description: |
+              Status of the dynamic group.
+            values:
+              - :UP_TO_DATE
+              - :UPDATING_MEMBERSHIPS
+              - :INVALID_QUERY
+              - :STATUS_UNSPECIFIED
+          - !ruby/object:Api::Type::Time
+            name: 'statusTime'
+            output: true
+            description: |
+              The latest time at which the dynamic group is guaranteed to be in
+              the given status. If status is UP_TO_DATE, the latest time at
+              which the dynamic group was confirmed to be up-to-date. If status
+              is UPDATING_MEMBERSHIPS, the time at which dynamic group was
+              created.
+
+               A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
+               resolution and up to nine fractional digits.
+               Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
