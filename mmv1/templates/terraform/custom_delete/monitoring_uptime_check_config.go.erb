@@ -45,7 +45,7 @@ res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 
 if err != nil {
     if transport_tpg.IsGoogleApiErrorWithCode(err, 400) {
-        err := fmt.Errorf("%w Make sure all associated Alert Policies are deleted first.", err)
+        err := fmt.Errorf("%w - please ensure all associated Alert Policies are deleted.", err)
         return errwrap.Wrapf("Error when reading or editing UptimeCheckConfig: {{err}}", err)
     }
     return transport_tpg.HandleNotFoundError(err, d, "UptimeCheckConfig")
