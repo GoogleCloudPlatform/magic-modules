@@ -69,7 +69,7 @@ resource "google_apikeys_key" "key1" {
 
 	restrictions {
 		browser_key_restrictions {
-			allowed_referrers = ["*"]
+			allowed_referrers = [""]
 		}
 	}
 }
@@ -82,7 +82,7 @@ resource "google_apikeys_key" "key2" {
 
 	restrictions {
 		browser_key_restrictions {
-			allowed_referrers = ["*"]
+			allowed_referrers = [""]
 		}
 	}
 }
