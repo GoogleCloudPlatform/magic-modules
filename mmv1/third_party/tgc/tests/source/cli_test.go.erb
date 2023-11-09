@@ -29,10 +29,18 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/caiasset"
+	resources "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources"
 )
 
 // TestCLI tests the "convert" and "validate" subcommand against a generated .tfplan file.
 func TestCLI(t *testing.T) {
+	_, err := resources.NewConfig(context.Background(), "random-project", "", "", false, "", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Log("resources.NewConfig passed")
+
 	if testing.Short() {
 		t.Skip("skipping integration test in short mode.")
 		return
@@ -59,7 +67,7 @@ func TestCLI(t *testing.T) {
 		// Test both offline and online mode.
 		for _, offline := range []bool{true, false} {
 			offline := offline
-			t.Run(fmt.Sprintf("v=0.12/tf=%s/offline=%t", c.name, offline), func(t *testing.T) {
+			t.Run(fmt.Sprintf("tf=%s/offline=%t", c.name, offline), func(t *testing.T) {
 				t.Parallel()
 				// Create a temporary directory for running terraform.
 				dir, err := os.MkdirTemp(tmpDir, "terraform")
