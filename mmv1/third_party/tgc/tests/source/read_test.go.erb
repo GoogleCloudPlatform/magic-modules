@@ -11,10 +11,17 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai"
+	resources "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources"
 	"go.uber.org/zap/zaptest"
 )
 
 func TestReadPlannedAssetsCoverage(t *testing.T) {
+	// trigger gcloud auth by setting offline to false
+	_, err := resources.NewConfig(context.Background(), "project", "", "", false, "", nil)
+	if err != nil {
+		t.Fatalf("NewConfig(online) = %v, want = nil", err)
+	}
+
 	cases := []struct {
 		name string
 	}{
@@ -114,6 +121,12 @@ func TestReadPlannedAssetsCoverage(t *testing.T) {
 
 
 func TestReadPlannedAssetsCoverage_WithoutDefaultProject(t *testing.T) {
+	// trigger gcloud auth by setting offline to false
+	_, err := resources.NewConfig(context.Background(), "project", "", "", false, "", nil)
+	if err != nil {
+		t.Fatalf("NewConfig(online) = %v, want = nil", err)
+	}
+
 	cases := []struct {
 		name string
 	}{
