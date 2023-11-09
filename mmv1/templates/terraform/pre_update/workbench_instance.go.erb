@@ -33,12 +33,8 @@ if d.HasChange("gce_setup.0.machine_type") || d.HasChange("gce_setup.0.accelerat
 
   } else {
     log.Printf("[DEBUG] Workbench Instance %q has state %q.", name, state)
-    return nil
   }
 
 } else {
   log.Printf("[DEBUG] Workbench Instance %q need not be stopped for the update.", name)
-  return nil
 }
-
-
