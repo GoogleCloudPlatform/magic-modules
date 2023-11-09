@@ -36,13 +36,13 @@
         "after": {
           "instance": "my-database-instance",
           "name": "my-database",
-          "timeouts": null
+          "timeouts": null,
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "charset": true,
           "collation": true,
           "id": true,
-          "project": true,
           "self_link": true
         },
         "before_sensitive": false,

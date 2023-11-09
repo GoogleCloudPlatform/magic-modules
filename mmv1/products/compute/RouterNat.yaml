@@ -91,8 +91,22 @@ examples:
       address_name1: 'nat-address1'
       address_name2: 'nat-address2'
       address_name3: 'nat-address3'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'router_nat_private'
+    primary_resource_id: 'nat_type'
+    skip_test: true
+    min_version: beta
+    vars:
+      router_name: 'my-router'
+      nat_name: 'my-router-nat'
+      network_name: 'my-network'
+      subnet_name: 'my-subnetwork'
+      hub_name: 'my-hub'
+      spoke_name: 'my-spoke'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: 'templates/terraform/constants/router_nat.go.erb'
+  pre_create: 'templates/terraform/constants/router_nat_validate_action_active_range.go.erb'
+  pre_update: 'templates/terraform/constants/router_nat_validate_action_active_range.go.erb'
 custom_diff: [
   'resourceComputeRouterNatDrainNatIpsCustomDiff',
 ]
@@ -128,7 +142,7 @@ properties:
       function: 'verify.ValidateRFC1035Name(2, 63)'
   - !ruby/object:Api::Type::Enum
     name: 'natIpAllocateOption'
-    required: true
+    required: false
     description: |
       How external IPs should be allocated for this NAT. Valid values are
       `AUTO_ONLY` for only allowing NAT IPs allocated by Google Cloud
@@ -368,10 +382,57 @@ properties:
                 description:
                   'A reference to an address associated with this NAT'
               custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
+            - !ruby/object:Api::Type::Array
+              name: 'sourceNatActiveRanges'
+              min_version: beta
+              description: |
+                  A list of URLs of the subnetworks used as source ranges for this NAT Rule.
+                  These subnetworks must have purpose set to PRIVATE_NAT.
+                  This field is used for private NAT.
+              is_set: true
+              set_hash_func: computeRouterNatRulesSubnetHash
+              custom_flatten: 'templates/terraform/custom_flatten/nat_rules_subnets_set.erb'
+              item_type: !ruby/object:Api::Type::ResourceRef
+                name: 'subnet'
+                resource: 'Subnetwork'
+                imports: 'selfLink'
+                description:
+                  'A reference to a subnetwork address associated with this NAT'
+              custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
+            - !ruby/object:Api::Type::Array
+              name: 'sourceNatDrainRanges'
+              min_version: beta
+              description: |
+                A list of URLs of subnetworks representing source ranges to be drained.
+                This is only supported on patch/update, and these subnetworks must have previously been used as active ranges in this NAT Rule.
+                This field is used for private NAT.
+              is_set: true
+              set_hash_func: computeRouterNatRulesSubnetHash
+              custom_flatten: 'templates/terraform/custom_flatten/nat_rules_subnets_set.erb'
+              item_type: !ruby/object:Api::Type::ResourceRef
+                name: 'subnet'
+                resource: 'Subnetwork'
+                imports: 'selfLink'
+                description:
+                  'A reference to a subnetwork address associated with this NAT'
+              custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::Boolean
     name: enableEndpointIndependentMapping
     description: |
-      Specifies if endpoint independent mapping is enabled. This is enabled by default. For more information
-      see the [official documentation](https://cloud.google.com/nat/docs/overview#specs-rfcs).
-    default_value: true
+      Enable endpoint independent mapping.
+      For more information see the [official documentation](https://cloud.google.com/nat/docs/overview#specs-rfcs).
+    default_from_api: true
     send_empty_value: true
+  - !ruby/object:Api::Type::Enum
+    name: 'type'
+    immutable: true
+    min_version: beta
+    description: |
+      Indicates whether this NAT is used for public or private IP translation.
+      If unspecified, it defaults to PUBLIC.
+      If `PUBLIC` NAT used for public IP translation.
+      If `PRIVATE` NAT used for private IP translation.
+    values:
+      - :PUBLIC
+      - :PRIVATE
+    default_value: :PUBLIC

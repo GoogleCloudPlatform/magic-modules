@@ -88,6 +88,14 @@ examples:
       vpc_compute_subnetwork_name: 'run-subnetwork'
       compute_network_name: 'run-network'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudrunv2_service_directvpc'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
+      context[\"random_suffix\"\
+      ])"
+    vars:
+      cloud_run_service_name: 'cloudrun-service'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_probes'
     primary_resource_id: 'default'
     primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
@@ -115,6 +123,7 @@ examples:
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
+    required: true
     immutable: true
     url_param_only: true
     description: The location of the cloud run service
@@ -144,7 +153,7 @@ properties:
     output: true
     description: |
       A number that monotonically increases every time the user modifies the desired state. Please note that unlike v1, this is an int64 value. As with most Google APIs, its JSON representation will be a string instead of an integer.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |-
       Unstructured key value map that can be used to organize and categorize objects. User-provided labels are shared with Google's billing system, so they can be used to filter, or break down billing charges by team, component,
@@ -152,7 +161,7 @@ properties:
 
       Cloud Run API v2 does not support labels with  `run.googleapis.com`, `cloud.googleapis.com`, `serving.knative.dev`, or `autoscaling.knative.dev` namespaces, and they will be rejected.
       All system labels in v1 now have a corresponding field in v2 Service.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueAnnotations
     name: 'annotations'
     description: |-
       Unstructured key value map that may be set by external tools to store and arbitrary metadata. They are not queryable and should be preserved when modifying objects.
@@ -238,7 +247,7 @@ properties:
         description: |
           If True, indicates to use the default project's binary authorization policy. If False, binary authorization will be disabled.
   - !ruby/object:Api::Type::Array
-    name: 'custom_audiences'
+    name: 'customAudiences'
     min_version: beta
     description: |
       One or more custom audiences that you want this service to support. Specify each custom audience as the full URL in a string. The custom audiences are encoded in the token and used to authenticate requests.
@@ -301,6 +310,32 @@ properties:
             values:
               - :ALL_TRAFFIC
               - :PRIVATE_RANGES_ONLY
+            default_from_api: true
+          - !ruby/object:Api::Type::Array
+            name: 'networkInterfaces'
+            description: |-
+              Direct VPC egress settings. Currently only single network interface is supported.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'network'
+                  description: |-
+                    The VPC network that the Cloud Run resource will be able to send traffic to. At least one of network or subnetwork must be specified. If both
+                    network and subnetwork are specified, the given VPC subnetwork must belong to the given VPC network. If network is not specified, it will be
+                    looked up from the subnetwork.
+                  default_from_api: true
+                - !ruby/object:Api::Type::String
+                  name: 'subnetwork'
+                  description: |-
+                    The VPC subnetwork that the Cloud Run resource will get IPs from. At least one of network or subnetwork must be specified. If both
+                    network and subnetwork are specified, the given VPC subnetwork must belong to the given VPC network. If subnetwork is not specified, the
+                    subnetwork with the same name with the network will be used.
+                  default_from_api: true
+                - !ruby/object:Api::Type::Array
+                  name: 'tags'
+                  description: |-
+                    Network tags applied to this Cloud Run service.
+                  item_type: Api::Type::String
       - !ruby/object:Api::Type::String
         name: 'timeout'
         description: |-
@@ -497,19 +532,6 @@ properties:
                             default_value: ''
                             send_empty_value: true
                 - !ruby/object:Api::Type::NestedObject
-                  name: 'tcpSocket'
-                  description: |-
-                    TCPSocket specifies an action involving a TCP port. This field is not supported in liveness probe currently.
-                  deprecation_message: >-
-                    `tcp_socket` is deprecated and will be removed in a future major release. This field is not supported by the Cloud Run API.
-                  send_empty_value: true
-                  allow_empty_object: true
-                  properties:
-                    - !ruby/object:Api::Type::Integer
-                      name: port
-                      description: |-
-                        Port number to access on the container. Must be in the range 1 to 65535. If not specified, defaults to 8080.
-                - !ruby/object:Api::Type::NestedObject
                   name: grpc
                   description: |-
                     GRPC specifies an action involving a GRPC port.
@@ -703,6 +725,7 @@ properties:
                   description: |-
                     The Cloud SQL instance connection names, as can be found in https://console.cloud.google.com/sql/instances. Visit https://cloud.google.com/sql/docs/mysql/connect-run for more information on how to connect Cloud SQL and Cloud Run. Format: {project}:{location}:{instance}
                   item_type: Api::Type::String
+                  is_set: true
             - !ruby/object:Api::Type::NestedObject
               name: 'emptyDir'
               description: |-

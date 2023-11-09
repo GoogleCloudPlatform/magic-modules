@@ -8,10 +8,6 @@ description: |-
 
 Contains information about a GKEHub Feature Memberships. Feature Memberships configure GKEHub Features that apply to specific memberships rather than the project as a whole. The google_gke_hub is the Fleet API.
 
-~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
-See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
-
-
 ## Example Usage - Config Management
 
 ```hcl
@@ -364,6 +360,21 @@ This resource provides the following
 ## Import
 
 FeatureMembership can be imported using any of these accepted formats:
+
+* `projects/{{project}}/locations/{{location}}/features/{{feature}}/membershipId/{{membership}}`
+* `{{project}}/{{location}}/{{feature}}/{{membership}}`
+* `{{location}}/{{feature}}/{{membership}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import FeatureMembership using one of the formats above. For example:
+
+```tf
+import {
+  id = "projects/{{project}}/locations/{{location}}/features/{{feature}}/membershipId/{{membership}}"
+  to = google_gke_hub_feature_membership.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), FeatureMembership can be imported using one of the formats above. For example:
 
 ```
 $ terraform import google_gke_hub_feature_membership.default projects/{{project}}/locations/{{location}}/features/{{feature}}/membershipId/{{membership}}

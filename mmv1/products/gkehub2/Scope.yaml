@@ -15,8 +15,10 @@
 name: 'Scope'
 base_url: 'projects/{{project}}/locations/global/scopes'
 create_url: 'projects/{{project}}/locations/global/scopes?scopeId={{scope_id}}'
+update_url: 'projects/{{project}}/locations/global/scopes/{{scope_id}}'
 self_link: 'projects/{{project}}/locations/global/scopes/{{scope_id}}'
-immutable: true
+update_verb: :PATCH
+update_mask: true
 description: |
   Scope represents a Scope in a Fleet.
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -113,3 +115,7 @@ properties:
           - :READY
           - :DELETING
           - :UPDATING
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: 'labels'
+    description: |
+      Labels for this Scope.

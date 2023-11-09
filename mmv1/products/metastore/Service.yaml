@@ -155,7 +155,7 @@ properties:
     output: true
     description: |
       The relative resource name of the metastore service.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: 'User-defined labels for the metastore service.'
   # This is an x-product resource reference.

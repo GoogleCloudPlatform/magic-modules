@@ -265,7 +265,8 @@
           "source_tags": null,
           "target_service_accounts": null,
           "target_tags": null,
-          "timeouts": null
+          "timeouts": null,
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "allow": [
@@ -289,7 +290,6 @@
           "enable_logging": true,
           "id": true,
           "log_config": [],
-          "project": true,
           "self_link": true,
           "source_service_accounts": [
             false,
@@ -370,7 +370,8 @@
             "test-target_service_account2"
           ],
           "target_tags": null,
-          "timeouts": null
+          "timeouts": null,
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "allow": [],
@@ -392,7 +393,6 @@
           "enable_logging": true,
           "id": true,
           "log_config": [],
-          "project": true,
           "self_link": true,
           "source_ranges": [
             false,
@@ -474,7 +474,8 @@
             "test-target_tag1",
             "test-target_tag2"
           ],
-          "timeouts": null
+          "timeouts": null,
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "allow": [],
@@ -489,7 +490,6 @@
           "enable_logging": true,
           "id": true,
           "log_config": [],
-          "project": true,
           "self_link": true,
           "source_tags": [
             false
@@ -535,13 +535,14 @@
           "delete_default_routes_on_create": false,
           "description": null,
           "name": "test-network",
-          "timeouts": null
+          "timeouts": null,
+          "project": "{{.Provider.project}}",
+          "network_firewall_policy_enforcement_order": "AFTER_CLASSIC_FIREWALL"
         },
         "after_unknown": {
           "gateway_ipv4": true,
           "id": true,
           "mtu": true,
-          "project": true,
           "routing_mode": true,
           "self_link": true
         },

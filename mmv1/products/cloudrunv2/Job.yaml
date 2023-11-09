@@ -85,6 +85,13 @@ examples:
       vpc_compute_subnetwork_name: 'run-subnetwork'
       compute_network_name: 'run-network'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudrunv2_job_directvpc'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-job%s\", context[\"random_suffix\"\
+      ])"
+    vars:
+      cloud_run_job_name: 'cloudrun-job'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_job_secret'
     primary_resource_id: 'default'
     primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
@@ -104,6 +111,7 @@ examples:
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
+    required: true
     immutable: true
     url_param_only: true
     description: The location of the cloud run job
@@ -129,7 +137,7 @@ properties:
     output: true
     description: |
       A number that monotonically increases every time the user modifies the desired state.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |-
       Unstructured key value map that can be used to organize and categorize objects. User-provided labels are shared with Google's billing system, so they can be used to filter, or break down billing charges by team, component,
@@ -137,8 +145,8 @@ properties:
 
       Cloud Run API v2 does not support labels with `run.googleapis.com`, `cloud.googleapis.com`, `serving.knative.dev`, or `autoscaling.knative.dev` namespaces, and they will be rejected.
       All system labels in v1 now have a corresponding field in v2 Job.
-  - !ruby/object:Api::Type::KeyValuePairs
-    name: "annotations"
+  - !ruby/object:Api::Type::KeyValueAnnotations
+    name: 'annotations'
     description: |-
       Unstructured key value map that may be set by external tools to store and arbitrary metadata. They are not queryable and should be preserved when modifying objects.
 
@@ -229,7 +237,7 @@ properties:
           Cloud Run API v2 does not support labels with `run.googleapis.com`, `cloud.googleapis.com`, `serving.knative.dev`, or `autoscaling.knative.dev` namespaces, and they will be rejected.
           All system labels in v1 now have a corresponding field in v2 ExecutionTemplate.
       - !ruby/object:Api::Type::KeyValuePairs
-        name: "annotations"
+        name: 'annotations'
         description: |-
           Unstructured key value map that may be set by external tools to store and arbitrary metadata. They are not queryable and should be preserved when modifying objects.
 
@@ -367,160 +375,6 @@ properties:
                   name: 'workingDir'
                   description: |-
                     Container's working directory. If not specified, the container runtime's default will be used, which might be configured in the container image.
-                - !ruby/object:Api::Type::NestedObject
-                  name: 'livenessProbe'
-                  description: |-
-                    Periodic probe of container liveness. Container will be restarted if the probe fails. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
-                    This field is not supported in Cloud Run Job currently.
-                  deprecation_message: >-
-                    `liveness_probe` is deprecated and will be removed in a future major release. This field is not supported by the Cloud Run API.
-                  properties:
-                    - !ruby/object:Api::Type::Integer
-                      name: 'initialDelaySeconds'
-                      description: |-
-                        Number of seconds after the container has started before the probe is initiated. Defaults to 0 seconds. Minimum value is 0. Maximum value for liveness probe is 3600. Maximum value for startup probe is 240. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
-                      default_value: 0
-                    - !ruby/object:Api::Type::Integer
-                      name: 'timeoutSeconds'
-                      description: |-
-                        Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. Maximum value is 3600. Must be smaller than periodSeconds. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
-                      default_value: 1
-                    - !ruby/object:Api::Type::Integer
-                      name: 'periodSeconds'
-                      description: |-
-                        How often (in seconds) to perform the probe. Default to 10 seconds. Minimum value is 1. Maximum value for liveness probe is 3600. Maximum value for startup probe is 240. Must be greater or equal than timeoutSeconds
-                      default_value: 10
-                    - !ruby/object:Api::Type::Integer
-                      name: 'failureThreshold'
-                      description: |-
-                        Minimum consecutive failures for the probe to be considered failed after having succeeded. Defaults to 3. Minimum value is 1.
-                      default_value: 3
-                    - !ruby/object:Api::Type::NestedObject
-                      name: 'httpGet'
-                      description: |-
-                        HTTPGet specifies the http request to perform. Exactly one of HTTPGet or TCPSocket must be specified.
-                      send_empty_value: true
-                      allow_empty_object:
-                        true
-                        # exactly_one_of:
-                        #   - template.0.template.0.containers.0.livenessProbe.0.httpGet
-                        #   - template.0.template.0.containers.0.livenessProbe.0.tcpSocket
-                      properties:
-                        - !ruby/object:Api::Type::String
-                          name: 'path'
-                          default_value: '/'
-                          description: |-
-                            Path to access on the HTTP server. Defaults to '/'.
-                        - !ruby/object:Api::Type::Array
-                          name: httpHeaders
-                          description: |-
-                            Custom headers to set in the request. HTTP allows repeated headers.
-                          item_type: !ruby/object:Api::Type::NestedObject
-                            properties:
-                              - !ruby/object:Api::Type::String
-                                name: name
-                                required: true
-                                description: |-
-                                  The header field name
-                              - !ruby/object:Api::Type::String
-                                name: value
-                                description: |-
-                                  The header field value
-                                default_value: ''
-                                send_empty_value: true
-                    - !ruby/object:Api::Type::NestedObject
-                      name: 'tcpSocket'
-                      description: |-
-                        TCPSocket specifies an action involving a TCP port. Exactly one of HTTPGet or TCPSocket must be specified.
-                      send_empty_value: true
-                      allow_empty_object:
-                        true
-                        # exactly_one_of:
-                        #   - template.0.template.0.containers.0.livenessProbe.0.httpGet
-                        #   - template.0.template.0.containers.0.livenessProbe.0.tcpSocket
-                      properties:
-                        - !ruby/object:Api::Type::Integer
-                          name: port
-                          description: |-
-                            Port number to access on the container. Must be in the range 1 to 65535. If not specified, defaults to 8080.
-                - !ruby/object:Api::Type::NestedObject
-                  name: 'startupProbe'
-                  description: |-
-                    Startup probe of application within the container. All other probes are disabled if a startup probe is provided, until it succeeds. Container will not be added to service endpoints if the probe fails. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
-                    This field is not supported in Cloud Run Job currently.
-                  deprecation_message: >-
-                    `startup_probe` is deprecated and will be removed in a future major release. This field is not supported by the Cloud Run API.
-                  default_from_api: true
-                  properties:
-                    - !ruby/object:Api::Type::Integer
-                      name: 'initialDelaySeconds'
-                      description: |-
-                        Number of seconds after the container has started before the probe is initiated. Defaults to 0 seconds. Minimum value is 0. Maximum value for liveness probe is 3600. Maximum value for startup probe is 240. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
-                      default_value: 0
-                    - !ruby/object:Api::Type::Integer
-                      name: 'timeoutSeconds'
-                      description: |-
-                        Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. Maximum value is 3600. Must be smaller than periodSeconds. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
-                      default_value: 1
-                    - !ruby/object:Api::Type::Integer
-                      name: 'periodSeconds'
-                      description: |-
-                        How often (in seconds) to perform the probe. Default to 10 seconds. Minimum value is 1. Maximum value for liveness probe is 3600. Maximum value for startup probe is 240. Must be greater or equal than timeoutSeconds
-                      default_value: 10
-                    - !ruby/object:Api::Type::Integer
-                      name: 'failureThreshold'
-                      description: |-
-                        Minimum consecutive failures for the probe to be considered failed after having succeeded. Defaults to 3. Minimum value is 1.
-                      default_value: 3
-                    - !ruby/object:Api::Type::NestedObject
-                      name: 'httpGet'
-                      description: |-
-                        HTTPGet specifies the http request to perform. Exactly one of HTTPGet or TCPSocket must be specified.
-                      send_empty_value: true
-                      allow_empty_object:
-                        true
-                        # exactly_one_of:
-                        #   - template.0.template.0.containers.startupProbe.0.httpGet
-                        #   - template.0.template.0.containers.startupProbe.0.tcpSocket
-                      properties:
-                        - !ruby/object:Api::Type::String
-                          name: 'path'
-                          default_value: '/'
-                          description: |-
-                            Path to access on the HTTP server. Defaults to '/'.
-                        - !ruby/object:Api::Type::Array
-                          name: 'httpHeaders'
-                          description: |-
-                            Custom headers to set in the request. HTTP allows repeated headers.
-                          item_type: !ruby/object:Api::Type::NestedObject
-                            properties:
-                              - !ruby/object:Api::Type::String
-                                name: name
-                                required: true
-                                description: |-
-                                  The header field name
-                              - !ruby/object:Api::Type::String
-                                name: value
-                                description: |-
-                                  The header field value
-                                default_value: ''
-                                send_empty_value: true
-                    - !ruby/object:Api::Type::NestedObject
-                      name: 'tcpSocket'
-                      description: |-
-                        TCPSocket specifies an action involving a TCP port. Exactly one of HTTPGet or TCPSocket must be specified.
-                      send_empty_value: true
-                      allow_empty_object:
-                        true
-                        # exactly_one_of:
-                        #   - template.0.template.0.containers.startupProbe.0.httpGet
-                        #   - template.0.template.0.containers.startupProbe.0.tcpSocket
-                      properties:
-                        - !ruby/object:Api::Type::Integer
-                          name: port
-                          description: |-
-                            Port number to access on the container. Must be in the range 1 to 65535. If not specified, defaults to 8080.
-                          default_from_api: true
           - !ruby/object:Api::Type::Array
             name: 'volumes'
             description: |-
@@ -645,6 +499,32 @@ properties:
                 values:
                   - :ALL_TRAFFIC
                   - :PRIVATE_RANGES_ONLY
+                default_from_api: true
+              - !ruby/object:Api::Type::Array
+                name: 'networkInterfaces'
+                description: |-
+                  Direct VPC egress settings. Currently only single network interface is supported.
+                item_type: !ruby/object:Api::Type::NestedObject
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'network'
+                      description: |-
+                        The VPC network that the Cloud Run resource will be able to send traffic to. At least one of network or subnetwork must be specified. If both
+                        network and subnetwork are specified, the given VPC subnetwork must belong to the given VPC network. If network is not specified, it will be
+                        looked up from the subnetwork.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::String
+                      name: 'subnetwork'
+                      description: |-
+                        The VPC subnetwork that the Cloud Run resource will get IPs from. At least one of network or subnetwork must be specified. If both
+                        network and subnetwork are specified, the given VPC subnetwork must belong to the given VPC network. If subnetwork is not specified, the
+                        subnetwork with the same name with the network will be used.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::Array
+                      name: 'tags'
+                      description: |-
+                        Network tags applied to this Cloud Run job.
+                      item_type: Api::Type::String
           - !ruby/object:Api::Type::Integer
             name: 'maxRetries'
             description: |-

@@ -3,6 +3,9 @@ package rules
 import (
 	"testing"
 
+	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -13,77 +16,70 @@ func TestResourceSchemaRule_RemovingAField(t *testing.T) {
 }
 
 type resourceSchemaTestCase struct {
-	name               string
-	oldResourceSchema  map[string]*schema.Schema
-	newResourceSchema  map[string]*schema.Schema
-	expectedViolations int
+	name           string
+	resourceDiff   diff.ResourceDiff
+	expectedFields []string
 }
 
 var resourceSchemaRule_RemovingAField_TestCases = []resourceSchemaTestCase{
 	{
 		name: "control",
-		oldResourceSchema: map[string]*schema.Schema{
-			"field-a": {Description: "beep", Optional: true},
-			"field-b": {Description: "beep", Optional: true},
+		resourceDiff: diff.ResourceDiff{
+			Fields: map[string]diff.FieldDiff{
+				"field-a": diff.FieldDiff{
+					Old: &schema.Schema{Description: "beep", Optional: true},
+					New: &schema.Schema{Description: "beep", Optional: true},
+				},
+			},
 		},
-		newResourceSchema: map[string]*schema.Schema{
-			"field-a": {Description: "beep", Optional: true},
-			"field-b": {Description: "beep", Optional: true},
-		},
-		expectedViolations: 0,
+		expectedFields: []string{},
 	},
 	{
 		name: "adding a field",
-		oldResourceSchema: map[string]*schema.Schema{
-			"field-a": {Description: "beep", Optional: true},
-			"field-b": {Description: "beep", Optional: true},
+		resourceDiff: diff.ResourceDiff{
+			Fields: map[string]diff.FieldDiff{
+				"field-a": diff.FieldDiff{
+					Old: nil,
+					New: &schema.Schema{Description: "beep", Optional: true},
+				},
+			},
 		},
-		newResourceSchema: map[string]*schema.Schema{
-			"field-a": {Description: "beep", Optional: true},
-			"field-b": {Description: "beep", Optional: true},
-			"field-c": {Description: "beep", Optional: true},
-		},
-		expectedViolations: 0,
-	},
-	{
-		name: "renaming a field",
-		oldResourceSchema: map[string]*schema.Schema{
-			"field-a": {Description: "beep", Optional: true},
-			"field-b": {Description: "beep", Optional: true},
-		},
-		newResourceSchema: map[string]*schema.Schema{
-			"field-a": {Description: "beep", Optional: true},
-			"field-d": {Description: "beep", Optional: true},
-		},
-		expectedViolations: 1,
+		expectedFields: []string{},
 	},
 	{
 		name: "removing a field",
-		oldResourceSchema: map[string]*schema.Schema{
-			"field-a": {Description: "beep", Optional: true},
-			"field-b": {Description: "beep", Optional: true},
+		resourceDiff: diff.ResourceDiff{
+			Fields: map[string]diff.FieldDiff{
+				"field-a": diff.FieldDiff{
+					Old: &schema.Schema{Description: "beep", Optional: true},
+					New: nil,
+				},
+			},
 		},
-		newResourceSchema: map[string]*schema.Schema{
-			"field-a": {Description: "beep", Optional: true},
-		},
-		expectedViolations: 1,
+		expectedFields: []string{"field-a"},
 	},
 	{
-		name: "renaming a field and removing a field",
-		oldResourceSchema: map[string]*schema.Schema{
-			"field-a": {Description: "beep", Optional: true},
-			"field-b": {Description: "beep", Optional: true},
+		name: "removing multiple fields",
+		resourceDiff: diff.ResourceDiff{
+			Fields: map[string]diff.FieldDiff{
+				"field-a": diff.FieldDiff{
+					Old: &schema.Schema{Description: "beep", Optional: true},
+					New: nil,
+				},
+				"field-b": diff.FieldDiff{
+					Old: &schema.Schema{Description: "beep", Optional: true},
+					New: nil,
+				},
+			},
 		},
-		newResourceSchema: map[string]*schema.Schema{
-			"field-z": {Description: "beep", Optional: true},
-		},
-		expectedViolations: 2,
+		expectedFields: []string{"field-a", "field-b"},
 	},
 }
 
 func (tc *resourceSchemaTestCase) check(rule ResourceSchemaRule, t *testing.T) {
-	violations := rule.isRuleBreak(tc.oldResourceSchema, tc.newResourceSchema)
-	if tc.expectedViolations != len(violations) {
-		t.Errorf("Test `%s` failed: expected %d violations, got %d", tc.name, tc.expectedViolations, len(violations))
+	fields := rule.IsRuleBreak(tc.resourceDiff)
+	less := func(a, b string) bool { return a < b }
+	if !cmp.Equal(fields, tc.expectedFields, cmpopts.SortSlices(less)) {
+		t.Errorf("Test `%s` failed: wanted %v , got %v", tc.name, tc.expectedFields, fields)
 	}
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"regexp"
 	"strconv"
 	"time"
 
@@ -19,6 +20,7 @@ import (
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
 
@@ -31,37 +33,34 @@ import (
 )
 
 type FrameworkProviderConfig struct {
-    BillingProject types.String
-    Client *http.Client
-    Context context.Context
-    gRPCLoggingOptions []option.ClientOption
-    PollInterval time.Duration
-    Project types.String
-    Region types.String
-    Zone types.String
-    RequestBatcherIam *transport_tpg.RequestBatcher
-    RequestBatcherServiceUsage *transport_tpg.RequestBatcher
-    Scopes []string
-    TokenSource oauth2.TokenSource
-    UserAgent string
-    UserProjectOverride bool
+	BillingProject             types.String
+	Client                     *http.Client
+	Context                    context.Context
+	gRPCLoggingOptions         []option.ClientOption
+	PollInterval               time.Duration
+	Project                    types.String
+	Region                     types.String
+	Zone                       types.String
+	RequestBatcherIam          *transport_tpg.RequestBatcher
+	RequestBatcherServiceUsage *transport_tpg.RequestBatcher
+	Scopes                     types.List
+	TokenSource                oauth2.TokenSource
+	UniverseDomain             types.String
+	UserAgent                  string
+	UserProjectOverride        types.Bool
 
-    // paths for client setup
-    <% products.each do |product| -%>
-    <%= product[:definitions].name -%>BasePath string
-    <% end -%>
-}
-
-var defaultClientScopes = []string{
-	"https://www.googleapis.com/auth/cloud-platform",
-	"https://www.googleapis.com/auth/userinfo.email",
+	// paths for client setup
+	<% products.each do |product| -%>
+	<%= product[:definitions].name -%>BasePath string
+	<% end -%>
 }
 
 // LoadAndValidateFramework handles the bulk of configuring the provider
 // it is pulled out so that we can manually call this from our testing provider as well
-func (p *FrameworkProviderConfig) LoadAndValidateFramework(ctx context.Context, data fwmodels.ProviderModel, tfVersion string, diags *diag.Diagnostics, providerversion string) {
+func (p *FrameworkProviderConfig) LoadAndValidateFramework(ctx context.Context, data *fwmodels.ProviderModel, tfVersion string, diags *diag.Diagnostics, providerversion string) {
+
 	// Set defaults if needed
-	p.HandleDefaults(ctx, &data, diags)
+	p.HandleDefaults(ctx, data, diags)
 	if diags.HasError() {
 		return
 	}
@@ -77,7 +76,7 @@ func (p *FrameworkProviderConfig) LoadAndValidateFramework(ctx context.Context, 
 	}
 
 	// Set up client configuration
-	p.SetupClient(ctx, data, diags)
+	p.SetupClient(ctx, *data, diags)
 	if diags.HasError() {
 		return
 	}
@@ -98,17 +97,22 @@ func (p *FrameworkProviderConfig) LoadAndValidateFramework(ctx context.Context, 
 	<% end -%>
 
 	p.Context = ctx
-	p.Region = data.Region
+	p.BillingProject = data.BillingProject
+	p.Project = data.Project
+	p.Region = GetRegionFromRegionSelfLink(data.Region)
+	p.Scopes = data.Scopes
 	p.Zone = data.Zone
+	p.UserProjectOverride = data.UserProjectOverride
 	p.PollInterval = 10 * time.Second
 	p.Project = data.Project
+	p.UniverseDomain = data.UniverseDomain
 	p.RequestBatcherServiceUsage = transport_tpg.NewRequestBatcher("Service Usage", ctx, batchingConfig)
 	p.RequestBatcherIam = transport_tpg.NewRequestBatcher("IAM", ctx, batchingConfig)
 }
 
 // HandleDefaults will handle all the defaults necessary in the provider
 func (p *FrameworkProviderConfig) HandleDefaults(ctx context.Context, data *fwmodels.ProviderModel, diags *diag.Diagnostics) {
-	if data.AccessToken.IsNull() && data.Credentials.IsNull() {
+	if (data.AccessToken.IsNull() || data.AccessToken.IsUnknown()) && (data.Credentials.IsNull() || data.Credentials.IsUnknown()) {
 		credentials := transport_tpg.MultiEnvDefault([]string{
 			"GOOGLE_CREDENTIALS",
 			"GOOGLE_CLOUD_KEYFILE_JSON",
@@ -128,11 +132,11 @@ func (p *FrameworkProviderConfig) HandleDefaults(ctx context.Context, data *fwmo
 		}
 	}
 
-	if data.ImpersonateServiceAccount.IsNull() && os.Getenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT") != "" {
+	if (data.ImpersonateServiceAccount.IsNull() || data.ImpersonateServiceAccount.IsUnknown()) && os.Getenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT") != "" {
 		data.ImpersonateServiceAccount = types.StringValue(os.Getenv("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT"))
 	}
 
-	if data.Project.IsNull() {
+	if data.Project.IsNull() || data.Project.IsUnknown() {
 		project := transport_tpg.MultiEnvDefault([]string{
 			"GOOGLE_PROJECT",
 			"GOOGLE_CLOUD_PROJECT",
@@ -148,7 +152,7 @@ func (p *FrameworkProviderConfig) HandleDefaults(ctx context.Context, data *fwmo
 		data.BillingProject = types.StringValue(os.Getenv("GOOGLE_BILLING_PROJECT"))
 	}
 
-	if data.Region.IsNull() {
+	if data.Region.IsNull() || data.Region.IsUnknown() {
 		region := transport_tpg.MultiEnvDefault([]string{
 			"GOOGLE_REGION",
 			"GCLOUD_REGION",
@@ -160,7 +164,7 @@ func (p *FrameworkProviderConfig) HandleDefaults(ctx context.Context, data *fwmo
 		}
 	}
 
-	if data.Zone.IsNull() {
+	if data.Zone.IsNull() || data.Zone.IsUnknown() {
 		zone := transport_tpg.MultiEnvDefault([]string{
 			"GOOGLE_ZONE",
 			"GCLOUD_ZONE",
@@ -174,14 +178,14 @@ func (p *FrameworkProviderConfig) HandleDefaults(ctx context.Context, data *fwmo
 
 	if len(data.Scopes.Elements()) == 0 {
 		var d diag.Diagnostics
-		data.Scopes, d = types.ListValueFrom(ctx, types.StringType, defaultClientScopes)
+		data.Scopes, d = types.ListValueFrom(ctx, types.StringType, transport_tpg.DefaultClientScopes)
 		diags.Append(d...)
 		if diags.HasError() {
 			return
 		}
 	}
 
-	if !data.Batching.IsNull() {
+	if !data.Batching.IsNull() && !data.Batching.IsUnknown() {
 		var pbConfigs []fwmodels.ProviderBatching
 		d := data.Batching.ElementsAs(ctx, &pbConfigs, true)
 		diags.Append(d...)
@@ -189,18 +193,18 @@ func (p *FrameworkProviderConfig) HandleDefaults(ctx context.Context, data *fwmo
 			return
 		}
 
-		if pbConfigs[0].SendAfter.IsNull() {
+		if pbConfigs[0].SendAfter.IsNull() || pbConfigs[0].SendAfter.IsUnknown() {
 			pbConfigs[0].SendAfter = types.StringValue("10s")
 		}
 
-		if pbConfigs[0].EnableBatching.IsNull() {
+		if pbConfigs[0].EnableBatching.IsNull() || pbConfigs[0].EnableBatching.IsUnknown() {
 			pbConfigs[0].EnableBatching = types.BoolValue(true)
 		}
 
 		data.Batching, d = types.ListValueFrom(ctx, types.ObjectType{}.WithAttributeTypes(fwmodels.ProviderBatchingAttributes), pbConfigs)
 	}
 
-	if data.UserProjectOverride.IsNull() && os.Getenv("USER_PROJECT_OVERRIDE") != "" {
+	if (data.UserProjectOverride.IsNull() || data.UserProjectOverride.IsUnknown()) && os.Getenv("USER_PROJECT_OVERRIDE") != "" {
 		override, err := strconv.ParseBool(os.Getenv("USER_PROJECT_OVERRIDE"))
 		if err != nil {
 			diags.AddError(
@@ -209,11 +213,11 @@ func (p *FrameworkProviderConfig) HandleDefaults(ctx context.Context, data *fwmo
 		data.UserProjectOverride = types.BoolValue(override)
 	}
 
-	if data.RequestReason.IsNull() && os.Getenv("CLOUDSDK_CORE_REQUEST_REASON") != "" {
+	if (data.RequestReason.IsNull() || data.RequestReason.IsUnknown()) && os.Getenv("CLOUDSDK_CORE_REQUEST_REASON") != "" {
 		data.RequestReason = types.StringValue(os.Getenv("CLOUDSDK_CORE_REQUEST_REASON"))
 	}
 
-	if data.RequestTimeout.IsNull() {
+	if data.RequestTimeout.IsNull() || data.RequestTimeout.IsUnknown() {
 		data.RequestTimeout = types.StringValue("120s")
 	}
 
@@ -515,7 +519,7 @@ func (p *FrameworkProviderConfig) logGoogleIdentities(ctx context.Context, data 
 	// a separate diagnostics here
 	var d diag.Diagnostics
 
-	if data.ImpersonateServiceAccount.IsNull() {
+	if data.ImpersonateServiceAccount.IsNull() || data.ImpersonateServiceAccount.IsUnknown() {
 
 		tokenSource := GetTokenSource(ctx, data, true, diags)
 		if diags.HasError() {
@@ -575,19 +579,23 @@ func GetCredentials(ctx context.Context, data fwmodels.ProviderModel, initialCre
 	var clientScopes []string
 	var delegates []string
 
-	d := data.Scopes.ElementsAs(ctx, &clientScopes, false)
-	diags.Append(d...)
-	if diags.HasError() {
-		return googleoauth.Credentials{}
+	if !data.Scopes.IsNull() && !data.Scopes.IsUnknown() {
+		d := data.Scopes.ElementsAs(ctx, &clientScopes, false)
+		diags.Append(d...)
+		if diags.HasError() {
+			return googleoauth.Credentials{}
+		}
 	}
 
-	d = data.ImpersonateServiceAccountDelegates.ElementsAs(ctx, &delegates, false)
-	diags.Append(d...)
-	if diags.HasError() {
-		return googleoauth.Credentials{}
+	if !data.ImpersonateServiceAccountDelegates.IsNull() && !data.ImpersonateServiceAccountDelegates.IsUnknown() {
+		d := data.ImpersonateServiceAccountDelegates.ElementsAs(ctx, &delegates, false)
+		diags.Append(d...)
+		if diags.HasError() {
+			return googleoauth.Credentials{}
+		}
 	}
 
-	if !data.AccessToken.IsNull() {
+	if !data.AccessToken.IsNull() && !data.AccessToken.IsUnknown() {
 		contents, _, err := verify.PathOrContents(data.AccessToken.ValueString())
 		if err != nil {
 			diags.AddError("error loading access token", err.Error())
@@ -612,7 +620,7 @@ func GetCredentials(ctx context.Context, data fwmodels.ProviderModel, initialCre
 		}
 	}
 
-	if !data.Credentials.IsNull() {
+	if !data.Credentials.IsNull() && !data.Credentials.IsUnknown() {
 		contents, _, err := verify.PathOrContents(data.Credentials.ValueString())
 		if err != nil {
 			diags.AddError(fmt.Sprintf("error loading credentials: %s", err), err.Error())
@@ -671,7 +679,8 @@ func GetBatchingConfig(ctx context.Context, data types.List, diags *diag.Diagnos
 		EnableBatching: true,
 	}
 
-	if data.IsNull() {
+	// Handle if entire batching block is null/unknown
+	if data.IsNull() || data.IsUnknown() {
 		return bc
 	}
 
@@ -695,4 +704,17 @@ func GetBatchingConfig(ctx context.Context, data types.List, diags *diag.Diagnos
 	}
 
 	return bc
+}
+
+func GetRegionFromRegionSelfLink(selfLink basetypes.StringValue) basetypes.StringValue {
+	re := regexp.MustCompile("/compute/[a-zA-Z0-9]*/projects/[a-zA-Z0-9-]*/regions/([a-zA-Z0-9-]*)")
+	value := selfLink.String()
+	switch {
+	case re.MatchString(value):
+		if res := re.FindStringSubmatch(value); len(res) == 2 && res[1] != "" {
+			region := res[1]
+			return types.StringValue(region)
+		}
+	}
+	return selfLink
 }

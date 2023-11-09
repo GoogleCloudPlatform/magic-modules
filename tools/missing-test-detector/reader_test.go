@@ -13,11 +13,13 @@ func TestReadAllTests(t *testing.T) {
 		for path, err := range errs {
 			t.Logf("path: %s, err: %v", path, err)
 		}
+	} else {
+		t.Log("no services directory provided, skipping TestReadAllTests")
 	}
 }
 
 func TestReadCoveredResourceTestFile(t *testing.T) {
-	tests, err := readTestFile("testdata/service/covered_resource_test.go")
+	tests, err := readTestFiles([]string{"testdata/service/covered_resource_test.go"})
 	if err != nil {
 		t.Fatalf("error reading covered resource test file: %v", err)
 	}
@@ -45,7 +47,7 @@ func TestReadCoveredResourceTestFile(t *testing.T) {
 }
 
 func TestReadConfigVariableTestFile(t *testing.T) {
-	tests, err := readTestFile("testdata/service/config_variable_test.go")
+	tests, err := readTestFiles([]string{"testdata/service/config_variable_test.go"})
 	if err != nil {
 		t.Fatalf("error reading config variable test file: %v", err)
 	}
@@ -65,7 +67,7 @@ func TestReadConfigVariableTestFile(t *testing.T) {
 }
 
 func TestReadMultipleResourcesTestFile(t *testing.T) {
-	tests, err := readTestFile("testdata/service/multiple_resource_test.go")
+	tests, err := readTestFiles([]string{"testdata/service/multiple_resource_test.go"})
 	if err != nil {
 		t.Fatalf("error reading multiple resources test file: %v", err)
 	}
@@ -96,4 +98,82 @@ func TestReadMultipleResourcesTestFile(t *testing.T) {
 	}; !reflect.DeepEqual(tests[0].Steps, expectedSteps) {
 		t.Errorf("found unexpected test steps for multiple resources: %#v, expected %#v", tests[0].Steps, expectedSteps)
 	}
+}
+
+func TestReadSerialResourceTestFile(t *testing.T) {
+	tests, err := readTestFiles([]string{"testdata/service/serial_resource_test.go"})
+	if err != nil {
+		t.Fatalf("error reading serial resource test file: %v", err)
+	}
+	if len(tests) != 2 {
+		t.Fatalf("unexpected number of tests: %d, expected 2", len(tests))
+	}
+	if expectedTests := []*Test{
+		{
+			Name: "testAccSerialResource1",
+			Steps: []Step{
+				{
+					"serial_resource": {
+						"resource": {"field_one": "\"value-one\""},
+					},
+				},
+			},
+		},
+		{
+			Name: "testAccSerialResource2",
+			Steps: []Step{
+				{
+					"serial_resource": {
+						"resource": {
+							"field_two": Resource{
+								"field_three": "\"value-two\"",
+							},
+						},
+					},
+				},
+			},
+		},
+	}; !reflect.DeepEqual(tests, expectedTests) {
+		t.Errorf("found unexpected serialized tests: %v, expected %v", tests, expectedTests)
+	}
+
+}
+
+func TestReadCrossFileTests(t *testing.T) {
+	tests, err := readTestFiles([]string{"testdata/service/cross_file_1_test.go", "testdata/service/cross_file_2_test.go"})
+	if err != nil {
+		t.Fatalf("error reading cross file tests: %v", err)
+	}
+	if len(tests) != 2 {
+		t.Fatalf("unexpected number of tests: %d, expected 2", len(tests))
+	}
+	if expectedTests := []*Test{
+		{
+			Name: "testAccCrossFile1",
+			Steps: []Step{
+				{
+					"serial_resource": {
+						"resource": {"field_one": "\"value-one\""},
+					},
+				},
+			},
+		},
+		{
+			Name: "testAccCrossFile2",
+			Steps: []Step{
+				{
+					"serial_resource": {
+						"resource": {
+							"field_two": Resource{
+								"field_three": "\"value-two\"",
+							},
+						},
+					},
+				},
+			},
+		},
+	}; !reflect.DeepEqual(tests, expectedTests) {
+		t.Errorf("found unexpected cross file tests: %v, expected %v", tests, expectedTests)
+	}
+
 }

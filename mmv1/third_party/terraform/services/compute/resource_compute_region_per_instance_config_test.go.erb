@@ -127,7 +127,7 @@ func TestAccComputeRegionPerInstanceConfig_update(t *testing.T) {
 		},
 	})
 }
-<% unless version == 'ga' -%>
+
 func TestAccComputeRegionPerInstanceConfig_statefulIps(t *testing.T) {
 	t.Parallel()
 
@@ -168,7 +168,6 @@ func TestAccComputeRegionPerInstanceConfig_statefulIps(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func testAccComputeRegionPerInstanceConfig_statefulBasic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
@@ -347,7 +346,7 @@ resource "google_compute_region_instance_group_manager" "rigm" {
 }
 `, context)
 }
-<% unless version == 'ga' -%>
+
 func testAccComputeRegionPerInstanceConfig_statefulIpsBasic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_network" "default" {
@@ -499,7 +498,6 @@ resource "google_compute_disk" "disk1" {
 }
 `, context) + testAccComputeRegionPerInstanceConfig_rigm(context)
 }
-<% end -%>
 
 // Checks that the per instance config with the given name was destroyed
 func testAccCheckComputeRegionPerInstanceConfigDestroyed(t *testing.T, rigmId, configName string) resource.TestCheckFunc {

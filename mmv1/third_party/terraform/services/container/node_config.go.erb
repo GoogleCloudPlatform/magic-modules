@@ -32,8 +32,8 @@ func schemaLoggingVariant() *schema.Schema {
 	return &schema.Schema{
 		Type: schema.TypeString,
 		Optional: true,
+		Computed: true,
 		Description: `Type of logging agent that is used as the default value for node pools in the cluster. Valid values include DEFAULT and MAX_THROUGHPUT.`,
-		Default: "DEFAULT",
 		ValidateFunc: validation.StringInSlice([]string{"DEFAULT", "MAX_THROUGHPUT"}, false),
 	}
 }
@@ -411,37 +411,50 @@ func schemaNodeConfig() *schema.Schema {
 				},
 
 				"taint": {
-					Type:             schema.TypeList,
-					Optional:         true,
-					// Computed=true because GKE Sandbox will automatically add taints to nodes that can/cannot run sandboxed pods.
-					Computed:         true,
-					ForceNew:         true,
-					// Legacy config mode allows explicitly defining an empty taint.
-					// See https://www.terraform.io/docs/configuration/attr-as-blocks.html
-					ConfigMode: schema.SchemaConfigModeAttr,
+					Type:        schema.TypeList,
+					Optional:    true,
 					Description: `List of Kubernetes taints to be applied to each node.`,
-	<% unless version.nil? || version == 'ga' -%>
-					DiffSuppressFunc: containerNodePoolTaintSuppress,
-	<% end -%>
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"key": {
 								Type:     schema.TypeString,
 								Required: true,
-								ForceNew: true,
 								Description: `Key for taint.`,
 							},
 							"value": {
 								Type:     schema.TypeString,
 								Required: true,
-								ForceNew: true,
 								Description: `Value for taint.`,
 							},
 							"effect": {
 								Type:         schema.TypeString,
 								Required:     true,
-								ForceNew:     true,
 								ValidateFunc: validation.StringInSlice([]string{"NO_SCHEDULE", "PREFER_NO_SCHEDULE", "NO_EXECUTE"}, false),
+								Description: `Effect for taint.`,
+							},
+						},
+					},
+				},
+
+				"effective_taints": {
+					Type:             schema.TypeList,
+					Computed:         true,
+					Description: `List of kubernetes taints applied to each node.`,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"key": {
+								Type:     schema.TypeString,
+								Computed: true,
+								Description: `Key for taint.`,
+							},
+							"value": {
+								Type:     schema.TypeString,
+								Computed: true,
+								Description: `Value for taint.`,
+							},
+							"effect": {
+								Type:         schema.TypeString,
+								Computed:     true,
 								Description: `Effect for taint.`,
 							},
 						},
@@ -534,9 +547,17 @@ func schemaNodeConfig() *schema.Schema {
 						Schema: map[string]*schema.Schema{
 							"sysctls": {
 								Type:     schema.TypeMap,
-								Required: true,
+								Optional: true,
 								Elem:     &schema.Schema{Type: schema.TypeString},
 								Description: `The Linux kernel parameters to be applied to the nodes and all pods running on the nodes.`,
+							},
+							"cgroup_mode": {
+								Type:             schema.TypeString,
+								Optional:         true,
+								Computed:         true,
+								ValidateFunc:     validation.StringInSlice([]string{"CGROUP_MODE_UNSPECIFIED", "CGROUP_MODE_V1", "CGROUP_MODE_V2"}, false),
+								Description:      `cgroupMode specifies the cgroup mode to be used on the node.`,
+								DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("CGROUP_MODE_UNSPECIFIED"),
 							},
 						},
 					},
@@ -642,6 +663,29 @@ func schemaNodeConfig() *schema.Schema {
 						},
 					},
 				},
+				"fast_socket": {
+					Type:     schema.TypeList,
+					Optional: true,
+					MaxItems: 1,
+					Description: `Enable or disable NCCL Fast Socket in the node pool.`,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"enabled": {
+								Type:        schema.TypeBool,
+								Required:    true,
+								Description: `Whether or not NCCL Fast Socket is enabled`,
+							},
+						},
+					},
+				},
+				<% unless version == 'ga' -%>
+				"enable_confidential_storage": {
+						Type:     schema.TypeBool,
+						Optional: true,
+						ForceNew: true,
+						Description: `If enabled boot disks are configured with confidential mode.`,
+				},
+				<% end -%>
 			},
 		},
 	}
@@ -779,6 +823,13 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 		}
 	}
 
+	if v, ok := nodeConfig["fast_socket"]; ok && len(v.([]interface{})) > 0 {
+		conf := v.([]interface{})[0].(map[string]interface{})
+		nc.FastSocket = &container.FastSocket{
+			Enabled: conf["enabled"].(bool),
+		}
+	}
+
 	if v, ok := nodeConfig["reservation_affinity"]; ok && len(v.([]interface{})) > 0 {
 		conf := v.([]interface{})[0].(map[string]interface{})
 		valuesSet := conf["values"].(*schema.Set)
@@ -875,11 +926,12 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 				Value:  data["value"].(string),
 				Effect: data["effect"].(string),
 			}
+
 			nodeTaints = append(nodeTaints, taint)
 		}
+
 		nc.Taints = nodeTaints
 	}
-
 
 	if v, ok := nodeConfig["workload_metadata_config"]; ok {
 		nc.WorkloadMetadataConfig = expandWorkloadMetadataConfig(v)
@@ -920,6 +972,12 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 		nc.SoleTenantConfig = expandSoleTenantConfig(v)
 	}
 
+	<% unless version == 'ga' -%>
+	if v,ok := nodeConfig["enable_confidential_storage"]; ok {
+		nc.EnableConfidentialStorage = v.(bool)
+	}
+	<% end -%>
+	
 	<% unless version == "ga" -%>
 	if v, ok := nodeConfig["host_maintenance_policy"]; ok {
 		nc.HostMaintenancePolicy = expandHostMaintenancePolicy(v)
@@ -986,18 +1044,43 @@ func expandLinuxNodeConfig(v interface{}) *container.LinuxNodeConfig {
 	if len(ls) == 0 {
 		return nil
 	}
+	if ls[0] == nil {
+		return &container.LinuxNodeConfig{}
+	}
 	cfg := ls[0].(map[string]interface{})
+
+	linuxNodeConfig := &container.LinuxNodeConfig{}
+	sysctls := expandSysctls(cfg)
+	if sysctls != nil {
+		linuxNodeConfig.Sysctls = sysctls
+	}
+	cgroupMode := expandCgroupMode(cfg)
+	if len(cgroupMode) != 0 {
+		linuxNodeConfig.CgroupMode = cgroupMode
+	}
+
+	return linuxNodeConfig
+}
+
+func expandSysctls(cfg map[string]interface{}) map[string]string {
 	sysCfgRaw, ok := cfg["sysctls"]
 	if !ok {
 		return nil
 	}
-	m := make(map[string]string)
+	sysctls := make(map[string]string)
 	for k, v := range sysCfgRaw.(map[string]interface{}) {
-		m[k] = v.(string)
+		sysctls[k] = v.(string)
 	}
-	return &container.LinuxNodeConfig{
-		Sysctls: m,
+	return sysctls
+}
+
+func expandCgroupMode(cfg map[string]interface{}) string {
+	cgroupMode, ok := cfg["cgroup_mode"]
+	if !ok {
+		return ""
 	}
+
+	return cgroupMode.(string)
 }
 
 func expandSoleTenantConfig(v interface{}) *container.SoleTenantConfig {
@@ -1059,11 +1142,11 @@ func expandConfidentialNodes(configured interface{}) *container.ConfidentialNode
 }
 
 func flattenNodeConfigDefaults(c *container.NodeConfigDefaults) []map[string]interface{} {
-        result := make([]map[string]interface{}, 0, 1)
+	result := make([]map[string]interface{}, 0, 1)
 
-        if c == nil {
-                return result
-        }
+	if c == nil {
+		return result
+	}
 
 	result = append(result, map[string]interface{}{})
 
@@ -1072,14 +1155,25 @@ func flattenNodeConfigDefaults(c *container.NodeConfigDefaults) []map[string]int
 <% unless version == 'ga' -%>
 	result[0]["gcfs_config"] = flattenGcfsConfig(c.GcfsConfig)
 <% end -%>
-        return result
+	return result
 }
 
-func flattenNodeConfig(c *container.NodeConfig) []map[string]interface{} {
+// v == old state of `node_config`
+func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]interface{} {
 	config := make([]map[string]interface{}, 0, 1)
 
 	if c == nil {
 		return config
+	}
+
+	// default to no prior taint state if there are any issues
+	oldTaints := []interface{}{}
+	oldNodeConfigSchemaContainer := v.([]interface{})
+	if len(oldNodeConfigSchemaContainer) != 0 {
+		oldNodeConfigSchema := oldNodeConfigSchemaContainer[0].(map[string]interface{})
+		if vt, ok := oldNodeConfigSchema["taint"]; ok && len(vt.([]interface{})) > 0 {
+			oldTaints = vt.([]interface{})
+		}
 	}
 
 	config = append(config, map[string]interface{}{
@@ -1101,25 +1195,30 @@ func flattenNodeConfig(c *container.NodeConfig) []map[string]interface{} {
 		"metadata":                 c.Metadata,
 		"image_type":               c.ImageType,
 		"labels":                   c.Labels,
-		"resource_labels": 			c.ResourceLabels,
+		"resource_labels":          c.ResourceLabels,
 		"tags":                     c.Tags,
 		"preemptible":              c.Preemptible,
 		"spot":                     c.Spot,
 		"min_cpu_platform":         c.MinCpuPlatform,
 		"shielded_instance_config": flattenShieldedInstanceConfig(c.ShieldedInstanceConfig),
-		"taint":                    flattenTaints(c.Taints),
+		"taint":                    flattenTaints(c.Taints, oldTaints),
+		"effective_taints":         flattenEffectiveTaints(c.Taints),
 		"workload_metadata_config": flattenWorkloadMetadataConfig(c.WorkloadMetadataConfig),
 <% unless version == 'ga' -%>
-		"sandbox_config": 			 flattenSandboxConfig(c.SandboxConfig),
+		"sandbox_config": 			    flattenSandboxConfig(c.SandboxConfig),
 		"host_maintenance_policy":  flattenHostMaintenancePolicy(c.HostMaintenancePolicy),
 <% end -%>
 		"confidential_nodes":       flattenConfidentialNodes(c.ConfidentialNodes),
-		"boot_disk_kms_key": 		c.BootDiskKmsKey,
-		"kubelet_config":            flattenKubeletConfig(c.KubeletConfig),
-		"linux_node_config":         flattenLinuxNodeConfig(c.LinuxNodeConfig),
-                "node_group":                c.NodeGroup,
+		"boot_disk_kms_key":        c.BootDiskKmsKey,
+		"kubelet_config":           flattenKubeletConfig(c.KubeletConfig),
+		"linux_node_config":        flattenLinuxNodeConfig(c.LinuxNodeConfig),
+		"node_group":               c.NodeGroup,
 		"advanced_machine_features": flattenAdvancedMachineFeaturesConfig(c.AdvancedMachineFeatures),
-		"sole_tenant_config":                 flattenSoleTenantConfig(c.SoleTenantConfig),
+		"sole_tenant_config":        flattenSoleTenantConfig(c.SoleTenantConfig),
+		"fast_socket":               flattenFastSocket(c.FastSocket),
+	<% unless version == 'ga' -%>		
+		"enable_confidential_storage": c.EnableConfidentialStorage,
+	<% end -%>
 	})
 
 	if len(c.OauthScopes) > 0 {
@@ -1250,7 +1349,31 @@ func flattenGKEReservationAffinity(c *container.ReservationAffinity) []map[strin
 	return result
 }
 
-func flattenTaints(c []*container.NodeTaint) []map[string]interface{} {
+// flattenTaints records the set of taints already present in state.
+func flattenTaints(c []*container.NodeTaint, oldTaints []interface{}) []map[string]interface{} {
+	taintKeys := map[string]struct{}{}
+	for _, raw := range oldTaints {
+		data := raw.(map[string]interface{})
+		taintKey := data["key"].(string)
+		taintKeys[taintKey] = struct{}{}
+	}
+
+	result := []map[string]interface{}{}
+	for _, taint := range c {
+		if _, ok := taintKeys[taint.Key]; ok {
+			result = append(result, map[string]interface{}{
+				"key":    taint.Key,
+				"value":  taint.Value,
+				"effect": taint.Effect,
+			})
+		}
+	}
+
+	return result
+}
+
+// flattenEffectiveTaints records the complete set of taints returned from GKE.
+func flattenEffectiveTaints(c []*container.NodeTaint) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	for _, taint := range c {
 		result = append(result, map[string]interface{}{
@@ -1259,9 +1382,9 @@ func flattenTaints(c []*container.NodeTaint) []map[string]interface{} {
 			"effect": taint.Effect,
 		})
 	}
+
 	return result
 }
-
 
 func flattenWorkloadMetadataConfig(c *container.WorkloadMetadataConfig) []map[string]interface{} {
 	result := []map[string]interface{}{}
@@ -1329,74 +1452,6 @@ func containerNodePoolLabelsSuppress(k, old, new string, d *schema.ResourceData)
 
 	return true
 }
-
-func containerNodePoolTaintSuppress(k, old, new string, d *schema.ResourceData) bool {
-	// Node configs are embedded into multiple resources (container cluster and
-	// container node pool) so we determine the node config key dynamically.
-	idx := strings.Index(k, ".taint.")
-	if idx < 0 {
-		return false
-	}
-
-	root := k[:idx]
-
-	// Right now, GKE only applies its own out-of-band labels when you enable
-	// Sandbox. We only need to perform diff suppression in this case;
-	// otherwise, the default Terraform behavior is fine.
-	o, n := d.GetChange(root + ".sandbox_config.0.sandbox_type")
-	if o == nil || n == nil {
-		return false
-	}
-
-	// Pull the entire changeset as a list rather than trying to deal with each
-	// element individually.
-	o, n = d.GetChange(root + ".taint")
-	if o == nil || n == nil {
-		return false
-	}
-
-	type taintType struct {
-		Key, Value, Effect string
-	}
-
-	taintSet := make(map[taintType]struct{})
-
-	// Add all new taints to set.
-	for _, raw := range n.([]interface{}) {
-		data := raw.(map[string]interface{})
-		taint := taintType{
-			Key:    data["key"].(string),
-			Value:  data["value"].(string),
-			Effect: data["effect"].(string),
-		}
-		taintSet[taint] = struct{}{}
-	}
-
-	// Remove all current taints, skipping GKE-managed keys if not present in
-	// the new configuration.
-	for _, raw := range o.([]interface{}) {
-		data := raw.(map[string]interface{})
-		taint := taintType{
-			Key:    data["key"].(string),
-			Value:  data["value"].(string),
-			Effect: data["effect"].(string),
-		}
-		if _, ok := taintSet[taint]; ok {
-			delete(taintSet, taint)
-		} else if !strings.HasPrefix(taint.Key, "sandbox.gke.io/") && taint.Key != "kubernetes.io/arch" {
-			// User-provided taint removed in new configuration.
-			return false
-		}
-	}
-
-	// If, at this point, the set still has elements, the new configuration
-	// added an additional taint.
-	if len(taintSet) > 0 {
-		return false
-	}
-
-	return true
-}
 <% end -%>
 
 func flattenKubeletConfig(c *container.NodeKubeletConfig) []map[string]interface{} {
@@ -1416,7 +1471,8 @@ func flattenLinuxNodeConfig(c *container.LinuxNodeConfig) []map[string]interface
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"sysctls": c.Sysctls,
+			"sysctls":     c.Sysctls,
+			"cgroup_mode": c.CgroupMode,
 		})
 	}
 	return result
@@ -1448,6 +1504,16 @@ func flattenSoleTenantConfig(c *container.SoleTenantConfig) []map[string]interfa
 	return append(result, map[string]interface{}{
 		"node_affinity": affinities,
 	})
+}
+
+func flattenFastSocket(c *container.FastSocket) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"enabled": c.Enabled,
+		})
+	}
+	return result
 }
 
 <% unless version == 'ga' -%>

@@ -19,7 +19,7 @@ const (
 	defaultOrganizationDomain = "meep.test.com"
 	defaultOrganizationTarget = "13579"
 	defaultProject            = "foobar"
-	defaultProviderVersion    = "4.28.0"
+	defaultProviderVersion    = "5.0.0"
 	defaultRegion             = "us-central1"
 	defaultServiceAccount     = "meep@foobar.iam.gserviceaccount.com"
 )

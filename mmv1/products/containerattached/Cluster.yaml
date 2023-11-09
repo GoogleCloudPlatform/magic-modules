@@ -202,8 +202,8 @@ properties:
     description: |
       The Kubernetes version of the cluster.
     output: true
-  - !ruby/object:Api::Type::KeyValuePairs
-    name: annotations
+  - !ruby/object:Api::Type::KeyValueAnnotations
+    name: 'annotations'
     description: |
       Optional. Annotations on the cluster. This field has the same
       restrictions as Kubernetes annotations. The total size of all keys and
@@ -296,6 +296,16 @@ properties:
           For more info on RBAC, see
           https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles
         item_type: Api::Type::String
+      - !ruby/object:Api::Type::Array
+        name: adminGroups
+        description: |
+          Groups that can perform operations as a cluster admin. A managed
+          ClusterRoleBinding will be created to grant the `cluster-admin` ClusterRole
+          to the groups. Up to ten admin groups can be provided.
+
+          For more info on RBAC, see
+          https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles
+        item_type: Api::Type::String
   - !ruby/object:Api::Type::NestedObject
     name: monitoringConfig
     description: |
@@ -313,3 +323,17 @@ properties:
             name: enabled
             description: |
               Enable Managed Collection.
+  - !ruby/object:Api::Type::NestedObject
+    name: binaryAuthorization
+    description: |
+      Binary Authorization configuration.
+    allow_empty_object: true
+    default_from_api: true
+    properties:
+      - !ruby/object:Api::Type::Enum
+        name: evaluationMode
+        description: |
+          Configure Binary Authorization evaluation mode.
+        values:
+          - :DISABLED
+          - :PROJECT_SINGLETON_POLICY_ENFORCE

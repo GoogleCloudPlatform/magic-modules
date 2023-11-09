@@ -1,10 +1,11 @@
 resource "google_gkeonprem_bare_metal_admin_cluster" "<%= ctx[:primary_resource_id] %>" {
-  provider = google-beta
   name = "<%= ctx[:vars]['name'] %>"
   location = "us-west1"
   description = "test description"
   bare_metal_version = "1.13.4"
-  annotations = {}
+  annotations = {
+    env = "test"
+  }
   network_config {
     island_mode_cidr {
       service_address_cidr_blocks = ["172.26.0.0/16"]

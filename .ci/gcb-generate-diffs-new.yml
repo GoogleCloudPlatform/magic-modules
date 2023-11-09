@@ -182,23 +182,16 @@ steps:
           - $_PR_NUMBER
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
-      entrypoint: '/workspace/.ci/scripts/go-plus/tgc-tester/test_tgc.sh'
       id: tgc-test
       allowFailure: true
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["tpgb-head", "tpgb-base", "tgc-head", "tgc-base"]
-      env:
-        - TEST_PROJECT=$_VALIDATOR_TEST_PROJECT
-        - TEST_FOLDER_ID=$_VALIDATOR_TEST_FOLDER
-        - TEST_ANCESTRY=$_VALIDATOR_TEST_ANCESTRY
-        - TEST_ORG_ID=$_VALIDATOR_TEST_ORG
       args:
-          - $_PR_NUMBER
-          - $COMMIT_SHA
-          - $BUILD_ID
-          - $PROJECT_ID
-          - "17"  # Build step
-          - terraform-google-conversion
+        - 'test-tgc'
+      env:
+        - COMMIT_SHA=$COMMIT_SHA
+        - PR_NUMBER=$_PR_NUMBER
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
       id: tgc-test-integration-0.12.31
@@ -240,29 +233,27 @@ steps:
           - "19"  # Build step
           - terraform-google-conversion
 
-    - name: 'gcr.io/graphite-docker-images/bash-plus'
+    - name: 'gcr.io/graphite-docker-images/go-plus'
       id: tpgb-test
-      entrypoint: '/workspace/.ci/scripts/bash-plus/terraform-tester/test_terraform.sh'
+      allowFailure: true
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["tpgb-head", "tpgb-base"]
+      args:
+        - 'test-tpg'
       env:
         - VERSION=beta
         - COMMIT_SHA=$COMMIT_SHA
         - PR_NUMBER=$_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/bash-plus'
+    - name: 'gcr.io/graphite-docker-images/go-plus'
       id: tpg-test
-      entrypoint: '/workspace/.ci/scripts/bash-plus/terraform-tester/test_terraform.sh'
+      allowFailure: true
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["tpg-head", "tpg-base"]
       args:
-          - 'ga'                               # remove after 07/2023
-          - $_PR_NUMBER                        # remove after 07/2023
-          - $COMMIT_SHA                        # remove after 07/2023
-          - $BUILD_ID                          # remove after 07/2023
-          - $PROJECT_ID                        # remove after 07/2023
-          - GoogleCloudPlatform/magic-modules  # remove after 07/2023
-          - "21"                               # remove after 07/2023
+        - 'test-tpg'
       env:
         - VERSION=ga
         - COMMIT_SHA=$COMMIT_SHA

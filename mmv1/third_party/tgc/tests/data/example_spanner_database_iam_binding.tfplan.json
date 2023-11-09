@@ -95,7 +95,8 @@
           "encryption_config": [],
           "instance": "my-instance",
           "name": "my-database",
-          "timeouts": null
+          "timeouts": null,
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "ddl": [
@@ -104,7 +105,6 @@
           ],
           "encryption_config": [],
           "id": true,
-          "project": true,
           "state": true
         },
         "before_sensitive": false,
@@ -135,7 +135,8 @@
           "members": [
             "user:jane@example.com"
           ],
-          "role": "roles/compute.networkUser"
+          "role": "roles/compute.networkUser",
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "condition": [],
@@ -143,8 +144,7 @@
           "id": true,
           "members": [
             false
-          ],
-          "project": true
+          ]
         },
         "before_sensitive": false,
         "after_sensitive": {
@@ -173,12 +173,12 @@
           "labels": null,
           "name": "my-instance",
           "num_nodes": 1,
-          "timeouts": null
+          "timeouts": null,
+          "project": "{{.Provider.project}}"
         },
         "after_unknown": {
           "id": true,
           "processing_units": true,
-          "project": true,
           "state": true
         },
         "before_sensitive": false,

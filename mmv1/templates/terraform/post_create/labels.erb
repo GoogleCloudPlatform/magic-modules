@@ -1,5 +1,8 @@
 <% if properties.any?{ |p| p.name == "labels" } -%>
-if v, ok := d.GetOkExists("labels"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, labelsProp)) {
+if v, ok := d.GetOkExists("effective_labels"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, labelsProp)) {
+	labels := d.Get("labels")
+	terraformLables := d.Get("terraform_labels")
+
 	// Labels cannot be set in a create.  We'll have to set them here.
 	err = resource<%= resource_name -%>Read(d, meta)
 	if err != nil {
@@ -7,8 +10,8 @@ if v, ok := d.GetOkExists("labels"); !tpgresource.IsEmptyValue(reflect.ValueOf(v
 	}
 
 	obj := make(map[string]interface{})
-	// d.Get("labels") will have been overridden by the Read call.
-	labelsProp, err := expand<%= resource_name -%>Labels(v, d, config)
+	// d.Get("effective_labels") will have been overridden by the Read call.
+	labelsProp, err := expand<%= resource_name -%>EffectiveLabels(v, d, config)
 	if err != nil {
 		return err
 	}
@@ -46,5 +49,19 @@ if v, ok := d.GetOkExists("labels"); !tpgresource.IsEmptyValue(reflect.ValueOf(v
 		return err
 	}
 
+	// Set back the labels field, as it is needed to decide the value of "labels" in the state in the read function.
+	if err := d.Set("labels", labels); err != nil {
+		return fmt.Errorf("Error setting back labels: %s", err)
+	}
+
+	// Set back the terraform_labels field, as it is needed to decide the value of "terraform_labels" in the state in the read function.
+	if err := d.Set("terraform_labels", terraformLables); err != nil {
+		return fmt.Errorf("Error setting back terraform_labels: %s", err)
+	}
+
+	// Set back the effective_labels field, as it is needed to decide the value of "effective_labels" in the state in the read function.
+	if err := d.Set("effective_labels", v); err != nil {
+		return fmt.Errorf("Error setting back effective_labels: %s", err)
+	}
 }
 <% end -%>
