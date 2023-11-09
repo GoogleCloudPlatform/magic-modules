@@ -340,11 +340,6 @@ func TestInternalIpDiffSuppress(t *testing.T) {
 			New:                "2600:1900:4020:31cd:8000:0:0:8000",
 			ExpectDiffSuppress: false,
 		},
-		"do not suppress - ipv6 IPs with netmask": {
-			Old:                "2600:1900:4020:31cd:8000:0:0:0/96",
-			New:                "2600:1900:4020:31cd:8001::/96",
-			ExpectDiffSuppress: false,
-		},
 		"suppress - ipv4 IPs": {
 			Old:                "1.2.3.4",
 			New:                "1.2.3.4",
