@@ -320,6 +320,11 @@ func TestInternalIpDiffSuppress(t *testing.T) {
 			New:                "projects/project_id/regions/region/addresses/address-name",
 			ExpectDiffSuppress: true,
 		},
+		"do not suppress - ipv6 IPs different netmask": {
+			Old:                "2600:1900:4020:31cd:8000:0:0:0/96",
+			New:                "2600:1900:4020:31cd:8000:0:0:0/95",
+			ExpectDiffSuppress: false,
+		},
 		"do not suppress - reference and ipv6 IP with netmask": {
 			Old:                "projects/project_id/regions/region/addresses/address-name",
 			New:                "2600:1900:4020:31cd:8000:0:0:0/96",
@@ -363,6 +368,11 @@ func TestInternalIpDiffSuppress(t *testing.T) {
 		"do not suppress - different ipv4 IPs": {
 			Old:                "1.2.3.4",
 			New:                "1.2.3.5",
+			ExpectDiffSuppress: false,
+		},
+		"do not suppress - ipv4 IPs different netmask": {
+			Old:                "1.2.3.4/24",
+			New:                "1.2.3.5/25",
 			ExpectDiffSuppress: false,
 		},
 		"do not suppress - different references": {
