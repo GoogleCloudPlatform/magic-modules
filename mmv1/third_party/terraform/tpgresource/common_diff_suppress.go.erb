@@ -182,37 +182,39 @@ func TimestampDiffSuppress(format string) schema.SchemaDiffSuppressFunc {
 // Suppresses diff for IPv4 and IPv6 different formats.
 // It also suppress diffs if one IP and one reference are given.
 func InternalIpDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+	addr_equality := false
+	netmask_equality := false
+
 	addr_netmask_old := strings.Split(old, "/")
 	addr_netmask_new := strings.Split(new, "/")
 
 	// Check if old or new are IPs (with or without netmask)
-	addr_old := func() net.IP {
-		if net.ParseIP(addr_netmask_old[0]) == nil {
-			return net.ParseIP(addr_netmask_old[0])
-		}
-		return net.ParseIP(old)
-	}()
-	addr_new := func() net.IP {
-		if net.ParseIP(addr_netmask_new[0]) == nil {
-			return net.ParseIP(addr_netmask_new[0])
-		}
-		return net.ParseIP(new)
-	}()
-
-	// If old or new are references, return true
-	if (addr_old == nil) || (addr_new == nil) {
-		return true
+	var addr_old net.IP
+	if net.ParseIP(addr_netmask_old[0]) == nil {
+		addr_old = net.ParseIP(addr_netmask_old[0])
+	} else {
+		addr_old = net.ParseIP(old)
+	}
+	var addr_new net.IP
+	if net.ParseIP(addr_netmask_new[0]) == nil {
+		addr_new = net.ParseIP(addr_netmask_new[0])
+	} else {
+		addr_new = net.ParseIP(new)
 	}
 
-	addr_equality := false
-	netmask_equality := false
+	// if old is an IP and new is a reference
+	// consider them the same
+	if (addr_old != nil) && (addr_new == nil) {
+		addr_equality = true
+	}
 
+	// old and new are equivalent IP addresses
 	if bytes.Equal(addr_old, addr_new) {
 		addr_equality = true
 	}
 
 	// If old and new have a netmask compare them,
-	// otherwise always assume they are the same
+	// otherwise always assume they are the same.
 	if (len(addr_netmask_old)) == 2 && (len(addr_netmask_new) == 2) {
 		netmask_equality = addr_netmask_old[1] == addr_netmask_new[1]
 	} else {
