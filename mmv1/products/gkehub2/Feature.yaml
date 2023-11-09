@@ -271,9 +271,11 @@ properties:
           - !ruby/object:Api::Type::String
             name: version
             description: 'Configures the version of Policy Controller'
+            default_from_api: true
           - !ruby/object:Api::Type::NestedObject
             name: policyControllerHubConfig
             description: 'Configuration of Policy Controller'
+            required: true
             properties:
               - !ruby/object:Api::Type::Enum
                 name: installSpec
@@ -304,6 +306,7 @@ properties:
               - !ruby/object:Api::Type::NestedObject
                 name: monitoring
                 description: 'Monitoring specifies the configuration of monitoring Policy Controller.'
+                default_from_api: true
                 properties:
                   - !ruby/object:Api::Type::Array
                     name: backends
@@ -324,6 +327,7 @@ properties:
                 description: 'Specifies the deployment config to each of the deployments ("admission", "audit", "mutation").'
                 custom_expand: templates/terraform/custom_expand/gkehub2_feature_policycontroller_deployment_configs.go.erb
                 custom_flatten: templates/terraform/custom_flatten/gkehub2_feature_policycontroller_deployment_configs.go.erb
+                is_set: true
                 item_type: !ruby/object:Api::Type::NestedObject
                   name: 'required but unused'
                   description: 'required but unused'
@@ -331,16 +335,14 @@ properties:
                     - !ruby/object:Api::Type::Enum
                       name: component
                       description: 'The component that this deployment config should be applied to.'
+                      default_from_api: true
                       values:
-                        - :ADMISSION
-                        - :AUDIT
-                        - :MUTATION
+                        - :admission
+                        - :audit
+                        - :mutation
                     - !ruby/object:Api::Type::Integer
                       name: replicaCount
                       description: 'Pod replica count.'
-                    - !ruby/object:Api::Type::Boolean
-                      name: podAntiAffinity
-                      description: 'Pod anti-affinity enablement.'
                     - !ruby/object:Api::Type::NestedObject
                       name: containerResources
                       description: 'Container resource requirements.'
@@ -368,17 +370,40 @@ properties:
                     - !ruby/object:Api::Type::Enum
                       name: podAffinity
                       description: 'Pod affinity configuration.'
+                      default_from_api: true
                       values:
                         - :AFFINITY_UNSPECIFIED
                         - :NO_AFFINITY
                         - :ANTI_AFFINITY
+                    - !ruby/object:Api::Type::Array
+                      name: podToleration
+                      api_name: podTolerations
+                      description: 'Pod tolerations of node taints.'
+                      item_type: !ruby/object:Api::Type::NestedObject
+                        name: 'required but unused'
+                        description: 'required but unused'
+                        properties:
+                          - !ruby/object:Api::Type::String
+                            name: key
+                            description: 'Matches a taint key (not necessarily unique).'
+                          - !ruby/object:Api::Type::String
+                            name: operator
+                            description: 'Matches a taint operator.'
+                          - !ruby/object:Api::Type::String
+                            name: value
+                            description: 'Matches a taint value.'
+                          - !ruby/object:Api::Type::String
+                            name: effect
+                            description: 'Matches a taint effect.'
               - !ruby/object:Api::Type::NestedObject
                 name: policyContent
                 description: 'Specifies the desired policy content on the cluster.'
+                default_from_api: true
                 properties:
                   - !ruby/object:Api::Type::NestedObject
                     name: templateLibrary
                     description: 'Configures the installation of the Template Library.'
+                    default_from_api: true
                     properties:
                       - !ruby/object:Api::Type::Enum
                         name: installation
@@ -393,6 +418,7 @@ properties:
                     description: 'Configures which bundles to install and their corresponding install specs.'
                     custom_expand: templates/terraform/custom_expand/gkehub2_feature_policycontroller_policy_content_bundles.go.erb
                     custom_flatten: templates/terraform/custom_flatten/gkehub2_feature_policycontroller_policy_content_bundles.go.erb
+                    is_set: true
                     item_type: !ruby/object:Api::Type::NestedObject
                       name: 'required but unused'
                       description: 'required but unused'

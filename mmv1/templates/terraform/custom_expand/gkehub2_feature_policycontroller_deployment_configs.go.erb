@@ -14,8 +14,51 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d t
     }
 
     deploymentConfig := raw.(map[string]interface{})
+    log.Printf("WTF*** config is: %v\n", deploymentConfig)
     componentName := deploymentConfig["component"].(string)
     delete(deploymentConfig, "component")
+
+    if v, ok := deploymentConfig["pod_toleration"]; ok {
+      deploymentConfig["pod_tolerations"] = v
+      delete(deploymentConfig, "pod_toleration")
+    }
+
+    if v, ok := deploymentConfig["pod_affinity"]; ok {
+      pa := v.(string)
+      if pa == "" {
+        delete(deploymentConfig, "pod_affinity")
+      }
+    }
+
+    if v, ok := deploymentConfig["replica_count"]; ok {
+      rc := v.(int)
+      if rc == 0 {
+        delete(deploymentConfig, "replica_count")
+      }
+    }
+
+    // Somehow the container_resources field gets encoded unexpectedly into an array. Fix that.
+    if v, ok := deploymentConfig["container_resources"]; ok {
+      if arr, ok := v.([]interface{}); ok && len(arr) == 1 {
+        actualCR := arr[0].(map[string]interface{})
+        if l, ok := actualCR["limits"]; ok {
+          if lArr, ok := l.([]interface{}); ok && len(lArr) == 1 {
+            actualLimits := lArr[0].(map[string]interface{})
+            actualCR["limits"] = actualLimits
+          }
+        }
+        if r, ok := actualCR["requests"]; ok {
+          if rArr, ok := r.([]interface{}); ok && len(rArr) == 1 {
+            actualRequests := rArr[0].(map[string]interface{})
+            actualCR["requests"] = actualRequests
+          }
+        }
+        deploymentConfig["container_resources"] = actualCR
+      } else if ok && len(arr) == 0 {
+        delete(deploymentConfig, "container_resources")
+      }
+    }
+
     req[componentName] = deploymentConfig
   }
 

@@ -512,7 +512,7 @@ resource "google_gke_hub_feature" "feature" {
 
 func TestAccGKEHubFeature_FleetDefaultMemberConfigPolicyController(t *testing.T) {
 	// VCR fails to handle batched project services
-	// acctest.SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -533,7 +533,7 @@ func TestAccGKEHubFeature_FleetDefaultMemberConfigPolicyController(t *testing.T)
 				ResourceName:            "google_gke_hub_feature.feature",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"project"},
+				ImportStateVerifyIgnore: []string{"project", "update_time"},
 			},
 			{
 				Config: testAccGKEHubFeature_FleetDefaultMemberConfigPolicyControllerUpdate(context),
@@ -548,7 +548,8 @@ func TestAccGKEHubFeature_FleetDefaultMemberConfigPolicyController(t *testing.T)
 }
 
 func testAccGKEHubFeature_FleetDefaultMemberConfigPolicyController(context map[string]interface{}) string {
-	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
+// gkeHubFeatureProjectSetupForGA(context) + 
+	return acctest.Nprintf(`
 resource "google_gke_hub_feature" "feature" {
   name = "policycontroller"
   location = "global"
@@ -567,31 +568,49 @@ resource "google_gke_hub_feature" "feature" {
           }
         }
         audit_interval_seconds = 30
+        deployment_config {
+          component = "admission"
+          container_resources {
+            limits {
+              memory = "1Gi"
+              cpu = "1.5"
+            }
+            requests {
+              memory = "500Mi"
+              cpu = "150m"
+            }
+          }
+          pod_toleration {
+            key = "key1"
+            operator = "Equal"
+            value = "value1"
+            effect = "NoSchedule"
+          }
+        }
         referential_rules_enabled = true
       }
     }
   }
-  depends_on = [google_project_service.anthos, google_project_service.gkehub, google_project_service.poco]
-  project = google_project.project.project_id
 }
 `, context)
 }
 
 func testAccGKEHubFeature_FleetDefaultMemberConfigPolicyControllerUpdate(context map[string]interface{}) string {
-	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
+// gkeHubFeatureProjectSetupForGA(context) + 
+	return acctest.Nprintf(`
 resource "google_gke_hub_feature" "feature" {
   name = "policycontroller"
   location = "global"
   fleet_default_member_config {
     policycontroller {
-      hub_config {
+      policy_controller_hub_config {
         install_spec = "INSTALL_SPEC_SUSPENDED"
         policy_content {
-          bundles {
+          bundle {
             name = "pci-dss-v3.2.1"
             exempted_namespaces = ["baz", "bar"]
           }
-          bundles {
+          bundle {
             name = "nist-sp-800-190"
             exempted_namespaces = []
           }
@@ -601,24 +620,26 @@ resource "google_gke_hub_feature" "feature" {
         }
         constraint_violation_limit = 50
         referential_rules_enabled = true
+        log_denies_enabled = true
+        mutation_enabled = true
         deployment_config {
           component = "admission"
-          replica_count = 1
+          replica_count = 2
           pod_affinity = "ANTI_AFFINITY"
         }
         deployment_config {
           component = "audit"
           container_resources {
             limits {
-              memory = "500Mi"
-              cpu = "1g"
+              memory = "1Gi"
+              cpu = "1.5"
             }
             requests {
-              memory = "1Gi"
+              memory = "500Mi"
               cpu = "150m"
             }
           }
-          pod_tolerations {
+          pod_toleration {
             key = "key1"
             operator = "Equal"
             value = "value1"
@@ -627,14 +648,12 @@ resource "google_gke_hub_feature" "feature" {
         }
         monitoring {
           backends = [
-            :PROMETHEUS
+            "PROMETHEUS"
           ]
         }
       }
     }
   }
-  depends_on = [google_project_service.anthos, google_project_service.gkehub, google_project_service.poco]
-  project = google_project.project.project_id
 }
 `, context)
 }
