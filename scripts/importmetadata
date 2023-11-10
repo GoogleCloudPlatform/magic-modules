@@ -9,32 +9,25 @@
 # Checks if uses schema.ImportStatePassThrough(), if it has a hardcoded return based on how ID is constructed in the resource
 # Anything else is non standard -- will take from MD files 
 #
-# Expecting to see a resource and it's not being generated? Please reach out to @nickelliot
+# Expecting to see a resource and it's not being generated? Please reach out to nickelliot@google.com
 
 shopt -s nullglob
 
 if [ -z "$1" ]
 then
-	echo "Please run script with the format './scripts/importmetadata <ga or beta> <basepath (optional arg)>'"
+	basepath="$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta"
+else
+	basepath=$1
+fi
+if [[ $basepath =~ google-[^-\/]* ]]
+then
+	servicepath="${basepath}/${BASH_REMATCH[0]}"
+else
+	echo "basepath must contain reference to a google provider'"
 	exit 1
 fi
-if [ -z "$2" ]
-then
-	basepath="$GOPATH/src/github.com/hashicorp/"
-else
-	basepath=$2
-fi
-if [ "$1"=="beta" ]
-then
-	basepath="${basepath}/terraform-provider-google-beta"
-	servicepath="${basepath}/google-beta"
-else
-	basepath="${basepath}/terraform-provider-google"
-	servicepath="${basepath}/google"
-fi
-
-echo "# $resource_type: [list-of-acceptable-import-templates]" > importmetadata.txt
-echo "{" >> importmetadata.txt
+echo "# $resource_type: [list-of-acceptable-import-templates]"
+echo "{"
 
 for file in $(find $servicepath/services/**/resource_*.go -type f -print); do
 	importable=$(ggrep -Pzo 'Importer:' $file)
@@ -54,8 +47,8 @@ for file in $(find $servicepath/services/**/resource_*.go -type f -print); do
 		importable=$(ggrep -Pzo 'return ResourceLoggingBucketConfig' $file)
 		if [ -z "$importable"  ]
     	then
-#			echo -n \	\"$resource\"\: >> importmetadata.txt
-#			echo \	not importable >> importmetadata.txt
+#			echo -n \	\"$resource\"\:
+#			echo \	not importable
 
 # NOT IMPORTABLE RESOURCES
 			continue
@@ -69,14 +62,14 @@ for file in $(find $servicepath/services/**/resource_*.go -type f -print); do
 				importformat=$(ggrep -Pzo '```\n\$ terraform import(.*\n)*?```' $resourcemd)
 				if [ -z "$importformat"  ]
 	    		then
-					echo -n \	\"$resource\"\: >> importmetadata.txt
-					echo \	NON STANDARD MD LOGGING >> importmetadata.txt
+					echo -n \	\"$resource\"\:
+					echo \	NON STANDARD MD LOGGING
 #	    		else
-					echo -n \	\"$resource\"\: >> importmetadata.txt
+					echo -n \	\"$resource\"\:
 					importformat=$(sed -e 's|``` \$ terraform import [^.]*\.[^[[:space:]]* |\[\"|g'  <<< $importformat)
 					importformat=$(sed -e 's| \$ terraform import [^.]*\.[^[[:space:]]* |", "|g'  <<< $importformat)
 					importformat=$(sed -e 's| ```|\"\]|g'  <<< $importformat)
-			    	echo \ "$importformat" >> importmetadata.txt
+			    	echo \ "$importformat"
 		    	fi
 		    fi
 		fi
@@ -101,14 +94,14 @@ for file in $(find $servicepath/services/**/resource_*.go -type f -print); do
 					importformat=$(ggrep -Pzos '```\n\$ terraform import(.*\n)*?```' $resourcemd)
 					if [ -z "$importformat"  ]
 		    		then
-						echo -n \	\"$resource\"\: >> importmetadata.txt
-						echo \	"???" >> importmetadata.txt
+						echo -n \	\"$resource\"\:
+						echo \	"???"
 		    		else
-						echo -n \	\"$resource\"\: >> importmetadata.txt
+						echo -n \	\"$resource\"\:
 						importformat=$(sed -e 's|``` \$ terraform import [^.]*\.[^[[:space:]]* |\[\"|g'  <<< $importformat)
 						importformat=$(sed -e 's| \$ terraform import [^.]*\.[^[[:space:]]* |", "|g'  <<< $importformat)
 						importformat=$(sed -e 's| ```|\"\]|g'  <<< $importformat)
-				    	echo \ "$importformat" >> importmetadata.txt
+				    	echo \ "$importformat"
 			    	fi
 		    	else
 # need to do a different check for google_* resources
@@ -118,8 +111,8 @@ for file in $(find $servicepath/services/**/resource_*.go -type f -print); do
     				then
 						case $resource in
 						google_folder)
-							echo -n \	\"$resource\"\: >> importmetadata.txt
-							echo \ '["folders/{{folder_id}}", "{{folder_id}}"]' >> importmetadata.txt
+							echo -n \	\"$resource\"\:
+							echo \ '["folders/{{folder_id}}", "{{folder_id}}"]'
 							;;
 						google_logging_bucket_config)
 # fake logging resources
@@ -129,16 +122,16 @@ for file in $(find $servicepath/services/**/resource_*.go -type f -print); do
 							;;
 						*)
 		#resource needs to be hardcoded into this script for support
-							echo -n "$resource: " >> importmetadata.txt
-							echo "-- $resourcenogoog: " >> importmetadata.txt
-							echo \ NOT CONFIGURED  >> importmetadata.txt
+							echo -n "$resource: "
+							echo "-- $resourcenogoog: "
+							echo \ NOT CONFIGURED 
 						esac
 					else
-						echo -n \	\"$resource\"\: >> importmetadata.txt
+						echo -n \	\"$resource\"\:
 						importformat=$(sed -e 's|``` \$ terraform import [^.]*\.[^[[:space:]]* |\[\"|g'  <<< $importformat)
 						importformat=$(sed -e 's| \$ terraform import [^.]*\.[^[[:space:]]* |", "|g'  <<< $importformat)
 						importformat=$(sed -e 's| ```|\"\]|g'  <<< $importformat)
-				    	echo \ "$importformat" >> importmetadata.txt
+				    	echo \ "$importformat"
 				    fi
 			    fi
 		    else
@@ -147,44 +140,44 @@ for file in $(find $servicepath/services/**/resource_*.go -type f -print); do
 
 				case $resource in
 				google_app_engine_application)
-					echo -n \	\"$resource\"\: >> importmetadata.txt
-					echo \ '["{{project}}"]' >> importmetadata.txt
+					echo -n \	\"$resource\"\:
+					echo \ '["{{project}}"]'
 					;;
 				google_compute_project_default_network_tier)
-					echo -n \	\"$resource\"\: >> importmetadata.txt
-					echo \ '["{{project}}"]' >> importmetadata.txt
+					echo -n \	\"$resource\"\:
+					echo \ '["{{project}}"]'
 					;;
 				google_compute_project_metadata)
-					echo -n \	\"$resource\"\: >> importmetadata.txt
-					echo \ '["{{project}}"]' >> importmetadata.txt
+					echo -n \	\"$resource\"\:
+					echo \ '["{{project}}"]'
 					;;
 				google_compute_project_metadata_item)
-					echo -n \	\"$resource\"\: >> importmetadata.txt
-					echo \ '["{{key}}"]' >> importmetadata.txt
+					echo -n \	\"$resource\"\:
+					echo \ '["{{key}}"]'
 					;;
 				google_compute_shared_vpc_host_project)
-					echo -n \	\"$resource\"\: >> importmetadata.txt
-					echo \ '["{{project}}"]' >> importmetadata.txt
+					echo -n \	\"$resource\"\:
+					echo \ '["{{project}}"]'
 					;;
 				google_compute_shared_vpc_service_project)
-					echo -n \	\"$resource\"\: >> importmetadata.txt
-					echo \ '["{{host_project}}/{{service_project}}"]' >> importmetadata.txt
+					echo -n \	\"$resource\"\:
+					echo \ '["{{host_project}}/{{service_project}}"]'
 					;;
 				google_dataflow_job)
-					echo -n \	\"$resource\"\: >> importmetadata.txt
-					echo \ '["{{job_id}}"]' >> importmetadata.txt
+					echo -n \	\"$resource\"\:
+					echo \ '["{{job_id}}"]'
 					;;
 				google_billing_subaccount)
-					echo -n \	\"$resource\"\: >> importmetadata.txt
-					echo \ '["billingAccounts/{{master_billing_account}}"]' >> importmetadata.txt
+					echo -n \	\"$resource\"\:
+					echo \ '["billingAccounts/{{master_billing_account}}"]'
 					;;
 				google_organization_iam_custom_role)
-					echo -n \	\"$resource\"\: >> importmetadata.txt
-					echo \ '["organizations/{{org_id}}/roles/{{role_id}}"]' >> importmetadata.txt
+					echo -n \	\"$resource\"\:
+					echo \ '["organizations/{{org_id}}/roles/{{role_id}}"]'
 					;;
 				google_storage_notification)
-					echo -n \	\"$resource\"\: >> importmetadata.txt
-					echo \ '["{{notification_id}}", "{{bucket}}/notificationConfigs/{{id}}"]' >> importmetadata.txt
+					echo -n \	\"$resource\"\:
+					echo \ '["{{notification_id}}", "{{bucket}}/notificationConfigs/{{id}}"]'
 					;;
 				google_dataflow_flex_template_job)
 #code checks for importstatepassthrough but officially does not support importing so we proceed with no entry
@@ -194,13 +187,13 @@ for file in $(find $servicepath/services/**/resource_*.go -type f -print); do
 					;;
 				*)
 #resource needs to be hardcoded into this script for support
-					echo -n "$resource: " >> importmetadata.txt
-					echo \ NOT CONFIGURED  >> importmetadata.txt
+					echo -n "$resource: "
+					echo \ NOT CONFIGURED
 #					exit 1
 				esac
 			fi
 	    else
-			echo -n \	\"$resource\"\: >> importmetadata.txt
+			echo -n \	\"$resource\"\:
 			importformat=${importformat/tpgresource.ParseImportId\(\[\]string\{/\[}
 			importformat=${importformat/\}/]}
 			importformat=${importformat//(?P</\{\{}}
@@ -215,15 +208,21 @@ for file in $(find $servicepath/services/**/resource_*.go -type f -print); do
 			importformat=$(sed -e 's|, \]|\]|g'  <<< $importformat)
 			importformat=$(sed -e 's|\[ \"|\[\"|g'  <<< $importformat)
 
-	    	echo \ "$importformat" >> importmetadata.txt
+			importformat=${importformat//\^/}
+			importformat=${importformat//\$/}
+	    	echo \ "$importformat"
 	    fi
 	    iamname=${resource/google/iam}
 	    iamservice=$(basename $(dirname $file))
 	    if [ -f "$servicepath/services/$iamservice/$iamname.go" ]
 	    then
-			echo -n \	\"$iamname\"\: >> importmetadata.txt
-	    	echo \ "$importformat" >> importmetadata.txt
+			echo -n \	\"${resource}_iam_policy\"\:
+	    	echo \ "$importformat"
+			echo -n \	\"${resource}_iam_binding\"\:
+	    	echo \ ${importformat//\}\}\"/\}\} \{\{role\}\}\"}
+			echo -n \	\"${resource}_iam_member\"\:
+	    	echo \ ${importformat//\}\}\"/\}\} \{\{role\}\} \{\{member\}\}\"}
 	    fi
 	fi
 done
-echo "}" >> importmetadata.txt
+echo "}"
