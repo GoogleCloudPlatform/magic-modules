@@ -52,7 +52,7 @@ func TestReadPlannedAssetsCoverage(t *testing.T) {
 			generateTestFiles(t, "../testdata/templates", dir, c.name+".json")
 			generateTestFiles(t, "../testdata/templates", dir, c.name+".tf")
 
-			// tfstat files are for cases testing updates, eg. project update.
+			// tfstate files are for cases testing updates, eg. project update.
 			// Uses glob matching to match generateTestFiles internals.
 			tfstateMatches, err := filepath.Glob(filepath.Join("../testdata/templates", c.name+".tfstate"))
 			if err != nil {
@@ -69,7 +69,7 @@ func TestReadPlannedAssetsCoverage(t *testing.T) {
 				}
 			}
 
-      // Run terraform init and terraform apply to generate tfplan.json files
+			// Run terraform init and terraform apply to generate tfplan.json files
 			terraformWorkflow(t, dir, c.name)
 
 			// Unmarshal payload from testfile into `want` variable.
@@ -136,7 +136,7 @@ func TestReadPlannedAssetsCoverage_WithoutDefaultProject(t *testing.T) {
 			generateTestFiles(t, "../testdata/templates", dir, c.name+"_without_default_project.json")
 			generateTestFiles(t, "../testdata/templates", dir, c.name+".tf")
 
-      // Run terraform init and terraform plan to generate tfplan.json files
+			// Run terraform init and terraform plan to generate tfplan.json files
 			terraformWorkflow(t, dir, c.name)
 
 			// Unmarshal payload from testfile into `want` variable.
