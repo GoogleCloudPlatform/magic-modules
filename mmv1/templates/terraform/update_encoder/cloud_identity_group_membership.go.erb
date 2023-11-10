@@ -16,11 +16,54 @@
 	b, a := d.GetChange("roles")
 	before := b.(*schema.Set)
 	after := a.(*schema.Set)
-	// ref: https://cloud.google.com/identity/docs/reference/rest/v1/groups.memberships/modifyMembershipRoles#request-body
-	addRoles := after.Difference(before).List()
-	var removeRoles []string
-	for _, r := range before.Difference(after).List() {
-		removeRoles = append(removeRoles, r.(map[string]interface{})["name"].(string))
+
+	ignoreUpdateR := make(map[string]struct{})
+	addRoleList := after.Difference(before).List()
+	removeRoleList := before.Difference(after).List()
+
+	var updateRolesParams []map[string]interface{}
+	for _, addR := range addRoleList {
+		ar := addR.(map[string]interface{})["name"].(string)
+		ae := addR.(map[string]interface{})["expiry_detail"].([]map[string]string)
+		if len(ae) > 1 {
+			return nil, fmt.Errorf("only expect one or zero expiry_detail per role")
+		}
+		for _, removeR := range removeRoleList {
+			if ar == removeR.(map[string]interface{})["name"].(string) {
+				ignoreUpdateR[ar] = struct{}{}
+				var updateR map[string]interface{}
+				if len(ae) == 0 {
+					updateR = map[string]interface{}{"name": ar}
+				} else {
+					updateR = map[string]interface{}{"name": ar, "expiry_detail": ae[0]}
+				}
+				updateP := map[string]interface{}{"field_mask": "expiryDetail.expire_time", "membership_role": updateR}
+				updateRolesParams = append(updateRolesParams, updateP)
+			}
+		}
 	}
-	req := map[string]interface{}{"addRoles": addRoles, "removeRoles": removeRoles}
+
+	var addRoles []map[string]interface{}
+	for _, r := range addRoleList {
+		name := r.(map[string]interface{})["name"].(string)
+		if _, ignore := ignoreUpdateR[name]; ignore {
+			continue
+		}
+		expiryDetail := r.(map[string]interface{})["expiry_detail"].([]map[string]string)
+		if len(expiryDetail) == 0 {
+			addRoles = append(addRoles, map[string]interface{}{"name": name})
+		} else {
+			addRoles = append(addRoles, map[string]interface{}{"name": name, "expiry_detail": expiryDetail[0]})
+		}
+	}
+	var removeRoles []string
+	for _, r := range removeRoleList {
+		name := r.(map[string]interface{})["name"].(string)
+		if _, ignore := ignoreUpdateR[name]; ignore {
+			continue
+		}
+		removeRoles = append(removeRoles, name)
+	}
+	// ref: https://cloud.google.com/identity/docs/reference/rest/v1/groups.memberships/modifyMembershipRoles#request-body
+	req := map[string]interface{}{"addRoles": addRoles, "removeRoles": removeRoles, "updateRolesParams": updateRolesParams}
 	return req, nil
