@@ -29,7 +29,6 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/caiasset"
-	resources "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources"
 )
 
 // TestCLI tests the "convert" and "validate" subcommand against a generated .tfplan file.
@@ -37,12 +36,6 @@ func TestCLI(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test in short mode.")
 		return
-	}
-
-	// trigger gcloud auth by setting offline to false
-	_, err := resources.NewConfig(context.Background(), "project", "", "", false, "", nil)
-	if err != nil {
-		t.Fatalf("NewConfig(online) = %v, want = nil", err)
 	}
 
 	// Test cases for each type of resource is defined here.
