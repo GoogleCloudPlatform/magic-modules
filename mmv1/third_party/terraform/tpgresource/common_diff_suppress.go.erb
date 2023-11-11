@@ -191,30 +191,28 @@ func InternalIpDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
 	// Check if old or new are IPs (with or without netmask)
 	var addr_old net.IP
 	if net.ParseIP(addr_netmask_old[0]) == nil {
-		addr_old = net.ParseIP(addr_netmask_old[0])
-	} else {
 		addr_old = net.ParseIP(old)
+	} else {
+		addr_old = net.ParseIP(addr_netmask_old[0])
 	}
 	var addr_new net.IP
 	if net.ParseIP(addr_netmask_new[0]) == nil {
-		addr_new = net.ParseIP(addr_netmask_new[0])
-	} else {
 		addr_new = net.ParseIP(new)
+	} else {
+		addr_new = net.ParseIP(addr_netmask_new[0])
 	}
 
-	// if old is an IP and new is a reference
-	// consider them the same
-	if (addr_old != nil) && (addr_new == nil) {
-		addr_equality = true
+	if addr_old != nil {
+		if addr_new == nil {
+			// old is an IP and new is a reference
+			addr_equality = true
+		} else {
+			// old and new are IP addresses
+			addr_equality = bytes.Equal(addr_old, addr_new)
+		}
 	}
 
-	// old and new are equivalent IP addresses
-	if bytes.Equal(addr_old, addr_new) {
-		addr_equality = true
-	}
-
-	// If old and new have a netmask compare them,
-	// otherwise always assume they are the same.
+	// If old and new have a netmask compare them, otherwise suppress
 	if (len(addr_netmask_old)) == 2 && (len(addr_netmask_new) == 2) {
 		netmask_equality = addr_netmask_old[1] == addr_netmask_new[1]
 	} else {

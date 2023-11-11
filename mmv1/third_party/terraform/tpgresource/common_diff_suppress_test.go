@@ -305,7 +305,7 @@ func TestInternalIpDiffSuppress(t *testing.T) {
 			New:                "2600:1900:4020:31cd:8000::",
 			ExpectDiffSuppress: true,
 		},
-		"suppress - long ipv6 IP without netmask and short ipv6 IP wit netmask": {
+		"suppress - long ipv6 IP without netmask and short ipv6 IP with netmask": {
 			Old:                "2600:1900:4020:31cd:8000:0:0:0",
 			New:                "2600:1900:4020:31cd:8000::/96",
 			ExpectDiffSuppress: true,
