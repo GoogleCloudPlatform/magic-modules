@@ -61,12 +61,12 @@ func testAccNetappstoragePool_storagePoolCreateExample_full(context map[string]i
 	return acctest.Nprintf(`
 
 resource "google_compute_network" "peering_network" {
-  name = "tf-test-test-network%{random_suffix}"
+  name = "tf-test-network%{random_suffix}"
 }
 
 # Create an IP address
 resource "google_compute_global_address" "private_ip_alloc" {
-  name          = "tf-test-test-address%{random_suffix}"
+  name          = "tf-test-address%{random_suffix}"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
   prefix_length = 16
@@ -81,18 +81,21 @@ resource "google_service_networking_connection" "default" {
 }
 
 resource "google_netapp_storage_pool" "test_pool" {
-  name = "tf-test-test-pool%{random_suffix}"
+  name = "tf-test-pool%{random_suffix}"
   location = "us-central1"
   service_level = "PREMIUM"
   capacity_gib = "2048"
   network = google_compute_network.peering_network.id
   active_directory      = ""
-  description           = ""
+  description           = "this is a test description"
   global_access_allowed = false
   kms_config            = ""
-  labels                = {}
+  labels                = {
+    key= "test"
+    value= "pool"
+  }
   ldap_enabled          = false
-  psa_range             = ""
+  psa_range             = google_compute_global_address.private_ip_alloc.name
 
 }
 `, context)
@@ -102,12 +105,12 @@ func testAccNetappstoragePool_storagePoolCreateExample_update(context map[string
 	return acctest.Nprintf(`
 
 resource "google_compute_network" "peering_network" {
-  name = "tf-test-test-network%{random_suffix}"
+  name = "tf-test-network%{random_suffix}"
 }
 
 # Create an IP address
 resource "google_compute_global_address" "private_ip_alloc" {
-  name          = "tf-test-test-address%{random_suffix}"
+  name          = "tf-test-address%{random_suffix}"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
   prefix_length = 16
@@ -122,7 +125,7 @@ resource "google_service_networking_connection" "default" {
 }
 
 resource "google_netapp_storage_pool" "test_pool" {
-  name = "tf-test-test-pool%{random_suffix}"
+  name = "tf-test-pool%{random_suffix}"
   location = "us-central1"
   service_level = "PREMIUM"
   capacity_gib = "4096"
@@ -131,9 +134,12 @@ resource "google_netapp_storage_pool" "test_pool" {
   description           = "this is test"
   global_access_allowed = false
   kms_config            = ""
-  labels                = {}
+  labels                = {
+    key= "test"
+    value= "pool"
+  }
   ldap_enabled          = false
-  psa_range             = ""
+  psa_range             = google_compute_global_address.private_ip_alloc.name
 
 }
 `, context)
