@@ -25,6 +25,9 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://cloud.google.com/dataform/docs/'
   api: 'https://cloud.google.com/dataform/reference/rest/v1beta1/projects.locations.repositories'
 id_format: projects/{{project}}/locations/{{region}}/repositories/{{name}}
+iam_policy: !ruby/object:Api::Resource::IamPolicy
+  method_name_separator: ':'
+  parent_resource_attribute: 'repository'
 import_format:
   ['projects/{{project}}/locations/{{region}}/repositories/{{name}}']
 examples:
