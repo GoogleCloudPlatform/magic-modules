@@ -332,7 +332,10 @@ func HandleSDKDefaults(d *schema.ResourceData) error {
 			"CLOUDSDK_CORE_REQUEST_REASON",
 		}, nil))
 	}
+	return nil
+}
 
+func SetEndpointDefaults(d *schema.ResourceData) error {
 	// Generated Products
 	<% products.each do |product| -%>
 	if d.Get("<%= product[:definitions].name.underscore -%>_custom_endpoint") == "" {
