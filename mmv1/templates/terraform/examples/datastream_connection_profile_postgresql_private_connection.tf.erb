@@ -1,29 +1,3 @@
-resource "google_sql_database_instance" "instance" {
-    name             = "<%= ctx[:vars]['database_instance_name'] %>"
-    database_version = "POSTGRES_14"
-    region           = "us-central1"
-    settings {
-        tier = "db-f1-micro"
-    }
-    deletion_protection  = "<%= ctx[:vars]['deletion_protection'] %>"
-}
-
-resource "google_sql_database" "db" {
-    instance = google_sql_database_instance.instance.name
-    name     = "db"
-}
-
-resource "random_password" "pwd" {
-    length = 16
-    special = false
-}
-
-resource "google_sql_user" "user" {
-    name = "user"
-    instance = google_sql_database_instance.instance.name
-    password = random_password.pwd.result
-}
-
 resource "google_datastream_private_connection" "private_connection" {
 	display_name          = "Connection profile"
 	location              = "us-central1"
@@ -49,10 +23,10 @@ resource "google_datastream_connection_profile" "<%= ctx[:primary_resource_id] %
 	connection_profile_id = "<%= ctx[:vars]['connection_profile_id'] %>"
 
 	postgresql_profile {
-	    hostname = google_sql_database_instance.instance.private_ip_address
-      username = google_sql_user.user.name
-      password = google_sql_user.user.password
-      database = google_sql_database.db.name
+	    hostname = "hostname"
+      username = "username"
+      password = "password"
+      database = "database"
 	}
 
 	private_connectivity {
