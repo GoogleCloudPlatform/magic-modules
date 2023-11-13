@@ -445,4 +445,4 @@ properties:
       project-level default tier is used.
     values:
       - :PREMIUN
-      - :STANDAR
+      - :STANDARD
