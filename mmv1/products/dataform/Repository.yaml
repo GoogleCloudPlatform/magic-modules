@@ -28,6 +28,7 @@ id_format: projects/{{project}}/locations/{{region}}/repositories/{{name}}
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ':'
   parent_resource_attribute: 'repository'
+  min_version: beta
 import_format:
   ['projects/{{project}}/locations/{{region}}/repositories/{{name}}']
 examples:
