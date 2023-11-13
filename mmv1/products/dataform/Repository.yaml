@@ -34,6 +34,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataform_repository'
     primary_resource_id: dataform_respository
+    primary_resource_name:
+      'fmt.Sprintf("tf_test_repository%s", context["random_suffix"])'
     min_version: beta
     vars:
       git_repository_name: 'my/repository'
