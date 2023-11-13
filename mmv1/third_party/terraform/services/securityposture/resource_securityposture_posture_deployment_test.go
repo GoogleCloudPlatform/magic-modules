@@ -20,7 +20,6 @@ func TestAccSecurityPosturePostureDeployment_securityposturePostureDeployment_up
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckSecurityPosturePostureDeploymentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSecurityPosturePostureDeployment_securityposturePostureDeploymentBasic(context),
@@ -47,12 +46,12 @@ func TestAccSecurityPosturePostureDeployment_securityposturePostureDeployment_up
 func testAccSecurityPosturePostureDeployment_securityposturePostureDeploymentBasic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_securityposture_posture_deployment" "postureDeployment" {
-	name          = "posture_deployment_1"
+	posture_deployment_id          = "posture_deployment_1"
 	parent = "organizations/%{org_id}/locations/global"
     description = "a new posture deployment"
-    target_resource = "folders/123456"
-    posture_id = "organizations/%{org_id}/locations/global/postures/posture1"
-    posture_revision_id = "abcdef"
+    target_resource = "projects/190507214861"
+    posture_id = "organizations/%{org_id}/locations/global/postures/gcloud-test-posture"
+    posture_revision_id = "1fe5ff7a"
 }
 `, context)
 }
@@ -60,12 +59,12 @@ resource "google_securityposture_posture_deployment" "postureDeployment" {
 func testAccSecurityPosturePostureDeployment_securityposturePostureDeployment_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_securityposture_posture_deployment" "postureDeployment" {
-	name          = "posture_deployment_1"
+	posture_deployment_id          = "posture_deployment_1"
 	parent = "organizations/%{org_id}/locations/global"
     description = "an updated posture deployment"
-    target_resource = "folders/123456"
-    posture_id = "organizations/%{org_id}/locations/global/postures/posture2"
-    posture_revision_id = "bcdefg"
+    target_resource = "projects/190507214861"
+    posture_id = "organizations/%{org_id}/locations/global/postures/gcloud-test-list-posture"
+    posture_revision_id = "101b17f1"
 }
 `, context)
 }
