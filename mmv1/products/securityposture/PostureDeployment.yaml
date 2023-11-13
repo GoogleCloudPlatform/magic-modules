@@ -17,11 +17,13 @@ description: |
   Represents a deployment of a security posture on a resource.
 
 base_url: '{{parent}}/postureDeployments'
-self_link: '{{parent}}/postureDeployments/{{name}}'
+self_link: '{{parent}}/postureDeployments/{{posture_deployment_id}}'
 
-create_url: '{{parent}}/postureDeployments?postureDeploymentId={{name}}'
+create_url: '{{parent}}/postureDeployments?postureDeploymentId={{posture_deployment_id}}'
 update_verb: :PATCH
 update_mask: true
+
+# delete_url: '{{name}}'
 
 autogen_async: true
 async: !ruby/object:Api::OpAsync
@@ -43,14 +45,19 @@ parameters:
     url_param_only: true
     required: true
   - !ruby/object:Api::Type::String
-    name: 'name'
+    name: postureDeploymentId
+    description: |
+      ID of the posture deployment.
+    immutable: true
     required: true
+    url_param_only: true
+
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
     immutable: true
     description: |
       Name of the posture deployment instance.
-
-
-properties:
   - !ruby/object:Api::Type::String
     name: 'targetResource'
     required: true
