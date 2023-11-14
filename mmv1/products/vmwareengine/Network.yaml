@@ -47,6 +47,17 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "vmware_engine_network_standard"
     primary_resource_id: "vmw-engine-network"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "vmware_engine_network_legacy"
+    pull_external: true
+    primary_resource_id: "vmw-engine-network"
+    skip_test: true   # update tests will take care of create and update. Legacy network needs to be created on an isolated project.
+    vars:
+      proj_id: "vmw-proj"
+    test_env_vars:
+      location: :REGION
+      org_id: :ORG_ID
+      billing_account: :BILLING_ACCT
 parameters:
   - !ruby/object:Api::Type::String
     name: "location"

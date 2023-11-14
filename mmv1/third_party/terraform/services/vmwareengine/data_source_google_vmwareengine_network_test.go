@@ -1,17 +1,17 @@
 package vmwareengine_test
 
 import (
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccDataSourceVmwareEngineNetwork_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":   acctest.RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
