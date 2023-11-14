@@ -297,5 +297,5 @@ func collectResult(output string) *Result {
 		FailedTests:  results["FAIL"],
 		PassedTests:  results["PASS"],
 		SkippedTests: results["SKIP"],
-	}, nil
+	}
 }
