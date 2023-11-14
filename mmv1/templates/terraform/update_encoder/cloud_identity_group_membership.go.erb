@@ -24,7 +24,7 @@
 	var updateRolesParams []map[string]interface{}
 	for _, addR := range addRoleList {
 		ar := addR.(map[string]interface{})["name"].(string)
-		ae := addR.(map[string]interface{})["expiry_detail"].([]map[string]string)
+		ae := addR.(map[string]interface{})["expiry_detail"].([]map[string]interface{})
 		if len(ae) > 1 {
 			return nil, fmt.Errorf("only expect one or zero expiry_detail per role")
 		}
@@ -49,7 +49,7 @@
 		if _, ignore := ignoreUpdateR[name]; ignore {
 			continue
 		}
-		expiryDetail := r.(map[string]interface{})["expiry_detail"].([]map[string]string)
+		expiryDetail := r.(map[string]interface{})["expiry_detail"].([]map[string]interface{})
 		if len(expiryDetail) == 0 {
 			addRoles = append(addRoles, map[string]interface{}{"name": name})
 		} else {
