@@ -8,7 +8,7 @@ aliases:
 # MMv1 field reference
 
 This page documents commonly-used properties for fields. For a full list of
-available properties, see [type.rb ↗]("https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/type.rb").
+available properties, see [type.rb ↗](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/type.rb).
 
 ## Shared properties
 
@@ -72,16 +72,50 @@ Example:
 output: true
 ```
 
+### `sensitive`
+If true, the field is considered "sensitive", which means that its value will
+be obscured in Terraform output such as plans. If false, the value will not be
+obscured. Either way, the value will still be stored in plaintext in Terraform
+state. See
+[Handling Sensitive Values in State](https://developer.hashicorp.com/terraform/plugin/best-practices/sensitive-state)
+for more information.
+
+Sensitive fields are often not returned by the API (because they are sensitive).
+In this case, the field will also need to use [`ignore_read` or a `custom_flatten` function]({{< ref "/develop/field-reference#ignore_read" >}}).
+
+Example:
+
+```yaml
+sensitive: true
+```
+
 ### `ignore_read`
 If true, the provider sets the field's value in the resource state based only
 on the user's configuration. If false or unset, the provider sets the field's
 value in the resource state based on the API response. Only use this attribute
 if the field cannot be read from GCP due to either API or provider constraints.
 
-Example:
+Nested fields currently
+[do not support `ignore_read`](https://github.com/hashicorp/terraform-provider-google/issues/12410)
+but can replicate the behavior by implementing a
+[`custom_flatten`]({{< ref "/develop/custom-code#custom_flatten" >}})
+that always ignores the value returned by the API.
+](https://github.com/GoogleCloudPlatform/magic-modules/blob/5923d4cb878396a04bed9beaf22a8478e8b1e6a5/mmv1/templates/terraform/custom_flatten/source_representation_instance_configuration_password.go.erb).
+Any fields using a custom flatten also need to be added to `ignore_read_extra`
+for any examples where the field is set.
+
+Example: YAML
 
 ```yaml
 ignore_read: true
+```
+
+Example: Custom flatten
+
+```go
+func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+  return d.Get("password")
+}
 ```
 
 ### `default_value`
