@@ -254,32 +254,3 @@ properties:
             description: |
               Two letter unicode region codes to allow as defined by https://cldr.unicode.org/ The full list of these region codes is here: https://github.com/unicode-cldr/cldr-localenames-full/blob/master/main/en/territories.json
             item_type: Api::Type::String
-  - !ruby/object:Api::Type::NestedObject
-    name: 'client'
-    description: |
-      Options related to how clients making requests on behalf of a project should be configured.
-    properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: 'permissions'
-        description: |
-          Configuration related to restricting a user's ability to affect their account.
-        properties:
-          - !ruby/object:Api::Type::Boolean
-            name: 'disabledUserSignup'
-            description: |
-              When true, end users cannot sign up for a new account on the associated project through any of our API methods
-          - !ruby/object:Api::Type::Boolean
-            name: 'disabledUserDeletion'
-            description: |
-              When true, end users cannot delete their account on the associated project through any of our API methods
-      - !ruby/object:Api::Type::String
-        name: 'apiKey'
-        output: true
-        description: |
-          API key that can be used when making requests for this project.
-        sensitive: true
-      - !ruby/object:Api::Type::String
-        name: 'firebaseSubdomain'
-        output: true
-        description: |
-          Firebase subdomain.

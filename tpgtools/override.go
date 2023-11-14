@@ -54,6 +54,7 @@ const (
 	CustomSerializer                   = "CUSTOM_SERIALIZER"
 	TerraformProductName               = "CUSTOM_TERRAFORM_PRODUCT_NAME"
 	CustomTimeout                      = "CUSTOM_TIMEOUT"
+	StateUpgrade                       = "STATE_UPGRADE"
 )
 
 // Field-level Overrides

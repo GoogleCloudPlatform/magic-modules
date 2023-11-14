@@ -225,3 +225,8 @@ type CustomTimeoutDetails struct {
 	// The overriding Timeouts in Terraform
 	TimeoutMinutes int
 }
+
+type StateUpgradeDetails struct {
+	// The current schema version
+	SchemaVersion int
+}
