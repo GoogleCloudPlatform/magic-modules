@@ -43,9 +43,11 @@ examples:
       connection_profile_id: 'my-profile'
       network_name: 'my-network'
       database_instance_name: 'my-instance'
-      deletion_protection:
-        'true'
-      # This is covered by the update tests.
+      deletion_protection: 'true'
+    test_vars_overrides:
+      deletion_protection: 'false'
+    oics_vars_overrides:
+      deletion_protection: 'false'
   - !ruby/object:Provider::Terraform::Examples
     name: 'datastream_connection_profile_full'
     primary_resource_id:
@@ -61,9 +63,11 @@ examples:
     vars:
       connection_profile_id: 'my-profile'
       database_instance_name: 'my-instance'
-      deletion_protection:
-        'true'
-        # This is covered by the update tests.
+      deletion_protection: 'true'
+    test_vars_overrides:
+      deletion_protection: 'false'
+    oics_vars_overrides:
+      deletion_protection: 'false'
     skip_test: true
 parameters:
   - !ruby/object:Api::Type::String
