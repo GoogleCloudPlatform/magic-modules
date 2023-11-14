@@ -42,6 +42,10 @@ examples:
       private_connection_id: 'my-connection'
       connection_profile_id: 'my-profile'
       network_name: 'my-network'
+      database_instance_name: 'my-instance'
+      deletion_protection:
+        'true'
+      # This is covered by the update tests.
   - !ruby/object:Provider::Terraform::Examples
     name: 'datastream_connection_profile_full'
     primary_resource_id:
