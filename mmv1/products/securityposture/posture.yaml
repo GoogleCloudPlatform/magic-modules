@@ -290,31 +290,58 @@ properties:
                                 - allow_all
                                 - deny_all
                                 - enforce
+                            -  !ruby/object:Api::Type::NestedObject
+                              name: 'expr'
+                              required: true
+                              description: |
+                                Represents a textual expression in the Common Expression Language (CEL) syntax. CEL is a C-like expression language.
+                                This page details the objects and attributes that are used to the build the CEL expressions for
+                                custom access levels - https://cloud.google.com/access-context-manager/docs/custom-access-level-spec.
+                              properties:
+                                - !ruby/object:Api::Type::String
+                                  name: 'expression'
+                                  required: true
+                                  description:
+                                    Textual representation of an expression in Common Expression
+                                    Language syntax.
+                                - !ruby/object:Api::Type::String
+                                  name: 'title'
+                                  description:
+                                    Title for the expression, i.e. a short string describing its
+                                    purpose.
+                                - !ruby/object:Api::Type::String
+                                  name: 'description'
+                                  description: Description of the expression
+                                - !ruby/object:Api::Type::String
+                                  name: 'location'
+                                  description:
+                                    String indicating the location of the expression for error
+                                    reporting, e.g. a file name and a position in the file
                     exactly_one_of:
                       - org_policy_canned_constraint
                       - org_policy_custom_constraint
                       - security_health_analytics_module
                       - security_health_analytics_custom_module
-                  - !ruby/object:Api::Type::NestedObject
-                    name: 'orgPolicyCustomConstraint'
-                    exactly_one_of:
-                      - org_policy_canned_constraint
-                      - org_policy_custom_constraint
-                      - security_health_analytics_module
-                      - security_health_analytics_custom_module
-                  - !ruby/object:Api::Type::NestedObject
-                    name: 'securityHealthAnalyticsModule'
-                    exactly_one_of:
-                      - org_policy_canned_constraint
-                      - org_policy_custom_constraint
-                      - security_health_analytics_module
-                      - security_health_analytics_custom_module
-                  - !ruby/object:Api::Type::NestedObject
-                    name: 'securityHealthAnalyticsCustomModule'
-                    exactly_one_of:
-                      - org_policy_canned_constraint
-                      - org_policy_custom_constraint
-                      - security_health_analytics_module
-                      - security_health_analytics_custom_module
+                  # - !ruby/object:Api::Type::NestedObject
+                  #   name: 'orgPolicyCustomConstraint'
+                  #   exactly_one_of:
+                  #     - org_policy_canned_constraint
+                  #     - org_policy_custom_constraint
+                  #     - security_health_analytics_module
+                  #     - security_health_analytics_custom_module
+                  # - !ruby/object:Api::Type::NestedObject
+                  #   name: 'securityHealthAnalyticsModule'
+                  #   exactly_one_of:
+                  #     - org_policy_canned_constraint
+                  #     - org_policy_custom_constraint
+                  #     - security_health_analytics_module
+                  #     - security_health_analytics_custom_module
+                  # - !ruby/object:Api::Type::NestedObject
+                  #   name: 'securityHealthAnalyticsCustomModule'
+                  #   exactly_one_of:
+                  #     - org_policy_canned_constraint
+                  #     - org_policy_custom_constraint
+                  #     - security_health_analytics_module
+                  #     - security_health_analytics_custom_module
 
 

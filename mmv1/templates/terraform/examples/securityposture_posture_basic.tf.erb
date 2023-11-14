@@ -1,0 +1,21 @@
+resource "google_securityposture_posture" "<%= ctx[:primary_resource_id] %>" {
+	posture_id          = "posture_1"
+	parent = "organizations/<%= ctx[:test_env_vars]['org_id'] %>/locations/global"
+	state = ACTIVE
+    description = "a new posture"
+    policy_sets {
+	    	policy_set_id = "policy_set_1"
+	    	description = "a policy set"
+	    	policies {
+		    		policy_id = "policy_1"
+		    		constraint {
+		    			org_policy_canned_constraint {
+		    				canned_constraint_id = "storage.uniformBucketLevelAccess"
+		    				policy_rules {
+		    					enforce = true
+		    				}
+		    			}
+		    		}
+		    	}
+	    }
+}
