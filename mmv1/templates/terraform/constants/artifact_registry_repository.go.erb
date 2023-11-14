@@ -13,42 +13,22 @@
   # limitations under the License.
 -%>
 func upstreamPoliciesDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
-  log.Printf("%v, %v, %v\n", k, old, new)
   o, n := d.GetChange("virtual_repository_config.0.upstream_policies")
-  oMap, ok := o.([]any)
+  oldPolicies, ok := o.([]any)
   if !ok {
     return false
   }
-  nMap, ok := n.([]any)
+  newPolicies, ok := n.([]any)
   if !ok {
     return false
   }
-  hashFunc := func(val any) string {
+  hashFunc := func(val any) int {
     x := val.(map[string]any)
-    return fmt.Sprintf("[id:%v priority:%v repository:%v]", x["id"], x["priority"], x["repository"])
+    hashStr := fmt.Sprintf("[id:%v priority:%v repository:%v]", x["id"], x["priority"], x["repository"])
+    return schema.HashString(hashStr)
   }
 
-  return arrayDiffSuppress(oMap, nMap, hashFunc)
-}
-
-func arrayDiffSuppress(old, new []any, hashFunc func(x any) string) bool {
-  oldMap := map[string]bool{}
-  newMap := map[string]bool{}
-  for _, x := range old {
-    key := hashFunc(x)
-    oldMap[key] = true
-  }
-  for _, y := range new {
-    key := hashFunc(y)
-    newMap[key] = true
-  }
-  if len(oldMap) != len(newMap) {
-    return false
-  }
-  for x := range oldMap {
-    if !newMap[x] {
-      return false
-    }
-  }
-  return true
+  oldSet := schema.NewSet(hashFunc, oldPolicies)
+  newSet := schema.NewSet(hashFunc, newPolicies)
+  return oldSet.Equal(newSet)
 }
