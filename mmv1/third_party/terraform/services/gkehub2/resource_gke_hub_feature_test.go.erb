@@ -543,6 +543,14 @@ func TestAccGKEHubFeature_FleetDefaultMemberConfigPolicyController(t *testing.T)
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				Config: testAccGKEHubFeature_FleetDefaultMemberConfigPolicyControllerUpdateSetEmpty(context),
+			},
+			{
+				ResourceName:      "google_gke_hub_feature.feature",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -559,34 +567,12 @@ resource "google_gke_hub_feature" "feature" {
         install_spec = "INSTALL_SPEC_ENABLED"
         exemptable_namespaces = ["foo"]
         policy_content {
-          bundle {
-            name = "policy-essentials-v2022"
+          bundles {
+            bundle = "policy-essentials-v2022"
             exempted_namespaces = ["foo", "bar"]
-          }
-          template_library {
-            installation = "ALL"
           }
         }
         audit_interval_seconds = 30
-        deployment_config {
-          component = "admission"
-          container_resources {
-            limits {
-              memory = "1Gi"
-              cpu = "1.5"
-            }
-            requests {
-              memory = "500Mi"
-              cpu = "150m"
-            }
-          }
-          pod_toleration {
-            key = "key1"
-            operator = "Equal"
-            value = "value1"
-            effect = "NoSchedule"
-          }
-        }
         referential_rules_enabled = true
       }
     }
@@ -606,12 +592,12 @@ resource "google_gke_hub_feature" "feature" {
       policy_controller_hub_config {
         install_spec = "INSTALL_SPEC_SUSPENDED"
         policy_content {
-          bundle {
-            name = "pci-dss-v3.2.1"
+          bundles {
+            bundle = "pci-dss-v3.2.1"
             exempted_namespaces = ["baz", "bar"]
           }
-          bundle {
-            name = "nist-sp-800-190"
+          bundles {
+            bundle = "nist-sp-800-190"
             exempted_namespaces = []
           }
           template_library {
@@ -622,12 +608,12 @@ resource "google_gke_hub_feature" "feature" {
         referential_rules_enabled = true
         log_denies_enabled = true
         mutation_enabled = true
-        deployment_config {
+        deployment_configs {
           component = "admission"
           replica_count = 2
           pod_affinity = "ANTI_AFFINITY"
         }
-        deployment_config {
+        deployment_configs {
           component = "audit"
           container_resources {
             limits {
@@ -651,6 +637,32 @@ resource "google_gke_hub_feature" "feature" {
             "PROMETHEUS"
           ]
         }
+      }
+    }
+  }
+}
+`, context)
+}
+
+func testAccGKEHubFeature_FleetDefaultMemberConfigPolicyControllerUpdateSetEmpty(context map[string]interface{}) string {
+// gkeHubFeatureProjectSetupForGA(context) + 
+	return acctest.Nprintf(`
+resource "google_gke_hub_feature" "feature" {
+  name = "policycontroller"
+  location = "global"
+  fleet_default_member_config {
+    policycontroller {
+      policy_controller_hub_config {
+        install_spec = "INSTALL_SPEC_ENABLED"
+        policy_content {}
+        constraint_violation_limit = 50
+        referential_rules_enabled = true
+        log_denies_enabled = true
+        mutation_enabled = true
+        deployment_configs {
+          component = "admission"
+        }
+        monitoring {}
       }
     }
   }

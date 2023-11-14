@@ -311,6 +311,7 @@ properties:
                   - !ruby/object:Api::Type::Array
                     name: backends
                     description: 'Specifies the list of backends Policy Controller will export to. An empty list would effectively disable metrics export.'
+                    default_from_api: true
                     item_type: !ruby/object:Api::Type::Enum
                       name: 'required but unused'
                       description: 'required but unused'
@@ -321,28 +322,21 @@ properties:
               - !ruby/object:Api::Type::Integer
                 name: constraintViolationLimit
                 description: 'The maximum number of audit violations to be stored in a constraint. If not set, the internal default of 20 will be used.'
-              - !ruby/object:Api::Type::Array
-                name: deploymentConfig
-                api_name: deploymentConfigs
-                description: 'Specifies the deployment config to each of the deployments ("admission", "audit", "mutation").'
-                custom_expand: templates/terraform/custom_expand/gkehub2_feature_policycontroller_deployment_configs.go.erb
-                custom_flatten: templates/terraform/custom_flatten/gkehub2_feature_policycontroller_deployment_configs.go.erb
-                is_set: true
-                item_type: !ruby/object:Api::Type::NestedObject
-                  name: 'required but unused'
-                  description: 'required but unused'
+              - !ruby/object:Api::Type::Map
+                name: deploymentConfigs
+                description: 'Map of deployment configs to deployments ("admission", "audit", "mutation").'
+                key_name: component
+                key_description: 'Specifies which component to apply the deployment config to. Accepted values are "admission", "audit" and "mutation".'
+                default_from_api: true
+                value_type: !ruby/object:Api::Type::NestedObject
+                  name: deploymentConfig
+                  description: 'Configures deployment-specific options, such as high availability.'
                   properties:
-                    - !ruby/object:Api::Type::Enum
-                      name: component
-                      description: 'The component that this deployment config should be applied to.'
-                      default_from_api: true
-                      values:
-                        - :admission
-                        - :audit
-                        - :mutation
                     - !ruby/object:Api::Type::Integer
                       name: replicaCount
                       description: 'Pod replica count.'
+                      send_empty_value: false
+                      default_from_api: true
                     - !ruby/object:Api::Type::NestedObject
                       name: containerResources
                       description: 'Container resource requirements.'
@@ -398,7 +392,7 @@ properties:
               - !ruby/object:Api::Type::NestedObject
                 name: policyContent
                 description: 'Specifies the desired policy content on the cluster.'
-                default_from_api: true
+                # default_from_api: true
                 properties:
                   - !ruby/object:Api::Type::NestedObject
                     name: templateLibrary
@@ -409,24 +403,18 @@ properties:
                         name: installation
                         description: 'Configures the manner in which the template library is installed on the cluster.'
                         values:
-                          - :INSTALLATION_UNSPECIFIED
+                          - :INSTALATION_UNSPECIFIED
                           - :NOT_INSTALLED
                           - :ALL
-                  - !ruby/object:Api::Type::Array
-                    name: bundle
-                    api_name: bundles
+                  - !ruby/object:Api::Type::Map
+                    name: bundles
                     description: 'Configures which bundles to install and their corresponding install specs.'
-                    custom_expand: templates/terraform/custom_expand/gkehub2_feature_policycontroller_policy_content_bundles.go.erb
-                    custom_flatten: templates/terraform/custom_flatten/gkehub2_feature_policycontroller_policy_content_bundles.go.erb
-                    is_set: true
-                    item_type: !ruby/object:Api::Type::NestedObject
-                      name: 'required but unused'
-                      description: 'required but unused'
+                    key_name: bundle
+                    key_description: 'A bundle name supported in this version. Values configure the exempted namespaces for this bundle.'
+                    value_type: !ruby/object:Api::Type::NestedObject
+                      name: bundleInstallSpec
+                      description: 'The specification configuration for a single managed bundle.'
                       properties:
-                        - !ruby/object:Api::Type::String
-                          name: name
-                          description: 'The name of the bundle.'
-                          required: true
                         - !ruby/object:Api::Type::Array
                           name: exemptedNamespaces
                           description: 'The set of namespaces to be exempted from the bundle.'
