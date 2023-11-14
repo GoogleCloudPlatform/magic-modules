@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-const numDirs = 11 // number of directories in the provider to run tests in, -1 for all
+const numDirs = 11 // number of go directories in the provider to run tests in, -1 for all
 
 type Tester interface {
 	CloneProvider(goPath, githubUsername, githubToken string, version Version) error
@@ -131,19 +131,12 @@ func NewTester(goPath, saKey string) (Tester, error) {
 		return nil, err
 	}
 	return &vcrTester{
-		r:         r,
-		baseDir:   r.GetCWD(),
-		saKeyPath: saKeyPath,
-		cassettePaths: map[Version]string{
-			// here for local testing purposes
-			Beta: "cassettes/beta",
-		},
-		logPaths: make(map[logKey]string, numVersions*numModes),
-		repoPaths: map[Version]string{
-			// here for local testing purposes
-			GA:   "/usr/local/google/home/thomasrodgers/go/src/github.com/hashicorp/terraform-provider-google",
-			Beta: "/usr/local/google/home/thomasrodgers/go/src/github.com/hashicorp/terraform-provider-google-beta",
-		},
+		r:             r,
+		baseDir:       r.GetCWD(),
+		saKeyPath:     saKeyPath,
+		cassettePaths: make(map[Version]string, numVersions),
+		logPaths:      make(map[logKey]string, numVersions*numModes),
+		repoPaths:     make(map[Version]string, numVersions),
 	}, nil
 }
 
@@ -269,12 +262,11 @@ func (vt *vcrTester) Cleanup() error {
 		return err
 	}
 
-	/* skip for testing
 	for _, path := range vt.repoPaths {
 		if err := vt.r.RemoveAll(path); err != nil {
 			return err
 		}
-	}*/
+	}
 	return nil
 }
 
