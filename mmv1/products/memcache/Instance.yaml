@@ -149,6 +149,9 @@ properties:
     default_value: :MEMCACHE_1_5
     values:
       - :MEMCACHE_1_5
+      - :MEMCACHE_1_6_15
+    update_url: 'projects/{{project}}/locations/{{region}}/instances/{{name}}:upgrade'
+    update_verb: :POST
   - !ruby/object:Api::Type::NestedObject
     name: nodeConfig
     description: |
