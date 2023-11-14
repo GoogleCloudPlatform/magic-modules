@@ -18,8 +18,6 @@ require 'provider/terraform/import'
 require 'provider/terraform/custom_code'
 require 'provider/terraform/docs'
 require 'provider/terraform/examples'
-require 'overrides/terraform/resource_override'
-require 'overrides/terraform/property_override'
 require 'provider/terraform/sub_template'
 require 'google/golang_utils'
 
