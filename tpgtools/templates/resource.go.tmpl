@@ -85,6 +85,19 @@ func Resource{{$.PathType}}() *schema.Resource {
 		),
 {{- end }}
 
+{{- if gt $.SchemaVersion 0 }}
+		SchemaVersion: {{$.SchemaVersion}},
+		StateUpgraders: []schema.StateUpgrader{
+  {{- range $v := $.SchemaVersions }}
+			{
+				Type:    resource{{$.PathType}}ResourceV{{$v}}().CoreConfigSchema().ImpliedType(),
+				Upgrade: Resource{{$.PathType}}UpgradeV{{$v}},
+				Version: {{$v}},
+			},
+  {{- end }}
+		},
+{{- end }}
+
 		Schema: map[string]*schema.Schema{
 {{- range $p := $.SchemaProperties }}
 			"{{$p.Name}}": {
