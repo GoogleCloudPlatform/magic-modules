@@ -1,5 +1,8 @@
 resource "google_secure_source_manager_instance" "<%= ctx[:primary_resource_id] %>" {
-    provider = "google-beta"
+    provider = "google"
     instance_id = "<%= ctx[:vars]['instance_id'] %>"
     location = "us-central1"
+    labels = {
+      "foo" = "bar"
+    }
 }

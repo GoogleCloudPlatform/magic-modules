@@ -13,7 +13,6 @@
 
 --- !ruby/object:Api::Resource
 name: 'Instance'
-min_version: 'beta'
 kind: 'securesourcemanager#instance'
 base_url: 'projects/{{project}}/locations/{{location}}/instances?instance_id={{instance_id}}'
 self_link: 'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}'
@@ -49,7 +48,6 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    min_version: 'beta'
     name: 'secure_source_manager_instance_basic'
     primary_resource_id: 'default'
     primary_resource_name: '"instance1"'
