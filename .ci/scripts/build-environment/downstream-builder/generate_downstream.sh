@@ -175,7 +175,7 @@ else
         fi
     elif [ "$REPO" == "tf-oics" ]; then
         # use terraform generator with oics override
-        make tf-ocis OUTPUT_PATH="$LOCAL_PATH"
+        make tf-oics OUTPUT_PATH="$LOCAL_PATH"
     elif [ "$REPO" == "terraform" ]; then
         make clean-provider OUTPUT_PATH="$LOCAL_PATH"
         make provider OUTPUT_PATH="$LOCAL_PATH" VERSION=$VERSION

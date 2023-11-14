@@ -99,7 +99,7 @@ jobs:
           elif [ "$GH_REPO" == "docs-examples" ]; then
             UPSTREAM_OWNER=terraform-google-modules
             clone_repo
-            make tf-ocis
+            make tf-oics
           else
             echo "case not supported"
             exit 1

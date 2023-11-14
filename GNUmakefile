@@ -65,8 +65,8 @@ mmv1:
 	cd mmv1;\
 		bundle; \
 		if [ "$(VERSION)" = "ga" ]; then \
-			bundle exec compiler.rb -a -e terraform -o $(OUTPUT_PATH) -v ga --no-docs; \
-			bundle exec compiler.rb -a -e terraform -o $(OUTPUT_PATH) -v beta --no-code; \
+			bundle exec compiler.rb -a -e terraform -o $(OUTPUT_PATH) -v ga --no-docs $(mmv1_compile); \
+			bundle exec compiler.rb -a -e terraform -o $(OUTPUT_PATH) -v beta --no-code $(mmv1_compile); \
 		else \
 			bundle exec compiler.rb -e terraform -o $(OUTPUT_PATH) -v $(VERSION) $(mmv1_compile); \
 		fi
@@ -101,12 +101,12 @@ tgc:
 	cd mmv1;\
 		bundle;\
 		bundle exec compiler -e terraform -f tgc -v beta -o $(OUTPUT_PATH)/tfplan2cai $(mmv1_compile);\
-		bundle exec compiler -a -e terraform -f tgc_cai2hcl -o $(OUTPUT_PATH)/cai2hcl -v beta;\
+		bundle exec compiler -e terraform -f tgc_cai2hcl -v beta -o $(OUTPUT_PATH)/cai2hcl $(mmv1_compile);\
 
-tf-ocis:
+tf-oics:
 	cd mmv1;\
 		bundle;\
-		bundle exec compiler.rb -a -e terraform -f oics -o $(OUTPUT_PATH);\
+		bundle exec compiler.rb -a -e terraform -f oics -o $(OUTPUT_PATH) $(mmv1_compile);\
 
 test:
 	cd mmv1; \
