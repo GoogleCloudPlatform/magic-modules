@@ -19,7 +19,9 @@ type Tester interface {
 }
 
 type Result struct {
-	FailedTests []string
+	PassedTests  []string
+	SkippedTests []string
+	FailedTests  []string
 }
 
 type Version int
@@ -118,7 +120,7 @@ const accTestParalellism = 32
 
 const replayingTimeout = "240m"
 
-var failedTestsExpression = regexp.MustCompile(`(?m:^--- FAIL: TestAcc(\w+))`)
+var testResultsExpression = regexp.MustCompile(`(?m:^--- (PASS|FAIL|SKIP): TestAcc(\w+))`)
 
 // Create a new tester in the current working directory and write the service account key file.
 func NewTester(goPath, saKey string) (Tester, error) {
@@ -248,12 +250,7 @@ func (vt *vcrTester) Run(mode Mode, version Version) (*Result, error) {
 	if err := vt.r.WriteFile(logFileName, output); err != nil {
 		return nil, fmt.Errorf("error writing replaying log: %v, test output: %v", err, output)
 	}
-	// Collect failed tests from output.
-	failed, err := vt.matchingTests(output, failedTestsExpression)
-	if err != nil {
-		return nil, err
-	}
-	return &Result{FailedTests: failed}, nil
+	return collectResults(output)
 }
 
 // Deletes the service account key and the repos.
@@ -286,15 +283,19 @@ func (vt *vcrTester) googleTestDirectory() ([]string, error) {
 	return testDirs, nil
 }
 
-// Reads the log at the given path and returns a slice of tests matching the expression.
-func (vt *vcrTester) matchingTests(output string, exp *regexp.Regexp) ([]string, error) {
-	matches := exp.FindAllStringSubmatch(output, -1)
-	var tests []string
+// Collect result from output.
+func collectResults(output string) (*Result, error) {
+	matches := testResultsExpression.FindAllStringSubmatch(output, -1)
+	var results map[string][]string
 	for _, submatches := range matches {
-		if len(submatches) != 2 {
+		if len(submatches) != 3 {
 			return nil, fmt.Errorf("unexpected submatches for failed tests expression: %v", submatches)
 		}
-		tests = append(tests, submatches[1])
+		results[submatches[1]] = append(results[submatches[1]], submatches[2])
 	}
-	return tests, nil
+	return &Result{
+		FailedTests:  results["FAIL"],
+		PassedTests:  results["PASS"],
+		SkippedTests: results["SKIP"],
+	}, nil
 }

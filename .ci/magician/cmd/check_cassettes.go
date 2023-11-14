@@ -63,6 +63,8 @@ func execCheckCassettes(t vcr.Tester, goPath, githubToken string) {
 	}
 	fmt.Println("Failing tests: ", result.FailedTests)
 	// TODO(trodge) report these failures to bigquery
+	fmt.Println("Passing tests: ", result.PassedTests)
+	fmt.Println("Skipping tests: ", result.SkippedTests)
 
 	if err := t.Cleanup(); err != nil {
 		fmt.Println("Error cleaning up vcr tester: ", err)
