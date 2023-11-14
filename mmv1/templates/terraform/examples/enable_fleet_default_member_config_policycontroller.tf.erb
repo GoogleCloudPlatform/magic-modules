@@ -7,8 +7,8 @@ resource "google_gke_hub_feature" "feature" {
         install_spec = "INSTALL_SPEC_ENABLED"
         exemptable_namespaces = ["foo"]
         policy_content {
-          bundle {
-            name = "policy-essentials-v2022"
+          bundles {
+            bundle = "policy-essentials-v2022"
             exempted_namespaces = ["foo", "bar"]
           }
           template_library {

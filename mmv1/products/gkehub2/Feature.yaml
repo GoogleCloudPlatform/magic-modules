@@ -98,6 +98,16 @@ examples:
     skip_test: true
     primary_resource_name: 'fmt.Sprintf("policycontroller")'
     primary_resource_id: 'feature'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'enable_fleet_default_member_config_policycontroller_update'
+    skip_test: true
+    primary_resource_name: 'fmt.Sprintf("policycontroller")'
+    primary_resource_id: 'feature'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'enable_fleet_default_member_config_policycontroller_set_empty'
+    skip_test: true
+    primary_resource_name: 'fmt.Sprintf("policycontroller")'
+    primary_resource_id: 'feature'
 autogen_async: true
 # Skip sweeper gen since this is a child resource.
 skip_sweeper: true
