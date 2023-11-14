@@ -1,3 +1,5 @@
+data "google_project" "project" {}
+
 resource "google_secret_manager_secret" "<%= ctx[:vars]['secret_resource_id'] %>" {
   secret_id = "<%= ctx[:vars]['secret_id'] %>"
   replication {
@@ -8,6 +10,12 @@ resource "google_secret_manager_secret" "<%= ctx[:vars]['secret_resource_id'] %>
 resource "google_secret_manager_secret_version" "<%= ctx[:vars]['secret_resource_id'] %>_version" {
   secret = google_secret_manager_secret.<%= ctx[:vars]['secret_resource_id'] %>.id
   secret_data = "<%= ctx[:vars]['secret_data'] %>"
+}
+
+resource "google_secret_manager_secret_iam_member" "secret-access" {
+  secret_id = google_secret_manager_secret.<%= ctx[:vars]['secret_resource_id'] %>.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-artifactregistry.iam.gserviceaccount.com"
 }
 
 resource "google_artifact_registry_repository" "<%= ctx[:primary_resource_id] %>" {
