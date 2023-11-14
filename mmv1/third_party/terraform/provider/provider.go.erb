@@ -225,6 +225,9 @@ func DatasourceMapWithErrors() (map[string]*schema.Resource, error) {
 		"google_alloydb_supported_database_flags":          alloydb.DataSourceAlloydbSupportedDatabaseFlags(),
 		"google_artifact_registry_repository":              artifactregistry.DataSourceArtifactRegistryRepository(),
 		"google_app_engine_default_service_account":        appengine.DataSourceGoogleAppEngineDefaultServiceAccount(),
+		<% unless version == 'ga' -%>
+		"google_backup_dr_management_server":				backupdr.DataSourceGoogleCloudBackupDRService(),
+		<% end -%>
 		"google_beyondcorp_app_connection":                 beyondcorp.DataSourceGoogleBeyondcorpAppConnection(),
 		"google_beyondcorp_app_connector":                  beyondcorp.DataSourceGoogleBeyondcorpAppConnector(),
 		"google_beyondcorp_app_gateway":                    beyondcorp.DataSourceGoogleBeyondcorpAppGateway(),
@@ -658,7 +661,6 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	if err != nil {
 		return nil, diag.FromErr(err)
 	}
-	transport_tpg.HandleDCLCustomEndpointDefaults(d)
 
 	config := transport_tpg.Config{
 		Project:             d.Get("project").(string),
@@ -751,6 +753,12 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 			transport_tpg.DefaultBasePaths[key] = strings.ReplaceAll(basePath, "googleapis.com", config.UniverseDomain)
 		}
 	}
+
+	err = transport_tpg.SetEndpointDefaults(d)
+	if err != nil {
+		return nil, diag.FromErr(err)
+	}
+	transport_tpg.HandleDCLCustomEndpointDefaults(d)
 
 	// Given that impersonate_service_account is a secondary auth method, it has
 	// no conflicts to worry about. We pull the env var in a DefaultFunc.

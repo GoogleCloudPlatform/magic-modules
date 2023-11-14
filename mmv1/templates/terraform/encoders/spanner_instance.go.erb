@@ -1,5 +1,5 @@
-// Temp Logic to accommodate processing_units and num_nodes
-if obj["processingUnits"] == nil && obj["nodeCount"] == nil {
+// Temp Logic to accommodate autoscaling_config, processing_units and num_nodes
+if obj["processingUnits"] == nil && obj["nodeCount"] == nil && obj["autoscalingConfig"] == nil {
 	obj["nodeCount"] = 1
 }
 newObj := make(map[string]interface{})
