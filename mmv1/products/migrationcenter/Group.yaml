@@ -19,7 +19,9 @@ id_format: projects/{{project}}/locations/{{location}}/groups/{{group_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/groups/{{group_id}}
 name: Group
-description: Description
+description: 'A resource that represents an asset group. The purpose of an asset
+  group is to bundle a set of assets that have something in common, while
+  allowing users to add annotations to the group.'
 update_verb: :PATCH
 update_mask: true
 autogen_async: true
@@ -54,7 +56,7 @@ properties:
 parameters:
   - !ruby/object:Api::Type::String
     name: location
-    description: 'Part of `parent`. See documentation of `projectsId`. '
+    description: 'The location of the group. '
     url_param_only: true
     required: true
     immutable: true
