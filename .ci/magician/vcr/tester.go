@@ -234,7 +234,7 @@ func (vt *vcrTester) Run(mode Mode, version Version) (*Result, error) {
 %s
 	args:
 %s
-`, strings.Join(env, "\n"), strings.Join(args, "\n"))
+`, strings.Join(env, "\n"), strings.Join(args, " "))
 	output, err := vt.r.Run("go", args, env)
 	if err != nil {
 		// Use error as output for log.
@@ -250,7 +250,7 @@ func (vt *vcrTester) Run(mode Mode, version Version) (*Result, error) {
 	if err := vt.r.WriteFile(logFileName, output); err != nil {
 		return nil, fmt.Errorf("error writing replaying log: %v, test output: %v", err, output)
 	}
-	return collectResults(output)
+	return collectResult(output), nil
 }
 
 // Deletes the service account key and the repos.
@@ -283,13 +283,13 @@ func (vt *vcrTester) googleTestDirectory() ([]string, error) {
 	return testDirs, nil
 }
 
-// Collect result from output.
-func collectResults(output string) (*Result, error) {
+func collectResult(output string) *Result {
 	matches := testResultsExpression.FindAllStringSubmatch(output, -1)
-	var results map[string][]string
+	results := make(map[string][]string, len(matches))
 	for _, submatches := range matches {
 		if len(submatches) != 3 {
-			return nil, fmt.Errorf("unexpected submatches for failed tests expression: %v", submatches)
+			fmt.Printf("Warning: unexpected regex match found in test output: %v", submatches)
+			continue
 		}
 		results[submatches[1]] = append(results[submatches[1]], submatches[2])
 	}
