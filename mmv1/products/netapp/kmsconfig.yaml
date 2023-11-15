@@ -63,6 +63,8 @@ examples:
     primary_resource_id: "kmsConfig"
     vars:
       kms_name: "kms-test"
+      key_ring_value: "key-ring"
+      crypto_name: "crypto-name"
 properties:
   # Fields go here
   - !ruby/object:Api::Type::String

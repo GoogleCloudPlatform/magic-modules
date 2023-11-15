@@ -65,23 +65,45 @@ func TestAccNetappkmsconfig_kmsConfigCreateExample_Update(t *testing.T) {
 
 func testAccNetappkmsconfig_kmsConfigCreateExample_Full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_netapp_kmsconfig" "kmsConfig" {
-  kms_name = "tf-test-kms-test%{random_suffix}"
-  description=""
-  crypto_key_name="projects/cxo-automation-gcp/locations/us-central1/keyRings/kmsRing2/cryptoKeys/kmsCrypto111"
-  location="us-central1"
-}
+	resource "google_kms_key_ring" "keyring" {
+		name     = "tf-test-key-ring%{random_suffix}"
+		location = "us-central1"
+	  }
+	  
+	  resource "google_kms_crypto_key" "crypto_key" {
+		name            = "tf-test-crypto-name%{random_suffix}"
+		key_ring        = google_kms_key_ring.keyring.id
+		rotation_period = "100000s"
+	  }
+	  
+	  resource "google_netapp_kmsconfig" "kmsConfig" {
+		kms_name = "tf-test-kms-test%{random_suffix}"
+		description="this is a test description"
+		crypto_key_name=google_kms_crypto_key.crypto_key.id
+		location="us-central1"
+	  }
 `, context)
 }
 
 func testAccNetappkmsconfig_kmsConfigCreateExample_Update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_netapp_kmsconfig" "kmsConfig" {
-  kms_name = "tf-test-kms-test%{random_suffix}"
-  crypto_key_name="projects/cxo-automation-gcp/locations/us-central1/keyRings/kmsRing2/cryptoKeys/kmsCrypto111"
-  description="test description"
-  location="us-central1"
-}
+	resource "google_kms_key_ring" "keyring" {
+		name     = "tf-test-key-ring%{random_suffix}"
+		location = "us-central1"
+	  }
+	  
+	  resource "google_kms_crypto_key" "crypto_key" {
+		name            = "tf-test-crypto-name%{random_suffix}"
+		key_ring        = google_kms_key_ring.keyring.id
+		rotation_period = "100000s"
+	  }
+	  
+	  resource "google_netapp_kmsconfig" "kmsConfig" {
+		kms_name = "tf-test-kms-test%{random_suffix}"
+		description="kmsconfig update"
+		crypto_key_name=google_kms_crypto_key.crypto_key.id
+		location="us-central1"
+	  }
 `, context)
 }
 
