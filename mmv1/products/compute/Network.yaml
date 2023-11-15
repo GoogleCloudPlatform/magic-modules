@@ -100,6 +100,13 @@ properties:
     required: true
     validation: !ruby/object:Provider::Terraform::Validation
       function: 'verify.ValidateGCEName'
+  - !ruby/object:Api::Type::String
+    name: 'numberic_id'
+    description: |
+      The unique identifier for the resource. This identifier is defined by the server.
+    output: true
+    validation: !ruby/object:Provider::Terraform::Validation
+      function: 'verify.ValidateGCEName'
   - !ruby/object:Api::Type::Boolean
     name: 'autoCreateSubnetworks'
     description: |
