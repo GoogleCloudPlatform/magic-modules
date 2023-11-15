@@ -262,6 +262,7 @@ properties:
         name: 'revision'
         description: |-
           The unique name for the revision. If this field is omitted, it will be automatically generated based on the Service name.
+        custom_flatten: templates/terraform/custom_flatten/cloud_run_v2_service_revision.go.erb
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: |-

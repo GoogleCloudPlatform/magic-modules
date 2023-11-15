@@ -1,0 +1,6 @@
+func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+  if d.Get("template.0.revision") == "" {
+    return nil
+  }
+  return v
+}
