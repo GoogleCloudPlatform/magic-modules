@@ -22,7 +22,7 @@ type Runner interface {
 	GetCWD() string
 	Copy(src, dest string) error
 	Mkdir(path string) error
-	Walk(root string, fn WalkFunc) error
+	Walk(root string, fn filepath.WalkFunc) error
 	RemoveAll(path string) error
 	PushDir(path string) error
 	PopDir() error
@@ -55,7 +55,7 @@ func (ar *actualRunner) Mkdir(path string) error {
 	return os.MkdirAll(ar.abs(path), 0777)
 }
 
-func (ar *actualRunner) Walk(root string, fn WalkFunc) error {
+func (ar *actualRunner) Walk(root string, fn filepath.WalkFunc) error {
 	return filepath.Walk(root, fn)
 }
 
