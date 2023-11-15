@@ -55,6 +55,8 @@ examples:
     primary_resource_id: 'tpu'
     vars:
       vm_name: 'test-tpu'
+      network_name: 'tpu-net'
+      subnet_name: 'tpu-subnet'
   - !ruby/object:Provider::Terraform::Examples
     name: 'tpu_v2_vm_full'
     min_version: 'beta'
