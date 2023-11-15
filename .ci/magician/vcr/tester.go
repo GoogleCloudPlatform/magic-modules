@@ -96,6 +96,7 @@ type logKey struct {
 }
 
 type vcrTester struct {
+	env           map[string]string  // shared environment variables for running tests
 	r             exec.Runner        // for running commands and manipulating files
 	version       Version            // either "ga" or "beta", defaults to "ga"
 	mode          Mode               // either "REPLAYING" or "RECORDING", defaults to "REPLAYING"
@@ -113,16 +114,17 @@ const replayingTimeout = "240m"
 var testResultsExpression = regexp.MustCompile(`(?m:^--- (PASS|FAIL|SKIP): TestAcc(\w+))`)
 
 // Create a new tester in the current working directory and write the service account key file.
-func NewTester(goPath, saKey string) (Tester, error) {
+func NewTester(env map[string]string) (Tester, error) {
 	r, err := exec.NewRunner()
 	if err != nil {
 		return nil, err
 	}
 	saKeyPath := "sa_key.json"
-	if err := r.WriteFile(saKeyPath, saKey); err != nil {
+	if err := r.WriteFile(saKeyPath, env["SA_KEY"]); err != nil {
 		return nil, err
 	}
 	return &vcrTester{
+		env:           env,
 		r:             r,
 		baseDir:       r.GetCWD(),
 		saKeyPath:     saKeyPath,
@@ -146,7 +148,7 @@ func (vt *vcrTester) CloneProvider(goPath, githubUsername, githubToken string, v
 	return nil
 }
 
-// Fetch the cassettes for the current version.
+// Fetch the cassettes for the current version if not already fetched.
 // Should be run from the base dir.
 func (vt *vcrTester) FetchCassettes(version Version) error {
 	cassettePath, ok := vt.cassettePaths[version]
@@ -207,27 +209,28 @@ func (vt *vcrTester) Run(mode Mode, version Version) (*Result, error) {
 		replayingTimeout,
 		`-ldflags=-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc`,
 	)
-	env := []string{
-		"GOOGLE_REGION=us-central1",
-		"GOOGLE_ZONE=us-central1-a",
-		fmt.Sprintf("VCR_PATH=%s", filepath.Join(vt.baseDir, vt.cassettePaths[version])),
-		"VCR_MODE=" + mode.Upper(),
-		fmt.Sprintf("ACCTEST_PARALLELISM=%d", accTestParalellism),
-		"GOOGLE_CREDENTIALS=" + vt.saKeyPath,
-		fmt.Sprintf("GOOGLE_APPLICATION_CREDENTIALS=%s/sa_key.json", vt.baseDir),
-		"GOOGLE_TEST_DIRECTORY=" + strings.Join(testDirs, " "),
-		"TF_LOG=DEBUG",
-		"TF_LOG_SDK_FRAMEWORK=INFO",
-		fmt.Sprintf("TF_LOG_PATH_MASK=%s", filepath.Join(vt.baseDir, logPath, "%s.log")),
-		"TF_ACC=1",
-		"TF_SCHEMA_PANIC_ON_ERROR=1",
+	env := map[string]string{
+		"VCR_PATH":                       filepath.Join(vt.baseDir, vt.cassettePaths[version]),
+		"VCR_MODE":                       mode.Upper(),
+		"ACCTEST_PARALLELISM":            strconv.Itoa(accTestParalellism),
+		"GOOGLE_CREDENTIALS":             filepath.Join(vt.baseDir, vt.saKeyPath),
+		"GOOGLE_APPLICATION_CREDENTIALS": filepath.Join(vt.baseDir, vt.saKeyPath),
+		"GOOGLE_TEST_DIRECTORY":          strings.Join(testDirs, " "),
+		"TF_LOG":                         "DEBUG",
+		"TF_LOG_SDK_FRAMEWORK":           "INFO",
+		"TF_LOG_PATH_MASK":               filepath.Join(vt.baseDir, logPath, "%s.log"),
+		"TF_ACC":                         "1",
+		"TF_SCHEMA_PANIC_ON_ERROR":       "1",
+	}
+	for ev, val := range vt.env {
+		env[ev] = val
 	}
 	fmt.Printf(`Running go:
 	env:
-%s
+%v
 	args:
 %s
-`, strings.Join(env, "\n"), strings.Join(args, " "))
+`, env, strings.Join(args, " "))
 	output, err := vt.r.Run("go", args, env)
 	if err != nil {
 		// Use error as output for log.

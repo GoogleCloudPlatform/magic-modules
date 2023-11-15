@@ -11,6 +11,26 @@ import (
 // TODO(trodge): Move this into magician/github along with repo cloning
 const githubUsername = "modular-magician"
 
+var environmentVariables = [...]string{
+	"GITHUB_TOKEN",
+	"GOPATH",
+	"GOOGLE_BILLING_ACCOUNT",
+	"GOOGLE_CUST_ID",
+	"GOOGLE_FIRESTORE_PROJECT",
+	"GOOGLE_IDENTITY_USER",
+	"GOOGLE_MASTER_BILLING_ACCOUNT",
+	"GOOGLE_ORG",
+	"GOOGLE_ORG_2",
+	"GOOGLE_ORG_DOMAIN",
+	"GOOGLE_PROJECT",
+	"GOOGLE_PROJECT_NUMBER",
+	"GOOGLE_REGION",
+	"GOOGLE_SERVICE_ACCOUNT",
+	"GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION",
+	"GOOGLE_ZONE",
+	"SA_KEY",
+}
+
 var checkCassettesCmd = &cobra.Command{
 	Use:   "check-cassettes",
 	Short: "Run VCR tests on downstream main branch",
@@ -18,31 +38,35 @@ var checkCassettesCmd = &cobra.Command{
 	VCR cassettes using the newly built beta provider.
 
 	The following environment variables are expected:
-	1. GOPATH
-	2. SA_KEY
-	3. GITHUB_TOKEN
+` + listEnvironmentVariables() + `
 
 	It prints a list of tests that failed in replaying mode along with all test output.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		goPath, ok := os.LookupEnv("GOPATH")
-		if !ok {
-			fmt.Println("Did not provide GOPATH environment variable")
+		env := make(map[string]string, len(environmentVariables))
+		for _, ev := range environmentVariables {
+			val, ok := os.LookupEnv(ev)
+			if !ok {
+				fmt.Printf("Did not provide %s environment variable\n", ev)
+				os.Exit(1)
+			}
+			env[ev] = val
 		}
 
-		saKey := os.Getenv("SA_KEY")
-
-		githubToken, ok := os.LookupEnv("GITHUB_TOKEN")
-		if !ok {
-			fmt.Println("Did not provide GITHUB_TOKEN environment variable")
-			os.Exit(1)
-		}
-
-		t, err := vcr.NewTester(goPath, saKey)
+		t, err := vcr.NewTester(env)
 		if err != nil {
 			fmt.Println("Error creating VCR tester: ", err)
+			os.Exit(1)
 		}
-		execCheckCassettes(t, goPath, githubToken)
+		execCheckCassettes(t, env["GOPATH"], env["GITHUB_TOKEN"])
 	},
+}
+
+func listEnvironmentVariables() string {
+	var result string
+	for i, ev := range environmentVariables {
+		result += fmt.Sprintf("\t%2d. %s\n", i+1, ev)
+	}
+	return result
 }
 
 func execCheckCassettes(t vcr.Tester, goPath, githubToken string) {

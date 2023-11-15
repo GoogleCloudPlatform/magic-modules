@@ -28,8 +28,8 @@ type Runner interface {
 	PopDir() error
 	WriteFile(name, data string) error
 	ReadFile(name string) (string, error)
-	Run(name string, args, env []string) (string, error)
-	MustRun(name string, args, env []string) string
+	Run(name string, args []string, env map[string]string) (string, error)
+	MustRun(name string, args []string, env map[string]string) string
 }
 
 func NewRunner() (Runner, error) {
@@ -100,10 +100,12 @@ func (ar *actualRunner) ReadFile(name string) (string, error) {
 }
 
 // Run the given command with the given args and env, return output and error if any
-func (ar *actualRunner) Run(name string, args, env []string) (string, error) {
+func (ar *actualRunner) Run(name string, args []string, env map[string]string) (string, error) {
 	cmd := exec.Command(name, args...)
 	cmd.Dir = ar.cwd
-	cmd.Env = append(os.Environ(), env...)
+	for ev, val := range env {
+		cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", ev, val))
+	}
 	out, err := cmd.Output()
 	switch typedErr := err.(type) {
 	case *exec.ExitError:
@@ -116,7 +118,7 @@ func (ar *actualRunner) Run(name string, args, env []string) (string, error) {
 }
 
 // Run the command and exit if there's an error.
-func (ar *actualRunner) MustRun(name string, args, env []string) string {
+func (ar *actualRunner) MustRun(name string, args []string, env map[string]string) string {
 	out, err := ar.Run(name, args, env)
 	if err != nil {
 		log.Fatal(err)
