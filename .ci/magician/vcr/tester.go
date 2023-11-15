@@ -162,19 +162,22 @@ func (vt *vcrTester) FetchCassettes(version Version) error {
 	if _, err := vt.r.Run("gsutil", args, nil); err != nil {
 		return err
 	}
+	vt.cassettePaths[version] = cassettePath
 	return nil
 }
 
 // Run the vcr tests in the given mode and provider version and return the result.
-// This will overwrite any existing logs for the current version and the given mode.
+// This will overwrite any existing logs for the given mode and version.
 func (vt *vcrTester) Run(mode Mode, version Version) (*Result, error) {
-	logPath, ok := vt.logPaths[logKey{mode, version}]
+	lgky := logKey{mode, version}
+	logPath, ok := vt.logPaths[lgky]
 	if !ok {
 		// We've never run this mode and version.
 		logPath = filepath.Join("testlogs", mode.Lower(), version.String())
 		if err := vt.r.Mkdir(logPath); err != nil {
 			return nil, err
 		}
+		vt.logPaths[lgky] = logPath
 	}
 
 	repoPath, ok := vt.repoPaths[version]
