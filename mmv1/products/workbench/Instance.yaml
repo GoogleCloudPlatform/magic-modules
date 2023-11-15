@@ -211,6 +211,7 @@ properties:
         name: bootDisk
         default_from_api: true
         description: The definition of a boot disk.
+        immutable: true
         properties:
           - !ruby/object:Api::Type::String
             name: diskSizeGb
@@ -254,6 +255,7 @@ properties:
         name: dataDisks
         description: Data disks attached to the VM instance. Currently supports only one data disk.
         default_from_api: true
+        immutable: true
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::String
@@ -356,6 +358,7 @@ properties:
       - !ruby/object:Api::Type::Boolean
         name: disablePublicIp
         default_from_api: true
+        immutable: true
         description: Optional. If true, no external IP will be assigned to this VM instance.
       - !ruby/object:Api::Type::Array
         name: tags
@@ -380,6 +383,7 @@ properties:
         properties:
           - !ruby/object:Api::Type::Boolean
             name: enableGpuDriver
+            default_from_api: true
             description: |
               Optional. Whether the end user authorizes Google Cloud to install
               GPU driver on this VM instance. If this field is empty or set to false, the

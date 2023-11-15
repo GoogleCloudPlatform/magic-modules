@@ -11,8 +11,5 @@ resource "google_workbench_instance" "<%= ctx[:primary_resource_id] %>" {
       project      = "deeplearning-platform-release"
       family       = "tf-latest-gpu"
     }
-    gpu_driver_config {
-      enable_gpu_driver = true
-    }
   }
 }
