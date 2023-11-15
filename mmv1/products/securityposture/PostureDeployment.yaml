@@ -58,6 +58,7 @@ properties:
     immutable: true
     description: |
       Name of the posture deployment instance.
+    output: true
   - !ruby/object:Api::Type::String
     name: 'targetResource'
     required: true
@@ -105,11 +106,13 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'etag'
     description: 'For Resource freshness validation (https://google.aip.dev/154)'
+    output: true
   - !ruby/object:Api::Type::KeyValueAnnotations
     name: 'annotations'
     description: |
       Annotations is a key value map stored with a resource that
       may be set by external tools to store and retrieve arbitrary metadata.
+    send_empty_value: true
   - !ruby/object:Api::Type::Boolean
     name: reconciling
     description: |
