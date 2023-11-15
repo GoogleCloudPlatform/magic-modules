@@ -74,6 +74,7 @@ func terraformExec(t *testing.T, executable, dir string, args ...string) []byte 
 		"GOOGLE_PROJECT=" + data.Provider["project"],
 		"GOOGLE_FOLDER=" + data.FolderID,
 		"GOOGLE_ORG=" + data.OrgID,
+		"GOOGLE_OAUTH_ACCESS_TOKEN=fake-token", // GOOGLE_OAUTH_ACCESS_TOKEN is required so terraform plan does not require the google authentication cert
 	}
 	if os.Getenv("TF_CLI_CONFIG_FILE") != "" {
 		cmd.Env = append(cmd.Env, "TF_CLI_CONFIG_FILE="+os.Getenv("TF_CLI_CONFIG_FILE"))

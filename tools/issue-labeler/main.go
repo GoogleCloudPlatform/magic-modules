@@ -17,7 +17,7 @@ var flagDryRun = flag.Bool("backfill-dry-run", false, "when combined with backfi
 func main() {
 	flag.Parse()
 
-	regexpLabels, err := labeler.BuildRegexLabels(EnrolledTeamsYaml)
+	regexpLabels, err := labeler.BuildRegexLabels(labeler.EnrolledTeamsYaml)
 	if err != nil {
 		glog.Exitf("Error building regex labels: %v", err)
 	}
