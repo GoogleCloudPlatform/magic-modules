@@ -63,7 +63,6 @@ resource "google_vmwareengine_network" "default-nw" {
 # there can be only 1 Legacy network per region for a given project, so creating new project to isolate tests.
 resource "google_project" "acceptance" {
   name            = "tf-test-%{random_suffix}"
-  provider        = google-beta
   project_id      = "tf-test-%{random_suffix}"
   org_id          = "%{organization}"
   billing_account = "%{billing_account}"
@@ -71,7 +70,6 @@ resource "google_project" "acceptance" {
 
 resource "google_project_service" "acceptance" {
   project  = google_project.acceptance.project_id
-  provider = google-beta
   service  = "vmwareengine.googleapis.com"
 
   # Needed for CI tests for permissions to propagate, should not be needed for actual usage
