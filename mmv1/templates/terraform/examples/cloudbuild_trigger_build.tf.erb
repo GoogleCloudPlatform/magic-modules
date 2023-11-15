@@ -63,11 +63,11 @@ resource "google_cloudbuild_trigger" "<%= ctx[:primary_resource_id] %>" {
       }
 
       maven_artifacts {
-        repository = "https://us-west1-maven.pkg.dev/myProject/quickstart-java-repo"
-        path       = "/workspace/my-app/target/my-app-1.0.SNAPSHOT.jar"
-        artifactId = "my-app"
-        groupId    = "com.mycompany.app"
-        version    = "1.0"
+        repository  = "https://us-west1-maven.pkg.dev/myProject/quickstart-java-repo"
+        path        = "/workspace/my-app/target/my-app-1.0.SNAPSHOT.jar"
+        artifact_id = "my-app"
+        group_id    = "com.mycompany.app"
+        version     = "1.0"
       }
     }
     options {
