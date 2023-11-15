@@ -22,7 +22,7 @@ var checkCassettesCmd = &cobra.Command{
 	2. SA_KEY
 	3. GITHUB_TOKEN
 
-	It prints a list of tests that failed in replaying mode.`,
+	It prints a list of tests that failed in replaying mode along with all test output.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		goPath, ok := os.LookupEnv("GOPATH")
 		if !ok {

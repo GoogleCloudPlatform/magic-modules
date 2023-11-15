@@ -2,6 +2,7 @@ package vcr
 
 import (
 	"fmt"
+	"io/fs"
 	"magician/exec"
 	"path/filepath"
 	"regexp"
@@ -95,7 +96,7 @@ type logKey struct {
 }
 
 type vcrTester struct {
-	r             vcrRunner          // for running commands and manipulating files
+	r             exec.Runner        // for running commands and manipulating files
 	version       Version            // either "ga" or "beta", defaults to "ga"
 	mode          Mode               // either "REPLAYING" or "RECORDING", defaults to "REPLAYING"
 	baseDir       string             // the directory in which this tester was created
@@ -103,17 +104,6 @@ type vcrTester struct {
 	cassettePaths map[Version]string // where cassettes are relative to baseDir by version
 	logPaths      map[logKey]string  // where logs are relative to baseDir by version and mode
 	repoPaths     map[Version]string // relative paths of already cloned repos by version
-}
-
-type vcrRunner interface {
-	GetCWD() string
-	PushDir(path string) error
-	PopDir() error
-	Mkdir(path string) error
-	WriteFile(name, data string) error
-	ReadFile(name string) (string, error)
-	RemoveAll(path string) error
-	Run(name string, args, env []string) (string, error)
 }
 
 const accTestParalellism = 32
@@ -250,6 +240,7 @@ func (vt *vcrTester) Run(mode Mode, version Version) (*Result, error) {
 	if err := vt.r.WriteFile(logFileName, output); err != nil {
 		return nil, fmt.Errorf("error writing replaying log: %v, test output: %v", err, output)
 	}
+	vt.printLogs(logPath)
 	return collectResult(output), nil
 }
 
@@ -268,7 +259,7 @@ func (vt *vcrTester) Cleanup() error {
 }
 
 // Returns a list of all directories to run tests in.
-// Must be called after chaging into the provider dir.
+// Must be called after changing into the provider dir.
 func (vt *vcrTester) googleTestDirectory() ([]string, error) {
 	var testDirs []string
 	if allPackages, err := vt.r.Run("go", []string{"list", "./..."}, nil); err != nil {
@@ -281,6 +272,27 @@ func (vt *vcrTester) googleTestDirectory() ([]string, error) {
 		}
 	}
 	return testDirs, nil
+}
+
+// Print all log file names and contents, except for all_tests.log.
+// Must be called after running tests.
+func (vt *vcrTester) printLogs(logPath string) {
+	vt.r.Walk(logPath, func(path string, info fs.FileInfo, err error) error {
+		if err != nil {
+			return nil
+		}
+		if info.Name() == "all_tests.log" {
+			return nil
+		}
+		if info.IsDir() {
+			return nil
+		}
+		fmt.Println("======= ", info.Name(), " =======")
+		if logContent, err := vt.r.ReadFile(path); err == nil {
+			fmt.Println(logContent)
+		}
+		return nil
+	})
 }
 
 func collectResult(output string) *Result {
