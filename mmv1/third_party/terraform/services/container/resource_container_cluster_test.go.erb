@@ -4694,6 +4694,9 @@ resource "google_container_cluster" "primary" {
     kalm_config {
       enabled = false
     }
+    stateful_ha_config {
+      enabled = false
+    }
 <% end -%>
   }
   deletion_protection = false
@@ -4760,6 +4763,9 @@ resource "google_container_cluster" "primary" {
     }
     kalm_config {
       enabled = true
+    }
+    stateful_ha_config {
+      enabled = false
     }
 <% end -%>
   deletion_protection = false
