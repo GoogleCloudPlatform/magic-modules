@@ -281,6 +281,10 @@ resource "google_workbench_instance" "instance" {
     }
   }
 
+  labels = {
+    k = "val"
+  }
+
 }
 `, context)
 }

@@ -108,15 +108,6 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: gceSetup
     default_from_api: true
-    update_mask_fields:
-      - 'gceSetup.machineType'
-      - 'gceSetup.metadata'
-      - 'gceSetup.acceleratorConfigs.type'
-      - 'gceSetup.acceleratorConfigs.coreCount'
-      - 'gceSetup.shieldedInstanceConfig.enableSecureBoot'
-      - 'gceSetup.shieldedInstanceConfig.enableVtpm'
-      - 'gceSetup.shieldedInstanceConfig.enableIntegrityMonitoring'
-      - 'gceSetup.gpu_driver_config.enable_gpu_driver'
     description: The definition of how to configure a VM instance outside of Resources and Identity.
     properties:
       - !ruby/object:Api::Type::String
@@ -494,8 +485,6 @@ properties:
     description: |
       Optional. Labels to apply to this instance. These can be later modified
       by the UpdateInstance method.
-    update_mask_fields:
-      - 'labels'
     diff_suppress_func: WorkbenchInstanceLabelsDiffSuppress
 parameters:
   - !ruby/object:Api::Type::String
