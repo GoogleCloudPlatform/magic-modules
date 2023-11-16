@@ -180,7 +180,7 @@ func TimestampDiffSuppress(format string) schema.SchemaDiffSuppressFunc {
 }
 
 // Suppresses diff for IPv4 and IPv6 different formats.
-// It also suppresses diffs if an IP and one reference are given.
+// It also suppresses diffs if an IP is changing to a reference.
 func InternalIpDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
 	addr_equality := false
 	netmask_equality := false
@@ -213,6 +213,7 @@ func InternalIpDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
 	}
 
 	// If old and new both have a netmask compare them, otherwise suppress
+	// This is not technically correct but prevents the permadiff described in https://github.com/hashicorp/terraform-provider-google/issues/16400
 	if (len(addr_netmask_old)) == 2 && (len(addr_netmask_new) == 2) {
 		netmask_equality = addr_netmask_old[1] == addr_netmask_new[1]
 	} else {
