@@ -36,6 +36,7 @@ var (
 		"hao-nan-li",
 		"SarahFrench",
 		"c2thorn",
+		"shuyama1",
 	}
 )
 
