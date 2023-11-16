@@ -76,7 +76,6 @@ func testAccCloudIdentityGroup_update(context map[string]interface{}) string {
 resource "google_cloud_identity_group" "cloud_identity_group_basic" {
   display_name = "tf-test-my-identity-group%{random_suffix}-update"
   description  = "my-description"
-  initial_group_config = "EMPTY"
 
   parent = "customers/%{cust_id}"
 
@@ -87,13 +86,6 @@ resource "google_cloud_identity_group" "cloud_identity_group_basic" {
   labels = {
     "cloudidentity.googleapis.com/groups.discussion_forum" = ""
     "cloudidentity.googleapis.com/groups.security" = ""
-  }
-
-  dynamic_group_metadata {
-    queries {
-      resource_type = "USER"
-      query         = "user.addresses.exists(ad, ad.locality=='Sunnyvale')"
-    }
   }
 }
 `, context)
@@ -257,8 +249,8 @@ resource "google_cloud_identity_group" "cloud_identity_groups_dynamic" {
   }
 
   labels = {
-    "cloudidentity.googleapis.com/groups.discussion_forum" = "",
     "cloudidentity.googleapis.com/groups.dynamic" = ""
+    "cloudidentity.googleapis.com/groups.discussion_forum" = ""
   }
 
   dynamic_group_metadata {
