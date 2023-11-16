@@ -77,13 +77,21 @@ func TestAccIAMWorkforcePoolWorkforcePool_minimal(t *testing.T) {
 func testAccIAMWorkforcePoolWorkforcePool_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_iam_workforce_pool" "my_pool" {
-  workforce_pool_id = "my-pool-%{random_suffix}"
-  parent            = "organizations/%{org_id}"
-  location          = "global"
-  display_name      = "Display name"
-  description       = "A sample workforce pool."
-  disabled          = false
-  session_duration  = "7200s"
+  workforce_pool_id   = "my-pool-%{random_suffix}"
+  parent              = "organizations/%{org_id}"
+  location            = "global"
+  display_name        = "Display name"
+  description         = "A sample workforce pool."
+  disabled            = false
+  session_duration    = "7200s"
+  access_restrictions = {
+    allowedServices = [
+      {
+	domain = "backstory.chronicle.security"
+      }
+    ]
+    disableProgrammaticSignin = false
+  }
 }
 `, context)
 }
