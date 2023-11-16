@@ -18,7 +18,7 @@ steps:
         - "GOOGLE_PROJECT_NUMBER"
         - "GOOGLE_SERVICE_ACCOUNT"
         - "SA_KEY"
-        - "GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION"]
+        - "GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION"
       env:
         - "GOOGLE_REGION=us-central1"
         - "GOOGLE_ZONE=us-central1-a"
