@@ -88,7 +88,7 @@ resource "google_netapp_storage_pool" "test_pool" {
   network = google_compute_network.peering_network.id
   active_directory      = ""
   description           = "this is a test description"
-  global_access_allowed = false
+  global_access_allowed = true
   kms_config            = ""
   labels                = {
     key= "test"
