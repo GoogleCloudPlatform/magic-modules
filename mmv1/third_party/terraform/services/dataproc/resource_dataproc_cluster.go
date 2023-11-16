@@ -1508,6 +1508,7 @@ by Dataproc`,
 						"dataproc_metric_config": {
 							Type:         schema.TypeList,
 							Optional:     true,
+							Computed:     true,
 							MaxItems:     1,
 							Description:  `The config for Dataproc metrics.`,
 							AtLeastOneOf: clusterConfigKeys,
@@ -1525,6 +1526,7 @@ by Dataproc`,
 						"auxiliary_node_groups": {
 							Type:         schema.TypeList,
 							Optional:     true,
+							Computed:     true,
 							Description:  `The node group settings.`,
 							AtLeastOneOf: clusterConfigKeys,
 							Elem: &schema.Resource{
@@ -1555,6 +1557,7 @@ by Dataproc`,
 												"node_group_config": {
 													Description: `The node group instance group configuration.`,
 													Optional:    true,
+													Computed:    true,
 													MaxItems:    1,
 													Type:        schema.TypeList,
 													Elem: &schema.Resource{
@@ -1622,6 +1625,12 @@ by Dataproc`,
 																ForceNew:    true,
 																Elem:        acceleratorsSchema(),
 																Description: `The Compute Engine accelerator (GPU) configuration for these instances. Can be specified multiple times.`,
+															},
+															"instance_names": {
+																Type:        schema.TypeList,
+																Computed:    true,
+																Elem:        &schema.Schema{Type: schema.TypeString},
+																Description: `List of auxiliary node group instance names which have been assigned to the cluster.`,
 															},
 														},
 													},
@@ -2051,7 +2060,10 @@ func expandNodeGroup(cfg map[string]interface{}) *dataproc.NodeGroup {
 	}
 
 	if v, ok := cfg["node_group_config"]; ok {
-		conf.NodeGroupConfig = expandNodeGroupConfig(v.([]interface{})[0].(map[string]interface{}))
+		ng := v.([]interface{})
+		if len(ng) > 0 {
+			conf.NodeGroupConfig = expandNodeGroupConfig(v.([]interface{})[0].(map[string]interface{}))
+		}
 	}
 	return conf
 }
@@ -3031,7 +3043,6 @@ func flattenNodeGroupConfig(icg *dataproc.InstanceGroupConfig) []map[string]inte
 		data["num_instances"] = icg.NumInstances
 		data["machine_type"] = tpgresource.GetResourceNameFromSelfLink(icg.MachineTypeUri)
 		data["min_cpu_platform"] = icg.MinCpuPlatform
-		data["image_uri"] = icg.ImageUri
 		data["instance_names"] = icg.InstanceNames
 		if icg.DiskConfig != nil {
 			disk["boot_disk_size_gb"] = icg.DiskConfig.BootDiskSizeGb
