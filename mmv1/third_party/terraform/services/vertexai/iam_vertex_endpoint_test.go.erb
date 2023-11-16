@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestAccVertexAIEndpointIamBindingGenerated(t *testing.T) {
+func TestAccVertexAIEndpointIamBinding(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -26,7 +26,7 @@ func TestAccVertexAIEndpointIamBindingGenerated(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVertexAIEndpointIamBinding_basicGenerated(context),
+				Config: testAccVertexAIEndpointIamBinding_basic(context),
 			},
 			{
 				ResourceName:      "google_vertex_ai_endpoint_iam_binding.foo",
@@ -36,7 +36,7 @@ func TestAccVertexAIEndpointIamBindingGenerated(t *testing.T) {
 			},
 			{
 				// Test Iam Binding update
-				Config: testAccVertexAIEndpointIamBinding_updateGenerated(context),
+				Config: testAccVertexAIEndpointIamBinding_update(context),
 			},
 			{
 				ResourceName:      "google_vertex_ai_endpoint_iam_binding.foo",
@@ -48,7 +48,7 @@ func TestAccVertexAIEndpointIamBindingGenerated(t *testing.T) {
 	})
 }
 
-func TestAccVertexAIEndpointIamMemberGenerated(t *testing.T) {
+func TestAccVertexAIEndpointIamMember(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -62,7 +62,7 @@ func TestAccVertexAIEndpointIamMemberGenerated(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Member creation (no update for member, no need to test)
-				Config: testAccVertexAIEndpointIamMember_basicGenerated(context),
+				Config: testAccVertexAIEndpointIamMember_basic(context),
 			},
 			{
 				ResourceName:      "google_vertex_ai_endpoint_iam_member.foo",
@@ -74,7 +74,7 @@ func TestAccVertexAIEndpointIamMemberGenerated(t *testing.T) {
 	})
 }
 
-func TestAccVertexAIEndpointIamPolicyGenerated(t *testing.T) {
+func TestAccVertexAIEndpointIamPolicy(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -87,7 +87,7 @@ func TestAccVertexAIEndpointIamPolicyGenerated(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVertexAIEndpointIamPolicy_basicGenerated(context),
+				Config: testAccVertexAIEndpointIamPolicy_basic(context),
 				Check:  resource.TestCheckResourceAttrSet("data.google_vertex_ai_endpoint_iam_policy.foo", "policy_data"),
 			},
 			{
@@ -109,7 +109,7 @@ func TestAccVertexAIEndpointIamPolicyGenerated(t *testing.T) {
 	})
 }
 
-func testAccVertexAIEndpointIamMember_basicGenerated(context map[string]interface{}) string {
+func testAccVertexAIEndpointIamMember_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_vertex_ai_endpoint" "endpoint" {
   name         = "tf-test-endpoint-name%{random_suffix}"
@@ -156,7 +156,7 @@ endpoint = google_vertex_ai_endpoint.endpoint.name
 `, context)
 }
 
-func testAccVertexAIEndpointIamPolicy_basicGenerated(context map[string]interface{}) string {
+func testAccVertexAIEndpointIamPolicy_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_vertex_ai_endpoint" "endpoint" {
   name         = "tf-test-endpoint-name%{random_suffix}"
@@ -267,7 +267,7 @@ endpoint = google_vertex_ai_endpoint.endpoint.name
 `, context)
 }
 
-func testAccVertexAIEndpointIamBinding_basicGenerated(context map[string]interface{}) string {
+func testAccVertexAIEndpointIamBinding_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_vertex_ai_endpoint" "endpoint" {
   name         = "tf-test-endpoint-name%{random_suffix}"
@@ -314,7 +314,7 @@ endpoint = google_vertex_ai_endpoint.endpoint.name
 `, context)
 }
 
-func testAccVertexAIEndpointIamBinding_updateGenerated(context map[string]interface{}) string {
+func testAccVertexAIEndpointIamBinding_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_vertex_ai_endpoint" "endpoint" {
   name         = "tf-test-endpoint-name%{random_suffix}"
