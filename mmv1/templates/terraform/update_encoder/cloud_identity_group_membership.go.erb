@@ -24,9 +24,9 @@
 	var updateRolesParams []map[string]interface{}
 	for _, addR := range addRoleList {
 		ar := addR.(map[string]interface{})["name"].(string)
-		ae := addR.(map[string]interface{})["expiryDetail"].([]interface {})
+		ae := addR.(map[string]interface{})["expiry_detail"].([]interface {})
 		if len(ae) > 1 {
-			return nil, fmt.Errorf("only expect one or zero expiryDetail per role")
+			return nil, fmt.Errorf("only expect one or zero expiry_detail per role")
 		}
 		for _, removeR := range removeRoleList {
 			if ar == removeR.(map[string]interface{})["name"].(string) {
@@ -35,9 +35,9 @@
 				if len(ae) == 0 {
 					updateR = map[string]interface{}{"name": ar}
 				} else {
-					updateR = map[string]interface{}{"name": ar, "expiryDetail": ae[0]}
+					updateR = map[string]interface{}{"name": ar, "expiry_detail": ae[0]}
 				}
-				updateP := map[string]interface{}{"fieldMask": "expiryDetail.expire_time", "membershipRole": updateR}
+				updateP := map[string]interface{}{"field_mask": "expiryDetail.expire_time", "membership_role": updateR}
 				updateRolesParams = append(updateRolesParams, updateP)
 			}
 		}
@@ -49,11 +49,11 @@
 		if _, ignore := ignoreUpdateR[name]; ignore {
 			continue
 		}
-		expiryDetail := r.(map[string]interface{})["expiryDetail"].([]interface {})
+		expiryDetail := r.(map[string]interface{})["expiry_detail"].([]interface {})
 		if len(expiryDetail) == 0 {
 			addRoles = append(addRoles, map[string]interface{}{"name": name})
 		} else {
-			addRoles = append(addRoles, map[string]interface{}{"name": name, "expiryDetail": expiryDetail[0]})
+			addRoles = append(addRoles, map[string]interface{}{"name": name, "expiry_detail": expiryDetail[0]})
 		}
 	}
 	var removeRoles []string
