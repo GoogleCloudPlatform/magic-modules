@@ -57,12 +57,14 @@ if ! git diff --exit-code origin/$OLD_BRANCH origin/$NEW_BRANCH; then
 fi
 popd
 
-## Breaking change setup and execution
+## Diff processor - TPG
 set +e
 pushd $MM_LOCAL_PATH/tools/diff-processor
 cp -r $TPG_LOCAL_PATH old/
 cp -r $TPG_LOCAL_PATH new/
 make build OLD_REF=$OLD_BRANCH NEW_REF=$NEW_BRANCH
+
+### Breaking changes
 TPG_BREAKING="$(bin/diff-processor breaking-changes)"
 retVal=$?
 if [ $retVal -ne 0 ]; then
@@ -70,16 +72,35 @@ if [ $retVal -ne 0 ]; then
     BREAKING_CHANGE_BUILD_FAILURE=1
 fi
 
+### Add labels
+GITHUB_TOKEN=$GITHUB_TOKEN $MM_LOCAL_PATH/tools/diff-processor/bin/diff-processor add-labels $PR_NUMBER
 rm -rf ./old/ ./new/ ./bin/
+popd
+set -e
+
+## Diff processor - TPGB
+set +e
+pushd $MM_LOCAL_PATH/tools/diff-processor
 cp -r $TPGB_LOCAL_PATH old/
 cp -r $TPGB_LOCAL_PATH new/
 make build OLD_REF=$OLD_BRANCH NEW_REF=$NEW_BRANCH
+
+### Breaking changes
 TPGB_BREAKING="$(bin/diff-processor breaking-changes)"
 retVal=$?
 if [ $retVal -ne 0 ]; then
     TPGB_BREAKING=""
     BREAKING_CHANGE_BUILD_FAILURE=1
 fi
+
+### Add labels
+GITHUB_TOKEN=$GITHUB_TOKEN $MM_LOCAL_PATH/tools/diff-processor/bin/diff-processor add-labels $PR_NUMBER
+rm -rf ./old/ ./new/ ./bin/
+popd
+set -e
+
+## Report breaking change failures
+set +e
 if [ $BREAKING_CHANGE_BUILD_FAILURE -eq 0 ]; then
     echo "Breaking changes succeeded"
     # Export variables here so that they can be used in compare_breaking_changes
@@ -91,7 +112,6 @@ else
     echo "Breaking changes failed"
     BREAKINGCHANGES="## Breaking Change Detection Failed${NEWLINE}The breaking change detector crashed during execution. This is usually due to the downstream provider(s) failing to compile. Please investigate or follow up with your reviewer."
 fi
-popd
 set -e
 
 ## Missing test setup and execution
