@@ -53,7 +53,7 @@ func testAccCloudIdentityGroupMembership_updateTest(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccCloudIdentityGroupMembership_update3(context),
+				Config: testAccCloudIdentityGroupMembership_addExpiry(context),
 			},
 			{
 				ResourceName:      "google_cloud_identity_group_membership.basic",
@@ -61,7 +61,15 @@ func testAccCloudIdentityGroupMembership_updateTest(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccCloudIdentityGroupMembership_update4(context),
+				Config: testAccCloudIdentityGroupMembership_updateExpiry(context),
+			},
+			{
+				ResourceName:      "google_cloud_identity_group_membership.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccCloudIdentityGroupMembership_update1(context),
 			},
 			{
 				ResourceName:      "google_cloud_identity_group_membership.basic",
@@ -137,7 +145,7 @@ resource "google_cloud_identity_group_membership" "basic" {
 `, context)
 }
 
-func testAccCloudIdentityGroupMembership_update3(context map[string]interface{}) string {
+func testAccCloudIdentityGroupMembership_addExpiry(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_cloud_identity_group" "group" {
   display_name = "tf-test-my-identity-group%{random_suffix}"
@@ -171,7 +179,7 @@ resource "google_cloud_identity_group_membership" "basic" {
 `, context)
 }
 
-func testAccCloudIdentityGroupMembership_update4(context map[string]interface{}) string {
+func testAccCloudIdentityGroupMembership_updateExpiry(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_cloud_identity_group" "group" {
   display_name = "tf-test-my-identity-group%{random_suffix}"
