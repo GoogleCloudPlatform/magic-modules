@@ -52,6 +52,22 @@ func testAccCloudIdentityGroupMembership_updateTest(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				Config: testAccCloudIdentityGroupMembership_update3(context),
+			},
+			{
+				ResourceName:      "google_cloud_identity_group_membership.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccCloudIdentityGroupMembership_update4(context),
+			},
+			{
+				ResourceName:      "google_cloud_identity_group_membership.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -81,9 +97,6 @@ resource "google_cloud_identity_group_membership" "basic" {
 
   roles {
     name = "MEMBER"
-    expiry_detail {
-      expire_time = "2215-10-02T15:01:23Z"
-    }
   }
 
 }
@@ -120,6 +133,74 @@ resource "google_cloud_identity_group_membership" "basic" {
   roles {
     name = "MANAGER"
   }
+}
+`, context)
+}
+
+func testAccCloudIdentityGroupMembership_update3(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_cloud_identity_group" "group" {
+  display_name = "tf-test-my-identity-group%{random_suffix}"
+
+  parent = "customers/%{cust_id}"
+
+  group_key {
+    id = "tf-test-my-identity-group%{random_suffix}@%{org_domain}"
+  }
+
+  labels = {
+    "cloudidentity.googleapis.com/groups.discussion_forum" = ""
+  }
+}
+
+resource "google_cloud_identity_group_membership" "basic" {
+  group    = google_cloud_identity_group.group.id
+
+  preferred_member_key {
+    id = "%{identity_user}@%{org_domain}"
+  }
+
+  roles {
+    name = "MEMBER"
+    expiry_detail {
+      expire_time = "2215-10-02T15:01:23Z"
+    }
+  }
+
+}
+`, context)
+}
+
+func testAccCloudIdentityGroupMembership_update4(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_cloud_identity_group" "group" {
+  display_name = "tf-test-my-identity-group%{random_suffix}"
+
+  parent = "customers/%{cust_id}"
+
+  group_key {
+    id = "tf-test-my-identity-group%{random_suffix}@%{org_domain}"
+  }
+
+  labels = {
+    "cloudidentity.googleapis.com/groups.discussion_forum" = ""
+  }
+}
+
+resource "google_cloud_identity_group_membership" "basic" {
+  group    = google_cloud_identity_group.group.id
+
+  preferred_member_key {
+    id = "%{identity_user}@%{org_domain}"
+  }
+
+  roles {
+    name = "MEMBER"
+    expiry_detail {
+      expire_time = "2216-10-02T15:01:23Z"
+    }
+  }
+
 }
 `, context)
 }
