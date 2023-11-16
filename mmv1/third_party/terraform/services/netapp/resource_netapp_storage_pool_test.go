@@ -95,7 +95,6 @@ resource "google_netapp_storage_pool" "test_pool" {
     value= "pool"
   }
   ldap_enabled          = false
-  psa_range             = google_compute_global_address.private_ip_alloc.name
 
 }
 `, context)
@@ -139,7 +138,6 @@ resource "google_netapp_storage_pool" "test_pool" {
     value= "pool"
   }
   ldap_enabled          = false
-  psa_range             = google_compute_global_address.private_ip_alloc.name
 
 }
 `, context)

@@ -113,11 +113,6 @@ properties:
     description: |
       Flag indicating if the pool is NFS LDAP enabled or not.
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: 'psaRange'
-    description: |
-      Name of the Private Service Access allocated range. If not provided, any available range will be chosen.
-    immutable: true
   - !ruby/object:Api::Type::Enum
     name: 'encryptionType'
     description: |
