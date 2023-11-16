@@ -122,7 +122,3 @@ properties:
       - :SERVICE_MANAGED
       - :CLOUD_KMS
     output: true
-  - !ruby/object:Api::Type::Boolean
-    name: 'globalAccessAllowed'
-    description: |
-      Allows SO pool to access AD or DNS server from other regions.
