@@ -167,6 +167,12 @@ service/compute-l7-load-balancer:
   - google_compute_region_target_http_proxy
   - google_compute_target_https_proxy
   - google_compute_region_target_https_proxy
+service/compute-managed:
+  resources:
+  - google_compute_instance_group_manager.*
+  - google_compute_region_instance_group_manager.*
+  - google_compute_per_instance_config.*
+  - google_compute_region_per_instance_config.*
 service/compute-nat:
   resources:
   - google_compute_router_nat
@@ -183,6 +189,9 @@ service/compute-networking-neg:
   - google_compute_global_network_endpoint.*
   - google_compute_network_endpoint.*
   - google_compute_region_network_endpoint.*
+service/compute-packet-mirroring:
+  resources:
+  - google_compute_packet_mirroring
 service/compute-pd:
   resources:
   - google_compute_attached_disk.*
@@ -406,15 +415,15 @@ service/monitoring-services:
 service/monitoring-uptime:
   resources:
   - google_monitoring_uptime_.*
+service/network-connectivity-center:
+  resources:
+  - google_network_connectivity_hub
+  - google_network_connectivity_spoke
 service/network-security:
   resources:
   - google_network_security_authorization_policy
   - google_network_security_client_tls_policy
-  - google_network_security_gateway_security_policy
-  - google_network_security_gateway_security_policy_rule
   - google_network_security_server_tls_policy
-  - google_network_security_tls_inspection_policy
-  - google_network_security_url_lists
 service/network-security-distributed-firewall:
   resources:
   - google_network_security_address_group
@@ -428,6 +437,12 @@ service/networkconnectivity-serviceautomation:
 service/networkmanagement-connectivity-test:
   resources:
   - google_network_management_connectivity_test
+service/networksecurity-swp:
+  resources:
+  - google_network_security_gateway_security_policy
+  - google_network_security_gateway_security_policy_rule
+  - google_network_security_url_lists
+  - google_network_security_tls_inspection_policy
 service/networkservices-media-cdn:
   resources:
   - google_network_services_edge_cache_.*
