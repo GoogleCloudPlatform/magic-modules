@@ -257,7 +257,8 @@ resource "google_cloud_identity_group" "cloud_identity_groups_dynamic" {
   }
 
   labels = {
-    "cloudidentity.googleapis.com/groups.discussion_forum" = ""
+    "cloudidentity.googleapis.com/groups.discussion_forum" = "",
+    "cloudidentity.googleapis.com/groups.dynamic" = ""
   }
 
   dynamic_group_metadata {
