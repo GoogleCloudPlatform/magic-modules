@@ -12,7 +12,6 @@
 # limitations under the License.
 --- !ruby/object:Api::Resource
 name: "BareMetalAdminCluster"
-min_version: beta
 base_url: "projects/{{project}}/locations/{{location}}/bareMetalAdminClusters"
 create_url: "projects/{{project}}/locations/{{location}}/bareMetalAdminClusters?bare_metal_admin_cluster_id={{name}}"
 update_url: "projects/{{project}}/locations/{{location}}/bareMetalAdminClusters/{{name}}"
@@ -31,7 +30,6 @@ description: "A Google Bare Metal Admin Cluster."
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "gkeonprem_bare_metal_admin_cluster_basic"
-    min_version: beta
     primary_resource_id: "admin-cluster-basic"
     vars:
       name: "my-cluster"
@@ -39,7 +37,6 @@ examples:
       project: "fake-backend-360322"
   - !ruby/object:Provider::Terraform::Examples
     name: "gkeonprem_bare_metal_admin_cluster_full"
-    min_version: beta
     primary_resource_id: "admin-cluster-basic"
     vars:
       name: "my-cluster"

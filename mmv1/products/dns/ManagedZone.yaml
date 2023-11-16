@@ -47,6 +47,9 @@ examples:
       dns_compute_instance: 'dns-compute-instance'
       allow_http_traffic: 'allow-http-traffic'
       example_zone_googlecloudexample: 'example-zone-googlecloudexample'
+      dns_name: "googlecloudexample.net."
+    test_vars_overrides:
+      dns_name: '"mz.gcp.tfacc.hashicorptest.com."'
     ignore_read_extra:
       - 'force_destroy'
   - !ruby/object:Provider::Terraform::Examples

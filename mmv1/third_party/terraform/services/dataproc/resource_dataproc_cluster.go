@@ -738,8 +738,316 @@ func ResourceDataprocCluster() *schema.Resource {
 							},
 						},
 
-						"master_config": instanceConfigSchema("master_config"),
-						"worker_config": instanceConfigSchema("worker_config"),
+						"master_config": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							AtLeastOneOf: clusterConfigKeys,
+							Computed:     true,
+							MaxItems:     1,
+							Description:  `The Compute Engine config settings for the cluster's master instance.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"num_instances": {
+										Type:        schema.TypeInt,
+										Optional:    true,
+										ForceNew:    true,
+										Computed:    true,
+										Description: `Specifies the number of master nodes to create. If not specified, GCP will default to a predetermined computed value.`,
+										AtLeastOneOf: []string{
+											"cluster_config.0.master_config.0.num_instances",
+											"cluster_config.0.master_config.0.image_uri",
+											"cluster_config.0.master_config.0.machine_type",
+											"cluster_config.0.master_config.0.accelerators",
+										},
+									},
+
+									"image_uri": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Computed: true,
+										AtLeastOneOf: []string{
+											"cluster_config.0.master_config.0.num_instances",
+											"cluster_config.0.master_config.0.image_uri",
+											"cluster_config.0.master_config.0.machine_type",
+											"cluster_config.0.master_config.0.accelerators",
+										},
+										ForceNew:    true,
+										Description: `The URI for the image to use for this master`,
+									},
+
+									"machine_type": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Computed: true,
+										AtLeastOneOf: []string{
+											"cluster_config.0.master_config.0.num_instances",
+											"cluster_config.0.master_config.0.image_uri",
+											"cluster_config.0.master_config.0.machine_type",
+											"cluster_config.0.master_config.0.accelerators",
+										},
+										ForceNew:    true,
+										Description: `The name of a Google Compute Engine machine type to create for the master`,
+									},
+
+									"min_cpu_platform": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Computed: true,
+										AtLeastOneOf: []string{
+											"cluster_config.0.master_config.0.num_instances",
+											"cluster_config.0.master_config.0.image_uri",
+											"cluster_config.0.master_config.0.machine_type",
+											"cluster_config.0.master_config.0.accelerators",
+										},
+										ForceNew:    true,
+										Description: `The name of a minimum generation of CPU family for the master. If not specified, GCP will default to a predetermined computed value for each zone.`,
+									},
+									"disk_config": {
+										Type:     schema.TypeList,
+										Optional: true,
+										Computed: true,
+										AtLeastOneOf: []string{
+											"cluster_config.0.master_config.0.num_instances",
+											"cluster_config.0.master_config.0.image_uri",
+											"cluster_config.0.master_config.0.machine_type",
+											"cluster_config.0.master_config.0.accelerators",
+											"cluster_config.0.master_config.0.disk_config",
+										},
+										MaxItems:    1,
+										Description: `Disk Config`,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"num_local_ssds": {
+													Type:        schema.TypeInt,
+													Optional:    true,
+													Computed:    true,
+													Description: `The amount of local SSD disks that will be attached to each master cluster node. Defaults to 0.`,
+													AtLeastOneOf: []string{
+														"cluster_config.0.master_config.0.disk_config.0.num_local_ssds",
+														"cluster_config.0.master_config.0.disk_config.0.boot_disk_size_gb",
+														"cluster_config.0.master_config.0.disk_config.0.boot_disk_type",
+													},
+													ForceNew: true,
+												},
+
+												"boot_disk_size_gb": {
+													Type:        schema.TypeInt,
+													Optional:    true,
+													Computed:    true,
+													Description: `Size of the primary disk attached to each node, specified in GB. The primary disk contains the boot volume and system libraries, and the smallest allowed disk size is 10GB. GCP will default to a predetermined computed value if not set (currently 500GB). Note: If SSDs are not attached, it also contains the HDFS data blocks and Hadoop working directories.`,
+													AtLeastOneOf: []string{
+														"cluster_config.0.master_config.0.disk_config.0.num_local_ssds",
+														"cluster_config.0.master_config.0.disk_config.0.boot_disk_size_gb",
+														"cluster_config.0.master_config.0.disk_config.0.boot_disk_type",
+													},
+													ForceNew:     true,
+													ValidateFunc: validation.IntAtLeast(10),
+												},
+
+												"boot_disk_type": {
+													Type:        schema.TypeString,
+													Optional:    true,
+													Description: `The disk type of the primary disk attached to each node. Such as "pd-ssd" or "pd-standard". Defaults to "pd-standard".`,
+													AtLeastOneOf: []string{
+														"cluster_config.0.master_config.0.disk_config.0.num_local_ssds",
+														"cluster_config.0.master_config.0.disk_config.0.boot_disk_size_gb",
+														"cluster_config.0.master_config.0.disk_config.0.boot_disk_type",
+													},
+													ForceNew: true,
+													Default:  "pd-standard",
+												},
+											},
+										},
+									},
+									"accelerators": {
+										Type:     schema.TypeSet,
+										Optional: true,
+										AtLeastOneOf: []string{
+											"cluster_config.0.master_config.0.num_instances",
+											"cluster_config.0.master_config.0.image_uri",
+											"cluster_config.0.master_config.0.machine_type",
+											"cluster_config.0.master_config.0.accelerators",
+										},
+										ForceNew:    true,
+										Elem:        acceleratorsSchema(),
+										Description: `The Compute Engine accelerator (GPU) configuration for these instances. Can be specified multiple times.`,
+									},
+
+									"instance_names": {
+										Type:        schema.TypeList,
+										Computed:    true,
+										Elem:        &schema.Schema{Type: schema.TypeString},
+										Description: `List of master instance names which have been assigned to the cluster.`,
+									},
+								},
+							},
+						},
+						"worker_config": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							AtLeastOneOf: clusterConfigKeys,
+							Computed:     true,
+							MaxItems:     1,
+							Description:  `The Compute Engine config settings for the cluster's worker instances.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"num_instances": {
+										Type:        schema.TypeInt,
+										Optional:    true,
+										ForceNew:    false,
+										Computed:    true,
+										Description: `Specifies the number of worker nodes to create. If not specified, GCP will default to a predetermined computed value.`,
+										AtLeastOneOf: []string{
+											"cluster_config.0.worker_config.0.num_instances",
+											"cluster_config.0.worker_config.0.image_uri",
+											"cluster_config.0.worker_config.0.machine_type",
+											"cluster_config.0.worker_config.0.accelerators",
+											"cluster_config.0.worker_config.0.min_num_instances",
+										},
+									},
+
+									"image_uri": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Computed: true,
+										AtLeastOneOf: []string{
+											"cluster_config.0.worker_config.0.num_instances",
+											"cluster_config.0.worker_config.0.image_uri",
+											"cluster_config.0.worker_config.0.machine_type",
+											"cluster_config.0.worker_config.0.accelerators",
+											"cluster_config.0.worker_config.0.min_num_instances",
+										},
+										ForceNew:    true,
+										Description: `The URI for the image to use for this master/worker`,
+									},
+
+									"machine_type": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Computed: true,
+										AtLeastOneOf: []string{
+											"cluster_config.0.worker_config.0.num_instances",
+											"cluster_config.0.worker_config.0.image_uri",
+											"cluster_config.0.worker_config.0.machine_type",
+											"cluster_config.0.worker_config.0.accelerators",
+											"cluster_config.0.worker_config.0.min_num_instances",
+										},
+										ForceNew:    true,
+										Description: `The name of a Google Compute Engine machine type to create for the master/worker`,
+									},
+
+									"min_cpu_platform": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Computed: true,
+										AtLeastOneOf: []string{
+											"cluster_config.0.worker_config.0.num_instances",
+											"cluster_config.0.worker_config.0.image_uri",
+											"cluster_config.0.worker_config.0.machine_type",
+											"cluster_config.0.worker_config.0.accelerators",
+											"cluster_config.0.worker_config.0.min_num_instances",
+										},
+										ForceNew:    true,
+										Description: `The name of a minimum generation of CPU family for the master/worker. If not specified, GCP will default to a predetermined computed value for each zone.`,
+									},
+									"disk_config": {
+										Type:     schema.TypeList,
+										Optional: true,
+										Computed: true,
+										AtLeastOneOf: []string{
+											"cluster_config.0.worker_config.0.num_instances",
+											"cluster_config.0.worker_config.0.image_uri",
+											"cluster_config.0.worker_config.0.machine_type",
+											"cluster_config.0.worker_config.0.accelerators",
+											"cluster_config.0.worker_config.0.min_num_instances",
+											"cluster_config.0.worker_config.0.disk_config",
+										},
+										MaxItems:    1,
+										Description: `Disk Config`,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"num_local_ssds": {
+													Type:        schema.TypeInt,
+													Optional:    true,
+													Computed:    true,
+													Description: `The amount of local SSD disks that will be attached to each master cluster node. Defaults to 0.`,
+													AtLeastOneOf: []string{
+														"cluster_config.0.worker_config.0.disk_config.0.num_local_ssds",
+														"cluster_config.0.worker_config.0.disk_config.0.boot_disk_size_gb",
+														"cluster_config.0.worker_config.0.disk_config.0.boot_disk_type",
+													},
+													ForceNew: true,
+												},
+
+												"boot_disk_size_gb": {
+													Type:        schema.TypeInt,
+													Optional:    true,
+													Computed:    true,
+													Description: `Size of the primary disk attached to each node, specified in GB. The primary disk contains the boot volume and system libraries, and the smallest allowed disk size is 10GB. GCP will default to a predetermined computed value if not set (currently 500GB). Note: If SSDs are not attached, it also contains the HDFS data blocks and Hadoop working directories.`,
+													AtLeastOneOf: []string{
+														"cluster_config.0.worker_config.0.disk_config.0.num_local_ssds",
+														"cluster_config.0.worker_config.0.disk_config.0.boot_disk_size_gb",
+														"cluster_config.0.worker_config.0.disk_config.0.boot_disk_type",
+													},
+													ForceNew:     true,
+													ValidateFunc: validation.IntAtLeast(10),
+												},
+
+												"boot_disk_type": {
+													Type:        schema.TypeString,
+													Optional:    true,
+													Description: `The disk type of the primary disk attached to each node. Such as "pd-ssd" or "pd-standard". Defaults to "pd-standard".`,
+													AtLeastOneOf: []string{
+														"cluster_config.0.worker_config.0.disk_config.0.num_local_ssds",
+														"cluster_config.0.worker_config.0.disk_config.0.boot_disk_size_gb",
+														"cluster_config.0.worker_config.0.disk_config.0.boot_disk_type",
+													},
+													ForceNew: true,
+													Default:  "pd-standard",
+												},
+											},
+										},
+									},
+
+									// Note: preemptible workers don't support accelerators
+									"accelerators": {
+										Type:     schema.TypeSet,
+										Optional: true,
+										AtLeastOneOf: []string{
+											"cluster_config.0.worker_config.0.num_instances",
+											"cluster_config.0.worker_config.0.image_uri",
+											"cluster_config.0.worker_config.0.machine_type",
+											"cluster_config.0.worker_config.0.accelerators",
+											"cluster_config.0.worker_config.0.min_num_instances",
+										},
+										ForceNew:    true,
+										Elem:        acceleratorsSchema(),
+										Description: `The Compute Engine accelerator (GPU) configuration for these instances. Can be specified multiple times.`,
+									},
+
+									"instance_names": {
+										Type:        schema.TypeList,
+										Computed:    true,
+										Elem:        &schema.Schema{Type: schema.TypeString},
+										Description: `List of master/worker instance names which have been assigned to the cluster.`,
+									},
+									"min_num_instances": {
+										Type:     schema.TypeInt,
+										Optional: true,
+										Computed: true,
+										ForceNew: false,
+										AtLeastOneOf: []string{
+											"cluster_config.0.worker_config.0.num_instances",
+											"cluster_config.0.worker_config.0.image_uri",
+											"cluster_config.0.worker_config.0.machine_type",
+											"cluster_config.0.worker_config.0.accelerators",
+											"cluster_config.0.worker_config.0.min_num_instances",
+										},
+										Description: `The minimum number of primary worker instances to create.`,
+									},
+								},
+							},
+						},
 						// preemptible_worker_config has a slightly different config
 						"preemptible_worker_config": {
 							Type:         schema.TypeList,
@@ -830,6 +1138,74 @@ func ResourceDataprocCluster() *schema.Resource {
 										Computed:    true,
 										Elem:        &schema.Schema{Type: schema.TypeString},
 										Description: `List of preemptible instance names which have been assigned to the cluster.`,
+									},
+									"instance_flexibility_policy": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										Computed:    true,
+										Description: `Instance flexibility Policy allowing a mixture of VM shapes and provisioning models.`,
+										AtLeastOneOf: []string{
+											"cluster_config.0.preemptible_worker_config.0.num_instances",
+											"cluster_config.0.preemptible_worker_config.0.preemptibility",
+											"cluster_config.0.preemptible_worker_config.0.disk_config",
+											"cluster_config.0.preemptible_worker_config.0.instance_flexibility_policy",
+										},
+										MaxItems: 1,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"instance_selection_list": {
+													Type:     schema.TypeList,
+													Computed: true,
+													Optional: true,
+													ForceNew: true,
+													AtLeastOneOf: []string{
+														"cluster_config.0.preemptible_worker_config.0.instance_flexibility_policy.0.instance_selection_list",
+													},
+													Description: `List of instance selection options that the group will use when creating new VMs.`,
+													Elem: &schema.Resource{
+														Schema: map[string]*schema.Schema{
+															"machine_types": {
+																Type:        schema.TypeList,
+																Computed:    true,
+																Optional:    true,
+																ForceNew:    true,
+																Elem:        &schema.Schema{Type: schema.TypeString},
+																Description: `Full machine-type names, e.g. "n1-standard-16".`,
+															},
+															"rank": {
+																Type:        schema.TypeInt,
+																Computed:    true,
+																Optional:    true,
+																ForceNew:    true,
+																Elem:        &schema.Schema{Type: schema.TypeInt},
+																Description: `Preference of this instance selection. Lower number means higher preference. Dataproc will first try to create a VM based on the machine-type with priority rank and fallback to next rank based on availability. Machine types and instance selections with the same priority have the same preference.`,
+															},
+														},
+													},
+												},
+												"instance_selection_results": {
+													Type:        schema.TypeList,
+													Computed:    true,
+													Description: `A list of instance selection results in the group.`,
+													Elem: &schema.Resource{
+														Schema: map[string]*schema.Schema{
+															"machine_type": {
+																Type:        schema.TypeString,
+																Computed:    true,
+																Elem:        &schema.Schema{Type: schema.TypeString},
+																Description: `Full machine-type names, e.g. "n1-standard-16".`,
+															},
+															"vm_count": {
+																Type:        schema.TypeInt,
+																Computed:    true,
+																Elem:        &schema.Schema{Type: schema.TypeInt},
+																Description: `Number of VM provisioned with the machine_type.`,
+															},
+														},
+													},
+												},
+											},
+										},
 									},
 								},
 							},
@@ -1175,135 +1551,6 @@ func metricsSchema() *schema.Resource {
 	}
 }
 
-func instanceConfigSchema(parent string) *schema.Schema {
-	var instanceConfigKeys = []string{
-		"cluster_config.0." + parent + ".0.num_instances",
-		"cluster_config.0." + parent + ".0.image_uri",
-		"cluster_config.0." + parent + ".0.machine_type",
-		"cluster_config.0." + parent + ".0.min_cpu_platform",
-		"cluster_config.0." + parent + ".0.disk_config",
-		"cluster_config.0." + parent + ".0.accelerators",
-	}
-
-	masterConfig := strings.Contains(parent, "master")
-
-	return &schema.Schema{
-		Type:         schema.TypeList,
-		Optional:     true,
-		Computed:     true,
-		AtLeastOneOf: clusterConfigKeys,
-		MaxItems:     1,
-		Description:  `The Google Compute Engine config settings for the master/worker instances in a cluster.`,
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"num_instances": {
-					Type:         schema.TypeInt,
-					Optional:     true,
-					ForceNew:     masterConfig,
-					Computed:     true,
-					Description:  `Specifies the number of master/worker nodes to create. If not specified, GCP will default to a predetermined computed value.`,
-					AtLeastOneOf: instanceConfigKeys,
-				},
-
-				"image_uri": {
-					Type:         schema.TypeString,
-					Optional:     true,
-					Computed:     true,
-					AtLeastOneOf: instanceConfigKeys,
-					ForceNew:     true,
-					Description:  `The URI for the image to use for this master/worker`,
-				},
-
-				"machine_type": {
-					Type:         schema.TypeString,
-					Optional:     true,
-					Computed:     true,
-					AtLeastOneOf: instanceConfigKeys,
-					ForceNew:     true,
-					Description:  `The name of a Google Compute Engine machine type to create for the master/worker`,
-				},
-
-				"min_cpu_platform": {
-					Type:         schema.TypeString,
-					Optional:     true,
-					Computed:     true,
-					AtLeastOneOf: instanceConfigKeys,
-					ForceNew:     true,
-					Description:  `The name of a minimum generation of CPU family for the master/worker. If not specified, GCP will default to a predetermined computed value for each zone.`,
-				},
-				"disk_config": {
-					Type:         schema.TypeList,
-					Optional:     true,
-					Computed:     true,
-					AtLeastOneOf: instanceConfigKeys,
-					MaxItems:     1,
-					Description:  `Disk Config`,
-					Elem: &schema.Resource{
-						Schema: map[string]*schema.Schema{
-							"num_local_ssds": {
-								Type:        schema.TypeInt,
-								Optional:    true,
-								Computed:    true,
-								Description: `The amount of local SSD disks that will be attached to each master cluster node. Defaults to 0.`,
-								AtLeastOneOf: []string{
-									"cluster_config.0." + parent + ".0.disk_config.0.num_local_ssds",
-									"cluster_config.0." + parent + ".0.disk_config.0.boot_disk_size_gb",
-									"cluster_config.0." + parent + ".0.disk_config.0.boot_disk_type",
-								},
-								ForceNew: true,
-							},
-
-							"boot_disk_size_gb": {
-								Type:        schema.TypeInt,
-								Optional:    true,
-								Computed:    true,
-								Description: `Size of the primary disk attached to each node, specified in GB. The primary disk contains the boot volume and system libraries, and the smallest allowed disk size is 10GB. GCP will default to a predetermined computed value if not set (currently 500GB). Note: If SSDs are not attached, it also contains the HDFS data blocks and Hadoop working directories.`,
-								AtLeastOneOf: []string{
-									"cluster_config.0." + parent + ".0.disk_config.0.num_local_ssds",
-									"cluster_config.0." + parent + ".0.disk_config.0.boot_disk_size_gb",
-									"cluster_config.0." + parent + ".0.disk_config.0.boot_disk_type",
-								},
-								ForceNew:     true,
-								ValidateFunc: validation.IntAtLeast(10),
-							},
-
-							"boot_disk_type": {
-								Type:        schema.TypeString,
-								Optional:    true,
-								Description: `The disk type of the primary disk attached to each node. Such as "pd-ssd" or "pd-standard". Defaults to "pd-standard".`,
-								AtLeastOneOf: []string{
-									"cluster_config.0." + parent + ".0.disk_config.0.num_local_ssds",
-									"cluster_config.0." + parent + ".0.disk_config.0.boot_disk_size_gb",
-									"cluster_config.0." + parent + ".0.disk_config.0.boot_disk_type",
-								},
-								ForceNew: true,
-								Default:  "pd-standard",
-							},
-						},
-					},
-				},
-
-				// Note: preemptible workers don't support accelerators
-				"accelerators": {
-					Type:         schema.TypeSet,
-					Optional:     true,
-					AtLeastOneOf: instanceConfigKeys,
-					ForceNew:     true,
-					Elem:         acceleratorsSchema(),
-					Description:  `The Compute Engine accelerator (GPU) configuration for these instances. Can be specified multiple times.`,
-				},
-
-				"instance_names": {
-					Type:        schema.TypeList,
-					Computed:    true,
-					Elem:        &schema.Schema{Type: schema.TypeString},
-					Description: `List of master/worker instance names which have been assigned to the cluster.`,
-				},
-			},
-		},
-	}
-}
-
 // We need to pull accelerators' schema out so we can use it to make a set hash func
 func acceleratorsSchema() *schema.Resource {
 	return &schema.Resource{
@@ -1634,12 +1881,12 @@ func expandClusterConfig(d *schema.ResourceData, config *transport_tpg.Config) (
 
 	if cfg, ok := configOptions(d, "cluster_config.0.master_config"); ok {
 		log.Println("[INFO] got master_config")
-		conf.MasterConfig = expandInstanceGroupConfig(cfg)
+		conf.MasterConfig = expandMasterInstanceGroupConfig(cfg)
 	}
 
 	if cfg, ok := configOptions(d, "cluster_config.0.worker_config"); ok {
 		log.Println("[INFO] got worker config")
-		conf.WorkerConfig = expandInstanceGroupConfig(cfg)
+		conf.WorkerConfig = expandWorkerInstanceGroupConfig(cfg)
 	}
 
 	if cfg, ok := configOptions(d, "cluster_config.0.preemptible_worker_config"); ok {
@@ -1916,13 +2163,47 @@ func expandPreemptibleInstanceGroupConfig(cfg map[string]interface{}) *dataproc.
 			}
 		}
 	}
+
+	if ifpc, ok := cfg["instance_flexibility_policy"]; ok {
+		ifps := ifpc.([]interface{})
+		if len(ifps) > 0 {
+			flexibilityPolicy := ifps[0].(map[string]interface{})
+			icg.InstanceFlexibilityPolicy = &dataproc.InstanceFlexibilityPolicy{}
+			if v, ok := flexibilityPolicy["instance_selection_list"]; ok {
+				icg.InstanceFlexibilityPolicy.InstanceSelectionList = expandInstanceSelectionList(v)
+			}
+		}
+
+	}
 	if p, ok := cfg["preemptibility"]; ok {
 		icg.Preemptibility = p.(string)
 	}
 	return icg
 }
 
-func expandInstanceGroupConfig(cfg map[string]interface{}) *dataproc.InstanceGroupConfig {
+func expandInstanceSelectionList(v interface{}) []*dataproc.InstanceSelection {
+	instanceSelectionList := v.([]interface{})
+
+	instanceSelections := []*dataproc.InstanceSelection{}
+	for _, v1 := range instanceSelectionList {
+		instanceSelectionItem := v1.(map[string]interface{})
+		machineTypes := []string{}
+		for _, machineType := range instanceSelectionItem["machine_types"].([]interface{}) {
+			machineTypes = append(machineTypes, machineType.(string))
+		}
+		instanceSelection := &dataproc.InstanceSelection{
+			MachineTypes: machineTypes,
+		}
+		if x, ok := instanceSelectionItem["rank"]; ok {
+			instanceSelection.Rank = int64(x.(int))
+		}
+		instanceSelections = append(instanceSelections, instanceSelection)
+	}
+
+	return instanceSelections
+}
+
+func expandMasterInstanceGroupConfig(cfg map[string]interface{}) *dataproc.InstanceGroupConfig {
 	icg := &dataproc.InstanceGroupConfig{}
 
 	if v, ok := cfg["num_instances"]; ok {
@@ -1933,6 +2214,47 @@ func expandInstanceGroupConfig(cfg map[string]interface{}) *dataproc.InstanceGro
 	}
 	if v, ok := cfg["min_cpu_platform"]; ok {
 		icg.MinCpuPlatform = v.(string)
+	}
+	if v, ok := cfg["image_uri"]; ok {
+		icg.ImageUri = v.(string)
+	}
+
+	if dc, ok := cfg["disk_config"]; ok {
+		d := dc.([]interface{})
+		if len(d) > 0 {
+			dcfg := d[0].(map[string]interface{})
+			icg.DiskConfig = &dataproc.DiskConfig{}
+
+			if v, ok := dcfg["boot_disk_size_gb"]; ok {
+				icg.DiskConfig.BootDiskSizeGb = int64(v.(int))
+			}
+			if v, ok := dcfg["num_local_ssds"]; ok {
+				icg.DiskConfig.NumLocalSsds = int64(v.(int))
+			}
+			if v, ok := dcfg["boot_disk_type"]; ok {
+				icg.DiskConfig.BootDiskType = v.(string)
+			}
+		}
+	}
+
+	icg.Accelerators = expandAccelerators(cfg["accelerators"].(*schema.Set).List())
+	return icg
+}
+
+func expandWorkerInstanceGroupConfig(cfg map[string]interface{}) *dataproc.InstanceGroupConfig {
+	icg := &dataproc.InstanceGroupConfig{}
+
+	if v, ok := cfg["num_instances"]; ok {
+		icg.NumInstances = int64(v.(int))
+	}
+	if v, ok := cfg["machine_type"]; ok {
+		icg.MachineTypeUri = tpgresource.GetResourceNameFromSelfLink(v.(string))
+	}
+	if v, ok := cfg["min_cpu_platform"]; ok {
+		icg.MinCpuPlatform = v.(string)
+	}
+	if v, ok := cfg["min_num_instances"]; ok {
+		icg.MinNumInstances = int64(v.(int))
 	}
 	if v, ok := cfg["image_uri"]; ok {
 		icg.ImageUri = v.(string)
@@ -2279,8 +2601,8 @@ func flattenClusterConfig(d *schema.ResourceData, cfg *dataproc.ClusterConfig) (
 		"bucket":                    cfg.ConfigBucket,
 		"temp_bucket":               cfg.TempBucket,
 		"gce_cluster_config":        flattenGceClusterConfig(d, cfg.GceClusterConfig),
-		"master_config":             flattenInstanceGroupConfig(d, cfg.MasterConfig),
-		"worker_config":             flattenInstanceGroupConfig(d, cfg.WorkerConfig),
+		"master_config":             flattenMasterInstanceGroupConfig(d, cfg.MasterConfig),
+		"worker_config":             flattenWorkerInstanceGroupConfig(d, cfg.WorkerConfig),
 		"software_config":           flattenSoftwareConfig(d, cfg.SoftwareConfig),
 		"encryption_config":         flattenEncryptionConfig(d, cfg.EncryptionConfig),
 		"autoscaling_config":        flattenAutoscalingConfig(d, cfg.AutoscalingConfig),
@@ -2532,6 +2854,7 @@ func flattenPreemptibleInstanceGroupConfig(d *schema.ResourceData, icg *dataproc
 	}
 
 	disk := map[string]interface{}{}
+	instanceFlexibilityPolicy := map[string]interface{}{}
 	data := map[string]interface{}{}
 
 	if icg != nil {
@@ -2543,13 +2866,46 @@ func flattenPreemptibleInstanceGroupConfig(d *schema.ResourceData, icg *dataproc
 			disk["num_local_ssds"] = icg.DiskConfig.NumLocalSsds
 			disk["boot_disk_type"] = icg.DiskConfig.BootDiskType
 		}
+		if icg.InstanceFlexibilityPolicy != nil {
+			instanceFlexibilityPolicy["instance_selection_list"] = flattenInstanceSelectionList(icg.InstanceFlexibilityPolicy.InstanceSelectionList)
+			instanceFlexibilityPolicy["instance_selection_results"] = flattenInstanceSelectionResults(icg.InstanceFlexibilityPolicy.InstanceSelectionResults)
+		}
 	}
 
 	data["disk_config"] = []map[string]interface{}{disk}
+	data["instance_flexibility_policy"] = []map[string]interface{}{instanceFlexibilityPolicy}
 	return []map[string]interface{}{data}
 }
 
-func flattenInstanceGroupConfig(d *schema.ResourceData, icg *dataproc.InstanceGroupConfig) []map[string]interface{} {
+func flattenInstanceSelectionList(is []*dataproc.InstanceSelection) []map[string]interface{} {
+
+	instanceSelections := []map[string]interface{}{}
+	for _, v := range is {
+		instanceSelection := map[string]interface{}{}
+		if len(v.MachineTypes) > 0 {
+			instanceSelection["machine_types"] = v.MachineTypes
+		}
+		instanceSelection["rank"] = v.Rank
+		instanceSelections = append(instanceSelections, instanceSelection)
+	}
+	return instanceSelections
+
+}
+
+func flattenInstanceSelectionResults(isr []*dataproc.InstanceSelectionResult) []map[string]interface{} {
+
+	instanceSelectionResults := []map[string]interface{}{}
+	for _, v := range isr {
+		instanceSelection := map[string]interface{}{}
+		instanceSelection["machine_type"] = v.MachineType
+		instanceSelection["vm_count"] = v.VmCount
+		instanceSelectionResults = append(instanceSelectionResults, instanceSelection)
+	}
+	return instanceSelectionResults
+
+}
+
+func flattenMasterInstanceGroupConfig(d *schema.ResourceData, icg *dataproc.InstanceGroupConfig) []map[string]interface{} {
 	disk := map[string]interface{}{}
 	data := map[string]interface{}{}
 
@@ -2557,6 +2913,30 @@ func flattenInstanceGroupConfig(d *schema.ResourceData, icg *dataproc.InstanceGr
 		data["num_instances"] = icg.NumInstances
 		data["machine_type"] = tpgresource.GetResourceNameFromSelfLink(icg.MachineTypeUri)
 		data["min_cpu_platform"] = icg.MinCpuPlatform
+		data["image_uri"] = icg.ImageUri
+		data["instance_names"] = icg.InstanceNames
+		if icg.DiskConfig != nil {
+			disk["boot_disk_size_gb"] = icg.DiskConfig.BootDiskSizeGb
+			disk["num_local_ssds"] = icg.DiskConfig.NumLocalSsds
+			disk["boot_disk_type"] = icg.DiskConfig.BootDiskType
+		}
+
+		data["accelerators"] = flattenAccelerators(icg.Accelerators)
+	}
+
+	data["disk_config"] = []map[string]interface{}{disk}
+	return []map[string]interface{}{data}
+}
+
+func flattenWorkerInstanceGroupConfig(d *schema.ResourceData, icg *dataproc.InstanceGroupConfig) []map[string]interface{} {
+	disk := map[string]interface{}{}
+	data := map[string]interface{}{}
+
+	if icg != nil {
+		data["num_instances"] = icg.NumInstances
+		data["machine_type"] = tpgresource.GetResourceNameFromSelfLink(icg.MachineTypeUri)
+		data["min_cpu_platform"] = icg.MinCpuPlatform
+		data["min_num_instances"] = icg.MinNumInstances
 		data["image_uri"] = icg.ImageUri
 		data["instance_names"] = icg.InstanceNames
 		if icg.DiskConfig != nil {

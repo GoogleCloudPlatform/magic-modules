@@ -821,7 +821,6 @@ func ResourceBigQueryTable() *schema.Resource {
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			// Schema: [Optional] Describes the schema of this table.
-			// Schema is mutually exclusive with View and Materialized View.
 			"schema": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -833,10 +832,8 @@ func ResourceBigQueryTable() *schema.Resource {
 				},
 				DiffSuppressFunc: bigQueryTableSchemaDiffSuppress,
 				Description:      `A JSON schema for the table.`,
-				ConflictsWith:    []string{"view", "materialized_view"},
 			},
 			// View: [Optional] If specified, configures this table as a view.
-			// View is mutually exclusive with Schema and Materialized View.
 			"view": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -863,11 +860,9 @@ func ResourceBigQueryTable() *schema.Resource {
 						},
 					},
 				},
-				ConflictsWith: []string{"schema", "materialized_view"},
 			},
 
 			// Materialized View: [Optional] If specified, configures this table as a materialized view.
-			// Materialized View is mutually exclusive with Schema and View.
 			"materialized_view": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -912,7 +907,6 @@ func ResourceBigQueryTable() *schema.Resource {
 						},
 					},
 				},
-				ConflictsWith: []string{"schema", "view"},
 			},
 
 			// TimePartitioning: [Experimental] If specified, configures time-based
@@ -959,9 +953,11 @@ func ResourceBigQueryTable() *schema.Resource {
 						// require a partition filter that can be used for partition elimination to be
 						// specified.
 						"require_partition_filter": {
-							Type:        schema.TypeBool,
-							Optional:    true,
-							Description: `If set to true, queries over this table require a partition filter that can be used for partition elimination to be specified.`,
+							Type:          schema.TypeBool,
+							Optional:      true,
+							Description:   `If set to true, queries over this table require a partition filter that can be used for partition elimination to be specified.`,
+							Deprecated:    `This field is deprecated and will be removed in a future major release; please use the top level field with the same name instead.`,
+							ConflictsWith: []string{"require_partition_filter"},
 						},
 					},
 				},
@@ -1018,6 +1014,16 @@ func ResourceBigQueryTable() *schema.Resource {
 						},
 					},
 				},
+			},
+
+			// RequirePartitionFilter: [Optional] If set to true, queries over this table
+			// require a partition filter that can be used for partition elimination to be
+			// specified.
+			"require_partition_filter": {
+				Type:          schema.TypeBool,
+				Optional:      true,
+				Description:   `If set to true, queries over this table require a partition filter that can be used for partition elimination to be specified.`,
+				ConflictsWith: []string{"time_partitioning.0.require_partition_filter"},
 			},
 
 			// Clustering: [Optional] Specifies column names to use for data clustering.  Up to four
@@ -1338,6 +1344,10 @@ func resourceTable(d *schema.ResourceData, meta interface{}) (*bigquery.Table, e
 		table.RangePartitioning = rangePartitioning
 	}
 
+	if v, ok := d.GetOk("require_partition_filter"); ok {
+		table.RequirePartitionFilter = v.(bool)
+	}
+
 	if v, ok := d.GetOk("clustering"); ok {
 		table.Clustering = &bigquery.Clustering{
 			Fields:          tpgresource.ConvertStringArr(v.([]interface{})),
@@ -1376,15 +1386,40 @@ func resourceBigQueryTableCreate(d *schema.ResourceData, meta interface{}) error
 
 	datasetID := d.Get("dataset_id").(string)
 
-	log.Printf("[INFO] Creating BigQuery table: %s", table.TableReference.TableId)
+	if table.View != nil && table.Schema != nil {
 
-	res, err := config.NewBigQueryClient(userAgent).Tables.Insert(project, datasetID, table).Do()
-	if err != nil {
-		return err
+		log.Printf("[INFO] Removing schema from table definition because big query does not support setting schema on view creation")
+		schemaBack := table.Schema
+		table.Schema = nil
+
+		log.Printf("[INFO] Creating BigQuery table: %s without schema", table.TableReference.TableId)
+
+		res, err := config.NewBigQueryClient(userAgent).Tables.Insert(project, datasetID, table).Do()
+		if err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] BigQuery table %s has been created", res.Id)
+		d.SetId(fmt.Sprintf("projects/%s/datasets/%s/tables/%s", res.TableReference.ProjectId, res.TableReference.DatasetId, res.TableReference.TableId))
+
+		table.Schema = schemaBack
+		log.Printf("[INFO] Updating BigQuery table: %s with schema", table.TableReference.TableId)
+		if _, err = config.NewBigQueryClient(userAgent).Tables.Update(project, datasetID, res.TableReference.TableId, table).Do(); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] BigQuery table %s has been update with schema", res.Id)
+	} else {
+		log.Printf("[INFO] Creating BigQuery table: %s", table.TableReference.TableId)
+
+		res, err := config.NewBigQueryClient(userAgent).Tables.Insert(project, datasetID, table).Do()
+		if err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] BigQuery table %s has been created", res.Id)
+		d.SetId(fmt.Sprintf("projects/%s/datasets/%s/tables/%s", res.TableReference.ProjectId, res.TableReference.DatasetId, res.TableReference.TableId))
 	}
-
-	log.Printf("[INFO] BigQuery table %s has been created", res.Id)
-	d.SetId(fmt.Sprintf("projects/%s/datasets/%s/tables/%s", res.TableReference.ProjectId, res.TableReference.DatasetId, res.TableReference.TableId))
 
 	return resourceBigQueryTableRead(d, meta)
 }
@@ -1469,6 +1504,14 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error setting type: %s", err)
 	}
 
+	// determine whether the deprecated require_partition_filter field is used
+	use_old_rpf := false
+	if _, ok := d.GetOk("time_partitioning.0.require_partition_filter"); ok {
+		use_old_rpf = true
+	} else if err := d.Set("require_partition_filter", res.RequirePartitionFilter); err != nil {
+		return fmt.Errorf("Error setting require_partition_filter: %s", err)
+	}
+
 	if res.ExternalDataConfiguration != nil {
 		externalDataConfiguration, err := flattenExternalDataConfiguration(res.ExternalDataConfiguration)
 		if err != nil {
@@ -1499,7 +1542,7 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if res.TimePartitioning != nil {
-		if err := d.Set("time_partitioning", flattenTimePartitioning(res.TimePartitioning)); err != nil {
+		if err := d.Set("time_partitioning", flattenTimePartitioning(res.TimePartitioning, use_old_rpf)); err != nil {
 			return err
 		}
 	}
@@ -2097,7 +2140,7 @@ func flattenEncryptionConfiguration(ec *bigquery.EncryptionConfiguration) []map[
 	return []map[string]interface{}{{"kms_key_name": ec.KmsKeyName, "kms_key_version": ""}}
 }
 
-func flattenTimePartitioning(tp *bigquery.TimePartitioning) []map[string]interface{} {
+func flattenTimePartitioning(tp *bigquery.TimePartitioning, use_old_rpf bool) []map[string]interface{} {
 	result := map[string]interface{}{"type": tp.Type}
 
 	if tp.Field != "" {
@@ -2108,7 +2151,7 @@ func flattenTimePartitioning(tp *bigquery.TimePartitioning) []map[string]interfa
 		result["expiration_ms"] = tp.ExpirationMs
 	}
 
-	if tp.RequirePartitionFilter {
+	if tp.RequirePartitionFilter && use_old_rpf {
 		result["require_partition_filter"] = tp.RequirePartitionFilter
 	}
 

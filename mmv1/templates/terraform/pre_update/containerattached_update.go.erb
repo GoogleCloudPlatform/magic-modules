@@ -1,7 +1,10 @@
 // The generated code sets the wrong masks for the following fields.
 newUpdateMask := []string{}
-if d.HasChange("authorization") {
+if d.HasChange("authorization.0.admin_users") {
     newUpdateMask = append(newUpdateMask, "authorization.admin_users")
+}
+if d.HasChange("authorization.0.admin_groups") {
+    newUpdateMask = append(newUpdateMask, "authorization.admin_groups")
 }
 if d.HasChange("logging_config") {
     newUpdateMask = append(newUpdateMask, "logging_config.component_config.enable_components")
@@ -12,9 +15,13 @@ if d.HasChange("monitoring_config") {
 if d.HasChange("binary_authorization") {
     newUpdateMask = append(newUpdateMask, "binary_authorization.evaluation_mode")
 }
+if d.HasChange("proxy_config") {
+    newUpdateMask = append(newUpdateMask, "proxy_config.kubernetes_secret.name")
+    newUpdateMask = append(newUpdateMask, "proxy_config.kubernetes_secret.namespace")
+}
 // Pull out any other set fields from the generated mask.
 for _, mask := range updateMask {
-    if mask == "authorization" || mask == "loggingConfig" || mask == "monitoringConfig" || mask == "binaryAuthorization" {
+    if mask == "authorization" || mask == "loggingConfig" || mask == "monitoringConfig" || mask == "binaryAuthorization" || mask == "proxyConfig" {
         continue
     }
     newUpdateMask = append(newUpdateMask, mask)

@@ -703,6 +703,33 @@ properties:
               description: |
                 Indicates whether the parameter content should be redacted in log.
                 If redaction is enabled, the parameter content will be replaced by parameter name during logging. Note: the parameter content is subject to redaction if either parameter level redaction or entity type level redaction is enabled.
+            - !ruby/object:Api::Type::NestedObject
+              name: 'advancedSettings'
+              description: |
+                Hierarchical advanced settings for this parameter. The settings exposed at the lower level overrides the settings exposed at the higher level.
+                Hierarchy: Agent->Flow->Page->Fulfillment/Parameter.
+              properties:
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'dtmfSettings'
+                  description: |
+                    Define behaviors for DTMF (dual tone multi frequency). DTMF settings does not override each other. DTMF settings set at different levels define DTMF detections running in parallel. Exposed at the following levels:
+                    * Agent level
+                    * Flow level
+                    * Page level
+                    * Parameter level
+                  properties:
+                    - !ruby/object:Api::Type::Boolean
+                      name: 'enabled'
+                      description: |
+                        If true, incoming audio is processed for DTMF (dual tone multi frequency) events. For example, if the caller presses a button on their telephone keypad and DTMF processing is enabled, Dialogflow will detect the event (e.g. a "3" was pressed) in the incoming audio and pass the event to the bot to drive business logic (e.g. when 3 is pressed, return the account balance).
+                    - !ruby/object:Api::Type::Integer
+                      name: 'maxDigits'
+                      description: |
+                        Max length of DTMF digits.
+                    - !ruby/object:Api::Type::String
+                      name: 'finishDigit'
+                      description: |
+                        The digit that terminates a DTMF digit sequence.
   - !ruby/object:Api::Type::Array
     name: 'transitionRouteGroups'
     description: |
@@ -1132,3 +1159,30 @@ properties:
           description: |
             The target flow to transition to.
             Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'advancedSettings'
+    description: |
+      Hierarchical advanced settings for this page. The settings exposed at the lower level overrides the settings exposed at the higher level.
+      Hierarchy: Agent->Flow->Page->Fulfillment/Parameter.
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: 'dtmfSettings'
+        description: |
+          Define behaviors for DTMF (dual tone multi frequency). DTMF settings does not override each other. DTMF settings set at different levels define DTMF detections running in parallel. Exposed at the following levels:
+          * Agent level
+          * Flow level
+          * Page level
+          * Parameter level
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'enabled'
+            description: |
+              If true, incoming audio is processed for DTMF (dual tone multi frequency) events. For example, if the caller presses a button on their telephone keypad and DTMF processing is enabled, Dialogflow will detect the event (e.g. a "3" was pressed) in the incoming audio and pass the event to the bot to drive business logic (e.g. when 3 is pressed, return the account balance).
+          - !ruby/object:Api::Type::Integer
+            name: 'maxDigits'
+            description: |
+              Max length of DTMF digits.
+          - !ruby/object:Api::Type::String
+            name: 'finishDigit'
+            description: |
+              The digit that terminates a DTMF digit sequence.

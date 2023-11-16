@@ -50,18 +50,19 @@ examples:
       resource_name: 'basic-network-attachment'
       network_name: 'basic-network'
       subnetwork_name: 'basic-subnetwork'
+      accepted_producer_project_name: 'prj-accepted'
+      rejected_producer_project_name: 'prj-rejected'
     test_env_vars:
       org_id: :ORG_ID
       billing_account: :BILLING_ACCT
-# TODO uncomment once this resource is available at google_compute_instance resource
-#   - !ruby/object:Provider::Terraform::Examples
-#     name: 'network_attachment_instance_usage'
-#     primary_resource_id: 'default'
-#     vars:
-#       resource_name: 'basic-network-attachment'
-#       network_name: 'basic-network'
-#       subnetwork_name: 'basic-subnetwork'
-#       instance_name: 'basic-instance'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'network_attachment_instance_usage'
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'basic-network-attachment'
+      network_name: 'basic-network'
+      subnetwork_name: 'basic-subnetwork'
+      instance_name: 'basic-instance'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'

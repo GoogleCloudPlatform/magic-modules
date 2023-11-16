@@ -22,6 +22,9 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 base_url: "projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools"
 self_link: 'projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools/{{name}}'
 create_url: "projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools?nodePoolId={{name}}"
+update_url: 'projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools/{{name}}'
+update_verb: :PATCH
+update_mask: true
 autogen_async: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
@@ -102,9 +105,8 @@ properties:
     description: |
       The time when the node pool was last updated.
     output: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: "labels"
-    default_from_api: true
     description: "Labels associated with this resource."
   - !ruby/object:Api::Type::String
     name: "nodeLocation"

@@ -22,7 +22,9 @@ description: |
 
   If you wish to use Firestore with App Engine, use the
   [`google_app_engine_application`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/app_engine_application)
-  resource instead.
+  resource instead. If you were previously using the `google_app_engine_application` resource exclusively for managing a Firestore database
+  and would like to use the `google_firestore_database` resource instead, please follow the instructions
+  [here](https://cloud.google.com/firestore/docs/app-engine-requirement).
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/firestore/docs/'
@@ -67,15 +69,13 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'firestore_database'
     primary_resource_id: 'database'
-    pull_external: true
+    vars:
+      name: "example-database-id"
     test_env_vars:
-      org_id: :ORG_ID
-      billing_account: :BILLING_ACCT
+      project_id: :PROJECT_NAME
     ignore_read_extra:
       - project
       - etag
-    vars:
-      project_id: 'my-project'
   - !ruby/object:Provider::Terraform::Examples
     name: 'firestore_default_database_in_datastore_mode'
     primary_resource_id: 'datastore_mode_database'
@@ -89,19 +89,21 @@ examples:
       project_id: 'my-project'
   - !ruby/object:Provider::Terraform::Examples
     name: 'firestore_database_in_datastore_mode'
-    primary_resource_id: 'database'
-    pull_external: true
+    primary_resource_id: 'datastore_mode_database'
+    vars:
+      name: "example-database-id"
     test_env_vars:
-      org_id: :ORG_ID
-      billing_account: :BILLING_ACCT
+      project_id: :PROJECT_NAME
     ignore_read_extra:
       - project
       - etag
-    vars:
-      project_id: 'my-project'
   - !ruby/object:Provider::Terraform::Examples
     name: 'firestore_database_with_delete_protection'
     primary_resource_id: 'database'
+    vars:
+      name: "example-database-id"
+    test_env_vars:
+      project_id: :PROJECT_NAME
     skip_test: true
 properties:
   - !ruby/object:Api::Type::String

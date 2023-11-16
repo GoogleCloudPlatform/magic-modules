@@ -6,13 +6,13 @@ import (
 	"net/http"
 )
 
-func (gh *github) PostBuildStatus(prNumber, title, state, target_url, commitSha string) error {
+func (gh *github) PostBuildStatus(prNumber, title, state, targetURL, commitSha string) error {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/%s", commitSha)
 
 	postBody := map[string]string{
 		"context":    title,
 		"state":      state,
-		"target_url": target_url,
+		"target_url": targetURL,
 	}
 
 	_, err := utils.RequestCall(url, "POST", gh.token, nil, postBody)
@@ -102,7 +102,7 @@ func (gh *github) CreateWorkflowDispatchEvent(workflowFileName string, inputs ma
 		"inputs": inputs,
 	})
 
-	if resp != 200 {
+	if resp != 200 && resp != 204 {
 		return fmt.Errorf("server returned %d creating workflow dispatch event", resp)
 	}
 

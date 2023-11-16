@@ -622,7 +622,7 @@ The `web_server_network_access_control` supports:
 
 * `cidr_block` -
   (Required)
-  `cidr_block< must be specified in CIDR notation.
+  `cidr_block` must be specified in CIDR notation.
 
 ## Argument Reference - Cloud Composer 2
 
@@ -655,6 +655,11 @@ The following arguments are supported:
 * `project` -
   (Optional) The ID of the project in which the resource belongs.
   If it is not provided, the provider project is used.
+
+* `storage_config` -
+  (Optional)
+  Configuration options for storage used by Composer environment. Structure is documented below.
+
 
 The `config` block supports:
 
@@ -707,6 +712,13 @@ The `config` block supports:
   Kubernetes master through HTTPS except traffic from the given CIDR blocks,
   Google Compute Engine Public IPs and Google Prod IPs. Structure is
   documented below.
+
+The `storage_config` block supports:
+
+* `bucket` -
+  (Required)
+  Name of an existing Cloud Storage bucket to be used by the environment.
+
 
 The `node_config` block supports:
 
@@ -948,7 +960,7 @@ The `workloads_config` block supports:
   Configuration for resources used by Airflow schedulers.
 
 * `triggerer` -
-  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+  (Optional)
   Configuration for resources used by Airflow triggerer.
 
 * `web_server` -
@@ -1062,6 +1074,21 @@ This resource provides the following
 ## Import
 
 Environment can be imported using any of these accepted formats:
+
+* `projects/{{project}}/locations/{{region}}/environments/{{name}}`
+* `{{project}}/{{region}}/{{name}}`
+* `{{name}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import Environment using one of the formats above. For example:
+
+```tf
+import {
+  id = "projects/{{project}}/locations/{{region}}/environments/{{name}}"
+  to = google_composer_environment.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), Environment can be imported using one of the formats above. For example:
 
 ```
 $ terraform import google_composer_environment.default projects/{{project}}/locations/{{region}}/environments/{{name}}
