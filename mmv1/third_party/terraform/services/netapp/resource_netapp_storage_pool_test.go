@@ -42,7 +42,7 @@ func TestAccNetappstoragePool_storagePoolCreateExample_update(t *testing.T) {
 				ResourceName:            "google_netapp_storage_pool.test_pool",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name"},
+				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccNetappstoragePool_storagePoolCreateExample_update(context),
