@@ -1,0 +1,5 @@
+func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+    numeric_id := d.Get("id")
+
+    return numeric_id // If this is the id from the API then it should be the id number and not the resource path
+}

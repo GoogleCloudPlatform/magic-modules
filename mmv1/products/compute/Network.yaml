@@ -70,6 +70,8 @@ virtual_fields:
       If set to `true`, default routes (`0.0.0.0/0`) will be deleted
       immediately after network creation. Defaults to `false`.
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  encoder: templates/terraform/encoders/compute_network.go.erb
+  update_encoder: templates/terraform/update_encoder/compute_network.go.erb
   post_create: templates/terraform/post_create/compute_network_delete_default_route.erb
 properties:
   - !ruby/object:Api::Type::String
@@ -101,12 +103,16 @@ properties:
     validation: !ruby/object:Provider::Terraform::Validation
       function: 'verify.ValidateGCEName'
   - !ruby/object:Api::Type::String
-    name: 'numberic_id'
+    name: 'id'
+    description: |
+      testing to see if this returns the id NUMBER
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'numericId'
     description: |
       The unique identifier for the resource. This identifier is defined by the server.
     output: true
-    validation: !ruby/object:Provider::Terraform::Validation
-      function: 'verify.ValidateGCEName'
+    custom_flatten: 'templates/terraform/custom_flatten/compute_network_numeric_id.go.erb'
   - !ruby/object:Api::Type::Boolean
     name: 'autoCreateSubnetworks'
     description: |
