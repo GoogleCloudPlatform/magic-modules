@@ -184,6 +184,7 @@ module "project-services" {
     "bigtableadmin.googleapis.com",
     "billingbudgets.googleapis.com",
     "binaryauthorization.googleapis.com",
+    "blockchainnodeengine.googleapis.com",
     "certificatemanager.googleapis.com",
     "cloudapis.googleapis.com",
     "cloudasset.googleapis.com",
