@@ -741,10 +741,6 @@ properties:
     name: 'iap'
     description: Settings for enabling Cloud Identity Aware Proxy
     properties:
-      - !ruby/object:Api::Type::Boolean
-        name: 'enabled'
-        description: |
-          Whether the serving infrastructure will authenticate and authorize all incoming requests.
       - !ruby/object:Api::Type::String
         name: 'oauth2ClientId'
         required: true
