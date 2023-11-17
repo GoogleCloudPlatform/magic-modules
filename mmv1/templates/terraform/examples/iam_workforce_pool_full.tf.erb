@@ -7,9 +7,9 @@ resource "google_iam_workforce_pool" "<%= ctx[:primary_resource_id] %>" {
   disabled            = false
   session_duration    = "7200s"
   access_restrictions {
-    allowedServices {
+    allowed_services {
       domain = "backstory.chronicle.security"
     }
-    disableProgrammaticSignin = false
+    disable_programmatic_signin = false
   }
 }
