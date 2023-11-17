@@ -106,6 +106,43 @@ func TestAccComputeNetwork_routingModeAndUpdate(t *testing.T) {
 	})
 }
 
+func TestAccComputeNetwork_numericId(t *testing.T) {
+	t.Parallel()
+
+	var network compute.Network
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeNetworkDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeNetwork_basic(acctest.RandString(t, 10)),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeNetworkExists(
+						t, "google_compute_network.bar", &network),
+					testAccCheckComputeNetworkIsAutoSubnet(
+						t, "google_compute_network.bar", &network),
+				),
+			},
+			{
+				Config: testAccComputeNetwork_basic(acctest.RandString(t, 10)),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeNumericId(
+						t, "google_compute_network.bar", &network),
+					testAccCheckComputeNetworkIsAutoSubnet(
+						t, "google_compute_network.bar", &network),
+				),
+			},
+			{
+				ResourceName:      "google_compute_network.bar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccComputeNetwork_default_routing_mode(t *testing.T) {
 	t.Parallel()
 
@@ -423,4 +460,37 @@ resource "google_compute_network" "acc_network_firewall_policy_enforcement_order
   network_firewall_policy_enforcement_order = "%s"
 }
 `, network, order)
+}
+
+func testAccCheckComputeNumericId(t *testing.T, n string, network *compute.Network) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("Not found: %s", n)
+		}
+
+		if rs.Primary.Attributes["name"] == "" {
+			return fmt.Errorf("No ID is set")
+		}
+
+		config := acctest.GoogleProviderConfig(t)
+
+		found, err := config.NewComputeClient(config.UserAgent).Networks.Get(
+			config.Project, rs.Primary.Attributes["name"]).Do()
+		if err != nil {
+			return err
+		}
+
+		if found.Id.(string) != rs.Primary.Attributes["id"] {
+			return fmt.Errorf("id does not match")
+		}
+
+		if found.Id.(string) != rs.Primary.Attributes["numeric_id"] {
+			return fmt.Errorf("numeric_id does not match")
+		}
+
+		*network = *found
+
+		return nil
+	}
 }
