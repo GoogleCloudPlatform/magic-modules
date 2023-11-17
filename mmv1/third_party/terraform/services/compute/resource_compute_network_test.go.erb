@@ -481,12 +481,12 @@ func testAccCheckComputeNumericId(t *testing.T, n string, network *compute.Netwo
 			return err
 		}
 
-		if found.Id.(string) != rs.Primary.Attributes["id"] {
-			return fmt.Errorf("id does not match")
+		if fmt.Sprintf("projects/%v/global/networks/%v", config.Project, found.Name) != rs.Primary.Attributes["id"] {
+			return fmt.Errorf("id does not match; %v != %v", fmt.Sprintf("projects/%v/global/networks/%v", config.Project, found.Name), rs.Primary.Attributes["id"])
 		}
 
-		if found.Id.(string) != rs.Primary.Attributes["numeric_id"] {
-			return fmt.Errorf("numeric_id does not match")
+		if strconv.Itoa(int(found.Id)) != rs.Primary.Attributes["numeric_id"] {
+			return fmt.Errorf("numeric_id does not match; %v != %v", strconv.Itoa(int(found.Id)), rs.Primary.Attributes["id"])
 		}
 
 		*network = *found
