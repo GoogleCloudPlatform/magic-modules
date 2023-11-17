@@ -46,6 +46,14 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
+iam_policy: !ruby/object:Api::Resource::IamPolicy
+  parent_resource_attribute: 'instance_id'
+  method_name_separator: ':'
+  import_format:
+    [
+      'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}',
+      '{{name}}',
+    ]
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'secure_source_manager_instance_basic'
@@ -100,11 +108,3 @@ properties:
       - :DELETING
       - :PAUSED
       - :UNKNOWN
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  parent_resource_attribute: 'instance_id'
-  method_name_separator: ':'
-  import_format:
-    [
-      'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}',
-      '{{name}}',
-    ]
