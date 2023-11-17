@@ -286,6 +286,7 @@ module "project-services" {
     "run.googleapis.com",
     "runtimeconfig.googleapis.com",
     "secretmanager.googleapis.com",
+    "securesourcemanager.googleapis.com",
     "securetoken.googleapis.com",
     "securitycenter.googleapis.com",
     "serviceconsumermanagement.googleapis.com",
