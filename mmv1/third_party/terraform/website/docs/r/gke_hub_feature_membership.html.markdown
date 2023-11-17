@@ -15,7 +15,6 @@ resource "google_container_cluster" "cluster" {
   name               = "my-cluster"
   location           = "us-central1-a"
   initial_node_count = 1
-  provider = google-beta
 }
 
 resource "google_gke_hub_membership" "membership" {
@@ -25,7 +24,6 @@ resource "google_gke_hub_membership" "membership" {
       resource_link = "//container.googleapis.com/${google_container_cluster.cluster.id}"
     }
   }
-  provider = google-beta
 }
 
 resource "google_gke_hub_feature" "feature" {
@@ -35,7 +33,6 @@ resource "google_gke_hub_feature" "feature" {
   labels = {
     foo = "bar"
   }
-  provider = google-beta
 }
 
 resource "google_gke_hub_feature_membership" "feature_member" {
@@ -50,7 +47,6 @@ resource "google_gke_hub_feature_membership" "feature_member" {
       }
     }
   }
-  provider = google-beta
 }
 ```
 ## Example Usage - Config Management with OCI
@@ -60,7 +56,6 @@ resource "google_container_cluster" "cluster" {
   name               = "my-cluster"
   location           = "us-central1-a"
   initial_node_count = 1
-  provider = google-beta
 }
 
 resource "google_gke_hub_membership" "membership" {
@@ -70,7 +65,6 @@ resource "google_gke_hub_membership" "membership" {
       resource_link = "//container.googleapis.com/${google_container_cluster.cluster.id}"
     }
   }
-  provider = google-beta
 }
 
 resource "google_gke_hub_feature" "feature" {
@@ -80,7 +74,6 @@ resource "google_gke_hub_feature" "feature" {
   labels = {
     foo = "bar"
   }
-  provider = google-beta
 }
 
 resource "google_gke_hub_feature_membership" "feature_member" {
@@ -99,7 +92,6 @@ resource "google_gke_hub_feature_membership" "feature_member" {
       }
     }
   }
-  provider = google-beta
 }
 ```
 
@@ -112,7 +104,6 @@ resource "google_gke_hub_feature" "feature" {
   labels = {
     foo = "bar"
   }
-  provider = google-beta
 }
 ```
 
@@ -123,7 +114,6 @@ resource "google_container_cluster" "cluster" {
   name               = "my-cluster"
   location           = "us-central1-a"
   initial_node_count = 1
-  provider = google-beta
 }
 
 resource "google_gke_hub_membership" "membership" {
@@ -133,14 +123,12 @@ resource "google_gke_hub_membership" "membership" {
       resource_link = "//container.googleapis.com/${google_container_cluster.cluster.id}"
     }
   }
-  provider = google-beta
 }
 
 resource "google_gke_hub_feature" "feature" {
   name = "servicemesh"
   location = "global"
 
-  provider = google-beta
 }
 
 resource "google_gke_hub_feature_membership" "feature_member" {
@@ -150,7 +138,6 @@ resource "google_gke_hub_feature_membership" "feature_member" {
   mesh {
     management = "MANAGEMENT_AUTOMATIC"
   }
-  provider = google-beta
 }
 ```
 
