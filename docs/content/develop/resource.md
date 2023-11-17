@@ -216,6 +216,11 @@ For more information about types of resources and the generation process overall
 
 ## Add fields
 
+In general, Terraform resources should implement all configurable fields, as well as all
+read-only fields that could be useful to reference from other fields. For example, generated
+UUIDs are almost certainly useful to expose; `etag` fields are not useful unless required as an
+input to the update API; create time and update time are usually fine to include or exclude.
+
 {{< tabs "fields" >}}
 {{< tab "MMv1" >}}
 1. For each API field, copy the following template into the resource's `properties` attribute. Be sure to indent appropriately.
