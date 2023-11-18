@@ -101,6 +101,16 @@ examples:
     vars:
       repository_id: 'my-repository'
       description: 'example docker repository with cleanup policies'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'artifact_registry_repository_remote_custom'
+    primary_resource_id: 'my-repo'
+    vars:
+      repository_id: 'example-custom-remote'
+      description: 'example remote docker repository with credentials'
+      secret_id: 'example-secret'
+      secret_resource_id: 'example-custom-remote-secret'
+      username: 'remote-username'
+      secret_data: 'remote-password'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/artifact_registry_repository.go.erb
   encoder: templates/terraform/encoders/location_from_region.go.erb
@@ -506,7 +516,30 @@ properties:
                 description: |-
                   Specific repository from the base, e.g. `"centos/8-stream/BaseOS/x86_64/os"`
                 immutable: true
-
+      - !ruby/object:Api::Type::NestedObject
+        name: 'upstreamCredentials'
+        description: |-
+          The credentials used to access the remote repository.
+        immutable: true
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'usernamePasswordCredentials'
+            description: |-
+              Use username and password to access the remote repository.
+            immutable: true
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'username'
+                description: |-
+                  The username to access the remote repository.
+                immutable: true
+              - !ruby/object:Api::Type::String
+                name: 'passwordSecretVersion'
+                description: |-
+                  The Secret Manager key version that holds the password to access the
+                  remote repository. Must be in the format of
+                  `projects/{project}/secrets/{secret}/versions/{version}`.
+                immutable: true
   - !ruby/object:Api::Type::Boolean
     name: 'cleanupPolicyDryRun'
     min_version: beta
