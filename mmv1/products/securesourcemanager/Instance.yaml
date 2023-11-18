@@ -49,6 +49,8 @@ async: !ruby/object:Api::OpAsync
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   parent_resource_attribute: 'instance_id'
   method_name_separator: ':'
+  allowed_iam_role: 'roles/securesourcemanager.instanceManager'
+  admin_iam_role: 'roles/securesourcemanager.instanceOwner'
   import_format:
     [
       'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}',
@@ -138,6 +140,7 @@ properties:
     values:
       - :STATE_NOTE_UNSPECIFIED
       - :PAUSED_CMEK_UNAVAILABLE
+      - :INSTANCE_RESUMING
   - !ruby/object:Api::Type::String
     name: 'kms_key'
     description: |
