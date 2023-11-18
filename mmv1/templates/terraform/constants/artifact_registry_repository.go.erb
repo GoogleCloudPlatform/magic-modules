@@ -22,13 +22,26 @@ func upstreamPoliciesDiffSuppress(k, old, new string, d *schema.ResourceData) bo
   if !ok {
     return false
   }
-  hashFunc := func(val any) int {
-    x := val.(map[string]any)
-    hashStr := fmt.Sprintf("[id:%v priority:%v repository:%v]", x["id"], x["priority"], x["repository"])
-    return schema.HashString(hashStr)
+
+  var oldHashes, newHashes []interface{}
+  for _, policy := range oldPolicies {
+    data, ok := policy.(map[string]any)
+    if !ok {
+      return false
+    }
+    hashStr := fmt.Sprintf("[id:%v priority:%v repository:%v]", data["id"], data["priority"], data["repository"])
+    oldHashes = append(oldHashes, hashStr)
+  }
+  for _, policy := range newPolicies {
+    data, ok := policy.(map[string]any)
+    if !ok {
+      return false
+    }
+    hashStr := fmt.Sprintf("[id:%v priority:%v repository:%v]", data["id"], data["priority"], data["repository"])
+    newHashes = append(newHashes, hashStr)
   }
 
-  oldSet := schema.NewSet(hashFunc, oldPolicies)
-  newSet := schema.NewSet(hashFunc, newPolicies)
+  oldSet := schema.NewSet(schema.HashString, oldHashes)
+  newSet := schema.NewSet(schema.HashString, newHashes)
   return oldSet.Equal(newSet)
 }
