@@ -123,6 +123,7 @@ properties:
     default_value: '3600s'
   - !ruby/object:Api::Type::NestedObject
     name: 'accessRestrictions'
+    immutable: true
     description: |
       Configure access restrictions on the workforce pool users. This is an optional field. If specified web
       sign-in can be restricted to given set of services or programmatic sign-in can be disabled for pool users.
