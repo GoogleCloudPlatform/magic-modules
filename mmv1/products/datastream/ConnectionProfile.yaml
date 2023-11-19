@@ -39,6 +39,8 @@ examples:
     name: 'datastream_connection_profile_postgresql_private_connection'
     pull_external: true
     primary_resource_id: 'default'
+    # Random provider
+    skip_vcr: true
     vars:
       private_connection_id: 'my-connection'
       connection_profile_id: 'my-profile'
