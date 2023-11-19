@@ -114,23 +114,23 @@ examples:
     skip_docs: true
     primary_resource_id: 'telemetry'
     vars:
-      metastore_service_name: 'telemetry'
+      metastore_service_name: 'ms-telemetry'
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataproc_metastore_service_dpms2'
     primary_resource_id: 'dpms2'
     vars:
-      metastore_service_name: 'dpms2'
+      metastore_service_name: 'ms-dpms2'
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataproc_metastore_service_dpms2_scaling_factor'
     primary_resource_id: 'dpms2_scaling_factor'
     vars:
-      metastore_service_name: 'dpms2sf'
+      metastore_service_name: 'ms-dpms2sf'
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataproc_metastore_service_dpms2_scaling_factor_lt1'
     skip_docs: true
     primary_resource_id: 'dpms2_scaling_factor_lt1'
     vars:
-      metastore_service_name: 'dpms2sflt1'
+      metastore_service_name: 'ms-dpms2sflt1'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'serviceId'

@@ -103,6 +103,13 @@ examples:
       name: 'id-'
     test_env_vars:
       project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dlp_job_trigger_multiple_actions'
+    primary_resource_id: 'basic'
+    vars:
+      trigger: 'trigger'
+    test_env_vars:
+      project: :PROJECT_NAME
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/dlp_job_trigger.go.erb
   decoder: templates/terraform/decoders/dlp_job_trigger.go.erb
@@ -1012,7 +1019,7 @@ properties:
       - !ruby/object:Api::Type::Array
         name: 'actions'
         description: |
-          A task to execute on the completion of a job.
+          Configuration block for the actions to execute on the completion of a job. Can be specified multiple times, but only one for each type. Each action block supports fields documented below. This argument is processed in [attribute-as-blocks mode](https://www.terraform.io/docs/configuration/attr-as-blocks.html).
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::NestedObject
