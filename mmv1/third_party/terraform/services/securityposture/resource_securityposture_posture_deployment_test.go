@@ -22,10 +22,10 @@ func TestAccSecurityPosturePostureDeployment_securityposturePostureDeployment_up
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSecurityPosturePostureDeployment_securityposturePostureDeploymentBasic(context),
+				Config: testAccSecurityPosturePostureDeployment_securityposturePostureDeployment_basic(context),
 			},
 			{
-				ResourceName:            "google_security_posture_posture_deployment.postureDeployment",
+				ResourceName:            "google_securityposture_posture_deployment.postureDeployment",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"parent", "annotations"},
@@ -34,7 +34,7 @@ func TestAccSecurityPosturePostureDeployment_securityposturePostureDeployment_up
 				Config: testAccSecurityPosturePostureDeployment_securityposturePostureDeployment_update(context),
 			},
 			{
-				ResourceName:            "google_security_posture_posture_deployment.postureDeployment",
+				ResourceName:            "google_securityposture_posture_deployment.postureDeployment",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"parent", "annotations"},
@@ -43,15 +43,15 @@ func TestAccSecurityPosturePostureDeployment_securityposturePostureDeployment_up
 	})
 }
 
-func testAccSecurityPosturePostureDeployment_securityposturePostureDeploymentBasic(context map[string]interface{}) string {
+func testAccSecurityPosturePostureDeployment_securityposturePostureDeployment_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_securityposture_posture_deployment" "postureDeployment" {
 	posture_deployment_id          = "posture_deployment_1"
 	parent = "organizations/%{org_id}/locations/global"
     description = "a new posture deployment"
     target_resource = "projects/190507214861"
-    posture_id = "organizations/%{org_id}/locations/global/postures/gcloud-test-posture"
-    posture_revision_id = "1fe5ff7a"
+    posture_id = "organizations/%{org_id}/locations/global/postures/testExtractPosture"
+    posture_revision_id = "0d81b87b"
 }
 `, context)
 }
@@ -63,8 +63,8 @@ resource "google_securityposture_posture_deployment" "postureDeployment" {
 	parent = "organizations/%{org_id}/locations/global"
     description = "an updated posture deployment"
     target_resource = "projects/190507214861"
-    posture_id = "organizations/%{org_id}/locations/global/postures/gcloud-test-list-posture"
-    posture_revision_id = "101b17f1"
+    posture_id = "organizations/%{org_id}/locations/global/postures/posture-foo-5"
+    posture_revision_id = "48e17293"
 }
 `, context)
 }
