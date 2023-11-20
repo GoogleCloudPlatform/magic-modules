@@ -60,15 +60,11 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'secure_source_manager_instance_basic'
     primary_resource_id: 'default'
-    primary_resource_name: '"instance1"'
-    vars:
-      instance_id: 'instance1'
+    primary_resource_name: 'fmt.Sprintf("tf-test-instance%s", context["random_suffix"])'
   - !ruby/object:Provider::Terraform::Examples
     name: 'secure_source_manager_instance_iam'
     primary_resource_id: 'default'
-    primary_resource_name: '"instance2"'
-    vars:
-      instance_id: 'instance2'
+    primary_resource_name: 'fmt.Sprintf("tf-test-instance%s", context["random_suffix"])'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'

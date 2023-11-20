@@ -1,25 +1,25 @@
 resource "google_secure_source_manager_instance" "<%= ctx[:primary_resource_id] %>" {
     provider = "google"
-    instance_id = "<%= ctx[:vars]['instance_id'] %>"
+    instance_id = "tf-test-instance%{random_suffix}"
     location = "us-central1"
     labels = {
       "foo" = "bar"
     }
 }
 
-resource "google_secure_source_manager_instance_iam_binding" "instance" {
+resource "google_secure_source_manager_instance_iam_binding" "primary" {
   location = "us-central1"
-  instance_id = "<%= ctx[:vars]['instance_id'] %>"
+  instance_id = google_secure_source_manager_instance.<%= ctx[:primary_resource_id] %>.instance_id
   role = "roles/securesourcemanager.instanceManager"
 
   members = [
-    "allAuthenticatedUsers"
+    "allUsers"
   ]
 }
 
-resource "google_secure_source_manager_iam_member" "instance" {
+resource "google_secure_source_manager_iam_member" "primary" {
   location = "us-central1"
-  instance_id = "<%= ctx[:vars]['instance_id'] %>"
+  instance_id = google_secure_source_manager_instance.<%= ctx[:primary_resource_id] %>.instance_id
   role = "roles/securesourcemanager.instanceAccessor"
-  member     = "allAuthenticatedUsers"
+  member     = "allUsers"
 }
