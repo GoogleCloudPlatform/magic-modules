@@ -31,7 +31,7 @@ else
 fi
 
 post_body=$( jq -n \
-	--arg context "${gh_repo}-test-integration-${TERRAFORM_VERSION}" \
+	--arg context "${gh_repo}-test-integration" \
 	--arg target_url "https://console.cloud.google.com/cloud-build/builds;region=global/${build_id};step=${build_step}?project=${project_id}" \
 	--arg state "pending" \
 	'{context: $context, target_url: $target_url, state: $state}')
@@ -61,7 +61,7 @@ else
 fi
 
 post_body=$( jq -n \
-	--arg context "${gh_repo}-test-integration-${TERRAFORM_VERSION}" \
+	--arg context "${gh_repo}-test-integration" \
 	--arg target_url "https://console.cloud.google.com/cloud-build/builds;region=global/${build_id};step=${build_step}?project=${project_id}" \
 	--arg state "${state}" \
 	'{context: $context, target_url: $target_url, state: $state}')
