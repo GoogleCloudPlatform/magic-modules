@@ -8481,6 +8481,7 @@ resource "google_container_cluster" "primary" {
 	location           = "us-central1-f"
 	initial_node_count = 1
 	min_master_version = data.google_container_engine_versions.uscentral1a.release_channel_latest_version["STABLE"]
+	deletion_protection = false
 	cluster_network_performance_config {
 		total_egress_bandwidth_tier = "%s"
 	}
