@@ -205,7 +205,7 @@ For more information about types of resources and the generation process overall
      - Change the file suffix to `.go.erb`
      - Add `<% autogen_exception -%>` to the top of the file
      - Wrap each beta-only test in a separate version guard: `<% unless version == 'ga' -%>...<% else -%>...<% end -%>`
-5. Register the resource in [`magic-modules/mmv1/third_party/terraform/utils/provider.go.erb`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/utils/provider.go.erb) under "START handwritten resources"
+5. Register the resource `handwrittenResources` in [`magic-modules/mmv1/third_party/terraform/provider/provider_mmv1_resources.go.erb`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/provider/provider_mmv1_resources.go.erb)
    - Add a version guard for any beta-only resources.
 6. Optional: Complete other handwritten tasks that require the MMv1 configuration file.
     - [Add resource tests]({{< ref "/develop/test.md" >}})
@@ -443,7 +443,7 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
      - Change the file suffix to `.go.erb`
      - Add `<% autogen_exception -%>` to the top of the file
      - Wrap each beta-only code block (including any imports) in a separate version guard: `<% unless version == 'ga' -%>...<% else -%>...<% end -%>`
-4. Register the binding, member, and policy resources in [`magic-modules/mmv1/third_party/terraform/utils/provider.go.erb`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/utils/provider.go.erb) under "START non-generated IAM resources"
+4. Register the binding, member, and policy resources `handwrittenIAMResources` in [`magic-modules/mmv1/third_party/terraform/provider/provider_mmv1_resources.go.erb`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/provider/provider_mmv1_resources.go.erb)
    - Add a version guard for any beta-only resources.
 {{< /tab >}}
 {{< /tabs >}}
