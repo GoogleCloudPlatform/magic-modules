@@ -59,7 +59,7 @@ examples:
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/set_computed_name.erb
   post_import: templates/terraform/post_import/cloud_identity_group_membership.go.erb
-  update_encoder: templates/terraform/update_encoder/cloud_identity_group_membership.go.erb
+  custom_update: templates/terraform/custom_update/cloud_identity_group_membership.go.erb
 
 parameters:
   - !ruby/object:Api::Type::ResourceRef
