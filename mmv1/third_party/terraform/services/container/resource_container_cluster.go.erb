@@ -2241,7 +2241,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			EnableL4ilbSubsetting:     d.Get("enable_l4_ilb_subsetting").(bool),
 			DnsConfig:                 expandDnsConfig(d.Get("dns_config")),
 			GatewayApiConfig:          expandGatewayApiConfig(d.Get("gateway_api_config")),
-			ClusterNetworkPerformanceConfig:  expandNetworkPerformanceConfig(d.Get("cluster_network_performance_config")),
+			NetworkPerformanceConfig:  expandNetworkPerformanceConfig(d.Get("cluster_network_performance_config")),
 <% unless version == "ga" -%>
 			EnableMultiNetworking:     d.Get("enable_multi_networking").(bool),
 			EnableFqdnNetworkPolicy:   d.Get("enable_fqdn_network_policy").(bool),
@@ -4000,7 +4000,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		if cnpc, ok := d.GetOk("cluster_network_performance_config"); ok {
 			req := &container.UpdateClusterRequest{
 				Update: &container.ClusterUpdate{
-					DesiredClusterNetworkPerformanceConfig: expandNetworkPerformanceConfig(cnpc),
+					DesiredNetworkPerformanceConfig: expandNetworkPerformanceConfig(cnpc),
 				},
 			}
 
