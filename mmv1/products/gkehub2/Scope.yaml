@@ -56,10 +56,10 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'gkehub_scope_basic'
-    primary_resource_name: 'fmt.Sprintf("scope%s", context["random_suffix"])'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-scope%s", context["random_suffix"])'
     primary_resource_id: 'scope'
     vars:
-      resource_name: 'scope'
+      resource_name: 'my-scope'
     test_env_vars:
       project: :PROJECT_NAME
 # Skip sweeper gen since this is a child resource.
