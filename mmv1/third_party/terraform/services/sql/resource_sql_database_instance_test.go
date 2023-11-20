@@ -1608,7 +1608,7 @@ func TestAccSQLDatabaseInstance_sqlPostgresDataCacheConfig(t *testing.T) {
 	})
 }
 
-func TestAccSqlDatabaseInstance_Edition_Upgrade(t *testing.T) {
+func TestAccSqlDatabaseInstance_Mysql_Edition_Upgrade(t *testing.T) {
 	t.Parallel()
 	enterpriseTier := "db-custom-2-13312"
 	editionUpgrade := "tf-test-enterprise-upgrade-" + acctest.RandString(t, 10)
@@ -1634,6 +1634,44 @@ func TestAccSqlDatabaseInstance_Edition_Upgrade(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.edition", "ENTERPRISE_PLUS"),
 					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.data_cache_config.0.data_cache_enabled", "true"),
+				),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func TestAccSqlDatabaseInstance_Postgres_Edition_Upgrade(t *testing.T) {
+	t.Parallel()
+	enterpriseTier := "db-custom-2-13312"
+	enterprisePlusTier := "db-perf-optimized-N-2"
+	editionUpgrade := "tf-test-enterprise-upgrade-" + acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlDatabaseInstance_EditionConfig_noEdition(editionUpgrade, enterpriseTier),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.edition", "ENTERPRISE"),
+				),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testGoogleSqlDatabaseInstance_EditionConfig(editionUpgrade, enterprisePlusTier, "ENTERPRISE_PLUS"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.edition", "ENTERPRISE_PLUS"),
 				),
 			},
 			{
