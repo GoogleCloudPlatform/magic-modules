@@ -114,6 +114,12 @@ resource "google_iam_workforce_pool" "my_pool" {
   description       = "A sample workforce pool with updated description."
   disabled          = true
   session_duration  = "3600s"
+  access_restrictions {
+    allowed_services {
+      domain = "backstory.chronicle.security"
+    }
+    disable_programmatic_signin = false
+  }
 }
 `, context)
 }
