@@ -15,7 +15,7 @@
 name: 'PostureDeployment'
 description: |
   Represents a deployment of a security posture on a resource.
-
+import_format: ['{{%parent}}/postureDeployments/{{posture_deployment_id}}']
 base_url: '{{parent}}/postureDeployments'
 self_link: '{{parent}}/postureDeployments/{{posture_deployment_id}}'
 
@@ -23,7 +23,6 @@ create_url: '{{parent}}/postureDeployments?postureDeploymentId={{posture_deploym
 update_verb: :PATCH
 update_mask: true
 
-# delete_url: '{{name}}'
 
 autogen_async: true
 async: !ruby/object:Api::OpAsync
