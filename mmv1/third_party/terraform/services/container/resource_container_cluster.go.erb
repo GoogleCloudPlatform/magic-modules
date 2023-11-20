@@ -2086,7 +2086,6 @@ func ResourceContainerCluster() *schema.Resource {
 						"total_egress_bandwidth_tier": {
 							Type:         schema.TypeString,
 							Required:     true,
-							Default:     "TIER_UNSPECIFIED",
 							ValidateFunc: validation.StringInSlice([]string{"TIER_UNSPECIFIED", "TIER_1"}, false),
 							Description:  `Node network tier.`,
 						},
