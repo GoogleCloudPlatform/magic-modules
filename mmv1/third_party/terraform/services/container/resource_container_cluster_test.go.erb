@@ -4137,7 +4137,7 @@ func TestAccContainerCluster_withClusterNetworkPerformanceConfig(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withClusterNetworkPerformanceConfig(clusterName, "TEST_TIER"),
-				ExpectError: regexp.MustCompile(`expected cluster_network_performance_config\.0\.totalEgressBandwidthTier to be one of \[TIER_UNSPECIFIED TIER_1\], got TEST_TIER`),
+				ExpectError: regexp.MustCompile(`expected cluster_network_performance_config\.0\.total_egress_bandwidth_tier to be one of \[TIER_UNSPECIFIED TIER_1\], got TEST_TIER`),
 			},
 			{
 				Config: testAccContainerCluster_withClusterNetworkPerformanceConfig(clusterName, "TIER_UNSPECIFIED"),
@@ -8482,7 +8482,7 @@ resource "google_container_cluster" "primary" {
 	initial_node_count = 1
 	min_master_version = data.google_container_engine_versions.uscentral1a.release_channel_latest_version["STABLE"]
 	cluster_network_performance_config {
-		totalEgressBandwidthTier = "%s"
+		total_egress_bandwidth_tier = "%s"
 	}
 }
 `, clusterName, clusterNetworkPerformanceTier)

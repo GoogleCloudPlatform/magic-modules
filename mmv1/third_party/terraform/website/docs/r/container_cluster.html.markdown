@@ -1271,7 +1271,7 @@ linux_node_config {
 
 <a name="nested_cluster_network_performance_config"></a>The `cluster_network_performance_config` block supports:
 
-* `totalEgressBandwidthTier` - (Required) Specifies the total network bandwidth tier for the NodePool. `TIER_UNSPECIFIED` or `TIER_1`.
+* `total_egress_bandwidth_tier` - (Required) Specifies the total network bandwidth tier for the NodePool. `TIER_UNSPECIFIED` or `TIER_1`.
 
 <a name="nested_protect_config"></a>The `protect_config` block supports:
 
