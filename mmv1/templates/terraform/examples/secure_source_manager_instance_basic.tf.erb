@@ -6,3 +6,19 @@ resource "google_secure_source_manager_instance" "<%= ctx[:primary_resource_id] 
       "foo" = "bar"
     }
 }
+
+data "google_iam_policy" "owner" {
+  binding {
+    role = "roles/securesourcemanager.instanceOwner"
+
+    members = [
+      "allAuthenticatedUsers"
+    ]
+  }
+}
+
+resource "google_secure_source_manager_instance_iam_policy" "instance" {
+  location = "us-central1"
+  instance_id = "<%= ctx[:vars]['instance_id'] %>"
+  policy_data = data.google_iam_policy.owner.policy_data
+}
