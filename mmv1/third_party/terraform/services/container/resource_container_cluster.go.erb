@@ -1225,7 +1225,7 @@ func ResourceContainerCluster() *schema.Resource {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Computed:    true,
-				MaxItems: 	 1,
+				MaxItems:    1,
 				Description: `The notification config for sending cluster upgrade notifications`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -1561,19 +1561,19 @@ func ResourceContainerCluster() *schema.Resource {
 						},
 
 						"stack_type": {
-							Type:             schema.TypeString,
-							Optional:    	  true,
-							ForceNew:         true,
-							Default:          "IPV4",
-							ValidateFunc:     validation.StringInSlice([]string{"IPV4", "IPV4_IPV6"}, false),
-							Description: 	  `The IP Stack type of the cluster. Choose between IPV4 and IPV4_IPV6. Default type is IPV4 Only if not set`,
+							Type:         schema.TypeString,
+							Optional:     true,
+							ForceNew:     true,
+							Default:      "IPV4",
+							ValidateFunc: validation.StringInSlice([]string{"IPV4", "IPV4_IPV6"}, false),
+							Description:  `The IP Stack type of the cluster. Choose between IPV4 and IPV4_IPV6. Default type is IPV4 Only if not set`,
 						},
 						"pod_cidr_overprovision_config": {
-							Type:     schema.TypeList,
-							Optional: true,
-							Computed: true,
-							ForceNew: true,
-							MaxItems: 1,
+							Type:        schema.TypeList,
+							Optional:    true,
+							Computed:    true,
+							ForceNew:    true,
+							MaxItems:    1,
 							Description: `Configuration for cluster level pod cidr overprovision. Default is disabled=false.`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -1913,38 +1913,38 @@ func ResourceContainerCluster() *schema.Resource {
 			},
 
 			"enable_intranode_visibility": {
-			   Type: schema.TypeBool,
-			   Optional: true,
-			   Computed: true,
-			   Description: `Whether Intra-node visibility is enabled for this cluster. This makes same node pod to pod traffic visible for VPC network.`,
-			   ConflictsWith: []string{"enable_autopilot"},
+				Type: schema.TypeBool,
+				Optional: true,
+				Computed: true,
+				Description: `Whether Intra-node visibility is enabled for this cluster. This makes same node pod to pod traffic visible for VPC network.`,
+				ConflictsWith: []string{"enable_autopilot"},
 			},
 			"enable_l4_ilb_subsetting": {
-			   Type: schema.TypeBool,
-			   Optional: true,
-			   Description: `Whether L4ILB Subsetting is enabled for this cluster.`,
-			   Default: false,
+				Type: schema.TypeBool,
+				Optional: true,
+				Description: `Whether L4ILB Subsetting is enabled for this cluster.`,
+				Default: false,
 			},
 <% unless version == 'ga' -%>
 			"enable_multi_networking": {
-			   Type: schema.TypeBool,
-			   Optional: true,
-			   ForceNew: true,
-			   Description: `Whether multi-networking is enabled for this cluster.`,
-			   Default: false,
+				Type: schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+				Description: `Whether multi-networking is enabled for this cluster.`,
+				Default: false,
 			},
 			"enable_fqdn_network_policy": {
-			   Type: schema.TypeBool,
-			   Optional: true,
-			   Description: `Whether FQDN Network Policy is enabled on this cluster.`,
-			   Default: false,
+				Type: schema.TypeBool,
+				Optional: true,
+				Description: `Whether FQDN Network Policy is enabled on this cluster.`,
+				Default: false,
 			},
 <% end -%>
 			"private_ipv6_google_access": {
-			   Type: schema.TypeString,
-			   Optional: true,
-			   Description: `The desired state of IPv6 connectivity to Google Services. By default, no private IPv6 access to or from Google Services (all access will be via IPv4).`,
-			   Computed: true,
+				Type: schema.TypeString,
+				Optional: true,
+				Description: `The desired state of IPv6 connectivity to Google Services. By default, no private IPv6 access to or from Google Services (all access will be via IPv4).`,
+				Computed: true,
 			},
 
 			"cost_management_config": {
@@ -2236,7 +2236,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		NetworkConfig: &container.NetworkConfig{
 			EnableIntraNodeVisibility: d.Get("enable_intranode_visibility").(bool),
 			DefaultSnatStatus:         expandDefaultSnatStatus(d.Get("default_snat_status")),
-		    DatapathProvider:          d.Get("datapath_provider").(string),
+			DatapathProvider:          d.Get("datapath_provider").(string),
 			PrivateIpv6GoogleAccess:   d.Get("private_ipv6_google_access").(string),
 			EnableL4ilbSubsetting:     d.Get("enable_l4_ilb_subsetting").(bool),
 			DnsConfig:                 expandDnsConfig(d.Get("dns_config")),
@@ -2246,7 +2246,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			EnableMultiNetworking:     d.Get("enable_multi_networking").(bool),
 			EnableFqdnNetworkPolicy:   d.Get("enable_fqdn_network_policy").(bool),
 <% end -%>
-	    },
+		},
 		MasterAuth:     expandMasterAuth(d.Get("master_auth")),
 		NotificationConfig: expandNotificationConfig(d.Get("notification_config")),
 		ConfidentialNodes: expandConfidentialNodes(d.Get("confidential_nodes")),
@@ -2329,9 +2329,9 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		cluster.NodeConfig = expandNodeConfig([]interface{}{})
 	}
 
-        if v, ok := d.GetOk("node_pool_defaults"); ok {
-                cluster.NodePoolDefaults = expandNodePoolDefaults(v)
-        }
+	if v, ok := d.GetOk("node_pool_defaults"); ok {
+		cluster.NodePoolDefaults = expandNodePoolDefaults(v)
+	}
 
 	if v, ok := d.GetOk("node_config"); ok {
 		cluster.NodeConfig = expandNodeConfig(v)
@@ -2981,18 +2981,18 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	if d.HasChange("allow_net_admin") {
 		allowed := d.Get("allow_net_admin").(bool)
 		req := &container.UpdateClusterRequest{
-		    Update: &container.ClusterUpdate{
-		        DesiredAutopilotWorkloadPolicyConfig: &container.WorkloadPolicyConfig{
+			Update: &container.ClusterUpdate{
+				DesiredAutopilotWorkloadPolicyConfig: &container.WorkloadPolicyConfig{
 					AllowNetAdmin: allowed,
 				},
-		    },
+			},
 		}
 
-	    updateF := updateFunc(req, "updating net admin for GKE autopilot workload policy config")
+		updateF := updateFunc(req, "updating net admin for GKE autopilot workload policy config")
 		// Call update serially.
 		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
-		    return err
-	    }
+			return err
+		}
 
 		log.Printf("[INFO] GKE cluster %s's autopilot workload policy config allow_net_admin has been set to %v", d.Id(), allowed)
 	}
@@ -5218,7 +5218,7 @@ func expandFleet(configured interface{}) *container.Fleet {
 	return &container.Fleet{
 		Project: config["project"].(string),
 	}
-}  
+}
 
 func expandEnableK8sBetaApis(configured interface{}, enabledAPIs []string) *container.K8sBetaAPIConfig {
 	l := configured.([]interface{})
@@ -5437,10 +5437,10 @@ func flattenBinaryAuthorization(c *container.BinaryAuthorization) []map[string]i
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-                        "enabled":         c.Enabled,
+			"enabled":         c.Enabled,
 			"evaluation_mode": c.EvaluationMode,
 		})
-        }
+	}
 	return result
 }
 
