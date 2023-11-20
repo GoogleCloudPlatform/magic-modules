@@ -352,8 +352,8 @@ func ResourceComposerEnvironment() *schema.Resource {
 										Type:             schema.TypeString,
 										Optional:         true,
 										ForceNew:         true,
-										Description:      `IPv4 cidr range that will be used by Composer internal components.`
-									}
+										Description:      `IPv4 cidr range that will be used by Composer internal components.`,
+									},
 								},
 							},
 						},
@@ -2165,8 +2165,8 @@ func expandComposerEnvironmentConfigNodeConfig(v interface{}, d *schema.Resource
 	transformed.Tags = transformedTags
 
 	if transformedComposerInternalIpv4CidrBlock, ok := original["composer_internal_ipv4_cidr_block"]; ok {
-			transformed.ComposerInternalIpv4CidrBlock = transformedComposerInternalIpv4CidrBlock.(string)
-		}
+		transformed.ComposerInternalIpv4CidrBlock = transformedComposerInternalIpv4CidrBlock.(string)
+	}
 
 	return transformed, nil
 }
