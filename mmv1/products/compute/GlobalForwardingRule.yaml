@@ -503,11 +503,6 @@ properties:
           immutable: true
           default_from_api: true
         - !ruby/object:Api::Type::String
-          name: 'service'
-          description: |
-            Service Directory service to register the forwarding rule under.
-          immutable: true
-        - !ruby/object:Api::Type::String
           name: 'serviceDirectoryRegion'
           description: |
             [Optional] Service Directory region to register this global forwarding rule under.
