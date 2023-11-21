@@ -1880,7 +1880,8 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		}
 	}
 
-	// Check if edition changed and patch with datacache.
+	// Check if the edition is being updated, because patching edition is an atomic operation and can not be
+	// performed with other fields, we first patch edition, tier and data cache config before updating the rest of the fields.
 	if d.HasChange("settings.0.edition") {
 		edition := d.Get("settings.0.edition").(string)
 		tier := d.Get("settings.0.tier").(string)
