@@ -13,13 +13,13 @@ resource "google_secure_source_manager_instance_iam_binding" "instance" {
   role = "roles/securesourcemanager.instanceManager"
 
   members = [
-    "allAuthenticatedUsers"
+    "user:admin@hashicorptest.com"
   ]
 }
 
-resource "google_secure_source_manager_iam_member" "instance" {
+resource "google_secure_source_manager_instance_iam_member" "instance" {
   location = "us-central1"
   instance_id = google_secure_source_manager_instance.<%= ctx[:primary_resource_id] %>.instance_id
   role = "roles/securesourcemanager.instanceAccessor"
-  member     = "allAuthenticatedUsers"
+  member     = "user:admin@hashicorptest.com"
 }

@@ -18,7 +18,7 @@ base_url: 'projects/{{project}}/locations/{{location}}/instances?instance_id={{i
 self_link: 'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}'
 update_verb: :PATCH
 update_mask: true
-description: 'An isolated set of resources (TODO need better description)'
+description: 'Instances are deployed to an available Google Cloud region and are accessible via their web interface.'
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/secure-source-manager/'
@@ -60,13 +60,17 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'secure_source_manager_instance_basic'
     primary_resource_id: 'default'
-    primary_resource_name: '"instance1"'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-instance%s\",
+      context[\"random_suffix\"\
+      ])"
     vars:
       instance_id: 'instance1'
   - !ruby/object:Provider::Terraform::Examples
     name: 'secure_source_manager_instance_iam'
     primary_resource_id: 'default'
-    primary_resource_name: '"instance2"'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-instance%s\",
+      context[\"random_suffix\"\
+      ])"
     vars:
       instance_id: 'instance2'
 parameters:
