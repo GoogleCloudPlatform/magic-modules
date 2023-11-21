@@ -311,6 +311,15 @@ resource "google_sql_user" "user2" {
   instance = google_sql_database_instance.instance.name
   host     = "gmail.com"
   password = "hunter2"
+	type = "CLOUD_IAM_USER"
+}
+
+resource "google_sql_user" "user3" {
+  name     = "admin"
+  instance = google_sql_database_instance.instance.name
+  host     = "gmail.com"
+  password = "hunter3"
+	type = "CLOUD_IAM_GROUP"
 }
 `, instance, password)
 }
@@ -399,11 +408,18 @@ resource "time_sleep" "wait_30_seconds" {
   create_duration = "30s"
 }
 
-resource "google_sql_user" "user" {
+resource "google_sql_user" "user1" {
   depends_on = [time_sleep.wait_30_seconds]
   name     = "admin"
   instance = google_sql_database_instance.instance.name
   type     = "CLOUD_IAM_USER"
+}
+
+resource "google_sql_user" "user2" {
+  depends_on = [time_sleep.wait_30_seconds]
+  name     = "admin"
+  instance = google_sql_database_instance.instance.name
+  type     = "CLOUD_IAM_GROUP_USER"
 }
 `, instance)
 }
