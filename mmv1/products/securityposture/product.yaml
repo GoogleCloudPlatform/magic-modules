@@ -12,11 +12,11 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: SecurityPosture
+name: Securityposture
 display_name: Security Posture
 versions:
   - !ruby/object:Api::Product::Version
-    name: v1alpha
+    name: ga
     base_url: https://securityposture.googleapis.com/v1alpha/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
