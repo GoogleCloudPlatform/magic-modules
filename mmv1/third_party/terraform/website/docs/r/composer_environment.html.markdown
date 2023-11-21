@@ -771,7 +771,7 @@ The `node_config` block supports:
   See the [documentation](https://cloud.google.com/composer/docs/enable-ip-masquerade-agent).
 
 * `composer_internal_ipv4_cidr_block` -
-  (Optional)
+  (Optional, Cloud Composer 3 only)
   At least /20 IPv4 cidr range that will be used by Composer internal components.
   Cannot be updated.
 
