@@ -23,7 +23,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/secure-source-manager/'
   api: 'https://cloud.google.com/secure-source-manager/docs/reference/rest/v1/projects.locations.instances'
-import_format: ['projects/{{project}}/locations/{{location}}/instances/{{instance_id}}', '{{name}}']
+import_format: ['projects/{{project}}/locations/{{location}}/instances/{{instance_id}}', '{{instance_id}}']
 autogen_async: true
 async: !ruby/object:Api::OpAsync
   actions: ['create', 'delete']
@@ -64,7 +64,7 @@ examples:
       context[\"random_suffix\"\
       ])"
     vars:
-      instance_id: 'instance1'
+      instance_id: 'my-instance'
   - !ruby/object:Provider::Terraform::Examples
     name: 'secure_source_manager_instance_iam'
     primary_resource_id: 'default'
@@ -72,7 +72,7 @@ examples:
       context[\"random_suffix\"\
       ])"
     vars:
-      instance_id: 'instance2'
+      instance_id: 'my-instance'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'

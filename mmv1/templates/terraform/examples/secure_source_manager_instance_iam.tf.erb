@@ -1,6 +1,6 @@
 resource "google_secure_source_manager_instance" "<%= ctx[:primary_resource_id] %>" {
-    instance_id = "<%= ctx[:vars]['instance_id'] %>"
     location = "us-central1"
+    instance_id = "<%= ctx[:vars]['instance_id'] %>"
     labels = {
       "foo" = "bar"
     }
@@ -10,7 +10,6 @@ resource "google_secure_source_manager_instance_iam_binding" "instance" {
   location = "us-central1"
   instance_id = google_secure_source_manager_instance.<%= ctx[:primary_resource_id] %>.instance_id
   role = "roles/securesourcemanager.instanceManager"
-
   members = [
     "user:admin@hashicorptest.com"
   ]
