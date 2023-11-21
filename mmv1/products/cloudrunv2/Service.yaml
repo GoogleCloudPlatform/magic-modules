@@ -660,7 +660,6 @@ properties:
               name: 'dependsOn'
               description: |-
                 Containers which should be started before this container. If specified the container will wait to start until all containers with the listed names are healthy.
-              min_version: beta
               item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: 'volumes'
