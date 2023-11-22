@@ -834,7 +834,7 @@ func ResourceComposerEnvironment() *schema.Resource {
 										Optional:    true,
 										AtLeastOneOf: workloadsConfigKeys,
 										ForceNew:    false,
-										Description: `Configuration for resources used by Dag Processor.`,
+										Description: `Configuration for resources used by DAG processor.`,
 										MaxItems:     1,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
@@ -843,21 +843,21 @@ func ResourceComposerEnvironment() *schema.Resource {
 													Optional:     true,
 													ForceNew:     false,
 													ValidateFunc: validation.FloatAtLeast(0),
-													Description:  `CPU request and limit for Dag Processor.`,
+													Description:  `CPU request and limit for DAG processor.`,
 												},
 												"memory_gb": {
 													Type:         schema.TypeFloat,
 													Optional:     true,
 													ForceNew:     false,
 													ValidateFunc: validation.FloatAtLeast(0),
-													Description:  `Memory (GB) request and limit for Dag Processor.`,
+													Description:  `Memory (GB) request and limit for DAG processor.`,
 												},
 												"storage_gb": {
 													Type:         schema.TypeFloat,
 													Optional:     true,
 													ForceNew:     false,
 													ValidateFunc: validation.FloatAtLeast(0),
-													Description:  `Storage (GB) request and limit for Dag Processor.`,
+													Description:  `Storage (GB) request and limit for DAG processor.`,
 												},
 											},
 										},
