@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package vmwareengine
-<% unless version == 'ga' -%>
+
 import (
 	"fmt"
 
@@ -14,7 +13,6 @@ func DataSourceVmwareengineNetwork() *schema.Resource {
 	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceVmwareengineNetwork().Schema)
 	tpgresource.AddRequiredFieldsToSchema(dsSchema, "location", "name")
 	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project")
-
 	return &schema.Resource{
 		Read:   dataSourceVmwareengineNetworkRead,
 		Schema: dsSchema,
@@ -40,4 +38,3 @@ func dataSourceVmwareengineNetworkRead(d *schema.ResourceData, meta interface{})
 	}
 	return nil
 }
-<% end -%>

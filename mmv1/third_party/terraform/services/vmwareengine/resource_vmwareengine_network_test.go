@@ -1,15 +1,12 @@
-<% autogen_exception -%>
 package vmwareengine_test
-<% unless version == 'ga' -%>
 
 import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccVmwareengineNetwork_vmwareEngineNetworkUpdate(t *testing.T) {
@@ -24,7 +21,7 @@ func TestAccVmwareengineNetwork_vmwareEngineNetworkUpdate(t *testing.T) {
 	configTemplate := vmwareEngineNetworkConfigTemplate(context)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckVmwareengineNetworkDestroyProducer(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"random": {},
@@ -56,7 +53,6 @@ func TestAccVmwareengineNetwork_vmwareEngineNetworkUpdate(t *testing.T) {
 func vmwareEngineNetworkConfigTemplate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_vmwareengine_network" "default-nw" {
-  provider    = google-beta
   project     = google_project_service.acceptance.project
   name        = "%{region}-default"
   location    = "%{region}"
@@ -67,7 +63,6 @@ resource "google_vmwareengine_network" "default-nw" {
 # there can be only 1 Legacy network per region for a given project, so creating new project to isolate tests.
 resource "google_project" "acceptance" {
   name            = "tf-test-%{random_suffix}"
-  provider        = google-beta
   project_id      = "tf-test-%{random_suffix}"
   org_id          = "%{organization}"
   billing_account = "%{billing_account}"
@@ -75,7 +70,6 @@ resource "google_project" "acceptance" {
 
 resource "google_project_service" "acceptance" {
   project  = google_project.acceptance.project_id
-  provider = google-beta
   service  = "vmwareengine.googleapis.com"
 
   # Needed for CI tests for permissions to propagate, should not be needed for actual usage
@@ -89,4 +83,3 @@ resource "time_sleep" "wait_60_seconds" {
 }
 `, context)
 }
-<% end -%>
