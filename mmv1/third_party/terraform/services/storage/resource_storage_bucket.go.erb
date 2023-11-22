@@ -188,6 +188,7 @@ func ResourceStorageBucket() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"age": {
 										Type:        schema.TypeInt,
+										Default:     nil,
 										Optional:    true,
 										Description: `Minimum age of an object in days to satisfy this condition.`,
 									},
@@ -1242,7 +1243,9 @@ func flattenBucketLifecycleRuleCondition(condition *storage.BucketLifecycleRuleC
 		"matches_prefix":             tpgresource.ConvertStringArrToInterface(condition.MatchesPrefix),
 		"matches_suffix":             tpgresource.ConvertStringArrToInterface(condition.MatchesSuffix),
 	}
+	log.Printf("[DEBUG] flattening Age? %d\n\n", condition.Age)
 	if condition.Age != nil {
+		log.Printf("[DEBUG] flattening Age %d\n\n", *condition.Age)
 		ruleCondition["age"] = int(*condition.Age)
 	}
 	if condition.IsLive == nil {
@@ -1402,10 +1405,14 @@ func expandStorageBucketLifecycleRuleCondition(v interface{}) (*storage.BucketLi
 	condition := conditions[0].(map[string]interface{})
 	transformed := &storage.BucketLifecycleRuleCondition{}
 
-	if v, ok := condition["age"]; ok {
+	log.Printf("[DEBUG] expanding Age? %s\n\n", condition["age"])
+	if v, ok := condition["age"]; v != nil && ok {
+		log.Printf("[DEBUG] expanding Age %d\n\n", v)
 		age := int64(v.(int))
 		transformed.Age = &age
-		transformed.ForceSendFields = append(transformed.ForceSendFields, "Age")
+	} else {
+		log.Printf("[DEBUG] nil Age %d\n\n", v)
+		transformed.NullFields = append(transformed.NullFields, "Age")
 	}
 
 	if v, ok := condition["created_before"]; ok {
