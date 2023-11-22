@@ -57,6 +57,7 @@ var (
 <% unless version == "ga" -%>
 		"config.0.software_config.0.cloud_data_lineage_integration",
 <% end -%>
+		"config.0.software_config.0.web_server_plugins_mode"
 	}
 
 	composerConfigKeys = []string{
@@ -472,6 +473,15 @@ func ResourceComposerEnvironment() *schema.Resource {
 										},
 									},
 <% end -%>
+									"web_server_plugins_mode": {
+										Type:         schema.TypeString,
+										Optional:     true,
+										Computed:     true,
+										ForceNew:     false,
+										AtLeastOneOf: composerSoftwareConfigKeys,
+										ValidateFunc: validation.StringInSlice([]string{"ENABLED", "DISABLED"}, false),
+										Description:  `Should be either 'ENABLED' or 'DISABLED'. Defaults to 'ENABLED'. Used in Composer 3.`
+									}
 								},
 							},
 						},
@@ -1200,6 +1210,21 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 			}
 		}
 
+		if d.HasChange("config.0.software_config.0.web_server_plugins_mode") {
+			patchObj := &composer.Environment{
+				Config: &composer.EnvironmentConfig{
+					SoftwareConfig: &composer.SoftwareConfig{},
+				},
+			}
+			if config != nil && config.SoftwareConfig != nil {
+				patchObj.Config.SoftwareConfig.WebServerPluginsMode = config.SoftwareConfig.WebServerPluginsMode
+			}
+			err = resourceComposerEnvironmentPatchField("config.softwareConfig.webServerPluginsMode", userAgent, patchObj, d, tfConfig)
+			if err != nil {
+				return err
+			}
+		}
+
 		if d.HasChange("config.0.node_count") {
 			patchObj := &composer.Environment{Config: &composer.EnvironmentConfig{}}
 			if config != nil {
@@ -1705,6 +1730,7 @@ func flattenComposerEnvironmentConfigSoftwareConfig(softwareCfg *composer.Softwa
 <% unless version == "ga" -%>
 	transformed["cloud_data_lineage_integration"] = flattenComposerEnvironmentConfigSoftwareConfigCloudDataLineageIntegration(softwareCfg.CloudDataLineageIntegration)
 <% end -%>
+	transformed["web_server_plugins_mode"] = softwareCfg.WebServerPluginsMode
 	return []interface{}{transformed}
 }
 
@@ -2363,6 +2389,7 @@ func expandComposerEnvironmentConfigSoftwareConfig(v interface{}, d *schema.Reso
 	}
 	transformed.CloudDataLineageIntegration = transformedCloudDataLineageIntegration
 <% end -%>
+	transformed.WebServerPluginsMode = original["web_server_plugins_mode"].(string)
 
 	return transformed, nil
 }
