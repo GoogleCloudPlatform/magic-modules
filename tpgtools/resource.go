@@ -173,6 +173,11 @@ type Resource struct {
 	Reference *Link
 	// Guides point to non-rest useful context for the resource.
 	Guides []Link
+
+	// The current schema version
+	SchemaVersion int
+	// The schema versions from 0 to the current schema version
+	SchemaVersions []int
 }
 
 type Link struct {
@@ -680,6 +685,20 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 	if terraformProductNameOk {
 		scpn := SnakeCaseProductName(terraformProductName.Product)
 		res.TerraformProductName = &scpn
+	}
+
+	// Resource Override: StateUpgrade
+	stateUpgrade := StateUpgradeDetails{}
+	stateUpgradeOk, err := overrides.ResourceOverrideWithDetails(StateUpgrade, &stateUpgrade, location)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to decode state upgrade details: %v", err)
+	}
+	if stateUpgradeOk {
+		res.SchemaVersion = stateUpgrade.SchemaVersion
+		res.SchemaVersions = make([]int, res.SchemaVersion)
+		for i := range res.SchemaVersions {
+			res.SchemaVersions[i] = i
+		}
 	}
 
 	res.Samples = res.loadSamples()

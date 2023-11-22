@@ -13,7 +13,6 @@
 
 require 'api/object'
 require 'compile/core'
-require 'overrides/runner'
 
 module Provider
   # Settings for the provider
@@ -68,12 +67,9 @@ module Provider
       raise "Config #{cfg_file}(#{config.class}) is not a Provider::Config" \
         unless config.class <= Provider::Config
 
-      api = Overrides::Runner.build(api, config.overrides,
-                                    config.resource_override,
-                                    config.property_override)
       config.spread_api config, api, [], '' unless api.nil?
       config.validate
-      api.validate
+      api&.validate
       [api, config]
     end
 
@@ -89,7 +85,6 @@ module Provider
       super
 
       check :files, type: Provider::Config::Files
-      check :overrides, type: Overrides::ResourceOverrides
     end
 
     # Provides the API object to any type that requires, e.g. for validation

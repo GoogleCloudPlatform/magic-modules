@@ -561,8 +561,315 @@ func resourceDataprocClusterResourceV0() *schema.Resource {
 							},
 						},
 
-						"master_config": instanceConfigSchema("master_config"),
-						"worker_config": instanceConfigSchema("worker_config"),
+						"master_config": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							AtLeastOneOf: clusterConfigKeys,
+							Computed:     true,
+							MaxItems:     1,
+							Description:  `The Compute Engine config settings for the cluster's master instance.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"num_instances": {
+										Type:        schema.TypeInt,
+										Optional:    true,
+										ForceNew:    true,
+										Computed:    true,
+										Description: `Specifies the number of master nodes to create. If not specified, GCP will default to a predetermined computed value.`,
+										AtLeastOneOf: []string{
+											"cluster_config.0.master_config.0.num_instances",
+											"cluster_config.0.master_config.0.image_uri",
+											"cluster_config.0.master_config.0.machine_type",
+											"cluster_config.0.master_config.0.accelerators",
+										},
+									},
+
+									"image_uri": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Computed: true,
+										AtLeastOneOf: []string{
+											"cluster_config.0.master_config.0.num_instances",
+											"cluster_config.0.master_config.0.image_uri",
+											"cluster_config.0.master_config.0.machine_type",
+											"cluster_config.0.master_config.0.accelerators",
+										},
+										ForceNew:    true,
+										Description: `The URI for the image to use for this master`,
+									},
+
+									"machine_type": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Computed: true,
+										AtLeastOneOf: []string{
+											"cluster_config.0.master_config.0.num_instances",
+											"cluster_config.0.master_config.0.image_uri",
+											"cluster_config.0.master_config.0.machine_type",
+											"cluster_config.0.master_config.0.accelerators",
+										},
+										ForceNew:    true,
+										Description: `The name of a Google Compute Engine machine type to create for the master`,
+									},
+
+									"min_cpu_platform": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Computed: true,
+										AtLeastOneOf: []string{
+											"cluster_config.0.master_config.0.num_instances",
+											"cluster_config.0.master_config.0.image_uri",
+											"cluster_config.0.master_config.0.machine_type",
+											"cluster_config.0.master_config.0.accelerators",
+										},
+										ForceNew:    true,
+										Description: `The name of a minimum generation of CPU family for the master. If not specified, GCP will default to a predetermined computed value for each zone.`,
+									},
+									"disk_config": {
+										Type:     schema.TypeList,
+										Optional: true,
+										Computed: true,
+										AtLeastOneOf: []string{
+											"cluster_config.0.master_config.0.num_instances",
+											"cluster_config.0.master_config.0.image_uri",
+											"cluster_config.0.master_config.0.machine_type",
+											"cluster_config.0.master_config.0.accelerators",
+										},
+										MaxItems:    1,
+										Description: `Disk Config`,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"num_local_ssds": {
+													Type:        schema.TypeInt,
+													Optional:    true,
+													Computed:    true,
+													Description: `The amount of local SSD disks that will be attached to each master cluster node. Defaults to 0.`,
+													AtLeastOneOf: []string{
+														"cluster_config.0.master_config.0.disk_config.0.num_local_ssds",
+														"cluster_config.0.master_config.0.disk_config.0.boot_disk_size_gb",
+														"cluster_config.0.master_config.0.disk_config.0.boot_disk_type",
+													},
+													ForceNew: true,
+												},
+
+												"boot_disk_size_gb": {
+													Type:        schema.TypeInt,
+													Optional:    true,
+													Computed:    true,
+													Description: `Size of the primary disk attached to each node, specified in GB. The primary disk contains the boot volume and system libraries, and the smallest allowed disk size is 10GB. GCP will default to a predetermined computed value if not set (currently 500GB). Note: If SSDs are not attached, it also contains the HDFS data blocks and Hadoop working directories.`,
+													AtLeastOneOf: []string{
+														"cluster_config.0.master_config.0.disk_config.0.num_local_ssds",
+														"cluster_config.0.master_config.0.disk_config.0.boot_disk_size_gb",
+														"cluster_config.0.master_config.0.disk_config.0.boot_disk_type",
+													},
+													ForceNew:     true,
+													ValidateFunc: validation.IntAtLeast(10),
+												},
+
+												"boot_disk_type": {
+													Type:        schema.TypeString,
+													Optional:    true,
+													Description: `The disk type of the primary disk attached to each node. Such as "pd-ssd" or "pd-standard". Defaults to "pd-standard".`,
+													AtLeastOneOf: []string{
+														"cluster_config.0.master_config.0.disk_config.0.num_local_ssds",
+														"cluster_config.0.master_config.0.disk_config.0.boot_disk_size_gb",
+														"cluster_config.0.master_config.0.disk_config.0.boot_disk_type",
+													},
+													ForceNew: true,
+													Default:  "pd-standard",
+												},
+											},
+										},
+									},
+									"accelerators": {
+										Type:     schema.TypeSet,
+										Optional: true,
+										AtLeastOneOf: []string{
+											"cluster_config.0.master_config.0.num_instances",
+											"cluster_config.0.master_config.0.image_uri",
+											"cluster_config.0.master_config.0.machine_type",
+											"cluster_config.0.master_config.0.accelerators",
+										},
+										ForceNew:    true,
+										Elem:        acceleratorsSchema(),
+										Description: `The Compute Engine accelerator (GPU) configuration for these instances. Can be specified multiple times.`,
+									},
+
+									"instance_names": {
+										Type:        schema.TypeList,
+										Computed:    true,
+										Elem:        &schema.Schema{Type: schema.TypeString},
+										Description: `List of master instance names which have been assigned to the cluster.`,
+									},
+								},
+							},
+						},
+						"worker_config": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							AtLeastOneOf: clusterConfigKeys,
+							Computed:     true,
+							MaxItems:     1,
+							Description:  `The Compute Engine config settings for the cluster's worker instances.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"num_instances": {
+										Type:        schema.TypeInt,
+										Optional:    true,
+										ForceNew:    false,
+										Computed:    true,
+										Description: `Specifies the number of worker nodes to create. If not specified, GCP will default to a predetermined computed value.`,
+										AtLeastOneOf: []string{
+											"cluster_config.0.worker_config.0.num_instances",
+											"cluster_config.0.worker_config.0.image_uri",
+											"cluster_config.0.worker_config.0.machine_type",
+											"cluster_config.0.worker_config.0.accelerators",
+											"cluster_config.0.worker_config.0.min_num_instances",
+										},
+									},
+
+									"image_uri": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Computed: true,
+										AtLeastOneOf: []string{
+											"cluster_config.0.worker_config.0.num_instances",
+											"cluster_config.0.worker_config.0.image_uri",
+											"cluster_config.0.worker_config.0.machine_type",
+											"cluster_config.0.worker_config.0.accelerators",
+											"cluster_config.0.worker_config.0.min_num_instances",
+										},
+										ForceNew:    true,
+										Description: `The URI for the image to use for this master/worker`,
+									},
+
+									"machine_type": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Computed: true,
+										AtLeastOneOf: []string{
+											"cluster_config.0.worker_config.0.num_instances",
+											"cluster_config.0.worker_config.0.image_uri",
+											"cluster_config.0.worker_config.0.machine_type",
+											"cluster_config.0.worker_config.0.accelerators",
+											"cluster_config.0.worker_config.0.min_num_instances",
+										},
+										ForceNew:    true,
+										Description: `The name of a Google Compute Engine machine type to create for the master/worker`,
+									},
+
+									"min_cpu_platform": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Computed: true,
+										AtLeastOneOf: []string{
+											"cluster_config.0.worker_config.0.num_instances",
+											"cluster_config.0.worker_config.0.image_uri",
+											"cluster_config.0.worker_config.0.machine_type",
+											"cluster_config.0.worker_config.0.accelerators",
+											"cluster_config.0.worker_config.0.min_num_instances",
+										},
+										ForceNew:    true,
+										Description: `The name of a minimum generation of CPU family for the master/worker. If not specified, GCP will default to a predetermined computed value for each zone.`,
+									},
+									"disk_config": {
+										Type:     schema.TypeList,
+										Optional: true,
+										Computed: true,
+										AtLeastOneOf: []string{
+											"cluster_config.0.worker_config.0.num_instances",
+											"cluster_config.0.worker_config.0.image_uri",
+											"cluster_config.0.worker_config.0.machine_type",
+											"cluster_config.0.worker_config.0.accelerators",
+											"cluster_config.0.worker_config.0.min_num_instances",
+											"cluster_config.0.worker_config.0.disk_config",
+										},
+										MaxItems:    1,
+										Description: `Disk Config`,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"num_local_ssds": {
+													Type:        schema.TypeInt,
+													Optional:    true,
+													Computed:    true,
+													Description: `The amount of local SSD disks that will be attached to each master cluster node. Defaults to 0.`,
+													AtLeastOneOf: []string{
+														"cluster_config.0.worker_config.0.disk_config.0.num_local_ssds",
+														"cluster_config.0.worker_config.0.disk_config.0.boot_disk_size_gb",
+														"cluster_config.0.worker_config.0.disk_config.0.boot_disk_type",
+													},
+													ForceNew: true,
+												},
+
+												"boot_disk_size_gb": {
+													Type:        schema.TypeInt,
+													Optional:    true,
+													Computed:    true,
+													Description: `Size of the primary disk attached to each node, specified in GB. The primary disk contains the boot volume and system libraries, and the smallest allowed disk size is 10GB. GCP will default to a predetermined computed value if not set (currently 500GB). Note: If SSDs are not attached, it also contains the HDFS data blocks and Hadoop working directories.`,
+													AtLeastOneOf: []string{
+														"cluster_config.0.worker_config.0.disk_config.0.num_local_ssds",
+														"cluster_config.0.worker_config.0.disk_config.0.boot_disk_size_gb",
+														"cluster_config.0.worker_config.0.disk_config.0.boot_disk_type",
+													},
+													ForceNew:     true,
+													ValidateFunc: validation.IntAtLeast(10),
+												},
+
+												"boot_disk_type": {
+													Type:        schema.TypeString,
+													Optional:    true,
+													Description: `The disk type of the primary disk attached to each node. Such as "pd-ssd" or "pd-standard". Defaults to "pd-standard".`,
+													AtLeastOneOf: []string{
+														"cluster_config.0.worker_config.0.disk_config.0.num_local_ssds",
+														"cluster_config.0.worker_config.0.disk_config.0.boot_disk_size_gb",
+														"cluster_config.0.worker_config.0.disk_config.0.boot_disk_type",
+													},
+													ForceNew: true,
+													Default:  "pd-standard",
+												},
+											},
+										},
+									},
+
+									// Note: preemptible workers don't support accelerators
+									"accelerators": {
+										Type:     schema.TypeSet,
+										Optional: true,
+										AtLeastOneOf: []string{
+											"cluster_config.0.worker_config.0.num_instances",
+											"cluster_config.0.worker_config.0.image_uri",
+											"cluster_config.0.worker_config.0.machine_type",
+											"cluster_config.0.worker_config.0.accelerators",
+											"cluster_config.0.worker_config.0.min_num_instances",
+										},
+										ForceNew:    true,
+										Elem:        acceleratorsSchema(),
+										Description: `The Compute Engine accelerator (GPU) configuration for these instances. Can be specified multiple times.`,
+									},
+
+									"instance_names": {
+										Type:        schema.TypeList,
+										Computed:    true,
+										Elem:        &schema.Schema{Type: schema.TypeString},
+										Description: `List of master/worker instance names which have been assigned to the cluster.`,
+									},
+									"min_num_instances": {
+										Type:     schema.TypeInt,
+										Optional: true,
+										Computed: true,
+										ForceNew: false,
+										AtLeastOneOf: []string{
+											"cluster_config.0.worker_config.0.num_instances",
+											"cluster_config.0.worker_config.0.image_uri",
+											"cluster_config.0.worker_config.0.machine_type",
+											"cluster_config.0.worker_config.0.accelerators",
+											"cluster_config.0.worker_config.0.min_num_instances",
+										},
+										Description: `The minimum number of primary worker instances to create.`,
+									},
+								},
+							},
+						},
 						// preemptible_worker_config has a slightly different config
 						"preemptible_worker_config": {
 							Type:         schema.TypeList,
@@ -653,6 +960,74 @@ func resourceDataprocClusterResourceV0() *schema.Resource {
 										Computed:    true,
 										Elem:        &schema.Schema{Type: schema.TypeString},
 										Description: `List of preemptible instance names which have been assigned to the cluster.`,
+									},
+									"instance_flexibility_policy": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										Computed:    true,
+										Description: `Instance flexibility Policy allowing a mixture of VM shapes and provisioning models.`,
+										AtLeastOneOf: []string{
+											"cluster_config.0.preemptible_worker_config.0.num_instances",
+											"cluster_config.0.preemptible_worker_config.0.preemptibility",
+											"cluster_config.0.preemptible_worker_config.0.disk_config",
+											"cluster_config.0.preemptible_worker_config.0.instance_flexibility_policy",
+										},
+										MaxItems: 1,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"instance_selection_list": {
+													Type:     schema.TypeList,
+													Computed: true,
+													Optional: true,
+													ForceNew: true,
+													AtLeastOneOf: []string{
+														"cluster_config.0.preemptible_worker_config.0.instance_flexibility_policy.0.instance_selection_list",
+													},
+													Description: `List of instance selection options that the group will use when creating new VMs.`,
+													Elem: &schema.Resource{
+														Schema: map[string]*schema.Schema{
+															"machine_types": {
+																Type:        schema.TypeList,
+																Computed:    true,
+																Optional:    true,
+																ForceNew:    true,
+																Elem:        &schema.Schema{Type: schema.TypeString},
+																Description: `Full machine-type names, e.g. "n1-standard-16".`,
+															},
+															"rank": {
+																Type:        schema.TypeInt,
+																Computed:    true,
+																Optional:    true,
+																ForceNew:    true,
+																Elem:        &schema.Schema{Type: schema.TypeInt},
+																Description: `Preference of this instance selection. Lower number means higher preference. Dataproc will first try to create a VM based on the machine-type with priority rank and fallback to next rank based on availability. Machine types and instance selections with the same priority have the same preference.`,
+															},
+														},
+													},
+												},
+												"instance_selection_results": {
+													Type:        schema.TypeList,
+													Computed:    true,
+													Description: `A list of instance selection results in the group.`,
+													Elem: &schema.Resource{
+														Schema: map[string]*schema.Schema{
+															"machine_type": {
+																Type:        schema.TypeString,
+																Computed:    true,
+																Elem:        &schema.Schema{Type: schema.TypeString},
+																Description: `Full machine-type names, e.g. "n1-standard-16".`,
+															},
+															"vm_count": {
+																Type:        schema.TypeInt,
+																Computed:    true,
+																Elem:        &schema.Schema{Type: schema.TypeInt},
+																Description: `Number of VM provisioned with the machine_type.`,
+															},
+														},
+													},
+												},
+											},
+										},
 									},
 								},
 							},

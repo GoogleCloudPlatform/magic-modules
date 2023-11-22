@@ -16,7 +16,6 @@ require 'fileutils'
 require 'google/extensions'
 require 'google/logger'
 require 'json'
-require 'overrides/runner'
 require 'provider/file_template'
 
 module Provider
@@ -411,6 +410,7 @@ module Provider
     def properties_by_custom_update(properties)
       update_props = properties.reject do |p|
         p.update_url.nil? || p.update_verb.nil? || p.update_verb == :NOOP ||
+          p.is_a?(Api::Type::KeyValueTerraformLabels) ||
           p.is_a?(Api::Type::KeyValueLabels) # effective_labels is used for update
       end
 

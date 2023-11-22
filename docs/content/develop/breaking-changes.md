@@ -42,8 +42,13 @@ For more information, see
     the ID format will break the ability to parse the IDs from any deployments.
 * <a name="resource-import-format"></a> Removing or altering resource import ID formats
   * Automation written by end users may rely on specific import formats.
-* Major changes to default resource behavior
-  * For example, changing the default implementation of resource deletion
+* Changes to default resource behavior
+  *  Changing resource deletion behavior
+    * In limited cases changes may be permissible if the prior behavior could **never** succeed.
+    * Changing resource deletion to skip deleting the resource by default if delete was previously called
+    * Changing resource deletion to specify a force flag
+  * Adding a new field with a default different from the API default
+    * If an API default is expected to change- a breaking change for the API- use `default_from_api` which will avoid sending a value and safely take the server default in Terraform
 
 ## Field-level breaking changes
 

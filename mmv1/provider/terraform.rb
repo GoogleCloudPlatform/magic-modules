@@ -18,8 +18,6 @@ require 'provider/terraform/import'
 require 'provider/terraform/custom_code'
 require 'provider/terraform/docs'
 require 'provider/terraform/examples'
-require 'overrides/terraform/resource_override'
-require 'overrides/terraform/property_override'
 require 'provider/terraform/sub_template'
 require 'google/golang_utils'
 
@@ -105,11 +103,13 @@ module Provider
     end
 
     def force_new?(property, resource)
-      (!property.output || property.is_a?(Api::Type::KeyValueEffectiveLabels)) &&
+      ((!property.output || property.is_a?(Api::Type::KeyValueEffectiveLabels)) &&
         (property.immutable || (resource.immutable && property.update_url.nil? &&
                               property.immutable.nil? &&
                             (property.parent.nil? ||
-                             force_new?(property.parent, resource))))
+                             force_new?(property.parent, resource))))) ||
+        (property.is_a?(Api::Type::KeyValueTerraformLabels) &&
+          !updatable?(resource, resource.all_user_properties))
     end
 
     # Returns tuples of (fieldName, list of update masks) for

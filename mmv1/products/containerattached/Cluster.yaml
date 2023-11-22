@@ -296,6 +296,16 @@ properties:
           For more info on RBAC, see
           https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles
         item_type: Api::Type::String
+      - !ruby/object:Api::Type::Array
+        name: adminGroups
+        description: |
+          Groups that can perform operations as a cluster admin. A managed
+          ClusterRoleBinding will be created to grant the `cluster-admin` ClusterRole
+          to the groups. Up to ten admin groups can be provided.
+
+          For more info on RBAC, see
+          https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles
+        item_type: Api::Type::String
   - !ruby/object:Api::Type::NestedObject
     name: monitoringConfig
     description: |
@@ -327,3 +337,23 @@ properties:
         values:
           - :DISABLED
           - :PROJECT_SINGLETON_POLICY_ENFORCE
+  - !ruby/object:Api::Type::NestedObject
+    name: proxyConfig
+    description: |
+      Support for proxy configuration.
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: kubernetesSecret
+        description: |
+          The Kubernetes Secret resource that contains the HTTP(S) proxy configuration.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: name
+            required: true
+            description: |
+              Name of the kubernetes secret containing the proxy config.
+          - !ruby/object:Api::Type::String
+            name: namespace
+            required: true
+            description: |
+              Namespace of the kubernetes secret containing the proxy config.
