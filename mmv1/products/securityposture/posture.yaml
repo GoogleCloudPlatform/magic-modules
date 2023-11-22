@@ -17,7 +17,7 @@ description: |
   Represents a collection of policy set including its name, state, description
   and policy sets. A policy set includes set of policies along with their definition.
   A posture can be created at the organization level.  
-
+import_format: ['{{%parent}}/postures/{{posture_id}}']
 base_url: '{{parent}}/postures'
 
 self_link: '{{parent}}/postures/{{posture_id}}'
@@ -36,6 +36,8 @@ autogen_async: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     base_url: '{{op_id}}'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/posture.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'securityposture_posture_basic'
@@ -275,6 +277,7 @@ properties:
                             name: 'name'
                             immutable: true
                             required: true
+                            diff_suppress_func: 'customConstraintNameSuppress'
                             description: |
                               Immutable. The name of the custom constraint. This is unique within the organization.
                           - !ruby/object:Api::Type::String

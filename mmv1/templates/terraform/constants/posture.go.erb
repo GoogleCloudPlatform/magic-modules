@@ -1,0 +1,8 @@
+// Suppress unremovable default scope values from GCP.
+func customConstraintNameSuppress(_, old, new string, _ *schema.ResourceData) bool {
+	if len(old) > 0 {
+		old = old[:len(old)-8]
+	}
+
+	return old == new
+}
