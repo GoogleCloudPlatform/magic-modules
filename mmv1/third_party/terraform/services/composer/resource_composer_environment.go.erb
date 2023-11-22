@@ -85,6 +85,7 @@ var (
 		"config.0.workloads_config.0.triggerer",
 		"config.0.workloads_config.0.web_server",
 		"config.0.workloads_config.0.worker",
+		"config.0.workloads_config.0.dag_processor",
 	}
 
 	composerPrivateEnvironmentConfig = []string{
@@ -818,6 +819,39 @@ func ResourceComposerEnvironment() *schema.Resource {
 											},
 										},
 									},
+									"dag_processor": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										AtLeastOneOf: workloadsConfigKeys,
+										ForceNew:    false,
+										Description: `Configuration for resources used by Dag Processor.`,
+										MaxItems:     1,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"cpu": {
+													Type:         schema.TypeFloat,
+													Optional:     true,
+													ForceNew:     false,
+													ValidateFunc: validation.FloatAtLeast(0),
+													Description:  `CPU request and limit for Dag Processor.`,
+												},
+												"memory_gb": {
+													Type:         schema.TypeFloat,
+													Optional:     true,
+													ForceNew:     false,
+													ValidateFunc: validation.FloatAtLeast(0),
+													Description:  `Memory (GB) request and limit for Dag Processor.`,
+												},
+												"storage_gb": {
+													Type:         schema.TypeFloat,
+													Optional:     true,
+													ForceNew:     false,
+													ValidateFunc: validation.FloatAtLeast(0),
+													Description:  `Storage (GB) request and limit for Dag Processor.`,
+												},
+											},
+										},
+									},
 								},
 							},
 						},
@@ -1525,11 +1559,13 @@ func flattenComposerEnvironmentConfigWorkloadsConfig(workloadsConfig *composer.W
 	transformedTriggerer := make(map[string]interface{})
 	transformedWebServer := make(map[string]interface{})
 	transformedWorker := make(map[string]interface{})
+	transformedDagProcessor := make(map[string]interface{})
 
 	wlCfgScheduler := workloadsConfig.Scheduler
 	wlCfgTriggerer := workloadsConfig.Triggerer
 	wlCfgWebServer := workloadsConfig.WebServer
 	wlCfgWorker := workloadsConfig.Worker
+	wlCfgDagProcessor := workloadsConfig.DagProcessor
 
 	if wlCfgScheduler == nil {
 		transformedScheduler = nil
@@ -1566,12 +1602,21 @@ func flattenComposerEnvironmentConfigWorkloadsConfig(workloadsConfig *composer.W
 		transformedWorker["max_count"] = wlCfgWorker.MaxCount
 	}
 
+	if wlCfgDagProcessor == nil {
+			transformedDagProcessor = nil
+	} else {
+		transformedDagProcessor["cpu"] = wlCfgDagProcessor.Cpu
+		transformedDagProcessor["memory_gb"] = wlCfgDagProcessor.MemoryGb
+		transformedDagProcessor["storage_gb"] = wlCfgDagProcessor.StorageGb
+	}
+
 	transformed["scheduler"] = []interface{}{transformedScheduler}
 	if transformedTriggerer != nil {
 		transformed["triggerer"] = []interface{}{transformedTriggerer}
 	}
 	transformed["web_server"] = []interface{}{transformedWebServer}
 	transformed["worker"] = []interface{}{transformedWorker}
+	transformed["dag_processor"] = []interface{}{transformedDagProcessor}
 
 
 	return []interface{}{transformed}
@@ -1982,6 +2027,17 @@ func expandComposerEnvironmentConfigWorkloadsConfig(v interface{}, d *schema.Res
 			transformedWorker.MinCount = int64(originalWorkerRaw["min_count"].(int))
 			transformedWorker.MaxCount = int64(originalWorkerRaw["max_count"].(int))
 			transformed.Worker = transformedWorker
+		}
+	}
+
+	if v, ok := original["dag_processor"]; ok {
+		if len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
+			transformedDagProcessor := &composer.DagProcessorResource{}
+			originalDagProcessorRaw := v.([]interface{})[0].(map[string]interface{})
+			transformedDagProcessor.Cpu = originalDagProcessorRaw["cpu"].(float64)
+			transformedDagProcessor.MemoryGb = originalDagProcessorRaw["memory_gb"].(float64)
+			transformedDagProcessor.StorageGb = originalDagProcessorRaw["storage_gb"].(float64)
+			transformed.DagProcessor = transformedDagProcessor
 		}
 	}
 
