@@ -124,8 +124,7 @@ func TestAccSqlUser_postgresIAM(t *testing.T) {
 			{
 				Config: testGoogleSqlUser_postgresIAM(instance),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user1"),
-					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user2"),
+					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user"),
 				),
 			},
 			{
