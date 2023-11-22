@@ -20,6 +20,8 @@ description: |
   ServiceBinding is the resource that defines a Service Directory Service to be used in a
   BackendService resource.
 immutable: true
+schema_version: 1
+state_upgraders: true
 references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/traffic-director/docs/reference/network-services/rest/v1beta1/projects.locations.serviceBindings'
 async: !ruby/object:Api::OpAsync

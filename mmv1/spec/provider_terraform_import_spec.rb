@@ -66,10 +66,7 @@ describe Provider::Terraform do
                                  .concat(data)
                                  .join("\n"))
       product.objects.append(res)
-      new_product = Overrides::Runner.build(product, config.overrides,
-                                            config.resource_override,
-                                            config.property_override)
-      new_product.objects.last
+      product.objects.last
     end
   end
 end
