@@ -313,7 +313,7 @@ resource "google_sql_user" "user2" {
   instance = google_sql_database_instance.instance.name
   host     = "gmail.com"
   password = "hunter2"
-	type = "CLOUD_IAM_USER"
+  type = "CLOUD_IAM_USER"
 }
 
 resource "google_sql_user" "user3" {
@@ -321,7 +321,7 @@ resource "google_sql_user" "user3" {
   instance = google_sql_database_instance.instance.name
   host     = "gmail.com"
   password = "hunter3"
-	type = "CLOUD_IAM_GROUP"
+  type = "CLOUD_IAM_GROUP"
 }
 `, instance, password)
 }
