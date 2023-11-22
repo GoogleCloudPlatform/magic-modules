@@ -25,7 +25,7 @@ func TestAccSecurityCenterEventThreatDetectionCustomModule(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckSecurityCenterOrganizationCustomModuleDestroyProducer(t),
+		CheckDestroy:             testAccSecurityCenterEventThreatDetectionCustomModuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSecurityCenterEventThreatDetectionCustomModule_sccOrganizationCustomModuleExample(context),
@@ -124,7 +124,7 @@ func testAccSecurityCenterEventThreatDetectionCustomModuleDestroyProducer(t *tes
 				UserAgent: config.UserAgent,
 			})
 			if err == nil {
-				return fmt.Errorf("SecurityCenterOrganizationCustomModule still exists at %s", url)
+				return fmt.Errorf("EventThreatDetectionCustomModule still exists at %s", url)
 			}
 		}
 

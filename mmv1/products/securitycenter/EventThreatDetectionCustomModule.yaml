@@ -22,7 +22,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Overview of custom modules for Event Threat Detection': 'https://cloud.google.com/security-command-center/docs/custom-modules-etd-overview'
   api: 'https://cloud.google.com/security-command-center/docs/reference/rest/v1/organizations.eventThreatDetectionSettings.customModules'
 base_url: 'organizations/{{organization}}/eventThreatDetectionSettings/customModules'
-self_link: 'organizations/{{organization}}/eventThreatDetectionSettings/customModules/{{module}}'
+self_link: 'organizations/{{organization}}/eventThreatDetectionSettings/customModules/{{name}}'
 mutex: 'organizations/{{organization}}/eventThreatDetectionSettings/customModules'
 update_verb: :PATCH
 update_mask: true
