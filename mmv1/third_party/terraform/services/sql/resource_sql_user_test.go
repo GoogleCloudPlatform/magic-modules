@@ -411,18 +411,11 @@ resource "time_sleep" "wait_30_seconds" {
   create_duration = "30s"
 }
 
-resource "google_sql_user" "user1" {
+resource "google_sql_user" "user" {
   depends_on = [time_sleep.wait_30_seconds]
   name     = "admin"
   instance = google_sql_database_instance.instance.name
   type     = "CLOUD_IAM_USER"
-}
-
-resource "google_sql_user" "user2" {
-  depends_on = [time_sleep.wait_30_seconds]
-  name     = "admin"
-  instance = google_sql_database_instance.instance.name
-  type     = "CLOUD_IAM_GROUP_USER"
 }
 `, instance)
 }
