@@ -98,89 +98,28 @@ elif [ "$COMMAND" == "downstream" ]; then
     COMMIT_MESSAGE="$ORIGINAL_MESSAGE$NEWLINE[upstream:$REFERENCE]"
 fi
 
-if [ "$COMMAND" == "base" ]; then
-    pushd mmv1
-    if [ "$REPO" == "terraform" ]; then
-        pushd $LOCAL_PATH
-        go mod download
-        find . -type f -not -wholename "./.git*" -not -wholename "./.changelog*" -not -name ".travis.yml" -not -name ".golangci.yml" -not -name "CHANGELOG.md" -not -name "CHANGELOG_v*.md" -not -name "GNUmakefile" -not -name "docscheck.sh" -not -name "LICENSE" -not -name "README.md" -not -wholename "./examples*" -not -name ".go-version" -not -name ".hashibot.hcl" -print0 | xargs -0 git rm
-        popd
+
+if [ "$REPO" == "terraform-google-conversion" ]; then
+    make clean-tgc OUTPUT_PATH="$LOCAL_PATH"
+    make tgc OUTPUT_PATH="$LOCAL_PATH"
+
+    if [ "$COMMAND" == "downstream" ]; then
+      pushd $LOCAL_PATH
+      go get -d github.com/hashicorp/terraform-provider-google-beta@$BASE_BRANCH
+      go mod tidy
+      set +e
+      make build
+      set -e
+      popd
     fi
-
-    if [ "$REPO" == "terraform-google-conversion" ]; then
-        # Generate tfplan2cai
-        pushd $LOCAL_PATH
-        # clear out the templates as they are copied during
-        # generation from mmv1/third_party/validator/tests/data
-        rm -rf ./tfplan2cai/testdata/templates/
-        rm -rf ./tfplan2cai/testdata/generatedconvert/
-        rm -rf ./tfplan2cai/converters/google/provider
-        rm -rf ./tfplan2cai/converters/google/resources
-        find ./tfplan2cai/test/** -type f -exec git rm {} \;
-        popd
-
-        bundle exec compiler.rb -a -e terraform -f validator -o $LOCAL_PATH/tfplan2cai -v $VERSION
-
-        # Generate cai2hcl
-        pushd $LOCAL_PATH
-        rm -rf ./cai2hcl/*
-        popd
-
-        bundle exec compiler.rb -a -e terraform -f tgc_cai2hcl -o $LOCAL_PATH/cai2hcl -v $VERSION
-
-        if [ "$COMMAND" == "downstream" ]; then
-          pushd $LOCAL_PATH
-          go get -d github.com/hashicorp/terraform-provider-google-beta@$BASE_BRANCH
-          go mod tidy
-          set +e
-          make build
-          set -e
-          popd
-        fi
-    elif [ "$REPO" == "tf-oics" ]; then
-        # use terraform generator with oics override
-        bundle exec compiler.rb -a -e terraform -f oics -o $LOCAL_PATH -v $VERSION
-    else
-        if [ "$REPO" == "terraform" ]; then
-            if [ "$VERSION" == "ga" ]; then
-                bundle exec compiler.rb -a -e $REPO -o $LOCAL_PATH -v $VERSION --no-docs
-                bundle exec compiler.rb -a -e $REPO -o $LOCAL_PATH -v beta --no-code
-            else
-                bundle exec compiler.rb -a -e $REPO -o $LOCAL_PATH -v $VERSION
-            fi
-            pushd ../
-            make tpgtools OUTPUT_PATH=$LOCAL_PATH VERSION=$VERSION
-
-            # Only generate TeamCity-related file for TPG and TPGB
-            if [ "$VERSION" == "ga" ] || [ "$VERSION" == "beta" ]; then
-                make teamcity-servicemap-generate OUTPUT_PATH=$LOCAL_PATH VERSION=$VERSION
-            fi
-            popd
-        fi
-    fi
-    popd
-else
-    if [ "$REPO" == "terraform-google-conversion" ]; then
-        make clean-tgc OUTPUT_PATH="$LOCAL_PATH"
-        make tgc OUTPUT_PATH="$LOCAL_PATH"
-
-        if [ "$COMMAND" == "downstream" ]; then
-          pushd $LOCAL_PATH
-          go get -d github.com/hashicorp/terraform-provider-google-beta@$BASE_BRANCH
-          go mod tidy
-          set +e
-          make build
-          set -e
-          popd
-        fi
-    elif [ "$REPO" == "tf-oics" ]; then
-        # use terraform generator with oics override
-        make tf-oics OUTPUT_PATH="$LOCAL_PATH"
-    elif [ "$REPO" == "terraform" ]; then
-        make clean-provider OUTPUT_PATH="$LOCAL_PATH"
-        make provider OUTPUT_PATH="$LOCAL_PATH" VERSION=$VERSION
-    fi
+elif [ "$REPO" == "tf-oics" ]; then
+    # use terraform generator with oics override
+    make tf-oics OUTPUT_PATH="$LOCAL_PATH"
+elif [ "$REPO" == "terraform" ]; then
+    make clean-provider OUTPUT_PATH="$LOCAL_PATH"
+    make provider OUTPUT_PATH="$LOCAL_PATH" VERSION=$VERSION
 fi
+
 
 pushd $LOCAL_PATH
 
