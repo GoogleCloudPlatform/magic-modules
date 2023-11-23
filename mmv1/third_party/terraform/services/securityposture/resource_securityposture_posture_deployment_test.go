@@ -13,8 +13,9 @@ func TestAccSecurityPosturePostureDeployment_securityposturePostureDeployment_up
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":        envvar.GetTestOrgFromEnv(t),
-		"random_suffix": acctest.RandString(t, 10),
+		"org_id":         envvar.GetTestOrgFromEnv(t),
+		"project_number": envvar.GetTestProjectNumberFromEnv(),
+		"random_suffix":  acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -49,9 +50,9 @@ resource "google_securityposture_posture_deployment" "postureDeployment" {
 	posture_deployment_id          = "posture_deployment_1"
 	parent = "organizations/%{org_id}/locations/global"
     description = "a new posture deployment"
-    target_resource = "projects/190507214861"
-    posture_id = "organizations/%{org_id}/locations/global/postures/testExtractPosture"
-    posture_revision_id = "0d81b87b"
+    target_resource = "projects/%{project_number}"
+    posture_id = "organizations/%{org_id}/locations/global/postures/testPosture"
+    posture_revision_id = "eb29beb8"
 }
 `, context)
 }
@@ -62,7 +63,7 @@ resource "google_securityposture_posture_deployment" "postureDeployment" {
 	posture_deployment_id          = "posture_deployment_1"
 	parent = "organizations/%{org_id}/locations/global"
     description = "an updated posture deployment"
-    target_resource = "projects/190507214861"
+    target_resource = "projects/%{project_number}"
     posture_id = "organizations/%{org_id}/locations/global/postures/posture-foo-5"
     posture_revision_id = "48e17293"
 }

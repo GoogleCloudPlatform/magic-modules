@@ -34,6 +34,7 @@ examples:
     primary_resource_id: 'postureDeployment'
     test_env_vars:
       org_id: :ORG_ID
+      project_number: :PROJECT_NUMBER
 
 parameters:
   - !ruby/object:Api::Type::String
@@ -82,7 +83,8 @@ properties:
     name: 'postureId'
     required: true
     description: |
-      Full name of the posture which needs to be deployed.
+      Relative name of the posture which needs to be deployed. It should be in the format:
+        organizations/<ORG_ID>/locations/<LOCATION>/postures/<postureID>
   - !ruby/object:Api::Type::String
     name: 'postureRevisionId'
     required: true
