@@ -65,14 +65,6 @@ examples:
       ])"
     vars:
       instance_id: 'my-instance'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'secure_source_manager_instance_iam_condition'
-    primary_resource_id: 'default'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-my-instance%s\",
-      context[\"random_suffix\"\
-      ])"
-    vars:
-      instance_id: 'my-instance'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
