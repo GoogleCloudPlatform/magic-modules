@@ -15,7 +15,7 @@
 name: 'DeploymentResourcePool'
 base_url: 'projects/{{project}}/locations/{{region}}/deploymentResourcePools'
 create_url: 'projects/{{project}}/locations/{{region}}/deploymentResourcePools'
-self_link:  'projects/{{project}}/locations/{{region}}/deploymentResourcePools/{{deployment_resource_pool_id}}'
+self_link: 'projects/{{project}}/locations/{{region}}/deploymentResourcePools/{{deployment_resource_pool_id}}'
 # No method is not defined for DeploymentResourcePools
 immutable: true
 create_verb: :POST
@@ -34,10 +34,10 @@ async: !ruby/object:Api::OpAsync
     resource_inside_response: true
   status: !ruby/object:Api::OpAsync::Status
     path: 'done'
-    complete: True
+    complete: true
     allowed:
-      - True
-      - False
+      - true
+      - false
   error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
