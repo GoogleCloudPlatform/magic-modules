@@ -1,0 +1,105 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: FeatureOnlineStore
+base_url: projects/{{project}}/locations/{{region}}/featureOnlineStores
+create_url: projects/{{project}}/locations/{{region}}/featureOnlineStores?featureOnlineStoreId={{name}}
+self_link: projects/{{project}}/locations/{{region}}/featureOnlineStores/{{name}}
+update_verb: :PATCH
+update_mask: true
+create_verb: :POST
+references: !ruby/object:Api::Resource::ReferenceLinks
+  api: https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featureOnlineStores
+async: !ruby/object:Api::OpAsync
+  actions:
+    - create
+    - delete
+    - update
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'
+description: Vertex AI Feature Online Store provides a centralized repository for serving ML features and embedding indexes at low latency. The Feature Online Store is a top-level container.
+autogen_async: false
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: vertex_ai_feature_online_store
+    primary_resource_id: feature_online_store
+parameters:
+  - !ruby/object:Api::Type::String
+    name: region
+    description: The region of feature online store. eg us-central1
+    url_param_only: true
+    immutable: true
+properties:
+  - !ruby/object:Api::Type::String
+    name: name
+    description: The resource name of the Feature Online Store.
+    immutable: true
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+  - !ruby/object:Api::Type::String
+    name: createTime
+    output: true
+    description: The timestamp of when the feature online store was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+  - !ruby/object:Api::Type::String
+    name: updateTime
+    output: true
+    description: The timestamp of when the feature online store was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+  - !ruby/object:Api::Type::String
+    name: etag
+    output: true
+    ignore_read: true
+    description: Used to perform consistent read-modify-write updates.
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: labels
+    description: The labels with user-defined metadata to organize your feature online stores.
+  - !ruby/object:Api::Type::String
+    name: state
+    output: true
+    description: The state of the Feature Online Store. See the possible states in [this link](https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featureOnlineStores#state).
+  - !ruby/object:Api::Type::NestedObject
+    name: bigtable
+    description: Settings for Cloud Bigtable instance that will be created to serve featureValues for all FeatureViews under this FeatureOnlineStore.
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: autoScaling
+        required: true
+        description: Autoscaling config applied to Bigtable Instance.
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: minNodeCount
+            required: true
+            description: The minimum number of nodes to scale down to. Must be greater than or equal to 1.
+          - !ruby/object:Api::Type::Integer
+            name: maxNodeCount
+            description: The maximum number of nodes to scale up to. Must be greater than or equal to minNodeCount, and less than or equal to 10 times of 'minNodeCount'.
+          - !ruby/object:Api::Type::Integer
+            name: cpuUtilizationTarget
+            description:
+               A percentage of the cluster's CPU capacity. Can be from 10% to 80%.
+               When a cluster's CPU utilization exceeds the target that you have set,
+               Bigtable immediately adds nodes to the cluster. When CPU utilization is substantially lower than the target, Bigtable removes nodes. If not set will default to 50%.
+
