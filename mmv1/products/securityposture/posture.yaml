@@ -119,6 +119,7 @@ properties:
       name: 'PolicySet'
       description: |
         Set of security policies.
+      required: true
       properties:
         - !ruby/object:Api::Type::String
           name: 'policySetId'
@@ -165,7 +166,11 @@ properties:
                         Mapping of security controls for the policy.
               - !ruby/object:Api::Type::NestedObject
                 name: 'constraint'
-                description: 'Policy constraint definition.'
+                description: 'Policy constraint definition.It can have the definition of one of following constraints:
+                orgPolicyCannedConstraint
+                orgPolicyCustomConstraint
+                securityHealthAnalyticsModule
+                securityHealthAnalyticsCustomModule'
                 required: true
                 properties:
                   - !ruby/object:Api::Type::NestedObject
