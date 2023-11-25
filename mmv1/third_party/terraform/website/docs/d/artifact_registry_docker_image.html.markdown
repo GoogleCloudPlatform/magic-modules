@@ -8,23 +8,27 @@ description: |-
 
 This data source fetches information from a provided Artifact Registry repository, including the fully qualified name and URI for an image, based on a the latest version of image name and optional digest or tag.
 
-Requires one of the following OAuth scopes:
-
-* `https://www.googleapis.com/auth/cloud-platform`
-* `https://www.googleapis.com/auth/cloud-platform.read-only`
+~> **Note**
+Requires one of the following OAuth scopes: `https://www.googleapis.com/auth/cloud-platform` or `https://www.googleapis.com/auth/cloud-platform.read-only`.
 
 ## Example Usage
 
 ```hcl
 data "google_artifact_registry_docker_image" "my-image" {
   repository = "my-repository"
-  location   = "us-west1"
+  location   = "my-location"
   image      = "my-image"
-  tag        = "latest"
+  tag        = "my-tag"
 }
 
-output "image_uri" {
-  value = data.google_artifact_registry_docker_image.self_link
+resource "google_cloud_run_v2_service" "default" {
+ # ...
+ 
+  template {
+    containers {
+      image = data.google_artifact_registry_docker_image.my-image.self_link
+    }
+  }
 }
 ```
 
@@ -53,17 +57,23 @@ If a `digest` or `tag` is not provided, then the last updated version of the ima
 
 The following computed attributes are exported:
 
-* `name` - The fully qualified name of the fetched image.  This name has the form: `projects/<projectId>/locations/<location>/repository/<repository_name>/dockerImages/<docker_image>`. For example, "projects/test-project/locations/us-west4/repositories/test-repo/dockerImages/nginx@sha256:e9954c1fc875017be1c3e36eca16be2d9e9bccc4bf072163515467d6a823c7cf".
+* `name` - The fully qualified name of the fetched image.  This name has the form: `projects/{{project}}/locations/{{location}}/repository/{{repository}}/dockerImages/{{docker_image}}`. For example, 
+```
+projects/test-project/locations/us-west4/repositories/test-repo/dockerImages/nginx@sha256:e9954c1fc875017be1c3e36eca16be2d9e9bccc4bf072163515467d6a823c7cf
+```
 
-* `self_link` - The URI to access the image.  For example, "us-west4-docker.pkg.dev/test-project/test-repo/nginx@sha256:e9954c1fc875017be1c3e36eca16be2d9e9bccc4bf072163515467d6a823c7cf".
+* `self_link` - The URI to access the image.  For example, 
+```
+us-west4-docker.pkg.dev/test-project/test-repo/nginx@sha256:e9954c1fc875017be1c3e36eca16be2d9e9bccc4bf072163515467d6a823c7cf
+```
 
 * `tags` - A list of all tags associated with the image.
 
 * `image_size_bytes` - Calculated size of the image in bytes.
 
-* `media_type` - Media type of this image, e.g. "application/vnd.docker.distribution.manifest.v2+json". 
+* `media_type` - Media type of this image, e.g. `application/vnd.docker.distribution.manifest.v2+json`. 
 
-* `upload_time` - The time, as a RFC 3339 string, the image was uploaded. For example, "2014-10-02T15:01:23.045123456Z".
+* `upload_time` - The time, as a RFC 3339 string, the image was uploaded. For example, `2014-10-02T15:01:23.045123456Z`.
 
 * `build_time` - The time, as a RFC 3339 string, this image was built. 
 
