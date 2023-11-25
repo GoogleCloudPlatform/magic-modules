@@ -1,12 +1,26 @@
 package artifactregistry
 
 import (
+	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
+
+// https://cloud.google.com/artifact-registry/docs/reference/rest/v1/projects.locations.repositories.dockerImages#DockerImage
+type DockerImage struct {
+	name           string
+	uri            string
+	tags           []string
+	imageSizeBytes string
+	mediaType      string
+	uploadTime     string
+	buildTime      string
+	updateTime     string
+}
 
 func DataSourceArtifactRegistryDockerImage() *schema.Resource {
 
@@ -89,7 +103,6 @@ func DataSourceArtifactRegistryDockerImage() *schema.Resource {
 	}
 }
 
-// ArtifactRegistryBasePath
 func DataSourceArtifactRegistryDockerImageRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
@@ -102,31 +115,40 @@ func DataSourceArtifactRegistryDockerImageRead(d *schema.ResourceData, meta inte
 		return err
 	}
 
-	var res map[string]interface{}
+	var res DockerImage
 
 	// check that only one of digest or tag is set
-	if _, ok := d.GetOk("digest"); ok {
-		if _, ok := d.GetOk("tag"); ok {
-			return fmt.Errorf("only one of tag or digest can be set")
-		} else {
-			// fetch image by digest
-			// https://cloud.google.com/artifact-registry/docs/reference/rest/v1/projects.locations.repositories.dockerImages/get
-			url, err := tpgresource.ReplaceVars(d, config, "{{ArtifactRegistryBasePath}}projects/{{project}}/locations/{{region}}/repositories/{{repository}}/dockerImages/{{image}}@{{digest}}")
-			if err != nil {
-				return fmt.Errorf("Error setting api endpoint")
-			}
+	_, hasDigest := d.GetOk("digest")
+	tag, hasTag := d.GetOk("tag")
 
-			res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-				Config:    config,
-				Method:    "GET",
-				Project:   project,
-				RawURL:    url,
-				UserAgent: userAgent,
-			})
-			if err != nil {
-				return err
-			}
+	if !hasDigest && !hasTag {
+		return fmt.Errorf("either tag or digest must be provided")
+	}
+
+	if hasDigest && hasTag {
+		return fmt.Errorf("only one of tag or digest can be set")
+	}
+
+	if hasDigest {
+		// fetch image by digest
+		// https://cloud.google.com/artifact-registry/docs/reference/rest/v1/projects.locations.repositories.dockerImages/get
+		url, err := tpgresource.ReplaceVars(d, config, "{{ArtifactRegistryBasePath}}projects/{{project}}/locations/{{region}}/repositories/{{repository}}/dockerImages/{{image}}@{{digest}}")
+		if err != nil {
+			return fmt.Errorf("Error setting api endpoint")
 		}
+
+		resGet, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   project,
+			RawURL:    url,
+			UserAgent: userAgent,
+		})
+		if err != nil {
+			return err
+		}
+
+		res = convertResponseToStruct(resGet)
 	} else {
 		// fetch the list of images, ordered by update time
 		// https://cloud.google.com/artifact-registry/docs/reference/rest/v1/projects.locations.repositories.dockerImages/list
@@ -140,7 +162,7 @@ func DataSourceArtifactRegistryDockerImageRead(d *schema.ResourceData, meta inte
 			return err
 		}
 
-		reslist, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		resList, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "LIST",
 			Project:   project,
@@ -151,56 +173,102 @@ func DataSourceArtifactRegistryDockerImageRead(d *schema.ResourceData, meta inte
 			return err
 		}
 
+		resListImages := flattenDatasourceListResponse(resList)
+
+		var resFiltered []DockerImage
+
+		// The response gives a list of all images, filter by name
+		for _, image := range resListImages {
+
+			imageName, ok := d.Get("image").(string)
+			if !ok {
+				return fmt.Errorf("Error: Image name is not a string")
+			}
+
+			if strings.Contains(image.name, "dockerImages/"+imageName+"@sha256") {
+				resFiltered = append(resFiltered, image)
+			}
+		}
+
 		// If tag is provided, iterate over response and find the image containing the tag
-		if _, ok := d.GetOk("tag"); ok {
-			tag := d.Get("tag")
+		if hasTag {
 		out:
-			for _, image := range reslist["dockerImages"] {
-				for _, tags := range image["tags"] {
-					if tags.(string) == tag {
-						res := image
+			for _, image := range resFiltered {
+				for _, iterTag := range image.tags {
+					if iterTag == tag {
+						res = image
 						break out
 					}
 				}
 			}
 		} else {
 			// use the first image in the response
-			res := reslist["dockerImages"][0]
+			res = resFiltered[0]
 		}
 	}
 
 	// set the schema data using the response
-	if err := d.Set("name", res["name"]); err != nil {
+	if err := d.Set("name", res.name); err != nil {
 		return fmt.Errorf("Error setting name: %s", err)
 	}
 
-	if err := d.Set("self_link", res["uri"]); err != nil {
+	if err := d.Set("self_link", res.uri); err != nil {
 		return fmt.Errorf("Error setting self_link: %s", err)
 	}
 
-	if err := d.Set("tags", res["tags"]); err != nil {
+	if err := d.Set("tags", res.tags); err != nil {
 		return fmt.Errorf("Error setting tags: %s", err)
 	}
 
-	if err := d.Set("image_size_bytes", res["imageSizeBytes"]); err != nil {
+	if err := d.Set("image_size_bytes", res.imageSizeBytes); err != nil {
 		return fmt.Errorf("Error setting image_size_bytes: %s", err)
 	}
 
-	if err := d.Set("media_type", res["mediaType"]); err != nil {
+	if err := d.Set("media_type", res.mediaType); err != nil {
 		return fmt.Errorf("Error setting media_type: %s", err)
 	}
 
-	if err := d.Set("upload_time", res["uploadTime"]); err != nil {
+	if err := d.Set("upload_time", res.uploadTime); err != nil {
 		return fmt.Errorf("Error setting upload_time: %s", err)
 	}
 
-	if err := d.Set("build_time", res["buildTime"]); err != nil {
+	if err := d.Set("build_time", res.buildTime); err != nil {
 		return fmt.Errorf("Error setting build_time: %s", err)
 	}
 
-	if err := d.Set("update_time", res["updateTime"]); err != nil {
+	if err := d.Set("update_time", res.updateTime); err != nil {
 		return fmt.Errorf("Error setting update_time: %s", err)
 	}
 
 	return nil
+}
+
+func flattenDatasourceListResponse(res map[string]interface{}) []DockerImage {
+	var dockerImages []DockerImage
+
+	resDockerImages, ok := res["dockerImages"].([]map[string]interface{})
+	if !ok {
+		fmt.Errorf("Error: dockerImages is not a slice")
+	}
+
+	for _, image := range resDockerImages {
+		dockerImages = append(dockerImages, convertResponseToStruct(image))
+	}
+
+	return dockerImages
+}
+
+func convertResponseToStruct(res map[string]interface{}) DockerImage {
+	var dockerImage DockerImage
+
+	jsonStr, err := json.Marshal(res)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	if err := json.Unmarshal(jsonStr, &dockerImage); err != nil {
+		fmt.Println(err)
+	}
+
+	return dockerImage
 }
