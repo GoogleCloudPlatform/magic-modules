@@ -121,10 +121,6 @@ func DataSourceArtifactRegistryDockerImageRead(d *schema.ResourceData, meta inte
 	_, hasDigest := d.GetOk("digest")
 	tag, hasTag := d.GetOk("tag")
 
-	if !hasDigest && !hasTag {
-		return fmt.Errorf("either tag or digest must be provided")
-	}
-
 	if hasDigest && hasTag {
 		return fmt.Errorf("only one of tag or digest can be set")
 	}
