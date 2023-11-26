@@ -152,7 +152,7 @@ func DataSourceArtifactRegistryDockerImageRead(d *schema.ResourceData, meta inte
 	} else {
 		// fetch the list of images, ordered by update time
 		// https://cloud.google.com/artifact-registry/docs/reference/rest/v1/projects.locations.repositories.dockerImages/list
-		url, err := tpgresource.ReplaceVars(d, config, "{{ArtifactRegistryBasePath}}projects/{{project}}/locations/{{region}}/repositories/{repository}}/dockerImages")
+		url, err := tpgresource.ReplaceVars(d, config, "{{ArtifactRegistryBasePath}}projects/{{project}}/locations/{{region}}/repositories/{{repository}}/dockerImages")
 		if err != nil {
 			return fmt.Errorf("Error setting api endpoint")
 		}
