@@ -54,7 +54,7 @@ func TestAccDataSourceArtifactRegistryDockerImage(t *testing.T) {
 // Test the data source against the public AR repo
 // https://console.cloud.google.com/artifacts/docker/go-containerregistry/us/gcr.io
 const testAccDataSourceArtifactRegistryDockerImageConfig = `
-data "artifactregistry_docker_image" "testTag" {
+data "google_artifact_registry_docker_image" "testTag" {
   project    = "go-containerregistry"
   repository = "gcr.io"
   region     = "us"
@@ -62,7 +62,7 @@ data "artifactregistry_docker_image" "testTag" {
   tag        = "latest"
 }
 
-data "artifactregistry_docker_image" "testDigest" {
+data "google_artifact_registry_docker_image" "testDigest" {
 	project    = "go-containerregistry"
 	repository = "gcr.io"
 	region     = "us"
