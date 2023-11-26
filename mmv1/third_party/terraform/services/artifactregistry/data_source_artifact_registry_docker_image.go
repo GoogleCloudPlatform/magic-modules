@@ -1,8 +1,8 @@
 package artifactregistry
 
 import (
-	"encoding/json"
 	"fmt"
+	"net/url"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -132,7 +132,8 @@ func DataSourceArtifactRegistryDockerImageRead(d *schema.ResourceData, meta inte
 	if hasDigest {
 		// fetch image by digest
 		// https://cloud.google.com/artifact-registry/docs/reference/rest/v1/projects.locations.repositories.dockerImages/get
-		url, err := tpgresource.ReplaceVars(d, config, "{{ArtifactRegistryBasePath}}projects/{{project}}/locations/{{region}}/repositories/{{repository}}/dockerImages/{{image}}@{{digest}}")
+		imageUrlSafe := url.QueryEscape(d.Get("image").(string))
+		urlRequest, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{ArtifactRegistryBasePath}}projects/{{project}}/locations/{{region}}/repositories/{{repository}}/dockerImages/%s@{{digest}}", imageUrlSafe))
 		if err != nil {
 			return fmt.Errorf("Error setting api endpoint")
 		}
@@ -141,7 +142,7 @@ func DataSourceArtifactRegistryDockerImageRead(d *schema.ResourceData, meta inte
 			Config:    config,
 			Method:    "GET",
 			Project:   project,
-			RawURL:    url,
+			RawURL:    urlRequest,
 			UserAgent: userAgent,
 		})
 		if err != nil {
@@ -152,58 +153,69 @@ func DataSourceArtifactRegistryDockerImageRead(d *schema.ResourceData, meta inte
 	} else {
 		// fetch the list of images, ordered by update time
 		// https://cloud.google.com/artifact-registry/docs/reference/rest/v1/projects.locations.repositories.dockerImages/list
-		url, err := tpgresource.ReplaceVars(d, config, "{{ArtifactRegistryBasePath}}projects/{{project}}/locations/{{region}}/repositories/{{repository}}/dockerImages")
+		urlRequest, err := tpgresource.ReplaceVars(d, config, "{{ArtifactRegistryBasePath}}projects/{{project}}/locations/{{region}}/repositories/{{repository}}/dockerImages")
 		if err != nil {
 			return fmt.Errorf("Error setting api endpoint")
 		}
 
-		u, err := transport_tpg.AddQueryParams(url, map[string]string{"orderBy": "update_time desc"})
+		urlRequest, err = transport_tpg.AddQueryParams(urlRequest, map[string]string{"orderBy": "update_time desc"})
 		if err != nil {
 			return err
 		}
 
-		resList, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-			Config:    config,
-			Method:    "LIST",
-			Project:   project,
-			RawURL:    u,
-			UserAgent: userAgent,
-		})
+		resListImages, token, err := retreiveListOfDockerImages(config, project, urlRequest, userAgent)
 		if err != nil {
 			return err
 		}
+	out:
+		for {
+			var resFiltered []DockerImage
 
-		resListImages := flattenDatasourceListResponse(resList)
+			// The response gives a list of all images, filter by name
+			for _, image := range resListImages {
 
-		var resFiltered []DockerImage
+				imageName, ok := d.Get("image").(string)
+				if !ok {
+					return fmt.Errorf("Error: Image name is not a string")
+				}
 
-		// The response gives a list of all images, filter by name
-		for _, image := range resListImages {
-
-			imageName, ok := d.Get("image").(string)
-			if !ok {
-				return fmt.Errorf("Error: Image name is not a string")
-			}
-
-			if strings.Contains(image.name, "dockerImages/"+imageName+"@sha256") {
-				resFiltered = append(resFiltered, image)
-			}
-		}
-
-		// If tag is provided, iterate over response and find the image containing the tag
-		if hasTag {
-		out:
-			for _, image := range resFiltered {
-				for _, iterTag := range image.tags {
-					if iterTag == tag {
-						res = image
-						break out
-					}
+				if strings.Contains(image.name, "/"+url.QueryEscape(imageName)+"@") {
+					resFiltered = append(resFiltered, image)
 				}
 			}
-		} else {
-			// use the first image in the response
-			res = resFiltered[0]
+
+			// If tag is provided, iterate over response and find the image containing the tag
+			if hasTag {
+				for _, image := range resFiltered {
+					for _, iterTag := range image.tags {
+						if iterTag == tag {
+							res = image
+							break out
+						}
+					}
+				}
+			} else { // use the first image in the response
+				if len(resFiltered) > 0 {
+					res = resFiltered[0]
+					break out
+				}
+			}
+
+			// No matching image was found on this page and no more pages are available
+			if token == "" {
+				return fmt.Errorf("Requested image was not found.")
+			}
+
+			// Retrieve the next page and search again
+			urlNext, err := transport_tpg.AddQueryParams(urlRequest, map[string]string{"pageToken": token})
+			if err != nil {
+				return err
+			}
+
+			resListImages, token, err = retreiveListOfDockerImages(config, project, urlNext, userAgent)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -240,18 +252,38 @@ func DataSourceArtifactRegistryDockerImageRead(d *schema.ResourceData, meta inte
 		return fmt.Errorf("Error setting update_time: %s", err)
 	}
 
+	id := fmt.Sprintf("projects/%s/locations/%s/repositories/dockerImages/%s", project, d.Get("region"), d.Get("image"))
+	d.SetId(id)
+
 	return nil
+}
+
+func retreiveListOfDockerImages(config *transport_tpg.Config, project string, urlRequest string, userAgent string) ([]DockerImage, string, error) {
+	resList, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    urlRequest,
+		UserAgent: userAgent,
+	})
+	if err != nil {
+		return make([]DockerImage, 0), "", err
+	}
+
+	if nextPageToken, ok := resList["nextPageToken"].(string); ok {
+		return flattenDatasourceListResponse(resList), nextPageToken, nil
+	} else {
+		return flattenDatasourceListResponse(resList), "", nil
+	}
 }
 
 func flattenDatasourceListResponse(res map[string]interface{}) []DockerImage {
 	var dockerImages []DockerImage
 
-	resDockerImages, ok := res["dockerImages"].([]map[string]interface{})
-	if !ok {
-		fmt.Errorf("Error: dockerImages is not a slice")
-	}
+	resDockerImages, _ := res["dockerImages"].([]interface{})
 
-	for _, image := range resDockerImages {
+	for _, resImage := range resDockerImages {
+		image, _ := resImage.(map[string]interface{})
 		dockerImages = append(dockerImages, convertResponseToStruct(image))
 	}
 
@@ -261,13 +293,42 @@ func flattenDatasourceListResponse(res map[string]interface{}) []DockerImage {
 func convertResponseToStruct(res map[string]interface{}) DockerImage {
 	var dockerImage DockerImage
 
-	jsonStr, err := json.Marshal(res)
-	if err != nil {
-		fmt.Println(err)
+	if name, ok := res["name"].(string); ok {
+		dockerImage.name = name
 	}
 
-	if err := json.Unmarshal(jsonStr, &dockerImage); err != nil {
-		fmt.Println(err)
+	if uri, ok := res["uri"].(string); ok {
+		dockerImage.uri = uri
+	}
+
+	if tags, ok := res["tags"].([]interface{}); ok {
+		var stringTags []string
+
+		for _, tag := range tags {
+			strTag := tag.(string)
+			stringTags = append(stringTags, strTag)
+		}
+		dockerImage.tags = stringTags
+	}
+
+	if imageSizeBytes, ok := res["imageSizeBytes"].(string); ok {
+		dockerImage.imageSizeBytes = imageSizeBytes
+	}
+
+	if mediaType, ok := res["mediaType"].(string); ok {
+		dockerImage.mediaType = mediaType
+	}
+
+	if uploadTime, ok := res["uploadTime"].(string); ok {
+		dockerImage.uploadTime = uploadTime
+	}
+
+	if buildTime, ok := res["buildTime"].(string); ok {
+		dockerImage.buildTime = buildTime
+	}
+
+	if updateTime, ok := res["updateTime"].(string); ok {
+		dockerImage.updateTime = updateTime
 	}
 
 	return dockerImage
