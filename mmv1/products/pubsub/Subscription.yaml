@@ -275,6 +275,19 @@ properties:
               When true, writes the Pub/Sub message metadata to
               `x-goog-pubsub-<KEY>:<VAL>` headers of the HTTP request. Writes the
               Pub/Sub message attributes to `<KEY>:<VAL>` headers of the HTTP request.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'pubsubWrapper'
+        custom_flatten: 'templates/terraform/custom_flatten/pubsub_pubsub_wrapper_write_metadata_flatten.go.erb'
+        description: |
+          When set, the payload to the push endpoint is in the form of the JSON representation of a PubsubMessage.
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'writeMetadata'
+            required: true
+            send_empty_value: true
+            description: |
+              When true, writes the Pub/Sub message metadata to `x-goog-pubsub-<KEY>:<VAL>`` headers of the HTTP request. 
+              Writes the Pub/Sub message attributes to `<KEY>:<VAL>` headers of the HTTP request.
   - !ruby/object:Api::Type::Integer
     name: 'ackDeadlineSeconds'
     description: |
