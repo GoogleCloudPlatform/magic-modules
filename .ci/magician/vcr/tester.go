@@ -287,9 +287,6 @@ func (vt *vcrTester) printLogs(logPath string) {
 		if err != nil {
 			return nil
 		}
-		if info.Name() == "all_tests.log" {
-			return nil
-		}
 		if info.IsDir() {
 			return nil
 		}
