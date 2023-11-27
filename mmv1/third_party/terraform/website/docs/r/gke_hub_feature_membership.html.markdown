@@ -128,7 +128,6 @@ resource "google_gke_hub_membership" "membership" {
 resource "google_gke_hub_feature" "feature" {
   name = "servicemesh"
   location = "global"
-
 }
 
 resource "google_gke_hub_feature_membership" "feature_member" {
@@ -137,6 +136,50 @@ resource "google_gke_hub_feature_membership" "feature_member" {
   membership = google_gke_hub_membership.membership.membership_id
   mesh {
     management = "MANAGEMENT_AUTOMATIC"
+  }
+}
+```
+
+## Example Usage - Config Management with Regional Membership
+
+```hcl
+resource "google_container_cluster" "cluster" {
+  name               = "my-cluster"
+  location           = "us-central1-a"
+  initial_node_count = 1
+}
+
+resource "google_gke_hub_membership" "membership" {
+  membership_id = "my-membership"
+  location      = "us-central1"
+  endpoint {
+    gke_cluster {
+      resource_link = "//container.googleapis.com/${google_container_cluster.cluster.id}"
+    }
+  }
+}
+
+resource "google_gke_hub_feature" "feature" {
+  name = "configmanagement"
+  location = "global"
+
+  labels = {
+    foo = "bar"
+  }
+}
+
+resource "google_gke_hub_feature_membership" "feature_member" {
+  location = "global"
+  feature = google_gke_hub_feature.feature.name
+  membership = google_gke_hub_membership.membership.membership_id
+  membership_location = google_gke_hub_membership.membership.location
+  configmanagement {
+    version = "1.6.2"
+    config_sync {
+      git {
+        sync_repo = "https://github.com/hashicorp/terraform"
+      }
+    }
   }
 }
 ```
@@ -165,7 +208,11 @@ The following arguments are supported:
   
 * `membership` -
   (Optional)
-  The name of the membership
+  The name of the membership  
+
+* `membership_location` -
+  (Optional)
+  The location of the membership, for example, "us-central1". Default is "global".
   
 * `project` -
   (Optional)
@@ -321,7 +368,7 @@ The following arguments are supported:
 
 * `monitoring` -
   (Optional)
-  Specifies the backends Policy Controller should export metrics to. For example, to specify metrics should be exported to Cloud Monitoring and Prometheus, specify backends: [\"cloudmonitoring\", \"prometheus\"]. Default: [\"cloudmonitoring\", \"prometheus\"]    
+  Specifies the backends Policy Controller should export metrics to. For example, to specify metrics should be exported to Cloud Monitoring and Prometheus, specify backends: ["cloudmonitoring", "prometheus"]. Default: ["cloudmonitoring", "prometheus"]    
 
 <a name="nested_mesh"></a>The `mesh` block supports:
 
