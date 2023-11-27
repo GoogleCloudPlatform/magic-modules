@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Product
 name: DiscoveryEngine
-display_name: Cloud Discovery Engine
+display_name: Discovery Engine
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
@@ -22,5 +22,5 @@ scopes:
   - https://www.googleapis.com/auth/cloud-platform
 apis_required:
   - !ruby/object:Api::Product::ApiReference
-    name: Google Cloud Discovery Engine API
+    name: Discovery Engine API
     url: https://console.cloud.google.com/apis/library/discoveryengine.googleapis.com/
