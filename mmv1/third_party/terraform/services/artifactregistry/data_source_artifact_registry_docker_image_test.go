@@ -50,7 +50,7 @@ func TestAccDataSourceArtifactRegistryDockerImage(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName+"None", "name"),
 					resource.TestCheckResourceAttrSet(resourceName+"None", "self_link"),
 					// gcr.io does not have a imageSizeBytes field in the JSON response
-					// resource.TestCheckResourceAttrSet(resourceName+"Tag", "image_size_bytes"),
+					// resource.TestCheckResourceAttrSet(resourceName+"None", "image_size_bytes"),
 					resource.TestCheckResourceAttrSet(resourceName+"None", "media_type"),
 					validateTimeStamps(resourceName+"None"),
 				),
@@ -112,7 +112,7 @@ func checkTaggedDataSources(resourceName string, expectedTag string) resource.Te
 		resource.TestCheckResourceAttrSet(resourceName, "self_link"),
 		resource.TestCheckTypeSetElemAttr(resourceName, "tags.*", expectedTag),
 		// gcr.io does not have a imageSizeBytes field in the JSON response
-		// resource.TestCheckResourceAttrSet(resourceName+"Tag", "image_size_bytes"),
+		// resource.TestCheckResourceAttrSet(resourceName, "image_size_bytes"),
 		resource.TestCheckResourceAttrSet(resourceName, "media_type"),
 		validateTimeStamps(resourceName),
 	)
@@ -128,7 +128,7 @@ func checkDigestDataSources(resourceName string, expectedName string, expectedSe
 		resource.TestCheckResourceAttr(resourceName, "self_link", expectedSelfLink),
 		// tags may become an empty list in the future
 		// gcr.io does not have a imageSizeBytes field in the JSON response
-		// resource.TestCheckResourceAttrSet(resourceName+"Digest", "image_size_bytes"),
+		// resource.TestCheckResourceAttrSet(resourceName, "image_size_bytes"),
 		resource.TestCheckResourceAttrSet(resourceName, "media_type"),
 		validateTimeStamps(resourceName),
 	)
