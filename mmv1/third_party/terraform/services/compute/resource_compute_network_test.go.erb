@@ -109,7 +109,7 @@ func TestAccComputeNetwork_routingModeAndUpdate(t *testing.T) {
 
 func TestAccComputeNetwork_numericId(t *testing.T) {
 	t.Parallel()
-	suffixName = acctest.RandString(t, 10)
+	var suffixName = acctest.RandString(t, 10)
 
 	var network compute.Network
 
