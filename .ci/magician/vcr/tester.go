@@ -208,6 +208,7 @@ func (vt *vcrTester) Run(mode Mode, version Version) (*Result, error) {
 		"-timeout",
 		replayingTimeout,
 		`-ldflags=-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc`,
+		"-vet=off",
 	)
 	env := map[string]string{
 		"VCR_PATH":                       filepath.Join(vt.baseDir, vt.cassettePaths[version]),
