@@ -109,6 +109,7 @@ func TestAccComputeNetwork_routingModeAndUpdate(t *testing.T) {
 
 func TestAccComputeNetwork_numericId(t *testing.T) {
 	t.Parallel()
+	suffixName = acctest.RandString(t, 10)
 
 	var network compute.Network
 
@@ -118,16 +119,7 @@ func TestAccComputeNetwork_numericId(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeNetworkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeNetwork_basic(acctest.RandString(t, 10)),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeNetworkExists(
-						t, "google_compute_network.bar", &network),
-					testAccCheckComputeNetworkIsAutoSubnet(
-						t, "google_compute_network.bar", &network),
-				),
-			},
-			{
-				Config: testAccComputeNetwork_basic(acctest.RandString(t, 10)),
+				Config: testAccComputeNetwork_basic(suffixName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeNumericId(
 						t, "google_compute_network.bar", &network),
