@@ -13,6 +13,7 @@ const githubUsername = "modular-magician"
 
 var environmentVariables = [...]string{
 	"GITHUB_TOKEN",
+	"GOCACHE",
 	"GOPATH",
 	"GOOGLE_BILLING_ACCOUNT",
 	"GOOGLE_CUST_ID",
@@ -28,7 +29,6 @@ var environmentVariables = [...]string{
 	"GOOGLE_SERVICE_ACCOUNT",
 	"GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION",
 	"GOOGLE_ZONE",
-	"HOME",
 	"SA_KEY",
 }
 
