@@ -1732,7 +1732,13 @@ func flattenComposerEnvironmentConfigSoftwareConfig(softwareCfg *composer.Softwa
 <% unless version == "ga" -%>
 	transformed["cloud_data_lineage_integration"] = flattenComposerEnvironmentConfigSoftwareConfigCloudDataLineageIntegration(softwareCfg.CloudDataLineageIntegration)
 <% end -%>
-	transformed["web_server_plugins_mode"] = softwareCfg.WebServerPluginsMode
+	if softwareCfg.WebServerPluginsMode == "PLUGINS_DISABLED"{
+		transformed["web_server_plugins_mode"] = "DISABLED"
+	} else if softwareCfg.WebServerPluginsMode == "PLUGINS_ENABLED"{
+		transformed["web_server_plugins_mode"] = "ENABLED"
+	} else {
+		transformed["web_server_plugins_mode"] = softwareCfg.WebServerPluginsMode
+	}
 	return []interface{}{transformed}
 }
 
@@ -2391,7 +2397,13 @@ func expandComposerEnvironmentConfigSoftwareConfig(v interface{}, d *schema.Reso
 	}
 	transformed.CloudDataLineageIntegration = transformedCloudDataLineageIntegration
 <% end -%>
-	transformed.WebServerPluginsMode = original["web_server_plugins_mode"].(string)
+	if original["web_server_plugins_mode"].(string) == "DISABLED"{
+		transformed.WebServerPluginsMode = "PLUGINS_DISABLED"
+	} else if original["web_server_plugins_mode"].(string) == "ENABLED"{
+		transformed.WebServerPluginsMode = "PLUGINS_ENABLED"
+	} else {
+		transformed.WebServerPluginsMode = original["web_server_plugins_mode"].(string)
+	}
 
 	return transformed, nil
 }
