@@ -355,7 +355,7 @@ resource "google_pubsub_subscription" "foo" {
 `, saAccount, topicFoo, subscription)
 }
 
-func testAccPubsubSubscription_pushPubSubWrapper(topicFoo, saAccount, subscription string) string {
+func testAccPubsubSubscription_pushPubsubWrapper(topicFoo, saAccount, subscription string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" { }
 
