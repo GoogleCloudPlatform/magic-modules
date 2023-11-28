@@ -3666,8 +3666,8 @@ func TestAccContainerCluster_errorCleanDanglingCluster(t *testing.T) {
 	containerNetName := fmt.Sprintf("tf-test-container-net-%s", acctest.RandString(t, 10))
 
 	initConfig := testAccContainerCluster_withInitialCIDR(containerNetName, clusterName)
-	overlapConfig := testAccContainerCluster_withCIDROverlap(initConfig, clusterNameError, "")
-	overlapConfigWithTimeout := testAccContainerCluster_withCIDROverlap(initConfig, clusterNameErrorWithTimeout, "40s")
+	overlapConfig := testAccContainerCluster_withCIDROverlap(initConfig, clusterNameError)
+	overlapConfigWithTimeout := testAccContainerCluster_withCIDROverlapWithTimeout(initConfig, clusterNameErrorWithTimeout, "40s")
 
 	checkTaintApplied := func(st *terraform.State) error {
 		// Return an error if there is no tainted (i.e. marked for deletion) cluster.
@@ -8011,9 +8011,33 @@ resource "google_container_cluster" "cidr_error_preempt" {
 `, containerNetName, clusterName)
 }
 
-func testAccContainerCluster_withCIDROverlap(initConfig, secondCluster, createTimeout string) string {
+func testAccContainerCluster_withCIDROverlap(initConfig, secondCluster string) string {
 	return fmt.Sprintf(`
-  %s
+%s
+
+resource "google_container_cluster" "cidr_error_overlap" {
+  name     = "%s"
+  location = "us-central1-a"
+
+  network    = google_compute_network.container_network.name
+  subnetwork = google_compute_subnetwork.container_subnetwork.name
+
+  initial_node_count = 1
+
+  networking_mode = "VPC_NATIVE"
+  ip_allocation_policy {
+    cluster_ipv4_cidr_block  = "10.0.0.0/16"
+    services_ipv4_cidr_block = "10.1.0.0/16"
+  }
+  deletion_protection = false
+}
+`, initConfig, secondCluster)
+}
+
+
+func testAccContainerCluster_withCIDROverlapWithTimeout(initConfig, secondCluster, createTimeout string) string {
+	return fmt.Sprintf(`
+%s
 
 resource "google_container_cluster" "cidr_error_overlap" {
   name     = "%s"
