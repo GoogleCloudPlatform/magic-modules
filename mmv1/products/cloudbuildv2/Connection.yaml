@@ -15,9 +15,16 @@
 name: 'Connection'
 base_url: projects/{{project}}/locations/{{location}}/connections
 self_link: projects/{{project}}/locations/{{location}}/connections/{{name}}
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/build/docs'
+  api: 'https://cloud.google.com/build/docs/api/reference/rest'
+autogen_async: true
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    base_url: '{{op_id}}'
 description: |
-  Only used to generate IAM resources.
-exclude_tgc: true
+  A connection to a SCM like GitHub, GitHub Enterprise, Bitbucket Data Center or GitLab.
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   skip_import_test: true
   method_name_separator: ':'
