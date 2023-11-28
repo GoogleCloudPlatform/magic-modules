@@ -58,6 +58,13 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
       'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataStores/{{data_store_id}}',
     ]
 
+examples:
+- !ruby/object:Provider::Terraform::Examples
+  name: "discoveryengine_datastore_basic"
+  primary_resource_id: "default"
+  vars:
+    data_store_id: "default_data_store_id"
+
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
