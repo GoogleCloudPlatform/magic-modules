@@ -18,7 +18,7 @@ func TestAccSecurityCenterEventThreatDetectionCustomModule(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"org_id":        envvar.GetTestOrgTargetFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -75,12 +75,12 @@ func testAccSecurityCenterEventThreatDetectionCustomModule_sccOrganizationCustom
 	return acctest.Nprintf(`
 resource "google_scc_event_threat_detection_custom_module" "example" {
 	organization = "%{org_id}"
-	display_name = "tf_test_custom_module%{random_suffix}"
+	display_name = "tf_test_custom_module%{random_suffix}_updated"
 	enablement_state = "DISABLED"
 	type="CONFIGURABLE_BAD_IP"
 	config = <<EOF
               {"metadata": {
-				"severity": "LOW",
+				"severity": "MEDIUM",
 				"description": "Flagged by Forcepoint as malicious",
 				"recommendation": "Contact the owner of the relevant project."
 			  },

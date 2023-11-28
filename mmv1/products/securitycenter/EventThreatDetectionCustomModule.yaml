@@ -30,13 +30,13 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "scc_event_threat_detection_custom_module"
     primary_resource_id: "example"
+    # Has a handwritten update test
     skip_test: true
     vars:
       display_name: basic_custom_module
+      type: 'CONFIGURABLE_BAD_IP'
     test_env_vars:
       org_id: :ORG_ID
-    test_vars_overrides:
-      sleep: "true"
 
 parameters:
   - !ruby/object:Api::Type::String
@@ -50,7 +50,6 @@ parameters:
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
-    immutable: true
     output: true
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
     description: |
@@ -75,7 +74,6 @@ properties:
     description: |
       The state of enablement for the module at the given level of the hierarchy.
     values:
-      - :ENABLEMENT_STATE_UNSPECIFIED
       - :ENABLED
       - :DISABLED
   - !ruby/object:Api::Type::String
@@ -85,7 +83,6 @@ properties:
       Type for the module. e.g. CONFIGURABLE_BAD_IP.
   - !ruby/object:Api::Type::String
     name: 'displayName'
-    required: true
     description: |
       The human readable name to be displayed for the module.
   - !ruby/object:Api::Type::String
