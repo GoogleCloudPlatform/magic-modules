@@ -742,12 +742,14 @@ properties:
     properties:
       - !ruby/object:Api::Type::String
         name: 'oauth2ClientId'
-        required: true
+        default_from_api: true
+        optional: true
         description: |
           OAuth2 Client ID for IAP
       - !ruby/object:Api::Type::String
         name: 'oauth2ClientSecret'
-        required: true
+        default_from_api: true
+        optional: true
         description: |
           OAuth2 Client Secret for IAP
         send_empty_value: true
@@ -760,6 +762,12 @@ properties:
         description: |
           OAuth2 Client Secret SHA-256 for IAP
         sensitive: true
+      - !ruby/object:Api::Type::Boolean
+        name: 'enabled'
+        optional: true
+        default_from_api: true
+        description: |
+          Whether the serving infrastructure will authenticate and authorize all incoming requests.
   - !ruby/object:Api::Type::Enum
     name: 'loadBalancingScheme'
     immutable: true
