@@ -13,7 +13,6 @@
 
 --- !ruby/object:Api::Resource
 name: 'PrivateCloud'
-min_version: beta
 base_url: 'projects/{{project}}/locations/{{location}}/privateClouds'
 self_link: 'projects/{{project}}/locations/{{location}}/privateClouds/{{name}}'
 delete_url: 'projects/{{project}}/locations/{{location}}/privateClouds/{{name}}?delay_hours=0'
@@ -55,7 +54,6 @@ examples:
     name: "vmware_engine_private_cloud_basic"
     config_path: "templates/terraform/examples/vmware_engine_private_cloud_basic.tf.erb"
     primary_resource_id: "vmw-engine-pc"
-    min_version: beta
     skip_test: true   # update tests will take care of create and update. PC creation is expensive and node reservation is required.
     vars:
       private_cloud_id: "sample-pc"
@@ -66,7 +64,6 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "vmware_engine_private_cloud_full"
     config_path: "templates/terraform/examples/vmware_engine_private_cloud_full.tf.erb"
-    min_version: beta
     primary_resource_id: "vmw-engine-pc"
     skip_test: true   # update tests will take care of create and update. PC creation is expensive and node reservation is required.
     vars:
@@ -154,6 +151,12 @@ properties:
           as it does not support all features.
           * managementIpAddressLayoutVersion=2: Indicates the latest IP address layout
           used by all newly created private clouds. This version supports all current features.
+
+      - !ruby/object:Api::Type::String
+        name: 'dnsServerIp'
+        output: true
+        description: |
+          DNS Server IP of the Private Cloud.
 
   - !ruby/object:Api::Type::NestedObject
     name: 'managementCluster'
