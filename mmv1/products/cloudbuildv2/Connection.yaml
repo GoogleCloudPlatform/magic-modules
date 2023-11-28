@@ -14,6 +14,7 @@
 --- !ruby/object:Api::Resource
 name: 'Connection'
 base_url: projects/{{project}}/locations/{{location}}/connections
+create_url: projects/{{project}}/locations/{{location}}/connections?connectionId={{name}}
 self_link: projects/{{project}}/locations/{{location}}/connections/{{name}}
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
