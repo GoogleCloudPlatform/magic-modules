@@ -22,11 +22,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/terraform-provider-google-beta/google-beta/fwmodels"
-	"github.com/hashicorp/terraform-provider-google-beta/google-beta/fwprovider"
-	tpgprovider "github.com/hashicorp/terraform-provider-google-beta/google-beta/provider"
-	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
-	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
+	"github.com/hashicorp/terraform-provider-google/google/fwmodels"
+	"github.com/hashicorp/terraform-provider-google/google/fwprovider"
+	tpgprovider "github.com/hashicorp/terraform-provider-google/google/provider"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/dnaeon/go-vcr/cassette"
 	"github.com/dnaeon/go-vcr/recorder"
