@@ -265,6 +265,7 @@ module "project-services" {
     "mobilecrashreporting.googleapis.com",
     "monitoring.googleapis.com",
     "multiclustermetering.googleapis.com",
+    "netapp.googleapis.com",
     "networkconnectivity.googleapis.com",
     "networkmanagement.googleapis.com",
     "networksecurity.googleapis.com",
