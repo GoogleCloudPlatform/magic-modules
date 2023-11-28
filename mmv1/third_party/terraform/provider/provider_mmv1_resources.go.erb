@@ -201,9 +201,8 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	<% end -%>
 	"google_vmwareengine_network":                      vmwareengine.DataSourceVmwareengineNetwork(),
 	"google_vmwareengine_network_peering":              vmwareengine.DataSourceVmwareengineNetworkPeering(),
-	<% unless version == 'ga' -%>
 	"google_vmwareengine_private_cloud":                vmwareengine.DataSourceVmwareenginePrivateCloud(),
-	<% end -%>
+
 	// ####### END handwritten datasources ###########
 }
 
