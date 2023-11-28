@@ -10,8 +10,6 @@ import (
 	"strings"
 )
 
-const numDirs = 11 // number of go directories in the provider to run tests in, -1 for all
-
 type Tester interface {
 	CloneProvider(goPath, githubUsername, githubToken string, version Version) error
 	FetchCassettes(version Version) error
@@ -194,10 +192,6 @@ func (vt *vcrTester) Run(mode Mode, version Version) (*Result, error) {
 		return nil, err
 	}
 
-	if numDirs > -1 {
-		testDirs = testDirs[:numDirs]
-	}
-
 	args := []string{"test"}
 	args = append(args, testDirs...)
 	args = append(args,
@@ -247,7 +241,6 @@ func (vt *vcrTester) Run(mode Mode, version Version) (*Result, error) {
 	if err := vt.r.WriteFile(logFileName, output); err != nil {
 		return nil, fmt.Errorf("error writing replaying log: %v, test output: %v", err, output)
 	}
-	vt.printLogs(logPath)
 	return collectResult(output), nil
 }
 
