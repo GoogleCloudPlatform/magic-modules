@@ -13,67 +13,73 @@
 
 --- !ruby/object:Api::Resource
 name: 'DataStore'
-kind: 'discoveryEngine#dataStore'
 description: |
-  The DataStore resource is the Vertex AI Search and Conversation data store
-  that are used to find answers for end-user's questions. It is a collection of
-  websites and documents, each of which reference end-user's data.
-  
-  A data store can consist of different types of sources:
-  Web data collected from google search index;
-  Unstructured data uploaded through Cloud Storage bucket or BigQuery;
-  Structured data uploaded through Cloud Storage bucket or BigQuery.
-
-  For more information, please see
-  https://cloud.google.com/generative-ai-app-builder/docs/agent-data-store
+  Vertex AI Search and Conversation data store is a collection of websites and
+  documents used to find answers for end-user's questions.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Create a search data store': 'https://cloud.google.com/generative-ai-app-builder/docs/create-data-store-es'
+  # TODO: Update the link to the REST API reference for the resource from v1alpha to v1.
   api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1alpha/projects.locations.collections.dataStores'
 
 base_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataStores'
 self_link: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataStores/{{data_store_id}}'
 create_url: 'projects/{{project}}/locations/{{location}}/collections/{{collectionId}}/dataStores?dataStoreId={{data_store_id}}'
 update_verb: :PATCH
-autogen_async: true
+update_mask: true
 
+autogen_async: true
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: "name"
+    base_url: "{{op_id}}"
+    wait_ms: 1000
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 60
+      update_minutes: 60
+      delete_minutes: 60
+  result: !ruby/object:Api::OpAsync::Result
+    path: "response"
+  status: !ruby/object:Api::OpAsync::Status
+    path: "done"
+    complete: true
+    allowed:
+    - true
+    - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: "error"
+    message: "message"
 iam_policy: !ruby/object:Api::Resource::IamPolicy
-  parent_resource_attribute: 'data_store_id'
+  parent_resource_attribute: 'data_store'
   method_name_separator: ':'
   fetch_iam_policy_verb: :POST
-  import_format: [
-    'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataStores/{{data_store_id}}',
-  ]
+  import_format:
+    [
+      'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataStores/{{data_store_id}}',
+    ]
 
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'project'
-    required: true
-    immutable: true
-    url_param_only: true
-    description: |
-      A valid project identifier.
   - !ruby/object:Api::Type::String
     name: 'location'
     required: true
     immutable: true
     url_param_only: true
     description: |
-      The geographic location where the data store reside.
+      The geographic location where the data store should reside.
   - !ruby/object:Api::Type::String
     name: 'collectionId'
     required: true
     immutable: true
     url_param_only: true
     description: |
-      The collection id of the document.
+      The unique id of the collection for configuring resources and access to a set of data stores.
   - !ruby/object:Api::Type::String
     name: 'dataStoreId'
     required: true
     immutable: true
     url_param_only: true
     description: |
-      The unique id of the data store. This field must conform to [RFC-1034](https://tools.ietf.org/html/rfc1034) standard with a length limit of 63 characters.
+      The unique id of the data store.
 
 properties:
   - !ruby/object:Api::Type::String
@@ -90,6 +96,7 @@ properties:
     description: |
       The display name of the data store. This field must be a UTF-8 encoded
       string with a length limit of 128 characters.
+    required: true
   - !ruby/object:Api::Type::Enum
     name: 'industryVertical'
     description: |
@@ -98,9 +105,9 @@ properties:
       - :INDUSTRY_VERTICAL_UNSPECIFIED
       - :GENERIC
       - :MEDIA
-      - :HEALTHCARE_GUIDELINE
       - :HEALTHCARE_FHIR
       - :CCAI_SEARCH
+    immutable: true
   - !ruby/object:Api::Type::Array
     name: 'solutionTypes'
     description: |
@@ -118,6 +125,11 @@ properties:
       - :SOLUTION_TYPE_RECOMMENDATION
       - :SOLUTION_TYPE_SEARCH
       - :SOLUTION_TYPE_CHAT
+  - !ruby/object:Api::Type::String
+    name: 'defaultSchemaId'
+    description: |
+      The id of the default [Schema][] associated with this data store.
+    output: true
   - !ruby/object:Api::Type::Enum
     name: 'contentConfig'
     description: |
@@ -128,32 +140,9 @@ properties:
     - :NO_CONTENT
     - :CONTENT_REQUIRED
     - :PUBLIC_WEBSITE
-  - !ruby/object:Api::Type::Enum
-    name: 'searchTier'
+    immutable: true
+  - !ruby/object:Api::Type::Time
+    name: "createTime"
     description: |
-      Search tier on the DataStore level. Different tiers might have different
-      pricing. To learn more, please check the pricing documentation.
-    values:
-    - :SEARCH_TIER_UNSPECIFIED
-    - :STANDARD
-    - :ENTERPRISE
-  - !ruby/object:Api::Type::Array
-    name: 'searchAddOns'
-    description: |
-      Add-on feature for search.
-    item_type: !ruby/object:Api::Type::Enum
-      name: 'searchAddOn'
-      description: |
-        Search add-on on the DataStore level
-      values:
-      - :SEARCH_ADD_ON_UNSPECIFIED
-      - :LLM
-  - !ruby/object:Api::Type::NestedObject
-    name: 'companyInfo'
-    description: |
-      Company related information for the DataStore.
-    properties:
-      - !ruby/object:Api::Type::String
-        name: 'displayName'
-        description: |
-          The company name associated with the DataStore.
+      Timestamp when the [DataStore][] was created.
+    output: true
