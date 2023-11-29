@@ -173,6 +173,24 @@ func TestAccDataprocCluster_withAccelerators(t *testing.T) {
 	})
 }
 
+func testAccCheckDataprocAuxiliaryNodeGroupAccelerator(cluster *dataproc.Cluster, project string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		expectedUri := fmt.Sprintf("projects/%s/zones/.*/acceleratorTypes/nvidia-tesla-k80", project)
+		r := regexp.MustCompile(expectedUri)
+
+		nodeGroup := cluster.Config.AuxiliaryNodeGroups[0].NodeGroup.NodeGroupConfig.Accelerators
+		if len(nodeGroup) != 1 {
+			return fmt.Errorf("Saw %d nodeGroup accelerator types instead of 1", len(nodeGroup))
+		}
+
+		matches := r.FindStringSubmatch(nodeGroup[0].AcceleratorTypeUri)
+		if len(matches) != 1 {
+			return fmt.Errorf("Saw %s master accelerator type instead of %s", nodeGroup[0].AcceleratorTypeUri, expectedUri)
+		}
+		return nil
+	}
+}
+
 func testAccCheckDataprocClusterAccelerator(cluster *dataproc.Cluster, project string, masterCount int, workerCount int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		expectedUri := fmt.Sprintf("projects/%s/zones/.*/acceleratorTypes/nvidia-tesla-k80", project)
@@ -517,6 +535,7 @@ func TestAccDataprocCluster_spotWithInstanceFlexibilityPolicy(t *testing.T) {
 func TestAccDataprocCluster_spotWithAuxiliaryNodeGroups(t *testing.T) {
 	t.Parallel()
 
+	project := envvar.GetTestProjectFromEnv()
 	rnd := acctest.RandString(t, 10)
 	var cluster dataproc.Cluster
 	acctest.VcrTest(t, resource.TestCase{
@@ -530,8 +549,14 @@ func TestAccDataprocCluster_spotWithAuxiliaryNodeGroups(t *testing.T) {
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_auxiliary_node_groups", &cluster),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.with_auxiliary_node_groups", "cluster_config.0.auxiliary_node_groups.0.node_group.0.roles.0", "DRIVER"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.with_auxiliary_node_groups", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.num_instances", "2"),
-					resource.TestCheckResourceAttr("google_dataproc_cluster.with_auxiliary_node_groups", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.machine_type", "n2d-standard-2"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.with_auxiliary_node_groups", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.machine_type", "n1-standard-2"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.with_auxiliary_node_groups", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.min_cpu_platform", "AMD Rome"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.with_auxiliary_node_groups", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.disk_config.0.boot_disk_size_gb", "35"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.with_auxiliary_node_groups", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.disk_config.0.boot_disk_type", "pd-standard"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.with_auxiliary_node_groups", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.disk_config.0.num_local_ssds", "1"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.with_auxiliary_node_groups", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.accelerators.0.accelerator_count", "1"),
+					testAccCheckDataprocAuxiliaryNodeGroupAccelerator(&cluster, project),
+
 				),
 			},
 		},
@@ -1933,9 +1958,16 @@ resource "google_dataproc_cluster" "with_auxiliary_node_groups" {
         roles = ["DRIVER"]
         node_group_config{
           num_instances=2
-          machine_type="n2d-standard-2"
+          machine_type="n1-standard-2"
+          min_cpu_platform = "AMD Rome"
           disk_config {
             boot_disk_size_gb = 35
+            boot_disk_type = "pd-standard"
+            num_local_ssds = 1
+          }
+          accelerators {
+            accelerator_count = 1
+            accelerator_type  = "nvidia-tesla-k80"
           }
         }
       }

@@ -839,10 +839,16 @@ auxiliary_node_groups{
     roles = ["DRIVER"]
     node_group_config{
       num_instances=2
-      machine_type="n2d-standard-2"
+      machine_type="n1-standard-2"
+      min_cpu_platform = "AMD Rome"
       disk_config {
         boot_disk_size_gb = 35
-        boot_disk_type    = "pd-standard"
+        boot_disk_type = "pd-standard"
+        num_local_ssds = 1
+      }
+      accelerators {
+        accelerator_count = 1
+        accelerator_type  = "nvidia-tesla-t4"
       }
     }
   }
