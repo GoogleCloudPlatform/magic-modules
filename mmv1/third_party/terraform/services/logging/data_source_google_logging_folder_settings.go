@@ -24,7 +24,7 @@ func DataSourceGoogleLoggingFolderSettings() *schema.Resource {
 			},
 			"kms_key_name": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Computed: true,
 				Description: `The resource name for the configured Cloud KMS key.
 				KMS key name format:
 				"projects/[PROJECT_ID]/locations/[LOCATION]/keyRings/[KEYRING]/cryptoKeys/[KEY]"
