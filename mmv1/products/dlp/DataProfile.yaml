@@ -13,10 +13,10 @@
 
 --- !ruby/object:Api::Resource
 # API resource name
-name: 'ResourceName'
+name: 'DataProfile'
 # Resource description for the provider documentation.
 description: |
-  RESOURCE_DESCRIPTION  
+  A data profile is a set of metrics that Sensitive Data Protection gathers from scanning a particular resource. These metrics include the predicted infoTypes, the assessed data risk and sensitivity levels, and metadata about your tables. Use these insights to make informed decisions about how you protect, share, and use your data.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
    # Link to quickstart in the API's Guides section. For example:
