@@ -10,7 +10,7 @@ resource "google_org_policy_custom_constraint" "constraint" {
   resource_types = ["container.googleapis.com/NodePool"]
 }
 
-resource "google_org_policy_policy" "bool" {
+resource "google_org_policy_policy" "primary" {
   name   = "organizations/{{org_id}}/policies/${google_org_policy_custom_constraint.constraint.name}"
   parent = "organizations/{{org_id}}"
 
