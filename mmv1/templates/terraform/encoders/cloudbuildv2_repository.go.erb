@@ -15,12 +15,12 @@
 // Extract any empty fields from the parent_connection field.
 project := d.Get("project").(string)
 parent_connection := d.Get("parent_connection").(string)
-project, err := ExtractFieldByPattern("project", project, parent_connection, "((projects|folders|organizations|billingAccounts)/[a-z0-9A-Z-]*)/locations/.*")
+project, err := tpgresource.ExtractFieldByPattern("project", project, parent_connection, "((projects|folders|organizations|billingAccounts)/[a-z0-9A-Z-]*)/locations/.*")
 if err != nil {
 	return nil, fmt.Errorf("error extracting project field: %s", err)
 }
 location := d.Get("location").(string)
-location, err = ExtractFieldByPattern("location", location, parent_connection, "[a-zA-Z]*/[a-z0-9A-Z-]*/locations/([a-z0-9-]*)/buckets/.*")
+location, err = tpgresource.ExtractFieldByPattern("location", location, parent_connection, "[a-zA-Z]*/[a-z0-9A-Z-]*/locations/([a-z0-9-]*)/buckets/.*")
 if err != nil {
 	return nil, fmt.Errorf("error extracting location field: %s", err)
 }
