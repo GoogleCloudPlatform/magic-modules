@@ -110,3 +110,4 @@ properties:
       - :ACTIVE
       - :DELETING
       - :PAUSED
+      - :UNKNOWN
