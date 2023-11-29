@@ -105,3 +105,8 @@ properties:
     description: |
       The current state of the Instance.
     output: true
+    values:
+      - :CREATING
+      - :ACTIVE
+      - :DELETING
+      - :PAUSED
