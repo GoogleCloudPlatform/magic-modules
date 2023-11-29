@@ -34,13 +34,13 @@ parameters:
     description: The location for the resource
     url_param_only: true
     immutable: true
-    default_from_api: true # EXTRACT_FROM_FIELD_IF_EMPTY
+    default_from_api: true  # EXTRACT_FROM_FIELD_IF_EMPTY
   - !ruby/object:Api::Type::String
     name: project
     description: The project for the resource
     url_param_only: true
     immutable: true
-    default_from_api: true # EXTRACT_FROM_FIELD_IF_EMPTY
+    default_from_api: true  # EXTRACT_FROM_FIELD_IF_EMPTY
   - !ruby/object:Api::Type::ResourceRef
     name: parent_connection
     resource: connection
@@ -76,4 +76,3 @@ properties:
     name: etag
     description: This checksum is computed by the server based on the value of other fields, and may be sent on update and delete requests to ensure the client has an up-to-date value before proceeding.
     output: true
-
