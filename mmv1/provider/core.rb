@@ -16,7 +16,6 @@ require 'fileutils'
 require 'google/extensions'
 require 'google/logger'
 require 'json'
-require 'overrides/runner'
 require 'provider/file_template'
 
 module Provider

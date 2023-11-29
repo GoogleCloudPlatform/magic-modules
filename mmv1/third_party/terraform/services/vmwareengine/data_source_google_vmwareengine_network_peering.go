@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package vmwareengine
-<% unless version == 'ga' -%>
+
 import (
 	"fmt"
 
@@ -9,28 +8,27 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func DataSourceVmwareengineNetwork() *schema.Resource {
+func DataSourceVmwareengineNetworkPeering() *schema.Resource {
 
-	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceVmwareengineNetwork().Schema)
-	tpgresource.AddRequiredFieldsToSchema(dsSchema, "location", "name")
+	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceVmwareengineNetworkPeering().Schema)
+	tpgresource.AddRequiredFieldsToSchema(dsSchema, "name")
 	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project")
-
 	return &schema.Resource{
-		Read:   dataSourceVmwareengineNetworkRead,
+		Read:   dataSourceVmwareengineNetworkPeeringRead,
 		Schema: dsSchema,
 	}
 }
 
-func dataSourceVmwareengineNetworkRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceVmwareengineNetworkPeeringRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 
 	// Store the ID now
-	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{location}}/vmwareEngineNetworks/{{name}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/global/networkPeerings/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
 	d.SetId(id)
-	err = resourceVmwareengineNetworkRead(d, meta)
+	err = resourceVmwareengineNetworkPeeringRead(d, meta)
 	if err != nil {
 		return err
 	}
@@ -40,4 +38,3 @@ func dataSourceVmwareengineNetworkRead(d *schema.ResourceData, meta interface{})
 	}
 	return nil
 }
-<% end -%>
