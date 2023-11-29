@@ -26,12 +26,21 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     base_url: '{{op_id}}'
 description: "A repository associated to a parent connection."
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  encoder: templates/terraform/encoders/cloudbuildv2_repository.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: location
     description: The location for the resource
     url_param_only: true
     immutable: true
+    default_from_api: true # EXTRACT_FROM_FIELD_IF_EMPTY
+  - !ruby/object:Api::Type::String
+    name: project
+    description: The project for the resource
+    url_param_only: true
+    immutable: true
+    default_from_api: true # EXTRACT_FROM_FIELD_IF_EMPTY
   - !ruby/object:Api::Type::ResourceRef
     name: parent_connection
     resource: connection
