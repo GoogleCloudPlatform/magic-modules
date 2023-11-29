@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/cai2hcl/common"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/caiasset"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/cai2hcl/common"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/caiasset"
 
 	tfschema "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/zclconf/go-cty/cty"
