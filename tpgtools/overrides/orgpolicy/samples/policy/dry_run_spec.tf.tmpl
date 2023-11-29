@@ -14,6 +14,9 @@ resource "google_org_policy_policy" "primary" {
   name   = "organizations/{{org_id}}/policies/${google_org_policy_custom_constraint.constraint.name}"
   parent = "organizations/{{org_id}}"
 
+  inherit_from_parent = false
+  reset               = false
+
   spec {
     rules {
       enforce = "FALSE"
