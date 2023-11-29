@@ -67,3 +67,4 @@ Quotas that will need to be adjusted to support all tests:
 - compute.googleapis.com/regional_static_addresses (us-central1)
 - compute.googleapis.com/routers
 - compute.googleapis.com/c2_cpus (us-central1)
+- compute.googleapis.com/n2_cpus (us-central1) to 36+
