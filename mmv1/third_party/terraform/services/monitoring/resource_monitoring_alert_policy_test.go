@@ -319,6 +319,8 @@ resource "google_monitoring_alert_policy" "full" {
     }
   }
 
+  severity     = "WARNING"
+
   documentation {
     content   = "test content"
     mime_type = "text/markdown"
@@ -347,6 +349,8 @@ resource "google_monitoring_alert_policy" "mql" {
       }
     }
   }
+
+  severity     = "WARNING"
 
   documentation {
     content   = "test content"
@@ -381,6 +385,8 @@ resource "google_monitoring_alert_policy" "log" {
     }
     auto_close = "2000s"
   }
+
+  severity     = "WARNING"
 
   documentation {
     content   = "test content"
@@ -440,6 +446,8 @@ resource "google_monitoring_alert_policy" "promql" {
       rule_group      = "abc"
     }
   }
+
+  severity     = "WARNING"
 
   documentation {
     content   = "test content"
