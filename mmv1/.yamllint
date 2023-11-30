@@ -1,5 +1,6 @@
 extends: default
 
+
 rules:
   line-length: disable
   # Comments indentation will look weird
