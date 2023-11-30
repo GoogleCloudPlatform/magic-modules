@@ -20,7 +20,3 @@ versions:
     base_url: https://privateca.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Certificate Authority API
-    url: https://console.cloud.google.com/apis/api/privateca.googleapis.com

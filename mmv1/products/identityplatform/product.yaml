@@ -22,7 +22,3 @@ scopes:
   - https://www.googleapis.com/auth/identitytoolkit
   - https://www.googleapis.com/auth/firebase
   - https://www.googleapis.com/auth/cloud-platform
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Google Identity Platform
-    url: https://console.cloud.google.com/marketplace/details/google-cloud-platform/customer-identity/
