@@ -2,6 +2,9 @@ package cmd
 
 import (
 	"fmt"
+	"magician/exec"
+	"magician/provider"
+	"magician/source"
 	"magician/vcr"
 	"os"
 
@@ -55,12 +58,20 @@ var checkCassettesCmd = &cobra.Command{
 			env[ev] = val
 		}
 
-		t, err := vcr.NewTester(env)
+		rnr, err := exec.NewRunner()
+		if err != nil {
+			fmt.Println("Error creating Runner: ", err)
+			os.Exit(1)
+		}
+
+		ctlr := source.NewController(env["GOPATH"], "modular-magician", env["GITHUB_TOKEN"], rnr)
+
+		t, err := vcr.NewTester(env, rnr)
 		if err != nil {
 			fmt.Println("Error creating VCR tester: ", err)
 			os.Exit(1)
 		}
-		execCheckCassettes(t, env["GOPATH"], env["GITHUB_TOKEN"], env["COMMIT_SHA"])
+		execCheckCassettes(env["COMMIT_SHA"], t, ctlr)
 	},
 }
 
@@ -72,18 +83,24 @@ func listEnvironmentVariables() string {
 	return result
 }
 
-func execCheckCassettes(t vcr.Tester, goPath, githubToken, commit string) {
-	if err := t.FetchCassettes(vcr.Beta); err != nil {
+func execCheckCassettes(commit string, t vcr.Tester, ctlr *source.Controller) {
+	if err := t.FetchCassettes(provider.Beta); err != nil {
 		fmt.Println("Error fetching cassettes: ", err)
 		os.Exit(1)
 	}
 
-	if err := t.CloneProvider(goPath, githubUsername, githubToken, "downstream-pr-"+commit, vcr.Beta); err != nil {
+	providerRepo := &source.Repo{
+		Name: provider.Beta.RepoName(),
+		Branch: "downstream-pr-"+commit
+	}
+	ctlr.SetPath(providerRepo)
+	if err := ctlr.Clone(providerRepo); err != nil {
 		fmt.Println("Error cloning provider: ", err)
 		os.Exit(1)
 	}
+	t.SetRepoPath(provider.Beta, providerRepo.Path)
 
-	result, err := t.Run(vcr.Replaying, vcr.Beta)
+	result, err := t.Run(vcr.Replaying, provider.Beta)
 	if err != nil {
 		fmt.Println("Error running VCR: ", err)
 		os.Exit(1)
