@@ -15,9 +15,13 @@ if d.HasChange("monitoring_config") {
 if d.HasChange("binary_authorization") {
     newUpdateMask = append(newUpdateMask, "binary_authorization.evaluation_mode")
 }
+if d.HasChange("proxy_config") {
+    newUpdateMask = append(newUpdateMask, "proxy_config.kubernetes_secret.name")
+    newUpdateMask = append(newUpdateMask, "proxy_config.kubernetes_secret.namespace")
+}
 // Pull out any other set fields from the generated mask.
 for _, mask := range updateMask {
-    if mask == "authorization" || mask == "loggingConfig" || mask == "monitoringConfig" || mask == "binaryAuthorization" {
+    if mask == "authorization" || mask == "loggingConfig" || mask == "monitoringConfig" || mask == "binaryAuthorization" || mask == "proxyConfig" {
         continue
     }
     newUpdateMask = append(newUpdateMask, mask)

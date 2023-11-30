@@ -22,6 +22,9 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 base_url: 'projects/{{project}}/locations/{{location}}/clusters'
 self_link: 'projects/{{project}}/locations/{{location}}/clusters/{{name}}'
 create_url: 'projects/{{project}}/locations/{{location}}/clusters?cluster_id={{name}}'
+update_url: 'projects/{{project}}/locations/{{location}}/clusters/{{name}}'
+update_verb: :PATCH
+update_mask: true
 autogen_async: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
@@ -476,7 +479,7 @@ properties:
     default_from_api: true
     description: |
       The target cluster version. For example: "1.5.0".
-    update_url: 'projects/{{project}}/locations/{{region}}/instances/{{name}}:upgrade'
+    update_url: 'projects/{{project}}/locations/{{location}}/clusters/{{name}}:upgrade'
     update_verb: :POST
   - !ruby/object:Api::Type::Enum
     name: "releaseChannel"

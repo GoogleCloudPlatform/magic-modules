@@ -20,6 +20,8 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Manage certificate issuance configs': 'https://cloud.google.com/certificate-manager/docs/issuance-configs'
   api: 'https://cloud.google.com/certificate-manager/docs/reference/certificate-manager/rest/v1/projects.locations.certificateIssuanceConfigs'
 immutable: true
+schema_version: 1
+state_upgraders: true
 description: |
   Certificate represents a HTTP-reachable backend for a Certificate.
 async: !ruby/object:Api::OpAsync

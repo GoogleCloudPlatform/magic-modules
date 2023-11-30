@@ -98,8 +98,14 @@ immediately, with more details in dedicated headers below:
 `terraform plan` or `terraform apply` on Google provider `5.0.0` or later with
 an existing pre-`5.0.0` resource before an `apply`, the plan will show an
 update adding your current `labels` values to `terraform_labels`. This change
-may result in a no-op update call to the API depending on the resource
-implementation, but can otherwise be safely applied.
+will result in a no-op update on most resources, which can be safely applied.
+However, some resources are immutable. Before 5.6.0 this would fail. After
+5.6.0, a plan that includes recreating the resource will be created. This may
+be applied to move forward with the upgrade but will recreate the resource if
+you do so. We plan to make a change for these resources that will be recreated
+that will compute the terraform_labels value as part of the upgrade, and will
+come out for affected resources in the following releases after 5.6.0.
+
 
 !> This change introduced a regression we were unable to resolve, and labels
 with an empty value (`""`) should be avoided, as they will be ignored and not
@@ -723,6 +729,7 @@ For more information on configuring Firebase resources with Terraform, see [Get 
 If you have existing resources created using `google_firebase_project_location`:
 1. Remove the `google_firebase_project_location` block
 1. Add blocks according to "New config" in this section for any of the following that you need: `google_app_engine_application`, `google_firebase_storage_bucket`, and/or `google_firestore_database`.
+1. Run `terraform state rm` for your existing `google_firebase_project_location` resource
 1. Import the existing resources corresponding to the blocks added in the previous step:
    `terraform import google_app_engine_application.default <project-id>`
    `terraform import google_firebase_storage_bucket.default-bucket <project-id>/<project-id>.appspot.com`

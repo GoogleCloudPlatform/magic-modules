@@ -1,4 +1,4 @@
-module github.com/GoogleCloudPlatform/magic-modules/issue-labeler/tools/issue-labeler
+module github.com/GoogleCloudPlatform/magic-modules/tools/issue-labeler
 
 go 1.19
 
