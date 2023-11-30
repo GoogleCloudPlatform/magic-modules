@@ -11,11 +11,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'provider/abstract_core'
 require 'provider/config'
 
 module Provider
-  class Terraform < Provider::AbstractCore
+  class Terraform
     # Settings for the provider
     class Config < Provider::Config
       def provider
