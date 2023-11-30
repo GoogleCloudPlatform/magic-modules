@@ -85,7 +85,6 @@ examples:
     min_version: beta
     vars:
       dataset_id: 'example_dataset'
-    skip_test: true
 virtual_fields:
   - !ruby/object:Api::Type::Boolean
     name: 'delete_contents_on_destroy'
@@ -304,6 +303,7 @@ properties:
     description: |
      Information about the external metadata storage where the dataset is
      defined. Filled out when the dataset type is EXTERNAL.
+    min_version: beta
     immutable: true
     properties:
       - !ruby/object:Api::Type::String
