@@ -619,26 +619,8 @@ module Provider
     # that should not be exposed outside the object hierarchy.
     private
 
-    def generate_requires(properties, requires = [])
-      requires.concat(properties.collect(&:requires))
-    end
-
     def provider_name
       self.class.name.split('::').last.downcase
-    end
-
-    # Determines the copyright year. If the file already exists we'll attempt to
-    # recognize the copyright year, and if it finds it will keep it.
-    def effective_copyright_year(out_file)
-      copyright_mask = /# Copyright (?<year>[0-9-]*) Google Inc./
-      if File.exist?(out_file)
-        first_line = File.read(out_file).split("\n")
-                         .select { |l| copyright_mask.match(l) }
-                         .first
-        matcher = copyright_mask.match(first_line)
-        return matcher[:year] unless matcher.nil?
-      end
-      Time.now.year
     end
 
     # Adapted from the method used in templating
