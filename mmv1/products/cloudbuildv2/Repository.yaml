@@ -26,6 +26,30 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     base_url: '{{op_id}}'
 description: "A repository associated to a parent connection."
+examples:
+# These tests depend on secrets stored in a separate project, so we prefer not
+# to show them in the docs.
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudbuildv2_repository_ghe'
+    primary_resource_id: 'primary'
+    skip_docs: true
+    vars:
+      connection_name: 'connection'
+      repository_name: 'repository'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudbuildv2_repository_github'
+    primary_resource_id: 'primary'
+    skip_docs: true
+    vars:
+      connection_name: 'connection'
+      repository_name: 'repository'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudbuildv2_repository_gle'
+    primary_resource_id: 'primary'
+    skip_docs: true
+    vars:
+      connection_name: 'connection'
+      repository_name: 'repository'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/cloudbuildv2_repository.go.erb
 parameters:
