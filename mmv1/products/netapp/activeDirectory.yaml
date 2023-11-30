@@ -1,0 +1,252 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+# API resource name
+name: 'activeDirectory'
+# Resource description for the provider documentation.
+description: |
+  ActiveDirectory is the public representation of the active directory config.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'QUICKSTART_TITLE': 'https://cloud.google.com/netapp/volumes/docs/reference/rest/v1/projects.locations.activeDirectories'
+  # Link to the REST API reference for the resource. For example,
+  api: 'https://cloud.google.com/netapp/volumes/docs/reference/rest/v1/projects.locations.activeDirectories'
+# Marks the resource as beta-only. Ensure a beta version block is present in
+# provider.yaml.
+# min_version: beta
+
+# Inserts styled markdown into the header of the resource's page in the
+# provider documentation.
+# docs: !ruby/object:Provider::Terraform::Docs
+#   warning: |
+#     MULTILINE_WARNING_MARKDOWN
+#   note: |
+#     MULTILINE_NOTE_MARKDOWN
+
+# URL for the resource's standard List method. https://google.aip.dev/132
+# Terraform field names enclosed in double curly braces are replaced with
+# the field values from the resource at runtime.
+base_url: projects/{{project}}/locations/{{location}}/activeDirectories
+# URL for the resource's standard Get method. https://google.aip.dev/131
+# Terraform field names enclosed in double curly braces are replaced with
+# the field values from the resource at runtime.
+self_link: projects/{{project}}/locations/{{location}}/activeDirectories/{{active_directory_id}}
+
+# If true, the resource and all its fields are considered immutable - that is,
+# only creatable, not updatable. Individual fields can override this if they
+# have a custom update method in the API.
+# immutable: true
+
+# Overrides one or more timeouts, in minutes. All timeouts default to 20.
+# timeouts: !ruby/object:Api::Timeouts
+#   insert_minutes: 20
+#   update_minutes: 20
+#   delete_minutes: 20
+
+# URL for the resource's standard Create method, including query parameters.
+# https://google.aip.dev/133
+# Terraform field names enclosed in double curly braces are replaced with
+# the field values from the resource at runtime.
+create_url: projects/{{project}}/locations/{{location}}/activeDirectories?activeDirectoryId={{active_directory_id}}
+# Overrides the HTTP verb used to create a new resource.
+# Allowed values: :POST, :PUT, :PATCH. Default: :POST
+create_verb: :POST
+
+# Overrides the URL for the resource's standard Update method. (If unset, the
+# self_link URL is used by default.) https://google.aip.dev/134
+# Terraform field names enclosed in double curly braces are replaced with
+# the field values from the resource at runtime.
+update_url: projects/{{project}}/locations/{{location}}/activeDirectories/{{active_directory_id}}
+# The HTTP verb used to update a resource. Allowed values: :POST, :PUT, :PATCH. Default: :PUT.
+update_verb: :PATCH
+# If true, the resource sets an `updateMask` query parameter listing modified
+# fields when updating the resource. If false, it does not.
+update_mask: true
+
+# Overrides the URL for the resource's standard Delete method. (If unset, the
+# self_link URL is used by default.) https://google.aip.dev/135
+# Terraform field names enclosed in double curly braces are replaced with
+# the field values from the resource at runtime.
+delete_url: projects/{{project}}/locations/{{location}}/activeDirectories/{{active_directory_id}}
+# Overrides the HTTP verb used to delete a resource.
+# Allowed values: :POST, :PUT, :PATCH, :DELETE. Default: :DELETE
+delete_verb: :DELETE
+
+# If true, code for handling long-running operations is generated along with
+# the resource. If false, that code is not generated.
+autogen_async: true
+# Sets parameters for handling operations returned by the API.
+async: !ruby/object:Api::OpAsync
+  # Overrides which API calls return operations. Default: ['create',
+  # 'update', 'delete']
+  # actions: ['create', 'update', 'delete']
+  operation: !ruby/object:Api::OpAsync::Operation
+    base_url: '{{op_id}}'
+
+  # If true, the provider sets the resource's Terraform ID after the resource is created,
+  # taking into account values that are set by the API at create time. This is only possible
+  # when the completed operation's JSON includes the created resource in the "response" field.
+  # If false (or unset), the provider sets the resource's Terraform ID before the resource is
+  # created, based only on the resource configuration.
+  # result: !ruby/object:Api::OpAsync::Result
+  #   resource_inside_response: true
+
+# All resources (of all kinds) that share a mutex value block rather than
+# executing concurrent API requests.
+# Terraform field names enclosed in double curly braces are replaced with
+# the field values from the resource at runtime.
+# mutex: RESOURCE_NAME/{{name}}
+
+id_format: 'projects/{{project}}/locations/{{location}}/activeDirectories/{{active_directory_id}}'
+import_format: ['projects/{{project}}/locations/{{location}}/activeDirectories/{{active_directory_id}}']
+
+parameters:
+  - !ruby/object:Api::Type::String
+    name: 'location'
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      LOCATION_DESCRIPTION
+  - !ruby/object:Api::Type::String
+    name: 'active_directory_id'
+    description:
+      'ID of the active directory to create
+      `[_a-zA-Z0-9][-_.a-zA-Z0-9]*`.'
+    required: true
+    immutable: true
+    url_param_only: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'Active_Directory_Create'
+    primary_resource_id: 'test_active_directory'
+    vars:
+      active_directory_name: 'test-active-directory'
+properties:
+  # Fields go here
+  - !ruby/object:Api::Type::String
+    name: name
+    output: true
+    description: |
+      The resource name of the active directory. Format: projects/{projectNumber}/locations/{locationId}/activeDirectories/{activeDirectoryId}.
+  - !ruby/object:Api::Type::String
+    name: 'createTime'
+    description: |
+      Create time of the active directory. A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+    output: true
+  - !ruby/object:Api::Type::Enum
+    name: 'state'
+    description: |
+      The state of the AD.
+    values:
+      - :STATE_UNSPECIFIED
+      - :CREATING
+      - :READY
+      - :UPDATING
+      - :DELETING
+      - :IN_USE
+      - :ERROR
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'domain'
+    description: |
+      Name of the Active Directory domain
+    required: true
+  - !ruby/object:Api::Type::String
+    name: 'site'
+    description: |
+      The Active Directory site the service will limit Domain Controller discovery too.
+    required: false
+  - !ruby/object:Api::Type::String
+    name: 'dns'
+    description: |
+      Comma separated list of DNS server IP addresses for the Active Directory domain.
+    required: true
+  - !ruby/object:Api::Type::String
+    name: 'netBiosPrefix'
+    description: |
+      NetBIOSPrefix is used as a prefix for SMB server name.
+    required: true
+  - !ruby/object:Api::Type::String
+    name: 'organizationalUnit'
+    description: |
+      The Organizational Unit (OU) within the Windows Active Directory the user belongs to.
+    required: false
+    default_from_api: true
+  - !ruby/object:Api::Type::Boolean
+    name: 'aesEncryption'
+    description: |
+      If enabled, AES encryption will be enabled for SMB communication.
+    required: false
+  - !ruby/object:Api::Type::String
+    name: 'username'
+    description: |
+      Username of the Active Directory domain administrator.
+    required: true
+  - !ruby/object:Api::Type::String
+    name: 'password'
+    description: |
+      Password of the Active Directory domain administrator.
+    required: true
+    sensitive: true
+  - !ruby/object:Api::Type::String
+    name: 'backupOperators'
+    description: |
+      Users to be added to the Built-in Backup Operator active directory group.
+    required: false
+  - !ruby/object:Api::Type::String
+    name: 'securityOperators'
+    description: |
+      Domain users to be given the SeSecurityPrivilege.
+    required: false
+  - !ruby/object:Api::Type::String
+    name: 'kdcHostname'
+    description: |
+      Name of the active directory machine. This optional parameter is used only while creating kerberos volume
+    required: false
+  - !ruby/object:Api::Type::String
+    name: 'kdcIp'
+    description: |
+      KDC server IP address for the active directory machine.
+    required: false
+  - !ruby/object:Api::Type::Boolean
+    name: 'nfsUsersWithLdap'
+    description: |
+      If enabled, will allow access to local users and LDAP users. If access is needed for only LDAP users, it has to be disabled.
+    required: false
+  - !ruby/object:Api::Type::String
+    name: 'description'
+    description: |
+      Description of the active directory.
+    required: false
+  - !ruby/object:Api::Type::Boolean
+    name: 'ldapSigning'
+    description: |
+      Specifies whether or not the LDAP traffic needs to be signed.
+    required: false
+  - !ruby/object:Api::Type::Boolean
+    name: 'encryptDcConnections'
+    description: |
+      If enabled, traffic between the SMB server to Domain Controller (DC) will be encrypted.
+    required: false
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: labels
+    description: |
+      Labels as key value pairs.An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+    required: false
+  - !ruby/object:Api::Type::String
+    name: 'stateDetails'
+    description: |
+      The state details of the Active Directory.
+    output: true
