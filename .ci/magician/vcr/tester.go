@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/fs"
 	"magician/exec"
+	"magician/provider"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -11,9 +12,9 @@ import (
 )
 
 type Tester interface {
-	CloneProvider(goPath, githubUsername, githubToken, branch string, version Version) error
-	FetchCassettes(version Version) error
-	Run(mode Mode, version Version) (*Result, error)
+	SetRepoPath(version provider.Version, repoPath string)
+	FetchCassettes(version provider.Version) error
+	Run(mode Mode, version provider.Version) (*Result, error)
 	Cleanup() error
 }
 
@@ -21,48 +22,6 @@ type Result struct {
 	PassedTests  []string
 	SkippedTests []string
 	FailedTests  []string
-}
-
-type Version int
-
-const (
-	GA Version = iota
-	Beta
-)
-
-const numVersions = 2
-
-func (v Version) String() string {
-	switch v {
-	case GA:
-		return "ga"
-	case Beta:
-		return "beta"
-	}
-	return "unknown"
-}
-
-func (v Version) BucketPath() string {
-	if v == GA {
-		return ""
-	}
-	return v.String() + "/"
-}
-
-// TODO: move this into magician/github
-func (v Version) RepoName() string {
-	switch v {
-	case GA:
-		return "terraform-provider-google"
-	case Beta:
-		return "terraform-provider-google-beta"
-	}
-	return "unknown"
-}
-
-// TODO: move this into magician/github
-func (v Version) URL(githubUsername, githubToken string) string {
-	return fmt.Sprintf("https://%s:%s@github.com/%s/%s", githubUsername, githubToken, githubUsername, v.RepoName())
 }
 
 type Mode int
@@ -90,18 +49,17 @@ func (m Mode) Upper() string {
 
 type logKey struct {
 	mode    Mode
-	version Version
+	version provider.Version
 }
 
 type vcrTester struct {
-	env           map[string]string  // shared environment variables for running tests
-	r             *exec.Runner       // for running commands and manipulating files
-	version       Version            // either "ga" or "beta", defaults to "ga"
-	baseDir       string             // the directory in which this tester was created
-	saKeyPath     string             // where sa_key.json is relative to baseDir
-	cassettePaths map[Version]string // where cassettes are relative to baseDir by version
-	logPaths      map[logKey]string  // where logs are relative to baseDir by version and mode
-	repoPaths     map[Version]string // relative paths of already cloned repos by version
+	env           map[string]string           // shared environment variables for running tests
+	rnr           *exec.Runner                // for running commands and manipulating files
+	baseDir       string                      // the directory in which this tester was created
+	saKeyPath     string                      // where sa_key.json is relative to baseDir
+	cassettePaths map[provider.Version]string // where cassettes are relative to baseDir by version
+	logPaths      map[logKey]string           // where logs are relative to baseDir by version and mode
+	repoPaths     map[provider.Version]string // relative paths of already cloned repos by version
 }
 
 const accTestParalellism = 32
@@ -111,54 +69,40 @@ const replayingTimeout = "240m"
 var testResultsExpression = regexp.MustCompile(`(?m:^--- (PASS|FAIL|SKIP): TestAcc(\w+))`)
 
 // Create a new tester in the current working directory and write the service account key file.
-func NewTester(env map[string]string) (Tester, error) {
-	r, err := exec.NewRunner()
-	if err != nil {
-		return nil, err
-	}
+func NewTester(env map[string]string, rnr *exec.Runner) (Tester, error) {
 	saKeyPath := "sa_key.json"
-	if err := r.WriteFile(saKeyPath, env["SA_KEY"]); err != nil {
+	if err := rnr.WriteFile(saKeyPath, env["SA_KEY"]); err != nil {
 		return nil, err
 	}
 	return &vcrTester{
 		env:           env,
-		r:             r,
-		baseDir:       r.GetCWD(),
+		rnr:           rnr,
+		baseDir:       rnr.GetCWD(),
 		saKeyPath:     saKeyPath,
-		cassettePaths: make(map[Version]string, numVersions),
-		logPaths:      make(map[logKey]string, numVersions*numModes),
-		repoPaths:     make(map[Version]string, numVersions),
+		cassettePaths: make(map[provider.Version]string, provider.NumVersions),
+		logPaths:      make(map[logKey]string, provider.NumVersions*numModes),
+		repoPaths:     make(map[provider.Version]string, provider.NumVersions),
 	}, nil
 }
 
-// Clone the built downstream branch of the provider to a local path under the go path and store it by version in the paths map.
-func (vt *vcrTester) CloneProvider(goPath, githubUsername, githubToken, branch string, version Version) error {
-	if _, ok := vt.repoPaths[version]; ok {
-		// Skip cloning an already cloned repo.
-		return nil
-	}
-	repoPath := filepath.Join(goPath, "src", "github.com", githubUsername, version.RepoName())
+func (vt *vcrTester) SetRepoPath(version provider.Version, repoPath string) {
 	vt.repoPaths[version] = repoPath
-	if _, err := vt.r.Run("git", []string{"clone", "--branch", branch, version.URL(githubUsername, githubToken), repoPath}, nil); err != nil {
-		return err
-	}
-	return nil
 }
 
 // Fetch the cassettes for the current version if not already fetched.
 // Should be run from the base dir.
-func (vt *vcrTester) FetchCassettes(version Version) error {
+func (vt *vcrTester) FetchCassettes(version provider.Version) error {
 	cassettePath, ok := vt.cassettePaths[version]
 	if ok {
 		return nil
 	}
 	cassettePath = filepath.Join("cassettes", version.String())
-	vt.r.Mkdir(cassettePath)
+	vt.rnr.Mkdir(cassettePath)
 	bucketPath := fmt.Sprintf("gs://ci-vcr-cassettes/%sfixtures/*", version.BucketPath())
 	// Fetch the cassettes.
 	args := []string{"-m", "-q", "cp", bucketPath, cassettePath}
 	fmt.Println("Fetching cassettes:\n", "gsutil", strings.Join(args, " "))
-	if _, err := vt.r.Run("gsutil", args, nil); err != nil {
+	if _, err := vt.rnr.Run("gsutil", args, nil); err != nil {
 		return err
 	}
 	vt.cassettePaths[version] = cassettePath
@@ -167,13 +111,13 @@ func (vt *vcrTester) FetchCassettes(version Version) error {
 
 // Run the vcr tests in the given mode and provider version and return the result.
 // This will overwrite any existing logs for the given mode and version.
-func (vt *vcrTester) Run(mode Mode, version Version) (*Result, error) {
+func (vt *vcrTester) Run(mode Mode, version provider.Version) (*Result, error) {
 	lgky := logKey{mode, version}
 	logPath, ok := vt.logPaths[lgky]
 	if !ok {
 		// We've never run this mode and version.
 		logPath = filepath.Join("testlogs", mode.Lower(), version.String())
-		if err := vt.r.Mkdir(logPath); err != nil {
+		if err := vt.rnr.Mkdir(logPath); err != nil {
 			return nil, err
 		}
 		vt.logPaths[lgky] = logPath
@@ -183,7 +127,7 @@ func (vt *vcrTester) Run(mode Mode, version Version) (*Result, error) {
 	if !ok {
 		return nil, fmt.Errorf("no repo cloned for version %s in %v", version, vt.repoPaths)
 	}
-	if err := vt.r.PushDir(repoPath); err != nil {
+	if err := vt.rnr.PushDir(repoPath); err != nil {
 		return nil, err
 	}
 	testDirs, err := vt.googleTestDirectory()
@@ -240,19 +184,19 @@ func (vt *vcrTester) Run(mode Mode, version Version) (*Result, error) {
 	args:
 %s
 `, printedEnv, strings.Join(args, " "))
-	output, err := vt.r.Run("go", args, env)
+	output, err := vt.rnr.Run("go", args, env)
 	if err != nil {
 		// Use error as output for log.
 		output = fmt.Sprintf("Error replaying tests:\n%v", err)
 	}
 	// Leave repo directory.
-	if err := vt.r.PopDir(); err != nil {
+	if err := vt.rnr.PopDir(); err != nil {
 		return nil, err
 	}
 
 	logFileName := filepath.Join(logPath, "all_tests.log")
 	// Write output (or error) to test log.
-	if err := vt.r.WriteFile(logFileName, output); err != nil {
+	if err := vt.rnr.WriteFile(logFileName, output); err != nil {
 		return nil, fmt.Errorf("error writing replaying log: %v, test output: %v", err, output)
 	}
 	if err := vt.uploadLogs(logPath, "thomasrodgers-vcr-logs"); err != nil {
@@ -261,16 +205,10 @@ func (vt *vcrTester) Run(mode Mode, version Version) (*Result, error) {
 	return collectResult(output), nil
 }
 
-// Deletes the service account key and the repos.
+// Deletes the service account key.
 func (vt *vcrTester) Cleanup() error {
-	if err := vt.r.RemoveAll(vt.saKeyPath); err != nil {
+	if err := vt.rnr.RemoveAll(vt.saKeyPath); err != nil {
 		return err
-	}
-
-	for _, path := range vt.repoPaths {
-		if err := vt.r.RemoveAll(path); err != nil {
-			return err
-		}
 	}
 	return nil
 }
@@ -279,7 +217,7 @@ func (vt *vcrTester) Cleanup() error {
 // Must be called after changing into the provider dir.
 func (vt *vcrTester) googleTestDirectory() ([]string, error) {
 	var testDirs []string
-	if allPackages, err := vt.r.Run("go", []string{"list", "./..."}, nil); err != nil {
+	if allPackages, err := vt.rnr.Run("go", []string{"list", "./..."}, nil); err != nil {
 		return nil, err
 	} else {
 		for _, dir := range strings.Split(allPackages, "\n") {
@@ -294,7 +232,7 @@ func (vt *vcrTester) googleTestDirectory() ([]string, error) {
 // Print all log file names and contents, except for all_tests.log.
 // Must be called after running tests.
 func (vt *vcrTester) printLogs(logPath string) {
-	vt.r.Walk(logPath, func(path string, info fs.FileInfo, err error) error {
+	vt.rnr.Walk(logPath, func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
 			return nil
 		}
@@ -305,7 +243,7 @@ func (vt *vcrTester) printLogs(logPath string) {
 			return nil
 		}
 		fmt.Println("======= ", info.Name(), " =======")
-		if logContent, err := vt.r.ReadFile(path); err == nil {
+		if logContent, err := vt.rnr.ReadFile(path); err == nil {
 			fmt.Println(logContent)
 		}
 		return nil
@@ -316,12 +254,12 @@ func (vt *vcrTester) uploadLogs(logPath, logBucket string) error {
 	bucketPath := fmt.Sprintf("gs://%s/", logBucket)
 	args := []string{"-m", "-q", "cp", "-r", logPath, bucketPath}
 	fmt.Println("Uploading logs:\n", "gsutil", strings.Join(args, " "))
-	if _, err := vt.r.Run("gsutil", args, nil); err != nil {
+	if _, err := vt.rnr.Run("gsutil", args, nil); err != nil {
 		return err
 	}
 	args = []string{"-m", "-q", "cp", "-r", "cassettes", bucketPath}
 	fmt.Println("Uploading cassettes:\n", "gsutil", strings.Join(args, " "))
-	if _, err := vt.r.Run("gsutil", args, nil); err != nil {
+	if _, err := vt.rnr.Run("gsutil", args, nil); err != nil {
 		return err
 	}
 	return nil

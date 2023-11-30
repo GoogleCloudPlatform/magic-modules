@@ -16,6 +16,7 @@
 package cmd
 
 import (
+	"magician/source"
 	"reflect"
 	"testing"
 )
@@ -25,7 +26,8 @@ func TestExecGenerateComment(t *testing.T) {
 	gh := &mockGithub{
 		calledMethods: make(map[string][][]any),
 	}
-	execGenerateComment("build1", "project1", "17", "sha1", "pr1", "*******", gh, mr)
+	ctlr := source.NewController("/mock/dir/go", "modular-magician", "*******", mr)
+	execGenerateComment("build1", "project1", "17", "sha1", "pr1", "*******", gh, mr, ctlr)
 
 	for method, expectedCalls := range map[string][]ParameterList{
 		"Copy": {

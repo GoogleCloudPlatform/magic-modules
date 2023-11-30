@@ -19,6 +19,8 @@ import (
 	"fmt"
 	"magician/exec"
 	"magician/github"
+	"magician/provider"
+	"magician/source"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -28,16 +30,6 @@ import (
 )
 
 const allowBreakingChangesLabel = "override-breaking-change"
-
-type ProviderVersion string
-
-type Repository struct {
-	Name        string // Name in GitHub (e.g. magic-modules)
-	Title       string // Title for display (e.g. Magic Modules)
-	Path        string // local Path once checked out, including Name
-	Version     ProviderVersion
-	DiffCanFail bool // whether to allow the command to continue if cloning or diffing the repo fails
-}
 
 var generateCommentCmd = &cobra.Command{
 	Use:   "generate-comment",
@@ -88,11 +80,12 @@ var generateCommentCmd = &cobra.Command{
 			fmt.Println("Error creating a runner: ", err)
 			os.Exit(1)
 		}
-		execGenerateComment(buildID, projectID, buildStep, commit, prNumber, githubToken, gh, rnr)
+		ctlr := source.NewController(filepath.Join("workspace", "go"), "modular-magician", githubToken, rnr)
+		execGenerateComment(buildID, projectID, buildStep, commit, prNumber, githubToken, gh, rnr, ctlr)
 	},
 }
 
-func execGenerateComment(buildID, projectID, buildStep, commit, prNumber, githubToken string, gh GithubClient, rnr ExecRunner) {
+func execGenerateComment(buildID, projectID, buildStep, commit, prNumber, githubToken string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller) {
 	newBranch := "auto-pr-" + prNumber
 	oldBranch := "auto-pr-" + prNumber + "-old"
 	wd := rnr.GetCWD()
@@ -108,7 +101,7 @@ func execGenerateComment(buildID, projectID, buildStep, commit, prNumber, github
 	tfcLocalPath := filepath.Join(mmLocalPath, "..", "tfc")
 
 	var diffs string
-	for _, repo := range []Repository{
+	for _, repo := range []*source.Repo{
 		{
 			Name:  tpgRepoName,
 			Title: "Terraform GA",
@@ -132,7 +125,7 @@ func execGenerateComment(buildID, projectID, buildStep, commit, prNumber, github
 		},
 	} {
 		// TPG/TPGB difference
-		repoDiffs, err := cloneAndDiff(repo, oldBranch, newBranch, githubToken, rnr)
+		repoDiffs, err := cloneAndDiff(repo, oldBranch, newBranch, ctlr)
 		if err != nil {
 			fmt.Printf("Error cloning and diffing tpg repo: %v\n", err)
 			if !repo.DiffCanFail {
@@ -148,18 +141,22 @@ func execGenerateComment(buildID, projectID, buildStep, commit, prNumber, github
 	var err error
 	diffProcessorPath := filepath.Join(mmLocalPath, "tools", "diff-processor")
 	// versionedBreakingChanges is a map of breaking change output by provider version.
-	versionedBreakingChanges := make(map[ProviderVersion]string, 2)
+	versionedBreakingChanges := make(map[provider.Version]string, 2)
 
-	for _, repo := range []Repository{
+	for _, repo := range []struct {
+		Title   string
+		Path    string
+		Version provider.Version
+	}{
 		{
 			Title:   "TPG",
 			Path:    tpgLocalPath,
-			Version: "ga",
+			Version: provider.GA,
 		},
 		{
 			Title:   "TPGB",
 			Path:    tpgbLocalPath,
-			Version: "beta",
+			Version: provider.Beta,
 		},
 	} {
 		// TPG diff processor
@@ -190,7 +187,7 @@ func execGenerateComment(buildID, projectID, buildStep, commit, prNumber, github
 		breakingChanges = `## Breaking Change Detection Failed
 The breaking change detector crashed during execution. This is usually due to the downstream provider(s) failing to compile. Please investigate or follow up with your reviewer.`
 	} else {
-		breakingChanges = combineBreakingChanges(versionedBreakingChanges["ga"], versionedBreakingChanges["beta"])
+		breakingChanges = combineBreakingChanges(versionedBreakingChanges[provider.GA], versionedBreakingChanges[provider.Beta])
 	}
 
 	// Missing test detector
@@ -259,29 +256,27 @@ The breaking change detector crashed during execution. This is usually due to th
 	}
 }
 
-func cloneAndDiff(repo Repository, oldBranch, newBranch, githubToken string, rnr ExecRunner) (string, error) {
+func cloneAndDiff(repo *source.Repo, oldBranch, newBranch string, ctlr *source.Controller) (string, error) {
 	// Clone the repo to the desired repo.Path.
-	url := fmt.Sprintf("https://modular-magician:%s@github.com/modular-magician/%s", githubToken, repo.Name)
-	if _, err := rnr.Run("git", []string{"clone", "-b", newBranch, url, repo.Path}, nil); err != nil {
+	repo.Branch = newBranch
+	if err := ctlr.Clone(repo); err != nil {
 		return "", fmt.Errorf("error cloning %s: %v\n", repo.Name, err)
 	}
 
-	// Push dir to the newly cloned repo.
-	if err := rnr.PushDir(repo.Path); err != nil {
+	if err := ctlr.Fetch(repo, oldBranch); err != nil {
 		return "", err
 	}
-	if _, err := rnr.Run("git", []string{"fetch", "origin", oldBranch}, nil); err != nil {
-		return "", fmt.Errorf("error fetching branch %s in repo %s: %v\n", oldBranch, repo.Name, err)
-	}
 
-	// Return summary, if any, and return to original directory.
-	if summary, err := rnr.Run("git", []string{"diff", "origin/" + oldBranch, "origin/" + newBranch, "--shortstat"}, nil); err != nil {
-		return "", fmt.Errorf("error diffing %s and %s: %v\n", oldBranch, newBranch, err)
-	} else if summary != "" {
-		summary = strings.TrimSuffix(summary, "\n")
-		return fmt.Sprintf("%s: [Diff](https://github.com/modular-magician/%s/compare/%s..%s) (%s)", repo.Title, repo.Name, oldBranch, newBranch, summary), rnr.PopDir()
+	// Return summary, if any.
+	diffs, err := ctlr.Diff(repo, oldBranch, newBranch)
+	if err != nil {
+		return "", err
 	}
-	return "", rnr.PopDir()
+	if diffs == "" {
+		return "", nil
+	}
+	diffs = strings.TrimSuffix(diffs, "\n")
+	return fmt.Sprintf("%s: [Diff](https://github.com/modular-magician/%s/compare/%s..%s) (%s)", repo.Title, repo.Name, oldBranch, newBranch, diffs), nil
 }
 
 // Build the diff processor for tpg or tpgb
