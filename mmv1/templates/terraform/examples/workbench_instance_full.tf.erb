@@ -34,7 +34,7 @@ resource "google_workbench_instance" "<%= ctx[:primary_resource_id] %>" {
     disable_public_ip = false
 
     gpu_driver_config {
-      enable_gpu_driver = true
+      enable_gpu_driver = false
     }
 
     service_accounts {

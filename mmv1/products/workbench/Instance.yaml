@@ -362,6 +362,7 @@ properties:
         item_type: Api::Type::String
         default_from_api: true
         diff_suppress_func: WorkbenchInstanceTagsDiffSuppress
+        immutable: true
         output: true
         description: |
           Optional. The Compute Engine tags to add to instance (see [Tagging
@@ -393,6 +394,8 @@ properties:
               is stored. If not specified, we'll automatically choose from official GPU
               drivers.
         name: gpuDriverConfig
+        default_from_api: true
+        allow_empty_object: true
         description: A GPU driver configuration
   - !ruby/object:Api::Type::String
     name: proxyUri

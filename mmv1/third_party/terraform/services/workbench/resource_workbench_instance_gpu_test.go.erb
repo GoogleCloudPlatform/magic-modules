@@ -75,9 +75,6 @@ resource "google_workbench_instance" "instance" {
       terraform = "true"
     }
 
-    gpu_driver_config {
-      enable_gpu_driver = true
-    }
   }
 
   labels = {
@@ -152,9 +149,6 @@ resource "google_workbench_instance" "instance" {
       core_count   = 1
     }
 
-    gpu_driver_config {
-      enable_gpu_driver = true
-    }
   }
 
   labels = {
@@ -209,9 +203,6 @@ resource "google_workbench_instance" "instance" {
       type         = "NVIDIA_TESLA_T4"
       core_count   = 1
     }
-    gpu_driver_config {
-      enable_gpu_driver = true
-    }
 
   }
 }
@@ -227,9 +218,6 @@ resource "google_workbench_instance" "instance" {
   gce_setup {
     machine_type = "n1-standard-16"
 
-    gpu_driver_config {
-      enable_gpu_driver = false
-    }
   }
 
 }
