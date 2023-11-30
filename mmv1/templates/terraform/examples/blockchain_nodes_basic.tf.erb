@@ -1,0 +1,16 @@
+resource "google_blockchain_node_engine_blockchain_nodes" "<%= ctx[:primary_resource_id] %>" {
+  blockchain_type = "ETHEREUM"
+  ethereum_details {
+    api_enable_admin = false
+    api_enable_debug = false
+    consensus_client = "LIGHTHOUSE"
+    execution_client = "ERIGON"
+    geth_details {
+      garbage_collection_mode = "FULL"
+    }
+    network = "NETWORK_UNSPECIFIED"
+  }
+  labels = {
+    environment = "dev"
+  }
+}

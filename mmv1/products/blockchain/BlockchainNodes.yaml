@@ -1,0 +1,157 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'BlockchainNodes'
+base_url: projects/{{project}}/locations/{{location}}/blockchainNodes
+self_link: projects/{{project}}/locations/{{location}}/blockchainNodes/{{name}}
+description: |
+  A representation of a blockchain node.
+
+
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/blockchain-node-engine'
+  api: 'https://cloud.google.com/blockchain-node-engine/docs/reference/rest/v1/projects.locations.blockchainNodes'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'blockchain_nodes_basic'
+    primary_resource_id: 'default_node'
+    vars:
+      node_name: 'blockchain_name'
+properties:
+  - !ruby/object:Api::Type::String
+    name: name
+    output: true
+    description: |
+      The number of the google project that firebase is enabled on.
+  - !ruby/object:Api::Type::String
+    name: createTime
+    output: true
+    description: |
+      The timestamp at which the blockchain node was first created.
+  - !ruby/object:Api::Type::String
+    name: updateTime
+    output: true
+    description: |
+      The timestamp at which the blockchain node was last updated.
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: labels
+    description: |
+      User-provided key-value pairs
+  - !ruby/object:Api::Type::NestedObject
+    name: connectionInfo
+    description: |
+      The connection information through which to interact with a blockchain node.
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: endpointInfo
+        output: true
+        description: |
+          The endpoint information through which to interact with a blockchain node.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: jsonRpcApiEndpoint
+            output: true
+            description: |
+              The assigned URL for the node JSON-RPC API endpoint.
+          - !ruby/object:Api::Type::String
+            name: websocketsApiEndpoint
+            output: true
+            description: |
+              The assigned URL for the node WebSockets API endpoint.
+  - !ruby/object:Api::Type::NestedObject
+    name: ethereumDetails
+    description: |
+      User-provided key-value pairs
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: gethDetails
+        description: |
+          User-provided key-value pairs
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: garbageCollectionMode
+            immutable: true
+            values:
+              - :GARBAGE_COLLECTION_MODE_UNSPECIFIED
+              - :FULL
+              - :ARCHIVE
+            description: |
+              Blockchain garbage collection mode.
+      - !ruby/object:Api::Type::NestedObject
+        name: additionalEndpoints
+        description: |
+          User-provided key-value pairs
+        properties:
+          - !ruby/object:Api::Type::String
+            name: beaconApiEndpoint
+            output: true
+            description: |
+              The assigned URL for the node's Beacon API endpoint.
+          - !ruby/object:Api::Type::String
+            name: beaconPrometheusMetricsApiEndpoint
+            output: true
+            description: |
+              The assigned URL for the node's Beacon Prometheus metrics endpoint.
+          - !ruby/object:Api::Type::String
+            name: executionClientPrometheusMetricsApiEndpoint
+            output: true
+            description: |
+              The assigned URL for the node's execution client's Prometheus metrics endpoint.
+      - !ruby/object:Api::Type::Enum
+        name: network
+        immutable: true
+        values:
+          - :NETWORK_UNSPECIFIED
+          - :MAINNET
+          - :TESTNET_GOERLI_PRATER
+          - :TESTNET_SEPOLIA
+        description: |
+          The Ethereum environment being accessed.
+      - !ruby/object:Api::Type::Enum
+        name: executionClient
+        immutable: true
+        values:
+          - :EXECUTION_CLIENT_UNSPECIFIED
+          - :GETH
+          - :ERIGON
+        description: |
+          The execution client
+      - !ruby/object:Api::Type::Enum
+        name: consensusClient
+        immutable: true
+        values:
+          - :CONSENSUS_CLIENT_UNSPECIFIED
+          - :LIGHTHOUSE
+          - :ERIGON_EMBEDDED_CONSENSUS_LAYER
+        description: |
+          The consensus client
+      - !ruby/object:Api::Type::Boolean
+        name: apiEnableAdmin
+        immutable: true
+        description: |
+          Enables JSON-RPC access to functions in the admin namespace. Defaults to false.
+      - !ruby/object:Api::Type::Boolean
+        name: apiEnableDebug
+        immutable: true
+        description: |
+          Enables JSON-RPC access to functions in the debug namespace. Defaults to false.
+  - !ruby/object:Api::Type::Enum
+    name: blockchainType
+    immutable: true
+    values:
+      - :BLOCKCHAIN_TYPE_UNSPECIFIED
+      - :ETHEREUM
+    description: |
+      User-provided key-value pairs
