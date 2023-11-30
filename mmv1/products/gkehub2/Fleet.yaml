@@ -100,6 +100,28 @@ properties:
     description: The default cluster configurations to apply across the fleet.
     properties:
       - !ruby/object:Api::Type::NestedObject
+        name: "binaryAuthorizationConfig"
+        description: Enable/Disable binary authorization features for the cluster.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: "evaluationMode"
+            description: Mode of operation for binauthz policy evaluation.
+            values:
+              - DISABLED
+              - POLICY_BINDINGS
+          - !ruby/object:Api::Type::Array
+            name: "policyBindings"
+            description: Binauthz policies that apply to this cluster.
+            output: false
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: "name"
+                  description: |
+                    The relative resource name of the binauthz platform policy to audit. GKE
+                    platform policies have the following format:
+                    `projects/{project_number}/platforms/gke/policies/{policy_id}`.
+      - !ruby/object:Api::Type::NestedObject
         name: "securityPostureConfig"
         description: Enable/Disable Security Posture features for the cluster.
         properties:
