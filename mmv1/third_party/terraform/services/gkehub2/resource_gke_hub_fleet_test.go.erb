@@ -59,7 +59,7 @@ resource "google_gke_hub_fleet" "default" {
   display_name = "my production fleet"
   default_cluster_config { 
 	binary_authorization_config {
-		evaluationMode = "DISABLED"
+		evaluation_mode = "DISABLED"
 	}
 	security_posture_config {
 		mode = "DISABLED"
@@ -78,7 +78,7 @@ resource "google_gke_hub_fleet" "default" {
   display_name = "my staging fleet"
   default_cluster_config {
 	binary_authorization_config {
-		evaluationMode = "POLICY_BINDINGS"
+		evaluation_mode = "POLICY_BINDINGS"
 		policy_bindings = {
 			name = "projects/${google_project.project.project_id}/platforms/gke/policies/policy_id
 		}
