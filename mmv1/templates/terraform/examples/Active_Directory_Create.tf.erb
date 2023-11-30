@@ -1,0 +1,9 @@
+resource "google_netapp_active_directory" "<%= ctx[:primary_resource_id] %>" {
+    active_directory_id = "<%= ctx[:vars]['active_directory_name'] %>"
+    location = "us-central1"
+    domain = "ad.internal"
+    dns = "172.30.64.3"
+    net_bios_prefix = "smbserver"
+    username = "paavan"
+    password = "r+<Gh/{Pgc8#4-<"
+  }
