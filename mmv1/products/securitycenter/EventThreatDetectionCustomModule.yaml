@@ -53,7 +53,7 @@ properties:
     output: true
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
     description: |
-      Immutable. The resource name of the Event Threat Detection custom module.
+      The resource name of the Event Threat Detection custom module.
       Its format is "organizations/{organization}/eventThreatDetectionSettings/customModules/{module}".
   - !ruby/object:Api::Type::String
     name: 'config'

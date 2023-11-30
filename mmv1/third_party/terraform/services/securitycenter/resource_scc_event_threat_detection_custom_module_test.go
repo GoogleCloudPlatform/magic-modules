@@ -77,16 +77,15 @@ resource "google_scc_event_threat_detection_custom_module" "example" {
 	organization = "%{org_id}"
 	display_name = "tf_test_custom_module%{random_suffix}_updated"
 	enablement_state = "DISABLED"
-	type="CONFIGURABLE_BAD_IP"
+	type="CONFIGURABLE_BAD_DOMAIN"
 	config = <<EOF
               {"metadata": {
 				"severity": "MEDIUM",
 				"description": "Flagged by Forcepoint as malicious",
 				"recommendation": "Contact the owner of the relevant project."
 			  },
-			  "ips": [
-				"192.0.2.1",
-				"192.0.2.0/24"
+			  "domains": [
+				"example.com"
 			  ]}
             EOF
 }
