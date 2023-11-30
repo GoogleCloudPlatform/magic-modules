@@ -23,7 +23,3 @@ versions:
     base_url: https://vpcaccess.googleapis.com/v1beta1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Serverless VPC Access API
-    url: https://console.cloud.google.com/apis/library/vpcaccess.googleapis.com/

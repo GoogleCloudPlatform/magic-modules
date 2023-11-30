@@ -21,7 +21,3 @@ versions:
     base_url: https://cloudfunctions.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Cloud Functions API
-    url: https://console.cloud.google.com/apis/library/cloudfunctions.googleapis.com/
