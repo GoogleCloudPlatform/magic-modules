@@ -762,7 +762,6 @@ properties:
         sensitive: true
       - !ruby/object:Api::Type::Boolean
         name: 'enabled'
-        default_from_api: true
         description: |
           Whether the serving infrastructure will authenticate and authorize all incoming requests.
   - !ruby/object:Api::Type::Enum
