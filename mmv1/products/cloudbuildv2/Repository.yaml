@@ -35,12 +35,6 @@ parameters:
     url_param_only: true
     immutable: true
     default_from_api: true  # EXTRACT_FROM_FIELD_IF_EMPTY
-  - !ruby/object:Api::Type::String
-    name: project
-    description: The project for the resource
-    url_param_only: true
-    immutable: true
-    default_from_api: true  # EXTRACT_FROM_FIELD_IF_EMPTY
   - !ruby/object:Api::Type::ResourceRef
     name: parent_connection
     resource: connection
