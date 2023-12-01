@@ -112,7 +112,6 @@ properties:
           - !ruby/object:Api::Type::Array
             name: "policyBindings"
             description: Binauthz policies that apply to this cluster.
-            output: false
             item_type: !ruby/object:Api::Type::NestedObject
               properties:
                 - !ruby/object:Api::Type::String
