@@ -220,7 +220,7 @@ func ResourceStorageBucket() *schema.Resource {
 									"no_age": {
                     Type:        schema.TypeBool,
                     Optional:    true,
-                    Description: `Minimum age of an object in days to satisfy this condition.`,
+                    Description: `While set `true`, `age` value will be omitted.Required to set `true` when `age` is unset in the config file.`,
                   },
 									"with_state": {
 										Type:         schema.TypeString,
@@ -1259,10 +1259,10 @@ func flattenBucketLifecycleRuleCondition(d *schema.ResourceData, condition *stor
 			ruleCondition["with_state"] = "ARCHIVED"
 		}
 	}
-
-	if state_condition,ok := d.GetOk("lifecycle_rule.0.condition"); ok{
-    conditions := state_condition.(*schema.Set).List()[0].(map[string]interface{})
-    ruleCondition["no_age"] = conditions["no_age"].(bool)
+  // setting no_age value from state config since it is terraform only variable and not getting value from backend.
+	if v, ok := d.GetOk("lifecycle_rule.0.condition"); ok{
+    state_condition := v.(*schema.Set).List()[0].(map[string]interface{})
+    ruleCondition["no_age"] = state_condition["no_age"].(bool)
 	} else {
 	  ruleCondition["no_age"] = false
 	}
@@ -1414,6 +1414,8 @@ func expandStorageBucketLifecycleRuleCondition(v interface{}) (*storage.BucketLi
 
 	condition := conditions[0].(map[string]interface{})
 	transformed := &storage.BucketLifecycleRuleCondition{}
+	// Setting high precedence of no_age over age when both used together.
+	// Only sets age value to transformed when no_age has false value
 	if v, ok := condition["no_age"]; ok && !(v.(bool)) {
 		if v, ok := condition["age"]; ok {
 			age := int64(v.(int))
@@ -1668,6 +1670,8 @@ func setStorageBucket(d *schema.ResourceData, config *transport_tpg.Config, res 
 	if err := d.Set("autoclass", flattenBucketAutoclass(res.Autoclass)); err != nil {
 		return fmt.Errorf("Error setting autoclass: %s", err)
 	}
+	// lifecycle_rule contains terraform only variable no_age.
+	// Passing config("d") to flattener function to set no_age separately.
 	if err := d.Set("lifecycle_rule", flattenBucketLifecycle(d,res.Lifecycle)); err != nil {
 		return fmt.Errorf("Error setting lifecycle_rule: %s", err)
 	}
