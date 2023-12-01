@@ -155,16 +155,16 @@ properties:
                   name: "targets_present_condition"
                   description: "Optional. Details around targets enumerated in the rule."
                   properties:
-                  - !ruby/object:Api::Type::String
-                    name: "status"
-                    description: "True if there aren't any missing Targets."
-                  - !ruby/object:Api::Type::Array
-                    name: "missing_targets"
-                    item_type: Api::Type::String
-                    description: "The list of Target names that do not exist. For example, `projects/{project_id}/locations/{location_name}/targets/{target_name}`."
-                  - !ruby/object:Api::Type::String
-                    name: "update_time"
-                    description: "Last time the condition was updated."
+                    - !ruby/object:Api::Type::String
+                      name: "status"
+                      description: "True if there aren't any missing Targets."
+                    - !ruby/object:Api::Type::Array
+                      name: "missing_targets"
+                      item_type: Api::Type::String
+                      description: "The list of Target names that do not exist. For example, `projects/{project_id}/locations/{location_name}/targets/{target_name}`."
+                    - !ruby/object:Api::Type::String
+                      name: "update_time"
+                      description: "Last time the condition was updated."
         - !ruby/object:Api::Type::NestedObject
           name: "advance_rollout_rule"
           description: "Optional. The `AdvanceRolloutRule` will automatically advance a successful Rollout."
