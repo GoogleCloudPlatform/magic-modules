@@ -6416,7 +6416,6 @@ resource "google_container_cluster" "with_node_pool" {
 `, cluster, nodePool, networkName, subnetworkName)
 }
 
-<% unless version == 'ga' -%>
 func testAccContainerCluster_withAutoscalingProfile(cluster, autoscalingProfile, networkName, subnetworkName string) string {
 	config := fmt.Sprintf(`
 resource "google_container_cluster" "autoscaling_with_profile" {
@@ -6435,7 +6434,6 @@ resource "google_container_cluster" "autoscaling_with_profile" {
 `, cluster, autoscalingProfile, networkName, subnetworkName)
 	return config
 }
-<% end -%>
 
 func testAccContainerCluster_autoprovisioning(cluster, networkName, subnetworkName string, autoprovisioning, withNetworkTag bool) string {
 	config := fmt.Sprintf(`
