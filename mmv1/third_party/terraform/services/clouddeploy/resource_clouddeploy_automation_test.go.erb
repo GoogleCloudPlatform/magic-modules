@@ -1,6 +1,8 @@
 <% autogen_exception -%>
 package clouddeploy_test
 
+
+<% unless version == 'ga' -%>
 import (
 	"fmt"
 	"testing"
@@ -115,3 +117,5 @@ resource "google_clouddeploy_delivery_pipeline" "pipeline" {
  }
 `, context)
 }
+<% end -%>
+
