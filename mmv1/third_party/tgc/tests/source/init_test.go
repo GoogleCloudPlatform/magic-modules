@@ -13,7 +13,7 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/caiasset"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/caiasset"
 )
 
 var (
@@ -25,8 +25,6 @@ var (
 // configs. It contains Google API resources that are expected to be returned
 // after converting the terraform plan.
 type testData struct {
-	// is not nil - Terraform 12 version used
-	TFVersion string
 	// provider "google"
 	Provider map[string]string
 	Project  map[string]string
@@ -63,7 +61,6 @@ func init() {
 	//As time is not information in terraform resource data, time is fixed for testing purposes
 	fixedTime := time.Date(2021, time.April, 14, 15, 16, 17, 0, time.UTC)
 	data = &testData{
-		TFVersion: "0.12",
 		Provider: map[string]string{
 			"version":     providerVersion,
 			"project":     project,

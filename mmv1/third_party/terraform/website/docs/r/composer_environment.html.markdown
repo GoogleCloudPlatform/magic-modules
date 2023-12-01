@@ -302,7 +302,6 @@ The following arguments are supported:
   The configuration used for the Private IP Cloud Composer environment. Structure is [documented below](#nested_private_environment_config).
 
 * `web_server_network_access_control` -
-  (Optional, Cloud Composer 1 only)
   The network-level access control policy for the Airflow web server.
   If unspecified, no network-level access restrictions are applied.
 
@@ -569,9 +568,13 @@ The `web_server_network_access_control` supports:
 <a name="nested_database_config"></a>The `database_config` block supports:
 
 * `machine_type` -
-  (Required)
-  Cloud SQL machine type used by Airflow database. It has to be one of: db-n1-standard-2,
+  (Optional)
+  Optional. Cloud SQL machine type used by Airflow database. It has to be one of: db-n1-standard-2,
   db-n1-standard-4, db-n1-standard-8 or db-n1-standard-16.
+
+* `Zone` -
+  (Optional)
+  Preferred Cloud SQL database zone.
 
 <a name="nested_web_server_config"></a>The `web_server_config` block supports:
 
@@ -622,7 +625,7 @@ The `web_server_network_access_control` supports:
 
 * `cidr_block` -
   (Required)
-  `cidr_block< must be specified in CIDR notation.
+  `cidr_block` must be specified in CIDR notation.
 
 ## Argument Reference - Cloud Composer 2
 
@@ -655,6 +658,11 @@ The following arguments are supported:
 * `project` -
   (Optional) The ID of the project in which the resource belongs.
   If it is not provided, the provider project is used.
+
+* `storage_config` -
+  (Optional)
+  Configuration options for storage used by Composer environment. Structure is documented below.
+
 
 The `config` block supports:
 
@@ -707,6 +715,13 @@ The `config` block supports:
   Kubernetes master through HTTPS except traffic from the given CIDR blocks,
   Google Compute Engine Public IPs and Google Prod IPs. Structure is
   documented below.
+
+The `storage_config` block supports:
+
+* `bucket` -
+  (Required)
+  Name of an existing Cloud Storage bucket to be used by the environment.
+
 
 The `node_config` block supports:
 

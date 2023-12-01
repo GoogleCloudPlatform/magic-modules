@@ -22,7 +22,3 @@ versions:
     base_url: https://firestore.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Google Cloud Firestore API
-    url: https://console.cloud.google.com/apis/library/firestore.googleapis.com

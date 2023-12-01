@@ -25,6 +25,9 @@ create_url: projects/{{project}}/schemas?schemaId={{name}}
 update_url: projects/{{project}}/schemas/{{name}}:commit
 update_verb: :POST
 update_mask: false
+iam_policy: !ruby/object:Api::Resource::IamPolicy
+  parent_resource_attribute: 'schema'
+  method_name_separator: ':'
 async: !ruby/object:Provider::Terraform::PollAsync
   check_response_func_existence: transport_tpg.PollCheckForExistence
   check_response_func_absence: transport_tpg.PollCheckForAbsence
@@ -34,8 +37,11 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'pubsub_schema_basic'
     primary_resource_id: 'example'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-example-schema%s\",
+      context[\"random_suffix\"\
+      ])"
     vars:
-      schema_name: 'example'
+      schema_name: 'example-schema'
   - !ruby/object:Provider::Terraform::Examples
     name: 'pubsub_schema_protobuf'
     primary_resource_id: 'example'

@@ -63,9 +63,7 @@ func main() {
 		case changelog.EntryErrorNotFound:
 			body := "Oops! It looks like no changelog entry is attached to" +
 				" this PR. Please include a release note block" +
-				" in the PR body, as described in https://github.com/GoogleCloudPlatform/magic-modules/blob/master/.ci/RELEASE_NOTES_GUIDE.md:" +
-				"\n\n~~~\n```release-note:TYPE\nRelease note" +
-				"\n```\n~~~"
+				" in the PR body, as described in https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/"
 			log.Fatal(body)
 		case changelog.EntryErrorUnknownTypes:
 			unknownTypes := err.Details["unknownTypes"].([]string)
@@ -82,7 +80,7 @@ func main() {
 			for _, t := range unknownTypes {
 				body += "\n* " + t
 			}
-			body += "\n\nPlease only use the types listed in https://github.com/GoogleCloudPlatform/magic-modules/blob/master/.ci/RELEASE_NOTES_GUIDE.md."
+			body += "\n\nPlease only use the types listed in https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/."
 			log.Fatal(body)
 		}
 	}

@@ -256,6 +256,13 @@ func ResourceStorageBucket() *schema.Resource {
 				Description: `The bucket's Lifecycle Rules configuration.`,
 			},
 
+			"enable_object_retention": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				ForceNew:    true,
+				Description: `Enables each object in the bucket to have its own retention policy, which prevents deletion until stored for a specific length of time.`,
+			},
+
 			"versioning": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -283,6 +290,12 @@ func ResourceStorageBucket() *schema.Resource {
 							Type:        schema.TypeBool,
 							Required:    true,
 							Description: `While set to true, autoclass automatically transitions objects in your bucket to appropriate storage classes based on each object's access pattern.`,
+						},
+						"terminal_storage_class": {
+								Type:        schema.TypeString,
+								Optional:    true,
+								Computed:    true,
+								Description: `The storage class that objects in the bucket eventually transition to if they are not read for a certain length of time. Supported values include: NEARLINE, ARCHIVE.`,
 						},
 					},
 				},
@@ -588,7 +601,11 @@ func resourceStorageBucketCreate(d *schema.ResourceData, meta interface{}) error
 
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() error {
-			res, err = config.NewStorageClient(userAgent).Buckets.Insert(project, sb).Do()
+			insertCall := config.NewStorageClient(userAgent).Buckets.Insert(project, sb)
+			if d.Get("enable_object_retention").(bool) {
+				insertCall.EnableObjectRetention(true)
+			}
+			res, err = insertCall.Do()
 			return err
 		},
 	})
@@ -1115,6 +1132,16 @@ func flattenBucketRetentionPolicy(bucketRetentionPolicy *storage.BucketRetention
 	return bucketRetentionPolicies
 }
 
+func flattenBucketObjectRetention(bucketObjectRetention *storage.BucketObjectRetention) bool {
+	if bucketObjectRetention == nil {
+		return false
+	}
+	if bucketObjectRetention.Mode == "Enabled" {
+		return true
+	}
+	return false
+}
+
 func expandBucketVersioning(configured interface{}) *storage.BucketVersioning {
 	versionings := configured.([]interface{})
 	if len(versionings) == 0 {
@@ -1142,6 +1169,9 @@ func expandBucketAutoclass(configured interface{}) *storage.BucketAutoclass {
 	bucketAutoclass := &storage.BucketAutoclass{}
 
 	bucketAutoclass.Enabled = autoclass["enabled"].(bool)
+	if autoclass["terminal_storage_class"] != "" {
+		bucketAutoclass.TerminalStorageClass = autoclass["terminal_storage_class"].(string)
+	}
 	bucketAutoclass.ForceSendFields = append(bucketAutoclass.ForceSendFields, "Enabled")
 
 	return bucketAutoclass
@@ -1169,7 +1199,8 @@ func flattenBucketAutoclass(bucketAutoclass *storage.BucketAutoclass) []map[stri
 	}
 
 	autoclass := map[string]interface{}{
-		"enabled": bucketAutoclass.Enabled,
+		"enabled":                bucketAutoclass.Enabled,
+		"terminal_storage_class": bucketAutoclass.TerminalStorageClass,
 	}
 	autoclassList = append(autoclassList, autoclass)
 	return autoclassList
@@ -1609,6 +1640,9 @@ func setStorageBucket(d *schema.ResourceData, config *transport_tpg.Config, res 
 	}
 	if err := d.Set("logging", flattenBucketLogging(res.Logging)); err != nil {
 		return fmt.Errorf("Error setting logging: %s", err)
+	}
+	if err := d.Set("enable_object_retention", flattenBucketObjectRetention(res.ObjectRetention)); err != nil {
+		return fmt.Errorf("Error setting object retention: %s", err)
 	}
 	if err := d.Set("versioning", flattenBucketVersioning(res.Versioning)); err != nil {
 		return fmt.Errorf("Error setting versioning: %s", err)

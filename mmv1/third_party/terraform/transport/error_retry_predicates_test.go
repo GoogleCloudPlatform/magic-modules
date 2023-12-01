@@ -170,3 +170,25 @@ func TestIsSwgAutogenRouterRetryableError_notReady(t *testing.T) {
 		t.Errorf("Error not detected as retryable")
 	}
 }
+
+func TestFirestoreField409_retryUnderlyingDataChanged(t *testing.T) {
+	err := googleapi.Error{
+		Code: 409,
+		Body: "Please retry, underlying data changed",
+	}
+	isRetryable, _ := FirestoreField409RetryUnderlyingDataChanged(&err)
+	if !isRetryable {
+		t.Errorf("Error not detected as retryable")
+	}
+}
+
+func TestFirestoreIndex409_crossTransactionContetion(t *testing.T) {
+	err := googleapi.Error{
+		Code: 409,
+		Body: "Aborted due to cross-transaction contention",
+	}
+	isRetryable, _ := FirestoreIndex409CrossTransactionContetion(&err)
+	if !isRetryable {
+		t.Errorf("Error not detected as retryable")
+	}
+}

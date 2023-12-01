@@ -20,10 +20,6 @@ versions:
   - !ruby/object:Api::Product::Version
     name: beta
     base_url: https://backupdr.googleapis.com/v1/
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Backup and DR API
-    url: https://console.cloud.google.com/apis/library/backupdr.googleapis.com/
 async: !ruby/object:Api::OpAsync
   actions: ['create', 'delete']
   operation: !ruby/object:Api::OpAsync::Operation

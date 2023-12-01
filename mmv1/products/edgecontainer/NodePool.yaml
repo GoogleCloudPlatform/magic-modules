@@ -22,6 +22,9 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 base_url: "projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools"
 self_link: 'projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools/{{name}}'
 create_url: "projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools?nodePoolId={{name}}"
+update_url: 'projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools/{{name}}'
+update_verb: :PATCH
+update_mask: true
 autogen_async: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation

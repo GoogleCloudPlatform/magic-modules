@@ -18,6 +18,9 @@ Manages a project-level logging sink. For more information see:
 
 ~> **Note** You must [enable the Cloud Resource Manager API](https://console.cloud.google.com/apis/library/cloudresourcemanager.googleapis.com)
 
+~> **Note:** The `_Default` and `_Required` logging sinks are automatically created for a given project and cannot be deleted. Creating a resource of this type will acquire and update the resource that already exists at the desired location. These sinks cannot be removed so deleting this resource will remove the sink config from your terraform state but will leave the logging sink unchanged. The sinks that are currently automatically created are "_Default" and "_Required".
+
+
 ## Example Usage - Basic Sink
 
 ```hcl
@@ -164,7 +167,7 @@ resource "google_logging_project_sink" "log-bucket" {
 
 The following arguments are supported:
 
-* `name` - (Required) The name of the logging sink.
+* `name` - (Required) The name of the logging sink. Logging automatically creates two sinks: `_Required` and `_Default`.
 
 * `destination` - (Required) The destination of the sink (or, in other words, where logs are written to). Can be a
     Cloud Storage bucket, a PubSub topic, a BigQuery dataset or a Cloud Logging bucket . Examples:
@@ -188,8 +191,7 @@ The following arguments are supported:
 * `project` - (Optional) The ID of the project to create the sink in. If omitted, the project associated with the provider is
     used.
 
-* `unique_writer_identity` - (Optional) Whether or not to create a unique identity associated with this sink. If `false`
-    (the default), then the `writer_identity` used is `serviceAccount:cloud-logs@system.gserviceaccount.com`. If `true`,
+* `unique_writer_identity` - (Optional) Whether or not to create a unique identity associated with this sink. If `false`, then the `writer_identity` used is `serviceAccount:cloud-logs@system.gserviceaccount.com`. If `true` (the default),
     then a unique service account is created and used for this sink. If you wish to publish logs across projects or utilize
     `bigquery_options`, you must set `unique_writer_identity` to true.
 

@@ -123,6 +123,7 @@ examples:
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
+    required: true
     immutable: true
     url_param_only: true
     description: The location of the cloud run service
@@ -247,7 +248,6 @@ properties:
           If True, indicates to use the default project's binary authorization policy. If False, binary authorization will be disabled.
   - !ruby/object:Api::Type::Array
     name: 'customAudiences'
-    min_version: beta
     description: |
       One or more custom audiences that you want this service to support. Specify each custom audience as the full URL in a string. The custom audiences are encoded in the token and used to authenticate requests.
       For more information, see https://cloud.google.com/run/docs/configuring/custom-audiences.
@@ -660,7 +660,6 @@ properties:
               name: 'dependsOn'
               description: |-
                 Containers which should be started before this container. If specified the container will wait to start until all containers with the listed names are healthy.
-              min_version: beta
               item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: 'volumes'

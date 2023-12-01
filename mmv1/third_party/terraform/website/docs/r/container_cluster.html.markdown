@@ -122,14 +122,14 @@ locations. In contrast, in a regional cluster, cluster master nodes are present
 in multiple zones in the region. For that reason, regional clusters should be
 preferred.
 
-* `deletion_protection` - (Optional) Whether or not to allow Terraform to destroy 
-the cluster. Unless this field is set to false in Terraform state, a 
+* `deletion_protection` - (Optional) Whether or not to allow Terraform to destroy
+the cluster. Unless this field is set to false in Terraform state, a
 `terraform destroy` or `terraform apply` that would delete the cluster will fail.
 
 * `addons_config` - (Optional) The configuration for addons supported by GKE.
     Structure is [documented below](#nested_addons_config).
 
-* `allow_net_admin` - (Optional) Enable NET_ADMIN for the cluster. Defaults to 
+* `allow_net_admin` - (Optional) Enable NET_ADMIN for the cluster. Defaults to
 `false`. This field should only be enabled for Autopilot clusters (`enable_autopilot`
 set to `true`).
 
@@ -194,7 +194,7 @@ set this to a value of at least `1`, alongside setting
 `remove_default_node_pool` to `true`.
 
 * `ip_allocation_policy` - (Optional) Configuration of cluster IP allocation for
-VPC-native clusters. If this block is unset during creation, it will be set by the GKE backend. 
+VPC-native clusters. If this block is unset during creation, it will be set by the GKE backend.
 Structure is [documented below](#nested_ip_allocation_policy).
 
 * `networking_mode` - (Optional) Determines whether alias IPs or routes will be used for pod IPs in the cluster.
@@ -378,6 +378,9 @@ subnetwork in which the cluster's instances are launched.
 * `security_posture_config` - (Optional)
 Enable/Disable Security Posture API features for the cluster. Structure is [documented below](#nested_security_posture_config).
 
+* `fleet` - (Optional)
+Fleet configuration for the cluster. Structure is [documented below](#nested_fleet).
+
 <a name="nested_default_snat_status"></a>The `default_snat_status` block supports
 
 *  `disabled` - (Required) Whether the cluster disables default in-node sNAT rules. In-node sNAT rules will be disabled when defaultSnatStatus is disabled.When disabled is set to false, default IP masquerade rules will be applied to the nodes to prevent sNAT on cluster internal traffic
@@ -420,7 +423,7 @@ Enable/Disable Security Posture API features for the cluster. Structure is [docu
 * `istio_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
     Structure is [documented below](#nested_istio_config).
 
-* `identity_service_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)). Structure is [documented below](#nested_identity_service_config).
+* `identity_service_config` - (Optional). Structure is [documented below](#nested_identity_service_config).
 
 * `dns_cache_config` - (Optional).
     The status of the NodeLocal DNSCache addon. It is disabled by default.
@@ -732,7 +735,7 @@ Default value is `IPV4`.
 Possible values are `IPV4` and `IPV4_IPV6`.
 
 * `additional_pod_ranges_config` - (Optional) The configuration for additional pod secondary ranges at
-the cluster level. Used for Autopilot clusters and Standard clusters with which control of the 
+the cluster level. Used for Autopilot clusters and Standard clusters with which control of the
 secondary Pod IP address assignment to node pools isn't needed. Structure is [documented below](#nested_additional_pod_ranges_config).
 
 
@@ -783,6 +786,9 @@ The `master_authorized_networks_config.cidr_blocks` block supports:
 
 * `disk_type` - (Optional) Type of the disk attached to each node
     (e.g. 'pd-standard', 'pd-balanced' or 'pd-ssd'). If unspecified, the default disk type is 'pd-standard'
+
+* `enable_confidential_storage` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+Enabling Confidential Storage will create boot disk with confidential mode. It is disabled by default.
 
 * `ephemeral_storage_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Parameters for the ephemeral storage filesystem. If unspecified, ephemeral storage is backed by the boot disk. Structure is [documented below](#nested_ephemeral_storage_config).
 
@@ -983,6 +989,10 @@ sole_tenant_config {
 * `count` (Required) - The number of the guest accelerator cards exposed to this instance.
 
 * `gpu_driver_installation_config` (Optional) - Configuration for auto installation of GPU driver. Structure is [documented below](#nested_gpu_driver_installation_config).
+  
+* `gpu_partition_size` (Optional) - Size of partitions to create on the GPU. Valid values are described in the NVIDIA mig [user guide](https://docs.nvidia.com/datacenter/tesla/mig-user-guide/#partitioning).
+
+* `gpu_sharing_config` (Optional) - Configuration for GPU sharing. Structure is [documented below](#nested_gpu_sharing_config).
 
 <a name="nested_gpu_driver_installation_config"></a>The `gpu_driver_installation_config` block supports:
 
@@ -992,10 +1002,6 @@ sole_tenant_config {
     * `"INSTALLATION_DISABLED"`: Disable GPU driver auto installation and needs manual installation.
     * `"DEFAULT"`: "Default" GPU driver in COS and Ubuntu.
     * `"LATEST"`: "Latest" GPU driver in COS.
-
-* `gpu_partition_size` (Optional) - Size of partitions to create on the GPU. Valid values are described in the NVIDIA mig [user guide](https://docs.nvidia.com/datacenter/tesla/mig-user-guide/#partitioning).
-
-* `gpu_sharing_config` (Optional) - Configuration for GPU sharing. Structure is [documented below](#nested_gpu_sharing_config).
 
 <a name="nested_gpu_sharing_config"></a>The `gpu_sharing_config` block supports:
 
@@ -1277,7 +1283,11 @@ linux_node_config {
 * `mode` - (Optional) Sets the mode of the Kubernetes security posture API's off-cluster features. Available options include `DISABLED` and `BASIC`.
 
 
-* `vulnerability_mode` - (Optional) Sets the mode of the Kubernetes security posture API's workload vulnerability scanning. Available options include `VULNERABILITY_DISABLED` and `VULNERABILITY_BASIC`.
+* `vulnerability_mode` - (Optional) Sets the mode of the Kubernetes security posture API's workload vulnerability scanning. Available options include `VULNERABILITY_DISABLED`, `VULNERABILITY_BASIC` and `VULNERABILITY_ENTERPRISE`.
+
+<a name="nested_fleet"></a>The `fleet` block supports:
+
+* `project` - (Optional) The name of the Fleet host project where this cluster will be registered.
 
 
 ## Attributes Reference
@@ -1322,6 +1332,8 @@ exported:
 * `cluster_autoscaling.0.auto_provisioning_defaults.0.management.0.upgrade_options` - Specifies the [Auto Upgrade knobs](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1beta1/NodeManagement#AutoUpgradeOptions) for the node pool.
 
 * `node_config.0.effective_taints` - List of kubernetes taints applied to each node. Structure is [documented above](#nested_taint).
+
+* `fleet.0.membership` - The resource name of the fleet Membership resource associated to this cluster with format `//gkehub.googleapis.com/projects/{{project}}/locations/{{location}}/memberships/{{name}}`. See the official doc for [fleet management](https://cloud.google.com/kubernetes-engine/docs/fleets-overview). 
 
 ## Timeouts
 

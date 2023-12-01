@@ -47,6 +47,7 @@ After applying this configuration:
 - Add a new test user in the Google Workspace Admin Console: https://admin.google.com/ac/users
 - Create a `support@` group in the Google Workspace Admin Console, add new service account as a member, and make it an owner
 - Enroll in Cloud Armor Managed Protection Plus tier
+- Add Cloud Identity Premium Plan to the Google Workspace domain
 
 Quotas that will need to be adjusted to support all tests:
 - Project quota for the new service account
@@ -67,3 +68,4 @@ Quotas that will need to be adjusted to support all tests:
 - compute.googleapis.com/regional_static_addresses (us-central1)
 - compute.googleapis.com/routers
 - compute.googleapis.com/c2_cpus (us-central1)
+- compute.googleapis.com/n2_cpus (us-central1) to 36+
