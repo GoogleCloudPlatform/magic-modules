@@ -23,4 +23,3 @@ apis_required:
   - !ruby/object:Api::Product::ApiReference
     name: Blockchain Node Engine API
     url: https://console.cloud.google.com/marketplace/product/google/blockchainnodeengine.googleapis.com
-    
