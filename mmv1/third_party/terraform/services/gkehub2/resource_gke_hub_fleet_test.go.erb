@@ -80,7 +80,7 @@ resource "google_gke_hub_fleet" "default" {
 	binary_authorization_config {
 		evaluation_mode = "POLICY_BINDINGS"
 		policy_bindings = {
-			name = "projects/${google_project.project.project_id}/platforms/gke/policies/policy_id
+			name = "projects/${google_project.project.project_id}/platforms/gke/policies/policy_id"
 		}
 	}
 	security_posture_config {
