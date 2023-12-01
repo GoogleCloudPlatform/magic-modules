@@ -38,6 +38,7 @@ autogen_async: true
 examples:
 - !ruby/object:Provider::Terraform::Examples
   name: "clouddeploy_automation_basic"
+  min_version: beta
   primary_resource_id: "automation"
   primary_resource_name: "fmt.Sprintf(\"tf_test_my_delivery_pipeline%s\",
         context[\"\
