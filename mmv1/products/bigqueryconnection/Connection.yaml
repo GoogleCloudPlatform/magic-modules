@@ -125,7 +125,7 @@ examples:
     region_override: "US"
     primary_resource_id: "connection"
     vars:
-      connection_id: "my-connection"      
+      connection_id: "my-connection"
 properties:
   - !ruby/object:Api::Type::String
     name: name
