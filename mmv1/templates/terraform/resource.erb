@@ -250,7 +250,6 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
         return err
     }
 
-
     log.Printf("[DEBUG] Creating new <%= object.name -%>: %#v", obj)
 <%    if object.nested_query&.modify_by_patch -%>
 <%# Keep this after mutex - patch request data relies on current resource state %>
@@ -337,7 +336,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     // identity fields and d.Id() before read
     var opRes map[string]interface{}
     err = <%= client_name_pascal -%>OperationWaitTimeWithResponse(
-    config, res, &opRes, <% if has_project || object.async.include_project -%> project, <% end -%> "Creating <%= object.name -%>", userAgent,
+    config, res, &opRes, <% if has_project || object.async.include_project -%> <% if object.legacy_long_form_project -%>tpgresource.GetResourceNameFromSelfLink(project)<% else %>project<% end %>, <% end -%> "Creating <%= object.name -%>", userAgent,
         d.Timeout(schema.TimeoutCreate))
     if err != nil {
 <%          if object.custom_code.post_create_failure -%>
@@ -390,7 +389,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 
 <%        else # if object.async.is_a? Api::OpAsync -%>
     err = <%= client_name_pascal -%>OperationWaitTime(
-    config, res, <% if has_project || object.async.include_project -%> project, <% end -%> "Creating <%= object.name -%>", userAgent,
+    config, res, <% if has_project || object.async.include_project -%> <% if object.legacy_long_form_project -%>tpgresource.GetResourceNameFromSelfLink(project)<% else %>project<% end %>, <% end -%> "Creating <%= object.name -%>", userAgent,
         d.Timeout(schema.TimeoutCreate))
 
     if err != nil {
@@ -809,7 +808,7 @@ if len(updateMask) > 0 {
 <%      if object.async&.allow?('update') -%>
 <%        if object.async.is_a? Api::OpAsync -%>
     err = <%= client_name_pascal -%>OperationWaitTime(
-        config, res, <% if has_project || object.async.include_project -%> project, <% end -%> "Updating <%= object.name -%>", userAgent,
+        config, res, <% if has_project || object.async.include_project -%> <% if object.legacy_long_form_project -%>tpgresource.GetResourceNameFromSelfLink(project)<% else %>project<% end %>, <% end -%> "Updating <%= object.name -%>", userAgent,
         d.Timeout(schema.TimeoutUpdate))
 
     if err != nil {
@@ -970,7 +969,7 @@ if len(updateMask) > 0 {
 <%        if object.async&.allow?('update') -%>
 <%          if object.async.is_a? Api::OpAsync-%>
         err = <%= client_name_pascal -%>OperationWaitTime(
-            config, res, <% if has_project || object.async.include_project -%> project, <% end -%> "Updating <%= object.name -%>", userAgent,
+            config, res, <% if has_project || object.async.include_project -%> <% if object.legacy_long_form_project -%>tpgresource.GetResourceNameFromSelfLink(project)<% else %>project<% end %>, <% end -%> "Updating <%= object.name -%>", userAgent,
             d.Timeout(schema.TimeoutUpdate))
         if err != nil {
             return err
@@ -1109,7 +1108,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     }
 <%        else -%>
     err = <%= client_name_pascal -%>OperationWaitTime(
-        config, res, <% if has_project || object.async.include_project-%> project, <% end -%> "Deleting <%= object.name -%>", userAgent,
+        config, res, <% if has_project || object.async.include_project-%> <% if object.legacy_long_form_project -%>tpgresource.GetResourceNameFromSelfLink(project)<% else %>project<% end %>, <% end -%> "Deleting <%= object.name -%>", userAgent,
         d.Timeout(schema.TimeoutDelete))
 
     if err != nil {
@@ -1144,7 +1143,6 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
     if err != nil {
         return nil, fmt.Errorf("Error constructing id: %s", err)
     }
-
     d.SetId(id)
 
 <%-     unless object.virtual_fields.empty? -%>

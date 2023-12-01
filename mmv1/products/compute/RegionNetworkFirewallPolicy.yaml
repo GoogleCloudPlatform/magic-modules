@@ -17,7 +17,8 @@ base_url: projects/{{project}}/regions/{{region}}/firewallPolicies
 create_url: projects/{{project}}/regions/{{region}}/firewallPolicies
 self_link: projects/{{project}}/regions/{{region}}/firewallPolicies/{{name}}
 update_verb: :PATCH
-description: ""
+description: "The Compute NetworkFirewallPolicy resource"
+legacy_long_form_project: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
@@ -47,6 +48,7 @@ parameters:
     name: region
     description: The region of this resource.
     url_param_only: true
+    default_from_api: true
     immutable: true
 properties:
   - !ruby/object:Api::Type::String
@@ -59,9 +61,10 @@ properties:
     required: true
     immutable: true
   - !ruby/object:Api::Type::String
-    name: id
+    name: regionNetworkFirewallPolicyId
     description: The unique identifier for the resource. This identifier is defined by the server.
     output: true
+    api_name: id
   - !ruby/object:Api::Type::String
     name: description
     description: An optional description of this resource. Provide this property when you create the resource.
