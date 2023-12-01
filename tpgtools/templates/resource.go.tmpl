@@ -85,6 +85,19 @@ func Resource{{$.PathType}}() *schema.Resource {
 		),
 {{- end }}
 
+{{- if gt $.SchemaVersion 0 }}
+		SchemaVersion: {{$.SchemaVersion}},
+		StateUpgraders: []schema.StateUpgrader{
+  {{- range $v := $.SchemaVersions }}
+			{
+				Type:    resource{{$.PathType}}ResourceV{{$v}}().CoreConfigSchema().ImpliedType(),
+				Upgrade: Resource{{$.PathType}}UpgradeV{{$v}},
+				Version: {{$v}},
+			},
+  {{- end }}
+		},
+{{- end }}
+
 		Schema: map[string]*schema.Schema{
 {{- range $p := $.SchemaProperties }}
 			"{{$p.Name}}": {
@@ -713,6 +726,55 @@ func flatten{{$.PathType}}{{$v.PackagePath}}(obj *{{$.Package}}.{{$v.ObjectType}
 {{ end }}
 }
 {{ end -}}
+
+{{ if $.HasLabels }}
+func flatten{{$.PathType}}Labels(v map[string]string, d *schema.ResourceData) interface{} {
+	if v == nil {
+		return nil
+	}
+
+	transformed := make(map[string]interface{})
+	if l, ok := d.Get("labels").(map[string]interface{}); ok {
+		for k, _ := range l {
+			transformed[k] = v[k]
+		}
+	}
+
+	return transformed
+}
+
+func flatten{{$.PathType}}TerraformLabels(v map[string]string, d *schema.ResourceData) interface{} {
+	if v == nil {
+		return nil
+	}
+
+	transformed := make(map[string]interface{})
+	if l, ok := d.Get("terraform_labels").(map[string]interface{}); ok {
+		for k, _ := range l {
+			transformed[k] = v[k]
+		}
+	}
+
+	return transformed
+}
+{{ end }}
+
+{{ if $.HasAnnotations }}
+func flatten{{$.PathType}}Annotations(v map[string]string, d *schema.ResourceData) interface{} {
+	if v == nil {
+		return nil
+	}
+
+	transformed := make(map[string]interface{})
+	if l, ok := d.Get("annotations").(map[string]interface{}); ok {
+		for k, _ := range l {
+			transformed[k] = v[k]
+		}
+	}
+
+	return transformed
+}
+{{ end }}
 
 {{ range $v := .EnumArrays -}}
 func flatten{{$.PathType}}{{$v.PackagePath}}Array(obj []{{$.Package}}.{{$v.ObjectType}}Enum) interface{} {

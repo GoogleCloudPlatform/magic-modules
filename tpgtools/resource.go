@@ -173,6 +173,11 @@ type Resource struct {
 	Reference *Link
 	// Guides point to non-rest useful context for the resource.
 	Guides []Link
+
+	// The current schema version
+	SchemaVersion int
+	// The schema versions from 0 to the current schema version
+	SchemaVersions []int
 }
 
 type Link struct {
@@ -381,6 +386,26 @@ func (r Resource) IDFunction() string {
 	return "tpgresource.ReplaceVarsForId"
 }
 
+// Check if the resource has the lables field for the resource
+func (r Resource) HasLabels() bool {
+	for _, p := range r.Properties {
+		if p.IsResourceLabels() {
+			return true
+		}
+	}
+	return false
+}
+
+// Check if the resource has the annotations field for the resource
+func (r Resource) HasAnnotations() bool {
+	for _, p := range r.Properties {
+		if p.IsResourceAnnotations() {
+			return true
+		}
+	}
+	return false
+}
+
 // ResourceInput is a Resource along with additional generation metadata.
 type ResourceInput struct {
 	Resource
@@ -566,6 +591,14 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 		res.CustomizeDiff = cdiff.Functions
 	}
 
+	if res.HasLabels() {
+		res.CustomizeDiff = append(res.CustomizeDiff, "tpgresource.SetLabelsDiff")
+	}
+
+	if res.HasAnnotations() {
+		res.CustomizeDiff = append(res.CustomizeDiff, "tpgresource.SetAnnotationsDiff")
+	}
+
 	// ListFields
 	if parameters, ok := typeFetcher.doc.Paths["list"]; ok {
 		for _, param := range parameters.Parameters {
@@ -652,6 +685,20 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 	if terraformProductNameOk {
 		scpn := SnakeCaseProductName(terraformProductName.Product)
 		res.TerraformProductName = &scpn
+	}
+
+	// Resource Override: StateUpgrade
+	stateUpgrade := StateUpgradeDetails{}
+	stateUpgradeOk, err := overrides.ResourceOverrideWithDetails(StateUpgrade, &stateUpgrade, location)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to decode state upgrade details: %v", err)
+	}
+	if stateUpgradeOk {
+		res.SchemaVersion = stateUpgrade.SchemaVersion
+		res.SchemaVersions = make([]int, res.SchemaVersion)
+		for i := range res.SchemaVersions {
+			res.SchemaVersions[i] = i
+		}
 	}
 
 	res.Samples = res.loadSamples()
@@ -810,6 +857,18 @@ func (r *Resource) loadHandWrittenSamples() []Sample {
 			sample.Name = &sampleName
 		}
 		sample.TestSlug = RenderedString(snakeToTitleCase(miscellaneousNameSnakeCase(sampleName)).titlecase() + "HandWritten")
+
+		// The "labels" and "annotations" fields in the state are decided by the configuration.
+		// During importing, as the configuration is unavailableafter, the "labels" and "annotations" fields in the state will be empty.
+		// So add the "labels" and the "annotations" fields to the ImportStateVerifyIgnore list.
+		if r.HasLabels() {
+			sample.IgnoreRead = append(sample.IgnoreRead, "labels", "terraform_labels")
+		}
+
+		if r.HasAnnotations() {
+			sample.IgnoreRead = append(sample.IgnoreRead, "annotations")
+		}
+
 		samples = append(samples, sample)
 	}
 
@@ -896,6 +955,18 @@ func (r *Resource) loadDCLSamples() []Sample {
 		}
 		sample.DependencyList = dependencies
 		sample.TestSlug = RenderedString(sampleNameToTitleCase(*sample.Name).titlecase())
+
+		// The "labels" and "annotations" fields in the state are decided by the configuration.
+		// During importing, as the configuration is unavailable, the "labels" and "annotations" fields in the state will be empty.
+		// So add the "labels" and the "annotations" fields to the ImportStateVerifyIgnore list.
+		if r.HasLabels() {
+			sample.IgnoreRead = append(sample.IgnoreRead, "labels", "terraform_labels")
+		}
+
+		if r.HasAnnotations() {
+			sample.IgnoreRead = append(sample.IgnoreRead, "annotations")
+		}
+
 		samples = append(samples, sample)
 	}
 

@@ -262,6 +262,15 @@ The following arguments are supported:
   No more than 64 labels can be associated with a given environment.
   Both keys and values must be <= 128 bytes in size.
 
+  **Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
+	Please refer to the field 'effective_labels' for all of the labels present on the resource.
+
+* `terraform_labels` -
+  The combination of labels configured directly on the resource and default labels configured on the provider.
+
+* `effective_labels` -
+  All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.
+
 * `region` -
   (Optional)
   The location or Compute Engine region for the environment.
@@ -560,9 +569,13 @@ The `web_server_network_access_control` supports:
 <a name="nested_database_config"></a>The `database_config` block supports:
 
 * `machine_type` -
-  (Required)
-  Cloud SQL machine type used by Airflow database. It has to be one of: db-n1-standard-2,
+  (Optional)
+  Optional. Cloud SQL machine type used by Airflow database. It has to be one of: db-n1-standard-2,
   db-n1-standard-4, db-n1-standard-8 or db-n1-standard-16.
+
+* `Zone` -
+  (Optional)
+  Preferred Cloud SQL database zone.
 
 <a name="nested_web_server_config"></a>The `web_server_config` block supports:
 
@@ -613,7 +626,7 @@ The `web_server_network_access_control` supports:
 
 * `cidr_block` -
   (Required)
-  `cidr_block< must be specified in CIDR notation.
+  `cidr_block` must be specified in CIDR notation.
 
 ## Argument Reference - Cloud Composer 2
 
@@ -646,6 +659,11 @@ The following arguments are supported:
 * `project` -
   (Optional) The ID of the project in which the resource belongs.
   If it is not provided, the provider project is used.
+
+* `storage_config` -
+  (Optional)
+  Configuration options for storage used by Composer environment. Structure is documented below.
+
 
 The `config` block supports:
 
@@ -698,6 +716,13 @@ The `config` block supports:
   Kubernetes master through HTTPS except traffic from the given CIDR blocks,
   Google Compute Engine Public IPs and Google Prod IPs. Structure is
   documented below.
+
+The `storage_config` block supports:
+
+* `bucket` -
+  (Required)
+  Name of an existing Cloud Storage bucket to be used by the environment.
+
 
 The `node_config` block supports:
 
@@ -939,7 +964,7 @@ The `workloads_config` block supports:
   Configuration for resources used by Airflow schedulers.
 
 * `triggerer` -
-  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+  (Optional)
   Configuration for resources used by Airflow triggerer.
 
 * `web_server` -
@@ -1053,6 +1078,21 @@ This resource provides the following
 ## Import
 
 Environment can be imported using any of these accepted formats:
+
+* `projects/{{project}}/locations/{{region}}/environments/{{name}}`
+* `{{project}}/{{region}}/{{name}}`
+* `{{name}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import Environment using one of the formats above. For example:
+
+```tf
+import {
+  id = "projects/{{project}}/locations/{{region}}/environments/{{name}}"
+  to = google_composer_environment.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), Environment can be imported using one of the formats above. For example:
 
 ```
 $ terraform import google_composer_environment.default projects/{{project}}/locations/{{region}}/environments/{{name}}

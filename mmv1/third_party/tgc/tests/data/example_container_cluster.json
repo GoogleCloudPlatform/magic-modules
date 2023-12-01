@@ -53,7 +53,8 @@
       "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
       "data": {
         "displayName": "Service Account",
-        "email": "service-account-id@{{.Provider.project}}.iam.gserviceaccount.com"
+        "email": "service-account-id@{{.Provider.project}}.iam.gserviceaccount.com",
+        "projectId": "{{.Provider.project}}"
       }
     }
   }

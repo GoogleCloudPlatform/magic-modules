@@ -16,6 +16,9 @@ name: OrgPolicy
 display_name: Organization Policy
 versions:
   - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://orgpolicy.googleapis.com/v2/
+  - !ruby/object:Api::Product::Version
     name: beta
     base_url: https://orgpolicy.googleapis.com/v2/
 scopes:

@@ -37,8 +37,17 @@ examples:
       instance_name: 'test-instance'
       network_name: 'test-network'
       address_name: 'address'
+    skip_test: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'memcache_instance_basic_test'
+    primary_resource_id: 'instance'
+    vars:
+      instance_name: 'test-instance'
+      network_name: 'test-network'
+      address_name: 'address'
     test_vars_overrides:
-      network_name: 'acctest.BootstrapSharedTestNetwork(t, "memcache-instance-basic")'
+      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
+    skip_docs: true
 parameters:
   - !ruby/object:Api::Type::String
     name: 'region'
@@ -101,7 +110,7 @@ properties:
     name: 'discoveryEndpoint'
     description: Endpoint for Discovery API
     output: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Resource labels to represent user-provided metadata.
@@ -140,6 +149,9 @@ properties:
     default_value: :MEMCACHE_1_5
     values:
       - :MEMCACHE_1_5
+      - :MEMCACHE_1_6_15
+    update_url: 'projects/{{project}}/locations/{{region}}/instances/{{name}}:upgrade'
+    update_verb: :POST
   - !ruby/object:Api::Type::NestedObject
     name: nodeConfig
     description: |

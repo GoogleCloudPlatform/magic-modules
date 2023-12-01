@@ -10,10 +10,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccFirestoreDatabase_update(t *testing.T) {
+func TestAccFirestoreDatabase_updateConcurrencyMode(t *testing.T) {
 	t.Parallel()
 
-	orgId := envvar.GetTestOrgFromEnv(t)
+	projectId := envvar.GetTestProjectFromEnv()
 	randomSuffix := acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -24,19 +24,19 @@ func TestAccFirestoreDatabase_update(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFirestoreDatabase_concurrencyMode(orgId, randomSuffix, "OPTIMISTIC"),
+				Config: testAccFirestoreDatabase_concurrencyMode(projectId, randomSuffix, "OPTIMISTIC"),
 			},
 			{
-				ResourceName:      "google_firestore_database.default",
+				ResourceName:      "google_firestore_database.database",
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{"etag", "project"},
 			},
 			{
-				Config: testAccFirestoreDatabase_concurrencyMode(orgId, randomSuffix, "PESSIMISTIC"),
+				Config: testAccFirestoreDatabase_concurrencyMode(projectId, randomSuffix, "PESSIMISTIC"),
 			},
 			{
-				ResourceName:      "google_firestore_database.default",
+				ResourceName:      "google_firestore_database.database",
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{"etag", "project"},
@@ -45,37 +45,108 @@ func TestAccFirestoreDatabase_update(t *testing.T) {
 	})
 }
 
-func testAccFirestoreDatabase_concurrencyMode(orgId string, randomSuffix string, concurrencyMode string) string {
+func TestAccFirestoreDatabase_updatePitrEnablement(t *testing.T) {
+	t.Parallel()
+
+	projectId := envvar.GetTestProjectFromEnv()
+	randomSuffix := acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFirestoreDatabase_pitrEnablement(projectId, randomSuffix, "POINT_IN_TIME_RECOVERY_ENABLED"),
+			},
+			{
+				ResourceName:      "google_firestore_database.database",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"etag", "project"},
+			},
+			{
+				Config: testAccFirestoreDatabase_pitrEnablement(projectId, randomSuffix, "POINT_IN_TIME_RECOVERY_DISABLED"),
+			},
+			{
+				ResourceName:      "google_firestore_database.database",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"etag", "project"},
+			},
+		},
+	})
+}
+
+func TestAccFirestoreDatabase_updateDeleteProtectionState(t *testing.T) {
+	t.Parallel()
+
+	projectId := envvar.GetTestProjectFromEnv()
+	randomSuffix := acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFirestoreDatabase_deleteProtectionState(projectId, randomSuffix, "DELETE_PROTECTION_ENABLED"),
+			},
+			{
+				ResourceName:      "google_firestore_database.database",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"etag", "project"},
+			},
+			{
+				Config: testAccFirestoreDatabase_deleteProtectionState(projectId, randomSuffix, "DELETE_PROTECTION_DISABLED"),
+			},
+			{
+				ResourceName:      "google_firestore_database.database",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"etag", "project"},
+			},
+		},
+	})
+}
+
+func testAccFirestoreDatabase_concurrencyMode(projectId string, randomSuffix string, concurrencyMode string) string {
 	return fmt.Sprintf(`
-resource "google_project" "default" {
-  project_id = "tf-test%s"
-  name       = "tf-test%s"
-  org_id     = "%s"
-}
-
-resource "time_sleep" "wait_60_seconds" {
-  depends_on = [google_project.default]
-
-  create_duration = "60s"
-}
-
-resource "google_project_service" "firestore" {
-  project = google_project.default.project_id
-  service = "firestore.googleapis.com"
-
-  # Needed for CI tests for permissions to propagate, should not be needed for actual usage
-  depends_on = [time_sleep.wait_60_seconds]
-}
-
-resource "google_firestore_database" "default" {
-  name             = "(default)"
+resource "google_firestore_database" "database" {
+  project          = "%s"
+  name             = "tf-test-%s"
   type             = "DATASTORE_MODE"
   location_id      = "nam5"
   concurrency_mode = "%s"
-
-  project = google_project.default.project_id
-
-  depends_on = [google_project_service.firestore]
 }
-`, randomSuffix, randomSuffix, orgId, concurrencyMode)
+`, projectId, randomSuffix, concurrencyMode)
+}
+
+func testAccFirestoreDatabase_pitrEnablement(projectId string, randomSuffix string, pointInTimeRecoveryEnablement string) string {
+	return fmt.Sprintf(`
+resource "google_firestore_database" "database" {
+  project                           = "%s"
+  name                              = "tf-test-%s"
+  type                              = "DATASTORE_MODE"
+  location_id                       = "nam5"
+  point_in_time_recovery_enablement = "%s"
+}
+`, projectId, randomSuffix, pointInTimeRecoveryEnablement)
+}
+
+func testAccFirestoreDatabase_deleteProtectionState(projectId string, randomSuffix string, deleteProtectionState string) string {
+	return fmt.Sprintf(`
+resource "google_firestore_database" "database" {
+  project                 = "%s"
+  name                    = "tf-test-%s"
+  type                    = "DATASTORE_MODE"
+  location_id             = "nam5"
+  delete_protection_state = "%s"
+}
+`, projectId, randomSuffix, deleteProtectionState)
 }

@@ -60,8 +60,12 @@ fun Google<%= version.capitalize unless version == 'ga' -%>(environment: String,
         // Adding this allows custom builds to use alternative branches. E.g. testing release branches in the downstreams
 
         params {
+            // Controls the VCS root, and allows custom builds to point at different branches
             param("BRANCH_NAME", branchRef)
-            
+<% unless version == 'ga' -%>
+            // Skip the sweeper for project resources in the Beta tests only
+            param("env.SKIP_PROJECT_SWEEPER", "1")
+<% end -%>
             // Not used, but making `environment` a param makes the value visible to non-admins in TeamCity
             param("ENVIRONMENT", environment)
         }
@@ -114,15 +118,4 @@ class NightlyTriggerConfiguration(environment: String, branchRef: String, nightl
     var daysOfWeek = daysOfWeek
     var daysOfMonth = daysOfMonth
 
-    init {
-        // If the environment parameter is set to the value of MAJOR_RELEASE_TESTING, 
-        // change the days of week to the day for v5.0.0 feature branch testing
-        if (environment == MAJOR_RELEASE_TESTING) {
-<% if version == 'ga' -%>
-            this.daysOfWeek = "5" // Thursday for GA, TeamCity numbers days Sun=1...Sat=7
-<% elsif version == 'beta' -%>
-            this.daysOfWeek = "6" // Friday for Beta, TeamCity numbers days Sun=1...Sat=7
-<% end -%>
-        }
-    }
 }

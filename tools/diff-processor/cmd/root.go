@@ -1,10 +1,13 @@
 package cmd
+
 import (
 	"fmt"
-	"os"
 	"github.com/spf13/cobra"
+	"os"
 )
+
 const rootCmdDesc = "Utilities for interacting with diffs between Terraform schema versions."
+
 type rootOptions struct {
 }
 
@@ -18,8 +21,10 @@ func newRootCmd() (*cobra.Command, *rootOptions, error) {
 		SilenceErrors: true,
 	}
 	cmd.AddCommand(newBreakingChangesCmd(o))
+	cmd.AddCommand(newAddLabelsCmd(o))
 	return cmd, o, nil
 }
+
 // Execute is the entry-point for all commands.
 // This lets us keep all new command functions private.
 func Execute() {

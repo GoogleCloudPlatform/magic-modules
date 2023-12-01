@@ -1,18 +1,33 @@
 package cmd
+
 import (
-	"fmt"
+	newProvider "google/provider/new/google/provider"
+	oldProvider "google/provider/old/google/provider"
+
+	"io"
+	"os"
 	"sort"
 
+	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
+	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/rules"
 	"github.com/spf13/cobra"
-	"github.com/GoogleCloudPlatform/magic-modules/.ci/diff-processor/diff"
 )
+
 const breakingChangesDesc = `Check for breaking changes between the new / old Terraform provider versions.`
+
 type breakingChangesOptions struct {
-	rootOptions           *rootOptions
+	rootOptions       *rootOptions
+	computeSchemaDiff func() diff.SchemaDiff
+	stdout            io.Writer
 }
+
 func newBreakingChangesCmd(rootOptions *rootOptions) *cobra.Command {
 	o := &breakingChangesOptions{
-		rootOptions:           rootOptions,
+		rootOptions: rootOptions,
+		computeSchemaDiff: func() diff.SchemaDiff {
+			return diff.ComputeSchemaDiff(oldProvider.ResourceMap(), newProvider.ResourceMap())
+		},
+		stdout: os.Stdout,
 	}
 	cmd := &cobra.Command{
 		Use:   "breaking-changes",
@@ -25,10 +40,14 @@ func newBreakingChangesCmd(rootOptions *rootOptions) *cobra.Command {
 	return cmd
 }
 func (o *breakingChangesOptions) run() error {
-	breakages := diff.Compare()
-	sort.Strings(breakages)
-	for _, breakage := range breakages {
-		fmt.Println(breakage)
+	schemaDiff := o.computeSchemaDiff()
+	breakingChanges := rules.ComputeBreakingChanges(schemaDiff)
+	sort.Strings(breakingChanges)
+	for _, breakingChange := range breakingChanges {
+		_, err := o.stdout.Write([]byte(breakingChange + "\n"))
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

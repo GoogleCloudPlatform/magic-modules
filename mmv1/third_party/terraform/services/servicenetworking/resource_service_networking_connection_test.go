@@ -13,9 +13,11 @@ import (
 func TestAccServiceNetworkingConnection_create(t *testing.T) {
 	t.Parallel()
 
-	network := acctest.BootstrapSharedTestNetwork(t, "service-networking-connection-create")
+	network := fmt.Sprintf("tf-test-service-networking-connection-create-%s", acctest.RandString(t, 10))
 	addr := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	service := "servicenetworking.googleapis.com"
+	org_id := envvar.GetTestOrgFromEnv(t)
+	billing_account := envvar.GetTestBillingAccountFromEnv(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -23,7 +25,7 @@ func TestAccServiceNetworkingConnection_create(t *testing.T) {
 		CheckDestroy:             testServiceNetworkingConnectionDestroy(t, service, network),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccServiceNetworkingConnection(network, addr, "servicenetworking.googleapis.com"),
+				Config: testAccServiceNetworkingConnection(network, addr, "servicenetworking.googleapis.com", org_id, billing_account),
 			},
 			{
 				ResourceName:      "google_service_networking_connection.foobar",
@@ -37,10 +39,12 @@ func TestAccServiceNetworkingConnection_create(t *testing.T) {
 func TestAccServiceNetworkingConnection_update(t *testing.T) {
 	t.Parallel()
 
-	network := acctest.BootstrapSharedTestNetwork(t, "service-networking-connection-update")
+	network := fmt.Sprintf("tf-test-service-networking-connection-update-%s", acctest.RandString(t, 10))
 	addr1 := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	addr2 := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	service := "servicenetworking.googleapis.com"
+	org_id := envvar.GetTestOrgFromEnv(t)
+	billing_account := envvar.GetTestBillingAccountFromEnv(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -48,7 +52,7 @@ func TestAccServiceNetworkingConnection_update(t *testing.T) {
 		CheckDestroy:             testServiceNetworkingConnectionDestroy(t, service, network),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccServiceNetworkingConnection(network, addr1, "servicenetworking.googleapis.com"),
+				Config: testAccServiceNetworkingConnection(network, addr1, "servicenetworking.googleapis.com", org_id, billing_account),
 			},
 			{
 				ResourceName:      "google_service_networking_connection.foobar",
@@ -56,7 +60,7 @@ func TestAccServiceNetworkingConnection_update(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccServiceNetworkingConnection(network, addr2, "servicenetworking.googleapis.com"),
+				Config: testAccServiceNetworkingConnection(network, addr2, "servicenetworking.googleapis.com", org_id, billing_account),
 			},
 			{
 				ResourceName:      "google_service_networking_connection.foobar",
@@ -92,10 +96,23 @@ func testServiceNetworkingConnectionDestroy(t *testing.T, parent, network string
 	}
 }
 
-func testAccServiceNetworkingConnection(networkName, addressRangeName, serviceName string) string {
+func testAccServiceNetworkingConnection(networkName, addressRangeName, serviceName, org_id, billing_account string) string {
 	return fmt.Sprintf(`
-data "google_compute_network" "servicenet" {
+resource "google_project" "project" {
+  project_id      = "%s"
+  name            = "%s"
+  org_id          = "%s"
+  billing_account = "%s"
+}
+
+resource "google_project_service" "servicenetworking" {
+  project = google_project.project.project_id
+  service = "servicenetworking.googleapis.com"
+}
+
+resource "google_compute_network" "servicenet" {
   name = "%s"
+  depends_on = [google_project_service.servicenetworking]
 }
 
 resource "google_compute_global_address" "foobar" {
@@ -103,13 +120,15 @@ resource "google_compute_global_address" "foobar" {
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
   prefix_length = 16
-  network       = data.google_compute_network.servicenet.self_link
+  network       = google_compute_network.servicenet.self_link
+  depends_on = [google_project_service.servicenetworking]
 }
 
 resource "google_service_networking_connection" "foobar" {
-  network                 = data.google_compute_network.servicenet.self_link
+  network                 = google_compute_network.servicenet.self_link
   service                 = "%s"
   reserved_peering_ranges = [google_compute_global_address.foobar.name]
+  depends_on = [google_project_service.servicenetworking]
 }
-`, networkName, addressRangeName, serviceName)
+`, addressRangeName, addressRangeName, org_id, billing_account, networkName, addressRangeName, serviceName)
 }

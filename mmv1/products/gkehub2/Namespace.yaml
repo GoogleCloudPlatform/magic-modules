@@ -133,7 +133,7 @@ properties:
       Scope. Scope-level labels (`namespace_labels` in the Fleet Scope
       resource) take precedence over Namespace-level labels if they share
       a key. Keys and values must be Kubernetes-conformant.
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Labels for this Namespace.

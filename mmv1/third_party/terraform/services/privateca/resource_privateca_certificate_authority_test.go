@@ -34,7 +34,7 @@ func TestAccPrivatecaCertificateAuthority_privatecaCertificateAuthorityUpdate(t 
 				ResourceName:            "google_privateca_certificate_authority.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"ignore_active_certificates_on_deletion", "location", "certificate_authority_id", "pool", "deletion_protection", "skip_grace_period"},
+				ImportStateVerifyIgnore: []string{"ignore_active_certificates_on_deletion", "location", "certificate_authority_id", "pool", "deletion_protection", "skip_grace_period", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccPrivatecaCertificateAuthority_privatecaCertificateAuthorityEnd(context),
@@ -43,7 +43,7 @@ func TestAccPrivatecaCertificateAuthority_privatecaCertificateAuthorityUpdate(t 
 				ResourceName:            "google_privateca_certificate_authority.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"ignore_active_certificates_on_deletion", "location", "certificate_authority_id", "pool", "deletion_protection", "skip_grace_period"},
+				ImportStateVerifyIgnore: []string{"ignore_active_certificates_on_deletion", "location", "certificate_authority_id", "pool", "deletion_protection", "skip_grace_period", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccPrivatecaCertificateAuthority_privatecaCertificateAuthorityBasicRoot(context),
@@ -52,7 +52,7 @@ func TestAccPrivatecaCertificateAuthority_privatecaCertificateAuthorityUpdate(t 
 				ResourceName:            "google_privateca_certificate_authority.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"ignore_active_certificates_on_deletion", "location", "certificate_authority_id", "pool", "deletion_protection", "skip_grace_period"},
+				ImportStateVerifyIgnore: []string{"ignore_active_certificates_on_deletion", "location", "certificate_authority_id", "pool", "deletion_protection", "skip_grace_period", "labels", "terraform_labels"},
 			},
 		},
 	})

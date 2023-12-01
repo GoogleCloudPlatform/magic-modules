@@ -44,6 +44,10 @@ resource "google_firebase_hosting_site" "default" {
 resource "google_firebase_hosting_channel" "channel" {
 	site_id = google_firebase_hosting_site.default.site_id
 	channel_id = "tf-test-channel%{random_suffix}"
+
+	labels = {
+		foo = "bar"
+	}
 }
 
 data "google_firebase_hosting_channel" "channel" {

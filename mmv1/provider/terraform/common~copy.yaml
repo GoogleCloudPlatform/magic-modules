@@ -46,10 +46,17 @@
 <% end -%>
 
 <%
-  Dir["third_party/terraform/provider/*.go"].each do |file_path|
-    fname = file_path.split('/')[-1]
+  Dir["third_party/terraform/provider/**/*.go"].each do |file_path|
+    fname = file_path.delete_prefix("third_party/terraform/provider")
 -%>
 '<%= dir -%>/provider/<%= fname -%>': 'third_party/terraform/provider/<%= fname -%>'
+<% end -%>
+
+<%
+  Dir["third_party/terraform/tpgdclresource/*.go"].each do |file_path|
+    fname = file_path.split('/')[-1]
+-%>
+'<%= dir -%>/tpgdclresource/<%= fname -%>': 'third_party/terraform/tpgdclresource/<%= fname -%>'
 <% end -%>
 
 <%
@@ -116,12 +123,6 @@
 <% end -%>
 
 <%
-  Dir["third_party/terraform/utils/*.go"].each do |file_path|
-    fname = file_path.split('/')[-1]
--%>
-'<%= dir -%>/<%= fname -%>': 'third_party/terraform/utils/<%= fname -%>'
-<% end -%>
-<%
   Dir["third_party/terraform/scripts/**/*.*"].each do |file_path|
     next if file_path.end_with?('.erb')
     fname = file_path.delete_prefix('third_party/terraform/')
@@ -139,6 +140,12 @@
 <% end -%>
 <%
   Dir["third_party/terraform/.teamcity/*/*.kt"].each do |file_path|
+    fname = file_path.delete_prefix("third_party/terraform/")
+-%>
+'<%= fname -%>': '<%= file_path -%>'
+<% end -%>
+<%
+  Dir["third_party/terraform/META.d/*.yaml"].each do |file_path|
     fname = file_path.delete_prefix("third_party/terraform/")
 -%>
 '<%= fname -%>': '<%= file_path -%>'

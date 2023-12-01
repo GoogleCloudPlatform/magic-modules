@@ -14,7 +14,7 @@ Manages a Cloud Dataproc cluster resource within GCP.
 
 
 !> **Warning:** Due to limitations of the API, all arguments except
-`labels`,`cluster_config.worker_config.num_instances` and `cluster_config.preemptible_worker_config.num_instances` are non-updatable. Changing others will cause recreation of the
+`labels`,`cluster_config.worker_config.num_instances` and `cluster_config.preemptible_worker_config.num_instances` are non-updatable. Changing `cluster_config.worker_config.min_num_instances` will be ignored. Changing others will cause recreation of the
 whole cluster!
 
 ## Example Usage - Basic
@@ -129,7 +129,14 @@ resource "google_dataproc_cluster" "accelerated_cluster" {
 * `region` - (Optional) The region in which the cluster and associated nodes will be created in.
    Defaults to `global`.
 
-* `labels` - (Optional, Computed) The list of labels (key/value pairs) to be applied to
+* `labels` - (Optional) The list of labels (key/value pairs) configured on the resource through Terraform and to be applied to
+   instances in the cluster.
+   **Note**: This field is non-authoritative, and will only manage the labels present in your configuration. Please refer to the field `effective_labels` for all of the labels present on the resource.
+
+* `terraform_labels` -
+  The combination of labels configured directly on the resource and default labels configured on the provider.
+
+* `effective_labels` - (Computed) The list of labels (key/value pairs) to be applied to
    instances in the cluster. GCP generates some itself including `goog-dataproc-cluster-name`
    which is the name of the cluster.
 
@@ -532,7 +539,7 @@ cluster_config {
     num_instances    = 3
     machine_type     = "e2-medium"
     min_cpu_platform = "Intel Skylake"
-
+    min_num_instance = 2
     disk_config {
       boot_disk_type    = "pd-standard"
       boot_disk_size_gb = 30
@@ -575,6 +582,8 @@ cluster_config {
 * `image_uri` (Optional) The URI for the image to use for this worker.  See [the guide](https://cloud.google.com/dataproc/docs/guides/dataproc-images)
     for more information.
 
+* `min_num_instances` (Optional) The minimum number of primary worker instances to create.  If `min_num_instances` is set, cluster creation will succeed if the number of primary workers created is at least equal to the `min_num_instances` number.
+
 * `accelerators` (Optional) The Compute Engine accelerator configuration for these instances. Can be specified multiple times.
 
     * `accelerator_type` - (Required) The short name of the accelerator type to expose to this instance. For example, `nvidia-tesla-k80`.
@@ -598,6 +607,16 @@ cluster_config {
       boot_disk_type    = "pd-standard"
       boot_disk_size_gb = 30
       num_local_ssds    = 1
+    }
+    instance_flexibility_policy {
+      instance_selection_list {
+        machine_types = ["n2-standard-2","n1-standard-2"]
+        rank          = 1
+      }
+      instance_selection_list {
+        machine_types = ["n2d-standard-2"]
+        rank          = 3
+      }
     }
   }
 }
@@ -628,6 +647,13 @@ will be set for you based on whatever was set for the `worker_config.machine_typ
 
 	* `num_local_ssds` - (Optional) The amount of local SSD disks that will be
 	attached to each preemptible worker node. Defaults to 0.
+
+* `instance_flexibility_policy` (Optional) Instance flexibility Policy allowing a mixture of VM shapes and provisioning models.
+
+    * `instance_selection_list` - (Optional) List of instance selection options that the group will use when creating new VMs.
+      * `machine_types` - (Optional) Full machine-type names, e.g. `"n1-standard-16"`.
+
+      * `rank` - (Optional) Preference of this instance selection. A lower number means higher preference. Dataproc will first try to create a VM based on the machine-type with priority rank and fallback to next rank based on availability. Machine types and instance selections with the same priority have the same preference.
 
 - - -
 

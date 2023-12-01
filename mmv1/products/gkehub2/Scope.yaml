@@ -15,8 +15,10 @@
 name: 'Scope'
 base_url: 'projects/{{project}}/locations/global/scopes'
 create_url: 'projects/{{project}}/locations/global/scopes?scopeId={{scope_id}}'
+update_url: 'projects/{{project}}/locations/global/scopes/{{scope_id}}'
 self_link: 'projects/{{project}}/locations/global/scopes/{{scope_id}}'
-immutable: true
+update_verb: :PATCH
+update_mask: true
 description: |
   Scope represents a Scope in a Fleet.
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -54,8 +56,10 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'gkehub_scope_basic'
-    primary_resource_name: 'fmt.Sprintf("tf-test-scope%s", context["random_suffix"])'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-scope%s", context["random_suffix"])'
     primary_resource_id: 'scope'
+    vars:
+      resource_name: 'my-scope'
     test_env_vars:
       project: :PROJECT_NAME
 # Skip sweeper gen since this is a child resource.
@@ -113,3 +117,7 @@ properties:
           - :READY
           - :DELETING
           - :UPDATING
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: 'labels'
+    description: |
+      Labels for this Scope.

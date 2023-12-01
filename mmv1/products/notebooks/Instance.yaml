@@ -80,8 +80,9 @@ examples:
     test_env_vars:
       service_account: :SERVICE_ACCT
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/notebooks_instance.go
   update_encoder: templates/terraform/update_encoder/notebooks_instance.go
+state_upgraders: true
+schema_version: 1
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'location'
@@ -344,15 +345,13 @@ properties:
       Format: projects/{project_id}/regions/{region}/subnetworks/{subnetwork_id}
     diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
     default_from_api: true
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       Labels to apply to this instance. These can be later modified by the setLabels method.
       An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
     update_verb: :PATCH
     update_url: 'projects/{{project}}/locations/{{location}}/instances/{{name}}:setLabels'
-    default_from_api: true
-    diff_suppress_func: NotebooksInstanceLabelDiffSuppress
   - !ruby/object:Api::Type::Array
     name: 'tags'
     description: |
