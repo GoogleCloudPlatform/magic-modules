@@ -1,0 +1,117 @@
+<% autogen_exception -%>
+package clouddeploy_test
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+)
+
+func TestAccClouddeployAutomation_update(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project":         envvar.GetTestProjectFromEnv(),
+		"service_account": fmt.Sprintf("%s-compute@developer.gserviceaccount.com", envvar.GetTestProjectFromEnv()),
+		"random_suffix":   acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckClouddeployAutomationDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccClouddeployAutomation_basic(context),
+			},
+			{
+				ResourceName:            "google_clouddeploy_automation.automation",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "delivery_pipeline", "annotations", "labels", "terraform_labels"},
+			},
+			{
+				Config: testAccClouddeployAutomation_update(context),
+			},
+			{
+				ResourceName:            "google_clouddeploy_automation.automation",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "delivery_pipeline", "annotations", "labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccClouddeployAutomation_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_clouddeploy_automation" "automation" {
+  provider = google-beta
+  name     = "tf-test-cd-automation%{random_suffix}"
+  location = "us-central1"
+  delivery_pipeline = google_clouddeploy_delivery_pipeline.pipeline.name
+  service_account = "%{service_account}"
+  selector {
+    targets {id = "*"}
+  }
+  rules {
+    promote_release_rule{
+      id = "promote-release"
+    }
+  }
+}
+
+resource "google_clouddeploy_delivery_pipeline" "pipeline" {
+  provider = google-beta
+  name = "tf-test-cd-pipeline%{random_suffix}"
+  location = "us-central1"
+  serial_pipeline  {
+    stages {
+      target_id = "test"
+      profiles = ["test-profile"]
+    }
+  }
+ }
+`, context)
+}
+
+func testAccClouddeployAutomation_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+
+resource "google_clouddeploy_automation" "automation" {
+  provider = google-beta
+  name     = "tf-test-cd-automation%{random_suffix}"
+  location = "us-central1"
+  delivery_pipeline = google_clouddeploy_delivery_pipeline.pipeline.name
+  service_account = "%{service_account}"
+  selector {
+    targets {id = "test"}
+  }
+	suspended = true
+  rules {
+    promote_release_rule{
+      id = "promote-release1"
+      wait = "200"
+      destination_target_id = "@next"
+      destination_phase = "stable"
+    }
+  }
+}
+
+resource "google_clouddeploy_delivery_pipeline" "pipeline" {
+  provider = google-beta
+  name = "tf-test-cd-pipeline%{random_suffix}"
+  location = "us-central1"
+  serial_pipeline  {
+    stages {
+      target_id = "test"
+      profiles = ["test-profile"]
+    }
+  }
+ }
+`, context)
+}
