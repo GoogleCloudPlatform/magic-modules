@@ -22,9 +22,10 @@ description: |
 create_verb: :PATCH
 delete_verb: :PATCH
 deprecation_message: >-
-  Deprecated. Use the `google_identity_platform_config` resource instead.
-  It contains a more comprehensive list of fields, and was created before
-  google_identity_platform_project_default_config` was added.
+  `google_identity_platform_config` is deprecated and will be removed in the next major release
+  of the provider. Use the `google_identity_platform_config` resource instead. It contains a more
+  comprehensive list of fields, and was created before `google_identity_platform_project_default_config`
+  was added.
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   test_check_destroy: templates/terraform/custom_check_destroy/identity_platform_project_default_config.go.erb
 docs: !ruby/object:Provider::Terraform::Docs
