@@ -78,9 +78,10 @@ properties:
       - :DISABLED
   - !ruby/object:Api::Type::String
     name: 'type'
+    immutable: true
     required: true
     description: |
-      Type for the module. e.g. CONFIGURABLE_BAD_IP.
+      Immutable. Type for the module. e.g. CONFIGURABLE_BAD_IP.
   - !ruby/object:Api::Type::String
     name: 'displayName'
     description: |
