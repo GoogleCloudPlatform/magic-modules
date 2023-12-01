@@ -615,7 +615,10 @@ properties:
         default_from_api: true
       - !ruby/object:Api::Type::String
         name: 'serviceAccountEmail'
-        description: 'The email of the service account for this function.'
+        description: |
+          Optional. The email of the trigger's service account. The service account
+          must have permission to invoke Cloud Run services. If empty, defaults to the
+          Compute Engine default service account: {project_number}-compute@developer.gserviceaccount.com.
         default_from_api: true
       - !ruby/object:Api::Type::Enum
         name: 'retryPolicy'

@@ -63,9 +63,7 @@ func main() {
 		case changelog.EntryErrorNotFound:
 			body := "Oops! It looks like no changelog entry is attached to" +
 				" this PR. Please include a release note block" +
-				" in the PR body, as described in https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/:" +
-				"\n\n~~~\n```release-note:TYPE\nRelease note" +
-				"\n```\n~~~"
+				" in the PR body, as described in https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/"
 			log.Fatal(body)
 		case changelog.EntryErrorUnknownTypes:
 			unknownTypes := err.Details["unknownTypes"].([]string)

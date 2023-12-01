@@ -1,6 +1,6 @@
 module magician
 
-go 1.19
+go 1.20
 
 require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
