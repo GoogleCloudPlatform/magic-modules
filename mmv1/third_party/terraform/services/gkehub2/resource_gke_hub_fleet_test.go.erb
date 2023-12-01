@@ -48,6 +48,14 @@ func TestAccGKEHub2Fleet_gkehubFleetBasicExample_update(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				Config: testAccGKEHub2Fleet_removedDefaultClusterConfig(context),
+			},
+			{
+				ResourceName:      "google_gke_hub_fleet.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -88,6 +96,17 @@ resource "google_gke_hub_fleet" "default" {
 		vulnerability_mode = "VULNERABILITY_BASIC"
 	}
   }
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
+}
+`, context)
+}
+
+func testAccGKEHub2Fleet_removedDefaultClusterConfig(context map[string]interface{}) string {
+	return gkeHubFleetProjectSetupForGA(context) + acctest.Nprintf(`
+resource "google_gke_hub_fleet" "default" {
+  project = google_project.project.project_id
+  display_name = "my updated fleet"
+
   depends_on = [time_sleep.wait_for_gkehub_enablement]
 }
 `, context)
