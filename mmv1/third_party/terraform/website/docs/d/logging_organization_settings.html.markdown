@@ -8,7 +8,7 @@ description: |-
 
 Describes the settings associated with a organization.
 
-To get more information about Service, see:
+To get more information about LoggingOrganizationSettings, see:
 
 * [API documentation](https://cloud.google.com/logging/docs/reference/v2/rest/v2/organizations/getSettings)
 * [Configure default settings for organizations and folders](https://cloud.google.com/logging/docs/default-settings).

@@ -8,7 +8,7 @@ description: |-
 
 Describes the settings associated with a project.
 
-To get more information about Service, see:
+To get more information about LoggingProjectSettings, see:
 
 * [API documentation](https://cloud.google.com/logging/docs/reference/v2/rest/v2/projects/getSettings)
 * [Configure default settings for organizations and folders](https://cloud.google.com/logging/docs/default-settings).

@@ -8,7 +8,7 @@ description: |-
 
 Describes the settings associated with a folder.
 
-To get more information about Service, see:
+To get more information about LoggingFolderSettings, see:
 
 * [API documentation](https://cloud.google.com/logging/docs/reference/v2/rest/v2/folders/getSettings)
 * [Configure default settings for organizations and folders](https://cloud.google.com/logging/docs/default-settings).
