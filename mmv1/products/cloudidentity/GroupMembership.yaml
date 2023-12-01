@@ -59,7 +59,7 @@ examples:
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/set_computed_name.erb
   post_import: templates/terraform/post_import/cloud_identity_group_membership.go.erb
-  update_encoder: templates/terraform/update_encoder/cloud_identity_group_membership.go.erb
+  custom_update: templates/terraform/custom_update/cloud_identity_group_membership.go.erb
 
 parameters:
   - !ruby/object:Api::Type::ResourceRef
@@ -180,6 +180,22 @@ properties:
             - :OWNER
             - :MANAGER
             - :MEMBER
+        - !ruby/object:Api::Type::NestedObject
+          name: 'expiryDetail'
+          description: |
+            The MembershipRole expiry details, only supported for MEMBER role.
+            Other roles cannot be accompanied with MEMBER role having expiry.
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'expireTime'
+              required: true
+              description: |
+                The time at which the MembershipRole will expire.
+
+                A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
+                resolution and up to nine fractional digits.
+
+                Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
   - !ruby/object:Api::Type::String
     name: 'type'
     output: true
