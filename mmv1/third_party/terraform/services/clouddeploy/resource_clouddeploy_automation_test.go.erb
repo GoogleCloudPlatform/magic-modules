@@ -4,53 +4,53 @@ package clouddeploy_test
 
 <% unless version == 'ga' -%>
 import (
-	"fmt"
-	"testing"
+  "fmt"
+  "testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
+  "github.com/hashicorp/terraform-provider-google/google/acctest"
+  "github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccClouddeployAutomation_update(t *testing.T) {
-	t.Parallel()
+  t.Parallel()
 
-	context := map[string]interface{}{
-		"project":         envvar.GetTestProjectFromEnv(),
-		"service_account": fmt.Sprintf("%s-compute@developer.gserviceaccount.com", envvar.GetTestProjectFromEnv()),
-		"random_suffix":   acctest.RandString(t, 10),
-	}
+  context := map[string]interface{}{
+    "project":         envvar.GetTestProjectFromEnv(),
+    "service_account": fmt.Sprintf("%s-compute@developer.gserviceaccount.com", envvar.GetTestProjectFromEnv()),
+    "random_suffix":   acctest.RandString(t, 10),
+  }
 
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-		CheckDestroy:             testAccCheckClouddeployAutomationDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccClouddeployAutomation_basic(context),
-			},
-			{
-				ResourceName:            "google_clouddeploy_automation.automation",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "delivery_pipeline", "annotations", "labels", "terraform_labels"},
-			},
-			{
-				Config: testAccClouddeployAutomation_update(context),
-			},
-			{
-				ResourceName:            "google_clouddeploy_automation.automation",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "delivery_pipeline", "annotations", "labels", "terraform_labels"},
-			},
-		},
-	})
+  acctest.VcrTest(t, resource.TestCase{
+    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+    CheckDestroy:             testAccCheckClouddeployAutomationDestroyProducer(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccClouddeployAutomation_basic(context),
+      },
+      {
+        ResourceName:            "google_clouddeploy_automation.automation",
+        ImportState:             true,
+        ImportStateVerify:       true,
+        ImportStateVerifyIgnore: []string{"location", "delivery_pipeline", "annotations", "labels", "terraform_labels"},
+      },
+      {
+        Config: testAccClouddeployAutomation_update(context),
+      },
+      {
+        ResourceName:            "google_clouddeploy_automation.automation",
+        ImportState:             true,
+        ImportStateVerify:       true,
+        ImportStateVerifyIgnore: []string{"location", "delivery_pipeline", "annotations", "labels", "terraform_labels"},
+      },
+    },
+  })
 }
 
 func testAccClouddeployAutomation_basic(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+  return acctest.Nprintf(`
 resource "google_clouddeploy_automation" "automation" {
   provider = google-beta
   name     = "tf-test-cd-automation%{random_suffix}"
@@ -82,16 +82,30 @@ resource "google_clouddeploy_delivery_pipeline" "pipeline" {
 }
 
 func testAccClouddeployAutomation_update(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+  return acctest.Nprintf(`
 
 resource "google_clouddeploy_automation" "automation" {
   provider = google-beta
   name     = "tf-test-cd-automation%{random_suffix}"
   location = "us-central1"
   delivery_pipeline = google_clouddeploy_delivery_pipeline.pipeline.name
+  annotations = {
+    my_first_annotation = "example-annotation-1"
+    my_second_annotation = "example-annotation-2"
+  }
+  labels = {
+    my_first_label = "example-label-1"
+    my_second_label = "example-label-2"
+  }
+  description = "automation resource"
   service_account = "%{service_account}"
   selector {
-    targets {id = "test"}
+    targets {
+			id = "test"
+			labels = {
+				foo = "bar""
+			}
+    }
   }
 	suspended = true
   rules {
@@ -100,6 +114,12 @@ resource "google_clouddeploy_automation" "automation" {
       wait = "200"
       destination_target_id = "@next"
       destination_phase = "stable"
+    }
+		advance_rollout_rule {
+      destination_target_id = "dev"
+      id                    = "advance rollout"
+      source_phases         = ["deploy"]
+      wait                  = "200"
     }
   }
 }
