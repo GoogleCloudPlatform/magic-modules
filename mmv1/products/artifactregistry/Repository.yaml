@@ -112,6 +112,7 @@ examples:
       username: 'remote-username'
       secret_data: 'remote-password'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/artifact_registry_repository.go.erb
   encoder: templates/terraform/encoders/location_from_region.go.erb
 properties:
   - !ruby/object:Api::Type::String
@@ -231,6 +232,7 @@ properties:
     properties:
       - !ruby/object:Api::Type::Array
         name: 'upstreamPolicies'
+        diff_suppress_func: 'upstreamPoliciesDiffSuppress'
         description: |-
           Policies that configure the upstream artifacts distributed by the Virtual
           Repository. Upstream policies cannot be set on a standard repository.
