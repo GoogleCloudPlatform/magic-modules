@@ -111,12 +111,12 @@ properties:
       - :PAUSED
       - :UNKNOWN
   - !ruby/object:Api::Type::NestedObject
-    name: 'host_config'
+    name: 'hostConfig'
     description: |
       A list of hostnames for this instance.
     output: true
     properties:
-      - !ruby/object:Api::Type::String:
+      - !ruby/object:Api::Type::String
         name: 'html'
         description: 'HTML hostname.'
         output: true
@@ -125,15 +125,15 @@ properties:
         description: 'API hostname.'
         output: true
       - !ruby/object:Api::Type::String
-        name: 'git_http'
+        name: 'gitHttp'
         description: 'Git HTTP hostname.'
         output: true
       - !ruby/object:Api::Type::String
-        name: 'git_ssh'
+        name: 'gitSsh'
         description: 'Git SSH hostname.'
         output: true
   - !ruby/object:Api::Type::Enum
-    name: 'state_note'
+    name: 'stateNote'
     description: |
       Provides information about the current instance state.
     output: true
@@ -142,33 +142,34 @@ properties:
       - :PAUSED_CMEK_UNAVAILABLE
       - :INSTANCE_RESUMING
   - !ruby/object:Api::Type::String
-    name: 'kms_key'
+    name: 'kmsKey'
     description: |
       Customer-managed encryption key name, in the format projects/*/locations/*/keyRings/*/cryptoKeys/*.
     immutable: true
   - !ruby/object:Api::Type::NestedObject
-    name: 'private_config'
+    name: 'privateConfig'
     description: |
       Private settings for private instance.
     properties:
-      - !ruby/object:Api::Type::Boolean:
-        name: 'is_private'
-        description: 'Indicate if it's private instance.'
+      - !ruby/object:Api::Type::Boolean
+        name: 'isPrivate'
+        description: |
+          'Indicate if it's private instance.'
         required: true
         immutable: true
-      - !ruby/object:Api::Type::String:
-        name: 'ca_pool'
+      - !ruby/object:Api::Type::String
+        name: 'caPool'
         description: |
           CA pool resource, resource must in the format of `projects/{project}/locations/{location}/caPools/{ca_pool}`.
         required: true
         immutable: true
-      - !ruby/object:Api::Type::String:
-        name: 'http_service_attachment'
+      - !ruby/object:Api::Type::String
+        name: 'httpServiceAttachment'
         description: |
           Service Attachment for HTTP, resource is in the format of `projects/{project}/regions/{region}/serviceAttachments/{service_attachment}`.
         output: true
-      - !ruby/object:Api::Type::String:
-        name: 'ssh_service_attachment'
+      - !ruby/object:Api::Type::String
+        name: 'sshServiceAttachment'
         description: |
           Service Attachment for SSH, resource is in the format of `projects/{project}/regions/{region}/serviceAttachments/{service_attachment}`.
         output: true

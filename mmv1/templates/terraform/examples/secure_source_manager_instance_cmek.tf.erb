@@ -1,0 +1,17 @@
+resource "google_kms_crypto_key" "crypto_key" {
+  name     = "<%= ctx[:vars]['key_name'] %>"
+  key_ring = google_kms_key_ring.key_ring.id
+}
+
+resource "google_kms_key_ring" "key_ring" {
+  name     = "<%= ctx[:vars]['keyring_name'] %>"
+  location = "us-central1"
+}
+
+resource "google_secure_source_manager_instance" "<%= ctx[:primary_resource_id] %>" {
+    location = "us-central1"
+    instance_id = "<%= ctx[:vars]['instance_id'] %>"
+    
+}
+
+data "google_project" "project" {}
