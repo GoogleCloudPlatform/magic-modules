@@ -3244,10 +3244,6 @@ func TestAccContainerCluster_withSoleTenantGroup(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
-// consider merging this test with TestAccContainerCluster_nodeAutoprovisioningDefaults
-// once the feature is GA
-
 func TestAccContainerCluster_withAutoscalingProfile(t *testing.T) {
 	t.Parallel()
 	clusterName := fmt.Sprintf("cluster-test-%s", acctest.RandString(t, 10))
@@ -3303,6 +3299,8 @@ func TestAccContainerCluster_withInvalidAutoscalingProfile(t *testing.T) {
 		},
 	})
 }
+
+<% unless version == 'ga' -%>
 
 func TestAccContainerCluster_sharedVpc(t *testing.T) {
 	// Multiple fine-grained resources
