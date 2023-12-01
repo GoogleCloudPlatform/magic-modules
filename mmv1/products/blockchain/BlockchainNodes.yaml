@@ -29,6 +29,14 @@ examples:
     primary_resource_id: 'default_node'
     vars:
       node_name: 'blockchain_name'
+parameters:
+  - !ruby/object:Api::Type::String
+    name: location
+    description: |
+      Location of Blockchain Node being created.
+    required: true
+    immutable: true
+    url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
     name: name
