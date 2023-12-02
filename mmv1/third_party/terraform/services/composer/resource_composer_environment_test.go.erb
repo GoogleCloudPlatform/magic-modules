@@ -1116,6 +1116,40 @@ func TestAccComposerEnvironment_customBucket(t *testing.T) {
 	})
 }
 
+// Checks Composer 3 environment creation with new fields.
+func TestAccComposerEnvironmentComposer3_basic(t *testing.T) {
+	t.Parallel()
+
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, acctest.RandInt(t))
+	subnetwork := network + "-1"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:		          func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComposerEnvironmentComposer3_basic(envName, network, subnetwork),
+			},
+			{
+				ResourceName:			"google_composer_environment.test",
+				ImportState:			 true,
+				ImportStateVerify: true,
+			},
+			// This is a terrible clean-up step in order to get destroy to succeed,
+			// due to dangling firewall rules left by the Composer Environment blocking network deletion.
+			// TODO: Remove this check if firewall rules bug gets fixed by Composer.
+			{
+				PlanOnly:					 true,
+				ExpectNonEmptyPlan: false,
+				Config:						 testAccComposerEnvironmentComposer3_basic(envName, network, subnetwork),
+				Check:							testAccCheckClearComposerEnvironmentFirewalls(t, network),
+			},
+		},
+	})
+}
+
 // Checks Composer 3 specific updatable fields.
 func TestAccComposerEnvironmentComposer3_update(t *testing.T) {
 	t.Parallel()
