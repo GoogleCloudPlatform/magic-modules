@@ -1781,8 +1781,8 @@ func expandComposerEnvironmentConfig(v interface{}, d *schema.ResourceData, conf
 	}
 	transformed.PrivateEnvironmentConfig = transformedPrivateEnvironmentConfig
 
-	if enablePrivateEndpointRaw, ok := original["enable_private_endpoint"]; ok {
-		transformed.PrivateEnvironmentConfig.EnablePrivateEndpoint = enablePrivateEndpointRaw.(bool)
+	if enablePrivateEnvironmentRaw, ok := original["enable_private_environment"]; ok {
+		transformed.PrivateEnvironmentConfig.EnablePrivateEnvironment = enablePrivateEnvironmentRaw.(bool)
 	}
 
 	if enablePrivateBuildsOnlyRaw, ok := original["enable_private_builds_only"]; ok {
