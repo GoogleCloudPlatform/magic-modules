@@ -14,9 +14,13 @@ Get information about a Google Compute Regional Persistent disks.
 
 ```hcl
 data "google_compute_region_disk" "disk" {
-  name    = "persistent-regional-disk"
-  project = "example"
-  region  = "us-central1"
+  name                      = "persistent-regional-disk"
+  project                   = "example"
+  region                    = "us-central1"
+  type                      = "pd-ssd"
+  physical_block_size_bytes = 4096
+  
+  replica_zones = ["us-central1-a", "us-central1-f"]
 }
 
 resource "google_compute_instance" "default" {
