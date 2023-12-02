@@ -1,7 +1,7 @@
 package common
 
 import (
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/caiasset"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/caiasset"
 )
 
 // Converter which aggregates all service-specific converters in the same interface.

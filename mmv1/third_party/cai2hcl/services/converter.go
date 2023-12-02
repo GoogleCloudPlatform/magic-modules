@@ -3,9 +3,9 @@ package services
 import (
 	"fmt"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/cai2hcl/common"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/cai2hcl/services/compute"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/cai2hcl/services/resourcemanager"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/cai2hcl/common"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/cai2hcl/services/compute"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/cai2hcl/services/resourcemanager"
 )
 
 var uberConverters = []common.UberConverter{
