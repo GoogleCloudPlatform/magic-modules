@@ -1190,7 +1190,7 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 					PrivateEnvironmentConfig: &composer.PrivateEnvironmentConfig{},
 				},
 			}
-			if config != nil && config.PrivateEnvironmentConfig != nil && config.PrivateEnvironmentConfig.EnablePrivateEnvironment != nil {
+			if config != nil && config.PrivateEnvironmentConfig != nil {
 				patchObj.Config.PrivateEnvironmentConfig.EnablePrivateEnvironment = config.PrivateEnvironmentConfig.EnablePrivateEnvironment
 			}
 			err = resourceComposerEnvironmentPatchField("config.PrivateEnvironmentConfig.EnablePrivateEnvironment", userAgent, patchObj, d, tfConfig)
@@ -1205,7 +1205,7 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 					PrivateEnvironmentConfig: &composer.PrivateEnvironmentConfig{},
 				},
 			}
-			if config != nil && config.PrivateEnvironmentConfig != nil && config.PrivateEnvironmentConfig.EnablePrivateBuildsOnly != nil {
+			if config != nil && config.PrivateEnvironmentConfig != nil {
 				patchObj.Config.PrivateEnvironmentConfig.EnablePrivateBuildsOnly = config.PrivateEnvironmentConfig.EnablePrivateBuildsOnly
 			}
 			err = resourceComposerEnvironmentPatchField("config.PrivateEnvironmentConfig.EnablePrivateBuildsOnly", userAgent, patchObj, d, tfConfig)
