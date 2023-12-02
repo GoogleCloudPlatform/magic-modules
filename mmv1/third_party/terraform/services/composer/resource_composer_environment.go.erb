@@ -74,6 +74,8 @@ var (
 		"config.0.environment_size",
 		"config.0.master_authorized_networks_config",
 		"config.0.resilience_mode",
+		"config.0.enable_private_environment",
+		"config.0.enable_private_builds_only",
 	}
 
 	recoveryConfigKeys = []string{
@@ -552,6 +554,22 @@ func ResourceComposerEnvironment() *schema.Resource {
 									},
 								},
 							},
+						},
+						"enable_private_environment": {
+							Type:         schema.TypeBool,
+							Computed:     true,
+							Optional:     true,
+							ForceNew:     false,
+							AtLeastOneOf: composerConfigKeys,
+							Description:  ``,
+						},
+						"enable_private_builds_only": {
+							Type:         schema.TypeBool,
+							Computed:     true,
+							Optional:     true,
+							ForceNew:     false,
+							AtLeastOneOf: composerConfigKeys,
+							Description:  ``,
 						},
 						"web_server_network_access_control": {
 							Type:        schema.TypeList,
@@ -1166,6 +1184,36 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 			}
 		}
 
+		if d.HasChange("config.0.enable_private_environment") {
+			patchObj := &composer.Environment{
+				Config: &composer.EnvironmentConfig{
+					PrivateEnvironmentConfig: &composer.PrivateEnvironmentConfig{},
+				},
+			}
+			if config != nil && config.PrivateEnvironmentConfig != nil && config.PrivateEnvironmentConfig.EnablePrivateEnvironment != nil {
+				patchObj.Config.PrivateEnvironmentConfig.EnablePrivateEnvironment = config.PrivateEnvironmentConfig.EnablePrivateEnvironment
+			}
+			err = resourceComposerEnvironmentPatchField("config.PrivateEnvironmentConfig.EnablePrivateEnvironment", userAgent, patchObj, d, tfConfig)
+			if err != nil {
+				return err
+			}
+		}
+
+		if d.HasChange("config.0.enable_private_builds_only") {
+			patchObj := &composer.Environment{
+				Config: &composer.EnvironmentConfig{
+					PrivateEnvironmentConfig: &composer.PrivateEnvironmentConfig{},
+				},
+			}
+			if config != nil && config.PrivateEnvironmentConfig != nil && config.PrivateEnvironmentConfig.EnablePrivateBuildsOnly != nil {
+				patchObj.Config.PrivateEnvironmentConfig.EnablePrivateBuildsOnly = config.PrivateEnvironmentConfig.EnablePrivateBuildsOnly
+			}
+			err = resourceComposerEnvironmentPatchField("config.PrivateEnvironmentConfig.EnablePrivateBuildsOnly", userAgent, patchObj, d, tfConfig)
+			if err != nil {
+				return err
+			}
+		}
+
 		if d.HasChange("config.0.node_count") {
 			patchObj := &composer.Environment{Config: &composer.EnvironmentConfig{}}
 			if config != nil {
@@ -1406,6 +1454,8 @@ func flattenComposerEnvironmentConfig(envCfg *composer.EnvironmentConfig) interf
 	transformed["node_config"] = flattenComposerEnvironmentConfigNodeConfig(envCfg.NodeConfig)
 	transformed["software_config"] = flattenComposerEnvironmentConfigSoftwareConfig(envCfg.SoftwareConfig)
 	transformed["private_environment_config"] = flattenComposerEnvironmentConfigPrivateEnvironmentConfig(envCfg.PrivateEnvironmentConfig)
+	transformed["enable_private_environment"] = envCfg.PrivateEnvironmentConfig.EnablePrivateEnvironment
+	transformed["enable_private_builds_only"] = envCfg.PrivateEnvironmentConfig.EnablePrivateBuildsOnly
 	transformed["web_server_network_access_control"] = flattenComposerEnvironmentConfigWebServerNetworkAccessControl(envCfg.WebServerNetworkAccessControl)
 	transformed["database_config"] = flattenComposerEnvironmentConfigDatabaseConfig(envCfg.DatabaseConfig)
 	transformed["web_server_config"] = flattenComposerEnvironmentConfigWebServerConfig(envCfg.WebServerConfig)
@@ -1730,6 +1780,14 @@ func expandComposerEnvironmentConfig(v interface{}, d *schema.ResourceData, conf
 		return nil, err
 	}
 	transformed.PrivateEnvironmentConfig = transformedPrivateEnvironmentConfig
+
+	if enablePrivateEndpointRaw, ok := original["enable_private_endpoint"]; ok {
+		transformed.PrivateEnvironmentConfig.EnablePrivateEndpoint = enablePrivateEndpointRaw.(bool)
+	}
+
+	if enablePrivateBuildsOnlyRaw, ok := original["enable_private_builds_only"]; ok {
+		transformed.PrivateEnvironmentConfig.EnablePrivateBuildsOnly = enablePrivateBuildsOnlyRaw.(bool)
+	}
 
 	transformedWebServerNetworkAccessControl, err := expandComposerEnvironmentConfigWebServerNetworkAccessControl(original["web_server_network_access_control"], d, config)
 	if err != nil {
