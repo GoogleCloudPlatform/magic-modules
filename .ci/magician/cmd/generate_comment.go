@@ -156,7 +156,7 @@ func execGenerateComment(buildID, projectID, buildStep, commit, prNumber, github
 			fmt.Println("Error computing TPG breaking changes: ", err)
 			showBreakingChangesFailed = true
 		}
-		versionedBreakingChanges[repo.Version] = output
+		versionedBreakingChanges[repo.Version] = strings.TrimSuffix(output, "\n")
 		err = addLabels(diffProcessorPath, githubToken, prNumber, r)
 		if err != nil {
 			fmt.Println("Error adding TPG labels to PR: ", err)
@@ -344,7 +344,7 @@ func combineBreakingChanges(tpgBreaking, tpgbBreaking string) string {
 		allMessages = append(tpgUnique, tpgbMessages...)
 	}
 	if len(allMessages) > 0 {
-		return `Breaking Change(s) Detected
+		return `## Breaking Change(s) Detected
 The following breaking change(s) were detected within your pull request.
 
 * ` + strings.Join(allMessages, "\n* ") + `
