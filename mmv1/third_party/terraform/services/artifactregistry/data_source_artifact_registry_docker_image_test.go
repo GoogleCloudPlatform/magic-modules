@@ -24,13 +24,17 @@ func TestAccDataSourceArtifactRegistryDockerImage(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					// Data source using a tag
 					checkTaggedDataSources(resourceName+"Tag", "latest"),
+					resource.TestCheckResourceAttrSet(resourceName+"Tag", "image_size_bytes"),
+					validateTimeStamps(resourceName+"Tag"),
 
 					// Data source using a digest
 					checkDigestDataSources(
 						resourceName+"Digest",
-						"projects/go-containerregistry/locations/us/repositories/gcr.io/dockerImages/crane@sha256:0f1cfc0f8c87eb871b4c6f5c4b80f89fa912986369b1e3313a5e808214270bb3",
-						"us-docker.pkg.dev/go-containerregistry/gcr.io/crane@sha256:0f1cfc0f8c87eb871b4c6f5c4b80f89fa912986369b1e3313a5e808214270bb3",
+						"projects/cloudrun/locations/us/repositories/container/dockerImages/hello@sha256:77cb9fbc6a667b8bfdbeca4c49e7703d825746eba53b736f0318bb7712828821",
+						"us-docker.pkg.dev/cloudrun/container/hello@sha256:77cb9fbc6a667b8bfdbeca4c49e7703d825746eba53b736f0318bb7712828821",
 					),
+					resource.TestCheckResourceAttrSet(resourceName+"Digest", "image_size_bytes"),
+					validateTimeStamps(resourceName+"Digest"),
 
 					// url safe docker name using a tag
 					checkTaggedDataSources(resourceName+"UrlTag", "latest"),
@@ -49,33 +53,31 @@ func TestAccDataSourceArtifactRegistryDockerImage(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName+"None", "image"),
 					resource.TestCheckResourceAttrSet(resourceName+"None", "name"),
 					resource.TestCheckResourceAttrSet(resourceName+"None", "self_link"),
-					// gcr.io does not have a imageSizeBytes field in the JSON response
-					// resource.TestCheckResourceAttrSet(resourceName+"None", "image_size_bytes"),
-					resource.TestCheckResourceAttrSet(resourceName+"None", "media_type"),
-					validateTimeStamps(resourceName+"None"),
 				),
 			},
 		},
 	})
 }
 
-// Test the data source against the public AR repo
+// Test the data source against the public AR repos
+// https://console.cloud.google.com/artifacts/docker/cloudrun/us/container
 // https://console.cloud.google.com/artifacts/docker/go-containerregistry/us/gcr.io
+// Currently, gcr.io does not provide a imageSizeBytes or buildTime field in the JSON response
 const testAccDataSourceArtifactRegistryDockerImageConfig = `
 data "google_artifact_registry_docker_image" "testTag" {
-	project    = "go-containerregistry"
-	repository = "gcr.io"
+	project    = "cloudrun"
+	repository = "container"
 	region     = "us"
-	image      = "crane"
+	image      = "hello"
 	tag        = "latest"
 }
 
 data "google_artifact_registry_docker_image" "testDigest" {
-	project    = "go-containerregistry"
-	repository = "gcr.io"
+	project    = "cloudrun"
+	repository = "container"
 	region     = "us"
-	image      = "crane"
-	digest     = "sha256:0f1cfc0f8c87eb871b4c6f5c4b80f89fa912986369b1e3313a5e808214270bb3"
+	image      = "hello"
+	digest     = "sha256:77cb9fbc6a667b8bfdbeca4c49e7703d825746eba53b736f0318bb7712828821"
 }
 
 data "google_artifact_registry_docker_image" "testUrlTag" {
@@ -111,10 +113,7 @@ func checkTaggedDataSources(resourceName string, expectedTag string) resource.Te
 		resource.TestCheckResourceAttrSet(resourceName, "name"),
 		resource.TestCheckResourceAttrSet(resourceName, "self_link"),
 		resource.TestCheckTypeSetElemAttr(resourceName, "tags.*", expectedTag),
-		// gcr.io does not have a imageSizeBytes field in the JSON response
-		// resource.TestCheckResourceAttrSet(resourceName, "image_size_bytes"),
 		resource.TestCheckResourceAttrSet(resourceName, "media_type"),
-		validateTimeStamps(resourceName),
 	)
 }
 
@@ -126,11 +125,7 @@ func checkDigestDataSources(resourceName string, expectedName string, expectedSe
 		resource.TestCheckResourceAttrSet(resourceName, "image"),
 		resource.TestCheckResourceAttr(resourceName, "name", expectedName),
 		resource.TestCheckResourceAttr(resourceName, "self_link", expectedSelfLink),
-		// tags may become an empty list in the future
-		// gcr.io does not have a imageSizeBytes field in the JSON response
-		// resource.TestCheckResourceAttrSet(resourceName, "image_size_bytes"),
 		resource.TestCheckResourceAttrSet(resourceName, "media_type"),
-		validateTimeStamps(resourceName),
 	)
 }
 
@@ -146,10 +141,10 @@ func validateTimeStamps(dataSourceName string) resource.TestCheckFunc {
 			return fmt.Errorf("upload_time is not RFC3339: %s", ds.Primary.Attributes["upload_time"])
 		}
 
-		// gcr.io repo does not have a buildTime in the JSON response
-		// if !isRFC3339(ds.Primary.Attributes["build_time"]) {
-		// 	return fmt.Errorf("build_time is not RFC3339: %s", ds.Primary.Attributes["build_time"])
-		// }
+		if !isRFC3339(ds.Primary.Attributes["build_time"]) {
+			return fmt.Errorf("build_time is not RFC3339: %s", ds.Primary.Attributes["build_time"])
+		}
+
 		if !isRFC3339(ds.Primary.Attributes["update_time"]) {
 			return fmt.Errorf("update_time is not RFC3339: %s", ds.Primary.Attributes["update_time"])
 		}
