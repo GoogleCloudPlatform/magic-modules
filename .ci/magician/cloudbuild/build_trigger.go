@@ -36,6 +36,8 @@ func triggerCloudBuildRun(projectId, triggerId, repoName, commitSha string, subs
 		Substitutions: substitutions,
 	}
 
+	fmt.Println("Starting Cloud Build Run: ", triggerId)
+
 	_, err = c.Projects.Triggers.Run(projectId, triggerId, repoSource).Do()
 	if err != nil {
 		return fmt.Errorf("failed to create Cloud Build run: %s", err)

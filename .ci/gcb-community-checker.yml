@@ -53,6 +53,8 @@ steps:
     id: community-checker
     secretEnv: ["GITHUB_TOKEN", "GENERATE_DIFFS_TRIGGER"]
     timeout: 8000s
+    env:
+      - BUILD_ID=$BUILD_ID
     args:
         - "community-checker"
         - $_PR_NUMBER
