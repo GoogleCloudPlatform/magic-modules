@@ -125,6 +125,8 @@ The following arguments are supported:
 
 * `requester_pays` - (Optional, Default: false) Enables [Requester Pays](https://cloud.google.com/storage/docs/requester-pays) on a storage bucket.
 
+* `rpo` - (Optional) RPO setting of the bucket. If set 'ASYNC_TURBO', The Turbo Replication will be enabled for the bucket. 'DEFAULT' value will set RPO setting to default RPO. **Note**: Turbo Replication is only for buckets in dual-regions (https://cloud.google.com/storage/docs/managing-turbo-replication). **Note**: If used with single-region bucket, It will throw an error.
+
 * `uniform_bucket_level_access` - (Optional, Default: false) Enables [Uniform bucket-level access](https://cloud.google.com/storage/docs/uniform-bucket-level-access) access to a bucket.
 
 * `public_access_prevention` - (Optional) Prevents public access to a bucket. Acceptable values are "inherited" or "enforced". If "inherited", the bucket uses [public access prevention](https://cloud.google.com/storage/docs/public-access-prevention). only if the bucket is subject to the public access prevention organization policy constraint. Defaults to "inherited".
