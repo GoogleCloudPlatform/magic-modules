@@ -315,6 +315,7 @@ resource "google_sql_user" "user2" {
   password = "hunter2"
   type = "CLOUD_IAM_USER"
 }
+
 resource "google_sql_user" "user3" {
   name     = "admin"
   instance = google_sql_database_instance.instance.name
