@@ -49,7 +49,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "gkehub_fleet_basic"
     skip_test: true
-    primary_resource_id: 'default'
+    primary_resource_id: "default"
 id_format: "projects/{{project}}/locations/global/fleets/default"
 import_format: ["projects/{{project}}/locations/global/fleets/default"]
 properties:
@@ -95,3 +95,25 @@ properties:
           - READY
           - DELETING
           - UPDATING
+  - !ruby/object:Api::Type::NestedObject
+    name: "defaultClusterConfig"
+    description: The default cluster configurations to apply across the fleet.
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: "securityPostureConfig"
+        description: Enable/Disable Security Posture features for the cluster.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: "mode"
+            description: Sets which mode to use for Security Posture features.
+            values:
+              - DISABLED
+              - BASIC
+              - ENTERPRISE
+          - !ruby/object:Api::Type::Enum
+            name: "vulnerabilityMode"
+            description: Sets which mode to use for vulnerability scanning.
+            values:
+              - VULNERABILITY_DISABLED
+              - VULNERABILITY_BASIC
+              - VULNERABILITY_ENTERPRISE

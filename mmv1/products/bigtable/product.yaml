@@ -20,7 +20,3 @@ versions:
     base_url: https://bigtableadmin.googleapis.com/v2/
 scopes:
   - https://www.googleapis.com/auth/bigtable
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Bigtable API
-    url: https://console.cloud.google.com/apis/library/bigtable.googleapis.com/

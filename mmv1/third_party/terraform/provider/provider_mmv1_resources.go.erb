@@ -139,7 +139,10 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_folder":                                    resourcemanager.DataSourceGoogleFolder(),
 	"google_folders":                                   resourcemanager.DataSourceGoogleFolders(),
 	"google_folder_organization_policy":                resourcemanager.DataSourceGoogleFolderOrganizationPolicy(),
+	"google_logging_folder_settings":                   logging.DataSourceGoogleLoggingFolderSettings(),
+	"google_logging_organization_settings":             logging.DataSourceGoogleLoggingOrganizationSettings(),
 	"google_logging_project_cmek_settings":             logging.DataSourceGoogleLoggingProjectCmekSettings(),
+	"google_logging_project_settings":                  logging.DataSourceGoogleLoggingProjectSettings(),
 	"google_logging_sink":                              logging.DataSourceGoogleLoggingSink(),
 	"google_monitoring_notification_channel":           monitoring.DataSourceMonitoringNotificationChannel(),
 	"google_monitoring_cluster_istio_service":          monitoring.DataSourceMonitoringServiceClusterIstio(),
@@ -196,11 +199,14 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_vpc_access_connector":                      vpcaccess.DataSourceVPCAccessConnector(),
 	"google_redis_instance":                            redis.DataSourceGoogleRedisInstance(),
 	"google_vertex_ai_index":                           vertexai.DataSourceVertexAIIndex(),
-	"google_vmwareengine_network":                    	vmwareengine.DataSourceVmwareengineNetwork(),
 	<% unless version == 'ga' -%>
-	"google_vmwareengine_private_cloud": 								vmwareengine.DataSourceVmwareenginePrivateCloud(),
-	"google_vmwareengine_cluster": 											vmwareengine.DataSourceVmwareengineCluster(),
+	"google_vmwareengine_cluster":                      vmwareengine.DataSourceVmwareengineCluster(),
 	<% end -%>
+	"google_vmwareengine_network":                      vmwareengine.DataSourceVmwareengineNetwork(),
+	"google_vmwareengine_network_peering":              vmwareengine.DataSourceVmwareengineNetworkPeering(),
+	"google_vmwareengine_network_policy":               vmwareengine.DataSourceVmwareengineNetworkPolicy(),
+	"google_vmwareengine_private_cloud":                vmwareengine.DataSourceVmwareenginePrivateCloud(),
+
 	// ####### END handwritten datasources ###########
 }
 
