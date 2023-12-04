@@ -13,6 +13,7 @@
 
 require 'api/object'
 require 'google/string_utils'
+require 'provider/terraform/validation'
 
 module Api
   # Represents a property type
