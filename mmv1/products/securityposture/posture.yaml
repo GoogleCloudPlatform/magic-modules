@@ -24,7 +24,7 @@ self_link: '{{parent}}/postures/{{posture_id}}'
 
 create_url: '{{parent}}/postures?postureId={{posture_id}}'
 
-update_url: '{{parent}}/postures/{{posture_id}}?revisionId={{revisionId}}'
+update_url: '{{parent}}/postures/{{posture_id}}?revisionId={{revision_id}}'
 update_verb: :PATCH
 
 update_mask: true
@@ -280,7 +280,6 @@ properties:
                         properties:
                           - !ruby/object:Api::Type::String
                             name: 'name'
-                            immutable: true
                             required: true
                             diff_suppress_func: 'customConstraintNameSuppress'
                             description: |
@@ -315,7 +314,6 @@ properties:
                             item_type: Api::Type::String
                           - !ruby/object:Api::Type::Array
                             name: 'resourceTypes'
-                            immutable: true
                             min_size: 1
                             required: true
                             description: |
