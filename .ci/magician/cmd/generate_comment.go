@@ -211,7 +211,7 @@ The breaking change detector crashed during execution. This is usually due to th
 	if diffs == "" {
 		message += "## Diff report\nYour PR hasn't generated any diffs, but I'll let you know if a future commit does."
 	} else {
-		message += "## Diff report\nYour PR generated some diffs in downstreams - here they are.\n" + diffs
+		message += "## Diff report\nYour PR generated some diffs in downstreams - here they are.\n" + diffs + "\n"
 		if missingTests != "" {
 			message += "\n" + missingTests + "\n"
 		}
