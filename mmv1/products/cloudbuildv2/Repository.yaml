@@ -13,9 +13,9 @@
 
 --- !ruby/object:Api::Resource
 name: Repository
-base_url: projects/{{project}}/locations/{{location}}/connections/{{connection}}/repositories
-create_url: projects/{{project}}/locations/{{location}}/connections/{{connection}}/repositories?repositoryId={{name}}
-self_link: projects/{{project}}/locations/{{location}}/connections/{{connection}}/repositories/{{name}}
+base_url: projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/repositories
+create_url: projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/repositories?repositoryId={{name}}
+self_link: projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/repositories/{{name}}
 immutable: true
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
