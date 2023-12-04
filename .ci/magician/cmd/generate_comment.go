@@ -124,7 +124,9 @@ func execGenerateComment(buildID, projectID, buildStep, commit, prNumber, github
 				os.Exit(1)
 			}
 		}
-		diffs += "\n" + repoDiffs
+		if repoDiffs != "" {
+			diffs += "\n" + repoDiffs
+		}
 	}
 
 	var showBreakingChangesFailed bool
