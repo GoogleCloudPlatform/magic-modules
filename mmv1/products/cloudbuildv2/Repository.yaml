@@ -26,6 +26,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     base_url: '{{op_id}}'
 description: "A repository associated to a parent connection."
+exclude_tgc: true
 examples:
 # These tests depend on secrets stored in a separate project, so we prefer not
 # to show them in the docs.
