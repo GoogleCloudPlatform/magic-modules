@@ -326,6 +326,7 @@ var handwrittenResources = map[string]*schema.Resource{
 	"google_compute_attached_disk":                 compute.ResourceComputeAttachedDisk(),
 	"google_compute_instance":                      compute.ResourceComputeInstance(),
 	"google_compute_disk_async_replication":        compute.ResourceComputeDiskAsyncReplication(),
+	"google_compute_router_peer":					compute.ResourceComputeRouterBgpPeer(),
 	<% unless version == 'ga' -%>
 	"google_compute_instance_from_machine_image":   compute.ResourceComputeInstanceFromMachineImage(),
 	<% end -%>

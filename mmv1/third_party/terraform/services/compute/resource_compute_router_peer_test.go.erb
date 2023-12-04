@@ -20,7 +20,7 @@ import (
 	<% end -%>
 )
 
-func TestAccComputeRouterBgpPeer_routerPeerRouterApplianceExample(t *testing.T) {
+func TestAccComputeRouterBgpPeer_routerPeerRouterAppliance(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -33,7 +33,7 @@ func TestAccComputeRouterBgpPeer_routerPeerRouterApplianceExample(t *testing.T) 
 		CheckDestroy:             testAccCheckComputeRouterBgpPeerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRouterBgpPeer_routerPeerRouterApplianceExample(context),
+				Config: testAccComputeRouterBgpPeer_routerPeerRouterAppliance(context),
 			},
 			{
 				ResourceName:            "google_compute_router_peer.peer",
@@ -45,7 +45,7 @@ func TestAccComputeRouterBgpPeer_routerPeerRouterApplianceExample(t *testing.T) 
 	})
 }
 
-func testAccComputeRouterBgpPeer_routerPeerRouterApplianceExample(context map[string]interface{}) string {
+func testAccComputeRouterBgpPeer_routerPeerRouterAppliance(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_network" "network" {
   name                    = "tf-test-my-router%{random_suffix}-net"
