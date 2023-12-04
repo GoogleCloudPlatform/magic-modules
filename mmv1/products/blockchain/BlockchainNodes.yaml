@@ -35,6 +35,9 @@ parameters:
     description: |
       Location of Blockchain Node being created.
     immutable: true
+    required: false
+    ignore_read: true
+    default_from_api: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
