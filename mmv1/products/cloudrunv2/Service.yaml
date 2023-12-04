@@ -64,9 +64,6 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_limits'
     primary_resource_id: 'default'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-service%s\",
-      context[\"\
-      random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
   - !ruby/object:Provider::Terraform::Examples
