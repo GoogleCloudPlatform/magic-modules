@@ -658,9 +658,6 @@ func BuildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *tr
 		if err != nil {
 			return nil, err
 		}
-		if shorten {
-			project = strings.TrimPrefix(project, "projects/")
-		}
 	}
 
 	if strings.Contains(linkTmpl, "{{project_id_or_project}}") {
