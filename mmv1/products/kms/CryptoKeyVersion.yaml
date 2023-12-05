@@ -104,15 +104,18 @@ properties:
         description: |
           The certificate chains needed to validate the attestation
         properties:
-          - !ruby/object:Api::Type::String
+          - !ruby/object:Api::Type::Array
+            item_type: Api::Type::String
             name: 'caviumCerts'
             description: |
               Cavium certificate chain corresponding to the attestation.
-          - !ruby/object:Api::Type::String
+          - !ruby/object:Api::Type::Array
+            item_type: Api::Type::String
             name: 'googleCardCerts'
             description: |
               Google card certificate chain corresponding to the attestation.
-          - !ruby/object:Api::Type::String
+          - !ruby/object:Api::Type::Array
+            item_type: Api::Type::String
             name: 'googlePartitionCerts'
             description: |
               Google partition certificate chain corresponding to the attestation.
