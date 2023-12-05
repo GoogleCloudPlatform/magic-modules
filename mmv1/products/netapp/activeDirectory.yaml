@@ -200,6 +200,7 @@ properties:
       Password of the Active Directory domain administrator.
     required: true
     sensitive: true
+    ignore_read: true
   - !ruby/object:Api::Type::String
     name: 'backupOperators'
     description: |
