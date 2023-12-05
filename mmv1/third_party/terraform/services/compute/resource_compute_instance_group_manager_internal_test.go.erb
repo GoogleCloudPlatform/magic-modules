@@ -93,7 +93,12 @@ func TestFlattenStatefulPolicyStatefulExternalIps(t *testing.T) {
 		ExternalIPs  map[string]compute.StatefulPolicyPreservedStateNetworkIp
 		Expected     []map[string]interface{}
 	}{
-		"Single external IP (nic0) in config and API-side": {
+		"No external IPs in config nor API data": {
+			ConfigValues: map[string]interface{}{},
+			ExternalIPs: map[string]compute.StatefulPolicyPreservedStateNetworkIp{},
+			Expected: []map[string]interface{}{},
+		},
+		"Single external IP (nic0) in config and API data": {
 			ConfigValues: map[string]interface{}{
 				"stateful_external_ip": []interface{}{
 					map[string]interface{}{
@@ -114,7 +119,7 @@ func TestFlattenStatefulPolicyStatefulExternalIps(t *testing.T) {
 				},
 			},
 		},
-		"Two external IPs (nic0, nic1). Unordered in config and sorted API-side": {
+		"Two external IPs (nic0, nic1). Unordered in config and sorted in API data": {
 			ConfigValues: map[string]interface{}{
 				"stateful_external_ip": []interface{}{
 					map[string]interface{}{
@@ -146,7 +151,7 @@ func TestFlattenStatefulPolicyStatefulExternalIps(t *testing.T) {
 				},
 			},
 		},
-		"Two external IPs (nic0, nic1). Only nic0 in config and both stored API-side": {
+		"Two external IPs (nic0, nic1). Only nic0 in config and both stored in API data": {
 			ConfigValues: map[string]interface{}{
 				"stateful_external_ip": []interface{}{
 					map[string]interface{}{
@@ -174,7 +179,28 @@ func TestFlattenStatefulPolicyStatefulExternalIps(t *testing.T) {
 				},
 			},
 		},
-		"Three external IPs (nic0, nic1, nic2). Only nic1, nic2 in config and all 3 stored API-side": {
+		"Two external IPs (nic0, nic1). None stored in config and both stored in API data": {
+			ConfigValues: map[string]interface{}{},
+			ExternalIPs: map[string]compute.StatefulPolicyPreservedStateNetworkIp{
+				"nic0": {
+					AutoDelete: "NEVER",
+				},
+				"nic1": {
+					AutoDelete: "NEVER",
+				},
+			},
+			Expected: []map[string]interface{}{
+				{
+					"interface_name": "nic0",
+					"delete_rule":    "NEVER",
+				},
+				{
+					"interface_name": "nic1",
+					"delete_rule":    "NEVER",
+				},
+			},
+		},
+		"Three external IPs (nic0, nic1, nic2). Only nic1, nic2 in config and all 3 stored in API data": {
 			ConfigValues: map[string]interface{}{
 				"stateful_external_ip": []interface{}{
 					map[string]interface{}{
