@@ -363,7 +363,6 @@ properties:
         default_from_api: true
         diff_suppress_func: WorkbenchInstanceTagsDiffSuppress
         immutable: true
-        output: true
         description: |
           Optional. The Compute Engine tags to add to instance (see [Tagging
           instances](https://cloud.google.com/compute/docs/label-or-tag-resources#tags)).

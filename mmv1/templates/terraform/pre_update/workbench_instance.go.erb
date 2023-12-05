@@ -47,8 +47,14 @@ if d.HasChange("gce_setup.0.machine_type") {
 if d.HasChange("gce_setup.0.accelerator_configs") {
     newUpdateMask = append(newUpdateMask, "gce_setup.accelerator_configs")
 }
-if d.HasChange("gce_setup.0.shielded_instance_config") {
-    newUpdateMask = append(newUpdateMask, "gce_setup.shielded_instance_config")
+if d.HasChange("gce_setup.0.shielded_instance_config.0.enable_secure_boot") {
+    newUpdateMask = append(newUpdateMask, "gce_setup.shielded_instance_config.enable_secure_boot")
+}
+if d.HasChange("gce_setup.0.shielded_instance_config.0.enable_vtpm") {
+    newUpdateMask = append(newUpdateMask, "gce_setup.shielded_instance_config.enable_vtpm")
+}
+if d.HasChange("gce_setup.0.shielded_instance_config.0.enable_secure_boot.0.enable_integrity_monitoring") {
+    newUpdateMask = append(newUpdateMask, "gce_setup.shielded_instance_config.enable_integrity_monitoring")
 }
 if d.HasChange("gce_setup.0.gpu_driver_config.0.enable_gpu_driver") {
     newUpdateMask = append(newUpdateMask, "gceSetup.gpu_driver_config.enable_gpu_driver")
