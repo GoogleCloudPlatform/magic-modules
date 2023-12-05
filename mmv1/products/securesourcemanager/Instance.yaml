@@ -63,6 +63,26 @@ examples:
       ])"
     vars:
       instance_id: 'my-instance'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'secure_source_manager_instance_cmek'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-instance%s\",
+      context[\"random_suffix\"\
+      ])"
+    vars:
+      instance_id: 'my-instance'
+      keyring_name: 'my-keyring'
+      key_name: 'my-key'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'secure_source_manager_instance_private'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-instance%s\",
+      context[\"random_suffix\"\
+      ])"
+    vars:
+      instance_id: 'my-instance'
+      ca_pool_id: 'ca-pool'
+      root_ca_id: 'root-ca'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
