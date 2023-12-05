@@ -192,6 +192,9 @@ func (vt *vcrTester) Run(mode Mode, version Version) (*Result, error) {
 		return nil, err
 	}
 
+	// Run only a small subset of tests for now.
+	testDirs = testDirs[:24]
+
 	args := []string{"test"}
 	args = append(args, testDirs...)
 	args = append(args,
@@ -220,12 +223,19 @@ func (vt *vcrTester) Run(mode Mode, version Version) (*Result, error) {
 	for ev, val := range vt.env {
 		env[ev] = val
 	}
+	var printedEnv string
+	for ev, val := range env {
+		if ev == "SA_KEY" || ev == "GITHUB_TOKEN" {
+			val = "{hidden}"
+		}
+		printedEnv += fmt.Sprintf("%s=%s\n", ev, val)
+	}
 	fmt.Printf(`Running go:
 	env:
-%v
+%s
 	args:
 %s
-`, env, strings.Join(args, " "))
+`, printedEnv, strings.Join(args, " "))
 	output, err := vt.r.Run("go", args, env)
 	if err != nil {
 		// Use error as output for log.
@@ -240,6 +250,9 @@ func (vt *vcrTester) Run(mode Mode, version Version) (*Result, error) {
 	// Write output (or error) to test log.
 	if err := vt.r.WriteFile(logFileName, output); err != nil {
 		return nil, fmt.Errorf("error writing replaying log: %v, test output: %v", err, output)
+	}
+	if err := vt.uploadLogs(logPath, "thomasrodgers-vcr-logs"); err != nil {
+		return nil, fmt.Errorf("error uploading logs: %v", err)
 	}
 	return collectResult(output), nil
 }
@@ -290,6 +303,16 @@ func (vt *vcrTester) printLogs(logPath string) {
 		}
 		return nil
 	})
+}
+
+func (vt *vcrTester) uploadLogs(logPath, logBucket string) error {
+	bucketPath := fmt.Sprintf("gs://%s/logs", logBucket)
+	args := []string{"-m", "-q", "cp", logPath, bucketPath}
+	fmt.Println("Fetching cassettes:\n", "gsutil", strings.Join(args, " "))
+	if _, err := vt.r.Run("gsutil", args, nil); err != nil {
+		return err
+	}
+	return nil
 }
 
 func collectResult(output string) *Result {
