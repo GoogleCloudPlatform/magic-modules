@@ -71,21 +71,21 @@ func (gh *github) GetPullRequestPreviousAssignedReviewers(prNumber string) ([]st
 }
 
 func (gh *github) GetPullRequestLabelIDs(prNumber string) (map[int]struct{}, error) {
-	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/%s/reviews", prNumber)
+	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/%s", prNumber)
 
-	var labels []struct {
-		Label struct {
+	var pullRequest struct {
+		Labels []struct {
 			ID int `json:"id"`
-		} `json:"label"`
+		} `json:"labels"`
 	}
 
-	if _, err := utils.RequestCall(url, "GET", gh.token, &labels, nil); err != nil {
+	if _, err := utils.RequestCall(url, "GET", gh.token, &pullRequest, nil); err != nil {
 		return nil, err
 	}
 
-	var result map[int]struct{}
-	for _, label := range labels {
-		result[label.Label.ID] = struct{}{}
+	result := make(map[int]struct{}, len(pullRequest.Labels))
+	for _, label := range pullRequest.Labels {
+		result[label.ID] = struct{}{}
 	}
 
 	return result, nil
