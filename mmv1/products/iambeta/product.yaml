@@ -18,7 +18,7 @@ legacy_name: iam
 versions:
   - !ruby/object:Api::Product::Version
     name: beta
-    base_url: https://iam.googleapis.com/v1beta/
+    base_url: https://iam.googleapis.com/v1/
   - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://iam.googleapis.com/v1/
