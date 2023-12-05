@@ -60,9 +60,9 @@ func TestAccComputeRegionNetworkFirewallPolicy_LongForm(t *testing.T) {
 				Config: testAccComputeRegionNetworkFirewallPolicy_LongForm(context),
 			},
 			{
-				ResourceName:            "google_compute_region_network_firewall_policy.primary",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_compute_region_network_firewall_policy.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
 				// Import won't get the long form of any URL parameter
 				ImportStateVerifyIgnore: []string{"project", "region"},
 			},
@@ -91,7 +91,6 @@ resource "google_compute_region_network_firewall_policy" "primary" {
 }
 `, context)
 }
-
 
 func testAccComputeRegionNetworkFirewallPolicy_LongForm(context map[string]interface{}) string {
 	return acctest.Nprintf(`
