@@ -32,7 +32,7 @@ async: !ruby/object:Api::OpAsync
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
     path: 'response'
-    resource_inside_response: true
+    resource_inside_response: false
   status: !ruby/object:Api::OpAsync::Status
     path: 'done'
     complete: true
@@ -135,6 +135,7 @@ properties:
             - !ruby/object:Api::Type::KeyValuePairs
               name: "labels"
               description: "Target labels."
+              default_from_api: true
   - !ruby/object:Api::Type::Array
     name: "rules"
     description: "Required. List of Automation rules associated with the Automation resource. Must have at least one rule and limited to 250 rules per Delivery Pipeline. Note: the order of the rules here is not the same as the order of execution."

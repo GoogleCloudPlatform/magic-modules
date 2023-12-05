@@ -8,7 +8,6 @@ resource "google_clouddeploy_automation" "<%= ctx[:primary_resource_id] %>" {
   selector {
     targets {
       id = "*"
-      labels = {}
     }
   }
   suspended = false
