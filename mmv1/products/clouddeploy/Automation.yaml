@@ -37,8 +37,8 @@ async: !ruby/object:Api::OpAsync
     path: 'done'
     complete: true
     allowed:
-    - true
-    - false
+      - true
+      - false
   error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
