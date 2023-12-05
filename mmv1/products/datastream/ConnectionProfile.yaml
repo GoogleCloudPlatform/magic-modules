@@ -36,12 +36,21 @@ examples:
     vars:
       connection_profile_id: 'my-profile'
   - !ruby/object:Provider::Terraform::Examples
-    name: 'datastream_connection_profile_bigquery_private_connection'
+    name: 'datastream_connection_profile_postgresql_private_connection'
+    pull_external: true
     primary_resource_id: 'default'
+    # Random provider
+    skip_vcr: true
     vars:
       private_connection_id: 'my-connection'
       connection_profile_id: 'my-profile'
       network_name: 'my-network'
+      database_instance_name: 'my-instance'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      deletion_protection: 'false'
+    oics_vars_overrides:
+      deletion_protection: 'false'
   - !ruby/object:Provider::Terraform::Examples
     name: 'datastream_connection_profile_full'
     primary_resource_id:
@@ -57,9 +66,11 @@ examples:
     vars:
       connection_profile_id: 'my-profile'
       database_instance_name: 'my-instance'
-      deletion_protection:
-        'true'
-        # This is covered by the update tests.
+      deletion_protection: 'true'
+    test_vars_overrides:
+      deletion_protection: 'false'
+    oics_vars_overrides:
+      deletion_protection: 'false'
     skip_test: true
 parameters:
   - !ruby/object:Api::Type::String

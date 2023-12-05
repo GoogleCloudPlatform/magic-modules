@@ -62,6 +62,11 @@ examples:
     vars:
       cloud_run_service_name: 'cloudrun-service'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudrunv2_service_limits'
+    primary_resource_id: 'default'
+    vars:
+      cloud_run_service_name: 'cloudrun-service'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_sql'
     primary_resource_id: 'default'
     primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
@@ -248,7 +253,6 @@ properties:
           If True, indicates to use the default project's binary authorization policy. If False, binary authorization will be disabled.
   - !ruby/object:Api::Type::Array
     name: 'customAudiences'
-    min_version: beta
     description: |
       One or more custom audiences that you want this service to support. Specify each custom audience as the full URL in a string. The custom audiences are encoded in the token and used to authenticate requests.
       For more information, see https://cloud.google.com/run/docs/configuring/custom-audiences.
@@ -422,7 +426,7 @@ properties:
                 - !ruby/object:Api::Type::KeyValuePairs
                   name: 'limits'
                   description: |-
-                    Only memory and CPU are supported. Note: The only supported values for CPU are '1', '2', '4', and '8'. Setting 4 CPU requires at least 2Gi of memory. The values of the map is string form of the 'quantity' k8s type: https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
+                    Only memory and CPU are supported. Use key `cpu` for CPU limit and `memory` for memory limit. Note: The only supported values for CPU are '1', '2', '4', and '8'. Setting 4 CPU requires at least 2Gi of memory. The values of the map is string form of the 'quantity' k8s type: https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
                   default_from_api: true
                 - !ruby/object:Api::Type::Boolean
                   name: 'cpuIdle'
@@ -661,7 +665,6 @@ properties:
               name: 'dependsOn'
               description: |-
                 Containers which should be started before this container. If specified the container will wait to start until all containers with the listed names are healthy.
-              min_version: beta
               item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: 'volumes'

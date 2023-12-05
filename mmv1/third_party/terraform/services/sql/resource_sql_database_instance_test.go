@@ -1562,6 +1562,9 @@ func TestAccSQLDatabaseInstance_sqlMysqlDataCacheConfig(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleSqlDatabaseInstance_sqlMysqlDataCacheConfig(instanceName),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.data_cache_config.0.data_cache_enabled", "true"),
+				),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -1600,6 +1603,120 @@ func TestAccSQLDatabaseInstance_sqlPostgresDataCacheConfig(t *testing.T) {
 				Config: testGoogleSqlDatabaseInstance_sqlPostgresDataCacheConfig(enterpriseInstanceName, enterpriseTier, "ENTERPRISE"),
 				ExpectError: regexp.MustCompile(
 					fmt.Sprintf("Error, failed to create instance %s: googleapi: Error 400: Invalid request: Only ENTERPRISE PLUS edition supports data cache.., invalid", enterpriseInstanceName)),
+			},
+		},
+	})
+}
+
+func TestAccSqlDatabaseInstance_Mysql_Edition_Upgrade(t *testing.T) {
+	t.Parallel()
+	enterpriseTier := "db-custom-2-13312"
+	editionUpgrade := "tf-test-enterprise-upgrade-" + acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlDatabaseInstance_sqlMysql(editionUpgrade, enterpriseTier),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.edition", "ENTERPRISE"),
+				),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testGoogleSqlDatabaseInstance_sqlMysqlDataCacheConfig(editionUpgrade),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.edition", "ENTERPRISE_PLUS"),
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.data_cache_config.0.data_cache_enabled", "true"),
+				),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func TestAccSqlDatabaseInstance_Postgres_Edition_Upgrade(t *testing.T) {
+	t.Parallel()
+	enterpriseTier := "db-custom-2-13312"
+	enterprisePlusTier := "db-perf-optimized-N-2"
+	editionUpgrade := "tf-test-enterprise-upgrade-" + acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlDatabaseInstance_EditionConfig_noEdition(editionUpgrade, enterpriseTier),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.edition", "ENTERPRISE"),
+				),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testGoogleSqlDatabaseInstance_EditionConfig(editionUpgrade, enterprisePlusTier, "ENTERPRISE_PLUS"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.edition", "ENTERPRISE_PLUS"),
+				),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func TestAccSqlDatabaseInstance_Edition_Downgrade(t *testing.T) {
+	t.Parallel()
+	enterprisePlusTier := "db-perf-optimized-N-2"
+	enterpriseTier := "db-custom-2-13312"
+	editionDowngrade := "tf-test-enterprise-downgrade-" + acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlDatabaseInstance_EditionConfig(editionDowngrade, enterprisePlusTier, "ENTERPRISE_PLUS"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.edition", "ENTERPRISE_PLUS"),
+				),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testGoogleSqlDatabaseInstance_EditionConfig_noEdition(editionDowngrade, enterpriseTier),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.edition", "ENTERPRISE"),
+				),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -2157,42 +2274,60 @@ func TestAccSqlDatabaseInstance_updateSslOptionsForPostgreSQL(t *testing.T) {
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+
+		// We don't do ImportStateVerify for the ssl_mode because of the implementation. The ssl_mode is expected to be discarded if the local state doesn't have it.
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName, databaseVersion, false, "ALLOW_UNENCRYPTED_AND_ENCRYPTED"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.require_ssl", "false"),
+					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.ssl_mode", "ALLOW_UNENCRYPTED_AND_ENCRYPTED"),
+				),
 			},
 			{
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "settings.0.ip_configuration.0.ssl_mode"},
 			},
 			{
 				Config: testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName, databaseVersion, false, "ENCRYPTED_ONLY"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.require_ssl", "false"),
+					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.ssl_mode", "ENCRYPTED_ONLY"),
+				),
 			},
 			{
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "settings.0.ip_configuration.0.ssl_mode"},
 			},
 			{
 				Config: testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName, databaseVersion, true, "TRUSTED_CLIENT_CERTIFICATE_REQUIRED"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.require_ssl", "true"),
+					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.ssl_mode", "TRUSTED_CLIENT_CERTIFICATE_REQUIRED"),
+				),
 			},
 			{
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "settings.0.ip_configuration.0.ssl_mode"},
 			},
 			{
 				Config: testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName, databaseVersion, false, "ALLOW_UNENCRYPTED_AND_ENCRYPTED"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.require_ssl", "false"),
+					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.ssl_mode", "ALLOW_UNENCRYPTED_AND_ENCRYPTED"),
+				),
 			},
 			{
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "settings.0.ip_configuration.0.ssl_mode"},
 			},
 		},
 	})
@@ -2358,6 +2493,9 @@ resource "google_sql_database_instance" "instance" {
   deletion_protection = false
   settings {
     tier = "%s"
+     backup_configuration {
+      transaction_log_retention_days = 7
+     }    
   }
 }`, databaseName, tier)
 }
@@ -2375,6 +2513,20 @@ resource "google_sql_database_instance" "instance" {
     edition = "%s"
   }
 }`, databaseName, tier, edition)
+}
+
+func testGoogleSqlDatabaseInstance_sqlMysql(databaseName, tier string) string {
+	return fmt.Sprintf(`
+
+resource "google_sql_database_instance" "instance" {
+  name             = "%s"
+  region           = "us-east1"
+  database_version    = "MYSQL_8_0_31"
+  deletion_protection = false
+  settings {
+    tier = "%s"
+  }
+}`, databaseName, tier)
 }
 
 func testGoogleSqlDatabaseInstance_sqlMysqlDataCacheConfig(instanceName string) string {

@@ -302,7 +302,6 @@ The following arguments are supported:
   The configuration used for the Private IP Cloud Composer environment. Structure is [documented below](#nested_private_environment_config).
 
 * `web_server_network_access_control` -
-  (Optional, Cloud Composer 1 only)
   The network-level access control policy for the Airflow web server.
   If unspecified, no network-level access restrictions are applied.
 
@@ -569,9 +568,13 @@ The `web_server_network_access_control` supports:
 <a name="nested_database_config"></a>The `database_config` block supports:
 
 * `machine_type` -
-  (Required)
-  Cloud SQL machine type used by Airflow database. It has to be one of: db-n1-standard-2,
+  (Optional)
+  Optional. Cloud SQL machine type used by Airflow database. It has to be one of: db-n1-standard-2,
   db-n1-standard-4, db-n1-standard-8 or db-n1-standard-16.
+
+* `Zone` -
+  (Optional)
+  Preferred Cloud SQL database zone.
 
 <a name="nested_web_server_config"></a>The `web_server_config` block supports:
 

@@ -483,7 +483,7 @@ module Api
         @custom_diff.append('tpgresource.SetMetadataLabelsDiff')
       end
 
-      props << build_terraform_labels_field('labels', labels.field_min_version)
+      props << build_terraform_labels_field('labels', labels)
       props << build_effective_labels_field('labels', labels)
     end
 
@@ -521,7 +521,7 @@ module Api
       )
     end
 
-    def build_terraform_labels_field(name, min_version)
+    def build_terraform_labels_field(name, labels)
       description = "The combination of #{name} configured directly on the resource
  and default #{name} configured on the provider."
 
@@ -530,8 +530,10 @@ module Api
         output: true,
         api_name: name,
         description:,
-        min_version:,
-        ignore_write: true
+        min_version: labels.field_min_version,
+        ignore_write: true,
+        update_url: labels.update_url,
+        immutable: labels.immutable
       )
     end
 
@@ -615,16 +617,6 @@ Please refer to the field `effective_#{title}` for all of the #{title} present o
 
     def collection_uri
       @base_url
-    end
-
-    def async_operation_url
-      [@__product.base_url, async_operation_uri].flatten.join
-    end
-
-    def async_operation_uri
-      raise 'Not an async resource' if async.nil?
-
-      async.operation.base_url
     end
 
     def full_create_url

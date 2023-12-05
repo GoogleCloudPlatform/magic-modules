@@ -35,6 +35,9 @@ service/apigateway:
 service/apigee:
   resources:
   - google_apigee_.*
+service/apikeys:
+  resources:
+  - google_apikeys_key
 service/artifactregistry:
   resources:
   - google_artifact_registry_.*
@@ -167,9 +170,31 @@ service/compute-l7-load-balancer:
   - google_compute_region_target_http_proxy
   - google_compute_target_https_proxy
   - google_compute_region_target_https_proxy
+service/compute-managed:
+  resources:
+  - google_compute_instance_group_manager.*
+  - google_compute_region_instance_group_manager.*
+  - google_compute_per_instance_config.*
+  - google_compute_region_per_instance_config.*
 service/compute-nat:
   resources:
   - google_compute_router_nat
+service/compute-network-peering:
+  resources:
+  - google_compute_network_peering.*
+service/compute-networking-ig:
+  resources:
+  - google_compute_instance_group
+  - google_compute_instance_group_named_port
+  - google_compute_region_instance_group
+service/compute-networking-neg:
+  resources:
+  - google_compute_global_network_endpoint.*
+  - google_compute_network_endpoint.*
+  - google_compute_region_network_endpoint.*
+service/compute-packet-mirroring:
+  resources:
+  - google_compute_packet_mirroring
 service/compute-pd:
   resources:
   - google_compute_attached_disk.*
@@ -206,6 +231,14 @@ service/compute-sole-tenancy:
   resources:
   - google_compute_node_group
   - google_compute_node_template
+service/compute-vpc:
+  resources:
+  - google_compute_network
+  - google_compute_route
+  - google_compute_subnetwork
+  - google_compute_shared_vpc_host_project
+  - google_compute_shared_vpc_service_project
+  - google_compute_project_default_network_tier
 service/compute-vpn:
   resources:
   - google_compute_ha_vpn_gateway
@@ -229,9 +262,15 @@ service/dataflow:
 service/dataform:
   resources:
   - google_dataform_.*
+service/datafusion:
+  resources:
+  - google_data_fusion_.*
 service/datamigration:
   resources:
   - google_database_migration_service_.*
+service/dataplex:
+  resources:
+  - google_dataplex_.*
 service/dataproc:
   resources:
   - google_dataproc_cluster
@@ -249,6 +288,9 @@ service/deploymentmanager:
 service/dialogflow:
   resources:
   - google_dialogflow_.*
+service/discoveryengine:
+  resources:
+  - google_discoveryengine_.*
 service/dlp:
   resources:
   - google_data_loss_prevention_.*
@@ -338,6 +380,9 @@ service/identitytoolkit:
 service/ids:
   resources:
   - google_cloud_ids_.*
+service/integrationconnectors:
+  resources:
+  - google_integration_connectors_.*
 service/logging:
   resources:
   - google_logging_.*
@@ -376,15 +421,15 @@ service/monitoring-services:
 service/monitoring-uptime:
   resources:
   - google_monitoring_uptime_.*
+service/network-connectivity-center:
+  resources:
+  - google_network_connectivity_hub
+  - google_network_connectivity_spoke
 service/network-security:
   resources:
   - google_network_security_authorization_policy
   - google_network_security_client_tls_policy
-  - google_network_security_gateway_security_policy
-  - google_network_security_gateway_security_policy_rule
   - google_network_security_server_tls_policy
-  - google_network_security_tls_inspection_policy
-  - google_network_security_url_lists
 service/network-security-distributed-firewall:
   resources:
   - google_network_security_address_group
@@ -398,6 +443,12 @@ service/networkconnectivity-serviceautomation:
 service/networkmanagement-connectivity-test:
   resources:
   - google_network_management_connectivity_test
+service/networksecurity-swp:
+  resources:
+  - google_network_security_gateway_security_policy
+  - google_network_security_gateway_security_policy_rule
+  - google_network_security_url_lists
+  - google_network_security_tls_inspection_policy
 service/networkservices-media-cdn:
   resources:
   - google_network_services_edge_cache_.*
@@ -429,6 +480,9 @@ service/osconfig:
 service/oslogin:
   resources:
   - google_os_login_.*
+service/policy-based-routing:
+  resources:
+  - google_network_connectivity_policy_based_route
 service/private-service-connect-interfaces:
   resources:
   - google_compute_network_attachment
@@ -446,6 +500,9 @@ service/pubsub:
 service/pubsublite:
   resources:
   - google_pubsub_lite_.*
+service/recaptchaenterprise:
+  resources:
+  - google_recaptcha_enterprise_key
 service/redis-cluster:
   resources:
   - google_redis_cluster
@@ -469,6 +526,9 @@ service/service-networking:
 service/servicedirectory:
   resources:
   - google_service_directory_.*
+service/serviceusage:
+  resources:
+  - google_project_service
 service/serviceusage-quota:
   resources:
   - google_service_usage_consumer_quota_override
@@ -484,6 +544,9 @@ service/sqladmin:
 service/storage:
   resources:
   - google_storage_.*
+service/tpu:
+  resources:
+  - google_tpu_.*
 service/vmwareengine:
   resources:
   - google_vmwareengine_network

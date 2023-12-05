@@ -47,7 +47,7 @@ jobs:
         path: |
           ~/go/pkg/mod
           ~/.cache/go-build
-        key: ${{ runner.os }}-test-${{ github.event.inputs.repo }}-${{hashFiles('go.sum','google-beta/transport/**','google-beta/tpgresource/**','google-beta/acctest/**','google-beta/envvar/**','google-beta/sweeper/**','google-beta/verify/**') }}
+        key: ${{ runner.os }}-test-${{ github.event.inputs.repo }}-${{hashFiles('go.sum','google-*/transport/**','google-*/tpgresource/**','google-*/acctest/**','google-*/envvar/**','google-*/sweeper/**','google-*/verify/**') }}
         restore-keys: |
           ${{ runner.os }}-test-${{ github.event.inputs.repo }}-${{ hashFiles('go.sum') }}
           ${{ runner.os }}-test-${{ github.event.inputs.repo }}-
@@ -80,9 +80,9 @@ jobs:
         }'
     - name: Set up Go
       if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
-      uses: actions/setup-go@v4
+      uses: actions/setup-go@v3
       with:
-        go-version: '^1.19.1'
+        go-version: '^1.20'
     - name: Build Provider
       if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |
