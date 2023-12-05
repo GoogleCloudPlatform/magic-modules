@@ -61,3 +61,5 @@ resource "google_secure_source_manager_instance" "<%= ctx[:primary_resource_id] 
     google_privateca_certificate_authority.root_ca
   ]
 }
+
+data "google_project" "project" {}

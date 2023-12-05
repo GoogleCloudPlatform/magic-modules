@@ -170,6 +170,7 @@ properties:
     name: 'privateConfig'
     description: |
       Private settings for private instance.
+    immutable: true
     properties:
       - !ruby/object:Api::Type::Boolean
         name: 'isPrivate'
