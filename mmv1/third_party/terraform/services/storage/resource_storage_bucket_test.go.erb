@@ -287,6 +287,12 @@ func TestAccStorageBucket_lifecycleRuleStateArchived(t *testing.T) {
 				),
 			},
 			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+			{
 				Config: testAccStorageBucket_lifecycleRule_withStateArchived(bucketName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckStorageBucketExists(
@@ -377,7 +383,7 @@ func TestAccStorageBucket_lifecycleRuleStateAny(t *testing.T) {
 
 func TestAccStorageBucket_lifecycleRulesNoAge(t *testing.T) {
 	t.Parallel()
-  var bucket storage.Bucket
+	var bucket storage.Bucket
 	bucketName := acctest.TestBucketName(t)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -388,8 +394,8 @@ func TestAccStorageBucket_lifecycleRulesNoAge(t *testing.T) {
 			{
 				Config: testAccStorageBucket_customAttributes_withLifecycle1(bucketName),
 				Check: resource.ComposeTestCheckFunc(
-				  testAccCheckStorageBucketExists(
-          						t, "google_storage_bucket.bucket", bucketName, &bucket),
+					testAccCheckStorageBucketExists(
+						t, "google_storage_bucket.bucket", bucketName, &bucket),
 				),
 			},
 			{
@@ -399,46 +405,46 @@ func TestAccStorageBucket_lifecycleRulesNoAge(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
 			{
-        Config: testAccStorageBucket_customAttributes_withLifecycleNoAge(bucketName),
-        Check: resource.ComposeTestCheckFunc(
-          testAccCheckStorageBucketExists(
-                      t, "google_storage_bucket.bucket", bucketName, &bucket),
-          testAccCheckStorageBucketLifecycleConditionNoAge(nil, &bucket),
-        ),
-      },
-      {
-        ResourceName:            "google_storage_bucket.bucket",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"force_destroy","lifecycle_rule.0.condition.0.no_age"},
-      },
-      {
-        Config: testAccStorageBucket_customAttributes_withLifecycleNoAgeAndAge(bucketName),
-        Check: resource.ComposeTestCheckFunc(
-          testAccCheckStorageBucketExists(
-                      t, "google_storage_bucket.bucket", bucketName, &bucket),
-          testAccCheckStorageBucketLifecycleConditionNoAge(nil, &bucket),
-        ),
-      },
-      {
-        ResourceName:            "google_storage_bucket.bucket",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"force_destroy","lifecycle_rule.0.condition.0.no_age"},
-      },
-      {
-        Config: testAccStorageBucket_customAttributes_withLifecycle1(bucketName),
-        Check: resource.ComposeTestCheckFunc(
-          testAccCheckStorageBucketExists(
-                      t, "google_storage_bucket.bucket", bucketName, &bucket),
-        ),
-      },
-      {
-        ResourceName:            "google_storage_bucket.bucket",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"force_destroy"},
-      },
+				Config: testAccStorageBucket_customAttributes_withLifecycleNoAge(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckStorageBucketExists(
+						t, "google_storage_bucket.bucket", bucketName, &bucket),
+					testAccCheckStorageBucketLifecycleConditionNoAge(nil, &bucket),
+				),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy","lifecycle_rule.0.condition.0.no_age"},
+			},
+			{
+				Config: testAccStorageBucket_customAttributes_withLifecycleNoAgeAndAge(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckStorageBucketExists(
+						t, "google_storage_bucket.bucket", bucketName, &bucket),
+					testAccCheckStorageBucketLifecycleConditionNoAge(nil, &bucket),
+				),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy","lifecycle_rule.0.condition.0.no_age"},
+			},
+			{
+				Config: testAccStorageBucket_customAttributes_withLifecycle1(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckStorageBucketExists(
+						t, "google_storage_bucket.bucket", bucketName, &bucket),
+				),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
 		},
 	})
 }

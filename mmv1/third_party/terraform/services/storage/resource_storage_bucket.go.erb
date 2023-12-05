@@ -218,10 +218,10 @@ func ResourceStorageBucket() *schema.Resource {
 										Description: `Creation date of an object in RFC 3339 (e.g. 2017-06-13) to satisfy this condition.`,
 									},
 									"no_age": {
-                    Type:        schema.TypeBool,
-                    Optional:    true,
-                    Description: `While set true, age value will be omitted.Required to set true when age is unset in the config file.`,
-                  },
+										Type:        schema.TypeBool,
+										Optional:    true,
+										Description: `While set true, age value will be omitted.Required to set true when age is unset in the config file.`,
+									},
 									"with_state": {
 										Type:         schema.TypeString,
 										Computed:     true,
@@ -1221,7 +1221,7 @@ func flattenBucketLifecycle(d *schema.ResourceData, lifecycle *storage.BucketLif
 	for _, rule := range lifecycle.Rule {
 		rules = append(rules, map[string]interface{}{
 			"action":    schema.NewSet(resourceGCSBucketLifecycleRuleActionHash, []interface{}{flattenBucketLifecycleRuleAction(rule.Action)}),
-			"condition": schema.NewSet(resourceGCSBucketLifecycleRuleConditionHash, []interface{}{flattenBucketLifecycleRuleCondition(d,rule.Condition)}),
+			"condition": schema.NewSet(resourceGCSBucketLifecycleRuleConditionHash, []interface{}{flattenBucketLifecycleRuleCondition(d, rule.Condition)}),
 		})
 	}
 
@@ -1261,10 +1261,8 @@ func flattenBucketLifecycleRuleCondition(d *schema.ResourceData, condition *stor
 	}
   // setting no_age value from state config since it is terraform only variable and not getting value from backend.
 	if v, ok := d.GetOk("lifecycle_rule.0.condition"); ok{
-    state_condition := v.(*schema.Set).List()[0].(map[string]interface{})
-    ruleCondition["no_age"] = state_condition["no_age"].(bool)
-	} else {
-	  ruleCondition["no_age"] = false
+		state_condition := v.(*schema.Set).List()[0].(map[string]interface{})
+		ruleCondition["no_age"] = state_condition["no_age"].(bool)
 	}
 
 	return ruleCondition
