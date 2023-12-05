@@ -74,6 +74,7 @@ properties:
     description: Name of the repository.
     required: true
     immutable: true
+    ignore_read: true
   - !ruby/object:Api::Type::String
     name: remoteUri
     description: Required. Git Clone HTTPS URI.
