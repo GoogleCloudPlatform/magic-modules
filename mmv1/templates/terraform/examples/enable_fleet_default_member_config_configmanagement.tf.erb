@@ -1,7 +1,7 @@
 resource "google_gke_hub_feature" "feature" {
   name = "configmanagement"
   location = "global"
-  fleetDefaultMemberConfig {
+  fleet_default_member_config {
     configmanagement {
       config_sync {
         git {

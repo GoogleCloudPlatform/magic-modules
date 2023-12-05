@@ -770,7 +770,6 @@ func ResourceContainerCluster() *schema.Resource {
 								},
 							},
 						},
-						<% unless version == 'ga' -%>
 						"autoscaling_profile": {
 							Type:             schema.TypeString,
 							Default:          "BALANCED",
@@ -779,7 +778,6 @@ func ResourceContainerCluster() *schema.Resource {
 							ValidateFunc:     validation.StringInSlice([]string{"BALANCED", "OPTIMIZE_UTILIZATION"}, false),
 							Description:      `Configuration options for the Autoscaling profile feature, which lets you choose whether the cluster autoscaler should optimize for resource utilization or resource availability when deciding to remove nodes from a cluster. Can be BALANCED or OPTIMIZE_UTILIZATION. Defaults to BALANCED.`,
 						},
-						<% end -%>
 					},
 				},
 			},
@@ -2005,7 +2003,6 @@ func ResourceContainerCluster() *schema.Resource {
 				Type:        schema.TypeList,
 				Optional:    true,
 				MaxItems:    1,
-				ForceNew:    true,
 				DiffSuppressFunc: suppressDiffForAutopilot,
 				Description: `Configuration for Cloud DNS for Kubernetes Engine.`,
 				Elem: &schema.Resource{
@@ -2954,6 +2951,22 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 
 		log.Printf("[INFO] GKE cluster %s's cluster-wide autoscaling has been updated", d.Id())
+	}
+
+	if d.HasChange("dns_config") {
+		req := &container.UpdateClusterRequest{
+			Update: &container.ClusterUpdate{
+				DesiredDnsConfig: expandDnsConfig(d.Get("dns_config")),
+			},
+		}
+
+		updateF := updateFunc(req, "updating GKE cluster DNSConfig")
+		// Call update serially.
+		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] GKE cluster %s's DNSConfig has been updated", d.Id())
 	}
 
 	if d.HasChange("allow_net_admin") {
@@ -4558,9 +4571,7 @@ func expandClusterAutoscaling(configured interface{}, d *schema.ResourceData) *c
 	return &container.ClusterAutoscaling{
 		EnableNodeAutoprovisioning: config["enabled"].(bool),
 		ResourceLimits:             resourceLimits,
-		<% unless version == 'ga' -%>
 		AutoscalingProfile: config["autoscaling_profile"].(string),
-		<% end -%>
 		AutoprovisioningNodePoolDefaults: expandAutoProvisioningDefaults(config["auto_provisioning_defaults"], d),
 	}
 }
@@ -5795,9 +5806,7 @@ func flattenClusterAutoscaling(a *container.ClusterAutoscaling) []map[string]int
 	} else {
 		r["enabled"] = false
 	}
-	<% unless version == 'ga' -%>
 	r["autoscaling_profile"] = a.AutoscalingProfile
-	<% end -%>
 
 	return []map[string]interface{}{r}
 }
