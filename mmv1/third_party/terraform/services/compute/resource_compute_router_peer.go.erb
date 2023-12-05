@@ -17,11 +17,6 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
 
-	<% if version == "ga" -%>
-		"google.golang.org/api/compute/v1"
-	<% else -%>
-		compute "google.golang.org/api/compute/v0.beta"
-	<% end -%>
 )
 
 func ipv6RepresentationDiffSuppress(_, old, new string, d *schema.ResourceData) bool {
