@@ -4,7 +4,6 @@ package clouddeploy_test
 
 <% unless version == 'ga' -%>
 import (
-  "fmt"
   "testing"
 
   "github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -17,9 +16,8 @@ func TestAccClouddeployAutomation_update(t *testing.T) {
   t.Parallel()
 
   context := map[string]interface{}{
-    "project":         envvar.GetTestProjectFromEnv(),
-    "service_account": fmt.Sprintf("%s-compute@developer.gserviceaccount.com", envvar.GetTestProjectFromEnv()),
-    "random_suffix":   acctest.RandString(t, 10),
+    "service_account": envvar.GetTestServiceAccountFromEnv(t),
+		"random_suffix":   acctest.RandString(t, 10),
   }
 
   acctest.VcrTest(t, resource.TestCase{
@@ -58,7 +56,10 @@ resource "google_clouddeploy_automation" "automation" {
   delivery_pipeline = google_clouddeploy_delivery_pipeline.pipeline.name
   service_account = "%{service_account}"
   selector {
-    targets {id = "*"}
+    targets {
+      id = "*"
+      labels = {}
+    }
   }
   rules {
     promote_release_rule{
@@ -103,7 +104,7 @@ resource "google_clouddeploy_automation" "automation" {
     targets {
 			id = "test"
 			labels = {
-				foo = "bar""
+				foo = "bar"
 			}
     }
   }
@@ -111,15 +112,16 @@ resource "google_clouddeploy_automation" "automation" {
   rules {
     promote_release_rule{
       id = "promote-release1"
-      wait = "200"
+      wait = "200s"
       destination_target_id = "@next"
       destination_phase = "stable"
     }
-		advance_rollout_rule {
-      destination_target_id = "dev"
+  }
+  rules {
+    advance_rollout_rule {
       id                    = "advance rollout"
       source_phases         = ["deploy"]
-      wait                  = "200"
+      wait                  = "200s"
     }
   }
 }

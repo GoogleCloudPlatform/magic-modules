@@ -19,39 +19,54 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Automate your deployment': 'https://cloud.google.com/deploy/docs/automation'
   api: 'https://cloud.google.com/deploy/docs/api/reference/rest/v1/projects.locations.deliveryPipelines.automations'
-base_url: 'projects/{{project}}/locations/{{location}}/deliveryPipelines/{delivery_pipeline}/automations'
-self_link: 'projects/{{project}}/locations/{{location}}/deliveryPipelines/{delivery_pipeline}/automations/{{automation}}'
+base_url: 'projects/{{project}}/locations/{{location}}/deliveryPipelines/{{delivery_pipeline}}/automations'
+self_link: 'projects/{{project}}/locations/{{location}}/deliveryPipelines/{{delivery_pipeline}}/automations/{{name}}'
 min_version: beta
-create_url: 'projects/{{project}}/locations/{{location}}/deliveryPipelines/{delivery_pipeline}/automations?automationId={{automation}}'
+create_url: 'projects/{{project}}/locations/{{location}}/deliveryPipelines/{{delivery_pipeline}}/automations?automationId={{name}}'
 update_verb: :PATCH
 update_mask: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
     base_url: '{{op_id}}'
     wait_ms: 1000
-id_format: projects/{{project}}/locations/{{location}}/deliveryPipelines/{{delivery_pipeline}}/automations/{{automation}}
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+    - true
+    - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'
+id_format: 'projects/{{project}}/locations/{{location}}/deliveryPipelines/{{delivery_pipeline}}/automations/{{name}}'
 import_format:
   [
-    'projects/{{project}}/locations/{{location}}/deliveryPipelines/{{delivery_pipeline}}/automations/{{automation}}',
+    'projects/{{project}}/locations/{{location}}/deliveryPipelines/{{delivery_pipeline}}/automations/{{name}}',
   ]
 autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "clouddeploy_automation_basic"
     min_version: beta
-    primary_resource_id: "automation"
-    primary_resource_name: "fmt.Sprintf(\"tf_test_my_delivery_pipeline%s\",
-          context[\"\
-          random_suffix\"]), fmt.Sprintf(\"tf_test_my_automation%s\",
-          context[\"random_suffix\"\
-          ])"
+    primary_resource_id: "b-automation"
     vars:
       automation: "cd-automation"
       delivery_pipeline: "cd-pipeline"
     test_env_vars:
-      project: :PROJECT_NAME
-    test_vars_overrides:
-      service_account: 'fmt.Sprintf("%s-compute@developer.gserviceaccount.com", envvar.GetTestProjectFromEnv())'
+      service_account: :SERVICE_ACCT
+  - !ruby/object:Provider::Terraform::Examples
+    name: "clouddeploy_automation_full"
+    min_version: beta
+    primary_resource_id: "f-automation"
+    vars:
+      automation: "cd-automation"
+      delivery_pipeline: "cd-pipeline"
+    test_env_vars:
+      service_account: :SERVICE_ACCT
 parameters:
   - !ruby/object:Api::Type::String
     name: "location"
@@ -71,7 +86,7 @@ properties:
     description: "Output only. Name of the `Automation`. Format is `projects/{project}/locations/{location}/deliveryPipelines/{delivery_pipeline}/automations/{automation}`."
     required: true
     immutable: true
-    pattern: "projects/{{project}}/locations/{{location}}/deliveryPipelines/{{delivery_pipeline}}/automations/{{name}}"
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   - !ruby/object:Api::Type::String
     name: "uid"
     description: "Output only. Unique identifier of the `Automation`."
@@ -146,25 +161,6 @@ properties:
             - !ruby/object:Api::Type::String
               name: "destination_phase"
               description: "Optional. The starting phase of the rollout created by this operation. Default to the first phase."
-            - !ruby/object:Api::Type::NestedObject
-              name: "condition"
-              description: "Output only. Information around the state of the Automation rule."
-              output: true
-              properties:
-                - !ruby/object:Api::Type::NestedObject
-                  name: "targets_present_condition"
-                  description: "Optional. Details around targets enumerated in the rule."
-                  properties:
-                    - !ruby/object:Api::Type::String
-                      name: "status"
-                      description: "True if there aren't any missing Targets."
-                    - !ruby/object:Api::Type::Array
-                      name: "missing_targets"
-                      item_type: Api::Type::String
-                      description: "The list of Target names that do not exist. For example, `projects/{project_id}/locations/{location_name}/targets/{target_name}`."
-                    - !ruby/object:Api::Type::String
-                      name: "update_time"
-                      description: "Last time the condition was updated."
         - !ruby/object:Api::Type::NestedObject
           name: "advance_rollout_rule"
           description: "Optional. The `AdvanceRolloutRule` will automatically advance a successful Rollout."
@@ -186,22 +182,3 @@ properties:
               name: "source_phases"
               item_type: Api::Type::String
               description: "Optional. Proceeds only after phase name matched any one in the list. This value must consist of lower-case letters, numbers, and hyphens, start with a letter and end with a letter or a number, and have a max length of 63 characters. In other words, it must match the following regex: `^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$`."
-            - !ruby/object:Api::Type::NestedObject
-              name: "condition"
-              description: "Output only. Information around the state of the Automation rule."
-              output: true
-              properties:
-                - !ruby/object:Api::Type::NestedObject
-                  name: "targets_present_condition"
-                  description: "Optional. Details around targets enumerated in the rule."
-                  properties:
-                    - !ruby/object:Api::Type::String
-                      name: "status"
-                      description: "True if there aren't any missing Targets."
-                    - !ruby/object:Api::Type::Array
-                      name: "missing_targets"
-                      item_type: Api::Type::String
-                      description: "The list of Target names that do not exist. For example, `projects/{project_id}/locations/{location_name}/targets/{target_name}`."
-                    - !ruby/object:Api::Type::String
-                      name: "update_time"
-                      description: "Last time the condition was updated."

@@ -1,12 +1,17 @@
 resource "google_clouddeploy_automation" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
   name     = "<%= ctx[:vars]['automation'] %>"
-  location = "us-central1"
+  project = google_clouddeploy_delivery_pipeline.pipeline.project
+  location = google_clouddeploy_delivery_pipeline.pipeline.location
   delivery_pipeline = google_clouddeploy_delivery_pipeline.pipeline.name
-  service_account = "<%= ctx[:vars]['service_account'] %>"
+  service_account = "<%= ctx[:test_env_vars]['service_account'] %>"
   selector {
-    targets {id = "*"}
+    targets {
+      id = "*"
+      labels = {}
+    }
   }
+  suspended = false
   rules {
     promote_release_rule{
       id = "promote-release"
@@ -21,7 +26,13 @@ resource "google_clouddeploy_delivery_pipeline" "pipeline" {
   serial_pipeline  {
     stages {
       target_id = "test"
-      profiles = ["test-profile"]
+      profiles = []
     }
   }
  }
+
+resource "google_service_account" "automation_sa" {
+  provider     = google-beta
+  account_id   = "tf-test-dataform-sa%{random_suffix}"
+  display_name = "Dataform Service Account"
+}
