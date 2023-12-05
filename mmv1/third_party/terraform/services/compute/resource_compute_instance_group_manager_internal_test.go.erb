@@ -1,3 +1,4 @@
+<% autogen_exception -%>
 package compute
 
 import (
@@ -5,7 +6,12 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+
+<% if version == "ga" -%>
 	"google.golang.org/api/compute/v1"
+<% else -%>
+	compute "google.golang.org/api/compute/v0.beta"
+<% end -%>
 )
 
 func TestInstanceGroupManager_parseUniqueId(t *testing.T) {
