@@ -33,8 +33,8 @@ func testAccDataSourceGoogleComputeRegionDisk_basic(context map[string]interface
 	return acctest.Nprintf(`
 resource "google_compute_region_disk" "foo" {
   name          = "tf-test-compute-disk-%{random_suffix}"
-	type          = "pd-standard"
-	replica_zones = ["us-central1-a", "us-central1-f"]
+  type          = "pd-standard"
+  replica_zones = ["us-central1-a", "us-central1-f"]
 
   labels = {
     my-label = "my-label-value"
