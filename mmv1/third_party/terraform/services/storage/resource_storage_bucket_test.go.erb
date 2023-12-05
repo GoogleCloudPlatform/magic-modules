@@ -381,6 +381,65 @@ func TestAccStorageBucket_lifecycleRuleStateAny(t *testing.T) {
 	})
 }
 
+func TestAccStorageBucket_lifecycleRuleAge(t *testing.T) {
+	t.Parallel()
+
+	var bucket storage.Bucket
+	bucketName := fmt.Sprintf("tf-test-acc-bucket-%d", acctest.RandInt(t))
+	int64_10 := int64(10)
+	int64_0 := int64(0)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageBucketDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageBucket_lifecycleRule_withAgeTen(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckStorageBucketExists(
+						t, "google_storage_bucket.bucket", bucketName, &bucket),
+					testAccCheckStorageBucketLifecycleConditionAge(&int64_10, &bucket),
+				),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+			{
+				Config: testAccStorageBucket_lifecycleRule_withAgeNil(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckStorageBucketExists(
+						t, "google_storage_bucket.bucket", bucketName, &bucket),
+					testAccCheckStorageBucketLifecycleConditionAge(nil, &bucket),
+				),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+			{
+				Config: testAccStorageBucket_lifecycleRule_withAgeZero(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckStorageBucketExists(
+						t, "google_storage_bucket.bucket", bucketName, &bucket),
+					testAccCheckStorageBucketLifecycleConditionAge(&int64_0, &bucket),
+				),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+		},
+	})
+}
+
 func TestAccStorageBucket_storageClass(t *testing.T) {
 	t.Parallel()
 
@@ -1296,6 +1355,25 @@ func testAccCheckStorageBucketMissing(t *testing.T, bucketName string) resource.
 	}
 }
 
+func testAccCheckStorageBucketLifecycleConditionAge(expected *int64, b *storage.Bucket) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		actual := b.Lifecycle.Rule[0].Condition.Age
+		if expected == nil && b.Lifecycle.Rule[0].Condition.Age == nil {
+			return nil
+		}
+		if expected == nil {
+			return fmt.Errorf("expected condition Age to be unset, instead got %d", *actual)
+		}
+		if actual == nil {
+			return fmt.Errorf("expected condition Age to be %d, instead got nil (unset)", *expected)
+		}
+		if *expected != *actual {
+			return fmt.Errorf("expected condition Age to be %d, instead got %d", *expected, *actual)
+		}
+		return nil
+	}
+}
+
 func testAccCheckStorageBucketLifecycleConditionState(expected *bool, b *storage.Bucket) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		actual := b.Lifecycle.Rule[0].Condition.IsLive
@@ -1855,6 +1933,65 @@ resource "google_storage_bucket" "bucket" {
     condition {
       age        = 10
       with_state = "ANY"
+    }
+  }
+}
+`, bucketName)
+}
+
+func testAccStorageBucket_lifecycleRule_withAgeTen(bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name          = "%s"
+  location      = "US"
+  force_destroy = true
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+
+    condition {
+      age        = 10
+      with_state = "ARCHIVED"
+    }
+  }
+}
+`, bucketName)
+}
+
+func testAccStorageBucket_lifecycleRule_withAgeNil(bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name          = "%s"
+  location      = "US"
+  force_destroy = true
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+
+    condition {
+      with_state = "ARCHIVED"
+    }
+  }
+}
+`, bucketName)
+}
+
+func testAccStorageBucket_lifecycleRule_withAgeZero(bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name          = "%s"
+  location      = "US"
+  force_destroy = true
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+
+    condition {
+	  age        = 0
+      with_state = "ARCHIVED"
     }
   }
 }
