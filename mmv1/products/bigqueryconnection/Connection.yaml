@@ -121,7 +121,6 @@ examples:
       database: 'projects/project/instances/instance/databases/database'
   - !ruby/object:Provider::Terraform::Examples
     name: "bigquery_connection_spark"
-    pull_external: true
     region_override: "US"
     primary_resource_id: "connection"
     vars:
