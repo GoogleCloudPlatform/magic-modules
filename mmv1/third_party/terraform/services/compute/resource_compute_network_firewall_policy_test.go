@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
- )
+)
 
 func TestAccComputeNetworkFirewallPolicy_GlobalHandWritten(t *testing.T) {
 	t.Parallel()
@@ -58,9 +58,9 @@ func TestAccComputeNetworkFirewallPolicy_LongForm(t *testing.T) {
 				Config: testAccComputeNetworkFirewallPolicy_LongForm(context),
 			},
 			{
-				ResourceName:            "google_compute_network_firewall_policy.primary",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_compute_network_firewall_policy.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
 				// Import won't get the long form of any URL parameter
 				ImportStateVerifyIgnore: []string{"project", "region"},
 			},
