@@ -214,19 +214,6 @@ func TestAccStorageBucket_dualLocation_rpo(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
 			{
-				Config: testAccStorageBucket_dualLocation(bucketName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"google_storage_bucket.bucket", "rpo", "ASYNC_TURBO"),
-				),
-			},
-			{
-				ResourceName:            "google_storage_bucket.bucket",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
-			},
-			{
 				Config: testAccStorageBucket_dualLocation_rpo(bucketName,"DEFAULT"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(

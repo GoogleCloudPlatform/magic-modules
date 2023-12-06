@@ -1692,9 +1692,9 @@ func setStorageBucket(d *schema.ResourceData, config *transport_tpg.Config, res 
 	// Needs to hide rpo field for single-region buckets.
 	// Check the Rpo field from API response to determine whether bucket is in single region config or not.
 	if res.Rpo != "" {
-    if err := d.Set("rpo", res.Rpo); err != nil {
-      return fmt.Errorf("Error setting RPO setting : %s", err)
-    }
+		if err := d.Set("rpo", res.Rpo); err != nil {
+			return fmt.Errorf("Error setting RPO setting : %s", err)
+		}
 	}
 	if res.IamConfiguration != nil && res.IamConfiguration.UniformBucketLevelAccess != nil {
 		if err := d.Set("uniform_bucket_level_access", res.IamConfiguration.UniformBucketLevelAccess.Enabled); err != nil {
