@@ -43,8 +43,7 @@ examples:
       listing_id: 'my_listing'
       destination_dataset_id: 'destination_dataset'
       description: 'example data exchange'
-#TODO(lobato): IAM policy
-#TODO(lobato): Examples
+# TODO(lobato): IAM policy
 
 properties:
   - !ruby/object:Api::Type::NestedObject
