@@ -23,10 +23,6 @@ versions:
     base_url: https://workflows.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Workflows API
-    url: https://console.cloud.google.com/apis/library/workflows.googleapis.com/
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'

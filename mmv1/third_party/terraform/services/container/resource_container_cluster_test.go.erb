@@ -3244,10 +3244,6 @@ func TestAccContainerCluster_withSoleTenantGroup(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
-// consider merging this test with TestAccContainerCluster_nodeAutoprovisioningDefaults
-// once the feature is GA
-
 func TestAccContainerCluster_withAutoscalingProfile(t *testing.T) {
 	t.Parallel()
 	clusterName := fmt.Sprintf("cluster-test-%s", acctest.RandString(t, 10))
@@ -3303,6 +3299,8 @@ func TestAccContainerCluster_withInvalidAutoscalingProfile(t *testing.T) {
 		},
 	})
 }
+
+<% unless version == 'ga' -%>
 
 func TestAccContainerCluster_sharedVpc(t *testing.T) {
 	// Multiple fine-grained resources
@@ -4079,12 +4077,21 @@ func TestAccContainerCluster_withDNSConfig(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
+				Config: testAccContainerCluster_basic(clusterName, networkName, subnetworkName),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
 				Config: testAccContainerCluster_withDNSConfig(clusterName, "CLOUD_DNS", domainName, "VPC_SCOPE", networkName, subnetworkName),
 			},
 			{
-				ResourceName:      "google_container_cluster.with_dns_config",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
@@ -6416,7 +6423,6 @@ resource "google_container_cluster" "with_node_pool" {
 `, cluster, nodePool, networkName, subnetworkName)
 }
 
-<% unless version == 'ga' -%>
 func testAccContainerCluster_withAutoscalingProfile(cluster, autoscalingProfile, networkName, subnetworkName string) string {
 	config := fmt.Sprintf(`
 resource "google_container_cluster" "autoscaling_with_profile" {
@@ -6435,7 +6441,6 @@ resource "google_container_cluster" "autoscaling_with_profile" {
 `, cluster, autoscalingProfile, networkName, subnetworkName)
 	return config
 }
-<% end -%>
 
 func testAccContainerCluster_autoprovisioning(cluster, networkName, subnetworkName string, autoprovisioning, withNetworkTag bool) string {
 	config := fmt.Sprintf(`
@@ -8398,9 +8403,9 @@ resource "google_container_cluster" "with_autopilot" {
 
 func testAccContainerCluster_withDNSConfig(clusterName, clusterDns, clusterDnsDomain, clusterDnsScope, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
-resource "google_container_cluster" "with_dns_config" {
-  name               = "%s"
-  location           = "us-central1-f"
+resource "google_container_cluster" "primary" {
+	name               = "%s"
+	location           = "us-central1-a"
   initial_node_count = 1
   dns_config {
     cluster_dns 	   = "%s"

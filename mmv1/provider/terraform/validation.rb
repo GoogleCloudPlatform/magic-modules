@@ -12,10 +12,9 @@
 # limitations under the License.
 
 require 'api/object'
-require 'provider/abstract_core'
 
 module Provider
-  class Terraform < Provider::AbstractCore
+  class Terraform
     # Support for schema ValidateFunc functionality.
     class Validation < Api::Object
       # Ensures the value matches this regex

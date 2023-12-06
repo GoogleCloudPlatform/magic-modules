@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/caiasset"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/caiasset"
 	hashicorpcty "github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/hcl/hcl/printer"
 	"github.com/hashicorp/hcl/v2/hclwrite"
