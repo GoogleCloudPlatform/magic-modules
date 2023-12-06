@@ -308,7 +308,13 @@ func (vt *vcrTester) printLogs(logPath string) {
 func (vt *vcrTester) uploadLogs(logPath, logBucket string) error {
 	bucketPath := fmt.Sprintf("gs://%s/", logBucket)
 	args := []string{"-m", "-q", "cp", "-r", logPath, bucketPath}
-	fmt.Println("Fetching cassettes:\n", "gsutil", strings.Join(args, " "))
+	fmt.Println("Uploading logs:\n", "gsutil", strings.Join(args, " "))
+	if _, err := vt.r.Run("gsutil", args, nil); err != nil {
+		return err
+	}
+	bucketPath += "cassettes/"
+	args = []string{"-m", "-q", "cp", "-r", "cassettes", bucketPath}
+	fmt.Println("Uploading cassettes:\n", "gsutil", strings.Join(args, " "))
 	if _, err := vt.r.Run("gsutil", args, nil); err != nil {
 		return err
 	}
