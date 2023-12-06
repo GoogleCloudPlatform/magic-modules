@@ -14,6 +14,7 @@ resource "google_privateca_certificate_authority" "root_ca" {
   location                 = "us-central1"
   deletion_protection = false
   ignore_active_certificates_on_deletion = true
+  skip_grace_period = true
   config {
     subject_config {
       subject {
@@ -58,8 +59,15 @@ resource "google_secure_source_manager_instance" "<%= ctx[:primary_resource_id] 
     ca_pool = google_privateca_ca_pool.ca_pool.id
   }
   depends_on = [
-    google_privateca_certificate_authority.root_ca
+    google_privateca_certificate_authority.root_ca,
+    time_sleep.wait_60_seconds
   ]
+}
+
+resource "time_sleep" "wait_60_seconds" {
+  depends_on = [google_privateca_ca_pool_iam_binding.ca_pool_binding]
+
+  create_duration = "60s"
 }
 
 data "google_project" "project" {}
