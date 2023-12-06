@@ -1,0 +1,8 @@
+subscription, ok := res["subscription"]
+if ok {
+    name, nok := subscription.(map[string]interface{})["name"]
+    if nok {
+        d.SetId(name.(string)) 
+        d.Set("name", name.(string))
+    }
+}
