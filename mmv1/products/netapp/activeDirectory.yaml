@@ -56,6 +56,11 @@ examples:
     primary_resource_id: 'test_active_directory'
     vars:
       active_directory_name: 'test-active-directory'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'netapp_active_directory_full'
+    primary_resource_full_id: 'test_active_directory_full'
+    vars:
+      active_directory_full_name: 'test-active-directory-full'
 properties:
   # Fields go here
   - !ruby/object:Api::Type::String
