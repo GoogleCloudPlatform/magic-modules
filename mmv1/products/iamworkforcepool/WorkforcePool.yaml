@@ -121,3 +121,27 @@ properties:
       If `sessionDuration` is not configured, minted credentials have a default duration of one hour (3600s).
       A duration in seconds with up to nine fractional digits, ending with '`s`'. Example: "`3.5s`".
     default_value: '3600s'
+  - !ruby/object:Api::Type::NestedObject
+    name: 'accessRestrictions'
+    immutable: true
+    description: |
+      Configure access restrictions on the workforce pool users. This is an optional field. If specified web
+      sign-in can be restricted to given set of services or programmatic sign-in can be disabled for pool users.
+    properties:
+      - !ruby/object:Api::Type::Array
+        name: 'allowedServices'
+        description: |
+          Services allowed for web sign-in with the workforce pool.
+          If not set by default there are no restrictions.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'domain'
+              description: |
+                Domain name of the service.
+                Example: console.cloud.google
+      - !ruby/object:Api::Type::Boolean
+        name: 'disableProgrammaticSignin'
+        description: |
+          Disable programmatic sign-in by disabling token issue via the Security Token API endpoint.
+          See [Security Token Service API](https://cloud.google.com/iam/docs/reference/sts/rest).

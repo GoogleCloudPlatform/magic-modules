@@ -22,7 +22,3 @@ versions:
     base_url: https://datacatalog.googleapis.com/v1beta1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Google Cloud Data Catalog API
-    url: https://console.cloud.google.com/apis/library/datacatalog.googleapis.com

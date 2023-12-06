@@ -20,7 +20,3 @@ versions:
     base_url: https://datamigration.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Database Migration API
-    url: https://console.cloud.google.com/apis/library/datamigration.googleapis.com
