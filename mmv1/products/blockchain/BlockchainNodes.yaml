@@ -15,6 +15,7 @@
 name: 'BlockchainNodes'
 base_url: projects/{{project}}/locations/{{location}}/blockchainNodes
 self_link: projects/{{project}}/locations/{{location}}/blockchainNodes/{{name}}
+create_url: projects/{{project}}/locations/{{location}}/blockchainNodes?blockchain_node_id={{blockchain_node_id}}
 description: |
   A representation of a blockchain node.
 
@@ -39,6 +40,12 @@ parameters:
     ignore_read: true
     default_from_api: true
     url_param_only: true
+  - !ruby/object:Api::Type::String
+    name: blockchainNodeId
+    url_param_only: true
+    required: true
+    description: |
+      ID of the requesting object.
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -129,6 +136,15 @@ properties:
           - :TESTNET_SEPOLIA
         description: |
           The Ethereum environment being accessed.
+      - !ruby/object:Api::Type::Enum
+        name: nodeType
+        immutable: true
+        values:
+          - :LIGHT	
+          - :FULL
+          - :ARCHIVE
+        description: |
+          The type of Ethereum node.
       - !ruby/object:Api::Type::Enum
         name: executionClient
         immutable: true

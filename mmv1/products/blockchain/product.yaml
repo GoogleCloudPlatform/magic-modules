@@ -16,6 +16,6 @@ name: BlockchainNodeEngine
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
-    base_url: https://blockchainnodeengine.googleapis.com/
+    base_url: https://blockchainnodeengine.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
