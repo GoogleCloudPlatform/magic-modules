@@ -1072,7 +1072,7 @@ data "google_project" "project" {}
 resource "google_kms_crypto_key_iam_member" "crypto_key" {
 	crypto_key_id = "%{key_name}"
 	role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-	members = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com"
+	member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com"
   }
 `, context)
 }
