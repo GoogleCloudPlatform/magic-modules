@@ -1,4 +1,4 @@
-resource "google_netapp_active_directory" "<%= ctx[:primary_resource_full_id] %>" {
+resource "google_netapp_active_directory" "<%= ctx[:primary_resource_id] %>" {
     active_directory_id = "<%= ctx[:vars]['active_directory_full_name'] %>"
     location = "us-central1"
     domain = "ad.internal"
@@ -22,4 +22,4 @@ resource "google_netapp_active_directory" "<%= ctx[:primary_resource_full_id] %>
     organizational_unit    = "CN=Computers"
     security_operators     = "administrator,cvs-svc,nfsuser"
     site                   = "test-site"
-}
+  }
