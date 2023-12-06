@@ -37,5 +37,43 @@ resource "google_securityposture_posture" "<%= ctx[:primary_resource_id] %>" {
     			}
     		}
 		}
+		policies {
+    		policy_id = "policy_3"
+    		constraint {
+    			security_health_analytics_module {
+    				module_name = "BIGQUERY_TABLE_CMEK_DISABLED"
+    				module_enablement_state = "ENABLED"
+    			}
+    		}
+    		description = "enable BIGQUERY_TABLE_CMEK_DISABLED"
+    	}
+    	policies {
+    		policy_id = "policy_4"
+    		constraint {
+    			security_health_analytics_custom_module {
+    				display_name = "custom SHA policy"
+    				config {
+    					predicate {
+              				expression = "resource.rotationPeriod > duration('2592000s')"
+            			}
+            			custom_output {
+			              	properties {
+			                	name = "duration"
+			                	value_expression {
+			                  		expression = "resource.rotationPeriod"
+			                	}
+			              	}
+			            }
+			            resource_selector {
+			              	resource_types = ["cloudkms.googleapis.com/CryptoKey"]
+			            }
+			            severity = "LOW"
+			            description = "Custom Module"
+			            recommendation = "Testing custom modules"
+    				}
+    				module_enablement_state = "ENABLED"
+    			}
+    		}
+		}
 	}
 }
