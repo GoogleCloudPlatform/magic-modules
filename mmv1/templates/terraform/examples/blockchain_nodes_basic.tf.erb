@@ -1,15 +1,12 @@
 resource "google_blockchain_node_engine_blockchain_nodes" "<%= ctx[:primary_resource_id] %>" {
   location = "us-central1"
   blockchain_type = "ETHEREUM"
+  blockchain_node_id = "test"
   ethereum_details {
-    api_enable_admin = false
-    api_enable_debug = false
+    node_type = "ARCHIVE"
     consensus_client = "LIGHTHOUSE"
     execution_client = "ERIGON"
-    geth_details {
-      garbage_collection_mode = "FULL"
-    }
-    network = "NETWORK_UNSPECIFIED"
+    network = "MAINNET"
   }
   labels = {
     environment = "dev"
