@@ -202,12 +202,14 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	<% unless version == 'ga' -%>
 	"google_vmwareengine_cluster":                      vmwareengine.DataSourceVmwareengineCluster(),
 	<% end -%>
+	"google_vmwareengine_external_address":             vmwareengine.DataSourceVmwareengineExternalAddress(),
 	"google_vmwareengine_network":                      vmwareengine.DataSourceVmwareengineNetwork(),
 	"google_vmwareengine_network_peering":              vmwareengine.DataSourceVmwareengineNetworkPeering(),
 	"google_vmwareengine_network_policy":               vmwareengine.DataSourceVmwareengineNetworkPolicy(),
 	"google_vmwareengine_nsx_credentials":              vmwareengine.DataSourceVmwareengineNsxCredentials(),
 	"google_vmwareengine_private_cloud":                vmwareengine.DataSourceVmwareenginePrivateCloud(),
-	"google_vmwareengine_vcenter_credentials":              vmwareengine.DataSourceVmwareengineVcenterCredentials(),
+	"google_vmwareengine_subnet":                       vmwareengine.DataSourceVmwareengineSubnet(),
+	"google_vmwareengine_vcenter_credentials":          vmwareengine.DataSourceVmwareengineVcenterCredentials(),
 
 	// ####### END handwritten datasources ###########
 }
@@ -332,6 +334,7 @@ var handwrittenResources = map[string]*schema.Resource{
 	"google_compute_attached_disk":                 compute.ResourceComputeAttachedDisk(),
 	"google_compute_instance":                      compute.ResourceComputeInstance(),
 	"google_compute_disk_async_replication":        compute.ResourceComputeDiskAsyncReplication(),
+	"google_compute_router_peer":			compute.ResourceComputeRouterBgpPeer(),
 	<% unless version == 'ga' -%>
 	"google_compute_instance_from_machine_image":   compute.ResourceComputeInstanceFromMachineImage(),
 	<% end -%>
