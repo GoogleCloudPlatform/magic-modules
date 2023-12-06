@@ -12,10 +12,14 @@ resource "google_netapp_active_directory" "<%= ctx[:primary_resource_full_id] %>
     encrypt_dc_connections = false
     kdc_hostname           = "hostname"
     kdc_ip                 = "10.10.0.11"
-    labels                 = "netapp_ad_labels"
+    labels                 = { 
+        "name": "wrench", 
+        "mass": "1.3kg", 
+        "count": "3" 
+    }
     ldap_signing           = false
     nfs_users_with_ldap    = false
     organizational_unit    = "CN=Computers"
     security_operators     = "administrator,cvs-svc,nfsuser"
     site                   = "test-site"
-  }
+}
