@@ -71,17 +71,18 @@ func listEnvironmentVariables() string {
 }
 
 func execCheckCassettes(t vcr.Tester, goPath, githubToken string) {
-	if err := t.FetchCassettes(vcr.Beta); err != nil {
-		fmt.Println("Error fetching cassettes: ", err)
-		os.Exit(1)
-	}
+	/*
+		if err := t.FetchCassettes(vcr.Beta); err != nil {
+			fmt.Println("Error fetching cassettes: ", err)
+			os.Exit(1)
+		}*/
 
 	if err := t.CloneProvider(goPath, githubUsername, githubToken, vcr.Beta); err != nil {
 		fmt.Println("Error cloning provider: ", err)
 		os.Exit(1)
 	}
 
-	result, err := t.Run(vcr.Replaying, vcr.Beta)
+	result, err := t.Run(vcr.Recording, vcr.Beta)
 	if err != nil {
 		fmt.Println("Error running VCR: ", err)
 		os.Exit(1)

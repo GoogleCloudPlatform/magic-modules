@@ -192,6 +192,14 @@ func (vt *vcrTester) Run(mode Mode, version Version) (*Result, error) {
 		return nil, err
 	}
 
+	cassettePath := filepath.Join("cassettes", version.String())
+	if mode == Replaying {
+		cassettePath, ok = vt.cassettePaths[version]
+		if !ok {
+			return nil, fmt.Errorf("cassettes not fetched for version %s", version)
+		}
+	}
+
 	// Run only a small subset of tests for now.
 	testDirs = testDirs[:24]
 
@@ -201,14 +209,14 @@ func (vt *vcrTester) Run(mode Mode, version Version) (*Result, error) {
 		"-parallel",
 		strconv.Itoa(accTestParalellism),
 		"-v",
-		"-run=TestAcc",
+		"-run=TestAccBigqueryConnectionConnection",
 		"-timeout",
 		replayingTimeout,
 		`-ldflags=-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc`,
 		"-vet=off",
 	)
 	env := map[string]string{
-		"VCR_PATH":                       filepath.Join(vt.baseDir, vt.cassettePaths[version]),
+		"VCR_PATH":                       filepath.Join(vt.baseDir, cassettePath),
 		"VCR_MODE":                       mode.Upper(),
 		"ACCTEST_PARALLELISM":            strconv.Itoa(accTestParalellism),
 		"GOOGLE_CREDENTIALS":             filepath.Join(vt.baseDir, vt.saKeyPath),
@@ -312,7 +320,6 @@ func (vt *vcrTester) uploadLogs(logPath, logBucket string) error {
 	if _, err := vt.r.Run("gsutil", args, nil); err != nil {
 		return err
 	}
-	bucketPath += "cassettes/"
 	args = []string{"-m", "-q", "cp", "-r", "cassettes", bucketPath}
 	fmt.Println("Uploading cassettes:\n", "gsutil", strings.Join(args, " "))
 	if _, err := vt.r.Run("gsutil", args, nil); err != nil {
