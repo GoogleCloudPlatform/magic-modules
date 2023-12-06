@@ -19,35 +19,21 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'QUICKSTART_TITLE': 'https://cloud.google.com/netapp/volumes/docs/reference/rest/v1/projects.locations.activeDirectories'
   api: 'https://cloud.google.com/netapp/volumes/docs/reference/rest/v1/projects.locations.activeDirectories'
-
 base_url: projects/{{project}}/locations/{{location}}/activeDirectories
-
 self_link: projects/{{project}}/locations/{{location}}/activeDirectories/{{active_directory_id}}
-
 create_url: projects/{{project}}/locations/{{location}}/activeDirectories?activeDirectoryId={{active_directory_id}}
-
 create_verb: :POST
-
 update_url: projects/{{project}}/locations/{{location}}/activeDirectories/{{active_directory_id}}
-
 update_verb: :PATCH
-
 update_mask: true
-
 delete_url: projects/{{project}}/locations/{{location}}/activeDirectories/{{active_directory_id}}
-
 delete_verb: :DELETE
-
 autogen_async: true
-
 async: !ruby/object:Api::OpAsync
-
   operation: !ruby/object:Api::OpAsync::Operation
     base_url: '{{op_id}}'
-
 id_format: 'projects/{{project}}/locations/{{location}}/activeDirectories/{{active_directory_id}}'
 import_format: ['projects/{{project}}/locations/{{location}}/activeDirectories/{{active_directory_id}}']
-
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -66,7 +52,7 @@ parameters:
     url_param_only: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: 'Active_Directory_Create'
+    name: 'netapp_active_directory_basic'
     primary_resource_id: 'test_active_directory'
     vars:
       active_directory_name: 'test-active-directory'
