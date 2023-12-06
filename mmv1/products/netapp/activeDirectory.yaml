@@ -55,7 +55,7 @@ examples:
     name: 'netapp_active_directory_basic'
     primary_resource_id: 'test_active_directory_basic'
     vars:
-      active_directory_name: 'test-active-directory-basic'
+      active_directory_basic_name: 'test-active-directory-basic'
   - !ruby/object:Provider::Terraform::Examples
     name: 'netapp_active_directory_full'
     primary_resource_full_id: 'test_active_directory_full'
