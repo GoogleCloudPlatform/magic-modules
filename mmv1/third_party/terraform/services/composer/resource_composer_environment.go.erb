@@ -228,16 +228,24 @@ func ResourceComposerEnvironment() *schema.Resource {
 										Type:             schema.TypeString,
 										Computed:         true,
 										Optional:         true,
-										ForceNew:         true,
+										ForceNew:         false,
 										DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 										Description:      `The Compute Engine machine type used for cluster instances, specified as a name or relative resource name. For example: "projects/{project}/zones/{zone}/machineTypes/{machineType}". Must belong to the enclosing environment's project and region/zone. The network must belong to the environment's project. If unspecified, the "default" network ID in the environment's project is used. If a Custom Subnet Network is provided, subnetwork must also be provided.`,
 									},
 									"subnetwork": {
 										Type:             schema.TypeString,
+										Computed:         true,
 										Optional:         true,
-										ForceNew:         true,
+										ForceNew:         false,
 										DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 										Description:      `The Compute Engine subnetwork to be used for machine communications, , specified as a self-link, relative resource name (e.g. "projects/{project}/regions/{region}/subnetworks/{subnetwork}"), or by name. If subnetwork is provided, network must also be provided and the subnetwork must belong to the enclosing environment's project and region.`,
+									},
+									"composer_network_attachment": {
+										Type:             schema.TypeString,
+										Computed:         true,
+										Optional:         true,
+										ForceNew:         false,
+										Description:      ``,
 									},
 									"disk_size_gb": {
 										Type:        schema.TypeInt,
@@ -1606,6 +1614,7 @@ func flattenComposerEnvironmentConfigNodeConfig(nodeCfg *composer.NodeConfig) in
 	transformed["machine_type"] = nodeCfg.MachineType
 	transformed["network"] = nodeCfg.Network
 	transformed["subnetwork"] = nodeCfg.Subnetwork
+	transformed["composer_network_attachment"] = nodeCfg.ComposerNetworkAttachment
 	transformed["disk_size_gb"] = nodeCfg.DiskSizeGb
 	transformed["service_account"] = nodeCfg.ServiceAccount
 	transformed["oauth_scopes"] = flattenComposerEnvironmentConfigNodeConfigOauthScopes(nodeCfg.OauthScopes)
@@ -2139,6 +2148,11 @@ func expandComposerEnvironmentConfigNodeConfig(v interface{}, d *schema.Resource
 		}
 		transformed.Subnetwork = transformedSubnetwork
 	}
+
+	if v, ok := original["composer_network_attachment"]; ok {
+		transformed.ComposerNetworkAttachment = v.(string)
+	}
+
 	transformedIPAllocationPolicy, err := expandComposerEnvironmentIPAllocationPolicy(original["ip_allocation_policy"], d, config)
 	if err != nil {
 		return nil, err
