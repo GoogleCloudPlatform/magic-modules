@@ -81,7 +81,7 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: destinationDataset
     description: The destination dataset for this subscription.
-    required: true 
+    required: true
     properties:
       - !ruby/object:Api::Type::String
         name: friendlyName
