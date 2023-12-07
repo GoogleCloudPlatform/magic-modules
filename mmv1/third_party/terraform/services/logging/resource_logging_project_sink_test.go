@@ -527,6 +527,11 @@ resource "google_service_account_iam_member" "loggingsa-customsa-binding" {
   member = "serviceAccount:service-${local.project_number}@gcp-sa-logging.iam.gserviceaccount.com"
 }
 
+resource "time_sleep" "wait_60_seconds" {
+  depends_on = [google_service_account_iam_member.loggingsa-customsa-binding]
+  create_duration = "60s"
+}
+
 resource "google_logging_project_sink" "custom_writer" {
   name        = "%s"
   destination = "logging.googleapis.com/projects/${google_project.destination-project.project_id}/locations/us-central1/buckets/shared-bucket"
@@ -536,8 +541,8 @@ resource "google_logging_project_sink" "custom_writer" {
   custom_writer_identity = "serviceAccount:${google_service_account.test-account1.email}"
 
   depends_on = [
-	google_logging_project_bucket_config.destination-bucket,
-	google_service_account_iam_member.loggingsa-customsa-binding,
+		google_logging_project_bucket_config.destination-bucket,
+		time_sleep.wait_60_seconds,
 	]
 }
 `, project, project, org, billingId, serviceAccount, envvar.GetTestProjectFromEnv(), name, envvar.GetTestProjectFromEnv())
