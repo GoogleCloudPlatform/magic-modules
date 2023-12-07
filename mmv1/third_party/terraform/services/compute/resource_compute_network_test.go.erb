@@ -123,7 +123,7 @@ func TestAccComputeNetwork_numericId(t *testing.T) {
 			{
 				Config: testAccComputeNetwork_basic(suffixName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestMatchResourceAttr("google_compute_network.bar", "numeric_id",regexp.MustCompile("[1-9]\\d{0,}")),
+					resource.TestMatchResourceAttr("google_compute_network.bar", "numeric_id",regexp.MustCompile("^\\d{1,}$")),
 					resource.TestCheckResourceAttr("google_compute_network.bar", "id", networkId),
 				),
 			},
