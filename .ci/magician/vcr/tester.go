@@ -97,7 +97,6 @@ type vcrTester struct {
 	env           map[string]string  // shared environment variables for running tests
 	r             exec.Runner        // for running commands and manipulating files
 	version       Version            // either "ga" or "beta", defaults to "ga"
-	mode          Mode               // either "REPLAYING" or "RECORDING", defaults to "REPLAYING"
 	baseDir       string             // the directory in which this tester was created
 	saKeyPath     string             // where sa_key.json is relative to baseDir
 	cassettePaths map[Version]string // where cassettes are relative to baseDir by version
