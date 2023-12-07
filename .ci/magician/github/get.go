@@ -5,21 +5,26 @@ import (
 	utils "magician/utility"
 )
 
-func (gh *github) GetPullRequestAuthor(prNumber string) (string, error) {
+type PullRequest struct {
+	User struct {
+		Login string `json:"login"`
+	} `json:"user"`
+	Labels []struct {
+		Name string
+	}
+}
+
+func (gh *github) GetPullRequest(prNumber string) (string, error) {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/%s", prNumber)
 
-	var pullRequest struct {
-		User struct {
-			Login string `json:"login"`
-		} `json:"user"`
-	}
+	var pullRequest PullRequest
 
 	_, err := utils.RequestCall(url, "GET", gh.token, &pullRequest, nil)
 	if err != nil {
 		return "", err
 	}
 
-	return pullRequest.User.Login, nil
+	return pullRequest, nil
 }
 
 func (gh *github) GetPullRequestRequestedReviewer(prNumber string) (string, error) {

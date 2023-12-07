@@ -13,7 +13,7 @@ import (
 )
 
 type mcGithub interface {
-	GetPullRequestAuthor(prNumber string) (string, error)
+	GetPullRequest(prNumber string) (string, error)
 	GetUserType(user string) github.UserType
 	GetPullRequestRequestedReviewer(prNumber string) (string, error)
 	GetPullRequestPreviousAssignedReviewers(prNumber string) ([]string, error)
@@ -92,12 +92,13 @@ func execMembershipChecker(prNumber, commitSha, branchName, headRepoUrl, headBra
 		"_BASE_BRANCH":   baseBranch,
 	}
 
-	author, err := gh.GetPullRequestAuthor(prNumber)
+	author, err := gh.GetPullRequest(prNumber)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
+	author := pullRequest.User.Login
 	authorUserType := gh.GetUserType(author)
 	trusted := authorUserType == github.CoreContributorUserType || authorUserType == github.GooglerUserType
 
@@ -116,7 +117,7 @@ func execMembershipChecker(prNumber, commitSha, branchName, headRepoUrl, headBra
 			os.Exit(1)
 		}
 
-		reviewersToRequest, newPrimaryReviewer := github.ChooseReviewers(firstRequestedReviewer, previouslyInvolvedReviewers)
+		reviewersToRequest, newPrimaryReviewer := github.ChooseCoreReviewers(firstRequestedReviewer, previouslyInvolvedReviewers)
 
 		for _, reviewer := range reviewersToRequest {
 			err = gh.RequestPullRequestReviewer(prNumber, reviewer)

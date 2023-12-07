@@ -10,8 +10,8 @@ type mockGithub struct {
 	calledMethods     map[string][][]any
 }
 
-func (m *mockGithub) GetPullRequestAuthor(prNumber string) (string, error) {
-	m.calledMethods["GetPullRequestAuthor"] = append(m.calledMethods["GetPullRequestAuthor"], []any{prNumber})
+func (m *mockGithub) GetPullRequest(prNumber string) (string, error) {
+	m.calledMethods["GetPullRequest"] = append(m.calledMethods["GetPullRequest"], []any{prNumber})
 	return m.author, nil
 }
 
