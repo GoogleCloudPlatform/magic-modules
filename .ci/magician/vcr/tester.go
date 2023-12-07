@@ -11,7 +11,7 @@ import (
 )
 
 type Tester interface {
-	CloneProvider(goPath, githubUsername, githubToken string, version Version) error
+	CloneProvider(goPath, githubUsername, githubToken, branch string, version Version) error
 	FetchCassettes(version Version) error
 	Run(mode Mode, version Version) (*Result, error)
 	Cleanup() error
@@ -62,7 +62,7 @@ func (v Version) RepoName() string {
 
 // TODO: move this into magician/github
 func (v Version) URL(githubUsername, githubToken string) string {
-	return fmt.Sprintf("https://%s:%s@github.com/hashicorp/%s", githubUsername, githubToken, v.RepoName())
+	return fmt.Sprintf("https://%s:%s@github.com/%s/%s", githubUsername, githubToken, githubUsername, v.RepoName())
 }
 
 type Mode int
@@ -131,15 +131,15 @@ func NewTester(env map[string]string) (Tester, error) {
 	}, nil
 }
 
-// Clone the provider with the given url to a local path under the go path and store it by version in the paths map.
-func (vt *vcrTester) CloneProvider(goPath, githubUsername, githubToken string, version Version) error {
+// Clone the built downstream branch of the provider to a local path under the go path and store it by version in the paths map.
+func (vt *vcrTester) CloneProvider(goPath, githubUsername, githubToken, branch string, version Version) error {
 	if _, ok := vt.repoPaths[version]; ok {
 		// Skip cloning an already cloned repo.
 		return nil
 	}
 	repoPath := filepath.Join(goPath, "src", "github.com", githubUsername, version.RepoName())
 	vt.repoPaths[version] = repoPath
-	if _, err := vt.r.Run("git", []string{"clone", version.URL(githubUsername, githubToken), repoPath}, nil); err != nil {
+	if _, err := vt.r.Run("git", []string{"clone", "--branch", branch, version.URL(githubUsername, githubToken), repoPath}, nil); err != nil {
 		return err
 	}
 	return nil

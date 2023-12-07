@@ -12,6 +12,7 @@ import (
 const githubUsername = "modular-magician"
 
 var environmentVariables = [...]string{
+	"COMMIT_SHA",
 	"GITHUB_TOKEN",
 	"GOCACHE",
 	"GOPATH",
@@ -59,7 +60,7 @@ var checkCassettesCmd = &cobra.Command{
 			fmt.Println("Error creating VCR tester: ", err)
 			os.Exit(1)
 		}
-		execCheckCassettes(t, env["GOPATH"], env["GITHUB_TOKEN"])
+		execCheckCassettes(t, env["GOPATH"], env["GITHUB_TOKEN"], env["COMMIT_SHA"])
 	},
 }
 
@@ -71,13 +72,13 @@ func listEnvironmentVariables() string {
 	return result
 }
 
-func execCheckCassettes(t vcr.Tester, goPath, githubToken string) {
+func execCheckCassettes(t vcr.Tester, goPath, githubToken, commit string) {
 	if err := t.FetchCassettes(vcr.Beta); err != nil {
 		fmt.Println("Error fetching cassettes: ", err)
 		os.Exit(1)
 	}
 
-	if err := t.CloneProvider(goPath, githubUsername, githubToken, vcr.Beta); err != nil {
+	if err := t.CloneProvider(goPath, githubUsername, githubToken, "downstream-pr-"+commit, vcr.Beta); err != nil {
 		fmt.Println("Error cloning provider: ", err)
 		os.Exit(1)
 	}
