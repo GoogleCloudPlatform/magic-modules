@@ -372,7 +372,7 @@ func AddressWithPrefixLength(prefixLength int) func(*OptionalSettings) {
 	}
 }
 
-func ConnectionWith(parentService string) func(*OptionalSettings) {
+func ConnectionWithParentService(parentService string) func(*OptionalSettings) {
 	return func(settings *OptionalSettings) {
 		settings.ParentService = parentService
 	}
@@ -411,7 +411,7 @@ func BootstrapSharedTestGlobalAddress(t *testing.T, testId string, params ...fun
 		log.Printf("[DEBUG] Global address %q not found, bootstrapping", addressName)
 		url := fmt.Sprintf("%sprojects/%s/global/addresses", config.ComputeBasePath, project)
 
-		settings := OptionalSettings(params...)
+		settings := NewOptionalSettings(params...)
 
 		netObj := map[string]interface{}{
 			"name":          addressName,
@@ -470,7 +470,7 @@ func BootstrapSharedTestGlobalAddress(t *testing.T, testId string, params ...fun
 //
 // testId specifies the test for which a shared network and a gobal address are used/initialized.
 func BootstrapSharedServiceNetworkingConnection(t *testing.T, testId string, params ...func(*OptionalSettings)) string {
-	settings := OptionalSettings(params...)
+	settings := NewOptionalSettings(params...)
 	parentService := settings.ParentService
 	projectId := envvar.GetTestProjectFromEnv()
 
