@@ -91,8 +91,8 @@ module Provider
       # common-compile.yaml is a special file that will get compiled by the last product
       # used in a single invocation of the compiled. It should not contain product-specific
       # information; instead, it should be run-specific such as the version to compile at.
-      compile_product_files(output_folder) \
-        unless @config.files.nil? || @config.files.compile.nil?
+      # compile_product_files(output_folder) \
+      #   unless @config.files.nil? || @config.files.compile.nil?
 
       FileUtils.mkpath output_folder
       pwd = Dir.pwd
@@ -160,16 +160,16 @@ module Provider
     end
 
     # Compiles files specified within the product
-    def compile_product_files(output_folder)
-      file_template = ProductFileTemplate.new(
-        output_folder,
-        nil,
-        @api,
-        @target_version_name,
-        build_env
-      )
-      compile_file_list(output_folder, @config.files.compile, file_template)
-    end
+    # def compile_product_files(output_folder)
+    #   file_template = ProductFileTemplate.new(
+    #     output_folder,
+    #     nil,
+    #     @api,
+    #     @target_version_name,
+    #     build_env
+    #   )
+    #   compile_file_list(output_folder, @config.files.compile, file_template)
+    # end
 
     # Compiles files that are shared at the provider level
     def compile_common_files(

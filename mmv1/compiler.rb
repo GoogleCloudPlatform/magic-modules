@@ -157,11 +157,6 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
   api_override_path = File.join(override_dir, product_name, 'api.yaml') if override_dir
   api_yaml_path = File.join(product_name, 'api.yaml')
 
-  provider_override_path = ''
-  provider_override_path = File.join(override_dir, product_name, "#{provider_name}.yaml") \
-    if override_dir
-  provider_yaml_path = File.join(product_name, "#{provider_name}.yaml")
-
   unless File.exist?(product_yaml_path) || File.exist?(product_override_path) \
     || File.exist?(api_yaml_path) || File.exist?(api_override_path)
     raise "#{product_name} does not contain an api.yaml or product.yaml file"
@@ -187,14 +182,6 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
     product_yaml = result.to_yaml
   elsif File.exist?(product_yaml_path)
     product_yaml = File.read(product_yaml_path)
-  end
-
-  unless File.exist?(provider_yaml_path) || File.exist?(provider_override_path)
-    unless File.exist?(product_yaml_path) || File.exist?(product_override_path)
-      Google::LOGGER.info "#{product_name}: Skipped as no #{provider_name}.yaml file exists"
-      next
-    end
-    provider_yaml_path = 'templates/terraform.yaml'
   end
 
   raise "Output path '#{output_path}' does not exist or is not a directory" \
@@ -263,22 +250,13 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
     product_api.set_variable(resources, 'objects')
   end
 
-  if File.exist?(provider_yaml_path)
-    product_api, provider_config, = \
-      Provider::Config.parse(provider_yaml_path, product_api, version)
-  end
-  # Load any dynamic overrides passed in with -r
-  if File.exist?(provider_override_path)
-    product_api, provider_config, = \
-      Provider::Config.parse(provider_override_path, product_api, version, override_dir)
-  end
-
   Google::LOGGER.info "#{product_name}: Compiling provider config"
+  provider_config = nil
   pp provider_config if ENV['COMPILER_DEBUG']
 
   if force_provider.nil?
     provider = \
-      provider_config.provider.new(provider_config, product_api, version, start_time)
+      Provider::Terraform.new(provider_config, product_api, version, start_time)
   else
     override_providers = {
       'oics' => Provider::TerraformOiCS,

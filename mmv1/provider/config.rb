@@ -37,20 +37,6 @@ module Provider
 
     attr_reader :overrides
 
-    # List of files to copy or compile into target module
-    class Files < Api::Object
-      attr_reader :compile
-      attr_reader :copy
-      attr_reader :resource
-
-      def validate
-        super
-        check :compile, type: Hash
-        check :copy, type: Hash
-        check :resource, type: Hash
-      end
-    end
-
     def self.parse(cfg_file, api = nil, version_name = 'ga', provider_override_path = nil)
       raise 'Version passed to the compiler cannot be nil' if version_name.nil?
 
@@ -101,14 +87,6 @@ module Provider
           if var_value.respond_to?(:consume_config)
         spread_api(var_value, api, visited, indent)
       end
-    end
-
-    def resource_override
-      Overrides::ResourceOverride
-    end
-
-    def property_override
-      Overrides::PropertyOverride
     end
   end
 end
