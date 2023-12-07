@@ -175,6 +175,7 @@ properties:
       - !ruby/object:Api::Type::NestedObject
         name: vmImage
         default_from_api: true
+        immutable: true
         custom_flatten: templates/terraform/custom_flatten/workbench_instance_vm_image_flatten.go.erb
         description: |
           Definition of a custom Compute Engine virtual machine image for starting
@@ -454,10 +455,6 @@ properties:
           name: targetVersion
           description: Optional. Target VM Version, like m63.
   - !ruby/object:Api::Type::String
-    name: id
-    description: Output only. Unique ID of the resource.
-    output: true
-  - !ruby/object:Api::Type::String
     name: healthState
     description: Output only. Instance health_state.
     output: true
@@ -501,11 +498,6 @@ parameters:
   - !ruby/object:Api::Type::String
     name: instanceId
     description: Required. User-defined unique ID of this instance.
-    url_param_only: true
-    immutable: true
-  - !ruby/object:Api::Type::String
-    name: requestId
-    description: Optional. Idempotent request UUID.
     url_param_only: true
     immutable: true
 async: !ruby/object:Api::OpAsync
