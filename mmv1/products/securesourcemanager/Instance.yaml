@@ -20,7 +20,8 @@ immutable: true
 description: 'Instances are deployed to an available Google Cloud region and are accessible via their web interface.'
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation': 'https://cloud.google.com/secure-source-manager/overview/overview'
+    'Official Documentation': 'https://cloud.google.com/secure-source-manager/docs/create-instance'
+  api: 'https://cloud.google.com/secure-source-manager/docs/reference/rest/v1/projects.locations.instances'
 import_format: ['projects/{{project}}/locations/{{location}}/instances/{{instance_id}}', '{{instance_id}}']
 autogen_async: true
 async: !ruby/object:Api::OpAsync
