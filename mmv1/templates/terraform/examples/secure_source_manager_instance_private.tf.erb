@@ -12,9 +12,6 @@ resource "google_privateca_certificate_authority" "root_ca" {
   pool                     = google_privateca_ca_pool.ca_pool.name
   certificate_authority_id = "<%= ctx[:vars]['root_ca_id'] %>"
   location                 = "us-central1"
-  deletion_protection = false
-  ignore_active_certificates_on_deletion = true
-  skip_grace_period = true
   config {
     subject_config {
       subject {
@@ -40,6 +37,11 @@ resource "google_privateca_certificate_authority" "root_ca" {
   key_spec {
     algorithm = "RSA_PKCS1_4096_SHA256"
   }
+
+  // Disable deletion protections for easier test cleanup purposes
+  deletion_protection = false
+  ignore_active_certificates_on_deletion = true
+  skip_grace_period = true
 }
 
 resource "google_privateca_ca_pool_iam_binding" "ca_pool_binding" {
