@@ -11,12 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'provider/config'
+# require 'provider/config'
 
 module Provider
   class Terraform
     # Settings for the provider
-    class Config < Provider::Config
+    class Config
       def provider
         Provider::Terraform
       end
