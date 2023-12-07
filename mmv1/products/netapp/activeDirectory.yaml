@@ -17,7 +17,7 @@ description: |
   ActiveDirectory is the public representation of the active directory config.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation`: 'https://cloud.google.com/netapp/volumes/docs/configure-and-use/active-directory/about-ad'
+    'Official Documentation': 'https://cloud.google.com/netapp/volumes/docs/configure-and-use/active-directory/about-ad'
   api: 'https://cloud.google.com/netapp/volumes/docs/reference/rest/v1/projects.locations.activeDirectories'
 base_url: projects/{{project}}/locations/{{location}}/activeDirectories
 self_link: projects/{{project}}/locations/{{location}}/activeDirectories/{{active_directory_id}}
