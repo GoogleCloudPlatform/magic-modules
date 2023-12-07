@@ -199,16 +199,13 @@ func (vt *vcrTester) Run(mode Mode, version Version) (*Result, error) {
 		}
 	}
 
-	// Run only a small subset of tests for now.
-	testDirs = testDirs[:24]
-
 	args := []string{"test"}
 	args = append(args, testDirs...)
 	args = append(args,
 		"-parallel",
 		strconv.Itoa(accTestParalellism),
 		"-v",
-		"-run=TestAccBigqueryConnectionConnection",
+		"-run=TestAcc",
 		"-timeout",
 		replayingTimeout,
 		`-ldflags=-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc`,
