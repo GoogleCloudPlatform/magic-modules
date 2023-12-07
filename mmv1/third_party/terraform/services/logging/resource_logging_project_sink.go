@@ -98,8 +98,14 @@ func resourceLoggingProjectSinkAcquireOrCreate(d *schema.ResourceData, meta inte
 // 2) taint the value of writer_identity when unique_writer_identity is updating from false -> true
 func resourceLoggingProjectSinkCustomizeDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	// separate func to allow unit testing
-	resourceLoggingProjectSinkCustomizeDiffFunc(d)
-	resourceLoggingProjectSinkUniqueWriterIdentityCustomizeDiffFunc(d)
+	err := resourceLoggingProjectSinkCustomizeDiffFunc(d)
+	if err != nil {
+		return err
+	}
+	err = resourceLoggingProjectSinkUniqueWriterIdentityCustomizeDiffFunc(d)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -124,7 +130,10 @@ func resourceLoggingProjectSinkUniqueWriterIdentityCustomizeDiffFunc(diff *schem
 	}
 	// taint the value of writer_identity when unique_writer_identity is updating from false -> true
 	if diff.Get("unique_writer_identity").(bool) {
-		diff.SetNewComputed("writer_identity")
+		err := diff.SetNewComputed("writer_identity")
+		if err != nil {
+			return fmt.Errorf("Error re-setting writer_identity: %s", err)
+		}
 	}
 	return nil
 }
