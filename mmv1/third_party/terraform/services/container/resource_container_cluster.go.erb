@@ -6398,12 +6398,6 @@ func containerClusterEnableK8sBetaApisCustomizeDiffFunc(d tpgresource.TerraformR
 }
 
 func containerClusterNodeVersionCustomizeDiff(_ context.Context,diff *schema.ResourceDiff, meta interface{}) error {
-	//separate func to allow unit testing
-	return containerClusterNodeVersionCustomizeDiffFunc(diff)
-}
-
-func containerClusterNodeVersionCustomizeDiffFunc(diff tpgresource.TerraformResourceDiff) error {
-
 	oldValueName, _ := diff.GetChange("name")
 	if oldValueName != "" {
 		return nil
