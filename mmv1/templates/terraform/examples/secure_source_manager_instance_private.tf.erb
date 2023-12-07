@@ -66,6 +66,7 @@ resource "google_secure_source_manager_instance" "<%= ctx[:primary_resource_id] 
   ]
 }
 
+# ca pool IAM permissions can take time to propagate
 resource "time_sleep" "wait_60_seconds" {
   depends_on = [google_privateca_ca_pool_iam_binding.ca_pool_binding]
 
