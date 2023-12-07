@@ -23,6 +23,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://cloud.google.com/secure-source-manager/overview/overview'
 import_format: ['projects/{{project}}/locations/{{location}}/instances/{{instance_id}}', '{{instance_id}}']
 autogen_async: true
+pull_external: true
 async: !ruby/object:Api::OpAsync
   actions: ['create', 'delete']
   operation: !ruby/object:Api::OpAsync::Operation
