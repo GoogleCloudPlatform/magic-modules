@@ -62,7 +62,7 @@ func (v Version) RepoName() string {
 
 // TODO: move this into magician/github
 func (v Version) URL(githubUsername, githubToken string) string {
-	return fmt.Sprintf("https://%s:%s@github.com/%s/%s", githubUsername, githubToken, githubUsername, v.RepoName())
+	return fmt.Sprintf("https://%s:%s@github.com/hashicorp/%s", githubUsername, githubToken, v.RepoName())
 }
 
 type Mode int
