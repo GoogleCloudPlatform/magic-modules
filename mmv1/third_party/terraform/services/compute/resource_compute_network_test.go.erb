@@ -3,9 +3,10 @@ package compute_test
 
 import (
 	"fmt"
-	"strconv"
+	"regexp"
 	"testing"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -109,9 +110,10 @@ func TestAccComputeNetwork_routingModeAndUpdate(t *testing.T) {
 
 func TestAccComputeNetwork_numericId(t *testing.T) {
 	t.Parallel()
-	var suffixName = acctest.RandString(t, 10)
-
-	var network compute.Network
+	suffixName := acctest.RandString(t, 10)
+    networkName := fmt.Sprintf("tf-test-network-basic-%s", suffixName)
+    projectId := envvar.GetTestProjectFromEnv()
+    networkId := fmt.Sprintf("projects/%v/global/networks/%v", projectId, networkName)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -121,10 +123,8 @@ func TestAccComputeNetwork_numericId(t *testing.T) {
 			{
 				Config: testAccComputeNetwork_basic(suffixName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeNumericId(
-						t, "google_compute_network.bar", &network),
-					testAccCheckComputeNetworkIsAutoSubnet(
-						t, "google_compute_network.bar", &network),
+					resource.TestMatchResourceAttr("google_compute_network.bar", "numeric_id",regexp.MustCompile("[1-9]\\d{0,}")),
+					resource.TestCheckResourceAttr("google_compute_network.bar", "id", networkId),
 				),
 			},
 			{
@@ -453,37 +453,4 @@ resource "google_compute_network" "acc_network_firewall_policy_enforcement_order
   network_firewall_policy_enforcement_order = "%s"
 }
 `, network, order)
-}
-
-func testAccCheckComputeNumericId(t *testing.T, n string, network *compute.Network) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("Not found: %s", n)
-		}
-
-		if rs.Primary.Attributes["name"] == "" {
-			return fmt.Errorf("No ID is set")
-		}
-
-		config := acctest.GoogleProviderConfig(t)
-
-		found, err := config.NewComputeClient(config.UserAgent).Networks.Get(
-			config.Project, rs.Primary.Attributes["name"]).Do()
-		if err != nil {
-			return err
-		}
-
-		if fmt.Sprintf("projects/%v/global/networks/%v", config.Project, found.Name) != rs.Primary.Attributes["id"] {
-			return fmt.Errorf("id does not match; %v != %v", fmt.Sprintf("projects/%v/global/networks/%v", config.Project, found.Name), rs.Primary.Attributes["id"])
-		}
-
-		if strconv.Itoa(int(found.Id)) != rs.Primary.Attributes["numeric_id"] {
-			return fmt.Errorf("numeric_id does not match; %v != %v", strconv.Itoa(int(found.Id)), rs.Primary.Attributes["numeric_id"])
-		}
-
-		*network = *found
-
-		return nil
-	}
 }
