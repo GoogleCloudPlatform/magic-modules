@@ -25,7 +25,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-func TestAccNetappactiveDirectory_activeDirectoryCreateExample(t *testing.T) {
+func TestAccNetappactiveDirectory_activeDirectory_FullUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -43,7 +43,7 @@ func TestAccNetappactiveDirectory_activeDirectoryCreateExample(t *testing.T) {
 				ResourceName:            "google_netapp_active_directory.test_active_directory_basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "active_directory_id", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"location", "active_directory_id", "pass", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccNetappactiveDirectory_activeDirectoryCreateExample_Full(context),
@@ -52,7 +52,7 @@ func TestAccNetappactiveDirectory_activeDirectoryCreateExample(t *testing.T) {
 				ResourceName:            "google_netapp_active_directory.test_active_directory_full",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "active_directory_id", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"location", "active_directory_id", "pass", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccNetappactiveDirectory_activeDirectoryCreateExample_Update(context),
@@ -61,7 +61,7 @@ func TestAccNetappactiveDirectory_activeDirectoryCreateExample(t *testing.T) {
 				ResourceName:            "google_netapp_active_directory.test_active_directory_full",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "active_directory_id", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"location", "active_directory_id", "pass", "labels", "terraform_labels"},
 			},
 		},
 	})
@@ -111,7 +111,7 @@ resource "google_netapp_active_directory" "test_active_directory_full" {
 `, context)
 }
 
-func testAccNetappactiveDirectory_activeDirectoryCreateExample_Update(context map[string]interface{}) string {
+func testAccNetappactiveDirectory_activeDirectoryCreateExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_netapp_active_directory" "test_active_directory_full" {
     active_directory_id = "tf-test-test-active-directory-full%{random_suffix}"

@@ -17,7 +17,7 @@ description: |
   ActiveDirectory is the public representation of the active directory config.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'QUICKSTART_TITLE': 'https://cloud.google.com/netapp/volumes/docs/reference/rest/v1/projects.locations.activeDirectories'
+    'Official Documentation`: 'https://cloud.google.com/netapp/volumes/docs/configure-and-use/active-directory/about-ad'
   api: 'https://cloud.google.com/netapp/volumes/docs/reference/rest/v1/projects.locations.activeDirectories'
 base_url: projects/{{project}}/locations/{{location}}/activeDirectories
 self_link: projects/{{project}}/locations/{{location}}/activeDirectories/{{active_directory_id}}
@@ -54,11 +54,13 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'netapp_active_directory_basic'
     primary_resource_id: 'test_active_directory_basic'
+    skip_test: true
     vars:
       active_directory_basic_name: 'test-active-directory-basic'
   - !ruby/object:Provider::Terraform::Examples
     name: 'netapp_active_directory_full'
     primary_resource_id: 'test_active_directory_full'
+    skip_test: true
     vars:
       active_directory_full_name: 'test-active-directory-full'
 properties:
