@@ -49,14 +49,16 @@ func DataSourceArtifactRegistryDockerImage() *schema.Resource {
 				Description: `The image name to fetch.`,
 			},
 			"digest": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: `The image digest to fetch.  This cannot be used if tag is provided.`,
+				Type:          schema.TypeString,
+				Optional:      true,
+				Description:   `The image digest to fetch.  This cannot be used if tag is provided.`,
+				ConflictsWith: []string{"tag"},
 			},
 			"tag": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: `The tag of the version of the image to fetch. This cannot be used if digest is provided.`,
+				Type:          schema.TypeString,
+				Optional:      true,
+				Description:   `The tag of the version of the image to fetch. This cannot be used if digest is provided.`,
+				ConflictsWith: []string{"digest"},
 			},
 			"name": {
 				Type:        schema.TypeString,
