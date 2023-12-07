@@ -105,7 +105,6 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'tokenStatus'
         output: true
-        deprecation_message: The field does not contain any token status information. Instead use https://cloud.google.com/dataform/reference/rest/v1beta1/projects.locations.repositories/computeAccessTokenStatus
         description: |
           Indicates the status of the Git access token. https://cloud.google.com/dataform/reference/rest/v1beta1/projects.locations.repositories#TokenStatus
   - !ruby/object:Api::Type::NestedObject
