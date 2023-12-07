@@ -9,12 +9,6 @@ resource "google_workbench_instance" "<%= ctx[:primary_resource_id] %>" {
       email = "<%= ctx[:test_env_vars]["service_account"] %>"
     }
 
-    shielded_instance_config {
-      enable_secure_boot = false
-      enable_vtpm = false
-      enable_integrity_monitoring = false
-    }
-
     network_interfaces {
     }
 

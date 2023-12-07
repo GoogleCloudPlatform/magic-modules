@@ -51,12 +51,6 @@ resource "google_workbench_instance" "<%= ctx[:primary_resource_id] %>" {
       kms_key = google_kms_crypto_key.crypto-key.id
     }
 
-    shielded_instance_config {
-      enable_secure_boot = true
-      enable_vtpm = true
-      enable_integrity_monitoring = true
-    }
-
     network_interfaces {
       network = google_compute_network.my_network.id
       subnet = google_compute_subnetwork.my_subnetwork.id
