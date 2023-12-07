@@ -29,6 +29,7 @@ var environmentVariables = [...]string{
 	"GOOGLE_SERVICE_ACCOUNT",
 	"GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION",
 	"GOOGLE_ZONE",
+	"PATH",
 	"SA_KEY",
 }
 
