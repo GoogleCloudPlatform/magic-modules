@@ -23,9 +23,6 @@ if [ "$#" -eq 0 ]; then
     exit 0
 fi
 
-echo PATH:
-echo $PATH
-
 # Run the binary and pass all arguments
 $GO_BINARY "$@"
 set +x
