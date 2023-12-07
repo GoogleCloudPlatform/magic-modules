@@ -7,7 +7,6 @@ import (
 
 	hashicorpcty "github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	tpg_transport "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 	"github.com/zclconf/go-cty/cty"
 	ctyjson "github.com/zclconf/go-cty/cty/json"
 )
@@ -54,11 +53,6 @@ func MapToCtyValWithSchema(m map[string]interface{}, s map[string]*schema.Schema
 		return cty.NilVal, fmt.Errorf("error unmarshaling JSON as cty.Value: %v", err)
 	}
 	return ret, nil
-}
-
-func NewConfig() *tpg_transport.Config {
-	// Currently its not needed, but it may change in future.
-	return &tpg_transport.Config{}
 }
 
 func hashicorpCtyTypeToZclconfCtyType(t hashicorpcty.Type) (cty.Type, error) {
