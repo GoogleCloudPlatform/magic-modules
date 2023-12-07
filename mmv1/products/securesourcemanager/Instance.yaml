@@ -75,6 +75,7 @@ examples:
       key_name: 'my-key'
   - !ruby/object:Provider::Terraform::Examples
     name: 'secure_source_manager_instance_private'
+    pull_external: true
     primary_resource_id: 'default'
     primary_resource_name: "fmt.Sprintf(\"tf-test-my-instance%s\",
       context[\"random_suffix\"\
@@ -83,7 +84,6 @@ examples:
       instance_id: 'my-instance'
       ca_pool_id: 'ca-pool'
       root_ca_id: 'root-ca'
-    pull_external: true
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
