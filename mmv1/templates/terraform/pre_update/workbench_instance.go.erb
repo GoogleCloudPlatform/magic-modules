@@ -50,12 +50,6 @@ if d.HasChange("gce_setup.0.accelerator_configs") {
 if d.HasChange("gce_setup.0.shielded_instance_config") {
     newUpdateMask = append(newUpdateMask, "gce_setup.shielded_instance_config")
 }
-if d.HasChange("gce_setup.0.gpu_driver_config.0.enable_gpu_driver") {
-    newUpdateMask = append(newUpdateMask, "gceSetup.gpu_driver_config.enable_gpu_driver")
-}
-if d.HasChange("gce_setup.0.gpu_driver_config.0.custom_gpu_driver_path") {
-    newUpdateMask = append(newUpdateMask, "gceSetup.gpu_driver_config.custom_gpu_driver_path")
-}
 if d.HasChange("gce_setup.0.metadata") {
     newUpdateMask = append(newUpdateMask, "gceSetup.metadata")
 }

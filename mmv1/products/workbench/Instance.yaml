@@ -378,25 +378,6 @@ properties:
         description: |
           Optional. Flag to enable ip forwarding or not, default false/off.
           https://cloud.google.com/vpc/docs/using-routes#canipforward
-      - !ruby/object:Api::Type::NestedObject
-        properties:
-          - !ruby/object:Api::Type::Boolean
-            name: enableGpuDriver
-            default_from_api: true
-            description: |
-              Optional. Whether the end user authorizes Google Cloud to install
-              GPU driver on this VM instance. If this field is empty or set to false, the
-              GPU driver won't be installed. Only applicable to instances with GPUs.
-          - !ruby/object:Api::Type::String
-            name: customGpuDriverPath
-            description: |
-              Optional. Specify a custom Cloud Storage path where the GPU driver
-              is stored. If not specified, we'll automatically choose from official GPU
-              drivers.
-        name: gpuDriverConfig
-        default_from_api: true
-        allow_empty_object: true
-        description: A GPU driver configuration
   - !ruby/object:Api::Type::String
     name: proxyUri
     description: Output only. The proxy endpoint that is used to access the Jupyter notebook.
