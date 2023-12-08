@@ -14,7 +14,6 @@ resource "google_kms_key_ring" "keyring" {
 resource "google_kms_crypto_key" "key" {
   name            = "<%= ctx[:vars]['key_name'] %>"
   key_ring        = google_kms_key_ring.keyring.id
-  rotation_period = "100000s"
 }
 
 resource "google_folder" "my_folder" {
