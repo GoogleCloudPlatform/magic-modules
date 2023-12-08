@@ -191,7 +191,6 @@ properties:
             description: |
               Specifies minimum number of processing units allocated to the instance.
               If set, this number should be multiples of 1000.
-            default_value: 1000
             exactly_one_of:
               - min_processing_units
               - min_nodes
