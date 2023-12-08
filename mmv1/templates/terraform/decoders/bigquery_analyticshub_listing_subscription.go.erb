@@ -1,12 +1,13 @@
 //name := d.Get("name").(string)
 
+res["name"] = d.Get("name").(string)
 res["destination_dataset"] = map[string]interface{}{
 	"description":   "A test subscription",
 	"friendly_name": "👋",
 	"location":      "US",
 	"dataset_reference": map[string]string{
 		"project_id": "lobato-dude",
-		"dataset_id": "test",
+		"dataset_id": "testlink",
 	},
 	"labels": map[string]string{
 		"testing": "🧪",
