@@ -18,7 +18,27 @@ self_link: '{{name}}'
 create_url: projects/{{project}}/locations/{{location}}/blockchainNodes?blockchain_node_id={{blockchain_node_id}}
 description: |
   A representation of a blockchain node.
+timeouts: !ruby/object:Api::Timeouts
+  insert_minutes: 45 
+  delete_minutes: 35 
 
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'
 
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
