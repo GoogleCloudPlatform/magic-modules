@@ -286,3 +286,54 @@ properties:
         description: |
           Firebase subdomain.
         default_from_api: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'mfa'
+    description: |
+      Options related to how clients making requests on behalf of a project should be configured.
+    ignore_read: true
+    properties:
+      - !ruby/object:Api::Type::Enum
+        name: 'state'
+        description: |
+          Whether MultiFactor Authentication has been enabled for this project.
+        values:
+          - :STATE_UNSPECIFIED
+          - :DISABLED
+          - :ENABLED
+          - :MANDATORY
+      - !ruby/object:Api::Type::Array
+        name: enabledProviders
+        description: |
+          A list of usable second factors for this project.
+        item_type: !ruby/object:Api::Type::Enum
+          name: 'undefined'
+          description: |
+            This field only has a name and description because of MM
+            limitations. It should not appear in downstreams.
+          values:
+            - :PROVIDER_UNSPECIFIED
+            - :PHONE_SMS
+      - !ruby/object:Api::Type::NestedObject
+        name: providerConfigs
+        description: |
+          A list of usable second factors for this project along with their configurations.
+          This field does not support phone based MFA, for that use the 'enabledProviders' field.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'state'
+            description: |
+              Whether MultiFactor Authentication has been enabled for this project.
+            values:
+              - :STATE_UNSPECIFIED
+              - :DISABLED
+              - :ENABLED
+              - :MANDATORY
+          - !ruby/object:Api::Type::NestedObject
+            name: totpProviderConfig
+            description: |
+              TOTP MFA provider config for this project.
+            properties:
+              - !ruby/object:Api::Type::Integer
+                name: adjacentIntervals
+                description: |
+                  The allowed number of adjacent intervals that will be used for verification to avoid clock skew.
