@@ -12,20 +12,18 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-# API resource name
 name: 'Subscription'
 base_url: projects/{{project}}/locations/{{location}}/subscriptions
 create_url: projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings/{{listing_id}}:subscribe
 self_link: '{{name}}'
-update_verb: :PATCH
-update_mask: true
+immutable: true
 min_version: ga
 description: A Bigquery Analytics Hub subscription
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/bigquery/docs/analytics-hub-introduction'
   api: 'https://cloud.google.com/bigquery/docs/reference/analytics-hub/rest/v1/projects.locations.subscriptions'
-skip_sweeper: true
+skip_sweeper: false
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/analytics_hub_subscription.go.erb
 examples:
@@ -43,8 +41,6 @@ examples:
       listing_id: 'my_listing'
       destination_dataset_id: 'destination_dataset'
       description: 'example data exchange'
-# TODO(lobato): IAM policy
-
 properties:
   - !ruby/object:Api::Type::NestedObject
     name: subscription
@@ -62,21 +58,18 @@ properties:
     description: |-
       The ID of the data exchange. Must contain only Unicode letters, numbers (0-9), underscores (_). Should not use characters that require URL-escaping, or characters outside of ASCII, spaces.
     required: true
-    immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::String
     name: listing_id
     description: |-
       The ID of the listing. Must contain only Unicode letters, numbers (0-9), underscores (_). Should not use characters that require URL-escaping, or characters outside of ASCII, spaces.
     required: true
-    immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::String
     name: 'location'
     description: |
       The name of the location where the listing you want to subscribe to resides.
     required: true
-    immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::NestedObject
     name: destinationDataset
@@ -98,7 +91,6 @@ properties:
         name: 'location'
         required: true
         description: The geographic location where the dataset should reside. See https://cloud.google.com/bigquery/docs/locations for supported locations.
-        immutable: true
         custom_flatten: templates/terraform/custom_flatten/bigquery_dataset_location.go.erb
         diff_suppress_func: 'tpgresource.CaseDiffSuppress'
       - !ruby/object:Api::Type::NestedObject
@@ -109,10 +101,8 @@ properties:
           - !ruby/object:Api::Type::String
             name: datasetId
             required: true
-            immutable: true
             description: A unique ID for this dataset, without the project name. The ID must contain only letters (a-z, A-Z), numbers (0-9), or underscores (_). The maximum length is 1,024 characters.
           - !ruby/object:Api::Type::String
             name: projectId
             required: true
-            immutable: true
             description: The ID of the project containing this dataset.
