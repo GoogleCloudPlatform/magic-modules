@@ -1,6 +1,5 @@
-<% autogen_exception -%>
 package vmwareengine
-<% unless version == 'ga' -%>
+
 import (
 	"fmt"
 
@@ -38,4 +37,3 @@ func dataSourceVmwareengineClusterRead(d *schema.ResourceData, meta interface{})
 	}
 	return nil
 }
-<% end -%>
