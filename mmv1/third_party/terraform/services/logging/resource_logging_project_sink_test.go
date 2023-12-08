@@ -187,7 +187,7 @@ func TestAccLoggingProjectSink_updatePreservesCustomWriter(t *testing.T) {
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},
-		CheckDestroy:             testAccCheckLoggingProjectSinkDestroyProducer(t),
+		CheckDestroy: testAccCheckLoggingProjectSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLoggingProjectSink_customWriter(org, billingId, project, sinkName, account),
