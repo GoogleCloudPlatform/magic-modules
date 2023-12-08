@@ -19,8 +19,8 @@ create_url: projects/{{project}}/locations/{{location}}/blockchainNodes?blockcha
 description: |
   A representation of a blockchain node.
 timeouts: !ruby/object:Api::Timeouts
-  insert_minutes: 45 
-  delete_minutes: 35 
+  insert_minutes: 45
+  delete_minutes: 35
 
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
@@ -160,7 +160,7 @@ properties:
         name: nodeType
         immutable: true
         values:
-          - :LIGHT	
+          - :LIGHT
           - :FULL
           - :ARCHIVE
         description: |
