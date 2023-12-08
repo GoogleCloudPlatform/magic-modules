@@ -211,7 +211,6 @@ properties:
             description: |
               Specifies number of nodes allocated to the instance. If set, this number
               should be greater than or equal to 1.
-            default_value: 1
             exactly_one_of:
               - min_processing_units
               - min_nodes
