@@ -619,16 +619,6 @@ Please refer to the field `effective_#{title}` for all of the #{title} present o
       @base_url
     end
 
-    def async_operation_url
-      [@__product.base_url, async_operation_uri].flatten.join
-    end
-
-    def async_operation_uri
-      raise 'Not an async resource' if async.nil?
-
-      async.operation.base_url
-    end
-
     def full_create_url
       [@__product.base_url, create_uri].flatten.join
     end
