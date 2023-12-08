@@ -258,6 +258,7 @@ properties:
     name: 'client'
     description: |
       Options related to how clients making requests on behalf of a project should be configured.
+    ignore_read: true
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'permissions'
@@ -278,8 +279,10 @@ properties:
         description: |
           API key that can be used when making requests for this project.
         sensitive: true
+        default_from_api: true
       - !ruby/object:Api::Type::String
         name: 'firebaseSubdomain'
         output: true
         description: |
           Firebase subdomain.
+        default_from_api: true
