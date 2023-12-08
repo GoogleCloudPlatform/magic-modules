@@ -1,7 +1,9 @@
 resource "google_blockchain_node_engine_blockchain_nodes" "<%= ctx[:primary_resource_id] %>" {
   location = "us-central1"
   blockchain_type = "ETHEREUM"
-  blockchain_node_id = "test"
+  blockchain_node_id = "<%= ctx[:blockchain_node_id_] %>"
+  api_enable_admin = true
+  api_enable_debug = true
   ethereum_details {
     node_type = "ARCHIVE"
     consensus_client = "LIGHTHOUSE"

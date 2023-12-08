@@ -49,7 +49,12 @@ examples:
     name: 'blockchain_nodes_basic'
     primary_resource_id: 'default_node'
     vars:
-      node_name: 'blockchain_name'
+      blockchain_node_id: 'blockchain_basic_node'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'blockchain_nodes_geth_details'
+    primary_resource_id: 'default_node_geth'
+    vars:
+      blockchain_node_id: 'blockchain_geth_node'
 parameters:
   - !ruby/object:Api::Type::String
     name: location

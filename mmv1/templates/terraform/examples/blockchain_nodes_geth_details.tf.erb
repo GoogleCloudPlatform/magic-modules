@@ -1,0 +1,19 @@
+resource "google_blockchain_node_engine_blockchain_nodes" "<%= ctx[:primary_resource_id] %>" {
+  location = "us-central1"
+  blockchain_type = "ETHEREUM"
+  api_enable_admin = true
+  api_enable_debug = true
+  blockchain_node_id = "<%= ctx[:blockchain_node_id] %>"
+  "ethereumDetails": {
+    "nodeType" : "FULL",
+    "consensusClient": "LIGHTHOUSE",
+    "executionClient": "GETH",
+    "network": "MAINNET",
+    "geth_details": {
+      "garbageCollectionMode": "FULL"
+    }
+ },
+  labels = {
+    environment = "dev"
+  }
+}
