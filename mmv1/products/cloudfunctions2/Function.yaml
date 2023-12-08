@@ -219,6 +219,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudfunctions2_cmek'
     skip_docs: true # the example file is written in a repetitive way to help acc tests, so exclude
+    skip_vcr: true
     primary_resource_id: 'function'
     min_version: beta
     vars:
