@@ -17,7 +17,7 @@ resource "google_bigquery_analytics_hub_listing" "<%= ctx[:primary_resource_id] 
   }
 }
 
-resource "google_bigquery_analytics_hub_subscription" "<%= ctx[:primary_resource_id] %>" {
+resource "google_bigquery_analytics_hub_listing_subscription" "<%= ctx[:primary_resource_id] %>" {
   location = "US"
   data_exchange_id = google_bigquery_analytics_hub_data_exchange.<%= ctx[:primary_resource_id] %>.data_exchange_id
   listing_id       = google_bigquery_analytics_hub_listing.<%= ctx[:primary_resource_id] %>.listing_id

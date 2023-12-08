@@ -12,24 +12,25 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: 'Subscription'
+name: 'ListingSubscription'
 base_url: projects/{{project}}/locations/{{location}}/subscriptions
 create_url: projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings/{{listing_id}}:subscribe
 self_link: '{{name}}'
 immutable: true
 min_version: ga
-description: A Bigquery Analytics Hub subscription
+description: A Bigquery Analytics Hub listing subscription
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/bigquery/docs/analytics-hub-introduction'
   api: 'https://cloud.google.com/bigquery/docs/reference/analytics-hub/rest/v1/projects.locations.subscriptions'
 skip_sweeper: false
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  decoder: templates/terraform/decoders/bigquery_analyticshub_listing_subscription.go.erb
   post_create: templates/terraform/post_create/analytics_hub_subscription.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: 'bigquery_analyticshub_subscription_basic'
-    primary_resource_id: 'subscription'
+    name: 'bigquery_analyticshub_listing_subscription_basic'
+    primary_resource_id: 'listing_subscription'
     primary_resource_name: "fmt.Sprintf(\"tf_test_my_data_exchange%s\",
       context[\"\
       random_suffix\"]), fmt.Sprintf(\"tf_test_my_listing%s\",
