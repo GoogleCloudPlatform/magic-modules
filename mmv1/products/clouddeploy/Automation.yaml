@@ -115,10 +115,12 @@ properties:
   - !ruby/object:Api::Type::Boolean
     name: "suspended"
     description: "Optional. When Suspended, automation is deactivated from execution."
+    send_empty_value: true
   - !ruby/object:Api::Type::String
     name: "service_account"
     description: "Required. Email address of the user-managed IAM service account that creates Cloud Deploy release and rollout resources."
     required: true
+    ignore_read: true
   - !ruby/object:Api::Type::NestedObject
     name: "selector"
     description: "Required. Selected resources to which the automation will be applied."

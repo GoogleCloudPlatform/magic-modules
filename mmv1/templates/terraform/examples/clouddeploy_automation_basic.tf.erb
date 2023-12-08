@@ -12,7 +12,7 @@ resource "google_clouddeploy_automation" "<%= ctx[:primary_resource_id] %>" {
   }
   suspended = false
   rules {
-    promote_release_rule{
+    promote_release_rule {
       id = "promote-release"
     }
   }
@@ -29,9 +29,3 @@ resource "google_clouddeploy_delivery_pipeline" "pipeline" {
     }
   }
  }
-
-resource "google_service_account" "automation_sa" {
-  provider     = google-beta
-  account_id   = "tf-test-dataform-sa%{random_suffix}"
-  display_name = "Dataform Service Account"
-}
