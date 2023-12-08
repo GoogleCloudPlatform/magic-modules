@@ -174,9 +174,9 @@ properties:
             VM instance. Currently supports only one service account.
       - !ruby/object:Api::Type::NestedObject
         name: vmImage
+        custom_flatten: templates/terraform/custom_flatten/workbench_instance_vm_image_flatten.go.erb
         default_from_api: true
         immutable: true
-        custom_flatten: templates/terraform/custom_flatten/workbench_instance_vm_image_flatten.go.erb
         description: |
           Definition of a custom Compute Engine virtual machine image for starting
           a workbench instance with the environment installed directly on the VM.
