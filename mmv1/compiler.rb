@@ -144,29 +144,11 @@ allowed_classes = Google::YamlValidator.allowed_classes
 # so lets build it first
 all_product_files = all_product_files.sort_by { |product| product == 'products/compute' ? 0 : 1 }
 
-# products_for_version entries are a hash of product definitions (:definitions)
-# and provider config (:overrides) for the product
 # rubocop:disable Metrics/BlockLength
 products_for_version = Parallel.map(all_product_files, in_processes: 8) do |product_name|
   product_override_path = ''
   product_override_path = File.join(override_dir, product_name, 'product.yaml') if override_dir
   product_yaml_path = File.join(product_name, 'product.yaml')
-
-<<<<<<< HEAD
-  provider_override_path = ''
-  provider_override_path = File.join(override_dir, product_name, "#{provider_name}.yaml") \
-    if override_dir
-  provider_yaml_path = File.join(product_name, "#{provider_name}.yaml")
-=======
-  api_override_path = ''
-  api_override_path = File.join(override_dir, product_name, 'api.yaml') if override_dir
-  api_yaml_path = File.join(product_name, 'api.yaml')
-
-  # provider_override_path = ''
-  # provider_override_path = File.join(override_dir, product_name, "#{provider_name}.yaml") \
-  #   if override_dir
-  # provider_yaml_path = File.join(product_name, "#{provider_name}.yaml")
->>>>>>> 8c28d4dac (Remove usage of terraform.yaml template fie)
 
   unless File.exist?(product_yaml_path) || File.exist?(product_override_path)
     raise "#{product_name} does not contain an api.yaml or product.yaml file"
@@ -184,14 +166,6 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
     product_yaml = File.read(product_yaml_path)
   end
 
-  # unless File.exist?(provider_yaml_path) || File.exist?(provider_override_path)
-  #   unless File.exist?(product_yaml_path) || File.exist?(product_override_path)
-  #     Google::LOGGER.info "#{product_name}: Skipped as no #{provider_name}.yaml file exists"
-  #     next
-  #   end
-  #   provider_yaml_path = 'templates/terraform.yaml'
-  # end
-
   raise "Output path '#{output_path}' does not exist or is not a directory" \
     unless Dir.exist?(output_path)
 
@@ -204,8 +178,6 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
       "#{product_name} does not have a '#{version}' version, skipping"
     next
   end
-
-  Google::LOGGER.info "#{product_yaml_path}: product_yaml_path"
 
   if File.exist?(product_yaml_path) || File.exist?(product_override_path)
     resources = []
@@ -260,33 +232,11 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
     product_api.set_variable(resources, 'objects')
   end
 
-  # Google::LOGGER.info "#{provider_yaml_path}: provider_yaml_path"
-  # Google::LOGGER.info "#{provider_override_path}: provider_override_path"
-
-  # Google::LOGGER.info "#{product_api}: Compiling provider config product_api 0"
-
-  # if File.exist?(provider_yaml_path)
-  #   product_api, provider_config, = \
-  #     Provider::Config.parse(provider_yaml_path, product_api, version)
-  # end
-  # # Load any dynamic overrides passed in with -r
-  # if File.exist?(provider_override_path)
-  #   product_api, provider_config, = \
-  #     Provider::Config.parse(provider_override_path, product_api, version, override_dir)
-  # end
-
-  provider_config = nil
   product_api&.validate
-
-  # Google::LOGGER.info "#{product_api}: Compiling provider config product_api"
-  # Google::LOGGER.info "#{provider_config}: Compiling provider config provider_config"
-
-  Google::LOGGER.info "#{product_name}: Compiling provider config"
-  # pp provider_config if ENV['COMPILER_DEBUG']
 
   if force_provider.nil?
     provider = \
-      Provider::Terraform.new(provider_config, product_api, version, start_time)
+      Provider::Terraform.new(product_api, version, start_time)
   else
     override_providers = {
       'oics' => Provider::TerraformOiCS,
@@ -303,12 +253,12 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
     end
 
     provider = \
-      override_providers[force_provider].new(provider_config, product_api, version, start_time)
+      override_providers[force_provider].new(product_api, version, start_time)
   end
 
   unless products_to_generate.include?(product_name)
     Google::LOGGER.info "#{product_name}: Not specified, skipping generation"
-    next { definitions: product_api, overrides: provider_config, provider: provider } # rubocop:disable Style/HashSyntax
+    next { definitions: product_api, provider: provider } # rubocop:disable Style/HashSyntax
   end
 
   Google::LOGGER.info \
@@ -322,9 +272,8 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
     generate_docs
   )
 
-  # provider_config is mutated by instantiating a provider.
   # we need to preserve a single provider instance to use outside of this loop.
-  { definitions: product_api, overrides: provider_config, provider: provider } # rubocop:disable Style/HashSyntax
+  { definitions: product_api, provider: provider } # rubocop:disable Style/HashSyntax
 end
 
 products_for_version = products_for_version.compact # remove any nil values
