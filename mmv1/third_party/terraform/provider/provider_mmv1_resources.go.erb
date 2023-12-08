@@ -200,9 +200,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_vpc_access_connector":                      vpcaccess.DataSourceVPCAccessConnector(),
 	"google_redis_instance":                            redis.DataSourceGoogleRedisInstance(),
 	"google_vertex_ai_index":                           vertexai.DataSourceVertexAIIndex(),
-	<% unless version == 'ga' -%>
 	"google_vmwareengine_cluster":                      vmwareengine.DataSourceVmwareengineCluster(),
-	<% end -%>
 	"google_vmwareengine_external_address":             vmwareengine.DataSourceVmwareengineExternalAddress(),
 	"google_vmwareengine_network":                      vmwareengine.DataSourceVmwareengineNetwork(),
 	"google_vmwareengine_network_peering":              vmwareengine.DataSourceVmwareengineNetworkPeering(),
