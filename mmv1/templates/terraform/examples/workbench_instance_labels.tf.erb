@@ -9,9 +9,6 @@ resource "google_workbench_instance" "<%= ctx[:primary_resource_id] %>" {
       email = "<%= ctx[:test_env_vars]["service_account"] %>"
     }
 
-    network_interfaces {
-    }
-
     metadata = {
       terraform = "true"
     }

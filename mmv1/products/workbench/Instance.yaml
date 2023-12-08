@@ -129,7 +129,6 @@ properties:
             - !ruby/object:Api::Type::Enum
               name: type
               values:
-                - ACCELERATOR_TYPE_UNSPECIFIED
                 - NVIDIA_TESLA_P100
                 - NVIDIA_TESLA_V100
                 - NVIDIA_TESLA_P4
@@ -151,6 +150,7 @@ properties:
             Currently supports only one accelerator configuration.
       - !ruby/object:Api::Type::Array
         name: serviceAccounts
+        max_items: 1
         description: |
           The service account that serves as an identity for the VM instance. Currently supports only one service account.
         default_from_api: true
@@ -159,12 +159,12 @@ properties:
           properties:
             - !ruby/object:Api::Type::String
               name: email
+              immutable: true
               default_from_api: true
               description: Optional. Email address of the service account.
             - !ruby/object:Api::Type::Array
               name: scopes
               item_type: Api::Type::String
-              default_from_api: true
               description: |
                 Output only. The list of scopes to be made available for this
                 service account. Set by the CLH to https://www.googleapis.com/auth/cloud-platform
@@ -183,17 +183,20 @@ properties:
         properties:
           - !ruby/object:Api::Type::String
             name: project
+            immutable: true
             description: |
                 The name of the Google Cloud project that this VM image belongs to.
                 Format: {project_id}
           - !ruby/object:Api::Type::String
             name: name
+            immutable: true
             description: Optional. Use VM image name to find the image.
             exactly_one_of:
               - vm_image.0.name
               - vm_image.0.family
           - !ruby/object:Api::Type::String
             name: family
+            immutable: true
             description: |
               Optional. Use this VM image family to find the image; the newest
               image in this family will be used.
@@ -220,7 +223,6 @@ properties:
             immutable: true
             custom_flatten: templates/terraform/custom_flatten/workbench_instance_boot_disk_type_flatten.go.erb
             values:
-              - DISK_TYPE_UNSPECIFIED
               - PD_STANDARD
               - PD_SSD
               - PD_BALANCED
@@ -231,7 +233,6 @@ properties:
             default_from_api: true
             custom_flatten: templates/terraform/custom_flatten/workbench_instance_boot_disk_encryption_flatten.go.erb
             values:
-              - DISK_ENCRYPTION_UNSPECIFIED
               - GMEK
               - CMEK
             description: |
@@ -249,6 +250,7 @@ properties:
       - !ruby/object:Api::Type::Array
         name: dataDisks
         description: Data disks attached to the VM instance. Currently supports only one data disk.
+        max_size: 1
         default_from_api: true
         immutable: true
         item_type: !ruby/object:Api::Type::NestedObject
@@ -265,7 +267,6 @@ properties:
               name: diskType
               custom_flatten: templates/terraform/custom_flatten/workbench_instance_data_disk_type_flatten.go.erb
               values:
-                - DISK_TYPE_UNSPECIFIED
                 - PD_STANDARD
                 - PD_SSD
                 - PD_BALANCED
@@ -277,7 +278,6 @@ properties:
               default_from_api: true
               custom_flatten: templates/terraform/custom_flatten/workbench_instance_data_disk_encryption_flatten.go.erb
               values:
-                - DISK_ENCRYPTION_UNSPECIFIED
                 - GMEK
                 - CMEK
               description: |
@@ -305,21 +305,23 @@ properties:
             - !ruby/object:Api::Type::String
               name: network
               description: 'Optional. The name of the VPC that this VM instance is in.'
+              immutable: true
               custom_expand: templates/terraform/custom_expand/network_full_url.erb
               diff_suppress_func: tpgresource.CompareSelfLinkRelativePaths
               default_from_api: true
             - !ruby/object:Api::Type::String
               name: subnet
+              immutable: true
               description: 'Optional. The name of the subnet that this VM instance is in.'
               diff_suppress_func: tpgresource.CompareSelfLinkRelativePaths
               default_from_api: true
             - !ruby/object:Api::Type::Enum
               name: nicType
+              immutable: true
               description: |
                 Optional. The type of vNIC to be used on this interface. This
                 may be gVNIC or VirtioNet.
               values:
-                - UNSPECIFIED_NIC_TYPE
                 - VIRTIO_NET
                 - GVNIC
           description: Optional. The network interfaces for the VM. Supports only one interface.
