@@ -3,9 +3,24 @@ package common
 import (
 	"fmt"
 
+	"github.com/hashicorp/hcl/hcl/printer"
 	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/zclconf/go-cty/cty"
 )
+
+func HclWriteBlocks(blocks []*HCLResourceBlock) ([]byte, error) {
+	f := hclwrite.NewFile()
+	rootBody := f.Body()
+
+	for _, resourceBlock := range blocks {
+		hclBlock := rootBody.AppendNewBlock("resource", resourceBlock.Labels)
+		if err := hclWriteBlock(resourceBlock.Value, hclBlock.Body()); err != nil {
+			return nil, err
+		}
+	}
+
+	return printer.Format(f.Bytes())
+}
 
 func hclWriteBlock(val cty.Value, body *hclwrite.Body) error {
 	if val.IsNull() {
