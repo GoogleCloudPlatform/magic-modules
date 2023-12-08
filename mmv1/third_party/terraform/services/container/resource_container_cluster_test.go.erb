@@ -3657,6 +3657,7 @@ func TestAccContainerCluster_autoprovisioningDefaultsManagement(t *testing.T) {
 // taints it, having Terraform clean it up during the next apply. This test
 // name is now inexact, but is being preserved to maintain the test history.
 func TestAccContainerCluster_errorCleanDanglingCluster(t *testing.T) {
+	acctest.SkipIfVcr(t) // skipped because the timeout step doesn't record operation GET interactions
 	t.Parallel()
 
 	suffix := acctest.RandString(t, 10)
