@@ -8,7 +8,11 @@ import (
 
 func TestExecCommunityChecker_CoreContributorFlow(t *testing.T) {
 	gh := &mockGithub{
-		author:        "core_author",
+		pullRequest: github.PullRequest{
+			User: github.User{
+				Login: "core_author",
+			},
+		},
 		userType:      github.CoreContributorUserType,
 		calledMethods: make(map[string][][]any),
 	}
@@ -34,7 +38,11 @@ func TestExecCommunityChecker_CoreContributorFlow(t *testing.T) {
 
 func TestExecCommunityChecker_GooglerFlow(t *testing.T) {
 	gh := &mockGithub{
-		author:            "googler_author",
+		pullRequest: github.PullRequest{
+			User: github.User{
+				Login: "googler_author",
+			},
+		},
 		userType:          github.GooglerUserType,
 		calledMethods:     make(map[string][][]any),
 		firstReviewer:     "reviewer1",
@@ -61,7 +69,11 @@ func TestExecCommunityChecker_GooglerFlow(t *testing.T) {
 
 func TestExecCommunityChecker_AmbiguousUserFlow(t *testing.T) {
 	gh := &mockGithub{
-		author:            "ambiguous_author",
+		pullRequest: github.PullRequest{
+			User: github.User{
+				Login: "ambiguous_author",
+			},
+		},
 		userType:          github.CommunityUserType,
 		calledMethods:     make(map[string][][]any),
 		firstReviewer:     github.GetRandomReviewer(),

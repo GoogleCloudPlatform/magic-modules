@@ -14,7 +14,7 @@ var (
 )
 
 // Returns a list of users to request review from, as well as a new primary reviewer if this is the first run.
-func ChooseReviewers(firstRequestedReviewer string, previouslyInvolvedReviewers []string) (reviewersToRequest []string, newPrimaryReviewer string) {
+func ChooseCoreReviewers(firstRequestedReviewer string, previouslyInvolvedReviewers []string) (reviewersToRequest []string, newPrimaryReviewer string) {
 	hasPrimaryReviewer := false
 	newPrimaryReviewer = ""
 
