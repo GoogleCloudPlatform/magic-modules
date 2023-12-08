@@ -3,16 +3,16 @@ package cmd
 import "magician/github"
 
 type mockGithub struct {
-	author            string
+	pullRequest       github.PullRequest
 	userType          github.UserType
 	firstReviewer     string
 	previousReviewers []string
 	calledMethods     map[string][][]any
 }
 
-func (m *mockGithub) GetPullRequest(prNumber string) (string, error) {
+func (m *mockGithub) GetPullRequest(prNumber string) (github.PullRequest, error) {
 	m.calledMethods["GetPullRequest"] = append(m.calledMethods["GetPullRequest"], []any{prNumber})
-	return m.author, nil
+	return m.pullRequest, nil
 }
 
 func (m *mockGithub) GetUserType(user string) github.UserType {
@@ -58,9 +58,4 @@ func (m *mockGithub) PostBuildStatus(prNumber string, title string, state string
 func (m *mockGithub) CreateWorkflowDispatchEvent(workflowFileName string, inputs map[string]any) error {
 	m.calledMethods["CreateWorkflowDispatchEvent"] = append(m.calledMethods["CreateWorkflowDispatchEvent"], []any{workflowFileName, inputs})
 	return nil
-}
-
-func (m *mockGithub) GetPullRequestLabelIDs(prNumber string) (map[int]struct{}, error) {
-	m.calledMethods["GetPullRequestLabelIDs"] = append(m.calledMethods["GetPullRequestLabelIDs"], []any{prNumber})
-	return nil, nil
 }

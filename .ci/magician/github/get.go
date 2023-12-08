@@ -5,29 +5,35 @@ import (
 	utils "magician/utility"
 )
 
+type User struct {
+	Login string `json:"login"`
+}
+
+type Label struct {
+	Name string `json:"name"`
+}
+
 type PullRequest struct {
 	User struct {
 		Login string `json:"login"`
 	} `json:"user"`
-	Labels []struct {
-		Name string
-	}
+	Labels []Label `json:"labels"`
 }
 
-func (gh *github) GetPullRequest(prNumber string) (string, error) {
+func (gh *Client) GetPullRequest(prNumber string) (PullRequest, error) {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/%s", prNumber)
 
 	var pullRequest PullRequest
 
 	_, err := utils.RequestCall(url, "GET", gh.token, &pullRequest, nil)
 	if err != nil {
-		return "", err
+		return pullRequest, err
 	}
 
 	return pullRequest, nil
 }
 
-func (gh *github) GetPullRequestRequestedReviewer(prNumber string) (string, error) {
+func (gh *Client) GetPullRequestRequestedReviewer(prNumber string) (string, error) {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/%s/requested_reviewers", prNumber)
 
 	var requestedReviewers struct {
@@ -48,7 +54,7 @@ func (gh *github) GetPullRequestRequestedReviewer(prNumber string) (string, erro
 	return requestedReviewers.Users[0].Login, nil
 }
 
-func (gh *github) GetPullRequestPreviousAssignedReviewers(prNumber string) ([]string, error) {
+func (gh *Client) GetPullRequestPreviousAssignedReviewers(prNumber string) ([]string, error) {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/%s/reviews", prNumber)
 
 	var reviews []struct {
@@ -75,7 +81,7 @@ func (gh *github) GetPullRequestPreviousAssignedReviewers(prNumber string) ([]st
 	return result, nil
 }
 
-func (gh *github) GetPullRequestLabelIDs(prNumber string) (map[int]struct{}, error) {
+func (gh *Client) GetPullRequestLabelIDs(prNumber string) (map[int]struct{}, error) {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/%s/reviews", prNumber)
 
 	var labels []struct {
