@@ -56,7 +56,7 @@ func (ut UserType) String() string {
 	}
 }
 
-func (gh *github) GetUserType(user string) UserType {
+func (gh *Client) GetUserType(user string) UserType {
 	if isTeamMember(user, gh.token) {
 		fmt.Println("User is a team member")
 		return CoreContributorUserType
