@@ -3,7 +3,7 @@ resource "google_blockchain_node_engine_blockchain_nodes" "<%= ctx[:primary_reso
   blockchain_type = "ETHEREUM"
   api_enable_admin = true
   api_enable_debug = true
-  blockchain_node_id = "<%= ctx[:blockchain_node_id] %>"
+  blockchain_node_id = "<%= ctx[:vars]["blockchain_node_id"] %>"
   "ethereumDetails": {
     "nodeType" : "FULL",
     "consensusClient": "LIGHTHOUSE",
