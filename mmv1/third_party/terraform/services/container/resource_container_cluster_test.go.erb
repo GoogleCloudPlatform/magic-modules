@@ -4308,6 +4308,56 @@ func TestAccContainerCluster_withFleetConfig(t *testing.T) {
 	})
 }
 
+<% unless version == 'ga' -%>
+func TestAccContainerCluster_withWorkloadALTSConfig(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withWorkloadALTSConfig(clusterName, networkName, subnetworkName),
+			},
+			{
+				ResourceName:      "google_container_cluster.with_workload_alts_config",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				Check: resource.TestCheckResourceAttr(
+					"google_container_cluster.with_workload_alts_config", "workload_alts_config.enable_alts", "true"),
+			},
+			{
+				Config: testAccContainerCluster_withWorkloadALTSConfig_update_false(clusterName, networkName, subnetworkName),
+			},
+			{
+				ResourceName:      "google_container_cluster.with_workload_alts_config",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				Check: resource.TestCheckResourceAttr(
+					"google_container_cluster.with_workload_alts_config", "workload_alts_config.enable_alts", "false"),
+			},
+			{
+				Config: testAccContainerCluster_withWorkloadALTSConfig_remove(clusterName, networkName, subnetworkName),
+			},
+			{
+				ResourceName:      "google_container_cluster.with_workload_alts_config",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				Check: resource.TestCheckNoResourceAttr(
+					"google_container_cluster.with_workload_alts_config", "workload_alts_config.enable_alts"),
+			},
+		},
+	})
+}
+<% end -%>
+
 func testAccContainerCluster_withFleetConfig(name, projectID string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
@@ -9257,5 +9307,53 @@ resource "google_container_cluster" "without_confidential_boot_disk" {
  deletion_protection = false
 }
 `, clusterName, npName)
+}
+<% end -%>
+
+<% unless version == 'ga' -%>
+func testAccContainerCluster_withWorkloadALTSConfig(name, networkName, subnetworkName string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_workload_alts_config" {
+	name               = "%s"
+	location           = "us-central1-a"
+	initial_node_count = 1
+	network         = "%s"
+	subnetwork      = "%s"
+	workload_alts_config {
+		enable_alts = true
+	}
+}
+`, name, networkName, subnetworkName)
+}
+<% end -%>
+
+<% unless version == 'ga' -%>
+func testAccContainerCluster_withWorkloadALTSConfig_update_false(name, networkName, subnetworkName string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_workload_alts_config" {
+	name               = "%s"
+	location           = "us-central1-a"
+	initial_node_count = 1
+	network         = "%s"
+	subnetwork      = "%s"
+	workload_alts_config {
+		enable_alts = false
+	}
+}
+`, name, networkName, subnetworkName)
+}
+<% end -%>
+
+<% unless version == 'ga' -%>
+func testAccContainerCluster_withWorkloadALTSConfig_remove(name, networkName, subnetworkName string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_workload_alts_config" {
+	name               = "%s"
+	location           = "us-central1-a"
+	initial_node_count = 1
+	network         = "%s"
+	subnetwork      = "%s"
+}
+`, name, networkName, subnetworkName)
 }
 <% end -%>
