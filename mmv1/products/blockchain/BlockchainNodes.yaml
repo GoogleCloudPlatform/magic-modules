@@ -93,10 +93,11 @@ properties:
       User-provided key-value pairs
   - !ruby/object:Api::Type::NestedObject
     name: connectionInfo
+    output: true
     description: |
       The connection information through which to interact with a blockchain node.
     properties:
-      - !ruby/object:Api::Type::NestedObject
+      - !ruby/object:Api::Type::KeyValuePairs
         name: endpointInfo
         output: true
         description: |
@@ -131,7 +132,7 @@ properties:
               - :ARCHIVE
             description: |
               Blockchain garbage collection mode.
-      - !ruby/object:Api::Type::NestedObject
+      - !ruby/object:Api::Type::KeyValuePairs
         name: additionalEndpoints
         description: |
           User-provided key-value pairs

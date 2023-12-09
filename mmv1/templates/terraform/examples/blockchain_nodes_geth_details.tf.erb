@@ -5,10 +5,10 @@ resource "google_blockchain_node_engine_blockchain_nodes" "<%= ctx[:primary_reso
   ethereum_details {
     api_enable_admin = true
     api_enable_debug = true
-    node_type = "FULL",
-    consensus_client = "LIGHTHOUSE",
-    execution_client = "GETH",
-    network = "MAINNET",
+    node_type = "FULL"
+    consensus_client = "LIGHTHOUSE"
+    execution_client = "GETH"
+    network = "MAINNET"
     geth_details {
       garbage_collection_mode = "FULL"
     }
