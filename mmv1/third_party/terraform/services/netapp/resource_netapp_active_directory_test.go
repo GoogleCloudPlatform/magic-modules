@@ -111,7 +111,7 @@ resource "google_netapp_active_directory" "test_active_directory_full" {
 `, context)
 }
 
-func testAccNetappactiveDirectory_activeDirectoryCreateExample_update(context map[string]interface{}) string {
+func testAccNetappactiveDirectory_activeDirectoryCreateExample_Update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_netapp_active_directory" "test_active_directory_full" {
     active_directory_id = "tf-test-test-active-directory-full%{random_suffix}"
