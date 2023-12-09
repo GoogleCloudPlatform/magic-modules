@@ -2,7 +2,6 @@ package source
 
 import (
 	"fmt"
-	"magician/exec"
 	"path/filepath"
 )
 
@@ -15,13 +14,19 @@ type Repo struct {
 }
 
 type Controller struct {
-	rnr      *exec.Runner
+	rnr      Runner
 	username string
 	token    string
 	goPath   string
 }
 
-func NewController(goPath, username, token string, rnr *exec.Runner) *Controller {
+type Runner interface {
+	PushDir(path string) error
+	PopDir() error
+	Run(name string, args []string, env map[string]string) (string, error)
+}
+
+func NewController(goPath, username, token string, rnr Runner) *Controller {
 	return &Controller{
 		rnr:      rnr,
 		username: username,
