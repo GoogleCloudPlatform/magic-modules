@@ -1,0 +1,20 @@
+const dynamicLabel = "cloudidentity.googleapis.com/groups.dynamic"
+
+// we want to suppress the dynamic label diff
+func resourceCloudIdentityGroupDynamicLabelDiffSuppress(k, _, _ string, d *schema.ResourceData) bool {
+  // For a map, k is path to the element, rather than the map.
+  // E.g. "node_groups.2.ips.0"
+  lastDotIndex := strings.LastIndex(k, ".")
+  if lastDotIndex != -1 {
+    k = string(k[:lastDotIndex])
+  }
+
+  oldData, newData := d.GetChange(k)
+  m := make(map[string]interface{})
+  for key, val := range newData.(map[string]interface{}) {
+    if key != dynamicLabel {
+      m[key] = val
+    }
+  }
+  return reflect.DeepEqual(oldData.(map[string]interface{}), m)
+}

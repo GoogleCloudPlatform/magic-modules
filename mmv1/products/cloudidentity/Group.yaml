@@ -60,6 +60,7 @@ examples:
       org_domain: :ORG_DOMAIN
       cust_id: :CUST_ID
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/cloud_identity_group_dynamic_label.go.erb
   post_create: templates/terraform/post_create/set_computed_name.erb
   custom_import: templates/terraform/custom_import/cloud_identity_group_import.go.erb
 parameters:
@@ -181,6 +182,7 @@ properties:
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'labels'
     required: true
+    diff_suppress_func: resourceCloudIdentityGroupDynamicLabelDiffSuppress
     description: |
       One or more label entries that apply to the Group. Currently supported labels contain a key with an empty value.
 
