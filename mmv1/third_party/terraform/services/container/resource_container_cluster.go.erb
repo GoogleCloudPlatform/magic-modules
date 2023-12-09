@@ -2073,23 +2073,23 @@ func ResourceContainerCluster() *schema.Resource {
 				},
 			},
 			<% unless version == 'ga' -%>
-			"workload_alts_config": {
-				Type:             schema.TypeList,
-				Optional:         true,
-				MaxItems:         1,
-				Description:      `Configuration for direct-path (via ALTS) with workload identity.`,
-				Elem: &schema.Resource{
-						Schema: map[string]*schema.Schema{
-								"enable_alts": {
-										Type:          schema.TypeBool,
-										Optional:      true,
-										Description:   `Whether the alts handshaker should be enabled or not for direct-path. Requires Workload Identity (workloadPool must be non-empty).`,
-										RequiredWith: []string{"workload_identity_config.workload_pool"}
-								},
-						},
+				"workload_alts_config": {
+					Type:             schema.TypeList,
+					Optional:         true,
+					MaxItems:         1,
+					Description:      `Configuration for direct-path (via ALTS) with workload identity.`,
+					Elem: &schema.Resource{
+							Schema: map[string]*schema.Schema{
+									"enable_alts": {
+											Type:          schema.TypeBool,
+											Optional:      true,
+											Description:   `Whether the alts handshaker should be enabled or not for direct-path. Requires Workload Identity (workloadPool must be non-empty).`,
+											RequiredWith: []string{"workload_identity_config.workload_pool"},
+									},
+							},
+					},
 				},
-			},
-			<% end -%>
+				<% end -%>
 		},
 	}
 }
@@ -5399,17 +5399,19 @@ func expandNodePoolAutoConfigNetworkTags(configured interface{}) *container.Netw
 	return nt
 }
 
-func expandWorkloadAltsConfig(configured interface{}) *container.WorkloadAltsConfig {
+<% unless version == 'ga' -%>
+func expandWorkloadAltsConfig(configured interface{}) *container.WorkloadALTSConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil
 	}
 
 	config := l[0].(map[string]interface{})
-	return &container.WorkloadAltsConfig{
+	return &container.WorkloadALTSConfig{
 		EnableAlts:              config["enable_alts"].(bool),
 	}
 }
+<% end -%>
 
 func flattenNotificationConfig(c *container.NotificationConfig) []map[string]interface{} {
 	if c == nil {
@@ -6169,7 +6171,8 @@ func flattenNodePoolAutoConfigNetworkTags(c *container.NetworkTags) []map[string
 	return []map[string]interface{}{result}
 }
 
-func flattenWorkloadAltsConfig(c *container.WorkloadAltsConfig) []map[string]interface{} {
+<% unless version == 'ga' -%>
+func flattenWorkloadAltsConfig(c *container.WorkloadALTSConfig) []map[string]interface{} {
 	if c == nil {
 		return nil
 	}
@@ -6179,6 +6182,7 @@ func flattenWorkloadAltsConfig(c *container.WorkloadAltsConfig) []map[string]int
 		},
 	}
 }
+<% end -%>
 
 func resourceContainerClusterStateImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*transport_tpg.Config)
