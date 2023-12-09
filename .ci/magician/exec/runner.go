@@ -64,10 +64,6 @@ func (ar *Runner) RemoveAll(path string) error {
 	return os.RemoveAll(ar.abs(path))
 }
 
-func (ar *Runner) Walk(root string, fn WalkFunc) error {
-	return filepath.Walk(root, fn)
-}
-
 // PushDir changes the directory for the runner to the desired path and saves the previous directory in the stack.
 func (ar *Runner) PushDir(path string) error {
 	if ar.dirStack == nil {
