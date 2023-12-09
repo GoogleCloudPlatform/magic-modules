@@ -15,6 +15,8 @@ func TestAccLoggingFolderSettings_update(t *testing.T) {
 	context := map[string]interface{}{
 		"org_id":        envvar.GetTestOrgFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
+		"original_key":  acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name,
+		"updated_key":   acctest.BootstrapKMSKeyInLocation(t, "us-east1").CryptoKey.Name,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -48,20 +50,9 @@ func testAccLoggingFolderSettings_full(context map[string]interface{}) string {
 resource "google_logging_folder_settings" "example" {
   disable_default_sink = true
   folder               = google_folder.my_folder.folder_id
-  kms_key_name         = google_kms_crypto_key.key.id
+  kms_key_name         = %{original_key}
   storage_location     = "us-central1"
   depends_on           = [ google_kms_crypto_key_iam_member.iam ]
-}
-
-resource "google_kms_key_ring" "keyring" {
-  name     = "tf-test-keyring-%{random_suffix}"
-  location = "us-central1"
-}
-
-resource "google_kms_crypto_key" "key" {
-  name            = "tf-test-k-%{random_suffix}"
-  key_ring        = google_kms_key_ring.keyring.id
-  rotation_period = "100000s"
 }
 
 resource "google_folder" "my_folder" {
@@ -74,9 +65,9 @@ data "google_logging_folder_settings" "settings" {
 }
 
 resource "google_kms_crypto_key_iam_member" "iam" {
-  crypto_key_id = google_kms_crypto_key.key.id
-  role = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member = "serviceAccount:${data.google_logging_folder_settings.settings.kms_service_account_id}"
+  crypto_key_id = "%{original_key}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:${data.google_logging_folder_settings.settings.kms_service_account_id}"
 }
 `, context)
 }
@@ -86,20 +77,9 @@ func testAccLoggingFolderSettings_update(context map[string]interface{}) string 
 resource "google_logging_folder_settings" "example" {
   disable_default_sink = false
   folder               = google_folder.my_folder.folder_id
-  kms_key_name         = google_kms_crypto_key.key.id
+  kms_key_name         = "%{updated_key}"
   storage_location     = "us-east1"
   depends_on           = [ google_kms_crypto_key_iam_member.iam ]
-}
-
-resource "google_kms_key_ring" "keyring" {
-  name     = "tf-test-keyring-%{random_suffix}"
-  location = "us-east1"
-}
-
-resource "google_kms_crypto_key" "key" {
-  name            = "tf-test-k-%{random_suffix}"
-  key_ring        = google_kms_key_ring.keyring.id
-  rotation_period = "100000s"
 }
 
 resource "google_folder" "my_folder" {
@@ -112,9 +92,9 @@ data "google_logging_folder_settings" "settings" {
 }
 
 resource "google_kms_crypto_key_iam_member" "iam" {
-  crypto_key_id = google_kms_crypto_key.key.id
-  role = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member = "serviceAccount:${data.google_logging_folder_settings.settings.kms_service_account_id}"
+  crypto_key_id = "%{updated_key}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:${data.google_logging_folder_settings.settings.kms_service_account_id}"
 }
 `, context)
 }

@@ -36,10 +36,11 @@ examples:
     name: "logging_organization_settings"
     primary_resource_id: "example"
     vars:
-      key_name: "key-"
-      keyring_name: "keyring-"
+      key_name: "kms-key"
     test_env_vars:
       org_id: :ORG_TARGET
+    test_vars_overrides:
+      key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'organization'

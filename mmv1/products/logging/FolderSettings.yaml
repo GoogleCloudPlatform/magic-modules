@@ -37,11 +37,12 @@ examples:
     name: "logging_folder_settings"
     primary_resource_id: "example"
     vars:
-      key_name: "k-"
-      keyring_name: "keyring-"
-      folder_name: "folder-"
+      key_name: "kms-key"
+      folder_name: "folder-name"
     test_env_vars:
       org_id: :ORG_ID
+    test_vars_overrides:
+      key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'folder'

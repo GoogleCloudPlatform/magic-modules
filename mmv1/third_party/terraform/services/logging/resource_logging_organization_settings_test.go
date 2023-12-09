@@ -13,6 +13,8 @@ func TestAccLoggingOrganizationSettings_update(t *testing.T) {
 	context := map[string]interface{}{
 		"org_id":        envvar.GetTestOrgTargetFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
+		"original_key":  acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name,
+		"updated_key":   acctest.BootstrapKMSKeyInLocation(t, "us-east1").CryptoKey.Name,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -45,21 +47,10 @@ func testAccLoggingOrganizationSettings_full(context map[string]interface{}) str
 	return acctest.Nprintf(`
 resource "google_logging_organization_settings" "example" {
   disable_default_sink = false
-  kms_key_name         = google_kms_crypto_key.key.id
+  kms_key_name         = "%{original_key}"
   organization         = "%{org_id}"
   storage_location     = "us-central1"
   depends_on           = [ google_kms_crypto_key_iam_member.iam ]
-}
-
-resource "google_kms_key_ring" "keyring" {
-  name     = "tf-test-keyring-%{random_suffix}"
-  location = "us-central1"
-}
-
-resource "google_kms_crypto_key" "key" {
-  name            = "tf-test-key-%{random_suffix}"
-  key_ring        = google_kms_key_ring.keyring.id
-  rotation_period = "100000s"
 }
 
 data "google_logging_organization_settings" "settings" {
@@ -67,9 +58,9 @@ data "google_logging_organization_settings" "settings" {
 }
 
 resource "google_kms_crypto_key_iam_member" "iam" {
-  crypto_key_id = google_kms_crypto_key.key.id
-  role = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member = "serviceAccount:${data.google_logging_organization_settings.settings.kms_service_account_id}"
+  crypto_key_id = "%{original_key}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:${data.google_logging_organization_settings.settings.kms_service_account_id}"
 }
 `, context)
 }
@@ -78,21 +69,10 @@ func testAccLoggingOrganizationSettings_update(context map[string]interface{}) s
 	return acctest.Nprintf(`
 resource "google_logging_organization_settings" "example" {
   disable_default_sink = true
-  kms_key_name         = google_kms_crypto_key.key.id
+  kms_key_name         = "%{updated_key}"
   organization         = "%{org_id}"
   storage_location     = "us-east1"
   depends_on           = [ google_kms_crypto_key_iam_member.iam ]
-}
-
-resource "google_kms_key_ring" "keyring" {
-  name     = "tf-test-keyring-%{random_suffix}"
-  location = "us-east1"
-}
-
-resource "google_kms_crypto_key" "key" {
-  name            = "tf-test-key-%{random_suffix}"
-  key_ring        = google_kms_key_ring.keyring.id
-  rotation_period = "100000s"
 }
 
 data "google_logging_organization_settings" "settings" {
@@ -100,9 +80,9 @@ data "google_logging_organization_settings" "settings" {
 }
 
 resource "google_kms_crypto_key_iam_member" "iam" {
-  crypto_key_id = google_kms_crypto_key.key.id
-  role = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member = "serviceAccount:${data.google_logging_organization_settings.settings.kms_service_account_id}"
+  crypto_key_id = "%{updated_key}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:${data.google_logging_organization_settings.settings.kms_service_account_id}"
 }
 `, context)
 }
