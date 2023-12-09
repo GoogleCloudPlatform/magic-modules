@@ -32,7 +32,6 @@ update_verb: :PATCH
 # update_mask: true
 # This is a singleton resource that cannot be deleted, so skip delete.
 skip_delete: true
-autogen_async: false
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "logging_folder_settings"

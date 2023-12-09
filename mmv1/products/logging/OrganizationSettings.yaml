@@ -31,7 +31,6 @@ create_verb: :PATCH
 update_verb: :PATCH
 # This is a singleton resource that cannot be deleted, so skip delete.
 skip_delete: true
-autogen_async: false
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "logging_organization_settings"
