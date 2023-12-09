@@ -33,10 +33,10 @@ update_mask: true
 autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "integration_connectors_connection_basic"
-    primary_resource_id: "pubsubconnection"
+    name: "integration_connectors_endpoint_attachment"
+    primary_resource_id: "sampleendpointattachment"
     vars:
-      connection_name: "test-pubsub"
+      endpoint_attachment_name: "test-endpoint-attachment"
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: "name"
@@ -97,6 +97,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: "serviceAttachment"
     required: true
+    immutable: true
     description: |
       The path of the service attachment.
   - !ruby/object:Api::Type::String
