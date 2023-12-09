@@ -43,9 +43,9 @@ examples:
 parameters:
   - !ruby/object:Api::Type::String
     name: 'organization'
-    required: yes
-    immutable: yes
-    url_param_only: yes
+    required: true
+    immutable: true
+    url_param_only: true
     description: |
       The organization for which to retrieve or configure settings.
 properties:

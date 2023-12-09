@@ -45,9 +45,9 @@ examples:
 parameters:
   - !ruby/object:Api::Type::String
     name: 'folder'
-    required: yes
-    immutable: yes
-    url_param_only: yes
+    required: true
+    immutable: true
+    url_param_only: true
     description: |
       The folder for which to retrieve settings.
 properties:
