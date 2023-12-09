@@ -41,12 +41,11 @@ parameters:
     immutable: true
     url_param_only: true
     description: |
-      LOCATION_DESCRIPTION
+      Name of the region for the policy to apply to.
   - !ruby/object:Api::Type::String
     name: 'active_directory_id'
-    description:
-      'ID of the active directory to create
-      `[_a-zA-Z0-9][-_.a-zA-Z0-9]*`.'
+    description: |
+      The resource name of the Active Directory pool. Needs to be unique per location.
     required: true
     immutable: true
     url_param_only: true
@@ -69,16 +68,16 @@ properties:
     name: name
     output: true
     description: |
-      The resource name of the active directory. Format: projects/{projectNumber}/locations/{locationId}/activeDirectories/{activeDirectoryId}.
+      The resource name of the active directory.
   - !ruby/object:Api::Type::String
     name: 'createTime'
     description: |
-      Create time of the active directory. A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+      Create time of the active directory. A timestamp in RFC3339 UTC "Zulu" format. Examples: "2023-06-22T09:13:01.617Z".
     output: true
   - !ruby/object:Api::Type::Enum
     name: 'state'
     description: |
-      The state of the AD.
+      The state of the Active Directory policy (not the Active Directory itself).
     values:
       - :STATE_UNSPECIFIED
       - :CREATING
@@ -91,12 +90,13 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'domain'
     description: |
-      Name of the Active Directory domain
+      Fully qualified domain name for the Active Directory domain.
     required: true
   - !ruby/object:Api::Type::String
     name: 'site'
     description: |
-      The Active Directory site the service will limit Domain Controller discovery too.
+      Specifies an Active Directory site to manage domain controller selection.
+      Use when Active Directory domain controllers in multiple regions are configured. Defaults to `Default-First-Site-Name` if left empty.
     required: false
   - !ruby/object:Api::Type::String
     name: 'dns'
@@ -106,60 +106,64 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'netBiosPrefix'
     description: |
-      NetBIOSPrefix is used as a prefix for SMB server name.
+      NetBIOS name prefix of the server to be created.
+      A five-character random ID is generated automatically, for example, -6f9a, and appended to the prefix. The full UNC share path will have the following format:
+      `\\NetBIOS_PREFIX-ABCD.DOMAIN_NAME\SHARE_NAME`
     required: true
   - !ruby/object:Api::Type::String
     name: 'organizationalUnit'
     description: |
-      The Organizational Unit (OU) within the Windows Active Directory the user belongs to.
+      Name of the Organizational Unit where you intend to create the computer account for NetApp Volumes.
+      Defaults to `CN=Computers` if left empty.
     required: false
     default_from_api: true
   - !ruby/object:Api::Type::Boolean
     name: 'aesEncryption'
     description: |
-      If enabled, AES encryption will be enabled for SMB communication.
+      Enables AES-128 and AES-256 encryption for Kerberos-based communication with Active Directory.
     required: false
   - !ruby/object:Api::Type::String
     name: 'username'
     description: |
-      Username of the Active Directory domain administrator.
+      Username for the Active Directory account with permissions to create the compute account within the specified organizational unit.
     required: true
   - !ruby/object:Api::Type::String
     name: 'password'
     description: |
-      Password of the Active Directory domain administrator.
+      Password for specified username.
     required: true
     sensitive: true
     ignore_read: true
   - !ruby/object:Api::Type::String
     name: 'backupOperators'
     description: |
-      Users to be added to the Built-in Backup Operator active directory group.
+      Domain user/group accounts to be added to the Backup Operators group of the SMB service. The Backup Operators group allows members to backup and restore files regardless of whether they have read or write access to the files. Comma-separated list.
     required: false
   - !ruby/object:Api::Type::String
     name: 'securityOperators'
     description: |
-      Domain users to be given the SeSecurityPrivilege.
+      Domain accounts that require elevated privileges such as `SeSecurityPrivilege` to manage security logs. Comma-separated list.
     required: false
   - !ruby/object:Api::Type::String
     name: 'kdcHostname'
     description: |
-      Name of the active directory machine. This optional parameter is used only while creating kerberos volume
+      Hostname of the Active Directory server used as Kerberos Key Distribution Center. Only requried for volumes using kerberized NFSv4.1
     required: false
   - !ruby/object:Api::Type::String
     name: 'kdcIp'
     description: |
-      KDC server IP address for the active directory machine.
+      IP address of the Active Directory server used as Kerberos Key Distribution Center.
     required: false
   - !ruby/object:Api::Type::Boolean
     name: 'nfsUsersWithLdap'
     description: |
-      If enabled, will allow access to local users and LDAP users. If access is needed for only LDAP users, it has to be disabled.
+      Local UNIX users on clients without valid user information in Active Directory are blocked from access to LDAP enabled volumes.
+      This option can be used to temporarily switch such volumes to AUTH_SYS authentication (user ID + 1-16 groups).
     required: false
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
-      Description of the active directory.
+      An optional description of this resource.
     required: false
   - !ruby/object:Api::Type::Boolean
     name: 'ldapSigning'
@@ -174,7 +178,7 @@ properties:
   - !ruby/object:Api::Type::KeyValueLabels
     name: labels
     description: |
-      Labels as key value pairs.An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+      Labels as key value pairs. Example: `{ "owner": "Bob", "department": "finance", "purpose": "testing" }`.
     required: false
   - !ruby/object:Api::Type::String
     name: 'stateDetails'
