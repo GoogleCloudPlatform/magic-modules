@@ -35,6 +35,9 @@ service/apigateway:
 service/apigee:
   resources:
   - google_apigee_.*
+service/apikeys:
+  resources:
+  - google_apikeys_key
 service/artifactregistry:
   resources:
   - google_artifact_registry_.*
@@ -285,6 +288,9 @@ service/deploymentmanager:
 service/dialogflow:
   resources:
   - google_dialogflow_.*
+service/discoveryengine:
+  resources:
+  - google_discoveryengine_.*
 service/dlp:
   resources:
   - google_data_loss_prevention_.*
@@ -520,6 +526,9 @@ service/service-networking:
 service/servicedirectory:
   resources:
   - google_service_directory_.*
+service/serviceusage:
+  resources:
+  - google_project_service
 service/serviceusage-quota:
   resources:
   - google_service_usage_consumer_quota_override

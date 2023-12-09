@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func (gh *github) PostBuildStatus(prNumber, title, state, targetURL, commitSha string) error {
+func (gh *Client) PostBuildStatus(prNumber, title, state, targetURL, commitSha string) error {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/%s", commitSha)
 
 	postBody := map[string]string{
@@ -25,7 +25,7 @@ func (gh *github) PostBuildStatus(prNumber, title, state, targetURL, commitSha s
 	return nil
 }
 
-func (gh *github) PostComment(prNumber, comment string) error {
+func (gh *Client) PostComment(prNumber, comment string) error {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/%s/comments", prNumber)
 
 	body := map[string]string{
@@ -46,7 +46,7 @@ func (gh *github) PostComment(prNumber, comment string) error {
 	return nil
 }
 
-func (gh *github) RequestPullRequestReviewer(prNumber, assignee string) error {
+func (gh *Client) RequestPullRequestReviewer(prNumber, assignee string) error {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/%s/requested_reviewers", prNumber)
 
 	body := map[string][]string{
@@ -68,7 +68,7 @@ func (gh *github) RequestPullRequestReviewer(prNumber, assignee string) error {
 	return nil
 }
 
-func (gh *github) AddLabel(prNumber, label string) error {
+func (gh *Client) AddLabel(prNumber, label string) error {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/%s/labels", prNumber)
 
 	body := map[string][]string{
@@ -84,7 +84,7 @@ func (gh *github) AddLabel(prNumber, label string) error {
 
 }
 
-func (gh *github) RemoveLabel(prNumber, label string) error {
+func (gh *Client) RemoveLabel(prNumber, label string) error {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/%s/labels/%s", prNumber, label)
 	_, err := utils.RequestCall(url, "DELETE", gh.token, nil, nil)
 
@@ -95,7 +95,7 @@ func (gh *github) RemoveLabel(prNumber, label string) error {
 	return nil
 }
 
-func (gh *github) CreateWorkflowDispatchEvent(workflowFileName string, inputs map[string]any) error {
+func (gh *Client) CreateWorkflowDispatchEvent(workflowFileName string, inputs map[string]any) error {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/actions/workflows/%s/dispatches", workflowFileName)
 	resp, err := utils.RequestCall(url, "POST", gh.token, nil, map[string]any{
 		"ref":    "main",
