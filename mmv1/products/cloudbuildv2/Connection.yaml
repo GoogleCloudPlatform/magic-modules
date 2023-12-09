@@ -24,6 +24,7 @@ autogen_async: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     base_url: '{{op_id}}'
+update_verb: :PATCH
 description: |
   A connection to a SCM like GitHub, GitHub Enterprise, Bitbucket Data Center or GitLab.
 exclude_tgc: true
