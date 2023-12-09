@@ -90,8 +90,8 @@ func execCheckCassettes(commit string, t vcr.Tester, ctlr *source.Controller) {
 	}
 
 	providerRepo := &source.Repo{
-		Name: provider.Beta.RepoName(),
-		Branch: "downstream-pr-"+commit
+		Name:   provider.Beta.RepoName(),
+		Branch: "downstream-pr-" + commit,
 	}
 	ctlr.SetPath(providerRepo)
 	if err := ctlr.Clone(providerRepo); err != nil {
