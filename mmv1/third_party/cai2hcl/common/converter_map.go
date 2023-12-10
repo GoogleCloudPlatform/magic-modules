@@ -4,25 +4,23 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/caiasset"
 )
 
-// Converter which aggregates all service-specific converters in the same interface.
-type UberConverter struct {
-	// Mapping between asset type (i.e. compute.googleapis.com/Instance) to collection of matchers.
-	// Collection of asset name formats (i.e. projects/(?P<project>[^/]+)/regions/(?P<region>[^/]+)/forwardingRules)
-	// together with corresponding converter name.
-	ConverterByAssetType map[string]string
+// Configuration object to map CAI Assets to Converters.
+type ConverterMap struct {
+	// Mapping from CAI Asset Type to converter name.
+	AssetTypeToConverter map[string]string
 
-	// Mapping between converter name and converter constructor.
+	// Mapping from converter name and converter.
 	Converters map[string]Converter
 }
 
-// Convert assets of any of known types to the list of HCL blocks.
-func (c UberConverter) Convert(assets []*caiasset.Asset) ([]*HCLResourceBlock, error) {
+// ConvertMap implements Converter interface to be able to convert any Asset type.
+func (c ConverterMap) Convert(assets []*caiasset.Asset) ([]*HCLResourceBlock, error) {
 	// Group resources from the same tf resource type for convert.
 	// tf -> cai has 1:N mappings occasionally
 	groups := make(map[string][]*caiasset.Asset)
 	for _, asset := range assets {
 
-		name, _ := c.ConverterByAssetType[asset.Type]
+		name, _ := c.AssetTypeToConverter[asset.Type]
 		if name != "" {
 			groups[name] = append(groups[name], asset)
 		}

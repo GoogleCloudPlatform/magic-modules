@@ -6,7 +6,6 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/caiasset"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/cai2hcl/common"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/cai2hcl/services"
 	"go.uber.org/zap"
 )
 
@@ -16,15 +15,15 @@ type Options struct {
 	ErrorLogger *zap.Logger
 }
 
-// Converts CAI Assets into HCL.
+// Converts CAI Assets into HCL string.
 func Convert(assets []*caiasset.Asset, options *Options) ([]byte, error) {
 	if options == nil || options.ErrorLogger == nil {
 		return nil, fmt.Errorf("logger is not initialized")
 	}
 
-	servicesConverter := services.UberConverter
+	converter := ConverterMap
 
-	blocks, err := servicesConverter.Convert(assets)
+	blocks, err := converter.Convert(assets)
 	if err != nil {
 		return nil, err
 	}

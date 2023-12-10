@@ -5,11 +5,11 @@ import (
 	tpg_provider "github.com/hashicorp/terraform-provider-google-beta/google-beta/provider"
 )
 
-// Function initializing a converter from TF resource name and TF resource schema.
+// Function to create converter based on TF resource name and TF resource schema.
 type ConverterFactory = func(name string, schema map[string]*schema.Schema) Converter
 
-// Initializes map of converters.
-func CreateConverterMap(converterFactories map[string]ConverterFactory) map[string]Converter {
+// Initializes converters from correpsonding converter factories.
+func CreateConverters(converterFactories map[string]ConverterFactory) map[string]Converter {
 	provider := tpg_provider.Provider()
 
 	result := make(map[string]Converter, len(converterFactories))
