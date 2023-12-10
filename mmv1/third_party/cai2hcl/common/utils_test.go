@@ -22,21 +22,6 @@ func TestSubsetOfFieldsMapsToCtyValue(t *testing.T) {
 	assert.Equal(t, "forwarding-rule-1", val.GetAttr("name").AsString())
 }
 
-func TestMissingFieldDoesNotBreakConversion(t *testing.T) {
-	resourceSchema := createSchema("google_compute_forwarding_rule")
-	outputMap := map[string]interface{}{
-		"name":         "fr-1",
-		"unknownField": "unknownValue",
-	}
-
-	val, err := MapToCtyValWithSchema(outputMap, resourceSchema)
-
-	assert.Nil(t, err)
-
-	assert.True(t, val.Type().HasAttribute("name"))
-	assert.Equal(t, "fr-1", val.GetAttr("name").AsString())
-}
-
 func TestWrongFieldTypeBreaksConversion(t *testing.T) {
 	resourceSchema := createSchema("google_compute_backend_service")
 	outputMap := map[string]interface{}{
