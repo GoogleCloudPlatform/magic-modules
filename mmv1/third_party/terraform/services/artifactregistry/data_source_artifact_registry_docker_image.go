@@ -119,13 +119,7 @@ func DataSourceArtifactRegistryDockerImageRead(d *schema.ResourceData, meta inte
 
 	var res DockerImage
 
-	// check that only one of digest or tag is set
 	_, hasDigest := d.GetOk("digest")
-	tag, hasTag := d.GetOk("tag")
-
-	if hasDigest && hasTag {
-		return fmt.Errorf("only one of tag or digest can be set")
-	}
 
 	if hasDigest {
 		// fetch image by digest
@@ -161,59 +155,14 @@ func DataSourceArtifactRegistryDockerImageRead(d *schema.ResourceData, meta inte
 			return err
 		}
 
-		resListImages, token, err := retreiveListOfDockerImages(config, project, urlRequest, userAgent)
+		imageName, ok := d.Get("image").(string)
+		if !ok {
+			return fmt.Errorf("Error: Image name is not a string")
+		}
+
+		res, err = retrieveAndFilterImages(d, config, project, urlRequest, userAgent, imageName)
 		if err != nil {
 			return err
-		}
-	out:
-		for {
-			var resFiltered []DockerImage
-
-			// The response gives a list of all images, filter by name
-			for _, image := range resListImages {
-
-				imageName, ok := d.Get("image").(string)
-				if !ok {
-					return fmt.Errorf("Error: Image name is not a string")
-				}
-
-				if strings.Contains(image.name, "/"+url.QueryEscape(imageName)+"@") {
-					resFiltered = append(resFiltered, image)
-				}
-			}
-
-			// If tag is provided, iterate over response and find the image containing the tag
-			if hasTag {
-				for _, image := range resFiltered {
-					for _, iterTag := range image.tags {
-						if iterTag == tag {
-							res = image
-							break out
-						}
-					}
-				}
-			} else { // use the first image in the response
-				if len(resFiltered) > 0 {
-					res = resFiltered[0]
-					break out
-				}
-			}
-
-			// No matching image was found on this page and no more pages are available
-			if token == "" {
-				return fmt.Errorf("Requested image was not found.")
-			}
-
-			// Retrieve the next page and search again
-			urlNext, err := transport_tpg.AddQueryParams(urlRequest, map[string]string{"pageToken": token})
-			if err != nil {
-				return err
-			}
-
-			resListImages, token, err = retreiveListOfDockerImages(config, project, urlNext, userAgent)
-			if err != nil {
-				return err
-			}
 		}
 	}
 
@@ -256,7 +205,50 @@ func DataSourceArtifactRegistryDockerImageRead(d *schema.ResourceData, meta inte
 	return nil
 }
 
-func retreiveListOfDockerImages(config *transport_tpg.Config, project string, urlRequest string, userAgent string) ([]DockerImage, string, error) {
+func retrieveAndFilterImages(d *schema.ResourceData, config *transport_tpg.Config, project string, urlRequest string, userAgent string, imageName string) (DockerImage, error) {
+	// Paging through the list mehtod until either:
+	// if a tag was provided, the matching image name and tag pair
+	// otherwise, return the first matching image name
+
+	tag, hasTag := d.GetOk("tag")
+
+	for {
+		resListImages, token, err := retrieveListOfDockerImages(config, project, urlRequest, userAgent)
+		if err != nil {
+			return DockerImage{}, err
+		}
+
+		var resFiltered []DockerImage
+		for _, image := range resListImages {
+			if strings.Contains(image.name, "/"+url.QueryEscape(imageName)+"@") {
+				resFiltered = append(resFiltered, image)
+			}
+		}
+
+		if hasTag {
+			for _, image := range resFiltered {
+				for _, iterTag := range image.tags {
+					if iterTag == tag {
+						return image, nil
+					}
+				}
+			}
+		} else if len(resFiltered) > 0 {
+			return resFiltered[0], nil
+		}
+
+		if token == "" {
+			return DockerImage{}, fmt.Errorf("Requested image was not found.")
+		}
+
+		urlRequest, err = transport_tpg.AddQueryParams(urlRequest, map[string]string{"pageToken": token})
+		if err != nil {
+			return DockerImage{}, err
+		}
+	}
+}
+
+func retrieveListOfDockerImages(config *transport_tpg.Config, project string, urlRequest string, userAgent string) ([]DockerImage, string, error) {
 	resList, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "GET",
