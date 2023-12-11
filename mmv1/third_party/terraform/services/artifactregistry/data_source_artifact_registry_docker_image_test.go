@@ -47,9 +47,7 @@ func TestAccDataSourceArtifactRegistryDockerImage(t *testing.T) {
 					),
 
 					// Data source using no tag or digest
-					resource.TestCheckResourceAttrSet(resourceName+"None", "project"),
 					resource.TestCheckResourceAttrSet(resourceName+"None", "repository"),
-					resource.TestCheckResourceAttrSet(resourceName+"None", "region"),
 					resource.TestCheckResourceAttrSet(resourceName+"None", "image"),
 					resource.TestCheckResourceAttrSet(resourceName+"None", "name"),
 					resource.TestCheckResourceAttrSet(resourceName+"None", "self_link"),
@@ -64,51 +62,51 @@ func TestAccDataSourceArtifactRegistryDockerImage(t *testing.T) {
 // https://console.cloud.google.com/artifacts/docker/go-containerregistry/us/gcr.io
 // Currently, gcr.io does not provide a imageSizeBytes or buildTime field in the JSON response
 const testAccDataSourceArtifactRegistryDockerImageConfig = `
+data "google_artifact_registry_repository" "container" {
+	project       = "cloudrun"
+	location      = "us"
+	repository_id = "container"
+}
+
+data "google_artifact_registry_repository" "gcr" {
+	project       = "go-containerregistry"
+	location      = "us"
+	repository_id = "gcr.io"
+}
+
 data "google_artifact_registry_docker_image" "testTag" {
-	project    = "cloudrun"
-	repository = "container"
-	region     = "us"
+	repository = data.google_artifact_registry_repository.container.id
 	image      = "hello"
 	tag        = "latest"
 }
 
 data "google_artifact_registry_docker_image" "testDigest" {
-	project    = "cloudrun"
-	repository = "container"
-	region     = "us"
+	repository = data.google_artifact_registry_repository.container.id
 	image      = "hello"
 	digest     = "sha256:77cb9fbc6a667b8bfdbeca4c49e7703d825746eba53b736f0318bb7712828821"
 }
 
 data "google_artifact_registry_docker_image" "testUrlTag" {
-	project    = "go-containerregistry"
-	repository = "gcr.io"
-	region     = "us"
+	repository = data.google_artifact_registry_repository.gcr.id
 	image      = "krane/debug"
 	tag        = "latest"
 }
 
 data "google_artifact_registry_docker_image" "testUrlDigest" {
-	project    = "go-containerregistry"
-	repository = "gcr.io"
-	region     = "us"
+	repository = data.google_artifact_registry_repository.gcr.id
 	image      = "krane/debug"
 	digest     = "sha256:26903bf659994649af0b8ccb2675b76318b2bc3b2c85feea9a1f9d5b98eff363"
 }
 
 data "google_artifact_registry_docker_image" "testNone" {
-	project    = "go-containerregistry"
-	repository = "gcr.io"
-	region     = "us"
+	repository = data.google_artifact_registry_repository.gcr.id
 	image      = "crane"
 }
 `
 
 func checkTaggedDataSources(resourceName string, expectedTag string) resource.TestCheckFunc {
 	return resource.ComposeTestCheckFunc(
-		resource.TestCheckResourceAttrSet(resourceName, "project"),
 		resource.TestCheckResourceAttrSet(resourceName, "repository"),
-		resource.TestCheckResourceAttrSet(resourceName, "region"),
 		resource.TestCheckResourceAttrSet(resourceName, "image"),
 		resource.TestCheckResourceAttrSet(resourceName, "name"),
 		resource.TestCheckResourceAttrSet(resourceName, "self_link"),
@@ -119,9 +117,7 @@ func checkTaggedDataSources(resourceName string, expectedTag string) resource.Te
 
 func checkDigestDataSources(resourceName string, expectedName string, expectedSelfLink string) resource.TestCheckFunc {
 	return resource.ComposeTestCheckFunc(
-		resource.TestCheckResourceAttrSet(resourceName, "project"),
 		resource.TestCheckResourceAttrSet(resourceName, "repository"),
-		resource.TestCheckResourceAttrSet(resourceName, "region"),
 		resource.TestCheckResourceAttrSet(resourceName, "image"),
 		resource.TestCheckResourceAttr(resourceName, "name", expectedName),
 		resource.TestCheckResourceAttr(resourceName, "self_link", expectedSelfLink),
