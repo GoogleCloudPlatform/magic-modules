@@ -1072,6 +1072,33 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 			return err
 		}
 
+		if d.HasChange(""config.0.node_config.0.composer_network_attachment"") {
+			// step 1: update with empty composer_network_attachment
+			patchObj := &composer.Environment{
+				Config: &composer.EnvironmentConfig{
+					NodeConfig: &composer.NodeConfig{},
+				},
+			}
+			err = resourceComposerEnvironmentPatchField("config.nodeConfig.composerNetworkAttachment", userAgent, patchObj, d, tfConfig)
+			if err != nil {
+				return err
+			}
+
+			// step 2: update with new composer_network_attachment
+			patchObj := &composer.Environment{
+				Config: &composer.EnvironmentConfig{
+					NodeConfig: &composer.NodeConfig{},
+				},
+			}
+			if config != nil && config.NodeConfig != nil {
+				patchObj.Config.NodeConfig.ComposerNetworkAttachment = config.NodeConfig.ComposerNetworkAttachment
+			}
+			err = resourceComposerEnvironmentPatchField("config.nodeConfig.composerNetworkAttachment", userAgent, patchObj, d, tfConfig)
+			if err != nil {
+				return err
+			}
+		}
+
 <% unless version == "ga" -%>
 		if d.HasChange("config.0.software_config.0.image_version") {
 			patchObj := &composer.Environment{
