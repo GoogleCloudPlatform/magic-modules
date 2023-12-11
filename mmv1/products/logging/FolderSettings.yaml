@@ -34,7 +34,7 @@ update_verb: :PATCH
 skip_delete: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "logging_folder_settings"
+    name: "logging_folder_settings_all"
     primary_resource_id: "example"
     vars:
       key_name: "kms-key"
@@ -43,6 +43,30 @@ examples:
       org_id: :ORG_ID
     test_vars_overrides:
       key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+  - !ruby/object:Provider::Terraform::Examples
+    name: "logging_folder_settings_only_cmek"
+    primary_resource_id: "example"
+    vars:
+      key_name: "kms-key"
+      folder_name: "folder-name"
+    test_env_vars:
+      org_id: :ORG_ID
+    test_vars_overrides:
+      key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+  - !ruby/object:Provider::Terraform::Examples
+    name: "logging_folder_settings_only_location"
+    primary_resource_id: "example"
+    vars:
+      folder_name: "folder-name"
+    test_env_vars:
+      org_id: :ORG_ID
+  - !ruby/object:Provider::Terraform::Examples
+    name: "logging_folder_settings_only_disable_default"
+    primary_resource_id: "example"
+    vars:
+      folder_name: "folder-name"
+    test_env_vars:
+      org_id: :ORG_ID
 parameters:
   - !ruby/object:Api::Type::String
     name: 'folder'
