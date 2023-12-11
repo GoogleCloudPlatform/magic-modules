@@ -14,9 +14,14 @@ Requires one of the following OAuth scopes: `https://www.googleapis.com/auth/clo
 ## Example Usage
 
 ```hcl
+resource "google_artifact_registry_repository" "my-repo" {
+  location      = "us-west1"
+  repository_id = "my-repository"
+  format        = "DOCKER"
+}
+
 data "google_artifact_registry_docker_image" "my-image" {
-  repository = "my-repository"
-  location   = "my-location"
+  repository = google_artifact_registry_repository.my-repo.id
   image      = "my-image"
   tag        = "my-tag"
 }
@@ -36,16 +41,11 @@ resource "google_cloud_run_v2_service" "default" {
 
 The following arguments are supported:
 
-* `repository` - (Required) The repository name.
-
-* `location` - (Required) The location of the artifact registry repository. For example, "us-west1".
+* `repository` - (Required) The fully-qualified identify of the repository. That is, `projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}`.
 
 * `image` - (Required) The image name to fetch.
 
 - - -
-
-* `project` - (Optional) The project ID in which the resource belongs. If it
-    is not provided, the provider project is used.
 
 * `digest` - (Optional) The image digest to fetch.  This cannot be used if `tag` is provided.
 

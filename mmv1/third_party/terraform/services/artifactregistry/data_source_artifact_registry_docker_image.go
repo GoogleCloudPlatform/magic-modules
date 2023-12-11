@@ -28,20 +28,10 @@ func DataSourceArtifactRegistryDockerImage() *schema.Resource {
 		Read: DataSourceArtifactRegistryDockerImageRead,
 
 		Schema: map[string]*schema.Schema{
-			"project": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: `Project ID of the project.`,
-			},
 			"repository": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: `The repository name.`,
-			},
-			"region": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: `The location of the artifact registry repository. For example, "us-west1".`,
+				Description: `The fully-qualified path to the repository.`,
 			},
 			"image": {
 				Type:        schema.TypeString,
@@ -112,11 +102,6 @@ func DataSourceArtifactRegistryDockerImageRead(d *schema.ResourceData, meta inte
 		return err
 	}
 
-	project, err := tpgresource.GetProject(d, config)
-	if err != nil {
-		return err
-	}
-
 	var res DockerImage
 
 	_, hasDigest := d.GetOk("digest")
@@ -125,7 +110,7 @@ func DataSourceArtifactRegistryDockerImageRead(d *schema.ResourceData, meta inte
 		// fetch image by digest
 		// https://cloud.google.com/artifact-registry/docs/reference/rest/v1/projects.locations.repositories.dockerImages/get
 		imageUrlSafe := url.QueryEscape(d.Get("image").(string))
-		urlRequest, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{ArtifactRegistryBasePath}}projects/{{project}}/locations/{{region}}/repositories/{{repository}}/dockerImages/%s@{{digest}}", imageUrlSafe))
+		urlRequest, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{ArtifactRegistryBasePath}}{{repository}}/dockerImages/%s@{{digest}}", imageUrlSafe))
 		if err != nil {
 			return fmt.Errorf("Error setting api endpoint")
 		}
@@ -133,7 +118,6 @@ func DataSourceArtifactRegistryDockerImageRead(d *schema.ResourceData, meta inte
 		resGet, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "GET",
-			Project:   project,
 			RawURL:    urlRequest,
 			UserAgent: userAgent,
 		})
@@ -145,7 +129,7 @@ func DataSourceArtifactRegistryDockerImageRead(d *schema.ResourceData, meta inte
 	} else {
 		// fetch the list of images, ordered by update time
 		// https://cloud.google.com/artifact-registry/docs/reference/rest/v1/projects.locations.repositories.dockerImages/list
-		urlRequest, err := tpgresource.ReplaceVars(d, config, "{{ArtifactRegistryBasePath}}projects/{{project}}/locations/{{region}}/repositories/{{repository}}/dockerImages")
+		urlRequest, err := tpgresource.ReplaceVars(d, config, "{{ArtifactRegistryBasePath}}{{repository}}/dockerImages")
 		if err != nil {
 			return fmt.Errorf("Error setting api endpoint")
 		}
@@ -160,7 +144,7 @@ func DataSourceArtifactRegistryDockerImageRead(d *schema.ResourceData, meta inte
 			return fmt.Errorf("Error: Image name is not a string")
 		}
 
-		res, err = retrieveAndFilterImages(d, config, project, urlRequest, userAgent, imageName)
+		res, err = retrieveAndFilterImages(d, config, urlRequest, userAgent, imageName)
 		if err != nil {
 			return err
 		}
@@ -199,13 +183,17 @@ func DataSourceArtifactRegistryDockerImageRead(d *schema.ResourceData, meta inte
 		return fmt.Errorf("Error setting update_time: %s", err)
 	}
 
-	id := fmt.Sprintf("projects/%s/locations/%s/repositories/dockerImages/%s", project, d.Get("region"), d.Get("image"))
+	id, err := tpgresource.ReplaceVars(d, config, "{{ArtifactRegistryBasePath}}{{repository}}/dockerImages/{{image}}")
+	if err != nil {
+		return fmt.Errorf("Error constructing the data source id: %s", err)
+	}
+
 	d.SetId(id)
 
 	return nil
 }
 
-func retrieveAndFilterImages(d *schema.ResourceData, config *transport_tpg.Config, project string, urlRequest string, userAgent string, imageName string) (DockerImage, error) {
+func retrieveAndFilterImages(d *schema.ResourceData, config *transport_tpg.Config, urlRequest string, userAgent string, imageName string) (DockerImage, error) {
 	// Paging through the list mehtod until either:
 	// if a tag was provided, the matching image name and tag pair
 	// otherwise, return the first matching image name
@@ -213,7 +201,7 @@ func retrieveAndFilterImages(d *schema.ResourceData, config *transport_tpg.Confi
 	tag, hasTag := d.GetOk("tag")
 
 	for {
-		resListImages, token, err := retrieveListOfDockerImages(config, project, urlRequest, userAgent)
+		resListImages, token, err := retrieveListOfDockerImages(config, urlRequest, userAgent)
 		if err != nil {
 			return DockerImage{}, err
 		}
@@ -248,11 +236,10 @@ func retrieveAndFilterImages(d *schema.ResourceData, config *transport_tpg.Confi
 	}
 }
 
-func retrieveListOfDockerImages(config *transport_tpg.Config, project string, urlRequest string, userAgent string) ([]DockerImage, string, error) {
+func retrieveListOfDockerImages(config *transport_tpg.Config, urlRequest string, userAgent string) ([]DockerImage, string, error) {
 	resList, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "GET",
-		Project:   project,
 		RawURL:    urlRequest,
 		UserAgent: userAgent,
 	})
