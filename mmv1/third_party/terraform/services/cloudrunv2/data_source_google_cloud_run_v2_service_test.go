@@ -119,5 +119,5 @@ resource "google_cloud_run_v2_service_iam_member" "foo_run_invoker" {
   role = "roles/run.invoker"
   member = "serviceAccount:${google_service_account.foo.email}"
 }
-`, name, location)
+`, name, location, name)
 }
