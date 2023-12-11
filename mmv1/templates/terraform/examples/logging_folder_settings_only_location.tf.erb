@@ -7,7 +7,3 @@ resource "google_folder" "my_folder" {
   display_name = "<%= ctx[:vars]['folder_name'] %>"
   parent       = "organizations/<%= ctx[:test_env_vars]['org_id'] %>"
 }
-
-data "google_logging_folder_settings" "settings" {
-  folder = google_folder.my_folder.folder_id
-}
