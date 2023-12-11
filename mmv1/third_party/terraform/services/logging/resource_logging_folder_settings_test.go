@@ -50,7 +50,7 @@ func testAccLoggingFolderSettings_full(context map[string]interface{}) string {
 resource "google_logging_folder_settings" "example" {
   disable_default_sink = true
   folder               = google_folder.my_folder.folder_id
-  kms_key_name         = %{original_key}
+  kms_key_name         = "%{original_key}"
   storage_location     = "us-central1"
   depends_on           = [ google_kms_crypto_key_iam_member.iam ]
 }
