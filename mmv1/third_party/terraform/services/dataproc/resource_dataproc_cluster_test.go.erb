@@ -555,6 +555,7 @@ func TestAccDataprocCluster_spotWithAuxiliaryNodeGroups(t *testing.T) {
 					resource.TestCheckResourceAttr("google_dataproc_cluster.with_auxiliary_node_groups", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.disk_config.0.boot_disk_type", "pd-standard"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.with_auxiliary_node_groups", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.disk_config.0.num_local_ssds", "1"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.with_auxiliary_node_groups", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.accelerators.0.accelerator_count", "1"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.with_auxiliary_node_groups", "cluster_config.0.auxiliary_node_groups.0.node_group_id", "node-group-id"),
 					testAccCheckDataprocAuxiliaryNodeGroupAccelerator(&cluster, project),
 
 				),
@@ -1954,6 +1955,7 @@ resource "google_dataproc_cluster" "with_auxiliary_node_groups" {
     }
 
     auxiliary_node_groups{
+      node_group_id="node-group-id"
       node_group {
         roles = ["DRIVER"]
         node_group_config{
