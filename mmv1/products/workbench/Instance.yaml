@@ -150,7 +150,6 @@ properties:
             Currently supports only one accelerator configuration.
       - !ruby/object:Api::Type::Array
         name: serviceAccounts
-        max_items: 1
         description: |
           The service account that serves as an identity for the VM instance. Currently supports only one service account.
         default_from_api: true
