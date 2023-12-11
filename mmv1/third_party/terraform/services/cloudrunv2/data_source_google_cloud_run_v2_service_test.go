@@ -68,7 +68,7 @@ func TestAccDataSourceGoogleCloudRunV2Service_bindIAMPermission(t *testing.T) {
 
 	project := envvar.GetTestProjectFromEnv()
 
-	name := fmt.Sprintf("tf-test-%d", acctest.RandString(t, 10))
+	name := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	location := "us-central1"
 	id := fmt.Sprintf("projects/%s/locations/%s/services/%s", project, location, name)
 
