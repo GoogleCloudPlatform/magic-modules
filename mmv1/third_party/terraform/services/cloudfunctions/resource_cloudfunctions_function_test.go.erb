@@ -295,7 +295,9 @@ func TestAccCloudFunctionsFunction_dockerRepository(t *testing.T) {
 
 <% unless version == "ga" -%>
 func TestAccCloudFunctionsFunction_cmek(t *testing.T) {
+	acctest.SkipIfVcr(t)
 	t.Parallel()
+
 	kmsKey := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
 	funcResourceName := "google_cloudfunctions_function.function"
 	arRepoName := fmt.Sprintf("tf-cmek-test-docker-repository-%s", acctest.RandString(t, 10))
