@@ -12,17 +12,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type ccGithub interface {
-	GetPullRequestAuthor(prNumber string) (string, error)
-	GetUserType(user string) github.UserType
-	RemoveLabel(prNumber string, label string) error
-	PostBuildStatus(prNumber string, title string, state string, targetUrl string, commitSha string) error
-}
-
-type ccCloudbuild interface {
-	TriggerMMPresubmitRuns(commitSha string, substitutions map[string]string) error
-}
-
 // communityApprovalCmd represents the communityApproval command
 var communityApprovalCmd = &cobra.Command{
 	Use:   "community-checker",
@@ -63,13 +52,13 @@ var communityApprovalCmd = &cobra.Command{
 		baseBranch := args[5]
 		fmt.Println("Base Branch: ", baseBranch)
 
-		gh := github.NewGithubService()
-		cb := cloudbuild.NewCloudBuildService()
+		gh := github.NewClient()
+		cb := cloudbuild.NewClient()
 		execCommunityChecker(prNumber, commitSha, branchName, headRepoUrl, headBranch, baseBranch, gh, cb)
 	},
 }
 
-func execCommunityChecker(prNumber, commitSha, branchName, headRepoUrl, headBranch, baseBranch string, gh ccGithub, cb ccCloudbuild) {
+func execCommunityChecker(prNumber, commitSha, branchName, headRepoUrl, headBranch, baseBranch string, gh GithubClient, cb CloudbuildClient) {
 	substitutions := map[string]string{
 		"BRANCH_NAME":    branchName,
 		"_PR_NUMBER":     prNumber,
@@ -78,12 +67,13 @@ func execCommunityChecker(prNumber, commitSha, branchName, headRepoUrl, headBran
 		"_BASE_BRANCH":   baseBranch,
 	}
 
-	author, err := gh.GetPullRequestAuthor(prNumber)
+	pullRequest, err := gh.GetPullRequest(prNumber)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
+	author := pullRequest.User.Login
 	authorUserType := gh.GetUserType(author)
 	trusted := authorUserType == github.CoreContributorUserType || authorUserType == github.GooglerUserType
 

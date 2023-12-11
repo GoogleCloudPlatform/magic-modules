@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"os"
 
-	"google.golang.org/api/cloudbuild/v1"
+	cloudbuildv1 "google.golang.org/api/cloudbuild/v1"
 )
 
-func (cb cloudBuild) ApproveCommunityChecker(prNumber, commitSha string) error {
+func (cb *Client) ApproveCommunityChecker(prNumber, commitSha string) error {
 	buildId, err := getPendingBuildId(PROJECT_ID, commitSha)
 	if err != nil {
 		return err
@@ -26,7 +26,7 @@ func (cb cloudBuild) ApproveCommunityChecker(prNumber, commitSha string) error {
 	return nil
 }
 
-func (cb cloudBuild) GetAwaitingApprovalBuildLink(prNumber, commitSha string) (string, error) {
+func (cb *Client) GetAwaitingApprovalBuildLink(prNumber, commitSha string) (string, error) {
 	buildId, err := getPendingBuildId(PROJECT_ID, commitSha)
 	if err != nil {
 		return "", err
@@ -49,7 +49,7 @@ func getPendingBuildId(projectId, commitSha string) (string, error) {
 
 	ctx := context.Background()
 
-	c, err := cloudbuild.NewService(ctx)
+	c, err := cloudbuildv1.NewService(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -76,15 +76,15 @@ func getPendingBuildId(projectId, commitSha string) (string, error) {
 func approveBuild(projectId, buildId string) error {
 	ctx := context.Background()
 
-	c, err := cloudbuild.NewService(ctx)
+	c, err := cloudbuildv1.NewService(ctx)
 	if err != nil {
 		return err
 	}
 
 	name := fmt.Sprintf("projects/%s/builds/%s", projectId, buildId)
 
-	approveBuildRequest := &cloudbuild.ApproveBuildRequest{
-		ApprovalResult: &cloudbuild.ApprovalResult{
+	approveBuildRequest := &cloudbuildv1.ApproveBuildRequest{
+		ApprovalResult: &cloudbuildv1.ApprovalResult{
 			Decision: "APPROVED",
 		},
 	}
