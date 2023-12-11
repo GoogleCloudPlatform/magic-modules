@@ -9,12 +9,16 @@ func resourceCloudIdentityGroupDynamicLabelDiffSuppress(k, _, _ string, d *schem
     k = string(k[:lastDotIndex])
   }
 
-  oldData, newData := d.GetChange(k)
-  m := make(map[string]interface{})
-  for key, val := range newData.(map[string]interface{}) {
-    if key != dynamicLabel {
-      m[key] = val
-    }
-  }
-  return reflect.DeepEqual(oldData.(map[string]interface{}), m)
+	oldData, newData := d.GetChange(k)
+	if oldData == nil || newData == nil {
+		return false
+	}
+
+	m := make(map[string]interface{})
+	for key, val := range newData.(map[string]interface{}) {
+		if key != dynamicLabel {
+			m[key] = val
+		}
+	}
+	return reflect.DeepEqual(oldData.(map[string]interface{}), m)
 }
