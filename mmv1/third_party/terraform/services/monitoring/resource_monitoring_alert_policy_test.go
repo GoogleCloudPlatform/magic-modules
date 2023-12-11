@@ -68,7 +68,7 @@ func testAccMonitoringAlertPolicy_update(t *testing.T) {
 	severity1 := "WARNING"
 	filter2 := `metric.type=\"compute.googleapis.com/instance/cpu/utilization\" AND resource.type=\"gce_instance\"`
 	aligner2 := "ALIGN_MAX"
-	severity2 := "ERROR" 
+	severity2 := "ERROR"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
