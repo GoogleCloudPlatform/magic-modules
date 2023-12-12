@@ -4252,7 +4252,7 @@ func expandBinaryAuthorization(configured interface{}, legacy_enabled bool) *con
 		}
 	}
 	config := l[0].(map[string]interface{})
-        if config["evaluation_mode"].(string) == nil {
+        if config["evaluation_mode"].(string) == "" {
 		return &container.BinaryAuthorization{
 			Enabled:         config["enabled"].(bool),
                         ForceSendFields: []string{"Enabled"},
