@@ -18,14 +18,9 @@ create_url: projects/{{project}}/locations/{{region}}/featureOnlineStores?featur
 self_link: projects/{{project}}/locations/{{region}}/featureOnlineStores/{{name}}
 update_verb: :PATCH
 update_mask: true
-create_verb: :POST
 references: !ruby/object:Api::Resource::ReferenceLinks
   api: https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featureOnlineStores
 async: !ruby/object:Api::OpAsync
-  actions:
-    - create
-    - delete
-    - update
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
     base_url: '{{op_id}}'
@@ -54,11 +49,13 @@ parameters:
     description: The region of feature online store. eg us-central1
     url_param_only: true
     immutable: true
+    required: true
 properties:
   - !ruby/object:Api::Type::String
     name: name
     description: The resource name of the Feature Online Store.
     immutable: true
+    required: true
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::String
     name: createTime
@@ -95,6 +92,7 @@ properties:
             description: The minimum number of nodes to scale down to. Must be greater than or equal to 1.
           - !ruby/object:Api::Type::Integer
             name: maxNodeCount
+            required: true
             description: The maximum number of nodes to scale up to. Must be greater than or equal to minNodeCount, and less than or equal to 10 times of 'minNodeCount'.
           - !ruby/object:Api::Type::Integer
             name: cpuUtilizationTarget
