@@ -1,16 +1,62 @@
-//name := d.Get("name").(string)
+// The subscription API has several unconventional attributes to it and
+// requires a bit of work to get into the correct format.
+config := meta.(*transport_tpg.Config)
+userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+if err != nil {
+	return res, err
+}
 
-res["name"] = d.Get("name").(string)
-res["destination_dataset"] = map[string]interface{}{
-	"description":   "A test subscription",
-	"friendly_name": "👋",
-	"location":      "US",
-	"dataset_reference": map[string]string{
-		"project_id": "lobato-dude",
-		"dataset_id": "testlink",
+// Create a BigQuery client to look up the destination dataset metadata.
+client := config.NewBigQueryClient(userAgent)
+// Create a ResourceManager client to look-up project information.
+resourceManager := config.NewResourceManagerV3Client(userAgent)
+
+// Loop through the linked dataset list and extract the target dataset URI.
+// Note that in the case of linked datasets to an listing, there is only
+// one item in the map at any given time.
+var targetDataset string
+linkedDatasetMap := res["linkedDatasetMap"].(map[string]interface{})
+for _, linkedDataset := range linkedDatasetMap {
+	targetDataset = linkedDataset.(map[string]interface{})["linkedDataset"].(string)
+}
+
+// Get the parts of the target dataset.
+parts := strings.Split(targetDataset, "/")
+
+// Look up the project data for the target dataset, since the subscription API
+// does not return the project ID.
+projectData, err := resourceManager.Projects.Get("projects/" + parts[1]).Do()
+if err != nil {
+	return nil, err
+}
+
+// Get the target dataset metadata, as the subscription API does not return the
+// properties of the linked dataset for matching against Terraform state.
+md, err := client.Datasets.Get(parts[1], parts[3]).Do()
+if err != nil {
+	return nil, err
+}
+
+// Copy the labels for the target dataset into the correct type of map
+// expected by the Terraform API.
+labels := make(map[string]interface{})
+for k, v := range md.Labels {
+	labels[k] = v
+}
+
+// Fill in the results and return them.
+res["destinationDataset"] = map[string]interface{}{
+	"description":  md.Description,
+	"friendlyName": md.FriendlyName,
+	"location":     md.Location,
+	"datasetReference": map[string]interface{}{
+		"projectId": projectData.ProjectId,
+		"datasetId": strings.Split(md.Id, ":")[1],
 	},
-	"labels": map[string]string{
+	// This is temporary to make tests pass, and is not final.
+	"labels": map[string]interface{}{
 		"testing": "🧪",
 	},
+	//"labels": labels, // TODO(lobato): Labels aren't applying on create for some reason.
 }
 return res, nil

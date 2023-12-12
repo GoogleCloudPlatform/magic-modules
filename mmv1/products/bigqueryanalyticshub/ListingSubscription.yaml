@@ -24,9 +24,14 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://cloud.google.com/bigquery/docs/analytics-hub-introduction'
   api: 'https://cloud.google.com/bigquery/docs/reference/analytics-hub/rest/v1/projects.locations.subscriptions'
 skip_sweeper: false
+import_format:
+  [
+    'projects/{{project}}/locations/{{location}}/subscriptions/{{subscription_id}}'
+  ]
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   decoder: templates/terraform/decoders/bigquery_analyticshub_listing_subscription.go.erb
   post_create: templates/terraform/post_create/analytics_hub_subscription.go.erb
+  post_import: templates/terraform/post_import/analytics_hub_subscription.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_analyticshub_listing_subscription_basic'
@@ -53,6 +58,11 @@ properties:
         name: name
         description: |-
           The resource name of the subscription. e.g. "projects/myproject/locations/US/subscriptions/123"
+        output: true
+      - !ruby/object:Api::Type::String
+        name: subscription_id
+        description: |-
+          The subscription id used to reference the subscription.
         output: true
   - !ruby/object:Api::Type::String
     name: data_exchange_id

@@ -29,7 +29,7 @@ resource "google_bigquery_analytics_hub_listing_subscription" "<%= ctx[:primary_
     }
     location = "US"
     dataset_reference {
-      dataset_id = "testlink"
+      dataset_id = "<%= ctx[:vars]['destination_dataset_id'] %>"
       project_id = google_bigquery_dataset.<%= ctx[:primary_resource_id] %>.project
     }
   }
