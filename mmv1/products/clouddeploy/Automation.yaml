@@ -95,11 +95,11 @@ properties:
     name: "description"
     description: "Optional. Description of the `Automation`. Max length is 255 characters."
   - !ruby/object:Api::Type::String
-    name: "create_time"
+    name: "createTime"
     description: "Output only. Time at which the automation was created."
     output: true
   - !ruby/object:Api::Type::String
-    name: "update_time"
+    name: "updateTime"
     description: "Output only. Time at which the automation was updated."
     output: true
   - !ruby/object:Api::Type::KeyValueAnnotations
@@ -117,10 +117,9 @@ properties:
     description: "Optional. When Suspended, automation is deactivated from execution."
     send_empty_value: true
   - !ruby/object:Api::Type::String
-    name: "service_account"
+    name: "serviceAccount"
     description: "Required. Email address of the user-managed IAM service account that creates Cloud Deploy release and rollout resources."
     required: true
-    ignore_read: true
   - !ruby/object:Api::Type::NestedObject
     name: "selector"
     description: "Required. Selected resources to which the automation will be applied."
@@ -145,7 +144,7 @@ properties:
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::NestedObject
-          name: "promote_release_rule"
+          name: "promoteReleaseRule"
           description: "Optional. `PromoteReleaseRule` will automatically promote a release from the current target to a specified target."
           exactly_one_of:
             - promote_release_rule
@@ -159,13 +158,13 @@ properties:
               name: "wait"
               description: "Optional. How long the release need to be paused until being promoted to the next target."
             - !ruby/object:Api::Type::String
-              name: "destination_target_id"
+              name: "destinationTargetId"
               description: "Optional. The ID of the stage in the pipeline to which this `Release` is deploying. If unspecified, default it to the next stage in the promotion flow. The value of this field could be one of the following: * The last segment of a target name. It only needs the ID to determine if the target is one of the stages in the promotion sequence defined in the pipeline. * \"@next\", the next target in the promotion sequence."
             - !ruby/object:Api::Type::String
-              name: "destination_phase"
+              name: "destinationPhase"
               description: "Optional. The starting phase of the rollout created by this operation. Default to the first phase."
         - !ruby/object:Api::Type::NestedObject
-          name: "advance_rollout_rule"
+          name: "advanceRolloutRule"
           description: "Optional. The `AdvanceRolloutRule` will automatically advance a successful Rollout."
           exactly_one_of:
             - promote_release_rule
@@ -179,6 +178,6 @@ properties:
               name: "wait"
               description: "Optional. How long to wait after a rollout is finished."
             - !ruby/object:Api::Type::Array
-              name: "source_phases"
+              name: "sourcePhases"
               item_type: Api::Type::String
               description: "Optional. Proceeds only after phase name matched any one in the list. This value must consist of lower-case letters, numbers, and hyphens, start with a letter and end with a letter or a number, and have a max length of 63 characters. In other words, it must match the following regex: `^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$`."

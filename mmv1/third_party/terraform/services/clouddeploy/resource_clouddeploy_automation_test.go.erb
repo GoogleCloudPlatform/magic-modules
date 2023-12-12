@@ -32,7 +32,7 @@ func TestAccClouddeployAutomation_update(t *testing.T) {
         ResourceName:            "google_clouddeploy_automation.automation",
         ImportState:             true,
         ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"location", "delivery_pipeline", "terraform_labels", "service_account"},
+	ImportStateVerifyIgnore: []string{"location", "delivery_pipeline", "annotations", "labels", "terraform_labels"},
       },
       {
         Config: testAccClouddeployAutomation_update(context),
@@ -41,7 +41,7 @@ func TestAccClouddeployAutomation_update(t *testing.T) {
         ResourceName:            "google_clouddeploy_automation.automation",
         ImportState:             true,
         ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"location", "delivery_pipeline", "terraform_labels", "service_account"},
+	ImportStateVerifyIgnore: []string{"location", "delivery_pipeline", "annotations", "labels", "terraform_labels"},
       },
     },
   })
@@ -94,12 +94,12 @@ resource "google_clouddeploy_automation" "automation" {
   delivery_pipeline = google_clouddeploy_delivery_pipeline.pipeline.name
   service_account = "%{service_account}"
   annotations = {
-    my_first_annotation = "example-annotation-1"
-    my_second_annotation = "example-annotation-2"
+     first_annotation = "example-annotation-1"
+     second_annotation = "example-annotation-2"
   }
   labels = {
-    my_first_label = "example-label-1"
-    my_second_label = "example-label-2"
+    first_label = "example-label-1"
+    second_label = "example-label-2"
   }
   description = "automation resource"
   selector {
