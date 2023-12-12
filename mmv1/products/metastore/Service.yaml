@@ -66,6 +66,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataproc_metastore_service_cmek_test'
     skip_docs: true
+    skip_vcr: true
     primary_resource_id: 'default'
     vars:
       metastore_service_name: 'example-service'
