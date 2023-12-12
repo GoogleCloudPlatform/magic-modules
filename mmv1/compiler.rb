@@ -21,7 +21,6 @@ Dir.chdir(File.dirname(__FILE__))
 # generation.
 ENV['TZ'] = 'UTC'
 
-require 'active_support/inflector'
 require 'api/compiler'
 require 'openapi_generate/parser'
 require 'google/logger'
@@ -153,31 +152,16 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
   product_override_path = File.join(override_dir, product_name, 'product.yaml') if override_dir
   product_yaml_path = File.join(product_name, 'product.yaml')
 
-  api_override_path = ''
-  api_override_path = File.join(override_dir, product_name, 'api.yaml') if override_dir
-  api_yaml_path = File.join(product_name, 'api.yaml')
-
   provider_override_path = ''
   provider_override_path = File.join(override_dir, product_name, "#{provider_name}.yaml") \
     if override_dir
   provider_yaml_path = File.join(product_name, "#{provider_name}.yaml")
 
-  unless File.exist?(product_yaml_path) || File.exist?(product_override_path) \
-    || File.exist?(api_yaml_path) || File.exist?(api_override_path)
+  unless File.exist?(product_yaml_path) || File.exist?(product_override_path)
     raise "#{product_name} does not contain an api.yaml or product.yaml file"
   end
 
-  if File.exist?(api_override_path)
-    result = if File.exist?(api_yaml_path)
-               YAML.load_file(api_yaml_path, permitted_classes: allowed_classes) \
-                   .merge(YAML.load_file(api_override_path, permitted_classes: allowed_classes))
-             else
-               YAML.load_file(api_override_path, permitted_classes: allowed_classes)
-             end
-    product_yaml = result.to_yaml
-  elsif File.exist?(api_yaml_path)
-    product_yaml = File.read(api_yaml_path)
-  elsif File.exist?(product_override_path)
+  if File.exist?(product_override_path)
     result = if File.exist?(product_yaml_path)
                YAML.load_file(product_yaml_path, permitted_classes: allowed_classes) \
                    .merge(YAML.load_file(product_override_path, permitted_classes: allowed_classes))
