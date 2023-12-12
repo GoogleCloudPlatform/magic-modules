@@ -180,19 +180,49 @@ properties:
         name: 'autoscalingLimits'
         description: |
           Defines scale in controls to reduce the risk of response latency
-          and outages due to abrupt scale-in events
+          and outages due to abrupt scale-in events. Users can define the minimum and
+          maximum compute capacity allocated to the instance, and the autoscaler will
+          only scale within that range. Users can either use nodes or processing
+          units to specify the limits, but should use the same unit to set both the
+          min_limit and max_limit.
         properties:
           - !ruby/object:Api::Type::Integer
             name: 'minProcessingUnits'
             description: |
               Specifies minimum number of processing units allocated to the instance.
               If set, this number should be multiples of 1000.
+            exactly_one_of:
+              - min_processing_units
+              - min_nodes
           - !ruby/object:Api::Type::Integer
             name: 'maxProcessingUnits'
             description: |
               Specifies maximum number of processing units allocated to the instance.
               If set, this number should be multiples of 1000 and be greater than or equal to
               min_processing_units.
+            exactly_one_of:
+              - max_processing_units
+              - max_nodes
+          - !ruby/object:Api::Type::Integer
+            name: 'minNodes'
+            description: |
+              Specifies number of nodes allocated to the instance. If set, this number
+              should be greater than or equal to 1.
+            exactly_one_of:
+              - min_processing_units
+              - min_nodes
+            required_with:
+              - max_nodes
+          - !ruby/object:Api::Type::Integer
+            name: 'maxNodes'
+            description: |
+              Specifies maximum number of nodes allocated to the instance. If set, this number
+              should be greater than or equal to min_nodes.
+            exactly_one_of:
+              - max_processing_units
+              - max_nodes
+            required_with:
+              - min_nodes
       - !ruby/object:Api::Type::NestedObject
         name: 'autoscalingTargets'
         description: |
