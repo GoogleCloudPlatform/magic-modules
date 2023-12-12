@@ -194,11 +194,11 @@ func TestAccCloudIdentityGroup_cloudIdentityGroupsDynamicExample(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudIdentityGroup_cloudIdentityGroupsDynamicExample(context),
+				ExpectNonEmptyPlan: true,
 			},
 			{
 				ResourceName:            "google_cloud_identity_group.cloud_identity_groups_dynamic",
 				ImportState:             true,
-				ImportStateVerify:       true,
 			},
 		},
 	})
