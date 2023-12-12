@@ -65,7 +65,7 @@ resource "google_kms_crypto_key_iam_member" "iam" {
 `, context)
 }
 
-func testAccLoggingOrganizationSettings_update(context map[string]interface{}) string {
+func testAccLoggingOrganizationSettings_onlyRequired(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_logging_organization_settings" "example" {
   organization = "%{org_id}"
