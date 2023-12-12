@@ -43,6 +43,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: vertex_ai_feature_online_store
     primary_resource_id: feature_online_store
+    vars:
+      feature_online_store_name: example_feature_online_store
 parameters:
   - !ruby/object:Api::Type::String
     name: region

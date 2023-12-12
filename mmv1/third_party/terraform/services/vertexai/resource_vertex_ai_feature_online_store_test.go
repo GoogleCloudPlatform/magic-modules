@@ -45,7 +45,7 @@ func TestAccVertexAIFeatureOnlineStore_updated(t *testing.T) {
 func testAccVertexAIFeatureOnlineStore_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource google_vertex_ai_feature_online_store "feature_online_store" {
-    name = "sample_feature_online_store"
+    name = "tf_test_feature_online_store%{random_suffix}"
     region = "us-central1"
     labels = {
         label-one = "value-one"
@@ -65,7 +65,7 @@ resource google_vertex_ai_feature_online_store "feature_online_store" {
 func testAccVertexAIFeatureOnlineStore_updated(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource google_vertex_ai_feature_online_store "feature_online_store" {
-    name = "sample_feature_online_store"
+    name = "tf_test_feature_online_store%{random_suffix}"
     region = "us-central1"
     labels = {
         label-one = "value-one"
