@@ -53,10 +53,7 @@ res["destinationDataset"] = map[string]interface{}{
 		"projectId": projectData.ProjectId,
 		"datasetId": strings.Split(md.Id, ":")[1],
 	},
-	// This is temporary to make tests pass, and is not final.
-	"labels": map[string]interface{}{
-		"testing": "🧪",
-	},
-	//"labels": labels, // TODO(lobato): Labels aren't applying on create for some reason.
+	"labels": labels,
 }
+
 return res, nil

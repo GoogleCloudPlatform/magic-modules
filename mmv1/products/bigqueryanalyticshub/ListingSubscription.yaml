@@ -93,7 +93,7 @@ properties:
       - !ruby/object:Api::Type::String
         name: description
         description: A user-friendly description of the dataset.
-      - !ruby/object:Api::Type::KeyValueLabels
+      - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: |
           The labels associated with this dataset. You can use these to

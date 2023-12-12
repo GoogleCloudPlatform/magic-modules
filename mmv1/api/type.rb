@@ -809,7 +809,7 @@ module Api
         resource_name = @__resource.name
 
         if lineage == 'labels' || lineage == 'metadata.labels' ||
-           lineage == 'configuration.labels' || lineage == 'destination_dataset.labels'
+           lineage == 'configuration.labels'
           if !(is_a? Api::Type::KeyValueLabels) &&
              # The label value must be empty string, so skip this resource
              !(product_name == 'CloudIdentity' && resource_name == 'Group') &&
