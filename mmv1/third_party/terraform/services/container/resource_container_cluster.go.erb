@@ -4970,11 +4970,6 @@ func expandPrivateClusterConfig(configured interface{}) *container.PrivateCluste
 		EnablePrivateEndpoint:      config["enable_private_endpoint"].(bool),
 		EnablePrivateNodes:         config["enable_private_nodes"].(bool),
 		MasterIpv4CidrBlock:        config["master_ipv4_cidr_block"].(string),
-	config := l[0].(map[string]interface{})
-	return &container.PrivateClusterConfig{
-		EnablePrivateEndpoint:      config["enable_private_endpoint"].(bool),
-		EnablePrivateNodes:         config["enable_private_nodes"].(bool),
-		MasterIpv4CidrBlock:        config["master_ipv4_cidr_block"].(string),
 		MasterGlobalAccessConfig:   expandPrivateClusterConfigMasterGlobalAccessConfig(config["master_global_access_config"]),
 		PrivateEndpointSubnetwork:  config["private_endpoint_subnetwork"].(string),
 		ForceSendFields:            []string{"EnablePrivateEndpoint", "EnablePrivateNodes", "MasterIpv4CidrBlock", "MasterGlobalAccessConfig"},
@@ -6407,5 +6402,10 @@ func containerClusterEnableK8sBetaApisCustomizeDiffFunc(d tpgresource.TerraformR
 		newAPIsSet := new.(*schema.Set)
 		for _, oldAPI := range oldAPIsSet.List() {
 			if !newAPIsSet.Contains(oldAPI) {
+				return d.ForceNew("enable_k8s_beta_apis.0.enabled_apis")
+			}
+		}
+	}
+
 	return nil
 }
