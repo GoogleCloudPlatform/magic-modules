@@ -194,8 +194,6 @@ properties:
             exactly_one_of:
               - min_processing_units
               - min_nodes
-            required_with:
-              - max_processing_units
           - !ruby/object:Api::Type::Integer
             name: 'maxProcessingUnits'
             description: |
@@ -205,8 +203,6 @@ properties:
             exactly_one_of:
               - max_processing_units
               - max_nodes
-            required_with:
-              - min_processing_units
           - !ruby/object:Api::Type::Integer
             name: 'minNodes'
             description: |
