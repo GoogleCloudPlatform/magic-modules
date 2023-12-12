@@ -243,16 +243,16 @@ properties:
                       description: |
                          Version of the upgrade, e.g., "1.22.1-gke.100". It should be a valid version. It must not exceet 99 characters.
                 - !ruby/object:Api::Type::NestedObject
-                    name: 'postConditions'
-                    description: |
-                      Post conditions to override for the specified upgrade.
-                    required: true
-                    properties:
-                      - !ruby/object:Api::Type::String
-                        name: 'soaking'
-                        description: |
-                          Amount of time to "soak" after a rollout has been finished before marking it COMPLETE. Cannot exceed 30 days.
-                        required: true
+                  name: 'postConditions'
+                  description: |
+                    Post conditions to override for the specified upgrade.
+                  required: true
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'soaking'
+                      description: |
+                        Amount of time to "soak" after a rollout has been finished before marking it COMPLETE. Cannot exceed 30 days.
+                      required: true
   - !ruby/object:Api::Type::NestedObject
     name: fleetDefaultMemberConfig
     description: Optional. Fleet Default Membership Configuration.
