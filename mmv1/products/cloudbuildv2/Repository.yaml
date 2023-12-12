@@ -51,6 +51,12 @@ examples:
     vars:
       connection_name: 'connection'
       repository_name: 'repository'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudbuildv2_repository_ghe_doc'
+    skip_test: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudbuildv2_repository_github_doc'
+    skip_test: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/cloudbuildv2_repository.go.erb
 parameters:
