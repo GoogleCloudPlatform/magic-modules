@@ -661,7 +661,7 @@ resource "google_cloudbuildv2_connection" "primary" {
     }
 
     webhook_secret_secret_version = "projects/407304063574/secrets/gle-webhook-secret/versions/latest"
-    host_uri                      = "https://gle-us.gle-us-private.com/"
+    host_uri                      = "https://gle-us.gle-us-private.com"
 
     service_directory_config {
       service = "projects/407304063574/locations/us-west1/namespaces/private-conn/services/gitlab-private"
