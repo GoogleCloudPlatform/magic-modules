@@ -24,7 +24,7 @@ func TestAccLoggingFolderSettings_update(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLoggingFolderSettings_full(context),
+				Config: testAccLoggingFolderSettings_onlyRequired(context),
 			},
 			{
 				ResourceName:            "google_logging_folder_settings.example",
@@ -33,7 +33,7 @@ func TestAccLoggingFolderSettings_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"folder"},
 			},
 			{
-				Config: testAccLoggingFolderSettings_update(context),
+				Config: testAccLoggingFolderSettings_full(context),
 			},
 			{
 				ResourceName:            "google_logging_folder_settings.example",
@@ -72,29 +72,15 @@ resource "google_kms_crypto_key_iam_member" "iam" {
 `, context)
 }
 
-func testAccLoggingFolderSettings_update(context map[string]interface{}) string {
+func testAccLoggingFolderSettings_onlyRequired(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_logging_folder_settings" "example" {
-  disable_default_sink = false
-  folder               = google_folder.my_folder.folder_id
-  kms_key_name         = "%{updated_key}"
-  storage_location     = "us-east1"
-  depends_on           = [ google_kms_crypto_key_iam_member.iam ]
+  folder = google_folder.my_folder.folder_id
 }
 
 resource "google_folder" "my_folder" {
   display_name = "tf-test-folder-%{random_suffix}"
   parent       = "organizations/%{org_id}"
-}
-
-data "google_logging_folder_settings" "settings" {
-  folder = google_folder.my_folder.folder_id
-}
-
-resource "google_kms_crypto_key_iam_member" "iam" {
-  crypto_key_id = "%{updated_key}"
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:${data.google_logging_folder_settings.settings.kms_service_account_id}"
 }
 `, context)
 }

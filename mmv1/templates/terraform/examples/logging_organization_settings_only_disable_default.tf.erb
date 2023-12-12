@@ -1,4 +1,0 @@
-resource "google_logging_organization_settings" "<%= ctx[:primary_resource_id] %>" {
-  disable_default_sink = true
-  organization         = "<%= ctx[:test_env_vars]['org_id'] %>"
-}

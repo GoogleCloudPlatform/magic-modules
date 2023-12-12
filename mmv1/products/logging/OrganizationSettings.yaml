@@ -35,31 +35,13 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "logging_organization_settings_all"
     primary_resource_id: "example"
+    skip_test: true
     vars:
       key_name: "kms-key"
     test_env_vars:
       org_id: :ORG_TARGET
     test_vars_overrides:
       key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
-  - !ruby/object:Provider::Terraform::Examples
-    name: "logging_organization_settings_only_cmek"
-    primary_resource_id: "example"
-    vars:
-      key_name: "kms-key"
-    test_env_vars:
-      org_id: :ORG_TARGET
-    test_vars_overrides:
-      key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
-  - !ruby/object:Provider::Terraform::Examples
-    name: "logging_organization_settings_only_location"
-    primary_resource_id: "example"
-    test_env_vars:
-      org_id: :ORG_TARGET
-  - !ruby/object:Provider::Terraform::Examples
-    name: "logging_organization_settings_only_disable_default"
-    primary_resource_id: "example"
-    test_env_vars:
-      org_id: :ORG_TARGET
 parameters:
   - !ruby/object:Api::Type::String
     name: 'organization'

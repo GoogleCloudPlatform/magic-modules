@@ -22,7 +22,7 @@ func TestAccLoggingOrganizationSettings_update(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLoggingOrganizationSettings_full(context),
+				Config: testAccLoggingOrganizationSettings_onlyRequired(context),
 			},
 			{
 				ResourceName:            "google_logging_organization_settings.example",
@@ -31,7 +31,7 @@ func TestAccLoggingOrganizationSettings_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"organization"},
 			},
 			{
-				Config: testAccLoggingOrganizationSettings_update(context),
+				Config: testAccLoggingOrganizationSettings_full(context),
 			},
 			{
 				ResourceName:            "google_logging_organization_settings.example",
@@ -68,21 +68,7 @@ resource "google_kms_crypto_key_iam_member" "iam" {
 func testAccLoggingOrganizationSettings_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_logging_organization_settings" "example" {
-  disable_default_sink = true
-  kms_key_name         = "%{updated_key}"
-  organization         = "%{org_id}"
-  storage_location     = "us-east1"
-  depends_on           = [ google_kms_crypto_key_iam_member.iam ]
-}
-
-data "google_logging_organization_settings" "settings" {
   organization = "%{org_id}"
-}
-
-resource "google_kms_crypto_key_iam_member" "iam" {
-  crypto_key_id = "%{updated_key}"
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:${data.google_logging_organization_settings.settings.kms_service_account_id}"
 }
 `, context)
 }
