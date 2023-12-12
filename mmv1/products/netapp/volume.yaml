@@ -103,7 +103,7 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: 'exportPolicy'
     description: |-
-      Export policy of the volume for NFSv3 and/or NFSv4.1 access.
+      Export policy of the volume for NFSV3 and/or NFSV4.1 access.
     properties:
       - !ruby/object:Api::Type::Array
         name: 'rules'
@@ -132,11 +132,11 @@ properties:
             - !ruby/object:Api::Type::Boolean
               name: 'nfsv3'
               description: |
-                Enable to apply the export rule to NFSv3 clients.
+                Enable to apply the export rule to NFSV3 clients.
             - !ruby/object:Api::Type::Boolean
               name: 'nfsv4'
               description: |
-                Enable to apply the export rule to NFSv4.1 clients.
+                Enable to apply the export rule to NFSV4.1 clients.
             - !ruby/object:Api::Type::Boolean
               name: 'kerberos5ReadOnly'
               description: |
@@ -164,7 +164,7 @@ properties:
   - !ruby/object:Api::Type::Array
     name: 'protocols'
     description: |
-      The protocol of the volume. Allowed combinations are `['NFSv3']`, `['NFSv4']`, `['SMB']`, `['NFSv3', 'NFSv4']`, `['SMB', 'NFSv3']` and `['SMB', 'NFSv4']`.
+      The protocol of the volume. Allowed combinations are `['NFSV3']`, `['NFSV4']`, `['SMB']`, `['NFSV3', 'NFSV4']`, `['SMB', 'NFSV3']` and `['SMB', 'NFSV4']`.
     required: true
     immutable: true
     item_type: !ruby/object:Api::Type::Enum
@@ -224,18 +224,20 @@ properties:
   - !ruby/object:Api::Type::Enum
     name: 'securityStyle'
     description: |
-      Security Style of the Volume. Use UNIX to use UNIX or NFSv4 ACLs for file permissions.
+      Security Style of the Volume. Use UNIX to use UNIX or NFSV4 ACLs for file permissions.
       Use NTFS to use NTFS ACLs for file permissions. Can only be set for volumes which use SMB together with NFS as protocol.
     values:
       - :SECURITY_STYLE_UNSPECIFIED
       - :NTFS
       - :UNIX
     immutable: true
+    default_from_api: true
   - !ruby/object:Api::Type::Boolean
     name: 'kerberosEnabled'
     description: |
       Flag indicating if the volume is a kerberos volume or not, export policy rules control kerberos security modes (krb5, krb5i, krb5p).
     immutable: true
+    default_value: false
   - !ruby/object:Api::Type::Boolean
     name: ldapEnabled
     description: |
@@ -317,6 +319,8 @@ properties:
         name: 'enabled'
         description: |-
           Enables automated snapshot creation according to defined schedule. Default is false.
+        default_value: false
+        send_empty_value: true
       - !ruby/object:Api::Type::NestedObject
         name: 'hourlySchedule'
         description: |-

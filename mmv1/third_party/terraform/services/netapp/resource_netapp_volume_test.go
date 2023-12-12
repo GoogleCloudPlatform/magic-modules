@@ -57,6 +57,15 @@ func TestAccNetappvolume_volumeCreateExample_update(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels"},
 			},
+			{
+				Config: testAccNetappvolume_volumeCreateExample_updatesnapshot(context),
+			},
+			{
+				ResourceName:            "google_netapp_volume.test_volume",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels"},
+			},
 		},
 	})
 }
@@ -72,6 +81,13 @@ resource "google_netapp_storage_pool" "default" {
   network = data.google_compute_network.default.id
 }
 
+resource "google_netapp_storage_pool" "default2" {
+	name = "tf-test-pool%{random_suffix}"
+	location = "us-central1"
+	service_level = "EXTREME"
+	capacity_gib = "2048"
+	network = data.google_compute_network.default.id
+  }
 
 resource "google_netapp_volume" "test_volume" {
   location = "us-central1"
@@ -92,9 +108,22 @@ resource "google_netapp_volume" "test_volume" {
   kerberos_enabled = false
   export_policy {
     rules {
-		access_type           = "READ_WRITE"
+		access_type           = "READ_ONLY"
 		allowed_clients       = "0.0.0.0/0"
 		has_root_access       = "false"
+		kerberos5_read_only   = false
+		kerberos5_read_write  = false
+		kerberos5i_read_only  = false
+		kerberos5i_read_write = false
+		kerberos5p_read_only  = false
+		kerberos5p_read_write = false
+		nfsv3                 = true
+		nfsv4                 = false
+    }
+	rules {
+		access_type           = "READ_WRITE"
+		allowed_clients       = "10.2.3.4,10.2.3.5"
+		has_root_access       = "true"
 		kerberos5_read_only   = false
 		kerberos5_read_write  = false
 		kerberos5i_read_only  = false
@@ -149,24 +178,31 @@ resource "google_netapp_storage_pool" "default" {
   network = data.google_compute_network.default.id
 }
 
+resource "google_netapp_storage_pool" "default2" {
+	name = "tf-test-pool%{random_suffix}"
+	location = "us-central1"
+	service_level = "EXTREME"
+	capacity_gib = "2048"
+	network = data.google_compute_network.default.id
+  }
 
 resource "google_netapp_volume" "test_volume" {
   location = "us-central1"
   name = "tf-test-test-volume%{random_suffix}"
   capacity_gib = "200"
   share_name = "testshare"
-  storage_pool = google_netapp_storage_pool.default.name
+  storage_pool = google_netapp_storage_pool.default2.name
   protocols = ["NFSV3"]
   smb_settings = []
-  unix_permissions = "0770"
+  unix_permissions = "0740"
   labels = {}
   description = ""
-  snapshot_directory = false
+  snapshot_directory = true
   security_style = "UNIX"
   kerberos_enabled = false
   export_policy {
     rules {
-		access_type           = "READ_ONLY"
+		access_type           = "READ_WRITE"
 		allowed_clients       = "0.0.0.0/0"
 		has_root_access       = "true"
 		kerberos5_read_only   = false
@@ -187,6 +223,88 @@ resource "google_netapp_volume" "test_volume" {
       snapshots_to_keep = 1
     }
     enabled = true
+    hourly_schedule {
+      minute            = 10
+      snapshots_to_keep = 1
+    }
+    monthly_schedule {
+      days_of_month     = "1"
+      hour              = 1
+      minute            = 1
+      snapshots_to_keep = 1
+    }
+    weekly_schedule {
+      day               = "Sunday"
+      hour              = 1
+      minute            = 1
+      snapshots_to_keep = 1
+    }
+  }
+
+}
+
+data "google_compute_network" "default" {
+  name = "%{network_name}"
+}
+`, context)
+}
+
+func testAccNetappvolume_volumeCreateExample_updatesnapshot(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+
+resource "google_netapp_storage_pool" "default" {
+  name = "tf-test-test-pool%{random_suffix}"
+  location = "us-central1"
+  service_level = "PREMIUM"
+  capacity_gib = "2048"
+  network = data.google_compute_network.default.id
+}
+
+resource "google_netapp_storage_pool" "default2" {
+	name = "tf-test-pool%{random_suffix}"
+	location = "us-central1"
+	service_level = "EXTREME"
+	capacity_gib = "2048"
+	network = data.google_compute_network.default.id
+  }
+
+resource "google_netapp_volume" "test_volume" {
+  location = "us-central1"
+  name = "tf-test-test-volume%{random_suffix}"
+  capacity_gib = "200"
+  share_name = "testshare"
+  storage_pool = google_netapp_storage_pool.default2.name
+  protocols = ["NFSV3"]
+  smb_settings = []
+  unix_permissions = "0740"
+  labels = {}
+  description = ""
+  snapshot_directory = true
+  security_style = "UNIX"
+  kerberos_enabled = false
+  export_policy {
+    rules {
+		access_type           = "READ_WRITE"
+		allowed_clients       = "0.0.0.0/0"
+		has_root_access       = "true"
+		kerberos5_read_only   = false
+		kerberos5_read_write  = false
+		kerberos5i_read_only  = false
+		kerberos5i_read_write = false
+		kerberos5p_read_only  = false
+		kerberos5p_read_write = false
+		nfsv3                 = true
+		nfsv4                 = false
+    }
+  }
+  restricted_actions = ["DELETE"]
+  snapshot_policy {
+    daily_schedule {
+      hour              = 1
+      minute            = 1
+      snapshots_to_keep = 1
+    }
+    enabled = false
     hourly_schedule {
       minute            = 10
       snapshots_to_keep = 1
