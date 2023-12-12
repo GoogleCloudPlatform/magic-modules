@@ -222,7 +222,7 @@ resource "google_cloud_identity_group" "cloud_identity_groups_dynamic" {
   dynamic_group_metadata {
     queries {
       resource_type = "USER"
-      query         = "user.addresses.exists(ad, ad.locality=='Sunnyvale')"
+      query         = "user.addresses.exists(ad, ad.locality=='Seattle')"
     }
   }
 }
