@@ -14,14 +14,14 @@ Requires one of the following OAuth scopes: `https://www.googleapis.com/auth/clo
 ## Example Usage
 
 ```hcl
-resource "google_artifact_registry_repository" "my-repo" {
+resource "google_artifact_registry_repository" "my_repo" {
   location      = "us-west1"
   repository_id = "my-repository"
   format        = "DOCKER"
 }
 
-data "google_artifact_registry_docker_image" "my-image" {
-  repository = google_artifact_registry_repository.my-repo.id
+data "google_artifact_registry_docker_image" "my_image" {
+  repository = google_artifact_registry_repository.my_repo.id
   image      = "my-image"
   tag        = "my-tag"
 }
@@ -31,7 +31,7 @@ resource "google_cloud_run_v2_service" "default" {
  
   template {
     containers {
-      image = data.google_artifact_registry_docker_image.my-image.self_link
+      image = data.google_artifact_registry_docker_image.my_image.self_link
     }
   }
 }

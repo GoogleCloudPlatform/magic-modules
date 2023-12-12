@@ -194,7 +194,7 @@ func DataSourceArtifactRegistryDockerImageRead(d *schema.ResourceData, meta inte
 }
 
 func retrieveAndFilterImages(d *schema.ResourceData, config *transport_tpg.Config, urlRequest string, userAgent string, imageName string) (DockerImage, error) {
-	// Paging through the list mehtod until either:
+	// Paging through the list method until either:
 	// if a tag was provided, the matching image name and tag pair
 	// otherwise, return the first matching image name
 
@@ -248,13 +248,13 @@ func retrieveListOfDockerImages(config *transport_tpg.Config, urlRequest string,
 	}
 
 	if nextPageToken, ok := resList["nextPageToken"].(string); ok {
-		return flattenDatasourceListResponse(resList), nextPageToken, nil
+		return flattenDataSourceListResponse(resList), nextPageToken, nil
 	} else {
-		return flattenDatasourceListResponse(resList), "", nil
+		return flattenDataSourceListResponse(resList), "", nil
 	}
 }
 
-func flattenDatasourceListResponse(res map[string]interface{}) []DockerImage {
+func flattenDataSourceListResponse(res map[string]interface{}) []DockerImage {
 	var dockerImages []DockerImage
 
 	resDockerImages, _ := res["dockerImages"].([]interface{})
