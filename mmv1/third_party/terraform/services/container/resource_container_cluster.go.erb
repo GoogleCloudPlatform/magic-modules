@@ -2201,7 +2201,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		PodSecurityPolicyConfig: expandPodSecurityPolicyConfig(d.Get("pod_security_policy_config")),
 <% end -%>
 		Autoscaling:             expandClusterAutoscaling(d.Get("cluster_autoscaling"), d),
-		BinaryAuthorization:     expandBinaryAuthorization(d.Get("binary_authorization")),
+		BinaryAuthorization:     expandBinaryAuthorization(d.Get("binary_authorization"), false),
 		Autopilot: &container.Autopilot{
 			Enabled:         d.Get("enable_autopilot").(bool),
 			WorkloadPolicyConfig: workloadPolicyConfig,
@@ -2988,24 +2988,10 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s's autopilot workload policy config allow_net_admin has been set to %v", d.Id(), allowed)
 	}
 
-        if d.HasChange("binary_authorization") {
-                if d.HasChange("enable_binary_authorization") {
-                        // Only consider enabled bool if evaluation mode is unspecified.
-                        if d.Get("binary_authorization.0.evaluation_mode").(string) == "" {
-                                enabled := d.Get("enable_binary_authorization").(bool) || d.Get("binary_authorization.0.enabled").(bool)
-		                req := &container.UpdateClusterRequest{
-			                Update: &container.ClusterUpdate{
-				                DesiredBinaryAuthorization: &container.BinaryAuthorization{
-				 	                Enabled:         enabled,
-					                ForceSendFields: []string{"Enabled"},
-				                },
-			                },
-		                }
-                        }
-                }
+        if d.HasChange("binary_authorization") || d.HasChange("enable_binary_authorization") {
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
-				DesiredBinaryAuthorization: expandBinaryAuthorization(d.Get("binary_authorization")),
+				DesiredBinaryAuthorization: expandBinaryAuthorization(d.Get("binary_authorization"), d.Get("enable_binary_authorization").(bool)),
 			},
 		}
 
@@ -3016,26 +3002,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 
 		log.Printf("[INFO] GKE cluster %s's binary authorization has been updated to %v", d.Id(), req.Update.DesiredBinaryAuthorization)
-	}
-
-	if d.HasChange("enable_binary_authorization") && !d.HasChange("binary_authorization"){
-		enabled := d.Get("enable_binary_authorization").(bool)
-		req := &container.UpdateClusterRequest{
-			Update: &container.ClusterUpdate{
-				DesiredBinaryAuthorization: &container.BinaryAuthorization{
-					Enabled:         enabled,
-					ForceSendFields: []string{"Enabled"},
-				},
-			},
-		}
-
-		updateF := updateFunc(req, "updating GKE binary authorization")
-		// Call update serially.
-		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
-			return err
-		}
-
-		log.Printf("[INFO] GKE cluster %s's binary authorization has been updated to %v", d.Id(), enabled)
 	}
 
 	if d.HasChange("private_cluster_config.0.enable_private_endpoint") {
@@ -4861,11 +4827,11 @@ func expandNotificationConfig(configured interface{}) *container.NotificationCon
 	}
 }
 
-func expandBinaryAuthorization(configured interface{}) *container.BinaryAuthorization {
+func expandBinaryAuthorization(configured interface{}, legacy_enabled bool) *container.BinaryAuthorization {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return &container.BinaryAuthorization{
-			Enabled:         false,
+			Enabled:         legacy_enabled,
 			ForceSendFields: []string{"Enabled"},
 		}
 	}
