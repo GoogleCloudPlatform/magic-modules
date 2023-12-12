@@ -52,6 +52,7 @@ examples:
       - description
     vars:
       job_id: job_load
+      feature_group_name: example_feature_group
 parameters:
   - !ruby/object:Api::Type::String
     name: region

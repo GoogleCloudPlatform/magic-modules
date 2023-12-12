@@ -1,5 +1,5 @@
   resource "google_vertex_ai_feature_group" "<%= ctx[:primary_resource_id] %>" {
-  name = "sample_feature_group_movie_reviews"
+  name = "<%= ctx[:vars]['feature_group_name'] %>"
   description = "A sample feature group"
   region = "us-central1"
   labels = {
@@ -10,7 +10,7 @@
         # The source table must have a column named 'feature_timestamp' of type TIMESTAMP.
         input_uri = "bq://${google_bigquery_table.sample_table.project}.${google_bigquery_table.sample_table.dataset_id}.${google_bigquery_table.sample_table.table_id}"
     }
-    entity_id_columns = ["movie_id"]
+    entity_id_columns = ["feature_id"]
   }
 }
 
@@ -29,12 +29,7 @@ resource "google_bigquery_table" "sample_table" {
   schema = <<EOF
 [
     {
-        "name": "movie_id",
-        "type": "STRING",
-        "mode": "NULLABLE"
-    },
-    {
-        "name": "review",
+        "name": "feature_id",
         "type": "STRING",
         "mode": "NULLABLE"
     },
