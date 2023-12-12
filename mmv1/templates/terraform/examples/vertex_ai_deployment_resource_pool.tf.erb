@@ -1,6 +1,6 @@
 resource "google_vertex_ai_deployment_resource_pool" "<%= ctx[:primary_resource_id] %>" {
     region = "us-central1"
-    deployment_resource_pool_id = "sample-deployment-resource-pool"
+    name = "<%= ctx[:vars]['deployment_resource_pool_id'] %>"
     dedicated_resources {
         machine_spec {
             machine_type = "n1-standard-4"
