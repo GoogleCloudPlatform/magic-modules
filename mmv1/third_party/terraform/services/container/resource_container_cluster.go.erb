@@ -2988,7 +2988,37 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s's autopilot workload policy config allow_net_admin has been set to %v", d.Id(), allowed)
 	}
 
-	if d.HasChange("enable_binary_authorization") {
+        if d.HasChange("binary_authorization") {
+                if d.HasChange("enable_binary_authorization") {
+                        // Only consider enabled bool if evaluation mode is unspecified.
+                        if d.Get("binary_authorization.0.evaluation_mode").(string) == "" {
+                                enabled := d.Get("enable_binary_authorization").(bool) || d.Get("binary_authorization.0.enabled").(bool)
+		                req := &container.UpdateClusterRequest{
+			                Update: &container.ClusterUpdate{
+				                DesiredBinaryAuthorization: &container.BinaryAuthorization{
+				 	                Enabled:         enabled,
+					                ForceSendFields: []string{"Enabled"},
+				                },
+			                },
+		                }
+                        }
+                }
+		req := &container.UpdateClusterRequest{
+			Update: &container.ClusterUpdate{
+				DesiredBinaryAuthorization: expandBinaryAuthorization(d.Get("binary_authorization")),
+			},
+		}
+
+		updateF := updateFunc(req, "updating GKE binary authorization")
+		// Call update serially.
+		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] GKE cluster %s's binary authorization has been updated to %v", d.Id(), req.Update.DesiredBinaryAuthorization)
+	}
+
+	if d.HasChange("enable_binary_authorization") && !d.HasChange("binary_authorization"){
 		enabled := d.Get("enable_binary_authorization").(bool)
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
@@ -3044,22 +3074,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 
 		log.Printf("[INFO] GKE cluster %s's master global access config has been updated to %v", d.Id(), config)
-	}
-
-    if d.HasChange("binary_authorization") {
-		req := &container.UpdateClusterRequest{
-			Update: &container.ClusterUpdate{
-				DesiredBinaryAuthorization: expandBinaryAuthorization(d.Get("binary_authorization")),
-			},
-		}
-
-		updateF := updateFunc(req, "updating GKE binary authorization")
-		// Call update serially.
-		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
-			return err
-		}
-
-		log.Printf("[INFO] GKE cluster %s's binary authorization has been updated to %v", d.Id(), req.Update.DesiredBinaryAuthorization)
 	}
 
 	if d.HasChange("enable_shielded_nodes") {
@@ -4856,13 +4870,8 @@ func expandBinaryAuthorization(configured interface{}) *container.BinaryAuthoriz
 		}
 	}
 	config := l[0].(map[string]interface{})
-        if config["evaluation_mode"] == "" {
-		return &container.BinaryAuthorization{
-			Enabled:         config["enabled"].(bool),
-			ForceSendFields: []string{"Enabled"},
-                      }
-        }
 	return &container.BinaryAuthorization{
+                Enabled:        config["enabled"].(bool),
 		EvaluationMode: config["evaluation_mode"].(string),
 	}
 }
@@ -4956,6 +4965,11 @@ func expandPrivateClusterConfig(configured interface{}) *container.PrivateCluste
 	if len(l) == 0 {
 		return nil
 	}
+	config := l[0].(map[string]interface{})
+	return &container.PrivateClusterConfig{
+		EnablePrivateEndpoint:      config["enable_private_endpoint"].(bool),
+		EnablePrivateNodes:         config["enable_private_nodes"].(bool),
+		MasterIpv4CidrBlock:        config["master_ipv4_cidr_block"].(string),
 	config := l[0].(map[string]interface{})
 	return &container.PrivateClusterConfig{
 		EnablePrivateEndpoint:      config["enable_private_endpoint"].(bool),
@@ -6393,10 +6407,5 @@ func containerClusterEnableK8sBetaApisCustomizeDiffFunc(d tpgresource.TerraformR
 		newAPIsSet := new.(*schema.Set)
 		for _, oldAPI := range oldAPIsSet.List() {
 			if !newAPIsSet.Contains(oldAPI) {
-				return d.ForceNew("enable_k8s_beta_apis.0.enabled_apis")
-			}
-		}
-	}
-
 	return nil
 }
