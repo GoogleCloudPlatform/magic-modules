@@ -6,78 +6,83 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestAccVertexAIFeatureOnlineStore_updated(t *testing.T) {
+func TestAccVertexAIFeatureOnlineStore_vertexAiFeatureonlinestoreWithBigtable_updated(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+		"random_suffix":   acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckVertexAIFeatureOnlineStoreDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVertexAIFeatureOnlineStore_basic(context),
+				Config: testAccVertexAIFeatureOnlineStore_vertexAiFeatureonlinestoreWithBigtable_basic(context),
 			},
 			{
-				ResourceName:            "google_vertex_ai_feature_online_store.feature_online_store",
+				ResourceName:            "google_vertex_ai_feature_online_store.featureonlinestore_bigtable",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "region", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"name", "etag", "region", "force_destroy", "labels", "terraform_labels"},
 			},
 			{
-				Config: testAccVertexAIFeatureOnlineStore_updated(context),
+				Config: testAccVertexAIFeatureOnlineStore_vertexAiFeatureonlinestoreWithBigtableExample_update(context),
 			},
 			{
-				ResourceName:            "google_vertex_ai_feature_online_store.feature_online_store",
+
+				ResourceName:            "google_vertex_ai_feature_online_store.featureonlinestore_bigtable",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "region", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"name", "etag", "region", "force_destroy", "labels", "terraform_labels"},
 			},
 		},
 	})
 }
 
-func testAccVertexAIFeatureOnlineStore_basic(context map[string]interface{}) string {
+func testAccVertexAIFeatureOnlineStore_vertexAiFeatureonlinestoreWithBigtable_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource google_vertex_ai_feature_online_store "feature_online_store" {
-    name = "tf_test_feature_online_store%{random_suffix}"
-    region = "us-central1"
-    labels = {
-        label-one = "value-one"
+##FeatureOnlineStore With BigTable
+resource "google_vertex_ai_feature_online_store" "featureonlinestore_bigtable" {
+  name     = "terraform2%{random_suffix}"
+  labels = {
+    foo = "bar"
+  }
+  region   = "us-central1"
+  bigtable {
+    auto_scaling {
+        min_node_count = 1
+        max_node_count = 3
+        cpu_utilization_target = 50
     }
-
-    bigtable {
-        auto_scaling {
-            min_node_count = 1
-            max_node_count = 2
-            cpu_utilization_target = 60
-        }
-    }
+  }
+  force_destroy = true
 }
 `, context)
 }
 
-func testAccVertexAIFeatureOnlineStore_updated(context map[string]interface{}) string {
+func testAccVertexAIFeatureOnlineStore_vertexAiFeatureonlinestoreWithBigtableExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource google_vertex_ai_feature_online_store "feature_online_store" {
-    name = "tf_test_feature_online_store%{random_suffix}"
-    region = "us-central1"
-    labels = {
-        label-one = "value-one"
-		label-two = "value-two"
+##FeatureOnlineStore With BigTable
+resource "google_vertex_ai_feature_online_store" "featureonlinestore_bigtable" {
+  name     = "terraform2%{random_suffix}"
+  labels = {
+    foo1 = "bar1"
+  }
+  region   = "us-central1"
+  bigtable {
+    auto_scaling {
+        min_node_count = 2
+        max_node_count = 4
+        cpu_utilization_target = 60
     }
-
-    bigtable {
-        auto_scaling {
-            min_node_count = 2
-            max_node_count = 3
-        }
-    }
+  }
+  force_destroy = true
 }
 `, context)
 }
