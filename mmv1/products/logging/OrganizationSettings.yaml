@@ -35,13 +35,12 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "logging_organization_settings_all"
     primary_resource_id: "example"
+    # Covered by update test.
     skip_test: true
     vars:
       key_name: "kms-key"
     test_env_vars:
       org_id: :ORG_TARGET
-    test_vars_overrides:
-      key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'organization'
