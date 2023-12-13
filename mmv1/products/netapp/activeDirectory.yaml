@@ -20,20 +20,20 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://cloud.google.com/netapp/volumes/docs/configure-and-use/active-directory/about-ad'
   api: 'https://cloud.google.com/netapp/volumes/docs/reference/rest/v1/projects.locations.activeDirectories'
 base_url: projects/{{project}}/locations/{{location}}/activeDirectories
-self_link: projects/{{project}}/locations/{{location}}/activeDirectories/{{active_directory_id}}
-create_url: projects/{{project}}/locations/{{location}}/activeDirectories?activeDirectoryId={{active_directory_id}}
+self_link: projects/{{project}}/locations/{{location}}/activeDirectories/{{name}}
+create_url: projects/{{project}}/locations/{{location}}/activeDirectories?activeDirectoryId={{name}}
 create_verb: :POST
-update_url: projects/{{project}}/locations/{{location}}/activeDirectories/{{active_directory_id}}
+update_url: projects/{{project}}/locations/{{location}}/activeDirectories/{{name}}
 update_verb: :PATCH
 update_mask: true
-delete_url: projects/{{project}}/locations/{{location}}/activeDirectories/{{active_directory_id}}
+delete_url: projects/{{project}}/locations/{{location}}/activeDirectories/{{name}}
 delete_verb: :DELETE
 autogen_async: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     base_url: '{{op_id}}'
-id_format: 'projects/{{project}}/locations/{{location}}/activeDirectories/{{active_directory_id}}'
-import_format: ['projects/{{project}}/locations/{{location}}/activeDirectories/{{active_directory_id}}']
+id_format: 'projects/{{project}}/locations/{{location}}/activeDirectories/{{name}}'
+import_format: ['projects/{{project}}/locations/{{location}}/activeDirectories/{{name}}']
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
