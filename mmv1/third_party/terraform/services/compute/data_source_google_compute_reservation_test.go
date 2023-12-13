@@ -1,3 +1,5 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
 package compute_test
 
 import (
@@ -5,74 +7,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
-
-func TestComputeReservationIdParsing(t *testing.T) {
-	cases := map[string]struct {
-		ImportId            string
-		ExpectedError       bool
-		ExpectedCanonicalId string
-		Config              *transport_tpg.Config
-	}{
-		"id is a full self link": {
-			ImportId:            "https://www.googleapis.com/compute/v1/projects/test-project/zones/us-west1-a/reservations/test-reservation",
-			ExpectedError:       false,
-			ExpectedCanonicalId: "projects/test-project/zones/us-west1-a/reservations/test-reservation",
-		},
-		"id is a partial self link": {
-			ImportId:            "projects/test-project/zones/us-west1-a/reservations/test-reservation",
-			ExpectedError:       false,
-			ExpectedCanonicalId: "projects/test-project/zones/us-west1-a/reservations/test-reservation",
-		},
-		"id is project/zone/reservation": {
-			ImportId:            "test-project/us-west1-a/test-reservation",
-			ExpectedError:       false,
-			ExpectedCanonicalId: "projects/test-project/zones/us-west1-a/reservations/test-reservation",
-		},
-		"id is zone/reservation": {
-			ImportId:            "us-west1-a/test-reservation",
-			ExpectedError:       false,
-			ExpectedCanonicalId: "projects/default-project/zones/us-west1-a/reservations/test-reservation",
-			Config:              &transport_tpg.Config{Project: "default-project"},
-		},
-		"id is reservation": {
-			ImportId:            "test-reservation",
-			ExpectedError:       false,
-			ExpectedCanonicalId: "projects/default-project/zones/us-west1-a/reservations/test-reservation",
-			Config:              &transport_tpg.Config{Project: "default-project", Zone: "us-west1-a"},
-		},
-		"id has invalid format": {
-			ImportId:      "i/n/v/a/l/i/d",
-			ExpectedError: true,
-		},
-	}
-
-	for tn, tc := range cases {
-		reservationId, err := compute.ParseComputeReservationId(tc.ImportId, tc.Config)
-
-		if tc.ExpectedError && err == nil {
-			t.Fatalf("bad: %s, expected an error", tn)
-		}
-
-		if err != nil {
-			if tc.ExpectedError {
-				continue
-			}
-			t.Fatalf("bad: %s, err: %#v", tn, err)
-		}
-
-		if reservationId.CanonicalId() != tc.ExpectedCanonicalId {
-			t.Fatalf("bad: %s, expected canonical id to be `%s` but is `%s`", tn, tc.ExpectedCanonicalId, reservationId.CanonicalId())
-		}
-	}
-}
 
 func TestAccDataSourceComputeReservation(t *testing.T) {
 	t.Parallel()
@@ -155,13 +95,8 @@ func testAccCheckDataSourceComputeReservationDestroy(t *testing.T, name string) 
 
 			config := acctest.GoogleProviderConfig(t)
 
-			reservationId, err := compute.ParseComputeReservationId(rs.Primary.ID, nil)
-			if err != nil {
-				return err
-			}
-
-			_, err = config.NewComputeClient(config.UserAgent).Reservations.Get(
-				config.Project, reservationId.Zone, reservationId.Name).Do()
+			_, err := config.NewComputeClient(config.UserAgent).Reservations.Get(
+				config.Project, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"]).Do()
 			if err == nil {
 				return fmt.Errorf("Reservation still exists")
 			}
