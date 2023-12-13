@@ -3031,11 +3031,11 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		if d.HasChange("enable_binary_authorization") {
 			req.Update = &container.ClusterUpdate{
 				DesiredBinaryAuthorization: expandBinaryAuthorization(d.Get("binary_authorization"), d.Get("enable_binary_authorization").(bool)),
-			},
+			}
 		} else {
 			req.Update = &container.ClusterUpdate{
 				DesiredBinaryAuthorization: expandBinaryAuthorization(d.Get("binary_authorization"), false),
-			},
+			}
 		}
 
 		updateF := updateFunc(req, "updating GKE binary authorization")
