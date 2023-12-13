@@ -43,7 +43,7 @@ parameters:
     description: |
       Name of the region for the policy to apply to.
   - !ruby/object:Api::Type::String
-    name: 'active_directory_id'
+    name: 'name'
     description: |
       The resource name of the Active Directory pool. Needs to be unique per location.
     required: true
@@ -64,11 +64,6 @@ examples:
       active_directory_full_name: 'test-active-directory-full'
 properties:
   # Fields go here
-  - !ruby/object:Api::Type::String
-    name: name
-    output: true
-    description: |
-      The resource name of the active directory.
   - !ruby/object:Api::Type::String
     name: 'createTime'
     description: |
