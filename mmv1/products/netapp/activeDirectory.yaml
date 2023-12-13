@@ -130,7 +130,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'password'
     description: |
-      Password for specified username.
+      Password for specified username. Note - Manual changes done to the password will not be detected. Terraform will not re-apply the password, unless you use a new password in Terraform.
     required: true
     sensitive: true
     ignore_read: true
