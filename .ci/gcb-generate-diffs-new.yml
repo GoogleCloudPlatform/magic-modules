@@ -169,17 +169,17 @@ steps:
           - $_PR_NUMBER
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
-      entrypoint: '/workspace/.ci/scripts/go-plus/github-differ/generate_comment.sh'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: diff
       secretEnv: ["GITHUB_TOKEN"]
+      args:
+          - 'generate-comment'
       env:
         - BUILD_ID=$BUILD_ID
         - PROJECT_ID=$PROJECT_ID
         - BUILD_STEP=17
         - COMMIT_SHA=$COMMIT_SHA
         - PR_NUMBER=$_PR_NUMBER
-      args:
-          - $_PR_NUMBER
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
       id: tgc-test
