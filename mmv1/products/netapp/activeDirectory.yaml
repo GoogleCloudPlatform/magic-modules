@@ -117,6 +117,7 @@ properties:
     description: |
       Enables AES-128 and AES-256 encryption for Kerberos-based communication with Active Directory.
     required: false
+    default_value: true
   - !ruby/object:Api::Type::String
     name: 'username'
     description: |
