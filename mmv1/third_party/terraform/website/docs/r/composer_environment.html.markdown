@@ -770,7 +770,7 @@ The `node_config` block supports:
   See the [documentation](https://cloud.google.com/composer/docs/enable-ip-masquerade-agent).
 
 * `composer_internal_ipv4_cidr_block` -
-  (Optional, Cloud Composer 3 only)
+  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
   At least /20 IPv4 cidr range that will be used by Composer internal components.
   Cannot be updated.
 
