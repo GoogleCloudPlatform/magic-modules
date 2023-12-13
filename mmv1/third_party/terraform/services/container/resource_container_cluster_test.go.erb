@@ -4312,16 +4312,17 @@ func TestAccContainerCluster_withFleetConfig(t *testing.T) {
 func TestAccContainerCluster_withWorkloadALTSConfig(t *testing.T) {
 	t.Parallel()
 
+	networkName := "gke-cluster"
+	subnetworkName := "gke-cluster"
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
-	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
+	pid := envvar.GetTestProjectFromEnv()
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withWorkloadALTSConfig(clusterName, networkName, subnetworkName),
+				Config: testAccContainerCluster_withWorkloadALTSConfig(pid, networkName, subnetworkName, clusterName),
 			},
 			{
 				ResourceName:      "google_container_cluster.with_workload_alts_config",
@@ -4332,7 +4333,7 @@ func TestAccContainerCluster_withWorkloadALTSConfig(t *testing.T) {
 					"google_container_cluster.with_workload_alts_config", "workload_alts_config.enable_alts", "true"),
 			},
 			{
-				Config: testAccContainerCluster_withWorkloadALTSConfig_update_false(clusterName, networkName, subnetworkName),
+				Config: testAccContainerCluster_withWorkloadALTSConfig_update(pid, networkName, subnetworkName, clusterName),
 			},
 			{
 				ResourceName:      "google_container_cluster.with_workload_alts_config",
@@ -4341,17 +4342,6 @@ func TestAccContainerCluster_withWorkloadALTSConfig(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 				Check: resource.TestCheckResourceAttr(
 					"google_container_cluster.with_workload_alts_config", "workload_alts_config.enable_alts", "false"),
-			},
-			{
-				Config: testAccContainerCluster_withWorkloadALTSConfig_remove(clusterName, networkName, subnetworkName),
-			},
-			{
-				ResourceName:      "google_container_cluster.with_workload_alts_config",
-				ImportState:       true,
-				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
-				Check: resource.TestCheckNoResourceAttr(
-					"google_container_cluster.with_workload_alts_config", "workload_alts_config.enable_alts"),
 			},
 		},
 	})
@@ -9311,49 +9301,79 @@ resource "google_container_cluster" "without_confidential_boot_disk" {
 <% end -%>
 
 <% unless version == 'ga' -%>
-func testAccContainerCluster_withWorkloadALTSConfig(name, networkName, subnetworkName string) string {
+func testAccContainerCluster_withWorkloadALTSConfig(projectID, name, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
-resource "google_container_cluster" "with_workload_alts_config" {
-	name               = "%s"
-	location           = "us-central1-a"
-	initial_node_count = 1
-	network         = "%s"
-	subnetwork      = "%s"
-	workload_alts_config {
-		enable_alts = true
+	data "google_project" "project" {
+		provider = google-beta
+		project_id = "%s"
 	}
-}
-`, name, networkName, subnetworkName)
+	resource "google_compute_network" "network" {
+		provider                 = google-beta
+		name                     = "%s"
+		auto_create_subnetworks  = false
+		enable_ula_internal_ipv6 = true
+	}
+	resource "google_compute_subnetwork" "subnet" {
+		provider         = google-beta
+		name             = "%s"
+		network          = google_compute_network.network.id
+		ip_cidr_range    = "9.12.22.0/24"
+		region           = "us-central1"
+	}
+	resource "google_container_cluster" "with_workload_alts_config" {
+		provider = google-beta
+		name               = "%s"
+		location           = "us-central1-a"
+		initial_node_count = 1
+		network         = google_compute_network.network.name
+		subnetwork      = google_compute_subnetwork.subnet.name
+		workload_alts_config {
+			enable_alts = true
+		}
+		workload_identity_config {
+			workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
+		}
+		deletion_protection = false
+	}
+`, projectID, networkName, subnetworkName, name)
 }
 <% end -%>
 
 <% unless version == 'ga' -%>
-func testAccContainerCluster_withWorkloadALTSConfig_update_false(name, networkName, subnetworkName string) string {
+func testAccContainerCluster_withWorkloadALTSConfig_update(projectID, networkName, subnetworkName, clusterName string) string {
 	return fmt.Sprintf(`
-resource "google_container_cluster" "with_workload_alts_config" {
-	name               = "%s"
-	location           = "us-central1-a"
-	initial_node_count = 1
-	network         = "%s"
-	subnetwork      = "%s"
-	workload_alts_config {
-		enable_alts = false
+	data "google_project" "project" {
+		provider = google-beta
+		project_id = "%s"
 	}
-}
-`, name, networkName, subnetworkName)
-}
-<% end -%>
-
-<% unless version == 'ga' -%>
-func testAccContainerCluster_withWorkloadALTSConfig_remove(name, networkName, subnetworkName string) string {
-	return fmt.Sprintf(`
-resource "google_container_cluster" "with_workload_alts_config" {
-	name               = "%s"
-	location           = "us-central1-a"
-	initial_node_count = 1
-	network         = "%s"
-	subnetwork      = "%s"
-}
-`, name, networkName, subnetworkName)
+	resource "google_compute_network" "network" {
+		provider                 = google-beta
+		name                     = "%s"
+		auto_create_subnetworks  = false
+		enable_ula_internal_ipv6 = true
+	}
+	resource "google_compute_subnetwork" "subnet" {
+		provider         = google-beta
+		name             = "%s"
+		network          = google_compute_network.network.id
+		ip_cidr_range    = "9.12.22.0/24"
+		region           = "us-central1"
+	}
+	resource "google_container_cluster" "with_workload_alts_config" {
+		provider = google-beta
+		name               = "%s"
+		location           = "us-central1-a"
+		initial_node_count = 1
+		network         = google_compute_network.network.name
+		subnetwork      = google_compute_subnetwork.subnet.name
+		workload_alts_config {
+			enable_alts = false
+		}
+		workload_identity_config {
+			workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
+		}
+		deletion_protection = false
+	}
+	`, projectID, networkName, subnetworkName, clusterName)
 }
 <% end -%>

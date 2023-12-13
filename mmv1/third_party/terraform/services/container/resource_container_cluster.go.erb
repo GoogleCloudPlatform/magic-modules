@@ -2076,15 +2076,15 @@ func ResourceContainerCluster() *schema.Resource {
 				"workload_alts_config": {
 					Type:             schema.TypeList,
 					Optional:         true,
+					Computed:		  true,
 					MaxItems:         1,
 					Description:      `Configuration for direct-path (via ALTS) with workload identity.`,
 					Elem: &schema.Resource{
 							Schema: map[string]*schema.Schema{
 									"enable_alts": {
 											Type:          schema.TypeBool,
-											Optional:      true,
+											Required:      true,
 											Description:   `Whether the alts handshaker should be enabled or not for direct-path. Requires Workload Identity (workloadPool must be non-empty).`,
-											RequiredWith: []string{"workload_identity_config.workload_pool"},
 									},
 							},
 					},
@@ -4200,7 +4200,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 
 		updateF := updateFunc(req, "updating GKE cluster WorkloadALTSConfig")
-		// Call update serially.
 		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
 			return err
 		}
@@ -5409,6 +5408,7 @@ func expandWorkloadAltsConfig(configured interface{}) *container.WorkloadALTSCon
 	config := l[0].(map[string]interface{})
 	return &container.WorkloadALTSConfig{
 		EnableAlts:              config["enable_alts"].(bool),
+		ForceSendFields: []string{"EnableAlts"},
 	}
 }
 <% end -%>
