@@ -198,7 +198,8 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'unixPermissions'
     description: |
-      Unix permission the mount point will be created with. Default is 700. Applicable for UNIX security style volumes only.
+      Unix permission the mount point will be created with. Default is 0700. Applicable for UNIX security style volumes only.
+    default_from_api: true
   - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
