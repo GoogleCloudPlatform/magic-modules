@@ -352,7 +352,7 @@ func ResourceComposerEnvironment() *schema.Resource {
 										Type:             schema.TypeString,
 										Computed:         true,
 										Optional:         true,
-										ForceNew:         false,
+										ForceNew:         true,
 										Description:      `IPv4 cidr range that will be used by Composer internal components.`,
 									},
 								},
