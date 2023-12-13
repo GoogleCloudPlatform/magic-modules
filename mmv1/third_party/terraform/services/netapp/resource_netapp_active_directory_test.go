@@ -43,7 +43,7 @@ func TestAccNetappactiveDirectory_activeDirectory_FullUpdate(t *testing.T) {
 				ResourceName:            "google_netapp_active_directory.test_active_directory_basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "active_directory_id", "pass", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"location", "name", "pass", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccNetappactiveDirectory_activeDirectoryCreateExample_Full(context),
@@ -52,7 +52,7 @@ func TestAccNetappactiveDirectory_activeDirectory_FullUpdate(t *testing.T) {
 				ResourceName:            "google_netapp_active_directory.test_active_directory_full",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "active_directory_id", "pass", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"location", "name", "pass", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccNetappactiveDirectory_activeDirectoryCreateExample_Update(context),
@@ -61,7 +61,7 @@ func TestAccNetappactiveDirectory_activeDirectory_FullUpdate(t *testing.T) {
 				ResourceName:            "google_netapp_active_directory.test_active_directory_full",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "active_directory_id", "pass", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"location", "name", "pass", "labels", "terraform_labels"},
 			},
 		},
 	})
@@ -70,13 +70,13 @@ func TestAccNetappactiveDirectory_activeDirectory_FullUpdate(t *testing.T) {
 func testAccNetappactiveDirectory_activeDirectoryCreateExample_Basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_netapp_active_directory" "test_active_directory_basic" {
-    active_directory_id = "tf-test-test-active-directory-basic%{random_suffix}"
-	location = "us-central1"
-	domain = "ad.internal"
-	dns = "172.30.64.3"
-	net_bios_prefix = "smbserver"
-	username = "user"
-	password = "pass"
+    name = "tf-test-test-active-directory-basic%{random_suffix}"
+    location = "us-central1"
+    domain = "ad.internal"
+    dns = "172.30.64.3"
+    net_bios_prefix = "smbserver"
+    username = "user"
+    password = "pass"
   }
 `, context)
 }
@@ -84,7 +84,7 @@ resource "google_netapp_active_directory" "test_active_directory_basic" {
 func testAccNetappactiveDirectory_activeDirectoryCreateExample_Full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_netapp_active_directory" "test_active_directory_full" {
-    active_directory_id = "tf-test-test-active-directory-full%{random_suffix}"
+    name = "tf-test-test-active-directory-full%{random_suffix}"
     location = "us-central1"
     domain = "ad.internal"
     dns = "172.30.64.3"
@@ -92,7 +92,7 @@ resource "google_netapp_active_directory" "test_active_directory_full" {
     username = "user"
     password = "pass"
     aes_encryption         = false
-    backup_operators       = "administrator,cvs-svc,nfsuser"
+    backup_operators       = ["test1", "test2"]
     description            = "ActiveDirectory is the public representation of the active directory config."
     encrypt_dc_connections = false
     kdc_hostname           = "hostname"
@@ -105,7 +105,7 @@ resource "google_netapp_active_directory" "test_active_directory_full" {
     ldap_signing           = false
     nfs_users_with_ldap    = false
     organizational_unit    = "CN=Computers"
-    security_operators     = "administrator,cvs-svc,nfsuser"
+    security_operators     = ["test1", "test2"]
     site                   = "test-site"
   }
 `, context)
@@ -114,7 +114,7 @@ resource "google_netapp_active_directory" "test_active_directory_full" {
 func testAccNetappactiveDirectory_activeDirectoryCreateExample_Update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_netapp_active_directory" "test_active_directory_full" {
-    active_directory_id = "tf-test-test-active-directory-full%{random_suffix}"
+    name = "tf-test-test-active-directory-full%{random_suffix}"
     location = "us-central1"
     domain = "ad.internal"
     dns = "172.30.64.3"
@@ -122,7 +122,7 @@ resource "google_netapp_active_directory" "test_active_directory_full" {
     username = "user"
     password = "pass"
     aes_encryption         = false
-    backup_operators       = "administrator,cvs-svc,nfsuser"
+    backup_operators       = ["test1", "test2"]
     description            = "ActiveDirectory is the public representation of the active directory config."
     encrypt_dc_connections = false
     kdc_hostname           = "hostname"
@@ -135,7 +135,7 @@ resource "google_netapp_active_directory" "test_active_directory_full" {
     ldap_signing           = true
     nfs_users_with_ldap    = true
     organizational_unit    = "CN=Computers"
-    security_operators     = "administrator,cvs-svc,nfsuser"
+    security_operators     = ["test1", "test2"]
     site                   = "test-site"
   }
 `, context)
