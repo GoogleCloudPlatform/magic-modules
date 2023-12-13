@@ -42,5 +42,3 @@ The following arguments are supported:
 ## Attributes Reference
 
 See [google_compute_reservation](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_reservation) resource for details of the available attributes.
-
-
