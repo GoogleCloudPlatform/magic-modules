@@ -3026,7 +3026,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s's master global access config has been updated to %v", d.Id(), config)
 	}
 
-        if d.HasChange("binary_authorization") || d.HasChange("enable_binary_authorization") {
+  if d.HasChange("binary_authorization") || d.HasChange("enable_binary_authorization") {
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
 				DesiredBinaryAuthorization: expandBinaryAuthorization(d.Get("binary_authorization"), d.Get("enable_binary_authorization").(bool)),
@@ -4837,7 +4837,7 @@ func expandBinaryAuthorization(configured interface{}, legacy_enabled bool) *con
 	}
 	config := l[0].(map[string]interface{})
 	return &container.BinaryAuthorization{
-                Enabled:        config["enabled"].(bool),
+    Enabled:        config["enabled"].(bool),
 		EvaluationMode: config["evaluation_mode"].(string),
 	}
 }
