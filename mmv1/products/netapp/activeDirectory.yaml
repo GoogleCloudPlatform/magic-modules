@@ -129,16 +129,18 @@ properties:
     required: true
     sensitive: true
     ignore_read: true
-  - !ruby/object:Api::Type::String
+  - !ruby/object:Api::Type::Array
     name: 'backupOperators'
     description: |
       Domain user/group accounts to be added to the Backup Operators group of the SMB service. The Backup Operators group allows members to backup and restore files regardless of whether they have read or write access to the files. Comma-separated list.
     required: false
-  - !ruby/object:Api::Type::String
+    item_type: Api::Type::String
+  - !ruby/object:Api::Type::Array
     name: 'securityOperators'
     description: |
       Domain accounts that require elevated privileges such as `SeSecurityPrivilege` to manage security logs. Comma-separated list.
     required: false
+    item_type: Api::Type::String
   - !ruby/object:Api::Type::String
     name: 'kdcHostname'
     description: |
