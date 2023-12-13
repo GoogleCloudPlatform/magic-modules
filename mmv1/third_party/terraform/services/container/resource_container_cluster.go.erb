@@ -3026,7 +3026,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s's master global access config has been updated to %v", d.Id(), config)
 	}
 
-	if d.HasChange("binary_authorization") {
+	if d.HasChange("binary_authorization") || d.HasChange("enable_binary_authorization") {
 		req := &container.UpdateClusterRequest{}
 		if d.HasChange("enable_binary_authorization") {
 			req.Update = &container.ClusterUpdate{
