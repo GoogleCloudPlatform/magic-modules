@@ -1,3 +1,18 @@
+/*
+* Copyright 2023 Google LLC. All Rights Reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+ */
 package cmd
 
 import (
@@ -124,7 +139,9 @@ func execGenerateComment(buildID, projectID, buildStep, commit, prNumber, github
 				os.Exit(1)
 			}
 		}
-		diffs += "\n" + repoDiffs
+		if repoDiffs != "" {
+			diffs += "\n" + repoDiffs
+		}
 	}
 
 	var showBreakingChangesFailed bool
@@ -156,7 +173,7 @@ func execGenerateComment(buildID, projectID, buildStep, commit, prNumber, github
 			fmt.Println("Error computing TPG breaking changes: ", err)
 			showBreakingChangesFailed = true
 		}
-		versionedBreakingChanges[repo.Version] = output
+		versionedBreakingChanges[repo.Version] = strings.TrimSuffix(output, "\n")
 		err = addLabels(diffProcessorPath, githubToken, prNumber, r)
 		if err != nil {
 			fmt.Println("Error adding TPG labels to PR: ", err)
@@ -209,7 +226,7 @@ The breaking change detector crashed during execution. This is usually due to th
 	if diffs == "" {
 		message += "## Diff report\nYour PR hasn't generated any diffs, but I'll let you know if a future commit does."
 	} else {
-		message += "## Diff report\nYour PR generated some diffs in downstreams - here they are.\n" + diffs
+		message += "## Diff report\nYour PR generated some diffs in downstreams - here they are.\n" + diffs + "\n"
 		if missingTests != "" {
 			message += "\n" + missingTests + "\n"
 		}
@@ -344,14 +361,14 @@ func combineBreakingChanges(tpgBreaking, tpgbBreaking string) string {
 		allMessages = append(tpgUnique, tpgbMessages...)
 	}
 	if len(allMessages) > 0 {
-		return `Breaking Change(s) Detected
+		return `## Breaking Change(s) Detected
 The following breaking change(s) were detected within your pull request.
 
 * ` + strings.Join(allMessages, "\n* ") + `
 
 If you believe this detection to be incorrect please raise the concern with your reviewer.
 If you intend to make this change you will need to wait for a [major release](https://www.terraform.io/plugin/sdkv2/best-practices/versioning#example-major-number-increments) window.
-An ` + "`override-breaking-change`" + `label can be added to allow merging.
+An ` + "`override-breaking-change`" + ` label can be added to allow merging.
 `
 	}
 	return ""
