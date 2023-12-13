@@ -13,7 +13,7 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/caiasset"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/caiasset"
 )
 
 var (

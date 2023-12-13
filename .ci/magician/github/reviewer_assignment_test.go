@@ -9,7 +9,7 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-func TestChooseReviewers(t *testing.T) {
+func TestChooseCoreReviewers(t *testing.T) {
 	cases := map[string]struct {
 		FirstRequestedReviewer                           string
 		PreviouslyInvolvedReviewers                      []string
@@ -57,7 +57,7 @@ func TestChooseReviewers(t *testing.T) {
 		tc := tc
 		t.Run(tn, func(t *testing.T) {
 			t.Parallel()
-			reviewers, primaryReviewer := ChooseReviewers(tc.FirstRequestedReviewer, tc.PreviouslyInvolvedReviewers)
+			reviewers, primaryReviewer := ChooseCoreReviewers(tc.FirstRequestedReviewer, tc.PreviouslyInvolvedReviewers)
 			if tc.ExpectPrimaryReviewer && primaryReviewer == "" {
 				t.Error("wanted primary reviewer to be returned; got none")
 			}

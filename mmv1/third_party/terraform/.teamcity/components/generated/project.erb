@@ -64,7 +64,7 @@ fun Google<%= version.capitalize unless version == 'ga' -%>(environment: String,
             param("BRANCH_NAME", branchRef)
 <% unless version == 'ga' -%>
             // Skip the sweeper for project resources in the Beta tests only
-            param("env.SKIP_PROJECT_SWEEPER", 1)
+            param("env.SKIP_PROJECT_SWEEPER", "1")
 <% end -%>
             // Not used, but making `environment` a param makes the value visible to non-admins in TeamCity
             param("ENVIRONMENT", environment)
