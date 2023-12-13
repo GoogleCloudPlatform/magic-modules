@@ -4,7 +4,6 @@ package compute_test
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -27,7 +26,7 @@ func TestAccDataSourceComputeReservation(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckDataSourceComputeReservationDestroy(t, rsFullName),
+		CheckDestroy:             testAccCheckComputeReservationDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceComputeReservationConfig(reservationName, rsName, dsName),
@@ -76,30 +75,6 @@ func testAccDataSourceComputeReservationCheck(t *testing.T, data_source_name str
 
 		if ds_attr["status"] != "READY" {
 			return fmt.Errorf("status is %s; want READY", ds_attr["status"])
-		}
-
-		return nil
-	}
-}
-
-func testAccCheckDataSourceComputeReservationDestroy(t *testing.T, name string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		for _, rs := range s.RootModule().Resources {
-			if rs.Type != "google_compute_reservation" {
-				continue
-			}
-
-			if strings.HasPrefix(name, "data.") {
-				continue
-			}
-
-			config := acctest.GoogleProviderConfig(t)
-
-			_, err := config.NewComputeClient(config.UserAgent).Reservations.Get(
-				config.Project, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"]).Do()
-			if err == nil {
-				return fmt.Errorf("Reservation still exists")
-			}
 		}
 
 		return nil
