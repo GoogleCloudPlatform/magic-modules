@@ -154,3 +154,4 @@
 '.teamcity/Makefile': 'third_party/terraform/.teamcity/Makefile'
 'version/version.go': 'third_party/terraform/version/version.go'
 'go.sum': 'third_party/terraform/go.sum'
+'.go-version': 'third_party/terraform/.go-version'
