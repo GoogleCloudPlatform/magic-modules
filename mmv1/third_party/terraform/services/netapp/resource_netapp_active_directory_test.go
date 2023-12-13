@@ -98,9 +98,7 @@ resource "google_netapp_active_directory" "test_active_directory_full" {
     kdc_hostname           = "hostname"
     kdc_ip                 = "10.10.0.11"
     labels                 = { 
-        "name": "wrench", 
-        "mass": "1.3kg", 
-        "count": "3" 
+        "foo": "bar"
     }
     ldap_signing           = false
     nfs_users_with_ldap    = false
@@ -128,9 +126,7 @@ resource "google_netapp_active_directory" "test_active_directory_full" {
     kdc_hostname           = "hostname"
     kdc_ip                 = "10.10.0.11"
     labels                 = { 
-        "name": "wrench", 
-        "mass": "1.3kg", 
-        "count": "3" 
+        "foo": "bar"
     }
     ldap_signing           = true
     nfs_users_with_ldap    = true
