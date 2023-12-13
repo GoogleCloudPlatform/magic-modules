@@ -97,7 +97,7 @@ properties:
     description: |
       The connection information through which to interact with a blockchain node.
     properties:
-      - !ruby/object:Api::Type::KeyValuePairs
+      - !ruby/object:Api::Type::NestedObject
         name: endpointInfo
         output: true
         description: |
@@ -132,7 +132,7 @@ properties:
               - :ARCHIVE
             description: |
               Blockchain garbage collection mode.
-      - !ruby/object:Api::Type::KeyValuePairs
+      - !ruby/object:Api::Type::NestedObject
         name: additionalEndpoints
         description: |
           User-provided key-value pairs
