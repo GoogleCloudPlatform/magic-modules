@@ -116,7 +116,7 @@ resource "google_netapp_active_directory" "test_active_directory_full" {
     location = "us-central1"
     domain = "ad.internal"
     dns = "172.30.64.3"
-    net_bios_prefix = "smbupdated"
+    net_bios_prefix = "smbup"
     username = "user"
     password = "pass"
     aes_encryption         = false
