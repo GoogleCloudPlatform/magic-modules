@@ -53,7 +53,6 @@ func testAccVertexAIFeatureGroup_basic(context map[string]interface{}) string {
   }
   big_query {
     big_query_source {
-        # The source table must have a column named 'feature_timestamp' of type TIMESTAMP.
         input_uri = "bq://${google_bigquery_table.sample_table.project}.${google_bigquery_table.sample_table.dataset_id}.${google_bigquery_table.sample_table.table_id}"
     }
     entity_id_columns = ["feature_id"]

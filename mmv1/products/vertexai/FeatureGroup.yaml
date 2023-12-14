@@ -20,7 +20,9 @@ update_verb: :PATCH
 update_mask: true
 create_verb: :POST
 references: !ruby/object:Api::Resource::ReferenceLinks
-  api: https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featureGroups
+  guides: 
+    'Creating a Feature Group': 'https://cloud.google.com/vertex-ai/docs/featurestore/latest/create-featuregroup'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featureGroups'
 async: !ruby/object:Api::OpAsync
   actions:
     - create
