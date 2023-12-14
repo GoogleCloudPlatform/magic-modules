@@ -2076,7 +2076,7 @@ func ResourceContainerCluster() *schema.Resource {
 				"workload_alts_config": {
 					Type:             schema.TypeList,
 					Optional:         true,
-					Computed:		  true,
+					Computed:         true,
 					MaxItems:         1,
 					Description:      `Configuration for direct-path (via ALTS) with workload identity.`,
 					Elem: &schema.Resource{
