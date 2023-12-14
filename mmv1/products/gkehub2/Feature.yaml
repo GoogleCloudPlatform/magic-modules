@@ -215,6 +215,9 @@ properties:
         name: configmanagement
         description: Config Management spec
         properties:
+          - !ruby/object:Api::Type::String
+            name: version
+            description: 'Version of ACM installed'
           - !ruby/object:Api::Type::NestedObject
             name: configSync
             description: 'ConfigSync configuration for the cluster'
@@ -274,6 +277,7 @@ properties:
                   - !ruby/object:Api::Type::String
                     name: version
                     description: 'Version of ACM installed'
+                    deprecation_message: The configmanagement.config_sync.oci.version field is deprecated and will be removed in a future major release. Please use configmanagement.version field to specify the version of ACM installed instead.
       - !ruby/object:Api::Type::NestedObject
         name: policycontroller
         description: Policy Controller spec
