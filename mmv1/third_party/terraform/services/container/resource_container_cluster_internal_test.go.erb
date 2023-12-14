@@ -188,3 +188,57 @@ func TestContainerClusterEnableK8sBetaApisCustomizeDiff(t *testing.T) {
 		}
 	}
 }
+
+func TestContainerCluster_NodeVersionCustomizeDiff(t* testing.T) {
+	t.Parallel()
+
+	cases := map[string]struct{
+		MasterVersion  string
+		NodeVersion  string
+		ExpectError  bool
+	}{
+		"Master version and node version are exactly the same" : {
+			MasterVersion : "1.10.9-gke.5",
+			NodeVersion : "1.10.9-gke.5",
+			ExpectError : false,
+		},
+		"Master version and node version have the same Kubernetes patch version but not the same gke-N suffix, should not throw an error " : {
+			MasterVersion : "1.10.9-gke.5",
+			NodeVersion : "1.10.9-gke.9",
+			ExpectError : false,
+		},
+		"Master version and node version have different minor versions" :{
+			MasterVersion : "1.10.9-gke.5",
+			NodeVersion : "1.11.6-gke.11",
+			ExpectError : true,
+		},
+		"Master version and node version have different Kubernetes Patch Versions" :{
+			MasterVersion : "1.10.9-gke.5",
+			NodeVersion : "1.10.6-gke.11",
+			ExpectError : true,
+		},
+	}
+
+	for tn,tc := range cases {
+		d := &tpgresource.ResourceDiffMock{
+			Before: map[string]interface{}{
+				"name" : "",
+				"min_master_version": "",
+				"node_version": "",
+			},
+			After: map[string]interface{}{
+				"name" : "test",
+				"min_master_version": tc.MasterVersion,
+				"node_version": tc.NodeVersion,
+			},
+		}
+		err := containerClusterNodeVersionCustomizeDiffFunc(d)
+
+		if tc.ExpectError && err == nil {
+			t.Errorf("%s failed, expected error but was none", tn)
+		}
+		if !tc.ExpectError && err != nil {
+			t.Errorf("%s failed, found unexpected error: %s", tn, err)
+		}
+	}
+}
