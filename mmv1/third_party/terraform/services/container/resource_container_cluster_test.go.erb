@@ -4321,7 +4321,7 @@ func TestAccContainerCluster_withWorkloadALTSConfig(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withWorkloadALTSConfig(pid, networkName, subnetworkName, clusterName),
+				Config: testAccContainerCluster_withWorkloadALTSConfig(pid, networkName, subnetworkName, clusterName, true),
 			},
 			{
 				ResourceName:      "google_container_cluster.with_workload_alts_config",
@@ -4332,7 +4332,7 @@ func TestAccContainerCluster_withWorkloadALTSConfig(t *testing.T) {
 					"google_container_cluster.with_workload_alts_config", "workload_alts_config.enable_alts", "true"),
 			},
 			{
-				Config: testAccContainerCluster_withWorkloadALTSConfig_update(pid, networkName, subnetworkName, clusterName),
+				Config: testAccContainerCluster_withWorkloadALTSConfig(pid, networkName, subnetworkName, clusterName, false),
 			},
 			{
 				ResourceName:      "google_container_cluster.with_workload_alts_config",
@@ -9301,7 +9301,7 @@ resource "google_container_cluster" "without_confidential_boot_disk" {
 <% end -%>
 
 <% unless version == 'ga' -%>
-func testAccContainerCluster_withWorkloadALTSConfig(projectID, name, networkName, subnetworkName string) string {
+func testAccContainerCluster_withWorkloadALTSConfig(projectID, name, networkName, subnetworkName string, enable bool) string {
 	return fmt.Sprintf(`
 	data "google_project" "project" {
 		provider = google-beta
@@ -9328,52 +9328,13 @@ func testAccContainerCluster_withWorkloadALTSConfig(projectID, name, networkName
 		network         = google_compute_network.network.name
 		subnetwork      = google_compute_subnetwork.subnet.name
 		workload_alts_config {
-			enable_alts = true
+			enable_alts = %v
 		}
 		workload_identity_config {
 			workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
 		}
 		deletion_protection = false
 	}
-`, projectID, networkName, subnetworkName, name)
-}
-<% end -%>
-
-<% unless version == 'ga' -%>
-func testAccContainerCluster_withWorkloadALTSConfig_update(projectID, networkName, subnetworkName, clusterName string) string {
-	return fmt.Sprintf(`
-	data "google_project" "project" {
-		provider = google-beta
-		project_id = "%s"
-	}
-	resource "google_compute_network" "network" {
-		provider                 = google-beta
-		name                     = "%s"
-		auto_create_subnetworks  = false
-		enable_ula_internal_ipv6 = true
-	}
-	resource "google_compute_subnetwork" "subnet" {
-		provider         = google-beta
-		name             = "%s"
-		network          = google_compute_network.network.id
-		ip_cidr_range    = "9.12.22.0/24"
-		region           = "us-central1"
-	}
-	resource "google_container_cluster" "with_workload_alts_config" {
-		provider = google-beta
-		name               = "%s"
-		location           = "us-central1-a"
-		initial_node_count = 1
-		network         = google_compute_network.network.name
-		subnetwork      = google_compute_subnetwork.subnet.name
-		workload_alts_config {
-			enable_alts = false
-		}
-		workload_identity_config {
-			workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
-		}
-		deletion_protection = false
-	}
-	`, projectID, networkName, subnetworkName, clusterName)
+`, projectID, networkName, subnetworkName, name, enable)
 }
 <% end -%>
