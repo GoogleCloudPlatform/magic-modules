@@ -4311,8 +4311,8 @@ func TestAccContainerCluster_withFleetConfig(t *testing.T) {
 func TestAccContainerCluster_withWorkloadALTSConfig(t *testing.T) {
 	t.Parallel()
 
-	networkName := "gke-cluster"
-	subnetworkName := "gke-cluster"
+	networkName := "gke-cluster-alts"
+	subnetworkName := "gke-cluster-alts"
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	pid := envvar.GetTestProjectFromEnv()
 	acctest.VcrTest(t, resource.TestCase{
