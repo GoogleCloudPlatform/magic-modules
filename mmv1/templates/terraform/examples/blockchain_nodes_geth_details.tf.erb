@@ -12,7 +12,8 @@ resource "google_blockchain_node_engine_blockchain_nodes" "<%= ctx[:primary_reso
     geth_details {
       garbage_collection_mode = "FULL"
     }
- },
+  }
+  
   labels = {
     environment = "dev"
   }
