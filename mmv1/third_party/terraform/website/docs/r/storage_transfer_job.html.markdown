@@ -112,6 +112,8 @@ resource "google_storage_transfer_job" "s3-bucket-nightly-backup" {
 
 The following arguments are supported:
 
+* `name` - (Optional) The name of the Transfer Job. If unspecified, the provider will assign a random unique name with `transferJobs/{{name}}` format, where `name` is a numeric value.
+
 * `description` - (Required) Unique description to identify the Transfer Job.
 
 * `transfer_spec` - (Required) Transfer specification. Structure [documented below](#nested_transfer_spec).
