@@ -215,9 +215,6 @@ properties:
         name: configmanagement
         description: Config Management spec
         properties:
-          - !ruby/object:Api::Type::String
-            name: version
-            description: 'Version of ACM installed'
           - !ruby/object:Api::Type::NestedObject
             name: configSync
             description: 'ConfigSync configuration for the cluster'
@@ -274,6 +271,9 @@ properties:
                   - !ruby/object:Api::Type::String
                     name: syncWaitSecs
                     description: 'Period in seconds between consecutive syncs. Default: 15'
+                  - !ruby/object:Api::Type::String
+                    name: version
+                    description: 'Version of ACM installed'
       - !ruby/object:Api::Type::NestedObject
         name: policycontroller
         description: Policy Controller spec
