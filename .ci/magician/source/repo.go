@@ -48,8 +48,10 @@ func (gc Controller) Clone(repo *Repo) error {
 	} else {
 		_, err = gc.rnr.Run("git", []string{"clone", "-b", repo.Branch, url, repo.Path}, nil)
 	}
-	if strings.Contains(err.Error(), "already exists and is not an empty directory") {
-		return nil
+	if err != nil {
+		if strings.Contains(err.Error(), "already exists and is not an empty directory") {
+			return nil
+		}
 	}
 	return err
 }

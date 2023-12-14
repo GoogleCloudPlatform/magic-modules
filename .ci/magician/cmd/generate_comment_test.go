@@ -27,7 +27,25 @@ func TestExecGenerateComment(t *testing.T) {
 		calledMethods: make(map[string][][]any),
 	}
 	ctlr := source.NewController("/mock/dir/go", "modular-magician", "*******", mr)
-	execGenerateComment("build1", "project1", "17", "sha1", "pr1", "*******", gh, mr, ctlr)
+	env := map[string]string{
+		"BUILD_ID":     "build1",
+		"BUILD_STEP":   "17",
+		"COMMIT_SHA":   "sha1",
+		"GITHUB_TOKEN": "*******",
+		"PR_NUMBER":    "pr1",
+		"PROJECT_ID":   "project1",
+	}
+	diffProcessorEnv := map[string]string{
+		"BUILD_ID":     "build1",
+		"BUILD_STEP":   "17",
+		"COMMIT_SHA":   "sha1",
+		"GITHUB_TOKEN": "*******",
+		"NEW_REF":      "auto-pr-pr1",
+		"OLD_REF":      "auto-pr-pr1-old",
+		"PR_NUMBER":    "pr1",
+		"PROJECT_ID":   "project1",
+	}
+	execGenerateComment(env, gh, mr, ctlr)
 
 	for method, expectedCalls := range map[string][]ParameterList{
 		"Copy": {
@@ -58,12 +76,12 @@ func TestExecGenerateComment(t *testing.T) {
 			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-pr1", "https://modular-magician:*******@github.com/modular-magician/docs-examples", "/mock/dir/tfoics"}, map[string]string(nil)},
 			{"/mock/dir/tfoics", "git", []string{"fetch", "origin", "auto-pr-pr1-old"}, map[string]string(nil)},
 			{"/mock/dir/tfoics", "git", []string{"diff", "origin/auto-pr-pr1-old", "origin/auto-pr-pr1", "--shortstat"}, map[string]string(nil)},
-			{"/mock/dir/magic-modules/tools/diff-processor", "make", []string{"build"}, map[string]string{"OLD_REF": "auto-pr-pr1-old", "NEW_REF": "auto-pr-pr1"}},
+			{"/mock/dir/magic-modules/tools/diff-processor", "make", []string{"build"}, diffProcessorEnv},
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"breaking-changes"}, map[string]string(nil)},
-			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"add-labels", "pr1"}, map[string]string{"GITHUB_TOKEN": "*******"}},
-			{"/mock/dir/magic-modules/tools/diff-processor", "make", []string{"build"}, map[string]string{"OLD_REF": "auto-pr-pr1-old", "NEW_REF": "auto-pr-pr1"}},
+			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"add-labels", "pr1"}, diffProcessorEnv},
+			{"/mock/dir/magic-modules/tools/diff-processor", "make", []string{"build"}, diffProcessorEnv},
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"breaking-changes"}, map[string]string(nil)},
-			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"add-labels", "pr1"}, map[string]string{"GITHUB_TOKEN": "*******"}},
+			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"add-labels", "pr1"}, diffProcessorEnv},
 			{"/mock/dir/tpgbold", "git", []string{"checkout", "origin/auto-pr-pr1-old"}, map[string]string(nil)},
 			{"/mock/dir/tpgbold", "find", []string{".", "-type", "f", "-name", "*.go", "-exec", "sed", "-i.bak", "s~github.com/hashicorp/terraform-provider-google-beta~google/provider/old~g", "{}", "+"}, map[string]string(nil)},
 			{"/mock/dir/tpgbold", "sed", []string{"-i.bak", "s|github.com/hashicorp/terraform-provider-google-beta|google/provider/old|g", "go.mod"}, map[string]string(nil)},

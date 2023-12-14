@@ -147,9 +147,8 @@ func execGenerateComment(env map[string]string, gh GithubClient, rnr ExecRunner,
 	// versionedBreakingChanges is a map of breaking change output by provider version.
 	versionedBreakingChanges := make(map[provider.Version]string, 2)
 
-	diffProcessorEnv := env
-	diffProcessorEnv["OLD_REF"] = oldBranch
-	diffProcessorEnv["NEW_REF"] = newBranch
+	env["OLD_REF"] = oldBranch
+	env["NEW_REF"] = newBranch
 	for _, repo := range []struct {
 		Title   string
 		Path    string
@@ -167,7 +166,7 @@ func execGenerateComment(env map[string]string, gh GithubClient, rnr ExecRunner,
 		},
 	} {
 		// TPG(B) diff processor
-		err = buildDiffProcessor(diffProcessorPath, repo.Path, diffProcessorEnv, rnr)
+		err = buildDiffProcessor(diffProcessorPath, repo.Path, env, rnr)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
