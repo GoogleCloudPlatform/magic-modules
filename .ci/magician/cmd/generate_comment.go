@@ -31,18 +31,25 @@ import (
 
 const allowBreakingChangesLabel = "override-breaking-change"
 
+var gcEnvironmentVariables = [...]string{
+	"BUILD_ID",
+	"BUILD_STEP",
+	"COMMIT_SHA",
+	"GITHUB_TOKEN",
+	"GOPATH",
+	"HOME",
+	"PATH",
+	"PR_NUMBER",
+	"PROJECT_ID",
+}
+
 var generateCommentCmd = &cobra.Command{
 	Use:   "generate-comment",
 	Short: "Run presubmit generate comment",
 	Long: `This command processes pull requests and performs various validations and actions based on the PR's metadata and author.
 
 	The following PR details are expected as environment variables:
-	1. BUILD_ID
-	2. PROJECT_ID
-	3. BUILD_STEP
-	4. COMMIT_SHA
-	5. PR_NUMBER
-	6. GITHUB_TOKEN
+` + listGCEnvironmentVariables() + `
 
 	The command performs the following steps:
 	1. Clone the tpg, tpgb, tfc, and tfoics repos from modular-magician.
@@ -53,25 +60,14 @@ var generateCommentCmd = &cobra.Command{
 	6. Run unit tests for the missing test detector.
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		buildID := os.Getenv("BUILD_ID")
-		fmt.Println("Build ID: ", buildID)
-
-		projectID := os.Getenv("PROJECT_ID")
-		fmt.Println("Project ID: ", projectID)
-
-		buildStep := os.Getenv("BUILD_STEP")
-		fmt.Println("Build Step: ", buildStep)
-
-		commit := os.Getenv("COMMIT_SHA")
-		fmt.Println("Commit SHA: ", commit)
-
-		prNumber := os.Getenv("PR_NUMBER")
-		fmt.Println("PR Number: ", prNumber)
-
-		githubToken, ok := os.LookupEnv("GITHUB_TOKEN")
-		if !ok {
-			fmt.Println("Did not provide GITHUB_TOKEN environment variable")
-			os.Exit(1)
+		env := make(map[string]string, len(gcEnvironmentVariables))
+		for _, ev := range gcEnvironmentVariables {
+			val, ok := os.LookupEnv(ev)
+			if !ok {
+				fmt.Printf("Did not provide %s environment variable\n", ev)
+				os.Exit(1)
+			}
+			env[ev] = val
 		}
 
 		gh := github.NewClient()
@@ -80,14 +76,22 @@ var generateCommentCmd = &cobra.Command{
 			fmt.Println("Error creating a runner: ", err)
 			os.Exit(1)
 		}
-		ctlr := source.NewController(filepath.Join("workspace", "go"), "modular-magician", githubToken, rnr)
-		execGenerateComment(buildID, projectID, buildStep, commit, prNumber, githubToken, gh, rnr, ctlr)
+		ctlr := source.NewController(filepath.Join("workspace", "go"), "modular-magician", env["GITHUB_TOKEN"], rnr)
+		execGenerateComment(env, gh, rnr, ctlr)
 	},
 }
 
-func execGenerateComment(buildID, projectID, buildStep, commit, prNumber, githubToken string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller) {
-	newBranch := "auto-pr-" + prNumber
-	oldBranch := "auto-pr-" + prNumber + "-old"
+func listGCEnvironmentVariables() string {
+	var result string
+	for i, ev := range gcEnvironmentVariables {
+		result += fmt.Sprintf("\t%2d. %s\n", i+1, ev)
+	}
+	return result
+}
+
+func execGenerateComment(env map[string]string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller) {
+	newBranch := "auto-pr-" + env["PR_NUMBER"]
+	oldBranch := "auto-pr-" + env["PR_NUMBER"] + "-old"
 	wd := rnr.GetCWD()
 	mmLocalPath := filepath.Join(wd, "..", "..")
 	tpgRepoName := "terraform-provider-google"
@@ -143,6 +147,9 @@ func execGenerateComment(buildID, projectID, buildStep, commit, prNumber, github
 	// versionedBreakingChanges is a map of breaking change output by provider version.
 	versionedBreakingChanges := make(map[provider.Version]string, 2)
 
+	diffProcessorEnv := env
+	diffProcessorEnv["OLD_REF"] = oldBranch
+	diffProcessorEnv["NEW_REF"] = newBranch
 	for _, repo := range []struct {
 		Title   string
 		Path    string
@@ -159,8 +166,8 @@ func execGenerateComment(buildID, projectID, buildStep, commit, prNumber, github
 			Version: provider.Beta,
 		},
 	} {
-		// TPG diff processor
-		err = buildDiffProcessor(diffProcessorPath, repo.Path, oldBranch, newBranch, rnr)
+		// TPG(B) diff processor
+		err = buildDiffProcessor(diffProcessorPath, repo.Path, diffProcessorEnv, rnr)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -171,7 +178,7 @@ func execGenerateComment(buildID, projectID, buildStep, commit, prNumber, github
 			showBreakingChangesFailed = true
 		}
 		versionedBreakingChanges[repo.Version] = strings.TrimSuffix(output, "\n")
-		err = addLabels(diffProcessorPath, githubToken, prNumber, rnr)
+		err = addLabels(diffProcessorPath, env, rnr)
 		if err != nil {
 			fmt.Println("Error adding TPG labels to PR: ", err)
 		}
@@ -202,7 +209,7 @@ The breaking change detector crashed during execution. This is usually due to th
 	if breakingChanges != "" {
 		message += breakingChanges + "\n\n"
 
-		pullRequest, err := gh.GetPullRequest(prNumber)
+		pullRequest, err := gh.GetPullRequest(env["PR_NUMBER"])
 		if err != nil {
 			fmt.Printf("Error getting pull request: %v\n", err)
 			os.Exit(1)
@@ -229,13 +236,13 @@ The breaking change detector crashed during execution. This is usually due to th
 		}
 	}
 
-	if err := gh.PostComment(prNumber, message); err != nil {
-		fmt.Printf("Error posting comment to PR %s: %v\n", prNumber, err)
+	if err := gh.PostComment(env["PR_NUMBER"], message); err != nil {
+		fmt.Printf("Error posting comment to PR %s: %v\n", env["PR_NUMBER"], err)
 	}
 
-	targetURL := fmt.Sprintf("https://console.cloud.google.com/cloud-build/builds;region=global/%s;step=%s?project=%s", buildID, buildStep, projectID)
-	if err := gh.PostBuildStatus(prNumber, "terraform-provider-breaking-change-test", breakingState, targetURL, commit); err != nil {
-		fmt.Printf("Error posting build status for pr %s commit %s: %v\n", prNumber, commit, err)
+	targetURL := fmt.Sprintf("https://console.cloud.google.com/cloud-build/builds;region=global/%s;step=%s?project=%s", env["BUILD_ID"], env["BUILD_STEP"], env["PROJECT_ID"])
+	if err := gh.PostBuildStatus(env["PR_NUMBER"], "terraform-provider-breaking-change-test", breakingState, targetURL, env["COMMIT_SHA"]); err != nil {
+		fmt.Printf("Error posting build status for pr %s commit %s: %v\n", env["PR_NUMBER"], env["COMMIT_SHA"], err)
 		os.Exit(1)
 	}
 
@@ -245,7 +252,7 @@ The breaking change detector crashed during execution. This is usually due to th
 	}
 	if diffs := rnr.MustRun("git", []string{"diff", "HEAD", "origin/main", "tools/missing-test-detector"}, nil); diffs != "" {
 		fmt.Printf("Found diffs in missing test detector:\n%s\nRunning tests.\n", diffs)
-		if err := testTools(mmLocalPath, tpgbLocalPath, prNumber, commit, buildID, buildStep, projectID, gh, rnr); err != nil {
+		if err := testTools(mmLocalPath, tpgbLocalPath, env, gh, rnr); err != nil {
 			fmt.Printf("Error testing tools in %s: %v\n", mmLocalPath, err)
 			os.Exit(1)
 		}
@@ -280,7 +287,7 @@ func cloneAndDiff(repo *source.Repo, oldBranch, newBranch string, ctlr *source.C
 }
 
 // Build the diff processor for tpg or tpgb
-func buildDiffProcessor(diffProcessorPath, providerLocalPath, oldBranch, newBranch string, rnr ExecRunner) error {
+func buildDiffProcessor(diffProcessorPath, providerLocalPath string, env map[string]string, rnr ExecRunner) error {
 	if err := rnr.PushDir(diffProcessorPath); err != nil {
 		return err
 	}
@@ -289,10 +296,7 @@ func buildDiffProcessor(diffProcessorPath, providerLocalPath, oldBranch, newBran
 			return err
 		}
 	}
-	if _, err := rnr.Run("make", []string{"build"}, map[string]string{
-		"OLD_REF": oldBranch,
-		"NEW_REF": newBranch,
-	}); err != nil {
+	if _, err := rnr.Run("make", []string{"build"}, env); err != nil {
 		return fmt.Errorf("Error running make build in %s: %v\n", diffProcessorPath, err)
 	}
 	return rnr.PopDir()
@@ -309,11 +313,11 @@ func computeBreakingChanges(diffProcessorPath string, rnr ExecRunner) (string, e
 	return breakingChanges, rnr.PopDir()
 }
 
-func addLabels(diffProcessorPath, githubToken, prNumber string, rnr ExecRunner) error {
+func addLabels(diffProcessorPath string, env map[string]string, rnr ExecRunner) error {
 	if err := rnr.PushDir(diffProcessorPath); err != nil {
 		return err
 	}
-	output, err := rnr.Run("bin/diff-processor", []string{"add-labels", prNumber}, map[string]string{"GITHUB_TOKEN": githubToken})
+	output, err := rnr.Run("bin/diff-processor", []string{"add-labels", env["PR_NUMBER"]}, env)
 	fmt.Println(output)
 	if err != nil {
 		return err
@@ -445,7 +449,7 @@ func updatePackageName(name, path string, rnr ExecRunner) error {
 
 // Run unit tests for the missing test detector and diff processor.
 // Report results using Github API.
-func testTools(mmLocalPath, tpgbLocalPath, prNumber, commit, buildID, buildStep, projectID string, gh GithubClient, rnr ExecRunner) error {
+func testTools(mmLocalPath, tpgbLocalPath string, env map[string]string, gh GithubClient, rnr ExecRunner) error {
 	missingTestDetectorPath := filepath.Join(mmLocalPath, "tools", "missing-test-detector")
 	rnr.PushDir(missingTestDetectorPath)
 	if _, err := rnr.Run("go", []string{"mod", "tidy"}, nil); err != nil {
@@ -457,8 +461,8 @@ func testTools(mmLocalPath, tpgbLocalPath, prNumber, commit, buildID, buildStep,
 		fmt.Printf("error from running go test in %s: %v\n", missingTestDetectorPath, err)
 		state = "failure"
 	}
-	targetURL := fmt.Sprintf("https://console.cloud.google.com/cloud-build/builds;region=global/%s;step=%s?project=%s", buildID, buildStep, projectID)
-	if err := gh.PostBuildStatus(prNumber, "unit-tests-missing-test-detector", state, targetURL, commit); err != nil {
+	targetURL := fmt.Sprintf("https://console.cloud.google.com/cloud-build/builds;region=global/%s;step=%s?project=%s", env["BUILD_ID"], env["BUILD_STEP"], env["PROJECT_ID"])
+	if err := gh.PostBuildStatus(env["PR_NUMBER"], "unit-tests-missing-test-detector", state, targetURL, env["COMMIT_SHA"]); err != nil {
 		return err
 	}
 	return rnr.PopDir()

@@ -3,6 +3,7 @@ package source
 import (
 	"fmt"
 	"path/filepath"
+	"strings"
 )
 
 type Repo struct {
@@ -47,6 +48,9 @@ func (gc Controller) Clone(repo *Repo) error {
 	} else {
 		_, err = gc.rnr.Run("git", []string{"clone", "-b", repo.Branch, url, repo.Path}, nil)
 	}
+	if strings.Contains(err.Error(), "already exists and is not an empty directory") {
+		return nil
+	}
 	return err
 }
 
@@ -69,4 +73,11 @@ func (gc Controller) Diff(repo *Repo, oldBranch, newBranch string) (string, erro
 		return "", fmt.Errorf("error diffing %s and %s: %v", oldBranch, newBranch, err)
 	}
 	return diffs, gc.rnr.PopDir()
+}
+
+func (gc Controller) Cleanup(repo *Repo) error {
+	if _, err := gc.rnr.Run("rm", []string{"-rf", repo.Path}, nil); err != nil {
+		return err
+	}
+	return nil
 }
