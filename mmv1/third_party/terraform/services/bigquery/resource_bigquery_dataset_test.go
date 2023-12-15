@@ -599,7 +599,7 @@ resource "google_bigquery_dataset" "test" {
     kms_key_name = "%s"
   }
 
-  project = google_kms_crypto_key_iam_member.kms-member.project
+  depends_on = [google_kms_crypto_key_iam_member.kms-member]
 }
 `, pid, kmsKey, datasetID, kmsKey)
 }
