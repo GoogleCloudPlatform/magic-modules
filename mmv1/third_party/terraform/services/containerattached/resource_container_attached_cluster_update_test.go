@@ -37,7 +37,7 @@ func TestAccContainerAttachedCluster_update(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location", "annotations"},
 			},
-      {
+			{
 				Config: testAccContainerAttachedCluster_containerAttachedCluster_removeAuthorizationUsers(context),
 			},
 			{
@@ -46,7 +46,7 @@ func TestAccContainerAttachedCluster_update(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location", "annotations"},
 			},
-      {
+			{
 				Config: testAccContainerAttachedCluster_containerAttachedCluster_removeAuthorizationGroups(context),
 			},
 			{
