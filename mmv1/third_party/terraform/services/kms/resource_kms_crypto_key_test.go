@@ -172,6 +172,7 @@ func TestAccKmsCryptoKey_basic(t *testing.T) {
 					testAccCheckGoogleKmsCryptoKeyWasRemovedFromState("google_kms_crypto_key.crypto_key"),
 					testAccCheckGoogleKmsCryptoKeyVersionsDestroyed(t, projectId, location, keyRingName, cryptoKeyName),
 					testAccCheckGoogleKmsCryptoKeyRotationDisabled(t, projectId, location, keyRingName, cryptoKeyName),
+					resource.TestCheckResourceAttrSet("google_kms_crypto_key.crypto_key", "primary"),
 				),
 			},
 		},
