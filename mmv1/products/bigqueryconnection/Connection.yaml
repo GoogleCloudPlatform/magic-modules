@@ -171,7 +171,7 @@ properties:
     description: A descriptive description for the connection
   - !ruby/object:Api::Type::String
     name: 'kmsKeyName'
-    description:  |-
+    description: |-
       The Cloud KMS key that is used for encryption. Example: projects/[kms_project_id]/locations/[region]/keyRings/[key_region]/cryptoKeys/[key].
   - !ruby/object:Api::Type::Boolean
     name: 'hasCredential'
