@@ -2762,7 +2762,7 @@ resource "google_composer_environment" "test" {
     }
     workloads_config {
       dag_processor {
-        cpu          = 1.25
+        cpu          = 1
         memory_gb    = 2.5
         storage_gb   = 2
       }
@@ -2798,7 +2798,7 @@ resource "google_composer_environment" "test" {
     }
     workloads_config {
       dag_processor {
-        cpu          = 1
+        cpu          = 2
         memory_gb    = 2
         storage_gb   = 1
       }
