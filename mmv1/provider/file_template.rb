@@ -123,8 +123,6 @@ module Provider
   class ProductFileTemplate < Provider::FileTemplate
     # The name of the resource
     attr_accessor :name
-    # The provider-specific configuration.
-    attr_accessor :config
     # The namespace of the product.
     attr_accessor :product_ns
     # The resource itself.
@@ -134,10 +132,9 @@ module Provider
 
     class << self
       # Construct a new ProductFileTemplate based on a resource object
-      def file_for_resource(output_folder, object, version, config, env)
+      def file_for_resource(output_folder, object, version, env)
         file_template = new(output_folder, object.name, object.__product, version, env)
         file_template.object = object
-        file_template.config = config
         file_template
       end
     end

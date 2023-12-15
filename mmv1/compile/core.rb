@@ -38,7 +38,7 @@ module Compile
     # that the provider writer wants to expose to the template can be made
     # available through the bindings.
     #
-    # This allows for exposing instance variables, such as @api and config, or
+    # This allows for exposing instance variables, such as @api, or
     # provider or function specific data, such as output_folder. Functions such
     # as Provider::Core::generate_file() or Provider::Core::compile_file() can
     # allow providers to generate such bindings (by passing them in a Hash to
