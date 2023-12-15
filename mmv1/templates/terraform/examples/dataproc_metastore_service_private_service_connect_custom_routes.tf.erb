@@ -25,7 +25,7 @@ resource "google_dataproc_metastore_service" "<%= ctx[:primary_resource_id] %>" 
   network_config {
     consumers {
       subnetwork            = google_compute_subnetwork.subnet.id
-      custom_routes_enabled = true
     }
+    custom_routes_enabled = true
   }
 }
