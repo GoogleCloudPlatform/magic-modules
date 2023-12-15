@@ -53,6 +53,13 @@
 <% end -%>
 
 <%
+  Dir["third_party/terraform/tpgdclresource/*.go"].each do |file_path|
+    fname = file_path.split('/')[-1]
+-%>
+'<%= dir -%>/tpgdclresource/<%= fname -%>': 'third_party/terraform/tpgdclresource/<%= fname -%>'
+<% end -%>
+
+<%
   Dir["third_party/terraform/tpgiamresource/*.go"].each do |file_path|
     fname = file_path.split('/')[-1]
 -%>
@@ -147,3 +154,4 @@
 '.teamcity/Makefile': 'third_party/terraform/.teamcity/Makefile'
 'version/version.go': 'third_party/terraform/version/version.go'
 'go.sum': 'third_party/terraform/go.sum'
+'.go-version': 'third_party/terraform/.go-version'

@@ -181,3 +181,36 @@ func TestFirestoreField409_retryUnderlyingDataChanged(t *testing.T) {
 		t.Errorf("Error not detected as retryable")
 	}
 }
+
+func TestFirestoreIndex409_crossTransactionContetion(t *testing.T) {
+	err := googleapi.Error{
+		Code: 409,
+		Body: "Aborted due to cross-transaction contention",
+	}
+	isRetryable, _ := FirestoreIndex409Retry(&err)
+	if !isRetryable {
+		t.Errorf("Error not detected as retryable")
+	}
+}
+
+func TestFirestoreIndex409_retryUnderlyingDataChanged(t *testing.T) {
+	err := googleapi.Error{
+		Code: 409,
+		Body: "Please retry, underlying data changed",
+	}
+	isRetryable, _ := FirestoreIndex409Retry(&err)
+	if !isRetryable {
+		t.Errorf("Error not detected as retryable")
+	}
+}
+
+func TestExternalIpServiceNotActive(t *testing.T) {
+	err := googleapi.Error{
+		Code: 400,
+		Body: "External IP address network service is not active in the provided network policy",
+	}
+	isRetryable, _ := ExternalIpServiceNotActive(&err)
+	if !isRetryable {
+		t.Errorf("Error not detected as retryable")
+	}
+}

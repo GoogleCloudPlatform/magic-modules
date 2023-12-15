@@ -81,7 +81,7 @@ jobs:
       if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
       uses: actions/setup-go@v3
       with:
-        go-version: '^1.19'
+        go-version: '^1.20'
     - name: Build Terraform Google Conversion
       if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |

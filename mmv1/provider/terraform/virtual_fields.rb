@@ -15,10 +15,9 @@ require 'uri'
 require 'api/object'
 require 'compile/core'
 require 'google/golang_utils'
-require 'provider/abstract_core'
 
 module Provider
-  class Terraform < Provider::AbstractCore
+  class Terraform
     # Virtual fields are Terraform-only fields that control Terraform's
     # behaviour. They don't map to underlying API fields (although they
     # may map to parameters), and will require custom code to be added to
