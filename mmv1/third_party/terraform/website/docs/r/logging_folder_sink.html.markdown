@@ -56,7 +56,7 @@ The following arguments are supported:
 * `folder` - (Required) The folder to be exported to the sink. Note that either `[FOLDER_ID]` or `folders/[FOLDER_ID]` is
     accepted.
 
-* `destination` - (Required) The destination of the sink (or, in other words, where logs are written to). Can be a Cloud Storage bucket, a PubSub topic, a BigQuery dataset, a Cloud Logging bucket, or another project. Examples:
+* `destination` - (Required) The destination of the sink (or, in other words, where logs are written to). Can be a Cloud Storage bucket, a PubSub topic, a BigQuery dataset, a Cloud Logging bucket, or a Google Cloud project. Examples:
 
     - `storage.googleapis.com/[GCS_BUCKET]`
     - `bigquery.googleapis.com/projects/[PROJECT_ID]/datasets/[DATASET]`
