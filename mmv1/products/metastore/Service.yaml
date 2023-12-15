@@ -108,6 +108,15 @@ examples:
       network_name: 'my-network'
       subnet_name: 'my-subnetwork'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'dataproc_metastore_service_private_service_connect_custom_routes'
+    skip_test: true
+    min_version: beta
+    primary_resource_id: default
+    vars:
+      metastore_service_name: 'metastore-srv'
+      network_name: 'my-network'
+      subnet_name: 'my-subnetwork'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'dataproc_metastore_service_telemetry'
     skip_docs: true
     primary_resource_id: 'telemetry'
