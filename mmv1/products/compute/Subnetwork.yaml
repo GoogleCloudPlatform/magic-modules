@@ -373,6 +373,7 @@ properties:
     update_verb: :PATCH
     update_url: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
     fingerprint_name: 'fingerprint'
+    default_from_api: true
     values:
       - :EXTERNAL
       - :INTERNAL
