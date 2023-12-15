@@ -170,4 +170,4 @@ properties:
       - !ruby/object:Api::Type::Boolean
         name: 'restrictQueryResult'
         description:
-           If true, restrict export of query result derived from restricted linked dataset table.
+          If true, restrict export of query result derived from restricted linked dataset table.
