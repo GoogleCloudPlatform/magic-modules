@@ -3832,7 +3832,7 @@ resource "google_sql_database_instance" "replica" {
 
   depends_on = [
     google_sql_database_instance.master,
-	google_kms_crypto_key_iam_member.crypto_key_rep
+    google_kms_crypto_key_iam_member.crypto_key_rep
   ]
 }
 `
