@@ -11,9 +11,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// TODO(trodge): Move this into magician/github along with repo cloning
-const githubUsername = "modular-magician"
-
 var environmentVariables = [...]string{
 	"COMMIT_SHA",
 	"GITHUB_TOKEN",
