@@ -96,22 +96,12 @@ properties:
         name: 'name'
         description: |
           The resource name for this CryptoKeyVersion.
-      - !ruby/object:Api::Type::Enum
+        output: true
+      - !ruby/object:Api::Type::String
         name: 'state'
         description: |
           The current state of the CryptoKeyVersion.
-        values:
-          - :CRYPTO_KEY_VERSION_STATE_UNSPECIFIED
-          - :PENDING_GENERATION
-          - :ENABLED
-          - :DISABLED
-          - :DESTROYED
-          - :DESTROY_SCHEDULED
-          - :PENDING_IMPORT
-          - :IMPORT_FAILED
-          - :GENERATION_FAILED
-          - :PENDING_EXTERNAL_DESTRUCTION
-          - :EXTERNAL_DESTRUCTION_FAILED
+        output: true
   - !ruby/object:Api::Type::String
     name: 'purpose'
     description: |
