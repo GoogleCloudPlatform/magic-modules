@@ -20,7 +20,7 @@ create_url: 'projects/{{project}}/locations/{{location}}/privateClouds?privateCl
 update_verb: :PATCH
 references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/vmware-engine/docs/reference/rest/v1/projects.locations.privateClouds'
-description: Represents a private cloud resource. Private clouds are zonal resources.
+description: / Represents a private cloud resource. Private clouds are zonal resources.
 error_abort_predicates: ['transport_tpg.Is429QuotaError']
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
@@ -285,14 +285,3 @@ properties:
         name: 'fqdn'
         description: |-
           Fully qualified domain name of the appliance.
-
-  - !ruby/object:Api::Type::Enum
-    name: 'type'
-    description: |
-      Initial type of the private cloud.
-    immutable: true
-    ignore_read: true
-    values:
-      - :STANDARD
-      - :TIME_LIMITED
-    default_value: :STANDARD
