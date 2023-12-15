@@ -1116,6 +1116,7 @@ func TestAccComposerEnvironment_customBucket(t *testing.T) {
 	})
 }
 
+<% unless version == "ga" -%>
 // Checks Composer 3 environment creation with new fields.
 func TestAccComposerEnvironmentComposer3_basic(t *testing.T) {
 	t.Parallel()
@@ -1141,10 +1142,10 @@ func TestAccComposerEnvironmentComposer3_basic(t *testing.T) {
 			// due to dangling firewall rules left by the Composer Environment blocking network deletion.
 			// TODO: Remove this check if firewall rules bug gets fixed by Composer.
 			{
-				PlanOnly:					 true,
+				PlanOnly:           true,
 				ExpectNonEmptyPlan: false,
-				Config:						 testAccComposerEnvironmentComposer3_basic(envName, network, subnetwork),
-				Check:							testAccCheckClearComposerEnvironmentFirewalls(t, network),
+				Config:             testAccComposerEnvironmentComposer3_basic(envName, network, subnetwork),
+				Check:              testAccCheckClearComposerEnvironmentFirewalls(t, network),
 			},
 		},
 	})
@@ -1178,14 +1179,15 @@ func TestAccComposerEnvironmentComposer3_update(t *testing.T) {
 			// due to dangling firewall rules left by the Composer Environment blocking network deletion.
 			// TODO: Remove this check if firewall rules bug gets fixed by Composer.
 			{
-				PlanOnly:					  true,
+				PlanOnly:           true,
 				ExpectNonEmptyPlan: false,
-				Config:						  testAccComposerEnvironmentComposer3_update(envName, network, subnetwork),
-				Check:							testAccCheckClearComposerEnvironmentFirewalls(t, network),
+				Config:             testAccComposerEnvironmentComposer3_update(envName, network, subnetwork),
+				Check:              testAccCheckClearComposerEnvironmentFirewalls(t, network),
 			},
 		},
 	})
 }
+<% end -%>
 
 func testAccComposerEnvironment_customBucket(bucketName, envName, network, subnetwork string) string {
 	return fmt.Sprintf(`
@@ -2748,6 +2750,7 @@ resource "google_project_iam_member" "composer-worker" {
 `, environment, network, subnetwork, serviceAccount)
 }
 
+<% unless version == "ga" -%>
 func testAccComposerEnvironmentComposer3_basic(name, network, subnetwork string) string {
 	return fmt.Sprintf(`
 resource "google_composer_environment" "test" {
@@ -2791,7 +2794,7 @@ resource "google_composer_environment" "test" {
   config {
     software_config {
 			web_server_plugins_mode = "DISABLED"
-      image_version = "composer-3-airflow-2"
+			image_version = "composer-3-airflow-2"
     }
     workloads_config {
       dag_processor {
@@ -2802,6 +2805,7 @@ resource "google_composer_environment" "test" {
     }
   }
 }
+<% end -%>
 
 // use a separate network to avoid conflicts with other tests running in parallel
 // that use the default network/subnet

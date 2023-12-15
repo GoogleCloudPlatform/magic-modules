@@ -56,8 +56,8 @@ var (
 		"config.0.software_config.0.scheduler_count",
 <% unless version == "ga" -%>
 		"config.0.software_config.0.cloud_data_lineage_integration",
-<% end -%>
 		"config.0.software_config.0.web_server_plugins_mode",
+<% end -%>
 	}
 
 	composerConfigKeys = []string{
@@ -86,7 +86,9 @@ var (
 		"config.0.workloads_config.0.triggerer",
 		"config.0.workloads_config.0.web_server",
 		"config.0.workloads_config.0.worker",
+<% unless version == "ga" -%>
 		"config.0.workloads_config.0.dag_processor",
+<% end -%>
 	}
 
 	composerPrivateEnvironmentConfig = []string{
@@ -472,7 +474,6 @@ func ResourceComposerEnvironment() *schema.Resource {
 											},
 										},
 									},
-<% end -%>
 									"web_server_plugins_mode": {
 										Type:         schema.TypeString,
 										Optional:     true,
@@ -482,6 +483,7 @@ func ResourceComposerEnvironment() *schema.Resource {
 										ValidateFunc: validation.StringInSlice([]string{"ENABLED", "DISABLED"}, false),
 										Description:  `Should be either 'ENABLED' or 'DISABLED'. Defaults to 'ENABLED'. Used in Composer 3.`,
 									},
+<% end -%>
 								},
 							},
 						},
@@ -829,6 +831,7 @@ func ResourceComposerEnvironment() *schema.Resource {
 											},
 										},
 									},
+<% unless version == "ga" -%>
 									"dag_processor": {
 										Type:        schema.TypeList,
 										Optional:    true,
@@ -862,6 +865,7 @@ func ResourceComposerEnvironment() *schema.Resource {
 											},
 										},
 									},
+<% end -%>
 								},
 							},
 						},
@@ -1210,6 +1214,7 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 			}
 		}
 
+<% unless version == "ga" -%>
 		if d.HasChange("config.0.software_config.0.web_server_plugins_mode") {
 			patchObj := &composer.Environment{
 				Config: &composer.EnvironmentConfig{
@@ -1224,6 +1229,7 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 				return err
 			}
 		}
+<% end -%>
 
 		if d.HasChange("config.0.node_count") {
 			patchObj := &composer.Environment{Config: &composer.EnvironmentConfig{}}
@@ -1584,13 +1590,17 @@ func flattenComposerEnvironmentConfigWorkloadsConfig(workloadsConfig *composer.W
 	transformedTriggerer := make(map[string]interface{})
 	transformedWebServer := make(map[string]interface{})
 	transformedWorker := make(map[string]interface{})
+<% unless version == "ga" -%>
 	transformedDagProcessor := make(map[string]interface{})
+<% end -%>
 
 	wlCfgScheduler := workloadsConfig.Scheduler
 	wlCfgTriggerer := workloadsConfig.Triggerer
 	wlCfgWebServer := workloadsConfig.WebServer
 	wlCfgWorker := workloadsConfig.Worker
+<% unless version == "ga" -%>
 	wlCfgDagProcessor := workloadsConfig.DagProcessor
+<% end -%>
 
 	if wlCfgScheduler == nil {
 		transformedScheduler = nil
@@ -1627,6 +1637,7 @@ func flattenComposerEnvironmentConfigWorkloadsConfig(workloadsConfig *composer.W
 		transformedWorker["max_count"] = wlCfgWorker.MaxCount
 	}
 
+<% unless version == "ga" -%>
 	if wlCfgDagProcessor == nil {
 			transformedDagProcessor = nil
 	} else {
@@ -1634,6 +1645,7 @@ func flattenComposerEnvironmentConfigWorkloadsConfig(workloadsConfig *composer.W
 		transformedDagProcessor["memory_gb"] = wlCfgDagProcessor.MemoryGb
 		transformedDagProcessor["storage_gb"] = wlCfgDagProcessor.StorageGb
 	}
+<% end -%>
 
 	transformed["scheduler"] = []interface{}{transformedScheduler}
 	if transformedTriggerer != nil {
@@ -1641,7 +1653,9 @@ func flattenComposerEnvironmentConfigWorkloadsConfig(workloadsConfig *composer.W
 	}
 	transformed["web_server"] = []interface{}{transformedWebServer}
 	transformed["worker"] = []interface{}{transformedWorker}
+<% unless version == "ga" -%>
 	transformed["dag_processor"] = []interface{}{transformedDagProcessor}
+<% end -%>
 
 
 	return []interface{}{transformed}
@@ -1731,7 +1745,6 @@ func flattenComposerEnvironmentConfigSoftwareConfig(softwareCfg *composer.Softwa
 	transformed["scheduler_count"] = softwareCfg.SchedulerCount
 <% unless version == "ga" -%>
 	transformed["cloud_data_lineage_integration"] = flattenComposerEnvironmentConfigSoftwareConfigCloudDataLineageIntegration(softwareCfg.CloudDataLineageIntegration)
-<% end -%>
 	if softwareCfg.WebServerPluginsMode == "PLUGINS_DISABLED"{
 		transformed["web_server_plugins_mode"] = "DISABLED"
 	} else if softwareCfg.WebServerPluginsMode == "PLUGINS_ENABLED"{
@@ -1739,6 +1752,7 @@ func flattenComposerEnvironmentConfigSoftwareConfig(softwareCfg *composer.Softwa
 	} else {
 		transformed["web_server_plugins_mode"] = softwareCfg.WebServerPluginsMode
 	}
+<% end -%>
 	return []interface{}{transformed}
 }
 
@@ -2064,6 +2078,7 @@ func expandComposerEnvironmentConfigWorkloadsConfig(v interface{}, d *schema.Res
 		}
 	}
 
+<% unless version == "ga" -%>
 	if v, ok := original["dag_processor"]; ok {
 		if len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
 			transformedDagProcessor := &composer.DagProcessorResource{}
@@ -2074,6 +2089,7 @@ func expandComposerEnvironmentConfigWorkloadsConfig(v interface{}, d *schema.Res
 			transformed.DagProcessor = transformedDagProcessor
 		}
 	}
+<% end -%>
 
 	return transformed, nil
 }
@@ -2396,7 +2412,7 @@ func expandComposerEnvironmentConfigSoftwareConfig(v interface{}, d *schema.Reso
 		return nil, err
 	}
 	transformed.CloudDataLineageIntegration = transformedCloudDataLineageIntegration
-<% end -%>
+
 	if original["web_server_plugins_mode"].(string) == "DISABLED"{
 		transformed.WebServerPluginsMode = "PLUGINS_DISABLED"
 	} else if original["web_server_plugins_mode"].(string) == "ENABLED"{
@@ -2404,6 +2420,7 @@ func expandComposerEnvironmentConfigSoftwareConfig(v interface{}, d *schema.Reso
 	} else {
 		transformed.WebServerPluginsMode = original["web_server_plugins_mode"].(string)
 	}
+<% end -%>
 
 	return transformed, nil
 }

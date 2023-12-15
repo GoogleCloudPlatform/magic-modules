@@ -477,7 +477,7 @@ The following arguments are supported:
   The number of schedulers for Airflow.
 
 * `web_server_plugins_mode` -
-  (Optional, Cloud Composer 3 only)
+  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
   Web server plugins configuration. Should be either 'ENABLED' or 'DISABLED'. Defaults to 'ENABLED'.
 
 
@@ -981,7 +981,7 @@ The `workloads_config` block supports:
   Configuration for resources used by Airflow workers.
 
 * `dag_processor` -
-  (Optional, Cloud Composer 3 only)
+  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
   Configuration for resources used by DAG processor.
 
 The `scheduler` block supports:
