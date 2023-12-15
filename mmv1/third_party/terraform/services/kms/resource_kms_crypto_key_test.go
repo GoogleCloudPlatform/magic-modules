@@ -150,6 +150,10 @@ func TestAccKmsCryptoKey_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleKmsCryptoKey_basic(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_kms_crypto_key.crypto_key", "primary"),
+				),
+
 			},
 			{
 				ResourceName:            "google_kms_crypto_key.crypto_key",
@@ -172,7 +176,6 @@ func TestAccKmsCryptoKey_basic(t *testing.T) {
 					testAccCheckGoogleKmsCryptoKeyWasRemovedFromState("google_kms_crypto_key.crypto_key"),
 					testAccCheckGoogleKmsCryptoKeyVersionsDestroyed(t, projectId, location, keyRingName, cryptoKeyName),
 					testAccCheckGoogleKmsCryptoKeyRotationDisabled(t, projectId, location, keyRingName, cryptoKeyName),
-					resource.TestCheckResourceAttrSet("google_kms_crypto_key.crypto_key", "primary"),
 				),
 			},
 		},
