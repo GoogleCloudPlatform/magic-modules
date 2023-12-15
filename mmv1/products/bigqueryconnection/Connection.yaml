@@ -97,6 +97,16 @@ examples:
       connection_id: 'my-connection'
       iam_role_id: 'arn:aws:iam::999999999999:role/omnirole'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'bigquery_connection_kms'
+    pull_external: true
+    primary_resource_id: 'connection'
+    vars:
+      connection_id: 'my-connection'
+      kms_key_name: 'kms-key'
+      iam_role_id: 'arn:aws:iam::999999999999:role/omnirole'
+    test_vars_overrides:
+      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_connection_azure'
     pull_external: true
     primary_resource_id: 'connection'
@@ -159,6 +169,9 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'description'
     description: A descriptive description for the connection
+  - !ruby/object:Api::Type::String
+    name: 'kmsKeyName'
+    description: The Cloud KMS key that is used for encryption. Example: projects/[kms_project_id]/locations/[region]/keyRings/[key_region]/cryptoKeys/[key].
   - !ruby/object:Api::Type::Boolean
     name: 'hasCredential'
     output: true
