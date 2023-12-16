@@ -41,16 +41,7 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 				ImportStateVerifyIgnore: []string{"location", "name", "update_time", "type"},
 			},
 			{
-				Config: testPrivateCloudUpdateConfig(context, "description2", 4), // Expand PC
-			},
-			{
-				ResourceName:            "google_vmwareengine_private_cloud.vmw-engine-pc",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "update_time", "type"},
-			},
-			{
-				Config: testPrivateCloudUpdateConfig(context, "description2", 3), // Shrink PC
+				Config: testPrivateCloudUpdateConfig(context, "description2", 3), // Upgrade to STANDARD PC
 			},
 			{
 				ResourceName:            "google_vmwareengine_private_cloud.vmw-engine-pc",
@@ -90,6 +81,11 @@ resource "google_vmwareengine_private_cloud" "vmw-engine-pc" {
       node_count = "%{node_count}"
       custom_core_count = 32
     }
+  }
+
+  # Ignore changes to type for TIME_LIMITED Private Clouds
+  lifecycle {
+    ignore_changes = [type]
   }
 }
 

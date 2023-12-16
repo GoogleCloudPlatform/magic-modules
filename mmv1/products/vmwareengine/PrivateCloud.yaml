@@ -290,8 +290,10 @@ properties:
     name: 'type'
     description: |
       Initial type of the private cloud.
+
+      **Note:** Set `lifecycle.ignore_changes = [type]` when upgrading a TIME_LIMITED PC to STANDARD by increasing its node count.
+
     immutable: true
-    ignore_read: true
     values:
       - :STANDARD
       - :TIME_LIMITED

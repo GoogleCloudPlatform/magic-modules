@@ -16,6 +16,11 @@ resource "google_vmwareengine_private_cloud" "<%= ctx[:primary_resource_id] %>" 
       custom_core_count = 32
     }
   }
+
+  # Ignore changes to type for TIME_LIMITED Private Clouds
+  lifecycle {
+    ignore_changes = [type]
+  }
 }
 
 resource "google_vmwareengine_network" "pc-nw" {

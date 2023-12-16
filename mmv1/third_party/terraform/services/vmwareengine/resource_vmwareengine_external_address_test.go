@@ -16,7 +16,7 @@ func TestAccVmwareengineExternalAddress_vmwareEngineExternalAddressUpdate(t *tes
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"region":        "southamerica-east1", // using region with low node utilization.
+		"region":        "southamerica-west1", // using region with low node utilization.
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
