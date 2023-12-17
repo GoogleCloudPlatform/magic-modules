@@ -21,14 +21,32 @@ func Convert(assets []*caiasset.Asset, options *Options) ([]byte, error) {
 		return nil, fmt.Errorf("logger is not initialized")
 	}
 
-	converter := ConverterMap
+	// Group resources from the same tf resource type for convert.
+	// tf -> cai has 1:N mappings occasionally
+	groups := make(map[string][]*caiasset.Asset)
+	for _, asset := range assets {
 
-	blocks, err := converter.Convert(assets)
-	if err != nil {
-		return nil, err
+		name, _ := ConverterMap.AssetTypeToConverterName[asset.Type]
+		if name != "" {
+			groups[name] = append(groups[name], asset)
+		}
 	}
 
-	t, err := common.HclWriteBlocks(blocks)
+	allBlocks := []*common.HCLResourceBlock{}
+	for name, assets := range groups {
+		converter, ok := ConverterMap.ConverterNameToConverter[name]
+		if !ok {
+			continue
+		}
+		newBlocks, err := converter.Convert(assets)
+		if err != nil {
+			return nil, err
+		}
+
+		allBlocks = append(allBlocks, newBlocks...)
+	}
+
+	t, err := common.HclWriteBlocks(allBlocks)
 
 	options.ErrorLogger.Debug(string(t))
 

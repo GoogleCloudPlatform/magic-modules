@@ -4,24 +4,25 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/cai2hcl/common"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/cai2hcl/services/compute"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/cai2hcl/services/resourcemanager"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	tpg_provider "github.com/hashicorp/terraform-provider-google-beta/google-beta/provider"
 )
 
+var provider *schema.Provider = tpg_provider.Provider()
+
 var ConverterMap = common.ConverterMap{
-	AssetTypeToConverter: map[string]string{
-		// Compute
-		compute.ComputeInstanceAssetType:       "google_compute_instance",
-		compute.ComputeForwardingRuleAssetType: "google_compute_forwarding_rule",
+	AssetTypeToConverterName: map[string]string{
+		compute.ComputeInstanceAssetType:       compute.ComputeInstanceSchemaName,
+		compute.ComputeForwardingRuleAssetType: compute.ComputeForwardingRuleSchemaName,
 
-		// ResourceManager
-		resourcemanager.ProjectAssetType:        "google_project",
-		resourcemanager.ProjectBillingAssetType: "google_project",
+		resourcemanager.ProjectAssetType:        resourcemanager.ProjectSchemaName,
+		resourcemanager.ProjectBillingAssetType: resourcemanager.ProjectSchemaName,
 	},
-	Converters: common.CreateConverters(map[string]common.ConverterFactory{
-		// Compute
-		"google_compute_instance":        compute.NewComputeInstanceConverter,
-		"google_compute_forwarding_rule": compute.NewComputeForwardingRuleConverter,
 
-		// ResourceManager
-		"google_project": resourcemanager.NewProjectConverter,
-	}),
+	ConverterNameToConverter: map[string]common.Converter{
+		compute.ComputeInstanceSchemaName:       compute.NewComputeInstanceConverter(provider),
+		compute.ComputeForwardingRuleSchemaName: compute.NewComputeForwardingRuleConverter(provider),
+
+		resourcemanager.ProjectSchemaName: resourcemanager.NewProjectConverter(provider),
+	},
 }

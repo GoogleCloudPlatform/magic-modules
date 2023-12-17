@@ -11,7 +11,7 @@ import (
 	ctyjson "github.com/zclconf/go-cty/cty/json"
 )
 
-// Extracts named part from resource url.
+// ParseFieldValue extracts named part from resource url.
 func ParseFieldValue(url string, name string) string {
 	fragments := strings.Split(url, "/")
 	for ix, item := range fragments {
@@ -22,7 +22,7 @@ func ParseFieldValue(url string, name string) string {
 	return ""
 }
 
-// Decodes the map object into the target struct.
+// DecodeJSON decodes the map object into the target struct.
 func DecodeJSON(data map[string]interface{}, v interface{}) error {
 	b, err := json.Marshal(data)
 	if err != nil {
@@ -34,7 +34,7 @@ func DecodeJSON(data map[string]interface{}, v interface{}) error {
 	return nil
 }
 
-// Converts resource from untyped map format to TF JSON.
+// MapToCtyValWithSchema converts resource from untyped map format to TF JSON.
 func MapToCtyValWithSchema(m map[string]interface{}, s map[string]*schema.Schema) (cty.Value, error) {
 	b, err := json.Marshal(&m)
 	if err != nil {

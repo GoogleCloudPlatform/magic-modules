@@ -8,6 +8,7 @@ import (
 	"github.com/zclconf/go-cty/cty"
 )
 
+// HclWriteBlocks prints HCLResourceBlock objects as string.
 func HclWriteBlocks(blocks []*HCLResourceBlock) ([]byte, error) {
 	f := hclwrite.NewFile()
 	rootBody := f.Body()

@@ -1,4 +1,4 @@
-package cai2hcl
+package cai2hcl_test
 
 import (
 	"testing"
@@ -9,7 +9,6 @@ import (
 func TestConvertCompute(t *testing.T) {
 	cai2hclTesting.AssertTestFiles(
 		t,
-		ConverterMap,
 		"./services/compute/testdata",
 		[]string{
 			"full_compute_instance",
@@ -19,7 +18,6 @@ func TestConvertCompute(t *testing.T) {
 func TestConvertResourcemanager(t *testing.T) {
 	cai2hclTesting.AssertTestFiles(
 		t,
-		ConverterMap,
 		"./services/resourcemanager/testdata",
 		[]string{
 			"project_create",
