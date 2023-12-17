@@ -14,10 +14,10 @@ func TestAccGKEBackupBackupPlan_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":       envvar.GetTestProjectFromEnv(),
-		"random_suffix": acctest.RandString(t, 10),
-		"network_name" := acctest.BootstrapSharedTestNetwork(t, "gke-cluster"),
-		"subnetwork_name" := acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster")),
+		"project":         envvar.GetTestProjectFromEnv(),
+		"random_suffix":   acctest.RandString(t, 10),
+		"network_name":    acctest.BootstrapSharedTestNetwork(t, "gke-cluster"),
+		"subnetwork_name": acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster")),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

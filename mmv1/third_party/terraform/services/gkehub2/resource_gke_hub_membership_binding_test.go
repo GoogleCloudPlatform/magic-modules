@@ -13,11 +13,11 @@ func TestAccGKEHub2MembershipBinding_gkehubMembershipBindingBasicExample_update(
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":       envvar.GetTestProjectFromEnv(),
-		"location":      envvar.GetTestRegionFromEnv(),
-		"random_suffix": acctest.RandString(t, 10),
-		"network_name" := acctest.BootstrapSharedTestNetwork(t, "gke-cluster"),
-		"subnetwork_name" := acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster")),
+		"project":         envvar.GetTestProjectFromEnv(),
+		"location":        envvar.GetTestRegionFromEnv(),
+		"random_suffix":   acctest.RandString(t, 10),
+		"network_name":    acctest.BootstrapSharedTestNetwork(t, "gke-cluster"),
+		"subnetwork_name": acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster")),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
