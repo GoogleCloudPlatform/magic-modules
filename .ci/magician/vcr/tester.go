@@ -199,7 +199,7 @@ func (vt *vcrTester) Run(mode Mode, version provider.Version) (*Result, error) {
 	if err := vt.rnr.WriteFile(logFileName, output); err != nil {
 		return nil, fmt.Errorf("error writing replaying log: %v, test output: %v", err, output)
 	}
-	if err := vt.uploadLogs(logPath, "thomasrodgers-vcr-logs"); err != nil {
+	if err := vt.uploadLogs(logPath, "vcr-check-cassettes"); err != nil {
 		return nil, fmt.Errorf("error uploading logs: %v", err)
 	}
 	return collectResult(output), nil
