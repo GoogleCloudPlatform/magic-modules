@@ -4306,6 +4306,8 @@ func TestAccContainerCluster_withFleetConfig(t *testing.T) {
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
 	projectID := envvar.GetTestProjectFromEnv()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -4327,7 +4329,7 @@ func TestAccContainerCluster_withFleetConfig(t *testing.T) {
 				ExpectError: regexp.MustCompile(`changing existing fleet host project is not supported`),
 			},
 			{
-				Config: testAccContainerCluster_DisableFleet(clusterName),
+				Config: testAccContainerCluster_DisableFleet(clusterName, networkName, subnetworkName),
 			},
 			{
 				ResourceName:      "google_container_cluster.primary",
@@ -4379,7 +4381,7 @@ func TestAccContainerCluster_withWorkloadALTSConfig(t *testing.T) {
 }
 <% end -%>
 
-func testAccContainerCluster_withFleetConfig(name, projectID string) string {
+func testAccContainerCluster_withFleetConfig(name, projectID, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
   name               = "%s"
