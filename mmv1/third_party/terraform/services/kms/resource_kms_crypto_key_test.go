@@ -151,7 +151,7 @@ func TestAccKmsCryptoKey_basic(t *testing.T) {
 			{
 				Config: testGoogleKmsCryptoKey_basic(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("google_kms_crypto_key.crypto_key", "primary.0"),
+					resource.TestCheckResourceAttrSet("google_kms_crypto_key.crypto_key", "primary.0.name"),
 				),
 			},
 			{
