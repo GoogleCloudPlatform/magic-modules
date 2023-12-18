@@ -153,7 +153,6 @@ func TestAccKmsCryptoKey_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("google_kms_crypto_key.crypto_key", "primary.0"),
 				),
-
 			},
 			{
 				ResourceName:            "google_kms_crypto_key.crypto_key",
