@@ -274,6 +274,10 @@ properties:
                   - !ruby/object:Api::Type::String
                     name: syncWaitSecs
                     description: 'Period in seconds between consecutive syncs. Default: 15'
+                  - !ruby/object:Api::Type::String
+                    name: version
+                    description: 'Version of ACM installed'
+                    deprecation_message: The `configmanagement.config_sync.oci.version` field is deprecated and will be removed in a future major release. Please use `configmanagement.version` field to specify the version of ACM installed instead.
       - !ruby/object:Api::Type::NestedObject
         name: policycontroller
         description: Policy Controller spec
