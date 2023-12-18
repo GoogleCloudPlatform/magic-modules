@@ -683,11 +683,12 @@ func ResourceComposerEnvironment() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"scheduler": {
-										Type:        schema.TypeList,
-										Optional:    true,
+										Type:         schema.TypeList,
+										Optional:     true,
 										AtLeastOneOf: workloadsConfigKeys,
-										ForceNew:    false,
-										Description: `Configuration for resources used by Airflow schedulers.`,
+										ForceNew:     false,
+										Computed:     true,
+										Description:  `Configuration for resources used by Airflow schedulers.`,
 										MaxItems:     1,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
@@ -723,11 +724,12 @@ func ResourceComposerEnvironment() *schema.Resource {
 										},
 									},
 									"triggerer": {
-										Type:        schema.TypeList,
-										Optional:    true,
+										Type:         schema.TypeList,
+										Optional:     true,
 										AtLeastOneOf: workloadsConfigKeys,
-										Description: `Configuration for resources used by Airflow triggerers.`,
-										MaxItems:    1,
+										Computed:     true,
+										Description:  `Configuration for resources used by Airflow triggerers.`,
+										MaxItems:     1,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"cpu": {
@@ -752,11 +754,12 @@ func ResourceComposerEnvironment() *schema.Resource {
 										},
 									},
 									"web_server": {
-										Type:        schema.TypeList,
-										Optional:    true,
+										Type:         schema.TypeList,
+										Optional:     true,
 										AtLeastOneOf: workloadsConfigKeys,
-										ForceNew:    false,
-										Description: `Configuration for resources used by Airflow web server.`,
+										ForceNew:     false,
+										Computed:     true,
+										Description:  `Configuration for resources used by Airflow web server.`,
 										MaxItems:     1,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
@@ -785,11 +788,12 @@ func ResourceComposerEnvironment() *schema.Resource {
 										},
 									},
 									"worker": {
-										Type:        schema.TypeList,
-										Optional:    true,
+										Type:         schema.TypeList,
+										Optional:     true,
 										AtLeastOneOf: workloadsConfigKeys,
-										ForceNew:    false,
-										Description: `Configuration for resources used by Airflow workers.`,
+										ForceNew:     false,
+										Computed:     true,
+										Description:  `Configuration for resources used by Airflow workers.`,
 										MaxItems:     1,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
@@ -833,11 +837,12 @@ func ResourceComposerEnvironment() *schema.Resource {
 									},
 <% unless version == "ga" -%>
 									"dag_processor": {
-										Type:        schema.TypeList,
-										Optional:    true,
+										Type:         schema.TypeList,
+										Optional:     true,
 										AtLeastOneOf: workloadsConfigKeys,
-										ForceNew:    false,
-										Description: `Configuration for resources used by DAG processor.`,
+										ForceNew:     false,
+										Computed:     true,
+										Description:  `Configuration for resources used by DAG processor.`,
 										MaxItems:     1,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
