@@ -51,6 +51,7 @@ resource "google_integration_connectors_endpoint_attachment" "sampleendpointatta
   name     = "tf-test-test-endpoint-attachment%{random_suffix}"
   location = "us-central1"
   description = "tf created description"
+  # Third party dependency, see https://github.com/GoogleCloudPlatform/magic-modules/pull/9616#discussion_r1429029155
   service_attachment = "projects/connectors-example/regions/us-central1/serviceAttachments/test"
   labels = {
     foo = "bar"
