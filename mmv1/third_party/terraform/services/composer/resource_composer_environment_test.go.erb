@@ -1142,10 +1142,10 @@ func TestAccComposerEnvironmentComposer3_basic(t *testing.T) {
 			// due to dangling firewall rules left by the Composer Environment blocking network deletion.
 			// TODO: Remove this check if firewall rules bug gets fixed by Composer.
 			{
-				PlanOnly:					 true,
+				PlanOnly:           true,
 				ExpectNonEmptyPlan: false,
-				Config:						 testAccComposerEnvironmentComposer3_basic(envName, network, subnetwork),
-				Check:							testAccCheckClearComposerEnvironmentFirewalls(t, network),
+				Config:             testAccComposerEnvironmentComposer3_basic(envName, network, subnetwork),
+				Check:              testAccCheckClearComposerEnvironmentFirewalls(t, network),
 			},
 		},
 	})
@@ -1179,10 +1179,10 @@ func TestAccComposerEnvironmentComposer3_update(t *testing.T) {
 			// due to dangling firewall rules left by the Composer Environment blocking network deletion.
 			// TODO: Remove this check if firewall rules bug gets fixed by Composer.
 			{
-				PlanOnly:					  true,
+				PlanOnly:           true,
 				ExpectNonEmptyPlan: false,
-				Config:						  testAccComposerEnvironmentComposer3_updated(envName, network, subnetwork),
-				Check:							testAccCheckClearComposerEnvironmentFirewalls(t, network),
+				Config:             testAccComposerEnvironmentComposer3_updated(envName, network, subnetwork),
+				Check:              testAccCheckClearComposerEnvironmentFirewalls(t, network),
 			},
 		},
 	})
@@ -1208,18 +1208,18 @@ func TestAccComposerEnvironmentComposer3_updateToEmpty(t *testing.T) {
 				Config: testAccComposerEnvironmentComposer3_empty(envName, network, subnetwork),
 			},
 			{
-				ResourceName:			"google_composer_environment.test",
-				ImportState:			 true,
+				ResourceName:      "google_composer_environment.test",
+				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			// This is a terrible clean-up step in order to get destroy to succeed,
 			// due to dangling firewall rules left by the Composer Environment blocking network deletion.
 			// TODO: Remove this check if firewall rules bug gets fixed by Composer.
 			{
-				PlanOnly:					  true,
+				PlanOnly:           true,
 				ExpectNonEmptyPlan: false,
-				Config:						  testAccComposerEnvironmentComposer3_updated(envName, network, subnetwork),
-				Check:							testAccCheckClearComposerEnvironmentFirewalls(t, network),
+				Config:             testAccComposerEnvironmentComposer3_updated(envName, network, subnetwork),
+				Check:              testAccCheckClearComposerEnvironmentFirewalls(t, network),
 			},
 		},
 	})
@@ -1245,18 +1245,18 @@ func TestAccComposerEnvironmentComposer3_updateFromEmpty(t *testing.T) {
 				Config: testAccComposerEnvironmentComposer3_updated(envName, network, subnetwork),
 			},
 			{
-				ResourceName:			"google_composer_environment.test",
-				ImportState:			 true,
+				ResourceName:      "google_composer_environment.test",
+				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			// This is a terrible clean-up step in order to get destroy to succeed,
 			// due to dangling firewall rules left by the Composer Environment blocking network deletion.
 			// TODO: Remove this check if firewall rules bug gets fixed by Composer.
 			{
-				PlanOnly:					  true,
+				PlanOnly:           true,
 				ExpectNonEmptyPlan: false,
-				Config:						  testAccComposerEnvironmentComposer3_updated(envName, network, subnetwork),
-				Check:							testAccCheckClearComposerEnvironmentFirewalls(t, network),
+				Config:             testAccComposerEnvironmentComposer3_updated(envName, network, subnetwork),
+				Check:              testAccCheckClearComposerEnvironmentFirewalls(t, network),
 			},
 		},
 	})
@@ -2862,8 +2862,8 @@ resource "google_composer_environment" "test" {
     software_config {
       image_version = "composer-3-airflow-2"
     }
-		enable_private_environment = true
-		enable_private_builds_only = true
+    enable_private_environment = true
+    enable_private_builds_only = true
   }
 }
 
@@ -2892,8 +2892,8 @@ resource "google_composer_environment" "test" {
     software_config {
       image_version = "composer-3-airflow-2"
     }
-		enable_private_environment = false
-		enable_private_builds_only = false
+    enable_private_environment = false
+    enable_private_builds_only = false
   }
 }
 

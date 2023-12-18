@@ -564,7 +564,7 @@ func ResourceComposerEnvironment() *schema.Resource {
 							Optional:     true,
 							ForceNew:     false,
 							AtLeastOneOf: composerConfigKeys,
-							Description:  ``,
+							Description:  `Optional. If true, a private Composer environment will be created.`,
 						},
 						"enable_private_builds_only": {
 							Type:         schema.TypeBool,
@@ -572,7 +572,7 @@ func ResourceComposerEnvironment() *schema.Resource {
 							Optional:     true,
 							ForceNew:     false,
 							AtLeastOneOf: composerConfigKeys,
-							Description:  ``,
+							Description:  `Optional. If true, builds performed during operations that install Python packages have only private connectivity to Google services. If false, the builds also have access to the internet.`,
 						},
 <% end -%>
 						"web_server_network_access_control": {
