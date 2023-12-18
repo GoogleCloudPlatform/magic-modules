@@ -18,7 +18,6 @@ require 'google/logger'
 require 'json'
 require 'provider/file_template'
 require 'provider/terraform/async'
-require 'provider/terraform/config'
 require 'provider/terraform/import'
 require 'provider/terraform/custom_code'
 require 'provider/terraform/docs'
@@ -42,8 +41,7 @@ module Provider
     RESOURCE_DIRECTORY_BETA = 'google-beta'.freeze
     RESOURCE_DIRECTORY_PRIVATE = 'google-private'.freeze
 
-    def initialize(config, api, version_name, start_time)
-      @config = config
+    def initialize(api, version_name, start_time)
       @api = api
 
       # @target_version_name is the version specified by MM for this generation
@@ -84,15 +82,6 @@ module Provider
     # Main entry point for generation.
     def generate(output_folder, types, product_path, dump_yaml, generate_code, generate_docs)
       generate_objects(output_folder, types, generate_code, generate_docs)
-
-      # Compilation has to be the last step, as some files (e.g.
-      # CONTRIBUTING.md) may depend on the list of all files previously copied
-      # or compiled.
-      # common-compile.yaml is a special file that will get compiled by the last product
-      # used in a single invocation of the compiled. It should not contain product-specific
-      # information; instead, it should be run-specific such as the version to compile at.
-      compile_product_files(output_folder) \
-        unless @config.files.nil? || @config.files.compile.nil?
 
       FileUtils.mkpath output_folder
       pwd = Dir.pwd
@@ -157,18 +146,6 @@ module Provider
           end
         end
       end.map(&:join)
-    end
-
-    # Compiles files specified within the product
-    def compile_product_files(output_folder)
-      file_template = ProductFileTemplate.new(
-        output_folder,
-        nil,
-        @api,
-        @target_version_name,
-        build_env
-      )
-      compile_file_list(output_folder, @config.files.compile, file_template)
     end
 
     # Compiles files that are shared at the provider level
@@ -793,7 +770,6 @@ module Provider
         output_folder,
         object,
         version,
-        @config,
         build_env
       )
     end

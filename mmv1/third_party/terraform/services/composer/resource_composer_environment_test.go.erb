@@ -1134,8 +1134,8 @@ func TestAccComposerEnvironmentComposer3_basic(t *testing.T) {
 				Config: testAccComposerEnvironmentComposer3_basic(envName, network, subnetwork),
 			},
 			{
-				ResourceName:			"google_composer_environment.test",
-				ImportState:			 true,
+				ResourceName:      "google_composer_environment.test",
+				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			// This is a terrible clean-up step in order to get destroy to succeed,
@@ -2760,6 +2760,9 @@ resource "google_composer_environment" "test" {
     software_config {
       image_version = "composer-3-airflow-2"
     }
+    node_config {
+      composer_internal_ipv4_cidr_block = "100.64.128.0/20"
+    }
     workloads_config {
       dag_processor {
         cpu          = 1
@@ -2796,6 +2799,9 @@ resource "google_composer_environment" "test" {
       web_server_plugins_mode = "DISABLED"
       image_version = "composer-3-airflow-2"
     }
+    node_config {
+      composer_internal_ipv4_cidr_block = "100.64.128.0/20"
+    }
     workloads_config {
       dag_processor {
         cpu          = 2
@@ -2805,7 +2811,6 @@ resource "google_composer_environment" "test" {
     }
   }
 }
-<% end -%>
 
 // use a separate network to avoid conflicts with other tests running in parallel
 // that use the default network/subnet
@@ -2822,6 +2827,7 @@ resource "google_compute_subnetwork" "test" {
 }
 `, name, network, subnetwork)
 }
+<% end -%>
 
 // WARNING: This is not actually a check and is a terrible clean-up step because Composer Environments
 // have a bug that hasn't been fixed. Composer will add firewalls to non-default networks for environments
