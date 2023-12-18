@@ -74,8 +74,10 @@ var (
 		"config.0.environment_size",
 		"config.0.master_authorized_networks_config",
 		"config.0.resilience_mode",
+<% unless version == "ga" -%>
 		"config.0.enable_private_environment",
 		"config.0.enable_private_builds_only",
+<% end -%>
 	}
 
 	recoveryConfigKeys = []string{
@@ -555,6 +557,7 @@ func ResourceComposerEnvironment() *schema.Resource {
 								},
 							},
 						},
+<% unless version == "ga" -%>
 						"enable_private_environment": {
 							Type:         schema.TypeBool,
 							Computed:     true,
@@ -571,6 +574,7 @@ func ResourceComposerEnvironment() *schema.Resource {
 							AtLeastOneOf: composerConfigKeys,
 							Description:  ``,
 						},
+<% end -%>
 						"web_server_network_access_control": {
 							Type:        schema.TypeList,
 							Optional:    true,
@@ -1184,6 +1188,7 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 			}
 		}
 
+<% unless version == "ga" -%>
 		if d.HasChange("config.0.enable_private_environment") {
 			patchObj := &composer.Environment{
 				Config: &composer.EnvironmentConfig{
@@ -1213,6 +1218,7 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 				return err
 			}
 		}
+<% end -%>
 
 		if d.HasChange("config.0.node_count") {
 			patchObj := &composer.Environment{Config: &composer.EnvironmentConfig{}}
@@ -1454,8 +1460,10 @@ func flattenComposerEnvironmentConfig(envCfg *composer.EnvironmentConfig) interf
 	transformed["node_config"] = flattenComposerEnvironmentConfigNodeConfig(envCfg.NodeConfig)
 	transformed["software_config"] = flattenComposerEnvironmentConfigSoftwareConfig(envCfg.SoftwareConfig)
 	transformed["private_environment_config"] = flattenComposerEnvironmentConfigPrivateEnvironmentConfig(envCfg.PrivateEnvironmentConfig)
+<% unless version == "ga" -%>
 	transformed["enable_private_environment"] = envCfg.PrivateEnvironmentConfig.EnablePrivateEnvironment
 	transformed["enable_private_builds_only"] = envCfg.PrivateEnvironmentConfig.EnablePrivateBuildsOnly
+<% end -%>
 	transformed["web_server_network_access_control"] = flattenComposerEnvironmentConfigWebServerNetworkAccessControl(envCfg.WebServerNetworkAccessControl)
 	transformed["database_config"] = flattenComposerEnvironmentConfigDatabaseConfig(envCfg.DatabaseConfig)
 	transformed["web_server_config"] = flattenComposerEnvironmentConfigWebServerConfig(envCfg.WebServerConfig)
@@ -1783,6 +1791,7 @@ func expandComposerEnvironmentConfig(v interface{}, d *schema.ResourceData, conf
 	}
 	transformed.PrivateEnvironmentConfig = transformedPrivateEnvironmentConfig
 
+<% unless version == "ga" -%>
 	if enablePrivateEnvironmentRaw, ok := original["enable_private_environment"]; ok {
 		if transformed.PrivateEnvironmentConfig == nil{
 			transformed.PrivateEnvironmentConfig = &composer.PrivateEnvironmentConfig{}
@@ -1796,6 +1805,7 @@ func expandComposerEnvironmentConfig(v interface{}, d *schema.ResourceData, conf
 		}
 		transformed.PrivateEnvironmentConfig.EnablePrivateBuildsOnly = enablePrivateBuildsOnlyRaw.(bool)
 	}
+<% end -%>
 
 	transformedWebServerNetworkAccessControl, err := expandComposerEnvironmentConfigWebServerNetworkAccessControl(original["web_server_network_access_control"], d, config)
 	if err != nil {
