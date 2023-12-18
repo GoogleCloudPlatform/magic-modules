@@ -69,7 +69,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     description:
-      The name of the FeatureOnlinestore. This value may be up to 60 characters, and
+      The name of the FeatureGroup. This value may be up to 60 characters, and
       valid characters are [a-z0-9_]. The first character cannot be a number.
     immutable: true
     url_param_only: true
@@ -88,16 +88,16 @@ properties:
     name: 'createTime'
     output: true
     description: |
-      The timestamp of when the featurestore was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      The timestamp of when the featureGroup was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
   - !ruby/object:Api::Type::String
     name: 'updateTime'
     output: true
     description: |
-      The timestamp of when the featurestore was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      The timestamp of when the featureGroup was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
   - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
-      A set of key/value label pairs to assign to this Featurestore.
+      A set of key/value label pairs to assign to this featureGroup.
   - !ruby/object:Api::Type::NestedObject
     name: 'bigQuery'
     required: true
