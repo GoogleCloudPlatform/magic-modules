@@ -2,6 +2,7 @@ resource "google_vmwareengine_private_cloud" "<%= ctx[:primary_resource_id] %>" 
   location    = "<%= ctx[:test_env_vars]['region'] %>-a"
   name        = "<%= ctx[:vars]['private_cloud_id'] %>"
   description = "Sample test PC."
+  type        = "TIME_LIMITED"
   network_config {
     management_cidr       = "192.168.30.0/24"
     vmware_engine_network = google_vmwareengine_network.pc-nw.id
@@ -11,7 +12,7 @@ resource "google_vmwareengine_private_cloud" "<%= ctx[:primary_resource_id] %>" 
     cluster_id = "<%= ctx[:vars]['management_cluster_id'] %>"
     node_type_configs {
       node_type_id = "standard-72"
-      node_count   = 3
+      node_count   = 1
       custom_core_count = 32
     }
   }
@@ -22,3 +23,4 @@ resource "google_vmwareengine_network" "pc-nw" {
   location    = "global"
   type        = "STANDARD"
   description = "PC network description."
+}

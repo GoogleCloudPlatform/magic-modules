@@ -22,6 +22,12 @@ resource "google_secret_manager_secret_version" "secret_version" {
 resource "google_dataform_repository" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
   name = "<%= ctx[:vars]['dataform_repository_name'] %>"
+  display_name = "<%= ctx[:vars]['dataform_repository_name'] %>"
+  npmrc_environment_variables_secret_version = google_secret_manager_secret_version.secret_version.id
+
+  labels = {
+    label_foo1 = "label-bar1"
+  }
 
   git_remote_settings {
       url = google_sourcerepo_repository.git_repository.url

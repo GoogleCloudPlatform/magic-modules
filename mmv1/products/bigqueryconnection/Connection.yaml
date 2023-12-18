@@ -119,6 +119,12 @@ examples:
     vars:
       connection_id: 'my-connection'
       database: 'projects/project/instances/instance/databases/database'
+  - !ruby/object:Provider::Terraform::Examples
+    name: "bigquery_connection_spark"
+    region_override: "US"
+    primary_resource_id: "connection"
+    vars:
+      connection_id: "my-connection"
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -167,6 +173,7 @@ properties:
       - azure
       - cloud_spanner
       - cloud_resource
+      - spark
     properties:
       - !ruby/object:Api::Type::String
         name: 'instanceId'
@@ -216,6 +223,7 @@ properties:
       - azure
       - cloud_spanner
       - cloud_resource
+      - spark
     update_mask_fields:
       - 'aws.access_role.iam_role_id'
     properties:
@@ -248,6 +256,7 @@ properties:
       - azure
       - cloud_spanner
       - cloud_resource
+      - spark
     update_mask_fields:
       - 'azure.customer_tenant_id'
       - 'azure.federated_application_client_id'
@@ -295,6 +304,7 @@ properties:
       - azure
       - cloud_spanner
       - cloud_resource
+      - spark
     properties:
       - !ruby/object:Api::Type::String
         name: 'database'
@@ -352,6 +362,7 @@ properties:
       - azure
       - cloud_spanner
       - cloud_resource
+      - spark
     send_empty_value: true
     properties:
       - !ruby/object:Api::Type::String
@@ -360,3 +371,35 @@ properties:
           The account ID of the service created for the purpose of this
           connection.
         output: true
+  - !ruby/object:Api::Type::NestedObject
+    name: spark
+    description: Container for connection properties to execute stored procedures for Apache Spark.
+      resources.
+    exactly_one_of:
+      - cloud_sql
+      - aws
+      - azure
+      - cloud_spanner
+      - cloud_resource
+      - spark
+    send_empty_value: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'serviceAccountId'
+        description: The account ID of the service created for the purpose of this
+          connection.
+        output: true
+      - !ruby/object:Api::Type::NestedObject
+        name: metastoreServiceConfig
+        description: Dataproc Metastore Service configuration for the connection.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: metastoreService
+            description: Resource name of an existing Dataproc Metastore service in the form of projects/[projectId]/locations/[region]/services/[serviceId].
+      - !ruby/object:Api::Type::NestedObject
+        name: sparkHistoryServerConfig
+        description: Spark History Server configuration for the connection.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: dataprocCluster
+            description: Resource name of an existing Dataproc Cluster to act as a Spark History Server for the connection if the form of projects/[projectId]/regions/[region]/clusters/[cluster_name].
