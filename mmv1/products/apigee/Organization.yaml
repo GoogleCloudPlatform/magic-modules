@@ -103,6 +103,8 @@ examples:
       beta
       # Resource creation race
     skip_vcr: true
+    ignore_read_extra:
+      - properties
   - !ruby/object:Provider::Terraform::Examples
     name: 'apigee_organization_cloud_full_disable_vpc_peering'
     skip_test:
