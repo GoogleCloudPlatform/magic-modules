@@ -2201,7 +2201,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		PodSecurityPolicyConfig: expandPodSecurityPolicyConfig(d.Get("pod_security_policy_config")),
 <% end -%>
 		Autoscaling:             expandClusterAutoscaling(d.Get("cluster_autoscaling"), d),
-		BinaryAuthorization:     expandBinaryAuthorization(d.Get("binary_authorization"), false),
+		BinaryAuthorization:     expandBinaryAuthorization(d.Get("binary_authorization")),
 		Autopilot: &container.Autopilot{
 			Enabled:         d.Get("enable_autopilot").(bool),
 			WorkloadPolicyConfig: workloadPolicyConfig,
@@ -3026,16 +3026,11 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s's master global access config has been updated to %v", d.Id(), config)
 	}
 
-	if d.HasChange("binary_authorization") || d.HasChange("enable_binary_authorization") {
-		req := &container.UpdateClusterRequest{}
-		if d.HasChange("enable_binary_authorization") {
-			req.Update = &container.ClusterUpdate{
-				DesiredBinaryAuthorization: expandBinaryAuthorization(d.Get("binary_authorization"), d.Get("enable_binary_authorization").(bool)),
-			}
-		} else {
-			req.Update = &container.ClusterUpdate{
-				DesiredBinaryAuthorization: expandBinaryAuthorization(d.Get("binary_authorization"), false),
-			}
+	if d.HasChange("binary_authorization") {
+		req := &container.UpdateClusterRequest{
+			Update: &container.ClusterUpdate{
+				DesiredBinaryAuthorization: expandBinaryAuthorization(d.Get("binary_authorization")),
+			},
 		}
 
 		updateF := updateFunc(req, "updating GKE binary authorization")
@@ -4832,11 +4827,11 @@ func expandNotificationConfig(configured interface{}) *container.NotificationCon
 	}
 }
 
-func expandBinaryAuthorization(configured interface{}, legacy_enabled bool) *container.BinaryAuthorization {
+func expandBinaryAuthorization(configured interface{}) *container.BinaryAuthorization {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return &container.BinaryAuthorization{
-			Enabled:         legacy_enabled,
+			Enabled:         false,
 			ForceSendFields: []string{"Enabled"},
 		}
 	}
