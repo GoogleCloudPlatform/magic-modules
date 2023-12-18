@@ -675,7 +675,7 @@ func schemaNodeConfig() *schema.Schema {
 						},
 					},
 				},
-				<% unless version == 'beta' -%>
+				<% if version == 'beta' -%>
 				"resource_manager_tags": {
 					Type:        schema.TypeMap,
 					Optional:    true,
