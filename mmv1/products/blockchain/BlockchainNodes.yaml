@@ -134,6 +134,7 @@ properties:
               Blockchain garbage collection mode.
       - !ruby/object:Api::Type::NestedObject
         name: additionalEndpoints
+        output: true
         description: |
           User-provided key-value pairs
         properties:
