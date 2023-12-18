@@ -262,7 +262,7 @@ resource "google_logging_project_bucket_config" "basic" {
 	location  = "global"
 	retention_days = %d
 	description = "retention test %d days"
-	bucket_id = "_Default"
+	bucket_id = "test-bucket"
 }
 `, context), retention, retention)
 }
@@ -279,7 +279,7 @@ resource "google_logging_project_bucket_config" "basic" {
 	project    = google_project.default.name
 	location  = "global"
 	enable_analytics = %t
-	bucket_id = "_Default"
+	bucket_id = "test-bucket"
 }
 `, context), analytics)
 }
@@ -443,7 +443,7 @@ resource "google_logging_billing_account_bucket_config" "basic" {
 	location  = "global"
 	retention_days = %d
 	description = "retention test %d days"
-	bucket_id = "_Default"
+	bucket_id = "test-bucket"
 }
 `, context), retention, retention)
 }
@@ -459,7 +459,7 @@ resource "google_logging_organization_bucket_config" "basic" {
 	location  = "global"
 	retention_days = %d
 	description = "retention test %d days"
-	bucket_id = "_Default"
+	bucket_id = "test-bucket"
 }
 `, context), retention, retention)
 }
@@ -529,7 +529,7 @@ resource "google_logging_organization_bucket_config" "basic" {
 	location  = "global"
 	retention_days = 30
 	description = "retention test 30 days"
-	bucket_id = "_Default"
+	bucket_id = "test_bucket"
 
 	index_configs {
 		field_path 	= "jsonPayload.request.url"
