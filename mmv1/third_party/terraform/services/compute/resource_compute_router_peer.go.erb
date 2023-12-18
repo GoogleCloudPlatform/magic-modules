@@ -289,13 +289,13 @@ of one of the entries in the Router.md5_authentication_keys. The field must comp
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"md5_authentication_key_name": {
+						"name": {
 							Type:     schema.TypeString,
 							Required: true,
 							Description: `[REQUIRED] Name used to identify the key.
 Must be unique within a router. Must be referenced by exactly one bgpPeer. Must comply with RFC1035.`,
 						},
-						"md5_authentication_key_value": {
+						"key": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: `Value of the key.`,
@@ -416,7 +416,7 @@ func resourceComputeRouterBgpPeerCreate(d *schema.ResourceData, meta interface{}
 		md5AuthenticationKeys which is an array which specify all the keys (name and value). The constraint here is that a key must
 		be used by exactly one bgpPeer to be considered valid.
 		*/
-		md5AuthenticationKeyName := md5AuthenticationKeyProp.(map[string]interface{})["md5AuthenticationKeyName"]
+		md5AuthenticationKeyName := md5AuthenticationKeyProp.(map[string]interface{})["name"]
 		obj["md5AuthenticationKeyName"] = md5AuthenticationKeyName
 		obj["md5AuthenticationKey"] = md5AuthenticationKeyProp
 	}
@@ -697,7 +697,7 @@ func resourceComputeRouterBgpPeerUpdate(d *schema.ResourceData, meta interface{}
 		md5AuthenticationKeys which is an array which specify all the keys (name and value). The constraint here is that a key must
 		be used by exactly one bgpPeer to be considered valid.
 		*/
-		md5AuthenticationKeyName := md5AuthenticationKeyProp.(map[string]interface{})["md5AuthenticationKeyName"]
+		md5AuthenticationKeyName := md5AuthenticationKeyProp.(map[string]interface{})["name"]
 		obj["md5AuthenticationKeyName"] = md5AuthenticationKeyName
 		obj["md5AuthenticationKey"] = md5AuthenticationKeyProp
 	}
@@ -938,7 +938,9 @@ func flattenNestedComputeRouterBgpPeerMd5AuthenticationKey(v interface{}, d *sch
 	}
 
 	transformed := make(map[string]interface{})
-	transformed["md5AuthenticationKeyName"] = v
+	transformed["name"] = v
+	//key value is not returned as it is a sensitive field
+	transformed["key"] = nil
 	return []interface{}{transformed}
 }
 
@@ -1166,18 +1168,18 @@ func expandNestedComputeRouterBgpPeerMd5AuthenticationKey(v interface{}, d tpgre
 	original := raw.(map[string]interface{})
 	transformed := make(map[string]interface{})
 
-	transformedMd5AuthenticationKeyName, err := expandNestedComputeRouterBgpPeerMd5AuthenticationKeyMd5AuthenticationKeyName(original["md5_authentication_key_name"], d, config)
+	transformedMd5AuthenticationKeyName, err := expandNestedComputeRouterBgpPeerMd5AuthenticationKeyMd5AuthenticationKeyName(original["name"], d, config)
 	if err != nil {
 		return nil, err
 	} else if val := reflect.ValueOf(transformedMd5AuthenticationKeyName); val.IsValid() && !tpgresource.IsEmptyValue(val) {
-		transformed["md5AuthenticationKeyName"] = transformedMd5AuthenticationKeyName
+		transformed["name"] = transformedMd5AuthenticationKeyName
 	}
 
-	transformedMd5AuthenticationKeyValue, err := expandNestedComputeRouterBgpPeerMd5AuthenticationKeyMd5AuthenticationKeyValue(original["md5_authentication_key_value"], d, config)
+	transformedMd5AuthenticationKeyValue, err := expandNestedComputeRouterBgpPeerMd5AuthenticationKeyMd5AuthenticationKeyValue(original["key"], d, config)
 	if err != nil {
 		return nil, err
 	} else if val := reflect.ValueOf(transformedMd5AuthenticationKeyValue); val.IsValid() && !tpgresource.IsEmptyValue(val) {
-		transformed["md5AuthenticationKeyValue"] = transformedMd5AuthenticationKeyValue
+		transformed["key"] = transformedMd5AuthenticationKeyValue
 	}
 
 	return transformed, nil
