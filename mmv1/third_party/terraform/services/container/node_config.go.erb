@@ -892,6 +892,10 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 		nc.ResourceLabels = m
 	}
 
+	if v, ok := nodeConfig["resource_manager_tags"]; ok {
+		nc.ResourceManagerTags = expandResourceManagerTags(v)
+	}
+
 	if v, ok := nodeConfig["tags"]; ok {
 		tagsList := v.([]interface{})
 		tags := []string{}
@@ -994,6 +998,11 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 	}
 
 	return nc
+}
+
+func expandResourceManagerTags(v interface{}) *container.ResourceManagerTags {
+	// expand func
+	return nil
 }
 
 func expandWorkloadMetadataConfig(v interface{}) *container.WorkloadMetadataConfig {
@@ -1231,6 +1240,17 @@ func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]inte
 	}
 
 	return config
+}
+
+func flattenResourceManagerTags(c *container.ResourceManagerTags) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	for _, rmtags := range c {
+		rmtag := container.ResourceManagerTags{
+			"tags": rmtags.Tags,
+		}
+	}
+
+	return result
 }
 
 func flattenAdvancedMachineFeaturesConfig(c *container.AdvancedMachineFeatures) []map[string]interface{} {
