@@ -15,20 +15,6 @@ data "google_compute_reservation" "reservation" {
   zone = "us-central1-a"
 }
 
-resource "google_compute_reservation" "test" {
-  name = "gce-reservation"
-  zone = "us-central1-a"
-  project = "PROJECT_ID"
-
-
-  specific_reservation {
-    count = 3
-    instance_properties {
-      min_cpu_platform = "Intel Cascade Lake"
-      machine_type     = "n2-standard-2"
-    }
-  }
-}
 ```
 
 ## Argument Reference
