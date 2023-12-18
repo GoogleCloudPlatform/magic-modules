@@ -56,6 +56,32 @@ func TestAccContainerCluster_basic(t *testing.T) {
 	})
 }
 
+func TestAccContainerCluster_resourceManagerTags(t *testing.T) {
+	t.Parallel()
+
+	var instance compute.Instance
+	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+		"instance_name": instanceName,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_resourceManagerTags(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckContainerClusterExists(
+						t, "google_compute_instance.foobar", &instance)),
+			},
+		},
+	})
+}
+
 func TestAccContainerCluster_networkingModeRoutes(t *testing.T) {
 	t.Parallel()
 
@@ -4398,11 +4424,11 @@ func testAccContainerCluster_withIncompatibleMasterVersionNodeVersion(name strin
 	resource "google_container_cluster" "gke_cluster" {
 		name = "%s"
 		location = "us-central1"
-	
+
 		min_master_version = "1.10.9-gke.5"
 		node_version = "1.10.6-gke.11"
 		initial_node_count = 1
-		
+
 	}
 	`, name)
 }
@@ -6607,7 +6633,7 @@ resource "google_container_cluster" "with_autoprovisioning" {
   min_master_version = data.google_container_engine_versions.central1a.latest_master_version
   initial_node_count = 1
   deletion_protection = false
-  
+
   network    = "%s"
   subnetwork    = "%s"
 
@@ -9072,7 +9098,7 @@ resource "google_compute_resource_policy" "policy" {
 resource "google_container_cluster" "cluster" {
   name               = "%s"
   location           = "us-central1-a"
-  
+
   node_pool {
     name               = "%s"
     initial_node_count = 2
@@ -9107,7 +9133,7 @@ func testAccContainerCluster_additional_pod_ranges_config(name string, nameCount
 			}
 		`, podRangeNamesStr)
 	}
-	
+
 	return fmt.Sprintf(`
 	resource "google_compute_network" "main" {
 		name                    = "%s"

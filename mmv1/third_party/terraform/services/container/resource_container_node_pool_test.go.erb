@@ -37,6 +37,36 @@ func TestAccContainerNodePool_basic(t *testing.T) {
 	})
 }
 
+func TestAccContainerNodePool_resourceManagerTags(t *testing.T) {
+	t.Parallel()
+
+	var instance compute.Instance
+	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+		"instance_name": instanceName,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerNodePool_basicWithClusterId(cluster, np, networkName, subnetworkName),
+			},
+			{
+				ResourceName:            "google_container_node_pool.np",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"cluster"},
+			},
+		},
+	})
+}
+
+
 func TestAccContainerNodePool_basicWithClusterId(t *testing.T) {
 	t.Parallel()
 
@@ -2600,6 +2630,10 @@ resource "google_container_node_pool" "np_with_node_config" {
     resource_labels = {
       "key1" = "foo"
     }
+
+	resource_manager_tags = {
+	  "asd" = "asd"
+	}
   }
 }
 `, cluster, networkName, subnetworkName, nodePool)
@@ -4132,7 +4166,7 @@ resource "google_container_node_pool" "with_confidential_boot_disk" {
   name               = "%s"
   location           = "us-central1-a"
   cluster            = google_container_cluster.cluster.name
-    
+
   node_config {
     image_type = "COS_CONTAINERD"
     boot_disk_kms_key = "%s"
@@ -4149,7 +4183,7 @@ resource "google_container_node_pool" "with_confidential_boot_disk" {
 }
 
 func TestAccContainerNodePool_withoutConfidentialBootDisk(t *testing.T) {
-	t.Parallel()	
+	t.Parallel()
 
 	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	np := fmt.Sprintf("tf-test-np-%s", acctest.RandString(t, 10))
@@ -4193,7 +4227,7 @@ resource "google_container_node_pool" "without_confidential_boot_disk" {
   name               = "%s"
   location           = "us-central1-a"
   cluster            = google_container_cluster.cluster.name
-    
+
   node_config {
     image_type = "COS_CONTAINERD"
     oauth_scopes = [
