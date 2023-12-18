@@ -748,21 +748,18 @@ func ResourceComposerEnvironment() *schema.Resource {
 												"cpu": {
 													Type:         schema.TypeFloat,
 													Required:     true,
-													Computed:     true,
 													ValidateFunc: validation.FloatAtLeast(0),
 													Description:  `CPU request and limit for a single Airflow triggerer replica.`,
 												},
 												"memory_gb": {
 													Type:         schema.TypeFloat,
 													Required:     true,
-													Computed:     true,
 													ValidateFunc: validation.FloatAtLeast(0),
 													Description:  `Memory (GB) request and limit for a single Airflow triggerer replica.`,
 												},
 												"count": {
 													Type:         schema.TypeInt,
 													Required:     true,
-													Computed:     true,
 													ValidateFunc: validation.IntAtLeast(0),
 													Description:  `The number of triggerers.`,
 												},
