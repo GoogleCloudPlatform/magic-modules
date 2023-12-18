@@ -302,7 +302,6 @@ The following arguments are supported:
   The configuration used for the Private IP Cloud Composer environment. Structure is [documented below](#nested_private_environment_config).
 
 * `web_server_network_access_control` -
-  (Optional, Cloud Composer 1 only)
   The network-level access control policy for the Airflow web server.
   If unspecified, no network-level access restrictions are applied.
 
@@ -769,6 +768,11 @@ The `node_config` block supports:
   destinations and services targeted from Airflow DAGs and tasks only receive 
   packets from node IP addresses instead of Pod IP addresses
   See the [documentation](https://cloud.google.com/composer/docs/enable-ip-masquerade-agent).
+
+* `composer_internal_ipv4_cidr_block` -
+  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
+  At least /20 IPv4 cidr range that will be used by Composer internal components.
+  Cannot be updated.
 
 The `software_config` block supports:
 
