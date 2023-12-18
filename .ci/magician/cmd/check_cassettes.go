@@ -102,10 +102,10 @@ func execCheckCassettes(commit string, t vcr.Tester, ctlr *source.Controller) {
 		fmt.Println("Error running VCR: ", err)
 		os.Exit(1)
 	}
-	fmt.Println("Failing tests: ", result.FailedTests)
+	fmt.Println(len(result.FailedTests), " failed tests: ", result.FailedTests)
 	// TODO(trodge) report these failures to bigquery
-	fmt.Println("Passing tests: ", result.PassedTests)
-	fmt.Println("Skipping tests: ", result.SkippedTests)
+	fmt.Println(len(result.PassedTests), " passed tests: ", result.PassedTests)
+	fmt.Println(len(result.SkippedTests), " skipped tests: ", result.SkippedTests)
 
 	if err := t.Cleanup(); err != nil {
 		fmt.Println("Error cleaning up vcr tester: ", err)
