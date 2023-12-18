@@ -23,7 +23,3 @@ versions:
     base_url: https://vmwareengine.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: VMwareEngine API
-    url: https://console.cloud.google.com/apis/library/vmwareengine.googleapis.com/

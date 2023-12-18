@@ -93,7 +93,7 @@ Set `deprecation_message` on the field. For example:
   name: 'apiFieldName'
   description: |
     MULTILINE_FIELD_DESCRIPTION
-  deprecation_message: api_field_name is deprecated and will be removed in a future major release. Use other_field_name instead.
+  deprecation_message: "`api_field_name` is deprecated and will be removed in a future major release. Use `other_field_name` instead."
 ```
 
 Replace the second sentence with an appropriate short description of the replacement path and/or the reason for
@@ -107,7 +107,7 @@ The deprecation message will automatically show up in the resource documentation
    ```go
    "api_field_name": {
       Type:       schema.String,
-      Deprecated: "api_field_name is deprecated and will be removed in a future major release. Use other_field_name instead.",
+      Deprecated: "`api_field_name` is deprecated and will be removed in a future major release. Use `other_field_name` instead.",
       ...
    }
    ```

@@ -1,18 +1,33 @@
+/*
+* Copyright 2023 Google LLC. All Rights Reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+ */
 package cmd
 
 import "magician/github"
 
 type mockGithub struct {
-	author            string
+	pullRequest       github.PullRequest
 	userType          github.UserType
 	firstReviewer     string
 	previousReviewers []string
 	calledMethods     map[string][][]any
 }
 
-func (m *mockGithub) GetPullRequestAuthor(prNumber string) (string, error) {
-	m.calledMethods["GetPullRequestAuthor"] = append(m.calledMethods["GetPullRequestAuthor"], []any{prNumber})
-	return m.author, nil
+func (m *mockGithub) GetPullRequest(prNumber string) (github.PullRequest, error) {
+	m.calledMethods["GetPullRequest"] = append(m.calledMethods["GetPullRequest"], []any{prNumber})
+	return m.pullRequest, nil
 }
 
 func (m *mockGithub) GetUserType(user string) github.UserType {
@@ -58,9 +73,4 @@ func (m *mockGithub) PostBuildStatus(prNumber string, title string, state string
 func (m *mockGithub) CreateWorkflowDispatchEvent(workflowFileName string, inputs map[string]any) error {
 	m.calledMethods["CreateWorkflowDispatchEvent"] = append(m.calledMethods["CreateWorkflowDispatchEvent"], []any{workflowFileName, inputs})
 	return nil
-}
-
-func (m *mockGithub) GetPullRequestLabelIDs(prNumber string) (map[int]struct{}, error) {
-	m.calledMethods["GetPullRequestLabelIDs"] = append(m.calledMethods["GetPullRequestLabelIDs"], []any{prNumber})
-	return nil, nil
 }

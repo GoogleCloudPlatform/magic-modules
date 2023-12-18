@@ -13,6 +13,7 @@
 
 require 'provider/terraform_oics'
 require 'fileutils'
+require 'set'
 
 module Provider
   # Code generator for a library converting terraform state to gcp objects.
