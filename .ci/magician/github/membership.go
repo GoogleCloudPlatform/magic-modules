@@ -50,6 +50,7 @@ var (
 	onVacationReviewers = []string{
 		"hao-nan-li",
 		"c2thorn",
+		"SarahFrench",
 	}
 )
 
