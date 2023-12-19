@@ -12,10 +12,14 @@
         # See the License for the specific language governing permissions and
         # limitations under the License.
 -%>
+config := meta.(*transport_tpg.Config)
 // Extract any empty fields from the parent_connection field.
-project := d.Get("project").(string)
+project, err := tpgresource.GetProject(d, config)
+if err != nil {
+	return nil, fmt.Errorf("error getting project: %s", err)
+}
 parent_connection := d.Get("parent_connection").(string)
-project, err := tpgresource.ExtractFieldByPattern("project", project, parent_connection, "projects/([a-z0-9A-Z-]*)/locations/.*")
+project, err = tpgresource.ExtractFieldByPattern("project", project, parent_connection, "projects/([a-z0-9A-Z-]*)/locations/.*")
 if err != nil {
 	return nil, fmt.Errorf("error extracting project field: %s", err)
 }
@@ -27,10 +31,7 @@ if err != nil {
 // Set project to the extracted value.
 d.Set("project", project)
 // Set all the other fields to their short forms before forming url and setting ID.
-parent_connection = tpgresource.GetResourceNameFromSelfLink(parent_connection)
 name := d.Get("name").(string)
-name = tpgresource.GetResourceNameFromSelfLink(name)
 d.Set("location", location)
-d.Set("parent_connection", parent_connection)
 d.Set("name", name)
 return obj, nil
