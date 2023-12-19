@@ -11,6 +11,8 @@ resource "google_container_cluster" "primary" {
     }
   }
   deletion_protection  = "<%= ctx[:vars]['deletion_protection'] %>"
+  network       = "<%= ctx[:vars]['network_name'] %>"
+  subnetwork    = "<%= ctx[:vars]['subnetwork_name'] %>"
 }
 
 resource "google_gke_backup_backup_plan" "basic" {
