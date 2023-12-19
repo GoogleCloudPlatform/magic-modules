@@ -83,10 +83,10 @@ parameters:
 properties:
   - !ruby/object:Api::Type::String
     name: "name"
-    description: "Output only. Name of the `Automation`. Format is `projects/{project}/locations/{location}/deliveryPipelines/{delivery_pipeline}/automations/{automation}`."
+    description: "Name of the `Automation`."
     required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    url_param_only: true
   - !ruby/object:Api::Type::String
     name: "uid"
     description: "Output only. Unique identifier of the `Automation`."
@@ -128,6 +128,7 @@ properties:
       - !ruby/object:Api::Type::Array
         name: "targets"
         description: "Contains attributes about a target."
+        required: true
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::String
@@ -146,9 +147,6 @@ properties:
         - !ruby/object:Api::Type::NestedObject
           name: "promoteReleaseRule"
           description: "Optional. `PromoteReleaseRule` will automatically promote a release from the current target to a specified target."
-          exactly_one_of:
-            - promote_release_rule
-            - advance_rollout_rule
           properties:
             - !ruby/object:Api::Type::String
               name: "id"
@@ -166,9 +164,6 @@ properties:
         - !ruby/object:Api::Type::NestedObject
           name: "advanceRolloutRule"
           description: "Optional. The `AdvanceRolloutRule` will automatically advance a successful Rollout."
-          exactly_one_of:
-            - promote_release_rule
-            - advance_rollout_rule
           properties:
             - !ruby/object:Api::Type::String
               name: "id"
