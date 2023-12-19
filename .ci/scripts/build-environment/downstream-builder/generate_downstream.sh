@@ -45,7 +45,11 @@ function clone_repo() {
     fi
 
     GITHUB_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/$UPSTREAM_OWNER/$GH_REPO
-    SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/$SCRATCH_OWNER/$GH_REPO
+    if [ "$COMMAND" == "downstream" ]; then
+      SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/$SCRATCH_OWNER/$GH_REPO-release
+    else
+      SCRATCH_PATH=https://modular-magician:$GITHUB_TOKEN@github.com/$SCRATCH_OWNER/$GH_REPO
+    fi
     mkdir -p "$(dirname $LOCAL_PATH)"
 
     echo "BASE_BRANCH: $BASE_BRANCH"
