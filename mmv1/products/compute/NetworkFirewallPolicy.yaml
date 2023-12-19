@@ -1,0 +1,79 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the License);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: NetworkFirewallPolicy
+base_url: projects/{{project}}/global/firewallPolicies
+create_url: projects/{{project}}/global/firewallPolicies
+self_link: projects/{{project}}/global/firewallPolicies/{{name}}
+update_verb: :PATCH
+description: "The Compute NetworkFirewallPolicy resource"
+legacy_long_form_project: true
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    kind: 'compute#operation'
+    path: 'name'
+    base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'targetLink'
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'status'
+    complete: 'DONE'
+    allowed:
+      - 'PENDING'
+      - 'RUNNING'
+      - 'DONE'
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error/errors'
+    message: 'message'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'network_firewall_policy_full'
+    primary_resource_id: 'policy'
+    vars:
+      policy_name: 'tf-test-policy'
+properties:
+  - !ruby/object:Api::Type::String
+    name: creationTimestamp
+    description: Creation timestamp in RFC3339 text format.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: name
+    description: User-provided name of the Network firewall policy. The name should be unique in the project in which the firewall policy is created. The name must be 1-63 characters long, and comply with RFC1035. Specifically, the name must be 1-63 characters long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])? which means the first character must be a lowercase letter, and all following characters must be a dash, lowercase letter, or digit, except the last character, which cannot be a dash.
+    required: true
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: networkFirewallPolicyId
+    description: The unique identifier for the resource. This identifier is defined by the server.
+    output: true
+    api_name: id
+  - !ruby/object:Api::Type::String
+    name: description
+    description: An optional description of this resource. Provide this property when you create the resource.
+  - !ruby/object:Api::Type::Fingerprint
+    name: fingerprint
+    description: Fingerprint of the resource. This field is used internally during updates of this resource.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: selfLink
+    description: Server-defined URL for the resource.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: selfLinkWithId
+    description: Server-defined URL for this resource with the resource id.
+    output: true
+  - !ruby/object:Api::Type::Integer
+    name: ruleTupleCount
+    description: Total count of all firewall policy rule tuples. A firewall policy can not exceed a set number of tuples.
+    output: true
