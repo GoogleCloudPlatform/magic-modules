@@ -20,7 +20,8 @@ immutable: true
 description: 'Instances are deployed to an available Google Cloud region and are accessible via their web interface.'
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation': 'https://cloud.google.com/secure-source-manager/overview/overview'
+    'Official Documentation': 'https://cloud.google.com/secure-source-manager/docs/create-instance'
+  api: 'https://cloud.google.com/secure-source-manager/docs/reference/rest/v1/projects.locations.instances'
 import_format: ['projects/{{project}}/locations/{{location}}/instances/{{instance_id}}', '{{instance_id}}']
 autogen_async: true
 async: !ruby/object:Api::OpAsync
@@ -63,6 +64,27 @@ examples:
       ])"
     vars:
       instance_id: 'my-instance'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'secure_source_manager_instance_cmek'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-instance%s\",
+      context[\"random_suffix\"\
+      ])"
+    vars:
+      instance_id: 'my-instance'
+      keyring_name: 'my-keyring'
+      key_name: 'my-key'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'secure_source_manager_instance_private'
+    pull_external: true
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-instance%s\",
+      context[\"random_suffix\"\
+      ])"
+    vars:
+      instance_id: 'my-instance'
+      ca_pool_id: 'ca-pool'
+      root_ca_id: 'root-ca'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -110,3 +132,67 @@ properties:
       - :DELETING
       - :PAUSED
       - :UNKNOWN
+  - !ruby/object:Api::Type::NestedObject
+    name: 'hostConfig'
+    description: |
+      A list of hostnames for this instance.
+    output: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'html'
+        description: 'HTML hostname.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'api'
+        description: 'API hostname.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'gitHttp'
+        description: 'Git HTTP hostname.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'gitSsh'
+        description: 'Git SSH hostname.'
+        output: true
+  - !ruby/object:Api::Type::Enum
+    name: 'stateNote'
+    description: |
+      Provides information about the current instance state.
+    output: true
+    values:
+      - :STATE_NOTE_UNSPECIFIED
+      - :PAUSED_CMEK_UNAVAILABLE
+      - :INSTANCE_RESUMING
+  - !ruby/object:Api::Type::String
+    name: 'kmsKey'
+    description: |
+      Customer-managed encryption key name, in the format projects/*/locations/*/keyRings/*/cryptoKeys/*.
+    immutable: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'privateConfig'
+    description: |
+      Private settings for private instance.
+    immutable: true
+    properties:
+      - !ruby/object:Api::Type::Boolean
+        name: 'isPrivate'
+        description: |
+          'Indicate if it's private instance.'
+        required: true
+        immutable: true
+      - !ruby/object:Api::Type::String
+        name: 'caPool'
+        description: |
+          CA pool resource, resource must in the format of `projects/{project}/locations/{location}/caPools/{ca_pool}`.
+        required: true
+        immutable: true
+      - !ruby/object:Api::Type::String
+        name: 'httpServiceAttachment'
+        description: |
+          Service Attachment for HTTP, resource is in the format of `projects/{project}/regions/{region}/serviceAttachments/{service_attachment}`.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'sshServiceAttachment'
+        description: |
+          Service Attachment for SSH, resource is in the format of `projects/{project}/regions/{region}/serviceAttachments/{service_attachment}`.
+        output: true
