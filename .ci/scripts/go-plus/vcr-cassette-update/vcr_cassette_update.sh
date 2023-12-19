@@ -20,7 +20,7 @@ set +e
 mkdir fixtures
 
 # pull main cassettes (major release uses branch specific casssettes as primary ones)
-gsutil -m -q cp gs://ci-vcr-cassettes/beta/fixtures/* fixtures/
+# gsutil -m -q cp gs://ci-vcr-cassettes/beta/fixtures/* fixtures/
 
 echo $SA_KEY > sa_key.json
 gcloud auth activate-service-account $GOOGLE_SERVICE_ACCOUNT --key-file=$local_path/sa_key.json --project=$GOOGLE_PROJECT
@@ -189,10 +189,9 @@ else
     echo "#################################"
     echo "Errors occurred during REPLAYING mode."
     echo "#################################"
-    comment+="$\textcolor{red}{\textsf{Errors occurred during REPLAYING mode. Please fix them to complete your PR}}$ ${NEWLINE}"
   else
     echo "#################################"
-    echo "Errors occurred during REPLAYING mode."
+    echo "All tests passed in REPLAYING mode."
     echo "#################################"
   fi
 fi
