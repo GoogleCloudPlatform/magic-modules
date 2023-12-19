@@ -65,8 +65,9 @@ examples:
     'fmt.Sprintf("default_collection"),
     fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
   vars:
-    collection_id: "default_collection"
-    data_store_id: "default_data_store_id"
+    display_name: "tf-test-structured-datastore"
+    industry_vertical: "GENERIC"
+    content_config: "NO_CONTENT"
 
 parameters:
   - !ruby/object:Api::Type::String

@@ -1,6 +1,7 @@
 resource "google_discoveryengine_data_store" "primary" {
   project       = "codelab-terraform-jialei"
   location      = "us-central1"
-  collection_id = "<%= ctx[:vars]['collection_id'] %>"
-  data_store_id = "<%= ctx[:vars]['data_store_id'] %>"
+  display_name = "<%= ctx[:vars]['display_name'] %>"
+  industry_vertical = "<%= ctx[:vars]['industry_vertical'] %>"
+  content_config = "<%= ctx[:vars]['content_config'] %>"
 }
