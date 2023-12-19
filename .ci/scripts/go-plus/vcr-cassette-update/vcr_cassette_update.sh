@@ -20,7 +20,7 @@ set +e
 mkdir fixtures
 
 # pull main cassettes (major release uses branch specific casssettes as primary ones)
-# gsutil -m -q cp gs://ci-vcr-cassettes/beta/fixtures/* fixtures/
+gsutil -m -q cp gs://ci-vcr-cassettes/beta/fixtures/* fixtures/
 
 echo $SA_KEY > sa_key.json
 gcloud auth activate-service-account $GOOGLE_SERVICE_ACCOUNT --key-file=$local_path/sa_key.json --project=$GOOGLE_PROJECT
@@ -49,7 +49,7 @@ if [ $? != 0 ]; then
 fi
 
 echo "running tests in REPLAYING mode now"
-TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/replaying/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test $GOOGLE_TEST_DIRECTORY -parallel $ACCTEST_PARALLELISM -v -run=TestAccComputeFirewall_ -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" > replaying_test.log
+TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/replaying/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test $GOOGLE_TEST_DIRECTORY -parallel $ACCTEST_PARALLELISM -v -run=TestAcc -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" > replaying_test.log
 
 # store replaying build log
 gsutil -h "Content-Type:text/plain" -q cp replaying_test.log gs://vcr-nightly/beta/$today/$build_id/logs/build-log/
