@@ -251,8 +251,8 @@ properties:
         name: 'vcenterNetwork'
         description:
           vcenter_network specifies vCenter network name. Inherited from the
-          admin cluster.
-        output: true
+          admin cluster if not set.
+        default_from_api: true
       - !ruby/object:Api::Type::NestedObject
         name: 'hostConfig'
         description:
