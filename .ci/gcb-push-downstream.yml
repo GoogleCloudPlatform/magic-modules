@@ -42,7 +42,7 @@ timeout: 86400s
 options:
     machineType: 'N1_HIGHCPU_32'
 
-logsBucket: 'gs:cloudbuild-downstream-builder-logs'
+logsBucket: 'gs://cloudbuild-downstream-builder-logs'
 availableSecrets:
   secretManager:
     - versionName: projects/673497134629/secrets/github-classic--repo-workflow/versions/latest
