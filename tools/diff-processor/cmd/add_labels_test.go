@@ -12,7 +12,7 @@ import (
 )
 
 var enrolledTeamsYaml = []byte(`
-services/google-x:
+service/google-x:
   resources:
   - google_x_resource`)
 
@@ -112,7 +112,7 @@ func TestAddLabelsCmdRun(t *testing.T) {
 				Labels:      []labeler.Label{},
 				PullRequest: map[string]any{},
 			},
-			expectedLabels: []string{"services/google-x"},
+			expectedLabels: []string{"service/google-x"},
 		},
 		"service labels are deduped": {
 			args: []string{"12345"},
@@ -148,7 +148,7 @@ func TestAddLabelsCmdRun(t *testing.T) {
 				Labels:      []labeler.Label{},
 				PullRequest: map[string]any{},
 			},
-			expectedLabels: []string{"services/google-x"},
+			expectedLabels: []string{"service/google-x"},
 		},
 		"existing labels are preserved": {
 			args: []string{"12345"},
@@ -173,7 +173,7 @@ func TestAddLabelsCmdRun(t *testing.T) {
 				Labels:      []labeler.Label{{Name: "override-breaking-change"}},
 				PullRequest: map[string]any{},
 			},
-			expectedLabels: []string{"override-breaking-change", "services/google-x"},
+			expectedLabels: []string{"override-breaking-change", "service/google-x"},
 		},
 		"existing service label prevents new service labels": {
 			args: []string{"12345"},
@@ -195,7 +195,7 @@ func TestAddLabelsCmdRun(t *testing.T) {
 			githubIssue: &labeler.Issue{
 				Number:      12345,
 				Body:        "Unused",
-				Labels:      []labeler.Label{{Name: "services/google-z"}},
+				Labels:      []labeler.Label{{Name: "service/google-z"}},
 				PullRequest: map[string]any{},
 			},
 			// nil indicates that the issue won't be updated at all (preserving existing labels)
@@ -241,7 +241,7 @@ func TestAddLabelsCmdRun(t *testing.T) {
 			githubIssue: &labeler.Issue{
 				Number:      12345,
 				Body:        "Unused",
-				Labels:      []labeler.Label{{Name: "services/google-z"}},
+				Labels:      []labeler.Label{{Name: "service/google-z"}},
 				PullRequest: map[string]any{},
 			},
 			expectError: true,
