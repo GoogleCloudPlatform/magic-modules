@@ -24,17 +24,6 @@ steps:
           - checkout
           - $COMMIT_SHA
 
-    # TPG
-    - name: 'gcr.io/graphite-docker-images/bash-plus'
-      entrypoint: '/workspace/.ci/scripts/bash-plus/downstream-waiter/wait_for_commit.sh'
-      id: tpg-sync
-      secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["checkout"]
-      args:
-          - 'tpg-sync'
-          - $BRANCH_NAME
-          - $COMMIT_SHA
-
     - name: 'gcr.io/graphite-docker-images/build-environment'
       entrypoint: '/workspace/.ci/scripts/build-environment/downstream-builder/generate_downstream.sh'
       secretEnv: ["GITHUB_TOKEN"]
