@@ -443,7 +443,7 @@ resource "google_logging_billing_account_bucket_config" "basic" {
 	location  = "global"
 	retention_days = %d
 	description = "retention test %d days"
-	bucket_id = "test-bucket"
+	bucket_id = "_Default"
 }
 `, context), retention, retention)
 }
@@ -459,7 +459,7 @@ resource "google_logging_organization_bucket_config" "basic" {
 	location  = "global"
 	retention_days = %d
 	description = "retention test %d days"
-	bucket_id = "test-bucket"
+	bucket_id = "_Default"
 }
 `, context), retention, retention)
 }
