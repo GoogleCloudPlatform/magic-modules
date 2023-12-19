@@ -6,9 +6,12 @@ package cmd
 import (
 	"fmt"
 	"magician/github"
+ 	"math/rand"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/GoogleCloudPlatform/magic-modules/tools/issue-labeler/labeler"
 )
 
 // requestServiceReviewersCmd represents the requestServiceReviewers command
@@ -25,78 +28,86 @@ var requestServiceReviewersCmd = &cobra.Command{
 		fmt.Println("PR Number: ", prNumber)
 
 		gh := github.NewGithubService()
-		execRequestServiceReviewers(prNumber, gh)
+		execRequestServiceReviewers(prNumber, gh, labeler.EnrolledTeamsYaml)
 	},
 }
 
-func execRequestServiceReviewers(prNumber string, gh github.GithubService) {
+func execRequestServiceReviewers(prNumber string, gh github.GithubService, enrolledTeamsYaml []byte) {
 	pullRequest, err := gh.GetPullRequest(prNumber)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	if authorUserType != github.CoreContributorUserType {
-		fmt.Println("Not core contributor - assigning reviewer")
+	enrolledTeams := make(map[string]labeler.LabelData)
+	if err := yaml.Unmarshal(enrolledTeamsYaml, &enrolledTeams); err != nil {
+		fmt.Printf("Error unmarshalling enrolled teams yaml: %s", err)
+		os.Exit(1)
+	}
 
-		previouslyInvolvedReviewers, err := gh.GetPullRequestPreviousAssignedReviewers(prNumber)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+	previousReviewers, err := gh.GetPullRequestPreviousAssignedReviewers(prNumber)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	// If more than three service labels are impacted, don't request reviews.
+	// Only request reviews from unique service teams.
+	githubTeams := make(map[string]struct{})
+	teamCount := 0
+	for _, label := range pullRequest.Labels {
+		if !strings.HasPrefix(label.Name, "service/") || label.Name == "service/terraform" {
+			continue
 		}
-
-		reviewersToRequest, newPrimaryReviewer := github.ChooseCoreReviewers(firstRequestedReviewer, previouslyInvolvedReviewers)
-
-		for _, reviewer := range reviewersToRequest {
-			err = gh.RequestPullRequestReviewer(prNumber, reviewer)
-			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
-			}
-		}
-
-		if newPrimaryReviewer != "" {
-			comment := github.FormatReviewerComment(newPrimaryReviewer, authorUserType, trusted)
-			err = gh.PostComment(prNumber, comment)
-			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
-			}
+		teamCount += 1
+		if labelData, ok := enrolledTeams[label]; ok {
+			githubTeams[labelData] = struct{}{}
 		}
 	}
 
-	// auto_run(contributor-membership-checker) will be run on every commit or /gcbrun:
-	// only triggers builds for trusted users
-	if trusted {
-		err = cb.TriggerMMPresubmitRuns(commitSha, substitutions)
+	if teamCount > 3 {
+		fmt.Println("Provider-wide change (>3 services impacted); not requesting service team reviews")
+		return
+	}
+
+	// For each service team, check if there is already a reviewer in the team list. Rerequest
+	// review if there is and choose a random reviewer from the list if there isn't.
+	previousReviewersMap = make(map[string]struct{})
+	toRequest := []string{}
+	for _, reviewer := range previousReviewers {
+		previousReviewersMap[reviewer] = struct{}{}
+	}
+
+	exitCode := 0
+	for githubTeam, _ := range githubTeams {
+		members, err := gh.GetTeamMembers("GoogleCloudPlatform", githubTeam)
 		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+			fmt.Printf("Error fetching members for GoogleCloudPlatform/%s: %s", githubTeam, err)
+			exitCode = 1
+			continue
+		}
+		hasReviewer := false
+		for _, member := range members {
+			if previousReviewersMap[member] {
+				hasReviewer = true
+				toRequest = append(toRequest, member)
+			}
+		}
+
+		if !hasReviewer {
+			toRequest = append(toRequest, members[rand.Intn(len(members))])
 		}
 	}
 
-	// in contributor-membership-checker job:
-	// 1. auto approve community-checker run for trusted users
-	// 2. add awaiting-approval label to external contributor PRs
-	if trusted {
-		err = cb.ApproveCommunityChecker(prNumber, commitSha)
+	for _, reviewer := range toRequest {
+		err = gh.RequestPullRequestReviewer(prNumber, reviewer)
 		if err != nil {
 			fmt.Println(err)
-			os.Exit(1)
+			exitCode = 1
 		}
-	} else {
-		gh.AddLabel(prNumber, "awaiting-approval")
-		targetUrl, err := cb.GetAwaitingApprovalBuildLink(prNumber, commitSha)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
-		err = gh.PostBuildStatus(prNumber, "Approve Build", "success", targetUrl, commitSha)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+	}
+	if exitCode != 0 {
+		os.Exit(1)
 	}
 }
 
