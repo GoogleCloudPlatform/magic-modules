@@ -529,7 +529,7 @@ resource "google_logging_organization_bucket_config" "basic" {
 	location  = "global"
 	retention_days = 30
 	description = "retention test 30 days"
-	bucket_id = "test_bucket"
+	bucket_id = "_Default"
 
 	index_configs {
 		field_path 	= "jsonPayload.request.url"
