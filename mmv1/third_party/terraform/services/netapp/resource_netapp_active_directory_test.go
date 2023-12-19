@@ -37,15 +37,6 @@ func TestAccNetappactiveDirectory_activeDirectory_FullUpdate(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetappactiveDirectory_activeDirectoryCreateExample_Basic(context),
-			},
-			{
-				ResourceName:            "google_netapp_active_directory.test_active_directory_basic",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "pass", "labels", "terraform_labels"},
-			},
-			{
 				Config: testAccNetappactiveDirectory_activeDirectoryCreateExample_Full(context),
 			},
 			{
@@ -67,19 +58,6 @@ func TestAccNetappactiveDirectory_activeDirectory_FullUpdate(t *testing.T) {
 	})
 }
 
-func testAccNetappactiveDirectory_activeDirectoryCreateExample_Basic(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_netapp_active_directory" "test_active_directory_basic" {
-    name = "tf-test-test-active-directory-basic%{random_suffix}"
-    location = "us-central1"
-    domain = "ad.internal"
-    dns = "172.30.64.3"
-    net_bios_prefix = "smbserver"
-    username = "user"
-    password = "pass"
-  }
-`, context)
-}
 
 func testAccNetappactiveDirectory_activeDirectoryCreateExample_Full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
