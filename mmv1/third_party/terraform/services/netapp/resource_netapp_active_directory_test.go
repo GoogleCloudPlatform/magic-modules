@@ -58,7 +58,6 @@ func TestAccNetappactiveDirectory_activeDirectory_FullUpdate(t *testing.T) {
 	})
 }
 
-
 func testAccNetappactiveDirectory_activeDirectoryCreateExample_Full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_netapp_active_directory" "test_active_directory_full" {
