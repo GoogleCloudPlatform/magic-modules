@@ -1,5 +1,5 @@
 resource google_vertex_ai_feature_online_store "<%= ctx[:primary_resource_id] %>" {
-    name = "<%= ctx[:vars]['feature_online_store_name'] %>"
+    name = "<%= ctx[:vars]['name'] %>"
     region = "us-central1"
     labels = {
         label-one = "value-one"

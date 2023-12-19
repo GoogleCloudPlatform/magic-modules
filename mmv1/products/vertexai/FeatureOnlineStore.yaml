@@ -44,7 +44,7 @@ examples:
     name: vertex_ai_feature_online_store
     primary_resource_id: feature_online_store
     vars:
-      feature_online_store_name: example_feature_online_store
+      name: example_feature_online_store
 parameters:
   - !ruby/object:Api::Type::String
     name: region
@@ -98,6 +98,7 @@ properties:
             description: The maximum number of nodes to scale up to. Must be greater than or equal to minNodeCount, and less than or equal to 10 times of 'minNodeCount'.
           - !ruby/object:Api::Type::Integer
             name: cpuUtilizationTarget
+            default_from_api: true
             description:
               A percentage of the cluster's CPU capacity. Can be from 10% to 80%.
               When a cluster's CPU utilization exceeds the target that you have set,
