@@ -48,9 +48,10 @@ func TestAccLoggingBucketConfigProject_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-		"project_name":  "tf-test-" + acctest.RandString(t, 10),
-		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"random_suffix":   acctest.RandString(t, 10),
+		"project_name":    "tf-test-" + acctest.RandString(t, 10),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -92,9 +93,10 @@ func TestAccLoggingBucketConfigProject_analyticsEnabled(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-		"project_name":  "tf-test-" + acctest.RandString(t, 10),
-		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"random_suffix":   acctest.RandString(t, 10),
+		"project_name":    "tf-test-" + acctest.RandString(t, 10),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
