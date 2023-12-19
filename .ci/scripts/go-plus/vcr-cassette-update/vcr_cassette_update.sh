@@ -157,16 +157,14 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
   echo "RECORDING Tests Report"
   if [[ -n $RECORDING_PASSED_TESTS ]]; then
     RECORDING_PASSED_TESTS_COUNT=$(echo "$RECORDING_PASSED_TESTS" | wc -l)
-    echo "Tests passed during RECORDING mode"
-    echo ""
+    echo "Tests passed during RECORDING mode:"
     echo $RECORDING_PASSED_TESTS
     echo ""
   fi
 
   if [[ -n $RECORDING_FAILED_TESTS ]]; then
     RECORDING_FAILED_TESTS_COUNT=$(echo "$RECORDING_FAILED_TESTS" | wc -l)
-    echo "Tests failed during RECORDING mode"
-    echo ""
+    echo "Tests failed during RECORDING mode:"
     echo $RECORDING_FAILED_TESTS
     echo ""
     if [[ $RECORDING_PASSED_TESTS_COUNT+$RECORDING_FAILED_TESTS_COUNT -lt $FAILED_TESTS_COUNT ]]; then
