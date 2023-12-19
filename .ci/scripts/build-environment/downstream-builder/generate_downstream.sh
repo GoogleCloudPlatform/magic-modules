@@ -175,9 +175,5 @@ if [ "$COMMITTED" == "true" ] && [ "$COMMAND" == "downstream" ]; then
 
     # Wait a few seconds, then merge the PR.
     sleep 5
-    echo "Merging PR $NEW_PR_URL"
-    curl -L -H "Authorization: token ${GITHUB_TOKEN}" \
-        -X PUT \
-        -d '{"merge_method": "squash"}' \
-        "https://api.github.com/repos/$UPSTREAM_OWNER/$GH_REPO/pulls/$NEW_PR_NUMBER/merge"
+    echo "not merging change"
 fi
