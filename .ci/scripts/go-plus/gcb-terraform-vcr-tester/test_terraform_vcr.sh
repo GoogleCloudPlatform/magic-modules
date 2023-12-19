@@ -109,11 +109,16 @@ fi
 update_status "pending"
 
 run_full_VCR=false
+
+# declare an associative array ("hashmap") to track affected service packages
 declare -A affected_services
 
 for file in $gofiles
 do
   if [[ $file = google-beta/services* ]]; then
+    # $file should be in format 'google-beta/service/SERVICE_NAME'
+    # $(echo "$file" | awk -F / '{ print $3 }') is to get the service package name
+    # separate the string with '/' and get the third part
     affected_services[$(echo "$file" | awk -F / '{ print $3 }')]=1
   elif [[ $file = google-beta/provider/provider_mmv1_resources.go ]] || [[ $file = google-beta/provider/provider_dcl_resources.go ]]; then
     echo "ignore changes in $file"
@@ -132,7 +137,7 @@ affected_services_comment="None"
 if [[ "$run_full_VCR" = true ]]; then
   echo "run full VCR tests"
   affected_services_comment="all service packages are affected"
-  TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/replaying/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test $GOOGLE_TEST_DIRECTORY -parallel $ACCTEST_PARALLELISM -v -run=TestAcc -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" > replaying_test.log
+  TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/replaying/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test $GOOGLE_TEST_DIRECTORY -parallel $ACCTEST_PARALLELISM -v -run=TestAcc -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" > replaying_test.log # write log into file
 
   test_exit_code=$?
 else
@@ -140,7 +145,7 @@ else
   for service in "${!affected_services[@]}"
   do
     echo "run VCR tests in $service"
-    TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/replaying/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta/services/$service -parallel $ACCTEST_PARALLELISM -v -run=TestAcc -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" >> replaying_test.log
+    TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/replaying/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta/services/$service -parallel $ACCTEST_PARALLELISM -v -run=TestAcc -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" >> replaying_test.log # append logs into file
 
     test_exit_code=$(($test_exit_code || $?))
     affected_services_comment+="<li>$service</li>"
