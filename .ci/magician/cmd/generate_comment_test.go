@@ -1,6 +1,22 @@
+/*
+* Copyright 2023 Google LLC. All Rights Reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+ */
 package cmd
 
 import (
+	"magician/source"
 	"reflect"
 	"testing"
 )
@@ -10,9 +26,28 @@ func TestExecGenerateComment(t *testing.T) {
 	gh := &mockGithub{
 		calledMethods: make(map[string][][]any),
 	}
-	execGenerateComment("build1", "project1", "17", "sha1", "pr1", "*******", gh, mr)
+	ctlr := source.NewController("/mock/dir/go", "modular-magician", "*******", mr)
+	env := map[string]string{
+		"BUILD_ID":     "build1",
+		"BUILD_STEP":   "17",
+		"COMMIT_SHA":   "sha1",
+		"GITHUB_TOKEN": "*******",
+		"PR_NUMBER":    "pr1",
+		"PROJECT_ID":   "project1",
+	}
+	diffProcessorEnv := map[string]string{
+		"BUILD_ID":     "build1",
+		"BUILD_STEP":   "17",
+		"COMMIT_SHA":   "sha1",
+		"GITHUB_TOKEN": "*******",
+		"NEW_REF":      "auto-pr-pr1",
+		"OLD_REF":      "auto-pr-pr1-old",
+		"PR_NUMBER":    "pr1",
+		"PROJECT_ID":   "project1",
+	}
+	execGenerateComment(env, gh, mr, ctlr)
 
-	for method, expectedCalls := range map[string][][]any{
+	for method, expectedCalls := range map[string][]ParameterList{
 		"Copy": {
 			{"/mock/dir/tpg", "/mock/dir/magic-modules/tools/diff-processor/old"},
 			{"/mock/dir/tpg", "/mock/dir/magic-modules/tools/diff-processor/new"},
@@ -29,38 +64,39 @@ func TestExecGenerateComment(t *testing.T) {
 			{"/mock/dir/magic-modules/tools/diff-processor/bin"},
 		},
 		"Run": {
-			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-pr1", "https://modular-magician:*******@github.com/modular-magician/terraform-provider-google", "/mock/dir/tpg"}, []string(nil)},
-			{"/mock/dir/tpg", "git", []string{"fetch", "origin", "auto-pr-pr1-old"}, []string(nil)},
-			{"/mock/dir/tpg", "git", []string{"diff", "origin/auto-pr-pr1-old", "origin/auto-pr-pr1", "--shortstat"}, []string(nil)},
-			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-pr1", "https://modular-magician:*******@github.com/modular-magician/terraform-provider-google-beta", "/mock/dir/tpgb"}, []string(nil)},
-			{"/mock/dir/tpgb", "git", []string{"fetch", "origin", "auto-pr-pr1-old"}, []string(nil)},
-			{"/mock/dir/tpgb", "git", []string{"diff", "origin/auto-pr-pr1-old", "origin/auto-pr-pr1", "--shortstat"}, []string(nil)},
-			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-pr1", "https://modular-magician:*******@github.com/modular-magician/terraform-google-conversion", "/mock/dir/tfc"}, []string(nil)},
-			{"/mock/dir/tfc", "git", []string{"fetch", "origin", "auto-pr-pr1-old"}, []string(nil)},
-			{"/mock/dir/tfc", "git", []string{"diff", "origin/auto-pr-pr1-old", "origin/auto-pr-pr1", "--shortstat"}, []string(nil)},
-			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-pr1", "https://modular-magician:*******@github.com/modular-magician/docs-examples", "/mock/dir/tfoics"}, []string(nil)},
-			{"/mock/dir/tfoics", "git", []string{"fetch", "origin", "auto-pr-pr1-old"}, []string(nil)},
-			{"/mock/dir/tfoics", "git", []string{"diff", "origin/auto-pr-pr1-old", "origin/auto-pr-pr1", "--shortstat"}, []string(nil)},
-			{"/mock/dir/magic-modules/tools/diff-processor", "make", []string{"build"}, []string{"OLD_REF=auto-pr-pr1-old", "NEW_REF=auto-pr-pr1"}},
-			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"breaking-changes"}, []string(nil)},
-			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"add-labels", "pr1"}, []string{"GITHUB_TOKEN=*******"}},
-			{"/mock/dir/magic-modules/tools/diff-processor", "make", []string{"build"}, []string{"OLD_REF=auto-pr-pr1-old", "NEW_REF=auto-pr-pr1"}},
-			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"breaking-changes"}, []string(nil)},
-			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"add-labels", "pr1"}, []string{"GITHUB_TOKEN=*******"}},
-			{"/mock/dir/tpgbold", "git", []string{"checkout", "origin/auto-pr-pr1-old"}, []string(nil)},
-			{"/mock/dir/tpgbold", "find", []string{".", "-type", "f", "-name", "*.go", "-exec", "sed", "-i.bak", "s~github.com/hashicorp/terraform-provider-google-beta~google/provider/old~g", "{}", "+"}, []string(nil)},
-			{"/mock/dir/tpgbold", "sed", []string{"-i.bak", "s|github.com/hashicorp/terraform-provider-google-beta|google/provider/old|g", "go.mod"}, []string(nil)},
-			{"/mock/dir/tpgbold", "sed", []string{"-i.bak", "s|github.com/hashicorp/terraform-provider-google-beta|google/provider/old|g", "go.sum"}, []string(nil)},
-			{"/mock/dir/tpgb", "find", []string{".", "-type", "f", "-name", "*.go", "-exec", "sed", "-i.bak", "s~github.com/hashicorp/terraform-provider-google-beta~google/provider/new~g", "{}", "+"}, []string(nil)},
-			{"/mock/dir/tpgb", "sed", []string{"-i.bak", "s|github.com/hashicorp/terraform-provider-google-beta|google/provider/new|g", "go.mod"}, []string(nil)},
-			{"/mock/dir/tpgb", "sed", []string{"-i.bak", "s|github.com/hashicorp/terraform-provider-google-beta|google/provider/new|g", "go.sum"}, []string(nil)},
-			{"/mock/dir/magic-modules/tools/missing-test-detector", "go", []string{"mod", "edit", "-replace", "google/provider/new=/mock/dir/tpgb"}, []string(nil)},
-			{"/mock/dir/magic-modules/tools/missing-test-detector", "go", []string{"mod", "edit", "-replace", "google/provider/old=/mock/dir/tpgbold"}, []string(nil)},
-			{"/mock/dir/magic-modules/tools/missing-test-detector", "go", []string{"mod", "tidy"}, []string(nil)},
-			{"/mock/dir/magic-modules/tools/missing-test-detector", "go", []string{"run", ".", "-services-dir=/mock/dir/tpgb/google-beta/services"}, []string(nil)},
-			{"/mock/dir/magic-modules", "git", []string{"diff", "HEAD", "origin/main", "tools/missing-test-detector"}, []string(nil)}},
+			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-pr1", "https://modular-magician:*******@github.com/modular-magician/terraform-provider-google", "/mock/dir/tpg"}, map[string]string(nil)},
+			{"/mock/dir/tpg", "git", []string{"fetch", "origin", "auto-pr-pr1-old"}, map[string]string(nil)},
+			{"/mock/dir/tpg", "git", []string{"diff", "origin/auto-pr-pr1-old", "origin/auto-pr-pr1", "--shortstat"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-pr1", "https://modular-magician:*******@github.com/modular-magician/terraform-provider-google-beta", "/mock/dir/tpgb"}, map[string]string(nil)},
+			{"/mock/dir/tpgb", "git", []string{"fetch", "origin", "auto-pr-pr1-old"}, map[string]string(nil)},
+			{"/mock/dir/tpgb", "git", []string{"diff", "origin/auto-pr-pr1-old", "origin/auto-pr-pr1", "--shortstat"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-pr1", "https://modular-magician:*******@github.com/modular-magician/terraform-google-conversion", "/mock/dir/tfc"}, map[string]string(nil)},
+			{"/mock/dir/tfc", "git", []string{"fetch", "origin", "auto-pr-pr1-old"}, map[string]string(nil)},
+			{"/mock/dir/tfc", "git", []string{"diff", "origin/auto-pr-pr1-old", "origin/auto-pr-pr1", "--shortstat"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-pr1", "https://modular-magician:*******@github.com/modular-magician/docs-examples", "/mock/dir/tfoics"}, map[string]string(nil)},
+			{"/mock/dir/tfoics", "git", []string{"fetch", "origin", "auto-pr-pr1-old"}, map[string]string(nil)},
+			{"/mock/dir/tfoics", "git", []string{"diff", "origin/auto-pr-pr1-old", "origin/auto-pr-pr1", "--shortstat"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/tools/diff-processor", "make", []string{"build"}, diffProcessorEnv},
+			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"breaking-changes"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"add-labels", "pr1"}, diffProcessorEnv},
+			{"/mock/dir/magic-modules/tools/diff-processor", "make", []string{"build"}, diffProcessorEnv},
+			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"breaking-changes"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"add-labels", "pr1"}, diffProcessorEnv},
+			{"/mock/dir/tpgbold", "git", []string{"checkout", "origin/auto-pr-pr1-old"}, map[string]string(nil)},
+			{"/mock/dir/tpgbold", "find", []string{".", "-type", "f", "-name", "*.go", "-exec", "sed", "-i.bak", "s~github.com/hashicorp/terraform-provider-google-beta~google/provider/old~g", "{}", "+"}, map[string]string(nil)},
+			{"/mock/dir/tpgbold", "sed", []string{"-i.bak", "s|github.com/hashicorp/terraform-provider-google-beta|google/provider/old|g", "go.mod"}, map[string]string(nil)},
+			{"/mock/dir/tpgbold", "sed", []string{"-i.bak", "s|github.com/hashicorp/terraform-provider-google-beta|google/provider/old|g", "go.sum"}, map[string]string(nil)},
+			{"/mock/dir/tpgb", "find", []string{".", "-type", "f", "-name", "*.go", "-exec", "sed", "-i.bak", "s~github.com/hashicorp/terraform-provider-google-beta~google/provider/new~g", "{}", "+"}, map[string]string(nil)},
+			{"/mock/dir/tpgb", "sed", []string{"-i.bak", "s|github.com/hashicorp/terraform-provider-google-beta|google/provider/new|g", "go.mod"}, map[string]string(nil)},
+			{"/mock/dir/tpgb", "sed", []string{"-i.bak", "s|github.com/hashicorp/terraform-provider-google-beta|google/provider/new|g", "go.sum"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/tools/missing-test-detector", "go", []string{"mod", "edit", "-replace", "google/provider/new=/mock/dir/tpgb"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/tools/missing-test-detector", "go", []string{"mod", "edit", "-replace", "google/provider/old=/mock/dir/tpgbold"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/tools/missing-test-detector", "go", []string{"mod", "tidy"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/tools/missing-test-detector", "go", []string{"run", ".", "-services-dir=/mock/dir/tpgb/google-beta/services"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules", "git", []string{"diff", "HEAD", "origin/main", "tools/missing-test-detector"}, map[string]string(nil)},
+		},
 	} {
-		if actualCalls, ok := mr.calledMethods[method]; !ok {
+		if actualCalls, ok := mr.Calls(method); !ok {
 			t.Fatalf("Found no calls for %s", method)
 		} else if len(actualCalls) != len(expectedCalls) {
 			t.Fatalf("Unexpected number of calls for %s, got %d, expected %d", method, len(actualCalls), len(expectedCalls))
