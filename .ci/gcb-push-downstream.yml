@@ -187,9 +187,10 @@ options:
     machineType: 'N1_HIGHCPU_32'
 
 
+logsBucket: 'gs://cloudbuild-downstream-builder-logs'
 availableSecrets:
   secretManager:
-    - versionName: projects/673497134629/secrets/github-magician-token/versions/latest
+    - versionName: projects/673497134629/secrets/github-classic--repo-workflow/versions/latest
       env: GITHUB_TOKEN
     - versionName: projects/673497134629/secrets/ci-test-project/versions/latest
       env: GOOGLE_PROJECT
