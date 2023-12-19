@@ -229,7 +229,7 @@ func ResourceComposerEnvironment() *schema.Resource {
 										Computed:         true,
 										Optional:         true,
 										ForceNew:         false,
-										ConflictsWith:    []string{"config.0.node_config.0.composer_network_attachment"}
+										ConflictsWith:    []string{"config.0.node_config.0.composer_network_attachment"},
 										DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 										Description:      `The Compute Engine machine type used for cluster instances, specified as a name or relative resource name. For example: "projects/{project}/zones/{zone}/machineTypes/{machineType}". Must belong to the enclosing environment's project and region/zone. The network must belong to the environment's project. If unspecified, the "default" network ID in the environment's project is used. If a Custom Subnet Network is provided, subnetwork must also be provided.`,
 									},
@@ -238,9 +238,9 @@ func ResourceComposerEnvironment() *schema.Resource {
 										Computed:         true,
 										Optional:         true,
 										ForceNew:         false,
-										ConflictsWith:    []string{"config.0.node_config.0.composer_network_attachment"}
+										ConflictsWith:    []string{"config.0.node_config.0.composer_network_attachment"},
 										DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
-										Description:      `The Compute Engine subnetwork to be used for machine communications, , specified as a self-link, relative resource name (e.g. "projects/{project}/regions/{region}/subnetworks/{subnetwork}"), or by name. If subnetwork is provided, network must also be provided and the subnetwork must belong to the enclosing environment's project and region.`,
+										Description:      `The Compute Engine subnetwork to be used for machine communications, specified as a self-link, relative resource name (e.g. "projects/{project}/regions/{region}/subnetworks/{subnetwork}"), or by name. If subnetwork is provided, network must also be provided and the subnetwork must belong to the enclosing environment's project and region.`,
 									},
 <% unless version == "ga" -%>
 									"composer_network_attachment": {
@@ -1084,19 +1084,20 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 		}
 
 <% unless version == "ga" -%>
-		if d.HasChange("config.0.node_config.0.network") {
-			// step 1: update with empty network
-			patchObj := &composer.Environment{
+		is_composer_3 := strings.Contains(d.Get("config.0.software_config.0.image_version").(string), "composer-3")
+		if (d.HasChange("config.0.node_config.0.network") || d.HasChange("config.0.node_config.0.subnetwork")) && is_composer_3 {
+			// step 1: update with empty network and subnetwork
+			patchObjEmpty := &composer.Environment{
 				Config: &composer.EnvironmentConfig{
 					NodeConfig: &composer.NodeConfig{},
 				},
 			}
-			err = resourceComposerEnvironmentPatchField("config.nodeConfig.network", userAgent, patchObj, d, tfConfig)
+			err = resourceComposerEnvironmentPatchField("config.nodeConfig.network,config.nodeConfig.subnetwork", userAgent, patchObjEmpty, d, tfConfig)
 			if err != nil {
 				return err
 			}
 
-			// step 2: update with new network
+			// step 2: update with new network and subnetwork
 			patchObj := &composer.Environment{
 				Config: &composer.EnvironmentConfig{
 					NodeConfig: &composer.NodeConfig{},
@@ -1104,35 +1105,9 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 			}
 			if config != nil && config.NodeConfig != nil {
 				patchObj.Config.NodeConfig.Network = config.NodeConfig.Network
-			}
-			err = resourceComposerEnvironmentPatchField("config.nodeConfig.network", userAgent, patchObj, d, tfConfig)
-			if err != nil {
-				return err
-			}
-		}
-
-		if d.HasChange("config.0.node_config.0.subnetwork") {
-			// step 1: update with empty subnetwork
-			patchObj := &composer.Environment{
-				Config: &composer.EnvironmentConfig{
-					NodeConfig: &composer.NodeConfig{},
-				},
-			}
-			err = resourceComposerEnvironmentPatchField("config.nodeConfig.subnetwork", userAgent, patchObj, d, tfConfig)
-			if err != nil {
-				return err
-			}
-
-			// step 2: update with new subnetwork
-			patchObj := &composer.Environment{
-				Config: &composer.EnvironmentConfig{
-					NodeConfig: &composer.NodeConfig{},
-				},
-			}
-			if config != nil && config.NodeConfig != nil {
 				patchObj.Config.NodeConfig.Subnetwork = config.NodeConfig.Subnetwork
 			}
-			err = resourceComposerEnvironmentPatchField("config.nodeConfig.subnetwork", userAgent, patchObj, d, tfConfig)
+			err = resourceComposerEnvironmentPatchField("config.nodeConfig.network,config.nodeConfig.subnetwork", userAgent, patchObj, d, tfConfig)
 			if err != nil {
 				return err
 			}
@@ -1140,12 +1115,12 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 
 		if d.HasChange("config.0.node_config.0.composer_network_attachment") {
 			// step 1: update with empty composer_network_attachment
-			patchObj := &composer.Environment{
+			patchObjEmpty := &composer.Environment{
 				Config: &composer.EnvironmentConfig{
 					NodeConfig: &composer.NodeConfig{},
 				},
 			}
-			err = resourceComposerEnvironmentPatchField("config.nodeConfig.composerNetworkAttachment", userAgent, patchObj, d, tfConfig)
+			err = resourceComposerEnvironmentPatchField("config.nodeConfig.composerNetworkAttachment", userAgent, patchObjEmpty, d, tfConfig)
 			if err != nil {
 				return err
 			}
