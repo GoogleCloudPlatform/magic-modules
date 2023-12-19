@@ -675,14 +675,12 @@ func schemaNodeConfig() *schema.Schema {
 						},
 					},
 				},
-				<% if version == 'beta' -%>
 				"resource_manager_tags": {
 					Type:        schema.TypeMap,
 					Optional:    true,
 					ForceNew:    true,
 					Description: `A map of resource manager tag keys and values to be attached to the nodes.`,
 				},
-				<% end -%>
 				<% unless version == 'ga' -%>
 				"enable_confidential_storage": {
 						Type:     schema.TypeBool,
