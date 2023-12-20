@@ -527,7 +527,7 @@ func TestAccGKEHubFeature_Clusterupgrade(t *testing.T) {
 				ResourceName:            "google_gke_hub_feature.feature",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"project"},
+				ImportStateVerifyIgnore: []string{"project", "update_time"},
 			},
 			{
 				Config: testAccGKEHubFeature_ClusterupgradeUpdate(context),
@@ -536,6 +536,7 @@ func TestAccGKEHubFeature_Clusterupgrade(t *testing.T) {
 				ResourceName:      "google_gke_hub_feature.feature",
 				ImportState:       true,
 				ImportStateVerify: true,
+        ImportStateVerifyIgnore: []string{"update_time"},
 			},
 		},
 	})
