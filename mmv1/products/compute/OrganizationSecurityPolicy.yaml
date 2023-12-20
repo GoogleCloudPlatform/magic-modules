@@ -18,6 +18,9 @@ base_url: 'locations/global/securityPolicies?parentId={{parent}}'
 self_link: 'locations/global/securityPolicies/{{policy_id}}'
 create_url: 'locations/global/securityPolicies?parentId={{parent}}'
 update_verb: :PATCH
+deprecation_message: >-
+  `google_compute_organizationsecuritypolicy` is deprecated and will be removed in the next major release
+  of the provider. Use `google_compute_firewall_policy` instead.
 description: |
   Organization security policies are used to control incoming/outgoing traffic.
 references: !ruby/object:Api::Resource::ReferenceLinks
