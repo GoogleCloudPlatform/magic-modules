@@ -74,6 +74,34 @@ resource "google_sql_user" "iam_service_account_user" {
 }
 ```
 
+Example using [Cloud SQL IAM Group authentication](https://cloud.google.com/sql/docs/mysql/iam-authentication#iam-group-auth).
+
+```hcl
+resource "random_id" "db_name_suffix" {
+  byte_length = 4
+}
+
+resource "google_sql_database_instance" "main" {
+  name             = "main-instance-${random_id.db_name_suffix.hex}"
+  database_version = "MYSQL_8_0"
+
+  settings {
+    tier = "db-f1-micro"
+
+    database_flags {
+      name  = "cloudsql.iam_authentication"
+      value = "on"
+    }
+  }
+}
+
+resource "google_sql_user" "iam_group_user" {
+  name     = "iam_group@example.com"
+  instance = google_sql_database_instance.main.name
+  type     = "CLOUD_IAM_GROUP"
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
