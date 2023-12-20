@@ -484,7 +484,12 @@ func resourceComputeRouterBgpPeerCreate(d *schema.ResourceData, meta interface{}
 
 	log.Printf("[DEBUG] Finished creating RouterBgpPeer %q: %#v", d.Id(), res)
 
-	return resourceComputeRouterBgpPeerRead(d, meta)
+	err = resourceComputeRouterBgpPeerRead(d, meta)
+	if err != nil {
+		return err
+	}
+
+	return d.Set("md5_authentication_key", md5AuthenticationKeyProp)
 }
 
 func resourceComputeRouterBgpPeerRead(d *schema.ResourceData, meta interface{}) error {
@@ -750,7 +755,12 @@ func resourceComputeRouterBgpPeerUpdate(d *schema.ResourceData, meta interface{}
 		return err
 	}
 
-	return resourceComputeRouterBgpPeerRead(d, meta)
+	err = resourceComputeRouterBgpPeerRead(d, meta)
+	if err != nil {
+		return err
+	}
+
+	return d.Set("md5_authentication_key", []interface{}{md5AuthenticationKeyProp})
 }
 
 func resourceComputeRouterBgpPeerDelete(d *schema.ResourceData, meta interface{}) error {
@@ -1338,6 +1348,9 @@ func resourceComputeRouterBgpPeerPatchUpdateEncoder(d *schema.ResourceData, meta
 		return nil, err
 	}
 
+	log.Printf("[DEBUG] inside UpdateEncoder - bgpPeerItems:  %+v, md5AuthenticationKeys - %+v", bgpPeerItems, md5AuthenticationKeys)
+	log.Printf("[DEBUG] inside UpdateEncoder - obj:  %+v", obj)
+
 	idx, item, err := resourceComputeRouterBgpPeerFindNestedObjectInList(d, meta, bgpPeerItems)
 	if err != nil {
 		return nil, err
@@ -1348,32 +1361,54 @@ func resourceComputeRouterBgpPeerPatchUpdateEncoder(d *schema.ResourceData, meta
 		return nil, fmt.Errorf("Unable to update RouterBgpPeer %q - not found in list", d.Id())
 	}
 
-	var kvp map[string]interface{}
+	var md5AuthenticationKey map[string]interface{}
+	var deletedKeyName interface{}
+	var wasPresent bool
 	val, ok := obj["md5AuthenticationKey"]
 	if ok {
-		kvp = val.(map[string]interface{})
+		md5AuthenticationKey = val.(map[string]interface{})
 		//remove key from this map as it not needed here
 		delete(obj, "md5AuthenticationKey")
+	} else {
+		//check if key used to be present
+		deletedKeyName, wasPresent = item["md5AuthenticationKeyName"]
+		if wasPresent {
+			delete(item, "md5AuthenticationKeyName")
+		}
 	}
 
-	// Merge new object into old.
+	//merging the bgpRouterPeer objects
 	for k, v := range obj {
 		item[k] = v
 	}
+	log.Printf("[DEBUG] UpdateEncoder - sending new object to be updated %#v", item)
+
+	//merging the md5AuthenticationKeys objects
+	isKeyNew := true
+	log.Printf("[DEBUG] UpdateEncoder - currentMd5AuthenticationKeys %#v", md5AuthenticationKeys)
+	for i, val := range md5AuthenticationKeys {
+		key := val.(map[string]interface{})
+		if key["name"] == md5AuthenticationKey["name"] {
+			key = md5AuthenticationKey
+			md5AuthenticationKeys[i] = key
+			isKeyNew = false
+		}
+
+		if key["name"] == deletedKeyName {
+			//if the key was deleted, then remove it from the parent router object as well
+			md5AuthenticationKeys = append(md5AuthenticationKeys[:i], md5AuthenticationKeys[i+1:]...)
+			log.Printf("[DEBUG] deleting unused key from parent object ,md5AuthenticationKeys - %+v", md5AuthenticationKeys)
+		}
+
+	}
 	bgpPeerItems[idx] = item
+	if isKeyNew {
+		md5AuthenticationKeys = append(md5AuthenticationKeys, md5AuthenticationKey)
+	}
 
-	var res map[string]interface{}
-
-	// Return list with new item added
-	if ok {
-		res = map[string]interface{}{
-			"bgpPeers":              append(bgpPeerItems, obj),
-			"md5AuthenticationKeys": append(md5AuthenticationKeys, kvp),
-		}
-	} else {
-		res = map[string]interface{}{
-			"bgpPeers": bgpPeerItems,
-		}
+	res := map[string]interface{}{
+		"bgpPeers":              bgpPeerItems,
+		"md5AuthenticationKeys": md5AuthenticationKeys,
 	}
 
 	return res, nil
@@ -1382,7 +1417,7 @@ func resourceComputeRouterBgpPeerPatchUpdateEncoder(d *schema.ResourceData, meta
 // PatchDeleteEncoder handles creating request data to PATCH parent resource
 // with list excluding object to delete.
 func resourceComputeRouterBgpPeerPatchDeleteEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
-	currItems, _, err := resourceComputeRouterBgpPeerListForPatch(d, meta)
+	currItems, md5AuthenticationKeys, err := resourceComputeRouterBgpPeerListForPatch(d, meta)
 	if err != nil {
 		return nil, err
 	}
@@ -1396,9 +1431,19 @@ func resourceComputeRouterBgpPeerPatchDeleteEncoder(d *schema.ResourceData, meta
 		return nil, tpgresource.Fake404("nested", "ComputeRouterBgpPeer")
 	}
 
+	//if the removed bgp peer has some md5AuthKey associated with it, then remove the key from the router parent object as well
+	keyName := item["md5AuthenticationKeyName"]
+	for i, val := range md5AuthenticationKeys {
+		key := val.(map[string]interface{})
+		if key["name"] == keyName {
+			md5AuthenticationKeys = append(md5AuthenticationKeys[:i], md5AuthenticationKeys[i+1:]...)
+		}
+	}
+
 	updatedItems := append(currItems[:idx], currItems[idx+1:]...)
 	res := map[string]interface{}{
-		"bgpPeers": updatedItems,
+		"bgpPeers":              updatedItems,
+		"md5AuthenticationKeys": md5AuthenticationKeys,
 	}
 
 	return res, nil
