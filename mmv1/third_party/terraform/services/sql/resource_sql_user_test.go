@@ -92,10 +92,10 @@ func TestAccSqlUser_iamGroupUser(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      "google_sql_user.user",
-				ImportStateId:     fmt.Sprintf("%s/%s/iam-group-auth-test-group@google.com", envvar.GetTestProjectFromEnv(), instance),
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_sql_user.user",
+				ImportStateId:           fmt.Sprintf("%s/%s/iam-group-auth-test-group@google.com", envvar.GetTestProjectFromEnv(), instance),
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"password"},
 			},
 		},
@@ -546,8 +546,8 @@ resource "google_sql_database_instance" "instance" {
     database_flags {
 		name  = "cloudsql_iam_authentication"
 		value = "on"
+		}
 	}
-  }
 }
 
 resource "google_sql_user" "user" {
