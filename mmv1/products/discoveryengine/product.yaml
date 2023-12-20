@@ -17,7 +17,7 @@ display_name: Discovery Engine
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
-    base_url: https://discoveryengine.googleapis.com/v1/
+    base_url: https://discoveryengine.googleapis.com/v1alpha/
   - !ruby/object:Api::Product::Version
     name: beta
     base_url: https://discoveryengine.googleapis.com/v1/

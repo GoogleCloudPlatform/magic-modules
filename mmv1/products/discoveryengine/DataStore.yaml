@@ -50,7 +50,7 @@ async: !ruby/object:Api::OpAsync
     path: "error"
     message: "message"
 iam_policy: !ruby/object:Api::Resource::IamPolicy
-  parent_resource_attribute: 'data_store'
+  parent_resource_attribute: 'data_store_id'
   method_name_separator: ':'
   fetch_iam_policy_verb: :POST
   import_format:
@@ -61,13 +61,16 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
 examples:
 - !ruby/object:Provider::Terraform::Examples
   name: "discoveryengine_datastore_basic"
+  primary_resource_id: 'primary'
   primary_resource_name:
     'fmt.Sprintf("default_collection"),
     fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
   vars:
+    collection_id: "default_collection"
+    data_store_id: "tf-test-structured-datastore-id"
     display_name: "tf-test-structured-datastore"
-    industry_vertical: "GENERIC"
-    content_config: "NO_CONTENT"
+    industry_vertical: GENERIC
+    content_config: NO_CONTENT
 
 parameters:
   - !ruby/object:Api::Type::String
