@@ -59,7 +59,6 @@ resource "google_vertex_ai_feature_online_store" "featureonlinestore" {
    cpu_utilization_target = 80
  }
 }
-  force_destroy = true
 }
 
 resource "google_bigquery_dataset" "tf-test-dataset" {
@@ -133,7 +132,6 @@ max_node_count = 2
 cpu_utilization_target = 80
 }
 }
-force_destroy = true
 }
 
 resource "google_bigquery_dataset" "tf-test-dataset" {

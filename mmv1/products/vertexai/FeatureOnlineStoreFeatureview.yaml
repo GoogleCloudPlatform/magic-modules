@@ -115,10 +115,10 @@ properties:
     description: |
       Configures how data is supposed to be extracted from a BigQuery source to be loaded onto the FeatureOnlineStore.
     conflicts:
-      - featureRegistrySource
+      - feature_registry_source
     exactly_one_of:
-      - bigQuerySource
-      - featureRegistrySource
+      - big_query_source
+      - feature_registry_source
     properties:
       - !ruby/object:Api::Type::String
         name: 'uri'
@@ -134,10 +134,10 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: 'featureRegistrySource'
     conflicts:
-      - bigQuerySource
+      - big_query_source
     exactly_one_of:
-      - bigQuerySource
-      - featureRegistrySource
+      - big_query_source
+      - feature_registry_source
     description: |
       Configures the features from a Feature Registry source that need to be loaded onto the FeatureOnlineStore.
     properties:
