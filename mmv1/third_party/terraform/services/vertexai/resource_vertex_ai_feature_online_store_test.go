@@ -6,16 +6,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestAccVertexAIFeatureOnlineStore_vertexAiFeatureonlinestoreWithBigtable_updated(t *testing.T) {
+func TestAccVertexAIFeatureOnlineStore_updated(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":          envvar.GetTestOrgFromEnv(t),
-		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
-		"random_suffix":   acctest.RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -23,20 +20,19 @@ func TestAccVertexAIFeatureOnlineStore_vertexAiFeatureonlinestoreWithBigtable_up
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVertexAIFeatureOnlineStore_vertexAiFeatureonlinestoreWithBigtable_basic(context),
+				Config: testAccVertexAIFeatureOnlineStore_basic(context),
 			},
 			{
-				ResourceName:            "google_vertex_ai_feature_online_store.featureonlinestore_bigtable",
+				ResourceName:            "google_vertex_ai_feature_online_store.feature_online_store",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"name", "etag", "region", "force_destroy", "labels", "terraform_labels"},
 			},
 			{
-				Config: testAccVertexAIFeatureOnlineStore_vertexAiFeatureonlinestoreWithBigtableExample_update(context),
+				Config: testAccVertexAIFeatureOnlineStore_updated(context),
 			},
 			{
-
-				ResourceName:            "google_vertex_ai_feature_online_store.featureonlinestore_bigtable",
+				ResourceName:            "google_vertex_ai_feature_online_store.feature_online_store",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"name", "etag", "region", "force_destroy", "labels", "terraform_labels"},
@@ -45,20 +41,21 @@ func TestAccVertexAIFeatureOnlineStore_vertexAiFeatureonlinestoreWithBigtable_up
 	})
 }
 
-func testAccVertexAIFeatureOnlineStore_vertexAiFeatureonlinestoreWithBigtable_basic(context map[string]interface{}) string {
+func testAccVertexAIFeatureOnlineStore_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-##FeatureOnlineStore With BigTable
-resource "google_vertex_ai_feature_online_store" "featureonlinestore_bigtable" {
-  name     = "tf_test_terraform2%{random_suffix}"
-  labels = {
-    foo = "bar"
-  }
-  region   = "us-central1"
-  bigtable {
-    auto_scaling {
-        min_node_count = 1
-        max_node_count = 3
-        cpu_utilization_target = 50
+resource google_vertex_ai_feature_online_store "feature_online_store" {
+    name = "tf_test_feature_online_store%{random_suffix}"
+    region = "us-central1"
+    labels = {
+        label-one = "value-one"
+    }
+
+    bigtable {
+        auto_scaling {
+            min_node_count = 1
+            max_node_count = 2
+            cpu_utilization_target = 60
+        }
     }
   }
   force_destroy = true
@@ -66,20 +63,21 @@ resource "google_vertex_ai_feature_online_store" "featureonlinestore_bigtable" {
 `, context)
 }
 
-func testAccVertexAIFeatureOnlineStore_vertexAiFeatureonlinestoreWithBigtableExample_update(context map[string]interface{}) string {
+func testAccVertexAIFeatureOnlineStore_updated(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-##FeatureOnlineStore With BigTable
-resource "google_vertex_ai_feature_online_store" "featureonlinestore_bigtable" {
-  name     = "tf_test_terraform2%{random_suffix}"
-  labels = {
-    foo1 = "bar1"
-  }
-  region   = "us-central1"
-  bigtable {
-    auto_scaling {
-        min_node_count = 2
-        max_node_count = 4
-        cpu_utilization_target = 60
+resource google_vertex_ai_feature_online_store "feature_online_store" {
+    name = "tf_test_feature_online_store%{random_suffix}"
+    region = "us-central1"
+    labels = {
+        label-one = "value-one"
+		label-two = "value-two"
+    }
+
+    bigtable {
+        auto_scaling {
+            min_node_count = 2
+            max_node_count = 3
+        }
     }
   }
   force_destroy = true
