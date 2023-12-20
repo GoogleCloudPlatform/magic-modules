@@ -544,10 +544,10 @@ resource "google_sql_database_instance" "instance" {
   settings {
     tier = "db-f1-micro"
     database_flags {
-		name  = "cloudsql_iam_authentication"
-		value = "on"
-		}
-	}
+      name  = "cloudsql_iam_authentication"
+      value = "on"
+    }
+  }
 }
 
 resource "google_sql_user" "user" {
