@@ -14,9 +14,9 @@
 --- !ruby/object:Api::Resource
 # API resource name
 name: 'DiscoverConfig'
-base_url: 'projects/{{project}}/locations/{{location}}/discoveryConfigs'
-self_link: 'projects/{{project}}/locations/{{location}}/resourcenames/discoveryConfigs'
-create_url: 'projects/{{project}}/locations/{{location}}/resourcenames?resourceId={{name}}'
+base_url: '{{parent}}/discoveryConfigs'
+self_link: '{{parent}}/discoveryConfigs'
+create_url: '{{parent}}/discoveryConfigs'
 create_verb: POST
 update_mask: true
 # Resource description for the provider documentation.
@@ -26,7 +26,61 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Schedule inspection scan': 'https://cloud.google.com/dlp/docs/schedule-inspection-scan'
   api: 'https://cloud.google.com/dlp/docs/reference/rest/v2/projects.locations.discoveryConfigs'
+id_format: '{{parent}}/discoveryConfigs/{{name}}'
+parameters:
+  - !ruby/object:Api::Type::String
+    name: 'parent'
+    description: |
+      The parent of the inspect template in any of the following formats:
 
+      * `projects/{{project}}`
+      * `projects/{{project}}/locations/{{location}}`
+      * `organizations/{{organization_id}}`
+      * `organizations/{{organization_id}}/locations/{{location}}`
+    required: true
+    immutable: true
+    url_param_only: true
+properties:
+  - !ruby/object:Api::Type::NestedObject
+    name: 'DiscoveryConfig'
+    description: Configuration for discovery to scan resources for profile generation. Only one discovery configuration may exists per organization, folder, or porject. 
+    properties:
+      - !ruby/object:Api:Type:String 
+        name: name
+        description: Unique resource name for the DiscoveryConfig, assigned by the service when the DiscoveryConfig is created.
+      - !ruby/object:Api:Type:String
+        name: displayName
+        description: Display Name (max 1000 Chars)
+      - !ruby/object:Api:Type:NestedObject 
+        name: 'OrgConfig'
+        properties: 
+        - !ruby/object:Api:Type:String
+          name: projectId
+          description: The project that will run the scan. The DLP service account that exists within this project must have access to all resources that are profiled, and the cloud DLP API must be enabled. 
+        - !ruby/object:Api:Type:NestedObject
+          name: location 
+          description: The data to scan folder org or project 
+          properties: 
+          - !ruby/object:Api:Type:String
+          name: organizationId 
+          description: The ID of an organization to scan 
+          - !ruby/object:Api:Type:String
+          name: folderId
+          description: The ID for the folder within an organization to scan 
+      - !ruby/object:Api:Type:String 
+        name: 'inspectTemplates[]'
+        description: Detection logic for profile generation 
+      - !ruby/object:Api:Type:NestedObject 
+        name: 'actions[]'
+        description: Actions to execute at the completion of scanning
+        properties: 
+        - !ruby/object:Api:Type:NestedObject
+          name:  exportData
+          description: Export data profiles into a provided location 
+          properties: 
+          - !
+      - !ruby/object:Api:Type:String 
+        name: 
 
 
 # Overrides the HTTP verb used to create a new resource.
