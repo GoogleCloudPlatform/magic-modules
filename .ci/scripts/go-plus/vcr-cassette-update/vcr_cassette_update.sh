@@ -19,8 +19,12 @@ set +e
 # cassette retrieval
 mkdir fixtures
 
-# pull main cassettes (major release uses branch specific casssettes as primary ones)
+# pull main cassettes
 gsutil -m -q cp gs://ci-vcr-cassettes/beta/fixtures/* fixtures/
+
+# main cassettes backup
+# incase nightly run goes wrong. this will be used to restore the cassettes
+gsutil -m -q cp gs://ci-vcr-cassettes/beta/fixtures/* gs://vcr-nightly/beta/$today/$build_id/main_cassettes_back/fixtures/
 
 echo $SA_KEY > sa_key.json
 gcloud auth activate-service-account $GOOGLE_SERVICE_ACCOUNT --key-file=$local_path/sa_key.json --project=$GOOGLE_PROJECT
@@ -143,9 +147,6 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
     echo "#################################"
     exit 0
   fi
-
-  # RECORDING_FAILED_TESTS=$(grep "^--- FAIL: TestAcc" recording_test.log | awk -v today=$today -v build_id=$build_id '{print "`"$3"`[[Error message](https://storage.cloud.google.com/vcr-nightly/beta/"today"/"build_id"/logs/build-log/recording_build/"$3"_recording_test.log)] [[Debug log](https://storage.cloud.google.com/vcr-nightly/beta/"today"/"build_id"/logs/recording/"$3".log)]"}')
-  # RECORDING_PASSED_TESTS=$(grep "^--- PASS: TestAcc" recording_test.log | awk -v today=$today -v build_id=$build_id '{print "`"$3"`[[Debug log](https://storage.cloud.google.com/vcr-nightly/beta/"today"/"build_id"/logs/recording/"$3".log)]"}')
 
   RECORDING_FAILED_TESTS=$(grep "^--- FAIL: TestAcc" recording_test.log | awk '{print $3}')
   RECORDING_PASSED_TESTS=$(grep "^--- PASS: TestAcc" recording_test.log | awk '{print $3}')
