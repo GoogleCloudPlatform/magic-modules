@@ -1,0 +1,22 @@
+config := meta.(*transport_tpg.Config)
+if err := tpgresource.ParseImportId([]string{
+	"(?P<feature_online_store>.+)/featureViews/(?P<name>[^/]+)",
+}, d, config); err != nil {
+	return nil, err
+}
+
+// Replace import id for the resource id
+id, err := tpgresource.ReplaceVars(d, config, "{{feature_online_store}}/featureViews/{{name}}")
+if err != nil {
+	return nil, fmt.Errorf("Error constructing id: %s", err)
+}
+d.SetId(id)
+
+featureOnlineStore := d.Get("feature_online_store").(string)
+
+re := regexp.MustCompile("^projects/(.+)/locations/(.+)/featureOnlineStores/(.+)$")
+if parts := re.FindStringSubmatch(featureOnlineStore); parts != nil {
+	d.Set("region", parts[2])
+}
+
+return []*schema.ResourceData{d}, nil
