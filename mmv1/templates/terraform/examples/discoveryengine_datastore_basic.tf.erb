@@ -1,7 +1,7 @@
 resource "google_discoveryengine_data_store" "primary" {
   project       = "codelab-terraform-jialei"
   location      = "global"
-  data_store_id    = "tf-test-structured-datastore-id"
+  data_store_id    = "<%= ctx[:vars]['data_store_id'] %>"
   display_name = "tf-test-structured-datastore"
   industry_vertical = "GENERIC"
   content_config = "NO_CONTENT"
