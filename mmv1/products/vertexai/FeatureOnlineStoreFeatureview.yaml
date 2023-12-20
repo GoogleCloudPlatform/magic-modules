@@ -53,19 +53,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'vertex_ai_featureonlinestore_featureview'
     primary_resource_id: 'featureview'
-    primary_resource_name:
-      "fmt.Sprintf(\"projects/%s/locations/%s/featureOnlinestore/%s\"\
-      , envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv(),
-      fmt.Sprintf(\"terraform%s\"\
-      , context[\"random_suffix\"])), fmt.Sprintf(\"terraform%s\",
-      context[\"random_suffix\"\
-      ])"
     vars:
       name: 'tf_test_fv1'
-      project: 'appeng-flex'
-    test_env_vars:
-      org_id: :ORG_ID
-      billing_account: :BILLING_ACCT
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_create: templates/terraform/constants/vertex_ai_featureonlinestore_featureview.go.erb
   pre_delete: templates/terraform/constants/vertex_ai_featureonlinestore_featureview.go.erb
