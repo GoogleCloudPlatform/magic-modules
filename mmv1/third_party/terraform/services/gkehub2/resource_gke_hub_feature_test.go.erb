@@ -582,7 +582,7 @@ resource "google_gke_hub_feature" "feature" {
   location = "global"
   spec {
     clusterupgrade {
-      upstream_fleets = [tostring(google_project.project_2.number)]
+      upstream_fleets = [google_project.project_2.number]
       post_conditions {
         soaking = "120s"
       }
