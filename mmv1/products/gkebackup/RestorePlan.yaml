@@ -43,11 +43,15 @@ examples:
       ])"
     vars:
       name: 'restore-all-ns'
+      network_name: 'default'
+      subnetwork_name: 'default'
     test_env_vars:
       project: :PROJECT_NAME
       deletion_protection: 'true'
     test_vars_overrides:
       deletion_protection: 'false'
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      subnetwork_name: 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       deletion_protection: 'false'
   - !ruby/object:Provider::Terraform::Examples
@@ -55,11 +59,15 @@ examples:
     primary_resource_id: 'rollback_ns'
     vars:
       name: 'rollback-ns'
+      network_name: 'default'
+      subnetwork_name: 'default'
     test_env_vars:
       project: :PROJECT_NAME
       deletion_protection: 'true'
     test_vars_overrides:
       deletion_protection: 'false'
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      subnetwork_name: 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       deletion_protection: 'false'
   - !ruby/object:Provider::Terraform::Examples
@@ -67,11 +75,15 @@ examples:
     primary_resource_id: 'rollback_app'
     vars:
       name: 'rollback-app'
+      network_name: 'default'
+      subnetwork_name: 'default'
     test_env_vars:
       project: :PROJECT_NAME
       deletion_protection: 'true'
     test_vars_overrides:
       deletion_protection: 'false'
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      subnetwork_name: 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       deletion_protection: 'false'
   - !ruby/object:Provider::Terraform::Examples
@@ -79,11 +91,15 @@ examples:
     primary_resource_id: 'all_cluster_resources'
     vars:
       name: 'all-groupkinds'
+      network_name: 'default'
+      subnetwork_name: 'default'
     test_env_vars:
       project: :PROJECT_NAME
       deletion_protection: 'true'
     test_vars_overrides:
       deletion_protection: 'false'
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      subnetwork_name: 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       deletion_protection: 'false'
   - !ruby/object:Provider::Terraform::Examples
@@ -91,11 +107,15 @@ examples:
     primary_resource_id: 'rename_ns'
     vars:
       name: 'rename-ns'
+      network_name: 'default'
+      subnetwork_name: 'default'
     test_env_vars:
       project: :PROJECT_NAME
       deletion_protection: 'true'
     test_vars_overrides:
       deletion_protection: 'false'
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      subnetwork_name: 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       deletion_protection: 'false'
   - !ruby/object:Provider::Terraform::Examples
@@ -103,11 +123,15 @@ examples:
     primary_resource_id: 'transform_rule'
     vars:
       name: 'transform-rule'
+      network_name: 'default'
+      subnetwork_name: 'default'
     test_env_vars:
       project: :PROJECT_NAME
       deletion_protection: 'true'
     test_vars_overrides:
       deletion_protection: 'false'
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      subnetwork_name: 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       deletion_protection: 'false'
 skip_sweeper: true

@@ -45,8 +45,12 @@ examples:
       name: 'basic-plan'
       cluster_name: 'basic-cluster'
       deletion_protection: 'true'
+      network_name: 'default'
+      subnetwork_name: 'default'
     test_vars_overrides:
       deletion_protection: 'false'
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      subnetwork_name: 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       deletion_protection: 'false'
     test_env_vars:
@@ -58,8 +62,12 @@ examples:
       name: 'autopilot-plan'
       cluster_name: 'autopilot-cluster'
       deletion_protection: 'true'
+      network_name: 'default'
+      subnetwork_name: 'default'
     test_vars_overrides:
       deletion_protection: 'false'
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      subnetwork_name: 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       deletion_protection: 'false'
   - !ruby/object:Provider::Terraform::Examples
@@ -70,8 +78,12 @@ examples:
       cluster_name: 'cmek-cluster'
       key_name: 'backup-key'
       deletion_protection: 'true'
+      network_name: 'default'
+      subnetwork_name: 'default'
     test_vars_overrides:
       deletion_protection: 'false'
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      subnetwork_name: 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       deletion_protection: 'false'
     test_env_vars:
@@ -83,8 +95,12 @@ examples:
       name: 'full-plan'
       cluster_name: 'full-cluster'
       deletion_protection: 'true'
+      network_name: 'default'
+      subnetwork_name: 'default'
     test_vars_overrides:
       deletion_protection: 'false'
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      subnetwork_name: 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       deletion_protection: 'false'
     test_env_vars:
