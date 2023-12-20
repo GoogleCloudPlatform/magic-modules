@@ -18,11 +18,11 @@ package cmd
 import "magician/github"
 
 type mockGithub struct {
-	pullRequest       github.PullRequest
-	userType          github.UserType
-	firstReviewer     string
-	previousReviewers []string
-	calledMethods     map[string][][]any
+	pullRequest        github.PullRequest
+	userType           github.UserType
+	requestedReviewers []github.User
+	previousReviewers  []github.User
+	calledMethods      map[string][][]any
 }
 
 func (m *mockGithub) GetPullRequest(prNumber string) (github.PullRequest, error) {
@@ -35,13 +35,13 @@ func (m *mockGithub) GetUserType(user string) github.UserType {
 	return m.userType
 }
 
-func (m *mockGithub) GetPullRequestRequestedReviewer(prNumber string) (string, error) {
-	m.calledMethods["GetPullRequestRequestedReviewer"] = append(m.calledMethods["GetPullRequestRequestedReviewer"], []any{prNumber})
-	return m.firstReviewer, nil
+func (m *mockGithub) GetPullRequestRequestedReviewers(prNumber string) ([]github.User, error) {
+	m.calledMethods["GetPullRequestRequestedReviewers"] = append(m.calledMethods["GetPullRequestRequestedReviewers"], []any{prNumber})
+	return m.requestedReviewers, nil
 }
 
-func (m *mockGithub) GetPullRequestPreviousAssignedReviewers(prNumber string) ([]string, error) {
-	m.calledMethods["GetPullRequestPreviousAssignedReviewers"] = append(m.calledMethods["GetPullRequestPreviousAssignedReviewers"], []any{prNumber})
+func (m *mockGithub) GetPullRequestPreviousReviewers(prNumber string) ([]github.User, error) {
+	m.calledMethods["GetPullRequestPreviousReviewers"] = append(m.calledMethods["GetPullRequestPreviousReviewers"], []any{prNumber})
 	return m.previousReviewers, nil
 }
 
