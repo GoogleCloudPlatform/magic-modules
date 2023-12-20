@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-func TestAccNetappbackupVault_netappBackupVaultExample(t *testing.T) {
+func TestAccNetappbackupVault_netappBackupVaultExample_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
