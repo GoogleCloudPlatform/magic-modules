@@ -115,6 +115,8 @@ properties:
     name: 'virtualMachine'
     exactly_one_of:
       - virtual_machine
+    update_verb: :POST
+    update_url: 'projects/{{project}}/locations/{{location}}/runtimes/{{name}}:switch'
     description: |
       Use a Compute Engine VM image to start the managed notebook instance.
     properties:
