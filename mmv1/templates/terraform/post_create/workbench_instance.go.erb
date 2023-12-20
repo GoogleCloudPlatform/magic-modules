@@ -1,0 +1,3 @@
+if err := waitForWorkbenchInstanceActive(d, config, d.Timeout(schema.TimeoutCreate) - time.Minute); err != nil {
+  return fmt.Errorf("Workbench instance %q did not reach ACTIVE state: %q", d.Get("name").(string), err)
+}
