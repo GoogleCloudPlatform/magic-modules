@@ -85,6 +85,23 @@ properties:
     name: 'labels'
     description: |
       Labels with user-defined metadata to apply to this resource.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'primary'
+    description: |
+      A copy of the primary CryptoKeyVersion that will be used by cryptoKeys.encrypt when this CryptoKey is given in EncryptRequest.name.
+      Keys with purpose ENCRYPT_DECRYPT may have a primary. For other keys, this field will be unset.
+    output: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          The resource name for this CryptoKeyVersion.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'state'
+        description: |
+          The current state of the CryptoKeyVersion.
+        output: true
   - !ruby/object:Api::Type::String
     name: 'purpose'
     description: |
