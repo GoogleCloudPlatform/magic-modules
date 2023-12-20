@@ -161,7 +161,7 @@ properties:
         diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
   - !ruby/object:Api::Type::NestedObject
     name: restrictedExportConfig
-    description: if set, restricted export configuration will be propagated and enforced on the linked dataset.
+    description: If set, restricted export configuration will be propagated and enforced on the linked dataset.
     properties:
       - !ruby/object:Api::Type::Boolean
         name: 'enabled'
