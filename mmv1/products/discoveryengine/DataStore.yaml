@@ -22,9 +22,9 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   # TODO: Update the link to the REST API reference for the resource from v1alpha to v1.
   api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1alpha/projects.locations.collections.dataStores'
 
-base_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataStores'
-self_link: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataStores/{{data_store_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/collections/{{collectionId}}/dataStores?dataStoreId={{data_store_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores'
+self_link: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores?dataStoreId={{data_store_id}}'
 update_verb: :PATCH
 update_mask: true
 
@@ -55,7 +55,7 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   fetch_iam_policy_verb: :POST
   import_format:
     [
-      'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataStores/{{data_store_id}}',
+      'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}',
     ]
 
 examples:
@@ -63,8 +63,7 @@ examples:
   name: "discoveryengine_datastore_basic"
   primary_resource_id: 'primary'
   primary_resource_name:
-    'fmt.Sprintf("default_collection"),
-    fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
+    'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
   vars:
     collection_id: "default_collection"
     data_store_id: "tf-test-structured-datastore-id"
@@ -80,13 +79,6 @@ parameters:
     url_param_only: true
     description: |
       The geographic location where the data store should reside.
-  - !ruby/object:Api::Type::String
-    name: 'collectionId'
-    required: true
-    immutable: true
-    url_param_only: true
-    description: |
-      The unique id of the collection for configuring resources and access to a set of data stores.
   - !ruby/object:Api::Type::String
     name: 'dataStoreId'
     required: true
