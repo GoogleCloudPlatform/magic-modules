@@ -12,11 +12,4 @@ if err != nil {
 }
 d.SetId(id)
 
-// feature_group := d.Get("feature_group").(string)
-//
-// re := regexp.MustCompile("^projects/(.+)/locations/(.+)/featureGroups/(.+)$")
-// if parts := re.FindStringSubmatch(feature_group); parts != nil {
-// 	d.Set("region", parts[2])
-// }
-
 return []*schema.ResourceData{d}, nil
