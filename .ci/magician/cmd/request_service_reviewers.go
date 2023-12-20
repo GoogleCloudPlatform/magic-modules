@@ -18,12 +18,12 @@ package cmd
 import (
 	"fmt"
 	"magician/github"
- 	"math/rand"
+	"math/rand"
 	"os"
 	"strings"
 
-	"github.com/spf13/cobra"
 	"github.com/GoogleCloudPlatform/magic-modules/tools/issue-labeler/labeler"
+	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 )
 
