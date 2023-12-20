@@ -86,6 +86,7 @@ properties:
     description: The resource name of the Feature Online Store. This value may be up to 60 characters, and
       valid characters are [a-z0-9_]. The first character cannot be a number.
     immutable: true
+    required: true
     url_param_only: true
     pattern: projects/{{project}}/locations/{{region}}/featureOnlineStores/{{name}}
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
@@ -112,6 +113,9 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: bigtable
     description: Settings for Cloud Bigtable instance that will be created to serve featureValues for all FeatureViews under this FeatureOnlineStore.
+    exactly_one_of:
+      - bigtable
+      - optimized
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: autoScaling
@@ -136,7 +140,7 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: optimized
     description:
-      Contains settings for the Optimized store that will be created to serve featureValues for all FeatureViews under this FeatureOnlineStore
+      Settings for the Optimized store that will be created to serve featureValues for all FeatureViews under this FeatureOnlineStore
     conflicts:
       - embeddingManagement
     exactly_one_of:
@@ -159,12 +163,12 @@ properties:
       - !ruby/object:Api::Type::String
         name: publicEndpointDomainName
         description: |
-          populated with the domain name to use for this FeatureOnlineStore
+          Domain name to use for this FeatureOnlineStore
         output: true
       - !ruby/object:Api::Type::String
         name: serviceAttachment
         description: |
-          name of the service attachment resource. Populated if private service connect is enabled and after FeatureViewSync is created.
+          Name of the service attachment resource. Applicable only if private service connect is enabled and after FeatureViewSync is created.
         output: true
       - !ruby/object:Api::Type::NestedObject
         name: privateServiceConnectConfig

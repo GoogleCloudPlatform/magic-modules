@@ -18,6 +18,7 @@ func TestAccVertexAIFeatureOnlineStore_updated(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckVertexAIFeatureOnlineStoreDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccVertexAIFeatureOnlineStore_basic(context),
@@ -57,7 +58,6 @@ resource google_vertex_ai_feature_online_store "feature_online_store" {
             cpu_utilization_target = 60
         }
     }
-  }
   force_destroy = true
 }
 `, context)
@@ -79,7 +79,6 @@ resource google_vertex_ai_feature_online_store "feature_online_store" {
             max_node_count = 3
         }
     }
-  }
   force_destroy = true
 }
 `, context)
