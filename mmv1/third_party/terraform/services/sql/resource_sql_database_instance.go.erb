@@ -787,6 +787,7 @@ is set to true. Defaults to ZONAL.`,
 							Optional:     true,
 							ForceNew:     true,
 							AtLeastOneOf: replicaConfigurationKeys,
+							Sensitive:    true,
 							Description:  `PEM representation of the trusted CA's x509 certificate.`,
 						},
 						"client_certificate": {
@@ -794,6 +795,7 @@ is set to true. Defaults to ZONAL.`,
 							Optional:     true,
 							ForceNew:     true,
 							AtLeastOneOf: replicaConfigurationKeys,
+							Sensitive:    true,
 							Description:  `PEM representation of the replica's x509 certificate.`,
 						},
 						"client_key": {
@@ -801,6 +803,7 @@ is set to true. Defaults to ZONAL.`,
 							Optional:     true,
 							ForceNew:     true,
 							AtLeastOneOf: replicaConfigurationKeys,
+							Sensitive:    true,
 							Description:  `PEM representation of the replica's private key. The corresponding public key in encoded in the client_certificate.`,
 						},
 						"connect_retry_interval": {
@@ -865,8 +868,9 @@ is set to true. Defaults to ZONAL.`,
 				Description: `The configuration for replication.`,
 			},
 			"server_ca_cert": {
-				Type:     schema.TypeList,
-				Computed: true,
+				Type:       schema.TypeList,
+				Computed:   true,
+				Sensitive:  true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"cert": {
