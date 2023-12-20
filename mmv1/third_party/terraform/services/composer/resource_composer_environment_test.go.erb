@@ -1218,7 +1218,7 @@ func TestAccComposerEnvironmentComposer3_updateToEmpty(t *testing.T) {
 			{
 				PlanOnly:           true,
 				ExpectNonEmptyPlan: false,
-				Config:             Config: testAccComposerEnvironmentComposer3_empty(envName, network, subnetwork),
+				Config:             testAccComposerEnvironmentComposer3_empty(envName, network, subnetwork),
 				Check:              testAccCheckClearComposerEnvironmentFirewalls(t, network),
 			},
 		},
