@@ -43,10 +43,19 @@ description: Vertex AI Feature Online Store provides a centralized repository fo
 autogen_async: false
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: vertex_ai_feature_online_store
-    primary_resource_id: feature_online_store
+    name: 'vertex_ai_featureonlinestore_with_bigtable'
+    primary_resource_id: 'featureonlinestore'
+    primary_resource_name: "fmt.Sprintf(\"terraform%s\",
+      context[\"random_suffix\"\
+      ])"
     vars:
-      name: example_feature_online_store
+      name: 'terraform2'
+      project: 'appeng-flex'
+    test_env_vars:
+      org_id: :ORG_ID
+      billing_account: :BILLING_ACCT
+    ignore_read_extra:
+      - 'force_destroy'
   - !ruby/object:Provider::Terraform::Examples
     name: 'vertex_ai_featureonlinestore_with_beta_fields_optimized'
     primary_resource_id: 'featureonlinestore'
@@ -121,12 +130,16 @@ properties:
     name: 'labels'
     description: |
       A set of key/value label pairs to assign to this Featurestore.
+  - !ruby/object:Api::Type::String
+    name: state
+    output: true
+    description: The state of the Feature Online Store. See the possible states in [this link](https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featureOnlineStores#state).
   - !ruby/object:Api::Type::NestedObject
     name: 'dedicatedServingEndpoint'
     description: |
-       The dedicated serving endpoint for this FeatureOnlineStore, which is different from common vertex service endpoint.
-    min_version: beta
+       The dedicated serving endpoint for this FeatureOnlineStore, which is different from common vertex service endpoint. Only need to set when you choose Optimized storage type or enable EmbeddingManagement. Will use public endpoint by default.
     default_from_api: true
+    min_version: beta
     properties:
       - !ruby/object:Api::Type::String
         name: 'publicEndpointDomainName'
@@ -142,18 +155,14 @@ properties:
         name: 'privateServiceConnectConfig'
         description: |
           Private service connect config.
-        default_from_api: true
         properties:
           - !ruby/object:Api::Type::Boolean
             name: 'enablePrivateServiceConnect'
             required: true
-            default_from_api: true
             description: |
               If set to true, customers will use private service connection to send request. Otherwise, the connection will set to public endpoint.
           - !ruby/object:Api::Type::Array
             name: 'projectAllowlist'
-            required: true
-            default_from_api: true
             description: |
               A list of Projects from which the forwarding rule will target the service attachment.
             item_type: Api::Type::String
@@ -161,6 +170,8 @@ properties:
     name: 'embeddingManagement'
     description: |
       The settings for embedding management in FeatureOnlineStore. Embedding management can only be used with BigTable.
+    conflicts:
+      - optimized
     min_version: beta
     properties:
       - !ruby/object:Api::Type::Boolean
@@ -172,8 +183,6 @@ properties:
     name: 'bigtable'
     description: |
       Contains settings for the Cloud Bigtable instance that will be created to serve featureValues for all FeatureViews under this FeatureOnlineStore.
-    conflicts:
-      - optimized
     exactly_one_of:
       - bigtable
       - optimized
@@ -198,12 +207,13 @@ properties:
             name: 'cpuUtilizationTarget'
             description: |
               A percentage of the cluster's CPU capacity. Can be from 10% to 80%. When a cluster's CPU utilization exceeds the target that you have set, Bigtable immediately adds nodes to the cluster. When CPU utilization is substantially lower than the target, Bigtable removes nodes. If not set will default to 50%.
+            default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: 'optimized'
     description:
       Contains settings for the Optimized store that will be created to serve featureValues for all FeatureViews under this FeatureOnlineStore
     conflicts:
-      - bigtable
+      - embeddingManagement
     exactly_one_of:
       - bigtable
       - optimized

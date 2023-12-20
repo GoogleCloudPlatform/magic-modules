@@ -49,7 +49,7 @@ func testAccVertexAIFeatureOnlineStore_vertexAiFeatureonlinestoreWithBigtable_ba
 	return acctest.Nprintf(`
 ##FeatureOnlineStore With BigTable
 resource "google_vertex_ai_feature_online_store" "featureonlinestore_bigtable" {
-  name     = "terraform2%{random_suffix}"
+  name     = "tf_test_terraform2%{random_suffix}"
   labels = {
     foo = "bar"
   }
@@ -70,7 +70,7 @@ func testAccVertexAIFeatureOnlineStore_vertexAiFeatureonlinestoreWithBigtableExa
 	return acctest.Nprintf(`
 ##FeatureOnlineStore With BigTable
 resource "google_vertex_ai_feature_online_store" "featureonlinestore_bigtable" {
-  name     = "terraform2%{random_suffix}"
+  name     = "tf_test_terraform2%{random_suffix}"
   labels = {
     foo1 = "bar1"
   }
