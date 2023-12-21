@@ -12,6 +12,7 @@ timeout: 20000s
 options:
     machineType: 'N1_HIGHCPU_32'
 
+logsBucket: 'gs://cloudbuild-vcr-nightly-logs'
 availableSecrets:
   secretManager:
     - versionName: projects/673497134629/secrets/github-magician-token/versions/latest

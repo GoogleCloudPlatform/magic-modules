@@ -27,7 +27,7 @@ gsutil -m -q cp gs://ci-vcr-cassettes/beta/fixtures/* fixtures/
 
 # main cassettes backup
 # incase nightly run goes wrong. this will be used to restore the cassettes
-gsutil -m -q cp fixtures/* gs://vcr-nightly/beta/$today/$build_id/main_cassettes_back/fixtures/
+gsutil -m -q cp fixtures/* gs://vcr-nightly/beta/$today/$build_id/main_cassettes_backup/fixtures/
 
 mkdir testlog
 mkdir testlog/replaying
