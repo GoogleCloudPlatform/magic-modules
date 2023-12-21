@@ -320,6 +320,4 @@ properties:
       the private service access connection for example, "test-default"
       associated with IP range 10.0.0.0/29.
     ignore_read: true
-    default_from_api: true
-    is_set: true
     item_type: Api::Type::String
