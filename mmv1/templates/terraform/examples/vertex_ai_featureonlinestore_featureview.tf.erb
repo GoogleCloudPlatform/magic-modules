@@ -1,5 +1,5 @@
 resource "google_vertex_ai_feature_online_store" "featureonlinestore" {
-  name = "tf_test_featureonlinestore12"
+  name = "<%= ctx[:vars]['name'] %>"
   labels = {
     foo = "bar"
   }
@@ -15,7 +15,7 @@ resource "google_vertex_ai_feature_online_store" "featureonlinestore" {
 
 resource "google_bigquery_dataset" "tf-test-dataset" {
 
-  dataset_id    = "tf_test_dataset1_featureview1"
+  dataset_id    = "<%= ctx[:vars]['name'] %>"
   friendly_name = "test"
   description   = "This is a test description"
   location      = "US"
@@ -25,7 +25,7 @@ resource "google_bigquery_table" "tf-test-table" {
   deletion_protection = false
 
   dataset_id = google_bigquery_dataset.tf-test-dataset.dataset_id
-  table_id   = "tf_test_bq_table"
+  table_id   = "<%= ctx[:vars]['name'] %>"
   schema     = <<EOF
   [
   {
@@ -52,7 +52,8 @@ EOF
 
 resource "google_vertex_ai_feature_onlinestore_featureview" "<%= ctx[:primary_resource_id] %>" {
   name                 = "<%= ctx[:vars]['name'] %>"
-  feature_online_store = google_vertex_ai_feature_online_store.featureonlinestore.id
+  region               = "us-central1"
+  feature_online_store = google_vertex_ai_feature_online_store.featureonlinestore.name
   sync_config {
     cron = "0 0 * * *"
   }

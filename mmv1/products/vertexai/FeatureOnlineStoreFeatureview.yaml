@@ -13,9 +13,9 @@
 
 --- !ruby/object:Api::Resource
 name: FeatureOnlinestoreFeatureview
-base_url: '{{feature_online_store}}/featureViews'
-create_url: '{{feature_online_store}}/featureViews?featureViewId={{name}}'
-self_link: '{{feature_online_store}}/featureViews/{{name}}'
+base_url: projects/{{project}}/locations/{{region}}/featureOnlineStores/{{feature_online_store}}/featureViews
+create_url: projects/{{project}}/locations/{{region}}/featureOnlineStores/{{feature_online_store}}/featureViews?featureViewId={{name}}
+self_link: projects/{{project}}/locations/{{region}}/featureOnlineStores/{{feature_online_store}}/featureViews/{{name}}
 update_verb: :PATCH
 update_mask: true
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -42,34 +42,33 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
-  include_project: true
 description: |-
   FeatureView is representation of values that the FeatureOnlineStore will serve based on its syncConfig.
-import_format: ['{{feature_online_store}}/featureViews/{{name}}']
+import_format:
+  [
+    'projects/{{project}}/locations/{{region}}/featureOnlineStores/{{feature_online_store}}/featureViews/{{name}}',
+  ]
 autogen_async: false
-# Skipping the sweeper due to the non-standard base_url
-skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'vertex_ai_featureonlinestore_featureview'
     primary_resource_id: 'featureview'
     vars:
-      name: 'tf_test_fv1'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  pre_create: templates/terraform/constants/vertex_ai_featureonlinestore_featureview.go.erb
-  pre_delete: templates/terraform/constants/vertex_ai_featureonlinestore_featureview.go.erb
-  custom_import: templates/terraform/custom_import/vertex_ai_featureonlinestore_featureview.go.erb
-  extra_schema_entry: templates/terraform/extra_schema_entry/vertex_ai_featureonlinestore_featureview.go.erb
-  encoder: templates/terraform/encoders/vertex_ai_featureonlinestore_featureview.go.erb
+      name: 'example_feature_view'
 parameters:
   - !ruby/object:Api::Type::String
     name: featureOnlineStore
     description:
-      The name of the FeatureOnlineStore to use, in the format
-      projects/{project}/locations/{region}/featureOnlineStores/{featureOnlineStore}.
+      The name of the FeatureOnlineStore to use for the featureview.
     url_param_only: true
     immutable: true
     required: true
+  - !ruby/object:Api::Type::String
+    name: 'region'
+    description: The region for the resource. It should be the same as the featureonlinestore region.
+    required: true
+    immutable: true
+    url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -78,8 +77,6 @@ properties:
       valid characters are [a-z0-9_]. The first character cannot be a number.
     immutable: true
     url_param_only: true
-    pattern: 'projects/{{project}}/locations/{{region}}/featureOnlineStores/{{featureOnlineStore}}/featureViews/{{name}}'
-    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::String
     name: 'etag'
     description: Used to perform consistent read-modify-write updates.
@@ -114,11 +111,6 @@ properties:
     name: 'bigQuerySource'
     description: |
       Configures how data is supposed to be extracted from a BigQuery source to be loaded onto the FeatureOnlineStore.
-    conflicts:
-      - feature_registry_source
-    exactly_one_of:
-      - big_query_source
-      - feature_registry_source
     properties:
       - !ruby/object:Api::Type::String
         name: 'uri'
@@ -131,30 +123,3 @@ properties:
         description: |
           Columns to construct entityId / row keys. Start by supporting 1 only.
         item_type: Api::Type::String
-  - !ruby/object:Api::Type::NestedObject
-    name: 'featureRegistrySource'
-    conflicts:
-      - big_query_source
-    exactly_one_of:
-      - big_query_source
-      - feature_registry_source
-    description: |
-      Configures the features from a Feature Registry source that need to be loaded onto the FeatureOnlineStore.
-    properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: 'featureGroups'
-        required: true
-        description: |
-          List of features that need to be synced to Online Store.
-        properties:
-          - !ruby/object:Api::Type::String
-            name: 'featureGroupId'
-            required: true
-            description: |
-              Identifier of the feature group.
-          - !ruby/object:Api::Type::Array
-            name: featureIds
-            required: true
-            description: |
-              Identifiers of features under the feature group.
-            item_type: Api::Type::String

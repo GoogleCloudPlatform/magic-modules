@@ -21,6 +21,7 @@ func TestAccVertexAIFeatureOnlinestoreFeatureview_vertexAiFeatureonlinestoreFeat
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckVertexAIFeatureOnlinestoreFeatureviewDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccVertexAIFeatureOnlinestoreFeatureview_vertexAiFeatureonlinestoreFeatureview_basic(context),
@@ -63,7 +64,7 @@ resource "google_vertex_ai_feature_online_store" "featureonlinestore" {
 
 resource "google_bigquery_dataset" "tf-test-dataset" {
 
-  dataset_id                  = "tf_test_dataset1_featureview1"
+  dataset_id                  = "tf_test_dataset1_featureview12"
   friendly_name               = "test"
   description                 = "This is a test description"
   location                    = "US"
@@ -100,7 +101,11 @@ EOF
 
 resource "google_vertex_ai_feature_onlinestore_featureview" "featureview" {
    name = "tf_test_tf_test_fv1%{random_suffix}"
-    feature_online_store = google_vertex_ai_feature_online_store.featureonlinestore.id
+   region   = "us-central1"
+   labels = {
+    foo = "bar"
+  }
+    feature_online_store = google_vertex_ai_feature_online_store.featureonlinestore.name
     sync_config {
       cron = "0 0 * * *"
     }
@@ -122,7 +127,7 @@ func testAccVertexAIFeatureOnlinestoreFeatureview_vertexAiFeatureonlinestoreFeat
 resource "google_vertex_ai_feature_online_store" "featureonlinestore" {
 name     = "tf_test_featureonlinestore12"
 labels = {
-foo = "bar"
+foo1 = "bar1"
 }
 region   = "us-central1"
 bigtable {
@@ -136,7 +141,7 @@ cpu_utilization_target = 80
 
 resource "google_bigquery_dataset" "tf-test-dataset" {
 
-dataset_id                  = "tf_test_dataset1_featureview1"
+dataset_id                  = "tf_test_dataset1_featureview12"
 friendly_name               = "test"
 description                 = "This is a test description"
 location                    = "US"
@@ -173,7 +178,11 @@ EOF
 
 resource "google_vertex_ai_feature_onlinestore_featureview" "featureview" {
 name = "tf_test_tf_test_fv1%{random_suffix}"
-feature_online_store = google_vertex_ai_feature_online_store.featureonlinestore.id
+region   = "us-central1"
+labels = {
+  foo1 = "bar1"
+  }
+feature_online_store = google_vertex_ai_feature_online_store.featureonlinestore.name
 sync_config {
   cron = "0 4 * * *"
 }
