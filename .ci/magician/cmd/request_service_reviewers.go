@@ -72,7 +72,7 @@ func execRequestServiceReviewers(prNumber string, gh GithubClient, enrolledTeams
 
 	// If more than three service labels are impacted, don't request reviews.
 	// Only request reviews from unique service teams.
-	githubTeams := make(map[string]struct{})
+	githubTeamsSet := make(map[string]struct{})
 	teamCount := 0
 	for _, label := range pullRequest.Labels {
 		if !strings.HasPrefix(label.Name, "service/") || label.Name == "service/terraform" {
@@ -80,7 +80,7 @@ func execRequestServiceReviewers(prNumber string, gh GithubClient, enrolledTeams
 		}
 		teamCount += 1
 		if labelData, ok := enrolledTeams[label.Name]; ok {
-			githubTeams[labelData.Team] = struct{}{}
+			githubTeamsSet[labelData.Team] = struct{}{}
 		}
 	}
 
@@ -92,18 +92,18 @@ func execRequestServiceReviewers(prNumber string, gh GithubClient, enrolledTeams
 	// For each service team, check if one of the team members is already a reviewer. Rerequest
 	// review if there is and choose a random reviewer from the list if there isn't.
 	reviewersToRequest := []string{}
-	requestedReviewersMap := make(map[string]struct{})
+	requestedReviewersSet := make(map[string]struct{})
 	for _, reviewer := range requestedReviewers {
-		requestedReviewersMap[reviewer.Login] = struct{}{}
+		requestedReviewersSet[reviewer.Login] = struct{}{}
 	}
 
-	previousReviewersMap := make(map[string]struct{})
+	previousReviewersSet := make(map[string]struct{})
 	for _, reviewer := range previousReviewers {
-		previousReviewersMap[reviewer.Login] = struct{}{}
+		previousReviewersSet[reviewer.Login] = struct{}{}
 	}
 
 	exitCode := 0
-	for githubTeam, _ := range githubTeams {
+	for githubTeam, _ := range githubTeamsSet {
 		members, err := gh.GetTeamMembers("GoogleCloudPlatform", githubTeam)
 		if err != nil {
 			fmt.Printf("Error fetching members for GoogleCloudPlatform/%s: %s", githubTeam, err)
@@ -118,10 +118,10 @@ func execRequestServiceReviewers(prNumber string, gh GithubClient, enrolledTeams
 				reviewerPool = append(reviewerPool, member.Login)
 			}
 			// Don't re-request review if there's an active review request
-			if _, ok := requestedReviewersMap[member.Login]; ok {
+			if _, ok := requestedReviewersSet[member.Login]; ok {
 				hasReviewer = true
 			}
-			if _, ok := previousReviewersMap[member.Login]; ok {
+			if _, ok := previousReviewersSet[member.Login]; ok {
 				hasReviewer = true
 				reviewersToRequest = append(reviewersToRequest, member.Login)
 			}
