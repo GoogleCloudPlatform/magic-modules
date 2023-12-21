@@ -67,7 +67,7 @@ func testAccNetappkmsconfig_kmsConfigCreateExample_Full(context map[string]inter
 	return acctest.Nprintf(`
 	resource "google_kms_key_ring" "keyring" {
 		name     = "tf-test-key-ring%{random_suffix}"
-		location = "us-west1""
+		location = "us-west1"
 	}
 	  
 	resource "google_kms_crypto_key" "crypto_key" {
