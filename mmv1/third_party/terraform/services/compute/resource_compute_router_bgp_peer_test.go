@@ -303,7 +303,6 @@ func TestAccComputeRouterPeer_AddMd5AuthenticationKey(t *testing.T) {
 	t.Parallel()
 
 	routerName := fmt.Sprintf("tf-test-router-%s", acctest.RandString(t, 10))
-
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -354,7 +353,7 @@ func TestAccComputeRouterPeer_UpdateMd5AuthenticationKey(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccComputeRouterPeerWithMd5AuthKey(routerName),
+				Config: testAccComputeRouterPeerWithMd5AuthKeyUpdate(routerName),
 				Check: testAccCheckComputeRouterPeerExists(
 					t, resourceName),
 			},
