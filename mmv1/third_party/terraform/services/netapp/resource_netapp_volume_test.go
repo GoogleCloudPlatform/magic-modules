@@ -1,7 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 
 // ----------------------------------------------------------------------------
 //
@@ -27,7 +25,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-func TestAccNetappvolume_volumeCreateExample_update(t *testing.T) {
+func TestAccNetappVolume_volumeBasicExample_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -38,9 +36,18 @@ func TestAccNetappvolume_volumeCreateExample_update(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckNetappVolumeDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetappvolume_volumeCreateExample_full(context),
+				Config: testAccNetappVolume_volumeBasicExample_basic(context),
+			},
+			{
+				ResourceName:            "google_netapp_volume.test_volume",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels"},
+			}, {
+				Config: testAccNetappVolume_volumeBasicExample_full(context),
 			},
 			{
 				ResourceName:            "google_netapp_volume.test_volume",
@@ -49,7 +56,7 @@ func TestAccNetappvolume_volumeCreateExample_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels"},
 			},
 			{
-				Config: testAccNetappvolume_volumeCreateExample_update(context),
+				Config: testAccNetappVolume_volumeBasicExample_update(context),
 			},
 			{
 				ResourceName:            "google_netapp_volume.test_volume",
@@ -58,7 +65,7 @@ func TestAccNetappvolume_volumeCreateExample_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels"},
 			},
 			{
-				Config: testAccNetappvolume_volumeCreateExample_updatesnapshot(context),
+				Config: testAccNetappVolume_volumeBasicExample_updatesnapshot(context),
 			},
 			{
 				ResourceName:            "google_netapp_volume.test_volume",
@@ -70,239 +77,268 @@ func TestAccNetappvolume_volumeCreateExample_update(t *testing.T) {
 	})
 }
 
-func testAccNetappvolume_volumeCreateExample_full(context map[string]interface{}) string {
+func testAccNetappVolume_volumeBasicExample_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-
 resource "google_netapp_storage_pool" "default" {
-  name = "tf-test-test-pool%{random_suffix}"
-  location = "us-central1"
-  service_level = "PREMIUM"
-  capacity_gib = "2048"
-  network = data.google_compute_network.default.id
+	name = "tf-test-test-pool%{random_suffix}"
+	location = "us-central1"
+	service_level = "PREMIUM"
+	capacity_gib = "2048"
+	network = data.google_compute_network.default.id
 }
 
+resource "google_netapp_volume" "test_volume" {
+	location = "us-central1"
+	name = "tf-test-test-volume%{random_suffix}"
+	capacity_gib = "100"
+	share_name = "tf-test-test-volume%{random_suffix}"
+	storage_pool = google_netapp_storage_pool.default.name
+	protocols = ["NFSV3"]
+	smb_settings = []
+	unix_permissions = "0770"
+	labels = {}
+	description = ""
+	snapshot_directory = false
+	security_style = "UNIX"
+	kerberos_enabled = false
+}
+
+data "google_compute_network" "default" {
+	name = "%{network_name}"
+}
+`, context)
+}
+
+func testAccNetappVolume_volumeBasicExample_full(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_netapp_storage_pool" "default" {
+	name = "tf-test-test-pool%{random_suffix}"
+	location = "us-central1"
+	service_level = "PREMIUM"
+	capacity_gib = "2048"
+	network = data.google_compute_network.default.id
+}
+	
 resource "google_netapp_storage_pool" "default2" {
 	name = "tf-test-pool%{random_suffix}"
 	location = "us-central1"
 	service_level = "EXTREME"
 	capacity_gib = "2048"
 	network = data.google_compute_network.default.id
-  }
-
+}
+	  
 resource "google_netapp_volume" "test_volume" {
-  location = "us-central1"
-  name = "tf-test-test-volume%{random_suffix}"
-  capacity_gib = "100"
-  share_name = "testshare"
-  storage_pool = google_netapp_storage_pool.default.name
-  protocols = ["NFSV3"]
-  smb_settings = []
-  unix_permissions = "0770"
-  labels = {
-	key= "test"
-    value= "pool"
-  }
-  description = "This is a test description"
-  snapshot_directory = false
-  security_style = "UNIX"
-  kerberos_enabled = false
-  export_policy {
-    rules {
-		access_type           = "READ_ONLY"
-		allowed_clients       = "0.0.0.0/0"
-		has_root_access       = "false"
-		kerberos5_read_only   = false
-		kerberos5_read_write  = false
-		kerberos5i_read_only  = false
-		kerberos5i_read_write = false
-		kerberos5p_read_only  = false
-		kerberos5p_read_write = false
-		nfsv3                 = true
-		nfsv4                 = false
-    }
-	rules {
-		access_type           = "READ_WRITE"
-		allowed_clients       = "10.2.3.4,10.2.3.5"
-		has_root_access       = "true"
-		kerberos5_read_only   = false
-		kerberos5_read_write  = false
-		kerberos5i_read_only  = false
-		kerberos5i_read_write = false
-		kerberos5p_read_only  = false
-		kerberos5p_read_write = false
-		nfsv3                 = true
-		nfsv4                 = false
-    }
-  }
-  restricted_actions = []
-  snapshot_policy {
-    daily_schedule {
-      hour              = 1
-      minute            = 1
-      snapshots_to_keep = 2
-    }
-    enabled = true
-    hourly_schedule {
-      minute            = 20
-      snapshots_to_keep = 2
-    }
-    monthly_schedule {
-      days_of_month     = "5"
-      hour              = 2
-      minute            = 3
-      snapshots_to_keep = 4
-    }
-    weekly_schedule {
-      day               = "Wednesday"
-      hour              = 2
-      minute            = 3
-      snapshots_to_keep = 2
-    }
-  }
-
+	location = "us-central1"
+	name = "tf-test-test-volume%{random_suffix}"
+	capacity_gib = "100"
+	share_name = "tf-test-test-volume%{random_suffix}"
+	storage_pool = google_netapp_storage_pool.default.name
+	protocols = ["NFSV3"]
+	smb_settings = []
+	unix_permissions = "0770"
+	labels = {
+		key= "test"
+		value= "pool"
+	}
+	description = "This is a test description"
+	snapshot_directory = false
+	security_style = "UNIX"
+	kerberos_enabled = false
+	export_policy {
+		rules {
+			access_type           = "READ_ONLY"
+			allowed_clients       = "0.0.0.0/0"
+			has_root_access       = "false"
+			kerberos5_read_only   = false
+			kerberos5_read_write  = false
+			kerberos5i_read_only  = false
+			kerberos5i_read_write = false
+			kerberos5p_read_only  = false
+			kerberos5p_read_write = false
+			nfsv3                 = true
+			nfsv4                 = false
+		}
+		rules {
+			access_type           = "READ_WRITE"
+			allowed_clients       = "10.2.3.4,10.2.3.5"
+			has_root_access       = "true"
+			kerberos5_read_only   = false
+			kerberos5_read_write  = false
+			kerberos5i_read_only  = false
+			kerberos5i_read_write = false
+			kerberos5p_read_only  = false
+			kerberos5p_read_write = false
+			nfsv3                 = true
+			nfsv4                 = false
+		}
+	}
+	restricted_actions = []
+	snapshot_policy {
+		daily_schedule {
+		hour              = 1
+		minute            = 1
+		snapshots_to_keep = 2
+		}
+		enabled = true
+		hourly_schedule {
+		minute            = 20
+		snapshots_to_keep = 2
+		}
+		monthly_schedule {
+		days_of_month     = "5"
+		hour              = 2
+		minute            = 3
+		snapshots_to_keep = 4
+		}
+		weekly_schedule {
+		day               = "Wednesday"
+		hour              = 2
+		minute            = 3
+		snapshots_to_keep = 2
+		}
+	}
 }
 
 data "google_compute_network" "default" {
-  name = "%{network_name}"
+	name = "%{network_name}"
 }
-`, context)
+	  `, context)
 }
-func testAccNetappvolume_volumeCreateExample_update(context map[string]interface{}) string {
+
+func testAccNetappVolume_volumeBasicExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 
 resource "google_netapp_storage_pool" "default" {
-  name = "tf-test-test-pool%{random_suffix}"
-  location = "us-central1"
-  service_level = "PREMIUM"
-  capacity_gib = "2048"
-  network = data.google_compute_network.default.id
+	name = "tf-test-test-pool%{random_suffix}"
+	location = "us-central1"
+	service_level = "PREMIUM"
+	capacity_gib = "2048"
+	network = data.google_compute_network.default.id
 }
-
+  
 resource "google_netapp_storage_pool" "default2" {
 	name = "tf-test-pool%{random_suffix}"
 	location = "us-central1"
 	service_level = "EXTREME"
 	capacity_gib = "2048"
 	network = data.google_compute_network.default.id
-  }
+}
 
 resource "google_netapp_volume" "test_volume" {
-  location = "us-central1"
-  name = "tf-test-test-volume%{random_suffix}"
-  capacity_gib = "200"
-  share_name = "testshare"
-  storage_pool = google_netapp_storage_pool.default2.name
-  protocols = ["NFSV3"]
-  smb_settings = []
-  unix_permissions = "0740"
-  labels = {}
-  description = ""
-  snapshot_directory = true
-  security_style = "UNIX"
-  kerberos_enabled = false
-  export_policy {
-    rules {
-		access_type           = "READ_WRITE"
-		allowed_clients       = "0.0.0.0/0"
-		has_root_access       = "true"
-		kerberos5_read_only   = false
-		kerberos5_read_write  = false
-		kerberos5i_read_only  = false
-		kerberos5i_read_write = false
-		kerberos5p_read_only  = false
-		kerberos5p_read_write = false
-		nfsv3                 = true
-		nfsv4                 = false
-    }
-  }
-  restricted_actions = ["DELETE"]
-  snapshot_policy {
-    daily_schedule {
-      hour              = 1
-      minute            = 1
-      snapshots_to_keep = 1
-    }
-    enabled = true
-    hourly_schedule {
-      minute            = 10
-      snapshots_to_keep = 1
-    }
-    monthly_schedule {
-      days_of_month     = "1"
-      hour              = 1
-      minute            = 1
-      snapshots_to_keep = 1
-    }
-    weekly_schedule {
-      day               = "Sunday"
-      hour              = 1
-      minute            = 1
-      snapshots_to_keep = 1
-    }
-  }
-
+	location = "us-central1"
+	name = "tf-test-test-volume%{random_suffix}"
+	capacity_gib = "200"
+	share_name = "tf-test-test-volume%{random_suffix}"
+	storage_pool = google_netapp_storage_pool.default2.name
+	protocols = ["NFSV3"]
+	smb_settings = []
+	unix_permissions = "0740"
+	labels = {}
+	description = ""
+	snapshot_directory = true
+	security_style = "UNIX"
+	kerberos_enabled = false
+	export_policy {
+		rules {
+			access_type           = "READ_WRITE"
+			allowed_clients       = "0.0.0.0/0"
+			has_root_access       = "true"
+			kerberos5_read_only   = false
+			kerberos5_read_write  = false
+			kerberos5i_read_only  = false
+			kerberos5i_read_write = false
+			kerberos5p_read_only  = false
+			kerberos5p_read_write = false
+			nfsv3                 = true
+			nfsv4                 = false
+		}
+	}
+	restricted_actions = ["DELETE"]
+	snapshot_policy {
+		daily_schedule {
+		hour              = 1
+		minute            = 1
+		snapshots_to_keep = 1
+		}
+		enabled = true
+		hourly_schedule {
+		minute            = 10
+		snapshots_to_keep = 1
+		}
+		monthly_schedule {
+		days_of_month     = "1"
+		hour              = 1
+		minute            = 1
+		snapshots_to_keep = 1
+		}
+		weekly_schedule {
+		day               = "Sunday"
+		hour              = 1
+		minute            = 1
+		snapshots_to_keep = 1
+		}
+	}
 }
 
 data "google_compute_network" "default" {
-  name = "%{network_name}"
+	name = "%{network_name}"
 }
-`, context)
+  `, context)
 }
 
-func testAccNetappvolume_volumeCreateExample_updatesnapshot(context map[string]interface{}) string {
+func testAccNetappVolume_volumeBasicExample_updatesnapshot(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 
 resource "google_netapp_storage_pool" "default" {
-  name = "tf-test-test-pool%{random_suffix}"
-  location = "us-central1"
-  service_level = "PREMIUM"
-  capacity_gib = "2048"
-  network = data.google_compute_network.default.id
+	name = "tf-test-test-pool%{random_suffix}"
+	location = "us-central1"
+	service_level = "PREMIUM"
+	capacity_gib = "2048"
+	network = data.google_compute_network.default.id
 }
-
+	
 resource "google_netapp_storage_pool" "default2" {
 	name = "tf-test-pool%{random_suffix}"
 	location = "us-central1"
 	service_level = "EXTREME"
 	capacity_gib = "2048"
 	network = data.google_compute_network.default.id
-  }
-
-resource "google_netapp_volume" "test_volume" {
-  location = "us-central1"
-  name = "tf-test-test-volume%{random_suffix}"
-  capacity_gib = "200"
-  share_name = "testshare"
-  storage_pool = google_netapp_storage_pool.default2.name
-  protocols = ["NFSV3"]
-  smb_settings = []
-  unix_permissions = "0740"
-  labels = {}
-  description = ""
-  snapshot_directory = true
-  security_style = "UNIX"
-  kerberos_enabled = false
-  export_policy {
-    rules {
-		access_type           = "READ_WRITE"
-		allowed_clients       = "0.0.0.0/0"
-		has_root_access       = "true"
-		kerberos5_read_only   = false
-		kerberos5_read_write  = false
-		kerberos5i_read_only  = false
-		kerberos5i_read_write = false
-		kerberos5p_read_only  = false
-		kerberos5p_read_write = false
-		nfsv3                 = true
-		nfsv4                 = false
-    }
-  }
-  restricted_actions = ["DELETE"]
-
 }
+	
+resource "google_netapp_volume" "test_volume" {
+	location = "us-central1"
+	name = "tf-test-test-volume%{random_suffix}"
+	capacity_gib = "200"
+	share_name = "tf-test-test-volume%{random_suffix}"
+	storage_pool = google_netapp_storage_pool.default2.name
+	protocols = ["NFSV3"]
+	smb_settings = []
+	unix_permissions = "0740"
+	labels = {}
+	description = ""
+	snapshot_directory = true
+	security_style = "UNIX"
+	kerberos_enabled = false
+	export_policy {
+		rules {
+			access_type           = "READ_WRITE"
+			allowed_clients       = "0.0.0.0/0"
+			has_root_access       = "true"
+			kerberos5_read_only   = false
+			kerberos5_read_write  = false
+			kerberos5i_read_only  = false
+			kerberos5i_read_write = false
+			kerberos5p_read_only  = false
+			kerberos5p_read_write = false
+			nfsv3                 = true
+			nfsv4                 = false
+		}
+	}
+	restricted_actions = ["DELETE"]
+	}
 
 data "google_compute_network" "default" {
-  name = "%{network_name}"
+	name = "%{network_name}"
 }
-`, context)
+	`, context)
 }
