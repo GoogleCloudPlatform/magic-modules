@@ -20,7 +20,7 @@ var (
 	EnrolledTeamsYaml []byte
 )
 
-type labelData struct {
+type LabelData struct {
 	Team      string   `yaml:"team,omitempty"`
 	Resources []string `yaml:"resources"`
 }
@@ -31,7 +31,7 @@ type RegexpLabel struct {
 }
 
 func BuildRegexLabels(teamsYaml []byte) ([]RegexpLabel, error) {
-	enrolledTeams := make(map[string]labelData)
+	enrolledTeams := make(map[string]LabelData)
 	regexpLabels := []RegexpLabel{}
 	if err := yaml.Unmarshal(teamsYaml, &enrolledTeams); err != nil {
 		return regexpLabels, fmt.Errorf("Error unmarshalling enrolled teams yaml: %w", err)
