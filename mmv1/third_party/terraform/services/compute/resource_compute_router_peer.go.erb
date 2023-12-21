@@ -489,7 +489,7 @@ func resourceComputeRouterBgpPeerCreate(d *schema.ResourceData, meta interface{}
 		return err
 	}
 
-	return d.Set("md5_authentication_key", md5AuthenticationKeyProp)
+	return d.Set("md5_authentication_key", []interface{}{md5AuthenticationKeyProp})
 }
 
 func resourceComputeRouterBgpPeerRead(d *schema.ResourceData, meta interface{}) error {
