@@ -20,7 +20,7 @@ service/google-z:
     - google_z_resource
 `)
 
-func TestExecRequestServiceReviewersMembershipChecker_CoreContributorFlow(t *testing.T) {
+func TestExecRequestServiceReviewersMembershipChecker(t *testing.T) {
 	cases := map[string]struct {
 		pullRequest             github.PullRequest
 		requestedReviewers      []string
@@ -140,7 +140,7 @@ func TestExecRequestServiceReviewersMembershipChecker_CoreContributorFlow(t *tes
 			}
 
 			if tc.expectSpecificReviewers != nil {
-				assert.Equal(t, tc.expectSpecificReviewers, actualReviewers)
+				assert.ElementsMatch(t, tc.expectSpecificReviewers, actualReviewers)
 			}
 		})
 	}
