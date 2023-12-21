@@ -45,7 +45,7 @@ func testAccNetappbackupVault_netappBackupVaultExample_basic(context map[string]
 	return acctest.Nprintf(`
 resource "google_netapp_backup_vault" "test_backup_vault" {
   name = "tf-test-test-backup-vault%{random_suffix}"
-  location = "us-central1"
+  location = "us-west2"
 }
 `, context)
 }
@@ -54,7 +54,7 @@ func testAccNetappbackupVault_netappBackupVaultExample_update(context map[string
 	return acctest.Nprintf(`
 resource "google_netapp_backup_vault" "test_backup_vault" {
   name = "tf-test-test-backup-vault%{random_suffix}"
-  location = "us-central1"
+  location = "us-west2"
   description = "Terraform created vault"
   labels = { 
     "creator": "testuser"
