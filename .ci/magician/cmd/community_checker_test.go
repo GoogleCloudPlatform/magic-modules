@@ -58,10 +58,10 @@ func TestExecCommunityChecker_GooglerFlow(t *testing.T) {
 				Login: "googler_author",
 			},
 		},
-		userType:          github.GooglerUserType,
-		calledMethods:     make(map[string][][]any),
-		firstReviewer:     "reviewer1",
-		previousReviewers: []string{github.GetRandomReviewer(), "reviewer3"},
+		userType:           github.GooglerUserType,
+		calledMethods:      make(map[string][][]any),
+		requestedReviewers: []github.User{github.User{Login: "reviewer1"}},
+		previousReviewers:  []github.User{github.User{Login: github.GetRandomReviewer()}, github.User{Login: "reviewer3"}},
 	}
 	cb := &mockCloudBuild{
 		calledMethods: make(map[string][][]any),
@@ -89,10 +89,10 @@ func TestExecCommunityChecker_AmbiguousUserFlow(t *testing.T) {
 				Login: "ambiguous_author",
 			},
 		},
-		userType:          github.CommunityUserType,
-		calledMethods:     make(map[string][][]any),
-		firstReviewer:     github.GetRandomReviewer(),
-		previousReviewers: []string{github.GetRandomReviewer(), "reviewer3"},
+		userType:           github.CommunityUserType,
+		calledMethods:      make(map[string][][]any),
+		requestedReviewers: []github.User{github.User{Login: github.GetRandomReviewer()}},
+		previousReviewers:  []github.User{github.User{Login: github.GetRandomReviewer()}, github.User{Login: "reviewer3"}},
 	}
 	cb := &mockCloudBuild{
 		calledMethods: make(map[string][][]any),
