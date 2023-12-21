@@ -298,30 +298,6 @@ resource "google_netapp_volume" "test_volume" {
     }
   }
   restricted_actions = ["DELETE"]
-  snapshot_policy {
-    daily_schedule {
-      hour              = 1
-      minute            = 1
-      snapshots_to_keep = 1
-    }
-    enabled = false
-    hourly_schedule {
-      minute            = 10
-      snapshots_to_keep = 1
-    }
-    monthly_schedule {
-      days_of_month     = "1"
-      hour              = 1
-      minute            = 1
-      snapshots_to_keep = 1
-    }
-    weekly_schedule {
-      day               = "Sunday"
-      hour              = 1
-      minute            = 1
-      snapshots_to_keep = 1
-    }
-  }
 
 }
 

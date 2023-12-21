@@ -314,12 +314,12 @@ properties:
           output: true
   - !ruby/object:Api::Type::NestedObject
     name: snapshotPolicy
-    description: Snapshot policy defines the schedule for automatic snapshot creation.
+    description: Snapshot policy defines the schedule for automatic snapshot creation. To disable automatic snapshot creation you have to remove the whole snapshot_policy block.
     properties:
       - !ruby/object:Api::Type::Boolean
         name: 'enabled'
         description: |-
-          Enables automated snapshot creation according to defined schedule. Default is false.
+          Enables automated snapshot creation according to defined schedule. Default is false. To disable automatic snapshot creation you have to remove the whole snapshot_policy block.
         default_value: false
         send_empty_value: true
       - !ruby/object:Api::Type::NestedObject
