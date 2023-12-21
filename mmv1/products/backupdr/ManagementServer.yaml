@@ -78,7 +78,7 @@ properties:
   - !ruby/object:Api::Type::Array
     name: 'networks'
     description: |
-      Network details to create management server (management console).
+      Network details to create management server (management console).UPDATE
     required: true
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
