@@ -127,7 +127,7 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
   done
 
   # store cassettes
-  gsutil -m -q cp fixtures/* gs://vcr-nightly/beta/$today/$build_id/cassettes/fixtures/
+  gsutil -m -q cp fixtures/* gs://ci-vcr-cassettes/beta/fixtures/
 
   # store recording build log
   gsutil -h "Content-Type:text/plain" -q cp recording_test.log gs://vcr-nightly/beta/$today/$build_id/logs/build-log/
