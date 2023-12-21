@@ -59,6 +59,7 @@ resource "google_memcache_instance" "test" {
       "max-item-size" = "8388608"
     }
   }
+  reserved_ip_range_id = ["tf-bootstrap-addr-memcache-instance-update-1"]
 }
 
 data "google_compute_network" "memcache_network" {
