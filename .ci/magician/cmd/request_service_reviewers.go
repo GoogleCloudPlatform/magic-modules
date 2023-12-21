@@ -35,7 +35,7 @@ var requestServiceReviewersCmd = &cobra.Command{
 
 	If a PR has more than 3 service labels, the command will not do anything.
 	`,
-	Args: cobra.ExactArgs(6),
+	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		prNumber := args[0]
 		fmt.Println("PR Number: ", prNumber)
@@ -91,13 +91,15 @@ func execRequestServiceReviewers(prNumber string, gh GithubClient, enrolledTeams
 
 	// For each service team, check if one of the team members is already a reviewer. Rerequest
 	// review if there is and choose a random reviewer from the list if there isn't.
-	reviewersMap := make(map[string]struct{})
 	toRequest := []string{}
+	requestedReviewersMap := make(map[string]struct{})
 	for _, reviewer := range requestedReviewers {
-		reviewersMap[reviewer.Login] = struct{}{}
+		requestedReviewersMap[reviewer.Login] = struct{}{}
 	}
+
+	previousReviewersMap := make(map[string]struct{})
 	for _, reviewer := range previousReviewers {
-		reviewersMap[reviewer.Login] = struct{}{}
+		previousReviewersMap[reviewer.Login] = struct{}{}
 	}
 
 	exitCode := 0
@@ -109,15 +111,24 @@ func execRequestServiceReviewers(prNumber string, gh GithubClient, enrolledTeams
 			continue
 		}
 		hasReviewer := false
+		reviewerPool := []string{}
 		for _, member := range members {
-			if _, ok := reviewersMap[member.Login]; ok {
+			// Exclude PR author
+			if member.Login != pullRequest.User.Login {
+				reviewerPool = append(reviewerPool, member.Login)
+			}
+			// Don't re-request review if there's an active review request
+			if _, ok := requestedReviewersMap[member.Login]; ok {
+				hasReviewer = true
+			}
+			if _, ok := previousReviewersMap[member.Login]; ok {
 				hasReviewer = true
 				toRequest = append(toRequest, member.Login)
 			}
 		}
 
-		if !hasReviewer {
-			toRequest = append(toRequest, members[rand.Intn(len(members))].Login)
+		if !hasReviewer && len(reviewerPool) > 0 {
+			toRequest = append(toRequest, reviewerPool[rand.Intn(len(reviewerPool))])
 		}
 	}
 
