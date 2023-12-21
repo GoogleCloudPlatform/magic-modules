@@ -129,8 +129,8 @@ Set `deprecation_message` on the resource. For example:
 
 ```yaml
 deprecation_message: >-
-  `google_RESOURCE_NAME` is deprecated and will be removed in the next major release
-  of the provider. Use `google_OTHER_RESOURCE_NAME` instead.
+  `google_RESOURCE_NAME` is deprecated and will be removed in a future major release.
+  Use `google_OTHER_RESOURCE_NAME` instead.
 ```
 
 Replace RESOURCE_NAME with the name of the resource (excluding the `google_` prefix). Replace the
@@ -145,8 +145,8 @@ The deprecation message will automatically show up in the resource documentation
    ```go
    return &schema.Resource{
       ...
-      DeprecationMessage: "`google_RESOURCE_NAME` is deprecated and will be removed in the next " +
-                          "major release of the provider. Use `google_OTHER_RESOURCE_NAME` instead.",
+      DeprecationMessage: "`google_RESOURCE_NAME` is deprecated and will be removed in a future " +
+                          "major release. Use `google_OTHER_RESOURCE_NAME` instead.",
       ...
    }
    ```
@@ -156,8 +156,8 @@ The deprecation message will automatically show up in the resource documentation
    deprecation.
 2. Add a warning to the resource documentation stating that the resource is deprecated. For example:
    ```markdown
-   ~> **Warning:** `google_RESOURCE_NAME` is deprecated and will be removed in the next
-   major release of the provider. Use `google_OTHER_RESOURCE_NAME` instead.
+   ~> **Warning:** `google_RESOURCE_NAME` is deprecated and will be removed in a future
+   major release. Use `google_OTHER_RESOURCE_NAME` instead.
    ```
 {{< /tab >}}
 {{< /tabs >}}
