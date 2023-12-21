@@ -48,7 +48,6 @@ service/backupdr:
   resources:
   - google_backup_dr_.*
 service/beyondcorp:
-  team: terraform-notifications-test
   resources:
   - google_beyondcorp_.*
 service/bigquery:
