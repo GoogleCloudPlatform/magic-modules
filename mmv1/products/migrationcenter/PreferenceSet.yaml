@@ -56,12 +56,12 @@ properties:
           target product or business goal, but not both. \n Possible values:\n COMPUTE_MIGRATION_TARGET_PRODUCT_UNSPECIFIED\nCOMPUTE_MIGRATION_TARGET_PRODUCT_COMPUTE_ENGINE\nCOMPUTE_MIGRATION_TARGET_PRODUCT_VMWARE_ENGINE\nCOMPUTE_MIGRATION_TARGET_PRODUCT_SOLE_TENANCY"
       - !ruby/object:Api::Type::NestedObject
         properties:
-        - !ruby/object:Api::Type::Array
-          name: preferredRegions
-          item_type: Api::Type::String
-          description: 'A list of preferred regions, ordered by the most preferred region
-            first. Set only valid Google Cloud region names. See https://cloud.google.com/compute/docs/regions-zones
-            for available regions. '
+          - !ruby/object:Api::Type::Array
+            name: preferredRegions
+            item_type: Api::Type::String
+            description: 'A list of preferred regions, ordered by the most preferred region
+              first. Set only valid Google Cloud region names. See https://cloud.google.com/compute/docs/regions-zones
+              for available regions. '
         name: regionPreferences
         description: 'The user preferences relating to target regions. '
       - !ruby/object:Api::Type::String
@@ -83,11 +83,11 @@ properties:
                 name: allowedMachineSeries
                 item_type: !ruby/object:Api::Type::NestedObject
                   properties:
-                  - !ruby/object:Api::Type::String
-                    name: code
-                    description: 'Code to identify a Compute Engine machine series. Consult
-                      https://cloud.google.com/compute/docs/machine-resource#machine_type_comparison
-                      for more details on the available series. '
+                    - !ruby/object:Api::Type::String
+                      name: code
+                      description: 'Code to identify a Compute Engine machine series. Consult
+                        https://cloud.google.com/compute/docs/machine-resource#machine_type_comparison
+                        for more details on the available series. '
                 description: 'Compute Engine machine series to consider for insights and recommendations.
                   If empty, no restriction is applied on the machine series. '
               name: machinePreferences
@@ -177,21 +177,21 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-  async: !ruby/object:Api::OpAsync
-    operation: !ruby/object:Api::OpAsync::Operation
-      path: name
-      base_url: "{{op_id}}"
-      wait_ms: 1000
-      timeouts:
-    result: !ruby/object:Api::OpAsync::Result
-      path: response
-      resource_inside_response: true
-    status: !ruby/object:Api::OpAsync::Status
-      path: done
-      complete: true
-      allowed:
-      - true
-      - false
-    error: !ruby/object:Api::OpAsync::Error
-      path: error
-      message: message
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: name
+    base_url: "{{op_id}}"
+    wait_ms: 1000
+    timeouts:
+  result: !ruby/object:Api::OpAsync::Result
+    path: response
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: done
+    complete: true
+    allowed:
+    - true
+    - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: error
+    message: message
