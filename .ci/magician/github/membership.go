@@ -51,6 +51,9 @@ var (
 		"hao-nan-li",
 		"c2thorn",
 		"SarahFrench",
+		"melinath",
+		"roaks3",
+		"trodge",
 	}
 )
 
