@@ -91,7 +91,7 @@ func execRequestServiceReviewers(prNumber string, gh GithubClient, enrolledTeams
 
 	// For each service team, check if one of the team members is already a reviewer. Rerequest
 	// review if there is and choose a random reviewer from the list if there isn't.
-	toRequest := []string{}
+	reviewersToRequest := []string{}
 	requestedReviewersMap := make(map[string]struct{})
 	for _, reviewer := range requestedReviewers {
 		requestedReviewersMap[reviewer.Login] = struct{}{}
@@ -123,16 +123,16 @@ func execRequestServiceReviewers(prNumber string, gh GithubClient, enrolledTeams
 			}
 			if _, ok := previousReviewersMap[member.Login]; ok {
 				hasReviewer = true
-				toRequest = append(toRequest, member.Login)
+				reviewersToRequest = append(reviewersToRequest, member.Login)
 			}
 		}
 
 		if !hasReviewer && len(reviewerPool) > 0 {
-			toRequest = append(toRequest, reviewerPool[rand.Intn(len(reviewerPool))])
+			reviewersToRequest = append(reviewersToRequest, reviewerPool[rand.Intn(len(reviewerPool))])
 		}
 	}
 
-	for _, reviewer := range toRequest {
+	for _, reviewer := range reviewersToRequest {
 		err = gh.RequestPullRequestReviewer(prNumber, reviewer)
 		if err != nil {
 			fmt.Println(err)
