@@ -85,3 +85,14 @@ func (gh *Client) GetPullRequestPreviousReviewers(prNumber string) ([]User, erro
 
 	return result, nil
 }
+
+func (gh *Client) GetTeamMembers(organization, team string) ([]User, error) {
+	url := fmt.Sprintf("https://api.github.com/orgs/%s/teams/%s/members", organization, team)
+
+	var members []User
+	_, err := utils.RequestCall(url, "GET", gh.token, &members, nil)
+	if err != nil {
+		return nil, err
+	}
+	return members, nil
+}
