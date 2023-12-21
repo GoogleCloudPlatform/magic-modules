@@ -90,10 +90,10 @@ properties:
                         for more details on the available series. '
                 description: 'Compute Engine machine series to consider for insights and recommendations.
                   If empty, no restriction is applied on the machine series. '
-              name: machinePreferences
-              description: 'The type of machines to consider when calculating virtual machine
-                migration insights and recommendations. Not all machine types are available
-                in all zones and regions. '
+            name: machinePreferences
+            description: 'The type of machines to consider when calculating virtual machine
+              migration insights and recommendations. Not all machine types are available
+              in all zones and regions. '
           - !ruby/object:Api::Type::String
             name: licenseType
             description: "License type to consider when calculating costs for virtual machine
@@ -190,8 +190,8 @@ async: !ruby/object:Api::OpAsync
     path: done
     complete: true
     allowed:
-    - true
-    - false
+      - true
+      - false
   error: !ruby/object:Api::OpAsync::Error
     path: error
     message: message
