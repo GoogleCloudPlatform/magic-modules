@@ -54,6 +54,7 @@ var (
 		"melinath",
 		"roaks3",
 		"trodge",
+		"zli82016",
 	}
 )
 
