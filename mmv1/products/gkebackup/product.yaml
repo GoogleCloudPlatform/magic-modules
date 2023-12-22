@@ -40,7 +40,3 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Backup for GKE API
-    url: https://console.cloud.google.com/apis/library/gkebackup.googleapis.com

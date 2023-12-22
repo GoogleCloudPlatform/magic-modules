@@ -155,6 +155,9 @@ func Resource<%= resource_name -%>() *schema.Resource {
             "<%= field.name -%>": {
                 Type: <%= tf_type(field) -%>,
                 Optional: true,
+<%       if field.immutable -%>
+                ForceNew: true,
+<%       end -%>
 <%       unless field.default_value.nil? -%>
                 Default:  <%= go_literal(field.default_value) -%>,
 <%       end -%>
@@ -242,13 +245,10 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     defer transport_tpg.MutexStore.Unlock(lockName)
 <%    end -%>
 
-    url, err := tpgresource.ReplaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.create_uri}" -%>")
+    url, err := tpgresource.ReplaceVars<% if object.legacy_long_form_project -%>ForId<% end -%>(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.create_uri}" -%>")
     if err != nil {
         return err
     }
-<%    if object.legacy_long_form_project -%>
-    url = strings.ReplaceAll(url, "projects/projects/", "projects/")
-<%    end -%>
 
     log.Printf("[DEBUG] Creating new <%= object.name -%>: %#v", obj)
 <%    if object.nested_query&.modify_by_patch -%>
@@ -323,13 +323,10 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 <%    end -%>
 
     // Store the ID now
-    id, err := tpgresource.ReplaceVars(d, config, "<%= id_format(object) -%>")
+    id, err := tpgresource.ReplaceVars<% if object.legacy_long_form_project -%>ForId<% end -%>(d, config, "<%= id_format(object) -%>")
     if err != nil {
         return fmt.Errorf("Error constructing id: %s", err)
     }
-<%    if object.legacy_long_form_project -%>
-    id = strings.ReplaceAll(id, "projects/projects/", "projects/")
-<%    end -%>
     d.SetId(id)
 
 <%    if object.async&.allow?('create') -%>
@@ -339,7 +336,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     // identity fields and d.Id() before read
     var opRes map[string]interface{}
     err = <%= client_name_pascal -%>OperationWaitTimeWithResponse(
-    config, res, &opRes, <% if has_project || object.async.include_project -%> project, <% end -%> "Creating <%= object.name -%>", userAgent,
+    config, res, &opRes, <% if has_project || object.async.include_project -%> <% if object.legacy_long_form_project -%>tpgresource.GetResourceNameFromSelfLink(project)<% else %>project<% end %>, <% end -%> "Creating <%= object.name -%>", userAgent,
         d.Timeout(schema.TimeoutCreate))
     if err != nil {
 <%          if object.custom_code.post_create_failure -%>
@@ -384,18 +381,15 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 <%          end -%>
 
     // This may have caused the ID to update - update it if so.
-    id, err = tpgresource.ReplaceVars(d, config, "<%= id_format(object) -%>")
+    id, err = tpgresource.ReplaceVars<% if object.legacy_long_form_project -%>ForId<% end -%>(d, config, "<%= id_format(object) -%>")
     if err != nil {
         return fmt.Errorf("Error constructing id: %s", err)
     }
-<%          if object.legacy_long_form_project -%>
-    id = strings.ReplaceAll(id, "projects/projects/", "projects/")
-<%          end -%>
     d.SetId(id)
 
 <%        else # if object.async.is_a? Api::OpAsync -%>
     err = <%= client_name_pascal -%>OperationWaitTime(
-    config, res, <% if has_project || object.async.include_project -%> project, <% end -%> "Creating <%= object.name -%>", userAgent,
+    config, res, <% if has_project || object.async.include_project -%> <% if object.legacy_long_form_project -%>tpgresource.GetResourceNameFromSelfLink(project)<% else %>project<% end %>, <% end -%> "Creating <%= object.name -%>", userAgent,
         d.Timeout(schema.TimeoutCreate))
 
     if err != nil {
@@ -446,13 +440,12 @@ func resource<%= resource_name -%>PollRead(d *schema.ResourceData, meta interfac
 <%    else -%>
         config := meta.(*transport_tpg.Config)
 
-        url, err := tpgresource.ReplaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
+
+        url, err := tpgresource.ReplaceVars<% if object.legacy_long_form_project -%>ForId<% end -%>(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
+
         if err != nil {
             return nil, err
         }
-<%      if object.legacy_long_form_project -%>
-        url = strings.ReplaceAll(url, "projects/projects/", "projects/")
-<%      end -%>
 
         billingProject := ""
 
@@ -538,13 +531,10 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
         return err
     }
 
-    url, err := tpgresource.ReplaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}#{object.read_query_params}" -%>")
+    url, err := tpgresource.ReplaceVars<% if object.legacy_long_form_project -%>ForId<% end -%>(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}#{object.read_query_params}" -%>")
     if err != nil {
         return err
     }
-<%  if object.legacy_long_form_project -%>
-    url = strings.ReplaceAll(url, "projects/projects/", "projects/")
-<%  end -%>
 
     billingProject := ""
 
@@ -763,13 +753,10 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
     defer transport_tpg.MutexStore.Unlock(lockName)
 <%      end -%>
 
-    url, err := tpgresource.ReplaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{update_uri(object, object.update_url)}" -%>")
+    url, err := tpgresource.ReplaceVars<% if object.legacy_long_form_project -%>ForId<% end -%>(d, config, "<%= "{{#{object.__product.name}BasePath}}#{update_uri(object, object.update_url)}" -%>")
     if err != nil {
         return err
     }
-<%      if object.legacy_long_form_project -%>
-    url = strings.ReplaceAll(url, "projects/projects/", "projects/")
-<%      end -%>
 
     log.Printf("[DEBUG] Updating <%= object.name -%> %q: %#v", d.Id(), obj)
 <%= lines(compile(pwd + '/templates/terraform/update_mask.erb')) if object.update_mask -%>
@@ -821,7 +808,7 @@ if len(updateMask) > 0 {
 <%      if object.async&.allow?('update') -%>
 <%        if object.async.is_a? Api::OpAsync -%>
     err = <%= client_name_pascal -%>OperationWaitTime(
-        config, res, <% if has_project || object.async.include_project -%> project, <% end -%> "Updating <%= object.name -%>", userAgent,
+        config, res, <% if has_project || object.async.include_project -%> <% if object.legacy_long_form_project -%>tpgresource.GetResourceNameFromSelfLink(project)<% else %>project<% end %>, <% end -%> "Updating <%= object.name -%>", userAgent,
         d.Timeout(schema.TimeoutUpdate))
 
     if err != nil {
@@ -940,13 +927,11 @@ if len(updateMask) > 0 {
         defer transport_tpg.MutexStore.Unlock(lockName)
 <%        end -%>
 
-        url, err := tpgresource.ReplaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{update_uri(object, key[:update_url])}" -%>")
+        url, err := tpgresource.ReplaceVars<% if object.legacy_long_form_project -%>ForId<% end -%>(d, config, "<%= "{{#{object.__product.name}BasePath}}#{update_uri(object, key[:update_url])}" -%>")
         if err != nil {
             return err
         }
-<%        if object.legacy_long_form_project -%>
-    url = strings.ReplaceAll(url, "projects/projects/", "projects/")
-<%        end -%>
+
 
 <%= lines(compile(pwd + '/' + object.custom_code.pre_update)) if object.custom_code.pre_update -%>
 <%        if object.supports_indirect_user_project_override -%>
@@ -984,7 +969,7 @@ if len(updateMask) > 0 {
 <%        if object.async&.allow?('update') -%>
 <%          if object.async.is_a? Api::OpAsync-%>
         err = <%= client_name_pascal -%>OperationWaitTime(
-            config, res, <% if has_project || object.async.include_project -%> project, <% end -%> "Updating <%= object.name -%>", userAgent,
+            config, res, <% if has_project || object.async.include_project -%> <% if object.legacy_long_form_project -%>tpgresource.GetResourceNameFromSelfLink(project)<% else %>project<% end %>, <% end -%> "Updating <%= object.name -%>", userAgent,
             d.Timeout(schema.TimeoutUpdate))
         if err != nil {
             return err
@@ -1057,13 +1042,10 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     defer transport_tpg.MutexStore.Unlock(lockName)
 <%      end -%>
 
-    url, err := tpgresource.ReplaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.delete_uri}" -%>")
+    url, err := tpgresource.ReplaceVars<% if object.legacy_long_form_project -%>ForId<% end -%>(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.delete_uri}" -%>")
     if err != nil {
         return err
     }
-<%      if object.legacy_long_form_project -%>
-    url = strings.ReplaceAll(url, "projects/projects/", "projects/")
-<%      end -%>
 
 <%# If the deletion of the object requires sending a request body, the custom code will set 'obj' -%>
     var obj map[string]interface{}
@@ -1126,7 +1108,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     }
 <%        else -%>
     err = <%= client_name_pascal -%>OperationWaitTime(
-        config, res, <% if has_project || object.async.include_project-%> project, <% end -%> "Deleting <%= object.name -%>", userAgent,
+        config, res, <% if has_project || object.async.include_project-%> <% if object.legacy_long_form_project -%>tpgresource.GetResourceNameFromSelfLink(project)<% else %>project<% end %>, <% end -%> "Deleting <%= object.name -%>", userAgent,
         d.Timeout(schema.TimeoutDelete))
 
     if err != nil {
@@ -1157,13 +1139,10 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
     }
 
     // Replace import id for the resource id
-    id, err := tpgresource.ReplaceVars(d, config, "<%= id_format(object) -%>")
+    id, err := tpgresource.ReplaceVars<% if object.legacy_long_form_project -%>ForId<% end -%>(d, config, "<%= id_format(object) -%>")
     if err != nil {
         return nil, fmt.Errorf("Error constructing id: %s", err)
     }
-<%      if object.legacy_long_form_project -%>
-    id = strings.ReplaceAll(id, "projects/projects/", "projects/")
-<%      end -%>
     d.SetId(id)
 
 <%-     unless object.virtual_fields.empty? -%>

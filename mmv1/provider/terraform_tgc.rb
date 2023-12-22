@@ -13,6 +13,7 @@
 
 require 'provider/terraform_oics'
 require 'fileutils'
+require 'set'
 
 module Provider
   # Code generator for a library converting terraform state to gcp objects.
@@ -82,10 +83,6 @@ module Provider
     def validate_non_defined_tests(file_set, non_defined_tests)
       if non_defined_tests.any? { |test| !file_set.member?("#{test}.json") }
         raise "test file named #{test}.json expected but found none"
-      end
-
-      if non_defined_tests.any? { |test| !file_set.member?("#{test}.tfplan.json") }
-        raise "test file named #{test}.tfplan.json expected but found none"
       end
 
       return unless non_defined_tests.any? { |test| !file_set.member?("#{test}.tf") }
