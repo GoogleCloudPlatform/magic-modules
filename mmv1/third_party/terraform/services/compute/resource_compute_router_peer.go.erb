@@ -499,6 +499,8 @@ func resourceComputeRouterBgpPeerRead(d *schema.ResourceData, meta interface{}) 
 		return err
 	}
 
+	log.Printf("[DEBUG] Reading RouterBgpPeerobject - %#v", d.Get("md5_authentication_key"))
+
 	url, err := tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/routers/{{router}}")
 	if err != nil {
 		return err
@@ -946,11 +948,15 @@ func flattenNestedComputeRouterBgpPeerMd5AuthenticationKey(v interface{}, d *sch
 	if v == nil {
 		return nil
 	}
-
+	originalKeyValue := d.Get("md5_authentication_key").([]interface{})
 	transformed := make(map[string]interface{})
 	transformed["name"] = v
+	log.Printf("[DEBUG] originalKeyValue - %#v)", originalKeyValue)
 	//key value is not returned as it is a sensitive field
-	transformed["key"] = nil
+	if len(originalKeyValue) != 0 {
+		transformed["key"] = originalKeyValue[0].(map[string]interface{})["key"]
+		log.Printf("[DEBUG] transformed key value - %#v)", transformed["key"])
+	}
 	return []interface{}{transformed}
 }
 
