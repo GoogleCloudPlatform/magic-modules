@@ -113,4 +113,3 @@ properties:
     description: |
       The total number of volumes assigned by this backup policy.
     output: true
-    
