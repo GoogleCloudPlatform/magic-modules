@@ -85,3 +85,4 @@ properties:
     description: |
       Labels as key value pairs. Example: `{ "owner": "Bob", "department": "finance", "purpose": "testing" }`.
     required: false
+    
