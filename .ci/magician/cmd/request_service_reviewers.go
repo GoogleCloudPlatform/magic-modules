@@ -45,6 +45,11 @@ var requestServiceReviewersCmd = &cobra.Command{
 	},
 }
 
+// TODO: Switch to labeler.LabelData after a soak period.
+type LabelData struct {
+	Team string `yaml:"team,omitempty"`
+}
+
 func execRequestServiceReviewers(prNumber string, gh GithubClient, enrolledTeamsYaml []byte) {
 	pullRequest, err := gh.GetPullRequest(prNumber)
 	if err != nil {
@@ -52,7 +57,7 @@ func execRequestServiceReviewers(prNumber string, gh GithubClient, enrolledTeams
 		os.Exit(1)
 	}
 
-	enrolledTeams := make(map[string]labeler.LabelData)
+	enrolledTeams := make(map[string]LabelData)
 	if err := yaml.Unmarshal(enrolledTeamsYaml, &enrolledTeams); err != nil {
 		fmt.Printf("Error unmarshalling enrolled teams yaml: %s", err)
 		os.Exit(1)
