@@ -47,6 +47,16 @@ steps:
           git diff $base_commit origin/main -- .ci/ > /workspace/ci.diff
           git apply ./ci.diff --allow-empty
         fi
+        if [ "$_BASE_BRANCH" != "main" ]; then
+          echo "Checking out tools/ folder from main"
+          git checkout origin/main -- tools/
+        else
+          base_commit=$(git merge-base origin/main HEAD)
+          echo "Common ancestor commit: $base_commit"
+          git diff $base_commit origin/main -- tools/
+          git diff $base_commit origin/main -- tools/ > /workspace/tools.diff
+          git apply ./tools.diff --allow-empty
+        fi
 
   - name: 'gcr.io/graphite-docker-images/go-plus'
     entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
