@@ -1372,9 +1372,14 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 		ReservationAffinity:        reservationAffinity,
 	}
 
+	if _, ok := d.GetOk("effective_labels"); ok {
+		instanceProperties.Labels = tpgresource.ExpandEffectiveLabels(d)
+	}
+
 	if _, ok := d.GetOk("resource_manager_tags"); ok {
 		instanceProperties.ResourceManagerTags = tpgresource.ExpandStringMap(d, "resource_manager_tags")
 	}
+
 	var itName string
 	if v, ok := d.GetOk("name"); ok {
 		itName = v.(string)
@@ -1490,7 +1495,6 @@ func flattenDisk(disk *compute.AttachedDisk, configDisk map[string]any, defaultP
 		} else {
 			diskMap["disk_size_gb"] = disk.InitializeParams.DiskSizeGb
 		}
-
 		diskMap["resource_policies"] = disk.InitializeParams.ResourcePolicies
 		diskMap["resource_manager_tags"] = disk.InitializeParams.ResourceManagerTags
 	}
