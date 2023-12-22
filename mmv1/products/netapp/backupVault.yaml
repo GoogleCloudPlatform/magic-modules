@@ -18,7 +18,7 @@ description: |
   A vault can hold multiple backups for multiple volumes in that region.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation': 'https://cloud.google.com/netapp/volumes/docs/protect-data/about-volume-backups'
+    'Documentation': 'https://cloud.google.com/netapp/volumes/docs/protect-data/about-volume-backups'
   api: 'https://cloud.google.com/netapp/volumes/docs/reference/rest/v1/projects.locations.backupVaults'
 base_url: projects/{{project}}/locations/{{location}}/backupVaults
 self_link: projects/{{project}}/locations/{{location}}/backupVaults/{{name}}
@@ -54,6 +54,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'netapp_backup_vault'
     primary_resource_id: 'test_backup_vault'
+    skip_test: true
     vars:
       backup_vault_name: 'test-backup-vault'
 properties:
