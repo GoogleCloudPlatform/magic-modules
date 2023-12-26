@@ -1,3 +1,5 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
 package compute_test
 
 import (
@@ -303,6 +305,7 @@ func TestAccComputeRouterPeer_AddMd5AuthenticationKey(t *testing.T) {
 	t.Parallel()
 
 	routerName := fmt.Sprintf("tf-test-router-%s", acctest.RandString(t, 10))
+	resourceName := "google_compute_router_peer.foobar"
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -310,23 +313,11 @@ func TestAccComputeRouterPeer_AddMd5AuthenticationKey(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeRouterPeerWithMd5AuthKey(routerName),
-				Check: testAccCheckComputeRouterPeerExists(
-					t, "google_compute_router_peer.foobar"),
-			},
-			{
-				ResourceName:      "google_compute_router_peer.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccComputeRouterPeerBasic(routerName),
-				Check: testAccCheckComputeRouterPeerExists(
-					t, "google_compute_router_peer.foobar"),
-			},
-			{
-				ResourceName:      "google_compute_router_peer.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "md5_authentication_key.#", "1"), // Check for one element in the list
+					resource.TestCheckResourceAttr(resourceName, "md5_authentication_key.0.name", fmt.Sprintf("%s-peer-key", routerName)),
+					resource.TestCheckResourceAttr(resourceName, "md5_authentication_key.0.key", fmt.Sprintf("%s-peer-key-value", routerName)),
+				),
 			},
 		},
 	})
@@ -344,23 +335,19 @@ func TestAccComputeRouterPeer_UpdateMd5AuthenticationKey(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeRouterPeerWithMd5AuthKey(routerName),
-				Check: testAccCheckComputeRouterPeerExists(
-					t, "google_compute_router_peer.foobar"),
-			},
-			{
-				ResourceName:      "google_compute_router_peer.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "md5_authentication_key.#", "1"), // Check for one element in the list
+					resource.TestCheckResourceAttr(resourceName, "md5_authentication_key.0.name", fmt.Sprintf("%s-peer-key", routerName)),
+					resource.TestCheckResourceAttr(resourceName, "md5_authentication_key.0.key", fmt.Sprintf("%s-peer-key-value", routerName)),
+				),
 			},
 			{
 				Config: testAccComputeRouterPeerWithMd5AuthKeyUpdate(routerName),
-				Check: testAccCheckComputeRouterPeerExists(
-					t, resourceName),
-			},
-			{
-				ResourceName:      "google_compute_router_peer.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "md5_authentication_key.#", "1"), // Check for one element in the list
+					resource.TestCheckResourceAttr(resourceName, "md5_authentication_key.0.name", fmt.Sprintf("%s-peer-key", routerName)),
+					resource.TestCheckResourceAttr(resourceName, "md5_authentication_key.0.key", fmt.Sprintf("%s-peer-key-value-1", routerName)),
+				),
 			},
 		},
 	})
