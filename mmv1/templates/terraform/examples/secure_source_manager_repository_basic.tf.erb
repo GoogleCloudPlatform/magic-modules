@@ -6,7 +6,16 @@ resource "google_secure_source_manager_instance" "my_instance" {
   }
 }
 
+# It can take up to 60 minutes for the instance to be ready.
+resource "time_sleep" "wait_60_minutes" {
+  depends_on = [google_secure_source_manager_instance.my_instance]
+
+  create_duration = "3600s"
+}
+
 resource "google_secure_source_manager_repository" "<%= ctx[:primary_resource_id] %>" {
   instance = google_secure_source_manager_instance.my_instance.name
   repository_id = "<%= ctx[:vars]['respository_id'] %>"
+
+  depends_on = [time_sleep.wait_60_minutes]
 }
