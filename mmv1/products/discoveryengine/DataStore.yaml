@@ -27,6 +27,10 @@ self_link: 'projects/{{project}}/locations/{{location}}/collections/default_coll
 create_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores?dataStoreId={{data_store_id}}'
 update_verb: :PATCH
 update_mask: true
+import_format:
+  [
+    'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}',
+  ]
 
 autogen_async: true
 async: !ruby/object:Api::OpAsync
@@ -49,10 +53,6 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: "error"
     message: "message"
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  parent_resource_attribute: 'data_store_id'
-  method_name_separator: ':'
-  fetch_iam_policy_verb: :POST
 
 examples:
 - !ruby/object:Provider::Terraform::Examples
