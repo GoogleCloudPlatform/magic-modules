@@ -20,7 +20,7 @@ import (
 func BootstrapAllPSARoles(t *testing.T, prefix string, agentNames, roles []string) bool {
 	config := BootstrapConfig(t)
 	if config == nil {
-		t.Fatal("Could not bootstrap a config for BootstrapAllPSARoles.")
+		t.Fatal("Could not bootstrap a config for BootstrapAllPSARoles. -- testing")
 	}
 	client := config.NewResourceManagerClient(config.UserAgent)
 
