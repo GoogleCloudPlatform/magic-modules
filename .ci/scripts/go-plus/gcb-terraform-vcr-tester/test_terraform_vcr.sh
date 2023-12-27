@@ -65,6 +65,10 @@ else
 fi
 
 set +e
+
+echo $SA_KEY > sa_key.json
+gcloud auth activate-service-account $GOOGLE_SERVICE_ACCOUNT --key-file=$local_path/sa_key.json --project=$GOOGLE_PROJECT
+
 # cassette retrieval
 mkdir fixtures
 if [ "$BASE_BRANCH" != "FEATURE-BRANCH-major-release-5.0.0" ]; then
@@ -80,8 +84,6 @@ fi
 # copy PR branch specific cassettes over main. This might fail but that's ok if the folder doesnt exist
 gsutil -m -q cp gs://ci-vcr-cassettes/beta/refs/heads/auto-pr-$pr_number/fixtures/* fixtures/
 
-echo $SA_KEY > sa_key.json
-gcloud auth activate-service-account $GOOGLE_SERVICE_ACCOUNT --key-file=$local_path/sa_key.json --project=$GOOGLE_PROJECT
 
 mkdir testlog
 mkdir testlog/replaying
