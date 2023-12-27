@@ -439,6 +439,37 @@ func TestAccDataflowFlexTemplateJob_withProviderDefaultLabels(t *testing.T) {
 	})
 }
 
+func TestAccDataflowFlexTemplateJob_withLaunchOptions(t *testing.T) {
+	// This resource uses custom retry logic that cannot be sped up without
+	// modifying the actual resource
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	randStr := acctest.RandString(t, 10)
+	job := "tf-test-dataflow-job-" + randStr
+	bucket := "tf-test-dataflow-bucket-" + randStr
+	topic := "tf-test-topic" + randStr
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataflowFlexTemplateJob_withLaunchOptions(job, bucket, topic),
+				Check: resource.ComposeTestCheckFunc(
+					testAccDataflowFlexJobExists(t, "google_dataflow_flex_template_job.flex_job_launch_options", false),
+				),
+			},
+			{
+				ResourceName:            "google_dataflow_flex_template_job.flex_job_launch_options",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "container_spec_gcs_path", "labels", "terraform_labels"},
+			},
+		},
+	})
+}
 func testAccDataflowFlexTemplateJobHasNetwork(t *testing.T, res, expected string, wait bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		instanceTmpl, err := testAccDataflowFlexTemplateGetGeneratedInstanceTemplate(t, s, res)
@@ -1265,6 +1296,63 @@ resource "google_dataflow_flex_template_job" "flex_job_experiments" {
 
 }
 `, topicName, bucket, job, strings.Join(experiments, `", "`))
+}
+
+func testAccDataflowFlexTemplateJob_withLaunchOptions(job, bucket, topicName string) string {
+	return fmt.Sprintf(`
+
+resource "google_pubsub_topic" "example" {
+  name = "%s"
+}
+
+data "google_storage_bucket_object" "flex_template" {
+  name   = "latest/flex/Streaming_Data_Generator"
+  bucket = "dataflow-templates"
+}
+
+resource "google_storage_bucket" "bucket" {
+  name = "%s"
+  location = "US-CENTRAL1"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_object" "schema" {
+  name = "schema.json"
+  bucket = google_storage_bucket.bucket.name
+  content = <<EOF
+{
+	"eventId": "{{uuid()}}",
+	"eventTimestamp": {{timestamp()}},
+	"ipv4": "{{ipv4()}}",
+	"ipv6": "{{ipv6()}}",
+	"country": "{{country()}}",
+	"username": "{{username()}}",
+	"quest": "{{random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road")}}",
+	"score": {{integer(100, 10000)}},
+	"completed": {{bool()}}
+}
+EOF
+}
+
+resource "google_dataflow_flex_template_job" "flex_job_launch_options" {
+  name = "%s"
+  container_spec_gcs_path = "gs://${data.google_storage_bucket_object.flex_template.bucket}/${data.google_storage_bucket_object.flex_template.name}"
+  on_delete = "cancel"
+  enable_streaming_engine = true
+  parameters = {
+    schemaLocation = "gs://${google_storage_bucket_object.schema.bucket}/schema.json"
+    qps = "1"
+    topic = google_pubsub_topic.example.id
+  }
+  labels = {
+   "my_labels" = "value"
+  }
+  launch_options = {
+   "ft_launch_timeout_secs": "60"
+  }
+}
+`, topicName, bucket, job)
 }
 
 func testAccDataflowFlexTemplateJob_withProviderDefaultLabels(job, bucket, topicName, randStr string) string {
