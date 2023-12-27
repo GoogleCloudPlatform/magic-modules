@@ -1,0 +1,8 @@
+resource "google_discoveryengine_data_store" "website_basic" {
+  project       = "codelab-terraform-jialei"
+  location      = "global"
+  data_store_id    = "<%= ctx[:vars]['data_store_id'] %>"
+  display_name = "tf-test-website-datastore"
+  industry_vertical = "GENERIC"
+  content_config = "PUBLIC_WEBSITE"
+}
