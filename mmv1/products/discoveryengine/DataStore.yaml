@@ -19,14 +19,11 @@ description: |
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Create a search data store': 'https://cloud.google.com/generative-ai-app-builder/docs/create-data-store-es'
-  # TODO: Update the link to the REST API reference for the resource from v1alpha to v1.
   api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1alpha/projects.locations.collections.dataStores'
 
 base_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores'
 self_link: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}'
 create_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores?dataStoreId={{data_store_id}}'
-update_verb: :PATCH
-update_mask: true
 import_format:
   [
     'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}',
@@ -56,8 +53,8 @@ async: !ruby/object:Api::OpAsync
 
 examples:
 - !ruby/object:Provider::Terraform::Examples
-  name: "discoveryengine_datastore_basic"
-  primary_resource_id: 'primary'
+  name: "discoveryengine_datastore_structured_basic"
+  primary_resource_id: 'structured_basic'
   primary_resource_name:
     'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
   vars:
