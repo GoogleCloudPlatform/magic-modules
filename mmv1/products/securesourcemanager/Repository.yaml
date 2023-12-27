@@ -1,0 +1,142 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'Repository'
+description: |
+  Secure Source Manager repository
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Create and clone a repository': 'https://cloud.google.com/secure-source-manager/docs/create-clone-repository'
+  api: 'https://cloud.google.com/secure-source-manager/docs/reference/rest/v1/projects.locations.repositories'
+base_url: 'projects/{{project}}/locations/{{location}}/repositories'
+self_link: 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/repositories?repositoryId={{respository_id}}'
+delete_url: 'projects/{{project}}/locations/{{location}}/repositories/{{respository_id}}'
+autogen_async: true
+async: !ruby/object:Api::OpAsync
+  actions: ['create', 'delete']
+  operation: !ruby/object:Api::OpAsync::Operation
+    base_url: '{{op_id}}'
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+iam_policy: !ruby/object:Api::Resource::IamPolicy
+  parent_resource_attribute: 'repository_id'
+  method_name_separator: ':'
+  fetch_iam_policy_verb: :POST
+  import_format: [
+    'projects/{{project}}/locations/{{location}}/respositories/{{repository_id}}'
+  ]
+  allowed_iam_role: 'roles/securesourcemanager.repoCreator'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'secure_source_manager_instance_repository_basic'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-repository%s\",
+      context[\"random_suffix\"\
+      ])"
+    vars:
+      instance_id: 'my-instance'
+      respository_id: 'my-repository'
+parameters:
+  - !ruby/object:Api::Type::String
+    name: 'repository_id'
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The ID to use for the repository, which will become the final component of the repository's resource name. 
+      This value should be 4-63 characters, and valid characters are /[a-z][0-9]-/.
+  - !ruby/object:Api::Type::String
+    name: 'allow_missing'
+    required: false
+    immutable: true
+    url_param_only: true
+    description: |
+      If set to true, and the repository is not found, the request will succeed but no action will be taken on the server.   
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description: |
+      A unique identifier for a repository.
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: 'description'
+    description: |
+      Description of the repository.
+  - !ruby/object:Api::Type::String
+    name: 'instance'
+    description: |
+      The name of the instance in which the repository is hosted.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'uid'
+    description: |
+      Unique identifier of the repository.
+    output: true
+  - !ruby/object:Api::Type::Time
+    name: 'createTime'
+    description: |
+      Create timestamp.
+    output: true
+  - !ruby/object:Api::Type::Time
+    name: 'updateTime'
+    description: |
+      Update timestamp.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'etag'
+    description: |
+      This checksum is computed by the server based on the value of other fields, and may be sent on update and delete requests to ensure the client has an up-to-date value before proceeding.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'uris'
+    description: |
+      URIs for the repository.
+    output: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'html'
+        description: 'HTML is the URI for user to view the repository in a browser.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'gitHttp'
+        description: 'gitHttps is the git HTTPS URI for git operations.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'api'
+        description: 'API is the URI for API access.'
+        output: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'initialConfig'
+    description: |
+      Initial configurations for the repository.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'defaultBranch'
+        description: 'Default branch name of the repository.'
+      - !ruby/object:Api::Type::Array
+        name: 'gitignores'
+        description: 'List of gitignore template names user can choose from.'
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::String
+        name: 'license'
+        description: 'License template name user can choose from.'
+      - !ruby/object:Api::Type::String
+        name: 'readme'
+        description: 'README template name.'
