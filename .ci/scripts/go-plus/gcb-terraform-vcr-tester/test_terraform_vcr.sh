@@ -69,7 +69,9 @@ set +e
 mkdir fixtures
 if [ "$BASE_BRANCH" != "FEATURE-BRANCH-major-release-5.0.0" ]; then
   # pull main cassettes (major release uses branch specific casssettes as primary ones)
-  gsutil -m -q cp gs://ci-vcr-cassettes/beta/fixtures/* fixtures/
+  gsutil -m -q cp gs://vcr-nightly/beta/2023-12-26/846baec4-8a20-437d-8e5b-3957fbd3b769/main_cassettes_backup/fixtures/* fixtures/
+  echo "///////////////////////"
+  echo "cassette retrieval done"
 fi
 if [ "$BASE_BRANCH" != "main" ]; then
   # copy feature branch specific cassettes over main. This might fail but that's ok if the folder doesnt exist
@@ -217,7 +219,13 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
   export VCR_MODE=RECORDING
   FAILED_TESTS=$(grep "^--- FAIL: TestAcc" replaying_test.log | awk '{print $3}')
   # test_exit_code=0
+  echo "///////////////////////"
+  echo "running VCR RECORDING"
+  echo "GOOGLE_TEST_DIRECTORY: $GOOGLE_TEST_DIRECTORY"
+  echo "FAILED_TESTS: $FAILED_TESTS"
   parallel --jobs 16 TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/recording/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test {1} -parallel 1 -v -run="{2}$" -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" ">>" testlog/recording_build/{2}_recording_test.log ::: $GOOGLE_TEST_DIRECTORY ::: $FAILED_TESTS
+  echo "VCR RECORDING done"
+  echo "///////////////////////"
 
   test_exit_code=$?
 
@@ -225,8 +233,11 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
   # Note: build logs are different from debug logs
   for failed_test in $FAILED_TESTS
   do
+    echo "failed_test: $FAILED_TESTS"
     cat testlog/recording_build/${failed_test}_recording_test.log >> recording_test.log
   done
+
+  echo "recording build logs cleanup done"
 
   # store cassettes
   gsutil -m -q cp fixtures/* gs://ci-vcr-cassettes/beta/refs/heads/auto-pr-$pr_number/fixtures/
@@ -239,6 +250,8 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
 
   # store recording test logs
   gsutil -h "Content-Type:text/plain" -m -q cp testlog/recording/* gs://ci-vcr-logs/beta/refs/heads/auto-pr-$pr_number/artifacts/$build_id/recording/
+
+  echo "recording build logs storage done"
 
   # handle provider crash
   RECORDING_TESTS_PANIC=$(grep "^panic: " recording_test.log)

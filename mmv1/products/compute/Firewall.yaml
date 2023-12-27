@@ -166,7 +166,7 @@ properties:
     name: 'description'
     description: |
       An optional description of this resource. Provide this property when
-      you create the resource.
+      you create the resource. Trigger tests
   - !ruby/object:Api::Type::Array
     name: 'destinationRanges'
     description: |
