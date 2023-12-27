@@ -61,7 +61,7 @@ parameters:
     immutable: true
     url_param_only: true
     description: |
-      The ID to use for the repository, which will become the final component of the repository's resource name. 
+      The ID to use for the repository, which will become the final component of the repository's resource name.
       This value should be 4-63 characters, and valid characters are /[a-z][0-9]-/.
   - !ruby/object:Api::Type::String
     name: 'allow_missing'
@@ -69,7 +69,7 @@ parameters:
     immutable: true
     url_param_only: true
     description: |
-      If set to true, and the repository is not found, the request will succeed but no action will be taken on the server.   
+      If set to true, and the repository is not found, the request will succeed but no action will be taken on the server.
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
