@@ -50,6 +50,38 @@ func TestAccDataflowFlexTemplateJob_basic(t *testing.T) {
 	})
 }
 
+func TestAccDataflowFlexTemplateJob_streamingEngine(t *testing.T) {
+	// This resource uses custom retry logic that cannot be sped up without
+	// modifying the actual resource
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	randStr := acctest.RandString(t, 10)
+	job := "tf-test-dataflow-job-" + randStr
+	bucket := "tf-test-dataflow-bucket-" + randStr
+	topic := "tf-test-topic" + randStr
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataflowFlexTemplateJob_streamingEngine(job, bucket, topic),
+				Check: resource.ComposeTestCheckFunc(
+					testAccDataflowFlexJobExists(t, "google_dataflow_flex_template_job.flex_job_streaming_engine", false),
+				),
+			},
+			{
+				ResourceName:            "google_dataflow_flex_template_job.flex_job_streaming_engine",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "container_spec_gcs_path", "labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
 func TestAccDataflowFlexTemplateJob_streamUpdate(t *testing.T) {
 	// This resource uses custom retry logic that cannot be sped up without
 	// modifying the actual resource
@@ -588,6 +620,60 @@ resource "google_dataflow_flex_template_job" "flex_job" {
   name = "%s"
   container_spec_gcs_path = "gs://${data.google_storage_bucket_object.flex_template.bucket}/${data.google_storage_bucket_object.flex_template.name}"
   on_delete = "cancel"
+  parameters = {
+    schemaLocation = "gs://${google_storage_bucket_object.schema.bucket}/schema.json"
+    qps = "1"
+    topic = google_pubsub_topic.example.id
+  }
+  labels = {
+   "my_labels" = "value"
+  }
+}
+`, topicName, bucket, job)
+}
+
+func testAccDataflowFlexTemplateJob_streamingEngine(job, bucket, topicName string) string {
+	return fmt.Sprintf(`
+
+resource "google_pubsub_topic" "example" {
+  name = "%s"
+}
+
+data "google_storage_bucket_object" "flex_template" {
+  name   = "latest/flex/Streaming_Data_Generator"
+  bucket = "dataflow-templates"
+}
+
+resource "google_storage_bucket" "bucket" {
+  name = "%s"
+  location = "US-CENTRAL1"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_object" "schema" {
+  name = "schema.json"
+  bucket = google_storage_bucket.bucket.name
+  content = <<EOF
+{
+	"eventId": "{{uuid()}}",
+	"eventTimestamp": {{timestamp()}},
+	"ipv4": "{{ipv4()}}",
+	"ipv6": "{{ipv6()}}",
+	"country": "{{country()}}",
+	"username": "{{username()}}",
+	"quest": "{{random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road")}}",
+	"score": {{integer(100, 10000)}},
+	"completed": {{bool()}}
+}
+EOF
+}
+
+resource "google_dataflow_flex_template_job" "flex_job_streaming_engine" {
+  name = "%s"
+  container_spec_gcs_path = "gs://${data.google_storage_bucket_object.flex_template.bucket}/${data.google_storage_bucket_object.flex_template.name}"
+  on_delete = "cancel"
+  enable_streaming_engine = true
   parameters = {
     schemaLocation = "gs://${google_storage_bucket_object.schema.bucket}/schema.json"
     qps = "1"
