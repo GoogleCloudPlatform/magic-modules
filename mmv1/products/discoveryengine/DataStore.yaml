@@ -45,34 +45,34 @@ async: !ruby/object:Api::OpAsync
     path: "done"
     complete: true
     allowed:
-    - true
-    - false
+      - true
+      - false
   error: !ruby/object:Api::OpAsync::Error
     path: "error"
     message: "message"
 
 examples:
-- !ruby/object:Provider::Terraform::Examples
-  name: "discoveryengine_datastore_structured_basic"
-  primary_resource_id: 'structured_basic'
-  primary_resource_name:
-    'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
-  vars:
-    data_store_id: "data-store-id"
-- !ruby/object:Provider::Terraform::Examples
-  name: "discoveryengine_datastore_unstructured_basic"
-  primary_resource_id: 'unstructured_basic'
-  primary_resource_name:
-    'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
-  vars:
-    data_store_id: "data-store-id"
-- !ruby/object:Provider::Terraform::Examples
-  name: "discoveryengine_datastore_website_basic"
-  primary_resource_id: 'website_basic'
-  primary_resource_name:
-    'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
-  vars:
-    data_store_id: "data-store-id"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "discoveryengine_datastore_structured_basic"
+    primary_resource_id: 'structured_basic'
+    primary_resource_name:
+      'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
+    vars:
+      data_store_id: "data-store-id"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "discoveryengine_datastore_unstructured_basic"
+    primary_resource_id: 'unstructured_basic'
+    primary_resource_name:
+      'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
+    vars:
+      data_store_id: "data-store-id"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "discoveryengine_datastore_website_basic"
+    primary_resource_id: 'website_basic'
+    primary_resource_name:
+      'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
+    vars:
+      data_store_id: "data-store-id"
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -121,7 +121,7 @@ properties:
     description: |
       The solutions that the data store enrolls. Available solutions for each
       [industry_vertical][]:
-      `MEDIA`: `SOLUTION_TYPE_RECOMMENDATION` and `SOLUTION_TYPE_SEARCH`. 
+      `MEDIA`: `SOLUTION_TYPE_RECOMMENDATION` and `SOLUTION_TYPE_SEARCH`.
       `SITE_SEARCH`: `SOLUTION_TYPE_SEARCH` is automatically enrolled. Other
       solutions cannot be enrolled.
     item_type: !ruby/object:Api::Type::Enum
@@ -129,10 +129,10 @@ properties:
       description: |
         The type of solution.
       values:
-      - :SOLUTION_TYPE_UNSPECIFIED
-      - :SOLUTION_TYPE_RECOMMENDATION
-      - :SOLUTION_TYPE_SEARCH
-      - :SOLUTION_TYPE_CHAT
+        - :SOLUTION_TYPE_UNSPECIFIED
+        - :SOLUTION_TYPE_RECOMMENDATION
+        - :SOLUTION_TYPE_SEARCH
+        - :SOLUTION_TYPE_CHAT
   - !ruby/object:Api::Type::String
     name: 'defaultSchemaId'
     description: |
@@ -144,10 +144,10 @@ properties:
       The content config of the data store. If this field is unset, the server
       behavior defaults to [ContentConfig.NO_CONTENT][]
     values:
-    - :CONTENT_CONFIG_UNSPECIFIED
-    - :NO_CONTENT
-    - :CONTENT_REQUIRED
-    - :PUBLIC_WEBSITE
+      - :CONTENT_CONFIG_UNSPECIFIED
+      - :NO_CONTENT
+      - :CONTENT_REQUIRED
+      - :PUBLIC_WEBSITE
     immutable: true
   - !ruby/object:Api::Type::Time
     name: "createTime"
