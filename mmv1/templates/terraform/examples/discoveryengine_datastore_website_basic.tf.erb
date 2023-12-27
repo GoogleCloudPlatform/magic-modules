@@ -4,4 +4,5 @@ resource "google_discoveryengine_data_store" "website_basic" {
   display_name      = "tf-test-website-datastore"
   industry_vertical = "GENERIC"
   content_config    = "PUBLIC_WEBSITE"
+  solution_types    = ["SOLUTION_TYPE_SEARCH"]
 }

@@ -4,4 +4,5 @@ resource "google_discoveryengine_data_store" "unstructured_basic" {
   display_name      = "tf-test-unstructured-datastore"
   industry_vertical = "GENERIC"
   content_config    = "CONTENT_REQUIRED"
+  solution_types    = ["SOLUTION_TYPE_SEARCH"]
 }
