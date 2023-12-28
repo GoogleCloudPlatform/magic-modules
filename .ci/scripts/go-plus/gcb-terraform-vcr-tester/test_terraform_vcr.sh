@@ -141,9 +141,13 @@ if [[ "$run_full_VCR" = true ]]; then
 
   test_exit_code=$?
 else
+  # clear GOOGLE_TEST_DIRECTORY list
+  GOOGLE_TEST_DIRECTORY=()
   affected_services_comment="<ul>"
   for service in "${!affected_services[@]}"
   do
+    # append affected service package path
+    GOOGLE_TEST_DIRECTORY+=("./google-beta/services/$service")
     echo "run VCR tests in $service"
     TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/replaying/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta/services/$service -parallel $ACCTEST_PARALLELISM -v -run=TestAcc -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" >> replaying_test.log # append logs into file
 
