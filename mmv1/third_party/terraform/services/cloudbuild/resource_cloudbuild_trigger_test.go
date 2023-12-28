@@ -236,7 +236,7 @@ func testAccCloudBuildTrigger_basic(name string) string {
 	return fmt.Sprintf(`
 resource "google_cloudbuild_trigger" "build_trigger" {
   name        = "%s"
-  description = "acceptance test build trigger -- test"
+  description = "acceptance test build trigger"
   trigger_template {
     branch_name = "main"
     repo_name   = "some-repo"
