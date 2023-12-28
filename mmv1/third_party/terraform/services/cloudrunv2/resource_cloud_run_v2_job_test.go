@@ -48,7 +48,7 @@ func testAccCloudRunV2Job_cloudrunv2JobFull(context map[string]interface{}) stri
     name     = "tf-test-cloudrun-job%{random_suffix}"
     location = "us-central1"
     labels = {
-      label-1 = "value-1"
+      label-2 = "value-2"
     }
     annotations = {
       job-annotation-1 = "job-value-1"
