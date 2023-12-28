@@ -1,0 +1,178 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'Automation'
+description: |
+  An `Automation` enables the automation of manually driven actions for a Delivery Pipeline, which includes Release promotion amongst Targets, Rollout repair and Rollout deployment strategy advancement.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Automate your deployment': 'https://cloud.google.com/deploy/docs/automation'
+  api: 'https://cloud.google.com/deploy/docs/api/reference/rest/v1/projects.locations.deliveryPipelines.automations'
+base_url: 'projects/{{project}}/locations/{{location}}/deliveryPipelines/{{delivery_pipeline}}/automations'
+self_link: 'projects/{{project}}/locations/{{location}}/deliveryPipelines/{{delivery_pipeline}}/automations/{{name}}'
+min_version: beta
+create_url: 'projects/{{project}}/locations/{{location}}/deliveryPipelines/{{delivery_pipeline}}/automations?automationId={{name}}'
+update_verb: :PATCH
+update_mask: true
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+    resource_inside_response: false
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'
+id_format: 'projects/{{project}}/locations/{{location}}/deliveryPipelines/{{delivery_pipeline}}/automations/{{name}}'
+import_format:
+  [
+    'projects/{{project}}/locations/{{location}}/deliveryPipelines/{{delivery_pipeline}}/automations/{{name}}',
+  ]
+autogen_async: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "clouddeploy_automation_basic"
+    min_version: beta
+    primary_resource_id: "b-automation"
+    vars:
+      automation: "cd-automation"
+      delivery_pipeline: "cd-pipeline"
+    test_env_vars:
+      service_account: :SERVICE_ACCT
+  - !ruby/object:Provider::Terraform::Examples
+    name: "clouddeploy_automation_full"
+    min_version: beta
+    primary_resource_id: "f-automation"
+    vars:
+      automation: "cd-automation"
+      delivery_pipeline: "cd-pipeline"
+    test_env_vars:
+      service_account: :SERVICE_ACCT
+parameters:
+  - !ruby/object:Api::Type::String
+    name: "location"
+    immutable: true
+    url_param_only: true
+    description: "The location for the resource"
+    required: true
+  - !ruby/object:Api::Type::String
+    name: "delivery_pipeline"
+    immutable: true
+    url_param_only: true
+    description: "The delivery_pipeline for the resource"
+    required: true
+properties:
+  - !ruby/object:Api::Type::String
+    name: "name"
+    description: "Name of the `Automation`."
+    required: true
+    immutable: true
+    url_param_only: true
+  - !ruby/object:Api::Type::String
+    name: "uid"
+    description: "Output only. Unique identifier of the `Automation`."
+    output: true
+  - !ruby/object:Api::Type::String
+    name: "description"
+    description: "Optional. Description of the `Automation`. Max length is 255 characters."
+  - !ruby/object:Api::Type::String
+    name: "createTime"
+    description: "Output only. Time at which the automation was created."
+    output: true
+  - !ruby/object:Api::Type::String
+    name: "updateTime"
+    description: "Output only. Time at which the automation was updated."
+    output: true
+  - !ruby/object:Api::Type::KeyValueAnnotations
+    name: "annotations"
+    description: "Optional. User annotations. These attributes can only be set and used by the user, and not by Cloud Deploy. Annotations must meet the following constraints: * Annotations are key/value pairs. * Valid annotation keys have two segments: an optional prefix and name, separated by a slash (`/`). * The name segment is required and must be 63 characters or less, beginning and ending with an alphanumeric character (`[a-z0-9A-Z]`) with dashes (`-`), underscores (`_`), dots (`.`), and alphanumerics between. * The prefix is optional. If specified, the prefix must be a DNS subdomain: a series of DNS labels separated by dots(`.`), not longer than 253 characters in total, followed by a slash (`/`). See https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/#syntax-and-character-set for more details."
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: "labels"
+    description: "Optional. Labels are attributes that can be set and used by both the user and by Cloud Deploy. Labels must meet the following constraints: * Keys and values can contain only lowercase letters, numeric characters, underscores, and dashes. * All characters must use UTF-8 encoding, and international characters are allowed. * Keys must start with a lowercase letter or international character. * Each resource is limited to a maximum of 64 labels. Both keys and values are additionally constrained to be <= 63 characters."
+  - !ruby/object:Api::Type::String
+    name: "etag"
+    description: "Optional. The weak etag of the `Automation` resource. This checksum is computed by the server based on the value of other fields, and may be sent on update and delete requests to ensure the client has an up-to-date value before proceeding."
+    output: true
+  - !ruby/object:Api::Type::Boolean
+    name: "suspended"
+    description: "Optional. When Suspended, automation is deactivated from execution."
+    send_empty_value: true
+  - !ruby/object:Api::Type::String
+    name: "serviceAccount"
+    description: "Required. Email address of the user-managed IAM service account that creates Cloud Deploy release and rollout resources."
+    required: true
+  - !ruby/object:Api::Type::NestedObject
+    name: "selector"
+    description: "Required. Selected resources to which the automation will be applied."
+    required: true
+    properties:
+      - !ruby/object:Api::Type::Array
+        name: "targets"
+        description: "Contains attributes about a target."
+        required: true
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: "id"
+              description: "ID of the `Target`. The value of this field could be one of the following: * The last segment of a target name. It only needs the ID to determine which target is being referred to * \"*\", all targets in a location."
+            - !ruby/object:Api::Type::KeyValuePairs
+              name: "labels"
+              description: "Target labels."
+              default_from_api: true
+  - !ruby/object:Api::Type::Array
+    name: "rules"
+    description: "Required. List of Automation rules associated with the Automation resource. Must have at least one rule and limited to 250 rules per Delivery Pipeline. Note: the order of the rules here is not the same as the order of execution."
+    required: true
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::NestedObject
+          name: "promoteReleaseRule"
+          description: "Optional. `PromoteReleaseRule` will automatically promote a release from the current target to a specified target."
+          properties:
+            - !ruby/object:Api::Type::String
+              name: "id"
+              description: "Required. ID of the rule. This id must be unique in the `Automation` resource to which this rule belongs. The format is `a-z{0,62}`."
+              required: true
+            - !ruby/object:Api::Type::String
+              name: "wait"
+              description: "Optional. How long the release need to be paused until being promoted to the next target."
+            - !ruby/object:Api::Type::String
+              name: "destinationTargetId"
+              description: "Optional. The ID of the stage in the pipeline to which this `Release` is deploying. If unspecified, default it to the next stage in the promotion flow. The value of this field could be one of the following: * The last segment of a target name. It only needs the ID to determine if the target is one of the stages in the promotion sequence defined in the pipeline. * \"@next\", the next target in the promotion sequence."
+            - !ruby/object:Api::Type::String
+              name: "destinationPhase"
+              description: "Optional. The starting phase of the rollout created by this operation. Default to the first phase."
+        - !ruby/object:Api::Type::NestedObject
+          name: "advanceRolloutRule"
+          description: "Optional. The `AdvanceRolloutRule` will automatically advance a successful Rollout."
+          properties:
+            - !ruby/object:Api::Type::String
+              name: "id"
+              description: "Required. ID of the rule. This id must be unique in the `Automation` resource to which this rule belongs. The format is `a-z{0,62}`."
+              required: true
+            - !ruby/object:Api::Type::String
+              name: "wait"
+              description: "Optional. How long to wait after a rollout is finished."
+            - !ruby/object:Api::Type::Array
+              name: "sourcePhases"
+              item_type: Api::Type::String
+              description: "Optional. Proceeds only after phase name matched any one in the list. This value must consist of lower-case letters, numbers, and hyphens, start with a letter and end with a letter or a number, and have a max length of 63 characters. In other words, it must match the following regex: `^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$`."
