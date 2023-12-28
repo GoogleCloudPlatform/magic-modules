@@ -484,12 +484,12 @@ func resourceComputeRouterBgpPeerCreate(d *schema.ResourceData, meta interface{}
 
 	log.Printf("[DEBUG] Finished creating RouterBgpPeer %q: %#v", d.Id(), res)
 
-	err = resourceComputeRouterBgpPeerRead(d, meta)
+	err = d.Set("md5_authentication_key", []interface{}{md5AuthenticationKeyProp})
 	if err != nil {
 		return err
 	}
 
-	return d.Set("md5_authentication_key", []interface{}{md5AuthenticationKeyProp})
+	return resourceComputeRouterBgpPeerRead(d, meta)
 }
 
 func resourceComputeRouterBgpPeerRead(d *schema.ResourceData, meta interface{}) error {
@@ -498,8 +498,6 @@ func resourceComputeRouterBgpPeerRead(d *schema.ResourceData, meta interface{}) 
 	if err != nil {
 		return err
 	}
-
-	log.Printf("[DEBUG] Reading RouterBgpPeerobject - %#v", d.Get("md5_authentication_key"))
 
 	url, err := tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/routers/{{router}}")
 	if err != nil {
@@ -757,12 +755,12 @@ func resourceComputeRouterBgpPeerUpdate(d *schema.ResourceData, meta interface{}
 		return err
 	}
 
-	err = resourceComputeRouterBgpPeerRead(d, meta)
+	err = d.Set("md5_authentication_key", []interface{}{md5AuthenticationKeyProp})
 	if err != nil {
 		return err
 	}
 
-	return d.Set("md5_authentication_key", []interface{}{md5AuthenticationKeyProp})
+	return resourceComputeRouterBgpPeerRead(d, meta)
 }
 
 func resourceComputeRouterBgpPeerDelete(d *schema.ResourceData, meta interface{}) error {
@@ -951,11 +949,9 @@ func flattenNestedComputeRouterBgpPeerMd5AuthenticationKey(v interface{}, d *sch
 	originalKeyValue := d.Get("md5_authentication_key").([]interface{})
 	transformed := make(map[string]interface{})
 	transformed["name"] = v
-	log.Printf("[DEBUG] originalKeyValue - %#v)", originalKeyValue)
 	//key value is not returned as it is a sensitive field
 	if len(originalKeyValue) != 0 {
 		transformed["key"] = originalKeyValue[0].(map[string]interface{})["key"]
-		log.Printf("[DEBUG] transformed key value - %#v)", transformed["key"])
 	}
 	return []interface{}{transformed}
 }
