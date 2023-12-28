@@ -29,6 +29,7 @@ self_link: '{{parent}}/locations/{{location}}/postures/{{posture_id}}'
 create_url: '{{parent}}/locations/{{location}}/postures?postureId={{posture_id}}'
 
 update_url: '{{parent}}/locations/{{location}}/postures/{{posture_id}}?revisionId={{revision_id}}'
+
 update_verb: :PATCH
 
 update_mask: true

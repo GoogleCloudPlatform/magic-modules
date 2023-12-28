@@ -46,26 +46,92 @@ func TestAccSecurityPosturePostureDeployment_securityposturePostureDeployment_up
 
 func testAccSecurityPosturePostureDeployment_securityposturePostureDeployment_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_securityposture_posture" "posture1" {
+    posture_id          = "posture_1"
+    parent = "organizations/%{org_id}/locations/global"
+    state = "ACTIVE"
+    description = "a new posture"
+    policy_sets {
+        policy_set_id = "org_policy_set"
+        description = "set of org policies"
+        policies {
+            policy_id = "policy_1"
+            constraint {
+                org_policy_canned_constraint {
+                    canned_constraint_id = "storage.uniformBucketLevelAccess"
+                    policy_rules {
+                        enforce = true
+                    }
+                }
+            }
+        }
+    }
+}
+
 resource "google_securityposture_posture_deployment" "postureDeployment" {
 	posture_deployment_id          = "posture_deployment_1"
 	parent = "organizations/%{org_id}/locations/global"
     description = "a new posture deployment"
     target_resource = "projects/%{project_number}"
-    posture_id = "organizations/%{org_id}/locations/global/postures/testPosture"
-    posture_revision_id = "eb29beb8"
+    posture_id = google_securityposture_posture.posture1.name
+    posture_revision_id = google_securityposture_posture.posture1.revision_id
 }
 `, context)
 }
 
 func testAccSecurityPosturePostureDeployment_securityposturePostureDeployment_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_securityposture_posture" "posture1" {
+    posture_id          = "posture_1"
+    parent = "organizations/%{org_id}/locations/global"
+    state = "ACTIVE"
+    description = "a new posture"
+    policy_sets {
+        policy_set_id = "org_policy_set"
+        description = "set of org policies"
+        policies {
+            policy_id = "policy_1"
+            constraint {
+                org_policy_canned_constraint {
+                    canned_constraint_id = "storage.uniformBucketLevelAccess"
+                    policy_rules {
+                        enforce = true
+                    }
+                }
+            }
+        }
+    }
+}
+
+resource "google_securityposture_posture" "posture2" {
+    posture_id          = "posture_2"
+    parent = "organizations/%{org_id}/locations/global"
+    state = "ACTIVE"
+    description = "a new posture"
+    policy_sets {
+        policy_set_id = "org_policy_set"
+        description = "set of org policies"
+        policies {
+            policy_id = "policy_1"
+            constraint {
+                org_policy_canned_constraint {
+                    canned_constraint_id = "storage.publicAccessPrevention"
+                    policy_rules {
+                        enforce = true
+                    }
+                }
+            }
+        }
+    }
+}
+
 resource "google_securityposture_posture_deployment" "postureDeployment" {
 	posture_deployment_id          = "posture_deployment_1"
 	parent = "organizations/%{org_id}/locations/global"
     description = "an updated posture deployment"
     target_resource = "projects/%{project_number}"
-    posture_id = "organizations/%{org_id}/locations/global/postures/posture-foo-5"
-    posture_revision_id = "48e17293"
+    posture_id = google_securityposture_posture.posture2.name
+    posture_revision_id = google_securityposture_posture.posture2.revision_id
 }
 `, context)
 }
