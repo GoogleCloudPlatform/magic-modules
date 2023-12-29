@@ -375,7 +375,7 @@ properties:
                                 - allow_all
                                 - deny_all
                                 - enforce
-                            -  !ruby/object:Api::Type::NestedObject
+                            - !ruby/object:Api::Type::NestedObject
                               name: 'expr'
                               description: |
                                 Represents a textual expression in the Common Expression Language (CEL) syntax. CEL is a C-like expression language.
@@ -459,11 +459,11 @@ properties:
                             required: true
                             properties:
                               - !ruby/object:Api::Type::String
-                                  name: 'expression'
-                                  required: true
-                                  description:
-                                    Textual representation of an expression in Common Expression
-                                    Language syntax.
+                                name: 'expression'
+                                required: true
+                                description:
+                                  Textual representation of an expression in Common Expression
+                                  Language syntax.
                               - !ruby/object:Api::Type::String
                                 name: 'title'
                                 description:
