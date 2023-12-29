@@ -46,8 +46,8 @@ func TestAccSecurityPosturePostureDeployment_securityposturePostureDeployment_up
 
 func testAccSecurityPosturePostureDeployment_securityposturePostureDeployment_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_securityposture_posture" "posture1" {
-    posture_id          = "posture_1"
+resource "google_securityposture_posture" "posture_one" {
+    posture_id          = "posture_one"
     parent = "organizations/%{org_id}/locations/global"
     state = "ACTIVE"
     description = "a new posture"
@@ -68,21 +68,21 @@ resource "google_securityposture_posture" "posture1" {
     }
 }
 
-resource "google_securityposture_posture_deployment" "postureDeployment" {
-	posture_deployment_id          = "posture_deployment_1"
+resource "google_securityposture_posture_deployment" "postureDeployment_one" {
+	posture_deployment_id          = "posture_deployment_one"
 	parent = "organizations/%{org_id}/locations/global"
     description = "a new posture deployment"
     target_resource = "projects/%{project_number}"
-    posture_id = google_securityposture_posture.posture1.name
-    posture_revision_id = google_securityposture_posture.posture1.revision_id
+    posture_id = google_securityposture_posture.posture_one.name
+    posture_revision_id = google_securityposture_posture.posture_one.revision_id
 }
 `, context)
 }
 
 func testAccSecurityPosturePostureDeployment_securityposturePostureDeployment_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_securityposture_posture" "posture1" {
-    posture_id          = "posture_1"
+resource "google_securityposture_posture" "posture_one" {
+    posture_id          = "posture_one"
     parent = "organizations/%{org_id}/locations/global"
     state = "ACTIVE"
     description = "a new posture"
@@ -103,8 +103,8 @@ resource "google_securityposture_posture" "posture1" {
     }
 }
 
-resource "google_securityposture_posture" "posture2" {
-    posture_id          = "posture_2"
+resource "google_securityposture_posture" "posture_two" {
+    posture_id          = "posture_two"
     parent = "organizations/%{org_id}/locations/global"
     state = "ACTIVE"
     description = "a new posture"
@@ -125,13 +125,13 @@ resource "google_securityposture_posture" "posture2" {
     }
 }
 
-resource "google_securityposture_posture_deployment" "postureDeployment" {
-	posture_deployment_id          = "posture_deployment_1"
+resource "google_securityposture_posture_deployment" "postureDeployment_one" {
+	posture_deployment_id          = "posture_deployment_one"
 	parent = "organizations/%{org_id}/locations/global"
     description = "an updated posture deployment"
     target_resource = "projects/%{project_number}"
-    posture_id = google_securityposture_posture.posture2.name
-    posture_revision_id = google_securityposture_posture.posture2.revision_id
+    posture_id = google_securityposture_posture.posture_two.name
+    posture_revision_id = google_securityposture_posture.posture_two.revision_id
 }
 `, context)
 }
