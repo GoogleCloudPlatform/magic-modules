@@ -26,7 +26,7 @@ func TestAccSecurityPosturePostureDeployment_securityposturePostureDeployment_up
 				Config: testAccSecurityPosturePostureDeployment_securityposturePostureDeployment_basic(context),
 			},
 			{
-				ResourceName:            "google_securityposture_posture_deployment.postureDeployment",
+				ResourceName:            "google_securityposture_posture_deployment.postureDeployment_one",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"parent", "annotations"},
@@ -35,7 +35,7 @@ func TestAccSecurityPosturePostureDeployment_securityposturePostureDeployment_up
 				Config: testAccSecurityPosturePostureDeployment_securityposturePostureDeployment_update(context),
 			},
 			{
-				ResourceName:            "google_securityposture_posture_deployment.postureDeployment",
+				ResourceName:            "google_securityposture_posture_deployment.postureDeployment_one",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"parent", "annotations"},
