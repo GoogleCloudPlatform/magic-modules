@@ -179,7 +179,7 @@ properties:
             name: "hostGroups"
             description: |
               Vsphere host groups to apply to all VMs in the node pool
-            item_type: !ruby/object:Api::Type::String
+            item_type: Api::Type::String
       - !ruby/object:Api::Type::Boolean
         name: "enableLoadBalancer"
         description: |
