@@ -117,8 +117,8 @@ func TestAccComputeNetwork_numericId(t *testing.T) {
 	t.Parallel()
 	suffixName := acctest.RandString(t, 10)
 	networkName := fmt.Sprintf("tf-test-network-basic-%s", suffixName)
-    projectId := envvar.GetTestProjectFromEnv()
-    networkId := fmt.Sprintf("projects/%v/global/networks/%v", projectId, networkName)
+	projectId := envvar.GetTestProjectFromEnv()
+	networkId := fmt.Sprintf("projects/%v/global/networks/%v", projectId, networkName)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
