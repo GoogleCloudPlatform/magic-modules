@@ -23,7 +23,7 @@ func TestAccComputeNetwork_explicitAutoSubnet(t *testing.T) {
 
 	var network compute.Network
 	suffixName := acctest.RandString(t, 10)
-    networkName := fmt.Sprintf("tf-test-network-basic-%s", suffixName)
+	networkName := fmt.Sprintf("tf-test-network-basic-%s", suffixName)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -53,7 +53,7 @@ func TestAccComputeNetwork_customSubnet(t *testing.T) {
 
 	var network compute.Network
 	suffixName := acctest.RandString(t, 10)
-    networkName := fmt.Sprintf("tf-test-network-custom-sn-%s", suffixName)
+	networkName := fmt.Sprintf("tf-test-network-custom-sn-%s", suffixName)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -83,7 +83,7 @@ func TestAccComputeNetwork_routingModeAndUpdate(t *testing.T) {
 
 	var network compute.Network
 	suffixName := acctest.RandString(t, 10)
-    networkName := fmt.Sprintf("tf-test-network-routing-mode-%s", suffixName)
+	networkName := fmt.Sprintf("tf-test-network-routing-mode-%s", suffixName)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -116,7 +116,7 @@ func TestAccComputeNetwork_routingModeAndUpdate(t *testing.T) {
 func TestAccComputeNetwork_numericId(t *testing.T) {
 	t.Parallel()
 	suffixName := acctest.RandString(t, 10)
-    networkName := fmt.Sprintf("tf-test-network-basic-%s", suffixName)
+	networkName := fmt.Sprintf("tf-test-network-basic-%s", suffixName)
     projectId := envvar.GetTestProjectFromEnv()
     networkId := fmt.Sprintf("projects/%v/global/networks/%v", projectId, networkName)
 
@@ -146,7 +146,7 @@ func TestAccComputeNetwork_default_routing_mode(t *testing.T) {
 
 	var network compute.Network
 	suffixName := acctest.RandString(t, 10)
-    networkName := fmt.Sprintf("tf-test-network-network-default-routes-%s", suffixName)
+	networkName := fmt.Sprintf("tf-test-network-network-default-routes-%s", suffixName)
 
 	expectedRoutingMode := "REGIONAL"
 
@@ -173,7 +173,7 @@ func TestAccComputeNetwork_networkDeleteDefaultRoute(t *testing.T) {
 
 	var network compute.Network
 	suffixName := acctest.RandString(t, 10)
-    networkName := fmt.Sprintf("tf-test-network-network-default-routes-%s", suffixName)
+	networkName := fmt.Sprintf("tf-test-network-network-default-routes-%s", suffixName)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -199,7 +199,7 @@ func TestAccComputeNetwork_networkFirewallPolicyEnforcementOrderAndUpdate(t *tes
 	var network compute.Network
 	var updatedNetwork compute.Network
 	suffixName := acctest.RandString(t, 10)
-    networkName := fmt.Sprintf("tf-test-network-firewall-policy-enforcement-order-%s", suffixName)
+	networkName := fmt.Sprintf("tf-test-network-firewall-policy-enforcement-order-%s", suffixName)
 
 	defaultNetworkFirewallPolicyEnforcementOrder := "AFTER_CLASSIC_FIREWALL"
 	explicitNetworkFirewallPolicyEnforcementOrder := "BEFORE_CLASSIC_FIREWALL"
