@@ -100,19 +100,19 @@ func execMembershipChecker(prNumber, commitSha, branchName, headRepoUrl, headBra
 	if authorUserType != github.CoreContributorUserType {
 		fmt.Println("Not core contributor - assigning reviewer")
 
-		firstRequestedReviewer, err := gh.GetPullRequestRequestedReviewer(prNumber)
+		requestedReviewers, err := gh.GetPullRequestRequestedReviewers(prNumber)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
 
-		previouslyInvolvedReviewers, err := gh.GetPullRequestPreviousAssignedReviewers(prNumber)
+		previousReviewers, err := gh.GetPullRequestPreviousReviewers(prNumber)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
 
-		reviewersToRequest, newPrimaryReviewer := github.ChooseCoreReviewers(firstRequestedReviewer, previouslyInvolvedReviewers)
+		reviewersToRequest, newPrimaryReviewer := github.ChooseCoreReviewers(requestedReviewers, previousReviewers)
 
 		for _, reviewer := range reviewersToRequest {
 			err = gh.RequestPullRequestReviewer(prNumber, reviewer)
