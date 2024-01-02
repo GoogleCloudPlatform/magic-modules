@@ -95,8 +95,8 @@ func TestFlattenStatefulPolicyStatefulExternalIps(t *testing.T) {
 	}{
 		"No external IPs in config nor API data": {
 			ConfigValues: map[string]interface{}{},
-			ExternalIPs: map[string]compute.StatefulPolicyPreservedStateNetworkIp{},
-			Expected: []map[string]interface{}{},
+			ExternalIPs:  map[string]compute.StatefulPolicyPreservedStateNetworkIp{},
+			Expected:     []map[string]interface{}{},
 		},
 		"Single external IP (nic0) in config and API data": {
 			ConfigValues: map[string]interface{}{
@@ -235,6 +235,38 @@ func TestFlattenStatefulPolicyStatefulExternalIps(t *testing.T) {
 				},
 				{
 					"interface_name": "nic0",
+					"delete_rule":    "NEVER",
+				},
+			},
+		},
+		"Three external IPs (nic0, nic1, nic2). Only nic0, nic2 in config and only nic1, nic2 stored in API data": {
+			ConfigValues: map[string]interface{}{
+				"stateful_external_ip": []interface{}{
+					map[string]interface{}{
+						"interface_name": "nic2",
+						"delete_rule":    "NEVER",
+					},
+					map[string]interface{}{
+						"interface_name": "nic0",
+						"delete_rule":    "NEVER",
+					},
+				},
+			},
+			ExternalIPs: map[string]compute.StatefulPolicyPreservedStateNetworkIp{
+				"nic1": {
+					AutoDelete: "NEVER",
+				},
+				"nic2": {
+					AutoDelete: "NEVER",
+				},
+			},
+			Expected: []map[string]interface{}{
+				{
+					"interface_name": "nic2",
+					"delete_rule":    "NEVER",
+				},
+				{
+					"interface_name": "nic1",
 					"delete_rule":    "NEVER",
 				},
 			},
