@@ -1,6 +1,6 @@
 <%= lines(autogen_notice(:go, pwd)) -%>
 
-package <%= product_ns.downcase -%>
+package <%= object.__product.name .downcase -%>
 
 import (
 <%- # We list all the v2 imports here and unstable imports, because we run 'goimports' to guess the correct
@@ -24,7 +24,7 @@ import (
 )
 
 <%
-    resource_name = product_ns + object.name
+    resource_name = object.__product.name  + object.name
     properties = object.all_user_properties
     # See discussion on asset name here: https://github.com/GoogleCloudPlatform/magic-modules/pull/1520
     product_backend_name=@base_url.split('://')[1].split('.googleapis.com')[0]
