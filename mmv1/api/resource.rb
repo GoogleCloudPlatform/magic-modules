@@ -647,10 +647,6 @@ Please refer to the field `effective_#{title}` for all of the #{title} present o
       end
     end
 
-    def product_ns
-      @__product.name
-    end
-
     def merge(other)
       result = self.class.new
       instance_variables.each do |v|
