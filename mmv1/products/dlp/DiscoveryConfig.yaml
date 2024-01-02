@@ -108,6 +108,44 @@ properties:
               - :SCORE_INCREASED
               - :ERROR_CHANGED
           - !ruby/object:Api::Type::NestedObject
-            name: pubSub  
+            name: pubSubCondition
+            description: Conditions for triggering pubsub 
+            properties: 
+            - !ruby/object:Api:Type:NestedObject
+              name: expressions
+              description: An expression 
+              properties:
+              - !ruby/object:Api:Type:Enum
+                name: logicalOperator
+                description: The operator to apply to the collection of conditions
+                values: 
+                  - :LOGICAL_OPERATOR_UNSPECIFIED
+                  - :OR
+                  - :AND
+              - !ruby/object:Api:Type:NestedObject
+                name: conditions
+                properties: 
+                - !ruby/object:Api:Type:Enum
+                  name: minimumRiskScore
+                  description: The minimum data risk score that triggers the condition.
+                  values: 
+                    - :PROFILE_SCORE_BUCKET_UNSPECIFIED
+                    - :HIGH
+                    - :MEDIUM_OR_HIGH
+                - !ruby/object:Api:Type:Enum
+                  name: minimumSensitivityScore
+                  description: The minimum sensitvity level that triggers the condition. 
+                  values: 
+                    - :PROFILE_SCORE_BUCKET_UNSPECIFIED
+                    - :HIGH
+                    - :MEDIUM_OR_HIGH
+          - !ruby/object:Api:Type:Enum
+            name: detailOfMessage
+            description: How much data to include in the pub/sub message. 
+            values:
+              - :DETAIL_LEVEL_UNSPECIFIED
+              - :TABLE_PROFILE
+              - :RESOURCE_NAME
+                    
       - !ruby/object:Api::Type::String 
         name: 
