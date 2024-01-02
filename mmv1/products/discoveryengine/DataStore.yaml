@@ -23,7 +23,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 
 base_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores'
 self_link: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores?dataStoreId={{data_store_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores?dataStoreId={{data_store_id}}&createAdvancedSiteSearch={{create_advanced_site_search}}'
 import_format:
   [
     'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}',
@@ -88,6 +88,14 @@ parameters:
     url_param_only: true
     description: |
       The unique id of the data store.
+  - !ruby/object:Api::Type::Boolean
+    name: 'createAdvancedSiteSearch'
+    default_value: false
+    url_param_only: true
+    description: |
+      If true, an advanced data store for site search will be created. If the
+      data store is not configured as site search (GENERIC vertical and
+      PUBLIC_WEBSITE contentConfig), this flag will be ignored.
 
 properties:
   - !ruby/object:Api::Type::String
