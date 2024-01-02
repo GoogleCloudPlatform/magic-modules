@@ -54,16 +54,6 @@ func TestAccServiceAccount_basic(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			// Test creating a service account that already exists.
-			{
-				Config: testAccServiceAccountIgnoreCreateAlreadyExists(accountId, displayName, desc),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"google_service_account.acceptance", "project", project),
-					resource.TestCheckResourceAttr(
-						"google_service_account.acceptance", "member", "serviceAccount:"+expectedEmail),
-				),
-			},
 			// The second step updates the service account
 			{
 				Config: testAccServiceAccountBasic(accountId, displayName2, desc2),
@@ -93,6 +83,47 @@ func TestAccServiceAccount_basic(t *testing.T) {
 				ResourceName:      "google_service_account.acceptance",
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+// Test the option to ignore ALREADY_EXISTS error from creating a service account.
+func TestAccServiceAccount_createIgnoreAlreadyExists(t *testing.T) {
+	t.Parallel()
+
+	accountId := "a" + acctest.RandString(t, 10)
+	displayName := "Terraform Test"
+	desc := "test description"
+	project := envvar.GetTestProjectFromEnv()
+	expectedEmail := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", accountId, project)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			// The first step creates a basic service account
+			{
+				Config: testAccServiceAccountBasic(accountId, displayName, desc),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_service_account.acceptance", "project", project),
+					resource.TestCheckResourceAttr(
+						"google_service_account.acceptance", "member", "serviceAccount:"+expectedEmail),
+				),
+			},
+			{
+				ResourceName:      "google_service_account.acceptance",
+				ImportStateId:     fmt.Sprintf("projects/%s/serviceAccounts/%s", project, expectedEmail),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// The second step creates a new resource that duplicates with the existing service account.
+			{
+				Config: testAccServiceAccountCreateIgnoreAlreadyExists(accountId, displayName, desc),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_service_account.duplicate", "member", "serviceAccount:"+expectedEmail),
+				),
 			},
 		},
 	})
@@ -176,15 +207,20 @@ resource "google_service_account" "acceptance" {
 `, account, name, desc)
 }
 
-func testAccServiceAccountIgnoreCreateAlreadyExists(account, name, desc string) string {
+func testAccServiceAccountCreateIgnoreAlreadyExists(account, name, desc string) string {
 	return fmt.Sprintf(`
 resource "google_service_account" "acceptance" {
   account_id   = "%v"
   display_name = "%v"
   description  = "%v"
-  ignore_create_already_exists = true
 }
-`, account, name, desc)
+resource "google_service_account" "duplicate" {
+  account_id   = "%v"
+  display_name = "%v"
+  description  = "%v"
+  create_ignore_already_exists = true
+}
+`, account, name, desc, account, name, desc)
 }
 
 func testAccServiceAccountWithProject(project, account, name string) string {
