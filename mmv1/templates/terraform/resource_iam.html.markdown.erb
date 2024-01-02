@@ -36,8 +36,8 @@
     directly inserted from YAML.
 -%>
 <%
-  tf_product = (object.__product.legacy_name || product_ns).underscore
-  product_ns_display = (object.__product.legacy_name || product_ns).camelize
+  tf_product = (object.__product.legacy_name || object.__product.name ).underscore
+  product_ns_display = (object.__product.legacy_name || object.__product.name ).camelize
   tf_subcategory = (object.__product.display_name)
   resource_ns = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}"
   resource_ns_iam = "#{resource_ns}_iam"

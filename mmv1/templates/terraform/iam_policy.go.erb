@@ -18,7 +18,7 @@
 
 <%= lines(autogen_notice(:go, pwd)) -%>
 
-package <%= product_ns.downcase -%>
+package <%= object.__product.name .downcase -%>
 
 import (
 	"fmt"
@@ -31,7 +31,7 @@ import (
 	"<%= import_path() -%>/tpgresource"
 	transport_tpg "<%= import_path() -%>/transport"
 )
-<% resource_name = product_ns + object.name -%>
+<% resource_name = object.__product.name  + object.name -%>
 <%
 resource_uri = object.iam_policy.base_url || object.self_link_uri
 parent_resource_name = object.iam_policy.parent_resource_attribute || object.name.underscore
@@ -320,9 +320,9 @@ func (u *<%= resource_name -%>IamUpdater) GetResourceId() string {
 }
 
 func (u *<%= resource_name -%>IamUpdater) GetMutexKey() string {
-	return fmt.Sprintf("iam-<%= product_ns.downcase -%>-<%= object.name.downcase -%>-%s", u.GetResourceId())
+	return fmt.Sprintf("iam-<%= object.__product.name .downcase -%>-<%= object.name.downcase -%>-%s", u.GetResourceId())
 }
 
 func (u *<%= resource_name -%>IamUpdater) DescribeResource() string {
-	return fmt.Sprintf("<%= product_ns.downcase -%> <%= object.name.downcase -%> %q", u.GetResourceId())
+	return fmt.Sprintf("<%= object.__product.name .downcase -%> <%= object.name.downcase -%> %q", u.GetResourceId())
 }
