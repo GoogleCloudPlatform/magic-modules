@@ -1431,6 +1431,58 @@ func TestAccBigQueryTable_invalidSchemas(t *testing.T) {
 	})
 }
 
+func TestAccBigQueryTable_TableReplicationInfo_ConflictsWithView(t *testing.T) {
+	t.Parallel()
+
+	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	tableID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccBigQueryTableWithReplicationInfoAndView(datasetID, tableID),
+				ExpectError: regexp.MustCompile("Schema, view, or materialized view cannot be specified when table replication info is present"),
+			},
+		},
+	})
+}
+
+func TestAccBigQueryTable_TableReplicationInfo_WithoutReplicationInterval(t *testing.T) {
+	t.Parallel()
+
+	projectID := envvar.GetTestProjectFromEnv()
+
+	sourceDatasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	sourceTableID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	connectionID := "bigquerytestdefault.aws-us-east-1.wjchen_replica_mv_tf_connection"
+	sourceURI := "s3://bq-testing/mmiaolin-test/large_orders/*.parquet"
+	// Has to follow google sql IntervalValue encoding
+	maxStaleness := "0-0 0 10:0:0"
+	sourceMaterializedViewID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	destinationDatasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	replicaMaterializedViewID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryTableWithReplicationInfoNoReplicationInterval(projectID, sourceDatasetID, sourceTableID, connectionID, sourceURI, maxStaleness, sourceMaterializedViewID, destinationDatasetID, replicaMaterializedViewID),
+			},
+			{
+				ResourceName:            "google_bigquery_table.replica_mv",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"schema", "external_data_configuration.0.schema", "encryption_configuration", "deletion_protection"},
+			},
+		},
+	})
+}
+
 func testAccCheckBigQueryExtData(t *testing.T, expectedQuoteChar string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
@@ -1763,7 +1815,7 @@ resource "google_bigquery_table" "test" {
     hive_partitioning_options {
       mode = "AUTO"
       source_uri_prefix = "gs://${google_storage_bucket.test.name}/"
-	  require_partition_filter = true
+	    require_partition_filter = true
     }
 
   }
@@ -1803,7 +1855,7 @@ resource "google_bigquery_table" "test" {
     hive_partitioning_options {
       mode = "CUSTOM"
       source_uri_prefix = "gs://${google_storage_bucket.test.name}/{key1:STRING}"
-	  require_partition_filter = true
+	    require_partition_filter = true
     }
 
     schema = <<EOH
@@ -3041,8 +3093,8 @@ func testAccBigQueryTableFromBigtable(context map[string]interface{}) string {
 			"https://googleapis.com/bigtable/${google_bigtable_table.table.id}",
 		  ]
 		}
-	  }
-	  resource "google_bigquery_dataset" "dataset" {
+	}
+	resource "google_bigquery_dataset" "dataset" {
 		dataset_id                  = "tf_test_ds_%{random_suffix}"
 		friendly_name               = "test"
 		description                 = "This is a test description"
@@ -3051,7 +3103,7 @@ func testAccBigQueryTableFromBigtable(context map[string]interface{}) string {
 		labels = {
 		  env = "default"
 		}
-	  }
+	}
 `, context)
 }
 
@@ -3624,6 +3676,98 @@ resource "google_bigquery_table" "test" {
   EOF
 }
 `, datasetID, tableID, schema)
+}
+
+func testAccBigQueryTableWithReplicationInfoAndView(datasetID, tableID string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "test" {
+  dataset_id = "%s"
+}
+
+resource "google_bigquery_table" "test" {
+  deletion_protection = false
+  table_id   = "%s"
+  dataset_id = google_bigquery_dataset.test.dataset_id
+  view {
+    query          = "SELECT state FROM [lookerdata:cdc.project_tycho_reports]"
+    use_legacy_sql = true
+  }
+  table_replication_info {
+    source_project_id = "source_project_id"
+    source_dataset_id = "source_dataset_id"
+    source_table_id = "source_table_id"
+  }
+}
+`, datasetID, tableID)
+}
+
+func testAccBigQueryTableWithReplicationInfoNoReplicationInterval(projectID, sourceDatasetID, sourceTableID, connectionID, sourceURI, maxStaleness, sourceMaterializedViewID, destinationDatasetID, replicaMaterializedViewID string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "source" {
+  dataset_id = "%s"
+  location = "aws-us-east-1"
+}
+
+resource "google_bigquery_table" "source_table" {
+  deletion_protection = false
+  table_id   = "%s"
+  dataset_id = google_bigquery_dataset.source.dataset_id
+  external_data_configuration {
+    connection_id   = "%s"
+    autodetect      = true
+		metadata_cache_mode = "AUTOMATIC"
+    source_format = "PARQUET"
+    source_uris = [
+      "%s",
+    ]
+  }
+  max_staleness = "%s"
+	encryption_configuration {}
+ }
+
+resource "google_bigquery_table" "source_mv" {
+  deletion_protection = false
+  table_id   = "%s"
+  dataset_id = google_bigquery_dataset.source.dataset_id
+
+  materialized_view {
+    query = "SELECT * FROM %s.%s"
+  }
+	max_staleness = "%s"
+
+	depends_on = ["google_bigquery_table.source_table"]
+}
+
+resource "google_bigquery_dataset_access" "access" {
+  dataset_id    = google_bigquery_dataset.source.dataset_id
+  view {
+    project_id = "%s"
+    dataset_id = google_bigquery_table.source_mv.dataset_id
+    table_id   = google_bigquery_table.source_mv.table_id
+  }
+}
+
+resource "google_bigquery_dataset" "destination" {
+  dataset_id = "%s"
+  location = "us"
+}
+
+resource "google_bigquery_table" "replica_mv" {
+  provider = google-beta
+
+  depends_on = [google_bigquery_dataset_access.access]
+
+  deletion_protection = false
+  dataset_id = google_bigquery_dataset.destination.dataset_id
+  table_id   = "%s"
+  table_replication_info {
+    source_project_id = "%s"
+    source_dataset_id = google_bigquery_table.source_mv.dataset_id
+    source_table_id = google_bigquery_table.source_mv.table_id
+    #replication_interval_ms = 600000
+  }
+}
+`, sourceDatasetID, sourceTableID, connectionID, sourceURI, maxStaleness, sourceMaterializedViewID, sourceDatasetID, sourceTableID, maxStaleness, projectID, destinationDatasetID, replicaMaterializedViewID, projectID)
 }
 
 var TEST_CSV = `lifelock,LifeLock,,web,Tempe,AZ,1-May-07,6850000,USD,b
