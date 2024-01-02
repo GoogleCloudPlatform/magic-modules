@@ -1,13 +1,29 @@
+/*
+* Copyright 2023 Google LLC. All Rights Reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+ */
 package cmd
 
 import "magician/github"
 
 type mockGithub struct {
-	pullRequest       github.PullRequest
-	userType          github.UserType
-	firstReviewer     string
-	previousReviewers []string
-	calledMethods     map[string][][]any
+	pullRequest        github.PullRequest
+	userType           github.UserType
+	requestedReviewers []github.User
+	previousReviewers  []github.User
+	teamMembers        map[string][]github.User
+	calledMethods      map[string][][]any
 }
 
 func (m *mockGithub) GetPullRequest(prNumber string) (github.PullRequest, error) {
@@ -20,14 +36,19 @@ func (m *mockGithub) GetUserType(user string) github.UserType {
 	return m.userType
 }
 
-func (m *mockGithub) GetPullRequestRequestedReviewer(prNumber string) (string, error) {
-	m.calledMethods["GetPullRequestRequestedReviewer"] = append(m.calledMethods["GetPullRequestRequestedReviewer"], []any{prNumber})
-	return m.firstReviewer, nil
+func (m *mockGithub) GetPullRequestRequestedReviewers(prNumber string) ([]github.User, error) {
+	m.calledMethods["GetPullRequestRequestedReviewers"] = append(m.calledMethods["GetPullRequestRequestedReviewers"], []any{prNumber})
+	return m.requestedReviewers, nil
 }
 
-func (m *mockGithub) GetPullRequestPreviousAssignedReviewers(prNumber string) ([]string, error) {
-	m.calledMethods["GetPullRequestPreviousAssignedReviewers"] = append(m.calledMethods["GetPullRequestPreviousAssignedReviewers"], []any{prNumber})
+func (m *mockGithub) GetPullRequestPreviousReviewers(prNumber string) ([]github.User, error) {
+	m.calledMethods["GetPullRequestPreviousReviewers"] = append(m.calledMethods["GetPullRequestPreviousReviewers"], []any{prNumber})
 	return m.previousReviewers, nil
+}
+
+func (m *mockGithub) GetTeamMembers(organization, team string) ([]github.User, error) {
+	m.calledMethods["GetTeamMembers"] = append(m.calledMethods["GetTeamMembers"], []any{organization, team})
+	return m.teamMembers[team], nil
 }
 
 func (m *mockGithub) RequestPullRequestReviewer(prNumber string, reviewer string) error {
