@@ -69,3 +69,4 @@ Quotas that will need to be adjusted to support all tests:
 - compute.googleapis.com/routers
 - compute.googleapis.com/c2_cpus (us-central1)
 - compute.googleapis.com/n2_cpus (us-central1) to 36+
+- VMware Engine standard 72 vCPUs nodes per region - southamerica-east1 to 21
