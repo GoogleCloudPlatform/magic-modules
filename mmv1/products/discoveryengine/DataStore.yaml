@@ -110,11 +110,8 @@ properties:
     description: |
       The industry vertical that the data store registers.
     values:
-      - :INDUSTRY_VERTICAL_UNSPECIFIED
       - :GENERIC
       - :MEDIA
-      - :HEALTHCARE_FHIR
-      - :CCAI_SEARCH
     immutable: true
   - !ruby/object:Api::Type::Array
     name: 'solutionTypes'
