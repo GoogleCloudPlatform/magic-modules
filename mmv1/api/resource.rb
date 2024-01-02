@@ -665,7 +665,8 @@ Please refer to the field `effective_#{title}` for all of the #{title} present o
       update_prop
     end
 
-    # Handwritten TF Operation objects will be shaped like accessContextManager while the Google Go Client will have a name like accesscontextmanager
+    # Handwritten TF Operation objects will be shaped like accessContextManager
+    # while the Google Go Client will have a name like accesscontextmanager
     def client_name_pascal
       client_name = __product.client_name || __product.name
       client_name.camelize(:upper)
@@ -680,16 +681,16 @@ Please refer to the field `effective_#{title}` for all of the #{title} present o
       timeouts_filtered
     end
 
-    def has_project
-      base_url.include?('{{project}}') || (create_url && create_url.include?('{{project}}'))
+    def project?
+      base_url.include?('{{project}}') || create_url&.include?('{{project}}')
     end
 
-    def has_region
-      base_url.include?('{{region}}') && parameters.any?{ |p| p.name == 'region' && p.ignore_read }
+    def region?
+      base_url.include?('{{region}}') && parameters.any? { |p| p.name == 'region' && p.ignore_read }
     end
 
-    def has_zone
-      base_url.include?('{{zone}}') && parameters.any?{ |p| p.name == 'zone' && p.ignore_read }
+    def zone?
+      base_url.include?('{{zone}}') && parameters.any? { |p| p.name == 'zone' && p.ignore_read }
     end
 
     def merge(other)

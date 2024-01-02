@@ -94,7 +94,7 @@ func Resource<%= object.resource_name -%>() *schema.Resource {
 <%      end -%>
         },
 <%  end -%>
-<% if ((object.has_project || object.has_region || object.has_zone) && !object.skip_default_cdiff) || object.custom_diff.any? || object.settable_properties.any? {|p| p.unordered_list}-%>
+<% if ((object.project? || object.region? || object.zone?) && !object.skip_default_cdiff) || object.custom_diff.any? || object.settable_properties.any? {|p| p.unordered_list}-%>
         CustomizeDiff: customdiff.All(
 <%      if object.settable_properties.any? {|p| p.unordered_list} -%>
         <%=
@@ -108,13 +108,13 @@ func Resource<%= object.resource_name -%>() *schema.Resource {
         <%= cdiff%>,
 <%          end -%>
 <%      end -%>
-<%      if object.has_project && !object.skip_default_cdiff -%>
+<%      if object.project? && !object.skip_default_cdiff -%>
             tpgresource.DefaultProviderProject,
 <%      end -%>
-<%      if object.has_region && !object.skip_default_cdiff  -%>
+<%      if object.region? && !object.skip_default_cdiff  -%>
             tpgresource.DefaultProviderRegion,
 <%      end -%>
-<%      if object.has_zone && !object.skip_default_cdiff  -%>
+<%      if object.zone? && !object.skip_default_cdiff  -%>
             tpgresource.DefaultProviderZone,
 <%      end -%>
         ),
@@ -146,7 +146,7 @@ func Resource<%= object.resource_name -%>() *schema.Resource {
 <%     end -%>
 <%   end -%>
 <%= lines(compile(pwd + '/' + object.custom_code.extra_schema_entry)) if object.custom_code.extra_schema_entry -%>
-<%  if object.has_project -%>
+<%  if object.project? -%>
             "project": {
                 Type:     schema.TypeString,
                 Optional: true,
@@ -246,7 +246,7 @@ func resource<%= object.resource_name -%>Create(d *schema.ResourceData, meta int
 <%    end -%>
     billingProject := ""
 
-<%    if object.has_project -%>
+<%    if object.project? -%>
     project, err := tpgresource.GetProject(d, config)
     if err != nil {
         return fmt.Errorf("Error fetching project for <%= object.name -%>: %s", err)
@@ -316,7 +316,7 @@ func resource<%= object.resource_name -%>Create(d *schema.ResourceData, meta int
     // identity fields and d.Id() before read
     var opRes map[string]interface{}
     err = <%= object.client_name_pascal -%>OperationWaitTimeWithResponse(
-    config, res, &opRes, <% if object.has_project || object.async.include_project -%> <% if object.legacy_long_form_project -%>tpgresource.GetResourceNameFromSelfLink(project)<% else %>project<% end %>, <% end -%> "Creating <%= object.name -%>", userAgent,
+    config, res, &opRes, <% if object.project? || object.async.include_project -%> <% if object.legacy_long_form_project -%>tpgresource.GetResourceNameFromSelfLink(project)<% else %>project<% end %>, <% end -%> "Creating <%= object.name -%>", userAgent,
         d.Timeout(schema.TimeoutCreate))
     if err != nil {
 <%          if object.custom_code.post_create_failure -%>
@@ -369,7 +369,7 @@ func resource<%= object.resource_name -%>Create(d *schema.ResourceData, meta int
 
 <%        else # if object.async.is_a? Api::OpAsync -%>
     err = <%= object.client_name_pascal -%>OperationWaitTime(
-    config, res, <% if object.has_project || object.async.include_project -%> <% if object.legacy_long_form_project -%>tpgresource.GetResourceNameFromSelfLink(project)<% else %>project<% end %>, <% end -%> "Creating <%= object.name -%>", userAgent,
+    config, res, <% if object.project? || object.async.include_project -%> <% if object.legacy_long_form_project -%>tpgresource.GetResourceNameFromSelfLink(project)<% else %>project<% end %>, <% end -%> "Creating <%= object.name -%>", userAgent,
         d.Timeout(schema.TimeoutCreate))
 
     if err != nil {
@@ -429,7 +429,7 @@ func resource<%= object.resource_name -%>PollRead(d *schema.ResourceData, meta i
 
         billingProject := ""
 
-<%      if object.has_project -%>
+<%      if object.project? -%>
         project, err := tpgresource.GetProject(d, config)
         if err != nil {
             return nil, fmt.Errorf("Error fetching project for <%= object.name -%>: %s", err)
@@ -518,7 +518,7 @@ func resource<%= object.resource_name -%>Read(d *schema.ResourceData, meta inter
 
     billingProject := ""
 
-<%  if object.has_project -%>
+<%  if object.project? -%>
     project, err := tpgresource.GetProject(d, config)
     if err != nil {
         return fmt.Errorf("Error fetching project for <%= object.name -%>: %s", err)
@@ -604,13 +604,13 @@ func resource<%= object.resource_name -%>Read(d *schema.ResourceData, meta inter
 <%      end -%>
 <%    end -%>
 <%  end -%>
-<%  if object.has_project -%>
+<%  if object.project? -%>
     if err := d.Set("project", project); err != nil {
         return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
     }
 <%  end -%>
 
-<%  if object.has_region -%>
+<%  if object.region? -%>
     region, err := tpgresource.GetRegion(d, config)
     if err != nil {
         return err
@@ -620,7 +620,7 @@ func resource<%= object.resource_name -%>Read(d *schema.ResourceData, meta inter
     }
 <%  end -%>
 
-<%  if object.has_zone -%>
+<%  if object.zone? -%>
     zone, err := tpgresource.GetZone(d, config)
     if err != nil {
         return err
@@ -679,7 +679,7 @@ func resource<%= object.resource_name -%>Update(d *schema.ResourceData, meta int
 
     billingProject := ""
 
-<%    if object.has_project -%>
+<%    if object.project? -%>
     project, err := tpgresource.GetProject(d, config)
     if err != nil {
         return fmt.Errorf("Error fetching project for <%= object.name -%>: %s", err)
@@ -788,7 +788,7 @@ if len(updateMask) > 0 {
 <%      if object.async&.allow?('update') -%>
 <%        if object.async.is_a? Api::OpAsync -%>
     err = <%= object.client_name_pascal -%>OperationWaitTime(
-        config, res, <% if object.has_project || object.async.include_project -%> <% if object.legacy_long_form_project -%>tpgresource.GetResourceNameFromSelfLink(project)<% else %>project<% end %>, <% end -%> "Updating <%= object.name -%>", userAgent,
+        config, res, <% if object.project? || object.async.include_project -%> <% if object.legacy_long_form_project -%>tpgresource.GetResourceNameFromSelfLink(project)<% else %>project<% end %>, <% end -%> "Updating <%= object.name -%>", userAgent,
         d.Timeout(schema.TimeoutUpdate))
 
     if err != nil {
@@ -949,7 +949,7 @@ if len(updateMask) > 0 {
 <%        if object.async&.allow?('update') -%>
 <%          if object.async.is_a? Api::OpAsync-%>
         err = <%= object.client_name_pascal -%>OperationWaitTime(
-            config, res, <% if object.has_project || object.async.include_project -%> <% if object.legacy_long_form_project -%>tpgresource.GetResourceNameFromSelfLink(project)<% else %>project<% end %>, <% end -%> "Updating <%= object.name -%>", userAgent,
+            config, res, <% if object.project? || object.async.include_project -%> <% if object.legacy_long_form_project -%>tpgresource.GetResourceNameFromSelfLink(project)<% else %>project<% end %>, <% end -%> "Updating <%= object.name -%>", userAgent,
             d.Timeout(schema.TimeoutUpdate))
         if err != nil {
             return err
@@ -1001,7 +1001,7 @@ func resource<%= object.resource_name -%>Delete(d *schema.ResourceData, meta int
 
     billingProject := ""
 
-<%      if object.has_project -%>
+<%      if object.project? -%>
     project, err := tpgresource.GetProject(d, config)
     if err != nil {
         return fmt.Errorf("Error fetching project for <%= object.name -%>: %s", err)
@@ -1088,7 +1088,7 @@ func resource<%= object.resource_name -%>Delete(d *schema.ResourceData, meta int
     }
 <%        else -%>
     err = <%= object.client_name_pascal -%>OperationWaitTime(
-        config, res, <% if object.has_project || object.async.include_project-%> <% if object.legacy_long_form_project -%>tpgresource.GetResourceNameFromSelfLink(project)<% else %>project<% end %>, <% end -%> "Deleting <%= object.name -%>", userAgent,
+        config, res, <% if object.project? || object.async.include_project-%> <% if object.legacy_long_form_project -%>tpgresource.GetResourceNameFromSelfLink(project)<% else %>project<% end %>, <% end -%> "Deleting <%= object.name -%>", userAgent,
         d.Timeout(schema.TimeoutDelete))
 
     if err != nil {
