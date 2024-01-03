@@ -1,9 +1,9 @@
-resource "google_discoveryengine_data_store" "website_basic" {
+resource "google_discoveryengine_data_store" "advanced_site_search_basic" {
   location                    = "global"
   data_store_id               = "<%= ctx[:vars]['data_store_id'] %>"
-  display_name                = "tf-test-website-datastore"
+  display_name                = "tf-test-advanced-site-search-datastore"
   industry_vertical           = "GENERIC"
   content_config              = "PUBLIC_WEBSITE"
   solution_types              = ["SOLUTION_TYPE_SEARCH"]
-  create_advanced_site_search = false
+  create_advanced_site_search = true
 }

@@ -73,6 +73,13 @@ examples:
       'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
     vars:
       data_store_id: "data-store-id"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "discoveryengine_datastore_advanced_site_search_basic"
+    primary_resource_id: 'advanced_site_search_basic'
+    primary_resource_name:
+      'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
+    vars:
+      data_store_id: "data-store-id"
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'

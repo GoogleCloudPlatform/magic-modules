@@ -1,8 +1,9 @@
 resource "google_discoveryengine_data_store" "unstructured_basic" {
-  location          = "global"
-  data_store_id     = "<%= ctx[:vars]['data_store_id'] %>"
-  display_name      = "tf-test-unstructured-datastore"
-  industry_vertical = "GENERIC"
-  content_config    = "CONTENT_REQUIRED"
-  solution_types    = ["SOLUTION_TYPE_SEARCH"]
+  location                    = "global"
+  data_store_id               = "<%= ctx[:vars]['data_store_id'] %>"
+  display_name                = "tf-test-unstructured-datastore"
+  industry_vertical           = "GENERIC"
+  content_config              = "CONTENT_REQUIRED"
+  solution_types              = ["SOLUTION_TYPE_SEARCH"]
+  create_advanced_site_search = false
 }
