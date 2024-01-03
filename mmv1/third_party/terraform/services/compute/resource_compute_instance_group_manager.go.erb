@@ -778,7 +778,7 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 	if err = d.Set("stateful_disk", flattenStatefulPolicy(manager.StatefulPolicy)); err != nil {
 		return fmt.Errorf("Error setting stateful_disk in state: %s", err.Error())
 	}
-	if err = d.Set("stateful_internal_ip", flattenStatefulPolicyStatefulInternalIps(manager.StatefulPolicy)); err != nil {
+	if err = d.Set("stateful_internal_ip", flattenStatefulPolicyStatefulInternalIps(d, manager.StatefulPolicy)); err != nil {
 		return fmt.Errorf("Error setting stateful_internal_ip in state: %s", err.Error())
 	}
 	if err = d.Set("stateful_external_ip", flattenStatefulPolicyStatefulExternalIps(d, manager.StatefulPolicy)); err != nil {
@@ -1306,20 +1306,12 @@ func flattenStatefulPolicy(statefulPolicy *compute.StatefulPolicy) []map[string]
 	return result
 }
 
-func flattenStatefulPolicyStatefulInternalIps(statefulPolicy *compute.StatefulPolicy) []map[string]interface{} {
+func flattenStatefulPolicyStatefulInternalIps(d *schema.ResourceData, statefulPolicy *compute.StatefulPolicy) []map[string]interface{} {
 	if statefulPolicy == nil || statefulPolicy.PreservedState == nil || statefulPolicy.PreservedState.InternalIPs == nil {
 		return make([]map[string]interface{}, 0, 0)
 	}
-	result := make([]map[string]interface{}, 0, len(statefulPolicy.PreservedState.InternalIPs))
-	for interfaceName, internalIp := range statefulPolicy.PreservedState.InternalIPs {
-		data := map[string]interface{}{
-			"interface_name": interfaceName,
-			"delete_rule": internalIp.AutoDelete,
-		}
 
-		result = append(result, data)
-	}
-	return result
+	return flattenStatefulPolicyStatefulIps(d, "stateful_internal_ip", statefulPolicy.PreservedState.InternalIPs)
 }
 
 func flattenStatefulPolicyStatefulExternalIps(d *schema.ResourceData, statefulPolicy *compute.StatefulPolicy) []map[string]interface{} {
