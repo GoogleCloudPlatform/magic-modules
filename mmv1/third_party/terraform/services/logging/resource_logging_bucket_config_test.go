@@ -257,6 +257,7 @@ resource "google_project" "default" {
 	project_id = "%{project_name}"
 	name       = "%{project_name}"
 	org_id     = "%{org_id}"
+	billing_account = "%{billing_account}"
 }
 
 resource "google_logging_project_bucket_config" "basic" {
@@ -275,6 +276,7 @@ resource "google_project" "default" {
 	project_id = "%{project_name}"
 	name       = "%{project_name}"
 	org_id     = "%{org_id}"
+	billing_account = "%{billing_account}"
 }
 
 resource "google_logging_project_bucket_config" "basic" {
