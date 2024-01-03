@@ -1327,26 +1327,31 @@ func flattenStatefulPolicyStatefulExternalIps(d *schema.ResourceData, statefulPo
 		return make([]map[string]interface{}, 0)
 	}
 
-	// statefulPolicy.PreservedState.ExternalIPs is affected by API-side reordering of external IPs, where ordering
-	// is done by the interface_name value.
-	// Below we intend to reorder the external IPs to match the order in the config.
-	// Also, data is converted from a map (client library's statefulPolicy.PreservedState.ExternalIPs) to a slice (stored in state).
-	// Any external IPs found from the API response that aren't in the config are appended to the end of the slice.
+	return flattenStatefulPolicyStatefulIps(d, "stateful_external_ip", statefulPolicy.PreservedState.ExternalIPs)
+}
 
-	configIpOrder := d.Get("stateful_external_ip").([]interface{})
+func flattenStatefulPolicyStatefulIps(d *schema.ResourceData, ipfieldName string, ips map[string]compute.StatefulPolicyPreservedStateNetworkIp) []map[string]interface{} {
+
+	// statefulPolicy.PreservedState.ExternalIPs and statefulPolicy.PreservedState.InternalIPs are affected by API-side reordering
+	// of external/internal IPs, where ordering is done by the interface_name value.
+	// Below we intend to reorder the IPs to match the order in the config.
+	// Also, data is converted from a map (client library's statefulPolicy.PreservedState.ExternalIPs, or .InternalIPs) to a slice (stored in state).
+	// Any IPs found from the API response that aren't in the config are appended to the end of the slice.
+
+	configIpOrder := d.Get(ipfieldName).([]interface{})
 	order := map[string]int{} // record map of interface name to index
 	for i, el := range configIpOrder {
-		externalIp := el.(map[string]interface{})
-		interfaceName := externalIp["interface_name"].(string)
+		ip := el.(map[string]interface{})
+		interfaceName := ip["interface_name"].(string)
 		order[interfaceName] = i
 	}
 
 	orderedResult := make([]map[string]interface{}, len(configIpOrder))
 	unexpectedIps := []map[string]interface{}{}
-	for interfaceName, externalIp := range statefulPolicy.PreservedState.ExternalIPs {
+	for interfaceName, ip := range ips {
 		data := map[string]interface{}{
 			"interface_name": interfaceName,
-			"delete_rule":    externalIp.AutoDelete,
+			"delete_rule":    ip.AutoDelete,
 		}
 
 		index, found := order[interfaceName]
@@ -1354,7 +1359,7 @@ func flattenStatefulPolicyStatefulExternalIps(d *schema.ResourceData, statefulPo
 			unexpectedIps = append(unexpectedIps, data)
 			continue
 		}
-		orderedResult[index] = data // Put elements from API response in correct order
+		orderedResult[index] = data // Put elements from API response in order that matches the config
 	}
 
 	// Remove any nils from the ordered list. This can occur if the API doesn't include an interface present in the config.
