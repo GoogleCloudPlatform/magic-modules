@@ -150,18 +150,50 @@ properties:
         name : 'target[]'
         description: Target to match against for determining what to scan and how frequently
         properties:
-        - !ruby/object:Api:type:NestedObject
+        - !ruby/object:Api:Type:NestedObject
           name: bigQueryTarget
           description: BigQuery target for Discovery. The first target to match a table will be the one applied. 
           properties: 
-          - !ruby/object:Api:type:NestedObject
+          - !ruby/object:Api:Type:NestedObject
             name: filter
             description: Required. The tables the discovery cadence applies to. The first target with a matching filter will be the one to apply to a table
             properties:
-            !ruby/object:Api:type:NestedObject
-            name: table 
-            description: A specific set of tables for this filter to apply to. A table collection must be specified in only one filer per config. 
-            
+            - !ruby/object:Api:Type:NestedObject
+              name: table 
+              description: A specific set of tables for this filter to apply to. A table collection must be specified in only one filer per config. 
+              properties: 
+              - !ruby/object:Api:Type:NestedObject
+                name: includeRegexes
+                description: A collection of regular expressions to match a BQ table against. 
+                properties:
+                - !ruby/object:Api:Type:NestedObject
+                  name: 'patterns[]'
+                  description: A single BigQuery regular expression pattern to match against one or more tables, datasets, or projects that contain BigQuery tables.
+                  properties: 
+                  - !ruby/object:Api:Type:String
+                    name: projectIdRegex
+                    description:  For organizations, if unset, will match all projects. Has no effect for data profile configurations created within a project.
+                  - !ruby/object:Api:Type:String
+                    name: datasetIdRegex
+                    description: if unset, this property matches all datasets 
+                  - !ruby/object:Api:Type:String 
+                    name: tableIdRegex
+                    description: if unset, this property matches all tables
+              - !ruby/object:Api:Type:NestedObject
+                name: otherTables
+                description: Catch-all. This should always be the last filter in the list because anything above it will apply first. 
+                properties:
+                - !ruby/object:Api::Type::String 
+                  name: createdAfter
+                  description: A timestamp in RFC3339 UTC "Zulu" format with nanosecond resolution and upto nine fractional digits.
+                - !ruby/object:Api:Type:NestedObject
+                  name: orCondition        
+                  description: At least one of the conditions must be true for a table to be scanned. 
+                  properties: 
+                  - !ruby/object:Api:Type:String 
+                    name : minAge
+                    description: Duration format. Minimum age a table must have before Cloud DLP can profile it. value greater than 1.
+                    
                     
       - !ruby/object:Api::Type::String 
         name: 
