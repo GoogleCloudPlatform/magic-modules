@@ -27,7 +27,7 @@ func TestAccVertexAIFeatureGroupFeature_updated(t *testing.T) {
 				ResourceName:            "google_vertex_ai_feature_group_feature.feature_group_feature",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "feature_group", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"feature_group", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccVertexAIFeatureGroupFeature_updated(context),
@@ -36,7 +36,7 @@ func TestAccVertexAIFeatureGroupFeature_updated(t *testing.T) {
 				ResourceName:            "google_vertex_ai_feature_group_feature.feature_group_feature",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "feature_group", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"feature_group", "labels", "terraform_labels"},
 			},
 		},
 	})
