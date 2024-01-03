@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-func TestAccVertexAIFeatureOnlinestoreFeatureview_vertexAiFeatureonlinestoreFeatureview_updated(t *testing.T) {
+func TestAccVertexAIFeatureOnlineStoreFeatureview_vertexAiFeatureonlinestoreFeatureview_updated(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -21,34 +21,34 @@ func TestAccVertexAIFeatureOnlinestoreFeatureview_vertexAiFeatureonlinestoreFeat
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckVertexAIFeatureOnlinestoreFeatureviewDestroyProducer(t),
+		CheckDestroy:             testAccCheckVertexAIFeatureOnlineStoreFeatureviewDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVertexAIFeatureOnlinestoreFeatureview_vertexAiFeatureonlinestoreFeatureview_basic(context),
+				Config: testAccVertexAIFeatureOnlineStoreFeatureview_vertexAiFeatureonlinestoreFeatureview_basic(context),
 			},
 			{
-				ResourceName:            "google_vertex_ai_feature_onlinestore_featureview.featureview",
+				ResourceName:            "google_vertex_ai_feature_online_store_featureview.featureview",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"name", "etag", "feature_online_store", "labels", "terraform_labels"},
 			},
 			{
-				Config: testAccVertexAIFeatureOnlinestoreFeatureview_vertexAiFeatureonlinestoreFeatureview_update(context),
+				Config: testAccVertexAIFeatureOnlineStoreFeatureview_vertexAiFeatureonlinestoreFeatureview_update(context),
 			},
 			{
-				ResourceName:            "google_vertex_ai_feature_onlinestore_featureview.featureview",
+				ResourceName:            "google_vertex_ai_feature_online_store_featureview.featureview",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "etag", "feature_online_store", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"name", "feature_online_store", "labels", "terraform_labels"},
 			},
 		},
 	})
 }
 
-func testAccVertexAIFeatureOnlinestoreFeatureview_vertexAiFeatureonlinestoreFeatureview_basic(context map[string]interface{}) string {
+func testAccVertexAIFeatureOnlineStoreFeatureview_vertexAiFeatureonlinestoreFeatureview_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_vertex_ai_feature_online_store" "featureonlinestore" {
-  name     = "tf_test_featureonlinestore12"
+  name     = "tf_test_featureonlinestore%{random_suffix}"
   labels = {
     foo = "bar"
   }
@@ -64,7 +64,7 @@ resource "google_vertex_ai_feature_online_store" "featureonlinestore" {
 
 resource "google_bigquery_dataset" "tf-test-dataset" {
 
-  dataset_id                  = "tf_test_dataset1_featureview12"
+  dataset_id                  = "tf_test_dataset1_featureview%{random_suffix}"
   friendly_name               = "test"
   description                 = "This is a test description"
   location                    = "US"
@@ -74,7 +74,7 @@ resource "google_bigquery_table" "tf-test-table" {
   deletion_protection = false
 
   dataset_id = google_bigquery_dataset.tf-test-dataset.dataset_id
-  table_id   = "tf_test_bq_table"
+  table_id   = "tf_test_bq_table%{random_suffix}"
   schema = <<EOF
   [
   {
@@ -99,8 +99,8 @@ resource "google_bigquery_table" "tf-test-table" {
 EOF
 }
 
-resource "google_vertex_ai_feature_onlinestore_featureview" "featureview" {
-   name = "tf_test_tf_test_fv1%{random_suffix}"
+resource "google_vertex_ai_feature_online_store_featureview" "featureview" {
+   name = "tf_test_fv%{random_suffix}"
    region   = "us-central1"
    labels = {
     foo = "bar"
@@ -122,10 +122,10 @@ data "google_project" "project" {
 `, context)
 }
 
-func testAccVertexAIFeatureOnlinestoreFeatureview_vertexAiFeatureonlinestoreFeatureview_update(context map[string]interface{}) string {
+func testAccVertexAIFeatureOnlineStoreFeatureview_vertexAiFeatureonlinestoreFeatureview_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_vertex_ai_feature_online_store" "featureonlinestore" {
-name     = "tf_test_featureonlinestore12"
+name     = "tf_test_featureonlinestore%{random_suffix}"
 labels = {
 foo1 = "bar1"
 }
@@ -141,7 +141,7 @@ cpu_utilization_target = 80
 
 resource "google_bigquery_dataset" "tf-test-dataset" {
 
-dataset_id                  = "tf_test_dataset1_featureview12"
+dataset_id                  = "tf_test_dataset1_featureview%{random_suffix}"
 friendly_name               = "test"
 description                 = "This is a test description"
 location                    = "US"
@@ -151,7 +151,7 @@ resource "google_bigquery_table" "tf-test-table" {
 deletion_protection = false
 
 dataset_id = google_bigquery_dataset.tf-test-dataset.dataset_id
-table_id   = "tf_test_bq_table"
+table_id   = "tf_test_bq_table%{random_suffix}"
 schema = <<EOF
 [
 {
@@ -176,8 +176,8 @@ schema = <<EOF
 EOF
 }
 
-resource "google_vertex_ai_feature_onlinestore_featureview" "featureview" {
-name = "tf_test_tf_test_fv1%{random_suffix}"
+resource "google_vertex_ai_feature_online_store_featureview" "featureview" {
+name = "tf_test_fv%{random_suffix}"
 region   = "us-central1"
 labels = {
   foo1 = "bar1"

@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: FeatureOnlinestoreFeatureview
+name: FeatureOnlineStoreFeatureview
 base_url: projects/{{project}}/locations/{{region}}/featureOnlineStores/{{feature_online_store}}/featureViews
 create_url: projects/{{project}}/locations/{{region}}/featureOnlineStores/{{feature_online_store}}/featureViews?featureViewId={{name}}
 self_link: projects/{{project}}/locations/{{region}}/featureOnlineStores/{{feature_online_store}}/featureViews/{{name}}
@@ -77,11 +77,6 @@ properties:
       valid characters are [a-z0-9_]. The first character cannot be a number.
     immutable: true
     url_param_only: true
-  - !ruby/object:Api::Type::String
-    name: 'etag'
-    description: Used to perform consistent read-modify-write updates.
-    output: true
-    ignore_read: true
   - !ruby/object:Api::Type::String
     name: 'createTime'
     output: true

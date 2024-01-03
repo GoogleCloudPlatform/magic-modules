@@ -50,7 +50,7 @@ resource "google_bigquery_table" "tf-test-table" {
 EOF
 }
 
-resource "google_vertex_ai_feature_onlinestore_featureview" "<%= ctx[:primary_resource_id] %>" {
+resource "google_vertex_ai_feature_online_store_featureview" "<%= ctx[:primary_resource_id] %>" {
   name                 = "<%= ctx[:vars]['name'] %>"
   region               = "us-central1"
   feature_online_store = google_vertex_ai_feature_online_store.featureonlinestore.name
