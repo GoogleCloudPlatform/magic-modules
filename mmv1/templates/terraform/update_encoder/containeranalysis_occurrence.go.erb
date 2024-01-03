@@ -20,4 +20,4 @@ if err != nil {
 	obj["noteName"] = noteNameProp
 }
 
-return resource<%= resource_name -%>Encoder(d, meta, obj)
+return resource<%= object.resource_name -%>Encoder(d, meta, obj)
