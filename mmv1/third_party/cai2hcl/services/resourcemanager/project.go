@@ -19,6 +19,9 @@ const ProjectAssetType string = "cloudresourcemanager.googleapis.com/Project"
 // ProjectAssetType is the CAI asset type name for project.
 const ProjectBillingAssetType string = "cloudbilling.googleapis.com/ProjectBillingInfo"
 
+// ProjectSchemaName is the TF resource schema name for resourcemanager project.
+const ProjectSchemaName string = "google_project"
+
 // ProjectConverter for compute project resource.
 type ProjectConverter struct {
 	name     string
@@ -27,9 +30,11 @@ type ProjectConverter struct {
 }
 
 // NewProjectConverter returns an HCL converter for compute project.
-func NewProjectConverter(name string, schema map[string]*tfschema.Schema) common.Converter {
+func NewProjectConverter(provider *tfschema.Provider) common.Converter {
+	schema := provider.ResourcesMap[ProjectSchemaName].Schema
+
 	return &ProjectConverter{
-		name:     name,
+		name:     ProjectSchemaName,
 		schema:   schema,
 		billings: make(map[string]string),
 	}
