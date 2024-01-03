@@ -170,11 +170,9 @@ properties:
                 - !ruby/object:Api::Type::String
                   name: "category"
                   description: The Vsphere tag category.
-                  output: true
                 - !ruby/object:Api::Type::String
                   name: "tag"
                   description: The Vsphere tag name.
-                  output: true
           - !ruby/object:Api::Type::Array
             name: "hostGroups"
             description: |
