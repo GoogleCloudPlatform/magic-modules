@@ -26,17 +26,17 @@ func DataSourceGoogleFilestoreInstance() *schema.Resource {
 
 func dataSourceGoogleFilestoreInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	
+
 	location, err := tpgresource.GetLocation(d, config)
 	if err != nil {
 		return err
 	}
-	
+
 	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
-	
+
 	id := fmt.Sprintf("projects/%s/locations/%s/instances/%s", project, location, d.Get("name").(string))
 	if err != nil {
 		return err
