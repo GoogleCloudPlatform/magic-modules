@@ -1243,11 +1243,11 @@ func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]inte
 
 func flattenResourceManagerTags(c *container.ResourceManagerTags) []map[string]interface{} {
 	result := []map[string]interface{}{}
-	for _, rmtags := range c {
-		rmtag := container.ResourceManagerTags{
-			"tags": rmtags.Tags,
-		}
-	}
+	// for _, rmtags := range c {
+	// 	rmtag := container.ResourceManagerTags{
+	// 		"tags": rmtags.Tags,
+	// 	}
+	// }
 
 	return result
 }
