@@ -87,27 +87,25 @@ func TestInstanceGroupManager_convertUniqueId(t *testing.T) {
 	}
 }
 
-func TestFlattenStatefulPolicyStatefulExternalIps(t *testing.T) {
+func TestFlattenStatefulPolicyStatefulIps(t *testing.T) {
 	cases := map[string]struct {
-		ConfigValues map[string]interface{}
-		ExternalIPs  map[string]compute.StatefulPolicyPreservedStateNetworkIp
+		ConfigValues []interface{}
+		Ips          map[string]compute.StatefulPolicyPreservedStateNetworkIp
 		Expected     []map[string]interface{}
 	}{
-		"No external IPs in config nor API data": {
-			ConfigValues: map[string]interface{}{},
-			ExternalIPs:  map[string]compute.StatefulPolicyPreservedStateNetworkIp{},
+		"No IPs in config nor API data": {
+			ConfigValues: []interface{}{},
+			Ips:          map[string]compute.StatefulPolicyPreservedStateNetworkIp{},
 			Expected:     []map[string]interface{}{},
 		},
-		"Single external IP (nic0) in config and API data": {
-			ConfigValues: map[string]interface{}{
-				"stateful_external_ip": []interface{}{
-					map[string]interface{}{
-						"interface_name": "nic0",
-						"delete_rule":    "NEVER",
-					},
+		"Single IP (nic0) in config and API data": {
+			ConfigValues: []interface{}{
+				map[string]interface{}{
+					"interface_name": "nic0",
+					"delete_rule":    "NEVER",
 				},
 			},
-			ExternalIPs: map[string]compute.StatefulPolicyPreservedStateNetworkIp{
+			Ips: map[string]compute.StatefulPolicyPreservedStateNetworkIp{
 				"nic0": {
 					AutoDelete: "NEVER",
 				},
@@ -119,20 +117,18 @@ func TestFlattenStatefulPolicyStatefulExternalIps(t *testing.T) {
 				},
 			},
 		},
-		"Two external IPs (nic0, nic1). Unordered in config and sorted in API data": {
-			ConfigValues: map[string]interface{}{
-				"stateful_external_ip": []interface{}{
-					map[string]interface{}{
-						"interface_name": "nic1",
-						"delete_rule":    "NEVER",
-					},
-					map[string]interface{}{
-						"interface_name": "nic0",
-						"delete_rule":    "NEVER",
-					},
+		"Two IPs (nic0, nic1). Unordered in config and sorted in API data": {
+			ConfigValues: []interface{}{
+				map[string]interface{}{
+					"interface_name": "nic1",
+					"delete_rule":    "NEVER",
+				},
+				map[string]interface{}{
+					"interface_name": "nic0",
+					"delete_rule":    "NEVER",
 				},
 			},
-			ExternalIPs: map[string]compute.StatefulPolicyPreservedStateNetworkIp{
+			Ips: map[string]compute.StatefulPolicyPreservedStateNetworkIp{
 				"nic0": {
 					AutoDelete: "NEVER",
 				},
@@ -151,16 +147,14 @@ func TestFlattenStatefulPolicyStatefulExternalIps(t *testing.T) {
 				},
 			},
 		},
-		"Two external IPs (nic0, nic1). Only nic0 in config and both stored in API data": {
-			ConfigValues: map[string]interface{}{
-				"stateful_external_ip": []interface{}{
-					map[string]interface{}{
-						"interface_name": "nic0",
-						"delete_rule":    "NEVER",
-					},
+		"Two IPs (nic0, nic1). Only nic0 in config and both stored in API data": {
+			ConfigValues: []interface{}{
+				map[string]interface{}{
+					"interface_name": "nic0",
+					"delete_rule":    "NEVER",
 				},
 			},
-			ExternalIPs: map[string]compute.StatefulPolicyPreservedStateNetworkIp{
+			Ips: map[string]compute.StatefulPolicyPreservedStateNetworkIp{
 				"nic0": {
 					AutoDelete: "NEVER",
 				},
@@ -179,9 +173,9 @@ func TestFlattenStatefulPolicyStatefulExternalIps(t *testing.T) {
 				},
 			},
 		},
-		"Two external IPs (nic0, nic1). None stored in config and both stored in API data": {
-			ConfigValues: map[string]interface{}{},
-			ExternalIPs: map[string]compute.StatefulPolicyPreservedStateNetworkIp{
+		"Two IPs (nic0, nic1). None stored in config and both stored in API data": {
+			ConfigValues: []interface{}{},
+			Ips: map[string]compute.StatefulPolicyPreservedStateNetworkIp{
 				"nic0": {
 					AutoDelete: "NEVER",
 				},
@@ -200,20 +194,18 @@ func TestFlattenStatefulPolicyStatefulExternalIps(t *testing.T) {
 				},
 			},
 		},
-		"Three external IPs (nic0, nic1, nic2). Only nic1, nic2 in config and all 3 stored in API data": {
-			ConfigValues: map[string]interface{}{
-				"stateful_external_ip": []interface{}{
-					map[string]interface{}{
-						"interface_name": "nic1",
-						"delete_rule":    "NEVER",
-					},
-					map[string]interface{}{
-						"interface_name": "nic2",
-						"delete_rule":    "NEVER",
-					},
+		"Three IPs (nic0, nic1, nic2). Only nic1, nic2 in config and all 3 stored in API data": {
+			ConfigValues: []interface{}{
+				map[string]interface{}{
+					"interface_name": "nic1",
+					"delete_rule":    "NEVER",
+				},
+				map[string]interface{}{
+					"interface_name": "nic2",
+					"delete_rule":    "NEVER",
 				},
 			},
-			ExternalIPs: map[string]compute.StatefulPolicyPreservedStateNetworkIp{
+			Ips: map[string]compute.StatefulPolicyPreservedStateNetworkIp{
 				"nic0": {
 					AutoDelete: "NEVER",
 				},
@@ -239,20 +231,18 @@ func TestFlattenStatefulPolicyStatefulExternalIps(t *testing.T) {
 				},
 			},
 		},
-		"Three external IPs (nic0, nic1, nic2). Only nic0, nic2 in config and only nic1, nic2 stored in API data": {
-			ConfigValues: map[string]interface{}{
-				"stateful_external_ip": []interface{}{
-					map[string]interface{}{
-						"interface_name": "nic2",
-						"delete_rule":    "NEVER",
-					},
-					map[string]interface{}{
-						"interface_name": "nic0",
-						"delete_rule":    "NEVER",
-					},
+		"Three IPs (nic0, nic1, nic2). Only nic0, nic2 in config and only nic1, nic2 stored in API data": {
+			ConfigValues: []interface{}{
+				map[string]interface{}{
+					"interface_name": "nic2",
+					"delete_rule":    "NEVER",
+				},
+				map[string]interface{}{
+					"interface_name": "nic0",
+					"delete_rule":    "NEVER",
 				},
 			},
-			ExternalIPs: map[string]compute.StatefulPolicyPreservedStateNetworkIp{
+			Ips: map[string]compute.StatefulPolicyPreservedStateNetworkIp{
 				"nic1": {
 					AutoDelete: "NEVER",
 				},
@@ -278,21 +268,31 @@ func TestFlattenStatefulPolicyStatefulExternalIps(t *testing.T) {
 
 			// Terraform config
 			schema := ResourceComputeRegionInstanceGroupManager().Schema
-			d := tpgresource.SetupTestResourceDataFromConfigMap(t, schema, tc.ConfigValues)
+			config := map[string]interface{}{
+				"stateful_external_ip": tc.ConfigValues,
+				"stateful_internal_ip": tc.ConfigValues,
+			}
+			d := tpgresource.SetupTestResourceDataFromConfigMap(t, schema, config)
 
 			// API response
 			statefulPolicyPreservedState := compute.StatefulPolicyPreservedState{
-				ExternalIPs: tc.ExternalIPs,
+				ExternalIPs: tc.Ips,
+				InternalIPs: tc.Ips,
 			}
 			statefulPolicy := compute.StatefulPolicy{
 				PreservedState: &statefulPolicyPreservedState,
 			}
 
-			output := flattenStatefulPolicyStatefulExternalIps(d, &statefulPolicy)
+			outputExternal := flattenStatefulPolicyStatefulExternalIps(d, &statefulPolicy)
+			if !reflect.DeepEqual(tc.Expected, outputExternal) {
+				t.Fatalf("expected external IPs output to be %#v, but got %#v", tc.Expected, outputExternal)
+			}
 
-			if !reflect.DeepEqual(tc.Expected, output) {
-				t.Fatalf("expected output to be %#v, but got %#v", tc.Expected, output)
+			outputInternal := flattenStatefulPolicyStatefulInternalIps(d, &statefulPolicy)
+			if !reflect.DeepEqual(tc.Expected, outputInternal) {
+				t.Fatalf("expected internal IPs output to be %#v, but got %#v", tc.Expected, outputInternal)
 			}
 		})
 	}
 }
+
