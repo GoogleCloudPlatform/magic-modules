@@ -1,17 +1,17 @@
-<% if properties.any?{ |p| p.name == "labels" } -%>
+<% if object.properties.any?{ |p| p.name == "labels" } -%>
 if v, ok := d.GetOkExists("effective_labels"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, labelsProp)) {
 	labels := d.Get("labels")
 	terraformLables := d.Get("terraform_labels")
 
 	// Labels cannot be set in a create.  We'll have to set them here.
-	err = resource<%= resource_name -%>Read(d, meta)
+	err = resource<%= object.resource_name -%>Read(d, meta)
 	if err != nil {
 		return err
 	}
 
 	obj := make(map[string]interface{})
 	// d.Get("effective_labels") will have been overridden by the Read call.
-	labelsProp, err := expand<%= resource_name -%>EffectiveLabels(v, d, config)
+	labelsProp, err := expand<%= object.resource_name -%>EffectiveLabels(v, d, config)
 	if err != nil {
 		return err
 	}
@@ -38,11 +38,11 @@ if v, ok := d.GetOkExists("effective_labels"); !tpgresource.IsEmptyValue(reflect
 		<% end -%>
 	})
 	if err != nil {
-		return fmt.Errorf("Error adding labels to <%= resource_name -%> %q: %s", d.Id(), err)
+		return fmt.Errorf("Error adding labels to <%= object.resource_name -%> %q: %s", d.Id(), err)
 	}
 
 	err = ComputeOperationWaitTime(
-		config, res, project, "Updating <%= resource_name -%> Labels", userAgent,
+		config, res, project, "Updating <%= object.resource_name -%> Labels", userAgent,
 		d.Timeout(schema.TimeoutUpdate))
 
 	if err != nil {

@@ -12,7 +12,6 @@
 # limitations under the License.
 
 require 'api/object'
-require 'api/product/api_reference'
 require 'api/product/version'
 require 'google/logger'
 require 'compile/core'
@@ -75,7 +74,6 @@ module Api
       check :display_name, type: String
       check :objects, type: Array, item_type: Api::Resource
       check :scopes, type: Array, item_type: String, required: true
-      check :apis_required, type: Array, item_type: Api::Product::ApiReference
       check :operation_retry, type: String
 
       check :async, type: Api::Async

@@ -16,6 +16,8 @@ name: 'Index'
 base_url: projects/{{project}}/databases/{{database}}/collectionGroups/{{collection}}/indexes
 self_link: '{{name}}'
 immutable: true
+error_retry_predicates:
+  ["transport_tpg.FirestoreIndex409Retry"]
 description: |
   Cloud Firestore indexes enable simple and complex queries against documents in a database.
    This resource manages composite indexes and not single

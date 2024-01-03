@@ -36,8 +36,8 @@
     directly inserted from YAML.
 -%>
 <%
-  tf_product = (object.__product.legacy_name || product_ns).underscore
-  product_ns_display = (object.__product.legacy_name || product_ns).camelize
+  tf_product = (object.__product.legacy_name || object.__product.name ).underscore
+  product_ns_display = (object.__product.legacy_name || object.__product.name ).camelize
   tf_subcategory = (object.__product.display_name)
   resource_ns = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}"
   resource_ns_iam = "#{resource_ns}_iam"
@@ -99,7 +99,7 @@ The following arguments are supported:
 * `<%= param.name.underscore -%>` - (Required) <%= param.description -%> Used to find the parent resource to bind the IAM policy to
 <% end -%>
 <% end -%>
-<% if object.iam_policy.base_url.present? -%>
+<% if !object.iam_policy.base_url.nil? -%>
 <% if object.iam_policy.base_url.include?("{{project}}") -%>
 <%# The following new line allow for project to be bullet-formatted properly. -%>
 

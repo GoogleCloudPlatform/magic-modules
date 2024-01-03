@@ -2719,6 +2719,7 @@ resource "google_bigquery_table" "test" {
     ]
   }
   max_staleness = "%s"
+  depends_on = [google_project_iam_member.test]
 }
 `, connectionID, datasetID, bucketName, objectName, tableID, maxStaleness)
 }
@@ -2773,6 +2774,7 @@ resource "google_bigquery_table" "test" {
       "gs://${google_storage_bucket.test.name}/${google_storage_bucket_object.test.name}",
     ]
   }
+  depends_on = [google_project_iam_member.test]
 }
 `, datasetID, bucketName, objectName, content, connectionID, projectID, tableID, schema)
 }
@@ -2826,6 +2828,7 @@ resource "google_bigquery_table" "test" {
       "gs://${google_storage_bucket.test.name}/${google_storage_bucket_object.test.name}",
     ]
   }
+  depends_on = [google_project_iam_member.test]
 }
 `, datasetID, bucketName, objectName, content, connectionID, projectID, tableID, schema)
 }

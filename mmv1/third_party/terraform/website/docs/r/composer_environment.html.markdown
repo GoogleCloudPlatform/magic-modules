@@ -302,7 +302,6 @@ The following arguments are supported:
   The configuration used for the Private IP Cloud Composer environment. Structure is [documented below](#nested_private_environment_config).
 
 * `web_server_network_access_control` -
-  (Optional, Cloud Composer 1 only)
   The network-level access control policy for the Airflow web server.
   If unspecified, no network-level access restrictions are applied.
 
@@ -475,6 +474,11 @@ The following arguments are supported:
 * `scheduler_count` -
   (Optional, Cloud Composer 1 with Airflow 2 only)
   The number of schedulers for Airflow.
+
+* `web_server_plugins_mode` -
+  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
+  Web server plugins configuration. Should be either 'ENABLED' or 'DISABLED'. Defaults to 'ENABLED'.
+
 
 See [documentation](https://cloud.google.com/composer/docs/how-to/managing/configuring-private-ip) for setting up private environments. <a name="nested_private_environment_config"></a>The `private_environment_config` block supports:
 
@@ -770,6 +774,11 @@ The `node_config` block supports:
   packets from node IP addresses instead of Pod IP addresses
   See the [documentation](https://cloud.google.com/composer/docs/enable-ip-masquerade-agent).
 
+* `composer_internal_ipv4_cidr_block` -
+  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
+  At least /20 IPv4 cidr range that will be used by Composer internal components.
+  Cannot be updated.
+
 The `software_config` block supports:
 
 * `airflow_config_overrides` -
@@ -975,6 +984,10 @@ The `workloads_config` block supports:
   (Optional)
   Configuration for resources used by Airflow workers.
 
+* `dag_processor` -
+  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
+  Configuration for resources used by DAG processor.
+
 The `scheduler` block supports:
 
 * `cpu` -
@@ -1045,6 +1058,20 @@ The `worker` block supports:
   The maximum number of Airflow workers that the environment can run. The number of workers in the
   environment does not go above this number, even if a higher number of workers is required to
   handle the load.
+
+The `dag_processor` block supports:
+
+* `cpu` -
+  (Optional)
+  CPU request and limit for DAG processor.
+
+* `memory_gb` -
+  (Optional)
+  Memory (GB) request and limit for DAG processor.
+
+* `float storage_gb`
+  (Optional)
+  Storage (GB) request and limit for DAG processor.
 
 ## Attributes Reference
 
