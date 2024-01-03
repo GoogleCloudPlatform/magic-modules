@@ -11,8 +11,6 @@ import (
 )
 
 func TestAccDataSourceDnsManagedZones_basic(t *testing.T) {
-	// TODO: https://github.com/hashicorp/terraform-provider-google/issues/14158
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
