@@ -55,20 +55,6 @@ import_format:
   - '{{name}}'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: 'firestore_default_database'
-    primary_resource_id: 'database'
-    pull_external: true
-    vars:
-      delete_protection_state: "DELETE_PROTECTION_ENABLED"
-    test_env_vars:
-      project_id: :PROJECT_NAME
-    test_vars_overrides:
-      delete_protection_state: '"DELETE_PROTECTION_DISABLED"'
-    ignore_read_extra:
-      - project
-      - etag
-      - deletion_policy
-  - !ruby/object:Provider::Terraform::Examples
     name: 'firestore_database'
     primary_resource_id: 'database'
     vars:
