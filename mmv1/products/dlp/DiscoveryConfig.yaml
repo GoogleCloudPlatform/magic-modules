@@ -146,6 +146,22 @@ properties:
               - :DETAIL_LEVEL_UNSPECIFIED
               - :TABLE_PROFILE
               - :RESOURCE_NAME
+      - !ruby/object:Api:Type:NestedObjectTarget
+        name : 'target[]'
+        description: Target to match against for determining what to scan and how frequently
+        properties:
+        - !ruby/object:Api:type:NestedObject
+          name: bigQueryTarget
+          description: BigQuery target for Discovery. The first target to match a table will be the one applied. 
+          properties: 
+          - !ruby/object:Api:type:NestedObject
+            name: filter
+            description: Required. The tables the discovery cadence applies to. The first target with a matching filter will be the one to apply to a table
+            properties:
+            !ruby/object:Api:type:NestedObject
+            name: table 
+            description: A specific set of tables for this filter to apply to. A table collection must be specified in only one filer per config. 
+            
                     
       - !ruby/object:Api::Type::String 
         name: 
