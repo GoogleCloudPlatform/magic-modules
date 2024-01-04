@@ -7,6 +7,7 @@ import (
 
 	hashicorpcty "github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	tpg_transport "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 	"github.com/zclconf/go-cty/cty"
 	ctyjson "github.com/zclconf/go-cty/cty/json"
 )
@@ -36,6 +37,9 @@ func DecodeJSON(data map[string]interface{}, v interface{}) error {
 
 // MapToCtyValWithSchema converts resource from untyped map format to TF JSON.
 func MapToCtyValWithSchema(m map[string]interface{}, s map[string]*schema.Schema) (cty.Value, error) {
+	// Normalize non-marshable properties manually.
+	m = normalizeFlattenedMap(m, s).(map[string]interface{})
+
 	b, err := json.Marshal(&m)
 	if err != nil {
 		return cty.NilVal, fmt.Errorf("error marshaling map as JSON: %v", err)
@@ -62,4 +66,50 @@ func hashicorpCtyTypeToZclconfCtyType(t hashicorpcty.Type) (cty.Type, error) {
 		return cty.NilType, err
 	}
 	return ret, nil
+}
+
+func NewConfig() *tpg_transport.Config {
+	return &tpg_transport.Config{}
+}
+
+// Normalizes the output map by eliminating unmarshallable objects like schema.Set.
+func normalizeFlattenedMap(obj interface{}, resourceSchema map[string]*schema.Schema) interface{} {
+	switch obj.(type) {
+	case []interface{}:
+		arrObj := obj.([]interface{})
+		newArrObj := make([]interface{}, len(arrObj))
+
+		for i := range arrObj {
+			newArrObj[i] = normalizeFlattenedMap(arrObj[i], resourceSchema)
+		}
+
+		return newArrObj
+	case map[string]interface{}:
+		mapObj := obj.(map[string]interface{})
+		newMapObj := map[string]interface{}{}
+
+		if resourceSchema == nil {
+			return obj
+		}
+
+		for key, value := range mapObj {
+			propertySchema := resourceSchema[key]
+			if propertySchema == nil {
+				// In future: report partial error about unknown field.
+				continue
+			}
+
+			switch propertySchema.Elem.(type) {
+			case *schema.Resource:
+				newMapObj[key] = normalizeFlattenedMap(value, propertySchema.Elem.(*schema.Resource).Schema)
+			default:
+				newMapObj[key] = normalizeFlattenedMap(value, nil)
+			}
+		}
+		return newMapObj
+	case *schema.Set:
+		return normalizeFlattenedMap(obj.(*schema.Set).List(), resourceSchema)
+	default:
+		return obj
+	}
 }
