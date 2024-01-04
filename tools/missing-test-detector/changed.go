@@ -32,6 +32,10 @@ func changedResourceFields() map[string]ResourceChanges {
 func resourceMapChanges(oldResourceMap, newResourceMap map[string]*schema.Resource) map[string]ResourceChanges {
 	changes := make(map[string]ResourceChanges)
 	for resourceName, newResource := range newResourceMap {
+		if resourceName == "google_compute_instance_from_template" || resourceName == "google_compute_instance_from_machine_image" {
+			// This resource is skipped because its changes can be covered by google_compute_instance.
+			continue
+		}
 		if fields := changedFields(oldResourceMap[resourceName], newResource, false); len(fields) > 0 {
 			changes[resourceName] = fields
 		}

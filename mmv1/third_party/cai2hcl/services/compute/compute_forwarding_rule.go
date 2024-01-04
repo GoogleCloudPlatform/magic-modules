@@ -47,7 +47,7 @@ func forwardingRuleCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v
 // ComputeForwardingRuleAssetType is the CAI asset type name.
 const ComputeForwardingRuleAssetType string = "compute.googleapis.com/ForwardingRule"
 
-// ComputeForwardingRuleSchemaName is the TF resource schema name.
+// ComputeForwardingRuleSchemaName is a TF resource schema name.
 const ComputeForwardingRuleSchemaName string = "google_compute_forwarding_rule"
 
 type ComputeForwardingRuleConverter struct {
@@ -55,6 +55,7 @@ type ComputeForwardingRuleConverter struct {
 	schema map[string]*schema.Schema
 }
 
+// NewComputeForwardingRuleConverter returns an HCL converter for compute instance.
 func NewComputeForwardingRuleConverter(provider *schema.Provider) common.Converter {
 	schema := provider.ResourcesMap[ComputeForwardingRuleSchemaName].Schema
 
