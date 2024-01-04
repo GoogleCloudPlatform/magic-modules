@@ -250,7 +250,7 @@ func TestAccComputeInstance_resourceManagerTags(t *testing.T) {
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
     context := map[string]interface{}{
-		"project":        envvar.GetTestProjectFromEnv(),
+		"project":       envvar.GetTestProjectFromEnv(),
 		"random_suffix": acctest.RandString(t, 10),
 		"instance_name": instanceName,
 	}
