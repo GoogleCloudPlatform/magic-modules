@@ -54,10 +54,10 @@ func TestAccContainerNodePool_resourceManagerTags(t *testing.T) {
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerNodePool_basicWithClusterId(cluster, np, networkName, subnetworkName),
+				Config: testAccContainerCluster_resourceManagerTags(, np, networkName, subnetworkName),
 			},
 			{
-				ResourceName:            "google_container_node_pool.np",
+				ResourceName:            "google_container_node_pool.",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"cluster"},
@@ -4242,3 +4242,51 @@ resource "google_container_node_pool" "without_confidential_boot_disk" {
 `, cluster, networkName, subnetworkName, np)
 }
 <% end -%>
+
+func testAccContainerNodePool_resourceManagerTags(projectID, clusterName, randomSuffix string) string {
+	return fmt.Sprintf(`
+resource "google_tags_tag_key" "key" {
+  parent = "projects/%[1]s"
+  short_name = "foobarbaz%[2]s"
+  description = "For foo/bar resources."
+}
+
+resource "google_tags_tag_value" "value" {
+  parent = "tagKeys/${google_tags_tag_key.key.name}"
+  short_name = "foo-%[2]s"
+  description = "For foo resources."
+}
+
+resource "google_container_cluster" "primary" {
+	name               = "%[3]s"
+	location           = "us-central1-a"
+
+	# We can't create a cluster with no node pool defined, but we want to only use
+	# separately managed node pools. So we create the smallest possible default
+	# node pool and immediately delete it.
+	remove_default_node_pool = true
+	initial_node_count       = 1
+
+	timeouts {
+	  create = "30m"
+	  update = "40m"
+	}
+  }
+
+# Separately Managed Node Pool
+resource "google_container_node_pool" "primary_nodes" {
+  name       = google_container_cluster.primary.name
+  location   = var.region
+  cluster    = google_container_cluster.primary.name
+
+  version = data.google_container_engine_versions.gke_version.release_channel_latest_version["STABLE"]
+  node_count = var.gke_num_nodes
+
+  node_config {
+    # preemptible  = true
+    machine_type = "n1-standard-1"
+
+
+}
+`, projectID, randomSuffix, clusterName)
+}
