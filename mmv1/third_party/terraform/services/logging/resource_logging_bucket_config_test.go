@@ -52,7 +52,7 @@ func TestAccLoggingBucketConfigProject_basic(t *testing.T) {
 		"project_name":    "tf-test-" + acctest.RandString(t, 10),
 		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
 		"org_id":          envvar.GetTestOrgFromEnv(t),
-		"bucket_id":            "tf-test-bucket-" + acctest.RandString(t, 10)
+		"bucket_id":       "tf-test-bucket-" + acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -98,7 +98,7 @@ func TestAccLoggingBucketConfigProject_analyticsEnabled(t *testing.T) {
 		"project_name":    "tf-test-" + acctest.RandString(t, 10),
 		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
 		"org_id":          envvar.GetTestOrgFromEnv(t),
-		"bucket_id":            "tf-test-bucket-" + acctest.RandString(t, 10)
+		"bucket_id":       "tf-test-bucket-" + acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
