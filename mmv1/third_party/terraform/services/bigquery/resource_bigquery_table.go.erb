@@ -529,7 +529,7 @@ func ResourceBigQueryTable() *schema.Resource {
 							Default:      "NONE",
 							Description:  `The compression type of the data source. Valid values are "NONE" or "GZIP".`,
 						},
-						// Schema: Optional] The schema for the data.
+						// Schema: [Optional] The schema for the data.
 						// Schema is required for CSV and JSON formats if autodetect is not on.
 						// Schema is disallowed for Google Cloud Bigtable, Cloud Datastore backups, Avro, Iceberg, ORC, and Parquet formats.
 						"schema": {
