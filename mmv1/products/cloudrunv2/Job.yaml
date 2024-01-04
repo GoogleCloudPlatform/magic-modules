@@ -470,7 +470,7 @@ properties:
                 - !ruby/object:Api::Type::NestedObject
                   name: 'gcs'
                   description: |-
-                    Cloud Storage bucket mounted as a volume using GCSFuse.
+                    Cloud Storage bucket mounted as a volume using GCSFuse. This feature requires the launch stage to be set to ALPHA or BETA.
                   min_version: beta
                   # exactly_one_of:
                   #   - template.0.volumes.0.secret
