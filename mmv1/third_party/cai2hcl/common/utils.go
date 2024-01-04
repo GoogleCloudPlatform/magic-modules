@@ -7,7 +7,7 @@ import (
 
 	hashicorpcty "github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	tpg_transport "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
+	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 	"github.com/zclconf/go-cty/cty"
 	ctyjson "github.com/zclconf/go-cty/cty/json"
 )
@@ -68,8 +68,8 @@ func hashicorpCtyTypeToZclconfCtyType(t hashicorpcty.Type) (cty.Type, error) {
 	return ret, nil
 }
 
-func NewConfig() *tpg_transport.Config {
-	return &tpg_transport.Config{}
+func NewConfig() *transport_tpg.Config {
+	return &transport_tpg.Config{}
 }
 
 // Normalizes the output map by eliminating unmarshallable objects like schema.Set.
