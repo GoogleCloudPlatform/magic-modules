@@ -1253,6 +1253,11 @@ resource "google_project" "project" {
   billing_account = "%{billing_account}"
 }
 
+resource "google_project_service" "anthos" {
+  project = google_project.project.project_id
+  service = "anthos.googleapis.com"
+}
+
 resource "google_project_service" "mesh" {
   project = google_project.project.project_id
   service = "meshconfig.googleapis.com"
