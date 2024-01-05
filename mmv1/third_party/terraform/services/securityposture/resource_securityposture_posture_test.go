@@ -56,7 +56,7 @@ resource "google_securityposture_posture" "posture1" {
     	policies {
     		policy_id = "policy_1"
     		constraint {
-    			org_policy_canned_constraint {
+    			org_policy_constraint {
     				canned_constraint_id = "storage.uniformBucketLevelAccess"
     				policy_rules {
     					enforce = true
@@ -82,7 +82,7 @@ resource "google_securityposture_posture" "posture1" {
     	policies {
     		policy_id = "policy_1"
     		constraint {
-    			org_policy_custom_constraint {
+    			org_policy_constraint_custom {
     				custom_constraint {
     					name         = "organizations/%{org_id}/customConstraints/custom.disableGkeAutoUpgrade"
 					  	display_name = "Disable GKE auto upgrade"

@@ -167,14 +167,14 @@ properties:
               - !ruby/object:Api::Type::NestedObject
                 name: 'constraint'
                 description: 'Policy constraint definition.It can have the definition of one of following constraints:
-                orgPolicyCannedConstraint
-                orgPolicyCustomConstraint
+                orgPolicyConstraint
+                OrgPolicyConstraintCustom
                 securityHealthAnalyticsModule
                 securityHealthAnalyticsCustomModule'
                 required: true
                 properties:
                   - !ruby/object:Api::Type::NestedObject
-                    name: 'orgPolicyCannedConstraint'
+                    name: 'orgPolicyConstraint'
                     description: |
                       Organization policy canned constraint definition.
                     properties:
@@ -195,10 +195,10 @@ properties:
                               description: |
                                 List of values to be used for this policy rule. This field can be set only in policies for list constraints.
                               exactly_one_of:
-                                - values
-                                - allow_all
-                                - deny_all
-                                - enforce
+                                - policy_sets.0.policies.0.constraint.0.org_policy_constraint.0.policy_rules.0.values
+                                - policy_sets.0.policies.0.constraint.0.org_policy_constraint.0.policy_rules.0.allow_all
+                                - policy_sets.0.policies.0.constraint.0.org_policy_constraint.0.policy_rules.0.deny_all
+                                - policy_sets.0.policies.0.constraint.0.org_policy_constraint.0.policy_rules.0.enforce
                               properties:
                                 - !ruby/object:Api::Type::Array
                                   name: 'allowedValues'
@@ -213,20 +213,20 @@ properties:
                               description: |
                                 Setting this to true means that all values are allowed. This field can be set only in policies for list constraints.
                               exactly_one_of:
-                                - values
-                                - allow_all
-                                - deny_all
-                                - enforce
+                                - policy_sets.0.policies.0.constraint.0.org_policy_constraint.0.policy_rules.0.values
+                                - policy_sets.0.policies.0.constraint.0.org_policy_constraint.0.policy_rules.0.allow_all
+                                - policy_sets.0.policies.0.constraint.0.org_policy_constraint.0.policy_rules.0.deny_all
+                                - policy_sets.0.policies.0.constraint.0.org_policy_constraint.0.policy_rules.0.enforce
                               default_value: false
                             - !ruby/object:Api::Type::Boolean
                               name: 'denyAll'
                               description: |
                                 Setting this to true means that all values are denied. This field can be set only in policies for list constraints.
                               exactly_one_of:
-                                - values
-                                - allow_all
-                                - deny_all
-                                - enforce
+                                - policy_sets.0.policies.0.constraint.0.org_policy_constraint.0.policy_rules.0.values
+                                - policy_sets.0.policies.0.constraint.0.org_policy_constraint.0.policy_rules.0.allow_all
+                                - policy_sets.0.policies.0.constraint.0.org_policy_constraint.0.policy_rules.0.deny_all
+                                - policy_sets.0.policies.0.constraint.0.org_policy_constraint.0.policy_rules.0.enforce
                               default_value: false
                             - !ruby/object:Api::Type::Boolean
                               name: 'enforce'
@@ -234,10 +234,10 @@ properties:
                                 If `true`, then the policy is enforced. If `false`, then any configuration is acceptable.
                                 This field can be set only in policies for boolean constraints.
                               exactly_one_of:
-                                - values
-                                - allow_all
-                                - deny_all
-                                - enforce
+                                - policy_sets.0.policies.0.constraint.0.org_policy_constraint.0.policy_rules.0.values
+                                - policy_sets.0.policies.0.constraint.0.org_policy_constraint.0.policy_rules.0.allow_all
+                                - policy_sets.0.policies.0.constraint.0.org_policy_constraint.0.policy_rules.0.deny_all
+                                - policy_sets.0.policies.0.constraint.0.org_policy_constraint.0.policy_rules.0.enforce
                             - !ruby/object:Api::Type::NestedObject
                               name: 'expr'
                               description: |
@@ -265,12 +265,12 @@ properties:
                                     String indicating the location of the expression for error
                                     reporting, e.g. a file name and a position in the file
                     exactly_one_of:
-                      - org_policy_canned_constraint
-                      - org_policy_custom_constraint
+                      - org_policy_constraint
+                      - org_policy_constraint_custom
                       - security_health_analytics_module
                       - security_health_analytics_custom_module
                   - !ruby/object:Api::Type::NestedObject
-                    name: 'orgPolicyCustomConstraint'
+                    name: 'orgPolicyConstraintCustom'
                     description: |
                       Organization policy custom constraint policy definition.
                     properties:
@@ -332,10 +332,10 @@ properties:
                               description: |
                                 List of values to be used for this policy rule. This field can be set only in policies for list constraints.
                               exactly_one_of:
-                                - values
-                                - allow_all
-                                - deny_all
-                                - enforce
+                                - policy_sets.0.policies.0.constraint.0.org_policy_constraint_custom.0.policy_rules.0.values
+                                - policy_sets.0.policies.0.constraint.0.org_policy_constraint_custom.0.policy_rules.0.allow_all
+                                - policy_sets.0.policies.0.constraint.0.org_policy_constraint_custom.0.policy_rules.0.deny_all
+                                - policy_sets.0.policies.0.constraint.0.org_policy_constraint_custom.0.policy_rules.0.enforce
                               properties:
                                 - !ruby/object:Api::Type::Array
                                   name: 'allowedValues'
@@ -350,20 +350,20 @@ properties:
                               description: |
                                 Setting this to true means that all values are allowed. This field can be set only in policies for list constraints.
                               exactly_one_of:
-                                - values
-                                - allow_all
-                                - deny_all
-                                - enforce
+                                - policy_sets.0.policies.0.constraint.0.org_policy_constraint_custom.0.policy_rules.0.values
+                                - policy_sets.0.policies.0.constraint.0.org_policy_constraint_custom.0.policy_rules.0.allow_all
+                                - policy_sets.0.policies.0.constraint.0.org_policy_constraint_custom.0.policy_rules.0.deny_all
+                                - policy_sets.0.policies.0.constraint.0.org_policy_constraint_custom.0.policy_rules.0.enforce
                               default_value: false
                             - !ruby/object:Api::Type::Boolean
                               name: 'denyAll'
                               description: |
                                 Setting this to true means that all values are denied. This field can be set only in policies for list constraints.
                               exactly_one_of:
-                                - values
-                                - allow_all
-                                - deny_all
-                                - enforce
+                                - policy_sets.0.policies.0.constraint.0.org_policy_constraint_custom.0.policy_rules.0.values
+                                - policy_sets.0.policies.0.constraint.0.org_policy_constraint_custom.0.policy_rules.0.allow_all
+                                - policy_sets.0.policies.0.constraint.0.org_policy_constraint_custom.0.policy_rules.0.deny_all
+                                - policy_sets.0.policies.0.constraint.0.org_policy_constraint_custom.0.policy_rules.0.enforce
                               default_value: false
                             - !ruby/object:Api::Type::Boolean
                               name: 'enforce'
@@ -371,10 +371,10 @@ properties:
                                 If `true`, then the policy is enforced. If `false`, then any configuration is acceptable.
                                 This field can be set only in policies for boolean constraints.
                               exactly_one_of:
-                                - values
-                                - allow_all
-                                - deny_all
-                                - enforce
+                                - policy_sets.0.policies.0.constraint.0.org_policy_constraint_custom.0.policy_rules.0.values
+                                - policy_sets.0.policies.0.constraint.0.org_policy_constraint_custom.0.policy_rules.0.allow_all
+                                - policy_sets.0.policies.0.constraint.0.org_policy_constraint_custom.0.policy_rules.0.deny_all
+                                - policy_sets.0.policies.0.constraint.0.org_policy_constraint_custom.0.policy_rules.0.enforce
                             - !ruby/object:Api::Type::NestedObject
                               name: 'expr'
                               description: |
@@ -402,8 +402,8 @@ properties:
                                     String indicating the location of the expression for error
                                     reporting, e.g. a file name and a position in the file
                     exactly_one_of:
-                      - org_policy_canned_constraint
-                      - org_policy_custom_constraint
+                      - org_policy_constraint
+                      - org_policy_constraint_custom
                       - security_health_analytics_module
                       - security_health_analytics_custom_module
                   - !ruby/object:Api::Type::NestedObject
@@ -422,8 +422,8 @@ properties:
                           - :ENABLED
                           - :DISABLED
                     exactly_one_of:
-                      - org_policy_canned_constraint
-                      - org_policy_custom_constraint
+                      - org_policy_constraint
+                      - org_policy_constraint_custom
                       - security_health_analytics_module
                       - security_health_analytics_custom_module
                   - !ruby/object:Api::Type::NestedObject
@@ -455,7 +455,9 @@ properties:
                         properties:
                           - !ruby/object:Api::Type::NestedObject
                             name: 'predicate'
-                            description: 'The CEL expression to evaluate to produce findings.'
+                            description: |
+                              The CEL expression to evaluate to produce findings.When the expression
+                              evaluates to true against a resource, a finding is generated.
                             required: true
                             properties:
                               - !ruby/object:Api::Type::String
@@ -479,7 +481,11 @@ properties:
                                   reporting, e.g. a file name and a position in the file
                           - !ruby/object:Api::Type::NestedObject
                             name: 'customOutput'
-                            description: 'Custom output properties.'
+                            description: |
+                              Custom output properties. A set of optional name-value pairs that define custom source properties to
+                              return with each finding that is generated by the custom module. The custom
+                              source properties that are defined here are included in the finding JSON
+                              under `sourceProperties`.
                             properties:
                               - !ruby/object:Api::Type::Array
                                 name: 'properties'
@@ -494,7 +500,10 @@ properties:
                                       required: true
                                     - !ruby/object:Api::Type::NestedObject
                                       name: 'valueExpression'
-                                      description: 'The CEL expression for the custom output.'
+                                      description: |
+                                        The CEL expression for the custom output. A resource property can be
+                                        specified to return the value of the property or a text string enclosed
+                                        in quotation marks.
                                       properties:
                                         - !ruby/object:Api::Type::String
                                           name: 'expression'
@@ -548,7 +557,7 @@ properties:
                               An explanation of the recommended steps that security teams can take to
                               resolve the detected issue
                     exactly_one_of:
-                      - org_policy_canned_constraint
-                      - org_policy_custom_constraint
+                      - org_policy_constraint
+                      - org_policy_constraint_custom
                       - security_health_analytics_module
                       - security_health_analytics_custom_module
