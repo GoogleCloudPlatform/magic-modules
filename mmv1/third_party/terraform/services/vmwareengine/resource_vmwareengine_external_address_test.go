@@ -74,7 +74,7 @@ resource "google_vmwareengine_private_cloud" "external-address-pc" {
     cluster_id = "tf-test-sample-external-address-cluster%{random_suffix}"
     node_type_configs {
       node_type_id = "standard-72"
-      node_count   = 3
+      node_count   = 1
     }
   }
 }
