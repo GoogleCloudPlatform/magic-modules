@@ -35,6 +35,13 @@ async: !ruby/object:Api::OpAsync
     base_url: '{{op_id}}'
 id_format: 'projects/{{project}}/locations/{{location}}/backupVaults/{{name}}'
 import_format: ['projects/{{project}}/locations/{{location}}/backupVaults/{{name}}']
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'netapp_backup_vault'
+    primary_resource_id: 'test_backup_vault'
+    skip_test: true
+    vars:
+      backup_vault_name: 'test-backup-vault'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -50,13 +57,6 @@ parameters:
     required: true
     immutable: true
     url_param_only: true
-examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'netapp_backup_vault'
-    primary_resource_id: 'test_backup_vault'
-    skip_test: true
-    vars:
-      backup_vault_name: 'test-backup-vault'
 properties:
   - !ruby/object:Api::Type::Enum
     name: 'state'
