@@ -577,12 +577,6 @@ func testAccComputeRouterPeerWithMd5AuthKey(routerName string) string {
     region  = google_compute_subnetwork.foobar.region
   }
   
-  resource "google_compute_ha_vpn_gateway" "foobar1" {
-    name    = "%s-gateway1"
-    network = google_compute_network.foobar.self_link
-    region  = google_compute_subnetwork.foobar.region
-  }
-  
   resource "google_compute_external_vpn_gateway" "external_gateway" {
     name            = "%s-external-gateway"
     redundancy_type = "SINGLE_IP_INTERNALLY_REDUNDANT"
@@ -613,22 +607,12 @@ func testAccComputeRouterPeerWithMd5AuthKey(routerName string) string {
     vpn_gateway_interface           = 0
   }
   
-  resource "google_compute_vpn_tunnel" "foobar1" {
-    name               = "%s1"
-    region             = google_compute_subnetwork.foobar.region
-    vpn_gateway = google_compute_ha_vpn_gateway.foobar1.id
-    peer_external_gateway           = google_compute_external_vpn_gateway.external_gateway.id
-    peer_external_gateway_interface = 0  
-    shared_secret      = "unguessable"
-    router             = google_compute_router.foobar.name
-    vpn_gateway_interface           = 0
-  }
-  
   resource "google_compute_router_interface" "foobar" {
     name       = "%s"
     router     = google_compute_router.foobar.name
     region     = google_compute_router.foobar.region
     vpn_tunnel = google_compute_vpn_tunnel.foobar.name
+    ip_range = "169.254.3.1/30"
   }
   
   resource "google_compute_router_interface" "foobar1" {
@@ -636,51 +620,43 @@ func testAccComputeRouterPeerWithMd5AuthKey(routerName string) string {
     router     = google_compute_router.foobar.name
     region     = google_compute_router.foobar.region
     vpn_tunnel = google_compute_vpn_tunnel.foobar.name
-  }
-  
-  resource "google_compute_router_interface" "foobar2" {
-    name       = "%s2"
-    router     = google_compute_router.foobar.name
-    region     = google_compute_router.foobar.region
-    vpn_tunnel = google_compute_vpn_tunnel.foobar1.name
+    ip_range = "169.254.4.1/30"
+    depends_on = [
+      google_compute_router_interface.foobar
+    ]
   }
   
   resource "google_compute_router_peer" "foobar" {
-    name                      = "%s-peer1"
+    name                      = "%s-peer"
     router                    = google_compute_router.foobar.name
     region                    = google_compute_router.foobar.region
     peer_asn                  = 65515
     advertised_route_priority = 100
     interface                 = google_compute_router_interface.foobar.name
+    peer_ip_address           = "169.254.3.2"
     md5_authentication_key {
-      name = "%s-peer1-key"
-      key = "%s-peer1-key-value"
+      name = "%s-peer-key"
+      key = "%s-peer-key-value"
     }
   }
   
   resource "google_compute_router_peer" "foobar1" {
-    name                      = "%s-peer2"
+    name                      = "%s-peer1"
     router                    = google_compute_router.foobar.name
     region                    = google_compute_router.foobar.region
     peer_asn                  = 65516
     advertised_route_priority = 100
     interface                 = google_compute_router_interface.foobar1.name
-  }
-  
-  resource "google_compute_router_peer" "foobar2" {
-    name                      = "%s-peer3"
-    router                    = google_compute_router.foobar.name
-    region                    = google_compute_router.foobar.region
-    peer_asn                  = 65517
-    advertised_route_priority = 100
-    interface                 = google_compute_router_interface.foobar2.name
+    peer_ip_address           = "169.254.4.2"
     md5_authentication_key {
-      name = "%s-peer3-key"
-      key = "%s-peer3-key-value"
+      name = "%s-peer1-key"
+      key = "%s-peer1-key-value"
     }
+    depends_on = [
+      google_compute_router_peer.foobar
+    ]
   }
-`, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName,
-		routerName, routerName, routerName, routerName, routerName, routerName)
+`, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName)
 }
 
 func testAccComputeRouterPeerWithMd5AuthKeyUpdate(routerName string) string {
@@ -708,12 +684,6 @@ func testAccComputeRouterPeerWithMd5AuthKeyUpdate(routerName string) string {
     region  = google_compute_subnetwork.foobar.region
   }
   
-  resource "google_compute_ha_vpn_gateway" "foobar1" {
-    name    = "%s-gateway1"
-    network = google_compute_network.foobar.self_link
-    region  = google_compute_subnetwork.foobar.region
-  }
-  
   resource "google_compute_external_vpn_gateway" "external_gateway" {
     name            = "%s-external-gateway"
     redundancy_type = "SINGLE_IP_INTERNALLY_REDUNDANT"
@@ -744,22 +714,12 @@ func testAccComputeRouterPeerWithMd5AuthKeyUpdate(routerName string) string {
     vpn_gateway_interface           = 0
   }
   
-  resource "google_compute_vpn_tunnel" "foobar1" {
-    name               = "%s1"
-    region             = google_compute_subnetwork.foobar.region
-    vpn_gateway = google_compute_ha_vpn_gateway.foobar1.id
-    peer_external_gateway           = google_compute_external_vpn_gateway.external_gateway.id
-    peer_external_gateway_interface = 0  
-    shared_secret      = "unguessable"
-    router             = google_compute_router.foobar.name
-    vpn_gateway_interface           = 0
-  }
-  
   resource "google_compute_router_interface" "foobar" {
     name       = "%s"
     router     = google_compute_router.foobar.name
     region     = google_compute_router.foobar.region
     vpn_tunnel = google_compute_vpn_tunnel.foobar.name
+    ip_range = "169.254.3.1/30"
   }
   
   resource "google_compute_router_interface" "foobar1" {
@@ -767,51 +727,43 @@ func testAccComputeRouterPeerWithMd5AuthKeyUpdate(routerName string) string {
     router     = google_compute_router.foobar.name
     region     = google_compute_router.foobar.region
     vpn_tunnel = google_compute_vpn_tunnel.foobar.name
-  }
-  
-  resource "google_compute_router_interface" "foobar2" {
-    name       = "%s2"
-    router     = google_compute_router.foobar.name
-    region     = google_compute_router.foobar.region
-    vpn_tunnel = google_compute_vpn_tunnel.foobar1.name
+    ip_range = "169.254.4.1/30"
+    depends_on = [
+      google_compute_router_interface.foobar
+    ]
   }
   
   resource "google_compute_router_peer" "foobar" {
-    name                      = "%s-peer1"
+    name                      = "%s-peer"
     router                    = google_compute_router.foobar.name
     region                    = google_compute_router.foobar.region
     peer_asn                  = 65515
     advertised_route_priority = 100
     interface                 = google_compute_router_interface.foobar.name
+    peer_ip_address           = "169.254.3.2"
     md5_authentication_key {
-      name = "%s-peer1-key"
-      key = "%s-peer1-key-value-changed"
+      name = "%s-peer-key"
+      key = "%s-peer-key-value"
     }
   }
   
   resource "google_compute_router_peer" "foobar1" {
-    name                      = "%s-peer2"
+    name                      = "%s-peer1"
     router                    = google_compute_router.foobar.name
     region                    = google_compute_router.foobar.region
     peer_asn                  = 65516
     advertised_route_priority = 100
     interface                 = google_compute_router_interface.foobar1.name
-  }
-  
-  resource "google_compute_router_peer" "foobar2" {
-    name                      = "%s-peer3"
-    router                    = google_compute_router.foobar.name
-    region                    = google_compute_router.foobar.region
-    peer_asn                  = 65517
-    advertised_route_priority = 100
-    interface                 = google_compute_router_interface.foobar2.name
+    peer_ip_address           = "169.254.4.2"
     md5_authentication_key {
-      name = "%s-peer3-key"
-      key = "%s-peer3-key-value"
+      name = "%s-peer1-key"
+      key = "%s-peer1-key-value-changed"
     }
+    depends_on = [
+      google_compute_router_peer.foobar
+    ]
   }
-`, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName,
-		routerName, routerName, routerName, routerName, routerName, routerName)
+`, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName)
 }
 
 func testAccComputeRouterPeerKeepRouter(routerName string) string {
