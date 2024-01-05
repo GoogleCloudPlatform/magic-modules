@@ -37,9 +37,9 @@ func DecodeJSON(data map[string]interface{}, v interface{}) error {
 
 // MapToCtyValWithSchema normalizes and converts resource from untyped map format to TF JSON.
 //
-// Normalization is a output post-processing, which does the following:
+// Normalization is a post-processing of the output map, which does the following:
 // * Converts unmarshallable "schema.Set" to marshallable counterpart.
-// 2. Strips out properties, which are not in the resource TF schema.
+// * Strips out properties, which are not part ofthe resource TF schema.
 func MapToCtyValWithSchemaNormalized(m map[string]interface{}, s map[string]*schema.Schema) (cty.Value, error) {
 	m = normalizeNodeRec(m, s).(map[string]interface{})
 
@@ -80,19 +80,21 @@ func NewConfig() *transport_tpg.Config {
 	return &transport_tpg.Config{}
 }
 
-func normalizeNodeRec(node interface{}, resourceSchema map[string]*schema.Schema) interface{} {
+// normalizeNodeRec traverses the output map recursively, removes fields which are
+// not a part of TF schema and converts unmarshallable "schema.Set" objects to arrays.
+func normalizeNodeRec(node interface{}, mapSchema map[string]*schema.Schema) interface{} {
 	switch node.(type) {
 	case map[string]interface{}:
 		mapObj := node.(map[string]interface{})
 		newMapObj := map[string]interface{}{}
 
-		if resourceSchema == nil {
-			// Schema is applicable only for key-value objects.
+		if mapSchema == nil {
+			// mapSchema is applicable only for key-value objects.
 			return node
 		}
 
 		for key, value := range mapObj {
-			propertySchema := resourceSchema[key]
+			propertySchema := mapSchema[key]
 			if propertySchema == nil {
 				// Strip unknown fields.
 				continue
@@ -102,7 +104,7 @@ func normalizeNodeRec(node interface{}, resourceSchema map[string]*schema.Schema
 			case *schema.Resource:
 				newMapObj[key] = normalizeNodeRec(value, propertySchema.Elem.(*schema.Resource).Schema)
 			default:
-				// *schema.ValueType
+				// Most likely its *schema.ValueType
 				newMapObj[key] = normalizeNodeRec(value, nil)
 			}
 		}
