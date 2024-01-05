@@ -68,7 +68,7 @@ resource "google_vmwareengine_private_cloud" "subnet-pc" {
     cluster_id = "tf-test-mgmt-cluster%{random_suffix}"
     node_type_configs {
       node_type_id = "standard-72"
-      node_count   = 3
+      node_count   = 1
     }
   }
 }
