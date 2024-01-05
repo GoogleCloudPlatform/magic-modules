@@ -10,7 +10,7 @@ resource "google_cloud_run_v2_service" "<%= ctx[:primary_resource_id] %>" {
     containers {
       image = "us-docker.pkg.dev/cloudrun/container/hello"
       volume_mounts {
-        name = "bucket"
+        name       = "bucket"
         mount_path = "/var/www"
       }
     }
@@ -18,7 +18,8 @@ resource "google_cloud_run_v2_service" "<%= ctx[:primary_resource_id] %>" {
     volumes {
       name = "bucket"
       gcs {
-        bucket = google_storage_bucket.<%= ctx[:primary_resource_id] %>.name
+        bucket    = google_storage_bucket.<%= ctx[:primary_resource_id] %>.name
+        read_only = false
       }
     }
   }

@@ -765,9 +765,11 @@ properties:
                 - !ruby/object:Api::Type::String
                   name: bucket
                   description: GCS Bucket name
+                  required: true
                 - !ruby/object:Api::Type::Boolean
                   name: readOnly
                   description: If true, mount the GCS bucket as read-only
+                  required: false
             - !ruby/object:Api::Type::NestedObject
               name: nfs
               description: Represents an NFS mount.
@@ -775,12 +777,15 @@ properties:
                 - !ruby/object:Api::Type::String
                   name: server
                   description: Hostname or IP address of the NFS server
+                  required: true
                 - !ruby/object:Api::Type::String
                   name: path
                   description: Path that is exported by the NFS server.
+                  required: true
                 - !ruby/object:Api::Type::Boolean
                   name: readOnly
                   description: If true, mount the NFS volume as read only
+                  required: false
       - !ruby/object:Api::Type::Enum
         name: 'executionEnvironment'
         description: |-

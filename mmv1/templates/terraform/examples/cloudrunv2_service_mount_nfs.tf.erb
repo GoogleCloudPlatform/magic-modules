@@ -24,8 +24,9 @@ resource "google_cloud_run_v2_service" "<%= ctx[:primary_resource_id] %>" {
     volumes {
       name = "nfs"
       nfs {
-        server = google_filestore_instance.default.networks[0].ip_addresses[0]
-        path   = "/share1"
+        server    = google_filestore_instance.default.networks[0].ip_addresses[0]
+        path      = "/share1"
+        read_only = false
       }
     }
   }
