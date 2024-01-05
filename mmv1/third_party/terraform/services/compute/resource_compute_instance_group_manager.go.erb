@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 
@@ -1353,6 +1354,9 @@ func flattenStatefulPolicyStatefulIps(d *schema.ResourceData, ipfieldName string
 		}
 		orderedResult[index] = data // Put elements from API response in order that matches the config
 	}
+	sort.Slice(unexpectedIps, func(i, j int) bool {
+		return unexpectedIps[i]["interface_name"].(string) < unexpectedIps[j]["interface_name"].(string)
+	})
 
 	// Remove any nils from the ordered list. This can occur if the API doesn't include an interface present in the config.
 	finalResult := []map[string]interface{}{}
