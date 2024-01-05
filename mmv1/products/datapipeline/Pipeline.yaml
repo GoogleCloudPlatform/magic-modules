@@ -393,6 +393,7 @@ properties:
     description: |
       Optional. A service account email to be used with the Cloud Scheduler job. If not specified, the default compute engine service account will be used.
     immutable: true
+    default_from_api: true
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'pipelineSources'
     description: |
