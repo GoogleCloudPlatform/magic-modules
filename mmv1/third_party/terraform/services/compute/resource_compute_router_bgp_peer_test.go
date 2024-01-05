@@ -1,5 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package compute_test
 
 import (
@@ -306,7 +304,7 @@ func TestAccComputeRouterPeer_AddMd5AuthenticationKey(t *testing.T) {
 
 	routerName := fmt.Sprintf("tf-test-router-%s", acctest.RandString(t, 10))
 	resourceName1 := "google_compute_router_peer.foobar"
-	resourceName2 := "google_compute_router_peer.foobar2"
+	resourceName2 := "google_compute_router_peer.foobar1"
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -316,11 +314,11 @@ func TestAccComputeRouterPeer_AddMd5AuthenticationKey(t *testing.T) {
 				Config: testAccComputeRouterPeerWithMd5AuthKey(routerName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName1, "md5_authentication_key.#", "1"), // Check for one element in the list
-					resource.TestCheckResourceAttr(resourceName1, "md5_authentication_key.0.name", fmt.Sprintf("%s-peer1-key", routerName)),
-					resource.TestCheckResourceAttr(resourceName1, "md5_authentication_key.0.key", fmt.Sprintf("%s-peer1-key-value", routerName)),
+					resource.TestCheckResourceAttr(resourceName1, "md5_authentication_key.0.name", fmt.Sprintf("%s-peer-key", routerName)),
+					resource.TestCheckResourceAttr(resourceName1, "md5_authentication_key.0.key", fmt.Sprintf("%s-peer-key-value", routerName)),
 					resource.TestCheckResourceAttr(resourceName2, "md5_authentication_key.#", "1"), // Check for one element in the list
-					resource.TestCheckResourceAttr(resourceName2, "md5_authentication_key.0.name", fmt.Sprintf("%s-peer3-key", routerName)),
-					resource.TestCheckResourceAttr(resourceName2, "md5_authentication_key.0.key", fmt.Sprintf("%s-peer3-key-value", routerName)),
+					resource.TestCheckResourceAttr(resourceName2, "md5_authentication_key.0.name", fmt.Sprintf("%s-peer1-key", routerName)),
+					resource.TestCheckResourceAttr(resourceName2, "md5_authentication_key.0.key", fmt.Sprintf("%s-peer1-key-value", routerName)),
 				),
 			},
 		},
@@ -656,7 +654,8 @@ func testAccComputeRouterPeerWithMd5AuthKey(routerName string) string {
       google_compute_router_peer.foobar
     ]
   }
-`, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName)
+`, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName,
+		routerName)
 }
 
 func testAccComputeRouterPeerWithMd5AuthKeyUpdate(routerName string) string {
@@ -763,7 +762,8 @@ func testAccComputeRouterPeerWithMd5AuthKeyUpdate(routerName string) string {
       google_compute_router_peer.foobar
     ]
   }
-`, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName)
+`, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName,
+		routerName)
 }
 
 func testAccComputeRouterPeerKeepRouter(routerName string) string {
