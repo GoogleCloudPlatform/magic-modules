@@ -263,6 +263,8 @@ properties:
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
+    update_verb: :PATCH
+    update_url: projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}
   # This is a multi-resource resource reference (Address, GlobalAddress)
   - !ruby/object:Api::Type::String
     name: 'IPAddress'
