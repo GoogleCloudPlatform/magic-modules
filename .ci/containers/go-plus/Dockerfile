@@ -37,16 +37,3 @@ RUN wget https://releases.hashicorp.com/terraform/1.2.5/terraform_1.2.5_linux_am
     && unzip terraform_1.2.5_linux_amd64.zip \
     && rm terraform_1.2.5_linux_amd64.zip \
     && mv ./terraform /bin/terraform
-
-### the following version of terraform are required for
-### terraform-validator-tester-integration
-RUN wget https://releases.hashicorp.com/terraform/0.13.7/terraform_0.13.7_linux_amd64.zip \
-    && unzip terraform_0.13.7_linux_amd64.zip \
-    && rm terraform_0.13.7_linux_amd64.zip \
-    && mkdir /terraform \
-    && mv terraform /terraform/0.13.7
-
-RUN wget https://releases.hashicorp.com/terraform/0.12.31/terraform_0.12.31_linux_amd64.zip \
-    && unzip terraform_0.12.31_linux_amd64.zip \
-    && rm terraform_0.12.31_linux_amd64.zip \
-    && mv terraform /terraform/0.12.31
