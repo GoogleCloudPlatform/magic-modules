@@ -1,0 +1,425 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Models
+base_url: projects/{{project}}/locations/{{region}}/models
+create_url: 'projects/{{project}}/locations/{{region}}/modelsPRE_CREATE_REPLACE_ME'
+delete_url: '{{name}}'
+self_link: '{{name}}'
+
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.models'
+description: |-
+  A trained machine learning Model.
+id_format: '{{name}}'
+update_verb: 'PATCH'
+exclude_import: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+  encoder: templates/terraform/encoders/vertex_ai_models.tmpl
+  decoder: templates/terraform/decoders/vertex_ai_models.tmpl
+  pre_create: templates/terraform/pre_create/vertex_ai_models.tmpl
+examples:
+  - name: 'vertex_ai_model_source_basic'
+    exclude_import_test: true
+    primary_resource_id: 'model'
+    vars:
+      model_id: 'test-model'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+parameters:
+  - type: String
+    name: region
+    description: The region of the Model. eg us-central1
+    url_param_only: true
+    immutable: true
+    default_from_api: true
+properties:
+  - type: String
+    name: 'name'
+    description:
+      The name of the Model. This value may be up to 60 characters, and
+      valid characters are [a-z0-9_]. The first character cannot be a number.
+    output: true
+    # url_param_only: true
+    custom_flatten: templates/terraform/custom_flatten/vertex_ai_name_from_model.tmpl
+  - type: String
+    name: 'description'
+    description: Description of the Model.
+    immutable: true
+  - type: String
+    name: 'versionId'
+    description: The version ID of the Model.
+    immutable: true
+    output: true
+  - type: String
+    name: 'versionCreateTime'
+    output: true
+    description: |
+      The timestamp of when this version was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+  - type: String
+    name: 'versionUpdateTime'
+    output: true
+    description: |
+      The timestamp of when this version was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+  - type: String
+    name: 'versionDescription'
+    output: true
+    description: |
+      The description of this version
+  - type: String
+    name: 'metadataSchemaUri'
+    immutable: true
+    description: |
+      Points to a YAML file stored on Google Cloud Storage describing additional information about the Model, that is specific to it.
+  - type: NestedObject
+    name: 'predictSchemata'
+    description: |
+      The schemata that describe formats of the Model's predictions and explanations as given and returned via PredictionService.Predict and PredictionService.Explain.
+    properties:
+      - type: String
+        name: instanceSchemaUri
+        immutable: true
+        description: |
+          Points to a YAML file stored on Google Cloud Storage describing the format of a single instance, which are used in PredictRequest.instances, ExplainRequest.instances and BatchPredictionJob.input_config.
+      - type: String
+        name: parametersSchemaUri
+        immutable: true
+        description: |
+          Points to a YAML file stored on Google Cloud Storage describing the parameters of prediction and explanation via PredictRequest.parameters, ExplainRequest.parameters and BatchPredictionJob.model_parameters.
+      - type: String
+        name: predictionSchemaUri
+        immutable: true
+        description: |
+          Points to a YAML file stored on Google Cloud Storage describing the format of a single prediction produced by this Model, which are returned via PredictResponse.predictions, ExplainResponse.explanations, and BatchPredictionJob.output_config.
+  - type: Array
+    name: 'supportedExportFormats'
+    output: true
+    description: |
+      The formats in which this Model may be exported. If empty, this Model is not available for export.
+    item_type:
+      type: NestedObject
+      properties:
+        - type: String
+          name: id
+          output: true
+          description: |
+            The ID of the export format.
+        - type: Enum
+          name: exportableContent
+          immutable: true
+          description: |
+            The content of this Model that may be exported.
+          enum_values:
+            - :ARTIFACT
+            - :IMAGE
+  - type: String
+    name: 'trainerPipeline'
+    output: true
+    description: |
+      The resource name of the TrainingPipeline that uploaded this Model, if any.
+  - type: String
+    name: 'pipelineJob'
+    description: |
+      This field is populated if the model is produced by a pipeline job.
+  - type: NestedObject
+    name: 'containerSpec'
+    default_from_api: true
+    description: |
+      The specification of the container that is to be used when deploying this Model.
+    properties:
+      - type: String
+        name: 'imageUri'
+        required: true
+        immutable: true
+        description: URI of the Docker image to be used as the custom container for serving predictions.
+      - type: Array
+        name: 'command'
+        immutable: true
+        description: Specifies the command that runs when the container starts. This overrides the container's ENTRYPOINT.
+        item_type:
+          type: String
+      - type: Array
+        name: 'args'
+        immutable: true
+        description: Specifies arguments for the command that runs when the container starts.
+        item_type:
+          type: String
+      - type: Array
+        name: 'env'
+        immutable: true
+        description: List of environment variables to set in the container.
+        item_type:
+          type: NestedObject
+          properties:
+            - type: String
+              name: 'name'
+              required: true
+              description: name of the environment variable. Must be a valid C identifier.
+            - type: String
+              name: 'value'
+              required: true
+              description: Variables that reference a $(VAR_NAME) are expanded using the previous defined environment variables in the container and any service environment variables.
+      - type: Array
+        name: 'ports'
+        immutable: true
+        description: List of ports to expose from the container.
+        item_type:
+          type: NestedObject
+          properties:
+            - type: Integer
+              name: 'containerPort'
+              required: true
+              description: The number of the port to expose on the pod's IP address. Must be a valid port number, between 1 and 65535 inclusive.
+      - type: String
+        name: 'predictRoute'
+        immutable: true
+        description: HTTP path on the container to send prediction requests to.
+      - type: String
+        name: 'healthRoute'
+        immutable: true
+        description: HTTP path on the container to send health checks to.
+      - type: Array
+        name: 'grpcPorts'
+        immutable: true
+        description: List of ports to expose from the container.
+        item_type:
+          type: NestedObject
+          properties:
+            - type: Integer
+              name: 'containerPort'
+              required: true
+              description: The number of the port to expose on the pod's IP address. Must be a valid port number, between 1 and 65535 inclusive.
+      - type: String
+        name: 'deploymentTimeout'
+        immutable: true
+        description: Deployment timeout. Limit for deployment timeout is 2 hours.
+      - type: String
+        name: 'sharedMemorySizeMb'
+        immutable: true
+        description: The amount of the VM memory to reserve as the shared memory for the model in megabytes.
+      - type: NestedObject
+        name: 'startupProbe'
+        immutable: true
+        description: Specification for Kubernetes startup probe.
+        properties:
+          - type: Integer
+            name: 'periodSeconds'
+            immutable: true
+            default_value: 10
+            description: How often (in seconds) to perform the probe. Default to 10 seconds. Minimum value is 1. Must be less than timeoutSeconds.
+          - type: Integer
+            name: 'timeoutSeconds'
+            immutable: true
+            default_value: 1
+            description: Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. Must be greater or equal to periodSeconds.
+          - type: NestedObject
+            name: 'exec'
+            description: Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. Must be greater or equal to periodSeconds.
+            properties:
+              - type: String
+                name: 'command'
+                description: Command is the command line to execute inside the container, the working directory for the command is root ('/') in the container's filesystem.
+      - type: NestedObject
+        name: 'healthProbe'
+        immutable: true
+        description: Specification for Kubernetes readiness probe.
+        properties:
+          - type: Integer
+            name: 'periodSeconds'
+            immutable: true
+            default_value: 10
+            description: How often (in seconds) to perform the probe. Default to 10 seconds. Minimum value is 1. Must be less than timeoutSeconds.
+          - type: Integer
+            name: 'timeoutSeconds'
+            immutable: true
+            default_value: 1
+            description: Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. Must be greater or equal to periodSeconds.
+          - type: NestedObject
+            name: 'exec'
+            description: Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. Must be greater or equal to periodSeconds.
+            properties:
+              - type: String
+                name: 'command'
+                description: Command is the command line to execute inside the container, the working directory for the command is root ('/') in the container's filesystem.
+  - type: String
+    name: 'artifactUri'
+    immutable: true
+    default_from_api: true
+    description: |
+      The path to the directory containing the Model artifact and any of its supporting files.
+  - type: String
+    name: 'createTime'
+    output: true
+    description: |
+      The timestamp of when the Model was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+  - type: String
+    name: 'updateTime'
+    output: true
+    description: |
+      The timestamp of when the MetadataStore was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+  - type: String
+    name: 'displayName'
+    default_from_api: true
+    description:
+      The display name of the Model. The name can be up to 128 characters long
+      and can consist of any UTF-8 characters.
+  - type: String
+    name: 'etag'
+    description: Used to perform consistent read-modify-write updates.
+    output: true
+    ignore_read: true
+  - type: Array
+    name: 'versionAliases'
+    default_from_api: true
+    description:
+      user provided version aliases so that a model version can be referenced via alias.
+    item_type:
+      type: String
+  - type: KeyValueLabels
+    name: 'labels'
+    description: The labels with user-defined metadata to organize your Models.
+  - type: NestedObject
+    name: 'encryptionSpec'
+    immutable: true
+    description: |
+      Customer-managed encryption key spec for a MetadataStore. If set, this MetadataStore and all sub-resources of this MetadataStore will be secured by this key.
+    properties:
+      - type: String
+        name: 'kmsKeyName'
+        description: |
+          Required. The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource.
+          Has the form: projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key. The key needs to be in the same region as where the resource is created.
+        immutable: true
+  - type: NestedObject
+    name: 'metadata'
+    description: An additional information about the Index
+    properties:
+      - type: NestedObject
+        name: 'config'
+        immutable: true
+        description: The configuration of the Matching Engine Index.
+        properties:
+          - type: Integer
+            name: 'dimensions'
+            description: The number of dimensions of the input vectors.
+            required: true
+          - type: Integer
+            name: 'approximateNeighborsCount'
+            description: |-
+              The default number of neighbors to find via approximate search before exact reordering is
+              performed. Exact reordering is a procedure where results returned by an
+              approximate search algorithm are reordered via a more expensive distance computation.
+              Required if tree-AH algorithm is used.
+          - type: String
+            name: 'shardSize'
+            description: |-
+              Index data is split into equal parts to be processed. These are called "shards".
+              The shard size must be specified when creating an index. The value must be one of the followings:
+              * SHARD_SIZE_SMALL: Small (2GB)
+              * SHARD_SIZE_MEDIUM: Medium (20GB)
+              * SHARD_SIZE_LARGE: Large (50GB)
+            immutable: true
+            default_from_api: true
+          - type: String
+            name: 'distanceMeasureType'
+            description: |-
+              The distance measure used in nearest neighbor search. The value must be one of the followings:
+              * SQUARED_L2_DISTANCE: Euclidean (L_2) Distance
+              * L1_DISTANCE: Manhattan (L_1) Distance
+              * COSINE_DISTANCE: Cosine Distance. Defined as 1 - cosine similarity.
+              * DOT_PRODUCT_DISTANCE: Dot Product Distance. Defined as a negative of the dot product
+            default_value: 'DOT_PRODUCT_DISTANCE'
+          - type: String
+            name: 'featureNormType'
+            description: |-
+              Type of normalization to be carried out on each vector. The value must be one of the followings:
+              * UNIT_L2_NORM: Unit L2 normalization type
+              * NONE: No normalization type is specified.
+            default_value: 'NONE'
+            ignore_read: true
+          - type: NestedObject
+            name: 'algorithmConfig'
+            description:
+              The configuration with regard to the algorithms used for efficient
+              search.
+            properties:
+              - type: NestedObject
+                name: 'treeAhConfig'
+                exactly_one_of:
+                  - treeAhConfig
+                  - bruteForceConfig
+                description: |-
+                  Configuration options for using the tree-AH algorithm (Shallow tree + Asymmetric Hashing).
+                  Please refer to this paper for more details: https://arxiv.org/abs/1908.10396
+                properties:
+                  - type: Integer
+                    name: 'leafNodeEmbeddingCount'
+                    description:
+                      Number of embeddings on each leaf node. The default value
+                      is 1000 if not set.
+                    default_value: 1000
+                  - type: Integer
+                    name: 'leafNodesToSearchPercent'
+                    description: |-
+                      The default percentage of leaf nodes that any query may be searched. Must be in
+                      range 1-100, inclusive. The default value is 10 (means 10%) if not set.
+                    default_value: 10
+              - type: NestedObject
+                name: 'bruteForceConfig'
+                allow_empty_object: true
+                send_empty_value: true
+                properties: []
+                exactly_one_of:
+                  - treeAhConfig
+                  - bruteForceConfig
+                description: |-
+                  Configuration options for using brute force search, which simply implements the
+                  standard linear search in the database for each query.
+  - type: String
+    name: 'sourceModel'
+    default_from_api: true
+    at_least_one_of:
+      - model
+      - sourceModel
+    description: |
+      The resource name of the Model to copy. That Model must be in the same Project
+  - type: ResourceRef
+    name: 'model'
+    resource: 'Model'
+    imports: 'displayName'
+    at_least_one_of:
+      - sourceModel
+      - model
+    description: |
+      The Model to create.
+  - type: String
+    name: 'modelId'
+    default_from_api: true
+    description: |
+      Copy sourceModel into a new Model with this ID. The ID will become the final component of the model resource name.
