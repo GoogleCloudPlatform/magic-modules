@@ -1,0 +1,420 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: Models
+base_url: projects/{{project}}/locations/{{region}}/models
+self_link: 'projects/{{project}}/locations/{{region}}/models/{{name}}'
+min_version: beta
+immutable: true
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.models'
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 40
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'
+description: |-
+  A trained machine learning Model.
+autogen_async: false
+id_format: '{{name}}'
+skip_sweeper: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'vertex_ai_model'
+    skip_test: true
+    primary_resource_id: 'model'
+    vars:
+      name: 'test-model'
+parameters:
+  - !ruby/object:Api::Type::String
+    name: region
+    description: The region of the Model. eg us-central1
+    url_param_only: true
+    immutable: true
+    default_from_api: true
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description:
+      The name of the Model. This value may be up to 60 characters, and
+      valid characters are [a-z0-9_]. The first character cannot be a number.
+    url_param_only: true
+    pattern: projects/{{project}}/locations/{{region}}/models/{{name}}
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+  - !ruby/object:Api::Type::String
+    name: 'description'
+    description: Description of the Model.
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: 'versionId'
+    description: The version ID of the Model.
+    immutable: true
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'versionCreateTime'
+    output: true
+    description: |
+      The timestamp of when this version was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+  - !ruby/object:Api::Type::String
+    name: 'versionUpdateTime'
+    output: true
+    description: |
+      The timestamp of when this version was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+  - !ruby/object:Api::Type::String
+    name: 'versionDescription'
+    output: true
+    description: |
+      The description of this version
+  - !ruby/object:Api::Type::String
+    name: 'metadataSchemaUri'
+    immutable: true
+    description: |
+      Points to a YAML file stored on Google Cloud Storage describing additional information about the Model, that is specific to it.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'predictSchemata'
+    output: true
+    description: |
+      The schemata that describe formats of the Model's predictions and explanations as given and returned via PredictionService.Predict and PredictionService.Explain.
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: instanceSchemaUri
+          immutable: true
+          description: |
+            Points to a YAML file stored on Google Cloud Storage describing the format of a single instance, which are used in PredictRequest.instances, ExplainRequest.instances and BatchPredictionJob.input_config.
+        - !ruby/object:Api::Type::String
+          name: parametersSchemaUri
+          immutable: true
+          description: |
+            Points to a YAML file stored on Google Cloud Storage describing the parameters of prediction and explanation via PredictRequest.parameters, ExplainRequest.parameters and BatchPredictionJob.model_parameters.
+        - !ruby/object:Api::Type::String
+          name: predictionSchemaUri
+          immutable: true
+          description: |
+            Points to a YAML file stored on Google Cloud Storage describing the format of a single prediction produced by this Model, which are returned via PredictResponse.predictions, ExplainResponse.explanations, and BatchPredictionJob.output_config.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'supportedExportFormats'
+    output: true
+    description: |
+      The formats in which this Model may be exported. If empty, this Model is not available for export.
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: id
+          output: true
+          description: |
+            The ID of the export format.
+        - !ruby/object:Api::Type::Enum
+          name: exportableContent
+          immutable: true
+          description: |
+            The content of this Model that may be exported.
+          values:
+            - :ARTIFACT
+            - :IMAGE
+  - !ruby/object:Api::Type::String
+    name: 'trainerPipeline'
+    output: true
+    description: |
+      The resource name of the TrainingPipeline that uploaded this Model, if any.
+  - !ruby/object:Api::Type::String
+    name: 'pipelineJob'
+    description: |
+      This field is populated if the model is produced by a pipeline job.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'containerSpec'
+    description: |
+      The specification of the container that is to be used when deploying this Model.
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'imageUri'
+          required: true
+          immutable: true
+          description: URI of the Docker image to be used as the custom container for serving predictions.
+        - !ruby/object:Api::Type::Array
+          name: 'command'
+          immutable: true
+          description: Specifies the command that runs when the container starts. This overrides the container's ENTRYPOINT.
+          item_type: !ruby/object:Api::Type::String
+        - !ruby/object:Api::Type::Array
+          name: 'args'
+          immutable: true
+          description: Specifies arguments for the command that runs when the container starts.
+          item_type: !ruby/object:Api::Type::String
+        - !ruby/object:Api::Type::Array
+          name: 'env'
+          immutable: true
+          description: List of environment variables to set in the container. 
+          item_type: !ruby/object:Api::Type::NestedObject
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'name'
+                required: true
+                description: name of the environment variable. Must be a valid C identifier.
+              - !ruby/object:Api::Type::String
+                name: 'value'
+                required: true
+                description: Variables that reference a $(VAR_NAME) are expanded using the previous defined environment variables in the container and any service environment variables.
+        - !ruby/object:Api::Type::Array
+          name: 'ports'
+          immutable: true
+          description: List of ports to expose from the container.
+          item_type: !ruby/object:Api::Type::NestedObject
+            properties:
+              - !ruby/object:Api::Type::Integer
+                name: 'containerPort'
+                required: true
+                description: The number of the port to expose on the pod's IP address. Must be a valid port number, between 1 and 65535 inclusive.
+        - !ruby/object:Api::Type::String
+          name: 'predictRoute'
+          immutable: true
+          description: HTTP path on the container to send prediction requests to.
+        - !ruby/object:Api::Type::String
+          name: 'healthRoute'
+          immutable: true
+          description: HTTP path on the container to send health checks to.
+        - !ruby/object:Api::Type::Array
+          name: 'grpcPorts'
+          immutable: true
+          description: List of ports to expose from the container.
+          item_type: !ruby/object:Api::Type::NestedObject
+            properties:
+              - !ruby/object:Api::Type::Integer
+                name: 'containerPort'
+                required: true
+                description: The number of the port to expose on the pod's IP address. Must be a valid port number, between 1 and 65535 inclusive.
+        - !ruby/object:Api::Type::String
+          name: 'deploymentTimeout'
+          immutable: true
+          description:  Deployment timeout. Limit for deployment timeout is 2 hours.
+        - !ruby/object:Api::Type::String
+          name: 'sharedMemorySizeMb'
+          immutable: true
+          description:  The amount of the VM memory to reserve as the shared memory for the model in megabytes.
+        - !ruby/object:Api::Type::NestedObject
+          name: 'startupProbe'
+          immutable: true
+          description: Specification for Kubernetes startup probe.
+          properties:
+            - !ruby/object:Api::Type::Integer
+              name: 'periodSeconds'
+              immutable: true
+              default_value: 10
+              description:  How often (in seconds) to perform the probe. Default to 10 seconds. Minimum value is 1. Must be less than timeoutSeconds.
+            - !ruby/object:Api::Type::Integer
+              name: 'timeoutSeconds'
+              immutable: true
+              default_value: 1
+              description:  Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. Must be greater or equal to periodSeconds.
+            - !ruby/object:Api::Type::NestedObject
+              name: 'exec'
+              description:  Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. Must be greater or equal to periodSeconds.
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'command'
+                  description: Command is the command line to execute inside the container, the working directory for the command is root ('/') in the container's filesystem.
+        - !ruby/object:Api::Type::NestedObject
+          name: 'healthProbe'
+          immutable: true
+          description: Specification for Kubernetes readiness probe.
+          properties:
+            - !ruby/object:Api::Type::Integer
+              name: 'periodSeconds'
+              immutable: true
+              default_value: 10
+              description:  How often (in seconds) to perform the probe. Default to 10 seconds. Minimum value is 1. Must be less than timeoutSeconds.
+            - !ruby/object:Api::Type::Integer
+              name: 'timeoutSeconds'
+              immutable: true
+              default_value: 1
+              description:  Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. Must be greater or equal to periodSeconds.
+            - !ruby/object:Api::Type::NestedObject
+              name: 'exec'
+              description:  Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. Must be greater or equal to periodSeconds.
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'command'
+                  description: Command is the command line to execute inside the container, the working directory for the command is root ('/') in the container's filesystem.
+  - !ruby/object:Api::Type::String
+    name: 'artifactUri'
+    immutable: true
+    description: |
+      The path to the directory containing the Model artifact and any of its supporting files.
+
+  - !ruby/object:Api::Type::String
+    name: 'createTime'
+    output: true
+    description: |
+      The timestamp of when the Model was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+  - !ruby/object:Api::Type::String
+    name: 'updateTime'
+    output: true
+    description: |
+      The timestamp of when the MetadataStore was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+  - !ruby/object:Api::Type::String
+    name: 'displayName'
+    description:
+      The display name of the Model. The name can be up to 128 characters long
+      and can consist of any UTF-8 characters.
+    required: true
+  - !ruby/object:Api::Type::String
+    name: 'metadataSchemaUri'
+    description: |-
+      Points to a YAML file stored on Google Cloud Storage describing additional information about the Model, that is specific to it. Unset if the Model does not have any additional information.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'etag'
+    description: Used to perform consistent read-modify-write updates.
+    output: true
+    ignore_read: true
+  - !ruby/object:Api::Type::Array
+    name: 'versionAliases'
+    description:
+      user provided version aliases so that a model version can be referenced via alias.
+    item_type: !ruby/object:Api::Type::String
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: 'labels'
+    description: The labels with user-defined metadata to organize your Models.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'encryptionSpec'
+    immutable: true
+    description: |
+      Customer-managed encryption key spec for a MetadataStore. If set, this MetadataStore and all sub-resources of this MetadataStore will be secured by this key.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'kmsKeyName'
+        description: |
+          Required. The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource.
+          Has the form: projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key. The key needs to be in the same region as where the resource is created.
+        immutable: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'metadata'
+    description: An additional information about the Index
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'contentsDeltaUri'
+        required: true
+        description: |-
+          Allows inserting, updating  or deleting the contents of the Matching Engine Index.
+          The string must be a valid Cloud Storage directory path. If this
+          field is set when calling IndexService.UpdateIndex, then no other
+          Index field can be also updated as part of the same call.
+          The expected structure and format of the files this URI points to is
+          described at https://cloud.google.com/vertex-ai/docs/matching-engine/using-matching-engine#input-data-format
+        custom_flatten: templates/terraform/custom_flatten/vertex_ai_index_ignore_contents_delta_uri.go.erb
+      - !ruby/object:Api::Type::Boolean
+        name: 'isCompleteOverwrite'
+        description: |-
+          If this field is set together with contentsDeltaUri when calling IndexService.UpdateIndex,
+          then existing content of the Index will be replaced by the data from the contentsDeltaUri.
+        default_value: false
+        custom_flatten: templates/terraform/custom_flatten/vertex_ai_index_ignore_is_complete_overwrite.go.erb
+      - !ruby/object:Api::Type::NestedObject
+        name: 'config'
+        immutable: true
+        description: The configuration of the Matching Engine Index.
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'dimensions'
+            description: The number of dimensions of the input vectors.
+            required: true
+          - !ruby/object:Api::Type::Integer
+            name: 'approximateNeighborsCount'
+            description: |-
+              The default number of neighbors to find via approximate search before exact reordering is
+              performed. Exact reordering is a procedure where results returned by an
+              approximate search algorithm are reordered via a more expensive distance computation.
+              Required if tree-AH algorithm is used.
+          - !ruby/object:Api::Type::String
+            name: 'shardSize'
+            description: |-
+              Index data is split into equal parts to be processed. These are called "shards".
+              The shard size must be specified when creating an index. The value must be one of the followings:
+              * SHARD_SIZE_SMALL: Small (2GB)
+              * SHARD_SIZE_MEDIUM: Medium (20GB)
+              * SHARD_SIZE_LARGE: Large (50GB)
+            immutable: true
+            default_from_api: true
+          - !ruby/object:Api::Type::String
+            name: 'distanceMeasureType'
+            description: |-
+              The distance measure used in nearest neighbor search. The value must be one of the followings:
+              * SQUARED_L2_DISTANCE: Euclidean (L_2) Distance
+              * L1_DISTANCE: Manhattan (L_1) Distance
+              * COSINE_DISTANCE: Cosine Distance. Defined as 1 - cosine similarity.
+              * DOT_PRODUCT_DISTANCE: Dot Product Distance. Defined as a negative of the dot product
+            default_value: 'DOT_PRODUCT_DISTANCE'
+          - !ruby/object:Api::Type::String
+            name: 'featureNormType'
+            description: |-
+              Type of normalization to be carried out on each vector. The value must be one of the followings:
+              * UNIT_L2_NORM: Unit L2 normalization type
+              * NONE: No normalization type is specified.
+            default_value: 'NONE'
+            ignore_read: true
+          - !ruby/object:Api::Type::NestedObject
+            name: 'algorithmConfig'
+            description:
+              The configuration with regard to the algorithms used for efficient
+              search.
+            properties:
+              - !ruby/object:Api::Type::NestedObject
+                name: 'treeAhConfig'
+                exactly_one_of:
+                  - treeAhConfig
+                  - bruteForceConfig
+                description: |-
+                  Configuration options for using the tree-AH algorithm (Shallow tree + Asymmetric Hashing).
+                  Please refer to this paper for more details: https://arxiv.org/abs/1908.10396
+                properties:
+                  - !ruby/object:Api::Type::Integer
+                    name: 'leafNodeEmbeddingCount'
+                    description:
+                      Number of embeddings on each leaf node. The default value
+                      is 1000 if not set.
+                    default_value: 1000
+                  - !ruby/object:Api::Type::Integer
+                    name: 'leafNodesToSearchPercent'
+                    description: |-
+                      The default percentage of leaf nodes that any query may be searched. Must be in
+                      range 1-100, inclusive. The default value is 10 (means 10%) if not set.
+                    default_value: 10
+              - !ruby/object:Api::Type::NestedObject
+                name: 'bruteForceConfig'
+                allow_empty_object: true
+                send_empty_value: true
+                properties: []
+                exactly_one_of:
+                  - treeAhConfig
+                  - bruteForceConfig
+                description: |-
+                  Configuration options for using brute force search, which simply implements the
+                  standard linear search in the database for each query.
