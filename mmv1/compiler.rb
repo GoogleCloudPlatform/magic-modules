@@ -229,6 +229,7 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
         resources.push(resource)
       end
     end
+    resources = resources.sort_by(&:name)
     product_api.set_variable(resources, 'objects')
   end
 
@@ -276,12 +277,13 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
   { definitions: product_api, provider: provider } # rubocop:disable Style/HashSyntax
 end
 
-products_for_version = products_for_version.compact # remove any nil values
+# remove any nil values
+products_for_version = products_for_version.compact.sort_by { |p| p[:definitions].name.downcase }
 
 # In order to only copy/compile files once per provider this must be called outside
 # of the products loop. This will get called with the provider from the final iteration
 # of the loop
-final_product = products_for_version.compact.last
+final_product = products_for_version.last
 provider = final_product[:provider]
 
 provider&.copy_common_files(output_path, generate_code, generate_docs)
@@ -290,7 +292,7 @@ common_compile_file = "provider/#{provider_name}/common~compile.yaml"
 if generate_code
   provider&.compile_common_files(
     output_path,
-    products_for_version.sort_by { |p| p[:definitions].name.downcase },
+    products_for_version,
     common_compile_file
   )
 
@@ -299,7 +301,7 @@ if generate_code
     common_compile_file = "#{override_dir}/common~compile.yaml"
     provider&.compile_common_files(
       output_path,
-      products_for_version.sort_by { |p| p[:definitions].name.downcase },
+      products_for_version,
       common_compile_file,
       override_dir
     )
