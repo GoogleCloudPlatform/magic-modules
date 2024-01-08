@@ -12,25 +12,25 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 )
 
-func TestAccDataSourceGoogleNetwork(t *testing.T) {
+func TestAccDataSourceGoogleServiceAttachment(t *testing.T) {
 	t.Parallel()
 
-	networkName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	serviceAttachmentName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceGoogleNetworkConfig(networkName),
+				Config: testAccDataSourceGoogleServiceAttachmentConfig(serviceAttachmentName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccDataSourceGoogleNetworkCheck("data.google_compute_network.my_network", "google_compute_network.foobar"),
+					testAccDataSourceGoogleServiceAttachmentCheck("data.google_compute_service_attachment.my_attachment", "google_compute_service_attachment.foobar"),
 				),
 			},
 		},
 	})
 }
 
-func testAccDataSourceGoogleNetworkCheck(data_source_name string, resource_name string) resource.TestCheckFunc {
+func testAccDataSourceGoogleServiceAttachmentCheck(data_source_name string, resource_name string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		ds, ok := s.RootModule().Resources[data_source_name]
 		if !ok {
@@ -44,14 +44,14 @@ func testAccDataSourceGoogleNetworkCheck(data_source_name string, resource_name 
 
 		ds_attr := ds.Primary.Attributes
 		rs_attr := rs.Primary.Attributes
-		network_attrs_to_test := []string{
+		attachment_attrs_to_test := []string{
 			"id",
 			"name",
 			"description",
-			"internal_ipv6_range",
+			"region"
 		}
 
-		for _, attr_to_check := range network_attrs_to_test {
+		for _, attr_to_check := range attachment_attrs_to_test {
 			if ds_attr[attr_to_check] != rs_attr[attr_to_check] {
 				return fmt.Errorf(
 					"%s is %s; want %s",
@@ -70,17 +70,56 @@ func testAccDataSourceGoogleNetworkCheck(data_source_name string, resource_name 
 	}
 }
 
-func testAccDataSourceGoogleNetworkConfig(name string) string {
+func testAccDataSourceGoogleServiceAttachmentConfig(name string) string {
 	return fmt.Sprintf(`
-resource "google_compute_network" "foobar" {
+resource "google_compute_service_attachment" "foobar" {
   name                     = "%s"
   description              = "my-description"
-  enable_ula_internal_ipv6 = true
-  auto_create_subnetworks  = false
+  region                   = "us-west1"
+  connection_preference    = "ACCEPT_AUTOMATIC"
+  nat_subnets              = [google_compute_subnetwork.psc_ilb_nat.id]
+  target_service           = google_compute_forwarding_rule.psc_ilb_target_service.id
 }
 
-data "google_compute_network" "my_network" {
-  name = google_compute_network.foobar.name
+  resource "google_compute_region_backend_service" "producer_service_backend" {
+	name   = "producer-service"
+	region = "us-west2"
+  
+	health_checks = [google_compute_health_check.producer_service_health_check.id]
+  }
+  
+  resource "google_compute_health_check" "producer_service_health_check" {
+	name = "producer-service-health-check"
+  
+	check_interval_sec = 1
+	timeout_sec        = 1
+	tcp_health_check {
+	  port = "80"
+	}
+  }
+  resource "google_compute_network" "psc_ilb_network" {
+	name = "psc-ilb-network"
+	auto_create_subnetworks = false
+  }
+  
+  resource "google_compute_subnetwork" "psc_ilb_producer_subnetwork" {
+	name   = "psc-ilb-producer-subnetwork"
+	region = "us-west1"
+  
+	network       = google_compute_network.psc_ilb_network.id
+	ip_cidr_range = "10.0.0.0/16"
+  }
+  
+  resource "google_compute_subnetwork" "psc_ilb_nat" {
+	name   = "psc-ilb-nat"
+	region = "us-west1"
+  
+	network       = google_compute_network.psc_ilb_network.id
+	purpose       =  "PRIVATE_SERVICE_CONNECT"
+	ip_cidr_range = "10.1.0.0/16"
+  }
+data "google_compute_service_attachment" "my_attachment" {
+  name = google_compute_service_attachment.foobar.name
 }
 `, name)
 }
