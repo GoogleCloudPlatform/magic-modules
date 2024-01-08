@@ -8,9 +8,9 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func DataSourceGoogleComputeAttachments() *schema.Resource {
+func DataSourceGoogleComputeAttachment() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceGoogleComputeAttachmentsRead,
+		Read: dataSourceGoogleComputeAttachmentRead,
 
 		Schema: map[string]*schema.Schema{
 
@@ -39,7 +39,7 @@ func DataSourceGoogleComputeAttachments() *schema.Resource {
 	}
 }
 
-func dataSourceGoogleComputeAttachmentsRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceGoogleComputeAttachmentRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
