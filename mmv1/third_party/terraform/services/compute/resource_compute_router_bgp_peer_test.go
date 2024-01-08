@@ -329,7 +329,7 @@ func TestAccComputeRouterPeer_UpdateMd5AuthenticationKey(t *testing.T) {
 	t.Parallel()
 
 	routerName := fmt.Sprintf("tf-test-router-%s", acctest.RandString(t, 10))
-	resourceName := "google_compute_router_peer.foobar"
+	resourceName := "google_compute_router_peer.foobar1"
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
