@@ -151,6 +151,9 @@ properties:
       - !ruby/object:Api::Type::String
         name: preferredRenewalMethod
         default_from_api: true
+        at_least_one_of:
+          - managementSettings.0.preferredRenewalMethod
+          - managementSettings.0.transferLockState
         description: |
           The desired renewal method for this Registration. The actual renewalMethod is automatically updated to reflect this choice.
           If unset or equal to RENEWAL_METHOD_UNSPECIFIED, the actual renewalMethod is treated as if it were set to AUTOMATIC_RENEWAL.
@@ -163,6 +166,9 @@ properties:
       - !ruby/object:Api::Type::String
         name: transferLockState
         default_from_api: true
+        at_least_one_of:
+          - managementSettings.0.preferredRenewalMethod
+          - managementSettings.0.transferLockState
         description: Controls whether the domain can be transferred to another registrar. Values are UNLOCKED or LOCKED.
   - !ruby/object:Api::Type::NestedObject
     name: dnsSettings
@@ -171,6 +177,9 @@ properties:
       - !ruby/object:Api::Type::NestedObject
         name: customDns
         description: Configuration for an arbitrary DNS provider.
+        exactly_one_of:
+          - dnsSettings.0.googleDomainsDns
+          - dnsSettings.0.customDns
         properties:
           - !ruby/object:Api::Type::Array
             name: nameServers
@@ -201,6 +210,9 @@ properties:
       - !ruby/object:Api::Type::NestedObject
         name: googleDomainsDns
         description: Settings controlling the DNS configuration of the Registration.
+        exactly_one_of:
+          - dnsSettings.0.googleDomainsDns
+          - dnsSettings.0.customDns
         properties:
           - !ruby/object:Api::Type::String
             name: dsState
