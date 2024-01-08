@@ -1,3 +1,4 @@
+<% autogen_exception -%>
 package bigquery_test
 
 import (
@@ -1431,6 +1432,7 @@ func TestAccBigQueryTable_invalidSchemas(t *testing.T) {
 	})
 }
 
+<% unless version == 'ga' -%>
 func TestAccBigQueryTable_TableReplicationInfo_ConflictsWithView(t *testing.T) {
 	t.Parallel()
 
@@ -1439,7 +1441,7 @@ func TestAccBigQueryTable_TableReplicationInfo_ConflictsWithView(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1457,32 +1459,106 @@ func TestAccBigQueryTable_TableReplicationInfo_WithoutReplicationInterval(t *tes
 
 	sourceDatasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
 	sourceTableID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
-	connectionID := "bigquerytestdefault.aws-us-east-1.wjchen_replica_mv_tf_connection"
-	sourceURI := "s3://bq-testing/mmiaolin-test/large_orders/*.parquet"
+	connectionID := "bigquerytestdefault.aws-us-east-1.e2e_ccmv_tf_test"
+	sourceURI := "s3://bq-testing/parquet/all_types.parquet"
 	// Has to follow google sql IntervalValue encoding
 	maxStaleness := "0-0 0 10:0:0"
 	sourceMaterializedViewID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
 	destinationDatasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
 	replicaMaterializedViewID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	replicationIntervalExpression := "" // replication_interval_ms = 600000
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBigQueryTableWithReplicationInfoNoReplicationInterval(projectID, sourceDatasetID, sourceTableID, connectionID, sourceURI, maxStaleness, sourceMaterializedViewID, destinationDatasetID, replicaMaterializedViewID),
+				Config: testAccBigQueryTableWithReplicationInfo(projectID, sourceDatasetID, sourceTableID, connectionID, sourceURI, maxStaleness, sourceMaterializedViewID, destinationDatasetID, replicaMaterializedViewID, replicationIntervalExpression),
 			},
 			{
 				ResourceName:            "google_bigquery_table.replica_mv",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"schema", "external_data_configuration.0.schema", "encryption_configuration", "deletion_protection"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
 }
 
+func TestAccBigQueryTable_TableReplicationInfo_WithReplicationInterval(t *testing.T) {
+	t.Parallel()
+
+	projectID := envvar.GetTestProjectFromEnv()
+
+	sourceDatasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	sourceTableID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	connectionID := "bigquerytestdefault.aws-us-east-1.e2e_ccmv_tf_test"
+	sourceURI := "s3://bq-testing/parquet/all_types.parquet"
+	// Has to follow google sql IntervalValue encoding
+	maxStaleness := "0-0 0 10:0:0"
+	sourceMaterializedViewID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	destinationDatasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	replicaMaterializedViewID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	replicationIntervalExpression := "replication_interval_ms = 600000"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryTableWithReplicationInfo(projectID, sourceDatasetID, sourceTableID, connectionID, sourceURI, maxStaleness, sourceMaterializedViewID, destinationDatasetID, replicaMaterializedViewID, replicationIntervalExpression),
+			},
+			{
+				ResourceName:            "google_bigquery_table.replica_mv",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func TestAccBigQueryTable_TableReplicationInfo_Update(t *testing.T) {
+	t.Parallel()
+
+	projectID := envvar.GetTestProjectFromEnv()
+
+	sourceDatasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	sourceTableID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	connectionID := "bigquerytestdefault.aws-us-east-1.e2e_ccmv_tf_test"
+	sourceURI := "s3://bq-testing/parquet/all_types.parquet"
+	// Has to follow google sql IntervalValue encoding
+	maxStaleness := "0-0 0 10:0:0"
+	sourceMaterializedViewID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	destinationDatasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	replicaMaterializedViewID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	replicationIntervalExpressionOld := ""
+	replicationIntervalExpressionNew := "replication_interval_ms = 600000"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryTableWithReplicationInfo(projectID, sourceDatasetID, sourceTableID, connectionID, sourceURI, maxStaleness, sourceMaterializedViewID, destinationDatasetID, replicaMaterializedViewID, replicationIntervalExpressionOld),
+			},
+			{
+				ResourceName:            "google_bigquery_table.replica_mv",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config:      testAccBigQueryTableWithReplicationInfo(projectID, sourceDatasetID, sourceTableID, connectionID, sourceURI, maxStaleness, sourceMaterializedViewID, destinationDatasetID, replicaMaterializedViewID, replicationIntervalExpressionNew),
+				ExpectError: regexp.MustCompile("Table replication info is not supported in update"),
+			},
+		},
+	})
+}
+<% end -%>
 func testAccCheckBigQueryExtData(t *testing.T, expectedQuoteChar string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
@@ -3678,13 +3754,18 @@ resource "google_bigquery_table" "test" {
 `, datasetID, tableID, schema)
 }
 
+<% unless version == 'ga' -%>
 func testAccBigQueryTableWithReplicationInfoAndView(datasetID, tableID string) string {
 	return fmt.Sprintf(`
 resource "google_bigquery_dataset" "test" {
+  provider = google-beta
+
   dataset_id = "%s"
 }
 
 resource "google_bigquery_table" "test" {
+  provider = google-beta
+
   deletion_protection = false
   table_id   = "%s"
   dataset_id = google_bigquery_dataset.test.dataset_id
@@ -3701,14 +3782,18 @@ resource "google_bigquery_table" "test" {
 `, datasetID, tableID)
 }
 
-func testAccBigQueryTableWithReplicationInfoNoReplicationInterval(projectID, sourceDatasetID, sourceTableID, connectionID, sourceURI, maxStaleness, sourceMaterializedViewID, destinationDatasetID, replicaMaterializedViewID string) string {
+func testAccBigQueryTableWithReplicationInfo(projectID, sourceDatasetID, sourceTableID, connectionID, sourceURI, maxStaleness, sourceMaterializedViewID, destinationDatasetID, replicaMaterializedViewID, replicationIntervalExpression string) string {
 	return fmt.Sprintf(`
 resource "google_bigquery_dataset" "source" {
+  provider = google-beta
+
   dataset_id = "%s"
   location = "aws-us-east-1"
 }
 
 resource "google_bigquery_table" "source_table" {
+  provider = google-beta
+
   deletion_protection = false
   table_id   = "%s"
   dataset_id = google_bigquery_dataset.source.dataset_id
@@ -3722,10 +3807,11 @@ resource "google_bigquery_table" "source_table" {
     ]
   }
   max_staleness = "%s"
-	encryption_configuration {}
  }
 
 resource "google_bigquery_table" "source_mv" {
+  provider = google-beta
+
   deletion_protection = false
   table_id   = "%s"
   dataset_id = google_bigquery_dataset.source.dataset_id
@@ -3735,10 +3821,12 @@ resource "google_bigquery_table" "source_mv" {
   }
 	max_staleness = "%s"
 
-	depends_on = ["google_bigquery_table.source_table"]
+  depends_on = ["google_bigquery_table.source_table"]
 }
 
 resource "google_bigquery_dataset_access" "access" {
+  provider = google-beta
+
   dataset_id    = google_bigquery_dataset.source.dataset_id
   view {
     project_id = "%s"
@@ -3748,6 +3836,8 @@ resource "google_bigquery_dataset_access" "access" {
 }
 
 resource "google_bigquery_dataset" "destination" {
+  provider = google-beta
+
   dataset_id = "%s"
   location = "us"
 }
@@ -3764,11 +3854,12 @@ resource "google_bigquery_table" "replica_mv" {
     source_project_id = "%s"
     source_dataset_id = google_bigquery_table.source_mv.dataset_id
     source_table_id = google_bigquery_table.source_mv.table_id
-    #replication_interval_ms = 600000
+    %s
   }
 }
-`, sourceDatasetID, sourceTableID, connectionID, sourceURI, maxStaleness, sourceMaterializedViewID, sourceDatasetID, sourceTableID, maxStaleness, projectID, destinationDatasetID, replicaMaterializedViewID, projectID)
+`, sourceDatasetID, sourceTableID, connectionID, sourceURI, maxStaleness, sourceMaterializedViewID, sourceDatasetID, sourceTableID, maxStaleness, projectID, destinationDatasetID, replicaMaterializedViewID, projectID, replicationIntervalExpression)
 }
+<% end -%>
 
 var TEST_CSV = `lifelock,LifeLock,,web,Tempe,AZ,1-May-07,6850000,USD,b
 lifelock,LifeLock,,web,Tempe,AZ,1-Oct-06,6000000,USD,a
