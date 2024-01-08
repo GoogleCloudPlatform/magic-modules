@@ -54,14 +54,14 @@ func dataSourceGoogleComputeAttachmentRead(d *schema.ResourceData, meta interfac
 	region := d.Get("region").(string)
 	id := fmt.Sprintf("projects/%s/regions/%s/serviceAttachments/%s", project, region, name)
 
-	attachment, err := config.NewComputeClient(userAgent).serviceAttachments.Get(project, region, name).Do()
+	attachment, err := config.NewComputeClient(userAgent).ServiceAttachments.Get(project, region, name).Do()
 	if err != nil {
 		return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("Service Attachment Not Found : %s", name), id)
 	}
 	if err := d.Set("self_link", attachment.SelfLink); err != nil {
 		return fmt.Errorf("Error setting self_link: %s", err)
 	}
-	if err := d.Set("description", attachment.description); err != nil {
+	if err := d.Set("Description", attachment.Description); err != nil {
 		return fmt.Errorf("Error setting description: %s", err)
 	}
 
