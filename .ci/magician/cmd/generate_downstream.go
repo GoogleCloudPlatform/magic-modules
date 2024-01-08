@@ -260,6 +260,9 @@ func pushCommit(upstreamRepo, scratchRepo *source.Repo, baseBranch, command, com
 
 	if _, err := rnr.Run("git", []string{"commit", "--signoff", "-m", commitMessage}, nil); err != nil {
 		if strings.Contains(err.Error(), "nothing to commit, working tree clean") {
+			if _, err := rnr.Run("git", []string{"push", ctlr.URL(scratchRepo), scratchRepo.Branch, "-f"}, nil); err != nil {
+				return err
+			}
 			return nil
 		}
 		return err
