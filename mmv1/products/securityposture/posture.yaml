@@ -38,13 +38,6 @@ async: !ruby/object:Api::OpAsync
     base_url: '{{op_id}}'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/posture.go.erb
-examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'securityposture_posture_basic'
-    primary_resource_id: 'posture1'
-    test_env_vars:
-      org_id: :ORG_ID
-
 
 parameters:
   - !ruby/object:Api::Type::String
