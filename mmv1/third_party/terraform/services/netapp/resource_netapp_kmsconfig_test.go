@@ -18,16 +18,11 @@
 package netapp_test
 
 import (
-	// "fmt"
-	// "strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	// "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	// "github.com/hashicorp/terraform-provider-google/google/tpgresource"
-	// transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccNetappkmsconfig_kmsConfigCreateExample_Update(t *testing.T) {
@@ -40,6 +35,7 @@ func TestAccNetappkmsconfig_kmsConfigCreateExample_Update(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckNetappkmsconfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetappkmsconfig_kmsConfigCreateExample_Full(context),
@@ -48,7 +44,7 @@ func TestAccNetappkmsconfig_kmsConfigCreateExample_Update(t *testing.T) {
 				ResourceName:            "google_netapp_kmsconfig.kmsConfig",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name"},
+				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccNetappkmsconfig_kmsConfigCreateExample_Update(context),
@@ -57,7 +53,7 @@ func TestAccNetappkmsconfig_kmsConfigCreateExample_Update(t *testing.T) {
 				ResourceName:            "google_netapp_kmsconfig.kmsConfig",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name"},
+				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels"},
 			},
 		},
 	})
@@ -101,6 +97,9 @@ func testAccNetappkmsconfig_kmsConfigCreateExample_Update(context map[string]int
 		description="kmsconfig update"
 		crypto_key_name=google_kms_crypto_key.crypto_key.id
 		location="us-west1"
+		labels = {
+			"foo": "bar",
+		}
 	}
 `, context)
 }
