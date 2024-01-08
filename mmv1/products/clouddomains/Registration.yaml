@@ -22,7 +22,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 base_url: 'projects/{{project}}/locations/{{location}}/registrations'
 self_link: 'projects/{{project}}/locations/{{location}}/registrations/{{domain_name}}'
 create_url: 'projects/{{project}}/locations/{{location}}/registrations:register'
-import_format: [ 'projects/{{project}}/locations/{{location}}/registrations/{{domain_name}}' ]
+import_format: ['projects/{{project}}/locations/{{location}}/registrations/{{domain_name}}']
 immutable: true
 # Cannot be deleted
 skip_delete: true
@@ -110,14 +110,14 @@ properties:
   - !ruby/object:Api::Type::Array
     name: contactNotices
     description: The list of contact notices that the caller acknowledges. Possible value is PUBLIC_CONTACT_DATA_ACKNOWLEDGEMENT
-    item_type: Api::Type::String  
+    item_type: Api::Type::String
     ignore_read: true
   - !ruby/object:Api::Type::NestedObject
     name: yearlyPrice
     required: true
     ignore_read: true
     description: |
-      Required. Yearly price to register or renew the domain. The value that should be put here can be obtained from 
+      Required. Yearly price to register or renew the domain. The value that should be put here can be obtained from
       registrations.retrieveRegisterParameters or registrations.searchDomains calls.
     properties:
       - !ruby/object:Api::Type::String
@@ -207,26 +207,26 @@ properties:
             required: true
             description: Required. The state of DS records for this domain. Used to enable or disable automatic DNSSEC.
       - !ruby/object:Api::Type::Array
-          name: "glueRecords"
-          description: "The list of glue records for this Registration. Commonly empty."
-          item_type: !ruby/object:Api::Type::NestedObject
-            properties:
-              - !ruby/object:Api::Type::String
-                name: hostName
-                description: "Required. Domain name of the host in Punycode format."
-                required: true
-              - !ruby/object:Api::Type::Array
-                name: ipv4Addresses
-                description: |
-                  List of IPv4 addresses corresponding to this host in the standard decimal format (e.g. 198.51.100.1). 
-                  At least one of ipv4_address and ipv6_address must be set.
-                item_type: Api::Type::String
-              - !ruby/object:Api::Type::Array
-                name: ipv6Addresses
-                description: |
-                  List of IPv4 addresses corresponding to this host in the standard decimal format (e.g. 198.51.100.1). 
-                  At least one of ipv4_address and ipv6_address must be set.
-                item_type: Api::Type::String
+        name: "glueRecords"
+        description: "The list of glue records for this Registration. Commonly empty."
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: hostName
+              description: "Required. Domain name of the host in Punycode format."
+              required: true
+            - !ruby/object:Api::Type::Array
+              name: ipv4Addresses
+              description: |
+                List of IPv4 addresses corresponding to this host in the standard decimal format (e.g. 198.51.100.1).
+                At least one of ipv4_address and ipv6_address must be set.
+              item_type: Api::Type::String
+            - !ruby/object:Api::Type::Array
+              name: ipv6Addresses
+              description: |
+                List of IPv4 addresses corresponding to this host in the standard decimal format (e.g. 198.51.100.1).
+                At least one of ipv4_address and ipv6_address must be set.
+              item_type: Api::Type::String
   - !ruby/object:Api::Type::NestedObject
     name: contactSettings
     description: Required. Settings for contact information linked to the Registration.
@@ -246,7 +246,7 @@ properties:
         description: |
           Caution: Anyone with access to this email address, phone number, and/or postal address can take control of the domain.
 
-          Warning: For new Registrations, the registrant receives an email confirmation that they must complete within 15 days to 
+          Warning: For new Registrations, the registrant receives an email confirmation that they must complete within 15 days to
           avoid domain suspension.
         properties:
           - !ruby/object:Api::Type::String
@@ -274,8 +274,8 @@ properties:
                 name: regionCode
                 required: true
                 description: |
-                  Required. CLDR region code of the country/region of the address. This is never inferred and it is up to the user to 
-                  ensure the value is correct. See https://cldr.unicode.org/ and 
+                  Required. CLDR region code of the country/region of the address. This is never inferred and it is up to the user to
+                  ensure the value is correct. See https://cldr.unicode.org/ and
                   https://www.unicode.org/cldr/charts/30/supplemental/territory_information.html for details. Example: "CH" for Switzerland.
               - !ruby/object:Api::Type::String
                 name: languageCode
@@ -340,7 +340,7 @@ properties:
         description: |
           Caution: Anyone with access to this email address, phone number, and/or postal address can take control of the domain.
 
-          Warning: For new Registrations, the registrant receives an email confirmation that they must complete within 15 days to 
+          Warning: For new Registrations, the registrant receives an email confirmation that they must complete within 15 days to
           avoid domain suspension.
         properties:
           - !ruby/object:Api::Type::String
@@ -368,8 +368,8 @@ properties:
                 name: regionCode
                 required: true
                 description: |
-                  Required. CLDR region code of the country/region of the address. This is never inferred and it is up to the user to 
-                  ensure the value is correct. See https://cldr.unicode.org/ and 
+                  Required. CLDR region code of the country/region of the address. This is never inferred and it is up to the user to
+                  ensure the value is correct. See https://cldr.unicode.org/ and
                   https://www.unicode.org/cldr/charts/30/supplemental/territory_information.html for details. Example: "CH" for Switzerland.
               - !ruby/object:Api::Type::String
                 name: languageCode
@@ -434,7 +434,7 @@ properties:
         description: |
           Caution: Anyone with access to this email address, phone number, and/or postal address can take control of the domain.
 
-          Warning: For new Registrations, the registrant receives an email confirmation that they must complete within 15 days to 
+          Warning: For new Registrations, the registrant receives an email confirmation that they must complete within 15 days to
           avoid domain suspension.
         properties:
           - !ruby/object:Api::Type::String
@@ -462,8 +462,8 @@ properties:
                 name: regionCode
                 required: true
                 description: |
-                  Required. CLDR region code of the country/region of the address. This is never inferred and it is up to the user to 
-                  ensure the value is correct. See https://cldr.unicode.org/ and 
+                  Required. CLDR region code of the country/region of the address. This is never inferred and it is up to the user to
+                  ensure the value is correct. See https://cldr.unicode.org/ and
                   https://www.unicode.org/cldr/charts/30/supplemental/territory_information.html for details. Example: "CH" for Switzerland.
               - !ruby/object:Api::Type::String
                 name: languageCode
@@ -520,4 +520,3 @@ properties:
                   The recipient at the address. This field may, under certain circumstances, contain multiline information. For example,
                   it might contain "care of" information.
                 item_type: Api::Type::String
-
