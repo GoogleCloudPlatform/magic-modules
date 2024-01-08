@@ -1,0 +1,74 @@
+<%# The license inside this block applies to this file.
+	# Copyright 2024 Google Inc.
+	# Licensed under the Apache License, Version 2.0 (the "License");
+	# you may not use this file except in compliance with the License.
+	# You may obtain a copy of the License at
+	#
+	#     http://www.apache.org/licenses/LICENSE-2.0
+	#
+	# Unless required by applicable law or agreed to in writing, software
+	# distributed under the License is distributed on an "AS IS" BASIS,
+	# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	# See the License for the specific language governing permissions and
+	# limitations under the License.
+-%>
+func flattenClouddomainsRegistrationContactSettingsTechnicalContact(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return nil
+	}
+	original := v.(map[string]interface{})
+	if len(original) == 0 {
+		return nil
+	}
+	transformed := make(map[string]interface{})
+
+	// Skip phone and fax numbers due to ambiguous accept vs return values 
+	transformed["phone_number"] = d.Get("contact_settings.0.technical_contact.0.phone_number")
+	transformed["fax_number"] = d.Get("contact_settings.0.technical_contact.0.fax_number")
+
+	transformed["email"] = original["email"]
+	transformed["postal_address"] =
+		flattenClouddomainsRegistrationContactSettingsTechnicalContactPostalAddress(original["postalAddress"], d, config)
+	return []interface{}{transformed}
+}
+
+func flattenClouddomainsRegistrationContactSettingsTechnicalContactPostalAddress(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return nil
+	}
+	original := v.(map[string]interface{})
+	if len(original) == 0 {
+		return nil
+	}
+	transformed := make(map[string]interface{})
+	transformed["revision"] =
+		flattenClouddomainsRegistrationContactSettingsTechnicalContactPostalAddressRevision(original["revision"], d, config)
+	transformed["region_code"] = original["regionCode"]
+	transformed["language_code"] = original["languageCode"]
+	transformed["postal_code"] = original["postalCode"]
+	transformed["sorting_code"] = original["sortingCode"]
+	transformed["administrative_area"] = original["administrativeArea"]
+	transformed["locality"] = original["locality"]
+	transformed["sublocality"] = original["sublocality"]
+	transformed["organization"] = original["organization"]
+	transformed["address_lines"] = original["addressLines"]
+	transformed["recipients"] = original["recipients"]
+	return []interface{}{transformed}
+}
+
+func flattenClouddomainsRegistrationContactSettingsTechnicalContactPostalAddressRevision(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	// Handles the string fixed64 format
+	if strVal, ok := v.(string); ok {
+		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
+			return intVal
+		}
+	}
+
+	// number values are represented as float64
+	if floatVal, ok := v.(float64); ok {
+		intVal := int(floatVal)
+		return intVal
+	}
+
+	return v // let terraform core handle it otherwise
+}
