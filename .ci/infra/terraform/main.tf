@@ -69,6 +69,12 @@ resource "google_organization_iam_member" "sa_deny_admin" {
   member = google_service_account.sa.member
 }
 
+resource "google_organization_iam_member" "sa_discovery_engine_admin" {
+  org_id = data.google_organization.org.org_id
+  role   = "roles/discoveryengine.admin"
+  member = google_service_account.sa.member
+}
+
 resource "google_organization_iam_member" "sa_folder_admin" {
   org_id = data.google_organization.org.org_id
   role   = "roles/resourcemanager.folderAdmin"
