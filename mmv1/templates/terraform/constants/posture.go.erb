@@ -1,0 +1,9 @@
+// Suppress the concatenated posture revision_id from custom-constraint name.
+func customConstraintNameSuppress(_, old, new string, _ *schema.ResourceData) bool {
+	revisionIdLength := 8
+	if len(old) > 0 {
+		old = old[:len(old)-revisionIdLength]
+	}
+
+	return old == new
+}
