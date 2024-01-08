@@ -1707,8 +1707,10 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceBigQueryTableUpdate(d *schema.ResourceData, meta interface{}) error {
 	<% unless version == 'ga' -%>
-	if d.Get("table_replication_info") != nil {
-		return errors.New("Table replication info is not supported in update")
+	if v, ok := d.GetOk("table_replication_info"); ok {
+		if len(v.([]interface{})) > 0 {
+			return errors.New("Table replication info is not supported in update")
+		}
 	}
 
 	<% end -%>
