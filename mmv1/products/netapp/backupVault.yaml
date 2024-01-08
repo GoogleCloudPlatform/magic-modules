@@ -1,0 +1,87 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'backupVault'
+description: |
+  A backup vault is the location where backups are stored. You can only create one backup vault per region.
+  A vault can hold multiple backups for multiple volumes in that region.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Documentation': 'https://cloud.google.com/netapp/volumes/docs/protect-data/about-volume-backups'
+  api: 'https://cloud.google.com/netapp/volumes/docs/reference/rest/v1/projects.locations.backupVaults'
+base_url: projects/{{project}}/locations/{{location}}/backupVaults
+self_link: projects/{{project}}/locations/{{location}}/backupVaults/{{name}}
+create_url: projects/{{project}}/locations/{{location}}/backupVaults?backupVaultId={{name}}
+create_verb: :POST
+update_url: projects/{{project}}/locations/{{location}}/backupVaults/{{name}}
+update_verb: :PATCH
+update_mask: true
+delete_url: projects/{{project}}/locations/{{location}}/backupVaults/{{name}}
+delete_verb: :DELETE
+autogen_async: true
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    base_url: '{{op_id}}'
+id_format: 'projects/{{project}}/locations/{{location}}/backupVaults/{{name}}'
+import_format: ['projects/{{project}}/locations/{{location}}/backupVaults/{{name}}']
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'netapp_backup_vault'
+    primary_resource_id: 'test_backup_vault'
+    skip_test: true
+    vars:
+      backup_vault_name: 'test-backup-vault'
+parameters:
+  - !ruby/object:Api::Type::String
+    name: 'location'
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      Location (region) of the backup vault.
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description: |
+      The resource name of the backup vault. Needs to be unique per location.
+    required: true
+    immutable: true
+    url_param_only: true
+properties:
+  - !ruby/object:Api::Type::Enum
+    name: 'state'
+    description: |
+      The state of the Backup Vault.
+    values:
+      - :STATE_UNSPECIFIED
+      - :CREATING
+      - :READY
+      - :UPDATING
+      - :DELETING
+      - :ERROR
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'createTime'
+    description: |
+      Create time of the backup vault. A timestamp in RFC3339 UTC "Zulu" format. Examples: "2023-06-22T09:13:01.617Z".
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'description'
+    description: |
+      An optional description of this resource.
+    required: false
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: labels
+    description: |
+      Labels as key value pairs. Example: `{ "owner": "Bob", "department": "finance", "purpose": "testing" }`.
+    required: false
