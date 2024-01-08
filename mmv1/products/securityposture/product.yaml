@@ -17,10 +17,6 @@ display_name: Security Posture
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
-    base_url: https://securityposture.googleapis.com/v1alpha/
+    base_url: https://securityposture.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Security Posture
-    url: https://console.cloud.google.com/apis/library/securityposture.googleapis.com/
