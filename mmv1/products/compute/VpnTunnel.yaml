@@ -219,7 +219,6 @@ properties:
       internally during updates.
     update_url: 'projects/{{project}}/regions/{{region}}/vpnTunnels/{{name}}/setLabels'
     update_verb: :POST
-    min_version: beta
   - !ruby/object:Api::Type::String
     name: 'detailedStatus'
     output: true
