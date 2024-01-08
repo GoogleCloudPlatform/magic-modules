@@ -269,7 +269,7 @@ module OpenAPIGenerate
       resource_paths.each do |path_array|
         resource = build_resource(spec_path, path_array[0], path_array[1])
         file_path = File.join(product_path, "#{resource.name}.yaml")
-        File.write(file_path, resource.to_yaml(:SortKeys => true))
+        File.write(file_path, resource.to_yaml)
       end
     end
   end
