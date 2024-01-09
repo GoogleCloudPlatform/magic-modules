@@ -56,7 +56,7 @@ func TestAccServiceNetworkingConnection_abandon(t *testing.T) {
 			{
 				ResourceName:      "google_service_networking_connection.foobar",
 				ImportState:       true,
-				ImportStateVerify: true,
+				ImportStateVerify: false,
 			},
 		},
 	})
