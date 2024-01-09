@@ -177,7 +177,7 @@ properties:
       - !ruby/object:Api::Type::NestedObject
         name: customDns
         description: Configuration for an arbitrary DNS provider.
-        exactly_one_of:
+        conflicts:
           - dnsSettings.0.googleDomainsDns
           - dnsSettings.0.customDns
         properties:
@@ -210,7 +210,7 @@ properties:
       - !ruby/object:Api::Type::NestedObject
         name: googleDomainsDns
         description: Settings controlling the DNS configuration of the Registration.
-        exactly_one_of:
+        conflicts:
           - dnsSettings.0.googleDomainsDns
           - dnsSettings.0.customDns
         properties:
