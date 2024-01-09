@@ -642,7 +642,7 @@ resource "google_spanner_database" "database" {
 
   deletion_protection = false
 
-  depends_on = [google_kms_crypto_key_iam_binding.crypto-key-binding]
+  depends_on = [google_kms_crypto_key_iam_member.crypto-key-binding]
 }
 
 resource "google_kms_key_ring" "keyring" {
@@ -658,14 +658,12 @@ resource "google_kms_crypto_key" "example-key" {
   rotation_period = "100000s"
 }
 
-resource "google_kms_crypto_key_iam_binding" "crypto-key-binding" {
+resource "google_kms_crypto_key_iam_member" "crypto-key-binding" {
   provider      = google-beta
   crypto_key_id = google_kms_crypto_key.example-key.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 
-  members = [
-    "serviceAccount:${google_project_service_identity.ck_sa.email}",
-  ]
+  member = "serviceAccount:${google_project_service_identity.ck_sa.email}"
 }
 
 data "google_project" "project" {

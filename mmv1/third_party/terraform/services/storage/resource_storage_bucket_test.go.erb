@@ -178,6 +178,98 @@ func TestAccStorageBucket_dualLocation(t *testing.T) {
 	})
 }
 
+func TestAccStorageBucket_dualLocation_rpo(t *testing.T) {
+	t.Parallel()
+	bucketName := acctest.TestBucketName(t)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageBucketDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageBucket_dualLocation(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket.bucket", "rpo", "DEFAULT"),
+				),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+			{
+				Config: testAccStorageBucket_dualLocation_rpo(bucketName,"ASYNC_TURBO"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket.bucket", "rpo", "ASYNC_TURBO"),
+				),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+			{
+				Config: testAccStorageBucket_dualLocation_rpo(bucketName,"DEFAULT"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket.bucket", "rpo", "DEFAULT"),
+				),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+		},
+	})
+}
+
+func TestAccStorageBucket_multiLocation_rpo(t *testing.T) {
+	t.Parallel()
+
+	bucketName := acctest.TestBucketName(t)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageBucketDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageBucket_basic(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket.bucket", "rpo", "DEFAULT"),
+				),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+			{
+				Config: testAccStorageBucket_multiLocation_rpo(bucketName,"DEFAULT"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket.bucket", "rpo", "DEFAULT"),
+				),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+		},
+	})
+}
+
 func TestAccStorageBucket_customAttributes(t *testing.T) {
 	t.Parallel()
 
@@ -369,6 +461,74 @@ func TestAccStorageBucket_lifecycleRuleStateAny(t *testing.T) {
 					testAccCheckStorageBucketExists(
 						t, "google_storage_bucket.bucket", bucketName, &bucket),
 					testAccCheckStorageBucketLifecycleConditionState(googleapi.Bool(false), &bucket),
+				),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+		},
+	})
+}
+
+func TestAccStorageBucket_lifecycleRulesNoAge(t *testing.T) {
+	t.Parallel()
+	var bucket storage.Bucket
+	bucketName := acctest.TestBucketName(t)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageBucketDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageBucket_customAttributes_withLifecycle1(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckStorageBucketExists(
+						t, "google_storage_bucket.bucket", bucketName, &bucket),
+				),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+			{
+				Config: testAccStorageBucket_customAttributes_withLifecycleNoAge(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckStorageBucketExists(
+						t, "google_storage_bucket.bucket", bucketName, &bucket),
+					testAccCheckStorageBucketLifecycleConditionNoAge(nil, &bucket),
+				),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy","lifecycle_rule.0.condition.0.no_age"},
+			},
+			{
+				Config: testAccStorageBucket_customAttributes_withLifecycleNoAgeAndAge(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckStorageBucketExists(
+						t, "google_storage_bucket.bucket", bucketName, &bucket),
+					testAccCheckStorageBucketLifecycleConditionNoAge(nil, &bucket),
+				),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy","lifecycle_rule.0.condition.0.no_age"},
+			},
+			{
+				Config: testAccStorageBucket_customAttributes_withLifecycle1(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckStorageBucketExists(
+						t, "google_storage_bucket.bucket", bucketName, &bucket),
 				),
 			},
 			{
@@ -691,6 +851,47 @@ func TestAccStorageBucket_forceDestroyObjectDeleteError(t *testing.T) {
 	})
 }
 
+func TestAccStorageBucket_enable_object_retention(t *testing.T) {
+	t.Parallel()
+
+	var bucket storage.Bucket
+	bucketName := acctest.TestBucketName(t)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageBucketDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageBucket_enable_object_retention(bucketName, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckStorageBucketExists(
+						t, "google_storage_bucket.bucket", bucketName, &bucket),
+				),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+			{
+				Config: testAccStorageBucket_enable_object_retention(bucketName, "false"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckStorageBucketExists(
+						t, "google_storage_bucket.bucket", bucketName, &bucket),
+				),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+		},
+	})
+}
+
 func TestAccStorageBucket_versioning(t *testing.T) {
 	t.Parallel()
 
@@ -698,9 +899,9 @@ func TestAccStorageBucket_versioning(t *testing.T) {
 	bucketName := fmt.Sprintf("tf-test-acl-bucket-%d", acctest.RandInt(t))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                    func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:                testAccStorageBucketDestroyProducer(t),
+		CheckDestroy:             testAccStorageBucketDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccStorageBucket_versioning(bucketName, "true"),
@@ -719,7 +920,7 @@ func TestAccStorageBucket_versioning(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
-						{
+			{
 				Config: testAccStorageBucket_versioning_empty(bucketName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckStorageBucketExists(
@@ -736,7 +937,7 @@ func TestAccStorageBucket_versioning(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
-						{
+			{
 				Config: testAccStorageBucket_versioning(bucketName, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckStorageBucketExists(
@@ -753,7 +954,7 @@ func TestAccStorageBucket_versioning(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
-						{
+			{
 				Config: testAccStorageBucket_versioning_empty(bucketName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckStorageBucketExists(
@@ -779,9 +980,9 @@ func TestAccStorageBucket_logging(t *testing.T) {
 
 	bucketName := fmt.Sprintf("tf-test-acl-bucket-%d", acctest.RandInt(t))
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                    func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:                testAccStorageBucketDestroyProducer(t),
+		CheckDestroy:             testAccStorageBucketDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccStorageBucket_logging(bucketName, "log-bucket"),
@@ -840,9 +1041,9 @@ func TestAccStorageBucket_cors(t *testing.T) {
 	bucketName := fmt.Sprintf("tf-test-acl-bucket-%d", acctest.RandInt(t))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                    func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:                testAccStorageBucketDestroyProducer(t),
+		CheckDestroy:             testAccStorageBucketDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleStorageBucketsCors(bucketName),
@@ -872,9 +1073,9 @@ func TestAccStorageBucket_defaultEventBasedHold(t *testing.T) {
 	bucketName := fmt.Sprintf("tf-test-acl-bucket-%d", acctest.RandInt(t))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                    func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:                testAccStorageBucketDestroyProducer(t),
+		CheckDestroy:             testAccStorageBucketDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccStorageBucket_defaultEventBasedHold(bucketName),
@@ -1274,6 +1475,25 @@ func testAccCheckStorageBucketLifecycleConditionState(expected *bool, b *storage
 	}
 }
 
+func testAccCheckStorageBucketLifecycleConditionNoAge(expected *int64, b *storage.Bucket) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		actual := b.Lifecycle.Rule[0].Condition.Age
+		if expected == nil && b.Lifecycle.Rule[0].Condition.Age== nil {
+			return nil
+		}
+		if expected == nil {
+			return fmt.Errorf("expected condition Age to be unset, instead got %d", *actual)
+		}
+		if actual == nil {
+			return fmt.Errorf("expected condition Age to be %d, instead got nil (unset)", *expected)
+		}
+		if *expected != *actual {
+			return fmt.Errorf("expected condition Age to be %d, instead got %d", *expected, *actual)
+		}
+		return nil
+	}
+}
+
 func testAccStorageBucketDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
@@ -1363,6 +1583,31 @@ resource "google_storage_bucket" "bucket" {
 `, bucketName)
 }
 
+func testAccStorageBucket_dualLocation_rpo(bucketName string,rpo string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name          = "%s"
+  location      = "ASIA"
+  force_destroy = true
+  custom_placement_config {
+    data_locations = ["ASIA-EAST1", "ASIA-SOUTHEAST1"]
+  }
+  rpo = "%s"
+}
+`, bucketName,rpo)
+}
+
+func testAccStorageBucket_multiLocation_rpo(bucketName string,rpo string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name          = "%s"
+  location      = "ASIA"
+  force_destroy = true
+  rpo = "%s"
+}
+`, bucketName,rpo)
+}
+
 func testAccStorageBucket_customAttributes(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
@@ -1437,6 +1682,45 @@ resource "google_storage_bucket" "bucket" {
 `, bucketName)
 }
 
+func testAccStorageBucket_customAttributes_withLifecycleNoAge(bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name          = "%s"
+  location      = "EU"
+  force_destroy = "true"
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+    condition {
+      num_newer_versions = 2
+      no_age = true
+    }
+  }
+}
+`, bucketName)
+}
+
+func testAccStorageBucket_customAttributes_withLifecycleNoAgeAndAge(bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name          = "%s"
+  location      = "EU"
+  force_destroy = "true"
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+    condition {
+      num_newer_versions = 2
+      age = 10
+      no_age = true
+    }
+  }
+}
+`, bucketName)
+}
+
 func testAccStorageBucket_storageClass(bucketName, storageClass, location string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
@@ -1493,6 +1777,17 @@ resource "google_storage_bucket" "bucket" {
   }
 }
 `, bucketName)
+}
+
+func testAccStorageBucket_enable_object_retention(bucketName string, enabled string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name                    = "%s"
+  location                = "US"
+  force_destroy           = "true"
+  enable_object_retention = "%s"
+}
+`, bucketName, enabled)
 }
 
 func testAccStorageBucket_versioning(bucketName, enabled string) string {

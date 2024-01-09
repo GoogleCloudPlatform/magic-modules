@@ -1057,6 +1057,8 @@ func TestAccBigQueryExternalDataTable_CSV_WithSchema_UpdateAllowQuotedNewlines(t
 }
 
 func TestAccBigQueryDataTable_bigtable(t *testing.T) {
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -2717,6 +2719,7 @@ resource "google_bigquery_table" "test" {
     ]
   }
   max_staleness = "%s"
+  depends_on = [google_project_iam_member.test]
 }
 `, connectionID, datasetID, bucketName, objectName, tableID, maxStaleness)
 }
@@ -2771,6 +2774,7 @@ resource "google_bigquery_table" "test" {
       "gs://${google_storage_bucket.test.name}/${google_storage_bucket_object.test.name}",
     ]
   }
+  depends_on = [google_project_iam_member.test]
 }
 `, datasetID, bucketName, objectName, content, connectionID, projectID, tableID, schema)
 }
@@ -2824,6 +2828,7 @@ resource "google_bigquery_table" "test" {
       "gs://${google_storage_bucket.test.name}/${google_storage_bucket_object.test.name}",
     ]
   }
+  depends_on = [google_project_iam_member.test]
 }
 `, datasetID, bucketName, objectName, content, connectionID, projectID, tableID, schema)
 }

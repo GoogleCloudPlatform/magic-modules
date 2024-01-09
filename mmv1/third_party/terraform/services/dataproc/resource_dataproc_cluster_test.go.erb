@@ -105,7 +105,6 @@ func TestAccDataprocCluster_basic(t *testing.T) {
 	})
 }
 
-<% if version == "ga" -%>
 func TestAccDataprocVirtualCluster_basic(t *testing.T) {
 	t.Parallel()
 
@@ -113,9 +112,8 @@ func TestAccDataprocVirtualCluster_basic(t *testing.T) {
 	rnd := acctest.RandString(t, 10)
 	pid := envvar.GetTestProjectFromEnv()
 	version := "3.1-dataproc-7"
-	networkName := acctest.BootstrapSharedTestNetwork(t, "dataproc-cluster")
-	subnetworkName := acctest.BootstrapSubnet(t, "dataproc-cluster", networkName)
-	acctest.BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -123,7 +121,7 @@ func TestAccDataprocVirtualCluster_basic(t *testing.T) {
 		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataprocVirtualCluster_basic(pid, rnd, subnetworkName),
+				Config: testAccDataprocVirtualCluster_basic(pid, rnd, networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.virtual_cluster", &cluster),
 
@@ -145,7 +143,6 @@ func TestAccDataprocVirtualCluster_basic(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccDataprocCluster_withAccelerators(t *testing.T) {
 	t.Parallel()
@@ -174,6 +171,24 @@ func TestAccDataprocCluster_withAccelerators(t *testing.T) {
 			},
 		},
 	})
+}
+
+func testAccCheckDataprocAuxiliaryNodeGroupAccelerator(cluster *dataproc.Cluster, project string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		expectedUri := fmt.Sprintf("projects/%s/zones/.*/acceleratorTypes/nvidia-tesla-k80", project)
+		r := regexp.MustCompile(expectedUri)
+
+		nodeGroup := cluster.Config.AuxiliaryNodeGroups[0].NodeGroup.NodeGroupConfig.Accelerators
+		if len(nodeGroup) != 1 {
+			return fmt.Errorf("Saw %d nodeGroup accelerator types instead of 1", len(nodeGroup))
+		}
+
+		matches := r.FindStringSubmatch(nodeGroup[0].AcceleratorTypeUri)
+		if len(matches) != 1 {
+			return fmt.Errorf("Saw %s master accelerator type instead of %s", nodeGroup[0].AcceleratorTypeUri, expectedUri)
+		}
+		return nil
+	}
 }
 
 func testAccCheckDataprocClusterAccelerator(cluster *dataproc.Cluster, project string, masterCount int, workerCount int) resource.TestCheckFunc {
@@ -488,6 +503,61 @@ func TestAccDataprocCluster_spotSecondary(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.spot_secondary", &cluster),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.spot_secondary", "cluster_config.0.preemptible_worker_config.0.preemptibility", "SPOT"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccDataprocCluster_spotWithInstanceFlexibilityPolicy(t *testing.T) {
+	t.Parallel()
+
+	rnd := acctest.RandString(t, 10)
+	var cluster dataproc.Cluster
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocCluster_spotWithInstanceFlexibilityPolicy(rnd),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.spot_with_instance_flexibility_policy", &cluster),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.spot_with_instance_flexibility_policy", "cluster_config.0.preemptible_worker_config.0.preemptibility", "SPOT"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.spot_with_instance_flexibility_policy", "cluster_config.0.preemptible_worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.machine_types.0", "n2d-standard-2"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.spot_with_instance_flexibility_policy", "cluster_config.0.preemptible_worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.rank", "3"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccDataprocCluster_spotWithAuxiliaryNodeGroups(t *testing.T) {
+	t.Parallel()
+
+	project := envvar.GetTestProjectFromEnv()
+	rnd := acctest.RandString(t, 10)
+	var cluster dataproc.Cluster
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocCluster_withAuxiliaryNodeGroups(rnd),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_auxiliary_node_groups", &cluster),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.with_auxiliary_node_groups", "cluster_config.0.auxiliary_node_groups.0.node_group.0.roles.0", "DRIVER"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.with_auxiliary_node_groups", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.num_instances", "2"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.with_auxiliary_node_groups", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.machine_type", "n1-standard-2"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.with_auxiliary_node_groups", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.min_cpu_platform", "AMD Rome"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.with_auxiliary_node_groups", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.disk_config.0.boot_disk_size_gb", "35"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.with_auxiliary_node_groups", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.disk_config.0.boot_disk_type", "pd-standard"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.with_auxiliary_node_groups", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.disk_config.0.num_local_ssds", "1"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.with_auxiliary_node_groups", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.accelerators.0.accelerator_count", "1"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.with_auxiliary_node_groups", "cluster_config.0.auxiliary_node_groups.0.node_group_id", "node-group-id"),
+					testAccCheckDataprocAuxiliaryNodeGroupAccelerator(&cluster, project),
+
 				),
 			},
 		},
@@ -1257,8 +1327,7 @@ resource "google_dataproc_cluster" "basic" {
 `, rnd)
 }
 
-<% if version == "ga" -%>
-func testAccDataprocVirtualCluster_basic(projectID, rnd, subnetworkName string) string {
+func testAccDataprocVirtualCluster_basic(projectID, rnd, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {
   project_id = "%s"
@@ -1267,11 +1336,8 @@ data "google_project" "project" {
 resource "google_container_cluster" "primary" {
   name     = "tf-test-gke-%s"
   location = "us-central1-a"
-  cluster_config {
-    gce_cluster_config {
-      subnetwork = "%s"
-    }
-  }
+  network    = "%s"
+  subnetwork    = "%s"
 
   initial_node_count = 1
 
@@ -1320,9 +1386,8 @@ resource "google_dataproc_cluster" "virtual_cluster" {
 	  }
 	}
   }
-`, projectID, rnd, subnetworkName, projectID, rnd, rnd, rnd, rnd, rnd, rnd)
+`, projectID, rnd, networkName, subnetworkName, projectID, rnd, rnd, rnd, rnd, rnd, rnd)
 }
-<% end -%>
 
 func testAccCheckDataprocGkeClusterNodePoolsHaveRoles(cluster *dataproc.Cluster, roles ...string) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
@@ -1823,6 +1888,95 @@ resource "google_dataproc_cluster" "spot_secondary" {
   }
 }
 	`, rnd, subnetworkName)
+}
+
+func testAccDataprocCluster_spotWithInstanceFlexibilityPolicy(rnd string) string {
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "spot_with_instance_flexibility_policy" {
+  name   = "tf-test-dproc-%s"
+  region = "us-central1"
+
+  cluster_config {
+    master_config {
+      num_instances = "1"
+      machine_type  = "e2-medium"
+      disk_config {
+        boot_disk_size_gb = 35
+      }
+    }
+
+    worker_config {
+      num_instances = "2"
+      machine_type  = "e2-medium"
+      disk_config {
+        boot_disk_size_gb = 35
+      }
+    }
+
+    preemptible_worker_config {
+      num_instances = "3"
+      preemptibility = "SPOT"
+      disk_config {
+        boot_disk_size_gb = 35
+      }
+	  instance_flexibility_policy {
+        instance_selection_list {
+          machine_types = ["n2d-standard-2"]
+          rank          = 3
+        }
+      }
+    }
+  }
+}
+	`, rnd)
+}
+
+func testAccDataprocCluster_withAuxiliaryNodeGroups(rnd string) string {
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "with_auxiliary_node_groups" {
+  name   = "tf-test-dproc-%s"
+  region = "us-central1"
+
+  cluster_config {
+    master_config {
+      num_instances = "1"
+      machine_type  = "e2-medium"
+      disk_config {
+        boot_disk_size_gb = 35
+      }
+    }
+
+    worker_config {
+      num_instances = "2"
+      machine_type  = "e2-medium"
+      disk_config {
+        boot_disk_size_gb = 35
+      }
+    }
+
+    auxiliary_node_groups{
+      node_group_id="node-group-id"
+      node_group {
+        roles = ["DRIVER"]
+        node_group_config{
+          num_instances=2
+          machine_type="n1-standard-2"
+          min_cpu_platform = "AMD Rome"
+          disk_config {
+            boot_disk_size_gb = 35
+            boot_disk_type = "pd-standard"
+            num_local_ssds = 1
+          }
+          accelerators {
+            accelerator_count = 1
+            accelerator_type  = "nvidia-tesla-k80"
+          }
+        }
+      }
+    }
+  }
+}
+	`, rnd)
 }
 
 func testAccDataprocCluster_withStagingBucketOnly(bucketName string) string {

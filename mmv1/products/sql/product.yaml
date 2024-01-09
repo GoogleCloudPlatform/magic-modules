@@ -21,10 +21,6 @@ versions:
     base_url: https://sqladmin.googleapis.com/sql/v1beta4/
 scopes:
   - https://www.googleapis.com/auth/sqlservice.admin
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Cloud SQL Admin API
-    url: https://console.cloud.google.com/apis/library/sqladmin.googleapis.com/
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'sql#operation'

@@ -15,10 +15,9 @@ require 'uri'
 require 'api/object'
 require 'compile/core'
 require 'google/golang_utils'
-require 'provider/abstract_core'
 
 module Provider
-  class Terraform < Provider::AbstractCore
+  class Terraform
     # Inserts custom strings into terraform resource docs.
     class Docs < Api::Object
       # All these values should be strings, which will be inserted

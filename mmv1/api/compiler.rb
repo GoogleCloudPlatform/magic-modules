@@ -15,15 +15,12 @@ require 'api/async'
 require 'api/product'
 require 'api/resource'
 require 'api/type'
-require 'compile/core'
 require 'google/yaml_validator'
 
 module Api
   # Process <product>.yaml and produces output module
   class Compiler
     include Compile::Core
-
-    attr_reader :product
 
     def initialize(catalog)
       @catalog = catalog
