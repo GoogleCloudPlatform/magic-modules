@@ -141,8 +141,6 @@ properties:
             output: true
           - !ruby/object:Api::Type::String
             name: 'machineType'
-            update_verb: :POST
-            update_url: 'projects/{{project}}/locations/{{location}}/runtimes/{{name}}:switch'
             description: |
               The Compute Engine machine type used for runtimes.
             required: true
@@ -340,8 +338,6 @@ properties:
             name: 'acceleratorConfig'
             description: |
               The Compute Engine accelerator configuration for this runtime.
-            update_verb: :POST
-            update_url: 'projects/{{project}}/locations/{{location}}/runtimes/{{name}}:switch'
             properties:
               - !ruby/object:Api::Type::String
                 name: 'type'
