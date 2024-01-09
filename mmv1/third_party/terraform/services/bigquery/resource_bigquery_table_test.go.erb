@@ -1457,24 +1457,25 @@ func TestAccBigQueryTable_TableReplicationInfo_WithoutReplicationInterval(t *tes
 
 	projectID := envvar.GetTestProjectFromEnv()
 
-	sourceDatasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
-	sourceTableID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
-	connectionID := "bigquerytestdefault.aws-us-east-1.e2e_ccmv_tf_test"
-	sourceURI := "s3://bq-testing/parquet/all_types.parquet"
-	// Has to follow google sql IntervalValue encoding
-	maxStaleness := "0-0 0 10:0:0"
-	sourceMaterializedViewID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
-	destinationDatasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
-	replicaMaterializedViewID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
-	replicationIntervalExpression := "" // replication_interval_ms = 600000
+	sourceDatasetID := fmt.Sprintf("tf_test_source_dataset_%s", acctest.RandString(t, 10))
+	sourceTableID := fmt.Sprintf("tf_test_source_table_%s", acctest.RandString(t, 10))
+	sourceMVJobID := fmt.Sprintf("tf_test_create_source_mv_job_%s", acctest.RandString(t, 10))
+	sourceMVID := fmt.Sprintf("tf_test_source_mv_%s", acctest.RandString(t, 10))
+	replicaDatasetID := fmt.Sprintf("tf_test_replica_dataset_%s", acctest.RandString(t, 10))
+	replicaMVID := fmt.Sprintf("tf_test_replica_mv_%s", acctest.RandString(t, 10))
+	replicationIntervalExpr := ""
+	dropMVJobID := fmt.Sprintf("tf_test_drop_source_mv_job_%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ExternalProviders:        map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBigQueryTableWithReplicationInfo(projectID, sourceDatasetID, sourceTableID, connectionID, sourceURI, maxStaleness, sourceMaterializedViewID, destinationDatasetID, replicaMaterializedViewID, replicationIntervalExpression),
+				Config: testAccBigQueryTableWithReplicationInfo(projectID, sourceDatasetID, sourceTableID, sourceMVJobID, sourceMVID, replicaDatasetID, replicaMVID, replicationIntervalExpr, dropMVJobID),
 			},
 			{
 				ResourceName:            "google_bigquery_table.replica_mv",
@@ -1491,24 +1492,25 @@ func TestAccBigQueryTable_TableReplicationInfo_WithReplicationInterval(t *testin
 
 	projectID := envvar.GetTestProjectFromEnv()
 
-	sourceDatasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
-	sourceTableID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
-	connectionID := "bigquerytestdefault.aws-us-east-1.e2e_ccmv_tf_test"
-	sourceURI := "s3://bq-testing/parquet/all_types.parquet"
-	// Has to follow google sql IntervalValue encoding
-	maxStaleness := "0-0 0 10:0:0"
-	sourceMaterializedViewID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
-	destinationDatasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
-	replicaMaterializedViewID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
-	replicationIntervalExpression := "replication_interval_ms = 600000"
+	sourceDatasetID := fmt.Sprintf("tf_test_source_dataset_%s", acctest.RandString(t, 10))
+	sourceTableID := fmt.Sprintf("tf_test_source_table_%s", acctest.RandString(t, 10))
+	sourceMVJobID := fmt.Sprintf("tf_test_create_source_mv_job_%s", acctest.RandString(t, 10))
+	sourceMVID := fmt.Sprintf("tf_test_source_mv_%s", acctest.RandString(t, 10))
+	replicaDatasetID := fmt.Sprintf("tf_test_replica_dataset_%s", acctest.RandString(t, 10))
+	replicaMVID := fmt.Sprintf("tf_test_replica_mv_%s", acctest.RandString(t, 10))
+	replicationIntervalExpr := "replication_interval_ms = 600000"
+	dropMVJobID := fmt.Sprintf("tf_test_drop_source_mv_job_%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ExternalProviders:        map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBigQueryTableWithReplicationInfo(projectID, sourceDatasetID, sourceTableID, connectionID, sourceURI, maxStaleness, sourceMaterializedViewID, destinationDatasetID, replicaMaterializedViewID, replicationIntervalExpression),
+				Config: testAccBigQueryTableWithReplicationInfo(projectID, sourceDatasetID, sourceTableID, sourceMVJobID, sourceMVID, replicaDatasetID, replicaMVID, replicationIntervalExpr, dropMVJobID),
 			},
 			{
 				ResourceName:            "google_bigquery_table.replica_mv",
@@ -1525,25 +1527,26 @@ func TestAccBigQueryTable_TableReplicationInfo_Update(t *testing.T) {
 
 	projectID := envvar.GetTestProjectFromEnv()
 
-	sourceDatasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
-	sourceTableID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
-	connectionID := "bigquerytestdefault.aws-us-east-1.e2e_ccmv_tf_test"
-	sourceURI := "s3://bq-testing/parquet/all_types.parquet"
-	// Has to follow google sql IntervalValue encoding
-	maxStaleness := "0-0 0 10:0:0"
-	sourceMaterializedViewID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
-	destinationDatasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
-	replicaMaterializedViewID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
-	replicationIntervalExpressionOld := ""
-	replicationIntervalExpressionNew := "replication_interval_ms = 600000"
+	sourceDatasetID := fmt.Sprintf("tf_test_source_dataset_%s", acctest.RandString(t, 10))
+	sourceTableID := fmt.Sprintf("tf_test_source_table_%s", acctest.RandString(t, 10))
+	sourceMVJobID := fmt.Sprintf("tf_test_create_source_mv_job_%s", acctest.RandString(t, 10))
+	sourceMVID := fmt.Sprintf("tf_test_source_mv_%s", acctest.RandString(t, 10))
+	replicaDatasetID := fmt.Sprintf("tf_test_replica_dataset_%s", acctest.RandString(t, 10))
+	replicaMVID := fmt.Sprintf("tf_test_replica_mv_%s", acctest.RandString(t, 10))
+	replicationIntervalExprOld := ""
+	replicationIntervalExprNew := "replication_interval_ms = 600000"
+	dropMVJobID := fmt.Sprintf("tf_test_drop_source_mv_job_%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
+		ExternalProviders:        map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBigQueryTableWithReplicationInfo(projectID, sourceDatasetID, sourceTableID, connectionID, sourceURI, maxStaleness, sourceMaterializedViewID, destinationDatasetID, replicaMaterializedViewID, replicationIntervalExpressionOld),
+				Config: testAccBigQueryTableWithReplicationInfo(projectID, sourceDatasetID, sourceTableID, sourceMVJobID, sourceMVID, replicaDatasetID, replicaMVID, replicationIntervalExprOld, dropMVJobID),
 			},
 			{
 				ResourceName:            "google_bigquery_table.replica_mv",
@@ -1552,7 +1555,7 @@ func TestAccBigQueryTable_TableReplicationInfo_Update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config:      testAccBigQueryTableWithReplicationInfo(projectID, sourceDatasetID, sourceTableID, connectionID, sourceURI, maxStaleness, sourceMaterializedViewID, destinationDatasetID, replicaMaterializedViewID, replicationIntervalExpressionNew),
+				Config: testAccBigQueryTableWithReplicationInfo(projectID, sourceDatasetID, sourceTableID, sourceMVJobID, sourceMVID, replicaDatasetID, replicaMVID, replicationIntervalExprNew, dropMVJobID),
 				ExpectError: regexp.MustCompile("Table replication info is not supported in update"),
 			},
 		},
@@ -3783,7 +3786,7 @@ resource "google_bigquery_table" "test" {
 `, datasetID, tableID)
 }
 
-func testAccBigQueryTableWithReplicationInfo(projectID, sourceDatasetID, sourceTableID, connectionID, sourceURI, maxStaleness, sourceMaterializedViewID, destinationDatasetID, replicaMaterializedViewID, replicationIntervalExpression string) string {
+func testAccBigQueryTableWithReplicationInfo(projectID, sourceDatasetID, sourceTableID, sourceMVJobID, sourceMVID, replicaDatasetID, replicaMVID, replicationIntervalExpr, dropMVJobID string) string {
 	return fmt.Sprintf(`
 resource "google_bigquery_dataset" "source" {
   provider = google-beta
@@ -3799,30 +3802,34 @@ resource "google_bigquery_table" "source_table" {
   table_id   = "%s"
   dataset_id = google_bigquery_dataset.source.dataset_id
   external_data_configuration {
-    connection_id   = "%s"
+    connection_id   = "bigquerytestdefault.aws-us-east-1.e2e_ccmv_tf_test"
     autodetect      = true
 		metadata_cache_mode = "AUTOMATIC"
     source_format = "PARQUET"
     source_uris = [
-      "%s",
+      "s3://bq-testing/parquet/all_types.parquet",
     ]
   }
-  max_staleness = "%s"
+  max_staleness = "0-0 0 10:0:0"
  }
 
-resource "google_bigquery_table" "source_mv" {
-  provider = google-beta
+ resource "google_bigquery_job" "source_mv_job" {
+  job_id = "%s"
 
-  deletion_protection = false
-  table_id   = "%s"
-  dataset_id = google_bigquery_dataset.source.dataset_id
-
-  materialized_view {
-    query = "SELECT * FROM %s.%s"
+  location = "aws-us-east-1"
+  query {
+    query = "CREATE MATERIALIZED VIEW %s.%s OPTIONS(max_staleness=INTERVAL \"10:00:0\" HOUR TO SECOND) AS SELECT * FROM %s.%s"
+    use_legacy_sql = false
+    create_disposition = ""
+    write_disposition = ""
   }
-  max_staleness = "%s"
 
-  depends_on = ["google_bigquery_table.source_table"]
+  depends_on = [google_bigquery_table.source_table]
+}
+
+resource "time_sleep" "wait_10_seconds" {
+  depends_on = [google_bigquery_job.source_mv_job]
+  create_duration = "10s"
 }
 
 resource "google_bigquery_dataset_access" "access" {
@@ -3831,12 +3838,14 @@ resource "google_bigquery_dataset_access" "access" {
   dataset_id    = google_bigquery_dataset.source.dataset_id
   view {
     project_id = "%s"
-    dataset_id = google_bigquery_table.source_mv.dataset_id
-    table_id   = google_bigquery_table.source_mv.table_id
+    dataset_id = google_bigquery_dataset.source.dataset_id
+    table_id   = "%s"
   }
+
+  depends_on = [time_sleep.wait_10_seconds]
 }
 
-resource "google_bigquery_dataset" "destination" {
+resource "google_bigquery_dataset" "replica" {
   provider = google-beta
 
   dataset_id = "%s"
@@ -3846,19 +3855,39 @@ resource "google_bigquery_dataset" "destination" {
 resource "google_bigquery_table" "replica_mv" {
   provider = google-beta
 
-  depends_on = [google_bigquery_dataset_access.access]
-
   deletion_protection = false
-  dataset_id = google_bigquery_dataset.destination.dataset_id
+  dataset_id = google_bigquery_dataset.replica.dataset_id
   table_id   = "%s"
   table_replication_info {
     source_project_id = "%s"
-    source_dataset_id = google_bigquery_table.source_mv.dataset_id
-    source_table_id = google_bigquery_table.source_mv.table_id
+    source_dataset_id = google_bigquery_dataset.source.dataset_id
+    source_table_id = "%s"
     %s
   }
+
+  depends_on = [google_bigquery_dataset_access.access]
 }
-`, sourceDatasetID, sourceTableID, connectionID, sourceURI, maxStaleness, sourceMaterializedViewID, sourceDatasetID, sourceTableID, maxStaleness, projectID, destinationDatasetID, replicaMaterializedViewID, projectID, replicationIntervalExpression)
+
+resource "google_bigquery_job" "drop_source_mv_job" {
+  project = "bigquerytestdefault"
+  job_id = "%s"
+
+  location = "aws-us-east-1"
+  query {
+    query = "DROP MATERIALIZED VIEW %s.%s"
+    use_legacy_sql = false
+    create_disposition = ""
+    write_disposition = ""
+  }
+
+  depends_on = [google_bigquery_table.replica_mv]
+}
+
+resource "time_sleep" "wait_10_seconds_last" {
+  depends_on = [google_bigquery_job.drop_source_mv_job]
+  create_duration = "10s"
+}
+`, sourceDatasetID, sourceTableID, sourceMVJobID, sourceDatasetID, sourceMVID, sourceDatasetID, sourceTableID, projectID, sourceMVID, replicaDatasetID, replicaMVID, projectID, sourceMVID, replicationIntervalExpr, dropMVJobID, sourceDatasetID, sourceMVID)
 }
 
 <% end -%>
