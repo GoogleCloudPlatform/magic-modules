@@ -364,10 +364,30 @@ func resourceDataflowFlexJobSetupEnv(d *schema.ResourceData, config *transport_t
 	var enableStreamingEngine bool
 	if p, ok := d.GetOk("parameters.enableStreamingEngine"); ok {
 		delete(updatedParameters, "enableStreamingEngine")
-		enableStreamingEngine = p.(bool)
+
+		enabled, ok := p.(bool)
+		if ok {
+			enableStreamingEngine = enabled
+		} else {
+			var err error
+			enableStreamingEngine, err = strconv.ParseBool(p.(string))
+			if err != nil {
+				return dataflow.FlexTemplateRuntimeEnvironment{}, updatedParameters, fmt.Errorf("Parameter enableStreamingEngine must be a valid boolean value, provided %v", p)
+			}
+		}
+
 	} else {
-		if v, ok := d.GetOk("enable_streaming_engine"); ok {
-			enableStreamingEngine = v.(bool)
+			if v, ok := d.GetOk("enable_streaming_engine"); ok {
+			enabled, ok := v.(bool)
+			if ok {
+				enableStreamingEngine = enabled
+			} else {
+				var err error
+				enableStreamingEngine, err = strconv.ParseBool(v.(string))
+				if err != nil {
+					return dataflow.FlexTemplateRuntimeEnvironment{}, updatedParameters, fmt.Errorf("Parameter enable_streaming_engine must be a valid boolean value, provided %v", v)
+				}
+			}
 		}
 	}
 
@@ -764,11 +784,18 @@ func resourceDataflowFlexJobTypeCustomizeDiff(_ context.Context, d *schema.Resou
 
 	if p, ok := d.GetOk("parameters.enableStreamingEngine"); ok {
 		if d.HasChange("enable_streaming_engine") {
-			e := d.Get("enable_streaming_engine")
-			return fmt.Errorf("Error setting enable_streaming_engine, value is supplied twice: enable_streaming_engine=%t, parameters.enableStreamingEngine=%t", e.(bool), p.(bool))
+            e := d.Get("enable_streaming_engine")
+            return fmt.Errorf("Error setting enable_streaming_engine, value is supplied twice: enable_streaming_engine=%v, parameters.enableStreamingEngine=%v", e, p)
 		} else {
-			p := d.Get("parameters.enableStreamingEngine")
-			d.SetNew("enable_streaming_engine", p.(string))
+			enableStreamingEngine, ok := p.(bool)
+			if !ok {
+				var err error
+				enableStreamingEngine, err = strconv.ParseBool(p.(string))
+				if err != nil {
+					return fmt.Errorf("Parameter enableStreamingEngine must be a valid boolean value, provided %v", p)
+				}
+			}
+			d.SetNew("enable_streaming_engine", enableStreamingEngine)
 		}
 	}
 
