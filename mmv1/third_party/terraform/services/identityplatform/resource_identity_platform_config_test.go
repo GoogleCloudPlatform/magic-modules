@@ -170,24 +170,12 @@ resource "google_identity_platform_config" "basic" {
     }
   }
 
-  client {
-    permissions {
-      disabled_user_deletion = false
-      disabled_user_signup   = false
-    }
-  }
-
   mfa {
     enabled_providers = ["PHONE_SMS"]
     provider_configs {
-      state = "DISABLED"
+      state = "ENABLED"
     }
     state = "DISABLED"
-  }
-  monitoring {
-    request_logging {
-      enabled = false
-    }
   }
 }
 `, context)
