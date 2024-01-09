@@ -263,9 +263,9 @@ func resourceLoggingBucketConfigCreate(d *schema.ResourceData, meta interface{},
 		return fmt.Errorf("Error creating Bucket: %s", err)
 	}
 	d.SetId(id)
-
+	var opRes map[string]interface{}
 	// Wait for the operation to complete
-	waitErr := LoggingOperationWaitTimeWithResponse(config, res, project, "Bucket to create", userAgent, d.Timeout(schema.TimeoutCreate))
+	waitErr := LoggingOperationWaitTimeWithResponse(config, res, &opRes, "Bucket to create", userAgent, d.Timeout(schema.TimeoutCreate))
 	if waitErr != nil {
 		d.SetId("")
 		return waitErr
