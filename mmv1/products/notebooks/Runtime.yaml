@@ -94,7 +94,6 @@ examples:
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/notebooks_runtime.go
   pre_update: templates/terraform/pre_update/notebooks_runtime.go.erb
-  custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'location'
