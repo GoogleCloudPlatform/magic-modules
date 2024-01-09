@@ -58,11 +58,10 @@ func TestAccEndpointsService_grpc(t *testing.T) {
 	})
 }
 
-func TestAccEndpointsService_grpcNotPreComputeConfigId(t *testing.T) {
+func TestAccEndpointsService_grpcNotPreComputeConfigIdByGrpcConfig(t *testing.T) {
 	t.Parallel()
 	prj := envvar.GetTestProjectFromEnv()
 	parent := fmt.Sprintf("projects/%s", prj)
-	description := acctest.RandString(t, 100)
 	serviceId := "tf-test" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -71,11 +70,34 @@ func TestAccEndpointsService_grpcNotPreComputeConfigId(t *testing.T) {
 		CheckDestroy:             testAccCheckEndpointServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEndpointsService_grpcNotPreComputeConfigId(serviceId, envvar.GetTestProjectFromEnv(), parent, description),
+				Config: testAccEndpointsService_grpcNotPreComputeConfigIdByGrpcConfig(serviceId, envvar.GetTestProjectFromEnv(), parent, "1"),
 				Check:  testAccCheckEndpointExistsByName(t, serviceId),
 			},
 			{
-				Config: testAccEndpointsService_grpcNotPreComputeConfigId(serviceId, envvar.GetTestProjectFromEnv(), parent, description),
+				Config: testAccEndpointsService_grpcNotPreComputeConfigIdByGrpcConfig(serviceId, envvar.GetTestProjectFromEnv(), parent, "2"),
+				Check:  testAccCheckEndpointExistsByName(t, serviceId),
+			},
+		},
+	})
+}
+
+func TestAccEndpointsService_openapiNotPreComputeConfigId(t *testing.T) {
+	t.Parallel()
+	prj := envvar.GetTestProjectFromEnv()
+	parent := fmt.Sprintf("projects/%s", prj)
+	serviceId := "tf-test" + acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckEndpointServiceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccEndpointsService_openapiNotPreComputeConfigId(serviceId, envvar.GetTestProjectFromEnv(), parent, "1"),
+				Check:  testAccCheckEndpointExistsByName(t, serviceId),
+			},
+			{
+				Config: testAccEndpointsService_openapiNotPreComputeConfigId(serviceId, envvar.GetTestProjectFromEnv(), parent, "2"),
 				Check:  testAccCheckEndpointExistsByName(t, serviceId),
 			},
 		},
@@ -153,17 +175,17 @@ EOF
 `, serviceId, project)
 }
 
-func testAccEndpointsService_grpcNotPreComputeConfigId(serviceId, project, parent, description string) string {
+func testAccEndpointsService_grpcNotPreComputeConfigIdByGrpcConfig(serviceId, project, parent, description string) string {
 	return fmt.Sprintf(`
 resource "google_tags_tag_key" "key1" {
   parent      = "%[3]s"
-  short_name  = "endpoints-service-test-1"
+  short_name  = "endpoints-%[1]s-1"
   description = "%[4]s"
 }
 
 resource "google_tags_tag_key" "key2" {
   parent      = "%[3]s"
-  short_name  = "endpoints-service-test-2"
+  short_name  = "endpoints-%[1]s-2"
   lifecycle {
     replace_triggered_by = [google_tags_tag_key.key1.description]
   }
@@ -185,6 +207,71 @@ EOF
 
   protoc_output_base64 = filebase64("test-fixtures/test_api_descriptor.pb")
 }
+`, serviceId, project, parent, description)
+}
+
+func testAccEndpointsService_openapiNotPreComputeConfigId(serviceId, project, parent, description string) string {
+	return fmt.Sprintf(`
+resource "google_tags_tag_key" "key1" {
+  parent      = "%[3]s"
+  short_name  = "endpoints-%[1]s-1"
+  description = "%[4]s"
+}
+
+resource "google_tags_tag_key" "key2" {
+  parent      = "%[3]s"
+  short_name  = "endpoints-%[1]s-2"
+  lifecycle {
+    replace_triggered_by = [google_tags_tag_key.key1.description]
+  }
+}
+resource "google_endpoints_service" "endpoints_service" {
+  service_name   = "%[1]s.endpoints.%[2]s.cloud.goog"
+  project        = "%[2]s"
+  openapi_config = <<EOF
+swagger: "2.0"
+info:
+  description: "${google_tags_tag_key.key2.namespaced_name}"
+  title: "Endpoints Example, rev. 1"
+  version: "1.0.0"
+host: "%[1]s.endpoints.%[2]s.cloud.goog"
+basePath: "/"
+consumes:
+- "application/json"
+produces:
+- "application/json"
+schemes:
+- "https"
+paths:
+  "/echo":
+    post:
+      description: "Echo back a given message."
+      operationId: "echo"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "Echo"
+          schema:
+            $ref: "#/definitions/echoMessage"
+      parameters:
+      - description: "Message to echo"
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: "#/definitions/echoMessage"
+      security:
+      - api_key: []
+definitions:
+  echoMessage:
+    properties:
+      message:
+        type: "string"
+EOF
+
+}
+
 `, serviceId, project, parent, description)
 }
 
