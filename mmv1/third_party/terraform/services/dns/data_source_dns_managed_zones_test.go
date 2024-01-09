@@ -33,6 +33,14 @@ func TestAccDataSourceDnsManagedZones_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.google_dns_managed_zones.qa", "id", expectedId),
 					resource.TestMatchResourceAttr("data.google_dns_managed_zones.qa", "managed_zones.#", regexp.MustCompile("^[1-9]")), // Non-zero number length
+
+					// Checks below ensure that fields in the first element are set. We can't always make assertions about exact values.
+					resource.TestCheckResourceAttr("data.google_dns_managed_zones.qa", "managed_zones.0.project", project),
+					resource.TestCheckResourceAttrSet("data.google_dns_managed_zones.qa", "managed_zones.0.name"),
+					resource.TestCheckResourceAttrSet("data.google_dns_managed_zones.qa", "managed_zones.0.dns_name"),
+					resource.TestCheckResourceAttrSet("data.google_dns_managed_zones.qa", "managed_zones.0.managed_zone_id"),
+					resource.TestCheckResourceAttrSet("data.google_dns_managed_zones.qa", "managed_zones.0.visibility"),
+					resource.TestCheckResourceAttrSet("data.google_dns_managed_zones.qa", "managed_zones.0.id"),
 				),
 			},
 		},
