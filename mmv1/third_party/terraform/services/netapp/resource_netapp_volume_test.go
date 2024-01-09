@@ -94,13 +94,6 @@ resource "google_netapp_volume" "test_volume" {
 	share_name = "tf-test-test-volume%{random_suffix}"
 	storage_pool = google_netapp_storage_pool.default.name
 	protocols = ["NFSV3"]
-	smb_settings = []
-	unix_permissions = "0770"
-	labels = {}
-	description = ""
-	snapshot_directory = false
-	security_style = "UNIX"
-	kerberos_enabled = false
 }
 
 data "google_compute_network" "default" {
@@ -175,26 +168,17 @@ resource "google_netapp_volume" "test_volume" {
 	restricted_actions = []
 	snapshot_policy {
 		daily_schedule {
-		hour              = 1
-		minute            = 1
-		snapshots_to_keep = 2
+			snapshots_to_keep = 2
 		}
 		enabled = true
 		hourly_schedule {
-		minute            = 20
-		snapshots_to_keep = 2
+			snapshots_to_keep = 2
 		}
 		monthly_schedule {
-		days_of_month     = "5"
-		hour              = 2
-		minute            = 3
-		snapshots_to_keep = 4
+			snapshots_to_keep = 4
 		}
 		weekly_schedule {
-		day               = "Wednesday"
-		hour              = 2
-		minute            = 3
-		snapshots_to_keep = 2
+			snapshots_to_keep = 2
 		}
 	}
 }
@@ -255,27 +239,27 @@ resource "google_netapp_volume" "test_volume" {
 	}
 	restricted_actions = ["DELETE"]
 	snapshot_policy {
-		daily_schedule {
-		hour              = 1
-		minute            = 1
-		snapshots_to_keep = 1
-		}
 		enabled = true
+		daily_schedule {
+			hour              = 1
+			minute            = 2
+			snapshots_to_keep = 1
+		}
 		hourly_schedule {
-		minute            = 10
-		snapshots_to_keep = 1
+			minute            = 10
+			snapshots_to_keep = 1
 		}
 		monthly_schedule {
-		days_of_month     = "1"
-		hour              = 1
-		minute            = 1
-		snapshots_to_keep = 1
+			days_of_month     = "2"
+			hour              = 3
+			minute            = 4
+			snapshots_to_keep = 1
 		}
 		weekly_schedule {
-		day               = "Sunday"
-		hour              = 1
-		minute            = 1
-		snapshots_to_keep = 1
+			day               = "Monday"
+			hour              = 5
+			minute            = 6
+			snapshots_to_keep = 1
 		}
 	}
 }
