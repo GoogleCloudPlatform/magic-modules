@@ -63,10 +63,13 @@ examples:
     # ignore_read_extra:
     #   - 'contact_settings.0.registrant_contact.0.phone_number'
     #   - 'contact_settings.0.registrant_contact.0.fax_number'
+    #   - 'contact_settings.0.registrant_contact.0.postal_address'
     #   - 'contact_settings.0.admin_contact.0.phone_number'
     #   - 'contact_settings.0.admin_contact.0.fax_number'
+    #   - 'contact_settings.0.admin_contact.0.postal_address'
     #   - 'contact_settings.0.technical_contact.0.phone_number'
     #   - 'contact_settings.0.technical_contact.0.fax_number'
+    #   - 'contact_settings.0.technical_contact.0.postal_address'
 parameters:
   - !ruby/object:Api::Type::String
     name: location
