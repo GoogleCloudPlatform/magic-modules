@@ -262,8 +262,14 @@ func resourceLoggingBucketConfigCreate(d *schema.ResourceData, meta interface{},
 	if err != nil {
 		return fmt.Errorf("Error creating Bucket: %s", err)
 	}
-
 	d.SetId(id)
+
+	// Wait for the operation to complete
+	waitErr := LoggingOperationWaitTimeWithResponse(config, res, project, "Bucket to create", userAgent, d.Timeout(schema.TimeoutCreate))
+	if waitErr != nil {
+		d.SetId("")
+		return waitErr
+	}
 
 	log.Printf("[DEBUG] Finished creating Bucket %q: %#v", d.Id(), res)
 
