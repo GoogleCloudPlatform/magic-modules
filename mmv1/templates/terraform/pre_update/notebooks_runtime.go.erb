@@ -34,9 +34,7 @@ if callSwitch {
   switchObj["machineType"] = machineType
 
   acceleratorConfigInterface := make(map[string]interface{})
-  if d.Get("virtual_machine.0.virtual_machine_config.0.accelerator_config.0.type") == 0 {
-  acceleratorConfigInterface = nil
-  } else {
+  if d.Get("virtual_machine.0.virtual_machine_config.0.accelerator_config.0.type") != 0 {
   log.Printf("[DEBUG] Accelerator Type: %q", d.Get("virtual_machine.0.virtual_machine_config.0.accelerator_config.0.type"))
   log.Printf("[DEBUG] Accelerator Count: %q", d.Get("virtual_machine.0.virtual_machine_config.0.accelerator_config.0.core_count"))
   acceleratorConfigInterface["coreCount"] = d.Get("virtual_machine.0.virtual_machine_config.0.accelerator_config.0.core_count")
