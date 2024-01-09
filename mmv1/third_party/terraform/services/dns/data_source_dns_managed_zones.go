@@ -75,14 +75,14 @@ func (d *GoogleDnsManagedZonesDataSource) Schema(ctx context.Context, req dataso
 						"name": schema.StringAttribute{
 							Description:         "A unique name for the resource.",
 							MarkdownDescription: "A unique name for the resource.",
-							Optional:            true,
+							Computed:            true,
 						},
 
 						// Google Cloud DNS ManagedZone resources do not have a SelfLink attribute.
 						"project": schema.StringAttribute{
 							Description:         "The ID of the project for the Google Cloud.",
 							MarkdownDescription: "The ID of the project for the Google Cloud.",
-							Optional:            true,
+							Computed:            true,
 						},
 
 						"dns_name": schema.StringAttribute{
