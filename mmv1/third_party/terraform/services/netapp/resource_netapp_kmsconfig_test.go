@@ -26,7 +26,7 @@ import (
 )
 
 func TestAccNetappkmsconfig_kmsConfigCreateExample_Update(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
@@ -63,7 +63,7 @@ func testAccNetappkmsconfig_kmsConfigCreateExample_Full(context map[string]inter
 	return acctest.Nprintf(`
 	resource "google_kms_key_ring" "keyring" {
 		name     = "tf-test-key-ring%{random_suffix}"
-		location = "us-west1"
+		location = "us-central1"
 	}
 	  
 	resource "google_kms_crypto_key" "crypto_key" {
@@ -75,7 +75,7 @@ func testAccNetappkmsconfig_kmsConfigCreateExample_Full(context map[string]inter
 		name = "tf-test-kms-test%{random_suffix}"
 		description="this is a test description"
 		crypto_key_name=google_kms_crypto_key.crypto_key.id
-		location="us-west1"
+		location="us-central1"
 	}
 `, context)
 }
@@ -84,7 +84,7 @@ func testAccNetappkmsconfig_kmsConfigCreateExample_Update(context map[string]int
 	return acctest.Nprintf(`
 	resource "google_kms_key_ring" "keyring" {
 		name     = "tf-test-key-ring%{random_suffix}"
-		location = "us-west1"
+		location = "us-central1"
 	}
 	  
 	resource "google_kms_crypto_key" "crypto_key" {
@@ -96,7 +96,7 @@ func testAccNetappkmsconfig_kmsConfigCreateExample_Update(context map[string]int
 		name = "tf-test-kms-test%{random_suffix}"
 		description="kmsconfig update"
 		crypto_key_name=google_kms_crypto_key.crypto_key.id
-		location="us-west1"
+		location="us-central1"
 		labels = {
 			"foo": "bar",
 		}
