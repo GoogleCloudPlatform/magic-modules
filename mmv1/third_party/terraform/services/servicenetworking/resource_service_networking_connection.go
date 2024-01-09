@@ -60,10 +60,10 @@ func ResourceServiceNetworkingConnection() *schema.Resource {
 				Description: `Named IP address range(s) of PEERING type reserved for this service provider. Note that invoking this method with a different range when connection is already established will not reallocate already provisioned service producer subnetworks.`,
 			},
 			"deletion_policy": {
-				Type:        schema.TypeString,
-				Optional:    true,
+				Type:         schema.TypeString,
+				Optional:     true,
 				ValidateFunc: validation.StringInSlice([]string{"ABANDON", ""}, false),
-				Description: `When set to ABANDON, terraform will abandon management of the resource instead of deleting it. Prevents terraform apply failures with CloudSQL. Note: The resource will still exist.`
+				Description:  `When set to ABANDON, terraform will abandon management of the resource instead of deleting it. Prevents terraform apply failures with CloudSQL. Note: The resource will still exist.`,
 			},
 			"peering": {
 				Type:     schema.TypeString,
@@ -256,10 +256,10 @@ func resourceServiceNetworkingConnectionUpdate(d *schema.ResourceData, meta inte
 func resourceServiceNetworkingConnectionDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 
-	if deletionPolicy := d.Get("deletion_policy"); deletion_policy == "ABANDON" (
+	if deletionPolicy := d.Get("deletion_policy"); deletionPolicy == "ABANDON" {
 		log.Printf("[WARN] The service networking connection has been abandoned")
 		return nil
-	)
+	}
 
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
