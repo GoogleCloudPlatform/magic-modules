@@ -1,32 +1,35 @@
 resource "google_clouddomains_registration" <%= ctx[:primary_resource_id] %> {
-  domain_name = "tf-test-domain.com"
+  domain_name = "example-domain.com"
   location    = "global"
   labels = {
     labelkey = "labelvalue"
   }
-  domain_notices  = ["HSTS_PRELOADED"]
-  contact_notices = ["PUBLIC_CONTACT_DATA_ACKNOWLEDGEMENT"]
   yearly_price {
     currency_code = "USD"
     units         = 12
   }
   dns_settings {
-    google_domains_dns {
-      ds_state = "DS_RECORDS_PUBLISHED"
+    custom_dns {
+      name_servers = [
+        "ns-cloud-a1.googledomains.com.", 
+        "ns-cloud-a2.googledomains.com.", 
+        "ns-cloud-a3.googledomains.com.", 
+        "ns-cloud-a4.googledomains.com."
+      ]
     }
   }
   contact_settings {
-    privacy = "PUBLIC_CONTACT_DATA"
+    privacy = "REDACTED_CONTACT_DATA"
     registrant_contact {
       phone_number = "+12345000000"
       email        = "user@example.com"
       postal_address {
         region_code         = "US"
-        postal_code         = "12345"
+        postal_code         = "95050"
         administrative_area = "CA"
         locality            = "Example City"
         address_lines       = ["1234 Example street"]
-        recipients          = ["example"]
+        recipients          = ["example recipient"]
       }
     }
     admin_contact {
@@ -34,11 +37,11 @@ resource "google_clouddomains_registration" <%= ctx[:primary_resource_id] %> {
       email        = "user@example.com"
       postal_address {
         region_code         = "US"
-        postal_code         = "12345"
+        postal_code         = "95050"
         administrative_area = "CA"
         locality            = "Example City"
         address_lines       = ["1234 Example street"]
-        recipients          = ["example"]
+        recipients          = ["example recipient"]
       }
     }
     technical_contact {
@@ -46,11 +49,11 @@ resource "google_clouddomains_registration" <%= ctx[:primary_resource_id] %> {
       email        = "user@example.com"
       postal_address {
         region_code         = "US"
-        postal_code         = "12345"
+        postal_code         = "95050"
         administrative_area = "CA"
         locality            = "Example City"
         address_lines       = ["1234 Example street"]
-        recipients          = ["example"]
+        recipients          = ["example recipient"]
       }
     }
   }

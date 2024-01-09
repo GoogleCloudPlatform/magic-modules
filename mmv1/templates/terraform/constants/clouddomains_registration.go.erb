@@ -11,6 +11,8 @@ func waitForRegistrationActive(d *schema.ResourceData, config *transport_tpg.Con
 		state := d.Get("state").(string)
 		if state == "REGISTRATION_PENDING" {
 			return resource.RetryableError(fmt.Errorf("Registration %q has state %q.", name, state))
+		} else if state == "REGISTRATION_FAILED" {
+			return resource.NonRetryableError(fmt.Errorf("Registration %q has failed with state %q.", name, state))
 		} else {
 			log.Printf("[DEBUG] Registration %q has state %q.", name, state)
 			return nil

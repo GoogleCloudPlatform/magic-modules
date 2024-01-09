@@ -177,8 +177,6 @@ properties:
       - !ruby/object:Api::Type::NestedObject
         name: customDns
         description: Configuration for an arbitrary DNS provider.
-        conflicts:
-          - dnsSettings.0.googleDomainsDns
         properties:
           - !ruby/object:Api::Type::Array
             name: nameServers
@@ -206,16 +204,6 @@ properties:
                 - !ruby/object:Api::Type::String
                   name: digest
                   description: The digest generated from the referenced DNSKEY.
-      - !ruby/object:Api::Type::NestedObject
-        name: googleDomainsDns
-        description: Settings controlling the DNS configuration of the Registration.
-        conflicts:
-          - dnsSettings.0.customDns
-        properties:
-          - !ruby/object:Api::Type::String
-            name: dsState
-            required: true
-            description: Required. The state of DS records for this domain. Used to enable or disable automatic DNSSEC.
       - !ruby/object:Api::Type::Array
         name: "glueRecords"
         description: "The list of glue records for this Registration. Commonly empty."
@@ -275,11 +263,6 @@ properties:
             required: true
             description: Required. Postal address of the contact.
             properties:
-              - !ruby/object:Api::Type::Integer
-                name: revision
-                description: |
-                  The schema revision of the PostalAddress. This must be set to 0, which is the latest revision. All new revisions must
-                  be backward compatible with old revisions.
               - !ruby/object:Api::Type::String
                 name: regionCode
                 required: true
@@ -288,21 +271,7 @@ properties:
                   ensure the value is correct. See https://cldr.unicode.org/ and
                   https://www.unicode.org/cldr/charts/30/supplemental/territory_information.html for details. Example: "CH" for Switzerland.
               - !ruby/object:Api::Type::String
-                name: languageCode
-                description: |
-                  BCP-47 language code of the contents of this address (if known). This is often the UI language of the input form
-                  or is expected to match one of the languages used in the address' country/region, or their transliterated equivalents.
-                  This can affect formatting in certain countries, but is not critical to the correctness of the data and will never affect
-                  any validation or other non-formatting related operations.
-
-                  If this value is not known, it should be omitted (rather than specifying a possibly incorrect default).
-              - !ruby/object:Api::Type::String
                 name: postalCode
-                description: |
-                  Postal code of the address. Not all countries use or require postal codes to be present, but where they are used,
-                  they may trigger additional validation with other parts of the address (e.g. state/zip validation in the U.S.A.).
-              - !ruby/object:Api::Type::String
-                name: sortingCode
                 description: |
                   Postal code of the address. Not all countries use or require postal codes to be present, but where they are used,
                   they may trigger additional validation with other parts of the address (e.g. state/zip validation in the U.S.A.).
@@ -318,10 +287,6 @@ properties:
                 description: |
                   Generally refers to the city/town portion of the address. Examples: US city, IT comune, UK post town. In regions of the world
                   where localities are not well defined or do not fit into this structure well, leave locality empty and use addressLines.
-              - !ruby/object:Api::Type::String
-                name: sublocality
-                description: |
-                  Sublocality of the address. For example, this can be neighborhoods, boroughs, districts.
               - !ruby/object:Api::Type::String
                 name: organization
                 description: |
@@ -369,11 +334,6 @@ properties:
             required: true
             description: Required. Postal address of the contact.
             properties:
-              - !ruby/object:Api::Type::Integer
-                name: revision
-                description: |
-                  The schema revision of the PostalAddress. This must be set to 0, which is the latest revision. All new revisions must
-                  be backward compatible with old revisions.
               - !ruby/object:Api::Type::String
                 name: regionCode
                 required: true
@@ -382,21 +342,7 @@ properties:
                   ensure the value is correct. See https://cldr.unicode.org/ and
                   https://www.unicode.org/cldr/charts/30/supplemental/territory_information.html for details. Example: "CH" for Switzerland.
               - !ruby/object:Api::Type::String
-                name: languageCode
-                description: |
-                  BCP-47 language code of the contents of this address (if known). This is often the UI language of the input form
-                  or is expected to match one of the languages used in the address' country/region, or their transliterated equivalents.
-                  This can affect formatting in certain countries, but is not critical to the correctness of the data and will never affect
-                  any validation or other non-formatting related operations.
-
-                  If this value is not known, it should be omitted (rather than specifying a possibly incorrect default).
-              - !ruby/object:Api::Type::String
                 name: postalCode
-                description: |
-                  Postal code of the address. Not all countries use or require postal codes to be present, but where they are used,
-                  they may trigger additional validation with other parts of the address (e.g. state/zip validation in the U.S.A.).
-              - !ruby/object:Api::Type::String
-                name: sortingCode
                 description: |
                   Postal code of the address. Not all countries use or require postal codes to be present, but where they are used,
                   they may trigger additional validation with other parts of the address (e.g. state/zip validation in the U.S.A.).
@@ -412,10 +358,6 @@ properties:
                 description: |
                   Generally refers to the city/town portion of the address. Examples: US city, IT comune, UK post town. In regions of the world
                   where localities are not well defined or do not fit into this structure well, leave locality empty and use addressLines.
-              - !ruby/object:Api::Type::String
-                name: sublocality
-                description: |
-                  Sublocality of the address. For example, this can be neighborhoods, boroughs, districts.
               - !ruby/object:Api::Type::String
                 name: organization
                 description: |
@@ -463,11 +405,6 @@ properties:
             required: true
             description: Required. Postal address of the contact.
             properties:
-              - !ruby/object:Api::Type::Integer
-                name: revision
-                description: |
-                  The schema revision of the PostalAddress. This must be set to 0, which is the latest revision. All new revisions must
-                  be backward compatible with old revisions.
               - !ruby/object:Api::Type::String
                 name: regionCode
                 required: true
@@ -476,21 +413,7 @@ properties:
                   ensure the value is correct. See https://cldr.unicode.org/ and
                   https://www.unicode.org/cldr/charts/30/supplemental/territory_information.html for details. Example: "CH" for Switzerland.
               - !ruby/object:Api::Type::String
-                name: languageCode
-                description: |
-                  BCP-47 language code of the contents of this address (if known). This is often the UI language of the input form
-                  or is expected to match one of the languages used in the address' country/region, or their transliterated equivalents.
-                  This can affect formatting in certain countries, but is not critical to the correctness of the data and will never affect
-                  any validation or other non-formatting related operations.
-
-                  If this value is not known, it should be omitted (rather than specifying a possibly incorrect default).
-              - !ruby/object:Api::Type::String
                 name: postalCode
-                description: |
-                  Postal code of the address. Not all countries use or require postal codes to be present, but where they are used,
-                  they may trigger additional validation with other parts of the address (e.g. state/zip validation in the U.S.A.).
-              - !ruby/object:Api::Type::String
-                name: sortingCode
                 description: |
                   Postal code of the address. Not all countries use or require postal codes to be present, but where they are used,
                   they may trigger additional validation with other parts of the address (e.g. state/zip validation in the U.S.A.).
@@ -506,10 +429,6 @@ properties:
                 description: |
                   Generally refers to the city/town portion of the address. Examples: US city, IT comune, UK post town. In regions of the world
                   where localities are not well defined or do not fit into this structure well, leave locality empty and use addressLines.
-              - !ruby/object:Api::Type::String
-                name: sublocality
-                description: |
-                  Sublocality of the address. For example, this can be neighborhoods, boroughs, districts.
               - !ruby/object:Api::Type::String
                 name: organization
                 description: |

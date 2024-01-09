@@ -22,53 +22,12 @@ func flattenClouddomainsRegistrationContactSettingsAdminContact(v interface{}, d
 	}
 	transformed := make(map[string]interface{})
 
-	// Skip phone and fax numbers due to ambiguous accept vs return values 
+	// Skip reading the following due to ambiguous accept vs return values 
 	transformed["phone_number"] = d.Get("contact_settings.0.admin_contact.0.phone_number")
 	transformed["fax_number"] = d.Get("contact_settings.0.admin_contact.0.fax_number")
+	transformed["postal_address"] = d.Get("contact_settings.0.admin_contact.0.postal_address")
 
+	// Don't skip email as it is not normalized
 	transformed["email"] = original["email"]
-	transformed["postal_address"] =
-		flattenClouddomainsRegistrationContactSettingsAdminContactPostalAddress(original["postalAddress"], d, config)
 	return []interface{}{transformed}
-}
-
-func flattenClouddomainsRegistrationContactSettingsAdminContactPostalAddress(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	if v == nil {
-		return nil
-	}
-	original := v.(map[string]interface{})
-	if len(original) == 0 {
-		return nil
-	}
-	transformed := make(map[string]interface{})
-	transformed["revision"] =
-		flattenClouddomainsRegistrationContactSettingsAdminContactPostalAddressRevision(original["revision"], d, config)
-	transformed["region_code"] = original["regionCode"]
-	transformed["language_code"] = original["languageCode"]
-	transformed["postal_code"] = original["postalCode"]
-	transformed["sorting_code"] = original["sortingCode"]
-	transformed["administrative_area"] = original["administrativeArea"]
-	transformed["locality"] = original["locality"]
-	transformed["sublocality"] = original["sublocality"]
-	transformed["organization"] = original["organization"]
-	transformed["address_lines"] = original["addressLines"]
-	transformed["recipients"] = original["recipients"]
-	return []interface{}{transformed}
-}
-
-func flattenClouddomainsRegistrationContactSettingsAdminContactPostalAddressRevision(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	// Handles the string fixed64 format
-	if strVal, ok := v.(string); ok {
-		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
-			return intVal
-		}
-	}
-
-	// number values are represented as float64
-	if floatVal, ok := v.(float64); ok {
-		intVal := int(floatVal)
-		return intVal
-	}
-
-	return v // let terraform core handle it otherwise
 }
