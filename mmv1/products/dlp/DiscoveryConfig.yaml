@@ -193,7 +193,32 @@ properties:
                   - !ruby/object:Api:Type:String 
                     name : minAge
                     description: Duration format. Minimum age a table must have before Cloud DLP can profile it. value greater than 1.
-                    
+                  - !ruby/object:Api:Type:Integer
+                    name: minRowCount
+                    description: Minimum number of rows that should be present before Cloud DLP profiles as a table. 
+                - !ruby/object:Api:Type:NestedObject
+                  name: types
+                  description: Restrict discovery to specify table type
+                  properties:
+                  - !ruby/object:Api:Type:Enum
+                    name: 'type[]'
+                    description: A set of BiqQuery table types
+                    values:
+                      - BIG_QUERY_TABLE_TYPE_UNSPECIFIED
+                      - BIG_QUERY_TABLE_TYPE_TABLE
+                      - BIG_QUERY_TABLE_TYPE_EXTERNAL_BIG_LAKE
+                - !ruby/object:Api:Type:NestedObject
+                  name: typeCollection
+                  description: Restrict discovery to categories of table type
+                  properties:
+                  - !ruby/object:Api:Type:Enum
+                    name: 'typeCollection[]'
+                    description: Currently view, materialized view, snapshot and non-biglake external tables are supported. 
+                    values: 
+                      - BIG_QUERY_COLLECTION_UNSPECIFIED
+                      - BIG_QUERY_COLLECTION_ALL_TYPES
+                      - BIG_QUERY_COLLECTION_ONLY_SUPPORTED_TYPES
+                 
                     
       - !ruby/object:Api::Type::String 
         name: 
