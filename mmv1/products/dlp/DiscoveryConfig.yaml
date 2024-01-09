@@ -218,7 +218,17 @@ properties:
                       - BIG_QUERY_COLLECTION_UNSPECIFIED
                       - BIG_QUERY_COLLECTION_ALL_TYPES
                       - BIG_QUERY_COLLECTION_ONLY_SUPPORTED_TYPES
-                 
+          - !ruby/object:Api:Type:NestedObject
+            name: cadence
+            description: How often and when to update profiles. New tables that match both the fiter and conditions are scanned as quickly as possible depending on system capacity. 
+            properties:
+            - !ruby/object:Api:Type:NestedObject
+              name: schemaModifiedCadence
+              description: Governs when to update data profiles when a schema is modified
+              properties: 
+              - !ruby/object:Api:Type:Enum
+                name: 'types[]'
+                description: The type of events to consider when deciding if the table's schema has been modified and should have the profile updated. Defa       
                     
       - !ruby/object:Api::Type::String 
         name: 
