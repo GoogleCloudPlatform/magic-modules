@@ -30,11 +30,21 @@ if callSwitch {
   log.Printf("[DEBUG] Switching Runtime: %q", d.Id())
 
   switchObj := make(map[string]interface{})
-  switchObj["machineType"] = d.Get("virtual_machine.0.virtual_machine_config.0.machine_type")
-  acceleratorConfig := make(map[string]interface{})
-  acceleratorConfig["coreCount"] = d.Get("virtual_machine.0.virtual_machine_config.0.accelerator_config.0.core_count")
-  acceleratorConfig["type"] = d.Get("virtual_machine.0.virtual_machine_config.0.accelerator_config.0.type")
-  switchObj["acceleratorConfig"] = acceleratorConfig
+  machineType := d.Get("virtual_machine.0.virtual_machine_config.0.machine_type")
+  switchObj["machineType"] = machineType
+
+  acceleratorConfig := d.Get("virtual_machine.0.virtual_machine_config.0.accelerator_config")
+  acceleratorConfigInterface := make(map[string]interface{})
+  if acceleratorConfig == nil {
+  acceleratorConfigInterface := nil
+  } else {
+  log.Printf("[DEBUG] Accelerator Type: %q", d.Get("virtual_machine.0.virtual_machine_config.0.accelerator_config.0.type"))
+  log.Printf("[DEBUG] Accelerator Count: %q", d.Get("virtual_machine.0.virtual_machine_config.0.accelerator_config.0.core_count"))
+  acceleratorConfigInterface["coreCount"] = d.Get("virtual_machine.0.virtual_machine_config.0.accelerator_config.0.core_count")
+  acceleratorConfigInterface["type"] = d.Get("virtual_machine.0.virtual_machine_config.0.accelerator_config.0.type")
+  }
+  switchObj["acceleratorConfig"] = acceleratorConfigInterface
+
 
   dRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 	Config: config,
