@@ -179,7 +179,6 @@ properties:
         description: Configuration for an arbitrary DNS provider.
         conflicts:
           - dnsSettings.0.googleDomainsDns
-          - dnsSettings.0.customDns
         properties:
           - !ruby/object:Api::Type::Array
             name: nameServers
