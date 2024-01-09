@@ -32,9 +32,9 @@ async: !ruby/object:Api::OpAsync
     base_url: "{{op_id}}"
     wait_ms: 1000
     timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 60
-      update_minutes: 60
-      delete_minutes: 60
+      insert_minutes: 480
+      update_minutes: 480
+      delete_minutes: 480
   result: !ruby/object:Api::OpAsync::Result
     path: "response"
   status: !ruby/object:Api::OpAsync::Status
@@ -67,11 +67,13 @@ examples:
   # to avoid leaking the machine name, and node location to public.
   # Skip the vcr test because as we only have limited machine resources and we don't want it run
   # in github presubmit test.
+  # TODO: enable the test when GDCE have extra prod rack for TF e2e testing.
   - !ruby/object:Provider::Terraform::Examples
     name: "edgecontainer_local_control_plane_node_pool_internal"
     primary_resource_id: "default"
     skip_docs: true
     skip_vcr: true
+    skip_test: true
 parameters:
   - !ruby/object:Api::Type::String
     name: "name"
