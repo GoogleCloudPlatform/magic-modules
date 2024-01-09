@@ -138,11 +138,11 @@ func testServiceNetworkingConnectionDestroyAbandon(t *testing.T, parent, network
 
 		for _, c := range response.Connections {
 			if c.Network == networkName {
-				return nil
+				return fmt.Errorf("Found %s which should have been destroyed.", networkName)
 			}
 		}
 
-		return fmt.Errorf("Did not find %s which should still exist.", networkName)
+		return nil
 	}
 }
 
