@@ -66,9 +66,14 @@ steps:
 
     - name: 'gcr.io/graphite-docker-images/build-environment'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
+      id: build-magician-binary
+      waitFor: ["merged"]
+
+    - name: 'gcr.io/graphite-docker-images/build-environment'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: tpg-head
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["merged"]
+      waitFor: ["build-magician-binary"]
       env:
         - BASE_BRANCH=$_BASE_BRANCH
       args:
@@ -82,7 +87,7 @@ steps:
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: tpg-base
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["merged"]
+      waitFor: ["build-magician-binary"]
       env:
         - BASE_BRANCH=$_BASE_BRANCH
       args:
@@ -96,7 +101,7 @@ steps:
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       secretEnv: ["GITHUB_TOKEN"]
       id: tpgb-head
-      waitFor: ["merged"]
+      waitFor: ["build-magician-binary"]
       env:
         - BASE_BRANCH=$_BASE_BRANCH
       args:
@@ -110,7 +115,7 @@ steps:
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: tpgb-base
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["merged"]
+      waitFor: ["build-magician-binary"]
       env:
         - BASE_BRANCH=$_BASE_BRANCH
       args:
@@ -124,7 +129,7 @@ steps:
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: tgc-head
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["merged"]
+      waitFor: ["build-magician-binary"]
       env:
         - BASE_BRANCH=$_BASE_BRANCH
       args:
@@ -138,7 +143,7 @@ steps:
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: tgc-base
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["merged"]
+      waitFor: ["build-magician-binary"]
       env:
         - BASE_BRANCH=$_BASE_BRANCH
       args:
@@ -152,7 +157,7 @@ steps:
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: tf-oics-head
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["merged"]
+      waitFor: ["build-magician-binary"]
       env:
         - BASE_BRANCH=$_BASE_BRANCH
       args:
@@ -166,7 +171,7 @@ steps:
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: tf-oics-base
       secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["merged"]
+      waitFor: ["build-magician-binary"]
       env:
         - BASE_BRANCH=$_BASE_BRANCH
       args:
