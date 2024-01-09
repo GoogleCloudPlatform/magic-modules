@@ -211,7 +211,6 @@ properties:
         name: googleDomainsDns
         description: Settings controlling the DNS configuration of the Registration.
         conflicts:
-          - dnsSettings.0.googleDomainsDns
           - dnsSettings.0.customDns
         properties:
           - !ruby/object:Api::Type::String
