@@ -173,6 +173,8 @@ group. You can specify one or more values. For more information, see the [offici
 
 * `stateful_external_ip` - (Optional) External network IPs assigned to the instances that will be preserved on instance delete, update, etc. This map is keyed with the network interface name. Structure is [documented below](#nested_stateful_external_ip).
 
+* `params` - (Optional [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Stores additional params passed with the request, but not persisted as part of resource payload. Structure is [documented below](#nested_params). For more information, see [API](https://cloud.google.com/compute/docs/reference/rest/beta/instanceGroupManagers/insert).
+
 - - -
 
 <a name="nested_update_policy"></a>The `update_policy` block supports:
@@ -316,6 +318,18 @@ one of which has a `target_size.percent` of `60` will create 2 instances of that
 * `interface_name` - (Required), The network interface name of the external Ip. Possible value: `nic0`.
 
 * `delete_rule` - (Optional), A value that prescribes what should happen to the external ip when the VM instance is deleted. The available options are `NEVER` and `ON_PERMANENT_INSTANCE_DELETION`. `NEVER` - detach the ip when the VM is deleted, but do not delete the ip. `ON_PERMANENT_INSTANCE_DELETION` will delete the external ip when the VM is permanently deleted from the instance group.
+
+<a name="nested_params"></a>The `params` block supports:
+
+```hcl
+params{
+  resource_manager_tags = {
+    "tagKeys/123": "tagValues/123"
+  }
+}
+```
+
+* `resource_manager_tags` - (Optional) Specifies a list of resource manager tags to apply to the regional instance group manager. A resource manager tag is a key-value pair. You can attach exactly one value to a regional instance group manager for a given key. A regional instance group manager can have a maximum of 50 key-value pairs attached.
 
 ## Attributes Reference
 
