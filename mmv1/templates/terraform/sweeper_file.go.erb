@@ -4,7 +4,7 @@
 
 <%= lines(autogen_notice(:go, pwd)) -%>
 
-package <%= product_ns.downcase -%>
+package <%= object.__product.name .downcase -%>
 
 import (
   "context"
@@ -20,7 +20,7 @@ import (
 )
 
 <%
-sweeper_name = product_ns + object.name
+sweeper_name = object.__product.name  + object.name
 wrap_path = object&.nested_query&.keys&.first || object.collection_url_key
 listUrlTemplate = object.__product.base_url + object.base_url
 
