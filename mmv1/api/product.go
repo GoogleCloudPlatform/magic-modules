@@ -37,44 +37,35 @@ type Product struct {
 	// Name string
 
 	// Display Name: The full name of the GCP product; eg "Cloud Bigtable"
-	// A custom getter is used for :display_name instead of `attr_reader`
 
-	// attr_reader
 	Objects []interface{}
 
 	// The list of permission scopes available for the service
 	// For example: `https://www.googleapis.com/auth/compute`
 
-	// attr_accessor
 	Scopes []string
 
 	// The API versions of this product
 
-	// attr_accessor
 	Versions []product.Version
 
 	// The base URL for the service API endpoint
 	// For example: `https://www.googleapis.com/compute/v1/`
 
-	// attr_accessor
-	BaseUrl string
+	BaseUrl string `yaml:"base_url"`
 
 	// A function reference designed for the rare case where you
 	// need to use retries in operation calls. Used for the service api
 	// as it enables itself (self referential) and can result in occasional
 	// failures on operation_get. see github.com/hashicorp/terraform-provider-google/issues/9489
 
-	// attr_reader
-	OperationRetry string
+	OperationRetry string `yaml:"operation_retry"`
 
-	// attr_reader
 	Async OpAsync
 
-	// attr_reader
-	LegacyName string
+	LegacyName string `yaml:"legacy_name"`
 
-	// attr_reader
-	ClientName string
+	ClientName string `yaml:"client_name"`
 }
 
 // def validate
@@ -117,8 +108,6 @@ type Product struct {
 //       @display_name
 //     end
 //   end
-
-//   attr_writer :display_name
 
 //   // Most general version that exists for the product
 //   // If GA is present, use that, else beta, else alpha

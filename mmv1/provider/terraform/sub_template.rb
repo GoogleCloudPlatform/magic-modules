@@ -15,12 +15,11 @@ module Provider
   class Terraform
     # Functions to compile sub-templates.
     module SubTemplate
-      def build_newyaml_field(property, object, pwd, layer)
+      def build_newyaml_field(property, object, pwd)
         compile_template "#{pwd}/templates/terraform/yaml_conversion_field.erb",
                          property:,
                          object:,
-                         pwd:,
-                         layer:
+                         pwd:
       end
 
       def build_schema_property(property, object, pwd)

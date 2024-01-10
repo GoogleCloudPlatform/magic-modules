@@ -26,11 +26,9 @@ type Async struct {
 	google.YamlValidator
 
 	// Describes an operation
-	// attr_reader :
 	Operation Operation
 
 	// The list of methods where operations are used.
-	// attr_reader :
 	Actions []string
 }
 
@@ -52,10 +50,8 @@ type Operation struct {
 	// Contains information about an long-running operation, to make
 	// requests for the state of an operation.
 
-	// attr_reader :
 	Timeouts Timeouts
 
-	// attr_reader :
 	Result Result
 }
 
@@ -70,7 +66,6 @@ type Result struct {
 
 	// Contains information about the result of an Operation
 
-	// attr_reader :
 	ResourceInsideResponse bool
 }
 
@@ -84,25 +79,19 @@ type OpAsync struct {
 	// TODO: Should embed Async or not?
 	// < Async
 
-	// attr_reader :
 	Operation OpAsyncOperation
 
-	// attr_reader :
 	Result OpAsyncResult
 
-	// attr_reader :
 	Status OpAsyncStatus
 
-	// attr_reader :
 	Error OpAsyncError
 
 	// If true, include project as an argument to OperationWaitTime.
 	// It is intended for resources that calculate project/region from a selflink field
-	// attr_reader :
-	IncludeProject bool
+	IncludeProject bool `yaml:"include_project"`
 
 	// The list of methods where operations are used.
-	// attr_reader :
 	Actions []string
 }
 
@@ -130,24 +119,18 @@ type OpAsync struct {
 type OpAsyncOperation struct {
 	// TODO: Should embed Operation or not?
 	// < Async::Operation
-	// attr_reader :
 	Kind string
 
-	// attr_reader :
 	Path string
 
-	// attr_reader :
-	BaseUrl string
+	BaseUrl string `yaml:"base_url"`
 
-	// attr_reader :
-	WaitMs int
+	WaitMs int `yaml:"wait_ms"`
 
-	// attr_reader :
 	Timeouts Timeouts
 
 	// Use this if the resource includes the full operation url.
-	// attr_reader :
-	FullUrl string
+	FullUrl string `yaml:"full_url"`
 }
 
 // def initialize(path, base_url, wait_ms, timeouts)
@@ -175,7 +158,6 @@ type OpAsyncOperation struct {
 type OpAsyncResult struct {
 	Result Result `yaml:",inline"`
 
-	// attr_reader :
 	Path string
 }
 
@@ -196,13 +178,10 @@ type OpAsyncResult struct {
 type OpAsyncStatus struct {
 	google.YamlValidator
 
-	// attr_reader :
 	Path string
 
-	// attr_reader :
 	Complete bool
 
-	// attr_reader :
 	Allowed []bool
 }
 
@@ -223,10 +202,8 @@ type OpAsyncStatus struct {
 type OpAsyncError struct {
 	google.YamlValidator
 
-	// attr_reader :
 	Path string
 
-	// attr_reader :
 	Message string
 }
 

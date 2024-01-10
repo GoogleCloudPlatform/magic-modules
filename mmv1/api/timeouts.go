@@ -29,14 +29,11 @@ const DEFAULT_DELETE_TIMEOUT_MINUTES = 20
 type Timeouts struct {
 	google.YamlValidator
 
-	// attr_reader :
-	InsertMinutes int
+	InsertMinutes int `yaml:"insert_minutes"`
 
-	// attr_reader :
-	UpdateMinutes int
+	UpdateMinutes int `yaml:"update_minutes"`
 
-	// attr_reader :
-	DeleteMinutes int
+	DeleteMinutes int `yaml:"delete_minutes"`
 }
 
 // def initialize

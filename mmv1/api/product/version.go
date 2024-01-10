@@ -27,10 +27,10 @@ type Version struct {
 	// include Comparable
 
 	// attr_reader
-	CaiBaseUrl string
+	CaiBaseUrl string `yaml:"cai_base_url"`
 
 	// attr_accessor
-	BaseUrl string
+	BaseUrl string `yaml:"base_url"`
 
 	// attr_accessor
 	Name string

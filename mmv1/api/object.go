@@ -25,15 +25,11 @@ import (
 type NamedObject struct {
 	google.YamlValidator
 
-	// The list of properties (attr_reader) that can be overridden in
-	// <provider>.yaml.
-	// attr_reader
 	Name string
 
 	// original value of :name before the provider override happens
 	// same as :name if not overridden in provider
-	// attr_reader
-	ApiName string
+	ApiName string `yaml:"api_name"`
 }
 
 // func (n *Named) string_array(arr) {

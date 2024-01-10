@@ -81,6 +81,11 @@ func main() {
 					continue
 				}
 
+				// TODO REMOVE: limiting test block
+				// if !strings.Contains(resourceYamlPath, "datafusion") {
+				// 	continue
+				// }
+
 				// Prepend "go_" to the Go yaml files' name to distinguish with the ruby yaml files
 				if filepath.Base(resourceYamlPath) == "go_product.yaml" || !strings.HasPrefix(filepath.Base(resourceYamlPath), "go_") {
 					continue
