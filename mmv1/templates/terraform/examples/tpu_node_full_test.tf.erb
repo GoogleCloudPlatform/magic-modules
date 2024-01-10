@@ -1,6 +1,3 @@
-data "google_tpu_tensorflow_versions" "available" {
-}
-
 <%#-
   WARNING: cidr_block must not overlap with other existing TPU blocks
   Make sure if you change this value that it does not overlap with the
@@ -13,7 +10,13 @@ resource "google_tpu_node" "<%= ctx[:primary_resource_id] %>" {
 
   accelerator_type = "v3-8"
 
-  tensorflow_version = data.google_tpu_tensorflow_versions.available.versions[0]
+<%#-
+  We previously used the first available version from the
+  google_tpu_tensorflow_versions data source. However, this started to return a
+  random set of versions which caused our tests to occasionally fail, so we pin
+  tensorflow_version to a specific version so that our tests pass reliably.
+-%>
+  tensorflow_version = "2.10.0"
 
   description = "Terraform Google Provider test TPU"
   use_service_networking = true
