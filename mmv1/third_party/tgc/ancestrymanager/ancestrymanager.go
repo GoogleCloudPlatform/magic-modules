@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	crmv1 "google.golang.org/api/cloudresourcemanager/v1"
 	crmv3 "google.golang.org/api/cloudresourcemanager/v3"
@@ -229,7 +230,15 @@ func (m *manager) getAncestorsWithCache(key string) ([]string, error) {
 		if strings.HasPrefix(cur, "projects") {
 			// fall back to use v1 API GetAncestry to avoid requiring extra folder permission
 			projectID := strings.TrimPrefix(cur, "projects/")
-			resp, err := m.resourceManagerV1.Projects.GetAncestry(projectID, &crmv1.GetAncestryRequest{}).Do()
+			var resp *crmv1.GetAncestryResponse
+			var err error
+			err = transport_tpg.Retry(transport_tpg.RetryOptions{
+				RetryFunc: func() error {
+					resp, err = m.resourceManagerV1.Projects.GetAncestry(projectID, &crmv1.GetAncestryRequest{}).Do()
+					return err
+				},
+				Timeout: 2 * time.Minute,
+			})
 			if err != nil {
 				return nil, handleCRMError(cur, err)
 			}
@@ -240,7 +249,15 @@ func (m *manager) getAncestorsWithCache(key string) ([]string, error) {
 			// break out of the loop
 			cur = ""
 		} else {
-			project, err := m.resourceManagerV3.Projects.Get(cur).Do()
+			var project *crmv3.Project
+			var err error
+			err = transport_tpg.Retry(transport_tpg.RetryOptions{
+				RetryFunc: func() error {
+					project, err = m.resourceManagerV3.Projects.Get(cur).Do()
+					return err
+				},
+				Timeout: 2 * time.Minute,
+			})
 			if err != nil {
 				return nil, handleCRMError(cur, err)
 			}
