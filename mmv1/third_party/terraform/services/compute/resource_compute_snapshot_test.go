@@ -111,7 +111,7 @@ resource "google_kms_key_ring" "keyring" {
 resource "google_kms_crypto_key" "example-key" {
   name            = "%s"
   key_ring        = google_kms_key_ring.keyring.id
-  rotation_period = "100000s"
+  rotation_period = "7776000s"
 }
 
 resource "google_kms_crypto_key_iam_member" "example-key" {
