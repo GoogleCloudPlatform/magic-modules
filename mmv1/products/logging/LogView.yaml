@@ -47,6 +47,8 @@ examples:
     name: 'logging_log_view_long_name'
     primary_resource_id: 'logging_log_view'
     primary_resource_name: 'fmt.Sprintf("tf-test-my-view%s", context["random_suffix"])'
+    vars:
+      log_view_name: 'my-view'
     test_env_vars:
       project: :PROJECT_NAME
     skip_docs: true
