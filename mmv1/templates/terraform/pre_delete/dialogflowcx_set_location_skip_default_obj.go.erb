@@ -3,16 +3,16 @@
 location := ""
 
 if parts := regexp.MustCompile(`locations\/([^\/]*)\/`).FindStringSubmatch(d.Get("parent").(string)); parts != nil {
-    location = parts[1]
+	location = parts[1]
 } else {
-    return fmt.Errorf(
-        "Saw %s when the parent is expected to contains location %s",
-        d.Get("parent"),
-        "projects/{{project}}/locations/{{location}}/...",
-    )
+	return fmt.Errorf(
+		"Saw %s when the parent is expected to contains location %s",
+		d.Get("parent"),
+		"projects/{{project}}/locations/{{location}}/...",
+	)
 }
 
-url = strings.Replace(url,"-dialogflow",fmt.Sprintf("%s-dialogflow",location),1)
+url = strings.Replace(url, "-dialogflow", fmt.Sprintf("%s-dialogflow", location), 1)
 
 // if it's a default object Dialogflow creates for you, skip deletion
 // Note: below we try to access fields that aren't present in the resource, because this custom code is reused across multiple Dialogflow resources that contain different fields. When the field isn't present, we deliberately ignore the error and the boolean is false.
@@ -20,7 +20,7 @@ isDefaultStartFlow, _ := d.Get("is_default_start_flow").(bool)
 isDefaultWelcomeIntent, _ := d.Get("is_default_welcome_intent").(bool)
 isDefaultNegativeIntent, _ := d.Get("is_default_negative_intent").(bool)
 if isDefaultStartFlow || isDefaultWelcomeIntent || isDefaultNegativeIntent {
-    // we can't delete these resources so do nothing
-    log.Printf("[DEBUG] Not deleting default <%= resource_name -%>")
-    return nil
+	// we can't delete these resources so do nothing
+	log.Printf("[DEBUG] Not deleting default <%= object.resource_name -%>")
+	return nil
 }

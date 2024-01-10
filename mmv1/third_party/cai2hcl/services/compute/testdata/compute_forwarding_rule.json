@@ -25,7 +25,7 @@
     }
   },
   {
-    "name": "//compute.googleapis.com/projects/myproj/regions/us-central1/instances/test-2",
+    "name": "//compute.googleapis.com/projects/myproj/regions/us-central1/forwardingRules/test-2",
     "asset_type": "compute.googleapis.com/ForwardingRule",
     "ancestry_path": "organizations/123/folders/456/project/myproj",
     "resource": {
