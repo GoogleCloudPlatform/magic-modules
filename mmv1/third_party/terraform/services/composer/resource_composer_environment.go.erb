@@ -1807,18 +1807,17 @@ func expandComposerEnvironmentConfig(v interface{}, d *schema.ResourceData, conf
 	/*
 		config.enable_private_environment in terraform maps to
 		composer.PrivateEnvironmentConfig.EnablePrivateEnvironment in API.
+		Check image version to avoid overriding EnablePrivateEnvironment in case of other versions.
 	*/
-	if enablePrivateEnvironmentRaw, ok := original["enable_private_environment"]; ok {
-		if enablePrivateEnvironmentRaw != nil {
+	if isComposer3(d, config) {
+		if enablePrivateEnvironmentRaw, ok := original["enable_private_environment"]; ok {
 			if transformed.PrivateEnvironmentConfig == nil {
 				transformed.PrivateEnvironmentConfig = &composer.PrivateEnvironmentConfig{}
 			}
 			transformed.PrivateEnvironmentConfig.EnablePrivateEnvironment = enablePrivateEnvironmentRaw.(bool)
 		}
-	}
 
-	if enablePrivateBuildsOnlyRaw, ok := original["enable_private_builds_only"]; ok {
-		if enablePrivateBuildsOnlyRaw != nil {
+		if enablePrivateBuildsOnlyRaw, ok := original["enable_private_builds_only"]; ok {
 			if transformed.PrivateEnvironmentConfig == nil{
 				transformed.PrivateEnvironmentConfig = &composer.PrivateEnvironmentConfig{}
 			}
@@ -2690,4 +2689,11 @@ func versionsEqual(old, new string) (bool, error) {
 		return false, err
 	}
 	return o.Equal(n), nil
+}
+
+func isComposer3(d *schema.ResourceData, config *transport_tpg.Config)	bool {
+	log.Printf("[DEBUG] image version is %s", d.Get("config.0.software_config.0.image_version"))
+
+	image_version := d.Get("config.0.software_config.0.image_version").(string)
+	return strings.Contains(image_version, "composer-3")
 }
