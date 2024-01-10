@@ -192,7 +192,7 @@ func TestAccKmsCryptoKey_rotation(t *testing.T) {
 	projectBillingAccount := envvar.GetTestBillingAccountFromEnv(t)
 	keyRingName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	cryptoKeyName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-	rotationPeriod := "7776000s"
+	rotationPeriod := "1000000s"
 	updatedRotationPeriod := "7776000s"
 
 	acctest.VcrTest(t, resource.TestCase{

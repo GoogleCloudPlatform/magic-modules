@@ -9,11 +9,11 @@ func TestCryptoKeyNextRotationCalculation(t *testing.T) {
 	t.Parallel()
 
 	now := time.Now().UTC()
-	period, _ := time.ParseDuration("7776000s")
+	period, _ := time.ParseDuration("1000000s")
 
 	expected := now.Add(period).Format(time.RFC3339Nano)
 
-	timestamp, err := kmsCryptoKeyNextRotation(now, "7776000s")
+	timestamp, err := kmsCryptoKeyNextRotation(now, "1000000s")
 
 	if err != nil {
 		t.Fatalf("unexpected failure parsing time %s and duration 1000s: %s", now, err.Error())
