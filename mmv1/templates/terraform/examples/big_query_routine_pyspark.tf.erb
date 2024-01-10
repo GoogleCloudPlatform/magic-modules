@@ -4,7 +4,7 @@ resource "google_bigquery_dataset" "test" {
 
 resource "google_bigquery_connection" "test" {
 	connection_id = "<%= ctx[:vars]['connection_id'] %>"
-  location      = "US"
+	location      = "US"
 	spark { }
 }
 
