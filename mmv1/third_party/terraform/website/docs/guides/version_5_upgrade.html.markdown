@@ -244,7 +244,9 @@ through Terraform, the system, and other clients, equivalent to
 
 ### TFC Drift Detection with Labels
 
- Due to the provider not being authoritative in +5.0.0, it has led to issues in detecting drift with labels through Terraform Cloud's UI. In order to detect drift, it's recommended to use Terraform's `check` block to compare the number of labels in both `effective_labels` and `terraform_labels`. A mismatch would only happen if drift is present, the following code would run this check on applicable resources.
+In <5.0.0, Drift Detection was possible for labels but would lead to some confusion for users due to GCP often adding labels to itself. This resulted in Drift Detection not being 100% correct of the time.
+
+In order to detect drift, it's recommended to use Terraform's `check` block to compare the number of labels in both `effective_labels` and `terraform_labels`. A mismatch would only happen if drift is present, the following code would run this check on applicable resources.
  ```
  check "google_storage_bucket" {
   assert {
@@ -253,6 +255,8 @@ through Terraform, the system, and other clients, equivalent to
   }
 }
  ```
+
+~> **Note:** This would reintroduce the original problem with Drift Detection where it's not 100% correct with labels. Users will need to determine if the change comes from GCP and update their Terraform configuration assuming it's a stable GCP created label.
 
 #### Resource annotations
 
