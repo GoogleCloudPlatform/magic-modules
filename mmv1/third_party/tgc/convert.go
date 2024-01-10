@@ -25,6 +25,7 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/caiasset"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/ancestrymanager"
 	resources "github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/converters/google/resources"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/converters/google/resources/cai"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/tfdata"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/tfplan"
 	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
@@ -172,13 +173,20 @@ func (c *Converter) addDelete(rc *tfjson.ResourceChange) error {
 		}
 
 		for _, converted := range convertedItems {
-
 			key := converted.Type + converted.Name
 			var existingConverterAsset *resources.Asset
 			if existing, exists := c.assets[key]; exists {
 				existingConverterAsset = &existing.converterAsset
 			} else if !c.offline {
-				asset, err := converter.FetchFullResource(rd, c.cfg)
+				var asset cai.Asset
+				var err error
+				err = transport_tpg.Retry(transport_tpg.RetryOptions{
+					RetryFunc: func() error {
+						asset, err = converter.FetchFullResource(rd, c.cfg)
+						return err
+					},
+					Timeout: 2 * time.Minute,
+				})
 				if errors.Cause(err) == resources.ErrEmptyIdentityField {
 					c.errorLogger.Debug(fmt.Sprintf("%s: Unable to fetch and merge remote %s asset due to unset or (known after apply) identity fields on the TF resource.", rc.Address, converted.Type))
 					existingConverterAsset = nil
@@ -190,14 +198,14 @@ func (c *Converter) addDelete(rc *tfjson.ResourceChange) error {
 				} else {
 					existingConverterAsset = &asset
 				}
-				if existingConverterAsset != nil {
-					converted = converter.MergeDelete(*existingConverterAsset, converted)
-					augmented, err := c.augmentAsset(rd, c.cfg, converted)
-					if err != nil {
-						return err
-					}
-					c.assets[key] = augmented
+			}
+			if existingConverterAsset != nil {
+				converted = converter.MergeDelete(*existingConverterAsset, converted)
+				augmented, err := c.augmentAsset(rd, c.cfg, converted)
+				if err != nil {
+					return err
 				}
+				c.assets[key] = augmented
 			}
 		}
 	}
@@ -232,7 +240,15 @@ func (c *Converter) addCreateOrUpdateOrNoop(rc *tfjson.ResourceChange) error {
 			if existing, exists := c.assets[key]; exists {
 				existingConverterAsset = &existing.converterAsset
 			} else if converter.FetchFullResource != nil && !c.offline {
-				asset, err := converter.FetchFullResource(rd, c.cfg)
+				var asset cai.Asset
+				var err error
+				err = transport_tpg.Retry(transport_tpg.RetryOptions{
+					RetryFunc: func() error {
+						asset, err = converter.FetchFullResource(rd, c.cfg)
+						return err
+					},
+					Timeout: 2 * time.Minute,
+				})
 				if errors.Cause(err) == resources.ErrEmptyIdentityField {
 					c.errorLogger.Debug(fmt.Sprintf("%s: Unable to fetch and merge remote %s asset due to unset or (known after apply) identity fields on the TF resource.", rc.Address, converted.Type))
 					existingConverterAsset = nil
