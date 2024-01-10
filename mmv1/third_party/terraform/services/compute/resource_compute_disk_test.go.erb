@@ -560,7 +560,6 @@ func TestAccComputeDisk_encryptionKMS(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccComputeDisk_pdHyperDiskEnableConfidentialCompute(t *testing.T) {
 	t.Skip()
 	t.Parallel()
@@ -596,7 +595,6 @@ func TestAccComputeDisk_pdHyperDiskEnableConfidentialCompute(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccComputeDisk_deleteDetach(t *testing.T) {
 	t.Parallel()
