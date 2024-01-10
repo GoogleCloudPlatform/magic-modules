@@ -65,7 +65,6 @@ properties:
     name: labels
     description: |
       Labels as key value pairs. Example: `{ "owner": "Bob", "department": "finance", "purpose": "testing" }`.
-    required: false
   - !ruby/object:Api::Type::Enum
     name: 'state'
     description: |
@@ -102,7 +101,6 @@ properties:
     description: |
       If enabled, make backups automatically according to the schedules.
       This will be applied to all volumes that have this policy attached and enforced on volume level.
-    required: false
     default_value: true
     send_empty_value: true
   - !ruby/object:Api::Type::Integer
