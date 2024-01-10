@@ -112,10 +112,6 @@ func (gh *Client) CreateWorkflowDispatchEvent(workflowFileName string, inputs ma
 		return fmt.Errorf("failed to create workflow dispatch event: %s", err)
 	}
 
-	if resp != 200 && resp != 204 {
-		return fmt.Errorf("server returned %d creating workflow dispatch event", resp)
-	}
-
 	fmt.Printf("Successfully created workflow dispatch event for %s with inputs %v\n", workflowFileName, inputs)
 
 	return nil
@@ -123,16 +119,12 @@ func (gh *Client) CreateWorkflowDispatchEvent(workflowFileName string, inputs ma
 
 func (gh *Client) MergePullRequest(owner, repo, prNumber string) error {
 	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/pulls/%s/merge", owner, repo, prNumber)
-	resp, err := utils.RequestCall(url, "PUT", gh.token, nil, map[string]any{
+	err := utils.RequestCall(url, "PUT", gh.token, nil, map[string]any{
 		"merge_method": "squash",
 	})
 
 	if err != nil {
 		return fmt.Errorf("failed to merge pull request: %s", err)
-	}
-
-	if resp != 200 && resp != 204 {
-		return fmt.Errorf("server returned %d merging pull request", resp)
 	}
 
 	fmt.Printf("Successfully merged pull request %s\n", prNumber)
