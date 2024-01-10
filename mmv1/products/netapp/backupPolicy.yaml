@@ -24,12 +24,10 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 base_url: projects/{{project}}/locations/{{location}}/backupPolicies
 self_link: projects/{{project}}/locations/{{location}}/backupPolicies/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/backupPolicies?backupPolicyId={{name}}
-create_verb: :POST
 update_url: projects/{{project}}/locations/{{location}}/backupPolicies/{{name}}
 update_verb: :PATCH
 update_mask: true
 delete_url: projects/{{project}}/locations/{{location}}/backupPolicies/{{name}}
-delete_verb: :DELETE
 autogen_async: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
@@ -99,7 +97,6 @@ properties:
     name: 'description'
     description: |
       An optional description of this resource.
-    required: false
   - !ruby/object:Api::Type::Boolean
     name: 'enabled'
     description: |
