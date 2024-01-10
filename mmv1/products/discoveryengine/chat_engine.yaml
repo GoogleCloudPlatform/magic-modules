@@ -1,0 +1,132 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'ChatEngine'
+description: |
+  Vertex chat and Conversation Enging Chat type
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides: 
+    'Vertex AI Conversation' : 'https://cloud.google.com/dialogflow/cx/docs/concept/generative'
+  api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1alpha/projects.locations.collections.engines'
+
+base_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}'
+self_link: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines?engineId={{engine_id}}'
+delete_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}'
+
+update_verb: :PATCH
+update_mask: true
+
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'
+autogen_async: true
+
+import_format:
+  [
+    'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}',
+  ]
+
+parameters:
+  - !ruby/object:Api::Type::String
+    name: 'engineId'
+    description: |
+      The ID to use for chat engine.
+    required: true
+    immutable: true
+    url_param_only: true
+  - !ruby/object:Api::Type::String
+    name: 'collection_id'
+    description: |
+      The collectionId.
+    required: true
+    immutable: true
+    url_param_only: true
+  - !ruby/object:Api::Type::String
+    name: 'location'
+    description: |
+      Location.
+    required: true
+    immutable: true
+    url_param_only: true
+properties:
+  - !ruby/object:Api::Type::String
+      name: 'industryVertical'
+      description: |
+        Industry Vertical
+      immutable: true
+  - !ruby/object:Api::Type::String
+      name: 'displayName'
+      description: |
+        displayName
+      required: true
+  - !ruby/object:Api::Type::Array
+      name: 'dataStoreIds'
+      description: |
+        Data Store IDs
+      required: true
+      immutable: true
+      item_type: Api::Type::String
+  - !ruby/object:Api::Type::String
+      name: 'solutionType'
+      description: |
+        A solution type
+      immutable: true
+  - !ruby/object:Api::Type::Time
+      name: 'createTime'
+      description: |
+        Timestamp the Engine was created at.
+      output: true
+  - !ruby/object:Api::Type::Time
+      name: 'updateTime'
+      description: |
+        Timestamp the Engine was last updated.
+      output: true
+  - !ruby/object:Api::Type::NestedObject
+      name: 'chatEngineConfig'
+      description: |
+        Configurations for a chat Engine.
+      required: true
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'dialogflowAgentToLink'
+          description: |
+            Dialogflow agent to link
+          required: true
+  - !ruby/object:Api::Type::NestedObject
+      name: 'commonConfig'
+      description: |
+        Configurations for a chat Engine.
+      required: true
+      immutable: true
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'companyName'
+          description: |
+            The name of the company, business or entity that is associated with the engine
+          required: true
