@@ -48,9 +48,7 @@ var (
 		"boot_disk.0.initialize_params.0.resource_manager_tags",
 		"boot_disk.0.initialize_params.0.provisioned_iops",
 		"boot_disk.0.initialize_params.0.provisioned_throughput",
-<% unless version == 'ga' -%>
 		"boot_disk.0.initialize_params.0.enable_confidential_compute",
-<% end -%>
 	}
 
 	schedulingKeys = []string{
@@ -267,7 +265,6 @@ func ResourceComputeInstance() *schema.Resource {
 										Description:  `Indicates how much throughput to provision for the disk. This sets the number of throughput mb per second that the disk can handle. Values must be between 1 and 7,124.`,
 									},
 
-<% unless version == 'ga' -%>
 									"enable_confidential_compute": {
 										Type:         schema.TypeBool,
 										Optional:     true,
@@ -275,7 +272,6 @@ func ResourceComputeInstance() *schema.Resource {
 										ForceNew:     true,
 										Description:  `A flag to enable confidential compute mode on boot disk`,
 									},
-<% end -%>
 								},
 							},
 						},
@@ -2832,11 +2828,9 @@ func expandBootDisk(d *schema.ResourceData, config *transport_tpg.Config, projec
 			disk.InitializeParams.ProvisionedThroughput = int64(v.(int))
 		}
 
-		<% unless version == 'ga' -%>
 		if v, ok := d.GetOk("boot_disk.0.initialize_params.0.enable_confidential_compute"); ok {
 			disk.InitializeParams.EnableConfidentialCompute = v.(bool)
 		}
-		<% end -%>
 
 		if v, ok := d.GetOk("boot_disk.0.initialize_params.0.type"); ok {
 			diskTypeName := v.(string)
@@ -2905,9 +2899,7 @@ func flattenBootDisk(d *schema.ResourceData, disk *compute.AttachedDisk, config 
 			"resource_manager_tags": d.Get("boot_disk.0.initialize_params.0.resource_manager_tags"),
 			"provisioned_iops": diskDetails.ProvisionedIops,
 			"provisioned_throughput": diskDetails.ProvisionedThroughput,
-<% unless version == 'ga' -%>
 			"enable_confidential_compute": diskDetails.EnableConfidentialCompute,
-<% end -%>
 		}}
 	}
 
