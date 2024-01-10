@@ -101,9 +101,9 @@ func IsTeamReviewer(reviewer string) bool {
 
 func isOrgMember(author, org, githubToken string) bool {
 	url := fmt.Sprintf("https://api.github.com/orgs/%s/members/%s", org, author)
-	res, _ := utils.RequestCall(url, "GET", githubToken, nil, nil)
+	err := utils.RequestCall(url, "GET", githubToken, nil, nil)
 
-	return res != 404
+	return err.Error() != "got code 404 from server"
 }
 
 func GetRandomReviewer() string {

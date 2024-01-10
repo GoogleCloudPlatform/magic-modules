@@ -25,15 +25,15 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-func RequestCall(url, method, credentials string, result any, body any) (int, error) {
+func RequestCall(url, method, credentials string, result any, body any) error {
 	client := &http.Client{}
 	jsonBody, err := json.Marshal(body)
 	if err != nil {
-		return 1, fmt.Errorf("error marshaling JSON: %s", err)
+		return fmt.Errorf("error marshaling JSON: %s", err)
 	}
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(jsonBody))
 	if err != nil {
-		return 2, fmt.Errorf("error creating request: %s", err)
+		return fmt.Errorf("error creating request: %s", err)
 	}
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", credentials))
 	req.Header.Set("Content-Type", "application/json")
@@ -44,13 +44,13 @@ func RequestCall(url, method, credentials string, result any, body any) (int, er
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return 3, err
+		return err
 	}
 	defer resp.Body.Close()
 
 	respBodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return 5, err
+		return err
 	}
 
 	fmt.Println("response status-code: ", resp.StatusCode)
@@ -60,11 +60,15 @@ func RequestCall(url, method, credentials string, result any, body any) (int, er
 	// Decode the response, if needed
 	if result != nil {
 		if err = json.Unmarshal(respBodyBytes, &result); err != nil {
-			return 4, err
+			return err
 		}
 	}
 
-	return resp.StatusCode, nil
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return fmt.Errorf("got code %d from server", resp.StatusCode)
+	}
+
+	return nil
 }
 
 func Removes(s1 []string, s2 []string) []string {
