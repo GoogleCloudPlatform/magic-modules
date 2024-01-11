@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestAccDiscoveryEngineDataStore_discoveryengineDatastoreStructuredBasicExample_update(t *testing.T) {
+func TestAccDiscoveryEngineDataStore_discoveryengineDatastoreBasicExample_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -19,19 +19,19 @@ func TestAccDiscoveryEngineDataStore_discoveryengineDatastoreStructuredBasicExam
 		CheckDestroy:             testAccCheckDiscoveryEngineDataStoreDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDiscoveryEngineDataStore_discoveryengineDatastoreStructuredBasicExample_basic(context),
+				Config: testAccDiscoveryEngineDataStore_discoveryengineDatastoreBasicExample_basic(context),
 			},
 			{
-				ResourceName:            "google_discovery_engine_data_store.structured_basic",
+				ResourceName:            "google_discovery_engine_data_store.basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location", "data_store_id", "create_advanced_site_search"},
 			},
 			{
-				Config: testAccDiscoveryEngineDataStore_discoveryengineDatastoreStructuredBasicExample_update(context),
+				Config: testAccDiscoveryEngineDataStore_discoveryengineDatastoreBasicExample_update(context),
 			},
 			{
-				ResourceName:            "google_discovery_engine_data_store.structured_basic",
+				ResourceName:            "google_discovery_engine_data_store.basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location", "data_store_id", "create_advanced_site_search"},
@@ -40,9 +40,9 @@ func TestAccDiscoveryEngineDataStore_discoveryengineDatastoreStructuredBasicExam
 	})
 }
 
-func testAccDiscoveryEngineDataStore_discoveryengineDatastoreStructuredBasicExample_basic(context map[string]interface{}) string {
+func testAccDiscoveryEngineDataStore_discoveryengineDatastoreBasicExample_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_discovery_engine_data_store" "structured_basic" {
+resource "google_discovery_engine_data_store" "basic" {
   location                    = "global"
   data_store_id               = "tf-test-data-store-id%{random_suffix}"
   display_name                = "tf-test-structured-datastore"
@@ -54,9 +54,9 @@ resource "google_discovery_engine_data_store" "structured_basic" {
 `, context)
 }
 
-func testAccDiscoveryEngineDataStore_discoveryengineDatastoreStructuredBasicExample_update(context map[string]interface{}) string {
+func testAccDiscoveryEngineDataStore_discoveryengineDatastoreBasicExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_discovery_engine_data_store" "structured_basic" {
+resource "google_discovery_engine_data_store" "basic" {
   location                    = "global"
   data_store_id               = "updated-tf-test-data-store-id%{random_suffix}"
   display_name                = "tf-test-structured-datastore"

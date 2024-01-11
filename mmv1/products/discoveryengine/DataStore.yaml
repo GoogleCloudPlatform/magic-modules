@@ -57,8 +57,8 @@ async: !ruby/object:Api::OpAsync
 
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "discoveryengine_datastore_structured_basic"
-    primary_resource_id: 'structured_basic'
+    name: "discoveryengine_datastore_basic"
+    primary_resource_id: 'basic'
     primary_resource_name:
       'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
     vars:
