@@ -216,7 +216,7 @@ func resourceLoggingProjectBucketConfigCreate(d *schema.ResourceData, meta inter
 	obj["cmekSettings"] = expandCmekSettings(d.Get("cmek_settings"))
 	obj["indexConfigs"] = expandIndexConfigs(d.Get("index_configs"))
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{LoggingBasePath}}projects/{{project}}/locations/{{location}}/buckets:createAsync?bucketId={{bucket_id}}")
+	url, err := tpgresource.ReplaceVars(d, config, "{{LoggingBasePath}}projects/{{project}}/locations/{{location}}/buckets:updateAsync?bucketId={{bucket_id}}")
 	if err != nil {
 		return err
 	}
