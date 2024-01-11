@@ -47,9 +47,7 @@ var (
 	}
 
 	// This is for reviewers who are "on vacation": will not receive new review assignments but will still receive re-requests for assigned PRs.
-	onVacationReviewers = []string{
-		
-	}
+	onVacationReviewers = []string{}
 )
 
 type UserType int64
@@ -103,7 +101,10 @@ func isOrgMember(author, org, githubToken string) bool {
 	url := fmt.Sprintf("https://api.github.com/orgs/%s/members/%s", org, author)
 	err := utils.RequestCall(url, "GET", githubToken, nil, nil)
 
-	return err.Error() != "got code 404 from server"
+	if err != nil {
+		return err.Error() != "got code 404 from server"
+	}
+	return true
 }
 
 func GetRandomReviewer() string {
