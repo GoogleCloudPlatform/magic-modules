@@ -562,8 +562,6 @@ func TestAccComposerEnvironment_ComposerV2HighResilience(t *testing.T) {
 }
 
 func TestAccComposerEnvironment_UpdateComposerV2WithTriggerer(t *testing.T) {
-	// TODO: This test was seemingly working, but then started to re-run on every gcbrun https://github.com/hashicorp/terraform-provider-google/issues/14160
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t))
@@ -2864,6 +2862,16 @@ resource "google_composer_environment" "test" {
     software_config {
       image_version = "composer-3-airflow-2"
     }
+    node_config {
+      composer_internal_ipv4_cidr_block = "100.64.128.0/20"
+    }
+    workloads_config {
+      dag_processor {
+        cpu          = 1
+        memory_gb    = 2.5
+        storage_gb   = 2
+      }
+    }
     enable_private_environment = true
     enable_private_builds_only = true
   }
@@ -2895,7 +2903,15 @@ resource "google_composer_environment" "test" {
       composer_internal_ipv4_cidr_block = "100.64.128.0/20"
     }
     software_config {
+      web_server_plugins_mode = "DISABLED"
       image_version = "composer-3-airflow-2"
+    }
+    workloads_config {
+      dag_processor {
+        cpu          = 2
+        memory_gb    = 2
+        storage_gb   = 1
+      }
     }
     enable_private_environment = false
     enable_private_builds_only = false

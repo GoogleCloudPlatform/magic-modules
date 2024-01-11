@@ -194,13 +194,12 @@ steps:
         - PR_NUMBER=$_PR_NUMBER
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
-      id: tgc-test-integration-0.12.31
+      id: tgc-test-integration
       entrypoint: '/workspace/.ci/scripts/go-plus/tgc-tester-integration/test_tgc_integration.sh'
       allowFailure: true
       secretEnv: ["GITHUB_TOKEN"]
       waitFor: ["tpgb-head", "tpgb-base", "tgc-head", "tgc-base"]
       env:
-        - TERRAFORM_VERSION=0.12.31
         - TEST_PROJECT=$_VALIDATOR_TEST_PROJECT
         - TEST_FOLDER_ID=$_VALIDATOR_TEST_FOLDER
         - TEST_ANCESTRY=$_VALIDATOR_TEST_ANCESTRY
@@ -211,26 +210,6 @@ steps:
           - $BUILD_ID
           - $PROJECT_ID
           - "18"  # Build step
-          - terraform-google-conversion
-
-    - name: 'gcr.io/graphite-docker-images/go-plus'
-      id: tgc-test-integration-0.13.7
-      entrypoint: '/workspace/.ci/scripts/go-plus/tgc-tester-integration/test_tgc_integration.sh'
-      allowFailure: true
-      secretEnv: ["GITHUB_TOKEN"]
-      waitFor: ["tpgb-head", "tpgb-base", "tgc-head", "tgc-base"]
-      env:
-        - TERRAFORM_VERSION=0.13.7
-        - TEST_PROJECT=$_VALIDATOR_TEST_PROJECT
-        - TEST_FOLDER_ID=$_VALIDATOR_TEST_FOLDER
-        - TEST_ANCESTRY=$_VALIDATOR_TEST_ANCESTRY
-        - TEST_ORG_ID=$_VALIDATOR_TEST_ORG
-      args:
-          - $_PR_NUMBER
-          - $COMMIT_SHA
-          - $BUILD_ID
-          - $PROJECT_ID
-          - "19"  # Build step
           - terraform-google-conversion
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
@@ -272,6 +251,14 @@ steps:
           - $BUILD_ID
           - $PROJECT_ID
           - "22"  # Build step
+
+    - name: 'gcr.io/graphite-docker-images/go-plus'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
+      secretEnv: ["GITHUB_TOKEN"]
+      waitFor: ["diff"]
+      args:
+          - 'request-service-reviewers'
+          - $_PR_NUMBER
 
 # Long timeout to enable waiting on VCR test
 timeout: 20000s

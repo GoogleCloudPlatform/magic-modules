@@ -30,29 +30,8 @@ else
     echo "Running tests: Go files changed"
 fi
 
-
-TERRAFORM_BINARY=/terraform/$TERRAFORM_VERSION
-if test -f "$TERRAFORM_BINARY"; then
-    echo "terraform binary $TERRAFORM_BINARY exists on container"
-    echo setting terraform to version $TERRAFORM_VERSION
-    set x-
-    mv /terraform/$TERRAFORM_VERSION /bin/terraform
-    set x+
-    terraform version
-else
-    echo "terraform binary $TERRAFORM_BINARY does not exist."
-    echo "exiting ..."
-	  state="failure"
-    post_body=$( jq -n \
-      --arg context "${gh_repo}-test-integration-${TERRAFORM_VERSION}" \
-      --arg target_url "https://console.cloud.google.com/cloud-build/builds;region=global/${build_id};step=${build_step}?project=${project_id}" \
-      --arg state "$state" \
-      '{context: $context, target_url: $target_url, state: $state}')
-    exit 0
-fi
-
 post_body=$( jq -n \
-	--arg context "${gh_repo}-test-integration-${TERRAFORM_VERSION}" \
+	--arg context "${gh_repo}-test-integration" \
 	--arg target_url "https://console.cloud.google.com/cloud-build/builds;region=global/${build_id};step=${build_step}?project=${project_id}" \
 	--arg state "pending" \
 	'{context: $context, target_url: $target_url, state: $state}')
@@ -82,7 +61,7 @@ else
 fi
 
 post_body=$( jq -n \
-	--arg context "${gh_repo}-test-integration-${TERRAFORM_VERSION}" \
+	--arg context "${gh_repo}-test-integration" \
 	--arg target_url "https://console.cloud.google.com/cloud-build/builds;region=global/${build_id};step=${build_step}?project=${project_id}" \
 	--arg state "${state}" \
 	'{context: $context, target_url: $target_url, state: $state}')
