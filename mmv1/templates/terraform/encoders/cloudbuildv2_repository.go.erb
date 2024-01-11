@@ -12,25 +12,26 @@
         # See the License for the specific language governing permissions and
         # limitations under the License.
 -%>
-// Extract any empty fields from the bucket field.
-parent := d.Get("parent").(string)
-bucket := d.Get("bucket").(string)
-parent, err := tpgresource.ExtractFieldByPattern("parent", parent, bucket, "((projects|folders|organizations|billingAccounts)/[a-z0-9A-Z-]*)/locations/.*")
+config := meta.(*transport_tpg.Config)
+// Extract any empty fields from the parent_connection field.
+project, err := tpgresource.GetProject(d, config)
 if err != nil {
-	return nil, fmt.Errorf("error extracting parent field: %s", err)
+	return nil, fmt.Errorf("error getting project: %s", err)
+}
+parent_connection := d.Get("parent_connection").(string)
+project, err = tpgresource.ExtractFieldByPattern("project", project, parent_connection, "projects/([a-z0-9A-Z-]*)/locations/.*")
+if err != nil {
+	return nil, fmt.Errorf("error extracting project field: %s", err)
 }
 location := d.Get("location").(string)
-location, err = tpgresource.ExtractFieldByPattern("location", location, bucket, "[a-zA-Z]*/[a-z0-9A-Z-]*/locations/([a-z0-9-]*)/buckets/.*")
+location, err = tpgresource.ExtractFieldByPattern("location", location, parent_connection, "projects/[a-z0-9A-Z-]*/locations/([a-z0-9-]*)/connections/.*")
 if err != nil {
 	return nil, fmt.Errorf("error extracting location field: %s", err)
 }
-// Set parent to the extracted value.
-d.Set("parent", parent)
+// Set project to the extracted value.
+d.Set("project", project)
 // Set all the other fields to their short forms before forming url and setting ID.
-bucket = tpgresource.GetResourceNameFromSelfLink(bucket)
 name := d.Get("name").(string)
-name = tpgresource.GetResourceNameFromSelfLink(name)
 d.Set("location", location)
-d.Set("bucket", bucket)
 d.Set("name", name)
 return obj, nil
