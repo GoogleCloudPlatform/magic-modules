@@ -144,6 +144,7 @@ properties:
         - :SOLUTION_TYPE_RECOMMENDATION
         - :SOLUTION_TYPE_SEARCH
         - :SOLUTION_TYPE_CHAT
+    immutable: true
   - !ruby/object:Api::Type::String
     name: 'defaultSchemaId'
     description: |
