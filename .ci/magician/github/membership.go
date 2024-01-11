@@ -102,7 +102,7 @@ func isOrgMember(author, org, githubToken string) bool {
 	err := utils.RequestCall(url, "GET", githubToken, nil, nil)
 
 	if err != nil {
-		return err.Error() != "got code 404 from server"
+		return false
 	}
 	return true
 }
