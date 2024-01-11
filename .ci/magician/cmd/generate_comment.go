@@ -456,7 +456,10 @@ func testTools(mmLocalPath, tpgbLocalPath string, env map[string]string, gh Gith
 	}
 	servicesDir := filepath.Join(tpgbLocalPath, "google-beta", "services")
 	state := "success"
-	if _, err := rnr.Run("go", []string{"test"}, map[string]string{"SERVICES_DIR": servicesDir}); err != nil {
+	if _, err := rnr.Run("go", []string{"test"}, map[string]string{
+		"GOPATH":       env["GOPATH"],
+		"SERVICES_DIR": servicesDir,
+	}); err != nil {
 		fmt.Printf("error from running go test in %s: %v\n", missingTestDetectorPath, err)
 		state = "failure"
 	}
