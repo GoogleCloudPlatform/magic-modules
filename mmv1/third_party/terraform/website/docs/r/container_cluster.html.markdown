@@ -793,6 +793,9 @@ The `master_authorized_networks_config.cidr_blocks` block supports:
 * `enable_confidential_storage` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
 Enabling Confidential Storage will create boot disk with confidential mode. It is disabled by default.
 
+* `enable_confidential_storage_override_for_default_node_pool` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+If set, it creates boot disk with confidential mode for the default node pool only if cluster creation doesn't specify node_config or node_pool configurations.
+
 * `ephemeral_storage_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Parameters for the ephemeral storage filesystem. If unspecified, ephemeral storage is backed by the boot disk. Structure is [documented below](#nested_ephemeral_storage_config).
 
 ```hcl
@@ -896,6 +899,8 @@ gvnic {
     Structure is [documented below](#nested_sandbox_config).
 
 * `boot_disk_kms_key` - (Optional) The Customer Managed Encryption Key used to encrypt the boot disk attached to each node in the node pool. This should be of the form projects/[KEY_PROJECT_ID]/locations/[LOCATION]/keyRings/[RING_NAME]/cryptoKeys/[KEY_NAME]. For more information about protecting resources with Cloud KMS Keys please see: https://cloud.google.com/compute/docs/disks/customer-managed-encryption
+
+* `boot_disk_kms_key_override_for_default_node_pool` -  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) If provided, it adds the encryption key for the default node pool only if node_pool/node_config is not configured in cluster definition.
 
 * `service_account` - (Optional) The service account to be used by the Node VMs.
     If not specified, the "default" service account is used.

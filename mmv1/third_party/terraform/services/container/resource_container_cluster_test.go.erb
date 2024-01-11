@@ -9378,6 +9378,46 @@ resource "google_container_cluster" "without_confidential_boot_disk" {
 }
 `, clusterName, npName, networkName, subnetworkName)
 }
+
+func TestAccContainerCluster_withConfidentialBootDiskOverride(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	kms := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withConfidentialBootDiskOverride(clusterName, kms.CryptoKey.Name),
+			},
+			{
+				ResourceName:            "google_container_cluster.with_confidential_boot_disk_override",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "enable_confidential_storage_override_for_default_node_pool", "boot_disk_kms_key_override_for_default_node_pool"},
+			},
+		},
+	})
+}
+
+func testAccContainerCluster_withConfidentialBootDiskOverride(name string, kmskeyname string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_confidential_boot_disk_override" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  release_channel {
+   channel = "RAPID"
+   }
+  enable_confidential_storage_override_for_default_node_pool = true
+  boot_disk_kms_key_override_for_default_node_pool = "%s"
+  deletion_protection = false
+}
+`, name, kmskeyname)
+}
 <% end -%>
 
 <% unless version == 'ga' -%>

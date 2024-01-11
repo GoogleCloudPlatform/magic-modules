@@ -1620,6 +1620,20 @@ func ResourceContainerCluster() *schema.Resource {
 				Description: `If true, deletes the default node pool upon cluster creation. If you're using google_container_node_pool resources with no default node pool, this should be set to true, alongside setting initial_node_count to at least 1.`,
 				ConflictsWith: []string{"enable_autopilot"},
 			},
+			
+<% unless version == "ga" -%>
+			"enable_confidential_storage_override_for_default_node_pool": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: `If true, sets the "enable_confidential_storage" flag for default node pool only if node pool/ node config is not define during cluster creation`,
+			},
+
+			"boot_disk_kms_key_override_for_default_node_pool": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: `If provided, the key is used for default node pool boot disk encryption only if node pool/ node config is not define during cluster creation`,
+			},
+<% end -%>
 
 			"private_cluster_config": {
 				Type:             schema.TypeList,
@@ -2324,11 +2338,22 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		// Node Configs have default values that are set in the expand function,
 		// but can only be set if node pools are unspecified.
 		cluster.NodeConfig = expandNodeConfig([]interface{}{})
+		<% unless version == 'ga' -%>
+		if v, ok := d.GetOk("enable_confidential_storage_override_for_default_node_pool"); ok {
+			cluster.NodeConfig.EnableConfidentialStorage = v.(bool)
+			// Add default compatible disk and machine types for confidential storage
+			cluster.NodeConfig.DiskType = "hyperdisk-balanced"
+			cluster.NodeConfig.MachineType = "n2-standard-2"
+		}
+		if v, ok := d.GetOk("boot_disk_kms_key_override_for_default_node_pool"); ok {
+			cluster.NodeConfig.BootDiskKmsKey = v.(string)
+		}
+		<% end -%>
 	}
 
-        if v, ok := d.GetOk("node_pool_defaults"); ok {
-                cluster.NodePoolDefaults = expandNodePoolDefaults(v)
-        }
+	if v, ok := d.GetOk("node_pool_defaults"); ok {
+		cluster.NodePoolDefaults = expandNodePoolDefaults(v)
+	}
 
 	if v, ok := d.GetOk("node_config"); ok {
 		cluster.NodeConfig = expandNodeConfig(v)
