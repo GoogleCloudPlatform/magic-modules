@@ -14,8 +14,9 @@
 --- !ruby/object:Api::Resource
 name: 'DataStore'
 description: |
-  Vertex AI Search and Conversation data store is a collection of websites and
-  documents used to find answers for end-user's questions.
+  Data store is a collection of websites and documents used to find answers for
+  end-user's questions in Discovery Engine (a.k.a. Vertex AI Search and
+  Conversation).
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Create a search data store': 'https://cloud.google.com/generative-ai-app-builder/docs/create-data-store-es'
@@ -112,7 +113,6 @@ properties:
       `projects/{project}/locations/{location}/collections/{collection_id}/dataStores/{data_store_id}`.
       This field must be a UTF-8 encoded string with a length limit of 1024
       characters.
-    immutable: true
     output: true
   - !ruby/object:Api::Type::String
     name: 'displayName'
@@ -141,7 +141,6 @@ properties:
       description: |
         The type of solution.
       values:
-        - :SOLUTION_TYPE_UNSPECIFIED
         - :SOLUTION_TYPE_RECOMMENDATION
         - :SOLUTION_TYPE_SEARCH
         - :SOLUTION_TYPE_CHAT
@@ -156,7 +155,6 @@ properties:
       The content config of the data store. If this field is unset, the server
       behavior defaults to [ContentConfig.NO_CONTENT][]
     values:
-      - :CONTENT_CONFIG_UNSPECIFIED
       - :NO_CONTENT
       - :CONTENT_REQUIRED
       - :PUBLIC_WEBSITE
