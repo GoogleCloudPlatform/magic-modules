@@ -25,6 +25,8 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 base_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores'
 self_link: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}'
 create_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores?dataStoreId={{data_store_id}}&createAdvancedSiteSearch={{create_advanced_site_search}}'
+update_verb: :PATCH
+update_mask: true
 import_format:
   [
     'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}',
