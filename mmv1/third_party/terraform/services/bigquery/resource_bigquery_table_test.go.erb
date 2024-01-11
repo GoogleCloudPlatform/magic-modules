@@ -3872,7 +3872,6 @@ resource "google_bigquery_table" "replica_mv" {
 resource "google_bigquery_job" "drop_source_mv_job" {
   provider = google-beta
 
-  project = "bigquerytestdefault"
   job_id = "%s"
 
   location = "aws-us-east-1"
