@@ -110,6 +110,7 @@ properties:
       - :GENERIC
       - :MEDIA
     immutable: true
+    required: true
   - !ruby/object:Api::Type::Array
     name: 'solutionTypes'
     description: |
@@ -142,6 +143,7 @@ properties:
       - :CONTENT_REQUIRED
       - :PUBLIC_WEBSITE
     immutable: true
+    required: true
   - !ruby/object:Api::Type::Time
     name: "createTime"
     description: |
