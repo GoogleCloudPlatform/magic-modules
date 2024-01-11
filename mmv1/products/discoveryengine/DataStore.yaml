@@ -27,6 +27,7 @@ self_link: 'projects/{{project}}/locations/{{location}}/collections/default_coll
 create_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores?dataStoreId={{data_store_id}}&createAdvancedSiteSearch={{create_advanced_site_search}}'
 update_verb: :PATCH
 update_mask: true
+delete_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}'
 import_format:
   [
     'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}',
