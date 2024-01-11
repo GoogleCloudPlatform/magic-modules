@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: Discoveryengine
+name: DiscoveryEngine
 display_name: Discovery Engine
 versions:
   - !ruby/object:Api::Product::Version
