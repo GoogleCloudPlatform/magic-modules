@@ -1291,6 +1291,7 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 				patchObj.Config.PrivateEnvironmentConfig.EnablePrivateBuildsOnly = config.PrivateEnvironmentConfig.EnablePrivateBuildsOnly
 			}
 			err = resourceComposerEnvironmentPatchField("config.PrivateEnvironmentConfig.EnablePrivateBuildsOnly", userAgent, patchObj, d, tfConfig)
+		}
 
 		if d.HasChange("config.0.software_config.0.web_server_plugins_mode") {
 			patchObj := &composer.Environment{
@@ -2818,8 +2819,6 @@ func versionsEqual(old, new string) (bool, error) {
 }
 
 func isComposer3(d *schema.ResourceData, config *transport_tpg.Config)	bool {
-	log.Printf("[DEBUG] image version is %s", d.Get("config.0.software_config.0.image_version"))
-
 	image_version := d.Get("config.0.software_config.0.image_version").(string)
 	return strings.Contains(image_version, "composer-3")
 }
