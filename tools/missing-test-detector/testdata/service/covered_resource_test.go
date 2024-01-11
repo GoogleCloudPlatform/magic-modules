@@ -27,9 +27,9 @@ resource "covered_resource" "resource" {
   field_one = "value-one"
   field_four {
     field_five {
-      field_six = "value-three"
+      field_six = %v
     }
-  }`)) + acctest.Nprintf(`
+  }`), 0) + acctest.Nprintf(`
   field_seven = %{bool}
 }
 `, context)
