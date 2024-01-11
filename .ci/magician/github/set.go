@@ -18,6 +18,7 @@ package github
 import (
 	"fmt"
 	utils "magician/utility"
+	"net/http"
 )
 
 func (gh *Client) PostBuildStatus(prNumber, title, state, targetURL, commitSha string) error {
@@ -29,7 +30,7 @@ func (gh *Client) PostBuildStatus(prNumber, title, state, targetURL, commitSha s
 		"target_url": targetURL,
 	}
 
-	err := utils.RequestCall(url, "POST", gh.token, nil, postBody)
+	_, err := utils.RequestCall(url, "POST", gh.token, nil, postBody)
 	if err != nil {
 		return err
 	}
@@ -46,9 +47,13 @@ func (gh *Client) PostComment(prNumber, comment string) error {
 		"body": comment,
 	}
 
-	err := utils.RequestCall(url, "POST", gh.token, nil, body)
+	reqStatusCode, err := utils.RequestCall(url, "POST", gh.token, nil, body)
 	if err != nil {
 		return err
+	}
+
+	if reqStatusCode != http.StatusCreated {
+		return fmt.Errorf("error posting comment for PR %s", prNumber)
 	}
 
 	fmt.Printf("Successfully posted comment to pull request %s\n", prNumber)
@@ -64,9 +69,13 @@ func (gh *Client) RequestPullRequestReviewer(prNumber, assignee string) error {
 		"team_reviewers": {},
 	}
 
-	err := utils.RequestCall(url, "POST", gh.token, nil, body)
+	reqStatusCode, err := utils.RequestCall(url, "POST", gh.token, nil, body)
 	if err != nil {
 		return err
+	}
+
+	if reqStatusCode != http.StatusCreated {
+		return fmt.Errorf("error adding reviewer for PR %s", prNumber)
 	}
 
 	fmt.Printf("Successfully added reviewer %s to pull request %s\n", assignee, prNumber)
@@ -80,7 +89,7 @@ func (gh *Client) AddLabel(prNumber, label string) error {
 	body := map[string][]string{
 		"labels": {label},
 	}
-	err := utils.RequestCall(url, "POST", gh.token, nil, body)
+	_, err := utils.RequestCall(url, "POST", gh.token, nil, body)
 
 	if err != nil {
 		return fmt.Errorf("failed to add %s label: %s", label, err)
@@ -92,7 +101,7 @@ func (gh *Client) AddLabel(prNumber, label string) error {
 
 func (gh *Client) RemoveLabel(prNumber, label string) error {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/%s/labels/%s", prNumber, label)
-	err := utils.RequestCall(url, "DELETE", gh.token, nil, nil)
+	_, err := utils.RequestCall(url, "DELETE", gh.token, nil, nil)
 
 	if err != nil {
 		return fmt.Errorf("failed to remove %s label: %s", label, err)
@@ -103,10 +112,14 @@ func (gh *Client) RemoveLabel(prNumber, label string) error {
 
 func (gh *Client) CreateWorkflowDispatchEvent(workflowFileName string, inputs map[string]any) error {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/actions/workflows/%s/dispatches", workflowFileName)
-	err := utils.RequestCall(url, "POST", gh.token, nil, map[string]any{
+	resp, err := utils.RequestCall(url, "POST", gh.token, nil, map[string]any{
 		"ref":    "main",
 		"inputs": inputs,
 	})
+
+	if resp != 200 && resp != 204 {
+		return fmt.Errorf("server returned %d creating workflow dispatch event", resp)
+	}
 
 	if err != nil {
 		return fmt.Errorf("failed to create workflow dispatch event: %s", err)
