@@ -216,7 +216,7 @@ func resourceLoggingProjectBucketConfigCreate(d *schema.ResourceData, meta inter
 	obj["cmekSettings"] = expandCmekSettings(d.Get("cmek_settings"))
 	obj["indexConfigs"] = expandIndexConfigs(d.Get("index_configs"))
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{LoggingBasePath}}projects/{{project}}/locations/{{location}}/buckets?bucketId={{bucket_id}}")
+	url, err := tpgresource.ReplaceVars(d, config, "{{LoggingBasePath}}projects/{{project}}/locations/{{location}}/buckets:createAsync?bucketId={{bucket_id}}")
 	if err != nil {
 		return err
 	}
@@ -249,6 +249,13 @@ func resourceLoggingProjectBucketConfigCreate(d *schema.ResourceData, meta inter
 	}
 
 	d.SetId(id)
+	var opRes map[string]interface{}
+	// Wait for the operation to complete
+	waitErr := LoggingOperationWaitTimeWithResponse(config, res, &opRes, "Bucket to create", userAgent, d.Timeout(schema.TimeoutCreate))
+	if waitErr != nil {
+		d.SetId("")
+		return waitErr
+	}
 
 	log.Printf("[DEBUG] Finished creating Bucket %q: %#v", d.Id(), res)
 
