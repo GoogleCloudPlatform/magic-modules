@@ -37,6 +37,5 @@ resource "google_bigquery_routine" "<%= ctx[:primary_resource_id] %>" {
   spark_options {
     connection          = google_bigquery_connection.test.name
     runtime_version     = "2.1"
-    py_file_uris        = ["gs://test-bucket/test.py"]
   }
 }

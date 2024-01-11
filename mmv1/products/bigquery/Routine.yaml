@@ -60,6 +60,13 @@ examples:
       connection_id: 'connection_id'
       routine_id: 'routine_id'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'big_query_routine_pyspark_mainfile'
+    primary_resource_id: 'pyspark_mainfile'
+    vars:
+      dataset_id: 'dataset_id'
+      connection_id: 'connection_id'
+      routine_id: 'routine_id'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'big_query_routine_spark_jar'
     primary_resource_id: 'spark_jar'
     vars:
