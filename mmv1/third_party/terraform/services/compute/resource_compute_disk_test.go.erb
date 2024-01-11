@@ -560,14 +560,16 @@ func TestAccComputeDisk_encryptionKMS(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccComputeDisk_pdHyperDiskEnableConfidentialCompute(t *testing.T) {
-	t.Skip()
 	t.Parallel()
 
 	context := map[string]interface{}{
 		"random_suffix":        acctest.RandString(t, 10),
-		"kms":                  acctest.BootstrapKMSKey(t).CryptoKey.Name, // global KMS key
+		"kms":                  acctest.BootstrapKMSKeyWithPurposeInLocationAndName(
+			t,
+			"ENCRYPT_DECRYPT",
+			"us-central1",
+			"tf-bootstrap-hyperdisk-key1").CryptoKey.Name, // regional KMS key
 		"disk_size":            64,
 		"confidential_compute": true,
 	}
@@ -596,7 +598,6 @@ func TestAccComputeDisk_pdHyperDiskEnableConfidentialCompute(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccComputeDisk_deleteDetach(t *testing.T) {
 	t.Parallel()
