@@ -498,19 +498,18 @@ func TestAccComputeAddress_withAttributionRemoved(t *testing.T) {
 				),
 			},
 			{
-				// Skipping attribution on resources that already have attribution leaves the previous attribution intact.
+				// Skipping attribution on resources that already have attribution removes the previous attribution.
 				Config: testAccComputeAddress_networkTier_withSkipAttribution(suffix, "CREATION_ONLY"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_compute_address.foobar", "labels.%", "2"),
-					resource.TestCheckResourceAttr("google_compute_address.foobar", "labels.env", "bar"),
-					resource.TestCheckResourceAttr("google_compute_address.foobar", "labels.default_expiration_ms", "7200000"),
+					resource.TestCheckResourceAttr("google_compute_address.foobar", "labels.env", "foo"),
+					resource.TestCheckResourceAttr("google_compute_address.foobar", "labels.default_expiration_ms", "3600000"),
 
-					resource.TestCheckResourceAttr("google_compute_address.foobar", "terraform_labels.%", "3"),
-					resource.TestCheckResourceAttr("google_compute_address.foobar", "terraform_labels.goog-terraform-provisioned", "true"),
-					resource.TestCheckResourceAttr("google_compute_address.foobar", "terraform_labels.env", "bar"),
-					resource.TestCheckResourceAttr("google_compute_address.foobar", "terraform_labels.default_expiration_ms", "7200000"),
+					resource.TestCheckResourceAttr("google_compute_address.foobar", "terraform_labels.%", "2"),
+					resource.TestCheckResourceAttr("google_compute_address.foobar", "terraform_labels.env", "foo"),
+					resource.TestCheckResourceAttr("google_compute_address.foobar", "terraform_labels.default_expiration_ms", "3600000"),
 
-					resource.TestCheckResourceAttr("google_compute_address.foobar", "effective_labels.%", "3"),
+					resource.TestCheckResourceAttr("google_compute_address.foobar", "effective_labels.%", "2"),
 				),
 			},
 		},
