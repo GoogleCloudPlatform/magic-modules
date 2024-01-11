@@ -38,7 +38,7 @@ func (gh *Client) GetPullRequest(prNumber string) (PullRequest, error) {
 
 	var pullRequest PullRequest
 
-	_, err := utils.RequestCall(url, "GET", gh.token, &pullRequest, nil)
+	err := utils.RequestCall(url, "GET", gh.token, &pullRequest, nil)
 	if err != nil {
 		return pullRequest, err
 	}
@@ -53,7 +53,7 @@ func (gh *Client) GetPullRequestRequestedReviewers(prNumber string) ([]User, err
 		Users []User `json:"users"`
 	}
 
-	_, err := utils.RequestCall(url, "GET", gh.token, &requestedReviewers, nil)
+	err := utils.RequestCall(url, "GET", gh.token, &requestedReviewers, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +68,7 @@ func (gh *Client) GetPullRequestPreviousReviewers(prNumber string) ([]User, erro
 		User User `json:"user"`
 	}
 
-	_, err := utils.RequestCall(url, "GET", gh.token, &reviews, nil)
+	err := utils.RequestCall(url, "GET", gh.token, &reviews, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +90,7 @@ func (gh *Client) GetTeamMembers(organization, team string) ([]User, error) {
 	url := fmt.Sprintf("https://api.github.com/orgs/%s/teams/%s/members", organization, team)
 
 	var members []User
-	_, err := utils.RequestCall(url, "GET", gh.token, &members, nil)
+	err := utils.RequestCall(url, "GET", gh.token, &members, nil)
 	if err != nil {
 		return nil, err
 	}
