@@ -3865,7 +3865,7 @@ func testAccCheckComputeInstanceHasMinCpuPlatform(instance *compute.Instance, mi
 	}
 }
 
-<% if version == "beta"%>
+<% if version == "beta" -%>
 func testAccCheckComputeInstanceHasNetworkAttachment(instance *compute.Instance, networkAttachmentName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, networkInterface := range instance.NetworkInterfaces {
@@ -7253,8 +7253,6 @@ resource "google_compute_instance" "foobar" {
 `, skip, strategy, instance)
 }
 
-<% unless version == 'ga' -%>
-
 func testAccComputeInstanceConfidentialHyperDiskBootDisk(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_compute_image" "my_image" {
@@ -8707,7 +8705,7 @@ resource "google_compute_instance" "foobar" {
 
 <% end -%>
 
-<% if version =="beta"%>
+<% if version =="beta" -%>
 func testAccComputeInstance_networkAttachment(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_compute_image" "my_image" {
