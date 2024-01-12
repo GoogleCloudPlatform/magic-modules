@@ -114,11 +114,7 @@ properties:
   - !ruby/object:Api::Type::Array
     name: 'solutionTypes'
     description: |
-      The solutions that the data store enrolls. Available solutions for each
-      [industry_vertical][]:
-      `MEDIA`: `SOLUTION_TYPE_RECOMMENDATION` and `SOLUTION_TYPE_SEARCH`.
-      `SITE_SEARCH`: `SOLUTION_TYPE_SEARCH` is automatically enrolled. Other
-      solutions cannot be enrolled.
+      The solutions that the data store enrolls.
     item_type: !ruby/object:Api::Type::Enum
       name: 'solutionType'
       description: |
@@ -131,13 +127,12 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'defaultSchemaId'
     description: |
-      The id of the default [Schema][] associated with this data store.
+      The id of the default Schema associated with this data store.
     output: true
   - !ruby/object:Api::Type::Enum
     name: 'contentConfig'
     description: |
-      The content config of the data store. If this field is unset, the server
-      behavior defaults to [ContentConfig.NO_CONTENT][]
+      The content config of the data store.
     values:
       - :NO_CONTENT
       - :CONTENT_REQUIRED
@@ -147,5 +142,5 @@ properties:
   - !ruby/object:Api::Type::Time
     name: "createTime"
     description: |
-      Timestamp when the [DataStore][] was created.
+      Timestamp when the DataStore was created.
     output: true
