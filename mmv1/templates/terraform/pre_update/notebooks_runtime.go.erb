@@ -36,8 +36,8 @@ if callSwitch {
   acceleratorConfigInterface := make(map[string]interface{})
   _, ok := d.GetOk("virtual_machine.0.virtual_machine_config.0.accelerator_config")
   if ok {
-  acceleratorConfigInterface["coreCount"] = d.Get("virtual_machine.0.virtual_machine_config.0.accelerator_config.0.core_count")
-  acceleratorConfigInterface["type"] = d.Get("virtual_machine.0.virtual_machine_config.0.accelerator_config.0.type")
+    acceleratorConfigInterface["coreCount"] = d.Get("virtual_machine.0.virtual_machine_config.0.accelerator_config.0.core_count")
+    acceleratorConfigInterface["type"] = d.Get("virtual_machine.0.virtual_machine_config.0.accelerator_config.0.type")
   }
   switchObj["acceleratorConfig"] = acceleratorConfigInterface
 
