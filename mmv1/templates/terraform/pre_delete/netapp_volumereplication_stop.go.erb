@@ -24,7 +24,7 @@ if err != nil {
 err = NetappOperationWaitTime(
                 config, reso, project, "Deleting volumereplication", userAgent,
                 d.Timeout(schema.TimeoutDelete))
-        if err != nil {
-                return err
-        }
+if err != nil {
+		return err
+}
         

@@ -1,6 +1,6 @@
 time.Sleep(20 * time.Second)
 log.Printf("[DEBUG] value of destvol %q: %v", reflect.TypeOf(d.Get("destination_volume")), d.Get("destination_volume"))
-if d.Get("delete_destination_volume").(string) == "Yes" {
+if d.Get("delete_destination_volume").(bool) == true {
         str1 := d.Get("destination_volume").(string)
         res1 := str1+"?force=true"
         de_url, err := tpgresource.ReplaceVars(d, config, "{{NetappBasePath}}")
