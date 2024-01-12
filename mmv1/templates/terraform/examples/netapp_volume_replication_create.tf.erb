@@ -1,46 +1,45 @@
 
-data "google_compute_network""default"{
+data "google_compute_network" "default" {
   name = "<%= ctx[:vars]['network_name'] %>"
 }
 
-resource "google_netapp_storage_pool""source_pool"{
-  name = "<%= ctx[:vars]['source_pool_name'] %>"
-  location = "us-west2"
+resource "google_netapp_storage_pool" "source_pool" {
+  name          = "<%= ctx[:vars]['source_pool_name'] %>"
+  location      = "us-west2"
   service_level = "PREMIUM"
-  capacity_gib = 2048
-  network = data.google_compute_network.default.id
+  capacity_gib  = 2048
+  network       = data.google_compute_network.default.id
 }
 
-resource "google_netapp_storage_pool""destination_pool"{
-  name = "<%= ctx[:vars]['destination_pool_name'] %>"
-  location = "us-central1"
+resource "google_netapp_storage_pool" "destination_pool" {
+  name          = "<%= ctx[:vars]['destination_pool_name'] %>"
+  location      = "us-central1"
   service_level = "PREMIUM"
-  capacity_gib = 2048
-  network = data.google_compute_network.default.id
+  capacity_gib  = 2048
+  network       = data.google_compute_network.default.id
 }
 
-resource "google_netapp_volume""source_volume"{
-  location = google_netapp_storage_pool.source_pool.location
-  name = "<%= ctx[:vars]['volume_name'] %>"
+resource "google_netapp_volume" "source_volume" {
+  location     = google_netapp_storage_pool.source_pool.location
+  name         = "<%= ctx[:vars]['volume_name'] %>"
   capacity_gib = 100
-  share_name = "<%= ctx[:vars]['volume_name'] %>"
+  share_name   = "<%= ctx[:vars]['volume_name'] %>"
   storage_pool = google_netapp_storage_pool.source_pool.name
   protocols = [
     "NFSV3"
   ]
 }
 
-resource "google_netapp_volumereplication""<%= ctx[:primary_resource_id] %>"{
-  depends_on = [google_netapp_volume.test_volume
-  ]
-  location = "us-central1"
-  volume_name = google_netapp_volume.test_volume.name
-  name = "<%= ctx[:vars]['replication_name'] %>"
+resource "google_netapp_volumereplication" "my-replication" {
+  depends_on           = [google_netapp_volume.test_volume]
+  location             = "us-central1"
+  volume_name          = google_netapp_volume.test_volume.name
+  name                 = "<%= ctx[:vars]['replication_name'] %>"
   replication_schedule = "DAILY"
   destination_volume_parameters {
-	  storage_pool= google_netapp_storage_pool.default.name
-  	volume_id= "<%= ctx[:vars]['rep_vol_name'] %>"
-  	share_name= "<%= ctx[:vars]['rep_share_name'] %>"
-  	description= "This is a replicated volume"
+    storage_pool = google_netapp_storage_pool.default.name
+    volume_id    = "<%= ctx[:vars]['rep_vol_name'] %>"
+    share_name   = "<%= ctx[:vars]['rep_share_name'] %>"
+    description  = "This is a replicated volume"
   }
 }
