@@ -113,11 +113,32 @@ properties:
         Configurations for a chat Engine.
       required: true
       properties:
-        - !ruby/object:Api::Type::String
-          name: 'dialogflowAgentToLink'
+        - !ruby/object:Api::Type::NestedObject
+          name: 'agentCreationConfig'
           description: |
-            Dialogflow agent to link
+            Configurations for a chat Engine.
           required: true
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'business'
+              description: |
+                Business Name
+              required: true
+            - !ruby/object:Api::Type::String
+              name: 'defaultLanguageCode'
+              description: |
+                Default Language Code
+              required: true
+            - !ruby/object:Api::Type::String
+              name: 'timeZone'
+              description: |
+                time zone
+              required: true
+            - !ruby/object:Api::Type::String
+              name: 'location'
+              description: |
+                location
+              required: true
   - !ruby/object:Api::Type::NestedObject
       name: 'commonConfig'
       description: |
