@@ -81,14 +81,14 @@ func testAccNetappVolume_volumeBasicExample_basic(context map[string]interface{}
 	return acctest.Nprintf(`
 resource "google_netapp_storage_pool" "default" {
 	name = "tf-test-test-pool%{random_suffix}"
-	location = "us-west1"
+	location = "us-west2"
 	service_level = "PREMIUM"
 	capacity_gib = "2048"
 	network = data.google_compute_network.default.id
 }
 
 resource "google_netapp_volume" "test_volume" {
-	location = "us-west1"
+	location = "us-west2"
 	name = "tf-test-test-volume%{random_suffix}"
 	capacity_gib = "100"
 	share_name = "tf-test-test-volume%{random_suffix}"
@@ -106,7 +106,7 @@ func testAccNetappVolume_volumeBasicExample_full(context map[string]interface{})
 	return acctest.Nprintf(`
 resource "google_netapp_storage_pool" "default" {
 	name = "tf-test-test-pool%{random_suffix}"
-	location = "us-west1"
+	location = "us-west2"
 	service_level = "PREMIUM"
 	capacity_gib = "2048"
 	network = data.google_compute_network.default.id
@@ -114,14 +114,14 @@ resource "google_netapp_storage_pool" "default" {
 	
 resource "google_netapp_storage_pool" "default2" {
 	name = "tf-test-pool%{random_suffix}"
-	location = "us-west1"
+	location = "us-west2"
 	service_level = "EXTREME"
 	capacity_gib = "2048"
 	network = data.google_compute_network.default.id
 }
 	  
 resource "google_netapp_volume" "test_volume" {
-	location = "us-west1"
+	location = "us-west2"
 	name = "tf-test-test-volume%{random_suffix}"
 	capacity_gib = "100"
 	share_name = "tf-test-test-volume%{random_suffix}"
@@ -194,7 +194,7 @@ func testAccNetappVolume_volumeBasicExample_update(context map[string]interface{
 
 resource "google_netapp_storage_pool" "default" {
 	name = "tf-test-test-pool%{random_suffix}"
-	location = "us-west1"
+	location = "us-west2"
 	service_level = "PREMIUM"
 	capacity_gib = "2048"
 	network = data.google_compute_network.default.id
@@ -202,14 +202,14 @@ resource "google_netapp_storage_pool" "default" {
   
 resource "google_netapp_storage_pool" "default2" {
 	name = "tf-test-pool%{random_suffix}"
-	location = "us-west1"
+	location = "us-west2"
 	service_level = "EXTREME"
 	capacity_gib = "2048"
 	network = data.google_compute_network.default.id
 }
 
 resource "google_netapp_volume" "test_volume" {
-	location = "us-west1"
+	location = "us-west2"
 	name = "tf-test-test-volume%{random_suffix}"
 	capacity_gib = "200"
 	share_name = "tf-test-test-volume%{random_suffix}"
@@ -275,7 +275,7 @@ func testAccNetappVolume_volumeBasicExample_updatesnapshot(context map[string]in
 
 resource "google_netapp_storage_pool" "default" {
 	name = "tf-test-test-pool%{random_suffix}"
-	location = "us-west1"
+	location = "us-west2"
 	service_level = "PREMIUM"
 	capacity_gib = "2048"
 	network = data.google_compute_network.default.id
@@ -283,14 +283,14 @@ resource "google_netapp_storage_pool" "default" {
 	
 resource "google_netapp_storage_pool" "default2" {
 	name = "tf-test-pool%{random_suffix}"
-	location = "us-west1"
+	location = "us-west2"
 	service_level = "EXTREME"
 	capacity_gib = "2048"
 	network = data.google_compute_network.default.id
 }
 	
 resource "google_netapp_volume" "test_volume" {
-	location = "us-west1"
+	location = "us-west2"
 	name = "tf-test-test-volume%{random_suffix}"
 	capacity_gib = "200"
 	share_name = "tf-test-test-volume%{random_suffix}"
