@@ -162,7 +162,8 @@ module Provider
           SERVICE_ACCT: 'my@service-account.com',
           CUST_ID: 'A01b123xz',
           IDENTITY_USER: 'cloud_identity_user',
-          PAP_DESCRIPTION: 'description'
+          PAP_DESCRIPTION: 'description',
+          VM_RUNTIME_VERSION: 'tpu-vm-tf-2.13.0'
         }
         @vars ||= {}
         @test_env_vars ||= {}

@@ -8,5 +8,5 @@ resource "google_tpu_v2_vm" "<%= ctx[:primary_resource_id] %>" {
   name = "<%= ctx[:vars]["vm_name"] %>"
   zone = "us-central1-c"
 
-  runtime_version = "tpu-vm-tf-2.13.0"
+  runtime_version = "<%= ctx[:test_env_vars]["vm_runtime_version"] %>"
 }
