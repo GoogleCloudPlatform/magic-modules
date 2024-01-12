@@ -13,6 +13,7 @@
 
 --- !ruby/object:Api::Resource
 name: "ProjectAddressGroup"
+legacy_name: "AddressGroup"
 base_url: "projects/{{project}}/locations/{{location}}/addressGroups"
 self_link: "projects/{{project}}/locations/{{location}}/addressGroups/{{name}}"
 # This resource is only used to generate IAM resources. They do not correspond to real
@@ -61,5 +62,4 @@ properties:
     required: true
     description: |
       The location of the gateway security policy.
-      The default value is `global`.
     url_param_only: true
