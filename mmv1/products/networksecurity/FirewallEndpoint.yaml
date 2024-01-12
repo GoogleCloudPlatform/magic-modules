@@ -30,8 +30,8 @@ references:
     'Firewall endpoint overview': 'https://cloud.google.com/firewall/docs/about-firewall-endpoints'
     'Create and associate firewall endpoints': 'https://cloud.google.com/firewall/docs/configure-firewall-endpoints'
 timeouts: !ruby/object:Api::Timeouts
-  insert_minutes: 60 
-  update_minutes: 60 
+  insert_minutes: 60
+  update_minutes: 60
   delete_minutes: 60
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
@@ -63,7 +63,7 @@ examples:
     test_env_vars:
       org_id: :ORG_ID
 custom_code:
-  !ruby/object:Provider::Terraform::CustomCode # Calling custom operation that are different from other network security resources.
+  !ruby/object:Provider::Terraform::CustomCode  # Calling custom operation that are different from other network security resources.
   pre_create: templates/terraform/pre_create/network_security_firewall_endpoint_operation.go.erb
   pre_update: templates/terraform/pre_update/network_security_firewall_endpoint_operation.go.erb
   pre_delete: templates/terraform/pre_delete/network_security_firewall_endpoint_operation.go.erb
