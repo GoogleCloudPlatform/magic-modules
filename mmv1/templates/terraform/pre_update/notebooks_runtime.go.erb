@@ -22,11 +22,11 @@ if callSwitch {
   state := d.Get("state").(string)
   if state == "INITIALIZING" {
     time.Sleep(300 * time.Second)
-	}
+  }
   switchURL, err := tpgresource.ReplaceVars(d, config, "{{NotebooksBasePath}}projects/{{project}}/locations/{{location}}/runtimes/{{name}}:switch")
-	  if err != nil {
-		  return err
-	  }
+  if err != nil {
+    return err
+  }
   log.Printf("[DEBUG] Switching Runtime: %q", d.Id())
 
   switchObj := make(map[string]interface{})
