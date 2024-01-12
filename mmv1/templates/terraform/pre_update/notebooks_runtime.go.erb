@@ -43,12 +43,12 @@ if callSwitch {
 
 
   dRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-	Config: config,
-	Method: "POST",
-	RawURL: switchURL,
-	UserAgent: userAgent,
-	Body: switchObj,
-	Timeout: d.Timeout(schema.TimeoutUpdate),
+    Config: config,
+    Method: "POST",
+    RawURL: switchURL,
+    UserAgent: userAgent,
+    Body: switchObj,
+    Timeout: d.Timeout(schema.TimeoutUpdate),
   })
 
   if err != nil {
