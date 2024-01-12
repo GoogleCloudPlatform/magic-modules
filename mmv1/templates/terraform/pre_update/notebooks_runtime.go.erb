@@ -22,7 +22,8 @@ if callSwitch {
   state := d.Get("state").(string)
   if state == "INITIALIZING" {
     time.Sleep(300 * time.Second)
-  }
+	}
+
   switchURL, err := tpgresource.ReplaceVars(d, config, "{{NotebooksBasePath}}projects/{{project}}/locations/{{location}}/runtimes/{{name}}:switch")
   if err != nil {
     return err
