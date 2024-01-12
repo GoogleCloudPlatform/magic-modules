@@ -59,7 +59,7 @@ examples:
     test_env_vars:
       org_id: :ORG_ID
   - !ruby/object:Provider::Terraform::Examples
-    name: 'network_security_security_profile_severity_override'
+    name: 'network_security_security_profile_overrides'
     primary_resource_id: 'default'
     min_version: beta
     vars:

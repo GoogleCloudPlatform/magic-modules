@@ -14,5 +14,10 @@ resource "google_network_security_security_profile" "<%= ctx[:primary_resource_i
       action   = "DENY"
       severity = "HIGH"
     }
+
+    threat_overrides {
+      action    = "ALLOW"
+      threat_id = "280647"
+    }
   }
 }

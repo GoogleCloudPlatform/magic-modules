@@ -52,6 +52,7 @@ resource "google_network_security_security_profile" "foobar" {
     parent      = "organizations/%s"
     location    = "global"
     description = "My security profile."
+    type        = "THREAT_PREVENTION"
 
     labels = {
         foo = "bar"
@@ -63,11 +64,12 @@ resource "google_network_security_security_profile" "foobar" {
 func testAccNetworkSecuritySecurityProfiles_update(orgId string, randomSuffix string) string {
 	return fmt.Sprintf(`
 resource "google_network_security_security_profile" "foobar" {
-	provider    = google-beta
+    provider    = google-beta
     name        = "tf-test-my-security-profile%s"
-	parent 		= "organizations/%s"
+    parent      = "organizations/%s"
     location    = "global"
     description = "My security profile. Update"
+    type        = "THREAT_PREVENTION"
 
     labels = {
         foo = "foo"
