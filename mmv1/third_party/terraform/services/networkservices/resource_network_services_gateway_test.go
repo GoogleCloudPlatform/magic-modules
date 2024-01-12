@@ -81,7 +81,7 @@ func TestAccNetworkServicesGateway_networkServicesGatewaySecureWebProxyWithoutAd
 		CheckDestroy:             testAccCheckNetworkServicesGatewayDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkServicesGateway_networkServicesGatewaySecureWebProxyWithoutAddresses(context, true),
+				Config: testAccNetworkServicesGateway_networkServicesGatewaySecureWebProxy(context, false),
 			},
 			{
 				ResourceName:            "google_network_services_gateway.default",
@@ -93,7 +93,7 @@ func TestAccNetworkServicesGateway_networkServicesGatewaySecureWebProxyWithoutAd
 	})
 }
 
-func testAccNetworkServicesGateway_networkServicesGatewaySecureWebProxyWithoutAddresses(context map[string]interface{}, withAddresses bool) string {
+func testAccNetworkServicesGateway_networkServicesGatewaySecureWebProxy(context map[string]interface{}, withAddresses bool) string {
 	config := ""
 	config += acctest.Nprintf(`
 resource "google_certificate_manager_certificate" "default" {
