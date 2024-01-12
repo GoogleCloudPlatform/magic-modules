@@ -35,21 +35,9 @@ timeouts: !ruby/object:Api::Timeouts
   delete_minutes: 60
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
     base_url: '{{op_id}}'
-    wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
-    path: 'response'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
-    path: 'error'
-    message: 'message'
-  include_project: true
+    result: !ruby/object:Api::OpAsync::Result
+      resource_inside_response: true
 autogen_async: true
 import_format: ['{{%parent}}/locations/{{location}}/firewallEndpoints/{{name}}']
 examples:
