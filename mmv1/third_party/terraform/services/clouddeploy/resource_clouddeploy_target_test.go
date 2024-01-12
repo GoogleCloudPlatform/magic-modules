@@ -278,7 +278,6 @@ resource "google_clouddeploy_target" "primary" {
 }
 
 func TestAccClouddeployTarget_withCreationOnlyAttribution(t *testing.T) {
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -355,6 +354,7 @@ func TestAccClouddeployTarget_withCreationOnlyAttribution(t *testing.T) {
 }
 
 func TestAccClouddeployTarget_withProactiveAttribution(t *testing.T) {
+	// VCR tests cache provider configuration between steps, this test changes provider configuration and fails under VCR.
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 

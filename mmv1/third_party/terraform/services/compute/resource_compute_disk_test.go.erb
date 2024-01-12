@@ -1324,7 +1324,6 @@ resource "google_compute_disk" "foobar" {
 }
 
 func TestAccComputeDisk_attributionLabelOnCreation(t *testing.T) {
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
@@ -1364,6 +1363,7 @@ func TestAccComputeDisk_attributionLabelOnCreation(t *testing.T) {
 }
 
 func TestAccComputeDisk_attributionLabelOnCreationSkip(t *testing.T) {
+	// VCR tests cache provider configuration between steps, this test changes provider configuration and fails under VCR.
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
@@ -1402,6 +1402,7 @@ func TestAccComputeDisk_attributionLabelOnCreationSkip(t *testing.T) {
 }
 
 func TestAccComputeDisk_attributionLabelProactive(t *testing.T) {
+	// VCR tests cache provider configuration between steps, this test changes provider configuration and fails under VCR.
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 

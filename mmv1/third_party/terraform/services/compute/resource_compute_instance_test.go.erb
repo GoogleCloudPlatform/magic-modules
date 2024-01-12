@@ -2721,7 +2721,6 @@ func TestAccComputeInstance_regionBootDisk(t *testing.T) {
 }
 
 func TestAccComputeInstance_creationOnlyAttributionLabel(t *testing.T) {
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	var instance compute.Instance
@@ -2755,6 +2754,7 @@ func TestAccComputeInstance_creationOnlyAttributionLabel(t *testing.T) {
 }
 
 func TestAccComputeInstance_creationOnlyAttributionLabelConfiguredOnUpdate(t *testing.T) {
+	// VCR tests cache provider configuration between steps, this test changes provider configuration and fails under VCR.
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
@@ -2789,6 +2789,7 @@ func TestAccComputeInstance_creationOnlyAttributionLabelConfiguredOnUpdate(t *te
 }
 
 func TestAccComputeInstance_proactiveAttributionLabel(t *testing.T) {
+	// VCR tests cache provider configuration between steps, this test changes provider configuration and fails under VCR.
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 

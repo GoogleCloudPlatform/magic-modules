@@ -341,6 +341,8 @@ func TestAccComputeAddress_withCreationOnlyAttribution(t *testing.T) {
 }
 
 func TestAccComputeAddress_withCreationOnlyAttributionSetOnUpdate(t *testing.T) {
+	// VCR tests cache provider configuration between steps, this test changes provider configuration and fails under VCR.
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	suffix := acctest.RandString(t, 10)
@@ -435,6 +437,8 @@ func TestAccComputeAddress_withProactiveAttribution(t *testing.T) {
 }
 
 func TestAccComputeAddress_withProactiveAttributionSetOnUpdate(t *testing.T) {
+	// VCR tests cache provider configuration between steps, this test changes provider configuration and fails under VCR.
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	suffix := acctest.RandString(t, 10)
@@ -473,6 +477,8 @@ func TestAccComputeAddress_withProactiveAttributionSetOnUpdate(t *testing.T) {
 }
 
 func TestAccComputeAddress_withAttributionRemoved(t *testing.T) {
+	// VCR tests cache provider configuration between steps, this test changes provider configuration and fails under VCR.
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	suffix := acctest.RandString(t, 10)
@@ -499,15 +505,15 @@ func TestAccComputeAddress_withAttributionRemoved(t *testing.T) {
 			},
 			{
 				// Skipping attribution on resources that already have attribution removes the previous attribution.
-				Config: testAccComputeAddress_networkTier_withSkipAttribution(suffix, "CREATION_ONLY"),
+				Config: testAccComputeAddress_networkTier_withSkipAttributionUpdate(suffix, "CREATION_ONLY"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_compute_address.foobar", "labels.%", "2"),
-					resource.TestCheckResourceAttr("google_compute_address.foobar", "labels.env", "foo"),
-					resource.TestCheckResourceAttr("google_compute_address.foobar", "labels.default_expiration_ms", "3600000"),
+					resource.TestCheckResourceAttr("google_compute_address.foobar", "labels.env", "bar"),
+					resource.TestCheckResourceAttr("google_compute_address.foobar", "labels.default_expiration_ms", "7200000"),
 
 					resource.TestCheckResourceAttr("google_compute_address.foobar", "terraform_labels.%", "2"),
-					resource.TestCheckResourceAttr("google_compute_address.foobar", "terraform_labels.env", "foo"),
-					resource.TestCheckResourceAttr("google_compute_address.foobar", "terraform_labels.default_expiration_ms", "3600000"),
+					resource.TestCheckResourceAttr("google_compute_address.foobar", "terraform_labels.env", "bar"),
+					resource.TestCheckResourceAttr("google_compute_address.foobar", "terraform_labels.default_expiration_ms", "7200000"),
 
 					resource.TestCheckResourceAttr("google_compute_address.foobar", "effective_labels.%", "2"),
 				),
@@ -648,6 +654,25 @@ func testAccComputeAddress_networkTier_withAttributionUpdate(suffix, strategy st
 	return fmt.Sprintf(`
 provider "google" {
   skip_terraform_attribution_label              = false
+  terraform_attribution_label_addition_strategy = %q
+}
+
+resource "google_compute_address" "foobar" {
+  name         = "tf-test-address-%s"
+  network_tier = "STANDARD"
+
+  labels = {
+    env                   = "bar"
+    default_expiration_ms = 7200000
+  }
+}
+`, strategy, suffix)
+}
+
+func testAccComputeAddress_networkTier_withSkipAttributionUpdate(suffix, strategy string) string {
+	return fmt.Sprintf(`
+provider "google" {
+  skip_terraform_attribution_label              = true
   terraform_attribution_label_addition_strategy = %q
 }
 
