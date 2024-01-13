@@ -59,6 +59,7 @@ parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
     default_value: 'global'
+    immutable: true
     description: |
       The location of the security profile.
       The default value is `global`.
@@ -117,7 +118,6 @@ properties:
                 - :ALLOW
                 - :DEFAULT_ACTION
                 - :DENY
-                - :THREAT_ACTION_UNSPECIFIED
             - !ruby/object:Api::Type::Enum
               name: 'severity'
               description: Severity level to match.
@@ -128,7 +128,6 @@ properties:
                 - :INFORMATIONAL
                 - :LOW
                 - :MEDIUM
-                - :SEVERITY_UNSPECIFIED
       - !ruby/object:Api::Type::Array
         name: threatOverrides
         description: |
@@ -146,7 +145,6 @@ properties:
                 - :ALLOW
                 - :DEFAULT_ACTION
                 - :DENY
-                - :THREAT_ACTION_UNSPECIFIED
             - !ruby/object:Api::Type::String
               name: 'threatId'
               description: Vendor-specific ID of a threat to override.
@@ -158,15 +156,13 @@ properties:
               values:
                 - :ANTIVIRUS
                 - :DNS
-                - :THREAT_TYPE_UNSPECIFIED
                 - :UNKNOWN
                 - :VULNERABILITY
                 - :SPYWARE
   - !ruby/object:Api::Type::Enum
     name: 'type'
     description: The type of security profile.
+    required: true
     immutable: true
-    default_value: :THREAT_PREVENTION
     values:
-      - :PROFILE_TYPE_UNSPECIFIED
       - :THREAT_PREVENTION
