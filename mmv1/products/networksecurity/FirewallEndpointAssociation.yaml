@@ -31,6 +31,7 @@ references:
     'Firewall endpoint overview': 'https://cloud.google.com/firewall/docs/about-firewall-endpoints'
     'Create and associate firewall endpoints': 'https://cloud.google.com/firewall/docs/configure-firewall-endpoints'
 async: !ruby/object:Api::OpAsync
+  include_project: true
   operation: !ruby/object:Api::OpAsync::Operation
     base_url: '{{op_id}}'
     result: !ruby/object:Api::OpAsync::Result
@@ -51,11 +52,6 @@ examples:
     test_env_vars:
       org_id: :ORG_ID
       project: :PROJECT_NAME
-custom_code:
-  !ruby/object:Provider::Terraform::CustomCode  # Calling custom operation that are different from other network security resources.
-  pre_create: templates/terraform/pre_create/network_security_firewall_endpoint_association_operation.go.erb
-  pre_update: templates/terraform/pre_update/network_security_firewall_endpoint_association_operation.go.erb
-  pre_delete: templates/terraform/pre_delete/network_security_firewall_endpoint_association_operation.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -124,4 +120,3 @@ properties:
       - :CREATING
       - :DELETING
       - :INACTIVE
-      - :STATE_UNSPECIFIED
