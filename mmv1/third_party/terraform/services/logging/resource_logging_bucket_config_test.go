@@ -281,6 +281,7 @@ resource "google_project" "default" {
 	billing_account = "%{billing_account}"
 }
 
+// time_sleep would allow for permissions to be granted before creating log bucket
 resource "time_sleep" "wait_60_seconds" {
 	create_duration = "60s"
   
