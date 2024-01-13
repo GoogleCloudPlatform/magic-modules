@@ -1263,23 +1263,27 @@ func ResourceBigQueryTable() *schema.Resource {
 						"source_project_id": {
 							Type:        schema.TypeString,
 							Required:    true,
-							Description: `The ID of the source project."`,
+							ForceNew:    true,
+							Description: `The ID of the source project.`,
 						},
 						"source_dataset_id": {
 							Type:        schema.TypeString,
 							Required:    true,
-							Description: `The ID of the source dataset."`,
+							ForceNew:    true,
+							Description: `The ID of the source dataset.`,
 						},
 						"source_table_id": {
 							Type:        schema.TypeString,
 							Required:    true,
-							Description: `The ID of the source materialized view."`,
+							ForceNew:    true,
+							Description: `The ID of the source materialized view.`,
 						},
 						"replication_interval_ms": {
 							Type:        schema.TypeInt,
+							Default:     300000,
 							Optional:    true,
-							Computed:    true,
-							Description: `The interval at which the source materialized view is polled for updates."`,
+							ForceNew:    true,
+							Description: `The interval at which the source materialized view is polled for updates. The default is 300000.`,
 						},
 					},
 				},
@@ -1706,14 +1710,6 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceBigQueryTableUpdate(d *schema.ResourceData, meta interface{}) error {
-	<% unless version == 'ga' -%>
-	if v, ok := d.GetOk("table_replication_info"); ok {
-		if len(v.([]interface{})) > 0 {
-			return errors.New("Table replication info is not supported in update")
-		}
-	}
-
-	<% end -%>
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
