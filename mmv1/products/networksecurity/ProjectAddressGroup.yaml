@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Resource
 name: "ProjectAddressGroup"
-legacy_name: "AddressGroup"
+legacy_name: 'google_network_security_address_group'
 base_url: "projects/{{project}}/locations/{{location}}/addressGroups"
 self_link: "projects/{{project}}/locations/{{location}}/addressGroups/{{name}}"
 # This resource is only used to generate IAM resources. They do not correspond to real
