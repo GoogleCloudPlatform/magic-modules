@@ -286,7 +286,7 @@ resource "google_project" "default" {
 
 // time_sleep would allow for permissions to be granted before creating log bucket
 resource "time_sleep" "wait_60_seconds" {
-	create_duration = "60s"
+	create_duration = "2m"
   
 	depends_on = [
 	  google_project.default,
