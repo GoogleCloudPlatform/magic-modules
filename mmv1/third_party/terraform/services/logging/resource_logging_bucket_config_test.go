@@ -281,6 +281,14 @@ resource "google_project" "default" {
 	billing_account = "%{billing_account}"
 }
 
+resource "time_sleep" "wait_60_seconds" {
+	create_duration = "60s"
+  
+	depends_on = [
+	  google_project.default,
+	]
+  }
+
 resource "google_logging_project_bucket_config" "basic" {
 	project    = google_project.default.name
 	location  = "global"
