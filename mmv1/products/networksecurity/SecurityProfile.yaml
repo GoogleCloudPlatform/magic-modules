@@ -29,6 +29,7 @@ references:
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     base_url: '{{op_id}}'
+  include_project: true
 import_format: ['{{%parent}}/locations/{{location}}/securityProfiles/{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
@@ -47,11 +48,6 @@ examples:
       resource_name: 'my-security-profile'
     test_env_vars:
       org_id: :ORG_ID
-custom_code:
-  !ruby/object:Provider::Terraform::CustomCode # Calling custom operation that are different from other network security resources.
-  pre_create: templates/terraform/pre_create/network_security_security_profile_operation.go.erb
-  pre_update: templates/terraform/pre_update/network_security_security_profile_operation.go.erb
-  pre_delete: templates/terraform/pre_delete/network_security_security_profile_operation.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
