@@ -5,7 +5,7 @@ data "google_compute_network" "default" {
 
 resource "google_netapp_storage_pool" "source_pool" {
   name          = "<%= ctx[:vars]['source_pool_name'] %>"
-  location      = "us-west2"
+  location      = "us-central1"
   service_level = "PREMIUM"
   capacity_gib  = 2048
   network       = data.google_compute_network.default.id
@@ -13,7 +13,7 @@ resource "google_netapp_storage_pool" "source_pool" {
 
 resource "google_netapp_storage_pool" "destination_pool" {
   name          = "<%= ctx[:vars]['destination_pool_name'] %>"
-  location      = "us-central1"
+  location      = "us-west2"
   service_level = "PREMIUM"
   capacity_gib  = 2048
   network       = data.google_compute_network.default.id
@@ -31,15 +31,17 @@ resource "google_netapp_volume" "source_volume" {
 }
 
 resource "google_netapp_volumereplication" "my-replication" {
-  depends_on           = [google_netapp_volume.test_volume]
-  location             = "us-central1"
-  volume_name          = google_netapp_volume.test_volume.name
+  depends_on           = [google_netapp_volume.source_volume]
+  location             = google_netapp_volume.source_volume.location
+  volume_name          = google_netapp_volume.source_volume.name
   name                 = "<%= ctx[:vars]['replication_name'] %>"
-  replication_schedule = "DAILY"
+  replication_schedule = "EVERY_10_MINUTES"
   destination_volume_parameters {
-    storage_pool = google_netapp_storage_pool.default.name
-    volume_id    = "<%= ctx[:vars]['rep_vol_name'] %>"
-    share_name   = "<%= ctx[:vars]['rep_share_name'] %>"
+    storage_pool = google_netapp_storage_pool.destination_pool.id
+    volume_id    = "<%= ctx[:vars]['destination_volume'] %>"
+    # Keeping the share_name of source and destination the same makes
+    # simplifies implementing client failover concepts
+    share_name   = "<%= ctx[:vars]['volume_name'] %>"
     description  = "This is a replicated volume"
   }
 }
