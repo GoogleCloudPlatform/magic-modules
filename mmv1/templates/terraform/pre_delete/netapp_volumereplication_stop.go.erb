@@ -2,6 +2,7 @@ rawurl, err := tpgresource.ReplaceVars(d, config, "{{NetappBasePath}}projects/{{
 if err != nil {
 		return err
 	}
+// Consider doing a force stop?
 reso, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 	Config: config,
 	Method: "POST",

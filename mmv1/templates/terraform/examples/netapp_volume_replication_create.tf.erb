@@ -49,3 +49,10 @@ resource "google_netapp_volumereplication" "my-replication" {
   # for testing, but questionable for production!
   delete_destination_volume = true
 }
+
+# Wait for replication to reach mirrorState==MIRRORED
+resource "time_sleep" "wait_for_mirrored" {
+  depends_on = [google_netapp_volumereplication.my-replication]
+
+  create_duration = "6m"
+}
