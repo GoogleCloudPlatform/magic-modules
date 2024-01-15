@@ -312,6 +312,11 @@ The following arguments are supported:
   Google Compute Engine Public IPs and Google Prod IPs. Structure is
   [documented below](#nested_master_authorized_networks_config).
 
+* `data_retention_config` -
+  (Optional)
+  The configuration setting for Airflow data retention mechanism.
+  [documented below](#nested_data_retention_config).
+
 <a name="nested_node_config"></a>The `node_config` block supports:
 
 * `zone` -
@@ -613,6 +618,19 @@ The `web_server_network_access_control` supports:
   (Required)
   `cidr_block` must be specified in CIDR notation.
 
+<a name="nested_data_retention_config"></a>The `data_retention_config` block supports:
+* `task_logs_retention_config` - 
+  (Optional)
+  The configuration setting for Task Logs.
+  [documented below](#nested_task_logs_retention_config)
+
+<a name="nested_task_logs_retention_config"></a>The `task_logs_retention_config` block supports:
+* `storage_mode` - 
+  (Optional)
+  The mode of storage for Airflow workers task logs. Values for storage mode are 
+  `CLOUD_LOGGING_ONLY` for enabling logs in cloud logging only feature and 
+  `CLOUD_LOGGING_AND_CLOUD_STORAGE` for disabling logs in cloud logging only feature.
+
 ## Argument Reference - Cloud Composer 2
 
 The following arguments are supported:
@@ -701,6 +719,11 @@ The `config` block supports:
   Kubernetes master through HTTPS except traffic from the given CIDR blocks,
   Google Compute Engine Public IPs and Google Prod IPs. Structure is
   documented below.
+
+* `data_retention_config` -
+  (Optional, CLoud Composer 2.0.23 or newer only)
+  Configuration setting for airflow data rentention mechanism.
+
 
 The `storage_config` block supports:
 

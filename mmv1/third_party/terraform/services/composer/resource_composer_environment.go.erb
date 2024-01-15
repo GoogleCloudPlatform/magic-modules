@@ -682,6 +682,36 @@ func ResourceComposerEnvironment() *schema.Resource {
 								},
 							},
 						},
+
+						"data_retention_config": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: composerConfigKeys,
+							MaxItems:     1,
+							Description:  `The configuration setting for Airflow data retention mechanism. This field is supported for Cloud Composer environments in versions composer-2.0.32-airflow-2.1.4. or newer`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"task_logs_retention_config": {
+										Type:         schema.TypeList,
+										Optional:     true,
+										ForceNew:     false,
+										Description: `Optional. The configuration setting for Task Logs.`,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"storage_mode": {
+													Type:         schema.TypeString,
+													Optional:     true,
+													ForceNew:     false,
+													VValidateFunc: validation.StringInSlice([]string{"CLOUD_LOGGING_ONLY", "CLOUD_LOGGING_AND_CLOUD_STORAGE"}, false),
+													Description:  `Whether logs in cloud logging only is enabled or not. This field is supported for Cloud Composer environments in versions composer-2.0.32-airflow-2.1.4 and newer.`,
+												},
+											},
+										},
+									},
+								},
+							},
+						},
 						"workloads_config": {
 							Type:         schema.TypeList,
 							Optional:     true,
@@ -1505,6 +1535,7 @@ func flattenComposerEnvironmentConfig(envCfg *composer.EnvironmentConfig) interf
 	transformed["web_server_config"] = flattenComposerEnvironmentConfigWebServerConfig(envCfg.WebServerConfig)
 	transformed["encryption_config"] = flattenComposerEnvironmentConfigEncryptionConfig(envCfg.EncryptionConfig)
 	transformed["maintenance_window"] = flattenComposerEnvironmentConfigMaintenanceWindow(envCfg.MaintenanceWindow)
+	transformed["data_retention_config"] = flattenComposerEnvironmentConfigDataRetentionConfig(envCfg.DataRetentionConfig)
 	transformed["workloads_config"] = flattenComposerEnvironmentConfigWorkloadsConfig(envCfg.WorkloadsConfig)
 	transformed["recovery_config"] = flattenComposerEnvironmentConfigRecoveryConfig(envCfg.RecoveryConfig)
 	transformed["environment_size"] = envCfg.EnvironmentSize
@@ -1605,6 +1636,28 @@ func flattenComposerEnvironmentConfigMaintenanceWindow(maintenanceWindow *compos
 	transformed["start_time"] = maintenanceWindow.StartTime
 	transformed["end_time"] = maintenanceWindow.EndTime
 	transformed["recurrence"] = maintenanceWindow.Recurrence
+
+	return []interface{}{transformed}
+}
+
+func flattenComposerEnvironmentConfigDataRetentionConfig(dataRetentionConfig *composer.DataRetentionConfig) interface{} {
+	if maintenanceWindow == nil {
+		return nil
+	}
+
+	transformed := make(map[string]interface{})
+	transformed["task_logs_retention_config"] = flattenComposerEnvironmentConfigDataRetentionConfigTaskLogsRetentionConfig(dataRetentionConfig.TaskLogsRetentionConfig)
+
+	return []interface{}{transformed}
+}
+
+func flattenComposerEnvironmentConfigDataRetentionConfigTaskLogsRetentionConfig(taskLogsRetentionConfig *composer.TaskLogsRetentionConfig) interface{} {
+	if maintenanceWindow == nil {
+		return nil
+	}
+
+	transformed := make(map[string]interface{})
+	transformed["storage_mode"] = taskLogsRetentionConfig.StorageMode
 
 	return []interface{}{transformed}
 }
@@ -1885,6 +1938,13 @@ func expandComposerEnvironmentConfig(v interface{}, d *schema.ResourceData, conf
 		return nil, err
 	}
 	transformed.MaintenanceWindow = transformedMaintenanceWindow
+
+	transformedDataRetentionConfig, err := expandComposerEnvironmentConfigDataRetentionConfig(original["data_retention_config"], d, config)
+	if err != nil {
+		return nil, err
+	}
+	transformed.DataRetentionConfig = transformedDataRetentionConfig
+
 	transformedWorkloadsConfig, err := expandComposerEnvironmentConfigWorkloadsConfig(original["workloads_config"], d, config)
 	if err != nil {
 		return nil, err
@@ -2049,6 +2109,38 @@ func expandComposerEnvironmentConfigMaintenanceWindow(v interface{}, d *schema.R
 
 	if v, ok := original["recurrence"]; ok {
 		transformed.Recurrence = v.(string)
+	}
+
+	return transformed, nil
+}
+
+func expandComposerEnvironmentConfigDataRetentionConfig(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) (*composer.DataRetentionConfig, error) {
+	l := v.([]interface{})
+	if len(l) == 0 {
+		return nil, nil
+	}
+	raw := l[0]
+	original := raw.(map[string]interface{})
+	transformed := &composer.DataRetentionConfig{}
+
+	if v, ok := original["task_logs_retention_config"]; ok {
+		transformed.TaskLogsRetentionConfig = expandComposerEnvironmentConfigDataRetentionConfigTaskLogsRetentionConfig(original["task_logs_retention_config"], d, config)
+	}
+
+	return transformed, nil
+}
+
+func expandComposerEnvironmentConfigDataRetentionConfigTaskLogsRetentionConfig(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) (*composer.TaskLogsRetentionConfig, error) {
+	l := v.([]interface{})
+	if len(l) == 0 {
+		return nil, nil
+	}
+	raw := l[0]
+	original := raw.(map[string]interface{})
+	transformed := &composer.DataRetentionConfig{}
+
+	if v, ok := original["storage_mode"]; ok {
+		transformed.StorageMode = v.(string)
 	}
 
 	return transformed, nil
