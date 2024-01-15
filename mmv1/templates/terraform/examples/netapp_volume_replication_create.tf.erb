@@ -41,8 +41,8 @@ resource "google_netapp_volumereplication" "my-replication" {
     volume_id    = "<%= ctx[:vars]['destination_volume'] %>"
     # Keeping the share_name of source and destination the same makes
     # simplifies implementing client failover concepts
-    share_name   = "<%= ctx[:vars]['volume_name'] %>"
-    description  = "This is a replicated volume"
+    share_name  = "<%= ctx[:vars]['volume_name'] %>"
+    description = "This is a replicated volume"
   }
   # WARNING: Setting delete_destination_volume to true, will delete the
   # destination volume too, if the replication is deleted. This is great

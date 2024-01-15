@@ -18,7 +18,7 @@ description: |
   a source volume in one location to a destination volume in a different location. This capability lets
   you use the replicated volume for critical application activity in case of a location-wide outage or
   disaster. The replicated volume can also be used as a read-only copy while the mirror is enabled, or
-  as a independent volume if the mirror is stopped. A destination volume will also contain the 
+  as a independent volume if the mirror is stopped. A destination volume will also contain the
   snapshots of the source volume.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
@@ -48,8 +48,7 @@ examples:
       destination_volume: 'destination-volume'
       network_name: 'test-network'
     test_vars_overrides:
-      network_name: '"shared-vpc-prod"'
-      # network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-1", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
+      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-1", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -128,7 +127,7 @@ properties:
     name: 'createTime'
     description: |
       Create time of the active directory. A timestamp in RFC3339 UTC "Zulu" format. Examples: "2023-06-22T09:13:01.617Z".
-    output: true   
+    output: true
   - !ruby/object:Api::Type::String
     name: 'destinationVolume'
     description: |
@@ -240,4 +239,4 @@ virtual_fields:
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_delete: templates/terraform/pre_delete/netapp_volumereplication_stop.go.erb
   post_delete: templates/terraform/post_delete/netapp_volumereplication_delete_destination_volume.go.erb
-#   pre_update: templates/terraform/pre_update/netapp_volumereplication_mirror_state.go.erb
+  # pre_update: templates/terraform/pre_update/netapp_volumereplication_mirror_state.go.erb
