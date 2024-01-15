@@ -1781,7 +1781,7 @@ resource "google_compute_subnetwork" "test" {
 `, envName, network, subnetwork)
 }
 
-func testAccComposerEnvironment_composerV2TESTING(envName, network, subnetwork string) string {
+func testAccComposerEnvironment_composerV2(envName, network, subnetwork string) string {
 	return fmt.Sprintf(`
 resource "google_composer_environment" "test" {
   name   = "%s"

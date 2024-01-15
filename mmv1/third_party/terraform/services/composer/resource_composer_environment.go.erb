@@ -703,7 +703,7 @@ func ResourceComposerEnvironment() *schema.Resource {
 													Type:         schema.TypeString,
 													Optional:     true,
 													ForceNew:     false,
-													VValidateFunc: validation.StringInSlice([]string{"CLOUD_LOGGING_ONLY", "CLOUD_LOGGING_AND_CLOUD_STORAGE"}, false),
+													ValidateFunc: validation.StringInSlice([]string{"CLOUD_LOGGING_ONLY", "CLOUD_LOGGING_AND_CLOUD_STORAGE"}, false),
 													Description:  `Whether logs in cloud logging only is enabled or not. This field is supported for Cloud Composer environments in versions composer-2.0.32-airflow-2.1.4 and newer.`,
 												},
 											},
@@ -1641,7 +1641,7 @@ func flattenComposerEnvironmentConfigMaintenanceWindow(maintenanceWindow *compos
 }
 
 func flattenComposerEnvironmentConfigDataRetentionConfig(dataRetentionConfig *composer.DataRetentionConfig) interface{} {
-	if maintenanceWindow == nil {
+	if dataRetentionConfig == nil {
 		return nil
 	}
 
@@ -1652,7 +1652,7 @@ func flattenComposerEnvironmentConfigDataRetentionConfig(dataRetentionConfig *co
 }
 
 func flattenComposerEnvironmentConfigDataRetentionConfigTaskLogsRetentionConfig(taskLogsRetentionConfig *composer.TaskLogsRetentionConfig) interface{} {
-	if maintenanceWindow == nil {
+	if taskLogsRetentionConfig == nil {
 		return nil
 	}
 
@@ -2123,8 +2123,12 @@ func expandComposerEnvironmentConfigDataRetentionConfig(v interface{}, d *schema
 	original := raw.(map[string]interface{})
 	transformed := &composer.DataRetentionConfig{}
 
-	if v, ok := original["task_logs_retention_config"]; ok {
-		transformed.TaskLogsRetentionConfig = expandComposerEnvironmentConfigDataRetentionConfigTaskLogsRetentionConfig(original["task_logs_retention_config"], d, config)
+	if taskLogsRetentionConfig, ok := original["task_logs_retention_config"]; ok {
+		transformedTaskLogsRetentionConfig, err := expandComposerEnvironmentConfigDataRetentionConfigTaskLogsRetentionConfig(taskLogsRetentionConfig, d, config)
+		if err != nil {
+			return nil, err
+		}
+		transformed.TaskLogsRetentionConfig = transformedTaskLogsRetentionConfig
 	}
 
 	return transformed, nil
@@ -2137,7 +2141,7 @@ func expandComposerEnvironmentConfigDataRetentionConfigTaskLogsRetentionConfig(v
 	}
 	raw := l[0]
 	original := raw.(map[string]interface{})
-	transformed := &composer.DataRetentionConfig{}
+	transformed := &composer.TaskLogsRetentionConfig{}
 
 	if v, ok := original["storage_mode"]; ok {
 		transformed.StorageMode = v.(string)
