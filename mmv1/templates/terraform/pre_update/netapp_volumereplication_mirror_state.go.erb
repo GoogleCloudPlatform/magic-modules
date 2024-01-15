@@ -1,6 +1,6 @@
 log.Printf("[DEBUG] value of replication_state : %v", d.Get("replication_enabled"))
 var obj map[string]interface{}
-rawurl, err := tpgresource.ReplaceVars(d, config, "{{NetappBasePath}}projects/{{project}}/locations/{{location}}/volumes/{{volume_id}}/replications/{{name}}:")
+rawurl, err := tpgresource.ReplaceVars(d, config, "{{NetappBasePath}}projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/replications/{{name}}:")
 if err != nil {
 	return err
 }

@@ -72,11 +72,6 @@ parameters:
     required: true
     immutable: true
     url_param_only: true
-# The following functionality needs to be discussed in review process
-# custom_code: !ruby/object:Provider::Terraform::CustomCode
-#   pre_delete: templates/terraform/pre_delete/netapp_volumereplication_stop.go.erb
-#   post_delete: templates/terraform/post_delete/netapp_volumereplication_delete_destination.go.erb
-#   pre_update: templates/terraform/pre_update/netapp_volumereplication_mirror_state.go.erb
 properties:
   - !ruby/object:Api::Type::Enum
     name: 'state'
@@ -237,3 +232,9 @@ virtual_fields:
       Set to true to enable/resume the mirror. WARNING: Resuming a mirror overwrites the destination volume with the content
       of the source volume and resumes replication updates from source to destination according to replication schedule.
     default_value: true
+
+# The following functionality needs to be discussed in review process
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_delete: templates/terraform/pre_delete/netapp_volumereplication_stop.go.erb
+#   post_delete: templates/terraform/post_delete/netapp_volumereplication_delete_destination.go.erb
+#   pre_update: templates/terraform/pre_update/netapp_volumereplication_mirror_state.go.erb

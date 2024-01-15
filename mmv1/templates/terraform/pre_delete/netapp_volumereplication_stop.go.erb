@@ -1,4 +1,4 @@
-rawurl, err := tpgresource.ReplaceVars(d, config, "{{NetappBasePath}}projects/{{project}}/locations/{{location}}/volumes/{{volume_id}}/replications/{{name}}:stop")
+rawurl, err := tpgresource.ReplaceVars(d, config, "{{NetappBasePath}}projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/replications/{{name}}:stop")
 if err != nil {
 		return err
 	}
@@ -27,4 +27,3 @@ err = NetappOperationWaitTime(
 if err != nil {
 		return err
 }
-        
