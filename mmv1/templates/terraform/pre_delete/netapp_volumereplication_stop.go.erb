@@ -18,7 +18,7 @@ reso, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 <% end -%>
 })
 if err != nil {
-	return fmt.Errorf("Error stopping replication %q: %s", d.Id(), err)
+	return fmt.Errorf("Error stopping volumereplication %q before deleting it: %s", d.Id(), err)
 }
 
 err = NetappOperationWaitTime(
