@@ -113,7 +113,10 @@ properties:
   - !ruby/object:Api::Type::Enum
     name: 'mirrorState'
     description: |
-       Indicates the state of the mirror between source and destination volumes. Updated every 5 minutes.
+       Indicates the state of the mirror between source and destination volumes. Depending on the amount of data
+       in your source volume, PREPARING phase can take hours or days. mirrorState = MIRRORED indicates your baseline
+       transfer ended and destination volume became accessible read-only. TRANSFERRING means a MIRRORED volume
+       currently receives an update. Updated every 5 minutes.
     values:
       - :MIRROR_STATE_UNSPECIFIED
       - :PREPARING
@@ -236,5 +239,5 @@ virtual_fields:
 # The following functionality needs to be discussed in review process
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_delete: templates/terraform/pre_delete/netapp_volumereplication_stop.go.erb
-#   post_delete: templates/terraform/post_delete/netapp_volumereplication_delete_destination.go.erb
+  post_delete: templates/terraform/post_delete/netapp_volumereplication_delete_destination_volume.go.erb
 #   pre_update: templates/terraform/pre_update/netapp_volumereplication_mirror_state.go.erb

@@ -44,4 +44,8 @@ resource "google_netapp_volumereplication" "my-replication" {
     share_name   = "<%= ctx[:vars]['volume_name'] %>"
     description  = "This is a replicated volume"
   }
+  # WARNING: Setting delete_destination_volume to true, will delete the
+  # destination volume too, if the replication is deleted. This is great
+  # for testing, but questionable for production!
+  delete_destination_volume = true
 }
