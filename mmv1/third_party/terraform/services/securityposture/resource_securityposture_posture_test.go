@@ -47,7 +47,8 @@ func testAccSecurityposturePosture_securityposturePosture_full(context map[strin
 	return acctest.Nprintf(`
 resource "google_securityposture_posture" "posture1" {
 	posture_id          = "posture_1"
-	parent = "organizations/%{org_id}/locations/global"
+	parent = "organizations/%{org_id}"
+	location = "global"
 	state = "ACTIVE"
     description = "a new posture"
     policy_sets {
@@ -73,7 +74,8 @@ func testAccSecurityposturePosture_securityposturePosture_update(context map[str
 	return acctest.Nprintf(`
 resource "google_securityposture_posture" "posture1" {
 	posture_id          = "posture_1"
-	parent = "organizations/%{org_id}/locations/global"
+	parent = "organizations/%{org_id}"
+	location = "global"
 	state = "ACTIVE"
     description = "a new posture"
     policy_sets {

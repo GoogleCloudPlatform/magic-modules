@@ -18,19 +18,19 @@ description: |
   and policy sets. A policy set includes set of policies along with their definition.
   A posture can be created at the organization level.
   Every update to a deployed posture creates a new posture revision with an updated revision_id.
-import_format: ['{{%parent}}/postures/{{posture_id}}']
-base_url: '{{parent}}/postures'
+import_format: ['{{parent}}/locations/{{location}}/postures/{{posture_id}}']
+base_url: '{{parent}}/locations/{{location}}/postures'
 
-self_link: '{{parent}}/postures/{{posture_id}}'
+self_link: '{{parent}}/locations/{{location}}/postures/{{posture_id}}'
 
-create_url: '{{parent}}/postures?postureId={{posture_id}}'
+create_url: '{{parent}}/locations/{{location}}/postures?postureId={{posture_id}}'
 
-update_url: '{{parent}}/postures/{{posture_id}}?revisionId={{revision_id}}'
+update_url: '{{parent}}/locations/{{location}}/postures/{{posture_id}}?revisionId={{revision_id}}'
 update_verb: :PATCH
 
 update_mask: true
 
-delete_url: '{{parent}}/postures/{{posture_id}}'
+delete_url: '{{parent}}/locations/{{location}}/postures/{{posture_id}}'
 
 autogen_async: true
 # Sets parameters for handling operations returned by the API.
@@ -49,9 +49,15 @@ examples:
 
 parameters:
   - !ruby/object:Api::Type::String
-    name: parent
+    name: 'parent'
     description: |
-      The parent of the resource, an organization. Format should be `organizations/{organization_id}/locations/{location}`.
+      The parent of the resource, an organization. Format should be `organizations/{organization_id}`.
+    immutable: true
+    url_param_only: true
+    required: true
+  - !ruby/object:Api::Type::String
+    name: 'location'
+    description: "Location of the resource, eg: global."
     immutable: true
     url_param_only: true
     required: true
@@ -405,7 +411,6 @@ properties:
                         name: 'id'
                         description: 'A server generated id of custom module.'
                         output: true
-                        immutable: true
                       - !ruby/object:Api::Type::String
                         name: 'displayName'
                         description: |
