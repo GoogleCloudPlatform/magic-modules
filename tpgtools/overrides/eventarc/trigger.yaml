@@ -15,3 +15,9 @@
   details:
     functions: 
     - tpgresource.DefaultProviderProject
+- type: CUSTOM_SCHEMA_VALUES
+  field: destination.cloud_function
+  details:
+    required: false
+    optional: false
+    computed: true
