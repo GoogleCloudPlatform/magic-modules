@@ -1,0 +1,16 @@
+resource "google_discovery_engine_search_engine" "basic" {
+  engine_id = "<%= ctx[:vars]['engine_id'] %>"
+  collection_id = "default_collection"
+  location = "global"
+  display_name = "Example Display Name"
+  industry_vertical = "GENERIC"
+  data_store_ids = ["test-demo-data_1705085526185"]
+  solution_type = "SOLUTION_TYPE_SEARCH"
+  common_config {
+    company_name = "Example Company Name"
+  }
+  search_engine_config {
+    search_tier = "SEARCH_TIER_ENTERPRISE"
+    search_add_ons = ["SEARCH_ADD_ON_LLM"]
+  }
+}
