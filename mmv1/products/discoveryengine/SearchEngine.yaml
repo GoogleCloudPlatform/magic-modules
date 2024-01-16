@@ -67,67 +67,67 @@ parameters:
 
 properties:
   - !ruby/object:Api::Type::String
-      name: 'industryVertical'
-      description: |
-        Industry Vertical
-      immutable: true
+    name: 'industryVertical'
+    description: |
+      Industry Vertical
+    immutable: true
   - !ruby/object:Api::Type::String
-      name: 'displayName'
-      description: |
-        displayName
-      required: true
+    name: 'displayName'
+    description: |
+      displayName
+    required: true
   - !ruby/object:Api::Type::Array
-      name: 'dataStoreIds'
-      description: |
-        Data Store ID
-      required: true
-      immutable: true
-      item_type: Api::Type::String
+    name: 'dataStoreIds'
+    description: |
+      Data Store ID
+    required: true
+    immutable: true
+    item_type: Api::Type::String
   - !ruby/object:Api::Type::String
-      name: 'solutionType'
-      description: |
-        A solution type
-      immutable: true
+    name: 'solutionType'
+    description: |
+      A solution type
+    immutable: true
   - !ruby/object:Api::Type::Time
-      name: 'createTime'
-      description: |
-        Timestamp the Engine was created at.
-      output: true
+    name: 'createTime'
+    description: |
+      Timestamp the Engine was created at.
+    output: true
   - !ruby/object:Api::Type::Time
-      name: 'updateTime'
-      description: |
-        Timestamp the Engine was last updated.
-      output: true
+    name: 'updateTime'
+    description: |
+      Timestamp the Engine was last updated.
+    output: true
   - !ruby/object:Api::Type::NestedObject
-      name: 'searchEngineConfig'
-      description: |
-        Configurations for a Search Engine.
-      required: false
-      immutable: false
-      properties:
-        - !ruby/object:Api::Type::String
-          name: 'searchTier'
-          description: |
-            Industry Vertical
-          required: false
-          immutable: false
-        - !ruby/object:Api::Type::Array
-          name: 'searchAddOns'
-          description: |
-            The add-on that this search engine enables.
-          required: false
-          immutable: false
-          item_type: Api::Type::String
+    name: 'searchEngineConfig'
+    description: |
+      Configurations for a Search Engine.
+    required: false
+    immutable: false
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'searchTier'
+        description: |
+          Industry Vertical
+        required: false
+        immutable: false
+      - !ruby/object:Api::Type::Array
+        name: 'searchAddOns'
+        description: |
+          The add-on that this search engine enables.
+        required: false
+        immutable: false
+        item_type: Api::Type::String
   - !ruby/object:Api::Type::NestedObject
-      name: 'commonConfig'
-      description: |
-        Configurations for a Search Engine.
-      required: false
-      immutable: true
-      properties:
-        - !ruby/object:Api::Type::String
-          name: 'companyName'
-          description: |
-            The name of the company, business or entity that is associated with the engine
-          required: false
-          immutable: true
+    name: 'commonConfig'
+    description: |
+      Configurations for a Search Engine.
+    required: false
+    immutable: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'companyName'
+        description: |
+          The name of the company, business or entity that is associated with the engine
+        required: false
+        immutable: true
