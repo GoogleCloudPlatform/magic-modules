@@ -1,8 +1,0 @@
-if v, ok := d.GetOk("feature_group"); ok {
-	re := regexp.MustCompile("^projects/(.+)/locations/(.+)/featureGroup/(.+)$")
-	if parts := re.FindStringSubmatch(v.(string)); parts != nil {
-		d.Set("region", parts[2])
-	}
-}
-
-return obj, nil

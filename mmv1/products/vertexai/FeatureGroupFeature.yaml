@@ -13,9 +13,9 @@
 
 --- !ruby/object:Api::Resource
 name: FeatureGroupFeature
-base_url: '{{feature_group}}/features'
-create_url: '{{feature_group}}/features?featureId={{name}}'
-self_link: '{{feature_group}}/features/{{name}}'
+base_url: 'projects/{{project}}/locations/{{region}}/featureGroups/{{feature_group}}/features'
+create_url: 'projects/{{project}}/locations/{{region}}/featureGroups/{{feature_group}}/features?featureId={{name}}'
+self_link: 'projects/{{project}}/locations/{{region}}/featureGroups/{{feature_group}}/features/{{name}}'
 update_verb: :PATCH
 update_mask: true
 create_verb: :POST
@@ -44,8 +44,11 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
-  include_project: true
-description: Vertex AI Feature Group.
+description: Vertex AI Feature Group Feature is feature metadata information.
+import_format:
+  [
+    'projects/{{project}}/locations/{{region}}/featureGroups/{{feature_group}}/features/{{name}}'
+  ]
 autogen_async: false
 examples:
   - !ruby/object:Provider::Terraform::Examples
@@ -63,27 +66,26 @@ examples:
       name: example_feature
       feature_group_name: example_feature_group
     skip_docs: true
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  pre_create: templates/terraform/pre_create/vertex_ai_feature_group_feature.go.erb
-  pre_delete: templates/terraform/pre_delete/vertex_ai_feature_group_feature.go.erb
-  custom_import: templates/terraform/custom_import/vertex_ai_feature_group_feature.go.erb
-  extra_schema_entry: templates/terraform/extra_schema_entry/vertex_ai_feature_group_feature.go.erb
-  encoder: templates/terraform/encoders/vertex_ai_feature_group_feature.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: featureGroup
-    description: The name of the Feature Group to use, in the format
-      `projects/{project}/locations/{location}/featureGroups/{feature_group}`.
+    description: The name of the Feature Group.
     url_param_only: true
     immutable: true
     required: true
+  - !ruby/object:Api::Type::String
+    name: 'region'
+    description: The region for the resource. It should be the same as the feature group's region.
+    required: true
+    immutable: true
+    url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
     name: name
     description: The resource name of the Feature Group Feature.
     required: true
-    pattern: '{{feature_group}}/features/{{name}}'
-    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+    immutable: true
+    url_param_only: true
   - !ruby/object:Api::Type::String
     name: createTime
     output: true

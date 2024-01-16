@@ -46,7 +46,8 @@ func testAccVertexAIFeatureGroupFeature_basic(context map[string]interface{}) st
 	return acctest.Nprintf(`
 resource "google_vertex_ai_feature_group_feature" "feature_group_feature" {
   name = "tf_test_example_feature%{random_suffix}"
-  feature_group = google_vertex_ai_feature_group.sample_feature_group.id
+  region = "us-central1"
+  feature_group = google_vertex_ai_feature_group.sample_feature_group.name
   description = "A sample feature"
   labels = {
       label-one = "value-one"
@@ -115,7 +116,8 @@ func testAccVertexAIFeatureGroupFeature_updated(context map[string]interface{}) 
 	return acctest.Nprintf(`
 resource "google_vertex_ai_feature_group_feature" "feature_group_feature" {
   name = "tf_test_example_feature%{random_suffix}"
-  feature_group = google_vertex_ai_feature_group.sample_feature_group.id
+  region = "us-central1"
+  feature_group = google_vertex_ai_feature_group.sample_feature_group.name
   description = "A sample feature (updated)"
   labels = {
       label-one = "value-one"
