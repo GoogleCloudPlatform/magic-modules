@@ -81,6 +81,9 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: githubConfig
     description: Configuration for connections to github.com.
+    conflicts:
+      - 'github_enterprise_config'
+      - 'gitlab_config'
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: authorizerCredential
@@ -89,6 +92,7 @@ properties:
           - !ruby/object:Api::Type::String
             name: oauthTokenSecretVersion
             description: 'A SecretManager resource containing the OAuth token that authorizes the Cloud Build connection. Format: `projects/*/secrets/*/versions/*`.'
+            diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
           - !ruby/object:Api::Type::String
             name: username
             description: Output only. The username associated to this token.
@@ -98,6 +102,9 @@ properties:
         description: GitHub App installation id.
   - !ruby/object:Api::Type::NestedObject
     name: githubEnterpriseConfig
+    conflicts:
+      - 'github_config'
+      - 'gitlab_config'
     description: Configuration for connections to an instance of GitHub Enterprise.
     properties:
       - !ruby/object:Api::Type::String
@@ -113,9 +120,11 @@ properties:
       - !ruby/object:Api::Type::String
         name: privateKeySecretVersion
         description: SecretManager resource containing the private key of the GitHub App, formatted as `projects/*/secrets/*/versions/*`.
+        diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
       - !ruby/object:Api::Type::String
         name: webhookSecretSecretVersion
         description: SecretManager resource containing the webhook secret of the GitHub App, formatted as `projects/*/secrets/*/versions/*`.
+        diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
       - !ruby/object:Api::Type::Integer
         name: appInstallationId
         description: ID of the installation of the GitHub App.
@@ -127,11 +136,15 @@ properties:
             name: service
             description: 'Required. The Service Directory service name. Format: projects/{project}/locations/{location}/namespaces/{namespace}/services/{service}.'
             required: true
+            diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
       - !ruby/object:Api::Type::String
         name: sslCa
         description: SSL certificate to use for requests to GitHub Enterprise.
   - !ruby/object:Api::Type::NestedObject
     name: gitlabConfig
+    conflicts:
+      - 'github_config'
+      - 'github_enterprise_config'
     description: Configuration for connections to gitlab.com or an instance of GitLab Enterprise.
     properties:
       - !ruby/object:Api::Type::String
@@ -143,6 +156,7 @@ properties:
         description: Required. Immutable. SecretManager resource containing the webhook secret of a GitLab Enterprise project, formatted as `projects/*/secrets/*/versions/*`.
         required: true
         immutable: true
+        diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
       - !ruby/object:Api::Type::NestedObject
         name: readAuthorizerCredential
         description: Required. A GitLab personal access token with the minimum `read_api` scope access.
@@ -152,6 +166,7 @@ properties:
             name: userTokenSecretVersion
             description: 'Required. A SecretManager resource containing the user token that authorizes the Cloud Build connection. Format: `projects/*/secrets/*/versions/*`.'
             required: true
+            diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
           - !ruby/object:Api::Type::String
             name: username
             description: Output only. The username associated to this token.
@@ -165,6 +180,7 @@ properties:
             name: userTokenSecretVersion
             description: 'Required. A SecretManager resource containing the user token that authorizes the Cloud Build connection. Format: `projects/*/secrets/*/versions/*`.'
             required: true
+            diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
           - !ruby/object:Api::Type::String
             name: username
             description: Output only. The username associated to this token.
@@ -177,6 +193,7 @@ properties:
             name: service
             description: 'Required. The Service Directory service name. Format: projects/{project}/locations/{location}/namespaces/{namespace}/services/{service}.'
             required: true
+            diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
       - !ruby/object:Api::Type::String
         name: sslCa
         description: SSL certificate to use for requests to GitLab Enterprise.
