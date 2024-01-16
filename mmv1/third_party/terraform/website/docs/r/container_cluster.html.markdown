@@ -794,7 +794,7 @@ The `master_authorized_networks_config.cidr_blocks` block supports:
 Enabling Confidential Storage will create boot disk with confidential mode. It is disabled by default.
 
 * `enable_confidential_storage_override_for_default_node_pool` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
-If set, it creates boot disk with confidential mode for the default node pool only if cluster creation doesn't specify node_config or node_pool configurations.
+If set, creates default node-pool boot disk with confidential mode on with compatible machine type:`n2-standard-2` and disk-type:`hyperdisk-balanced`. The changes are made only if cluster creation doesn't specify node_config or node_pool configurations.
 
 * `ephemeral_storage_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Parameters for the ephemeral storage filesystem. If unspecified, ephemeral storage is backed by the boot disk. Structure is [documented below](#nested_ephemeral_storage_config).
 
