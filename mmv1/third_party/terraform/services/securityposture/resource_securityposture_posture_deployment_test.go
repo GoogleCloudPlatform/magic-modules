@@ -70,7 +70,8 @@ resource "google_securityposture_posture" "posture_one" {
 
 resource "google_securityposture_posture_deployment" "postureDeployment_one" {
 	posture_deployment_id          = "posture_deployment_one"
-	parent = "organizations/%{org_id}/locations/global"
+	parent = "organizations/%{org_id}"
+	location = "global"
     description = "a new posture deployment"
     target_resource = "projects/%{project_number}"
     posture_id = google_securityposture_posture.posture_one.name
@@ -127,7 +128,8 @@ resource "google_securityposture_posture" "posture_two" {
 
 resource "google_securityposture_posture_deployment" "postureDeployment_one" {
 	posture_deployment_id          = "posture_deployment_one"
-	parent = "organizations/%{org_id}/locations/global"
+	parent = "organizations/%{org_id}"
+	location = "global"
     description = "an updated posture deployment"
     target_resource = "projects/%{project_number}"
     posture_id = google_securityposture_posture.posture_two.name

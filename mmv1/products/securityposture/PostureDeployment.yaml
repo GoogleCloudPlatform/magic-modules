@@ -15,11 +15,11 @@
 name: 'PostureDeployment'
 description: |
   Represents a deployment of a security posture on a resource.
-import_format: ['{{%parent}}/postureDeployments/{{posture_deployment_id}}']
-base_url: '{{parent}}/postureDeployments'
-self_link: '{{parent}}/postureDeployments/{{posture_deployment_id}}'
+import_format: ['{{%parent}}/locations/{{location}}/postureDeployments/{{posture_deployment_id}}']
+base_url: '{{parent}}/locations/{{location}}/postureDeployments'
+self_link: '{{parent}}/locations/{{location}}/postureDeployments/{{posture_deployment_id}}'
 
-create_url: '{{parent}}/postureDeployments?postureDeploymentId={{posture_deployment_id}}'
+create_url: '{{parent}}/locations/{{location}}/postureDeployments?postureDeploymentId={{posture_deployment_id}}'
 update_verb: :PATCH
 update_mask: true
 
@@ -40,7 +40,14 @@ parameters:
   - !ruby/object:Api::Type::String
     name: parent
     description: |
-      The parent of the resource, an organization. Format should be `organizations/{organization_id}/locations/{location}`.
+      The parent of the resource, an organization. Format should be `organizations/{organization_id}`.
+    immutable: true
+    url_param_only: true
+    required: true
+    - !ruby/object:Api::Type::String
+    name: location
+    description: |
+      The location of the resource, eg. global`.
     immutable: true
     url_param_only: true
     required: true
@@ -55,7 +62,6 @@ parameters:
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
-    immutable: true
     description: |
       Name of the posture deployment instance.
     output: true
