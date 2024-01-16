@@ -1916,17 +1916,11 @@ func expandComposerEnvironmentConfig(v interface{}, d *schema.ResourceData, conf
 		Check image version to avoid overriding EnablePrivateEnvironment in case of other versions.
 	*/
 	if isComposer3(d, config) {
+		transformed.PrivateEnvironmentConfig = &composer.PrivateEnvironmentConfig{}
 		if enablePrivateEnvironmentRaw, ok := original["enable_private_environment"]; ok {
-			if transformed.PrivateEnvironmentConfig == nil {
-				transformed.PrivateEnvironmentConfig = &composer.PrivateEnvironmentConfig{}
-			}
 			transformed.PrivateEnvironmentConfig.EnablePrivateEnvironment = enablePrivateEnvironmentRaw.(bool)
 		}
-
 		if enablePrivateBuildsOnlyRaw, ok := original["enable_private_builds_only"]; ok {
-			if transformed.PrivateEnvironmentConfig == nil{
-				transformed.PrivateEnvironmentConfig = &composer.PrivateEnvironmentConfig{}
-			}
 			transformed.PrivateEnvironmentConfig.EnablePrivateBuildsOnly = enablePrivateBuildsOnlyRaw.(bool)
 		}
 	}
