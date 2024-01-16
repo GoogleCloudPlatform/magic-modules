@@ -168,6 +168,7 @@ properties:
     immutable: true
   - !ruby/object:Api::Type::Boolean
     name: 'enableHistoryModifications'
+    min_version: beta
     description: |
       Whether to allow the ExecuteBundle API to accept history bundles, and directly insert and overwrite historical
       resource versions into the FHIR store. If set to false, using history bundles fails with an error.
