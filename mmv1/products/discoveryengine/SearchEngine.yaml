@@ -41,6 +41,7 @@ examples:
       'fmt.Sprintf("tf_test_search_engine%s", context["random_suffix"])'
     vars:
       engine_id: "example-engine-id"
+      data_store_id: "example-datastore-id"
 
 parameters:
   - !ruby/object:Api::Type::String
