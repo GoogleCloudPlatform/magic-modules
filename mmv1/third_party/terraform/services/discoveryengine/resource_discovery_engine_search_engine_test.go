@@ -44,13 +44,22 @@ func TestAccDiscoveryEngineSearchEngine_discoveryengineSearchengineBasicExample_
 
 func testAccDiscoveryEngineSearchEngine_discoveryengineSearchengineBasicExample_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_discovery_engine_data_store" "basic" {
+    location                    = "global"
+    data_store_id               = "tf-test-example-datastore%{random_suffix}"
+    display_name                = "tf-test-structured-datastore"
+    industry_vertical           = "GENERIC"
+    content_config              = "NO_CONTENT"
+    solution_types              = ["SOLUTION_TYPE_SEARCH"]
+    create_advanced_site_search = false
+    }
 resource "google_discovery_engine_search_engine" "basic" {
   engine_id = "tf-test-example-engine-id%{random_suffix}"
   collection_id = "default_collection"
   location = "global"
   display_name = "Example Display Name"
   industry_vertical = "GENERIC"
-  data_store_ids = ["test-demo-data_1705085526185"]
+  data_store_ids = [google_discovery_engine_data_store.basic.data_store_id]
   solution_type = "SOLUTION_TYPE_SEARCH"
   common_config {
     company_name = "Example Company Name"
@@ -65,13 +74,22 @@ resource "google_discovery_engine_search_engine" "basic" {
 
 func testAccDiscoveryEngineSearchEngine_discoveryengineSearchengineBasicExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_discovery_engine_data_store" "basic" {
+    location                    = "global"
+    data_store_id               = "tf-test-example-datastore%{random_suffix}"
+    display_name                = "tf-test-structured-datastore"
+    industry_vertical           = "GENERIC"
+    content_config              = "NO_CONTENT"
+    solution_types              = ["SOLUTION_TYPE_SEARCH"]
+    create_advanced_site_search = false
+    }
 resource "google_discovery_engine_search_engine" "basic" {
   engine_id = "tf-test-example-engine-id%{random_suffix}"
   collection_id = "default_collection"
   location = "global"
   display_name = "Updated Example Display Name"
   industry_vertical = "GENERIC"
-  data_store_ids = ["test-demo-data_1705085526185"]
+  data_store_ids = [google_discovery_engine_data_store.basic.data_store_id]
   solution_type = "SOLUTION_TYPE_SEARCH"
   common_config {
     company_name = "Updated Example Company Name"
