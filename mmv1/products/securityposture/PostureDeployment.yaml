@@ -44,7 +44,7 @@ parameters:
     immutable: true
     url_param_only: true
     required: true
-    - !ruby/object:Api::Type::String
+  - !ruby/object:Api::Type::String
     name: location
     description: |
       The location of the resource, eg. global`.
