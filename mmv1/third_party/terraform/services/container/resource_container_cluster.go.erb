@@ -1625,7 +1625,7 @@ func ResourceContainerCluster() *schema.Resource {
 			"enable_confidential_storage_override_for_default_node_pool": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: `If true, updates the default node pool to set "enable_confidential_storage" flag; use confidential mode compatible machine type:`n2-standard-2` and disk-type:`hyperdisk-balanced`. The configurations changes are made only if node pool/node config is not defined during cluster creation.`,
+				Description: `If true, updates the default node pool to set "enable_confidential_storage" flag; use confidential mode compatible machine type:"n2-standard-2" and disk-type:"hyperdisk-balanced". The configurations changes are made only if node pool/node config is not defined during cluster creation.`,
 			},
 
 			"boot_disk_kms_key_override_for_default_node_pool": {
