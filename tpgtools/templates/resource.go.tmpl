@@ -413,6 +413,7 @@ func resource{{$.PathType}}Read(d *schema.ResourceData, meta interface{}) error 
 
 {{- if $.Updatable }}
 func resource{{$.PathType}}Update(d *schema.ResourceData, meta interface{}) error {
+{{- if $.HasMutableNonLabelsFields }}
 	config := meta.(*transport_tpg.Config)
 
 {{- range $v := .Properties }}
@@ -490,6 +491,10 @@ func resource{{$.PathType}}Update(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	log.Printf("[DEBUG] Finished creating {{$.DCLTitle}} %q: %#v", d.Id(), res)
+
+{{- else }}
+	// Only the root field "labels" and "terraform_labels" are mutable
+{{- end }}
 
 	return resource{{$.PathType}}Read(d, meta)
 }

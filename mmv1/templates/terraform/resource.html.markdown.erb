@@ -179,7 +179,7 @@ This resource provides the following
 [Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options:
 
 - `create` - Default is <%= timeouts.insert_minutes -%> minutes.
-<% if updatable?(object, properties) -%>
+<% if updatable?(object, properties) || object.root_labels? -%>
 - `update` - Default is <%= timeouts.update_minutes -%> minutes.
 <% end -%>
 - `delete` - Default is <%= timeouts.delete_minutes -%> minutes.

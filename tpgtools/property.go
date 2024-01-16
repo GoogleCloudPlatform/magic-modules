@@ -906,6 +906,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 
 			if p.IsResourceLabels() {
 				props = append(props, build_terraform_labels_field(p, resource, parent))
+				p.ForceNew = false
 			}
 		}
 
@@ -969,7 +970,6 @@ func build_terraform_labels_field(p Property, resource *Resource, parent *Proper
 		resource:    resource,
 		parent:      parent,
 		Computed:    true,
-		ForceNew:    p.ForceNew, // Add ForceNew property if labels field has it
 		PackageName: p.PackageName,
 		StateSetter: &stateSetter,
 	}
