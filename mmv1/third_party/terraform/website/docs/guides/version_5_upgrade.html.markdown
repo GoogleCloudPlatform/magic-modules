@@ -242,7 +242,7 @@ all of the labels present on the resource in GCP including the labels configured
 through Terraform, the system, and other clients, equivalent to
 `effective_labels` on the resource.
 
-### TFC Drift Detection with Labels
+### How to make Terraform Cloud's Drift Detection feature compatible with the new implementation of labels
 
 In <5.0.0, Drift Detection was possible for labels but would lead to some confusion for users due to GCP often adding labels to itself. This resulted in Drift Detection not being 100% correct of the time.
 
