@@ -458,6 +458,7 @@ func testTools(mmLocalPath, tpgbLocalPath string, env map[string]string, gh Gith
 	state := "success"
 	if _, err := rnr.Run("go", []string{"test"}, map[string]string{
 		"GOPATH":       env["GOPATH"],
+		"HOME":         env["HOME"],
 		"SERVICES_DIR": servicesDir,
 	}); err != nil {
 		fmt.Printf("error from running go test in %s: %v\n", missingTestDetectorPath, err)
