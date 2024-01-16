@@ -54,5 +54,5 @@ resource "google_netapp_volumereplication" "my-replication" {
 resource "time_sleep" "wait_for_mirrored" {
   depends_on = [google_netapp_volumereplication.my-replication]
 
-  create_duration = "6m"
+  destroy_duration = "6m"
 }
