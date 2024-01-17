@@ -23,12 +23,14 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 base_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}'
 self_link: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}'
 create_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines?engineId={{engine_id}}'
+update_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}'
 delete_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}'
 
 update_verb: :PATCH
 update_mask: true
 
 async: !ruby/object:Api::OpAsync
+  actions: ['create', 'delete']
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
     base_url: '{{op_id}}'
@@ -90,12 +92,14 @@ properties:
       description: |
         Data Store IDs
       required: true
-      immutable: true
       item_type: Api::Type::String
-  - !ruby/object:Api::Type::String
+  - !ruby/object:Api::Type::Enum
       name: 'solutionType'
       description: |
-        A solution type
+        Solution type for Chat Engine is SOLUTION_TYPE_CHAT
+      values:
+        - :SOLUTION_TYPE_CHAT
+      default_value: :SOLUTION_TYPE_CHAT
       immutable: true
   - !ruby/object:Api::Type::Time
       name: 'createTime'
@@ -112,6 +116,8 @@ properties:
       description: |
         Configurations for a chat Engine.
       required: true
+      immutable: true
+      ignore_read: true
       properties:
         - !ruby/object:Api::Type::NestedObject
           name: 'agentCreationConfig'
@@ -151,3 +157,15 @@ properties:
           description: |
             The name of the company, business or entity that is associated with the engine
           required: true
+          immutable: true
+  - !ruby/object:Api::Type::NestedObject
+      name: 'chatEngineMetadata'
+      description: |
+        Additional information of the Chat Engine.
+      output: true
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'dialogflowAgent'
+          description: |
+            The resource name of a Dialogflow agent, that this Chat Engine refers to.
+          output: true
