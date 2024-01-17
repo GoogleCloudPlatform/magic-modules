@@ -298,6 +298,8 @@ resource "google_logging_project_bucket_config" "basic" {
 	location  = "global"
 	enable_analytics = %t
 	bucket_id = "%{bucket_id}"
+
+	depends_on = [time_sleep.wait_60_seconds]
 }
 `, context), analytics)
 }
