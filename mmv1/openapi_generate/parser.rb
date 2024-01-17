@@ -41,7 +41,7 @@ module OpenAPIGenerate
       additional_description = ''
 
       # allOf is a workaround for overriding fields on shared objects
-      if obj.respond_to?(:all_of) && (obj.all_of&.length() != nil)
+      if obj.respond_to?(:all_of) && !obj.all_of&.length().nil?
         obj = obj.all_of[0]
         type = obj.type
       end
@@ -68,7 +68,8 @@ module OpenAPIGenerate
         elsif name == 'annotations'
           # standard annotations field handling
           field = Api::Type::KeyValueAnnotations.new
-        elsif obj.respond_to?(:additional_properties) && obj.additional_properties.respond_to?(:type)
+        elsif obj.respond_to?(:additional_properties) \
+          && obj.additional_properties.respond_to?(:type)
           # additionalProperties.type signifies a string -> string map
           field = Api::Type::KeyValuePairs.new
         else
