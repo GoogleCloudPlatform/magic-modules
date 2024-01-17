@@ -18,7 +18,7 @@ description: |
   and policy sets. A policy set includes set of policies along with their definition.
   A posture can be created at the organization level.
   Every update to a deployed posture creates a new posture revision with an updated revision_id.
-import_format: ['{{parent}}/locations/{{location}}/postures/{{posture_id}}']
+import_format: ['{{%parent}}/locations/{{location}}/postures/{{posture_id}}']
 base_url: '{{parent}}/locations/{{location}}/postures'
 
 self_link: '{{parent}}/locations/{{location}}/postures/{{posture_id}}'
@@ -256,11 +256,6 @@ properties:
                                   description:
                                     String indicating the location of the expression for error
                                     reporting, e.g. a file name and a position in the file
-                    exactly_one_of:
-                      - policy_sets.0.policies.0.constraint.0.org_policy_constraint
-                      - policy_sets.0.policies.0.constraint.0.org_policy_constraint_custom
-                      - policy_sets.0.policies.0.constraint.0.security_health_analytics_module
-                      - policy_sets.0.policies.0.constraint.0.security_health_analytics_custom_module
                   - !ruby/object:Api::Type::NestedObject
                     name: 'orgPolicyConstraintCustom'
                     description: |
@@ -378,11 +373,6 @@ properties:
                                   description:
                                     String indicating the location of the expression for error
                                     reporting, e.g. a file name and a position in the file
-                    exactly_one_of:
-                      - policy_sets.0.policies.0.constraint.0.org_policy_constraint
-                      - policy_sets.0.policies.0.constraint.0.org_policy_constraint_custom
-                      - policy_sets.0.policies.0.constraint.0.security_health_analytics_module
-                      - policy_sets.0.policies.0.constraint.0.security_health_analytics_custom_module
                   - !ruby/object:Api::Type::NestedObject
                     name: 'securityHealthAnalyticsModule'
                     description: 'Security Health Analytics built-in detector definition.'
@@ -398,11 +388,6 @@ properties:
                           - :ENABLEMENT_STATE_UNSPECIFIED
                           - :ENABLED
                           - :DISABLED
-                    exactly_one_of:
-                      - policy_sets.0.policies.0.constraint.0.org_policy_constraint
-                      - policy_sets.0.policies.0.constraint.0.org_policy_constraint_custom
-                      - policy_sets.0.policies.0.constraint.0.security_health_analytics_module
-                      - policy_sets.0.policies.0.constraint.0.security_health_analytics_custom_module
                   - !ruby/object:Api::Type::NestedObject
                     name: 'securityHealthAnalyticsCustomModule'
                     description: 'Definition of Security Health Analytics Custom Module.'
@@ -532,8 +517,3 @@ properties:
                             description: |
                               An explanation of the recommended steps that security teams can take to
                               resolve the detected issue
-                    exactly_one_of:
-                      - policy_sets.0.policies.0.constraint.0.org_policy_constraint
-                      - policy_sets.0.policies.0.constraint.0.org_policy_constraint_custom
-                      - policy_sets.0.policies.0.constraint.0.security_health_analytics_module
-                      - policy_sets.0.policies.0.constraint.0.security_health_analytics_custom_module
