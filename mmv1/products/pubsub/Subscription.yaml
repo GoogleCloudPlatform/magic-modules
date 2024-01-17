@@ -134,13 +134,6 @@ properties:
           When true, use the BigQuery table's schema as the columns to write to in BigQuery. Messages
           must be published in JSON format. Only one of useTopicSchema and useTableSchema can be set.
       - !ruby/object:Api::Type::Boolean
-        name: 'useTableSchema'
-        conflicts:
-          - use_topic_schema
-        description: |
-          When true, use the BigQuery table's schema as the columns to write to in BigQuery. Messages
-          must be published in JSON format. Only one of useTopicSchema and useTableSchema can be set.
-      - !ruby/object:Api::Type::Boolean
         name: 'writeMetadata'
         description: |
           When true, write the subscription name, messageId, publishTime, attributes, and orderingKey to additional columns in the table.
