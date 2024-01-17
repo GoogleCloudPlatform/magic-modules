@@ -1,0 +1,47 @@
+---
+steps:
+    - name: 'gcr.io/graphite-docker-images/go-plus'
+      id: gcb-vcr-nightly
+      entrypoint: '/workspace/.ci/scripts/go-plus/vcr-cassette-update/vcr_cassette_update.sh'
+      secretEnv: ["GITHUB_TOKEN", "GOOGLE_BILLING_ACCOUNT", "GOOGLE_CUST_ID", "GOOGLE_FIRESTORE_PROJECT", "GOOGLE_IDENTITY_USER", "GOOGLE_MASTER_BILLING_ACCOUNT", "GOOGLE_ORG", "GOOGLE_ORG_2", "GOOGLE_ORG_DOMAIN", "GOOGLE_PROJECT", "GOOGLE_PROJECT_NUMBER", "GOOGLE_SERVICE_ACCOUNT", "SA_KEY", "GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION", "GOOGLE_TPU_V2_VM_RUNTIME_VERSION"]
+      args:
+          - $BUILD_ID
+
+# Long timeout to enable waiting on VCR test
+timeout: 20000s
+options:
+    machineType: 'N1_HIGHCPU_32'
+
+logsBucket: 'gs://cloudbuild-vcr-nightly-logs'
+availableSecrets:
+  secretManager:
+    - versionName: projects/673497134629/secrets/github-magician-token/versions/latest
+      env: GITHUB_TOKEN
+    - versionName: projects/673497134629/secrets/ci-test-billing-account/versions/latest
+      env: GOOGLE_BILLING_ACCOUNT
+    - versionName: projects/673497134629/secrets/ci-test-cust-id/versions/latest
+      env: GOOGLE_CUST_ID
+    - versionName: projects/673497134629/secrets/ci-test-firestore-project/versions/latest
+      env: GOOGLE_FIRESTORE_PROJECT
+    - versionName: projects/673497134629/secrets/ci-test-identity-user/versions/latest
+      env: GOOGLE_IDENTITY_USER
+    - versionName: projects/673497134629/secrets/ci-test-master-billing-account/versions/latest
+      env: GOOGLE_MASTER_BILLING_ACCOUNT
+    - versionName: projects/673497134629/secrets/ci-test-org/versions/latest
+      env: GOOGLE_ORG
+    - versionName: projects/673497134629/secrets/ci-test-org-2/versions/latest
+      env: GOOGLE_ORG_2
+    - versionName: projects/673497134629/secrets/ci-test-org-domain/versions/latest
+      env: GOOGLE_ORG_DOMAIN
+    - versionName: projects/673497134629/secrets/ci-test-project/versions/latest
+      env: GOOGLE_PROJECT
+    - versionName: projects/673497134629/secrets/ci-test-project-number/versions/latest
+      env: GOOGLE_PROJECT_NUMBER
+    - versionName: projects/673497134629/secrets/ci-test-service-account/versions/latest
+      env: GOOGLE_SERVICE_ACCOUNT
+    - versionName: projects/673497134629/secrets/ci-test-service-account-key/versions/latest
+      env: SA_KEY
+    - versionName: projects/673497134629/secrets/ci-test-public-advertised-prefix-description/versions/latest
+      env: GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION
+    - versionName: projects/673497134629/secrets/ci-test-tpu-v2-vm-runtime-version/versions/latest
+      env: GOOGLE_TPU_V2_VM_RUNTIME_VERSION

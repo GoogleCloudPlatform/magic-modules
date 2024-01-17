@@ -1,6 +1,6 @@
 <%= lines(autogen_notice(:go, pwd)) -%>
 
-package <%= product_ns.downcase -%>
+package <%= object.__product.name .downcase -%>
 
 import (
 <%- # We list all the v2 imports here and unstable imports, because we run 'goimports' to guess the correct
@@ -24,7 +24,7 @@ import (
 )
 
 <%
-    resource_name = product_ns + object.name
+    resource_name = object.__product.name  + object.name
     properties = object.all_user_properties
     # See discussion on asset name here: https://github.com/GoogleCloudPlatform/magic-modules/pull/1520
     product_backend_name=@base_url.split('://')[1].split('.googleapis.com')[0]
@@ -40,25 +40,25 @@ import (
 
 <%= lines(compile(pwd + '/' + object.custom_code.constants)) if object.custom_code.constants -%>
 
-const <%= resource_name -%>AssetType string = "<%= product_backend_name.downcase -%>.googleapis.com/<%= object.name -%>"
+const <%= object.resource_name -%>AssetType string = "<%= product_backend_name.downcase -%>.googleapis.com/<%= object.name -%>"
 
 
-func ResourceConverter<%= resource_name -%>() cai.ResourceConverter {
+func ResourceConverter<%= object.resource_name -%>() cai.ResourceConverter {
     return cai.ResourceConverter{
-        AssetType: <%= resource_name -%>AssetType,
-        Convert: Get<%= resource_name -%>CaiObject,
+        AssetType: <%= object.resource_name -%>AssetType,
+        Convert: Get<%= object.resource_name -%>CaiObject,
     }
 }
 
-func Get<%= resource_name -%>CaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]cai.Asset, error) {
+func Get<%= object.resource_name -%>CaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]cai.Asset, error) {
     name, err := cai.AssetName(d, config, "<%= asset_name_template -%>")
     if err != nil {
         return []cai.Asset{}, err
     }
-    if obj, err := Get<%= resource_name -%>ApiObject(d, config); err == nil {
+    if obj, err := Get<%= object.resource_name -%>ApiObject(d, config); err == nil {
         return []cai.Asset{{
             Name: name,
-            Type: <%= resource_name -%>AssetType,
+            Type: <%= object.resource_name -%>AssetType,
             Resource: &cai.AssetResource{
                 Version: "<%= api_version -%>",
                 DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/<%= product_backend_name.downcase -%>/<%= api_version -%>/rest",
@@ -71,13 +71,13 @@ func Get<%= resource_name -%>CaiObject(d tpgresource.TerraformResourceData, conf
     }
 }
 
-func Get<%= resource_name -%>ApiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
+func Get<%= object.resource_name -%>ApiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
     obj := make(map[string]interface{})
 <%  object.settable_properties.each do |prop| -%>
 <%    if prop.flatten_object -%>
-    <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(nil, d, config)
+    <%= prop.api_name -%>Prop, err := expand<%= object.resource_name -%><%= titlelize_property(prop) -%>(nil, d, config)
 <%    else # if flatten -%>
-    <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
+    <%= prop.api_name -%>Prop, err := expand<%= object.resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
 <%    end -%>
     if err != nil {
         return nil, err
@@ -91,19 +91,19 @@ func Get<%= resource_name -%>ApiObject(d tpgresource.TerraformResourceData, conf
 <%  end -%>
 
 <%  if object.custom_code.encoder -%>
-    return resource<%= resource_name -%>Encoder(d, config, obj)
+    return resource<%= object.resource_name -%>Encoder(d, config, obj)
 <%  else -%>
     return obj, nil
 <%  end -%>
 }
 
 <% if object.custom_code.encoder -%>
-func resource<%= resource_name -%>Encoder(d tpgresource.TerraformResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+func resource<%= object.resource_name -%>Encoder(d tpgresource.TerraformResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
 <%= lines(compile(pwd + '/' + object.custom_code.encoder)) -%>
 }
 <% end -%>
 
 <% object.settable_properties.each do |prop| -%>
-<%= lines(build_expand_method(resource_name, prop, object, pwd), 1) -%>
+<%= lines(build_expand_method(object.resource_name, prop, object, pwd), 1) -%>
 <% end -%>
 

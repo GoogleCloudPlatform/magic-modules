@@ -166,6 +166,13 @@ properties:
       ** This property can be changed manually in the Google Cloud Healthcare admin console without recreating the FHIR store **
     required: false
     immutable: true
+  - !ruby/object:Api::Type::Boolean
+    name: 'enableHistoryModifications'
+    min_version: beta
+    description: |
+      Whether to allow the ExecuteBundle API to accept history bundles, and directly insert and overwrite historical
+      resource versions into the FHIR store. If set to false, using history bundles fails with an error.
+    required: false
   - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     required: false

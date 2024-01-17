@@ -519,7 +519,10 @@ resource "google_alloydb_cluster" "secondary" {
     kms_key_name = google_kms_crypto_key.key.id
   }
 
-  depends_on = [google_alloydb_instance.primary, google_kms_crypto_key_iam_member.crypto_key]
+  depends_on = [
+    google_alloydb_instance.primary,
+    google_kms_crypto_key_iam_member.crypto_key
+  ]
 }
 
 data "google_project" "project" {}
@@ -1145,7 +1148,7 @@ func TestAccAlloydbCluster_secondaryClusterPromoteWithNetworkConfigAndAllocatedI
 				ResourceName:            "google_alloydb_cluster.secondary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
 			},
 			{
 				Config: testAccAlloydbCluster_secondaryClusterPromoteWithNetworkConfigAndAllocatedIPRange(context),
@@ -1154,7 +1157,7 @@ func TestAccAlloydbCluster_secondaryClusterPromoteWithNetworkConfigAndAllocatedI
 				ResourceName:            "google_alloydb_cluster.secondary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
 			},
 		},
 	})

@@ -48,9 +48,10 @@ func TestAccLoggingBucketConfigProject_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-		"project_name":  "tf-test-" + acctest.RandString(t, 10),
-		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"random_suffix":   acctest.RandString(t, 10),
+		"project_name":    "tf-test-" + acctest.RandString(t, 10),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -92,9 +93,10 @@ func TestAccLoggingBucketConfigProject_analyticsEnabled(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-		"project_name":  "tf-test-" + acctest.RandString(t, 10),
-		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"random_suffix":   acctest.RandString(t, 10),
+		"project_name":    "tf-test-" + acctest.RandString(t, 10),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -255,6 +257,7 @@ resource "google_project" "default" {
 	project_id = "%{project_name}"
 	name       = "%{project_name}"
 	org_id     = "%{org_id}"
+	billing_account = "%{billing_account}"
 }
 
 resource "google_logging_project_bucket_config" "basic" {
@@ -262,7 +265,7 @@ resource "google_logging_project_bucket_config" "basic" {
 	location  = "global"
 	retention_days = %d
 	description = "retention test %d days"
-	bucket_id = "_Default"
+	bucket_id = "test-bucket"
 }
 `, context), retention, retention)
 }
@@ -273,13 +276,14 @@ resource "google_project" "default" {
 	project_id = "%{project_name}"
 	name       = "%{project_name}"
 	org_id     = "%{org_id}"
+	billing_account = "%{billing_account}"
 }
 
 resource "google_logging_project_bucket_config" "basic" {
 	project    = google_project.default.name
 	location  = "global"
 	enable_analytics = %t
-	bucket_id = "_Default"
+	bucket_id = "test-bucket"
 }
 `, context), analytics)
 }

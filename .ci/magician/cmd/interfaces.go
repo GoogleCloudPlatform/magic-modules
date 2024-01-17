@@ -21,9 +21,10 @@ import (
 
 type GithubClient interface {
 	GetPullRequest(prNumber string) (github.PullRequest, error)
-	GetPullRequestRequestedReviewer(prNumber string) (string, error)
-	GetPullRequestPreviousAssignedReviewers(prNumber string) ([]string, error)
+	GetPullRequestRequestedReviewers(prNumber string) ([]github.User, error)
+	GetPullRequestPreviousReviewers(prNumber string) ([]github.User, error)
 	GetUserType(user string) github.UserType
+	GetTeamMembers(organization, team string) ([]github.User, error)
 	PostBuildStatus(prNumber, title, state, targetURL, commitSha string) error
 	PostComment(prNumber, comment string) error
 	RequestPullRequestReviewer(prNumber, assignee string) error
