@@ -356,7 +356,7 @@ Replace `String` in the field type with one of the following options:
         - !ruby/object:Api::Type::String
           name: 'FIELD_NAME'
           description: |
-            MULTI_LINE_FIELD_DESCRIPTION        
+            MULTI_LINE_FIELD_DESCRIPTION
 ```
 
 This type is only used for string -> complex type mappings, use "KeyValuePairs" for simple mappings. Complex maps can't be represented natively in Terraform, and this type is transformed into an associative array (TypeSet) with the key merged into the object alongside other top-level fields.
