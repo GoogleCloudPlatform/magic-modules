@@ -149,11 +149,7 @@ func execGenerateComment(env map[string]string, gh GithubClient, rnr ExecRunner,
 
 	env["OLD_REF"] = oldBranch
 	env["NEW_REF"] = newBranch
-	for _, repo := range []struct {
-		Title   string
-		Path    string
-		Version provider.Version
-	}{
+	for _, repo := range []*source.Repo{
 		{
 			Title:   "TPG",
 			Path:    tpgLocalPath,
