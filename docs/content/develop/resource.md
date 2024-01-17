@@ -342,6 +342,28 @@ Replace `String` in the field type with one of the following options:
         MULTI_LINE_FIELD_DESCRIPTION
 ```
 {{< /tab >}}
+{{< tab "Map" >}}
+```yaml
+  - !ruby/object:Api::Type::Map
+    name: 'API_FIELD_NAME'
+    description: |
+      MULTILINE_FIELD_DESCRIPTION
+    key_name: KEY_NAME
+    key_description: |
+      MULTILINE_KEY_FIELD_DESCRIPTION
+    value_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'FIELD_NAME'
+          description: |
+            MULTI_LINE_FIELD_DESCRIPTION        
+```
+
+This type is only used for string -> complex type mappings, use "KeyValuePairs" for simple mappings. Complex maps can't be represented natively in Terraform, and this type is transformed into an associative array (TypeSet) with the key merged into the object alongside other top-level fields.
+
+For `key_name` and `key_description`, provide a domain-appropriate name and description. For example, a map that references a specific type of resource would generally use the singular resource kind as the key name (such as "topic" for PubSub Topic) and a descriptor of the expected format depending on the context (such as resourceId vs full resource name).
+
+{{< /tab >}}
 {{< /tabs >}}
 
 2. Modify the field configuration according to the API documentation and behavior.
