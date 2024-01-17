@@ -148,7 +148,7 @@ resource "google_bigquery_dataset" "test" {
 }
 
 resource "google_bigquery_connection" "test_updated" {
-  connection_id = "tf_test_connection_id%{random_suffix}"
+  connection_id = "tf_test_connection_updated_id%{random_suffix}"
   location      = "US"
   spark { }
 }
