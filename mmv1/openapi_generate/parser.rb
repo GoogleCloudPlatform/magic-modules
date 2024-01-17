@@ -40,6 +40,12 @@ module OpenAPIGenerate
       end
       additional_description = ''
 
+      # allOf is a workaround for overriding fields on shared objects
+      if obj.respond_to?(:all_of) && !obj.all_of&.length().nil?
+        obj = obj.all_of[0]
+        type = obj.type
+      end
+
       case type
       when 'string'
         field = Api::Type::String.new(name)
@@ -59,6 +65,13 @@ module OpenAPIGenerate
         if name == 'labels'
           # standard labels field handling
           field = Api::Type::KeyValueLabels.new
+        elsif name == 'annotations'
+          # standard annotations field handling
+          field = Api::Type::KeyValueAnnotations.new
+        elsif obj.respond_to?(:additional_properties) \
+          && obj.additional_properties.respond_to?(:type)
+          # additionalProperties.type signifies a string -> string map
+          field = Api::Type::KeyValuePairs.new
         else
           field = Api::Type::NestedObject.new
           required_props = obj.required || []
@@ -96,7 +109,7 @@ module OpenAPIGenerate
           field.instance_variable_set(:@item_type, nested_object)
         end
       else
-        raise "Failed to identify field type #{type}"
+        raise "Failed to identify field type #{type} #{name}"
       end
 
       field.instance_variable_set(
