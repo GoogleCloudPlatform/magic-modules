@@ -135,7 +135,7 @@ resource "google_healthcare_fhir_store" "default" {
   version                       = "R4"
 
 <% unless version == "ga" -%>
-	enable_history_modifications = true
+  enable_history_modifications = true
 <% end -%>
 }
 
@@ -152,8 +152,8 @@ resource "google_healthcare_fhir_store" "default" {
   name     = "%s"
   dataset  = google_healthcare_dataset.dataset.id
 
-  enable_update_create         = true
-  version                      = "R4"
+  enable_update_create = true
+  version              = "R4"
 
 
   notification_config {
@@ -167,7 +167,7 @@ resource "google_healthcare_fhir_store" "default" {
 	send_previous_resource_on_delete = true
   }
 
-	enable_history_modifications = true
+  enable_history_modifications = true
 <% end -%>
   labels = {
     label1 = "labelvalue1"
