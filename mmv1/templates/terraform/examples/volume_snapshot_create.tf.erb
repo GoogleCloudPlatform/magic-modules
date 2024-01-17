@@ -2,14 +2,14 @@ resource "google_netapp_storage_pool" "default" {
   name = "<%= ctx[:vars]['pool_name'] %>"
   location = "us-west2"
   service_level = "PREMIUM"
-  capacity_gib = "2048"
+  capacity_gib = 2048
   network = data.google_compute_network.default.id
 }
 
 resource "google_netapp_volume" "default" {
-  location = "us-west2"
+  location = google_netapp_storage_pool.default.location
   name = "<%= ctx[:vars]['volume_name'] %>"
-  capacity_gib = "100"
+  capacity_gib = 100
   share_name = "<%= ctx[:vars]['volume_name'] %>"
   storage_pool = google_netapp_storage_pool.default.name
   protocols = ["NFSV3"]
@@ -17,9 +17,8 @@ resource "google_netapp_volume" "default" {
 
 resource "google_netapp_volumesnapshot" "<%= ctx[:primary_resource_id] %>" {
   depends_on = [google_netapp_volume.default]
-  location = "us-west2"
+  location = google_netapp_volume.default.location
   volume_name = google_netapp_volume.default.name
-  description = "This is a test description"
   name = "<%= ctx[:vars]['snap_name'] %>"
 }
 

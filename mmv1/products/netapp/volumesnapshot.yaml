@@ -14,8 +14,12 @@
 --- !ruby/object:Api::Resource
 name: 'volumesnapshot'
 description: |
-  NetApp Volumes helps you manage your data usage with snapshots that can quickly restore lost data. Snapshots are point-in-time versions of your volume's content. They are resources of volumes and are instant captures of your data that consume space only for modified data. Because data changes over time, snapshots usually consume more space as they get older.
-  NetApp Volumes volumes use just-in-time copy-on-write so that unmodified files in snapshots don't consume any of the volume's capacity.
+  NetApp Volumes helps you manage your data usage with snapshots that can quickly restore lost data.
+  Snapshots are point-in-time versions of your volume's content. They are resources of volumes and are
+  instant captures of your data that consume space only for modified data. Because data changes over
+  time, snapshots usually consume more space as they get older.
+  NetApp Volumes volumes use just-in-time copy-on-write so that unmodified files in snapshots don't
+  consume any of the volume's capacity.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Documentation': 'https://cloud.google.com/netapp/volumes/docs/configure-and-use/volume-snapshots/overview'
@@ -37,19 +41,18 @@ parameters:
     immutable: true
     url_param_only: true
     description: |
-      Name of the snapshot location. Snapshots are child resources of volumes and live in same location.
+      Name of the snapshot location. Snapshots are child resources of volumes and live in the same location.
   - !ruby/object:Api::Type::String
     name: 'volume_name'
     description: |
-      'The unique name of the volume
-      `[_a-zA-Z0-9][-_.a-zA-Z0-9]*`.'
+      The name of the volume to create the snapshot in.
     required: true
     immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::String
     name: 'name'
     description:
-      'The resource name of the snapshot. Format: projects/{{projectId}}/locations/{{location}}/volumes/{{volumename}}/snapshots/{snapshotname}.'
+      The name of the snapshot.
     required: true
     immutable: true
     url_param_only: true
