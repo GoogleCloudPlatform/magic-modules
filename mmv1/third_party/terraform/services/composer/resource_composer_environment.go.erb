@@ -717,9 +717,8 @@ func ResourceComposerEnvironment() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"task_logs_retention_config": {
 										Type:         schema.TypeList,
-										Optional:     true,
 										Description: `Optional. The configuration setting for Task Logs.`,
-										required:     true,
+										Required:     true,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"storage_mode": {
