@@ -1362,9 +1362,15 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 			}
 		}
 		if d.HasChange("config.0.data_retention_config.0.task_logs_retention_config.0.storage_mode") {
-			patchObj := &composer.Environment{Config: &composer.EnvironmentConfig{}}
-				if config != nil {
-					patchObj.Config.DataRetentionConfig.TaskLogsRetentionConfig = config.DataRetentionConfig.TaskLogsRetentionConfig
+			patchObj := &composer.Environment{
+				Config: &composer.EnvironmentConfig{
+					DataRetentionConfig: &composer.DataRetentionConfig{
+						TaskLogsRetentionConfig: &composer.TaskLogsRetentionConfig{},
+					},
+				},
+			}
+				if config != nil && config.DataRetentionConfig != nil && config.DataRetentionConfig.TaskLogsRetentionConfig != nil {
+					patchObj.Config.DataRetentionConfig.TaskLogsRetentionConfig.StorageMode = config.DataRetentionConfig.TaskLogsRetentionConfig.StorageMode
 				}
 				err = resourceComposerEnvironmentPatchField("config.DataRetentionConfig.TaskLogsRetentionConfig.StorageMode", userAgent, patchObj, d, tfConfig)
 			  if err != nil {

@@ -597,7 +597,7 @@ func TestAccComposerEnvironment_UpdateComposerV2WithTriggerer(t *testing.T) {
 	})
 }
 
-func TestAccComposerEnvironment_UpdateComposerV2TESTING(t *testing.T) {
+func TestAccComposerEnvironment_UpdateComposerV2(t *testing.T) {
 	t.Parallel()
 
 	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t))
