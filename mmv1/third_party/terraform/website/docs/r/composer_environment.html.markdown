@@ -312,7 +312,6 @@ The following arguments are supported:
   Google Compute Engine Public IPs and Google Prod IPs. Structure is
   [documented below](#nested_master_authorized_networks_config).
 
-
 <a name="nested_node_config"></a>The `node_config` block supports:
 
 * `zone` -
@@ -374,7 +373,7 @@ The following arguments are supported:
 * `ip_allocation_policy` -
   (Optional)
   Configuration for controlling how IPs are allocated in the GKE cluster.
-  Structure is [documented below](#nested_ip_allocation_policy).
+  Structure is [documented below](#nested_ip_allocation_policy). Structure is
   Cannot be updated.
 
 * `max_pods_per_node` -

@@ -75,11 +75,11 @@ var (
 		"config.0.environment_size",
 		"config.0.master_authorized_networks_config",
 		"config.0.resilience_mode",
+<% unless version == "ga" -%>
+		"config.0.enable_private_environment",
+		"config.0.enable_private_builds_only",
+<% end -%>
 		"config.0.data_retention_config",
-	}
-
-	dataRetentionConfigKeys = []string{
-		"config.0.data_retention_config.0.task_logs_retention_config",
 	}
 
 	recoveryConfigKeys = []string{
@@ -701,7 +701,7 @@ func ResourceComposerEnvironment() *schema.Resource {
 										Type:         schema.TypeList,
 										Optional:     true,
 										Description: `Optional. The configuration setting for Task Logs.`,
-										AtLeastOneOf: dataRetentionConfigKeys,
+										required:     true,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"storage_mode": {
