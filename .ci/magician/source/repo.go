@@ -2,6 +2,7 @@ package source
 
 import (
 	"fmt"
+	"magician/provider"
 	"path/filepath"
 	"strings"
 )
@@ -10,8 +11,10 @@ type Repo struct {
 	Name        string // Name in GitHub (e.g. magic-modules)
 	Title       string // Title for display (e.g. Magic Modules)
 	Branch      string // Branch to clone, optional
+	Owner       string // Owner of repo, optional
 	Path        string // local Path once cloned, including Name
-	DiffCanFail bool   // whether to allow the command to continue if cloning or diffing the repo fails
+	Version     provider.Version
+	DiffCanFail bool // whether to allow the command to continue if cloning or diffing the repo fails
 }
 
 type Controller struct {
@@ -37,12 +40,24 @@ func NewController(goPath, username, token string, rnr Runner) *Controller {
 }
 
 func (gc Controller) SetPath(repo *Repo) {
-	repo.Path = filepath.Join(gc.goPath, "src", "github.com", gc.username, repo.Name)
+	owner := repo.Owner
+	if owner == "" {
+		owner = gc.username
+	}
+	repo.Path = filepath.Join(gc.goPath, "src", "github.com", owner, repo.Name)
+}
+
+func (gc Controller) URL(repo *Repo) string {
+	owner := repo.Owner
+	if owner == "" {
+		owner = gc.username
+	}
+	return fmt.Sprintf("https://%s:%s@github.com/%s/%s", gc.username, gc.token, owner, repo.Name)
 }
 
 func (gc Controller) Clone(repo *Repo) error {
+	url := gc.URL(repo)
 	var err error
-	url := fmt.Sprintf("https://%s:%s@github.com/%s/%s", gc.username, gc.token, gc.username, repo.Name)
 	if repo.Branch == "" {
 		_, err = gc.rnr.Run("git", []string{"clone", url, repo.Path}, nil)
 	} else {
@@ -54,6 +69,16 @@ func (gc Controller) Clone(repo *Repo) error {
 		}
 	}
 	return err
+}
+
+func (gc Controller) Checkout(repo *Repo, ref string) error {
+	if err := gc.rnr.PushDir(repo.Path); err != nil {
+		return err
+	}
+	if _, err := gc.rnr.Run("git", []string{"checkout", ref}, nil); err != nil {
+		return err
+	}
+	return gc.rnr.PopDir()
 }
 
 func (gc Controller) Fetch(repo *Repo, branch string) error {
