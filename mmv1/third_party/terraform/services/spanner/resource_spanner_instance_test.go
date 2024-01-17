@@ -169,7 +169,7 @@ func TestAccSpannerInstance_basicWithAutoscalingUsingProcessingUnitConfig(t *tes
 func TestAccSpannerInstance_basicWithAutoscalingUsingProcessingUnitConfigUpdate(t *testing.T) {
 	t.Parallel()
 
-	displayName := fmt.Sprintf("tf-test-spanner-%s", acctest.RandString(t, 10))
+	displayName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -254,7 +254,7 @@ func TestAccSpannerInstance_basicWithAutoscalingUsingNodeConfig(t *testing.T) {
 func TestAccSpannerInstance_basicWithAutoscalingUsingNodeConfigUpdate(t *testing.T) {
 	t.Parallel()
 
-	displayName := fmt.Sprintf("tf-test-spanner-%s", acctest.RandString(t, 10))
+	displayName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
