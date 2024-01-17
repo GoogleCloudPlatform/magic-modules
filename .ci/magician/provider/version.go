@@ -3,7 +3,8 @@ package provider
 type Version int
 
 const (
-	GA Version = iota
+	None Version = iota
+	GA
 	Beta
 )
 
