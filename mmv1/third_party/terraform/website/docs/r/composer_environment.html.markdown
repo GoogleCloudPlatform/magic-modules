@@ -312,10 +312,6 @@ The following arguments are supported:
   Google Compute Engine Public IPs and Google Prod IPs. Structure is
   [documented below](#nested_master_authorized_networks_config).
 
-* `data_retention_config` -
-  (Optional)
-  The configuration setting for Airflow data retention mechanism.
-  [documented below](#nested_data_retention_config).
 
 <a name="nested_node_config"></a>The `node_config` block supports:
 
@@ -621,15 +617,15 @@ The `web_server_network_access_control` supports:
 <a name="nested_data_retention_config"></a>The `data_retention_config` block supports:
 * `task_logs_retention_config` - 
   (Optional)
-  The configuration setting for Task Logs.
+  The configuration setting for Task Logs. Structure is
   [documented below](#nested_task_logs_retention_config)
 
 <a name="nested_task_logs_retention_config"></a>The `task_logs_retention_config` block supports:
 * `storage_mode` - 
   (Optional)
   The mode of storage for Airflow workers task logs. Values for storage mode are 
-  `CLOUD_LOGGING_ONLY` for enabling logs in cloud logging only feature and 
-  `CLOUD_LOGGING_AND_CLOUD_STORAGE` for disabling logs in cloud logging only feature.
+  `CLOUD_LOGGING_ONLY` to only store logs in cloud logging and 
+  `CLOUD_LOGGING_AND_CLOUD_STORAGE` to store logs in cloud logging and cloud storage.
 
 ## Argument Reference - Cloud Composer 2
 
