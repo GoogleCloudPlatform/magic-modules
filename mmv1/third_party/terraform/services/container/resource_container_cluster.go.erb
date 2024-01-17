@@ -1415,11 +1415,11 @@ func ResourceContainerCluster() *schema.Resource {
 			"node_pool_defaults": clusterSchemaNodePoolDefaults(),
 
 			"node_pool_auto_config": {
-				Type:             schema.TypeList,
-				Optional:         true,
-				Computed:         true,
-				MaxItems:         1,
-				Description:      `Node pool configs that apply to all auto-provisioned node pools in autopilot clusters and node auto-provisioning enabled clusters.`,
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				MaxItems:    1,
+				Description: `Node pool configs that apply to all auto-provisioned node pools in autopilot clusters and node auto-provisioning enabled clusters.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"network_tags": {
@@ -1438,14 +1438,11 @@ func ResourceContainerCluster() *schema.Resource {
 								},
 							},
 						},
-					},
-					Schema: map[string]*schema.Schema{
 						"resource_manager_tags": {
-							Type:         schema.TypeMap,
-							Optional:     true,
-							ForceNew:     true,
-							MaxItems:    5,
-							Description:  `A map of resource manager tags. Resource manager tag keys and values have the same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/456. The field is ignored (both PUT & PATCH) when empty.`,
+							Type:        schema.TypeMap,
+							Optional:    true,
+							ForceNew:    true,
+							Description: `A map of resource manager tags. Resource manager tag keys and values have the same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/456. The field is ignored (both PUT & PATCH) when empty.`,
 						},
 					},
 				},
@@ -5404,7 +5401,7 @@ func expandNodePoolAutoConfig(configured interface{}) *container.NodePoolAutoCon
 		npac.NetworkTags = expandNodePoolAutoConfigNetworkTags(v)
 	}
 
-	if v, ok := nodeConfig["resource_manager_tags"]; ok {
+	if v, ok := config["resource_manager_tags"]; ok {
 		npac.ResourceManagerTags = expandResourceManagerTags(v)
 	}
 
