@@ -109,7 +109,7 @@ func TestAccLoggingBucketConfigProject_analyticsEnabled(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLoggingBucketConfigProject_basic(context),
+				Config: testAccLoggingBucketConfigProject_basic(context, 30),
 			},
 			{
 				ResourceName:            "google_logging_project_bucket_config.basic",
