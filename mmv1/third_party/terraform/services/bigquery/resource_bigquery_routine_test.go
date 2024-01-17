@@ -147,7 +147,7 @@ resource "google_bigquery_dataset" "test" {
   dataset_id = "tf_test_dataset_id%{random_suffix}"
 }
 
-resource "google_bigquery_connection" "test" {
+resource "google_bigquery_connection" "test_updated" {
   connection_id = "tf_test_connection_id%{random_suffix}"
   location      = "US"
   spark { }
@@ -160,11 +160,11 @@ resource "google_bigquery_routine" "spark_jar" {
   language        = "SCALA"
   definition_body = ""
   spark_options {
-    connection      = google_bigquery_connection.test.name
+    connection      = google_bigquery_connection.test_updated.name
     runtime_version = "2.1"
     container_image = "gcr.io/my-project-id/my-spark-image:latest"
-    main_class      = "com.google.test.jar.MainClass"
-    jar_uris        = [ "gs://test-bucket/uberjar_spark_spark3.jar" ]
+    main_class      = "com.google.test.jar.MainClassUpdated"
+    jar_uris        = [ "gs://test-bucket/uberjar_spark_spark3_updated.jar" ]
     properties      = {
       "spark.dataproc.scaling.version" : "2",
       "spark.reducer.fetchMigratedShuffle.enabled" : "true",
