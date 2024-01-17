@@ -19,7 +19,7 @@ if d.HasChange("processing_units") {
 	updateMask = append(updateMask, "processingUnits")
 }
 if d.HasChange("autoscaling_config") {
-  old, new := d.GetChange("autoscaling_config")
+	old, new := d.GetChange("autoscaling_config")
 	oldSlice := old.([]interface{})
 	newSlice := new.([]interface{})
 	if len(oldSlice) == 0 || len(newSlice) == 0 {

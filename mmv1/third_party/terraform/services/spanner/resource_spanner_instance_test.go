@@ -169,12 +169,24 @@ func TestAccSpannerInstance_basicWithAutoscalingUsingProcessingUnitConfig(t *tes
 func TestAccSpannerInstance_basicWithAutoscalingUsingProcessingUnitConfigUpdate(t *testing.T) {
 	t.Parallel()
 
-	displayName := fmt.Sprintf("spanner-test-%s-dname", acctest.RandString(t, 10))
+	displayName := fmt.Sprintf("tf-test-spanner-%s", acctest.RandString(t, 10))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckSpannerInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
+			{
+				Config: testAccSpannerInstance_basic(displayName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_spanner_instance.basic", "state"),
+				),
+			},
+			{
+				ResourceName:            "google_spanner_instance.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
 			{
 				Config: testAccSpannerInstance_basicWithAutoscalerConfigUsingProcessingUnitsAsConfigsUpdate(displayName, 1000, 2000, 65, 95),
 				Check: resource.ComposeTestCheckFunc(
@@ -189,6 +201,18 @@ func TestAccSpannerInstance_basicWithAutoscalingUsingProcessingUnitConfigUpdate(
 			},
 			{
 				Config: testAccSpannerInstance_basicWithAutoscalerConfigUsingProcessingUnitsAsConfigsUpdate(displayName, 2000, 3000, 75, 90),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_spanner_instance.basic", "state"),
+				),
+			},
+			{
+				ResourceName:            "google_spanner_instance.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				Config: testAccSpannerInstance_basic(displayName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("google_spanner_instance.basic", "state"),
 				),
@@ -230,12 +254,24 @@ func TestAccSpannerInstance_basicWithAutoscalingUsingNodeConfig(t *testing.T) {
 func TestAccSpannerInstance_basicWithAutoscalingUsingNodeConfigUpdate(t *testing.T) {
 	t.Parallel()
 
-	displayName := fmt.Sprintf("spanner-test-%s-dname", acctest.RandString(t, 10))
+	displayName := fmt.Sprintf("tf-test-spanner-%s", acctest.RandString(t, 10))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckSpannerInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
+			{
+				Config: testAccSpannerInstance_basic(displayName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_spanner_instance.basic", "state"),
+				),
+			},
+			{
+				ResourceName:            "google_spanner_instance.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
 			{
 				Config: testAccSpannerInstance_basicWithAutoscalerConfigUsingNodesAsConfigsUpdate(displayName, 1, 2, 65, 95),
 				Check: resource.ComposeTestCheckFunc(
@@ -260,144 +296,8 @@ func TestAccSpannerInstance_basicWithAutoscalingUsingNodeConfigUpdate(t *testing
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
-		},
-	})
-}
-
-func TestAccSpannerInstance_basicAddAutoscalingUsingNodeConfigUpdate(t *testing.T) {
-	t.Parallel()
-
-	name := fmt.Sprintf("spanner-test-%s", acctest.RandString(t, 10))
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckSpannerInstanceDestroyProducer(t),
-		Steps: []resource.TestStep{
 			{
-				Config: testAccSpannerInstance_basic(name),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("google_spanner_instance.basic", "state"),
-				),
-			},
-			{
-				ResourceName:            "google_spanner_instance.basic",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
-			},
-			{
-				Config: testAccSpannerInstance_basicWithAutoscalerConfigUsingNodesAsConfigs(name),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("google_spanner_instance.basic", "state"),
-				),
-			},
-			{
-				ResourceName:            "google_spanner_instance.basic",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
-			},
-		},
-	})
-}
-
-func TestAccSpannerInstance_basicRemoveAutoscalingUsingNodeConfigUpdate(t *testing.T) {
-	t.Parallel()
-
-	name := fmt.Sprintf("spanner-test-%s", acctest.RandString(t, 10))
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckSpannerInstanceDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccSpannerInstance_basicWithAutoscalerConfigUsingNodesAsConfigs(name),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("google_spanner_instance.basic", "state"),
-				),
-			},
-			{
-				ResourceName:            "google_spanner_instance.basic",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
-			},
-			{
-				Config: testAccSpannerInstance_basic(name),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("google_spanner_instance.basic", "state"),
-				),
-			},
-			{
-				ResourceName:            "google_spanner_instance.basic",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
-			},
-		},
-	})
-}
-
-func TestAccSpannerInstance_basicAddAutoscalingUsingProcessingUnitConfigUpdate(t *testing.T) {
-	t.Parallel()
-
-	name := fmt.Sprintf("spanner-test-%s", acctest.RandString(t, 10))
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckSpannerInstanceDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccSpannerInstance_basic(name),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("google_spanner_instance.basic", "state"),
-				),
-			},
-			{
-				ResourceName:            "google_spanner_instance.basic",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
-			},
-			{
-				Config: testAccSpannerInstance_basicWithAutoscalerConfigUsingProcessingUnitsAsConfigs(name),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("google_spanner_instance.basic", "state"),
-				),
-			},
-			{
-				ResourceName:            "google_spanner_instance.basic",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
-			},
-		},
-	})
-}
-
-func TestAccSpannerInstance_basicRemoveAutoscalingUsingProcessingUnitConfigUpdate(t *testing.T) {
-	t.Parallel()
-
-	name := fmt.Sprintf("spanner-test-%s", acctest.RandString(t, 10))
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckSpannerInstanceDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccSpannerInstance_basicWithAutoscalerConfigUsingProcessingUnitsAsConfigs(name),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("google_spanner_instance.basic", "state"),
-				),
-			},
-			{
-				ResourceName:            "google_spanner_instance.basic",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
-			},
-			{
-				Config: testAccSpannerInstance_basic(name),
+				Config: testAccSpannerInstance_basic(displayName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("google_spanner_instance.basic", "state"),
 				),
