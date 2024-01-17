@@ -1052,6 +1052,7 @@ func TestAccCloudRunService_csiVolume(t *testing.T) {
 func testAccCloudRunService_cloudRunServiceWithEmptyDirVolume(name, project string) string {
 	return fmt.Sprintf(`
 resource "google_cloud_run_service" "default" {
+  provider = google-beta
   name     = "%s"
   location = "us-central1"
 
@@ -1091,6 +1092,7 @@ resource "google_cloud_run_service" "default" {
 func testAccCloudRunService_cloudRunServiceUpdateWithGcsVolume(name, project string) string {
 	return fmt.Sprintf(`
 resource "google_cloud_run_service" "default" {
+  provider = google-beta
   name     = "%s"
   location = "us-central1"
 
@@ -1120,6 +1122,7 @@ resource "google_cloud_run_service" "default" {
         name = "vol1"
         csi {
           driver = "gcsfuse.run.googleapis.com"
+          read_only = true
           volume_attributes = {
             bucketName = "gcp-public-data-landsat"
           }
