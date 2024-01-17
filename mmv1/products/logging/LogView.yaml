@@ -34,6 +34,7 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   fetch_iam_policy_verb: :POST
   set_iam_policy_verb: :POST
   import_format: ['{{%view}}']
+  min_version: beta
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'logging_log_view_basic'
