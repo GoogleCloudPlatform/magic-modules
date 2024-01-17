@@ -109,6 +109,7 @@ if openapi_generate
   # This writes to a fake demo product currently. In the future this should
   # produce the entire product folder including product.yaml for a single OpenAPI spec
   OpenAPIGenerate::Parser.new('openapi_generate/openapi/*', 'products').run
+  return
 end
 
 all_product_files = []
