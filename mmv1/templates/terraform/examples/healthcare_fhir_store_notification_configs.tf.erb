@@ -8,6 +8,7 @@ resource "google_healthcare_fhir_store" "default" {
   disable_referential_integrity = false
   disable_resource_versioning   = false
   enable_history_import         = false
+  enable_history_modifications  = false
 
   labels = {
     label1 = "labelvalue1"

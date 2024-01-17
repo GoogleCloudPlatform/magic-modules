@@ -1,3 +1,18 @@
+/*
+* Copyright 2023 Google LLC. All Rights Reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+ */
 package github
 
 import (
@@ -33,7 +48,7 @@ var (
 
 	// This is for reviewers who are "on vacation": will not receive new review assignments but will still receive re-requests for assigned PRs.
 	onVacationReviewers = []string{
-		"hao-nan-li",
+		"c2thorn",
 	}
 )
 
@@ -56,7 +71,7 @@ func (ut UserType) String() string {
 	}
 }
 
-func (gh *github) GetUserType(user string) UserType {
+func (gh *Client) GetUserType(user string) UserType {
 	if isTeamMember(user, gh.token) {
 		fmt.Println("User is a team member")
 		return CoreContributorUserType
@@ -86,9 +101,12 @@ func IsTeamReviewer(reviewer string) bool {
 
 func isOrgMember(author, org, githubToken string) bool {
 	url := fmt.Sprintf("https://api.github.com/orgs/%s/members/%s", org, author)
-	res, _ := utils.RequestCall(url, "GET", githubToken, nil, nil)
+	err := utils.RequestCall(url, "GET", githubToken, nil, nil)
 
-	return res != 404
+	if err != nil {
+		return false
+	}
+	return true
 }
 
 func GetRandomReviewer() string {

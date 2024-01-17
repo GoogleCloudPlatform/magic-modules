@@ -46,9 +46,9 @@ var (
 		"boot_disk.0.initialize_params.0.image",
 		"boot_disk.0.initialize_params.0.labels",
 		"boot_disk.0.initialize_params.0.resource_manager_tags",
-<% unless version == 'ga' -%>
+		"boot_disk.0.initialize_params.0.provisioned_iops",
+		"boot_disk.0.initialize_params.0.provisioned_throughput",
 		"boot_disk.0.initialize_params.0.enable_confidential_compute",
-<% end -%>
 	}
 
 	schedulingKeys = []string{
@@ -240,19 +240,38 @@ func ResourceComputeInstance() *schema.Resource {
 									"resource_manager_tags": {
 										Type:         schema.TypeMap,
 										Optional:     true,
-										AtLeastOneOf: initializeParamsKeys,
 										ForceNew:     true,
+										AtLeastOneOf: initializeParamsKeys,
 										Description:  `A map of resource manager tags. Resource manager tag keys and values have the same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/456. The field is ignored (both PUT & PATCH) when empty.`,
 									},
-<% unless version == 'ga' -%>
-									"enable_confidential_compute": {
-										Type:             schema.TypeBool,
-										Optional:         true,
+									
+									"provisioned_iops": {
+										Type:         schema.TypeInt,
+										Optional:     true,
 										AtLeastOneOf: initializeParamsKeys,
-										ForceNew:         true,
-										Description:      `A flag to enable confidential compute mode on boot disk`,
+										Computed:     true,
+										ForceNew:     true,
+										ValidateFunc: validation.IntBetween(10000, 120000),
+										Description:  `Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second that the disk can handle. Values must be between 10,000 and 120,000.`,
 									},
-<% end -%>
+
+									"provisioned_throughput": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										AtLeastOneOf: initializeParamsKeys,
+										Computed:     true,
+										ForceNew:     true,
+										ValidateFunc: validation.IntBetween(1, 7124),
+										Description:  `Indicates how much throughput to provision for the disk. This sets the number of throughput mb per second that the disk can handle. Values must be between 1 and 7,124.`,
+									},
+
+									"enable_confidential_compute": {
+										Type:         schema.TypeBool,
+										Optional:     true,
+										AtLeastOneOf: initializeParamsKeys,
+										ForceNew:     true,
+										Description:  `A flag to enable confidential compute mode on boot disk`,
+									},
 								},
 							},
 						},
@@ -592,7 +611,6 @@ func ResourceComputeInstance() *schema.Resource {
 			"description": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				ForceNew:    true,
 				Description: `A brief description of the resource.`,
 			},
 
@@ -646,8 +664,6 @@ func ResourceComputeInstance() *schema.Resource {
 						"resource_manager_tags": {
 							Type:         schema.TypeMap,
 							Optional:     true,
-							// This field is intentionally not updatable. The API overrides all existing tags on the field when updated.  See go/gce-tags-terraform-support for details.
-							ForceNew:     true,
 							Description:  `A map of resource manager tags. Resource manager tag keys and values have the same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/456. The field is ignored (both PUT & PATCH) when empty.`,
 						},
 					},
@@ -1702,6 +1718,35 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 	// Enable partial mode for the resource since it is possible
 	d.Partial(true)
 
+	if d.HasChange("description") {
+		err = transport_tpg.Retry(transport_tpg.RetryOptions{
+			RetryFunc: func() error {
+				instance, err := config.NewComputeClient(userAgent).Instances.Get(project, zone, instance.Name).Do()
+				if err != nil {
+					return fmt.Errorf("Error retrieving instance: %s", err)
+				}
+
+				instance.Description = d.Get("description").(string)
+
+				op, err := config.NewComputeClient(userAgent).Instances.Update(project, zone, instance.Name, instance).Do()
+				if err != nil {
+					return fmt.Errorf("Error updating instance: %s", err)
+				}
+
+				opErr := ComputeOperationWaitTime(config, op, project, "description, updating", userAgent, d.Timeout(schema.TimeoutUpdate))
+				if opErr != nil {
+					return opErr
+				}
+
+				return nil
+			},
+		})
+
+		if err != nil {
+			return err
+		}
+	}
+
 	if d.HasChange("metadata") {
 		metadata, err := resourceInstanceMetadata(d)
 		if err != nil {
@@ -1775,6 +1820,40 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		opErr := ComputeOperationWaitTime(config, op, project, "labels to update", userAgent, d.Timeout(schema.TimeoutUpdate))
 		if opErr != nil {
 			return opErr
+		}
+	}
+
+	if d.HasChange("params.0.resource_manager_tags") {
+		err = transport_tpg.Retry(transport_tpg.RetryOptions{
+			RetryFunc: func() error {
+				instance, err := config.NewComputeClient(userAgent).Instances.Get(project, zone, instance.Name).Do()
+				if err != nil {
+					return fmt.Errorf("Error retrieving instance: %s", err)
+				}
+
+				params, err := expandParams(d)
+				if err != nil {
+					return fmt.Errorf("Error updating params: %s", err)
+				}
+
+				instance.Params = params
+
+				op, err := config.NewComputeClient(userAgent).Instances.Update(project, zone, instance.Name, instance).Do()
+				if err != nil {
+					return fmt.Errorf("Error updating instance: %s", err)
+				}
+
+				opErr := ComputeOperationWaitTime(config, op, project, "resource_manager_tags, updating", userAgent, d.Timeout(schema.TimeoutUpdate))
+				if opErr != nil {
+					return opErr
+				}
+
+				return nil
+			},
+		})
+
+		if err != nil {
+			return err
 		}
 	}
 
@@ -2741,11 +2820,17 @@ func expandBootDisk(d *schema.ResourceData, config *transport_tpg.Config, projec
 			disk.InitializeParams.DiskSizeGb = int64(v.(int))
 		}
 
-		<% unless version == 'ga' -%>
+		if v, ok := d.GetOk("boot_disk.0.initialize_params.0.provisioned_iops"); ok {
+			disk.InitializeParams.ProvisionedIops = int64(v.(int))
+		}
+
+		if v, ok := d.GetOk("boot_disk.0.initialize_params.0.provisioned_throughput"); ok {
+			disk.InitializeParams.ProvisionedThroughput = int64(v.(int))
+		}
+
 		if v, ok := d.GetOk("boot_disk.0.initialize_params.0.enable_confidential_compute"); ok {
 			disk.InitializeParams.EnableConfidentialCompute = v.(bool)
 		}
-		<% end -%>
 
 		if v, ok := d.GetOk("boot_disk.0.initialize_params.0.type"); ok {
 			diskTypeName := v.(string)
@@ -2812,9 +2897,9 @@ func flattenBootDisk(d *schema.ResourceData, disk *compute.AttachedDisk, config 
 			"size":   diskDetails.SizeGb,
 			"labels": diskDetails.Labels,
 			"resource_manager_tags": d.Get("boot_disk.0.initialize_params.0.resource_manager_tags"),
-<% unless version == 'ga' -%>
+			"provisioned_iops": diskDetails.ProvisionedIops,
+			"provisioned_throughput": diskDetails.ProvisionedThroughput,
 			"enable_confidential_compute": diskDetails.EnableConfidentialCompute,
-<% end -%>
 		}}
 	}
 

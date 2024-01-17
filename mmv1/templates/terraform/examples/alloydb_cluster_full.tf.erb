@@ -2,6 +2,7 @@ resource "google_alloydb_cluster" "<%= ctx[:primary_resource_id] %>" {
   cluster_id   = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
   location     = "us-central1"
   network      = google_compute_network.default.id
+  database_version = "POSTGRES_15"
 
   initial_user {
     user     = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
