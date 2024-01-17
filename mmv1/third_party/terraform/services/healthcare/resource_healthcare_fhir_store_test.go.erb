@@ -135,7 +135,7 @@ resource "google_healthcare_fhir_store" "default" {
   version                       = "R4"
 
 <% unless version == "ga" -%>
-  enable_history_modifications = true
+  enable_history_modifications = false
 <% end -%>
 }
 
