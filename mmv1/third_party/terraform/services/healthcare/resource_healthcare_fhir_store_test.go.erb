@@ -132,8 +132,11 @@ resource "google_healthcare_fhir_store" "default" {
   disable_referential_integrity = false
   disable_resource_versioning   = false
   enable_history_import         = false
-  enable_history_modifications  = false
   version                       = "R4"
+
+<% unless version == "ga" -%>
+	enable_history_modifications = true
+<% end -%>
 }
 
 resource "google_healthcare_dataset" "dataset" {
@@ -150,7 +153,6 @@ resource "google_healthcare_fhir_store" "default" {
   dataset  = google_healthcare_dataset.dataset.id
 
   enable_update_create         = true
-  enable_history_modifications = true
   version                      = "R4"
 
 
@@ -165,6 +167,7 @@ resource "google_healthcare_fhir_store" "default" {
 	send_previous_resource_on_delete = true
   }
 
+	enable_history_modifications = true
 <% end -%>
   labels = {
     label1 = "labelvalue1"
@@ -206,10 +209,7 @@ func testAccCheckGoogleHealthcareFhirStoreUpdate(t *testing.T, pubsubTopic strin
 			if !response.EnableUpdateCreate {
 				return fmt.Errorf("fhirStore 'EnableUpdateCreate' not updated: %s", gcpResourceUri)
 			}
-			
-			if !response.EnableHistoryModifications {
-				return fmt.Errorf("fhirStore 'EnableHistoryModifications' not updated: %s", gcpResourceUri)
-			}
+
 
 			// because the GET for the FHIR store resource does not return the "enableHistoryImport" flag, this value
 			// will always be false and cannot be relied upon
