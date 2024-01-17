@@ -109,6 +109,15 @@ func TestAccLoggingBucketConfigProject_analyticsEnabled(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
+				Config: testAccLoggingBucketConfigProject_basic(context),
+			},
+			{
+				ResourceName:            "google_logging_project_bucket_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"project"},
+			},
+			{
 				Config: testAccLoggingBucketConfigProject_analyticsEnabled(context, true),
 			},
 			{
@@ -285,8 +294,8 @@ resource "google_project" "default" {
 }
 
 // time_sleep would allow for permissions to be granted before creating log bucket
-resource "time_sleep" "wait_60_seconds" {
-	create_duration = "10m"
+resource "time_sleep" "wait_1_minute" {
+	create_duration = "1m"
   
 	depends_on = [
 	  google_project.default,
@@ -299,7 +308,7 @@ resource "google_logging_project_bucket_config" "basic" {
 	enable_analytics = %t
 	bucket_id = "%{bucket_id}"
 
-	depends_on = [time_sleep.wait_60_seconds]
+	depends_on = [time_sleep.wait_1_minute]
 }
 `, context), analytics)
 }
