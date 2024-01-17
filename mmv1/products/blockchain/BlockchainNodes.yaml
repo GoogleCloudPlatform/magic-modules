@@ -15,7 +15,7 @@
 name: 'BlockchainNodes'
 base_url: projects/{{project}}/locations/{{location}}/blockchainNodes
 self_link: 'projects/{{project}}/locations/{{location}}/blockchainNodes/{{blockchain_node_id}}'
-import_format: ['{{blockchain_node_id}}']
+import_format: ['{{name}}']
 create_url: projects/{{project}}/locations/{{location}}/blockchainNodes?blockchain_node_id={{blockchain_node_id}}
 description: |
   A representation of a blockchain node.
