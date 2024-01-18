@@ -57,7 +57,7 @@ resource "google_securityposture_posture" "posture_one" {
         policies {
             policy_id = "policy_1"
             constraint {
-                org_policy_canned_constraint {
+                org_policy_constraint {
                     canned_constraint_id = "storage.uniformBucketLevelAccess"
                     policy_rules {
                         enforce = true
@@ -93,7 +93,7 @@ resource "google_securityposture_posture" "posture_one" {
         policies {
             policy_id = "policy_1"
             constraint {
-                org_policy_canned_constraint {
+                org_policy_constraint {
                     canned_constraint_id = "storage.uniformBucketLevelAccess"
                     policy_rules {
                         enforce = true
@@ -115,7 +115,7 @@ resource "google_securityposture_posture" "posture_two" {
         policies {
             policy_id = "policy_1"
             constraint {
-                org_policy_canned_constraint {
+                org_policy_constraint {
                     canned_constraint_id = "storage.publicAccessPrevention"
                     policy_rules {
                         enforce = true

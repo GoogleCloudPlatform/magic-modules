@@ -182,7 +182,7 @@ properties:
                 name: 'constraint'
                 description: 'Policy constraint definition.It can have the definition of one of following constraints:
                 orgPolicyConstraint
-                OrgPolicyConstraintCustom
+                orgPolicyConstraintCustom
                 securityHealthAnalyticsModule
                 securityHealthAnalyticsCustomModule'
                 required: true
