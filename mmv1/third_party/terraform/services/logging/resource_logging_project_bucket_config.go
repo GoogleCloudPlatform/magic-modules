@@ -339,19 +339,24 @@ func resourceLoggingProjectBucketConfigUpdate(d *schema.ResourceData, meta inter
 	if d.HasChange("enable_analytics") {
 		obj["analyticsEnabled"] = d.Get("enable_analytics")
 		updateMaskAnalytics = append(updateMaskAnalytics, "analyticsEnabled")
-		url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMaskAnalytics, ",")})
+		asyncUrl := url + ":updatesync"
+		asyncUrl, err = transport_tpg.AddQueryParams(asyncUrl, map[string]string{"updateMask": strings.Join(updateMaskAnalytics, ",")})
 		if err != nil {
 			return err
 		}
-		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
-			Method:    "PATCH",
-			RawURL:    url,
+			Method:    "POST",
+			RawURL:    asyncUrl,
 			UserAgent: userAgent,
 			Body:      obj,
 			Timeout:   d.Timeout(schema.TimeoutUpdate),
 		})
-		if err != nil {
+
+		var opRes map[string]interface{}
+		// Wait for the operation to complete
+		waitErr := LoggingOperationWaitTimeWithResponse(config, res, &opRes, "Updating Bucket with analytics", userAgent, d.Timeout(schema.TimeoutCreate))
+		if waitErr != nil {
 			return fmt.Errorf("Error updating Logging Bucket Config %q: %s", d.Id(), err)
 		}
 	}
