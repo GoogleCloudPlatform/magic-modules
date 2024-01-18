@@ -30,7 +30,7 @@ warn() {
 found=0
 count_in_path() {
     echo "Check for ${1} in path..."
-    found=$(which -a ${1} | uniq | wc -l)
+    found=$(which -a "${1}" | uniq | wc -l)
 }
 
 count_in_path ruby
