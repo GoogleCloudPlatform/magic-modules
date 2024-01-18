@@ -468,16 +468,6 @@ module Api
 
     private
 
-    # A constant value to be provided as field
-    class Constant < Type
-      attr_reader :value
-
-      def validate
-        @description = "This is always #{value}."
-        super
-      end
-    end
-
     # Represents a primitive (non-composite) type.
     class Primitive < Type
     end
@@ -651,9 +641,9 @@ module Api
         EXPORT_KEY
       end
 
-      def out_name
-        EXPORT_KEY.underscore
-      end
+      # def out_name
+      #   EXPORT_KEY.underscore
+      # end
     end
 
     # Represents a reference to another resource

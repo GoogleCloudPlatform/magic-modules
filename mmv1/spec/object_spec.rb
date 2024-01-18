@@ -23,11 +23,6 @@ describe Api::Object do
     it { is_expected.to raise_error(StandardError, /Missing 'name'/) }
   end
 
-  context 'out_name underscore style' do
-    subject { object('name: "MyCamelCaseObjectName"').out_name }
-    it { is_expected.to eq 'my_camel_case_object_name' }
-  end
-
   private
 
   def object(*data)
