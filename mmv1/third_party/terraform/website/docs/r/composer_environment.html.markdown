@@ -713,7 +713,7 @@ The `config` block supports:
 
 * `data_retention_config` -
   (Optional, CLoud Composer 2.0.23 or newer only)
-  Configuration setting for airflow data rentention mechanism.
+  Configuration setting for airflow data rentention mechanism. Structure is
   [documented below](#nested_data_retention_config).
 
 <a name="nested_data_retention_config"></a>The `data_retention_config` block supports:
