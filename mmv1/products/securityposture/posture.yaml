@@ -167,7 +167,7 @@ properties:
                 required: true
                 properties:
                   - !ruby/object:Api::Type::NestedObject
-                    name: 'orgPolicyCannedConstraint'
+                    name: 'orgPolicyConstraint'
                     description: |
                       Organization policy canned constraint definition.
                     properties:
@@ -263,7 +263,7 @@ properties:
                       - security_health_analytics_module
                       - security_health_analytics_custom_module
                   - !ruby/object:Api::Type::NestedObject
-                    name: 'orgPolicyCustomConstraint'
+                    name: 'orgPolicyConstraintCustom'
                     description: |
                       Organization policy custom constraint policy definition.
                     properties:
