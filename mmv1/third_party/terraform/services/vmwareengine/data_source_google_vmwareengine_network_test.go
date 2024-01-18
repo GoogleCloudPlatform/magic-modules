@@ -12,10 +12,9 @@ func TestAccDataSourceVmwareEngineNetwork_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":             acctest.RandString(t, 10),
-		"org_id":                    envvar.GetTestOrgFromEnv(t),
-		"billing_account":           envvar.GetTestBillingAccountFromEnv(t),
-		"terraform_service_account": envvar.GetTestServiceAccountFromEnv(t),
+		"random_suffix":   acctest.RandString(t, 10),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
