@@ -622,19 +622,6 @@ The `web_server_network_access_control` supports:
   (Required)
   `cidr_block` must be specified in CIDR notation.
 
-<a name="nested_data_retention_config"></a>The `data_retention_config` block supports:
-* `task_logs_retention_config` - 
-  (Optional)
-  The configuration setting for Task Logs. Structure is
-  [documented below](#nested_task_logs_retention_config)
-
-<a name="nested_task_logs_retention_config"></a>The `task_logs_retention_config` block supports:
-* `storage_mode` - 
-  (Optional)
-  The mode of storage for Airflow workers task logs. Values for storage mode are 
-  `CLOUD_LOGGING_ONLY` to only store logs in cloud logging and 
-  `CLOUD_LOGGING_AND_CLOUD_STORAGE` to store logs in cloud logging and cloud storage.
-
 ## Argument Reference - Cloud Composer 2
 
 The following arguments are supported:
@@ -727,6 +714,20 @@ The `config` block supports:
 * `data_retention_config` -
   (Optional, CLoud Composer 2.0.23 or newer only)
   Configuration setting for airflow data rentention mechanism.
+  [documented below](#nested_data_retention_config).
+
+<a name="nested_data_retention_config"></a>The `data_retention_config` block supports:
+* `task_logs_retention_config` - 
+  (Optional)
+  The configuration setting for Task Logs. Structure is
+  [documented below](#nested_task_logs_retention_config)
+
+<a name="nested_task_logs_retention_config"></a>The `task_logs_retention_config` block supports:
+* `storage_mode` - 
+  (Optional)
+  The mode of storage for Airflow workers task logs. Values for storage mode are 
+  `CLOUD_LOGGING_ONLY` to only store logs in cloud logging and 
+  `CLOUD_LOGGING_AND_CLOUD_STORAGE` to store logs in cloud logging and cloud storage.
 
 
 The `storage_config` block supports:
