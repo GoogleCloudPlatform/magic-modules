@@ -79,7 +79,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
-      Name of the posture.
+      Name of the posture. It is immutable.
     output: true
   - !ruby/object:Api::Type::Enum
     name: 'state'
