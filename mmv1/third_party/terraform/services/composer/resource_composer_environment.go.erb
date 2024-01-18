@@ -75,6 +75,10 @@ var (
 		"config.0.environment_size",
 		"config.0.master_authorized_networks_config",
 		"config.0.resilience_mode",
+<% unless version == "ga" -%>
+		"config.0.enable_private_environment",
+		"config.0.enable_private_builds_only",
+<% end -%>
 	}
 
 	recoveryConfigKeys = []string{
@@ -575,6 +579,24 @@ func ResourceComposerEnvironment() *schema.Resource {
 								},
 							},
 						},
+<% unless version == "ga" -%>
+						"enable_private_environment": {
+							Type:         schema.TypeBool,
+							Computed:     true,
+							Optional:     true,
+							ForceNew:     false,
+							AtLeastOneOf: composerConfigKeys,
+							Description:  `Optional. If true, a private Composer environment will be created.`,
+						},
+						"enable_private_builds_only": {
+							Type:         schema.TypeBool,
+							Computed:     true,
+							Optional:     true,
+							ForceNew:     false,
+							AtLeastOneOf: composerConfigKeys,
+							Description:  `Optional. If true, builds performed during operations that install Python packages have only private connectivity to Google services. If false, the builds also have access to the internet.`,
+						},
+<% end -%>
 						"web_server_network_access_control": {
 							Type:        schema.TypeList,
 							Optional:    true,
@@ -1244,6 +1266,33 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 		}
 
 <% unless version == "ga" -%>
+		if d.HasChange("config.0.enable_private_environment") {
+			patchObj := &composer.Environment{
+				Config: &composer.EnvironmentConfig{
+					PrivateEnvironmentConfig: &composer.PrivateEnvironmentConfig{},
+				},
+			}
+			if config != nil && config.PrivateEnvironmentConfig != nil {
+				patchObj.Config.PrivateEnvironmentConfig.EnablePrivateEnvironment = config.PrivateEnvironmentConfig.EnablePrivateEnvironment
+			}
+			err = resourceComposerEnvironmentPatchField("config.PrivateEnvironmentConfig.EnablePrivateEnvironment", userAgent, patchObj, d, tfConfig)
+			if err != nil {
+				return err
+			}
+		}
+
+		if d.HasChange("config.0.enable_private_builds_only") {
+			patchObj := &composer.Environment{
+				Config: &composer.EnvironmentConfig{
+					PrivateEnvironmentConfig: &composer.PrivateEnvironmentConfig{},
+				},
+			}
+			if config != nil && config.PrivateEnvironmentConfig != nil {
+				patchObj.Config.PrivateEnvironmentConfig.EnablePrivateBuildsOnly = config.PrivateEnvironmentConfig.EnablePrivateBuildsOnly
+			}
+			err = resourceComposerEnvironmentPatchField("config.PrivateEnvironmentConfig.EnablePrivateBuildsOnly", userAgent, patchObj, d, tfConfig)
+		}
+
 		if d.HasChange("config.0.software_config.0.web_server_plugins_mode") {
 			patchObj := &composer.Environment{
 				Config: &composer.EnvironmentConfig{
@@ -1500,6 +1549,10 @@ func flattenComposerEnvironmentConfig(envCfg *composer.EnvironmentConfig) interf
 	transformed["node_config"] = flattenComposerEnvironmentConfigNodeConfig(envCfg.NodeConfig)
 	transformed["software_config"] = flattenComposerEnvironmentConfigSoftwareConfig(envCfg.SoftwareConfig)
 	transformed["private_environment_config"] = flattenComposerEnvironmentConfigPrivateEnvironmentConfig(envCfg.PrivateEnvironmentConfig)
+<% unless version == "ga" -%>
+	transformed["enable_private_environment"] = envCfg.PrivateEnvironmentConfig.EnablePrivateEnvironment
+	transformed["enable_private_builds_only"] = envCfg.PrivateEnvironmentConfig.EnablePrivateBuildsOnly
+<% end -%>
 	transformed["web_server_network_access_control"] = flattenComposerEnvironmentConfigWebServerNetworkAccessControl(envCfg.WebServerNetworkAccessControl)
 	transformed["database_config"] = flattenComposerEnvironmentConfigDatabaseConfig(envCfg.DatabaseConfig)
 	transformed["web_server_config"] = flattenComposerEnvironmentConfigWebServerConfig(envCfg.WebServerConfig)
@@ -1855,6 +1908,23 @@ func expandComposerEnvironmentConfig(v interface{}, d *schema.ResourceData, conf
 		return nil, err
 	}
 	transformed.PrivateEnvironmentConfig = transformedPrivateEnvironmentConfig
+
+<% unless version == "ga" -%>
+	/*
+		config.enable_private_environment in terraform maps to
+		composer.PrivateEnvironmentConfig.EnablePrivateEnvironment in API.
+		Check image version to avoid overriding EnablePrivateEnvironment in case of other versions.
+	*/
+	if isComposer3(d, config) {
+		transformed.PrivateEnvironmentConfig = &composer.PrivateEnvironmentConfig{}
+		if enablePrivateEnvironmentRaw, ok := original["enable_private_environment"]; ok {
+			transformed.PrivateEnvironmentConfig.EnablePrivateEnvironment = enablePrivateEnvironmentRaw.(bool)
+		}
+		if enablePrivateBuildsOnlyRaw, ok := original["enable_private_builds_only"]; ok {
+			transformed.PrivateEnvironmentConfig.EnablePrivateBuildsOnly = enablePrivateBuildsOnlyRaw.(bool)
+		}
+	}
+<% end -%>
 
 	transformedWebServerNetworkAccessControl, err := expandComposerEnvironmentConfigWebServerNetworkAccessControl(original["web_server_network_access_control"], d, config)
 	if err != nil {
@@ -2740,4 +2810,9 @@ func versionsEqual(old, new string) (bool, error) {
 		return false, err
 	}
 	return o.Equal(n), nil
+}
+
+func isComposer3(d *schema.ResourceData, config *transport_tpg.Config)	bool {
+	image_version := d.Get("config.0.software_config.0.image_version").(string)
+	return strings.Contains(image_version, "composer-3")
 }
