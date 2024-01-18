@@ -71,22 +71,22 @@ func testVmwareEngineClusterConfig(context map[string]interface{}, nodeCount int
 	context["node_count"] = nodeCount
 	return acctest.Nprintf(`
 resource "google_project" "project" {
-	project_id      = "tf-test%{random_suffix}"
-	name            = "tf-test%{random_suffix}"
-	org_id          = "%{org_id}"
-	billing_account = "%{billing_account}"
+  project_id      = "tf-test%{random_suffix}"
+  name            = "tf-test%{random_suffix}"
+  org_id          = "%{org_id}"
+  billing_account = "%{billing_account}"
 }
 
 resource "google_project_service" "vmwareengine" {
-	project = google_project.project.project_id
-	service = "vmwareengine.googleapis.com"
+  project = google_project.project.project_id
+  service = "vmwareengine.googleapis.com"
 }
 
 resource "time_sleep" "sleep" {
-	create_duration = "1m"
-	depends_on = [
-		google_project_service.vmwareengine,
-	]
+  create_duration = "1m"
+  depends_on = [
+    google_project_service.vmwareengine,
+  ]
 }
 
 resource "google_vmwareengine_network" "cluster-nw" {

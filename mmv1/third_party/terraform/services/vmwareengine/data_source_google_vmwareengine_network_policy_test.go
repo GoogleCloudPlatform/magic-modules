@@ -39,52 +39,52 @@ func TestAccDataSourceVmwareengineNetworkPolicy_basic(t *testing.T) {
 func testAccVmwareengineNetworkPolicy_ds(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_project" "project" {
-	project_id      = "tf-test%{random_suffix}"
-	name            = "tf-test%{random_suffix}"
-	org_id          = "%{org_id}"
-	billing_account = "%{billing_account}"
+  project_id      = "tf-test%{random_suffix}"
+  name            = "tf-test%{random_suffix}"
+  org_id          = "%{org_id}"
+  billing_account = "%{billing_account}"
 }
 
 resource "google_project_service" "vmwareengine" {
-	project = google_project.project.project_id
-	service = "vmwareengine.googleapis.com"
+  project = google_project.project.project_id
+  service = "vmwareengine.googleapis.com"
 }
 
 resource "time_sleep" "sleep" {
-	create_duration = "1m"
-	depends_on = [
-		google_project_service.vmwareengine,
-	]
+  create_duration = "1m"
+  depends_on = [
+    google_project_service.vmwareengine,
+  ]
 }
 
 resource "google_vmwareengine_network" "network-policy-ds-nw" {
-	project = google_project.project.project_id
-	name = "tf-test-sample-nw%{random_suffix}"
-	location = "global" 
-	type = "STANDARD"
-	description = "VMwareEngine standard network sample"
+  project = google_project.project.project_id
+  name = "tf-test-sample-nw%{random_suffix}"
+  location = "global" 
+  type = "STANDARD"
+  description = "VMwareEngine standard network sample"
 
-	depends_on = [
-		time_sleep.sleep # Sleep allows permissions in the new project to propagate
-	]
+  depends_on = [
+    time_sleep.sleep # Sleep allows permissions in the new project to propagate
+  ]
 }
 
 resource "google_vmwareengine_network_policy" "vmw-engine-network-policy" {
-	project = google_project.project.project_id
-	location = "%{region}"
-	name = "tf-test-sample-network-policy%{random_suffix}"
-	internet_access {
-		enabled = true
-	}
-	external_ip {
-		enabled = true
-	}
-	edge_services_cidr = "192.168.30.0/26"
-	vmware_engine_network = google_vmwareengine_network.network-policy-ds-nw.id
+  project = google_project.project.project_id
+  location = "%{region}"
+  name = "tf-test-sample-network-policy%{random_suffix}"
+  internet_access {
+    enabled = true
+  }
+  external_ip {
+    enabled = true
+  }
+  edge_services_cidr = "192.168.30.0/26"
+  vmware_engine_network = google_vmwareengine_network.network-policy-ds-nw.id
 
-	depends_on = [
-		time_sleep.sleep # Sleep allows permissions in the new project to propagate
-	]
+  depends_on = [
+    time_sleep.sleep # Sleep allows permissions in the new project to propagate
+  ]
 }
 
 data "google_vmwareengine_network_policy" "ds" {
