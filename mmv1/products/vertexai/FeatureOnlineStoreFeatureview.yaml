@@ -56,7 +56,7 @@ examples:
     vars:
       name: 'example_feature_view'
   - !ruby/object:Provider::Terraform::Examples
-    name: 'vertex_ai_featureonlinestore_featureview_with_beta_fields'
+    name: 'vertex_ai_featureonlinestore_featureview_with_vector_search'
     primary_resource_id: 'featureview_beta'
     vars:
       name: 'example_feature_view_beta'
@@ -135,11 +135,11 @@ properties:
         name: 'embeddingColumn'
         required: true
         description: |
-          Column of embedding. This column contains the source data to create index for vector search. embeddingColumn must be set when using vector search.
+          Column of embedding. This column contains the source data to create index for vector search.
       - !ruby/object:Api::Type::Array
         name: 'filterColumns'
         description: |
-          Columns of features that're used to filter vector search results.
+          Columns of features that are used to filter vector search results.
         item_type: Api::Type::String
       - !ruby/object:Api::Type::String
         name: 'crowdingColumn'
@@ -149,11 +149,7 @@ properties:
         name: distanceMeasureType
         description: |
           The distance measure used in nearest neighbor search.
-          SQUARED_L2_DISTANCE: Euclidean (L_2) Distance.
-
-          COSINE_DISTANCE: Cosine Distance. Defined as 1 - cosine similarity.
-
-          DOT_PRODUCT_DISTANCE: Dot Product Distance. Defined as a negative of the dot product.
+          For details on allowed values, see the [API documentation](https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.featureOnlineStores.featureViews#DistanceMeasureType).
         values:
           - :SQUARED_L2_DISTANCE
           - :COSINE_DISTANCE
@@ -164,7 +160,7 @@ properties:
           - treeAhConfig
           - bruteForceConfig
         description: |
-          Configuration options for the tree-AH algorithm (Shallow tree + Asymmetric Hashing).
+          Configuration options for the tree-AH algorithm (Shallow tree + Asymmetric Hashing). Please refer to this paper for more details: https://arxiv.org/abs/1908.10396
         properties:
           - !ruby/object:Api::Type::String
             name: 'leafNodeEmbeddingCount'
