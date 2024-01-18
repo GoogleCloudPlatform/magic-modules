@@ -67,7 +67,7 @@ parameters:
     immutable: true
     url_param_only: true
     description: |
-      Id of the posture.
+      Id of the posture. It is an immutable field.
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
