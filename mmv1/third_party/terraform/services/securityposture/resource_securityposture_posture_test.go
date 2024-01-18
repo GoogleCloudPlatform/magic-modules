@@ -25,7 +25,7 @@ func TestAccSecurityposturePosture_securityposturePosture_update(t *testing.T) {
 				Config: testAccSecurityposturePosture_securityposturePosture_full(context),
 			},
 			{
-				ResourceName:            "google_securityposture_posture.posture1",
+				ResourceName:            "google_securityposture_posture.posture_test",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"parent", "posture_id", "annotations"},
@@ -34,7 +34,7 @@ func TestAccSecurityposturePosture_securityposturePosture_update(t *testing.T) {
 				Config: testAccSecurityposturePosture_securityposturePosture_update(context),
 			},
 			{
-				ResourceName:            "google_securityposture_posture.posture1",
+				ResourceName:            "google_securityposture_posture.posture_test",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"parent", "posture_id", "annotations"},
@@ -45,8 +45,8 @@ func TestAccSecurityposturePosture_securityposturePosture_update(t *testing.T) {
 
 func testAccSecurityposturePosture_securityposturePosture_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_securityposture_posture" "posture1" {
-	posture_id          = "posture_1"
+resource "google_securityposture_posture" "posture_test" {
+	posture_id          = "posture_test"
 	parent = "organizations/%{org_id}"
 	location = "global"
 	state = "ACTIVE"
@@ -72,8 +72,8 @@ resource "google_securityposture_posture" "posture1" {
 
 func testAccSecurityposturePosture_securityposturePosture_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_securityposture_posture" "posture1" {
-	posture_id          = "posture_1"
+resource "google_securityposture_posture" "posture_test" {
+	posture_id          = "posture_test"
 	parent = "organizations/%{org_id}"
 	location = "global"
 	state = "ACTIVE"
