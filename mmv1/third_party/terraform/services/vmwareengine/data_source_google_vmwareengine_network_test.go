@@ -62,6 +62,10 @@ data "google_vmwareengine_network" "ds" {
   name     = google_vmwareengine_network.nw.name
   project  = google_project.project.project_id
   location = "global"
+
+  depends_on = [
+    google_project_service.vmwareengine
+  ]
 }
 `, context)
 }
