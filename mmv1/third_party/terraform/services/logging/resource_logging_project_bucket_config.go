@@ -387,7 +387,7 @@ func resourceLoggingProjectBucketConfigUpdate(d *schema.ResourceData, meta inter
 	if len(updateMask) > 0 {
 		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
-			Method:    "POST",
+			Method:    "PATCH",
 			RawURL:    url,
 			UserAgent: userAgent,
 			Body:      obj,
