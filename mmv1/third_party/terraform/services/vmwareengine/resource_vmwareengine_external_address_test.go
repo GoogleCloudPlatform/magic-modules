@@ -20,7 +20,7 @@ func TestAccVmwareengineExternalAddress_vmwareEngineExternalAddressUpdate(t *tes
 		"region":          "southamerica-east1", // using region with low node utilization.
 		"random_suffix":   acctest.RandString(t, 10),
 		"org_id":          envvar.GetTestOrgFromEnv(t),
-		"billing_account": envvar.GetTestBillingAccountFromEnv(t)
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -29,7 +29,7 @@ func TestAccVmwareengineExternalAddress_vmwareEngineExternalAddressUpdate(t *tes
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},
-		CheckDestroy:             testAccCheckVmwareengineExternalAddressDestroyProducer(t),
+		CheckDestroy: testAccCheckVmwareengineExternalAddressDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testVmwareEngineExternalAddressConfig(context, "description1", "192.168.0.66"),
