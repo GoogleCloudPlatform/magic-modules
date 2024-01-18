@@ -17,7 +17,7 @@ description: |
   Vertex chat and Conversation Enging Chat type
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Vertex AI Conversation' : 'https://cloud.google.com/dialogflow/cx/docs/concept/generative'
+    'Vertex AI Conversation': 'https://cloud.google.com/dialogflow/cx/docs/concept/generative'
   api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1alpha/projects.locations.collections.engines'
 
 base_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}'
@@ -91,7 +91,7 @@ properties:
     name: 'dataStoreIds'
     min_size: 1
     description: |
-      Data Store IDs, Data Stores cannot be removed once added. 
+      Data Store IDs, Data Stores cannot be removed once added.
       Removing a Data Store from Chat Engine will result in error.
       To resolve error, first use `terraform refresh` command to correct state,
       then revert the code change to ensure graceful teardown.
