@@ -1,50 +1,21 @@
-<% autogen_exception -%>
-/*
- * Copyright (c) HashiCorp, Inc.
- * SPDX-License-Identifier: MPL-2.0
- */
+package builds
 
-// this file is auto-generated with mmv1, any changes made here will be overwritten
-
-import jetbrains.buildServer.configs.kotlin.*
-import jetbrains.buildServer.configs.kotlin.buildFeatures.GolangFeature
+import DefaultTerraformCoreVersion
+import jetbrains.buildServer.configs.kotlin.BuildSteps
 import jetbrains.buildServer.configs.kotlin.buildSteps.ScriptBuildStep
-import jetbrains.buildServer.configs.kotlin.triggers.schedule
 
-// NOTE: in time this could be pulled out into a separate Kotlin package
+// NOTE: this file includes Extensions of the Kotlin DSL class BuildSteps
+// This allows us to reuse code in the config easily, while ensuring the same build steps can be used across builds.
+// See the class's documentation: https://teamcity.jetbrains.com/app/dsl-documentation/root/build-steps/index.html
 
-// The native Go test runner (which TeamCity shells out to) will fail
-// the entire test suite when a single test panics, which isn't ideal.
-//
-// Until that changes, we'll continue to use `teamcity-go-test` to run
-// each test individually
-
-// NOTE: this file includes Extensions of Kotlin DSL classes
-// See
-// - BuildFeatures           https://teamcity.jetbrains.com/app/dsl-documentation/root/build-features/index.html
-// - BuildSteps              https://teamcity.jetbrains.com/app/dsl-documentation/root/build-steps/index.html
-// - ParametrizedWithType    https://teamcity.jetbrains.com/app/dsl-documentation/root/parametrized-with-type/index.html
-// - Triggers                https://teamcity.jetbrains.com/app/dsl-documentation/root/triggers/index.html
-
-
-const val useTeamCityGoTest = false
-
-fun BuildFeatures.Golang() {
-    if (useTeamCityGoTest) {
-        feature(GolangFeature {
-            testFormat = "json"
-        })
-    }
-}
-
-fun BuildSteps.ConfigureGoEnv() {
+fun BuildSteps.configureGoEnv() {
     step(ScriptBuildStep {
         name = "Configure Go version using .go-version file"
         scriptContent = "goenv install -s \$(goenv local) && goenv rehash"
     })
 }
 
-fun BuildSteps.SetGitCommitBuildId() {
+fun BuildSteps.setGitCommitBuildId() {
     step(ScriptBuildStep {
         name = "Set build id as shortened git commit hash"
         scriptContent = """
@@ -59,7 +30,7 @@ fun BuildSteps.SetGitCommitBuildId() {
     })
 }
 
-fun BuildSteps.TagBuildToIndicatePurpose() {
+fun BuildSteps.tagBuildToIndicatePurpose() {
     step(ScriptBuildStep {
         name = "Set build tag to indicate if build is run automatically or manually triggered"
         scriptContent = """
@@ -82,11 +53,11 @@ fun BuildSteps.TagBuildToIndicatePurpose() {
     })
 }
 
-fun BuildSteps.DownloadTerraformBinary() {
+fun BuildSteps.downloadTerraformBinary() {
     // https://releases.hashicorp.com/terraform/0.12.28/terraform_0.12.28_linux_amd64.zip
-    var terraformUrl = "https://releases.hashicorp.com/terraform/%env.TERRAFORM_CORE_VERSION%/terraform_%env.TERRAFORM_CORE_VERSION%_linux_amd64.zip"
+    val terraformUrl = "https://releases.hashicorp.com/terraform/%env.TERRAFORM_CORE_VERSION%/terraform_%env.TERRAFORM_CORE_VERSION%_linux_amd64.zip"
     step(ScriptBuildStep {
-        name = "Download Terraform version %s".format(defaultTerraformCoreVersion)
+        name = "Download Terraform version %s".format(DefaultTerraformCoreVersion)
         scriptContent = """
         #!/bin/bash
         mkdir -p tools
@@ -98,7 +69,7 @@ fun BuildSteps.DownloadTerraformBinary() {
 }
 
 // RunSweepers runs sweepers, and relies on set build configuration parameters
-fun BuildSteps.RunSweepers(sweeperStepName : String) {
+fun BuildSteps.runSweepers(sweeperStepName: String) {
     step(ScriptBuildStep{
         name = sweeperStepName
         scriptContent = "go test -v \"%PACKAGE_PATH%\" -sweep=\"%SWEEPER_REGIONS%\" -sweep-allow-failures -sweep-run=\"%SWEEP_RUN%\" -timeout 30m"
@@ -108,8 +79,8 @@ fun BuildSteps.RunSweepers(sweeperStepName : String) {
 // RunAcceptanceTests runs tests for a given directory, using either:
 // - TeamCity's test runner - stops remaining tests after a failure
 // - jen20/teamcity-go-test - allows tests to continue after a failure, and requires a test binary
-fun BuildSteps.RunAcceptanceTests() {
-    if (useTeamCityGoTest) {
+fun BuildSteps.runAcceptanceTests() {
+    if (UseTeamCityGoTest) {
         step(ScriptBuildStep {
             name = "Run Tests"
             scriptContent = "go test -v \"%PACKAGE_PATH%\" -timeout=\"%TIMEOUT%h\" -test.parallel=\"%PARALLELISM%\" -run=\"%TEST_PREFIX%\" -json"
@@ -128,7 +99,6 @@ fun BuildSteps.RunAcceptanceTests() {
                     echo "Skipping compilation of test binary; no Go test files found"
                 fi
             """.trimIndent()
-
         })
 
         step(ScriptBuildStep {
@@ -152,79 +122,5 @@ fun BuildSteps.RunAcceptanceTests() {
                 ./test-binary -test.list="%TEST_PREFIX%" | teamcity-go-test -test ./test-binary -parallelism "%PARALLELISM%" -timeout "%TIMEOUT%h"
             """.trimIndent()
         })
-    }
-}
-
-fun ParametrizedWithType.TerraformAcceptanceTestParameters(parallelism : Int, prefix : String, timeout: String, sweeperRegions: String, sweepRun: String) {
-    text("PARALLELISM", "%d".format(parallelism))
-    text("TEST_PREFIX", prefix)
-    text("TIMEOUT", timeout)
-    text("SWEEPER_REGIONS", sweeperRegions)
-    text("SWEEP_RUN", sweepRun)
-}
-
-fun ParametrizedWithType.TerraformLoggingParameters() {
-    // Set logging levels to match old projects
-    text("env.TF_LOG", "DEBUG")
-    text("env.TF_LOG_CORE", "WARN")
-    text("env.TF_LOG_SDK_FRAMEWORK", "INFO")
-
-    // Set where logs are sent
-    text("PROVIDER_NAME", providerName)
-    text("env.TF_LOG_PATH_MASK", "%system.teamcity.build.checkoutDir%/debug-%PROVIDER_NAME%-%env.BUILD_NUMBER%-%s.txt")
-}
-
-fun ParametrizedWithType.ReadOnlySettings() {
-    hiddenVariable("teamcity.ui.settings.readOnly", "true", "Requires build configurations be edited via Kotlin")
-}
-
-fun ParametrizedWithType.TerraformAcceptanceTestsFlag() {
-    hiddenVariable("env.TF_ACC", "1", "Set to a value to run the Acceptance Tests")
-}
-
-fun ParametrizedWithType.TerraformCoreBinaryTesting() {
-    text("env.TERRAFORM_CORE_VERSION", defaultTerraformCoreVersion, "The version of Terraform Core which should be used for testing")
-    hiddenVariable("env.TF_ACC_TERRAFORM_PATH", "%system.teamcity.build.checkoutDir%/tools/terraform", "The path where the Terraform Binary is located")
-}
-
-fun ParametrizedWithType.TerraformShouldPanicForSchemaErrors() {
-    hiddenVariable("env.TF_SCHEMA_PANIC_ON_ERROR", "1", "Panic if unknown/unmatched fields are set into the state")
-}
-
-fun ParametrizedWithType.WorkingDirectory(path : String) {
-    text("PACKAGE_PATH", path, "", "The path at which to run - automatically updated", ParameterDisplay.HIDDEN)
-}
-
-fun ParametrizedWithType.hiddenVariable(name: String, value: String, description: String) {
-    text(name, value, "", description, ParameterDisplay.HIDDEN)
-}
-
-fun ParametrizedWithType.hiddenPasswordVariable(name: String, value: String, description: String) {
-    password(name, value, "", description, ParameterDisplay.HIDDEN)
-}
-
-fun Triggers.RunNightly(config: NightlyTriggerConfiguration) {
-    val filter = "+:" + config.branchRef // e.g. "+:refs/heads/main"
-
-    schedule{
-        enabled = config.nightlyTestsEnabled
-        branchFilter = filter
-        triggerBuild = always() // Run build even if no new commits/pending changes
-        withPendingChangesOnly = false
-        enforceCleanCheckout = true
-
-        schedulingPolicy = cron {
-            hours = config.startHour.toString()
-            timezone = "SERVER"
-
-            dayOfWeek = config.daysOfWeek
-            dayOfMonth = config.daysOfMonth
-        }
-    }
-}
-
-fun BuildType.addTrigger(triggerConfig: NightlyTriggerConfiguration){
-    triggers {
-        RunNightly(triggerConfig)
     }
 }

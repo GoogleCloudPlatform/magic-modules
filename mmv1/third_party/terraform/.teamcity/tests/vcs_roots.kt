@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 /*
  * Copyright (c) HashiCorp, Inc.
  * SPDX-License-Identifier: MPL-2.0
@@ -8,15 +7,14 @@
 
 package tests
 
-import Google<%= version.capitalize unless version == 'ga' -%>
-
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import projects.googleCloudRootProject
 
 class VcsTests {
     @Test
     fun buildsHaveCleanCheckOut() {
-        val project = Google<%= version.capitalize unless version == 'ga' -%>("default", "description", testVcsRootId(), "refs/heads/main", testConfiguration())
+        val project = googleCloudRootProject(testContextParameters())
         project.buildTypes.forEach { bt ->
             assertTrue("Build '${bt.id}' doesn't use clean checkout", bt.vcs.cleanCheckout)
         }
