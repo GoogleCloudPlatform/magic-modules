@@ -12,9 +12,10 @@ func TestAccDataSourceVmwareEngineNetwork_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":   acctest.RandString(t, 10),
-		"org_id":          envvar.GetTestOrgFromEnv(t),
-		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+		"random_suffix":             acctest.RandString(t, 10),
+		"org_id":                    envvar.GetTestOrgFromEnv(t),
+		"billing_account":           envvar.GetTestBillingAccountFromEnv(t),
+		"terraform_service_account": envvar.GetTestServiceAccountFromEnv(t),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -46,6 +47,12 @@ resource "google_project_service" "vmwareengine" {
   service = "vmwareengine.googleapis.com"
 }
 
+resource "google_project_iam_member" "vmwareengine_admin" {
+  project = google_project.project.project_id
+  role    = "roles/vmwareengine.vmwareengineAdmin"
+  member  = "serviceAccount:%{terraform_service_account}"
+}
+
 resource "google_vmwareengine_network" "nw" {
   project           = google_project.project.project_id
   name              = "tf-test-sample-network%{random_suffix}"
@@ -54,7 +61,8 @@ resource "google_vmwareengine_network" "nw" {
   description       = "VMwareEngine standard network sample"
 
   depends_on = [
-    google_project_service.vmwareengine
+    google_project_service.vmwareengine,
+    google_project_iam_member.vmwareengine_admin
   ]
 }
 
@@ -62,10 +70,6 @@ data "google_vmwareengine_network" "ds" {
   name     = google_vmwareengine_network.nw.name
   project  = google_project.project.project_id
   location = "global"
-
-  depends_on = [
-    google_project_service.vmwareengine
-  ]
 }
 `, context)
 }
