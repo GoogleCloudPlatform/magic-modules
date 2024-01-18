@@ -51,6 +51,18 @@ resource "google_project_iam_member" "vmwareengine_admin" {
   project = google_project.project.project_id
   role    = "roles/vmwareengine.vmwareengineAdmin"
   member  = "serviceAccount:%{terraform_service_account}"
+
+  depends_on = [
+    google_project_service.vmwareengine,
+  ]
+}
+
+resource "time_sleep" "sleep" {
+  create_duration = "1m"
+
+  depends_on = [
+    google_project_iam_member.vmwareengine_admin,
+  ]
 }
 
 resource "google_vmwareengine_network" "nw" {
@@ -62,7 +74,8 @@ resource "google_vmwareengine_network" "nw" {
 
   depends_on = [
     google_project_service.vmwareengine,
-    google_project_iam_member.vmwareengine_admin
+    google_project_iam_member.vmwareengine_admin,
+	time_sleep.sleep
   ]
 }
 
