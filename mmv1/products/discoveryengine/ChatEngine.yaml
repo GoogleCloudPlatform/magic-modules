@@ -89,8 +89,12 @@ properties:
       required: true
   - !ruby/object:Api::Type::Array
       name: 'dataStoreIds'
+      min_size: 1
       description: |
-        Data Store IDs
+        Data Store IDs, Data Stores cannot be removed once added. 
+        Removing a Data Store from Chat Engine will result in error.
+        To resolve error, first use `terraform refresh` command to correct state,
+        then revert the code change to ensure graceful teardown.
       required: true
       item_type: Api::Type::String
   - !ruby/object:Api::Type::Enum
