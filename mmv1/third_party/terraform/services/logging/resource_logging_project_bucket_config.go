@@ -339,7 +339,7 @@ func resourceLoggingProjectBucketConfigUpdate(d *schema.ResourceData, meta inter
 	if d.HasChange("enable_analytics") {
 		obj["analyticsEnabled"] = d.Get("enable_analytics")
 		updateMaskAnalytics = append(updateMaskAnalytics, "analyticsEnabled")
-		asyncUrl := url + ":updatesync"
+		asyncUrl := url + ":updateAsync"
 		asyncUrl, err = transport_tpg.AddQueryParams(asyncUrl, map[string]string{"updateMask": strings.Join(updateMaskAnalytics, ",")})
 		if err != nil {
 			return err
@@ -387,7 +387,7 @@ func resourceLoggingProjectBucketConfigUpdate(d *schema.ResourceData, meta inter
 	if len(updateMask) > 0 {
 		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
-			Method:    "PATCH",
+			Method:    "POST",
 			RawURL:    url,
 			UserAgent: userAgent,
 			Body:      obj,
