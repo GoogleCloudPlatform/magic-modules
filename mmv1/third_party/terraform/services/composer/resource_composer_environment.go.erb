@@ -1084,8 +1084,8 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 		}
 
 <% unless version == "ga" -%>
-		is_composer_3 := strings.Contains(d.Get("config.0.software_config.0.image_version").(string), "composer-3")
-		if (d.HasChange("config.0.node_config.0.network") || d.HasChange("config.0.node_config.0.subnetwork")) && is_composer_3 {
+		noChangeErrorMessage := "Update request does not result in any change to the environment's configuration"
+		if d.HasChange("config.0.node_config.0.network") || d.HasChange("config.0.node_config.0.subnetwork"){
 			// step 1: update with empty network and subnetwork
 			patchObjEmpty := &composer.Environment{
 				Config: &composer.EnvironmentConfig{
@@ -1093,23 +1093,25 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 				},
 			}
 			err = resourceComposerEnvironmentPatchField("config.nodeConfig.network,config.nodeConfig.subnetwork", userAgent, patchObjEmpty, d, tfConfig)
-			if err != nil {
+			if err != nil && !strings.Contains(err.Error(), noChangeErrorMessage){
 				return err
 			}
 
-			// step 2: update with new network and subnetwork
-			patchObj := &composer.Environment{
-				Config: &composer.EnvironmentConfig{
-					NodeConfig: &composer.NodeConfig{},
-				},
-			}
-			if config != nil && config.NodeConfig != nil {
-				patchObj.Config.NodeConfig.Network = config.NodeConfig.Network
-				patchObj.Config.NodeConfig.Subnetwork = config.NodeConfig.Subnetwork
-			}
-			err = resourceComposerEnvironmentPatchField("config.nodeConfig.network,config.nodeConfig.subnetwork", userAgent, patchObj, d, tfConfig)
-			if err != nil {
-				return err
+			// step 2: update with new network and subnetwork, if new values are not empty
+			if (config.NodeConfig.Network != "" && config.NodeConfig.Subnetwork != ""){
+				patchObj := &composer.Environment{
+					Config: &composer.EnvironmentConfig{
+						NodeConfig: &composer.NodeConfig{},
+					},
+				}
+				if config != nil && config.NodeConfig != nil {
+					patchObj.Config.NodeConfig.Network = config.NodeConfig.Network
+					patchObj.Config.NodeConfig.Subnetwork = config.NodeConfig.Subnetwork
+				}
+				err = resourceComposerEnvironmentPatchField("config.nodeConfig.network,config.nodeConfig.subnetwork", userAgent, patchObj, d, tfConfig)
+				if err != nil {
+					return err
+				}
 			}
 		}
 
@@ -1121,22 +1123,24 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 				},
 			}
 			err = resourceComposerEnvironmentPatchField("config.nodeConfig.composerNetworkAttachment", userAgent, patchObjEmpty, d, tfConfig)
-			if err != nil {
+			if err != nil && !strings.Contains(err.Error(), noChangeErrorMessage){
 				return err
 			}
 
 			// step 2: update with new composer_network_attachment
-			patchObj := &composer.Environment{
-				Config: &composer.EnvironmentConfig{
-					NodeConfig: &composer.NodeConfig{},
-				},
-			}
-			if config != nil && config.NodeConfig != nil {
-				patchObj.Config.NodeConfig.ComposerNetworkAttachment = config.NodeConfig.ComposerNetworkAttachment
-			}
-			err = resourceComposerEnvironmentPatchField("config.nodeConfig.composerNetworkAttachment", userAgent, patchObj, d, tfConfig)
-			if err != nil {
-				return err
+			if (config.NodeConfig.ComposerNetworkAttachment != ""){
+				patchObj := &composer.Environment{
+					Config: &composer.EnvironmentConfig{
+						NodeConfig: &composer.NodeConfig{},
+					},
+				}
+				if config != nil && config.NodeConfig != nil {
+					patchObj.Config.NodeConfig.ComposerNetworkAttachment = config.NodeConfig.ComposerNetworkAttachment
+				}
+				err = resourceComposerEnvironmentPatchField("config.nodeConfig.composerNetworkAttachment", userAgent, patchObj, d, tfConfig)
+				if err != nil {
+					return err
+				}
 			}
 		}
 <% end -%>
