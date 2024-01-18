@@ -57,9 +57,9 @@ examples:
       name: 'example_feature_view'
   - !ruby/object:Provider::Terraform::Examples
     name: 'vertex_ai_featureonlinestore_featureview_with_vector_search'
-    primary_resource_id: 'featureview_beta'
+    primary_resource_id: 'featureview_vector_search'
     vars:
-      name: 'example_feature_view_beta'
+      name: 'example_feature_view_vector_search'
     min_version: beta
 parameters:
   - !ruby/object:Api::Type::String
@@ -169,6 +169,8 @@ properties:
             default_from_api: true
       - !ruby/object:Api::Type::NestedObject
         name: 'bruteForceConfig'
+        description: |
+          Configuration options for using brute force search, which simply implements the standard linear search in the database for each query. It is primarily meant for benchmarking and to generate the ground truth for approximate search.
         exactly_one_of:
           - treeAhConfig
           - bruteForceConfig
