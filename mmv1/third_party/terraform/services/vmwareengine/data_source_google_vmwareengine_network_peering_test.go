@@ -63,7 +63,6 @@ resource "google_vmwareengine_network" "network-peering-nw" {
 	type              = "STANDARD"
 
 	depends_on = [
-		google_project_service.vmwareengine,
 		time_sleep.sleep # Sleep allows permissions in the new project to propagate
 	]
 }
@@ -75,7 +74,6 @@ resource "google_vmwareengine_network" "network-peering-peer-nw" {
 	type              = "STANDARD"
 
 	depends_on = [
-		google_project_service.vmwareengine,
 		time_sleep.sleep # Sleep allows permissions in the new project to propagate
 	]
 }
@@ -89,7 +87,6 @@ resource "google_vmwareengine_network_peering" "vmw-engine-network-peering" {
 	peer_network_type = "VMWARE_ENGINE_NETWORK"
 
 	depends_on = [
-		google_project_service.vmwareengine,
 		time_sleep.sleep # Sleep allows permissions in the new project to propagate
 	]
 }

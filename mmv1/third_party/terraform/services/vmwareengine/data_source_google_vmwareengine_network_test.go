@@ -65,7 +65,6 @@ resource "google_vmwareengine_network" "nw" {
   description       = "VMwareEngine standard network sample"
 
   depends_on = [
-    google_project_service.vmwareengine,
     time_sleep.sleep # Sleep allows permissions in the new project to propagate
   ]
 }
