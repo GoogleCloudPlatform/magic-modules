@@ -13,11 +13,11 @@
 
 require 'spec_helper'
 
-class TestObject < Api::Object::Named
+class TestObject < Api::NamedObject
   attr_reader :some_property
 end
 
-describe Api::Object do
+describe Google::YamlValidator do
   context 'requires name' do
     subject { -> { object('some_property: "bar"').validate } }
     it { is_expected.to raise_error(StandardError, /Missing 'name'/) }

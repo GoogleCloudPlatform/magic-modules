@@ -17,11 +17,11 @@ require 'provider/terraform/validation'
 
 module Api
   # Represents a property type
-  class Type < Api::Object::Named
+  class Type < Api::NamedObject
     # The list of properties (attr_reader) that can be overridden in
     # <provider>.yaml.
     module Fields
-      include Api::Object::Named::Properties
+      include Api::NamedObject::Properties
 
       attr_reader :default_value
       attr_accessor :description
@@ -640,10 +640,6 @@ module Api
       def name
         EXPORT_KEY
       end
-
-      # def out_name
-      #   EXPORT_KEY.underscore
-      # end
     end
 
     # Represents a reference to another resource
