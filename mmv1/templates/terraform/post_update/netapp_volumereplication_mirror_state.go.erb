@@ -1,4 +1,13 @@
 log.Printf("[DEBUG] value of replication_state : %v", d.Get("replication_enabled"))
+// This needs more work. We should send stop/resume only when action is required. Add missing state checks
+// STATES transitions
+// replication_enabled==true, mirrorState!=STOPPED -> NOOP
+// replication_enabled==true, mirrorState==STOPPED -> resume
+// replication_enabled==false, mirrorState==STOPPED -> NOOP
+// replication_enabled==false, mirrorState==MIRRORED -> stop
+// replication_enabled==false, mirrorState==TRANSFERRING -> force stop
+// replication_enabled==false, mirrorState==PREPARING -> error. cannot be stopped
+
 var obj map[string]interface{}
 rawurl, err := tpgresource.ReplaceVars(d, config, "{{NetappBasePath}}projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/replications/{{name}}:")
 if err != nil {
@@ -8,7 +17,14 @@ if err != nil {
 if d.Get("replication_enabled").(bool) == true {
 	rawurl = rawurl + "resume"
 } else {
-	rawurl = rawurl + "stop"	
+	// replication_enabled==false, mirrorState==MIRRORED -> stop
+	rawurl = rawurl + "stop"
+	// replication_enabled==false, mirrorState==TRANSFERRING -> force stop
+	if d.Get("force_stopping").(bool) == true {
+		obj = map[string]interface{}{
+			"force": true,
+		}
+	}
 }
 reso, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 	Config:    config,

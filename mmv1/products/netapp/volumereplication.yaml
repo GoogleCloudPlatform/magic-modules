@@ -20,6 +20,10 @@ description: |
   disaster. The replicated volume can also be used as a read-only copy while the mirror is enabled, or
   as a independent volume if the mirror is stopped. A destination volume will also contain the
   snapshots of the source volume.
+  
+  Please note that the destination volume is not a managed resource. As long as the mirror is active
+  (mirrorState in not STOPPED) configuration changes done to source or destination volumes are automatically
+  done to both.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Documentation': 'https://cloud.google.com/netapp/volumes/docs/protect-data/about-volume-replication'
@@ -234,9 +238,18 @@ virtual_fields:
       Set to true to enable/resume the mirror. WARNING: Resuming a mirror overwrites the destination volume with the content
       of the source volume and resumes replication updates from source to destination according to replication schedule.
     default_value: true
+  - !ruby/object:Api::Type::Boolean
+    name: 'force_stopping'
+    description: |
+      Stopping a mirror will fail if a mirror update is currently in progress (mirrorState is PREPARING or TRANSFERRING).
+      While it is advisable to let updates complete before stopping, this parameter allows a stop action
+      triggered by replication_enabled=false being forced. The current transfer will be aborted and destination
+      volume content will remain in the state of the last successful update. 
+      Enabling this parameter is the only way to abort a long running PREPARING phase. Default is false.
+    default_value: false 
 
 # The following functionality needs to be discussed in review process
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  pre_delete: templates/terraform/pre_delete/netapp_volumereplication_stop.go.erb
+  pre_delete: templates/terraform/pre_delete/netapp_volumereplication_stop_before_delete.go.erb
   post_delete: templates/terraform/post_delete/netapp_volumereplication_delete_destination_volume.go.erb
-  # pre_update: templates/terraform/pre_update/netapp_volumereplication_mirror_state.go.erb
+  # post_update: templates/terraform/post_update/netapp_volumereplication_mirror_state.go.erb

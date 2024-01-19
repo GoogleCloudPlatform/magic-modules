@@ -50,9 +50,12 @@ resource "google_netapp_volumereplication" "my-replication" {
   delete_destination_volume = true
 }
 
-# Wait for replication to reach mirrorState==MIRRORED
+# Wait for replication to reach mirrorState==MIRRORED. For an empty volume
+# this takes about a minute. For volumes with a lot of data, it can take
+# many hours.
+# Since mirrorState is updated every 5 minutes, lets wait 310 seconds
 resource "time_sleep" "wait_for_mirrored" {
   depends_on = [google_netapp_volumereplication.my-replication]
 
-  destroy_duration = "6m"
+  create_duration = "310"
 }
