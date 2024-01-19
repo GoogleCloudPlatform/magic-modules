@@ -631,17 +631,6 @@ module Api
       end
     end
 
-    # Represents a 'selfLink' property, which returns the URI of the resource.
-    class SelfLink < FetchedExternal
-      EXPORT_KEY = 'selfLink'.freeze
-
-      attr_reader :resource
-
-      def name
-        EXPORT_KEY
-      end
-    end
-
     # Represents a reference to another resource
     class ResourceRef < Type
       # The fields which can be overridden in provider.yaml.
