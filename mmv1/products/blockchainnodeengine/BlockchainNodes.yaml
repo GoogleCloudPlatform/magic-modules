@@ -64,7 +64,6 @@ parameters:
     immutable: true
     required: false
     ignore_read: true
-    default_from_api: true
     url_param_only: true
   - !ruby/object:Api::Type::String
     name: blockchainNodeId
