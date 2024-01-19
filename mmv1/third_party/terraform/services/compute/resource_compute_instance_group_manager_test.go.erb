@@ -342,7 +342,7 @@ func TestAccInstanceGroupManager_stateful(t *testing.T) {
 	target := fmt.Sprintf("tf-test-igm-%s", acctest.RandString(t, 10))
 	igm := fmt.Sprintf("tf-test-igm-%s", acctest.RandString(t, 10))
 	hck := fmt.Sprintf("tf-test-igm-%s", acctest.RandString(t, 10))
- 	network := fmt.Sprintf("tf-test-igm-%s", acctest.RandString(t, 10))
+	network := fmt.Sprintf("tf-test-igm-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

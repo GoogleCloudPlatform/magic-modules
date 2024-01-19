@@ -29,10 +29,13 @@ type Label struct {
 }
 
 type PullRequest struct {
-	User struct {
-		Login string `json:"login"`
-	} `json:"user"`
-	Labels []Label `json:"labels"`
+	HTMLUrl        string  `json:"html_url"`
+	Number         int     `json:"number"`
+	Title          string  `json:"title"`
+	User           User    `json:"user"`
+	Body           string  `json:"body"`
+	Labels         []Label `json:"labels"`
+	MergeCommitSha string  `json:"merge_commit_sha"`
 }
 
 func (gh *Client) GetPullRequest(prNumber string) (PullRequest, error) {
@@ -40,58 +43,68 @@ func (gh *Client) GetPullRequest(prNumber string) (PullRequest, error) {
 
 	var pullRequest PullRequest
 
-	_, err := utils.RequestCall(url, "GET", gh.token, &pullRequest, nil)
-	if err != nil {
-		return pullRequest, err
-	}
+	err := utils.RequestCall(url, "GET", gh.token, &pullRequest, nil)
 
-	return pullRequest, nil
+	return pullRequest, err
 }
 
-func (gh *Client) GetPullRequestRequestedReviewer(prNumber string) (string, error) {
+func (gh *Client) GetPullRequests(state, base, sort, direction string) ([]PullRequest, error) {
+	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls?state=%s&base=%s&sort=%s&direction=%s", state, base, sort, direction)
+
+	var pullRequests []PullRequest
+
+	err := utils.RequestCall(url, "GET", gh.token, &pullRequests, nil)
+
+	return pullRequests, err
+}
+
+func (gh *Client) GetPullRequestRequestedReviewers(prNumber string) ([]User, error) {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/%s/requested_reviewers", prNumber)
 
 	var requestedReviewers struct {
-		Users []struct {
-			Login string `json:"login"`
-		} `json:"users"`
+		Users []User `json:"users"`
 	}
 
-	_, err := utils.RequestCall(url, "GET", gh.token, &requestedReviewers, nil)
-	if err != nil {
-		return "", err
-	}
-
-	if requestedReviewers.Users == nil || len(requestedReviewers.Users) == 0 {
-		return "", nil
-	}
-
-	return requestedReviewers.Users[0].Login, nil
-}
-
-func (gh *Client) GetPullRequestPreviousAssignedReviewers(prNumber string) ([]string, error) {
-	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/%s/reviews", prNumber)
-
-	var reviews []struct {
-		User struct {
-			Login string `json:"login"`
-		} `json:"user"`
-	}
-
-	_, err := utils.RequestCall(url, "GET", gh.token, &reviews, nil)
+	err := utils.RequestCall(url, "GET", gh.token, &requestedReviewers, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	previousAssignedReviewers := map[string]struct{}{}
-	for _, review := range reviews {
-		previousAssignedReviewers[review.User.Login] = struct{}{}
+	return requestedReviewers.Users, nil
+}
+
+func (gh *Client) GetPullRequestPreviousReviewers(prNumber string) ([]User, error) {
+	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/%s/reviews", prNumber)
+
+	var reviews []struct {
+		User User `json:"user"`
 	}
 
-	result := []string{}
-	for key := range previousAssignedReviewers {
-		result = append(result, key)
+	err := utils.RequestCall(url, "GET", gh.token, &reviews, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	previousAssignedReviewers := map[string]User{}
+	for _, review := range reviews {
+		previousAssignedReviewers[review.User.Login] = review.User
+	}
+
+	result := []User{}
+	for _, user := range previousAssignedReviewers {
+		result = append(result, user)
 	}
 
 	return result, nil
+}
+
+func (gh *Client) GetTeamMembers(organization, team string) ([]User, error) {
+	url := fmt.Sprintf("https://api.github.com/orgs/%s/teams/%s/members", organization, team)
+
+	var members []User
+	err := utils.RequestCall(url, "GET", gh.token, &members, nil)
+	if err != nil {
+		return nil, err
+	}
+	return members, nil
 }

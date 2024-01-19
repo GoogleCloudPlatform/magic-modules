@@ -108,23 +108,17 @@ if openapi_generate
   # Test write OpenAPI --> YAML
   # This writes to a fake demo product currently. In the future this should
   # produce the entire product folder including product.yaml for a single OpenAPI spec
-  OpenAPIGenerate::Parser.new('openapi_generate/openapi/*', 'products/demo').run
+  OpenAPIGenerate::Parser.new('openapi_generate/openapi/*', 'products').run
+  return
 end
 
 all_product_files = []
-Dir['products/**/api.yaml'].each do |file_path|
-  all_product_files.push(File.dirname(file_path))
-end
 Dir['products/**/product.yaml'].each do |file_path|
   all_product_files.push(File.dirname(file_path))
 end
 
 if override_dir
   Google::LOGGER.info "Using override directory '#{override_dir}'"
-  Dir["#{override_dir}/products/**/api.yaml"].each do |file_path|
-    product = File.dirname(Pathname.new(file_path).relative_path_from(override_dir))
-    all_product_files.push(product) unless all_product_files.include? product
-  end
   Dir["#{override_dir}/products/**/product.yaml"].each do |file_path|
     product = File.dirname(Pathname.new(file_path).relative_path_from(override_dir))
     all_product_files.push(product) unless all_product_files.include? product
@@ -132,7 +126,7 @@ if override_dir
 end
 
 products_to_generate = all_product_files if all_products
-raise 'No api.yaml or product.yaml files found.' if products_to_generate.empty?
+raise 'No product.yaml file found.' if products_to_generate.empty?
 
 start_time = Time.now
 Google::LOGGER.info "Generating MM output to '#{output_path}'"
@@ -151,7 +145,7 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
   product_yaml_path = File.join(product_name, 'product.yaml')
 
   unless File.exist?(product_yaml_path) || File.exist?(product_override_path)
-    raise "#{product_name} does not contain an api.yaml or product.yaml file"
+    raise "#{product_name} does not contain a product.yaml file"
   end
 
   if File.exist?(product_override_path)
@@ -183,7 +177,6 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
     resources = []
     Dir["#{product_name}/*"].each do |file_path|
       next if File.basename(file_path) == 'product.yaml' \
-       || File.basename(file_path) == 'terraform.yaml' \
        || File.extname(file_path) != '.yaml'
 
       if override_dir
@@ -204,7 +197,6 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
       ovr_prod_dir = File.join(override_dir, product_name)
       Dir["#{ovr_prod_dir}/*"].each do |override_path|
         next if File.basename(override_path) == 'product.yaml' \
-        || File.basename(override_path) == 'terraform.yaml' \
         || File.extname(override_path) != '.yaml'
 
         file_path = File.join(product_name, File.basename(override_path))
@@ -229,6 +221,7 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
         resources.push(resource)
       end
     end
+    resources = resources.sort_by(&:name)
     product_api.set_variable(resources, 'objects')
   end
 
@@ -276,12 +269,13 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
   { definitions: product_api, provider: provider } # rubocop:disable Style/HashSyntax
 end
 
-products_for_version = products_for_version.compact # remove any nil values
+# remove any nil values
+products_for_version = products_for_version.compact.sort_by { |p| p[:definitions].name.downcase }
 
 # In order to only copy/compile files once per provider this must be called outside
 # of the products loop. This will get called with the provider from the final iteration
 # of the loop
-final_product = products_for_version.compact.last
+final_product = products_for_version.last
 provider = final_product[:provider]
 
 provider&.copy_common_files(output_path, generate_code, generate_docs)
@@ -290,7 +284,7 @@ common_compile_file = "provider/#{provider_name}/common~compile.yaml"
 if generate_code
   provider&.compile_common_files(
     output_path,
-    products_for_version.sort_by { |p| p[:definitions].name.downcase },
+    products_for_version,
     common_compile_file
   )
 
@@ -299,7 +293,7 @@ if generate_code
     common_compile_file = "#{override_dir}/common~compile.yaml"
     provider&.compile_common_files(
       output_path,
-      products_for_version.sort_by { |p| p[:definitions].name.downcase },
+      products_for_version,
       common_compile_file,
       override_dir
     )

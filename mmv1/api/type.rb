@@ -47,7 +47,7 @@ module Api
       # For nested fields, this only applies at the current level. This means
       # it should be explicitly added to each field that needs the ForceNew
       # behavior.
-      attr_reader :immutable
+      attr_accessor :immutable
 
       # url_param_only will not send the field in the resource body and will
       # not attempt to read the field from the API response.

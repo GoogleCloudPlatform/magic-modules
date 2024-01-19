@@ -1,0 +1,17 @@
+url_kms_verify, err := tpgresource.ReplaceVars(d, config, "{{NetappBasePath}}projects/{{project}}/locations/{{location}}/kmsConfigs/{{name}}:verify")
+	if err != nil {
+		return err
+	}
+
+	res_kms_verify, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   billingProject,
+		RawURL:    url_kms_verify,
+		UserAgent: userAgent,
+		Timeout:   d.Timeout(schema.TimeoutCreate),
+	})
+	if err != nil {
+		return fmt.Errorf("Error verifying kmsconfig: %s", err)
+	}
+    log.Printf("[DEBUG] Finished verifying kmsconfig : %#v",res_kms_verify)
