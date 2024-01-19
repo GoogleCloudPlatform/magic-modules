@@ -382,7 +382,7 @@ The following arguments are supported:
 * `ip_allocation_policy` -
   (Optional)
   Configuration for controlling how IPs are allocated in the GKE cluster.
-  Structure is [documented below](#nested_ip_allocation_policy). Structure is
+  Structure is [documented below](#nested_ip_allocation_policy).
   Cannot be updated.
 
 * `max_pods_per_node` -
@@ -712,7 +712,7 @@ The `config` block supports:
   documented below.
 
 * `data_retention_config` -
-  (Optional, CLoud Composer 2.0.23 or newer only)
+  (Optional, Cloud Composer 2.0.23 or newer only)
   Configuration setting for airflow data rentention mechanism. Structure is
   [documented below](#nested_data_retention_config).
 
@@ -720,7 +720,7 @@ The `config` block supports:
 * `task_logs_retention_config` - 
   (Optional)
   The configuration setting for Task Logs. Structure is
-  [documented below](#nested_task_logs_retention_config)
+  [documented below](#nested_task_logs_retention_config).
 
 <a name="nested_task_logs_retention_config"></a>The `task_logs_retention_config` block supports:
 * `storage_mode` - 

@@ -1413,10 +1413,10 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 					},
 				},
 			}
-				if config != nil && config.DataRetentionConfig != nil && config.DataRetentionConfig.TaskLogsRetentionConfig != nil {
-					patchObj.Config.DataRetentionConfig.TaskLogsRetentionConfig.StorageMode = config.DataRetentionConfig.TaskLogsRetentionConfig.StorageMode
-				}
-				err = resourceComposerEnvironmentPatchField("config.DataRetentionConfig.TaskLogsRetentionConfig.StorageMode", userAgent, patchObj, d, tfConfig)
+			if config != nil && config.DataRetentionConfig != nil && config.DataRetentionConfig.TaskLogsRetentionConfig != nil {
+				patchObj.Config.DataRetentionConfig.TaskLogsRetentionConfig.StorageMode = config.DataRetentionConfig.TaskLogsRetentionConfig.StorageMode
+			}
+			err = resourceComposerEnvironmentPatchField("config.DataRetentionConfig.TaskLogsRetentionConfig.StorageMode", userAgent, patchObj, d, tfConfig)
 			  if err != nil {
 				return err
 			}
