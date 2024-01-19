@@ -90,6 +90,7 @@ resource "google_vmwareengine_network" "network-peering-peer-nw" {
 }
 
 resource "google_vmwareengine_network_peering" "vmw-engine-network-peering" {
+  project = google_project.project.project_id
   name = "tf-test-sample-network-peering%{random_suffix}"
   description = "%{description}"
   vmware_engine_network = google_vmwareengine_network.network-peering-nw.id
