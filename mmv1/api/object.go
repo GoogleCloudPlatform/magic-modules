@@ -13,10 +13,18 @@
 
 package api
 
+<<<<<<< HEAD
+=======
+import (
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
+)
+
+>>>>>>> 98fee8e3c (Rewrite compiler.go)
 // require 'google/extensions'
 // require 'google/logger'
 // require 'google/yaml_validator'
 
+<<<<<<< HEAD
 // Represents a base object
 // type Object struct {
 // 	// < Google::YamlValidator
@@ -34,6 +42,21 @@ type NamedObject struct {
 	// original value of :name before the provider override happens
 	// same as :name if not overridden in provider
 	api_name string
+=======
+// Represents an object that has a (mandatory) name
+type NamedObject struct {
+	google.YamlValidator
+
+	// The list of properties (attr_reader) that can be overridden in
+	// <provider>.yaml.
+	// attr_reader
+	Name string
+
+	// original value of :name before the provider override happens
+	// same as :name if not overridden in provider
+	// attr_reader
+	ApiName string
+>>>>>>> 98fee8e3c (Rewrite compiler.go)
 }
 
 // func (n *Named) string_array(arr) {

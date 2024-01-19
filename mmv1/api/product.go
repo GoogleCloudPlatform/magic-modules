@@ -13,6 +13,10 @@
 
 package api
 
+import (
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
+)
+
 // require 'api/object'
 // require 'api/product/version'
 // require 'google/logger'
@@ -21,7 +25,7 @@ package api
 
 // Represents a product to be managed
 type Product struct {
-	// < Api::NamedObject
+	NamedObject `yaml:",inline"`
 	// include Compile::Core
 
 	// Inherited:
@@ -29,39 +33,47 @@ type Product struct {
 	// This isn't just the API name because it doesn't meaningfully separate
 	// words in the api name - "accesscontextmanager" vs "AccessContextManager"
 	// Example inputs: "Compute", "AccessContextManager"
-	// name
+	// Name string
 
 	// Display Name: The full name of the GCP product; eg "Cloud Bigtable"
 	// A custom getter is used for :display_name instead of `attr_reader`
 
-	objects []interface{}
+	// attr_reader
+	Objects []interface{}
 
 	// The list of permission scopes available for the service
 	// For example: `https://www.googleapis.com/auth/compute`
-	scopes []string
+
+	// attr_accessor
+	Scopes []string
 
 	// The API versions of this product
-	versions []interface{}
+
+	// attr_accessor
+	Versions []product.Version
 
 	// The base URL for the service API endpoint
 	// For example: `https://www.googleapis.com/compute/v1/`
-	base_url string
+
+	// attr_accessor
+	BaseUrl string
 
 	// A function reference designed for the rare case where you
 	// need to use retries in operation calls. Used for the service api
 	// as it enables itself (self referential) and can result in occasional
 	// failures on operation_get. see github.com/hashicorp/terraform-provider-google/issues/9489
-	operation_retry string
 
-	// The APIs required to be enabled for this product.
-	// Usually just the product's API
-	// apis_required
+	// attr_reader
+	OperationRetry string
 
-	async interface{}
+	// attr_reader
+	Async OpAsync
 
-	legacy_name string
+	// attr_reader
+	LegacyName string
 
-	client_name string
+	// attr_reader
+	ClientName string
 }
 
 // def validate
