@@ -23,6 +23,7 @@ timeouts: !ruby/object:Api::Timeouts
   insert_minutes: 45
   delete_minutes: 35
 
+autogen_async: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
@@ -62,8 +63,7 @@ parameters:
     description: |
       Location of Blockchain Node being created.
     immutable: true
-    required: false
-    ignore_read: true
+    required: true
     url_param_only: true
   - !ruby/object:Api::Type::String
     name: blockchainNodeId
