@@ -88,6 +88,7 @@ resource "google_vmwareengine_network" "network-policy-nw" {
 }
 
 resource "google_vmwareengine_network_policy" "vmw-engine-network-policy" {
+  project           = google_project.project.project_id
   location = "%{region}"
   name = "tf-test-sample-network-policy%{random_suffix}"
   description = "%{description}" 
