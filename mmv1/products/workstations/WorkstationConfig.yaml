@@ -438,7 +438,7 @@ properties:
           name: 'path'
           description: |
             Path to which the request should be sent.
-        - !ruby/object:Api::Type::String
+        - !ruby/object:Api::Type::Integer
           name: 'port'
           description: |
             Port to which the request should be sent.
