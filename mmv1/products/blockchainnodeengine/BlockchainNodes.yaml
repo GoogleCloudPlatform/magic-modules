@@ -76,7 +76,7 @@ properties:
     name: name
     output: true
     description: |
-      The number of the google project that firebase is enabled on.
+      The fully qualified name of the blockchain node. e.g. projects/my-project/locations/us-central1/blockchainNodes/my-node.
   - !ruby/object:Api::Type::String
     name: createTime
     output: true
