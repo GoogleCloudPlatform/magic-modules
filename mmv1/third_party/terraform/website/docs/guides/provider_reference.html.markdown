@@ -287,7 +287,7 @@ with `skip_terraform_attribution_label` this determines when the
 `goog-terraform-provisioned = true` label will be added to resources. There
 are two possible values: `CREATION_ONLY` (the default value) will only add
 the label to newly created resources; and `PROACTIVE`, which will add the
-label to affected resources during the next `terraform apply`.
+label to all resources with `labels` during the next `terraform apply`.
 
 If `skip_terraform_attribution_label` is `true`, this configuration is
 ignored. This example configuration adds the label to resources every
