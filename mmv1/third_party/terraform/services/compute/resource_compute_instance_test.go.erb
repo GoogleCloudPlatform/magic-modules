@@ -2732,7 +2732,7 @@ func TestAccComputeInstance_creationOnlyAttributionLabel(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstance_attributionLabelCreate(instanceName, "false", "CREATION_ONLY"),
+				Config: testAccComputeInstance_attributionLabelCreate(instanceName, "true", "CREATION_ONLY"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
@@ -2741,7 +2741,7 @@ func TestAccComputeInstance_creationOnlyAttributionLabel(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccComputeInstance_attributionLabelUpdate(instanceName, "false", "CREATION_ONLY"),
+				Config: testAccComputeInstance_attributionLabelUpdate(instanceName, "true", "CREATION_ONLY"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
@@ -2767,7 +2767,7 @@ func TestAccComputeInstance_creationOnlyAttributionLabelConfiguredOnUpdate(t *te
 		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstance_attributionLabelCreate(instanceName, "true", "CREATION_ONLY"),
+				Config: testAccComputeInstance_attributionLabelCreate(instanceName, "false", "CREATION_ONLY"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
@@ -2776,7 +2776,7 @@ func TestAccComputeInstance_creationOnlyAttributionLabelConfiguredOnUpdate(t *te
 				),
 			},
 			{
-				Config: testAccComputeInstance_attributionLabelUpdate(instanceName, "false", "CREATION_ONLY"),
+				Config: testAccComputeInstance_attributionLabelUpdate(instanceName, "true", "CREATION_ONLY"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
@@ -2802,7 +2802,7 @@ func TestAccComputeInstance_proactiveAttributionLabel(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstance_attributionLabelCreate(instanceName, "true", "PROACTIVE"),
+				Config: testAccComputeInstance_attributionLabelCreate(instanceName, "false", "PROACTIVE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
@@ -2811,7 +2811,7 @@ func TestAccComputeInstance_proactiveAttributionLabel(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccComputeInstance_attributionLabelUpdate(instanceName, "false", "PROACTIVE"),
+				Config: testAccComputeInstance_attributionLabelUpdate(instanceName, "true", "PROACTIVE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
@@ -7180,10 +7180,10 @@ resource "google_compute_instance" "foobar" {
 `, instance, enableConfidentialCompute)
 }
 
-func testAccComputeInstance_attributionLabelCreate(instance, skip, strategy string) string {
+func testAccComputeInstance_attributionLabelCreate(instance, add, strategy string) string {
 	return fmt.Sprintf(`
 provider "google" {
-	skip_terraform_attribution_label              = %s
+	add_terraform_attribution_label               = %s
 	terraform_attribution_label_addition_strategy = %q
 }
 
@@ -7214,13 +7214,13 @@ resource "google_compute_instance" "foobar" {
     user_label = "foo"
   }
 }
-`, skip, strategy, instance)
+`, add, strategy, instance)
 }
 
-func testAccComputeInstance_attributionLabelUpdate(instance, skip, strategy string) string {
+func testAccComputeInstance_attributionLabelUpdate(instance, add, strategy string) string {
 	return fmt.Sprintf(`
 provider "google" {
-	skip_terraform_attribution_label              = %s
+	add_terraform_attribution_label               = %s
 	terraform_attribution_label_addition_strategy = %q
 }
 
@@ -7251,7 +7251,7 @@ resource "google_compute_instance" "foobar" {
     user_label = "bar"
   }
 }
-`, skip, strategy, instance)
+`, add, strategy, instance)
 }
 
 func testAccComputeInstanceConfidentialHyperDiskBootDisk(context map[string]interface{}) string {

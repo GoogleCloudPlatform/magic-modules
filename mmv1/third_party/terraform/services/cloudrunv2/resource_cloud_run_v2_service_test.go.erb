@@ -751,7 +751,7 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceAttributionLabel(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix":        acctest.RandString(t, 10),
-		"skip_attribution":     "false",
+		"add_attribution":      "true",
 		"attribution_strategy": "CREATION_ONLY",
 	}
 
@@ -797,7 +797,7 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceAttributionLabel(t *testing.T) {
 func testAccCloudRunV2Service_cloudrunv2ServiceWithAttributionLabel(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 provider "google" {
-  skip_terraform_attribution_label              = %{skip_attribution}
+  add_terraform_attribution_label               = %{add_attribution}
   terraform_attribution_label_addition_strategy = "%{attribution_strategy}"
 }
 
@@ -824,7 +824,7 @@ resource "google_cloud_run_v2_service" "default" {
 func testAccCloudRunV2Service_cloudrunv2ServiceWithAttributionLabelUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 provider "google" {
-  skip_terraform_attribution_label              = %{skip_attribution}
+  add_terraform_attribution_label               = %{add_attribution}
   terraform_attribution_label_addition_strategy = "%{attribution_strategy}"
 }
 

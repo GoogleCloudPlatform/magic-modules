@@ -615,7 +615,7 @@ resource "google_compute_address" "foobar" {
 func testAccComputeAddress_networkTier_withAttribution(suffix, strategy string) string {
 	return fmt.Sprintf(`
 provider "google" {
-  skip_terraform_attribution_label              = false
+  add_terraform_attribution_label               = true
   terraform_attribution_label_addition_strategy = %q
 }
 
@@ -634,7 +634,7 @@ resource "google_compute_address" "foobar" {
 func testAccComputeAddress_networkTier_withSkipAttribution(suffix, strategy string) string {
 	return fmt.Sprintf(`
 provider "google" {
-  skip_terraform_attribution_label              = true
+  add_terraform_attribution_label               = false
   terraform_attribution_label_addition_strategy = %q
 }
 
@@ -653,7 +653,7 @@ resource "google_compute_address" "foobar" {
 func testAccComputeAddress_networkTier_withAttributionUpdate(suffix, strategy string) string {
 	return fmt.Sprintf(`
 provider "google" {
-  skip_terraform_attribution_label              = false
+  add_terraform_attribution_label               = true
   terraform_attribution_label_addition_strategy = %q
 }
 
@@ -672,7 +672,7 @@ resource "google_compute_address" "foobar" {
 func testAccComputeAddress_networkTier_withSkipAttributionUpdate(suffix, strategy string) string {
 	return fmt.Sprintf(`
 provider "google" {
-  skip_terraform_attribution_label              = true
+  add_terraform_attribution_label               = false
   terraform_attribution_label_addition_strategy = %q
 }
 
@@ -691,7 +691,7 @@ resource "google_compute_address" "foobar" {
 func testAccComputeAddress_networkTier_withAttributionClear(suffix, strategy string) string {
 	return fmt.Sprintf(`
 provider "google" {
-  skip_terraform_attribution_label              = false
+  add_terraform_attribution_label               = true
   terraform_attribution_label_addition_strategy = %q
 }
 

@@ -448,7 +448,7 @@ func TestAccDataflowJob_withAttributionLabelCreationOnly(t *testing.T) {
 	randStr := acctest.RandString(t, 10)
 	bucket := "tf-test-dataflow-gcs-" + randStr
 	job := "tf-test-dataflow-job-" + randStr
-	skip := "false"
+	add := "true"
 	strategy := "CREATION_ONLY"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -457,7 +457,7 @@ func TestAccDataflowJob_withAttributionLabelCreationOnly(t *testing.T) {
 		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataflowJob_attributionLabelCreate(bucket, job, skip, strategy),
+				Config: testAccDataflowJob_attributionLabelCreate(bucket, job, add, strategy),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_dataflow_job.big_data", "labels.%", "1"),
 					resource.TestCheckResourceAttr("google_dataflow_job.big_data", "labels.user_label", "foo"),
@@ -476,7 +476,7 @@ func TestAccDataflowJob_withAttributionLabelCreationOnly(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "labels", "terraform_labels"},
 			},
 			{
-				Config: testAccDataflowJob_attributionLabelUpdate(bucket, job, skip, strategy),
+				Config: testAccDataflowJob_attributionLabelUpdate(bucket, job, add, strategy),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_dataflow_job.big_data", "labels.%", "1"),
 					resource.TestCheckResourceAttr("google_dataflow_job.big_data", "labels.user_label", "bar"),
@@ -515,7 +515,7 @@ func TestAccDataflowJob_withAttributionLabelProactive(t *testing.T) {
 		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataflowJob_attributionLabelCreate(bucket, job, "true", strategy),
+				Config: testAccDataflowJob_attributionLabelCreate(bucket, job, "false", strategy),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_dataflow_job.big_data", "labels.%", "1"),
 					resource.TestCheckResourceAttr("google_dataflow_job.big_data", "labels.user_label", "foo"),
@@ -533,7 +533,7 @@ func TestAccDataflowJob_withAttributionLabelProactive(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "labels", "terraform_labels"},
 			},
 			{
-				Config: testAccDataflowJob_attributionLabelUpdate(bucket, job, "false", strategy),
+				Config: testAccDataflowJob_attributionLabelUpdate(bucket, job, "true", strategy),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_dataflow_job.big_data", "labels.%", "1"),
 					resource.TestCheckResourceAttr("google_dataflow_job.big_data", "labels.user_label", "bar"),
@@ -1638,10 +1638,10 @@ resource "google_dataflow_flex_template_job" "flex_job_fullupdate" {
 `, topicName, randStr, bucket, job)
 }
 
-func testAccDataflowJob_attributionLabelCreate(bucket, job, skip, strategy string) string {
+func testAccDataflowJob_attributionLabelCreate(bucket, job, add, strategy string) string {
 	return fmt.Sprintf(`
 provider "google" {
-  skip_terraform_attribution_label              = %s
+  add_terraform_attribution_label               = %s
   terraform_attribution_label_addition_strategy = %q
 }
 
@@ -1666,13 +1666,13 @@ resource "google_dataflow_job" "big_data" {
   }
   on_delete = "cancel"
 }
-`, skip, strategy, bucket, job, testDataflowJobTemplateWordCountUrl, testDataflowJobSampleFileUrl)
+`, add, strategy, bucket, job, testDataflowJobTemplateWordCountUrl, testDataflowJobSampleFileUrl)
 }
 
-func testAccDataflowJob_attributionLabelUpdate(bucket, job, skip, strategy string) string {
+func testAccDataflowJob_attributionLabelUpdate(bucket, job, add, strategy string) string {
 	return fmt.Sprintf(`
 provider "google" {
-  skip_terraform_attribution_label              = %s
+  add_terraform_attribution_label              = %s
   terraform_attribution_label_addition_strategy = %q
 }
 
@@ -1697,7 +1697,7 @@ resource "google_dataflow_job" "big_data" {
   }
   on_delete = "cancel"
 }
-`, skip, strategy, bucket, job, testDataflowJobTemplateWordCountUrl, testDataflowJobSampleFileUrl)
+`, add, strategy, bucket, job, testDataflowJobTemplateWordCountUrl, testDataflowJobSampleFileUrl)
 }
 
 func testAccDataflowFlexJobHasOption(t *testing.T, res, option, expectedValue string, wait bool) resource.TestCheckFunc {

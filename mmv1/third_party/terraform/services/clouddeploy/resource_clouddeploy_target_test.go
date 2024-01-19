@@ -284,7 +284,7 @@ func TestAccClouddeployTarget_withCreationOnlyAttribution(t *testing.T) {
 		"project_name":         envvar.GetTestProjectFromEnv(),
 		"region":               envvar.GetTestRegionFromEnv(),
 		"random_suffix":        acctest.RandString(t, 10),
-		"skip_attribution":     "false",
+		"add_attribution":      "true",
 		"attribution_strategy": "CREATION_ONLY",
 	}
 
@@ -363,14 +363,14 @@ func TestAccClouddeployTarget_withProactiveAttribution(t *testing.T) {
 		"project_name":         envvar.GetTestProjectFromEnv(),
 		"region":               envvar.GetTestRegionFromEnv(),
 		"random_suffix":        suffix,
-		"skip_attribution":     "true",
+		"add_attribution":      "false",
 		"attribution_strategy": "PROACTIVE",
 	}
 	enabledContext := map[string]interface{}{
 		"project_name":         envvar.GetTestProjectFromEnv(),
 		"region":               envvar.GetTestRegionFromEnv(),
 		"random_suffix":        suffix,
-		"skip_attribution":     "false",
+		"add_attribution":      "true",
 		"attribution_strategy": "PROACTIVE",
 	}
 
@@ -420,7 +420,7 @@ provider "google" {
   default_labels = {
     default_key1 = "default_value1"
   }
-  skip_terraform_attribution_label              = %{skip_attribution}
+  add_terraform_attribution_label               = %{add_attribution}
   terraform_attribution_label_addition_strategy = "%{attribution_strategy}"
 }
 
@@ -461,7 +461,7 @@ provider "google" {
   default_labels = {
     default_key1 = "default_value1"
   }
-  skip_terraform_attribution_label              = %{skip_attribution}
+  add_terraform_attribution_label               = %{add_attribution}
   terraform_attribution_label_addition_strategy = "%{attribution_strategy}"
 }
 
@@ -502,7 +502,7 @@ provider "google" {
   default_labels = {
     default_key1 = "default_value1"
   }
-  skip_terraform_attribution_label              = %{skip_attribution}
+  add_terraform_attribution_label               = %{add_attribution}
   terraform_attribution_label_addition_strategy = "%{attribution_strategy}"
 }
 

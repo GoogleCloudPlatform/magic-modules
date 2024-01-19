@@ -78,7 +78,7 @@ func SetLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) 
 	}
 
 	// Append optional label indicating the resource was provisioned using Terraform
-	if !config.SkipTerraformAttributionLabel {
+	if config.AddTerraformAttributionLabel {
 		if el, ok := d.Get("effective_labels").(map[string]any); ok {
 			_, hasExistingLabel := el[transport_tpg.AttributionKey]
 			if hasExistingLabel ||
@@ -146,7 +146,7 @@ func SetMetadataLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta inter
 	}
 
 	// Append optional label indicating the resource was provisioned using Terraform
-	if !config.SkipTerraformAttributionLabel {
+	if config.AddTerraformAttributionLabel {
 		if el, ok := d.Get("metadata.0.effective_labels").(map[string]any); ok {
 			_, hasExistingLabel := el[transport_tpg.AttributionKey]
 			if hasExistingLabel ||

@@ -1374,7 +1374,7 @@ func TestAccComputeDisk_attributionLabelOnCreationSkip(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeDisk_attributionLabel(diskName, "true", "CREATION_ONLY"),
+				Config: testAccComputeDisk_attributionLabel(diskName, "false", "CREATION_ONLY"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_compute_disk.foobar", "labels.%", "1"),
 					resource.TestCheckResourceAttr("google_compute_disk.foobar", "labels.user-label", "foo"),
@@ -1386,7 +1386,7 @@ func TestAccComputeDisk_attributionLabelOnCreationSkip(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccComputeDisk_attributionLabelUpdated(diskName, "false", "CREATION_ONLY"),
+				Config: testAccComputeDisk_attributionLabelUpdated(diskName, "true", "CREATION_ONLY"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_compute_disk.foobar", "labels.%", "1"),
 					resource.TestCheckResourceAttr("google_compute_disk.foobar", "labels.user-label", "bar"),
@@ -1413,7 +1413,7 @@ func TestAccComputeDisk_attributionLabelProactive(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeDisk_attributionLabel(diskName, "true", "PROACTIVE"),
+				Config: testAccComputeDisk_attributionLabel(diskName, "false", "PROACTIVE"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_compute_disk.foobar", "labels.%", "1"),
 					resource.TestCheckResourceAttr("google_compute_disk.foobar", "labels.user-label", "foo"),
@@ -1425,7 +1425,7 @@ func TestAccComputeDisk_attributionLabelProactive(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccComputeDisk_attributionLabelUpdated(diskName, "false", "PROACTIVE"),
+				Config: testAccComputeDisk_attributionLabelUpdated(diskName, "true", "PROACTIVE"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_compute_disk.foobar", "labels.%", "1"),
 					resource.TestCheckResourceAttr("google_compute_disk.foobar", "labels.user-label", "bar"),
@@ -1441,10 +1441,10 @@ func TestAccComputeDisk_attributionLabelProactive(t *testing.T) {
 	})
 }
 
-func testAccComputeDisk_attributionLabel(diskName, skip, strategy string) string {
+func testAccComputeDisk_attributionLabel(diskName, add, strategy string) string {
 	return fmt.Sprintf(`
 provider "google" {
-	skip_terraform_attribution_label              = %s
+	add_terraform_attribution_label               = %s
 	terraform_attribution_label_addition_strategy = %q
 }
 
@@ -1463,13 +1463,13 @@ resource "google_compute_disk" "foobar" {
     user-label = "foo"
   }
 }
-`, skip, strategy, diskName)
+`, add, strategy, diskName)
 }
 
-func testAccComputeDisk_attributionLabelUpdated(diskName, skip, strategy string) string {
+func testAccComputeDisk_attributionLabelUpdated(diskName, add, strategy string) string {
 	return fmt.Sprintf(`
 provider "google" {
-	skip_terraform_attribution_label              = %s
+	add_terraform_attribution_label               = %s
 	terraform_attribution_label_addition_strategy = %q
 }
 
@@ -1488,6 +1488,6 @@ resource "google_compute_disk" "foobar" {
     user-label = "bar"
   }
 }
-`, skip, strategy, diskName)
+`, add, strategy, diskName)
 }
 

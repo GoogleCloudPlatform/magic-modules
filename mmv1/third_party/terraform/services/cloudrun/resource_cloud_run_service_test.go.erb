@@ -1020,7 +1020,7 @@ func TestAccCloudRunService_withCreationOnlyAttribution(t *testing.T) {
 	context := map[string]interface{}{
 		"project":              envvar.GetTestProjectFromEnv(),
 		"random_suffix":        acctest.RandString(t, 10),
-		"skip_attribution":     "false",
+		"add_attribution":      "true",
 		"attribution_strategy": "CREATION_ONLY",
 	}
 
@@ -1083,13 +1083,13 @@ func TestAccCloudRunService_withProactiveAttribution(t *testing.T) {
 	createContext := map[string]interface{}{
 		"project":              envvar.GetTestProjectFromEnv(),
 		"random_suffix":        suffix,
-		"skip_attribution":     "true",
+		"add_attribution":      "false",
 		"attribution_strategy": "PROACTIVE",
 	}
 	updateContext := map[string]interface{}{
 		"project":              envvar.GetTestProjectFromEnv(),
 		"random_suffix":        suffix,
-		"skip_attribution":     "false",
+		"add_attribution":      "true",
 		"attribution_strategy": "PROACTIVE",
 	}
 
@@ -1144,7 +1144,7 @@ func TestAccCloudRunService_withProactiveAttribution(t *testing.T) {
 func testAccCloudRunService_withAttributionLabelCreate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 provider "google" {
-  skip_terraform_attribution_label              = %{skip_attribution}
+  add_terraform_attribution_label               = %{add_attribution}
   terraform_attribution_label_addition_strategy = "%{attribution_strategy}"
 }
 
@@ -1178,7 +1178,7 @@ resource "google_cloud_run_service" "default" {
 func testAccCloudRunService_withAttributionLabelUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 provider "google" {
-  skip_terraform_attribution_label              = %{skip_attribution}
+  add_terraform_attribution_label               = %{add_attribution}
   terraform_attribution_label_addition_strategy = "%{attribution_strategy}"
 }
 
@@ -1212,7 +1212,7 @@ resource "google_cloud_run_service" "default" {
 func testAccCloudRunService_withAttributionLabelClear(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 provider "google" {
-  skip_terraform_attribution_label              = %{skip_attribution}
+  add_terraform_attribution_label               = %{add_attribution}
   terraform_attribution_label_addition_strategy = "%{attribution_strategy}"
 }
 
