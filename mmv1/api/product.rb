@@ -19,7 +19,7 @@ require 'json'
 
 module Api
   # Represents a product to be managed
-  class Product < Api::Object::Named
+  class Product < Api::NamedObject
     include Compile::Core
 
     # Inherited:

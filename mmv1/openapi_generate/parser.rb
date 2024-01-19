@@ -216,7 +216,7 @@ module OpenAPIGenerate
       resource.id_format = self_link
       resource.import_format = [self_link]
 
-      # Name is on the Api::Object::Named parent resource, lets not modify that
+      # Name is on the Api::NamedObject parent resource, lets not modify that
       resource.instance_variable_set(:@name, resource_name)
       # TODO(slevenick): Get resource description published in OpenAPI spec
       resource.description = 'Description'
@@ -267,7 +267,7 @@ module OpenAPIGenerate
       product.versions = [api_version]
       # Standard titling is "Service Name API"
       display_name = root.raw_schema['info']['title'].sub(' API', '')
-      # Name is on the Api::Object::Named parent resource, lets not modify that
+      # Name is on the Api::NamedObject parent resource, lets not modify that
       product.instance_variable_set(:@name, display_name.gsub(' ', ''))
       product.display_name = display_name
       # Scopes should be added soon to OpenAPI, until then use global scope

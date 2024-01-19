@@ -11,7 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'api/async'
 require 'api/product'
 require 'api/resource'
 require 'api/type'
@@ -20,8 +19,6 @@ require 'google/yaml_validator'
 module Api
   # Process <product>.yaml and produces output module
   class Compiler
-    include Compile::Core
-
     def initialize(catalog)
       @catalog = catalog
     end

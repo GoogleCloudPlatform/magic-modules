@@ -17,11 +17,11 @@ require 'provider/terraform/validation'
 
 module Api
   # Represents a property type
-  class Type < Api::Object::Named
+  class Type < Api::NamedObject
     # The list of properties (attr_reader) that can be overridden in
     # <provider>.yaml.
     module Fields
-      include Api::Object::Named::Properties
+      include Api::NamedObject::Properties
 
       attr_reader :default_value
       attr_accessor :description
@@ -468,16 +468,6 @@ module Api
 
     private
 
-    # A constant value to be provided as field
-    class Constant < Type
-      attr_reader :value
-
-      def validate
-        @description = "This is always #{value}."
-        super
-      end
-    end
-
     # Represents a primitive (non-composite) type.
     class Primitive < Type
     end
@@ -638,21 +628,6 @@ module Api
         end
 
         result
-      end
-    end
-
-    # Represents a 'selfLink' property, which returns the URI of the resource.
-    class SelfLink < FetchedExternal
-      EXPORT_KEY = 'selfLink'.freeze
-
-      attr_reader :resource
-
-      def name
-        EXPORT_KEY
-      end
-
-      def out_name
-        EXPORT_KEY.underscore
       end
     end
 

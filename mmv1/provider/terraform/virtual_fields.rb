@@ -32,7 +32,7 @@ module Provider
     # Both are resource level fields and do not make sense, and are also not
     # supported, for nested fields. Nested fields that shouldn't be included
     # in API payloads are better handled with custom expand/encoder logic.
-    class VirtualFields < Api::Object
+    class VirtualFields < Google::YamlValidator
       include Compile::Core
       include Google::GolangUtils
 
