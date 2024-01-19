@@ -16,7 +16,7 @@ require 'api/timeout'
 
 module Api
   # Base class from which other Async classes can inherit.
-  class Async < Api::Object
+  class Async < Google::YamlValidator
     # Describes an operation
     attr_reader :operation
 
@@ -35,7 +35,7 @@ module Api
     end
 
     # Base async operation type
-    class Operation < Api::Object
+    class Operation < Google::YamlValidator
       # Contains information about an long-running operation, to make
       # requests for the state of an operation.
       attr_reader :timeouts
@@ -48,7 +48,7 @@ module Api
     end
 
     # Base result class
-    class Result < Api::Object
+    class Result < Google::YamlValidator
       # Contains information about the result of an Operation
 
       attr_reader :resource_inside_response
@@ -145,7 +145,7 @@ module Api
 
     # Provides information to parse the result response to check operation
     # status
-    class Status < Api::Object
+    class Status < Google::YamlValidator
       attr_reader :path
       attr_reader :complete
       attr_reader :allowed
@@ -165,7 +165,7 @@ module Api
     end
 
     # Provides information on how to retrieve errors of the executed operations
-    class Error < Api::Object
+    class Error < Google::YamlValidator
       attr_reader :path
       attr_reader :message
 
