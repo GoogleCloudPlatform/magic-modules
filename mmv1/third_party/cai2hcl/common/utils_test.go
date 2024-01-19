@@ -131,7 +131,16 @@ func TestFieldWithTypeSchemaListAndNestedObject(t *testing.T) {
 	val, err := MapToCtyValWithSchema(flattenedMap, resourceSchema)
 
 	assert.Nil(t, err)
-	assert.Equal(t, []cty.Value{cty.ObjectVal(map[string]cty.Value{"nested_key": cty.StringVal("value")})}, val.GetAttr("list").AsValueSlice())
+	assert.Equal(t,
+		[]cty.Value{
+			cty.ObjectVal(
+				map[string]cty.Value{
+					"nested_key": cty.StringVal("value"),
+				},
+			),
+		},
+		val.GetAttr("list").AsValueSlice(),
+	)
 }
 
 func TestFieldWithTypeSchemaSetAndNestedObject(t *testing.T) {
@@ -161,7 +170,14 @@ func TestFieldWithTypeSchemaSetAndNestedObject(t *testing.T) {
 	val, err := MapToCtyValWithSchema(flattenedMap, resourceSchema)
 
 	assert.Nil(t, err)
-	assert.Equal(t, []cty.Value{cty.ObjectVal(map[string]cty.Value{"nested_key": cty.StringVal("value")})}, val.GetAttr("list").AsValueSlice())
+	assert.Equal(t,
+		[]cty.Value{
+			cty.ObjectVal(
+				map[string]cty.Value{
+					"nested_key": cty.StringVal("value"),
+				},
+			)},
+		val.GetAttr("list").AsValueSlice())
 }
 
 func createSchema(name string) map[string]*schema.Schema {
