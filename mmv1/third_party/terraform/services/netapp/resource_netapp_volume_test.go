@@ -319,7 +319,8 @@ resource "google_netapp_volume" "test_volume" {
 		}
 	}
 	restricted_actions = ["DELETE"]
-	}
+	deletion_policy = "FORCE"
+}
 
 data "google_compute_network" "default" {
 	name = "%{network_name}"
