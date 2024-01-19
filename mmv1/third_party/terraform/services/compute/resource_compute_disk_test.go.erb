@@ -1333,7 +1333,7 @@ func TestAccComputeDisk_attributionLabelOnCreation(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeDisk_attributionLabel(diskName, "false", "CREATION_ONLY"),
+				Config: testAccComputeDisk_attributionLabel(diskName, "true", "CREATION_ONLY"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_compute_disk.foobar", "labels.%", "1"),
 					resource.TestCheckResourceAttr("google_compute_disk.foobar", "labels.user-label", "foo"),
@@ -1346,7 +1346,7 @@ func TestAccComputeDisk_attributionLabelOnCreation(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccComputeDisk_attributionLabelUpdated(diskName, "false", "CREATION_ONLY"),
+				Config: testAccComputeDisk_attributionLabelUpdated(diskName, "true", "CREATION_ONLY"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_compute_disk.foobar", "labels.%", "1"),
 					resource.TestCheckResourceAttr("google_compute_disk.foobar", "labels.user-label", "bar"),
