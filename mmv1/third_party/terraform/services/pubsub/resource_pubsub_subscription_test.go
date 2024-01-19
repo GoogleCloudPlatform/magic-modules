@@ -188,19 +188,19 @@ func TestAccPubsubSubscriptionBigQuery_update(t *testing.T) {
 				Config: testAccPubsubSubscriptionBigQuery_basic(dataset, table, topic, subscriptionShort, false),
 			},
 			{
-				ResourceName:            "google_pubsub_subscription.foo",
-				ImportStateId:           subscriptionShort,
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_pubsub_subscription.foo",
+				ImportStateId:     subscriptionShort,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccPubsubSubscriptionBigQuery_basic(dataset, table, topic, subscriptionShort, true),
 			},
 			{
-				ResourceName:            "google_pubsub_subscription.foo",
-				ImportStateId:           subscriptionShort,
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_pubsub_subscription.foo",
+				ImportStateId:     subscriptionShort,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
