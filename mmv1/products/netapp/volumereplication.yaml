@@ -14,16 +14,19 @@
 --- !ruby/object:Api::Resource
 name: 'volumereplication'
 description: |
-  Volume replication creates a copy of our volume byasynchronously replicate
-  a source volume in one location to a destination volume in a different location. This capability lets
-  you use the replicated volume for critical application activity in case of a location-wide outage or
-  disaster. The replicated volume can also be used as a read-only copy while the mirror is enabled, or
-  as a independent volume if the mirror is stopped. A destination volume will also contain the
-  snapshots of the source volume.
+  Volume replication creates an asynchronous mirror of a volume in a different location. This capability
+  lets you use the replicated volume for critical application activity in case of a location-wide outage
+  or disaster.
+
+  A new destination volume is created as part of the replication resource. It's content is updated on a
+  schedule with content of the source volume. It can be used as a read-only copy while the mirror is
+  enabled, or as an independent read-write volume while the mirror is stopped. A destination volume will
+  also contain the snapshots of the source volume. Resuming a mirror will overwrite all changes on the
+  destination volume with the content of the source volume. While is mirror is enabled, all configuration
+  changes done to source or destination volumes are automatically done to both. Please note that the
+  destination volume is not a resource managed by Terraform.
   
-  Please note that the destination volume is not a managed resource. As long as the mirror is active
-  (mirrorState in not STOPPED) configuration changes done to source or destination volumes are automatically
-  done to both.
+  Reversing the replication direction is not supported through the provider.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Documentation': 'https://cloud.google.com/netapp/volumes/docs/protect-data/about-volume-replication'
@@ -235,21 +238,20 @@ virtual_fields:
       Set to false to stop/break the mirror. Stopping the mirror makes the destination volume read-write
       and act independently from the source volume.
 
-      Set to true to enable/resume the mirror. WARNING: Resuming a mirror overwrites the destination volume with the content
-      of the source volume and resumes replication updates from source to destination according to replication schedule.
+      Set to true to enable/resume the mirror. WARNING: Resuming a mirror overwrites any changes 
+      done to the destination volume with the content of the source volume. 
     default_value: true
   - !ruby/object:Api::Type::Boolean
     name: 'force_stopping'
     description: |
-      Stopping a mirror will fail if a mirror update is currently in progress (mirrorState is PREPARING or TRANSFERRING).
-      While it is advisable to let updates complete before stopping, this parameter allows a stop action
-      triggered by replication_enabled=false being forced. The current transfer will be aborted and destination
-      volume content will remain in the state of the last successful update. 
-      Enabling this parameter is the only way to abort a long running PREPARING phase. Default is false.
+      Only replications with mirror_state=MIRRORED can be stopped. A replication in mirror_state=TRANSFERRING
+      currently receives an update and stopping the update might be undesirable. Set this parameter to true
+      to stop anyway. All data transferred to the destination will be discarded and content of destination
+      volume will remain at the state of the last successful update. Default is false.
     default_value: false 
 
 # The following functionality needs to be discussed in review process
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_delete: templates/terraform/pre_delete/netapp_volumereplication_stop_before_delete.go.erb
   post_delete: templates/terraform/post_delete/netapp_volumereplication_delete_destination_volume.go.erb
-  # post_update: templates/terraform/post_update/netapp_volumereplication_mirror_state.go.erb
+  post_update: templates/terraform/post_update/netapp_volumereplication_mirror_state.go.erb

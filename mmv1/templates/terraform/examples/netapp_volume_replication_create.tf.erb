@@ -36,6 +36,7 @@ resource "google_netapp_volumereplication" "my-replication" {
   volume_name          = google_netapp_volume.source_volume.name
   name                 = "<%= ctx[:vars]['replication_name'] %>"
   replication_schedule = "EVERY_10_MINUTES"
+  description          = "This is a replication resource"
   destination_volume_parameters {
     storage_pool = google_netapp_storage_pool.destination_pool.id
     volume_id    = "<%= ctx[:vars]['destination_volume'] %>"
@@ -51,11 +52,10 @@ resource "google_netapp_volumereplication" "my-replication" {
 }
 
 # Wait for replication to reach mirrorState==MIRRORED. For an empty volume
-# this takes about a minute. For volumes with a lot of data, it can take
-# many hours.
-# Since mirrorState is updated every 5 minutes, lets wait 310 seconds
+# this should takes less than a minute. For volumes with a lot of data,
+# it can take many hours.
 resource "time_sleep" "wait_for_mirrored" {
   depends_on = [google_netapp_volumereplication.my-replication]
 
-  create_duration = "310"
+  create_duration = "60s"
 }
