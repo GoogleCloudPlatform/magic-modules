@@ -282,6 +282,15 @@ The following arguments are supported:
   (Optional)
   The configuration used for the Private IP Cloud Composer environment. Structure is [documented below](#nested_private_environment_config).
 
+* `enable_private_environment` -
+  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
+  If true, a private Composer environment will be created.
+
+* `enable_private_builds_only` -
+  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
+  If true, builds performed during operations that install Python packages have only private connectivity to Google services.
+  If false, the builds also have access to the internet.
+
 * `web_server_network_access_control` -
   The network-level access control policy for the Airflow web server.
   If unspecified, no network-level access restrictions are applied.
@@ -701,6 +710,25 @@ The `config` block supports:
   Kubernetes master through HTTPS except traffic from the given CIDR blocks,
   Google Compute Engine Public IPs and Google Prod IPs. Structure is
   documented below.
+
+* `data_retention_config` -
+  (Optional, Cloud Composer 2.0.23 or newer only)
+  Configuration setting for airflow data rentention mechanism. Structure is
+  [documented below](#nested_data_retention_config).
+
+<a name="nested_data_retention_config"></a>The `data_retention_config` block supports:
+* `task_logs_retention_config` - 
+  (Optional)
+  The configuration setting for Task Logs. Structure is
+  [documented below](#nested_task_logs_retention_config).
+
+<a name="nested_task_logs_retention_config"></a>The `task_logs_retention_config` block supports:
+* `storage_mode` - 
+  (Optional)
+  The mode of storage for Airflow workers task logs. Values for storage mode are 
+  `CLOUD_LOGGING_ONLY` to only store logs in cloud logging and 
+  `CLOUD_LOGGING_AND_CLOUD_STORAGE` to store logs in cloud logging and cloud storage.
+
 
 The `storage_config` block supports:
 
