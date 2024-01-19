@@ -26,10 +26,6 @@ func TestAccVmwareengineNetwork_vmwareEngineNetworkUpdate(t *testing.T) {
 			"time": {},
 		},
 		CheckDestroy: testAccCheckVmwareengineNetworkDestroyProducer(t),
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"random": {},
-			"time":   {},
-		},
 		Steps: []resource.TestStep{
 			{
 				Config: fmt.Sprintf(configTemplate, "description1"),
