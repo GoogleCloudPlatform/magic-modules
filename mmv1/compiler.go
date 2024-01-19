@@ -8,6 +8,8 @@ import (
 	"path"
 	"path/filepath"
 	"sort"
+
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
 )
 
 func main() {
@@ -42,26 +44,34 @@ func main() {
 		return false
 	})
 
-	log.Printf(" all_product_files %#v", all_product_files)
+	// log.Printf(" all_product_files %#v", all_product_files)
 
 	for _, product_name := range all_product_files {
 		product_yaml_path := path.Join(product_name, "product.yaml")
-		log.Printf(" product_yaml_path %#v", product_yaml_path)
+		// log.Printf(" product_yaml_path %#v", product_yaml_path)
 
 		if _, err := os.Stat(product_yaml_path); errors.Is(err, os.ErrNotExist) {
 			log.Fatalf("%s does not contain a product.yaml file", product_name)
 		}
 
-		files, err := filepath.Glob(fmt.Sprintf("%s/*", product_name))
+		productYaml, err := os.ReadFile(product_yaml_path)
 		if err != nil {
 			return
 		}
-		for _, file_path := range files {
+
+		productApi := api.Product{}
+		api.NewCompiler(productYaml, productApi).Run()
+
+		resourceFiles, err := filepath.Glob(fmt.Sprintf("%s/*", product_name))
+		if err != nil {
+			return
+		}
+		for _, file_path := range resourceFiles {
 			if filepath.Base(file_path) == "product.yaml" || filepath.Ext(file_path) != ".yaml" {
 				continue
 			}
 
-			log.Printf(" file_path %#v", file_path)
+			// log.Printf(" file_path %#v", file_path)
 
 		}
 	}
