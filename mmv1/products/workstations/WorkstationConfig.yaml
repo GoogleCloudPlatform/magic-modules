@@ -438,10 +438,12 @@ properties:
           name: 'path'
           description: |
             Path to which the request should be sent.
+          required: true
         - !ruby/object:Api::Type::Integer
           name: 'port'
           description: |
             Port to which the request should be sent.
+          required: true
   - !ruby/object:Api::Type::Boolean
     name: 'degraded'
     description: |
