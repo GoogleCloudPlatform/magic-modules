@@ -436,7 +436,8 @@ func testAccWorkstationsWorkstationConfig_readinessChecks(context map[string]int
     location               = "us-central1"
 
     readiness_checks {
-      port = 22
+      path = "/"
+      port = 80
     }
   
     host {
