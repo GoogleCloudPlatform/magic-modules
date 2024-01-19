@@ -20,7 +20,7 @@ module Provider
   class Terraform
     # Generates configs to be shown as examples in docs and outputted as tests
     # from a shared template
-    class Examples < Api::Object
+    class Examples < Google::YamlValidator
       include Compile::Core
       include Google::GolangUtils
 
