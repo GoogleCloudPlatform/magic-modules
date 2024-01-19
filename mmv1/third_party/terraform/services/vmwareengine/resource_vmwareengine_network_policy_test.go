@@ -76,7 +76,7 @@ resource "time_sleep" "sleep" {
 }
 
 resource "google_vmwareengine_network" "network-policy-nw" {
-  project           = google_project.project
+  project           = google_project.project.project_id
   name              = "tf-test-sample-nw%{random_suffix}"
   location          = "global" 
   type              = "STANDARD"

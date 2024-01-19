@@ -70,7 +70,7 @@ resource "time_sleep" "sleep" {
 }
 
 resource "google_vmwareengine_network" "network-peering-nw" {
-  project           = google_project.project
+  project           = google_project.project.project_id
   name              = "tf-test-sample-nw%{random_suffix}"
   location          = "global"
   type              = "STANDARD"
@@ -80,7 +80,7 @@ resource "google_vmwareengine_network" "network-peering-nw" {
 }
 
 resource "google_vmwareengine_network" "network-peering-peer-nw" {
-  project           = google_project.project
+  project           = google_project.project.project_id
   name              = "tf-test-peer-nw%{random_suffix}"
   location          = "global"
   type              = "STANDARD"
