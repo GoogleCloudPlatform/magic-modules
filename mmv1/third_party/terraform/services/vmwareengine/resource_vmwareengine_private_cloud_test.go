@@ -104,6 +104,7 @@ resource "google_vmwareengine_network" "default-nw" {
 }
 
 resource "google_vmwareengine_private_cloud" "vmw-engine-pc" {
+  project     = google_project.project.project_id
   location = "%{region}-a"
   name = "tf-test-sample-pc%{random_suffix}"
   description = "%{description}"
@@ -123,6 +124,7 @@ resource "google_vmwareengine_private_cloud" "vmw-engine-pc" {
 }
 
 data "google_vmwareengine_private_cloud" "ds" {
+	project     = google_project.project.project_id
 	location = "%{region}-a"
 	name = "tf-test-sample-pc%{random_suffix}"
 	depends_on = [

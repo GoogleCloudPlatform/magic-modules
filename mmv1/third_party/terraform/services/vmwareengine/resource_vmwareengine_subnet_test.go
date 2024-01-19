@@ -83,6 +83,7 @@ resource "google_vmwareengine_network" "subnet-nw" {
 }
 
 resource "google_vmwareengine_private_cloud" "subnet-pc" {
+  project     = google_project.project.project_id
   location    = "%{region}-a"
   name        = "tf-test-subnet-pc%{random_suffix}"
   type        = "TIME_LIMITED"

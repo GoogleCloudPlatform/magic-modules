@@ -83,6 +83,7 @@ resource "google_vmwareengine_network" "external-access-rule-nw" {
 }
 
 resource "google_vmwareengine_private_cloud" "external-access-rule-pc" {
+  project     = google_project.project.project_id
   location    = "%{region}-a"
   name        = "tf-test-sample-external-access-rule-pc-%{random_suffix}"
   type        = "TIME_LIMITED"
@@ -177,6 +178,7 @@ resource "google_vmwareengine_network" "external-access-rule-nw" {
 }
 
 resource "google_vmwareengine_private_cloud" "external-access-rule-pc" {
+  project     = google_project.project.project_id
   location    = "%{region}-a"
   name        = "tf-test-sample-external-access-rule-pc-%{random_suffix}"
   type        = "TIME_LIMITED"
