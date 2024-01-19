@@ -145,7 +145,7 @@ properties:
               - :FULL
               - :ARCHIVE
             description: |
-              Blockchain garbage collection mode.
+              Blockchain garbage collection modes. Only applicable when NodeType is FULL or ARCHIVE.
       - !ruby/object:Api::Type::NestedObject
         name: additionalEndpoints
         output: true
