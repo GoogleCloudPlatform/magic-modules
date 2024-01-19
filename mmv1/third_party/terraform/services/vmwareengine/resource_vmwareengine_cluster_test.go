@@ -118,10 +118,6 @@ resource "google_vmwareengine_private_cloud" "cluster-pc" {
       node_count   = 3
     }
   }
-
-  depends_on = [
-    time_sleep.sleep # Sleep allows permissions in the new project to propagate
-  ]
 }
 
 resource "google_vmwareengine_cluster" "vmw-engine-ext-cluster" {
@@ -132,19 +128,11 @@ resource "google_vmwareengine_cluster" "vmw-engine-ext-cluster" {
     node_count   = %{node_count}
     custom_core_count = 32
   }
-
-  depends_on = [
-    time_sleep.sleep # Sleep allows permissions in the new project to propagate
-  ]
 }
 
 data "google_vmwareengine_cluster" "ds" {
   name = google_vmwareengine_cluster.vmw-engine-ext-cluster.name
   parent = google_vmwareengine_private_cloud.cluster-pc.id
-
-  depends_on = [
-    time_sleep.sleep # Sleep allows permissions in the new project to propagate
-  ]
 }
 `, context)
 }
