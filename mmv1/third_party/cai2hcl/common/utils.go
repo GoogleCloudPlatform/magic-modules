@@ -90,38 +90,15 @@ func normalizeFlattenedObj(obj interface{}, schemaPerProp map[string]*schema.Sch
 		objMap := obj.(map[string]interface{})
 		objMapNew := map[string]interface{}{}
 
-		for key, value := range objMap {
-			propertySchema := schemaPerProp[key]
-			if propertySchema == nil {
-				// Igore unknown fields for now.
-				// TODO: store and report issue to the caller.
-				//
-				// This may happen i.e. for new fields which are implemented in magic-modules,
-				// but client TPG version is not yet upgraded.
-				//
-				// Example:
-				//      New field X implemented
-				//               |
-				//              (1)
-				//               |
-				//        (2)    v     (3)
-				//  TGC <------ MMv1  ---->  TPG
-				//
-				// (1), (2), (3) represent timestamps when change is added to Magic-Modules, TGC and TPG repos.
-				//
-				// At timestampt (2.5), TGC will have a generated converter for X, but TPG will not be
-				// aware of field schema.
-				//
-				// Clients with such dependencies may end up here.
-				continue
-			}
+		for property, propertySchema := range schemaPerProp {
+			propertyValue := objMap[property]
 
 			switch propertySchema.Elem.(type) {
 			case *schema.Resource:
-				objMapNew[key] = normalizeFlattenedObj(value, propertySchema.Elem.(*schema.Resource).Schema)
+				objMapNew[property] = normalizeFlattenedObj(propertyValue, propertySchema.Elem.(*schema.Resource).Schema)
 			case *schema.ValueType:
 			default:
-				objMapNew[key] = normalizeFlattenedObj(value, nil)
+				objMapNew[property] = normalizeFlattenedObj(propertyValue, nil)
 			}
 		}
 		return objMapNew
