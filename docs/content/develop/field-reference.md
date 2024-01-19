@@ -172,7 +172,7 @@ all listed fields. Not supported within
 Example:
 
 ```yaml
-- !ruby/object:Api::Type::Array
+- !ruby/object:Api::Type::String
   name: 'fieldOne'
   conflicts:
     - field_two
@@ -187,7 +187,7 @@ must be set. Must be set separately on all listed fields. Not supported within
 Example:
 
 ```yaml
-- !ruby/object:Api::Type::Array
+- !ruby/object:Api::Type::String
   name: 'fieldOne'
   exactly_one_of:
     - field_one
@@ -204,7 +204,7 @@ set separately on all listed fields. Not supported within
 Example:
 
 ```yaml
-- !ruby/object:Api::Type::Array
+- !ruby/object:Api::Type::String
   name: 'fieldOne'
   at_least_one_of:
     - field_one
