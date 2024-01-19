@@ -37,6 +37,33 @@ func TestWrongFieldTypeBreaksConversion(t *testing.T) {
 	assert.Contains(t, err.Error(), "string is required")
 }
 
+func TestNilValue(t *testing.T) {
+	resourceSchema := createSchema("google_compute_forwarding_rule")
+	outputMap := map[string]interface{}{
+		"name":        "fr-1",
+		"description": nil,
+	}
+
+	val, err := MapToCtyValWithSchema(outputMap, resourceSchema)
+
+	assert.Nil(t, err)
+	assert.Equal(t, cty.Value(cty.StringVal("fr-1")), val.GetAttr("name"))
+	assert.Equal(t, cty.Value(cty.NullVal(cty.String)), val.GetAttr("description"))
+}
+
+func TestNilValueInRequiredField(t *testing.T) {
+	resourceSchema := createSchema("google_compute_forwarding_rule")
+	outputMap := map[string]interface{}{
+		"name": nil,
+	}
+
+	val, err := MapToCtyValWithSchema(outputMap, resourceSchema)
+
+	// In future we may want to fail in this case.
+	assert.Nil(t, err)
+	assert.Equal(t, cty.Value(cty.NullVal(cty.String)), val.GetAttr("name"))
+}
+
 func TestFieldsWithTypeSlice(t *testing.T) {
 	resourceSchema := createSchema("google_compute_forwarding_rule")
 	outputMap := map[string]interface{}{
@@ -51,19 +78,6 @@ func TestFieldsWithTypeSlice(t *testing.T) {
 	assert.Equal(t, []cty.Value{cty.StringVal("80")}, val.GetAttr("ports").AsValueSlice())
 }
 
-func TestMissingFieldBreaksConversion(t *testing.T) {
-	resourceSchema := createSchema("google_compute_forwarding_rule")
-	outputMap := map[string]interface{}{
-		"name":         "fr-1",
-		"unknownField": "unknownValue",
-	}
-
-	val, err := MapToCtyValWithSchema(outputMap, resourceSchema)
-
-	assert.True(t, val.IsNull())
-	assert.Contains(t, err.Error(), "unsupported attribute")
-}
-
 func TestMissingFieldDoesNotBreakConversionConversionWhenOutputNormalized(t *testing.T) {
 	resourceSchema := createSchema("google_compute_forwarding_rule")
 	outputMap := map[string]interface{}{
@@ -71,25 +85,12 @@ func TestMissingFieldDoesNotBreakConversionConversionWhenOutputNormalized(t *tes
 		"unknownField": "unknownValue",
 	}
 
-	val, err := MapToCtyValWithSchemaNormalized(outputMap, resourceSchema)
+	val, err := MapToCtyValWithSchema(outputMap, resourceSchema)
 
 	assert.Nil(t, err)
 
 	assert.True(t, val.Type().HasAttribute("name"))
 	assert.Equal(t, "fr-1", val.GetAttr("name").AsString())
-}
-
-func TestFieldWithTypeSchemaSetBreaksConversion(t *testing.T) {
-	resourceSchema := createSchema("google_compute_forwarding_rule")
-	outputMap := map[string]interface{}{
-		"name":  "fr-1",
-		"ports": schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface([]string{"80"})),
-	}
-
-	val, err := MapToCtyValWithSchema(outputMap, resourceSchema)
-
-	assert.True(t, val.IsNull())
-	assert.Contains(t, err.Error(), "error marshaling map as JSON: json: unsupported type: schema.SchemaSetFunc")
 }
 
 func TestFieldWithTypeSchemaSetDoesNotBreakConversionWhenOutputNormalized(t *testing.T) {
@@ -99,7 +100,7 @@ func TestFieldWithTypeSchemaSetDoesNotBreakConversionWhenOutputNormalized(t *tes
 		"ports": schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface([]string{"80"})),
 	}
 
-	val, err := MapToCtyValWithSchemaNormalized(outputMap, resourceSchema)
+	val, err := MapToCtyValWithSchema(outputMap, resourceSchema)
 
 	assert.Nil(t, err)
 	assert.Equal(t, []cty.Value{cty.StringVal("80")}, val.GetAttr("ports").AsValueSlice())

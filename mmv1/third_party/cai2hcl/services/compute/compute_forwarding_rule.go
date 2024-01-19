@@ -79,7 +79,7 @@ func (c *ComputeForwardingRuleConverter) convertResourceData(asset *caiasset.Ass
 
 	hcl, _ := resourceComputeForwardingRuleRead(assetResourceData, config)
 
-	ctyVal, err := common.MapToCtyValWithSchemaNormalized(hcl, c.schema)
+	ctyVal, err := common.MapToCtyValWithSchema(hcl, c.schema)
 	if err != nil {
 		return nil, err
 	}
