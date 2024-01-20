@@ -102,6 +102,7 @@ resource "google_vmwareengine_private_cloud" "external-access-rule-pc" {
 }
 
 resource "google_vmwareengine_network_policy" "external-access-rule-np" {
+  project     = google_project.project.project_id
   location = "%{region}"
   name = "tf-test-sample-external-access-rule-np-%{random_suffix}"
   edge_services_cidr = "192.168.0.0/26"
@@ -197,6 +198,7 @@ resource "google_vmwareengine_private_cloud" "external-access-rule-pc" {
 }
 
 resource "google_vmwareengine_network_policy" "external-access-rule-np" {
+  project     = google_project.project.project_id
   location = "%{region}"
   name = "tf-test-sample-external-access-rule-np-%{random_suffix}"
   edge_services_cidr = "192.168.0.0/26"
