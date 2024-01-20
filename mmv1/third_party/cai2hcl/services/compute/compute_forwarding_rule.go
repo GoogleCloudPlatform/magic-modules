@@ -77,9 +77,9 @@ func (c *ComputeForwardingRuleConverter) convertResourceData(asset *caiasset.Ass
 
 	assetResourceData := asset.Resource.Data
 
-	hcl, _ := resourceComputeForwardingRuleRead(assetResourceData, config)
+	hcl, _ := flattenComputeForwardingRule(assetResourceData, config)
 
-	ctyVal, err := common.MapToCtyValWithSchemaNormalized(hcl, c.schema)
+	ctyVal, err := common.MapToCtyValWithSchema(hcl, c.schema)
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +92,7 @@ func (c *ComputeForwardingRuleConverter) convertResourceData(asset *caiasset.Ass
 	}, nil
 }
 
-func resourceComputeForwardingRuleRead(resource map[string]interface{}, config *transport_tpg.Config) (map[string]interface{}, error) {
+func flattenComputeForwardingRule(resource map[string]interface{}, config *transport_tpg.Config) (map[string]interface{}, error) {
 	result := make(map[string]interface{})
 	var resource_data *schema.ResourceData = nil
 

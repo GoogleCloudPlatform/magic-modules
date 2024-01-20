@@ -37,6 +37,33 @@ func TestWrongFieldTypeBreaksConversion(t *testing.T) {
 	assert.Contains(t, err.Error(), "string is required")
 }
 
+func TestNilValue(t *testing.T) {
+	resourceSchema := createSchema("google_compute_forwarding_rule")
+	outputMap := map[string]interface{}{
+		"name":        "fr-1",
+		"description": nil,
+	}
+
+	val, err := MapToCtyValWithSchema(outputMap, resourceSchema)
+
+	assert.Nil(t, err)
+	assert.Equal(t, cty.Value(cty.StringVal("fr-1")), val.GetAttr("name"))
+	assert.Equal(t, cty.Value(cty.NullVal(cty.String)), val.GetAttr("description"))
+}
+
+func TestNilValueInRequiredField(t *testing.T) {
+	resourceSchema := createSchema("google_compute_forwarding_rule")
+	outputMap := map[string]interface{}{
+		"name": nil,
+	}
+
+	val, err := MapToCtyValWithSchema(outputMap, resourceSchema)
+
+	// In future we may want to fail in this case.
+	assert.Nil(t, err)
+	assert.Equal(t, cty.Value(cty.NullVal(cty.String)), val.GetAttr("name"))
+}
+
 func TestFieldsWithTypeSlice(t *testing.T) {
 	resourceSchema := createSchema("google_compute_forwarding_rule")
 	outputMap := map[string]interface{}{
@@ -51,7 +78,7 @@ func TestFieldsWithTypeSlice(t *testing.T) {
 	assert.Equal(t, []cty.Value{cty.StringVal("80")}, val.GetAttr("ports").AsValueSlice())
 }
 
-func TestMissingFieldBreaksConversion(t *testing.T) {
+func TestMissingFieldDoesNotBreakConversionConversion(t *testing.T) {
 	resourceSchema := createSchema("google_compute_forwarding_rule")
 	outputMap := map[string]interface{}{
 		"name":         "fr-1",
@@ -59,19 +86,6 @@ func TestMissingFieldBreaksConversion(t *testing.T) {
 	}
 
 	val, err := MapToCtyValWithSchema(outputMap, resourceSchema)
-
-	assert.True(t, val.IsNull())
-	assert.Contains(t, err.Error(), "unsupported attribute")
-}
-
-func TestMissingFieldDoesNotBreakConversionConversionWhenOutputNormalized(t *testing.T) {
-	resourceSchema := createSchema("google_compute_forwarding_rule")
-	outputMap := map[string]interface{}{
-		"name":         "fr-1",
-		"unknownField": "unknownValue",
-	}
-
-	val, err := MapToCtyValWithSchemaNormalized(outputMap, resourceSchema)
 
 	assert.Nil(t, err)
 
@@ -79,7 +93,7 @@ func TestMissingFieldDoesNotBreakConversionConversionWhenOutputNormalized(t *tes
 	assert.Equal(t, "fr-1", val.GetAttr("name").AsString())
 }
 
-func TestFieldWithTypeSchemaSetBreaksConversion(t *testing.T) {
+func TestFieldWithTypeSchemaSet(t *testing.T) {
 	resourceSchema := createSchema("google_compute_forwarding_rule")
 	outputMap := map[string]interface{}{
 		"name":  "fr-1",
@@ -88,21 +102,82 @@ func TestFieldWithTypeSchemaSetBreaksConversion(t *testing.T) {
 
 	val, err := MapToCtyValWithSchema(outputMap, resourceSchema)
 
-	assert.True(t, val.IsNull())
-	assert.Contains(t, err.Error(), "error marshaling map as JSON: json: unsupported type: schema.SchemaSetFunc")
-}
-
-func TestFieldWithTypeSchemaSetDoesNotBreakConversionWhenOutputNormalized(t *testing.T) {
-	resourceSchema := createSchema("google_compute_forwarding_rule")
-	outputMap := map[string]interface{}{
-		"name":  "fr-1",
-		"ports": schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface([]string{"80"})),
-	}
-
-	val, err := MapToCtyValWithSchemaNormalized(outputMap, resourceSchema)
-
 	assert.Nil(t, err)
 	assert.Equal(t, []cty.Value{cty.StringVal("80")}, val.GetAttr("ports").AsValueSlice())
+}
+
+func TestFieldWithTypeSchemaListAndNestedObject(t *testing.T) {
+	resourceSchema := map[string]*schema.Schema{
+		"list": {
+			Type: schema.TypeList,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"nested_key": {
+						Type: schema.TypeString,
+					},
+				},
+			},
+		},
+	}
+	flattenedMap := map[string]interface{}{
+		"list": []interface{}{
+			map[string]interface{}{
+				"nested_key":         "value",
+				"nested_unknown_key": "unknown_key_value",
+			},
+		},
+	}
+
+	val, err := MapToCtyValWithSchema(flattenedMap, resourceSchema)
+
+	assert.Nil(t, err)
+	assert.Equal(t,
+		[]cty.Value{
+			cty.ObjectVal(
+				map[string]cty.Value{
+					"nested_key": cty.StringVal("value"),
+				},
+			),
+		},
+		val.GetAttr("list").AsValueSlice(),
+	)
+}
+
+func TestFieldWithTypeSchemaSetAndNestedObject(t *testing.T) {
+	nestedResource := &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"nested_key": {
+				Type: schema.TypeString,
+			},
+		},
+	}
+	resourceSchema := map[string]*schema.Schema{
+		"list": {
+			Type: schema.TypeSet,
+			Elem: nestedResource,
+		},
+	}
+
+	flattenedMap := map[string]interface{}{
+		"list": schema.NewSet(schema.HashResource(nestedResource), []interface{}{
+			map[string]interface{}{
+				"nested_key":         "value",
+				"nested_unknown_key": "unknown_key_value",
+			},
+		}),
+	}
+
+	val, err := MapToCtyValWithSchema(flattenedMap, resourceSchema)
+
+	assert.Nil(t, err)
+	assert.Equal(t,
+		[]cty.Value{
+			cty.ObjectVal(
+				map[string]cty.Value{
+					"nested_key": cty.StringVal("value"),
+				},
+			)},
+		val.GetAttr("list").AsValueSlice())
 }
 
 func createSchema(name string) map[string]*schema.Schema {

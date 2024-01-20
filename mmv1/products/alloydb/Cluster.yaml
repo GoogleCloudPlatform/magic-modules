@@ -13,6 +13,11 @@
 
 --- !ruby/object:Api::Resource
 name: 'Cluster'
+docs: !ruby/object:Provider::Terraform::Docs
+  note: |
+    Users can promote a secondary cluster to a primary cluster with the help of `cluster_type`.
+    To promote, users have to set the `cluster_type` property as `PRIMARY` and remove the `secondary_config` field from cluster configuration.
+    [See Example](https://github.com/hashicorp/terraform-provider-google/pull/16413).
 self_link: 'projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/clusters'
 create_url: 'projects/{{project}}/locations/{{location}}/clusters?clusterId={{cluster_id}}'
@@ -256,9 +261,9 @@ properties:
       An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
   - !ruby/object:Api::Type::String
     name: 'databaseVersion'
-    output: true
+    default_from_api: true
     description: |
-      The database engine major version. This is an output-only field and it's populated at the Cluster creation time. This field cannot be changed after cluster creation.
+      The database engine major version. This is an optional field and it's populated at the Cluster creation time. This field cannot be changed after cluster creation.
   - !ruby/object:Api::Type::NestedObject
     name: 'initialUser'
     description: |

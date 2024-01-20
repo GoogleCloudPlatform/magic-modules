@@ -40,14 +40,9 @@ func DecodeJSON(data map[string]interface{}, v interface{}) error {
 // Normalization is a post-processing of the output map, which does the following:
 // * Converts unmarshallable "schema.Set" to marshallable counterpart.
 // * Strips out properties, which are not part ofthe resource TF schema.
-func MapToCtyValWithSchemaNormalized(m map[string]interface{}, s map[string]*schema.Schema) (cty.Value, error) {
-	m = normalizeNodeRec(m, s).(map[string]interface{})
-
-	return MapToCtyValWithSchema(m, s)
-}
-
-// MapToCtyValWithSchema converts resource from untyped map format to TF JSON.
 func MapToCtyValWithSchema(m map[string]interface{}, s map[string]*schema.Schema) (cty.Value, error) {
+	m = normalizeFlattenedObj(m, s).(map[string]interface{})
+
 	b, err := json.Marshal(&m)
 	if err != nil {
 		return cty.NilVal, fmt.Errorf("error marshaling map as JSON: %v", err)
@@ -80,48 +75,53 @@ func NewConfig() *transport_tpg.Config {
 	return &transport_tpg.Config{}
 }
 
-// normalizeNodeRec traverses the output map recursively, removes fields which are
+// normalizeFlattenedObj traverses the output map recursively, removes fields which are
 // not a part of TF schema and converts unmarshallable "schema.Set" objects to arrays.
-func normalizeNodeRec(node interface{}, mapSchema map[string]*schema.Schema) interface{} {
-	switch node.(type) {
+func normalizeFlattenedObj(obj interface{}, schemaPerProp map[string]*schema.Schema) interface{} {
+	obj = convertToMarshallableObj(obj)
+
+	if schemaPerProp == nil {
+		// Schema for leaf nodes was already checked.
+		return obj
+	}
+
+	switch obj.(type) {
 	case map[string]interface{}:
-		mapObj := node.(map[string]interface{})
-		newMapObj := map[string]interface{}{}
+		objMap := obj.(map[string]interface{})
+		objMapNew := map[string]interface{}{}
 
-		if mapSchema == nil {
-			// mapSchema is applicable only for key-value objects.
-			return node
-		}
-
-		for key, value := range mapObj {
-			propertySchema := mapSchema[key]
-			if propertySchema == nil {
-				// Strip unknown fields.
-				continue
-			}
+		for property, propertySchema := range schemaPerProp {
+			propertyValue := objMap[property]
 
 			switch propertySchema.Elem.(type) {
 			case *schema.Resource:
-				newMapObj[key] = normalizeNodeRec(value, propertySchema.Elem.(*schema.Resource).Schema)
+				objMapNew[property] = normalizeFlattenedObj(propertyValue, propertySchema.Elem.(*schema.Resource).Schema)
+			case *schema.ValueType:
 			default:
-				// Most likely its *schema.ValueType
-				newMapObj[key] = normalizeNodeRec(value, nil)
+				objMapNew[property] = normalizeFlattenedObj(propertyValue, nil)
 			}
 		}
-		return newMapObj
-	case *schema.Set:
-		setObj := node.(*schema.Set)
-
-		return normalizeNodeRec(setObj.List(), nil)
+		return objMapNew
 	case []interface{}:
-		arrObj := node.([]interface{})
-		newArrObj := make([]interface{}, len(arrObj))
+		arr := obj.([]interface{})
+		arrNew := make([]interface{}, len(arr))
 
-		for i := range arrObj {
-			newArrObj[i] = normalizeNodeRec(arrObj[i], nil)
+		for i := range arr {
+			arrNew[i] = normalizeFlattenedObj(arr[i], schemaPerProp)
 		}
 
-		return newArrObj
+		return arrNew
+	default:
+		return obj
+	}
+}
+
+func convertToMarshallableObj(node interface{}) interface{} {
+	switch node.(type) {
+	case *schema.Set:
+		nodeSet := node.(*schema.Set)
+
+		return nodeSet.List()
 	default:
 		return node
 	}
