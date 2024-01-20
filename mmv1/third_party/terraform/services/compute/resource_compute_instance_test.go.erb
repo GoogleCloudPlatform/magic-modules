@@ -1812,10 +1812,10 @@ func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceConfidentialInstanceConfig(instanceName, true),
+				Config: testAccComputeInstanceConfidentialInstanceConfig(instanceName, true, "SEV"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
-					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance, true),
+					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance, true, "SEV"),
 				),
 			},
 		},
@@ -3850,12 +3850,17 @@ func testAccCheckComputeInstanceHasShieldedVmConfig(instance *compute.Instance, 
 	}
 }
 
-func testAccCheckComputeInstanceHasConfidentialInstanceConfig(instance *compute.Instance, EnableConfidentialCompute bool) resource.TestCheckFunc {
+func testAccCheckComputeInstanceHasConfidentialInstanceConfig(instance *compute.Instance, EnableConfidentialCompute bool, ConfidentialInstanceType string) resource.TestCheckFunc {
 
 	return func(s *terraform.State) error {
 		if instance.ConfidentialInstanceConfig.EnableConfidentialCompute != EnableConfidentialCompute {
 			return fmt.Errorf("Wrong ConfidentialInstanceConfig EnableConfidentialCompute: expected %t, got, %t", EnableConfidentialCompute, instance.ConfidentialInstanceConfig.EnableConfidentialCompute)
 		}
+		<% unless version == "ga" %>
+		if instance.ConfidentialInstanceConfig.ConfidentialInstanceType != ConfidentialInstanceType {
+			return fmt.Errorf("Wrong ConfidentialInstanceConfig ConfidentialInstanceType: expected %s, got, %s", ConfidentialInstanceType, instance.ConfidentialInstanceConfig.ConfidentialInstanceType)
+		}
+		<% end %>
 
 		return nil
 	}
@@ -7023,7 +7028,7 @@ resource "google_compute_instance" "foobar" {
 `, instance, enableSecureBoot, enableVtpm, enableIntegrityMonitoring)
 }
 
-func testAccComputeInstanceConfidentialInstanceConfig(instance string, enableConfidentialCompute bool) string {
+func testAccComputeInstanceConfidentialInstanceConfig(instance string, enableConfidentialCompute bool, confidentialInstanceType string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family    = "ubuntu-2004-lts"
@@ -7047,6 +7052,9 @@ resource "google_compute_instance" "foobar" {
 
   confidential_instance_config {
     enable_confidential_compute       = %t
+    <% unless version == "ga" %>
+    confidential_instance_type        = %q
+    <% end %>
   }
 
   scheduling {
@@ -7054,7 +7062,11 @@ resource "google_compute_instance" "foobar" {
   }
 
 }
+<% if version == "ga" %>
 `, instance, enableConfidentialCompute)
+<% else %>
+`, instance, enableConfidentialCompute, confidentialInstanceType)
+<% end %>
 }
 
 func testAccComputeInstanceConfidentialHyperDiskBootDisk(context map[string]interface{}) string {
