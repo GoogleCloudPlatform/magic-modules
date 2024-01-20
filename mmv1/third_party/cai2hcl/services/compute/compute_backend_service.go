@@ -211,7 +211,7 @@ func (c *ComputeBackendServiceConverter) convertResourceData(asset *caiasset.Ass
 
 	hcl, _ := resourceComputeBackendServiceRead(assetResourceData, config)
 
-	ctyVal, err := common.MapToCtyValWithSchemaNormalized(hcl, c.schema)
+	ctyVal, err := common.MapToCtyValWithSchema(hcl, c.schema)
 	if err != nil {
 		return nil, err
 	}
