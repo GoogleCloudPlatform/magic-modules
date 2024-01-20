@@ -73,6 +73,7 @@ resource "time_sleep" "sleep" {
 }
 
 resource "google_vmwareengine_network" "subnet-nw" {
+  project     = google_project.project.project_id
   name        = "tf-test-subnet-nw%{random_suffix}"
   location    = "global"
   type        = "STANDARD"
