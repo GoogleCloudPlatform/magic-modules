@@ -171,11 +171,34 @@ data "google_vmwareengine_external_access_rule" "ds" {
 
 func testVmwareEngineExternalAccessRuleUpdateConfig(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_project" "project" {
+  project_id      = "tf-test%{random_suffix}"
+  name            = "tf-test%{random_suffix}"
+  org_id          = "%{org_id}"
+  billing_account = "%{billing_account}"
+}
+
+resource "google_project_service" "vmwareengine" {
+  project = google_project.project.project_id
+  service = "vmwareengine.googleapis.com"
+}
+
+resource "time_sleep" "sleep" {
+  create_duration = "1m"
+  depends_on = [
+    google_project_service.vmwareengine,
+  ]
+}
 
 resource "google_vmwareengine_network" "external-access-rule-nw" {
+  project     = google_project.project.project_id
   name        = "tf-test-sample-external-access-rule-nw-%{random_suffix}"
   location    = "global"
   type        = "STANDARD"
+
+  depends_on = [
+    time_sleep.sleep # Sleep allows permissions in the new project to propagate
+  ]
 }
 
 resource "google_vmwareengine_private_cloud" "external-access-rule-pc" {
