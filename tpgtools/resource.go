@@ -291,6 +291,16 @@ func (r Resource) Updatable() bool {
 	return false
 }
 
+// The resource has other mutable fields, besides "labels" and "terraform_labels" fields
+func (r Resource) HasMutableNonLabelsFields() bool {
+	for _, p := range r.SchemaProperties() {
+		if !p.IsResourceLabels() && p.Name() != "terraform_labels" && !p.ForceNew && !(!p.Optional && p.Computed) {
+			return true
+		}
+	}
+	return false
+}
+
 // Objects are properties with sub-properties
 func (r Resource) Objects() (props []Property) {
 	for _, v := range r.Properties {

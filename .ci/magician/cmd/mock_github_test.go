@@ -31,6 +31,11 @@ func (m *mockGithub) GetPullRequest(prNumber string) (github.PullRequest, error)
 	return m.pullRequest, nil
 }
 
+func (m *mockGithub) GetPullRequests(state, base, sort, direction string) ([]github.PullRequest, error) {
+	m.calledMethods["GetPullRequests"] = append(m.calledMethods["GetPullRequests"], []any{state, base, sort, direction})
+	return []github.PullRequest{m.pullRequest}, nil
+}
+
 func (m *mockGithub) GetUserType(user string) github.UserType {
 	m.calledMethods["GetUserType"] = append(m.calledMethods["GetUserType"], []any{user})
 	return m.userType
@@ -78,5 +83,10 @@ func (m *mockGithub) PostBuildStatus(prNumber string, title string, state string
 
 func (m *mockGithub) CreateWorkflowDispatchEvent(workflowFileName string, inputs map[string]any) error {
 	m.calledMethods["CreateWorkflowDispatchEvent"] = append(m.calledMethods["CreateWorkflowDispatchEvent"], []any{workflowFileName, inputs})
+	return nil
+}
+
+func (m *mockGithub) MergePullRequest(owner, repo, prNumber string) error {
+	m.calledMethods["MergePullRequest"] = append(m.calledMethods["MergePullRequest"], []any{owner, repo, prNumber})
 	return nil
 }

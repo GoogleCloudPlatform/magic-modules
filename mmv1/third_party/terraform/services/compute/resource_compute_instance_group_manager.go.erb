@@ -4,7 +4,7 @@ package compute
 import (
 	"fmt"
 	"log"
-	"regexp"
+	"sort"
 	"strings"
 	"time"
 
@@ -984,21 +984,6 @@ func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta inte
 func resourceComputeInstanceGroupManagerDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 
-	if d.Get("wait_for_instances").(bool) {
-		err := computeIGMWaitForInstanceStatus(d, meta)
-		if err != nil {
-			notFound, reErr := regexp.MatchString(`not found`, err.Error())
-			if reErr != nil {
-				return reErr
-			}
-			if notFound {
-				// manager was not found, we can exit gracefully
-				return nil
-			}
-			return err
-		}
-	}
-
 	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -1353,6 +1338,9 @@ func flattenStatefulPolicyStatefulIps(d *schema.ResourceData, ipfieldName string
 		}
 		orderedResult[index] = data // Put elements from API response in order that matches the config
 	}
+	sort.Slice(unexpectedIps, func(i, j int) bool {
+		return unexpectedIps[i]["interface_name"].(string) < unexpectedIps[j]["interface_name"].(string)
+	})
 
 	// Remove any nils from the ordered list. This can occur if the API doesn't include an interface present in the config.
 	finalResult := []map[string]interface{}{}

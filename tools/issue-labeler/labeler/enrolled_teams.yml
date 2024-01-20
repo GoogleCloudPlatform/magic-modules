@@ -38,6 +38,9 @@ service/apigee:
 service/apikeys:
   resources:
   - google_apikeys_key
+service/appengine:
+  resources:
+  - google_app_engine_.*
 service/artifactregistry:
   resources:
   - google_artifact_registry_.*
@@ -429,6 +432,9 @@ service/monitoring-services:
 service/monitoring-uptime:
   resources:
   - google_monitoring_uptime_.*
+service/netapp:
+  resources:
+  - google_netapp_.*
 service/network-connectivity-center:
   resources:
   - google_network_connectivity_hub
@@ -476,6 +482,7 @@ service/networkservices-traffic-director:
 service/notebooks:
   resources:
   - google_notebooks_.*
+  - google_workbench_.*
 service/orgpolicy:
   resources:
   - google_folder_organization_policy

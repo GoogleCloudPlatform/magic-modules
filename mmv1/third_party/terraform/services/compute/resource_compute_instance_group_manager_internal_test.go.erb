@@ -173,13 +173,23 @@ func TestFlattenStatefulPolicyStatefulIps(t *testing.T) {
 				},
 			},
 		},
-		"Two IPs (nic0, nic1). None stored in config and both stored in API data": {
+		"Five IPs (nic0 - nic4). None stored in config and all stored in API data": {
 			ConfigValues: []interface{}{},
 			Ips: map[string]compute.StatefulPolicyPreservedStateNetworkIp{
+				// Out of order here to encourage randomness
+				"nic3": {
+					AutoDelete: "NEVER",
+				},
 				"nic0": {
 					AutoDelete: "NEVER",
 				},
 				"nic1": {
+					AutoDelete: "NEVER",
+				},
+				"nic4": {
+					AutoDelete: "NEVER",
+				},
+				"nic2": {
 					AutoDelete: "NEVER",
 				},
 			},
@@ -190,6 +200,18 @@ func TestFlattenStatefulPolicyStatefulIps(t *testing.T) {
 				},
 				{
 					"interface_name": "nic1",
+					"delete_rule":    "NEVER",
+				},
+				{
+					"interface_name": "nic2",
+					"delete_rule":    "NEVER",
+				},
+				{
+					"interface_name": "nic3",
+					"delete_rule":    "NEVER",
+				},
+				{
+					"interface_name": "nic4",
 					"delete_rule":    "NEVER",
 				},
 			},

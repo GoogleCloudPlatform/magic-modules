@@ -305,7 +305,7 @@ func readConfigFuncCallExpr(configFuncCallExpr *ast.CallExpr, funcDecls map[stri
 // Read the config string and return a test step.
 func readConfigStr(configStr string) (Step, error) {
 	// Remove template variables because they interfere with hcl parsing.
-	pattern := regexp.MustCompile("%{[^{}]*}")
+	pattern := regexp.MustCompile("%({[^{}]*}|[vdts])")
 	// Replace with a value that can be parsed outside quotation marks.
 	configStr = pattern.ReplaceAllString(configStr, "true")
 	parser := hclparse.NewParser()

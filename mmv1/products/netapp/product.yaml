@@ -12,7 +12,7 @@
 # limitations under the License.
 --- !ruby/object:Api::Product
 name: Netapp
-display_name: Netapp
+display_name: Google Cloud NetApp Volumes
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
