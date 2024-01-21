@@ -27,6 +27,7 @@ func TestAccMemcacheInstance_update(t *testing.T) {
 				ResourceName:      "google_memcache_instance.test",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"reserved_ip_range_id"},
 			},
 			{
 				Config: testAccMemcacheInstance_update2(prefix, name, network),
