@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 	"time"
+	"context"
 
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
@@ -167,6 +168,8 @@ func ResourceComposerEnvironment() *schema.Resource {
 			tpgresource.DefaultProviderProject,
 			tpgresource.DefaultProviderRegion,
 			tpgresource.SetLabelsDiff,
+			customdiff.ForceNewIf("config.0.node_config.0.network", networkForceNewCustomDiff),
+			customdiff.ForceNewIf("config.0.node_config.0.subnetwork", subnetworkForceNewCustomDiff),
 		),
 
 		Schema: map[string]*schema.Schema{
@@ -2899,4 +2902,17 @@ func versionsEqual(old, new string) (bool, error) {
 func isComposer3(d *schema.ResourceData, config *transport_tpg.Config)	bool {
 	image_version := d.Get("config.0.software_config.0.image_version").(string)
 	return strings.Contains(image_version, "composer-3")
+}
+
+func notComposer3(ctx context.Context, d *schema.ResourceDiff, meta interface{}) bool {
+	image_version := d.Get("config.0.software_config.0.image_version").(string)
+	return !strings.Contains(image_version, "composer-3")
+}
+
+func networkForceNewCustomDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) bool {
+	return d.HasChange("config.0.node_config.0.network") && notComposer3(ctx, d, meta)
+}
+
+func subnetworkForceNewCustomDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) bool {
+	return d.HasChange("config.0.node_config.0.subnetwork") && notComposer3(ctx, d, meta)
 }
