@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	logging_tpg "github.com/hashicorp/terraform-provider-google/google/services/logging"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -136,7 +137,11 @@ func projectBucketConfigID(d *schema.ResourceData, config *transport_tpg.Config)
 	bucketID := d.Get("bucket_id").(string)
 
 	if !strings.HasPrefix(project, "project") {
-		project = "projects/" + project
+		if strings.HasPrefix(project, "/") {
+			project = "projects" + project
+		} else {
+			project = "projects/" + project
+		}
 	}
 
 	id := fmt.Sprintf("%s/locations/%s/buckets/%s", project, location, bucketID)
@@ -190,6 +195,9 @@ func resourceLoggingProjectBucketConfigAcquireOrCreate(parentType string, iDFunc
 				log.Printf("[DEGUG] Loggin Bucket not exist %s", id)
 				// we need to pass the id in here because we don't want to set it in state
 				// until we know there won't be any errors on create
+				if d.Get("enable_analytics") {
+					return resourceLoggingProjectBucketConfigCreateAsync(d, meta, id)
+				}
 				return resourceLoggingProjectBucketConfigCreate(d, meta, id)
 			}
 		}
@@ -251,6 +259,78 @@ func resourceLoggingProjectBucketConfigCreate(d *schema.ResourceData, meta inter
 	d.SetId(id)
 
 	log.Printf("[DEBUG] Finished creating Bucket %q: %#v", d.Id(), res)
+
+	return resourceLoggingProjectBucketConfigRead(d, meta)
+}
+
+func resourceLoggingProjectBucketConfigCreateAsync(d *schema.ResourceData, meta interface{}, id string) error {
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
+
+	obj := make(map[string]interface{})
+	obj["name"] = d.Get("name")
+	obj["description"] = d.Get("description")
+	obj["locked"] = d.Get("locked")
+	obj["retentionDays"] = d.Get("retention_days")
+	obj["analyticsEnabled"] = d.Get("enable_analytics")
+	obj["cmekSettings"] = expandCmekSettings(d.Get("cmek_settings"))
+	obj["indexConfigs"] = expandIndexConfigs(d.Get("index_configs"))
+
+	url, err := tpgresource.ReplaceVars(d, config, "{{LoggingBasePath}}projects/{{project}}/locations/{{location}}/buckets:createAsync?bucketId={{bucket_id}}")
+	if err != nil {
+		return err
+	}
+
+	log.Printf("[DEBUG] Creating new Bucket: %#v", obj)
+	billingProject := ""
+
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return err
+	}
+	billingProject = project
+
+	// err == nil indicates that the billing_project value was found
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+		billingProject = bp
+	}
+
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   billingProject,
+		RawURL:    url,
+		UserAgent: userAgent,
+		Body:      obj,
+		Timeout:   d.Timeout(schema.TimeoutCreate),
+	})
+	if err != nil {
+		return fmt.Errorf("Error creating Bucket: %s", err)
+	}
+
+	d.SetId(id)
+
+	// Use the resource in the long-running operation response to populate
+	// identity fields and d.Id() before read
+	var opRes map[string]interface{}
+	logging_tpg.LoggingOperationWaitTimeWithResponse(config, res, &opRes, "Creating Analytics-enabled Bucket", userAgent, d.Timeout(schema.TimeoutCreate))
+
+	log.Printf("[DEBUG] Finished creating Analytics-enabled Bucket %q: %#v", d.Id(), res)
+	if err != nil {
+		// The resource didn't actually create
+		d.SetId("")
+
+		return fmt.Errorf("Error waiting to create Analytics-enabled bucket: %s", err)
+	}
+
+	if err := d.Set("name", opRes["name"]); err != nil {
+		return err
+	}
+
+	log.Printf("[DEBUG] Finished creating Analytics-enabled Bucket %q: %#v", d.Id(), res)
 
 	return resourceLoggingProjectBucketConfigRead(d, meta)
 }
