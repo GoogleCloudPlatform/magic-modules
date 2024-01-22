@@ -83,7 +83,8 @@ properties:
   - !ruby/object:Api::Type::Enum
     name: 'state'
     description: |
-      State of the posture.
+      State of the posture. Update to state field should not be triggered along with
+      with other field updates.
     required: true
     values:
       - :DEPRECATED
@@ -273,7 +274,7 @@ properties:
                           - !ruby/object:Api::Type::String
                             name: 'name'
                             required: true
-                            diff_suppress_func: 'customConstraintNameSuppress'
+                            custom_flatten: 'templates/terraform/custom_flatten/securityposture_custom_constraint_name.go.erb'
                             description: |
                               Immutable. The name of the custom constraint. This is unique within the organization.
                           - !ruby/object:Api::Type::String
