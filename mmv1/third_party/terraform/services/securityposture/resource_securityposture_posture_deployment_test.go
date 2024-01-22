@@ -94,28 +94,6 @@ resource "google_securityposture_posture" "posture_one" {
             policy_id = "policy_1"
             constraint {
                 org_policy_constraint {
-                    canned_constraint_id = "storage.uniformBucketLevelAccess"
-                    policy_rules {
-                        enforce = true
-                    }
-                }
-            }
-        }
-    }
-}
-
-resource "google_securityposture_posture" "posture_two" {
-    posture_id          = "posture_two"
-    parent = "organizations/%{org_id}/locations/global"
-    state = "ACTIVE"
-    description = "a new posture"
-    policy_sets {
-        policy_set_id = "org_policy_set"
-        description = "set of org policies"
-        policies {
-            policy_id = "policy_1"
-            constraint {
-                org_policy_constraint {
                     canned_constraint_id = "storage.publicAccessPrevention"
                     policy_rules {
                         enforce = true
@@ -132,8 +110,8 @@ resource "google_securityposture_posture_deployment" "postureDeployment_one" {
 	location = "global"
     description = "an updated posture deployment"
     target_resource = "projects/%{project_number}"
-    posture_id = google_securityposture_posture.posture_two.name
-    posture_revision_id = google_securityposture_posture.posture_two.revision_id
+    posture_id = google_securityposture_posture.posture_one.name
+    posture_revision_id = google_securityposture_posture.posture_one.revision_id
 }
 `, context)
 }

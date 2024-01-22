@@ -19,9 +19,6 @@ description: |
   and its revision_id in the posture deployment configuration. Every update to a deployed posture generates a new revision_id.
   Thus, the updated revision_id should be used in the respective posture deployment's configuration to deploy that posture 
   on a resource.
-  It is recommended to populate the posture_revision_id with the generated 8-character value, instead of using the resource 
-  reference. Using resource address reference in revision_id might result into terraform error during simultaneous updates
-  to posture and posture deployment.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Create and deploy a posture': 'https://cloud.google.com/security-command-center/docs/how-to-use-security-posture'
