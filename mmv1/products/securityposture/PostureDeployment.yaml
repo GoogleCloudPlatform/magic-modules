@@ -15,6 +15,9 @@
 name: 'PostureDeployment'
 description: |
   Represents a deployment of a security posture on a resource.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Create and deploy a posture': 'https://cloud.google.com/security-command-center/docs/how-to-use-security-posture'
 import_format: ['{{%parent}}/locations/{{location}}/postureDeployments/{{posture_deployment_id}}']
 base_url: '{{parent}}/locations/{{location}}/postureDeployments'
 self_link: '{{parent}}/locations/{{location}}/postureDeployments/{{posture_deployment_id}}'
