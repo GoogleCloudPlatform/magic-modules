@@ -935,7 +935,7 @@ The `software_config` block supports:
   * spark: `spark-defaults.conf`
   * yarn: `yarn-site.xml`
 
-  
+
   For more information, see [Cluster properties](https://cloud.google.com/dataproc/docs/concepts/cluster-properties).
 
 ## Attributes Reference
