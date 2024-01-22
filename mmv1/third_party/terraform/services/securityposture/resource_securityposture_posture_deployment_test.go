@@ -65,6 +65,26 @@ resource "google_securityposture_posture" "posture_one" {
                 }
             }
         }
+        policies {
+    		policy_id = "policy_2"
+    		constraint {
+    			org_policy_constraint_custom {
+    				custom_constraint {
+    					name         = "organizations/%{org_id}/customConstraints/custom.disableGkeAutoUpgrade"
+					  	display_name = "Disable GKE auto upgrade"
+					  	description  = "Only allow GKE NodePool resource to be created or updated if AutoUpgrade is not enabled where this custom constraint is enforced."
+
+					  	action_type    = "ALLOW"
+					  	condition      = "resource.management.autoUpgrade == false"
+					  	method_types   = ["CREATE", "UPDATE"]
+					  	resource_types = ["container.googleapis.com/NodePool"]
+    				}
+    				policy_rules {
+    					enforce = true
+    				}
+    			}
+    		}
+		}
     }
 }
 
