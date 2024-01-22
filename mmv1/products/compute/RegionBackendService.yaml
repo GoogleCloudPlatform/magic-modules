@@ -53,6 +53,13 @@ examples:
       region_backend_service_name: 'region-service'
       health_check_name: 'rbs-health-check'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'region_backend_service_external_iap'
+    primary_resource_id: 'default'
+    vars:
+      region_backend_service_name: 'tf-test-region-service-external'
+    ignore_read_extra:
+      - 'iap.0.oauth2_client_secret'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'region_backend_service_cache'
     primary_resource_id: 'default'
     vars:

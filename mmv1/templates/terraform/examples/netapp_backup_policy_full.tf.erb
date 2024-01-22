@@ -1,0 +1,12 @@
+resource "google_netapp_backup_policy" "<%= ctx[:primary_resource_id] %>" {
+  name          = "<%= ctx[:vars]['backup_policy_full_name'] %>"
+  location = "us-central1"
+  daily_backup_limit   = 2
+  weekly_backup_limit  = 1
+  monthly_backup_limit = 1
+  description = "TF test backup schedule"
+  enabled = true
+  labels = {
+    "foo" = "bar"
+  }
+}

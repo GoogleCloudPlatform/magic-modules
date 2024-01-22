@@ -1,5 +1,5 @@
 # Stage 1: Download go module cache for builds
-FROM golang:1.19-bullseye AS builder
+FROM golang:1.20-bullseye AS builder
 ENV GOCACHE=/go/cache
 
 RUN apt-get update && apt-get install -y unzip
@@ -12,7 +12,7 @@ WORKDIR /app1/magic-modules-main/.ci/magician
 RUN go build -o /dev/null .
 
 # Stage 2: Creating the final image
-FROM golang:1.19-bullseye
+FROM golang:1.20-bullseye
 SHELL ["/bin/bash", "-c"]
 ENV GOCACHE=/go/cache
 
@@ -37,16 +37,3 @@ RUN wget https://releases.hashicorp.com/terraform/1.2.5/terraform_1.2.5_linux_am
     && unzip terraform_1.2.5_linux_amd64.zip \
     && rm terraform_1.2.5_linux_amd64.zip \
     && mv ./terraform /bin/terraform
-
-### the following version of terraform are required for
-### terraform-validator-tester-integration
-RUN wget https://releases.hashicorp.com/terraform/0.13.7/terraform_0.13.7_linux_amd64.zip \
-    && unzip terraform_0.13.7_linux_amd64.zip \
-    && rm terraform_0.13.7_linux_amd64.zip \
-    && mkdir /terraform \
-    && mv terraform /terraform/0.13.7
-
-RUN wget https://releases.hashicorp.com/terraform/0.12.31/terraform_0.12.31_linux_amd64.zip \
-    && unzip terraform_0.12.31_linux_amd64.zip \
-    && rm terraform_0.12.31_linux_amd64.zip \
-    && mv terraform /terraform/0.12.31

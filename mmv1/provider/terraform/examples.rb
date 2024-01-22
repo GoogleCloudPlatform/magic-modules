@@ -15,13 +15,12 @@ require 'uri'
 require 'api/object'
 require 'compile/core'
 require 'google/golang_utils'
-require 'provider/abstract_core'
 
 module Provider
-  class Terraform < Provider::AbstractCore
+  class Terraform
     # Generates configs to be shown as examples in docs and outputted as tests
     # from a shared template
-    class Examples < Api::Object
+    class Examples < Google::YamlValidator
       include Compile::Core
       include Google::GolangUtils
 

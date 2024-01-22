@@ -35,6 +35,12 @@ service/apigateway:
 service/apigee:
   resources:
   - google_apigee_.*
+service/apikeys:
+  resources:
+  - google_apikeys_key
+service/appengine:
+  resources:
+  - google_app_engine_.*
 service/artifactregistry:
   resources:
   - google_artifact_registry_.*
@@ -67,6 +73,9 @@ service/certificatemanager:
   - google_compute_managed_ssl_certificate
   - google_compute_region_ssl_certificate
   - google_compute_ssl_certificate
+service/cloud-dns:
+  resources:
+  - google_dns_.*
 service/cloudasset:
   resources:
   - google_cloud_asset_.*
@@ -133,6 +142,7 @@ service/compute-instances:
   - google_compute_instance
   - google_compute_instance_from_.*
   - google_compute_instance_iam.*
+  - google_compute_instance_settings
   - google_compute_instance_template
   - google_compute_region_instance_template
   - google_compute_project_metadata.*
@@ -167,6 +177,12 @@ service/compute-l7-load-balancer:
   - google_compute_region_target_http_proxy
   - google_compute_target_https_proxy
   - google_compute_region_target_https_proxy
+service/compute-managed:
+  resources:
+  - google_compute_instance_group_manager.*
+  - google_compute_region_instance_group_manager.*
+  - google_compute_per_instance_config.*
+  - google_compute_region_per_instance_config.*
 service/compute-nat:
   resources:
   - google_compute_router_nat
@@ -183,6 +199,9 @@ service/compute-networking-neg:
   - google_compute_global_network_endpoint.*
   - google_compute_network_endpoint.*
   - google_compute_region_network_endpoint.*
+service/compute-packet-mirroring:
+  resources:
+  - google_compute_packet_mirroring
 service/compute-pd:
   resources:
   - google_compute_attached_disk.*
@@ -261,9 +280,9 @@ service/dataplex:
   - google_dataplex_.*
 service/dataproc:
   resources:
-  - google_dataproc_cluster
-  - google_dataproc_autoscaling_policy
-  - google_dataproc_job
+  - google_dataproc_cluster.*
+  - google_dataproc_autoscaling_policy.*
+  - google_dataproc_job.*
   - google_dataproc_workflow_template
   - google_dataproc_batch
 service/datastream:
@@ -276,6 +295,9 @@ service/deploymentmanager:
 service/dialogflow:
   resources:
   - google_dialogflow_.*
+service/discoveryengine:
+  resources:
+  - google_discoveryengine_.*
 service/dlp:
   resources:
   - google_data_loss_prevention_.*
@@ -383,6 +405,9 @@ service/memcache:
 service/metastore:
   resources:
   - google_dataproc_metastore_.*
+service/migrationcenter:
+  resources:
+  - google_migration_center_.*
 service/monitoring-alerting:
   resources:
   - google_monitoring_notification_channel
@@ -392,6 +417,7 @@ service/monitoring-metrics:
   - google_monitoring_metric_descriptor
   - google_monitoring_group
 service/monitoring-services:
+  team: monitoring-core-services
   resources:
   - google_monitoring_custom_service
   - google_monitoring_dashboard
@@ -406,15 +432,18 @@ service/monitoring-services:
 service/monitoring-uptime:
   resources:
   - google_monitoring_uptime_.*
+service/netapp:
+  resources:
+  - google_netapp_.*
+service/network-connectivity-center:
+  resources:
+  - google_network_connectivity_hub
+  - google_network_connectivity_spoke
 service/network-security:
   resources:
   - google_network_security_authorization_policy
   - google_network_security_client_tls_policy
-  - google_network_security_gateway_security_policy
-  - google_network_security_gateway_security_policy_rule
   - google_network_security_server_tls_policy
-  - google_network_security_tls_inspection_policy
-  - google_network_security_url_lists
 service/network-security-distributed-firewall:
   resources:
   - google_network_security_address_group
@@ -428,6 +457,12 @@ service/networkconnectivity-serviceautomation:
 service/networkmanagement-connectivity-test:
   resources:
   - google_network_management_connectivity_test
+service/networksecurity-swp:
+  resources:
+  - google_network_security_gateway_security_policy
+  - google_network_security_gateway_security_policy_rule
+  - google_network_security_url_lists
+  - google_network_security_tls_inspection_policy
 service/networkservices-media-cdn:
   resources:
   - google_network_services_edge_cache_.*
@@ -447,6 +482,7 @@ service/networkservices-traffic-director:
 service/notebooks:
   resources:
   - google_notebooks_.*
+  - google_workbench_.*
 service/orgpolicy:
   resources:
   - google_folder_organization_policy
@@ -505,6 +541,9 @@ service/service-networking:
 service/servicedirectory:
   resources:
   - google_service_directory_.*
+service/serviceusage:
+  resources:
+  - google_project_service
 service/serviceusage-quota:
   resources:
   - google_service_usage_consumer_quota_override
@@ -525,9 +564,7 @@ service/tpu:
   - google_tpu_.*
 service/vmwareengine:
   resources:
-  - google_vmwareengine_network
-  - google_vmwareengine_private_cloud
-  - google_vmwareengine_cluster
+  - google_vmwareengine_.*
 service/vpcaccess:
   resources:
   - google_vpc_access_connector

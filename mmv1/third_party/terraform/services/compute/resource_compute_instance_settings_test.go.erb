@@ -1,18 +1,15 @@
 <% autogen_exception -%>
-
 package compute_test
 
+<% unless version == 'ga' -%>
 import (
-<% if version == "beta" -%>
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-<% end -%>
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-<% unless version == 'ga' -%>
 func TestAccComputeInstanceSettings_update(t *testing.T) {
 	t.Parallel()
 
@@ -55,7 +52,6 @@ func TestAccComputeInstanceSettings_update(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func testAccComputeInstanceSettings_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
@@ -105,3 +101,4 @@ resource "google_compute_instance_settings" "gce_instance_settings" {
 
 `, context)
 }
+<% end -%>
