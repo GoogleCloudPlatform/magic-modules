@@ -3,6 +3,7 @@
 var obj2 map[string]interface{}
 do_change := false
 var action string
+var targetState string
 // state transitions
 // there can be a glitch is a transfer starts/ends between reading mirrorState
 // and sending the action. This will be very rare. No workaround.
@@ -11,6 +12,7 @@ if d.Get("replication_enabled").(bool) == true {
 	case "STOPPED":
 		// replication_enabled==true, mirrorState==STOPPED -> resume
 		action = "resume"
+		targetState = "MIRRORED"
 		do_change = true
 	default:
 		// replication_enabled==true, mirrorState!=STOPPED -> NOOP
@@ -21,17 +23,20 @@ if d.Get("replication_enabled").(bool) == true {
 	case "MIRRORED":
 		// replication_enabled==false, mirrorState==MIRRORED -> stop
 		action = "stop"
+		targetState = "STOPPED"
 		do_change = true
 	case "TRANSFERRING":
 		// replication_enabled==false, mirrorState==TRANSFERRING -> force stop
 		// User needs to add force_stopping = true, otherwise will receive error
 		action = "stop"
+		targetState = "STOPPED"
 		do_change = true
 	case "PREPARING":
 		// replication_enabled==false, mirrorState==PREPARING -> stop
 		// Currently cannot be stopped. User will receive intended error.
 		// User needs to wait until mirrorState=MIRRORED
 		action = "stop"
+		targetState = "STOPPED"
 		do_change = true
 	default:
 		// replication_enabled==false, mirrorState==STOPPED -> NOOP
@@ -84,5 +89,12 @@ if do_change {
 			}
 		}
 		return err
+	}
+
+	// mirrorState should be okay by now, but we still observe glitches. So let's make sure.
+	// Wait for mirrorState=targetState before continuing
+	err = NetAppVolumeReplicationWaitForMirror(d, meta, targetState)
+	if err != nil {
+		return fmt.Errorf("Error waiting for volumereplication to reach mirror_state==%s: %s", targetState, err)
 	}
 }

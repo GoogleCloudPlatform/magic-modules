@@ -234,7 +234,6 @@ virtual_fields:
       Delete destination volume when replication resource is destroyed? Default is false.
     default_value: false
   - !ruby/object:Api::Type::Boolean
-    # Replications can be stopped and resumed. This requires to call the stop and resume API endpoints.
     name: "replication_enabled"
     description: |
       Set to false to stop/break the mirror. Stopping the mirror makes the destination volume read-write
@@ -251,9 +250,17 @@ virtual_fields:
       to stop anyway. All data transferred to the destination will be discarded and content of destination
       volume will remain at the state of the last successful update. Default is false.
     default_value: false
-
+  - !ruby/object:Api::Type::Boolean
+    name: "wait_for_mirror"
+    description: |
+      Replication resource state is independent of mirror_state. With enough data, it can take many hours
+      for mirror_state to reach MIRRORED. If you want Terraform to wait for the mirror to finish one
+      create/stop/resume operations, set this parameter to true. Default is false.
+    default_value: false
 # The following functionality needs to be discussed in review process
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/netapp_volumereplication.go.erb
+  post_create: templates/terraform/post_create/netapp_volumereplication_post_create.go.erb
   pre_delete: templates/terraform/pre_delete/netapp_volumereplication_stop_before_delete.go.erb
   post_delete: templates/terraform/post_delete/netapp_volumereplication_delete_destination_volume.go.erb
   post_update: templates/terraform/post_update/netapp_volumereplication_mirror_state.go.erb

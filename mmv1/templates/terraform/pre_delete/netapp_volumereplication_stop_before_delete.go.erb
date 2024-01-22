@@ -1,3 +1,4 @@
+// A replication can only be deleted if mirrorState==STOPPED
 // We are about to delete the replication and need to stop the mirror before.
 // FYI: Stopping a PREPARING mirror currently doesn't work. User have to wait until
 // mirror reaches MIRRORED.

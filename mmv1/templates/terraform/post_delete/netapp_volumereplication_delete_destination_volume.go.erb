@@ -1,4 +1,5 @@
-time.Sleep(20 * time.Second)
+// A replication CREATE also created a destination volume
+// A user can chooses to delete the destination volume after deleting the replication
 log.Printf("[DEBUG] value of destvol %q: %v", reflect.TypeOf(d.Get("destination_volume")), d.Get("destination_volume"))
 if d.Get("delete_destination_volume").(bool) == true {
 	str1 := d.Get("destination_volume").(string)

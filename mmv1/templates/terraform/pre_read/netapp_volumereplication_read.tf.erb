@@ -1,8 +1,3 @@
-// User can stop/resume mirrors manually. We need to calculate the actual
-// state of our virtual replication_enabled field
-// It relies on mirror_state being recent, so it should be in post_read,
-// which does not exit ...
-
 if d.Get("mirror_state").(string) == "STOPPED" {
 	if err := d.Set("replication_enabled", false); err != nil {
 		return fmt.Errorf("Error setting replication_enabled: %s", err)

@@ -30,7 +30,7 @@ resource "google_netapp_volume" "source_volume" {
   ]
 }
 
-resource "google_netapp_volumereplication" "my-replication" {
+resource "google_netapp_volumereplication" "<%= ctx[:primary_resource_id] %>" {
   depends_on           = [google_netapp_volume.source_volume]
   location             = google_netapp_volume.source_volume.location
   volume_name          = google_netapp_volume.source_volume.name
@@ -49,13 +49,5 @@ resource "google_netapp_volumereplication" "my-replication" {
   # destination volume too, if the replication is deleted. This is great
   # for testing, but questionable for production!
   delete_destination_volume = true
-}
-
-# Wait for replication to reach mirrorState==MIRRORED. For an empty volume
-# this should takes less than a minute. For volumes with a lot of data,
-# it can take many hours.
-resource "time_sleep" "wait_for_mirrored" {
-  depends_on = [google_netapp_volumereplication.my-replication]
-
-  create_duration = "60s"
+  wait_for_mirror = true
 }
