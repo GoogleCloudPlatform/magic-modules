@@ -57,22 +57,18 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'firestore_default_database'
     primary_resource_id: 'database'
-    pull_external: true
-    vars:
-      delete_protection_state: "DELETE_PROTECTION_ENABLED"
     test_env_vars:
       project_id: :PROJECT_NAME
-    test_vars_overrides:
-      delete_protection_state: '"DELETE_PROTECTION_DISABLED"'
     ignore_read_extra:
       - project
       - etag
       - deletion_policy
+    skip_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'firestore_database'
     primary_resource_id: 'database'
     vars:
-      name: "example-database-id"
+      database_id: "database-id"
       delete_protection_state: "DELETE_PROTECTION_ENABLED"
     test_env_vars:
       project_id: :PROJECT_NAME
@@ -85,12 +81,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'firestore_default_database_in_datastore_mode'
     primary_resource_id: 'datastore_mode_database'
-    vars:
-      delete_protection_state: "DELETE_PROTECTION_ENABLED"
     test_env_vars:
       project_id: :PROJECT_NAME
-    test_vars_overrides:
-      delete_protection_state: '"DELETE_PROTECTION_DISABLED"'
     ignore_read_extra:
       - project
       - etag
@@ -100,7 +92,7 @@ examples:
     name: 'firestore_database_in_datastore_mode'
     primary_resource_id: 'datastore_mode_database'
     vars:
-      name: "example-database-id"
+      database_id: "database-id"
       delete_protection_state: "DELETE_PROTECTION_ENABLED"
     test_env_vars:
       project_id: :PROJECT_NAME

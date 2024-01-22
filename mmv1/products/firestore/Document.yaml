@@ -43,16 +43,20 @@ examples:
     name: 'firestore_document_basic'
     primary_resource_id: 'mydoc'
     test_env_vars:
-      project_id: :FIRESTORE_PROJECT_NAME
+      org_id: :ORG_ID
     vars:
       document_id: 'my-doc-id'
+      project_id: 'project-id'
+    pull_external: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'firestore_document_nested_document'
     primary_resource_id: 'mydoc'
     test_env_vars:
-      project_id: :FIRESTORE_PROJECT_NAME
+      org_id: :ORG_ID
     vars:
       document_id: 'my-doc-id'
+      project_id: 'project-id'
+    pull_external: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/firestore_document.go.erb
   decoder: templates/terraform/decoders/firestore_document.go.erb
