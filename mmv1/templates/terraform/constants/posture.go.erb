@@ -7,3 +7,14 @@ func customConstraintNameSuppress(_, old, new string, _ *schema.ResourceData) bo
 
 	return old == new
 }
+
+// Compute revision_id for changes in posture fields.
+func revisionIdCustomizeDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+    if d.HasChanges("annotations", "description", "policy_sets", "state") {
+        err := d.SetNewComputed("revision_id")
+        if err != nil {
+            return fmt.Errorf("Error re-setting revision_id: %s", err)
+        }
+    }
+    return nil
+}

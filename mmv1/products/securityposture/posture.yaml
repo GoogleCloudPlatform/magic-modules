@@ -42,6 +42,9 @@ async: !ruby/object:Api::OpAsync
     base_url: '{{op_id}}'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/posture.go.erb
+custom_diff: [
+  'revisionIdCustomizeDiff',
+]
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'securityposture_posture_basic'
