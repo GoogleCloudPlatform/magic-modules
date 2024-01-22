@@ -1,0 +1,210 @@
+<% indent_spaces = 2 -%>
+<% unless property.class.to_s == 'Api::Type::KeyValueTerraformLabels' || property.class.to_s == 'Api::Type::KeyValueEffectiveLabels' -%>
+	- name: '<%= property.name.underscore -%>'
+    type: <%= property.class.to_s.gsub("Api::Type::", "") %>
+<%  unless property.description.nil? -%>
+    description: '<%= property.description.strip -%>'
+<%  end -%>
+<%  unless !property.unordered_list -%>
+    unordered_list: <%= property.unordered_list %>
+<%  end -%>
+<%  unless !property.is_set -%>
+    is_set: <%= property.is_set %>
+<%  end -%>
+<%  unless !property.schema_config_mode_attr -%>
+    schema_config_mode_attr: <%= property.schema_config_mode_attr %>
+<%  end -%>
+<%  unless property.pattern.nil? -%>
+    pattern: '<%= property.pattern %>'
+<%  end -%>
+<%  unless !property.exclude -%>
+    exclude: <%= property.exclude %>
+<%  end -%>
+<%  unless property.__resource.nil? -%>
+<%  unless property.min_version.name == 'ga'-%>
+    min_version: '<%= property.min_version.name %>'
+<%  end -%>
+<%  end -%>
+<%  unless property.exact_version.nil? -%>
+    exact_version: '<%= property.exact_version %>'
+<%  end -%>
+<%  unless property.url_param_only.nil? -%>
+    url_param_only: <%= property.url_param_only %>
+<%  end -%>
+<%  unless property.required.nil? -%>
+    required: <%= property.required %>
+<%  end -%>
+<%  unless property.immutable.nil? -%>
+    immutable: <%= property.immutable %>
+<%  end -%>
+<%  unless property.ignore_read.nil? -%>
+    ignore_read: <%= property.ignore_read %>
+<%  end -%>
+<%  unless !property.sensitive -%>
+    sensitive: <%= property.sensitive %>
+<%  end -%>
+<%  unless !property.default_from_api -%>
+    default_from_api: <%= property.default_from_api %>
+<%  end -%>
+<%  unless !property.output -%>
+    output: <%= property.output %>
+<%  end -%>
+<%  unless property.send_empty_value.nil? -%>
+    send_empty_value: <%= property.send_empty_value %>
+<%  end -%>
+<%  unless property.allow_empty_object.nil? -%>
+    allow_empty_object: <%= property.allow_empty_object %>
+<%  end -%>
+<%  unless property.read_query_params.nil? -%>
+    read_query_params: '<%= property.read_query_params %>'
+<%  end -%>
+<%  unless property.update_url.nil? -%>
+    update_url: '<%= property.update_url %>'
+<%  end -%>
+<%  unless property.update_verb == property.__resource&.update_verb -%>
+    update_verb: '<%= property.update_verb.to_s %>'
+<%  end -%>
+<%  unless property.update_id.nil? -%>
+    update_id: '<%= property.update_id %>'
+<%  end -%>
+<%  unless property.update_mask_fields.nil? -%>
+    update_mask_fields:
+<%  property.update_mask_fields.each do |fname| -%>
+      - '<%= fname %>'
+<%  end -%>
+<%  end -%>
+<%  unless property.fingerprint_name.nil? -%>
+    fingerprint_name: '<%= property.fingerprint_name %>'
+<%  end -%>
+<%  unless property.conflicts.nil? -%>
+<%  unless property.conflicts.empty? -%>
+    conflicts:
+<%  	property.conflicts.each do |fname| -%>
+      - <%= fname %>
+<%  	end -%>
+<%  end -%>
+<%  end -%>
+<%  unless property.at_least_one_of.nil? -%>
+<%  unless property.at_least_one_of.empty? -%>
+    at_least_one_of:
+<%  	property.at_least_one_of.each do |fname| -%>
+      - '<%= fname %>'
+<%  	end -%>
+<%  end -%>
+<%  end -%>
+<%  unless property.exactly_one_of.nil? -%>
+<%  unless property.exactly_one_of.empty? -%>
+    exactly_one_of:
+<%  	property.exactly_one_of.each do |fname| -%>
+      - '<%= fname %>'
+<%  	end -%>
+<%  end -%>
+<%  end -%>
+<%  unless property.required_with.nil? -%>
+<%  unless property.required_with.empty? -%>
+    required_with:
+<%  	property.required_with.each do |fname| -%>
+      - '<%= fname %>'
+<%  	end -%>
+<%  end -%>
+<%  end -%>
+<%  unless property.key_expander == 'tpgresource.ExpandString' -%>
+    key_expander: '<%= property.key_expander %>'
+<%  end -%>
+<%  unless property.key_diff_suppress_func.nil? -%>
+    key_diff_suppress_func: '<%= property.key_diff_suppress_func %>'
+<%  end -%>
+<%  unless property.diff_suppress_func.nil? -%>
+    diff_suppress_func: '<%= property.diff_suppress_func %>'
+<%  end -%>
+<%  unless property.state_func.nil? -%>
+    state_func: '<%= property.state_func %>'
+<%  end -%>
+<%  unless property.set_hash_func.nil? -%>
+    set_hash_func: '<%= property.set_hash_func %>'
+<%  end -%>
+<%  unless property.custom_flatten.nil? -%>
+    custom_flatten: '<%= property.custom_flatten %>'
+<%  end -%>
+<%  unless property.custom_expand.nil? -%>
+    custom_expand: '<%= property.custom_expand %>'
+<%  end -%>
+<%  unless property.flatten_object.nil? -%>
+    flatten_object: '<%= property.flatten_object %>'
+<%  end -%>
+<%  unless property.validation.nil? -%>
+    validation:
+<%  unless property.validation.regex.nil? -%>
+      regex: '<%= property.validation.regex %>'
+<%  end -%>
+<%  unless property.validation.function.nil? -%>
+      function: '<%= property.validation.function %>'
+<%  end -%>
+<%  end -%>
+<%  unless property.default_value.nil? -%>
+    default_value: <%= property.default_value %>
+<%  end -%>
+<%  unless property.deprecation_message.nil? -%>
+    deprecation_message: '<%= property.deprecation_message %>'
+<%  end -%>
+<%  unless property.removed_message.nil? -%>
+    removed_message: '<%= property.removed_message %>'
+<%  end -%>
+<%  if property.is_a?(Api::Type::Array) -%>
+<%      if property.item_type.is_a?(Api::Type::NestedObject) -%>
+    item_type: <%= property.item_type.type.to_s %>
+<%        unless property.item_type.properties.nil? -%>
+      properties:
+<%          property.item_type.properties.each do |prop| -%>
+<%=   lines(indent(build_newyaml_field(prop, object, pwd, layer+1),6*layer)) -%>
+<%          end -%>
+<%        end -%>
+<%      else -%>
+      item_type: <%= property.item_type.to_s %>
+<%  end -%>
+<%    unless property.min_size.nil? -%>
+    min_size: <%= property.min_size %>
+<%    end -%>
+<%    unless property.max_size.nil? -%>
+    max_size: <%= property.max_size %>
+<%    end -%>
+<%  end -%>
+<%  if property.is_a?(Api::Type::ResourceRef) -%>
+<%    unless property.resource.nil? -%>
+    resource: '<%= property.resource %>'
+<%    end -%>
+<%    unless property.imports.nil? -%>
+    imports: '<%= property.imports.to_s %>'
+<%    end -%>
+<%  end -%>
+<%  if property.is_a?(Api::Type::Enum) -%>
+<%    unless property.values.nil? -%>
+    values:
+<%      property.values.each do |enumval| -%>
+      - '<%= enumval %>'
+<%      end -%>
+<%    end -%>
+<%    unless property.skip_docs_values.nil? -%>
+    skip_docs_values: <%= property.skip_docs_values %>
+<%    end -%>
+<%  end -%>
+<%  if property.is_a?(Api::Type::Map) -%>
+<%    unless property.value_type.nil? -%>
+    value_type: '<%= property.value_type.to_s %>'
+<%    end -%>
+<%    unless property.key_name.nil? -%>
+    key_name: '<%= property.key_name %>'
+<%    end -%>
+<%    unless property.key_description.nil? -%>
+    key_description: '<%= property.key_description %>'
+<%    end -%>
+<%  end -%>
+<%  if property.is_a?(Api::Type::NestedObject) -%>
+<%    unless property.properties.nil? -%>
+    properties:
+<%      property.properties.each do |prop| -%>
+<%= lines(indent(build_newyaml_field(prop, object, pwd, layer+1),4*layer)) -%>
+<%      end -%>
+<%    end -%>
+<%  end -%>
+<%  end -%>
