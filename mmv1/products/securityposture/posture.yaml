@@ -18,6 +18,9 @@ description: |
   and policy sets. A policy set includes set of policies along with their definition.
   A posture can be created at the organization level.
   Every update to a deployed posture creates a new posture revision with an updated revision_id.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Create and deploy a posture': 'https://cloud.google.com/security-command-center/docs/how-to-use-security-posture'
 import_format: ['{{%parent}}/locations/{{location}}/postures/{{posture_id}}']
 base_url: '{{parent}}/locations/{{location}}/postures'
 
