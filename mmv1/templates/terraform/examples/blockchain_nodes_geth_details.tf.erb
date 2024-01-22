@@ -5,7 +5,7 @@ resource "google_blockchain_node_engine_blockchain_nodes" "<%= ctx[:primary_reso
   ethereum_details {
     api_enable_admin = true
     api_enable_debug = true
-    validator_config = {
+    validator_config {
       mev_relay_urls = ["https://mev1.example.org/","https://mev2.example.org/"]
     }
     node_type = "FULL"
