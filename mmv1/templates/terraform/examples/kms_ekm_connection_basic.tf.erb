@@ -1,0 +1,15 @@
+resource "google_kms_ekm_connection" "<%= ctx[:primary_resource_id] %>" {
+  name            	= "ekmconnection-example"
+  keyManagementMode 	= MANUAL
+  serviceResolvers: [
+    {
+      serviceDirectoryService 	= "projects/*/locations/*/namespaces/*/services/*"
+      hostname 			= "example.cloud.goog"
+      serverCertificates: [
+      	{
+      		rawDer		= "chykm91dGVygoogexamplechym89"
+      	}
+      ]
+    }
+  ]
+}

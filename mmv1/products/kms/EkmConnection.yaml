@@ -140,12 +140,10 @@ properties:
     name: 'keyManagementMode'
     description: |
       Optional. Describes who can perform control plane operations on the EKM. If unset, this defaults to MANUAL
-    default: :MANUAL
     required: false
     values:
       - :MANUAL
       - :CLOUD_KMS
-      - :KEY_MANAGEMENT_MODE_UNSPECIFIED
   - !ruby/object:Api::Type::String
     name: 'etag'
     required: false
@@ -156,4 +154,9 @@ properties:
     description: |
       Optional. Identifies the EKM Crypto Space that this EkmConnection maps to. Note: This field is required if KeyManagementMode is CLOUD_KMS.
     required: false
-
+  - !ruby/object:Api::Type::String
+    name: 'createTime'
+    description: |
+      Output only. The time at which the EkmConnection was created.
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+    output: true
