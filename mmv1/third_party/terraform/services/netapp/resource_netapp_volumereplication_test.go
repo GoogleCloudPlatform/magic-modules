@@ -34,15 +34,6 @@ func TestAccNetappvolumereplication_netappVolumeReplicationCreateExample_update(
 				ImportStateVerifyIgnore: []string{"transferStats", "destination_volume_parameters", "location", "volume_name", "name", "labels", "terraform_labels", "delete_destination_volume", "force_stopping", "replication_enabled"},
 			},
 			{
-				Config: testAccNetappvolumereplication_netappVolumeReplicationCreateExample_waitformirror(context),
-			},
-			{
-				ResourceName:            "google_netapp_volumereplication.test_replication",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"transferStats", "destination_volume_parameters", "location", "volume_name", "name", "labels", "terraform_labels", "delete_destination_volume", "force_stopping", "replication_enabled"},
-			},
-			{
 				Config: testAccNetappvolumereplication_netappVolumeReplicationCreateExample_stop(context),
 			},
 			{
@@ -125,59 +116,6 @@ resource "google_netapp_volumereplication" "test_replication" {
   wait_for_mirror = true
 }
 `, context)
-}
-
-func testAccNetappvolumereplication_netappVolumeReplicationCreateExample_waitformirror(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-  data "google_compute_network" "default" {
-    name = "%{network_name}"
-  }
-  
-  resource "google_netapp_storage_pool" "source_pool" {
-    name          = "tf-test-source-pool%{random_suffix}"
-    location      = "us-central1"
-    service_level = "PREMIUM"
-    capacity_gib  = 2048
-    network       = data.google_compute_network.default.id
-  }
-  
-  resource "google_netapp_storage_pool" "destination_pool" {
-    name          = "tf-test-destination-pool%{random_suffix}"
-    location      = "us-west2"
-    service_level = "PREMIUM"
-    capacity_gib  = 2048
-    network       = data.google_compute_network.default.id
-  }
-  
-  resource "google_netapp_volume" "source_volume" {
-    location     = google_netapp_storage_pool.source_pool.location
-    name         = "tf-test-source-volume%{random_suffix}"
-    capacity_gib = 100
-    share_name   = "tf-test-source-volume%{random_suffix}"
-    storage_pool = google_netapp_storage_pool.source_pool.name
-    protocols = [
-      "NFSV3"
-    ]
-  }
-  
-  resource "google_netapp_volumereplication" "test_replication" {
-    depends_on           = [google_netapp_volume.source_volume]
-    location             = google_netapp_volume.source_volume.location
-    volume_name          = google_netapp_volume.source_volume.name
-    name                 = "tf-test-test-replication%{random_suffix}"
-    replication_schedule = "EVERY_10_MINUTES"
-    destination_volume_parameters {
-      storage_pool = google_netapp_storage_pool.destination_pool.id
-      volume_id    = "tf-test-destination-volume%{random_suffix}"
-      # Keeping the share_name of source and destination the same makes
-      # simplifies implementing client failover concepts
-      share_name  = "tf-test-source-volume%{random_suffix}"
-      description = "This is a replicated volume"
-    }
-    delete_destination_volume = true
-	  wait_for_mirror = true
-  }
-  `, context)
 }
 
 // Update parameters
