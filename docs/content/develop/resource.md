@@ -399,6 +399,8 @@ This section covers how to add IAM resources in Terraform if they are supported 
 1. Add the following top-level block to `ResourceName.yaml` directly above `parameters`.
 
 ```yaml
+# some resources have `exclude_resource` in order to only generate IAM support.
+# exclude_resource: true
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   # Name of the field on the terraform IAM resources which references
   # the parent resource. Update to match the parent resource's name.
