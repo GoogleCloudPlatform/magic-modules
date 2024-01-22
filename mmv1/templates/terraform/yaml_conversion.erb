@@ -58,6 +58,7 @@ references:
 #docs blocks 
 -%>
 <%  unless object.docs.nil? -%>
+<%  unless object.docs.empty? -%>
 docs:
 <%  	unless object.docs.warning.nil? -%>
 	warning: '<%= object.docs.warning %>'
@@ -74,6 +75,7 @@ docs:
 <%  	unless object.docs.attributes.nil? -%>
 	attributes: '<%= object.docs.attributes %>'
 <%  	end -%>
+<%  end -%>
 <%  end -%>
 <% 
 #url/http attrs 
@@ -336,6 +338,7 @@ iam_policy:
 #custom code 
 -%>
 <%  unless object.custom_code.nil? -%>
+<%  unless object.custom_code.empty? -%>
 custom_code:
 <%  	unless object.custom_code.extra_schema_entry.nil? -%>
 		extra_schema_entry: '<%= object.custom_code.extra_schema_entry %>'
@@ -388,6 +391,7 @@ custom_code:
 <%  	unless object.custom_code.test_check_destroy.nil? -%>
 		test_check_destroy: '<%= object.custom_code.test_check_destroy %>'
 <%  	end -%>
+<%  end -%>
 <%  end -%>
 <%  unless object.custom_diff.empty? || (object.custom_diff.size == 1 && object.custom_diff.include?("tpgresource.SetLabelsDiff")) -%>
 custom_diff:
