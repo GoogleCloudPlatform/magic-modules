@@ -17,7 +17,7 @@ description: |
   Represents a deployment of a security posture on a resource. A posture contains user curated policy sets. A posture can
   be deployed on a project or on a folder or on an organization. To deploy a posture we need to populate the posture's name
   and its revision_id in the posture deployment configuration. Every update to a deployed posture generates a new revision_id.
-  Thus, the updated revision_id should be used in the respective posture deployment's configuration to deploy that posture 
+  Thus, the updated revision_id should be used in the respective posture deployment's configuration to deploy that posture
   on a resource.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
