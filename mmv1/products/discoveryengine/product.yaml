@@ -17,6 +17,6 @@ display_name: Discovery Engine
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
-    base_url: https://discoveryengine.googleapis.com/v1/
+    base_url: https://{{location}}-discoveryengine.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
