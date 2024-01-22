@@ -359,6 +359,9 @@ func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Conf
 			"ipv6_access_config": flattenIpv6AccessConfigs(iface.Ipv6AccessConfigs),
 			"ipv6_address":        iface.Ipv6Address,
 			"queue_count":         iface.QueueCount,
+			<% unless version == 'ga' -%>
+			"network_attachment": iface.NetworkAttachment,
+			<% end -%>
 		}
 		// Instance template interfaces never have names, so they're absent
 		// in the instance template network_interface schema. We want to use the
