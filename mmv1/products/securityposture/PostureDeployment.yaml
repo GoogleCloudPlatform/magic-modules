@@ -145,3 +145,11 @@ properties:
       This is an output only optional field which will be filled in case when
       PostureDeployment state is UPDATE_FAILED or CREATE_FAILED or DELETE_FAILED.
       It denotes the desired Posture revision_id to be deployed.
+  - !ruby/object:Api::Type::String
+    name: 'failureMessage'
+    output: true
+    description: |
+      This is a output only optional field which will be filled in case where
+      PostureDeployment enters a failure state like UPDATE_FAILED or
+      CREATE_FAILED or DELETE_FAILED. It will have the failure message for posture deployment's
+      CREATE/UPDATE/DELETE methods.
