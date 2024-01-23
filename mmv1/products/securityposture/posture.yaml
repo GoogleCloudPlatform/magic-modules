@@ -52,7 +52,6 @@ examples:
     test_env_vars:
       org_id: :ORG_ID
 
-
 parameters:
   - !ruby/object:Api::Type::String
     name: 'parent'
@@ -114,11 +113,6 @@ properties:
     name: 'etag'
     description: 'For Resource freshness validation (https://google.aip.dev/154)'
     output: true
-  - !ruby/object:Api::Type::KeyValueAnnotations
-    name: 'annotations'
-    description: |
-      Annotations is a key value map stored with a resource that
-      may be set by external tools to store and retrieve arbitrary metadata.
   - !ruby/object:Api::Type::Boolean
     name: reconciling
     description: |
@@ -181,7 +175,7 @@ properties:
                 name: 'constraint'
                 description: 'Policy constraint definition.It can have the definition of one of following constraints:
                 orgPolicyConstraint
-                OrgPolicyConstraintCustom
+                orgPolicyConstraintCustom
                 securityHealthAnalyticsModule
                 securityHealthAnalyticsCustomModule'
                 required: true

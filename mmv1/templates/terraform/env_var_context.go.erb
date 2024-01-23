@@ -17,6 +17,8 @@
 		"<%= var_name -%>": envvar.GetTestServiceAccountFromEnv(t),
 	<% elsif var_type == :PROJECT_NAME -%>
 		"<%= var_name -%>": envvar.GetTestProjectFromEnv(),
+	<% elsif var_type == :PROJECT_NUMBER -%>
+		"<%= var_name -%>": envvar.GetTestProjectNumberFromEnv(),
 	<% elsif var_type == :FIRESTORE_PROJECT_NAME -%>
 		"<%= var_name -%>": envvar.GetTestFirestoreProjectFromEnv(t),
 	<% elsif var_type == :CUST_ID  -%>
