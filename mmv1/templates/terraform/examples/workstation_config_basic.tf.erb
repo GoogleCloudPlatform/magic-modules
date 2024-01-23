@@ -42,6 +42,8 @@ resource "google_workstations_workstation_config" "<%= ctx[:primary_resource_id]
     label-one = "value-one"
   }
 
+  disable_tcp_connections = false
+
   labels = {
     "label" = "key"
   }
