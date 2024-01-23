@@ -1,6 +1,6 @@
 ---
 title: "Add resource tests"
-weight: 40
+weight: 10
 aliases:
   - /docs/how-to/add-mmv1-test
   - /how-to/add-mmv1-test
@@ -8,6 +8,7 @@ aliases:
   - /docs/how-to/add-handwritten-test
   - /how-to/add-handwritten-test
   - /develop/add-handwritten-test
+  - /develop/test
 ---
 
 # Add resource tests
@@ -223,4 +224,4 @@ An update test is a test that creates the target resource and then makes updates
 
 ## What's next?
 
-- [Run your tests]({{< ref "/develop/run-tests.md" >}})
+- [Run your tests]({{< ref "/develop/test/run-tests.md" >}})
