@@ -49,7 +49,7 @@ func testAccSecurityPosturePostureDeployment_securityposturePostureDeployment_ba
 resource "google_securityposture_posture" "posture_one" {
     posture_id          = "posture_one"
     parent = "organizations/%{org_id}"
-    locations = "global"
+    location = "global"
     state = "ACTIVE"
     description = "a new posture"
     policy_sets {
@@ -86,7 +86,7 @@ func testAccSecurityPosturePostureDeployment_securityposturePostureDeployment_up
 resource "google_securityposture_posture" "posture_one" {
     posture_id          = "posture_one"
     parent = "organizations/%{org_id}"
-    locations = "global"
+    location = "global"
     state = "ACTIVE"
     description = "a new posture"
     policy_sets {
