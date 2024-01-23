@@ -29,7 +29,7 @@ func TestAccCloudbuildv2Connection_GheCompleteConnection(t *testing.T) {
 				ResourceName:            "google_cloudbuildv2_connection.primary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"annotations"},
+				ImportStateVerifyIgnore: []string{"annotations", "name"},
 			},
 		},
 	})
@@ -331,7 +331,7 @@ func testAccCloudbuildv2Connection_GheCompleteConnection(context map[string]inte
 	return acctest.Nprintf(`
 resource "google_cloudbuildv2_connection" "primary" {
   location = "%{region}"
-  name     = "tf-test-connection%{random_suffix}"
+  name     = "projects/%{project_name}/locations/%{region}/connections/tf-test-connection%{random_suffix}"
 
   github_enterprise_config {
     host_uri                      = "https://ghe.proctor-staging-test.com"
