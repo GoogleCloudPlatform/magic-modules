@@ -1,5 +1,6 @@
 resource "google_kms_ekm_connection" "<%= ctx[:primary_resource_id] %>" {
   name            	= "ekmconnection-example"
+  location		= "us-central1"
   keyManagementMode 	= MANUAL
   serviceResolvers: [
     {
