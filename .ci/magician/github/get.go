@@ -29,8 +29,13 @@ type Label struct {
 }
 
 type PullRequest struct {
-	User   User    `json:"user"`
-	Labels []Label `json:"labels"`
+	HTMLUrl        string  `json:"html_url"`
+	Number         int     `json:"number"`
+	Title          string  `json:"title"`
+	User           User    `json:"user"`
+	Body           string  `json:"body"`
+	Labels         []Label `json:"labels"`
+	MergeCommitSha string  `json:"merge_commit_sha"`
 }
 
 func (gh *Client) GetPullRequest(prNumber string) (PullRequest, error) {
@@ -39,11 +44,18 @@ func (gh *Client) GetPullRequest(prNumber string) (PullRequest, error) {
 	var pullRequest PullRequest
 
 	err := utils.RequestCall(url, "GET", gh.token, &pullRequest, nil)
-	if err != nil {
-		return pullRequest, err
-	}
 
-	return pullRequest, nil
+	return pullRequest, err
+}
+
+func (gh *Client) GetPullRequests(state, base, sort, direction string) ([]PullRequest, error) {
+	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls?state=%s&base=%s&sort=%s&direction=%s", state, base, sort, direction)
+
+	var pullRequests []PullRequest
+
+	err := utils.RequestCall(url, "GET", gh.token, &pullRequests, nil)
+
+	return pullRequests, err
 }
 
 func (gh *Client) GetPullRequestRequestedReviewers(prNumber string) ([]User, error) {
