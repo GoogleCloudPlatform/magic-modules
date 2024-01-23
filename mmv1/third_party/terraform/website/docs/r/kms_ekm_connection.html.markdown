@@ -37,6 +37,7 @@ To get more information about EkmConnection, see:
 ```hcl
 resource "google_kms_ekm_connection" "example-ekmconnection" {
   name            	= "ekmconnection-example"
+  location		= "us-central1"
   keyManagementMode 	= MANUAL
   serviceResolvers: [
     {
@@ -65,6 +66,11 @@ The following arguments are supported:
   (Required)
   A list of ServiceResolvers where the EKM can be reached. There should be one ServiceResolver per EKM replica. Currently, only a single ServiceResolver is supported
   Structure is [documented below](#nested_service_resolvers).
+
+* `location` -
+  (Required)
+  The location for the EkmConnection.
+  A full list of valid locations can be found by running `gcloud kms locations list`.
 
 
 <a name="nested_service_resolvers"></a>The `service_resolvers` block supports:

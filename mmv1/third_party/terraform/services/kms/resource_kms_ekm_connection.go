@@ -37,6 +37,12 @@ func ResourceKMSEkmConnection() *schema.Resource {
 		),
 
 		Schema: map[string]*schema.Schema{
+			"location": {
+				Type:     schema.TypeString,
+				Required: true,
+				Description: `The location for the EkmConnection.
+A full list of valid locations can be found by running 'gcloud kms locations list'.`,
+			},
 			"name": {
 				Type:        schema.TypeString,
 				Required:    true,
@@ -195,6 +201,12 @@ func resourceKMSEkmConnectionCreate(d *schema.ResourceData, meta interface{}) er
 		return err
 	} else if v, ok := d.GetOkExists("crypto_space_path"); !tpgresource.IsEmptyValue(reflect.ValueOf(cryptoSpacePathProp)) && (ok || !reflect.DeepEqual(v, cryptoSpacePathProp)) {
 		obj["cryptoSpacePath"] = cryptoSpacePathProp
+	}
+	locationProp, err := expandKMSEkmConnectionLocation(d.Get("location"), d, config)
+	if err != nil {
+		return err
+	} else if v, ok := d.GetOkExists("location"); !tpgresource.IsEmptyValue(reflect.ValueOf(locationProp)) && (ok || !reflect.DeepEqual(v, locationProp)) {
+		obj["location"] = locationProp
 	}
 
 	obj, err = resourceKMSEkmConnectionEncoder(d, meta, obj)
@@ -366,6 +378,12 @@ func resourceKMSEkmConnectionUpdate(d *schema.ResourceData, meta interface{}) er
 	} else if v, ok := d.GetOkExists("crypto_space_path"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, cryptoSpacePathProp)) {
 		obj["cryptoSpacePath"] = cryptoSpacePathProp
 	}
+	locationProp, err := expandKMSEkmConnectionLocation(d.Get("location"), d, config)
+	if err != nil {
+		return err
+	} else if v, ok := d.GetOkExists("location"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, locationProp)) {
+		obj["location"] = locationProp
+	}
 
 	obj, err = resourceKMSEkmConnectionEncoder(d, meta, obj)
 	if err != nil {
@@ -398,6 +416,10 @@ func resourceKMSEkmConnectionUpdate(d *schema.ResourceData, meta interface{}) er
 
 	if d.HasChange("crypto_space_path") {
 		updateMask = append(updateMask, "cryptoSpacePath")
+	}
+
+	if d.HasChange("location") {
+		updateMask = append(updateMask, "location")
 	}
 	// updateMask is a URL parameter but not present in the schema, so ReplaceVars
 	// won't set it
@@ -760,6 +782,10 @@ func expandKMSEkmConnectionEtag(v interface{}, d tpgresource.TerraformResourceDa
 }
 
 func expandKMSEkmConnectionCryptoSpacePath(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	return v, nil
+}
+
+func expandKMSEkmConnectionLocation(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
