@@ -17,8 +17,8 @@ kind: 'compute#networkEndpoint'
 base_url: 'projects/{{project}}/regions/{{region}}/networkEndpointGroups/{{region_network_endpoint_group}}'
 description: |
   A Region network endpoint represents a IP address/FQDN and port combination that is
-  part of a specific network endpoint group (NEG). 
-  
+  part of a specific network endpoint group (NEG).
+
   **NOTE**: Network endpoints cannot be created outside of a network endpoint group.
 immutable: true
 create_verb: :POST
@@ -112,14 +112,14 @@ properties:
     name: 'ipAddress'
     description: |
       IPv4 address external endpoint.
-      
+
       This can only be specified when network_endpoint_type of the NEG is INTERNET_IP_PORT.
   - !ruby/object:Api::Type::String
     name: 'fqdn'
     at_least_one_of:
-    - fqdn
-    - ip_address
+      - fqdn
+      - ip_address
     description: |
       Fully qualified domain name of network endpoint.
-      
+
       This can only be specified when network_endpoint_type of the NEG is INTERNET_FQDN_PORT.
