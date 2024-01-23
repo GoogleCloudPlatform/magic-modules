@@ -203,7 +203,7 @@ properties:
     name: 'description'
     description: |
       An optional description of this resource.
-  # We want to get rid of this. Please don't expose.
+  # Use of snapReserve is depricated. We don't expose it intentially.
   # - !ruby/object:Api::Type::Integer
   #   name: 'snapReserve'
   #   description: |
@@ -425,5 +425,6 @@ virtual_fields:
       - :DEFAULT
       - :FORCE
     default_value: :DEFAULT
+    ignore_read_extra: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_delete: templates/terraform/pre_delete/netapp_volume_force_delete.go.erb
