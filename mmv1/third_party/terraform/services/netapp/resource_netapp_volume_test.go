@@ -45,7 +45,7 @@ func TestAccNetappVolume_volumeBasicExample_update(t *testing.T) {
 				ResourceName:            "google_netapp_volume.test_volume",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels", "deletion_policy"},
 			}, {
 				Config: testAccNetappVolume_volumeBasicExample_full(context),
 			},
@@ -53,7 +53,7 @@ func TestAccNetappVolume_volumeBasicExample_update(t *testing.T) {
 				ResourceName:            "google_netapp_volume.test_volume",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels", "deletion_policy"},
 			},
 			{
 				Config: testAccNetappVolume_volumeBasicExample_update(context),
@@ -62,7 +62,7 @@ func TestAccNetappVolume_volumeBasicExample_update(t *testing.T) {
 				ResourceName:            "google_netapp_volume.test_volume",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels", "deletion_policy"},
 			},
 			{
 				Config: testAccNetappVolume_volumeBasicExample_updatesnapshot(context),
@@ -71,7 +71,7 @@ func TestAccNetappVolume_volumeBasicExample_update(t *testing.T) {
 				ResourceName:            "google_netapp_volume.test_volume",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels", "deletion_policy"},
 			},
 		},
 	})

@@ -59,6 +59,8 @@ examples:
       volume_name: 'test-volume'
       pool_name: 'test-pool'
       network_name: 'test-network'
+    ignore_read_extra:
+      - "deletion_policy"
     test_vars_overrides:
       network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-1", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
 properties:
@@ -425,6 +427,6 @@ virtual_fields:
       - :DEFAULT
       - :FORCE
     default_value: :DEFAULT
-    ignore_read_extra: true
+    ignore_read: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_delete: templates/terraform/pre_delete/netapp_volume_force_delete.go.erb
