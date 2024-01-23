@@ -1,0 +1,83 @@
+resource "google_securityposture_posture" "<%= ctx[:primary_resource_id] %>"{
+  posture_id  = "posture_1"
+  parent      = "organizations/<%= ctx[:test_env_vars]['org_id'] %>"
+  location    = "global"
+  state       = "ACTIVE"
+  description = "a new posture"
+  policy_sets {
+    policy_set_id = "org_policy_set"
+    description   = "set of org policies"
+    policies {
+      policy_id = "canned_org_policy"
+      constraint {
+        org_policy_constraint {
+          canned_constraint_id = "storage.uniformBucketLevelAccess"
+          policy_rules {
+            enforce = true
+          }
+        }
+      }
+    }
+    policies {
+      policy_id = "custom_org_policy"
+      constraint {
+        org_policy_constraint_custom {
+          custom_constraint {
+            name         = "organizations/<%= ctx[:test_env_vars]['org_id'] %>/customConstraints/custom.disableGkeAutoUpgrade"
+            display_name = "Disable GKE auto upgrade"
+            description  = "Only allow GKE NodePool resource to be created or updated if AutoUpgrade is not enabled where this custom constraint is enforced."
+            action_type    = "ALLOW"
+            condition      = "resource.management.autoUpgrade == false"
+            method_types   = ["CREATE", "UPDATE"]
+            resource_types = ["container.googleapis.com/NodePool"]
+          }
+          policy_rules {
+            enforce = true
+          }
+        }
+      }
+    }
+  }
+  policy_sets {
+    policy_set_id = "sha_policy_set"
+    description   = "set of sha policies"
+    policies {
+      policy_id = "sha_builtin_module"
+      constraint {
+        security_health_analytics_module {
+          module_name             = "BIGQUERY_TABLE_CMEK_DISABLED"
+          module_enablement_state = "ENABLED"
+        }
+      }
+      description = "enable BIGQUERY_TABLE_CMEK_DISABLED"
+    }
+    policies {
+      policy_id = "sha_custom_module"
+      constraint {
+        security_health_analytics_custom_module {
+          display_name = "custom SHA policy"
+          config {
+            predicate {
+              expression = "resource.rotationPeriod > duration('2592000s')"
+            }
+            custom_output {
+              properties {
+                name = "duration"
+                value_expression {
+                  expression = "resource.rotationPeriod"
+                }
+              }
+            }
+            resource_selector {
+              resource_types = ["cloudkms.googleapis.com/CryptoKey"]
+            }
+            severity       = "LOW"
+            description    = "Custom Module"
+            recommendation = "Testing custom modules"
+          }
+          module_enablement_state = "ENABLED"
+        }
+      }
+    }
+  }
+}
