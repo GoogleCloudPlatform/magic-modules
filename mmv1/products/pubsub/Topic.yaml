@@ -119,7 +119,7 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: 'schemaSettings'
     description: |
-      UPDATED_DESCRIPTION
+      Settings for validating messages published against a schema.
     default_from_api: true
     properties:
       - !ruby/object:Api::Type::String
