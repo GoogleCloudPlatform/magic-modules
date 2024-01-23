@@ -1,6 +1,7 @@
 resource "google_securityposture_posture" "posture1" {
     posture_id          = "posture_1"
-    parent = "organizations/<%= ctx[:test_env_vars]['org_id'] %>/locations/global"
+    parent = "organizations/<%= ctx[:test_env_vars]['org_id'] %>"
+    location = "global"
     state = "ACTIVE"
     description = "a new posture"
     policy_sets {

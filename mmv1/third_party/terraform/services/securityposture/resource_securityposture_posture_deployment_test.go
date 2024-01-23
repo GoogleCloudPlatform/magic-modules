@@ -48,7 +48,8 @@ func testAccSecurityPosturePostureDeployment_securityposturePostureDeployment_ba
 	return acctest.Nprintf(`
 resource "google_securityposture_posture" "posture_one" {
     posture_id          = "posture_one"
-    parent = "organizations/%{org_id}/locations/global"
+    parent = "organizations/%{org_id}"
+    locations = "global"
     state = "ACTIVE"
     description = "a new posture"
     policy_sets {
@@ -84,7 +85,8 @@ func testAccSecurityPosturePostureDeployment_securityposturePostureDeployment_up
 	return acctest.Nprintf(`
 resource "google_securityposture_posture" "posture_one" {
     posture_id          = "posture_one"
-    parent = "organizations/%{org_id}/locations/global"
+    parent = "organizations/%{org_id}"
+    locations = "global"
     state = "ACTIVE"
     description = "a new posture"
     policy_sets {
