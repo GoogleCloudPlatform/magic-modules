@@ -70,7 +70,7 @@ func testAccDiscoveryEngineChatEngine_discoveryengineChatengineBasicExample_basi
 		}
 	}
 	`, context)
-	}
+}
 
 func testAccDiscoveryEngineChatEngine_discoveryengineChatengineBasicExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
@@ -112,4 +112,4 @@ func testAccDiscoveryEngineChatEngine_discoveryengineChatengineBasicExample_upda
 		}
 	}
 	`, context)
-	}
+}
