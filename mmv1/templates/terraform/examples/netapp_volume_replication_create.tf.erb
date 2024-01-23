@@ -28,6 +28,7 @@ resource "google_netapp_volume" "source_volume" {
   protocols = [
     "NFSV3"
   ]
+  deletion_policy = "FORCE"
 }
 
 resource "google_netapp_volumereplication" "<%= ctx[:primary_resource_id] %>" {
@@ -40,7 +41,7 @@ resource "google_netapp_volumereplication" "<%= ctx[:primary_resource_id] %>" {
   destination_volume_parameters {
     storage_pool = google_netapp_storage_pool.destination_pool.id
     volume_id    = "<%= ctx[:vars]['destination_volume'] %>"
-    # Keeping the share_name of source and destination the same makes
+    # Keeping the share_name of source and destination the same
     # simplifies implementing client failover concepts
     share_name  = "<%= ctx[:vars]['volume_name'] %>"
     description = "This is a replicated volume"

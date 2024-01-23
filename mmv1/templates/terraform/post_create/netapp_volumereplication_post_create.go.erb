@@ -1,4 +1,4 @@
-if d.Get("wait_for_mirror") == true {
+if d.Get("wait_for_mirror").(bool) == true {
 	// Wait for mirrorState=MIRRORED before treating the resource as created
 	err = NetAppVolumeReplicationWaitForMirror(d, meta, "MIRRORED")
 	if err != nil {

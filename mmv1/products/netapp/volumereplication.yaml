@@ -58,6 +58,11 @@ examples:
       replication_name: "test-replication"
       destination_volume: "destination-volume"
       network_name: "test-network"
+    ignore_read_extra:
+      - "delete_destination_volume"
+      - "replication_enabled"
+      - "force_stopping"
+      - "wait_for_mirror"
     test_vars_overrides:
       network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-1", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
 parameters:
@@ -152,36 +157,44 @@ properties:
         name: "transferBytes"
         description: |
           Number of bytes transferred so far in current transfer.
+        output: true
       - !ruby/object:Api::Type::String
         name: "totalTransferDuration"
         description: |
           Total time taken so far during current transfer.
+        output: true
       - !ruby/object:Api::Type::String
         name: "lastTransferBytes"
         description: |
           Size of last completed transfer in bytes.
+        output: true
       - !ruby/object:Api::Type::String
         name: "lastTransferDuration"
         description: |
           Time taken during last completed transfer.
+        output: true
       - !ruby/object:Api::Type::String
         name: "lagDuration"
         description: |
           The elapsed time since the creation of the snapshot on the source volume that was last replicated
           to the destination volume. Lag time represents the difference in age of the destination volume
           data in relation to the source volume data.
+        output: true
       - !ruby/object:Api::Type::String
         name: "updateTime"
         description: |
           Time when progress was updated last. A timestamp in RFC3339 UTC "Zulu" format. Examples: "2023-06-22T09:13:01.617Z".
+        output: true
       - !ruby/object:Api::Type::String
         name: "lastTransferEndTime"
         description: |
           Time when last transfer completed. A timestamp in RFC3339 UTC "Zulu" format. Examples: "2023-06-22T09:13:01.617Z".
+        output: true
       - !ruby/object:Api::Type::String
         name: "lastTransferError"
         description: |
           A message describing the cause of the last transfer failure.
+        output: true
   - !ruby/object:Api::Type::KeyValueLabels
     name: "labels"
     description: |
@@ -233,6 +246,7 @@ virtual_fields:
     description: |
       Delete destination volume when replication resource is destroyed? Default is false.
     default_value: false
+    ignore_read: true
   - !ruby/object:Api::Type::Boolean
     name: "replication_enabled"
     description: |
@@ -242,6 +256,7 @@ virtual_fields:
       Set to true to enable/resume the mirror. WARNING: Resuming a mirror overwrites any changes
       done to the destination volume with the content of the source volume.
     default_value: true
+    ignore_read: true
   - !ruby/object:Api::Type::Boolean
     name: "force_stopping"
     description: |
@@ -250,6 +265,7 @@ virtual_fields:
       to stop anyway. All data transferred to the destination will be discarded and content of destination
       volume will remain at the state of the last successful update. Default is false.
     default_value: false
+    ignore_read: true
   - !ruby/object:Api::Type::Boolean
     name: "wait_for_mirror"
     description: |
@@ -257,6 +273,7 @@ virtual_fields:
       for mirror_state to reach MIRRORED. If you want Terraform to wait for the mirror to finish one
       create/stop/resume operations, set this parameter to true. Default is false.
     default_value: false
+    ignore_read: true
 # The following functionality needs to be discussed in review process
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/netapp_volumereplication.go.erb

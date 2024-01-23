@@ -27,8 +27,6 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 base_url: projects/{{project}}/locations/{{location}}/volumes
 self_link: projects/{{project}}/locations/{{location}}/volumes/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/volumes?volumeId={{name}}
-# Snapshots are nested resources of volumes. Add force=true to delete volumes with snapshots.
-delete_url: 'projects/{{project}}/locations/{{location}}/volumes/{{name}}?force=true'
 update_url: projects/{{project}}/locations/{{location}}/volumes/{{name}}
 update_verb: :PATCH
 update_mask: true

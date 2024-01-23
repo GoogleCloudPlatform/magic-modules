@@ -71,7 +71,7 @@ if do_change {
 	}
 
 	err = NetappOperationWaitTime(
-		config, res2, project, "Deleting volumereplication", userAgent,
+		config, res2, project, "volumereplication "+action, userAgent,
 		d.Timeout(schema.TimeoutDelete))
 
 	if err != nil {

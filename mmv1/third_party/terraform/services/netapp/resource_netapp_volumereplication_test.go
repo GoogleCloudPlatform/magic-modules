@@ -31,7 +31,7 @@ func TestAccNetappvolumereplication_netappVolumeReplicationCreateExample_update(
 				ResourceName:            "google_netapp_volumereplication.test_replication",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"transferStats", "destination_volume_parameters", "location", "volume_name", "name", "labels", "terraform_labels", "delete_destination_volume", "force_stopping", "replication_enabled"},
+				ImportStateVerifyIgnore: []string{"destination_volume_parameters", "location", "volume_name", "name", "delete_destination_volume", "replication_enabled", "force_stopping", "wait_for_mirror", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccNetappvolumereplication_netappVolumeReplicationCreateExample_stop(context),
@@ -40,7 +40,7 @@ func TestAccNetappvolumereplication_netappVolumeReplicationCreateExample_update(
 				ResourceName:            "google_netapp_volumereplication.test_replication",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"transferStats", "destination_volume_parameters", "location", "volume_name", "name", "labels", "terraform_labels", "delete_destination_volume", "force_stopping", "replication_enabled"},
+				ImportStateVerifyIgnore: []string{"destination_volume_parameters", "location", "volume_name", "name", "delete_destination_volume", "replication_enabled", "force_stopping", "wait_for_mirror", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccNetappvolumereplication_netappVolumeReplicationCreateExample_resume(context),
@@ -49,7 +49,7 @@ func TestAccNetappvolumereplication_netappVolumeReplicationCreateExample_update(
 				ResourceName:            "google_netapp_volumereplication.test_replication",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"transferStats", "destination_volume_parameters", "location", "volume_name", "name", "labels", "terraform_labels", "delete_destination_volume", "force_stopping", "replication_enabled"},
+				ImportStateVerifyIgnore: []string{"destination_volume_parameters", "location", "volume_name", "name", "delete_destination_volume", "replication_enabled", "force_stopping", "wait_for_mirror", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccNetappvolumereplication_netappVolumeReplicationCreateExample_update(context),
@@ -58,7 +58,7 @@ func TestAccNetappvolumereplication_netappVolumeReplicationCreateExample_update(
 				ResourceName:            "google_netapp_volumereplication.test_replication",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"transferStats", "destination_volume_parameters", "location", "volume_name", "name", "labels", "terraform_labels", "delete_destination_volume", "force_stopping", "replication_enabled"},
+				ImportStateVerifyIgnore: []string{"destination_volume_parameters", "location", "volume_name", "name", "delete_destination_volume", "replication_enabled", "force_stopping", "wait_for_mirror", "labels", "terraform_labels"},
 			},
 		},
 	})
@@ -96,6 +96,7 @@ resource "google_netapp_volume" "source_volume" {
   protocols = [
     "NFSV3"
   ]
+  deletion_policy = "FORCE"
 }
 
 resource "google_netapp_volumereplication" "test_replication" {
@@ -107,7 +108,7 @@ resource "google_netapp_volumereplication" "test_replication" {
   destination_volume_parameters {
     storage_pool = google_netapp_storage_pool.destination_pool.id
     volume_id    = "tf-test-destination-volume%{random_suffix}"
-    # Keeping the share_name of source and destination the same makes
+    # Keeping the share_name of source and destination the same
     # simplifies implementing client failover concepts
     share_name  = "tf-test-source-volume%{random_suffix}"
     description = "This is a replicated volume"
@@ -151,6 +152,7 @@ resource "google_netapp_volume" "source_volume" {
   protocols = [
     "NFSV3"
   ]
+  deletion_policy = "FORCE"
 }
 
 resource "google_netapp_volumereplication" "test_replication" {
@@ -167,7 +169,7 @@ resource "google_netapp_volumereplication" "test_replication" {
   destination_volume_parameters {
     storage_pool = google_netapp_storage_pool.destination_pool.id
     volume_id    = "tf-test-destination-volume%{random_suffix}"
-    # Keeping the share_name of source and destination the same makes
+    # Keeping the share_name of source and destination the same
     # simplifies implementing client failover concepts
     share_name  = "tf-test-source-volume%{random_suffix}"
     description = "This is a replicated volume"
@@ -213,6 +215,7 @@ resource "google_netapp_volume" "source_volume" {
   protocols = [
     "NFSV3"
   ]
+  deletion_policy = "FORCE"
 }
 
 resource "google_netapp_volumereplication" "test_replication" {
@@ -229,7 +232,7 @@ resource "google_netapp_volumereplication" "test_replication" {
 	destination_volume_parameters {
 	  storage_pool = google_netapp_storage_pool.destination_pool.id
 	  volume_id    = "tf-test-destination-volume%{random_suffix}"
-	  # Keeping the share_name of source and destination the same makes
+	  # Keeping the share_name of source and destination the same
 	  # simplifies implementing client failover concepts
 	  share_name  = "tf-test-source-volume%{random_suffix}"
 	  description = "This is a replicated volume"
@@ -275,6 +278,7 @@ resource "google_netapp_volume" "source_volume" {
   protocols = [
     "NFSV3"
   ]
+  deletion_policy = "FORCE"
 }
 
 resource "google_netapp_volumereplication" "test_replication" {
@@ -291,7 +295,7 @@ resource "google_netapp_volumereplication" "test_replication" {
 	destination_volume_parameters {
 	  storage_pool = google_netapp_storage_pool.destination_pool.id
 	  volume_id    = "tf-test-destination-volume%{random_suffix}"
-	  # Keeping the share_name of source and destination the same makes
+	  # Keeping the share_name of source and destination the same
 	  # simplifies implementing client failover concepts
 	  share_name  = "tf-test-source-volume%{random_suffix}"
 	  description = "This is a replicated volume"

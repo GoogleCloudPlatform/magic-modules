@@ -1,32 +1,34 @@
 // A replication CREATE also created a destination volume
 // A user can chooses to delete the destination volume after deleting the replication
-log.Printf("[DEBUG] value of destvol %q: %v", reflect.TypeOf(d.Get("destination_volume")), d.Get("destination_volume"))
 if d.Get("delete_destination_volume").(bool) == true {
-	str1 := d.Get("destination_volume").(string)
-	// Always force volume deletion
-	res1 := str1 + "?force=true"
-	de_url, err := tpgresource.ReplaceVars(d, config, "{{NetappBasePath}}")
+	log.Printf("[DEBUG] delete_destination_volume is true. Deleting destination volume %v", d.Get("destination_volume"))
+	destination_volume := d.Get("destination_volume").(string)
+	del_url, err := tpgresource.ReplaceVars(d, config, "{{NetappBasePath}}"+destination_volume+"?force=true")
 	if err != nil {
 		return err
 	}
-	var obj1 map[string]interface{}
-	res2, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+
+	var obj map[string]interface{}
+	res_del, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "DELETE",
 		Project:   billingProject,
-		RawURL:    de_url + res1,
+		RawURL:    del_url,
 		UserAgent: userAgent,
-		Body:      obj1,
+		Body:      obj,
 		Timeout:   d.Timeout(schema.TimeoutDelete),
 	})
 	if err != nil {
-		return transport_tpg.HandleNotFoundError(err, d, "volume")
+		return transport_tpg.HandleNotFoundError(err, d, "Volume")
 	}
+
 	err = NetappOperationWaitTime(
-		config, res2, project, "Deleting volume", userAgent,
+		config, res_del, project, "Deleting destination volume", userAgent,
 		d.Timeout(schema.TimeoutDelete))
+
 	if err != nil {
 		return err
 	}
-	log.Printf("[DEBUG] Finished deleting volume %q: %#v", d.Id(), res2)
+
+	log.Printf("[DEBUG] Finished deleting destination Volume %q: %#v", destination_volume, res_del)
 }
