@@ -234,7 +234,6 @@ properties:
   - !ruby/object:Api::Type::KeyValueAnnotations
     name: annotations
     description: Allows clients to store small amounts of arbitrary data.
-  - !ruby/object:Api::Type::String
+  - !ruby/object:Api::Type::Fingerprint
     name: etag
     description: This checksum is computed by the server based on the value of other fields, and may be sent on update and delete requests to ensure the client has an up-to-date value before proceeding.
-    output: true
