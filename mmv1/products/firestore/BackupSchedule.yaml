@@ -40,16 +40,24 @@ docs: !ruby/object:Provider::Terraform::Docs
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'firestore_backup_schedule_daily'
-    primary_resource_id:
-      'daily-backup'
+    primary_resource_id: 'daily-backup'
+    vars:
+      database_id: 'database-id'
+      delete_protection_state: "DELETE_PROTECTION_ENABLED"
     test_env_vars:
-      project_id: :FIRESTORE_PROJECT_NAME
+      project_id: :PROJECT_NAME
+    test_vars_overrides:
+      delete_protection_state: '"DELETE_PROTECTION_DISABLED"'
   - !ruby/object:Provider::Terraform::Examples
     name: 'firestore_backup_schedule_weekly'
-    primary_resource_id:
-      'weekly-backup'
+    primary_resource_id: 'weekly-backup'
+    vars:
+      database_id: 'database-id'
+      delete_protection_state: "DELETE_PROTECTION_ENABLED"
     test_env_vars:
-      project_id: :FIRESTORE_PROJECT_NAME
+      project_id: :PROJECT_NAME
+    test_vars_overrides:
+      delete_protection_state: '"DELETE_PROTECTION_DISABLED"'
 parameters:
   - !ruby/object:Api::Type::String
     name: database
@@ -64,7 +72,7 @@ properties:
     output: true
     description: |
       The unique backup schedule identifier across all locations and databases for the given project. Format:
-      `projects/{{project}}/databases/{{database}}/backupSchedules/{{backupSchedule}}
+      `projects/{{project}}/databases/{{database}}/backupSchedules/{{backupSchedule}}`
     immutable: true
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::String

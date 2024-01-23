@@ -149,11 +149,7 @@ func execGenerateComment(env map[string]string, gh GithubClient, rnr ExecRunner,
 
 	env["OLD_REF"] = oldBranch
 	env["NEW_REF"] = newBranch
-	for _, repo := range []struct {
-		Title   string
-		Path    string
-		Version provider.Version
-	}{
+	for _, repo := range []*source.Repo{
 		{
 			Title:   "TPG",
 			Path:    tpgLocalPath,
@@ -456,7 +452,11 @@ func testTools(mmLocalPath, tpgbLocalPath string, env map[string]string, gh Gith
 	}
 	servicesDir := filepath.Join(tpgbLocalPath, "google-beta", "services")
 	state := "success"
-	if _, err := rnr.Run("go", []string{"test"}, map[string]string{"SERVICES_DIR": servicesDir}); err != nil {
+	if _, err := rnr.Run("go", []string{"test"}, map[string]string{
+		"GOPATH":       env["GOPATH"],
+		"HOME":         env["HOME"],
+		"SERVICES_DIR": servicesDir,
+	}); err != nil {
 		fmt.Printf("error from running go test in %s: %v\n", missingTestDetectorPath, err)
 		state = "failure"
 	}

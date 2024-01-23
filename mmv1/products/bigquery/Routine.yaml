@@ -52,6 +52,27 @@ examples:
     vars:
       dataset_id: 'dataset_id'
       routine_id: 'routine_id'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'big_query_routine_pyspark'
+    primary_resource_id: 'pyspark'
+    vars:
+      dataset_id: 'dataset_id'
+      connection_id: 'connection_id'
+      routine_id: 'routine_id'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'big_query_routine_pyspark_mainfile'
+    primary_resource_id: 'pyspark_mainfile'
+    vars:
+      dataset_id: 'dataset_id'
+      connection_id: 'connection_id'
+      routine_id: 'routine_id'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'big_query_routine_spark_jar'
+    primary_resource_id: 'spark_jar'
+    vars:
+      dataset_id: 'dataset_id'
+      connection_id: 'connection_id'
+      routine_id: 'routine_id'
 properties:
   - !ruby/object:Api::Type::NestedObject
     name: routineReference
@@ -101,6 +122,9 @@ properties:
     values:
       - :SQL
       - :JAVASCRIPT
+      - :PYTHON
+      - :JAVA
+      - :SCALA
   - !ruby/object:Api::Type::Array
     name: 'arguments'
     description: Input/output argument of a function or a stored procedure.
@@ -201,3 +225,61 @@ properties:
       - :DETERMINISM_LEVEL_UNSPECIFIED
       - :DETERMINISTIC
       - :NOT_DETERMINISTIC
+  - !ruby/object:Api::Type::NestedObject
+    name: 'sparkOptions'
+    description: |
+      Optional. If language is one of "PYTHON", "JAVA", "SCALA", this field stores the options for spark stored procedure.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'connection'
+        description: |
+          Fully qualified name of the user-provided Spark connection object.
+          Format: "projects/{projectId}/locations/{locationId}/connections/{connectionId}"
+      - !ruby/object:Api::Type::String
+        name: 'runtimeVersion'
+        description: Runtime version. If not specified, the default runtime version is used.
+      - !ruby/object:Api::Type::String
+        name: 'containerImage'
+        description: Custom container image for the runtime environment.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: "properties"
+        description: |
+          Configuration properties as a set of key/value pairs, which will be passed on to the Spark application.
+          For more information, see Apache Spark and the procedure option list.
+          An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+        default_from_api: true
+      - !ruby/object:Api::Type::String
+        name: 'mainFileUri'
+        description: |
+          The main file/jar URI of the Spark application.
+          Exactly one of the definitionBody field and the mainFileUri field must be set for Python.
+          Exactly one of mainClass and mainFileUri field should be set for Java/Scala language type.
+      - !ruby/object:Api::Type::Array
+        name: 'pyFileUris'
+        description: |
+          Python files to be placed on the PYTHONPATH for PySpark application. Supported file types: .py, .egg, and .zip. For more information about Apache Spark, see Apache Spark.
+        item_type: Api::Type::String
+        default_from_api: true
+      - !ruby/object:Api::Type::Array
+        name: 'jarUris'
+        description: |
+          JARs to include on the driver and executor CLASSPATH. For more information about Apache Spark, see Apache Spark.
+        item_type: Api::Type::String
+        default_from_api: true
+      - !ruby/object:Api::Type::Array
+        name: 'fileUris'
+        description: |
+          Files to be placed in the working directory of each executor. For more information about Apache Spark, see Apache Spark.
+        item_type: Api::Type::String
+        default_from_api: true
+      - !ruby/object:Api::Type::Array
+        name: 'archiveUris'
+        description: |
+          Archive files to be extracted into the working directory of each executor. For more information about Apache Spark, see Apache Spark.
+        item_type: Api::Type::String
+        default_from_api: true
+      - !ruby/object:Api::Type::String
+        name: 'mainClass'
+        description: |
+          The fully qualified name of a class in jarUris, for example, com.example.wordcount.
+          Exactly one of mainClass and main_jar_uri field should be set for Java/Scala language type.
