@@ -31,7 +31,7 @@ resource "google_netapp_volume" "source_volume" {
   deletion_policy = "FORCE"
 }
 
-resource "google_netapp_volumereplication" "<%= ctx[:primary_resource_id] %>" {
+resource "google_netapp_volume_replication" "<%= ctx[:primary_resource_id] %>" {
   depends_on           = [google_netapp_volume.source_volume]
   location             = google_netapp_volume.source_volume.location
   volume_name          = google_netapp_volume.source_volume.name

@@ -71,7 +71,7 @@ if do_change {
 	}
 
 	err = NetappOperationWaitTime(
-		config, res2, project, "volumereplication "+action, userAgent,
+		config, res2, project, "volume replication "+action, userAgent,
 		d.Timeout(schema.TimeoutDelete))
 
 	if err != nil {
@@ -95,6 +95,6 @@ if do_change {
 	// Wait for mirrorState=targetState before continuing
 	err = NetAppVolumeReplicationWaitForMirror(d, meta, targetState)
 	if err != nil {
-		return fmt.Errorf("Error waiting for volumereplication to reach mirror_state==%s: %s", targetState, err)
+		return fmt.Errorf("Error waiting for volume replication to reach mirror_state==%s: %s", targetState, err)
 	}
 }

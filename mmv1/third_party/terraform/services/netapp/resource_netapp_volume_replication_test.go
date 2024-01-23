@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-func TestAccNetappvolumereplication_netappVolumeReplicationCreateExample_update(t *testing.T) {
+func TestAccNetappVolumeReplication_netappVolumeReplicationCreateExample_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -22,40 +22,40 @@ func TestAccNetappvolumereplication_netappVolumeReplicationCreateExample_update(
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckNetappvolumereplicationDestroyProducer(t),
+		CheckDestroy:             testAccCheckNetappVolumeReplicationDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetappvolumereplication_netappVolumeReplicationCreateExample_basic(context),
+				Config: testAccNetappVolumeReplication_netappVolumeReplicationCreateExample_basic(context),
 			},
 			{
-				ResourceName:            "google_netapp_volumereplication.test_replication",
+				ResourceName:            "google_netapp_volume_replication.test_replication",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"destination_volume_parameters", "location", "volume_name", "name", "delete_destination_volume", "replication_enabled", "force_stopping", "wait_for_mirror", "labels", "terraform_labels"},
 			},
 			{
-				Config: testAccNetappvolumereplication_netappVolumeReplicationCreateExample_stop(context),
+				Config: testAccNetappVolumeReplication_netappVolumeReplicationCreateExample_stop(context),
 			},
 			{
-				ResourceName:            "google_netapp_volumereplication.test_replication",
+				ResourceName:            "google_netapp_volume_replication.test_replication",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"destination_volume_parameters", "location", "volume_name", "name", "delete_destination_volume", "replication_enabled", "force_stopping", "wait_for_mirror", "labels", "terraform_labels"},
 			},
 			{
-				Config: testAccNetappvolumereplication_netappVolumeReplicationCreateExample_resume(context),
+				Config: testAccNetappVolumeReplication_netappVolumeReplicationCreateExample_resume(context),
 			},
 			{
-				ResourceName:            "google_netapp_volumereplication.test_replication",
+				ResourceName:            "google_netapp_volume_replication.test_replication",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"destination_volume_parameters", "location", "volume_name", "name", "delete_destination_volume", "replication_enabled", "force_stopping", "wait_for_mirror", "labels", "terraform_labels"},
 			},
 			{
-				Config: testAccNetappvolumereplication_netappVolumeReplicationCreateExample_update(context),
+				Config: testAccNetappVolumeReplication_netappVolumeReplicationCreateExample_update(context),
 			},
 			{
-				ResourceName:            "google_netapp_volumereplication.test_replication",
+				ResourceName:            "google_netapp_volume_replication.test_replication",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"destination_volume_parameters", "location", "volume_name", "name", "delete_destination_volume", "replication_enabled", "force_stopping", "wait_for_mirror", "labels", "terraform_labels"},
@@ -65,7 +65,7 @@ func TestAccNetappvolumereplication_netappVolumeReplicationCreateExample_update(
 }
 
 // Basic replication
-func testAccNetappvolumereplication_netappVolumeReplicationCreateExample_basic(context map[string]interface{}) string {
+func testAccNetappVolumeReplication_netappVolumeReplicationCreateExample_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_compute_network" "default" {
   name = "%{network_name}"
@@ -99,7 +99,7 @@ resource "google_netapp_volume" "source_volume" {
   deletion_policy = "FORCE"
 }
 
-resource "google_netapp_volumereplication" "test_replication" {
+resource "google_netapp_volume_replication" "test_replication" {
   depends_on           = [google_netapp_volume.source_volume]
   location             = google_netapp_volume.source_volume.location
   volume_name          = google_netapp_volume.source_volume.name
@@ -120,7 +120,7 @@ resource "google_netapp_volumereplication" "test_replication" {
 }
 
 // Update parameters
-func testAccNetappvolumereplication_netappVolumeReplicationCreateExample_update(context map[string]interface{}) string {
+func testAccNetappVolumeReplication_netappVolumeReplicationCreateExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 
 data "google_compute_network" "default" {
@@ -155,7 +155,7 @@ resource "google_netapp_volume" "source_volume" {
   deletion_policy = "FORCE"
 }
 
-resource "google_netapp_volumereplication" "test_replication" {
+resource "google_netapp_volume_replication" "test_replication" {
   depends_on           = [google_netapp_volume.source_volume]
   location             = google_netapp_volume.source_volume.location
   volume_name          = google_netapp_volume.source_volume.name
@@ -183,7 +183,7 @@ resource "google_netapp_volumereplication" "test_replication" {
 }
 
 // Stop replication
-func testAccNetappvolumereplication_netappVolumeReplicationCreateExample_stop(context map[string]interface{}) string {
+func testAccNetappVolumeReplication_netappVolumeReplicationCreateExample_stop(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 
 data "google_compute_network" "default" {
@@ -218,7 +218,7 @@ resource "google_netapp_volume" "source_volume" {
   deletion_policy = "FORCE"
 }
 
-resource "google_netapp_volumereplication" "test_replication" {
+resource "google_netapp_volume_replication" "test_replication" {
 	depends_on           = [google_netapp_volume.source_volume]
 	location             = google_netapp_volume.source_volume.location
 	volume_name          = google_netapp_volume.source_volume.name
@@ -246,7 +246,7 @@ resource "google_netapp_volumereplication" "test_replication" {
 }
 
 // resume replication
-func testAccNetappvolumereplication_netappVolumeReplicationCreateExample_resume(context map[string]interface{}) string {
+func testAccNetappVolumeReplication_netappVolumeReplicationCreateExample_resume(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 
 data "google_compute_network" "default" {
@@ -281,7 +281,7 @@ resource "google_netapp_volume" "source_volume" {
   deletion_policy = "FORCE"
 }
 
-resource "google_netapp_volumereplication" "test_replication" {
+resource "google_netapp_volume_replication" "test_replication" {
 	depends_on           = [google_netapp_volume.source_volume]
 	location             = google_netapp_volume.source_volume.location
 	volume_name          = google_netapp_volume.source_volume.name

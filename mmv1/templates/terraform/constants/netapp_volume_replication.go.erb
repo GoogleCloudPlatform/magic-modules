@@ -15,7 +15,7 @@ func NetAppVolumeReplicationWaitForMirror(d *schema.ResourceData, meta interface
 
 	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
-		return fmt.Errorf("Error fetching project for volumereplication: %s", err)
+		return fmt.Errorf("Error fetching project for volume replication: %s", err)
 	}
 	billingProject = project
 
@@ -33,7 +33,7 @@ func NetAppVolumeReplicationWaitForMirror(d *schema.ResourceData, meta interface
 			UserAgent: userAgent,
 		})
 		if err != nil {
-			return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Netappvolumereplication %q", d.Id()))
+			return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("NetappVolumeReplication %q", d.Id()))
 		}
 
 		log.Printf("[DEBUG] waiting for mirrorState. actual: %v, target: %v", res["mirrorState"], targetState)
