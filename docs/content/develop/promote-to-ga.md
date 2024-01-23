@@ -1,6 +1,6 @@
 ---
 title: "Promote to GA"
-weight: 70
+weight: 50
 ---
 
 # Promote from beta to GA
@@ -71,4 +71,4 @@ For handwritten resources, modify the documentation as appropriate for your chan
 
 ## What's next?
 
-- [Test your changes]({{< ref "/develop/run-tests.md" >}}) 
+- [Test your changes]({{< ref "/develop/test/run-tests.md" >}})

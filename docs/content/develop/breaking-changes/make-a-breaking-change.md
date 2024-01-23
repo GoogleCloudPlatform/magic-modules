@@ -3,7 +3,9 @@ majorVersion: "5.0.0"
 upgradeGuide: "version_5_upgrade.html.markdown"
 title: "Make a breaking change"
 summary: "Guidance on making a breaking changes"
-weight: 100
+weight: 20
+aliases:
+- /develop/make-a-breaking-change
 ---
 
 # Make a breaking change
@@ -215,4 +217,4 @@ The upgrade guide and the actual breaking change will be merged only after both 
 
 ## What's next?
 
-- [Run tests]({{< ref "/develop/run-tests.md" >}})
+- [Run tests]({{< ref "/develop/test/run-tests.md" >}})

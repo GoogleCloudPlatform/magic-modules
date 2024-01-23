@@ -1,6 +1,6 @@
 ---
 title: "Run tests"
-weight: 70
+weight: 20
 aliases:
   - /docs/getting-started/run-provider-tests
   - /docs/getting-started/use-built-provider
@@ -8,6 +8,7 @@ aliases:
   - /get-started/use-built-provider
   - /getting-started/run-provider-tests
   - /getting-started/use-built-provider
+  - /develop/run-tests
 ---
 
 # Run tests
@@ -128,7 +129,7 @@ Tests will use whatever version of the `terraform` binary is found on your `PATH
 
     Replace `VERSION` with the version you want to test.
 
-1. Run automated tests following the [earlier section]({{< ref "/develop/run-tests#run-automated-tests" >}}).
+1. Run automated tests following the [earlier section]({{< ref "/develop/test/run-tests#run-automated-tests" >}}).
 
 ## Optional: Test manually
 
