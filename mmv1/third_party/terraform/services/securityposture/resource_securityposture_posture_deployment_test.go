@@ -65,33 +65,13 @@ resource "google_securityposture_posture" "posture_one" {
                 }
             }
         }
-        policies {
-    		policy_id = "policy_2"
-    		constraint {
-    			org_policy_constraint_custom {
-    				custom_constraint {
-    					name         = "organizations/%{org_id}/customConstraints/custom.disableGkeAutoUpgrade"
-					  	display_name = "Disable GKE auto upgrade"
-					  	description  = "Only allow GKE NodePool resource to be created or updated if AutoUpgrade is not enabled where this custom constraint is enforced."
-
-					  	action_type    = "ALLOW"
-					  	condition      = "resource.management.autoUpgrade == false"
-					  	method_types   = ["CREATE", "UPDATE"]
-					  	resource_types = ["container.googleapis.com/NodePool"]
-    				}
-    				policy_rules {
-    					enforce = true
-    				}
-    			}
-    		}
-		}
     }
 }
 
 resource "google_securityposture_posture_deployment" "postureDeployment_one" {
-	posture_deployment_id          = "posture_deployment_one"
-	parent = "organizations/%{org_id}"
-	location = "global"
+    posture_deployment_id          = "posture_deployment_one"
+    parent = "organizations/%{org_id}"
+    location = "global"
     description = "a new posture deployment"
     target_resource = "projects/%{project_number}"
     posture_id = google_securityposture_posture.posture_one.name
@@ -125,9 +105,9 @@ resource "google_securityposture_posture" "posture_one" {
 }
 
 resource "google_securityposture_posture_deployment" "postureDeployment_one" {
-	posture_deployment_id          = "posture_deployment_one"
-	parent = "organizations/%{org_id}"
-	location = "global"
+    posture_deployment_id          = "posture_deployment_one"
+    parent = "organizations/%{org_id}"
+    location = "global"
     description = "an updated posture deployment"
     target_resource = "projects/%{project_number}"
     posture_id = google_securityposture_posture.posture_one.name
