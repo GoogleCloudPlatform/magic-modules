@@ -297,7 +297,7 @@ service/dialogflow:
   - google_dialogflow_.*
 service/discoveryengine:
   resources:
-  - google_discoveryengine_.*
+  - google_discovery_engine_.*
 service/dlp:
   resources:
   - google_data_loss_prevention_.*
