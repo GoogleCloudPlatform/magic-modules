@@ -1,8 +1,8 @@
 resource "google_compute_region_network_endpoint" "<%= ctx[:primary_resource_id] %>" {
-  network_endpoint_group = google_compute_region_network_endpoint_group.neg.name
+  region_network_endpoint_group = google_compute_region_network_endpoint_group.group.name
 
-  ip_address  = "<%= ctx[:vars]['ip_address'] %>"
-  port        = "<%= ctx[:vars]['port'] %>"
+  fqdn  = "backend.example.com"
+  port        = 443
 }
 
 
@@ -11,7 +11,7 @@ resource "google_compute_region_network_endpoint_group" "group" {
   network      = google_compute_network.default.id
 
   region         = "us-central1"
-  network_endpoint_type = "INTERNET_IP_PORT"
+  network_endpoint_type = "INTERNET_FQDN_PORT"
 }
 
 resource "google_compute_network" "default" {

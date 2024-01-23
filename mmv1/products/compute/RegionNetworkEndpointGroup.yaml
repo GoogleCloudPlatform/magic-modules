@@ -89,12 +89,14 @@ examples:
     name: 'region_network_endpoint_group_internet_ip_port'
     primary_resource_id: 'region_network_endpoint_group_internet_ip_port'
     vars:
-        neg_name: 'ip-port-neg'
+      neg_name: 'ip-port-neg'
+      network_name: 'network'
   - !ruby/object:Provider::Terraform::Examples
     name: 'region_network_endpoint_group_internet_fqdn_port'
     primary_resource_id: 'region_network_endpoint_group_internet_fqdn_port'
     vars:
       neg_name: 'ip-port-neg'
+      network_name: 'network'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'

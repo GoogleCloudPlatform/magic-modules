@@ -1,10 +1,10 @@
 config := meta.(*transport_tpg.Config)
 // instance is optional, so use * instead of + when reading the import id
 if err := tpgresource.ParseImportId([]string{
-    "projects/(?P<project>[^/]+)/regions/(?P<region>[^/]+)/networkEndpointGroups/(?P<region_network_endpoint_group>[^/]+)/(?P<ip_address>[^/]+)/(?P<fqdn>[^/]+)/(?P<port>[^/]+)",
-    "(?P<project>[^/]+)/(?P<region>[^/]+)/(?P<region_network_endpoint_group>[^/]+)/(?P<ip_address>[^/]+)/(?P<fqdn>[^/]+)/(?P<port>[^/]+)",
-    "(?P<region>[^/]+)/(?P<region_network_endpoint_group>[^/]+)/(?P<ip_address>[^/]+)/(?P<fqdn>[^/]+)/(?P<port>[^/]+)",
-    "(?P<region_network_endpoint_group>[^/]+)/(?P<ip_address>[^/]+)/(?P<fqdn>[^/]+)/(?P<port>[^/]+)",
+    "projects/(?P<project>[^/]+)/regions/(?P<region>[^/]+)/networkEndpointGroups/(?P<region_network_endpoint_group>[^/]+)/(?P<ip_address>[^/]*)/(?P<fqdn>[^/]*)/(?P<port>[^/]+)",
+    "(?P<project>[^/]+)/(?P<region>[^/]+)/(?P<region_network_endpoint_group>[^/]+)/(?P<ip_address>[^/]*)/(?P<fqdn>[^/]*)/(?P<port>[^/]+)",
+    "(?P<region>[^/]+)/(?P<region_network_endpoint_group>[^/]+)/(?P<ip_address>[^/]*)/(?P<fqdn>[^/]*)/(?P<port>[^/]+)",
+    "(?P<region_network_endpoint_group>[^/]+)/(?P<ip_address>[^/]*)/(?P<fqdn>[^/]*)/(?P<port>[^/]+)",
 }, d, config); err != nil {
 	return nil, err
 }
