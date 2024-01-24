@@ -34,6 +34,7 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   allowed_iam_role: 'roles/logging.admin'
   method_name_separator: ':'
   fetch_iam_policy_verb: :POST
+  iam_conditions_request_type: :REQUEST_BODY
   min_version: beta
 examples:
   - !ruby/object:Provider::Terraform::Examples
