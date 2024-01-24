@@ -136,6 +136,7 @@ properties:
       - :MIRRORED
       - :STOPPED
       - :TRANSFERRING
+    custom_flatten: templates/terraform/custom_flatten/netapp_volume_replicaton_mirror_state.go.erb
     output: true
   - !ruby/object:Api::Type::String
     name: "createTime"

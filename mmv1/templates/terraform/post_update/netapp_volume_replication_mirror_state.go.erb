@@ -75,19 +75,6 @@ if do_change {
 		d.Timeout(schema.TimeoutDelete))
 
 	if err != nil {
-		// action failed. We need to fix state of virtual replication_enabled field manually.
-		// This can go away if Read implement state reconciliation for replication_enabled
-		if action == "resume" {
-			// resume action failed. Our mirror is still stopped.
-			if err := d.Set("replication_enabled", false); err != nil {
-				return fmt.Errorf("Error setting replication_enabled: %s", err)
-			}
-		} else {
-			// stop action failed. Our mirror is still mirrored.
-			if err := d.Set("replication_enabled", true); err != nil {
-				return fmt.Errorf("Error setting replication_enabled: %s", err)
-			}
-		}
 		return err
 	}
 
