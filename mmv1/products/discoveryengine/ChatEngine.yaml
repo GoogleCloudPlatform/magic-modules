@@ -14,7 +14,7 @@
 --- !ruby/object:Api::Resource
 name: 'ChatEngine'
 description: |
-  Vertex chat and Conversation Enging Chat type
+  Vertex chat and Conversation Engine Chat type
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Vertex AI Conversation': 'https://cloud.google.com/dialogflow/cx/docs/concept/generative'
