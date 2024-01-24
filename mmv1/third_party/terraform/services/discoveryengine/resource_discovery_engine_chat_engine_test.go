@@ -21,7 +21,7 @@ func TestAccDiscoveryEngineChatEngine_discoveryengineChatengineBasicExample_upda
 				Config: testAccDiscoveryEngineChatEngine_discoveryengineChatengineBasicExample_basic(context),
 			},
 			{
-				ResourceName:            "google_discovery_engine_chat_engine.chat_engine",
+				ResourceName:            "google_discovery_engine_chat_engine.primary",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"chat_engine_config"},
@@ -30,7 +30,7 @@ func TestAccDiscoveryEngineChatEngine_discoveryengineChatengineBasicExample_upda
 				Config: testAccDiscoveryEngineChatEngine_discoveryengineChatengineBasicExample_update(context),
 			},
 			{
-				ResourceName:            "google_discovery_engine_chat_engine.chat_engine",
+				ResourceName:            "google_discovery_engine_chat_engine.primary",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"chat_engine_config"},
@@ -50,7 +50,7 @@ func testAccDiscoveryEngineChatEngine_discoveryengineChatengineBasicExample_basi
 		solution_types              = ["SOLUTION_TYPE_CHAT"]
 	}
 
-	resource "google_discovery_engine_chat_engine" "chat_engine" {
+	resource "google_discovery_engine_chat_engine" "primary" {
 		engine_id = "tf-test-chat-engine-id%{random_suffix}"
 		collection_id = "default_collection"
 		location = "global"
@@ -92,7 +92,7 @@ func testAccDiscoveryEngineChatEngine_discoveryengineChatengineBasicExample_upda
 		solution_types              = ["SOLUTION_TYPE_CHAT"]
 	}
 
-	resource "google_discovery_engine_chat_engine" "chat_engine" {
+	resource "google_discovery_engine_chat_engine" "primary" {
 		engine_id = "tf-test-chat-engine-id%{random_suffix}"
 		collection_id = "default_collection"
 		location = "global"

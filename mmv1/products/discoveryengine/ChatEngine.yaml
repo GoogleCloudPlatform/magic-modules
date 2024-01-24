@@ -29,10 +29,12 @@ delete_url: 'projects/{{project}}/locations/{{location}}/collections/{{collectio
 update_verb: :PATCH
 update_mask: true
 
+autogen_async: true
+
 async: !ruby/object:Api::OpAsync
   actions: ['create', 'delete']
   operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
+    # path: 'name'
     base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
@@ -47,7 +49,6 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
-autogen_async: true
 
 import_format:
   [
