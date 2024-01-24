@@ -21,6 +21,8 @@ res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 if err != nil {
 	return err
 }
+
+// empty enforcementMode is equivalent to absence.
 if v := res["enforcementMode"]; v != nil {
 	return fmt.Errorf("FirebaseAppCheckServiceConfig still exists at %s", url)
 }
