@@ -38,7 +38,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/load-balancing/docs/negs/'
     'Internet NEGs Official Documentation': 'https://cloud.google.com/load-balancing/docs/negs/internet-neg-concepts'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/beta/networkEndpointGroups'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/beta/regionNetworkEndpointGroups'
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
