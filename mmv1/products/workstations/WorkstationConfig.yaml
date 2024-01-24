@@ -428,11 +428,31 @@ properties:
         description: |
           The service account to use with the specified KMS key.
         required: true
+  - !ruby/object:Api::Type::Array
+    name: 'readinessChecks'
+    description: |
+      Readiness checks to be performed on a workstation.
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'path'
+          description: |
+            Path to which the request should be sent.
+          required: true
+        - !ruby/object:Api::Type::Integer
+          name: 'port'
+          description: |
+            Port to which the request should be sent.
+          required: true
   - !ruby/object:Api::Type::Boolean
     name: 'degraded'
     description: |
       Whether this resource is in degraded mode, in which case it may require user action to restore full functionality. Details can be found in the conditions field.
     output: true
+  - !ruby/object:Api::Type::Boolean
+    name: 'disableTcpConnections'
+    description: |
+      Disables support for plain TCP connections in the workstation. By default the service supports TCP connections via a websocket relay. Setting this option to true disables that relay, which prevents the usage of services that require plain tcp connections, such as ssh. When enabled, all communication must occur over https or wss.
   - !ruby/object:Api::Type::Array
     name: 'conditions'
     description: |-
