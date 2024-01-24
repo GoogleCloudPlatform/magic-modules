@@ -18,7 +18,7 @@ description: |
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Vertex AI Conversation': 'https://cloud.google.com/dialogflow/cx/docs/concept/generative'
-  api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1alpha/projects.locations.collections.engines'
+  api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/projects.locations.collections.engines'
 
 base_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}'
 self_link: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}'
