@@ -215,8 +215,6 @@ func TestAccComputeSecurityPolicy_withAdvancedOptionsConfig(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			<% end -%>
-
 			{
 				Config: testAccComputeSecurityPolicy_basic(spName),
 			},
