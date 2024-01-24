@@ -1,6 +1,6 @@
 <% indent_spaces = 2 -%>
 <% unless property.class.to_s == 'Api::Type::KeyValueTerraformLabels' || property.class.to_s == 'Api::Type::KeyValueEffectiveLabels' -%>
-	- name: '<%= property.name.underscore -%>'
+	- name: '<%= property.name -%>'
 		type: <%= property.class.to_s.gsub("Api::Type::", "") %>
 <%  unless property.description.nil? -%>
 		description: '<%= property.description.strip -%>'

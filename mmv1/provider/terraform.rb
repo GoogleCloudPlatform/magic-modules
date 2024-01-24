@@ -396,7 +396,16 @@ module Provider
         end
         Dir.chdir pwd
       end
+      # if iam_policy is not defined or excluded, don't generate it
+      return if object.iam_policy.nil? || object.iam_policy.exclude
 
+      FileUtils.mkpath output_folder
+      Dir.chdir output_folder
+      Google::LOGGER.debug "Generating #{object.name} IAM policy"
+      generate_iam_policy(pwd, data.clone, generate_code, generate_docs)
+      Dir.chdir pwd
+    end
+    
     def generate_object_modified(object, output_folder, version_name)
       pwd = Dir.pwd
       data = build_object_data(pwd, object, output_folder, version_name)
@@ -405,7 +414,7 @@ module Provider
       Google::LOGGER.debug "Generating #{object.name} rewrite yaml"
       generate_newyaml(pwd, data.clone)
       Dir.chdir pwd
-      end
+    end
 
     def generate_newyaml(pwd, data)
       # @api.api_name is the service folder name
@@ -416,17 +425,6 @@ module Provider
                     '/templates/terraform/yaml_conversion.erb',
                     "#{target_folder}/#{full_resource_name(data)}.yaml",
                     self)
-    end
-
-
-      # if iam_policy is not defined or excluded, don't generate it
-      return if object.iam_policy.nil? || object.iam_policy.exclude
-
-      FileUtils.mkpath output_folder
-      Dir.chdir output_folder
-      Google::LOGGER.debug "Generating #{object.name} IAM policy"
-      generate_iam_policy(pwd, data.clone, generate_code, generate_docs)
-      Dir.chdir pwd
     end
 
     def build_env
