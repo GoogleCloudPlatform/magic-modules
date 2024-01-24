@@ -1,0 +1,5 @@
+resource "google_firebase_app_check_service_config" "default" {
+  project = "<%= ctx[:test_env_vars]['project_id'] %>"
+  service_id = "<%= ctx[:vars]['service_id'] %>"
+  enforcement_mode = "ENFORCED"
+}

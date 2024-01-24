@@ -1,0 +1,26 @@
+config := acctest.GoogleProviderConfig(t)
+
+url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{FirebaseAppCheckBasePath}}projects/{{project}}/services/{{service_id}}")
+if err != nil {
+	return err
+}
+
+billingProject := envvar.GetTestProjectFromEnv()
+
+if config.BillingProject != "" {
+	billingProject = config.BillingProject
+}
+
+res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config:    config,
+	Method:    "GET",
+	Project:   billingProject,
+	RawURL:    url,
+	UserAgent: config.UserAgent,
+})
+if err != nil {
+	return err
+}
+if v := res["enforcementMode"]; v != nil {
+	return fmt.Errorf("FirebaseAppCheckServiceConfig still exists at %s", url)
+}
