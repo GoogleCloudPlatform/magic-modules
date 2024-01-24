@@ -1,4 +1,4 @@
-// Copyright 2019 Google Inc.
+// Copyright 2024 Google Inc.
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,102 +13,154 @@
 
 package resource
 
+import (
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
+)
+
 // Information about the IAM policy for this resource
 // Several GCP resources have IAM policies that are scoped to
 // and accessed via their parent resource
 // See: https://cloud.google.com/iam/docs/overview
 type IamPolicy struct {
-	// boolean of if this binding should be generated
-	exclude bool
+	google.YamlValidator
 
 	// boolean of if this binding should be generated
-	excludeTgc bool
+
+	// attr_reader
+	Exclude bool
+
+	// boolean of if this binding should be generated
+
+	// attr_reader
+	ExcludeTgc bool
 
 	// Boolean of if tests for IAM resources should exclude import test steps
 	// Used to handle situations where typical generated IAM tests cannot import
 	// due to the parent resource having an API-generated id
-	skipImportTest bool
+
+	// attr_reader
+	SkipImportTest bool
 
 	// Character that separates resource identifier from method call in URL
 	// For example, PubSub subscription uses {resource}:getIamPolicy
 	// While Compute subnetwork uses {resource}/getIamPolicy
-	methodNameSeparator string
+
+	// attr_reader
+	MethodNameSeparator string
 
 	// The terraform type of the parent resource if it is not the same as the
 	// IAM resource. The IAP product needs these as its IAM policies refer
 	// to compute resources
-	parentResourceType string
+
+	// attr_reader
+	ParentResourceType string
 
 	// Some resources allow retrieving the IAM policy with GET requests,
 	// others expect POST requests
-	fetchIamPolicyVerb string
+
+	// attr_reader
+	FetchIamPolicyVerb string
 
 	// Last part of URL for fetching IAM policy.
-	fetchIamPolicyMethod string
+
+	// attr_reader
+	FetchIamPolicyMethod string
 
 	// Some resources allow setting the IAM policy with POST requests,
 	// others expect PUT requests
-	setIamPolicyVerb string
+
+	// attr_reader
+	SetIamPolicyVerb string
 
 	// Last part of URL for setting IAM policy.
-	setIamPolicyMethod string
+
+	// attr_reader
+	SetIamPolicyMethod string
 
 	// Whether the policy JSON is contained inside of a 'policy' object.
-	wrappedPolicyObj bool
+
+	// attr_reader
+	WrappedPolicyObj bool
 
 	// Certain resources allow different sets of roles to be set with IAM policies
 	// This is a role that is acceptable for the given IAM policy resource for use in tests
-	allowedIamRole string
+
+	// attr_reader
+	AllowedIamRole string
 
 	// This is a role that grants create/read/delete for the parent resource for use in tests.
 	// If set, the test runner will receive a binding to this role in _policy tests in order to
 	// avoid getting locked out of the resource.
-	adminIamRole string
+
+	// attr_reader
+	AdminIamRole string
 
 	// Certain resources need an attribute other than "id" from their parent resource
 	// Especially when a parent is not the same type as the IAM resource
-	parentResourceAttribute string
+
+	// attr_reader
+	ParentResourceAttribute string
 
 	// If the IAM resource test needs a new project to be created, this is the name of the project
-	testProjectName string
+
+	// attr_reader
+	TestProjectName string
 
 	// Resource name may need a custom diff suppress function. Default is to use
 	// CompareSelfLinkOrResourceName
-	customDiffSuppress *string
+
+	// attr_reader
+	CustomDiffSuppress *string
 
 	// Some resources (IAP) use fields named differently from the parent resource.
 	// We need to use the parent's attributes to create an IAM policy, but they may not be
 	// named as the IAM IAM resource expects.
 	// This allows us to specify a file (relative to MM root) containing a partial terraform
 	// config with the test/example attributes of the IAM resource.
-	exampleConfigBody string
+
+	// attr_reader
+	ExampleConfigBody string
 
 	// How the API supports IAM conditions
-	iamConditionsRequestType string
+
+	// attr_reader
+	IamConditionsRequestType string
 
 	// Allows us to override the base_url of the resource. This is required for Cloud Run as the
 	// IAM resources use an entirely different base URL from the actual resource
-	baseUrl string
+
+	// attr_reader
+	BaseUrl string
 
 	// Allows us to override the import format of the resource. Useful for Cloud Run where we need
 	// variables that are outside of the base_url qualifiers.
-	importFormat []string
+
+	// attr_reader
+	ImportFormat []string
 
 	// Allows us to override the self_link of the resource. This is required for Artifact Registry
 	// to prevent breaking changes
-	selfLink string
+
+	// attr_reader
+	SelfLink string
 
 	// [Optional] Version number in the request payload.
 	// if set, it overrides the default IamPolicyVersion
-	iamPolicyVersion string
+
+	// attr_reader
+	IamPolicyVersion string
 
 	// [Optional] Min version to make IAM resources available at
 	// If unset, defaults to 'ga'
-	minVersion string
+
+	// attr_reader
+	MinVersion string
 
 	// [Optional] Check to see if zone value should be replaced with GOOGLE_ZONE in iam tests
 	// Defaults to true
-	substituteZoneValue bool
+
+	// attr_reader
+	SubstituteZoneValue bool
 }
 
 // func (p *IamPolicy) validate() {

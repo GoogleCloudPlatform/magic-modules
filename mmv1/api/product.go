@@ -26,6 +26,7 @@ import (
 // Represents a product to be managed
 type Product struct {
 	NamedObject `yaml:",inline"`
+
 	// include Compile::Core
 
 	// Inherited:

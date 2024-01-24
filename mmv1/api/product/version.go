@@ -22,6 +22,7 @@ var ORDER = [...]string{"ga", "beta", "alpha", "private"}
 // a superset of beta, and beta a superset of GA. Each version will have a
 // different version url.
 type Version struct {
+	// TODO: Should embed NamedObject or not?
 	// < Api::NamedObject
 	// include Comparable
 

@@ -13,12 +13,17 @@
 
 package api
 
+import (
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
+)
+
 // require 'api/object'
 // require 'api/timeout'
 
 // Base class from which other Async classes can inherit.
 type Async struct {
-	// < Google::YamlValidator
+	// Embed YamlValidator object
+	google.YamlValidator
 
 	// Describes an operation
 	// attr_reader :
@@ -42,16 +47,16 @@ type Async struct {
 
 // Base async operation type
 type Operation struct {
-	// < Google::YamlValidator
+	google.YamlValidator
 
 	// Contains information about an long-running operation, to make
 	// requests for the state of an operation.
 
 	// attr_reader :
-	Timeouts
+	Timeouts Timeouts
 
 	// attr_reader :
-	Result
+	Result Result
 }
 
 // def validate
@@ -61,7 +66,7 @@ type Operation struct {
 
 // Base result class
 type Result struct {
-	// < Google::YamlValidator
+	google.YamlValidator
 
 	// Contains information about the result of an Operation
 
@@ -76,6 +81,7 @@ type Result struct {
 
 // Represents an asynchronous operation definition
 type OpAsync struct {
+	// TODO: Should embed Async or not?
 	// < Async
 
 	// attr_reader :
@@ -122,6 +128,7 @@ type OpAsync struct {
 // The main implementation of Operation,
 // corresponding to common GCP Operation resources.
 type OpAsyncOperation struct {
+	// TODO: Should embed Operation or not?
 	// < Async::Operation
 	// attr_reader :
 	Kind string
@@ -136,7 +143,7 @@ type OpAsyncOperation struct {
 	WaitMs int
 
 	// attr_reader :
-	Timeouts
+	Timeouts Timeouts
 
 	// Use this if the resource includes the full operation url.
 	// attr_reader :
@@ -166,7 +173,7 @@ type OpAsyncOperation struct {
 
 // Represents the results of an Operation request
 type OpAsyncResult struct {
-	Result `yaml:",inline"`
+	Result Result `yaml:",inline"`
 
 	// attr_reader :
 	Path string
@@ -187,7 +194,7 @@ type OpAsyncResult struct {
 // Provides information to parse the result response to check operation
 // status
 type OpAsyncStatus struct {
-	// < Google::YamlValidator
+	google.YamlValidator
 
 	// attr_reader :
 	Path string
@@ -214,7 +221,7 @@ type OpAsyncStatus struct {
 
 // Provides information on how to retrieve errors of the executed operations
 type OpAsyncError struct {
-	// < Google::YamlValidator
+	google.YamlValidator
 
 	// attr_reader :
 	Path string

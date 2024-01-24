@@ -1,12 +1,14 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
 	"path"
 	"path/filepath"
 	"sort"
+	"strings"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
@@ -47,7 +49,7 @@ func main() {
 	yamlValidator := google.YamlValidator{}
 
 	for _, product_name := range all_product_files {
-		product_yaml_path := path.Join(product_name, "product_go.yaml")
+		product_yaml_path := path.Join(product_name, "go_product.yaml")
 
 		// TODO: uncomment the error check that if the product.yaml exists for each product
 		// after Go-converted product.yaml files are complete for all products
@@ -57,25 +59,44 @@ func main() {
 		// }
 
 		if _, err := os.Stat(product_yaml_path); err == nil {
-			log.Printf(" product_yaml_path %#v", product_yaml_path)
+			log.Printf("product_yaml_path %#v", product_yaml_path)
 
 			productYaml, err := os.ReadFile(product_yaml_path)
 			if err != nil {
-				return
+				log.Fatalf("Cannot open the file: %v", productYaml)
 			}
-
 			productApi := api.Product{}
 			yamlValidator.Parse(productYaml, &productApi)
-			log.Printf(" productApi %#v", productApi)
+
+			// TODO: remove these lines, which are for debugging
+			prod, _ := json.Marshal(&productApi)
+			log.Printf("prod %s", string(prod))
 
 			resourceFiles, err := filepath.Glob(fmt.Sprintf("%s/*", product_name))
 			if err != nil {
-				return
+				log.Fatalf("Cannot get resources files: %v", err)
 			}
-			for _, file_path := range resourceFiles {
-				if filepath.Base(file_path) == "product.yaml" || filepath.Base(file_path) == "product_go.yaml" || filepath.Ext(file_path) != ".yaml" {
+			for _, resourceYamlPath := range resourceFiles {
+				if filepath.Base(resourceYamlPath) == "product.yaml" || filepath.Ext(resourceYamlPath) != ".yaml" {
 					continue
 				}
+
+				// Prepend "go_" to the Go yaml files' name to distinguish with the ruby yaml files
+				if filepath.Base(resourceYamlPath) == "go_product.yaml" || !strings.HasPrefix(filepath.Base(resourceYamlPath), "go_") {
+					continue
+				}
+
+				log.Printf(" resourceYamlPath %s", resourceYamlPath)
+				resourceYaml, err := os.ReadFile(resourceYamlPath)
+				if err != nil {
+					log.Fatalf("Cannot open the file: %v", resourceYamlPath)
+				}
+				resource := api.Resource{}
+				yamlValidator.Parse(resourceYaml, &resource)
+
+				// TODO: remove these lines, which are for debugging
+				res, _ := json.Marshal(&resource)
+				log.Printf("resource %s", string(res))
 			}
 		}
 	}
