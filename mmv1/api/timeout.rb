@@ -15,7 +15,7 @@ require 'api/object'
 
 module  Api
   # Provides timeout information for the different operation types
-  class Timeouts < Api::Object
+  class Timeouts < Google::YamlValidator
     # Default timeout for all operation types is 20, the Terraform default (https://www.terraform.io/plugin/sdkv2/resources/retries-and-customizable-timeouts)
     # minutes. This can be overridden for each resource.
     DEFAULT_INSERT_TIMEOUT_MINUTES = 20

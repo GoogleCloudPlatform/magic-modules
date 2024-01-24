@@ -373,15 +373,6 @@ func (p *FrameworkProviderConfig) HandleDefaults(ctx context.Context, data *fwmo
 		}
 	}
 
-	if data.CloudDeployCustomEndpoint.IsNull() {
-		customEndpoint := transport_tpg.MultiEnvDefault([]string{
-			"GOOGLE_CLOUDDEPLOY_CUSTOM_ENDPOINT",
-		}, "")
-		if customEndpoint != nil {
-			data.CloudDeployCustomEndpoint = types.StringValue(customEndpoint.(string))
-		}
-	}
-
 	if data.CloudResourceManagerCustomEndpoint.IsNull() {
 		customEndpoint := transport_tpg.MultiEnvDefault([]string{
 			"GOOGLE_CLOUD_RESOURCE_MANAGER_CUSTOM_ENDPOINT",

@@ -1,6 +1,18 @@
 /*
-Copyright © 2023 NAME HERE <EMAIL ADDRESS>
-*/
+* Copyright 2023 Google LLC. All Rights Reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+ */
 package cmd
 
 import (
@@ -11,17 +23,6 @@ import (
 
 	"github.com/spf13/cobra"
 )
-
-type ccGithub interface {
-	GetPullRequestAuthor(prNumber string) (string, error)
-	GetUserType(user string) github.UserType
-	RemoveLabel(prNumber string, label string) error
-	PostBuildStatus(prNumber string, title string, state string, targetUrl string, commitSha string) error
-}
-
-type ccCloudbuild interface {
-	TriggerMMPresubmitRuns(commitSha string, substitutions map[string]string) error
-}
 
 // communityApprovalCmd represents the communityApproval command
 var communityApprovalCmd = &cobra.Command{
@@ -63,13 +64,13 @@ var communityApprovalCmd = &cobra.Command{
 		baseBranch := args[5]
 		fmt.Println("Base Branch: ", baseBranch)
 
-		gh := github.NewGithubService()
-		cb := cloudbuild.NewCloudBuildService()
+		gh := github.NewClient()
+		cb := cloudbuild.NewClient()
 		execCommunityChecker(prNumber, commitSha, branchName, headRepoUrl, headBranch, baseBranch, gh, cb)
 	},
 }
 
-func execCommunityChecker(prNumber, commitSha, branchName, headRepoUrl, headBranch, baseBranch string, gh ccGithub, cb ccCloudbuild) {
+func execCommunityChecker(prNumber, commitSha, branchName, headRepoUrl, headBranch, baseBranch string, gh GithubClient, cb CloudbuildClient) {
 	substitutions := map[string]string{
 		"BRANCH_NAME":    branchName,
 		"_PR_NUMBER":     prNumber,
@@ -78,12 +79,13 @@ func execCommunityChecker(prNumber, commitSha, branchName, headRepoUrl, headBran
 		"_BASE_BRANCH":   baseBranch,
 	}
 
-	author, err := gh.GetPullRequestAuthor(prNumber)
+	pullRequest, err := gh.GetPullRequest(prNumber)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
+	author := pullRequest.User.Login
 	authorUserType := gh.GetUserType(author)
 	trusted := authorUserType == github.CoreContributorUserType || authorUserType == github.GooglerUserType
 

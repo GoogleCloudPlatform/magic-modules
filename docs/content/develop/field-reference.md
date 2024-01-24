@@ -166,27 +166,50 @@ send_empty_value: true
 ### `conflicts`
 Specifies a list of fields (excluding the current field) that cannot be
 specified at the same time as the current field. Must be set separately on
-all listed fields.
+all listed fields. Not supported within
+[lists of nested objects](https://github.com/hashicorp/terraform-plugin-sdk/issues/470#issue-630928923).
 
 Example:
 
 ```yaml
-conflicts:
-  - field_one
-  - nested_object.0.nested_field
+- !ruby/object:Api::Type::String
+  name: 'fieldOne'
+  conflicts:
+    - field_two
+    - nested_object.0.nested_field
 ```
 
 ### `exactly_one_of`
-Specifies a list of fields (including the current field) that cannot be
-specified at the same time (but at least one of which must be set). Must be
-set separately on all listed fields.
+Specifies a list of fields (including the current field) of which exactly one
+must be set. Must be set separately on all listed fields. Not supported within
+[lists of nested objects](https://github.com/hashicorp/terraform-plugin-sdk/issues/470#issue-630928923).
 
 Example:
 
 ```yaml
-exactly_one_of:
-  - field_one
-  - nested_object.0.nested_field
+- !ruby/object:Api::Type::String
+  name: 'fieldOne'
+  exactly_one_of:
+    - field_one
+    - field_two
+    - nested_object.0.nested_field
+```
+
+### `at_least_one_of`
+Specifies a list of fields (including the current field) that cannot be
+specified at the same time (but at least one of which must be set). Must be
+set separately on all listed fields. Not supported within
+[lists of nested objects](https://github.com/hashicorp/terraform-plugin-sdk/issues/470#issue-630928923).
+
+Example:
+
+```yaml
+- !ruby/object:Api::Type::String
+  name: 'fieldOne'
+  at_least_one_of:
+    - field_one
+    - field_two
+    - nested_object.0.nested_field
 ```
 
 ## `Enum` properties

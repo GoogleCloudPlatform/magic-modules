@@ -1,0 +1,183 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: FeatureOnlineStoreFeatureview
+base_url: projects/{{project}}/locations/{{region}}/featureOnlineStores/{{feature_online_store}}/featureViews
+create_url: projects/{{project}}/locations/{{region}}/featureOnlineStores/{{feature_online_store}}/featureViews?featureViewId={{name}}
+self_link: projects/{{project}}/locations/{{region}}/featureOnlineStores/{{feature_online_store}}/featureViews/{{name}}
+update_verb: :PATCH
+update_mask: true
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featureOnlineStores.featureViews'
+async: !ruby/object:Api::OpAsync
+  actions:
+    - create
+    - delete
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'
+description: |-
+  FeatureView is representation of values that the FeatureOnlineStore will serve based on its syncConfig.
+import_format:
+  [
+    'projects/{{project}}/locations/{{region}}/featureOnlineStores/{{feature_online_store}}/featureViews/{{name}}',
+  ]
+autogen_async: false
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'vertex_ai_featureonlinestore_featureview'
+    primary_resource_id: 'featureview'
+    vars:
+      name: 'example_feature_view'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'vertex_ai_featureonlinestore_featureview_with_vector_search'
+    primary_resource_id: 'featureview_vector_search'
+    vars:
+      name: 'example_feature_view_vector_search'
+    min_version: beta
+parameters:
+  - !ruby/object:Api::Type::String
+    name: featureOnlineStore
+    description:
+      The name of the FeatureOnlineStore to use for the featureview.
+    url_param_only: true
+    immutable: true
+    required: true
+  - !ruby/object:Api::Type::String
+    name: 'region'
+    description: The region for the resource. It should be the same as the featureonlinestore region.
+    required: true
+    immutable: true
+    url_param_only: true
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description:
+      Name of the FeatureView. This value may be up to 60 characters, and
+      valid characters are [a-z0-9_]. The first character cannot be a number.
+    immutable: true
+    url_param_only: true
+  - !ruby/object:Api::Type::String
+    name: 'createTime'
+    output: true
+    description: |
+      The timestamp of when the featureOnlinestore was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+  - !ruby/object:Api::Type::String
+    name: 'updateTime'
+    output: true
+    description: |
+      The timestamp of when the featureOnlinestore was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: 'labels'
+    description: |
+      A set of key/value label pairs to assign to this FeatureView.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'syncConfig'
+    description: |
+      Configures when data is to be synced/updated for this FeatureView. At the end of the sync the latest featureValues for each entityId of this FeatureView are made ready for online serving.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'cron'
+        description: |
+          Cron schedule (https://en.wikipedia.org/wiki/Cron) to launch scheduled runs.
+          To explicitly set a timezone to the cron tab, apply a prefix in the cron tab: "CRON_TZ=${IANA_TIME_ZONE}" or "TZ=${IANA_TIME_ZONE}".
+        default_from_api: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'bigQuerySource'
+    description: |
+      Configures how data is supposed to be extracted from a BigQuery source to be loaded onto the FeatureOnlineStore.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'uri'
+        required: true
+        description: |
+          The BigQuery view URI that will be materialized on each sync trigger based on FeatureView.SyncConfig.
+      - !ruby/object:Api::Type::Array
+        name: 'entityIdColumns'
+        required: true
+        description: |
+          Columns to construct entityId / row keys. Start by supporting 1 only.
+        item_type: Api::Type::String
+  - !ruby/object:Api::Type::NestedObject
+    name: 'vectorSearchConfig'
+    description: |
+      Configuration for vector search. It contains the required configurations to create an index from source data, so that approximate nearest neighbor (a.k.a ANN) algorithms search can be performed during online serving.
+    immutable: true
+    min_version: beta
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'embeddingColumn'
+        required: true
+        description: |
+          Column of embedding. This column contains the source data to create index for vector search.
+      - !ruby/object:Api::Type::Array
+        name: 'filterColumns'
+        description: |
+          Columns of features that are used to filter vector search results.
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::String
+        name: 'crowdingColumn'
+        description: |
+          Column of crowding. This column contains crowding attribute which is a constraint on a neighbor list produced by nearest neighbor search requiring that no more than some value k' of the k neighbors returned have the same value of crowdingAttribute.
+      - !ruby/object:Api::Type::Enum
+        name: distanceMeasureType
+        description: |
+          The distance measure used in nearest neighbor search.
+          For details on allowed values, see the [API documentation](https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.featureOnlineStores.featureViews#DistanceMeasureType).
+        values:
+          - :SQUARED_L2_DISTANCE
+          - :COSINE_DISTANCE
+          - :DOT_PRODUCT_DISTANCE
+      - !ruby/object:Api::Type::NestedObject
+        name: 'treeAhConfig'
+        exactly_one_of:
+          - treeAhConfig
+          - bruteForceConfig
+        description: |
+          Configuration options for the tree-AH algorithm (Shallow tree + Asymmetric Hashing). Please refer to this paper for more details: https://arxiv.org/abs/1908.10396
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'leafNodeEmbeddingCount'
+            description: |
+              Number of embeddings on each leaf node. The default value is 1000 if not set.
+            default_from_api: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'bruteForceConfig'
+        description: |
+          Configuration options for using brute force search, which simply implements the standard linear search in the database for each query. It is primarily meant for benchmarking and to generate the ground truth for approximate search.
+        exactly_one_of:
+          - treeAhConfig
+          - bruteForceConfig
+        properties: []
+        send_empty_value: true
+        allow_empty_object: true
+      - !ruby/object:Api::Type::Integer
+        name: 'embeddingDimension'
+        description: |
+          The number of dimensions of the input embedding.

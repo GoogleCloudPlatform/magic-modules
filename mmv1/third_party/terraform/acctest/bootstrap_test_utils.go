@@ -443,6 +443,35 @@ func BootstrapSharedTestGlobalAddress(t *testing.T, testId string, params ...fun
 	return address.Name
 }
 
+type ServiceNetworkSettings struct {
+	PrefixLength  int
+	ParentService string
+}
+
+func ServiceNetworkWithPrefixLength(prefixLength int) func(*ServiceNetworkSettings) {
+	return func(settings *ServiceNetworkSettings) {
+		settings.PrefixLength = prefixLength
+	}
+}
+
+func ServiceNetworkWithParentService(parentService string) func(*ServiceNetworkSettings) {
+	return func(settings *ServiceNetworkSettings) {
+		settings.ParentService = parentService
+	}
+}
+
+func NewServiceNetworkSettings(options ...func(*ServiceNetworkSettings)) *ServiceNetworkSettings {
+	settings := &ServiceNetworkSettings{
+		PrefixLength:  16,                                 // default prefix length
+		ParentService: "servicenetworking.googleapis.com", // default parent service
+	}
+
+	for _, o := range options {
+		o(settings)
+	}
+	return settings
+}
+
 // BootstrapSharedServiceNetworkingConnection will create a shared network
 // if it hasn't been created in the test project, a global address
 // if it hasn't been created in the test project, and a service networking connection
@@ -461,8 +490,9 @@ func BootstrapSharedTestGlobalAddress(t *testing.T, testId string, params ...fun
 // https://cloud.google.com/vpc/docs/configure-private-services-access#removing-connection
 //
 // testId specifies the test for which a shared network and a gobal address are used/initialized.
-func BootstrapSharedServiceNetworkingConnection(t *testing.T, testId string, params ...func(*AddressSettings)) string {
-	parentService := "services/servicenetworking.googleapis.com"
+func BootstrapSharedServiceNetworkingConnection(t *testing.T, testId string, params ...func(*ServiceNetworkSettings)) string {
+	settings := NewServiceNetworkSettings(params...)
+	parentService := "services/" + settings.ParentService
 	projectId := envvar.GetTestProjectFromEnv()
 
 	config := BootstrapConfig(t)
@@ -479,7 +509,7 @@ func BootstrapSharedServiceNetworkingConnection(t *testing.T, testId string, par
 
 	networkName := SharedTestNetworkPrefix + testId
 	networkId := fmt.Sprintf("projects/%v/global/networks/%v", project.ProjectNumber, networkName)
-	globalAddressName := BootstrapSharedTestGlobalAddress(t, testId, params...)
+	globalAddressName := BootstrapSharedTestGlobalAddress(t, testId, AddressWithPrefixLength(settings.PrefixLength))
 
 	readCall := config.NewServiceNetworkingClient(config.UserAgent).Services.Connections.List(parentService).Network(networkId)
 	if config.UserProjectOverride {
@@ -579,65 +609,6 @@ func BootstrapServicePerimeterProjects(t *testing.T, desiredProjects int) []*clo
 	}
 
 	return projects
-}
-
-func RemoveContainerServiceAgentRoleFromContainerEngineRobot(t *testing.T, project *cloudresourcemanager.Project) {
-	config := BootstrapConfig(t)
-	if config == nil {
-		return
-	}
-
-	client := config.NewResourceManagerClient(config.UserAgent)
-	containerEngineRobot := fmt.Sprintf("serviceAccount:service-%d@container-engine-robot.iam.gserviceaccount.com", project.ProjectNumber)
-	getPolicyRequest := &cloudresourcemanager.GetIamPolicyRequest{}
-	policy, err := client.Projects.GetIamPolicy(project.ProjectId, getPolicyRequest).Do()
-	if err != nil {
-		t.Fatalf("error getting project iam policy: %v", err)
-	}
-	roleFound := false
-	changed := false
-	for _, binding := range policy.Bindings {
-		if binding.Role == "roles/container.serviceAgent" {
-			memberFound := false
-			for i, member := range binding.Members {
-				if member == containerEngineRobot {
-					binding.Members[i] = binding.Members[len(binding.Members)-1]
-					memberFound = true
-				}
-			}
-			if memberFound {
-				binding.Members = binding.Members[:len(binding.Members)-1]
-				changed = true
-			}
-		} else if binding.Role == "roles/editor" {
-			memberFound := false
-			for _, member := range binding.Members {
-				if member == containerEngineRobot {
-					memberFound = true
-					break
-				}
-			}
-			if !memberFound {
-				binding.Members = append(binding.Members, containerEngineRobot)
-				changed = true
-			}
-			roleFound = true
-		}
-	}
-	if !roleFound {
-		policy.Bindings = append(policy.Bindings, &cloudresourcemanager.Binding{
-			Members: []string{containerEngineRobot},
-			Role:    "roles/editor",
-		})
-		changed = true
-	}
-	if changed {
-		setPolicyRequest := &cloudresourcemanager.SetIamPolicyRequest{Policy: policy}
-		policy, err = client.Projects.SetIamPolicy(project.ProjectId, setPolicyRequest).Do()
-		if err != nil {
-			t.Fatalf("error setting project iam policy: %v", err)
-		}
-	}
 }
 
 // BootstrapProject will create or get a project named

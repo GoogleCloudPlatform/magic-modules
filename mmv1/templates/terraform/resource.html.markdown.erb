@@ -36,7 +36,7 @@
     directly inserted from YAML.
 -%>
 <%
-  tf_product = (object.__product.legacy_name || product_ns).underscore
+  tf_product = (object.__product.legacy_name || object.__product.name ).underscore
   tf_subcategory = (object.__product.display_name)
   terraform_name = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}"
   properties = object.all_user_properties
@@ -179,7 +179,7 @@ This resource provides the following
 [Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options:
 
 - `create` - Default is <%= timeouts.insert_minutes -%> minutes.
-<% if updatable?(object, properties) -%>
+<% if updatable?(object, properties) || object.root_labels? -%>
 - `update` - Default is <%= timeouts.update_minutes -%> minutes.
 <% end -%>
 - `delete` - Default is <%= timeouts.delete_minutes -%> minutes.

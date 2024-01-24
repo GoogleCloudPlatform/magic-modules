@@ -19,7 +19,7 @@ require 'google/golang_utils'
 module Provider
   class Terraform
     # Inserts custom code into terraform resources.
-    class CustomCode < Api::Object
+    class CustomCode < Google::YamlValidator
       # Collection of fields allowed in the CustomCode section for
       # Terraform.
 
@@ -34,12 +34,7 @@ module Provider
       # resource's Resource.Schema map.  They should be formatted as
       # entries in the map, e.g. `"foo": &schema.Schema{ ... },`.
       attr_reader :extra_schema_entry
-      # Resource definition code is inserted below everything else
-      # in the resource's Resource {...} definition.  This may be useful
-      # for things like a MigrateState / SchemaVersion pair.
-      # This is likely to be used rarely and may be removed if all its
-      # use cases are covered in other ways.
-      attr_reader :resource_definition
+
       # ====================
       # Encoders & Decoders
       # ====================
@@ -132,7 +127,6 @@ module Provider
         super
 
         check :extra_schema_entry, type: String
-        check :resource_definition, type: String
         check :encoder, type: String
         check :update_encoder, type: String
         check :decoder, type: String
