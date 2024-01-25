@@ -40,6 +40,7 @@ func TestAccPubsubTopic_update(t *testing.T) {
 			},
 		},
 	})
+	t.Fatal("make this test fail")
 }
 
 func TestAccPubsubTopic_cmek(t *testing.T) {
