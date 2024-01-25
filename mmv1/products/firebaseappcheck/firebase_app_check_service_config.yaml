@@ -15,9 +15,11 @@
 name: 'ServiceConfig'
 base_url: projects/{{project}}/services/
 self_link: projects/{{project}}/services/{{service_id}}
+create_url: projects/{{project}}/services/{{service_id}}?updateMask=enforcementMode
 create_verb: :PATCH
 update_verb: :PATCH
 update_mask: true
+delete_url: projects/{{project}}/services/{{service_id}}?updateMask=enforcementMode
 delete_verb: :PATCH
 description: The enforcement configuration for a service supported by App Check.
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -31,8 +33,6 @@ import_format:
     '{{service_id}}',
   ]
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_create: templates/terraform/custom_create/firebase_app_check_service_config.go
-  custom_delete: templates/terraform/custom_delete/firebase_app_check_service_config.go
   test_check_destroy: templates/terraform/custom_check_destroy/firebase_app_check_service_config.go
 examples:
   - !ruby/object:Provider::Terraform::Examples
@@ -86,10 +86,11 @@ properties:
     description: |
       The App Check enforcement mode for a service supported by App Check. Valid values are
 
-      (Unset)
+      (Unset) or OFF
       Firebase App Check is not enforced for the service, nor are App Check metrics collected.
       Though the service is not protected by App Check in this mode, other applicable protections,
       such as user authorization, are still enforced. An unconfigured service is in this mode by default.
+      Deleting the Terraform resource will switch the enforcement to OFF for this service.
 
       UNENFORCED
       Firebase App Check is not enforced for the service. App Check metrics are collected to help you
