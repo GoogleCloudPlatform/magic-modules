@@ -15,7 +15,7 @@ resource "google_netapp_volume" "default" {
   protocols = ["NFSV3"]
 }
 
-resource "google_netapp_volumesnapshot" "<%= ctx[:primary_resource_id] %>" {
+resource "google_netapp_volume_snapshot" "<%= ctx[:primary_resource_id] %>" {
   depends_on = [google_netapp_volume.default]
   location = google_netapp_volume.default.location
   volume_name = google_netapp_volume.default.name
