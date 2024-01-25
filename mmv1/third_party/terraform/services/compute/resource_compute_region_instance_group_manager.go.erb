@@ -715,7 +715,7 @@ func resourceComputeRegionInstanceGroupManagerRead(d *schema.ResourceData, meta 
 		return fmt.Errorf("Error setting region: %s", err)
 	}
 	if err := d.Set("creation_timestamp", flattenCreationTimestamp(manager.CreationTimestamp, d, config)); err != nil {
-		return fmt.Errorf("Error reading IGM: %s", err)
+		return fmt.Errorf("Error reading creation_timestamp: %s", err)
 	}
 	if err := d.Set("description", manager.Description); err != nil {
 		return fmt.Errorf("Error setting description: %s", err)
