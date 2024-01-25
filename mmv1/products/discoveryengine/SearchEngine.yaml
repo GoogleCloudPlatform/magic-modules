@@ -18,7 +18,7 @@ description: |
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Create a Search Engine': 'https://cloud.google.com/generative-ai-app-builder/docs/create-engine-es'
-  api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1alpha/projects.locations.collections.engines'
+  api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/projects.locations.collections.engines'
 
 base_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}'
 self_link: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}'
@@ -54,7 +54,7 @@ parameters:
   - !ruby/object:Api::Type::String
     name: 'collection_id'
     description: |
-      The collectionId.
+      The collection ID.
     required: true
     immutable: true
     url_param_only: true
@@ -67,15 +67,18 @@ parameters:
     url_param_only: true
 
 properties:
-  - !ruby/object:Api::Type::String
+  - !ruby/object:Api::Type::Enum
     name: 'industryVertical'
     description: |
       Industry Vertical
     immutable: true
+    values:
+      - :GENERIC
+      - :MEDIA
   - !ruby/object:Api::Type::String
     name: 'displayName'
     description: |
-      displayName
+      Display Name
     required: true
   - !ruby/object:Api::Type::Array
     name: 'dataStoreIds'
@@ -84,11 +87,13 @@ properties:
     required: true
     immutable: true
     item_type: Api::Type::String
-  - !ruby/object:Api::Type::String
+  - !ruby/object:Api::Type::Enum
     name: 'solutionType'
     description: |
       A solution type
     immutable: true
+    values:
+      - :SOLUTION_TYPE_SEARCH
   - !ruby/object:Api::Type::Time
     name: 'createTime'
     description: |
@@ -106,19 +111,27 @@ properties:
     required: false
     immutable: false
     properties:
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::Enum
         name: 'searchTier'
         description: |
-          Industry Vertical
+          Search Tier
         required: false
         immutable: false
+        values:
+          - :SEARCH_TIER_STANDARD
+          - :SEARCH_TIER_ENTERPRISE
       - !ruby/object:Api::Type::Array
         name: 'searchAddOns'
         description: |
           The add-on that this search engine enables.
         required: false
         immutable: false
-        item_type: Api::Type::String
+        item_type: !ruby/object:Api::Type::Enum
+          name: 'searchAddOn'
+          description: |
+            The add-on that this search engine enables.
+          values:
+            - :SEARCH_ADD_ON_LLM
   - !ruby/object:Api::Type::NestedObject
     name: 'commonConfig'
     description: |
