@@ -76,11 +76,14 @@ parameters:
     immutable: true
     url_param_only: true
 properties:
-  - !ruby/object:Api::Type::String
+  - !ruby/object:Api::Type::Enum
     name: 'industryVertical'
     description: |
-      Industry Vertical
+      The industry vertical that the chat engine registers.
+    values:
+      - :GENERIC
     immutable: true
+    required: true
   - !ruby/object:Api::Type::String
     name: 'displayName'
     description: |
