@@ -427,6 +427,5 @@ virtual_fields:
       - :DEFAULT
       - :FORCE
     default_value: :DEFAULT
-    ignore_read: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_delete: templates/terraform/pre_delete/netapp_volume_force_delete.go.erb
