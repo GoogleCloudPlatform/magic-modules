@@ -204,6 +204,7 @@ properties:
     name: "destinationVolumeParameters"
     description: |-
       Destination volume parameters.
+    immutable: true
     ignore_read: true
     properties:
       - !ruby/object:Api::Type::String
@@ -247,7 +248,6 @@ virtual_fields:
     description: |
       Delete destination volume when replication resource is destroyed? Default is false.
     default_value: false
-    ignore_read: true
   - !ruby/object:Api::Type::Boolean
     name: "replication_enabled"
     description: |
@@ -257,7 +257,6 @@ virtual_fields:
       Set to true to enable/resume the mirror. WARNING: Resuming a mirror overwrites any changes
       done to the destination volume with the content of the source volume.
     default_value: true
-    ignore_read: true
   - !ruby/object:Api::Type::Boolean
     name: "force_stopping"
     description: |
@@ -266,7 +265,6 @@ virtual_fields:
       to stop anyway. All data transferred to the destination will be discarded and content of destination
       volume will remain at the state of the last successful update. Default is false.
     default_value: false
-    ignore_read: true
   - !ruby/object:Api::Type::Boolean
     name: "wait_for_mirror"
     description: |
@@ -274,7 +272,6 @@ virtual_fields:
       for mirror_state to reach MIRRORED. If you want Terraform to wait for the mirror to finish one
       create/stop/resume operations, set this parameter to true. Default is false.
     default_value: false
-    ignore_read: true
 # The following functionality needs to be discussed in review process
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/netapp_volume_replication.go.erb
