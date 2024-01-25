@@ -209,7 +209,7 @@ func (c *ComputeBackendServiceConverter) convertResourceData(asset *caiasset.Ass
 
 	assetResourceData := asset.Resource.Data
 
-	hcl, _ := resourceComputeBackendServiceRead(assetResourceData, config)
+	hcl, _ := flattenComputeBackendService(assetResourceData, config)
 
 	ctyVal, err := common.MapToCtyValWithSchema(hcl, c.schema)
 	if err != nil {
@@ -224,7 +224,7 @@ func (c *ComputeBackendServiceConverter) convertResourceData(asset *caiasset.Ass
 	}, nil
 }
 
-func resourceComputeBackendServiceRead(resource map[string]interface{}, config *transport_tpg.Config) (map[string]interface{}, error) {
+func flattenComputeBackendService(resource map[string]interface{}, config *transport_tpg.Config) (map[string]interface{}, error) {
 	result := make(map[string]interface{})
 	var resource_data *schema.ResourceData = nil
 
