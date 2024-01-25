@@ -102,10 +102,7 @@ properties:
     name: 'dataStoreIds'
     min_size: 1
     description: |
-      Data Store IDs, Data Stores cannot be removed once added.
-      Removing a Data Store from Chat Engine will result in error.
-      To resolve error, first use `terraform refresh` command to correct state,
-      then revert the code change to ensure graceful teardown.
+      Data Store IDs, currently modification of Data Stores after creation is not supported.
     required: true
     item_type: Api::Type::String
     immutable: true
