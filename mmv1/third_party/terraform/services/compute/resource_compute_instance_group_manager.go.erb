@@ -1271,10 +1271,6 @@ func expandUpdatePolicy(configured []interface{}) *compute.InstanceGroupManagerU
 	return updatePolicy
 }
 
-func flattenCreationTimestamp(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	return v
-}
-
 func flattenAutoHealingPolicies(autoHealingPolicies []*compute.InstanceGroupManagerAutoHealingPolicy) []map[string]interface{} {
 	autoHealingPoliciesSchema := make([]map[string]interface{}, 0, len(autoHealingPolicies))
 	for _, autoHealingPolicy := range autoHealingPolicies {
