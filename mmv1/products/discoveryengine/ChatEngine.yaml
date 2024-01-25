@@ -98,6 +98,7 @@ properties:
       then revert the code change to ensure graceful teardown.
     required: true
     item_type: Api::Type::String
+    immutable: true
   - !ruby/object:Api::Type::Enum
     name: 'solutionType'
     description: |
@@ -134,7 +135,6 @@ properties:
             name: 'business'
             description: |
               Business Name
-            required: true
           - !ruby/object:Api::Type::String
             name: 'defaultLanguageCode'
             description: |
@@ -149,19 +149,16 @@ properties:
             name: 'location'
             description: |
               location
-            required: true
   - !ruby/object:Api::Type::NestedObject
     name: 'commonConfig'
     description: |
       Configurations for a chat Engine.
-    required: true
     immutable: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'companyName'
         description: |
           The name of the company, business or entity that is associated with the engine
-        required: true
         immutable: true
   - !ruby/object:Api::Type::NestedObject
     name: 'chatEngineMetadata'
