@@ -1,6 +1,6 @@
 resource "google_firestore_index" "<%= ctx[:primary_resource_id] %>" {
-  project = "<%= ctx[:test_env_vars]['project_id'] %>"
-
+  project    = "<%= ctx[:test_env_vars]['project_id'] %>"
+  database   = "(default)"
   collection = "chatrooms"
 
   query_scope = "COLLECTION_RECURSIVE"
@@ -15,5 +15,4 @@ resource "google_firestore_index" "<%= ctx[:primary_resource_id] %>" {
     field_path = "description"
     order      = "DESCENDING"
   }
-
 }
