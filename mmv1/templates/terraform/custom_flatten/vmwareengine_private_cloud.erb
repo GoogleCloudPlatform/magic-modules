@@ -17,8 +17,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
 	// We only record the value present when the resource was created.
 
 	// Return the value set in the config
-	val, ok := d.GetOkExists("type")
-	if ok {
+	if val, ok := d.GetOkExists("type"); ok {
 		return val
 	}
 
