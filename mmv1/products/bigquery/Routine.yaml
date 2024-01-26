@@ -73,6 +73,12 @@ examples:
       dataset_id: 'dataset_id'
       connection_id: 'connection_id'
       routine_id: 'routine_id'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'big_query_routine_data_governance_type'
+    primary_resource_id: 'data_governance_type'
+    vars:
+      dataset_id: 'dataset_id'
+      routine_id: 'routine_id'
 properties:
   - !ruby/object:Api::Type::NestedObject
     name: routineReference
