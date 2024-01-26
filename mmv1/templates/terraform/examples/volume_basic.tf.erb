@@ -13,6 +13,7 @@ resource "google_netapp_volume" "<%= ctx[:primary_resource_id] %>" {
   share_name = "<%= ctx[:vars]['volume_name'] %>"
   storage_pool = google_netapp_storage_pool.default.name
   protocols = ["NFSV3"]
+  deletion_policy = "DEFAULT"
 }
 
 data "google_compute_network" "default" {

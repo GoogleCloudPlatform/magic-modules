@@ -59,6 +59,8 @@ examples:
       volume_name: 'test-volume'
       pool_name: 'test-pool'
       network_name: 'test-network'
+    ignore_read_extra:
+      - "deletion_policy"
     test_vars_overrides:
       network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-1", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
 properties:
@@ -203,7 +205,7 @@ properties:
     name: 'description'
     description: |
       An optional description of this resource.
-  # We want to get rid of this. Please don't expose.
+  # Use of snapReserve is depricated. We don't expose it intentially.
   # - !ruby/object:Api::Type::Integer
   #   name: 'snapReserve'
   #   description: |
@@ -414,3 +416,16 @@ properties:
 #       description: |-
 #         Full name of the snapshot resource. Format: `projects/{{project}}/locations/{{location}}/volumes/{{volume}}/snapshots/{{snapshot}}`.
 #       required: true
+virtual_fields:
+  - !ruby/object:Api::Type::Enum
+    name: 'deletion_policy'
+    description: |
+      Policy to determine if the volume should be deleted forcefully.
+      Volumes may have nested snapshot resources. Deleting such a volume will fail.
+      Setting this parameter to FORCE will delete volumes including nested snapshots.
+    values:
+      - :DEFAULT
+      - :FORCE
+    default_value: :DEFAULT
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_delete: templates/terraform/pre_delete/netapp_volume_force_delete.go.erb
