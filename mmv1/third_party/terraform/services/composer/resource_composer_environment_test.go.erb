@@ -1203,11 +1203,13 @@ func TestAccComposerEnvironmentComposer3_withNetworkAttachment(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComposerEnvironmentComposer3_withNetworkAttachment(envName, networkAttachment, network, subnetwork),
+				ExpectNonEmptyPlan: true, // Composer 3 is modifying network attachment out of terraform, ignoring nonempty plan for now
 			},
 			{
 				ResourceName:       "google_composer_environment.test",
 				ImportState:        true,
 				ImportStateVerify:  true,
+				ExpectNonEmptyPlan: true,
 			},
 			// This is a terrible clean-up step in order to get destroy to succeed,
 			// due to dangling firewall rules left by the Composer Environment blocking network deletion.
@@ -1216,6 +1218,7 @@ func TestAccComposerEnvironmentComposer3_withNetworkAttachment(t *testing.T) {
 				PlanOnly:           true,
 				Config:             testAccComposerEnvironmentComposer3_withNetworkAttachment(envName, fullFormNetworkAttachmentName, network, subnetwork),
 				Check:              testAccCheckClearComposerEnvironmentFirewalls(t, network),
+				ExpectNonEmptyPlan: true,
 			},
 		},
 	})
