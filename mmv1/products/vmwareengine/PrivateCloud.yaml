@@ -291,7 +291,7 @@ properties:
     description: |
       Initial type of the private cloud.
     immutable: true
-    ignore_read: true
+    custom_flatten: templates/terraform/custom_flatten/vmwareengine_private_cloud.erb
     values:
       - :STANDARD
       - :TIME_LIMITED
