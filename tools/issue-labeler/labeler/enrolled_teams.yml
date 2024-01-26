@@ -531,6 +531,9 @@ service/run:
 service/secretmanager:
   resources:
   - google_secret_manager_.*
+service/securesourcemanager:
+  resources:
+  - google_secure_source_manager_.*
 service/securitycenter:
   resources:
   - google_scc_.*
