@@ -124,7 +124,7 @@ properties:
           - !ruby/object:Api::Type::String
             name: 'business'
             description: |
-              Business Name
+              Name of the company, organization or other entity that the agent represents. Used for knowledge connector LLM prompt and for knowledge search.
           - !ruby/object:Api::Type::String
             name: 'defaultLanguageCode'
             description: |
