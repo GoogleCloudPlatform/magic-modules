@@ -4,7 +4,7 @@ description: |-
   Get a service attachment in a Google Cloud project.
 ---
 
-# google\_compute\_service_attachment
+# google\_compute\_service\_attachment
 
 Get a service attachment  in a specified Google Cloud project
 
