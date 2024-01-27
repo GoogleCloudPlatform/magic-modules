@@ -3,7 +3,7 @@ package compute
 import (
 	"testing"
 
-	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestResolveImage_NotPanicWhenClientIsNil(t *testing.T) {
