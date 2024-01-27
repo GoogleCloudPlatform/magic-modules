@@ -94,7 +94,7 @@ resource "google_compute_forwarding_rule" "psc_ilb_target_service" {
 
   resource "google_compute_region_backend_service" "producer_service_backend" {
 	name   = "producer-service"
-	region = "us-west2"
+	region = "us-west1"
   
 	health_checks = [google_compute_health_check.producer_service_health_check.id]
   }
