@@ -21,7 +21,7 @@ func DataSourceGoogleComputeAttachment() *schema.Resource {
 
 			"project": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 			"name": {
 				Type:     schema.TypeString,
@@ -29,7 +29,7 @@ func DataSourceGoogleComputeAttachment() *schema.Resource {
 			},
 			"region": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 		},
 	}
