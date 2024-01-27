@@ -131,6 +131,7 @@ resource "google_compute_forwarding_rule" "psc_ilb_target_service" {
   }
 data "google_compute_service_attachment" "my_attachment" {
   name = google_compute_service_attachment.foobar.name
+  region = google_compute_service_attachment.foobar.region
 }
 `, name)
 }

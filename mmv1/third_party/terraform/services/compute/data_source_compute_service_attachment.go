@@ -29,7 +29,7 @@ func DataSourceGoogleComputeAttachment() *schema.Resource {
 			},
 			"region": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 			},
 		},
 	}
