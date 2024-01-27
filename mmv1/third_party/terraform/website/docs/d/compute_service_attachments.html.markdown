@@ -8,6 +8,11 @@ description: |-
 
 Get a service attachment  in a specified Google Cloud project
 
+To get more information about service attachment, see:
+
+* [API documentation](https://cloud.google.com/compute/docs/reference/rest/v1/serviceAttachments/)
+* How-to Guides
+    * [Official Documentation](https://cloud.google.com/vpc/docs/configure-private-service-connect-producer)
 ## Example Usage
 
 ```tf
