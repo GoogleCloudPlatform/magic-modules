@@ -65,7 +65,6 @@ func testAccDiscoveryEngineChatEngine_discoveryengineChatengineBasicExample_basi
 			business = "test business name"
 			default_language_code = "en"
 			time_zone = "America/Los_Angeles"
-			location = "global"
 		  }
 		}
 	}
@@ -107,7 +106,6 @@ func testAccDiscoveryEngineChatEngine_discoveryengineChatengineBasicExample_upda
 			business = "test business name"
 			default_language_code = "en"
 			time_zone = "America/Los_Angeles"
-			location = "global"
 		  }
 		}
 	}

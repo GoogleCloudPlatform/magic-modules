@@ -54,14 +54,6 @@ parameters:
     immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::String
-    name: 'name'
-    description: |
-      The unique full resource name of the chat engine. Values are of the format
-      `projects/{project}/locations/{location}/collections/{collection_id}/engines/{engine_id}`.
-      This field must be a UTF-8 encoded string with a length limit of 1024
-      characters.
-    output: true
-  - !ruby/object:Api::Type::String
     name: 'collection_id'
     description: |
       The collection ID.
@@ -76,6 +68,14 @@ parameters:
     immutable: true
     url_param_only: true
 properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description: |
+      The unique full resource name of the chat engine. Values are of the format
+      `projects/{project}/locations/{location}/collections/{collection_id}/engines/{engine_id}`.
+      This field must be a UTF-8 encoded string with a length limit of 1024
+      characters.
+    output: true
   - !ruby/object:Api::Type::Enum
     name: 'industryVertical'
     description: |
@@ -83,7 +83,7 @@ properties:
     values:
       - :GENERIC
     immutable: true
-    required: true
+    default_value: :GENERIC
   - !ruby/object:Api::Type::String
     name: 'displayName'
     description: |
@@ -135,10 +135,10 @@ properties:
             description: |
               time zone
             required: true
-          - !ruby/object:Api::Type::String
-            name: 'location'
-            description: |
-              location
+          # - !ruby/object:Api::Type::String
+          #   name: 'location'
+          #   description: |
+          #     location
   - !ruby/object:Api::Type::NestedObject
     name: 'commonConfig'
     description: |
