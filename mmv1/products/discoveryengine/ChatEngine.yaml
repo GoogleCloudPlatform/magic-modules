@@ -142,7 +142,7 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: 'commonConfig'
     description: |
-      Configurations for a chat Engine.
+      Common config spec that specifies the metadata of the engine.
     immutable: true
     properties:
       - !ruby/object:Api::Type::String
