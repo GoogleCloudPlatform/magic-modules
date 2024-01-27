@@ -80,6 +80,17 @@ resource "google_compute_service_attachment" "foobar" {
   target_service           = google_compute_forwarding_rule.psc_ilb_target_service.id
 }
 
+resource "google_compute_forwarding_rule" "psc_ilb_target_service" {
+	name   = "producer-forwarding-rule"
+	region = "us-west1"
+  
+	load_balancing_scheme = "INTERNAL"
+	backend_service       = google_compute_region_backend_service.producer_service_backend.id
+	all_ports             = true
+	network               = google_compute_network.psc_ilb_network.name
+	subnetwork            = google_compute_subnetwork.psc_ilb_producer_subnetwork.name
+  }
+
   resource "google_compute_region_backend_service" "producer_service_backend" {
 	name   = "producer-service"
 	region = "us-west2"
