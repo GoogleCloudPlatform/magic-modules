@@ -133,7 +133,7 @@ properties:
           - !ruby/object:Api::Type::String
             name: 'timeZone'
             description: |
-              time zone
+              The time zone of the agent from the [time zone database](https://www.iana.org/time-zones), e.g., America/New_York, Europe/Paris.
             required: true
           - !ruby/object:Api::Type::String
             name: 'location'
