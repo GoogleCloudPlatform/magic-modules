@@ -148,7 +148,7 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'companyName'
         description: |
-          The name of the company, business or entity that is associated with the engine
+          The name of the company, business or entity that is associated with the engine. Setting this may help improve LLM related features.
         immutable: true
   - !ruby/object:Api::Type::NestedObject
     name: 'chatEngineMetadata'
