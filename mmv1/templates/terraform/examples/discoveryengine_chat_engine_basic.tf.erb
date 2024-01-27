@@ -10,7 +10,7 @@ resource "google_discovery_engine_data_store" "data_store" {
 resource "google_discovery_engine_chat_engine" "<%= ctx[:primary_resource_id] %>" {
   engine_id = "<%= ctx[:primary_resource_id] %>"
   collection_id = "default_collection"
-  location = "global"
+  location = google_discovery_engine_data_store.data_store.location
   display_name = "test desplay name"
   industry_vertical = google_discovery_engine_data_store.data_store.industry_vertical
   data_store_ids = [google_discovery_engine_data_store.data_store.data_store_id, google_discovery_engine_data_store.data_store_2.data_store_id]
