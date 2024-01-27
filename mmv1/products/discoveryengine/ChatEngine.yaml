@@ -135,10 +135,10 @@ properties:
             description: |
               time zone
             required: true
-          # - !ruby/object:Api::Type::String
-          #   name: 'location'
-          #   description: |
-          #     location
+          - !ruby/object:Api::Type::String
+            name: 'location'
+            description: |
+              Agent location for Agent creation, currently supported values: global/us/eu, it needs to be the same region as the Chat Engine.
   - !ruby/object:Api::Type::NestedObject
     name: 'commonConfig'
     description: |
