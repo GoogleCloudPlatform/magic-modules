@@ -1,0 +1,431 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'Volume'
+description: |
+  A volume is a file system container in a storage pool that stores application, database, and user data.
+
+  You can create a volume's capacity using the available capacity in the storage pool and you can define and resize the capacity without disruption to any processes.
+
+  Storage pool settings apply to the volumes contained within them automatically.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Quickstart': 'https://cloud.google.com/netapp/volumes/docs/get-started/quickstarts/create-volume'
+    'Documentation': 'https://cloud.google.com/netapp/volumes/docs/configure-and-use/volumes/overview'
+  api: 'https://cloud.google.com/netapp/volumes/docs/reference/rest/v1/projects.locations.volumes'
+base_url: projects/{{project}}/locations/{{location}}/volumes
+self_link: projects/{{project}}/locations/{{location}}/volumes/{{name}}
+create_url: projects/{{project}}/locations/{{location}}/volumes?volumeId={{name}}
+update_url: projects/{{project}}/locations/{{location}}/volumes/{{name}}
+update_verb: :PATCH
+update_mask: true
+autogen_async: true
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    base_url: '{{op_id}}'
+id_format: 'projects/{{project}}/locations/{{location}}/volumes/{{name}}'
+import_format: ['projects/{{project}}/locations/{{location}}/volumes/{{name}}']
+parameters:
+  - !ruby/object:Api::Type::String
+    name: 'location'
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      Name of the pool location. Usually a region name, expect for some STANDARD service level pools which require a zone name.
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description:
+      The name of the volume. Needs to be unique per location.
+    required: true
+    immutable: true
+    url_param_only: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'volume_basic'
+    primary_resource_id: 'test_volume'
+    vars:
+      volume_name: 'test-volume'
+      pool_name: 'test-pool'
+      network_name: 'test-network'
+    ignore_read_extra:
+      - "deletion_policy"
+    test_vars_overrides:
+      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-1", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'shareName'
+    description: |
+      Share name (SMB) or export path (NFS) of the volume. Needs to be unique per location.
+    required: true
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: 'psaRange'
+    description: |
+      Name of the Private Service Access allocated range. Inherited from storage pool.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'storagePool'
+    description: |
+      Name of the storage pool to create the volume in. Pool needs enough spare capacity to accomodate the volume.
+    required: true
+  - !ruby/object:Api::Type::String
+    name: 'network'
+    description: |
+      VPC network name with format: `projects/{{project}}/global/networks/{{network}}`. Inherited from storage pool.
+    output: true
+  - !ruby/object:Api::Type::Enum
+    name: 'serviceLevel'
+    description: |
+      Service level of the volume. Inherited from storage pool.
+    values:
+      - :SERVICE_LEVEL_UNSPECIFIED
+      - :PREMIUM
+      - :EXTREME
+      - :STANDARD
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'capacityGib'
+    description: |
+      Capacity of the volume (in GiB).
+    required: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'exportPolicy'
+    description: |-
+      Export policy of the volume for NFSV3 and/or NFSV4.1 access.
+    properties:
+      - !ruby/object:Api::Type::Array
+        name: 'rules'
+        description: |-
+          Export rules (up to 5) control NFS volume access.
+        required: true
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'allowedClients'
+              description: |-
+                Defines the client ingress specification (allowed clients) as a comma seperated list with IPv4 CIDRs or IPv4 host addresses.
+            - !ruby/object:Api::Type::String
+              name: 'hasRootAccess'
+              description: |-
+                 If enabled, the root user (UID = 0) of the specified clients doesn't get mapped to nobody (UID = 65534). This is also known as no_root_squash.
+            - !ruby/object:Api::Type::Enum
+              name: 'accessType'
+              description: |
+                Defines the access type for clients matching the `allowedClients` specification.
+              values:
+                - :READ_ONLY
+                - :READ_WRITE
+                - :READ_NONE
+            - !ruby/object:Api::Type::Boolean
+              name: 'nfsv3'
+              description: |
+                Enable to apply the export rule to NFSV3 clients.
+            - !ruby/object:Api::Type::Boolean
+              name: 'nfsv4'
+              description: |
+                Enable to apply the export rule to NFSV4.1 clients.
+            - !ruby/object:Api::Type::Boolean
+              name: 'kerberos5ReadOnly'
+              description: |
+                If enabled (true) the rule defines a read only access for clients matching the 'allowedClients' specification. It enables nfs clients to mount using 'authentication' kerberos security mode.
+            - !ruby/object:Api::Type::Boolean
+              name: 'kerberos5ReadWrite'
+              description: |
+                If enabled (true) the rule defines read and write access for clients matching the 'allowedClients' specification. It enables nfs clients to mount using 'authentication' kerberos security mode. The 'kerberos5ReadOnly' value is ignored if this is enabled.
+            - !ruby/object:Api::Type::Boolean
+              name: 'kerberos5iReadOnly'
+              description: |
+                If enabled (true) the rule defines a read only access for clients matching the 'allowedClients' specification. It enables nfs clients to mount using 'integrity' kerberos security mode.
+            - !ruby/object:Api::Type::Boolean
+              name: 'kerberos5iReadWrite'
+              description: |
+                If enabled (true) the rule defines read and write access for clients matching the 'allowedClients' specification. It enables nfs clients to mount using 'integrity' kerberos security mode. The 'kerberos5iReadOnly' value is ignored if this is enabled.
+            - !ruby/object:Api::Type::Boolean
+              name: 'kerberos5pReadOnly'
+              description: |
+                If enabled (true) the rule defines a read only access for clients matching the 'allowedClients' specification. It enables nfs clients to mount using 'privacy' kerberos security mode.
+            - !ruby/object:Api::Type::Boolean
+              name: 'kerberos5pReadWrite'
+              description: |
+                If enabled (true) the rule defines read and write access for clients matching the 'allowedClients' specification. It enables nfs clients to mount using 'privacy' kerberos security mode. The 'kerberos5pReadOnly' value is ignored if this is enabled.
+  - !ruby/object:Api::Type::Array
+    name: 'protocols'
+    description: |
+      The protocol of the volume. Allowed combinations are `['NFSV3']`, `['NFSV4']`, `['SMB']`, `['NFSV3', 'NFSV4']`, `['SMB', 'NFSV3']` and `['SMB', 'NFSV4']`.
+    required: true
+    immutable: true
+    item_type: !ruby/object:Api::Type::Enum
+      name: 'protocols'
+      description: |
+        Access protocol types.
+      values:
+        - :NFSV3
+        - :NFSV4
+        - :SMB
+  - !ruby/object:Api::Type::Array
+    name: 'smbSettings'
+    description: |
+      Settings for volumes with SMB access.
+    item_type: !ruby/object:Api::Type::Enum
+      name: 'smbSettings'
+      description: |
+        Settings for volumes with SMB access.
+      values:
+        - :ENCRYPT_DATA
+        - :BROWSABLE
+        - :CHANGE_NOTIFY
+        - :NON_BROWSABLE
+        - :OPLOCKS
+        - :SHOW_SNAPSHOT
+        - :SHOW_PREVIOUS_VERSIONS
+        - :ACCESS_BASED_ENUMERATION
+        - :CONTINUOUSLY_AVAILABLE
+  - !ruby/object:Api::Type::String
+    name: 'unixPermissions'
+    description: |
+      Unix permission the mount point will be created with. Default is 0770. Applicable for UNIX security style volumes only.
+    default_from_api: true
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: 'labels'
+    description: |
+      Labels as key value pairs. Example: `{ "owner": "Bob", "department": "finance", "purpose": "testing" }`.
+  - !ruby/object:Api::Type::String
+    name: 'description'
+    description: |
+      An optional description of this resource.
+  # Use of snapReserve is depricated. We don't expose it intentially.
+  # - !ruby/object:Api::Type::Integer
+  #   name: 'snapReserve'
+  #   description: |
+  #     Snap_reserve specifies percentage of volume storage reserved for snapshot storage. Default is 0 percent. Use is deprecated.
+  - !ruby/object:Api::Type::Boolean
+    name: 'snapshotDirectory'
+    description: |
+      If enabled, a NFS volume will contain a read-only .snapshot directory which provides access to each of the volume's snapshots. Will enable "Previous Versions" support for SMB.
+  - !ruby/object:Api::Type::String
+    name: 'usedGib'
+    description: |
+      Used capacity of the volume (in GiB). This is computed periodically and it does not represent the realtime usage.
+    output: true
+  - !ruby/object:Api::Type::Enum
+    name: 'securityStyle'
+    description: |
+      Security Style of the Volume. Use UNIX to use UNIX or NFSV4 ACLs for file permissions.
+      Use NTFS to use NTFS ACLs for file permissions. Can only be set for volumes which use SMB together with NFS as protocol.
+    values:
+      - :NTFS
+      - :UNIX
+    immutable: true
+    default_from_api: true
+  - !ruby/object:Api::Type::Boolean
+    name: 'kerberosEnabled'
+    description: |
+      Flag indicating if the volume is a kerberos volume or not, export policy rules control kerberos security modes (krb5, krb5i, krb5p).
+    immutable: true
+    default_value: false
+  - !ruby/object:Api::Type::Boolean
+    name: ldapEnabled
+    description: |
+      Flag indicating if the volume is NFS LDAP enabled or not. Inherited from storage pool.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'activeDirectory'
+    description: |
+      Reports the resource name of the Active Directory policy being used. Inherited from storage pool.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'kmsConfig'
+    description: |
+      Reports the CMEK policy resurce name being used for volume encryption. Inherited from storage pool.
+    output: true
+  - !ruby/object:Api::Type::Enum
+    name: 'encryptionType'
+    description: |
+      Reports the data-at-rest encryption type of the volume. Inherited from storage pool.
+    values:
+      - :ENCRYPTION_TYPE_UNSPECIFIED
+      - :SERVICE_MANAGED
+      - :CLOUD_KMS
+    output: true
+  - !ruby/object:Api::Type::Boolean
+    name: 'hasReplication'
+    description: |
+      Indicates whether the volume is part of a volume replication relationship.
+    output: true
+  - !ruby/object:Api::Type::Array
+    name: 'restrictedActions'
+    description: |
+      List of actions that are restricted on this volume.
+    item_type: !ruby/object:Api::Type::Enum
+      name: 'restrictedActions'
+      description: |
+        Settings for volumes with SMB access.
+      values:
+        - :DELETE
+  - !ruby/object:Api::Type::Array
+    name: 'mountOptions'
+    description: Reports mount instructions for this volume.
+    output: true
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'export'
+          description: Export path of the volume.
+          output: true
+        - !ruby/object:Api::Type::String
+          name: 'exportFull'
+          output: true
+          description: |
+            Full export path of the volume.
+
+            Format for NFS volumes: `<export_ip>:/<shareName>`
+
+            Format for SMB volumes: `\\\\netbios_prefix-four_random_hex_letters.domain_name\\shareName`
+        - !ruby/object:Api::Type::String
+          name: 'instructions'
+          description: Human-readable mount instructions.
+          output: true
+        - !ruby/object:Api::Type::Enum
+          name: 'protocol'
+          description: |
+              Protocol to mount with.
+          values:
+            - :PROTOCOLS_UNSPECIFIED
+            - :NFSV3
+            - :NFSV4
+            - :SMB
+          output: true
+  - !ruby/object:Api::Type::NestedObject
+    name: snapshotPolicy
+    description: |-
+      Snapshot policy defines the schedule for automatic snapshot creation.
+      To disable automatic snapshot creation you have to remove the whole snapshot_policy block.
+    properties:
+      - !ruby/object:Api::Type::Boolean
+        name: 'enabled'
+        description: |-
+          Enables automated snapshot creation according to defined schedule. Default is false.
+          To disable automatic snapshot creation you have to remove the whole snapshot_policy block.
+        default_value: false
+        send_empty_value: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'hourlySchedule'
+        description: |-
+          Hourly schedule policy.
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'snapshotsToKeep'
+            description: |-
+              The maximum number of snapshots to keep for the hourly schedule.
+            required: true
+          - !ruby/object:Api::Type::Integer
+            name: 'minute'
+            description: |-
+              Set the minute of the hour to create the snapshot (0-59), defaults to the top of the hour (0).
+            default_value: 0
+      - !ruby/object:Api::Type::NestedObject
+        name: 'dailySchedule'
+        description: |-
+          Daily schedule policy.
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'snapshotsToKeep'
+            description: |-
+              The maximum number of snapshots to keep for the daily schedule.
+            required: true
+          - !ruby/object:Api::Type::Integer
+            name: 'minute'
+            description: |-
+              Set the minute of the hour to create the snapshot (0-59), defaults to the top of the hour (0).
+            default_value: 0
+          - !ruby/object:Api::Type::Integer
+            name: 'hour'
+            description: |-
+              Set the hour to create the snapshot (0-23), defaults to midnight (0).
+            default_value: 0
+      - !ruby/object:Api::Type::NestedObject
+        name: 'weeklySchedule'
+        description: |-
+          Weekly schedule policy.
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'snapshotsToKeep'
+            description: |-
+              The maximum number of snapshots to keep for the weekly schedule.
+            required: true
+          - !ruby/object:Api::Type::Integer
+            name: 'minute'
+            description: |-
+              Set the minute of the hour to create the snapshot (0-59), defaults to the top of the hour (0).
+            default_value: 0
+          - !ruby/object:Api::Type::Integer
+            name: 'hour'
+            description: |-
+              Set the hour to create the snapshot (0-23), defaults to midnight (0).
+            default_value: 0
+          - !ruby/object:Api::Type::String
+            name: 'day'
+            description: |-
+              Set the day or days of the week to make a snapshot. Accepts a comma separated days of the week. Defaults to 'Sunday'.
+            default_value: 'Sunday'
+      - !ruby/object:Api::Type::NestedObject
+        name: 'monthlySchedule'
+        description: |-
+          Monthly schedule policy.
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'snapshotsToKeep'
+            description: |-
+              The maximum number of snapshots to keep for the monthly schedule
+            required: true
+          - !ruby/object:Api::Type::Integer
+            name: 'minute'
+            description: |-
+              Set the minute of the hour to create the snapshot (0-59), defaults to the top of the hour (0).
+            default_value: 0
+          - !ruby/object:Api::Type::Integer
+            name: 'hour'
+            description: |-
+              Set the hour to create the snapshot (0-23), defaults to midnight (0).
+            default_value: 0
+          - !ruby/object:Api::Type::String
+            name: 'daysOfMonth'
+            description: |-
+              Set the day or days of the month to make a snapshot (1-31). Accepts a comma separated number of days. Defaults to '1'.
+            default_value: '1'
+# This is disabled until we have support for backup resource and can test it.
+# - !ruby/object:Api::Type::NestedObject
+#   name: restoreParameters
+#   description: Specifies the source information to create a volume from.
+#   immutable: true
+#   properties:
+#     - !ruby/object:Api::Type::String
+#       name: 'sourceSnapshot'
+#       description: |-
+#         Full name of the snapshot resource. Format: `projects/{{project}}/locations/{{location}}/volumes/{{volume}}/snapshots/{{snapshot}}`.
+#       required: true
+virtual_fields:
+  - !ruby/object:Api::Type::Enum
+    name: 'deletion_policy'
+    description: |
+      Policy to determine if the volume should be deleted forcefully.
+      Volumes may have nested snapshot resources. Deleting such a volume will fail.
+      Setting this parameter to FORCE will delete volumes including nested snapshots.
+    values:
+      - :DEFAULT
+      - :FORCE
+    default_value: :DEFAULT
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_delete: templates/terraform/pre_delete/netapp_volume_force_delete.go.erb

@@ -60,18 +60,33 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'firestore_field_basic'
     primary_resource_id: 'basic'
+    vars:
+      database_id: 'database-id'
+      delete_protection_state: "DELETE_PROTECTION_ENABLED"
     test_env_vars:
-      project_id: :FIRESTORE_PROJECT_NAME
+      project_id: :PROJECT_NAME
+    test_vars_overrides:
+      delete_protection_state: '"DELETE_PROTECTION_DISABLED"'
   - !ruby/object:Provider::Terraform::Examples
     name: 'firestore_field_timestamp'
     primary_resource_id: 'timestamp'
+    vars:
+      database_id: 'database-id'
+      delete_protection_state: "DELETE_PROTECTION_ENABLED"
     test_env_vars:
-      project_id: :FIRESTORE_PROJECT_NAME
+      project_id: :PROJECT_NAME
+    test_vars_overrides:
+      delete_protection_state: '"DELETE_PROTECTION_DISABLED"'
   - !ruby/object:Provider::Terraform::Examples
     name: 'firestore_field_match_override'
     primary_resource_id: 'match_override'
+    vars:
+      database_id: 'database-id'
+      delete_protection_state: "DELETE_PROTECTION_ENABLED"
     test_env_vars:
-      project_id: :FIRESTORE_PROJECT_NAME
+      project_id: :PROJECT_NAME
+    test_vars_overrides:
+      delete_protection_state: '"DELETE_PROTECTION_DISABLED"'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/index_self_link_as_name_set_project.go.erb
   encoder: templates/terraform/encoders/firestore_field.go.erb

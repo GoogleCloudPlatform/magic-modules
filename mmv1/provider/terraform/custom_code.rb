@@ -19,7 +19,7 @@ require 'google/golang_utils'
 module Provider
   class Terraform
     # Inserts custom code into terraform resources.
-    class CustomCode < Api::Object
+    class CustomCode < Google::YamlValidator
       # Collection of fields allowed in the CustomCode section for
       # Terraform.
 

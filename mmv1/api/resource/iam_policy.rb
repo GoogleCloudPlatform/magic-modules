@@ -16,12 +16,12 @@ require 'google/string_utils'
 
 module Api
   # An object available in the product
-  class Resource < Api::Object::Named
+  class Resource < Api::NamedObject
     # Information about the IAM policy for this resource
     # Several GCP resources have IAM policies that are scoped to
     # and accessed via their parent resource
     # See: https://cloud.google.com/iam/docs/overview
-    class IamPolicy < Api::Object
+    class IamPolicy < Google::YamlValidator
       # boolean of if this binding should be generated
       attr_reader :exclude
 
