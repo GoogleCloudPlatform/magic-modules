@@ -447,6 +447,7 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
    - `self_link` (set to same value as `base_url`)
    - `id_format` (set to same value as `base_url`)
    - `import_format` (including `base_url` value)
+   - `exclude_resource` (set to `true`)
    - `properties`
 2. Follow the MMv1 directions in [Add fields]({{<ref "#add-fields" >}}) to add only the fields used by base_url.
 3. Follow the MMv1 directions in this section to add IAM support.
