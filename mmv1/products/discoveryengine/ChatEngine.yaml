@@ -87,7 +87,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'displayName'
     description: |
-      displayName
+      The display name of the engine. Should be human readable. UTF-8 encoded string with limit of 1024 characters.
     required: true
   - !ruby/object:Api::Type::Array
     name: 'dataStoreIds'
