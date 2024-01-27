@@ -118,7 +118,7 @@ properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'agentCreationConfig'
         description: |
-          Configurations for a chat Engine.
+          The configuration to generate the Dialogflow agent that is associated to this Engine.
         required: true
         properties:
           - !ruby/object:Api::Type::String
