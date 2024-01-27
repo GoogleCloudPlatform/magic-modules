@@ -56,18 +56,10 @@ resource "google_discovery_engine_data_store" "basic" {
 resource "google_discovery_engine_search_engine" "basic" {
   engine_id = "tf-test-example-engine-id%{random_suffix}"
   collection_id = "default_collection"
-  location = "global"
+  location = google_discovery_engine_data_store.basic.location
   display_name = "Example Display Name"
-  industry_vertical = "GENERIC"
   data_store_ids = [google_discovery_engine_data_store.basic.data_store_id]
-  solution_type = "SOLUTION_TYPE_SEARCH"
-  common_config {
-    company_name = "Example Company Name"
-  }
-  search_engine_config {
-    search_tier = "SEARCH_TIER_ENTERPRISE"
-    search_add_ons = ["SEARCH_ADD_ON_LLM"]
-  }
+  industry_vertical = google_discovery_engine_data_store.basic.industry_vertical
 }
 `, context)
 }
@@ -86,18 +78,10 @@ resource "google_discovery_engine_data_store" "basic" {
 resource "google_discovery_engine_search_engine" "basic" {
   engine_id = "tf-test-example-engine-id%{random_suffix}"
   collection_id = "default_collection"
-  location = "global"
+  location = google_discovery_engine_data_store.basic.location
   display_name = "Updated Example Display Name"
-  industry_vertical = "GENERIC"
   data_store_ids = [google_discovery_engine_data_store.basic.data_store_id]
-  solution_type = "SOLUTION_TYPE_SEARCH"
-  common_config {
-    company_name = "Updated Example Company Name"
-  }
-  search_engine_config {
-    search_tier = "SEARCH_TIER_STANDARD"
-    search_add_ons = ["SEARCH_ADD_ON_LLM"]
-  }
+  industry_vertical = google_discovery_engine_data_store.basic.industry_vertical
 }
 `, context)
 }

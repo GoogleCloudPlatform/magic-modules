@@ -28,11 +28,21 @@ delete_url: 'projects/{{project}}/locations/{{location}}/collections/{{collectio
 update_verb: :PATCH
 update_mask: true
 
+autogen_async: true
+
+async: !ruby/object:Api::OpAsync
+  actions: ['create', 'delete']
+  operation: !ruby/object:Api::OpAsync::Operation
+    base_url: '{{op_id}}'
+  result: !ruby/object:Api::OpAsync::Result
+    resource_inside_response: true
+
 import_format:
   [
     'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}',
   ]
-
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  encoder: templates/terraform/encoders/discovery_engine_search_engine_hardcode_solution_type.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "discoveryengine_searchengine_basic"
@@ -67,10 +77,18 @@ parameters:
     url_param_only: true
 
 properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description: |
+      The unique full resource name of the search engine. Values are of the format
+      `projects/{project}/locations/{location}/collections/{collection_id}/engines/{engine_id}`.
+      This field must be a UTF-8 encoded string with a length limit of 1024
+      characters.
+    output: true
   - !ruby/object:Api::Type::Enum
     name: 'industryVertical'
     description: |
-      Industry Vertical
+      The industry vertical that the engine registers. The restriction of the Engine industry vertical is based on DataStore: If unspecified, default to GENERIC. Vertical on Engine has to match vertical of the DataStore liniked to the engine.
     immutable: true
     values:
       - :GENERIC
@@ -78,22 +96,15 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'displayName'
     description: |
-      Display Name
+      Required. The display name of the engine. Should be human readable. UTF-8 encoded string with limit of 1024 characters.
     required: true
   - !ruby/object:Api::Type::Array
     name: 'dataStoreIds'
     description: |
-      Data Store ID
+      The data stores associated with this engine. For SOLUTION_TYPE_SEARCH type of engines, they can only associate with at most one data store.
     required: true
     immutable: true
     item_type: Api::Type::String
-  - !ruby/object:Api::Type::Enum
-    name: 'solutionType'
-    description: |
-      A solution type
-    immutable: true
-    values:
-      - :SOLUTION_TYPE_SEARCH
   - !ruby/object:Api::Type::Time
     name: 'createTime'
     description: |
@@ -108,40 +119,35 @@ properties:
     name: 'searchEngineConfig'
     description: |
       Configurations for a Search Engine.
-    required: false
-    immutable: false
+    default_from_api: true
     properties:
       - !ruby/object:Api::Type::Enum
         name: 'searchTier'
         description: |
-          Search Tier
-        required: false
-        immutable: false
+          The search feature tier of this engine. Defaults to SearchTier.SEARCH_TIER_STANDARD if not specified.
         values:
           - :SEARCH_TIER_STANDARD
           - :SEARCH_TIER_ENTERPRISE
+        default_from_api: true
       - !ruby/object:Api::Type::Array
         name: 'searchAddOns'
         description: |
           The add-on that this search engine enables.
-        required: false
-        immutable: false
         item_type: !ruby/object:Api::Type::Enum
           name: 'searchAddOn'
           description: |
             The add-on that this search engine enables.
           values:
             - :SEARCH_ADD_ON_LLM
+          default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: 'commonConfig'
     description: |
-      Configurations for a Search Engine.
-    required: false
+      Common config spec that specifies the metadata of the engine.
     immutable: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'companyName'
         description: |
-          The name of the company, business or entity that is associated with the engine
-        required: false
+          The name of the company, business or entity that is associated with the engine. Setting this may help improve LLM related features.cd
         immutable: true
