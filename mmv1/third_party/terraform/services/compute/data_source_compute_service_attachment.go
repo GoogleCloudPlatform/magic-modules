@@ -21,7 +21,7 @@ func DataSourceGoogleComputeAttachment() *schema.Resource {
 
 			"project": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 			},
 			"name": {
 				Type:     schema.TypeString,
@@ -30,10 +30,6 @@ func DataSourceGoogleComputeAttachment() *schema.Resource {
 			"region": {
 				Type:     schema.TypeString,
 				Required: true,
-			},
-			"description": {
-				Type:     schema.TypeString,
-				Computed: true,
 			},
 		},
 	}
@@ -60,9 +56,6 @@ func dataSourceGoogleComputeAttachmentRead(d *schema.ResourceData, meta interfac
 	}
 	if err := d.Set("self_link", attachment.SelfLink); err != nil {
 		return fmt.Errorf("Error setting self_link: %s", err)
-	}
-	if err := d.Set("Description", attachment.Description); err != nil {
-		return fmt.Errorf("Error setting description: %s", err)
 	}
 
 	d.SetId(id)

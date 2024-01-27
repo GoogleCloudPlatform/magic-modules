@@ -47,7 +47,6 @@ func testAccDataSourceGoogleServiceAttachmentCheck(data_source_name string, reso
 		attachment_attrs_to_test := []string{
 			"id",
 			"name",
-			"description",
 			"region",
 		}
 
