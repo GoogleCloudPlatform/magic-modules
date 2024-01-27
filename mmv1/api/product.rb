@@ -19,7 +19,7 @@ require 'json'
 
 module Api
   # Represents a product to be managed
-  class Product < Api::Object::Named
+  class Product < Api::NamedObject
     include Compile::Core
 
     # Inherited:
@@ -36,14 +36,14 @@ module Api
 
     # The list of permission scopes available for the service
     # For example: `https://www.googleapis.com/auth/compute`
-    attr_reader :scopes
+    attr_accessor :scopes
 
     # The API versions of this product
-    attr_reader :versions
+    attr_accessor :versions
 
     # The base URL for the service API endpoint
     # For example: `https://www.googleapis.com/compute/v1/`
-    attr_reader :base_url
+    attr_accessor :base_url
 
     # A function reference designed for the rare case where you
     # need to use retries in operation calls. Used for the service api
@@ -101,6 +101,8 @@ module Api
         @display_name
       end
     end
+
+    attr_writer :display_name
 
     # Most general version that exists for the product
     # If GA is present, use that, else beta, else alpha

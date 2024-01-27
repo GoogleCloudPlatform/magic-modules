@@ -27,11 +27,7 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ':'
   parent_resource_attribute: 'name'
   base_url: projects/{{project}}/locations/{{location}}/services/{{name}}
-  import_format:
-    [
-      'projects/{{project}}/locations/{{location}}/services/{{name}}',
-      '{{name}}',
-    ]
+  import_format: ['projects/{{project}}/locations/{{location}}/services/{{name}}', '{{name}}']
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
@@ -56,9 +52,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_basic'
     primary_resource_id: 'default'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-service%s\",
-      context[\"\
-      random_suffix\"])"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-service%s\", context[\"random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
   - !ruby/object:Provider::Terraform::Examples
@@ -69,9 +63,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_sql'
     primary_resource_id: 'default'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
-      context[\"random_suffix\"\
-      ])"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
       secret_id: 'secret-1'
@@ -84,9 +76,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_vpcaccess'
     primary_resource_id: 'default'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
-      context[\"random_suffix\"\
-      ])"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
       vpc_access_connector_name: 'run-vpc'
@@ -95,25 +85,19 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_directvpc'
     primary_resource_id: 'default'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
-      context[\"random_suffix\"\
-      ])"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_probes'
     primary_resource_id: 'default'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
-      context[\"random_suffix\"\
-      ])"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_service_secret'
     primary_resource_id: 'default'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
-      context[\"random_suffix\"\
-      ])"
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\", context[\"random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
       secret_id: 'secret-1'
@@ -125,6 +109,21 @@ examples:
       random_suffix\"])"
     vars:
       cloud_run_service_name: 'cloudrun-service'
+
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudrunv2_service_mount_gcs'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-service-%s\", context[\"random_suffix\"])"
+    vars:
+      cloud_run_service_name: 'cloudrun-service'
+
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudrunv2_service_mount_nfs'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-service-%s\", context[\"random_suffix\"])"
+    vars:
+      cloud_run_service_name: 'cloudrun-service'
+
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -554,6 +553,17 @@ properties:
                         The name of the service to place in the gRPC HealthCheckRequest
                         (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
                         If this is not specified, the default behavior is defined by gRPC.
+                - !ruby/object:Api::Type::NestedObject
+                  name: tcpSocket
+                  description: TCPSocketAction describes an action based on opening a socket
+                  properties:
+                    - !ruby/object:Api::Type::Integer
+                      name: port
+                      description: |-
+                        Port number to access on the container. Must be in the range 1 to 65535.
+                        If not specified, defaults to the exposed port of the container, which
+                        is the value of container.ports[0].containerPort.
+                      required: true
             - !ruby/object:Api::Type::NestedObject
               name: 'startupProbe'
               description: |-
@@ -585,8 +595,7 @@ properties:
                   description: |-
                     HTTPGet specifies the http request to perform. Exactly one of HTTPGet or TCPSocket must be specified.
                   send_empty_value: true
-                  allow_empty_object:
-                    true
+                  allow_empty_object: true
                     # exactly_one_of:
                     #   - template.0.containers.0.startupProbe.0.httpGet
                     #   - template.0.containers.0.startupProbe.0.tcpSocket
@@ -625,8 +634,7 @@ properties:
                   description: |-
                     TCPSocket specifies an action involving a TCP port. Exactly one of HTTPGet or TCPSocket must be specified.
                   send_empty_value: true
-                  allow_empty_object:
-                    true
+                  allow_empty_object: true
                     # exactly_one_of:
                     #   - template.0.containers.0.startupProbe.0.httpGet
                     #   - template.0.containers.0.startupProbe.0.tcpSocket
@@ -749,7 +757,35 @@ properties:
                 - !ruby/object:Api::Type::String
                   name: 'sizeLimit'
                   description: |-
-                      Limit on the storage usable by this EmptyDir volume. The size limit is also applicable for memory medium. The maximum usage on memory medium EmptyDir would be the minimum value between the SizeLimit specified here and the sum of memory limits of all containers in a pod. This field's values are of the 'Quantity' k8s type: https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/. The default is nil which means that the limit is undefined. More info: https://kubernetes.io/docs/concepts/storage/volumes/#emptydir.
+                    Limit on the storage usable by this EmptyDir volume. The size limit is also applicable for memory medium. The maximum usage on memory medium EmptyDir would be the minimum value between the SizeLimit specified here and the sum of memory limits of all containers in a pod. This field's values are of the 'Quantity' k8s type: https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/. The default is nil which means that the limit is undefined. More info: https://kubernetes.io/docs/concepts/storage/volumes/#emptydir.
+            - !ruby/object:Api::Type::NestedObject
+              name: gcs
+              description: Represents a GCS Bucket mounted as a volume.
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: bucket
+                  description: GCS Bucket name
+                  required: true
+                - !ruby/object:Api::Type::Boolean
+                  name: readOnly
+                  description: If true, mount the GCS bucket as read-only
+                  required: false
+            - !ruby/object:Api::Type::NestedObject
+              name: nfs
+              description: Represents an NFS mount.
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: server
+                  description: Hostname or IP address of the NFS server
+                  required: true
+                - !ruby/object:Api::Type::String
+                  name: path
+                  description: Path that is exported by the NFS server.
+                  required: true
+                - !ruby/object:Api::Type::Boolean
+                  name: readOnly
+                  description: If true, mount the NFS volume as read only
+                  required: false
       - !ruby/object:Api::Type::Enum
         name: 'executionEnvironment'
         description: |-
