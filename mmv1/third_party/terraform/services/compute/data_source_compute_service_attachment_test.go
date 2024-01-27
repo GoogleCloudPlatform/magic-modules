@@ -75,6 +75,7 @@ resource "google_compute_service_attachment" "foobar" {
   name                     = "%s"
   description              = "my-description"
   region                   = "us-west1"
+  enable_proxy_protocol    = true
   connection_preference    = "ACCEPT_AUTOMATIC"
   nat_subnets              = [google_compute_subnetwork.psc_ilb_nat.id]
   target_service           = google_compute_forwarding_rule.psc_ilb_target_service.id
