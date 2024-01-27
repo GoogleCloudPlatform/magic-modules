@@ -79,7 +79,7 @@ properties:
   - !ruby/object:Api::Type::Enum
     name: 'industryVertical'
     description: |
-      The industry vertical that the chat engine registers.
+      The industry vertical that the chat engine registers. Vertical on Engine has to match vertical of the DataStore linked to the engine.
     values:
       - :GENERIC
     immutable: true
