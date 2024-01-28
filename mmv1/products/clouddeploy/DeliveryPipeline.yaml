@@ -1,0 +1,178 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'DeliveryPipeline'
+description: |
+  A DeliveryPipeline defines a pipeline through which a Skaffold configuration can progress.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Deploy an app to GKE using Cloud Deploy': 'https://cloud.google.com/deploy/docs/deploy-app-gke'
+    'Deploy an app to Cloud Run using Cloud Deploy': 'https://cloud.google.com/deploy/docs/deploy-app-run'
+    'Create a pipeline and release in the Google Cloud console': 'https://cloud.google.com/deploy/docs/deploy-app-in-console'
+  api: 'https://cloud.google.com/deploy/docs/api/reference/rest/v1/projects.locations.deliveryPipelines'
+base_url: 'projects/{{project}}/locations/{{location}}/deliveryPipelines'
+self_link: 'projects/{{project}}/locations/{{location}}/deliveryPipelines/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/deliveryPipelines?deliveryPipelineId={{name}}'
+update_verb: :PATCH
+update_mask: true
+autogen_async: true
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+    resource_inside_response: false
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'
+id_format: 'projects/{{project}}/locations/{{location}}/deliveryPipelines/{{name}}'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/deliveryPipelines/{{name}}'
+iam_policy: !ruby/object:Api::Resource::IamPolicy
+  parent_resource_attribute: 'name'
+  method_name_separator: ':'
+  base_url: 'projects/{{project}}/locations/{{location}}/deliveryPipelines/{{name}}'
+  import_format: ['projects/{{project}}/locations/{{location}}/deliveryPipelines/{{name}}', '{{name}}']
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'clouddeploy_delivery_pipeline_basic'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-cd-delivery-pipeline%s", context["random_suffix"])'
+    vars:
+      delivery_pipeline: 'cd-delivery-pipeline'
+parameters:
+  - !ruby/object:Api::Type::String
+    name: 'location'
+    required: true
+    immutable: true
+    url_param_only: true
+    description: 'The location for the resource'
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    required: true
+    immutable: true
+    url_param_only: true
+    description: 'Name of the `DeliveryPipeline`.'
+  - !ruby/object:Api::Type::String
+    name: "uid"
+    description: "Output only. Unique identifier of the `DeliveryPipeline`."
+    output: true
+  - !ruby/object:Api::Type::String
+    name: "description"
+    description: "Optional. Description of the `DeliveryPipeline`. Max length is 255 characters."
+  - !ruby/object:Api::Type::KeyValueAnnotations
+    name: "annotations"
+    description: |
+      Optional. User annotations. These attributes can only be set and used by the user, and not by Cloud Deploy.\
+      An object containing a list of `"key": value` pairs. Example: `{ "name": "wrench", "mass": "1.3kg", "count": "3" }`.
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: "labels"
+    description: |
+      Optional. Labels are attributes that can be set and used by both the user and by Cloud Deploy. Labels must meet the following constraints:
+
+      * Keys and values can contain only lowercase letters, numeric characters, underscores, and dashes.
+      * All characters must use UTF-8 encoding, and international characters are allowed.
+      * Keys must start with a lowercase letter or international character.
+      * Each resource is limited to a maximum of 64 labels.
+
+      Both keys and values are additionally constrained to be <= 128 bytes.
+
+      An object containing a list of `"key": value pairs. Example: `{ "name": "wrench", "mass": "1.3kg", "count": "3" }`.
+  - !ruby/object:Api::Type::String
+    name: "createTime"
+    description: "Output only. Time at which the pipeline was created."
+    output: true
+  - !ruby/object:Api::Type::String
+    name: "updateTime"
+    description: "Output only. Time at which the pipeline was updated."
+    output: true
+  - !ruby/object:Api::Type::NestedObject
+    name: "condition"
+    description: "Output only. Information around the state of the Delivery Pipeline."
+    output: true
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: "pipelineReadyCondition"
+        description: "Details around the Pipeline's overall status."
+        output: true
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: "status"
+            description: "True if the Pipeline is in a valid state. Otherwise at least one condition in `PipelineCondition` is in an invalid state. Iterate over those conditions and see which condition(s) has status = false to find out what is wrong with the Pipeline."
+            output: true
+          - !ruby/object:Api::Type::String
+            name: "updatedTime"
+            description: "Last time the condition was updated."
+            output: true
+      - !ruby/object:Api::Type::NestedObject
+        name: "targetsPresentCondition"
+        description: "Details around targets enumerated in the pipeline."
+        output: true
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: "status"
+            description: "True if there aren't any missing Targets."
+            output: true
+          - !ruby/object:Api::Type::Array
+            name: "missingTargets"
+            description: "The list of Target names that do not exist. For example, `projects/{projectId}/locations/{location_name}/targets/{target_name}`."
+            output: true
+            item_type: Api::Type::String
+          - !ruby/object:Api::Type::String
+            name: "updatedTime"
+            description: "Last time the condition was updated."
+            output: true
+      - !ruby/object:Api::Type::NestedObject
+        name: "targetsTypeCondition"
+        description: "Details on the whether the targets enumerated in the pipeline are of the same type."
+        output: true
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: "status"
+            description: "True if the targets are all a comparable type. For example this is true if all targets are GKE clusters. This is false if some targets are Cloud Run targets and others are GKE clusters."
+            output: true
+          - !ruby/object:Api::Type::String
+            name: "errorDetails"
+            description: "Human readable error message."
+            output: true
+  - !ruby/object:Api::Type::String
+    name: "etag"
+    description: "This checksum is computed by the server based on the value of other fields, and may be sent on update and delete requests to ensure the client has an up-to-date value before proceeding."
+  - !ruby/object:Api::Type::Boolean
+    name: "suspended"
+    description: "When suspended, no new releases or rollouts can be created, but in-progress ones will complete."
+  - !ruby/object:Api::Type::NestedObject
+    name: "serialPipeline"
+    description: "SerialPipeline defines a sequential set of stages for a `DeliveryPipeline`."
+    properties:
+      - !ruby/object:Api::Type::Array
+        name: "stages"
+        description: "Each stage specifies configuration for a Target. The ordering of this list defines the promotion flow."
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: "targetId"
+              description: |
+                The targetId to which this stage points. This field refers exclusively to the last segment of a target name.
+                For example, this field would just be `my-target` (rather than `projects/project/locations/location/targets/my-target`).
+                The location of the `Target` is inferred to be the same as the location of the `DeliveryPipeline` that contains this Stage.
