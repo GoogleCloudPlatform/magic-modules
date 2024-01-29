@@ -19,7 +19,7 @@ require 'google/golang_utils'
 module Provider
   class Terraform
     # Inserts custom strings into terraform resource docs.
-    class Docs < Api::Object
+    class Docs < Google::YamlValidator
       # All these values should be strings, which will be inserted
       # directly into the terraform resource documentation.  The
       # strings should _not_ be the names of template files

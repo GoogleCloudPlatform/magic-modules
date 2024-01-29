@@ -19,11 +19,11 @@ require 'google/string_utils'
 
 module Api
   # An object available in the product
-  class Resource < Api::Object::Named
+  class Resource < Api::NamedObject
     # The list of properties (attr_reader) that can be overridden in
     # <provider>.yaml.
     module Properties
-      include Api::Object::Named::Properties
+      include Api::NamedObject::Properties
 
       # [Required] A description of the resource that's surfaced in provider
       # documentation.

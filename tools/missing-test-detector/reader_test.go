@@ -37,7 +37,7 @@ func TestReadCoveredResourceTestFile(t *testing.T) {
 		"field_one": "\"value-one\"",
 		"field_four": Resource{
 			"field_five": Resource{
-				"field_six": "\"value-three\"",
+				"field_six": "true",
 			},
 		},
 		"field_seven": "true",
