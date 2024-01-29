@@ -113,6 +113,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Binaryauthorization",
         "path" to "./google-beta/services/binaryauthorization"
     ),
+    "blockchainnodeengine" to mapOf(
+        "name" to "blockchainnodeengine",
+        "displayName" to "Blockchainnodeengine",
+        "path" to "./google-beta/services/blockchainnodeengine"
+    ),
     "certificatemanager" to mapOf(
         "name" to "certificatemanager",
         "displayName" to "Certificatemanager",
@@ -567,6 +572,11 @@ var ServicesListBeta = mapOf(
         "name" to "securitycenter",
         "displayName" to "Securitycenter",
         "path" to "./google-beta/services/securitycenter"
+    ),
+    "securityposture" to mapOf(
+        "name" to "securityposture",
+        "displayName" to "Securityposture",
+        "path" to "./google-beta/services/securityposture"
     ),
     "securityscanner" to mapOf(
         "name" to "securityscanner",

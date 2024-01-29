@@ -113,6 +113,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Binaryauthorization",
         "path" to "./google/services/binaryauthorization"
     ),
+    "blockchainnodeengine" to mapOf(
+        "name" to "blockchainnodeengine",
+        "displayName" to "Blockchainnodeengine",
+        "path" to "./google/services/blockchainnodeengine"
+    ),
     "certificatemanager" to mapOf(
         "name" to "certificatemanager",
         "displayName" to "Certificatemanager",
@@ -137,6 +142,11 @@ var ServicesListGa = mapOf(
         "name" to "clouddeploy",
         "displayName" to "Clouddeploy",
         "path" to "./google/services/clouddeploy"
+    ),
+    "clouddomains" to mapOf(
+        "name" to "clouddomains",
+        "displayName" to "Clouddomains",
+        "path" to "./google/services/clouddomains"
     ),
     "cloudfunctions" to mapOf(
         "name" to "cloudfunctions",
@@ -292,6 +302,11 @@ var ServicesListGa = mapOf(
         "name" to "dialogflowcx",
         "displayName" to "Dialogflowcx",
         "path" to "./google/services/dialogflowcx"
+    ),
+    "discoveryengine" to mapOf(
+        "name" to "discoveryengine",
+        "displayName" to "Discoveryengine",
+        "path" to "./google/services/discoveryengine"
     ),
     "dns" to mapOf(
         "name" to "dns",
@@ -552,6 +567,11 @@ var ServicesListGa = mapOf(
         "name" to "securitycenter",
         "displayName" to "Securitycenter",
         "path" to "./google/services/securitycenter"
+    ),
+    "securityposture" to mapOf(
+        "name" to "securityposture",
+        "displayName" to "Securityposture",
+        "path" to "./google/services/securityposture"
     ),
     "securityscanner" to mapOf(
         "name" to "securityscanner",
