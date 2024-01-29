@@ -40,7 +40,6 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'logging_log_view_basic'
     primary_resource_id: 'logging_log_view'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-view%s", context["random_suffix"])'
     vars:
       log_view_id: 'my-log-view'
       log_bucket_id: 'my-log-bucket'
@@ -49,7 +48,6 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'logging_log_view_long_name'
     primary_resource_id: 'logging_log_view'
-    primary_resource_name: 'fmt.Sprintf("projects/%s/locations/%s/buckets/_Default/views/%s", envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv(), fmt.Sprintf("tf-test-my-view%s", context["random_suffix"]))'
     vars:
       log_view_id: 'my-log-view'
       log_bucket_id: 'my-log-bucket'
@@ -57,7 +55,7 @@ examples:
       project: :PROJECT_NAME
     skip_docs: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  encoder: templates/terraform/encoders/logging_log_view.go.erba
+  encoder: templates/terraform/encoders/logging_log_view.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: parent
