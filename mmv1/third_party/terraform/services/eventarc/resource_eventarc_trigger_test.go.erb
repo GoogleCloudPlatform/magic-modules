@@ -183,7 +183,7 @@ resource "google_eventarc_trigger" "primary" {
 	location = "%{region}"
 	matching_criteria {
 		attribute = "type"
-		value = "datadog.v1.alert"
+		value = "google.cloud.pubsub.topic.v1.messagePublished"
 	}
 	destination {
 		http_endpoint {
