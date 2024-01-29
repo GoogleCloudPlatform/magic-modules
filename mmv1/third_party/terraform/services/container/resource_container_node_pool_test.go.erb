@@ -4241,57 +4241,57 @@ resource "google_container_node_pool" "without_confidential_boot_disk" {
 func testAccContainerNodePool_resourceManagerTags(projectID, clusterName, networkName, subnetworkName, randomSuffix string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {
-	project_id = "%[1]s"
+  project_id = "%[1]s"
 }
 
 resource "google_project_iam_binding" "tags" {
-	project = "%[1]s"
-	role    = "roles/resourcemanager.tagHoldAdmin"
-	members = [
-		"serviceAccount:service-${data.google_project.project.number}@container-engine-robot.iam.gserviceaccount.com",
-	]
+  project = "%[1]s"
+  role    = "roles/resourcemanager.tagHoldAdmin"
+  members = [
+    "serviceAccount:service-${data.google_project.project.number}@container-engine-robot.iam.gserviceaccount.com",
+  ]
 }
 
 resource "google_tags_tag_key" "key" {
-	parent = "projects/%[1]s"
-	short_name = "foobarbaz-%[2]s"
-	description = "For foo/bar resources"
-	purpose = "GCE_FIREWALL"
-	purpose_data = {
-	network = "%[1]s/%[4]s"
-	}
+  parent = "projects/%[1]s"
+  short_name = "foobarbaz-%[2]s"
+  description = "For foo/bar resources"
+  purpose = "GCE_FIREWALL"
+  purpose_data = {
+  network = "%[1]s/%[4]s"
+  }
 }
 
 resource "google_tags_tag_value" "value" {
-	parent = "tagKeys/${google_tags_tag_key.key.name}"
-	short_name = "foo-%[2]s"
-	description = "For foo resources"
+  parent = "tagKeys/${google_tags_tag_key.key.name}"
+  short_name = "foo-%[2]s"
+  description = "For foo resources"
 }
 
 data "google_container_engine_versions" "uscentral1a" {
-	location = "us-central1-a"
+  location = "us-central1-a"
 }
 
 resource "google_container_cluster" "primary" {
-	name               = "%[3]s"
-	location           = "us-central1-a"
-	min_master_version = data.google_container_engine_versions.uscentral1a.release_channel_latest_version["STABLE"]
+  name               = "%[3]s"
+  location           = "us-central1-a"
+  min_master_version = data.google_container_engine_versions.uscentral1a.release_channel_latest_version["STABLE"]
 
-	# We can't create a cluster with no node pool defined, but we want to only use
-	# separately managed node pools. So we create the smallest possible default
-	# node pool and immediately delete it.
-	remove_default_node_pool = true
-	initial_node_count = 1
+  # We can't create a cluster with no node pool defined, but we want to only use
+  # separately managed node pools. So we create the smallest possible default
+  # node pool and immediately delete it.
+  remove_default_node_pool = true
+  initial_node_count = 1
 
-	deletion_protection = false
-	network             = "%[4]s"
-	subnetwork          = "%[5]s"
+  deletion_protection = false
+  network             = "%[4]s"
+  subnetwork          = "%[5]s"
 
-	timeouts {
-	  create = "30m"
-	  update = "40m"
-	}
+  timeouts {
+    create = "30m"
+    update = "40m"
   }
+}
 
 # Separately Managed Node Pool
 resource "google_container_node_pool" "primary_nodes" {
@@ -4299,16 +4299,16 @@ resource "google_container_node_pool" "primary_nodes" {
   location   = var.region
   cluster    = google_container_cluster.primary.name
 
-  version = data.google_container_engine_versions.gke_version.release_channel_latest_version["STABLE"]
+  version = data.google_container_engine_versions.uscentral1a.release_channel_latest_version["STABLE"]
   node_count = var.gke_num_nodes
 
   node_config {
-	machine_type    = "n1-standard-1"  // can't be e2 because of local-ssd
-	disk_size_gb    = 15
+    machine_type    = "n1-standard-1"  // can't be e2 because of local-ssd
+    disk_size_gb    = 15
 
-	resource_manager_tags = {
-		"tagKeys/${google_tags_tag_key.key.name}" = "tagValues/${google_tags_tag_value.value.name}"
-	}
+    resource_manager_tags = {
+      "tagKeys/${google_tags_tag_key.key.name}" = "tagValues/${google_tags_tag_value.value.name}"
+    }
   }
 }
 `, projectID, randomSuffix, clusterName, networkName, subnetworkName)

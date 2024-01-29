@@ -9562,15 +9562,15 @@ func testAccContainerCluster_withWorkloadALTSConfig(projectID, name, networkName
 func testAccContainerCluster_resourceManagerTags(projectID, clusterName, networkName, subnetworkName, randomSuffix string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {
-	project_id = "%[1]s"
+  project_id = "%[1]s"
 }
 
 resource "google_project_iam_binding" "tags" {
-	project = "%[1]s"
-	role    = "roles/resourcemanager.tagHoldAdmin"
-	members = [
-		"serviceAccount:service-${data.google_project.project.number}@container-engine-robot.iam.gserviceaccount.com",
-	]
+  project = "%[1]s"
+  role    = "roles/resourcemanager.tagHoldAdmin"
+  members = [
+    "serviceAccount:service-${data.google_project.project.number}@container-engine-robot.iam.gserviceaccount.com",
+  ]
 }
 
 resource "google_tags_tag_key" "key" {
@@ -9579,7 +9579,7 @@ resource "google_tags_tag_key" "key" {
   description = "For foo/bar resources"
   purpose = "GCE_FIREWALL"
   purpose_data = {
-	network = "%[1]s/%[4]s"
+    network = "%[1]s/%[4]s"
   }
 }
 
@@ -9590,7 +9590,7 @@ resource "google_tags_tag_value" "value" {
 }
 
 data "google_container_engine_versions" "uscentral1a" {
-	location = "us-central1-a"
+  location = "us-central1-a"
 }
 
 resource "google_container_cluster" "primary" {

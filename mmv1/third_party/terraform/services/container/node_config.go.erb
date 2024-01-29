@@ -890,7 +890,7 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 		nc.ResourceLabels = m
 	}
 
-	if v, ok := nodeConfig["resource_manager_tags"]; ok {
+	if v, ok := nodeConfig["resource_manager_tags"]; ok && len(v.(map[string]interface{})) > 0 {
 		nc.ResourceManagerTags = expandResourceManagerTags(v)
 	}
 
