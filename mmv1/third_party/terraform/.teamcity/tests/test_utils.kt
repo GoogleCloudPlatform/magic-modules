@@ -28,7 +28,7 @@ fun testContextParameters(): AllContextParameters {
         "firestoreProjectGa",
         "firestoreProjectBeta",
         "firestoreProjectVcr",
-"masterBillingAccountGa",
+        "masterBillingAccountGa",
         "masterBillingAccountBeta",
         "masterBillingAccountVcr",
         "org2Ga",
