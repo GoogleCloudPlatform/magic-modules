@@ -1,10 +1,10 @@
 resource "google_kms_ekm_connection" "<%= ctx[:primary_resource_id] %>" {
-  name            	= "ekmconnection-example"
+  name            	= "<%= ctx[:vars]['ekmconnection_name'] %>"
   location		= "us-central1"
   keyManagementMode 	= MANUAL
   serviceResolvers: [
     {
-      serviceDirectoryService 	= "projects/*/locations/*/namespaces/*/services/*"
+      serviceDirectoryService 	= "projects/data.google_project.project.name/locations/us-central1/namespaces/google_service_directory_namespace.sd_namespace.id/services/google_service_directory_service.sd_service.id"
       hostname 			= "example.cloud.goog"
       serverCertificates: [
       	{
@@ -14,3 +14,22 @@ resource "google_kms_ekm_connection" "<%= ctx[:primary_resource_id] %>" {
     }
   ]
 }
+
+resource "google_service_directory_namespace" "sd_namespace" {
+  provider     = google-beta
+  namespace_id = "ekm-namespace"
+  location     = "us-central1"
+  project      = var.vpc_project_id
+}
+
+resource "google_service_directory_service" "sd_service" {
+  provider   = google-beta
+  service_id = "ekm-service"
+  namespace  = google_service_directory_namespace.sd_namespace.id
+
+  metadata = {
+    region = "us-central1"
+  }
+}
+
+data "google_project" "project" {}
