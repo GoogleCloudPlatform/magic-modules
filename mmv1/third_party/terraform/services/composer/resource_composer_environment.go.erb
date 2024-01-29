@@ -168,6 +168,7 @@ func ResourceComposerEnvironment() *schema.Resource {
 			tpgresource.DefaultProviderProject,
 			tpgresource.DefaultProviderRegion,
 			tpgresource.SetLabelsDiff,
+			customdiff.ComputedIf("config.0.node_config.0.network", networkComputedConditionFunc),
 			customdiff.ForceNewIf("config.0.node_config.0.network", networkForceNewCustomDiff),
 			customdiff.ForceNewIf("config.0.node_config.0.subnetwork", subnetworkForceNewCustomDiff),
 		),
@@ -237,7 +238,6 @@ func ResourceComposerEnvironment() *schema.Resource {
 									},
 									"network": {
 										Type:             schema.TypeString,
-										Computed:         true,
 										Optional:         true,
 										ForceNew:         false,
 										ConflictsWith:    []string{"config.0.node_config.0.composer_network_attachment"},
@@ -1995,7 +1995,7 @@ func expandComposerEnvironmentConfig(v interface{}, d *schema.ResourceData, conf
 		composer.PrivateEnvironmentConfig.EnablePrivateEnvironment in API.
 		Check image version to avoid overriding EnablePrivateEnvironment in case of other versions.
 	*/
-	if isComposer3(d, config) {
+	if isComposer3(d) {
 		transformed.PrivateEnvironmentConfig = &composer.PrivateEnvironmentConfig{}
 		if enablePrivateEnvironmentRaw, ok := original["enable_private_environment"]; ok {
 			transformed.PrivateEnvironmentConfig.EnablePrivateEnvironment = enablePrivateEnvironmentRaw.(bool)
@@ -2899,20 +2899,38 @@ func versionsEqual(old, new string) (bool, error) {
 	return o.Equal(n), nil
 }
 
-func isComposer3(d *schema.ResourceData, config *transport_tpg.Config)	bool {
-	image_version := d.Get("config.0.software_config.0.image_version").(string)
-	return strings.Contains(image_version, "composer-3")
-}
-
-func notComposer3(ctx context.Context, d *schema.ResourceDiff, meta interface{}) bool {
-	image_version := d.Get("config.0.software_config.0.image_version").(string)
-	return !strings.Contains(image_version, "composer-3")
+func isComposer3(d interface{})	bool {
+	var imageVersion string
+	switch d.(type) {
+	case *schema.ResourceData:
+		imageVersion= d.(*schema.ResourceData).Get("config.0.software_config.0.image_version").(string)
+	case *schema.ResourceDiff:
+		imageVersion= d.(*schema.ResourceDiff).Get("config.0.software_config.0.image_version").(string)
+	default:
+		log.Printf("[ERROR] error in plugin: unexpected argument type in isComposer3")
+	}
+	return strings.Contains(imageVersion, "composer-3")
 }
 
 func networkForceNewCustomDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) bool {
-	return d.HasChange("config.0.node_config.0.network") && notComposer3(ctx, d, meta)
+	return d.HasChange("config.0.node_config.0.network") && !isComposer3(d)
 }
 
 func subnetworkForceNewCustomDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) bool {
-	return d.HasChange("config.0.node_config.0.subnetwork") && notComposer3(ctx, d, meta)
+	return d.HasChange("config.0.node_config.0.subnetwork") && !isComposer3(d)
+}
+
+func networkComputedConditionFunc(ctx context.Context, d *schema.ResourceDiff, meta interface{}) bool {
+	if !isComposer3(d){
+		return true
+	}
+	old, new := d.GetChange("config.0.node_config.0.network")
+	get := d.Get("config.0.node_config.0.network").(string)
+	log.Printf("[DEBUG] old network %s", old)
+	log.Printf("[DEBUG] new network %s", new)
+	log.Printf("[DEBUG] get network %s", get)
+	if old != "" && new == "" {
+		return false
+	}
+	return true
 }
