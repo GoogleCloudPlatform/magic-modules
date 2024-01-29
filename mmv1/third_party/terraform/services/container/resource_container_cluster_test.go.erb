@@ -76,10 +76,12 @@ func TestAccContainerCluster_resourceManagerTags(t *testing.T) {
 				Config: testAccContainerCluster_resourceManagerTags(pid, clusterName, networkName, subnetworkName, randomSuffix),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("google_container_cluster.primary", "self_link"),
+					resource.TestCheckResourceAttrSet("google_container_cluster.primary", "node_config.0.resource_manager_tags"),
 				),
 			},
 			{
 				ResourceName:            "google_container_cluster.primary",
+				ImportStateId:           fmt.Sprintf("us-central1-a/%s", clusterName),
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
@@ -9594,28 +9596,34 @@ data "google_container_engine_versions" "uscentral1a" {
 }
 
 resource "google_container_cluster" "primary" {
-	name               = "%[3]s"
-	location           = "us-central1-a"
-	min_master_version = data.google_container_engine_versions.uscentral1a.release_channel_latest_version["STABLE"]
-	initial_node_count = 1
+  name               = "%[3]s"
+  location           = "us-central1-a"
+  min_master_version = data.google_container_engine_versions.uscentral1a.release_channel_latest_version["STABLE"]
+  initial_node_count = 1
 
-	node_config {
-		machine_type    = "n1-standard-1"  // can't be e2 because of local-ssd
-		disk_size_gb    = 15
+  node_config {
+    machine_type    = "n1-standard-1"  // can't be e2 because of local-ssd
+    disk_size_gb    = 15
 
-		resource_manager_tags = {
-			"tagKeys/${google_tags_tag_key.key.name}" = "tagValues/${google_tags_tag_value.value.name}"
-		}
-	}
+    resource_manager_tags = {
+      "tagKeys/${google_tags_tag_key.key.name}" = "tagValues/${google_tags_tag_value.value.name}"
+    }
+  }
 
-	deletion_protection = false
-	network    = "%[4]s"
-	subnetwork    = "%[5]s"
+  node_pool_auto_config {
+    resource_manager_tags = {
+      "tagKeys/${google_tags_tag_key.key.name}" = "tagValues/${google_tags_tag_value.value.name}"
+    }
+  }
 
-	timeouts {
-		create = "30m"
-		update = "40m"
-	}
+  deletion_protection = false
+  network    = "%[4]s"
+  subnetwork    = "%[5]s"
+
+  timeouts {
+    create = "30m"
+    update = "40m"
+  }
 }
 `, projectID, randomSuffix, clusterName, networkName, subnetworkName)
 }
