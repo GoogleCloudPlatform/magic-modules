@@ -1,6 +1,7 @@
+// This file is controlled by MMv1, any changes made here will be overwritten
+
 package generated
 
-// this file is auto-generated with mmv1, any changes made here will be overwritten
 var PackagesList = mapOf(
     "envvar" to mapOf(
         "name" to "envvar",

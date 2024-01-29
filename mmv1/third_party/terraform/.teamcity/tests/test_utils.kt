@@ -1,5 +1,4 @@
-
-// this file is copied from mmv1, any changes made here will be overwritten
+// This file is controlled by MMv1, any changes made here will be overwritten
 
 package tests
 
