@@ -204,28 +204,31 @@ properties:
     name: "destinationVolumeParameters"
     description: |-
       Destination volume parameters.
-    immutable: true
     ignore_read: true
     properties:
       - !ruby/object:Api::Type::String
         name: "storagePool"
         description: |
           Name of an existing storage pool for the destination volume with format: `projects/{{project}}/locations/{{location}}/storagePools/{{poolId}}`
+        immutable: true
         required: true
       - !ruby/object:Api::Type::String
         name: "volumeId"
         description: |
           Name for the destination volume to be created. If not specified, the name of the source volume will be used.
+        immutable: true
         default_from_api: true
       - !ruby/object:Api::Type::String
         name: "shareName"
         description: |
           Share name for destination volume. If not specified, name of source volume's share name will be used.
+        immutable: true
         default_from_api: true
       - !ruby/object:Api::Type::String
         name: "description"
         description: |
           Description for the destination volume.
+        immutable: true
   - !ruby/object:Api::Type::String
     name: "sourceVolume"
     description: |
