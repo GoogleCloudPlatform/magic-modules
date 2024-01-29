@@ -64,6 +64,25 @@ examples:
     test_vars_overrides:
       network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-1", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
 properties:
+  - !ruby/object:Api::Type::Enum
+    name: 'state'
+    description: |
+      State of the volume.
+    values:
+      - STATE_UNSPECIFIED
+      - READY
+      - CREATING
+      - DELETING
+      - UPDATING
+      - RESTORING
+      - DISABLED
+      - ERROR
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'stateDetails'
+    description: |
+      State details of the volume.
+    output: true
   - !ruby/object:Api::Type::String
     name: 'shareName'
     description: |
@@ -416,6 +435,26 @@ properties:
 #       description: |-
 #         Full name of the snapshot resource. Format: `projects/{{project}}/locations/{{location}}/volumes/{{volume}}/snapshots/{{snapshot}}`.
 #       required: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'backupConfig'
+        description: |-
+          Backup configuration for the volume.
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: 'backupPolicies'
+            description: |-
+              Optionally specify one or more backup policies for scheduled backups. Format: `projects/{{projectId}}/locations/{{location}}/backupPolicies/{{backupPolicyName}}``
+            item_type: Api::Type::String
+          - !ruby/object:Api::Type::String
+            name: 'backupVault'
+            description: |-
+              ID of the backup vault to use. Format: `projects/{{projectId}}/locations/{{location}}/backupVaults/{{backupVaultName}}``
+          - !ruby/object:Api::Type::Boolean
+            name: 'scheduledBackupEnabled'
+            description: |-
+              When set to true, scheduled backup is enabled on the volume.
+            send_empty_value: true
+            default_value: false
 virtual_fields:
   - !ruby/object:Api::Type::Enum
     name: 'deletion_policy'
