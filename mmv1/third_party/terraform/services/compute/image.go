@@ -3,8 +3,8 @@ package compute
 import (
 	"fmt"
 	"regexp"
+	"strings"
 
-	tpg_services_compute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
@@ -76,21 +76,136 @@ func sanityTestRegexMatches(expected int, got []string, regexType, name string) 
 	return nil
 }
 
-// ResolveImage is a wrapper around compute.ResolveImage and recover from panic
-// if client is il.
-func ResolveImage(c *transport_tpg.Config, project, name, userAgent string) (ret string, err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			if c.Client == nil {
-				ret = name
-				err = nil
-				return
-			}
-			panic(r)
+// If the given name is a URL, return it.
+// If it's in the form projects/{project}/global/images/{image}, return it
+// If it's in the form projects/{project}/global/images/family/{family}, return it
+// If it's in the form global/images/{image}, return it
+// If it's in the form global/images/family/{family}, return it
+// If it's in the form family/{family}, check if it's a family in the current project. If it is, return it as global/images/family/{family}.
+//
+//	If not, check if it could be a GCP-provided family, and if it exists. If it does, return it as projects/{project}/global/images/family/{family}.
+//
+// If it's in the form {project}/{family-or-image}, check if it's an image in the named project. If it is, return it as projects/{project}/global/images/{image}.
+//
+//	If not, check if it's a family in the named project. If it is, return it as projects/{project}/global/images/family/{family}.
+//
+// If it's in the form {family-or-image}, check if it's an image in the current project. If it is, return it as global/images/{image}.
+//
+//	If not, check if it could be a GCP-provided image, and if it exists. If it does, return it as projects/{project}/global/images/{image}.
+//	If not, check if it's a family in the current project. If it is, return it as global/images/family/{family}.
+//	If not, check if it could be a GCP-provided family, and if it exists. If it does, return it as projects/{project}/global/images/family/{family}
+func ResolveImage(c *transport_tpg.Config, project, name, userAgent string) (string, error) {
+	var builtInProject string
+	for k, v := range ImageMap {
+		if strings.Contains(name, k) {
+			builtInProject = v
+			break
 		}
-	}()
-
-	return tpg_services_compute.ResolveImage(c, project, name, userAgent)
+	}
+	switch {
+	case resolveImageLink.MatchString(name): // https://www.googleapis.com/compute/v1/projects/xyz/global/images/xyz
+		return name, nil
+	case resolveImageProjectImage.MatchString(name): // projects/xyz/global/images/xyz
+		res := resolveImageProjectImage.FindStringSubmatch(name)
+		if err := sanityTestRegexMatches(2, res, "project image", name); err != nil {
+			return "", err
+		}
+		return fmt.Sprintf("projects/%s/global/images/%s", res[1], res[2]), nil
+	case resolveImageProjectFamily.MatchString(name): // projects/xyz/global/images/family/xyz
+		res := resolveImageProjectFamily.FindStringSubmatch(name)
+		if err := sanityTestRegexMatches(2, res, "project family", name); err != nil {
+			return "", err
+		}
+		return fmt.Sprintf("projects/%s/global/images/family/%s", res[1], res[2]), nil
+	case resolveImageGlobalImage.MatchString(name): // global/images/xyz
+		res := resolveImageGlobalImage.FindStringSubmatch(name)
+		if err := sanityTestRegexMatches(1, res, "global image", name); err != nil {
+			return "", err
+		}
+		return fmt.Sprintf("global/images/%s", res[1]), nil
+	case resolveImageGlobalFamily.MatchString(name): // global/images/family/xyz
+		res := resolveImageGlobalFamily.FindStringSubmatch(name)
+		if err := sanityTestRegexMatches(1, res, "global family", name); err != nil {
+			return "", err
+		}
+		return fmt.Sprintf("global/images/family/%s", res[1]), nil
+	case resolveImageFamilyFamily.MatchString(name): // family/xyz
+		res := resolveImageFamilyFamily.FindStringSubmatch(name)
+		if err := sanityTestRegexMatches(1, res, "family family", name); err != nil {
+			return "", err
+		}
+		if ok, err := resolveImageFamilyExists(c, project, res[1], userAgent); err != nil {
+			return "", err
+		} else if ok {
+			return fmt.Sprintf("global/images/family/%s", res[1]), nil
+		}
+		if builtInProject != "" {
+			if ok, err := resolveImageFamilyExists(c, builtInProject, res[1], userAgent); err != nil {
+				return "", err
+			} else if ok {
+				return fmt.Sprintf("projects/%s/global/images/family/%s", builtInProject, res[1]), nil
+			}
+		}
+	case resolveImageProjectImageShorthand.MatchString(name): // xyz/xyz
+		res := resolveImageProjectImageShorthand.FindStringSubmatch(name)
+		if err := sanityTestRegexMatches(2, res, "project image shorthand", name); err != nil {
+			return "", err
+		}
+		if ok, err := resolveImageImageExists(c, res[1], res[2], userAgent); err != nil {
+			return "", err
+		} else if ok {
+			return fmt.Sprintf("projects/%s/global/images/%s", res[1], res[2]), nil
+		}
+		fallthrough // check if it's a family
+	case resolveImageProjectFamilyShorthand.MatchString(name): // xyz/xyz
+		res := resolveImageProjectFamilyShorthand.FindStringSubmatch(name)
+		if err := sanityTestRegexMatches(2, res, "project family shorthand", name); err != nil {
+			return "", err
+		}
+		if ok, err := resolveImageFamilyExists(c, res[1], res[2], userAgent); err != nil {
+			return "", err
+		} else if ok {
+			return fmt.Sprintf("projects/%s/global/images/family/%s", res[1], res[2]), nil
+		}
+	case resolveImageImage.MatchString(name): // xyz
+		res := resolveImageImage.FindStringSubmatch(name)
+		if err := sanityTestRegexMatches(1, res, "image", name); err != nil {
+			return "", err
+		}
+		if ok, err := resolveImageImageExists(c, project, res[1], userAgent); err != nil {
+			return "", err
+		} else if ok {
+			return fmt.Sprintf("global/images/%s", res[1]), nil
+		}
+		if builtInProject != "" {
+			// check the images GCP provides
+			if ok, err := resolveImageImageExists(c, builtInProject, res[1], userAgent); err != nil {
+				return "", err
+			} else if ok {
+				return fmt.Sprintf("projects/%s/global/images/%s", builtInProject, res[1]), nil
+			}
+		}
+		fallthrough // check if the name is a family, instead of an image
+	case resolveImageFamily.MatchString(name): // xyz
+		res := resolveImageFamily.FindStringSubmatch(name)
+		if err := sanityTestRegexMatches(1, res, "family", name); err != nil {
+			return "", err
+		}
+		if ok, err := resolveImageFamilyExists(c, c.Project, res[1], userAgent); err != nil {
+			return "", err
+		} else if ok {
+			return fmt.Sprintf("global/images/family/%s", res[1]), nil
+		}
+		if builtInProject != "" {
+			// check the families GCP provides
+			if ok, err := resolveImageFamilyExists(c, builtInProject, res[1], userAgent); err != nil {
+				return "", err
+			} else if ok {
+				return fmt.Sprintf("projects/%s/global/images/family/%s", builtInProject, res[1]), nil
+			}
+		}
+	}
+	return "", fmt.Errorf("Could not find image or family %s", name)
 }
 
 // resolveImageRefToRelativeURI takes the output of ResolveImage and coerces it

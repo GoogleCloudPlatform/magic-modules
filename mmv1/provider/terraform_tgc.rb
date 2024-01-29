@@ -307,7 +307,11 @@ module Provider
                        ['converters/google/convert.go',
                         'third_party/tgc/convert.go'],
                        ['converters/google/convert_test.go',
-                        'third_party/tgc/convert_test.go']
+                        'third_party/tgc/convert_test.go'],
+                       ['converters/google/resources/services/compute/imagewrapper.go',
+                        'third_party/tgc/imagewrapper.go'],
+                       ['converters/google/resources/services/compute/imagewrapper_test.go',
+                        'third_party/tgc/imagewrapper_test.go']
                      ])
     end
 
