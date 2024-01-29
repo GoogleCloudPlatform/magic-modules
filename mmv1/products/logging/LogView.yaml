@@ -40,9 +40,10 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'logging_log_view_basic'
     primary_resource_id: 'logging_log_view'
-    primary_resource_name: 'fmt.Sprintf("projects/%s/locations/%s/buckets/_Default/views/%s", envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv(), fmt.Sprintf("tf-test-my-view%s", context["random_suffix"]))'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-view%s", context["random_suffix"])'
     vars:
-      log_view_name: 'my-view'
+      log_view_id: 'my-log-view'
+      log_bucket_id: 'my-log-bucket'
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
@@ -50,12 +51,13 @@ examples:
     primary_resource_id: 'logging_log_view'
     primary_resource_name: 'fmt.Sprintf("projects/%s/locations/%s/buckets/_Default/views/%s", envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv(), fmt.Sprintf("tf-test-my-view%s", context["random_suffix"]))'
     vars:
-      log_view_name: 'my-view'
+      log_view_id: 'my-log-view'
+      log_bucket_id: 'my-log-bucket'
     test_env_vars:
       project: :PROJECT_NAME
     skip_docs: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  encoder: templates/terraform/encoders/logging_log_view.go.erb
+  encoder: templates/terraform/encoders/logging_log_view.go.erba
 parameters:
   - !ruby/object:Api::Type::String
     name: parent
