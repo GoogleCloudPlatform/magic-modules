@@ -205,7 +205,7 @@ properties:
     name: 'description'
     description: |
       An optional description of this resource.
-  # Use of snapReserve is depricated. We don't expose it intentially.
+  # Use of snapReserve is depricated. We don't expose it intentionally.
   # - !ruby/object:Api::Type::Integer
   #   name: 'snapReserve'
   #   description: |
