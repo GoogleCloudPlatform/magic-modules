@@ -216,6 +216,12 @@ For more information about types of resources and the generation process overall
 
 ## Add fields
 
+In general, Terraform resources should implement all configurable fields and all read-only fields.
+Even fields that seem like they would not be useful in Terraform (like update time or etag) often
+end up being requested by users, so it's usually easier to just add them all at once. However,
+optional or read-only fields can be omitted when adding a resource if they would require significant
+additional work to implement.
+
 {{< tabs "fields" >}}
 {{< tab "MMv1" >}}
 1. For each API field, copy the following template into the resource's `properties` attribute. Be sure to indent appropriately.
