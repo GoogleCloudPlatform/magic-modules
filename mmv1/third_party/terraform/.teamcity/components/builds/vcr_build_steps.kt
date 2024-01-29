@@ -28,7 +28,7 @@ fun BuildSteps.checkVcrEnvironmentVariables() {
                 exit 1
             fi
             if [ "${'$'}TEST" = "" ]; then
-                echo "TEST is not set - set it to a value like ./google/... or ./google-beta/services/compute"
+                echo "TEST is not set - set it to a value like ./google/..., ./google/services/... or ./google-beta/services/compute"
                 exit 1
             fi
             if [ "${'$'}TESTARGS" = "" ]; then
