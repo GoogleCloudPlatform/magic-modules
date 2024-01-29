@@ -177,6 +177,7 @@ properties:
       Set to true if the current state of Instance does not match the user's intended state, and the service is actively updating the resource to reconcile them. This can happen due to user-triggered updates or system actions like failover or maintenance.
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'databaseFlags'
+    default_from_api: true
     description:
       'Database flags. Set at instance level. * They are copied from primary
       instance on read instance creation. * Read instances can set new or
