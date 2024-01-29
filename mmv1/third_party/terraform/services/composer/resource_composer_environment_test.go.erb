@@ -1304,7 +1304,7 @@ func TestAccComposerEnvironmentComposer3_updateToEmpty(t *testing.T) {
 	subnetwork := network + "-1"
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:		              func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -1341,7 +1341,7 @@ func TestAccComposerEnvironmentComposer3_updateFromEmpty(t *testing.T) {
 	subnetwork := network + "-1"
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:		              func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
