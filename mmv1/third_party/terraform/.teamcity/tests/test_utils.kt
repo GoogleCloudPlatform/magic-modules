@@ -41,5 +41,6 @@ fun testContextParameters(): AllContextParameters {
         "orgDomain",
         "region",
         "zone",
-        "infraProject")
+        "infraProject",
+        "vcrBucketName")
 }

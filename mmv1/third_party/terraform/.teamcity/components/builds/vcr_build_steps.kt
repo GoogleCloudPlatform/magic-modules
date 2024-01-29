@@ -7,10 +7,10 @@ import jetbrains.buildServer.configs.kotlin.buildSteps.ScriptBuildStep
 
 fun BuildSteps.checkVcrEnvironmentVariables() {
     step(ScriptBuildStep {
-        name = "Setup for running VCR tests: feedback about user-supplied environment variables"
+        name = "Setup for running VCR tests: feedback about user-supplied environment variables and available CLI tools"
         scriptContent = """
             #!/bin/bash
-            echo "VCR TESTING ENVIRONMENT VARIABLE CHECKS"
+            echo "VCR TESTING ENVIRONMENT CHECKS - ENVs and CLI TOOLS"
             if [ "${'$'}VCR_MODE" = "" ]; then
                 echo "VCR_MODE is not set"
                 exit 1
@@ -23,12 +23,28 @@ fun BuildSteps.checkVcrEnvironmentVariables() {
                 echo "GOOGLE_INFRA_PROJECT is not set"
                 exit 1
             fi
+            if [ "${'$'}VCR_BUCKET_NAME" = "" ]; then
+                echo "VCR_BUCKET_NAME is not set"
+                exit 1
+            fi
             if [ "${'$'}TEST" = "" ]; then
                 echo "TEST is not set - set it to a value like ./google/... or ./google-beta/services/compute"
                 exit 1
             fi
             if [ "${'$'}TESTARGS" = "" ]; then
                 echo "TESTARGS is not set - set it to a value like -run=TestAccFoobar"
+                exit 1
+            fi
+
+            if ! command -v gcloud &> /dev/null   
+            then
+                echo "gcloud CLI not found"
+                exit 1
+            fi
+
+            if ! command -v gsutil &> /dev/null   
+            then
+                echo "gsutil CLI not found"
                 exit 1
             fi
         """.trimIndent()
@@ -41,7 +57,13 @@ fun BuildSteps.checkVcrEnvironmentVariables() {
 fun BuildSteps.runVcrAcceptanceTests() {
     step(ScriptBuildStep {
         name = "Run Tests"
-        scriptContent =  "go test \$(TEST) -v \$(TESTARGS) -timeout=\"%TIMEOUT%h\" -test.parallel=\"%PARALLELISM%\" -ldflags=\"-X=github.com/hashicorp/terraform-provider-google/version.ProviderVersion=acc\""
+        scriptContent =  """
+        echo "VCR Testing: Running acceptance tests"
+        echo "TESTARGS = ${'$'}TESTARGS"
+        echo "TEST = ${'$'}TEST"
+
+        go test ${'$'}TEST -v ${'$'}TESTARGS -timeout="%TIMEOUT%h" -test.parallel="%PARALLELISM%" -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc"
+        """.trimIndent()
     })
 }
 
@@ -50,36 +72,38 @@ fun BuildSteps.runVcrTestRecordingSetup() {
         name = "Setup for running VCR tests: if in REPLAY mode, download existing cassettes"
         scriptContent = """
             #!/bin/bash
-            echo "VCR TESTING SETUP"
-            echo "VCR_PATH: ${'$'}{VCR_PATH}"
+            echo "VCR Testing: Pre-test setup"
             echo "VCR_MODE: ${'$'}{VCR_MODE}"
+            echo "VCR_PATH: ${'$'}{VCR_PATH}"
+            
+            # Ensure directory exists regardless of VCR mode
+            mkdir -p ${'$'}VCR_PATH
+            
             if [ "${'$'}VCR_MODE" = "RECORDING" ]; then
-                echo "Recording mode, skipping cassette retrieval"
+                echo "RECORDING MODE - skipping this build step; nothing needed from Cloud Storage bucket"
                 exit 0
             fi
-            docker pull google/cloud-sdk:latest
-            docker run -t -d --name gcloud-config google/cloud-sdk
+
+            echo "REPLAY MODE- retrieving cassettes from Cloud Storage bucket"
+
+            # Authenticate gcloud CLI
             echo "${'$'}{GOOGLE_CREDENTIALS}" > google-account.json
-            sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' google-account.json > temp1.json
-            sed 's/{\\n/{/g' temp1.json > temp2.json
-            sed 's/,\\n/,/g' temp2.json > temp3.json
-            sed 's/"\\n}/"}/g' temp3.json > temp4.json
-            mv temp4.json google-account.json
-            rm temp*
-            docker cp google-account.json gcloud-config:sa-key.json
-            rm google-account.json
-            docker exec gcloud-config gcloud auth activate-service-account --key-file=sa-key.json
-            docker exec gcloud-config gsutil ls -p ${'$'}GOOGLE_INFRA_PROJECT gs://ci-vcr-cassettes/fixtures/
-            docker exec gcloud-config mkdir fixtures
-            docker exec gcloud-config gsutil -m cp gs://ci-vcr-cassettes/fixtures/* fixtures/
+            gcloud auth activate-service-account --key-file=google-account.json
+
+            # Pull files from GCS
+            gsutil ls -p ${'$'}GOOGLE_INFRA_PROJECT gs://${'$'}VCR_BUCKET_NAME/fixtures/
+            gsutil -m cp gs://${'$'}VCR_BUCKET_NAME/fixtures/* ${'$'}VCR_PATH
             # copy branch specific cassettes over master. This might fail but that's ok if the folder doesnt exist
-            export BRANCH_NAME = %teamcity.build.branch%
-            docker exec gcloud-config gsutil -m cp gs://ci-vcr-cassettes/%BRANCH_NAME%/fixtures/* fixtures/
-            mkdir -p ${'$'}VCR_PATH
-            docker cp gcloud-config:fixtures ${'$'}VCR_PATH/../
+            export BRANCH_NAME=%teamcity.build.branch%
+            gsutil -m cp gs://${'$'}VCR_BUCKET_NAME/${'$'}BRANCH_NAME/fixtures/* ${'$'}VCR_PATH
             ls ${'$'}VCR_PATH
-            docker stop gcloud-config
-            docker rm gcloud-config
+
+            # Cleanup
+            rm google-account.json
+            gcloud auth application-default revoke
+            gcloud auth revoke --all
+
+            echo "Finished"
         """.trimIndent()
         // ${'$'} is required to allow creating a script in TeamCity that contains
         // parts like ${GIT_HASH_SHORT} without having Kotlin syntax issues. For more info see:
@@ -92,37 +116,37 @@ fun BuildSteps.runVcrTestRecordingSaveCassettes() {
         name = "Tasks after running VCR tests: if in RECORDING mode, push new cassettes to GCS"
         scriptContent = """
             #!/bin/bash
-            echo "VCR TESTING POST"
-            echo "VCR_PATH: ${'$'}{VCR_PATH}"
+            echo "VCR Testing: Post-test steps"
             echo "VCR_MODE: ${'$'}{VCR_MODE}"
+            echo "VCR_PATH: ${'$'}{VCR_PATH}"
+
             if [ "${'$'}VCR_MODE" = "REPLAYING" ]; then
-            echo "Replaying mode, skipping"
+            echo "REPLAYING MODE - skipping this build step; nothing to be done"
             exit 0
             fi
-            docker pull google/cloud-sdk:latest
-            docker run -t -d --name gcloud-config google/cloud-sdk
+
+            echo "RECORDING MODE - push new cassettes to Cloud Storage bucket"
+
+            # Authenticate gcloud CLI
             echo "${'$'}{GOOGLE_CREDENTIALS}" > google-account.json
-            sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' google-account.json > temp1.json
-            sed 's/{\\n/{/g' temp1.json > temp2.json
-            sed 's/,\\n/,/g' temp2.json > temp3.json
-            sed 's/"\\n}/"}/g' temp3.json > temp4.json
-            mv temp4.json google-account.json
-            rm temp*
-            docker cp google-account.json gcloud-config:sa-key.json
-            rm google-account.json
-            branch=%BRANCH_NAME%
-            docker cp ${'$'}VCR_PATH gcloud-config:fixtures
-            docker exec gcloud-config gcloud auth activate-service-account --key-file=sa-key.json
-            docker exec gcloud-config gsutil ls -p ${'$'}GOOGLE_INFRA_PROJECT gs://
-            if [ "${'$'}branch" = "refs/heads/main" ]; then
+            gcloud auth activate-service-account --key-file=google-account.json
+
+            export BRANCH_NAME=%teamcity.build.branch%
+            gsutil ls -p ${'$'}GOOGLE_INFRA_PROJECT gs://${'$'}VCR_BUCKET_NAME/fixtures/
+            if [ "${'$'}BRANCH_NAME" = "refs/heads/main" ]; then
                 echo "Copying to main"
-                docker exec gcloud-config gsutil -m cp fixtures/* gs://ci-vcr-cassettes/fixtures/
+                gsutil -m cp ${'$'}VCR_PATH/* gs://${'$'}VCR_BUCKET_NAME/fixtures/
             else
-                echo "Copying to ${'$'}branch"
-                docker exec gcloud-config gsutil -m cp fixtures/* gs://ci-vcr-cassettes/${'$'}branch/fixtures/
+                echo "Copying to ${'$'}BRANCH_NAME"
+                gsutil -m cp ${'$'}VCR_PATH/* gs://${'$'}VCR_BUCKET_NAME/${'$'}BRANCH_NAME/fixtures/
             fi
-            docker stop gcloud-config
-            docker rm gcloud-config
+
+            # Cleanup
+            rm google-account.json
+            gcloud auth application-default revoke
+            gcloud auth revoke --all
+
+            echo "Finished"
         """.trimIndent()
         // ${'$'} is required to allow creating a script in TeamCity that contains
         // parts like ${GIT_HASH_SHORT} without having Kotlin syntax issues. For more info see:
