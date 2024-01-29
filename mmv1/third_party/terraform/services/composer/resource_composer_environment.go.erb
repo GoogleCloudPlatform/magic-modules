@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 	"time"
+	"context"
 
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
@@ -167,6 +168,7 @@ func ResourceComposerEnvironment() *schema.Resource {
 			tpgresource.DefaultProviderProject,
 			tpgresource.DefaultProviderRegion,
 			tpgresource.SetLabelsDiff,
+      customdiff.ValidateChange("config.0.software_config.0.image_version", imageVersionChangeValidationFunc),
 		),
 
 		Schema: map[string]*schema.Schema{
@@ -1915,7 +1917,8 @@ func expandComposerEnvironmentConfig(v interface{}, d *schema.ResourceData, conf
 		composer.PrivateEnvironmentConfig.EnablePrivateEnvironment in API.
 		Check image version to avoid overriding EnablePrivateEnvironment in case of other versions.
 	*/
-	if isComposer3(d, config) {
+	imageVersion := d.Get("config.0.software_config.0.image_version").(string)
+	if isComposer3(imageVersion) {
 		transformed.PrivateEnvironmentConfig = &composer.PrivateEnvironmentConfig{}
 		if enablePrivateEnvironmentRaw, ok := original["enable_private_environment"]; ok {
 			transformed.PrivateEnvironmentConfig.EnablePrivateEnvironment = enablePrivateEnvironmentRaw.(bool)
@@ -2812,7 +2815,13 @@ func versionsEqual(old, new string) (bool, error) {
 	return o.Equal(n), nil
 }
 
-func isComposer3(d *schema.ResourceData, config *transport_tpg.Config)	bool {
-	image_version := d.Get("config.0.software_config.0.image_version").(string)
-	return strings.Contains(image_version, "composer-3")
+func isComposer3(imageVersion string)	bool {
+	return strings.Contains(imageVersion, "composer-3")
+}
+
+func imageVersionChangeValidationFunc(ctx context.Context, old, new, meta any) error {
+	if old.(string) != "" && isComposer3(new.(string)) {
+		return fmt.Errorf("upgrade to composer 3 is not yet supported")
+	}
+	return nil
 }
