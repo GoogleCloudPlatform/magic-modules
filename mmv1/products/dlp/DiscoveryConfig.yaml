@@ -317,3 +317,21 @@ properties:
                   description : A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the google.rpc.Status.details field, or localized by the client.
                   - !ruby/object:Api::Type:NestedObject
                   name: 'details[]'
+              - !ruby/object:Api::Type::String
+                name: timestamp
+        - !ruby/object:Api::Type::String
+          name: createTime
+          description: Output only. The creation timestamp of a DiscoveryConfig.
+        - !ruby/object:Api::Type::String
+          name: updateTime
+          description: Output only. The last update timestamp of a DiscoveryConfig.
+        - !ruby/object:Api::Type::String
+          name: lastRunTime
+          description: Output only. The timestamp of the last time this config was executed
+        - !ruby/object:Api::Type::Enum
+          name: status
+          description: Required. A status for this configuration
+          values: 
+            - STATUS_UNSPECIFIED
+            - RUNNING
+            - PAUSED 
