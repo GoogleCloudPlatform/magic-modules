@@ -82,14 +82,6 @@ func testAccDiscoveryEngineChatEngine_discoveryengineChatengine_update(context m
 		solution_types              = ["SOLUTION_TYPE_CHAT"]
 	}
 
-	resource "google_discovery_engine_data_store" "test_data_store_2" {
-		location                    = google_discovery_engine_data_store.test_data_store.location
-		data_store_id               = "tf-test-data-store-2-id%{random_suffix}"
-		display_name                = "tf-test-structured-datastore"
-		industry_vertical           = "GENERIC"
-		content_config              = "NO_CONTENT"
-		solution_types              = ["SOLUTION_TYPE_CHAT"]
-	}
 
 	resource "google_discovery_engine_chat_engine" "primary" {
 		engine_id = "tf-test-chat-engine-id%{random_suffix}"
@@ -97,7 +89,8 @@ func testAccDiscoveryEngineChatEngine_discoveryengineChatengine_update(context m
 		location = google_discovery_engine_data_store.test_data_store.location
 		display_name = "tf-test-chat-engine-name-2%{random_suffix}"
 		industry_vertical = "GENERIC"
-		data_store_ids = [google_discovery_engine_data_store.test_data_store.data_store_id, google_discovery_engine_data_store.test_data_store_2.data_store_id]
+		data_store_ids = [google_discovery_engine_data_store.test_data_store.data_store_id]
+
 		common_config {
 		  company_name = "test-company"
 		}
