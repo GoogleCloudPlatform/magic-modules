@@ -15,34 +15,14 @@
 name: Models
 base_url: projects/{{project}}/locations/{{region}}/models
 self_link: 'projects/{{project}}/locations/{{region}}/models/{{name}}'
-min_version: beta
 immutable: true
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'
   api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.models'
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
-    base_url: '{{op_id}}'
-    wait_ms: 1000
-    timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 40
-  result: !ruby/object:Api::OpAsync::Result
-    path: 'response'
-    resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
-    path: 'error'
-    message: 'message'
+autogen_async: true
 description: |-
   A trained machine learning Model.
-autogen_async: false
 id_format: '{{name}}'
 skip_sweeper: true
 examples:
