@@ -5,15 +5,10 @@ package projects
 import ProviderNameBeta
 import builds.*
 import jetbrains.buildServer.configs.kotlin.Project
-import jetbrains.buildServer.configs.kotlin.RelativeId
-import projects.reused.mmUpstream
-import projects.reused.nightlyTests
-import projects.reused.vcrRecording
+import projects.reused.*
 import replaceCharsId
 import vcs_roots.HashiCorpVCSRootBeta
-import vcs_roots.HashiCorpVCSRootGa
 import vcs_roots.ModularMagicianVCSRootBeta
-import vcs_roots.ModularMagicianVCSRootGa
 
 // googleSubProjectBeta returns a subproject that is used for testing terraform-provider-google-beta (Beta)
 fun googleSubProjectBeta(allConfig: AllContextParameters): Project {
