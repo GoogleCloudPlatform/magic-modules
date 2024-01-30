@@ -111,129 +111,168 @@ properties:
             name: pubSubCondition
             description: Conditions for triggering pubsub 
             properties: 
-            - !ruby/object:Api:Type:NestedObject
+            - !ruby/object::Api::Type::NestedObject
               name: expressions
               description: An expression 
               properties:
-              - !ruby/object:Api:Type:Enum
+              - !ruby/object:Api::Type::Enum
                 name: logicalOperator
                 description: The operator to apply to the collection of conditions
                 values: 
                   - :LOGICAL_OPERATOR_UNSPECIFIED
                   - :OR
                   - :AND
-              - !ruby/object:Api:Type:NestedObject
+              - !ruby/object:Api::Type::NestedObject
                 name: conditions
                 properties: 
-                - !ruby/object:Api:Type:Enum
+                - !ruby/object:Api::Type::Enum
                   name: minimumRiskScore
                   description: The minimum data risk score that triggers the condition.
                   values: 
                     - :PROFILE_SCORE_BUCKET_UNSPECIFIED
                     - :HIGH
                     - :MEDIUM_OR_HIGH
-                - !ruby/object:Api:Type:Enum
+                - !ruby/object:Api::Type::Enum
                   name: minimumSensitivityScore
                   description: The minimum sensitivity level that triggers the condition. 
                   values: 
                     - :PROFILE_SCORE_BUCKET_UNSPECIFIED
                     - :HIGH
                     - :MEDIUM_OR_HIGH
-          - !ruby/object:Api:Type:Enum
+          - !ruby/object:Api::Type::Enum
             name: detailOfMessage
             description: How much data to include in the pub/sub message. 
             values:
               - :DETAIL_LEVEL_UNSPECIFIED
               - :TABLE_PROFILE
               - :RESOURCE_NAME
-      - !ruby/object:Api:Type:NestedObjectTarget
+      - !ruby/object:Api::Type::NestedObject
         name : 'target[]'
         description: Target to match against for determining what to scan and how frequently
         properties:
-        - !ruby/object:Api:Type:NestedObject
+        - !ruby/object:Api::Type::NestedObject
           name: bigQueryTarget
           description: BigQuery target for Discovery. The first target to match a table will be the one applied. 
           properties: 
-          - !ruby/object:Api:Type:NestedObject
+          - !ruby/object:Api::Type::NestedObject
             name: filter
             description: Required. The tables the discovery cadence applies to. The first target with a matching filter will be the one to apply to a table
             properties:
-            - !ruby/object:Api:Type:NestedObject
+            - !ruby/object:Api::Type::NestedObject
               name: table 
               description: A specific set of tables for this filter to apply to. A table collection must be specified in only one filer per config. 
               properties: 
-              - !ruby/object:Api:Type:NestedObject
+              - !ruby/object:Api::Type::NestedObject
                 name: includeRegexes
                 description: A collection of regular expressions to match a BQ table against. 
                 properties:
-                - !ruby/object:Api:Type:NestedObject
+                - !ruby/object:Api::Type::NestedObject
                   name: 'patterns[]'
                   description: A single BigQuery regular expression pattern to match against one or more tables, datasets, or projects that contain BigQuery tables.
                   properties: 
-                  - !ruby/object:Api:Type:String
+                  - !ruby/object:Api::Type::String
                     name: projectIdRegex
                     description:  For organizations, if unset, will match all projects. Has no effect for data profile configurations created within a project.
-                  - !ruby/object:Api:Type:String
+                  - !ruby/object:Api::Type::String
                     name: datasetIdRegex
                     description: if unset, this property matches all datasets 
-                  - !ruby/object:Api:Type:String 
+                  - !ruby/object:Api::Type::String 
                     name: tableIdRegex
                     description: if unset, this property matches all tables
-              - !ruby/object:Api:Type:NestedObject
+              - !ruby/object:Api::Type::NestedObject
                 name: otherTables
                 description: Catch-all. This should always be the last filter in the list because anything above it will apply first. 
                 properties:
                 - !ruby/object:Api::Type::String 
                   name: createdAfter
                   description: A timestamp in RFC3339 UTC "Zulu" format with nanosecond resolution and upto nine fractional digits.
-                - !ruby/object:Api:Type:NestedObject
+                - !ruby/object:Api::Type::NestedObject
                   name: orCondition        
                   description: At least one of the conditions must be true for a table to be scanned. 
                   properties: 
-                  - !ruby/object:Api:Type:String 
+                  - !ruby/object:Api::Type::String 
                     name : minAge
                     description: Duration format. The minimum age a table must have before Cloud DLP can profile it. value greater than 1.
-                  - !ruby/object:Api:Type:Integer
+                  - !ruby/object:Api::Type::Integer
                     name: minRowCount
                     description: Minimum number of rows that should be present before Cloud DLP profiles as a table. 
-                - !ruby/object:Api:Type:NestedObject
+                - !ruby/object:Api::Type::NestedObject
                   name: types
                   description: Restrict discovery to specify table type
                   properties:
-                  - !ruby/object:Api:Type:Enum
+                  - !ruby/object:Api::Type::Enum
                     name: 'type[]'
                     description: A set of BiqQuery table types
                     values:
                       - BIG_QUERY_TABLE_TYPE_UNSPECIFIED
                       - BIG_QUERY_TABLE_TYPE_TABLE
                       - BIG_QUERY_TABLE_TYPE_EXTERNAL_BIG_LAKE
-                - !ruby/object:Api:Type:NestedObject
+                - !ruby/object:Api::Type::NestedObject
                   name: typeCollection
                   description: Restrict discovery to categories of table type
                   properties:
-                  - !ruby/object:Api:Type:Enum
+                  - !ruby/object:Api::Type::Enum
                     name: 'typeCollection[]'
                     description: Currently view, materialized view, snapshot and non-biglake external tables are supported. 
                     values: 
                       - BIG_QUERY_COLLECTION_UNSPECIFIED
                       - BIG_QUERY_COLLECTION_ALL_TYPES
                       - BIG_QUERY_COLLECTION_ONLY_SUPPORTED_TYPES
-          - !ruby/object:Api:Type:NestedObject
+          - !ruby/object:Api::Type::NestedObject
+            name: conditions
+            description: In addition to matching the filter, these conditions must be true before a profile is generated
+            properties:
+            - !ruby/object:Api::Type::String 
+              name: createdAfter
+              description: A timestamp in RFC3339 UTC "Zulu" format with nanosecond resolution and upto nine fractional digits.
+            - !ruby/object:Api::Type::NestedObject
+              name: orCondition        
+              description: At least one of the conditions must be true for a table to be scanned. 
+              properties: 
+              - !ruby/object:Api::Type::String 
+                name : minAge
+                description: Duration format. The minimum age a table must have before Cloud DLP can profile it. value greater than 1.
+              - !ruby/object:Api::Type::Integer
+                name: minRowCount
+                description: Minimum number of rows that should be present before Cloud DLP profiles as a table. 
+              - !ruby/object:Api::Type::NestedObject
+                name: types
+                description: Restrict discovery to specify table type
+                properties:
+                - !ruby/object:Api::Type::Enum
+                  name: 'type[]'
+                  description: A set of BiqQuery table types
+                  values:
+                    - BIG_QUERY_TABLE_TYPE_UNSPECIFIED
+                    - BIG_QUERY_TABLE_TYPE_TABLE
+                    - BIG_QUERY_TABLE_TYPE_EXTERNAL_BIG_LAKE
+              - !ruby/object:Api::Type::NestedObject
+                name: typeCollection
+                description: Restrict discovery to categories of table type
+                properties:
+                - !ruby/object:Api::Type::Enum
+                  name: 'typeCollection[]'
+                  description: Currently view, materialized view, snapshot and non-biglake external tables are supported. 
+                  values: 
+                    - BIG_QUERY_COLLECTION_UNSPECIFIED
+                    - BIG_QUERY_COLLECTION_ALL_TYPES
+                    - BIG_QUERY_COLLECTION_ONLY_SUPPORTED_TYPES
+          - !ruby/object:Api::Type::NestedObject
             name: cadence
             description: How often and when to update profiles. New tables that match both the fiter and conditions are scanned as quickly as possible depending on system capacity. 
             properties:
-            - !ruby/object:Api:Type:NestedObject
+            - !ruby/object:Api::Type::NestedObject
               name: schemaModifiedCadence
               description: Governs when to update data profiles when a schema is modified
               properties: 
-              - !ruby/object:Api:Type:Enum
+              - !ruby/object:Api::Type::Enum
                 name: 'types[]'
                 description: The type of events to consider when deciding if the table's schema has been modified and should have the profile updated. Defa       
                 values: 
                   - SCHEMA_MODIFICATION_UNSPECIFIED
                   - SCHEME_NEW_COLUMN
                   - SCHEME_REMOVED_COLUMNS
-              - !ruby/object:Api:Type:Enum
+              - !ruby/object:Api::Type::Enum
                 name: 'frequency'
                 description: How frequently profiles may be updated when schemas are modified. Default to monthly 
                 values: 
@@ -241,9 +280,31 @@ properties:
                   - UPDATE_FREQUENCY_NEVER
                   - UPDATE_FREQUENCY_DAILY
                   - UPDATE_FREQUENCY_MONTHLY
-            - !ruby/object:Api:Type:object
+            - !ruby/object:Api::Type::object
               name: 'tableModifiedCadence'
-              description: Governs when to update profile when a table is modified
-              
+              description: Governs when to update profile when a table is modified.
+              values:
+                - !ruby/object:Api::Type::Enum
+                  name: 'types[]'
+                  description: 'The type of events to consider when deciding if the table has been modified and should have the profile updated. Defaults to MODIFIED_TIMESTAMP'
+                  values: 
+                    - TABLE_MODIFICATION_UNSPECIFIED
+                    - TABLE_MODIFIED_TIMESTAMP
+                - !ruby/object:Api::Type::Enum
+                  name: 'frequency'
+                  description: 'How frequently data profiles can be updated when tables are modified. Defaults to never.'
+                  values: 
+                    - UPDATE_FREQUENCY_UNSPECIFIED
+                    - UPDATE_FREQUENCY_NEVER
+                    - UPDATE_FREQUENCY_DAILY
+                    - UPDATE_FREQUENCY_MONTHLY
+                  
+                  
+                  
+                  
+                  properties: 
+                  - !ruby/object:Api::Type::Enum
+                  name: BigQueryTableModification
+                  description: 
       - !ruby/object:Api::Type::String 
         name: 
