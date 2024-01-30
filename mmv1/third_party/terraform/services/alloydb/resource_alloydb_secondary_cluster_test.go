@@ -1148,7 +1148,7 @@ func TestAccAlloydbCluster_secondaryClusterPromoteWithNetworkConfigAndAllocatedI
 				ResourceName:            "google_alloydb_cluster.secondary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
 			},
 			{
 				Config: testAccAlloydbCluster_secondaryClusterPromoteWithNetworkConfigAndAllocatedIPRange(context),
@@ -1157,7 +1157,7 @@ func TestAccAlloydbCluster_secondaryClusterPromoteWithNetworkConfigAndAllocatedI
 				ResourceName:            "google_alloydb_cluster.secondary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
 			},
 		},
 	})

@@ -1,0 +1,125 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'RegionNetworkEndpoint'
+kind: 'compute#networkEndpoint'
+base_url: 'projects/{{project}}/regions/{{region}}/networkEndpointGroups/{{region_network_endpoint_group}}'
+description: |
+  A Region network endpoint represents a IP address/FQDN and port combination that is
+  part of a specific network endpoint group (NEG).
+
+  **NOTE**: Network endpoints cannot be created outside of a network endpoint group.
+immutable: true
+create_verb: :POST
+create_url: projects/{{project}}/regions/{{region}}/networkEndpointGroups/{{region_network_endpoint_group}}/attachNetworkEndpoints
+delete_verb: :POST
+delete_url: projects/{{project}}/regions/{{region}}/networkEndpointGroups/{{region_network_endpoint_group}}/detachNetworkEndpoints
+read_verb: :POST
+self_link: projects/{{project}}/regions/{{region}}/networkEndpointGroups/{{region_network_endpoint_group}}/listNetworkEndpoints
+identity:
+  - ipAddress
+  - fqdn
+  - port
+nested_query: !ruby/object:Api::Resource::NestedQuery
+  keys:
+    - items
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/load-balancing/docs/negs/'
+    'Internet NEGs Official Documentation': 'https://cloud.google.com/load-balancing/docs/negs/internet-neg-concepts'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/beta/regionNetworkEndpointGroups'
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    kind: 'compute#operation'
+    path: 'name'
+    base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'targetLink'
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'status'
+    complete: 'DONE'
+    allowed:
+      - 'PENDING'
+      - 'RUNNING'
+      - 'DONE'
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error/errors'
+    message: 'message'
+id_format: '{{project}}/{{region}}/{{region_network_endpoint_group}}/{{ip_address}}/{{fqdn}}/{{port}}'
+mutex: networkEndpoint/{{project}}/{{region}}/{{region_network_endpoint_group}}
+exclude_tgc: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'region_network_endpoint_internet_ip_port'
+    primary_resource_id: 'region-internet-ip-port-endpoint'
+    vars:
+      neg_name: 'ip-port-neg'
+      network_name: 'network'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'region_network_endpoint_internet_fqdn_port'
+    primary_resource_id: 'region-internet-fqdn-port-endpoint'
+    vars:
+      neg_name: 'fqdn-port-neg'
+      network_name: 'network'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_delete: templates/terraform/pre_delete/compute_region_network_endpoint.go.erb
+  custom_import: templates/terraform/custom_import/compute_region_network_endpoint.go.erb
+  decoder: templates/terraform/decoders/network_endpoint.go.erb
+  encoder: templates/terraform/encoders/compute_region_network_endpoint.go.erb
+parameters:
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'region'
+    resource: 'Region'
+    imports: 'name'
+    description: |
+      Region where the containing network endpoint group is located.
+    required: false
+    url_param_only: true
+    default_from_api: true
+    ignore_read: true
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'regionNetworkEndpointGroup'
+    resource: 'RegionNetworkEndpointGroup'
+    imports: 'name'
+    description: |
+      The network endpoint group this endpoint is part of.
+    required: true
+    url_param_only: true
+    ignore_read: true
+    diff_suppress_func: tpgresource.CompareResourceNames
+properties:
+  - !ruby/object:Api::Type::Integer
+    name: 'port'
+    description: |
+      Port number of network endpoint.
+    required: true
+    custom_flatten: templates/terraform/custom_flatten/float64_to_int.go.erb
+    validation: !ruby/object:Provider::Terraform::Validation
+      function: 'validation.IntAtLeast(1)'
+  - !ruby/object:Api::Type::String
+    name: 'ipAddress'
+    description: |
+      IPv4 address external endpoint.
+
+      This can only be specified when network_endpoint_type of the NEG is INTERNET_IP_PORT.
+  - !ruby/object:Api::Type::String
+    name: 'fqdn'
+    at_least_one_of:
+      - fqdn
+      - ip_address
+    description: |
+      Fully qualified domain name of network endpoint.
+
+      This can only be specified when network_endpoint_type of the NEG is INTERNET_FQDN_PORT.
