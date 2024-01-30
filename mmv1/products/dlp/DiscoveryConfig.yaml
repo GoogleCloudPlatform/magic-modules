@@ -43,7 +43,7 @@ parameters:
 properties:
   - !ruby/object:Api::Type::NestedObject
     name: 'DiscoveryConfig'
-    description: Configuration for discovery to scan resources for profile generation. Only one discovery configuration may exists per organization, folder, or porject. 
+    description: Configuration for discovery to scan resources for profile generation. Only one discovery configuration may exists per organization, folder, or project. 
     properties:
       - !ruby/object:Api::Type::String 
         name: name
@@ -84,7 +84,7 @@ properties:
             properties: 
             - !ruby/object:Api::Type::String
               name: projectId 
-              description: The Google Cloud Platform project ID of the project containing the table. If omitted, project ID is inferred from the API call.
+              description: The Google Cloud Platform project ID of the project containing the table. If omitted, the project ID is inferred from the API call.
             - !ruby/object:Api::Type::String
               name: datasetId
               description: Dataset Id of the table
@@ -134,7 +134,7 @@ properties:
                     - :MEDIUM_OR_HIGH
                 - !ruby/object:Api:Type:Enum
                   name: minimumSensitivityScore
-                  description: The minimum sensitvity level that triggers the condition. 
+                  description: The minimum sensitivity level that triggers the condition. 
                   values: 
                     - :PROFILE_SCORE_BUCKET_UNSPECIFIED
                     - :HIGH
@@ -192,7 +192,7 @@ properties:
                   properties: 
                   - !ruby/object:Api:Type:String 
                     name : minAge
-                    description: Duration format. Minimum age a table must have before Cloud DLP can profile it. value greater than 1.
+                    description: Duration format. The minimum age a table must have before Cloud DLP can profile it. value greater than 1.
                   - !ruby/object:Api:Type:Integer
                     name: minRowCount
                     description: Minimum number of rows that should be present before Cloud DLP profiles as a table. 
@@ -229,6 +229,21 @@ properties:
               - !ruby/object:Api:Type:Enum
                 name: 'types[]'
                 description: The type of events to consider when deciding if the table's schema has been modified and should have the profile updated. Defa       
-                    
+                values: 
+                  - SCHEMA_MODIFICATION_UNSPECIFIED
+                  - SCHEME_NEW_COLUMN
+                  - SCHEME_REMOVED_COLUMNS
+              - !ruby/object:Api:Type:Enum
+                name: 'frequency'
+                description: How frequently profiles may be updated when schemas are modified. Default to monthly 
+                values: 
+                  - UPDATE_FREQUENCY_UNSPECIFIED
+                  - UPDATE_FREQUENCY_NEVER
+                  - UPDATE_FREQUENCY_DAILY
+                  - UPDATE_FREQUENCY_MONTHLY
+            - !ruby/object:Api:Type:object
+              name: 'tableModifiedCadence'
+              description: Governs when to update profile when a table is modified
+              
       - !ruby/object:Api::Type::String 
         name: 
