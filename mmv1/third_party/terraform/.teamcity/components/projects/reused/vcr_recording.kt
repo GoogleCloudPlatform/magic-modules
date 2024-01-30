@@ -25,7 +25,7 @@ fun vcrRecording(parentProject:String, providerName: String, hashicorpVcsRoot: G
     var hcVcr = VcrDetails(providerName, buildIdHashiCorp, hashicorpVcsRoot, sharedResources)
     var hcBuildConfig = hcVcr.vcrBuildConfig(config)
 
-    // Create the build config for hashicorp/terraform-provider-google
+    // Create the build config for modular-magician/terraform-provider-google
     var mmVcr = VcrDetails(providerName, buildIdModularMagician, modularMagicianVcsRoot, sharedResources)
     var mmBuildConfig = mmVcr.vcrBuildConfig(config)
 
