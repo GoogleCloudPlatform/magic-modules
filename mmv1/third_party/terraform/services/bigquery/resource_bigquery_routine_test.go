@@ -113,6 +113,31 @@ func TestAccBigQueryRoutine_bigQueryRoutineSparkJar_Update(t *testing.T) {
 	})
 }
 
+func TestAccBigQueryRoutine_bigQueryRoutineRemoteFunction(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"zip_path":      "function-source.zip",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigQueryRoutineDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryRoutine_bigQueryRoutineRemoteFunction(context),
+			},
+			{
+				ResourceName:      "google_bigquery_routine.spark_jar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccBigQueryRoutine_bigQueryRoutineSparkJar(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_bigquery_dataset" "test" {
@@ -169,6 +194,69 @@ resource "google_bigquery_routine" "spark_jar" {
       "spark.dataproc.scaling.version" : "2",
       "spark.reducer.fetchMigratedShuffle.enabled" : "true",
     }
+  }
+}
+`, context)
+}
+
+func testAccBigQueryRoutine_bigQueryRoutineRemoteFunction(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_storage_bucket" "default" {
+  name                        = "%{random_suffix}-gcf-source"
+  location                    = "US"
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_object" "object" {
+  name   = "function-source.zip"
+  bucket = google_storage_bucket.default.name
+  source = "./test-fixtures/function-source.zip"
+}
+
+resource "google_cloudfunctions2_function" "default" {
+  name        = "function-v2"
+  location    = "us-central1"
+  description = "a new function"
+
+  build_config {
+    runtime     = "nodejs16"
+    entry_point = "helloHttp"
+    source {
+      storage_source {
+        bucket = google_storage_bucket.default.name
+        object = google_storage_bucket_object.object.name
+      }
+    }
+  }
+
+  service_config {
+    max_instance_count = 1
+    available_memory   = "256M"
+    timeout_seconds    = 60
+  }
+}
+
+resource "google_bigquery_connection" "test" {
+  connection_id = "tf_test_connection_id%{random_suffix}"
+  location      = "US"
+  cloud_resource { }
+}
+
+output "function_uri" { 
+  value = google_bigquery_connection.test.cloud_resource
+}
+
+resource "google_bigquery_routine" "remote_function" {
+  dataset_id = "routines"
+  routine_id     = "obadaroutinehello2"
+  routine_type = "SCALAR_FUNCTION"
+  definition_body = ""
+
+  return_type = "{\"typeKind\" :  \"STRING\"}"
+
+  remote_function_options {
+    endpoint = google_cloudfunctions2_function.default.service_config[0].uri
+    connection = "${google_bigquery_connection.test.name}"
   }
 }
 `, context)
