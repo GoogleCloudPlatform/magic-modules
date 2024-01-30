@@ -298,13 +298,22 @@ properties:
                     - UPDATE_FREQUENCY_NEVER
                     - UPDATE_FREQUENCY_DAILY
                     - UPDATE_FREQUENCY_MONTHLY
-                  
-                  
-                  
-                  
-                  properties: 
-                  - !ruby/object:Api::Type::Enum
-                  name: BigQueryTableModification
-                  description: 
-      - !ruby/object:Api::Type::String 
-        name: 
+          - !ruby/object:Api::Type::NestedObject
+            name: disabled      
+            description: Tables that match this filter will not have profile created
+        - !ruby/object:Api::Type::NestedObject
+            name: 'errors[]'
+            description: Output only. A stream of errors encountered when the config was activated. Repeated errors may result in the config automatically being paused. Output only field. Will return the last 100 errors. Whenever the config is modified this list will be cleared.
+            properties: 
+              - !ruby/object:Api::Type::NestedObject
+                name: details 
+                description: Detailed error codes and messages.
+                Properties: 
+                  - !ruby/object:Api::Type::Integer
+                  name : code 
+                  description: The status code, which should be an enum value of google.rpc.Code.
+                  - !ruby/object:Api::Type::String
+                  name: message 
+                  description : A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the google.rpc.Status.details field, or localized by the client.
+                  - !ruby/object:Api::Type:NestedObject
+                  name: 'details[]'
