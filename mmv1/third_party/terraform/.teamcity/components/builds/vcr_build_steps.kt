@@ -140,7 +140,6 @@ fun BuildSteps.runVcrTestRecordingSaveCassettes() {
             chmod 600 google-account.json
             gcloud auth activate-service-account --key-file=google-account.json
 
-
             echo "\nListing files present in ${'$'}VCR_PATH:"
             ls ${'$'}VCR_PATH
 
@@ -165,6 +164,7 @@ fun BuildSteps.runVcrTestRecordingSaveCassettes() {
 
                 gsutil -m cp ${'$'}VCR_PATH/* gs://${'$'}VCR_BUCKET_NAME/${'$'}BRANCH_NAME/fixtures/
             fi
+
             # Cleanup
             rm google-account.json
             gcloud auth application-default revoke
