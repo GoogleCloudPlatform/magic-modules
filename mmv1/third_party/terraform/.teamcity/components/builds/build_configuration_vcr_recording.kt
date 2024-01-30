@@ -24,10 +24,12 @@ class VcrDetails(private val providerName: String, private val buildId: String, 
         // This helps VCR testing builds to run tests across multiple packages
         val path = "./${providerName}"
 
+        val repo = vcsRoot.url!!.replace("https://github.com/", "")
+
         return BuildType {
             id(buildId)
 
-            name = "VCR Recording - Using ${vcsRoot.url}"
+            name = "VCR Recording - Using ${repo}"
 
             vcs {
                 root(vcsRoot)
