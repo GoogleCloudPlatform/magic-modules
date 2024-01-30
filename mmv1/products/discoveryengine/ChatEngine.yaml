@@ -50,8 +50,6 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "discoveryengine_chat_engine_basic"
     primary_resource_id: 'primary'
-    primary_resource_name:
-      'fmt.Sprintf("tf-test-chat-engine%s", context["random_suffix"])'
     vars:
       engine_id: "chat-engine-id"
       data_store_id: "data-store"
