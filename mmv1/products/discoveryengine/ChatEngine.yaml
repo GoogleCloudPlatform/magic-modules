@@ -45,6 +45,16 @@ import_format:
 
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/discovery_engine_chat_engine_hardcode_solution_type.go.erb
+
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "discoveryengine_chat_engine_basic"
+    primary_resource_id: 'primary'
+    primary_resource_name:
+      'fmt.Sprintf("tf-test-chat-engine%s", context["random_suffix"])'
+    vars:
+      engine_id: "chat-engine-id"
+
 parameters:
   - !ruby/object:Api::Type::String
     name: 'engineId'

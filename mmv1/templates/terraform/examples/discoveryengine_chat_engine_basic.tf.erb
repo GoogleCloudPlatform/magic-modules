@@ -1,28 +1,36 @@
-resource "google_discovery_engine_data_store" "data_store" {
+resource "google_discovery_engine_data_store" "test_data_store" {
   location                    = "global"
-  data_store_id               = "<%= ctx[:vars]['data_store_id'] %>"
+  data_store_id               = "tf-test-data-store-id%{random_suffix}"
   display_name                = "tf-test-structured-datastore"
   industry_vertical           = "GENERIC"
   content_config              = "NO_CONTENT"
   solution_types              = ["SOLUTION_TYPE_CHAT"]
 }
 
-resource "google_discovery_engine_chat_engine" "<%= ctx[:primary_resource_id] %>" {
-  engine_id = "<%= ctx[:primary_resource_id] %>"
+resource "google_discovery_engine_data_store" "test_data_store_2" {
+  location                    = google_discovery_engine_data_store.test_data_store.location
+  data_store_id               = "tf-test-data-store-2-id%{random_suffix}"
+  display_name                = "tf-test-structured-datastore"
+  industry_vertical           = "GENERIC"
+  content_config              = "NO_CONTENT"
+  solution_types              = ["SOLUTION_TYPE_CHAT"]
+}
+
+resource "google_discovery_engine_chat_engine" "primary" {
+  engine_id = "<%= ctx[:vars]['engine_id'] %>"
   collection_id = "default_collection"
-  location = google_discovery_engine_data_store.data_store.location
-  display_name = "test desplay name"
-  industry_vertical = google_discovery_engine_data_store.data_store.industry_vertical
-  data_store_ids = [google_discovery_engine_data_store.data_store.data_store_id, google_discovery_engine_data_store.data_store_2.data_store_id]
+  location = google_discovery_engine_data_store.test_data_store.location
+  display_name = "tf-test-chat-engine-name-2%{random_suffix}"
+  industry_vertical = "GENERIC"
+  data_store_ids = [google_discovery_engine_data_store.test_data_store.data_store_id, google_discovery_engine_data_store.test_data_store_2.data_store_id]
   common_config {
     company_name = "test-company"
   }
   chat_engine_config {
     agent_creation_config {
-      business = "test business name"
-      default_language_code = "en"
-      time_zone = "America/Los_Angeles"
-      location = "global"
+    business = "test business name"
+    default_language_code = "en"
+    time_zone = "America/Los_Angeles"
     }
   }
 }
