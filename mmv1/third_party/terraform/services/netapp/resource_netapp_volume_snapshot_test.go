@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-func TestAccNetappvolumeSnapshot_volumeSnapshotCreateExample_update(t *testing.T) {
+func TestAccNetappVolumeSnapshot_volumeSnapshotCreateExample_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -22,10 +22,10 @@ func TestAccNetappvolumeSnapshot_volumeSnapshotCreateExample_update(t *testing.T
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckNetappvolumeSnapshotDestroyProducer(t),
+		CheckDestroy:             testAccCheckNetappVolumeSnapshotDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetappvolumesnapshot_volumeSnapshotCreateExample_full(context),
+				Config: testAccNetappVolumeSnapshot_volumeSnapshotCreateExample_full(context),
 			},
 			{
 				ResourceName:            "google_netapp_volume_snapshot.test_snapshot",
@@ -34,7 +34,7 @@ func TestAccNetappvolumeSnapshot_volumeSnapshotCreateExample_update(t *testing.T
 				ImportStateVerifyIgnore: []string{"location", "volume_name", "name", "labels", "terraform_labels"},
 			},
 			{
-				Config: testAccNetappvolumesnapshot_volumeSnapshotCreateExample_update(context),
+				Config: testAccNetappVolumeSnapshot_volumeSnapshotCreateExample_update(context),
 			},
 			{
 				ResourceName:            "google_netapp_volume_snapshot.test_snapshot",
@@ -46,7 +46,7 @@ func TestAccNetappvolumeSnapshot_volumeSnapshotCreateExample_update(t *testing.T
 	})
 }
 
-func testAccNetappvolumesnapshot_volumeSnapshotCreateExample_full(context map[string]interface{}) string {
+func testAccNetappVolumeSnapshot_volumeSnapshotCreateExample_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_netapp_storage_pool" "default" {
   name = "tf-test-test-pool%{random_suffix}"
@@ -83,7 +83,7 @@ data "google_compute_network" "default" {
 `, context)
 }
 
-func testAccNetappvolumesnapshot_volumeSnapshotCreateExample_update(context map[string]interface{}) string {
+func testAccNetappVolumeSnapshot_volumeSnapshotCreateExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_netapp_storage_pool" "default" {
   name = "tf-test-test-pool%{random_suffix}"
