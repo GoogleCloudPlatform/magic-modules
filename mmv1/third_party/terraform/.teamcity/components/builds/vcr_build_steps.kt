@@ -144,6 +144,13 @@ fun BuildSteps.runVcrTestRecordingSaveCassettes() {
             echo "\nListing files present in ${'$'}VCR_PATH:"
             ls ${'$'}VCR_PATH
 
+            # Fail early & explicitly if no files were created in the previous step
+            export FILE_COUNT=${'$'}(ls ${'$'}VCR_PATH | wc -l)
+            if test ${'$'}TEST_COUNT -le "0"; then
+                echo "No cassette files found locally to upload to Cloud Storage bucket"
+                exit 1
+            fi
+
             export BRANCH_NAME=%teamcity.build.branch%
             if [ "${'$'}BRANCH_NAME" = "refs/heads/main" ]; then
                 echo "\nUsing main branch, so copying files to fixures/ in root of Cloud Storage bucket"
