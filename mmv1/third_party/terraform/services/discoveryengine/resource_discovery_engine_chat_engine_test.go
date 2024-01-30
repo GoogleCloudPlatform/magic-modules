@@ -19,7 +19,7 @@ func TestAccDiscoveryEngineChatEngine_discoveryengineChatengine_update(t *testin
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDiscoveryEngineChatEngine_discoveryengineChatengineBasicExample_basic(context),
+				Config: testAccDiscoveryEngineChatEngine_discoveryengineChatengine_basic(context),
 			},
 			{
 				ResourceName:            "google_discovery_engine_chat_engine.primary",
@@ -28,7 +28,7 @@ func TestAccDiscoveryEngineChatEngine_discoveryengineChatengine_update(t *testin
 				ImportStateVerifyIgnore: []string{"chat_engine_config"},
 			},
 			{
-				Config: testAccDiscoveryEngineChatEngine_discoveryengineChatengineBasicExample_update(context),
+				Config: testAccDiscoveryEngineChatEngine_discoveryengineChatengine_update(context),
 			},
 			{
 				ResourceName:            "google_discovery_engine_chat_engine.primary",
@@ -40,7 +40,7 @@ func TestAccDiscoveryEngineChatEngine_discoveryengineChatengine_update(t *testin
 	})
 }
 
-func TestAccDiscoveryEngineChatEngine_discoveryengineChatengineBasicExample_update_location(t *testing.T) {
+func TestAccDiscoveryEngineChatEngine_discoveryengineChatengine_update_location(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -52,7 +52,7 @@ func TestAccDiscoveryEngineChatEngine_discoveryengineChatengineBasicExample_upda
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDiscoveryEngineChatEngine_discoveryengineChatengineBasicExample_update(context),
+				Config: testAccDiscoveryEngineChatEngine_discoveryengineChatengine_update(context),
 			},
 			{
 				ResourceName:            "google_discovery_engine_chat_engine.primary",
@@ -61,7 +61,7 @@ func TestAccDiscoveryEngineChatEngine_discoveryengineChatengineBasicExample_upda
 				ImportStateVerifyIgnore: []string{"chat_engine_config"},
 			},
 			{
-				Config: testAccDiscoveryEngineChatEngine_discoveryengineChatengineBasicExample_update_location(context),
+				Config: testAccDiscoveryEngineChatEngine_discoveryengineChatengine_update_location(context),
 			},
 			{
 				ResourceName:            "google_discovery_engine_chat_engine.primary",
@@ -73,7 +73,7 @@ func TestAccDiscoveryEngineChatEngine_discoveryengineChatengineBasicExample_upda
 	})
 }
 
-func testAccDiscoveryEngineChatEngine_discoveryengineChatengineBasicExample_basic(context map[string]interface{}) string {
+func testAccDiscoveryEngineChatEngine_discoveryengineChatengine_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 	resource "google_discovery_engine_data_store" "test_data_store" {
 		location                    = "global"
@@ -105,7 +105,7 @@ func testAccDiscoveryEngineChatEngine_discoveryengineChatengineBasicExample_basi
 	`, context)
 }
 
-func testAccDiscoveryEngineChatEngine_discoveryengineChatengineBasicExample_update(context map[string]interface{}) string {
+func testAccDiscoveryEngineChatEngine_discoveryengineChatengine_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 	resource "google_discovery_engine_data_store" "test_data_store" {
 		location                    = "global"
@@ -146,7 +146,7 @@ func testAccDiscoveryEngineChatEngine_discoveryengineChatengineBasicExample_upda
 	`, context)
 }
 
-func testAccDiscoveryEngineChatEngine_discoveryengineChatengineBasicExample_update_location(context map[string]interface{}) string {
+func testAccDiscoveryEngineChatEngine_discoveryengineChatengine_update_location(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 	resource "google_discovery_engine_data_store" "test_data_store" {
 		location                    = "eu"
