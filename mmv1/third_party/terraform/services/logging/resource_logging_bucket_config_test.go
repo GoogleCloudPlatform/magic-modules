@@ -16,7 +16,7 @@ func TestAccLoggingBucketConfigFolder_basic(t *testing.T) {
 		"random_suffix": acctest.RandString(t, 10),
 		"folder_name":   "tf-test-" + acctest.RandString(t, 10),
 		"org_id":        envvar.GetTestOrgFromEnv(t),
-		"bucket_id":     "tf-test-bucket-" + acctest.RandString(t, 10),
+		"bucket_id":     "_Default",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -187,7 +187,7 @@ func TestAccLoggingBucketConfigBillingAccount_basic(t *testing.T) {
 		"random_suffix":        acctest.RandString(t, 10),
 		"billing_account_name": "billingAccounts/" + envvar.GetTestMasterBillingAccountFromEnv(t),
 		"org_id":               envvar.GetTestOrgFromEnv(t),
-		"bucket_id":            "tf-test-bucket-" + acctest.RandString(t, 10),
+		"bucket_id":            "_Default",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -222,7 +222,7 @@ func TestAccLoggingBucketConfigOrganization_basic(t *testing.T) {
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 		"org_id":        envvar.GetTestOrgFromEnv(t),
-		"bucket_id":     "tf-test-bucket-" + acctest.RandString(t, 10),
+		"bucket_id":     "_Default",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -263,7 +263,7 @@ resource "google_logging_folder_bucket_config" "basic" {
 	location  = "global"
 	retention_days = %d
 	description = "retention test %d days"
-	bucket_id = "%{bucket_id}"
+	bucket_id = "_Default"
 }
 `, context), retention, retention)
 }
@@ -475,7 +475,7 @@ resource "google_logging_billing_account_bucket_config" "basic" {
 	location  = "global"
 	retention_days = %d
 	description = "retention test %d days"
-	bucket_id = "%{bucket_id}"
+	bucket_id = "_Default"
 }
 `, context), retention, retention)
 }
@@ -491,7 +491,7 @@ resource "google_logging_organization_bucket_config" "basic" {
 	location  = "global"
 	retention_days = %d
 	description = "retention test %d days"
-	bucket_id = "%{bucket_id}"
+	bucket_id = "_Default"
 }
 `, context), retention, retention)
 }
@@ -522,7 +522,7 @@ func TestAccLoggingBucketConfigOrganization_indexConfigs(t *testing.T) {
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 		"org_id":        envvar.GetTestOrgFromEnv(t),
-		"bucket_id":     "tf-test-bucket-" + acctest.RandString(t, 10),
+		"bucket_id":     "_Default",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -562,7 +562,7 @@ resource "google_logging_organization_bucket_config" "basic" {
 	location  = "global"
 	retention_days = 30
 	description = "retention test 30 days"
-	bucket_id = "%{bucket_id}"
+	bucket_id = "_Default"
 
 	index_configs {
 		field_path 	= "jsonPayload.request.url"
