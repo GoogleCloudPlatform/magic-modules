@@ -6,29 +6,6 @@ import (
 	"testing"
 )
 
-func TestAccDiscoveryEngineChatEngine_discoveryengineChatengineBasicExample_basic(t *testing.T) {
-	t.Parallel()
-
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccDiscoveryEngineChatEngine_discoveryengineChatengineBasicExample_basic(context),
-			},
-			{
-				ResourceName:            "google_discovery_engine_chat_engine.primary",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"chat_engine_config"},
-			},
-		},
-	})
-}
 
 func TestAccDiscoveryEngineChatEngine_discoveryengineChatengineBasicExample_update(t *testing.T) {
 	t.Parallel()
