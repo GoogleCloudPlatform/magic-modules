@@ -88,6 +88,7 @@ fun BuildSteps.runVcrTestRecordingSetup() {
 
             # Authenticate gcloud CLI
             echo "${'$'}{GOOGLE_CREDENTIALS}" > google-account.json
+            chmod 600 google-account.json
             gcloud auth activate-service-account --key-file=google-account.json
 
             # Pull files from GCS
@@ -129,6 +130,7 @@ fun BuildSteps.runVcrTestRecordingSaveCassettes() {
 
             # Authenticate gcloud CLI
             echo "${'$'}{GOOGLE_CREDENTIALS}" > google-account.json
+            chmod 600 google-account.json
             gcloud auth activate-service-account --key-file=google-account.json
 
             export BRANCH_NAME=%teamcity.build.branch%
