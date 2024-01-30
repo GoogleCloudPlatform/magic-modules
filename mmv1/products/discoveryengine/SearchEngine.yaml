@@ -120,6 +120,7 @@ properties:
     description: |
       Configurations for a Search Engine.
     default_from_api: true
+    required: true
     properties:
       - !ruby/object:Api::Type::Enum
         name: 'searchTier'
