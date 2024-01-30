@@ -49,6 +49,7 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   decoder: "templates/terraform/decoders/private_cloud.go.erb"
   post_update: "templates/terraform/post_update/private_cloud.go.erb"
   update_encoder: "templates/terraform/update_encoder/private_cloud.go.erb"
+  constants: templates/terraform/constants/vmwareengine_private_cloud_type.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "vmware_engine_private_cloud_basic"
@@ -292,7 +293,7 @@ properties:
       Initial type of the private cloud.
     immutable: true
     ignore_read: true
+    diff_suppress_func: vmwareenginePrivateCloudStandardTypeDiffSuppressFunc
     values:
       - :STANDARD
       - :TIME_LIMITED
-    default_value: :STANDARD
