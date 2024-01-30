@@ -128,7 +128,7 @@ properties:
         values:
           - :SEARCH_TIER_STANDARD
           - :SEARCH_TIER_ENTERPRISE
-        default_from_api: true
+        default_value: :SEARCH_TIER_STANDARD
       - !ruby/object:Api::Type::Array
         name: 'searchAddOns'
         description: |
@@ -139,7 +139,6 @@ properties:
             The add-on that this search engine enables.
           values:
             - :SEARCH_ADD_ON_LLM
-          default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: 'commonConfig'
     description: |
