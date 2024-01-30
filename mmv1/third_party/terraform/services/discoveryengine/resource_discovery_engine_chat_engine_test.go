@@ -96,7 +96,6 @@ func TestAccDiscoveryEngineChatEngine_discoveryengineChatengineBasicExample_upda
 	})
 }
 
-
 func testAccDiscoveryEngineChatEngine_discoveryengineChatengineBasicExample_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 	resource "google_discovery_engine_data_store" "test_data_store" {
