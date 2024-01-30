@@ -7,7 +7,7 @@ import (
 )
 
 
-func TestAccDiscoveryEngineChatEngine_discoveryengineChatengineBasicExample_update(t *testing.T) {
+func TestAccDiscoveryEngineChatEngine_discoveryengineChatengine_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
