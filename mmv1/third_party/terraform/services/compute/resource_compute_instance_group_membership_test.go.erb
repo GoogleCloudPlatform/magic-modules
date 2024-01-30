@@ -19,6 +19,7 @@ func TestAccComputeInstanceGroupMembership_instanceGroupMembershipBasic(t *testi
   suffix := acctest.RandString(t, 10)
 	context := map[string]interface{}{
 		"random_suffix": suffix,
+		"zone": envvar.GetTestZoneFromEnv()
 	}
 
 	igId := fmt.Sprintf("projects/%s/zones/%s/instanceGroups/instance-group-%s",
@@ -92,6 +93,7 @@ func TestAccComputeInstanceGroupMembership_instanceGroupMembershipBasic(t *testi
 func testAccComputeInstanceGroupMembership_instanceGroupMembershipBasic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
     resource "google_compute_instance_group_membership" "default" {
+      zone = %{zone}
       instance_group = google_compute_instance_group.default.name
       instance = google_compute_instance.default.self_link
     }
