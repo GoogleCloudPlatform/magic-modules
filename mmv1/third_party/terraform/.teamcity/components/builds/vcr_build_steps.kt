@@ -80,11 +80,11 @@ fun BuildSteps.runVcrTestRecordingSetup() {
             mkdir -p ${'$'}VCR_PATH
             
             if [ "${'$'}VCR_MODE" = "RECORDING" ]; then
-                echo "RECORDING MODE - skipping this build step; nothing needed from Cloud Storage bucket"
+                echo "\nRECORDING MODE - skipping this build step; nothing needed from Cloud Storage bucket"
                 exit 0
             fi
 
-            echo "REPLAY MODE- retrieving cassettes from Cloud Storage bucket"
+            echo "\nREPLAY MODE- retrieving cassettes from Cloud Storage bucket"
 
             # Authenticate gcloud CLI
             echo "${'$'}{GOOGLE_CREDENTIALS}" > google-account.json
@@ -92,11 +92,18 @@ fun BuildSteps.runVcrTestRecordingSetup() {
             gcloud auth activate-service-account --key-file=google-account.json
 
             # Pull files from GCS
+            echo "\nListing files present in gs://${'$'}VCR_BUCKET_NAME/fixtures/"
             gsutil ls -p ${'$'}GOOGLE_INFRA_PROJECT gs://${'$'}VCR_BUCKET_NAME/fixtures/
+
+            echo "\nCopying files present in gs://${'$'}VCR_BUCKET_NAME/fixtures/"
             gsutil -m cp gs://${'$'}VCR_BUCKET_NAME/fixtures/* ${'$'}VCR_PATH
-            # copy branch specific cassettes over master. This might fail but that's ok if the folder doesnt exist
+
+            # copy branch-specific cassettes over master. This might fail but that's ok if the folder doesnt exist
+            echo "\nAttempting to copy branch-specific files, if they exist: gs://${'$'}VCR_BUCKET_NAME/${'$'}BRANCH_NAME/fixtures/*"
             export BRANCH_NAME=%teamcity.build.branch%
             gsutil -m cp gs://${'$'}VCR_BUCKET_NAME/${'$'}BRANCH_NAME/fixtures/* ${'$'}VCR_PATH
+
+            echo "\nListing files present in ${'$'}VCR_PATH:"
             ls ${'$'}VCR_PATH
 
             # Cleanup
@@ -104,7 +111,7 @@ fun BuildSteps.runVcrTestRecordingSetup() {
             gcloud auth application-default revoke
             gcloud auth revoke --all
 
-            echo "Finished"
+            echo "\nFinished"
         """.trimIndent()
         // ${'$'} is required to allow creating a script in TeamCity that contains
         // parts like ${GIT_HASH_SHORT} without having Kotlin syntax issues. For more info see:
@@ -122,33 +129,41 @@ fun BuildSteps.runVcrTestRecordingSaveCassettes() {
             echo "VCR_PATH: ${'$'}{VCR_PATH}"
 
             if [ "${'$'}VCR_MODE" = "REPLAYING" ]; then
-            echo "REPLAYING MODE - skipping this build step; nothing to be done"
+            echo "\nREPLAYING MODE - skipping this build step; nothing to be done"
             exit 0
             fi
 
-            echo "RECORDING MODE - push new cassettes to Cloud Storage bucket"
+            echo "\nRECORDING MODE - push new cassettes to Cloud Storage bucket"
 
             # Authenticate gcloud CLI
             echo "${'$'}{GOOGLE_CREDENTIALS}" > google-account.json
             chmod 600 google-account.json
             gcloud auth activate-service-account --key-file=google-account.json
 
+
+            echo "\nListing files present in ${'$'}VCR_PATH:"
+            ls ${'$'}VCR_PATH
+
             export BRANCH_NAME=%teamcity.build.branch%
-            gsutil ls -p ${'$'}GOOGLE_INFRA_PROJECT gs://${'$'}VCR_BUCKET_NAME/fixtures/
             if [ "${'$'}BRANCH_NAME" = "refs/heads/main" ]; then
-                echo "Copying to main"
+                echo "\nUsing main branch, so copying files to fixures/ in root of Cloud Storage bucket"
+
+                echo "\nListing files already present in gs://${'$'}VCR_BUCKET_NAME/fixtures/:"
+                gsutil ls -p ${'$'}GOOGLE_INFRA_PROJECT gs://${'$'}VCR_BUCKET_NAME/fixtures/
+
+                echo "\nCopying files to Cloud Storage bucket:"
                 gsutil -m cp ${'$'}VCR_PATH/* gs://${'$'}VCR_BUCKET_NAME/fixtures/
             else
-                echo "Copying to ${'$'}BRANCH_NAME"
+                echo "\nUsing ${'$'}BRANCH_NAME branch, so copying files to ${'$'}BRANCH_NAME/fixtures/ folder in Cloud Storage bucket"
+
                 gsutil -m cp ${'$'}VCR_PATH/* gs://${'$'}VCR_BUCKET_NAME/${'$'}BRANCH_NAME/fixtures/
             fi
-
             # Cleanup
             rm google-account.json
             gcloud auth application-default revoke
             gcloud auth revoke --all
 
-            echo "Finished"
+            echo "\nFinished"
         """.trimIndent()
         // ${'$'} is required to allow creating a script in TeamCity that contains
         // parts like ${GIT_HASH_SHORT} without having Kotlin syntax issues. For more info see:
