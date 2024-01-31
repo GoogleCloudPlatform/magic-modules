@@ -48,7 +48,7 @@ class SweeperDetails(private val sweeperName: String, private val parentProjectN
 
             steps {
                 setGitCommitBuildId()
-                tagBuildToIndicatePurpose()
+                tagBuildToIndicateTriggerMethod()
                 configureGoEnv()
                 downloadTerraformBinary()
                 runSweepers(sweeperName)

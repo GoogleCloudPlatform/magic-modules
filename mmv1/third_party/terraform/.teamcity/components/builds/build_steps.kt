@@ -32,7 +32,7 @@ fun BuildSteps.setGitCommitBuildId() {
     })
 }
 
-fun BuildSteps.tagBuildToIndicatePurpose() {
+fun BuildSteps.tagBuildToIndicateTriggerMethod() {
     step(ScriptBuildStep {
         name = "Set build tag to indicate if build is run automatically or manually triggered"
         scriptContent = """
@@ -41,11 +41,11 @@ fun BuildSteps.tagBuildToIndicatePurpose() {
 
             if [[ "${'$'}TRIGGERED_BY_USERNAME" = "n/a" ]] ; then
                 echo "Build was triggered as part of automated testing. We know this because the `triggeredBy.username` value was `n/a`, value: ${'$'}{TRIGGERED_BY_USERNAME}"
-                TAG="nightly-test"
+                TAG="cron-trigger"
                 echo "##teamcity[addBuildTag '${'$'}{TAG}']"
             else
-                echo "Build wasn't triggered as part of automated testing. We know this because the `triggeredBy.username` value was not `n/a`, value: ${'$'}{TRIGGERED_BY_USERNAME}"
-                TAG="one-off-build"
+                echo "Build was triggered manually. We know this because `triggeredBy.username` has a non- `n/a` value: ${'$'}{TRIGGERED_BY_USERNAME}"
+                TAG="manual-trigger"
                 echo "##teamcity[addBuildTag '${'$'}{TAG}']"
             fi
         """.trimIndent()

@@ -39,7 +39,6 @@ class VcrDetails(private val providerName: String, private val buildId: String, 
             steps {
                 checkVcrEnvironmentVariables()
                 setGitCommitBuildId()
-                tagBuildToIndicatePurpose()
                 configureGoEnv()
                 downloadTerraformBinary()
                 runVcrTestRecordingSetup()
