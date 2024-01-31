@@ -74,6 +74,12 @@ func ResourceDataflowFlexTemplateJob() *schema.Resource {
 				Description: `Only applicable when updating a pipeline. Map of transform name prefixes of the job to be replaced with the corresponding name prefixes of the new job.`,
 			},
 
+			"launch_options": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: `Options to be used to configure Flex Template launcher instance.`,
+			},
+
 			"on_delete": {
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"cancel", "drain"}, false),
@@ -278,12 +284,15 @@ func resourceDataflowFlexTemplateJobCreate(d *schema.ResourceData, meta interfac
 		return err
 	}
 
+	launchOptions := tpgresource.ExpandStringMap(d, "launch_options")
+
 	request := dataflow.LaunchFlexTemplateRequest{
 		LaunchParameter: &dataflow.LaunchFlexTemplateParameter{
 			ContainerSpecGcsPath: d.Get("container_spec_gcs_path").(string),
 			JobName:              d.Get("name").(string),
 			Parameters:           updatedParameters,
 			Environment:          &env,
+			LaunchOptions:        launchOptions,
 		},
 	}
 
