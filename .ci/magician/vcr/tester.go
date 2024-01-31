@@ -371,6 +371,8 @@ func (vt *Tester) runInParallel(mode Mode, version provider.Version, testDir, te
 	if err := vt.rnr.WriteFile(logFileName, output); err != nil {
 		errs <- fmt.Errorf("error writing log: %v, test output: %v", err, output)
 	}
+	fmt.Println("ls", logPath)
+	fmt.Println(vt.rnr.Run("ls", []string{logPath}, nil))
 	<-running
 	wg.Done()
 }
@@ -402,7 +404,7 @@ func (vt *Tester) UploadLogs(logBucket, prNumber, buildID string, parallel, afte
 	if !ok {
 		return fmt.Errorf("no log path found for mode %s and version %s", mode.Lower(), version)
 	}
-	args := []string{"-m", "-q", "cp", "-r", filepath.Join(vt.baseDir, "testlogs", fmt.Sprintf("%s_test.log", mode.Lower())), bucketPath + "build-log/"}
+	args := []string{"-h", "Content-Type:text/plain", "-q", "cp", "-r", filepath.Join(vt.baseDir, "testlogs", fmt.Sprintf("%s_test.log", mode.Lower())), bucketPath + "build-log/"}
 	fmt.Println("Uploading build log:\n", "gsutil", strings.Join(args, " "))
 	if _, err := vt.rnr.Run("gsutil", args, nil); err != nil {
 		fmt.Println("Error uploading build log: ", err)
@@ -412,13 +414,13 @@ func (vt *Tester) UploadLogs(logBucket, prNumber, buildID string, parallel, afte
 		suffix = "_after_recording"
 	}
 	if parallel {
-		args := []string{"-m", "-q", "cp", "-r", filepath.Join(vt.baseDir, "testlogs", mode.Lower()+"_build", "*"), fmt.Sprintf("%sbuild-log/%s_build%s/", bucketPath, mode.Lower(), suffix)}
+		args := []string{"-h", "Content-Type:text/plain", "-m", "-q", "cp", "-r", filepath.Join(vt.baseDir, "testlogs", mode.Lower()+"_build", "*"), fmt.Sprintf("%sbuild-log/%s_build%s/", bucketPath, mode.Lower(), suffix)}
 		fmt.Println("Uploading build logs:\n", "gsutil", strings.Join(args, " "))
 		if _, err := vt.rnr.Run("gsutil", args, nil); err != nil {
 			fmt.Println("Error uploading build logs: ", err)
 		}
 	}
-	args = []string{"-m", "-q", "cp", "-r", filepath.Join(logPath, "*"), fmt.Sprintf("%s%s%s/", bucketPath, mode.Lower(), suffix)}
+	args = []string{"-h", "Content-Type:text/plain", "-m", "-q", "cp", "-r", filepath.Join(logPath, "*"), fmt.Sprintf("%s%s%s/", bucketPath, mode.Lower(), suffix)}
 	fmt.Println("Uploading logs:\n", "gsutil", strings.Join(args, " "))
 	if _, err := vt.rnr.Run("gsutil", args, nil); err != nil {
 		fmt.Println("Error uploading logs: ", err)
