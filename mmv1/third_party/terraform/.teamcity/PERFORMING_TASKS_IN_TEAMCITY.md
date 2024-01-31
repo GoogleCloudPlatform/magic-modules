@@ -2,6 +2,15 @@
 
 The testing environment in TeamCity can be found at https://hashicorp.teamcity.com/
 
+Contents:
+* [Projects in TeamCity](#projects-in-teamcity)
+* [How to do common tasks in TeamCity](#how-to-do-common-tasks-in-teamcity)
+    * [Looking at nightly test results](#looking-at-nightly-test-results)
+    * [Ad-hoc testing of branches in the downstream repositories](#ad-hoc-testing-of-branches-in-the-downstream-repositories)
+    * [Ad-hoc testing of branches in the upstream repositories, while reviewing a PR](#ad-hoc-testing-of-branches-in-the-upstream-repositories-while-reviewing-a-pr)
+
+
+
 ## Projects in TeamCity
 
 This is the hierarchy of projects in TeamCity currently:
@@ -26,9 +35,9 @@ Google Cloud/
 * The `Project Sweeper` project contains only the sweeper for `google_project` resources.
    * This sweeper's effects aren't confined to a single GCP project, so requires special control to ensure it doesn't interfere with other builds' acceptance tests.
 
-### How to do common tasks in TeamCity
+## How to do common tasks in TeamCity
 
-## Looking at nightly test results
+### Looking at nightly test results
 
 A CRON trigger causes all acceptance tests for the GA and Beta providers to run overnight, Mon-Sun. These tests use the `main` branches of hashicorp/terraform-provider-google(-beta) repos. The tests interact fully with Google APIs and are used to identify any breaking changes introduced by either a recent PR or a change in the API itself.
 
@@ -49,14 +58,14 @@ To view all the failed tests for a given commit:
     * Plain text means that the test has failed previously and hasn't since passed. 
  
 
-## Ad-hoc testing of release branches in the downstream repositories
+### Ad-hoc testing of branches in the downstream repositories
 
 In preparation for a release you may need to run tests on a release branch present in the downstream hashicorp/terraform-provider-google(-beta) repos. To do this you should navigate to `Google > Nightly Tests` or `Google Beta > Nightly Tests` and run a Custom Build. The resulting build will still use the terraform-provider-google(-beta) repo and the appropriate nightly testing GCP project, but you can change which branch is used and can limit which tests are run. See the official TeamCity documentation for [information on how to run a Custom Build](https://www.jetbrains.com/help/teamcity/running-custom-build.html).
 
 To use a release branch, or any other branch that isn't main, use [the `Build branch` dropdown menu](https://www.jetbrains.com/help/teamcity/running-custom-build.html#Build+Branch) in the `Run Custom Build` modal. Changing branches is no longer controlled by a parameter.
 
 
-## Ad-hoc testing of branches in the upstream repositories, while reviewing a PR
+### Ad-hoc testing of branches in the upstream repositories, while reviewing a PR
 
 When reviewing a PR you may need to run acceptance tests using the code shown in the Diff Report, present in branches in the modular-magician/terraform-provider-google(-beta) repositories.
 
@@ -69,7 +78,7 @@ Builds in these projects will test the code present in the Modular Magician's fo
 See the section above about how to run a Custom Build.
 
 
-## Triggering VCR tests to record new cassettes
+### Triggering VCR tests to record new cassettes
 
 Sometimes VCR cassettes need to be re-recorded by manual intervention, for example if a VCR test is failing across all PRs due to a bad cassette that isn't being replaced. Our VCR tests on PRs only use the Beta provider, so the only place to record VCR cassettes in TeamCity is:
 * `Google Beta > VCR  Recording`.
@@ -97,7 +106,7 @@ The Service Sweeper builds in `Google > Nightly Tests` and `Google Beta > Nightl
 
 ### Sweeping the VCR Project
 
-The Service Sweeper builds in `Google > MM Upstream Testing` and `Google Beta > MM Upstream Testing` run every night via CRON (these are redundant). They are designed to not run until there are no builds testing any services in the VCR test GCP project. No acceptance testing builds will start until the sweeper stops.
+The Service Sweeper builds in `Google > MM Upstream Testing` and `Google Beta > MM Upstream Testing` run every night via CRON. They are redundant as both sweep the VCR project, but I've left them both in. They are designed to not run until there are no builds testing any services in the VCR test GCP project. No acceptance testing builds will start until the sweeper stops.
 
 ### Sweeping `google_project` Resources
 
