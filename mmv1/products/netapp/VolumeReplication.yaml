@@ -74,7 +74,7 @@ parameters:
     description: |
       Name of region for this resource. The resource needs to be created in the region of the destination volume.
   - !ruby/object:Api::Type::String
-    name: "volume_name"
+    name: "volumeName"
     description: The name of the existing source volume.
     required: true
     immutable: true
@@ -249,14 +249,19 @@ virtual_fields:
   - !ruby/object:Api::Type::Boolean
     name: "delete_destination_volume"
     description: |
-      Delete destination volume when replication resource is destroyed? Default is false.
+      A destination volume is created as part of replication creation. The destination volume will not became
+      under Terraform management unless you import it manually. If you delete the replication, this volume
+      will remain.
+      Setting this parameter to true will delete the *current* destination volume when destroying the
+      replication. If you reversed the replication direction, this will be your former source volume!
+      For production use, it is recommended to keep this parameter false to avoid accidental volume
+      deletion. Handle with care. Default is false.
     default_value: false
   - !ruby/object:Api::Type::Boolean
     name: "replication_enabled"
     description: |
       Set to false to stop/break the mirror. Stopping the mirror makes the destination volume read-write
       and act independently from the source volume.
-
       Set to true to enable/resume the mirror. WARNING: Resuming a mirror overwrites any changes
       done to the destination volume with the content of the source volume.
     default_value: true

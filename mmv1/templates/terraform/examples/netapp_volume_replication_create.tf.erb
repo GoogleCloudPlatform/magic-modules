@@ -47,7 +47,7 @@ resource "google_netapp_volume_replication" "<%= ctx[:primary_resource_id] %>" {
     description = "This is a replicated volume"
   }
   # WARNING: Setting delete_destination_volume to true, will delete the
-  # destination volume too, if the replication is deleted. This is great
+  # CURRENT destination volume if the replication is deleted. This is great
   # for testing, but questionable for production!
   delete_destination_volume = true
   wait_for_mirror = true

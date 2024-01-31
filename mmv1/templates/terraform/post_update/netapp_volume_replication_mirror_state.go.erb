@@ -33,7 +33,8 @@ if d.Get("replication_enabled").(bool) == true {
 		do_change = true
 	case "PREPARING":
 		// replication_enabled==false, mirrorState==PREPARING -> stop
-		// Currently cannot be stopped. User will receive intended error.
+		// Currently cannot be stopped. User will receive following error:
+		// Error code 3, message: invalid request error: "Replication in preparing state. Please wait until replication is in 'READY' STATE and try again later.".
 		// User needs to wait until mirrorState=MIRRORED
 		action = "stop"
 		targetState = "STOPPED"
