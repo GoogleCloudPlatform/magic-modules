@@ -76,7 +76,7 @@ func TestAccContainerCluster_resourceManagerTags(t *testing.T) {
 				Config: testAccContainerCluster_resourceManagerTags(pid, clusterName, networkName, subnetworkName, randomSuffix),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("google_container_cluster.primary", "self_link"),
-					resource.TestCheckResourceAttrSet("google_container_cluster.primary", "node_config.0.resource_manager_tags"),
+					resource.TestCheckResourceAttrSet("google_container_cluster.primary", "node_config.0.resource_manager_tags.%"),
 				),
 			},
 			{
