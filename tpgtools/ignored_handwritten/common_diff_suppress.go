@@ -78,14 +78,6 @@ func Rfc3339TimeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	return false
 }
 
-// For managed SSL certs, if new is an absolute FQDN (trailing '.') but old isn't, treat them as equals.
-func AbsoluteDomainSuppress(k, old, new string, _ *schema.ResourceData) bool {
-	if k == "managed.0.domains.0" {
-		return old == strings.TrimRight(new, ".")
-	}
-	return old == new
-}
-
 func TimestampDiffSuppress(format string) schema.SchemaDiffSuppressFunc {
 	return func(_, old, new string, _ *schema.ResourceData) bool {
 		oldT, err := time.Parse(format, old)
