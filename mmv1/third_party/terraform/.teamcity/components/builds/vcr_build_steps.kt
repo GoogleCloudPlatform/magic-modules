@@ -54,6 +54,19 @@ fun BuildSteps.checkVcrEnvironmentVariables() {
     })
 }
 
+fun BuildSteps.tagBuildToIndicateVcrMode() {
+    step(ScriptBuildStep {
+        name = "Set build tag to indicate if build is recording or replaying VCR cassettes"
+        scriptContent = """
+            #!/bin/bash
+            echo "##teamcity[addBuildTag '${'$'}{VCR_MODE}']"
+        """.trimIndent()
+        // ${'$'} is required to allow creating a script in TeamCity that contains
+        // parts like ${GIT_HASH_SHORT} without having Kotlin syntax issues. For more info see:
+        // https://youtrack.jetbrains.com/issue/KT-2425/Provide-a-way-for-escaping-the-dollar-sign-symbol-in-multiline-strings-and-string-templates
+    })
+}
+
 fun BuildSteps.runVcrAcceptanceTests() {
     step(ScriptBuildStep {
         name = "Run Tests"
