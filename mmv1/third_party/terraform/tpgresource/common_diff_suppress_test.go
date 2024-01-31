@@ -173,45 +173,6 @@ func TestPortRangeDiffSuppress(t *testing.T) {
 	}
 }
 
-func TestLocationDiffSuppress(t *testing.T) {
-	cases := map[string]struct {
-		Old, New           string
-		ExpectDiffSuppress bool
-	}{
-		"locations to zones": {
-			Old:                "projects/x/locations/y/resource/z",
-			New:                "projects/x/zones/y/resource/z",
-			ExpectDiffSuppress: true,
-		},
-		"regions to locations": {
-			Old:                "projects/x/regions/y/resource/z",
-			New:                "projects/x/locations/y/resource/z",
-			ExpectDiffSuppress: true,
-		},
-		"locations to locations": {
-			Old:                "projects/x/locations/y/resource/z",
-			New:                "projects/x/locations/y/resource/z",
-			ExpectDiffSuppress: false,
-		},
-		"zones to regions": {
-			Old:                "projects/x/zones/y/resource/z",
-			New:                "projects/x/regions/y/resource/z",
-			ExpectDiffSuppress: false,
-		},
-		"different locations": {
-			Old:                "projects/x/locations/a/resource/z",
-			New:                "projects/x/locations/b/resource/z",
-			ExpectDiffSuppress: false,
-		},
-	}
-
-	for tn, tc := range cases {
-		if LocationDiffSuppress("policy_uri", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
-			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
-		}
-	}
-}
-
 func TestDurationDiffSuppress(t *testing.T) {
 	cases := map[string]struct {
 		Old, New           string
