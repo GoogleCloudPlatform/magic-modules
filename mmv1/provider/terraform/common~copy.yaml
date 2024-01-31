@@ -138,12 +138,21 @@
 'website/<%= fname -%>': 'third_party/terraform/website/<%= fname -%>'
 <% end -%>
 <% end -%>
+# Copy TeamCity-related Kotlin files
 <%
   Dir["third_party/terraform/.teamcity/**/*.kt"].each do |file_path|
     fname = file_path.delete_prefix("third_party/terraform/")
 -%>
 '<%= fname -%>': '<%= file_path -%>'
 <% end -%>
+# Copy TeamCity-related Markdown files
+<%
+  Dir["third_party/terraform/.teamcity/**/*.md"].each do |file_path|
+    fname = file_path.delete_prefix("third_party/terraform/")
+-%>
+'<%= fname -%>': '<%= file_path -%>'
+<% end -%>
+# Copy all files in the META.d folder
 <%
   Dir["third_party/terraform/META.d/*.yaml"].each do |file_path|
     fname = file_path.delete_prefix("third_party/terraform/")
