@@ -47,22 +47,20 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "discoveryengine_searchengine_basic"
     primary_resource_id: 'basic'
-    primary_resource_name:
-      'fmt.Sprintf("tf_test_search_engine%s", context["random_suffix"])'
     vars:
       engine_id: "example-engine-id"
       data_store_id: "example-datastore-id"
 
 parameters:
   - !ruby/object:Api::Type::String
-    name: 'engine_id'
+    name: 'engineId'
     description: |
       Unique ID to use for Search Engine App.
     required: true
     immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::String
-    name: 'collection_id'
+    name: 'collectionId'
     description: |
       The collection ID.
     required: true
@@ -93,6 +91,7 @@ properties:
     values:
       - :GENERIC
       - :MEDIA
+    default_value: :GENERIC
   - !ruby/object:Api::Type::String
     name: 'displayName'
     description: |
@@ -119,7 +118,6 @@ properties:
     name: 'searchEngineConfig'
     description: |
       Configurations for a Search Engine.
-    # default_from_api: true
     required: true
     properties:
       - !ruby/object:Api::Type::Enum
