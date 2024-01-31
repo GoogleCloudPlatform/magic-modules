@@ -260,6 +260,7 @@ steps:
         - BASE_BRANCH=$_BASE_BRANCH
         - "GOOGLE_REGION=us-central1"
         - "GOOGLE_ZONE=us-central1-a"
+        - "USER=magician"
       args:
         - 'test-terraform-vcr'
         - $_PR_NUMBER
