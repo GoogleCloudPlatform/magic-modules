@@ -1917,8 +1917,7 @@ func expandComposerEnvironmentConfig(v interface{}, d *schema.ResourceData, conf
 		composer.PrivateEnvironmentConfig.EnablePrivateEnvironment in API.
 		Check image version to avoid overriding EnablePrivateEnvironment in case of other versions.
 	*/
-	imageVersion := d.Get("config.0.software_config.0.image_version").(string)
-	if isComposer3(imageVersion) {
+	if isComposer3(d) {
 		transformed.PrivateEnvironmentConfig = &composer.PrivateEnvironmentConfig{}
 		if enablePrivateEnvironmentRaw, ok := original["enable_private_environment"]; ok {
 			transformed.PrivateEnvironmentConfig.EnablePrivateEnvironment = enablePrivateEnvironmentRaw.(bool)
@@ -2815,12 +2814,23 @@ func versionsEqual(old, new string) (bool, error) {
 	return o.Equal(n), nil
 }
 
-func isComposer3(imageVersion string)	bool {
+func isComposer3(v interface{})	bool {
+	var imageVersion string
+	switch v.(type) {
+	case *schema.ResourceData:
+		imageVersion = v.(*schema.ResourceData).Get("config.0.software_config.0.image_version").(string)
+	case *schema.ResourceDiff:
+		imageVersion = v.(*schema.ResourceDiff).Get("config.0.software_config.0.image_version").(string)
+	case string:
+		imageVersion = v.(string)
+	default:
+		log.Printf("[ERROR] error in plugin: unexpected argument type in isComposer3")
+	}
 	return strings.Contains(imageVersion, "composer-3")
 }
 
 func imageVersionChangeValidationFunc(ctx context.Context, old, new, meta any) error {
-	if old.(string) != "" && isComposer3(new.(string)) {
+	if old.(string) != "" && !isComposer3(old.(string)) && isComposer3(new.(string)) {
 		return fmt.Errorf("upgrade to composer 3 is not yet supported")
 	}
 	return nil
