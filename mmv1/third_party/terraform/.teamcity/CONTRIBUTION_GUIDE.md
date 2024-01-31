@@ -1,5 +1,15 @@
 # Contributing to the TeamCity configuration
 
+## Background
+
+The `.teamcity/` folder contains files that define what resources are present in our TeamCity environment.
+
+We use TeamCity's Kotlin DSL to configure our TeamCity projects:
+* [Kotlin DSL documentation](https://www.jetbrains.com/help/teamcity/kotlin-dsl.html)
+* [Kotlin DSL reference documentation](https://teamcity.jetbrains.com/app/dsl-documentation/index.html)
+
+For general information, [look at the TeamCity documentation](https://www.jetbrains.com/help/teamcity/teamcity-documentation.html). Whilst we use TeamCity Cloud, the TeamCity On Premise documentation is still relevant for understanding concepts.
+
 ## Environment
 
 Note: these instructions need to be tested and improved. Please contact @SarahFrench (e.g. [open a GitHub issue](https://github.com/hashicorp/terraform-provider-google/issues/new?assignees=&labels=technical-debt&projects=&template=11_developer_productivity.md) and tag me) for help!

@@ -9,16 +9,6 @@ Contents:
 * [Pushing configuration changes to TeamCity](#pushing-configuration-changes-to-teamcity)
 
 
-## Background
-
-The `.teamcity/` folder contains files that define what resources are present in our TeamCity environment.
-
-We use TeamCity's Kotlin DSL to configure our TeamCity projects:
-* [Kotlin DSL documentation](https://www.jetbrains.com/help/teamcity/kotlin-dsl.html)
-* [Kotlin DSL reference documentation](https://teamcity.jetbrains.com/app/dsl-documentation/index.html)
-
-For general information, [look at the TeamCity documentation](https://www.jetbrains.com/help/teamcity/teamcity-documentation.html). Whilst we use TeamCity Cloud, the TeamCity On Premise documentation is still relevant for understanding concepts.
-
 ## Using configuration files for the first time in a project
 
 At the start, we need to create a project in TeamCity and connect it to our hashicorp/terraform-provider-google repository, so TeamCity can pull in the configuration files to set that project's settings. This will cause all the resources defined in the configuration files to be created within that parent project.
