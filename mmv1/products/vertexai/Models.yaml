@@ -20,7 +20,6 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'
   api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.models'
-autogen_async: true
 description: |-
   A trained machine learning Model.
 id_format: '{{name}}'
@@ -260,11 +259,6 @@ properties:
       The display name of the Model. The name can be up to 128 characters long
       and can consist of any UTF-8 characters.
     required: true
-  - !ruby/object:Api::Type::String
-    name: 'metadataSchemaUri'
-    description: |-
-      Points to a YAML file stored on Google Cloud Storage describing additional information about the Model, that is specific to it. Unset if the Model does not have any additional information.
-    output: true
   - !ruby/object:Api::Type::String
     name: 'etag'
     description: Used to perform consistent read-modify-write updates.
