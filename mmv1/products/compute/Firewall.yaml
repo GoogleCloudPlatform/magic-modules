@@ -110,7 +110,7 @@ properties:
             icmp, esp, ah, sctp, ipip, all), or the IP protocol number.
           api_name: 'IPProtocol'
           required: true
-          diff_suppress_func: 'tpgresource.CompareCaseInsensitive'
+          diff_suppress_func: 'tpgresource.CaseDiffSuppress'
         - !ruby/object:Api::Type::Array
           item_type: Api::Type::String
           name: 'ports'
@@ -149,7 +149,7 @@ properties:
             one of the following well known protocol strings (tcp, udp,
             icmp, esp, ah, sctp, ipip, all), or the IP protocol number.
           api_name: 'IPProtocol'
-          diff_suppress_func: 'tpgresource.CompareCaseInsensitive'
+          diff_suppress_func: 'tpgresource.CaseDiffSuppress'
           required: true
         - !ruby/object:Api::Type::Array
           item_type: Api::Type::String
