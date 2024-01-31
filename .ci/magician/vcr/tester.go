@@ -63,7 +63,7 @@ const parallelJobs = 16
 
 const replayingTimeout = "240m"
 
-var testResultsExpression = regexp.MustCompile(`(?m:^--- (PASS|FAIL|SKIP): TestAcc(\w+))`)
+var testResultsExpression = regexp.MustCompile(`(?m:^--- (PASS|FAIL|SKIP): (TestAcc\w+))`)
 
 var testPanicExpression = regexp.MustCompile(`^panic: .*`)
 
