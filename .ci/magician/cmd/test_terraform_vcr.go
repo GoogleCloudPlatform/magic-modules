@@ -223,7 +223,7 @@ Please fix these to complete your PR. If you believe these test failures to be i
 		}
 
 		if len(recordingResult.FailedTests) > 0 {
-			comment += "$\\textcolor{green}{\\textsf{Tests failed during RECORDING mode:}}$\n"
+			comment += "$\\textcolor{red}{\\textsf{Tests failed during RECORDING mode:}}$\n"
 			for _, failedTest := range recordingResult.FailedTests {
 				comment += fmt.Sprintf("`%s`[[Error message](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-%s/artifacts/%s/build-log/recording_build/%s_recording_test.log)] [[Debug log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-%s/artifacts/%s/recording/%s.log)]\n", failedTest, prNumber, buildID, failedTest, prNumber, buildID, failedTest)
 			}
