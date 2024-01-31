@@ -145,7 +145,7 @@ fun BuildSteps.runVcrTestRecordingSaveCassettes() {
 
             # Fail early & explicitly if no files were created in the previous step
             export FILE_COUNT=${'$'}(ls ${'$'}VCR_PATH | wc -l)
-            if test ${'$'}TEST_COUNT -le "0"; then
+            if test ${'$'}FILE_COUNT -le "0"; then
                 echo "No cassette files found locally to upload to Cloud Storage bucket"
                 exit 1
             fi
