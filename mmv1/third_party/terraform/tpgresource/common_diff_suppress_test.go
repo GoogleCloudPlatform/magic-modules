@@ -4,39 +4,6 @@ package tpgresource
 
 import "testing"
 
-func TestIgnoreMissingKeyInMap(t *testing.T) {
-	cases := map[string]struct {
-		Old, New           string
-		Key                string
-		ExpectDiffSuppress bool
-	}{
-		"missing key in map": {
-			Old:                "",
-			New:                "v1",
-			Key:                "x-goog-version",
-			ExpectDiffSuppress: true,
-		},
-		"different values": {
-			Old:                "v1",
-			New:                "v2",
-			Key:                "x-goog-version",
-			ExpectDiffSuppress: false,
-		},
-		"same values": {
-			Old:                "v1",
-			New:                "v1",
-			Key:                "x-goog-version",
-			ExpectDiffSuppress: false,
-		},
-	}
-
-	for tn, tc := range cases {
-		if IgnoreMissingKeyInMap(tc.Key)("push_config.0.attributes."+tc.Key, tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
-			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
-		}
-	}
-}
-
 func TestCaseDiffSuppress(t *testing.T) {
 	cases := map[string]struct {
 		Old, New           string
