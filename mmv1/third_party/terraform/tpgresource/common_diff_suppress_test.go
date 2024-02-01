@@ -76,40 +76,6 @@ func TestIgnoreMissingKeyInMap(t *testing.T) {
 	}
 }
 
-func TestOptionalSurroundingSpacesSuppress(t *testing.T) {
-	cases := map[string]struct {
-		Old, New           string
-		ExpectDiffSuppress bool
-	}{
-		"surrounding spaces": {
-			Old:                "value",
-			New:                " value ",
-			ExpectDiffSuppress: true,
-		},
-		"no surrounding spaces": {
-			Old:                "value",
-			New:                "value",
-			ExpectDiffSuppress: true,
-		},
-		"one space each": {
-			Old:                " value",
-			New:                "value ",
-			ExpectDiffSuppress: true,
-		},
-		"different values": {
-			Old:                " different",
-			New:                "values ",
-			ExpectDiffSuppress: false,
-		},
-	}
-
-	for tn, tc := range cases {
-		if OptionalSurroundingSpacesSuppress("filter", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
-			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
-		}
-	}
-}
-
 func TestCaseDiffSuppress(t *testing.T) {
 	cases := map[string]struct {
 		Old, New           string

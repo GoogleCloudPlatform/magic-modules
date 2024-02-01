@@ -16,10 +16,6 @@ func OptionalPrefixSuppress(prefix string) schema.SchemaDiffSuppressFunc {
 	}
 }
 
-func OptionalSurroundingSpacesSuppress(k, old, new string, d *schema.ResourceData) bool {
-	return strings.TrimSpace(old) == strings.TrimSpace(new)
-}
-
 func EmptyOrDefaultStringSuppress(defaultVal string) schema.SchemaDiffSuppressFunc {
 	return func(k, old, new string, d *schema.ResourceData) bool {
 		return (old == "" && new == defaultVal) || (new == "" && old == defaultVal)
