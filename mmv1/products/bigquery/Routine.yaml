@@ -283,14 +283,6 @@ properties:
         description: |
           The fully qualified name of a class in jarUris, for example, com.example.wordcount.
           Exactly one of mainClass and main_jar_uri field should be set for Java/Scala language type.
-  - !ruby/object:Api::Type::Enum
-    name: 'dataGovernanceType'
-    description: |
-      If set to DATA_MASKING, the function is validated and made available as a
-      masking function.
-    values:
-      - :DATA_GOVERNANCE_TYPE_UNSPECIFIED
-      - :DATA_MASKING
   - !ruby/object:Api::Type::NestedObject
     name: 'remoteFunctionOptions'
     description: Remote function specific options.
