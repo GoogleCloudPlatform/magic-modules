@@ -96,13 +96,6 @@ func DurationDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	return oDuration == nDuration
 }
 
-<% if version != "ga" -%>
-// Suppress all diffs, used for Disk.Interface which is a nonfunctional field
-func AlwaysDiffSuppress(_, _, _ string, _ *schema.ResourceData) bool {
-	return true
-}
-<% end -%>
-
 // Use this method when subnet is optioanl and auto_create_subnetworks = true
 // API sometimes choose a subnet so the diff needs to be ignored
 func CompareOptionalSubnet(_, old, new string, _ *schema.ResourceData) bool {
