@@ -96,20 +96,6 @@ func DurationDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	return oDuration == nDuration
 }
 
-// Suppress diffs in below cases
-// "https://hello-rehvs75zla-uc.a.run.app/" -> "https://hello-rehvs75zla-uc.a.run.app"
-// "https://hello-rehvs75zla-uc.a.run.app" -> "https://hello-rehvs75zla-uc.a.run.app/"
-func LastSlashDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
-	if last := len(new) - 1; last >= 0 && new[last] == '/' {
-		new = new[:last]
-	}
-
-	if last := len(old) - 1; last >= 0 && old[last] == '/' {
-		old = old[:last]
-	}
-	return new == old
-}
-
 // Suppress diffs when the value read from api
 // has the project number instead of the project name
 func ProjectNumberDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
