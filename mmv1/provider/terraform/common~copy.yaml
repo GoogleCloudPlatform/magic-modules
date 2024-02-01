@@ -153,6 +153,8 @@
 -%>
 '<%= fname -%>': '<%= file_path -%>'
 <% end -%>
+'.teamcity/settings.kts': 'third_party/terraform/.teamcity/settings.kts'
+'.teamcity/pom.xml': 'third_party/terraform/.teamcity/pom.xml'
 '.teamcity/.gitignore': 'third_party/terraform/.teamcity/.gitignore'
 '.teamcity/Makefile': 'third_party/terraform/.teamcity/Makefile'
 <% end -%> # end if version_name == "ga"
