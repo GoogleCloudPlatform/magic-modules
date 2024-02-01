@@ -112,8 +112,8 @@ fun BuildSteps.runVcrTestRecordingSetup() {
             gsutil -m cp gs://${'$'}VCR_BUCKET_NAME/fixtures/* ${'$'}VCR_PATH
 
             # copy branch-specific cassettes over master. This might fail but that's ok if the folder doesnt exist
-            echo "Attempting to copy branch-specific files, if they exist: gs://${'$'}VCR_BUCKET_NAME/${'$'}BRANCH_NAME/fixtures/*"
             export BRANCH_NAME=%teamcity.build.branch%
+            echo "Attempting to copy branch-specific files, if they exist: gs://${'$'}VCR_BUCKET_NAME/beta/${'$'}BRANCH_NAME/fixtures/*"
             gsutil -m cp gs://${'$'}VCR_BUCKET_NAME/${'$'}BRANCH_NAME/fixtures/* ${'$'}VCR_PATH
 
             echo "Listing files present in ${'$'}VCR_PATH:"
