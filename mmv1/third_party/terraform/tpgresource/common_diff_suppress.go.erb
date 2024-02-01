@@ -96,16 +96,6 @@ func DurationDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	return oDuration == nDuration
 }
 
-// Use this method when subnet is optioanl and auto_create_subnetworks = true
-// API sometimes choose a subnet so the diff needs to be ignored
-func CompareOptionalSubnet(_, old, new string, _ *schema.ResourceData) bool {
-	if IsEmptyValue(reflect.ValueOf(new)) {
-		return true
-	}
-	// otherwise compare as self links
-	return CompareSelfLinkOrResourceName("", old, new, nil)
-}
-
 // Suppress diffs in below cases
 // "https://hello-rehvs75zla-uc.a.run.app/" -> "https://hello-rehvs75zla-uc.a.run.app"
 // "https://hello-rehvs75zla-uc.a.run.app" -> "https://hello-rehvs75zla-uc.a.run.app/"
