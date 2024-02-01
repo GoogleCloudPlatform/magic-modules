@@ -19,8 +19,8 @@ description: |
   Represents the Instance membership to the Instance Group.
 
   **NOTE** You can use this resource instead of the `instances` field in the
-  Instance   Group, however it's not recommended to use it alongside this field.
-  It might cause inconsistencies.
+  `google_compute_instance_group`, however it's not recommended to use it alongside this field.
+  It might cause inconsistencies, as they can end up competing over control.
 
   **NOTE** This resource has been added to avoid a situation, where after
   Instance is recreated, it's removed from Instance Group and it's needed to
@@ -40,10 +40,10 @@ nested_query: !ruby/object:Api::Resource::NestedQuery
     - items
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Add instances': 'https://cloud.google.com/compute/docs/reference/rest/beta/instanceGroups/addInstances'
-    'Remove instances': 'https://cloud.google.com/compute/docs/reference/rest/beta/instanceGroups/removeInstances'
-    'List instances': 'https://cloud.google.com/compute/docs/reference/rest/beta/instanceGroups/listInstances'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/beta/instanceGroups'
+    'Add instances': 'https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroups/addInstances'
+    'Remove instances': 'https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroups/removeInstances'
+    'List instances': 'https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroups/listInstances'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroups'
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
@@ -84,10 +84,7 @@ parameters:
     resource: 'Zone'
     imports: 'name'
     description: 'A reference to the zone where the instance group resides.'
-    required: false
     url_param_only: true
-    default_from_api: true
-    ignore_read: true
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::ResourceRef
     name: 'instanceGroup'
@@ -105,4 +102,5 @@ properties:
     description: 'An instance being added to the InstanceGroup'
     resource: 'Instance'
     imports: 'selfLink'
+    required: true
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'

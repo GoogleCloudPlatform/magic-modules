@@ -1,7 +1,7 @@
 config := meta.(*transport_tpg.Config)
 
 if err := tpgresource.ParseImportId([]string{
-    "projects/(?P<project>[^/]+)/regions/(?P<zone>[^/]+)/instanceGroups/(?P<instance_group>[^/]+)/(?P<instance>.+)",
+    "projects/(?P<project>[^/]+)/zones/(?P<zone>[^/]+)/instanceGroups/(?P<instance_group>[^/]+)/(?P<instance>.+)",
     "(?P<project>[^/]+)/(?P<zone>[^/]+)/(?P<instance_group>[^/]+)/(?P<instance>.+)",
     "(?P<zone>[^/]+)/(?P<instance_group>[^/]+)/(?P<instance>.+)",
     "(?P<instance_group>[^/]+)/(?P<instance>.+)",
