@@ -61,14 +61,12 @@ resource "google_kms_ekm_connection" "example-ekmconnection" {
 }
 
 resource "google_service_directory_namespace" "sd_namespace" {
-  provider     = google-beta
   namespace_id = "ekm-namespace"
   location     = "us-central1"
-  project      = var.vpc_project_id
+  project      = data.google_project.project.number
 }
 
 resource "google_service_directory_service" "sd_service" {
-  provider   = google-beta
   service_id = "ekm-service"
   namespace  = google_service_directory_namespace.sd_namespace.id
 
