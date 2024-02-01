@@ -341,19 +341,6 @@ func (vt *Tester) runInParallel(mode Mode, version provider.Version, testDir, te
 	for ev, val := range vt.env {
 		env[ev] = val
 	}
-	var printedEnv string
-	for ev, val := range env {
-		if ev == "SA_KEY" || ev == "GITHUB_TOKEN" {
-			val = "{hidden}"
-		}
-		printedEnv += fmt.Sprintf("%s=%s\n", ev, val)
-	}
-	fmt.Printf(`Running go:
-	env:
-%v
-	args:
-%s
-`, printedEnv, strings.Join(args, " "))
 	output, testErr := vt.rnr.Run("go", args, env)
 	outputs <- output
 	if testErr != nil {
@@ -371,8 +358,6 @@ func (vt *Tester) runInParallel(mode Mode, version provider.Version, testDir, te
 	if err := vt.rnr.WriteFile(logFileName, output); err != nil {
 		errs <- fmt.Errorf("error writing log: %v, test output: %v", err, output)
 	}
-	fmt.Println("ls", logPath)
-	fmt.Println(vt.rnr.Run("ls", []string{logPath}, nil))
 	<-running
 	wg.Done()
 }
