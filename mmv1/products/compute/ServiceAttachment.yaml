@@ -96,6 +96,7 @@ examples:
       consumer_address_name: 'psc-ilb-consumer-address'
       consumer_forwarding_rule_name: 'psc-ilb-consumer-forwarding-rule'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/compute_service_attachment.go.erb
   update_encoder: 'templates/terraform/update_encoder/compute_service_attachment.go.erb'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
@@ -208,6 +209,7 @@ properties:
       attachment.
     send_empty_value: true
     is_set: true
+    set_hash_func: computeServiceAttachmentConsumerAcceptListsHash
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::String
@@ -222,6 +224,7 @@ properties:
           description: |
             The network that is allowed to connect to this service attachment.
             Only one of project_id_or_num and network_url may be set.
+          diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
         - !ruby/object:Api::Type::Integer
           name: 'connectionLimit'
           required: true
