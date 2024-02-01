@@ -10,12 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func OptionalPrefixSuppress(prefix string) schema.SchemaDiffSuppressFunc {
-	return func(k, old, new string, d *schema.ResourceData) bool {
-		return prefix+old == new || prefix+new == old
-	}
-}
-
 func EmptyOrDefaultStringSuppress(defaultVal string) schema.SchemaDiffSuppressFunc {
 	return func(k, old, new string, d *schema.ResourceData) bool {
 		return (old == "" && new == defaultVal) || (new == "" && old == defaultVal)
