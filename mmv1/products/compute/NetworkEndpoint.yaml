@@ -89,6 +89,7 @@ parameters:
       Zone where the containing network endpoint group is located.
     required: false
     url_param_only: true
+    default_from_api: true
     ignore_read: true
   - !ruby/object:Api::Type::ResourceRef
     name: 'networkEndpointGroup'
