@@ -139,40 +139,6 @@ func TestCaseDiffSuppress(t *testing.T) {
 	}
 }
 
-func TestPortRangeDiffSuppress(t *testing.T) {
-	cases := map[string]struct {
-		Old, New           string
-		ExpectDiffSuppress bool
-	}{
-		"different single values": {
-			Old:                "80-80",
-			New:                "443",
-			ExpectDiffSuppress: false,
-		},
-		"different ranges": {
-			Old:                "80-80",
-			New:                "443-444",
-			ExpectDiffSuppress: false,
-		},
-		"same single values": {
-			Old:                "80-80",
-			New:                "80",
-			ExpectDiffSuppress: true,
-		},
-		"same ranges": {
-			Old:                "80-80",
-			New:                "80-80",
-			ExpectDiffSuppress: false,
-		},
-	}
-
-	for tn, tc := range cases {
-		if PortRangeDiffSuppress("ports", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
-			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
-		}
-	}
-}
-
 func TestDurationDiffSuppress(t *testing.T) {
 	cases := map[string]struct {
 		Old, New           string

@@ -426,7 +426,7 @@ properties:
       cannot have overlapping `portRange`s.
 
       @pattern: \d+(?:-\d+)?
-    diff_suppress_func: 'tpgresource.PortRangeDiffSuppress'
+    diff_suppress_func: 'portRangeDiffSuppress'
     default_from_api: true
   - !ruby/object:Api::Type::Array
     name: 'ports'

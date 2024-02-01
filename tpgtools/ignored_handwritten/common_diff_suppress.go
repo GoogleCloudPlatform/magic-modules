@@ -62,13 +62,6 @@ func CaseDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
 	return strings.ToUpper(old) == strings.ToUpper(new)
 }
 
-// Port range '80' and '80-80' is equivalent.
-// `old` is read from the server and always has the full range format (e.g. '80-80', '1024-2048').
-// `new` can be either a single port or a port range.
-func PortRangeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
-	return old == new+"-"+new
-}
-
 func TimestampDiffSuppress(format string) schema.SchemaDiffSuppressFunc {
 	return func(_, old, new string, _ *schema.ResourceData) bool {
 		oldT, err := time.Parse(format, old)
