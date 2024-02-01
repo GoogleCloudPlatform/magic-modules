@@ -105,16 +105,16 @@ fun BuildSteps.runVcrTestRecordingSetup() {
             gcloud auth activate-service-account --key-file=google-account.json
 
             # Pull files from GCS
-            echo "Listing files present in gs://${'$'}VCR_BUCKET_NAME/fixtures/"
-            gsutil ls -p ${'$'}GOOGLE_INFRA_PROJECT gs://${'$'}VCR_BUCKET_NAME/fixtures/
+            echo "Listing files present in gs://${'$'}VCR_BUCKET_NAME/beta/fixtures/"
+            gsutil ls -p ${'$'}GOOGLE_INFRA_PROJECT gs://${'$'}VCR_BUCKET_NAME/beta/fixtures/
 
-            echo "Copying files present in gs://${'$'}VCR_BUCKET_NAME/fixtures/"
-            gsutil -m cp gs://${'$'}VCR_BUCKET_NAME/fixtures/* ${'$'}VCR_PATH
+            echo "Copying files present in gs://${'$'}VCR_BUCKET_NAME/beta/fixtures/"
+            gsutil -m cp gs://${'$'}VCR_BUCKET_NAME/beta/fixtures/* ${'$'}VCR_PATH
 
             # copy branch-specific cassettes over master. This might fail but that's ok if the folder doesnt exist
             export BRANCH_NAME=%teamcity.build.branch%
             echo "Attempting to copy branch-specific files, if they exist: gs://${'$'}VCR_BUCKET_NAME/beta/${'$'}BRANCH_NAME/fixtures/*"
-            gsutil -m cp gs://${'$'}VCR_BUCKET_NAME/${'$'}BRANCH_NAME/fixtures/* ${'$'}VCR_PATH
+            gsutil -m cp gs://${'$'}VCR_BUCKET_NAME/beta/${'$'}BRANCH_NAME/fixtures/* ${'$'}VCR_PATH
 
             echo "Listing files present in ${'$'}VCR_PATH:"
             ls ${'$'}VCR_PATH
@@ -167,11 +167,11 @@ fun BuildSteps.runVcrTestRecordingSaveCassettes() {
             if [ "${'$'}BRANCH_NAME" = "refs/heads/main" ]; then
                 echo "Using main branch, so copying files to fixures/ in root of Cloud Storage bucket"
 
-                echo "Listing files already present in gs://${'$'}VCR_BUCKET_NAME/fixtures/:"
-                gsutil ls -p ${'$'}GOOGLE_INFRA_PROJECT gs://${'$'}VCR_BUCKET_NAME/fixtures/
+                echo "Listing files already present in gs://${'$'}VCR_BUCKET_NAME/beta/fixtures/:"
+                gsutil ls -p ${'$'}GOOGLE_INFRA_PROJECT gs://${'$'}VCR_BUCKET_NAME/beta/fixtures/
 
                 echo "Copying files to Cloud Storage bucket:"
-                gsutil -m cp ${'$'}VCR_PATH/* gs://${'$'}VCR_BUCKET_NAME/fixtures/
+                gsutil -m cp ${'$'}VCR_PATH/* gs://${'$'}VCR_BUCKET_NAME/beta/fixtures/
             else
                 echo "Using ${'$'}BRANCH_NAME branch, so copying files to ${'$'}BRANCH_NAME/fixtures/ folder in Cloud Storage bucket"
 
