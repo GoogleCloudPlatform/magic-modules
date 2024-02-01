@@ -169,6 +169,7 @@ func ResourceComposerEnvironment() *schema.Resource {
 			tpgresource.DefaultProviderRegion,
 			tpgresource.SetLabelsDiff,
       customdiff.ValidateChange("config.0.software_config.0.image_version", imageVersionChangeValidationFunc),
+			versionValidationCustomizeDiffFunc,
 		),
 
 		Schema: map[string]*schema.Schema{
@@ -2832,6 +2833,40 @@ func isComposer3(v interface{})	bool {
 func imageVersionChangeValidationFunc(ctx context.Context, old, new, meta any) error {
 	if old.(string) != "" && !isComposer3(old.(string)) && isComposer3(new.(string)) {
 		return fmt.Errorf("upgrade to composer 3 is not yet supported")
+	}
+	return nil
+}
+
+func validateComposer3FieldUsage(d *schema.ResourceDiff, key string, requireComposer3 bool) error {
+	_, ok := d.GetOk(key)
+	if ok && ( isComposer3(d) != requireComposer3 ) {
+		if requireComposer3 {
+			return fmt.Errorf("error in configuration, %s should only be used in Composer 3", key)
+		} else {
+			return fmt.Errorf("error in configuration, %s should not be used in Composer 3", key)
+		}
+	}
+	return nil
+}
+
+func versionValidationCustomizeDiffFunc(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	composer3FieldUsagePolicy := map[string]bool{
+		"config.0.node_config.0.max_pods_per_node": false, // not allowed in composer 3
+		"config.0.node_config.0.enable_ip_masq_agent": false,
+		"config.0.node_config.0.config.0.node_config.0.ip_allocation_policy": false,
+		"config.0.private_environment_config": false,
+		"config.0.master_authorized_networks_config": false,
+		"config.0.node_config.0.composer_network_attachment": true, // allowed only in composer 3
+		"config.0.node_config.0.composer_internal_ipv4_cidr_block": true,
+		"config.0.software_config.0.web_server_plugins_mode": true,
+		"config.0.enable_private_environment": true,
+		"config.0.enable_private_builds_only": true,
+		"config.0.workloads_config.0.dag_processor": true,
+	}
+	for key, allowed := range composer3FieldUsagePolicy {
+		if err := validateComposer3FieldUsage(d, key, allowed); err != nil {
+			return err
+		}
 	}
 	return nil
 }
