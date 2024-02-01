@@ -266,7 +266,7 @@ properties:
       When reading an `IPAddress`, the API always returns the IP
       address number.
     default_from_api: true
-    diff_suppress_func: 'tpgresource.InternalIpDiffSuppress'
+    diff_suppress_func: 'internalIpDiffSuppress'
   - !ruby/object:Api::Type::Enum
     name: 'IPProtocol'
     description: |
