@@ -252,4 +252,4 @@ properties:
       - next_hop_ip
       - next_hop_vpn_tunnel
       - next_hop_ilb
-    diff_suppress_func: 'tpgresource.CompareIpAddressOrSelfLinkOrResourceName'
+    diff_suppress_func: 'compareIpAddressOrSelfLinkOrResourceName'
