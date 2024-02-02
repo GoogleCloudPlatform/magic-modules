@@ -1423,3 +1423,92 @@ func TestGetProjectFromResource(t *testing.T) {
 		})
 	}
 }
+
+func TestGetAncestorsRetry(t *testing.T) {
+	v3Called := 0
+	v1Called := 0
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var payload []byte
+		var err error
+		if strings.HasPrefix(r.URL.Path, "/v3/") {
+			v3Called++
+			if v3Called == 1 {
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			} else {
+				resp := &crmv3.Project{
+					Name:   "folders/123",
+					Parent: "organizations/456",
+				}
+				payload, err = resp.MarshalJSON()
+			}
+		} else if strings.HasPrefix(r.URL.Path, "/v1/") {
+			v1Called++
+			if v1Called == 1 {
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			} else {
+				resp := &crmv1.GetAncestryResponse{
+					Ancestor: []*crmv1.Ancestor{
+						{ResourceId: &crmv1.ResourceId{Id: "abc", Type: "project"}},
+						{ResourceId: &crmv1.ResourceId{Id: "888", Type: "organization"}},
+					},
+				}
+				payload, err = resp.MarshalJSON()
+			}
+		} else {
+			w.WriteHeader(http.StatusForbidden)
+			w.Write([]byte(fmt.Sprintf("no response for url path %s", r.URL.Path)))
+			return
+		}
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(fmt.Sprintf("failed to MarshalJSON: %s", err)))
+			return
+		}
+		w.Write(payload)
+	}))
+	defer ts.Close()
+
+	tests := []struct {
+		name  string
+		input string
+		want  []string
+	}{
+		{
+			name:  "access v1 API",
+			input: "projects/abc",
+			want:  []string{"projects/abc", "organizations/888"},
+		},
+		{
+			name:  "access v3 API",
+			input: "folders/123",
+			want:  []string{"folders/123", "organizations/456"},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			mockV1Client, err := crmv1.NewService(context.Background(), option.WithEndpoint(ts.URL), option.WithoutAuthentication())
+			if err != nil {
+				t.Fatal(err)
+			}
+			mockV3Client, err := crmv3.NewService(context.Background(), option.WithEndpoint(ts.URL), option.WithoutAuthentication())
+			if err != nil {
+				t.Fatal(err)
+			}
+			m := &manager{
+				errorLogger:       zap.NewExample(),
+				ancestorCache:     make(map[string][]string),
+				resourceManagerV3: mockV3Client,
+				resourceManagerV1: mockV1Client,
+			}
+			got, err := m.getAncestorsWithCache(test.input)
+			if err != nil {
+				t.Fatalf("getAncestorsWithCache(%s) = %s, want = nil", test.input, err)
+			}
+			if diff := cmp.Diff(test.want, got); diff != "" {
+				t.Errorf("getAncestorsWithCache(%v) returned unexpected diff (-want +got):\n%s", test.input, diff)
+			}
+		})
+	}
+}
