@@ -1,3 +1,13 @@
+resource "google_kms_crypto_key" "crypto_key" {
+  name     = "<%= ctx[:vars]['key_name'] %>"
+  key_ring = google_kms_key_ring.key_ring.id
+}
+
+resource "google_kms_key_ring" "key_ring" {
+  name     = "<%= ctx[:vars]['keyring_name'] %>"
+  location = "global"
+}
+
 resource "google_notebooks_instance" "<%= ctx[:primary_resource_id] %>" {
   name = "<%= ctx[:vars]["instance_name"] %>"
   location = "us-central1-a"
@@ -28,6 +38,14 @@ resource "google_notebooks_instance" "<%= ctx[:primary_resource_id] %>" {
   metadata = {
     terraform = "true"
   }
+  service_account_scopes = [
+    "https://www.googleapis.com/auth/bigquery",
+    "https://www.googleapis.com/auth/devstorage.read_write",
+    "https://www.googleapis.com/auth/cloud-platform",
+    "https://www.googleapis.com/auth/userinfo.email"
+  ]
+  disk_encryption = "CMEK"
+  kms_key         = google_kms_crypto_key.crypto_key.id
 }
 
 data "google_compute_network" "my_network" {
