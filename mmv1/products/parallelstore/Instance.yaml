@@ -19,6 +19,7 @@ examples:
       network_name: 'network'
       address_name: 'address'
     config_path: "parallelstore_instance_basic.tf.erb"
+    min_version: beta
 properties:
 - !ruby/object:Api::Type::String
   name: name
@@ -86,6 +87,7 @@ properties:
     associated with IP range 10.0.0.0/29. If no range id is provided all ranges will
     be considered.
   immutable: true
+  default_from_api: true
 parameters:
 - !ruby/object:Api::Type::String
   name: location
