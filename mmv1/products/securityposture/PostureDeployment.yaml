@@ -101,7 +101,7 @@ properties:
     required: true
     description: |
       Relative name of the posture which needs to be deployed. It should be in the format:
-        organizations/ORGANIZATION_ID/locations/LOCATION/postures/POSTURE_ID
+        organizations/{organization_id}/locations/{location}/postures/{posture_id}
   - !ruby/object:Api::Type::String
     name: 'postureRevisionId'
     required: true
