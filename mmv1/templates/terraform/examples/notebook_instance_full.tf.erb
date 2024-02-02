@@ -1,3 +1,13 @@
+resource "google_kms_crypto_key" "crypto_key" {
+  name     = "<%= ctx[:vars]['key_name'] %>"
+  key_ring = google_kms_key_ring.key_ring.id
+}
+
+resource "google_kms_key_ring" "key_ring" {
+  name     = "<%= ctx[:vars]['keyring_name'] %>"
+  location = "global"
+}
+
 resource "google_notebooks_instance" "<%= ctx[:primary_resource_id] %>" {
   name = "<%= ctx[:vars]["instance_name"] %>"
   location = "us-central1-a"
