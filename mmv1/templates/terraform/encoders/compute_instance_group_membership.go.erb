@@ -16,7 +16,7 @@
 if err := d.Set("instance_group", tpgresource.GetResourceNameFromSelfLink(d.Get("instance_group").(string))); err != nil {
   return nil, fmt.Errorf("Error setting instance_group: %s", err)
 }
-obj["instance"] = flattenNestedComputeInstanceGroupMembershipInstance(d.Get("instance"), d, meta.(*transport_tpg.Config))
+
 wrappedReq := map[string]interface{}{
   "instances": []interface{}{obj},
 }
