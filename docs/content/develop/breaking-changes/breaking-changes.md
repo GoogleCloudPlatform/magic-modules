@@ -77,6 +77,9 @@ For more information, see
     if the change will destroy and recreate the resource due to changing an immutable value.
     Default changes in the provider are comparable in impact to default changes in an API,
     and modifying examples and modules may achieve the intended effect with a smaller blast radius.
+  * Adding a default value to an optional, immutable field can cause Terraform to propose destroying and
+    recreating a resource. This is true even when the default is added at the same time the new
+    field is first introduced.
 * <a name="field-changing-data-format"></a> Modifying how field data is stored in state
   * For example, changing the case of a value returned by the API in a flattener or decorder
 * Removing diff suppression from a field.
