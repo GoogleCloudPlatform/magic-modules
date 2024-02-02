@@ -3830,7 +3830,6 @@ resource "time_sleep" "wait_10_seconds_last" {
 `, sourceDatasetID, sourceTableID, sourceMVJobID, sourceDatasetID, sourceMVID, sourceDatasetID, sourceTableID, projectID, sourceMVID, replicaDatasetID, replicaMVID, projectID, sourceMVID, replicationIntervalExpr, dropMVJobID, sourceDatasetID, sourceMVID)
 }
 
-
 var TEST_CSV = `lifelock,LifeLock,,web,Tempe,AZ,1-May-07,6850000,USD,b
 lifelock,LifeLock,,web,Tempe,AZ,1-Oct-06,6000000,USD,a
 lifelock,LifeLock,,web,Tempe,AZ,1-Jan-08,25000000,USD,c
