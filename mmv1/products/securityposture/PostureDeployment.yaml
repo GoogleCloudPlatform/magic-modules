@@ -78,9 +78,9 @@ properties:
     immutable: true
     description: |
       The resource on which the posture should be deployed. This can be in one of the following formats:
-      projects/PROJECT_NUMBER,
-      folders/FOLDER_NUMBER,
-      organizations/ORGANIZATION_ID
+      projects/{project_number},
+      folders/{folder_number},
+      organizations/{organization_id}
   - !ruby/object:Api::Type::Enum
     name: 'state'
     description: |
