@@ -1219,6 +1219,44 @@ func TestAccComposerEnvironmentComposer3_upgrade_expectError(t *testing.T) {
 	})
 }
 
+func TestAccComposerEnvironmentComposer2_usesUnsupportedField_expectError(t *testing.T) {
+	t.Parallel()
+
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t))
+	errorRegExp, _ := regexp.Compile(".*error in configuration, .* should only be used in Composer 3.*")
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:		          func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config:             testAccComposerEnvironmentComposer2_usesUnsupportedField(envName),
+				ExpectError:        errorRegExp,
+			},
+		},
+	})
+}
+
+func TestAccComposerEnvironmentComposer3_usesUnsupportedField_expectError(t *testing.T) {
+	t.Parallel()
+
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t))
+	errorRegExp, _ := regexp.Compile(".*error in configuration, .* should not be used in Composer 3.*")
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:		          func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config:             testAccComposerEnvironmentComposer3_usesUnsupportedField(envName),
+				ExpectError:        errorRegExp,
+			},
+		},
+	})
+}
+
 // Checks Composer 3 specific updatable fields.
 func TestAccComposerEnvironmentComposer3_updateToEmpty(t *testing.T) {
 	t.Parallel()
@@ -2912,6 +2950,38 @@ resource "google_compute_subnetwork" "test" {
   network       = google_compute_network.test.self_link
 }
 `, name, network, subnetwork)
+}
+
+func testAccComposerEnvironmentComposer2_usesUnsupportedField(name string) string {
+return fmt.Sprintf(`
+resource "google_composer_environment" "test" {
+  name   = "%s"
+  region = "us-central1"
+  config {
+    software_config {
+      image_version = "composer-2-airflow-2"
+			web_server_plugins_mode = "ENABLED"
+    }
+  }
+}
+`, name)
+}
+
+func testAccComposerEnvironmentComposer3_usesUnsupportedField(name string) string {
+return fmt.Sprintf(`
+resource "google_composer_environment" "test" {
+  name   = "%s"
+  region = "us-central1"
+  config {
+	  node_config {
+	    enable_ip_masq_agent = true
+	  }
+    software_config {
+      image_version = "composer-3-airflow-2"
+    }
+  }
+}
+`, name)
 }
 
 func testAccComposerEnvironmentComposer3_basic(name, network, subnetwork string) string {
