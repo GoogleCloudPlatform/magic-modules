@@ -105,16 +105,16 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-    - !ruby/object:Api::Type::String
-    name: instanceId
-    description: 'Required. The logical name of the Parallelstore instance in the user
-      project with the following restrictions: * Must contain only lowercase letters,
-      numbers, and hyphens. * Must start with a letter. * Must be between 1-63 characters.
-      * Must end with a number or a letter. * Must be unique within the customer project
-      / location'
-    min_version: beta
-    url_param_only: true
-    immutable: true
+  - !ruby/object:Api::Type::String
+  name: instanceId
+  description: 'Required. The logical name of the Parallelstore instance in the user
+    project with the following restrictions: * Must contain only lowercase letters,
+    numbers, and hyphens. * Must start with a letter. * Must be between 1-63 characters.
+    * Must end with a number or a letter. * Must be unique within the customer project
+    / location'
+  min_version: beta
+  url_param_only: true
+  immutable: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: name
