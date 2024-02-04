@@ -73,7 +73,7 @@ func testAccDataSourceGoogleServiceAttachmentCheck(data_source_name string, reso
 	}
 }
 
-func testAccDataSourceGoogleServiceAttachmentConfig(name string) string {
+func testAccDataSourceGoogleServiceAttachmentConfig(context map[string]interface{}) string {
 	return fmt.Sprintf(`
 resource "google_compute_service_attachment" "foobar" {
   name                     = "%s"
