@@ -125,7 +125,7 @@ resource "google_compute_forwarding_rule" "psc_ilb_target_service" {
   }
   
   resource "google_compute_subnetwork" "psc_ilb_nat" {
-	name   = "psc-ilb-nat"
+	name   = "psc-ilb-nat%{random_suffix}"
 	region = "us-west1"
   
 	network       = google_compute_network.psc_ilb_network.id
