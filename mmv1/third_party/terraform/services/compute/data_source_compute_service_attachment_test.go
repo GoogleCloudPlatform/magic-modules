@@ -85,7 +85,7 @@ resource "google_compute_service_attachment" "foobar" {
 }
 
 resource "google_compute_forwarding_rule" "psc_ilb_target_service" {
-	name   = "producer-forwarding-rule"
+	name   = "producer-forwarding-rule%{random_suffix}"
 	region = "us-west1"
   
 	load_balancing_scheme = "INTERNAL"
