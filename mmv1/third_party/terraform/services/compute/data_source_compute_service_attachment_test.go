@@ -75,7 +75,7 @@ func testAccDataSourceGoogleServiceAttachmentCheck(data_source_name string, reso
 func testAccDataSourceGoogleServiceAttachmentConfig(context map[string]interface{}) string {
 	return fmt.Sprintf(`
 resource "google_compute_service_attachment" "foobar" {
-  name                     = "%s"
+  name                     = "tf-test%{random_suffix}"
   description              = "my-description"
   region                   = "us-west1"
   enable_proxy_protocol    = true
