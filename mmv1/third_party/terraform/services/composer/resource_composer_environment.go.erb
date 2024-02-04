@@ -1551,10 +1551,14 @@ func flattenComposerEnvironmentConfig(envCfg *composer.EnvironmentConfig) interf
 	transformed["airflow_uri"] = envCfg.AirflowUri
 	transformed["node_config"] = flattenComposerEnvironmentConfigNodeConfig(envCfg.NodeConfig)
 	transformed["software_config"] = flattenComposerEnvironmentConfigSoftwareConfig(envCfg.SoftwareConfig)
-	transformed["private_environment_config"] = flattenComposerEnvironmentConfigPrivateEnvironmentConfig(envCfg.PrivateEnvironmentConfig)
+	if !isComposer3(envCfg){
+		transformed["private_environment_config"] = flattenComposerEnvironmentConfigPrivateEnvironmentConfig(envCfg.PrivateEnvironmentConfig)
+	}
 <% unless version == "ga" -%>
-	transformed["enable_private_environment"] = envCfg.PrivateEnvironmentConfig.EnablePrivateEnvironment
-	transformed["enable_private_builds_only"] = envCfg.PrivateEnvironmentConfig.EnablePrivateBuildsOnly
+	if isComposer3(envCfg){
+		transformed["enable_private_environment"] = envCfg.PrivateEnvironmentConfig.EnablePrivateEnvironment
+		transformed["enable_private_builds_only"] = envCfg.PrivateEnvironmentConfig.EnablePrivateBuildsOnly
+	}
 <% end -%>
 	transformed["web_server_network_access_control"] = flattenComposerEnvironmentConfigWebServerNetworkAccessControl(envCfg.WebServerNetworkAccessControl)
 	transformed["database_config"] = flattenComposerEnvironmentConfigDatabaseConfig(envCfg.DatabaseConfig)
@@ -1739,7 +1743,9 @@ func flattenComposerEnvironmentConfigWorkloadsConfig(workloadsConfig *composer.W
 	transformed["web_server"] = []interface{}{transformedWebServer}
 	transformed["worker"] = []interface{}{transformedWorker}
 <% unless version == "ga" -%>
-	transformed["dag_processor"] = []interface{}{transformedDagProcessor}
+	if transformedDagProcessor != nil {
+		transformed["dag_processor"] = []interface{}{transformedDagProcessor}
+	}
 <% end -%>
 
 
@@ -2822,6 +2828,8 @@ func isComposer3(v interface{})	bool {
 		imageVersion = v.(*schema.ResourceData).Get("config.0.software_config.0.image_version").(string)
 	case *schema.ResourceDiff:
 		imageVersion = v.(*schema.ResourceDiff).Get("config.0.software_config.0.image_version").(string)
+	case *composer.EnvironmentConfig:
+		imageVersion = v.(*composer.EnvironmentConfig).SoftwareConfig.ImageVersion
 	case string:
 		imageVersion = v.(string)
 	default:
