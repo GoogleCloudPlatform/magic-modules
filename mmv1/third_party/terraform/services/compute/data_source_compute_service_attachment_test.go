@@ -117,7 +117,7 @@ resource "google_compute_forwarding_rule" "psc_ilb_target_service" {
   }
   
   resource "google_compute_subnetwork" "psc_ilb_producer_subnetwork" {
-	name   = "psc-ilb-producer-subnetwork"
+	name   = "psc-ilb-producer-subnetwork%{random_suffix}"
 	region = "us-west1"
   
 	network       = google_compute_network.psc_ilb_network.id
