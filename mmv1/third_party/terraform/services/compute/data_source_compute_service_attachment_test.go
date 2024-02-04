@@ -112,7 +112,7 @@ resource "google_compute_forwarding_rule" "psc_ilb_target_service" {
 	}
   }
   resource "google_compute_network" "psc_ilb_network" {
-	name = "psc-ilb-network"
+	name = "psc-ilb-network%{random_suffix}"
 	auto_create_subnetworks = false
   }
   
