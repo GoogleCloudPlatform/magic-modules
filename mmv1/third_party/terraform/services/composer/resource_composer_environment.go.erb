@@ -169,7 +169,6 @@ func ResourceComposerEnvironment() *schema.Resource {
 			tpgresource.DefaultProviderProject,
 			tpgresource.DefaultProviderRegion,
 			tpgresource.SetLabelsDiff,
-			customdiff.ComputedIf("config.0.node_config.0.network", networkComputedConditionFunc),
 			customdiff.ForceNewIf("config.0.node_config.0.network", networkForceNewCustomDiff),
 			customdiff.ForceNewIf("config.0.node_config.0.subnetwork", subnetworkForceNewCustomDiff),
 		),
@@ -239,6 +238,7 @@ func ResourceComposerEnvironment() *schema.Resource {
 									},
 									"network": {
 										Type:             schema.TypeString,
+										Computed:         true,
 										Optional:         true,
 										ForceNew:         false,
 										ConflictsWith:    []string{"config.0.node_config.0.composer_network_attachment"},
@@ -3028,19 +3028,4 @@ func networkForceNewCustomDiff(ctx context.Context, d *schema.ResourceDiff, meta
 
 func subnetworkForceNewCustomDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) bool {
 	return d.HasChange("config.0.node_config.0.subnetwork") && !isComposer3(d)
-}
-
-func networkComputedConditionFunc(ctx context.Context, d *schema.ResourceDiff, meta interface{}) bool {
-	if !isComposer3(d){
-		return true
-	}
-	old, new := d.GetChange("config.0.node_config.0.network")
-	get := d.Get("config.0.node_config.0.network").(string)
-	log.Printf("[DEBUG] old network %s", old)
-	log.Printf("[DEBUG] new network %s", new)
-	log.Printf("[DEBUG] get network %s", get)
-	if old != "" && new == "" {
-		return false
-	}
-	return true
 }
