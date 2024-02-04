@@ -24,7 +24,7 @@ func TestAccDataSourceGoogleServiceAttachment(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceGoogleServiceAttachmentConfig(serviceAttachmentName),
+				Config: testAccDataSourceGoogleServiceAttachmentConfig(context),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataSourceGoogleServiceAttachmentCheck("data.google_compute_service_attachment.my_attachment", "google_compute_service_attachment.foobar"),
 				),
