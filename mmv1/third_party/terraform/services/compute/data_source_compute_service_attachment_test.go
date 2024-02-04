@@ -19,7 +19,6 @@ func TestAccDataSourceGoogleServiceAttachment(t *testing.T) {
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	serviceAttachmentName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
