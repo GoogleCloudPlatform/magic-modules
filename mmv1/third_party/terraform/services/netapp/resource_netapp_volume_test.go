@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-func TestAccNetappVolume_volumeBasicExample_update(t *testing.T) {
+func TestAccNetappVolume_netappVolumeBasicExample_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -31,7 +31,7 @@ func TestAccNetappVolume_volumeBasicExample_update(t *testing.T) {
 				ResourceName:            "google_netapp_volume.test_volume",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels", "deletion_policy"},
+				ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
 			}, {
 				Config: testAccNetappVolume_volumeBasicExample_full(context),
 			},
@@ -39,7 +39,7 @@ func TestAccNetappVolume_volumeBasicExample_update(t *testing.T) {
 				ResourceName:            "google_netapp_volume.test_volume",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels", "deletion_policy"},
+				ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccNetappVolume_volumeBasicExample_update(context),
@@ -48,7 +48,7 @@ func TestAccNetappVolume_volumeBasicExample_update(t *testing.T) {
 				ResourceName:            "google_netapp_volume.test_volume",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels", "deletion_policy"},
+				ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccNetappVolume_volumeBasicExample_updatesnapshot(context),
@@ -57,7 +57,7 @@ func TestAccNetappVolume_volumeBasicExample_update(t *testing.T) {
 				ResourceName:            "google_netapp_volume.test_volume",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels", "deletion_policy"},
+				ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccNetappVolume_volumeBasicExample_createclonevolume(context),
@@ -66,7 +66,7 @@ func TestAccNetappVolume_volumeBasicExample_update(t *testing.T) {
 				ResourceName:            "google_netapp_volume.test_volume_clone",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels", "deletion_policy", "restore_parameters"},
+				ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
 			},
 		},
 	})

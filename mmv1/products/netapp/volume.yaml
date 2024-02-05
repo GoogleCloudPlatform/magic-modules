@@ -269,26 +269,29 @@ properties:
     description: |-
       Used to create this volume from a snapshot (= cloning) or an backup.
     # This parameter is only used at CREATE. READs will omit it.
+    immutable: true
     ignore_read: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'sourceSnapshot'
         description: |-
           Full name of the snapshot to use for creating this volume.
-          Format: `projects/{{project}}/locations/{{location}}/volumes/{{volume}}/snapshots/{{snapshot}}`
+          Format: `projects/{{project}}/locations/{{location}}/volumes/{{volume}}/snapshots/{{snapshot}}`.
+          source_snapshot and source_backup cannot be used simultaneously.
         conflicts:
-          - restoreParameters.sourceBackup
+          - restore_parameters.0.source_backup
         # This parameter is only used at CREATE. READs will omit it.
-        ignore_read: true
+        immutable: true
       - !ruby/object:Api::Type::String
         name: 'sourceBackup'
         description: |-
           Full name of the snapshot to use for creating this volume.
-          Format: `projects/{{project}}/locations/{{location}}/backupVaults/{{backupVaultId}}/backups/{{backup}}`        
+          Format: `projects/{{project}}/locations/{{location}}/backupVaults/{{backupVaultId}}/backups/{{backup}}`.
+          source_snapshot and source_backup cannot be used simultaneously.      
         conflicts:
-          - restoreParameters.sourceSnapshot
+          - restore_parameters.0.source_snapshot
         # This parameter is only used at CREATE. READs will omit it.
-        ignore_read: true          
+        immutable: true        
   - !ruby/object:Api::Type::String
     name: 'kmsConfig'
     description: |
