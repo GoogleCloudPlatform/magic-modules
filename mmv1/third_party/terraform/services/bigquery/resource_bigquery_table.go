@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package bigquery
 
 import (
@@ -1251,7 +1250,6 @@ func ResourceBigQueryTable() *schema.Resource {
 					},
 				},
 			},
-			<% unless version == 'ga' -%>
 			// TableReplicationInfo: [Optional] Replication info of a table created using `AS REPLICA` DDL like: `CREATE MATERIALIZED VIEW mv1 AS REPLICA OF src_mv`.
 			"table_replication_info": {
 				Type:        schema.TypeList,
@@ -1289,7 +1287,6 @@ func ResourceBigQueryTable() *schema.Resource {
 					},
 				},
 			},
-			<% end -%>
 		},
 		UseJSONNumber: true,
 	}
@@ -1426,7 +1423,6 @@ func resourceBigQueryTableCreate(d *schema.ResourceData, meta interface{}) error
 
 	datasetID := d.Get("dataset_id").(string)
 
-	<% unless version == 'ga' -%>
 	if v, ok := d.GetOk("table_replication_info"); ok {
 		if table.Schema != nil || table.View != nil || table.MaterializedView != nil {
 			return errors.New("Schema, view, or materialized view cannot be specified when table replication info is present")
@@ -1467,7 +1463,6 @@ func resourceBigQueryTableCreate(d *schema.ResourceData, meta interface{}) error
 		return resourceBigQueryTableRead(d, meta)
 	}
 
-	<% end -%>
 	if table.View != nil && table.Schema != nil {
 
 		log.Printf("[INFO] Removing schema from table definition because BigQuery does not support setting schema on view creation")
@@ -1679,7 +1674,6 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	<% unless version == 'ga' -%>
 	// TODO: Update when the Get API fields for TableReplicationInfo are available in the client library.
 	url, err := tpgresource.ReplaceVars(d, config, "{{BigQueryBasePath}}projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}")
 	if err != nil {
@@ -1706,7 +1700,6 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-  <% end -%>
 	return nil
 }
 
@@ -2497,7 +2490,6 @@ func flattenTableConstraints(edc *bigquery.TableConstraints) []map[string]interf
 	return []map[string]interface{}{result}
 }
 
-<% unless version == 'ga' -%>
 func expandTableReplicationInfo(cfg interface{}) map[string]interface{} {
 	raw := cfg.([]interface{})[0].(map[string]interface{})
 
@@ -2548,7 +2540,6 @@ func flattenTableReplicationInfo(tableReplicationInfo map[string]interface{}) []
 	return []map[string]interface{}{result}
 }
 
-<% end -%>
 func resourceBigQueryTableImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*transport_tpg.Config)
 	if err := tpgresource.ParseImportId([]string{
