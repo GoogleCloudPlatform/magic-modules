@@ -224,11 +224,11 @@ properties:
     name: 'description'
     description: |
       An optional description of this resource.
-  # Use of snapReserve is deprecated. Here aa a comment to express intention.
+  # Use of snapReserve is deprecated. Here as a comment to express intention.
   # - !ruby/object:Api::Type::Integer
   #   name: 'snapReserve'
   #   description: |
-  #     snap_reserve specifies percentage of volume storage reserved for snapshot storage. Default is 0 percent. Use is deprecated.
+  #     `snap_reserve` specifies percentage of volume storage reserved for snapshot storage. Default is 0 percent. Use is deprecated.
   - !ruby/object:Api::Type::Boolean
     name: 'snapshotDirectory'
     description: |
