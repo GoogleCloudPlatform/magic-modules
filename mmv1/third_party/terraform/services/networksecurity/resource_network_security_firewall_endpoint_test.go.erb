@@ -37,6 +37,15 @@ func TestAccNetworkSecurityFirewallEndpoints_basic(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
+			{
+				Config: testAccNetworkSecurityFirewallEndpoints_update(orgId, randomSuffix),
+			},
+			{
+				ResourceName:            "google_network_security_firewall_endpoint.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
 		},
 	})
 }
@@ -51,6 +60,21 @@ resource "google_network_security_firewall_endpoint" "foobar" {
 
     labels = {
         foo = "bar"
+    }
+}
+`, randomSuffix, orgId)
+}
+
+func testAccNetworkSecurityFirewallEndpoints_update(orgId string, randomSuffix string) string {
+	return fmt.Sprintf(`
+resource "google_network_security_firewall_endpoint" "foobar" {
+    provider = google-beta
+    name     = "tf-test-my-firewall-endpoint%s"
+    parent   = "organizations/%s"
+    location = "us-central1-a"
+
+    labels = {
+        foo = "bar-updated"
     }
 }
 `, randomSuffix, orgId)
