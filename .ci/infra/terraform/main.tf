@@ -275,6 +275,7 @@ module "project-services" {
     "orgpolicy.googleapis.com",
     "osconfig.googleapis.com",
     "oslogin.googleapis.com",
+    "parallelstore.googleapis.com",
     "privateca.googleapis.com",
     "pubsub.googleapis.com",
     "pubsublite.googleapis.com",
