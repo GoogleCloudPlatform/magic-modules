@@ -83,7 +83,6 @@ examples:
     test_env_vars:
       service_account: :SERVICE_ACCT
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/notebooks_instance.go
   update_encoder: templates/terraform/update_encoder/notebooks_instance.go
 state_upgraders: true
 schema_version: 1
