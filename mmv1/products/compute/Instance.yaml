@@ -608,7 +608,23 @@ properties:
     properties:
       - !ruby/object:Api::Type::Boolean
         name: 'enableConfidentialCompute'
-        description: Enables confidential computing
+        description: Enables confidential computing with AMD SEV.
+        at_least_one_of:
+          - confidential_instance_config.0.enable_confidential_compute
+          - confidential_instance_config.0.confidential_instance_type
+      - !ruby/object:Api::Type::Enum
+        name: 'confidentialInstanceType'
+        min_version: beta
+        description: |
+          The confidential computing technology the instance uses.
+          SEV is an AMD feature. One of the following values: SEV, SEV_SNP.
+          If SEV_SNP, min_cpu_platform = "AMD Milan" is currently required.
+        values:
+          - :SEV
+          - :SEV_SNP
+        at_least_one_of:
+          - confidential_instance_config.0.enable_confidential_compute
+          - confidential_instance_config.0.confidential_instance_type
   - !ruby/object:Api::Type::Enum
     name: 'status'
     description: |
