@@ -3,9 +3,7 @@ resource "google_parallelstore_instance" "<%= ctx[:primary_resource_id] %>" {
   location = "us-central1-a"
   description = "test instance"
   capacity_gib = 12000
-  network_config {
-    network_name = google_compute_network.network.name
-  }
+  network = google_compute_network.network.name
 
   labels = {
     test = "value"
