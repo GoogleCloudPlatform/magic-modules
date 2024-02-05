@@ -58,6 +58,11 @@ parameters:
       All instances not in this list will be removed from the InstanceGroup
       and will not be deleted.
       Only the full identifier of the instance will be returned.
+
+      **NOTE** If a user will be recreating instances under the same name
+      (eg. via `terraform taint`), please consider adding instances to an instance
+      group via the `instance_group_membership` resource, along side the
+      `update_triggered_by` lifecycle method with an instance's ID.
     exclude: true
     item_type: !ruby/object:Api::Type::ResourceRef
       name: 'instance'
