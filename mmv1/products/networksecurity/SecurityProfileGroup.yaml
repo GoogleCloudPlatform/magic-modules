@@ -37,8 +37,6 @@ examples:
     name: 'network_security_security_profile_group_basic'
     primary_resource_id: 'default'
     min_version: beta
-    vars:
-      resource_name: 'my-security-profile-group'
     test_env_vars:
       org_id: :ORG_ID
 parameters:
