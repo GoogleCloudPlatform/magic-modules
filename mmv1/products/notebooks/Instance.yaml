@@ -161,7 +161,6 @@ properties:
       - https://www.googleapis.com/auth/userinfo.email
     item_type: Api::Type::String
     default_from_api: true
-    diff_suppress_func: NotebooksInstanceScopesDiffSuppress
   - !ruby/object:Api::Type::NestedObject
     name: 'acceleratorConfig'
     description: |
