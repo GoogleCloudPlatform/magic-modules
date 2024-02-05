@@ -617,6 +617,7 @@ properties:
         description: |
           The confidential computing technology the instance uses.
           SEV is an AMD feature. One of the following values: SEV, SEV_SNP.
+          If SEV_SNP, min_cpu_platform = "AMD Milan" is currently required.
         values:
           - :SEV
           - :SEV_SNP
