@@ -76,7 +76,6 @@ examples:
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_delete: templates/terraform/pre_delete/compute_instance_group_membership.go.erb
   custom_import: templates/terraform/custom_import/compute_instance_group_membership.go.erb
-  decoder: templates/terraform/decoders/instance_group_membership.go.erb
   encoder: templates/terraform/encoders/compute_instance_group_membership.go.erb
 parameters:
   - !ruby/object:Api::Type::ResourceRef
@@ -103,4 +102,5 @@ properties:
     resource: 'Instance'
     imports: 'selfLink'
     required: true
+    custom_flatten: 'templates/terraform/custom_flatten/full_to_relative_path.erb'
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'

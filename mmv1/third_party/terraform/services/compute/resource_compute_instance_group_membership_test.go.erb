@@ -66,8 +66,8 @@ func TestAccComputeInstanceGroupMembership_instanceGroupMembershipBasic(t *testi
 	  Check: resource.ComposeTestCheckFunc(
 	    testAccCheckComputeInstanceGroupMembershipDestroyed(
 	      t, igId,
-	      testAccComputeRegionInstanceGroupMembershipGetInstanceName("add1-instance", suffix),
-	      testAccComputeRegionInstanceGroupMembershipGetInstanceName("add2-instance", suffix),
+	      testAccComputeInstanceGroupMembershipGetInstanceName("add1-instance", suffix),
+	      testAccComputeInstanceGroupMembershipGetInstanceName("add2-instance", suffix),
             ),
           ),
         },
@@ -83,7 +83,7 @@ func TestAccComputeInstanceGroupMembership_instanceGroupMembershipBasic(t *testi
 	  Check: resource.ComposeTestCheckFunc(
 	    testAccCheckComputeInstanceGroupMembershipDestroyed(
 	      t, igId,
-              testAccComputeRegionInstanceGroupMembershipGetInstanceName("default-instance", suffix)),
+              testAccComputeInstanceGroupMembershipGetInstanceName("default-instance", suffix)),
 	  ),
 	},
       },
@@ -173,7 +173,7 @@ func testAccComputeInstanceGroupMembership_noInstanceGroupMembership(context map
 
 func testAccCheckComputeInstanceGroupMembershipDestroyed(t *testing.T, instanceGroupId string, instances ...string) resource.TestCheckFunc {
   return func(s *terraform.State) error {
-    foundInstances, err := testAccComputeRegionInstanceGroupMembershipListMembership(t, instanceGroupId)
+    foundInstances, err := testAccComputeInstanceGroupMembershipListMembership(t, instanceGroupId)
     if err != nil {
       return fmt.Errorf("unable to confirm instance group members with instances %+v was destroyed: %v", instances, err)
     }
@@ -186,7 +186,7 @@ func testAccCheckComputeInstanceGroupMembershipDestroyed(t *testing.T, instanceG
   }
 }
 
-func testAccComputeRegionInstanceGroupMembershipListMembership(t *testing.T, instanceGroupId string) (map[string]struct{}, error) {
+func testAccComputeInstanceGroupMembershipListMembership(t *testing.T, instanceGroupId string) (map[string]struct{}, error) {
   config := acctest.GoogleProviderConfig(t)
 
   url := fmt.Sprintf("https://www.googleapis.com/compute/<% if version == 'ga' %>v1<% else %>beta<% end %>/%s/listInstances", instanceGroupId)
@@ -220,7 +220,7 @@ func testAccComputeRegionInstanceGroupMembershipListMembership(t *testing.T, ins
   return instances, nil
 }
 
-func testAccComputeRegionInstanceGroupMembershipGetInstanceName(instanceName string, suffix string) (string) {
+func testAccComputeInstanceGroupMembershipGetInstanceName(instanceName string, suffix string) (string) {
   return fmt.Sprintf("projects/%s/zones/%s/instances/%s-%s",
     envvar.GetTestProjectFromEnv(),
     envvar.GetTestZoneFromEnv(),
