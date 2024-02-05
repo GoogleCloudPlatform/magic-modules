@@ -336,7 +336,7 @@ func ResourceComputeInstance() *schema.Resource {
 							Description:      `The name or self_link of the subnetwork attached to this interface.`,
 						},
 
-						<% if version == "beta" -%>
+						<% unless version == 'ga' -%>
 						"network_attachment": {
 							Type:             schema.TypeString,
 							Optional:         true,
