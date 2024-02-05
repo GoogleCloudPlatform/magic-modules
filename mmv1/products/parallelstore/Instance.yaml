@@ -117,21 +117,22 @@ parameters:
       / location'
     immutable: true
     url_param_only: true
-  async: !ruby/object:Api::OpAsync
-    operation: !ruby/object:Api::OpAsync::Operation
-      path: name
-      base_url: "{{op_id}}"
-      wait_ms: 1000
-      timeouts:
-    result: !ruby/object:Api::OpAsync::Result
-      path: response
-      resource_inside_response: true
-    status: !ruby/object:Api::OpAsync::Status
-      path: done
-      complete: true
-      allowed:
-        - true
-        - false
-    error: !ruby/object:Api::OpAsync::Error
-      path: error
-      message: message
+
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: name
+    base_url: "{{op_id}}"
+    wait_ms: 1000
+    timeouts:
+  result: !ruby/object:Api::OpAsync::Result
+    path: response
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: done
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: error
+    message: message
