@@ -25,7 +25,7 @@ var testTGCIntegrationCmd = &cobra.Command{
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
 		env := make(map[string]string, len(environmentVariables))
-		for _, ev := range environmentVariables {
+		for _, ev := range ttiEnvironmentVariables {
 			val, ok := os.LookupEnv(ev)
 			if !ok {
 				fmt.Printf("Did not provide %s environment variable\n", ev)
