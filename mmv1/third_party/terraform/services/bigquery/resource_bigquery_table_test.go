@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package bigquery_test
 
 import (
@@ -1432,7 +1431,6 @@ func TestAccBigQueryTable_invalidSchemas(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccBigQueryTable_TableReplicationInfo_ConflictsWithView(t *testing.T) {
 	t.Parallel()
 
@@ -1441,7 +1439,7 @@ func TestAccBigQueryTable_TableReplicationInfo_ConflictsWithView(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1467,11 +1465,11 @@ func TestAccBigQueryTable_TableReplicationInfo_WithoutReplicationInterval(t *tes
 	replicationIntervalExpr := ""
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-		ExternalProviders:        map[string]resource.ExternalProvider{
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},
-		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
+		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigQueryTableWithReplicationInfo(projectID, sourceDatasetID, sourceTableID, sourceMVID, replicaDatasetID, replicaMVID, sourceMVJobID, dropMVJobID, replicationIntervalExpr),
@@ -1502,11 +1500,11 @@ func TestAccBigQueryTable_TableReplicationInfo_WithReplicationInterval(t *testin
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-		ExternalProviders:        map[string]resource.ExternalProvider{
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},
-		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
+		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigQueryTableWithReplicationInfo(projectID, sourceDatasetID, sourceTableID, sourceMVID, replicaDatasetID, replicaMVID, sourceMVJobID, dropMVJobID, replicationIntervalExpr),
@@ -1521,7 +1519,6 @@ func TestAccBigQueryTable_TableReplicationInfo_WithReplicationInterval(t *testin
 	})
 }
 
-<% end -%>
 func testAccCheckBigQueryExtData(t *testing.T, expectedQuoteChar string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
@@ -3100,7 +3097,7 @@ resource "google_bigquery_table" "test" {
 }
 
 func testAccBigQueryTableFromBigtable(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_bigtable_instance" "instance" {
   name = "tf-test-bigtable-inst-%{random_suffix}"
   cluster {
@@ -3717,18 +3714,13 @@ resource "google_bigquery_table" "test" {
 `, datasetID, tableID, schema)
 }
 
-<% unless version == 'ga' -%>
 func testAccBigQueryTableWithReplicationInfoAndView(datasetID, tableID string) string {
 	return fmt.Sprintf(`
 resource "google_bigquery_dataset" "test" {
-  provider = google-beta
-
   dataset_id = "%s"
 }
 
 resource "google_bigquery_table" "test" {
-  provider = google-beta
-
   deletion_protection = false
   table_id   = "%s"
   dataset_id = google_bigquery_dataset.test.dataset_id
@@ -3748,15 +3740,11 @@ resource "google_bigquery_table" "test" {
 func testAccBigQueryTableWithReplicationInfo(projectID, sourceDatasetID, sourceTableID, sourceMVID, replicaDatasetID, replicaMVID, sourceMVJobID, dropMVJobID, replicationIntervalExpr string) string {
 	return fmt.Sprintf(`
 resource "google_bigquery_dataset" "source" {
-  provider = google-beta
-
   dataset_id = "%s"
   location = "aws-us-east-1"
 }
 
 resource "google_bigquery_table" "source_table" {
-  provider = google-beta
-
   deletion_protection = false
   table_id   = "%s"
   dataset_id = google_bigquery_dataset.source.dataset_id
@@ -3773,8 +3761,6 @@ resource "google_bigquery_table" "source_table" {
 }
 
 resource "google_bigquery_job" "source_mv_job" {
-  provider = google-beta
-
   job_id = "%s"
 
   location = "aws-us-east-1"
@@ -3794,8 +3780,6 @@ resource "time_sleep" "wait_10_seconds" {
 }
 
 resource "google_bigquery_dataset_access" "access" {
-  provider = google-beta
-
   dataset_id    = google_bigquery_dataset.source.dataset_id
   view {
     project_id = "%s"
@@ -3807,15 +3791,11 @@ resource "google_bigquery_dataset_access" "access" {
 }
 
 resource "google_bigquery_dataset" "replica" {
-  provider = google-beta
-
   dataset_id = "%s"
   location = "us"
 }
 
 resource "google_bigquery_table" "replica_mv" {
-  provider = google-beta
-
   deletion_protection = false
   dataset_id = google_bigquery_dataset.replica.dataset_id
   table_id   = "%s"
@@ -3830,8 +3810,6 @@ resource "google_bigquery_table" "replica_mv" {
 }
 
 resource "google_bigquery_job" "drop_source_mv_job" {
-  provider = google-beta
-
   job_id = "%s"
 
   location = "aws-us-east-1"
@@ -3851,8 +3829,6 @@ resource "time_sleep" "wait_10_seconds_last" {
 }
 `, sourceDatasetID, sourceTableID, sourceMVJobID, sourceDatasetID, sourceMVID, sourceDatasetID, sourceTableID, projectID, sourceMVID, replicaDatasetID, replicaMVID, projectID, sourceMVID, replicationIntervalExpr, dropMVJobID, sourceDatasetID, sourceMVID)
 }
-
-<% end -%>
 
 var TEST_CSV = `lifelock,LifeLock,,web,Tempe,AZ,1-May-07,6850000,USD,b
 lifelock,LifeLock,,web,Tempe,AZ,1-Oct-06,6000000,USD,a
