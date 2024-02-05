@@ -276,8 +276,8 @@ properties:
         name: 'sourceSnapshot'
         description: |-
           Full name of the snapshot to use for creating this volume.
+          `source_snapshot` and `source_backup` cannot be used simultaneously.
           Format: `projects/{{project}}/locations/{{location}}/volumes/{{volume}}/snapshots/{{snapshot}}`.
-          source_snapshot and source_backup cannot be used simultaneously.
         conflicts:
           - restore_parameters.0.source_backup
         immutable: true
@@ -285,11 +285,11 @@ properties:
         name: 'sourceBackup'
         description: |-
           Full name of the snapshot to use for creating this volume.
+          `source_snapshot` and `source_backup` cannot be used simultaneously.
           Format: `projects/{{project}}/locations/{{location}}/backupVaults/{{backupVaultId}}/backups/{{backup}}`.
-          source_snapshot and source_backup cannot be used simultaneously.      
         conflicts:
           - restore_parameters.0.source_snapshot
-        immutable: true        
+        immutable: true
   - !ruby/object:Api::Type::String
     name: 'kmsConfig'
     description: |
@@ -450,26 +450,26 @@ properties:
             description: |-
               Set the day or days of the month to make a snapshot (1-31). Accepts a comma separated number of days. Defaults to '1'.
             default_value: '1'
-  - !ruby/object:Api::Type::NestedObject
-    name: 'backupConfig'
-    description: |-
-      Backup configuration for the volume.
-    properties:
-      - !ruby/object:Api::Type::Array
-        name: 'backupPolicies'
-        description: |-
-          Optionally specify one or more backup policies for scheduled backups. Format: `projects/{{projectId}}/locations/{{location}}/backupPolicies/{{backupPolicyName}}``
-        item_type: Api::Type::String
-      - !ruby/object:Api::Type::String
-        name: 'backupVault'
-        description: |-
-          ID of the backup vault to use. Format: `projects/{{projectId}}/locations/{{location}}/backupVaults/{{backupVaultName}}``
-      - !ruby/object:Api::Type::Boolean
-        name: 'scheduledBackupEnabled'
-        description: |-
-          When set to true, scheduled backup is enabled on the volume.
-        send_empty_value: true
-        default_value: false
+  # backupConfig is an upcoming feature. Needs more work/testing before release.
+  # - !ruby/object:Api::Type::NestedObject
+  #   name: 'backupConfig'
+  #   description: |-
+  #     Backup configuration for the volume.
+  #   properties:
+  #     - !ruby/object:Api::Type::Array
+  #       name: 'backupPolicies'
+  #       description: |-
+  #         Optionally specify one or more backup policies for scheduled backups. Format: `projects/{{projectId}}/locations/{{location}}/backupPolicies/{{backupPolicyName}}``
+  #       item_type: Api::Type::String
+  #     - !ruby/object:Api::Type::String
+  #       name: 'backupVault'
+  #       description: |-
+  #         ID of the backup vault to use. A backup vault is reqired to create manual or scheduled backups.
+  #         Format: `projects/{{projectId}}/locations/{{location}}/backupVaults/{{backupVaultName}}``
+  #     - !ruby/object:Api::Type::Boolean
+  #       name: 'scheduledBackupEnabled'
+  #       description: |-
+  #         When set to true, scheduled backup is enabled on the volume. Omit if no backup_policy is specified.
 virtual_fields:
   - !ruby/object:Api::Type::Enum
     name: 'deletion_policy'
