@@ -17,8 +17,5 @@ versions:
   - !ruby/object:Api::Product::Version
     name: beta
     base_url: https://parallelstore.googleapis.com/v1beta/
-  - !ruby/object:Api::Product::Version
-    name: ga
-    base_url: https://parallelstore.googleapis.com/v1beta/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
