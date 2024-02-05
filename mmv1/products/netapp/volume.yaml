@@ -224,11 +224,11 @@ properties:
     name: 'description'
     description: |
       An optional description of this resource.
-  # Use of snapReserve is depricated. We don't expose it intentionally.
+  # Use of snapReserve is deprecated. Here aa a comment to express intention.
   # - !ruby/object:Api::Type::Integer
   #   name: 'snapReserve'
   #   description: |
-  #     Snap_reserve specifies percentage of volume storage reserved for snapshot storage. Default is 0 percent. Use is deprecated.
+  #     snap_reserve specifies percentage of volume storage reserved for snapshot storage. Default is 0 percent. Use is deprecated.
   - !ruby/object:Api::Type::Boolean
     name: 'snapshotDirectory'
     description: |
@@ -268,8 +268,8 @@ properties:
     name: 'restoreParameters'
     description: |-
       Used to create this volume from a snapshot (= cloning) or an backup.
-    # This parameter is only used at CREATE. READs will omit it.
     immutable: true
+    # This parameter is only used at CREATE. READs will omit it.
     ignore_read: true
     properties:
       - !ruby/object:Api::Type::String
@@ -280,7 +280,6 @@ properties:
           source_snapshot and source_backup cannot be used simultaneously.
         conflicts:
           - restore_parameters.0.source_backup
-        # This parameter is only used at CREATE. READs will omit it.
         immutable: true
       - !ruby/object:Api::Type::String
         name: 'sourceBackup'
@@ -290,7 +289,6 @@ properties:
           source_snapshot and source_backup cannot be used simultaneously.      
         conflicts:
           - restore_parameters.0.source_snapshot
-        # This parameter is only used at CREATE. READs will omit it.
         immutable: true        
   - !ruby/object:Api::Type::String
     name: 'kmsConfig'
@@ -452,17 +450,6 @@ properties:
             description: |-
               Set the day or days of the month to make a snapshot (1-31). Accepts a comma separated number of days. Defaults to '1'.
             default_value: '1'
-# This is disabled until we have support for backup resource and can test it.
-# - !ruby/object:Api::Type::NestedObject
-#   name: restoreParameters
-#   description: Specifies the source information to create a volume from.
-#   immutable: true
-#   properties:
-#     - !ruby/object:Api::Type::String
-#       name: 'sourceSnapshot'
-#       description: |-
-#         Full name of the snapshot resource. Format: `projects/{{project}}/locations/{{location}}/volumes/{{volume}}/snapshots/{{snapshot}}`.
-#       required: true
   - !ruby/object:Api::Type::NestedObject
     name: 'backupConfig'
     description: |-
