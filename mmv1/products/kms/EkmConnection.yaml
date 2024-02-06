@@ -137,6 +137,7 @@ properties:
     description: |
       Optional. Describes who can perform control plane operations on the EKM. If unset, this defaults to MANUAL
     required: false
+    default_value: :MANUAL
     values:
       - :MANUAL
       - :CLOUD_KMS
