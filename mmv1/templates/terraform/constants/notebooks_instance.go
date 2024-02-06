@@ -26,6 +26,7 @@ func NotebooksInstanceScopesDiffSuppress(_, _, _ string, d *schema.ResourceData)
 	}
 	return false
 }
+<<<<<<< HEAD
 
 func NotebooksInstanceKmsDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
 	if strings.HasPrefix(old, new) {
@@ -33,3 +34,5 @@ func NotebooksInstanceKmsDiffSuppress(_, old, new string, _ *schema.ResourceData
 	}
 	return false
 }
+=======
+>>>>>>> b1ac77712 (change kms key to use existing one in tests)
