@@ -76,8 +76,9 @@ examples:
     vars:
       instance_name: 'workbench-instance'
       network_name: 'wbi-test-default'
-      keyring_name: 'tftest-shared-keyring-1'
-      key_name: 'tftest-shared-key-1'
+      key_name: 'my-crypto-key'
+    test_vars_overrides:
+      key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     test_env_vars:
       service_account: :SERVICE_ACCT
     ignore_read_extra:
