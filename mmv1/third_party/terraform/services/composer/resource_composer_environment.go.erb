@@ -168,8 +168,10 @@ func ResourceComposerEnvironment() *schema.Resource {
 			tpgresource.DefaultProviderProject,
 			tpgresource.DefaultProviderRegion,
 			tpgresource.SetLabelsDiff,
-      customdiff.ValidateChange("config.0.software_config.0.image_version", imageVersionChangeValidationFunc),
+<% unless version == "ga" -%>
+		  customdiff.ValidateChange("config.0.software_config.0.image_version", imageVersionChangeValidationFunc),
 			versionValidationCustomizeDiffFunc,
+<% end -%>
 		),
 
 		Schema: map[string]*schema.Schema{
