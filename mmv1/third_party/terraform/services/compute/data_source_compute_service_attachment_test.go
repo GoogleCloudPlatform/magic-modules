@@ -73,7 +73,7 @@ func testAccDataSourceGoogleServiceAttachmentCheck(data_source_name string, reso
 }
 
 func testAccDataSourceGoogleServiceAttachmentConfig(context map[string]interface{}) string {
-	return fmt.Sprintf(`
+	return acctest.Nprintf(`
 resource "google_compute_service_attachment" "foobar" {
   name                     = "tf-test%{random_suffix}"
   description              = "my-description"
