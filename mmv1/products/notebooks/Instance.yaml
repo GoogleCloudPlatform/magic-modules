@@ -330,6 +330,7 @@ properties:
     description: |
       The KMS key used to encrypt the disks, only applicable if diskEncryption is CMEK.
       Format: projects/{project_id}/locations/{location}/keyRings/{key_ring_id}/cryptoKeys/{key_id}
+    diff_suppress_func: NotebooksInstanceKmsDiffSuppress
   - !ruby/object:Api::Type::Boolean
     name: 'noPublicIp'
     description: |
