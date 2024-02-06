@@ -258,7 +258,7 @@ properties:
     name: 'client'
     description: |
       Options related to how clients making requests on behalf of a project should be configured.
-    ignore_read: true
+    default_from_api: true
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'permissions'
@@ -288,7 +288,7 @@ properties:
     name: 'mfa'
     description: |
       Options related to how clients making requests on behalf of a project should be configured.
-    ignore_read: true
+    default_from_api: true
     properties:
       - !ruby/object:Api::Type::Enum
         name: 'state'
@@ -352,14 +352,17 @@ properties:
     name: 'monitoring'
     description: |
       Configuration related to monitoring project activity.
-    ignore_read: true
+    default_from_api: true
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'requestLogging'
         description: |
           Configuration for logging requests made to this project to Stackdriver Logging
+        custom_flatten: templates/terraform/custom_flatten/identity_platform_config_logging.go.erb
+        send_empty_value: true
         properties:
           - !ruby/object:Api::Type::Boolean
             name: enabled
             description: |
               Whether logging is enabled for this project or not.
+            send_empty_value: true
