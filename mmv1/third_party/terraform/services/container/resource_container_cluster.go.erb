@@ -6099,7 +6099,7 @@ func flattenGatewayApiConfig(c *container.GatewayAPIConfig) []map[string]interfa
 
 func flattenFleet(c *container.Fleet) []map[string]interface{} {
 	if c == nil {
-        return nil
+		return nil
 	}
 
 	// Parse membership_id and membership_location from full membership name.
