@@ -47,7 +47,7 @@ examples:
       token: "\"5E728315-E121-467F-BCA1-1FE71130BB98\""
     test_env_vars:
       project_id: :PROJECT_NAME
-virtual_fields:
+parameters:
   - !ruby/object:Api::Type::String
     name: app_id
     description: |
