@@ -45,7 +45,7 @@ resource "google_notebooks_instance" "<%= ctx[:primary_resource_id] %>" {
     "https://www.googleapis.com/auth/userinfo.email"
   ]
   disk_encryption = "CMEK"
-  kms_key         = google_kms_crypto_key.crypto_key.id
+  kms_key         = "<%= ctx[:vars]['key_name'] %>"
 }
 
 data "google_compute_network" "my_network" {
