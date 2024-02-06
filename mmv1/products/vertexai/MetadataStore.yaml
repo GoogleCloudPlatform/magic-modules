@@ -45,7 +45,6 @@ description: |-
   Instance of a metadata store. Contains a set of metadata that can be queried.
 autogen_async: false
 id_format: '{{name}}'
-skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'vertex_ai_metadata_store'
