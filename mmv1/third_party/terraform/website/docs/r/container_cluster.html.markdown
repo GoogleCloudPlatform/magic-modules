@@ -1347,9 +1347,9 @@ exported:
 
 * `fleet.0.membership` - The resource name of the fleet Membership resource associated to this cluster with format `//gkehub.googleapis.com/projects/{{project}}/locations/{{location}}/memberships/{{name}}`. See the official doc for [fleet management](https://cloud.google.com/kubernetes-engine/docs/fleets-overview). 
 
-* `fleet.0.membership_id` - The short name of the fleet membership. 
+* `fleet.0.membership_id` - The short name of the fleet membership, extracted from `fleet.0.membership`.
 
-* `fleet.0.membership_location` - The location of the fleet membership, for example `us-central1`. 
+* `fleet.0.membership_location` - The location of the fleet membership,  extracted from `fleet.0.membership`.
 
 ## Timeouts
 
