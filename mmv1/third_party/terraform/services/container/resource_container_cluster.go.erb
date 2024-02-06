@@ -6112,11 +6112,11 @@ func flattenFleet(c *container.Fleet) []map[string]interface{} {
 
       return []map[string]interface{}{
                 {
-                      "project": c.Project,
-                      "membership": c.Membership,
-					  "membership_id": membership_id,
-					  "membership_location": membership_location,
-		              "pre_registered": c.PreRegistered,
+                    "project": c.Project,
+                    "membership": c.Membership,
+					"membership_id": membership_id,
+					"membership_location": membership_location,
+		            "pre_registered": c.PreRegistered,
                 },
       }       
 }
