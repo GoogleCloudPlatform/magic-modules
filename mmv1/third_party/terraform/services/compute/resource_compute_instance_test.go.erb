@@ -3215,7 +3215,7 @@ func testAccCheckComputeInstanceUpdateMachineType(t *testing.T, n string) resour
 	}
 }
 
-<% if version == "beta"%>
+<% unless version == "ga"%>
 func TestAccComputeInstance_NetworkAttachment(t *testing.T) {
 	t.Parallel()
 	suffix := fmt.Sprintf("%s", acctest.RandString(t, 10))
@@ -3884,7 +3884,7 @@ func testAccCheckComputeInstanceHasMinCpuPlatform(instance *compute.Instance, mi
 	}
 }
 
-<% if version == "beta" -%>
+<% unless version == "ga" -%>
 func testAccCheckComputeInstanceHasNetworkAttachment(instance *compute.Instance, networkAttachmentName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, networkInterface := range instance.NetworkInterfaces {
@@ -8827,7 +8827,7 @@ resource "google_compute_instance" "foobar" {
 
 <% end -%>
 
-<% if version =="beta" -%>
+<% unless version =="ga" -%>
 func testAccComputeInstance_networkAttachment(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_compute_image" "my_image" {
