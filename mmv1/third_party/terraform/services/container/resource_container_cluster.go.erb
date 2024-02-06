@@ -6109,8 +6109,8 @@ func flattenFleet(c *container.Fleet) []map[string]interface{} {
 		membership_id = match[4]
 		membership_location = match[3]
 	}
-
-    return []map[string]interface{}{
+	
+	return []map[string]interface{}{
 		{
 			"project": c.Project,
 			"membership": c.Membership,
