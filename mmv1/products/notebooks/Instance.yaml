@@ -79,10 +79,15 @@ examples:
       instance_name: 'notebooks-instance'
       key_name: 'my-crypto-key'
     test_vars_overrides:
+<<<<<<< HEAD
       key_name: 'acctest.BootstrapKMSKeyInLocation(t, "global").CryptoKey.Name'
+=======
+      key_name: 'BootstrapKMSKeyInLocation(t, "global").CryptoKey.Name'
+>>>>>>> da0540cad (change kms key to use existing one in tests)
     test_env_vars:
       service_account: :SERVICE_ACCT
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/notebooks_instance.go
   update_encoder: templates/terraform/update_encoder/notebooks_instance.go
 state_upgraders: true
 schema_version: 1
