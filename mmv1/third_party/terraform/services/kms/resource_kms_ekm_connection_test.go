@@ -47,11 +47,11 @@ resource "google_kms_ekm_connection" "example-ekmconnection" {
   name            	= "tf_test_ekmconnection_example%{random_suffix}"
   location		= "us-central1"
   keyManagementMode 	= MANUAL
-  serviceResolvers: [
+  serviceResolvers	= [
     {
       serviceDirectoryService 	= "projects/data.google_project.project.name/locations/us-central1/namespaces/google_service_directory_namespace.sd_namespace.id/services/google_service_directory_service.sd_service.id"
       hostname 			= "example.cloud.goog"
-      serverCertificates: [
+      serverCertificates	= [
       	{
       		rawDer		= "chykm91dGVygoogexamplechym89"
       	}
@@ -86,11 +86,11 @@ resource "google_kms_ekm_connection" "example-ekmconnection" {
   location		= "us-central1"
   keyManagementMode 	= CLOUD_KMS
   cryptoSpacePath	= "v0/longlived/crypto-space-placeholder"
-  serviceResolvers: [
+  serviceResolvers	= [
     {
       serviceDirectoryService 	= "projects/data.google_project.project.name/locations/us-central1/namespaces/ekm-namespace/services/ekm-service"
       hostname 			= "example.cloud.goog"
-      serverCertificates: [
+      serverCertificates	= [
       	{
       		rawDer		= "chykm91dGVygoogexamplechym89"
       	}
