@@ -46,7 +46,7 @@ func testAccKMSEkmConnection_kmsEkmConnectionBasicExample_full(context map[strin
 resource "google_kms_ekm_connection" "example-ekmconnection" {
   name            	= "tf_test_ekmconnection_example%{random_suffix}"
   location		= "us-central1"
-  key_management_mode 	= MANUAL
+  key_management_mode 	= "MANUAL"
   service_resolvers	= [
     {
       service_directory_service = "projects/data.google_project.project.name/locations/us-central1/namespaces/google_service_directory_namespace.sd_namespace.id/services/google_service_directory_service.sd_service.id"
@@ -84,7 +84,7 @@ func testAccKMSEkmConnection_kmsEkmConnectionBasicExample_update(context map[str
 resource "google_kms_ekm_connection" "example-ekmconnection" {
   name            	= "tf_test_ekmconnection_example%{random_suffix}"
   location		= "us-central1"
-  key_management_mode 	= CLOUD_KMS
+  key_management_mode 	= "CLOUD_KMS"
   crypto_space_path	= "v0/longlived/crypto-space-placeholder"
   service_resolvers	= [
     {
