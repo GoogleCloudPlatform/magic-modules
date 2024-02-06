@@ -60,7 +60,6 @@ func execTestTGCIntegration(prNumber, mmCommit, buildID, projectID, buildStep, g
 	newBranch := "auto-pr-" + prNumber
 	repo := &source.Repo{
 		Name:   ghRepo,
-		Owner:  "GoogleCloudPlatform",
 		Branch: newBranch,
 	}
 	ctlr.SetPath(repo)
