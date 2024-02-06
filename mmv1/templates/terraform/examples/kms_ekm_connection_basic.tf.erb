@@ -1,14 +1,14 @@
 resource "google_kms_ekm_connection" "<%= ctx[:primary_resource_id] %>" {
   name            	= "<%= ctx[:vars]['ekmconnection_name'] %>"
-  location		      = "us-central1"
-  keyManagementMode = MANUAL
-  serviceResolvers  = [
+  location		= "us-central1"
+  key_management_mode 	= MANUAL
+  service_resolvers  	= [
     {
-      serviceDirectoryService 	= "projects/data.google_project.project.name/locations/us-central1/namespaces/google_service_directory_namespace.sd_namespace.id/services/google_service_directory_service.sd_service.id"
-      hostname 			            = "example.cloud.goog"
-      serverCertificates        = [
+      service_directory_service = "projects/data.google_project.project.name/locations/us-central1/namespaces/google_service_directory_namespace.sd_namespace.id/services/google_service_directory_service.sd_service.id"
+      hostname 			 = "example.cloud.goog"
+      server_certificates        = [
       	{
-      		rawDer	= "chykm91dGVygoogexamplechym89"
+      		raw_der	= "chykm91dGVygoogexamplechym89"
       	}
       ]
     }
