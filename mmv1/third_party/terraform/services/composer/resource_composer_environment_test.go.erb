@@ -2953,6 +2953,10 @@ resource "google_composer_environment" "test" {
     software_config {
       image_version = "composer-3-airflow-2"
     }
+    node_config {
+      network    = google_compute_network.test.id
+      subnetwork = google_compute_subnetwork.test.id
+    }
   }
 }
 

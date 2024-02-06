@@ -3023,9 +3023,31 @@ func isComposer3(d interface{})	bool {
 }
 
 func networkForceNewCustomDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) bool {
-	return d.HasChange("config.0.node_config.0.network") && !isComposer3(d)
+	old, new := d.GetChange("config.0.node_config.0.network")
+	if isComposer3(d){
+		return false
+	}
+	if functionallyEquivalent(old.(string), new.(string)) {
+		return false
+	}
+	return true
 }
 
 func subnetworkForceNewCustomDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) bool {
-	return d.HasChange("config.0.node_config.0.subnetwork") && !isComposer3(d)
+	old, new := d.GetChange("config.0.node_config.0.subnetwork")
+	if isComposer3(d){
+		return false
+	}
+	if functionallyEquivalent(old.(string), new.(string)) {
+		return false
+	}
+	return true
+}
+
+func functionallyEquivalent(old, new string) bool {
+	prefix := "https://www.googleapis.com/compute/v1/"
+	if new == old || new == prefix + old || prefix + new == old {
+		return true
+	}
+	return false
 }
