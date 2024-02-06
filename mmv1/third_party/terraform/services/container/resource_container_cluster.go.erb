@@ -2065,6 +2065,11 @@ func ResourceContainerCluster() *schema.Resource {
 							Computed:         true,
 							Description:      `Full resource name of the registered fleet membership of the cluster.`,
 						},
+						"pre_registered": {
+							Type:             schema.TypeBool,
+							Computed:         true,
+							Description:      `Whether the cluster has been registered via the fleet API.`,
+						},
 						"membership_id": {
 							Type:             schema.TypeString,
 							Computed:         true,
@@ -2074,11 +2079,6 @@ func ResourceContainerCluster() *schema.Resource {
 							Type:             schema.TypeString,
 							Computed:         true,
 							Description:      `Location of the fleet membership, for example "us-central1".`,
-				        },
-						"pre_registered": {
-							Type:             schema.TypeBool,
-							Computed:         true,
-							Description:      `Whether the cluster has been registered via the fleet API.`,
 						},
 					},
 				},
