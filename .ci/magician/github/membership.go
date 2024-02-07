@@ -38,6 +38,7 @@ var (
 		"zli82016",
 		"trodge",
 		"hao-nan-li",
+		"NickElliot",
 	}
 
 	// This is for new team members who are onboarding
