@@ -114,9 +114,9 @@ func datasourceGoogleCloudAssetResourcesSearchAllRead(d *schema.ResourceData, me
 		}
 
 		var project string
-    if config.UserProjectOverride && config.BillingProject != "" {
-      project = config.BillingProject
-    }
+		if config.UserProjectOverride && config.BillingProject != "" {
+			project = config.BillingProject
+		}
 
 		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config: config,
