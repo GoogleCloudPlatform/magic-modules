@@ -423,8 +423,14 @@ module Provider
       FileUtils.mkpath target_folder
       data.generate(pwd,
                     '/templates/terraform/yaml_conversion.erb',
-                    "#{target_folder}/#{full_resource_name(data)}.yaml",
+                    "#{target_folder}/go_#{data.object.name}.yaml",
                     self)
+      if File.exist?("#{target_folder}/go_product.yaml") && File.mtime("#{target_folder}/go_product.yaml") > @env[:start_time]
+        data.generate(pwd,
+              '/templates/terraform/product_yaml_conversion.erb',
+              "#{target_folder}/go_product.yaml",
+              self)
+      end
     end
 
     def build_env
