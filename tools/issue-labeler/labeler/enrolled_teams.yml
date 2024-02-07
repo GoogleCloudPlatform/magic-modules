@@ -13,6 +13,8 @@ service/aiplatform-dataset:
 service/aiplatform-featurestore:
   resources:
   - google_vertex_ai_featurestore.*
+  - google_vertex_ai_feature_group
+  - google_vertex_ai_feature_online_store.*
 service/aiplatform-matching-engine:
   resources:
   - google_vertex_ai_index.*
@@ -42,6 +44,7 @@ service/appengine:
   resources:
   - google_app_engine_.*
 service/artifactregistry:
+  team: artifact-registry
   resources:
   - google_artifact_registry_.*
 service/assuredworkloads:
@@ -210,13 +213,10 @@ service/compute-pd:
   - google_compute_image.*
   - google_compute_snapshot.*
   - google_compute_machine_image.*
-service/compute-private-service-connect-published-service:
-  resources:
-  - google_compute_service_attachment
 service/compute-projects:
   resources:
   - google_project_usage_export_bucket
-service/compute-regional-pass-through-load-balancer:
+service/compute-regional-pass-through-lb:
   resources:
   - google_compute_target_instance
   - google_compute_target_pool
@@ -501,6 +501,9 @@ service/policy-based-routing:
 service/private-service-connect-interfaces:
   resources:
   - google_compute_network_attachment
+service/private-service-connect-published-service:
+  resources:
+  - google_compute_service_attachment
 service/privateca:
   resources:
   - google_privateca_.*
@@ -531,9 +534,15 @@ service/run:
 service/secretmanager:
   resources:
   - google_secret_manager_.*
+service/securesourcemanager:
+  resources:
+  - google_secure_source_manager_.*
 service/securitycenter:
   resources:
   - google_scc_.*
+service/securityposture:
+  resources:
+  - google_securityposture_.*
 service/service-networking:
   resources:
   - google_service_networking_connection
