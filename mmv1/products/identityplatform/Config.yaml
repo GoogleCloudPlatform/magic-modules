@@ -49,6 +49,9 @@ examples:
     test_vars_overrides:
       # Set quota start time for the following day.
       quota_start_time: 'time.Now().AddDate(0, 0, 1).Format(time.RFC3339)'
+    ignore_read_extra:
+      - "client.0.api_key"
+      - "client.0.firebase_subdomain"
     skip_vcr: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'identity_platform_config_minimal'
@@ -320,6 +323,7 @@ properties:
           properties:
             - !ruby/object:Api::Type::Enum
               name: 'state'
+              default_from_api: true
               description: |
                 Whether MultiFactor Authentication has been enabled for this project.
               values:

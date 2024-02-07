@@ -179,9 +179,6 @@ resource "google_identity_platform_config" "basic" {
 
   mfa {
     enabled_providers = ["PHONE_SMS"]
-    provider_configs {
-      state = "DISABLED"
-    }
     state = "DISABLED"
   }
   monitoring {
