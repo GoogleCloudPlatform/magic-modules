@@ -6,5 +6,7 @@ resource "google_looker_instance" "<%= ctx[:primary_resource_id] %>" {
     client_id = "<%= ctx[:vars]["client_id"] %>"
     client_secret = "<%= ctx[:vars]["client_secret"] %>"
   }
-  custom_domain = "<%= ctx[:vars]["custom_domain"] %>
+  custom_domain {
+    domain = "<%= ctx[:vars]["custom_domain"] %>"
+  }
 }
