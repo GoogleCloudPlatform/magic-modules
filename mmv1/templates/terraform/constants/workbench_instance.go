@@ -167,6 +167,7 @@ func WorkbenchInstanceKmsDiffSuppress(_, old, new string, _ *schema.ResourceData
 	return false
 }
 
+<% unless compiler == "terraformgoogleconversion-codegen" -%>
 func waitForWorkbenchOperation(config *transport_tpg.Config, d *schema.ResourceData, project string, billingProject string, userAgent string, response map[string]interface{}) error {
 	var opRes map[string]interface{}
 	err := WorkbenchOperationWaitTimeWithResponse(
@@ -177,3 +178,4 @@ func waitForWorkbenchOperation(config *transport_tpg.Config, d *schema.ResourceD
 	}
 	return nil
 }
+<% end -%>
