@@ -1,0 +1,10 @@
+resource "google_network_security_firewall_endpoint" "<%= ctx[:primary_resource_id] %>" {
+  provider    = google-beta
+  name        = "<%= ctx[:vars]['resource_name'] %>"
+  parent      = "organizations/<%= ctx[:test_env_vars]['org_id'] %>"
+  location    = "us-central1-a"
+
+  labels = {
+    foo = "bar"
+  }
+}
