@@ -199,6 +199,13 @@ fun ParametrizedWithType.terraformSkipProjectSweeper() {
     text("env.SKIP_PROJECT_SWEEPER", "1")
 }
 
+// BuildType.disableProjectSweep disabled sweeping project resources after a build configuration has been initialised
+fun BuildType.disableProjectSweep(){
+    params {
+        terraformSkipProjectSweeper()
+    }
+}
+
 // ParametrizedWithType.terraformEnableProjectSweeper unsets an environment variable used to skip the sweeper for project resources
 fun ParametrizedWithType.terraformEnableProjectSweeper() {
     text("env.SKIP_PROJECT_SWEEPER", "")
@@ -211,7 +218,7 @@ fun BuildType.enableProjectSweep(){
     }
 }
 
-// ParametrizedWithType.terraformEnableProjectSweeper unsets an environment variable used to skip the sweeper for project resources
+// ParametrizedWithType.vcrEnvironmentVariables unsets an environment variable used to skip the sweeper for project resources
 fun ParametrizedWithType.vcrEnvironmentVariables(config: AccTestConfiguration, providerName: String) {
     text("env.VCR_MODE", "RECORDING")
     text("env.VCR_PATH", "%system.teamcity.build.checkoutDir%/fixtures")
