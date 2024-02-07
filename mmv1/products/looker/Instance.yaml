@@ -416,3 +416,34 @@ properties:
         description: |
           Number of additional Developer Users to allocate to the Looker Instance.
   # UserMetadata Object - End
+  # CustomDomain Object
+  - !ruby/object:Api::Type::NestedObject
+    name: customDomain
+    description: |
+      Custom domain settings for a Looker instance.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'domain'
+        description: |
+          Domain name
+      - !ruby/object:Api::Type::Enum
+        name: 'state'
+        output: true
+        description: |
+          Status of the custom domain:
+          - CUSTOM_DOMAIN_STATE_UNSPECIFIED: Unspecified state
+          - UNVERIFIED: DNS record is not created
+          - VERIFIED: DNS record is created
+          - MODIFYING: Calling SLM to update
+          - AVAILABLE: ManagedCertificate is ready
+          - UNAVAILABLE: ManagedCertificate is not ready
+          - UNKNOWN: Status is not known
+        values:
+          - :CUSTOM_DOMAIN_STATE_UNSPECIFIED
+          - :UNVERIFIED
+          - :VERIFIED
+          - :MODIFYING
+          - :AVAILABLE
+          - :UNAVAILABLE
+          - :UNKNOWN
+  # CustomDomain Object - End
