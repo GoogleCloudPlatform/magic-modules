@@ -262,6 +262,7 @@ properties:
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'permissions'
+        custom_flatten: templates/terraform/custom_flatten/identity_platform_config_client_permissions.go.erb
         description: |
           Configuration related to restricting a user's ability to affect their account.
         properties:
