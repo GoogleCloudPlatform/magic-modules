@@ -245,7 +245,6 @@ properties:
               Optional. Input only. Disk encryption method used on the boot and
               data disks, defaults to GMEK.
             immutable: true
-            default_from_api: true
           - !ruby/object:Api::Type::String
             name: kmsKey
             description: |
@@ -290,7 +289,6 @@ properties:
                 Optional. Input only. Disk encryption method used on the boot
                 and data disks, defaults to GMEK.
               immutable: true
-              default_from_api: true
             - !ruby/object:Api::Type::String
               name: kmsKey
               description: |
