@@ -51,7 +51,7 @@ Note: this is likely to go out of date, so this description is kept at a high le
 │  │  # The root_project.kt file defines the parent project where versioned settings is enabled.
 │  │  ├─ reused/
 │  │     # Code for dynamically generating subprojects within Google, Google Beta, and Project Sweeper projects.
-│  ├─ vcsroots/
+│  ├─ vcs_roots/
 │  │  # Definitions of VCS roots used to pull the provider code from GA/Beta versions of HashiCorp
 │  │  # and Modular Magician repos.
 │  ├─ constants.kt
