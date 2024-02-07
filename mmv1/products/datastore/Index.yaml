@@ -28,7 +28,6 @@ description: |
 id_format: 'projects/{{project}}/indexes/{{index_id}}'
 error_retry_predicates: ['transport_tpg.DatastoreIndex409Contention']
 autogen_async: true
-skip_sweeper: true
 timeouts: !ruby/object:Api::Timeouts
   insert_minutes: 20
   delete_minutes: 20
