@@ -24,7 +24,7 @@ var testTGCIntegrationCmd = &cobra.Command{
 	The following PR details are expected as environment variables:
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		env := make(map[string]string, len(environmentVariables))
+		env := make(map[string]string, len(ttiEnvironmentVariables))
 		for _, ev := range ttiEnvironmentVariables {
 			val, ok := os.LookupEnv(ev)
 			if !ok {
@@ -99,7 +99,7 @@ func execTestTGCIntegration(prNumber, mmCommit, buildID, projectID, buildStep, g
 	if _, err := rnr.Run("go", []string{"mod", "edit", "-replace", fmt.Sprintf("github.com/hashicorp/terraform-provider-google-beta=github.com/%s/terraform-provider-google-beta@%s", githubUsername, newBranch)}, nil); err != nil {
 		fmt.Println("Error running go mod edit: ", err)
 	}
-	if _, err := rnr.Run("go", []string{"mod", "edit", "tidy"}, nil); err != nil {
+	if _, err := rnr.Run("go", []string{"mod", "tidy"}, nil); err != nil {
 		fmt.Println("Error running go mod tidy: ", err)
 	}
 
