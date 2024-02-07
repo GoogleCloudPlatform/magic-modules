@@ -68,6 +68,25 @@ func TestAccNetappVolume_netappVolumeBasicExample_update(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
 			},
+			// backupConfig is an upcoming feature. Needs more work/testing before release.
+			// 	{
+			// 		Config: testAccNetappVolume_volumeBasicExample_setupBackup(context),
+			// 	},
+			// 	{
+			// 		ResourceName:            "google_netapp_volume.test_volume",
+			// 		ImportState:             true,
+			// 		ImportStateVerify:       true,
+			// 		ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
+			// 	},
+			// 	{
+			// 		Config: testAccNetappVolume_volumeBasicExample_updateBackup(context),
+			// 	},
+			// 	{
+			// 		ResourceName:            "google_netapp_volume.test_volume",
+			// 		ImportState:             true,
+			// 		ImportStateVerify:       true,
+			// 		ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
+			// 	},
 		},
 	})
 }
@@ -232,7 +251,9 @@ resource "google_netapp_volume" "test_volume" {
 			nfsv4                 = false
 		}
 	}
-	restricted_actions = ["DELETE"]
+	# Delete protection only gets active after an NFS client mounts.
+	# Setting it here is save, volume can still be deleted.
+	deletion_policy = "FORCE"
 	snapshot_policy {
 		enabled = true
 		daily_schedule {
@@ -268,14 +289,6 @@ data "google_compute_network" "default" {
 func testAccNetappVolume_volumeBasicExample_updatesnapshot(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 
-resource "google_netapp_storage_pool" "default" {
-	name = "tf-test-test-pool%{random_suffix}"
-	location = "us-west2"
-	service_level = "PREMIUM"
-	capacity_gib = "2048"
-	network = data.google_compute_network.default.id
-}
-	
 resource "google_netapp_storage_pool" "default2" {
 	name = "tf-test-pool%{random_suffix}"
 	location = "us-west2"
@@ -332,17 +345,10 @@ data "google_compute_network" "default" {
 	`, context)
 }
 
+// Tests creating a new volume (clone) from a snapshot created from existing volume
 func testAccNetappVolume_volumeBasicExample_createclonevolume(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 
-resource "google_netapp_storage_pool" "default" {
-	name = "tf-test-test-pool%{random_suffix}"
-	location = "us-west2"
-	service_level = "PREMIUM"
-	capacity_gib = "2048"
-	network = data.google_compute_network.default.id
-}
-	
 resource "google_netapp_storage_pool" "default2" {
 	name = "tf-test-pool%{random_suffix}"
 	location = "us-west2"
@@ -404,6 +410,112 @@ resource "google_netapp_volume" "test_volume_clone" {
 	restore_parameters {
 		source_snapshot = google_netapp_volume_snapshot.test-snapshot.id
 	}
+}
+
+data "google_compute_network" "default" {
+	name = "%{network_name}"
+}
+	`, context)
+}
+
+// Tests adding backup vault and policy to the volume
+func testAccNetappVolume_volumeBasicExample_setupBackup(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+
+resource "google_netapp_storage_pool" "default2" {
+	name = "tf-test-pool%{random_suffix}"
+	location = "us-west2"
+	service_level = "EXTREME"
+	capacity_gib = "2048"
+	network = data.google_compute_network.default.id
+}
+	
+resource "google_netapp_volume" "test_volume" {
+	location = "us-west2"
+	name = "tf-test-test-volume%{random_suffix}"
+	capacity_gib = "200"
+	share_name = "tf-test-test-volume%{random_suffix}"
+	storage_pool = google_netapp_storage_pool.default2.name
+	protocols = ["NFSV3"]
+	security_style = "UNIX"
+	# Delete protection only gets active after an NFS client mounts.
+	# Setting it here is save, volume can still be deleted.
+	restricted_actions = ["DELETE"]
+	deletion_policy = "FORCE"
+	backup_config {
+		backup_policies = [
+		  google_netapp_backup_policy.backup-policy.id
+		]
+		backup_vault = google_netapp_backup_vault.backup-vault.id
+		scheduled_backup_enabled = true
+	  }
+}
+
+resource "google_netapp_backup_vault" "backup-vault" {
+	location = "us-west2"
+	name = "tf-test-vault%{random_suffix}"
+}
+  
+resource "google_netapp_backup_policy" "backup-policy" {
+	name          		 = "tf-test-backup-policy%{random_suffix}"
+	location 			 = "us-west2"
+	daily_backup_limit   = 2
+	weekly_backup_limit  = 1
+	monthly_backup_limit = 1
+	enabled = true
+}
+
+data "google_compute_network" "default" {
+	name = "%{network_name}"
+}
+	`, context)
+}
+
+// Updates backup settings. Cannot update backup vault, since only one allowed per location
+func testAccNetappVolume_volumeBasicExample_updateBackup(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+
+resource "google_netapp_storage_pool" "default2" {
+	name = "tf-test-pool%{random_suffix}"
+	location = "us-west2"
+	service_level = "EXTREME"
+	capacity_gib = "2048"
+	network = data.google_compute_network.default.id
+}
+	
+resource "google_netapp_volume" "test_volume" {
+	location = "us-west2"
+	name = "tf-test-test-volume%{random_suffix}"
+	capacity_gib = "200"
+	share_name = "tf-test-test-volume%{random_suffix}"
+	storage_pool = google_netapp_storage_pool.default2.name
+	protocols = ["NFSV3"]
+	security_style = "UNIX"
+	# Delete protection only gets active after an NFS client mounts.
+	# Setting it here is save, volume can still be deleted.
+	restricted_actions = ["DELETE"]
+	deletion_policy = "FORCE"
+	backup_config {
+		backup_policies = [
+		  google_netapp_backup_policy.backup-policy2.id
+		]
+		backup_vault = google_netapp_backup_vault.backup-vault.id
+		scheduled_backup_enabled = false
+	  }
+}
+
+resource "google_netapp_backup_vault" "backup-vault" {
+	location = "us-west2"
+	name = "tf-test-vault%{random_suffix}"
+}
+
+resource "google_netapp_backup_policy" "backup-policy2" {
+	name          		 = "tf-test-backup-policy2%{random_suffix}"
+	location 			 = "us-west2"
+	daily_backup_limit   = 4
+	weekly_backup_limit  = 2
+	monthly_backup_limit = 2
+	enabled = true
 }
 
 data "google_compute_network" "default" {
