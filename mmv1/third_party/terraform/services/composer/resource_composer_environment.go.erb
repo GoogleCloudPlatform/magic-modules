@@ -242,7 +242,7 @@ func ResourceComposerEnvironment() *schema.Resource {
 										Type:             schema.TypeString,
 										Computed:         true,
 										Optional:         true,
-<% if version == "ga" -%>>
+<% if version == "ga" -%>
 										ForceNew:         true,
 <% else -%>
 										ForceNew:         false,
@@ -254,7 +254,7 @@ func ResourceComposerEnvironment() *schema.Resource {
 									"subnetwork": {
 										Type:             schema.TypeString,
 										Optional:         true,
-<% if version == "ga" -%>>
+<% if version == "ga" -%>
 										ForceNew:         true,
 <% else -%>
 										ForceNew:         false,
