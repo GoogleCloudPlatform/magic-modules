@@ -15,7 +15,7 @@
 name: 'Instance'
 deprecation_message: >-
   `google_notebook_instance` is deprecated and will be removed in a future major release.
-  Use `google_workbench_instance` instead. 
+  Use `google_workbench_instance` instead.
 description: |
   A Cloud AI Platform Notebook instance.
 
