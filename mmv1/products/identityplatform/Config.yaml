@@ -295,6 +295,7 @@ properties:
         name: 'state'
         description: |
           Whether MultiFactor Authentication has been enabled for this project.
+        default_from_api: true
         values:
           - :DISABLED
           - :ENABLED
