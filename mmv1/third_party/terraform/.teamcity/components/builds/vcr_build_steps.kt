@@ -175,7 +175,7 @@ fun BuildSteps.runVcrTestRecordingSaveCassettes() {
             else
                 echo "Using ${'$'}BRANCH_NAME branch, so copying files to ${'$'}BRANCH_NAME/fixtures/ folder in Cloud Storage bucket"
 
-                gsutil -m cp ${'$'}VCR_PATH/* gs://${'$'}VCR_BUCKET_NAME/${'$'}BRANCH_NAME/fixtures/
+                gsutil -m cp ${'$'}VCR_PATH/* gs://${'$'}VCR_BUCKET_NAME/beta/${'$'}BRANCH_NAME/fixtures/
             fi
 
             # Cleanup
