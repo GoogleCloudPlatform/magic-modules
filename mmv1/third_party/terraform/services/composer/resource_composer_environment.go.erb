@@ -169,8 +169,10 @@ func ResourceComposerEnvironment() *schema.Resource {
 			tpgresource.DefaultProviderProject,
 			tpgresource.DefaultProviderRegion,
 			tpgresource.SetLabelsDiff,
-			customdiff.ForceNewIf("config.0.node_config.0.network", networkForceNewCustomDiff),
-			customdiff.ForceNewIf("config.0.node_config.0.subnetwork", subnetworkForceNewCustomDiff),
+<% unless version == "ga" -%>
+			customdiff.ForceNewIf("config.0.node_config.0.network", forceNewCustomDiff("config.0.node_config.0.network")),
+			customdiff.ForceNewIf("config.0.node_config.0.subnetwork", forceNewCustomDiff("config.0.node_config.0.subnetwork")),
+<% end -%>
 		),
 
 		Schema: map[string]*schema.Schema{
@@ -240,17 +242,25 @@ func ResourceComposerEnvironment() *schema.Resource {
 										Type:             schema.TypeString,
 										Computed:         true,
 										Optional:         true,
+<% if version == "ga" -%>>
+										ForceNew:         true,
+<% else -%>
 										ForceNew:         false,
 										ConflictsWith:    []string{"config.0.node_config.0.composer_network_attachment"},
+<% end -%>
 										DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 										Description:      `The Compute Engine machine type used for cluster instances, specified as a name or relative resource name. For example: "projects/{project}/zones/{zone}/machineTypes/{machineType}". Must belong to the enclosing environment's project and region/zone. The network must belong to the environment's project. If unspecified, the "default" network ID in the environment's project is used. If a Custom Subnet Network is provided, subnetwork must also be provided.`,
 									},
 									"subnetwork": {
 										Type:             schema.TypeString,
-										Computed:         true,
 										Optional:         true,
+<% if version == "ga" -%>>
+										ForceNew:         true,
+<% else -%>
 										ForceNew:         false,
+										Computed:         true,
 										ConflictsWith:    []string{"config.0.node_config.0.composer_network_attachment"},
+<% end -%>
 										DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 										Description:      `The Compute Engine subnetwork to be used for machine communications, specified as a self-link, relative resource name (e.g. "projects/{project}/regions/{region}/subnetworks/{subnetwork}"), or by name. If subnetwork is provided, network must also be provided and the subnetwork must belong to the enclosing environment's project and region.`,
 									},
@@ -3022,26 +3032,17 @@ func isComposer3(d interface{})	bool {
 	return strings.Contains(imageVersion, "composer-3")
 }
 
-func networkForceNewCustomDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) bool {
-	old, new := d.GetChange("config.0.node_config.0.network")
-	if isComposer3(d){
-		return false
+func forceNewCustomDiff(key string) customdiff.ResourceConditionFunc {
+	return func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) bool {
+		old, new := d.GetChange(key)
+		if isComposer3(d){
+			return false
+		}
+		if functionallyEquivalent(old.(string), new.(string)) {
+			return false
+		}
+		return true
 	}
-	if functionallyEquivalent(old.(string), new.(string)) {
-		return false
-	}
-	return true
-}
-
-func subnetworkForceNewCustomDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) bool {
-	old, new := d.GetChange("config.0.node_config.0.subnetwork")
-	if isComposer3(d){
-		return false
-	}
-	if functionallyEquivalent(old.(string), new.(string)) {
-		return false
-	}
-	return true
 }
 
 func functionallyEquivalent(old, new string) bool {
