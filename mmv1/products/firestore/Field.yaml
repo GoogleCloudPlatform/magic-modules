@@ -48,6 +48,7 @@ async: !ruby/object:Api::OpAsync
     path: 'error'
     message: 'message'
 autogen_async: true
+# Sweeper skipped as this resource has customized deletion.
 skip_sweeper: true
 import_format: ['{{name}}']
 docs: !ruby/object:Provider::Terraform::Docs
