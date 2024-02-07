@@ -113,8 +113,14 @@ func datasourceGoogleCloudAssetResourcesSearchAllRead(d *schema.ResourceData, me
 			return err
 		}
 
+		var project string
+		if config.UserProjectOverride && config.BillingProject != "" {
+			project = config.BillingProject
+		}
+
 		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config: config,
+			Project: project,
 			Method: "GET",
 			RawURL: url,
 			UserAgent: userAgent,
