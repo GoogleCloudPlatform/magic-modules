@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 <?xml version="1.0"?>
 <!--
  Copyright (c) HashiCorp, Inc.
@@ -7,9 +6,9 @@
 
 <project>
   <modelVersion>4.0.0</modelVersion>
-  <name>Terraform-Provider-Google<%= version.capitalize unless version == 'ga' -%> Config DSL Script</name>
-  <groupId>TerraformProviderGoogle<%= version.capitalize unless version == 'ga' -%></groupId>
-  <artifactId>TerraformProviderGoogle<%= version.capitalize unless version == 'ga' -%></artifactId>
+  <name>Terraform-Provider-Google Config DSL Script</name>
+  <groupId>TerraformProviderGoogle</groupId>
+  <artifactId>TerraformProviderGoogle</artifactId>
   <version>1.0-SNAPSHOT</version>
 
   <parent>
