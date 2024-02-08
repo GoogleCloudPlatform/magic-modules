@@ -14,11 +14,21 @@
 --- !ruby/object:Api::Resource
 name: 'Connection'
 base_url: projects/{{project}}/locations/{{location}}/connections
+create_url: projects/{{project}}/locations/{{location}}/connections?connectionId={{name}}
 self_link: projects/{{project}}/locations/{{location}}/connections/{{name}}
-exclude_resource: true
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/build/docs'
+  api: 'https://cloud.google.com/build/docs/api/reference/rest'
+autogen_async: true
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    base_url: '{{op_id}}'
+update_verb: :PATCH
 description: |
-  Only used to generate IAM resources.
+  A connection to a SCM like GitHub, GitHub Enterprise, Bitbucket Data Center or GitLab.
 exclude_tgc: true
+legacy_long_form_project: true
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   skip_import_test: true
   method_name_separator: ':'
@@ -40,8 +50,190 @@ examples:
       ])"
     vars:
       connection_name: 'tf-test-connection'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudbuildv2_connection_ghe'
+    skip_test: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudbuildv2_connection_github'
+    skip_test: true
+parameters:
+  - !ruby/object:Api::Type::String
+    name: name
+    description: Immutable. The resource name of the connection.
+    url_param_only: true
+    required: true
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: location
+    description: The location for the resource
+    url_param_only: true
+    required: true
+    immutable: true
 properties:
   - !ruby/object:Api::Type::String
-    name: 'name'
-    description: Dummy property.
-    required: true
+    name: createTime
+    description: Output only. Server assigned timestamp for when the connection was created.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: updateTime
+    description: Output only. Server assigned timestamp for when the connection was updated.
+    output: true
+  - !ruby/object:Api::Type::NestedObject
+    name: githubConfig
+    description: Configuration for connections to github.com.
+    conflicts:
+      - 'github_enterprise_config'
+      - 'gitlab_config'
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: authorizerCredential
+        description: OAuth credential of the account that authorized the Cloud Build GitHub App. It is recommended to use a robot account instead of a human user account. The OAuth token must be tied to the Cloud Build GitHub App.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: oauthTokenSecretVersion
+            description: 'A SecretManager resource containing the OAuth token that authorizes the Cloud Build connection. Format: `projects/*/secrets/*/versions/*`.'
+            diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+          - !ruby/object:Api::Type::String
+            name: username
+            description: Output only. The username associated to this token.
+            output: true
+      - !ruby/object:Api::Type::Integer
+        name: appInstallationId
+        description: GitHub App installation id.
+  - !ruby/object:Api::Type::NestedObject
+    name: githubEnterpriseConfig
+    conflicts:
+      - 'github_config'
+      - 'gitlab_config'
+    description: Configuration for connections to an instance of GitHub Enterprise.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: hostUri
+        description: Required. The URI of the GitHub Enterprise host this connection is for.
+        required: true
+      - !ruby/object:Api::Type::Integer
+        name: appId
+        description: Id of the GitHub App created from the manifest.
+      - !ruby/object:Api::Type::String
+        name: appSlug
+        description: The URL-friendly name of the GitHub App.
+      - !ruby/object:Api::Type::String
+        name: privateKeySecretVersion
+        description: SecretManager resource containing the private key of the GitHub App, formatted as `projects/*/secrets/*/versions/*`.
+        diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+      - !ruby/object:Api::Type::String
+        name: webhookSecretSecretVersion
+        description: SecretManager resource containing the webhook secret of the GitHub App, formatted as `projects/*/secrets/*/versions/*`.
+        diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+      - !ruby/object:Api::Type::Integer
+        name: appInstallationId
+        description: ID of the installation of the GitHub App.
+      - !ruby/object:Api::Type::NestedObject
+        name: serviceDirectoryConfig
+        description: Configuration for using Service Directory to privately connect to a GitHub Enterprise server. This should only be set if the GitHub Enterprise server is hosted on-premises and not reachable by public internet. If this field is left empty, calls to the GitHub Enterprise server will be made over the public internet.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: service
+            description: 'Required. The Service Directory service name. Format: projects/{project}/locations/{location}/namespaces/{namespace}/services/{service}.'
+            required: true
+            diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+      - !ruby/object:Api::Type::String
+        name: sslCa
+        description: SSL certificate to use for requests to GitHub Enterprise.
+  - !ruby/object:Api::Type::NestedObject
+    name: gitlabConfig
+    conflicts:
+      - 'github_config'
+      - 'github_enterprise_config'
+    description: Configuration for connections to gitlab.com or an instance of GitLab Enterprise.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: hostUri
+        description: The URI of the GitLab Enterprise host this connection is for. If not specified, the default value is https://gitlab.com.
+        default_from_api: true
+      - !ruby/object:Api::Type::String
+        name: webhookSecretSecretVersion
+        description: Required. Immutable. SecretManager resource containing the webhook secret of a GitLab Enterprise project, formatted as `projects/*/secrets/*/versions/*`.
+        required: true
+        immutable: true
+        diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+      - !ruby/object:Api::Type::NestedObject
+        name: readAuthorizerCredential
+        description: Required. A GitLab personal access token with the minimum `read_api` scope access.
+        required: true
+        properties:
+          - !ruby/object:Api::Type::String
+            name: userTokenSecretVersion
+            description: 'Required. A SecretManager resource containing the user token that authorizes the Cloud Build connection. Format: `projects/*/secrets/*/versions/*`.'
+            required: true
+            diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+          - !ruby/object:Api::Type::String
+            name: username
+            description: Output only. The username associated to this token.
+            output: true
+      - !ruby/object:Api::Type::NestedObject
+        name: authorizerCredential
+        description: Required. A GitLab personal access token with the `api` scope access.
+        required: true
+        properties:
+          - !ruby/object:Api::Type::String
+            name: userTokenSecretVersion
+            description: 'Required. A SecretManager resource containing the user token that authorizes the Cloud Build connection. Format: `projects/*/secrets/*/versions/*`.'
+            required: true
+            diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+          - !ruby/object:Api::Type::String
+            name: username
+            description: Output only. The username associated to this token.
+            output: true
+      - !ruby/object:Api::Type::NestedObject
+        name: serviceDirectoryConfig
+        description: Configuration for using Service Directory to privately connect to a GitLab Enterprise server. This should only be set if the GitLab Enterprise server is hosted on-premises and not reachable by public internet. If this field is left empty, calls to the GitLab Enterprise server will be made over the public internet.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: service
+            description: 'Required. The Service Directory service name. Format: projects/{project}/locations/{location}/namespaces/{namespace}/services/{service}.'
+            required: true
+            diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+      - !ruby/object:Api::Type::String
+        name: sslCa
+        description: SSL certificate to use for requests to GitLab Enterprise.
+      - !ruby/object:Api::Type::String
+        name: serverVersion
+        description: Output only. Version of the GitLab Enterprise server running on the `host_uri`.
+        output: true
+  - !ruby/object:Api::Type::NestedObject
+    name: installationState
+    description: Output only. Installation state of the Connection.
+    output: true
+    properties:
+      - !ruby/object:Api::Type::Enum
+        name: stage
+        description: Output only. Current step of the installation process.
+        output: true
+        values:
+          - :STAGE_UNSPECIFIED
+          - :PENDING_CREATE_APP
+          - :PENDING_USER_OAUTH
+          - :PENDING_INSTALL_APP
+          - :COMPLETE
+      - !ruby/object:Api::Type::String
+        name: message
+        description: Output only. Message of what the user should do next to continue the installation. Empty string if the installation is already complete.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: actionUri
+        description: Output only. Link to follow for next action. Empty string if the installation is already complete.
+        output: true
+  - !ruby/object:Api::Type::Boolean
+    name: disabled
+    description: If disabled is set to true, functionality is disabled for this connection. Repository based API methods and webhooks processing for repositories in this connection will be disabled.
+  - !ruby/object:Api::Type::Boolean
+    name: reconciling
+    description: Output only. Set to true when the connection is being set up or updated in the background.
+    output: true
+  - !ruby/object:Api::Type::KeyValueAnnotations
+    name: annotations
+    description: Allows clients to store small amounts of arbitrary data.
+  - !ruby/object:Api::Type::Fingerprint
+    name: etag
+    description: This checksum is computed by the server based on the value of other fields, and may be sent on update and delete requests to ensure the client has an up-to-date value before proceeding.
