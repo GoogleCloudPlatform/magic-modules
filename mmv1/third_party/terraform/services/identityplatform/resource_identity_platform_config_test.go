@@ -32,7 +32,7 @@ func TestAccIdentityPlatformConfig_update(t *testing.T) {
 				ResourceName:            "google_identity_platform_config.basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"client", "mfa", "monitoring"},
+				ImportStateVerifyIgnore: []string{"client.0.api_key", "client.0.firebase_subdomain"},
 			},
 			{
 				Config: testAccIdentityPlatformConfig_update(context),
@@ -41,7 +41,7 @@ func TestAccIdentityPlatformConfig_update(t *testing.T) {
 				ResourceName:            "google_identity_platform_config.basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"client", "mfa", "monitoring"},
+				ImportStateVerifyIgnore: []string{"client.0.api_key", "client.0.firebase_subdomain"},
 			},
 		},
 	})
