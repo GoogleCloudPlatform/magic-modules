@@ -30,7 +30,7 @@ fun mmUpstream(parentProject: String, providerName: String, vcsRoot: GitVcsRoot,
     val allPackages = getAllPackageInProviderVersion(providerName)
     val packageBuildConfigs = BuildConfigurationsForPackages(allPackages, providerName, projectId, vcsRoot, sharedResources, config)
 
-    // Create build config for sweeping the nightly test project - everything except projects
+    // Create build config for sweeping the VCR test project - everything except projects
     val serviceSweeperConfig = BuildConfigurationForServiceSweeper(providerName, ServiceSweeperName, SweepersList, projectId, vcsRoot, sharedResources, config)
     val trigger  = NightlyTriggerConfiguration(startHour=12)
     serviceSweeperConfig.addTrigger(trigger) // Only the sweeper is on a schedule in this project
