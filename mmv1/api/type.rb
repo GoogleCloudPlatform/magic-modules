@@ -806,7 +806,12 @@ module Api
             raise "Please use type KeyValueLabels for field #{lineage} " \
                   "in resource #{product_name}/#{resource_name}"
           end
-        elsif is_a? Api::Type::KeyValueLabels
+        elsif (is_a? Api::Type::KeyValueLabels) &&
+              # "namespaceLabels" is distinct from "labels", so skip the resource
+              !(product_name == 'GKEHub2' && resource_name == 'Namespace') &&
+
+              # "namespaceLabels" is distinct from "labels", so skip the resource
+              !(product_name == 'GKEHub2' && resource_name == 'Scope')
           raise "Please don't use type KeyValueLabels for field #{lineage} " \
                 "in resource #{product_name}/#{resource_name}"
         end
@@ -834,9 +839,21 @@ module Api
     class KeyValueLabels < KeyValuePairs
       def validate
         super
-        return unless @name != 'labels'
 
-        raise "The field #{name} has the type KeyValueLabels, but the field name is not 'labels'!"
+        return if @__resource.__product.nil?
+
+        product_name = @__resource.__product.name
+        resource_name = @__resource.name
+
+        if (@name != 'labels') &&
+           # "namespaceLabels" is distinct from "labels", so skip the resource
+           !(product_name == 'GKEHub2' && resource_name == 'Namespace') &&
+
+           # "namespaceLabels" is distinct from "labels", so skip the resource
+           !(product_name == 'GKEHub2' && resource_name == 'Scope')
+
+          raise "The field #{name} has the type KeyValueLabels, but the field name is not 'labels'!"
+        end
       end
     end
 
