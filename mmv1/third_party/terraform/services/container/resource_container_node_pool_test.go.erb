@@ -4261,6 +4261,7 @@ resource "google_container_node_pool" "without_confidential_boot_disk" {
 }
 `, cluster, networkName, subnetworkName, np)
 }
+<% end -%>
 
 func testAccContainerNodePool_resourceManagerTags(projectID, clusterName, networkName, subnetworkName, randomSuffix string) string {
 	return fmt.Sprintf(`
@@ -4534,4 +4535,3 @@ resource "google_container_node_pool" "primary_nodes" {
 }
 `, projectID, randomSuffix, clusterName, networkName, subnetworkName)
 }
-<% end -%>

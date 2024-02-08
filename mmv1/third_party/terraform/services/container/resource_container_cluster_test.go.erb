@@ -9572,6 +9572,7 @@ func testAccContainerCluster_withWorkloadALTSConfig(projectID, name, networkName
 	}
 `, projectID, networkName, subnetworkName, name, enable)
 }
+<% end -%>
 
 func testAccContainerCluster_resourceManagerTags(projectID, clusterName, networkName, subnetworkName, randomSuffix string) string {
 	return fmt.Sprintf(`
@@ -9633,4 +9634,3 @@ resource "google_container_cluster" "primary" {
 }
 `, projectID, randomSuffix, clusterName, networkName, subnetworkName)
 }
-<% end -%>
