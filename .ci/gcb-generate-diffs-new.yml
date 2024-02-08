@@ -253,17 +253,21 @@ steps:
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
       id: gcb-tpg-vcr-test
-      entrypoint: '/workspace/.ci/scripts/go-plus/gcb-terraform-vcr-tester/test_terraform_vcr.sh'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       secretEnv: ["GITHUB_TOKEN", "GOOGLE_BILLING_ACCOUNT", "GOOGLE_CUST_ID", "GOOGLE_FIRESTORE_PROJECT", "GOOGLE_IDENTITY_USER", "GOOGLE_MASTER_BILLING_ACCOUNT", "GOOGLE_ORG", "GOOGLE_ORG_2", "GOOGLE_ORG_DOMAIN", "GOOGLE_PROJECT", "GOOGLE_PROJECT_NUMBER", "GOOGLE_SERVICE_ACCOUNT", "SA_KEY", "GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION", "GOOGLE_TPU_V2_VM_RUNTIME_VERSION"]
       waitFor: ["diff"]
       env:
         - BASE_BRANCH=$_BASE_BRANCH
+        - "GOOGLE_REGION=us-central1"
+        - "GOOGLE_ZONE=us-central1-a"
+        - "USER=magician"
       args:
-          - $_PR_NUMBER
-          - $COMMIT_SHA
-          - $BUILD_ID
-          - $PROJECT_ID
-          - "22"  # Build step
+        - 'test-terraform-vcr'
+        - $_PR_NUMBER
+        - $COMMIT_SHA
+        - $BUILD_ID
+        - $PROJECT_ID
+        - "22"  # Build step
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'

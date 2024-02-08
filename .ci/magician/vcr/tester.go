@@ -7,21 +7,17 @@ import (
 	"magician/provider"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
+	"sync"
 )
-
-type Tester interface {
-	SetRepoPath(version provider.Version, repoPath string)
-	FetchCassettes(version provider.Version) error
-	Run(mode Mode, version provider.Version) (*Result, error)
-	Cleanup() error
-}
 
 type Result struct {
 	PassedTests  []string
 	SkippedTests []string
 	FailedTests  []string
+	Panics       []string
 }
 
 type Mode int
@@ -52,7 +48,7 @@ type logKey struct {
 	version provider.Version
 }
 
-type vcrTester struct {
+type Tester struct {
 	env           map[string]string           // shared environment variables for running tests
 	rnr           *exec.Runner                // for running commands and manipulating files
 	baseDir       string                      // the directory in which this tester was created
@@ -62,19 +58,22 @@ type vcrTester struct {
 	repoPaths     map[provider.Version]string // relative paths of already cloned repos by version
 }
 
-const accTestParalellism = 32
+const accTestParallelism = 32
+const parallelJobs = 16
 
 const replayingTimeout = "240m"
 
-var testResultsExpression = regexp.MustCompile(`(?m:^--- (PASS|FAIL|SKIP): TestAcc(\w+))`)
+var testResultsExpression = regexp.MustCompile(`(?m:^--- (PASS|FAIL|SKIP): (TestAcc\w+))`)
+
+var testPanicExpression = regexp.MustCompile(`^panic: .*`)
 
 // Create a new tester in the current working directory and write the service account key file.
-func NewTester(env map[string]string, rnr *exec.Runner) (Tester, error) {
+func NewTester(env map[string]string, rnr *exec.Runner) (*Tester, error) {
 	saKeyPath := "sa_key.json"
 	if err := rnr.WriteFile(saKeyPath, env["SA_KEY"]); err != nil {
 		return nil, err
 	}
-	return &vcrTester{
+	return &Tester{
 		env:           env,
 		rnr:           rnr,
 		baseDir:       rnr.GetCWD(),
@@ -85,42 +84,57 @@ func NewTester(env map[string]string, rnr *exec.Runner) (Tester, error) {
 	}, nil
 }
 
-func (vt *vcrTester) SetRepoPath(version provider.Version, repoPath string) {
+func (vt *Tester) SetRepoPath(version provider.Version, repoPath string) {
 	vt.repoPaths[version] = repoPath
 }
 
 // Fetch the cassettes for the current version if not already fetched.
 // Should be run from the base dir.
-func (vt *vcrTester) FetchCassettes(version provider.Version) error {
+func (vt *Tester) FetchCassettes(version provider.Version, baseBranch, prNumber string) error {
 	cassettePath, ok := vt.cassettePaths[version]
 	if ok {
 		return nil
 	}
-	cassettePath = filepath.Join("cassettes", version.String())
+	cassettePath = filepath.Join(vt.baseDir, "cassettes", version.String())
 	vt.rnr.Mkdir(cassettePath)
-	bucketPath := fmt.Sprintf("gs://ci-vcr-cassettes/%sfixtures/*", version.BucketPath())
+	if baseBranch != "FEATURE-BRANCH-major-release-5.0.0" {
+		bucketPath := fmt.Sprintf("gs://ci-vcr-cassettes/%sfixtures/*", version.BucketPath())
+		if err := vt.fetchBucketPath(bucketPath, cassettePath); err != nil {
+			fmt.Println("Error fetching cassettes: ", err)
+		}
+	}
+	if baseBranch != "main" {
+		bucketPath := fmt.Sprintf("gs://ci-vcr-cassettes/%srefs/branches/%s/fixtures/*", version.BucketPath(), baseBranch)
+		if err := vt.fetchBucketPath(bucketPath, cassettePath); err != nil {
+			fmt.Println("Error fetching cassettes: ", err)
+		}
+	}
+	if prNumber != "" {
+		bucketPath := fmt.Sprintf("gs://ci-vcr-cassettes/%srefs/heads/auto-pr-%s/fixtures/*", version.BucketPath(), prNumber)
+		if err := vt.fetchBucketPath(bucketPath, cassettePath); err != nil {
+			fmt.Println("Error fetching cassettes: ", err)
+		}
+	}
+	vt.cassettePaths[version] = cassettePath
+	return nil
+}
+
+func (vt *Tester) fetchBucketPath(bucketPath, cassettePath string) error {
 	// Fetch the cassettes.
 	args := []string{"-m", "-q", "cp", bucketPath, cassettePath}
 	fmt.Println("Fetching cassettes:\n", "gsutil", strings.Join(args, " "))
 	if _, err := vt.rnr.Run("gsutil", args, nil); err != nil {
 		return err
 	}
-	vt.cassettePaths[version] = cassettePath
 	return nil
 }
 
 // Run the vcr tests in the given mode and provider version and return the result.
 // This will overwrite any existing logs for the given mode and version.
-func (vt *vcrTester) Run(mode Mode, version provider.Version) (*Result, error) {
-	lgky := logKey{mode, version}
-	logPath, ok := vt.logPaths[lgky]
-	if !ok {
-		// We've never run this mode and version.
-		logPath = filepath.Join("testlogs", mode.Lower(), version.String())
-		if err := vt.rnr.Mkdir(logPath); err != nil {
-			return nil, err
-		}
-		vt.logPaths[lgky] = logPath
+func (vt *Tester) Run(mode Mode, version provider.Version, testDirs []string) (*Result, error) {
+	logPath, err := vt.getLogPath(mode, version)
+	if err != nil {
+		return nil, err
 	}
 
 	repoPath, ok := vt.repoPaths[version]
@@ -130,41 +144,53 @@ func (vt *vcrTester) Run(mode Mode, version provider.Version) (*Result, error) {
 	if err := vt.rnr.PushDir(repoPath); err != nil {
 		return nil, err
 	}
-	testDirs, err := vt.googleTestDirectory()
-	if err != nil {
-		return nil, err
+	if len(testDirs) == 0 {
+		var err error
+		testDirs, err = vt.googleTestDirectory()
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	cassettePath := filepath.Join("cassettes", version.String())
-	if mode == Replaying {
+	cassettePath := filepath.Join(vt.baseDir, "cassettes", version.String())
+	switch mode {
+	case Replaying:
 		cassettePath, ok = vt.cassettePaths[version]
 		if !ok {
 			return nil, fmt.Errorf("cassettes not fetched for version %s", version)
 		}
+	case Recording:
+		if err := vt.rnr.RemoveAll(cassettePath); err != nil {
+			return nil, fmt.Errorf("error removing cassettes: %v", err)
+		}
+		if err := vt.rnr.Mkdir(cassettePath); err != nil {
+			return nil, fmt.Errorf("error creating cassette dir: %v", err)
+		}
+		vt.cassettePaths[version] = cassettePath
 	}
 
 	args := []string{"test"}
 	args = append(args, testDirs...)
 	args = append(args,
 		"-parallel",
-		strconv.Itoa(accTestParalellism),
+		strconv.Itoa(accTestParallelism),
 		"-v",
 		"-run=TestAcc",
 		"-timeout",
 		replayingTimeout,
-		`-ldflags=-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc`,
+		"-ldflags=-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc",
 		"-vet=off",
 	)
 	env := map[string]string{
-		"VCR_PATH":                       filepath.Join(vt.baseDir, cassettePath),
+		"VCR_PATH":                       cassettePath,
 		"VCR_MODE":                       mode.Upper(),
-		"ACCTEST_PARALLELISM":            strconv.Itoa(accTestParalellism),
-		"GOOGLE_CREDENTIALS":             filepath.Join(vt.baseDir, vt.saKeyPath),
+		"ACCTEST_PARALLELISM":            strconv.Itoa(accTestParallelism),
+		"GOOGLE_CREDENTIALS":             vt.env["SA_KEY"],
 		"GOOGLE_APPLICATION_CREDENTIALS": filepath.Join(vt.baseDir, vt.saKeyPath),
 		"GOOGLE_TEST_DIRECTORY":          strings.Join(testDirs, " "),
 		"TF_LOG":                         "DEBUG",
 		"TF_LOG_SDK_FRAMEWORK":           "INFO",
-		"TF_LOG_PATH_MASK":               filepath.Join(vt.baseDir, logPath, "%s.log"),
+		"TF_LOG_PATH_MASK":               filepath.Join(logPath, "%s.log"),
 		"TF_ACC":                         "1",
 		"TF_SCHEMA_PANIC_ON_ERROR":       "1",
 	}
@@ -184,29 +210,224 @@ func (vt *vcrTester) Run(mode Mode, version provider.Version) (*Result, error) {
 	args:
 %s
 `, printedEnv, strings.Join(args, " "))
-	output, err := vt.rnr.Run("go", args, env)
-	if err != nil {
+	output, testErr := vt.rnr.Run("go", args, env)
+	if testErr != nil {
 		// Use error as output for log.
-		output = fmt.Sprintf("Error replaying tests:\n%v", err)
+		output = fmt.Sprintf("Error %s tests:\n%v", mode.Lower(), testErr)
 	}
 	// Leave repo directory.
 	if err := vt.rnr.PopDir(); err != nil {
 		return nil, err
 	}
 
-	logFileName := filepath.Join(logPath, "all_tests.log")
+	logFileName := filepath.Join(vt.baseDir, "testlogs", fmt.Sprintf("%s_test.log", mode.Lower()))
 	// Write output (or error) to test log.
+	// Append to existing log file.
+	previousLog, _ := vt.rnr.ReadFile(logFileName)
+	if previousLog != "" {
+		output = previousLog + "\n" + output
+	}
 	if err := vt.rnr.WriteFile(logFileName, output); err != nil {
-		return nil, fmt.Errorf("error writing replaying log: %v, test output: %v", err, output)
+		return nil, fmt.Errorf("error writing log: %v, test output: %v", err, output)
 	}
-	if err := vt.uploadLogs(logPath, "vcr-check-cassettes"); err != nil {
-		return nil, fmt.Errorf("error uploading logs: %v", err)
+	return collectResult(output), testErr
+}
+
+func (vt *Tester) RunParallel(mode Mode, version provider.Version, testDirs, tests []string) (*Result, error) {
+	logPath, err := vt.getLogPath(mode, version)
+	if err != nil {
+		return nil, err
 	}
-	return collectResult(output), nil
+	if vt.rnr.Mkdir(filepath.Join(vt.baseDir, "testlogs", mode.Lower()+"_build")); err != nil {
+		return nil, err
+	}
+	repoPath, ok := vt.repoPaths[version]
+	if !ok {
+		return nil, fmt.Errorf("no repo cloned for version %s in %v", version, vt.repoPaths)
+	}
+	if err := vt.rnr.PushDir(repoPath); err != nil {
+		return nil, err
+	}
+	if len(testDirs) == 0 {
+		var err error
+		testDirs, err = vt.googleTestDirectory()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	cassettePath := filepath.Join(vt.baseDir, "cassettes", version.String())
+	switch mode {
+	case Replaying:
+		cassettePath, ok = vt.cassettePaths[version]
+		if !ok {
+			return nil, fmt.Errorf("cassettes not fetched for version %s", version)
+		}
+	case Recording:
+		if err := vt.rnr.RemoveAll(cassettePath); err != nil {
+			return nil, fmt.Errorf("error removing cassettes: %v", err)
+		}
+		if err := vt.rnr.Mkdir(cassettePath); err != nil {
+			return nil, fmt.Errorf("error creating cassette dir: %v", err)
+		}
+		vt.cassettePaths[version] = cassettePath
+	}
+
+	running := make(chan struct{}, parallelJobs)
+	outputs := make(chan string, len(testDirs)*len(tests))
+	wg := &sync.WaitGroup{}
+	wg.Add(len(testDirs) * len(tests))
+	errs := make(chan error, len(testDirs)*len(tests)*2)
+	for _, testDir := range testDirs {
+		for _, test := range tests {
+			running <- struct{}{}
+			go vt.runInParallel(mode, version, testDir, test, logPath, cassettePath, running, wg, outputs, errs)
+		}
+	}
+
+	wg.Wait()
+
+	close(outputs)
+	close(errs)
+
+	// Leave repo directory.
+	if err := vt.rnr.PopDir(); err != nil {
+		return nil, err
+	}
+	var output string
+	for otpt := range outputs {
+		output += otpt
+	}
+	logFileName := filepath.Join(vt.baseDir, "testlogs", fmt.Sprintf("%s_test.log", mode.Lower()))
+	if err := vt.rnr.WriteFile(logFileName, output); err != nil {
+		return nil, err
+	}
+	var testErr error
+	for err := range errs {
+		if err != nil {
+			testErr = err
+			break
+		}
+	}
+	return collectResult(output), testErr
+}
+
+func (vt *Tester) runInParallel(mode Mode, version provider.Version, testDir, test, logPath, cassettePath string, running <-chan struct{}, wg *sync.WaitGroup, outputs chan<- string, errs chan<- error) {
+	args := []string{
+		"test",
+		testDir,
+		"-parallel",
+		"1",
+		"-v",
+		"-run=" + test,
+		"-timeout",
+		replayingTimeout,
+		"-ldflags=-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc",
+		"-vet=off",
+	}
+	env := map[string]string{
+		"VCR_PATH":                       cassettePath,
+		"VCR_MODE":                       mode.Upper(),
+		"ACCTEST_PARALLELISM":            "1",
+		"GOOGLE_CREDENTIALS":             vt.env["SA_KEY"],
+		"GOOGLE_APPLICATION_CREDENTIALS": filepath.Join(vt.baseDir, vt.saKeyPath),
+		"GOOGLE_TEST_DIRECTORY":          testDir,
+		"TF_LOG":                         "DEBUG",
+		"TF_LOG_SDK_FRAMEWORK":           "INFO",
+		"TF_LOG_PATH_MASK":               filepath.Join(logPath, "%s.log"),
+		"TF_ACC":                         "1",
+		"TF_SCHEMA_PANIC_ON_ERROR":       "1",
+	}
+	for ev, val := range vt.env {
+		env[ev] = val
+	}
+	output, testErr := vt.rnr.Run("go", args, env)
+	outputs <- output
+	if testErr != nil {
+		// Use error as output for log.
+		output = fmt.Sprintf("Error %s tests:\n%v", mode.Lower(), testErr)
+		errs <- testErr
+	}
+	logFileName := filepath.Join(vt.baseDir, "testlogs", mode.Lower()+"_build", fmt.Sprintf("%s_%s_test.log", test, mode.Lower()))
+	// Write output (or error) to test log.
+	// Append to existing log file.
+	previousLog, _ := vt.rnr.ReadFile(logFileName)
+	if previousLog != "" {
+		output = previousLog + "\n" + output
+	}
+	if err := vt.rnr.WriteFile(logFileName, output); err != nil {
+		errs <- fmt.Errorf("error writing log: %v, test output: %v", err, output)
+	}
+	<-running
+	wg.Done()
+}
+
+func (vt *Tester) getLogPath(mode Mode, version provider.Version) (string, error) {
+	lgky := logKey{mode, version}
+	logPath, ok := vt.logPaths[lgky]
+	if !ok {
+		// We've never run this mode and version.
+		logPath = filepath.Join(vt.baseDir, "testlogs", mode.Lower(), version.String())
+		if err := vt.rnr.Mkdir(logPath); err != nil {
+			return "", err
+		}
+		vt.logPaths[lgky] = logPath
+	}
+	return logPath, nil
+}
+
+func (vt *Tester) UploadLogs(logBucket, prNumber, buildID string, parallel, afterRecording bool, mode Mode, version provider.Version) error {
+	bucketPath := fmt.Sprintf("gs://%s/%s/", logBucket, version)
+	if prNumber != "" {
+		bucketPath += fmt.Sprintf("refs/heads/auto-pr-%s/", prNumber)
+	}
+	if buildID != "" {
+		bucketPath += fmt.Sprintf("artifacts/%s/", buildID)
+	}
+	lgky := logKey{mode, version}
+	logPath, ok := vt.logPaths[lgky]
+	if !ok {
+		return fmt.Errorf("no log path found for mode %s and version %s", mode.Lower(), version)
+	}
+	args := []string{"-h", "Content-Type:text/plain", "-q", "cp", "-r", filepath.Join(vt.baseDir, "testlogs", fmt.Sprintf("%s_test.log", mode.Lower())), bucketPath + "build-log/"}
+	fmt.Println("Uploading build log:\n", "gsutil", strings.Join(args, " "))
+	if _, err := vt.rnr.Run("gsutil", args, nil); err != nil {
+		fmt.Println("Error uploading build log: ", err)
+	}
+	var suffix string
+	if afterRecording {
+		suffix = "_after_recording"
+	}
+	if parallel {
+		args := []string{"-h", "Content-Type:text/plain", "-m", "-q", "cp", "-r", filepath.Join(vt.baseDir, "testlogs", mode.Lower()+"_build", "*"), fmt.Sprintf("%sbuild-log/%s_build%s/", bucketPath, mode.Lower(), suffix)}
+		fmt.Println("Uploading build logs:\n", "gsutil", strings.Join(args, " "))
+		if _, err := vt.rnr.Run("gsutil", args, nil); err != nil {
+			fmt.Println("Error uploading build logs: ", err)
+		}
+	}
+	args = []string{"-h", "Content-Type:text/plain", "-m", "-q", "cp", "-r", filepath.Join(logPath, "*"), fmt.Sprintf("%s%s%s/", bucketPath, mode.Lower(), suffix)}
+	fmt.Println("Uploading logs:\n", "gsutil", strings.Join(args, " "))
+	if _, err := vt.rnr.Run("gsutil", args, nil); err != nil {
+		fmt.Println("Error uploading logs: ", err)
+	}
+	return nil
+}
+
+func (vt *Tester) UploadCassettes(logBucket, prNumber string, version provider.Version) error {
+	cassettePath, ok := vt.cassettePaths[version]
+	if !ok {
+		return fmt.Errorf("no cassettes found for version %s", version)
+	}
+	args := []string{"-m", "-q", "cp", filepath.Join(cassettePath, "*"), fmt.Sprintf("gs://%s/%s/refs/heads/auto-pr-%s/fixtures/", logBucket, version, prNumber)}
+	fmt.Println("Uploading cassettes:\n", "gsutil", strings.Join(args, " "))
+	if _, err := vt.rnr.Run("gsutil", args, nil); err != nil {
+		fmt.Println("Error uploading cassettes: ", err)
+	}
+	return nil
 }
 
 // Deletes the service account key.
-func (vt *vcrTester) Cleanup() error {
+func (vt *Tester) Cleanup() error {
 	if err := vt.rnr.RemoveAll(vt.saKeyPath); err != nil {
 		return err
 	}
@@ -215,7 +436,7 @@ func (vt *vcrTester) Cleanup() error {
 
 // Returns a list of all directories to run tests in.
 // Must be called after changing into the provider dir.
-func (vt *vcrTester) googleTestDirectory() ([]string, error) {
+func (vt *Tester) googleTestDirectory() ([]string, error) {
 	var testDirs []string
 	if allPackages, err := vt.rnr.Run("go", []string{"list", "./..."}, nil); err != nil {
 		return nil, err
@@ -231,7 +452,7 @@ func (vt *vcrTester) googleTestDirectory() ([]string, error) {
 
 // Print all log file names and contents, except for all_tests.log.
 // Must be called after running tests.
-func (vt *vcrTester) printLogs(logPath string) {
+func (vt *Tester) printLogs(logPath string) {
 	vt.rnr.Walk(logPath, func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
 			return nil
@@ -250,24 +471,9 @@ func (vt *vcrTester) printLogs(logPath string) {
 	})
 }
 
-func (vt *vcrTester) uploadLogs(logPath, logBucket string) error {
-	bucketPath := fmt.Sprintf("gs://%s/", logBucket)
-	args := []string{"-m", "-q", "cp", "-r", logPath, bucketPath}
-	fmt.Println("Uploading logs:\n", "gsutil", strings.Join(args, " "))
-	if _, err := vt.rnr.Run("gsutil", args, nil); err != nil {
-		return err
-	}
-	args = []string{"-m", "-q", "cp", "-r", "cassettes", bucketPath}
-	fmt.Println("Uploading cassettes:\n", "gsutil", strings.Join(args, " "))
-	if _, err := vt.rnr.Run("gsutil", args, nil); err != nil {
-		return err
-	}
-	return nil
-}
-
 func collectResult(output string) *Result {
 	matches := testResultsExpression.FindAllStringSubmatch(output, -1)
-	results := make(map[string][]string, len(matches))
+	results := make(map[string][]string, 4)
 	for _, submatches := range matches {
 		if len(submatches) != 3 {
 			fmt.Printf("Warning: unexpected regex match found in test output: %v", submatches)
@@ -275,9 +481,15 @@ func collectResult(output string) *Result {
 		}
 		results[submatches[1]] = append(results[submatches[1]], submatches[2])
 	}
+	results["PANIC"] = testPanicExpression.FindAllString(output, -1)
+	sort.Strings(results["FAIL"])
+	sort.Strings(results["PASS"])
+	sort.Strings(results["SKIP"])
+	sort.Strings(results["PANIC"])
 	return &Result{
 		FailedTests:  results["FAIL"],
 		PassedTests:  results["PASS"],
 		SkippedTests: results["SKIP"],
+		Panics:       results["PANIC"],
 	}
 }
