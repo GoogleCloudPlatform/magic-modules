@@ -222,6 +222,8 @@ func iamMemberToAccess(member string) (string, string, error) {
 			return "groupByEmail", pieces[1], nil
 		case "domain":
 			return "domain", pieces[1], nil
+		case "iamMember":
+			return "iamMember", pieces[1], nil
 		case "user":
 			return "userByEmail", pieces[1], nil
 		case "serviceAccount":
@@ -234,7 +236,7 @@ func iamMemberToAccess(member string) (string, string, error) {
 		// These are special BigQuery Dataset permissions
 		return "specialGroup", member, nil
 	}
-	return "iamMember", member, nil
+	return "", "", fmt.Errorf("Failed to parse BigQuery Dataset IAM member type: %s", member)
 }
 
 func accessToIamMember(access map[string]interface{}) (string, error) {
