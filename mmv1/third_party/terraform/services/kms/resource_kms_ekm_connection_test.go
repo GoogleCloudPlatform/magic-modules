@@ -79,6 +79,7 @@ func testAccKMSEkmConnection_kmsEkmConnectionBasicExample_update(context map[str
 	return acctest.Nprintf(`
 resource "google_kms_ekm_connection" "example-ekmconnection" {
   name            	= "tf_test_ekmconnection_example%{random_suffix}"
+  location     		= "us-central1"
   key_management_mode 	= "CLOUD_KMS"
   crypto_space_path	= "v0/longlived/crypto-space-placeholder"
 }

@@ -47,6 +47,7 @@ parameters:
       A full list of valid locations can be found by running `gcloud kms locations list`.
     required: true
     ignore_read: true
+    url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
