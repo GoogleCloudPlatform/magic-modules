@@ -49,6 +49,9 @@ examples:
     test_vars_overrides:
       # Set quota start time for the following day.
       quota_start_time: 'time.Now().AddDate(0, 0, 1).Format(time.RFC3339)'
+    ignore_read_extra:
+      - "client.0.api_key"
+      - "client.0.firebase_subdomain"
     skip_vcr: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'identity_platform_config_minimal'
@@ -60,6 +63,9 @@ examples:
       billing_acct:
         :BILLING_ACCT
     skip_docs: true
+    ignore_read_extra:
+      - "client.0.api_key"
+      - "client.0.firebase_subdomain"
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_create: 'templates/terraform/custom_create/identity_platform_config.go'
 properties:
@@ -254,3 +260,118 @@ properties:
             description: |
               Two letter unicode region codes to allow as defined by https://cldr.unicode.org/ The full list of these region codes is here: https://github.com/unicode-cldr/cldr-localenames-full/blob/master/main/en/territories.json
             item_type: Api::Type::String
+  - !ruby/object:Api::Type::NestedObject
+    name: 'client'
+    description: |
+      Options related to how clients making requests on behalf of a project should be configured.
+    default_from_api: true
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: 'permissions'
+        custom_flatten: templates/terraform/custom_flatten/identity_platform_config_client_permissions.go.erb
+        description: |
+          Configuration related to restricting a user's ability to affect their account.
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'disabledUserSignup'
+            description: |
+              When true, end users cannot sign up for a new account on the associated project through any of our API methods
+          - !ruby/object:Api::Type::Boolean
+            name: 'disabledUserDeletion'
+            description: |
+              When true, end users cannot delete their account on the associated project through any of our API methods
+      - !ruby/object:Api::Type::String
+        name: 'apiKey'
+        output: true
+        description: |
+          API key that can be used when making requests for this project.
+        sensitive: true
+      - !ruby/object:Api::Type::String
+        name: 'firebaseSubdomain'
+        output: true
+        description: |
+          Firebase subdomain.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'mfa'
+    description: |
+      Options related to how clients making requests on behalf of a project should be configured.
+    default_from_api: true
+    properties:
+      - !ruby/object:Api::Type::Enum
+        name: 'state'
+        description: |
+          Whether MultiFactor Authentication has been enabled for this project.
+        default_from_api: true
+        values:
+          - :DISABLED
+          - :ENABLED
+          - :MANDATORY
+      - !ruby/object:Api::Type::Array
+        name: enabledProviders
+        description: |
+          A list of usable second factors for this project.
+        item_type: !ruby/object:Api::Type::Enum
+          name: 'undefined'
+          description: |
+            This field only has a name and description because of MM
+            limitations. It should not appear in downstreams.
+          values:
+            - :PHONE_SMS
+      - !ruby/object:Api::Type::Array
+        name: providerConfigs
+        description: |
+          A list of usable second factors for this project along with their configurations.
+          This field does not support phone based MFA, for that use the 'enabledProviders' field.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::Enum
+              name: 'state'
+              default_from_api: true
+              description: |
+                Whether MultiFactor Authentication has been enabled for this project.
+              values:
+                - :DISABLED
+                - :ENABLED
+                - :MANDATORY
+            - !ruby/object:Api::Type::NestedObject
+              name: totpProviderConfig
+              description: |
+                TOTP MFA provider config for this project.
+              properties:
+                - !ruby/object:Api::Type::Integer
+                  name: adjacentIntervals
+                  description: |
+                    The allowed number of adjacent intervals that will be used for verification to avoid clock skew.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'multiTenant'
+    description: |
+      Configuration related to multi-tenant functionality.
+    properties:
+      - !ruby/object:Api::Type::Boolean
+        name: 'allowTenants'
+        description: |
+          Whether this project can have tenants or not.
+      - !ruby/object:Api::Type::String
+        name: 'defaultTenantLocation'
+        description: |
+          The default cloud parent org or folder that the tenant project should be created under.
+          The parent resource name should be in the format of "/", such as "folders/123" or "organizations/456".
+          If the value is not set, the tenant will be created under the same organization or folder as the agent project.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'monitoring'
+    description: |
+      Configuration related to monitoring project activity.
+    default_from_api: true
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: 'requestLogging'
+        description: |
+          Configuration for logging requests made to this project to Stackdriver Logging
+        custom_flatten: templates/terraform/custom_flatten/identity_platform_config_logging.go.erb
+        send_empty_value: true
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: enabled
+            description: |
+              Whether logging is enabled for this project or not.
+            send_empty_value: true
