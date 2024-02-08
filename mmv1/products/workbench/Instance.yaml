@@ -80,7 +80,7 @@ examples:
       network_name: 'wbi-test-default'
       key_name: 'my-crypto-key'
     test_vars_overrides:
-      key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      key_name: 'acctest.BootstrapKMSKeyInLocation(t, "global").CryptoKey.Name'
     test_env_vars:
       service_account: :SERVICE_ACCT
     ignore_read_extra:
