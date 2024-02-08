@@ -218,7 +218,8 @@ fun BuildType.enableProjectSweep(){
     }
 }
 
-// ParametrizedWithType.vcrEnvironmentVariables unsets an environment variable used to skip the sweeper for project resources
+// ParametrizedWithType.vcrEnvironmentVariables sets environment variables that influence how VCR tests run
+// These values can be changed in custom builds, e.g. setting VCR_MODE=REPLAYING
 fun ParametrizedWithType.vcrEnvironmentVariables(config: AccTestConfiguration, providerName: String) {
     text("env.VCR_MODE", "RECORDING")
     text("env.VCR_PATH", "%system.teamcity.build.checkoutDir%/fixtures")
