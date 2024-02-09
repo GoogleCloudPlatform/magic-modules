@@ -18,6 +18,8 @@ base_url: projects/{{project}}/apps/{{app_id}}/debugTokens
 self_link: projects/{{project}}/apps/{{app_id}}/debugTokens/{{debug_token_id}}
 update_verb: :PATCH
 update_mask: true
+identity:
+  - debugTokenId
 description: |
   A debug token is a secret used during the development or integration testing of
   an app. It essentially allows the development or integration testing to bypass
@@ -60,17 +62,12 @@ parameters:
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
-    name: name
+    name: debugTokenId
+    api_name: name
     description: |
-      The fully-qualified resource name of the debug token.
+      The last segment of the resource name of the debug token.
     output: true
-    pattern: projects/{{project}}/apps/{{app_id}}/debugTokens/{{debug_token_id}}
-    custom_flatten: 'templates/terraform/custom_flatten/firebase_app_check_debug_token.go.erb'
-  - !ruby/object:Api::Type::String
-    name: debug_token_id
-    description: The ID of the debug token
-    output: true
-    ignore_read: true
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::String
     name: displayName
     description: |

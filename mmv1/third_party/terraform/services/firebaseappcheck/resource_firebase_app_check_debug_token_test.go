@@ -40,7 +40,7 @@ func TestAccFirebaseAppCheckDebugToken_firebaseAppCheckDebugTokenUpdate(t *testi
 				ResourceName:            "google_firebase_app_check_debug_token.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"debug_token_id", "token", "app_id"},
+				ImportStateVerifyIgnore: []string{"token", "app_id"},
 			},
 			{
 				Config: testAccFirebaseAppCheckDebugToken_firebaseAppCheckDebugTokenTemplate(contextUpdated),
@@ -49,7 +49,7 @@ func TestAccFirebaseAppCheckDebugToken_firebaseAppCheckDebugTokenUpdate(t *testi
 				ResourceName:            "google_firebase_app_check_debug_token.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"debug_token_id", "token", "app_id"},
+				ImportStateVerifyIgnore: []string{"token", "app_id"},
 			},
 		},
 	})
