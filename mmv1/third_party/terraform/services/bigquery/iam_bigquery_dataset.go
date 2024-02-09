@@ -228,8 +228,6 @@ func iamMemberToAccess(member string) (string, string, error) {
 			return "userByEmail", pieces[1], nil
 		case "serviceAccount":
 			return "userByEmail", pieces[1], nil
-		default:
-			return "", "", fmt.Errorf("Failed to parse BigQuery Dataset IAM member type: %s", member)
 		}
 	}
 	if member == "projectOwners" || member == "projectReaders" || member == "projectWriters" || member == "allAuthenticatedUsers" {
