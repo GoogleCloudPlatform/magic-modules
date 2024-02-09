@@ -8,6 +8,8 @@
 package tests
 
 import builds.AllContextParameters
+import jetbrains.buildServer.configs.kotlin.Project
+import org.junit.Assert
 
 const val gaProjectName = "Google"
 const val betaProjectName = "Google Beta"
@@ -49,4 +51,19 @@ fun testContextParameters(): AllContextParameters {
         "zone",
         "infraProject",
         "vcrBucketName")
+}
+
+fun getSubProject(rootProject: Project, parentProjectName: String, subProjectName: String): Project?  {
+    // Find parent project within root
+    var parentProject: Project? =  rootProject.subProjects.find { p->  p.name == parentProjectName}
+    if (parentProject == null) {
+        Assert.fail("Could not find the $parentProjectName project")
+    }
+    // Find subproject within parent identified above
+    var subProject: Project?  = parentProject!!.subProjects.find { p->  p.name == subProjectName}
+    if (subProject == null) {
+        Assert.fail("Could not find the $subProjectName project")
+    }
+
+    return subProject
 }
