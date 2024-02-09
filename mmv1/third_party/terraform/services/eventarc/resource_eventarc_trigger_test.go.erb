@@ -70,8 +70,7 @@ func TestAccEventarcTrigger_HttpDest(t *testing.T) {
 		"project_name":    envvar.GetTestProjectFromEnv(),
 		"service_account": envvar.GetTestServiceAccountFromEnv(t),
                 "network_attachment": fullFormNetworkAttachmentName,
-
-		
+                "random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
