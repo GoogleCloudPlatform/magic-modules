@@ -14,6 +14,7 @@ import org.junit.Assert
 const val gaProjectName = "Google"
 const val betaProjectName = "Google Beta"
 const val nightlyTestsProjectName = "Nightly Tests"
+const val mmUpstreamProjectName = "MM Upstream Testing"
 const val projectSweeperProjectName = "Project Sweeper"
 
 fun testContextParameters(): AllContextParameters {
@@ -53,7 +54,7 @@ fun testContextParameters(): AllContextParameters {
         "vcrBucketName")
 }
 
-fun getSubProject(rootProject: Project, parentProjectName: String, subProjectName: String): Project?  {
+fun getSubProject(rootProject: Project, parentProjectName: String, subProjectName: String): Project {
     // Find parent project within root
     var parentProject: Project? =  rootProject.subProjects.find { p->  p.name == parentProjectName}
     if (parentProject == null) {
@@ -65,5 +66,5 @@ fun getSubProject(rootProject: Project, parentProjectName: String, subProjectNam
         Assert.fail("Could not find the $subProjectName project")
     }
 
-    return subProject
+    return subProject!!
 }
