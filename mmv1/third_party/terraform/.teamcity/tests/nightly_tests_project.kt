@@ -9,13 +9,6 @@ import org.junit.Assert
 import projects.googleCloudRootProject
 
 class NightlyTestProjectsTests {
-
-    // Add failing test to be picked up by GHA
-    @Test
-    fun thisTestFails() {
-        assertTrue("This test will fail", false)
-    }
-
     @Test
     fun allBuildsShouldHaveTrigger() {
         val project = googleCloudRootProject(testContextParameters())
