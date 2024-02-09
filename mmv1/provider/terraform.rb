@@ -425,7 +425,8 @@ module Provider
                     '/templates/terraform/yaml_conversion.erb',
                     "#{target_folder}/go_#{data.object.name}.yaml",
                     self)
-      return unless !File.exist?("#{target_folder}/go_product.yaml")
+      return if File.exist?("#{target_folder}/go_product.yaml")
+
       data.generate(pwd,
                     '/templates/terraform/product_yaml_conversion.erb',
                     "#{target_folder}/go_product.yaml",
