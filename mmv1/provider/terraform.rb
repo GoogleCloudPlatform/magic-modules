@@ -405,7 +405,7 @@ module Provider
       generate_iam_policy(pwd, data.clone, generate_code, generate_docs)
       Dir.chdir pwd
     end
-    
+
     def generate_object_modified(object, output_folder, version_name)
       pwd = Dir.pwd
       data = build_object_data(pwd, object, output_folder, version_name)
@@ -425,12 +425,11 @@ module Provider
                     '/templates/terraform/yaml_conversion.erb',
                     "#{target_folder}/go_#{data.object.name}.yaml",
                     self)
-      if (!File.exist?("#{target_folder}/go_product.yaml"))
-        data.generate(pwd,
-              '/templates/terraform/product_yaml_conversion.erb',
-              "#{target_folder}/go_product.yaml",
-              self)
-      end
+      return unless !File.exist?("#{target_folder}/go_product.yaml"
+      data.generate(pwd,
+                    '/templates/terraform/product_yaml_conversion.erb',
+                    "#{target_folder}/go_product.yaml",
+                    self)
     end
 
     def build_env

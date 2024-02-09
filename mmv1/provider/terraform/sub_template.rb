@@ -22,6 +22,7 @@ module Provider
                          pwd:,
                          layer:
       end
+      
       def build_schema_property(property, object, pwd)
         compile_template "#{pwd}/templates/terraform/schema_property.erb",
                          property:,
