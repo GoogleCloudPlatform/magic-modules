@@ -29,6 +29,7 @@ const (
 	composerEnvironmentEnvVariablesRegexp          = "[a-zA-Z_][a-zA-Z0-9_]*."
 	composerEnvironmentReservedAirflowEnvVarRegexp = "AIRFLOW__[A-Z0-9_]+__[A-Z0-9_]+"
 	composerEnvironmentVersionRegexp               = `composer-(([0-9]+)(\.[0-9]+\.[0-9]+(-preview\.[0-9]+)?)?|latest)-airflow-(([0-9]+)((\.[0-9]+)(\.[0-9]+)?)?)`
+	composerEnvironmentNetworkReferencePrefix      = `(^https\://www\.googleapis\.com/compute/v1/($|projects/.+/.+/(networks|subnetworks)/$))|(^projects/.+/.+/(networks|subnetworks)/$)`
 )
 
 var composerEnvironmentReservedEnvVar = map[string]struct{}{
@@ -3035,20 +3036,29 @@ func isComposer3(d interface{})	bool {
 func forceNewCustomDiff(key string) customdiff.ResourceConditionFunc {
 	return func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) bool {
 		old, new := d.GetChange(key)
-		if isComposer3(d){
-			return false
-		}
-		if functionallyEquivalent(old.(string), new.(string)) {
+		if isComposer3(d) || networkReferenceEquivalent(old.(string), new.(string)) {
 			return false
 		}
 		return true
 	}
 }
 
-func functionallyEquivalent(old, new string) bool {
-	prefix := "https://www.googleapis.com/compute/v1/"
-	if new == old || new == prefix + old || prefix + new == old {
+// Checks if two network/subnetwork references are equivalent
+func networkReferenceEquivalent(s1, s2 string) bool {
+	prefixRegexp := regexp.MustCompile(composerEnvironmentNetworkReferencePrefix)
+	if s1 == s2 {
 		return true
+	}
+	if s1 == "" || s2 == "" {
+		return false
+	}
+	if len(s1) < len(s2) {
+		s1, s2 = s2, s1
+	}
+	if s1Prefix, ok := strings.CutSuffix(s1, s2); ok {
+		if prefixRegexp.MatchString(s1Prefix) {
+			return true
+		}
 	}
 	return false
 }
