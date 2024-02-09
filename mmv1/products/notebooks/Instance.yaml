@@ -82,9 +82,13 @@ examples:
     region_override: 'us-west1-a'
     vars:
       instance_name: 'notebooks-instance'
+      key_name: 'my-crypto-key'
+    test_vars_overrides:
+      key_name: 'acctest.BootstrapKMSKeyInLocation(t, "global").CryptoKey.Name'
     test_env_vars:
       service_account: :SERVICE_ACCT
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/notebooks_instance.go
   update_encoder: templates/terraform/update_encoder/notebooks_instance.go
 state_upgraders: true
 schema_version: 1
@@ -161,6 +165,8 @@ properties:
       - https://www.googleapis.com/auth/cloud-platform
       - https://www.googleapis.com/auth/userinfo.email
     item_type: Api::Type::String
+    default_from_api: true
+    diff_suppress_func: NotebooksInstanceScopesDiffSuppress
   - !ruby/object:Api::Type::NestedObject
     name: 'acceleratorConfig'
     description: |
@@ -323,11 +329,13 @@ properties:
     description: |
       Disk encryption method used on the boot and data disks, defaults to GMEK.
     diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("DISK_ENCRYPTION_UNSPECIFIED")'
+    default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'kmsKey'
     description: |
       The KMS key used to encrypt the disks, only applicable if diskEncryption is CMEK.
       Format: projects/{project_id}/locations/{location}/keyRings/{key_ring_id}/cryptoKeys/{key_id}
+    diff_suppress_func: NotebooksInstanceKmsDiffSuppress
   - !ruby/object:Api::Type::Boolean
     name: 'noPublicIp'
     description: |
