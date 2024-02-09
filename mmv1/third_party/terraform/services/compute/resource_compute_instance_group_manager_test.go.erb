@@ -673,6 +673,7 @@ resource "google_compute_instance_group_manager" "igm-update" {
 
   instance_lifecycle_policy {
     force_update_on_repair = "YES"
+    default_action_on_failure = "DO_NOTHING"
   }
 }
 `, template, target, description, igm)
@@ -779,6 +780,7 @@ resource "google_compute_instance_group_manager" "igm-update" {
 
   instance_lifecycle_policy {
     force_update_on_repair = "NO"
+    default_action_on_failure = "REPAIR"
   }
 }
 `, template1, target1, target2, template2, description, igm)
@@ -1792,6 +1794,7 @@ resource "google_compute_instance_group_manager" "igm-basic" {
 <% end -%>
   instance_lifecycle_policy {
     force_update_on_repair = "YES"
+    default_action_on_failure = "REPAIR"
   }
   wait_for_instances = true
   wait_for_instances_status = "UPDATED"
