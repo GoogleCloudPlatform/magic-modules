@@ -14,7 +14,7 @@ resource "google_cloud_run_v2_service" "<%= ctx[:primary_resource_id] %>" {
       depends_on = ["hello-2"]
       volume_mounts {
         name = "empty-dir-volume"
-	mount_path = "/mnt"
+        mount_path = "/mnt"
       }
     }
     containers {
