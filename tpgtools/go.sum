@@ -10,6 +10,8 @@ github.com/GoogleCloudPlatform/declarative-resource-client-library v1.60.0 h1:RF
 github.com/GoogleCloudPlatform/declarative-resource-client-library v1.60.0/go.mod h1:pL2Qt5HT+x6xrTd806oMiM3awW6kNIXB/iiuClz6m6k=
 github.com/GoogleCloudPlatform/declarative-resource-client-library v1.61.0 h1:IAr9UlYbxURIYABRMagXXo8pDlkFNFFXWz5J2+srrnc=
 github.com/GoogleCloudPlatform/declarative-resource-client-library v1.61.0/go.mod h1:pL2Qt5HT+x6xrTd806oMiM3awW6kNIXB/iiuClz6m6k=
+github.com/GoogleCloudPlatform/declarative-resource-client-library v1.62.0 h1:s4Y6r6RrYLBnqosGXLwR0h1Gqr0VT3wgd6rqvHsD9OE=
+github.com/GoogleCloudPlatform/declarative-resource-client-library v1.62.0/go.mod h1:pL2Qt5HT+x6xrTd806oMiM3awW6kNIXB/iiuClz6m6k=
 github.com/cenkalti/backoff v2.2.1+incompatible h1:tNowT99t7UNflLxfYYSlKYsBpXdEet03Pg2g16Swow4=
 github.com/cenkalti/backoff v2.2.1+incompatible/go.mod h1:90ReRw6GdpyfrHakVjL/QHaoyV4aDUVVkXQJJJ3NXXM=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
