@@ -36,6 +36,45 @@ func TestAccComputeSslCertificate_no_name(t *testing.T) {
 	})
 }
 
+func TestUnitComputeManagedSslCertificate_AbsoluteDomainSuppress(t *testing.T) {
+	cases := map[string]struct {
+		Old, New           string
+		ExpectDiffSuppress bool
+	}{
+		"new trailing dot": {
+			Old:                "sslcert.tf-test.club",
+			New:                "sslcert.tf-test.club.",
+			ExpectDiffSuppress: true,
+		},
+		"old trailing dot": {
+			Old:                "sslcert.tf-test.club.",
+			New:                "sslcert.tf-test.club",
+			ExpectDiffSuppress: true,
+		},
+		"same trailing dot": {
+			Old:                "sslcert.tf-test.club.",
+			New:                "sslcert.tf-test.club.",
+			ExpectDiffSuppress: false,
+		},
+		"different trailing dot": {
+			Old:                "sslcert.tf-test.club.",
+			New:                "sslcert.tf-test.clubs.",
+			ExpectDiffSuppress: false,
+		},
+		"different no trailing dot": {
+			Old:                "sslcert.tf-test.club",
+			New:                "sslcert.tf-test.clubs",
+			ExpectDiffSuppress: false,
+		},
+	}
+
+	for tn, tc := range cases {
+		if absoluteDomainSuppress("managed.0.domains.", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
+		}
+	}
+}
+
 func testAccCheckComputeSslCertificateExists(t *testing.T, n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]

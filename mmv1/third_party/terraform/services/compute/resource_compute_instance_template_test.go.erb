@@ -1364,6 +1364,50 @@ func TestAccComputeInstanceTemplate_resourceManagerTags(t *testing.T) {
 	})
 }
 
+func TestUnitComputeInstanceTemplate_IpCidrRangeDiffSuppress(t *testing.T) {
+	cases := map[string]struct {
+		Old, New           string
+		ExpectDiffSuppress bool
+	}{
+		"single ip address": {
+			Old:                "10.2.3.4",
+			New:                "10.2.3.5",
+			ExpectDiffSuppress: false,
+		},
+		"cidr format string": {
+			Old:                "10.1.2.0/24",
+			New:                "10.1.3.0/24",
+			ExpectDiffSuppress: false,
+		},
+		"netmask same mask": {
+			Old:                "10.1.2.0/24",
+			New:                "/24",
+			ExpectDiffSuppress: true,
+		},
+		"netmask different mask": {
+			Old:                "10.1.2.0/24",
+			New:                "/32",
+			ExpectDiffSuppress: false,
+		},
+		"add netmask": {
+			Old:                "",
+			New:                "/24",
+			ExpectDiffSuppress: false,
+		},
+		"remove netmask": {
+			Old:                "/24",
+			New:                "",
+			ExpectDiffSuppress: false,
+		},
+	}
+
+	for tn, tc := range cases {
+		if ipCidrRangeDiffSuppress("ip_cidr_range", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
+		}
+	}
+}
+
 func testAccCheckComputeInstanceTemplateDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
