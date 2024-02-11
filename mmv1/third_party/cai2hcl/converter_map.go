@@ -15,6 +15,8 @@ var AssetTypeToConverter = map[string]string{
 	compute.ComputeInstanceAssetType:       "google_compute_instance",
 	compute.ComputeForwardingRuleAssetType: "google_compute_forwarding_rule",
 
+	compute.ComputeBackendServiceAssetType: "google_compute_backend_service",
+
 	resourcemanager.ProjectAssetType:        "google_project",
 	resourcemanager.ProjectBillingAssetType: "google_project",
 }
@@ -23,6 +25,7 @@ var AssetTypeToConverter = map[string]string{
 var ConverterMap = map[string]common.Converter{
 	"google_compute_instance":        compute.NewComputeInstanceConverter(provider),
 	"google_compute_forwarding_rule": compute.NewComputeForwardingRuleConverter(provider),
+	"google_compute_backend_service": compute.NewComputeBackendServiceConverter(provider),
 
 	"google_project": resourcemanager.NewProjectConverter(provider),
 }

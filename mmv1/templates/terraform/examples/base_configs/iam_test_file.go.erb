@@ -50,16 +50,19 @@ import_url = import_format.gsub(/({{)%?(\w+)(}})/, '%s').gsub(object.__product.b
 				<% import_qualifiers.push('context["project_id"]') -%>
 			<% end -%>
 		<% end -%>
-        <% elsif param == 'zone' and object.iam_policy.substitute_zone_value -%>
-                <% import_qualifiers.push('envvar.GetTestZoneFromEnv()') -%>
+	<% elsif param == 'zone' and object.iam_policy.substitute_zone_value -%>
+		<% import_qualifiers.push('envvar.GetTestZoneFromEnv()') -%>
 	<% elsif param == 'region' || param == 'location' -%>
 		<% if example.region_override.nil? -%>
-				<% import_qualifiers.push('envvar.GetTestRegionFromEnv()') -%>
-			<% else -%>
-				<% import_qualifiers.push("\"#{example.region_override}\"") -%>
-			<% end -%>
+			<% import_qualifiers.push('envvar.GetTestRegionFromEnv()') -%>
+		<% else -%>
+			<% import_qualifiers.push("\"#{example.region_override}\"") -%>
+		<% end -%>
 	<% elsif param == 'universe_domain' -%>
-			<% import_qualifiers.push('envvar.GetTestUniverseDomainFromEnv()') -%>
+		<% import_qualifiers.push('envvar.GetTestUniverseDomainFromEnv()') -%>
+	<% else -%>
+		<%# The parameter was not added to import_qualifiers, so break out of the loop to avoid subsequent parameters being in the wrong position -%>
+		<% break -%>
 	<% end -%>
 <% end -%>
 func TestAcc<%= resource_name -%>IamBindingGenerated(t *testing.T) {

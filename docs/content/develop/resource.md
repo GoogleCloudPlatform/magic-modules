@@ -49,7 +49,7 @@ For more information about types of resources and the generation process overall
 1. Using an editor of your choice, in the appropriate [product folder]({{<ref "/get-started/how-magic-modules-works.md#mmv1" >}}), create a file called `RESOURCE_NAME.yaml`. Replace `RESOURCE_NAME` with the name of the API resource you are adding support for. For example, a configuration file for [NatAddress](https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.natAddresses) would be called `NatAddress.yaml`.
 2. Copy the following template into the new file:
    ```yaml
-   # Copyright 2023 Google Inc.
+   # Copyright 2024 Google Inc.
    # Licensed under the Apache License, Version 2.0 (the "License");
    # you may not use this file except in compliance with the License.
    # You may obtain a copy of the License at
@@ -215,6 +215,12 @@ For more information about types of resources and the generation process overall
 {{< /tabs >}}
 
 ## Add fields
+
+In general, Terraform resources should implement all configurable fields and all read-only fields.
+Even fields that seem like they would not be useful in Terraform (like update time or etag) often
+end up being requested by users, so it's usually easier to just add them all at once. However,
+optional or read-only fields can be omitted when adding a resource if they would require significant
+additional work to implement.
 
 {{< tabs "fields" >}}
 {{< tab "MMv1" >}}

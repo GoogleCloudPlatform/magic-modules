@@ -355,11 +355,17 @@ properties:
         - !ruby/object:Api::Type::String
           name: message
           description: Error message
-        - !ruby/object:Api::Type::Array
+        - !ruby/object:Api::Type::String
           name: 'details'
           description: |
             A list of messages that carry the error details.
-          item_type: Api::Type::KeyValuePairs
+          custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
+          custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
+          state_func:
+            'func(v interface{}) string { s, _ :=
+            structure.NormalizeJsonString(v); return s }'
+          validation: !ruby/object:Provider::Terraform::Validation
+            function: 'validation.StringIsJSON'
   - !ruby/object:Api::Type::NestedObject
     name: cert
     output: true
