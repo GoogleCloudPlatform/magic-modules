@@ -1,8 +1,0 @@
-- type: SERIALIZATION_ONLY
-- type: CUSTOM_SERIALIZER
-  details:
-    function: "serializeGAProjectToHCL"
-- type: CUSTOM_TERRAFORM_PRODUCT_NAME
-  details:
-    # Produces the correct resource name: `google_project`
-    product: ""
