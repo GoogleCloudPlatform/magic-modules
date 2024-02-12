@@ -16,7 +16,7 @@
 name: "PlayIntegrityConfig"
 base_url: projects/{{project}}/apps/{{app_id}}/playIntegrityConfig
 self_link: projects/{{project}}/apps/{{app_id}}/playIntegrityConfig
-create_url: projects/{{project}}/apps/{{app_id}}/playIntegrityConfig?updateMask=token_ttl
+create_url: projects/{{project}}/apps/{{app_id}}/playIntegrityConfig?updateMask=tokenTtl
 create_verb: :PATCH
 update_verb: :PATCH
 update_mask: true

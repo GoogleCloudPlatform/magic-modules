@@ -16,7 +16,7 @@
 name: "AppAttestConfig"
 base_url: projects/{{project}}/apps/{{app_id}}/appAttestConfig
 self_link: projects/{{project}}/apps/{{app_id}}/appAttestConfig
-create_url: projects/{{project}}/apps/{{app_id}}/appAttestConfig?updateMask=token_ttl
+create_url: projects/{{project}}/apps/{{app_id}}/appAttestConfig?updateMask=tokenTtl
 create_verb: :PATCH
 update_verb: :PATCH
 update_mask: true
