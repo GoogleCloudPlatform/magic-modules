@@ -117,7 +117,7 @@ properties:
           - :READY
           - :DELETING
           - :UPDATING
-  - !ruby/object:Api::Type::KeyValueLabels
+  - !ruby/object:Api::Type::KeyValuePairs
     name: 'namespaceLabels'
     description: |
       Scope-level cluster namespace labels. For the member clusters bound
