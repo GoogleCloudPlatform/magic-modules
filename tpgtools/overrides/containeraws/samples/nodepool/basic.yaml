@@ -1,0 +1,34 @@
+description: A basic example of a containeraws node pool
+name: basic_aws_cluster
+type: aws_cluster
+updates:
+- resource: ./basic_update.tf.tmpl
+variables:
+- name: byo_multicloud_prefix
+  type: byo_multicloud_prefix
+- name: name
+  type: resource_name
+- name: node-pool-name
+  type: resource_name
+- name: project
+  type: project
+- name: project_number
+  type: project_number
+- name: aws_account_id
+  type: aws_account_id
+- name: aws_volume_encryption_key
+  type: aws_volume_encryption_key
+- name: aws_vpc
+  type: aws_vpc
+- name: aws_database_encryption_key
+  type: aws_database_encryption_key
+- name: aws_security_group
+  type: aws_security_group
+- name: aws_subnet
+  type: aws_subnet
+- name: aws_security_group
+  type: aws_security_group
+- name: aws_region
+  type: aws_region
+- name: test_service_account
+  type: test_service_account

@@ -1,0 +1,64 @@
+{
+  "name": "{{assignment}}",
+  "project": "{{project}}",
+  "location": "{{zone}}",
+  "description": "A test os policy assignment",
+  "osPolicies": [
+    {
+      "id": "policy",
+      "description": "A test os policy",
+      "mode": "VALIDATION",
+      "resourceGroups": [
+        {
+          "inventoryFilters": [
+            {
+              "osShortName": "centos",
+              "osVersion": "8.*"
+            }
+          ],
+          "resources": [
+            {
+              "id": "apt",
+              "pkg": {
+                "desiredState": "INSTALLED",
+                "apt": {
+                  "name": "bazel"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "allowNoResourceGroupMatch": false
+    }
+  ],
+  "instanceFilter": {
+    "all": false,
+    "inclusionLabels": [
+      {
+        "labels": {
+          "label-one": "value-one"
+        }
+      }
+    ],
+    "exclusionLabels": [
+      {
+        "labels": {
+          "label-two": "value-two"
+        }
+      }
+    ],
+    "inventories": [
+      {
+        "osShortName": "centos",
+        "osVersion": "8.*"
+      }
+    ]
+  },
+  "rollout": {
+    "disruptionBudget": {
+      "fixed": 1
+    },
+    "minWaitDuration": "3.5s"
+  }
+}

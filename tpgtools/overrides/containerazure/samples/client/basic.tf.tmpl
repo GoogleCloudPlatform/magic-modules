@@ -1,0 +1,7 @@
+resource "google_container_azure_client" "primary" {
+  application_id = "{{azure_app}}"
+  location       = "us-west1"
+  name           = "{{client-name}}"
+  tenant_id      = "{{azure_tenant}}"
+  project        = "{{project}}"
+}

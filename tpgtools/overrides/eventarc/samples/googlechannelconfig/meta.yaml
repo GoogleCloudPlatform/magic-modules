@@ -1,0 +1,6 @@
+# meta.yaml
+#
+# We are hiding the terraform template because the test's for an Eventarc GoogleChannelConfig are handwritten in mmv1. However we want to 
+# generate the docs for a channel on the registry. We make tpgtools do this without it generating a test 
+test_hide:
+  - basic.tf.tmpl

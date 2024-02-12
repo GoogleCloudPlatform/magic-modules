@@ -1,0 +1,5 @@
+resource "google_compute_network_firewall_policy" "primary" {
+  name = "{{policy}}"
+  project = "{{project}}"
+  description = "Updated global network firewall policy"
+}

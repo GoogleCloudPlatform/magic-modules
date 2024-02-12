@@ -1,0 +1,17 @@
+package main
+
+import (
+        "fmt"
+)
+
+func DCLToTerraformReference(product DCLPackageName, resource miscellaneousNameSnakeCase, version string) (string, error) {
+        return "", fmt.Errorf("unimplemented - did you run `make serialize`?")
+}
+
+func ConvertSampleJSONToHCL(product DCLPackageName, resource miscellaneousNameSnakeCase, version string, hasGAEquivalent bool, b []byte) (string, error) {
+        return "", fmt.Errorf("unimplemented - did you run `make serialize`?")
+}
+
+func formatHCL(hcl string) (string, error) {
+        return "", fmt.Errorf("unimplemented - did you run `make serialize`?")
+}

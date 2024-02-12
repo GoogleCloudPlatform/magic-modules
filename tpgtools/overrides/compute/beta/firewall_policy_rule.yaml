@@ -1,0 +1,8 @@
+- type: DIFF_SUPPRESS_FUNC
+  field: target_resources
+  details:
+    diffsuppressfunc: tpgresource.CompareSelfLinkOrResourceName
+- type: CUSTOMIZE_DIFF
+  details:
+    functions: 
+    - tpgresource.DefaultProviderProject
