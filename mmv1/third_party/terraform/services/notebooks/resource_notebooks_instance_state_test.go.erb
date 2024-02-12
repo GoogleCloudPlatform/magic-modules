@@ -27,7 +27,7 @@ func TestAccNotebooksInstance_state(t *testing.T) {
 				ImportState:        true,
 				ImportStateVerify:  true,
 				ExpectNonEmptyPlan: true,
-				ImportStateVerifyIgnore: []string{"container_image", "metadata", "vm_image","desired_state"},
+				ImportStateVerifyIgnore: []string{"container_image", "metadata", "vm_image","desired_state", "update_time"},
 			},
       {
 				Config: testAccNotebooksInstance_basic_stopped(name),
@@ -37,7 +37,7 @@ func TestAccNotebooksInstance_state(t *testing.T) {
 				ImportState:        true,
 				ImportStateVerify:  true,
 				ExpectNonEmptyPlan: true,
-				ImportStateVerifyIgnore: []string{"container_image", "metadata", "vm_image","desired_state"},
+				ImportStateVerifyIgnore: []string{"container_image", "metadata", "vm_image","desired_state", "update_time"},
 			},
       {
 				Config: testAccNotebooksInstance_basic_active(name),
@@ -47,7 +47,7 @@ func TestAccNotebooksInstance_state(t *testing.T) {
 				ImportState:        true,
 				ImportStateVerify:  true,
 				ExpectNonEmptyPlan: true,
-				ImportStateVerifyIgnore: []string{"container_image", "metadata", "vm_image","desired_state"},
+				ImportStateVerifyIgnore: []string{"container_image", "metadata", "vm_image","desired_state", "update_time"},
 			},
 		},
 	})
