@@ -108,30 +108,6 @@
 -%>
 '<%= fname.delete_suffix(".erb") -%>': '<%= file_path -%>'
 <% end -%>
-# the generated folder inside .teamcity/components is where any files that need to be generated for team city
-# will live, ie the list of services
-<%
-  Dir["third_party/terraform/.teamcity/components/generated/*.erb"].each do |file_path|
-    fname = file_path.delete_prefix("third_party/terraform/")
--%>
-'<%= fname.delete_suffix(".erb") -%>.kt': '<%= file_path -%>'
-<% end -%>
-# the generated folder inside .teamcity/tests is where any files that need to be generated for team city tests
-# will live, ie files that include calling Google[Version]
-<%
-  Dir["third_party/terraform/.teamcity/tests/generated/*.erb"].each do |file_path|
-    fname = file_path.delete_prefix("third_party/terraform/")
--%>
-'<%= fname.delete_suffix(".erb") -%>.kt': '<%= file_path -%>'
-<% end -%>
-# there exists one file at the top level of .teamcity that needs to be generated for team city
-# we'll handle that here
-<%
-  Dir["third_party/terraform/.teamcity/generated/*.erb"].each do |file_path|
-    fname = file_path.delete_prefix("third_party/terraform/")
--%>
-'<%= fname.delete_suffix(".erb").gsub("generated/", "") -%>': '<%= file_path -%>'
-<% end -%>
 'main.go': 'third_party/terraform/main.go.erb'
 'go.mod': 'third_party/terraform/go.mod.erb'
 '.goreleaser.yml': 'third_party/terraform/.goreleaser.yml.erb'
