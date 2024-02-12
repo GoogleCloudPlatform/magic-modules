@@ -81,7 +81,7 @@ state. See
 for more information.
 
 Sensitive fields are often not returned by the API (because they are sensitive).
-In this case, the field will also need to use [`ignore_read` or a `custom_flatten` function]({{< ref "/develop/field-reference#ignore_read" >}}).
+In this case, the field will also need to use [`ignore_read` or a `custom_flatten` function]({{< ref "/develop/permadiff#ignore_read" >}}).
 
 Example:
 

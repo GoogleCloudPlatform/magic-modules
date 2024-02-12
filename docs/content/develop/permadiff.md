@@ -11,7 +11,7 @@ In a general sense, permadiffs are caused by the API returning a different value
 
 This page outlines best practices for working around various types of permadiffs in the `google` and `google-beta` providers.
 
-## API returns default value for unset field
+## API returns default value for unset field {#default}
 
 For new fields, if possible, set a client-side default that matches the API default. This will prevent the diff and will allow users to accurately see what the end state will be if the field is not set in their configuration. A client-side default should only be used if the API sets the same default value in all cases and the default value will be stable over time. Changing a client-side default is a [breaking change]({{< ref "/develop/breaking-changes/breaking-changes" >}}).
 
@@ -77,9 +77,9 @@ See [SDKv2 Schema Behaviors - Optional ↗](https://developer.hashicorp.com/terr
 {{< /tab >}}
 {{< /tabs >}}
 
-## API returns an empty value if default value is sent
+## API returns an empty value if default value is sent {#default_if_empty}
 
-Use a flattener to store the default value in state if the response has an empty value.
+Use a flattener to store the default value in state if the response has an empty (or unset) value.
 
 {{< tabs "default_if_empty" >}}
 {{< tab "MMv1" >}}
@@ -102,7 +102,7 @@ func flattenResourceNameFieldName(v interface{}, d *schema.ResourceData, config 
 {{< /tab >}}
 {{< /tabs >}}
 
-## API normalizes a value
+## API normalizes a value {#normalized-value}
 
 In cases where the API normalizes and returns a value in a simple, predictable way (such as capitalizing the value) add a diff suppress function for the field to suppress the diff.
 
@@ -168,7 +168,9 @@ See [SDKv2 Schema Behaviors - DiffSuppressFunc ↗](https://developer.hashicorp.
 {{< /tab >}}
 {{< /tabs >}}
 
-## API does not return a field that was sent
+## API field that is never included in the response {#ignore_read}
+
+This is common for fields that store credentials or similar information. Such fields should also be marked as [`sensitive`]({{< ref "/develop/field-reference#sensitive" >}}).
 
 In the flattener for the field, return the value of the field in the user's configuration.
 
@@ -222,7 +224,7 @@ In tests, add the field to `ImportStateVerifyIgnore` on any relevant import step
 {{< /tab >}}
 {{< /tabs >}}
 
-## API returns a list in a different order than was sent
+## API returns a list in a different order than was sent {#list-order}
 
 For an Array of nested objects, convert it to a Set – this is a [breaking change]({{< ref "/develop/breaking-changes/breaking-changes" >}}) and can only happen in a major release.
 
