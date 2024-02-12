@@ -1,0 +1,7 @@
+resource "google_compute_region_network_firewall_policy" "primary" {
+  name = "{{policy}}"
+  project = "{{project}}"
+  description = "Sample regional network firewall policy"
+  region = "{{region}}"
+}
+

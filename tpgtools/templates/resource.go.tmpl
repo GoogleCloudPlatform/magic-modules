@@ -1,0 +1,808 @@
+{{/* Copyright 2021 Google LLC. All Rights Reserved.
+
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+
+			http://www.apache.org/licenses/LICENSE-2.0
+
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License. */}}
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
+// ----------------------------------------------------------------------------
+//
+//     ***     AUTO GENERATED CODE    ***    Type: DCL     ***
+//
+// ----------------------------------------------------------------------------
+//
+//     This file is managed by Magic Modules (https://github.com/GoogleCloudPlatform/magic-modules)
+//     and is based on the DCL (https://github.com/GoogleCloudPlatform/declarative-resource-client-library).
+//     Changes will need to be made to the DCL or Magic Modules instead of here.
+//
+//     We are not currently able to accept contributions to this file. If changes
+//     are required, please file an issue at https://github.com/hashicorp/terraform-provider-google/issues/new/choose
+//
+// ----------------------------------------------------------------------------
+
+package {{$.Package}}
+
+import(
+	"context"
+	"fmt"
+	"log"
+{{- if $.ReplaceInBasePath.Present }}
+  "strings"
+{{- end }}
+	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+{{- if $.CustomizeDiff }}
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+{{- end }}
+{{- range $pkg := $.AdditionalFileImports }}
+	"{{ $pkg }}"
+{{- end }}
+
+	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
+	{{$.Package}} "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/{{$.DCLPackage}}"
+
+	"github.com/hashicorp/terraform-provider-google/google/tpgdclresource"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+func Resource{{$.PathType}}() *schema.Resource {
+	return &schema.Resource{
+		Create: resource{{$.PathType}}Create,
+		Read:   resource{{$.PathType}}Read,
+{{- if $.Updatable }}
+		Update: resource{{$.PathType}}Update,
+{{- end }}
+		Delete: resource{{$.PathType}}Delete,
+
+		Importer: &schema.ResourceImporter{
+			State: resource{{$.PathType}}Import,
+		},
+
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout({{$.InsertTimeoutMinutes}} * time.Minute),
+{{- if $.Updatable }}
+			Update: schema.DefaultTimeout({{$.UpdateTimeoutMinutes}} * time.Minute),
+{{- end }}
+			Delete: schema.DefaultTimeout({{$.DeleteTimeoutMinutes}} * time.Minute),
+		},
+
+{{- if $.CustomizeDiff }}
+		CustomizeDiff: customdiff.All(
+ {{- range $cdf := $.CustomizeDiff }}
+			{{$cdf }},
+ {{- end }}
+		),
+{{- end }}
+
+{{- if gt $.SchemaVersion 0 }}
+		SchemaVersion: {{$.SchemaVersion}},
+		StateUpgraders: []schema.StateUpgrader{
+  {{- range $v := $.SchemaVersions }}
+			{
+				Type:    resource{{$.PathType}}ResourceV{{$v}}().CoreConfigSchema().ImpliedType(),
+				Upgrade: Resource{{$.PathType}}UpgradeV{{$v}},
+				Version: {{$v}},
+			},
+  {{- end }}
+		},
+{{- end }}
+
+		Schema: map[string]*schema.Schema{
+{{- range $p := $.SchemaProperties }}
+			"{{$p.Name}}": {
+				Type: schema.{{$p.Type}},
+	{{- if $p.Required }}
+				Required: true,
+	{{- end }}
+	{{- if $p.Computed }}
+				Computed: true,
+	{{- end }}
+	{{- if $p.Optional }}
+				Optional: true,
+	{{- end }}
+	{{- if $p.ForceNew }}
+				ForceNew: true,
+	{{- end }}
+	{{- if $p.Sensitive}}
+				Sensitive: true,
+	{{- end }}
+	{{- if $p.DiffSuppressFunc }}
+				DiffSuppressFunc: {{$p.DiffSuppressFunc}},
+	{{- end }}
+				Description: "{{escapeDescription $p.Description}}",
+	{{- if $p.MaxItems }}
+				MaxItems: {{$p.MaxItems}},
+	{{- end }}
+	{{- if $p.MinItems }}
+				MinItems: {{$p.MinItems}},
+	{{- end }}
+	{{- if $p.Elem }}
+				Elem: {{$p.Elem}},
+	{{- end }}
+	{{- if $p.Default }}
+				Default: {{$p.Default}},
+	{{- end }}
+	{{- if $p.ConflictsWith }}
+				ConflictsWith: {{$p.ConflictsWith}},
+	{{- end }}
+	{{- if $p.ValidateFunc }}
+				ValidateFunc: {{$p.ValidateFunc}},
+	{{- end }}
+	{{- if $p.SetHashFunc }}
+				Set: {{$p.SetHashFunc}},
+	{{- end }}
+	{{- if $p.ConfigMode }}
+				ConfigMode: {{$p.ConfigMode}},
+	{{- end }}
+	{{- if $p.Removed }}
+				Removed: "{{$p.Removed}}",
+	{{- end }}
+	{{- if $p.Deprecated }}
+				Deprecated: "{{$p.Deprecated}}",
+	{{- end }}
+			},
+{{ end }}
+		},
+	}
+}
+
+{{ range $v := .Objects }}
+	{{ if $v.ShouldGenerateNestedSchema }}
+func {{$.PathType}}{{$v.PackagePath}}Schema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+	{{- range $p := $v.Properties }}
+			"{{$p.Name}}": {
+				Type: schema.{{$p.Type}},
+		{{- if $p.Required }}
+				Required: true,
+		{{- end }}
+		{{- if $p.Computed }}
+					Computed: true,
+		{{- end }}
+		{{- if $p.Optional }}
+					Optional: true,
+		{{- end }}
+		{{- if $p.ForceNew }}
+					ForceNew: true,
+		{{- end }}
+		{{- if $p.Sensitive }}
+					Sensitive: true,
+		{{- end }}
+		{{- if $p.DiffSuppressFunc }}
+					DiffSuppressFunc: {{$p.DiffSuppressFunc}},
+		{{- end }}
+					Description: "{{escapeDescription $p.Description}}",
+		{{- if $p.MaxItems }}
+					MaxItems: {{$p.MaxItems}},
+		{{- end }}
+		{{- if $p.MinItems }}
+					MinItems: {{$p.MinItems}},
+		{{- end }}
+		{{- if $p.Elem }}
+					Elem: {{$p.Elem}},
+		{{- end }}
+		{{- if $p.Default }}
+					Default: {{$p.Default}},
+		{{- end }}
+		{{- if $p.ConflictsWith }}
+					ConflictsWith: {{$p.ConflictsWith}},
+		{{- end }}
+		{{- if $p.ValidateFunc }}
+					ValidateFunc: {{$p.ValidateFunc}},
+		{{- end }}
+		{{- if $p.SetHashFunc }}
+					Set: {{$p.SetHashFunc}},
+		{{- end }}
+		{{- if $p.ConfigMode }}
+					ConfigMode: {{$p.ConfigMode}},
+		{{- end }}
+		{{- if $p.Removed }}
+					Removed: "{{$p.Removed}}",
+		{{- end }}
+		{{- if $p.Deprecated }}
+					Deprecated: "{{$p.Deprecated}}",
+		{{- end }}
+				},
+	{{ end }}
+		},
+	}
+}
+	{{ end -}}
+{{ end }}
+
+func resource{{$.PathType}}Create(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*transport_tpg.Config)
+
+{{- range $v := .Properties }}
+	{{- if and ($v.IdentityGetter) ($v.Settable) }}
+	{{$v.Name}}, err := {{$v.IdentityGetter}}
+	if err != nil {
+		return err
+	}
+	{{- end -}}
+{{ end }}
+
+	obj := &{{$.Package}}.{{$.DCLStructName}}{
+{{- range $v := .Properties }}
+	{{- if and ($v.Settable) ($v.StateGetter) }}
+	{{$v.PackageName}}: {{$v.StateGetter}},
+	{{- end -}}
+{{ end }}
+	}
+
+{{- if $.Mutex }}
+	lockName, err := {{ $.IDFunction }}(d, config, "{{$.Mutex}}")
+	if err != nil {
+		return err
+	}
+	transport_tpg.MutexStore.Lock(lockName)
+	defer transport_tpg.MutexStore.Unlock(lockName)
+{{ end }}
+
+{{ if $.PreCreateFunction }}
+	if err := {{$.PreCreateFunction}}(d, config, obj); err != nil {
+		return fmt.Errorf("error encountered in pre-create: %v", err)
+	}
+{{ end }}
+
+{{- if $.UseTerraformID }}
+{{/* TODO(magic-modules-eng): When the DCL can correctly handle IDs for regional/global splits, all resources
+should be converted to use the DCL's ID method, so normalization can be uniform. */}}
+	id, err := {{ $.IDFunction }}(d, config, "{{$.ID}}")
+{{- else }}
+	id, err := obj.ID()
+{{- end }}
+	if err != nil {
+		return fmt.Errorf("error constructing id: %s", err)
+	}
+	d.SetId(id)
+
+{{- if $.CustomCreateDirectiveFunction }}
+	directive := {{ $.CustomCreateDirectiveFunction }}(obj)
+{{- else if $.HasCreate }}
+	directive := tpgdclresource.CreateDirective
+{{- else }}
+	{{/* Resource has no create method, so we skip the BlockModification parameter. */}}
+	directive := tpgdclresource.UpdateDirective
+{{- end }}
+	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
+{{- if $.HasProject }}
+	billingProject := project
+{{- else }}
+	billingProject := ""
+{{- end}}
+	// err == nil indicates that the billing_project value was found
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+		billingProject = bp
+	}
+	client := transport_tpg.NewDCL{{$.TitleCasePackageName}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutCreate))
+	{{- if $.AppendToBasePath }}
+	client.Config.BasePath += "{{$.AppendToBasePath}}"
+	{{- end }}
+	{{- if $.ReplaceInBasePath.Present }}
+	client.Config.BasePath = strings.ReplaceAll(client.Config.BasePath, "{{$.ReplaceInBasePath.Old}}", "{{$.ReplaceInBasePath.New}}")
+	{{- end }}
+	if bp, err := tpgresource.ReplaceVars(d, config, client.Config.BasePath); err != nil {
+		d.SetId("")
+		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
+	} else {
+		client.Config.BasePath = bp
+	}
+	res, err := client.Apply{{$.DCLTitle}}(context.Background(), obj, directive...)
+
+	if _, ok := err.(dcl.DiffAfterApplyError); ok {
+		log.Printf("[DEBUG] Diff after apply returned from the DCL: %s", err)
+	} else if err != nil {
+		// The resource didn't actually create
+		d.SetId("")
+		return fmt.Errorf("Error creating {{$.DCLTitle}}: %s", err)
+	}
+
+{{ if $.HasServerGeneratedName}}
+		{{ range $v := .Properties -}}
+			{{- if ($v.IsServerGeneratedName) }}
+	if err = {{$v.StateSetter}}; err != nil {
+		return fmt.Errorf("error setting {{$v.Name}} in state: %s", err)
+	}
+			{{- end -}}
+		{{- end }}
+	// ID has a server-generated value, set again after creation.
+	{{ if $.UseTerraformID }}
+	id, err = {{ $.IDFunction }}(d, config, "{{$.ID}}")
+	if err != nil {
+		return fmt.Errorf("Error constructing id: %s", err)
+	}
+	d.SetId(id)
+	{{ else }}
+	id, err = res.ID()
+	if err != nil {
+		return fmt.Errorf("error constructing id: %s", err)
+	}
+	d.SetId(id)
+	{{ end}}
+{{ end }}
+
+	log.Printf("[DEBUG] Finished creating {{$.DCLTitle}} %q: %#v", d.Id(), res)
+
+{{ if $.PostCreateFunction }}
+	if err := {{$.PostCreateFunction}}(d, config, res); err != nil {
+		return fmt.Errorf("error encountered in post-create: %v", err)
+	}
+{{ end }}
+
+	return resource{{$.PathType}}Read(d, meta)
+}
+
+func resource{{$.PathType}}Read(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*transport_tpg.Config)
+
+{{- range $v := .Properties }}
+	{{- if $v.IdentityGetter }}
+	{{$v.Name}}, err := {{$v.IdentityGetter}}
+	if err != nil {
+		return err
+	}
+	{{- end -}}
+{{ end }}
+
+	obj := &{{$.Package}}.{{$.DCLStructName}}{
+{{- range $v := .Properties }}
+	{{- if ($v.StateGetter) }}
+	{{$v.PackageName}}: {{$v.StateGetter}},
+	{{- end -}}
+{{ end }}
+	}
+
+	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
+{{- if $.HasProject }}
+	billingProject := project
+{{- else }}
+	billingProject := ""
+{{- end}}
+	// err == nil indicates that the billing_project value was found
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+		billingProject = bp
+	}
+	client := transport_tpg.NewDCL{{$.TitleCasePackageName}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutRead))
+	{{- if $.AppendToBasePath }}
+	client.Config.BasePath += "{{$.AppendToBasePath}}"
+	{{- end }}
+	{{- if $.ReplaceInBasePath.Present }}
+	client.Config.BasePath = strings.ReplaceAll(client.Config.BasePath, "{{$.ReplaceInBasePath.Old}}", "{{$.ReplaceInBasePath.New}}")
+	{{- end }}
+	if bp, err := tpgresource.ReplaceVars(d, config, client.Config.BasePath); err != nil {
+		d.SetId("")
+		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
+	} else {
+		client.Config.BasePath = bp
+	}
+	res, err := client.Get{{$.DCLTitle}}(context.Background(), obj)
+	if err != nil {
+		resourceName := fmt.Sprintf("{{$.PathType}} %q", d.Id())
+		return tpgdclresource.HandleNotFoundDCLError(err, d, resourceName)
+	}
+
+{{ range $v := .Properties -}}
+	{{- if ($v.StateSetter) }}
+	if err = {{$v.StateSetter}}; err != nil {
+		return fmt.Errorf("error setting {{$v.Name}} in state: %s", err)
+	}
+	{{- end -}}
+{{- end }}
+
+	return nil
+}
+
+{{- if $.Updatable }}
+func resource{{$.PathType}}Update(d *schema.ResourceData, meta interface{}) error {
+{{- if $.HasMutableNonLabelsFields }}
+	config := meta.(*transport_tpg.Config)
+
+{{- range $v := .Properties }}
+	{{- if and ($v.IdentityGetter) ($v.Settable) }}
+	{{$v.Name}}, err := {{$v.IdentityGetter}}
+	if err != nil {
+		return err
+	}
+	{{- end -}}
+{{ end }}
+
+	obj := &{{$.Package}}.{{$.DCLStructName}}{
+{{- range $v := .Properties }}
+	{{- if ($v.StateGetter) }}
+	{{$v.PackageName}}: {{$v.StateGetter}},
+	{{- end -}}
+{{ end }}
+	}
+
+{{- if $.StateHint }}
+  // Construct state hint from old values
+  old := &{{$.Package}}.{{$.DCLStructName}}{
+  {{- range $v := .Properties }}
+    {{- if ($v.StateGetter) }}
+    {{$v.PackageName}}: {{$v.ChangeStateGetter}},
+    {{- end }}
+  {{- end }}
+  }
+{{- end }}
+
+{{- if $.Mutex }}
+	lockName, err := {{ $.IDFunction }}(d, config, "{{$.Mutex}}")
+	if err != nil {
+		return err
+	}
+	transport_tpg.MutexStore.Lock(lockName)
+	defer transport_tpg.MutexStore.Unlock(lockName)
+
+{{ end }}
+	directive := tpgdclresource.UpdateDirective
+	{{- if $.StateHint }}
+	directive = append(directive, dcl.WithStateHint(old))
+	{{- end }}
+	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
+
+	billingProject := ""
+	// err == nil indicates that the billing_project value was found
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+		billingProject = bp
+	}
+	client := transport_tpg.NewDCL{{$.TitleCasePackageName}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutUpdate))
+	{{- if $.AppendToBasePath }}
+	client.Config.BasePath += "{{$.AppendToBasePath}}"
+	{{- end }}
+	{{- if $.ReplaceInBasePath.Present }}
+	client.Config.BasePath = strings.ReplaceAll(client.Config.BasePath, "{{$.ReplaceInBasePath.Old}}", "{{$.ReplaceInBasePath.New}}")
+	{{- end }}
+	if bp, err := tpgresource.ReplaceVars(d, config, client.Config.BasePath); err != nil {
+		d.SetId("")
+		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
+	} else {
+		client.Config.BasePath = bp
+	}
+	res, err := client.Apply{{$.DCLTitle}}(context.Background(), obj, directive...)
+
+	if _, ok := err.(dcl.DiffAfterApplyError); ok {
+		log.Printf("[DEBUG] Diff after apply returned from the DCL: %s", err)
+	} else if err != nil {
+		// The resource didn't actually create
+		d.SetId("")
+		return fmt.Errorf("Error updating {{$.DCLTitle}}: %s", err)
+	}
+
+	log.Printf("[DEBUG] Finished creating {{$.DCLTitle}} %q: %#v", d.Id(), res)
+
+{{- else }}
+	// Only the root field "labels" and "terraform_labels" are mutable
+{{- end }}
+
+	return resource{{$.PathType}}Read(d, meta)
+}
+{{- end }}
+
+func resource{{$.PathType}}Delete(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*transport_tpg.Config)
+
+{{- range $v := .Properties }}
+	{{- if $v.IdentityGetter }}
+	{{$v.Name}}, err := {{$v.IdentityGetter}}
+	if err != nil {
+		return err
+	}
+	{{- end -}}
+{{ end }}
+
+	obj := &{{$.Package}}.{{$.DCLStructName}}{
+{{- range $v := .Properties }}
+	{{- if ($v.StateGetter) }}
+	{{$v.PackageName}}: {{$v.StateGetter}},
+	{{- end -}}
+{{ end }}
+	}
+
+{{- if $.Mutex }}
+	lockName, err := {{ $.IDFunction }}(d, config, "{{$.Mutex}}")
+	if err != nil {
+		return err
+	}
+	transport_tpg.MutexStore.Lock(lockName)
+	defer transport_tpg.MutexStore.Unlock(lockName)
+
+{{ end }}
+{{ if $.PreDeleteFunction }}
+	if err := {{$.PreDeleteFunction}}(d, config, obj); err != nil {
+		return fmt.Errorf("error encountered in pre-delete: %v", err)
+	}
+{{ end }}
+
+{{- if $.SkipDeleteFunction }}
+	skip, err := {{$.SkipDeleteFunction}}(config, obj)
+	if err != nil {
+		return fmt.Errorf("error encountered in skip-delete: %v", err)
+	}
+	if skip {
+		return nil
+	}
+{{- end }}
+
+	log.Printf("[DEBUG] Deleting {{$.DCLTitle}} %q", d.Id())
+	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
+{{- if $.HasProject }}
+	billingProject := project
+{{- else }}
+	billingProject := ""
+{{- end}}
+	// err == nil indicates that the billing_project value was found
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+		billingProject = bp
+	}
+	client := transport_tpg.NewDCL{{$.TitleCasePackageName}}Client(config, userAgent, billingProject, d.Timeout(schema.TimeoutDelete))
+{{- if $.AppendToBasePath }}
+	client.Config.BasePath += "{{$.AppendToBasePath}}"
+{{- end }}
+{{- if $.ReplaceInBasePath.Present }}
+	client.Config.BasePath = strings.ReplaceAll(client.Config.BasePath, "{{$.ReplaceInBasePath.Old}}", "{{$.ReplaceInBasePath.New}}")
+{{- end }}
+	if bp, err := tpgresource.ReplaceVars(d, config, client.Config.BasePath); err != nil {
+		d.SetId("")
+		return fmt.Errorf("Could not format %q: %w", client.Config.BasePath, err)
+	} else {
+		client.Config.BasePath = bp
+	}
+	if err := client.Delete{{$.DCLTitle}}(context.Background(), obj); err != nil {
+		return fmt.Errorf("Error deleting {{$.DCLTitle}}: %s", err)
+	}
+
+	log.Printf("[DEBUG] Finished deleting {{$.DCLTitle}} %q", d.Id())
+	return nil
+}
+
+func resource{{$.PathType}}Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	config := meta.(*transport_tpg.Config)
+{{ if $.CustomImportFunction }}
+	if err := {{$.CustomImportFunction}}(d, config); err != nil {
+		return nil, fmt.Errorf("error encountered in import: %v", err)
+	}
+{{ else -}}
+	{{$allowForwardSlash := shouldAllowForwardSlashInFormat $.ID $.Properties}}
+	if err := tpgresource.ParseImportId([]string{
+	{{- range $format := $.ImportFormats }}
+	"{{patternToRegex $format $allowForwardSlash}}",
+	{{- end }}
+	}, d, config); err != nil {
+		return nil, err
+	}
+
+	// Replace import id for the resource id
+	id, err := {{ $.IDFunction }}(d, config, "{{$.ID}}")
+	if err != nil {
+		return nil, fmt.Errorf("Error constructing id: %s", err)
+	}
+	d.SetId(id)
+
+	{{- range $v := .Properties }}
+		{{- if and (not $v.StateSetter) ($v.Default) }}
+	d.Set("{{$v.Name}}", {{$v.Default}})
+		{{- end -}}
+	{{ end }}
+
+{{ end }}
+	return []*schema.ResourceData{d}, nil
+}
+
+{{ range $v := .Objects -}}
+	{{ if $v.Settable -}}
+		{{ if $v.Collapsed -}}
+func expand{{$.PathType}}{{$v.PackagePath}}Collapsed(d *schema.ResourceData) *{{$.Package}}.{{$v.ObjectType}} {
+	collapsed := {{$.Package}}.{{$v.ObjectType}}{
+			{{- range $p := $v.Properties }}
+				{{- if and ($p.Settable) ($p.StateGetter) }}
+		{{$p.PackageName}}: {{$p.StateGetter}},
+				{{- end -}}
+			{{ end }}
+	}
+	// Return nil if empty
+	if ({{$.Package}}.{{$v.ObjectType}}{}) == collapsed {
+		return nil
+	}
+	return &collapsed
+}
+		{{ else -}}
+
+		{{ if $v.IsArray -}}
+func expand{{$.PathType}}{{$v.PackagePath}}Array(o interface{}) []{{$.Package}}.{{$v.ObjectType}} {
+	if o == nil {
+	{{- if $v.Computed }}
+		return nil
+	{{- else }}
+		return make([]{{$.Package}}.{{$v.ObjectType}}, 0)
+	{{- end }}
+	}
+
+			{{ if $v.IsSet -}}
+	o = o.(*schema.Set).List()
+			{{- end }}
+
+	objs := o.([]interface{})
+	if len(objs) == 0 || objs[0] == nil {
+	{{- if $v.Computed }}
+		return nil
+	{{- else }}
+		return make([]{{$.Package}}.{{$v.ObjectType}}, 0)
+	{{- end }}
+	}
+
+	items := make([]{{$.Package}}.{{$v.ObjectType}}, 0, len(objs))
+	for _, item := range objs {
+		i := expand{{$.PathType}}{{$v.PackagePath}}(item)
+		items = append(items, *i)
+	}
+
+	return items
+}
+		{{- end }}
+
+func expand{{$.PathType}}{{$v.PackagePath}}(o interface{}) *{{$.Package}}.{{$v.ObjectType}} {
+	if o == nil {
+	{{- if $v.Computed }}
+		return nil
+	{{- else }}
+		return {{$.Package}}.Empty{{$v.ObjectType}}
+	{{- end }}
+	}
+	{{ if $v.IsObject -}}
+	objArr := o.([]interface{})
+	if len(objArr) == 0 || objArr[0] == nil {
+	{{- if $v.Computed }}
+		return nil
+	{{- else }}
+		return {{$.Package}}.Empty{{$v.ObjectType}}
+	{{- end }}
+	}
+	obj := objArr[0].(map[string]interface{})
+	{{- else }}
+	obj := o.(map[string]interface{})
+	{{- end }}
+	return &{{$.Package}}.{{$v.ObjectType}}{
+	{{- range $p := $v.Properties }}
+		{{- if and ($p.Settable) ($p.ExpandGetter) }}
+		{{$p.PackageName}}: {{$p.ExpandGetter}},
+		{{- end -}}
+	{{ end }}
+	}
+}
+	{{- end }}
+{{- end }}
+
+	{{ if $v.IsArray -}}
+func flatten{{$.PathType}}{{$v.PackagePath}}Array(objs []{{$.Package}}.{{$v.ObjectType}}) []interface{} {
+	if objs == nil {
+		return nil
+	}
+
+	items := []interface{}{}
+	for _, item := range objs {
+		i := flatten{{$.PathType}}{{$v.PackagePath}}(&item)
+		items = append(items, i)
+	}
+
+	return items
+}
+	{{- end }}
+
+func flatten{{$.PathType}}{{$v.PackagePath}}(obj *{{$.Package}}.{{$v.ObjectType}}) interface{} {
+	if obj == nil || obj.Empty(){
+		return nil
+	}
+	transformed := map[string]interface{}{
+{{- range $p := $v.Properties }}
+	{{- if ($p.FlattenGetter) }}
+		"{{$p.Name}}": {{$p.FlattenGetter}},
+	{{- end -}}
+{{ end }}
+	}
+{{ if $v.IsObject }}
+	return []interface{}{transformed}
+{{ else }}
+	return transformed
+{{ end }}
+}
+{{ end -}}
+
+{{ if $.HasLabels }}
+func flatten{{$.PathType}}Labels(v map[string]string, d *schema.ResourceData) interface{} {
+	if v == nil {
+		return nil
+	}
+
+	transformed := make(map[string]interface{})
+	if l, ok := d.Get("labels").(map[string]interface{}); ok {
+		for k, _ := range l {
+			transformed[k] = v[k]
+		}
+	}
+
+	return transformed
+}
+
+func flatten{{$.PathType}}TerraformLabels(v map[string]string, d *schema.ResourceData) interface{} {
+	if v == nil {
+		return nil
+	}
+
+	transformed := make(map[string]interface{})
+	if l, ok := d.Get("terraform_labels").(map[string]interface{}); ok {
+		for k, _ := range l {
+			transformed[k] = v[k]
+		}
+	}
+
+	return transformed
+}
+{{ end }}
+
+{{ if $.HasAnnotations }}
+func flatten{{$.PathType}}Annotations(v map[string]string, d *schema.ResourceData) interface{} {
+	if v == nil {
+		return nil
+	}
+
+	transformed := make(map[string]interface{})
+	if l, ok := d.Get("annotations").(map[string]interface{}); ok {
+		for k, _ := range l {
+			transformed[k] = v[k]
+		}
+	}
+
+	return transformed
+}
+{{ end }}
+
+{{ range $v := .EnumArrays -}}
+func flatten{{$.PathType}}{{$v.PackagePath}}Array(obj []{{$.Package}}.{{$v.ObjectType}}Enum) interface{} {
+	if obj == nil {
+		return nil
+	}
+	items := []string{}
+	for _, item := range obj {
+		items = append(items, string(item))
+	}
+	return items
+}
+
+	{{- if $v.Settable }}
+func expand{{$.PathType}}{{$v.PackagePath}}Array(o interface{}) []{{$.Package}}.{{$v.ObjectType}}Enum {
+	objs := o.([]interface{})
+	items := make([]{{$.Package}}.{{$v.ObjectType}}Enum, 0, len(objs))
+	for _, item := range objs {
+		i := {{$.Package}}.{{$v.ObjectType}}EnumRef(item.(string))
+		items = append(items, *i)
+	}
+  return items
+}
+	{{- end }}
+{{ end }}
+

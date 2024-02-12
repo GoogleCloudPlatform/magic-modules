@@ -1,0 +1,43 @@
+resource "google_firebaserules_release" "primary" {
+  provider     = google-beta
+  name         = "firebase.storage/${google_storage_bucket.bucket.name}"
+  ruleset_name = "projects/{{project}}/rulesets/${google_firebaserules_ruleset.storage.name}"
+  project      = "{{project}}"
+
+  lifecycle {
+    replace_triggered_by = [
+      google_firebaserules_ruleset.storage
+    ]
+  }
+}
+
+# Provision a non-default Cloud Storage bucket.
+resource "google_storage_bucket" "bucket" {
+  provider = google-beta
+  project  = "{{project}}"
+  name     = "{{bucket}}"
+  location = "{{region}}"
+}
+
+# Make the Storage bucket accessible for Firebase SDKs, authentication, and Firebase Security Rules.
+resource "google_firebase_storage_bucket" "bucket" {
+  provider  = google-beta
+  project   = "{{project}}"
+  bucket_id = google_storage_bucket.bucket.name
+}
+
+# Create a ruleset of Firebase Security Rules from a local file.
+resource "google_firebaserules_ruleset" "storage" {
+  provider = google-beta
+  project  = "{{project}}"
+  source {
+    files {
+      name    = "storage.rules"
+      content = "service firebase.storage {match /b/{bucket}/o {match /{allPaths=**} {allow read, write: if request.auth != null;}}}"
+    }
+  }
+
+  depends_on = [
+    google_firebase_storage_bucket.bucket
+  ]
+}

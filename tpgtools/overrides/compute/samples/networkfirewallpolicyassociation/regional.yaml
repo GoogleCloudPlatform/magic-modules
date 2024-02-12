@@ -1,0 +1,13 @@
+updates:
+- resource: ./regional_update.tf.tmpl
+variables:
+- name: association
+  type: resource_name
+- name: policy
+  type: resource_name
+- name: network
+  type: resource_name
+- name: project
+  type: project
+- name: region 
+  type: region

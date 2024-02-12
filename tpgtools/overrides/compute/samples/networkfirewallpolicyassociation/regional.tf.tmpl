@@ -1,0 +1,18 @@
+resource "google_compute_region_network_firewall_policy" "basic_regional_network_firewall_policy" {
+  name = "{{policy}}"
+  project = "{{project}}"
+  description = "Sample global network firewall policy"
+  region = "{{region}}"
+}
+
+resource "google_compute_network" "basic_network" {
+  name = "{{network}}"
+}
+
+resource "google_compute_region_network_firewall_policy_association" "primary" {
+  name = "{{association}}"
+  attachment_target = google_compute_network.basic_network.id
+  firewall_policy =  google_compute_region_network_firewall_policy.basic_regional_network_firewall_policy.name
+  project =  "{{project}}"
+  region = "{{region}}"
+}

@@ -1,0 +1,298 @@
+{{/* Copyright 2021 Google LLC. All Rights Reserved.
+
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+
+			http://www.apache.org/licenses/LICENSE-2.0
+
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License. */}}
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
+// ----------------------------------------------------------------------------
+//
+//     ***     AUTO GENERATED CODE    ***    Type: DCL     ***
+//
+// ----------------------------------------------------------------------------
+//
+//     This file is managed by Magic Modules (https://github.com/GoogleCloudPlatform/magic-modules)
+//     and is based on the DCL (https://github.com/GoogleCloudPlatform/declarative-resource-client-library).
+//     Changes will need to be made to the DCL or Magic Modules instead of here.
+//
+//     We are not currently able to accept contributions to this file. If changes
+//     are required, please file an issue at https://github.com/hashicorp/terraform-provider-google/issues/new/choose
+//
+// ----------------------------------------------------------------------------
+
+package main
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"sort"
+	"strings"
+
+	fmtcmd "github.com/hashicorp/hcl/hcl/fmtcmd"
+{{- range $name, $path := $.Packages   }}
+	{{$name}} "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/{{$path}}"
+{{- end }}
+)
+
+// DCLToTerraformReference converts a DCL resource name to the final tpgtools name
+// after overrides are applied
+func DCLToTerraformReference(product DCLPackageName, resource miscellaneousNameSnakeCase, version string) (string, error) {
+	{{- range $version, $resList := $.Resources   }}
+		{{- if not (eq $version.V "ga") }}
+	if version == "{{$version.V}}" {
+		switch fmt.Sprintf("%s/%s", product, resource) {
+			{{- range $res := $resList   }}
+		case "{{$res.Package}}/{{$res.Name}}":
+			return "{{$res.TerraformName}}", nil
+			{{- end }}
+		}
+	}
+		{{- else }}
+	// If not found in sample version, fallthrough to GA
+	switch fmt.Sprintf("%s/%s", product, resource) {
+	{{- range $res := $resList   }}
+	case "{{$res.Package}}/{{$res.Name}}":
+		return "{{$res.TerraformName}}", nil
+	{{- end }}
+	default:
+		return "", fmt.Errorf("Error retrieving Terraform name from DCL resource type: %s/%s not found", product, resource)
+	}
+		{{ end }}
+	{{- end }}
+}
+
+// ConvertSampleJSONToHCL unmarshals json to an HCL string.
+func ConvertSampleJSONToHCL(product DCLPackageName, resource miscellaneousNameSnakeCase, version string, hasGAEquivalent bool, b []byte) (string, error) {
+	{{- range $version, $resList := $.Resources }}
+		{{- if not (eq $version.V "ga") }}
+	if version == "{{$version.V}}" {
+		switch fmt.Sprintf("%s/%s", product, resource) {
+			{{- range $res := $resList }}
+		case "{{$res.Package}}/{{$res.Name}}":
+			r := &{{$res.Package}}{{$version.SerializationSuffix}}.{{$res.DCLStructName}}{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+				{{- if $res.CustomSerializer }}
+			return {{$res.CustomSerializer}}(*r, hasGAEquivalent)
+				{{- else }}
+			return {{$res.TitleCaseFullName}}{{$version.SerializationSuffix}}AsHCL(*r, hasGAEquivalent)
+				{{- end }}
+			{{- end }}
+		}	
+	}
+		{{- else }}
+	// If not found in sample version, fallthrough to GA
+	switch fmt.Sprintf("%s/%s", product, resource) {
+			{{- range $res := $resList   }}
+	case "{{$res.Package}}/{{$res.Name}}":
+		r := &{{$res.Package}}{{$version.SerializationSuffix}}.{{$res.DCLStructName}}{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+				{{- if $res.CustomSerializer }}
+			return {{$res.CustomSerializer}}(*r, hasGAEquivalent)
+				{{- else }}
+			return {{$res.TitleCaseFullName}}{{$version.SerializationSuffix}}AsHCL(*r, hasGAEquivalent)
+				{{- end }}
+			{{- end }}
+	default:
+		return "", fmt.Errorf("Error converting sample JSON to HCL: %s not found", product, resource)
+	}
+		{{ end }}
+	{{- end }}
+
+}
+
+
+{{- range $version, $resList := $.Resources   }}
+	{{- range $res  := $resList   }}
+// {{ $res.TitleCaseFullName }}{{$version.SerializationSuffix}}AsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func {{ $res.TitleCaseFullName }}{{$version.SerializationSuffix}}AsHCL(r {{$res.Package}}{{$version.SerializationSuffix}}.{{$res.DCLStructName}}, hasGAEquivalent bool) (string, error) {
+	outputConfig := "resource \"{{$res.TerraformName}}\" \"output\" {\n"
+		{{- range $field := $res.Properties}}
+			{{- if $field.ShouldShowUpInSamples }}
+				{{- if eq $field.Type.String "TypeString" "TypeInt" "TypeBool" "TypeFloat" }}
+					{{- if $field.Type.IsDateTime }}
+	if !r.{{$field.PackageName}}.IsZero() {
+		outputConfig += fmt.Sprintf("\t{{$field.Name}} = %v\n", r.{{$field.PackageName}})
+	}
+					{{- else if $field.EnumBool }}
+	if r.{{$field.PackageName}} != nil {
+		outputConfig += fmt.Sprintf("\t{{$field.Name}} = %q\n", serializeEnumBool(r.{{$field.PackageName}}))
+	}
+					{{- else }}
+	if r.{{$field.PackageName}} != nil {
+		outputConfig += fmt.Sprintf("\t{{$field.Name}} = %#v\n", *r.{{$field.PackageName}})
+	}
+					{{- end}}
+				{{- else if $field.Type.IsObject }}
+	if v := convert{{$res.TitleCaseFullName}}{{$version.SerializationSuffix}}{{$field.PackagePath}}ToHCL(r.{{$field.PackageName}}); v != "" {
+						{{- if $field.Collapsed }}
+		outputConfig += v
+						{{- else }}
+		outputConfig += fmt.Sprintf("\t{{$field.Name}} %s\n", v)
+						{{- end }}
+	}
+				{{- else if eq $field.Type.String "TypeList" "TypeSet" }}
+	if r.{{$field.PackageName}} != nil {
+					{{- if $field.ElemIsBasicType }}
+		outputConfig += "\t{{$field.Name}} = ["
+		for _, v := range r.{{$field.PackageName}} {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+					{{- else }}
+		for _, v := range r.{{$field.PackageName}} {
+			outputConfig += fmt.Sprintf("\t{{$field.Name}} %s\n", convert{{$res.TitleCaseFullName}}{{$version.SerializationSuffix}}{{$field.PackagePath}}ToHCL(&v))
+		}
+					{{- end }}
+	}
+				{{- else if eq $field.Type.String "TypeMap" }}
+		{{- /* TODO(magic-modules-eng): Implement maps with non-string values */}}
+		outputConfig += "{{ if not $field.Collapsed }}\t{{end}}{{$field.Name}} = {"
+		keys{{$field.PackageName}} := []string{}
+		// golang range goes over maps in an arbitrary order- we've gotta order the
+		// keys ourselves to make the output deterministic
+		for k, _ := range r.{{$field.PackageName}} {
+			keys{{$field.PackageName}} = append(keys{{$field.PackageName}}, k)
+		}
+
+		sort.Strings(keys{{$field.PackageName}})
+
+		for _, k := range keys{{$field.PackageName}} {
+			outputConfig += fmt.Sprintf("%v = %q, ", k, r.{{$field.PackageName}}[k])
+		}
+		outputConfig += "}\n"
+				{{- end}}
+			{{- end}}
+		{{- end}}
+	formatted, err := formatHCL(outputConfig + "}")
+	if err != nil {
+		return "", err
+	}
+	if !hasGAEquivalent {
+		// The formatter will not accept the google-beta symbol because it is injected during testing.
+		return withProviderLine(formatted), nil
+	}
+	return formatted, nil
+}
+
+		{{ range $v := $res.Objects}}
+func convert{{$res.TitleCaseFullName}}{{$version.SerializationSuffix}}{{$v.PackagePath}}ToHCL(r *{{$res.Package}}{{$version.SerializationSuffix}}.{{$v.ObjectType}}) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{{ if not $v.Collapsed }}{\n{{end}}"
+			{{- range $field := $v.Properties}}
+				{{- if $field.Settable }}
+					{{- if eq $field.Type.String "TypeString" "TypeInt" "TypeBool" "TypeFloat" }}
+						{{- if $field.EnumBool }}
+	if r.{{$field.PackageName}} != nil {
+		outputConfig += fmt.Sprintf("{{ if not $v.Collapsed }}\t{{end}}{{$field.Name}} = %q\n", serializeEnumBool(r.{{$field.PackageName}}))
+	}
+						{{- else }}
+	if r.{{$field.PackageName}} != nil {
+		outputConfig += fmt.Sprintf("{{ if not $v.Collapsed }}\t{{end}}{{$field.Name}} = %#v\n", *r.{{$field.PackageName}})
+	}
+						{{- end }}
+					{{- else if $field.Type.IsObject }}
+	if v := convert{{$res.TitleCaseFullName}}{{$version.SerializationSuffix}}{{$field.PackagePath}}ToHCL(r.{{$field.PackageName}}); v != "" {
+		outputConfig += fmt.Sprintf("{{ if not $v.Collapsed }}\t{{end}}{{$field.Name}} %s\n", v)
+	}
+					{{- else if eq $field.Type.String "TypeList" "TypeSet" }}
+	if r.{{$field.PackageName}} != nil {
+						{{- if $field.ElemIsBasicType }}
+		outputConfig += "{{ if not $v.Collapsed }}\t{{end}}{{$field.Name}} = ["
+		for _, v := range r.{{$field.PackageName}} {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+						{{- else }}
+		for _, v := range r.{{$field.PackageName}} {
+			outputConfig += fmt.Sprintf("{{ if not $v.Collapsed }}\t{{end}}{{$field.Name}} %s\n", convert{{$res.TitleCaseFullName}}{{$version.SerializationSuffix}}{{$field.PackagePath}}ToHCL(&v))
+		}
+						{{- end }}
+	}
+					{{- else if eq $field.Type.String "TypeMap" }}
+		{{- /* TODO(magic-modules-eng): Implement maps with non-string values */}}
+		outputConfig += "{{ if not $field.Collapsed }}\t{{end}}{{$field.Name}} = {"
+		keys{{$field.PackageName}} := []string{}
+		// golang range goes over maps in an arbitrary order- we've gotta order the
+		// keys ourselves to make the output deterministic
+		for k, _ := range r.{{$field.PackageName}} {
+			keys{{$field.PackageName}} = append(keys{{$field.PackageName}}, k)
+		}
+
+		sort.Strings(keys{{$field.PackageName}})
+
+		for _, k := range keys{{$field.PackageName}} {
+			outputConfig += fmt.Sprintf("%v = %q, ", k, r.{{$field.PackageName}}[k])
+		}
+		outputConfig += "}\n"
+					{{- end}}
+				{{- end}}
+			{{- end}}
+	return outputConfig{{ if not $v.Collapsed }} + "}"{{end}}
+}
+
+		{{ end }}
+	{{- end }}
+{{- end }}
+{{- range $version, $resList := $.Resources   }}
+	{{- range $res := $resList  }}
+		{{- range $v := $res.Objects }}
+func convert{{$res.TitleCaseFullName}}{{$version.SerializationSuffix}}{{$v.PackagePath}}(i interface{}) (map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+			{{- range $prop := $v.Properties }}
+				{{- if $prop.IsObject }}
+		"{{$prop.PackageJSONName}}": convert{{$res.TitleCaseFullName}}{{$version.SerializationSuffix}}{{$prop.PackagePath}}(in["{{$prop.Name}}"]),
+				{{- else }}
+		"{{$prop.PackageJSONName}}": in["{{$prop.Name}}"],
+				{{- end }}
+			{{- end }}
+	}
+}
+
+
+func convert{{$res.TitleCaseFullName}}{{$version.SerializationSuffix}}{{$v.PackagePath}}List(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convert{{$res.TitleCaseFullName}}{{$version.SerializationSuffix}}{{$v.PackagePath}}(v))
+	}
+	return out
+}
+		{{ end }}
+	{{- end }}
+{{- end }}
+
+func formatHCL(hcl string) (string, error) {
+	b := bytes.Buffer{}
+	r := strings.NewReader(hcl)
+	if err := fmtcmd.Run(nil, nil, r, &b, fmtcmd.Options{}); err != nil {
+		return "", err
+	}
+	return b.String(), nil
+}

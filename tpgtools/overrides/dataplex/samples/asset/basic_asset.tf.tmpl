@@ -1,0 +1,66 @@
+resource "google_storage_bucket" "basic_bucket" {
+  name          = "{{bucket}}"
+  location      = "{{region}}"
+  uniform_bucket_level_access = true
+  lifecycle {
+    ignore_changes = [
+      labels
+    ]
+  }
+ 
+  project = "{{project}}"
+}
+ 
+resource "google_dataplex_lake" "basic_lake" {
+  name         = "{{lake}}"
+  location     = "{{region}}"
+  project = "{{project}}"
+}
+ 
+ 
+resource "google_dataplex_zone" "basic_zone" {
+  name         = "{{zone}}"
+  location     = "{{region}}"
+  lake = google_dataplex_lake.basic_lake.name
+  type = "RAW"
+ 
+  discovery_spec {
+    enabled = false
+  }
+ 
+ 
+  resource_spec {
+    location_type = "SINGLE_REGION"
+  }
+ 
+  project = "{{project}}"
+}
+ 
+ 
+resource "google_dataplex_asset" "primary" {
+  name          = "{{asset}}"
+  location      = "{{region}}"
+ 
+  lake = google_dataplex_lake.basic_lake.name
+  dataplex_zone = google_dataplex_zone.basic_zone.name
+ 
+  discovery_spec {
+    enabled = false
+  }
+ 
+  resource_spec {
+    name = "projects/{{project}}/buckets/{{bucket}}"
+    type = "STORAGE_BUCKET"
+  }
+
+  labels = {
+    env     = "foo"
+    my-asset = "exists"
+  }
+
+ 
+  project = "{{project}}"
+  depends_on = [
+    google_storage_bucket.basic_bucket
+  ]
+}

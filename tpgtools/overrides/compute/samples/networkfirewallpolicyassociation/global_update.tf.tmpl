@@ -1,0 +1,20 @@
+resource "google_compute_network_firewall_policy" "network_firewall_policy" {
+  name = "{{policy}}"
+  project = "{{project}}"
+  description = "Sample global network firewall policy"
+}
+
+resource "google_compute_network" "network" {
+  name = "{{network}}"
+}
+
+resource "google_compute_network" "network2" {
+  name = "update-{{network}}"
+}
+
+resource "google_compute_network_firewall_policy_association" "primary" {
+  name = "{{association}}"
+  attachment_target = google_compute_network.network2.id
+  firewall_policy =  google_compute_network_firewall_policy.network_firewall_policy.name
+  project =  "{{project}}"
+}

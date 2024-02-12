@@ -1,0 +1,16 @@
+# optional test level config -- needed for updates basic.tf.tmpl def
+updates:
+- resource: ./basic_asset.tf.tmpl
+variables:
+- name: lake
+  type: resource_name
+- name: zone
+  type: resource_name
+- name: asset
+  type: resource_name
+- name: bucket
+  type: resource_name
+- name: project
+  type: project
+- name: region
+  type: region

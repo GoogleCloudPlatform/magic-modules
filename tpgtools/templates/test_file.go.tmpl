@@ -1,0 +1,150 @@
+{{/* Copyright 2021 Google LLC. All Rights Reserved.
+
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+
+			http://www.apache.org/licenses/LICENSE-2.0
+
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License. */}}
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
+// ----------------------------------------------------------------------------
+//
+//     ***     AUTO GENERATED CODE    ***    Type: DCL     ***
+//
+// ----------------------------------------------------------------------------
+//
+//     This file is managed by Magic Modules (https://github.com/GoogleCloudPlatform/magic-modules)
+//     and is based on the DCL (https://github.com/GoogleCloudPlatform/declarative-resource-client-library).
+//     Changes will need to be made to the DCL or Magic Modules instead of here.
+//
+//     We are not currently able to accept contributions to this file. If changes
+//     are required, please file an issue at https://github.com/hashicorp/terraform-provider-google/issues/new/choose
+//
+// ----------------------------------------------------------------------------
+
+package {{$.Package}}_test
+
+import (
+	"context"
+	"fmt"
+	"strings"
+	"testing"
+{{$s := index ($.TestSamples) 0 -}}
+{{- range $extra_d := $s.ExtraDependencies -}}
+		"{{ $extra_d}}"
+{{ end -}}
+	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
+	{{$.Package}} "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/{{$.DCLPackage}}"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+{{- range $s := $.TestSamples }}
+func TestAcc{{$.PathType}}_{{$s.TestSlug}}(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{} {
+		{{- range $contextkey, $contextvalue := $s.ExpandContext }}
+		  "{{$contextkey}}" : {{$contextvalue}},
+		{{- end }}
+			"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+	{{ if $s.HasGAEquivalent -}}
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+	{{- else }}
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+	{{- end }}
+	{{ if true -}}
+		CheckDestroy: testAccCheck{{$.PathType}}DestroyProducer(t),
+	{{- end }}
+		Steps: []resource.TestStep{
+		{{- range $se := $s.EnumerateWithUpdateSamples }}
+			{
+				Config: testAcc{{$.PathType}}_{{$se.TestSlug}}(context),
+			{{- if $se.CustomCheck }}
+				Check:  resource.ComposeTestCheckFunc(
+				{{- range $index, $check := $se.CustomCheck -}}
+					{{ $check }} {{- if isLastIndex $se.CustomCheck $index }}, {{end -}}
+				{{- end }}
+				),
+			{{- end }}
+			},
+			{
+				ResourceName:      "{{$.TerraformName}}.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+			{{ if $se.IgnoreRead -}}
+				ImportStateVerifyIgnore: []string{ {{- range $ignoreReadValue := $se.IgnoreRead -}}"{{$ignoreReadValue}}", {{- end -}} },
+			{{- end }}
+			},
+		{{- end }}
+		},
+	})
+}
+{{- end }}
+
+{{$s := index ($.TestSamples) 0 -}}
+{{- range $cti := $s.GetCodeToInject }}
+{{ $cti }}
+{{ end }}
+
+{{- range $s := $.TestSamples -}}
+{{ range $se := $s.EnumerateWithUpdateSamples }}
+func testAcc{{$.PathType}}_{{$se.TestSlug}}(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+{{ $se.GenerateHCL false }}
+`, context)
+}
+{{ end }}
+{{- end }}
+
+func testAccCheck{{$.PathType}}DestroyProducer(t *testing.T) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		for name, rs := range s.RootModule().Resources {
+			if rs.Type != "rs.{{$.TerraformName}}" {
+				continue
+			}
+			if strings.HasPrefix(name, "data.") {
+				continue
+			}
+
+			config := acctest.GoogleProviderConfig(t)
+
+			billingProject := ""
+			if config.BillingProject != "" {
+				billingProject = config.BillingProject
+			}
+
+			obj := &{{$.Package}}.{{$.DCLStructName}}{
+				{{- range $v := .Properties }}
+				{{- if $v.StateGetterForDestroyTest }}
+					{{$v.PackageName}}: {{ $v.StateGetterForDestroyTest }},
+				{{- end }}
+				{{- end }}
+			}
+
+			client := transport_tpg.NewDCL{{$.TitleCasePackageName}}Client(config, config.UserAgent, billingProject, 0)
+			_, err := client.Get{{$.DCLTitle}}(context.Background(), obj)
+			if err == nil {
+				return fmt.Errorf("{{$.TerraformName}} still exists %v", obj)
+			}
+		}
+		return nil
+	}
+}
+
+
