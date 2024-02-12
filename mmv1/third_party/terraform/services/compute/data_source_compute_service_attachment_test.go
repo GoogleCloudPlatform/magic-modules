@@ -103,7 +103,7 @@ resource "google_compute_forwarding_rule" "psc_ilb_target_service" {
   }
   
   resource "google_compute_health_check" "producer_service_health_check" {
-	name = "producer-service-health-check%{random_suffix}"
+	name = "producer-service-health-check"
   
 	check_interval_sec = 1
 	timeout_sec        = 1
