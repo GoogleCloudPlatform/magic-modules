@@ -90,7 +90,6 @@ func TestAccContainerNodePool_resourceManagerTags(t *testing.T) {
 	})
 }
 
-
 func TestAccContainerNodePool_basicWithClusterId(t *testing.T) {
 	t.Parallel()
 
@@ -4337,11 +4336,11 @@ resource "google_container_cluster" "primary" {
 # Separately Managed Node Pool
 resource "google_container_node_pool" "primary_nodes" {
   name       = google_container_cluster.primary.name
-  location   = var.region
+  location   = "us-central1-a"
   cluster    = google_container_cluster.primary.name
 
   version = data.google_container_engine_versions.uscentral1a.release_channel_latest_version["STABLE"]
-  node_count = var.gke_num_nodes
+  node_count = 1
 
   node_config {
     machine_type    = "n1-standard-1"  // can't be e2 because of local-ssd
@@ -4429,11 +4428,11 @@ resource "google_container_cluster" "primary" {
 # Separately Managed Node Pool
 resource "google_container_node_pool" "primary_nodes" {
   name       = google_container_cluster.primary.name
-  location   = var.region
+  location   = "us-central1-a"
   cluster    = google_container_cluster.primary.name
 
   version = data.google_container_engine_versions.uscentral1a.release_channel_latest_version["STABLE"]
-  node_count = var.gke_num_nodes
+  node_count = 1
 
   node_config {
     machine_type    = "n1-standard-1"  // can't be e2 because of local-ssd
@@ -4522,11 +4521,11 @@ resource "google_container_cluster" "primary" {
 # Separately Managed Node Pool
 resource "google_container_node_pool" "primary_nodes" {
   name       = google_container_cluster.primary.name
-  location   = var.region
+  location   = "us-central1-a"
   cluster    = google_container_cluster.primary.name
 
   version = data.google_container_engine_versions.uscentral1a.release_channel_latest_version["STABLE"]
-  node_count = var.gke_num_nodes
+  node_count = 1
 
   node_config {
     machine_type    = "n1-standard-1"  // can't be e2 because of local-ssd
