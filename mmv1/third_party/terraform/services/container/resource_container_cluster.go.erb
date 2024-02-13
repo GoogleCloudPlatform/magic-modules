@@ -6104,7 +6104,7 @@ func flattenFleet(c *container.Fleet) []map[string]interface{} {
 
 	// Parse membership_id and membership_location from full membership name.
 	var membership_id, membership_location string
-	membershipRE = regexp.MustCompile(`^(//[a-zA-Z0-9\.\-]+)?/?projects/([^/]+)/locations/([a-zA-Z0-9\-]+)/memberships/([^/]+)$`)
+	membershipRE := regexp.MustCompile(`^(//[a-zA-Z0-9\.\-]+)?/?projects/([^/]+)/locations/([a-zA-Z0-9\-]+)/memberships/([^/]+)$`)
 	if match := membershipRE.FindStringSubmatch(c.Membership); match != nil {
 		membership_id = match[4]
 		membership_location = match[3]
