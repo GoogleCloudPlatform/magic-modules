@@ -21,4 +21,6 @@ resource "google_workbench_instance" "<%= ctx[:primary_resource_id] %>" {
     k = "val"
   }
 
+  desired_state = "STOPPED"
+
 }
