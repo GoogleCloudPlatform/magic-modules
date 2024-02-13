@@ -22,15 +22,19 @@ import (
 
 // Client for GitHub interactions.
 type Client struct {
-	token string
+	classicToken string
+	token        string
 }
 
 func NewClient() *Client {
-	githubToken, ok := os.LookupEnv("GITHUB_TOKEN")
+	githubToken, ok := os.LookupEnv("GITHUB_TOKEN_MAGIC_MODULES")
 	if !ok {
-		fmt.Println("Did not provide GITHUB_TOKEN environment variable")
+		fmt.Println("Did not provide GITHUB_TOKEN_MAGIC_MODULES environment variable")
 		os.Exit(1)
 	}
 
-	return &Client{token: githubToken}
+	return &Client{
+		classicToken: os.Getenv("GITHUB_TOKEN_CLASSIC"),
+		token:        githubToken,
+	}
 }

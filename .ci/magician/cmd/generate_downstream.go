@@ -19,7 +19,7 @@ var changelogExp = regexp.MustCompile("(?s)```release-note.*?```")
 
 var gdEnvironmentVariables = [...]string{
 	"BASE_BRANCH",
-	"GITHUB_TOKEN",
+	"GITHUB_TOKEN_DOWNSTREAMS",
 	"GOPATH",
 }
 
@@ -53,7 +53,7 @@ var generateDownstreamCmd = &cobra.Command{
 			fmt.Println("Error creating a runner: ", err)
 			os.Exit(1)
 		}
-		ctlr := source.NewController(env["GOPATH"], "modular-magician", env["GITHUB_TOKEN"], rnr)
+		ctlr := source.NewController(env["GOPATH"], "modular-magician", env["GITHUB_TOKEN_DOWNSTREAMS"], rnr)
 
 		if len(args) != 4 {
 			fmt.Printf("Wrong number of arguments %d, expected 4\n", len(args))

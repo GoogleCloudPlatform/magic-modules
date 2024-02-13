@@ -199,7 +199,7 @@ func (vt *Tester) Run(mode Mode, version provider.Version, testDirs []string) (*
 	}
 	var printedEnv string
 	for ev, val := range env {
-		if ev == "SA_KEY" || ev == "GITHUB_TOKEN" {
+		if ev == "SA_KEY" || ev == "GITHUB_TOKEN_DOWNSTREAMS" || ev == "GITHUB_TOKEN_MAGIC_MODULES" {
 			val = "{hidden}"
 		}
 		printedEnv += fmt.Sprintf("%s=%s\n", ev, val)
