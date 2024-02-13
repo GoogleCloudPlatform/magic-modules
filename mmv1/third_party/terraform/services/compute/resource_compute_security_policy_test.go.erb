@@ -189,7 +189,6 @@ func TestAccComputeSecurityPolicy_withAdvancedOptionsConfig(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			<% unless version == 'ga' -%>
 			{
 				Config: testAccComputeSecurityPolicy_withAdvancedOptionsConfig_update(spName),
 			},
@@ -216,7 +215,6 @@ func TestAccComputeSecurityPolicy_withAdvancedOptionsConfig(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			<% end -%>
 			{
 				Config: testAccComputeSecurityPolicy_basic(spName),
 			},
@@ -1108,19 +1106,15 @@ resource "google_compute_security_policy" "policy" {
       ]
     }
     log_level    = "VERBOSE"
-    <% unless version == 'ga' -%>
     user_ip_request_headers = [
       "True-Client-IP", 
       "x-custom-ip"
     ]
-    <% end -%>
-
   }
 }
 `, spName)
 }
 
-<% unless version == 'ga' -%>
 func testAccComputeSecurityPolicy_withAdvancedOptionsConfig_update(spName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_security_policy" "policy" {
@@ -1189,7 +1183,6 @@ resource "google_compute_security_policy" "policy" {
 }
 `, spName)
 }
-<% end -%>
 
 func testAccComputeSecurityPolicy_withAdaptiveProtection(spName string) string {
 	return fmt.Sprintf(`
