@@ -30,14 +30,14 @@ resource "google_workbench_instance" "<%= ctx[:primary_resource_id] %>" {
     boot_disk {
       disk_size_gb  = 310
       disk_type = "PD_SSD"
-      disk_encryption = "GMEK"
+      disk_encryption = "CMEK"
       kms_key = "<%= ctx[:vars]['key_name'] %>"
     }
 
     data_disks {
       disk_size_gb  = 330
       disk_type = "PD_SSD"
-      disk_encryption = "GMEK"
+      disk_encryption = "CMEK"
       kms_key = "<%= ctx[:vars]['key_name'] %>"
     }
 
@@ -64,5 +64,7 @@ resource "google_workbench_instance" "<%= ctx[:primary_resource_id] %>" {
   labels = {
     k = "val"
   }
+
+  desired_state = "ACTIVE"
 
 }
