@@ -140,3 +140,42 @@ func waitForWorkbenchInstanceActive(d *schema.ResourceData, config *transport_tp
 	})
 }
 <% end -%>
+
+func modifyWorkbenchInstanceState(config *transport_tpg.Config, d *schema.ResourceData, project string, billingProject string, userAgent string, state string) (map[string]interface{}, error) {
+	url, err := tpgresource.ReplaceVars(d, config, "{{WorkbenchBasePath}}projects/{{project}}/locations/{{location}}/instances/{{name}}:"+state)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config: config,
+		Method: "POST",
+		Project: billingProject,
+		RawURL: url,
+		UserAgent: userAgent,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("Unable to %q google_workbench_instance %q: %s", state, d.Id(), err)
+	}
+	return res, nil
+}
+
+func WorkbenchInstanceKmsDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+	if strings.HasPrefix(old, new) {
+		return true
+	}
+	return false
+}
+
+<% unless compiler == "terraformgoogleconversion-codegen" -%>
+func waitForWorkbenchOperation(config *transport_tpg.Config, d *schema.ResourceData, project string, billingProject string, userAgent string, response map[string]interface{}) error {
+	var opRes map[string]interface{}
+	err := WorkbenchOperationWaitTimeWithResponse(
+		config, response, &opRes, project, "Modifying Workbench Instance state", userAgent,
+		d.Timeout(schema.TimeoutUpdate))
+	if err != nil {
+		return err
+	}
+	return nil
+}
+<% end -%>
