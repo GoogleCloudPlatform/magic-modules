@@ -53,6 +53,7 @@ parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
     default_value: 'global'
+    immutable: true
     description: |
       The location of the security profile group.
       The default value is `global`.
