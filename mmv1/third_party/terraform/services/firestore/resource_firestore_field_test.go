@@ -103,7 +103,11 @@ resource "google_firestore_database" "database" {
 	location_id = "nam5"
 	type        = "FIRESTORE_NATIVE"
 
-	depends_on = [google_project_service.firestore] # control delete order
+	# used to control delete order
+	depends_on = [
+		google_project_service.firestore,
+		google_project.project
+	]
 }
 `, context)
 	} else {
