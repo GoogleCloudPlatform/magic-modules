@@ -84,17 +84,17 @@ resource "google_project" "project" {
 }
 
 # 60s wait between creating the project and enabling the service
-resource "time_sleep" "wait_60_sec_after_project" {
+resource "time_sleep" "wait_360_sec_after_project" {
 	depends_on = [google_project.project]
 
-	create_duration = "60s"
+	create_duration = "360s"
 }
 
 # 60s wait between enabling the service and trying to use it
-resource "time_sleep" "wait_60_sec_after_service" {
+resource "time_sleep" "wait_360_sec_after_service" {
 	depends_on = [google_project_service.firestore]
 
-	create_duration = "60s"
+	create_duration = "360s"
 }
 
 resource "google_project_service" "firestore" {
@@ -102,7 +102,7 @@ resource "google_project_service" "firestore" {
 	service = "firestore.googleapis.com"
 
 	# Needed for CI tests for permissions to propagate, should not be needed for actual usage
-	depends_on = [time_sleep.wait_60_sec_after_project]
+	depends_on = [time_sleep.wait_360_sec_after_project]
 }
 
 resource "google_firestore_database" "database" {
@@ -111,7 +111,7 @@ resource "google_firestore_database" "database" {
 	location_id = "nam5"
 	type        = "FIRESTORE_NATIVE"
 
-	depends_on = [time_sleep.wait_60_sec_after_service]
+	depends_on = [time_sleep.wait_360_sec_after_service]
 }
 `, context)
 	} else {
