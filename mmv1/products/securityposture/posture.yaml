@@ -231,7 +231,7 @@ properties:
                                 If `true`, then the policy is enforced. If `false`, then any configuration is acceptable.
                                 This field can be set only in policies for boolean constraints.
                             - !ruby/object:Api::Type::NestedObject
-                              name: 'expr'
+                              name: 'condition'
                               description: |
                                 Represents a textual expression in the Common Expression Language (CEL) syntax. CEL is a C-like expression language.
                                 This page details the objects and attributes that are used to the build the CEL expressions for
@@ -348,7 +348,7 @@ properties:
                                 If `true`, then the policy is enforced. If `false`, then any configuration is acceptable.
                                 This field can be set only in policies for boolean constraints.
                             - !ruby/object:Api::Type::NestedObject
-                              name: 'expr'
+                              name: 'condition'
                               description: |
                                 Represents a textual expression in the Common Expression Language (CEL) syntax. CEL is a C-like expression language.
                                 This page details the objects and attributes that are used to the build the CEL expressions for
