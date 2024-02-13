@@ -167,6 +167,7 @@ resource "google_healthcare_hl7_v2_store" "default" {
 resource "google_healthcare_dataset" "dataset" {
   name     = "%s"
   location = "us-central1"
+  reject_duplicate_message= true
 }
 `, hl7_v2StoreName, datasetName)
 }
