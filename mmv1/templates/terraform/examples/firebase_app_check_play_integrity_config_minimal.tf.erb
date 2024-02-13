@@ -18,4 +18,11 @@ resource "google_firebase_app_check_play_integrity_config" "default" {
   app_id  = google_firebase_android_app.default.app_id
 
   depends_on = [time_sleep.wait_30s]
+
+  lifecycle {
+    precondition {
+      condition     = length(google_firebase_android_app.default.sha256_hashes) > 0
+      error_message = "Provide a SHA-256 certificate on the Android App to use App Check"
+    }
+  }
 }
