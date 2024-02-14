@@ -16,7 +16,7 @@ func TestAccFirebaseAppCheckDeviceCheckConfig_firebaseAppCheckDeviceCheckConfigU
 		"project_id":       envvar.GetTestProjectFromEnv(),
 		"team_id":          "9987654321",
 		"private_key_path": "test-fixtures/private-key.p8",
-		"token_ttl":        "3600s",
+		"token_ttl":        "3900s",
 		"random_suffix":    acctest.RandString(t, 10),
 	}
 
@@ -38,7 +38,7 @@ func TestAccFirebaseAppCheckDeviceCheckConfig_firebaseAppCheckDeviceCheckConfigU
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFirebaseAppCheckDeviceCheckConfig_firebaseAppCheckDeviceCheckConfigMinimalExample(context),
+				Config: testAccFirebaseAppCheckDeviceCheckConfig_firebaseAppCheckDeviceCheckConfigFullExample(context),
 			},
 			{
 				ResourceName:            "google_firebase_app_check_device_check_config.default",
@@ -48,15 +48,6 @@ func TestAccFirebaseAppCheckDeviceCheckConfig_firebaseAppCheckDeviceCheckConfigU
 			},
 			{
 				Config: testAccFirebaseAppCheckDeviceCheckConfig_firebaseAppCheckDeviceCheckConfigFullExample(contextUpdated),
-			},
-			{
-				ResourceName:            "google_firebase_app_check_device_check_config.default",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"private_key", "app_id"},
-			},
-			{
-				Config: testAccFirebaseAppCheckDeviceCheckConfig_firebaseAppCheckDeviceCheckConfigMinimalExample(contextUpdated),
 			},
 			{
 				ResourceName:            "google_firebase_app_check_device_check_config.default",

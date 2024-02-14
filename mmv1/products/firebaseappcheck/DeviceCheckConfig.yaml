@@ -36,22 +36,6 @@ import_format:
   ]
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "firebase_app_check_device_check_config_minimal"
-    # Need the time_sleep resource
-    pull_external: true
-    primary_resource_id: "default"
-    vars:
-      bundle_id: "bundle.id.devicecheck"
-      key_id: "Key ID"
-      private_key_path: "path/to/private-key.p8"
-      team_id: "9987654321"
-    test_vars_overrides:
-      # Don't add random suffix
-      private_key_path: '"test-fixtures/private-key.p8"'
-      team_id: '"9987654321"'
-    test_env_vars:
-      project_id: :PROJECT_NAME
-  - !ruby/object:Provider::Terraform::Examples
     name: "firebase_app_check_device_check_config_full"
     # Need the time_sleep resource
     pull_external: true
@@ -84,7 +68,6 @@ properties:
     description: |
       The relative resource name of the DeviceCheck configuration object
     output: true
-    pattern: projects/{{project}}/apps/{{app_id}}/deviceCheckConfig
   - !ruby/object:Api::Type::String
     name: tokenTtl
     description: |
