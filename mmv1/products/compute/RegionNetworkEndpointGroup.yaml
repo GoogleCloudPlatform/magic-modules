@@ -167,6 +167,8 @@ properties:
       - cloud_function
       - app_engine
       - serverless_deployment
+    allow_empty_object: true
+    send_empty_value: true
     description: |
       This field is only used for SERVERLESS NEGs.
 
@@ -209,6 +211,7 @@ properties:
       - cloud_function
       - serverless_deployment
     allow_empty_object: true
+    send_empty_value: true
     description: |
       This field is only used for SERVERLESS NEGs.
 
@@ -243,6 +246,8 @@ properties:
       - cloud_run
       - app_engine
       - serverless_deployment
+    allow_empty_object: true
+    send_empty_value: true
     description: |
       This field is only used for SERVERLESS NEGs.
 
@@ -278,6 +283,7 @@ properties:
       - cloud_function
       - app_engine
     allow_empty_object: true
+    send_empty_value: true
     description: |
       This field is only used for SERVERLESS NEGs.
 
