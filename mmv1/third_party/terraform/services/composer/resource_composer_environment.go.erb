@@ -27,7 +27,7 @@ import (
 const (
 	composerEnvironmentEnvVariablesRegexp          = "[a-zA-Z_][a-zA-Z0-9_]*."
 	composerEnvironmentReservedAirflowEnvVarRegexp = "AIRFLOW__[A-Z0-9_]+__[A-Z0-9_]+"
-	composerEnvironmentVersionRegexp               = `composer-(([0-9]+)(\.[0-9]+\.[0-9]+(-preview\.[0-9]+)?)?|latest)-airflow-(([0-9]+)((\.[0-9]+)(\.[0-9]+)?)?)-build\.([0-9]+)`
+	composerEnvironmentVersionRegexp               = `composer-(([0-9]+)(\.[0-9]+\.[0-9]+(-preview\.[0-9]+)?)?|latest)-airflow-(([0-9]+)((\.[0-9]+)(\.[0-9]+)?)?)(-build\.([0-9]+))?`
 )
 
 var composerEnvironmentReservedEnvVar = map[string]struct{}{
@@ -2847,15 +2847,17 @@ func composerImageVersionDiffSuppress(_, old, new string, _ *schema.ResourceData
 	}
 
 	// We can only compare build numbers if both versions specified it
-	if len(newVersions) >= 11 && len(oldVersions) >= 11 {
-		oldBuildNumber := oldVersions[10]
-		newBuildNumber := newVersions[10]
-		eq, err := versionsEqual(oldBuildNumber, newBuildNumber)
-		if err != nil {
-			log.Printf("[WARN] Could not parse build number, %s", err)
-		}
-		if !eq {
-			return false
+	if len(newVersions) >= 12 && len(oldVersions) >= 12 {
+		oldBuildNumber := oldVersions[11]
+		newBuildNumber := newVersions[11]
+		if oldBuildNumber != "" && newBuildNumber != "" {
+			eq, err := versionsEqual(oldBuildNumber, newBuildNumber)
+			if err != nil {
+				log.Printf("[WARN] Could not parse build number, %s", err)
+			}
+			if !eq {
+				return false
+			}
 		}
 	}
 
