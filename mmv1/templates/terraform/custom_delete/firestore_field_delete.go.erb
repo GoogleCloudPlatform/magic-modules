@@ -52,7 +52,8 @@ if err != nil {
 	return err
 }
 
+log.Printf("[DEBUG] Finished deleting Field %q", d.Id())
+
 d.SetId("") // Remove the resource from state
 
-log.Printf("[DEBUG] Finished deleting Field %q", d.Id())
 return nil
