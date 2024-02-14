@@ -1,3 +1,18 @@
+/*
+* Copyright 2023 Google LLC. All Rights Reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+ */
 package cmd
 
 import (
@@ -52,10 +67,10 @@ func TestExecMembershipChecker_GooglerFlow(t *testing.T) {
 				Login: "googler_author",
 			},
 		},
-		userType:          github.GooglerUserType,
-		calledMethods:     make(map[string][][]any),
-		firstReviewer:     "reviewer1",
-		previousReviewers: []string{github.GetRandomReviewer(), "reviewer3"},
+		userType:           github.GooglerUserType,
+		calledMethods:      make(map[string][][]any),
+		requestedReviewers: []github.User{github.User{Login: "reviewer1"}},
+		previousReviewers:  []github.User{github.User{Login: github.GetRandomReviewer()}, github.User{Login: "reviewer3"}},
 	}
 	cb := &mockCloudBuild{
 		calledMethods: make(map[string][][]any),
@@ -100,10 +115,10 @@ func TestExecMembershipChecker_AmbiguousUserFlow(t *testing.T) {
 				Login: "ambiguous_author",
 			},
 		},
-		userType:          github.CommunityUserType,
-		calledMethods:     make(map[string][][]any),
-		firstReviewer:     github.GetRandomReviewer(),
-		previousReviewers: []string{github.GetRandomReviewer(), "reviewer3"},
+		userType:           github.CommunityUserType,
+		calledMethods:      make(map[string][][]any),
+		requestedReviewers: []github.User{github.User{Login: github.GetRandomReviewer()}},
+		previousReviewers:  []github.User{github.User{Login: github.GetRandomReviewer()}, github.User{Login: "reviewer3"}},
 	}
 	cb := &mockCloudBuild{
 		calledMethods: make(map[string][][]any),
@@ -156,10 +171,10 @@ func TestExecMembershipChecker_CommentForNewPrimaryReviewer(t *testing.T) {
 				Login: "googler_author",
 			},
 		},
-		userType:          github.GooglerUserType,
-		calledMethods:     make(map[string][][]any),
-		firstReviewer:     "",
-		previousReviewers: []string{"reviewer3"},
+		userType:           github.GooglerUserType,
+		calledMethods:      make(map[string][][]any),
+		requestedReviewers: []github.User{},
+		previousReviewers:  []github.User{github.User{Login: "reviewer3"}},
 	}
 	cb := &mockCloudBuild{
 		calledMethods: make(map[string][][]any),

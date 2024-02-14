@@ -13,6 +13,8 @@ service/aiplatform-dataset:
 service/aiplatform-featurestore:
   resources:
   - google_vertex_ai_featurestore.*
+  - google_vertex_ai_feature_group
+  - google_vertex_ai_feature_online_store.*
 service/aiplatform-matching-engine:
   resources:
   - google_vertex_ai_index.*
@@ -38,7 +40,11 @@ service/apigee:
 service/apikeys:
   resources:
   - google_apikeys_key
+service/appengine:
+  resources:
+  - google_app_engine_.*
 service/artifactregistry:
+  team: artifact-registry
   resources:
   - google_artifact_registry_.*
 service/assuredworkloads:
@@ -70,6 +76,9 @@ service/certificatemanager:
   - google_compute_managed_ssl_certificate
   - google_compute_region_ssl_certificate
   - google_compute_ssl_certificate
+service/cloud-dns:
+  resources:
+  - google_dns_.*
 service/cloudasset:
   resources:
   - google_cloud_asset_.*
@@ -136,6 +145,7 @@ service/compute-instances:
   - google_compute_instance
   - google_compute_instance_from_.*
   - google_compute_instance_iam.*
+  - google_compute_instance_settings
   - google_compute_instance_template
   - google_compute_region_instance_template
   - google_compute_project_metadata.*
@@ -203,13 +213,10 @@ service/compute-pd:
   - google_compute_image.*
   - google_compute_snapshot.*
   - google_compute_machine_image.*
-service/compute-private-service-connect-published-service:
-  resources:
-  - google_compute_service_attachment
 service/compute-projects:
   resources:
   - google_project_usage_export_bucket
-service/compute-regional-pass-through-load-balancer:
+service/compute-regional-pass-through-lb:
   resources:
   - google_compute_target_instance
   - google_compute_target_pool
@@ -273,9 +280,9 @@ service/dataplex:
   - google_dataplex_.*
 service/dataproc:
   resources:
-  - google_dataproc_cluster
-  - google_dataproc_autoscaling_policy
-  - google_dataproc_job
+  - google_dataproc_cluster.*
+  - google_dataproc_autoscaling_policy.*
+  - google_dataproc_job.*
   - google_dataproc_workflow_template
   - google_dataproc_batch
 service/datastream:
@@ -290,7 +297,7 @@ service/dialogflow:
   - google_dialogflow_.*
 service/discoveryengine:
   resources:
-  - google_discoveryengine_.*
+  - google_discovery_engine_.*
 service/dlp:
   resources:
   - google_data_loss_prevention_.*
@@ -398,6 +405,9 @@ service/memcache:
 service/metastore:
   resources:
   - google_dataproc_metastore_.*
+service/migrationcenter:
+  resources:
+  - google_migration_center_.*
 service/monitoring-alerting:
   resources:
   - google_monitoring_notification_channel
@@ -407,6 +417,7 @@ service/monitoring-metrics:
   - google_monitoring_metric_descriptor
   - google_monitoring_group
 service/monitoring-services:
+  team: monitoring-core-services
   resources:
   - google_monitoring_custom_service
   - google_monitoring_dashboard
@@ -421,6 +432,9 @@ service/monitoring-services:
 service/monitoring-uptime:
   resources:
   - google_monitoring_uptime_.*
+service/netapp:
+  resources:
+  - google_netapp_.*
 service/network-connectivity-center:
   resources:
   - google_network_connectivity_hub
@@ -468,6 +482,7 @@ service/networkservices-traffic-director:
 service/notebooks:
   resources:
   - google_notebooks_.*
+  - google_workbench_.*
 service/orgpolicy:
   resources:
   - google_folder_organization_policy
@@ -486,6 +501,9 @@ service/policy-based-routing:
 service/private-service-connect-interfaces:
   resources:
   - google_compute_network_attachment
+service/private-service-connect-published-service:
+  resources:
+  - google_compute_service_attachment
 service/privateca:
   resources:
   - google_privateca_.*
@@ -516,9 +534,15 @@ service/run:
 service/secretmanager:
   resources:
   - google_secret_manager_.*
+service/securesourcemanager:
+  resources:
+  - google_secure_source_manager_.*
 service/securitycenter:
   resources:
   - google_scc_.*
+service/securityposture:
+  resources:
+  - google_securityposture_.*
 service/service-networking:
   resources:
   - google_service_networking_connection
@@ -549,9 +573,7 @@ service/tpu:
   - google_tpu_.*
 service/vmwareengine:
   resources:
-  - google_vmwareengine_network
-  - google_vmwareengine_private_cloud
-  - google_vmwareengine_cluster
+  - google_vmwareengine_.*
 service/vpcaccess:
   resources:
   - google_vpc_access_connector

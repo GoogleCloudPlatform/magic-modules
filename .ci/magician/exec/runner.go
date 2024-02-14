@@ -1,9 +1,25 @@
+/*
+* Copyright 2023 Google LLC. All Rights Reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+ */
 package exec
 
 import (
 	"container/list"
 	"errors"
 	"fmt"
+	"io/fs"
 	"log"
 	"os"
 	"os/exec"
@@ -34,6 +50,14 @@ func (ar *Runner) GetCWD() string {
 
 func (ar *Runner) Copy(src, dest string) error {
 	return cp.Copy(ar.abs(src), ar.abs(dest))
+}
+
+func (ar *Runner) Mkdir(path string) error {
+	return os.MkdirAll(ar.abs(path), 0777)
+}
+
+func (ar *Runner) Walk(root string, fn filepath.WalkFunc) error {
+	return filepath.Walk(root, fn)
 }
 
 func (ar *Runner) RemoveAll(path string) error {
@@ -68,19 +92,34 @@ func (ar *Runner) WriteFile(name, data string) error {
 	return os.WriteFile(ar.abs(name), []byte(data), 0644)
 }
 
-func (ar *Runner) Run(name string, args, env []string) (string, error) {
+func (ar *Runner) ReadFile(name string) (string, error) {
+	data, err := os.ReadFile(ar.abs(name))
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
+}
+
+// Run the given command with the given args and env, return output and error if any
+func (ar *Runner) Run(name string, args []string, env map[string]string) (string, error) {
 	cmd := exec.Command(name, args...)
 	cmd.Dir = ar.cwd
-	cmd.Env = append(os.Environ(), env...)
+	for ev, val := range env {
+		cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", ev, val))
+	}
 	out, err := cmd.Output()
-	if err != nil {
-		exitErr := err.(*exec.ExitError)
-		return string(out), fmt.Errorf("error running %s: %v\nstdout:\n%sstderr:\n%s", name, err, out, exitErr.Stderr)
+	switch typedErr := err.(type) {
+	case *exec.ExitError:
+		return string(out), fmt.Errorf("error running %s: %v\nstdout:\n%sstderr:\n%s", name, err, out, typedErr.Stderr)
+	case *fs.PathError:
+		return "", fmt.Errorf("path error running %s: %v", name, typedErr)
+
 	}
 	return string(out), nil
 }
 
-func (ar *Runner) MustRun(name string, args, env []string) string {
+// Run the command and exit if there's an error.
+func (ar *Runner) MustRun(name string, args []string, env map[string]string) string {
 	out, err := ar.Run(name, args, env)
 	if err != nil {
 		log.Fatal(err)

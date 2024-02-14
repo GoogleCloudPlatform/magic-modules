@@ -4,24 +4,9 @@ package provider
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-<% products.each do |product|
-	product_definition = product[:definitions]
-	if version == 'ga'
-		some_resource_in_ga = false
-		product_definition.objects.each do |object|
-			if !object.exclude && !object.not_in_version?(product_definition.version_obj_or_closest(version))
-				some_resource_in_ga = true
-				break
-			end
-		end
-
-		if some_resource_in_ga -%>
-			"github.com/hashicorp/terraform-provider-google/google/services/<%= product[:definitions].name.downcase -%>"
+	<% get_mmv1_services_in_version(products, version).each do |service|  -%>
+	  "github.com/hashicorp/terraform-provider-google/google/services/<%= service -%>"
 	<% end -%>
-<% else -%>
-		"github.com/hashicorp/terraform-provider-google/google/services/<%= product[:definitions].name.downcase -%>"
-	<% end -%>
-<% end -%>
 
 	"github.com/hashicorp/terraform-provider-google/google/services/composer"
 	"github.com/hashicorp/terraform-provider-google/google/services/container"
@@ -86,6 +71,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_compute_instance_serial_port":              compute.DataSourceGoogleComputeInstanceSerialPort(),
 	"google_compute_instance_template":                 compute.DataSourceGoogleComputeInstanceTemplate(),
 	"google_compute_lb_ip_ranges":                      compute.DataSourceGoogleComputeLbIpRanges(),
+	"google_compute_machine_types":                     compute.DataSourceGoogleComputeMachineTypes(),
 	"google_compute_network":                           compute.DataSourceGoogleComputeNetwork(),
 	"google_compute_networks":                          compute.DataSourceGoogleComputeNetworks(),
 	"google_compute_network_endpoint_group":            compute.DataSourceGoogleComputeNetworkEndpointGroup(),
@@ -97,6 +83,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_compute_region_instance_template":          compute.DataSourceGoogleComputeRegionInstanceTemplate(),
 	"google_compute_region_network_endpoint_group":     compute.DataSourceGoogleComputeRegionNetworkEndpointGroup(),
 	"google_compute_region_ssl_certificate":            compute.DataSourceGoogleRegionComputeSslCertificate(),
+	"google_compute_reservation":                       compute.DataSourceGoogleComputeReservation(),
 	"google_compute_resource_policy":                   compute.DataSourceGoogleComputeResourcePolicy(),
 	"google_compute_router":                            compute.DataSourceGoogleComputeRouter(),
 	"google_compute_router_nat":                        compute.DataSourceGoogleComputeRouterNat(),
@@ -117,6 +104,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_container_registry_repository":             containeranalysis.DataSourceGoogleContainerRepo(),
 	"google_dataproc_metastore_service":                dataprocmetastore.DataSourceDataprocMetastoreService(),
 	"google_datastream_static_ips":                     datastream.DataSourceGoogleDatastreamStaticIps(),
+	"google_filestore_instance":                        filestore.DataSourceGoogleFilestoreInstance(),
 	"google_iam_policy":                                resourcemanager.DataSourceGoogleIamPolicy(),
 	"google_iam_role":                                  resourcemanager.DataSourceGoogleIamRole(),
 	"google_iam_testable_permissions":                  resourcemanager.DataSourceGoogleIamTestablePermissions(),
@@ -201,6 +189,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_redis_instance":                            redis.DataSourceGoogleRedisInstance(),
 	"google_vertex_ai_index":                           vertexai.DataSourceVertexAIIndex(),
 	"google_vmwareengine_cluster":                      vmwareengine.DataSourceVmwareengineCluster(),
+	"google_vmwareengine_external_access_rule":         vmwareengine.DataSourceVmwareengineExternalAccessRule(),
 	"google_vmwareengine_external_address":             vmwareengine.DataSourceVmwareengineExternalAddress(),
 	"google_vmwareengine_network":                      vmwareengine.DataSourceVmwareengineNetwork(),
 	"google_vmwareengine_network_peering":              vmwareengine.DataSourceVmwareengineNetworkPeering(),
@@ -216,27 +205,13 @@ var handwrittenDatasources = map[string]*schema.Resource{
 var generatedIAMDatasources = map[string]*schema.Resource{
 	// ####### START generated IAM datasources ###########
 	<%
-	products.each do |product|
-		product_definition = product[:definitions]
-		service = product_definition.name.downcase
-		config = product[:overrides]
-		sorted =  product_definition.objects.sort_by { |obj| obj.name }
-		sorted.each do |object|
-		next if object.exclude || object.not_in_version?(product_definition.version_obj_or_closest(version))
-		tf_product = (object.__product.legacy_name || product_definition.name).underscore
-		terraform_name = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}"
+	resources_for_version.each do |object|
+		unless object[:iam_class_name].nil?
 	-%>
+	"<%= object[:terraform_name] -%>_iam_policy":               tpgiamresource.DataSourceIamPolicy(<%= object[:iam_class_name] -%>IamSchema, <%= object[:iam_class_name] -%>IamUpdaterProducer),
 	<%
-	iam_policy = object&.iam_policy
-	unless iam_policy.nil? || iam_policy.exclude ||
-		(iam_policy.min_version && iam_policy.min_version < version)
-		iam_class_name = product_definition.name + object.name
-	-%>
-	"<%= terraform_name -%>_iam_policy":               tpgiamresource.DataSourceIamPolicy(<%= service -%>.<%= iam_class_name -%>IamSchema, <%= service -%>.<%= iam_class_name -%>IamUpdaterProducer),
-	<%
-	end # unless iam_policy.nil? || iam_policy.exclude
-	end   # product_definition.objects.each do
-	end     # products.each do
+		end
+	end
 	-%>
 	// ####### END generated IAM datasources ###########
 }
@@ -265,53 +240,26 @@ var handwrittenIAMDatasources = map[string]*schema.Resource{
 	// ####### END non-generated IAM datasources ###########
 }
 
-<%
-resource_count = 0
-iam_resource_count = 0
-products.each do |product|
-	product_definition = product[:definitions]
-	product_definition.objects.reject { |r| r.exclude || r.not_in_version?(product_definition.version_obj_or_closest(version)) }.each do |object|
-		resource_count += 1 unless object&.exclude_resource
-		iam_policy = object&.iam_policy
-		unless iam_policy.nil? || iam_policy.exclude
-			iam_resource_count += 3
-		end
-	end
-end
--%>
-
 // Resources
 // Generated resources: <%= resource_count %>
 // Generated IAM resources: <%= iam_resource_count %>
 // Total generated resources: <%= resource_count + iam_resource_count %>
 var generatedResources = map[string]*schema.Resource{
-	<%
-	products.each do |product|
-	product_definition = product[:definitions]
-	service = product_definition.name.downcase
-	config = product[:overrides]
-	sorted =  product_definition.objects.sort_by { |obj| obj.name }
-	sorted.each do |object|
-		next if object.exclude || object.not_in_version?(product_definition.version_obj_or_closest(version))
-		tf_product = (object.__product.legacy_name || product_definition.name).underscore
-		terraform_name = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}"
-	-%>
-	<% 	unless object&.exclude_resource -%>
-		"<%= terraform_name -%>": <%= service -%>.Resource<%= product_definition.name + object.name -%>(),
+	<% resources_for_version.each do |object| -%>
+	<% 	unless object[:resource_name].nil? -%>
+		"<%= object[:terraform_name] -%>": <%= object[:resource_name] -%>(),
 	<%  end -%>
 	<%
-		iam_policy = object&.iam_policy
-		unless iam_policy.nil? || iam_policy.exclude ||
-			(iam_policy.min_version && iam_policy.min_version < version)
-		  iam_class_name = product_definition.name + object.name
+	    unless object[:iam_class_name].nil?
 	-%>
-		"<%= terraform_name -%>_iam_binding":              tpgiamresource.ResourceIamBinding(<%= service -%>.<%= iam_class_name -%>IamSchema, <%= service -%>.<%= iam_class_name -%>IamUpdaterProducer, <%= service -%>.<%= iam_class_name -%>IdParseFunc),
-		"<%= terraform_name -%>_iam_member":               tpgiamresource.ResourceIamMember(<%= service -%>.<%= iam_class_name -%>IamSchema, <%= service -%>.<%= iam_class_name -%>IamUpdaterProducer, <%= service -%>.<%= iam_class_name -%>IdParseFunc),
-		"<%= terraform_name -%>_iam_policy":               tpgiamresource.ResourceIamPolicy(<%= service -%>.<%= iam_class_name -%>IamSchema, <%= service -%>.<%= iam_class_name -%>IamUpdaterProducer, <%= service -%>.<%= iam_class_name -%>IdParseFunc),
+		"<%= object[:terraform_name] -%>_iam_binding":              tpgiamresource.ResourceIamBinding(<%= object[:iam_class_name] -%>IamSchema, <%= object[:iam_class_name] -%>IamUpdaterProducer, <%= object[:iam_class_name] -%>IdParseFunc),
+		"<%= object[:terraform_name] -%>_iam_member":               tpgiamresource.ResourceIamMember(<%= object[:iam_class_name] -%>IamSchema, <%= object[:iam_class_name] -%>IamUpdaterProducer, <%= object[:iam_class_name] -%>IdParseFunc),
+		"<%= object[:terraform_name] -%>_iam_policy":               tpgiamresource.ResourceIamPolicy(<%= object[:iam_class_name] -%>IamSchema, <%= object[:iam_class_name] -%>IamUpdaterProducer, <%= object[:iam_class_name] -%>IdParseFunc),
 	<%
-	end # unless iam_policy.nil? || iam_policy.exclude
-	end   # product_definition.objects.each do
-	end     # products.each do
+	    end # unless object[:iam_class_name].nil?
+	-%>
+	<%
+	end     # resources_for_version.each do
 	-%>
 }
 

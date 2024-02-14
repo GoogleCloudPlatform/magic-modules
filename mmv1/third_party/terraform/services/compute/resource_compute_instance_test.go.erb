@@ -250,7 +250,7 @@ func TestAccComputeInstance_resourceManagerTags(t *testing.T) {
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
     context := map[string]interface{}{
-		"project":        envvar.GetTestProjectFromEnv(),
+		"project":       envvar.GetTestProjectFromEnv(),
 		"random_suffix": acctest.RandString(t, 10),
 		"instance_name": instanceName,
 	}
@@ -265,6 +265,43 @@ func TestAccComputeInstance_resourceManagerTags(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance)),
+			},
+			{
+				Config: testAccComputeInstance_resourceManagerTagsUpdate(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance)),
+			},
+		},
+	})
+}
+
+func TestAccComputeInstance_descriptionUpdate(t *testing.T) {
+	t.Parallel()
+
+	var instance compute.Instance
+	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_description(instanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "description", "old_desc"),
+				),
+			},
+			{
+				Config: testAccComputeInstance_descriptionUpdate(instanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "description", "new_desc"),
+				),
 			},
 		},
 	})
@@ -1767,6 +1804,9 @@ func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 	t.Parallel()
 
 	var instance compute.Instance
+	<% unless version == "ga" %>
+	var instance2 compute.Instance
+	<% end %>
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1775,18 +1815,31 @@ func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceConfidentialInstanceConfig(instanceName, true),
+				Config: testAccComputeInstanceConfidentialInstanceConfigEnable(instanceName, "SEV"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
-					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance, true),
+					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance, true, "SEV"),
+					<% unless version == "ga" %>
+					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar2", &instance2),
+					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance2, true, ""),
+					<% end %>
 				),
 			},
+			<% unless version == "ga" %>
+			{
+				Config: testAccComputeInstanceConfidentialInstanceConfigNoEnable(instanceName, "AMD Milan", "SEV_SNP"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar3", &instance),
+					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance, false, "SEV_SNP"),
+					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar4", &instance2),
+					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance2, false, "SEV_SNP"),
+				),
+			},
+			<% end %>
 		},
 	})
 }
 
-
-<% unless version == 'ga' -%>
 func TestAccComputeInstance_confidentialHyperDiskBootDisk(t *testing.T) {
 	t.Parallel()
 	kms := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-hyperdisk-key1")
@@ -1825,7 +1878,29 @@ func TestAccComputeInstance_confidentialHyperDiskBootDisk(t *testing.T) {
 		},
 	})
 }
-<% end -%>
+
+func TestAccComputeInstance_hyperdiskBootDisk_provisioned_iops_throughput(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"instance_name":         fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+		"zone":                  "us-central1-a",
+		"provisioned_iops": 	 12000,
+		"provisioned_throughput": 200,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceHyperDiskBootDiskProvisionedIopsThroughput(context),
+			},
+			computeInstanceImportStep(context["zone"].(string), context["instance_name"].(string), []string{"allow_stopping_for_update"}),
+		},
+	})
+}
 
 func TestAccComputeInstance_enableDisplay(t *testing.T) {
 	t.Parallel()
@@ -2663,6 +2738,109 @@ func TestAccComputeInstance_regionBootDisk(t *testing.T) {
 	})
 }
 
+func TestAccComputeInstance_creationOnlyAttributionLabel(t *testing.T) {
+	t.Parallel()
+
+	var instance compute.Instance
+	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_attributionLabelCreate(instanceName, "true", "CREATION_ONLY"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceLabel(&instance, "user_label", "foo"),
+					testAccCheckComputeInstanceAttributionLabel(&instance, true),
+				),
+			},
+			{
+				Config: testAccComputeInstance_attributionLabelUpdate(instanceName, "true", "CREATION_ONLY"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceLabel(&instance, "user_label", "bar"),
+					testAccCheckComputeInstanceAttributionLabel(&instance, true),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeInstance_creationOnlyAttributionLabelConfiguredOnUpdate(t *testing.T) {
+	// VCR tests cache provider configuration between steps, this test changes provider configuration and fails under VCR.
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	var instance compute.Instance
+	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_attributionLabelCreate(instanceName, "false", "CREATION_ONLY"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceLabel(&instance, "user_label", "foo"),
+					testAccCheckComputeInstanceAttributionLabel(&instance, false),
+				),
+			},
+			{
+				Config: testAccComputeInstance_attributionLabelUpdate(instanceName, "true", "CREATION_ONLY"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceLabel(&instance, "user_label", "bar"),
+					testAccCheckComputeInstanceAttributionLabel(&instance, false),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeInstance_proactiveAttributionLabel(t *testing.T) {
+	// VCR tests cache provider configuration between steps, this test changes provider configuration and fails under VCR.
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	var instance compute.Instance
+	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_attributionLabelCreate(instanceName, "false", "PROACTIVE"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceLabel(&instance, "user_label", "foo"),
+					testAccCheckComputeInstanceAttributionLabel(&instance, false),
+				),
+			},
+			{
+				Config: testAccComputeInstance_attributionLabelUpdate(instanceName, "true", "PROACTIVE"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceLabel(&instance, "user_label", "bar"),
+					testAccCheckComputeInstanceAttributionLabel(&instance, true),
+				),
+			},
+		},
+	})
+}
+
 <% unless version == 'ga' -%>
 // The tests related to security_policy use network_edge_security_service resource
 // which can only exist one per region. Because of that, all the following tests must run serially.
@@ -3037,7 +3215,7 @@ func testAccCheckComputeInstanceUpdateMachineType(t *testing.T, n string) resour
 	}
 }
 
-<% if version == "beta"%>
+<% unless version == "ga"%>
 func TestAccComputeInstance_NetworkAttachment(t *testing.T) {
 	t.Parallel()
 	suffix := fmt.Sprintf("%s", acctest.RandString(t, 10))
@@ -3550,6 +3728,26 @@ func testAccCheckComputeInstanceLabel(instance *compute.Instance, key string, va
 	}
 }
 
+func testAccCheckComputeInstanceAttributionLabel(instance *compute.Instance, present bool) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		if instance.Labels == nil {
+			if present {
+				return fmt.Errorf("no labels found on instance %s", instance.Name)
+			}
+			return nil
+		}
+
+		_, ok := instance.Labels["goog-terraform-provisioned"]
+		if ok {
+			if !present {
+				return fmt.Errorf("Attribution label found on instance %s", instance.Name)
+			}
+		}
+
+		return nil
+	}
+}
+
 func testAccCheckComputeInstanceServiceAccount(instance *compute.Instance, scope string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if count := len(instance.ServiceAccounts); count != 1 {
@@ -3686,7 +3884,7 @@ func testAccCheckComputeInstanceHasMinCpuPlatform(instance *compute.Instance, mi
 	}
 }
 
-<% if version == "beta"%>
+<% unless version == "ga" -%>
 func testAccCheckComputeInstanceHasNetworkAttachment(instance *compute.Instance, networkAttachmentName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, networkInterface := range instance.NetworkInterfaces {
@@ -3793,12 +3991,17 @@ func testAccCheckComputeInstanceHasShieldedVmConfig(instance *compute.Instance, 
 	}
 }
 
-func testAccCheckComputeInstanceHasConfidentialInstanceConfig(instance *compute.Instance, EnableConfidentialCompute bool) resource.TestCheckFunc {
+func testAccCheckComputeInstanceHasConfidentialInstanceConfig(instance *compute.Instance, EnableConfidentialCompute bool, ConfidentialInstanceType string) resource.TestCheckFunc {
 
 	return func(s *terraform.State) error {
 		if instance.ConfidentialInstanceConfig.EnableConfidentialCompute != EnableConfidentialCompute {
 			return fmt.Errorf("Wrong ConfidentialInstanceConfig EnableConfidentialCompute: expected %t, got, %t", EnableConfidentialCompute, instance.ConfidentialInstanceConfig.EnableConfidentialCompute)
 		}
+		<% unless version == "ga" %>
+		if instance.ConfidentialInstanceConfig.ConfidentialInstanceType != ConfidentialInstanceType {
+			return fmt.Errorf("Wrong ConfidentialInstanceConfig ConfidentialInstanceType: expected %s, got, %s", ConfidentialInstanceType, instance.ConfidentialInstanceConfig.ConfidentialInstanceType)
+		}
+		<% end %>
 
 		return nil
 	}
@@ -4031,6 +4234,58 @@ resource "google_compute_instance" "foobar" {
 `, instance)
 }
 
+func testAccComputeInstance_description(instance string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%s"
+  machine_type = "e2-medium"
+  zone         = "us-central1-a"
+  description  = "old_desc"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+}
+`, instance)
+}
+
+func testAccComputeInstance_descriptionUpdate(instance string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%s"
+  machine_type = "e2-medium"
+  zone         = "us-central1-a"
+  description  = "new_desc"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+}
+`, instance)
+}
+
 func testAccComputeInstance_resourceManagerTags(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_tags_tag_key" "key" {
@@ -4054,8 +4309,6 @@ resource "google_compute_instance" "foobar" {
   name           = "%{instance_name}"
   machine_type   = "e2-medium"
   zone           = "us-central1-a"
-  can_ip_forward = false
-  tags           = ["tag-key", "tag-value"]
 
   boot_disk {
     initialize_params {
@@ -4075,9 +4328,64 @@ resource "google_compute_instance" "foobar" {
   network_interface {
     network = "default"
   }
+}
+`, context)
+}
 
-  metadata = {
-    foo = "bar"
+func testAccComputeInstance_resourceManagerTagsUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_tags_tag_key" "key" {
+  parent = "projects/%{project}"
+  short_name = "foobarbaz%{random_suffix}"
+  description = "For foo/bar resources."
+}
+
+resource "google_tags_tag_value" "value" {
+  parent = "tagKeys/${google_tags_tag_key.key.name}"
+  short_name = "foo%{random_suffix}"
+  description = "For foo resources."
+}
+
+resource "google_tags_tag_key" "key_new" {
+  parent = "projects/%{project}"
+  short_name = "foobarbaznew%{random_suffix}"
+  description = "New key for foo/bar resources."
+}
+
+resource "google_tags_tag_value" "value_new" {
+  parent = "tagKeys/${google_tags_tag_key.key_new.name}"
+  short_name = "foonew%{random_suffix}"
+  description = "New value for foo resources."
+}
+
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+  name           = "%{instance_name}"
+  machine_type   = "e2-medium"
+  zone           = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+      resource_manager_tags = {
+        "tagKeys/${google_tags_tag_key.key.name}" = "tagValues/${google_tags_tag_value.value.name}"
+      }
+    }
+  }
+
+  params {
+    resource_manager_tags = {
+      "tagKeys/${google_tags_tag_key.key.name}"     = "tagValues/${google_tags_tag_value.value.name}"
+      "tagKeys/${google_tags_tag_key.key_new.name}" = "tagValues/${google_tags_tag_value.value_new.name}"
+    }
+  }
+
+  network_interface {
+    network = "default"
   }
 }
 `, context)
@@ -6861,7 +7169,7 @@ resource "google_compute_instance" "foobar" {
 `, instance, enableSecureBoot, enableVtpm, enableIntegrityMonitoring)
 }
 
-func testAccComputeInstanceConfidentialInstanceConfig(instance string, enableConfidentialCompute bool) string {
+func testAccComputeInstanceConfidentialInstanceConfigEnable(instance string, confidentialInstanceType string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family    = "ubuntu-2004-lts"
@@ -6884,7 +7192,10 @@ resource "google_compute_instance" "foobar" {
   }
 
   confidential_instance_config {
-    enable_confidential_compute       = %t
+    enable_confidential_compute       = true
+    <% unless version == "ga" %>
+    confidential_instance_type        = %q
+    <% end %>
   }
 
   scheduling {
@@ -6892,10 +7203,178 @@ resource "google_compute_instance" "foobar" {
   }
 
 }
-`, instance, enableConfidentialCompute)
+<% unless version == "ga" %>
+resource "google_compute_instance" "foobar2" {
+  name         = "%s2"
+  machine_type = "n2d-standard-2"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  confidential_instance_config {
+    enable_confidential_compute       = true
+  }
+
+  scheduling {
+    on_host_maintenance = "TERMINATE"
+  }
+
+}
+<% end %>
+<% if version == "ga" %>
+`, instance)
+<% else %>
+`, instance, confidentialInstanceType, instance)
+<% end %>
 }
 
-<% unless version == 'ga' -%>
+<% unless version == "ga" %>
+func testAccComputeInstanceConfidentialInstanceConfigNoEnable(instance string, minCpuPlatform, confidentialInstanceType string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image2" {
+  family    = "ubuntu-2004-lts"
+  project   = "ubuntu-os-cloud"
+}
+
+resource "google_compute_instance" "foobar3" {
+  name         = "%s3"
+  machine_type = "n2d-standard-2"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image2.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  min_cpu_platform = %q
+
+  confidential_instance_config {
+    enable_confidential_compute       = false
+    confidential_instance_type        = %q
+  }
+
+  scheduling {
+	  on_host_maintenance = "TERMINATE"
+  }
+
+}
+resource "google_compute_instance" "foobar4" {
+  name         = "%s4"
+  machine_type = "n2d-standard-2"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image2.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  min_cpu_platform = %q
+
+  confidential_instance_config {
+    confidential_instance_type        = %q
+  }
+
+  scheduling {
+    on_host_maintenance = "TERMINATE"
+  }
+
+}
+`, instance, minCpuPlatform, confidentialInstanceType, instance, minCpuPlatform, confidentialInstanceType)
+}
+<% end %>
+
+func testAccComputeInstance_attributionLabelCreate(instance, add, strategy string) string {
+	return fmt.Sprintf(`
+provider "google" {
+	add_terraform_attribution_label               = %s
+	terraform_attribution_label_addition_strategy = %q
+}
+
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+  name           = "%s"
+  machine_type   = "e2-medium"
+  zone           = "us-central1-a"
+  can_ip_forward = false
+  tags           = ["foo", "bar"]
+  desired_status  = "RUNNING"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  labels = {
+    user_label = "foo"
+  }
+}
+`, add, strategy, instance)
+}
+
+func testAccComputeInstance_attributionLabelUpdate(instance, add, strategy string) string {
+	return fmt.Sprintf(`
+provider "google" {
+	add_terraform_attribution_label               = %s
+	terraform_attribution_label_addition_strategy = %q
+}
+
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+  name           = "%s"
+  machine_type   = "e2-medium"
+  zone           = "us-central1-a"
+  can_ip_forward = false
+  tags           = ["foo", "bar"]
+  desired_status  = "RUNNING"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  labels = {
+    user_label = "bar"
+  }
+}
+`, add, strategy, instance)
+}
+
 func testAccComputeInstanceConfidentialHyperDiskBootDisk(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_compute_image" "my_image" {
@@ -6905,17 +7384,15 @@ data "google_compute_image" "my_image" {
 
 data "google_project" "project" {}
 
-resource "google_kms_crypto_key_iam_binding" "crypto_key" {
+resource "google_kms_crypto_key_iam_member" "crypto_key" {
   crypto_key_id = "%{key_name}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  members = [
-    "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com",
-  ]
+  member = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
 }
 
 resource "google_compute_instance" "foobar" {
   name         = "%{instance_name}"
-  machine_type = "n2-standard-2"
+  machine_type = "h3-standard-88"
   zone         = "%{zone}"
 
   boot_disk {
@@ -6932,12 +7409,42 @@ resource "google_compute_instance" "foobar" {
   network_interface {
     network = "default"
   }
-  depends_on = [google_kms_crypto_key_iam_binding.crypto_key]
+  depends_on = [google_kms_crypto_key_iam_member.crypto_key]
 
 }
 `, context)
 }
-<% end -%>
+
+func testAccComputeInstanceHyperDiskBootDiskProvisionedIopsThroughput(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+  family    = "ubuntu-2204-lts"
+  project   = "ubuntu-os-cloud"
+}
+
+data "google_project" "project" {}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%{instance_name}"
+  machine_type = "h3-standard-88"
+  zone         = "%{zone}"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+      provisioned_iops = %{provisioned_iops}
+      provisioned_throughput = %{provisioned_throughput}
+      type = "hyperdisk-balanced"
+      size = 100
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+}
+`, context)
+}
 
 func testAccComputeInstance_enableDisplay(instance string) string {
 	return fmt.Sprintf(`
@@ -8320,7 +8827,7 @@ resource "google_compute_instance" "foobar" {
 
 <% end -%>
 
-<% if version =="beta"%>
+<% unless version =="ga" -%>
 func testAccComputeInstance_networkAttachment(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_compute_image" "my_image" {

@@ -13,19 +13,14 @@
 
 require 'spec_helper'
 
-class TestObject < Api::Object::Named
+class TestObject < Api::NamedObject
   attr_reader :some_property
 end
 
-describe Api::Object do
+describe Google::YamlValidator do
   context 'requires name' do
     subject { -> { object('some_property: "bar"').validate } }
     it { is_expected.to raise_error(StandardError, /Missing 'name'/) }
-  end
-
-  context 'out_name underscore style' do
-    subject { object('name: "MyCamelCaseObjectName"').out_name }
-    it { is_expected.to eq 'my_camel_case_object_name' }
   end
 
   private

@@ -15,3 +15,13 @@
   details:
     functions: 
     - tpgresource.DefaultProviderProject
+- type: CUSTOM_SCHEMA_VALUES
+  field: destination.cloud_function
+  details:
+    required: false
+    optional: false
+    computed: true
+- type: CUSTOM_DESCRIPTION
+  field: destination.cloud_function
+  details:
+    description: "The Cloud Function resource name. Only Cloud Functions V2 is supported. Format projects/{project}/locations/{location}/functions/{function} This is a read-only field. [WARNING] Creating Cloud Functions V2 triggers is only supported via the Cloud Functions product. An error will be returned if the user sets this value."

@@ -99,14 +99,19 @@ examples:
     primary_resource_name: 'fmt.Sprintf("policycontroller")'
     primary_resource_id: 'feature'
   - !ruby/object:Provider::Terraform::Examples
-    name: 'enable_fleet_default_member_config_policycontroller_update'
+    name: 'enable_fleet_default_member_config_policycontroller_full'
     skip_test: true
     primary_resource_name: 'fmt.Sprintf("policycontroller")'
     primary_resource_id: 'feature'
   - !ruby/object:Provider::Terraform::Examples
-    name: 'enable_fleet_default_member_config_policycontroller_set_empty'
+    name: 'enable_fleet_default_member_config_policycontroller_minimal'
     skip_test: true
     primary_resource_name: 'fmt.Sprintf("policycontroller")'
+    primary_resource_id: 'feature'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'gkehub_feature_clusterupgrade'
+    skip_test: true
+    primary_resource_name: 'fmt.Sprint("clusterupgrade")'
     primary_resource_id: 'feature'
 autogen_async: true
 # Skip sweeper gen since this is a child resource.
@@ -195,6 +200,61 @@ properties:
                       - :MODE_UNSPECIFIED
                       - :COPY
                       - :MOVE
+      - !ruby/object:Api::Type::NestedObject
+        name: clusterupgrade
+        description: Clusterupgrade feature spec.
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: 'upstreamFleets'
+            description: |
+              Specified if other fleet should be considered as a source of upgrades. Currently, at most one upstream fleet is allowed. The fleet name should be either fleet project number or id.
+            required: true
+            item_type: Api::Type::String
+          - !ruby/object:Api::Type::NestedObject
+            name: 'postConditions'
+            description: |
+              Post conditions to override for the specified upgrade.
+            required: true
+            default_from_api: true
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'soaking'
+                description: |
+                  Amount of time to "soak" after a rollout has been finished before marking it COMPLETE. Cannot exceed 30 days.
+                required: true
+          - !ruby/object:Api::Type::Array
+            name: 'gkeUpgradeOverrides'
+            description: |
+              Configuration overrides for individual upgrades.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'upgrade'
+                  description: |
+                    Which upgrade to override.
+                  required: true
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'name'
+                      description: |
+                        Name of the upgrade, e.g., "k8s_control_plane". It should be a valid upgrade name. It must not exceet 99 characters.
+                      required: true
+                    - !ruby/object:Api::Type::String
+                      name: 'version'
+                      description: |
+                         Version of the upgrade, e.g., "1.22.1-gke.100". It should be a valid version. It must not exceet 99 characters.
+                      required: true
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'postConditions'
+                  description: |
+                    Post conditions to override for the specified upgrade.
+                  required: true
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'soaking'
+                      description: |
+                        Amount of time to "soak" after a rollout has been finished before marking it COMPLETE. Cannot exceed 30 days.
+                      required: true
   - !ruby/object:Api::Type::NestedObject
     name: fleetDefaultMemberConfig
     description: Optional. Fleet Default Membership Configuration.
@@ -215,6 +275,9 @@ properties:
         name: configmanagement
         description: Config Management spec
         properties:
+          - !ruby/object:Api::Type::String
+            name: version
+            description: 'Version of ACM installed'
           - !ruby/object:Api::Type::NestedObject
             name: configSync
             description: 'ConfigSync configuration for the cluster'
@@ -274,6 +337,7 @@ properties:
                   - !ruby/object:Api::Type::String
                     name: version
                     description: 'Version of ACM installed'
+                    deprecation_message: The `configmanagement.config_sync.oci.version` field is deprecated and will be removed in a future major release. Please use `configmanagement.version` field to specify the version of ACM installed instead.
       - !ruby/object:Api::Type::NestedObject
         name: policycontroller
         description: Policy Controller spec

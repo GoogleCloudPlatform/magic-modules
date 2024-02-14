@@ -1,0 +1,8 @@
+resource "google_netapp_backup_vault" "<%= ctx[:primary_resource_id] %>" {
+  name = "<%= ctx[:vars]['backup_vault_name'] %>"
+  location = "us-central1"
+  description = "Terraform created vault"
+  labels = { 
+    "creator": "testuser"
+  }
+}

@@ -19,11 +19,11 @@ require 'google/string_utils'
 
 module Api
   # An object available in the product
-  class Resource < Api::Object::Named
+  class Resource < Api::NamedObject
     # The list of properties (attr_reader) that can be overridden in
     # <provider>.yaml.
     module Properties
-      include Api::Object::Named::Properties
+      include Api::NamedObject::Properties
 
       # [Required] A description of the resource that's surfaced in provider
       # documentation.
@@ -146,14 +146,14 @@ module Api
 
       # The Terraform resource id format used when calling #setId(...).
       # For instance, `{{name}}` means the id will be the resource name.
-      attr_reader :id_format
+      attr_accessor :id_format
       # Override attribute used to handwrite the formats for generating regex strings
       # that match templated values to a self_link when importing, only necessary when
       # a resource is not adequately covered by the standard provider generated options.
       # Leading a token with `%`
       # i.e. {{%parent}}/resource/{{resource}}
       # will allow that token to hold multiple /'s.
-      attr_reader :import_format
+      attr_accessor :import_format
       attr_reader :custom_code
       attr_reader :docs
 
@@ -472,10 +472,6 @@ module Api
     end
 
     def add_labels_fields(props, parent, labels)
-      # The effective_labels field is used to write to API, instead of the labels field.
-      labels.ignore_write = true
-      labels.description = "#{labels.description}\n\n#{get_labels_field_note(labels.name)}"
-
       @custom_diff ||= []
       if parent.nil? || parent.flatten_object
         @custom_diff.append('tpgresource.SetLabelsDiff')
@@ -483,8 +479,15 @@ module Api
         @custom_diff.append('tpgresource.SetMetadataLabelsDiff')
       end
 
-      props << build_terraform_labels_field('labels', labels)
+      props << build_terraform_labels_field('labels', parent, labels)
       props << build_effective_labels_field('labels', labels)
+
+      # The effective_labels field is used to write to API, instead of the labels field.
+      labels.ignore_write = true
+      labels.description = "#{labels.description}\n\n#{get_labels_field_note(labels.name)}"
+      return unless parent.nil?
+
+      labels.immutable = false
     end
 
     def add_annotations_fields(props, parent, annotations)
@@ -521,9 +524,15 @@ module Api
       )
     end
 
-    def build_terraform_labels_field(name, labels)
+    def build_terraform_labels_field(name, parent, labels)
       description = "The combination of #{name} configured directly on the resource
  and default #{name} configured on the provider."
+
+      immutable = if parent.nil?
+                    false
+                  else
+                    labels.immutable
+                  end
 
       Api::Type::KeyValueTerraformLabels.new(
         name: "terraform#{name.capitalize}",
@@ -533,8 +542,16 @@ module Api
         min_version: labels.field_min_version,
         ignore_write: true,
         update_url: labels.update_url,
-        immutable: labels.immutable
+        immutable:
       )
+    end
+
+    # Check if the resource has root "labels" field
+    def root_labels?
+      root_properties.each do |p|
+        return true if p.is_a? Api::Type::KeyValueLabels
+      end
+      false
     end
 
     # Return labels fields that should be added to ImportStateVerifyIgnore
@@ -645,6 +662,52 @@ Please refer to the field `effective_#{title}` for all of the #{title} present o
       else
         @delete_url
       end
+    end
+
+    def resource_name
+      __product.name + name
+    end
+
+    # Filter the properties to keep only the ones don't have custom update
+    # method and group them by update url & verb.
+    def properties_without_custom_update(properties)
+      properties.select do |p|
+        p.update_url.nil? || p.update_verb.nil? || p.update_verb == :NOOP
+      end
+    end
+
+    def update_body_properties
+      update_prop = properties_without_custom_update(settable_properties)
+      update_prop = update_prop.reject(&:immutable) if update_verb == :PATCH
+      update_prop
+    end
+
+    # Handwritten TF Operation objects will be shaped like accessContextManager
+    # while the Google Go Client will have a name like accesscontextmanager
+    def client_name_pascal
+      client_name = __product.client_name || __product.name
+      client_name.camelize(:upper)
+    end
+
+    # In order of preference, use TF override,
+    # general defined timeouts, or default Timeouts
+    def timeouts
+      timeouts_filtered = @timeouts
+      timeouts_filtered ||= async&.operation&.timeouts
+      timeouts_filtered ||= Api::Timeouts.new
+      timeouts_filtered
+    end
+
+    def project?
+      base_url.include?('{{project}}') || create_url&.include?('{{project}}')
+    end
+
+    def region?
+      base_url.include?('{{region}}') && parameters.any? { |p| p.name == 'region' && p.ignore_read }
+    end
+
+    def zone?
+      base_url.include?('{{zone}}') && parameters.any? { |p| p.name == 'zone' && p.ignore_read }
     end
 
     def merge(other)
