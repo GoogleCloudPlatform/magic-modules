@@ -39,11 +39,11 @@ var (
 		"trodge",
 		"hao-nan-li",
 		"NickElliot",
+		"BBBmau",
 	}
 
 	// This is for new team members who are onboarding
 	trustedContributors = []string{
-		"BBBmau",
 	}
 
 	// This is for reviewers who are "on vacation": will not receive new review assignments but will still receive re-requests for assigned PRs.
