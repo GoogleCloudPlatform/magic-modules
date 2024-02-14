@@ -8,5 +8,6 @@
 package generated
 
 var ServiceParallelism = mapOf(
+    "accessapproval" to 1,
     "looker" to 1
 )
