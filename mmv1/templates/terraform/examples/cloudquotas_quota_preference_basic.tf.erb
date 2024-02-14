@@ -1,0 +1,10 @@
+resource "google_cloudquotas_quota_preference" "<%= ctx[:primary_resource_id] %>" {
+  name          = "projects/" + "<%= ctx[:test_env_vars]['project'] %>" + "/locations/global/" + "<%= ctx[:vars]['preference_name'] %>"
+  quota_config  = google_cloudquotas_quota_config.config
+  service       = "<%= ctx[:vars]['service'] %>"
+  quota_id      = "<%= ctx[:vars]['quota_id'] %>"
+  contact_email = "<%= ctx[:vars]['contact_email'] %>"
+}
+resource "google_cloudquotas_quota_config" "config" {
+  preferred_value          = "200"
+}
