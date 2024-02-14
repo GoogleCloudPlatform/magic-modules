@@ -87,6 +87,7 @@ resource "time_sleep" "wait_60_sec" {
 	depends_on = [google_project.project]
 
 	create_duration = "60s"
+	destroy_duration = "60s"
 }
 
 resource "google_project_service" "firestore" {
