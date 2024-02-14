@@ -198,9 +198,11 @@ Affected tests: ` + fmt.Sprintf("`%d`", len(replayingResult.FailedTests)) + `
 			replayingAfterRecordingResult, replayingAfterRecordingErr := vt.RunParallel(vcr.Replaying, provider.Beta, testDirs, recordingResult.PassedTests)
 			if replayingAfterRecordingErr != nil {
 				testState = "failure"
+			} else {
+				testState = "success"
 			}
 
-			if err := vt.UploadLogs("ci-vcr-logs", prNumber, buildID, true, false, vcr.Recording, provider.Beta); err != nil {
+			if err := vt.UploadLogs("ci-vcr-logs", prNumber, buildID, true, true, vcr.Replaying, provider.Beta); err != nil {
 				fmt.Println("Error uploading recording logs: ", err)
 				os.Exit(1)
 			}
