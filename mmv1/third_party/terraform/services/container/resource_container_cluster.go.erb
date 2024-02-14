@@ -5419,10 +5419,9 @@ func expandNodePoolAutoConfig(configured interface{}) *container.NodePoolAutoCon
 		npac.NetworkTags = expandNodePoolAutoConfigNetworkTags(v)
 	}
 
-	// TODO uncomment for auto_pilot_config
-	// if v, ok := config["resource_manager_tags"]; ok && len(v.(map[string]interface{})) > 0 {
-	// 	npac.ResourceManagerTags = expandResourceManagerTags(v)
-	// }
+	if v, ok := config["resource_manager_tags"]; ok && len(v.(map[string]interface{})) > 0 {
+		npac.ResourceManagerTags = expandResourceManagerTags(v)
+	}
 
 	return npac
 }
