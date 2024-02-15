@@ -14,7 +14,6 @@ import (
 var ccEnvironmentVariables = [...]string{
 	"COMMIT_SHA",
 	"GITHUB_TOKEN_DOWNSTREAMS",
-	"GITHUB_TOKEN_MAGIC_MODULES",
 	"GOCACHE",
 	"GOPATH",
 	"GOOGLE_BILLING_ACCOUNT",
