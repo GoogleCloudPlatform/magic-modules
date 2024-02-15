@@ -168,6 +168,8 @@ Affected tests: ` + fmt.Sprintf("`%d`", len(replayingResult.FailedTests)) + `
 		recordingResult, recordingErr := vt.RunParallel(vcr.Recording, provider.Beta, testDirs, replayingResult.FailedTests)
 		if recordingErr != nil {
 			testState = "failure"
+		} else {
+			testState = "success"
 		}
 
 		if err := vt.UploadCassettes("ci-vcr-cassettes", prNumber, provider.Beta); err != nil {
@@ -198,8 +200,6 @@ Affected tests: ` + fmt.Sprintf("`%d`", len(replayingResult.FailedTests)) + `
 			replayingAfterRecordingResult, replayingAfterRecordingErr := vt.RunParallel(vcr.Replaying, provider.Beta, testDirs, recordingResult.PassedTests)
 			if replayingAfterRecordingErr != nil {
 				testState = "failure"
-			} else {
-				testState = "success"
 			}
 
 			if err := vt.UploadLogs("ci-vcr-logs", prNumber, buildID, true, true, vcr.Replaying, provider.Beta); err != nil {
