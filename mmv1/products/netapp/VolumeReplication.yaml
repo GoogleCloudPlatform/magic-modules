@@ -204,6 +204,7 @@ properties:
     name: "destinationVolumeParameters"
     description: |-
       Destination volume parameters.
+    # destinationVolumeParameters is only used on CREATE. Will not be returned on READ.
     ignore_read: true
     properties:
       - !ruby/object:Api::Type::String
@@ -277,7 +278,7 @@ virtual_fields:
     name: "wait_for_mirror"
     description: |
       Replication resource state is independent of mirror_state. With enough data, it can take many hours
-      for mirror_state to reach MIRRORED. If you want Terraform to wait for the mirror to finish one
+      for mirror_state to reach MIRRORED. If you want Terraform to wait for the mirror to finish on
       create/stop/resume operations, set this parameter to true. Default is false.
     default_value: false
 custom_code: !ruby/object:Provider::Terraform::CustomCode

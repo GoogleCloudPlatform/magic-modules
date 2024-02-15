@@ -79,10 +79,11 @@ if do_change {
 		return err
 	}
 
-	// mirrorState should be okay by now, but we still observe glitches. So let's make sure.
-	// Wait for mirrorState=targetState before continuing
-	err = NetAppVolumeReplicationWaitForMirror(d, meta, targetState)
-	if err != nil {
-		return fmt.Errorf("Error waiting for volume replication to reach mirror_state==%s: %s", targetState, err)
+	// If user specified to wait for mirror operations, wait to reach target state
+	if d.Get("wait_for_mirror").(bool) == true {
+		err = NetAppVolumeReplicationWaitForMirror(d, meta, targetState)
+		if err != nil {
+			return fmt.Errorf("Error waiting for volume replication to reach mirror_state==%s: %s", targetState, err)
+		}
 	}
 }

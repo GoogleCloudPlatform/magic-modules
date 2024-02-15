@@ -122,7 +122,6 @@ resource "google_netapp_volume_replication" "test_replication" {
 // Update parameters
 func testAccNetappVolumeReplication_netappVolumeReplicationCreateExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-
 data "google_compute_network" "default" {
   name = "%{network_name}"
 }
@@ -161,7 +160,7 @@ resource "google_netapp_volume_replication" "test_replication" {
   volume_name          = google_netapp_volume.source_volume.name
   name                 = "tf-test-test-replication%{random_suffix}"
   replication_schedule = "EVERY_10_MINUTES"
-  description.                = "This is a replication resource"
+  description          = "This is a replication resource"
   labels = {
     key   = "test"
     value =  "replication"
@@ -185,7 +184,6 @@ resource "google_netapp_volume_replication" "test_replication" {
 // Stop replication
 func testAccNetappVolumeReplication_netappVolumeReplicationCreateExample_stop(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-
 data "google_compute_network" "default" {
   name = "%{network_name}"
 }
@@ -219,28 +217,28 @@ resource "google_netapp_volume" "source_volume" {
 }
 
 resource "google_netapp_volume_replication" "test_replication" {
-	depends_on           = [google_netapp_volume.source_volume]
-	location             = google_netapp_volume.source_volume.location
-	volume_name          = google_netapp_volume.source_volume.name
-	name                 = "tf-test-test-replication%{random_suffix}"
-	replication_schedule = "EVERY_10_MINUTES"
-	description 		   = "This is a replication resource"
-	labels = {
-		key   = "test"
-		value =  "replication2"
-	}
-	destination_volume_parameters {
-	  storage_pool = google_netapp_storage_pool.destination_pool.id
-	  volume_id    = "tf-test-destination-volume%{random_suffix}"
-	  # Keeping the share_name of source and destination the same
-	  # simplifies implementing client failover concepts
-	  share_name  = "tf-test-source-volume%{random_suffix}"
-	  description = "This is a replicated volume"
-	}
-	replication_enabled = false
-	delete_destination_volume = true
-	force_stopping = true
-	wait_for_mirror = true
+  depends_on           = [google_netapp_volume.source_volume]
+  location             = google_netapp_volume.source_volume.location
+  volume_name          = google_netapp_volume.source_volume.name
+  name                 = "tf-test-test-replication%{random_suffix}"
+  replication_schedule = "EVERY_10_MINUTES"
+  description          = "This is a replication resource"
+  labels = {
+    key   = "test"
+    value =  "replication2"
+  }
+  destination_volume_parameters {
+    storage_pool = google_netapp_storage_pool.destination_pool.id
+    volume_id    = "tf-test-destination-volume%{random_suffix}"
+    # Keeping the share_name of source and destination the same
+    # simplifies implementing client failover concepts
+    share_name  = "tf-test-source-volume%{random_suffix}"
+    description = "This is a replicated volume"
+  }
+  replication_enabled = false
+  delete_destination_volume = true
+  force_stopping = true
+  wait_for_mirror = true
 }
 `, context)
 }
@@ -248,7 +246,6 @@ resource "google_netapp_volume_replication" "test_replication" {
 // resume replication
 func testAccNetappVolumeReplication_netappVolumeReplicationCreateExample_resume(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-
 data "google_compute_network" "default" {
   name = "%{network_name}"
 }
@@ -282,28 +279,28 @@ resource "google_netapp_volume" "source_volume" {
 }
 
 resource "google_netapp_volume_replication" "test_replication" {
-	depends_on           = [google_netapp_volume.source_volume]
-	location             = google_netapp_volume.source_volume.location
-	volume_name          = google_netapp_volume.source_volume.name
-	name                 = "tf-test-test-replication%{random_suffix}"
-	replication_schedule = "HOURLY"
-	description 		   = "This is a replication resource"
-	labels = {
-		key   = "test"
-		value =  "replication2"
-	}
-	destination_volume_parameters {
-	  storage_pool = google_netapp_storage_pool.destination_pool.id
-	  volume_id    = "tf-test-destination-volume%{random_suffix}"
-	  # Keeping the share_name of source and destination the same
-	  # simplifies implementing client failover concepts
-	  share_name  = "tf-test-source-volume%{random_suffix}"
-	  description = "This is a replicated volume"
-	}
-	replication_enabled = true
-	delete_destination_volume = true
-	force_stopping = true
-	wait_for_mirror = true
+  depends_on           = [google_netapp_volume.source_volume]
+  location             = google_netapp_volume.source_volume.location
+  volume_name          = google_netapp_volume.source_volume.name
+  name                 = "tf-test-test-replication%{random_suffix}"
+  replication_schedule = "HOURLY"
+  description          = "This is a replication resource"
+  labels = {
+    key   = "test"
+    value =  "replication2"
+  }
+  destination_volume_parameters {
+    storage_pool = google_netapp_storage_pool.destination_pool.id
+    volume_id    = "tf-test-destination-volume%{random_suffix}"
+    # Keeping the share_name of source and destination the same
+    # simplifies implementing client failover concepts
+    share_name  = "tf-test-source-volume%{random_suffix}"
+    description = "This is a replicated volume"
+  }
+  replication_enabled = true
+  delete_destination_volume = true
+  force_stopping = true
+  wait_for_mirror = true
 }
 `, context)
 }
