@@ -99,7 +99,7 @@ steps:
 
     - name: 'gcr.io/graphite-docker-images/build-environment'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
-      secretEnv: ["GITHUB_TOKEND_DOWNSTREAMS"]
+      secretEnv: ["GITHUB_TOKEN_DOWNSTREAMS"]
       id: tpgb-head
       waitFor: ["build-magician-binary"]
       env:
