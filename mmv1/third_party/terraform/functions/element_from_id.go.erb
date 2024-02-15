@@ -9,8 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/function"
 )
 
-// GetElementFromSelfLink is reusable logic that is used in multiple provider-defined functions for pulling elements out of self links and ids of resources and data sources
-func GetElementFromSelfLink(ctx context.Context, input string, regex *regexp.Regexp, template string, pattern string, req function.RunRequest, resp *function.RunResponse) string {
+// GetElementFromId is reusable logic that is used in multiple provider-defined functions for pulling elements out of self links and ids of resources and data sources
+func GetElementFromId(ctx context.Context, input string, regex *regexp.Regexp, template string, pattern string, req function.RunRequest, resp *function.RunResponse) string {
 	submatches := regex.FindAllStringSubmatchIndex(input, -1)
 
 	// Zero matches means unusable input; error returned

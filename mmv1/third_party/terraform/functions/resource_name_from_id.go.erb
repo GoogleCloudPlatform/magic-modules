@@ -8,19 +8,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/function"
 )
 
-var _ function.Function = ResourceNameFromSelfLinkFunction{}
+var _ function.Function = ResourceNameFromIdFunction{}
 
-func NewResourceNameFromSelfLinkFunction() function.Function {
-	return &ResourceNameFromSelfLinkFunction{}
+func NewResourceNameFromIdFunction() function.Function {
+	return &ResourceNameFromIdFunction{}
 }
 
-type ResourceNameFromSelfLinkFunction struct{}
+type ResourceNameFromIdFunction struct{}
 
-func (f ResourceNameFromSelfLinkFunction) Metadata(ctx context.Context, req function.MetadataRequest, resp *function.MetadataResponse) {
+func (f ResourceNameFromIdFunction) Metadata(ctx context.Context, req function.MetadataRequest, resp *function.MetadataResponse) {
 	resp.Name = "resource_name_from_self_link"
 }
 
-func (f ResourceNameFromSelfLinkFunction) Definition(ctx context.Context, req function.DefinitionRequest, resp *function.DefinitionResponse) {
+func (f ResourceNameFromIdFunction) Definition(ctx context.Context, req function.DefinitionRequest, resp *function.DefinitionResponse) {
 	resp.Definition = function.Definition{
 		Summary:     "Returns the resource name within the resource self link or id provided as an argument.",
 		Description: "Takes a single string argument, which should be a self link or id of a resource. This function will either return the resource's short name from the input string or raise an error. The function returns the last element in that path before the end of the input string, e.g. when the function is passed the self link \"https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1-c/instances/my-instance\" as an argument it will return \"my-instance\".",
@@ -34,7 +34,7 @@ func (f ResourceNameFromSelfLinkFunction) Definition(ctx context.Context, req fu
 	}
 }
 
-func (f ResourceNameFromSelfLinkFunction) Run(ctx context.Context, req function.RunRequest, resp *function.RunResponse) {
+func (f ResourceNameFromIdFunction) Run(ctx context.Context, req function.RunRequest, resp *function.RunResponse) {
 
 	// Load arguments from function call
 	var arg0 string
@@ -50,7 +50,7 @@ func (f ResourceNameFromSelfLinkFunction) Run(ctx context.Context, req function.
 	pattern := "resourceType/{name}$"                        // Human-readable pseudo-regex pattern used in errors and warnings
 
 	// Get and return element from input string
-	resourceName := GetElementFromSelfLink(ctx, arg0, regex, template, pattern, req, resp)
+	resourceName := GetElementFromId(ctx, arg0, regex, template, pattern, req, resp)
 	if resp.Diagnostics.HasError() {
 		return
 	}
