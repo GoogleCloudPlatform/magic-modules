@@ -161,11 +161,11 @@ resource "google_netapp_volume_replication" "test_replication" {
   volume_name          = google_netapp_volume.source_volume.name
   name                 = "tf-test-test-replication%{random_suffix}"
   replication_schedule = "EVERY_10_MINUTES"
-  description 		   = "This is a replication resource"
-	labels = {
-		key   = "test"
-		value =  "replication"
-	}
+  description.                = "This is a replication resource"
+  labels = {
+    key   = "test"
+    value =  "replication"
+  }
   destination_volume_parameters {
     storage_pool = google_netapp_storage_pool.destination_pool.id
     volume_id    = "tf-test-destination-volume%{random_suffix}"
