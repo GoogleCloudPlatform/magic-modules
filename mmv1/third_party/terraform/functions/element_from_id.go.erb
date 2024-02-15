@@ -17,7 +17,7 @@ func GetElementFromId(ctx context.Context, input string, regex *regexp.Regexp, t
 	if len(submatches) == 0 {
 		resp.Diagnostics.AddArgumentError(
 			0,
-			"No project id is present in the input string",
+			"No matches present in the input string",
 			fmt.Sprintf("The input string \"%s\" doesn't contain the expected pattern \"%s\".", input, pattern),
 		)
 		resp.Diagnostics.Append(resp.Result.Set(ctx, "")...)
@@ -28,7 +28,7 @@ func GetElementFromId(ctx context.Context, input string, regex *regexp.Regexp, t
 	if len(submatches) > 1 {
 		resp.Diagnostics.AddArgumentWarning(
 			0,
-			"Ambiguous input string could contain more than one project id",
+			"Ambiguous input string could contain more than one match",
 			fmt.Sprintf("The input string \"%s\" contains more than one match for the pattern \"%s\". Terraform will use the first found match.", input, pattern),
 		)
 	}
