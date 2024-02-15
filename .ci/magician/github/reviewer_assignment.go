@@ -34,14 +34,14 @@ func ChooseCoreReviewers(requestedReviewers, previousReviewers []User) (reviewer
 	newPrimaryReviewer = ""
 
 	for _, reviewer := range requestedReviewers {
-		if IsTeamReviewer(reviewer.Login) {
+		if IsCoreReviewer(reviewer.Login) {
 			hasPrimaryReviewer = true
 			break
 		}
 	}
 
 	for _, reviewer := range previousReviewers {
-		if IsTeamReviewer(reviewer.Login) {
+		if IsCoreReviewer(reviewer.Login) {
 			hasPrimaryReviewer = true
 			reviewersToRequest = append(reviewersToRequest, reviewer.Login)
 		}
@@ -55,16 +55,14 @@ func ChooseCoreReviewers(requestedReviewers, previousReviewers []User) (reviewer
 	return reviewersToRequest, newPrimaryReviewer
 }
 
-func FormatReviewerComment(newPrimaryReviewer string, authorUserType UserType, trusted bool) string {
+func FormatReviewerComment(newPrimaryReviewer string) string {
 	tmpl, err := template.New("REVIEWER_ASSIGNMENT_COMMENT.md").Parse(reviewerAssignmentComment)
 	if err != nil {
 		panic(fmt.Sprintf("Unable to parse REVIEWER_ASSIGNMENT_COMMENT.md: %s", err))
 	}
 	sb := new(strings.Builder)
 	tmpl.Execute(sb, map[string]any{
-		"reviewer":       newPrimaryReviewer,
-		"authorUserType": authorUserType.String(),
-		"trusted":        trusted,
+		"reviewer": newPrimaryReviewer,
 	})
 	return sb.String()
 }
