@@ -18,6 +18,8 @@ jobs:
   request-review:
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -32,7 +34,5 @@ jobs:
           cd .ci/magician
           go build .
       - name: Request reviewer
-        permissions:
-          pull-requests: write
         run: .ci/magician request-reviewer ${{ github.event.pull_request.number }}
 
