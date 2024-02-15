@@ -214,7 +214,6 @@ func iamMemberToAccess(member string) (string, string, error) {
 	if strings.HasPrefix(member, "deleted:") {
 		return "", "", fmt.Errorf("BigQuery Dataset IAM member is deleted: %s", member)
 	}
-
 	pieces := strings.SplitN(member, ":", 2)
 	if len(pieces) > 1 {
 		switch pieces[0] {
@@ -249,7 +248,7 @@ func accessToIamMember(access map[string]interface{}) (string, error) {
 		return member.(string), nil
 	}
 	if member, ok := access["iamMember"]; ok {
-		return member.(string), nil
+		return fmt.Sprintf("iamMember:%s", member.(string)), nil
 	}
 	if _, ok := access["view"]; ok {
 		// view does not map to an IAM member, use access instead
