@@ -104,12 +104,12 @@ terraform {
 	}
 }
 
-resource "google_pubsub_topic" "example" {
+resource "google_pubsub_topic" "default" {
   name = "%{resource_name}"
 }
 
 output "%{output_name}" {
-	value = provider::google::%{function_name}(google_pubsub_topic.example.id)
+	value = provider::google::%{function_name}(google_pubsub_topic.default.id)
 }
 `, context)
 }
@@ -129,14 +129,14 @@ data "google_compute_network" "default" {
   name = "default"
 }
 
-resource "google_compute_subnetwork" "subnet" {
+resource "google_compute_subnetwork" "default" {
   name          = "%{resource_name}"
   ip_cidr_range = "10.2.0.0/16"
   network        = data.google_compute_network.default.id
 }
 
 output "%{output_name}" {
-	value = provider::google::%{function_name}(google_compute_subnetwork.subnet.self_link)
+	value = provider::google::%{function_name}(google_compute_subnetwork.default.self_link)
 }
 `, context)
 }
