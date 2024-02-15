@@ -18,7 +18,7 @@ base_url: 'projects/{{project}}/locations/{{location}}/backups'
 create_url: 'projects/{{project}}/locations/{{location}}/backups?backupId={{backup_id}}'
 update_verb: :PATCH
 update_mask: true
-description: 'An AlloyDB Backup.'
+description: 'An AlloyDB Backup. Updated.'
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'AlloyDB': 'https://cloud.google.com/alloydb/docs/'
