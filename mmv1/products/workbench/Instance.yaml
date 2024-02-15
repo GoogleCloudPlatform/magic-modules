@@ -185,9 +185,8 @@ properties:
         name: vmImage
         custom_flatten: templates/terraform/custom_flatten/workbench_instance_vm_image_flatten.go.erb
         default_from_api: true
-        exactly_one_of:
-          - vm_image
-          - container_image
+        conflicts:
+          - gce_setup.0.container_image
         immutable: true
         description: |
           Definition of a custom Compute Engine virtual machine image for starting
@@ -217,9 +216,8 @@ properties:
               - vm_image.0.family
       - !ruby/object:Api::Type::NestedObject
         name: containerImage
-        exactly_one_of:
-          - vm_image
-          - container_image
+        conflicts:
+          - gce_setup.0.vm_image
         description: |
           Use a container image to start the workbench instance.
         properties:
