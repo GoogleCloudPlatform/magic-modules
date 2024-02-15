@@ -280,7 +280,6 @@ virtual_fields:
       for mirror_state to reach MIRRORED. If you want Terraform to wait for the mirror to finish one
       create/stop/resume operations, set this parameter to true. Default is false.
     default_value: false
-# The following functionality needs to be discussed in review process
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/netapp_volume_replication.go.erb
   post_create: templates/terraform/post_create/netapp_volume_replication_post_create.go.erb
