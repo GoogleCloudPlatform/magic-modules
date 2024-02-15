@@ -14,6 +14,7 @@ jobs:
       repo: 'terraform-provider-google'
 
   teamcity-services-diff-check-ga:
+    needs: terraform-provider-google
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout Repository
