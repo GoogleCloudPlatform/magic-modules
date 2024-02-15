@@ -305,7 +305,7 @@ func (p *FrameworkProvider) Functions(_ context.Context) []func() function.Funct
 	return []func() function.Function{
 		functions.NewProjectFromIdFunction,
 		functions.NewRegionFromIdFunction,
-		functions.NewResourceNameFromIdFunction,
+		functions.NewNameFromIdFunction,
         functions.NewZoneFromIdFunction,
 	}
 }

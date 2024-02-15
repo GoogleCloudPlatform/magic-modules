@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-func TestAccProviderFunction_resource_name_from_self_link(t *testing.T) {
+func TestAccProviderFunction_name_from_id(t *testing.T) {
 	t.Parallel()
 	acctest.SkipIfVcr(t) // Need to determine if compatible with VCR, as functions are implemented in PF provider
 
@@ -27,7 +27,7 @@ func TestAccProviderFunction_resource_name_from_self_link(t *testing.T) {
 	invalidInput := resourceName
 
 	context := map[string]interface{}{
-		"function_name": "resource_name_from_self_link",
+		"function_name": "name_from_id",
 		"output_name":   "resource_name",
 		"resource_name": resourceName,
 		"input":     "", // overridden in test cases
