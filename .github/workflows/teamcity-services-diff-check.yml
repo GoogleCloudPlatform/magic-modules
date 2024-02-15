@@ -22,6 +22,17 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Download built artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: artifact-terraform-provider-google
+          path: artifacts
+
+      - name: Unzip the artifacts and delete the zip
+        run: |
+          unzip artifacts/output.zip -d ./
+          rm artifacts/output.zip
+
       - name: Setup Go
         uses: actions/setup-go@v3
         with:
