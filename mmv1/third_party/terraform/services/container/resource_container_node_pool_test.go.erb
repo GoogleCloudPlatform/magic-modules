@@ -4320,6 +4320,8 @@ resource "google_tags_tag_key" "key2" {
   purpose_data = {
     network = "%[1]s/%[4]s"
   }
+
+  depends_on = [google_tags_tag_key.key1]
 }
 
 resource "google_tags_tag_value" "value2" {
@@ -4432,6 +4434,8 @@ resource "google_tags_tag_key" "key2" {
   purpose_data = {
     network = "%[1]s/%[4]s"
   }
+
+  depends_on = [google_tags_tag_key.key1]
 }
 
 resource "google_tags_tag_value" "value2" {
@@ -4545,6 +4549,8 @@ resource "google_tags_tag_key" "key2" {
   purpose_data = {
     network = "%[1]s/%[4]s"
   }
+
+  depends_on = [google_tags_tag_key.key1]
 }
 
 resource "google_tags_tag_value" "value2" {
