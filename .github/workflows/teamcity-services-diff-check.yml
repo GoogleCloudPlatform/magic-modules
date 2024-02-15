@@ -1,0 +1,47 @@
+name: TeamCity Services Diff Check
+permissions: read-all
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/teamcity-services-diff-check.yml'
+      - 'mmv1/third_party/terraform/!.teamcity'
+jobs:
+  terraform-provider-google:
+    uses: ./.github/workflows/build-downstream.yml
+    with:
+      repo: 'terraform-provider-google'
+
+  teamcity-services-diff-check-ga:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          fetch-depth: 0
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '^1.20.1'
+
+      - name: Cache Go modules and build cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-test-terraform-provider-google-${{hashFiles('go.sum','google-*/transport/**','google-*/tpgresource/**','google-*/acctest/**','google-*/envvar/**','google-*/sweeper/**','google-*/verify/**') }}
+          restore-keys: |
+              ${{ runner.os }}-test-terraform-provider-google-${{ hashFiles('go.sum') }}
+              ${{ runner.os }}-test-terraform-provider-google-
+
+      - name: Build Provider
+        run: |
+          go build
+
+      - name: Diff Check
+        run: |
+          cd mmv1/third_party/terraform/.teamcity/components/inputs
+          go run diff_check.go
