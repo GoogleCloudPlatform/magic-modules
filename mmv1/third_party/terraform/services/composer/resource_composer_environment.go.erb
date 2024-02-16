@@ -1553,11 +1553,12 @@ func flattenComposerEnvironmentConfig(envCfg *composer.EnvironmentConfig) interf
 	transformed["airflow_uri"] = envCfg.AirflowUri
 	transformed["node_config"] = flattenComposerEnvironmentConfigNodeConfig(envCfg.NodeConfig)
 	transformed["software_config"] = flattenComposerEnvironmentConfigSoftwareConfig(envCfg.SoftwareConfig)
-	if !isComposer3(envCfg){
+	imageVersion := envCfg.SoftwareConfig.ImageVersion
+	if !isComposer3(imageVersion){
 		transformed["private_environment_config"] = flattenComposerEnvironmentConfigPrivateEnvironmentConfig(envCfg.PrivateEnvironmentConfig)
 	}
 <% unless version == "ga" -%>
-	if isComposer3(envCfg) && envCfg.PrivateEnvironmentConfig != nil {
+	if isComposer3(imageVersion) && envCfg.PrivateEnvironmentConfig != nil {
 		transformed["enable_private_environment"] = envCfg.PrivateEnvironmentConfig.EnablePrivateEnvironment
 		transformed["enable_private_builds_only"] = envCfg.PrivateEnvironmentConfig.EnablePrivateBuildsOnly
 	}
@@ -1926,7 +1927,8 @@ func expandComposerEnvironmentConfig(v interface{}, d *schema.ResourceData, conf
 		composer.PrivateEnvironmentConfig.EnablePrivateEnvironment in API.
 		Check image version to avoid overriding EnablePrivateEnvironment in case of other versions.
 	*/
-	if isComposer3(d) {
+	imageVersion := d.Get("config.0.software_config.0.image_version").(string)
+	if isComposer3(imageVersion) {
 		transformed.PrivateEnvironmentConfig = &composer.PrivateEnvironmentConfig{}
 		if enablePrivateEnvironmentRaw, ok := original["enable_private_environment"]; ok {
 			transformed.PrivateEnvironmentConfig.EnablePrivateEnvironment = enablePrivateEnvironmentRaw.(bool)
@@ -2823,21 +2825,8 @@ func versionsEqual(old, new string) (bool, error) {
 	return o.Equal(n), nil
 }
 
-func isComposer3(v interface{})	bool {
-	var imageVersion string
-	switch v.(type) {
-	case *schema.ResourceData:
-		imageVersion = v.(*schema.ResourceData).Get("config.0.software_config.0.image_version").(string)
-	case *schema.ResourceDiff:
-		imageVersion = v.(*schema.ResourceDiff).Get("config.0.software_config.0.image_version").(string)
-	case *composer.EnvironmentConfig:
-		imageVersion = v.(*composer.EnvironmentConfig).SoftwareConfig.ImageVersion
-	case string:
-		imageVersion = v.(string)
-	default:
-		log.Printf("[ERROR] error in plugin: unexpected argument type in isComposer3")
-	}
-	return strings.Contains(imageVersion, "composer-3")
+func isComposer3(v string)	bool {
+	return strings.Contains(v, "composer-3")
 }
 
 func imageVersionChangeValidationFunc(ctx context.Context, old, new, meta any) error {
@@ -2849,7 +2838,8 @@ func imageVersionChangeValidationFunc(ctx context.Context, old, new, meta any) e
 
 func validateComposer3FieldUsage(d *schema.ResourceDiff, key string, requireComposer3 bool) error {
 	_, ok := d.GetOk(key)
-	if ok && ( isComposer3(d) != requireComposer3 ) {
+	imageVersion := d.Get("config.0.software_config.0.image_version").(string)
+	if ok && ( isComposer3(imageVersion) != requireComposer3 ) {
 		if requireComposer3 {
 			return fmt.Errorf("error in configuration, %s should only be used in Composer 3", key)
 		} else {
