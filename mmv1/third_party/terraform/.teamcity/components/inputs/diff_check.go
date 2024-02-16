@@ -25,7 +25,7 @@ func main() {
 		return
 	}
 
-	pattern := regexp.MustCompile(`github\.com\/hashicorp\/terraform-provider-google\/google\/services\/(?P<service>\w+)`)
+	pattern := regexp.MustCompile(`github\.com\/hashicorp\/terraform-provider-(google|google-beta)\/(google|google-beta)\/services\/(?P<service>\w+)`)
 
 	// Template to convert "key: value" to "key=value" by
 	// referencing the values captured by the regex pattern.

@@ -1,0 +1,55 @@
+name: TeamCity Services Diff Check Beta
+permissions: read-all
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [opened, edited]
+    paths:
+      - '.github/workflows/teamcity-services-diff-check-beta.yml'
+      - 'mmv1/third_party/terraform/.teamcity/components/inputs/services_beta.kt'
+jobs:
+  terraform-provider-google-beta:
+    uses: ./.github/workflows/build-downstream.yml
+    with:
+      repo: 'terraform-provider-google-beta'
+
+  teamcity-services-diff-check-ga:
+    needs: terraform-provider-google-beta
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Download built artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: artifact-terraform-provider-google-beta
+          path: artifacts
+
+      - name: Unzip the artifacts and delete the zip
+        run: |
+          unzip artifacts/output.zip -d ./
+          rm artifacts/output.zip
+
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '^1.20'
+
+      - name: Cache Go modules and build cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-test-terraform-provider-google-beta-${{hashFiles('go.sum','google-beta-*/transport/**','google-beta-*/tpgresource/**','google-beta-*/acctest/**','google-*/envvar/**','google-beta-*/sweeper/**','google-beta-*/verify/**') }}
+          restore-keys: |
+              ${{ runner.os }}-test-terraform-provider-google-beta-${{ hashFiles('go.sum') }}
+              ${{ runner.os }}-test-terraform-provider-google-beta
+
+      - name: Build Provider
+        run: |
+          go build
+
+      - name: Diff Check
+        run: |
+          cd .teamcity/components/inputs
+          go run diff_check.go
