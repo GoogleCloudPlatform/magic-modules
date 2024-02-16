@@ -4,7 +4,7 @@ resource "google_scc_event_threat_detection_custom_module" "<%= ctx[:primary_res
   enablement_state = "ENABLED"
   type = "<%= ctx[:vars]['type'] %>"
   description = "My Event Threat Detection Custom Module"
-  cofig = jsonencode({
+  config = jsonencode({
     "metadata": {
       "severity": "LOW",
       "description": "Flagged by Forcepoint as malicious",
