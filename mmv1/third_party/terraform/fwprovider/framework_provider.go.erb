@@ -303,6 +303,7 @@ func (p *FrameworkProvider) Resources(_ context.Context) []func() resource.Resou
 // Functions defines the provider functions implemented in the provider.
 func (p *FrameworkProvider) Functions(_ context.Context) []func() function.Function {
 	return []func() function.Function{
+		functions.NewLocationFromIdFunction,
 		functions.NewProjectFromIdFunction,
 		functions.NewRegionFromIdFunction,
 		functions.NewNameFromIdFunction,
