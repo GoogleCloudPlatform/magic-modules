@@ -7,7 +7,7 @@ on:
     types: [opened, edited]
     paths:
       - '.github/workflows/teamcity-services-diff-check.yml'
-      - 'mmv1/third_party/terraform/!.teamcity'
+      - 'mmv1/third_party/terraform/.teamcity/components/inputs/services_ga.kt'
 jobs:
   terraform-provider-google:
     uses: ./.github/workflows/build-downstream.yml
