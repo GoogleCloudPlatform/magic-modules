@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestAccProviderFunction_project_id_from_id(t *testing.T) {
+func TestAccProviderFunction_project_from_id(t *testing.T) {
 	t.Parallel()
 	acctest.SkipIfVcr(t) // Need to determine if compatible with VCR, as functions are implemented in PF provider
 
@@ -24,7 +24,7 @@ func TestAccProviderFunction_project_id_from_id(t *testing.T) {
 	invalidInput := "zones/us-central1-c/instances/my-instance"
 
 	context := map[string]interface{}{
-		"function_name": "project_id_from_id",
+		"function_name": "project_from_id",
 		"output_name":   "project_id",
 		"resource_name": fmt.Sprintf("tf-test-project-id-func-%s", acctest.RandString(t, 10)),
 		"input":     "", // overridden in test cases

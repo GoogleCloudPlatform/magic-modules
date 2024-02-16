@@ -17,7 +17,7 @@ func NewProjectFromIdFunction() function.Function {
 type ProjectFromIdFunction struct{}
 
 func (f ProjectFromIdFunction) Metadata(ctx context.Context, req function.MetadataRequest, resp *function.MetadataResponse) {
-	resp.Name = "project_id_from_id"
+	resp.Name = "project_from_id"
 }
 
 func (f ProjectFromIdFunction) Definition(ctx context.Context, req function.DefinitionRequest, resp *function.DefinitionResponse) {
