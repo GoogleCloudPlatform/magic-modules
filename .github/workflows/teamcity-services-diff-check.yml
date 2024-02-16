@@ -50,5 +50,5 @@ jobs:
 
       - name: Diff Check
         run: |
-          cd mmv1/third_party/terraform/.teamcity/components/inputs
+          cd .teamcity/components/inputs
           go run diff_check.go
