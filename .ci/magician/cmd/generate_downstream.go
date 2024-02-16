@@ -61,7 +61,7 @@ var generateDownstreamCmd = &cobra.Command{
 			}
 		}
 
-		gh := github.NewClient()
+		gh := github.NewClient(githubToken)
 		rnr, err := exec.NewRunner()
 		if err != nil {
 			fmt.Println("Error creating a runner: ", err)

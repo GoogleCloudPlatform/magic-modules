@@ -15,19 +15,13 @@
  */
 package github
 
-import (
-	"os"
-)
-
 // Client for GitHub interactions.
 type Client struct {
-	classicToken string
-	token        string
+	token string
 }
 
-func NewClient() *Client {
+func NewClient(token string) *Client {
 	return &Client{
-		classicToken: os.Getenv("GITHUB_TOKEN_CLASSIC"),
-		token:        os.Getenv("GITHUB_TOKEN_MAGIC_MODULES"),
+		token: token,
 	}
 }

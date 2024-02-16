@@ -60,7 +60,7 @@ var testTerraformVCRCmd = &cobra.Command{
 			baseBranch = "main"
 		}
 
-		gh := github.NewClient()
+		gh := github.NewClient(env["GITHUB_TOKEN_MAGIC_MODULES"])
 		rnr, err := exec.NewRunner()
 		if err != nil {
 			fmt.Println("Error creating a runner: ", err)
