@@ -19,8 +19,12 @@ var changelogExp = regexp.MustCompile("(?s)```release-note.*?```")
 
 var gdEnvironmentVariables = [...]string{
 	"BASE_BRANCH",
-	"GITHUB_TOKEN_CLASSIC",
 	"GOPATH",
+}
+
+var gdOptionalEnvironmentVariables = [...]string{
+	"GITHUB_TOKEN_CLASSIC",
+	"GITHUB_TOKEN_DOWNSTREAMS",
 }
 
 var generateDownstreamCmd = &cobra.Command{
@@ -45,6 +49,10 @@ var generateDownstreamCmd = &cobra.Command{
 				os.Exit(1)
 			}
 			env[ev] = val
+		}
+
+		for _, ev := range gdOptionalEnvironmentVariables {
+			env[ev] = os.Getenv(ev)
 		}
 
 		gh := github.NewClient()
