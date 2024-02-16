@@ -54,5 +54,5 @@ jobs:
 
       - name: Diff Check
         run: |
-          cd .teamcity/components/inputs
-          go run diff_check.go google-beta services_beta.kt
+          cd tools/teamcity-diff-check
+          go run main.go google-beta services_beta.kt
