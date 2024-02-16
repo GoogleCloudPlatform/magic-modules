@@ -1,3 +1,5 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
 /*
  * Copyright (c) HashiCorp, Inc.
  * SPDX-License-Identifier: MPL-2.0
@@ -18,7 +20,10 @@ import (
 )
 
 func main() {
-	cmd := exec.Command("go", "list", "../../../google/services/...")
+	repo := os.Args
+	services := fmt.Sprintf("../../../%v/services/...", repo[1])
+	fmt.Println(services)
+	cmd := exec.Command("go", "list", services)
 	stdout, err := cmd.Output()
 	if err != nil {
 		fmt.Println(err.Error())
