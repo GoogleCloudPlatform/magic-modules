@@ -73,6 +73,14 @@ examples:
       kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
       network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "looker-vpc-network-1", acctest.ServiceNetworkWithPrefixLength(20))'
     skip_docs: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'looker_instance_custom_domain'
+    primary_resource_id: 'looker-instance'
+    vars:
+      instance_name: 'my-instance'
+      client_id: 'my-client-id'
+      client_secret: 'my-client-secret'
+      custom_domain: 'my-custom-domain'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'region'
@@ -416,3 +424,19 @@ properties:
         description: |
           Number of additional Developer Users to allocate to the Looker Instance.
   # UserMetadata Object - End
+  # CustomDomain Object
+  - !ruby/object:Api::Type::NestedObject
+    name: customDomain
+    description: |
+      Custom domain settings for a Looker instance.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'domain'
+        description: |
+          Domain name
+      - !ruby/object:Api::Type::String
+        name: 'state'
+        description: |
+          Status of the custom domain.
+        output: true
+  # CustomDomain Object - End
