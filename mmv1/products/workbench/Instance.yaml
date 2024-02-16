@@ -156,6 +156,36 @@ properties:
             use accelerators, make sure that your configuration has [enough vCPUs and memory
             to support the `machine_type` you have selected](https://cloud.google.com/compute/docs/gpus/#gpus-list).
             Currently supports only one accelerator configuration.
+      - !ruby/object:Api::Type::NestedObject
+        name: shieldedInstanceConfig
+        default_from_api: true
+        allow_empty_object: true
+        send_empty_value: true
+        description: |
+          A set of Shielded Instance options. See [Images using supported Shielded
+          VM features](https://cloud.google.com/compute/docs/instances/modifying-shielded-vm).
+          Not all combinations are valid.
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: enableSecureBoot
+            description: |
+              Optional. Defines whether the VM instance has Secure Boot enabled.
+              Secure Boot helps ensure that the system only runs authentic software by verifying
+              the digital signature of all boot components, and halting the boot process
+              if signature verification fails. Disabled by default.
+          - !ruby/object:Api::Type::Boolean
+            name: enableVtpm
+            description: |
+              Optional. Defines whether the VM instance has the vTPM enabled.
+              Enabled by default.
+          - !ruby/object:Api::Type::Boolean
+            name: enableIntegrityMonitoring
+            description: |
+              Optional. Defines whether the VM instance has integrity monitoring
+              enabled. Enables monitoring and attestation of the boot integrity of the VM
+              instance. The attestation is performed against the integrity policy baseline.
+              This baseline is initially derived from the implicitly trusted boot image
+              when the VM instance is created. Enabled by default.
       - !ruby/object:Api::Type::Array
         name: serviceAccounts
         description: |
