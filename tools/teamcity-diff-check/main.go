@@ -96,4 +96,6 @@ func main() {
 		fmt.Fprintf(os.Stderr, "error: diff in %s\n", *serviceFile)
 		os.Exit(1)
 	}
+
+	fmt.Println("No Diff")
 }

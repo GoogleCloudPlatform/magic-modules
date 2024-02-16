@@ -50,6 +50,7 @@ jobs:
       - name: Build Provider
         run: |
           cd tgp
+          ls
           go build
 
       - name: Diff Check
