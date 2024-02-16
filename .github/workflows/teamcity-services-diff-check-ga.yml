@@ -18,6 +18,12 @@ jobs:
     needs: terraform-provider-google
     runs-on: ubuntu-22.04
     steps:
+      - uses: actions/checkout@v3
+
+      - name: this
+        run: |
+         cd tools/teamcity-diff-check
+         go run main.go google services_ga.kt
       - name: Download built artifacts
         uses: actions/download-artifact@v2
         with:
@@ -51,5 +57,5 @@ jobs:
 
       - name: Diff Check
         run: |
-          cd .teamcity/components/inputs
-          go run diff_check.go google services_ga.kt
+          cd tools/teamcity-diff-check
+          go run main.go google services_ga.kt

@@ -12,6 +12,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"flag"
 	"fmt"
 	"io"
 	"os"
@@ -19,9 +20,12 @@ import (
 	"regexp"
 )
 
+var serviceFile = flag.String("service_file", "services_ga.kt", "kotlin service file to be parsed")
+var provider = flag.String("provider", "google", "Specify which provider to run diff_check on")
+
 func main() {
-	repo := os.Args
-	services := fmt.Sprintf("../../../%v/services/...", repo[1])
+	flag.Parse()
+	services := fmt.Sprintf("../%v/services/...", *provider)
 	fmt.Println(services)
 	cmd := exec.Command("go", "list", services)
 	stdout, err := cmd.Output()
@@ -47,8 +51,7 @@ func main() {
 
 	////////////////////////////////////////////////////////////////////////////////
 
-	service_file := os.Args[2]
-	f, err := os.Open(service_file)
+	f, err := os.Open(*serviceFile)
 	if err != nil {
 		panic(err)
 	}
@@ -85,7 +88,7 @@ func main() {
 	}
 
 	if !bytes.Equal(googleServices, teamcityServices) {
-		fmt.Fprintf(os.Stderr, "error: diff in services_ga.kt\n")
+		fmt.Fprintf(os.Stderr, "error: diff in %s\n", *serviceFile)
 		os.Exit(1)
 	}
 }
