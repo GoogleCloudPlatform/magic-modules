@@ -13,7 +13,6 @@ import (
 
 func TestAccProviderFunction_location_from_id(t *testing.T) {
 	t.Parallel()
-	acctest.SkipIfVcr(t) // Need to determine if compatible with VCR, as functions are implemented in PF provider
 
 	location := envvar.GetTestRegionFromEnv()
 	locationRegex := regexp.MustCompile(fmt.Sprintf("^%s$", location))

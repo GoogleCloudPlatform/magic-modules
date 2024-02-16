@@ -12,7 +12,6 @@ import (
 
 func TestAccProviderFunction_name_from_id(t *testing.T) {
 	t.Parallel()
-	acctest.SkipIfVcr(t) // Need to determine if compatible with VCR, as functions are implemented in PF provider
 
 	resourceName := fmt.Sprintf("tf-test-my-resource-%s", acctest.RandString(t, 10))
 	resourceNameRegex := regexp.MustCompile(fmt.Sprintf("^%s$", resourceName))

@@ -13,7 +13,6 @@ import (
 
 func TestAccProviderFunction_zone_from_id(t *testing.T) {
 	t.Parallel()
-	acctest.SkipIfVcr(t) // Need to determine if compatible with VCR, as functions are implemented in PF provider
 
 	zone := envvar.GetTestZoneFromEnv()
 	zoneRegex := regexp.MustCompile(fmt.Sprintf("^%s$", zone))
