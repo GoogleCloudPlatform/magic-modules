@@ -78,9 +78,8 @@ func main() {
 		teamcityServices = pattern.Expand(teamcityServices, template, bs, submatches)
 	}
 
-	if bytes.Equal(googleServices, teamcityServices) {
-		fmt.Println("No Changes!")
-	} else {
-		fmt.Println("Diff")
+	if !bytes.Equal(googleServices, teamcityServices) {
+		fmt.Fprintf(os.Stderr, "error: diff in services_ga.kt")
+		os.Exit(1)
 	}
 }
