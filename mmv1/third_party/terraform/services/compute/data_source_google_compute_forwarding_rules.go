@@ -14,11 +14,6 @@ func DataSourceGoogleComputeForwardingRules() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 
-			// "self_link": {
-			// 	Type:     schema.TypeString,
-			// 	Computed: true,
-			// },
-
 			"project": {
 				Type:     schema.TypeString,
 				Optional: true,
