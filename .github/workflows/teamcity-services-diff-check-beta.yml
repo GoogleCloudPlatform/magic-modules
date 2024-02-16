@@ -49,6 +49,7 @@ jobs:
 
       - name: Build Provider
         run: |
+          cd tgbp
           go build
 
       - name: Diff Check
