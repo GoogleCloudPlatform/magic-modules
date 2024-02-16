@@ -2069,16 +2069,26 @@ func ResourceContainerCluster() *schema.Resource {
 							Optional:          true,
 							Description:       `The Fleet host project of the cluster.`,
 						},
-                                          	"membership": {
-                                                	Type:             schema.TypeString,
-                                                	Computed:         true,
-                                                	Description:      `Full resource name of the registered fleet membership of the cluster.`,
-                                          	},
-                                          	"pre_registered": {
-                                                	Type:             schema.TypeBool,
-                                                	Computed:         true,
-                                                	Description:      `Whether the cluster has been registered via the fleet API.`,
-                                          	},
+						"membership": {
+							Type:             schema.TypeString,
+							Computed:         true,
+							Description:      `Full resource name of the registered fleet membership of the cluster.`,
+						},
+						"pre_registered": {
+							Type:             schema.TypeBool,
+							Computed:         true,
+							Description:      `Whether the cluster has been registered via the fleet API.`,
+						},
+						"membership_id": {
+							Type:             schema.TypeString,
+							Computed:         true,
+							Description:      `Short name of the fleet membership, for example "member-1".`,
+						},
+						"membership_location": {
+							Type:             schema.TypeString,
+							Computed:         true,
+							Description:      `Location of the fleet membership, for example "us-central1".`,
+						},
 					},
 				},
 			},
@@ -6108,16 +6118,27 @@ func flattenGatewayApiConfig(c *container.GatewayAPIConfig) []map[string]interfa
 }
 
 func flattenFleet(c *container.Fleet) []map[string]interface{} {
-      if c == nil {
-                return nil
-      }         
-      return []map[string]interface{}{
-                {
-                      "project": c.Project,
-                      "membership": c.Membership,
-		      "pre_registered": c.PreRegistered,
-                },
-      }       
+	if c == nil {
+		return nil
+	}
+
+	// Parse membership_id and membership_location from full membership name.
+	var membership_id, membership_location string
+	membershipRE := regexp.MustCompile(`^(//[a-zA-Z0-9\.\-]+)?/?projects/([^/]+)/locations/([a-zA-Z0-9\-]+)/memberships/([^/]+)$`)
+	if match := membershipRE.FindStringSubmatch(c.Membership); match != nil {
+		membership_id = match[4]
+		membership_location = match[3]
+	}
+	
+	return []map[string]interface{}{
+		{
+			"project": c.Project,
+			"membership": c.Membership,
+			"membership_id": membership_id,
+			"membership_location": membership_location,
+			"pre_registered": c.PreRegistered,
+		},
+	}
 }
 
 func flattenEnableK8sBetaApis(c *container.K8sBetaAPIConfig) []map[string]interface{} {
