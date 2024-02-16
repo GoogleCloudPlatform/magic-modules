@@ -6,7 +6,7 @@ on:
   pull_request:
     paths:
       - '.github/workflows/teamcity-pr-checks.yml'
-      - 'mmv1/third_party/terraform/!.teamcity'
+      - 'mmv1/third_party/terraform/.teamcity/**'
 
 
 jobs:
