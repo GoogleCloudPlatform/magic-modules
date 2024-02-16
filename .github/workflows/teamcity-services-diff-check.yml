@@ -4,6 +4,7 @@ permissions: read-all
 on:
   workflow_dispatch:
   pull_request:
+    types: [opened, edited]
     paths:
       - '.github/workflows/teamcity-services-diff-check.yml'
       - 'mmv1/third_party/terraform/!.teamcity'
