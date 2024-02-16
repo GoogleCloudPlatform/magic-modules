@@ -20,7 +20,6 @@ import (
 func main() {
 	cmd := exec.Command("go", "list", "../../../google/services/...")
 	stdout, err := cmd.Output()
-	fmt.Println(stdout)
 	if err != nil {
 		fmt.Println(err.Error())
 		return
