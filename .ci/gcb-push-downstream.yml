@@ -179,7 +179,7 @@ steps:
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
       entrypoint: '/workspace/.ci/scripts/go-plus/vcr-cassette-merger/vcr_merge.sh'
-      secretEnv: ["GITHUB_TOKEN", "GOOGLE_PROJECT"]
+      secretEnv: ["GITHUB_TOKEN_CLASSIC", "GOOGLE_PROJECT"]
       id: vcr-merge
       waitFor: ["tpg-push"]
       env:
@@ -192,7 +192,7 @@ steps:
       waitFor: ["vcr-merge"]
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       secretEnv:
-        - "GITHUB_TOKEN"
+        - "GITHUB_TOKEN_DOWNSTREAMS"
         - "GOOGLE_BILLING_ACCOUNT"
         - "GOOGLE_CUST_ID"
         - "GOOGLE_FIRESTORE_PROJECT"
