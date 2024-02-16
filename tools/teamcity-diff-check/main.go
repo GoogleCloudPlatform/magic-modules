@@ -25,7 +25,13 @@ var provider = flag.String("provider", "google", "Specify which provider to run 
 
 func main() {
 	flag.Parse()
-	services := fmt.Sprintf("../%v/services/...", *provider)
+	var providerPath string
+	if *provider == "google" {
+		providerPath = "tgp"
+	} else {
+		providerPath = "tgbp"
+	}
+	services := fmt.Sprintf("../%s/%s/services/...", providerPath, *provider)
 	fmt.Println(services)
 	cmd := exec.Command("go", "list", services)
 	stdout, err := cmd.Output()

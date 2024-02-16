@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Download built artifacts
         uses: actions/download-artifact@v2
         with:
@@ -28,7 +28,7 @@ jobs:
 
       - name: Unzip the artifacts and delete the zip
         run: |
-          unzip artifacts/output.zip -d ./
+          unzip artifacts/output.zip -d ./tgbp
           rm artifacts/output.zip
 
       - name: Setup Go

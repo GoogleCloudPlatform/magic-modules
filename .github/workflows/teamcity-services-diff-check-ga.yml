@@ -28,7 +28,7 @@ jobs:
 
       - name: Unzip the artifacts and delete the zip
         run: |
-          unzip artifacts/output.zip -d ./
+          unzip artifacts/output.zip -d ./tgp
           rm artifacts/output.zip
 
       - name: Setup Go
