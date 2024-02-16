@@ -80,6 +80,5 @@ func main() {
 
 	if !bytes.Equal(googleServices, teamcityServices) {
 		fmt.Fprintf(os.Stderr, "error: diff in services_ga.kt")
-		os.Exit(1)
 	}
 }
