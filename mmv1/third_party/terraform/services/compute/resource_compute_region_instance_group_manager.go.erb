@@ -847,17 +847,10 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
 		change = true
 	}
 
-	<% unless version == "ga" -%>
 	if d.HasChange("stateful_internal_ip") || d.HasChange("stateful_external_ip") || d.HasChange("stateful_disk") {
 		updatedManager.StatefulPolicy = expandStatefulPolicy(d)
 		change = true
 	}
-	<% else -%>
-	if d.HasChange("stateful_disk") {
-		updatedManager.StatefulPolicy = expandStatefulPolicy(d)
-		change = true
-	}
-	<% end -%>
 
 	<% unless version == "ga" -%>
 	if d.HasChange("all_instances_config") {

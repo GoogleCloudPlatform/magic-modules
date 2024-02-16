@@ -904,17 +904,10 @@ func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta inte
 	}
 	<% end -%>
 
-	<% unless version == "ga" -%>
 	if d.HasChange("stateful_internal_ip") || d.HasChange("stateful_external_ip") || d.HasChange("stateful_disk") {
 		updatedManager.StatefulPolicy = expandStatefulPolicy(d)
 		change = true
 	}
-	<% else -%>
-	if d.HasChange("stateful_disk") {
-		updatedManager.StatefulPolicy = expandStatefulPolicy(d)
-		change = true
-	}
-	<% end -%>
 
 	if d.HasChange("list_managed_instances_results") {
 		updatedManager.ListManagedInstancesResults = d.Get("list_managed_instances_results").(string)
