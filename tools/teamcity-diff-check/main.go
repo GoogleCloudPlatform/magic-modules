@@ -31,8 +31,7 @@ func main() {
 	} else {
 		providerPath = "tgbp"
 	}
-	services := fmt.Sprintf("../%s/%s/services/...", providerPath, *provider)
-	fmt.Println(services)
+	services := fmt.Sprintf("../../%s/%s/services/...", providerPath, *provider)
 	cmd := exec.Command("go", "list", services)
 	stdout, err := cmd.Output()
 	if err != nil {
@@ -57,7 +56,7 @@ func main() {
 
 	////////////////////////////////////////////////////////////////////////////////
 
-	f, err := os.Open(*serviceFile)
+	f, err := os.Open(fmt.Sprintf("../../%s/.teamcity/components/inputs/%s", providerPath, *serviceFile))
 	if err != nil {
 		panic(err)
 	}

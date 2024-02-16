@@ -55,4 +55,4 @@ jobs:
       - name: Diff Check
         run: |
           cd tools/teamcity-diff-check
-          go run main.go google services_ga.kt
+          go run main.go

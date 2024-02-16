@@ -55,4 +55,4 @@ jobs:
       - name: Diff Check
         run: |
           cd tools/teamcity-diff-check
-          go run main.go google-beta services_beta.kt
+          go run main.go -provide=google-beta -service_file=services_beta.kt
