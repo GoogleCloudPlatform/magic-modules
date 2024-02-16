@@ -35,7 +35,7 @@ func main() {
 	cmd := exec.Command("go", "list", services)
 	stdout, err := cmd.Output()
 	if err != nil {
-		fmt.Println(err.Error())
+		fmt.Println(err)
 		return
 	}
 

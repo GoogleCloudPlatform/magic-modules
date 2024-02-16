@@ -54,5 +54,6 @@ jobs:
 
       - name: Diff Check
         run: |
+          pwd
           cd tools/teamcity-diff-check
           go run main.go
