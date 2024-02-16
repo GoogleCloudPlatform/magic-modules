@@ -434,24 +434,9 @@ properties:
         name: 'domain'
         description: |
           Domain name
-      - !ruby/object:Api::Type::Enum
+      - !ruby/object:Api::Type::String
         name: 'state'
-        output: true
         description: |
-          Status of the custom domain:
-          - CUSTOM_DOMAIN_STATE_UNSPECIFIED: Unspecified state
-          - UNVERIFIED: DNS record is not created
-          - VERIFIED: DNS record is created
-          - MODIFYING: Calling SLM to update
-          - AVAILABLE: ManagedCertificate is ready
-          - UNAVAILABLE: ManagedCertificate is not ready
-          - UNKNOWN: Status is not known
-        values:
-          - :CUSTOM_DOMAIN_STATE_UNSPECIFIED
-          - :UNVERIFIED
-          - :VERIFIED
-          - :MODIFYING
-          - :AVAILABLE
-          - :UNAVAILABLE
-          - :UNKNOWN
+          Status of the custom domain.
+        output: true
   # CustomDomain Object - End
