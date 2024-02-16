@@ -16,7 +16,6 @@
 package github
 
 import (
-	"fmt"
 	"os"
 )
 
@@ -27,14 +26,8 @@ type Client struct {
 }
 
 func NewClient() *Client {
-	githubToken, ok := os.LookupEnv("GITHUB_TOKEN_MAGIC_MODULES")
-	if !ok {
-		fmt.Println("Did not provide GITHUB_TOKEN_MAGIC_MODULES environment variable")
-		os.Exit(1)
-	}
-
 	return &Client{
 		classicToken: os.Getenv("GITHUB_TOKEN_CLASSIC"),
-		token:        githubToken,
+		token:        os.Getenv("GITHUB_TOKEN_MAGIC_MODULES"),
 	}
 }

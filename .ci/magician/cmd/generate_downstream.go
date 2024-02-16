@@ -22,7 +22,7 @@ var gdEnvironmentVariables = [...]string{
 	"GOPATH",
 }
 
-var gdOptionalEnvironmentVariables = [...]string{
+var gdTokenEnvironmentVariables = [...]string{
 	"GITHUB_TOKEN_CLASSIC",
 	"GITHUB_TOKEN_DOWNSTREAMS",
 }
@@ -51,8 +51,14 @@ var generateDownstreamCmd = &cobra.Command{
 			env[ev] = val
 		}
 
-		for _, ev := range gdOptionalEnvironmentVariables {
-			env[ev] = os.Getenv(ev)
+		var githubToken string
+		for _, ev := range gdTokenEnvironmentVariables {
+			val, ok := os.LookupEnv(ev)
+			if ok {
+				env[ev] = val
+				githubToken = val
+				break
+			}
 		}
 
 		gh := github.NewClient()
@@ -61,7 +67,7 @@ var generateDownstreamCmd = &cobra.Command{
 			fmt.Println("Error creating a runner: ", err)
 			os.Exit(1)
 		}
-		ctlr := source.NewController(env["GOPATH"], "modular-magician", env["GITHUB_TOKEN_CLASSIC"], rnr)
+		ctlr := source.NewController(env["GOPATH"], "modular-magician", githubToken, rnr)
 
 		if len(args) != 4 {
 			fmt.Printf("Wrong number of arguments %d, expected 4\n", len(args))
