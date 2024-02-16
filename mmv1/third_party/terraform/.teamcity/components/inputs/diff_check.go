@@ -47,7 +47,8 @@ func main() {
 
 	////////////////////////////////////////////////////////////////////////////////
 
-	f, err := os.Open("services_ga.kt")
+	service_file := os.Args[2]
+	f, err := os.Open(service_file)
 	if err != nil {
 		panic(err)
 	}

@@ -14,7 +14,7 @@ jobs:
     with:
       repo: 'terraform-provider-google-beta'
 
-  teamcity-services-diff-check-ga:
+  teamcity-services-diff-check-beta:
     needs: terraform-provider-google-beta
     runs-on: ubuntu-22.04
     steps:
@@ -52,4 +52,4 @@ jobs:
       - name: Diff Check
         run: |
           cd .teamcity/components/inputs
-          go run diff_check.go google-beta
+          go run diff_check.go google-beta services_beta.kt
