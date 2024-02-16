@@ -927,7 +927,7 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: "connectorVersionInfraConfig"
     description: |
-      This cofiguration provides infra configs like rate limit threshold which need to be configurable for every connector version.
+      This configuration provides infra configs like rate limit threshold which need to be configurable for every connector version.
     output: true
     properties:
       - !ruby/object:Api::Type::String
