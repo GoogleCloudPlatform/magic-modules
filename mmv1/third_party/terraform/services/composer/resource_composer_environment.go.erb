@@ -2849,11 +2849,11 @@ func composerImageVersionDiffSuppress(_, old, new string, _ *schema.ResourceData
 	oldAirflow := oldVersions[5]
 	oldAirflowMajor := oldVersions[6]
 	oldAirflowMajorMinor := oldVersions[6] + oldVersions[8]
-	oldAirflowMajorMinorPatch := oldVersions[6] + oldVersions[8] + oldVersions[10]
+	oldAirflowMajorMinorPatch := oldVersions[6] + oldVersions[8] + oldVersions[9]
 	newAirflow := newVersions[5]
 	newAirflowMajor := newVersions[6]
 	newAirflowMajorMinor := newVersions[6] + newVersions[8]
-	newAirflowMajorMinorPatch := newVersions[6] + newVersions[8] + newVersions[10]
+	newAirflowMajorMinorPatch := newVersions[6] + newVersions[8] + newVersions[9]
 	// Check Airflow versions.
 	if oldAirflow == oldAirflowMajor || newAirflow == newAirflowMajor {
 		// If one of the Airflow versions specifies only major version
