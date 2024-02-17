@@ -11,12 +11,12 @@ package main
 
 import (
 	"bufio"
-	"bytes"
 	"flag"
 	"fmt"
 	"io"
 	"os"
 	"os/exec"
+	"reflect"
 	"regexp"
 )
 
@@ -35,19 +35,18 @@ func main() {
 		return
 	}
 
+	// Regex pattern captures "services" from `go list ../../provider/{{*provider}}/services/..`
 	pattern := regexp.MustCompile(`github\.com\/hashicorp\/terraform-provider-(google|google-beta)\/(google|google-beta)\/services\/(?P<service>\w+)`)
 
-	// Template to convert "key: value" to "key=value" by
-	// referencing the values captured by the regex pattern.
 	template := []byte("$service")
+	dst := []byte{}
 
-	googleServices := []byte{}
+	googleServices := []string{}
 
 	// For each match of the regex in the content.
 	for _, submatches := range pattern.FindAllSubmatchIndex(stdout, -1) {
-		// Apply the captured submatches to the template and append the output
-		// to the result.
-		googleServices = pattern.Expand(googleServices, template, stdout, submatches)
+		service := pattern.Expand(dst, template, stdout, submatches)
+		googleServices = append(googleServices, string(service))
 	}
 
 	////////////////////////////////////////////////////////////////////////////////
@@ -72,23 +71,21 @@ func main() {
 		return
 	}
 
-	// Regex pattern captures "key: value" pair from the content.
+	// Regex pattern captures "services" from *serviceFile.
 	pattern = regexp.MustCompile(`(?m)"(?P<service>\w+)"\sto\s+mapOf`)
 
-	// Template to convert "key: value" to "key=value" by
-	// referencing the values captured by the regex pattern.
 	template = []byte("$service")
 
-	teamcityServices := []byte{}
+	dst = []byte{}
+	teamcityServices := []string{}
 
 	// For each match of the regex in the content.
 	for _, submatches := range pattern.FindAllSubmatchIndex(bs, -1) {
-		// Apply the captured submatches to the template and append the output
-		// to the result.
-		teamcityServices = pattern.Expand(teamcityServices, template, bs, submatches)
+		service := pattern.Expand(dst, template, bs, submatches)
+		teamcityServices = append(teamcityServices, string(service))
 	}
 
-	if !bytes.Equal(googleServices, teamcityServices) {
+	if !reflect.DeepEqual(googleServices, teamcityServices) {
 		fmt.Fprintf(os.Stderr, "error: diff in %s\n", *serviceFile)
 		os.Exit(1)
 	}
