@@ -28,7 +28,7 @@ jobs:
 
       - name: Unzip the artifacts and delete the zip
         run: |
-          unzip artifacts/output.zip -d ./tgp
+          unzip artifacts/output.zip -d ./provider
           rm artifacts/output.zip
 
       - name: Setup Go
@@ -46,12 +46,6 @@ jobs:
           restore-keys: |
               ${{ runner.os }}-test-terraform-provider-google-${{ hashFiles('go.sum') }}
               ${{ runner.os }}-test-terraform-provider-google-
-
-      - name: Build Provider
-        run: |
-          cd tgp
-          ls
-          go build
 
       - name: Diff Check
         run: |

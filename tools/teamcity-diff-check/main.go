@@ -25,17 +25,13 @@ var provider = flag.String("provider", "google", "Specify which provider to run 
 
 func main() {
 	flag.Parse()
-	var providerPath string
-	if *provider == "google" {
-		providerPath = "tgp"
-	} else {
-		providerPath = "tgbp"
-	}
-	services := fmt.Sprintf("../../%s/%s/services/...", providerPath, *provider)
-	cmd := exec.Command("go", "list", services)
+
+	servicesPath := fmt.Sprintf("../../provider/%s/services/", *provider)
+	cmd := exec.Command("go", "list", "./...")
+	cmd.Dir = servicesPath
 	stdout, err := cmd.Output()
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println(err.Error())
 		return
 	}
 
@@ -43,7 +39,7 @@ func main() {
 
 	// Template to convert "key: value" to "key=value" by
 	// referencing the values captured by the regex pattern.
-	template := []byte("$service\n")
+	template := []byte("$service")
 
 	googleServices := []byte{}
 
@@ -56,7 +52,7 @@ func main() {
 
 	////////////////////////////////////////////////////////////////////////////////
 
-	f, err := os.Open(fmt.Sprintf("../../%s/.teamcity/components/inputs/%s", providerPath, *serviceFile))
+	f, err := os.Open(fmt.Sprintf("../../provider/.teamcity/components/inputs/%s", *serviceFile))
 	if err != nil {
 		panic(err)
 	}
@@ -81,7 +77,7 @@ func main() {
 
 	// Template to convert "key: value" to "key=value" by
 	// referencing the values captured by the regex pattern.
-	template = []byte("$service\n")
+	template = []byte("$service")
 
 	teamcityServices := []byte{}
 
