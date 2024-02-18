@@ -148,12 +148,6 @@
 '<%= fname -%>': '<%= file_path -%>'
 <% end -%>
 <%
-  Dir["third_party/terraform/.teamcity/**/*.go"].each do |file_path|
-    fname = file_path.delete_prefix("third_party/terraform/")
--%>
-'<%= fname -%>': '<%= file_path -%>'
-<% end -%>
-<%
   Dir["third_party/terraform/.teamcity/**/*.md"].each do |file_path|
     fname = file_path.delete_prefix("third_party/terraform/")
 -%>
