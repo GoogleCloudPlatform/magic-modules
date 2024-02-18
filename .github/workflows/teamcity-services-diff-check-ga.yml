@@ -14,8 +14,13 @@ jobs:
     with:
       repo: 'terraform-provider-google'
 
-  teamcity-services-diff-check-ga:
-    needs: terraform-provider-google
+  terraform-provider-google-beta:
+    uses: ./.github/workflows/build-downstream.yml
+    with:
+      repo: 'terraform-provider-google-beta'
+
+  teamcity-services-diff-check:
+    needs: [terraform-provider-google, terraform-provider-google-beta]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
@@ -23,7 +28,7 @@ jobs:
       - name: Download built artifacts
         uses: actions/download-artifact@v2
         with:
-          name: artifact-terraform-provider-google
+          name: artifact-provider
           path: artifacts
 
       - name: Unzip the artifacts and delete the zip
@@ -52,3 +57,5 @@ jobs:
           pwd
           cd tools/teamcity-diff-check
           go run main.go
+          go run main.go
+          go run main.go -provider=google-beta -service_file=services_beta.kt
