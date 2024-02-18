@@ -53,15 +53,15 @@ func main() {
 	test := exec.Command("ls")
 	test.Dir = "../../provider"
 	root, _ := test.Output()
-	fmt.Println(root)
+	fmt.Println(string(root))
 
 	test.Dir = "../../provider/.teamcity"
 	root, _ = test.Output()
-	fmt.Println(root)
+	fmt.Println(string(root))
 
 	test.Dir = "../../provider/.teamcity/components"
 	root, _ = test.Output()
-	fmt.Println(root)
+	fmt.Println(string(root))
 
 	f, err := os.Open(fmt.Sprintf("../../provider/.teamcity/components/inputs/%s", *serviceFile))
 	if err != nil {
