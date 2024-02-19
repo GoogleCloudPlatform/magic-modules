@@ -3036,29 +3036,9 @@ func isComposer3(d interface{})	bool {
 func forceNewCustomDiff(key string) customdiff.ResourceConditionFunc {
 	return func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) bool {
 		old, new := d.GetChange(key)
-		if isComposer3(d) || networkReferenceEquivalent(old.(string), new.(string)) {
+		if isComposer3(d) || tpgresource.CompareSelfLinkRelativePaths("", old.(string), new.(string), nil) {
 			return false
 		}
 		return true
 	}
-}
-
-// Checks if two network/subnetwork references are equivalent
-func networkReferenceEquivalent(s1, s2 string) bool {
-	prefixRegexp := regexp.MustCompile(composerEnvironmentNetworkReferencePrefix)
-	if s1 == s2 {
-		return true
-	}
-	if s1 == "" || s2 == "" {
-		return false
-	}
-	if len(s1) < len(s2) {
-		s1, s2 = s2, s1
-	}
-	if s1Prefix, ok := strings.CutSuffix(s1, s2); ok {
-		if prefixRegexp.MatchString(s1Prefix) {
-			return true
-		}
-	}
-	return false
 }
