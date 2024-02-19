@@ -30,6 +30,7 @@ func main() {
 	cmd := exec.Command("go", "list", "./...")
 	cmd.Dir = servicesPath
 	stdout, err := cmd.Output()
+
 	if err != nil {
 		fmt.Println(err.Error())
 		return
@@ -102,5 +103,5 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Println("No Diff")
+	fmt.Printf("No Diff in %s provider", *provider)
 }
