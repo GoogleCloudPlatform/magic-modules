@@ -618,6 +618,7 @@ This block also contains several computed attributes, documented below.
 <a name="nested_advanced_datapath_observability_config"></a>The `advanced_datapath_observability_config` block supports:
 
 * `enable_metrics` - (Required) Whether or not to enable advanced datapath metrics.
+* `enable_relay` - (Optional) Whether or not Relay is enabled.
 * `relay_mode` - (Optional) Mode used to make Relay available.
 
 <a name="nested_maintenance_policy"></a>The `maintenance_policy` block supports:
@@ -1348,6 +1349,10 @@ exported:
 * `node_config.0.effective_taints` - List of kubernetes taints applied to each node. Structure is [documented above](#nested_taint).
 
 * `fleet.0.membership` - The resource name of the fleet Membership resource associated to this cluster with format `//gkehub.googleapis.com/projects/{{project}}/locations/{{location}}/memberships/{{name}}`. See the official doc for [fleet management](https://cloud.google.com/kubernetes-engine/docs/fleets-overview).
+
+* `fleet.0.membership_id` - The short name of the fleet membership, extracted from `fleet.0.membership`. You can use this field to configure `membership_id` under [google_gkehub_feature_membership](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/gke_hub_feature_membership).
+
+* `fleet.0.membership_location` - The location of the fleet membership,  extracted from `fleet.0.membership`. You can use this field to configure `membership_location` under [google_gkehub_feature_membership](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/gke_hub_feature_membership).
 
 ## Timeouts
 
