@@ -4288,7 +4288,7 @@ resource "google_project_iam_binding" "tagUser" {
 }
 
 resource "time_sleep" "wait_120_seconds" {
-  create_duration = "300s"
+  create_duration = "120s"
 
   depends_on = [
     google_project_iam_binding.tagHoldAdmin,
@@ -4402,7 +4402,7 @@ resource "google_project_iam_binding" "tagUser" {
 }
 
 resource "time_sleep" "wait_120_seconds" {
-  create_duration = "300s"
+  create_duration = "120s"
 
   depends_on = [
     google_project_iam_binding.tagHoldAdmin,
@@ -4517,7 +4517,7 @@ resource "google_project_iam_binding" "tagUser" {
 }
 
 resource "time_sleep" "wait_120_seconds" {
-  create_duration = "300s"
+  create_duration = "120s"
 
   depends_on = [
     google_project_iam_binding.tagHoldAdmin,
