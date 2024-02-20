@@ -34,6 +34,7 @@ jobs:
 
       - name: Unzip the artifacts and delete the zip
         run: |
+          ls
           unzip -o artifacts/output -d ./provider
           rm artifacts/output.zip
 
