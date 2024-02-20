@@ -435,7 +435,7 @@ The following arguments are supported:
   ```
 
 * `image_version` -
-  (Optional in Cloud Composer 1, required in Cloud Composer 2)
+  (Optional in Cloud Composer 1, required in Cloud Composer 2 and 3)
 
   The version of the software running in the environment. This encapsulates both the version of Cloud Composer
   functionality and the version of Apache Airflow. It must match the regular expression
@@ -672,12 +672,12 @@ The `config` block supports:
   The configuration settings for Cloud Composer maintenance windows.
 
 * `workloads_config` -
-  (Optional, Cloud Composer 2 only)
+  (Optional)
   The Kubernetes workloads configuration for GKE cluster associated with the
   Cloud Composer environment.
 
 * `environment_size` -
-  (Optional, Cloud Composer 2 only)
+  (Optional)
   The environment size controls the performance parameters of the managed
   Cloud Composer infrastructure that includes the Airflow database. Values for
   environment size are `ENVIRONMENT_SIZE_SMALL`, `ENVIRONMENT_SIZE_MEDIUM`,
@@ -813,7 +813,7 @@ The `software_config` block supports:
   ```
 
 * `image_version` -
-  (Required in Cloud Composer 2, optional in Cloud Composer 1)
+  (Required in Cloud Composer 2 and 3, optional in Cloud Composer 1)
 
   **In Cloud Composer 2, you must specify an image with Cloud Composer 2**. Otherwise, the default image for Cloud Composer 1 is used. For more information about Cloud Composer images, see
   [Cloud Composer version list](https://cloud.google.com/composer/docs/concepts/versioning/composer-versions).
@@ -1114,23 +1114,16 @@ The `config` block supports:
   The configuration settings for Cloud Composer maintenance windows.
 
 * `workloads_config` -
-  (Optional, Cloud Composer 2 only)
+  (Optional)
   The Kubernetes workloads configuration for GKE cluster associated with the
   Cloud Composer environment.
 
 * `environment_size` -
-  (Optional, Cloud Composer 2 only)
+  (Optional)
   The environment size controls the performance parameters of the managed
   Cloud Composer infrastructure that includes the Airflow database. Values for
   environment size are `ENVIRONMENT_SIZE_SMALL`, `ENVIRONMENT_SIZE_MEDIUM`,
   and `ENVIRONMENT_SIZE_LARGE`.
-
-* `resilience_mode` -
-  (Optional, Cloud Composer 2.1.15 or newer only)
-  The resilience mode states whether high resilience is enabled for 
-  the environment or not. Values for resilience mode are `HIGH_RESILIENCE` 
-  for high resilience and `STANDARD_RESILIENCE` for standard
-  resilience.
 
 * `data_retention_config` -
   (Optional, Cloud Composer 2.0.23 or newer only)
@@ -1199,7 +1192,7 @@ The `node_config` block supports:
 
 * `composer_internal_ipv4_cidr_block` -
   (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
-  At least /20 IPv4 cidr range that will be used by Composer internal components.
+  /20 IPv4 cidr range that will be used by Composer internal components.
   Cannot be updated.
 
 The `software_config` block supports:
@@ -1245,23 +1238,23 @@ The `software_config` block supports:
   ```
 
 * `image_version` -
-  (Required in Cloud Composer 2, optional in Cloud Composer 1)
+  (Required in Cloud Composer 2 and 3, optional in Cloud Composer 1)
 
-  **In Cloud Composer 2, you must specify an image with Cloud Composer 2**. Otherwise, the default image for Cloud Composer 1 is used. For more information about Cloud Composer images, see
-  [Cloud Composer version list](https://cloud.google.com/composer/docs/concepts/versioning/composer-versions).
+  In Cloud Composer 3, you can only specify 3 in Cloud Composer portion of the image version.
+  Environment details will only show 3 as the Composer version as well.
 
-  The version of the software running in the environment. This encapsulates both the version of Cloud Composer
-  functionality and the version of Apache Airflow. It must match the regular expression
-  `composer-([0-9]+(\.[0-9]+\.[0-9]+(-preview\.[0-9]+)?)?|latest)-airflow-([0-9]+(\.[0-9]+(\.[0-9]+)?)?)`.
-  The Cloud Composer portion of the image version is a full semantic version, or an alias in the form of major
-  version number or 'latest'.
   The Apache Airflow portion of the image version is a full semantic version that points to one of the
-  supported Apache Airflow versions, or an alias in the form of only major or major.minor versions specified.
-  **Important**: In-place upgrade is only available using `google-beta` provider. It's because updating the
-  `image_version` is still in beta. Using `google-beta` provider, you can upgrade in-place between minor or
-  patch versions of Cloud Composer or Apache Airflow. For example, you can upgrade your environment from
-  `composer-1.16.x` to `composer-1.17.x`, or from `airflow-2.1.x` to `airflow-2.2.x`. You cannot upgrade between
-  major Cloud Composer or Apache Airflow versions (from `1.x.x` to `2.x.x`). To do so, create a new environment.
+  supported Apache Airflow versions, or an alias in the form of only major, major.minor or major.minor.patch versions specified.
+  Like in Composer 1 and 2, a given Airflow version is released multiple times in Composer, with different patches
+  and versions of dependencies. To distinguish between these versions in Composer 3, you can optionally specify a
+  build number to pin to a specific Airflow release. Environment details will always show the Airflow build number.
+  Example: 2.6.3-build.4.
+
+  The image version in Composer 3 must match the regular expression:
+  `composer-(([0-9]+)(\.[0-9]+\.[0-9]+(-preview\.[0-9]+)?)?|latest)-airflow-(([0-9]+)((\.[0-9]+)(\.[0-9]+)?)?(-build\.[0-9]+)?)`
+  Example: composer-3-airflow-2.6.3-build.4
+
+  **Important**: In-place upgrade for Composer 3 is not yet supported.
 
 * `cloud_data_lineage_integration` -
   (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html),
@@ -1303,35 +1296,11 @@ The `software_config` block supports:
   The only allowed values for 'FREQ' field are 'FREQ=DAILY' and 'FREQ=WEEKLY;BYDAY=...'.
   Example values: 'FREQ=WEEKLY;BYDAY=TU,WE', 'FREQ=DAILY'.
 
-The `recovery_config` block supports:
-
-* `scheduled_snapshots_config` -
-  (Optional)
-  The recovery configuration settings for the Cloud Composer environment.
-
-The `scheduled_snapshots_config` block supports:
-
-* `enabled` -
-  (Optional)
-  When enabled, Cloud Composer periodically saves snapshots of your environment to a Cloud Storage bucket.
-
-* `snapshot_location` -
-  (Optional)
-  The URI of a bucket folder where to save the snapshot.
-
-* `snapshot_creation_schedule` -
-  (Optional)
-  Snapshot schedule, in the unix-cron format.
-
-* `time_zone` -
-  (Optional)
-  A time zone for the schedule. This value is a time offset and does not take into account daylight saving time changes. Valid values are from UTC-12 to UTC+12. Examples: UTC, UTC-01, UTC+03.
-
 The `workloads_config` block supports:
 
 * `scheduler` -
   (Optional)
-  Configuration for resources used by Airflow schedulers.
+  Configuration for resources used by Airflow scheduler.
 
 * `triggerer` -
   (Optional)
