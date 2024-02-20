@@ -45,8 +45,8 @@ func main() {
 	cmd := exec.Command("go", "list", "./...")
 	cmd.Dir = servicesPath
 	stdout, err := cmd.Output()
-
 	if err != nil {
+		fmt.Println(string(stdout))
 		fmt.Println(err.Error())
 		return
 	}
@@ -66,18 +66,6 @@ func main() {
 	}
 
 	////////////////////////////////////////////////////////////////////////////////
-	test := exec.Command("ls")
-	test.Dir = "../../provider"
-	root, _ := test.Output()
-	fmt.Println(string(root))
-
-	test.Dir = "../../provider/.teamcity"
-	root, _ = test.Output()
-	fmt.Println(string(root))
-
-	test.Dir = "../../provider/.teamcity/components"
-	root, _ = test.Output()
-	fmt.Println(string(root))
 
 	f, err := os.Open(fmt.Sprintf("../../mmv1/third_party/terraform/.teamcity/components/inputs/%s", *serviceFile))
 	if err != nil {
