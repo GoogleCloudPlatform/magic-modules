@@ -353,12 +353,6 @@ The following arguments are supported:
   "projects/{project}/regions/{region}/subnetworks/{subnetwork}"), or by name. If subnetwork is provided,
   network must also be provided and the subnetwork must belong to the enclosing environment's project and region.
 
-* `composer_network_attachment` -
-  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
-  PSC (Private Service Connect) Network entry point. Customers can pre-create the Network Attachment 
-  and point Cloud Composer environment to use. It is possible to share network attachment among many environments, 
-  provided enough IP addresses are available.
-
 * `disk_size_gb` -
   (Optional, Cloud Composer 1 only)
   The disk size in GB used for node VMs. Minimum size is 20GB.
