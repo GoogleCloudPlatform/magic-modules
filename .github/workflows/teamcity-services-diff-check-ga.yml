@@ -9,23 +9,28 @@ on:
       - '.github/workflows/teamcity-services-diff-check-ga.yml'
       - 'mmv1/third_party/terraform/.teamcity/components/inputs/services_ga.kt'
 jobs:
-  terraform-provider-google-beta:
+  terraform-provider-google:
     uses: ./.github/workflows/build-downstream.yml
     with:
-      repo: 'terraform-provider-google-beta'
-
+      repo: 'terraform-provider-google'
+      
+  terraform-provider-google-beta:
+      uses: ./.github/workflows/build-downstream.yml
+      with:
+        repo: 'terraform-provider-google-beta'
+      
   teamcity-services-diff-check:
-    needs: terraform-provider-google-beta
+    needs: [terraform-provider-google, terraform-provider-google-beta]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
-
+      
       - name: Download built artifacts
         uses: actions/download-artifact@v2
         with:
-          name: artifact-terraform-provider-google-beta
+          name: artifact-provider
           path: artifacts
-
+      
       - name: Unzip the artifacts and delete the zip
         run: |
           unzip artifacts/output.zip -d ./provider
