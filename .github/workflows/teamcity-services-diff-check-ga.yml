@@ -68,4 +68,4 @@ jobs:
           pwd
           cd tools/teamcity-diff-check
           go run main.go
-          go run main.go -provider=google-beta -service_file=services_beta.kt
+          # go run main.go -provider=google-beta -service_file=services_beta.kt
