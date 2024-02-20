@@ -1,0 +1,11 @@
+resource "google_workbench_instance" "<%= ctx[:primary_resource_id] %>" {
+  name = "<%= ctx[:vars]['instance_name'] %>"
+  location = "us-west1-a"
+
+  gce_setup {
+    container_image {
+      repository = "us-docker.pkg.dev/deeplearning-platform-release/gcr.io/base-cu113.py310"
+      tag = "latest"
+    }
+  }
+}

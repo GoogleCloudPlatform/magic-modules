@@ -44,6 +44,15 @@ examples:
     vars:
       instance_name: 'workbench-instance'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'workbench_instance_basic_container'
+    primary_resource_id: 'instance'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-workbench-instance%s\",
+      context[\"\
+      random_suffix\"])"
+    region_override: 'us-west1-a'
+    vars:
+      instance_name: 'workbench-instance'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'workbench_instance_basic_gpu'
     primary_resource_id: 'instance'
     primary_resource_name: "fmt.Sprintf(\"tf-test-workbench-instance%s\",
@@ -213,6 +222,8 @@ properties:
         name: vmImage
         custom_flatten: templates/terraform/custom_flatten/workbench_instance_vm_image_flatten.go.erb
         default_from_api: true
+        conflicts:
+          - gce_setup.0.container_image
         immutable: true
         description: |
           Definition of a custom Compute Engine virtual machine image for starting
@@ -240,6 +251,23 @@ properties:
             exactly_one_of:
               - vm_image.0.name
               - vm_image.0.family
+      - !ruby/object:Api::Type::NestedObject
+        name: containerImage
+        conflicts:
+          - gce_setup.0.vm_image
+        description: |
+          Use a container image to start the workbench instance.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'repository'
+            description: |
+              The path to the container image repository.
+              For example: gcr.io/{project_id}/{imageName}
+            required: true
+          - !ruby/object:Api::Type::String
+            name: 'tag'
+            description: |
+              The tag of the container image. If not specified, this defaults to the latest tag.
       - !ruby/object:Api::Type::NestedObject
         name: bootDisk
         default_from_api: true
