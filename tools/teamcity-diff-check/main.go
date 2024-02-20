@@ -107,5 +107,5 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Printf("No Diff in %s provider", *provider)
+	fmt.Printf("No Diff in %s provider\n", *provider)
 }
