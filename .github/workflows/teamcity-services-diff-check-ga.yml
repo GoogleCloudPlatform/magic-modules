@@ -34,7 +34,7 @@ jobs:
 
       - name: Unzip the artifacts and delete the zip
         run: |
-          unzip -o artifacts/output.zip -d ./provider
+          unzip -o artifacts/output -d ./provider
           rm artifacts/output.zip
 
       - name: Setup Go
