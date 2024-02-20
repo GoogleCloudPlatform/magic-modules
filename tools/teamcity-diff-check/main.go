@@ -16,12 +16,27 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"reflect"
 	"regexp"
 )
 
 var serviceFile = flag.String("service_file", "services_ga.kt", "kotlin service file to be parsed")
 var provider = flag.String("provider", "google", "Specify which provider to run diff_check on")
+
+func serviceDifference(gS, tS []string) []string {
+	g := make(map[string]struct{}, len(gS))
+	for _, s := range gS {
+		g[s] = struct{}{}
+	}
+
+	var diff []string
+	for _, s := range tS {
+		if _, found := g[s]; !found {
+			diff = append(diff, s)
+		}
+	}
+
+	return diff
+}
 
 func main() {
 	flag.Parse()
@@ -98,8 +113,9 @@ func main() {
 		teamcityServices = append(teamcityServices, string(service))
 	}
 
-	if !reflect.DeepEqual(googleServices, teamcityServices) {
+	if diff := serviceDifference(googleServices, teamcityServices); len(diff) != 0 {
 		fmt.Fprintf(os.Stderr, "error: diff in %s\n", *serviceFile)
+		fmt.Fprintf(os.Stderr, "Missing Services: %s\n", diff)
 		os.Exit(1)
 	}
 
