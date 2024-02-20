@@ -28,9 +28,20 @@ jobs:
       - name: Download built artifacts
         uses: actions/download-artifact@v2
         with:
-          name: artifact-provider
+          name: artifact-terraform-provider-google
           path: artifacts
       
+      - name: Unzip the artifacts and delete the zip
+        run: |
+          unzip artifacts/output.zip -d ./provider
+          rm artifacts/output.zip
+
+      - name: Download built artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: artifact-terraform-provider-google-beta
+          path: artifacts
+  
       - name: Unzip the artifacts and delete the zip
         run: |
           unzip artifacts/output.zip -d ./provider
