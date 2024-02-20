@@ -22,34 +22,35 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 base_url: '{{parent}}/locations/global/quotaPreferences'
 self_link: '{{parent}}/locations/global/quotaPreferences/{{quota_preference_id}}'
 create_url: '{{parent}}/locations/global/quotaPreferences?quotaPreferenceId={{quota_preference_id}}&ignoreSafetyChecks={{ignore_safety_checks}}'
+update_url: '{{parent}}/locations/global/quotaPreferences/{{quota_preference_id}}?allowMissing={{allow_missing}}&validateOnly={{validate_only}}&ignoreSafetyChecks={{ignore_safety_checks}}'
 update_verb: :PATCH
 update_mask: true
 skip_delete: true
 autogen_async: false
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  encoder: templates/terraform/encoders/quota_preference.go.erb
+
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "cloudquotas_quota_preference_basic"
     primary_resource_id: "preference"
+    skip_test: true
     vars:
-      preference_name: "compute_CPUS-per-project"
-      service: "compute.googleapis.com"
-      quota_id: "CPUS-per-project-region"
-      contact_email: "liulola@google.com"
+      quota_preference_id: "compute_googleapis_com-CPUS-per-project_us-central2"
     test_env_vars:
       project: :PROJECT_NAME
 
 parameters:
   - !ruby/object:Api::Type::String
     name: 'parent'
-    required: true
     immutable: true
     url_param_only: true
-    description: The parent of the quota preference. 
+    description: The parent of the quota preference. Allowed parents are "projects/[project-id / number]" or "folders/[folder-id / number]" or "organizations/[org-id / number]".
   - !ruby/object:Api::Type::String
     name: 'quota_preference_id'
-    required: true
     immutable: true
     url_param_only: true
+    default_value: ""
     description: The unique quota preference id.
   - !ruby/object:Api::Type::Boolean
     name: 'allow_missing'
@@ -64,6 +65,7 @@ parameters:
   - !ruby/object:Api::Type::Enum
     name: 'ignore_safety_checks'
     url_param_only: true
+    default_value: :QUOTA_SAFETY_CHECK_UNSPECIFIED
     description: The list of quota safety checks to be ignored.
     values: 
       - :QUOTA_SAFETY_CHECK_UNSPECIFIED

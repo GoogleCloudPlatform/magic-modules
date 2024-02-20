@@ -1,10 +1,15 @@
-resource "google_cloudquotas_quota_preference" "<%= ctx[:primary_resource_id] %>" {
-  name          = "projects/" + "<%= ctx[:test_env_vars]['project'] %>" + "/locations/global/" + "<%= ctx[:vars]['preference_name'] %>"
-  quota_config  = google_cloudquotas_quota_config.config
-  service       = "<%= ctx[:vars]['service'] %>"
-  quota_id      = "<%= ctx[:vars]['quota_id'] %>"
-  contact_email = "<%= ctx[:vars]['contact_email'] %>"
+# [START cloudquotas_quota_preference_basic]
+resource "google_cloud_quotas_quota_preference" "<%= ctx[:primary_resource_id] %>" {
+  name          = "projects/<%= ctx[:test_env_vars]['project'] %>/locations/global/quotaPreferences/<%= ctx[:vars]['quota_preference_id'] %>"
+  quota_config  {
+    preferred_value = 210
+  }
+  dimensions = {
+    region = "us-central2"
+  }
+  service       = "compute.googleapis.com"
+  quota_id      = "CPUS-per-project-region"
+  contact_email = "liulola@google.com"
+  justification = "Increase quota for terraform testing."
 }
-resource "google_cloudquotas_quota_config" "config" {
-  preferred_value          = "200"
-}
+# [END cloudquotas_quota_preference_basic]
