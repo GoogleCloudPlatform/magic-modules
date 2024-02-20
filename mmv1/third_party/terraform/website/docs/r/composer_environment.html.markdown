@@ -1130,11 +1130,6 @@ The `config` block supports:
   The configuration settings for software (Airflow) inside the environment. Structure is
   documented below.
 
-* `private_environment_config` -
-  (Optional)
-  The configuration used for the Private IP Cloud Composer environment. Structure is documented
-  below.
-
 * `encryption_config` -
   (Optional)
   The encryption options for the Cloud Composer environment and its
@@ -1162,14 +1157,6 @@ The `config` block supports:
   the environment or not. Values for resilience mode are `HIGH_RESILIENCE` 
   for high resilience and `STANDARD_RESILIENCE` for standard
   resilience.
-
-* `master_authorized_networks_config` -
-  (Optional)
-  Configuration options for the master authorized networks feature. Enabled
-  master authorized networks will disallow all external traffic to access
-  Kubernetes master through HTTPS except traffic from the given CIDR blocks,
-  Google Compute Engine Public IPs and Google Prod IPs. Structure is
-  documented below.
 
 * `data_retention_config` -
   (Optional, Cloud Composer 2.0.23 or newer only)
@@ -1229,19 +1216,6 @@ The `node_config` block supports:
   used to identify valid sources or targets for network
   firewalls. Each tag within the list must comply with RFC1035.
   Cannot be updated.
-
-* `ip_allocation_policy` -
-  (Optional)
-  Configuration for controlling how IPs are allocated in the GKE cluster.
-  Structure is documented below.
-  Cannot be updated.
-
-* `enable_ip_masq_agent` -
-  (Optional)
-  IP Masq Agent translates Pod IP addresses to node IP addresses, so that 
-  destinations and services targeted from Airflow DAGs and tasks only receive 
-  packets from node IP addresses instead of Pod IP addresses
-  See the [documentation](https://cloud.google.com/composer/docs/enable-ip-masquerade-agent).
 
 * `composer_internal_ipv4_cidr_block` -
   (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
@@ -1319,72 +1293,6 @@ The `software_config` block supports:
 * `enabled` -
   (Required)
   Whether or not Cloud Data Lineage integration is enabled.
-
-See [documentation](https://cloud.google.com/composer/docs/how-to/managing/configuring-private-ip) for setting up private environments. The `private_environment_config` block supports:
-
-* `enable_private_endpoint` -
-  If true, access to the public endpoint of the GKE cluster is denied.
-
-* `master_ipv4_cidr_block` -
-  (Optional)
-  The IP range in CIDR notation to use for the hosted master network. This range is used
-  for assigning internal IP addresses to the cluster master or set of masters and to the
-  internal load balancer virtual IP. This range must not overlap with any other ranges
-  in use within the cluster's network.
-  If left blank, the default value of is used. See [documentation](https://cloud.google.com/composer/docs/how-to/managing/configuring-private-ip#defaults) for default values per region.
-
-* `cloud_sql_ipv4_cidr_block` -
-  (Optional)
-  The CIDR block from which IP range in tenant project will be reserved for Cloud SQL. Needs to be disjoint from `web_server_ipv4_cidr_block`
-
-* `cloud_composer_network_ipv4_cidr_block"` -
-  (Optional, Cloud Composer 2 only)
-  The CIDR block from which IP range for Cloud Composer Network in tenant project will be reserved. Needs to be disjoint from private_cluster_config.master_ipv4_cidr_block and cloud_sql_ipv4_cidr_block.
-
-* `enable_privately_used_public_ips` -
-  (Optional)
-  When enabled, IPs from public (non-RFC1918) ranges can be used for
-  `ip_allocation_policy.cluster_ipv4_cidr_block` and `ip_allocation_policy.service_ipv4_cidr_block`.
-
-* `cloud_composer_connection_subnetwork` -
-  (Optional)
-  When specified, the environment will use Private Service Connect instead of VPC peerings to connect
-  to Cloud SQL in the Tenant Project, and the PSC endpoint in the Customer Project will use an IP
-  address from this subnetwork. This field is supported for Cloud Composer environments in
-  versions `composer-2.*.*-airflow-*.*.*` and newer.
-
-
-The `ip_allocation_policy` block supports:
-
-* `cluster_secondary_range_name` -
-  (Optional)
-  The name of the cluster's secondary range used to allocate IP addresses to pods.
-  Specify either `cluster_secondary_range_name` or `cluster_ipv4_cidr_block` but not both.
-
-* `services_secondary_range_name` -
-  (Optional)
-  The name of the services' secondary range used to allocate IP addresses to the cluster.
-  Specify either `services_secondary_range_name` or `services_ipv4_cidr_block` but not both.
-
-* `cluster_ipv4_cidr_block` -
-  (Optional)
-  The IP address range used to allocate IP addresses to pods in the cluster.
-  For Cloud Composer 1 environments, this field is applicable only when `use_ip_aliases` is true.
-  Set to blank to have GKE choose a range with the default size.
-  Set to /netmask (e.g. /14) to have GKE choose a range with a specific netmask.
-  Set to a CIDR notation (e.g. 10.96.0.0/14) from the RFC-1918 private networks
-  (e.g. 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) to pick a specific range to use.
-  Specify either `cluster_secondary_range_name` or `cluster_ipv4_cidr_block` but not both.
-
-* `services_ipv4_cidr_block` -
-  (Optional)
-  The IP address range used to allocate IP addresses in this cluster.
-  For Cloud Composer 1 environments, this field is applicable only when `use_ip_aliases` is true.
-  Set to blank to have GKE choose a range with the default size.
-  Set to /netmask (e.g. /14) to have GKE choose a range with a specific netmask.
-  Set to a CIDR notation (e.g. 10.96.0.0/14) from the RFC-1918 private networks
-  (e.g. 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) to pick a specific range to use.
-  Specify either `services_secondary_range_name` or `services_ipv4_cidr_block` but not both.
 
 <a name="nested_encryption_config_comp_2"></a>The `encryption_config` block supports:
 
