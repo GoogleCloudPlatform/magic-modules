@@ -65,7 +65,6 @@ func main() {
 		googleServices = append(googleServices, string(service))
 	}
 
-	fmt.Println(googleServices)
 	////////////////////////////////////////////////////////////////////////////////
 
 	f, err := os.Open(fmt.Sprintf("../../mmv1/third_party/terraform/.teamcity/components/inputs/%s", *serviceFile))

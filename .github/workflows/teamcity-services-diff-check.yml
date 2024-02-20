@@ -1,4 +1,4 @@
-name: TeamCity Services Diff Check GA
+name: TeamCity Services Diff Check
 permissions: read-all
 
 on:
@@ -6,8 +6,9 @@ on:
   pull_request:
     types: [opened, edited]
     paths:
-      - '.github/workflows/teamcity-services-diff-check-ga.yml'
+      - '.github/workflows/teamcity-services-diff-check.yml'
       - 'mmv1/third_party/terraform/.teamcity/components/inputs/services_ga.kt'
+      - 'mmv1/third_party/terraform/.teamcity/components/inputs/services_beta.kt'
 jobs:
   terraform-provider-google:
     uses: ./.github/workflows/build-downstream.yml
