@@ -282,15 +282,6 @@ The following arguments are supported:
   (Optional)
   The configuration used for the Private IP Cloud Composer environment. Structure is [documented below](#nested_private_environment_config).
 
-* `enable_private_environment` -
-  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
-  If true, a private Composer environment will be created.
-
-* `enable_private_builds_only` -
-  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
-  If true, builds performed during operations that install Python packages have only private connectivity to Google services.
-  If false, the builds also have access to the internet.
-
 * `web_server_network_access_control` -
   The network-level access control policy for the Airflow web server.
   If unspecified, no network-level access restrictions are applied.
@@ -464,10 +455,6 @@ The following arguments are supported:
 * `scheduler_count` -
   (Optional, Cloud Composer 1 with Airflow 2 only)
   The number of schedulers for Airflow.
-
-* `web_server_plugins_mode` -
-  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
-  Web server plugins configuration. Should be either 'ENABLED' or 'DISABLED'. Defaults to 'ENABLED'.
 
 
 See [documentation](https://cloud.google.com/composer/docs/how-to/managing/configuring-private-ip) for setting up private environments. <a name="nested_private_environment_config"></a>The `private_environment_config` block supports:
@@ -783,11 +770,6 @@ The `node_config` block supports:
   packets from node IP addresses instead of Pod IP addresses
   See the [documentation](https://cloud.google.com/composer/docs/enable-ip-masquerade-agent).
 
-* `composer_internal_ipv4_cidr_block` -
-  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
-  At least /20 IPv4 cidr range that will be used by Composer internal components.
-  Cannot be updated.
-
 The `software_config` block supports:
 
 * `airflow_config_overrides` -
@@ -993,10 +975,6 @@ The `workloads_config` block supports:
   (Optional)
   Configuration for resources used by Airflow workers.
 
-* `dag_processor` -
-  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
-  Configuration for resources used by DAG processor.
-
 The `scheduler` block supports:
 
 * `cpu` -
@@ -1068,19 +1046,6 @@ The `worker` block supports:
   environment does not go above this number, even if a higher number of workers is required to
   handle the load.
 
-The `dag_processor` block supports:
-
-* `cpu` -
-  (Optional)
-  CPU request and limit for DAG processor.
-
-* `memory_gb` -
-  (Optional)
-  Memory (GB) request and limit for DAG processor.
-
-* `float storage_gb`
-  (Optional)
-  Storage (GB) request and limit for DAG processor.
 
 ## Argument Reference - Cloud Composer 3
 
@@ -1129,6 +1094,15 @@ The `config` block supports:
   (Optional)
   The configuration settings for software (Airflow) inside the environment. Structure is
   documented below.
+
+* `enable_private_environment` -
+  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
+  If true, a private Composer environment will be created.
+
+* `enable_private_builds_only` -
+  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
+  If true, builds performed during operations that install Python packages have only private connectivity to Google services.
+  If false, the builds also have access to the internet.
 
 * `encryption_config` -
   (Optional)
@@ -1201,6 +1175,12 @@ The `node_config` block supports:
   communications, specified as a self-link, relative resource name (for example,
   "projects/{project}/regions/{region}/subnetworks/{subnetwork}"), or by name. If subnetwork is provided,
   network must also be provided and the subnetwork must belong to the enclosing environment's project and region.
+
+* `composer_network_attachment` -
+  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
+  PSC (Private Service Connect) Network entry point. Customers can pre-create the Network Attachment 
+  and point Cloud Composer environment to use. It is possible to share network attachment among many environments, 
+  provided enough IP addresses are available.
 
 * `service_account` -
   (Optional)
@@ -1288,6 +1268,10 @@ The `software_config` block supports:
   Cloud Composer environments in versions composer-2.1.2-airflow-*.*.* and newer)
   The configuration for Cloud Data Lineage integration. Structure is
   [documented below](#nested_cloud_data_lineage_integration).
+
+* `web_server_plugins_mode` -
+  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
+  Web server plugins configuration. Should be either 'ENABLED' or 'DISABLED'. Defaults to 'ENABLED'.
 
 <a name="nested_cloud_data_lineage_integration"></a>The `cloud_data_lineage_integration` block supports:
 * `enabled` -
