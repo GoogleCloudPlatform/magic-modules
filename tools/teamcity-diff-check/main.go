@@ -45,11 +45,11 @@ func main() {
 	cmd := exec.Command("go", "list", "./...")
 	cmd.Dir = servicesPath
 	stdout, err := cmd.Output()
-	if err != nil {
-		fmt.Println(string(stdout))
-		fmt.Println(err.Error())
-		return
-	}
+	// if err != nil {
+	// 	fmt.Println(string(stdout))
+	// 	fmt.Println(err.Error())
+	// 	return
+	// }
 
 	// Regex pattern captures "services" from `go list ../../provider/{{*provider}}/services/..`
 	pattern := regexp.MustCompile(`github\.com\/hashicorp\/terraform-provider-(google|google-beta)\/(google|google-beta)\/services\/(?P<service>\w+)`)
