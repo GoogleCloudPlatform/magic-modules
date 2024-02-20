@@ -64,7 +64,7 @@ func main() {
 	root, _ = test.Output()
 	fmt.Println(string(root))
 
-	f, err := os.Open(fmt.Sprintf("../../provider/.teamcity/components/inputs/%s", *serviceFile))
+	f, err := os.Open(fmt.Sprintf("../../mmv1/third_party/terraform/.teamcity/components/inputs/%s", *serviceFile))
 	if err != nil {
 		panic(err)
 	}
