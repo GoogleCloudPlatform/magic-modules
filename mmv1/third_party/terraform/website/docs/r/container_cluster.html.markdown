@@ -11,7 +11,7 @@ Manages a Google Kubernetes Engine (GKE) cluster.
 To get more information about GKE clusters, see:
   * [The API reference](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1beta1/projects.locations.clusters)
   * How-to guides
-    * [GKE overview)[https://cloud.google.com/kubernetes-engine/docs/concepts/kubernetes-engine-overview]
+    * [GKE overview](https://cloud.google.com/kubernetes-engine/docs/concepts/kubernetes-engine-overview)
     * [About cluster configuration choices](https://cloud.google.com/kubernetes-engine/docs/concepts/types-of-clusters)
   * Terraform guidance
     * [Using GKE with Terraform](/docs/providers/google/guides/using_gke_with_terraform.html)
