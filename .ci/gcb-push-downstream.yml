@@ -225,6 +225,8 @@ availableSecrets:
   secretManager:
     - versionName: projects/673497134629/secrets/github-classic--repo-workflow/versions/latest
       env: GITHUB_TOKEN_CLASSIC
+    - versionName: projects/673497134629/secrets/github-magician-token-generate-diffs-downstreams/versions/latest
+      env: GITHUB_TOKEN_DOWNSTREAMS
     - versionName: projects/673497134629/secrets/ci-test-billing-account/versions/latest
       env: GOOGLE_BILLING_ACCOUNT
     - versionName: projects/673497134629/secrets/ci-test-cust-id/versions/latest
