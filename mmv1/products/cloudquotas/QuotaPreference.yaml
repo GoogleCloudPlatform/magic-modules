@@ -67,7 +67,7 @@ parameters:
     url_param_only: true
     default_value: :QUOTA_SAFETY_CHECK_UNSPECIFIED
     description: The list of quota safety checks to be ignored.
-    values: 
+    values:
       - :QUOTA_SAFETY_CHECK_UNSPECIFIED
       - :QUOTA_DECREASE_BELOW_USAGE
       - :QUOTA_DECREASE_PERCENTAGE_TOO_HIGH
@@ -76,7 +76,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
-      The resource name of the quota preference. Required except in the CREATE requests. 
+      The resource name of the quota preference. Required except in the CREATE requests.
   - !ruby/object:Api::Type::String
     name: 'service'
     required: true
@@ -96,7 +96,7 @@ properties:
         name: 'preferredValue'
         required: true
         description: |
-          The preferred value. Must be greater than or equal to -1. If set to -1, it means the value is "unlimited". 
+          The preferred value. Must be greater than or equal to -1. If set to -1, it means the value is "unlimited".
       - !ruby/object:Api::Type::String
         name: 'stateDetail'
         output: true
@@ -113,14 +113,14 @@ properties:
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'annotations'
         description: |-
-          The annotations map for clients to store small amounts of arbitrary data. Do not put PII or other sensitive information here. See https://google.aip.dev/128#annotations.   
-          
+          The annotations map for clients to store small amounts of arbitrary data. Do not put PII or other sensitive information here. See https://google.aip.dev/128#annotations.
+
           An object containing a list of "key: value" pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
       - !ruby/object:Api::Type::Enum
         name: 'requestOrigin'
         output: true
         description: The origin of the quota preference request.
-        values: 
+        values:
           - :ORIGIN_UNSPECIFIED
           - :CLOUD_CONSOLE`
           - :AUTO_ADJUSTER
@@ -128,10 +128,10 @@ properties:
     name: 'dimensions'
     description: |-
       The dimensions that this quota preference applies to. The key of the map entry is the name of a dimension, such as "region", "zone", "network_id", and the value of the map entry is the dimension value. If a dimension is missing from the map of dimensions, the quota preference applies to all the dimension values except for those that have other quota preferences configured for the specific value.
-      
-      NOTE: QuotaPreferences can only be applied across all values of "user" and "resource" dimension. Do not set values for "user" or "resource" in the dimension map. 
-      
-      Example: {"provider", "Foo Inc"} where "provider" is a service specific dimension. 
+
+      NOTE: QuotaPreferences can only be applied across all values of "user" and "resource" dimension. Do not set values for "user" or "resource" in the dimension map.
+
+      Example: {"provider", "Foo Inc"} where "provider" is a service specific dimension.
   - !ruby/object:Api::Type::String
     name: 'etag'
     description: |
@@ -146,7 +146,7 @@ properties:
     name: 'updateTime'
     output: true
     description: |
-      Update time stamp. 
+      Update time stamp.
       A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
   - !ruby/object:Api::Type::Boolean
     name: 'reconciling'
