@@ -1082,6 +1082,466 @@ The `dag_processor` block supports:
   (Optional)
   Storage (GB) request and limit for DAG processor.
 
+## Argument Reference - Cloud Composer 3
+
+The following arguments are supported:
+
+* `name` -
+  (Required)
+  Name of the environment
+
+* `config` -
+  (Optional)
+  Configuration parameters for this environment. Structure is documented below.
+
+* `labels` -
+  (Optional)
+  User-defined labels for this environment. The labels map can contain
+  no more than 64 entries. Entries of the labels map are UTF8 strings
+  that comply with the following restrictions:
+  Label keys must be between 1 and 63 characters long and must conform
+  to the following regular expression: `[a-z]([-a-z0-9]*[a-z0-9])?`.
+  Label values must be between 0 and 63 characters long and must
+  conform to the regular expression `([a-z]([-a-z0-9]*[a-z0-9])?)?`.
+  No more than 64 labels can be associated with a given environment.
+  Both keys and values must be <= 128 bytes in size.
+
+* `region` -
+  (Optional)
+  The location or Compute Engine region for the environment.
+
+* `project` -
+  (Optional) The ID of the project in which the resource belongs.
+  If it is not provided, the provider project is used.
+
+* `storage_config` -
+  (Optional)
+  Configuration options for storage used by Composer environment. Structure is documented below.
+
+
+The `config` block supports:
+
+* `node_config` -
+  (Optional)
+  The configuration used for the Kubernetes Engine cluster. Structure is documented below.
+
+* `software_config` -
+  (Optional)
+  The configuration settings for software (Airflow) inside the environment. Structure is
+  documented below.
+
+* `private_environment_config` -
+  (Optional)
+  The configuration used for the Private IP Cloud Composer environment. Structure is documented
+  below.
+
+* `encryption_config` -
+  (Optional)
+  The encryption options for the Cloud Composer environment and its
+  dependencies.
+
+* `maintenance_window` -
+  (Optional)
+  The configuration settings for Cloud Composer maintenance windows.
+
+* `workloads_config` -
+  (Optional, Cloud Composer 2 only)
+  The Kubernetes workloads configuration for GKE cluster associated with the
+  Cloud Composer environment.
+
+* `environment_size` -
+  (Optional, Cloud Composer 2 only)
+  The environment size controls the performance parameters of the managed
+  Cloud Composer infrastructure that includes the Airflow database. Values for
+  environment size are `ENVIRONMENT_SIZE_SMALL`, `ENVIRONMENT_SIZE_MEDIUM`,
+  and `ENVIRONMENT_SIZE_LARGE`.
+
+* `resilience_mode` -
+  (Optional, Cloud Composer 2.1.15 or newer only)
+  The resilience mode states whether high resilience is enabled for 
+  the environment or not. Values for resilience mode are `HIGH_RESILIENCE` 
+  for high resilience and `STANDARD_RESILIENCE` for standard
+  resilience.
+
+* `master_authorized_networks_config` -
+  (Optional)
+  Configuration options for the master authorized networks feature. Enabled
+  master authorized networks will disallow all external traffic to access
+  Kubernetes master through HTTPS except traffic from the given CIDR blocks,
+  Google Compute Engine Public IPs and Google Prod IPs. Structure is
+  documented below.
+
+* `data_retention_config` -
+  (Optional, Cloud Composer 2.0.23 or newer only)
+  Configuration setting for airflow data rentention mechanism. Structure is
+  [documented below](#nested_data_retention_config).
+
+<a name="nested_data_retention_config"></a>The `data_retention_config` block supports:
+* `task_logs_retention_config` - 
+  (Optional)
+  The configuration setting for Task Logs. Structure is
+  [documented below](#nested_task_logs_retention_config).
+
+<a name="nested_task_logs_retention_config"></a>The `task_logs_retention_config` block supports:
+* `storage_mode` - 
+  (Optional)
+  The mode of storage for Airflow workers task logs. Values for storage mode are 
+  `CLOUD_LOGGING_ONLY` to only store logs in cloud logging and 
+  `CLOUD_LOGGING_AND_CLOUD_STORAGE` to store logs in cloud logging and cloud storage.
+
+
+The `storage_config` block supports:
+
+* `bucket` -
+  (Required)
+  Name of an existing Cloud Storage bucket to be used by the environment.
+
+
+The `node_config` block supports:
+
+* `network` -
+  (Optional)
+  The Compute Engine network to be used for machine
+  communications, specified as a self-link, relative resource name
+  (for example "projects/{project}/global/networks/{network}"), by name.
+
+  The network must belong to the environment's project. If unspecified, the "default" network ID in the environment's
+  project is used. If a Custom Subnet Network is provided, subnetwork must also be provided.
+
+* `subnetwork` -
+  (Optional)
+  The Compute Engine subnetwork to be used for machine
+  communications, specified as a self-link, relative resource name (for example,
+  "projects/{project}/regions/{region}/subnetworks/{subnetwork}"), or by name. If subnetwork is provided,
+  network must also be provided and the subnetwork must belong to the enclosing environment's project and region.
+
+* `service_account` -
+  (Optional)
+  The Google Cloud Platform Service Account to be used by the
+  node VMs. If a service account is not specified, the "default"
+  Compute Engine service account is used. Cannot be updated. If given,
+  note that the service account must have `roles/composer.worker`
+  for any GCP resources created under the Cloud Composer Environment.
+
+* `tags` -
+  (Optional)
+  The list of instance tags applied to all node VMs. Tags are
+  used to identify valid sources or targets for network
+  firewalls. Each tag within the list must comply with RFC1035.
+  Cannot be updated.
+
+* `ip_allocation_policy` -
+  (Optional)
+  Configuration for controlling how IPs are allocated in the GKE cluster.
+  Structure is documented below.
+  Cannot be updated.
+
+* `enable_ip_masq_agent` -
+  (Optional)
+  IP Masq Agent translates Pod IP addresses to node IP addresses, so that 
+  destinations and services targeted from Airflow DAGs and tasks only receive 
+  packets from node IP addresses instead of Pod IP addresses
+  See the [documentation](https://cloud.google.com/composer/docs/enable-ip-masquerade-agent).
+
+* `composer_internal_ipv4_cidr_block` -
+  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
+  At least /20 IPv4 cidr range that will be used by Composer internal components.
+  Cannot be updated.
+
+The `software_config` block supports:
+
+* `airflow_config_overrides` -
+  (Optional) Apache Airflow configuration properties to override. Property keys contain the section and property names,
+  separated by a hyphen, for example "core-dags_are_paused_at_creation".
+
+  Section names must not contain hyphens ("-"), opening square brackets ("["), or closing square brackets ("]").
+  The property name must not be empty and cannot contain "=" or ";". Section and property names cannot contain
+  characters: "." Apache Airflow configuration property names must be written in snake_case. Property values can
+  contain any character, and can be written in any lower/upper case format. Certain Apache Airflow configuration
+  property values are [blacklisted](https://cloud.google.com/composer/docs/concepts/airflow-configurations#airflow_configuration_blacklists),
+  and cannot be overridden.
+
+* `pypi_packages` -
+  (Optional)
+  Custom Python Package Index (PyPI) packages to be installed
+  in the environment. Keys refer to the lowercase package name (e.g. "numpy"). Values are the lowercase extras and
+  version specifier (e.g. "==1.12.0", "[devel,gcp_api]", "[devel]>=1.8.2, <1.9.2"). To specify a package without
+  pinning it to a version specifier, use the empty string as the value.
+
+* `env_variables` -
+  (Optional)
+  Additional environment variables to provide to the Apache Airflow scheduler, worker, and webserver processes.
+  Environment variable names must match the regular expression `[a-zA-Z_][a-zA-Z0-9_]*`.
+  They cannot specify Apache Airflow software configuration overrides (they cannot match the regular expression
+  `AIRFLOW__[A-Z0-9_]+__[A-Z0-9_]+`), and they cannot match any of the following reserved names:
+  ```
+  AIRFLOW_HOME
+  C_FORCE_ROOT
+  CONTAINER_NAME
+  DAGS_FOLDER
+  GCP_PROJECT
+  GCS_BUCKET
+  GKE_CLUSTER_NAME
+  SQL_DATABASE
+  SQL_INSTANCE
+  SQL_PASSWORD
+  SQL_PROJECT
+  SQL_REGION
+  SQL_USER
+  ```
+
+* `image_version` -
+  (Required in Cloud Composer 2, optional in Cloud Composer 1)
+
+  **In Cloud Composer 2, you must specify an image with Cloud Composer 2**. Otherwise, the default image for Cloud Composer 1 is used. For more information about Cloud Composer images, see
+  [Cloud Composer version list](https://cloud.google.com/composer/docs/concepts/versioning/composer-versions).
+
+  The version of the software running in the environment. This encapsulates both the version of Cloud Composer
+  functionality and the version of Apache Airflow. It must match the regular expression
+  `composer-([0-9]+(\.[0-9]+\.[0-9]+(-preview\.[0-9]+)?)?|latest)-airflow-([0-9]+(\.[0-9]+(\.[0-9]+)?)?)`.
+  The Cloud Composer portion of the image version is a full semantic version, or an alias in the form of major
+  version number or 'latest'.
+  The Apache Airflow portion of the image version is a full semantic version that points to one of the
+  supported Apache Airflow versions, or an alias in the form of only major or major.minor versions specified.
+  **Important**: In-place upgrade is only available using `google-beta` provider. It's because updating the
+  `image_version` is still in beta. Using `google-beta` provider, you can upgrade in-place between minor or
+  patch versions of Cloud Composer or Apache Airflow. For example, you can upgrade your environment from
+  `composer-1.16.x` to `composer-1.17.x`, or from `airflow-2.1.x` to `airflow-2.2.x`. You cannot upgrade between
+  major Cloud Composer or Apache Airflow versions (from `1.x.x` to `2.x.x`). To do so, create a new environment.
+
+* `cloud_data_lineage_integration` -
+  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html),
+  Cloud Composer environments in versions composer-2.1.2-airflow-*.*.* and newer)
+  The configuration for Cloud Data Lineage integration. Structure is
+  [documented below](#nested_cloud_data_lineage_integration).
+
+<a name="nested_cloud_data_lineage_integration"></a>The `cloud_data_lineage_integration` block supports:
+* `enabled` -
+  (Required)
+  Whether or not Cloud Data Lineage integration is enabled.
+
+See [documentation](https://cloud.google.com/composer/docs/how-to/managing/configuring-private-ip) for setting up private environments. The `private_environment_config` block supports:
+
+* `enable_private_endpoint` -
+  If true, access to the public endpoint of the GKE cluster is denied.
+
+* `master_ipv4_cidr_block` -
+  (Optional)
+  The IP range in CIDR notation to use for the hosted master network. This range is used
+  for assigning internal IP addresses to the cluster master or set of masters and to the
+  internal load balancer virtual IP. This range must not overlap with any other ranges
+  in use within the cluster's network.
+  If left blank, the default value of is used. See [documentation](https://cloud.google.com/composer/docs/how-to/managing/configuring-private-ip#defaults) for default values per region.
+
+* `cloud_sql_ipv4_cidr_block` -
+  (Optional)
+  The CIDR block from which IP range in tenant project will be reserved for Cloud SQL. Needs to be disjoint from `web_server_ipv4_cidr_block`
+
+* `cloud_composer_network_ipv4_cidr_block"` -
+  (Optional, Cloud Composer 2 only)
+  The CIDR block from which IP range for Cloud Composer Network in tenant project will be reserved. Needs to be disjoint from private_cluster_config.master_ipv4_cidr_block and cloud_sql_ipv4_cidr_block.
+
+* `enable_privately_used_public_ips` -
+  (Optional)
+  When enabled, IPs from public (non-RFC1918) ranges can be used for
+  `ip_allocation_policy.cluster_ipv4_cidr_block` and `ip_allocation_policy.service_ipv4_cidr_block`.
+
+* `cloud_composer_connection_subnetwork` -
+  (Optional)
+  When specified, the environment will use Private Service Connect instead of VPC peerings to connect
+  to Cloud SQL in the Tenant Project, and the PSC endpoint in the Customer Project will use an IP
+  address from this subnetwork. This field is supported for Cloud Composer environments in
+  versions `composer-2.*.*-airflow-*.*.*` and newer.
+
+
+The `ip_allocation_policy` block supports:
+
+* `cluster_secondary_range_name` -
+  (Optional)
+  The name of the cluster's secondary range used to allocate IP addresses to pods.
+  Specify either `cluster_secondary_range_name` or `cluster_ipv4_cidr_block` but not both.
+
+* `services_secondary_range_name` -
+  (Optional)
+  The name of the services' secondary range used to allocate IP addresses to the cluster.
+  Specify either `services_secondary_range_name` or `services_ipv4_cidr_block` but not both.
+
+* `cluster_ipv4_cidr_block` -
+  (Optional)
+  The IP address range used to allocate IP addresses to pods in the cluster.
+  For Cloud Composer 1 environments, this field is applicable only when `use_ip_aliases` is true.
+  Set to blank to have GKE choose a range with the default size.
+  Set to /netmask (e.g. /14) to have GKE choose a range with a specific netmask.
+  Set to a CIDR notation (e.g. 10.96.0.0/14) from the RFC-1918 private networks
+  (e.g. 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) to pick a specific range to use.
+  Specify either `cluster_secondary_range_name` or `cluster_ipv4_cidr_block` but not both.
+
+* `services_ipv4_cidr_block` -
+  (Optional)
+  The IP address range used to allocate IP addresses in this cluster.
+  For Cloud Composer 1 environments, this field is applicable only when `use_ip_aliases` is true.
+  Set to blank to have GKE choose a range with the default size.
+  Set to /netmask (e.g. /14) to have GKE choose a range with a specific netmask.
+  Set to a CIDR notation (e.g. 10.96.0.0/14) from the RFC-1918 private networks
+  (e.g. 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) to pick a specific range to use.
+  Specify either `services_secondary_range_name` or `services_ipv4_cidr_block` but not both.
+
+<a name="nested_encryption_config_comp_2"></a>The `encryption_config` block supports:
+
+* `kms_key_name` -
+  (Required)
+  Customer-managed Encryption Key available through Google's Key Management Service. It must
+  be the fully qualified resource name,
+  i.e. projects/project-id/locations/location/keyRings/keyring/cryptoKeys/key. Cannot be updated.
+
+<a name="nested_maintenance_window_comp_2"></a>The `maintenance_window` block supports:
+
+* `start_time` -
+  (Required)
+  Start time of the first recurrence of the maintenance window.
+
+* `end_time` -
+  (Required)
+  Maintenance window end time. It is used only to calculate the duration of the maintenance window.
+  The value for end-time must be in the future, relative to 'start_time'.
+
+* `recurrence` -
+  (Required)
+  Maintenance window recurrence. Format is a subset of RFC-5545 (https://tools.ietf.org/html/rfc5545) 'RRULE'.
+  The only allowed values for 'FREQ' field are 'FREQ=DAILY' and 'FREQ=WEEKLY;BYDAY=...'.
+  Example values: 'FREQ=WEEKLY;BYDAY=TU,WE', 'FREQ=DAILY'.
+
+The `recovery_config` block supports:
+
+* `scheduled_snapshots_config` -
+  (Optional)
+  The recovery configuration settings for the Cloud Composer environment.
+
+The `scheduled_snapshots_config` block supports:
+
+* `enabled` -
+  (Optional)
+  When enabled, Cloud Composer periodically saves snapshots of your environment to a Cloud Storage bucket.
+
+* `snapshot_location` -
+  (Optional)
+  The URI of a bucket folder where to save the snapshot.
+
+* `snapshot_creation_schedule` -
+  (Optional)
+  Snapshot schedule, in the unix-cron format.
+
+* `time_zone` -
+  (Optional)
+  A time zone for the schedule. This value is a time offset and does not take into account daylight saving time changes. Valid values are from UTC-12 to UTC+12. Examples: UTC, UTC-01, UTC+03.
+
+The `workloads_config` block supports:
+
+* `scheduler` -
+  (Optional)
+  Configuration for resources used by Airflow schedulers.
+
+* `triggerer` -
+  (Optional)
+  Configuration for resources used by Airflow triggerer.
+
+* `web_server` -
+  (Optional)
+  Configuration for resources used by Airflow web server.
+
+* `worker` -
+  (Optional)
+  Configuration for resources used by Airflow workers.
+
+* `dag_processor` -
+  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
+  Configuration for resources used by DAG processor.
+
+The `scheduler` block supports:
+
+* `cpu` -
+  (Optional)
+  The number of CPUs for a single Airflow scheduler.
+
+* `memory_gb` -
+  (Optional)
+  The amount of memory (GB) for a single Airflow scheduler.
+
+* `storage_gb` -
+  (Optional)
+  The amount of storage (GB) for a single Airflow scheduler.
+
+* `count` -
+  (Optional)
+  The number of schedulers.
+
+The `triggerer` block supports:
+
+* `cpu` -
+  (Required)
+  The number of CPUs for a single Airflow triggerer.
+
+* `memory_gb` -
+  (Required)
+  The amount of memory (GB) for a single Airflow triggerer.
+
+* `count` -
+  (Required)
+  The number of Airflow triggerers.
+
+The `web_server` block supports:
+
+* `cpu` -
+  (Optional)
+  The number of CPUs for the Airflow web server.
+
+* `memory_gb` -
+  (Optional)
+  The amount of memory (GB) for the Airflow web server.
+
+* `storage_gb` -
+  (Optional)
+  The amount of storage (GB) for the Airflow web server.
+
+The `worker` block supports:
+
+* `cpu` -
+  (Optional)
+  The number of CPUs for a single Airflow worker.
+
+* `memory_gb` -
+  (Optional)
+  The amount of memory (GB) for a single Airflow worker.
+
+* `float storage_gb`
+  (Optional)
+  The amount of storage (GB) for a single Airflow worker.
+
+* `min_count` -
+  (Optional)
+  The minimum number of Airflow workers that the environment can run. The number of workers in the
+  environment does not go above this number, even if a lower number of workers can handle the load.
+
+* `max_count` -
+  (Optional)
+  The maximum number of Airflow workers that the environment can run. The number of workers in the
+  environment does not go above this number, even if a higher number of workers is required to
+  handle the load.
+
+The `dag_processor` block supports:
+
+* `cpu` -
+  (Optional)
+  CPU request and limit for DAG processor.
+
+* `memory_gb` -
+  (Optional)
+  Memory (GB) request and limit for DAG processor.
+
+* `float storage_gb`
+  (Optional)
+  Storage (GB) request and limit for DAG processor.
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are exported:
