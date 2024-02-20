@@ -392,6 +392,7 @@ properties:
     description: |
       The Compute Engine tags to add to instance.
     item_type: Api::Type::String
+    default_from_api: true
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'metadata'
     description: |
