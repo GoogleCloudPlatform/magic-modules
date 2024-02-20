@@ -21,6 +21,12 @@ resource "google_workbench_instance" "<%= ctx[:primary_resource_id] %>" {
       core_count   = 1
     }
 
+    shielded_instance_config {
+      enable_secure_boot = true
+      enable_vtpm = true
+      enable_integrity_monitoring = true
+    }
+
     disable_public_ip = false
 
     service_accounts {

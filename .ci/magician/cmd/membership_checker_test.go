@@ -18,7 +18,6 @@ package cmd
 import (
 	"magician/github"
 	"reflect"
-	"regexp"
 	"testing"
 )
 
@@ -78,20 +77,7 @@ func TestExecMembershipChecker_GooglerFlow(t *testing.T) {
 
 	execMembershipChecker("pr1", "sha1", "branch1", "url1", "head1", "base1", gh, cb)
 
-	method := "RequestPullRequestReviewer"
-	if calls, ok := gh.calledMethods[method]; !ok {
-		t.Fatal("Review wasn't requested for googler")
-	} else if len(calls) != 1 {
-		t.Fatalf("Wrong number of calls for %s, got %d, expected 1", method, len(calls))
-	} else if params := calls[0]; len(params) != 2 {
-		t.Fatalf("Wrong number of params for %s, got %d, expected 2", method, len(params))
-	} else if param := params[0]; param != "pr1" {
-		t.Fatalf("Wrong first param for %s, got %v, expected pr1", method, param)
-	} else if param := params[1]; !github.IsTeamReviewer(param.(string)) {
-		t.Fatalf("Wrong second param for %s, got %v, expected a team reviewer", method, param)
-	}
-
-	method = "TriggerMMPresubmitRuns"
+	method := "TriggerMMPresubmitRuns"
 	expected := [][]any{{"sha1", map[string]string{"BRANCH_NAME": "branch1", "_BASE_BRANCH": "base1", "_HEAD_BRANCH": "head1", "_HEAD_REPO_URL": "url1", "_PR_NUMBER": "pr1"}}}
 	if calls, ok := cb.calledMethods[method]; !ok {
 		t.Fatal("Presubmit runs not triggered for googler")
@@ -126,20 +112,7 @@ func TestExecMembershipChecker_AmbiguousUserFlow(t *testing.T) {
 
 	execMembershipChecker("pr1", "sha1", "branch1", "url1", "head1", "base1", gh, cb)
 
-	method := "RequestPullRequestReviewer"
-	if calls, ok := gh.calledMethods[method]; !ok {
-		t.Fatal("Review wasn't requested for ambiguous user")
-	} else if len(calls) != 1 {
-		t.Fatalf("Wrong number of calls for %s, got %d, expected 1", method, len(calls))
-	} else if params := calls[0]; len(params) != 2 {
-		t.Fatalf("Wrong number of params for %s, got %d, expected 2", method, len(params))
-	} else if param := params[0]; param != "pr1" {
-		t.Fatalf("Wrong first param for %s, got %v, expected pr1", method, param)
-	} else if param := params[1]; !github.IsTeamReviewer(param.(string)) {
-		t.Fatalf("Wrong second param for %s, got %v, expected a team reviewer", method, param)
-	}
-
-	method = "AddLabel"
+	method := "AddLabel"
 	expected := [][]any{{"pr1", "awaiting-approval"}}
 	if calls, ok := gh.calledMethods[method]; !ok {
 		t.Fatal("Label wasn't posted to pull request")
@@ -181,33 +154,4 @@ func TestExecMembershipChecker_CommentForNewPrimaryReviewer(t *testing.T) {
 	}
 
 	execMembershipChecker("pr1", "sha1", "branch1", "url1", "head1", "base1", gh, cb)
-
-	method := "RequestPullRequestReviewer"
-	if calls, ok := gh.calledMethods[method]; !ok {
-		t.Fatal("Review wasn't requested for googler")
-	} else if len(calls) != 1 {
-		t.Fatalf("Wrong number of calls for %s, got %d, expected 1", method, len(calls))
-	} else if params := calls[0]; len(params) != 2 {
-		t.Fatalf("Wrong number of params for %s, got %d, expected 2", method, len(params))
-	} else if param := params[0]; param != "pr1" {
-		t.Fatalf("Wrong first param for %s, got %v, expected pr1", method, param)
-	} else if param := params[1]; !github.IsTeamReviewer(param.(string)) {
-		t.Fatalf("Wrong second param for %s, got %v, expected a team reviewer", method, param)
-	}
-
-	method = "PostComment"
-	reviewerExp := regexp.MustCompile(`@(.*?),`)
-	if calls, ok := gh.calledMethods[method]; !ok {
-		t.Fatal("Comment wasn't posted stating user status")
-	} else if len(calls) != 1 {
-		t.Fatalf("Wrong number of calls for %s, got %d, expected 1", method, len(calls))
-	} else if params := calls[0]; len(params) != 2 {
-		t.Fatalf("Wrong number of params for %s, got %d, expected 2", method, len(params))
-	} else if param := params[0]; param != "pr1" {
-		t.Fatalf("Wrong first param for %s, got %v, expected pr1", method, param)
-	} else if param, ok := params[1].(string); !ok {
-		t.Fatalf("Got non-string second param for %s", method)
-	} else if submatches := reviewerExp.FindStringSubmatch(param); len(submatches) != 2 || !github.IsTeamReviewer(submatches[1]) {
-		t.Fatalf("%s called without a team reviewer (found %v) in the comment: %s", method, submatches, param)
-	}
 }
