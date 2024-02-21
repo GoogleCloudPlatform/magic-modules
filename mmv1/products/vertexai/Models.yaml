@@ -14,7 +14,7 @@
 --- !ruby/object:Api::Resource
 name: Models
 base_url: projects/{{project}}/locations/{{region}}/models
-self_link: 'projects/{{project}}/locations/{{region}}/models/{{name}}'
+create_url: 'projects/{{project}}/locations/{{region}}/modelsPRE_CREATE_REPLACE_ME'
 immutable: true
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
@@ -24,6 +24,12 @@ description: |-
   A trained machine learning Model.
 id_format: '{{name}}'
 skip_sweeper: true
+autogen_async: true
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    base_url: '{{op_id}}'
+import_format:
+  ['projects/{{project}}/locations/{{location}}/backups/{{backup_id}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'vertex_ai_model_basic'
@@ -32,7 +38,7 @@ examples:
     vars:
       name: 'test-model'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  encoder: templates/terraform/encoder/vertex_ai_models.go.erb
+  pre_create: templates/terraform/pre_create/vertex_ai_models.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: region
@@ -391,7 +397,6 @@ properties:
                   standard linear search in the database for each query.
   - !ruby/object:Api::Type::String
     name: 'sourceModel'
-    required: true
     at_least_one_of: 
       - model
       - sourceModel
@@ -399,7 +404,6 @@ properties:
       The resource name of the Model to copy. That Model must be in the same Project
   - !ruby/object:Api::Type::ResourceRef
     name: 'model'
-    required: true
     resource: 'Model'
     imports: 'name'
     at_least_one_of: 
