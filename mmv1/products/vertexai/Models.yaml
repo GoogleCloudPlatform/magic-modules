@@ -31,6 +31,8 @@ examples:
     primary_resource_id: 'model'
     vars:
       name: 'test-model'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  encoder: templates/terraform/encoder/vertex_ai_models.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: region
@@ -387,3 +389,29 @@ properties:
                 description: |-
                   Configuration options for using brute force search, which simply implements the
                   standard linear search in the database for each query.
+  - !ruby/object:Api::Type::String
+    name: 'sourceModel'
+    required: true
+    at_least_one_of: 
+      - model
+      - sourceModel
+    description: |
+      The resource name of the Model to copy. That Model must be in the same Project
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'model'
+    required: true
+    resource: 'Model'
+    imports: 'name'
+    at_least_one_of: 
+      - sourceModel
+      - model
+    description: |
+      The Model to create.
+  - !ruby/object:Api::Type::String
+    name: 'modelID'
+    description: |
+      Copy sourceModel into a new Model with this ID. The ID will become the final component of the model resource name.
+  - !ruby/object:Api::Type::String
+    name: 'parentModel'
+    description: |
+      Specify this field to copy sourceModel into this existing Model as a new version.

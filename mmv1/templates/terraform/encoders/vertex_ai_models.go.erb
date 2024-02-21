@@ -1,0 +1,9 @@
+if v, ok := d.GetOk("model"); ok {
+	d.Set("self_link", d.Get("self_link").(string) + ":upload")
+}
+
+if v, ok := d.GetOk("sourceModel"); ok {
+	d.Set("self_link", d.Get("self_link").(string) + ":copy")
+}
+
+return obj, nil
