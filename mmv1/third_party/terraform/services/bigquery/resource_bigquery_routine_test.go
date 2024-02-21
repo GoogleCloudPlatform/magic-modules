@@ -222,7 +222,7 @@ resource "google_storage_bucket_object" "object" {
 }
 
 resource "google_cloudfunctions2_function" "default" {
-  name        = "function-v2"
+  name        = "function-v2-0"
   location    = "us-central1"
   description = "a new function"
 
@@ -289,9 +289,9 @@ resource "google_storage_bucket_object" "object" {
 }
 
 resource "google_cloudfunctions2_function" "default2" {
-  name        = "function-v2.1"
+  name        = "function-v2-1"
   location    = "us-central1"
-  description = "a new function"
+  description = "a new new function"
 
   build_config {
     runtime     = "nodejs18"

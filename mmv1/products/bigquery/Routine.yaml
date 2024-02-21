@@ -53,22 +53,30 @@ examples:
       dataset_id: 'dataset_id'
       routine_id: 'routine_id'
   - !ruby/object:Provider::Terraform::Examples
-    name: 'big_query_routine_pyspark'
+    name: 'bigquery_routine_pyspark'
     primary_resource_id: 'pyspark'
     vars:
       dataset_id: 'dataset_id'
       connection_id: 'connection_id'
       routine_id: 'routine_id'
   - !ruby/object:Provider::Terraform::Examples
-    name: 'big_query_routine_pyspark_mainfile'
+    name: 'bigquery_routine_pyspark_mainfile'
     primary_resource_id: 'pyspark_mainfile'
     vars:
       dataset_id: 'dataset_id'
       connection_id: 'connection_id'
       routine_id: 'routine_id'
   - !ruby/object:Provider::Terraform::Examples
-    name: 'big_query_routine_spark_jar'
+    name: 'bigquery_routine_spark_jar'
     primary_resource_id: 'spark_jar'
+    vars:
+      dataset_id: 'dataset_id'
+      connection_id: 'connection_id'
+      routine_id: 'routine_id'
+  - !ruby/object:Provider::Terraform::Examples
+    skip_test: true
+    name: 'bigquery_routine_remote_function'
+    primary_resource_id: 'remote_function'
     vars:
       dataset_id: 'dataset_id'
       connection_id: 'connection_id'
