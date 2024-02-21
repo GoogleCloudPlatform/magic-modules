@@ -97,6 +97,7 @@ var (
 	forceNewClusterNodeConfigFields = []string{
 		"labels",
 		"workload_metadata_config",
+		"resource_manager_tags",
 	}
 
 	suppressDiffForAutopilot = schema.SchemaDiffSuppressFunc(func(k, oldValue, newValue string, d *schema.ResourceData) bool {
@@ -1424,11 +1425,11 @@ func ResourceContainerCluster() *schema.Resource {
 			"node_pool_defaults": clusterSchemaNodePoolDefaults(),
 
 			"node_pool_auto_config": {
-				Type:             schema.TypeList,
-				Optional:         true,
-				Computed:         true,
-				MaxItems:         1,
-				Description:      `Node pool configs that apply to all auto-provisioned node pools in autopilot clusters and node auto-provisioning enabled clusters.`,
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				MaxItems:    1,
+				Description: `Node pool configs that apply to all auto-provisioned node pools in autopilot clusters and node auto-provisioning enabled clusters.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"network_tags": {
@@ -5266,7 +5267,7 @@ func expandFleet(configured interface{}) *container.Fleet {
 	return &container.Fleet{
 		Project: config["project"].(string),
 	}
-}  
+}
 
 func expandEnableK8sBetaApis(configured interface{}, enabledAPIs []string) *container.K8sBetaAPIConfig {
 	l := configured.([]interface{})
@@ -5424,6 +5425,7 @@ func expandNodePoolAutoConfig(configured interface{}) *container.NodePoolAutoCon
 	if v, ok := config["network_tags"]; ok && len(v.([]interface{})) > 0 {
 		npac.NetworkTags = expandNodePoolAutoConfigNetworkTags(v)
 	}
+
 	return npac
 }
 
@@ -6129,7 +6131,7 @@ func flattenFleet(c *container.Fleet) []map[string]interface{} {
 		membership_id = match[4]
 		membership_location = match[3]
 	}
-	
+
 	return []map[string]interface{}{
 		{
 			"project": c.Project,

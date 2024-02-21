@@ -651,7 +651,7 @@ func ResourceComputeInstance() *schema.Resource {
 				},
 			},
 
-	        	"params": {
+	        "params": {
 				Type:        schema.TypeList,
 				MaxItems:    1,
 				Optional:    true,
@@ -673,7 +673,7 @@ func ResourceComputeInstance() *schema.Resource {
 				Optional:    true,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Description: `A set of key/value label pairs assigned to the instance.
-				
+
 				**Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
 				Please refer to the field 'effective_labels' for all of the labels present on the resource.`,
 			},
@@ -1422,7 +1422,7 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 		return fmt.Errorf("Error creating instance while setting the security policies: %s", err)
 	}
 	<% end -%>
-	
+
 	err = waitUntilInstanceHasDesiredStatus(config, d)
 	if err != nil {
 		return fmt.Errorf("Error waiting for status: %s", err)
@@ -1936,7 +1936,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		return fmt.Errorf("Instance had unexpected number of network interfaces: %d", len(instance.NetworkInterfaces))
 	}
 
-	<% unless version == 'ga' -%>	
+	<% unless version == 'ga' -%>
 	updateSecurityPolicy := false
 	for i := 0; i < len(instance.NetworkInterfaces); i++ {
 		prefix := fmt.Sprintf("network_interface.%d", i)
