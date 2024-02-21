@@ -24,12 +24,27 @@ description: |-
   A trained machine learning Model.
 id_format: '{{name}}'
 skip_sweeper: true
-autogen_async: true
+autogen_async: false
 async: !ruby/object:Api::OpAsync
+  actions:
+    - create
+    - delete
   operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
     base_url: '{{op_id}}'
-import_format:
-  ['projects/{{project}}/locations/{{location}}/backups/{{backup_id}}']
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'vertex_ai_model_basic'
@@ -266,7 +281,6 @@ properties:
     description:
       The display name of the Model. The name can be up to 128 characters long
       and can consist of any UTF-8 characters.
-    required: true
   - !ruby/object:Api::Type::String
     name: 'etag'
     description: Used to perform consistent read-modify-write updates.
