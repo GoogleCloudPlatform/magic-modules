@@ -312,7 +312,7 @@ resource "google_cloudfunctions2_function" "default2" {
 }
 
 resource "google_bigquery_connection" "test2" {
-  connection_id = "tf_test_connection_id%{random_suffix}"
+  connection_id = "tf_test_connection2_id%{random_suffix}"
   location      = "US"
   cloud_resource { }
 }
