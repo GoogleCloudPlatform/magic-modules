@@ -1,12 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
-/*
- * Copyright (c) HashiCorp, Inc.
- * SPDX-License-Identifier: MPL-2.0
- */
-
-// This file is controlled by MMv1, any changes made here will be overwritten
-
 package main
 
 import (
@@ -64,6 +55,10 @@ func main() {
 		service := pattern.Expand(dst, template, stdout, submatches)
 		googleServices = append(googleServices, string(service))
 	}
+	if len(googleServices) == 0 {
+		fmt.Fprintf(os.Stderr, "googleServices error: regex produced no matches.\n")
+		os.Exit(1)
+	}
 
 	////////////////////////////////////////////////////////////////////////////////
 
@@ -99,6 +94,10 @@ func main() {
 	for _, submatches := range pattern.FindAllSubmatchIndex(bs, -1) {
 		service := pattern.Expand(dst, template, bs, submatches)
 		teamcityServices = append(teamcityServices, string(service))
+	}
+	if len(teamcityServices) == 0 {
+		fmt.Fprintf(os.Stderr, "teamcityServices error: regex produced no matches.\n")
+		os.Exit(1)
 	}
 
 	if diff := serviceDifference(googleServices, teamcityServices); len(diff) != 0 {
