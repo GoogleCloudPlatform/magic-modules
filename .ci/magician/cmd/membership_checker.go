@@ -97,41 +97,6 @@ func execMembershipChecker(prNumber, commitSha, branchName, headRepoUrl, headBra
 	authorUserType := gh.GetUserType(author)
 	trusted := authorUserType == github.CoreContributorUserType || authorUserType == github.GooglerUserType
 
-	if authorUserType != github.CoreContributorUserType {
-		fmt.Println("Not core contributor - assigning reviewer")
-
-		requestedReviewers, err := gh.GetPullRequestRequestedReviewers(prNumber)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
-		previousReviewers, err := gh.GetPullRequestPreviousReviewers(prNumber)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
-		reviewersToRequest, newPrimaryReviewer := github.ChooseCoreReviewers(requestedReviewers, previousReviewers)
-
-		for _, reviewer := range reviewersToRequest {
-			err = gh.RequestPullRequestReviewer(prNumber, reviewer)
-			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
-			}
-		}
-
-		if newPrimaryReviewer != "" {
-			comment := github.FormatReviewerComment(newPrimaryReviewer, authorUserType, trusted)
-			err = gh.PostComment(prNumber, comment)
-			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
-			}
-		}
-	}
-
 	// auto_run(contributor-membership-checker) will be run on every commit or /gcbrun:
 	// only triggers builds for trusted users
 	if trusted {

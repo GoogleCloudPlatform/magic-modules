@@ -251,8 +251,7 @@ func ResourceComputeInstance() *schema.Resource {
 										AtLeastOneOf: initializeParamsKeys,
 										Computed:     true,
 										ForceNew:     true,
-										ValidateFunc: validation.IntBetween(10000, 120000),
-										Description:  `Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second that the disk can handle. Values must be between 10,000 and 120,000.`,
+										Description:  `Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second that the disk can handle.`,
 									},
 
 									"provisioned_throughput": {
@@ -261,8 +260,7 @@ func ResourceComputeInstance() *schema.Resource {
 										AtLeastOneOf: initializeParamsKeys,
 										Computed:     true,
 										ForceNew:     true,
-										ValidateFunc: validation.IntBetween(1, 7124),
-										Description:  `Indicates how much throughput to provision for the disk. This sets the number of throughput mb per second that the disk can handle. Values must be between 1 and 7,124.`,
+										Description:  `Indicates how much throughput to provision for the disk. This sets the number of throughput mb per second that the disk can handle.`,
 									},
 
 									"enable_confidential_compute": {
@@ -336,7 +334,7 @@ func ResourceComputeInstance() *schema.Resource {
 							Description:      `The name or self_link of the subnetwork attached to this interface.`,
 						},
 
-						<% if version == "beta" -%>
+						<% unless version == 'ga' -%>
 						"network_attachment": {
 							Type:             schema.TypeString,
 							Optional:         true,
@@ -446,7 +444,7 @@ func ResourceComputeInstance() *schema.Resource {
 
 						"ipv6_access_config": {
 							Type:        schema.TypeList,
-							Optional:    true,
+                                                        Optional:    true,
 							Description: `An array of IPv6 access configurations for this interface. Currently, only one IPv6 access config, DIRECT_IPV6, is supported. If there is no ipv6AccessConfig specified, then this instance will have no external IPv6 Internet access.`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -996,11 +994,29 @@ be from 0 to 999,999,999 inclusive.`,
 				Description: `The Confidential VM config being used by the instance.  on_host_maintenance has to be set to TERMINATE or this will fail to create.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						<% if version == "ga" %>
 						"enable_confidential_compute": {
 							Type:        schema.TypeBool,
 							Required:    true,
 							Description: `Defines whether the instance should have confidential compute enabled.`,
 						},
+						<% else %>
+						"enable_confidential_compute": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: `Defines whether the instance should have confidential compute enabled. Field will be deprecated in a future release`,
+							AtLeastOneOf: []string{"confidential_instance_config.0.enable_confidential_compute", "confidential_instance_config.0.confidential_instance_type"},
+						},
+						"confidential_instance_type": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: `
+								Specifies which confidential computing technology to use.
+								This could be one of the following values: SEV, SEV_SNP.
+								If SEV_SNP, min_cpu_platform = "AMD Milan" is currently required.`,
+							AtLeastOneOf: []string{"confidential_instance_config.0.enable_confidential_compute", "confidential_instance_config.0.confidential_instance_type"},
+						},
+						<% end %>
 					},
 				},
 			},
@@ -2038,6 +2054,23 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 
 			networkInterfacePatchObj := &compute.NetworkInterface{
 				AliasIpRanges: networkInterface.AliasIpRanges,
+				Fingerprint:   instNetworkInterface.Fingerprint,
+			}
+			updateCall := config.NewComputeClient(userAgent).Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, networkInterfacePatchObj).Do
+			op, err := updateCall()
+			if err != nil {
+				return errwrap.Wrapf("Error updating network interface: {{err}}", err)
+			}
+			opErr := ComputeOperationWaitTime(config, op, project, "network interface to update", userAgent, d.Timeout(schema.TimeoutUpdate))
+			if opErr != nil {
+				return opErr
+			}
+		}
+
+		if !updateDuringStop && d.HasChange(prefix+".stack_type") {
+
+			networkInterfacePatchObj := &compute.NetworkInterface{
+				StackType: d.Get(prefix+".stack_type").(string),
 				Fingerprint:   instNetworkInterface.Fingerprint,
 			}
 			updateCall := config.NewComputeClient(userAgent).Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, networkInterfacePatchObj).Do

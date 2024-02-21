@@ -22,12 +22,12 @@ aliases:
 1. [Create a new branch for your change](https://docs.github.com/en/get-started/quickstart/github-flow#create-a-branch)
 1. Make the code change. For example:
    - [Add or modify a resource]({{< ref "/develop/resource" >}})
-   - [Add resource tests]({{< ref "/develop/test" >}})
+   - [Add resource tests]({{< ref "/develop/test/test" >}})
    - [Add a datasource]({{< ref "/develop/add-handwritten-datasource" >}})
    - [Promote to GA]({{< ref "/develop/promote-to-ga" >}})
-   - [Make a breaking change]({{< ref "/develop/make-a-breaking-change" >}})
+   - [Make a breaking change]({{< ref "/develop/breaking-changes/make-a-breaking-change" >}})
 1. [Generate the providers]({{< ref "/get-started/generate-providers" >}}) that include your change.
-1. [Run provider tests locally]({{< ref "/develop/run-tests" >}}) that are relevant to the change you made
+1. [Run provider tests locally]({{< ref "/develop/test/run-tests" >}}) that are relevant to the change you made
 1. [Create a pull request (PR)]({{< ref "/contribute/create-pr" >}})
 1. Make changes in response to [code review]({{< ref "/contribute/create-pr#code-review" >}})
 

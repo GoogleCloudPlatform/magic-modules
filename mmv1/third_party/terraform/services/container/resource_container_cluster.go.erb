@@ -1197,7 +1197,7 @@ func ResourceContainerCluster() *schema.Resource {
 							Type:        schema.TypeList,
 							Optional:    true,
 							Computed:    true,
-							MaxItems:    2,
+							MaxItems:    1,
 							Description: `Configuration of Advanced Datapath Observability features.`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -1206,12 +1206,21 @@ func ResourceContainerCluster() *schema.Resource {
 										Required:    true,
 										Description: `Whether or not the advanced datapath metrics are enabled.`,
 									},
+									"enable_relay": {
+										Type:          schema.TypeBool,
+										Optional:      true,
+										Description:   `Whether or not Relay is enabled.`,
+										Default:       false,
+										ConflictsWith: []string{"monitoring_config.0.advanced_datapath_observability_config.0.relay_mode"},
+									},
 									"relay_mode": {
-										Type:         schema.TypeString,
-										Optional:     true,
-										Computed:     true,
-										Description:  `Mode used to make Relay available.`,
-										ValidateFunc: validation.StringInSlice([]string{"DISABLED", "INTERNAL_VPC_LB", "EXTERNAL_LB"}, false),
+										Type:          schema.TypeString,
+										Optional:      true,
+										Computed:      true,
+										Deprecated:    "Deprecated in favor of enable_relay field. Remove this attribute's configuration as this field will be removed in the next major release and enable_relay will become a required field.",
+										Description:   `Mode used to make Relay available.`,
+										ValidateFunc:  validation.StringInSlice([]string{"DISABLED", "INTERNAL_VPC_LB", "EXTERNAL_LB"}, false),
+										ConflictsWith: []string{"monitoring_config.0.advanced_datapath_observability_config.0.enable_relay"},
 									},
 								},
 							},
@@ -2060,16 +2069,26 @@ func ResourceContainerCluster() *schema.Resource {
 							Optional:          true,
 							Description:       `The Fleet host project of the cluster.`,
 						},
-                                          	"membership": {
-                                                	Type:             schema.TypeString,
-                                                	Computed:         true,
-                                                	Description:      `Full resource name of the registered fleet membership of the cluster.`,
-                                          	},
-                                          	"pre_registered": {
-                                                	Type:             schema.TypeBool,
-                                                	Computed:         true,
-                                                	Description:      `Whether the cluster has been registered via the fleet API.`,
-                                          	},
+						"membership": {
+							Type:             schema.TypeString,
+							Computed:         true,
+							Description:      `Full resource name of the registered fleet membership of the cluster.`,
+						},
+						"pre_registered": {
+							Type:             schema.TypeBool,
+							Computed:         true,
+							Description:      `Whether the cluster has been registered via the fleet API.`,
+						},
+						"membership_id": {
+							Type:             schema.TypeString,
+							Computed:         true,
+							Description:      `Short name of the fleet membership, for example "member-1".`,
+						},
+						"membership_location": {
+							Type:             schema.TypeString,
+							Computed:         true,
+							Description:      `Location of the fleet membership, for example "us-central1".`,
+						},
 					},
 				},
 			},
@@ -5316,7 +5335,18 @@ func expandMonitoringConfig(configured interface{}) *container.MonitoringConfig 
 
 		mc.AdvancedDatapathObservabilityConfig = &container.AdvancedDatapathObservabilityConfig{
 			EnableMetrics: advanced_datapath_observability_config["enable_metrics"].(bool),
-			RelayMode: advanced_datapath_observability_config["relay_mode"].(string),
+		}
+
+		enable_relay := advanced_datapath_observability_config["enable_relay"].(bool)
+		relay_mode := advanced_datapath_observability_config["relay_mode"].(string)
+		if enable_relay {
+			mc.AdvancedDatapathObservabilityConfig.EnableRelay = enable_relay
+		} else if relay_mode == "INTERNAL_VPC_LB" || relay_mode == "EXTERNAL_LB" {
+			mc.AdvancedDatapathObservabilityConfig.RelayMode = relay_mode
+		} else {
+			mc.AdvancedDatapathObservabilityConfig.EnableRelay = enable_relay
+			mc.AdvancedDatapathObservabilityConfig.RelayMode = "DISABLED"
+			mc.AdvancedDatapathObservabilityConfig.ForceSendFields = []string{"EnableRelay"}
 		}
 	}
 
@@ -6088,16 +6118,27 @@ func flattenGatewayApiConfig(c *container.GatewayAPIConfig) []map[string]interfa
 }
 
 func flattenFleet(c *container.Fleet) []map[string]interface{} {
-      if c == nil {
-                return nil
-      }         
-      return []map[string]interface{}{
-                {
-                      "project": c.Project,
-                      "membership": c.Membership,
-		      "pre_registered": c.PreRegistered,
-                },
-      }       
+	if c == nil {
+		return nil
+	}
+
+	// Parse membership_id and membership_location from full membership name.
+	var membership_id, membership_location string
+	membershipRE := regexp.MustCompile(`^(//[a-zA-Z0-9\.\-]+)?/?projects/([^/]+)/locations/([a-zA-Z0-9\-]+)/memberships/([^/]+)$`)
+	if match := membershipRE.FindStringSubmatch(c.Membership); match != nil {
+		membership_id = match[4]
+		membership_location = match[3]
+	}
+	
+	return []map[string]interface{}{
+		{
+			"project": c.Project,
+			"membership": c.Membership,
+			"membership_id": membership_id,
+			"membership_location": membership_location,
+			"pre_registered": c.PreRegistered,
+		},
+	}
 }
 
 func flattenEnableK8sBetaApis(c *container.K8sBetaAPIConfig) []map[string]interface{} {
@@ -6143,10 +6184,33 @@ func flattenMonitoringConfig(c *container.MonitoringConfig) []map[string]interfa
 }
 
 func flattenAdvancedDatapathObservabilityConfig(c *container.AdvancedDatapathObservabilityConfig) []map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+
+	if c.EnableRelay {
+		return []map[string]interface{}{
+			{
+				"enable_metrics": c.EnableMetrics,
+				"enable_relay":   c.EnableRelay,
+			},
+		}
+	}
+
+	if c.RelayMode == "INTERNAL_VPC_LB" || c.RelayMode == "EXTERNAL_LB" {
+		return []map[string]interface{}{
+			{
+				"enable_metrics": c.EnableMetrics,
+				"relay_mode":     c.RelayMode,
+			},
+		}
+	}
+
 	return []map[string]interface{}{
 		{
 			"enable_metrics": c.EnableMetrics,
-			"relay_mode": 	 c.RelayMode,
+			"enable_relay":   false,
+			"relay_mode":     "DISABLED",
 		},
 	}
 }
