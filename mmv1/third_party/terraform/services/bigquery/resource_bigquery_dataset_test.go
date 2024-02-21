@@ -330,6 +330,8 @@ func TestAccBigQueryDataset_storageBillModel(t *testing.T) {
 
 func TestAccBigQueryDataset_invalidCharacterInID(t *testing.T) {
 	t.Parallel()
+	// Not an acceptance test.
+	acctest.SkipIfVcr(t)
 
 	datasetID := fmt.Sprintf("tf_test_%s-with-hyphens", acctest.RandString(t, 10))
 
@@ -348,6 +350,8 @@ func TestAccBigQueryDataset_invalidCharacterInID(t *testing.T) {
 
 func TestAccBigQueryDataset_invalidLongID(t *testing.T) {
 	t.Parallel()
+	// Not an acceptance test.
+	acctest.SkipIfVcr(t)
 
 	datasetSuffix := acctest.RandString(t, 10)
 	datasetID := fmt.Sprintf("tf_test_%s", strings.Repeat(datasetSuffix, 200))
