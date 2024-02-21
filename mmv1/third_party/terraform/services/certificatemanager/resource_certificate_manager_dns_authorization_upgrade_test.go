@@ -69,6 +69,7 @@ func dnsAuthorizationResourceConfigUpdated(name string) string {
 	provider "mynewprovider" {}
 	
 	resource "google_certificate_manager_dns_authorization" "default" {
+		provider = mynewprovider
 		name        = "%s"
 		description = "The migrated default dns"
 		domain      = "domain.hashicorptest.com"
