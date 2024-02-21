@@ -4285,6 +4285,8 @@ resource "google_project_iam_binding" "tagUser" {
     "serviceAccount:service-${data.google_project.project.number}@container-engine-robot.iam.gserviceaccount.com",
     "serviceAccount:${data.google_project.project.number}@cloudservices.gserviceaccount.com",
   ]
+
+  depends_on = [google_project_iam_binding.tagHoldAdmin]
 }
 
 resource "time_sleep" "wait_120_seconds" {
@@ -4399,6 +4401,8 @@ resource "google_project_iam_binding" "tagUser" {
     "serviceAccount:service-${data.google_project.project.number}@container-engine-robot.iam.gserviceaccount.com",
     "serviceAccount:${data.google_project.project.number}@cloudservices.gserviceaccount.com",
   ]
+
+  depends_on = [google_project_iam_binding.tagHoldAdmin]
 }
 
 resource "time_sleep" "wait_120_seconds" {
@@ -4514,6 +4518,8 @@ resource "google_project_iam_binding" "tagUser" {
     "serviceAccount:service-${data.google_project.project.number}@container-engine-robot.iam.gserviceaccount.com",
     "serviceAccount:${data.google_project.project.number}@cloudservices.gserviceaccount.com",
   ]
+
+  depends_on = [google_project_iam_binding.tagHoldAdmin]
 }
 
 resource "time_sleep" "wait_120_seconds" {
