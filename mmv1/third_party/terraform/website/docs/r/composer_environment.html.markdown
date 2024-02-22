@@ -815,7 +815,6 @@ The `software_config` block supports:
 * `image_version` -
   (Required in Cloud Composer 2 and 3, optional in Cloud Composer 1)
 
-  **In Cloud Composer 2, you must specify an image with Cloud Composer 2**. Otherwise, the default image for Cloud Composer 1 is used. For more information about Cloud Composer images, see
   [Cloud Composer version list](https://cloud.google.com/composer/docs/concepts/versioning/composer-versions).
 
   The version of the software running in the environment. This encapsulates both the version of Cloud Composer
