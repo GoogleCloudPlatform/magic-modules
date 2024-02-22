@@ -813,7 +813,7 @@ The `software_config` block supports:
   ```
 
 * `image_version` -
-  (Required in Cloud Composer 2 and 3, optional in Cloud Composer 1)
+(Optional) If omitted, the default is the latest version of Composer 2.
 
 
   The version of the software running in the environment. This encapsulates both the version of Cloud Composer
