@@ -22,7 +22,7 @@ func (f ProjectFromIdFunction) Metadata(ctx context.Context, req function.Metada
 
 func (f ProjectFromIdFunction) Definition(ctx context.Context, req function.DefinitionRequest, resp *function.DefinitionResponse) {
 	resp.Definition = function.Definition{
-		Summary:     "Returns the project name within the resource id or self link provided as an argument.",
+		Summary:     "Returns the project within a provided resource id or self link.",
 		Description: "Takes a single string argument, which should be an id or self link of a resource. This function will either return the project name from the input string or raise an error due to no project being present in the string. The function uses the presence of \"projects/{{project}}/\" in the input string to identify the project name, e.g. when the function is passed the id \"projects/my-project/zones/us-central1-c/instances/my-instance\" as an argument it will return \"my-project\".",
 		Parameters: []function.Parameter{
 			function.StringParameter{
