@@ -1261,7 +1261,7 @@ The `software_config` block supports:
 
 * `web_server_plugins_mode` -
   (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
-  Web server plugins configuration. Should be either 'ENABLED' or 'DISABLED'. Defaults to 'ENABLED'.
+  Web server plugins configuration. Can be either 'ENABLED' or 'DISABLED'. Defaults to 'ENABLED'.
 
 <a name="nested_cloud_data_lineage_integration"></a>The `cloud_data_lineage_integration` block supports:
 * `enabled` -
