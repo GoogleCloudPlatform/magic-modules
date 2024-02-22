@@ -19,7 +19,7 @@ jobs:
       - name: Check for New Services
         run: |
           newServices=$(($(git diff --name-only --diff-filter=A origin/main HEAD | grep "mmv1/products" | wc -l)))
-          if [ "$newServices" != "0" ];then
+          if [ "$newServices" == "0" ];then
           exit 1
           fi
   terraform-provider-google:
