@@ -21,6 +21,7 @@ func TestFunctionRun_project_from_id(t *testing.T) {
 	// Happy path inputs
 	validId := fmt.Sprintf("projects/%s/zones/us-central1-c/instances/my-instance", projectId)
 	validSelfLink := fmt.Sprintf("https://www.googleapis.com/compute/v1/%s", validId)
+	validOpStyleResourceName := fmt.Sprintf("//gkehub.googleapis.com/projects/%s/locations/us-central1/memberships/my-membership", projectId)
 
 	// Unhappy path inputs
 	repetitiveInput := fmt.Sprintf("https://www.googleapis.com/compute/v1/projects/%s/projects/not-this-1/projects/not-this-2/instances/my-instance", projectId) // Multiple /projects/{{project}}/
@@ -41,6 +42,14 @@ func TestFunctionRun_project_from_id(t *testing.T) {
 		"it returns the expected output value when given a valid resource self_link input": {
 			request: function.RunRequest{
 				Arguments: function.NewArgumentsData([]attr.Value{types.StringValue(validSelfLink)}),
+			},
+			expected: function.RunResponse{
+				Result: function.NewResultData(types.StringValue(projectId)),
+			},
+		},
+		"it returns the expected output value when given a valid OP style resource name input": {
+			request: function.RunRequest{
+				Arguments: function.NewArgumentsData([]attr.Value{types.StringValue(validOpStyleResourceName)}),
 			},
 			expected: function.RunResponse{
 				Result: function.NewResultData(types.StringValue(projectId)),
