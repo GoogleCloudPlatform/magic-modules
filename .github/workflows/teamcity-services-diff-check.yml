@@ -85,8 +85,8 @@ jobs:
 
       - name: Diff Check
         run: |
-          ls provider/google > tools/teamcity-diff-check/services_ga.txt
-          ls provider/google-beta > tools/teamcity-diff-check/services_beta.txt
+          ls provider/google/services > tools/teamcity-diff-check/services_ga.txt
+          ls provider/google-beta/services > tools/teamcity-diff-check/services_beta.txt
           cd tools/teamcity-diff-check
           go run main.go -service_file=services_ga
           go run main.go -service_file=services_beta
