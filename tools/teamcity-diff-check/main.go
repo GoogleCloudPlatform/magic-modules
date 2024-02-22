@@ -6,12 +6,10 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"os/exec"
 	"regexp"
 )
 
-var serviceFile = flag.String("service_file", "services_ga.kt", "kotlin service file to be parsed")
-var provider = flag.String("provider", "google", "Specify which provider to run diff_check on")
+var serviceFile = flag.String("service_file", "services_ga", "kotlin service file to be parsed")
 
 func serviceDifference(gS, tS []string) []string {
 	t := make(map[string]struct{}, len(tS))
@@ -32,37 +30,22 @@ func serviceDifference(gS, tS []string) []string {
 func main() {
 	flag.Parse()
 
-	servicesPath := fmt.Sprintf("../../provider/%s/services/", *provider)
-	cmd := exec.Command("go", "list", "./...")
-	cmd.Dir = servicesPath
-	stdout, err := cmd.Output()
+	file, err := os.Open(*serviceFile + "txt")
 	if err != nil {
-		fmt.Println(string(stdout))
-		fmt.Println(err.Error())
+		fmt.Println(err)
 		return
 	}
-
-	// Regex pattern captures "services" from `go list ../../provider/{{*provider}}/services/..`
-	pattern := regexp.MustCompile(`github\.com\/hashicorp\/terraform-provider-(google|google-beta)\/(google|google-beta)\/services\/(?P<service>\w+)`)
-
-	template := []byte("$service")
-	dst := []byte{}
+	defer file.Close()
 
 	googleServices := []string{}
-
-	// For each match of the regex in the content.
-	for _, submatches := range pattern.FindAllSubmatchIndex(stdout, -1) {
-		service := pattern.Expand(dst, template, stdout, submatches)
-		googleServices = append(googleServices, string(service))
-	}
-	if len(googleServices) == 0 {
-		fmt.Fprintf(os.Stderr, "googleServices error: regex produced no matches.\n")
-		os.Exit(1)
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		googleServices = append(googleServices, scanner.Text())
 	}
 
 	////////////////////////////////////////////////////////////////////////////////
 
-	f, err := os.Open(fmt.Sprintf("../../mmv1/third_party/terraform/.teamcity/components/inputs/%s", *serviceFile))
+	f, err := os.Open(fmt.Sprintf("../../mmv1/third_party/terraform/.teamcity/components/inputs/%s", *serviceFile+".kt"))
 	if err != nil {
 		panic(err)
 	}
@@ -83,11 +66,11 @@ func main() {
 	}
 
 	// Regex pattern captures "services" from *serviceFile.
-	pattern = regexp.MustCompile(`(?m)"(?P<service>\w+)"\sto\s+mapOf`)
+	pattern := regexp.MustCompile(`(?m)"(?P<service>\w+)"\sto\s+mapOf`)
 
-	template = []byte("$service")
+	template := []byte("$service")
 
-	dst = []byte{}
+	dst := []byte{}
 	teamcityServices := []string{}
 
 	// For each match of the regex in the content.
@@ -106,5 +89,4 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Printf("No Diff in %s provider\n", *provider)
 }

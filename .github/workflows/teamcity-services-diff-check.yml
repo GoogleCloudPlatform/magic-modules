@@ -13,27 +13,33 @@ on:
 jobs:
   check-pr:
     runs-on: ubuntu-22.04
+    outputs:
+      services: ${{steps.services.outputs.services}}
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: Check for New Services
+        id: services
         run: |
-          newServices=$(($(git diff --name-only --diff-filter=A origin/main HEAD | grep "mmv1/products" | wc -l)))
-          if [ "$newServices" == "0" ];then
-          exit 1
+          newServices=$(($(git diff --name-only --diff-filter=A origin/main HEAD | grep -P “/products/.*/product.yaml" | wc -l)))
+          echo "$newServices">> "$GITHUB_OUTPUT"
+          if [ "$newServices" = "0" ];then
+          echo "No new service found." 
           fi
   terraform-provider-google:
+    if: ${{needs.check-pr.outputs.services}} != 0
     needs: check-pr
     uses: ./.github/workflows/build-downstream.yml
     with:
       repo: 'terraform-provider-google'
       
   terraform-provider-google-beta:
-      needs: check-pr
-      uses: ./.github/workflows/build-downstream.yml
-      with:
-        repo: 'terraform-provider-google-beta'
+    if: ${{needs.check-pr.outputs.services}} != 0
+    needs: check-pr
+    uses: ./.github/workflows/build-downstream.yml
+    with:
+      repo: 'terraform-provider-google-beta'
       
   teamcity-services-diff-check:
     needs: [terraform-provider-google, terraform-provider-google-beta]
@@ -81,8 +87,9 @@ jobs:
 
       - name: Diff Check
         run: |
+          ls provider/google > services_ga.txt
+          ls provider/google-beta > services_beta.txt
           cd tools/teamcity-diff-check
-          go run main.go
-          go run main.go -provider=google-beta -service_file=services_beta.kt
-
+          go run main.go -service_file=services_ga
+          go run main.go -service_file=services_beta
           
