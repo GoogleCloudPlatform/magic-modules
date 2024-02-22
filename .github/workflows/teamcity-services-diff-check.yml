@@ -19,11 +19,10 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Check for New Services
-        id: services
+      - id: services
         run: |
           newServices=$(($(git diff --name-only --diff-filter=A origin/main HEAD | grep -P "mmv1/products/.*/product.yaml" | wc -l)))
-          echo "$newServices" >> "${GITHUB_OUTPUT}"
+          echo "services=$newServices" >> "${GITHUB_OUTPUT}"
           if [ "$newServices" = "0" ];then
           echo "No new service found." 
           fi
