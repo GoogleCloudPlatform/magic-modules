@@ -14,14 +14,14 @@ var serviceFile = flag.String("service_file", "services_ga.kt", "kotlin service 
 var provider = flag.String("provider", "google", "Specify which provider to run diff_check on")
 
 func serviceDifference(gS, tS []string) []string {
-	g := make(map[string]struct{}, len(gS))
-	for _, s := range gS {
-		g[s] = struct{}{}
+	t := make(map[string]struct{}, len(tS))
+	for _, s := range tS {
+		t[s] = struct{}{}
 	}
 
 	var diff []string
-	for _, s := range tS {
-		if _, found := g[s]; !found {
+	for _, s := range gS {
+		if _, found := t[s]; !found {
 			diff = append(diff, s)
 		}
 	}

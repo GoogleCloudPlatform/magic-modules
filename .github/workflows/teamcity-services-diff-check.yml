@@ -10,6 +10,15 @@ on:
       - 'mmv1/third_party/terraform/.teamcity/components/inputs/services_ga.kt'
       - 'mmv1/third_party/terraform/.teamcity/components/inputs/services_beta.kt'
 jobs:
+  check-pr:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Check for New Services
+        run: |
+          newServices=$(($(git diff --name-only --diff-filter=A origin/main HEAD | grep "mmv1/products" | wc -l)))
+          if [ "$newServices" != "0" ];then
+          exit 1
+          fi
   terraform-provider-google:
     uses: ./.github/workflows/build-downstream.yml
     with:
@@ -69,3 +78,5 @@ jobs:
           cd tools/teamcity-diff-check
           go run main.go
           go run main.go -provider=google-beta -service_file=services_beta.kt
+
+          
