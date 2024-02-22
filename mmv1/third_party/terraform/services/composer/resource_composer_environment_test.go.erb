@@ -1268,10 +1268,49 @@ func TestAccComposerEnvironmentComposer3_updateWithNetworkAttachment(t *testing.
 		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComposerEnvironmentComposer3_withNetworkAndSubnetwork(envName, network, subnetwork),
+				Config:             testAccComposerEnvironmentComposer3_withNetworkAndSubnetwork(envName, networkAttachment, network, subnetwork),
 			},
 			{
 				Config:             testAccComposerEnvironmentComposer3_withNetworkAttachment(envName, networkAttachment, network, subnetwork),
+			},
+			{
+				ResourceName:       "google_composer_environment.test",
+				ImportState:        true,
+				ImportStateVerify:  true,
+				ExpectNonEmptyPlan: true,
+			},
+			// This is a terrible clean-up step in order to get destroy to succeed,
+			// due to dangling firewall rules left by the Composer Environment blocking network deletion.
+			// TODO: Remove this check if firewall rules bug gets fixed by Composer.
+			{
+				PlanOnly:           true,
+				Config:             testAccComposerEnvironmentComposer3_withNetworkAttachment(envName, fullFormNetworkAttachmentName, network, subnetwork),
+				Check:              testAccCheckClearComposerEnvironmentFirewalls(t, network),
+				ExpectNonEmptyPlan: true,
+			},
+		},
+	})
+}
+
+func TestAccComposerEnvironmentComposer3_updateWithNetworkAndSubnetwork(t *testing.T) {
+	t.Parallel()
+
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, acctest.RandInt(t))
+	subnetwork := network + "-1"
+	networkAttachment := fmt.Sprintf("%s-%d", testComposerNetworkAttachmentPrefix, acctest.RandInt(t))
+	fullFormNetworkAttachmentName := fmt.Sprintf("projects/%s/regions/%s/networkAttachments/%s", envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv(), networkAttachment)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:		              func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config:             testAccComposerEnvironmentComposer3_withNetworkAttachment(envName, networkAttachment, network, subnetwork),
+			},
+			{
+				Config:             testAccComposerEnvironmentComposer3_withNetworkAndSubnetwork(envName, networkAttachment, network, subnetwork),
 			},
 			{
 				ResourceName:       "google_composer_environment.test",
@@ -3112,7 +3151,7 @@ resource "google_compute_subnetwork" "test" {
 `, name, networkAttachment, network, subnetwork)
 }
 
-func testAccComposerEnvironmentComposer3_withNetworkAndSubnetwork(name, network, subnetwork string) string {
+func testAccComposerEnvironmentComposer3_withNetworkAndSubnetwork(name, networkAttachment, network, subnetwork string) string {
 	return fmt.Sprintf(`
 resource "google_composer_environment" "test" {
   name   = "%s"
@@ -3125,6 +3164,17 @@ resource "google_composer_environment" "test" {
     software_config {
       image_version = "composer-3-airflow-2"
     }
+  }
+}
+
+resource "google_compute_network_attachment" "test" {
+  name = "%s"
+  region = "us-central1"
+  subnetworks = [ google_compute_subnetwork.test.id ]
+  connection_preference = "ACCEPT_MANUAL"
+  // Composer 3 is modifying producer_accept_lists outside terraform, ignoring this change for now
+  lifecycle {
+    ignore_changes = [producer_accept_lists]
   }
 }
 
@@ -3141,7 +3191,7 @@ resource "google_compute_subnetwork" "test" {
   region        = "us-central1"
   network       = google_compute_network.test.self_link
 }
-`, name, network, subnetwork)
+`, name, networkAttachment, network, subnetwork)
 }
 
 func testAccComposerEnvironmentComposer3_withNetworkSubnetworkAndAttachment_expectError(name, networkAttachment, network, subnetwork string) string {
