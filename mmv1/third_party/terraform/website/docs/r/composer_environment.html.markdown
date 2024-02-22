@@ -815,7 +815,6 @@ The `software_config` block supports:
 * `image_version` -
   (Required in Cloud Composer 2 and 3, optional in Cloud Composer 1)
 
-  [Cloud Composer version list](https://cloud.google.com/composer/docs/concepts/versioning/composer-versions).
 
   The version of the software running in the environment. This encapsulates both the version of Cloud Composer
   functionality and the version of Apache Airflow. It must match the regular expression
