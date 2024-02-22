@@ -1306,6 +1306,9 @@ func TestAccComposerEnvironmentComposer3_updateWithNetworkAndSubnetwork(t *testi
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
+	    {
+				Config:             testAccComposerEnvironmentComposer3_withNetworkAndSubnetwork(envName, networkAttachment, network, subnetwork),
+			},
 			{
 				Config:             testAccComposerEnvironmentComposer3_withNetworkAttachment(envName, networkAttachment, network, subnetwork),
 			},
