@@ -22,7 +22,7 @@ jobs:
       - name: Check for New Services
         id: services
         run: |
-          newServices=$(($(git diff --name-only --diff-filter=A origin/main HEAD | grep -P “mmv1/products/.*/product.yaml" | wc -l)))
+          newServices=$(($(git diff --name-only --diff-filter=A origin/main HEAD | grep -P "mmv1/products/.*/product.yaml" | wc -l)))
           echo "$newServices" >> "$GITHUB_OUTPUT"
           if [ "$newServices" = "0" ];then
           echo "No new service found." 
