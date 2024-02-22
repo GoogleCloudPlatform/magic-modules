@@ -14,7 +14,7 @@ jobs:
   check-pr:
     runs-on: ubuntu-22.04
     outputs:
-      services: ${{steps.services.outputs.services}}
+      services: "${{steps.services.outputs.services}}"
     steps:
       - uses: actions/checkout@v3
         with:
@@ -26,6 +26,7 @@ jobs:
           echo "$newServices" >> $GITHUB_OUTPUT
           if [ "$newServices" = "0" ];then
           echo "No new service found." 
+          echo $GITHUB_OUTPUT
           fi
   terraform-provider-google:
     if: ${{needs.check-pr.outputs.services}} != 0
