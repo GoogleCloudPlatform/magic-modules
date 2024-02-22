@@ -52,7 +52,7 @@ jobs:
           unzip -o artifacts/output.zip -d ./provider
           rm artifacts/output.zip
 
-      - name: Download built artifacts
+      - name: Download built artifacts - Beta provider
         uses: actions/download-artifact@v2
         with:
           name: artifact-terraform-provider-google-beta
