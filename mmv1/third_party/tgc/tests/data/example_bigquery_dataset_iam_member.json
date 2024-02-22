@@ -10,7 +10,7 @@
       "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
       "data": {
         "datasetReference": {
-          "datasetId": "test-dataset"
+          "datasetId": "test_dataset"
         },
         "defaultTableExpirationMs": 3600000,
         "labels": {

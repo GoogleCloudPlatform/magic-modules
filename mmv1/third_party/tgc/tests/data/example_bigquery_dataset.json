@@ -11,7 +11,7 @@
       "data": {
         "friendlyName": "",
         "datasetReference": {
-          "datasetId": "test-dataset"
+          "datasetId": "test_dataset"
         },
         "labels": {
           "env": "dev"
