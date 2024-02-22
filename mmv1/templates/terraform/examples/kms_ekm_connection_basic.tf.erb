@@ -3,10 +3,10 @@ resource "google_kms_ekm_connection" "<%= ctx[:primary_resource_id] %>" {
   location		= "us-central1"
   key_management_mode 	= "MANUAL"
   service_resolvers  	{
-      service_directory_service  = "projects/315636579862/secrets/external-servicedirectoryservice/versions/latest"
-      hostname 			 = "projects/315636579862/secrets/external-uri/versions/latest"
+      service_directory_service  = "<%= ctx[:vars]['servicedirectoryservice'] %>"
+      hostname 			 = "<%= ctx[:vars]['hostname'] %>"
       server_certificates        {
-      		raw_der	= "projects/315636579862/secrets/external-rawder/versions/latest"
+      		raw_der	= "<%= ctx[:vars]['raw_der'] %>"
       	}
     }
 }
