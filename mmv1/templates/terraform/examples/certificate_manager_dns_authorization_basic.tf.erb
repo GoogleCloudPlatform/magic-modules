@@ -1,6 +1,7 @@
 resource "google_certificate_manager_dns_authorization" "<%= ctx[:primary_resource_id] %>" {
   name        = "<%= ctx[:vars]['dns_auth_name'] %>"
-  description = "The default dnss"
+  location    = "global"
+  description = "The default dns"
   domain      = "<%= ctx[:vars]['subdomain'] %>.hashicorptest.com"
 }
 
