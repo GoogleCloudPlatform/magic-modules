@@ -1124,7 +1124,7 @@ The `config` block supports:
   and `ENVIRONMENT_SIZE_LARGE`.
 
 * `data_retention_config` -
-  (Optional, Cloud Composer 2.0.23 or newer only)
+  (Optional, Cloud Composer 2.0.23 or later only)
   Configuration setting for airflow data rentention mechanism. Structure is
   [documented below](#nested_data_retention_config).
 
