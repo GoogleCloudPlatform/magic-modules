@@ -69,6 +69,11 @@ examples:
     vars:
       neg_name: 'appengine-neg'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'region_network_endpoint_group_appengine_empty'
+    primary_resource_id: 'appengine_neg'
+    vars:
+      neg_name: 'appengine-neg'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'region_network_endpoint_group_psc'
     primary_resource_id: 'psc_neg'
     vars:
@@ -209,6 +214,7 @@ properties:
       - cloud_function
       - serverless_deployment
     allow_empty_object: true
+    send_empty_value: true
     description: |
       This field is only used for SERVERLESS NEGs.
 
@@ -278,6 +284,7 @@ properties:
       - cloud_function
       - app_engine
     allow_empty_object: true
+    send_empty_value: true
     description: |
       This field is only used for SERVERLESS NEGs.
 
