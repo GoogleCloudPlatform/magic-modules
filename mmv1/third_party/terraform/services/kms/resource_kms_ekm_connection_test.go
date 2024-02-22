@@ -48,30 +48,13 @@ resource "google_kms_ekm_connection" "example-ekmconnection" {
   location		= "us-central1"
   key_management_mode 	= "MANUAL"
   service_resolvers  	{
-      service_directory_service  = google_service_directory_service.sd_service.id
-      hostname 			 = "example.cloud.goog"
+      service_directory_service  = "projects/315636579862/secrets/external-servicedirectoryservice/versions/latest"
+      hostname 			 = "projects/315636579862/secrets/external-uri/versions/latest"
       server_certificates        {
-      		raw_der	= "chykm91dGVygoogexamplechym89"
+      		raw_der	= "projects/315636579862/secrets/external-rawder/versions/latest"
       	}
     }
 }
-
-resource "google_service_directory_namespace" "sd_namespace" {
-  namespace_id = "ekm-namespace%{random_suffix}"
-  location     = "us-central1"
-  project      = data.google_project.project.number
-}
-
-resource "google_service_directory_service" "sd_service" {
-  service_id = "ekm-service"
-  namespace  = google_service_directory_namespace.sd_namespace.id
-
-  metadata = {
-    region = "us-central1"
-  }
-}
-
-data "google_project" "project" {}
 `, context)
 }
 
@@ -83,7 +66,5 @@ resource "google_kms_ekm_connection" "example-ekmconnection" {
   key_management_mode 	= "CLOUD_KMS"
   crypto_space_path	= "v0/longlived/crypto-space-placeholder"
 }
-
-data "google_project" "project" {}
 `, context)
 }
