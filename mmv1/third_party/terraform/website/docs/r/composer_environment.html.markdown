@@ -1239,7 +1239,6 @@ The `software_config` block supports:
   (Required in Cloud Composer 2 and 3, optional in Cloud Composer 1)
 
   In Cloud Composer 3, you can only specify 3 in Cloud Composer portion of the image version.
-  Environment details will only show 3 as the Composer version as well.
 
   The Apache Airflow portion of the image version is a full semantic version that points to one of the
   supported Apache Airflow versions, or an alias in the form of only major, major.minor or major.minor.patch versions specified.
