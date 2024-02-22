@@ -1,0 +1,101 @@
+[
+    {
+        "name": "//compute.googleapis.com/projects/myproj/regions/us-central1/backendServices/bs-1",
+        "asset_type": "compute.googleapis.com/RegionBackendService",
+        "ancestry_path": "organizations/123/folders/456/project/myproj",
+        "resource": {
+            "version": "v1",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
+            "discovery_name": "RegionBackendService",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/myproj",
+            "data": {
+                "backends": [
+                    {
+                        "balancingMode": "CONNECTION",
+                        "failover": false,
+                        "group": "projects/myproj/zones/us-central1-a/instanceGroups/ig-1"
+                    }
+                ],
+                "connectionDraining": {
+                    "drainingTimeoutSec": 30
+                },
+                "description": "bs-1 description",
+                "failoverPolicy": {},
+                "healthChecks": [
+                    "projects/myproj/global/healthChecks/hc-1"
+                ],
+                "loadBalancingScheme": "INTERNAL",
+                "logConfig": {
+                    "enable": true,
+                    "optionalMode": "INCLUDE_ALL_OPTIONAL",
+                    "sampleRate": 0.2
+                },
+                "name": "bs-1",
+                "network": "projects/myproj/global/networks/default",
+                "protocol": "TCP",
+                "region": "projects/myproj/regions/us-central1",
+                "sessionAffinity": "NONE"
+            }
+        }
+    },
+    {
+        "name": "//compute.googleapis.com/projects/myproj/regions/us-central1/backendServices/bs-2",
+        "asset_type": "compute.googleapis.com/RegionBackendService",
+        "ancestry_path": "organizations/123/folders/456/project/myproj",
+        "resource": {
+            "version": "v1",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
+            "discovery_name": "RegionBackendService",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/myproj",
+            "data": {
+                "backends": [
+                    {
+                        "balancingMode": "CONNECTION",
+                        "capacityScaler": 0.1,
+                        "group": "projects/myproj/zones/us-central1-c/networkEndpointGroups/neg-1",
+                        "maxConnections": 2
+                    }
+                ],
+                "circuitBreakers": {
+                    "maxRetries": 1
+                },
+                "connectionDraining": {
+                    "drainingTimeoutSec": 300
+                },
+                "description": "",
+                "healthChecks": [
+                    "projects/myproj/regions/us-central1/healthChecks/hc-1"
+                ],
+                "loadBalancingScheme": "EXTERNAL_MANAGED",
+                "localityLbPolicy": "RING_HASH",
+                "logConfig": {
+                    "enable": false
+                },
+                "name": "bs-2",
+                "outlierDetection": {
+                    "baseEjectionTime": {
+                        "nanos": 0,
+                        "seconds": "30"
+                    },
+                    "consecutiveErrors": 5,
+                    "consecutiveGatewayFailure": 3,
+                    "enforcingConsecutiveErrors": 0,
+                    "enforcingConsecutiveGatewayFailure": 100,
+                    "enforcingSuccessRate": 100,
+                    "interval": {
+                        "nanos": 0,
+                        "seconds": "1"
+                    },
+                    "maxEjectionPercent": 50,
+                    "successRateMinimumHosts": 5,
+                    "successRateRequestVolume": 100,
+                    "successRateStdevFactor": 1900
+                },
+                "protocol": "TCP",
+                "region": "projects/myproj/regions/us-central1",
+                "sessionAffinity": "CLIENT_IP",
+                "timeoutSec": 30
+            }
+        }
+    }
+]
