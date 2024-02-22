@@ -1244,7 +1244,7 @@ The `software_config` block supports:
   supported Apache Airflow versions, or an alias in the form of only major, major.minor or major.minor.patch versions specified.
   Like in Composer 1 and 2, a given Airflow version is released multiple times in Composer, with different patches
   and versions of dependencies. To distinguish between these versions in Composer 3, you can optionally specify a
-  build number to pin to a specific Airflow release. Environment details will always show the Airflow build number.
+  build number to pin to a specific Airflow release.
   Example: 2.6.3-build.4.
 
   The image version in Composer 3 must match the regular expression:
