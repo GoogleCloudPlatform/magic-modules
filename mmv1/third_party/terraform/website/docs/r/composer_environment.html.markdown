@@ -435,7 +435,7 @@ The following arguments are supported:
   ```
 
 * `image_version` -
-  (Optional in Cloud Composer 1, required in Cloud Composer 2 and 3)
+(Required) In Composer 1, use a specific Composer 1 version in this parameter. If omitted, the default is the latest version of Composer 2.  
 
   The version of the software running in the environment. This encapsulates both the version of Cloud Composer
   functionality and the version of Apache Airflow. It must match the regular expression
