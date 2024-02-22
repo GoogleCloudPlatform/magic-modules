@@ -1,0 +1,20 @@
+resource "google_firebase_web_app" "default" {
+  project      = "<%= ctx[:test_env_vars]['project_id'] %>"
+  display_name = "Web App for reCAPTCHA V3"
+}
+
+# It takes a while for App Check to recognize the new app
+# If your app already exists, you don't have to wait 30 seconds.
+resource "time_sleep" "wait_30s" {
+  depends_on      = [google_firebase_web_app.default]
+  create_duration = "30s"
+}
+
+resource "google_firebase_app_check_recaptcha_v3_config" "default" {
+  project     = "<%= ctx[:test_env_vars]['project_id'] %>"
+  app_id      = google_firebase_web_app.default.app_id
+  site_secret = "<%= ctx[:vars]['site_secret'] %>"
+  token_ttl   = "<%= ctx[:vars]['token_ttl'] %>"
+
+  depends_on = [time_sleep.wait_30s]
+}

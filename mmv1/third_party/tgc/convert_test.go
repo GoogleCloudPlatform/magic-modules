@@ -12,7 +12,10 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/caiasset"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/ancestrymanager"
 	resources "github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/converters/google/resources"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/converters/google/resources/cai"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/converters/google/resources/services/resourcemanager"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/tfdata"
+	"github.com/google/go-cmp/cmp"
 	tfjson "github.com/hashicorp/terraform-json"
 	provider "github.com/hashicorp/terraform-provider-google-beta/google-beta/provider"
 	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
@@ -635,18 +638,146 @@ func TestConvertWrapper(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		_, err := convertWrapper(test.converter, test.rd, test.cfg)
-		if !test.wantErr {
-			if err != nil {
-				t.Errorf("convertWrapper() = %q, want = nil", err)
+		t.Run(test.name, func(t *testing.T) {
+			_, err := convertWrapper(test.converter, test.rd, test.cfg)
+			if !test.wantErr {
+				if err != nil {
+					t.Errorf("convertWrapper() = %q, want = nil", err)
+				}
+			} else {
+				if err == nil {
+					t.Errorf("convertWrapper() = nil, want = %v", test.wantErrMsg)
+				} else if !strings.Contains(err.Error(), test.wantErrMsg) {
+					t.Errorf("convertWrapper() = %q, want containing %q", err, test.wantErrMsg)
+				}
 			}
-		} else {
-			if err == nil {
-				t.Errorf("convertWrapper() = nil, want = %v", test.wantErrMsg)
-			} else if !strings.Contains(err.Error(), test.wantErrMsg) {
-				t.Errorf("convertWrapper() = %q, want containing %q", err, test.wantErrMsg)
-			}
-		}
+		})
 	}
+}
 
+func TestConvertMergingWithExistAsset(t *testing.T) {
+	tests := []struct {
+		name    string
+		changes []*tfjson.ResourceChange
+		want    []caiasset.Asset
+	}{
+		{
+			name: "CreateOrUpdateOrNoop",
+			changes: []*tfjson.ResourceChange{
+				{
+					Address:      "google_project_iam_binding.test",
+					Mode:         "managed",
+					Type:         "google_project_iam_binding",
+					Name:         "test",
+					ProviderName: "registry.terraform.io/hashicorp/google-beta",
+					Change: &tfjson.Change{
+						Actions: tfjson.Actions{"create"},
+						Before:  nil,
+						After: map[string]interface{}{
+							"members": []interface{}{
+								"user:jane@example.com",
+							},
+							"project": "example-project",
+							"role":    "roles/editor",
+						},
+					},
+				},
+			},
+			want: []caiasset.Asset{
+				{
+					Name: "//cloudresourcemanager.googleapis.com/projects/example-project",
+					Type: "cloudresourcemanager.googleapis.com/Project",
+					IAMPolicy: &caiasset.IAMPolicy{
+						Bindings: []caiasset.IAMBinding{
+							{
+								Role:    "roles/editor",
+								Members: []string{"user:jane@example.com"},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "Delete",
+			changes: []*tfjson.ResourceChange{
+				{
+					Address:      "google_project_iam_binding.test",
+					Mode:         "managed",
+					Type:         "google_project_iam_binding",
+					Name:         "test",
+					ProviderName: "registry.terraform.io/hashicorp/google-beta",
+					Change: &tfjson.Change{
+						Actions: tfjson.Actions{"delete"},
+						After:   nil,
+						Before: map[string]interface{}{
+							"members": []interface{}{
+								"user:jane@example.com",
+							},
+							"project": "example-project",
+							"role":    "roles/editor",
+						},
+					},
+				},
+			},
+			want: []caiasset.Asset{
+				{
+					Name:      "//cloudresourcemanager.googleapis.com/projects/example-project",
+					Type:      "cloudresourcemanager.googleapis.com/Project",
+					IAMPolicy: &caiasset.IAMPolicy{},
+				},
+			},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			converter, _, err := newTestConverter(false)
+			assert.Nil(t, err)
+
+			fetchFuncCalled := 0
+			fetchFunc := func(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (cai.Asset, error) {
+				fetchFuncCalled++
+				return resourcemanager.FetchProjectIamPolicy(d, config)
+			}
+
+			converter.converters["google_project_iam_binding"] = []cai.ResourceConverter{
+				{
+					AssetType:         "cloudresourcemanager.googleapis.com/Project",
+					Convert:           resourcemanager.GetProjectIamBindingCaiObject,
+					FetchFullResource: fetchFunc,
+					MergeCreateUpdate: resourcemanager.MergeProjectIamBinding,
+					MergeDelete:       resourcemanager.MergeProjectIamBindingDelete,
+				},
+			}
+
+			// pre-populate the converter's asset cache
+			asset, err := converter.augmentAsset(nil, converter.cfg, cai.Asset{
+				Name: "//cloudresourcemanager.googleapis.com/projects/example-project",
+				Type: "cloudresourcemanager.googleapis.com/Project",
+				IAMPolicy: &cai.IAMPolicy{
+					Bindings: []cai.IAMBinding{
+						{
+							Role:    "roles/editor",
+							Members: []string{"user:abc@example.com"},
+						},
+					},
+				},
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+			converter.assets = map[string]Asset{
+				"cloudresourcemanager.googleapis.com/Project//cloudresourcemanager.googleapis.com/projects/example-project": asset,
+			}
+
+			err = converter.AddResourceChanges(test.changes)
+			if err != nil {
+				t.Fatalf("AddResourceChanges() = %s, want = nil", err)
+			}
+			if diff := cmp.Diff(test.want, converter.Assets()); diff != "" {
+				t.Errorf("AddResourceChanges() returned unexpected diff (-want +got):\n%s", diff)
+			}
+			assert.Equal(t, 0, fetchFuncCalled)
+		})
+	}
 }
