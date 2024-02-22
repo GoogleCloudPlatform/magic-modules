@@ -2,20 +2,18 @@
 package functions_test
 
 import (
-	"context"
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/function"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	tpg_functions "github.com/hashicorp/terraform-provider-google/google/functions"
 )
 
-func TestFunctionInternals_GetElementFromId(t *testing.T) {
+func TestFunctionInternals_ValidateElementFromIdArguments(t *testing.T) {
 
+	// Values here are matched to test case values below
 	regex := regexp.MustCompile("two/(?P<Element>[^/]+)/")
-	template := "$Element"
 	pattern := "two/{two}/"
 
 	cases := map[string]struct {
@@ -24,10 +22,6 @@ func TestFunctionInternals_GetElementFromId(t *testing.T) {
 		ExpectError     bool
 		ExpectWarning   bool
 	}{
-		"it can pull out a value from a string using a regex with a submatch": {
-			Input:           "one/element-1/two/element-2/three/element-3",
-			ExpectedElement: "element-2",
-		},
 		"it sets an error in diags if no match is found": {
 			Input:       "one/element-1/three/element-3",
 			ExpectError: true,
@@ -43,15 +37,12 @@ func TestFunctionInternals_GetElementFromId(t *testing.T) {
 		t.Run(tn, func(t *testing.T) {
 
 			// Arrange
-			ctx := context.Background()
-			req := function.RunRequest{}
 			resp := function.RunResponse{
-				Diagnostics: diag.Diagnostics{},
-				Result:      function.NewResultData(basetypes.StringValue{}), // Required to avoid nil pointer error
+				Result: function.NewResultData(basetypes.StringValue{}),
 			}
 
 			// Act
-			result := tpg_functions.GetElementFromId(ctx, tc.Input, regex, template, pattern, req, &resp)
+			tpg_functions.ValidateElementFromIdArguments(tc.Input, regex, pattern, &resp)
 
 			// Assert
 			if resp.Diagnostics.HasError() && !tc.ExpectError {
@@ -66,11 +57,37 @@ func TestFunctionInternals_GetElementFromId(t *testing.T) {
 			if (resp.Diagnostics.WarningsCount() == 0) && tc.ExpectWarning {
 				t.Fatal("Expected warning(s) to be set in response diags, but there were none.")
 			}
-			if resp.Diagnostics.HasError() {
-				// Stop test before checking returned value if errors occur
-				return
-			}
+		})
+	}
+}
 
+func TestFunctionInternals_GetElementFromId(t *testing.T) {
+
+	// Values here are matched to test case values below
+	regex := regexp.MustCompile("two/(?P<Element>[^/]+)/")
+	template := "$Element"
+
+	cases := map[string]struct {
+		Input           string
+		ExpectedElement string
+	}{
+		"it can pull out a value from a string using a regex with a submatch": {
+			Input:           "one/element-1/two/element-2/three/element-3",
+			ExpectedElement: "element-2",
+		},
+		"it will pull out the first value from a string with more than one submatch": {
+			Input:           "one/element-1/two/element-2/two/not-this-one/three/element-3",
+			ExpectedElement: "element-2",
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+
+			// Act
+			result := tpg_functions.GetElementFromId(tc.Input, regex, template)
+
+			// Assert
 			if result != tc.ExpectedElement {
 				t.Fatalf("Expected function logic to retrieve %s from input %s, got %s", tc.ExpectedElement, tc.Input, result)
 			}
