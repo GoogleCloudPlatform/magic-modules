@@ -26,17 +26,16 @@ jobs:
           echo "$newServices" >> "${GITHUB_OUTPUT}"
           if [ "$newServices" = "0" ];then
           echo "No new service found." 
-          echo $GITHUB_OUTPUT
           fi
   terraform-provider-google:
-    if: ${{needs.check-pr.outputs.services.value}} != 0
+    if: ${{needs.check-pr.outputs.services.value != 0}}
     needs: check-pr
     uses: ./.github/workflows/build-downstream.yml
     with:
       repo: 'terraform-provider-google'
       
   terraform-provider-google-beta:
-    if: ${{needs.check-pr.outputs.services}} != 0
+    if: ${{needs.check-pr.outputs.services != 0}} 
     needs: check-pr
     uses: ./.github/workflows/build-downstream.yml
     with:
