@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 2
+          fetch-depth: 0
       - name: Check for New Services
         run: |
           newServices=$(($(git diff --name-only --diff-filter=A origin/main HEAD | grep "mmv1/products" | wc -l)))
