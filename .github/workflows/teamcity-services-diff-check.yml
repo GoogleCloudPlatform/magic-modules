@@ -23,11 +23,13 @@ jobs:
           exit 1
           fi
   terraform-provider-google:
+    needs: check-pr
     uses: ./.github/workflows/build-downstream.yml
     with:
       repo: 'terraform-provider-google'
       
   terraform-provider-google-beta:
+      needs: check-pr
       uses: ./.github/workflows/build-downstream.yml
       with:
         repo: 'terraform-provider-google-beta'
