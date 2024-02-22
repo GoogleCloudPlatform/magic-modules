@@ -30,7 +30,7 @@ func serviceDifference(gS, tS []string) []string {
 func main() {
 	flag.Parse()
 
-	file, err := os.Open(*serviceFile + "txt")
+	file, err := os.Open(*serviceFile + ".txt")
 	if err != nil {
 		fmt.Println(err)
 		return
