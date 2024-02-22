@@ -1255,7 +1255,7 @@ The `software_config` block supports:
 
 * `cloud_data_lineage_integration` -
   (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html),
-  Cloud Composer environments in versions composer-2.1.2-airflow-*.*.* and newer)
+  Cloud Composer environments in versions composer-2.1.2-airflow-*.*.* and later)
   The configuration for Cloud Data Lineage integration. Structure is
   [documented below](#nested_cloud_data_lineage_integration).
 
