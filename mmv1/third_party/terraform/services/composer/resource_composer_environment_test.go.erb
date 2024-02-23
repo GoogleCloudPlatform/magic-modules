@@ -1306,9 +1306,6 @@ func TestAccComposerEnvironmentComposer3_updateWithNetworkAndSubnetwork(t *testi
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
-	    {
-				Config:             testAccComposerEnvironmentComposer3_withNetworkAndSubnetwork(envName, networkAttachment, network, subnetwork),
-			},
 			{
 				Config:             testAccComposerEnvironmentComposer3_withNetworkAttachment(envName, networkAttachment, network, subnetwork),
 			},
@@ -3130,12 +3127,24 @@ resource "google_composer_environment" "test" {
 resource "google_compute_network_attachment" "test" {
   name = "%s"
   region = "us-central1"
-  subnetworks = [ google_compute_subnetwork.test.id ]
+  subnetworks = [ google_compute_subnetwork.test-att.id ]
   connection_preference = "ACCEPT_MANUAL"
   // Composer 3 is modifying producer_accept_lists outside terraform, ignoring this change for now
   lifecycle {
     ignore_changes = [producer_accept_lists]
   }
+}
+
+resource "google_compute_network" "test-att" {
+  name                    = "%s-att"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "test-att" {
+  name          = "%s-att"
+  ip_cidr_range = "10.3.0.0/16"
+  region        = "us-central1"
+  network       = google_compute_network.test-att.self_link
 }
 
 // use a separate network to avoid conflicts with other tests running in parallel
@@ -3151,7 +3160,7 @@ resource "google_compute_subnetwork" "test" {
   region        = "us-central1"
   network       = google_compute_network.test.self_link
 }
-`, name, networkAttachment, network, subnetwork)
+`, name, networkAttachment, network, subnetwork, network, subnetwork)
 }
 
 func testAccComposerEnvironmentComposer3_withNetworkAndSubnetwork(name, networkAttachment, network, subnetwork string) string {
@@ -3173,12 +3182,24 @@ resource "google_composer_environment" "test" {
 resource "google_compute_network_attachment" "test" {
   name = "%s"
   region = "us-central1"
-  subnetworks = [ google_compute_subnetwork.test.id ]
+  subnetworks = [ google_compute_subnetwork.test-att.id ]
   connection_preference = "ACCEPT_MANUAL"
   // Composer 3 is modifying producer_accept_lists outside terraform, ignoring this change for now
   lifecycle {
     ignore_changes = [producer_accept_lists]
   }
+}
+
+resource "google_compute_network" "test-att" {
+  name                    = "%s-att"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "test-att" {
+  name          = "%s-att"
+  ip_cidr_range = "10.3.0.0/16"
+  region        = "us-central1"
+  network       = google_compute_network.test-att.self_link
 }
 
 // use a separate network to avoid conflicts with other tests running in parallel
@@ -3194,7 +3215,7 @@ resource "google_compute_subnetwork" "test" {
   region        = "us-central1"
   network       = google_compute_network.test.self_link
 }
-`, name, networkAttachment, network, subnetwork)
+`, name, networkAttachment, network, subnetwork, network, subnetwork)
 }
 
 func testAccComposerEnvironmentComposer3_withNetworkSubnetworkAndAttachment_expectError(name, networkAttachment, network, subnetwork string) string {
