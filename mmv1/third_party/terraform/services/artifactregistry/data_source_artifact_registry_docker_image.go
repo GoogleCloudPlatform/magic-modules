@@ -33,22 +33,10 @@ func DataSourceArtifactRegistryDockerImage() *schema.Resource {
 				Required:    true,
 				Description: `The fully-qualified path to the repository.`,
 			},
-			"image": {
+			"image_name": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: `The image name to fetch.`,
-			},
-			"digest": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				Description:   `The image digest to fetch.  This cannot be used if tag is provided.`,
-				ConflictsWith: []string{"tag"},
-			},
-			"tag": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				Description:   `The tag of the version of the image to fetch. This cannot be used if digest is provided.`,
-				ConflictsWith: []string{"digest"},
 			},
 			"name": {
 				Type:        schema.TypeString,
@@ -104,13 +92,13 @@ func DataSourceArtifactRegistryDockerImageRead(d *schema.ResourceData, meta inte
 
 	var res DockerImage
 
-	_, hasDigest := d.GetOk("digest")
+	imageName, tag, digest := parseImage(d.Get("image_name").(string))
 
-	if hasDigest {
+	if digest != "" {
 		// fetch image by digest
 		// https://cloud.google.com/artifact-registry/docs/reference/rest/v1/projects.locations.repositories.dockerImages/get
-		imageUrlSafe := url.QueryEscape(d.Get("image").(string))
-		urlRequest, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{ArtifactRegistryBasePath}}{{repository}}/dockerImages/%s@{{digest}}", imageUrlSafe))
+		imageUrlSafe := url.QueryEscape(imageName)
+		urlRequest, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{ArtifactRegistryBasePath}}{{repository}}/dockerImages/%s@%s", imageUrlSafe, digest))
 		if err != nil {
 			return fmt.Errorf("Error setting api endpoint")
 		}
@@ -139,12 +127,7 @@ func DataSourceArtifactRegistryDockerImageRead(d *schema.ResourceData, meta inte
 			return err
 		}
 
-		imageName, ok := d.Get("image").(string)
-		if !ok {
-			return fmt.Errorf("Error: Image name is not a string")
-		}
-
-		res, err = retrieveAndFilterImages(d, config, urlRequest, userAgent, imageName)
+		res, err = retrieveAndFilterImages(d, config, urlRequest, userAgent, imageName, tag)
 		if err != nil {
 			return err
 		}
@@ -183,7 +166,7 @@ func DataSourceArtifactRegistryDockerImageRead(d *schema.ResourceData, meta inte
 		return fmt.Errorf("Error setting update_time: %s", err)
 	}
 
-	id, err := tpgresource.ReplaceVars(d, config, "{{ArtifactRegistryBasePath}}{{repository}}/dockerImages/{{image}}")
+	id, err := tpgresource.ReplaceVars(d, config, "{{ArtifactRegistryBasePath}}{{repository}}/dockerImages/{{image_name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing the data source id: %s", err)
 	}
@@ -193,12 +176,27 @@ func DataSourceArtifactRegistryDockerImageRead(d *schema.ResourceData, meta inte
 	return nil
 }
 
-func retrieveAndFilterImages(d *schema.ResourceData, config *transport_tpg.Config, urlRequest string, userAgent string, imageName string) (DockerImage, error) {
+func parseImage(image string) (imageName string, tag string, digest string) {
+	splitByAt := strings.Split(image, "@")
+	splitByColon := strings.Split(image, ":")
+
+	if len(splitByAt) == 2 {
+		imageName = splitByAt[0]
+		digest = splitByAt[1]
+	} else if len(splitByColon) == 2 {
+		imageName = splitByColon[0]
+		tag = splitByColon[1]
+	} else {
+		imageName = image
+	}
+
+	return imageName, tag, digest
+}
+
+func retrieveAndFilterImages(d *schema.ResourceData, config *transport_tpg.Config, urlRequest string, userAgent string, imageName string, tag string) (DockerImage, error) {
 	// Paging through the list method until either:
 	// if a tag was provided, the matching image name and tag pair
 	// otherwise, return the first matching image name
-
-	tag, hasTag := d.GetOk("tag")
 
 	for {
 		resListImages, token, err := retrieveListOfDockerImages(config, urlRequest, userAgent)
@@ -213,7 +211,7 @@ func retrieveAndFilterImages(d *schema.ResourceData, config *transport_tpg.Confi
 			}
 		}
 
-		if hasTag {
+		if tag != "" {
 			for _, image := range resFiltered {
 				for _, iterTag := range image.tags {
 					if iterTag == tag {

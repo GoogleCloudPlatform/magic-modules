@@ -48,7 +48,7 @@ func TestAccDataSourceArtifactRegistryDockerImage(t *testing.T) {
 
 					// Data source using no tag or digest
 					resource.TestCheckResourceAttrSet(resourceName+"None", "repository"),
-					resource.TestCheckResourceAttrSet(resourceName+"None", "image"),
+					resource.TestCheckResourceAttrSet(resourceName+"None", "image_name"),
 					resource.TestCheckResourceAttrSet(resourceName+"None", "name"),
 					resource.TestCheckResourceAttrSet(resourceName+"None", "self_link"),
 				),
@@ -76,38 +76,34 @@ data "google_artifact_registry_repository" "gcr" {
 
 data "google_artifact_registry_docker_image" "testTag" {
 	repository = data.google_artifact_registry_repository.container.id
-	image      = "hello"
-	tag        = "latest"
+	image_name = "hello:latest"
 }
 
 data "google_artifact_registry_docker_image" "testDigest" {
 	repository = data.google_artifact_registry_repository.container.id
-	image      = "hello"
-	digest     = "sha256:77cb9fbc6a667b8bfdbeca4c49e7703d825746eba53b736f0318bb7712828821"
+	image_name = "hello@sha256:77cb9fbc6a667b8bfdbeca4c49e7703d825746eba53b736f0318bb7712828821"
 }
 
 data "google_artifact_registry_docker_image" "testUrlTag" {
 	repository = data.google_artifact_registry_repository.gcr.id
-	image      = "krane/debug"
-	tag        = "latest"
+	image_name = "krane/debug:latest"
 }
 
 data "google_artifact_registry_docker_image" "testUrlDigest" {
 	repository = data.google_artifact_registry_repository.gcr.id
-	image      = "krane/debug"
-	digest     = "sha256:26903bf659994649af0b8ccb2675b76318b2bc3b2c85feea9a1f9d5b98eff363"
+	image_name = "krane/debug@sha256:26903bf659994649af0b8ccb2675b76318b2bc3b2c85feea9a1f9d5b98eff363"
 }
 
 data "google_artifact_registry_docker_image" "testNone" {
 	repository = data.google_artifact_registry_repository.gcr.id
-	image      = "crane"
+	image_name = "crane"
 }
 `
 
 func checkTaggedDataSources(resourceName string, expectedTag string) resource.TestCheckFunc {
 	return resource.ComposeTestCheckFunc(
 		resource.TestCheckResourceAttrSet(resourceName, "repository"),
-		resource.TestCheckResourceAttrSet(resourceName, "image"),
+		resource.TestCheckResourceAttrSet(resourceName, "image_name"),
 		resource.TestCheckResourceAttrSet(resourceName, "name"),
 		resource.TestCheckResourceAttrSet(resourceName, "self_link"),
 		resource.TestCheckTypeSetElemAttr(resourceName, "tags.*", expectedTag),
@@ -118,7 +114,7 @@ func checkTaggedDataSources(resourceName string, expectedTag string) resource.Te
 func checkDigestDataSources(resourceName string, expectedName string, expectedSelfLink string) resource.TestCheckFunc {
 	return resource.ComposeTestCheckFunc(
 		resource.TestCheckResourceAttrSet(resourceName, "repository"),
-		resource.TestCheckResourceAttrSet(resourceName, "image"),
+		resource.TestCheckResourceAttrSet(resourceName, "image_name"),
 		resource.TestCheckResourceAttr(resourceName, "name", expectedName),
 		resource.TestCheckResourceAttr(resourceName, "self_link", expectedSelfLink),
 		resource.TestCheckResourceAttrSet(resourceName, "media_type"),
