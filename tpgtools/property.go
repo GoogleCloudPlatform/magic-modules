@@ -198,11 +198,21 @@ func (p Property) ObjectType() string {
 }
 
 func (p Property) IsArray() bool {
-	return (p.Type.String() == SchemaTypeList || p.Type.String() == SchemaTypeSet) && !p.Type.IsObject()
+	return (p.Type.String() == SchemaTypeList || p.Type.String() == SchemaTypeSet) && !p.Type.IsObject() && !p.IsComplexMap()
 }
 
 func (t Type) IsSet() bool {
 	return t.String() == SchemaTypeSet
+}
+
+// Complex map is for maps of string --> object that are supported in DCL but
+// not in Terraform. We handle this by adding a `name` field in the Terraform 
+// schema for the key in the map
+func (t Type) IsComplexMap() bool {
+	if t.typ.AdditionalProperties != nil {
+		return t.typ.AdditionalProperties.Type != "string"
+	}
+	return false
 }
 
 // ShouldGenerateNestedSchema returns true if an object's nested schema function should be generated.
@@ -278,6 +288,9 @@ func buildGetter(p Property, rawGetter string) string {
 		if p.Type.IsEnumArray() {
 			return fmt.Sprintf("expand%s%sArray(%s)", p.resource.PathType(), p.PackagePath(), rawGetter)
 		}
+		if p.Type.IsComplexMap() {
+			return fmt.Sprintf("expand%s%sMap(%s)", p.resource.PathType(), p.PackagePath(), rawGetter)
+		}
 		if p.Type.typ.Items != nil && p.Type.typ.Items.Type == "string" {
 			return fmt.Sprintf("tpgdclresource.ExpandStringArray(%s)", rawGetter)
 		}
@@ -317,6 +330,9 @@ func (p Property) DefaultStateSetter() string {
 
 		return fmt.Sprintf("d.Set(%q, res.%s)", p.Name(), p.PackageName)
 	case SchemaTypeList, SchemaTypeSet:
+		if p.IsComplexMap() {
+			return fmt.Sprintf("d.Set(%q, flatten%s%sMap(res.%s))", p.Name(), p.resource.PathType(), p.PackagePath(), p.PackageName)
+		}
 		if p.typ.Items != nil && ((p.typ.Items.Type == "string" && len(p.typ.Items.Enum) == 0) || p.typ.Items.Type == "integer") {
 			return fmt.Sprintf("d.Set(%q, res.%s)", p.Name(), p.PackageName)
 		}
@@ -365,6 +381,9 @@ func (p Property) flattenGetterWithParent(parent string) string {
 		if p.Type.IsEnumArray() {
 			return fmt.Sprintf("flatten%s%sArray(obj.%s)", p.resource.PathType(), p.PackagePath(), p.PackageName)
 		}
+		if p.Type.IsComplexMap() {
+			return fmt.Sprintf("flatten%s%sMap(%s.%s)", p.resource.PathType(), p.PackagePath(), parent, p.PackageName)
+		}
 		if p.Type.typ.Items != nil && p.Type.typ.Items.Type == "integer" {
 			return fmt.Sprintf("%s.%s", parent, p.PackageName)
 		}
@@ -376,7 +395,6 @@ func (p Property) flattenGetterWithParent(parent string) string {
 			return fmt.Sprintf("flatten%s%sArray(%s.%s)", p.resource.PathType(), p.PackagePath(), parent, p.PackageName)
 		}
 	}
-
 	if p.typ.Type == "object" {
 		return fmt.Sprintf("flatten%s%s(%s.%s)", p.resource.PathType(), p.PackagePath(), parent, p.PackageName)
 	}
@@ -651,6 +669,29 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 				p.ElemIsBasicType = true
 			}
 		}
+		// Complex maps are represented as TypeSet but don't have v.Items set.
+		// Use AdditionalProperties instead, and add an additional `name` field
+		// that represents the key in the map
+		if p.Type.IsComplexMap() {
+			props, err := createPropertiesFromSchema(p.Type.typ.AdditionalProperties, typeFetcher, overrides, resource, &p, location)
+			if err != nil {
+				return nil, err
+			}
+			keyProp := Property{
+				title:    "key_name",
+				Type:     Type{&openapi.Schema{Type: "string"}},
+				resource: resource,
+				parent:   &p,
+				Required: true,
+				Description: "The name for the key in the map for which this object is mapped to in the API",
+			}
+			props = append(props, keyProp)
+
+			p.Properties = props
+			e := fmt.Sprintf("%s%sSchema()", resource.PathType(), p.PackagePath())
+			p.Elem = &e
+			p.ElemIsBasicType = false
+		}
 
 		if !p.Computed {
 			if stringInSlice(v.Title, schema.Required) {
@@ -779,7 +820,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 			p.ValidateFunc = &vf.Function
 		}
 
-		if p.Type.String() == SchemaTypeSet {
+		if p.Type.IsSet() {
 			shf := SetHashFuncDetails{}
 			shfOk, err := overrides.PropertyOverrideWithDetails(SetHashFunc, p, &shf, location)
 			if err != nil {
