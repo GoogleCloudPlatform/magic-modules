@@ -398,7 +398,7 @@ properties:
               name: 'sourceSnapshot'
               description: |
                 Name of the snapshot to use as the source for the disk.
-                
+
                 Must be empty if `sourceImage` is set.
                 Must be empty if `read_only` is false.
                 Updating `source_snapshot` will update content in the ephemeral directory after the workstation is restarted.
@@ -406,7 +406,7 @@ properties:
               name: 'sourceImage'
               description: |
                 Name of the disk image to use as the source for the disk.
-                
+
                 Must be empty `sourceSnapshot` is set.
                 Updating `sourceImage` will update content in the ephemeral directory after the workstation is restarted.
             - !ruby/object:Api::Type::Boolean
