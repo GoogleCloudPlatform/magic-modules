@@ -48,9 +48,9 @@ var requestReviewerCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		prNumber := args[0]
 		fmt.Println("PR Number: ", prNumber)
-		githubToken, ok := os.LookupEnv("GITHUB_TOKEN_CLASSIC")
+		githubToken, ok := os.LookupEnv("GITHUB_TOKEN")
 		if !ok {
-			fmt.Println("Did not provide GITHUB_TOKEN_CLASSIC environment variable")
+			fmt.Println("Did not provide GITHUB_TOKEN environment variable")
 			os.Exit(1)
 		}
 		gh := github.NewClient(githubToken)
