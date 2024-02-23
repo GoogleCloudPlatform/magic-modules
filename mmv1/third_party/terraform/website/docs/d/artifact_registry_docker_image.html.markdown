@@ -43,15 +43,7 @@ The following arguments are supported:
 
 * `repository` - (Required) The fully-qualified identify of the repository. That is, `projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}`.
 
-* `image` - (Required) The image name to fetch.
-
-- - -
-
-* `digest` - (Optional) The image digest to fetch.  This cannot be used if `tag` is provided.
-
-* `tag` - (Optional) The tag of the version of the image to fetch. This cannot be used if `digest` is provided.
-
-If a `digest` or `tag` is not provided, then the last updated version of the image will be fetched.
+* `image_name` - (Required) The image name to fetch. If no digest or tag is provided, then the last modified image will be used.
 
 ## Attributes Reference
 
