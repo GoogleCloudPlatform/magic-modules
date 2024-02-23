@@ -1,4 +1,4 @@
-name: TeamCity Services Diff Check
+name: TeamCity Services Weekly Diff Check
 permissions: read-all
 
 on:
