@@ -25,6 +25,7 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   parent_resource_attribute: 'name'
   method_name_separator: ':'
   base_url: 'projects/{{project}}/locations/{{location}}/targets/{{name}}'
+  import_format: ['projects/{{project}}/locations/{{location}}/targets/{{name}}', '{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'clouddeploy_target_basic'
