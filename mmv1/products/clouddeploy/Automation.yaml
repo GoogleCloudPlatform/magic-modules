@@ -21,7 +21,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/deploy/docs/api/reference/rest/v1/projects.locations.deliveryPipelines.automations'
 base_url: 'projects/{{project}}/locations/{{location}}/deliveryPipelines/{{delivery_pipeline}}/automations'
 self_link: 'projects/{{project}}/locations/{{location}}/deliveryPipelines/{{delivery_pipeline}}/automations/{{name}}'
-min_version: beta
+
 create_url: 'projects/{{project}}/locations/{{location}}/deliveryPipelines/{{delivery_pipeline}}/automations?automationId={{name}}'
 update_verb: :PATCH
 update_mask: true
@@ -51,7 +51,6 @@ autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "clouddeploy_automation_basic"
-    min_version: beta
     primary_resource_id: "b-automation"
     vars:
       automation: "cd-automation"
@@ -60,7 +59,7 @@ examples:
       service_account: :SERVICE_ACCT
   - !ruby/object:Provider::Terraform::Examples
     name: "clouddeploy_automation_full"
-    min_version: beta
+
     primary_resource_id: "f-automation"
     vars:
       automation: "cd-automation"
