@@ -18,7 +18,7 @@
 
 <%= lines(autogen_notice(:go, pwd)) -%>
 
-package <%= product_ns.downcase -%>
+package <%= object.__product.name .downcase -%>
 
 import (
 
@@ -53,47 +53,27 @@ import (
 
 <%= lines(compile(pwd + '/' + object.custom_code.constants)) if object.custom_code.constants -%>
 
-<%
-    resource_name = product_ns + object.name
-    properties = object.all_user_properties
-    update_body_properties = properties_without_custom_update(object.settable_properties)
-    update_body_properties = update_body_properties.reject(&:immutable) if object.update_verb == :PATCH
-    # Handwritten TF Operation objects will be shaped like accessContextManager while the Google Go Client will have a name like accesscontextmanager
-    client_name = object.__product.client_name || product_ns
-    client_name_camel = client_name.camelize(:lower)
-    client_name_pascal = client_name.camelize(:upper)
-    client_name_lower = client_name.downcase
-    has_project = object.base_url.include?('{{project}}') || (object.create_url && object.create_url.include?('{{project}}'))
-    has_region = object.base_url.include?('{{region}}') && object.parameters.any?{ |p| p.name == 'region' && p.ignore_read }
-    has_zone = object.base_url.include?('{{zone}}') && object.parameters.any?{ |p| p.name == 'zone' && p.ignore_read }
-    # In order of preference, use TF override,
-    # general defined timeouts, or default Timeouts
-    timeouts = object.timeouts
-    timeouts ||= object&.async&.operation&.timeouts
-    timeouts ||= Api::Timeouts.new
--%>
-
-func Resource<%= resource_name -%>() *schema.Resource {
+func Resource<%= object.resource_name -%>() *schema.Resource {
     return &schema.Resource{
-        Create: resource<%= resource_name -%>Create,
-        Read: resource<%= resource_name -%>Read,
-<%  if updatable?(object, properties) -%>
-        Update: resource<%= resource_name -%>Update,
+        Create: resource<%= object.resource_name -%>Create,
+        Read: resource<%= object.resource_name -%>Read,
+<%  if updatable?(object, object.all_user_properties) || object.root_labels? -%>
+        Update: resource<%= object.resource_name -%>Update,
 <%  end -%>
-        Delete: resource<%= resource_name -%>Delete,
+        Delete: resource<%= object.resource_name -%>Delete,
 
 <%  unless object.exclude_import -%>
         Importer: &schema.ResourceImporter{
-            State: resource<%= resource_name -%>Import,
+            State: resource<%= object.resource_name -%>Import,
         },
 <%  end -%>
 
         Timeouts: &schema.ResourceTimeout {
-            Create: schema.DefaultTimeout(<%= timeouts.insert_minutes -%> * time.Minute),
-<%  if updatable?(object, properties) -%>
-            Update: schema.DefaultTimeout(<%= timeouts.update_minutes -%> * time.Minute),
+            Create: schema.DefaultTimeout(<%= object.timeouts.insert_minutes -%> * time.Minute),
+<%  if updatable?(object, object.all_user_properties) || object.root_labels? -%>
+            Update: schema.DefaultTimeout(<%= object.timeouts.update_minutes -%> * time.Minute),
 <%  end -%>
-            Delete: schema.DefaultTimeout(<%= timeouts.delete_minutes -%> * time.Minute),
+            Delete: schema.DefaultTimeout(<%= object.timeouts.delete_minutes -%> * time.Minute),
         },
 
 <%  if object.schema_version -%>
@@ -107,19 +87,19 @@ func Resource<%= resource_name -%>() *schema.Resource {
         StateUpgraders: []schema.StateUpgrader{
 <%      for v in object.state_upgrade_base_schema_version..object.schema_version-1 -%>
             {
-                Type: resource<%= "#{resource_name}ResourceV#{v}" -%>().CoreConfigSchema().ImpliedType(),
-                Upgrade: Resource<%= "#{resource_name}UpgradeV#{v}" -%>,
+                Type: resource<%= "#{object.resource_name}ResourceV#{v}" -%>().CoreConfigSchema().ImpliedType(),
+                Upgrade: Resource<%= "#{object.resource_name}UpgradeV#{v}" -%>,
                 Version: <%= v -%>,
             },
 <%      end -%>
         },
 <%  end -%>
-<% if ((has_project || has_region || has_zone) && !object.skip_default_cdiff) || object.custom_diff.any? || object.settable_properties.any? {|p| p.unordered_list}-%>
+<% if ((object.project? || object.region? || object.zone?) && !object.skip_default_cdiff) || object.custom_diff.any? || object.settable_properties.any? {|p| p.unordered_list}-%>
         CustomizeDiff: customdiff.All(
 <%      if object.settable_properties.any? {|p| p.unordered_list} -%>
         <%=
           object.settable_properties.select { |p| p.unordered_list }
-            .map { |p| "resource#{resource_name}#{p.name.camelize(:upper)}SetStyleDiff"}
+            .map { |p| "resource#{object.resource_name}#{p.name.camelize(:upper)}SetStyleDiff"}
             .join(",\n")
         -%>,
 <%      end -%>
@@ -128,13 +108,13 @@ func Resource<%= resource_name -%>() *schema.Resource {
         <%= cdiff%>,
 <%          end -%>
 <%      end -%>
-<%      if has_project && !object.skip_default_cdiff -%>
+<%      if object.project? && !object.skip_default_cdiff -%>
             tpgresource.DefaultProviderProject,
 <%      end -%>
-<%      if has_region && !object.skip_default_cdiff  -%>
+<%      if object.region? && !object.skip_default_cdiff  -%>
             tpgresource.DefaultProviderRegion,
 <%      end -%>
-<%      if has_zone && !object.skip_default_cdiff  -%>
+<%      if object.zone? && !object.skip_default_cdiff  -%>
             tpgresource.DefaultProviderZone,
 <%      end -%>
         ),
@@ -144,10 +124,8 @@ func Resource<%= resource_name -%>() *schema.Resource {
         DeprecationMessage: "<%= object.deprecation_message -%>",
 <% end -%>
 
-<%= lines(compile(pwd + '/' + object.custom_code.resource_definition)) if object.custom_code.resource_definition -%>
-
         Schema: map[string]*schema.Schema{
-<%  order_properties(properties).each do |prop| -%>
+<%  order_properties(object.all_user_properties).each do |prop| -%>
 <%=       lines(build_schema_property(prop, object, pwd)) -%>
 <%  end -%>
 <%- unless object.virtual_fields.empty? -%>
@@ -166,7 +144,7 @@ func Resource<%= resource_name -%>() *schema.Resource {
 <%     end -%>
 <%   end -%>
 <%= lines(compile(pwd + '/' + object.custom_code.extra_schema_entry)) if object.custom_code.extra_schema_entry -%>
-<%  if has_project -%>
+<%  if object.project? -%>
             "project": {
                 Type:     schema.TypeString,
                 Optional: true,
@@ -185,21 +163,21 @@ func Resource<%= resource_name -%>() *schema.Resource {
     }
 }
 
-<%  properties.each do |prop| -%>
+<%  object.all_user_properties.each do |prop| -%>
 <%= lines(build_subresource_schema(prop, object, pwd), 1) -%>
 <%  end -%>
 
 <%  object.settable_properties.select {|p| p.unordered_list}.each do |prop| -%>
-func resource<%= resource_name -%><%= prop.name.camelize(:upper) -%>SetStyleDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+func resource<%= object.resource_name -%><%= prop.name.camelize(:upper) -%>SetStyleDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
 <%=
     compile_template(pwd + '/templates/terraform/unordered_list_customize_diff.erb',
                      prop: prop,
-                     resource_name: resource_name)
+                     object: object)
 -%>
 }
 <%  end -%>
 
-func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{}) error {
+func resource<%= object.resource_name -%>Create(d *schema.ResourceData, meta interface{}) error {
 <%  if object.async&.is_a?(Api::OpAsync) && object.async.include_project && object.async&.allow?('create') -%>
     var project string
 <%  end -%>
@@ -215,7 +193,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     obj := make(map[string]interface{})
 <%    object.settable_properties.each do |prop| -%>
 <%      schemaPrefix = prop.flatten_object ? "nil" : "d.Get( \"#{prop.name.underscore}\" )" -%>
-    <%= prop.api_name -%>Prop, err := expand<%= "Nested" if object.nested_query -%><%= resource_name -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
+    <%= prop.api_name -%>Prop, err := expand<%= "Nested" if object.nested_query -%><%= object.resource_name -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
     if err != nil {
         return err
 <%      if prop.send_empty_value -%>
@@ -230,7 +208,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 <%    end -%>
 
 <%    if object.custom_code.encoder -%>
-    obj, err = resource<%= resource_name -%>Encoder(d, meta, obj)
+    obj, err = resource<%= object.resource_name -%>Encoder(d, meta, obj)
     if err != nil {
         return err
     }
@@ -245,18 +223,15 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     defer transport_tpg.MutexStore.Unlock(lockName)
 <%    end -%>
 
-    url, err := tpgresource.ReplaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.create_uri}" -%>")
+    url, err := tpgresource.ReplaceVars<% if object.legacy_long_form_project -%>ForId<% end -%>(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.create_uri}" -%>")
     if err != nil {
         return err
     }
-<%    if object.legacy_long_form_project -%>
-    url = strings.ReplaceAll(url, "projects/projects/", "projects/")
-<%    end -%>
 
     log.Printf("[DEBUG] Creating new <%= object.name -%>: %#v", obj)
 <%    if object.nested_query&.modify_by_patch -%>
 <%# Keep this after mutex - patch request data relies on current resource state %>
-    obj, err = resource<%= resource_name -%>PatchCreateEncoder(d, meta, obj)
+    obj, err = resource<%= object.resource_name -%>PatchCreateEncoder(d, meta, obj)
     if err != nil {
         return err
     }
@@ -269,7 +244,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 <%    end -%>
     billingProject := ""
 
-<%    if has_project -%>
+<%    if object.project? -%>
     project, err := tpgresource.GetProject(d, config)
     if err != nil {
         return fmt.Errorf("Error fetching project for <%= object.name -%>: %s", err)
@@ -310,7 +285,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     })
     if err != nil {
 <%    if object.custom_code.post_create_failure && object.async.nil? # Only add if not handled by async error handling -%>
-        resource<%= resource_name -%>PostCreateFailure(d, meta)
+        resource<%= object.resource_name -%>PostCreateFailure(d, meta)
 <%    end -%>
         return fmt.Errorf("Error creating <%= object.name -%>: %s", err)
     }
@@ -318,7 +293,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 <%    unless object.async&.is_a? Api::OpAsync -%>
 <%      object.gettable_properties.each do |prop| -%>
 <%        if object.identity.include?(prop) && prop.output -%>
-    if err := d.Set("<%= prop.name.underscore -%>", flatten<%= "Nested" if object.nested_query -%><%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"], d, config)); err != nil {
+    if err := d.Set("<%= prop.name.underscore -%>", flatten<%= "Nested" if object.nested_query -%><%= object.resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"], d, config)); err != nil {
         return fmt.Errorf(`Error setting computed identity field "<%=prop.name.underscore%>": %s`, err)
     }
 <%        end -%>
@@ -326,13 +301,10 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 <%    end -%>
 
     // Store the ID now
-    id, err := tpgresource.ReplaceVars(d, config, "<%= id_format(object) -%>")
+    id, err := tpgresource.ReplaceVars<% if object.legacy_long_form_project -%>ForId<% end -%>(d, config, "<%= id_format(object) -%>")
     if err != nil {
         return fmt.Errorf("Error constructing id: %s", err)
     }
-<%    if object.legacy_long_form_project -%>
-    id = strings.ReplaceAll(id, "projects/projects/", "projects/")
-<%    end -%>
     d.SetId(id)
 
 <%    if object.async&.allow?('create') -%>
@@ -341,12 +313,12 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     // Use the resource in the operation response to populate
     // identity fields and d.Id() before read
     var opRes map[string]interface{}
-    err = <%= client_name_pascal -%>OperationWaitTimeWithResponse(
-    config, res, &opRes, <% if has_project || object.async.include_project -%> project, <% end -%> "Creating <%= object.name -%>", userAgent,
+    err = <%= object.client_name_pascal -%>OperationWaitTimeWithResponse(
+    config, res, &opRes, <% if object.project? || object.async.include_project -%> <% if object.legacy_long_form_project -%>tpgresource.GetResourceNameFromSelfLink(project)<% else %>project<% end %>, <% end -%> "Creating <%= object.name -%>", userAgent,
         d.Timeout(schema.TimeoutCreate))
     if err != nil {
 <%          if object.custom_code.post_create_failure -%>
-        resource<%= resource_name -%>PostCreateFailure(d, meta)
+        resource<%= object.resource_name -%>PostCreateFailure(d, meta)
 <%          end -%>
 <%          unless object.taint_resource_on_failed_create -%>
         // The resource didn't actually create
@@ -357,7 +329,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     }
 
 <%          if object.custom_code.decoder -%>
-    opRes, err = resource<%= resource_name -%>Decoder(d, meta, opRes)
+    opRes, err = resource<%= object.resource_name -%>Decoder(d, meta, opRes)
     if err != nil {
         return fmt.Errorf("Error decoding response from operation: %s", err)
     }
@@ -368,7 +340,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 
 <%          if object.nested_query -%>
     if _, ok := opRes["<%=object.nested_query.keys[0]-%>"]; ok {
-        opRes, err = flattenNested<%= resource_name -%>(d, meta, opRes)
+        opRes, err = flattenNested<%= object.resource_name -%>(d, meta, opRes)
         if err != nil {
             return fmt.Errorf("Error getting nested object from operation response: %s", err)
         }
@@ -380,30 +352,27 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 <%          end -%>
 <%          object.gettable_properties.each do |prop| -%>
 <%            if object.identity.include?(prop) -%>
-    if err := d.Set("<%= prop.name.underscore -%>", flatten<%= "Nested" if object.nested_query -%><%= resource_name -%><%= titlelize_property(prop) -%>(opRes["<%= prop.api_name -%>"], d, config)); err != nil {
+    if err := d.Set("<%= prop.name.underscore -%>", flatten<%= "Nested" if object.nested_query -%><%= object.resource_name -%><%= titlelize_property(prop) -%>(opRes["<%= prop.api_name -%>"], d, config)); err != nil {
         return err
     }
 <%            end -%>
 <%          end -%>
 
     // This may have caused the ID to update - update it if so.
-    id, err = tpgresource.ReplaceVars(d, config, "<%= id_format(object) -%>")
+    id, err = tpgresource.ReplaceVars<% if object.legacy_long_form_project -%>ForId<% end -%>(d, config, "<%= id_format(object) -%>")
     if err != nil {
         return fmt.Errorf("Error constructing id: %s", err)
     }
-<%          if object.legacy_long_form_project -%>
-    id = strings.ReplaceAll(id, "projects/projects/", "projects/")
-<%          end -%>
     d.SetId(id)
 
 <%        else # if object.async.is_a? Api::OpAsync -%>
-    err = <%= client_name_pascal -%>OperationWaitTime(
-    config, res, <% if has_project || object.async.include_project -%> project, <% end -%> "Creating <%= object.name -%>", userAgent,
+    err = <%= object.client_name_pascal -%>OperationWaitTime(
+    config, res, <% if object.project? || object.async.include_project -%> <% if object.legacy_long_form_project -%>tpgresource.GetResourceNameFromSelfLink(project)<% else %>project<% end %>, <% end -%> "Creating <%= object.name -%>", userAgent,
         d.Timeout(schema.TimeoutCreate))
 
     if err != nil {
 <%          if object.custom_code.post_create_failure -%>
-        resource<%= resource_name -%>PostCreateFailure(d, meta)
+        resource<%= object.resource_name -%>PostCreateFailure(d, meta)
 <%          end -%>
 <%          unless object.taint_resource_on_failed_create -%>
         // The resource didn't actually create
@@ -420,13 +389,13 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 
 <%    if object.async&.allow?('create') -%>
 <%      if object.async.is_a? Provider::Terraform::PollAsync -%>
-    err = transport_tpg.PollingWaitTime(resource<%= resource_name -%>PollRead(d, meta), <%= object.async.check_response_func_existence -%>, "Creating <%= object.name -%>", d.Timeout(schema.TimeoutCreate), <%= object.async.target_occurrences -%>)
+    err = transport_tpg.PollingWaitTime(resource<%= object.resource_name -%>PollRead(d, meta), <%= object.async.check_response_func_existence -%>, "Creating <%= object.name -%>", d.Timeout(schema.TimeoutCreate), <%= object.async.target_occurrences -%>)
     if err != nil {
 <%        if object.async.suppress_error -%>
         log.Printf("[ERROR] Unable to confirm eventually consistent <%= object.name -%> %q finished updating: %q", d.Id(), err)
 <%        else -%>
 <%          if object.custom_code.post_create_failure -%>
-        resource<%= resource_name -%>PostCreateFailure(d, meta)
+        resource<%= object.resource_name -%>PostCreateFailure(d, meta)
 <%          end -%>
         return fmt.Errorf("Error waiting to create <%= object.name -%>: %s", err)
 <%        end -%>
@@ -437,29 +406,28 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 
     log.Printf("[DEBUG] Finished creating <%= object.name -%> %q: %#v", d.Id(), res)
 
-    return resource<%= resource_name -%>Read(d, meta)
+    return resource<%= object.resource_name -%>Read(d, meta)
 <%  end # if custom_create -%>
 }
 
 <%  if object.async&.is_a? Provider::Terraform::PollAsync -%>
-func resource<%= resource_name -%>PollRead(d *schema.ResourceData, meta interface{}) transport_tpg.PollReadFunc {
+func resource<%= object.resource_name -%>PollRead(d *schema.ResourceData, meta interface{}) transport_tpg.PollReadFunc {
     return func() (map[string]interface{}, error) {
 <%    if object.async.custom_poll_read -%>
 <%= lines(compile(pwd + '/' + object.async.custom_poll_read)) -%>
 <%    else -%>
         config := meta.(*transport_tpg.Config)
 
-        url, err := tpgresource.ReplaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
+
+        url, err := tpgresource.ReplaceVars<% if object.legacy_long_form_project -%>ForId<% end -%>(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
+
         if err != nil {
             return nil, err
         }
-<%      if object.legacy_long_form_project -%>
-        url = strings.ReplaceAll(url, "projects/projects/", "projects/")
-<%      end -%>
 
         billingProject := ""
 
-<%      if has_project -%>
+<%      if object.project? -%>
         project, err := tpgresource.GetProject(d, config)
         if err != nil {
             return nil, fmt.Errorf("Error fetching project for <%= object.name -%>: %s", err)
@@ -504,23 +472,23 @@ func resource<%= resource_name -%>PollRead(d *schema.ResourceData, meta interfac
             return res, err
         }
 <%      if object.nested_query -%>
-        res, err = flattenNested<%= resource_name -%>(d, meta, res)
+        res, err = flattenNested<%= object.resource_name -%>(d, meta, res)
         if err != nil {
             return nil, err
         }
 
         if res == nil {
-            return nil, tpgresource.Fake404("nested", "<%= resource_name%>")
+            return nil, tpgresource.Fake404("nested", "<%= object.resource_name%>")
         }
 
 <%      end -%>
 <%      if object.custom_code.decoder -%>
-        res, err = resource<%= resource_name -%>Decoder(d, meta, res)
+        res, err = resource<%= object.resource_name -%>Decoder(d, meta, res)
         if err != nil {
             return nil, err
         }
         if res == nil {
-            return nil, tpgresource.Fake404("decoded", "<%= resource_name%>")
+            return nil, tpgresource.Fake404("decoded", "<%= object.resource_name%>")
         }
 
 <%      end -%>
@@ -530,7 +498,7 @@ func resource<%= resource_name -%>PollRead(d *schema.ResourceData, meta interfac
 }
 <%  end # if object.async&.is_a? Provider::Terraform::PollAsync -%>
 
-func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{}) error {
+func resource<%= object.resource_name -%>Read(d *schema.ResourceData, meta interface{}) error {
 <%  if object.skip_read -%>
   // This resource could not be read from the API.
   return nil
@@ -541,17 +509,14 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
         return err
     }
 
-    url, err := tpgresource.ReplaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}#{object.read_query_params}" -%>")
+    url, err := tpgresource.ReplaceVars<% if object.legacy_long_form_project -%>ForId<% end -%>(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}#{object.read_query_params}" -%>")
     if err != nil {
         return err
     }
-<%  if object.legacy_long_form_project -%>
-    url = strings.ReplaceAll(url, "projects/projects/", "projects/")
-<%  end -%>
 
     billingProject := ""
 
-<%  if has_project -%>
+<%  if object.project? -%>
     project, err := tpgresource.GetProject(d, config)
     if err != nil {
         return fmt.Errorf("Error fetching project for <%= object.name -%>: %s", err)
@@ -590,21 +555,21 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
     })
     if err != nil {
 <%  if object.read_error_transform -%>
-        return transport_tpg.HandleNotFoundError(<%= object.read_error_transform %>(err), d, fmt.Sprintf("<%= resource_name -%> %q", d.Id()))
+        return transport_tpg.HandleNotFoundError(<%= object.read_error_transform %>(err), d, fmt.Sprintf("<%= object.resource_name -%> %q", d.Id()))
 <%  else -%>
-        return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("<%= resource_name -%> %q", d.Id()))
+        return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("<%= object.resource_name -%> %q", d.Id()))
 <%  end -%>
     }
 
 <%  if object.nested_query -%>
-    res, err = flattenNested<%= resource_name -%>(d, meta, res)
+    res, err = flattenNested<%= object.resource_name -%>(d, meta, res)
     if err != nil {
         return err
     }
 
     if res == nil {
         // Object isn't there any more - remove it from the state.
-        log.Printf("[DEBUG] Removing <%= resource_name -%> because it couldn't be matched.")
+        log.Printf("[DEBUG] Removing <%= object.resource_name -%> because it couldn't be matched.")
         d.SetId("")
         return nil
     }
@@ -612,14 +577,14 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 <%  end -%>
 
 <%  if object.custom_code.decoder -%>
-    res, err = resource<%= resource_name -%>Decoder(d, meta, res)
+    res, err = resource<%= object.resource_name -%>Decoder(d, meta, res)
     if err != nil {
         return err
     }
 
     if res == nil {
         // Decoding the object has resulted in it being gone. It may be marked deleted
-        log.Printf("[DEBUG] Removing <%= resource_name -%> because it no longer exists.")
+        log.Printf("[DEBUG] Removing <%= object.resource_name -%> because it no longer exists.")
         d.SetId("")
         return nil
     }
@@ -637,13 +602,13 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 <%      end -%>
 <%    end -%>
 <%  end -%>
-<%  if has_project -%>
+<%  if object.project? -%>
     if err := d.Set("project", project); err != nil {
         return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
     }
 <%  end -%>
 
-<%  if has_region -%>
+<%  if object.region? -%>
     region, err := tpgresource.GetRegion(d, config)
     if err != nil {
         return err
@@ -653,7 +618,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
     }
 <%  end -%>
 
-<%  if has_zone -%>
+<%  if object.zone? -%>
     zone, err := tpgresource.GetZone(d, config)
     if err != nil {
         return err
@@ -667,7 +632,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 <%    if prop.flatten_object -%>
 // Terraform must set the top level schema field, but since this object contains collapsed properties
 // it's difficult to know what the top level should be. Instead we just loop over the map returned from flatten.
-    if flattenedProp := flatten<%= "Nested" if object.nested_query -%><%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"], d, config); flattenedProp != nil {
+    if flattenedProp := flatten<%= "Nested" if object.nested_query -%><%= object.resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"], d, config); flattenedProp != nil {
         if gerr, ok := flattenedProp.(*googleapi.Error); ok {
             return fmt.Errorf("Error reading <%= object.name -%>: %s", gerr)
         }
@@ -681,7 +646,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
         }
     }
 <%    else -%>
-    if err := d.Set("<%= prop.name.underscore -%>", flatten<%= "Nested" if object.nested_query -%><%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"], d, config)); err != nil {
+    if err := d.Set("<%= prop.name.underscore -%>", flatten<%= "Nested" if object.nested_query -%><%= object.resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"], d, config)); err != nil {
         return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
     }
 <%    end -%>
@@ -697,7 +662,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 }
 
 <%  if updatable?(object, object.root_properties) -%>
-func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{}) error {
+func resource<%= object.resource_name -%>Update(d *schema.ResourceData, meta interface{}) error {
 <%    if object.async&.is_a?(Api::OpAsync) && object.async.include_project && object.async&.allow?('update') -%>
     var project string
 <%    end -%>
@@ -712,7 +677,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 
     billingProject := ""
 
-<%    if has_project -%>
+<%    if object.project? -%>
     project, err := tpgresource.GetProject(d, config)
     if err != nil {
         return fmt.Errorf("Error fetching project for <%= object.name -%>: %s", err)
@@ -727,10 +692,10 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 
 <%    if !object.immutable -%>
     obj := make(map[string]interface{})
-<%      update_body_properties.each do |prop| -%>
+<%      object.update_body_properties.each do |prop| -%>
     <%# flattened objects won't have something stored in state so instead nil is passed to the next expander. -%>
 <%        schemaPrefix = prop.flatten_object ? "nil" : "d.Get( \"#{prop.name.underscore}\" )" -%>
-    <%= prop.api_name -%>Prop, err := expand<%= "Nested" if object.nested_query -%><%= resource_name -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
+    <%= prop.api_name -%>Prop, err := expand<%= "Nested" if object.nested_query -%><%= object.resource_name -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
     if err != nil {
         return err
 <%        if prop.send_empty_value -%>
@@ -746,12 +711,12 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 
 <%#     We need to decide what encoder to use here - if there's an update encoder, use that! -%>
 <%      if object.custom_code.update_encoder -%>
-    obj, err = resource<%= resource_name -%>UpdateEncoder(d, meta, obj)
+    obj, err = resource<%= object.resource_name -%>UpdateEncoder(d, meta, obj)
     if err != nil {
         return err
     }
 <%      elsif object.custom_code.encoder -%>
-    obj, err = resource<%= resource_name -%>Encoder(d, meta, obj)
+    obj, err = resource<%= object.resource_name -%>Encoder(d, meta, obj)
     if err != nil {
         return err
     }
@@ -766,20 +731,17 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
     defer transport_tpg.MutexStore.Unlock(lockName)
 <%      end -%>
 
-    url, err := tpgresource.ReplaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{update_uri(object, object.update_url)}" -%>")
+    url, err := tpgresource.ReplaceVars<% if object.legacy_long_form_project -%>ForId<% end -%>(d, config, "<%= "{{#{object.__product.name}BasePath}}#{update_uri(object, object.update_url)}" -%>")
     if err != nil {
         return err
     }
-<%      if object.legacy_long_form_project -%>
-    url = strings.ReplaceAll(url, "projects/projects/", "projects/")
-<%      end -%>
 
     log.Printf("[DEBUG] Updating <%= object.name -%> %q: %#v", d.Id(), obj)
 <%= lines(compile(pwd + '/templates/terraform/update_mask.erb')) if object.update_mask -%>
 <%= lines(compile(pwd + '/' + object.custom_code.pre_update)) if object.custom_code.pre_update -%>
 <%      if object.nested_query&.modify_by_patch -%>
 <%#       Keep this after mutex - patch request data relies on current resource state %>
-    obj, err = resource<%= resource_name -%>PatchUpdateEncoder(d, meta, obj)
+    obj, err = resource<%= object.resource_name -%>PatchUpdateEncoder(d, meta, obj)
     if err != nil {
         return err
     }
@@ -823,15 +785,15 @@ if len(updateMask) > 0 {
 
 <%      if object.async&.allow?('update') -%>
 <%        if object.async.is_a? Api::OpAsync -%>
-    err = <%= client_name_pascal -%>OperationWaitTime(
-        config, res, <% if has_project || object.async.include_project -%> project, <% end -%> "Updating <%= object.name -%>", userAgent,
+    err = <%= object.client_name_pascal -%>OperationWaitTime(
+        config, res, <% if object.project? || object.async.include_project -%> <% if object.legacy_long_form_project -%>tpgresource.GetResourceNameFromSelfLink(project)<% else %>project<% end %>, <% end -%> "Updating <%= object.name -%>", userAgent,
         d.Timeout(schema.TimeoutUpdate))
 
     if err != nil {
         return err
     }
 <%        elsif object.async.is_a? Provider::Terraform::PollAsync -%>
-    err = transport_tpg.PollingWaitTime(resource<%= resource_name -%>PollRead(d, meta), <%= object.async.check_response_func_existence -%>, "Updating <%= object.name -%>", d.Timeout(schema.TimeoutUpdate), <%= object.async.target_occurrences -%>)
+    err = transport_tpg.PollingWaitTime(resource<%= object.resource_name -%>PollRead(d, meta), <%= object.async.check_response_func_existence -%>, "Updating <%= object.name -%>", d.Timeout(schema.TimeoutUpdate), <%= object.async.target_occurrences -%>)
     if err != nil {
 <%          if object.async.suppress_error-%>
         log.Printf("[ERROR] Unable to confirm eventually consistent <%= object.name -%> %q finished updating: %q", d.Id(), err)
@@ -885,17 +847,17 @@ if len(updateMask) > 0 {
 <%        end -%>
         })
         if err != nil {
-            return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("<%= resource_name -%> %q", d.Id()))
+            return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("<%= object.resource_name -%> %q", d.Id()))
         }
 
         obj["<%= key[:fingerprint_name] %>"] = getRes["<%= key[:fingerprint_name] %>"]
 
 <%      end # unless key[:fingerprint_name] -%>
-<%        custom_update_properties_by_key(properties, key)
+<%        custom_update_properties_by_key(object.all_user_properties, key)
             .reject(&:url_param_only)
             .each do |prop| -%>
 <%          schemaPrefix = prop.flatten_object ? "nil" : "d.Get( \"#{prop.name.underscore}\" )" -%>
-        <%= prop.api_name -%>Prop, err := expand<%= "Nested" if object.nested_query -%><%= resource_name -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
+        <%= prop.api_name -%>Prop, err := expand<%= "Nested" if object.nested_query -%><%= object.resource_name -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
         if err != nil {
             return err
 <%#         There is some nuance in when we choose to send a value to an update function.
@@ -928,7 +890,7 @@ if len(updateMask) > 0 {
 
 <%#     We need to decide what encoder to use here - if there's an update encoder, use that! -%>
 <%        if object.custom_code.update_encoder -%>
-    obj, err = resource<%= resource_name -%>UpdateEncoder(d, meta, obj)
+    obj, err = resource<%= object.resource_name -%>UpdateEncoder(d, meta, obj)
     if err != nil {
         return err
     }
@@ -943,13 +905,11 @@ if len(updateMask) > 0 {
         defer transport_tpg.MutexStore.Unlock(lockName)
 <%        end -%>
 
-        url, err := tpgresource.ReplaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{update_uri(object, key[:update_url])}" -%>")
+        url, err := tpgresource.ReplaceVars<% if object.legacy_long_form_project -%>ForId<% end -%>(d, config, "<%= "{{#{object.__product.name}BasePath}}#{update_uri(object, key[:update_url])}" -%>")
         if err != nil {
             return err
         }
-<%        if object.legacy_long_form_project -%>
-    url = strings.ReplaceAll(url, "projects/projects/", "projects/")
-<%        end -%>
+
 
 <%= lines(compile(pwd + '/' + object.custom_code.pre_update)) if object.custom_code.pre_update -%>
 <%        if object.supports_indirect_user_project_override -%>
@@ -986,14 +946,14 @@ if len(updateMask) > 0 {
 
 <%        if object.async&.allow?('update') -%>
 <%          if object.async.is_a? Api::OpAsync-%>
-        err = <%= client_name_pascal -%>OperationWaitTime(
-            config, res, <% if has_project || object.async.include_project -%> project, <% end -%> "Updating <%= object.name -%>", userAgent,
+        err = <%= object.client_name_pascal -%>OperationWaitTime(
+            config, res, <% if object.project? || object.async.include_project -%> <% if object.legacy_long_form_project -%>tpgresource.GetResourceNameFromSelfLink(project)<% else %>project<% end %>, <% end -%> "Updating <%= object.name -%>", userAgent,
             d.Timeout(schema.TimeoutUpdate))
         if err != nil {
             return err
         }
 <%          elsif object.async.is_a? Provider::Terraform::PollAsync -%>
-        err = transport_tpg.PollingWaitTime(resource<%= resource_name -%>PollRead(d, meta), <%= object.async.check_response_func_existence -%>, "Updating <%= object.name -%>", d.Timeout(schema.TimeoutUpdate), <%= object.async.target_occurrences -%>)
+        err = transport_tpg.PollingWaitTime(resource<%= object.resource_name -%>PollRead(d, meta), <%= object.async.check_response_func_existence -%>, "Updating <%= object.name -%>", d.Timeout(schema.TimeoutUpdate), <%= object.async.target_occurrences -%>)
         if err != nil {
 <%            if object.async.suppress_error-%>
         log.Printf("[ERROR] Unable to confirm eventually consistent <%= object.name -%> %q finished updating: %q", d.Id(), err)
@@ -1010,12 +970,17 @@ if len(updateMask) > 0 {
 <%    end -%>
 
 <%= lines(compile(pwd + '/' + object.custom_code.post_update)) if object.custom_code.post_update -%>
-    return resource<%= resource_name -%>Read(d, meta)
+    return resource<%= object.resource_name -%>Read(d, meta)
 <%  end # if custom_update -%>
 }
-<%  end # if updatable? -%>
+<% elsif object.root_labels? # if updatable? -%>
+func resource<%= object.resource_name -%>Update(d *schema.ResourceData, meta interface{}) error {
+    // Only the root field "labels" and "terraform_labels" are mutable
+    return resource<%= object.resource_name -%>Read(d, meta)
+}
+<%  end -%>
 
-func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{}) error {
+func resource<%= object.resource_name -%>Delete(d *schema.ResourceData, meta interface{}) error {
 <%  if object.async&.is_a?(Api::OpAsync) && object.async.include_project && object.async&.allow?('delete') -%>
     var project string
 <%  end -%>
@@ -1039,7 +1004,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 
     billingProject := ""
 
-<%      if has_project -%>
+<%      if object.project? -%>
     project, err := tpgresource.GetProject(d, config)
     if err != nil {
         return fmt.Errorf("Error fetching project for <%= object.name -%>: %s", err)
@@ -1060,20 +1025,17 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     defer transport_tpg.MutexStore.Unlock(lockName)
 <%      end -%>
 
-    url, err := tpgresource.ReplaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.delete_uri}" -%>")
+    url, err := tpgresource.ReplaceVars<% if object.legacy_long_form_project -%>ForId<% end -%>(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.delete_uri}" -%>")
     if err != nil {
         return err
     }
-<%      if object.legacy_long_form_project -%>
-    url = strings.ReplaceAll(url, "projects/projects/", "projects/")
-<%      end -%>
 
 <%# If the deletion of the object requires sending a request body, the custom code will set 'obj' -%>
     var obj map[string]interface{}
 <%= lines(compile(pwd + '/' + object.custom_code.pre_delete)) if object.custom_code.pre_delete -%>
 <%      if object.nested_query&.modify_by_patch -%>
 <%# Keep this after mutex - patch request data relies on current resource state %>
-    obj, err = resource<%= resource_name -%>PatchDeleteEncoder(d, meta, obj)
+    obj, err = resource<%= object.resource_name -%>PatchDeleteEncoder(d, meta, obj)
     if err != nil {
         return transport_tpg.HandleNotFoundError(err, d, "<%= object.name -%>")
     }
@@ -1119,7 +1081,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 
 <%      if object.async&.allow?('delete') -%>
 <%        if object.async.is_a? Provider::Terraform::PollAsync -%>
-    err = transport_tpg.PollingWaitTime(resource<%= resource_name -%>PollRead(d, meta), <%= object.async.check_response_func_absence -%>, "Deleting <%= object.name -%>", d.Timeout(schema.TimeoutCreate), <%= object.async.target_occurrences -%>)
+    err = transport_tpg.PollingWaitTime(resource<%= object.resource_name -%>PollRead(d, meta), <%= object.async.check_response_func_absence -%>, "Deleting <%= object.name -%>", d.Timeout(schema.TimeoutCreate), <%= object.async.target_occurrences -%>)
     if err != nil {
 <%          if object.async.suppress_error -%>
         log.Printf("[ERROR] Unable to confirm eventually consistent <%= object.name -%> %q finished updating: %q", d.Id(), err)
@@ -1128,8 +1090,8 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 <%          end -%>
     }
 <%        else -%>
-    err = <%= client_name_pascal -%>OperationWaitTime(
-        config, res, <% if has_project || object.async.include_project-%> project, <% end -%> "Deleting <%= object.name -%>", userAgent,
+    err = <%= object.client_name_pascal -%>OperationWaitTime(
+        config, res, <% if object.project? || object.async.include_project-%> <% if object.legacy_long_form_project -%>tpgresource.GetResourceNameFromSelfLink(project)<% else %>project<% end %>, <% end -%> "Deleting <%= object.name -%>", userAgent,
         d.Timeout(schema.TimeoutDelete))
 
     if err != nil {
@@ -1146,7 +1108,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 }
 
 <%  unless object.exclude_import -%>
-func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resource<%= object.resource_name -%>Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 <%    if object.custom_code.custom_import -%>
 <%= lines(compile(pwd + '/' + object.custom_code.custom_import)) -%>
 <%    else -%>
@@ -1160,13 +1122,10 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
     }
 
     // Replace import id for the resource id
-    id, err := tpgresource.ReplaceVars(d, config, "<%= id_format(object) -%>")
+    id, err := tpgresource.ReplaceVars<% if object.legacy_long_form_project -%>ForId<% end -%>(d, config, "<%= id_format(object) -%>")
     if err != nil {
         return nil, fmt.Errorf("Error constructing id: %s", err)
     }
-<%      if object.legacy_long_form_project -%>
-    id = strings.ReplaceAll(id, "projects/projects/", "projects/")
-<%      end -%>
     d.SetId(id)
 
 <%-     unless object.virtual_fields.empty? -%>
@@ -1188,21 +1147,21 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
 
 <%- nested_prefix = object.nested_query ? "Nested" : "" -%>
 <%  object.gettable_properties.reject(&:ignore_read).each do |prop| -%>
-<%= lines(build_flatten_method(nested_prefix+resource_name, prop, object, pwd), 1) -%>
+<%= lines(build_flatten_method(nested_prefix+object.resource_name, prop, object, pwd), 1) -%>
 <%  end -%>
 
 <%  object.settable_properties.each do |prop| -%>
-<%= lines(build_expand_method(nested_prefix+resource_name, prop, object, pwd), 1) -%>
+<%= lines(build_expand_method(nested_prefix+object.resource_name, prop, object, pwd), 1) -%>
 <%  end -%>
 
 <%  if object.custom_code.encoder -%>
-func resource<%= resource_name -%>Encoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+func resource<%= object.resource_name -%>Encoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
     <%= lines(compile(pwd + '/' + object.custom_code.encoder)) -%>
 }
 <%  end -%>
 
 <%  if object.custom_code.update_encoder-%>
-func resource<%= resource_name -%>UpdateEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+func resource<%= object.resource_name -%>UpdateEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
     <%= lines(compile(pwd + '/' + object.custom_code.update_encoder)) -%>
 }
 <%  end -%>
@@ -1210,22 +1169,21 @@ func resource<%= resource_name -%>UpdateEncoder(d *schema.ResourceData, meta int
 <%  if object.nested_query -%>
 <%= compile_template(pwd + '/templates/terraform/nested_query.go.erb',
                      object: object,
-                     settable_properties: object.settable_properties,
-                     resource_name: resource_name) -%>
+                     settable_properties: object.settable_properties) -%>
 <%  end -%>
 
 <%  if object.custom_code.decoder -%>
-func resource<%= resource_name -%>Decoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
+func resource<%= object.resource_name -%>Decoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
     <%= lines(compile(pwd + '/' + object.custom_code.decoder)) -%>
 }
 <%  end -%>
 
 <%  if object.custom_code.post_create_failure -%>
-func resource<%= resource_name -%>PostCreateFailure(d *schema.ResourceData, meta interface{}) {
+func resource<%= object.resource_name -%>PostCreateFailure(d *schema.ResourceData, meta interface{}) {
     <%= lines(compile(pwd + '/' + object.custom_code.post_create_failure)) -%>
 }
 <%  end -%>
 
 <%  if object.schema_version && object.state_upgraders -%>
-<%= lines(compile(pwd + "/templates/terraform/state_migrations/#{product_ns.underscore}_#{object.name.underscore}.go.erb")) -%>
+<%= lines(compile(pwd + "/templates/terraform/state_migrations/#{object.__product.name .underscore}_#{object.name.underscore}.go.erb")) -%>
 <%  end -%>

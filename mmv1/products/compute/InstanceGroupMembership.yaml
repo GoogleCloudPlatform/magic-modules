@@ -1,0 +1,106 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'InstanceGroupMembership'
+kind: 'compute#instanceGroup'
+base_url: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{instance_group}}'
+description: |
+  Represents the Instance membership to the Instance Group.
+
+  -> **NOTE** You can use this resource instead of the `instances` field in the
+  `google_compute_instance_group`, however it's not recommended to use it alongside this field.
+  It might cause inconsistencies, as they can end up competing over control.
+
+  -> **NOTE** This resource has been added to avoid a situation, where after
+  Instance is recreated, it's removed from Instance Group and it's needed to
+  perform `apply` twice. To avoid situations like this, please use this resource
+  with the lifecycle `update_triggered_by` method, with the passed Instance's ID.
+immutable: true
+create_verb: :POST
+create_url: projects/{{project}}/zones/{{zone}}/instanceGroups/{{instance_group}}/addInstances
+delete_verb: :POST
+delete_url: projects/{{project}}/zones/{{zone}}/instanceGroups/{{instance_group}}/removeInstances
+read_verb: :POST
+self_link: projects/{{project}}/zones/{{zone}}/instanceGroups/{{instance_group}}/listInstances
+identity:
+  - instance
+nested_query: !ruby/object:Api::Resource::NestedQuery
+  keys:
+    - items
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Add instances': 'https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroups/addInstances'
+    'Remove instances': 'https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroups/removeInstances'
+    'List instances': 'https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroups/listInstances'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroups'
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    kind: 'compute#operation'
+    path: 'name'
+    base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'targetLink'
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'status'
+    complete: 'DONE'
+    allowed:
+      - 'PENDING'
+      - 'RUNNING'
+      - 'DONE'
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error/errors'
+    message: 'message'
+id_format: '{{project}}/{{zone}}/{{instance_group}}/{{instance}}'
+mutex: instanceGroups/{{project}}/zones/{{zone}}/{{instance_group}}
+exclude_tgc: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'instance_group_membership'
+    skip_test: true
+    vars:
+      network_name: 'network'
+      instance_group_name: 'instance-group'
+      instance_name: 'instance'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_delete: templates/terraform/pre_delete/compute_instance_group_membership.go.erb
+  custom_import: templates/terraform/custom_import/compute_instance_group_membership.go.erb
+  encoder: templates/terraform/encoders/compute_instance_group_membership.go.erb
+parameters:
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'zone'
+    resource: 'Zone'
+    imports: 'name'
+    description: 'A reference to the zone where the instance group resides.'
+    url_param_only: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'instanceGroup'
+    resource: 'InstanceGroup'
+    imports: 'name'
+    description: |
+      Represents an Instance Group resource name that the instance belongs to.
+    required: true
+    url_param_only: true
+    ignore_read: true
+    diff_suppress_func: tpgresource.CompareResourceNames
+properties:
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'instance'
+    description: 'An instance being added to the InstanceGroup'
+    resource: 'Instance'
+    imports: 'selfLink'
+    required: true
+    custom_flatten: 'templates/terraform/custom_flatten/full_to_relative_path.erb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'

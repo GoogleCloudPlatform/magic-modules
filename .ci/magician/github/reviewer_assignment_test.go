@@ -1,3 +1,18 @@
+/*
+* Copyright 2023 Google LLC. All Rights Reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+ */
 package github
 
 import (
@@ -9,47 +24,52 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-func TestChooseReviewers(t *testing.T) {
+func TestChooseCoreReviewers(t *testing.T) {
 	cases := map[string]struct {
-		FirstRequestedReviewer                           string
-		PreviouslyInvolvedReviewers                      []string
+		RequestedReviewers                               []User
+		PreviousReviewers                                []User
 		ExpectReviewersFromList, ExpectSpecificReviewers []string
 		ExpectPrimaryReviewer                            bool
 	}{
 		"no previous review requests assigns new reviewer from team": {
-			FirstRequestedReviewer:      "",
-			PreviouslyInvolvedReviewers: []string{},
-			ExpectReviewersFromList:     utils.Removes(reviewerRotation, onVacationReviewers),
-			ExpectPrimaryReviewer:       true,
+			RequestedReviewers:      []User{},
+			PreviousReviewers:       []User{},
+			ExpectReviewersFromList: utils.Removes(reviewerRotation, onVacationReviewers),
+			ExpectPrimaryReviewer:   true,
 		},
-		"first requested reviewer means that primary reviewer was already selected": {
-			FirstRequestedReviewer:      "foobar",
-			PreviouslyInvolvedReviewers: []string{},
-			ExpectPrimaryReviewer:       false,
+		"requested reviewer from team means that primary reviewer was already selected": {
+			RequestedReviewers:    []User{User{Login: reviewerRotation[0]}},
+			PreviousReviewers:     []User{},
+			ExpectPrimaryReviewer: false,
+		},
+		"requested off-team reviewer does not mean that primary reviewer was already selected": {
+			RequestedReviewers:    []User{User{Login: "foobar"}},
+			PreviousReviewers:     []User{},
+			ExpectPrimaryReviewer: true,
 		},
 		"previously involved team member reviewers should have review requested and mean that primary reviewer was already selected": {
-			FirstRequestedReviewer:      "",
-			PreviouslyInvolvedReviewers: []string{reviewerRotation[0]},
-			ExpectSpecificReviewers:     []string{reviewerRotation[0]},
-			ExpectPrimaryReviewer:       false,
+			RequestedReviewers:      []User{},
+			PreviousReviewers:       []User{User{Login: reviewerRotation[0]}},
+			ExpectSpecificReviewers: []string{reviewerRotation[0]},
+			ExpectPrimaryReviewer:   false,
 		},
 		"previously involved reviewers that are not team members are ignored": {
-			FirstRequestedReviewer:      "",
-			PreviouslyInvolvedReviewers: []string{"foobar"},
-			ExpectReviewersFromList:     utils.Removes(reviewerRotation, onVacationReviewers),
-			ExpectPrimaryReviewer:       true,
+			RequestedReviewers:      []User{},
+			PreviousReviewers:       []User{User{Login: "foobar"}},
+			ExpectReviewersFromList: utils.Removes(reviewerRotation, onVacationReviewers),
+			ExpectPrimaryReviewer:   true,
 		},
 		"only previously involved team member reviewers will have review requested": {
-			FirstRequestedReviewer:      "",
-			PreviouslyInvolvedReviewers: []string{reviewerRotation[0], "foobar", reviewerRotation[1]},
-			ExpectSpecificReviewers:     []string{reviewerRotation[0], reviewerRotation[1]},
-			ExpectPrimaryReviewer:       false,
+			RequestedReviewers:      []User{},
+			PreviousReviewers:       []User{User{Login: reviewerRotation[0]}, User{Login: "foobar"}, User{Login: reviewerRotation[1]}},
+			ExpectSpecificReviewers: []string{reviewerRotation[0], reviewerRotation[1]},
+			ExpectPrimaryReviewer:   false,
 		},
 		"primary reviewer will not have review requested even if other team members previously reviewed": {
-			FirstRequestedReviewer:      reviewerRotation[1],
-			PreviouslyInvolvedReviewers: []string{reviewerRotation[0]},
-			ExpectSpecificReviewers:     []string{reviewerRotation[0]},
-			ExpectPrimaryReviewer:       false,
+			RequestedReviewers:      []User{User{Login: reviewerRotation[1]}},
+			PreviousReviewers:       []User{User{Login: reviewerRotation[0]}},
+			ExpectSpecificReviewers: []string{reviewerRotation[0]},
+			ExpectPrimaryReviewer:   false,
 		},
 	}
 
@@ -57,7 +77,7 @@ func TestChooseReviewers(t *testing.T) {
 		tc := tc
 		t.Run(tn, func(t *testing.T) {
 			t.Parallel()
-			reviewers, primaryReviewer := ChooseReviewers(tc.FirstRequestedReviewer, tc.PreviouslyInvolvedReviewers)
+			reviewers, primaryReviewer := ChooseCoreReviewers(tc.RequestedReviewers, tc.PreviousReviewers)
 			if tc.ExpectPrimaryReviewer && primaryReviewer == "" {
 				t.Error("wanted primary reviewer to be returned; got none")
 			}
@@ -107,27 +127,12 @@ func TestFormatReviewerComment(t *testing.T) {
 		tc := tc
 		t.Run(tn, func(t *testing.T) {
 			t.Parallel()
-			comment := FormatReviewerComment(tc.Reviewer, tc.AuthorUserType, tc.Trusted)
+			comment := FormatReviewerComment(tc.Reviewer)
 			t.Log(comment)
 			if !strings.Contains(comment, fmt.Sprintf("@%s", tc.Reviewer)) {
 				t.Errorf("wanted comment to contain @%s; does not.", tc.Reviewer)
 			}
-			if !strings.Contains(comment, tc.AuthorUserType.String()) {
-				t.Errorf("wanted comment to contain user type (%s); does not.", tc.AuthorUserType.String())
-			}
-			if strings.Contains(comment, fmt.Sprintf("~%s~", tc.AuthorUserType.String())) {
-				t.Errorf("wanted user type (%s) in comment to not be crossed out, but it is", tc.AuthorUserType.String())
-			}
-			for _, ut := range []UserType{CommunityUserType, GooglerUserType, CoreContributorUserType} {
-				if ut != tc.AuthorUserType && !strings.Contains(comment, fmt.Sprintf("~%s~", ut.String())) {
-					t.Errorf("wanted other user type (%s) in comment to be crossed out, but it is not", ut)
-				}
-			}
-
-			if tc.Trusted && !strings.Contains(comment, "Tests will run automatically") {
-				t.Errorf("wanted comment to say tests will run automatically; does not")
-			}
-			if !tc.Trusted && !strings.Contains(comment, "Tests will require approval") {
+			if !strings.Contains(comment, "Tests will require approval") {
 				t.Errorf("wanted comment to say tests will require approval; does not")
 			}
 		})

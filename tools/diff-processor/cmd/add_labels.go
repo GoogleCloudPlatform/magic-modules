@@ -65,7 +65,7 @@ func (o *addLabelsOptions) run(args []string) error {
 	oldLabels := make(map[string]struct{}, len(issue.Labels))
 	for _, label := range issue.Labels {
 		oldLabels[label.Name] = struct{}{}
-		if strings.HasPrefix(label.Name, "services/") {
+		if strings.HasPrefix(label.Name, "service/") {
 			hasServiceLabels = true
 		}
 	}

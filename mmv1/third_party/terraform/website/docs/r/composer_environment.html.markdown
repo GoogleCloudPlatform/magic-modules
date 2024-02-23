@@ -24,18 +24,19 @@ To get more information about Environments, see:
   * [Configuring Shared VPC for Composer Environments](https://cloud.google.com/composer/docs/composer-2/configure-shared-vpc)
 * [Apache Airflow Documentation](http://airflow.apache.org/)
 
-~> **Warning:** We **STRONGLY** recommend you read the [GCP
+We **STRONGLY** recommend you read the [GCP
 guides](https://cloud.google.com/composer/docs/how-to) as the Environment resource requires a long
 deployment process and involves several layers of GCP infrastructure, including a Kubernetes Engine
 cluster, Cloud Storage, and Compute networking resources. Due to limitations of the API, Terraform
-will not be able to automatically find or manage many of these underlying resources. In particular:
-* It can take up to one hour to create or update an environment resource. In addition, GCP may only
-  detect some errors in configuration when they are used (e.g. ~40-50 minutes into the creation
+will not be able to find or manage many of these underlying resources automatically. In particular:
+* Creating or updating an environment resource can take up to one hour. In addition, GCP may only
+  detect some errors in the configuration when they are used (e.g., ~40-50 minutes into the creation
   process), and is prone to limited error reporting. If you encounter confusing or uninformative
   errors, please verify your configuration is valid against GCP Cloud Composer before filing bugs
-  against the Terraform provider. * **Environments create Google Cloud Storage buckets that do not get
-  cleaned up automatically** on environment deletion. [More about Composer's use of Cloud
-  Storage](https://cloud.google.com/composer/docs/concepts/cloud-storage). * Please review the [known
+  against the Terraform provider.
+* **Environments create Google Cloud Storage buckets that are not automatically cleaned up** on environment deletion. [More about Composer's use of Cloud
+  Storage](https://cloud.google.com/composer/docs/concepts/cloud-storage).
+* Please review the [known
   issues](https://cloud.google.com/composer/docs/known-issues) for Composer if you are having
   problems.
 
@@ -64,29 +65,9 @@ resource "google_composer_environment" "test" {
 
 ### With GKE and Compute Resource Dependencies
 
-**NOTE** To use custom service accounts, you need to give at least `role/composer.worker` to the service account being used by the GKE Nodes on the Composer project.
+**NOTE** To use custom service accounts, you must give at least `role/composer.worker` to the service account used by the GKE Nodes on the Composer project.
 For more information, see the [Access Control](https://cloud.devsite.corp.google.com/composer/docs/how-to/access-control) page in the Cloud Composer documentation.
 You may need to assign additional roles depending on what the Airflow DAGs will be running.
-
-**NOTE** We STRONGLY recommend you read the [Cloud Composer guides](https://cloud.google.com/composer/docs/how-to)
-as the Environment
-resource requires a long deployment process and involves several layers of
-Google Cloud infrastructure, including a Kubernetes Engine cluster, Cloud
-Storage, and Compute networking resources. Composer manages most of these
-resources fully and as a result, Terraform may not be able to automatically
-find or manage the underlying resources. In particular:
-* It can take up to 50 minutes to create or update an environment resource and
-some errors may be detected later in the process. Also, some error messages may
-not be clear at first sight because they involve issues with the underlying
-resources. If you encounter such errors, please review Composer logs and verify
-if your configuration is valid against Cloud Composer before filing bugs
-against the Terraform provider.
-* Environments create Google Cloud Storage buckets that contain your DAGs and
-other work files. These buckets do not get deleted automatically on environment
-deletion. This is by design; it ensures that DAGs source code and other
-valuable data don’t get lost when an environment is deleted. [More about
-Composer's use of Cloud Storage](https://cloud.google.com/composer/docs/concepts/cloud-storage).
-* Please review the [known issues](https://cloud.google.com/composer/docs/known-issues) for Cloud Composer if you are having problems.
 
 #### GKE and Compute Resource Dependencies (Cloud Composer 1)
 
@@ -301,6 +282,15 @@ The following arguments are supported:
   (Optional)
   The configuration used for the Private IP Cloud Composer environment. Structure is [documented below](#nested_private_environment_config).
 
+* `enable_private_environment` -
+  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
+  If true, a private Composer environment will be created.
+
+* `enable_private_builds_only` -
+  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
+  If true, builds performed during operations that install Python packages have only private connectivity to Google services.
+  If false, the builds also have access to the internet.
+
 * `web_server_network_access_control` -
   The network-level access control policy for the Airflow web server.
   If unspecified, no network-level access restrictions are applied.
@@ -474,6 +464,11 @@ The following arguments are supported:
 * `scheduler_count` -
   (Optional, Cloud Composer 1 with Airflow 2 only)
   The number of schedulers for Airflow.
+
+* `web_server_plugins_mode` -
+  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
+  Web server plugins configuration. Should be either 'ENABLED' or 'DISABLED'. Defaults to 'ENABLED'.
+
 
 See [documentation](https://cloud.google.com/composer/docs/how-to/managing/configuring-private-ip) for setting up private environments. <a name="nested_private_environment_config"></a>The `private_environment_config` block supports:
 
@@ -716,6 +711,25 @@ The `config` block supports:
   Google Compute Engine Public IPs and Google Prod IPs. Structure is
   documented below.
 
+* `data_retention_config` -
+  (Optional, Cloud Composer 2.0.23 or newer only)
+  Configuration setting for airflow data rentention mechanism. Structure is
+  [documented below](#nested_data_retention_config).
+
+<a name="nested_data_retention_config"></a>The `data_retention_config` block supports:
+* `task_logs_retention_config` - 
+  (Optional)
+  The configuration setting for Task Logs. Structure is
+  [documented below](#nested_task_logs_retention_config).
+
+<a name="nested_task_logs_retention_config"></a>The `task_logs_retention_config` block supports:
+* `storage_mode` - 
+  (Optional)
+  The mode of storage for Airflow workers task logs. Values for storage mode are 
+  `CLOUD_LOGGING_ONLY` to only store logs in cloud logging and 
+  `CLOUD_LOGGING_AND_CLOUD_STORAGE` to store logs in cloud logging and cloud storage.
+
+
 The `storage_config` block supports:
 
 * `bucket` -
@@ -768,6 +782,11 @@ The `node_config` block supports:
   destinations and services targeted from Airflow DAGs and tasks only receive 
   packets from node IP addresses instead of Pod IP addresses
   See the [documentation](https://cloud.google.com/composer/docs/enable-ip-masquerade-agent).
+
+* `composer_internal_ipv4_cidr_block` -
+  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
+  At least /20 IPv4 cidr range that will be used by Composer internal components.
+  Cannot be updated.
 
 The `software_config` block supports:
 
@@ -974,6 +993,10 @@ The `workloads_config` block supports:
   (Optional)
   Configuration for resources used by Airflow workers.
 
+* `dag_processor` -
+  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
+  Configuration for resources used by DAG processor.
+
 The `scheduler` block supports:
 
 * `cpu` -
@@ -1044,6 +1067,20 @@ The `worker` block supports:
   The maximum number of Airflow workers that the environment can run. The number of workers in the
   environment does not go above this number, even if a higher number of workers is required to
   handle the load.
+
+The `dag_processor` block supports:
+
+* `cpu` -
+  (Optional)
+  CPU request and limit for DAG processor.
+
+* `memory_gb` -
+  (Optional)
+  Memory (GB) request and limit for DAG processor.
+
+* `float storage_gb`
+  (Optional)
+  Storage (GB) request and limit for DAG processor.
 
 ## Attributes Reference
 

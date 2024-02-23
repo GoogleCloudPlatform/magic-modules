@@ -64,6 +64,8 @@ resource "google_vertex_ai_endpoint" "endpoint" {
   encryption_spec {
     kms_key_name = "%{kms_key_name}"
   }
+
+  depends_on = [google_kms_crypto_key_iam_member.crypto_key]
 }
 
 data "google_compute_network" "vertex_network" {
@@ -95,6 +97,8 @@ resource "google_vertex_ai_endpoint" "endpoint" {
   encryption_spec {
     kms_key_name = "%{kms_key_name}"
   }
+
+  depends_on = [google_kms_crypto_key_iam_member.crypto_key]
 }
 
 data "google_compute_network" "vertex_network" {

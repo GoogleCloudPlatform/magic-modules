@@ -37,7 +37,7 @@ func TestReadCoveredResourceTestFile(t *testing.T) {
 		"field_one": "\"value-one\"",
 		"field_four": Resource{
 			"field_five": Resource{
-				"field_six": "\"value-three\"",
+				"field_six": "true",
 			},
 		},
 		"field_seven": "true",
@@ -144,10 +144,8 @@ func TestReadCrossFileTests(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error reading cross file tests: %v", err)
 	}
-	if len(tests) != 2 {
-		t.Fatalf("unexpected number of tests: %d, expected 2", len(tests))
-	}
-	if expectedTests := []*Test{
+
+	expectedTests := []*Test{
 		{
 			Name: "testAccCrossFile1",
 			Steps: []Step{
@@ -172,8 +170,44 @@ func TestReadCrossFileTests(t *testing.T) {
 				},
 			},
 		},
-	}; !reflect.DeepEqual(tests, expectedTests) {
+	}
+
+	if len(tests) != len(expectedTests) {
+		t.Fatalf("unexpected number of tests: %d, expected %d", len(tests), len(expectedTests))
+	}
+
+	if !reflect.DeepEqual(tests, expectedTests) {
 		t.Errorf("found unexpected cross file tests: %v, expected %v", tests, expectedTests)
 	}
 
+}
+
+func TestReadHelperFunctionCall(t *testing.T) {
+	tests, err := readTestFiles([]string{"testdata/service/function_call_test.go"})
+	if err != nil {
+		t.Fatalf("error reading function call test: %v", err)
+	}
+	if len(tests) != 1 {
+		t.Fatalf("unexpected number of tests: %d, expected 1", len(tests))
+	}
+	expectedTest := &Test{
+		Name: "TestAccFunctionCallResource",
+		Steps: []Step{
+			Step{
+				"helped_resource": Resources{
+					"primary": Resource{
+						"field_one": "\"value-one\"",
+					},
+				},
+				"helper_resource": Resources{
+					"default": Resource{
+						"field_one": "\"value-one\"",
+					},
+				},
+			},
+		},
+	}
+	if !reflect.DeepEqual(tests[0], expectedTest) {
+		t.Errorf("found unexpected tests using helper function: %v, expected %v", tests[0], expectedTest)
+	}
 }

@@ -528,7 +528,7 @@ func ResourceBigQueryTable() *schema.Resource {
 							Default:      "NONE",
 							Description:  `The compression type of the data source. Valid values are "NONE" or "GZIP".`,
 						},
-						// Schema: Optional] The schema for the  data.
+						// Schema: [Optional] The schema for the data.
 						// Schema is required for CSV and JSON formats if autodetect is not on.
 						// Schema is disallowed for Google Cloud Bigtable, Cloud Datastore backups, Avro, Iceberg, ORC, and Parquet formats.
 						"schema": {
@@ -887,7 +887,7 @@ func ResourceBigQueryTable() *schema.Resource {
 							Type:        schema.TypeInt,
 							Default:     1800000,
 							Optional:    true,
-							Description: `Specifies maximum frequency at which this materialized view will be refreshed. The default is 1800000`,
+							Description: `Specifies maximum frequency at which this materialized view will be refreshed. The default is 1800000.`,
 						},
 
 						"allow_non_incremental_definition": {
@@ -1250,6 +1250,43 @@ func ResourceBigQueryTable() *schema.Resource {
 					},
 				},
 			},
+			// TableReplicationInfo: [Optional] Replication info of a table created using `AS REPLICA` DDL like: `CREATE MATERIALIZED VIEW mv1 AS REPLICA OF src_mv`.
+			"table_replication_info": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				ForceNew:    true,
+				MaxItems:    1,
+				Description: `Replication info of a table created using "AS REPLICA" DDL like: "CREATE MATERIALIZED VIEW mv1 AS REPLICA OF src_mv".`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"source_project_id": {
+							Type:        schema.TypeString,
+							Required:    true,
+							ForceNew:    true,
+							Description: `The ID of the source project.`,
+						},
+						"source_dataset_id": {
+							Type:        schema.TypeString,
+							Required:    true,
+							ForceNew:    true,
+							Description: `The ID of the source dataset.`,
+						},
+						"source_table_id": {
+							Type:        schema.TypeString,
+							Required:    true,
+							ForceNew:    true,
+							Description: `The ID of the source materialized view.`,
+						},
+						"replication_interval_ms": {
+							Type:        schema.TypeInt,
+							Default:     300000,
+							Optional:    true,
+							ForceNew:    true,
+							Description: `The interval at which the source materialized view is polled for updates. The default is 300000.`,
+						},
+					},
+				},
+			},
 		},
 		UseJSONNumber: true,
 	}
@@ -1386,9 +1423,49 @@ func resourceBigQueryTableCreate(d *schema.ResourceData, meta interface{}) error
 
 	datasetID := d.Get("dataset_id").(string)
 
+	if v, ok := d.GetOk("table_replication_info"); ok {
+		if table.Schema != nil || table.View != nil || table.MaterializedView != nil {
+			return errors.New("Schema, view, or materialized view cannot be specified when table replication info is present")
+		}
+
+		replicationDDL := fmt.Sprintf("CREATE MATERIALIZED VIEW %s.%s.%s", d.Get("project").(string), d.Get("dataset_id").(string), d.Get("table_id").(string))
+
+		tableReplicationInfo := expandTableReplicationInfo(v)
+		replicationIntervalMs := tableReplicationInfo["replication_interval_ms"].(int64)
+		if replicationIntervalMs > 0 {
+			replicationIntervalSeconds := replicationIntervalMs / 1000
+			replicationDDL = fmt.Sprintf("%s OPTIONS(replication_interval_seconds=%d)", replicationDDL, replicationIntervalSeconds)
+		}
+
+		replicationDDL = fmt.Sprintf("%s AS REPLICA OF %s.%s.%s", replicationDDL, tableReplicationInfo["source_project_id"], tableReplicationInfo["source_dataset_id"], tableReplicationInfo["source_table_id"])
+		useLegacySQL := false
+
+		req := &bigquery.QueryRequest{
+			Query:        replicationDDL,
+			UseLegacySql: &useLegacySQL,
+		}
+
+		log.Printf("[INFO] Creating a replica materialized view with DDL: '%s'", replicationDDL)
+
+		_, err := config.NewBigQueryClient(userAgent).Jobs.Query(project, req).Do()
+
+		id := fmt.Sprintf("projects/%s/datasets/%s/tables/%s", project, datasetID, d.Get("table_id").(string))
+		if err != nil {
+			if deleteErr := resourceBigQueryTableDelete(d, meta); deleteErr != nil {
+				log.Printf("[INFO] Unable to clean up table %s: %s", id, deleteErr)
+			}
+			return err
+		}
+
+		log.Printf("[INFO] BigQuery table %s has been created", id)
+		d.SetId(id)
+
+		return resourceBigQueryTableRead(d, meta)
+	}
+
 	if table.View != nil && table.Schema != nil {
 
-		log.Printf("[INFO] Removing schema from table definition because big query does not support setting schema on view creation")
+		log.Printf("[INFO] Removing schema from table definition because BigQuery does not support setting schema on view creation")
 		schemaBack := table.Schema
 		table.Schema = nil
 
@@ -1408,7 +1485,7 @@ func resourceBigQueryTableCreate(d *schema.ResourceData, meta interface{}) error
 			return err
 		}
 
-		log.Printf("[INFO] BigQuery table %s has been update with schema", res.Id)
+		log.Printf("[INFO] BigQuery table %s has been updated with schema", res.Id)
 	} else {
 		log.Printf("[INFO] Creating BigQuery table: %s", table.TableReference.TableId)
 
@@ -1594,6 +1671,32 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 
 		if err := d.Set("table_constraints", table_constraints); err != nil {
 			return fmt.Errorf("Error setting table constraints: %s", err)
+		}
+	}
+
+	// TODO: Update when the Get API fields for TableReplicationInfo are available in the client library.
+	url, err := tpgresource.ReplaceVars(d, config, "{{BigQueryBasePath}}projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}")
+	if err != nil {
+		return err
+	}
+
+	log.Printf("[INFO] Reading BigQuery table through API: %s", url)
+
+	getRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
+	if err != nil {
+		return err
+	}
+
+	if v, ok := getRes["tableReplicationInfo"]; ok {
+		tableReplicationInfo := flattenTableReplicationInfo(v.(map[string]interface{}))
+
+		if err := d.Set("table_replication_info", tableReplicationInfo); err != nil {
+			return fmt.Errorf("Error setting table replication info: %s", err)
 		}
 	}
 
@@ -2127,6 +2230,10 @@ func flattenEncryptionConfiguration(ec *bigquery.EncryptionConfiguration) []map[
 	re := regexp.MustCompile(`(projects/.*/locations/.*/keyRings/.*/cryptoKeys/.*)/cryptoKeyVersions/.*`)
 	paths := re.FindStringSubmatch(ec.KmsKeyName)
 
+	if len(ec.KmsKeyName) == 0 {
+		return nil
+	}
+
 	if len(paths) > 0 {
 		return []map[string]interface{}{
 			{
@@ -2378,6 +2485,56 @@ func flattenTableConstraints(edc *bigquery.TableConstraints) []map[string]interf
 	}
 	if edc.ForeignKeys != nil {
 		result["foreign_keys"] = flattenForeignKeys(edc.ForeignKeys)
+	}
+
+	return []map[string]interface{}{result}
+}
+
+func expandTableReplicationInfo(cfg interface{}) map[string]interface{} {
+	raw := cfg.([]interface{})[0].(map[string]interface{})
+
+	result := map[string]interface{}{}
+
+	if v, ok := raw["source_project_id"]; ok {
+		result["source_project_id"] = v.(string)
+	}
+
+	if v, ok := raw["source_dataset_id"]; ok {
+		result["source_dataset_id"] = v.(string)
+	}
+
+	if v, ok := raw["source_table_id"]; ok {
+		result["source_table_id"] = v.(string)
+	}
+
+	if v, ok := raw["replication_interval_ms"]; ok {
+		result["replication_interval_ms"] = int64(v.(int))
+	}
+
+	return result
+}
+
+func flattenTableReplicationInfo(tableReplicationInfo map[string]interface{}) []map[string]interface{} {
+	result := map[string]interface{}{}
+
+	if v, ok := tableReplicationInfo["sourceTable"]; ok {
+		sourceTable := v.(map[string]interface{})
+		if v, ok := sourceTable["projectId"]; ok {
+			result["source_project_id"] = v.(string)
+		}
+		if v, ok := sourceTable["datasetId"]; ok {
+			result["source_dataset_id"] = v.(string)
+		}
+		if v, ok := sourceTable["tableId"]; ok {
+			result["source_table_id"] = v.(string)
+		}
+	}
+
+	if v, ok := tableReplicationInfo["replicationIntervalMs"]; ok {
+		replicationIntervalMs := v.(string)
+		if i, err := strconv.Atoi(replicationIntervalMs); err == nil {
+			result["replication_interval_ms"] = int64(i)
+		}
 	}
 
 	return []map[string]interface{}{result}

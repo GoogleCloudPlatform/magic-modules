@@ -1,8 +1,6 @@
 resource "google_firestore_database" "<%= ctx[:primary_resource_id] %>" {
-  project                 = "<%= ctx[:test_env_vars]['project_id'] %>"
-  name                    = "(default)"
-  location_id             = "nam5"
-  type                    = "DATASTORE_MODE"
-  delete_protection_state = "<%= ctx[:vars]['delete_protection_state'] %>"
-  deletion_policy         = "DELETE"
+  project     = "<%= ctx[:test_env_vars]['project_id'] %>"
+  name        = "(default)"
+  location_id = "nam5"
+  type        = "DATASTORE_MODE"
 }

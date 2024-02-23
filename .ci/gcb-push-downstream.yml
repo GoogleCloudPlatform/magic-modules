@@ -24,6 +24,11 @@ steps:
           - checkout
           - $COMMIT_SHA
 
+    - name: 'gcr.io/graphite-docker-images/build-environment'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
+      id: build-magician-binary
+      waitFor: ["checkout"]
+
     # TPG
     - name: 'gcr.io/graphite-docker-images/bash-plus'
       entrypoint: '/workspace/.ci/scripts/bash-plus/downstream-waiter/wait_for_commit.sh'
@@ -36,13 +41,14 @@ steps:
           - $COMMIT_SHA
 
     - name: 'gcr.io/graphite-docker-images/build-environment'
-      entrypoint: '/workspace/.ci/scripts/build-environment/downstream-builder/generate_downstream.sh'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       secretEnv: ["GITHUB_TOKEN"]
       id: tpg-push
-      waitFor: ["tpg-sync"]
+      waitFor: ["tpg-sync", "build-magician-binary"]
       env:
         - BASE_BRANCH=$BRANCH_NAME
       args:
+          - 'generate-downstream'
           - 'downstream'
           - 'terraform'
           - 'ga'
@@ -73,13 +79,14 @@ steps:
           - $COMMIT_SHA
 
     - name: 'gcr.io/graphite-docker-images/build-environment'
-      entrypoint: '/workspace/.ci/scripts/build-environment/downstream-builder/generate_downstream.sh'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       secretEnv: ["GITHUB_TOKEN"]
       id: tpgb-push
-      waitFor: ["tpgb-sync"]
+      waitFor: ["tpgb-sync", "build-magician-binary"]
       env:
         - BASE_BRANCH=$BRANCH_NAME
       args:
+          - 'generate-downstream'
           - 'downstream'
           - 'terraform'
           - 'beta'
@@ -110,13 +117,14 @@ steps:
           - $COMMIT_SHA
 
     - name: 'gcr.io/graphite-docker-images/build-environment'
-      entrypoint: '/workspace/.ci/scripts/build-environment/downstream-builder/generate_downstream.sh'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       secretEnv: ["GITHUB_TOKEN"]
       id: tgc-push
       waitFor: ["tgc-sync", "tpgb-push"]
       env:
         - BASE_BRANCH=$BRANCH_NAME
       args:
+          - 'generate-downstream'
           - 'downstream'
           - 'terraform-google-conversion'
           - 'beta'
@@ -147,13 +155,14 @@ steps:
           - $COMMIT_SHA
 
     - name: 'gcr.io/graphite-docker-images/build-environment'
-      entrypoint: '/workspace/.ci/scripts/build-environment/downstream-builder/generate_downstream.sh'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       secretEnv: ["GITHUB_TOKEN"]
       id: tf-oics-push
-      waitFor: ["tf-oics-sync"]
+      waitFor: ["tf-oics-sync", "build-magician-binary"]
       env:
         - BASE_BRANCH=$BRANCH_NAME
       args:
+          - 'generate-downstream'
           - 'downstream'
           - 'tf-oics'
           - 'beta'
@@ -175,11 +184,39 @@ steps:
     - name: 'gcr.io/graphite-docker-images/go-plus'
       entrypoint: '/workspace/.ci/scripts/go-plus/vcr-cassette-merger/vcr_merge.sh'
       secretEnv: ["GITHUB_TOKEN", "GOOGLE_PROJECT"]
+      id: vcr-merge
       waitFor: ["tpg-push"]
       env:
         - BASE_BRANCH=$BRANCH_NAME
       args:
           - $COMMIT_SHA
+
+    - name: 'gcr.io/graphite-docker-images/go-plus'
+      id: magician-check-vcr-cassettes
+      waitFor: ["vcr-merge"]
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
+      secretEnv:
+        - "GITHUB_TOKEN"
+        - "GOOGLE_BILLING_ACCOUNT"
+        - "GOOGLE_CUST_ID"
+        - "GOOGLE_FIRESTORE_PROJECT"
+        - "GOOGLE_IDENTITY_USER"
+        - "GOOGLE_MASTER_BILLING_ACCOUNT"
+        - "GOOGLE_ORG"
+        - "GOOGLE_ORG_2"
+        - "GOOGLE_ORG_DOMAIN"
+        - "GOOGLE_PROJECT"
+        - "GOOGLE_PROJECT_NUMBER"
+        - "GOOGLE_SERVICE_ACCOUNT"
+        - "SA_KEY"
+        - "GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION"
+        - "GOOGLE_TPU_V2_VM_RUNTIME_VERSION"
+      env:
+        - "COMMIT_SHA=$COMMIT_SHA"
+        - "GOOGLE_REGION=us-central1"
+        - "GOOGLE_ZONE=us-central1-a"
+      args:
+        - "check-cassettes"
 
 # set extremely long 1 day timeout, in order to ensure that any jams / backlogs can be cleared.
 timeout: 86400s
@@ -187,9 +224,36 @@ options:
     machineType: 'N1_HIGHCPU_32'
 
 
+logsBucket: 'gs://cloudbuild-downstream-builder-logs'
 availableSecrets:
   secretManager:
-    - versionName: projects/673497134629/secrets/github-magician-token/versions/latest
+    - versionName: projects/673497134629/secrets/github-classic--repo-workflow/versions/latest
       env: GITHUB_TOKEN
+    - versionName: projects/673497134629/secrets/ci-test-billing-account/versions/latest
+      env: GOOGLE_BILLING_ACCOUNT
+    - versionName: projects/673497134629/secrets/ci-test-cust-id/versions/latest
+      env: GOOGLE_CUST_ID
+    - versionName: projects/673497134629/secrets/ci-test-firestore-project/versions/latest
+      env: GOOGLE_FIRESTORE_PROJECT
+    - versionName: projects/673497134629/secrets/ci-test-identity-user/versions/latest
+      env: GOOGLE_IDENTITY_USER
+    - versionName: projects/673497134629/secrets/ci-test-master-billing-account/versions/latest
+      env: GOOGLE_MASTER_BILLING_ACCOUNT
+    - versionName: projects/673497134629/secrets/ci-test-org/versions/latest
+      env: GOOGLE_ORG
+    - versionName: projects/673497134629/secrets/ci-test-org-2/versions/latest
+      env: GOOGLE_ORG_2
+    - versionName: projects/673497134629/secrets/ci-test-org-domain/versions/latest
+      env: GOOGLE_ORG_DOMAIN
     - versionName: projects/673497134629/secrets/ci-test-project/versions/latest
       env: GOOGLE_PROJECT
+    - versionName: projects/673497134629/secrets/ci-test-project-number/versions/latest
+      env: GOOGLE_PROJECT_NUMBER
+    - versionName: projects/673497134629/secrets/ci-test-service-account/versions/latest
+      env: GOOGLE_SERVICE_ACCOUNT
+    - versionName: projects/673497134629/secrets/ci-test-service-account-key/versions/latest
+      env: SA_KEY
+    - versionName: projects/673497134629/secrets/ci-test-public-advertised-prefix-description/versions/latest
+      env: GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION
+    - versionName: projects/673497134629/secrets/ci-test-tpu-v2-vm-runtime-version/versions/latest
+      env: GOOGLE_TPU_V2_VM_RUNTIME_VERSION

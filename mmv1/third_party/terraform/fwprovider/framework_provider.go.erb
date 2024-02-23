@@ -137,6 +137,12 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
                 Optional:    true,
                 ElementType: types.StringType,
             },
+            "add_terraform_attribution_label": schema.BoolAttribute{
+                Optional: true,
+            },
+            "terraform_attribution_label_addition_strategy": schema.StringAttribute{
+                Optional: true,
+            },
             // Generated Products
             <% products.each do |product| -%>
             "<%= product[:definitions].name.underscore -%>_custom_endpoint": &schema.StringAttribute{
@@ -275,6 +281,7 @@ func (p *FrameworkProvider) DataSources(_ context.Context) []func() datasource.D
         resourcemanager.NewGoogleClientConfigDataSource,
         resourcemanager.NewGoogleClientOpenIDUserinfoDataSource,
         dns.NewGoogleDnsManagedZoneDataSource,
+        dns.NewGoogleDnsManagedZonesDataSource,
         dns.NewGoogleDnsRecordSetDataSource,
         dns.NewGoogleDnsKeysDataSource,
         <% unless version == 'ga' -%>

@@ -216,25 +216,23 @@ func readStepsCompLit(stepsCompLit *ast.CompositeLit, funcDecls map[string]*ast.
 			for _, eltCompLitElt := range eltCompLit.Elts {
 				if keyValueExpr, ok := eltCompLitElt.(*ast.KeyValueExpr); ok {
 					if ident, ok := keyValueExpr.Key.(*ast.Ident); ok && ident.Name == "Config" {
+						var configStr string
+						var err error
 						if configCallExpr, ok := keyValueExpr.Value.(*ast.CallExpr); ok {
-							step, err := readConfigCallExpr(configCallExpr, funcDecls, varDecls)
-							if err != nil {
-								errs = append(errs, err)
-							}
-							test.Steps = append(test.Steps, step)
+							configStr, err = readConfigCallExpr(configCallExpr, funcDecls, varDecls)
 						} else if ident, ok := keyValueExpr.Value.(*ast.Ident); ok {
 							if configVar, ok := varDecls[ident.Name]; ok {
-								configStr, err := strconv.Unquote(configVar.Value)
-								if err != nil {
-									errs = append(errs, err)
-								}
-								step, err := readConfigStr(configStr)
-								if err != nil {
-									errs = append(errs, err)
-								}
-								test.Steps = append(test.Steps, step)
+								configStr, err = strconv.Unquote(configVar.Value)
 							}
 						}
+						if err != nil {
+							errs = append(errs, err)
+						}
+						step, err := readConfigStr(configStr)
+						if err != nil {
+							errs = append(errs, err)
+						}
+						test.Steps = append(test.Steps, step)
 					}
 				}
 			}
@@ -247,46 +245,40 @@ func readStepsCompLit(stepsCompLit *ast.CompositeLit, funcDecls map[string]*ast.
 }
 
 // Read the call expression in the public test function that returns the config.
-func readConfigCallExpr(configCallExpr *ast.CallExpr, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) (Step, error) {
+func readConfigCallExpr(configCallExpr *ast.CallExpr, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) (string, error) {
 	if ident, ok := configCallExpr.Fun.(*ast.Ident); ok {
 		if configFunc, ok := funcDecls[ident.Name]; ok {
-			return readConfigFunc(configFunc)
+			return readConfigFunc(configFunc, funcDecls, varDecls)
 		}
-		return nil, fmt.Errorf("failed to find function declaration %s", ident.Name)
+		return "", fmt.Errorf("failed to find function declaration %s", ident.Name)
 	}
-	return nil, fmt.Errorf("failed to get ident for %v", configCallExpr.Fun)
+	return "", fmt.Errorf("failed to get ident for %v", configCallExpr.Fun)
 }
 
-func readConfigFunc(configFunc *ast.FuncDecl) (Step, error) {
+func readConfigFunc(configFunc *ast.FuncDecl, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) (string, error) {
 	for _, stmt := range configFunc.Body.List {
 		if returnStmt, ok := stmt.(*ast.ReturnStmt); ok {
-			for _, result := range returnStmt.Results {
-				configStr, err := readConfigFuncResult(result)
-				if err != nil {
-					return nil, err
-				}
-				if configStr != "" {
-					return readConfigStr(configStr)
-				}
+			if len(returnStmt.Results) > 0 {
+				return readConfigFuncResult(returnStmt.Results[0], funcDecls, varDecls)
 			}
-			return nil, fmt.Errorf("failed to find a config string in results %v", returnStmt.Results)
+			return "", fmt.Errorf("failed to find a config string in results %v", returnStmt.Results)
 		}
 	}
-	return nil, fmt.Errorf("failed to find a return statement in %v", configFunc.Body.List)
+	return "", fmt.Errorf("failed to find a return statement in %v", configFunc.Body.List)
 }
 
 // Read the return result of a config func and return the config string.
-func readConfigFuncResult(result ast.Expr) (string, error) {
+func readConfigFuncResult(result ast.Expr, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) (string, error) {
 	if basicLit, ok := result.(*ast.BasicLit); ok && basicLit.Kind == token.STRING {
 		return strconv.Unquote(basicLit.Value)
 	} else if callExpr, ok := result.(*ast.CallExpr); ok {
-		return readConfigFuncCallExpr(callExpr)
+		return readConfigFuncCallExpr(callExpr, funcDecls, varDecls)
 	} else if binaryExpr, ok := result.(*ast.BinaryExpr); ok {
-		xConfigStr, err := readConfigFuncResult(binaryExpr.X)
+		xConfigStr, err := readConfigFuncResult(binaryExpr.X, funcDecls, varDecls)
 		if err != nil {
 			return "", err
 		}
-		yConfigStr, err := readConfigFuncResult(binaryExpr.Y)
+		yConfigStr, err := readConfigFuncResult(binaryExpr.Y, funcDecls, varDecls)
 		if err != nil {
 			return "", err
 		}
@@ -298,22 +290,22 @@ func readConfigFuncResult(result ast.Expr) (string, error) {
 // Read the call expression in the config function that returns the config string.
 // The call expression can contain a nested call expression.
 // Return the config string.
-func readConfigFuncCallExpr(configFuncCallExpr *ast.CallExpr) (string, error) {
-	if len(configFuncCallExpr.Args) == 0 {
-		return "", fmt.Errorf("no arguments found for call expression %v", configFuncCallExpr)
+func readConfigFuncCallExpr(configFuncCallExpr *ast.CallExpr, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) (string, error) {
+	if len(configFuncCallExpr.Args) > 0 {
+		if basicLit, ok := configFuncCallExpr.Args[0].(*ast.BasicLit); ok && basicLit.Kind == token.STRING {
+			return strconv.Unquote(basicLit.Value)
+		} else if nestedCallExpr, ok := configFuncCallExpr.Args[0].(*ast.CallExpr); ok {
+			return readConfigFuncCallExpr(nestedCallExpr, funcDecls, varDecls)
+		}
 	}
-	if basicLit, ok := configFuncCallExpr.Args[0].(*ast.BasicLit); ok && basicLit.Kind == token.STRING {
-		return strconv.Unquote(basicLit.Value)
-	} else if nestedCallExpr, ok := configFuncCallExpr.Args[0].(*ast.CallExpr); ok {
-		return readConfigFuncCallExpr(nestedCallExpr)
-	}
-	return "", fmt.Errorf("no string literal found in arguments to call expression %v", configFuncCallExpr)
+	// Config string not readable from args, attempt to read call expression as a helper function.
+	return readConfigCallExpr(configFuncCallExpr, funcDecls, varDecls)
 }
 
 // Read the config string and return a test step.
 func readConfigStr(configStr string) (Step, error) {
 	// Remove template variables because they interfere with hcl parsing.
-	pattern := regexp.MustCompile("%{[^{}]*}")
+	pattern := regexp.MustCompile("%({[^{}]*}|[vdts])")
 	// Replace with a value that can be parsed outside quotation marks.
 	configStr = pattern.ReplaceAllString(configStr, "true")
 	parser := hclparse.NewParser()

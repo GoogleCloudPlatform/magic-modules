@@ -13,6 +13,7 @@
 
 require 'provider/terraform_oics'
 require 'fileutils'
+require 'set'
 
 module Provider
   # Code generator for a library converting terraform state to gcp objects.
@@ -247,8 +248,6 @@ module Provider
                         'third_party/terraform/services/compute/image.go'],
                        ['converters/google/resources/services/compute/disk_type.go',
                         'third_party/terraform/services/compute/disk_type.go'],
-                       ['converters/google/resources/services/logging/extract.go',
-                        'third_party/terraform/services/logging/extract.go'],
                        ['converters/google/resources/services/kms/kms_utils.go',
                         'third_party/terraform/services/kms/kms_utils.go'],
                        ['converters/google/resources/services/sourcerepo/source_repo_utils.go',

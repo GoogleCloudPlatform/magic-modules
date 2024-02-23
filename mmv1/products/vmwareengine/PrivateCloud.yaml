@@ -20,7 +20,7 @@ create_url: 'projects/{{project}}/locations/{{location}}/privateClouds?privateCl
 update_verb: :PATCH
 references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/vmware-engine/docs/reference/rest/v1/projects.locations.privateClouds'
-description: / Represents a private cloud resource. Private clouds are zonal resources.
+description: Represents a private cloud resource. Private clouds are zonal resources.
 error_abort_predicates: ['transport_tpg.Is429QuotaError']
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
@@ -49,6 +49,7 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   decoder: "templates/terraform/decoders/private_cloud.go.erb"
   post_update: "templates/terraform/post_update/private_cloud.go.erb"
   update_encoder: "templates/terraform/update_encoder/private_cloud.go.erb"
+  constants: templates/terraform/constants/vmwareengine_private_cloud_type.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "vmware_engine_private_cloud_basic"
@@ -285,3 +286,14 @@ properties:
         name: 'fqdn'
         description: |-
           Fully qualified domain name of the appliance.
+
+  - !ruby/object:Api::Type::Enum
+    name: 'type'
+    description: |
+      Initial type of the private cloud.
+    immutable: true
+    ignore_read: true
+    diff_suppress_func: vmwareenginePrivateCloudStandardTypeDiffSuppressFunc
+    values:
+      - :STANDARD
+      - :TIME_LIMITED

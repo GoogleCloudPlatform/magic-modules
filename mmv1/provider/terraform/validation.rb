@@ -16,7 +16,7 @@ require 'api/object'
 module Provider
   class Terraform
     # Support for schema ValidateFunc functionality.
-    class Validation < Api::Object
+    class Validation < Google::YamlValidator
       # Ensures the value matches this regex
       attr_reader :regex
       attr_reader :function
