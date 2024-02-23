@@ -134,7 +134,6 @@ examples:
       subnetwork_name: 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       deletion_protection: 'false'
-skip_sweeper: true
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
