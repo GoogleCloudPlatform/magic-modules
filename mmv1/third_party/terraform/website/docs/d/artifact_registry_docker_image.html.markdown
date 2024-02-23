@@ -41,15 +41,19 @@ resource "google_cloud_run_v2_service" "default" {
 
 The following arguments are supported:
 
-* `repository` - (Required) The fully-qualified identify of the repository. That is, `projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}`.
+* `location` - (Required) The location of the artifact registry.
 
-* `image_name` - (Required) The image name to fetch. If no digest or tag is provided, then the last modified image will be used.
+* `repository_id` - (Required) The last part of the repository name. to fetch from.
+
+* `image_name` - (Required) The image name to fetch. If no digest or tag is provided, then the latest modified image will be used.
+
+* `project` - (Optional) The project ID in which the resource belongs. If it is not provided, the provider project is used.
 
 ## Attributes Reference
 
 The following computed attributes are exported:
 
-* `name` - The fully qualified name of the fetched image.  This name has the form: `projects/{{project}}/locations/{{location}}/repository/{{repository}}/dockerImages/{{docker_image}}`. For example, 
+* `name` - The fully qualified name of the fetched image.  This name has the form: `projects/{{project}}/locations/{{location}}/repository/{{repository_id}}/dockerImages/{{docker_image}}`. For example, 
 ```
 projects/test-project/locations/us-west4/repositories/test-repo/dockerImages/nginx@sha256:e9954c1fc875017be1c3e36eca16be2d9e9bccc4bf072163515467d6a823c7cf
 ```

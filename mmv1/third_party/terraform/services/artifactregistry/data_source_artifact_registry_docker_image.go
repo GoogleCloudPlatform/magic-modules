@@ -28,10 +28,20 @@ func DataSourceArtifactRegistryDockerImage() *schema.Resource {
 		Read: DataSourceArtifactRegistryDockerImageRead,
 
 		Schema: map[string]*schema.Schema{
-			"repository": {
+			"project": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: `Project ID of the project.`,
+			},
+			"location": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: `The fully-qualified path to the repository.`,
+				Description: `The region of the artifact registry repository. For example, "us-west1".`,
+			},
+			"repository_id": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: `The last part of the repository name to fetch from.`,
 			},
 			"image_name": {
 				Type:        schema.TypeString,
@@ -98,7 +108,7 @@ func DataSourceArtifactRegistryDockerImageRead(d *schema.ResourceData, meta inte
 		// fetch image by digest
 		// https://cloud.google.com/artifact-registry/docs/reference/rest/v1/projects.locations.repositories.dockerImages/get
 		imageUrlSafe := url.QueryEscape(imageName)
-		urlRequest, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{ArtifactRegistryBasePath}}{{repository}}/dockerImages/%s@%s", imageUrlSafe, digest))
+		urlRequest, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{ArtifactRegistryBasePath}}projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/dockerImages/%s@%s", imageUrlSafe, digest))
 		if err != nil {
 			return fmt.Errorf("Error setting api endpoint")
 		}
@@ -117,7 +127,7 @@ func DataSourceArtifactRegistryDockerImageRead(d *schema.ResourceData, meta inte
 	} else {
 		// fetch the list of images, ordered by update time
 		// https://cloud.google.com/artifact-registry/docs/reference/rest/v1/projects.locations.repositories.dockerImages/list
-		urlRequest, err := tpgresource.ReplaceVars(d, config, "{{ArtifactRegistryBasePath}}{{repository}}/dockerImages")
+		urlRequest, err := tpgresource.ReplaceVars(d, config, "{{ArtifactRegistryBasePath}}projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/dockerImages")
 		if err != nil {
 			return fmt.Errorf("Error setting api endpoint")
 		}
@@ -166,7 +176,7 @@ func DataSourceArtifactRegistryDockerImageRead(d *schema.ResourceData, meta inte
 		return fmt.Errorf("Error setting update_time: %s", err)
 	}
 
-	id, err := tpgresource.ReplaceVars(d, config, "{{ArtifactRegistryBasePath}}{{repository}}/dockerImages/{{image_name}}")
+	id, err := tpgresource.ReplaceVars(d, config, "{{ArtifactRegistryBasePath}}projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/dockerImages/{{image_name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing the data source id: %s", err)
 	}
