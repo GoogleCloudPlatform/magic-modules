@@ -770,7 +770,7 @@ func flatten{{$.PathType}}{{$v.PackagePath}}(obj *{{$.Package}}.{{$v.ObjectType}
 {{- range $p := $v.Properties }}
 	{{- if or (not $v.IsComplexMap) (ne $p.Name "key_name") }}
 		"{{$p.Name}}": {{$p.FlattenGetter}},
-	{{- end}}
+	{{- end -}}
 {{ end }}
 	}
 {{ if $v.IsComplexMap }}
