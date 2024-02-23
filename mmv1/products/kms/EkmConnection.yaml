@@ -147,6 +147,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'etag'
     required: false
+    default_from_api: true
     description: |
       Optional. Etag of the currently stored EkmConnection.
   - !ruby/object:Api::Type::String
