@@ -3,10 +3,23 @@ resource "google_kms_ekm_connection" "<%= ctx[:primary_resource_id] %>" {
   location		= "us-central1"
   key_management_mode 	= "MANUAL"
   service_resolvers  	{
-      service_directory_service  = "<%= ctx[:vars]['servicedirectoryservice'] %>"
-      hostname 			 = "<%= ctx[:vars]['hostname'] %>"
+      service_directory_service  = data.google_secret_manager_secret_version.servicedirectoryservice.secret_data
+      hostname 			 = data.google_secret_manager_secret_version.hostname.secret_data
       server_certificates        {
-      		raw_der	= "<%= ctx[:vars]['raw_der'] %>"
+      		raw_der	= data.google_secret_manager_secret_version.raw_der.secret_data
       	}
     }
+}
+
+data "google_secret_manager_secret_version" "raw_der" {
+  secret = "<%= ctx[:vars]['raw_der'] %>"
+  project = "<%= ctx[:vars]['sec_project_id'] %>"
+}
+data "google_secret_manager_secret_version" "hostname" {
+  secret = "<%= ctx[:vars]['hostname'] %>"
+  project = "<%= ctx[:vars]['sec_project_id'] %>"
+}
+data "google_secret_manager_secret_version" "servicedirectoryservice" {
+  secret = "<%= ctx[:vars]['servicedirectoryservice'] %>"
+  project = "<%= ctx[:vars]['sec_project_id'] %>"
 }
