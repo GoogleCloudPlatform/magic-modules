@@ -52,12 +52,14 @@ parameters:
     required: true
     ignore_read: true
     url_param_only: true
+    immutable: true
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
       The resource name for the EkmConnection.
     required: true
+    immutable: true
   - !ruby/object:Api::Type::Array
     name: 'serviceResolvers'
     description: |

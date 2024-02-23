@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-func TestAccKMSEkmConnection_kmsEkmConnectionBasicExample_Full(t *testing.T) {
+func TestAccKMSEkmConnection_kmsEkmConnectionBasicExample_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -21,6 +21,15 @@ func TestAccKMSEkmConnection_kmsEkmConnectionBasicExample_Full(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKMSEkmConnection_kmsEkmConnectionBasicExample_full(context),
+			},
+			{
+				ResourceName:            "google_kms_ekm_connection.example-ekmconnection",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
+			},
+			{
+				Config: testAccKMSEkmConnection_kmsEkmConnectionBasicExample_update(context),
 			},
 			{
 				ResourceName:            "google_kms_ekm_connection.example-ekmconnection",
@@ -46,7 +55,6 @@ resource "google_kms_ekm_connection" "example-ekmconnection" {
       	}
     }
 }
-
 data "google_secret_manager_secret_version" "raw_der" {
   secret = "playground-cert"
   project = "315636579862"
@@ -58,6 +66,17 @@ data "google_secret_manager_secret_version" "hostname" {
 data "google_secret_manager_secret_version" "servicedirectoryservice" {
   secret = "external-servicedirectoryservice"
   project = "315636579862"
+}
+`, context)
+}
+
+func testAccKMSEkmConnection_kmsEkmConnectionBasicExample_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_kms_ekm_connection" "example-ekmconnection" {
+  name            	= "tf_test_ekmconnection_example%{random_suffix}"
+  location     		= "us-central1"
+  key_management_mode 	= "CLOUD_KMS"
+  crypto_space_path	= "v0/longlived/crypto-space-placeholder"
 }
 `, context)
 }
