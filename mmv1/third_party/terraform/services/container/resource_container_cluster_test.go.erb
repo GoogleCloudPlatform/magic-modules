@@ -9389,7 +9389,6 @@ func testAccContainerCluster_additional_pod_ranges_config(name string, nameCount
 	`, name, name, name, aprc)
 }
 
-<% unless version == 'ga' -%>
 func TestAccContainerCluster_withConfidentialBootDisk(t *testing.T) {
 	t.Parallel()
 
@@ -9558,7 +9557,6 @@ resource "google_container_cluster" "without_confidential_boot_disk" {
 }
 `, clusterName, npName, networkName, subnetworkName)
 }
-<% end -%>
 
 <% unless version == 'ga' -%>
 func testAccContainerCluster_withWorkloadALTSConfig(projectID, name, networkName, subnetworkName string, enable bool) string {
