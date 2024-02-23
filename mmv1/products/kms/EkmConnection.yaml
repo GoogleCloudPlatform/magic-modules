@@ -39,10 +39,6 @@ examples:
     skip_test: true
     vars:
       ekmconnection_name: 'ekmconnection_example'
-      servicedirectoryservice: 'external-servicedirectoryservice'
-      hostname: 'external-uri'
-      raw_der: 'playground-cert'
-      sec_project_id: '315636579862'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
