@@ -50,6 +50,13 @@ examples:
       dns_auth_name: 'dns-auth'
       zone_name: 'my-zone'
       subdomain: 'subdomain'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'certificate_manager_dns_authorization_regional'
+    primary_resource_id: 'default'
+    vars:
+      dns_auth_name: 'dns-auth'
+      zone_name: 'my-zone'
+      subdomain: 'subdomain'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
