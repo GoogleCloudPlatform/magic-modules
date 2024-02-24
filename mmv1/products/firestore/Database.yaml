@@ -271,6 +271,7 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: cmekConfig
     min_version: beta
+    immutable: true
     description: |
        The CMEK (Customer Managed Encryption Key) configuration for a Firestore
        database. If not present, the database is secured by the default Google
@@ -278,6 +279,8 @@ properties:
     properties:
       - !ruby/object:Api::Type::String
         name: kmsKeyName
+        required: true
+        immutable: true
         description: |
           The resource ID of a Cloud KMS key. If set, the database created will
           be a Customer-managed Encryption Key (CMEK) database encrypted with
@@ -292,8 +295,6 @@ properties:
           `projects/{project_id}/locations/{kms_location}/keyRings/{key_ring}/cryptoKeys/{crypto_key}`.
           How to retrive this resource ID is listed at
           https://cloud.google.com/kms/docs/getting-resource-ids#getting_the_id_for_a_key_and_version.
-        required: true
-        immutable: true
       - !ruby/object:Api::Type::Array
         name: activeKeyVersion
         output: true
