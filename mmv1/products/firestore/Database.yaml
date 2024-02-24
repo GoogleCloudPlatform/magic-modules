@@ -282,7 +282,7 @@ properties:
           The resource ID of a Cloud KMS key. If set, the database created will
           be a Customer-managed Encryption Key (CMEK) database encrypted with
           this key. This feature is allowlist only in initial launch.
-          
+
           Only keys in the same location as this database are allowed to be used
           for encryption. For Firestore's nam5 multi-region, this corresponds to Cloud KMS
           multi-region us. For Firestore's eur3 multi-region, this corresponds to
