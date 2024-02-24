@@ -223,7 +223,7 @@ resource "google_workstations_workstation_config" "default" {
 `, context)
 }
 
-func TestAccWorkstationsWorkstationConfig_persistentDirectories(t *testing.T) {
+func TestAccWorkstationsWorkstationConfig_ephemeralDirectories(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -236,7 +236,7 @@ func TestAccWorkstationsWorkstationConfig_persistentDirectories(t *testing.T) {
 		CheckDestroy:             testAccCheckWorkstationsWorkstationConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccWorkstationsWorkstationConfig_persistentDirectories(context),
+				Config: testAccWorkstationsWorkstationConfig_ephemeralDirectories(context),
 			},
 			{
 				ResourceName:            "google_workstations_workstation_cluster.default",
