@@ -303,4 +303,3 @@ properties:
            The expected format is
            `projects/{project_id}/locations/{kms_location}/keyRings/{key_ring}/cryptoKeys/{crypto_key}/cryptoKeyVersions/{key_version}`.
         item_type: Api::Type::String
-  
