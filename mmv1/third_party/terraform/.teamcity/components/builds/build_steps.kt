@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 // This file is controlled by MMv1, any changes made here will be overwritten
 
 package builds
@@ -113,7 +118,7 @@ fun BuildSteps.runAcceptanceTests() {
                   exit 0
                 fi
                 
-                export TEST_COUNT=${'$'}(./test-binary -test.list=%TEST_PREFIX% | wc -l)
+                export TEST_COUNT=${'$'}(./test-binary -test.list="%TEST_PREFIX%" | wc -l)
                 echo "Found ${'$'}{TEST_COUNT} tests that match the given test prefix %TEST_PREFIX%"
                 if test ${'$'}TEST_COUNT -le "0"; then
                   echo "Skipping test execution; no tests to run"

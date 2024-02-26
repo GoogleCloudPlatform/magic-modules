@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 // This file is controlled by MMv1, any changes made here will be overwritten
 
 package builds
@@ -29,7 +34,7 @@ fun BuildConfigurationForProjectSweeper(providerName: String, sweeperName: Strin
     val sweeperPath: String = sweeperPackage.getValue("path").toString()
 
     val sweeperRun = "GoogleProject" // Name from .google/services/resourcemanager/resource_google_project_sweeper.go
-    val sweeperRegions = "" // Projects aren't region-specific
+    val sweeperRegions = "us-central1" // A value needs to be present, despite projects not being regional resources
 
     val s = SweeperDetails(sweeperName, parentProjectName, providerName, sweeperRun, sweeperRegions)
 

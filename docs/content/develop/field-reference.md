@@ -81,7 +81,7 @@ state. See
 for more information.
 
 Sensitive fields are often not returned by the API (because they are sensitive).
-In this case, the field will also need to use [`ignore_read` or a `custom_flatten` function]({{< ref "/develop/field-reference#ignore_read" >}}).
+In this case, the field will also need to use [`ignore_read` or a `custom_flatten` function]({{< ref "/develop/permadiff#ignore_read" >}}).
 
 Example:
 
@@ -210,6 +210,20 @@ Example:
     - field_one
     - field_two
     - nested_object.0.nested_field
+```
+
+### `diff_suppress_func`
+Specifies the name of a [diff suppress function](https://developer.hashicorp.com/terraform/plugin/sdkv2/schemas/schema-behaviors#diffsuppressfunc)
+to use for this field. In many cases, a [custom flattener](https://googlecloudplatform.github.io/magic-modules/develop/custom-code/#custom_flatten)
+is preferred because it will allow the user to see a clearer diff when the field actually is being changed. See
+[Fix a permadiff]({{< ref "/develop/permadiff.md" >}}) for more information and best practices.
+
+Example:
+
+```yaml
+- !ruby/object:Api::Type::String
+  name: 'fieldOne'
+  diff_suppress_func: 'tpgresource.CaseDiffSuppress'
 ```
 
 ## `Enum` properties
