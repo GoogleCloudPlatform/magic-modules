@@ -208,12 +208,7 @@ func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
 				Optional:    true,
 				Default:     "STABLE",
 				ValidateFunc: validation.StringInSlice([]string{"STABLE", "UPDATED"}, false),
-
-				<% if version == "ga" -%>
-				Description: `When used with wait_for_instances specifies the status to wait for. When STABLE is specified this resource will wait until the instances are stable before returning. When UPDATED is set, it will wait for the version target to be reached and any per instance configs to be effective as well as all instances to be stable before returning.`,
-				<% else -%>
 				Description: `When used with wait_for_instances specifies the status to wait for. When STABLE is specified this resource will wait until the instances are stable before returning. When UPDATED is set, it will wait for the version target to be reached and any per instance configs to be effective and all instances configs to be effective as well as all instances to be stable before returning.`,
-				<% end -%>
 			},
 
 			"auto_healing_policies": {
@@ -365,7 +360,6 @@ func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
 					},
 				},
 			},
-			<% unless version == "ga" -%>
 			"all_instances_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -390,7 +384,6 @@ func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
 					},
 				},
 			},
-			<% end -%>
 			"stateful_internal_ip": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -481,7 +474,6 @@ func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
 								},
 							},
 						},
-						<% unless version == "ga" -%>
 						"all_instances_config": {
 							Type:        schema.TypeList,
 							Computed:    true,
@@ -496,7 +488,6 @@ func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
 								},
 							},
 						},
-						<% end -%>
 						"stateful": {
 							Type:        schema.TypeList,
 							Computed:    true,
@@ -562,9 +553,7 @@ func resourceComputeRegionInstanceGroupManagerCreate(d *schema.ResourceData, met
 		Versions:                    expandVersions(d.Get("version").([]interface{})),
 		UpdatePolicy:                expandRegionUpdatePolicy(d.Get("update_policy").([]interface{})),
 		InstanceLifecyclePolicy:     expandInstanceLifecyclePolicy(d.Get("instance_lifecycle_policy").([]interface{})),
-		<% unless version == "ga" -%>
 		AllInstancesConfig:          expandAllInstancesConfig(nil, d.Get("all_instances_config").([]interface{})),
-		<% end -%>
 		DistributionPolicy:          expandDistributionPolicy(d),
 		StatefulPolicy:              expandStatefulPolicy(d),
 		// Force send TargetSize to allow size of 0.
@@ -602,11 +591,7 @@ func resourceComputeRegionInstanceGroupManagerCreate(d *schema.ResourceData, met
 func computeRIGMWaitForInstanceStatus(d *schema.ResourceData, meta interface{}) error {
 	waitForUpdates := d.Get("wait_for_instances_status").(string) == "UPDATED"
 	conf := resource.StateChangeConf{
-		<% if version == "ga" -%>
-		Pending: []string{"creating", "error", "updating per instance configs", "reaching version target"},
-		<% else -%>
 		Pending: []string{"creating", "error", "updating per instance configs", "reaching version target", "updating all instances config"},
-		<% end -%>
 		Target:  []string{"created"},
 		Refresh: waitForInstancesRefreshFunc(getRegionalManager, waitForUpdates, d, meta),
 		Timeout: d.Timeout(schema.TimeoutCreate),
@@ -674,11 +659,9 @@ func waitForInstancesRefreshFunc(f getInstanceManagerFunc, waitForUpdates bool, 
 				if !m.Status.VersionTarget.IsReached {
 					return false, "reaching version target", nil
 				}
-				<% unless version == "ga" -%>
 				if !m.Status.AllInstancesConfig.Effective {
 					return false, "updating all instances config", nil
 				}
-				<% end -%>
 			}
 			return true, "created", nil
 		} else {
@@ -763,13 +746,11 @@ func resourceComputeRegionInstanceGroupManagerRead(d *schema.ResourceData, meta 
 	if err = d.Set("instance_lifecycle_policy", flattenInstanceLifecyclePolicy(manager.InstanceLifecyclePolicy)); err != nil {
 		return fmt.Errorf("Error setting instance lifecycle policy in state: %s", err.Error())
 	}
-	<% unless version == "ga" -%>
 	if manager.AllInstancesConfig != nil {
 		if err = d.Set("all_instances_config", flattenAllInstancesConfig(manager.AllInstancesConfig)); err != nil {
 			return fmt.Errorf("Error setting all_instances_config in state: %s", err.Error())
 		}
 	}
-	<% end -%>
 	if err = d.Set("stateful_disk", flattenStatefulPolicy(manager.StatefulPolicy)); err != nil {
 		return fmt.Errorf("Error setting stateful_disk in state: %s", err.Error())
 	}
@@ -852,7 +833,6 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
 		change = true
 	}
 
-	<% unless version == "ga" -%>
 	if d.HasChange("all_instances_config") {
 		oldAic, newAic := d.GetChange("all_instances_config")
 		if newAic == nil || len(newAic.([]interface{})) == 0 {
@@ -862,7 +842,6 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
 		}
 		change = true
 	}
-	<% end -%>
 
 	if d.HasChange("list_managed_instances_results") {
 		updatedManager.ListManagedInstancesResults = d.Get("list_managed_instances_results").(string)
