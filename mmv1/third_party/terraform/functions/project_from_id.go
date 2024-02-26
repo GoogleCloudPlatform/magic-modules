@@ -21,12 +21,12 @@ func (f ProjectFromIdFunction) Metadata(ctx context.Context, req function.Metada
 
 func (f ProjectFromIdFunction) Definition(ctx context.Context, req function.DefinitionRequest, resp *function.DefinitionResponse) {
 	resp.Definition = function.Definition{
-		Summary:     "Returns the project within a provided resource id, self link, or OP style resource name.",
-		Description: "Takes a single string argument, which should be a resource id, self link, or OP style resource name. This function will either return the project name from the input string or raise an error due to no project being present in the string. The function uses the presence of \"projects/{{project}}/\" in the input string to identify the project name, e.g. when the function is passed the id \"projects/my-project/zones/us-central1-c/instances/my-instance\" as an argument it will return \"my-project\".",
+		Summary:     "Returns the project within a provided resource's id, resource URI, self link, or full resource name.",
+		Description: "Takes a single string argument, which should be a resource's id, resource URI, self link, or full resource name. This function will either return the project name from the input string or raise an error due to no project being present in the string. The function uses the presence of \"projects/{{project}}/\" in the input string to identify the project name, e.g. when the function is passed the id \"projects/my-project/zones/us-central1-c/instances/my-instance\" as an argument it will return \"my-project\".",
 		Parameters: []function.Parameter{
 			function.StringParameter{
 				Name:        "id",
-				Description: "A string of a resource's id, a resource's self link, or an OP style resource name. For example, \"projects/my-project/zones/us-central1-c/instances/my-instance\", \"https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1-c/instances/my-instance\" and \"//gkehub.googleapis.com/projects/my-project/locations/us-central1/memberships/my-membership\" are valid values",
+				Description: "A string of a resource's id, resource URI, self link, or full resource name. For example, \"projects/my-project/zones/us-central1-c/instances/my-instance\", \"https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1-c/instances/my-instance\" and \"//gkehub.googleapis.com/projects/my-project/locations/us-central1/memberships/my-membership\" are valid values",
 			},
 		},
 		Return: function.StringReturn{},

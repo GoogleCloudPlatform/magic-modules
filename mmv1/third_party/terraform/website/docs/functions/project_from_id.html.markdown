@@ -35,7 +35,7 @@ project_from_id(id string) string
 
 ## Arguments
 
-1. `id` (String) A string of a resource's id, a resource's self link, or an OP style resource name. For example, these are all valid values:
+1. `id` (String) A string of a resource's id, resource URI, self link, or full resource name. For example, these are all valid values:
 
 * `"projects/my-project/zones/us-central1-c/instances/my-instance"`
 * `"https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1-c/instances/my-instance"`
