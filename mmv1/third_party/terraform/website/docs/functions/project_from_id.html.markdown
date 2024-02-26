@@ -6,7 +6,7 @@ description: |-
 
 # Function: project_from_id
 
-Returns the project within a provided resource id, self link, or OP style resource name.
+Returns the project within a provided resource's id, resource URI, self link, or full resource name.
 
 For more information about using provider-defined functions with Terraform [see the official documentation](https://developer.hashicorp.com/terraform/plugin/framework/functions/concepts).
 
