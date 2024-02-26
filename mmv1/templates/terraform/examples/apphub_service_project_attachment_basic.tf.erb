@@ -1,4 +1,4 @@
-resource "google_apphub_service_project" "<%= ctx[:primary_resource_id] %>" {
+resource "google_apphub_service_project_attachment" "<%= ctx[:primary_resource_id] %>" {
   service_project_attachment_id = google_project.service_project.project_id
 }
 
