@@ -48,11 +48,12 @@ func TestAccLoggingFolderSettings_update(t *testing.T) {
 func testAccLoggingFolderSettings_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_logging_folder_settings" "example" {
-  disable_default_sink = true
-  folder               = google_folder.my_folder.folder_id
-  kms_key_name         = "%{original_key}"
-  storage_location     = "us-central1"
-  depends_on           = [ google_kms_crypto_key_iam_member.iam ]
+  disable_default_sink.  = true
+  folder                 = google_folder.my_folder.folder_id
+  kms_key_name           = "%{original_key}"
+  storage_location       = "us-central1"
+  kms_service_account_id = data.google_logging_folder_settings.settings.logging_service_account_id
+  depends_on             = [ google_kms_crypto_key_iam_member.iam ]
 }
 
 resource "google_folder" "my_folder" {
