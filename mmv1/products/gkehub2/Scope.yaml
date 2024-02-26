@@ -117,6 +117,14 @@ properties:
           - :READY
           - :DELETING
           - :UPDATING
+  - !ruby/object:Api::Type::KeyValuePairs
+    name: 'namespaceLabels'
+    description: |
+      Scope-level cluster namespace labels. For the member clusters bound
+      to the Scope, these labels are applied to each namespace under the
+      Scope. Scope-level labels take precedence over Namespace-level
+      labels (`namespace_labels` in the Fleet Namespace resource) if they
+      share a key. Keys and values must be Kubernetes-conformant.
   - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
