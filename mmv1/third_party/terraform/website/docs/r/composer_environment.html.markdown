@@ -1047,6 +1047,8 @@ The `worker` block supports:
 
 ## Argument Reference - Cloud Composer 3
 
+**Please note: This documentation corresponds to Composer 3, which is not yet released.**
+
 The following arguments are supported:
 
 * `name` -
