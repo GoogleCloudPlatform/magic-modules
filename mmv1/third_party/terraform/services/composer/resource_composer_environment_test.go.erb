@@ -1238,7 +1238,6 @@ func TestAccComposerEnvironmentComposer3_withNetworkAttachment(t *testing.T) {
 				ResourceName:       "google_composer_environment.test",
 				ImportState:        true,
 				ImportStateVerify:  true,
-				ExpectNonEmptyPlan: true,
 			},
 			// This is a terrible clean-up step in order to get destroy to succeed,
 			// due to dangling firewall rules left by the Composer Environment blocking network deletion.
@@ -1277,7 +1276,6 @@ func TestAccComposerEnvironmentComposer3_updateWithNetworkAttachment(t *testing.
 				ResourceName:       "google_composer_environment.test",
 				ImportState:        true,
 				ImportStateVerify:  true,
-				ExpectNonEmptyPlan: true,
 			},
 			// This is a terrible clean-up step in order to get destroy to succeed,
 			// due to dangling firewall rules left by the Composer Environment blocking network deletion.
@@ -1316,7 +1314,6 @@ func TestAccComposerEnvironmentComposer3_updateWithNetworkAndSubnetwork(t *testi
 				ResourceName:       "google_composer_environment.test",
 				ImportState:        true,
 				ImportStateVerify:  true,
-				ExpectNonEmptyPlan: true,
 			},
 			// This is a terrible clean-up step in order to get destroy to succeed,
 			// due to dangling firewall rules left by the Composer Environment blocking network deletion.
