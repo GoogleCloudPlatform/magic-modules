@@ -222,6 +222,7 @@ module "project-services" {
     "datastream.googleapis.com",
     "deploymentmanager.googleapis.com",
     "dialogflow.googleapis.com",
+    "discoveryengine.googleapis.com",
     "dlp.googleapis.com",
     "dns.googleapis.com",
     "documentai.googleapis.com",
