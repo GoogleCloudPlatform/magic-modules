@@ -217,14 +217,12 @@ resource "google_compute_region_autoscaler" "foobar" {
       target = 0.5
       predictive_method = "OPTIMIZE_AVAILABILITY"
     }
-<% unless version == 'ga' -%>
     scale_down_control {
       max_scaled_down_replicas {
         percent = 80
       }
       time_window_sec = 300
     }
-<% end -%>
   }
 }
 `, autoscalerName)
@@ -269,14 +267,12 @@ resource "google_compute_region_autoscaler" "foobar" {
     cpu_utilization {
       target = 0.5
     }
-<% unless version == 'ga' -%>
     scale_down_control {
       max_scaled_down_replicas {
         percent = 80
       }
       time_window_sec = 300
     }
-<% end -%>
     scaling_schedules {
       name = "every-weekday-morning"
       description = "Increase to 2 every weekday at 7AM for 6 hours."
