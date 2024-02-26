@@ -12,6 +12,8 @@ For more information about using provider-defined functions with Terraform [see 
 
 ## Example Usage
 
+### Use with the `google` provider
+
 ```terraform
 terraform {
   required_providers {
@@ -24,6 +26,23 @@ terraform {
 # Value is "my-project"
 output "function_output" {
   value = provider::google::project_from_id("https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1-c/instances/my-instance")
+}
+```
+
+### Use with the `google-beta` provider
+
+```terraform
+terraform {
+  required_providers {
+    google-beta = {
+      source = "hashicorp/google-beta"
+    }
+  }
+}
+
+# Value is "my-project"
+output "function_output" {
+  value = provider::google-beta::project_from_id("https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1-c/instances/my-instance")
 }
 ```
 
