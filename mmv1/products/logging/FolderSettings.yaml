@@ -64,7 +64,7 @@ properties:
       The resource name for the configured Cloud KMS key.
   - !ruby/object:Api::Type::String
     name: kmsServiceAccountId
-    output: true
+    default_from_api: true
     description: |
       The service account that will be used by the Log Router to access your Cloud KMS key.
   - !ruby/object:Api::Type::String
