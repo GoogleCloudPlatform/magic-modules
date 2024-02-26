@@ -72,6 +72,11 @@ examples:
       schema_name: 'example'
     test_env_vars:
       project_name: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'pubsub_topic_ingestion_kinesis'
+    primary_resource_id: 'example'
+    vars:
+      topic_name: 'example-topic'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/no_send_name.go.erb
   update_encoder: templates/terraform/update_encoder/pubsub_topic.erb
