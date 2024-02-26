@@ -213,6 +213,7 @@ properties:
       - 'host.gceInstance.shieldedInstanceConfig.enableIntegrityMonitoring'
       - 'host.gceInstance.confidentialInstanceConfig.enableConfidentialCompute'
       - 'host.gceInstance.accelerators'
+      - 'host.gceInstance.disableSsh'
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'gceInstance'
@@ -257,6 +258,10 @@ properties:
             name: 'disablePublicIpAddresses'
             description: |
               Whether instances have no public IP address.
+          - !ruby/object:Api::Type::Boolean
+            name: 'disableSsh'
+            description: |
+              Whether to disable SSH access to the VM.
           - !ruby/object:Api::Type::Boolean
             name: 'enableNestedVirtualization'
             description: |

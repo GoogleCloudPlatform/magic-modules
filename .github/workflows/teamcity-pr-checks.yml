@@ -1,0 +1,46 @@
+name: TeamCity Configuration Tests
+permissions: read-all
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/teamcity-pr-checks.yml'
+      - 'mmv1/third_party/terraform/.teamcity/**'
+
+
+jobs:
+  teamcity-config-tests:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          fetch-depth: 0
+
+      - name: Setup Java
+        uses: actions/setup-java@387ac29b308b003ca37ba93a6cab5eb57c8f5f93 # v4.0.0
+        with:
+          distribution: zulu
+          java-version: 17
+          java-package: jdk
+
+      - name: Cache Maven files
+        uses: actions/cache@13aacd865c20de90d75de3b17ebe84f7a17d57d2 # v4.0.0
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Download TeamCity Tools
+        run : |
+          cd mmv1/third_party/terraform/.teamcity
+          make tools
+
+      # Running the tests twice ensures that the tests are discovered and run
+      - name: Run TeamCity Tests
+        run : |
+          cd mmv1/third_party/terraform/.teamcity
+          make test
+          make test
