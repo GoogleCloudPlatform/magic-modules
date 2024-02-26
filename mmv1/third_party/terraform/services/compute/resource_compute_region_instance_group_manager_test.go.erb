@@ -562,7 +562,6 @@ resource "google_compute_region_instance_group_manager" "igm-update" {
     port = 8080
   }
 
-<% unless version == "ga" -%>
   all_instances_config {
     metadata = {
       foo = "bar"
@@ -571,7 +570,6 @@ resource "google_compute_region_instance_group_manager" "igm-update" {
       doo = "dad"
     }
   }
-<% end -%>
 
   instance_lifecycle_policy {
     force_update_on_repair = "YES"
@@ -668,7 +666,6 @@ resource "google_compute_region_instance_group_manager" "igm-update" {
     port = 8443
   }
 
-<% unless version == "ga" -%>
   all_instances_config {
     metadata = {
       doo = "dad"
@@ -677,7 +674,6 @@ resource "google_compute_region_instance_group_manager" "igm-update" {
       foo = "bar"
     }
   }
-<% end -%>
 
   instance_lifecycle_policy {
     force_update_on_repair = "NO"
