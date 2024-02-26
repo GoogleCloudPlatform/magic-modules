@@ -1,0 +1,19 @@
+resource "google_network_security_security_profile_group" "<%= ctx[:primary_resource_id] %>" {
+  provider                  = google-beta
+  name                      = "<%= ctx[:vars]['security_profile_group_name'] %>"
+  parent                    = "organizations/<%= ctx[:test_env_vars]['org_id'] %>"
+  description               = "my description"
+  threat_prevention_profile = google_network_security_security_profile.security_profile.id
+
+  labels = {
+    foo = "bar"
+  }
+}
+
+resource "google_network_security_security_profile" "security_profile" {
+    provider    = google-beta
+    name        = "<%= ctx[:vars]['security_profile_name'] %>"
+    type        = "THREAT_PREVENTION"
+    parent      = "organizations/<%= ctx[:test_env_vars]['org_id'] %>"
+    location    = "global"
+}

@@ -30,6 +30,7 @@ import_format:
     '{{instance}}/{{name}}',
     '{{name}}',
   ]
+# Sweeper skipped as this resource has customized deletion.
 skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples

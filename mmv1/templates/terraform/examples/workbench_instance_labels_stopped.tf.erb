@@ -5,6 +5,12 @@ resource "google_workbench_instance" "<%= ctx[:primary_resource_id] %>" {
   gce_setup {
     machine_type = "e2-standard-4"
 
+    shielded_instance_config {
+      enable_secure_boot = false
+      enable_vtpm = false
+      enable_integrity_monitoring = false
+    }
+
     service_accounts {
       email = "<%= ctx[:test_env_vars]["service_account"] %>"
     }
@@ -20,5 +26,7 @@ resource "google_workbench_instance" "<%= ctx[:primary_resource_id] %>" {
   labels = {
     k = "val"
   }
+
+  desired_state = "STOPPED"
 
 }

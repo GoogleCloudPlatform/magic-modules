@@ -105,7 +105,6 @@ examples:
       deletion_protection: 'false'
     test_env_vars:
       project: :PROJECT_NAME
-skip_sweeper: true
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
