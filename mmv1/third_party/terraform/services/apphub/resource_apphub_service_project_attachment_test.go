@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccApphubServiceProjectAttachment_serviceProjectAttachmentUpdateBasic(t *testing.T) {
@@ -13,6 +14,7 @@ func TestAccApphubServiceProjectAttachment_serviceProjectAttachmentUpdateBasic(t
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -51,6 +53,7 @@ resource "google_apphub_service_project_attachment" "example" {
 resource "google_project" "service_project_new" {
 	project_id ="tf-test-project-2%{random_suffix}"
 	name = "Service Project New"
+	org_id = "%{org_id}"
 }
 `, context)
 }
@@ -60,6 +63,7 @@ func TestAccApphubServiceProjectAttachment_serviceProjectAttachmentUpdateFull(t 
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -99,6 +103,7 @@ resource "google_apphub_service_project_attachment" "example2" {
 resource "google_project" "service_project_full_new" {
 	project_id ="tf-test-project-2%{random_suffix}"
 	name = "Service Project Full New"
+	org_id = "%{org_id}"
 }
 `, context)
 }

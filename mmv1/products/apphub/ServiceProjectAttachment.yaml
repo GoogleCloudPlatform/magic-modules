@@ -33,12 +33,16 @@ examples:
     config_path: "templates/terraform/examples/apphub_service_project_attachment_basic.tf.erb"
     vars:
       service_project_attachment_id: "project-1"
+    test_env_vars:
+      org_id: :ORG_ID
   - !ruby/object:Provider::Terraform::Examples
     name: "service_project_attachment_full"
     primary_resource_id: "example2"
     config_path: "templates/terraform/examples/apphub_service_project_attachment_full.tf.erb"
     vars:
       service_project_attachment_id: "project-1"
+    test_env_vars:
+      org_id: :ORG_ID
 properties:
   - !ruby/object:Api::Type::String
     name: name
