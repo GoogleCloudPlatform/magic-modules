@@ -104,8 +104,8 @@ properties:
       projects.
     immutable: true
     values:
-    - :FIXED_RECORD
-    - :PER_RPOJECT_REOCRD
+      - :FIXED_RECORD
+      - :PER_RPOJECT_REOCRD
     default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: 'dnsResourceRecord'
