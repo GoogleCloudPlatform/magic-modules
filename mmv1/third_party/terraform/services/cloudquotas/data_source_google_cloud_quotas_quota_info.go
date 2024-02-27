@@ -1,7 +1,3 @@
-mmv1/third_party/terraform/services/cloudquotas/data_source_google_cloud_quotas_quota_info.go
-
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
 package cloudquotas
@@ -123,12 +119,12 @@ func DataSourceGoogleCloudQuotasQuotaInfo() *schema.Resource {
 				},
 			},
 			"is_concurrent": {
-				Type:        schema.TypeBool,
-				Computed:    true,
+				Type:     schema.TypeBool,
+				Computed: true,
 			},
 			"service_request_quota_uri": {
-				Type:        schema.TypeString,
-				Computed:    true,
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 		},
 		UseJSONNumber: true,
