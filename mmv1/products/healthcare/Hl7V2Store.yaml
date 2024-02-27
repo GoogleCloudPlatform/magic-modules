@@ -73,6 +73,12 @@ properties:
       ** Changing this property may recreate the Hl7v2 store (removing all data) **
     required: true
     immutable: true
+  - !ruby/object:Api::Type::Boolean
+    name: rejectDuplicateMessage
+    required: false
+    default_value: false
+    description: |
+      Determines whether duplicate messages are allowed.
   - !ruby/object:Api::Type::NestedObject
     name: parserConfig
     required: false
