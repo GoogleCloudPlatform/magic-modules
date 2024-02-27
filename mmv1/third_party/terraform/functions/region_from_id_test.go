@@ -49,11 +49,11 @@ func testProviderFunction_get_region_from_resource_id(context map[string]interfa
 	return acctest.Nprintf(`
 # terraform block required for provider function to be found
 terraform {
-	required_providers {
-		google = {
-			source = "hashicorp/google"
-		}
-	}
+  required_providers {
+    google = {
+      source = "hashicorp/google"
+    }
+  }
 }
 
 data "google_compute_network" "default" {
@@ -76,11 +76,11 @@ func testProviderFunction_get_region_from_resource_self_link(context map[string]
 	return acctest.Nprintf(`
 # terraform block required for provider function to be found
 terraform {
-	required_providers {
-		google = {
-			source = "hashicorp/google"
-		}
-	}
+  required_providers {
+    google = {
+      source = "hashicorp/google"
+    }
+  }
 }
 
 data "google_compute_network" "default" {
@@ -94,7 +94,7 @@ resource "google_compute_subnetwork" "default" {
 }
 
 output "%{output_name}" {
-	value = provider::google::%{function_name}(google_compute_subnetwork.default.self_link)
+  value = provider::google::%{function_name}(google_compute_subnetwork.default.self_link)
 }
 `, context)
 }
