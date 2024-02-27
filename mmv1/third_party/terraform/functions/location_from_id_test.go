@@ -42,11 +42,11 @@ func testProviderFunction_get_location_from_resource_id(context map[string]inter
 	return acctest.Nprintf(`
 # terraform block required for provider function to be found
 terraform {
-	required_providers {
-		google = {
-			source = "hashicorp/google"
-		}
-	}
+  required_providers {
+    google = {
+      source = "hashicorp/google"
+    }
+  }
 }
 
 resource "google_cloud_run_service" "default" {
@@ -68,7 +68,7 @@ resource "google_cloud_run_service" "default" {
 }
 
 output "%{output_name}" {
-	value = provider::google::%{function_name}(google_cloud_run_service.default.id)
+  value = provider::google::%{function_name}(google_cloud_run_service.default.id)
 }
 `, context)
 }
