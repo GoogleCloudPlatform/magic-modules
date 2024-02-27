@@ -47,11 +47,11 @@ func testProviderFunction_get_name_from_resource_id(context map[string]interface
 	return acctest.Nprintf(`
 # terraform block required for provider function to be found
 terraform {
-	required_providers {
-		google = {
-			source = "hashicorp/google"
-		}
-	}
+  required_providers {
+    google = {
+      source = "hashicorp/google"
+    }
+  }
 }
 
 resource "google_pubsub_topic" "default" {
@@ -59,7 +59,7 @@ resource "google_pubsub_topic" "default" {
 }
 
 output "%{output_name}" {
-	value = provider::google::%{function_name}(google_pubsub_topic.default.id)
+  value = provider::google::%{function_name}(google_pubsub_topic.default.id)
 }
 `, context)
 }
@@ -68,11 +68,11 @@ func testProviderFunction_get_name_from_resource_self_link(context map[string]in
 	return acctest.Nprintf(`
 # terraform block required for provider function to be found
 terraform {
-	required_providers {
-		google = {
-			source = "hashicorp/google"
-		}
-	}
+  required_providers {
+    google = {
+      source = "hashicorp/google"
+    }
+  }
 }
 
 data "google_compute_network" "default" {
@@ -86,7 +86,7 @@ resource "google_compute_subnetwork" "default" {
 }
 
 output "%{output_name}" {
-	value = provider::google::%{function_name}(google_compute_subnetwork.default.self_link)
+  value = provider::google::%{function_name}(google_compute_subnetwork.default.self_link)
 }
 `, context)
 }
