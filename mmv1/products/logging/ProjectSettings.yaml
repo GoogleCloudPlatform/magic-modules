@@ -61,7 +61,7 @@ properties:
     name: kmsServiceAccountId
     default_from_api: true
     description: |
-      The service account that will be used by the Log Router to access your Cloud KMS key.
+      The service account that will be used by the Log Router to access your Cloud KMS key. This can be modified only once to migrate from the legacy CMEK service account to the logging service account as described in [Migrate CMEK SA](https://cloud.google.com/logging/docs/routing/troubleshoot-cmek-orgs#migrate-cmek-sa).
   - !ruby/object:Api::Type::String
     name: storageLocation
     output: true
