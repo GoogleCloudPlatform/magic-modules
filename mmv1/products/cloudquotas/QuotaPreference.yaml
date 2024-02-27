@@ -74,7 +74,7 @@ parameters:
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
-    conflicts: 
+    conflicts:
       - parent
     description: |
       The resource name of the quota preference. Required except in the CREATE requests.
