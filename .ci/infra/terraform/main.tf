@@ -196,6 +196,7 @@ module "project-services" {
     "cloudidentity.googleapis.com",
     "cloudiot.googleapis.com",
     "cloudkms.googleapis.com",
+    "cloudquotas.googleapis.com",
     "cloudresourcemanager.googleapis.com",
     "cloudscheduler.googleapis.com",
     "cloudtasks.googleapis.com",
