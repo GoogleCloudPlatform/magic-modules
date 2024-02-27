@@ -74,10 +74,11 @@ examples:
       connection_id: 'connection_id'
       routine_id: 'routine_id'
   - !ruby/object:Provider::Terraform::Examples
-    name: 'big_query_routine_data_governance_type'
+    name: 'bigquery_routine_data_governance_type'
     primary_resource_id: 'data_governance_type'
     vars:
       dataset_id: 'dataset_id'
+      routine_id: 'routine_id'
   - !ruby/object:Provider::Terraform::Examples
     skip_test: true
     name: 'bigquery_routine_remote_function'
