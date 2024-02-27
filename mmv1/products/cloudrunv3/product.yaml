@@ -12,14 +12,14 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: CloudRunV2
-display_name: Cloud Run (v2 API)
+name: CloudRunV3
+display_name: Cloud Run (v3 API)
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
-    base_url: https://run.googleapis.com/v2/
+    base_url: https://run.googleapis.com/v3/
   - !ruby/object:Api::Product::Version
     name: beta
-    base_url: https://run.googleapis.com/v2/
+    base_url: https://run.googleapis.com/v3/
