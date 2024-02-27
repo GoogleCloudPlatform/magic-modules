@@ -479,6 +479,9 @@ func collectResult(output string) *Result {
 			fmt.Printf("Warning: unexpected regex match found in test output: %v", submatches)
 			continue
 		}
+		if _, ok := resultSets[submatches[1]]; !ok {
+			resultSets[submatches[1]] = make(map[string]struct{})
+		}
 		resultSets[submatches[1]][submatches[2]] = struct{}{}
 	}
 	results := make(map[string][]string, 4)
