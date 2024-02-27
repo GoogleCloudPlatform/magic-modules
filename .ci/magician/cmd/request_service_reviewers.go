@@ -106,7 +106,7 @@ func execRequestServiceReviewers(prNumber string, gh GithubClient, enrolledTeams
 	for githubTeam, _ := range githubTeamsSet {
 		teamOrg := strings.Split(githubTeam, "/")
 		if len(teamOrg) < 1 || len(teamOrg) > 2 {
-			fmt.Printf("Team %q is invalid; must match format `org/team`", githubTeam)
+			fmt.Printf("Team %q is invalid; must match format `team` or `org/team`", githubTeam)
 			exitCode = 1
 			continue
 		}
