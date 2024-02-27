@@ -473,19 +473,26 @@ func (vt *Tester) printLogs(logPath string) {
 
 func collectResult(output string) *Result {
 	matches := testResultsExpression.FindAllStringSubmatch(output, -1)
-	results := make(map[string][]string, 4)
+	resultSets := make(map[string]map[string]struct{}, 4)
 	for _, submatches := range matches {
 		if len(submatches) != 3 {
 			fmt.Printf("Warning: unexpected regex match found in test output: %v", submatches)
 			continue
 		}
-		results[submatches[1]] = append(results[submatches[1]], submatches[2])
+		if _, ok := resultSets[submatches[1]]; !ok {
+			resultSets[submatches[1]] = make(map[string]struct{})
+		}
+		resultSets[submatches[1]][submatches[2]] = struct{}{}
 	}
+	results := make(map[string][]string, 4)
 	results["PANIC"] = testPanicExpression.FindAllString(output, -1)
-	sort.Strings(results["FAIL"])
-	sort.Strings(results["PASS"])
-	sort.Strings(results["SKIP"])
 	sort.Strings(results["PANIC"])
+	for _, kind := range []string{"FAIL", "PASS", "SKIP"} {
+		for test := range resultSets[kind] {
+			results[kind] = append(results[kind], test)
+		}
+		sort.Strings(results[kind])
+	}
 	return &Result{
 		FailedTests:  results["FAIL"],
 		PassedTests:  results["PASS"],
