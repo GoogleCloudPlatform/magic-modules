@@ -1,0 +1,8 @@
+resource "google_logging_project_settings" "<%= ctx[:primary_resource_id] %>" {
+  project                = "<%= ctx[:test_env_vars]['project_name'] %>"
+  kms_service_account_id = data.google_logging_project_settings.settings.kms_service_account_id
+}
+
+data "google_logging_project_settings" "settings" {
+  project = "<%= ctx[:test_env_vars]['project_name'] %>"
+}
