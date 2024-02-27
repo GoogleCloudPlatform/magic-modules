@@ -23,8 +23,8 @@ base_url: 'organizations/{{organization}}/settings'
 self_link: 'organizations/{{organization}}/settings'
 import_format: ['organizations/{{organization}}/settings']
 # Hardcode the updateMask since d.HasChanged does not work on create.
-create_url: 'organizations/{{organization}}/settings?updateMask=disableDefaultSink,storageLocation,kmsKeyName'
-update_url: 'organizations/{{organization}}/settings?updateMask=disableDefaultSink,storageLocation,kmsKeyName'
+create_url: 'organizations/{{organization}}/settings?updateMask=disableDefaultSink,storageLocation,kmsKeyName,kmsServiceAccountId'
+update_url: 'organizations/{{organization}}/settings?updateMask=disableDefaultSink,storageLocation,kmsKeyName,kmsServiceAccountId'
 # This is a singleton resource that already is created, so create
 # is really an update, and therefore should be PATCHed.
 create_verb: :PATCH
