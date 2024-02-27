@@ -377,7 +377,8 @@ module Provider
 
           generate_object object, output_folder, @target_version_name, generate_code, generate_docs
         end
-        generate_object_modified object, output_folder, @target_version_name
+        # Uncomment for go YAML
+        # generate_object_modified object, output_folder, @target_version_name
       end
     end
 
