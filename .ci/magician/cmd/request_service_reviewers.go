@@ -45,11 +45,6 @@ var requestServiceReviewersCmd = &cobra.Command{
 	},
 }
 
-// TODO: Switch to labeler.LabelData after a soak period.
-type LabelData struct {
-	Team string `yaml:"team,omitempty"`
-}
-
 func execRequestServiceReviewers(prNumber string, gh GithubClient, enrolledTeamsYaml []byte) {
 	pullRequest, err := gh.GetPullRequest(prNumber)
 	if err != nil {
@@ -57,7 +52,7 @@ func execRequestServiceReviewers(prNumber string, gh GithubClient, enrolledTeams
 		os.Exit(1)
 	}
 
-	enrolledTeams := make(map[string]LabelData)
+	enrolledTeams := make(map[string]labeler.LabelData)
 	if err := yaml.Unmarshal(enrolledTeamsYaml, &enrolledTeams); err != nil {
 		fmt.Printf("Error unmarshalling enrolled teams yaml: %s", err)
 		os.Exit(1)
@@ -109,9 +104,23 @@ func execRequestServiceReviewers(prNumber string, gh GithubClient, enrolledTeams
 
 	exitCode := 0
 	for githubTeam, _ := range githubTeamsSet {
-		members, err := gh.GetTeamMembers("GoogleCloudPlatform", githubTeam)
+		teamOrg := strings.Split(githubTeam, "/")
+		if len(teamOrg) < 1 || len(teamOrg) > 2 {
+			fmt.Printf("Team %q is invalid; must match format `org/team`", githubTeam)
+			exitCode = 1
+			continue
+		}
+		var org, team string
+		if len(teamOrg) == 1 {
+			org = "GoogleCloudPlatform"
+			team = teamOrg[0]
+		} else {
+			org = teamOrg[0]
+			team = teamOrg[1]
+		}
+		members, err := gh.GetTeamMembers(org, team)
 		if err != nil {
-			fmt.Printf("Error fetching members for GoogleCloudPlatform/%s: %s", githubTeam, err)
+			fmt.Printf("Error fetching members for %s/%s: %s", org, team, err)
 			exitCode = 1
 			continue
 		}

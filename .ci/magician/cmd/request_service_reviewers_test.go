@@ -18,6 +18,10 @@ service/google-y:
 service/google-z:
     resources:
     - google_z_resource
+service/google-a:
+    team: other-org/other-team
+    resources:
+    - google_a_resource
 `)
 
 func TestExecRequestServiceReviewersMembershipChecker(t *testing.T) {
@@ -25,7 +29,7 @@ func TestExecRequestServiceReviewersMembershipChecker(t *testing.T) {
 		pullRequest             github.PullRequest
 		requestedReviewers      []string
 		previousReviewers       []string
-		teamMembers             map[string][]string
+		teamMembers             map[string]map[string][]string
 		expectSpecificReviewers []string
 	}{
 		"no service labels means no service team reviewers": {
@@ -53,7 +57,15 @@ func TestExecRequestServiceReviewersMembershipChecker(t *testing.T) {
 				User:   github.User{Login: "googler_author"},
 				Labels: []github.Label{{Name: "service/google-x"}},
 			},
-			teamMembers:             map[string][]string{"google-x": []string{"googler_team_member"}},
+			teamMembers:             map[string]map[string][]string{"GoogleCloudPlatform": {"google-x": []string{"googler_team_member"}}},
+			expectSpecificReviewers: []string{"googler_team_member"},
+		},
+		"teams can include an explicit GitHub organization": {
+			pullRequest: github.PullRequest{
+				User:   github.User{Login: "googler_author"},
+				Labels: []github.Label{{Name: "service/google-a"}},
+			},
+			teamMembers:             map[string]map[string][]string{"other-org": {"other-team": []string{"googler_team_member"}}},
 			expectSpecificReviewers: []string{"googler_team_member"},
 		},
 		"previous reviewers will be re-requested": {
@@ -62,7 +74,7 @@ func TestExecRequestServiceReviewersMembershipChecker(t *testing.T) {
 				Labels: []github.Label{{Name: "service/google-x"}},
 			},
 			previousReviewers:       []string{"googler_team_member"},
-			teamMembers:             map[string][]string{"google-x": []string{"googler_team_member", "googler_team_member_2", "googler_team_member_3", "googler_team_member_4", "googler_team_member_5"}},
+			teamMembers:             map[string]map[string][]string{"GoogleCloudPlatform": {"google-x": []string{"googler_team_member", "googler_team_member_2", "googler_team_member_3", "googler_team_member_4", "googler_team_member_5"}}},
 			expectSpecificReviewers: []string{"googler_team_member"},
 		},
 		"active reviewers will not be re-requested": {
@@ -71,7 +83,7 @@ func TestExecRequestServiceReviewersMembershipChecker(t *testing.T) {
 				Labels: []github.Label{{Name: "service/google-x"}},
 			},
 			requestedReviewers:      []string{"googler_team_member"},
-			teamMembers:             map[string][]string{"google-x": []string{"googler_team_member"}},
+			teamMembers:             map[string]map[string][]string{"GoogleCloudPlatform": {"google-x": []string{"googler_team_member"}}},
 			expectSpecificReviewers: []string{},
 		},
 		"authors will not be requested on their own PRs": {
@@ -79,7 +91,7 @@ func TestExecRequestServiceReviewersMembershipChecker(t *testing.T) {
 				User:   github.User{Login: "googler_team_member"},
 				Labels: []github.Label{{Name: "service/google-x"}},
 			},
-			teamMembers:             map[string][]string{"google-x": []string{"googler_team_member"}},
+			teamMembers:             map[string]map[string][]string{"GoogleCloudPlatform": {"google-x": []string{"googler_team_member"}}},
 			expectSpecificReviewers: []string{},
 		},
 		"other team members be requested even if the author is excluded": {
@@ -87,7 +99,7 @@ func TestExecRequestServiceReviewersMembershipChecker(t *testing.T) {
 				User:   github.User{Login: "googler_team_member"},
 				Labels: []github.Label{{Name: "service/google-x"}},
 			},
-			teamMembers:             map[string][]string{"google-x": []string{"googler_team_member", "googler_team_member_2"}},
+			teamMembers:             map[string]map[string][]string{"GoogleCloudPlatform": {"google-x": []string{"googler_team_member", "googler_team_member_2"}}},
 			expectSpecificReviewers: []string{"googler_team_member_2"},
 		},
 		"multiple teams can be requested at once": {
@@ -95,7 +107,7 @@ func TestExecRequestServiceReviewersMembershipChecker(t *testing.T) {
 				User:   github.User{Login: "googler_author"},
 				Labels: []github.Label{{Name: "service/google-x"}, {Name: "service/google-y"}, {Name: "service/google-z"}},
 			},
-			teamMembers:             map[string][]string{"google-x": []string{"googler_team_member"}, "google-y": []string{"googler_y_team_member"}},
+			teamMembers:             map[string]map[string][]string{"GoogleCloudPlatform": {"google-x": []string{"googler_team_member"}, "google-y": []string{"googler_y_team_member"}}},
 			expectSpecificReviewers: []string{"googler_team_member", "googler_y_team_member"},
 		},
 		">3 service teams will not be requested": {
@@ -103,7 +115,7 @@ func TestExecRequestServiceReviewersMembershipChecker(t *testing.T) {
 				User:   github.User{Login: "googler_author"},
 				Labels: []github.Label{{Name: "service/google-x"}, {Name: "service/google-y"}, {Name: "service/google-z"}, {Name: "service/google-a"}},
 			},
-			teamMembers:             map[string][]string{"google-x": []string{"googler_team_member"}, "google-y": []string{"googler_y_team_member"}},
+			teamMembers:             map[string]map[string][]string{"GoogleCloudPlatform": {"google-x": []string{"googler_team_member"}, "google-y": []string{"googler_y_team_member"}}},
 			expectSpecificReviewers: []string{},
 		},
 	}
@@ -117,11 +129,14 @@ func TestExecRequestServiceReviewersMembershipChecker(t *testing.T) {
 			for _, login := range tc.previousReviewers {
 				previousReviewers = append(previousReviewers, github.User{Login: login})
 			}
-			teamMembers := map[string][]github.User{}
-			for team, logins := range tc.teamMembers {
-				teamMembers[team] = []github.User{}
-				for _, login := range logins {
-					teamMembers[team] = append(teamMembers[team], github.User{Login: login})
+			teamMembers := map[string]map[string][]github.User{}
+			for org, teams := range tc.teamMembers {
+				teamMembers[org] = map[string][]github.User{}
+				for team, logins := range teams {
+					teamMembers[org][team] = []github.User{}
+					for _, login := range logins {
+						teamMembers[org][team] = append(teamMembers[org][team], github.User{Login: login})
+					}
 				}
 			}
 			gh := &mockGithub{

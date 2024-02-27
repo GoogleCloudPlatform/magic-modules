@@ -22,7 +22,7 @@ type mockGithub struct {
 	userType           github.UserType
 	requestedReviewers []github.User
 	previousReviewers  []github.User
-	teamMembers        map[string][]github.User
+	teamMembers        map[string]map[string][]github.User
 	calledMethods      map[string][][]any
 }
 
@@ -53,7 +53,7 @@ func (m *mockGithub) GetPullRequestPreviousReviewers(prNumber string) ([]github.
 
 func (m *mockGithub) GetTeamMembers(organization, team string) ([]github.User, error) {
 	m.calledMethods["GetTeamMembers"] = append(m.calledMethods["GetTeamMembers"], []any{organization, team})
-	return m.teamMembers[team], nil
+	return m.teamMembers[organization][team], nil
 }
 
 func (m *mockGithub) RequestPullRequestReviewer(prNumber string, reviewer string) error {
