@@ -56,6 +56,17 @@ examples:
     vars:
       instance_name: 'notebooks-instance'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'notebook_instance_basic_stopped'
+    primary_resource_id: 'instance'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-instance%s\",
+      context[\"\
+      random_suffix\"])"
+    region_override: 'us-west1-a'
+    vars:
+      instance_name: 'notebooks-instance'
+    ignore_read_extra:
+      - 'desired_state'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'notebook_instance_basic_container'
     primary_resource_id: 'instance'
     primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-instance%s\",
@@ -87,9 +98,20 @@ examples:
       key_name: 'acctest.BootstrapKMSKeyInLocation(t, "global").CryptoKey.Name'
     test_env_vars:
       service_account: :SERVICE_ACCT
+virtual_fields:
+  - !ruby/object:Api::Type::Enum
+    name: desired_state
+    description: |
+      Desired state of the Notebook Instance. Set this field to `ACTIVE` to start the Instance, and `STOPPED` to stop the Instance.
+    values:
+      - :ACTIVE
+      - :STOPPED
+    default_value: :ACTIVE
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/notebooks_instance.go
   update_encoder: templates/terraform/update_encoder/notebooks_instance.go
+  post_create: templates/terraform/post_create/notebooks_instance.go.erb
+  post_update: templates/terraform/post_update/notebooks_instance.go.erb
 state_upgraders: true
 schema_version: 1
 parameters:
@@ -370,6 +392,7 @@ properties:
     description: |
       The Compute Engine tags to add to instance.
     item_type: Api::Type::String
+    default_from_api: true
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'metadata'
     description: |

@@ -1,56 +1,52 @@
-<% autogen_exception -%>
 package clouddeploy_test
 
-
-<% unless version == 'ga' -%>
 import (
-  "testing"
+	"testing"
 
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
-  "github.com/hashicorp/terraform-provider-google/google/acctest"
-  "github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccClouddeployAutomation_update(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  context := map[string]interface{}{
-    "service_account": envvar.GetTestServiceAccountFromEnv(t),
-    "random_suffix":   acctest.RandString(t, 10),
-  }
+	context := map[string]interface{}{
+		"service_account": envvar.GetTestServiceAccountFromEnv(t),
+		"random_suffix":   acctest.RandString(t, 10),
+	}
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-    CheckDestroy:             testAccCheckClouddeployAutomationDestroyProducer(t),
-    Steps: []resource.TestStep{
-      {
-        Config: testAccClouddeployAutomation_basic(context),
-      },
-      {
-        ResourceName:            "google_clouddeploy_automation.automation",
-        ImportState:             true,
-        ImportStateVerify:       true,
-	ImportStateVerifyIgnore: []string{"location", "delivery_pipeline", "annotations", "labels", "terraform_labels"},
-      },
-      {
-        Config: testAccClouddeployAutomation_update(context),
-      },
-      {
-        ResourceName:            "google_clouddeploy_automation.automation",
-        ImportState:             true,
-        ImportStateVerify:       true,
-	ImportStateVerifyIgnore: []string{"location", "delivery_pipeline", "annotations", "labels", "terraform_labels"},
-      },
-    },
-  })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckClouddeployAutomationDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccClouddeployAutomation_basic(context),
+			},
+			{
+				ResourceName:            "google_clouddeploy_automation.automation",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "delivery_pipeline", "annotations", "labels", "terraform_labels"},
+			},
+			{
+				Config: testAccClouddeployAutomation_update(context),
+			},
+			{
+				ResourceName:            "google_clouddeploy_automation.automation",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "delivery_pipeline", "annotations", "labels", "terraform_labels"},
+			},
+		},
+	})
 }
 
 func testAccClouddeployAutomation_basic(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_clouddeploy_automation" "automation" {
-  provider = google-beta
   name     = "tf-test-cd-automation%{random_suffix}"
   location = "us-central1"
   delivery_pipeline = google_clouddeploy_delivery_pipeline.pipeline.name
@@ -71,7 +67,6 @@ resource "google_clouddeploy_automation" "automation" {
 }
 
 resource "google_clouddeploy_delivery_pipeline" "pipeline" {
-  provider = google-beta
   name = "tf-test-cd-pipeline%{random_suffix}"
   location = "us-central1"
   serial_pipeline  {
@@ -85,10 +80,9 @@ resource "google_clouddeploy_delivery_pipeline" "pipeline" {
 }
 
 func testAccClouddeployAutomation_update(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 
 resource "google_clouddeploy_automation" "automation" {
-  provider = google-beta
   name     = "tf-test-cd-automation%{random_suffix}"
   location = "us-central1"
   delivery_pipeline = google_clouddeploy_delivery_pipeline.pipeline.name
@@ -129,7 +123,6 @@ resource "google_clouddeploy_automation" "automation" {
 }
 
 resource "google_clouddeploy_delivery_pipeline" "pipeline" {
-  provider = google-beta
   name = "tf-test-cd-pipeline%{random_suffix}"
   location = "us-central1"
   serial_pipeline  {
@@ -141,5 +134,3 @@ resource "google_clouddeploy_delivery_pipeline" "pipeline" {
  }
 `, context)
 }
-<% end -%>
-

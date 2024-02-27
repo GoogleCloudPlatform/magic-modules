@@ -39,18 +39,16 @@ var (
 		"trodge",
 		"hao-nan-li",
 		"NickElliot",
+		"BBBmau",
 	}
 
 	// This is for new team members who are onboarding
-	trustedContributors = []string{
-		"BBBmau",
-	}
+	trustedContributors = []string{}
 
 	// This is for reviewers who are "on vacation": will not receive new review assignments but will still receive re-requests for assigned PRs.
 	onVacationReviewers = []string{
 		"zli82016",
 		"NickElliot",
-		"ScottSuarez",
 	}
 )
 
@@ -74,8 +72,8 @@ func (ut UserType) String() string {
 }
 
 func (gh *Client) GetUserType(user string) UserType {
-	if isTeamMember(user, gh.token) {
-		fmt.Println("User is a team member")
+	if IsCoreContributor(user) {
+		fmt.Println("User is a core contributor")
 		return CoreContributorUserType
 	}
 
@@ -93,11 +91,11 @@ func (gh *Client) GetUserType(user string) UserType {
 }
 
 // Check if a user is team member to not request a random reviewer
-func isTeamMember(author, githubToken string) bool {
-	return slices.Contains(reviewerRotation, author) || slices.Contains(trustedContributors, author)
+func IsCoreContributor(user string) bool {
+	return slices.Contains(reviewerRotation, user) || slices.Contains(trustedContributors, user)
 }
 
-func IsTeamReviewer(reviewer string) bool {
+func IsCoreReviewer(reviewer string) bool {
 	return slices.Contains(reviewerRotation, reviewer)
 }
 
@@ -112,8 +110,12 @@ func isOrgMember(author, org, githubToken string) bool {
 }
 
 func GetRandomReviewer() string {
-	availableReviewers := utils.Removes(reviewerRotation, onVacationReviewers)
+	availableReviewers := AvailableReviewers()
 	rand.Seed(time.Now().UnixNano())
 	reviewer := availableReviewers[rand.Intn(len(availableReviewers))]
 	return reviewer
+}
+
+func AvailableReviewers() []string {
+	return utils.Removes(reviewerRotation, onVacationReviewers)
 }
