@@ -50,7 +50,7 @@ resource "google_logging_organization_settings" "example" {
   kms_key_name           = "%{original_key}"
   organization           = "%{org_id}"
   storage_location       = "us-central1"
-  kms_service_account_id = google_logging_organization_settings.settings.logging_service_account_id
+  kms_service_account_id = data.google_logging_organization_settings.settings.logging_service_account_id
   depends_on             = [ google_kms_crypto_key_iam_member.iam ]
 }
 
