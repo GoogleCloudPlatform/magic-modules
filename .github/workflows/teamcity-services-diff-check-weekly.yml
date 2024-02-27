@@ -1,0 +1,71 @@
+name: TeamCity Services Weekly Diff Check
+permissions: read-all
+
+on:
+  schedule:
+    # Runs every tuesday morning
+    - cron:  '0 4 * * 2'
+
+jobs:
+  terraform-provider-google:
+    uses: ./.github/workflows/build-downstream.yml
+    with:
+      repo: 'terraform-provider-google'
+      
+  terraform-provider-google-beta:
+    uses: ./.github/workflows/build-downstream.yml
+    with:
+      repo: 'terraform-provider-google-beta'
+      
+  teamcity-services-diff-check:
+    needs: [terraform-provider-google, terraform-provider-google-beta]
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Download built artifacts - GA provider
+        uses: actions/download-artifact@v2
+        with:
+          name: artifact-terraform-provider-google
+          path: artifacts
+      
+      - name: Unzip the artifacts and delete the zip
+        run: |
+          unzip -o artifacts/output.zip -d ./provider
+          rm artifacts/output.zip
+
+      - name: Download built artifacts - Beta provider
+        uses: actions/download-artifact@v2
+        with:
+          name: artifact-terraform-provider-google-beta
+          path: artifacts
+  
+      - name: Unzip the artifacts and delete the zip
+        run: |
+          unzip -o artifacts/output.zip -d ./provider
+          rm artifacts/output.zip
+
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '^1.20'
+
+      - name: Cache Go modules and build cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-test-terraform-provider-google-${{hashFiles('go.sum','google-*/transport/**','google-*/tpgresource/**','google-*/acctest/**','google-*/envvar/**','google-*/sweeper/**','google-*/verify/**') }}
+          restore-keys: |
+              ${{ runner.os }}-test-terraform-provider-google-${{ hashFiles('go.sum') }}
+              ${{ runner.os }}-test-terraform-provider-google-
+
+      - name: Diff Check
+        run: |
+          ls provider/google/services > tools/teamcity-diff-check/services_ga.txt
+          ls provider/google-beta/services > tools/teamcity-diff-check/services_beta.txt
+          cd tools/teamcity-diff-check
+          go run main.go -service_file=services_ga
+          go run main.go -service_file=services_beta
+          
