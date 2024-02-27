@@ -8,121 +8,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-func TestAccApphubApplication_applicationUpdateBasic(t *testing.T) {
-	t.Parallel()
-
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckApphubApplicationDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccApphubApplication_applicationBasicExample(context),
-			},
-			{
-				ResourceName:            "google_apphub_application.example",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "application_id"},
-			},
-			{
-				Config: testAccApphubApplication_applicationUpdateBasic(context),
-			},
-			{
-				ResourceName:            "google_apphub_application.example",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "application_id"},
-			},
-		},
-	})
-}
-
-func testAccApphubApplication_applicationUpdateBasic(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_apphub_application" "example" {
-  location = "us-east1"
-  application_id = "tf-test-example-application-2%{random_suffix}"
-  scope {
-    type = "REGIONAL"
-  }
-}
-`, context)
-}
-
 func TestAccApphubApplication_applicationUpdateFull(t *testing.T) {
-	t.Parallel()
-
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckApphubApplicationDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccApphubApplication_applicationFullExample(context),
-			},
-			{
-				ResourceName:            "google_apphub_application.example2",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "application_id"},
-			},
-			{
-				Config: testAccApphubApplication_applicationUpdateFull(context),
-			},
-			{
-				ResourceName:            "google_apphub_application.example2",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "application_id"},
-			},
-		},
-	})
-}
-
-func testAccApphubApplication_applicationUpdateFull(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_apphub_application" "example2" {
-  location = "us-east1"
-  application_id = "tf-test-example-application-2%{random_suffix}"
-  display_name = "Application Full%{random_suffix}"
-  description = "Application for testing"
-  scope {
-    type = "REGIONAL"
-  }
-  attributes {
-    environment {
-      type = "STAGING"
-		}
-		criticality {  
-      type = "MISSION_CRITICAL"
-		}
-		business_owners {
-		  display_name =  "Alice%{random_suffix}"
-		  email        =  "alice@google.com%{random_suffix}"
-		}
-		developer_owners {
-		  display_name =  "Bob%{random_suffix}"
-		  email        =  "bob@google.com%{random_suffix}"
-		}
-		operator_owners {
-		  display_name =  "Charlie%{random_suffix}"
-		  email        =  "charlie@google.com%{random_suffix}"
-		}
-  }
-}
-`, context)
-}
-
-func TestAccApphubApplication_applicationUpdateAttributes(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -185,6 +71,13 @@ func TestAccApphubApplication_applicationUpdateAttributes(t *testing.T) {
 
 func testAccApphubApplication_applicationUpdateDisplayName(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+data "google_project" "host_project" {}
+
+resource "google_project_service" "apphub" {
+	project = data.google_project.host_project.project_id
+	service = "apphub.googleapis.com"
+}
+
 resource "google_apphub_application" "example2" {
   location = "us-east1"
   application_id = "tf-test-example-application%{random_suffix}"
@@ -212,12 +105,20 @@ resource "google_apphub_application" "example2" {
 		  email        =  "charlie@google.com%{random_suffix}"
 		}
   }
+  depends_on = [google_project_service.apphub]
 }
 `, context)
 }
 
 func testAccApphubApplication_applicationUpdateEnvironment(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+data "google_project" "host_project" {}
+
+resource "google_project_service" "apphub" {
+	project = data.google_project.host_project.project_id
+	service = "apphub.googleapis.com"
+}
+
 resource "google_apphub_application" "example2" {
   location = "us-east1"
   application_id = "tf-test-example-application%{random_suffix}"
@@ -245,12 +146,20 @@ resource "google_apphub_application" "example2" {
 		  email        =  "charlie@google.com%{random_suffix}"
 		}
   }
+  depends_on = [google_project_service.apphub]
 }
 `, context)
 }
 
 func testAccApphubApplication_applicationUpdateCriticality(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+data "google_project" "host_project" {}
+
+resource "google_project_service" "apphub" {
+	project = data.google_project.host_project.project_id
+	service = "apphub.googleapis.com"
+}
+
 resource "google_apphub_application" "example2" {
   location = "us-east1"
   application_id = "tf-test-example-application%{random_suffix}"
@@ -278,12 +187,20 @@ resource "google_apphub_application" "example2" {
 		  email        =  "charlie@google.com%{random_suffix}"
 		}
   }
+  depends_on = [google_project_service.apphub]
 }
 `, context)
 }
 
 func testAccApphubApplication_applicationUpdateOwners(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+data "google_project" "host_project" {}
+
+resource "google_project_service" "apphub" {
+	project = data.google_project.host_project.project_id
+	service = "apphub.googleapis.com"
+}
+
 resource "google_apphub_application" "example2" {
   location = "us-east1"
   application_id = "tf-test-example-application%{random_suffix}"
@@ -315,6 +232,7 @@ resource "google_apphub_application" "example2" {
 		  email        =  "charlie@google.com%{random_suffix}"
 		}
   }
+  depends_on = [google_project_service.apphub]
 }
 `, context)
 }

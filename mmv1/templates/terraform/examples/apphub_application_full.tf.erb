@@ -1,3 +1,10 @@
+data "google_project" "host_project" {}
+
+resource "google_project_service" "apphub" {
+  project = data.google_project.host_project.project_id
+  service = "apphub.googleapis.com"
+}
+
 resource "google_apphub_application" "<%= ctx[:primary_resource_id] %>" {
   location = "us-east1"
   application_id = "<%= ctx[:vars]['application_id'] %>"
@@ -26,4 +33,5 @@ resource "google_apphub_application" "<%= ctx[:primary_resource_id] %>" {
 		  email        =  "<%= ctx[:vars]['operator_email'] %>"
 		}
   }
+  depends_on = [google_project_service.apphub]
 }
