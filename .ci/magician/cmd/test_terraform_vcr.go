@@ -15,7 +15,8 @@ import (
 )
 
 var ttvEnvironmentVariables = [...]string{
-	"GITHUB_TOKEN",
+	"GITHUB_TOKEN_DOWNSTREAMS",
+	"GITHUB_TOKEN_MAGIC_MODULES",
 	"GOCACHE",
 	"GOPATH",
 	"GOOGLE_BILLING_ACCOUNT",
@@ -59,13 +60,13 @@ var testTerraformVCRCmd = &cobra.Command{
 			baseBranch = "main"
 		}
 
-		gh := github.NewClient()
+		gh := github.NewClient(env["GITHUB_TOKEN_MAGIC_MODULES"])
 		rnr, err := exec.NewRunner()
 		if err != nil {
 			fmt.Println("Error creating a runner: ", err)
 			os.Exit(1)
 		}
-		ctlr := source.NewController(env["GOPATH"], "modular-magician", env["GITHUB_TOKEN"], rnr)
+		ctlr := source.NewController(env["GOPATH"], "modular-magician", env["GITHUB_TOKEN_DOWNSTREAMS"], rnr)
 
 		vt, err := vcr.NewTester(env, rnr)
 		if err != nil {

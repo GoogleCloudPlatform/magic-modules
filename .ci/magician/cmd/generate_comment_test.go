@@ -28,22 +28,22 @@ func TestExecGenerateComment(t *testing.T) {
 	}
 	ctlr := source.NewController("/mock/dir/go", "modular-magician", "*******", mr)
 	env := map[string]string{
-		"BUILD_ID":     "build1",
-		"BUILD_STEP":   "17",
-		"COMMIT_SHA":   "sha1",
-		"GITHUB_TOKEN": "*******",
-		"PR_NUMBER":    "pr1",
-		"PROJECT_ID":   "project1",
+		"BUILD_ID":                   "build1",
+		"BUILD_STEP":                 "17",
+		"COMMIT_SHA":                 "sha1",
+		"GITHUB_TOKEN_MAGIC_MODULES": "*******",
+		"PR_NUMBER":                  "pr1",
+		"PROJECT_ID":                 "project1",
 	}
 	diffProcessorEnv := map[string]string{
-		"BUILD_ID":     "build1",
-		"BUILD_STEP":   "17",
-		"COMMIT_SHA":   "sha1",
-		"GITHUB_TOKEN": "*******",
-		"NEW_REF":      "auto-pr-pr1",
-		"OLD_REF":      "auto-pr-pr1-old",
-		"PR_NUMBER":    "pr1",
-		"PROJECT_ID":   "project1",
+		"BUILD_ID":                   "build1",
+		"BUILD_STEP":                 "17",
+		"COMMIT_SHA":                 "sha1",
+		"GITHUB_TOKEN_MAGIC_MODULES": "*******",
+		"NEW_REF":                    "auto-pr-pr1",
+		"OLD_REF":                    "auto-pr-pr1-old",
+		"PR_NUMBER":                  "pr1",
+		"PROJECT_ID":                 "project1",
 	}
 	execGenerateComment(env, gh, mr, ctlr)
 
