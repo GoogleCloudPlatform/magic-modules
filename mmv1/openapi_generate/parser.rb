@@ -33,7 +33,7 @@ module OpenAPIGenerate
     def write_object(name, obj, type, url_param)
       field = nil
       case name
-      when 'projectsId', "project"
+      when 'projectsId', 'project'
         # projectsId and project are omitted in MMv1 as they are inferred from
         # the presence of {{project}} in the URL
         return field
