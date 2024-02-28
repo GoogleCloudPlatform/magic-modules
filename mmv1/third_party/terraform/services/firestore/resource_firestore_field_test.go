@@ -83,11 +83,10 @@ resource "google_project" "project" {
 	org_id     = "%{org_id}"
 }
 
-resource "time_sleep" "wait_60_sec" {
+resource "time_sleep" "wait_60_seconds" {
 	depends_on = [google_project.project]
 
 	create_duration = "60s"
-	destroy_duration = "60s"
 }
 
 resource "google_project_service" "firestore" {
@@ -95,7 +94,7 @@ resource "google_project_service" "firestore" {
 	service = "firestore.googleapis.com"
 
 	# Needed for CI tests for permissions to propagate, should not be needed for actual usage
-	depends_on = [time_sleep.wait_60_sec]
+	depends_on = [time_sleep.wait_60_seconds]
 }
 
 resource "google_firestore_database" "database" {
