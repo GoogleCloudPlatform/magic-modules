@@ -72,18 +72,6 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: '^1.20'
-
-      - name: Cache Go modules and build cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/go-build
-          key: ${{ runner.os }}-test-terraform-provider-google-${{hashFiles('go.sum','google-*/transport/**','google-*/tpgresource/**','google-*/acctest/**','google-*/envvar/**','google-*/sweeper/**','google-*/verify/**') }}
-          restore-keys: |
-              ${{ runner.os }}-test-terraform-provider-google-${{ hashFiles('go.sum') }}
-              ${{ runner.os }}-test-terraform-provider-google-
-
       - name: Diff Check
         run: |
           ls provider/google/services > tools/teamcity-diff-check/services_ga.txt
