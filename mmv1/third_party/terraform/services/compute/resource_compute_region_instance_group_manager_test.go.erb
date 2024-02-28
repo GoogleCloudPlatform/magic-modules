@@ -96,7 +96,7 @@ func TestAccRegionInstanceGroupManager_update(t *testing.T) {
 			{
 				Config: testAccRegionInstanceGroupManager_update2(template1, target1, target2, template2, igm),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_compute_instance_group_manager.igm-update", "instance_lifecycle_policy.0.default_action_on_failure", "REPAIR"),
+					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm-update", "instance_lifecycle_policy.0.default_action_on_failure", "REPAIR"),
 				),
 			},
 			{
