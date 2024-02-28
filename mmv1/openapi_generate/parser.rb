@@ -124,9 +124,14 @@ module OpenAPIGenerate
       end
 
       # These methods are only available when the field is set
-      if obj.respond_to?(:read_only) && obj.read_only \
-        || obj.instance_variable_get(:@raw_schema)['x-google-identifier']
+      if obj.respond_to?(:read_only) && obj.read_only
         field.instance_variable_set(:@output, obj.read_only)
+      end
+
+      # x-google-identifier fields are described by AIP 203 and are represented
+      # as output only in Terraform.
+      if obj.instance_variable_get(:@raw_schema)['x-google-identifier']
+        field.instance_variable_set(:@output, true)
       end
 
       if (obj.respond_to?(:write_only) && obj.write_only) \
