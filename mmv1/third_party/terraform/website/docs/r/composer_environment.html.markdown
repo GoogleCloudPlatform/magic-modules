@@ -229,7 +229,7 @@ The following arguments are supported:
 
 * `config` -
   (Optional)
-  Configuration parameters for this environment  Structure is [documented below](#nested_config).
+  Configuration parameters for this environment  Structure is [documented below](#nested_config_c1).
 
 * `labels` -
   (Optional)
@@ -260,7 +260,7 @@ The following arguments are supported:
   (Optional) The ID of the project in which the resource belongs.
   If it is not provided, the provider project is used.
 
-<a name="nested_config"></a>The `config` block supports:
+<a name="nested_config_c1"></a>The `config` block supports:
 
 * `node_count` -
   (Optional, Cloud Composer 1 only)
@@ -268,19 +268,19 @@ The following arguments are supported:
 
 * `node_config` -
   (Optional)
-  The configuration used for the Kubernetes Engine cluster.  Structure is [documented below](#nested_node_config).
+  The configuration used for the Kubernetes Engine cluster.  Structure is [documented below](#nested_node_config_c1).
 
 * `recovery_config` -
   (Optional, Cloud Composer 2 only)
-  The configuration settings for recovery. Structure is [documented below](#nested_recovery_config).
+  The configuration settings for recovery. Structure is [documented below](#nested_recovery_config_c1).
 
 * `software_config` -
   (Optional)
-  The configuration settings for software inside the environment.  Structure is [documented below](#nested_software_config).
+  The configuration settings for software inside the environment.  Structure is [documented below](#nested_software_config_c1).
 
 * `private_environment_config` -
   (Optional)
-  The configuration used for the Private IP Cloud Composer environment. Structure is [documented below](#nested_private_environment_config).
+  The configuration used for the Private IP Cloud Composer environment. Structure is [documented below](#nested_private_environment_config_c1).
 
 * `web_server_network_access_control` -
   The network-level access control policy for the Airflow web server.
@@ -310,9 +310,9 @@ The following arguments are supported:
   master authorized networks will disallow all external traffic to access
   Kubernetes master through HTTPS except traffic from the given CIDR blocks,
   Google Compute Engine Public IPs and Google Prod IPs. Structure is
-  [documented below](#nested_master_authorized_networks_config).
+  [documented below](#nested_master_authorized_networks_config_c1).
 
-<a name="nested_node_config"></a>The `node_config` block supports:
+<a name="nested_node_config_c1"></a>The `node_config` block supports:
 
 * `zone` -
   (Optional, Cloud Composer 1 only)
@@ -373,7 +373,7 @@ The following arguments are supported:
 * `ip_allocation_policy` -
   (Optional)
   Configuration for controlling how IPs are allocated in the GKE cluster.
-  Structure is [documented below](#nested_ip_allocation_policy).
+  Structure is [documented below](#nested_ip_allocation_policy_c1).
   Cannot be updated.
 
 * `max_pods_per_node` -
@@ -392,7 +392,7 @@ The following arguments are supported:
   all destination addresses, except between pods traffic.
   See the [documentation](https://cloud.google.com/composer/docs/enable-ip-masquerade-agent).
 
-<a name="nested_software_config"></a>The `software_config` block supports:
+<a name="nested_software_config_c1"></a>The `software_config` block supports:
 
 * `airflow_config_overrides` -
   (Optional) Apache Airflow configuration properties to override. Property keys contain the section and property names,
@@ -457,7 +457,7 @@ The following arguments are supported:
   The number of schedulers for Airflow.
 
 
-See [documentation](https://cloud.google.com/composer/docs/how-to/managing/configuring-private-ip) for setting up private environments. <a name="nested_private_environment_config"></a>The `private_environment_config` block supports:
+See [documentation](https://cloud.google.com/composer/docs/how-to/managing/configuring-private-ip) for setting up private environments. <a name="nested_private_environment_config_c1"></a>The `private_environment_config` block supports:
 
 * `connection_type` -
   (Optional, Cloud Composer 2 only)
@@ -493,9 +493,9 @@ See [documentation](https://cloud.google.com/composer/docs/how-to/managing/confi
 The `web_server_network_access_control` supports:
 
 * `allowed_ip_range` -
-  A collection of allowed IP ranges with descriptions. Structure is [documented below](#nested_allowed_ip_range).
+  A collection of allowed IP ranges with descriptions. Structure is [documented below](#nested_allowed_ip_range_c1).
 
-<a name="nested_allowed_ip_range"></a>The `allowed_ip_range` supports:
+<a name="nested_allowed_ip_range_c1"></a>The `allowed_ip_range` supports:
 
 * `value` -
   (Required)
@@ -508,7 +508,7 @@ The `web_server_network_access_control` supports:
   (Optional)
   A description of this ip range.
 
-<a name="nested_ip_allocation_policy"></a>The `ip_allocation_policy` block supports:
+<a name="nested_ip_allocation_policy_c1"></a>The `ip_allocation_policy` block supports:
 
 * `use_ip_aliases` -
   (Optional, Cloud Composer 1 only)
@@ -547,7 +547,7 @@ The `web_server_network_access_control` supports:
   (e.g. 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) to pick a specific range to use.
   Specify either `services_secondary_range_name` or `services_ipv4_cidr_block` but not both.
 
-<a name="nested_database_config"></a>The `database_config` block supports:
+<a name="nested_database_config_c1"></a>The `database_config` block supports:
 
 * `machine_type` -
   (Optional)
@@ -558,7 +558,7 @@ The `web_server_network_access_control` supports:
   (Optional)
   Preferred Cloud SQL database zone.
 
-<a name="nested_web_server_config"></a>The `web_server_config` block supports:
+<a name="nested_web_server_config_c1"></a>The `web_server_config` block supports:
 
 * `machine_type` -
   (Required)
@@ -567,7 +567,7 @@ The `web_server_network_access_control` supports:
   Value custom is returned only in response, if Airflow web server parameters were
   manually changed to a non-standard values.
 
-<a name="nested_encryption_config"></a>The `encryption_config` block supports:
+<a name="nested_encryption_config_c1"></a>The `encryption_config` block supports:
 
 * `kms_key_name` -
   (Required)
@@ -575,7 +575,7 @@ The `web_server_network_access_control` supports:
   be the fully qualified resource name,
   i.e. projects/project-id/locations/location/keyRings/keyring/cryptoKeys/key. Cannot be updated.
 
-<a name="nested_maintenance_window"></a>The `maintenance_window` block supports:
+<a name="nested_maintenance_window_c1"></a>The `maintenance_window` block supports:
 * `start_time` -
   (Required)
   Start time of the first recurrence of the maintenance window.
@@ -591,15 +591,15 @@ The `web_server_network_access_control` supports:
   The only allowed values for 'FREQ' field are 'FREQ=DAILY' and 'FREQ=WEEKLY;BYDAY=...'.
   Example values: 'FREQ=WEEKLY;BYDAY=TU,WE', 'FREQ=DAILY'.
 
-<a name="nested_master_authorized_networks_config"></a>The `master_authorized_networks_config` block supports:
+<a name="nested_master_authorized_networks_config_c1"></a>The `master_authorized_networks_config` block supports:
 * `enabled` -
   (Required)
   Whether or not master authorized networks is enabled.
 
 * `cidr_blocks` -
-  `cidr_blocks `define up to 50 external networks that could access Kubernetes master through HTTPS. Structure is [documented below](#nested_cidr_blocks).
+  `cidr_blocks `define up to 50 external networks that could access Kubernetes master through HTTPS. Structure is [documented below](#nested_cidr_blocks_c1).
 
-<a name="nested_cidr_blocks"></a>The `cidr_blocks` supports:
+<a name="nested_cidr_blocks_c1"></a>The `cidr_blocks` supports:
 
 * `display_name` -
   (Optional)
@@ -931,7 +931,7 @@ The `ip_allocation_policy` block supports:
   The only allowed values for 'FREQ' field are 'FREQ=DAILY' and 'FREQ=WEEKLY;BYDAY=...'.
   Example values: 'FREQ=WEEKLY;BYDAY=TU,WE', 'FREQ=DAILY'.
 
-The `recovery_config` block supports:
+<a name="nested_recovery_config_c1"></a>The `recovery_config` block supports:
 
 * `scheduled_snapshots_config` -
   (Optional)
