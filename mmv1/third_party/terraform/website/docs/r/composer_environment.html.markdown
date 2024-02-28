@@ -701,15 +701,15 @@ The `config` block supports:
 * `data_retention_config` -
   (Optional, Cloud Composer 2.0.23 or newer only)
   Configuration setting for airflow data rentention mechanism. Structure is
-  [documented below](#nested_data_retention_config).
+  [documented below](#nested_data_retention_config_c2).
 
-<a name="nested_data_retention_config"></a>The `data_retention_config` block supports:
+<a name="nested_data_retention_config_c2"></a>The `data_retention_config` block supports:
 * `task_logs_retention_config` - 
   (Optional)
   The configuration setting for Task Logs. Structure is
-  [documented below](#nested_task_logs_retention_config).
+  [documented below](#nested_task_logs_retention_config_c2).
 
-<a name="nested_task_logs_retention_config"></a>The `task_logs_retention_config` block supports:
+<a name="nested_task_logs_retention_config_c2"></a>The `task_logs_retention_config` block supports:
 * `storage_mode` - 
   (Optional)
   The mode of storage for Airflow workers task logs. Values for storage mode are 
@@ -833,9 +833,9 @@ The `software_config` block supports:
   (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html),
   Cloud Composer environments in versions composer-2.1.2-airflow-*.*.* and newer)
   The configuration for Cloud Data Lineage integration. Structure is
-  [documented below](#nested_cloud_data_lineage_integration).
+  [documented below](#nested_cloud_data_lineage_integration_c2).
 
-<a name="nested_cloud_data_lineage_integration"></a>The `cloud_data_lineage_integration` block supports:
+<a name="nested_cloud_data_lineage_integration_c2"></a>The `cloud_data_lineage_integration` block supports:
 * `enabled` -
   (Required)
   Whether or not Cloud Data Lineage integration is enabled.
@@ -1128,15 +1128,15 @@ The `config` block supports:
 * `data_retention_config` -
   (Optional, Cloud Composer 2.0.23 or later only)
   Configuration setting for airflow data rentention mechanism. Structure is
-  [documented below](#nested_data_retention_config).
+  [documented below](#nested_data_retention_config_c3).
 
-<a name="nested_data_retention_config"></a>The `data_retention_config` block supports:
+<a name="nested_data_retention_config_c3"></a>The `data_retention_config` block supports:
 * `task_logs_retention_config` - 
   (Optional)
   The configuration setting for Task Logs. Structure is
-  [documented below](#nested_task_logs_retention_config).
+  [documented below](#nested_task_logs_retention_config_c3).
 
-<a name="nested_task_logs_retention_config"></a>The `task_logs_retention_config` block supports:
+<a name="nested_task_logs_retention_config_c3"></a>The `task_logs_retention_config` block supports:
 * `storage_mode` - 
   (Optional)
   The mode of storage for Airflow workers task logs. Values for storage mode are 
@@ -1259,13 +1259,13 @@ The `software_config` block supports:
   (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html),
   Cloud Composer environments in versions composer-2.1.2-airflow-*.*.* and later)
   The configuration for Cloud Data Lineage integration. Structure is
-  [documented below](#nested_cloud_data_lineage_integration).
+  [documented below](#nested_cloud_data_lineage_integration_c3).
 
 * `web_server_plugins_mode` -
   (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
   Web server plugins configuration. Can be either 'ENABLED' or 'DISABLED'. Defaults to 'ENABLED'.
 
-<a name="nested_cloud_data_lineage_integration"></a>The `cloud_data_lineage_integration` block supports:
+<a name="nested_cloud_data_lineage_integration_c3"></a>The `cloud_data_lineage_integration` block supports:
 * `enabled` -
   (Required)
   Whether or not Cloud Data Lineage integration is enabled.
