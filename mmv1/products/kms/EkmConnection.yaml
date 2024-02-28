@@ -127,6 +127,7 @@ properties:
                 description: |
                   Output only. The subject Alternative DNS names. Only present if parsed is true.
                 output: true
+                default_from_api: true
                 item_type: Api::Type::String
         - !ruby/object:Api::Type::String
           name: 'endpointFilter'
