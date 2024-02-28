@@ -769,7 +769,7 @@ The following arguments are supported:
   packets from node IP addresses instead of Pod IP addresses
   See the [documentation](https://cloud.google.com/composer/docs/enable-ip-masquerade-agent).
 
-<a name="nested_software_config_c2">The `software_config` block supports:
+<a name="nested_software_config_c2"></a>The `software_config` block supports:
 
 * `airflow_config_overrides` -
   (Optional) Apache Airflow configuration properties to override. Property keys contain the section and property names,
@@ -1056,7 +1056,7 @@ The following arguments are supported:
 
 * `config` -
   (Optional)
-  Configuration parameters for this environment. Structure is documented below.
+  Configuration parameters for this environment. Structure is [documented below](#nested_config_c3).
 
 * `labels` -
   (Optional)
@@ -1080,19 +1080,18 @@ The following arguments are supported:
 
 * `storage_config` -
   (Optional)
-  Configuration options for storage used by Composer environment. Structure is documented below.
+  Configuration options for storage used by Composer environment. Structure is [documented below](#nested_storage_config_c3).
 
 
-The `config` block supports:
+<a name="nested_config_c3"></a>The `config` block supports:
 
 * `node_config` -
   (Optional)
-  The configuration used for the Kubernetes Engine cluster. Structure is documented below.
+  The configuration used for the Kubernetes Engine cluster. Structure is [documented below](#nested_node_config_c3).
 
 * `software_config` -
   (Optional)
-  The configuration settings for software (Airflow) inside the environment. Structure is
-  documented below.
+  The configuration settings for software (Airflow) inside the environment. Structure is [documented below](#nested_software_config_c3).
 
 * `enable_private_environment` -
   (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
@@ -1143,14 +1142,14 @@ The `config` block supports:
   `CLOUD_LOGGING_AND_CLOUD_STORAGE` to store logs in cloud logging and cloud storage.
 
 
-The `storage_config` block supports:
+<a name="nested_storage_config_c3"></a>The `storage_config` block supports:
 
 * `bucket` -
   (Required)
   Name of an existing Cloud Storage bucket to be used by the environment.
 
 
-The `node_config` block supports:
+<a name="nested_node_config_c3"></a>The `node_config` block supports:
 
 * `network` -
   (Optional)
@@ -1194,7 +1193,7 @@ The `node_config` block supports:
   /20 IPv4 cidr range that will be used by Composer internal components.
   Cannot be updated.
 
-The `software_config` block supports:
+<a name="nested_software_config_c3">The `software_config` block supports:
 
 * `airflow_config_overrides` -
   (Optional) Apache Airflow configuration properties to override. Property keys contain the section and property names,
