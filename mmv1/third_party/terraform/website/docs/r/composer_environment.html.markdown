@@ -619,7 +619,7 @@ The following arguments are supported:
 
 * `config` -
   (Optional)
-  Configuration parameters for this environment. Structure is documented below.
+  Configuration parameters for this environment. Structure is [documented below](#nested_config_c2).
 
 * `labels` -
   (Optional)
@@ -643,24 +643,23 @@ The following arguments are supported:
 
 * `storage_config` -
   (Optional)
-  Configuration options for storage used by Composer environment. Structure is documented below.
+  Configuration options for storage used by Composer environment. Structure is [documented below](#nested_storage_config_c2).
 
 
-The `config` block supports:
+<a name="nested_config_c2"></a>The `config` block supports:
 
 * `node_config` -
   (Optional)
-  The configuration used for the Kubernetes Engine cluster. Structure is documented below.
+  The configuration used for the Kubernetes Engine cluster. Structure is [documented below](#nested_node_config_c2).
 
 * `software_config` -
   (Optional)
   The configuration settings for software (Airflow) inside the environment. Structure is
-  documented below.
+  [documented below](#nested_software_config_c2).
 
 * `private_environment_config` -
   (Optional)
-  The configuration used for the Private IP Cloud Composer environment. Structure is documented
-  below.
+  The configuration used for the Private IP Cloud Composer environment. Structure is [documented below](#nested_private_environment_config_c2).
 
 * `encryption_config` -
   (Optional)
@@ -696,7 +695,7 @@ The `config` block supports:
   master authorized networks will disallow all external traffic to access
   Kubernetes master through HTTPS except traffic from the given CIDR blocks,
   Google Compute Engine Public IPs and Google Prod IPs. Structure is
-  documented below.
+  [documented below](#nested_master_authorized_networks_config_c1).
 
 * `data_retention_config` -
   (Optional, Cloud Composer 2.0.23 or newer only)
@@ -717,14 +716,14 @@ The `config` block supports:
   `CLOUD_LOGGING_AND_CLOUD_STORAGE` to store logs in cloud logging and cloud storage.
 
 
-The `storage_config` block supports:
+<a name="nested_storage_config_c2"></a>The `storage_config` block supports:
 
 * `bucket` -
   (Required)
   Name of an existing Cloud Storage bucket to be used by the environment.
 
 
-The `node_config` block supports:
+<a name="nested_node_config_c2"></a>The `node_config` block supports:
 
 * `network` -
   (Optional)
@@ -760,7 +759,7 @@ The `node_config` block supports:
 * `ip_allocation_policy` -
   (Optional)
   Configuration for controlling how IPs are allocated in the GKE cluster.
-  Structure is documented below.
+  Structure is [documented below](#nested_ip_allocation_policy_c2).
   Cannot be updated.
 
 * `enable_ip_masq_agent` -
@@ -770,7 +769,7 @@ The `node_config` block supports:
   packets from node IP addresses instead of Pod IP addresses
   See the [documentation](https://cloud.google.com/composer/docs/enable-ip-masquerade-agent).
 
-The `software_config` block supports:
+<a name="nested_software_config_c2">The `software_config` block supports:
 
 * `airflow_config_overrides` -
   (Optional) Apache Airflow configuration properties to override. Property keys contain the section and property names,
@@ -840,7 +839,7 @@ The `software_config` block supports:
   (Required)
   Whether or not Cloud Data Lineage integration is enabled.
 
-See [documentation](https://cloud.google.com/composer/docs/how-to/managing/configuring-private-ip) for setting up private environments. The `private_environment_config` block supports:
+<a name="nested_private_environment_config_c2"></a>See [documentation](https://cloud.google.com/composer/docs/how-to/managing/configuring-private-ip) for setting up private environments. The `private_environment_config` block supports:
 
 * `enable_private_endpoint` -
   If true, access to the public endpoint of the GKE cluster is denied.
@@ -874,7 +873,7 @@ See [documentation](https://cloud.google.com/composer/docs/how-to/managing/confi
   versions `composer-2.*.*-airflow-*.*.*` and newer.
 
 
-The `ip_allocation_policy` block supports:
+<a name="nested_ip_allocation_policy_c2"></a>The `ip_allocation_policy` block supports:
 
 * `cluster_secondary_range_name` -
   (Optional)
