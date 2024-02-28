@@ -213,6 +213,7 @@ properties:
       - 'host.gceInstance.shieldedInstanceConfig.enableIntegrityMonitoring'
       - 'host.gceInstance.confidentialInstanceConfig.enableConfidentialCompute'
       - 'host.gceInstance.accelerators'
+      - 'host.gceInstance.disableSsh'
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'gceInstance'
@@ -257,6 +258,10 @@ properties:
             name: 'disablePublicIpAddresses'
             description: |
               Whether instances have no public IP address.
+          - !ruby/object:Api::Type::Boolean
+            name: 'disableSsh'
+            description: |
+              Whether to disable SSH access to the VM.
           - !ruby/object:Api::Type::Boolean
             name: 'enableNestedVirtualization'
             description: |
@@ -428,6 +433,22 @@ properties:
         description: |
           The service account to use with the specified KMS key.
         required: true
+  - !ruby/object:Api::Type::Array
+    name: 'readinessChecks'
+    description: |
+      Readiness checks to be performed on a workstation.
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'path'
+          description: |
+            Path to which the request should be sent.
+          required: true
+        - !ruby/object:Api::Type::Integer
+          name: 'port'
+          description: |
+            Port to which the request should be sent.
+          required: true
   - !ruby/object:Api::Type::Boolean
     name: 'degraded'
     description: |

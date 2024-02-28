@@ -1,4 +1,4 @@
-Hello! I am a robot. It looks like you are a: {{if eq .authorUserType "Community Contributor"}}Community Contributor{{else}}~Community Contributor~{{end}} {{if eq .authorUserType "Googler"}}Googler{{else}}~Googler~{{end}} {{if eq .authorUserType "Core Contributor"}}Core Contributor{{else}}~Core Contributor~{{end}}. {{if .trusted}}Tests will run automatically.{{else}}Tests will require approval to run.{{end}}
+Hello! I am a robot. Tests will require approval from a repository maintainer to run.
 
 @{{.reviewer}}, a repository maintainer, has been assigned to review your changes. If you have not received review feedback within 2 business days, please leave a comment on this PR asking them to take a look.
 

@@ -1,0 +1,160 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: "CustomTargetType"
+description: |
+  A Cloud Deploy `CustomTargetType` defines a type of custom target that can be referenced in a
+  Cloud Deploy `Target` in order to facilitate deploying to other systems besides the supported runtimes.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    "Define and use a custom target type": "https://cloud.google.com/deploy/docs/deploy-app-custom-target"
+  api: "https://cloud.google.com/deploy/docs/api/reference/rest/v1/projects.locations.customTargetTypes"
+base_url: "projects/{{project}}/locations/{{location}}/customTargetTypes"
+self_link: "projects/{{project}}/locations/{{location}}/customTargetTypes/{{name}}"
+create_url: "projects/{{project}}/locations/{{location}}/customTargetTypes?customTargetTypeId={{name}}"
+update_verb: :PATCH
+update_mask: true
+autogen_async: true
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: "name"
+    base_url: "{{op_id}}"
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: "response"
+    resource_inside_response: false
+  status: !ruby/object:Api::OpAsync::Status
+    path: "done"
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: "error"
+    message: "message"
+id_format: "projects/{{project}}/locations/{{location}}/customTargetTypes/{{name}}"
+import_format:
+  [
+    'projects/{{project}}/locations/{{location}}/customTargetTypes/{{name}}'
+  ]
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "clouddeploy_custom_target_type_basic"
+    primary_resource_id: "custom-target-type"
+    vars:
+      custom_target_type_name: "my-custom-target-type"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "clouddeploy_custom_target_type_git_skaffold_modules"
+    primary_resource_id: "custom-target-type"
+    vars:
+      custom_target_type_name: "my-custom-target-type"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "clouddeploy_custom_target_type_gcs_skaffold_modules"
+    primary_resource_id: "custom-target-type"
+    vars:
+      custom_target_type_name: "my-custom-target-type"
+parameters:
+  - !ruby/object:Api::Type::String
+    name: "location"
+    required: true
+    immutable: true
+    url_param_only: true
+    description: "The location of the source."
+properties:
+  - !ruby/object:Api::Type::String
+    name: "name"
+    description: "Name of the `CustomTargetType`."
+    required: true
+    immutable: true
+    url_param_only: true
+  - !ruby/object:Api::Type::String
+    name: "customTargetTypeId"
+    description: "Resource id of the `CustomTargetType`."
+    output: true
+  - !ruby/object:Api::Type::String
+    name: "uid"
+    description: "Unique identifier of the `CustomTargetType`."
+    output: true
+  - !ruby/object:Api::Type::String
+    name: "description"
+    description: "Description of the `CustomTargetType`. Max length is 255 characters."
+  - !ruby/object:Api::Type::KeyValueAnnotations
+    name: "annotations"
+    description: "User annotations. These attributes can only be set and used by the user, and not by Cloud Deploy. See https://google.aip.dev/128#annotations for more details such as format and size limitations."
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: "labels"
+    description: "Labels are attributes that can be set and used by both the user and by Cloud Deploy. Labels must meet the following constraints: * Keys and values can contain only lowercase letters, numeric characters, underscores, and dashes. * All characters must use UTF-8 encoding, and international characters are allowed. * Keys must start with a lowercase letter or international character. * Each resource is limited to a maximum of 64 labels. Both keys and values are additionally constrained to be <= 128 bytes."
+  - !ruby/object:Api::Type::String
+    name: "createTime"
+    description: "Time at which the `CustomTargetType` was created."
+    output: true
+  - !ruby/object:Api::Type::String
+    name: "updateTime"
+    description: "Time at which the `CustomTargetType` was updated."
+    output: true
+  - !ruby/object:Api::Type::String
+    name: "etag"
+    description: "The weak etag of the `CustomTargetType` resource. This checksum is computed by the server based on the value of other fields, and may be sent on update and delete requests to ensure the client has an up-to-date value before proceeding."
+    output: true
+  - !ruby/object:Api::Type::NestedObject
+    name: "customActions"
+    description: "Configures render and deploy for the `CustomTargetType` using Skaffold custom actions."
+    properties:
+      - !ruby/object:Api::Type::String
+        name: "renderAction"
+        description: "The Skaffold custom action responsible for render operations. If not provided then Cloud Deploy will perform the render operations via `skaffold render`."
+      - !ruby/object:Api::Type::String
+        name: "deployAction"
+        description: "The Skaffold custom action responsible for deploy operations."
+        required: true
+      - !ruby/object:Api::Type::Array
+        name: "includeSkaffoldModules"
+        description: "List of Skaffold modules Cloud Deploy will include in the Skaffold Config as required before performing diagnose."
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::Array
+              name: "configs"
+              description: "The Skaffold Config modules to use from the specified source."
+              item_type: Api::Type::String
+            - !ruby/object:Api::Type::NestedObject
+              name: "git"
+              description: "Remote git repository containing the Skaffold Config modules."
+              exactly_one_of:
+                - git
+                - googleCloudStorage
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: "repo"
+                  description: "Git repository the package should be cloned from."
+                  required: true
+                - !ruby/object:Api::Type::String
+                  name: "path"
+                  description: "Relative path from the repository root to the Skaffold file."
+                - !ruby/object:Api::Type::String
+                  name: "ref"
+                  description: "Git ref the package should be cloned from."
+            - !ruby/object:Api::Type::NestedObject
+              name: "googleCloudStorage"
+              description: "Cloud Storage bucket containing Skaffold Config modules."
+              exactly_one_of:
+                - git
+                - googleCloudStorage
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: "source"
+                  description: "Cloud Storage source paths to copy recursively. For example, providing `gs://my-bucket/dir/configs/*` will result in Skaffold copying all files within the `dir/configs` directory in the bucket `my-bucket`."
+                  required: true
+                - !ruby/object:Api::Type::String
+                  name: "path"
+                  description: "Relative path from the source to the Skaffold file."

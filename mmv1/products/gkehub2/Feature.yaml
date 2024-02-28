@@ -99,12 +99,12 @@ examples:
     primary_resource_name: 'fmt.Sprintf("policycontroller")'
     primary_resource_id: 'feature'
   - !ruby/object:Provider::Terraform::Examples
-    name: 'enable_fleet_default_member_config_policycontroller_update'
+    name: 'enable_fleet_default_member_config_policycontroller_full'
     skip_test: true
     primary_resource_name: 'fmt.Sprintf("policycontroller")'
     primary_resource_id: 'feature'
   - !ruby/object:Provider::Terraform::Examples
-    name: 'enable_fleet_default_member_config_policycontroller_set_empty'
+    name: 'enable_fleet_default_member_config_policycontroller_minimal'
     skip_test: true
     primary_resource_name: 'fmt.Sprintf("policycontroller")'
     primary_resource_id: 'feature'
