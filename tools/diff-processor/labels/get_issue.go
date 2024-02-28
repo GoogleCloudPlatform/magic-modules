@@ -20,7 +20,7 @@ func GetIssue(repository string, id uint64) (labeler.Issue, error) {
 		return issue, fmt.Errorf("Error creating request: %w", err)
 	}
 	req.Header.Add("Accept", "application/vnd.github+json")
-	req.Header.Add("Authorization", "Bearer "+os.Getenv("GITHUB_TOKEN"))
+	req.Header.Add("Authorization", "Bearer "+os.Getenv("GITHUB_TOKEN_MAGIC_MODULES"))
 	req.Header.Add("X-GitHub-Api-Version", "2022-11-28")
 	resp, err := client.Do(req)
 	if err != nil {

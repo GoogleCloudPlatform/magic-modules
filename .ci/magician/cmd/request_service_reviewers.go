@@ -40,7 +40,12 @@ var requestServiceReviewersCmd = &cobra.Command{
 		prNumber := args[0]
 		fmt.Println("PR Number: ", prNumber)
 
-		gh := github.NewClient()
+		githubToken, ok := os.LookupEnv("GITHUB_TOKEN_MAGIC_MODULES")
+		if !ok {
+			fmt.Println("Did not provide GITHUB_TOKEN_MAGIC_MODULES environment variable")
+			os.Exit(1)
+		}
+		gh := github.NewClient(githubToken)
 		execRequestServiceReviewers(prNumber, gh, labeler.EnrolledTeamsYaml)
 	},
 }
