@@ -223,12 +223,13 @@ func (vt *Tester) Run(mode Mode, version provider.Version, testDirs []string) (*
 	logFileName := filepath.Join(vt.baseDir, "testlogs", fmt.Sprintf("%s_test.log", mode.Lower()))
 	// Write output (or error) to test log.
 	// Append to existing log file.
-	previousLog, _ := vt.rnr.ReadFile(logFileName)
-	if previousLog != "" {
-		output = previousLog + "\n" + output
+	allOutput, _ := vt.rnr.ReadFile(logFileName)
+	if allOutput != "" {
+		allOutput += "\n"
 	}
-	if err := vt.rnr.WriteFile(logFileName, output); err != nil {
-		return nil, fmt.Errorf("error writing log: %v, test output: %v", err, output)
+	allOutput += output
+	if err := vt.rnr.WriteFile(logFileName, allOutput); err != nil {
+		return nil, fmt.Errorf("error writing log: %v, test output: %v", err, allOutput)
 	}
 	return collectResult(output), testErr
 }
@@ -319,7 +320,7 @@ func (vt *Tester) runInParallel(mode Mode, version provider.Version, testDir, te
 		"-parallel",
 		"1",
 		"-v",
-		"-run=" + test,
+		"-run=" + test + "$",
 		"-timeout",
 		replayingTimeout,
 		"-ldflags=-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc",
