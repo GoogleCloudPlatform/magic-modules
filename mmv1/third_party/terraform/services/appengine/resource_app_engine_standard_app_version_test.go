@@ -165,7 +165,7 @@ resource "google_project_service" "project" {
 }
 
 resource "time_sleep" "wait_60_seconds" {
-  depends_on = [google_project.project]
+  depends_on = [google_project.my_project]
 
   create_duration = "60s"
 }
