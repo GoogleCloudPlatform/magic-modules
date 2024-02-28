@@ -262,7 +262,7 @@ var healthCheckedTargetSchema *schema.Resource = &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"load_balancer_type": {
 						Type:         schema.TypeString,
-						Required:     true,
+						Optional:     true,
 						Description:  `The type of load balancer. This value is case-sensitive. Possible values: ["regionalL4ilb", "regionalL7ilb", "globalL7ilb"]`,
 						ValidateFunc: validation.StringInSlice([]string{"regionalL4ilb", "regionalL7ilb", "globalL7ilb"}, false),
 					},
