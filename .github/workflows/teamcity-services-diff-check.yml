@@ -15,11 +15,12 @@ jobs:
     outputs:
       services: ${{steps.services.outputs.services}}
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - id: services
-        name: "Check for New Services"
+      - name: "Check for New Services"
+        id: services
         run: |
           newServices=$(($(git diff --name-only --diff-filter=A origin/main HEAD | grep -P "mmv1/products/.*/product.yaml" | wc -l)))
           echo "services=$newServices" >> "${GITHUB_OUTPUT}"
