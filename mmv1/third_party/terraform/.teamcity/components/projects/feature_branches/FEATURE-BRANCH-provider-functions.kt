@@ -42,6 +42,7 @@ fun featureBranchProviderFunctionSubProject(allConfig: AllContextParameters): Pr
 
     val packageName = "functions" // This project will contain only builds to test this single package
     val sharedResourcesEmpty: List<String> = listOf() // No locking when testing functions
+    val vcrConfig = getVcrAcceptanceTestConfig(allConfig) // Reused below for both MM testing build configs
 
     var parentId: String // To be overwritten when each build config is generated below.
 
@@ -52,6 +53,9 @@ fun featureBranchProviderFunctionSubProject(allConfig: AllContextParameters): Pr
     // Enable testing using hashicorp/terraform-provider-google
     parentId = "${projectId}_HC_GA"
     val buildConfigHashiCorpGa = BuildConfigurationForSinglePackage(packageName, functionPackageGa.getValue("path"), "Provider-Defined Functions (GA provider, HashiCorp downstream)", ProviderNameGa, parentId, HashicorpVCSRootGa_featureBranchProviderFunctions, sharedResourcesEmpty, gaConfig)
+    // Enable testing using modular-magician/terraform-provider-google
+    parentId = "${projectId}_MM_GA"
+    val buildConfigModularMagicianGa = BuildConfigurationForSinglePackage(packageName, functionPackageGa.getValue("path"), "Provider-Defined Functions (GA provider, MM upstream)", ProviderNameGa, parentId, ModularMagicianVCSRootGa, sharedResourcesEmpty, vcrConfig)
 
     // Beta
     val betaConfig = getBetaAcceptanceTestConfig(allConfig)
@@ -59,8 +63,11 @@ fun featureBranchProviderFunctionSubProject(allConfig: AllContextParameters): Pr
     // Enable testing using hashicorp/terraform-provider-google-beta
     parentId = "${projectId}_HC_BETA"
     val buildConfigHashiCorpBeta = BuildConfigurationForSinglePackage(packageName, functionPackageBeta.getValue("path"), "Provider-Defined Functions (Beta provider, HashiCorp downstream)", ProviderNameBeta, parentId, HashicorpVCSRootBeta_featureBranchProviderFunctions, sharedResourcesEmpty, betaConfig)
+    // Enable testing using modular-magician/terraform-provider-google-beta
+    parentId = "${projectId}_MM_BETA"
+    val buildConfigModularMagicianBeta = BuildConfigurationForSinglePackage(packageName, functionPackageBeta.getValue("path"), "Provider-Defined Functions (Beta provider, MM upstream)", ProviderNameBeta, parentId, ModularMagicianVCSRootBeta, sharedResourcesEmpty, vcrConfig)
 
-    val allBuildConfigs = listOf(buildConfigHashiCorpGa, buildConfigHashiCorpBeta)
+    val allBuildConfigs = listOf(buildConfigHashiCorpGa, buildConfigModularMagicianGa, buildConfigHashiCorpBeta, buildConfigModularMagicianBeta)
 
     // Make these builds use a 1.8.0-ish version of TF core
     allBuildConfigs.forEach{ b ->
