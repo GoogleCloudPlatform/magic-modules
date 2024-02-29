@@ -68,6 +68,17 @@ var generateDownstreamCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		ctlr := source.NewController(env["GOPATH"], "modular-magician", githubToken, rnr)
+		oldToken := os.Getenv("GITHUB_TOKEN")
+		if err := os.Setenv("GITHUB_TOKEN", githubToken); err != nil {
+			fmt.Println("Error setting GITHUB_TOKEN environment variable: ", err)
+			os.Exit(1)
+		}
+		defer func() {
+			if err := os.Setenv("GITHUB_TOKEN", oldToken); err != nil {
+				fmt.Println("Error setting GITHUB_TOKEN environment variable: ", err)
+				os.Exit(1)
+			}
+		}()
 
 		if len(args) != 4 {
 			fmt.Printf("Wrong number of arguments %d, expected 4\n", len(args))
