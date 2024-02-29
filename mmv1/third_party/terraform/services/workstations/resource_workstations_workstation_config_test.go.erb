@@ -361,9 +361,9 @@ resource "google_compute_disk" "test_source_disk" {
   zone     = "us-central1-a"
 }
 
-resource "google_compute_snapshot" "test_source_image" {
+resource "google_compute_image" "test_source_image" {
   provider    = google-beta
-  name        = "tf-test-workstation-source-snapshot%{random_suffix}"
+  name        = "tf-test-workstation-source-image%{random_suffix}"
   source_disk = google_compute_disk.test_source_disk.name
   storage_locations = ["us-central1"]
 }
@@ -390,7 +390,7 @@ resource "google_workstations_workstation_config" "default" {
         mount_path = "/cache"
 	gce_pd {
  	      disk_type = "pd-standard"
-	      source_image = google_compute_snapshot.test_source_image.id
+	      source_image = google_compute_image.test_source_image.id
 	      read_only  = true
     	}
   }
