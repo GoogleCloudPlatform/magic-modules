@@ -26,7 +26,7 @@ func TestAccKMSEkmConnection_kmsEkmConnectionBasicExample_update(t *testing.T) {
 				ResourceName:            "google_kms_ekm_connection.example-ekmconnection",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location"},
+				ImportStateVerifyIgnore: []string{"location", "name"},
 			},
 			{
 				Config: testAccKMSEkmConnection_kmsEkmConnectionBasicExample_update(context),
@@ -35,7 +35,7 @@ func TestAccKMSEkmConnection_kmsEkmConnectionBasicExample_update(t *testing.T) {
 				ResourceName:            "google_kms_ekm_connection.example-ekmconnection",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location"},
+				ImportStateVerifyIgnore: []string{"location", "name"},
 			},
 		},
 	})
