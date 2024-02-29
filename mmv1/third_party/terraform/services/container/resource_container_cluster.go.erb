@@ -1664,7 +1664,6 @@ func ResourceContainerCluster() *schema.Resource {
 							Type:         schema.TypeString,
 							Computed:     true,
 							Optional:     true,
-							ForceNew:     true,
 							AtLeastOneOf: privateClusterConfigKeys,
 							ValidateFunc: verify.OrEmpty(validation.IsCIDRNetwork(28, 28)),
 							Description:  `The IP range in CIDR notation to use for the hosted master network. This range will be used for assigning private IP addresses to the cluster master(s) and the ILB VIP. This range must not overlap with any other ranges in use within the cluster's network, and it must be a /28 subnet. See Private Cluster Limitations for more details. This field only applies to private clusters, when enable_private_nodes is true.`,
@@ -1682,7 +1681,6 @@ func ResourceContainerCluster() *schema.Resource {
 						"private_endpoint_subnetwork": {
 							Type:         schema.TypeString,
 							Optional:     true,
-							ForceNew:     true,
 							AtLeastOneOf: privateClusterConfigKeys,
 							DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 							Description: `Subnetwork in cluster's network where master's endpoint will be provisioned.`,
@@ -3080,6 +3078,46 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 
 		log.Printf("[INFO] GKE cluster %s's enable private endpoint has been updated to %v", d.Id(), enabled)
+	}
+	
+	if d.HasChange("private_cluster_config.0.private_endpoint_subnetwork") {
+		subnetwork := d.Get("private_cluster_config.0.private_endpoint_subnetwork").(string)
+		req := &container.UpdateClusterRequest{
+			Update: &container.ClusterUpdate{
+				DesiredPrivateClusterConfig: &container.PrivateClusterConfig{
+					PrivateEndpointSubnetwork: subnetwork,
+					ForceSendFields:          []string{"PrivateEndpointSubnetwork"},
+				},
+			},
+		}
+
+		updateF := updateFunc(req, "updating private endpoint subnetwork")
+		// Call update serially.
+		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] GKE cluster %s's private endpoint subnetwork has been updated to %v", d.Id(), subnetwork)
+	}
+
+	if d.HasChange("private_cluster_config.0.master_ipv4_cidr_block") {
+		cidr := d.Get("private_cluster_config.0.master_ipv4_cidr_block").(string)
+		req := &container.UpdateClusterRequest{
+			Update: &container.ClusterUpdate{
+				DesiredPrivateClusterConfig: &container.PrivateClusterConfig{
+					MasterIpv4CidrBlock: cidr,
+					ForceSendFields:     []string{"MasterIpv4CidrBlock"},
+				},
+			},
+		}
+
+		updateF := updateFunc(req, "updating master IPv4 CIDR block")
+		// Call update serially.
+		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] GKE cluster %s's master IPv4 CIDR block has been updated to %v", d.Id(), cidr)
 	}
 
 	if d.HasChange("private_cluster_config") && d.HasChange("private_cluster_config.0.master_global_access_config") {
