@@ -70,6 +70,16 @@ resource "google_project_iam_member" "add_pscAuthorizedService" {
   role    = "roles/servicedirectory.pscAuthorizedService"
   member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-ekms.iam.gserviceaccount.com"
 }
+resource "google_project_iam_member" "add_sdviewer" {
+  project = data.google_project.vpc-project.number
+  role    = "roles/servicedirectory.viewer"
+  member  = "serviceAccount:service-1067888929963@gcp-sa-ekms.iam.gserviceaccount.com"
+}
+resource "google_project_iam_member" "add_pscAuthorizedService" {
+  project = data.google_project.vpc-project.number
+  role    = "roles/servicedirectory.pscAuthorizedService"
+  member  = "serviceAccount:service-1067888929963@gcp-sa-ekms.iam.gserviceaccount.com"
+}
 resource "google_kms_ekm_connection" "example-ekmconnection" {
   name            	= "tf_test_ekmconnection_example%{random_suffix}"
   location		= "us-central1"
