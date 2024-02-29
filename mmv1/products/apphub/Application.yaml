@@ -43,7 +43,7 @@ examples:
     primary_resource_id: "example2"
     config_path: "templates/terraform/examples/apphub_application_full.tf.erb"
     vars:
-      application_id: "example-application"  
+      application_id: "example-application"
       display_name: "Application Full"
       description: "Application for testing"
       business_name: "Alice"

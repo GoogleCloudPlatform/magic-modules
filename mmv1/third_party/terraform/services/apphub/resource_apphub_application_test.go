@@ -70,13 +70,7 @@ func TestAccApphubApplication_applicationUpdateFull(t *testing.T) {
 }
 
 func testAccApphubApplication_applicationUpdateDisplayName(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-data "google_project" "host_project" {}
-
-resource "google_project_service" "apphub" {
-	project = data.google_project.host_project.project_id
-	service = "apphub.googleapis.com"
-}
+	return enableApphubAPI(context) + acctest.Nprintf(`
 
 resource "google_apphub_application" "example2" {
   location = "us-east1"
@@ -111,13 +105,7 @@ resource "google_apphub_application" "example2" {
 }
 
 func testAccApphubApplication_applicationUpdateEnvironment(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-data "google_project" "host_project" {}
-
-resource "google_project_service" "apphub" {
-	project = data.google_project.host_project.project_id
-	service = "apphub.googleapis.com"
-}
+	return enableApphubAPI(context) + acctest.Nprintf(`
 
 resource "google_apphub_application" "example2" {
   location = "us-east1"
@@ -152,13 +140,7 @@ resource "google_apphub_application" "example2" {
 }
 
 func testAccApphubApplication_applicationUpdateCriticality(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-data "google_project" "host_project" {}
-
-resource "google_project_service" "apphub" {
-	project = data.google_project.host_project.project_id
-	service = "apphub.googleapis.com"
-}
+	return enableApphubAPI(context) + acctest.Nprintf(`
 
 resource "google_apphub_application" "example2" {
   location = "us-east1"
@@ -193,13 +175,7 @@ resource "google_apphub_application" "example2" {
 }
 
 func testAccApphubApplication_applicationUpdateOwners(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-data "google_project" "host_project" {}
-
-resource "google_project_service" "apphub" {
-	project = data.google_project.host_project.project_id
-	service = "apphub.googleapis.com"
-}
+	return enableApphubAPI(context) + acctest.Nprintf(`
 
 resource "google_apphub_application" "example2" {
   location = "us-east1"
@@ -233,6 +209,18 @@ resource "google_apphub_application" "example2" {
 		}
   }
   depends_on = [google_project_service.apphub]
+}
+`, context)
+}
+
+func enableApphubAPI(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "host_project" {}
+
+resource "google_project_service" "apphub" {
+	project = data.google_project.host_project.project_id
+	service = "apphub.googleapis.com"
+	disable_on_destroy = false
 }
 `, context)
 }
