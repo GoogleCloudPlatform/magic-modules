@@ -70,12 +70,12 @@ resource "google_project_iam_member" "add_pscAuthorizedService" {
   role    = "roles/servicedirectory.pscAuthorizedService"
   member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-ekms.iam.gserviceaccount.com"
 }
-resource "google_project_iam_member" "add_sdviewer" {
+resource "google_project_iam_member" "add_sdviewer_role" {
   project = data.google_project.vpc-project.number
   role    = "roles/servicedirectory.viewer"
   member  = "serviceAccount:service-1067888929963@gcp-sa-ekms.iam.gserviceaccount.com"
 }
-resource "google_project_iam_member" "add_pscAuthorizedService" {
+resource "google_project_iam_member" "add_pscAuthorizedService_role" {
   project = data.google_project.vpc-project.number
   role    = "roles/servicedirectory.pscAuthorizedService"
   member  = "serviceAccount:service-1067888929963@gcp-sa-ekms.iam.gserviceaccount.com"
