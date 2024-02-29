@@ -107,6 +107,10 @@ type Property struct {
 	// Sub-properties of nested objects or arrays with nested objects
 	Properties []Property
 
+	// If this is a complex map type, this string represents the name of the
+	// field that the key to the map can be set with
+	ComplexMapKeyName string
+
 	// Reference to the parent resource.
 	// note: "Properties" will not be available.
 	resource *Resource
@@ -677,8 +681,16 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 			if err != nil {
 				return nil, err
 			}
+			cm := ComplexMapKeyDetails{}
+			cmOk, err := overrides.PropertyOverrideWithDetails(ComplexMapKey, p, &cm, location)
+			if err != nil {
+				return nil, fmt.Errorf("failed to decode complex map key name details")
+			}
+			if !cmOk {
+				return nil, fmt.Errorf("failed to find complex map key name for map named: %s", p.Name())
+			}
 			keyProp := Property{
-				title:    "key_name",
+				title:    cm.KeyName,
 				Type:     Type{&openapi.Schema{Type: "string"}},
 				resource: resource,
 				parent:   &p,
@@ -691,6 +703,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 			e := fmt.Sprintf("%s%sSchema()", resource.PathType(), p.PackagePath())
 			p.Elem = &e
 			p.ElemIsBasicType = false
+			p.ComplexMapKeyName = cm.KeyName
 		}
 
 		if !p.Computed {
