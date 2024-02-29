@@ -134,6 +134,7 @@ properties:
           description: |
             Optional. The filter applied to the endpoints of the resolved service. If no filter is specified, all endpoints will be considered. An endpoint will be chosen arbitrarily from the filtered list for each request. For endpoint filter syntax and examples, see https://cloud.google.com/service-directory/docs/reference/rpc/google.cloud.servicedirectory.v1#resolveservicerequest.
           required: false
+          default_from_api: true
   - !ruby/object:Api::Type::Enum
     name: 'keyManagementMode'
     description: |
@@ -154,6 +155,7 @@ properties:
     description: |
       Optional. Identifies the EKM Crypto Space that this EkmConnection maps to. Note: This field is required if KeyManagementMode is CLOUD_KMS.
     required: false
+    default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'createTime'
     description: |
