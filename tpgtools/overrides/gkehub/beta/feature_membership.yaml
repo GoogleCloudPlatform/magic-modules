@@ -36,4 +36,4 @@
 - type: COMPLEX_MAP_KEY_NAME
   field: policycontroller.policy_controller_hub_config.deployment_configs
   details:
-    keyname: deployment_type
+    keyname: component_name
