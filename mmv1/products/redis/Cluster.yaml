@@ -222,6 +222,11 @@ properties:
     description: |
       Output only. Redis memory size in GB for the entire cluster.
     output: true
+  - !ruby/object:Api::Type::Double
+    name: preciseSizeGb
+    description: |
+      Output only. Redis memory precise size in GB for the entire cluster.
+    output: true
   - !ruby/object:Api::Type::Integer
     name: shardCount
     description: |
