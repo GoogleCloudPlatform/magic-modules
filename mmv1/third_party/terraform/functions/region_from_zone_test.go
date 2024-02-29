@@ -1,3 +1,5 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
 package functions_test
 
 import (
@@ -13,6 +15,9 @@ import (
 func TestAccProviderFunction_region_from_zone(t *testing.T) {
 	t.Parallel()
 
+	projectZone := envvar.GetTestZoneFromEnv()
+	projectZoneRegex := regexp.MustCompile(fmt.Sprintf("^%s$", projectZone[:len(projectZone)-2]))
+
 	context := map[string]interface{}{
 		"function_name": "region_from_zone",
 		"output_name":   "zone",
@@ -25,7 +30,7 @@ func TestAccProviderFunction_region_from_zone(t *testing.T) {
 			{
 				Config: testProviderFunction_get_region_from_zone(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestMatchOutput(context["output_name"].(string), "us-central1"),
+					resource.TestMatchOutput(context["output_name"].(string), projectZoneRegex),
 				),
 			},
 		},
@@ -60,7 +65,7 @@ resource "google_filestore_instance" "instance" {
   }
 
 output "%{output_name}" {
-	value = provider::google::%{function_name}(google_filestore_instance.default.location)
+	value = provider::google::%{function_name}(google_filestore_instance.instance.location)
 }
 `, context)
 }
