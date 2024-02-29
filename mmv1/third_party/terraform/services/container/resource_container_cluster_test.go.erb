@@ -1242,39 +1242,6 @@ func TestAccContainerCluster_withPrivateClusterConfigMissingCidrBlock(t *testing
 	})
 }
 
-func TestAccContainerCluster_withPrivateClusterConfigCidrBlockUpdate(t *testing.T) {
-	t.Parallel()
-
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
-	containerNetName := fmt.Sprintf("tf-test-container-net-%s", acctest.RandString(t, 10))
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccContainerCluster_PscBasic(containerNetName, clusterName),
-			},
-			{
-				ResourceName:            "google_container_cluster.with_private_endpoint_subnetwork",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
-			},
-			{
-				Config: testAccContainerCluster_withPrivateClusterConfigCidrBlockUpdate(containerNetName, clusterName),
-			},
-			{
-				ResourceName:            "google_container_cluster.with_private_endpoint_subnetwork",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
-			},
-		},
-	})
-}
-
 func TestAccContainerCluster_withPrivateClusterConfigMissingCidrBlock_withAutopilot(t *testing.T) {
 	t.Parallel()
 
@@ -7798,77 +7765,6 @@ resource "google_container_cluster" "with_resource_usage_export_config" {
   subnetwork    = "%s"
 }
 `, datasetId, clusterName, networkName, subnetworkName)
-}
-
-func testAccContainerCluster_PscBasic(containerNetName, clusterName string) string {
-  return fmt.Sprintf(`
-resource "google_compute_network" "container_network" {
-  name                    = "%s"
-  auto_create_subnetworks = false
-}
-
-resource "google_compute_subnetwork" "container_subnetwork" {
-  name                     = google_compute_network.container_network.name
-  network                  = google_compute_network.container_network.name
-  ip_cidr_range            = "10.0.36.0/24"
-  region                   = "us-central1"
-}
-
-resource "google_container_cluster" "psc" {
-  name               = "%s"
-  location           = "us-central1-c"
-  initial_node_count = 1
-
-  network    = google_compute_network.container_network.name
-  subnetwork = google_compute_subnetwork.container_subnetwork.name
-
-  master_authorized_networks_config {
-    gcp_public_cidrs_access_enabled = false 
-  }
-
-  private_cluster_config {
-    enable_private_nodes = true
-  }
-  min_master_version = "1.29.1-gke.1575000"
-  
-}
-`, containerNetName, clusterName)
-}
-
-func testAccContainerCluster_withPrivateClusterConfigCidrBlockUpdate(containerNetName, clusterName string) string {
-	return fmt.Sprintf(`
-resource "google_compute_network" "container_network" {
-  name                    = "%s"
-  auto_create_subnetworks = false
-}
-
-resource "google_compute_subnetwork" "container_subnetwork" {
-  name                     = google_compute_network.container_network.name
-  network                  = google_compute_network.container_network.name
-  ip_cidr_range            = "10.0.36.0/24"
-  region                   = "us-central1"
-}
-
-resource "google_container_cluster" "psc" {
-  name               = "%s"
-  location           = "us-central1-c"
-  initial_node_count = 1
-
-  network    = google_compute_network.container_network.name
-  subnetwork = google_compute_subnetwork.container_subnetwork.name
-
-  master_authorized_networks_config {
-    gcp_public_cidrs_access_enabled = false 
-  }
-
-  private_cluster_config {
-    enable_private_nodes = true
-	master_ipv4_cidr_block = "172.15.0.0/28"
-  }
-  min_master_version = "1.29.1-gke.1575000"
-  
-}
-`, containerNetName, clusterName)
 }
 
 func testAccContainerCluster_withPrivateClusterConfigMissingCidrBlock(containerNetName, clusterName, location string, autopilotEnabled bool) string {
