@@ -91,17 +91,54 @@ resource "google_kms_ekm_connection" "example-ekmconnection" {
       		raw_der	= data.google_secret_manager_secret_version.raw_der.secret_data
       	}
     }
+  depends_on = [
+  	google_project_iam_member.add_pscAuthorizedService_role,
+   	google_project_iam_member.add_sdviewer_role,
+    	google_project_iam_member.add_pscAuthorizedService,
+   	google_project_iam_member.add_sdviewer
+   ]
 }
 `, context)
 }
 
 func testAccKMSEkmConnection_kmsEkmConnectionBasicExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+data "google_project" "vpc-project" {
+  project_id = "cloud-ekm-refekm-playground"
+}
+data "google_project" "project" {
+}
+resource "google_project_iam_member" "add_sdviewer_updateekmconnection" {
+  project = data.google_project.vpc-project.number
+  role    = "roles/servicedirectory.viewer"
+  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-ekms.iam.gserviceaccount.com"
+}
+resource "google_project_iam_member" "add_pscAuthorizedService_updateekmconnection" {
+  project = data.google_project.vpc-project.number
+  role    = "roles/servicedirectory.pscAuthorizedService"
+  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-ekms.iam.gserviceaccount.com"
+}
+resource "google_project_iam_member" "add_sdviewer_role_updateekmconnection" {
+  project = data.google_project.vpc-project.number
+  role    = "roles/servicedirectory.viewer"
+  member  = "serviceAccount:service-1067888929963@gcp-sa-ekms.iam.gserviceaccount.com"
+}
+resource "google_project_iam_member" "add_pscAuthorizedService_role_updateekmconnection" {
+  project = data.google_project.vpc-project.number
+  role    = "roles/servicedirectory.pscAuthorizedService"
+  member  = "serviceAccount:service-1067888929963@gcp-sa-ekms.iam.gserviceaccount.com"
+}
 resource "google_kms_ekm_connection" "example-ekmconnection" {
   name            	= "tf_test_ekmconnection_example%{random_suffix}"
   location     		= "us-central1"
   key_management_mode 	= "CLOUD_KMS"
   crypto_space_path	= "v0/longlived/crypto-space-placeholder"
+  depends_on = [
+  	google_project_iam_member.add_pscAuthorizedService_role_updateekmconnection,
+   	google_project_iam_member.add_sdviewer_role_updateekmconnection,
+    	google_project_iam_member.add_pscAuthorizedService_updateekmconnection,
+   	google_project_iam_member.add_sdviewer_updateekmconnection
+   ]
 }
 `, context)
 }
