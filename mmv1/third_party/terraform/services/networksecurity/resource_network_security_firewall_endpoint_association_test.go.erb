@@ -29,7 +29,7 @@ func TestAccNetworkSecurityFirewallEndpointAssociations_basic(t *testing.T) {
 		CheckDestroy:             testAccCheckNetworkSecurityFirewallEndpointDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkSecurityFirewallEndpoints_basic(orgId, randomSuffix),
+				Config: testAccNetworkSecurityFirewallEndpointAssociation_basic(randomSuffix, orgId, ),
 			},
 			{
 				ResourceName:            "google_network_security_firewall_endpoint_association.foobar",
@@ -41,9 +41,10 @@ func TestAccNetworkSecurityFirewallEndpointAssociations_basic(t *testing.T) {
 	})
 }
 
-func testAccNetworkSecurityFirewallEndpoints_basic(randomSuffix string, orgId string, projectId string) string {
+func testAccNetworkSecurityFirewallEndpointAssociation_basic(randomSuffix string, orgId string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "foobar" {
+	provider                = google-beta
     name                    = "tf-test-my-vpc%s"
     auto_create_subnetworks = false
 }
@@ -53,26 +54,22 @@ resource "google_network_security_firewall_endpoint" "foobar" {
     name     = "tf-test-my-firewall-endpoint%s"
     parent   = "organizations/%s"
     location = "us-central1-a"
-
-    labels = {
-        foo = "bar"
-    }
 }
 
 # TODO: add tlsInspectionPolicy once resource is ready
 resource "google_network_security_firewall_endpoint_association" "foobar" {
     provider          = google-beta
     name              = "tf-test-my-firewall-endpoint%s"
-    parent            = "projects/%s"
+    parent            = "organizations/%s"
     location          = "us-central1-a"
     firewall_endpoint = google_network_security_firewall_endpoint.foobar.id
-    network           = google_compute_network.custom-test.id
+    network           = google_compute_network.foobar.id
 
     labels = {
         foo = "bar"
     }
 }
-`, randomSuffix, randomSuffix, orgId, randomSuffix, projectId)
+`, randomSuffix, randomSuffix, orgId, randomSuffix, orgId)
 }
 
 func testAccCheckNetworkSecurityFirewallEndpointAssociationDestroyProducer(t *testing.T) func(s *terraform.State) error {
