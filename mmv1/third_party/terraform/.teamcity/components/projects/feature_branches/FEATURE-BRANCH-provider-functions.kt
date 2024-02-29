@@ -43,6 +43,7 @@ fun featureBranchProviderFunctionSubProject(allConfig: AllContextParameters): Pr
     val packageName = "functions" // This project will contain only builds to test this single package
     val sharedResourcesEmpty: List<String> = listOf() // No locking when testing functions
     val vcrConfig = getVcrAcceptanceTestConfig(allConfig) // Reused below for both MM testing build configs
+    val trigger  = NightlyTriggerConfiguration() // Resued below for running tests against the downstream repos every night.
 
     var parentId: String // To be overwritten when each build config is generated below.
 
@@ -50,9 +51,12 @@ fun featureBranchProviderFunctionSubProject(allConfig: AllContextParameters): Pr
     val gaConfig = getGaAcceptanceTestConfig(allConfig)
     // How to make only build configuration to the relevant package(s)
     val functionPackageGa = PackagesListGa.getValue(packageName)
+
     // Enable testing using hashicorp/terraform-provider-google
     parentId = "${projectId}_HC_GA"
     val buildConfigHashiCorpGa = BuildConfigurationForSinglePackage(packageName, functionPackageGa.getValue("path"), "Provider-Defined Functions (GA provider, HashiCorp downstream)", ProviderNameGa, parentId, HashicorpVCSRootGa_featureBranchProviderFunctions, sharedResourcesEmpty, gaConfig)
+    buildConfigHashiCorpGa.addTrigger(trigger)
+
     // Enable testing using modular-magician/terraform-provider-google
     parentId = "${projectId}_MM_GA"
     val buildConfigModularMagicianGa = BuildConfigurationForSinglePackage(packageName, functionPackageGa.getValue("path"), "Provider-Defined Functions (GA provider, MM upstream)", ProviderNameGa, parentId, ModularMagicianVCSRootGa, sharedResourcesEmpty, vcrConfig)
@@ -60,9 +64,12 @@ fun featureBranchProviderFunctionSubProject(allConfig: AllContextParameters): Pr
     // Beta
     val betaConfig = getBetaAcceptanceTestConfig(allConfig)
     val functionPackageBeta = PackagesListBeta.getValue("functions")
+
     // Enable testing using hashicorp/terraform-provider-google-beta
     parentId = "${projectId}_HC_BETA"
     val buildConfigHashiCorpBeta = BuildConfigurationForSinglePackage(packageName, functionPackageBeta.getValue("path"), "Provider-Defined Functions (Beta provider, HashiCorp downstream)", ProviderNameBeta, parentId, HashicorpVCSRootBeta_featureBranchProviderFunctions, sharedResourcesEmpty, betaConfig)
+    buildConfigHashiCorpBeta.addTrigger(trigger)
+
     // Enable testing using modular-magician/terraform-provider-google-beta
     parentId = "${projectId}_MM_BETA"
     val buildConfigModularMagicianBeta = BuildConfigurationForSinglePackage(packageName, functionPackageBeta.getValue("path"), "Provider-Defined Functions (Beta provider, MM upstream)", ProviderNameBeta, parentId, ModularMagicianVCSRootBeta, sharedResourcesEmpty, vcrConfig)
