@@ -33,7 +33,7 @@ fun BuildConfigurationsForPackages(packages: Map<String, Map<String, String>>, p
     return list
 }
 
-// BuildConfigurationForSinglePackage accepts a details of a single package in a provider and returns a build configurations for it
+// BuildConfigurationForSinglePackage accepts details of a single package in a provider and returns a build configuration for it
 // Intended to be used in short-lived projects where we're testing specific packages, e.g. feature branch testing
 fun BuildConfigurationForSinglePackage(packageName: String, packagePath: String, packageDisplayName: String, providerName: String, parentProjectName: String, vcsRoot: GitVcsRoot, sharedResources: List<String>, environmentVariables: AccTestConfiguration): BuildType{
     val pkg = PackageDetails(packageName, packageDisplayName, providerName, parentProjectName)
