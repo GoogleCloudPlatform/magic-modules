@@ -2,8 +2,12 @@ name: TeamCity Services Weekly Diff Check
 permissions: read-all
 
 on:
+  # Enable ad hoc checks
+  workflow_dispatch:
+  
+  # Scheduled checks to catch edge cases
   schedule:
-    # Runs every tuesday morning
+    # Every Tuesday morning
     - cron:  '0 4 * * 2'
 
 jobs:
