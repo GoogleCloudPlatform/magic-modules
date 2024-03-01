@@ -1,3 +1,5 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
 package functions
 
 import (
@@ -41,11 +43,23 @@ func (f RegionFromZoneFunction) Run(ctx context.Context, req function.RunRequest
 		return
 	}
 
-	// Validate input - can't be an empty string, every zone will have 2nd to last element in string be a `-`
-	if len(arg0) != 0 && arg0[len(arg0)-2] == '-' {
-		resp.Diagnostics.Append(resp.Result.Set(ctx, arg0[:len(arg0)-2])...)
-	} else {
+	if arg0 == "" {
+		resp.Diagnostics.AddArgumentError(
+			0,
+			noMatchesErrorSummary,
+			"The input string is empty.",
+		)
 		return
 	}
 
+	if arg0[len(arg0)-2] != '-' {
+		resp.Diagnostics.AddArgumentError(
+			0,
+			noMatchesErrorSummary,
+			"The input string is invalid.",
+		)
+		return
+	}
+
+	resp.Diagnostics.Append(resp.Result.Set(ctx, arg0[:len(arg0)-2])...)
 }

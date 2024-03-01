@@ -1,8 +1,9 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
 package functions
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -30,9 +31,9 @@ func TestFunctionRun_region_from_zone(t *testing.T) {
 				Result: function.NewResultData(types.StringValue(region)),
 			},
 		},
-		"it returns an error when given input that is empty": {
+		"it returns an error when given input is empty": {
 			request: function.RunRequest{
-				Arguments: function.NewArgumentsData([]attr.Value{types.StringNull()}),
+				Arguments: function.NewArgumentsData([]attr.Value{types.StringValue("")}),
 			},
 			expected: function.RunResponse{
 				Result: function.NewResultData(types.StringNull()),
@@ -40,12 +41,12 @@ func TestFunctionRun_region_from_zone(t *testing.T) {
 					diag.NewArgumentErrorDiagnostic(
 						0,
 						noMatchesErrorSummary,
-						fmt.Sprintf("The input string is empty."),
+						"The input string is empty.",
 					),
 				},
 			},
 		},
-		"it returns an error when given input that is not a zone": {
+		"it returns an error when given input is not a zone": {
 			request: function.RunRequest{
 				Arguments: function.NewArgumentsData([]attr.Value{types.StringValue("foobar")}),
 			},
@@ -55,7 +56,7 @@ func TestFunctionRun_region_from_zone(t *testing.T) {
 					diag.NewArgumentErrorDiagnostic(
 						0,
 						noMatchesErrorSummary,
-						fmt.Sprintf("The input string foobar is not a valid zone."),
+						"The input string is invalid.",
 					),
 				},
 			},
