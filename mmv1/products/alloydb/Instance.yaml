@@ -55,6 +55,7 @@ autogen_async: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/alloydb_instance.go.erb
   pre_create: templates/terraform/pre_create/alloydb_instance.go.erb
+  post_create: templates/terraform/post_create/alloydb_instance.go.erb
   pre_delete: templates/terraform/pre_delete/alloydb_instance.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
@@ -68,6 +69,17 @@ examples:
       - 'reconciling'
       - 'update_time'
     skip_test: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'alloydb_instance_public_ip'
+    primary_resource_id: 'public_ip_instance'
+    min_version: beta
+    vars:
+      alloydb_cluster_name: 'alloydb-cluster'
+      alloydb_instance_name: 'alloydb-instance'
+      network_name: 'alloydb-network'
+    ignore_read_extra:
+      - 'reconciling'
+      - 'update_time'
   - !ruby/object:Provider::Terraform::Examples
     name: 'alloydb_secondary_instance_basic'
     primary_resource_id: 'secondary'
@@ -278,3 +290,29 @@ properties:
             values:
               - :ENCRYPTED_ONLY
               - :ALLOW_UNENCRYPTED_AND_ENCRYPTED
+  - !ruby/object:Api::Type::NestedObject
+    name: 'networkConfig'
+    default_from_api: true
+    min_version: beta
+    description: |
+      Metadata related to network configuration.
+    properties:
+      - !ruby/object:Api::Type::Boolean
+        name: enablePublicIp
+        description: |
+          Enables inbound public IP address.
+      - !ruby/object:Api::Type::Array
+        name: authorizedExternalNetworks
+        description: |
+          list of external networks authorized to access the instance.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: cidrRange
+              description: |
+                The IP range in CIDR notation that is allowed to access the instance.
+  - !ruby/object:Api::Type::String
+    name: publicIpAddress
+    output: true
+    description: |
+      The public IP address for the Instance, if `network_config.enable_public_ip` is set to true.
