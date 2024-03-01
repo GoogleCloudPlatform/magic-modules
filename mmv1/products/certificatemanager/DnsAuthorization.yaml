@@ -50,6 +50,13 @@ examples:
       dns_auth_name: 'dns-auth'
       zone_name: 'my-zone'
       subdomain: 'subdomain'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'certificate_manager_dns_authorization_regional'
+    primary_resource_id: 'default'
+    vars:
+      dns_auth_name: 'dns-auth'
+      zone_name: 'my-zone'
+      subdomain: 'subdomain'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -84,6 +91,22 @@ properties:
       A domain which is being authorized. A DnsAuthorization resource covers a
       single domain and its wildcard, e.g. authorization for "example.com" can
       be used to issue certificates for "example.com" and "*.example.com".
+  - !ruby/object:Api::Type::Enum
+    name: type
+    description: |
+      type of DNS authorization. If unset during the resource creation, FIXED_RECORD will
+      be used for global resources, and PER_PROJECT_RECORD will be used for other locations.
+
+      FIXED_RECORD DNS authorization uses DNS-01 validation method
+
+      PER_PROJECT_RECORD DNS authorization allows for independent management
+      of Google-managed certificates with DNS authorization across multiple
+      projects.
+    immutable: true
+    values:
+      - :FIXED_RECORD
+      - :PER_PROJECT_RECORD
+    default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: 'dnsResourceRecord'
     output: true
