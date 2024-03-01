@@ -4,6 +4,7 @@ package functions
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/function"
 )
@@ -56,7 +57,7 @@ func (f RegionFromZoneFunction) Run(ctx context.Context, req function.RunRequest
 		resp.Diagnostics.AddArgumentError(
 			0,
 			noMatchesErrorSummary,
-			"The input string is invalid.",
+			fmt.Sprintf("The input string \"%s\" is not a valid zone name.", arg0),
 		)
 		return
 	}

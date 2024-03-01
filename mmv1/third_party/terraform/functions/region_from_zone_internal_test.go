@@ -1,5 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package functions
 
 import (
@@ -56,7 +54,7 @@ func TestFunctionRun_region_from_zone(t *testing.T) {
 					diag.NewArgumentErrorDiagnostic(
 						0,
 						noMatchesErrorSummary,
-						"The input string is invalid.",
+						"The input string \"foobar\" is not a valid zone name.",
 					),
 				},
 			},
