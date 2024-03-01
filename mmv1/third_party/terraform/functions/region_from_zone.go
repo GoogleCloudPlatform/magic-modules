@@ -48,7 +48,7 @@ func (f RegionFromZoneFunction) Run(ctx context.Context, req function.RunRequest
 		resp.Diagnostics.AddArgumentError(
 			0,
 			noMatchesErrorSummary,
-			"The input string is empty.",
+			"The input string cannot be empty.",
 		)
 		return
 	}
