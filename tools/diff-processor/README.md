@@ -16,7 +16,7 @@ bin/diff-processor breaking-changes
 
 # Add labels to a PR based on the resources changed between OLD_REF and NEW_REF
 # The token used must have write access to issues
-GITHUB_TOKEN=github_token bin/diff-processor add-labels PR_ID [--dry-run]
+GITHUB_TOKEN_MAGIC_MODULES=github_token bin/diff-processor add-labels PR_ID [--dry-run]
 ```
 
 ## Test
