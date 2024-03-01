@@ -19,9 +19,10 @@ func TestAccProviderFunction_region_from_zone(t *testing.T) {
 	projectZoneRegex := regexp.MustCompile(fmt.Sprintf("^%s$", projectZone[:len(projectZone)-2]))
 
 	context := map[string]interface{}{
-		"function_name": "region_from_zone",
-		"output_name":   "zone",
-		"resource_name": fmt.Sprintf("tf-test-region-from-zone-func-%s", acctest.RandString(t, 10)),
+		"function_name":     "region_from_zone",
+		"output_name":       "zone",
+		"resource_name":     fmt.Sprintf("tf-test-region-from-zone-func-%s", acctest.RandString(t, 10)),
+		"resource_location": projectZone,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -48,24 +49,26 @@ terraform {
 	}
 }
 
-resource "google_filestore_instance" "instance" {
-	name = "%{resource_name}"
-	location = "us-central1-b"
-	tier     = "BASIC_HDD"
+resource "google_cloud_run_service" "default" {
+	name     = "%{resource_name}"
+	location = "%{resource_location}"
   
-	file_shares {
-	  capacity_gb = 1024
-	  name        = "share1"
+	template {
+	  spec {
+		containers {
+		  image = "us-docker.pkg.dev/cloudrun/container/hello"
+		}
+	  }
 	}
   
-	networks {
-	  network = "default"
-	  modes   = ["MODE_IPV4"]
+	traffic {
+	  percent         = 100
+	  latest_revision = true
 	}
   }
 
 output "%{output_name}" {
-	value = provider::google::%{function_name}(google_filestore_instance.instance.location)
+	value = provider::google::%{function_name}(google_cloud_run_service.default.location)
 }
 `, context)
 }
