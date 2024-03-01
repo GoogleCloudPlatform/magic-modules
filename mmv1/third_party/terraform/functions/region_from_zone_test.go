@@ -42,31 +42,24 @@ func testProviderFunction_get_region_from_zone(context map[string]interface{}) s
 terraform {
 	required_providers {
 		google = {
-			source = "hashicorp/google"
+		  source = "hashicorp/google"
 		}
 	}
 }
 
-resource "google_cloud_run_service" "default" {
-	name     = "%{resource_name}"
-	location = "%{resource_location}"
-  
-	template {
-	  spec {
-		containers {
-		  image = "us-docker.pkg.dev/cloudrun/container/hello"
-		}
-	  }
+resource "google_compute_disk" "default" {
+	name  = "%{resource_name}"
+	type  = "pd-ssd"
+	zone  = "%{resource_location}"
+	image = "debian-11-bullseye-v20220719"
+	labels = {
+	  environment = "dev"
 	}
-  
-	traffic {
-	  percent         = 100
-	  latest_revision = true
-	}
+	physical_block_size_bytes = 4096
   }
 
 output "%{output_name}" {
-	value = provider::google::%{function_name}(google_cloud_run_service.default.location)
+  value = provider::google::%{function_name}(google_compute_disk.default.zone)
 }
 `, context)
 }
