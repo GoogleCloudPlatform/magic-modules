@@ -79,6 +79,7 @@ const (
 	CustomListSize                    = "CUSTOM_LIST_SIZE_CONSTRAINT"
 	CustomDefault                     = "CUSTOM_DEFAULT"
 	CustomSchemaValues                = "CUSTOM_SCHEMA_VALUES"
+	ComplexMapKey                     = "COMPLEX_MAP_KEY_NAME"
 )
 
 // Overrides represents the type a resource's override file can be marshalled
