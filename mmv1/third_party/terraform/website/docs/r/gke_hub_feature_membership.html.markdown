@@ -522,7 +522,7 @@ The following arguments are supported:
     
 * `component_name` -
   (Required)
-  The name for the key in the map for which this object is mapped to in the API
+  The name of the component. One of `admission` `audit` or `mutation`
     
 * `container_resources` -
   (Optional)
@@ -603,7 +603,7 @@ The `bundles` block supports:
     
 * `bundle_name` -
   (Required)
-  The name for the key in the map for which this object is mapped to in the API
+  The name of the bundle.
     
 * `exempted_namespaces` -
   (Optional)
