@@ -7,7 +7,7 @@ aliases:
 
 # Best practices
 
-The following is a list of best practices that contributions are expected to follow in order to ensure a consistent UX for the Google Terraform provider internally and also compared to other Terraform providers.
+The following is a list of best practices that contributions are expected to follow in order to ensure a consistent UX for the Terraform provider for Google Cloud internally and also compared to other Terraform providers.
 
 ## ForceNew
 
@@ -44,7 +44,7 @@ See [magic-modules#13107](https://github.com/hashicorp/terraform-provider-google
 
 ## Add labels and annotations support
 
-The new labels model and the new annotations model are introduced in [Terraform Google Provider 5.0.0](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/version_5_upgrade#provider).
+The new labels model and the new annotations model are introduced in [Terraform provider for Google Cloud 5.0.0](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/version_5_upgrade#provider).
 
 There are now three label-related fields with the new labels model:
 * The `labels` field is now non-authoritative and only manages the label keys defined in your configuration for the resource.

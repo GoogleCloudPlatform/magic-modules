@@ -18,11 +18,11 @@ The `google` and `google-beta` providers are both considered "stable surfaces"
 for the purpose of releases, which means that neither provider allows breaking
 changes except during major releases, which are typically yearly.
 
-Terraform users rely on the stability of Terraform providers (including the GCP
-provider and other major providers.) Even as part of a major release, breaking
-changes that are overly broad and/or have little benefit to users can cause
-deeply negative reactions and significantly delay customers upgrading to the
-new major version.
+Terraform users rely on the stability of Terraform providers (including the
+Google Cloud provider and other major providers.) Even as part of a major
+release, breaking changes that are overly broad and/or have little benefit to
+users can cause deeply negative reactions and significantly delay customers
+upgrading to the new major version.
 
 Breaking changes may cause significant churn for users by forcing them to
 update their configurations. It also causes churn in tooling built on top of
@@ -177,7 +177,7 @@ Entries should focus on the changes that users need to make when upgrading
 to `{{% param "majorVersion" %}}`, rather than how to write configurations
 after upgrading.
 
-See [Terraform Google Provider 4.0.0 Upgrade Guide](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/version_4_upgrade)
+See [Terraform provider for Google Cloud 4.0.0 Upgrade Guide](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/version_4_upgrade)
 and other upgrade guides for examples.
 
 The upgrade guide and the actual breaking change will be merged only after both are completed.
