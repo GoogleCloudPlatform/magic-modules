@@ -13,7 +13,6 @@ import (
 
 var ccEnvironmentVariables = [...]string{
 	"COMMIT_SHA",
-	"GITHUB_TOKEN_DOWNSTREAMS",
 	"GOCACHE",
 	"GOPATH",
 	"GOOGLE_BILLING_ACCOUNT",
@@ -56,6 +55,8 @@ var checkCassettesCmd = &cobra.Command{
 			env[ev] = val
 		}
 
+		env["GITHUB_TOKEN_DOWNSTREAMS"] = githubTokenOrFallback("GITHUB_TOKEN_DOWNSTREAMS")
+
 		rnr, err := exec.NewRunner()
 		if err != nil {
 			fmt.Println("Error creating Runner: ", err)
@@ -71,6 +72,14 @@ var checkCassettesCmd = &cobra.Command{
 		}
 		execCheckCassettes(env["COMMIT_SHA"], vt, ctlr)
 	},
+}
+
+func githubTokenOrFallback(tokenName string) string {
+	val, ok := os.LookupEnv(tokenName)
+	if !ok {
+		return os.Getenv("GITHUB_TOKEN")
+	}
+	return val
 }
 
 func listCCEnvironmentVariables() string {

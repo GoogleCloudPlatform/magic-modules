@@ -72,11 +72,7 @@ var membershipCheckerCmd = &cobra.Command{
 		baseBranch := args[5]
 		fmt.Println("Base Branch: ", baseBranch)
 
-		githubToken, ok := os.LookupEnv("GITHUB_TOKEN_MAGIC_MODULES")
-		if !ok {
-			fmt.Println("Did not provide GITHUB_TOKEN_MAGIC_MODULES environment variable")
-			os.Exit(1)
-		}
+		githubToken := githubTokenOrFallback("GITHUB_TOKEN_MAGIC_MODULES")
 		gh := github.NewClient(githubToken)
 		cb := cloudbuild.NewClient()
 		execMembershipChecker(prNumber, commitSha, branchName, headRepoUrl, headBranch, baseBranch, gh, cb)

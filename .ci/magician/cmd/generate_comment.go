@@ -35,8 +35,6 @@ var gcEnvironmentVariables = [...]string{
 	"BUILD_ID",
 	"BUILD_STEP",
 	"COMMIT_SHA",
-	"GITHUB_TOKEN_DOWNSTREAMS",
-	"GITHUB_TOKEN_MAGIC_MODULES",
 	"GOPATH",
 	"HOME",
 	"PATH",
@@ -71,6 +69,9 @@ var generateCommentCmd = &cobra.Command{
 			env[ev] = val
 		}
 
+		for _, tokenName := range []string{"GITHUB_TOKEN_DOWNSTREAMS", "GITHUB_TOKEN_MAGIC_MODULES"} {
+			env[tokenName] = githubTokenOrFallback(tokenName)
+		}
 		gh := github.NewClient(env["GITHUB_TOKEN_MAGIC_MODULES"])
 		rnr, err := exec.NewRunner()
 		if err != nil {
