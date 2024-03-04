@@ -1137,7 +1137,7 @@ The following arguments are supported:
 <a name="nested_task_logs_retention_config_c3"></a>The `task_logs_retention_config` block supports:
 * `storage_mode` - 
   (Optional)
-  The mode of storage for Airflow workers task logs. Values for storage mode are 
+  The mode of storage for Airflow task logs. Values for storage mode are 
   `CLOUD_LOGGING_ONLY` to only store logs in cloud logging and 
   `CLOUD_LOGGING_AND_CLOUD_STORAGE` to store logs in cloud logging and cloud storage.
 
