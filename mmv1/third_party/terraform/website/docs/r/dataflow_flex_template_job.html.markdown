@@ -118,7 +118,7 @@ provided, the provider project is used.
 
 * `region` - (Optional) The region in which the created job should run.
 
-* `service_account_email` - (Optional) Service account to run the workers as.
+* `service_account_email` - (Optional) Service account email to run the workers as.
 
 * `subnetwork` - (Optional) Compute Engine subnetwork for launching instances to run your pipeline.
 
