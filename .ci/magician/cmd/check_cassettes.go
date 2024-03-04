@@ -13,7 +13,7 @@ import (
 
 var ccEnvironmentVariables = [...]string{
 	"COMMIT_SHA",
-	"GITHUB_TOKEN",
+	"GITHUB_TOKEN_DOWNSTREAMS",
 	"GOCACHE",
 	"GOPATH",
 	"GOOGLE_BILLING_ACCOUNT",
@@ -62,7 +62,7 @@ var checkCassettesCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		ctlr := source.NewController(env["GOPATH"], "modular-magician", env["GITHUB_TOKEN"], rnr)
+		ctlr := source.NewController(env["GOPATH"], "modular-magician", env["GITHUB_TOKEN_DOWNSTREAMS"], rnr)
 
 		vt, err := vcr.NewTester(env, rnr)
 		if err != nil {
