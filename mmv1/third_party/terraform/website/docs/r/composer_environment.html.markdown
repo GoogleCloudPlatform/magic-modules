@@ -1238,7 +1238,7 @@ The following arguments are supported:
 * `image_version` -
   (Required) If omitted, the default is the latest version of Composer 2.
 
-  In Cloud Composer 3, you can only specify 3 in Cloud Composer portion of the image version.
+  In Cloud Composer 3, you can only specify 3 in the Cloud Composer portion of the image version. Example: composer-3-airflow-x.y.z-build.t.
 
   The Apache Airflow portion of the image version is a full semantic version that points to one of the
   supported Apache Airflow versions, or an alias in the form of only major, major.minor or major.minor.patch versions specified.
