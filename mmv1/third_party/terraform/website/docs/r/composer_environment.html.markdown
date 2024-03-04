@@ -1236,7 +1236,7 @@ The following arguments are supported:
   ```
 
 * `image_version` -
-  (Required in Cloud Composer 2 and 3, optional in Cloud Composer 1)
+  (Required) If omitted, the default is the latest version of Composer 2.
 
   In Cloud Composer 3, you can only specify 3 in Cloud Composer portion of the image version.
 
