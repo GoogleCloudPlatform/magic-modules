@@ -210,8 +210,9 @@ func (t Type) IsSet() bool {
 }
 
 // Complex map is for maps of string --> object that are supported in DCL but
-// not in Terraform. We handle this by adding a `name` field in the Terraform 
-// schema for the key in the map
+// not in Terraform. We handle this by adding a field in the Terraform schema 
+// for the key in the map. This must be added via a COMPLEX_MAP_KEY_NAME
+// override
 func (t Type) IsComplexMap() bool {
 	if t.typ.AdditionalProperties != nil {
 		return t.typ.AdditionalProperties.Type != "string"
