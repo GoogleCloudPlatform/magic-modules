@@ -36,12 +36,12 @@ var requestServiceReviewersCmd = &cobra.Command{
 	If a PR has more than 3 service labels, the command will not do anything.
 	`,
 	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		prNumber := args[0]
 		fmt.Println("PR Number: ", prNumber)
 
 		gh := github.NewClient()
-		execRequestServiceReviewers(prNumber, gh, labeler.EnrolledTeamsYaml)
+		return execRequestServiceReviewers(prNumber, gh, labeler.EnrolledTeamsYaml)
 	},
 }
 
@@ -102,12 +102,11 @@ func execRequestServiceReviewers(prNumber string, gh GithubClient, enrolledTeams
 		previousReviewersSet[reviewer.Login] = struct{}{}
 	}
 
-	exitCode := 0
+	errors = []string{}
 	for githubTeam, _ := range githubTeamsSet {
 		teamOrg := strings.Split(githubTeam, "/")
 		if len(teamOrg) < 1 || len(teamOrg) > 2 {
-			fmt.Printf("Team %q is invalid; must match format `team` or `org/team`", githubTeam)
-			exitCode = 1
+			errors = append(errors, fmt.Sprintf("Team %q is invalid; must match format `team` or `org/team`", githubTeam))
 			continue
 		}
 		var org, team string
@@ -120,8 +119,7 @@ func execRequestServiceReviewers(prNumber string, gh GithubClient, enrolledTeams
 		}
 		members, err := gh.GetTeamMembers(org, team)
 		if err != nil {
-			fmt.Printf("Error fetching members for %s/%s: %s", org, team, err)
-			exitCode = 1
+			errors = append(errors, fmt.Sprintf("Error fetching members for %s/%s: %s", org, team, err))
 			continue
 		}
 		hasReviewer := false
@@ -149,13 +147,13 @@ func execRequestServiceReviewers(prNumber string, gh GithubClient, enrolledTeams
 	for _, reviewer := range reviewersToRequest {
 		err = gh.RequestPullRequestReviewer(prNumber, reviewer)
 		if err != nil {
-			fmt.Println(err)
-			exitCode = 1
+			errors = append(errors, err.(string))
 		}
 	}
-	if exitCode != 0 {
-		os.Exit(1)
+	if len(errors) > 0 {
+		return fmt.Errorf("requesting service reviewers: %v", errors)
 	}
+	return nil
 }
 
 func init() {

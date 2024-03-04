@@ -22,6 +22,10 @@ service/google-a:
     team: other-org/other-team
     resources:
     - google_a_resource
+service/google-b:
+    team: other-org/other-team/invalid-value
+    resources:
+    - google_b_resource
 `)
 
 func TestExecRequestServiceReviewersMembershipChecker(t *testing.T) {
@@ -31,6 +35,7 @@ func TestExecRequestServiceReviewersMembershipChecker(t *testing.T) {
 		previousReviewers       []string
 		teamMembers             map[string]map[string][]string
 		expectSpecificReviewers []string
+		expectError             bool
 	}{
 		"no service labels means no service team reviewers": {
 			pullRequest: github.PullRequest{
@@ -41,7 +46,7 @@ func TestExecRequestServiceReviewersMembershipChecker(t *testing.T) {
 		"unregistered service labels will not trigger review": {
 			pullRequest: github.PullRequest{
 				User:   github.User{Login: "googler_author"},
-				Labels: []github.Label{{Name: "service/google-a"}},
+				Labels: []github.Label{{Name: "service/google-unregistered"}},
 			},
 			expectSpecificReviewers: []string{},
 		},
@@ -117,6 +122,15 @@ func TestExecRequestServiceReviewersMembershipChecker(t *testing.T) {
 			},
 			teamMembers:             map[string]map[string][]string{"GoogleCloudPlatform": {"google-x": []string{"googler_team_member"}, "google-y": []string{"googler_y_team_member"}}},
 			expectSpecificReviewers: []string{},
+		},
+		"service teams with invalid team names will be gracefully skipped but return an error": {
+			pullRequest: github.PullRequest{
+				User:   github.User{Login: "googler_author"},
+				Labels: []github.Label{{Name: "service/google-a"}, {Name: "service/google-b"}},
+			},
+			teamMembers:             map[string]map[string][]string{"other-org": {"other-team": []string{"googler_team_member"}}},
+			expectSpecificReviewers: []string{"googler_team_member"},
+			expectError: true,
 		},
 	}
 	for tn, tc := range cases {
