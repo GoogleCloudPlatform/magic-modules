@@ -36,7 +36,6 @@ import_format:
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "firebase_app_check_recaptcha_v3_config_basic"
-    min_version: 'beta'
     # Need the time_sleep resource
     pull_external: true
     primary_resource_id: "default"
