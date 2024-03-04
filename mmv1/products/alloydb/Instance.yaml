@@ -278,3 +278,34 @@ properties:
             values:
               - :ENCRYPTED_ONLY
               - :ALLOW_UNENCRYPTED_AND_ENCRYPTED
+  - !ruby/object:Api::Type::NestedObject
+    name: 'pscInstanceConfig'
+    default_from_api: true
+    description: |
+      Configuration for Private Service Connect (PSC) for the instance.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'serviceAttachmentLink'
+        output: true
+        description: |
+          The service attachment created when Private Service Connect (PSC) is enabled for the instance.
+          The name of the resource will be in the format of 
+          `projects/<alloydb-tenant-project-number>/regions/<region-name>/serviceAttachments/<service-attachment-name>`
+      - !ruby/object:Api::Type::Array
+        name: allowedConsumerProjects
+        item_type: Api::Type::String
+        description: |
+          List of consumer projects that are allowed to create PSC endpoints to service-attachments to this instance.
+        default_from_api: true
+      - !ruby/object:Api::Type::Array
+        name: allowedConsumerNetworks
+        item_type: Api::Type::String
+        description: |
+          List of consumer networks that are allowed to create PSC endpoints to service-attachments to this instance.
+        default_from_api: true
+      - !ruby/object:Api::Type::String
+        name: 'pscDnsName'
+        output: true
+        description: |
+          The DNS name of the instance for PSC connectivity.
+          Name convention: <uid>.<uid>.<region>.alloydb-psc.goog
