@@ -1131,7 +1131,7 @@ The following arguments are supported:
 <a name="nested_data_retention_config_c3"></a>The `data_retention_config` block supports:
 * `task_logs_retention_config` - 
   (Optional)
-  The configuration setting for Task Logs. Structure is
+  The configuration setting for Airflow task logs. Structure is
   [documented below](#nested_task_logs_retention_config_c3).
 
 <a name="nested_task_logs_retention_config_c3"></a>The `task_logs_retention_config` block supports:
