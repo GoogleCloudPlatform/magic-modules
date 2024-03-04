@@ -15,7 +15,7 @@ package product
 
 // require 'api/object'
 
-var ORDER = [...]string{"ga", "beta", "alpha", "private"}
+var ORDER = []string{"ga", "beta", "alpha", "private"}
 
 // A version of the API for a given product / API group
 // In GCP, different product versions are generally ordered where alpha is
