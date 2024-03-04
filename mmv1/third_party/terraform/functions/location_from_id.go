@@ -36,9 +36,8 @@ func (f LocationFromIdFunction) Definition(ctx context.Context, req function.Def
 func (f LocationFromIdFunction) Run(ctx context.Context, req function.RunRequest, resp *function.RunResponse) {
 	// Load arguments from function call
 	var arg0 string
-	resp.Diagnostics.Append(req.Arguments.GetArgument(ctx, 0, &arg0)...)
-
-	if resp.Diagnostics.HasError() {
+	resp.Error = function.ConcatFuncErrors(req.Arguments.GetArgument(ctx, 0, &arg0))
+	if resp.Error != nil {
 		return
 	}
 
@@ -48,12 +47,12 @@ func (f LocationFromIdFunction) Run(ctx context.Context, req function.RunRequest
 	pattern := "locations/{location}/"                                // Human-readable pseudo-regex pattern used in errors and warnings
 
 	// Validate input
-	ValidateElementFromIdArguments(arg0, regex, pattern, resp)
-	if resp.Diagnostics.HasError() {
+	resp.Error = function.ConcatFuncErrors(ValidateElementFromIdArguments(ctx, arg0, regex, pattern))
+	if resp.Error != nil {
 		return
 	}
 
 	// Get and return element from input string
 	location := GetElementFromId(arg0, regex, template)
-	resp.Diagnostics.Append(resp.Result.Set(ctx, location)...)
+	resp.Error = function.ConcatFuncErrors(resp.Result.Set(ctx, location))
 }
