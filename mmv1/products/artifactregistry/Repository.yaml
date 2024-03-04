@@ -181,6 +181,7 @@ properties:
     name: 'dockerConfig'
     description: |-
       Docker repository config contains repository level configuration for the repositories of docker type.
+    allow_empty_object: true
     properties:
       - !ruby/object:Api::Type::Boolean
         name: 'immutableTags'
