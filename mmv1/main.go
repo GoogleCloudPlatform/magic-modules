@@ -80,7 +80,7 @@ func main() {
 			// TODO Q1: remove these lines, which are for debugging
 			// log.Printf("productYamlPath %#v", productYamlPath)
 
-			var resources []api.Resource
+			var resources []api.Resource = make([]api.Resource, 0)
 
 			productYaml, err := os.ReadFile(productYamlPath)
 			if err != nil {
@@ -132,7 +132,11 @@ func main() {
 
 			// TODO Q2: override resources
 
-			// TODO Q1: sort resources by name and set in product
+			// Sort resources by name
+			sort.Slice(resources, func(i, j int) bool {
+				return resources[i].Name < resources[j].Name
+			})
+			productApi.Objects = resources
 
 			// TODO Q2: set other providers via flag
 			providerToGenerate := provider.NewTerraform(productApi)
@@ -142,7 +146,6 @@ func main() {
 				continue
 			}
 
-			// TODO Q1: generate templates
 			log.Printf("%s: Generating files", productName)
 			providerToGenerate.Generate(outputPath, productName, generateCode, generateDocs)
 		}
