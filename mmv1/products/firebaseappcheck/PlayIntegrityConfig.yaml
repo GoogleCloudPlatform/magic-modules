@@ -37,7 +37,6 @@ import_format:
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "firebase_app_check_play_integrity_config_minimal"
-    min_version: 'beta'
     # Need the time_sleep resource
     pull_external: true
     primary_resource_id: "default"
@@ -47,7 +46,6 @@ examples:
       project_id: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
     name: "firebase_app_check_play_integrity_config_full"
-    min_version: 'beta'
     # Need the time_sleep resource
     pull_external: true
     primary_resource_id: "default"
