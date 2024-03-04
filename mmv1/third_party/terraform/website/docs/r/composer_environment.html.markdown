@@ -1125,7 +1125,7 @@ The following arguments are supported:
 
 * `data_retention_config` -
   (Optional, Cloud Composer 2.0.23 or later only)
-  Configuration setting for airflow data rentention mechanism. Structure is
+  Configuration setting for Airflow database retention mechanism. Structure is
   [documented below](#nested_data_retention_config_c3).
 
 <a name="nested_data_retention_config_c3"></a>The `data_retention_config` block supports:
