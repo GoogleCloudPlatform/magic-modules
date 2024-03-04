@@ -697,7 +697,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 				Required: true,
 				Description: "The name for the key in the map for which this object is mapped to in the API",
 			}
-			props = append(props, keyProp)
+			props = append([]Property{keyProp}, props...)
 
 			p.Properties = props
 			e := fmt.Sprintf("%s%sSchema()", resource.PathType(), p.PackagePath())
