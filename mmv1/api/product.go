@@ -39,7 +39,7 @@ type Product struct {
 
 	// Display Name: The full name of the GCP product; eg "Cloud Bigtable"
 
-	Objects []interface{}
+	Objects []*Resource
 
 	// The list of permission scopes available for the service
 	// For example: `https://www.googleapis.com/auth/compute`
@@ -67,6 +67,14 @@ type Product struct {
 	LegacyName string `yaml:"legacy_name"`
 
 	ClientName string `yaml:"client_name"`
+}
+
+func (p *Product) Validate() {
+	// TODO Q1 Rewrite super
+	//     super
+	for _, o := range p.Objects {
+		o.ProductMetadata = p
+	}
 }
 
 // def validate
