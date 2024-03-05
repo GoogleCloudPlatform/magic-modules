@@ -35,23 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v4
-      with:
-        repository: ${{ github.event.inputs.owner }}/${{ github.event.inputs.repo }}
-        ref: ${{ github.event.inputs.branch }}
-        fetch-depth: 2
-    - name: Check for Code Changes
-      id: pull_request
-      run: |
-        gofiles=$(git diff --name-only HEAD~1 | { grep -e "\.go$" -e "go.mod$" -e "go.sum$" || test $? = 1; })
-        if [ -z "$gofiles" ]; then
-          echo "has_changes=false" >> $GITHUB_OUTPUT
-        else
-          echo "has_changes=true" >> $GITHUB_OUTPUT
-        fi
     - name: Get Job URL
-      if: ${{ !cancelled() }}
       id: get_job
       run: |
         response=$(curl --get -Ss -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}/jobs")
@@ -68,6 +52,21 @@ jobs:
         "target_url": "${{ steps.get_job.outputs.url }}",
         "state": "pending"
         }'
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ github.event.inputs.owner }}/${{ github.event.inputs.repo }}
+        ref: ${{ github.event.inputs.branch }}
+        fetch-depth: 2
+    - name: Check for Code Changes
+      id: pull_request
+      run: |
+        gofiles=$(git diff --name-only HEAD~1 | { grep -e "\.go$" -e "go.mod$" -e "go.sum$" || test $? = 1; })
+        if [ -z "$gofiles" ]; then
+          echo "has_changes=false" >> $GITHUB_OUTPUT
+        else
+          echo "has_changes=true" >> $GITHUB_OUTPUT
+        fi
     - name: Set up Go
       if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
       uses: actions/setup-go@v4
