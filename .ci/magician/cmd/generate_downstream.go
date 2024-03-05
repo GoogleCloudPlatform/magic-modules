@@ -25,6 +25,7 @@ var gdEnvironmentVariables = [...]string{
 var gdTokenEnvironmentVariables = [...]string{
 	"GITHUB_TOKEN_CLASSIC",
 	"GITHUB_TOKEN_DOWNSTREAMS",
+	"GITHUB_TOKEN",
 }
 
 var generateDownstreamCmd = &cobra.Command{

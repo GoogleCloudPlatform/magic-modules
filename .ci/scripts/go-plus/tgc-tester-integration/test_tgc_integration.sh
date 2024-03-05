@@ -36,6 +36,11 @@ post_body=$( jq -n \
 	--arg state "pending" \
 	'{context: $context, target_url: $target_url, state: $state}')
 
+# Fall back to old github token if new token is unavailable.
+if [[ -z $GITHUB_TOKEN_MAGIC_MODULES ]]; then
+  GITHUB_TOKEN_MAGIC_MODULES=$GITHUB_TOKEN
+fi
+
 curl \
   -X POST \
   -u "$github_username:$GITHUB_TOKEN_MAGIC_MODULES" \
