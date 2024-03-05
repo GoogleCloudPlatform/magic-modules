@@ -140,6 +140,7 @@ properties:
           Defines operating mode for this policy.
       - !ruby/object:Api::Type::NestedObject
         name: 'scaleDownControl'
+        min_version: beta
         description: |
           Defines scale down controls to reduce the risk of response latency
           and outages due to abrupt scale-in events
@@ -264,6 +265,7 @@ properties:
               required: true
             - !ruby/object:Api::Type::Double
               name: 'singleInstanceAssignment'
+              min_version: beta
               description: |
                 If scaling is based on a per-group metric value that represents the
                 total amount of work to be done or resource usage, set this value to
@@ -339,6 +341,7 @@ properties:
                 (if you are using gce_instance resource type). If multiple
                 TimeSeries are returned upon the query execution, the autoscaler
                 will sum their respective values to obtain its scaling value.
+              min_version: beta
       - !ruby/object:Api::Type::NestedObject
         name: 'loadBalancingUtilization'
         description: |

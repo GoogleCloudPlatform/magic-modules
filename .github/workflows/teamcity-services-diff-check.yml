@@ -2,7 +2,6 @@ name: TeamCity Services Diff Check
 permissions: read-all
 
 on:
-  workflow_dispatch:
   pull_request:
     paths:
       - '.github/workflows/teamcity-services-diff-check.yml'
@@ -75,7 +74,7 @@ jobs:
           unzip -o artifacts/output.zip -d ./provider
           rm artifacts/output.zip
 
-      - name: Diff Check
+      - name: Check that new services have been added to the TeamCity configuration code
         run: |
           # Create lists of service packages in providers
           ls provider/google/services > tools/teamcity-diff-check/services_ga.txt
