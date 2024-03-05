@@ -1,4 +1,6 @@
-name: repository-documentation
+name: repository-documentation-test
+
+permissions: read-all
 
 on:
   push:
@@ -12,7 +14,7 @@ jobs:
   deploy:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
         with:
           submodules: true  # Fetch Hugo themes (true OR recursive)
           fetch-depth: 0    # Fetch all history for .GitInfo and .Lastmod
@@ -26,10 +28,3 @@ jobs:
       - name: Build
         working-directory: ./docs
         run: hugo --minify
-
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@de7ea6f8efb354206b205ef54722213d99067935 # v3.9.0
-        if: github.ref == 'refs/heads/main'
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs/public
