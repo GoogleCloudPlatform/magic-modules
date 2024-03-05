@@ -2,6 +2,7 @@ package apphub
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -107,7 +108,10 @@ func dataSourceApphubDiscoveredServiceRead(d *schema.ResourceData, meta interfac
 		return fmt.Errorf("Error setting discovered service: %s", err)
 	}
 
-	d.SetId(d["discovered_service"][0]["name"])
+	// ds := d.Get("discovered_service").([]map[string]interface{})
+	// d.SetId(ds[0]["name"].(string))
+	d.SetId(time.Now().UTC().String())
+
 	return nil
 
 }
