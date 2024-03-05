@@ -1,14 +1,5 @@
-data "google_project" "host_project" {}
-
-resource "google_project_service" "apphub" {
-  project = data.google_project.host_project.project_id
-  service = "apphub.googleapis.com"
-  disable_on_destroy = false
-}
-
 resource "google_apphub_service_project_attachment" "<%= ctx[:primary_resource_id] %>" {
   service_project_attachment_id = google_project.service_project.project_id
-  depends_on = [google_project_service.apphub]
 }
 
 resource "google_project" "service_project" {
