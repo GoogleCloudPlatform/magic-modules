@@ -3,9 +3,6 @@ name: repository-documentation-test
 permissions: read-all
 
 on:
-  push:
-    branches:
-      - main  # Set a branch to deploy
   pull_request:
     paths:
       - 'docs/**'
