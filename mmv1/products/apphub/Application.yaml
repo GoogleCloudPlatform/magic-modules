@@ -19,7 +19,8 @@ id_format: projects/{{project}}/locations/{{location}}/applications/{{applicatio
 import_format:
   - projects/{{project}}/locations/{{location}}/applications/{{application_id}}
 name: Application
-description: Description
+description: 'Application is a functional grouping of Services and Workloads that helps achieve a desired end-to-end business functionality. 
+  Services and Workloads are owned by the Application.'
 autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
@@ -72,7 +73,6 @@ properties:
             description: 'Criticality type. '
             required: true
             values:
-              - :TYPE_UNSPECIFIED
               - :MISSION_CRITICAL
               - :HIGH
               - :MEDIUM
@@ -86,7 +86,6 @@ properties:
             description: 'Environment type. '
             required: true
             values:
-              - :TYPE_UNSPECIFIED
               - :PRODUCTION
               - :STAGING
               - :TEST
@@ -102,6 +101,7 @@ properties:
               description: 'Optional. Contact''s name. '
             - !ruby/object:Api::Type::String
               name: email
+              required: true
               description: 'Required. Email address of the contacts. '
               required: true
         description: 'Optional. Developer team that owns development and coding. '
@@ -114,6 +114,7 @@ properties:
               description: 'Optional. Contact''s name. '
             - !ruby/object:Api::Type::String
               name: email
+              required: true
               description: 'Required. Email address of the contacts. '
         description: 'Optional. Operator team that ensures runtime and operations. '
       - !ruby/object:Api::Type::Array
@@ -125,6 +126,7 @@ properties:
               description: 'Optional. Contact''s name. '
             - !ruby/object:Api::Type::String
               name: email
+              required: true
               description: 'Required. Email address of the contacts. '
         description: 'Optional. Business team that ensures user needs are met and value
           is delivered '
@@ -142,10 +144,9 @@ properties:
     properties:
       - !ruby/object:Api::Type::Enum
         name: type
-        description: "Required. Scope Type. \n Possible values:\n TYPE_UNSPECIFIED\nREGIONAL"
+        description: "Required. Scope Type. \n Possible values:\nREGIONAL"
         required: true
         values:
-          - :TYPE_UNSPECIFIED
           - :REGIONAL
     name: scope
     description: 'Scope of an application. '

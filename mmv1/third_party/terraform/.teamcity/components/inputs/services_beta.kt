@@ -51,7 +51,7 @@ var ServicesListBeta = mapOf(
     "apphub" to mapOf(
         "name" to "apphub",
         "displayName" to "Apphub",
-        "path" to "./google/services/apphub"
+        "path" to "./google-beta/services/apphub"
     ),
     "artifactregistry" to mapOf(
         "name" to "artifactregistry",
