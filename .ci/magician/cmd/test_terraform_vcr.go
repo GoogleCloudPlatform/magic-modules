@@ -15,8 +15,6 @@ import (
 )
 
 var ttvEnvironmentVariables = [...]string{
-	"GITHUB_TOKEN_DOWNSTREAMS",
-	"GITHUB_TOKEN_MAGIC_MODULES",
 	"GOCACHE",
 	"GOPATH",
 	"GOOGLE_BILLING_ACCOUNT",
@@ -53,6 +51,15 @@ var testTerraformVCRCmd = &cobra.Command{
 				os.Exit(1)
 			}
 			env[ev] = val
+		}
+
+		for _, tokenName := range []string{"GITHUB_TOKEN_DOWNSTREAMS", "GITHUB_TOKEN_MAGIC_MODULES"} {
+			val, ok := lookupGithubTokenOrFallback(tokenName)
+			if !ok {
+				fmt.Printf("Did not provide %s or GITHUB_TOKEN environment variable\n", tokenName)
+				os.Exit(1)
+			}
+			env[tokenName] = val
 		}
 
 		baseBranch := os.Getenv("BASE_BRANCH")
