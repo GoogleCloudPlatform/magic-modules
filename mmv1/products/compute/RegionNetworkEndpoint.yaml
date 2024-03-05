@@ -19,7 +19,7 @@ description: |
   A Region network endpoint represents a IP address/FQDN and port combination that is
   part of a specific network endpoint group (NEG).
 
-  **NOTE**: Network endpoints cannot be created outside of a network endpoint group.
+  ~> **NOTE**: Network endpoints cannot be created outside of a network endpoint group.
 immutable: true
 create_verb: :POST
 create_url: projects/{{project}}/regions/{{region}}/networkEndpointGroups/{{region_network_endpoint_group}}/attachNetworkEndpoints

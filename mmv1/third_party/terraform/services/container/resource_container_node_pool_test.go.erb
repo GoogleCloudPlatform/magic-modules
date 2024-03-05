@@ -4135,8 +4135,6 @@ resource "google_container_node_pool" "np" {
 }
 <% end -%>
 
-<% unless version == 'ga' -%>
-
 func TestAccContainerNodePool_withConfidentialBootDisk(t *testing.T) {
 	t.Parallel()
 
@@ -4262,7 +4260,6 @@ resource "google_container_node_pool" "without_confidential_boot_disk" {
 }
 `, cluster, networkName, subnetworkName, np)
 }
-<% end -%>
 
 func testAccContainerNodePool_resourceManagerTags(projectID, clusterName, networkName, subnetworkName, randomSuffix string) string {
 	return fmt.Sprintf(`
@@ -4285,10 +4282,12 @@ resource "google_project_iam_binding" "tagUser" {
     "serviceAccount:service-${data.google_project.project.number}@container-engine-robot.iam.gserviceaccount.com",
     "serviceAccount:${data.google_project.project.number}@cloudservices.gserviceaccount.com",
   ]
+
+  depends_on = [google_project_iam_binding.tagHoldAdmin]
 }
 
 resource "time_sleep" "wait_120_seconds" {
-  create_duration = "300s"
+  create_duration = "120s"
 
   depends_on = [
     google_project_iam_binding.tagHoldAdmin,
@@ -4320,6 +4319,8 @@ resource "google_tags_tag_key" "key2" {
   purpose_data = {
     network = "%[1]s/%[4]s"
   }
+
+  depends_on = [google_tags_tag_key.key1]
 }
 
 resource "google_tags_tag_value" "value2" {
@@ -4397,10 +4398,12 @@ resource "google_project_iam_binding" "tagUser" {
     "serviceAccount:service-${data.google_project.project.number}@container-engine-robot.iam.gserviceaccount.com",
     "serviceAccount:${data.google_project.project.number}@cloudservices.gserviceaccount.com",
   ]
+
+  depends_on = [google_project_iam_binding.tagHoldAdmin]
 }
 
 resource "time_sleep" "wait_120_seconds" {
-  create_duration = "300s"
+  create_duration = "120s"
 
   depends_on = [
     google_project_iam_binding.tagHoldAdmin,
@@ -4432,6 +4435,8 @@ resource "google_tags_tag_key" "key2" {
   purpose_data = {
     network = "%[1]s/%[4]s"
   }
+
+  depends_on = [google_tags_tag_key.key1]
 }
 
 resource "google_tags_tag_value" "value2" {
@@ -4510,10 +4515,12 @@ resource "google_project_iam_binding" "tagUser" {
     "serviceAccount:service-${data.google_project.project.number}@container-engine-robot.iam.gserviceaccount.com",
     "serviceAccount:${data.google_project.project.number}@cloudservices.gserviceaccount.com",
   ]
+
+  depends_on = [google_project_iam_binding.tagHoldAdmin]
 }
 
 resource "time_sleep" "wait_120_seconds" {
-  create_duration = "300s"
+  create_duration = "120s"
 
   depends_on = [
     google_project_iam_binding.tagHoldAdmin,
@@ -4545,6 +4552,8 @@ resource "google_tags_tag_key" "key2" {
   purpose_data = {
     network = "%[1]s/%[4]s"
   }
+
+  depends_on = [google_tags_tag_key.key1]
 }
 
 resource "google_tags_tag_value" "value2" {

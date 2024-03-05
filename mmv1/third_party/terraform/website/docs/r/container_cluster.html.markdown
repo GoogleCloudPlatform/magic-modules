@@ -6,22 +6,21 @@ description: |-
 
 # google\_container\_cluster
 
--> Visit the [Provision a GKE Cluster (Google Cloud)](https://learn.hashicorp.com/tutorials/terraform/gke?in=terraform/kubernetes&utm_source=WEBSITE&utm_medium=WEB_IO&utm_offer=ARTICLE_PAGE&utm_content=DOCS) Learn tutorial to learn how to provision and interact
-with a GKE cluster.
+Manages a Google Kubernetes Engine (GKE) cluster.
 
--> See the [Using GKE with Terraform](/docs/providers/google/guides/using_gke_with_terraform.html)
-guide for more information about using GKE with Terraform.
+To get more information about GKE clusters, see:
+  * [The API reference](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1beta1/projects.locations.clusters)
+  * How-to guides
+    * [GKE overview](https://cloud.google.com/kubernetes-engine/docs/concepts/kubernetes-engine-overview)
+    * [About cluster configuration choices](https://cloud.google.com/kubernetes-engine/docs/concepts/types-of-clusters)
+  * Terraform guidance
+    * [Using GKE with Terraform](/docs/providers/google/guides/using_gke_with_terraform.html)
+    * [Provision a GKE Cluster (Google Cloud) Learn tutorial](https://learn.hashicorp.com/tutorials/terraform/gke?in=terraform/kubernetes&utm_source=WEBSITE&utm_medium=WEB_IO&utm_offer=ARTICLE_PAGE&utm_content=DOCS)
 
-Manages a Google Kubernetes Engine (GKE) cluster. For more information see
-[the official documentation](https://cloud.google.com/container-engine/docs/clusters)
-and [the API reference](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1beta1/projects.locations.clusters).
+-> On version 5.0.0+ of the provider, you must explicitly set `deletion_protection = false`
+and run `terraform apply` to write the field to state in order to destroy a cluster.
 
--> **Note**: On version 5.0.0+ of the provider, you must explicitly set `deletion_protection=false`
-(and run `terraform apply` to write the field to state) in order to destroy a cluster.
-It is recommended to not set this field (or set it to true) until you're ready to destroy.
-
-~> **Warning:** All arguments and attributes, including basic auth username and
-passwords as well as certificate outputs will be stored in the raw state as
+~> All arguments and attributes (including certificate outputs) will be stored in the raw state as
 plaintext. [Read more about sensitive data in state](https://www.terraform.io/language/state/sensitive-data).
 
 ## Example Usage - with a separately managed node pool (recommended)
@@ -618,6 +617,7 @@ This block also contains several computed attributes, documented below.
 <a name="nested_advanced_datapath_observability_config"></a>The `advanced_datapath_observability_config` block supports:
 
 * `enable_metrics` - (Required) Whether or not to enable advanced datapath metrics.
+* `enable_relay` - (Optional) Whether or not Relay is enabled.
 * `relay_mode` - (Optional) Mode used to make Relay available.
 
 <a name="nested_maintenance_policy"></a>The `maintenance_policy` block supports:
@@ -790,8 +790,7 @@ The `master_authorized_networks_config.cidr_blocks` block supports:
 * `disk_type` - (Optional) Type of the disk attached to each node
     (e.g. 'pd-standard', 'pd-balanced' or 'pd-ssd'). If unspecified, the default disk type is 'pd-standard'
 
-* `enable_confidential_storage` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
-Enabling Confidential Storage will create boot disk with confidential mode. It is disabled by default.
+* `enable_confidential_storage` - (Optional) Enabling Confidential Storage will create boot disk with confidential mode. It is disabled by default.
 
 * `ephemeral_storage_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Parameters for the ephemeral storage filesystem. If unspecified, ephemeral storage is backed by the boot disk. Structure is [documented below](#nested_ephemeral_storage_config).
 
@@ -1114,6 +1113,8 @@ subnet. See [Private Cluster Limitations](https://cloud.google.com/kubernetes-en
 for more details. This field only applies to private clusters, when
 `enable_private_nodes` is `true`.
 
+* `private_endpoint_subnetwork` - (Optional) Subnetwork in cluster's network where master's endpoint will be provisioned.
+
 * `master_global_access_config` (Optional) - Controls cluster master global
 access settings. If unset, Terraform will no longer manage this field and will
 not modify the previously-set value. Structure is [documented below](#nested_master_global_access_config).
@@ -1123,8 +1124,6 @@ In addition, the `private_cluster_config` allows access to the following read-on
 * `peering_name` - The name of the peering between this cluster and the Google owned VPC.
 
 * `private_endpoint` - The internal IP address of this cluster's master endpoint.
-
-* `private_endpoint_subnetwork` - Subnetwork in cluster's network where master's endpoint will be provisioned.
 
 * `public_endpoint` - The external IP address of this cluster's master endpoint.
 
@@ -1350,6 +1349,10 @@ exported:
 * `node_config.0.effective_taints` - List of kubernetes taints applied to each node. Structure is [documented above](#nested_taint).
 
 * `fleet.0.membership` - The resource name of the fleet Membership resource associated to this cluster with format `//gkehub.googleapis.com/projects/{{project}}/locations/{{location}}/memberships/{{name}}`. See the official doc for [fleet management](https://cloud.google.com/kubernetes-engine/docs/fleets-overview).
+
+* `fleet.0.membership_id` - The short name of the fleet membership, extracted from `fleet.0.membership`. You can use this field to configure `membership_id` under [google_gkehub_feature_membership](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/gke_hub_feature_membership).
+
+* `fleet.0.membership_location` - The location of the fleet membership,  extracted from `fleet.0.membership`. You can use this field to configure `membership_location` under [google_gkehub_feature_membership](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/gke_hub_feature_membership).
 
 ## Timeouts
 

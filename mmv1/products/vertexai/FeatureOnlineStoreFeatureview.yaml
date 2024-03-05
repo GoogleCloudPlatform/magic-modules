@@ -56,6 +56,11 @@ examples:
     vars:
       name: 'example_feature_view'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'vertex_ai_featureonlinestore_featureview_feature_registry'
+    primary_resource_id: 'featureview_featureregistry'
+    vars:
+      name: 'example_feature_view_feature_registry'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'vertex_ai_featureonlinestore_featureview_with_vector_search'
     primary_resource_id: 'featureview_vector_search'
     vars:
@@ -112,6 +117,9 @@ properties:
     name: 'bigQuerySource'
     description: |
       Configures how data is supposed to be extracted from a BigQuery source to be loaded onto the FeatureOnlineStore.
+    exactly_one_of:
+      - big_query_source
+      - feature_registry_source
     properties:
       - !ruby/object:Api::Type::String
         name: 'uri'
@@ -125,9 +133,39 @@ properties:
           Columns to construct entityId / row keys. Start by supporting 1 only.
         item_type: Api::Type::String
   - !ruby/object:Api::Type::NestedObject
+    name: 'featureRegistrySource'
+    conflicts:
+      - vector_search_config
+    exactly_one_of:
+      - big_query_source
+      - feature_registry_source
+    description: |
+      Configures the features from a Feature Registry source that need to be loaded onto the FeatureOnlineStore.
+    properties:
+      - !ruby/object:Api::Type::Array
+        name: 'featureGroups'
+        required: true
+        description: |
+          List of features that need to be synced to Online Store.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'featureGroupId'
+              required: true
+              description: |
+                Identifier of the feature group.
+            - !ruby/object:Api::Type::Array
+              name: featureIds
+              required: true
+              description: |
+                Identifiers of features under the feature group.
+              item_type: Api::Type::String
+  - !ruby/object:Api::Type::NestedObject
     name: 'vectorSearchConfig'
     description: |
       Configuration for vector search. It contains the required configurations to create an index from source data, so that approximate nearest neighbor (a.k.a ANN) algorithms search can be performed during online serving.
+    conflicts:
+      - feature_registry_source
     immutable: true
     min_version: beta
     properties:

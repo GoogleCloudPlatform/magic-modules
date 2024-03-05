@@ -72,7 +72,12 @@ var membershipCheckerCmd = &cobra.Command{
 		baseBranch := args[5]
 		fmt.Println("Base Branch: ", baseBranch)
 
-		gh := github.NewClient()
+		githubToken, ok := os.LookupEnv("GITHUB_TOKEN_MAGIC_MODULES")
+		if !ok {
+			fmt.Println("Did not provide GITHUB_TOKEN_MAGIC_MODULES environment variable")
+			os.Exit(1)
+		}
+		gh := github.NewClient(githubToken)
 		cb := cloudbuild.NewClient()
 		execMembershipChecker(prNumber, commitSha, branchName, headRepoUrl, headBranch, baseBranch, gh, cb)
 	},
@@ -96,41 +101,6 @@ func execMembershipChecker(prNumber, commitSha, branchName, headRepoUrl, headBra
 	author := pullRequest.User.Login
 	authorUserType := gh.GetUserType(author)
 	trusted := authorUserType == github.CoreContributorUserType || authorUserType == github.GooglerUserType
-
-	if authorUserType != github.CoreContributorUserType {
-		fmt.Println("Not core contributor - assigning reviewer")
-
-		requestedReviewers, err := gh.GetPullRequestRequestedReviewers(prNumber)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
-		previousReviewers, err := gh.GetPullRequestPreviousReviewers(prNumber)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
-		reviewersToRequest, newPrimaryReviewer := github.ChooseCoreReviewers(requestedReviewers, previousReviewers)
-
-		for _, reviewer := range reviewersToRequest {
-			err = gh.RequestPullRequestReviewer(prNumber, reviewer)
-			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
-			}
-		}
-
-		if newPrimaryReviewer != "" {
-			comment := github.FormatReviewerComment(newPrimaryReviewer, authorUserType, trusted)
-			err = gh.PostComment(prNumber, comment)
-			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
-			}
-		}
-	}
 
 	// auto_run(contributor-membership-checker) will be run on every commit or /gcbrun:
 	// only triggers builds for trusted users
