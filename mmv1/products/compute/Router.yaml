@@ -150,7 +150,7 @@ properties:
           This enum field has the one valid value: ALL_SUBNETS
         item_type: Api::Type::String  # TODO(#324): enum?
         send_empty_value: true
-      - !ruby/object:Api::Type::Array
+      - !ruby/object:Api::Type::Set
         name: advertisedIpRanges
         description: |
           User-specified list of individual IP ranges to advertise in
