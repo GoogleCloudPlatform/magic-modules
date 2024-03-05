@@ -381,7 +381,6 @@ properties:
           description: |
             Location of this directory in the running workstation.
           default_from_api: true
-          immutable: true
         - !ruby/object:Api::Type::NestedObject
           name: 'gcePd'
           description: |
@@ -393,7 +392,6 @@ properties:
               description: |
                 Type of the disk to use. Defaults to `"pd-standard"`.
               default_from_api: true
-              immutable: true
             - !ruby/object:Api::Type::String
               name: 'sourceSnapshot'
               description: |
