@@ -199,7 +199,7 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
       Dir["#{ovr_prod_dir}/*"].each do |override_path|
         next if File.basename(override_path) == 'product.yaml' \
         || File.extname(override_path) != '.yaml' \
-        || File.basename(file_path).include?('go_')
+        || File.basename(override_path).include?('go_')
 
         file_path = File.join(product_name, File.basename(override_path))
         res_yaml = if File.exist?(file_path)
