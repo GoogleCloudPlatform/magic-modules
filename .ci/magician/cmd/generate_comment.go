@@ -70,7 +70,12 @@ var generateCommentCmd = &cobra.Command{
 		}
 
 		for _, tokenName := range []string{"GITHUB_TOKEN_DOWNSTREAMS", "GITHUB_TOKEN_MAGIC_MODULES"} {
-			env[tokenName] = githubTokenOrFallback(tokenName)
+			val, ok := lookupGithubTokenOrFallback(tokenName)
+			if !ok {
+				fmt.Printf("Did not provide %s or GITHUB_TOKEN environment variable\n", tokenName)
+				os.Exit(1)
+			}
+			env[tokenName] = val
 		}
 		gh := github.NewClient(env["GITHUB_TOKEN_MAGIC_MODULES"])
 		rnr, err := exec.NewRunner()

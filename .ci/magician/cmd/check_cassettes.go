@@ -55,7 +55,11 @@ var checkCassettesCmd = &cobra.Command{
 			env[ev] = val
 		}
 
-		env["GITHUB_TOKEN_DOWNSTREAMS"] = githubTokenOrFallback("GITHUB_TOKEN_DOWNSTREAMS")
+		githubToken, ok := lookupGithubTokenOrFallback("GITHUB_TOKEN_DOWNSTREAMS")
+		if !ok {
+			fmt.Println("Did not provide GITHUB_TOKEN_DOWNSTREAMS or GITHUB_TOKEN environment variables")
+			os.Exit(1)
+		}
 
 		rnr, err := exec.NewRunner()
 		if err != nil {
@@ -63,7 +67,7 @@ var checkCassettesCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		ctlr := source.NewController(env["GOPATH"], "modular-magician", env["GITHUB_TOKEN_DOWNSTREAMS"], rnr)
+		ctlr := source.NewController(env["GOPATH"], "modular-magician", githubToken, rnr)
 
 		vt, err := vcr.NewTester(env, rnr)
 		if err != nil {
@@ -74,12 +78,12 @@ var checkCassettesCmd = &cobra.Command{
 	},
 }
 
-func githubTokenOrFallback(tokenName string) string {
+func lookupGithubTokenOrFallback(tokenName string) (string, bool) {
 	val, ok := os.LookupEnv(tokenName)
 	if !ok {
-		return os.Getenv("GITHUB_TOKEN")
+		return os.LookupEnv("GITHUB_TOKEN")
 	}
-	return val
+	return val, ok
 }
 
 func listCCEnvironmentVariables() string {
