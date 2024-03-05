@@ -27,16 +27,6 @@ examples:
     name: "application_basic"
     primary_resource_id: "example"
     config_path: "templates/terraform/examples/apphub_application_basic.tf.erb"
-    skip_test: true
-    vars:
-      location: "us-east1"
-      application_id: "example-application"
-      scope_type: "REGIONAL"
-  - !ruby/object:Provider::Terraform::Examples
-    name: "application_basic"
-    primary_resource_id: "example"
-    config_path: "templates/terraform/examples/apphub_application_basic.tf.erb"
-    skip_docs: true
     vars:
       application_id: "example-application"
   - !ruby/object:Provider::Terraform::Examples
