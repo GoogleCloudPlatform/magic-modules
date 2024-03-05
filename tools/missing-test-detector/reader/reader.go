@@ -1,4 +1,4 @@
-package main
+package reader
 
 import (
 	"fmt"
@@ -33,7 +33,7 @@ func (t *Test) String() string {
 }
 
 // Return a slice of tests as well as a map of file or test names to errors encountered.
-func readAllTests(servicesDir string) ([]*Test, map[string]error) {
+func ReadAllTests(servicesDir string) ([]*Test, map[string]error) {
 	dirs, err := os.ReadDir(servicesDir)
 	if err != nil {
 		return nil, map[string]error{servicesDir: err}
@@ -52,7 +52,7 @@ func readAllTests(servicesDir string) ([]*Test, map[string]error) {
 				testFileNames = append(testFileNames, filepath.Join(servicePath, file.Name()))
 			}
 		}
-		serviceTests, serviceErrs := readTestFiles(testFileNames)
+		serviceTests, serviceErrs := ReadTestFiles(testFileNames)
 		for fileName, err := range serviceErrs {
 			allErrs[fileName] = err
 		}
@@ -65,7 +65,7 @@ func readAllTests(servicesDir string) ([]*Test, map[string]error) {
 }
 
 // Read all the test files in a service directory together to capture cross-file function usage.
-func readTestFiles(filenames []string) ([]*Test, map[string]error) {
+func ReadTestFiles(filenames []string) ([]*Test, map[string]error) {
 	funcDecls := make(map[string]*ast.FuncDecl) // map of function names to function declarations
 	varDecls := make(map[string]*ast.BasicLit)  // map of variable names to value expressions
 	errs := make(map[string]error)              // map of file or test names to errors encountered parsing

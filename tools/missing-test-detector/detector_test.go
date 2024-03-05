@@ -3,10 +3,12 @@ package main
 import (
 	"reflect"
 	"testing"
+
+	"github.com/GoogleCloudPlatform/magic-modules/tools/missing-test-detector/reader"
 )
 
 func TestDetectMissingTests(t *testing.T) {
-	allTests, errs := readAllTests("testdata")
+	allTests, errs := reader.ReadAllTests("reader/testdata")
 	if len(errs) > 0 {
 		t.Errorf("errors reading tests before testing detect missing tests: %v", errs)
 	}

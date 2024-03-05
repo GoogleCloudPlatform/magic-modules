@@ -1,4 +1,4 @@
-module github.com/trodge/magic-modules/tools/missing-test-detector
+module github.com/GoogleCloudPlatform/magic-modules/tools/missing-test-detector
 
 go 1.20
 

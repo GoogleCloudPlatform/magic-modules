@@ -7,6 +7,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/GoogleCloudPlatform/magic-modules/tools/missing-test-detector/reader"
 	"github.com/golang/glog"
 )
 
@@ -15,7 +16,7 @@ var flagServicesDir = flag.String("services-dir", "", "directory where service d
 func main() {
 	flag.Parse()
 
-	allTests, errs := readAllTests(*flagServicesDir)
+	allTests, errs := reader.ReadAllTests(*flagServicesDir)
 	for path, err := range errs {
 		glog.Infof("error reading path: %s, err: %v", path, err)
 	}
