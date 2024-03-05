@@ -21,17 +21,17 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@ec02537da5712d66d4d50a0f33b7eb52773b5ed1
+        uses: ruby/setup-ruby@036ef458ddccddb148a2b9fb67e95a22fdbf728b # v1.160.0
         with:
           ruby-version: '3.1'
 
       - name: Cache Bundler gems
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: mmv1/vendor/bundle
           key: ${{ runner.os }}-gems-${{ hashFiles('mmv1/**/Gemfile.lock') }}
@@ -45,13 +45,13 @@ jobs:
         working-directory: mmv1
 
       - name: Set up Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v4
         with:
           go-version: '^1.20'
 
       # Cache Go modules
       - name: Cache Go modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
@@ -108,7 +108,7 @@ jobs:
           (current_dir=$(pwd) && cd $OUTPUT_PATH && zip -r "$current_dir/output.zip" .)
 
       - name: Upload built artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8 # v3.1.0
         with:
           name: artifact-${{ inputs.repo  }}
           path: output.zip
