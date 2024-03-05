@@ -19,7 +19,7 @@ id_format: projects/{{project}}/locations/{{location}}/applications/{{applicatio
 import_format:
   - projects/{{project}}/locations/{{location}}/applications/{{application_id}}
 name: Application
-description: 'Application is a functional grouping of Services and Workloads that helps achieve a desired end-to-end business functionality. 
+description: 'Application is a functional grouping of Services and Workloads that helps achieve a desired end-to-end business functionality.
   Services and Workloads are owned by the Application.'
 autogen_async: true
 examples:
@@ -103,7 +103,6 @@ properties:
               name: email
               required: true
               description: 'Required. Email address of the contacts. '
-              required: true
         description: 'Optional. Developer team that owns development and coding. '
       - !ruby/object:Api::Type::Array
         name: operatorOwners
