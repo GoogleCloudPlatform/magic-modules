@@ -1,4 +1,4 @@
-package main
+package reader
 
 import (
 	"os"
@@ -9,7 +9,7 @@ import (
 // This test only ensures there isn't a panic reading tests in the provider.
 func TestReadAllTests(t *testing.T) {
 	if servicesDir := os.Getenv("SERVICES_DIR"); servicesDir != "" {
-		_, errs := readAllTests(servicesDir)
+		_, errs := ReadAllTests(servicesDir)
 		for path, err := range errs {
 			t.Logf("path: %s, err: %v", path, err)
 		}
@@ -19,7 +19,7 @@ func TestReadAllTests(t *testing.T) {
 }
 
 func TestReadCoveredResourceTestFile(t *testing.T) {
-	tests, err := readTestFiles([]string{"testdata/service/covered_resource_test.go"})
+	tests, err := ReadTestFiles([]string{"testdata/service/covered_resource_test.go"})
 	if err != nil {
 		t.Fatalf("error reading covered resource test file: %v", err)
 	}
@@ -47,7 +47,7 @@ func TestReadCoveredResourceTestFile(t *testing.T) {
 }
 
 func TestReadConfigVariableTestFile(t *testing.T) {
-	tests, err := readTestFiles([]string{"testdata/service/config_variable_test.go"})
+	tests, err := ReadTestFiles([]string{"testdata/service/config_variable_test.go"})
 	if err != nil {
 		t.Fatalf("error reading config variable test file: %v", err)
 	}
@@ -67,7 +67,7 @@ func TestReadConfigVariableTestFile(t *testing.T) {
 }
 
 func TestReadMultipleResourcesTestFile(t *testing.T) {
-	tests, err := readTestFiles([]string{"testdata/service/multiple_resource_test.go"})
+	tests, err := ReadTestFiles([]string{"testdata/service/multiple_resource_test.go"})
 	if err != nil {
 		t.Fatalf("error reading multiple resources test file: %v", err)
 	}
@@ -101,7 +101,7 @@ func TestReadMultipleResourcesTestFile(t *testing.T) {
 }
 
 func TestReadSerialResourceTestFile(t *testing.T) {
-	tests, err := readTestFiles([]string{"testdata/service/serial_resource_test.go"})
+	tests, err := ReadTestFiles([]string{"testdata/service/serial_resource_test.go"})
 	if err != nil {
 		t.Fatalf("error reading serial resource test file: %v", err)
 	}
@@ -140,7 +140,7 @@ func TestReadSerialResourceTestFile(t *testing.T) {
 }
 
 func TestReadCrossFileTests(t *testing.T) {
-	tests, err := readTestFiles([]string{"testdata/service/cross_file_1_test.go", "testdata/service/cross_file_2_test.go"})
+	tests, err := ReadTestFiles([]string{"testdata/service/cross_file_1_test.go", "testdata/service/cross_file_2_test.go"})
 	if err != nil {
 		t.Fatalf("error reading cross file tests: %v", err)
 	}
@@ -183,7 +183,7 @@ func TestReadCrossFileTests(t *testing.T) {
 }
 
 func TestReadHelperFunctionCall(t *testing.T) {
-	tests, err := readTestFiles([]string{"testdata/service/function_call_test.go"})
+	tests, err := ReadTestFiles([]string{"testdata/service/function_call_test.go"})
 	if err != nil {
 		t.Fatalf("error reading function call test: %v", err)
 	}
@@ -193,7 +193,7 @@ func TestReadHelperFunctionCall(t *testing.T) {
 	expectedTest := &Test{
 		Name: "TestAccFunctionCallResource",
 		Steps: []Step{
-			Step{
+			{
 				"helped_resource": Resources{
 					"primary": Resource{
 						"field_one": "\"value-one\"",
