@@ -1,0 +1,234 @@
+--- !ruby/object:Api::Resource
+base_url: projects/{{project}}/locations/{{location}}/applications/{{applications_id}}/services
+create_url: projects/{{project}}/locations/{{location}}/applications/{{applications_id}}/services?serviceId={{service_id}}
+self_link: projects/{{project}}/locations/{{location}}/applications/{{applications_id}}/services/{{service_id}}
+id_format: projects/{{project}}/locations/{{location}}/applications/{{applications_id}}/services/{{service_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/applications/{{applications_id}}/services/{{service_id}}
+name: Service
+description: Description
+autogen_async: true
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: 'templates/terraform/constants/apphub_discovered_resource.go.erb'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "service_basic"
+    primary_resource_id: "example"
+    config_path: "templates/terraform/examples/apphub_service_basic.tf.erb"
+    skip_test: true
+    vars:
+      location: "us-east1"
+      application_id: "example-application-1"
+      service_project_attachment_id: "project-1"
+    test_env_vars:
+      org_id: :ORG_ID
+  - !ruby/object:Provider::Terraform::Examples
+    name: "service_basic"
+    primary_resource_id: "example"
+    config_path: "templates/terraform/examples/apphub_service_basic.tf.erb"
+    skip_docs: true
+    vars:
+      application_id: "example-application-1"
+      ilb_network: "l7-ilb-network"
+      ilb_subnet: "l7-ilb-subnet"
+      forwarding_rule: "l7-ilb-forwarding-rule"
+      backend_service: "l7-ilb-backend-subnet"
+      health_check: "l7-ilb-hc"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "service_full"
+    primary_resource_id: "example"
+    config_path: "templates/terraform/examples/apphub_service_full.tf.erb"
+    skip_docs: true
+    vars:
+      application_id: "example-application-1"
+      display_name: "Example Service Full"
+      description: "Register service for testing"
+      business_name: "Alice"
+      business_email: "alice@google.com"
+      developer_name: "Bob"
+      developer_email: "bob@google.com"
+      operator_name: "Charlie"
+      operator_email: "charlie@google.com"
+      ilb_network: "l7-ilb-network"
+      ilb_subnet: "l7-ilb-subnet"
+      forwarding_rule: "l7-ilb-forwarding-rule"
+      backend_service: "l7-ilb-backend-subnet"
+      health_check: "l7-ilb-hc"
+properties:
+  - !ruby/object:Api::Type::String
+    name: name
+    output: true
+    description: "Identifier. The resource name of a Service. Format:\n\"projects/{host-project-id}/locations/{location}/applications/{application-id}/services/{service-id}\" "
+  - !ruby/object:Api::Type::String
+    name: displayName
+    description: 'Optional. User-defined name for the Service. '
+  - !ruby/object:Api::Type::String
+    name: description
+    description: 'Optional. User-defined description of a Service. '
+  - !ruby/object:Api::Type::NestedObject
+    properties:
+      - !ruby/object:Api::Type::String
+        name: uri
+        description: "Output only. The underlying resource URI (For example, URI of Forwarding
+          Rule, URL Map,\nand Backend Service). "
+        output: true
+    output: true
+    name: serviceReference
+    description: 'Reference to an underlying networking resource that can comprise a
+      Service. '
+  - !ruby/object:Api::Type::NestedObject
+    properties:
+      - !ruby/object:Api::Type::String
+        name: gcpProject
+        description: "Output only. The service project identifier that the underlying
+          cloud resource\nresides in. "
+        output: true
+      - !ruby/object:Api::Type::String
+        name: location
+        description: "Output only. The location that the underlying resource resides in,
+          for example,\nus-west1. "
+        output: true
+      - !ruby/object:Api::Type::String
+        name: zone
+        description: "Output only. The location that the underlying resource resides in
+          if it is zonal, for\nexample, us-west1-a). "
+        output: true
+    output: true
+    name: serviceProperties
+    description: 'Properties of an underlying cloud resource that can comprise a Service. '
+  - !ruby/object:Api::Type::NestedObject
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: type
+            description: 'Criticality type. '
+            required: true
+            values:
+              - :TYPE_UNSPECIFIED
+              - :MISSION_CRITICAL
+              - :HIGH
+              - :MEDIUM
+              - :LOW
+        name: criticality
+        description: 'Criticality of the Application, Service, or Workload '
+      - !ruby/object:Api::Type::NestedObject
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: type
+            description: 'Environment type. '
+            required: true
+            values:
+              - :TYPE_UNSPECIFIED
+              - :PRODUCTION
+              - :STAGING
+              - :TEST
+              - :DEVELOPMENT
+        name: environment
+        description: 'Environment of the Application, Service, or Workload '
+      - !ruby/object:Api::Type::Array
+        name: developerOwners
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: displayName
+              description: 'Optional. Contact''s name. '
+            - !ruby/object:Api::Type::String
+              name: email
+              description: 'Required. Email address of the contacts. '
+              required: true
+        description: 'Optional. Developer team that owns development and coding. '
+      - !ruby/object:Api::Type::Array
+        name: operatorOwners
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: displayName
+              description: 'Optional. Contact''s name. '
+            - !ruby/object:Api::Type::String
+              name: email
+              description: 'Required. Email address of the contacts. '
+        description: 'Optional. Operator team that ensures runtime and operations. '
+      - !ruby/object:Api::Type::Array
+        name: businessOwners
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: displayName
+              description: 'Optional. Contact''s name. '
+            - !ruby/object:Api::Type::String
+              name: email
+              description: 'Required. Email address of the contacts. '
+        description: 'Optional. Business team that ensures user needs are met and value
+          is delivered '
+    name: attributes
+    description: 'Consumer provided attributes. '
+  - !ruby/object:Api::Type::String
+    name: discoveredService
+    diff_suppress_func: 'DiscoveredResourceProjectNumberDiffSuppress'
+    description: 'Required. Immutable. The resource name of the original discovered
+      service. '
+    required: true
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: createTime
+    description: 'Output only. Create time. '
+    output: true
+  - !ruby/object:Api::Type::String
+    name: updateTime
+    description: 'Output only. Update time. '
+    output: true
+  - !ruby/object:Api::Type::String
+    name: uid
+    description: "Output only. A universally unique identifier (UUID) for the `Service`
+      in the UUID4\nformat. "
+    output: true
+  - !ruby/object:Api::Type::Enum
+    name: state
+    description: "Output only. Service state. \n Possible values:\n STATE_UNSPECIFIED\nCREATING\nACTIVE\nDELETING\nDETACHED"
+    output: true
+    values:
+      - :STATE_UNSPECIFIED
+      - :CREATING
+      - :ACTIVE
+      - :DELETING
+      - :DETACHED
+parameters:
+  - !ruby/object:Api::Type::String
+    name: location
+    description: 'Part of `parent`. See documentation of `projectsId`. '
+    url_param_only: true
+    required: true
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: applicationsId
+    description: 'Part of `parent`. See documentation of `projectsId`. '
+    url_param_only: true
+    required: true
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: serviceId
+    description: 'Required. The Service identifier. '
+    url_param_only: true
+    required: true
+    immutable: true
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: name
+    base_url: "{{op_id}}"
+    wait_ms: 1000
+    timeouts:
+  result: !ruby/object:Api::OpAsync::Result
+    path: response
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: done
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: error
+    message: message
+update_verb: :PATCH
+update_mask: true
