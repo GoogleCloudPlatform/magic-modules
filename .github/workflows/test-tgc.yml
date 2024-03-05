@@ -36,7 +36,7 @@ jobs:
     timeout-minutes: 30
     steps:
     - name: Checkout Repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: ${{ github.event.inputs.owner }}/${{ github.event.inputs.repo }}
         ref: ${{ github.event.inputs.branch }}
@@ -79,7 +79,7 @@ jobs:
         }'
     - name: Set up Go
       if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
-      uses: actions/setup-go@v3
+      uses: actions/setup-go@v4
       with:
         go-version: '^1.20'
     - name: Build Terraform Google Conversion
