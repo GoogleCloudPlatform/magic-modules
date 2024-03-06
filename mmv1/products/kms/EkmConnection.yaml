@@ -57,6 +57,7 @@ properties:
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareResourceNames'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   - !ruby/object:Api::Type::Array
     name: 'serviceResolvers'
     description: |
