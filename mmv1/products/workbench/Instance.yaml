@@ -44,6 +44,15 @@ examples:
     vars:
       instance_name: 'workbench-instance'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'workbench_instance_basic_container'
+    primary_resource_id: 'instance'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-workbench-instance%s\",
+      context[\"\
+      random_suffix\"])"
+    region_override: 'us-west1-a'
+    vars:
+      instance_name: 'workbench-instance'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'workbench_instance_basic_gpu'
     primary_resource_id: 'instance'
     primary_resource_name: "fmt.Sprintf(\"tf-test-workbench-instance%s\",
@@ -55,7 +64,7 @@ examples:
     ignore_read_extra:
       - 'gce_setup.0.vm_image'
   - !ruby/object:Provider::Terraform::Examples
-    name: 'workbench_instance_labels'
+    name: 'workbench_instance_labels_stopped'
     primary_resource_id: 'instance'
     primary_resource_name: "fmt.Sprintf(\"tf-test-workbench-instance%s\",
       context[\"\
@@ -66,6 +75,8 @@ examples:
       network_name: 'wbi-test-default'
     test_env_vars:
       service_account: :SERVICE_ACCT
+    ignore_read_extra:
+      - 'desired_state'
   - !ruby/object:Provider::Terraform::Examples
     name: 'workbench_instance_full'
     primary_resource_id: 'instance'
@@ -76,21 +87,27 @@ examples:
     vars:
       instance_name: 'workbench-instance'
       network_name: 'wbi-test-default'
-      keyring_name: 'tftest-shared-keyring-1'
-      key_name: 'tftest-shared-key-1'
+      key_name: 'my-crypto-key'
+    test_vars_overrides:
+      key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     test_env_vars:
       service_account: :SERVICE_ACCT
     ignore_read_extra:
       - 'gce_setup.0.vm_image'
-      - 'gce_setup.0.boot_disk.0.disk_encryption'
       - 'gce_setup.0.boot_disk.0.disk_type'
-      - 'gce_setup.0.boot_disk.0.kms_key'
-      - 'gce_setup.0.data_disks.0.disk_encryption'
       - 'gce_setup.0.data_disks.0.disk_type'
-      - 'gce_setup.0.data_disks.0.kms_key'
 timeouts: !ruby/object:Api::Timeouts
   insert_minutes: 10
   update_minutes: 20
+virtual_fields:
+  - !ruby/object:Api::Type::Enum
+    name: desired_state
+    description: |
+      Desired state of the Workbench Instance. Set this field to `ACTIVE` to start the Instance, and `STOPPED` to stop the Instance.
+    values:
+      - :ACTIVE
+      - :STOPPED
+    default_value: :ACTIVE
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/workbench_instance.go
   post_create: templates/terraform/post_create/workbench_instance.go.erb
@@ -148,6 +165,36 @@ properties:
             use accelerators, make sure that your configuration has [enough vCPUs and memory
             to support the `machine_type` you have selected](https://cloud.google.com/compute/docs/gpus/#gpus-list).
             Currently supports only one accelerator configuration.
+      - !ruby/object:Api::Type::NestedObject
+        name: shieldedInstanceConfig
+        default_from_api: true
+        allow_empty_object: true
+        send_empty_value: true
+        description: |
+          A set of Shielded Instance options. See [Images using supported Shielded
+          VM features](https://cloud.google.com/compute/docs/instances/modifying-shielded-vm).
+          Not all combinations are valid.
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: enableSecureBoot
+            description: |
+              Optional. Defines whether the VM instance has Secure Boot enabled.
+              Secure Boot helps ensure that the system only runs authentic software by verifying
+              the digital signature of all boot components, and halting the boot process
+              if signature verification fails. Disabled by default.
+          - !ruby/object:Api::Type::Boolean
+            name: enableVtpm
+            description: |
+              Optional. Defines whether the VM instance has the vTPM enabled.
+              Enabled by default.
+          - !ruby/object:Api::Type::Boolean
+            name: enableIntegrityMonitoring
+            description: |
+              Optional. Defines whether the VM instance has integrity monitoring
+              enabled. Enables monitoring and attestation of the boot integrity of the VM
+              instance. The attestation is performed against the integrity policy baseline.
+              This baseline is initially derived from the implicitly trusted boot image
+              when the VM instance is created. Enabled by default.
       - !ruby/object:Api::Type::Array
         name: serviceAccounts
         description: |
@@ -175,6 +222,8 @@ properties:
         name: vmImage
         custom_flatten: templates/terraform/custom_flatten/workbench_instance_vm_image_flatten.go.erb
         default_from_api: true
+        conflicts:
+          - gce_setup.0.container_image
         immutable: true
         description: |
           Definition of a custom Compute Engine virtual machine image for starting
@@ -203,6 +252,23 @@ properties:
               - vm_image.0.name
               - vm_image.0.family
       - !ruby/object:Api::Type::NestedObject
+        name: containerImage
+        conflicts:
+          - gce_setup.0.vm_image
+        description: |
+          Use a container image to start the workbench instance.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'repository'
+            description: |
+              The path to the container image repository.
+              For example: gcr.io/{project_id}/{imageName}
+            required: true
+          - !ruby/object:Api::Type::String
+            name: 'tag'
+            description: |
+              The tag of the container image. If not specified, this defaults to the latest tag.
+      - !ruby/object:Api::Type::NestedObject
         name: bootDisk
         default_from_api: true
         description: The definition of a boot disk.
@@ -230,7 +296,6 @@ properties:
           - !ruby/object:Api::Type::Enum
             name: diskEncryption
             default_from_api: true
-            custom_flatten: templates/terraform/custom_flatten/workbench_instance_boot_disk_encryption_flatten.go.erb
             values:
               - GMEK
               - CMEK
@@ -241,11 +306,11 @@ properties:
           - !ruby/object:Api::Type::String
             name: kmsKey
             description: |
-              'Optional. Input only. The KMS key used to encrypt the disks, only
+              'Optional. The KMS key used to encrypt the disks, only
               applicable if disk_encryption is CMEK. Format: `projects/{project_id}/locations/{location}/keyRings/{key_ring_id}/cryptoKeys/{key_id}`
               Learn more about using your own encryption keys.'
             immutable: true
-            custom_flatten: templates/terraform/custom_flatten/workbench_instance_boot_disk_kms_flatten.go.erb
+            diff_suppress_func: WorkbenchInstanceKmsDiffSuppress
       - !ruby/object:Api::Type::Array
         name: dataDisks
         description: Data disks attached to the VM instance. Currently supports only one data disk.
@@ -275,7 +340,6 @@ properties:
             - !ruby/object:Api::Type::Enum
               name: diskEncryption
               default_from_api: true
-              custom_flatten: templates/terraform/custom_flatten/workbench_instance_data_disk_encryption_flatten.go.erb
               values:
                 - GMEK
                 - CMEK
@@ -286,11 +350,11 @@ properties:
             - !ruby/object:Api::Type::String
               name: kmsKey
               description: |
-                'Optional. Input only. The KMS key used to encrypt the disks,
+                'Optional. The KMS key used to encrypt the disks,
                 only applicable if disk_encryption is CMEK. Format: `projects/{project_id}/locations/{location}/keyRings/{key_ring_id}/cryptoKeys/{key_id}`
                 Learn more about using your own encryption keys.'
               immutable: true
-              custom_flatten: templates/terraform/custom_flatten/workbench_instance_data_disk_kms_flatten.go.erb
+              diff_suppress_func: WorkbenchInstanceKmsDiffSuppress
           description: |
             Optional. Data disks attached to the VM instance. Currently supports
             only one data disk.
