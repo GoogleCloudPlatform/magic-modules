@@ -24,7 +24,8 @@ jobs:
           newServices=$(($(git diff --name-only --diff-filter=A origin/main HEAD | grep -P "mmv1/products/.*/product.yaml" | wc -l)))
           echo "services=$newServices" >> "${GITHUB_OUTPUT}"
           if [ "$newServices" = "0" ];then
-          echo "No new service found." 
+          echo "No new service found."
+          exit 1
           fi
       - name: TeamCity Google Provider Generate
         if: ${{steps.services.outputs.services != '0'}}
