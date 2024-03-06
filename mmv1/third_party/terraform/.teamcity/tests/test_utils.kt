@@ -3,18 +3,68 @@
  * SPDX-License-Identifier: MPL-2.0
  */
 
-// this file is copied from mmv1, any changes made here will be overwritten
+// This file is controlled by MMv1, any changes made here will be overwritten
 
 package tests
 
-import jetbrains.buildServer.configs.kotlin.AbsoluteId
+import builds.AllContextParameters
+import jetbrains.buildServer.configs.kotlin.Project
+import org.junit.Assert
 
-import ClientConfiguration
+const val gaProjectName = "Google"
+const val betaProjectName = "Google Beta"
+const val nightlyTestsProjectName = "Nightly Tests"
+const val mmUpstreamProjectName = "MM Upstream Testing"
+const val projectSweeperProjectName = "Project Sweeper"
 
-fun testConfiguration() : ClientConfiguration {
-    return ClientConfiguration("custId", "org", "org2", "billingAccount", "billingAccount2", "masterBillingAccount", "credentials", "project", "orgDomain", "projectNumber", "region", "serviceAccount", "zone", "firestoreProject", "identityUser")
+fun testContextParameters(): AllContextParameters {
+    return AllContextParameters(
+        "credsGa",
+        "credsBeta",
+        "credsVcr",
+        "serviceAccountGa",
+        "serviceAccountBeta",
+        "serviceAccountVcr",
+        "projectGa",
+        "projectBeta",
+        "projectVcr",
+        "projectNumberGa",
+        "projectNumberBeta",
+        "projectNumberVcr",
+        "identityUserGa",
+        "identityUserBeta",
+        "identityUserVcr",
+        "firestoreProjectGa",
+        "firestoreProjectBeta",
+        "firestoreProjectVcr",
+        "masterBillingAccountGa",
+        "masterBillingAccountBeta",
+        "masterBillingAccountVcr",
+        "org2Ga",
+        "org2Beta",
+        "org2Vcr",
+        "billingAccount",
+        "billingAccount2",
+        "custId",
+        "org",
+        "orgDomain",
+        "region",
+        "zone",
+        "infraProject",
+        "vcrBucketName")
 }
 
-fun testVcsRootId() : AbsoluteId {
-    return AbsoluteId("TerraformProviderFoobar")
+fun getSubProject(rootProject: Project, parentProjectName: String, subProjectName: String): Project {
+    // Find parent project within root
+    var parentProject: Project? =  rootProject.subProjects.find { p->  p.name == parentProjectName}
+    if (parentProject == null) {
+        Assert.fail("Could not find the $parentProjectName project")
+    }
+    // Find subproject within parent identified above
+    var subProject: Project?  = parentProject!!.subProjects.find { p->  p.name == subProjectName}
+    if (subProject == null) {
+        Assert.fail("Could not find the $subProjectName project")
+    }
+
+    return subProject!!
 }
