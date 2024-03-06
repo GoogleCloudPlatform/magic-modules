@@ -27,12 +27,12 @@ jobs:
           fi
       - name: TeamCity Google Provider Generate
         if: ${{steps.services.outputs.services != '0'}}
-        uses: ./.github/actions/build-downstream/action.yml
+        uses: ./.github/actions/build-downstream
         with:
           repo: 'terraform-provider-google'
 
       - name: TeamCity Google Beta Provider Generate
-        uses: ./.github/actions/build-downstream/action.yml
+        uses: ./.github/actions/build-downstream
         with:
           repo: 'terraform-provider-google-beta'
 
