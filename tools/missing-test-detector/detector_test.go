@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/GoogleCloudPlatform/magic-modules/tools/missing-test-detector/reader"
+	"missing-test-detector/reader"
 )
 
 func TestDetectMissingTests(t *testing.T) {

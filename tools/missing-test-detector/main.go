@@ -7,7 +7,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/GoogleCloudPlatform/magic-modules/tools/missing-test-detector/reader"
+	"missing-test-detector/reader"
+
 	"github.com/golang/glog"
 )
 
