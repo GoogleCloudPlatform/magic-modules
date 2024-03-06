@@ -20,15 +20,17 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Cloud Quotas Overview': 'https://cloud.google.com/docs/quotas/overview'
   api: 'https://cloud.google.com/docs/quotas/reference/rest/v1/projects.locations.quotaPreferences'
 base_url: '{{parent}}/locations/global/quotaPreferences'
-self_link: '{{parent}}/locations/global/quotaPreferences/{{quota_preference_id}}'
-create_url: '{{parent}}/locations/global/quotaPreferences?quotaPreferenceId={{quota_preference_id}}&ignoreSafetyChecks={{ignore_safety_checks}}'
-update_url: '{{parent}}/locations/global/quotaPreferences/{{quota_preference_id}}?allowMissing={{allow_missing}}&validateOnly={{validate_only}}&ignoreSafetyChecks={{ignore_safety_checks}}'
+self_link: '{{parent}}/locations/global/quotaPreferences/{{name}}'
+create_url: '{{parent}}/locations/global/quotaPreferences?quotaPreferenceId={{name}}&ignoreSafetyChecks={{ignore_safety_checks}}'
+update_url: '{{parent}}/locations/global/quotaPreferences/{{name}}?allowMissing={{allow_missing}}&validateOnly={{validate_only}}&ignoreSafetyChecks={{ignore_safety_checks}}'
 update_verb: :PATCH
 update_mask: true
 skip_delete: true
 autogen_async: false
+import_format: ['{{%parent}}/locations/global/quotaPreferences/{{name}}']
+id_format: '{{parent}}/locations/global/quotaPreferences/{{name}}'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  encoder: templates/terraform/encoders/quota_preference.go.erb
+  constants: templates/terraform/constants/cloudquotas_quota_preference.go.erb
 
 examples:
   - !ruby/object:Provider::Terraform::Examples
@@ -36,7 +38,7 @@ examples:
     primary_resource_id: "preference"
     skip_test: true
     vars:
-      quota_preference_id: "compute_googleapis_com-CPUS-per-project_us-central2"
+      name: "compute_googleapis_com-CPUS-per-project_us-east1"
     test_env_vars:
       project: :PROJECT_NAME
 
@@ -45,20 +47,19 @@ parameters:
     name: 'parent'
     immutable: true
     url_param_only: true
+    required: true
+    default_from_api: true
     description: The parent of the quota preference. Allowed parents are "projects/[project-id / number]" or "folders/[folder-id / number]" or "organizations/[org-id / number]".
-  - !ruby/object:Api::Type::String
-    name: 'quota_preference_id'
-    immutable: true
-    url_param_only: true
-    description: The unique quota preference id. A UUID will be generated as the ID if the quota preference ID is empty.
   - !ruby/object:Api::Type::Boolean
     name: 'allow_missing'
     url_param_only: true
+    default_value: true
     description: |
       If set to true, and the quota preference is not found, a new one will be created. In this situation, updateMask is ignored.
   - !ruby/object:Api::Type::Boolean
     name: 'validate_only'
     url_param_only: true
+    default_value: false
     description: |
       If set to true, validate the request, but do not actually update. Note that a request being valid does not mean that the request is guaranteed to be fulfilled.
   - !ruby/object:Api::Type::Enum
@@ -74,17 +75,22 @@ parameters:
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
-    conflicts:
-      - parent
+    default_from_api: true
+    pattern: '{{parent}}/locations/global/quotaPreferences/{{name}}'
     description: |
       The resource name of the quota preference. Required except in the CREATE requests.
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+    custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::String
     name: 'service'
     required: true
+    default_from_api: true
     description: The name of the service to which the quota preference is applied.
   - !ruby/object:Api::Type::String
     name: 'quotaId'
     required: true
+    default_from_api: true
     description: |
       The id of the quota to which the quota preference is applied. A quota id is unique in the service.
       Example: `CPUS-per-project-region`.
@@ -113,6 +119,7 @@ properties:
           The trace id that the Google Cloud uses to provision the requested quota. This trace id may be used by the client to contact Cloud support to track the state of a quota preference request. The trace id is only produced for increase requests and is unique for each request. The quota decrease requests do not have a trace id.
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'annotations'
+        diff_suppress_func: QuotaConfigAnnotationsDiffSuppress
         description: |-
           The annotations map for clients to store small amounts of arbitrary data. Do not put PII or other sensitive information here. See https://google.aip.dev/128#annotations.
 
@@ -123,6 +130,7 @@ properties:
         description: The origin of the quota preference request.
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'dimensions'
+    default_from_api: true
     description: |-
       The dimensions that this quota preference applies to. The key of the map entry is the name of a dimension, such as "region", "zone", "network_id", and the value of the map entry is the dimension value. If a dimension is missing from the map of dimensions, the quota preference applies to all the dimension values except for those that have other quota preferences configured for the specific value.
 
@@ -131,6 +139,7 @@ properties:
       Example: `{"provider": "Foo Inc"}` where "provider" is a service specific dimension.
   - !ruby/object:Api::Type::String
     name: 'etag'
+    output: true
     description: |
       The current etag of the quota preference. If an etag is provided on update and does not match the current server's etag of the quota preference, the request will be blocked and an ABORTED error will be returned. See https://google.aip.dev/134#etags for more details on etags.
   - !ruby/object:Api::Type::String
@@ -152,9 +161,11 @@ properties:
       Is the quota preference pending Google Cloud approval and fulfillment.
   - !ruby/object:Api::Type::String
     name: 'justification'
+    ignore_read: true
     description: The reason / justification for this quota preference.
   - !ruby/object:Api::Type::String
     name: 'contactEmail'
+    ignore_read: true
     description: |-
       An email address that can be used for quota related communication between the Google Cloud and the user in case the Google Cloud needs further information to make a decision on whether the user preferred quota can be granted.
 

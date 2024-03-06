@@ -1,7 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package cloudquotas_test
 
 import (
@@ -33,19 +31,29 @@ func TestAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_up
 				Config: testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_basic(context),
 			},
 			{
-				ResourceName:            "google_cloud_quotas_quota_preference.preference",
+				ResourceName:            "google_cloud_quotas_quota_preference.my_preference",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"parent", "quota_preference_id", "allow_missing", "validate_only", "ignore_safety_checks"},
+				ImportStateVerifyIgnore: []string{"parent", "quota_preference_id", "allow_missing", "validate_only", "ignore_safety_checks", "contact_email"},
 			},
 			{
-				Config: testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_update(context),
+				Config: testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_increaseQuota(context),
 			},
 			{
-				ResourceName:            "google_cloud_quotas_quota_preference.preference",
+				ResourceName:            "google_cloud_quotas_quota_preference.my_preference",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"parent", "quota_preference_id", "allow_missing", "validate_only", "ignore_safety_checks"},
+				ExpectNonEmptyPlan:      true,
+				ImportStateVerifyIgnore: []string{"parent", "quota_preference_id", "allow_missing", "validate_only", "ignore_safety_checks", "contact_email", "justification", "quota_config.0.annotations"},
+			},
+			{
+				Config: testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_decreaseQuota(context),
+			},
+			{
+				ResourceName:            "google_cloud_quotas_quota_preference.my_preference",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parent", "quota_preference_id", "allow_missing", "validate_only", "ignore_safety_checks", "contact_email", "justification"},
 			},
 		},
 	})
@@ -53,54 +61,75 @@ func TestAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_up
 
 func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-		resource "google_project" "my_project" {
+		resource "google_project" "new_project" {
 			project_id 		= "tf-test%{random_suffix}"
 			name       		= "tf-test%{random_suffix}"
 			org_id          = "%{org_id}"
 			billing_account = "%{billing_account}"
 		}
 
-		resource "google_project_iam_binding" "project" {
-			project = google_project.my_project.project_id
+		resource "google_project_service" "cloudquotas" {
+			project  = google_project.new_project.project_id
+			service = "cloudquotas.googleapis.com"
+			depends_on = [google_project.new_project]
+		}
+
+		resource "google_project_service" "billing" {
+			project  = google_project.new_project.project_id
+			service = "cloudbilling.googleapis.com"
+			depends_on = [google_project.new_project]
+		}
+
+		resource "google_project_iam_binding" "project_iam" {
+			project = google_project_service.cloudquotas.project
 			role    = "roles/cloudquotas.admin"
 
 			members = [
-				"user:liulola@google.com",
+				"user:liulola@google.com"
 			]
+			depends_on = [google_project.new_project]
 		}
 
-		# Wait for project being created.
 		resource "time_sleep" "wait_120_seconds" {
-			depends_on = [google_project_iam_binding.project]
+			depends_on = [google_project_iam_binding.project_iam]
 			create_duration = "120s"
 		}
 
-		resource "google_cloud_quotas_quota_preference" "my-preference" {
-			name			= "projects/tf-test%{random_suffix}/locations/global/quotaPreferences/compute_googleapis_com-CPUS-per-project-us-central1"
-			quota_config {
-				preferred_value = 50
+		resource "google_cloud_quotas_quota_preference" "my_preference"{
+			parent				= "projects/${google_project_iam_binding.project_iam.project}"
+			name 				= "compute_googleapis_com-A2-CPUS-per-project_asia-northeast1"
+			dimensions          = { region = "asia-northeast1" }
+			service             = "compute.googleapis.com"
+			quota_id            = "A2-CPUS-per-project-region"
+			contact_email       = "liulola@google.com"
+			quota_config  {
+				preferred_value = 12
 			}
-			dimensions		= { region = "us-central1" }
-			service       	= "compute.googleapis.com"
-			quota_id      	= "CPUS-per-project-region"
-			contact_email 	= "liulola@google.com"
 		}
 	`, context)
 }
 
-func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_update(context map[string]interface{}) string {
+func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_increaseQuota(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-		resource "google_cloud_quotas_quota_preference" "my-preference" {
-			name          = "projects/tf-test%{random_suffix}/locations/global/quotaPreferences/compute_googleapis_com-CPUS-per-project-us-central1"
+		resource "google_cloud_quotas_quota_preference" "my_preference"{
+			contact_email       = "liulola@google.com"
+			justification		= "Increase quota for Terraform testing."
 			quota_config  {
-				preferred_value = 200
+				preferred_value = 12
+				annotations 	= { label = "terraform" }
 			}
-			dimensions 	= { region = "us-central1" }
-			service       = "compute.googleapis.com"
-			quota_id      = "CPUS-per-project-region"
-			contact_email = "liulola@google.com"
-			justification = "Increase quota for terraform testing."
-			validate_only = true
+		}
+	`, context)
+}
+
+func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_decreaseQuota(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+		resource "google_cloud_quotas_quota_preference" "my_preference"{
+			contact_email			= "liulola@google.com"
+			ignore_safety_checks	= "QUOTA_DECREASE_PERCENTAGE_TOO_HIGH"
+			quota_config  {
+				preferred_value 	= 10
+			}
 		}
 	`, context)
 }
