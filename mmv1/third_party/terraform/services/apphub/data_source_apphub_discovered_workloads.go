@@ -97,7 +97,7 @@ func dataSourceApphubDiscoveredWorkloadRead(d *schema.ResourceData, meta interfa
         })
         
         if err != nil {
-                return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("ApphubDiscoveredWorkload %q", d.Id()))
+                return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("ApphubDiscoveredWorkload %q", d.Id()), url)
         }
         
         if err := d.Set("discovered_workload", flattenApphubDiscoveredWorkload(res["discoveredWorkload"], d, config)); err != nil {
