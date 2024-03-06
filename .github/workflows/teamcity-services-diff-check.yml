@@ -9,13 +9,8 @@ on:
       - 'mmv1/third_party/terraform/.teamcity/components/inputs/services_beta.kt'
       - 'mmv1/products/**'
 jobs:
-  check-pr:
-    runs-on: ubuntu-22.04
-    outputs:
-      services: ${{steps.services.outputs.services}}
   teamcity-services-diff-check:
     
-    needs: check-pr
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout Repository
