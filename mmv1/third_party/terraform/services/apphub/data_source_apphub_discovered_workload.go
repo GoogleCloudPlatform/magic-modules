@@ -2,7 +2,6 @@ package apphub
 
 import (
     "fmt"
-    "time"
 
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
     "github.com/hashicorp/terraform-provider-google/google/tpgresource"
