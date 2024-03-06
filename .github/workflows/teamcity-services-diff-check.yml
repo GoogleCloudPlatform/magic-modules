@@ -10,7 +10,8 @@ on:
       - 'mmv1/products/**'
 jobs:
   teamcity-services-diff-check:
-    
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout Repository
@@ -30,11 +31,13 @@ jobs:
         uses: ./.github/actions/build-downstream
         with:
           repo: 'terraform-provider-google'
+          token: '$GITHUB_TOKEN'
 
       - name: TeamCity Google Beta Provider Generate
         uses: ./.github/actions/build-downstream
         with:
           repo: 'terraform-provider-google-beta'
+          token: '$GITHUB_TOKEN'
 
       - name: Checkout Repository
         uses: actions/checkout@v4
