@@ -62,11 +62,11 @@ properties:
           description: The data to scan folder org or project 
           properties: 
           - !ruby/object:Api::Type::String
-          name: organizationId 
-          description: The ID of an organization to scan 
+            name: organizationId 
+            description: The ID of an organization to scan 
           - !ruby/object:Api::Type::String
-          name: folderId
-          description: The ID for the folder within an organization to scan 
+            name: folderId
+            description: The ID for the folder within an organization to scan 
       - !ruby/object:Api::Type::String 
         name: 'inspectTemplates[]'
         description: Detection logic for profile generation 
@@ -310,13 +310,13 @@ properties:
                 description: Detailed error codes and messages.
                 Properties: 
                   - !ruby/object:Api::Type::Integer
-                  name : code 
-                  description: The status code, which should be an enum value of google.rpc.Code.
+                    name : code 
+                    description: The status code, which should be an enum value of google.rpc.Code.
                   - !ruby/object:Api::Type::String
-                  name: message 
-                  description : A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the google.rpc.Status.details field, or localized by the client.
+                    name: message 
+                    description : A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the google.rpc.Status.details field, or localized by the client.
                   - !ruby/object:Api::Type:NestedObject
-                  name: 'details[]'
+                    name: 'details[]'
               - !ruby/object:Api::Type::String
                 name: timestamp
         - !ruby/object:Api::Type::String
