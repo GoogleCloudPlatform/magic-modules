@@ -1,5 +1,5 @@
 name: build
-description: Generates Provider
+description: Generates Google/Google-Beta Provider
 inputs:
   repo:
     description: "provider repo"
