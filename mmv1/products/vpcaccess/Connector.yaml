@@ -106,7 +106,7 @@ properties:
   - !ruby/object:Api::Type::Integer
     name: minThroughput
     description: |
-      Minimum throughput of the connector in Mbps. Default and min is 200. Refers to the expected throughput when using an e2-micro machine type. 
+      Minimum throughput of the connector in Mbps. Default and min is 200. Refers to the expected throughput when using an e2-micro machine type.
       Value must be a multiple of 100 from 200 through 900. Must be lower than the value specified by maxThroughput. If both minThroughput and
       minInstances are provided, minInstances takes precedence over minThroughput. The use of minThroughput is discouraged in favor of minInstances.
     default_value: 200
