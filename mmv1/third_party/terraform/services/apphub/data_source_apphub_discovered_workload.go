@@ -86,17 +86,25 @@ func dataSourceApphubDiscoveredWorkloadRead(d *schema.ResourceData, meta interfa
         if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
                 billingProject = bp
         }
+        
+        var res map[string]interface{}
 
-        res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+        err = transport_tpg.Retry(transport_tpg.RetryOptions{
+        RetryFunc: func() (rerr error) {
+            res, rerr = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
                 Config:    config,
                 Method:    "GET",
                 Project:   billingProject,
                 RawURL:    url,
                 UserAgent: userAgent,
+            })
+            return rerr
+            },
+            Timeout: d.Timeout(schema.TimeoutRead),
         })
-        
+
         if err != nil {
-                return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("ApphubDiscoveredWorkload %q", d.Id()), url)
+            return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("ApphubDiscoveredWorkload %q", d.Id()), url)
         }
         
         if err := d.Set("discovered_workload", flattenApphubDiscoveredWorkload(res["discoveredWorkload"], d, config)); err != nil {
