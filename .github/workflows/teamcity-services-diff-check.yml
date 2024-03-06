@@ -25,9 +25,9 @@ jobs:
           echo "services=$newServices" >> "${GITHUB_OUTPUT}"
           if [ "$newServices" = "0" ];then
           echo "No new service found."
-          exit 1
           fi
       - name: TeamCity Google Provider Generate
+        id: generate
         if: ${{steps.services.outputs.services != '0'}}
         uses: ./.github/actions/build-downstream
         with:
@@ -35,42 +35,50 @@ jobs:
           token: '$GITHUB_TOKEN'
 
       - name: TeamCity Google Beta Provider Generate
+        if: steps.generate.outcome == 'success'
         uses: ./.github/actions/build-downstream
         with:
           repo: 'terraform-provider-google-beta'
           token: '$GITHUB_TOKEN'
 
       - name: Checkout Repository
+        if: steps.generate.outcome == 'success'
         uses: actions/checkout@v4
 
       - name: Setup Go
+        if: steps.generate.outcome == 'success'
         uses: actions/setup-go@v4
         with:
           go-version: '^1.20'
 
       - name: Download built artifacts - GA provider
+        if: steps.generate.outcome == 'success'
         uses: actions/download-artifact@v2
         with:
           name: artifact-terraform-provider-google
           path: artifacts
 
       - name: Unzip the artifacts and delete the zip
+        if: steps.generate.outcome == 'success'
         run: |
           unzip -o artifacts/output.zip -d ./provider
           rm artifacts/output.zip
 
       - name: Download built artifacts - Beta provider
+        if: steps.generate.outcome == 'success'
         uses: actions/download-artifact@v2
         with:
           name: artifact-terraform-provider-google-beta
           path: artifacts
 
       - name: Unzip the artifacts and delete the zip
+        if: steps.generate.outcome == 'success'
         run: |
           unzip -o artifacts/output.zip -d ./provider
           rm artifacts/output.zip
 
       - name: Check that new services have been added to the TeamCity configuration code
+        if: steps.generate.outcome == 'success'
         run: |
           # Create lists of service packages in providers
           ls provider/google/services > tools/teamcity-diff-check/services_ga.txt
