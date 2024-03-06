@@ -25,6 +25,9 @@ jobs:
           if [ "$newServices" = "0" ];then
           echo "No new service found." 
           fi
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
       - name: TeamCity Google Provider Generate
         if: ${{steps.services.outputs.services != '0'}}
         uses: ./.github/workflows/build-downstream.yml
