@@ -2,7 +2,6 @@ package apphub
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -92,25 +91,35 @@ func dataSourceApphubDiscoveredServiceRead(d *schema.ResourceData, meta interfac
 		billingProject = bp
 	}
 
-	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:    config,
-		Method:    "GET",
-		Project:   billingProject,
-		RawURL:    url,
-		UserAgent: userAgent,
+	var res map[string]interface{}
+
+	err = transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: func() (rerr error) {
+			res, rerr = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   billingProject,
+				RawURL:    url,
+				UserAgent: userAgent,
+			})
+			return rerr
+		},
+		Timeout: d.Timeout(schema.TimeoutRead),
 	})
-	fmt.Println(res, err, "Test print")
+
 	if err != nil {
-		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("ApphubDiscoveredService %q", d.Id()))
+		return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("ApphubDiscoveredService %q", d.Id()), url)
 	}
 
 	if err := d.Set("discovered_service", flattenApphubDiscoveredService(res["discoveredService"], d, config)); err != nil {
 		return fmt.Errorf("Error setting discovered service: %s", err)
 	}
 
-	// ds := d.Get("discovered_service").([]map[string]interface{})
-	// d.SetId(ds[0]["name"].(string))
-	d.SetId(time.Now().UTC().String())
+	id, err := tpgresource.ReplaceVars(d, config, "{{service_uri}}")
+	if err != nil {
+		return err
+	}
+	d.SetId(id)
 
 	return nil
 
