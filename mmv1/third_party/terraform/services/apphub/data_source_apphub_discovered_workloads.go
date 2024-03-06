@@ -95,16 +95,20 @@ func dataSourceApphubDiscoveredWorkloadRead(d *schema.ResourceData, meta interfa
                 RawURL:    url,
                 UserAgent: userAgent,
         })
-        fmt.Println(res, err, "Test print")
+        
         if err != nil {
-                return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("ApphubDiscoveredWorkload %q", d.Id()))
+                return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("ApphubDiscoveredWorkload %q", d.Id()))
         }
         
         if err := d.Set("discovered_workload", flattenApphubDiscoveredWorkload(res["discoveredWorkload"], d, config)); err != nil {
                 return fmt.Errorf("Error setting discovered workload: %s", err)
         }
         
-        d.SetId(time.Now().UTC().String())
+        id, err := tpgresource.ReplaceVars(d, config, "{{workload_uri}}")
+        if err != nil {
+        	return err
+        }
+        d.SetId(id)
         
         return nil
 
@@ -149,7 +153,7 @@ func flattenApphubWorkloadProperties(v interface{}, d *schema.ResourceData, conf
                 return nil
         }
         transformed := make(map[string]interface{})
-        transformed["gcp_project"] = flattenApphubDiscoveredWorkloadDataGcpProject(original["gcp_project"], d, config)
+        transformed["gcp_project"] = flattenApphubDiscoveredWorkloadDataGcpProject(original["gcpProject"], d, config)
         transformed["location"] = flattenApphubDiscoveredWorkloadDataLocation(original["location"], d, config)
         transformed["zone"] = flattenApphubDiscoveredWorkloadDataZone(original["zone"], d, config)
         return []interface{}{transformed}
