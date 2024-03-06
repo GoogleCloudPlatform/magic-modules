@@ -1,13 +1,19 @@
 resource "google_bigquery_dataset" "test" {
-	dataset_id = "<%= ctx[:vars]['dataset_id'] %>"
+	dataset_id = "tf_test_dataset_id%{random_suffix}"
 }
 
-resource "google_bigquery_routine" "sproc" {
-  dataset_id = google_bigquery_dataset.test.dataset_id
-  routine_id     = "<%= ctx[:vars]['routine_id'] %>"
-  routine_type = "PROCEDURE"
-  data_governance_type = "DATA_MASKING"
-  language = "SQL"
-  definition_body = "CREATE FUNCTION SSN_Mask(ssn STRING) RETURNS STRING AS (SAFE.REGEXP_REPLACE(ssn, '[0-9]', 'x'));"
-}
-
+resource "google_bigquery_routine" "data_governance_type" {
+	dataset_id = google_bigquery_dataset.test.dataset_id
+	routine_id     = "routine_id"
+	routine_type = "SCALAR_FUNCTION"
+	language = "SQL"
+	data_governance_type = "DATA_MASKING"
+	definition_body = "x"
+	arguments {
+	  name = "x"
+	  data_type = "{\"typeKind\" :  \"FLOAT64\"}"
+	} 
+  
+	return_type = "{\"typeKind\" :  \"FLOAT64\"}"
+  }
+  
