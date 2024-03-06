@@ -168,7 +168,6 @@ module "project-services" {
     "apikeys.googleapis.com",
     "appengine.googleapis.com",
     "appengineflex.googleapis.com",
-    "apphub.googleapis.com",
     "artifactregistry.googleapis.com",
     "assuredworkloads.googleapis.com",
     "autoscaling.googleapis.com",
