@@ -51,7 +51,7 @@ properties:
       - !ruby/object:Api::Type::String
         name: displayName
         description: Display Name (max 1000 Chars)
-      - !ruby/object:Api::Type::NestedObject 
+      - !ruby/object:Api::Type::NestedObject
         name: 'OrgConfig'
         properties: 
         - !ruby/object:Api::Type::String
@@ -70,7 +70,7 @@ properties:
       - !ruby/object:Api::Type::String 
         name: 'inspectTemplates[]'
         description: Detection logic for profile generation 
-      - !ruby/object:Api::Type::NestedObject 
+      - !ruby/object:Api::Type::NestedObject
         name: 'actions[]'
         description: Actions to execute at the completion of scanning
         properties: 
@@ -78,7 +78,7 @@ properties:
           name:  exportData
           description: Export data profiles into a provided location 
           properties: 
-          - !ruby/object:Api::Type::NestedObject 
+          - !ruby/object:Api::Type::NestedObject
             name: profileTable
             description: Store all table and column profiles in an existing table or a new table in an existing dataset. Each re-generation will result in a new row in BigQuery
             properties: 
@@ -91,7 +91,7 @@ properties:
             - !ruby/object:Api::Type::String
               name: tableId
               description: Name of the table
-        - !ruby/object:Api::Type::NestedObject 
+        - !ruby/object:Api::Type::NestedObject
           name: pubSubNotification
           description:  Publish a message into the Pub/Sub topic.
           properties: 
@@ -111,7 +111,7 @@ properties:
             name: pubSubCondition
             description: Conditions for triggering pubsub 
             properties: 
-            - !ruby/object::Api::Type::NestedObject
+            - !ruby/object:Api::Type::NestedObject
               name: expressions
               description: An expression 
               properties:
