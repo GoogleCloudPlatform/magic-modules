@@ -82,8 +82,6 @@ resource "google_kms_ekm_connection" "example-ekmconnection" {
       	}
     }
   depends_on = [
-  	google_project_iam_member.add_pscAuthorizedService_role,
-   	google_project_iam_member.add_sdviewer_role,
     	google_project_iam_member.add_pscAuthorizedService,
    	google_project_iam_member.add_sdviewer
    ]
