@@ -64,7 +64,12 @@ var communityApprovalCmd = &cobra.Command{
 		baseBranch := args[5]
 		fmt.Println("Base Branch: ", baseBranch)
 
-		gh := github.NewClient()
+		githubToken, ok := lookupGithubTokenOrFallback("GITHUB_TOKEN_MAGIC_MODULES")
+		if !ok {
+			fmt.Println("Did not provide GITHUB_TOKEN_MAGIC_MODULES or GITHUB_TOKEN environment variables")
+			os.Exit(1)
+		}
+		gh := github.NewClient(githubToken)
 		cb := cloudbuild.NewClient()
 		execCommunityChecker(prNumber, commitSha, branchName, headRepoUrl, headBranch, baseBranch, gh, cb)
 	},

@@ -36,21 +36,11 @@ jobs:
     timeout-minutes: 30
     steps:
     - name: Checkout Repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: ${{ github.event.inputs.owner }}/${{ github.event.inputs.repo }}
         ref: ${{ github.event.inputs.branch }}
         fetch-depth: 2
-    - name: Cache Go modules and build cache
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/go/pkg/mod
-          ~/.cache/go-build
-        key: ${{ runner.os }}-test-${{ github.event.inputs.repo }}-${{hashFiles('go.sum','google-*/transport/**','google-*/tpgresource/**','google-*/acctest/**','google-*/envvar/**','google-*/sweeper/**','google-*/verify/**') }}
-        restore-keys: |
-          ${{ runner.os }}-test-${{ github.event.inputs.repo }}-${{ hashFiles('go.sum') }}
-          ${{ runner.os }}-test-${{ github.event.inputs.repo }}-
     - name: Check for Code Changes
       id: pull_request
       run: |
@@ -80,7 +70,7 @@ jobs:
         }'
     - name: Set up Go
       if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
-      uses: actions/setup-go@v3
+      uses: actions/setup-go@v4
       with:
         go-version: '^1.20'
     - name: Build Provider

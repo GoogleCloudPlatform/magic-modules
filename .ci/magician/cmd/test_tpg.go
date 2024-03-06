@@ -42,7 +42,12 @@ var testTPGCmd = &cobra.Command{
 		commit := os.Getenv("COMMIT_SHA")
 		pr := os.Getenv("PR_NUMBER")
 
-		gh := github.NewClient()
+		githubToken, ok := lookupGithubTokenOrFallback("GITHUB_TOKEN_MAGIC_MODULES")
+		if !ok {
+			fmt.Println("Did not provide GITHUB_TOKEN_MAGIC_MODULES or GITHUB_TOKEN environment variables")
+			os.Exit(1)
+		}
+		gh := github.NewClient(githubToken)
 
 		execTestTPG(version, commit, pr, gh)
 	},
