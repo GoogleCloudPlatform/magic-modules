@@ -13,6 +13,10 @@ jobs:
     runs-on: ubuntu-22.04
     outputs:
       services: ${{steps.services.outputs.services}}
+  teamcity-services-diff-check:
+    
+    needs: check-pr
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -26,24 +30,17 @@ jobs:
           if [ "$newServices" = "0" ];then
           echo "No new service found." 
           fi
-  terraform-provider-google:
-    if: ${{needs.check-pr.outputs.services != '0'}}
-    needs: check-pr
-    uses: ./.github/workflows/build-downstream.yml
-    with:
-      repo: 'terraform-provider-google'
+      - name: TeamCity Google Provider Generate
+        if: ${{steps.services.outputs.services != '0'}}
+        uses: ./.github/workflows/build-downstream.yml
+        with:
+          repo: 'terraform-provider-google'
 
-  terraform-provider-google-beta:
-    if: ${{needs.check-pr.outputs.services != '0'}} 
-    needs: check-pr
-    uses: ./.github/workflows/build-downstream.yml
-    with:
-      repo: 'terraform-provider-google-beta'
+      - name: TeamCity Google Beta Provider Generate
+        uses: ./.github/workflows/build-downstream.yml
+        with:
+          repo: 'terraform-provider-google-beta'
 
-  teamcity-services-diff-check:
-    needs: [terraform-provider-google, terraform-provider-google-beta]
-    runs-on: ubuntu-22.04
-    steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
