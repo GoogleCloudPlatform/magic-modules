@@ -6,7 +6,7 @@ description: |-
 
 # Function: region_from_zone
 
-Returns the region within a provided resource's zone.
+Returns a region name derived from a provided zone.
 
 For more information about using provider-defined functions with Terraform [see the official documentation](https://developer.hashicorp.com/terraform/plugin/framework/functions/concepts).
 
