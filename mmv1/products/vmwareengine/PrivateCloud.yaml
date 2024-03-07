@@ -44,6 +44,7 @@ async: !ruby/object:Api::OpAsync
     message: "message"
 import_format: ["projects/{{project}}/locations/{{location}}/privateClouds/{{name}}"]
 autogen_async: true
+skip_sweeper: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_delete: "templates/terraform/post_delete/private_cloud.go.erb"
   decoder: "templates/terraform/decoders/private_cloud.go.erb"
