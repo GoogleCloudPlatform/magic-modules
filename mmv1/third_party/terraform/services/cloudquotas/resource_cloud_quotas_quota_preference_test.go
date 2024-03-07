@@ -68,42 +68,49 @@ func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_ba
 			billing_account = "%{billing_account}"
 		}
 
+		resource "google_project_iam_binding" "project_iam" {
+			project 	= google_project.new_project.project_id
+			role    	= "roles/cloudquotas.admin"
+			members 	= [
+				"user:testinguser2@google.com"
+			]
+			depends_on	= [google_project.new_project]
+		}
+
 		resource "google_project_service" "cloudquotas" {
-			project  = google_project.new_project.project_id
-			service = "cloudquotas.googleapis.com"
-			depends_on = [google_project.new_project]
+			project  	= google_project.new_project.project_id
+			service 	= "cloudquotas.googleapis.com"
+			depends_on	= [google_project_iam_binding.project_iam]
+		}
+
+		resource "google_project_service" "compute" {
+			project  	= google_project.new_project.project_id
+			service 	= "compute.googleapis.com"
+			depends_on	= [google_project_service.cloudquotas]
 		}
 
 		resource "google_project_service" "billing" {
-			project  = google_project.new_project.project_id
-			service = "cloudbilling.googleapis.com"
-			depends_on = [google_project.new_project]
+			project  	= google_project.new_project.project_id
+			service 	= "cloudbilling.googleapis.com"
+			depends_on	= [google_project_service.compute]
 		}
-
-		resource "google_project_iam_binding" "project_iam" {
-			project = google_project_service.cloudquotas.project
-			role    = "roles/cloudquotas.admin"
-
-			members = [
-				"user:liulola@google.com"
+		
+		resource "time_sleep" "wait_180_seconds" {
+			create_duration = "180s"
+			depends_on = [
+				google_project_service.billing, 
 			]
-			depends_on = [google_project.new_project]
-		}
-
-		resource "time_sleep" "wait_120_seconds" {
-			depends_on = [google_project_iam_binding.project_iam]
-			create_duration = "120s"
 		}
 
 		resource "google_cloud_quotas_quota_preference" "my_preference"{
-			parent				= "projects/${google_project_iam_binding.project_iam.project}"
-			name 				= "compute_googleapis_com-A2-CPUS-per-project_asia-northeast1"
-			dimensions          = { region = "asia-northeast1" }
+			parent				= "projects/${google_project_service.billing.project}"
+			name 				= "compute_googleapis_com-CPUS-per-project_us-central1"
+			dimensions          = { region = "us-central1" }
 			service             = "compute.googleapis.com"
-			quota_id            = "A2-CPUS-per-project-region"
-			contact_email       = "liulola@google.com"
+			quota_id            = "CPUS-per-project-region"
+			contact_email       = "testinguser2@google.com"
 			quota_config  {
-				preferred_value = 12
+				preferred_value = 70
 			}
 		}
 	`, context)
@@ -111,11 +118,46 @@ func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_ba
 
 func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_increaseQuota(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+		resource "google_project" "new_project" {
+			project_id 		= "tf-test%{random_suffix}"
+			name       		= "tf-test%{random_suffix}"
+			org_id          = "%{org_id}"
+			billing_account = "%{billing_account}"
+		}
+
+		resource "google_project_iam_binding" "project_iam" {
+			project 	= google_project.new_project.project_id
+			role    	= "roles/cloudquotas.admin"
+			members 	= [
+				"user:testinguser2@google.com"
+			]
+			depends_on	= [google_project.new_project]
+		}
+
+		resource "google_project_service" "cloudquotas" {
+			project  	= google_project.new_project.project_id
+			service 	= "cloudquotas.googleapis.com"
+			depends_on	= [google_project_iam_binding.project_iam]
+		}
+
+		resource "google_project_service" "compute" {
+			project  	= google_project.new_project.project_id
+			service 	= "compute.googleapis.com"
+			depends_on	= [google_project_service.cloudquotas]
+		}
+
+		resource "google_project_service" "billing" {
+			project  	= google_project.new_project.project_id
+			service 	= "cloudbilling.googleapis.com"
+			depends_on	= [google_project_service.compute]
+		}
+
 		resource "google_cloud_quotas_quota_preference" "my_preference"{
-			contact_email       = "liulola@google.com"
-			justification		= "Increase quota for Terraform testing."
+			dimensions          = { region = "us-central1" }
+			contact_email       = "testinguser2@google.com"
+			justification		= "Ignore. Increase quota for Terraform testing."
 			quota_config  {
-				preferred_value = 12
+				preferred_value = 72
 				annotations 	= { label = "terraform" }
 			}
 		}
@@ -124,12 +166,104 @@ func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_in
 
 func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_decreaseQuota(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+		resource "google_project" "new_project" {
+			project_id 		= "tf-test%{random_suffix}"
+			name       		= "tf-test%{random_suffix}"
+			org_id          = "%{org_id}"
+			billing_account = "%{billing_account}"
+		}
+
+		resource "google_project_iam_binding" "project_iam" {
+			project 	= google_project.new_project.project_id
+			role    	= "roles/cloudquotas.admin"
+			members 	= [
+				"user:testinguser2@google.com"
+			]
+			depends_on	= [google_project.new_project]
+		}
+
+		resource "google_project_service" "cloudquotas" {
+			project  	= google_project.new_project.project_id
+			service 	= "cloudquotas.googleapis.com"
+			depends_on	= [google_project_iam_binding.project_iam]
+		}
+
+		resource "google_project_service" "compute" {
+			project  	= google_project.new_project.project_id
+			service 	= "compute.googleapis.com"
+			depends_on	= [google_project_service.cloudquotas]
+		}
+
+		resource "google_project_service" "billing" {
+			project  	= google_project.new_project.project_id
+			service 	= "cloudbilling.googleapis.com"
+			depends_on	= [google_project_service.compute]
+		}
+
 		resource "google_cloud_quotas_quota_preference" "my_preference"{
-			contact_email			= "liulola@google.com"
-			ignore_safety_checks	= "QUOTA_DECREASE_PERCENTAGE_TOO_HIGH"
+			dimensions           	= { region = "us-central1" }
+			contact_email			= "testinguser2@google.com"
+			ignore_safety_checks 	= "QUOTA_DECREASE_PERCENTAGE_TOO_HIGH"
 			quota_config  {
-				preferred_value 	= 10
+				preferred_value 	= 65
 			}
+		}
+	`, context)
+}
+
+func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_upsert(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+	resource "google_project" "new_project" {
+			project_id 		= "tf-test%{random_suffix}"
+			name       		= "tf-test%{random_suffix}"
+			org_id          = "%{org_id}"
+			billing_account = "%{billing_account}"
+		}
+
+		resource "google_project_iam_binding" "project_iam" {
+			project = google_project.new_project.project_id
+			role    = "roles/cloudquotas.admin"
+			members = [
+				"user:testinguser3@google.com"
+			]
+			depends_on	= [google_project.new_project]
+		}
+
+		resource "google_project_service" "cloudquotas" {
+			project  	= google_project.new_project.project_id
+			service 	= "cloudquotas.googleapis.com"
+			depends_on	= [google_project_iam_binding.project_iam]
+		}
+
+		resource "google_project_service" "compute" {
+			project  	= google_project.new_project.project_id
+			service 	= "compute.googleapis.com"
+			depends_on	= [google_project_service.cloudquotas]
+		}
+
+		resource "google_project_service" "billing" {
+			project  	= google_project.new_project.project_id
+			service 	= "cloudbilling.googleapis.com"
+			depends_on	= [google_project_service.compute]
+		}
+
+		resource "time_sleep" "wait_180_seconds" {
+			depends_on = [
+				google_project_service.billing, 
+			]
+			create_duration = "180s"
+		}
+
+		resource "google_cloud_quotas_quota_preference" "my_preference"{
+			parent				= "projects/${google_project_service.billing.project}"
+			name 				= "libraryagent_googleapis_com-ReadsPerMinutePerProject"
+			service             = "libraryagent.googleapis.com"
+			quota_id            = "ReadsPerMinutePerProject"
+			contact_email       = "testinguser3@google.com"
+			quota_config  {
+				preferred_value = 15
+			}
+			allow_missing		= true
 		}
 	`, context)
 }
