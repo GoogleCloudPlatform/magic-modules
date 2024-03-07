@@ -315,7 +315,7 @@ properties:
                   - !ruby/object:Api::Type::String
                     name: message 
                     description : A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the google.rpc.Status.details field, or localized by the client.
-                  - !ruby/object:Api::Type:NestedObject
+                  - !ruby/object:Api::Type::NestedObject
                     name: 'details[]'
               - !ruby/object:Api::Type::String
                 name: timestamp
