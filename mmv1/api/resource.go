@@ -18,7 +18,6 @@ import (
 )
 
 type Resource struct {
-	// Embed NamedObject
 	NamedObject `yaml:",inline"`
 
 	// [Required] A description of the resource that's surfaced in provider
@@ -278,6 +277,7 @@ type Resource struct {
 func (r *Resource) Validate() {
 	// TODO Q1 Rewrite super
 	// super
+	r.NamedObject.Validate()
 
 	r.setResourceMetada(r.Parameters)
 	r.setResourceMetada(r.Properties)

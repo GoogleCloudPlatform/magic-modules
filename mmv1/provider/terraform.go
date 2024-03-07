@@ -37,6 +37,14 @@ type Terraform struct {
 func NewTerraform(product *api.Product) *Terraform {
 	t := Terraform{ResourceCount: 0, IAMResourceCount: 0}
 
+	for _, r := range product.Objects {
+		log.Printf("resource name %s  api_name %s", r.Name, r.ApiName)
+
+		for _, p := range r.Properties {
+			log.Printf("property name  %s api_name %s", p.Name, p.ApiName)
+		}
+	}
+
 	// TODO Q1
 	//      @target_version_name = version_name
 	//

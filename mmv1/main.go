@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -10,6 +11,8 @@ import (
 	"strings"
 
 	"golang.org/x/exp/slices"
+
+	"github.com/creasty/defaults"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
@@ -87,11 +90,13 @@ func main() {
 				log.Fatalf("Cannot open the file: %v", productYaml)
 			}
 			productApi := &api.Product{}
+			// Set default value of fields
+			defaults.Set(productApi)
 			yamlValidator.Parse(productYaml, productApi)
 
 			// TODO Q1: remove these lines, which are for debugging
-			// prod, _ := json.Marshal(productApi)
-			// log.Printf("prod %s", string(prod))
+			prod, _ := json.Marshal(productApi)
+			log.Printf("prod %s", string(prod))
 
 			if !productApi.ExistsAtVersionOrLower(version) {
 				log.Printf("%s does not have a '%s' version, skipping", productName, version)
@@ -132,7 +137,6 @@ func main() {
 			}
 
 			// TODO Q2: override resources
-			log.Printf("resources before sorting %#v", resources)
 
 			// Sort resources by name
 			sort.Slice(resources, func(i, j int) bool {

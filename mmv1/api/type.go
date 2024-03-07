@@ -238,60 +238,63 @@ type Type struct {
 
 const MAX_NAME = 20
 
-// func (t *Type) validate() {
-// super
-// check :description, type: ::String, required: true
-// check :exclude, type: :boolean, default: false, required: true
-// check :deprecation_message, type: ::String
-// check :removed_message, type: ::String
-// check :min_version, type: ::String
-// check :exact_version, type: ::String
-// check :output, type: :boolean
-// check :required, type: :boolean
-// check :send_empty_value, type: :boolean
-// check :allow_empty_object, type: :boolean
-// check :url_param_only, type: :boolean
-// check :read_query_params, type: ::String
-// check :immutable, type: :boolean
+func (t *Type) Validate() {
+	// super
+	t.NamedObject.Validate()
 
-// raise 'Property cannot be output and required at the same time.' \
-//   if @output && @required
+	// check :description, type: ::String, required: true
+	// check :exclude, type: :boolean, default: false, required: true
+	// check :deprecation_message, type: ::String
+	// check :removed_message, type: ::String
+	// check :min_version, type: ::String
+	// check :exact_version, type: ::String
+	// check :output, type: :boolean
+	// check :required, type: :boolean
+	// check :send_empty_value, type: :boolean
+	// check :allow_empty_object, type: :boolean
+	// check :url_param_only, type: :boolean
+	// check :read_query_params, type: ::String
+	// check :immutable, type: :boolean
 
-// check :update_verb, type: Symbol, allowed: %i[POST PUT PATCH NONE],
-//                     default: @__resource&.update_verb
+	// raise 'Property cannot be output and required at the same time.' \
+	//   if @output && @required
 
-// check :update_url, type: ::String
-// check :update_id, type: ::String
-// check :fingerprint_name, type: ::String
-// check :pattern, type: ::String
+	// check :update_verb, type: Symbol, allowed: %i[POST PUT PATCH NONE],
+	//                     default: @__resource&.update_verb
 
-// check_default_value_property
-// check_conflicts
-// check_at_least_one_of
-// check_exactly_one_of
-// check_required_with
+	// check :update_url, type: ::String
+	// check :update_id, type: ::String
+	// check :fingerprint_name, type: ::String
+	// check :pattern, type: ::String
 
-// check :sensitive, type: :boolean, default: false
-// check :is_set, type: :boolean, default: false
-// check :default_from_api, type: :boolean, default: false
-// check :unordered_list, type: :boolean, default: false
-// check :schema_config_mode_attr, type: :boolean, default: false
+	// check_default_value_property
+	// check_conflicts
+	// check_at_least_one_of
+	// check_exactly_one_of
+	// check_required_with
 
-// // technically set as a default everywhere, but only maps will use this.
-// check :key_expander, type: ::String, default: 'tpgresource.ExpandString'
-// check :key_diff_suppress_func, type: ::String
+	// check :sensitive, type: :boolean, default: false
+	// check :is_set, type: :boolean, default: false
+	// check :default_from_api, type: :boolean, default: false
+	// check :unordered_list, type: :boolean, default: false
+	// check :schema_config_mode_attr, type: :boolean, default: false
 
-// check :diff_suppress_func, type: ::String
-// check :state_func, type: ::String
-// check :validation, type: Provider::Terraform::Validation
-// check :set_hash_func, type: ::String
+	// // technically set as a default everywhere, but only maps will use this.
+	// check :key_expander, type: ::String, default: 'tpgresource.ExpandString'
+	// check :key_diff_suppress_func, type: ::String
 
-// check :custom_flatten, type: ::String
-// check :custom_expand, type: ::String
+	// check :diff_suppress_func, type: ::String
+	// check :state_func, type: ::String
+	// check :validation, type: Provider::Terraform::Validation
+	// check :set_hash_func, type: ::String
 
-// raise "'default_value' and 'default_from_api' cannot be both set" \
-//   if @default_from_api && !@default_value.nil?
-// }
+	// check :custom_flatten, type: ::String
+	// check :custom_expand, type: ::String
+
+	//	raise "'default_value' and 'default_from_api' cannot be both set" \
+	//	  if @default_from_api && !@default_value.nil?
+	//	}
+}
 
 // func (t *Type) to_s() {
 // JSON.pretty_generate(self)

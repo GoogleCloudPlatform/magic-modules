@@ -75,8 +75,9 @@ type NamedObject struct {
 // result
 // }
 
-// func (n *Named) validate() {
-// super
-// check :name, type: String, required: true
-// check :api_name, type: String, default: @name
-// }
+func (o *NamedObject) Validate() {
+	// super
+	// check :name, type: String, required: true
+	// check :api_name, type: String, default: @name
+	o.ApiName = o.Name
+}

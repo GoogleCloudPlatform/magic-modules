@@ -116,7 +116,7 @@ module Google
     end
 
     def check_property_value(property, prop_value, type)
-      Google::LOGGER.debug "Checking '#{property}' on #{object_display_name}"
+      Google::LOGGER.debug "Checking with value '#{prop_value}' on #{object_display_name}"
       check_type property, prop_value, type unless type.nil?
       prop_value.validate if prop_value.is_a?(Google::YamlValidator)
     end

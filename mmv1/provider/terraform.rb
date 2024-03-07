@@ -383,12 +383,20 @@ module Provider
     end
 
     def generate_object(object, output_folder, version_name, generate_code, generate_docs)
+      if object.name == "Instance"
+        Google::LOGGER.info "Generating0 #{object.name} #{object.api_name} resource instancezhenhua"
+      end
+
       pwd = Dir.pwd
       data = build_object_data(pwd, object, output_folder, version_name)
       unless object.exclude_resource
         FileUtils.mkpath output_folder
         Dir.chdir output_folder
-        Google::LOGGER.debug "Generating #{object.name} resource"
+        Google::LOGGER.info "Generating #{object.name} resource"
+
+        if object.name == "Instance"
+          Google::LOGGER.info "Generating #{object.name} #{object.api_name} resource instancezhenhua"
+        end
         generate_resource(pwd, data.clone, generate_code, generate_docs)
         if generate_code
           Google::LOGGER.debug "Generating #{object.name} tests"

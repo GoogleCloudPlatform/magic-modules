@@ -191,6 +191,7 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
         resource.properties_with_excluded, nil
       )
       resource.validate
+
       resources.push(resource)
     end
 
