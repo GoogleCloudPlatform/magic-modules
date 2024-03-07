@@ -1,9 +1,6 @@
 name: Provider Build and Unit Test
 
-permissions:
-  actions: read
-  contents: read
-  statuses: write
+permissions: read-all
 
 env:
   status_suffix: "-build-and-unit-tests"
@@ -32,6 +29,8 @@ concurrency:
 
 jobs:
   build-and-unit-test:
+    permissions:
+      statuses: write
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
