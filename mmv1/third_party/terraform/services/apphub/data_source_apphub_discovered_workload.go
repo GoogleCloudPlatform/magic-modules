@@ -12,6 +12,10 @@ func DataSourceApphubDiscoveredWorkload() *schema.Resource {
     return &schema.Resource{
         Read: dataSourceApphubDiscoveredWorkloadRead,
         Schema: map[string]*schema.Schema{
+        		"project":{
+        		    Type: schema.TypeString,
+        		    Optional: true,
+        		 },
                         "location":{
                             Type: schema.TypeString,
                             Required: true,
