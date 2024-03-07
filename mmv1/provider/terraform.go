@@ -34,7 +34,7 @@ type Terraform struct {
 	ResourcesForVersion []api.Resource
 }
 
-func NewTerraform(product api.Product) *Terraform {
+func NewTerraform(product *api.Product) *Terraform {
 	t := Terraform{ResourceCount: 0, IAMResourceCount: 0}
 
 	// TODO Q1
