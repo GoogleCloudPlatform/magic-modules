@@ -40,6 +40,7 @@ In addition to the arguments listed above, the following computed attributes are
 * `workload_reference` - Reference to an underlying networking resource that can comprise a Workload. Structure is [documented below](#nested_workload_reference)
 
 <a name="nested_workload_reference"></a>A `workload_reference` object would contain the following fields:-
+
 * uri - The underlying resource URI.
 
 * path - Additional path under the resource URI.
