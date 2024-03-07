@@ -68,6 +68,7 @@ steps:
       - "membership-checker"
       - $_PR_NUMBER
       - $COMMIT_SHA
+      # The following are unused and should be safe to remove at least 2 weeks after this comment was added.
       - $BRANCH_NAME
       - $_HEAD_REPO_URL
       - $_HEAD_BRANCH

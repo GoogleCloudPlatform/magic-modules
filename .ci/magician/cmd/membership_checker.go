@@ -52,25 +52,14 @@ var membershipCheckerCmd = &cobra.Command{
 			a. Adds the 'awaiting-approval' label.
 			b. Posts a link prompting approval for the build.
 	`,
-	Args: cobra.ExactArgs(6),
+	// This can change to cobra.ExactArgs(2) after at least a 2-week soak
+	Args: cobra.RangeArgs(2, 6),
 	Run: func(cmd *cobra.Command, args []string) {
 		prNumber := args[0]
 		fmt.Println("PR Number: ", prNumber)
 
 		commitSha := args[1]
 		fmt.Println("Commit SHA: ", commitSha)
-
-		branchName := args[2]
-		fmt.Println("Branch Name: ", branchName)
-
-		headRepoUrl := args[3]
-		fmt.Println("Head Repo URL: ", headRepoUrl)
-
-		headBranch := args[4]
-		fmt.Println("Head Branch: ", headBranch)
-
-		baseBranch := args[5]
-		fmt.Println("Base Branch: ", baseBranch)
 
 		githubToken, ok := lookupGithubTokenOrFallback("GITHUB_TOKEN_MAGIC_MODULES")
 		if !ok {
@@ -79,19 +68,11 @@ var membershipCheckerCmd = &cobra.Command{
 		}
 		gh := github.NewClient(githubToken)
 		cb := cloudbuild.NewClient()
-		execMembershipChecker(prNumber, commitSha, branchName, headRepoUrl, headBranch, baseBranch, gh, cb)
+		execMembershipChecker(prNumber, commitSha, gh, cb)
 	},
 }
 
-func execMembershipChecker(prNumber, commitSha, branchName, headRepoUrl, headBranch, baseBranch string, gh GithubClient, cb CloudbuildClient) {
-	substitutions := map[string]string{
-		"BRANCH_NAME":    branchName,
-		"_PR_NUMBER":     prNumber,
-		"_HEAD_REPO_URL": headRepoUrl,
-		"_HEAD_BRANCH":   headBranch,
-		"_BASE_BRANCH":   baseBranch,
-	}
-
+func execMembershipChecker(prNumber, commitSha string, gh GithubClient, cb CloudbuildClient) {
 	pullRequest, err := gh.GetPullRequest(prNumber)
 	if err != nil {
 		fmt.Println(err)
@@ -102,17 +83,6 @@ func execMembershipChecker(prNumber, commitSha, branchName, headRepoUrl, headBra
 	authorUserType := gh.GetUserType(author)
 	trusted := authorUserType == github.CoreContributorUserType || authorUserType == github.GooglerUserType
 
-	// auto_run(contributor-membership-checker) will be run on every commit or /gcbrun:
-	// only triggers builds for trusted users
-	if trusted {
-		err = cb.TriggerMMPresubmitRuns(commitSha, substitutions)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-	}
-
-	// in contributor-membership-checker job:
 	// 1. auto approve community-checker run for trusted users
 	// 2. add awaiting-approval label to external contributor PRs
 	if trusted {
