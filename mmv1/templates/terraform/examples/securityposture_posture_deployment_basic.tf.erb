@@ -1,5 +1,5 @@
-resource "google_securityposture_posture" "posture_example" {
-    posture_id          = "posture_example"
+resource "google_securityposture_posture" "posture_1" {
+    posture_id          = "posture_1"
     parent = "organizations/<%= ctx[:test_env_vars]['org_id'] %>"
     location = "global"
     state = "ACTIVE"
@@ -27,6 +27,6 @@ resource "google_securityposture_posture_deployment" "<%= ctx[:primary_resource_
     location = "global"
     description = "a new posture deployment"
     target_resource = "projects/<%= ctx[:test_env_vars]['project_number'] %>"
-    posture_id = google_securityposture_posture.posture_example.name
-    posture_revision_id = google_securityposture_posture.posture_example.revision_id
+    posture_id = google_securityposture_posture.posture_1.name
+    posture_revision_id = google_securityposture_posture.posture_1.revision_id
 }
