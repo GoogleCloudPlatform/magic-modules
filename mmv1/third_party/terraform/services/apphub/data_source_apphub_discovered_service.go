@@ -26,50 +26,42 @@ func DataSourceApphubDiscoveredService() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"discovered_service": {
+			"name": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"service_reference": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"name": {
+						"uri": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"service_reference": {
-							Type:     schema.TypeList,
+						"path": {
+							Type:     schema.TypeString,
 							Computed: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"uri": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"path": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-								},
-							},
 						},
-						"service_properties": {
-							Type:     schema.TypeList,
+					},
+				},
+			},
+			"service_properties": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"gcp_project": {
+							Type:     schema.TypeString,
 							Computed: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"gcp_project": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"location": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"zone": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-								},
-							},
+						},
+						"location": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"zone": {
+							Type:     schema.TypeString,
+							Computed: true,
 						},
 					},
 				},
@@ -131,8 +123,16 @@ func dataSourceApphubDiscoveredServiceRead(d *schema.ResourceData, meta interfac
 		return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("ApphubDiscoveredService %q", d.Id()), url)
 	}
 
-	if err := d.Set("discovered_service", flattenApphubDiscoveredService(res["discoveredService"], d, config)); err != nil {
-		return fmt.Errorf("Error setting discovered service: %s", err)
+	if err := d.Set("name", flattenApphubDiscoveredServiceName(res["discoveredService"].(map[string]interface{})["name"], d, config)); err != nil {
+		return fmt.Errorf("Error setting service name: %s", err)
+	}
+
+	if err := d.Set("service_reference", flattenApphubDiscoveredServiceReference(res["discoveredService"].(map[string]interface{})["serviceReference"], d, config)); err != nil {
+		return fmt.Errorf("Error setting service reference: %s", err)
+	}
+
+	if err := d.Set("service_properties", flattenApphubDiscoveredServiceProperties(res["discoveredService"].(map[string]interface{})["serviceProperties"], d, config)); err != nil {
+		return fmt.Errorf("Error setting service properties: %s", err)
 	}
 
 	d.SetId(res["discoveredService"].(map[string]interface{})["name"].(string))
@@ -141,22 +141,7 @@ func dataSourceApphubDiscoveredServiceRead(d *schema.ResourceData, meta interfac
 
 }
 
-func flattenApphubDiscoveredService(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	if v == nil {
-		return nil
-	}
-	original := v.(map[string]interface{})
-	if len(original) == 0 {
-		return nil
-	}
-	transformed := make(map[string]interface{})
-	transformed["name"] = flattenApphubDiscoveredServiceDataName(original["name"], d, config)
-	transformed["service_reference"] = flattenApphubServiceReference(original["serviceReference"], d, config)
-	transformed["service_properties"] = flattenApphubServiceProperties(original["serviceProperties"], d, config)
-	return []interface{}{transformed}
-}
-
-func flattenApphubServiceReference(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+func flattenApphubDiscoveredServiceReference(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil {
 		return nil
 	}
@@ -170,7 +155,7 @@ func flattenApphubServiceReference(v interface{}, d *schema.ResourceData, config
 	return []interface{}{transformed}
 }
 
-func flattenApphubServiceProperties(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+func flattenApphubDiscoveredServiceProperties(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil {
 		return nil
 	}
@@ -185,7 +170,7 @@ func flattenApphubServiceProperties(v interface{}, d *schema.ResourceData, confi
 	return []interface{}{transformed}
 }
 
-func flattenApphubDiscoveredServiceDataName(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+func flattenApphubDiscoveredServiceName(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
