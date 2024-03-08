@@ -177,7 +177,7 @@ module OpenAPIGenerate
       )
 
       id_param = path.post.parameters.select do |p|
-        p.name.downcase.include?(resource_name.downcase)
+        p.name.downcase.include?(resource_name.downcase.tr("0-9", ""))
       end.last
       raise 'did not find ID param' unless id_param
 
