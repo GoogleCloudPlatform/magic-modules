@@ -38,22 +38,6 @@ resource "google_project" "service_project" {
 	org_id = "%{org_id}"
 }
 
-resource "google_project_iam_binding" "apphub_service_project_iam_binding" {
-  project = google_project.service_project.project_id
-  role    = "roles/apphub.admin"
-  members = [
-    "%{service_account}",
-  ]
-}
-
-resource "google_project_iam_binding" "apphub_host_project_iam_binding" {
-  project =  "%{host_project}"
-  role    = "roles/apphub.admin"
-  members = [
-    "%{service_account}",
-  ]
-}
-
 # Enable Compute API
 resource "google_project_service" "compute_service_project" {
   project_id = google_project.service_project.project_id
@@ -62,7 +46,6 @@ resource "google_project_service" "compute_service_project" {
 
 resource "google_apphub_service_project_attachment" "service_project_attachment" {
   service_project_attachment_id = google_project.service_project_full.project_id
-	depends_on = [google_project_iam_binding.apphub_service_project_iam_binding, google_project_iam_binding.apphub_host_project_iam_binding]
 }
 
 # discovered service block
