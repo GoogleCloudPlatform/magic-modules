@@ -28,7 +28,6 @@ import_format: [
   '{{project}}/iap_tunnel/locations/{{region}}/destGroups/{{group_name}}',
   '{{region}}/destGroups/{{group_name}}',
 ]
-
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   skip_import_test: true
   parent_resource_attribute: 'dest_group'
