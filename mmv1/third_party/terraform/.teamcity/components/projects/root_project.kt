@@ -12,11 +12,13 @@ import SharedResourceNameGa
 import SharedResourceNameVcr
 import builds.AllContextParameters
 import builds.readOnlySettings
-import generated.GetPackageNameList
+import generated.PackagesListBeta
+import generated.PackagesListGa
 import generated.ServicesListBeta
 import generated.ServicesListGa
 import jetbrains.buildServer.configs.kotlin.Project
 import jetbrains.buildServer.configs.kotlin.sharedResource
+import projects.feature_branches.featureBranchProviderFunctionSubProject
 
 // googleCloudRootProject returns a root project that contains a subprojects for the GA and Beta version of the
 // Google provider. There are also resources to help manage the test projects used for acceptance tests.
@@ -38,27 +40,31 @@ fun googleCloudRootProject(allConfig: AllContextParameters): Project {
                 id = "GA_NIGHTLY_SERVICE_LOCK_SHARED_RESOURCE"
                 name = SharedResourceNameGa
                 enabled = true
-                resourceType = customValues(getServiceNameList(ServicesListGa) + GetPackageNameList())
+                resourceType = customValues(getPackageNameList(ServicesListGa) + getPackageNameList(PackagesListGa))
             }
             // For controlling sweeping of the Beta nightly test project
             sharedResource {
                 id = "BETA_NIGHTLY_SERVICE_LOCK_SHARED_RESOURCE"
                 name = SharedResourceNameBeta
                 enabled = true
-                resourceType = customValues(getServiceNameList(ServicesListBeta) + GetPackageNameList())
+                resourceType = customValues(getPackageNameList(ServicesListBeta) + getPackageNameList(PackagesListBeta))
             }
             // For controlling sweeping of the PR testing project
             sharedResource {
                 id = "PR_SERVICE_LOCK_SHARED_RESOURCE"
                 name = SharedResourceNameVcr
                 enabled = true
-                resourceType = customValues(getServiceNameList(ServicesListBeta) + GetPackageNameList()) // Use Beta list of services here, assuming Beta is a superset of GA
+                resourceType = customValues(getPackageNameList(ServicesListBeta) + getPackageNameList(PackagesListBeta)) // Use Beta list of services here, assuming Beta is a superset of GA
             }
         }
 
+        // Projects required for nightly testing, testing MM upstreams, and sweepers
         subProject(googleSubProjectGa(allConfig))
         subProject(googleSubProjectBeta(allConfig))
         subProject(projectSweeperSubProject(allConfig))
+
+        // Feature branch-testing projects - these will be added and removed as needed
+        subProject(featureBranchProviderFunctionSubProject(allConfig))
 
         params {
             readOnlySettings()
@@ -66,7 +72,7 @@ fun googleCloudRootProject(allConfig: AllContextParameters): Project {
     }
 }
 
-fun getServiceNameList(servicesList: Map<String, Map<String,String>>): List<String> {
+fun getPackageNameList(servicesList: Map<String, Map<String,String>>): List<String> {
     var serviceNameList: ArrayList<String> = arrayListOf()
     servicesList.forEach{ s ->
         var serviceName = s.value.getValue("name").toString()
