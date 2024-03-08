@@ -99,7 +99,7 @@ properties:
               properties: 
               - !ruby/object:Api::Type::String
                 name: topic
-                desctription: Cloud Pub/Sub topic to send notifications to. Format is projects/{project}/topics/{topic}.
+                description: Cloud Pub/Sub topic to send notifications to. Format is projects/{project}/topics/{topic}.
               - !ruby/object:Api::Type::Enum
                 name: event
                 description: The type of event that triggers a Pub/Sub. At most one PubSubNotification per EventType is permitted.
