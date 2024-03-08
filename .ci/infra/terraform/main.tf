@@ -135,6 +135,12 @@ resource "google_organization_iam_member" "sa_storage_admin" {
   member = google_service_account.sa.member
 }
 
+resource "google_organization_iam_member" "apphub_admin" {
+  billing_account_id = data.google_organization.org.org_id
+  role               = "roles/apphub.admin"
+  member             = google_service_account.sa.member
+}
+
 resource "google_billing_account_iam_member" "sa_master_billing_admin" {
   billing_account_id = data.google_billing_account.master_acct.id
   role               = "roles/billing.admin"
@@ -144,12 +150,6 @@ resource "google_billing_account_iam_member" "sa_master_billing_admin" {
 resource "google_billing_account_iam_member" "sa_master_billing_log_writer" {
   billing_account_id = data.google_billing_account.master_acct.id
   role               = "roles/logging.configWriter"
-  member             = google_service_account.sa.member
-}
-
-resource "google_billing_account_iam_member" "apphub_admin" {
-  billing_account_id = data.google_billing_account.master_acct.id
-  role               = "roles/apphub.admin"
   member             = google_service_account.sa.member
 }
 
