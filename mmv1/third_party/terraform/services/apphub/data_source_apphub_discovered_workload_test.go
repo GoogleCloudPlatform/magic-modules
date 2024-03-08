@@ -1,4 +1,3 @@
-
 package apphub_test
 
 import (
@@ -10,7 +9,7 @@ import (
 
 func TestDataSourceApphubDiscoveredWorkload_basic(t *testing.T) {
     t.Parallel()
-    
+
     context := map[string]interface{}{
     	"random_suffix": acctest.RandString(t, 10),
     }
@@ -28,12 +27,14 @@ func TestDataSourceApphubDiscoveredWorkload_basic(t *testing.T) {
 
 func testDataSourceApphubDiscoveredWorkload_basic(context map[string]interface{}) string {
     return acctest.Nprintf(`
-data "google_project" "host_project" {}
+resource "google_project" "service_project" {
+	project_id ="<%= ctx[:vars]['service_project_attachment_id'] %>"
+	name = "Service Project"
+	org_id = "<%= ctx[:test_env_vars]['org_id'] %>"
+}
 
-resource "google_project_service" "apphub" {
-  project = data.google_project.host_project.project_id
-  service = "apphub.googleapis.com"
-  disable_on_destroy = false
+resource "google_apphub_service_project_attachment" "service_project_attachment" {
+  service_project_attachment_id = google_project.service_project.project_id
 }
 
 data "google_apphub_discovered_workload" "catalog-workload" {
@@ -44,6 +45,7 @@ data "google_apphub_discovered_workload" "catalog-workload" {
 # backend subnet
 resource "google_compute_subnetwork" "ilb_subnet" {
   name          = "l7-ilb-subnet-%{random_suffix}"
+  project       = google_project.service_project.project_id
   ip_cidr_range = "10.0.1.0/24"
   region        = "us-east1"
   network       = "default"
@@ -52,9 +54,9 @@ resource "google_compute_subnetwork" "ilb_subnet" {
 # instance template
 resource "google_compute_instance_template" "instance_template" {
   name         = "l7-ilb-mig-template-%{random_suffix}"
+  project               = google_project.service_project.project_id
   machine_type = "e2-small"
   tags         = ["http-server"]
-
   network_interface {
     network    = "default"
     subnetwork = google_compute_subnetwork.ilb_subnet.id
@@ -67,21 +69,17 @@ resource "google_compute_instance_template" "instance_template" {
     auto_delete  = true
     boot         = true
   }
-
   # install nginx and serve a simple web page
   metadata = {
     startup-script = <<-EOF1
       #! /bin/bash
       set -euo pipefail
-
       export DEBIAN_FRONTEND=noninteractive
       apt-get update
       apt-get install -y nginx-light jq
-
       NAME=$(curl -H "Metadata-Flavor: Google" "http://metadata.google.internal/computeMetadata/v1/instance/hostname")
       IP=$(curl -H "Metadata-Flavor: Google" "http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/ip")
       METADATA=$(curl -f -H "Metadata-Flavor: Google" "http://metadata.google.internal/computeMetadata/v1/instance/attributes/?recursive=True" | jq 'del(.["startup-script"])')
-
       cat <<EOF > /var/www/html/index.html
       <pre>
       Name: $NAME
@@ -99,6 +97,7 @@ resource "google_compute_instance_template" "instance_template" {
 
 resource "google_compute_region_instance_group_manager" "mig" {
   name     = "l7-ilb-mig1-%{random_suffix}"
+  project               = google_project.service_project.project_id
   region   = "us-east1"
   version {
     instance_template = google_compute_instance_template.instance_template.id
@@ -110,4 +109,5 @@ resource "google_compute_region_instance_group_manager" "mig" {
 }
 `, context)
 }
+
 

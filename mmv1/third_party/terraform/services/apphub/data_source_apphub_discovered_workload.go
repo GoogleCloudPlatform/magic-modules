@@ -90,7 +90,7 @@ func dataSourceApphubDiscoveredWorkloadRead(d *schema.ResourceData, meta interfa
         if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
                 billingProject = bp
         }
-        
+
         var res map[string]interface{}
 
         err = transport_tpg.Retry(transport_tpg.RetryOptions{
@@ -110,13 +110,13 @@ func dataSourceApphubDiscoveredWorkloadRead(d *schema.ResourceData, meta interfa
         if err != nil {
             return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("ApphubDiscoveredWorkload %q", d.Id()), url)
         }
-        
+
         if err := d.Set("discovered_workload", flattenApphubDiscoveredWorkload(res["discoveredWorkload"], d, config)); err != nil {
                 return fmt.Errorf("Error setting discovered workload: %s", err)
         }
-        
-        d.SetId(res["name"].(string))
-        
+
+        d.SetId(res["discoveredWorkload"].(map[string]interface{})["name"].(string))
+
         return nil
 
 }
@@ -129,7 +129,7 @@ func flattenApphubDiscoveredWorkload(v interface{}, d *schema.ResourceData, conf
         if len(original) == 0 {
                 return nil
         }
-        
+
         transformed := make(map[string]interface{})
         transformed["name"] = flattenApphubDiscoveredWorkloadDataName(original["name"], d, config)
         transformed["workload_reference"] =  flattenApphubWorkloadReference(original["workloadReference"], d, config)
