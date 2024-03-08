@@ -311,6 +311,7 @@ properties:
                     item_type: Api::Type::KeyValuePairs
               - !ruby/object:Api::Type::String
                 name: timestamp
+                description: The times the error occurred. List includes the oldest timestamp and the last 9 timestamps.
       - !ruby/object:Api::Type::String
         name: createTime
         description: Output only. The creation timestamp of a DiscoveryConfig.
