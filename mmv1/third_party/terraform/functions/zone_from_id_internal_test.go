@@ -81,7 +81,7 @@ func TestFunctionRun_zone_from_id(t *testing.T) {
 					diag.NewArgumentErrorDiagnostic(
 						0,
 						noMatchesErrorSummary,
-						fmt.Sprintf("The input string \"%s\" doesn't contain the expected pattern \"regions/{region}/\".", invalidInput),
+						fmt.Sprintf("The input string \"%s\" doesn't contain the expected pattern \"zones/{zone}/\".", invalidInput),
 					),
 				},
 			},
