@@ -7,6 +7,7 @@ import (
 	<% get_mmv1_services_in_version(products, version).each do |service|  -%>
 	  "github.com/hashicorp/terraform-provider-google/google/services/<%= service -%>"
 	<% end -%>
+
 	"github.com/hashicorp/terraform-provider-google/google/services/composer"
 	"github.com/hashicorp/terraform-provider-google/google/services/container"
 	"github.com/hashicorp/terraform-provider-google/google/services/containeraws"
