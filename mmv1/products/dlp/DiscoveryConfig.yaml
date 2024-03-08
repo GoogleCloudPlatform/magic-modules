@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Resource
 # API resource name
-name: 'DiscoverConfig'
+name: 'DiscoveryConfig'
 base_url: '{{parent}}/discoveryConfigs'
 self_link: '{{parent}}/discoveryConfigs'
 create_url: '{{parent}}/discoveryConfigs'
@@ -149,7 +149,7 @@ properties:
                   - :TABLE_PROFILE
                   - :RESOURCE_NAME
       - !ruby/object:Api::Type::Array
-        name : 'targets'
+        name: 'targets'
         description: Target to match against for determining what to scan and how frequently
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
@@ -221,16 +221,16 @@ properties:
                         This field only has a name and description because of MM
                         limitations. It should not appear in downstreams.
                       values:
-                        - BIG_QUERY_TABLE_TYPE_UNSPECIFIED
-                        - BIG_QUERY_TABLE_TYPE_TABLE
-                        - BIG_QUERY_TABLE_TYPE_EXTERNAL_BIG_LAKE
+                        - :BIG_QUERY_TABLE_TYPE_UNSPECIFIED
+                        - :BIG_QUERY_TABLE_TYPE_TABLE
+                        - :BIG_QUERY_TABLE_TYPE_EXTERNAL_BIG_LAKE
                 - !ruby/object:Api::Type::Enum
                   name: typeCollection
                   description: Restrict discovery to categories of table types. Currently view, materialized view, snapshot and non-biglake external tables are supported.
                   values: 
-                    - BIG_QUERY_COLLECTION_UNSPECIFIED
-                    - BIG_QUERY_COLLECTION_ALL_TYPES
-                    - BIG_QUERY_COLLECTION_ONLY_SUPPORTED_TYPES
+                    - :BIG_QUERY_COLLECTION_UNSPECIFIED
+                    - :BIG_QUERY_COLLECTION_ALL_TYPES
+                    - :BIG_QUERY_COLLECTION_ONLY_SUPPORTED_TYPES
               - !ruby/object:Api::Type::NestedObject
                 name: cadence
                 description: How often and when to update profiles. New tables that match both the fiter and conditions are scanned as quickly as possible depending on system capacity. 
@@ -248,17 +248,17 @@ properties:
                         This field only has a name and description because of MM
                         limitations. It should not appear in downstreams.
                       values: 
-                      - SCHEMA_MODIFICATION_UNSPECIFIED
-                      - SCHEME_NEW_COLUMN
-                      - SCHEME_REMOVED_COLUMNS
+                      - :SCHEMA_MODIFICATION_UNSPECIFIED
+                      - :SCHEME_NEW_COLUMN
+                      - :SCHEME_REMOVED_COLUMNS
                   - !ruby/object:Api::Type::Enum
                     name: 'frequency'
                     description: How frequently profiles may be updated when schemas are modified. Default to monthly 
                     values: 
-                      - UPDATE_FREQUENCY_UNSPECIFIED
-                      - UPDATE_FREQUENCY_NEVER
-                      - UPDATE_FREQUENCY_DAILY
-                      - UPDATE_FREQUENCY_MONTHLY
+                      - :UPDATE_FREQUENCY_UNSPECIFIED
+                      - :UPDATE_FREQUENCY_NEVER
+                      - :UPDATE_FREQUENCY_DAILY
+                      - :UPDATE_FREQUENCY_MONTHLY
                 - !ruby/object:Api::Type::NestedObject
                   name: 'tableModifiedCadence'
                   description: Governs when to update profile when a table is modified.
@@ -278,10 +278,10 @@ properties:
                       name: 'frequency'
                       description: 'How frequently data profiles can be updated when tables are modified. Defaults to never.'
                       values: 
-                        - UPDATE_FREQUENCY_UNSPECIFIED
-                        - UPDATE_FREQUENCY_NEVER
-                        - UPDATE_FREQUENCY_DAILY
-                        - UPDATE_FREQUENCY_MONTHLY
+                        - :UPDATE_FREQUENCY_UNSPECIFIED
+                        - :UPDATE_FREQUENCY_NEVER
+                        - :UPDATE_FREQUENCY_DAILY
+                        - :UPDATE_FREQUENCY_MONTHLY
               - !ruby/object:Api::Type::NestedObject
                 name: disabled      
                 description: 'Tables that match this filter will not have profiles created.'
@@ -324,6 +324,6 @@ properties:
           name: status
           description: Required. A status for this configuration
           values: 
-            - STATUS_UNSPECIFIED
-            - RUNNING
-            - PAUSED 
+            - :STATUS_UNSPECIFIED
+            - :RUNNING
+            - :PAUSED 
