@@ -136,7 +136,7 @@ resource "google_organization_iam_member" "sa_storage_admin" {
 }
 
 resource "google_organization_iam_member" "apphub_admin" {
-  billing_account_id = data.google_organization.org.org_id
+  org_id = data.google_organization.org.org_id
   role               = "roles/apphub.admin"
   member             = google_service_account.sa.member
 }
