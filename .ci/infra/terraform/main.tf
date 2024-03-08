@@ -147,6 +147,12 @@ resource "google_billing_account_iam_member" "sa_master_billing_log_writer" {
   member             = google_service_account.sa.member
 }
 
+resource "google_billing_account_iam_member" "apphub_admin" {
+  billing_account_id = data.google_billing_account.master_acct.id
+  role               = "roles/apphub.admin"
+  member             = google_service_account.sa.member
+}
+
 resource "google_app_engine_application" "app" {
   project     = google_project.proj.project_id
   location_id = "us-central"
