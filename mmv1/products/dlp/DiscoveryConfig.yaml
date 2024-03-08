@@ -313,7 +313,7 @@ properties:
               - !ruby/object:Api::Type::NestedObject
                 name: details 
                 description: Detailed error codes and messages.
-                Properties: 
+                properties: 
                   - !ruby/object:Api::Type::Integer
                     name : code 
                     description: The status code, which should be an enum value of google.rpc.Code.
