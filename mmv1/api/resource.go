@@ -267,9 +267,28 @@ type Resource struct {
 	// Add a deprecation message for a resource that's been deprecated in the API.
 	DeprecationMessage string `yaml:"deprecation_message"`
 
-	Properties []Type
+	Properties []*Type
 
-	Parameters []Type
+	Parameters []*Type
+
+	ProductMetadata *Product
 }
 
 // TODO: rewrite functions
+func (r *Resource) Validate() {
+	// TODO Q1 Rewrite super
+	// super
+
+	r.setResourceMetada(r.Parameters)
+	r.setResourceMetada(r.Properties)
+}
+
+func (r *Resource) setResourceMetada(properties []*Type) {
+	if properties == nil {
+		return
+	}
+
+	for _, property := range properties {
+		property.ResourceMetadata = r
+	}
+}
