@@ -11,13 +11,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/function"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestFunctionRun_zone_from_id(t *testing.T) {
 	t.Parallel()
 
-	zone := envvar.GetTestZoneFromEnv()
+	zone := "us-central1-a"
 
 	// Happy path inputs
 	validId := fmt.Sprintf("projects/my-project/zones/%s/networkEndpointGroups/my-neg", zone)
