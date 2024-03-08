@@ -33,22 +33,13 @@ var membershipCheckerCmd = &cobra.Command{
 	The command expects the following pull request details as arguments:
 	1. PR Number
 	2. Commit SHA
-	3. Branch Name
-	4. Head Repo URL
-	5. Head Branch
-	6. Base Branch
 
 	It then performs the following operations:
 	1. Extracts and displays the pull request details.
 	2. Fetches the author of the pull request and determines their contribution type.
-	3. If the author is not a core contributor:
-			a. Identifies the initially requested reviewer and those who previously reviewed this PR.
-			b. Determines and requests reviewers based on the above.
-			c. Posts comments tailored to the contribution type, the trust level of the contributor, and the primary reviewer.
-	4. For trusted authors (Core Contributors and Googlers):
-			a. Triggers generate-diffs using the provided PR details.
-			b. Automatically approves the community-checker run.
-	5. For external or untrusted contributors:
+	3. For trusted authors (Core Contributors and Googlers):
+			a. Automatically approves the community-checker run.
+	4. For external or untrusted contributors:
 			a. Adds the 'awaiting-approval' label.
 			b. Posts a link prompting approval for the build.
 	`,
