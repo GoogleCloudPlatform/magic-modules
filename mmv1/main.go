@@ -6,9 +6,10 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"slices"
 	"sort"
 	"strings"
+
+	"golang.org/x/exp/slices"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
@@ -79,17 +80,17 @@ func main() {
 			// TODO Q1: remove these lines, which are for debugging
 			// log.Printf("productYamlPath %#v", productYamlPath)
 
-			var resources []api.Resource
+			var resources []*api.Resource = make([]*api.Resource, 0)
 
 			productYaml, err := os.ReadFile(productYamlPath)
 			if err != nil {
 				log.Fatalf("Cannot open the file: %v", productYaml)
 			}
-			productApi := api.Product{}
-			yamlValidator.Parse(productYaml, &productApi)
+			productApi := &api.Product{}
+			yamlValidator.Parse(productYaml, productApi)
 
 			// TODO Q1: remove these lines, which are for debugging
-			// prod, _ := json.Marshal(&productApi)
+			// prod, _ := json.Marshal(productApi)
 			// log.Printf("prod %s", string(prod))
 
 			if !productApi.ExistsAtVersionOrLower(version) {
@@ -117,21 +118,29 @@ func main() {
 				if err != nil {
 					log.Fatalf("Cannot open the file: %v", resourceYamlPath)
 				}
-				resource := api.Resource{}
-				yamlValidator.Parse(resourceYaml, &resource)
+				resource := &api.Resource{}
+				yamlValidator.Parse(resourceYaml, resource)
 
 				// TODO Q1: remove these lines, which are for debugging
-				// res, _ := json.Marshal(&resource)
+				// res, _ := json.Marshal(resource)
 				// log.Printf("resource %s", string(res))
 
 				// TODO Q1: add labels related fields
 
+				resource.Validate()
 				resources = append(resources, resource)
 			}
 
 			// TODO Q2: override resources
+			log.Printf("resources before sorting %#v", resources)
 
-			// TODO Q1: sort resources by name and set in product
+			// Sort resources by name
+			sort.Slice(resources, func(i, j int) bool {
+				return resources[i].Name < resources[j].Name
+			})
+
+			productApi.Objects = resources
+			productApi.Validate()
 
 			// TODO Q2: set other providers via flag
 			providerToGenerate := provider.NewTerraform(productApi)
@@ -141,7 +150,6 @@ func main() {
 				continue
 			}
 
-			// TODO Q1: generate templates
 			log.Printf("%s: Generating files", productName)
 			providerToGenerate.Generate(outputPath, productName, generateCode, generateDocs)
 		}
