@@ -1,6 +1,6 @@
 resource "google_apphub_service_project_attachment" "<%= ctx[:primary_resource_id] %>" {
   service_project_attachment_id = google_project.service_project.project_id
-  depends_on = [time_sleep.wait_30_seconds_host, google_project_iam_binding.apphub_service_project_iam_binding, google_project_iam_binding.apphub_host_project_iam_binding]
+  depends_on = [time_sleep.wait_120s]
 }
 
 resource "google_project" "service_project" {
@@ -8,36 +8,9 @@ resource "google_project" "service_project" {
   name = "Service Project"
   org_id = "<%= ctx[:test_env_vars]['org_id'] %>"
 }
-resource "time_sleep" "wait_30_seconds_project" {
+
+resource "time_sleep" "wait_120s" {
   depends_on = [google_project.service_project]
 
-  create_duration = "30s"
-}
-
-resource "google_project_iam_binding" "apphub_service_project_iam_binding" {
-  project = google_project.service_project.project_id
-  role    = "roles/apphub.admin"
-  members = [
-    "<%= 'serviceAccount:'+ ctx[:test_env_vars]['service_account'] %>",
-  ]
-  depends_on = [time_sleep.wait_30_seconds_project]
-}
-resource "time_sleep" "wait_30_seconds_service" {
-  depends_on = [google_project_iam_binding.apphub_service_project_iam_binding]
-
-  create_duration = "30s"
-}
-
-resource "google_project_iam_binding" "apphub_host_project_iam_binding" {
-  project =  "<%=ctx[:test_env_vars]['host_project']%>"
-  role    = "roles/apphub.admin"
-  members = [
-    "<%= 'serviceAccount:'+ ctx[:test_env_vars]['service_account'] %>",
-  ]
-  depends_on = [time_sleep.wait_30_seconds_service]
-}
-resource "time_sleep" "wait_30_seconds_host" {
-  depends_on = [google_project_iam_binding.apphub_host_project_iam_binding]
-
-  create_duration = "30s"
+  create_duration = "120s"
 }
