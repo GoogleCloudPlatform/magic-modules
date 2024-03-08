@@ -300,7 +300,12 @@ properties:
                     - UPDATE_FREQUENCY_MONTHLY
           - !ruby/object:Api::Type::NestedObject
             name: disabled      
-            description: Tables that match this filter will not have profile created
+            description: 'Tables that match this filter will not have profiles created.'
+            properties:
+              []  # Meant to be an empty object with no properties - see here : https://cloud.google.com/sensitive-data-protection/docs/reference/rest/v2/organizations.locations.discoveryConfigs#disabled
+              # The fields below are necessary to include the "disabled" filter in the payload
+            send_empty_value: true
+            allow_empty_object: true
         - !ruby/object:Api::Type::NestedObject
             name: 'errors[]'
             description: Output only. A stream of errors encountered when the config was activated. Repeated errors may result in the config automatically being paused. Output only field. Will return the last 100 errors. Whenever the config is modified this list will be cleared.
