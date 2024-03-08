@@ -29,9 +29,23 @@ func testDataSourceApphubDiscoveredService_basic(context map[string]interface{})
 	return acctest.Nprintf(
 		`
 resource "google_project" "service_project" {
-	project_id ="<%= ctx[:vars]['service_project_attachment_id'] %>"
+	project_id ="<%= ctx[:vars]['service_project_attachment_id'] %>-%{random_suffix}"
 	name = "Service Project"
 	org_id = "<%= ctx[:test_env_vars]['org_id'] %>"
+}
+
+resource "google_project_iam_binding" "apphub_service_project_iam_binding" {
+  project = google_project.service_project.project_id
+  role    = "roles/apphub.admin"
+  members = [
+    "<%= 'serviceAccount:'+ ctx[:test_env_vars]['service_account'] %>",
+  ]
+}
+
+# Enable Compute API
+resource "google_project_service" "compute_service_project" {
+  project_id = google_project.service_project.project_id
+  service = "compute.googleapis.com"
 }
 
 resource "google_apphub_service_project_attachment" "service_project_attachment" {
@@ -50,14 +64,14 @@ data "google_apphub_discovered_service" "catalog-service" {
 
 # VPC network
 resource "google_compute_network" "ilb_network" {
-  name                    = "<%= ctx[:vars]['ilb_network'] %>"
+  name                    = "<%= ctx[:vars]['ilb_network'] %>-%{random_suffix}"
   project                 = google_project.service_project.project_id
   auto_create_subnetworks = false
 }
 
 # backend subnet
 resource "google_compute_subnetwork" "ilb_subnet" {
-  name          = "<%= ctx[:vars]['ilb_subnet'] %>"
+  name          = "<%= ctx[:vars]['ilb_subnet'] %>-%{random_suffix}"
   project       = google_project.service_project.project_id
   ip_cidr_range = "10.0.1.0/24"
   region        = "us-east1"
@@ -66,7 +80,7 @@ resource "google_compute_subnetwork" "ilb_subnet" {
 
 # forwarding rule
 resource "google_compute_forwarding_rule" "forwarding_rule" {
-  name                  ="<%= ctx[:vars]['forwarding_rule'] %>"
+  name                  ="<%= ctx[:vars]['forwarding_rule'] %>-%{random_suffix}"
   project               = google_project.service_project.project_id
   region                = "us-east1"
   ip_version            = "IPV4"
@@ -79,7 +93,7 @@ resource "google_compute_forwarding_rule" "forwarding_rule" {
 
 # backend service
 resource "google_compute_region_backend_service" "backend" {
-  name                  = "<%= ctx[:vars]['backend_service'] %>"
+  name                  = "<%= ctx[:vars]['backend_service'] %>-%{random_suffix}"
   project               = google_project.service_project.project_id
   region                = "us-east1"
   health_checks         = [google_compute_health_check.default.id]
@@ -87,7 +101,7 @@ resource "google_compute_region_backend_service" "backend" {
     
 # health check
 resource "google_compute_health_check" "default" {
-  name     = "<%= ctx[:vars]['health_check'] %>"
+  name     = "<%= ctx[:vars]['health_check'] %>-%{random_suffix}"
   project  = google_project.service_project.project_id
   check_interval_sec = 1
   timeout_sec        = 1
