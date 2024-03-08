@@ -86,7 +86,7 @@ class SweeperTests {
     }
 
     @Test
-    fun betaNightlyProjectServiceSweeperRunsInGoogleBeta() {
+    fun betaNightlyProjectServiceSweeperSkipsProjectSweep() {
         val project = googleCloudRootProject(testContextParameters())
 
         // Find Beta nightly test project
