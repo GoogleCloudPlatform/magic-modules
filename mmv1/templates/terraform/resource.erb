@@ -1047,19 +1047,17 @@ func resource<%= object.resource_name -%>Delete(d *schema.ResourceData, meta int
 <%        end -%>
 <%      end -%>
 <%      if object.supports_indirect_user_project_override -%>
-
     if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
         billingProject = parts[1]
     }
-
 <%      end -%>
-    log.Printf("[DEBUG] Deleting <%= object.name -%> %q", d.Id())
 
     // err == nil indicates that the billing_project value was found
     if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
       billingProject = bp
     }
 
+    log.Printf("[DEBUG] Deleting <%= object.name -%> %q", d.Id())
     res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
         Config: config,
         Method: "<%= object.delete_verb.to_s.upcase -%>",
