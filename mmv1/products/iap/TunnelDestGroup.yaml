@@ -40,7 +40,6 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
     'projects/{{project}}/iap_tunnel/locations/{{region}}/destGroups/{{dest_group}}',
     '{{project}}/iap_tunnel/locations/{{region}}/destGroups/{{dest_group}}',
   ]
-
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'iap_destgroup'
