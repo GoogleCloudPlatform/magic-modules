@@ -5,6 +5,14 @@
 
 // This file is maintained in the GoogleCloudPlatform/magic-modules repository and copied into the downstream provider repositories. Any changes to this file in the downstream will be overwritten.
 
+/*
+  NOTE: This file is manually curated - any new packages added to the provider codebase will need to be accompanied with a change in this file.
+        When adding new entires make sure to ensure the path value is correct for TPG or TPGB
+        e.g. "path" to "./google/envvar"
+             versus
+             "path" to "./google-beta/envvar"
+*/
+
 package generated
 
 var PackagesListGa = mapOf(
