@@ -283,7 +283,7 @@ properties:
             - !ruby/object:Api::Type::NestedObject
               name: 'tableModifiedCadence'
               description: Governs when to update profile when a table is modified.
-              values:
+              properties:
                 - !ruby/object:Api::Type::Enum
                   name: 'types[]'
                   description: 'The type of events to consider when deciding if the table has been modified and should have the profile updated. Defaults to MODIFIED_TIMESTAMP'
