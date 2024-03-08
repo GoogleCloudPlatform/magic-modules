@@ -66,7 +66,7 @@ func TestFunctionRun_zone_from_id(t *testing.T) {
 					diag.NewArgumentWarningDiagnostic(
 						0,
 						ambiguousMatchesWarningSummary,
-						fmt.Sprintf("The input string \"%s\" contains more than one match for the pattern \"regions/{region}/\". Terraform will use the first found match.", repetitiveInput),
+						fmt.Sprintf("The input string \"%s\" contains more than one match for the pattern \"zones/{zone}/\". Terraform will use the first found match.", repetitiveInput),
 					),
 				},
 			},
