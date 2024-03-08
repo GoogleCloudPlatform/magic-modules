@@ -119,7 +119,7 @@ func dataSourceApphubDiscoveredServiceRead(d *schema.ResourceData, meta interfac
 		return fmt.Errorf("Error setting discovered service: %s", err)
 	}
 
-	d.SetId(res["name"].(string))
+	d.SetId(res["discoveredService"].(map[string]interface{})["name"].(string))
 
 	return nil
 
