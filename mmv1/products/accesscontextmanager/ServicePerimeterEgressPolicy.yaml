@@ -37,6 +37,14 @@ description: |
   within the ServicePerimeter to access a defined set of projects outside the
   perimeter in certain contexts (e.g. to read data from a Cloud Storage bucket
   or query against a BigQuery dataset).
+
+  ~> **Note:** By default, updates to this resource will remove the EgressPolicy from the
+  from the perimeter and add it back in a non-atomic manner. To ensure that the new EgressPolicy
+  is added before the old one is removed, add a `lifecycle` block with `create_before_destroy = true` to this resource.
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'access_context_manager_service_perimeter_egress_policy'
+    skip_test: true
 autogen_async: true
 exclude_tgc: true
 # Skipping the sweeper due to the non-standard base_url and because this is fine-grained under ServicePerimeter
@@ -61,6 +69,7 @@ properties:
     name: 'egressFrom'
     description: |
       Defines conditions on the source of a request causing this `EgressPolicy` to apply.
+    immutable: true
     properties:
       - !ruby/object:Api::Type::Enum
         name: 'identityType'
@@ -99,6 +108,7 @@ properties:
     description: |
       Defines the conditions on the `ApiOperation` and destination resources that
       cause this `EgressPolicy` to apply.
+    immutable: true
     properties:
       - !ruby/object:Api::Type::Array
         name: 'resources'
