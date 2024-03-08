@@ -35,6 +35,7 @@ examples:
       service_project_attachment_id: "project-1"
     test_env_vars:
       org_id: :ORG_ID
+      service_account: :SERVICE_ACCT
   - !ruby/object:Provider::Terraform::Examples
     name: "service_project_attachment_full"
     primary_resource_id: "example2"
@@ -43,6 +44,7 @@ examples:
       service_project_attachment_id: "project-1"
     test_env_vars:
       org_id: :ORG_ID
+      service_account: :SERVICE_ACCT
 properties:
   - !ruby/object:Api::Type::String
     name: name
