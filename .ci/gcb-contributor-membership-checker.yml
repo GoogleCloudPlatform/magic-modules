@@ -68,10 +68,6 @@ steps:
       - "membership-checker"
       - $_PR_NUMBER
       - $COMMIT_SHA
-      - $BRANCH_NAME
-      - $_HEAD_REPO_URL
-      - $_HEAD_BRANCH
-      - $_BASE_BRANCH
 
 availableSecrets:
   secretManager:

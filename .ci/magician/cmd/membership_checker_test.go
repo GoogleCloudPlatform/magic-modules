@@ -35,22 +35,10 @@ func TestExecMembershipChecker_CoreContributorFlow(t *testing.T) {
 		calledMethods: make(map[string][][]any),
 	}
 
-	execMembershipChecker("pr1", "sha1", "branch1", "url1", "head1", "base1", gh, cb)
+	execMembershipChecker("pr1", "sha1", gh, cb)
 
-	if _, ok := gh.calledMethods["RequestPullRequestReviewer"]; ok {
-		t.Fatal("Incorrectly requested review for core contributor")
-	}
-
-	method := "TriggerMMPresubmitRuns"
-	expected := [][]any{{"sha1", map[string]string{"BRANCH_NAME": "branch1", "_BASE_BRANCH": "base1", "_HEAD_BRANCH": "head1", "_HEAD_REPO_URL": "url1", "_PR_NUMBER": "pr1"}}}
-	if calls, ok := cb.calledMethods[method]; !ok {
-		t.Fatal("Presubmit runs not triggered for core author")
-	} else if !reflect.DeepEqual(calls, expected) {
-		t.Fatalf("Wrong calls for %s, got %v, expected %v", method, calls, expected)
-	}
-
-	method = "ApproveCommunityChecker"
-	expected = [][]any{{"pr1", "sha1"}}
+	method := "ApproveCommunityChecker"
+	expected := [][]any{{"pr1", "sha1"}}
 	if calls, ok := cb.calledMethods[method]; !ok {
 		t.Fatal("Community checker not approved for core author")
 	} else if !reflect.DeepEqual(calls, expected) {
@@ -75,18 +63,10 @@ func TestExecMembershipChecker_GooglerFlow(t *testing.T) {
 		calledMethods: make(map[string][][]any),
 	}
 
-	execMembershipChecker("pr1", "sha1", "branch1", "url1", "head1", "base1", gh, cb)
+	execMembershipChecker("pr1", "sha1", gh, cb)
 
-	method := "TriggerMMPresubmitRuns"
-	expected := [][]any{{"sha1", map[string]string{"BRANCH_NAME": "branch1", "_BASE_BRANCH": "base1", "_HEAD_BRANCH": "head1", "_HEAD_REPO_URL": "url1", "_PR_NUMBER": "pr1"}}}
-	if calls, ok := cb.calledMethods[method]; !ok {
-		t.Fatal("Presubmit runs not triggered for googler")
-	} else if !reflect.DeepEqual(calls, expected) {
-		t.Fatalf("Wrong calls for %s, got %v, expected %v", method, calls, expected)
-	}
-
-	method = "ApproveCommunityChecker"
-	expected = [][]any{{"pr1", "sha1"}}
+	method := "ApproveCommunityChecker"
+	expected := [][]any{{"pr1", "sha1"}}
 	if calls, ok := cb.calledMethods[method]; !ok {
 		t.Fatal("Community checker not approved for googler")
 	} else if !reflect.DeepEqual(calls, expected) {
@@ -110,7 +90,7 @@ func TestExecMembershipChecker_AmbiguousUserFlow(t *testing.T) {
 		calledMethods: make(map[string][][]any),
 	}
 
-	execMembershipChecker("pr1", "sha1", "branch1", "url1", "head1", "base1", gh, cb)
+	execMembershipChecker("pr1", "sha1", gh, cb)
 
 	method := "AddLabel"
 	expected := [][]any{{"pr1", "awaiting-approval"}}
@@ -131,10 +111,6 @@ func TestExecMembershipChecker_AmbiguousUserFlow(t *testing.T) {
 	if _, ok := gh.calledMethods["ApproveCommunityChecker"]; ok {
 		t.Fatal("Incorrectly approved community checker for ambiguous user")
 	}
-
-	if _, ok := gh.calledMethods["TriggerMMPresubmitRuns"]; ok {
-		t.Fatal("Incorrectly triggered presubmit runs for ambiguous user")
-	}
 }
 
 func TestExecMembershipChecker_CommentForNewPrimaryReviewer(t *testing.T) {
@@ -153,5 +129,5 @@ func TestExecMembershipChecker_CommentForNewPrimaryReviewer(t *testing.T) {
 		calledMethods: make(map[string][][]any),
 	}
 
-	execMembershipChecker("pr1", "sha1", "branch1", "url1", "head1", "base1", gh, cb)
+	execMembershipChecker("pr1", "sha1", gh, cb)
 }
