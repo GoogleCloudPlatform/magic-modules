@@ -45,7 +45,7 @@ resource "google_project_service" "compute_service_project" {
 }
 
 resource "google_apphub_service_project_attachment" "service_project_attachment" {
-  service_project_attachment_id = google_project.service_project_full.project_id
+  service_project_attachment_id = google_project.service_project.project_id
 }
 
 # discovered service block
@@ -62,6 +62,7 @@ resource "google_compute_network" "ilb_network" {
   name                    = "ilb_network-%{random_suffix}"
   project                 = google_project.service_project.project_id
   auto_create_subnetworks = false
+  depends_on = [google_project_service.compute_service_project]
 }
 
 # backend subnet
@@ -104,6 +105,7 @@ resource "google_compute_health_check" "default" {
   tcp_health_check {
     port = "80"
   }
+  depends_on = [google_project_service.compute_service_project]
 }
 `, context)
 }
