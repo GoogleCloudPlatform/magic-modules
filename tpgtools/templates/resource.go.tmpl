@@ -665,6 +665,39 @@ func expand{{$.PathType}}{{$v.PackagePath}}Array(o interface{}) []{{$.Package}}.
 }
 		{{- end }}
 
+		{{ if $v.IsComplexMap -}}
+func expand{{$.PathType}}{{$v.PackagePath}}Map(o interface{}) map[string]{{$.Package}}.{{$v.ObjectType}} {
+	if o == nil {
+	{{- if $v.Computed }}
+		return nil
+	{{- else }}
+		return make(map[string]{{$.Package}}.{{$v.ObjectType}})
+	{{- end }}
+	}
+
+	o = o.(*schema.Set).List()
+
+	objs := o.([]interface{})
+	if len(objs) == 0 || objs[0] == nil {
+	{{- if $v.Computed }}
+		return nil
+	{{- else }}
+		return make(map[string]{{$.Package}}.{{$v.ObjectType}})
+	{{- end }}
+	}
+
+	items := make(map[string]{{$.Package}}.{{$v.ObjectType}})
+	for _, item := range objs {
+		i := expand{{$.PathType}}{{$v.PackagePath}}(item)
+		if item != nil {
+			items[item.(map[string]interface{})["{{$v.ComplexMapKeyName}}"].(string)] = *i
+		}
+	}
+
+	return items
+}
+		{{- end }}
+
 func expand{{$.PathType}}{{$v.PackagePath}}(o interface{}) *{{$.Package}}.{{$v.ObjectType}} {
 	if o == nil {
 	{{- if $v.Computed }}
@@ -688,7 +721,7 @@ func expand{{$.PathType}}{{$v.PackagePath}}(o interface{}) *{{$.Package}}.{{$v.O
 	{{- end }}
 	return &{{$.Package}}.{{$v.ObjectType}}{
 	{{- range $p := $v.Properties }}
-		{{- if and ($p.Settable) ($p.ExpandGetter) }}
+		{{- if and ($p.Settable) ($p.ExpandGetter) (or (not $v.IsComplexMap) (ne $p.Name $v.ComplexMapKeyName)) }}
 		{{$p.PackageName}}: {{$p.ExpandGetter}},
 		{{- end -}}
 	{{ end }}
@@ -713,17 +746,36 @@ func flatten{{$.PathType}}{{$v.PackagePath}}Array(objs []{{$.Package}}.{{$v.Obje
 }
 	{{- end }}
 
-func flatten{{$.PathType}}{{$v.PackagePath}}(obj *{{$.Package}}.{{$v.ObjectType}}) interface{} {
-	if obj == nil || obj.Empty(){
+	{{ if $v.IsComplexMap -}}
+func flatten{{$.PathType}}{{$v.PackagePath}}Map(objs map[string]{{$.Package}}.{{$v.ObjectType}}) []interface{} {
+	if objs == nil {
+		return nil
+	}
+
+	items := []interface{}{}
+	for name, item := range objs {
+		i := flatten{{$.PathType}}{{$v.PackagePath}}(&item, name)
+		items = append(items, i)
+	}
+
+	return items
+}
+	{{- end }}
+
+func flatten{{$.PathType}}{{$v.PackagePath}}(obj *{{$.Package}}.{{$v.ObjectType}}{{- if $v.IsComplexMap -}}, name string{{- end -}}) interface{} {
+	if obj == nil {{- if not $v.IsComplexMap -}}|| obj.Empty(){{- end -}}{
 		return nil
 	}
 	transformed := map[string]interface{}{
 {{- range $p := $v.Properties }}
-	{{- if ($p.FlattenGetter) }}
+	{{- if or (not $v.IsComplexMap) (ne $p.Name $v.ComplexMapKeyName) }}
 		"{{$p.Name}}": {{$p.FlattenGetter}},
 	{{- end -}}
 {{ end }}
 	}
+{{ if $v.IsComplexMap }}
+	transformed["{{$v.ComplexMapKeyName}}"] = name
+{{ end }}
 {{ if $v.IsObject }}
 	return []interface{}{transformed}
 {{ else }}

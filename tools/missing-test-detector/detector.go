@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/GoogleCloudPlatform/magic-modules/tools/missing-test-detector/reader"
 	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -19,7 +20,7 @@ type FieldSet map[string]struct{}
 
 // Detect missing tests for the given resource changes map in the given slice of tests.
 // Return a map of resource names to missing test info about that resource.
-func detectMissingTests(changedFields map[string]ResourceChanges, allTests []*Test) (map[string]*MissingTestInfo, error) {
+func detectMissingTests(changedFields map[string]ResourceChanges, allTests []*reader.Test) (map[string]*MissingTestInfo, error) {
 	resourceNamesToTests := make(map[string][]string)
 	for _, test := range allTests {
 		for _, step := range test.Steps {
@@ -51,13 +52,13 @@ func detectMissingTests(changedFields map[string]ResourceChanges, allTests []*Te
 	return missingTests, nil
 }
 
-func markCoverage(fieldCoverage ResourceChanges, config Resource) error {
+func markCoverage(fieldCoverage ResourceChanges, config reader.Resource) error {
 	for fieldName, fieldValue := range config {
 		if coverage, ok := fieldCoverage[fieldName]; ok {
 			if field, ok := coverage.(*Field); ok {
 				field.Tested = true
 			} else if objectCoverage, ok := coverage.(ResourceChanges); ok {
-				if fieldValueConfig, ok := fieldValue.(Resource); ok {
+				if fieldValueConfig, ok := fieldValue.(reader.Resource); ok {
 					if err := markCoverage(objectCoverage, fieldValueConfig); err != nil {
 						return fmt.Errorf("error parsing %q: %s", fieldName, err)
 					}

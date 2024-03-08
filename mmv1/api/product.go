@@ -15,6 +15,7 @@ package api
 
 import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
+	"golang.org/x/exp/slices"
 )
 
 // require 'api/object'
@@ -38,7 +39,7 @@ type Product struct {
 
 	// Display Name: The full name of the GCP product; eg "Cloud Bigtable"
 
-	Objects []interface{}
+	Objects []*Resource
 
 	// The list of permission scopes available for the service
 	// For example: `https://www.googleapis.com/auth/compute`
@@ -66,6 +67,14 @@ type Product struct {
 	LegacyName string `yaml:"legacy_name"`
 
 	ClientName string `yaml:"client_name"`
+}
+
+func (p *Product) Validate() {
+	// TODO Q1 Rewrite super
+	//     super
+	for _, o := range p.Objects {
+		o.ProductMetadata = p
+	}
 }
 
 // def validate
@@ -157,6 +166,29 @@ type Product struct {
 //     end
 //     false
 //   end
+
+func (p *Product) ExistsAtVersionOrLower(name string) bool {
+	if !slices.Contains(product.ORDER, name) {
+		return false
+	}
+
+	for i := 0; i <= slices.Index(product.ORDER, name); i++ {
+		if p.ExistsAtVersion(product.ORDER[i]) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (p *Product) ExistsAtVersion(name string) bool {
+	for _, v := range p.Versions {
+		if v.Name == name {
+			return true
+		}
+	}
+	return false
+}
 
 //   def exists_at_version(name)
 //     // Versions aren't normally going to be empty since products need a
