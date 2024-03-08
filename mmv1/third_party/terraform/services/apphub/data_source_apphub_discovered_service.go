@@ -12,6 +12,10 @@ func DataSourceApphubDiscoveredService() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceApphubDiscoveredServiceRead,
 		Schema: map[string]*schema.Schema{
+			"project": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"location": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -115,11 +119,7 @@ func dataSourceApphubDiscoveredServiceRead(d *schema.ResourceData, meta interfac
 		return fmt.Errorf("Error setting discovered service: %s", err)
 	}
 
-	id, err := tpgresource.ReplaceVars(d, config, "{{service_uri}}")
-	if err != nil {
-		return err
-	}
-	d.SetId(id)
+	d.SetId(res["name"].(string))
 
 	return nil
 

@@ -23,8 +23,9 @@ data "google_apphub_discovered_service" "my-service" {
 
 The following arguments are supported:
 
-* `service_uri` - The uri of the service.
-* `location` - The location you want to get the discovered service from
+* `project` - The host project of the discovered service.
+* `service_uri` - (Required) The uri of the service.
+* `location` - (Required) The location of the discovered service.
 
 ## Attributes Reference
 
