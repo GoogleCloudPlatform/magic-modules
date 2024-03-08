@@ -39,7 +39,7 @@ func TestFunctionRun_region_from_zone(t *testing.T) {
 					diag.NewArgumentErrorDiagnostic(
 						0,
 						noMatchesErrorSummary,
-						"The input string is empty.",
+						"The input string cannot be empty.",
 					),
 				},
 			},
