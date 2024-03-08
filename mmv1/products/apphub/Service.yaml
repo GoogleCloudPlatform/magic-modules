@@ -37,6 +37,9 @@ examples:
       forwarding_rule: "l7-ilb-forwarding-rule"
       backend_service: "l7-ilb-backend-subnet"
       health_check: "l7-ilb-hc"
+    test_env_vars:
+      org_id: :ORG_ID
+      service_account: :SERVICE_ACCT
   - !ruby/object:Provider::Terraform::Examples
     name: "service_full"
     primary_resource_id: "example"
@@ -57,6 +60,9 @@ examples:
       forwarding_rule: "l7-ilb-forwarding-rule"
       backend_service: "l7-ilb-backend-subnet"
       health_check: "l7-ilb-hc"
+    test_env_vars:
+      org_id: :ORG_ID
+      service_account: :SERVICE_ACCT
 properties:
   - !ruby/object:Api::Type::String
     name: name
