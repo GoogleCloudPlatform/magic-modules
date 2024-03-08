@@ -23,9 +23,9 @@ data "google_apphub_discovered_workload" "my-workload" {
 
 The following arguments are supported:
 
-* `project` - The project where we are looking up the discovered workload from
+* `project` - The host project of the discovered workload.
 * `workload_uri` - (Required) The uri of the workload.
-* `location` - (Required) The location you want to get the discovered worklaod from
+* `location` - (Required) The location of the discovered workload.
 
 ## Attributes Reference
 

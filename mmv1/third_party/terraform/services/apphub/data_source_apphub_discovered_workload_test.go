@@ -13,7 +13,7 @@ func TestDataSourceApphubDiscoveredWorkload_basic(t *testing.T) {
     
     context := map[string]interface{}{
     	"random_suffix": acctest.RandString(t, 10),
-	}
+    }
 
     acctest.VcrTest(t, resource.TestCase{
         PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -37,37 +37,26 @@ resource "google_project_service" "apphub" {
 }
 
 data "google_apphub_discovered_workload" "catalog-workload" {
-  provider = google
   location = "us-east1"
   workload_uri = "//compute.googleapis.com/projects/472248274957/regions/us-east1/instanceGroups/l7-ilb-mig1"
-}
-
-# VPC network
-resource "google_compute_network" "ilb_network" {
-  name                    = "l7-ilb-network-%{random_suffix}"
-  provider                = google
-  auto_create_subnetworks = false
 }
 
 # backend subnet
 resource "google_compute_subnetwork" "ilb_subnet" {
   name          = "l7-ilb-subnet-%{random_suffix}"
-  provider      = google
   ip_cidr_range = "10.0.1.0/24"
   region        = "us-east1"
-  network       = google_compute_network.ilb_network.id
-  depends_on = [google_compute_network.ilb_network]
+  network       = "default"
 }
 
 # instance template
 resource "google_compute_instance_template" "instance_template" {
   name         = "l7-ilb-mig-template-%{random_suffix}"
-  provider     = google
   machine_type = "e2-small"
   tags         = ["http-server"]
 
   network_interface {
-    network    = google_compute_network.ilb_network.id
+    network    = "default"
     subnetwork = google_compute_subnetwork.ilb_subnet.id
     access_config {
       # add external ip to fetch packages
@@ -105,12 +94,11 @@ resource "google_compute_instance_template" "instance_template" {
   lifecycle {
     create_before_destroy = true
   }
-  depends_on = [google_compute_network.ilb_network, google_compute_subnetwork.ilb_subnet]
+  depends_on = [google_compute_subnetwork.ilb_subnet]
 }
 
 resource "google_compute_region_instance_group_manager" "mig" {
   name     = "l7-ilb-mig1-%{random_suffix}"
-  provider = google
   region   = "us-east1"
   version {
     instance_template = google_compute_instance_template.instance_template.id

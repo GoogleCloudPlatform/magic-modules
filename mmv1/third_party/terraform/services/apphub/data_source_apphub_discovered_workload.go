@@ -115,11 +115,7 @@ func dataSourceApphubDiscoveredWorkloadRead(d *schema.ResourceData, meta interfa
                 return fmt.Errorf("Error setting discovered workload: %s", err)
         }
         
-        id, err := tpgresource.ReplaceVars(d, config, "{{workload_uri}}")
-        if err != nil {
-        	return err
-        }
-        d.SetId(id)
+        d.SetId(res["name"].(string))
         
         return nil
 
