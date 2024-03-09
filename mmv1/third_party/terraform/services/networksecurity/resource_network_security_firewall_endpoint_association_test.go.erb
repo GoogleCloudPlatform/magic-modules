@@ -37,6 +37,15 @@ func TestAccNetworkSecurityFirewallEndpointAssociations_basic(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
+			{
+				Config: testAccNetworkSecurityFirewallEndpointAssociation_update(randomSuffix, orgId, ),
+			},
+			{
+				ResourceName:            "google_network_security_firewall_endpoint_association.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
 		},
 	})
 }
@@ -67,6 +76,37 @@ resource "google_network_security_firewall_endpoint_association" "foobar" {
 
     labels = {
         foo = "bar"
+    }
+}
+`, randomSuffix, randomSuffix, orgId, randomSuffix, orgId)
+}
+
+func testAccNetworkSecurityFirewallEndpointAssociation_update(randomSuffix string, orgId string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "foobar" {
+	provider                = google-beta
+    name                    = "tf-test-my-vpc%s"
+    auto_create_subnetworks = false
+}
+
+resource "google_network_security_firewall_endpoint" "foobar" {
+    provider = google-beta
+    name     = "tf-test-my-firewall-endpoint%s"
+    parent   = "organizations/%s"
+    location = "us-central1-a"
+}
+
+# TODO: add tlsInspectionPolicy once resource is ready
+resource "google_network_security_firewall_endpoint_association" "foobar" {
+    provider          = google-beta
+    name              = "tf-test-my-firewall-endpoint%s"
+    parent            = "organizations/%s"
+    location          = "us-central1-a"
+    firewall_endpoint = google_network_security_firewall_endpoint.foobar.id
+    network           = google_compute_network.foobar.id
+
+    labels = {
+        foo = "bar-updated"
     }
 }
 `, randomSuffix, randomSuffix, orgId, randomSuffix, orgId)
