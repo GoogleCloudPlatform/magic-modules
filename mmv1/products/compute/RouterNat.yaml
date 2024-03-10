@@ -107,6 +107,7 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: 'templates/terraform/constants/router_nat.go.erb'
   pre_create: 'templates/terraform/constants/router_nat_validate_action_active_range.go.erb'
   pre_update: 'templates/terraform/constants/router_nat_validate_action_active_range.go.erb'
+  encoder: 'templates/terraform/encoders/router_nat.go.erb'
 custom_diff: [
   'resourceComputeRouterNatDrainNatIpsCustomDiff',
 ]
@@ -437,3 +438,12 @@ properties:
       - :PUBLIC
       - :PRIVATE
     default_value: :PUBLIC
+  - !ruby/object:Api::Type::Enum
+    name: 'autoNetworkTier'
+    description: |
+      The network tier to use when automatically reserving NAT IP addresses.
+      Must be one of: PREMIUM, STANDARD. If not specified, then the current
+      project-level default tier is used.
+    values:
+      - :PREMIUN
+      - :STANDARD
