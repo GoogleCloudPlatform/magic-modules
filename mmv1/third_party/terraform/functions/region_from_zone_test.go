@@ -14,11 +14,9 @@ func TestAccProviderFunction_region_from_zone(t *testing.T) {
 	t.Parallel()
 	// Skipping due to requiring TF 1.8.0 in VCR systems : https://github.com/hashicorp/terraform-provider-google/issues/17451
 	acctest.SkipIfVcr(t)
-	projectZone := envvar.GetTestZoneFromEnv()
-	if projectZone != "" {
-		projectZone = projectZone[:len(projectZone)-2]
-	}
-	projectZoneRegex := regexp.MustCompile(fmt.Sprintf("^%s$", projectZone))
+	projectZone := "us-central1-a"
+	projectRegion := "us-central1"
+	projectRegionRegex := regexp.MustCompile(fmt.Sprintf("^%s$", projectRegion))
 
 	context := map[string]interface{}{
 		"function_name":     "region_from_zone",
