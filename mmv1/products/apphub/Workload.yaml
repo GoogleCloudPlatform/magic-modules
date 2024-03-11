@@ -39,6 +39,7 @@ examples:
       mig: "l7-ilb-mig1"
     test_env_vars:
       org_id: :ORG_ID
+      billing_account: :BILLING_ACCT
   - !ruby/object:Provider::Terraform::Examples
     name: "workload_full"
     pull_external: true
@@ -61,6 +62,7 @@ examples:
       mig: "l7-ilb-mig1"
     test_env_vars:
       org_id: :ORG_ID
+      billing_account: :BILLING_ACCT
 properties:
   - !ruby/object:Api::Type::String
     name: name
