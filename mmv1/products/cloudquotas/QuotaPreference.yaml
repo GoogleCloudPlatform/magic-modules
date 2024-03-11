@@ -22,13 +22,11 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 base_url: '{{parent}}/locations/global/quotaPreferences'
 self_link: '{{parent}}/locations/global/quotaPreferences/{{name}}'
 create_url: '{{parent}}/locations/global/quotaPreferences?quotaPreferenceId={{name}}&ignoreSafetyChecks={{ignore_safety_checks}}'
-update_url: '{{parent}}/locations/global/quotaPreferences/{{name}}?allowMissing={{allow_missing}}&validateOnly={{validate_only}}&ignoreSafetyChecks={{ignore_safety_checks}}'
+update_url: '{{parent}}/locations/global/quotaPreferences/{{name}}?validateOnly={{validate_only}}&ignoreSafetyChecks={{ignore_safety_checks}}'
 update_verb: :PATCH
 update_mask: true
 skip_delete: true
 autogen_async: false
-import_format: ['{{%parent}}/locations/global/quotaPreferences/{{name}}']
-id_format: '{{parent}}/locations/global/quotaPreferences/{{name}}'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/cloudquotas_quota_preference.go.erb
 
@@ -50,12 +48,6 @@ parameters:
     required: true
     default_from_api: true
     description: The parent of the quota preference. Allowed parents are "projects/[project-id / number]" or "folders/[folder-id / number]" or "organizations/[org-id / number]".
-  - !ruby/object:Api::Type::Boolean
-    name: 'allow_missing'
-    url_param_only: true
-    default_value: true
-    description: |
-      If set to true, and the quota preference is not found, a new one will be created. In this situation, updateMask is ignored.
   - !ruby/object:Api::Type::Boolean
     name: 'validate_only'
     url_param_only: true
@@ -130,6 +122,7 @@ properties:
         description: The origin of the quota preference request.
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'dimensions'
+    default_from_api: true
     description: |-
       The dimensions that this quota preference applies to. The key of the map entry is the name of a dimension, such as "region", "zone", "network_id", and the value of the map entry is the dimension value. If a dimension is missing from the map of dimensions, the quota preference applies to all the dimension values except for those that have other quota preferences configured for the specific value.
 
