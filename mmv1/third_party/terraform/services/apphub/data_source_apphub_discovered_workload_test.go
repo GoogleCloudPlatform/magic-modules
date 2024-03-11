@@ -34,32 +34,27 @@ func TestAccDataSourceApphubDiscoveredWorkload_basic(t *testing.T) {
 func testDataSourceApphubDiscoveredWorkload_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_project" "service_project" {
-	project_id ="tf-test-ah-%{random_suffix}"
-	name = "Service Project"
-	org_id = "%{org_id}"
-	billing_account = "%{billing_account}"
-}
-
-resource "time_sleep" "wait_120s_for_service_project" {
-  depends_on = [google_project.service_project]
-  create_duration = "120s"
+  project_id ="tf-test-ah-%{random_suffix}"
+  name = "Service Project"
+  org_id = "%{org_id}"
+  billing_account = "%{billing_account}"
 }
 
 # Enable Compute API
 resource "google_project_service" "compute_service_project" {
   project = google_project.service_project.project_id
   service = "compute.googleapis.com"
-  depends_on = [time_sleep.wait_120s_for_service_project]
+  depends_on = [google_project.service_project]
 }
 
-resource "time_sleep" "wait_120s_for_compute_api" {
-  depends_on = [google_project_service.compute_service_project]
+resource "time_sleep" "wait_120s" {
+  depends_on = [google_service_project.compute_service_project]
   create_duration = "120s"
 }
 
 resource "google_apphub_service_project_attachment" "service_project_attachment" {
   service_project_attachment_id = google_project.service_project.project_id
-  depends_on = [time_sleep.wait_120s_for_service_project]
+  depends_on = [time_sleep.wait_120s]
 }
     
 data "google_apphub_discovered_workload" "catalog-workload" {
@@ -79,7 +74,7 @@ resource "google_compute_network" "ilb_network" {
   name                    = "l7-ilb-network-%{random_suffix}"
   project                 = google_project.service_project.project_id
   auto_create_subnetworks = false
-  depends_on = [time_sleep.wait_120s_for_compute_api]
+  depends_on = [time_sleep.wait_120s]
 }
 
 # backend subnet
