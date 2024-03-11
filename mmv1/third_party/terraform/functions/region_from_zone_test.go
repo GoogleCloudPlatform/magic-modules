@@ -7,7 +7,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccProviderFunction_region_from_zone(t *testing.T) {
@@ -31,7 +30,7 @@ func TestAccProviderFunction_region_from_zone(t *testing.T) {
 			{
 				Config: testProviderFunction_get_region_from_zone(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestMatchOutput(context["output_name"].(string), projectZoneRegex),
+					resource.TestMatchOutput(context["output_name"].(string), projectRegionRegex),
 				),
 			},
 		},
