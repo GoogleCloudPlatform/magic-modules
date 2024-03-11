@@ -83,7 +83,6 @@ resource "google_compute_subnetwork" "ilb_subnet" {
   ip_cidr_range = "10.0.1.0/24"
   region        = "us-central1"
   network       = google_compute_network.ilb_network.id
-  depends_on = [google_compute_network.ilb_network]
 }
 
 # instance template
@@ -127,7 +126,6 @@ resource "google_compute_instance_template" "instance_template" {
   lifecycle {
     create_before_destroy = true
   }
-  depends_on = [google_compute_subnetwork.ilb_subnet, google_compute_network.ilb_network]
 }
 
 resource "google_compute_region_instance_group_manager" "mig" {
@@ -140,7 +138,6 @@ resource "google_compute_region_instance_group_manager" "mig" {
   }
   base_instance_name = "vm"
   target_size        = 2
-  depends_on = [google_compute_instance_template.instance_template]
 }
 `, context)
 }
