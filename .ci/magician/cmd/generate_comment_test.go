@@ -161,7 +161,7 @@ func TestFormatDiffComment(t *testing.T) {
 					},
 				},
 			},
-			expectedStrings: []string{"## Diff report", "## Errors", "`google` provider:\n- Provider 1\nOther:\n- Error 1\n- Error 2\n"},
+			expectedStrings: []string{"## Diff report", "## Errors", "`google` provider:\n- Provider 1\n\nOther:\n- Error 1\n- Error 2\n"},
 			notExpectedStrings: []string{
 				"generated some diffs",
 				"## Breaking Change(s) Detected",
@@ -177,14 +177,17 @@ func TestFormatDiffComment(t *testing.T) {
 						Repo:      "repo-1",
 						DiffStats: "+1 added, -1 removed",
 					},
+					{
+						Title:     "Repo 2",
+						Repo:      "repo-2",
+						DiffStats: "+2 added, -2 removed",
+					},
 				},
 			},
 			expectedStrings: []string{
 				"## Diff report",
 				"generated some diffs",
-				"Repo 1",
-				"[Diff](https://github.com/modular-magician/repo-1/compare/auto-pr-1234567890-old..auto-pr-1234567890)",
-				"+1 added, -1 removed",
+				"Repo 1: [Diff](https://github.com/modular-magician/repo-1/compare/auto-pr-1234567890-old..auto-pr-1234567890) (+1 added, -1 removed)\nRepo 2: [Diff](https://github.com/modular-magician/repo-2/compare/auto-pr-1234567890-old..auto-pr-1234567890) (+2 added, -2 removed)",
 			},
 			notExpectedStrings: []string{
 				"hasn't generated any diffs",

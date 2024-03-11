@@ -28,8 +28,7 @@ An `override-breaking-change` label can be added to allow merging.
 {{- $errorsLength := len .Errors}}
 {{- if gt $errorsLength 0}}
 ## Errors
-
-{{range .Errors -}}
+{{range .Errors}}
 {{.Title}}:
 {{- range .Errors}}
 - {{.}}{{end}}
