@@ -7,8 +7,8 @@ on:
   
   # Scheduled checks to catch edge cases
   schedule:
-    # Every Tuesday morning
-    - cron:  '0 4 * * 2'
+    # Every Monday and Tuesday morning
+    - cron:  '0 4 * * 1-2'
 
 jobs:
   terraform-provider-google:
