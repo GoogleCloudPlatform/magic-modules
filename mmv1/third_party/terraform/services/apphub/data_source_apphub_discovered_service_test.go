@@ -34,7 +34,7 @@ func testDataSourceApphubDiscoveredService_basic(context map[string]interface{})
 	return acctest.Nprintf(
 		`
 resource "google_project" "service_project" {
-	project_id ="apphub-service-project-%{random_suffix}"
+	project_id ="apphub-sp-%{random_suffix}"
 	name = "Service Project"
 	org_id = "%{org_id}"
 }
