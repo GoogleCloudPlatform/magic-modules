@@ -27,25 +27,26 @@ func TestExecGenerateComment(t *testing.T) {
 		calledMethods: make(map[string][][]any),
 	}
 	ctlr := source.NewController("/mock/dir/go", "modular-magician", "*******", mr)
-	env := map[string]string{
-		"BUILD_ID":                   "build1",
-		"BUILD_STEP":                 "17",
-		"COMMIT_SHA":                 "sha1",
-		"GITHUB_TOKEN_MAGIC_MODULES": "*******",
-		"PR_NUMBER":                  "pr1",
-		"PROJECT_ID":                 "project1",
-	}
 	diffProcessorEnv := map[string]string{
-		"BUILD_ID":                   "build1",
-		"BUILD_STEP":                 "17",
-		"COMMIT_SHA":                 "sha1",
-		"GITHUB_TOKEN_MAGIC_MODULES": "*******",
-		"NEW_REF":                    "auto-pr-pr1",
-		"OLD_REF":                    "auto-pr-pr1-old",
-		"PR_NUMBER":                  "pr1",
-		"PROJECT_ID":                 "project1",
+		"NEW_REF": "auto-pr-123456",
+		"OLD_REF": "auto-pr-123456-old",
 	}
-	execGenerateComment(env, gh, mr, ctlr)
+	addLabelsEnv := map[string]string{
+		"GITHUB_TOKEN_MAGIC_MODULES": "*******",
+	}
+	execGenerateComment(
+		123456,
+		"*******",
+		"build1",
+		"17",
+		"project1",
+		"sha1",
+		"", // goPath
+		"", // home
+		gh,
+		mr,
+		ctlr,
+	)
 
 	for method, expectedCalls := range map[string][]ParameterList{
 		"Copy": {
@@ -64,25 +65,25 @@ func TestExecGenerateComment(t *testing.T) {
 			{"/mock/dir/magic-modules/tools/diff-processor/bin"},
 		},
 		"Run": {
-			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-pr1", "https://modular-magician:*******@github.com/modular-magician/terraform-provider-google", "/mock/dir/tpg"}, map[string]string(nil)},
-			{"/mock/dir/tpg", "git", []string{"fetch", "origin", "auto-pr-pr1-old"}, map[string]string(nil)},
-			{"/mock/dir/tpg", "git", []string{"diff", "origin/auto-pr-pr1-old", "origin/auto-pr-pr1", "--shortstat"}, map[string]string(nil)},
-			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-pr1", "https://modular-magician:*******@github.com/modular-magician/terraform-provider-google-beta", "/mock/dir/tpgb"}, map[string]string(nil)},
-			{"/mock/dir/tpgb", "git", []string{"fetch", "origin", "auto-pr-pr1-old"}, map[string]string(nil)},
-			{"/mock/dir/tpgb", "git", []string{"diff", "origin/auto-pr-pr1-old", "origin/auto-pr-pr1", "--shortstat"}, map[string]string(nil)},
-			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-pr1", "https://modular-magician:*******@github.com/modular-magician/terraform-google-conversion", "/mock/dir/tfc"}, map[string]string(nil)},
-			{"/mock/dir/tfc", "git", []string{"fetch", "origin", "auto-pr-pr1-old"}, map[string]string(nil)},
-			{"/mock/dir/tfc", "git", []string{"diff", "origin/auto-pr-pr1-old", "origin/auto-pr-pr1", "--shortstat"}, map[string]string(nil)},
-			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-pr1", "https://modular-magician:*******@github.com/modular-magician/docs-examples", "/mock/dir/tfoics"}, map[string]string(nil)},
-			{"/mock/dir/tfoics", "git", []string{"fetch", "origin", "auto-pr-pr1-old"}, map[string]string(nil)},
-			{"/mock/dir/tfoics", "git", []string{"diff", "origin/auto-pr-pr1-old", "origin/auto-pr-pr1", "--shortstat"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-123456", "https://modular-magician:*******@github.com/modular-magician/terraform-provider-google", "/mock/dir/tpg"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-123456", "https://modular-magician:*******@github.com/modular-magician/terraform-provider-google-beta", "/mock/dir/tpgb"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-123456", "https://modular-magician:*******@github.com/modular-magician/terraform-google-conversion", "/mock/dir/tgc"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-123456", "https://modular-magician:*******@github.com/modular-magician/docs-examples", "/mock/dir/tfoics"}, map[string]string(nil)},
+			{"/mock/dir/tpg", "git", []string{"fetch", "origin", "auto-pr-123456-old"}, map[string]string(nil)},
+			{"/mock/dir/tpg", "git", []string{"diff", "origin/auto-pr-123456-old", "origin/auto-pr-123456", "--shortstat"}, map[string]string(nil)},
+			{"/mock/dir/tpgb", "git", []string{"fetch", "origin", "auto-pr-123456-old"}, map[string]string(nil)},
+			{"/mock/dir/tpgb", "git", []string{"diff", "origin/auto-pr-123456-old", "origin/auto-pr-123456", "--shortstat"}, map[string]string(nil)},
+			{"/mock/dir/tgc", "git", []string{"fetch", "origin", "auto-pr-123456-old"}, map[string]string(nil)},
+			{"/mock/dir/tgc", "git", []string{"diff", "origin/auto-pr-123456-old", "origin/auto-pr-123456", "--shortstat"}, map[string]string(nil)},
+			{"/mock/dir/tfoics", "git", []string{"fetch", "origin", "auto-pr-123456-old"}, map[string]string(nil)},
+			{"/mock/dir/tfoics", "git", []string{"diff", "origin/auto-pr-123456-old", "origin/auto-pr-123456", "--shortstat"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/tools/diff-processor", "make", []string{"build"}, diffProcessorEnv},
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"breaking-changes"}, map[string]string(nil)},
-			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"add-labels", "pr1"}, diffProcessorEnv},
+			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"add-labels", "123456"}, addLabelsEnv},
 			{"/mock/dir/magic-modules/tools/diff-processor", "make", []string{"build"}, diffProcessorEnv},
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"breaking-changes"}, map[string]string(nil)},
-			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"add-labels", "pr1"}, diffProcessorEnv},
-			{"/mock/dir/tpgbold", "git", []string{"checkout", "origin/auto-pr-pr1-old"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"add-labels", "123456"}, addLabelsEnv},
+			{"/mock/dir/tpgbold", "git", []string{"checkout", "origin/auto-pr-123456-old"}, map[string]string(nil)},
 			{"/mock/dir/tpgbold", "find", []string{".", "-type", "f", "-name", "*.go", "-exec", "sed", "-i.bak", "s~github.com/hashicorp/terraform-provider-google-beta~google/provider/old~g", "{}", "+"}, map[string]string(nil)},
 			{"/mock/dir/tpgbold", "sed", []string{"-i.bak", "s|github.com/hashicorp/terraform-provider-google-beta|google/provider/old|g", "go.mod"}, map[string]string(nil)},
 			{"/mock/dir/tpgbold", "sed", []string{"-i.bak", "s|github.com/hashicorp/terraform-provider-google-beta|google/provider/old|g", "go.sum"}, map[string]string(nil)},
@@ -110,8 +111,8 @@ func TestExecGenerateComment(t *testing.T) {
 	}
 
 	for method, expectedCalls := range map[string][][]any{
-		"PostBuildStatus": {{"pr1", "terraform-provider-breaking-change-test", "success", "https://console.cloud.google.com/cloud-build/builds;region=global/build1;step=17?project=project1", "sha1"}},
-		"PostComment":     {{"pr1", "Hi there, I'm the Modular magician. I've detected the following information about your changes:\n\n## Diff report\nYour PR generated some diffs in downstreams - here they are.\n\nTerraform GA: [Diff](https://github.com/modular-magician/terraform-provider-google/compare/auto-pr-pr1-old..auto-pr-pr1) ( 2 files changed, 40 insertions(+))\nTerraform Beta: [Diff](https://github.com/modular-magician/terraform-provider-google-beta/compare/auto-pr-pr1-old..auto-pr-pr1) ( 2 files changed, 40 insertions(+))\nTF Conversion: [Diff](https://github.com/modular-magician/terraform-google-conversion/compare/auto-pr-pr1-old..auto-pr-pr1) ( 1 file changed, 10 insertions(+))\n\n## Missing test report\nYour PR includes resource fields which are not covered by any test.\n\nResource: `google_folder_access_approval_settings` (3 total tests)\nPlease add an acceptance test which includes these fields. The test should include the following:\n\n```hcl\nresource \"google_folder_access_approval_settings\" \"primary\" {\n  uncovered_field = # value needed\n}\n\n```\n\n"}},
+		"PostBuildStatus": {{"123456", "terraform-provider-breaking-change-test", "success", "https://console.cloud.google.com/cloud-build/builds;region=global/build1;step=17?project=project1", "sha1"}},
+		"PostComment":     {{"123456", "Hi there, I'm the Modular magician. I've detected the following information about your changes:\n\n## Diff report\n\nYour PR generated some diffs in downstreams - here they are.\n\n`google` provider: [Diff](https://github.com/modular-magician/terraform-provider-google/compare/auto-pr-123456-old..auto-pr-123456) ( 2 files changed, 40 insertions(+))\n`google-beta` provider: [Diff](https://github.com/modular-magician/terraform-provider-google-beta/compare/auto-pr-123456-old..auto-pr-123456) ( 2 files changed, 40 insertions(+))\n`terraform-google-conversion`: [Diff](https://github.com/modular-magician/terraform-google-conversion/compare/auto-pr-123456-old..auto-pr-123456) ( 1 file changed, 10 insertions(+))\n\n## Missing test report\nYour PR includes resource fields which are not covered by any test.\n\nResource: `google_folder_access_approval_settings` (3 total tests)\nPlease add an acceptance test which includes these fields. The test should include the following:\n\n```hcl\nresource \"google_folder_access_approval_settings\" \"primary\" {\n  uncovered_field = # value needed\n}\n\n```\n"}},
 	} {
 		if actualCalls, ok := gh.calledMethods[method]; !ok {
 			t.Fatalf("Found no calls for %s", method)
