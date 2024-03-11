@@ -1,38 +1,38 @@
 package apphub_test
 
 import (
-    "testing"
+	"testing"
 
-    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-    "github.com/hashicorp/terraform-provider-google/google/acctest"
-    "github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccDataSourceApphubDiscoveredWorkload_basic(t *testing.T) {
-    t.Parallel()
+	t.Parallel()
 
-    context := map[string]interface{}{
-    	"org_id":        envvar.GetTestOrgFromEnv(t),
-    	"random_suffix": acctest.RandString(t, 10),
-    	"billing_account": envvar.GetTestBillingAccountFromEnv(t),
-    }
+	context := map[string]interface{}{
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"random_suffix":   acctest.RandString(t, 10),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+	}
 
-    acctest.VcrTest(t, resource.TestCase{
-        PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-        ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-        ExternalProviders: map[string]resource.ExternalProvider{
-		"time": {},
-	},
-        Steps: []resource.TestStep{
-            {
-                Config: testDataSourceApphubDiscoveredWorkload_basic(context),
-            },
-        },
-    })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testDataSourceApphubDiscoveredWorkload_basic(context),
+			},
+		},
+	})
 }
 
 func testDataSourceApphubDiscoveredWorkload_basic(context map[string]interface{}) string {
-    return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_project" "service_project" {
 	project_id ="tf-test-ah-%{random_suffix}"
 	name = "Service Project"
@@ -147,4 +147,3 @@ resource "google_compute_region_instance_group_manager" "mig" {
 }
 `, context)
 }
-
