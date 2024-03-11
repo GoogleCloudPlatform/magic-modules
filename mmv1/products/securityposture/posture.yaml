@@ -120,6 +120,7 @@ properties:
     output: true
   - !ruby/object:Api::Type::Array
     name: 'policySets'
+    required: true
     description: |
       List of policy sets for the posture.
     item_type: !ruby/object:Api::Type::NestedObject
@@ -141,6 +142,7 @@ properties:
           name: 'policies'
           description: |
             List of security policy
+          required: true
           item_type: !ruby/object:Api::Type::NestedObject
             name: 'Policy'
             description: |

@@ -26,7 +26,7 @@ import_format:
   ['projects/{{project}}/datasets/{{dataset_id}}/routines/{{routine_id}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: 'big_query_routine_basic'
+    name: 'bigquery_routine_basic'
     primary_resource_id: 'sproc'
     primary_resource_name: "fmt.Sprintf(\"tf_test_dataset_id%s\",
       context[\"random_suffix\"\
@@ -35,7 +35,7 @@ examples:
       dataset_id: 'dataset_id'
       routine_id: 'routine_id'
   - !ruby/object:Provider::Terraform::Examples
-    name: 'big_query_routine_json'
+    name: 'bigquery_routine_json'
     primary_resource_id: 'sproc'
     primary_resource_name: "fmt.Sprintf(\"tf_test_dataset_id%s\",
       context[\"random_suffix\"\
@@ -44,7 +44,7 @@ examples:
       dataset_id: 'dataset_id'
       routine_id: 'routine_id'
   - !ruby/object:Provider::Terraform::Examples
-    name: 'big_query_routine_tvf'
+    name: 'bigquery_routine_tvf'
     primary_resource_id: 'sproc'
     primary_resource_name: "fmt.Sprintf(\"tf_test_dataset_id%s\",
       context[\"random_suffix\"\
@@ -53,22 +53,30 @@ examples:
       dataset_id: 'dataset_id'
       routine_id: 'routine_id'
   - !ruby/object:Provider::Terraform::Examples
-    name: 'big_query_routine_pyspark'
+    name: 'bigquery_routine_pyspark'
     primary_resource_id: 'pyspark'
     vars:
       dataset_id: 'dataset_id'
       connection_id: 'connection_id'
       routine_id: 'routine_id'
   - !ruby/object:Provider::Terraform::Examples
-    name: 'big_query_routine_pyspark_mainfile'
+    name: 'bigquery_routine_pyspark_mainfile'
     primary_resource_id: 'pyspark_mainfile'
     vars:
       dataset_id: 'dataset_id'
       connection_id: 'connection_id'
       routine_id: 'routine_id'
   - !ruby/object:Provider::Terraform::Examples
-    name: 'big_query_routine_spark_jar'
+    name: 'bigquery_routine_spark_jar'
     primary_resource_id: 'spark_jar'
+    vars:
+      dataset_id: 'dataset_id'
+      connection_id: 'connection_id'
+      routine_id: 'routine_id'
+  - !ruby/object:Provider::Terraform::Examples
+    skip_test: true
+    name: 'bigquery_routine_remote_function'
+    primary_resource_id: 'remote_function'
     vars:
       dataset_id: 'dataset_id'
       connection_id: 'connection_id'
@@ -283,3 +291,33 @@ properties:
         description: |
           The fully qualified name of a class in jarUris, for example, com.example.wordcount.
           Exactly one of mainClass and main_jar_uri field should be set for Java/Scala language type.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'remoteFunctionOptions'
+    description: Remote function specific options.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'endpoint'
+        description: |
+          Endpoint of the user-provided remote service, e.g.
+          `https://us-east1-my_gcf_project.cloudfunctions.net/remote_add`
+      - !ruby/object:Api::Type::String
+        name: 'connection'
+        description: |
+          Fully qualified name of the user-provided connection object which holds
+          the authentication information to send requests to the remote service.
+          Format: "projects/{projectId}/locations/{locationId}/connections/{connectionId}"
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'userDefinedContext'
+        description: |
+          User-defined context as a set of key/value pairs, which will be sent as function
+          invocation context together with batched arguments in the requests to the remote
+          service. The total number of bytes of keys and values must be less than 8KB.
+
+          An object containing a list of "key": value pairs. Example:
+          `{ "name": "wrench", "mass": "1.3kg", "count": "3" }`.
+        default_from_api: true
+      - !ruby/object:Api::Type::String
+        name: 'maxBatchingRows'
+        description: |
+          Max number of rows in each batch sent to the remote service. If absent or if 0,
+          BigQuery dynamically decides the number of rows in a batch.

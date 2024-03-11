@@ -594,6 +594,7 @@ properties:
           events originating in this region. It can be the same
           region as the function, a different region or multi-region, or the global
           region. If not provided, defaults to the same region as the function.
+        default_from_api: true
       - !ruby/object:Api::Type::String
         name: 'eventType'
         description: 'Required. The type of event to observe.'

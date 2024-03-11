@@ -44,6 +44,15 @@ examples:
     vars:
       instance_name: 'workbench-instance'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'workbench_instance_basic_container'
+    primary_resource_id: 'instance'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-workbench-instance%s\",
+      context[\"\
+      random_suffix\"])"
+    region_override: 'us-west1-a'
+    vars:
+      instance_name: 'workbench-instance'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'workbench_instance_basic_gpu'
     primary_resource_id: 'instance'
     primary_resource_name: "fmt.Sprintf(\"tf-test-workbench-instance%s\",
@@ -156,6 +165,36 @@ properties:
             use accelerators, make sure that your configuration has [enough vCPUs and memory
             to support the `machine_type` you have selected](https://cloud.google.com/compute/docs/gpus/#gpus-list).
             Currently supports only one accelerator configuration.
+      - !ruby/object:Api::Type::NestedObject
+        name: shieldedInstanceConfig
+        default_from_api: true
+        allow_empty_object: true
+        send_empty_value: true
+        description: |
+          A set of Shielded Instance options. See [Images using supported Shielded
+          VM features](https://cloud.google.com/compute/docs/instances/modifying-shielded-vm).
+          Not all combinations are valid.
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: enableSecureBoot
+            description: |
+              Optional. Defines whether the VM instance has Secure Boot enabled.
+              Secure Boot helps ensure that the system only runs authentic software by verifying
+              the digital signature of all boot components, and halting the boot process
+              if signature verification fails. Disabled by default.
+          - !ruby/object:Api::Type::Boolean
+            name: enableVtpm
+            description: |
+              Optional. Defines whether the VM instance has the vTPM enabled.
+              Enabled by default.
+          - !ruby/object:Api::Type::Boolean
+            name: enableIntegrityMonitoring
+            description: |
+              Optional. Defines whether the VM instance has integrity monitoring
+              enabled. Enables monitoring and attestation of the boot integrity of the VM
+              instance. The attestation is performed against the integrity policy baseline.
+              This baseline is initially derived from the implicitly trusted boot image
+              when the VM instance is created. Enabled by default.
       - !ruby/object:Api::Type::Array
         name: serviceAccounts
         description: |
@@ -183,6 +222,8 @@ properties:
         name: vmImage
         custom_flatten: templates/terraform/custom_flatten/workbench_instance_vm_image_flatten.go.erb
         default_from_api: true
+        conflicts:
+          - gce_setup.0.container_image
         immutable: true
         description: |
           Definition of a custom Compute Engine virtual machine image for starting
@@ -210,6 +251,23 @@ properties:
             exactly_one_of:
               - vm_image.0.name
               - vm_image.0.family
+      - !ruby/object:Api::Type::NestedObject
+        name: containerImage
+        conflicts:
+          - gce_setup.0.vm_image
+        description: |
+          Use a container image to start the workbench instance.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'repository'
+            description: |
+              The path to the container image repository.
+              For example: gcr.io/{project_id}/{imageName}
+            required: true
+          - !ruby/object:Api::Type::String
+            name: 'tag'
+            description: |
+              The tag of the container image. If not specified, this defaults to the latest tag.
       - !ruby/object:Api::Type::NestedObject
         name: bootDisk
         default_from_api: true

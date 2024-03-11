@@ -31,6 +31,8 @@ examples:
     primary_resource_name:
       'fmt.Sprintf("tf-test-my-pipeline%s", context["random_suffix"])'
     primary_resource_id: 'primary'
+    ignore_read_extra:
+      - 'schedule_info.0.next_job_time'
     vars:
       pipeline_name: 'my-pipeline'
       account_id: 'my-account'
