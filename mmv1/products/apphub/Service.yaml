@@ -40,6 +40,7 @@ examples:
       health_check: "l7-ilb-hc"
     test_env_vars:
       org_id: :ORG_ID
+      billing_account: :BILLING_ACCT
   - !ruby/object:Provider::Terraform::Examples
     name: "service_full"
     pull_external: true
@@ -63,6 +64,7 @@ examples:
       health_check: "l7-ilb-hc"
     test_env_vars:
       org_id: :ORG_ID
+      billing_account: :BILLING_ACCT
 properties:
   - !ruby/object:Api::Type::String
     name: name
