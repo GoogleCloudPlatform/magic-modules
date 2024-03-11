@@ -336,13 +336,21 @@ The `status` block holds:
 
 * `is_stable` - A bit indicating whether the managed instance group is in a stable state. A stable state means that: none of the instances in the managed instance group is currently undergoing any type of change (for example, creation, restart, or deletion); no future changes are scheduled for instances in the managed instance group; and the managed instance group itself is not being modified.
 
+* `all_instances_config` - Status of all-instances configuration on the group.
+
+* `stateful` - Stateful status of the given Instance Group Manager.
+
 * `version_target` - A status of consistency of Instances' versions with their target version specified by version field on Instance Group Manager.
 
 The `version_target` block holds:
 
 * `version_target` - A bit indicating whether version target has been reached in this managed instance group, i.e. all instances are in their target version. Instances' target version are specified by version field on Instance Group Manager.
 
-* `stateful` - Stateful status of the given Instance Group Manager.
+The `all_instances_config` block holds:
+
+* `effective` -  A bit indicating whether this configuration has been applied to all managed instances in the group.
+
+* `current_revision` - Current all-instances configuration revision. This value is in RFC3339 text format.
 
 The `stateful` block holds:
 
