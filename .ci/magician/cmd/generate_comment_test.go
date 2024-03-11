@@ -28,8 +28,8 @@ func TestExecGenerateComment(t *testing.T) {
 	}
 	ctlr := source.NewController("/mock/dir/go", "modular-magician", "*******", mr)
 	diffProcessorEnv := map[string]string{
-		"NEW_REF": "auto-pr-123456",
-		"OLD_REF": "auto-pr-123456-old",
+		"NEW_REF":                    "auto-pr-123456",
+		"OLD_REF":                    "auto-pr-123456-old",
 	}
 	addLabelsEnv := map[string]string{
 		"GITHUB_TOKEN_MAGIC_MODULES": "*******",

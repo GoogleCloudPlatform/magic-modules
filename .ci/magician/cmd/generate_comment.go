@@ -39,6 +39,24 @@ var (
 	diffComment string
 )
 
+type Diff struct {
+	Repo      source.Repo
+	DiffStats string
+}
+
+type Errors struct {
+	Title  string
+	Errors []string
+}
+
+type diffCommentData struct {
+	PrNumber        int
+	Diffs           []Diff
+	BreakingChanges []string
+	MissingTests    string
+	Errors          []Errors
+}
+
 const allowBreakingChangesLabel = "override-breaking-change"
 
 var gcEnvironmentVariables = [...]string{
@@ -141,21 +159,21 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 		Path:    filepath.Join(mmLocalPath, "..", "tpgb"),
 		Version: provider.Beta,
 	}
-	tfoicsRepo := source.Repo{
-		Name:  "docs-examples",
-		Title: "Open in Cloud Shell",
-		Path:  filepath.Join(mmLocalPath, "..", "tfoics"),
-	}
 	tgcRepo := source.Repo{
 		Name:    "terraform-google-conversion",
 		Title:   "`terraform-google-conversion`",
 		Path:    filepath.Join(mmLocalPath, "..", "tgc"),
 		Version: provider.Beta,
 	}
+	tfoicsRepo := source.Repo{
+		Name:  "docs-examples",
+		Title: "Open in Cloud Shell",
+		Path:  filepath.Join(mmLocalPath, "..", "tfoics"),
+	}
 
 	// Initialize repos
-	data := map[string]any{
-		"prNumber": prNumber,
+	data := diffCommentData{
+		PrNumber: prNumber,
 	}
 	errors := map[string][]string{"Other": []string{}}
 	var err error
@@ -170,7 +188,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 		}
 	}
 
-	diffs := []map[string]any{}
+	diffs := []Diff{}
 	for _, repo := range []source.Repo{tpgRepo, tpgbRepo, tgcRepo, tfoicsRepo} {
 		if !repo.Cloned {
 			fmt.Println("Skipping diff; repo failed to clone:", repo.Name)
@@ -182,13 +200,13 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			errors[repo.Title] = append(errors[repo.Title], "Failed to compute repo diff stats")
 		}
 		if diffStats != "" {
-			diffs = append(diffs, map[string]any{
-				"repo":      repo,
-				"diffStats": diffStats,
+			diffs = append(diffs, Diff{
+				Repo:      repo,
+				DiffStats: diffStats,
 			})
 		}
 	}
-	data["diffs"] = diffs
+	data.Diffs = diffs
 
 	// The breaking changes are unique across both provider versions
 	uniqueBreakingChanges := map[string]struct{}{}
@@ -230,7 +248,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	}
 	breakingChangesSlice := maps.Keys(uniqueBreakingChanges)
 	sort.Strings(breakingChangesSlice)
-	data["breakingChanges"] = breakingChangesSlice
+	data.BreakingChanges = breakingChangesSlice
 
 	// Update breaking changes status on PR
 	breakingState := "success"
@@ -264,7 +282,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			fmt.Println("Error running missing test detector: ", err)
 			errors[repo.Title] = append(errors[repo.Title], "The missing test detector failed to run.")
 		}
-		data["missingTests"] = missingTests
+		data.MissingTests = missingTests
 	}
 
 	// Run unit tests for missing test detector
@@ -282,6 +300,24 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 		fmt.Println("Error running missing test detector unit tests: ", err)
 		errors["Other"] = append(errors["Other"], "Missing test detector unit tests failed to run.")
 	}
+
+	// Add errors to data as an ordered list
+	errorsList := []Errors{}
+	for _, repo := range []source.Repo{tpgRepo, tpgbRepo, tgcRepo, tfoicsRepo} {
+		if len(errors[repo.Title]) > 0 {
+			errorsList = append(errorsList, Errors{
+				Title:  repo.Title,
+				Errors: errors[repo.Title],
+			})
+		}
+	}
+	if len(errors["Other"]) > 0 {
+		errorsList = append(errorsList, Errors{
+			Title:  "Other",
+			Errors: errors["Other"],
+		})
+	}
+	data.Errors = errorsList
 
 	// Post diff comment
 	message, err := formatDiffComment(data)
@@ -472,7 +508,7 @@ func runMissingTestUnitTests(mmLocalPath, tpgbLocalPath, targetURL, goPath, home
 	return rnr.PopDir()
 }
 
-func formatDiffComment(data map[string]any) (string, error) {
+func formatDiffComment(data diffCommentData) (string, error) {
 	tmpl, err := template.New("DIFF_COMMENT.md").Parse(diffComment)
 	if err != nil {
 		panic(fmt.Sprintf("Unable to parse DIFF_COMMENT.md: %s", err))
