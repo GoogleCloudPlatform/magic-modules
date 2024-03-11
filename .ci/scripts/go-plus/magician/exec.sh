@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # Get the directory of the current script
 DIR="$(dirname $(realpath $0))"
 
@@ -20,7 +22,7 @@ fi
 # If there are no arguments only compile the binary
 if [ "$#" -eq 0 ]; then
     echo "No arguments provided"
-    exit 0
+    exit 1
 fi
 
 # Run the binary and pass all arguments
