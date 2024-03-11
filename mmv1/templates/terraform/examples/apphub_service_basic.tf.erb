@@ -13,9 +13,14 @@ resource "google_project" "service_project" {
   billing_account = "<%= ctx[:test_env_vars]['billing_account'] %>"
 }
 
+# Enable Compute API
+resource "google_project_service" "compute_service_project" {
+  project = google_project.service_project.project_id
+  service = "compute.googleapis.com"
+}
 
 resource "time_sleep" "wait_120s" {
-  depends_on = [google_project.service_project]
+  depends_on = [google_project_service.compute_service_project]
 
   create_duration = "120s"
 }
@@ -43,24 +48,13 @@ resource "google_apphub_service" "<%= ctx[:primary_resource_id] %>" {
 
 #creates service
 
-# Enable Compute API
-resource "google_project_service" "compute_service_project" {
-  project = google_project.service_project.project_id
-  service = "compute.googleapis.com"
-}
-
-resource "time_sleep" "wait_120s_compute_api" {
-  depends_on = [google_project_service.compute_service_project]
-
-  create_duration = "120s"
-}
 
 # VPC network
 resource "google_compute_network" "ilb_network" {
   name                    = "<%= ctx[:vars]['ilb_network'] %>"
   project                 = google_project.service_project.project_id
   auto_create_subnetworks = false
-  depends_on = [time_sleep.wait_120s_compute_api]
+  depends_on = [time_sleep.wait_120s]
 }
 
 
@@ -105,7 +99,7 @@ resource "google_compute_health_check" "default" {
   tcp_health_check {
     port = "80"
   }
-  depends_on = [time_sleep.wait_120s_compute_api]
+  depends_on = [time_sleep.wait_120s]
 }
 
 
