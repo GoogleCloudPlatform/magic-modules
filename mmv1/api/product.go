@@ -15,6 +15,7 @@ package api
 
 import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"golang.org/x/exp/slices"
 )
 
@@ -38,6 +39,7 @@ type Product struct {
 	// Name string
 
 	// Display Name: The full name of the GCP product; eg "Cloud Bigtable"
+	DisplayName string `yaml:"display_name"`
 
 	Objects []*Resource
 
@@ -108,15 +110,15 @@ func (p *Product) Validate() {
 //     name.downcase
 //   end
 
-//   // The product full name is the "display name" in string form intended for
-//   // users to read in documentation; "Google Compute Engine", "Cloud Bigtable"
-//   def display_name
-//     if @display_name.nil?
-//       name.space_separated
-//     else
-//       @display_name
-//     end
-//   end
+// The product full name is the "display name" in string form intended for
+// users to read in documentation; "Google Compute Engine", "Cloud Bigtable"
+func (p Product) GetDisplayName() string {
+	if p.DisplayName == "" {
+		return google.SpaceSeparated(p.Name)
+	}
+
+	return p.DisplayName
+}
 
 //   // Most general version that exists for the product
 //   // If GA is present, use that, else beta, else alpha
