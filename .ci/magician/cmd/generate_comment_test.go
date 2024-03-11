@@ -150,12 +150,16 @@ func TestFormatDiffComment(t *testing.T) {
 			data: diffCommentData{
 				Errors: []Errors{
 					{
+						Title: "`google` provider",
+						Errors: []string{"Provider 1"},
+					},
+					{
 						Title: "Other",
 						Errors: []string{"Error 1", "Error 2"},
 					},
 				},
 			},
-			expectedStrings: []string{"## Diff report", "## Errors", "Other", "- Error 1", "- Error 2"},
+			expectedStrings: []string{"## Diff report", "## Errors", "`google` provider:\n- Provider 1\nOther:\n- Error 1\n- Error 2\n"},
 			notExpectedStrings: []string{
 				"generated some diffs",
 				"## Breaking Change(s) Detected",
@@ -199,8 +203,7 @@ func TestFormatDiffComment(t *testing.T) {
 				"## Breaking Change(s) Detected",
 				"major release",
 				"`override-breaking-change`",
-				"- Breaking change 1",
-				"- Breaking change 2",
+				"- Breaking change 1\n- Breaking change 2\n",
 			},
 			notExpectedStrings: []string{
 				"generated some diffs",

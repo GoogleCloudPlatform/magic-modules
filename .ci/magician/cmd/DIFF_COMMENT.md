@@ -33,5 +33,5 @@ An `override-breaking-change` label can be added to allow merging.
 {{.Title}}:
 {{- range .Errors}}
 - {{.}}{{end}}
-{{- end}}
+{{end}}
 {{- end -}}
