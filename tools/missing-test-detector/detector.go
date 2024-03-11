@@ -5,7 +5,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/GoogleCloudPlatform/magic-modules/tools/missing-test-detector/reader"
+	"missing-test-detector/reader"
+
 	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/zclconf/go-cty/cty"
 )
