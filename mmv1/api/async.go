@@ -66,7 +66,7 @@ type Result struct {
 
 	// Contains information about the result of an Operation
 
-	ResourceInsideResponse bool
+	ResourceInsideResponse bool `yaml:"resource_inside_response"`
 }
 
 // def validate
