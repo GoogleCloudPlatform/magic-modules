@@ -13,6 +13,7 @@ func TestAccDataSourceApphubDiscoveredWorkload_basic(t *testing.T) {
     context := map[string]interface{}{
     	"org_id":        envvar.GetTestOrgFromEnv(t),
     	"random_suffix": acctest.RandString(t, 10),
+    	"billing_account": envvar.GetTestBillingAccountFromEnv(t),
     }
 
     acctest.VcrTest(t, resource.TestCase{
@@ -29,9 +30,10 @@ func TestAccDataSourceApphubDiscoveredWorkload_basic(t *testing.T) {
 func testDataSourceApphubDiscoveredWorkload_basic(context map[string]interface{}) string {
     return acctest.Nprintf(`
 resource "google_project" "service_project" {
-	project_id ="apphub-service-project-%{random_suffix}"
+	project_id ="apphub-sp-%{random_suffix}"
 	name = "Service Project"
 	org_id = "%{org_id}"
+	billing_account = "%{billing_account}"
 }
 
 resource "time_sleep" "wait_120s_for_service_project" {
