@@ -27,6 +27,8 @@ update_verb: :PATCH
 update_mask: true
 skip_delete: true
 autogen_async: false
+import_format: ['{{%parent}}/locations/global/quotaPreferences/{{name}}']
+id_format: '{{parent}}/locations/global/quotaPreferences/{{name}}'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/cloudquotas_quota_preference.go.erb
 
