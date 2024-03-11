@@ -14,7 +14,7 @@ func TestAccDataSourceApphubDiscoveredService_basic(t *testing.T) {
 	context := map[string]interface{}{
 		"org_id":          envvar.GetTestOrgFromEnv(t),
 		"random_suffix":   acctest.RandString(t, 10),
-		"billing_account": envvar.GetBillingAccountFromEnv(t),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
