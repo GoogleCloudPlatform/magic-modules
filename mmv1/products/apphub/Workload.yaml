@@ -1,0 +1,239 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+base_url: projects/{{project}}/locations/{{location}}/applications/{{applications_id}}/workloads
+create_url: projects/{{project}}/locations/{{location}}/applications/{{applications_id}}/workloads?workloadId={{workload_id}}
+self_link: projects/{{project}}/locations/{{location}}/applications/{{applications_id}}/workloads/{{workload_id}}
+id_format: projects/{{project}}/locations/{{location}}/applications/{{applications_id}}/workloads/{{workload_id}}
+import_format:
+- projects/{{project}}/locations/{{location}}/applications/{{applications_id}}/workloads/{{workload_id}}
+name: Workload
+description: 'Workload represents a binary deployment (such as Managed Instance Groups (MIGs), GKE deployments, etc.) that performs the smallest logical subset of business functionality.
+  It registers identified workload to the Application.'
+autogen_async: true
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: 'templates/terraform/constants/apphub_discovered_resource.go.erb'
+examples:
+- !ruby/object:Provider::Terraform::Examples
+  name: "workload_basic"
+  pull_external: true
+  primary_resource_id: "example"
+  config_path: "templates/terraform/examples/apphub_workload_basic.tf.erb"
+  vars:
+    application_id: "example-application-1"
+    service_project_attachment_id: "project-1"
+    ilb_network: "l7-ilb-network"
+    ilb_subnet: "l7-ilb-subnet"
+    instance_template: "l7-ilb-mig-template"
+    mig: "l7-ilb-mig1"
+  test_env_vars:
+      org_id: :ORG_ID
+- !ruby/object:Provider::Terraform::Examples
+  name: "workload_full"
+  pull_external: true
+  primary_resource_id: "example"
+  config_path: "templates/terraform/examples/apphub_workload_full.tf.erb"
+  vars:
+    application_id: "example-application-1"
+    service_project_attachment_id: "project-1"
+    display_name: "Example Service Full"
+    description: "Register service for testing"
+    business_name: "Alice"
+    business_email: "alice@google.com"
+    developer_name: "Bob"
+    developer_email: "bob@google.com"
+    operator_name: "Charlie"
+    operator_email: "charlie@google.com"
+    ilb_network: "l7-ilb-network"
+    ilb_subnet: "l7-ilb-subnet"
+    instance_template: "l7-ilb-mig-template"
+    mig: "l7-ilb-mig1"
+  test_env_vars:
+      org_id: :ORG_ID
+properties:
+- !ruby/object:Api::Type::String
+  name: name
+  output: true
+  description: "Identifier. The resource name of the Workload. Format:\n\"projects/{host-project-id}/locations/{location}/applications/{application-id}/workloads/{workload-id}\" "
+- !ruby/object:Api::Type::String
+  name: displayName
+  description: 'Optional. User-defined name for the Workload. '
+- !ruby/object:Api::Type::String
+  name: description
+  description: 'Optional. User-defined description of a Workload. '
+- !ruby/object:Api::Type::NestedObject
+  properties:
+  - !ruby/object:Api::Type::String
+    name: uri
+    description: 'Output only. The underlying compute resource uri. '
+    output: true
+  output: true
+  name: workloadReference
+  description: 'Reference of an underlying compute resource represented by the Workload. '
+- !ruby/object:Api::Type::NestedObject
+  properties:
+  - !ruby/object:Api::Type::String
+    name: gcpProject
+    description: "Output only. The service project identifier that the underlying
+      cloud resource\nresides in. Empty for non cloud resources. "
+    output: true
+  - !ruby/object:Api::Type::String
+    name: location
+    description: "Output only. The location that the underlying compute resource resides
+      in (e.g\nus-west1). "
+    output: true
+  - !ruby/object:Api::Type::String
+    name: zone
+    description: "Output only. The location that the underlying compute resource resides
+      in if it is zonal\n(e.g us-west1-a). "
+    output: true
+  output: true
+  name: workloadProperties
+  description: 'Properties of an underlying compute resource represented by the Workload. '
+- !ruby/object:Api::Type::String
+  name: discoveredWorkload
+  diff_suppress_func: 'DiscoveredResourceProjectNumberDiffSuppress'
+  description: 'Required. Immutable. The resource name of the original discovered
+    workload. '
+  required: true
+  immutable: true
+- !ruby/object:Api::Type::NestedObject
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: type
+            description: 'Criticality type. '
+            required: true
+            values:
+              - :MISSION_CRITICAL
+              - :HIGH
+              - :MEDIUM
+              - :LOW
+        name: criticality
+        description: 'Criticality of the Application, Service, or Workload '
+      - !ruby/object:Api::Type::NestedObject
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: type
+            description: 'Environment type. '
+            required: true
+            values:
+              - :PRODUCTION
+              - :STAGING
+              - :TEST
+              - :DEVELOPMENT
+        name: environment
+        description: 'Environment of the Application, Service, or Workload '
+      - !ruby/object:Api::Type::Array
+        name: developerOwners
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: displayName
+              description: 'Optional. Contact''s name. '
+            - !ruby/object:Api::Type::String
+              name: email
+              description: 'Required. Email address of the contacts. '
+              required: true
+        description: 'Optional. Developer team that owns development and coding. '
+      - !ruby/object:Api::Type::Array
+        name: operatorOwners
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: displayName
+              description: 'Optional. Contact''s name. '
+            - !ruby/object:Api::Type::String
+              name: email
+              description: 'Required. Email address of the contacts. '
+              required: true
+        description: 'Optional. Operator team that ensures runtime and operations. '
+      - !ruby/object:Api::Type::Array
+        name: businessOwners
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: displayName
+              description: 'Optional. Contact''s name. '
+            - !ruby/object:Api::Type::String
+              name: email
+              description: 'Required. Email address of the contacts. '
+              required: true
+        description: 'Optional. Business team that ensures user needs are met and value
+          is delivered '
+    name: attributes
+    description: 'Consumer provided attributes. '
+- !ruby/object:Api::Type::String
+  name: createTime
+  description: 'Output only. Create time. '
+  output: true
+- !ruby/object:Api::Type::String
+  name: updateTime
+  description: 'Output only. Update time. '
+  output: true
+- !ruby/object:Api::Type::String
+  name: uid
+  description: "Output only. A universally unique identifier (UUID) for the `Workload`
+    in the UUID4\nformat. "
+  output: true
+- !ruby/object:Api::Type::Enum
+  name: state
+  description: "Output only. Workload state. \n Possible values:\n STATE_UNSPECIFIED\nCREATING\nACTIVE\nDELETING\nDETACHED"
+  output: true
+  values:
+    - :STATE_UNSPECIFIED
+    - :CREATING
+    - :ACTIVE
+    - :DELETING
+    - :DETACHED
+parameters:
+- !ruby/object:Api::Type::String
+  name: location
+  description: 'Part of `parent`. See documentation of `projectsId`. '
+  url_param_only: true
+  required: true
+  immutable: true
+- !ruby/object:Api::Type::String
+  name: applicationsId
+  description: 'Part of `parent`. See documentation of `projectsId`. '
+  url_param_only: true
+  required: true
+  immutable: true
+- !ruby/object:Api::Type::String
+  name: workloadId
+  description: 'Required. The Workload identifier. '
+  url_param_only: true
+  required: true
+  immutable: true
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: name
+    base_url: "{{op_id}}"
+    wait_ms: 1000
+    timeouts:
+  result: !ruby/object:Api::OpAsync::Result
+    path: response
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: done
+    complete: true
+    allowed:
+    - true
+    - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: error
+    message: message
+update_verb: :PATCH
+update_mask: true

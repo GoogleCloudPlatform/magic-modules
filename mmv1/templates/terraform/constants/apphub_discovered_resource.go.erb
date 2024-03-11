@@ -1,0 +1,13 @@
+// Suppress the project id or number in the field
+// Format: "projects/<project-id-or-number>/*"
+func DiscoveredResourceProjectNumberDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	oldSplit := regexp.MustCompile("/").Split(old, 3)
+    newSplit := regexp.MustCompile("/").Split(new, 3)
+    if len(newSplit) < 3 {
+        return false
+    }
+    if newSplit[0]!=oldSplit[0] || newSplit[2]!=oldSplit[2] {
+        return false
+    }
+    return true
+}
