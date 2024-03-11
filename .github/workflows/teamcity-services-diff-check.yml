@@ -33,50 +33,15 @@ jobs:
         with:
           repo: 'terraform-provider-google'
           token: '$GITHUB_TOKEN'
-
       - name: TeamCity Google Beta Provider Generate
         if: steps.generate.outcome == 'success'
         uses: ./.github/actions/build-downstream
         with:
           repo: 'terraform-provider-google-beta'
           token: '$GITHUB_TOKEN'
-
       - name: Checkout Repository
         if: steps.generate.outcome == 'success'
         uses: actions/checkout@v4
-
-      - name: Setup Go
-        if: steps.generate.outcome == 'success'
-        uses: actions/setup-go@v4
-        with:
-          go-version: '^1.20'
-
-      - name: Download built artifacts - GA provider
-        if: steps.generate.outcome == 'success'
-        uses: actions/download-artifact@v2
-        with:
-          name: artifact-terraform-provider-google
-          path: artifacts
-
-      - name: Unzip the artifacts and delete the zip
-        if: steps.generate.outcome == 'success'
-        run: |
-          unzip -o artifacts/output.zip -d ./provider
-          rm artifacts/output.zip
-
-      - name: Download built artifacts - Beta provider
-        if: steps.generate.outcome == 'success'
-        uses: actions/download-artifact@v2
-        with:
-          name: artifact-terraform-provider-google-beta
-          path: artifacts
-
-      - name: Unzip the artifacts and delete the zip
-        if: steps.generate.outcome == 'success'
-        run: |
-          unzip -o artifacts/output.zip -d ./provider
-          rm artifacts/output.zip
-
       - name: Check that new services have been added to the TeamCity configuration code
         if: steps.generate.outcome == 'success'
         run: |
