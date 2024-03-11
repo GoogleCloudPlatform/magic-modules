@@ -20,8 +20,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"magician/source"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestExecGenerateComment(t *testing.T) {
@@ -34,6 +34,7 @@ func TestExecGenerateComment(t *testing.T) {
 		"NEW_REF": "auto-pr-123456",
 		"OLD_REF": "auto-pr-123456-old",
 		"PATH":    os.Getenv("PATH"),
+		"GOPATH":  os.Getenv("GOPATH"),
 	}
 	addLabelsEnv := map[string]string{
 		"GITHUB_TOKEN_MAGIC_MODULES": "*******",
@@ -45,8 +46,6 @@ func TestExecGenerateComment(t *testing.T) {
 		"17",
 		"project1",
 		"sha1",
-		"", // goPath
-		"", // home
 		gh,
 		mr,
 		ctlr,
@@ -133,13 +132,13 @@ func TestExecGenerateComment(t *testing.T) {
 }
 
 func TestFormatDiffComment(t *testing.T) {
-	cases := map[string]struct {
-		data               diffCommentData
-		expectedStrings    []string
+	cases := map[string]struct{
+		data diffCommentData
+		expectedStrings []string
 		notExpectedStrings []string
 	}{
 		"basic message": {
-			data:            diffCommentData{},
+			data: diffCommentData{},
 			expectedStrings: []string{"## Diff report", "hasn't generated any diffs"},
 			notExpectedStrings: []string{
 				"generated some diffs",
@@ -152,11 +151,11 @@ func TestFormatDiffComment(t *testing.T) {
 			data: diffCommentData{
 				Errors: []Errors{
 					{
-						Title:  "`google` provider",
+						Title: "`google` provider",
 						Errors: []string{"Provider 1"},
 					},
 					{
-						Title:  "Other",
+						Title: "Other",
 						Errors: []string{"Error 1", "Error 2"},
 					},
 				},
@@ -173,13 +172,13 @@ func TestFormatDiffComment(t *testing.T) {
 				PrNumber: 1234567890,
 				Diffs: []Diff{
 					{
-						Title:     "Repo 1",
-						Repo:      "repo-1",
+						Title: "Repo 1",
+						Repo: "repo-1",
 						DiffStats: "+1 added, -1 removed",
 					},
 					{
-						Title:     "Repo 2",
-						Repo:      "repo-2",
+						Title: "Repo 2",
+						Repo: "repo-2",
 						DiffStats: "+2 added, -2 removed",
 					},
 				},

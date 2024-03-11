@@ -125,8 +125,6 @@ var generateCommentCmd = &cobra.Command{
 			env["BUILD_STEP"],
 			env["PROJECT_ID"],
 			env["COMMIT_SHA"],
-			env["GOPATH"],
-			env["HOME"],
 			gh,
 			rnr,
 			ctlr,
@@ -142,7 +140,7 @@ func listGCEnvironmentVariables() string {
 	return result
 }
 
-func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, projectId, commitSha, goPath, home string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller) {
+func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, projectId, commitSha string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller) {
 	newBranch := fmt.Sprintf("auto-pr-%d", prNumber)
 	oldBranch := fmt.Sprintf("auto-pr-%d-old", prNumber)
 	wd := rnr.GetCWD()
@@ -213,16 +211,17 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	// The breaking changes are unique across both provider versions
 	uniqueBreakingChanges := map[string]struct{}{}
 	diffProcessorPath := filepath.Join(mmLocalPath, "tools", "diff-processor")
+	diffProcessorEnv := map[string]string{
+		"OLD_REF": oldBranch,
+		"NEW_REF": newBranch,
+		// Passthrough vars required for a valid build environment.
+		"PATH": os.Getenv("PATH"),
+		"GOPATH": os.Getenv("GOPATH"),
+	}
 	for _, repo := range []source.Repo{tpgRepo, tpgbRepo} {
 		if !repo.Cloned {
 			fmt.Println("Skipping breaking changes; repo failed to clone: ", repo.Name)
 			continue
-		}
-		diffProcessorEnv := map[string]string{
-			"OLD_REF": oldBranch,
-			"NEW_REF": newBranch,
-			// Passthrough vars required for a valid build environment.
-			"PATH": os.Getenv("PATH"),
 		}
 		err = buildDiffProcessor(diffProcessorPath, repo.Path, diffProcessorEnv, rnr)
 		if err != nil {
@@ -302,8 +301,6 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 		mmLocalPath,
 		tpgbRepo.Path,
 		targetURL,
-		goPath,
-		home,
 		commitSha,
 		prNumber,
 		gh,
@@ -483,7 +480,7 @@ func updatePackageName(name, path string, rnr ExecRunner) error {
 
 // Run unit tests for the missing test detector.
 // Report results using Github API.
-func runMissingTestUnitTests(mmLocalPath, tpgbLocalPath, targetURL, goPath, home, commitSha string, prNumber int, gh GithubClient, rnr ExecRunner) error {
+func runMissingTestUnitTests(mmLocalPath, tpgbLocalPath, targetURL, commitSha string, prNumber int, gh GithubClient, rnr ExecRunner) error {
 	if err := rnr.PushDir(mmLocalPath); err != nil {
 		return err
 	}
@@ -507,9 +504,10 @@ func runMissingTestUnitTests(mmLocalPath, tpgbLocalPath, targetURL, goPath, home
 	servicesDir := filepath.Join(tpgbLocalPath, "google-beta", "services")
 	state := "success"
 	if _, err := rnr.Run("go", []string{"test"}, map[string]string{
-		"GOPATH":       goPath,
-		"HOME":         home,
 		"SERVICES_DIR": servicesDir,
+		// Passthrough vars required from the parent environment
+		"GOPATH":       os.Getenv("GOPATH"),
+		"HOME":         os.Getenv("HOME"),
 	}); err != nil {
 		fmt.Printf("error from running go test in %s: %v\n", missingTestDetectorPath, err)
 		state = "failure"
