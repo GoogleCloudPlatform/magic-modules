@@ -202,7 +202,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 		}
 		if diffStats != "" {
 			diffs = append(diffs, Diff{
-				Title: repo.Title,
+				Title:     repo.Title,
 				Repo:      repo.Name,
 				DiffStats: diffStats,
 			})
@@ -221,6 +221,8 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 		diffProcessorEnv := map[string]string{
 			"OLD_REF": oldBranch,
 			"NEW_REF": newBranch,
+			// Passthrough vars required for a valid build environment.
+			"PATH": os.Getenv("PATH"),
 		}
 		err = buildDiffProcessor(diffProcessorPath, repo.Path, diffProcessorEnv, rnr)
 		if err != nil {
