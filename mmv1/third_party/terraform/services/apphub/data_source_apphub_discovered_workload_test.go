@@ -44,7 +44,6 @@ resource "google_project" "service_project" {
 resource "google_project_service" "compute_service_project" {
   project = google_project.service_project.project_id
   service = "compute.googleapis.com"
-  depends_on = [google_project.service_project]
 }
 
 resource "time_sleep" "wait_120s" {
