@@ -43,8 +43,6 @@ In addition to the arguments listed above, the following computed attributes are
 
 * uri - The underlying resource URI.
 
-* path - Additional path under the resource URI.
-
 * `workload_properties` - Properties of an underlying compute resource that can comprise a Workload. Structure is [documented below](#nested_workload_properties)
 
 <a name="nested_workload_properties"></a>A `workload_properties` object would contain the following fields:-
