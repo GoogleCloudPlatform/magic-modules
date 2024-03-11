@@ -12,15 +12,16 @@ func TestDataSourceApphubDiscoveredService_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":          envvar.GetTestOrgFromEnv(t),
-		"service_account": envvar.GetTestServiceAccountFromEnv(t),
-		"host_project":    envvar.GetTestProjectFromEnv(),
-		"random_suffix":   acctest.RandString(t, 10),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testDataSourceApphubDiscoveredService_basic(context),
@@ -38,14 +39,26 @@ resource "google_project" "service_project" {
 	org_id = "%{org_id}"
 }
 
+resource "time_sleep" "wait_120s_for_service_project" {
+  depends_on = [google_project.service_project]
+  create_duration = "120s"
+}
+
 # Enable Compute API
 resource "google_project_service" "compute_service_project" {
-  project_id = google_project.service_project.project_id
+  project = google_project.service_project.project_id
   service = "compute.googleapis.com"
+  depends_on = [time_sleep.wait_120s_for_service_project]
+}
+
+resource "time_sleep" "wait_120s_for_compute_api" {
+  depends_on = [google_project_service.compute_service_project]
+  create_duration = "120s"
 }
 
 resource "google_apphub_service_project_attachment" "service_project_attachment" {
   service_project_attachment_id = google_project.service_project.project_id
+  depends_on = [time_sleep.wait_120s_for_service_project]
 }
 
 # discovered service block
@@ -59,15 +72,15 @@ data "google_apphub_discovered_service" "catalog-service" {
 
 # VPC network
 resource "google_compute_network" "ilb_network" {
-  name                    = "ilb_network-%{random_suffix}"
+  name                    = "ilb-network-%{random_suffix}"
   project                 = google_project.service_project.project_id
   auto_create_subnetworks = false
-  depends_on = [google_project_service.compute_service_project]
+  depends_on = [time_sleep.wait_120s_for_compute_api]
 }
 
 # backend subnet
 resource "google_compute_subnetwork" "ilb_subnet" {
-  name          			 = "ilb_subnet-%{random_suffix}"
+  name          			 = "ilb-subnet-%{random_suffix}"
   project       			 = google_project.service_project.project_id
   ip_cidr_range 			 = "10.0.1.0/24"
   region        			 = "us-central1"
@@ -76,7 +89,7 @@ resource "google_compute_subnetwork" "ilb_subnet" {
 
 # forwarding rule
 resource "google_compute_forwarding_rule" "forwarding_rule" {
-  name                  = "forwarding_rule-%{random_suffix}"
+  name                  = "forwarding-rule-%{random_suffix}"
   project               = google_project.service_project.project_id
   region                = "us-central1"
   ip_version            = "IPV4"
@@ -89,7 +102,7 @@ resource "google_compute_forwarding_rule" "forwarding_rule" {
 
 # backend service
 resource "google_compute_region_backend_service" "backend" {
-  name                  = "backend_service-%{random_suffix}"
+  name                  = "backend-service-%{random_suffix}"
   project               = google_project.service_project.project_id
   region                = "us-central1"
   health_checks         = [google_compute_health_check.default.id]
@@ -97,7 +110,7 @@ resource "google_compute_region_backend_service" "backend" {
     
 # health check
 resource "google_compute_health_check" "default" {
-  name     					 		= "health_check-%{random_suffix}"
+  name     					 		= "health-check-%{random_suffix}"
   project  					 		= google_project.service_project.project_id
   check_interval_sec 		= 1
   timeout_sec        		= 1
@@ -105,7 +118,7 @@ resource "google_compute_health_check" "default" {
   tcp_health_check {
     port = "80"
   }
-  depends_on = [google_project_service.compute_service_project]
+  depends_on = [time_sleep.wait_120s_for_compute_api]
 }
 `, context)
 }
