@@ -12,8 +12,9 @@ func TestAccDataSourceApphubDiscoveredService_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":        envvar.GetTestOrgFromEnv(t),
-		"random_suffix": acctest.RandString(t, 10),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"random_suffix":   acctest.RandString(t, 10),
+		"billing_account": envvar.GetBillingAccountFromEnv(t),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -37,6 +38,7 @@ resource "google_project" "service_project" {
 	project_id ="apphub-sp-%{random_suffix}"
 	name = "Service Project"
 	org_id = "%{org_id}"
+  billing_account = "%{billing_account}"
 }
 
 resource "time_sleep" "wait_120s_for_service_project" {
