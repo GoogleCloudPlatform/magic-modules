@@ -65,7 +65,7 @@ runs:
 
           function clone_repo() {
             export OUTPUT_PATH=$GOPATH/src/github.com/$UPSTREAM_OWNER/$GH_REPO
-            echo $OUTPUT_PATH >> $GITHUB_ENV
+            echo "$OUTPUT_PATH" >> $GITHUB_ENV
             GITHUB_PATH=https://x-access-token:$GITHUB_TOKEN@github.com/$UPSTREAM_OWNER/$GH_REPO
             mkdir -p "$(dirname $OUTPUT_PATH)"
             git clone $GITHUB_PATH $OUTPUT_PATH --branch $BASE_BRANCH
