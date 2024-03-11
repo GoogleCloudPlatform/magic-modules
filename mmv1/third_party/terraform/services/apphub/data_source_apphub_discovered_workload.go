@@ -39,10 +39,6 @@ func DataSourceApphubDiscoveredWorkload() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"path": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
 					},
 				},
 			},
