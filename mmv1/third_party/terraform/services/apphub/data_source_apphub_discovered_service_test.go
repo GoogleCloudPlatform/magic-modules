@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestDataSourceApphubDiscoveredService_basic(t *testing.T) {
+func TestAccDataSourceApphubDiscoveredService_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
