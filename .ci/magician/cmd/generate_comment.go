@@ -40,7 +40,8 @@ var (
 )
 
 type Diff struct {
-	Repo      source.Repo
+	Title     string
+	Repo      string
 	DiffStats string
 }
 
@@ -201,7 +202,8 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 		}
 		if diffStats != "" {
 			diffs = append(diffs, Diff{
-				Repo:      repo,
+				Title: repo.Title,
+				Repo:      repo.Name,
 				DiffStats: diffStats,
 			})
 		}

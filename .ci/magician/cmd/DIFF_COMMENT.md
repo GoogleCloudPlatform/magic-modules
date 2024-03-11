@@ -7,7 +7,7 @@ Your PR hasn't generated any diffs, but I'll let you know if a future commit doe
 Your PR generated some diffs in downstreams - here they are.
 
 {{range .Diffs -}}
-{{.Repo.Title}}: [Diff](https://github.com/modular-magician/{{.Repo.Name}}/compare/auto-pr-{{$.PrNumber}}-old..auto-pr-{{$.PrNumber}}) ({{.DiffStats}})
+{{.Title}}: [Diff](https://github.com/modular-magician/{{.Repo}}/compare/auto-pr-{{$.PrNumber}}-old..auto-pr-{{$.PrNumber}}) ({{.DiffStats}})
 {{end -}}
 {{end -}}
 
@@ -16,6 +16,9 @@ Your PR generated some diffs in downstreams - here they are.
 ## Breaking Change(s) Detected
 
 The following breaking change(s) were detected within your pull request.
+
+{{- range .BreakingChanges}}
+- {{.}}{{end}}
 
 If you believe this detection to be incorrect please raise the concern with your reviewer.
 If you intend to make this change you will need to wait for a [major release](https://www.terraform.io/plugin/sdkv2/best-practices/versioning#example-major-number-increments) window.

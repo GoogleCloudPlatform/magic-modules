@@ -19,6 +19,8 @@ import (
 	"magician/source"
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestExecGenerateComment(t *testing.T) {
@@ -125,5 +127,118 @@ func TestExecGenerateComment(t *testing.T) {
 				}
 			}
 		}
+	}
+}
+
+func TestFormatDiffComment(t *testing.T) {
+	cases := map[string]struct{
+		data diffCommentData
+		expectedStrings []string
+		notExpectedStrings []string
+	}{
+		"basic message": {
+			data: diffCommentData{},
+			expectedStrings: []string{"## Diff report", "hasn't generated any diffs"},
+			notExpectedStrings: []string{
+				"generated some diffs",
+				"## Breaking Change(s) Detected",
+				"## Errors",
+				"## Missing test report",
+			},
+		},
+		"errors are displayed": {
+			data: diffCommentData{
+				Errors: []Errors{
+					{
+						Title: "Other",
+						Errors: []string{"Error 1", "Error 2"},
+					},
+				},
+			},
+			expectedStrings: []string{"## Diff report", "## Errors", "Other", "- Error 1", "- Error 2"},
+			notExpectedStrings: []string{
+				"generated some diffs",
+				"## Breaking Change(s) Detected",
+				"## Missing test report",
+			},
+		},
+		"diffs are displayed": {
+			data: diffCommentData{
+				PrNumber: 1234567890,
+				Diffs: []Diff{
+					{
+						Title: "Repo 1",
+						Repo: "repo-1",
+						DiffStats: "+1 added, -1 removed",
+					},
+				},
+			},
+			expectedStrings: []string{
+				"## Diff report",
+				"generated some diffs",
+				"Repo 1",
+				"[Diff](https://github.com/modular-magician/repo-1/compare/auto-pr-1234567890-old..auto-pr-1234567890)",
+				"+1 added, -1 removed",
+			},
+			notExpectedStrings: []string{
+				"hasn't generated any diffs",
+				"## Breaking Change(s) Detected",
+				"## Errors",
+				"## Missing test report",
+			},
+		},
+		"breaking changes are displayed": {
+			data: diffCommentData{
+				BreakingChanges: []string{
+					"Breaking change 1",
+					"Breaking change 2",
+				},
+			},
+			expectedStrings: []string{
+				"## Diff report",
+				"## Breaking Change(s) Detected",
+				"major release",
+				"`override-breaking-change`",
+				"- Breaking change 1",
+				"- Breaking change 2",
+			},
+			notExpectedStrings: []string{
+				"generated some diffs",
+				"## Errors",
+				"## Missing test report",
+			},
+		},
+		"missing tests are displayed": {
+			data: diffCommentData{
+				MissingTests: "## Missing test report",
+			},
+			expectedStrings: []string{
+				"## Diff report",
+				"## Missing test report",
+			},
+			notExpectedStrings: []string{
+				"generated some diffs",
+				"## Breaking Change(s) Detected",
+				"## Errors",
+			},
+		},
+	}
+
+	for tn, tc := range cases {
+		tc := tc
+		t.Run(tn, func(t *testing.T) {
+			t.Parallel()
+
+			comment, err := formatDiffComment(tc.data)
+			assert.Nil(t, err)
+
+			for _, s := range tc.expectedStrings {
+				assert.Contains(t, comment, s)
+			}
+
+			for _, s := range tc.notExpectedStrings {
+				assert.NotContains(t, comment, s)
+			}
+		})
 	}
 }
