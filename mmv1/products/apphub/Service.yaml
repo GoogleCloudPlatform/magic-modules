@@ -27,6 +27,7 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "service_basic"
+    pull_external: true
     primary_resource_id: "example"
     config_path: "templates/terraform/examples/apphub_service_basic.tf.erb"
     vars:
@@ -39,9 +40,9 @@ examples:
       health_check: "l7-ilb-hc"
     test_env_vars:
       org_id: :ORG_ID
-      service_account: :SERVICE_ACCT
   - !ruby/object:Provider::Terraform::Examples
     name: "service_full"
+    pull_external: true
     primary_resource_id: "example"
     config_path: "templates/terraform/examples/apphub_service_full.tf.erb"
     vars:
@@ -62,7 +63,6 @@ examples:
       health_check: "l7-ilb-hc"
     test_env_vars:
       org_id: :ORG_ID
-      service_account: :SERVICE_ACCT
 properties:
   - !ruby/object:Api::Type::String
     name: name

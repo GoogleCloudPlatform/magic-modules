@@ -12,25 +12,21 @@ resource "google_project" "service_project" {
   org_id = "<%= ctx[:test_env_vars]['org_id'] %>"
 }
 
-resource "google_project_iam_binding" "apphub_service_project_iam_binding" {
-  project = google_project.service_project.project_id
-  role    = "roles/apphub.admin"
-  members = [
-    "<%= 'serviceAccount:'+ ctx[:test_env_vars]['service_account'] %>",
-  ]
+resource "time_sleep" "wait_120s" {
+  depends_on = [google_project.service_project]
+
+  create_duration = "120s"
 }
 
 resource "google_apphub_service_project_attachment" "service_project_attachment" {
   service_project_attachment_id = google_project.service_project.project_id
-  depends_on = [google_project_iam_binding.apphub_service_project_iam_binding]
+  depends_on = [time_sleep.wait_120s]
 }
 
 # discovered service block
 data "google_apphub_discovered_service" "catalog-service" {
   provider = google
   location = "us-east1"
-  # ServiceReference | Application Hub | Google Cloud
-  # Using this reference means that this resource will not be provisioned until the forwarding rule is fully created
   service_uri = "//compute.googleapis.com/${google_compute_forwarding_rule.forwarding_rule.id}"
   depends_on = [google_apphub_service_project_attachment.service_project_attachment]
 }
@@ -39,7 +35,7 @@ resource "google_apphub_service" "<%= ctx[:primary_resource_id] %>" {
   location = "us-east1"
   applications_id = google_apphub_application.application.application_id
   service_id = google_compute_forwarding_rule.forwarding_rule.name
-  discovered_service = data.google_apphub_discovered_service.catalog-service.discovered_service[0].name
+  discovered_service = data.google_apphub_discovered_service.catalog-service.name
   display_name = "<%= ctx[:vars]['display_name'] %>"
   description = "<%= ctx[:vars]['description'] %>"
   attributes {
@@ -67,11 +63,24 @@ resource "google_apphub_service" "<%= ctx[:primary_resource_id] %>" {
 
 #creates service
 
+# Enable Compute API
+resource "google_project_service" "compute_service_project" {
+  project = google_project.service_project.project_id
+  service = "compute.googleapis.com"
+}
+
+resource "time_sleep" "wait_120s_compute_api" {
+  depends_on = [google_project_service.compute_service_project]
+
+  create_duration = "120s"
+}
+
 # VPC network
 resource "google_compute_network" "ilb_network" {
   name                    = "<%= ctx[:vars]['ilb_network'] %>"
   project                 = google_project.service_project.project_id
   auto_create_subnetworks = false
+  depends_on = [time_sleep.wait_120s_compute_api]
 }
 
 
@@ -116,6 +125,7 @@ resource "google_compute_health_check" "default" {
   tcp_health_check {
     port = "80"
   }
+  depends_on = [time_sleep.wait_120s_compute_api]
 }
 
 
