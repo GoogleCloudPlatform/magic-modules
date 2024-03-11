@@ -192,7 +192,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	diffs := []Diff{}
 	for _, repo := range []source.Repo{tpgRepo, tpgbRepo, tgcRepo, tfoicsRepo} {
 		if !repo.Cloned {
-			fmt.Println("Skipping diff; repo failed to clone:", repo.Name)
+			fmt.Println("Skipping diff; repo failed to clone: ", repo.Name)
 			continue
 		}
 		diffStats, err := computeDiff(&repo, oldBranch, ctlr)
@@ -214,6 +214,10 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	uniqueBreakingChanges := map[string]struct{}{}
 	diffProcessorPath := filepath.Join(mmLocalPath, "tools", "diff-processor")
 	for _, repo := range []source.Repo{tpgRepo, tpgbRepo} {
+		if !repo.Cloned {
+			fmt.Println("Skipping breaking changes; repo failed to clone: ", repo.Name)
+			continue
+		}
 		diffProcessorEnv := map[string]string{
 			"OLD_REF": oldBranch,
 			"NEW_REF": newBranch,
@@ -279,6 +283,10 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	// Run missing test detector (currently only for beta)
 	missingTestsPath := mmLocalPath
 	for _, repo := range []source.Repo{tpgbRepo} {
+		if !repo.Cloned {
+			fmt.Println("Skipping missing tests; repo failed to clone: ", repo.Name)
+			continue
+		}
 		missingTests, err := detectMissingTests(missingTestsPath, repo.Path, oldBranch, rnr)
 		if err != nil {
 			fmt.Println("Error running missing test detector: ", err)
