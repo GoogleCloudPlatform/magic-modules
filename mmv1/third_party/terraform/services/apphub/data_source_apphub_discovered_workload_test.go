@@ -26,6 +26,9 @@ func TestAccDataSourceApphubDiscoveredWorkload_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testDataSourceApphubDiscoveredWorkload_basic(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("data.google_apphub_discovered_workload.catalog-workload", "name"),
+				),
 			},
 		},
 	})
