@@ -35,18 +35,18 @@ In addition to the arguments listed above, the following computed attributes are
 
 * `service_reference` - Reference to an underlying networking resource that can comprise a Service. Structure is [documented below](#nested_service_reference)
 
-<a name="nested_service_reference"></a>A `service_reference` object would contain the following fields:-
+<a name="nested_service_reference"></a>A `service_reference` object would contain the following fields:
 
-* uri - The underlying resource URI.
+* `uri` - The underlying resource URI.
 
-* path - Additional path under the resource URI.
+* `path` - Additional path under the resource URI.
 
 * `service_properties` - Properties of an underlying compute resource that can comprise a Service. Structure is [documented below](#nested_service_properties)
 
-<a name="nested_service_properties"></a>A `service_properties` object would contain the following fields:-
+<a name="nested_service_properties"></a>A `service_properties` object would contain the following fields:
 
-* gcp_project - The service project identifier that the underlying cloud resource resides in.
+* `gcp_project` - The service project identifier that the underlying cloud resource resides in.
 
-* location - The location that the underlying resource resides in.
+* `location` - The location that the underlying resource resides in.
 
-* zone - The location that the underlying resource resides in if it is zonal.
+* `zone` - The location that the underlying resource resides in if it is zonal.

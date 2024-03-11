@@ -26,6 +26,9 @@ func TestAccDataSourceApphubDiscoveredService_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testDataSourceApphubDiscoveredService_basic(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("data.google_apphub_discovered_service.catalog-service", "name"),
+				),
 			},
 		},
 	})
@@ -45,7 +48,6 @@ resource "google_project" "service_project" {
 resource "google_project_service" "compute_service_project" {
   project = google_project.service_project.project_id
   service = "compute.googleapis.com"
-  depends_on = [google_project.service_project]
 }
 
 resource "time_sleep" "wait_120s" {
