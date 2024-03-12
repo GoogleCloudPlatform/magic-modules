@@ -76,8 +76,8 @@ properties:
         name: 'identities'
         description: |
           A list of identities that are allowed access through this `EgressPolicy`.
-          Should be in the format of email address. The email address should
-          represent individual user or service account only.
+          Should be in the format of an email address. The email address should
+          represent an individual user, service account, or Google group.
         item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: 'sources'
