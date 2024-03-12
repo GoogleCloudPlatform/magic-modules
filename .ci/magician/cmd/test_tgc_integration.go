@@ -11,27 +11,26 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var ttiEnvironmentVariables = [...]string{
-	"GOPATH",
-	"GITHUB_TOKEN",
-}
-
 var testTGCIntegrationCmd = &cobra.Command{
 	Use:   "test-tgc-integration",
 	Short: "Run tgc integration tests via workflow dispatch",
 	Long: `This command runs tgc unit tests via workflow dispatch
 
 	The following PR details are expected as environment variables:
+	1. GOPATH
+	2. GITHUB_TOKEN_MAGIC_MODULES
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		env := make(map[string]string, len(ttiEnvironmentVariables))
-		for _, ev := range ttiEnvironmentVariables {
-			val, ok := os.LookupEnv(ev)
-			if !ok {
-				fmt.Printf("Did not provide %s environment variable\n", ev)
-				os.Exit(1)
-			}
-			env[ev] = val
+		goPath, ok := os.LookupEnv("GOPATH")
+		if !ok {
+			fmt.Println("Did not provide GOPATH environment variable")
+			os.Exit(1)
+		}
+
+		githubToken, ok := lookupGithubTokenOrFallback("GITHUB_TOKEN_MAGIC_MODULES")
+		if !ok {
+			fmt.Println("Did not provide GITHUB_TOKEN_MAGIC_MODULES or GITHUB_TOKEN environment variables")
+			os.Exit(1)
 		}
 
 		rnr, err := exec.NewRunner()
@@ -40,20 +39,12 @@ var testTGCIntegrationCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		ctlr := source.NewController(env["GOPATH"], "modular-magician", env["GITHUB_TOKEN"], rnr)
+		ctlr := source.NewController(goPath, "modular-magician", githubToken, rnr)
 
-		gh := github.NewClient()
+		gh := github.NewClient(githubToken)
 
 		execTestTGCIntegration(args[0], args[1], args[2], args[3], args[4], args[5], "modular-magician", rnr, ctlr, gh)
 	},
-}
-
-func listTTIEnvironmentVariables() string {
-	var result string
-	for i, ev := range ttiEnvironmentVariables {
-		result += fmt.Sprintf("\t%2d. %s\n", i+1, ev)
-	}
-	return result
 }
 
 func execTestTGCIntegration(prNumber, mmCommit, buildID, projectID, buildStep, ghRepo, githubUsername string, rnr ExecRunner, ctlr *source.Controller, gh GithubClient) {
