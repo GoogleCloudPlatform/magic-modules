@@ -23,9 +23,13 @@ terraform {
   }
 }
 
-# Value is "my-instance"
+resource "google_pubsub_topic" "default" {
+  name = "my-topic"
+}
+
+# Value is "my-topic"
 output "function_output" {
-  value = provider::google::name_from_id("https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1-c/instances/my-instance")
+  value = provider::google::name_from_id(google_pubsub_topic.default.id)
 }
 ```
 
@@ -40,9 +44,14 @@ terraform {
   }
 }
 
-# Value is "my-instance"
+resource "google_pubsub_topic" "default" {
+  # provider argument omitted - provisioning by google or google-beta doesn't impact this example
+  name = "my-topic"
+}
+
+# Value is "my-topic"
 output "function_output" {
-  value = provider::google-beta::name_from_id("https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1-c/instances/my-instance")
+  value = provider::google-beta::name_from_id(google_pubsub_topic.default.id)
 }
 ```
 
