@@ -2,12 +2,10 @@ package apphub
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-	"google.golang.org/api/googleapi"
 )
 
 func DataSourceApphubDiscoveredService() *schema.Resource {
@@ -89,34 +87,12 @@ func dataSourceApphubDiscoveredServiceRead(d *schema.ResourceData, meta interfac
 		billingProject = bp
 	}
 
-	var res map[string]interface{}
-
-	err = transport_tpg.Retry(transport_tpg.RetryOptions{
-		RetryFunc: func() (rerr error) {
-			res, rerr = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-				Config:    config,
-				Method:    "GET",
-				Project:   billingProject,
-				RawURL:    url,
-				UserAgent: userAgent,
-			})
-			return rerr
-		},
-		Timeout: d.Timeout(schema.TimeoutRead),
-		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{
-			func(err error) (bool, string) {
-				gerr, ok := err.(*googleapi.Error)
-				if !ok {
-					return false, ""
-				}
-
-				if gerr.Code == 404 {
-					log.Printf("[DEBUG] Dismissed an error as retryable based on error code: %s", err)
-					return true, fmt.Sprintf("Retryable error code %d", gerr.Code)
-				}
-				return false, ""
-			},
-		},
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   billingProject,
+		RawURL:    url,
+		UserAgent: userAgent,
 	})
 
 	if err != nil {

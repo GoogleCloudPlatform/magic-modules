@@ -66,7 +66,7 @@ data "google_apphub_discovered_service" "catalog-service" {
   # ServiceReference | Application Hub | Google Cloud
   # Using this reference means that this resource will not be provisioned until the forwarding rule is fully created
   service_uri = "//compute.googleapis.com/${google_compute_forwarding_rule.forwarding_rule.id}"
-	depends_on = [google_apphub_service_project_attachment.service_project_attachment]
+	depends_on = [time_sleep.wait_120s_for_resource_ingestion]
 }
 
 # VPC network
@@ -97,6 +97,11 @@ resource "google_compute_forwarding_rule" "forwarding_rule" {
   backend_service       = google_compute_region_backend_service.backend.id
   network               = google_compute_network.ilb_network.id
   subnetwork            = google_compute_subnetwork.ilb_subnet.id
+}
+
+resource "time_sleep" "wait_120s_for_resource_ingestion" {
+  depends_on = [google_compute_forwarding_rule.forwarding_rule]
+  create_duration = "120s"
 }
 
 # backend service
