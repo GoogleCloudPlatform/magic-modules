@@ -1679,6 +1679,9 @@ resource "google_compute_router" "foobar" {
   name     = "%s"
   region   = google_compute_subnetwork.subnet1.region
   network  = google_compute_network.foobar.self_link
+  depends_on = [
+    google_network_connectivity_spoke.primary
+  ]
 }
 `, routerName, routerName, routerName, routerName, routerName, hubName, routerName, routerName)
 }
