@@ -3,8 +3,22 @@ var NotebooksInstanceProvidedScopes = []string{
 	"https://www.googleapis.com/auth/userinfo.email",
 }
 
+var NotebooksInstanceProvidedTags = []string{
+	"deeplearning-vm",
+	"notebook-instance",
+}
+
 func NotebooksInstanceScopesDiffSuppress(_, _, _ string, d *schema.ResourceData) bool {
-  old, new := d.GetChange("service_account_scopes")
+	return NotebooksDiffSuppressTemplate("service_account_scopes", NotebooksInstanceProvidedScopes, d)
+}
+
+func NotebooksInstanceTagsDiffSuppress(_, _, _ string, d *schema.ResourceData) bool {
+	return NotebooksDiffSuppressTemplate("tags", NotebooksInstanceProvidedTags, d)
+}
+
+func NotebooksDiffSuppressTemplate(field string, defaults []string, d *schema.ResourceData) bool {
+	old, new := d.GetChange(field)
+
 	oldValue := old.([]interface{})
 	newValue := new.([]interface{})
 	oldValueList := []string{}
@@ -17,7 +31,7 @@ func NotebooksInstanceScopesDiffSuppress(_, _, _ string, d *schema.ResourceData)
 	for _, item := range newValue {
 		newValueList = append(newValueList,item.(string))
 	}
-	newValueList= append(newValueList,NotebooksInstanceProvidedScopes...)
+	newValueList= append(newValueList,defaults...)
 
 	sort.Strings(oldValueList)
 	sort.Strings(newValueList)
