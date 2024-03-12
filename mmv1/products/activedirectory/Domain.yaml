@@ -57,7 +57,7 @@ error_abort_predicates: ['transport_tpg.Is429QuotaError']
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'active_directory_domain_basic'
-    primary_resource_id: 'ad-domain1'
+    primary_resource_id: 'ad-domain'
     vars:
       name: 'myorg'
       # the part of the domain before the first "." must be <15 chars, and
