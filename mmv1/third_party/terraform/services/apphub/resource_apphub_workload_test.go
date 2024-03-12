@@ -13,6 +13,7 @@ func TestAccApphubWorkload_apphubWorkloadUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
+		"org_id":          envvar.GetTestOrgFromEnv(t),
 		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
 		"random_suffix":   acctest.RandString(t, 10),
 	}
