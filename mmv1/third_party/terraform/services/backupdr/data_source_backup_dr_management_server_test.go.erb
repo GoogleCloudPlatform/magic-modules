@@ -23,6 +23,7 @@ func TestAccDataSourceGoogleBackupDRManagementServer_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleBackupDRManagementServer_basic(context),
+				CheckDestroy: testAccCheckBackupDRManagementServerDestroyProducer(t),
 				Check: resource.ComposeTestCheckFunc(
 					acctest.CheckDataSourceStateMatchesResourceState("data.google_backup_dr_management_server.foo", "google_backup_dr_management_server.foo"),
 				),
