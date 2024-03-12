@@ -29,7 +29,7 @@ func TestAccProviderFunction_zone_from_id(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Can get the zone from a resource's id in one step
-				// Uses google_compute_disk resource's id attribute with format projects/{{project}}/zones/{{zone}}/networkEndpointGroups/{{name}}
+				// Uses google_compute_disk resource's id attribute with format projects/{{project}}/zones/{{zone}}/disks/{{name}}
 				Config: testProviderFunction_get_zone_from_resource_id(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestMatchOutput(context["output_name"].(string), zoneRegex),
