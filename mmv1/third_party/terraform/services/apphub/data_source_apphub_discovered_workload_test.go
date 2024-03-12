@@ -83,7 +83,7 @@ resource "google_compute_subnetwork" "ilb_subnet" {
 }
 
 resource "time_sleep" "wait_120s_for_resource_ingestion" {
-  depends_on = [google_compute_forwarding_rule.forwarding_rule]
+  depends_on = [google_compute_region_instance_group_manager.mig]
   create_duration = "120s"
 }
 
