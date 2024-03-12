@@ -62,7 +62,7 @@ resource "google_apphub_service_project_attachment" "service_project_attachment"
 data "google_apphub_discovered_workload" "catalog-workload" {
   location = "us-central1"
   workload_uri = "${replace(google_compute_region_instance_group_manager.mig.instance_group, "https://www.googleapis.com/compute/v1", "//compute.googleapis.com")}"
-  depends_on = [google_apphub_service_project_attachment.service_project_attachment]
+  depends_on = [time_sleep.wait_120s_for_resource_ingestion]
 }
 
 # VPC network
@@ -80,6 +80,11 @@ resource "google_compute_subnetwork" "ilb_subnet" {
   ip_cidr_range = "10.0.1.0/24"
   region        = "us-central1"
   network       = google_compute_network.ilb_network.id
+}
+
+resource "time_sleep" "wait_120s_for_resource_ingestion" {
+  depends_on = [google_compute_forwarding_rule.forwarding_rule]
+  create_duration = "120s"
 }
 
 # instance template
