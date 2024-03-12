@@ -95,6 +95,13 @@ properties:
       The full names of the Google Compute Engine networks the domain instance is connected to. The domain is only available on networks listed in authorizedNetworks.
       If CIDR subnets overlap between networks, domain creation will fail.
     is_set: true
+  - !ruby/object:Api::Type::String
+    name: 'reservedIpRange'
+    required: true
+    immutable: true
+    description: |
+      The CIDR range of internal addresses that are reserved for this domain. Reserved networks must be /24 or larger.
+      Ranges must be unique and non-overlapping with existing subnets in authorizedNetworks
   - !ruby/object:Api::Type::Array
     name: 'locations'
     required: true
