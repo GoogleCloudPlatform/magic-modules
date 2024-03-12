@@ -86,6 +86,12 @@ resource "google_apphub_service_project_attachment" "service_project_attachment"
 data "google_apphub_discovered_workload" "catalog-workload" {
   location = "us-east1"
   workload_uri = "${replace(google_compute_region_instance_group_manager.mig.instance_group, "https://www.googleapis.com/compute/v1", "//compute.googleapis.com")}"
+  depends_on = [time_sleep.wait_120s_for_resource_ingestion]
+}
+
+resource "time_sleep" "wait_120s_for_resource_ingestion" {
+  depends_on = [google_compute_region_instance_group_manager.mig]
+  create_duration = "120s"
 }
 
 resource "google_apphub_workload" "example" {
