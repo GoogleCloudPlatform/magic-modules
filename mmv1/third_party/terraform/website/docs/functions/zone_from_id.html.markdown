@@ -51,6 +51,7 @@ terraform {
 }
 
 resource "google_compute_disk" "default" {
+  # provider argument omitted - provisioning by google or google-beta doesn't impact this example
   name  = "my-disk"
   zone  = "us-central1-c"
 }
