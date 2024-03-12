@@ -22,8 +22,6 @@ name: Workload
 description: 'Workload represents a binary deployment (such as Managed Instance Groups (MIGs), GKE deployments, etc.) that performs the smallest logical subset of business functionality.
   It registers identified workload to the Application.'
 autogen_async: true
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: 'templates/terraform/constants/apphub_discovered_resource.go.erb'
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "apphub_workload_basic"
@@ -142,7 +140,7 @@ properties:
     description: 'Properties of an underlying compute resource represented by the Workload. '
   - !ruby/object:Api::Type::String
     name: discoveredWorkload
-    diff_suppress_func: 'DiscoveredResourceProjectNumberDiffSuppress'
+    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
     description: 'Immutable. The resource name of the original discovered workload. '
     required: true
     immutable: true
