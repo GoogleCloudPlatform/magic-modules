@@ -1,4 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
 package storage
 
@@ -90,7 +89,6 @@ func ResourceStorageBucketObject() *schema.Resource {
 			"content": {
 				Type:     schema.TypeString,
 				Optional: true,
-				//	ForceNew:     true,
 				ExactlyOneOf: []string{"source"},
 				Sensitive:    true,
 				Computed:     true,
@@ -122,7 +120,6 @@ func ResourceStorageBucketObject() *schema.Resource {
 				Type: schema.TypeString,
 				// This field is not Computed because it needs to trigger a diff.
 				Optional: true,
-				//ForceNew: true,
 				// Makes the diff message nicer:
 				// detect_md5hash:       "1XcnP/iFw/hNrbhXi7QTmQ==" => "different hash" (forces new resource)
 				// Instead of the more confusing:
