@@ -61,13 +61,8 @@ resource "google_apphub_service_project_attachment" "service_project_attachment"
     
 data "google_apphub_discovered_workload" "catalog-workload" {
   location = "us-central1"
-  count=0
-  workload_uri = "//compute.googleapis.com/${data.google_compute_region_instance_group.ig.instances[count.index].attributes.id}"
+  workload_uri = "${replace(google_compute_region_instance_group_manager.mig.instance_group, "https://www.googleapis.com/compute/v1", "//compute.googleapis.com")}"
   depends_on = [google_apphub_service_project_attachment.service_project_attachment]
-}
-
-data "google_compute_region_instance_group" "ig" {
-  self_link = google_compute_region_instance_group_manager.mig.instance_group
 }
 
 # VPC network
