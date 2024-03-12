@@ -23,9 +23,19 @@ terraform {
   }
 }
 
+resource "google_compute_node_template" "default" {
+  name = "my-node-template"
+  region = "us-central1"
+}
+
 # Value is "us-central1"
-output "function_output" {
-  value = provider::google::region_from_id("https://www.googleapis.com/compute/v1/projects/my-project/regions/us-central1/subnetworks/my-subnetwork")
+output "region_from_id" {
+  value = provider::google::region_from_id(google_compute_node_template.default.id)
+}
+
+# Value is "us-central1"
+output "region_from_self_link" {
+  value = provider::google::region_from_id(google_compute_node_template.default.self_link)
 }
 ```
 
@@ -40,9 +50,20 @@ terraform {
   }
 }
 
+resource "google_compute_node_template" "default" {
+  # provider argument omitted - provisioning by google or google-beta doesn't impact this example
+  name = "my-node-template"
+  region = "us-central1"
+}
+
 # Value is "us-central1"
-output "function_output" {
-  value = provider::google-beta::region_from_id("https://www.googleapis.com/compute/v1/projects/my-project/regions/us-central1/subnetworks/my-subnetwork")
+output "region_from_id" {
+  value = provider::google-beta::region_from_id(google_compute_node_template.default.id)
+}
+
+# Value is "us-central1"
+output "region_from_self_link" {
+  value = provider::google-beta::region_from_id(google_compute_node_template.default.self_link)
 }
 ```
 

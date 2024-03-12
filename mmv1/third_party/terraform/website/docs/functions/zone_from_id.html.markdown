@@ -23,9 +23,19 @@ terraform {
   }
 }
 
+resource "google_compute_disk" "default" {
+  name  = "my-disk"
+  zone  = "us-central1-c"
+}
+
 # Value is "us-central1-c"
-output "function_output" {
-  value = provider::google::zone_from_id("https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1-c/instances/my-instance")
+output "zone_from_id" {
+  value = provider::google::zone_from_id(google_compute_disk.default.id)
+}
+
+# Value is "us-central1-c"
+output "zone_from_self_link" {
+  value = provider::google::zone_from_id(google_compute_disk.default.self_link)
 }
 ```
 
@@ -40,9 +50,19 @@ terraform {
   }
 }
 
+resource "google_compute_disk" "default" {
+  name  = "my-disk"
+  zone  = "us-central1-c"
+}
+
 # Value is "us-central1-c"
-output "function_output" {
-  value = provider::google-beta::zone_from_id("https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1-c/instances/my-instance")
+output "zone_from_id" {
+  value = provider::google-beta::zone_from_id(google_compute_disk.default.id)
+}
+
+# Value is "us-central1-c"
+output "zone_from_self_link" {
+  value = provider::google-beta::zone_from_id(google_compute_disk.default.self_link)
 }
 ```
 
