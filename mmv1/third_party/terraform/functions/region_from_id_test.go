@@ -29,7 +29,7 @@ func TestAccProviderFunction_region_from_id(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Can get the region from a resource's id in one step
-				// Uses google_compute_subnetwork resource's id attribute with format projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+				// Uses google_compute_node_template resource's id attribute with format projects/{{project}}/regions/{{region}}/nodeTemplates/{{name}}
 				Config: testProviderFunction_get_region_from_resource_id(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestMatchOutput(context["output_name"].(string), regionRegex),
@@ -37,7 +37,7 @@ func TestAccProviderFunction_region_from_id(t *testing.T) {
 			},
 			{
 				// Can get the region from a resource's self_link in one step
-				// Uses google_compute_subnetwork resource's self_link attribute
+				// Uses google_compute_node_template resource's self_link attribute
 				Config: testProviderFunction_get_region_from_resource_self_link(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestMatchOutput(context["output_name"].(string), regionRegex),
@@ -58,18 +58,12 @@ terraform {
   }
 }
 
-data "google_compute_network" "default" {
-  name = "default"
-}
-
-resource "google_compute_subnetwork" "default" {
-  name          = "%{resource_name}"
-  ip_cidr_range = "10.2.0.0/16"
-  network        = data.google_compute_network.default.id
+resource "google_compute_node_template" "default" {
+  name      = "%{resource_name}"
 }
 
 output "%{output_name}" {
-  value = provider::google::%{function_name}(google_compute_subnetwork.default.id)
+  value = provider::google::%{function_name}(google_compute_node_template.default.id)
 }
 `, context)
 }
@@ -85,18 +79,12 @@ terraform {
   }
 }
 
-data "google_compute_network" "default" {
-  name = "default"
-}
-
-resource "google_compute_subnetwork" "default" {
-  name          = "%{resource_name}"
-  ip_cidr_range = "10.2.0.0/16"
-  network        = data.google_compute_network.default.id
+resource "google_compute_node_template" "default" {
+  name      = "%{resource_name}"
 }
 
 output "%{output_name}" {
-  value = provider::google::%{function_name}(google_compute_subnetwork.default.self_link)
+  value = provider::google::%{function_name}(google_compute_node_template.default.self_link)
 }
 `, context)
 }
