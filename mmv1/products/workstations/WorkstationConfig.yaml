@@ -221,7 +221,6 @@ properties:
       - 'host.gceInstance.confidentialInstanceConfig.enableConfidentialCompute'
       - 'host.gceInstance.accelerators'
       - 'host.gceInstance.boostConfigs'
-      - 'host.gceInstance.disableSsh'
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'gceInstance'
