@@ -66,6 +66,29 @@ In addition to the arguments listed above, the following computed attributes are
 * `project` - (Optional) The ID of the project in which the resource belongs.
     If it is not provided, the provider project is used.
 
+* `id` - an identifier for the resource with format `projects/{{project}}/locations/{{location}}/applications/{{application_id}}`
+
+* `name` -
+  Identifier. The resource name of an Application. Format:
+  "projects/{host-project-id}/locations/{location}/applications/{application-id}"
+
+* `create_time` -
+  Output only. Create time.
+
+* `update_time` -
+  Output only. Update time.
+
+* `uid` -
+  Output only. A universally unique identifier (in UUID4 format) for the `Application`.
+
+* `state` -
+  Output only. Application state. 
+   Possible values:
+   STATE_UNSPECIFIED
+   CREATING
+   ACTIVE
+   DELETING
+
 
 <a name="nested_attributes"></a>The `attributes` block supports:
 
@@ -139,25 +162,3 @@ In addition to the arguments listed above, the following computed attributes are
   (Required)
   Required. Email address of the contacts.
 
-* `id` - an identifier for the resource with format `projects/{{project}}/locations/{{location}}/applications/{{application_id}}`
-
-* `name` -
-  Identifier. The resource name of an Application. Format:
-  "projects/{host-project-id}/locations/{location}/applications/{application-id}"
-
-* `create_time` -
-  Output only. Create time.
-
-* `update_time` -
-  Output only. Update time.
-
-* `uid` -
-  Output only. A universally unique identifier (in UUID4 format) for the `Application`.
-
-* `state` -
-  Output only. Application state. 
-   Possible values:
-   STATE_UNSPECIFIED
-  CREATING
-  ACTIVE
-  DELETING
