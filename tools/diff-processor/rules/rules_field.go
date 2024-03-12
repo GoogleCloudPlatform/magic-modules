@@ -216,6 +216,7 @@ var fieldRule_RemovingDiffSuppress = FieldRule{
 	name:        "Removing Diff Suppress Function",
 	definition:  "Diff suppress functions cannot be removed. Otherwise terraform configurations that previously had no diffs would show diffs.",
 	message:     "Field {{field}} lost its diff suppress function",
+	identifier:  "field-removing-diff-suppress",
 	isRuleBreak: fieldRule_RemovingDiffSuppress_func,
 }
 
