@@ -97,7 +97,12 @@ data "google_apphub_discovered_service" "catalog-service" {
   provider = google
   location = "us-east1"
   service_uri = "//compute.googleapis.com/${google_compute_forwarding_rule.forwarding_rule.id}"
-  depends_on = [google_apphub_service_project_attachment.service_project_attachment]
+  depends_on = [google_apphub_service_project_attachment.service_project_attachment, wait_120s_for_resource_ingestion]
+}
+
+resource "time_sleep" "wait_120s_for_resource_ingestion" {
+  depends_on = [google_compute_forwarding_rule.forwarding_rule]
+  create_duration = "120s"
 }
 
 resource "google_apphub_service" "example" {
