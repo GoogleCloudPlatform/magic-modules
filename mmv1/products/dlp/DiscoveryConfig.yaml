@@ -27,6 +27,34 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Schedule inspection scan': 'https://cloud.google.com/dlp/docs/schedule-inspection-scan'
   api: 'https://cloud.google.com/dlp/docs/reference/rest/v2/projects.locations.discoveryConfigs'
 id_format: '{{parent}}/discoveryConfigs/{{name}}'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dlp_inspect_template_basic'
+    primary_resource_id: 'basic'
+    vars:
+      template: 'temp'
+    test_env_vars:
+      project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dlp_inspect_template_custom_type'
+    primary_resource_id: 'custom'
+    vars:
+      template: 'temp'
+    test_env_vars:
+      project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dlp_inspect_template_custom_type_surrogate'
+    primary_resource_id: 'custom_type_surrogate'
+    test_env_vars:
+      project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dlp_inspect_template_with_template_id'
+    primary_resource_id: 'with_template_id'
+    vars:
+      name: 'my-template'
+    test_env_vars:
+      project: :PROJECT_NAME
+    skip_docs: true
 parameters:
   - !ruby/object:Api::Type::String
     name: 'parent'
