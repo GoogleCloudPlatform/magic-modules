@@ -18,6 +18,7 @@ self_link: '{{perimeter}}'
 create_verb: :PATCH
 delete_verb: :PATCH
 update_mask: true
+immutable: true
 identity:
   - egressFrom
   - egressTo
@@ -62,14 +63,12 @@ parameters:
     description: |
       The name of the Service Perimeter to add this resource to.
     required: true
-    immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::NestedObject
     name: 'egressFrom'
     description: |
       Defines conditions on the source of a request causing this `EgressPolicy` to apply.
-    immutable: true
     properties:
       - !ruby/object:Api::Type::Enum
         name: 'identityType'
@@ -108,7 +107,6 @@ properties:
     description: |
       Defines the conditions on the `ApiOperation` and destination resources that
       cause this `EgressPolicy` to apply.
-    immutable: true
     properties:
       - !ruby/object:Api::Type::Array
         name: 'resources'
