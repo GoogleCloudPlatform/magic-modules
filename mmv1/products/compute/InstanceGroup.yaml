@@ -59,7 +59,7 @@ parameters:
       and will not be deleted.
       Only the full identifier of the instance will be returned.
 
-      **NOTE** If a user will be recreating instances under the same name
+      !> **WARNING** If a user will be recreating instances under the same name
       (eg. via `terraform taint`), please consider adding instances to an instance
       group via the `instance_group_membership` resource, along side the
       `update_triggered_by` lifecycle method with an instance's ID.

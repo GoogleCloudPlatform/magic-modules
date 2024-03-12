@@ -19,8 +19,13 @@ var changelogExp = regexp.MustCompile("(?s)```release-note.*?```")
 
 var gdEnvironmentVariables = [...]string{
 	"BASE_BRANCH",
-	"GITHUB_TOKEN",
 	"GOPATH",
+}
+
+var gdTokenEnvironmentVariables = [...]string{
+	"GITHUB_TOKEN_CLASSIC",
+	"GITHUB_TOKEN_DOWNSTREAMS",
+	"GITHUB_TOKEN",
 }
 
 var generateDownstreamCmd = &cobra.Command{
@@ -47,13 +52,34 @@ var generateDownstreamCmd = &cobra.Command{
 			env[ev] = val
 		}
 
-		gh := github.NewClient()
+		var githubToken string
+		for _, ev := range gdTokenEnvironmentVariables {
+			val, ok := os.LookupEnv(ev)
+			if ok {
+				env[ev] = val
+				githubToken = val
+				break
+			}
+		}
+
+		gh := github.NewClient(githubToken)
 		rnr, err := exec.NewRunner()
 		if err != nil {
 			fmt.Println("Error creating a runner: ", err)
 			os.Exit(1)
 		}
-		ctlr := source.NewController(env["GOPATH"], "modular-magician", env["GITHUB_TOKEN"], rnr)
+		ctlr := source.NewController(env["GOPATH"], "modular-magician", githubToken, rnr)
+		oldToken := os.Getenv("GITHUB_TOKEN")
+		if err := os.Setenv("GITHUB_TOKEN", githubToken); err != nil {
+			fmt.Println("Error setting GITHUB_TOKEN environment variable: ", err)
+			os.Exit(1)
+		}
+		defer func() {
+			if err := os.Setenv("GITHUB_TOKEN", oldToken); err != nil {
+				fmt.Println("Error setting GITHUB_TOKEN environment variable: ", err)
+				os.Exit(1)
+			}
+		}()
 
 		if len(args) != 4 {
 			fmt.Printf("Wrong number of arguments %d, expected 4\n", len(args))

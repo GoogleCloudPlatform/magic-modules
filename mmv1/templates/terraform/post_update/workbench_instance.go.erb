@@ -1,33 +1,18 @@
 state := d.Get("state").(string)
+desired_state := d.Get("desired_state").(string)
 
-if state != "ACTIVE" {
-  startURL, err := tpgresource.ReplaceVars(d, config, "{{WorkbenchBasePath}}projects/{{project}}/locations/{{location}}/instances/{{name}}:start")
+if state != desired_state {
+  verb := "start"
+  if desired_state == "STOPPED" {
+    verb = "stop"
+  }
+  pRes, err := modifyWorkbenchInstanceState(config, d, project, billingProject, userAgent, verb)
   if err != nil {
     return err
   }
 
-  log.Printf("[DEBUG] Starting Workbench Instance: %q", name)
-
-  emptyReqBody := make(map[string]interface{})
-
-  pRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-                                          Config: config,
-                                          Method: "POST",
-                                          Project: billingProject,
-                                          RawURL: startURL,
-                                          UserAgent: userAgent,
-                                          Body: emptyReqBody,
-                                        })
-  if err != nil {
-    return fmt.Errorf("Error Starting Workbench Instance: %s", err)
-  }
-
-  var opResp map[string]interface{}
-  err = WorkbenchOperationWaitTimeWithResponse(
-    config, pRes, &opResp, project, "Starting Workbench Instance", userAgent,
-    d.Timeout(schema.TimeoutUpdate))
-  if err != nil {
-    return fmt.Errorf("Error waiting to start Workbench Instance: %s", err)
+  if err := waitForWorkbenchOperation(config, d, project, billingProject, userAgent, pRes); err != nil {
+    return fmt.Errorf("Error waiting to modify Workbench Instance state: %s", err)
   }
 
 } else {

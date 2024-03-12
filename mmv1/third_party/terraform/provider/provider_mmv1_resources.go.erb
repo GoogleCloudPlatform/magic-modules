@@ -28,6 +28,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_alloydb_supported_database_flags":          alloydb.DataSourceAlloydbSupportedDatabaseFlags(),
 	"google_artifact_registry_repository":              artifactregistry.DataSourceArtifactRegistryRepository(),
 	"google_app_engine_default_service_account":        appengine.DataSourceGoogleAppEngineDefaultServiceAccount(),
+	"google_apphub_discovered_service":		    apphub.DataSourceApphubDiscoveredService(),
 	<% unless version == 'ga' -%>
 	"google_backup_dr_management_server":				backupdr.DataSourceGoogleCloudBackupDRService(),
 	<% end -%>
@@ -60,6 +61,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_compute_default_service_account":           compute.DataSourceGoogleComputeDefaultServiceAccount(),
 	"google_compute_disk":                              compute.DataSourceGoogleComputeDisk(),
 	"google_compute_forwarding_rule":                   compute.DataSourceGoogleComputeForwardingRule(),
+	"google_compute_forwarding_rules":                  compute.DataSourceGoogleComputeForwardingRules(),
 	"google_compute_global_address":                    compute.DataSourceGoogleComputeGlobalAddress(),
 	"google_compute_global_forwarding_rule":            compute.DataSourceGoogleComputeGlobalForwardingRule(),
 	"google_compute_ha_vpn_gateway":                    compute.DataSourceGoogleComputeHaVpnGateway(),

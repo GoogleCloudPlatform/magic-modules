@@ -13,6 +13,11 @@
 
 --- !ruby/object:Api::Resource
 name: 'Instance'
+# This resource should not be removed until the 2025 major release or later.
+# Check instance availability first before fully removing.
+deprecation_message: >-
+  `google_notebook_instance` is deprecated and will be removed in a future major release.
+  Use `google_workbench_instance` instead.
 description: |
   A Cloud AI Platform Notebook instance.
 
@@ -51,6 +56,17 @@ examples:
     vars:
       instance_name: 'notebooks-instance'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'notebook_instance_basic_stopped'
+    primary_resource_id: 'instance'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-instance%s\",
+      context[\"\
+      random_suffix\"])"
+    region_override: 'us-west1-a'
+    vars:
+      instance_name: 'notebooks-instance'
+    ignore_read_extra:
+      - 'desired_state'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'notebook_instance_basic_container'
     primary_resource_id: 'instance'
     primary_resource_name: "fmt.Sprintf(\"tf-test-notebooks-instance%s\",
@@ -77,10 +93,25 @@ examples:
     region_override: 'us-west1-a'
     vars:
       instance_name: 'notebooks-instance'
+      key_name: 'my-crypto-key'
+    test_vars_overrides:
+      key_name: 'acctest.BootstrapKMSKeyInLocation(t, "global").CryptoKey.Name'
     test_env_vars:
       service_account: :SERVICE_ACCT
+virtual_fields:
+  - !ruby/object:Api::Type::Enum
+    name: desired_state
+    description: |
+      Desired state of the Notebook Instance. Set this field to `ACTIVE` to start the Instance, and `STOPPED` to stop the Instance.
+    values:
+      - :ACTIVE
+      - :STOPPED
+    default_value: :ACTIVE
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/notebooks_instance.go
   update_encoder: templates/terraform/update_encoder/notebooks_instance.go
+  post_create: templates/terraform/post_create/notebooks_instance.go.erb
+  post_update: templates/terraform/post_update/notebooks_instance.go.erb
 state_upgraders: true
 schema_version: 1
 parameters:
@@ -156,6 +187,8 @@ properties:
       - https://www.googleapis.com/auth/cloud-platform
       - https://www.googleapis.com/auth/userinfo.email
     item_type: Api::Type::String
+    default_from_api: true
+    diff_suppress_func: NotebooksInstanceScopesDiffSuppress
   - !ruby/object:Api::Type::NestedObject
     name: 'acceleratorConfig'
     description: |
@@ -318,11 +351,13 @@ properties:
     description: |
       Disk encryption method used on the boot and data disks, defaults to GMEK.
     diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("DISK_ENCRYPTION_UNSPECIFIED")'
+    default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'kmsKey'
     description: |
       The KMS key used to encrypt the disks, only applicable if diskEncryption is CMEK.
       Format: projects/{project_id}/locations/{location}/keyRings/{key_ring_id}/cryptoKeys/{key_id}
+    diff_suppress_func: NotebooksInstanceKmsDiffSuppress
   - !ruby/object:Api::Type::Boolean
     name: 'noPublicIp'
     description: |
@@ -357,6 +392,7 @@ properties:
     description: |
       The Compute Engine tags to add to instance.
     item_type: Api::Type::String
+    default_from_api: true
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'metadata'
     description: |
