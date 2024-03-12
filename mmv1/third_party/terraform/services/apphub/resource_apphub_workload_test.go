@@ -52,7 +52,7 @@ func TestAccApphubWorkload_apphubWorkloadUpdate(t *testing.T) {
 func testAccApphubWorkload_apphubWorkloadUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_apphub_application" "application" {
-  location = "us-east1"
+  location = "us-central1"
   application_id = "tf-test-example-application-1%{random_suffix}"
   scope {
     type = "REGIONAL"
@@ -85,7 +85,7 @@ resource "google_apphub_service_project_attachment" "service_project_attachment"
 
 # Discovered workload 
 data "google_apphub_discovered_workload" "catalog-workload" {
-  location = "us-east1"
+  location = "us-central1"
   workload_uri = "${replace(google_compute_region_instance_group_manager.mig.instance_group, "https://www.googleapis.com/compute/v1", "//compute.googleapis.com")}"
   depends_on = [time_sleep.wait_120s_for_resource_ingestion]
 }
@@ -96,7 +96,7 @@ resource "time_sleep" "wait_120s_for_resource_ingestion" {
 }
 
 resource "google_apphub_workload" "example" {
-  location = "us-east1"
+  location = "us-central1"
   application_id = google_apphub_application.application.application_id
   workload_id = google_compute_region_instance_group_manager.mig.name
   discovered_workload = data.google_apphub_discovered_workload.catalog-workload.name
@@ -118,7 +118,7 @@ resource "google_compute_subnetwork" "ilb_subnet" {
   name          = "tf-test-l7-ilb-subnet%{random_suffix}"
   project       = google_project.service_project.project_id
   ip_cidr_range = "10.0.1.0/24"
-  region        = "us-east1"
+  region        = "us-central1"
   network       = google_compute_network.ilb_network.id
 }
 
@@ -168,7 +168,7 @@ resource "google_compute_instance_template" "instance_template" {
 resource "google_compute_region_instance_group_manager" "mig" {
   name     = "tf-test-l7-ilb-mig1%{random_suffix}"
   project  = google_project.service_project.project_id
-  region   = "us-east1"
+  region   = "us-central1"
   version {
     instance_template = google_compute_instance_template.instance_template.id
     name              = "primary"
