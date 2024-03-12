@@ -211,7 +211,7 @@ properties:
             - !ruby/object:Api::Type::String
               name: email
               description: 'Email address of the contacts. '
-              required: true  
+              required: true
   - !ruby/object:Api::Type::String
     name: createTime
     description: 'Output only. Create time. '
