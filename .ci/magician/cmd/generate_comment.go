@@ -215,8 +215,9 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 		"OLD_REF": oldBranch,
 		"NEW_REF": newBranch,
 		// Passthrough vars required for a valid build environment.
-		"PATH": os.Getenv("PATH"),
+		"PATH":   os.Getenv("PATH"),
 		"GOPATH": os.Getenv("GOPATH"),
+		"HOME":   os.Getenv("HOME"),
 	}
 	for _, repo := range []source.Repo{tpgRepo, tpgbRepo} {
 		if !repo.Cloned {
@@ -505,9 +506,9 @@ func runMissingTestUnitTests(mmLocalPath, tpgbLocalPath, targetURL, commitSha st
 	state := "success"
 	if _, err := rnr.Run("go", []string{"test"}, map[string]string{
 		"SERVICES_DIR": servicesDir,
-		// Passthrough vars required from the parent environment
-		"GOPATH":       os.Getenv("GOPATH"),
-		"HOME":         os.Getenv("HOME"),
+		// Passthrough vars required for a valid build environment.
+		"GOPATH": os.Getenv("GOPATH"),
+		"HOME":   os.Getenv("HOME"),
 	}); err != nil {
 		fmt.Printf("error from running go test in %s: %v\n", missingTestDetectorPath, err)
 		state = "failure"
