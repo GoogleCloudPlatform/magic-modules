@@ -1,0 +1,418 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'RecordSet'
+kind: 'dns#resourceRecordSet'
+base_url: 'projects/{{project}}/managedZones/{{managedZone}}/rrsets/{{recordSet}}/{{type}}'
+description: |
+  A unit of data returned by the Cloud DNS authoritative nameservers.
+immutable: true
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'DNS records overview': 'https://cloud.google.com/dns/docs/records-overview'
+  api: 'https://cloud.google.com/dns/docs/reference/rest/v1/resourceRecordSets'
+id_format: 'projects/{{project}}/managedZones/{{managedZone}}/rrsets/{{name}}/{{type}}'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/dns_record_set.go.erb
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'managedZone'
+    description: |
+      The name of the zone in which this record set will reside.
+    immutable: true
+    required: true
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description: |
+      The DNS name this record set will apply to.
+    immutable: true
+    required: true
+    validation: !ruby/object:Provider::Terraform::Validation
+      function: 'validateRecordNameTrailingDot'
+  - !ruby/object:Api::Type::Array
+    name: 'rrdatas'
+    description: |
+      The string data for the records in this record set whose meaning depends
+      on the DNS type. For TXT record, if the string data contains spaces, add
+      surrounding \" if you don't want your string to get split on spaces. To
+      specify a single record value longer than 255 characters such as a TXT
+      record for DKIM, add \"\" inside the Terraform configuration string
+      (e.g. "first255characters\"\"morecharacters").
+    item_type: Api::Type::String
+    exactly_one_of:
+      - rrdatas
+      - routing_policy
+    diff_suppress_func: 'resourceRecordSetRrdatasDiffSuppress'
+  - !ruby/object:Api::Type::NestedObject
+    name: 'routingPolicy'
+    exactly_one_of:
+      - rrdatas
+      - routing_policy
+    description: |
+      Configures dynamic query responses based on the type of the configured
+      policy. GEO policies will consider the source location of the request;
+      WRR policies will respond according to the policy's weighted distribution;
+      Primary-backup policies will respond with the primary target(s) when they
+      are healthy, falling back to the backup policy otherwise.
+    properties:
+      - !ruby/object:Api::Type::Array
+        name: 'wrr'
+        description:
+          'The configuration for Weighted Round Robin based routing policy.'
+        exactly_one_of:
+          - wrr
+          - geo
+          - primary_backup
+        conflicts:
+          - routing_policy.0.enable_geo_fencing
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::Double
+              name: 'weight'
+              description: |
+                The ratio of traffic routed to the target.
+              required: true
+            - !ruby/object:Api::Type::Array
+              name: 'rrdatas'
+              description: |
+                The static rrdata returned to DNS queries that match the policy.
+              item_type: Api::Type::String
+            - !ruby/object:Api::Type::Array
+              name: 'healthCheckedTargets'
+              description: |
+                (For A and AAAA types only) The list of targets to be health
+                checked. Note that if DNSSEC is enabled for this zone, only one
+                of `rrdatas` or `health_checked_targets` can be set.
+              max_size: 1
+              item_type: !ruby/object:Api::Type::NestedObject
+                properties:
+                  - !ruby/object:Api::Type::Array
+                    name: 'internalLoadBalancers'
+                    description: |
+                      The list of internal load balancers to health check.
+                    item_type: !ruby/object:Api::Type::NestedObject
+                      properties:
+                        - !ruby/object:Api::Type::Enum
+                          name: 'loadBalancerType'
+                          description: |
+                            The type of load balancer. This value is
+                            case-sensitive.
+                          values:
+                            - :regionalL4ilb
+                            - :regionalL7ilb
+                            - :globalL7ilb
+                          required: true
+                        - !ruby/object:Api::Type::String
+                          name: 'ipAddress'
+                          description: |
+                            The frontend IP address of the load balancer.
+                          required: true
+                        - !ruby/object:Api::Type::String
+                          name: 'port'
+                          description: |
+                            The configured port of the load balancer.
+                          required: true
+                        - !ruby/object:Api::Type::Enum
+                          name: 'ipProtocol'
+                          description: |
+                            The configured IP protocol of the load balancer.
+                            This value is case-sensitive.
+                          values:
+                            - :tcp
+                            - :udp
+                          required: true
+                        - !ruby/object:Api::Type::String
+                          name: 'networkUrl'
+                          description: |
+                            The fully qualified url of the network in which the
+                            load balancer belongs. This should be formatted like
+                            `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`.
+                          required: true
+                        - !ruby/object:Api::Type::String
+                          name: 'project'
+                          description: |
+                            The ID of the project in which the load balancer is
+                            located.
+                          required: true
+                        - !ruby/object:Api::Type::String
+                          name: 'region'
+                          description: |
+                            The region of the load balancer. Only needed for
+                            regional load balancers.
+      - !ruby/object:Api::Type::Array
+        name: 'geo'
+        description:
+          'The configuration for Geolocation based routing policy.'
+        exactly_one_of:
+          - wrr
+          - geo
+          - primary_backup
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'location'
+              description: |
+                The name of the GCP region corresponding to this policy item's
+                data.
+              required: true
+            - !ruby/object:Api::Type::Array
+              name: 'rrdatas'
+              description: |
+                The static rrdata returned to DNS queries that match the policy.
+              item_type: Api::Type::String
+            - !ruby/object:Api::Type::Array
+              name: 'healthCheckedTargets'
+              description: |
+                (For A and AAAA types only) The list of targets to be health
+                checked. Note that if DNSSEC is enabled for this zone, only one
+                of `rrdatas` or `health_checked_targets` can be set.
+              max_size: 1
+              item_type: !ruby/object:Api::Type::NestedObject
+                properties:
+                  - !ruby/object:Api::Type::Array
+                    name: 'internalLoadBalancers'
+                    description: |
+                      The list of internal load balancers to health check.
+                    item_type: !ruby/object:Api::Type::NestedObject
+                      properties:
+                        - !ruby/object:Api::Type::Enum
+                          name: 'loadBalancerType'
+                          description: |
+                            The type of load balancer. This value is
+                            case-sensitive.
+                          values:
+                            - :regionalL4ilb
+                            - :regionalL7ilb
+                            - :globalL7ilb
+                          required: true
+                        - !ruby/object:Api::Type::String
+                          name: 'ipAddress'
+                          description: |
+                            The frontend IP address of the load balancer.
+                          required: true
+                        - !ruby/object:Api::Type::String
+                          name: 'port'
+                          description: |
+                            The configured port of the load balancer.
+                          required: true
+                        - !ruby/object:Api::Type::Enum
+                          name: 'ipProtocol'
+                          description: |
+                            The configured IP protocol of the load balancer.
+                            This value is case-sensitive.
+                          values:
+                            - :tcp
+                            - :udp
+                          required: true
+                        - !ruby/object:Api::Type::String
+                          name: 'networkUrl'
+                          description: |
+                            The fully qualified url of the network in which the
+                            load balancer belongs. This should be formatted like
+                            `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`.
+                          required: true
+                        - !ruby/object:Api::Type::String
+                          name: 'project'
+                          description: |
+                            The ID of the project in which the load balancer is
+                            located.
+                          required: true
+                        - !ruby/object:Api::Type::String
+                          name: 'region'
+                          description: |
+                            The region of the load balancer. Only needed for
+                            regional load balancers.
+      - !ruby/object:Api::Type::Boolean
+        name: 'enableGeoFencing'
+        description: |
+          Specifies whether to enable fencing for geo queries.
+        conflicts:
+          - routing_policy.0.wrr
+          - routing_policy.0.primary_backup
+      - !ruby/object:Api::Type::Array
+        name: 'primaryBackup'
+        description: |
+          The configuration for a primary-backup policy with global to regional
+          failover. Queries are responded to with the global primary targets,
+          but if none of the primary targets are healthy, then we fallback to a
+          regional failover policy.
+        exactly_one_of:
+          - wrr
+          - geo
+          - primary_backup
+        conflicts:
+          - routing_policy.0.enable_geo_fencing
+        max_size: 1
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::Array
+              name: 'primary'
+              description: |
+                The list of primary targest to be health checked.
+              max_size: 1
+              item_type: !ruby/object:Api::Type::NestedObject
+                properties:
+                  - !ruby/object:Api::Type::Array
+                    name: 'internalLoadBalancers'
+                    description: |
+                      The list of internal load balancers to health check.
+                    required: true
+                    item_type: !ruby/object:Api::Type::NestedObject
+                      properties:
+                        - !ruby/object:Api::Type::Enum
+                          name: 'loadBalancerType'
+                          description: |
+                            The type of load balancer. This value is
+                            case-sensitive.
+                          values:
+                            - :regionalL4ilb
+                            - :regionalL7ilb
+                            - :globalL7ilb
+                          required: true
+                        - !ruby/object:Api::Type::String
+                          name: 'ipAddress'
+                          description: |
+                            The frontend IP address of the load balancer.
+                          required: true
+                        - !ruby/object:Api::Type::String
+                          name: 'port'
+                          description: |
+                            The configured port of the load balancer.
+                          required: true
+                        - !ruby/object:Api::Type::Enum
+                          name: 'ipProtocol'
+                          description: |
+                            The configured IP protocol of the load balancer.
+                            This value is case-sensitive.
+                          values:
+                            - :tcp
+                            - :udp
+                          required: true
+                        - !ruby/object:Api::Type::String
+                          name: 'networkUrl'
+                          description: |
+                            The fully qualified url of the network in which the
+                            load balancer belongs. This should be formatted like
+                            `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`.
+                          required: true
+                        - !ruby/object:Api::Type::String
+                          name: 'project'
+                          description: |
+                            The ID of the project in which the load balancer is
+                            located.
+                          required: true
+                        - !ruby/object:Api::Type::String
+                          name: 'region'
+                          description: |
+                            The region of the load balancer. Only needed for
+                            regional load balancers.
+            - !ruby/object:Api::Type::Array
+              name: 'backupGeo'
+              description:
+                The backup geo targets, which provide a regional failover
+                policy for the otherwise global primary targets.
+              item_type: !ruby/object:Api::Type::NestedObject
+                properties:
+                  - !ruby/object:Api::Type::String
+                    name: 'location'
+                    description: |
+                      The name of the GCP region corresponding to this policy item's
+                      data.
+                    required: true
+                  - !ruby/object:Api::Type::Array
+                    name: 'rrdatas'
+                    description: |
+                      The static rrdata returned to DNS queries that match the policy.
+                    item_type: Api::Type::String
+                  - !ruby/object:Api::Type::Array
+                    name: 'healthCheckedTargets'
+                    description: |
+                      (For A and AAAA types only) The list of targets to be
+                      health checked. Note that if DNSSEC is enabled for this
+                      zone, only one of `rrdatas` or `health_checked_targets`
+                      can be set.
+                    max_size: 1
+                    item_type: !ruby/object:Api::Type::NestedObject
+                      properties:
+                        - !ruby/object:Api::Type::Array
+                          name: 'internalLoadBalancers'
+                          description: |
+                            The list of internal load balancers to health check.
+                          item_type: !ruby/object:Api::Type::NestedObject
+                            properties:
+                              - !ruby/object:Api::Type::Enum
+                                name: 'loadBalancerType'
+                                description: |
+                                  The type of load balancer. This value is
+                                  case-sensitive.
+                                values:
+                                  - :regionalL4ilb
+                                  - :regionalL7ilb
+                                  - :globalL7ilb
+                                required: true
+                              - !ruby/object:Api::Type::String
+                                name: 'ipAddress'
+                                description: |
+                                  The frontend IP address of the load balancer.
+                                required: true
+                              - !ruby/object:Api::Type::String
+                                name: 'port'
+                                description: |
+                                  The configured port of the load balancer.
+                                required: true
+                              - !ruby/object:Api::Type::Enum
+                                name: 'ipProtocol'
+                                description: |
+                                  The configured IP protocol of the load balancer.
+                                  This value is case-sensitive.
+                                values:
+                                  - :tcp
+                                  - :udp
+                                required: true
+                              - !ruby/object:Api::Type::String
+                                name: 'networkUrl'
+                                description: |
+                                  The fully qualified url of the network in
+                                  which the load balancer is located. This
+                                  should be formatted like
+                                  `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`.
+                                required: true
+                              - !ruby/object:Api::Type::String
+                                name: 'project'
+                                description: |
+                                  The ID of the project in which the load
+                                  balancer is located.
+                                required: true
+                              - !ruby/object:Api::Type::String
+                                name: 'region'
+                                description: |
+                                  The region of the load balancer. Only needed
+                                  for regional load balancers.
+            - !ruby/object:Api::Type::Boolean
+              name: 'enableGeoFencingForBackups'
+              description: |
+                Specifies whether to enable fencing for backup geo queries.
+            - !ruby/object:Api::Type::Double
+              name: 'trickleRatio'
+              description: |
+                Specifies the percentage of traffic to send to the backup
+                targets when the primary targets are healthy.
+  - !ruby/object:Api::Type::Integer
+    name: 'ttl'
+    description: The time-to-live of this record set (in seconds).
+  - !ruby/object:Api::Type::String
+    name: 'type'
+    description: |
+      The DNS record set type.
