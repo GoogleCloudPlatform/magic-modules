@@ -185,7 +185,7 @@ properties:
             - !ruby/object:Api::Type::String
               name: email
               description: 'Required. Email address of the contacts. '
-              required: true   
+              required: true
       - !ruby/object:Api::Type::Array
         name: operatorOwners
         description: 'Operator team that ensures runtime and operations. '
