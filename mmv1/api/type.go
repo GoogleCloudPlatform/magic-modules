@@ -231,10 +231,9 @@ type Type struct {
 	// just as they are in the standard flattener template.
 	CustomFlatten string `yaml:"custom_flatten"`
 
-	__resource Resource
+	ResourceMetadata *Resource
 
-	// TODO: set a specific type intead of interface{}
-	__parent interface{} // is nil for top-level properties
+	ParentMetadata *Type // is nil for top-level properties
 }
 
 const MAX_NAME = 20
