@@ -77,18 +77,12 @@ terraform {
   }
 }
 
-data "google_compute_network" "default" {
-  name = "default"
-}
-
-resource "google_compute_subnetwork" "default" {
-  name          = "%{resource_name}"
-  ip_cidr_range = "10.2.0.0/16"
-  network        = data.google_compute_network.default.id
+resource "google_compute_disk" "default" {
+  name  = "%{resource_name}"
 }
 
 output "%{output_name}" {
-  value = provider::google::%{function_name}(google_compute_subnetwork.default.self_link)
+  value = provider::google::%{function_name}(google_compute_disk.default.self_link)
 }
 `, context)
 }
