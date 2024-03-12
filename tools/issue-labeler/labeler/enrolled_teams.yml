@@ -181,6 +181,7 @@ service/compute-l7-load-balancer:
   - google_compute_target_https_proxy
   - google_compute_region_target_https_proxy
 service/compute-managed:
+  team: gcp-managed-instance-groups-terraform
   resources:
   - google_compute_instance_group_manager.*
   - google_compute_region_instance_group_manager.*

@@ -35,7 +35,6 @@ var gcEnvironmentVariables = [...]string{
 	"BUILD_ID",
 	"BUILD_STEP",
 	"COMMIT_SHA",
-	"GITHUB_TOKEN",
 	"GOPATH",
 	"HOME",
 	"PATH",
@@ -70,13 +69,21 @@ var generateCommentCmd = &cobra.Command{
 			env[ev] = val
 		}
 
-		gh := github.NewClient()
+		for _, tokenName := range []string{"GITHUB_TOKEN_DOWNSTREAMS", "GITHUB_TOKEN_MAGIC_MODULES"} {
+			val, ok := lookupGithubTokenOrFallback(tokenName)
+			if !ok {
+				fmt.Printf("Did not provide %s or GITHUB_TOKEN environment variable\n", tokenName)
+				os.Exit(1)
+			}
+			env[tokenName] = val
+		}
+		gh := github.NewClient(env["GITHUB_TOKEN_MAGIC_MODULES"])
 		rnr, err := exec.NewRunner()
 		if err != nil {
 			fmt.Println("Error creating a runner: ", err)
 			os.Exit(1)
 		}
-		ctlr := source.NewController(filepath.Join("workspace", "go"), "modular-magician", env["GITHUB_TOKEN"], rnr)
+		ctlr := source.NewController(filepath.Join("workspace", "go"), "modular-magician", env["GITHUB_TOKEN_DOWNSTREAMS"], rnr)
 		execGenerateComment(env, gh, rnr, ctlr)
 	},
 }

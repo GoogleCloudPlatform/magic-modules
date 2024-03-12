@@ -140,6 +140,7 @@ properties:
           Defines operating mode for this policy.
       - !ruby/object:Api::Type::NestedObject
         name: 'scaleDownControl'
+        min_version: beta
         description: |
           Defines scale down controls to reduce the risk of response latency
           and outages due to abrupt scale-in events

@@ -377,6 +377,8 @@ module Provider
 
           generate_object object, output_folder, @target_version_name, generate_code, generate_docs
         end
+        # Uncomment for go YAML
+        # generate_object_modified object, output_folder, @target_version_name
       end
     end
 
@@ -395,7 +397,6 @@ module Provider
         end
         Dir.chdir pwd
       end
-
       # if iam_policy is not defined or excluded, don't generate it
       return if object.iam_policy.nil? || object.iam_policy.exclude
 
@@ -404,6 +405,33 @@ module Provider
       Google::LOGGER.debug "Generating #{object.name} IAM policy"
       generate_iam_policy(pwd, data.clone, generate_code, generate_docs)
       Dir.chdir pwd
+    end
+
+    def generate_object_modified(object, output_folder, version_name)
+      pwd = Dir.pwd
+      data = build_object_data(pwd, object, output_folder, version_name)
+      FileUtils.mkpath output_folder
+      Dir.chdir output_folder
+      Google::LOGGER.debug "Generating #{object.name} rewrite yaml"
+      generate_newyaml(pwd, data.clone)
+      Dir.chdir pwd
+    end
+
+    def generate_newyaml(pwd, data)
+      # @api.api_name is the service folder name
+      product_name = @api.api_name
+      target_folder = File.join(folder_name(data.version), 'services', product_name)
+      FileUtils.mkpath target_folder
+      data.generate(pwd,
+                    '/templates/terraform/yaml_conversion.erb',
+                    "#{target_folder}/go_#{data.object.name}.yaml",
+                    self)
+      return if File.exist?("#{target_folder}/go_product.yaml")
+
+      data.generate(pwd,
+                    '/templates/terraform/product_yaml_conversion.erb',
+                    "#{target_folder}/go_product.yaml",
+                    self)
     end
 
     def build_env
