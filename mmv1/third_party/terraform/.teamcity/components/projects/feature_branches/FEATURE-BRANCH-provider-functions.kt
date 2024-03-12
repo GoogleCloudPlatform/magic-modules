@@ -43,7 +43,10 @@ fun featureBranchProviderFunctionSubProject(allConfig: AllContextParameters): Pr
     val packageName = "functions" // This project will contain only builds to test this single package
     val sharedResourcesEmpty: List<String> = listOf() // No locking when testing functions
     val vcrConfig = getVcrAcceptanceTestConfig(allConfig) // Reused below for both MM testing build configs
-    val trigger  = NightlyTriggerConfiguration() // Resued below for running tests against the downstream repos every night.
+    
+    // Trigger reused below for running tests against the downstream repos every night.
+    // Need to supply non-default branch filter
+    val trigger  = NightlyTriggerConfiguration(filter="+:refs/heads/$featureBranchProviderFunctionsName") 
 
     var parentId: String // To be overwritten when each build config is generated below.
 

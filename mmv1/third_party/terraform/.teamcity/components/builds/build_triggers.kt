@@ -18,15 +18,15 @@ class NightlyTriggerConfiguration(
     val nightlyTestsEnabled: Boolean = true,
     val startHour: Int = DefaultStartHour,
     val daysOfWeek: String = DefaultDaysOfWeek,
-    val daysOfMonth: String = DefaultDaysOfMonth
+    val daysOfMonth: String = DefaultDaysOfMonth,
+    val filter: String = "+:refs/heads/main"
 )
 
 fun Triggers.runNightly(config: NightlyTriggerConfiguration) {
-    val filter = "+:refs/heads/main"
 
     schedule{
         enabled = config.nightlyTestsEnabled
-        branchFilter = filter
+        branchFilter = config.filter
         triggerBuild = always() // Run build even if no new commits/pending changes
         withPendingChangesOnly = false
         enforceCleanCheckout = true
