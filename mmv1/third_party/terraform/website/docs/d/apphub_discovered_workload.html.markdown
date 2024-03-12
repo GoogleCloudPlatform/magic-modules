@@ -24,7 +24,7 @@ data "google_apphub_discovered_workload" "my-workload" {
 The following arguments are supported:
 
 * `project` - The host project of the discovered workload.
-* `workload_uri` - (Required) The uri of the workload. Example: "//compute.googleapis.com/projects/1/regions/us-east1/instanceGroups/id1"
+* `workload_uri` - (Required)  The uri of the workload (instance group managed by the Managed Instance Group). Example: "//compute.googleapis.com/projects/1/regions/us-east1/instanceGroups/id1"
 * `location` - (Required) The location of the discovered workload.
 
 ## Attributes Reference
