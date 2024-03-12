@@ -582,7 +582,7 @@ func TestAccAlloydbInstance_updatePscInstanceConfig(t *testing.T) {
 				Config: testAccAlloydbInstance_pscInstanceConfig(context),
 			},
 			{
-				Config: testAccAlloydbInstance_updateAllowlistPscInstanceConfigAllowlist(context),
+				Config: testAccAlloydbInstance_updatePscInstanceConfigAllowlist(context),
 			},
 		},
 	})
@@ -619,7 +619,7 @@ data "google_project" "project" {}
 `, context)
 }
 
-func testAccAlloydbInstance_updateAllowlistPscInstanceConfigAllowlist(context map[string]interface{}) string {
+func testAccAlloydbInstance_updatePscInstanceConfigAllowlist(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_alloydb_instance" "default" {
   provider = google-beta
