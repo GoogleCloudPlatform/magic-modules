@@ -22,8 +22,6 @@ name: Service
 description: 'Service is a network/api interface that exposes some functionality to clients for consumption over the network.
   Service typically has one or more Workloads behind it. It registers identified service to the Application.'
 autogen_async: true
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: 'templates/terraform/constants/apphub_discovered_resource.go.erb'
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "apphub_service_basic"
@@ -213,7 +211,7 @@ properties:
               required: true
   - !ruby/object:Api::Type::String
     name: discoveredService
-    diff_suppress_func: 'DiscoveredResourceProjectNumberDiffSuppress'
+    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
     description: 'Immutable. The resource name of the original discovered
       service. '
     required: true
