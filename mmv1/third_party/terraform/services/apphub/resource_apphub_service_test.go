@@ -52,7 +52,7 @@ func TestAccApphubService_serviceUpdate(t *testing.T) {
 func testAccApphubService_apphubServiceUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_apphub_application" "application" {
-  location = "us-east1"
+  location = "us-central1"
   application_id = "tf-test-example-application-1%{random_suffix}"
   scope {
     type = "REGIONAL"
@@ -86,7 +86,7 @@ resource "google_apphub_service_project_attachment" "service_project_attachment"
 # discovered service block
 data "google_apphub_discovered_service" "catalog-service" {
   provider = google
-  location = "us-east1"
+  location = "us-central1"
   service_uri = "//compute.googleapis.com/${google_compute_forwarding_rule.forwarding_rule.id}"
   depends_on = [google_apphub_service_project_attachment.service_project_attachment, time_sleep.wait_120s_for_resource_ingestion]
 }
@@ -97,7 +97,7 @@ resource "time_sleep" "wait_120s_for_resource_ingestion" {
 }
 
 resource "google_apphub_service" "example" {
-  location = "us-east1"
+  location = "us-central1"
   application_id = google_apphub_application.application.application_id
   service_id = google_compute_forwarding_rule.forwarding_rule.name
   discovered_service = data.google_apphub_discovered_service.catalog-service.name
@@ -121,7 +121,7 @@ resource "google_compute_subnetwork" "ilb_subnet" {
   name          = "tf-test-l7-ilb-subnet%{random_suffix}"
   project       = google_project.service_project.project_id
   ip_cidr_range = "10.0.1.0/24"
-  region        = "us-east1"
+  region        = "us-central1"
   network       = google_compute_network.ilb_network.id
 }
 
@@ -129,7 +129,7 @@ resource "google_compute_subnetwork" "ilb_subnet" {
 resource "google_compute_forwarding_rule" "forwarding_rule" {
   name                  ="tf-test-l7-ilb-forwarding-rule%{random_suffix}"
   project               = google_project.service_project.project_id
-  region                = "us-east1"
+  region                = "us-central1"
   ip_version            = "IPV4"
   load_balancing_scheme = "INTERNAL"
   all_ports             = true
@@ -144,7 +144,7 @@ resource "google_compute_forwarding_rule" "forwarding_rule" {
 resource "google_compute_region_backend_service" "backend" {
   name                  = "tf-test-l7-ilb-backend-subnet%{random_suffix}"
   project               = google_project.service_project.project_id
-  region                = "us-east1"
+  region                = "us-central1"
   health_checks         = [google_compute_health_check.default.id]
 }
 
