@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: 'ServicePerimeterResource'
+name: 'ServicePerimeterDryRunResource'
 create_url: '{{perimeter_name}}'
 base_url: ''
 self_link: '{{perimeter_name}}'
@@ -26,21 +26,21 @@ nested_query: !ruby/object:Api::Resource::NestedQuery
   modify_by_patch: true
   is_list_of_ids: true
   keys:
-    - status
+    - spec
     - resources
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Service Perimeter Quickstart': 'https://cloud.google.com/vpc-service-controls/docs/quickstart'
   api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.servicePerimeters'
 description: |
-  Allows configuring a single GCP resource that should be inside the `status` block of a service perimeter.
+  Allows configuring a single GCP resource that should be inside of the `spec` block of a dry run service perimeter.
   This resource is intended to be used in cases where it is not possible to compile a full list
   of projects to include in a `google_access_context_manager_service_perimeter` resource,
   to enable them to be added separately.
-  If your perimeter is in dry-run mode use `google_access_context_manager_service_perimeter_dry_run_resource` instead.
+  If your perimeter is NOT in dry-run mode use `google_access_context_manager_service_perimeter_resource` instead.
 
   ~> **Note:** If this resource is used alongside a `google_access_context_manager_service_perimeter` resource,
-  the service perimeter resource must have a `lifecycle` block with `ignore_changes = [status[0].resources]` so
+  the service perimeter resource must have a `lifecycle` block with `ignore_changes = [spec[0].resources]` so
   they don't fight over which resources should be in the policy.
 docs: !ruby/object:Provider::Terraform::Docs
   warning: |
@@ -58,13 +58,16 @@ import_format: ['{{perimeter_name}}/{{resource}}']
 mutex: '{{perimeter_name}}'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: 'access_context_manager_service_perimeter_resource_basic'
+    name: 'access_context_manager_service_perimeter_dry_run_resource_basic'
     skip_test: true
-    primary_resource_id: 'service-perimeter-resource'
+    primary_resource_id: 'service-perimeter-dry-run-resource'
     vars:
       service_perimeter_name: 'restrict_all'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/access_context_manager_service_perimeter_resource.go.erb
+  pre_update: templates/terraform/pre_create/access_context_manager_service_perimeter_dry_run_resource.go.erb
+  pre_create: templates/terraform/pre_create/access_context_manager_service_perimeter_dry_run_resource.go.erb
+  pre_delete: templates/terraform/pre_create/access_context_manager_service_perimeter_dry_run_resource.go.erb
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'perimeterName'
