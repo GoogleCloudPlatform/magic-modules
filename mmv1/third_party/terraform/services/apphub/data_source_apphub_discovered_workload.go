@@ -83,8 +83,6 @@ func dataSourceApphubDiscoveredWorkloadRead(d *schema.ResourceData, meta interfa
 		billingProject = bp
 	}
 
-	var res map[string]interface{}
-
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "GET",
