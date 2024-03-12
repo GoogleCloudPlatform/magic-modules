@@ -41,7 +41,7 @@ resource "google_apphub_workload" "<%= ctx[:primary_resource_id] %>" {
   location = "us-east1"
   application_id = google_apphub_application.application.application_id
   workload_id = google_compute_region_instance_group_manager.mig.name
-  discovered_workload = data.google_apphub_discovered_workload.catalog-workload.discovered_workload[0].name
+  discovered_workload = data.google_apphub_discovered_workload.catalog-workload.name
 }
 
 #Workload creation

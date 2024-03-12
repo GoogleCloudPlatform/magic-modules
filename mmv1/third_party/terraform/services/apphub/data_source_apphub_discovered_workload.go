@@ -2,12 +2,10 @@ package apphub
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-	"google.golang.org/api/googleapi"
 )
 
 func DataSourceApphubDiscoveredWorkload() *schema.Resource {
@@ -26,46 +24,38 @@ func DataSourceApphubDiscoveredWorkload() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"discovered_workload": {
+			"name": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"workload_reference": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"name": {
+						"uri": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"workload_reference": {
-							Type:     schema.TypeList,
+					},
+				},
+			},
+			"workload_properties": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"gcp_project": {
+							Type:     schema.TypeString,
 							Computed: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"uri": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-								},
-							},
 						},
-						"workload_properties": {
-							Type:     schema.TypeList,
+						"location": {
+							Type:     schema.TypeString,
 							Computed: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"gcp_project": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"location": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"zone": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-								},
-							},
+						},
+						"zone": {
+							Type:     schema.TypeString,
+							Computed: true,
 						},
 					},
 				},
@@ -81,7 +71,7 @@ func dataSourceApphubDiscoveredWorkloadRead(d *schema.ResourceData, meta interfa
 		return err
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{ApphubBasePath}}projects/{{project}}/locations/{{location}}/discoveredWorkloads:lookup?uri={{workload_uri}}")
+	url, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{ApphubBasePath}}projects/{{project}}/locations/{{location}}/discoveredWorkloads:lookup?uri={{workload_uri}}"))
 	if err != nil {
 		return err
 	}
@@ -95,40 +85,28 @@ func dataSourceApphubDiscoveredWorkloadRead(d *schema.ResourceData, meta interfa
 
 	var res map[string]interface{}
 
-	err = transport_tpg.Retry(transport_tpg.RetryOptions{
-		RetryFunc: func() (rerr error) {
-			res, rerr = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-				Config:    config,
-				Method:    "GET",
-				Project:   billingProject,
-				RawURL:    url,
-				UserAgent: userAgent,
-			})
-			return rerr
-		},
-		Timeout: d.Timeout(schema.TimeoutRead),
-		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{
-			func(err error) (bool, string) {
-				gerr, ok := err.(*googleapi.Error)
-				if !ok {
-					return false, ""
-				}
-
-				if gerr.Code == 404 {
-					log.Printf("[DEBUG] Dismissed an error as retryable based on error code: %s", err)
-					return true, fmt.Sprintf("Retryable error code %d", gerr.Code)
-				}
-				return false, ""
-			},
-		},
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   billingProject,
+		RawURL:    url,
+		UserAgent: userAgent,
 	})
 
 	if err != nil {
 		return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("ApphubDiscoveredWorkload %q", d.Id()), url)
 	}
 
-	if err := d.Set("discovered_workload", flattenApphubDiscoveredWorkload(res["discoveredWorkload"], d, config)); err != nil {
-		return fmt.Errorf("Error setting discovered workload: %s", err)
+	if err := d.Set("name", flattenApphubDiscoveredWorkloadName(res["discoveredWorkload"].(map[string]interface{})["name"], d, config)); err != nil {
+		return fmt.Errorf("Error setting workload name: %s", err)
+	}
+
+	if err := d.Set("workload_reference", flattenApphubDiscoveredWorkloadReference(res["discoveredWorkload"].(map[string]interface{})["workloadReference"], d, config)); err != nil {
+		return fmt.Errorf("Error setting service reference: %s", err)
+	}
+
+	if err := d.Set("workload_properties", flattenApphubDiscoveredWorkloadProperties(res["discoveredWorkload"].(map[string]interface{})["workloadProperties"], d, config)); err != nil {
+		return fmt.Errorf("Error setting workload properties: %s", err)
 	}
 
 	d.SetId(res["discoveredWorkload"].(map[string]interface{})["name"].(string))
@@ -137,23 +115,7 @@ func dataSourceApphubDiscoveredWorkloadRead(d *schema.ResourceData, meta interfa
 
 }
 
-func flattenApphubDiscoveredWorkload(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	if v == nil {
-		return nil
-	}
-	original := v.(map[string]interface{})
-	if len(original) == 0 {
-		return nil
-	}
-
-	transformed := make(map[string]interface{})
-	transformed["name"] = flattenApphubDiscoveredWorkloadDataName(original["name"], d, config)
-	transformed["workload_reference"] = flattenApphubWorkloadReference(original["workloadReference"], d, config)
-	transformed["workload_properties"] = flattenApphubWorkloadProperties(original["workloadProperties"], d, config)
-	return []interface{}{transformed}
-}
-
-func flattenApphubWorkloadReference(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+func flattenApphubDiscoveredWorkloadReference(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil {
 		return nil
 	}
@@ -166,7 +128,7 @@ func flattenApphubWorkloadReference(v interface{}, d *schema.ResourceData, confi
 	return []interface{}{transformed}
 }
 
-func flattenApphubWorkloadProperties(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+func flattenApphubDiscoveredWorkloadProperties(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil {
 		return nil
 	}
@@ -181,7 +143,7 @@ func flattenApphubWorkloadProperties(v interface{}, d *schema.ResourceData, conf
 	return []interface{}{transformed}
 }
 
-func flattenApphubDiscoveredWorkloadDataName(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+func flattenApphubDiscoveredWorkloadName(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
