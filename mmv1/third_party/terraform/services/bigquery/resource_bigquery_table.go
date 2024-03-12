@@ -256,17 +256,13 @@ func bigQueryTableNormalizePolicyTags(val interface{}) interface{} {
 
 // Compares two existing schema implementations and decides if
 // it is changeable.. pairs with a force new on not changeable
-func resourceBigQueryTableSchemaIsChangeable(old, new interface{}) (bool, error) {
+func resourceBigQueryTableSchemaIsChangeable(old, new interface{}, topLevel bool) (bool, error) {
 	switch old.(type) {
 	case []interface{}:
 		arrayOld := old.([]interface{})
 		arrayNew, ok := new.([]interface{})
 		if !ok {
 			// if not both arrays not changeable
-			return false, nil
-		}
-		if len(arrayOld) > len(arrayNew) {
-			// if not growing not changeable
 			return false, nil
 		}
 		if err := bigQueryTablecheckNameExists(arrayOld); err != nil {
@@ -289,12 +285,15 @@ func resourceBigQueryTableSchemaIsChangeable(old, new interface{}) (bool, error)
 			}
 		}
 		for key := range mapOld {
-			// all old keys should be represented in the new config
+			// dropping top level fields can happen in-place
 			if _, ok := mapNew[key]; !ok {
-				return false, nil
+				if !topLevel {
+					return false, nil
+				}
+				continue
 			}
 			if isChangable, err :=
-				resourceBigQueryTableSchemaIsChangeable(mapOld[key], mapNew[key]); err != nil || !isChangable {
+				resourceBigQueryTableSchemaIsChangeable(mapOld[key], mapNew[key], false); err != nil || !isChangable {
 				return false, err
 			}
 		}
@@ -337,7 +336,7 @@ func resourceBigQueryTableSchemaIsChangeable(old, new interface{}) (bool, error)
 					return false, nil
 				}
 			case "fields":
-				return resourceBigQueryTableSchemaIsChangeable(valOld, valNew)
+				return resourceBigQueryTableSchemaIsChangeable(valOld, valNew, false)
 
 				// other parameters: description, policyTags and
 				// policyTags.names[] are changeable
@@ -376,7 +375,7 @@ func resourceBigQueryTableSchemaCustomizeDiffFunc(d tpgresource.TerraformResourc
 			// same as above
 			log.Printf("[DEBUG] unable to unmarshal json customized diff - %v", err)
 		}
-		isChangeable, err := resourceBigQueryTableSchemaIsChangeable(old, new)
+		isChangeable, err := resourceBigQueryTableSchemaIsChangeable(old, new, true)
 		if err != nil {
 			return err
 		}
@@ -1724,6 +1723,40 @@ func resourceBigQueryTableUpdate(d *schema.ResourceData, meta interface{}) error
 
 	datasetID := d.Get("dataset_id").(string)
 	tableID := d.Get("table_id").(string)
+
+	oldTable, err := config.NewBigQueryClient(userAgent).Tables.Get(project, datasetID, tableID).Do()
+	if err != nil {
+		return err
+	}
+
+	newTableFields := map[string]bool{}
+	for _, field := range table.Schema.Fields {
+		newTableFields[field.Name] = true
+	}
+
+	droppedColumns := []string{}
+	for _, field := range oldTable.Schema.Fields {
+		if !newTableFields[field.Name] {
+			droppedColumns = append(droppedColumns, field.Name)
+		}
+	}
+
+	if len(droppedColumns) > 0 {
+		droppedColumnsString := strings.Join(droppedColumns, " ")
+		log.Printf("[INFO] Dropping columns in-place: %s", droppedColumnsString)
+
+		dropColumnsDDL := fmt.Sprintf("ALTER TABLE `%s.%s.%s` DROP COLUMN `%s`", d.Get("project").(string), d.Get("dataset_id").(string), d.Get("table_id").(string), droppedColumnsString)
+		useLegacySQL := false
+		req := &bigquery.QueryRequest{
+			Query:        dropColumnsDDL,
+			UseLegacySql: &useLegacySQL,
+		}
+
+		_, err = config.NewBigQueryClient(userAgent).Jobs.Query(project, req).Do()
+		if err != nil {
+			return err
+		}
+	}
 
 	if _, err = config.NewBigQueryClient(userAgent).Tables.Update(project, datasetID, tableID, table).Do(); err != nil {
 		return err

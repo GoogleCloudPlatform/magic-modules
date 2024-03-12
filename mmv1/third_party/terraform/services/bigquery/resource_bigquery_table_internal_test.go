@@ -403,7 +403,7 @@ func (testcase *testUnitBigQueryDataTableJSONChangeableTestCase) check(t *testin
 	if err := json.Unmarshal([]byte(testcase.jsonNew), &new); err != nil {
 		t.Fatalf("unable to unmarshal json - %v", err)
 	}
-	changeable, err := resourceBigQueryTableSchemaIsChangeable(old, new)
+	changeable, err := resourceBigQueryTableSchemaIsChangeable(old, new, true)
 	if err != nil {
 		t.Errorf("%s failed unexpectedly: %s", testcase.name, err)
 	}
@@ -445,7 +445,7 @@ var testUnitBigQueryDataTableIsChangableTestCases = []testUnitBigQueryDataTableJ
 		name:       "arraySizeDecreases",
 		jsonOld:    "[{\"name\": \"someValue\", \"type\" : \"INTEGER\", \"mode\" : \"NULLABLE\", \"description\" : \"someVal\" }, {\"name\": \"asomeValue\", \"type\" : \"INTEGER\", \"mode\" : \"NULLABLE\", \"description\" : \"someVal\" }]",
 		jsonNew:    "[{\"name\": \"someValue\", \"type\" : \"INTEGER\", \"mode\" : \"NULLABLE\", \"description\" : \"someVal\" }]",
-		changeable: false,
+		changeable: true,
 	},
 	{
 		name:       "descriptionChanges",
@@ -517,11 +517,25 @@ var testUnitBigQueryDataTableIsChangableTestCases = []testUnitBigQueryDataTableJ
 		jsonNew:    "[{\"name\": \"value2\", \"type\" : \"BOOLEAN\", \"mode\" : \"NULLABLE\", \"description\" : \"newVal\" },  {\"name\": \"value1\", \"type\" : \"INTEGER\", \"mode\" : \"NULLABLE\", \"description\" : \"someVal\" }]",
 		changeable: true,
 	},
+	// This is changeable but it is currently treated by terraform as
+	// the renamed column being dropped and a new column added
 	{
 		name:       "orderOfArrayChangesAndNameChanges",
 		jsonOld:    "[{\"name\": \"value1\", \"type\" : \"INTEGER\", \"mode\" : \"NULLABLE\", \"description\" : \"someVal\" }, {\"name\": \"value2\", \"type\" : \"BOOLEAN\", \"mode\" : \"NULLABLE\", \"description\" : \"someVal\" }]",
 		jsonNew:    "[{\"name\": \"value3\", \"type\" : \"BOOLEAN\", \"mode\" : \"NULLABLE\", \"description\" : \"newVal\" },  {\"name\": \"value1\", \"type\" : \"INTEGER\", \"mode\" : \"NULLABLE\", \"description\" : \"someVal\" }]",
+		changeable: true,
+	},
+	{
+		name:       "renameRequiredColumn",
+		jsonOld:    "[{\"name\": \"value1\", \"type\" : \"INTEGER\", \"mode\" : \"REQUIRED\", \"description\" : \"someVal\" }]",
+		jsonNew:    "[{\"name\": \"value3\", \"type\" : \"INTEGER\", \"mode\" : \"REQUIRED\", \"description\" : \"someVal\" }]",
 		changeable: false,
+	},
+	{
+		name:       "typeModeReqToNullAndColumnDropped",
+		jsonOld:    "[{\"name\": \"someValue\", \"type\" : \"BOOLEAN\", \"mode\" : \"REQUIRED\", \"description\" : \"someVal\" }, {\"name\": \"someValue2\", \"type\" : \"BOOLEAN\", \"mode\" : \"NULLABLE\", \"description\" : \"someVal\" }]",
+		jsonNew:    "[{\"name\": \"someValue\", \"type\" : \"BOOLEAN\", \"mode\" : \"NULLABLE\", \"description\" : \"some new value\" }]",
+		changeable: true,
 	},
 	{
 		name: "policyTags",
@@ -550,14 +564,18 @@ var testUnitBigQueryDataTableIsChangableTestCases = []testUnitBigQueryDataTableJ
 
 func TestUnitBigQueryDataTable_schemaIsChangable(t *testing.T) {
 	t.Parallel()
+	// Only top level column drops are changeable
+	skipNested := map[string]bool{"arraySizeDecreases": true, "orderOfArrayChangesAndNameChanges": true, "typeModeReqToNullAndColumnDropped": true}
 	for _, testcase := range testUnitBigQueryDataTableIsChangableTestCases {
 		testcase.check(t)
-		testcaseNested := &testUnitBigQueryDataTableJSONChangeableTestCase{
-			testcase.name + "Nested",
-			fmt.Sprintf("[{\"name\": \"someValue\", \"type\" : \"INTEGER\", \"fields\" : %s }]", testcase.jsonOld),
-			fmt.Sprintf("[{\"name\": \"someValue\", \"type\" : \"INT64\", \"fields\" : %s }]", testcase.jsonNew),
-			testcase.changeable,
+		if !skipNested[testcase.name] {
+			testcaseNested := &testUnitBigQueryDataTableJSONChangeableTestCase{
+				testcase.name + "Nested",
+				fmt.Sprintf("[{\"name\": \"someValue\", \"type\" : \"INTEGER\", \"fields\" : %s }]", testcase.jsonOld),
+				fmt.Sprintf("[{\"name\": \"someValue\", \"type\" : \"INT64\", \"fields\" : %s }]", testcase.jsonNew),
+				testcase.changeable,
+			}
+			testcaseNested.check(t)
 		}
-		testcaseNested.check(t)
 	}
 }
