@@ -12,12 +12,12 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-base_url: projects/{{project}}/locations/{{location}}/applications/{{applications_id}}/services
-create_url: projects/{{project}}/locations/{{location}}/applications/{{applications_id}}/services?serviceId={{service_id}}
-self_link: projects/{{project}}/locations/{{location}}/applications/{{applications_id}}/services/{{service_id}}
-id_format: projects/{{project}}/locations/{{location}}/applications/{{applications_id}}/services/{{service_id}}
+base_url: projects/{{project}}/locations/{{location}}/applications/{{application_id}}/services
+create_url: projects/{{project}}/locations/{{location}}/applications/{{application_id}}/services?serviceId={{service_id}}
+self_link: projects/{{project}}/locations/{{location}}/applications/{{application_id}}/services/{{service_id}}
+id_format: projects/{{project}}/locations/{{location}}/applications/{{application_id}}/services/{{service_id}}
 import_format:
-  - projects/{{project}}/locations/{{location}}/applications/{{applications_id}}/services/{{service_id}}
+  - projects/{{project}}/locations/{{location}}/applications/{{application_id}}/services/{{service_id}}
 name: Service
 description: 'Service is a network/api interface that exposes some functionality to clients for consumption over the network.
   Service typically has one or more Workloads behind it. It registers identified service to the Application.'
@@ -26,10 +26,9 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: 'templates/terraform/constants/apphub_discovered_resource.go.erb'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "service_basic"
+    name: "apphub_service_basic"
     pull_external: true
     primary_resource_id: "example"
-    config_path: "templates/terraform/examples/apphub_service_basic.tf.erb"
     vars:
       application_id: "example-application-1"
       service_project_attachment_id: "project-1"
@@ -42,10 +41,9 @@ examples:
       org_id: :ORG_ID
       billing_account: :BILLING_ACCT
   - !ruby/object:Provider::Terraform::Examples
-    name: "service_full"
+    name: "apphub_service_full"
     pull_external: true
     primary_resource_id: "example"
-    config_path: "templates/terraform/examples/apphub_service_full.tf.erb"
     vars:
       application_id: "example-application-1"
       service_project_attachment_id: "project-1"
@@ -212,7 +210,7 @@ parameters:
     required: true
     immutable: true
   - !ruby/object:Api::Type::String
-    name: applicationsId
+    name: applicationId
     description: 'Part of `parent`. See documentation of `projectsId`. '
     url_param_only: true
     required: true

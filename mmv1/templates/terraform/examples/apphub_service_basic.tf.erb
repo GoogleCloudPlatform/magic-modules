@@ -40,7 +40,7 @@ data "google_apphub_discovered_service" "catalog-service" {
 
 resource "google_apphub_service" "<%= ctx[:primary_resource_id] %>" {
   location = "us-east1"
-  applications_id = google_apphub_application.application.application_id
+  application_id = google_apphub_application.application.application_id
   service_id = google_compute_forwarding_rule.forwarding_rule.name
   discovered_service = data.google_apphub_discovered_service.catalog-service.name
 }
