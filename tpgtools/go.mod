@@ -6,7 +6,6 @@ require (
 	bitbucket.org/creachadair/stringset v0.0.11
 	github.com/GoogleCloudPlatform/declarative-resource-client-library v1.63.0
 	github.com/golang/glog v1.1.2
-	github.com/hashicorp/hcl v1.0.0
 	github.com/kylelemons/godebug v1.1.0
 	github.com/nasa9084/go-openapi v0.0.0-20210722142352-4a81d737faf6
 	gopkg.in/yaml.v2 v2.4.0
@@ -34,6 +33,6 @@ require (
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230822172742-b8732ec3820d // indirect
 	google.golang.org/grpc v1.57.0 // indirect
-	google.golang.org/protobuf v1.31.0 // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 )
