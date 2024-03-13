@@ -190,6 +190,7 @@ func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_de
 		}
 
 		resource "google_cloud_quotas_quota_preference" "my_preference"{
+			validate_only			= true
 			ignore_safety_checks	= "QUOTA_DECREASE_PERCENTAGE_TOO_HIGH"
 			quota_config  {
 				preferred_value		= 65
