@@ -1,5 +1,5 @@
 name: build
-description: Generates Google/Google-Beta Provider
+description: Generates given downstream Magic Modules Repository from `repo` input
 inputs:
   repo:
     description: "provider repo"

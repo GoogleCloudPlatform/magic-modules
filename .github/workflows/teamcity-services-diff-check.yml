@@ -33,14 +33,19 @@ jobs:
         with:
           repo: 'terraform-provider-google'
           token: '$GITHUB_TOKEN'
-      - run: echo "GOOGLE_REPO_PATH=${{ env.OUTPUT_PATH}}" >> $GITHUB_ENV
+        # The path where GA/Beta providers are generated is grabbed from the OUTPUT_PATH that's set in build_downstream.yaml
+        # export OUTPUT_PATH=$GOPATH/src/github.com/$UPSTREAM_OWNER/$GH_REPO
+        # OUTPUT_PATH changes after each generate (GA/beta)
+      - name: Set GOOGLE_REPO_PATH to path where GA provider was generated
+        run: echo "GOOGLE_REPO_PATH=${{ env.OUTPUT_PATH}}" >> $GITHUB_ENV
       - name: TeamCity Google Beta Provider Generate
         if: steps.generate.outcome == 'success'
         uses: ./.github/actions/build-downstream
         with:
           repo: 'terraform-provider-google-beta'
           token: '$GITHUB_TOKEN'
-      - run: echo "GOOGLE_BETA_REPO_PATH=${{ env.OUTPUT_PATH}}" >> $GITHUB_ENV
+      - name: Set GOOGLE_BETA_REPO_PATH to path where beta provider was generated
+        run: echo "GOOGLE_BETA_REPO_PATH=${{ env.OUTPUT_PATH}}" >> $GITHUB_ENV
       - name: Checkout Repository
         if: steps.generate.outcome == 'success'
         uses: actions/checkout@v4
