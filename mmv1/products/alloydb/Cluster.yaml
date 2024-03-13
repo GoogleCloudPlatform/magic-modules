@@ -62,13 +62,11 @@ examples:
     primary_resource_id: 'default'
     vars:
       alloydb_cluster_name: 'alloydb-cluster'
-    skip_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'alloydb_cluster_full'
     primary_resource_id: 'full'
     vars:
       alloydb_cluster_name: 'alloydb-cluster-full'
-    skip_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'alloydb_cluster_restore'
     primary_resource_id: 'source'
@@ -104,7 +102,6 @@ examples:
     test_vars_overrides:
       network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1")'
     skip_docs: true
-    skip_test: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_create: templates/terraform/pre_create/alloydb_cluster.go.erb
   pre_update: templates/terraform/pre_update/alloydb_cluster.go.erb
