@@ -102,13 +102,6 @@ examples:
       workstation_cluster_name: 'workstation-cluster'
       workstation_config_name: 'workstation-config'
   - !ruby/object:Provider::Terraform::Examples
-    name: 'workstation_config_service_account'
-    min_version: beta
-    primary_resource_id: 'default'
-    vars:
-      workstation_cluster_name: 'workstation-cluster'
-      workstation_config_name: 'workstation-config'
-  - !ruby/object:Provider::Terraform::Examples
     name: 'workstation_config_accelerators'
     min_version: beta
     primary_resource_id: 'default'
