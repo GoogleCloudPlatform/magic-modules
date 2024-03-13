@@ -55,7 +55,7 @@ func testAccDataSourceGoogleQuotaInfo_basic(context map[string]interface{}) stri
 		data "google_cloud_quotas_quota_info" "my_quota_info" {
 			parent      = "projects/%{project}"	
 			quota_id    = "%{quota_id}"
-			service 	  = "%{service}"
+			service 	= "%{service}"
 		}
 	`, context)
 }
