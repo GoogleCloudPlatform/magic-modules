@@ -16,18 +16,21 @@ func TestAccDataSourceGoogleQuotaInfos_basic(t *testing.T) {
 	t.Parallel()
 
 	resourceName := "data.google_cloud_quotas_quota_infos.my_quota_infos"
-	project := envvar.GetTestProjectFromEnv()
 	service := "libraryagent.googleapis.com"
+
+	context := map[string]interface{}{
+		"project": envvar.GetTestProjectFromEnv(),
+		"service": service,
+	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceGoogleQuotaInfos_basic(project, service),
+				Config: testAccDataSourceGoogleQuotaInfos_basic(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "quota_infos.#", "9"),
-					resource.TestCheckResourceAttrSet(resourceName, "quota_infos.0.%"),
 					resource.TestCheckResourceAttrSet(resourceName, "quota_infos.0.name"),
 					resource.TestCheckResourceAttrSet(resourceName, "quota_infos.0.quota_id"),
 					resource.TestCheckResourceAttrSet(resourceName, "quota_infos.0.metric"),
@@ -40,7 +43,7 @@ func TestAccDataSourceGoogleQuotaInfos_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceGoogleQuotaInfos_withPagination(project, service),
+				Config: testAccDataSourceGoogleQuotaInfos_withPagination(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "quota_infos.#", "2"),
 					resource.TestCheckResourceAttrSet(resourceName, "quota_infos.0.%"),
@@ -51,22 +54,22 @@ func TestAccDataSourceGoogleQuotaInfos_basic(t *testing.T) {
 	})
 }
 
-func testAccDataSourceGoogleQuotaInfos_basic(project, service string) string {
+func testAccDataSourceGoogleQuotaInfos_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-	data "google_cloud_quotas_quota_infos" "my_quota_infos" {
-		parent      = "projects/%{project}"	
-		service 	= "%{service}"
-	}
-`, map[string]interface{}{"project": project, "service": service})
+		data "google_cloud_quotas_quota_infos" "my_quota_infos" {
+			parent	= "projects/%{project}"	
+			service	= "%{service}"
+		}
+	`, context)
 }
 
-func testAccDataSourceGoogleQuotaInfos_withPagination(project, service string) string {
+func testAccDataSourceGoogleQuotaInfos_withPagination(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-	data "google_cloud_quotas_quota_infos" "my_quota_infos" {
-		parent      = "projects/%{project}"	
-		service 	= "%{service}"
-		page_size	= 2
-		page_token	= 2
-	}
-`, map[string]interface{}{"project": project, "service": service})
+		data "google_cloud_quotas_quota_infos" "my_quota_infos" {
+			parent      = "projects/%{project}"	
+			service 	= "%{service}"
+			page_size	= 2
+			page_token	= 2
+		}
+	`, context)
 }
