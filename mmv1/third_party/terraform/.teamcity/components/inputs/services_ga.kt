@@ -48,6 +48,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Appengine",
         "path" to "./google/services/appengine"
     ),
+    "apphub" to mapOf(
+        "name" to "apphub",
+        "displayName" to "Apphub",
+        "path" to "./google/services/apphub"
+    ),
     "artifactregistry" to mapOf(
         "name" to "artifactregistry",
         "displayName" to "Artifactregistry",
@@ -172,6 +177,11 @@ var ServicesListGa = mapOf(
         "name" to "cloudids",
         "displayName" to "Cloudids",
         "path" to "./google/services/cloudids"
+    ),
+    "cloudquotas" to mapOf(
+        "name" to "cloudquotas",
+        "displayName" to "Cloudquotas",
+        "path" to "./google/services/cloudquotas"
     ),
     "cloudrun" to mapOf(
         "name" to "cloudrun",

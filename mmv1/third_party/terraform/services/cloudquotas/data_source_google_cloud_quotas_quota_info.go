@@ -16,29 +16,24 @@ func DataSourceGoogleCloudQuotasQuotaInfo() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"parent": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: `The parent of the quota info. Allowed parents are "projects/[project-id / number]" or "folders/[folder-id / number]" or "organizations/[org-id / number].`,
+				Type:     schema.TypeString,
+				Required: true,
 			},
 			"service": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: `The name of the service in which the quota is defined.`,
+				Type:     schema.TypeString,
+				Required: true,
 			},
 			"quota_id": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: `The id of the quota, which is unique within the service.`,
+				Type:     schema.TypeString,
+				Required: true,
 			},
 			"name": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: `Resource name of this QuotaInfo. The ID component following "locations/" must be "global". Example: projects/123/locations/global/services/compute.googleapis.com/quotaInfos/CpusPerProjectPerRegion`,
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"metric": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: `The metric of the quota. It specifies the resources consumption the quota is defined for. Example: compute.googleapis.com/cpus`,
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"is_precise": {
 				Type:     schema.TypeBool,

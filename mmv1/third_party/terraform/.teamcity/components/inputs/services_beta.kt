@@ -48,6 +48,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Appengine",
         "path" to "./google-beta/services/appengine"
     ),
+    "apphub" to mapOf(
+        "name" to "apphub",
+        "displayName" to "Apphub",
+        "path" to "./google-beta/services/apphub"
+    ),
     "artifactregistry" to mapOf(
         "name" to "artifactregistry",
         "displayName" to "Artifactregistry",
@@ -172,6 +177,11 @@ var ServicesListBeta = mapOf(
         "name" to "cloudids",
         "displayName" to "Cloudids",
         "path" to "./google-beta/services/cloudids"
+    ),
+    "cloudquotas" to mapOf(
+        "name" to "cloudquotas",
+        "displayName" to "Cloudquotas",
+        "path" to "./google-beta/services/cloudquotas"
     ),
     "cloudrun" to mapOf(
         "name" to "cloudrun",
