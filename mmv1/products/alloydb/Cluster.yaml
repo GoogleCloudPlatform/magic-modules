@@ -135,10 +135,6 @@ properties:
     output: true
     description: |
       The system-generated UID of the resource.
-  - !ruby/object:Api::Type::String
-    name: 'forceMissingTestsCheck'
-    description: |
-      Test field
   - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: 'User-defined labels for the alloydb cluster.'
