@@ -33,11 +33,11 @@ import_format:
   ['projects/{{project}}/locations/{{region}}/repositories/{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: 'dataform_respository'
+    name: 'dataform_repository'
     # This example is used in the docs to address this issue
     # See : https://github.com/hashicorp/terraform-provider-google/issues/17335
     skip_test: true
-    primary_resource_id: dataform_respository
+    primary_resource_id: dataform_repository
     primary_resource_name:
       'fmt.Sprintf("tf_test_dataform_repository%s", context["random_suffix"])'
     min_version: beta
@@ -51,7 +51,7 @@ examples:
     # See : https://github.com/hashicorp/terraform-provider-google/issues/17335
     # See : https://issuetracker.google.com/issues/287850319
     skip_docs: true
-    primary_resource_id: dataform_respository
+    primary_resource_id: dataform_repository
     primary_resource_name:
       'fmt.Sprintf("tf_test_dataform_repository%s", context["random_suffix"])'
     min_version: beta
@@ -66,7 +66,7 @@ examples:
     # See : https://github.com/hashicorp/terraform-provider-google/issues/17335
     # See : https://issuetracker.google.com/issues/287850319
     skip_docs: true
-    primary_resource_id: dataform_respository
+    primary_resource_id: dataform_repository
     min_version: beta
     vars:
       git_repository_name: 'my/repository'
