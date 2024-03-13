@@ -1950,7 +1950,6 @@ resource "google_container_node_pool" "np" {
 `, cluster, networkName, subnetworkName, policyName, np)
 }
 
-<% unless version == 'ga' -%>
 func TestAccContainerNodePool_enableQueuedProvisioning(t *testing.T) {
 	t.Parallel()
 
@@ -2022,7 +2021,6 @@ resource "google_container_node_pool" "np" {
 }
 `, cluster, networkName, subnetworkName, np, enabled)
 }
-<% end -%>
 
 func TestAccContainerNodePool_threadsPerCore(t *testing.T) {
 	t.Parallel()
@@ -4135,8 +4133,6 @@ resource "google_container_node_pool" "np" {
 }
 <% end -%>
 
-<% unless version == 'ga' -%>
-
 func TestAccContainerNodePool_withConfidentialBootDisk(t *testing.T) {
 	t.Parallel()
 
@@ -4262,7 +4258,6 @@ resource "google_container_node_pool" "without_confidential_boot_disk" {
 }
 `, cluster, networkName, subnetworkName, np)
 }
-<% end -%>
 
 func testAccContainerNodePool_resourceManagerTags(projectID, clusterName, networkName, subnetworkName, randomSuffix string) string {
 	return fmt.Sprintf(`
