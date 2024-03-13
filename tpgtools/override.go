@@ -55,6 +55,7 @@ const (
 	TerraformProductName               = "CUSTOM_TERRAFORM_PRODUCT_NAME"
 	CustomTimeout                      = "CUSTOM_TIMEOUT"
 	StateUpgrade                       = "STATE_UPGRADE"
+	GenerateLongFormTests              = "GENERATE_LONG_FORM_TESTS"
 )
 
 // Field-level Overrides

@@ -95,6 +95,11 @@ type Property struct {
 	// the field being unset and being set to false.
 	EnumBool bool
 
+	// Whether this field is only used as a url parameter
+	Parameter bool
+	// Whether this field has long form behavior in the DCL
+	HasLongForm bool
+
 	// An IdentityGetter is a function to retrieve the value of an "identity" field
 	// from state. Identity fields will sometimes allow retrieval from multiple
 	// fields or from the user's environment variables.
@@ -210,7 +215,7 @@ func (t Type) IsSet() bool {
 }
 
 // Complex map is for maps of string --> object that are supported in DCL but
-// not in Terraform. We handle this by adding a field in the Terraform schema 
+// not in Terraform. We handle this by adding a field in the Terraform schema
 // for the key in the map. This must be added via a COMPLEX_MAP_KEY_NAME
 // override
 func (t Type) IsComplexMap() bool {
@@ -618,6 +623,9 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 			}
 		}
 
+		p.Parameter, _ = v.Extension["x-dcl-parameter"].(bool)
+		p.HasLongForm, _ = v.Extension["x-dcl-has-long-form"].(bool)
+
 		// Handle object properties
 		if len(v.Properties) > 0 {
 			props, err := createPropertiesFromSchema(v, typeFetcher, overrides, resource, &p, location)
@@ -691,11 +699,11 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 				return nil, fmt.Errorf("failed to find complex map key name for map named: %s", p.Name())
 			}
 			keyProp := Property{
-				title:    cm.KeyName,
-				Type:     Type{&openapi.Schema{Type: "string"}},
-				resource: resource,
-				parent:   &p,
-				Required: true,
+				title:       cm.KeyName,
+				Type:        Type{&openapi.Schema{Type: "string"}},
+				resource:    resource,
+				parent:      &p,
+				Required:    true,
 				Description: "The name for the key in the map for which this object is mapped to in the API",
 			}
 			props = append([]Property{keyProp}, props...)
