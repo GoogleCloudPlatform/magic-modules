@@ -36,7 +36,7 @@ func TestFunctionInternals_ValidateElementFromIdArguments(t *testing.T) {
 			ctx := context.Background()
 
 			// Act
-			err := tpg_functions.ValidateElementFromIdArguments(ctx, tc.Input, regex, pattern)
+			err := tpg_functions.ValidateElementFromIdArguments(ctx, tc.Input, regex, pattern, "function-name-here") // last arg value is inconsequential for this test
 
 			// Assert
 			if err != nil && !tc.ExpectError {

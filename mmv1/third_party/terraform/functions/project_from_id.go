@@ -10,13 +10,17 @@ import (
 var _ function.Function = ProjectFromIdFunction{}
 
 func NewProjectFromIdFunction() function.Function {
-	return &ProjectFromIdFunction{}
+	return &ProjectFromIdFunction{
+		name: "project_from_id",
+	}
 }
 
-type ProjectFromIdFunction struct{}
+type ProjectFromIdFunction struct {
+	name string // Makes function name available in Run logic for logging purposes
+}
 
 func (f ProjectFromIdFunction) Metadata(ctx context.Context, req function.MetadataRequest, resp *function.MetadataResponse) {
-	resp.Name = "project_from_id"
+	resp.Name = f.name
 }
 
 func (f ProjectFromIdFunction) Definition(ctx context.Context, req function.DefinitionRequest, resp *function.DefinitionResponse) {
@@ -47,7 +51,7 @@ func (f ProjectFromIdFunction) Run(ctx context.Context, req function.RunRequest,
 	pattern := "projects/{project}/"                              // Human-readable pseudo-regex pattern used in errors and warnings
 
 	// Validate input
-	resp.Error = function.ConcatFuncErrors(ValidateElementFromIdArguments(ctx, arg0, regex, pattern))
+	resp.Error = function.ConcatFuncErrors(ValidateElementFromIdArguments(ctx, arg0, regex, pattern, f.name))
 	if resp.Error != nil {
 		return
 	}

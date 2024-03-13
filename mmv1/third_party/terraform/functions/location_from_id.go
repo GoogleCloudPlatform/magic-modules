@@ -10,13 +10,17 @@ import (
 var _ function.Function = LocationFromIdFunction{}
 
 func NewLocationFromIdFunction() function.Function {
-	return &LocationFromIdFunction{}
+	return &LocationFromIdFunction{
+		name: "location_from_id",
+	}
 }
 
-type LocationFromIdFunction struct{}
+type LocationFromIdFunction struct {
+	name string // Makes function name available in Run logic for logging purposes
+}
 
 func (f LocationFromIdFunction) Metadata(ctx context.Context, req function.MetadataRequest, resp *function.MetadataResponse) {
-	resp.Name = "location_from_id"
+	resp.Name = f.name
 }
 
 func (f LocationFromIdFunction) Definition(ctx context.Context, req function.DefinitionRequest, resp *function.DefinitionResponse) {
@@ -47,7 +51,7 @@ func (f LocationFromIdFunction) Run(ctx context.Context, req function.RunRequest
 	pattern := "locations/{location}/"                                // Human-readable pseudo-regex pattern used in errors and warnings
 
 	// Validate input
-	resp.Error = function.ConcatFuncErrors(ValidateElementFromIdArguments(ctx, arg0, regex, pattern))
+	resp.Error = function.ConcatFuncErrors(ValidateElementFromIdArguments(ctx, arg0, regex, pattern, f.name))
 	if resp.Error != nil {
 		return
 	}

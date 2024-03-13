@@ -10,13 +10,17 @@ import (
 var _ function.Function = ZoneFromIdFunction{}
 
 func NewZoneFromIdFunction() function.Function {
-	return &ZoneFromIdFunction{}
+	return &ZoneFromIdFunction{
+		name: "zone_from_id",
+	}
 }
 
-type ZoneFromIdFunction struct{}
+type ZoneFromIdFunction struct {
+	name string // Makes function name available in Run logic for logging purposes
+}
 
 func (f ZoneFromIdFunction) Metadata(ctx context.Context, req function.MetadataRequest, resp *function.MetadataResponse) {
-	resp.Name = "zone_from_id"
+	resp.Name = f.name
 }
 
 func (f ZoneFromIdFunction) Definition(ctx context.Context, req function.DefinitionRequest, resp *function.DefinitionResponse) {
@@ -47,7 +51,7 @@ func (f ZoneFromIdFunction) Run(ctx context.Context, req function.RunRequest, re
 	pattern := "zones/{zone}/"                                // Human-readable pseudo-regex pattern used in errors and warnings
 
 	// Validate input
-	resp.Error = function.ConcatFuncErrors(ValidateElementFromIdArguments(ctx, arg0, regex, pattern))
+	resp.Error = function.ConcatFuncErrors(ValidateElementFromIdArguments(ctx, arg0, regex, pattern, f.name))
 	if resp.Error != nil {
 		return
 	}
