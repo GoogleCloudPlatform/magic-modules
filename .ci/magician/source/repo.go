@@ -14,7 +14,7 @@ type Repo struct {
 	Owner       string // Owner of repo, optional
 	Path        string // local Path once cloned, including Name
 	Version     provider.Version
-	DiffCanFail bool // whether to allow the command to continue if cloning or diffing the repo fails
+	Cloned      bool
 }
 
 type Controller struct {
