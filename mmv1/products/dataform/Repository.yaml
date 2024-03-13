@@ -42,7 +42,6 @@ examples:
       'fmt.Sprintf("tf_test_dataform_repository%s", context["random_suffix"])'
     min_version: beta
     vars:
-      git_repository_name: 'my/repository'
       dataform_repository_name: 'dataform_repository'
       data: secret-data
       secret_name: my-secret
