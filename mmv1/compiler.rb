@@ -192,6 +192,9 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
       )
       resource.validate
       resources.push(resource)
+    rescue StandardError => e
+      Google::LOGGER.error "Failed to compile #{file_path}: #{e}"
+      raise e
     end
 
     if override_dir
@@ -199,7 +202,7 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
       Dir["#{ovr_prod_dir}/*"].each do |override_path|
         next if File.basename(override_path) == 'product.yaml' \
         || File.extname(override_path) != '.yaml' \
-        || File.basename(file_path).include?('go_')
+        || File.basename(override_path).include?('go_')
 
         file_path = File.join(product_name, File.basename(override_path))
         res_yaml = if File.exist?(file_path)
@@ -221,6 +224,9 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
         )
         resource.validate
         resources.push(resource)
+      rescue StandardError => e
+        Google::LOGGER.error "Failed to compile using override #{override_path}: #{e}"
+        raise e
       end
     end
     resources = resources.sort_by(&:name)

@@ -13,6 +13,10 @@
 
 package api
 
+import (
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
+)
+
 // require 'api/object'
 // require 'google/string_utils'
 // require 'provider/terraform/validation'
@@ -231,10 +235,9 @@ type Type struct {
 	// just as they are in the standard flattener template.
 	CustomFlatten string `yaml:"custom_flatten"`
 
-	__resource Resource
+	ResourceMetadata *Resource
 
-	// TODO: set a specific type intead of interface{}
-	__parent interface{} // is nil for top-level properties
+	ParentMetadata *Type // is nil for top-level properties
 }
 
 const MAX_NAME = 20
@@ -442,24 +445,33 @@ const MAX_NAME = 20
 //   // @__parent
 // }
 
-// func (t *Type) min_version() {
-//   // if @min_version.nil?
-//   //   @__resource.min_version
-//   // else
-//   //   @__resource.__product.version_obj(@min_version)
-//   // end
-// }
+func (t *Type) MinVersionObj() *product.Version {
+	if t.MinVersion != "" {
+		return t.ResourceMetadata.ProductMetadata.versionObj(t.MinVersion)
+	} else {
+		return t.ResourceMetadata.MinVersionObj()
+	}
+}
 
-// func (t *Type) exact_version() {
-//   // return nil if @exact_version.nil? || @exact_version.empty?
+func (t *Type) exactVersionObj() *product.Version {
+	if t.ExactVersion == "" {
+		return nil
+	}
 
-//   // @__resource.__product.version_obj(@exact_version)
-// }
+	return t.ResourceMetadata.ProductMetadata.versionObj(t.ExactVersion)
+}
 
-// func (t *Type) exclude_if_not_in_version!(version) {
-//   // @exclude ||= exact_version != version unless exact_version.nil?
-//   // @exclude ||= version < min_version
-// }
+func (t *Type) ExcludeIfNotInVersion(version *product.Version) {
+	if !t.Exclude {
+		if versionObj := t.exactVersionObj(); versionObj != nil {
+			t.Exclude = versionObj.CompareTo(version) != 0
+		}
+
+		if !t.Exclude {
+			t.Exclude = version.CompareTo(t.MinVersionObj()) < 0
+		}
+	}
+}
 
 // // Overriding is_a? to enable class overrides.
 // // Ruby does not let you natively change types, so this is the next best
