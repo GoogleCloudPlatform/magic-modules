@@ -18,6 +18,7 @@ self_link: '{{perimeter}}'
 create_verb: :PATCH
 delete_verb: :PATCH
 update_mask: true
+immutable: true
 identity:
   - egressFrom
   - egressTo
@@ -37,6 +38,14 @@ description: |
   within the ServicePerimeter to access a defined set of projects outside the
   perimeter in certain contexts (e.g. to read data from a Cloud Storage bucket
   or query against a BigQuery dataset).
+
+  ~> **Note:** By default, updates to this resource will remove the EgressPolicy from the
+  from the perimeter and add it back in a non-atomic manner. To ensure that the new EgressPolicy
+  is added before the old one is removed, add a `lifecycle` block with `create_before_destroy = true` to this resource.
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'access_context_manager_service_perimeter_egress_policy'
+    skip_test: true
 autogen_async: true
 exclude_tgc: true
 # Skipping the sweeper due to the non-standard base_url and because this is fine-grained under ServicePerimeter
@@ -54,7 +63,6 @@ parameters:
     description: |
       The name of the Service Perimeter to add this resource to.
     required: true
-    immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::NestedObject
