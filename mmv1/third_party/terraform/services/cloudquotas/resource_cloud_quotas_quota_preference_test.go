@@ -1,7 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package cloudquotas_test
 
 import (
@@ -45,7 +41,6 @@ func TestAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_up
 				ResourceName:            "google_cloud_quotas_quota_preference.my_preference",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ExpectNonEmptyPlan:      true,
 				ImportStateVerifyIgnore: []string{"parent", "quota_preference_id", "validate_only", "ignore_safety_checks", "contact_email", "justification", "quota_config.0.annotations"},
 			},
 			{
@@ -66,7 +61,7 @@ func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_ba
 		resource "google_project" "new_project" {
 			project_id 		= "tf-test%{random_suffix}"
 			name       		= "tf-test%{random_suffix}"
-			org_id          = "%{org_id}"
+			org_id			= "%{org_id}"
 			billing_account	= "%{billing_account}"
 		}
 
@@ -79,24 +74,26 @@ func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_ba
 		resource "google_project_service" "compute" {
 			project  	= google_project.new_project.project_id
 			service 	= "compute.googleapis.com"
-			depends_on	= [google_project_service.cloudquotas]
+			depends_on	= [google_project.new_project]
 		}
 
 		resource "google_project_service" "billing" {
 			project  	= google_project.new_project.project_id
 			service 	= "cloudbilling.googleapis.com"
-			depends_on	= [google_project_service.compute]
+			depends_on	= [google_project.new_project]
 		}
 		
 		resource "time_sleep" "wait_180_seconds" {
 			create_duration	= "180s"
 			depends_on		= [
+				google_project_service.cloudquotas,
+				google_project_service.compute,
 				google_project_service.billing, 
 			]
 		}
 
 		resource "google_cloud_quotas_quota_preference" "my_preference"{
-			parent					= "projects/${google_project_service.billing.project}"
+			parent					= "projects/${google_project.new_project.project_id}"
 			name 					= "compute_googleapis_com-CPUS-per-project_us-central1"
 			dimensions				= { region = "us-central1" }
 			service					= "compute.googleapis.com"
@@ -106,6 +103,9 @@ func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_ba
 				preferred_value		= 70
 			}
 			ignore_safety_checks	= "QUOTA_DECREASE_PERCENTAGE_TOO_HIGH"
+			depends_on		= [
+				time_sleep.wait_180_seconds
+			]
 		}
 	`, context)
 }
@@ -115,7 +115,7 @@ func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_in
 		resource "google_project" "new_project" {
 			project_id 		= "tf-test%{random_suffix}"
 			name       		= "tf-test%{random_suffix}"
-			org_id          = "%{org_id}"
+			org_id			= "%{org_id}"
 			billing_account	= "%{billing_account}"
 		}
 
@@ -128,18 +128,20 @@ func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_in
 		resource "google_project_service" "compute" {
 			project  	= google_project.new_project.project_id
 			service 	= "compute.googleapis.com"
-			depends_on	= [google_project_service.cloudquotas]
+			depends_on	= [google_project.new_project]
 		}
 
 		resource "google_project_service" "billing" {
 			project  	= google_project.new_project.project_id
 			service 	= "cloudbilling.googleapis.com"
-			depends_on	= [google_project_service.compute]
+			depends_on	= [google_project.new_project]
 		}
-
+		
 		resource "time_sleep" "wait_180_seconds" {
 			create_duration	= "180s"
 			depends_on		= [
+				google_project_service.cloudquotas,
+				google_project_service.compute,
 				google_project_service.billing, 
 			]
 		}
@@ -160,7 +162,7 @@ func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_de
 		resource "google_project" "new_project" {
 			project_id 		= "tf-test%{random_suffix}"
 			name       		= "tf-test%{random_suffix}"
-			org_id          = "%{org_id}"
+			org_id			= "%{org_id}"
 			billing_account	= "%{billing_account}"
 		}
 
@@ -173,24 +175,25 @@ func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_de
 		resource "google_project_service" "compute" {
 			project  	= google_project.new_project.project_id
 			service 	= "compute.googleapis.com"
-			depends_on	= [google_project_service.cloudquotas]
+			depends_on	= [google_project.new_project]
 		}
 
 		resource "google_project_service" "billing" {
 			project  	= google_project.new_project.project_id
 			service 	= "cloudbilling.googleapis.com"
-			depends_on	= [google_project_service.compute]
+			depends_on	= [google_project.new_project]
 		}
-
+		
 		resource "time_sleep" "wait_180_seconds" {
 			create_duration	= "180s"
 			depends_on		= [
+				google_project_service.cloudquotas,
+				google_project_service.compute,
 				google_project_service.billing, 
 			]
 		}
 
 		resource "google_cloud_quotas_quota_preference" "my_preference"{
-			validate_only			= true
 			ignore_safety_checks	= "QUOTA_DECREASE_PERCENTAGE_TOO_HIGH"
 			quota_config  {
 				preferred_value		= 65
