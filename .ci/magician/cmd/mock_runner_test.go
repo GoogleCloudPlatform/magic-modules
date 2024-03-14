@@ -20,7 +20,12 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
 	"path/filepath"
+	"sort"
+	"strings"
+
+	"golang.org/x/exp/maps"
 )
 
 type ParameterList []any
@@ -37,7 +42,24 @@ type mockRunner struct {
 	dirStack      *list.List
 }
 
+func sortedEnvString(env map[string]string) string {
+	keys := maps.Keys(env)
+	sort.Strings(keys)
+	kvs := make([]string, len(keys))
+	for i, k := range keys {
+		kvs[i] = fmt.Sprintf("%s:%s", k, env[k])
+	}
+	return fmt.Sprintf("map[%s]", strings.Join(kvs, " "))
+}
+
 func NewMockRunner() MockRunner {
+	diffProcessorEnv := map[string]string{
+		"NEW_REF": "auto-pr-123456",
+		"OLD_REF": "auto-pr-123456-old",
+		"PATH":    os.Getenv("PATH"),
+		"GOPATH":  os.Getenv("GOPATH"),
+		"HOME":    os.Getenv("HOME"),
+	}
 	return &mockRunner{
 		calledMethods: make(map[string][]ParameterList),
 		cmdResults: map[string]string{
@@ -47,7 +69,7 @@ func NewMockRunner() MockRunner {
 			"/mock/dir/magic-modules/.ci/magician git [clone -b auto-pr-123456 https://modular-magician:*******@github.com/modular-magician/terraform-provider-google-beta /mock/dir/tpgb] map[]": "",
 			"/mock/dir/magic-modules git [diff HEAD origin/main tools/missing-test-detector] map[]":                                                                                               "",
 			"/mock/dir/magic-modules/tools/diff-processor bin/diff-processor [breaking-changes] map[]":                                                                                            "",
-			"/mock/dir/magic-modules/tools/diff-processor make [build] map[NEW_REF:auto-pr-123456 OLD_REF:auto-pr-123456-old]":                                                                    "",
+			"/mock/dir/magic-modules/tools/diff-processor make [build] " + sortedEnvString(diffProcessorEnv):                                                                                      "",
 			"/mock/dir/magic-modules/tools/diff-processor bin/diff-processor [add-labels 123456] map[GITHUB_TOKEN_MAGIC_MODULES:*******]":                                                         "",
 			"/mock/dir/magic-modules/tools/missing-test-detector go [mod edit -replace google/provider/new=/mock/dir/tpgb] map[]":                                                                 "",
 			"/mock/dir/magic-modules/tools/missing-test-detector go [mod edit -replace google/provider/old=/mock/dir/tpgbold] map[]":                                                              "",
@@ -128,7 +150,7 @@ func (mr *mockRunner) PopDir() error {
 
 func (mr *mockRunner) Run(name string, args []string, env map[string]string) (string, error) {
 	mr.calledMethods["Run"] = append(mr.calledMethods["Run"], ParameterList{mr.cwd, name, args, env})
-	cmd := fmt.Sprintf("%s %s %v %v", mr.cwd, name, args, env)
+	cmd := fmt.Sprintf("%s %s %v %s", mr.cwd, name, args, sortedEnvString(env))
 	if result, ok := mr.cmdResults[cmd]; ok {
 		return result, nil
 	}
