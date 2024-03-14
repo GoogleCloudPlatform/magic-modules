@@ -89,7 +89,7 @@ func execRequestServiceReviewers(prNumber string, gh GithubClient, enrolledTeams
 			continue
 		}
 		teamCount += 1
-		if labelData, ok := enrolledTeams[label.Name]; ok {
+		if labelData, ok := enrolledTeams[label.Name]; ok && labelData.Team != "" {
 			githubTeamsSet[labelData.Team] = struct{}{}
 		}
 	}
