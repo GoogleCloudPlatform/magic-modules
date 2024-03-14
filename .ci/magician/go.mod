@@ -13,7 +13,11 @@ require (
 	google.golang.org/api v0.112.0
 )
 
-require github.com/otiai10/copy v1.12.0
+require (
+	github.com/otiai10/copy v1.12.0
+	github.com/stretchr/testify v1.8.4
+	gopkg.in/yaml.v2 v2.4.0
+)
 
 require (
 	cloud.google.com/go/compute v1.18.0 // indirect
@@ -25,8 +29,8 @@ require (
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.3 // indirect
 	github.com/googleapis/gax-go/v2 v2.7.0 // indirect
+	github.com/kr/pretty v0.3.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/stretchr/testify v1.8.4 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	golang.org/x/net v0.15.0 // indirect
 	golang.org/x/oauth2 v0.6.0 // indirect
@@ -35,7 +39,6 @@ require (
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20230303212802-e74f57abe488 // indirect
 	google.golang.org/grpc v1.53.0 // indirect
-	google.golang.org/protobuf v1.28.1 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
