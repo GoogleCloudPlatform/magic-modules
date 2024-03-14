@@ -25,6 +25,8 @@ description: |
 immutable: true
 schema_version: 1
 state_upgraders: true
+# Skipping the sweeper since the resource needs force-deletion
+skip_sweeper: true
 id_format: projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}
 import_format:
   [
