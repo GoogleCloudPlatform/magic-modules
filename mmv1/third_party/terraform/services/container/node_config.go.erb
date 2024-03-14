@@ -979,7 +979,7 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 	if v,ok := nodeConfig["enable_confidential_storage"]; ok {
 		nc.EnableConfidentialStorage = v.(bool)
 	}
-	
+
 	<% unless version == "ga" -%>
 	if v, ok := nodeConfig["host_maintenance_policy"]; ok {
 		nc.HostMaintenancePolicy = expandHostMaintenancePolicy(v)
