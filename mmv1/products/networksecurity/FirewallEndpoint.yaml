@@ -84,10 +84,6 @@ properties:
     description: |
       Server-defined URL of this resource.
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'description'
-    description: |
-      Description of the firewall endpoint. Max length 2048 characters.
   - !ruby/object:Api::Type::Time
     name: 'createTime'
     description: Time the firewall endpoint was created in UTC.
