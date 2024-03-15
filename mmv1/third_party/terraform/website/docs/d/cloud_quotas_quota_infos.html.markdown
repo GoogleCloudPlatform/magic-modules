@@ -12,7 +12,6 @@ Provides information about all quotas for a given project, folder or organizatio
 data "google_cloud_quotas_quota_infos" "my_quota_infos" {
     parent      = "projects/my-project"	
     service 	= "compute.googleapis.com"
-    page_size	= 2
 }
 ```
 
@@ -24,16 +23,11 @@ The following arguments are supported:
 
 * `service` - (Required) The name of the service in which the quotas are defined.
 
-* `page_size` - (Optional) Requested page size. Server may return fewer items than requested. If unspecified, server will pick an appropriate default.
-
-* `page_token` - (Optional) A token identifying a page of results the server should return.
-
 
 ## Attributes Reference
 
 The following attributes are exported:
 
-* `next_page_token` - (Output) A token, which can be sent as pageToken to retrieve the next page. If this field is omitted, there are no subsequent pages.
 * `quota_infos` - (Output) The list of QuotaInfo.
 
 <a name="nested_quota_infos"></a> The `quota_infos` block supports:

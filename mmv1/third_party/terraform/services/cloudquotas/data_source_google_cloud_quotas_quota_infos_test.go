@@ -1,7 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package cloudquotas_test
 
 import (
@@ -16,7 +12,7 @@ func TestAccDataSourceGoogleQuotaInfos_basic(t *testing.T) {
 	t.Parallel()
 
 	resourceName := "data.google_cloud_quotas_quota_infos.my_quota_infos"
-	service := "libraryagent.googleapis.com"
+	service := "compute.googleapis.com"
 
 	context := map[string]interface{}{
 		"project": envvar.GetTestProjectFromEnv(),
@@ -30,7 +26,7 @@ func TestAccDataSourceGoogleQuotaInfos_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceGoogleQuotaInfos_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "quota_infos.#", "9"),
+					resource.TestCheckResourceAttr(resourceName, "quota_infos.#", "319"),
 					resource.TestCheckResourceAttrSet(resourceName, "quota_infos.0.name"),
 					resource.TestCheckResourceAttrSet(resourceName, "quota_infos.0.quota_id"),
 					resource.TestCheckResourceAttrSet(resourceName, "quota_infos.0.metric"),
@@ -42,14 +38,6 @@ func TestAccDataSourceGoogleQuotaInfos_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "quota_infos.0.dimensions_infos.0.applicable_locations.0"),
 				),
 			},
-			{
-				Config: testAccDataSourceGoogleQuotaInfos_withPagination(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "quota_infos.#", "2"),
-					resource.TestCheckResourceAttrSet(resourceName, "quota_infos.0.%"),
-					resource.TestCheckResourceAttr(resourceName, "next_page_token", "3"),
-				),
-			},
 		},
 	})
 }
@@ -59,17 +47,6 @@ func testAccDataSourceGoogleQuotaInfos_basic(context map[string]interface{}) str
 		data "google_cloud_quotas_quota_infos" "my_quota_infos" {
 			parent	= "projects/%{project}"	
 			service	= "%{service}"
-		}
-	`, context)
-}
-
-func testAccDataSourceGoogleQuotaInfos_withPagination(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-		data "google_cloud_quotas_quota_infos" "my_quota_infos" {
-			parent      = "projects/%{project}"	
-			service 	= "%{service}"
-			page_size	= 2
-			page_token	= 2
 		}
 	`, context)
 }

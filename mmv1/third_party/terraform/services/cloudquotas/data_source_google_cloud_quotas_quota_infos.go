@@ -1,5 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package cloudquotas
 
 import (
@@ -23,19 +21,6 @@ func DataSourceGoogleCloudQuotasQuotaInfos() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"page_token": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"page_size": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "100",
-			},
-			"next_page_token": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			"quota_infos": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -43,11 +28,11 @@ func DataSourceGoogleCloudQuotasQuotaInfos() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"service": {
 							Type:     schema.TypeString,
-							Required: true,
+							Computed: true,
 						},
 						"quota_id": {
 							Type:     schema.TypeString,
-							Required: true,
+							Computed: true,
 						},
 						"name": {
 							Type:     schema.TypeString,
@@ -158,7 +143,7 @@ func dataSourceGoogleCloudQuotasQuotaInfosRead(d *schema.ResourceData, meta inte
 		return err
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{CloudQuotasBasePath}}{{parent}}/locations/global/services/{{service}}/quotaInfos?pageSize={{page_size}}&pageToken={{page_token}}")
+	url, err := tpgresource.ReplaceVars(d, config, "{{CloudQuotasBasePath}}{{parent}}/locations/global/services/{{service}}/quotaInfos")
 	if err != nil {
 		return fmt.Errorf("error setting api endpoint")
 	}
@@ -173,10 +158,32 @@ func dataSourceGoogleCloudQuotasQuotaInfosRead(d *schema.ResourceData, meta inte
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("CloudQuotasQuotaInfo %q", d.Id()))
 	}
 
-	if err := d.Set("next_page_token", res["nextPageToken"]); err != nil {
-		return fmt.Errorf("error reading next page token: %s", err)
+	var quotaInfos []map[string]interface{}
+	for {
+		fetchedQuotaInfos := res["quotaInfos"].([]interface{})
+		for _, rawQuotaInfo := range fetchedQuotaInfos {
+			quotaInfos = append(quotaInfos, flattenCloudQuotasQuotaInfo(rawQuotaInfo.(map[string]interface{}), d, config))
+		}
+
+		if res["nextPageToken"] == nil || res["nextPageToken"].(string) == "" {
+			break
+		}
+		url, err = tpgresource.ReplaceVars(d, config, "{{CloudQuotasBasePath}}{{parent}}/locations/global/services/{{service}}/quotaInfos?pageToken="+res["nextPageToken"].(string))
+		if err != nil {
+			return fmt.Errorf("error setting api endpoint")
+		}
+		res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			RawURL:    url,
+			UserAgent: userAgent,
+		})
+		if err != nil {
+			return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("CloudQuotasQuotaInfo %q", d.Id()), url)
+		}
 	}
-	if err := d.Set("quota_infos", flattenCloudQuotasQuotaInfos(res["quotaInfos"].([]interface{}), d, config)); err != nil {
+
+	if err := d.Set("quota_infos", quotaInfos); err != nil {
 		return fmt.Errorf("error reading quota infos : %s", err)
 	}
 
@@ -184,34 +191,25 @@ func dataSourceGoogleCloudQuotasQuotaInfosRead(d *schema.ResourceData, meta inte
 	return nil
 }
 
-func flattenCloudQuotasQuotaInfos(fetchedQuotaInfos []interface{}, d *schema.ResourceData, config *transport_tpg.Config) []interface{} {
-	if fetchedQuotaInfos == nil {
-		return make([]interface{}, 0)
-	}
+func flattenCloudQuotasQuotaInfo(rawQuotaInfo map[string]interface{}, d *schema.ResourceData, config *transport_tpg.Config) map[string]interface{} {
+	quotaInfo := make(map[string]interface{})
 
-	quotaInfos := make([]interface{}, 0, len(fetchedQuotaInfos))
-	for _, rawQuotaInfo := range fetchedQuotaInfos {
-		quotaInfo := make(map[string]interface{})
-		rawQuotaInfo := rawQuotaInfo.(map[string]interface{})
+	quotaInfo["name"] = rawQuotaInfo["name"]
+	quotaInfo["quota_id"] = rawQuotaInfo["quotaId"]
+	quotaInfo["metric"] = rawQuotaInfo["metric"]
+	quotaInfo["service"] = rawQuotaInfo["service"]
+	quotaInfo["is_precise"] = rawQuotaInfo["isPrecise"]
+	quotaInfo["refresh_interval"] = rawQuotaInfo["refreshInterval"]
+	quotaInfo["container_type"] = rawQuotaInfo["containerType"]
+	quotaInfo["dimensions"] = rawQuotaInfo["dimensions"]
+	quotaInfo["metric_display_name"] = rawQuotaInfo["metricDisplayName"]
+	quotaInfo["quota_display_name"] = rawQuotaInfo["quotaDisplayName"]
+	quotaInfo["metric_unit"] = rawQuotaInfo["metricUnit"]
+	quotaInfo["quota_increase_eligibility"] = flattenCloudQuotasQuotaInfoQuotaIncreaseEligibility(rawQuotaInfo["quotaIncreaseEligibility"], d, config)
+	quotaInfo["is_fixed"] = rawQuotaInfo["isFixed"]
+	quotaInfo["dimensions_infos"] = flattenCloudQuotasQuotaInfoDimensionsInfos(rawQuotaInfo["dimensionsInfos"], d, config)
+	quotaInfo["is_concurrent"] = rawQuotaInfo["isConcurrent"]
+	quotaInfo["service_request_quota_uri"] = rawQuotaInfo["serviceRequestQuotaUri"]
 
-		quotaInfo["name"] = rawQuotaInfo["name"]
-		quotaInfo["quota_id"] = rawQuotaInfo["quotaId"]
-		quotaInfo["metric"] = rawQuotaInfo["metric"]
-		quotaInfo["service"] = rawQuotaInfo["service"]
-		quotaInfo["is_precise"] = rawQuotaInfo["isPrecise"]
-		quotaInfo["refresh_interval"] = rawQuotaInfo["refreshInterval"]
-		quotaInfo["container_type"] = rawQuotaInfo["containerType"]
-		quotaInfo["dimensions"] = rawQuotaInfo["dimensions"]
-		quotaInfo["metric_display_name"] = rawQuotaInfo["metricDisplayName"]
-		quotaInfo["quota_display_name"] = rawQuotaInfo["quotaDisplayName"]
-		quotaInfo["metric_unit"] = rawQuotaInfo["metricUnit"]
-		quotaInfo["quota_increase_eligibility"] = flattenCloudQuotasQuotaInfoQuotaIncreaseEligibility(rawQuotaInfo["quotaIncreaseEligibility"], d, config)
-		quotaInfo["is_fixed"] = rawQuotaInfo["isFixed"]
-		quotaInfo["dimensions_infos"] = flattenCloudQuotasQuotaInfoDimensionsInfos(rawQuotaInfo["dimensionsInfos"], d, config)
-		quotaInfo["is_concurrent"] = rawQuotaInfo["isConcurrent"]
-		quotaInfo["service_request_quota_uri"] = rawQuotaInfo["serviceRequestQuotaUri"]
-
-		quotaInfos = append(quotaInfos, quotaInfo)
-	}
-	return quotaInfos
+	return quotaInfo
 }
