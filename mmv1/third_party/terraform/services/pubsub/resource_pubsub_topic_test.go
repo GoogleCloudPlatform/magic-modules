@@ -271,10 +271,10 @@ resource "google_pubsub_topic" "foo" {
   # Outside of automated terraform-provider-google CI tests, these values must be of actual AWS resources for the test to pass.
   ingestion_data_source_settings {
     aws_kinesis {
-        stream_arn = "arn:aws:kinesis:us-west-2:111111111111:stream/fake-updated-stream-name"
-        consumer_arn = "arn:aws:kinesis:us-west-2:111111111111:stream/fake-updated-stream-name/consumer/consumer-1:1111111111"
-        aws_role_arn = "arn:aws:iam::111111111111:role/fake-role-name"
-        gcp_service_account = "fake-updated-service-account@fake-gcp-project.iam.gserviceaccount.com"
+        stream_arn = "arn:aws:kinesis:us-west-2:111111111111:stream/updated-fake-stream-name"
+        consumer_arn = "arn:aws:kinesis:us-west-2:111111111111:stream/updated-fake-stream-name/consumer/consumer-1:1111111111"
+        aws_role_arn = "arn:aws:iam::111111111111:role/updated-fake-role-name"
+        gcp_service_account = "updated-fake-service-account@fake-gcp-project.iam.gserviceaccount.com"
     }
   }
 }
