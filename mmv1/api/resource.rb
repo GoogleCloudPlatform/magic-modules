@@ -420,6 +420,10 @@ module Api
       end
     end
 
+    def sensitive_props
+      all_nested_properties(root_properties).select(&:sensitive)
+    end
+
     # Return the product-level async object, or the resource-specific one
     # if one exists.
     def async
