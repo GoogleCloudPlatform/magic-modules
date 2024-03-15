@@ -139,7 +139,7 @@ properties:
         - !ruby/object:Api::Type::String
           name: 'address'
           description: |
-            Output only. Network address of the exposed Redis endpoint used by clients to connect to the service. UPDATE
+            Output only. Network address of the exposed Redis endpoint used by clients to connect to the service.
         - !ruby/object:Api::Type::Integer
           name: 'port'
           description: |
