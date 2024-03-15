@@ -5,7 +5,7 @@ permissions: read-all
 on:
   pull_request:
     paths:
-      - 'mmv1/**.rb'
+      - 'mmv1/**/*.rb'
 
 jobs:
   rake-tests:
