@@ -42,6 +42,14 @@ type Timeouts struct {
 //   validate
 // end
 
+func NewTimeouts() *Timeouts {
+	return &Timeouts{
+		InsertMinutes: DEFAULT_INSERT_TIMEOUT_MINUTES,
+		UpdateMinutes: DEFAULT_UPDATE_TIMEOUT_MINUTES,
+		DeleteMinutes: DEFAULT_DELETE_TIMEOUT_MINUTES,
+	}
+}
+
 // def validate
 //   super
 

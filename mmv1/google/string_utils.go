@@ -14,8 +14,10 @@
 package google
 
 import (
+	"log"
 	"regexp"
 	"strings"
+	"unicode"
 )
 
 // // Helper class to process and mutate strings.
@@ -83,21 +85,34 @@ func SpaceSeparated(source string) string {
 //     "//{source}s"
 //   end
 
-//   // Slimmed down version of ActiveSupport::Inflector code
-//   def self.camelize(term, uppercase_first_letter)
-//     acronyms_camelize_regex = /^(?:(?=a)b(?=\b|[A-Z_])|\w)/
+func Camelize(term string, firstLetter string) string {
+	if firstLetter != "upper" && firstLetter != "lower" {
+		log.Fatalf("Invalid option, use either upper or lower")
+	}
 
-//     string = term.to_s
-//     string = if uppercase_first_letter
-//                string.sub(/^[a-z\d]*/) { |match| match.capitalize! || match }
-//              else
-//                string.sub(acronyms_camelize_regex) { |match| match.downcase! || match }
-//              end
-//     // handle snake case
-//     string.gsub!(/(?:_)([a-z\d]*)/i) do
-//       word = ::Regexp.last_match(1)
-//       word.capitalize! || word
-//     end
-//     string
-//   end
-// end
+	res := term
+	if firstLetter == "upper" {
+		res = regexp.MustCompile(`^[a-z\d]*/`).ReplaceAllStringFunc(res, func(match string) string {
+			return strings.Title(match)
+		})
+	} else {
+		// TODO: rewrite with the regular expression. Lookahead(?=) is not supported in Go
+		// 	acronymsCamelizeRegex := regexp.MustCompile(`^(?:(?=a)b(?=\b|[A-Z_])|\w)`)
+		// 	res = acronymsCamelizeRegex.ReplaceAllStringFunc(res, func(match string) string {
+		// 		return strings.ToLower(match)
+		// 	})
+		if len(res) != 0 {
+			r := []rune(res)
+			r[0] = unicode.ToLower(r[0])
+			res = string(r)
+		}
+	}
+	// handle snake case
+	re := regexp.MustCompile(`(?:_)([a-z\d]*)`)
+	res = re.ReplaceAllStringFunc(res, func(match string) string {
+		word := match[1:]
+		word = strings.Title(word)
+		return word
+	})
+	return res
+}
