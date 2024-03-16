@@ -1862,7 +1862,7 @@ func flattenExternalDataConfiguration(edc *bigquery.ExternalDataConfiguration) (
 		result["compression"] = edc.Compression
 	}
 
-	if edc.Compression != "" {
+	if edc.JsonExtension != "" {
 		result["json_extension"] = edc.JsonExtension
 	}
 
