@@ -190,6 +190,9 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
 * `json_options` (Optional) - Additional properties to set if
     `source_format` is set to "JSON". Structure is [documented below](#nested_json_options).
 
+* `json_extension` (Optional) - Load option to be used together with to set if
+    `source_format` is set to "NEWLINE_DELIMITED_JSON" to indicate that a variant of JSON is being loaded. Valid values are: `GEOJSON`.
+
 * `parquet_options` (Optional) - Additional properties to set if
     `source_format` is set to "PARQUET". Structure is [documented below](#nested_parquet_options).
 
