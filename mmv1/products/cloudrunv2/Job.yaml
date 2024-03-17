@@ -296,6 +296,7 @@ properties:
                   name: 'env'
                   description: |-
                     List of environment variables to set in the container.
+                  is_set: true
                   item_type: !ruby/object:Api::Type::NestedObject
                     properties:
                       - !ruby/object:Api::Type::String
