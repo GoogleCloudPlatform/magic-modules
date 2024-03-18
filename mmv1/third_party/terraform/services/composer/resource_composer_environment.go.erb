@@ -2407,7 +2407,7 @@ func expandComposerEnvironmentConfigWorkloadsConfig(v interface{}, d *schema.Res
 			transformedDagProcessor.Cpu = originalDagProcessorRaw["cpu"].(float64)
 			transformedDagProcessor.MemoryGb = originalDagProcessorRaw["memory_gb"].(float64)
 			transformedDagProcessor.StorageGb = originalDagProcessorRaw["storage_gb"].(float64)
-			transformedDagProcessor.Count = originalDagProcessorRaw["count"].(int)
+			transformedDagProcessor.Count = int64(originalDagProcessorRaw["count"].(int))
 			transformed.DagProcessor = transformedDagProcessor
 		}
 	}
