@@ -969,6 +969,14 @@ func ResourceComposerEnvironment() *schema.Resource {
 													ValidateFunc: validation.FloatAtLeast(0),
 													Description:  `Storage (GB) request and limit for DAG processor.`,
 												},
+												"count": {
+													Type:         schema.TypeInt,
+													Optional:     true,
+													ForceNew:     false,
+													Computed:     true,
+													ValidateFunc: validation.IntAtLeast(0),
+													Description:  `Number of DAG processors.`,
+												},
 											},
 										},
 									},
@@ -1887,6 +1895,7 @@ func flattenComposerEnvironmentConfigWorkloadsConfig(workloadsConfig *composer.W
 		transformedDagProcessor["cpu"] = wlCfgDagProcessor.Cpu
 		transformedDagProcessor["memory_gb"] = wlCfgDagProcessor.MemoryGb
 		transformedDagProcessor["storage_gb"] = wlCfgDagProcessor.StorageGb
+		transformedDagProcessor["count"] = wlCfgDagProcessor.Count
 	}
 <% end -%>
 
@@ -2398,6 +2407,7 @@ func expandComposerEnvironmentConfigWorkloadsConfig(v interface{}, d *schema.Res
 			transformedDagProcessor.Cpu = originalDagProcessorRaw["cpu"].(float64)
 			transformedDagProcessor.MemoryGb = originalDagProcessorRaw["memory_gb"].(float64)
 			transformedDagProcessor.StorageGb = originalDagProcessorRaw["storage_gb"].(float64)
+			transformedDagProcessor.Count = originalDagProcessorRaw["count"].(int)
 			transformed.DagProcessor = transformedDagProcessor
 		}
 	}
