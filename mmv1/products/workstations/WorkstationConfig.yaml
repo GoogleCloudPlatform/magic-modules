@@ -341,7 +341,7 @@ properties:
                 - !ruby/object:Api::Type::String
                   name: 'machineType'
                   description: |
-                    The type of machine that boosted VM instances will use. Defaults to `e2-standard-4`.
+                    The type of machine that boosted VM instances will use—for example, e2-standard-4. For more information about machine types that Cloud Workstations supports, see the list of available machine types https://cloud.google.com/workstations/docs/available-machine-types. Defaults to e2-standard-4.
                 - !ruby/object:Api::Type::Array
                   name: 'accelerators'
                   description: |

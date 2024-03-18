@@ -531,13 +531,13 @@ func testAccWorkstationsWorkstationConfig_boost(context map[string]interface{}) 
     workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
     location               = "us-central1"
     host {
-      gce_instance {  
+      gce_instance {
         boost_configs {
           id           = "boost-1"
           machine_type = "n1-standard-2"
           accelerators {
             type  = "nvidia-tesla-t4"
-            count = "1"
+            count = 1
           }
         }
         boost_configs {
@@ -960,6 +960,15 @@ resource "google_workstations_workstation_config" "default" {
       confidential_instance_config {
         enable_confidential_compute = true
       }
+ 
+      boost_configs {
+        id           = "boost-1"
+        machine_type = "n1-standard-2"
+        accelerators {
+          type  = "nvidia-tesla-t4"
+          count = 1
+        }
+      }
     }
   }
 }
@@ -1016,6 +1025,7 @@ resource "google_workstations_workstation_config" "default" {
 
       shielded_instance_config {}
       confidential_instance_config {}
+      boost_configs {}
     }
   }
 }
