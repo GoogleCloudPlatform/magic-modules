@@ -963,11 +963,7 @@ resource "google_workstations_workstation_config" "default" {
  
       boost_configs {
         id           = "boost-1"
-        machine_type = "n1-standard-2"
-        accelerators {
-          type  = "nvidia-tesla-t4"
-          count = 1
-        }
+        machine_type = "n2d-standard-2"
       }
     }
   }
