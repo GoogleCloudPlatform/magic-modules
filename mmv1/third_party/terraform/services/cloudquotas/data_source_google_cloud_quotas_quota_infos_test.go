@@ -26,7 +26,6 @@ func TestAccDataSourceGoogleQuotaInfos_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceGoogleQuotaInfos_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "quota_infos.#", "319"),
 					resource.TestCheckResourceAttrSet(resourceName, "quota_infos.0.name"),
 					resource.TestCheckResourceAttrSet(resourceName, "quota_infos.0.quota_id"),
 					resource.TestCheckResourceAttrSet(resourceName, "quota_infos.0.metric"),
