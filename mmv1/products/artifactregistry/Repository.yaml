@@ -101,11 +101,22 @@ examples:
       repository_id: 'my-repository'
       description: 'example docker repository with cleanup policies'
   - !ruby/object:Provider::Terraform::Examples
-    name: 'artifact_registry_repository_remote_custom'
+    name: 'artifact_registry_repository_remote_dockerhub_auth'
     primary_resource_id: 'my-repo'
     vars:
       repository_id: 'example-custom-remote'
       description: 'example remote docker repository with credentials'
+      secret_id: 'example-secret'
+      secret_resource_id: 'example-custom-remote-secret'
+      username: 'remote-username'
+      secret_data: 'remote-password'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'artifact_registry_repository_remote_custom_dockerhub_auth'
+    primary_resource_id: 'my-repo'
+    vars:
+      repository_id: 'example-custom-remote'
+      description: 'example remote docker repository with credentials'
+      custom_uri: 'https://registry-1.docker.io'
       secret_id: 'example-secret'
       secret_resource_id: 'example-custom-remote-secret'
       username: 'remote-username'
@@ -396,6 +407,20 @@ properties:
             values:
               - :DOCKER_HUB
             default_value: :DOCKER_HUB
+          - !ruby/object:Api::Type::NestedObject
+            name: 'customRepository'
+            exactly_one_of:
+              - remoteRepositoryConfig.0.docker_repository.0.custom_repository
+            description: |-
+              Settings for a Docker remote repository with a custom uri.
+            immutable: true
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'uri'
+                required: true
+                description: |-
+                  Specific uri to the registry, e.g. `"https://registry-1.docker.io"`
+                immutable: true
       - !ruby/object:Api::Type::NestedObject
         name: 'mavenRepository'
         exactly_one_of:
