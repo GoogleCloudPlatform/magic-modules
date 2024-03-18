@@ -27,7 +27,7 @@ resource "google_artifact_registry_repository" "<%= ctx[:primary_resource_id] %>
   remote_repository_config {
     description = "custom uri docker hub with auth credentials"
     docker_repository {
-      custom_repository = {
+      custom_repository {
         uri = "<%= ctx[:vars]['custom_uri'] %>"
       }
     }

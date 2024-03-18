@@ -371,7 +371,6 @@ properties:
             properties:
               - !ruby/object:Api::Type::Enum
                 name: 'repositoryBase'
-                required: true
                 description: |-
                   A common public repository base for Apt, e.g. `"debian/dists/buster"`
                 immutable: true
@@ -380,7 +379,6 @@ properties:
                   - :UBUNTU
               - !ruby/object:Api::Type::String
                 name: 'repositoryPath'
-                required: true
                 description: |-
                   Specific repository from the base.
                 immutable: true
@@ -394,7 +392,6 @@ properties:
             properties:
               - !ruby/object:Api::Type::String
                 name: 'uri'
-                required: true
                 description: |-
                   Specific uri to the registry, e.g. `"http://deb.debian.org/debian/dists/buster"`
                 immutable: true
@@ -431,7 +428,6 @@ properties:
             properties:
               - !ruby/object:Api::Type::String
                 name: 'uri'
-                required: true
                 description: |-
                   Specific uri to the registry, e.g. `"https://registry-1.docker.io"`
                 immutable: true
@@ -468,7 +464,6 @@ properties:
             properties:
               - !ruby/object:Api::Type::String
                 name: 'uri'
-                required: true
                 description: |-
                   Specific uri to the registry, e.g. `"https://repo.maven.apache.org/maven2"`
                 immutable: true
@@ -505,7 +500,6 @@ properties:
             properties:
               - !ruby/object:Api::Type::String
                 name: 'uri'
-                required: true
                 description: |-
                   Specific uri to the registry, e.g. `"https://registry.npmjs.org"`
                 immutable: true
@@ -542,7 +536,6 @@ properties:
             properties:
               - !ruby/object:Api::Type::String
                 name: 'uri'
-                required: true
                 description: |-
                   Specific uri to the registry, e.g. `"https://pypi.io"`
                 immutable: true
@@ -567,7 +560,6 @@ properties:
             properties:
               - !ruby/object:Api::Type::Enum
                 name: 'repositoryBase'
-                required: true
                 description: |-
                   A common public repository base for Yum.
                 immutable: true
@@ -580,7 +572,6 @@ properties:
                   - :EPEL
               - !ruby/object:Api::Type::String
                 name: 'repositoryPath'
-                required: true
                 description: |-
                   Specific repository from the base, e.g. `"centos/8-stream/BaseOS/x86_64/os"`
                 immutable: true
@@ -594,7 +585,6 @@ properties:
             properties:
               - !ruby/object:Api::Type::String
                 name: 'uri'
-                required: true
                 description: |-
                   Specific uri to the registry, e.g. `"https://dl.rockylinux.org/pub/rocky/9/BaseOS/x86_64/os"`
                 immutable: true
