@@ -399,7 +399,6 @@ properties:
                   Specific uri to the registry, e.g. `"http://deb.debian.org/debian/dists/buster"`
                 immutable: true
       - !ruby/object:Api::Type::NestedObject
-      - !ruby/object:Api::Type::NestedObject
         name: 'dockerRepository'
         exactly_one_of:
           - remoteRepositoryConfig.0.apt_repository
