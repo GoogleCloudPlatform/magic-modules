@@ -32,7 +32,7 @@ func TestAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_up
 				ResourceName:            "google_cloud_quotas_quota_preference.my_preference",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"parent", "quota_preference_id", "validate_only", "ignore_safety_checks", "contact_email"},
+				ImportStateVerifyIgnore: []string{"parent", "quota_preference_id", "ignore_safety_checks", "contact_email"},
 			},
 			{
 				Config: testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_increaseQuota(context),
@@ -41,7 +41,7 @@ func TestAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_up
 				ResourceName:            "google_cloud_quotas_quota_preference.my_preference",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"parent", "quota_preference_id", "validate_only", "ignore_safety_checks", "contact_email", "justification", "quota_config.0.annotations"},
+				ImportStateVerifyIgnore: []string{"parent", "quota_preference_id", "ignore_safety_checks", "contact_email", "justification", "quota_config.0.annotation"},
 			},
 			{
 				Config: testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_decreaseQuota(context),
@@ -50,7 +50,7 @@ func TestAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_up
 				ResourceName:            "google_cloud_quotas_quota_preference.my_preference",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"parent", "quota_preference_id", "validate_only", "ignore_safety_checks", "contact_email", "justification"},
+				ImportStateVerifyIgnore: []string{"parent", "quota_preference_id", "ignore_safety_checks", "contact_email"},
 			},
 		},
 	})
@@ -83,8 +83,8 @@ func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_ba
 			depends_on	= [google_project.new_project]
 		}
 		
-		resource "time_sleep" "wait_180_seconds" {
-			create_duration	= "180s"
+		resource "time_sleep" "wait_120_seconds" {
+			create_duration	= "120s"
 			depends_on		= [
 				google_project_service.cloudquotas,
 				google_project_service.compute,
@@ -103,8 +103,8 @@ func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_ba
 				preferred_value		= 70
 			}
 			ignore_safety_checks	= "QUOTA_DECREASE_PERCENTAGE_TOO_HIGH"
-			depends_on		= [
-				time_sleep.wait_180_seconds
+			depends_on				= [
+				time_sleep.wait_120_seconds
 			]
 		}
 	`, context)
@@ -136,15 +136,6 @@ func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_in
 			service 	= "cloudbilling.googleapis.com"
 			depends_on	= [google_project.new_project]
 		}
-		
-		resource "time_sleep" "wait_180_seconds" {
-			create_duration	= "180s"
-			depends_on		= [
-				google_project_service.cloudquotas,
-				google_project_service.compute,
-				google_project_service.billing, 
-			]
-		}
 
 		resource "google_cloud_quotas_quota_preference" "my_preference"{
 			contact_email		= "testinguser2@google.com"
@@ -153,6 +144,11 @@ func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_in
 				preferred_value = 72
 				annotations 	= { label = "terraform" }
 			}
+			depends_on		= [
+				google_project_service.cloudquotas,
+				google_project_service.compute,
+				google_project_service.billing, 
+			]
 		}
 	`, context)
 }
@@ -183,21 +179,17 @@ func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_de
 			service 	= "cloudbilling.googleapis.com"
 			depends_on	= [google_project.new_project]
 		}
-		
-		resource "time_sleep" "wait_180_seconds" {
-			create_duration	= "180s"
-			depends_on		= [
-				google_project_service.cloudquotas,
-				google_project_service.compute,
-				google_project_service.billing, 
-			]
-		}
 
 		resource "google_cloud_quotas_quota_preference" "my_preference"{
 			ignore_safety_checks	= "QUOTA_DECREASE_PERCENTAGE_TOO_HIGH"
 			quota_config  {
 				preferred_value		= 65
 			}
+			depends_on				= [
+				google_project_service.cloudquotas,
+				google_project_service.compute,
+				google_project_service.billing, 
+			]
 		}
 	`, context)
 }
