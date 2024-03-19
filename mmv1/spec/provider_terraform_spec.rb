@@ -23,20 +23,15 @@ end
 describe Provider::Terraform do
   context 'good file product' do
     let(:product) { Api::Compiler.new(File.read('spec/data/good-file.yaml')).run }
-    let(:parsed) { Provider::Config.parse('spec/data/terraform-config.yaml', product) }
-    let(:config) { parsed[1] }
-    let(:override_product) { parsed[0] }
-    let(:provider) { Provider::Terraform.new(config, product, 'ga', Time.now) }
+    let(:provider) { Provider::Terraform.new(product, 'ga', Time.now) }
     let(:resource) { product.objects[0] }
     let(:override_resource) do
-      override_product.objects.find { |o| o.name == 'ResourceWithTerraformOverride' }
+      product.objects.find { |o| o.name == 'ThirdResource' }
     end
 
     before do
       allow_open 'spec/data/good-file.yaml'
-      allow_open 'spec/data/terraform-config.yaml'
       product.validate
-      config.validate
     end
 
     describe '#format2regex' do
@@ -152,7 +147,7 @@ describe Provider::Terraform do
         is_expected.to eq(
           [
             ['string_one', ['stringOne']],
-            ['string_renamed', ['stringRename']],
+            ['string_renamed', ['stringRenamed']],
             ['object_one', ['objectOne']],
             ['object_two_string', ['overrideFoo', 'nested.overrideBar']],
             [
@@ -258,7 +253,7 @@ describe Provider::Terraform do
 
   def named_property(name)
     Google::YamlValidator.parse(
-      format("--- !ruby/object:Api::Object::Named\nname: '%<name>s'",
+      format("--- !ruby/object:Api::NamedObject\nname: '%<name>s'",
              name:)
     )
   end

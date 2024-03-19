@@ -52,6 +52,7 @@ import_format:
     '{{app_id}}',
   ]
 autogen_async: true
+# Sweeper skipped as this resource has customized deletion.
 skip_sweeper: true
 identity:
   - appId
@@ -121,8 +122,10 @@ properties:
       This identifier should be treated as an opaque token, as the data format is not specified.
   - !ruby/object:Api::Type::String
     name: packageName
+    immutable: true
+    required: true
     description: |
-      Immutable. The canonical package name of the Android app as would appear in the Google Play
+      The canonical package name of the Android app as would appear in the Google Play
       Developer Console.
   - !ruby/object:Api::Type::Array
     name: sha1Hashes

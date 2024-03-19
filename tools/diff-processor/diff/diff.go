@@ -3,10 +3,10 @@ package diff
 import (
 	"reflect"
 
-	"golang.org/x/exp/maps"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"golang.org/x/exp/maps"
 )
 
 // SchemaDiff is a nested map with field names as keys and Field objects
@@ -16,7 +16,7 @@ type SchemaDiff map[string]ResourceDiff
 
 type ResourceDiff struct {
 	ResourceConfig ResourceConfigDiff
-	Fields map[string]FieldDiff
+	Fields         map[string]FieldDiff
 }
 
 type ResourceConfigDiff struct {
@@ -171,17 +171,24 @@ func fieldChanged(oldField, newField *schema.Schema) bool {
 	}
 
 	// Check if Elem changed (unless old and new both represent nested fields)
-	if (oldField.Elem == nil || newField.Elem == nil) && !(oldField.Elem == nil && newField.Elem == nil) {
+	if (oldField.Elem == nil && newField.Elem != nil) || (oldField.Elem != nil && newField.Elem == nil) {
 		return true
 	}
-	_, oldHasChildren := oldField.Elem.(*schema.Resource)
-	_, newHasChildren := newField.Elem.(*schema.Resource)
-	if !oldHasChildren && !newHasChildren {
-		if !reflect.DeepEqual(oldField.Elem, newField.Elem) {
+	if oldField.Elem != nil && newField.Elem != nil {
+		// At this point new/old Elems are either schema.Schema or schema.Resource.
+		// If both are schema.Resource we don't need to do anything. Diffs on subfields
+		// are handled separately.
+		_, oldIsResource := oldField.Elem.(*schema.Resource)
+		_, newIsResource := newField.Elem.(*schema.Resource)
+
+		if (oldIsResource && !newIsResource) || (!oldIsResource && newIsResource) {
 			return true
 		}
-	} else if (oldHasChildren || newHasChildren) && !(oldHasChildren && newHasChildren) {
-		return true
+		if !oldIsResource && !newIsResource {
+			if fieldChanged(oldField.Elem.(*schema.Schema), newField.Elem.(*schema.Schema)) {
+				return true
+			}
+		}
 	}
 
 	// Check if any Schema struct fields that are functions have changed

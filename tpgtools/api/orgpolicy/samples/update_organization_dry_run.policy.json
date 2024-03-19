@@ -1,0 +1,14 @@
+{
+    "name": "organizations/{{org_id}}/policies/gcp.resourceLocations",
+    "parent": "organizations/{{org_id}}",
+    "dryRunSpec": {
+        "rules": [
+            {
+                "allowAll": true,
+                "enforce": true
+            }
+        ],
+        "reset": false,
+        "inheritFromParent": true
+    }
+}

@@ -18,6 +18,10 @@ resource "google_redis_instance" "<%= ctx[:primary_resource_id] %>" {
     my_key    = "my_val"
     other_key = "other_val"
   }
+
+  lifecycle {
+    prevent_destroy = <%= ctx[:vars]['prevent_destroy'] %>
+  }
 }
 
 // This example assumes this network already exists.

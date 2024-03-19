@@ -84,6 +84,13 @@ func GetProject(d TerraformResourceData, config *transport_tpg.Config) (string, 
 	return GetProjectFromSchema("project", d, config)
 }
 
+// GetUniverse reads the "universe_domain" field from the given resource data and falls
+// back to the provider's value if not given. If the provider's value is not
+// given, an error is returned.
+func GetUniverseDomain(d TerraformResourceData, config *transport_tpg.Config) (string, error) {
+	return GetUniverseDomainFromSchema("universe_domain", d, config)
+}
+
 // GetBillingProject reads the "billing_project" field from the given resource data and falls
 // back to the provider's value if not given. If no value is found, an error is returned.
 func GetBillingProject(d TerraformResourceData, config *transport_tpg.Config) (string, error) {
@@ -651,6 +658,9 @@ func BuildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *tr
 		if err != nil {
 			return nil, err
 		}
+		if shorten {
+			project = strings.TrimPrefix(project, "projects/")
+		}
 	}
 
 	if strings.Contains(linkTmpl, "{{project_id_or_project}}") {
@@ -664,6 +674,10 @@ func BuildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *tr
 		if err != nil {
 			return nil, err
 		}
+		if shorten {
+			project = strings.TrimPrefix(project, "projects/")
+			projectID = strings.TrimPrefix(projectID, "projects/")
+		}
 	}
 
 	if strings.Contains(linkTmpl, "{{region}}") {
@@ -671,12 +685,18 @@ func BuildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *tr
 		if err != nil {
 			return nil, err
 		}
+		if shorten {
+			region = strings.TrimPrefix(region, "regions/")
+		}
 	}
 
 	if strings.Contains(linkTmpl, "{{zone}}") {
 		zone, err = GetZone(d, config)
 		if err != nil {
 			return nil, err
+		}
+		if shorten {
+			zone = strings.TrimPrefix(zone, "zones/")
 		}
 	}
 
@@ -750,11 +770,15 @@ func DefaultProviderProject(_ context.Context, diff *schema.ResourceDiff, meta i
 
 	//project
 	if project := diff.Get("project"); project != nil {
-		project, err := GetProjectFromDiff(diff, config)
+		project2, err := GetProjectFromDiff(diff, config)
 		if err != nil {
 			return fmt.Errorf("Failed to retrieve project, pid: %s, err: %s", project, err)
 		}
-		err = diff.SetNew("project", project)
+		if CompareSelfLinkRelativePaths("", project.(string), project2, nil) {
+			return nil
+		}
+
+		err = diff.SetNew("project", project2)
 		if err != nil {
 			return err
 		}

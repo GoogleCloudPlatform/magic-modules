@@ -52,6 +52,13 @@ examples:
       group_name: 'soletenant-group'
       template_name: 'soletenant-tmpl'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'node_group_maintenance_interval'
+    min_version: beta
+    primary_resource_id: 'nodes'
+    vars:
+      group_name: 'soletenant-group'
+      template_name: 'soletenant-tmpl'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'node_group_autoscaling_policy'
     primary_resource_id: 'nodes'
     vars:
@@ -196,3 +203,14 @@ properties:
               required: true
               description: |
                 The project id/number should be the same as the key of this project config in the project map.
+  - !ruby/object:Api::Type::Enum
+    name: 'maintenanceInterval'
+    min_version: beta
+    description: |
+      Specifies the frequency of planned maintenance events. Set to one of the following:
+        - AS_NEEDED: Hosts are eligible to receive infrastructure and hypervisor updates as they become available.
+        - RECURRENT: Hosts receive planned infrastructure and hypervisor updates on a periodic basis, but not more frequently than every 28 days. This minimizes the number of planned maintenance operations on individual hosts and reduces the frequency of disruptions, both live migrations and terminations, on individual VMs.
+    values:
+      - :AS_NEEDED
+      - :RECURRENT
+    default_from_api: true

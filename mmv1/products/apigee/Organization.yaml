@@ -60,6 +60,8 @@ examples:
     test_env_vars:
       org_id: :ORG_ID
       billing_account: :BILLING_ACCT
+    ignore_read_extra:
+      - properties
     skip_docs:
       true
       # Resource creation race
@@ -76,6 +78,8 @@ examples:
     test_env_vars:
       org_id: :ORG_ID
       billing_account: :BILLING_ACCT
+    ignore_read_extra:
+      - properties
     skip_docs:
       true
       # Resource creation race
@@ -99,6 +103,8 @@ examples:
       beta
       # Resource creation race
     skip_vcr: true
+    ignore_read_extra:
+      - properties
   - !ruby/object:Provider::Terraform::Examples
     name: 'apigee_organization_cloud_full_disable_vpc_peering'
     skip_test:

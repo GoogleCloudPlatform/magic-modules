@@ -12,7 +12,7 @@ github_username=modular-magician
 
 
 new_branch="auto-pr-$pr_number"
-git_remote=https://$github_username:$GITHUB_TOKEN@github.com/$github_username/$gh_repo
+git_remote=https://github.com/$github_username/$gh_repo
 local_path=$GOPATH/src/github.com/GoogleCloudPlatform/$gh_repo
 mkdir -p "$(dirname $local_path)"
 git clone $git_remote $local_path --branch $new_branch --depth 2
@@ -30,36 +30,20 @@ else
     echo "Running tests: Go files changed"
 fi
 
-
-TERRAFORM_BINARY=/terraform/$TERRAFORM_VERSION
-if test -f "$TERRAFORM_BINARY"; then
-    echo "terraform binary $TERRAFORM_BINARY exists on container"
-    echo setting terraform to version $TERRAFORM_VERSION
-    set x-
-    mv /terraform/$TERRAFORM_VERSION /bin/terraform
-    set x+
-    terraform version
-else
-    echo "terraform binary $TERRAFORM_BINARY does not exist."
-    echo "exiting ..."
-	  state="failure"
-    post_body=$( jq -n \
-      --arg context "${gh_repo}-test-integration-${TERRAFORM_VERSION}" \
-      --arg target_url "https://console.cloud.google.com/cloud-build/builds;region=global/${build_id};step=${build_step}?project=${project_id}" \
-      --arg state "$state" \
-      '{context: $context, target_url: $target_url, state: $state}')
-    exit 0
-fi
-
 post_body=$( jq -n \
-	--arg context "${gh_repo}-test-integration-${TERRAFORM_VERSION}" \
+	--arg context "${gh_repo}-test-integration" \
 	--arg target_url "https://console.cloud.google.com/cloud-build/builds;region=global/${build_id};step=${build_step}?project=${project_id}" \
 	--arg state "pending" \
 	'{context: $context, target_url: $target_url, state: $state}')
 
+# Fall back to old github token if new token is unavailable.
+if [[ -z $GITHUB_TOKEN_MAGIC_MODULES ]]; then
+  GITHUB_TOKEN_MAGIC_MODULES=$GITHUB_TOKEN
+fi
+
 curl \
   -X POST \
-  -u "$github_username:$GITHUB_TOKEN" \
+  -u "$github_username:$GITHUB_TOKEN_MAGIC_MODULES" \
   -H "Accept: application/vnd.github.v3+json" \
   "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/$mm_commit_sha" \
   -d "$post_body"
@@ -82,14 +66,14 @@ else
 fi
 
 post_body=$( jq -n \
-	--arg context "${gh_repo}-test-integration-${TERRAFORM_VERSION}" \
+	--arg context "${gh_repo}-test-integration" \
 	--arg target_url "https://console.cloud.google.com/cloud-build/builds;region=global/${build_id};step=${build_step}?project=${project_id}" \
 	--arg state "${state}" \
 	'{context: $context, target_url: $target_url, state: $state}')
 
 curl \
   -X POST \
-  -u "$github_username:$GITHUB_TOKEN" \
+  -u "$github_username:$GITHUB_TOKEN_MAGIC_MODULES" \
   -H "Accept: application/vnd.github.v3+json" \
   "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/$mm_commit_sha" \
   -d "$post_body"

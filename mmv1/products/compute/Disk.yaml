@@ -383,6 +383,12 @@ properties:
       be used to determine whether the image was taken from the current
       or a previous instance of a given disk name.
     output: true
+  - !ruby/object:Api::Type::String
+    name: 'DiskId'
+    description: |
+      The unique identifier for the resource. This identifier is defined by the server.
+    output: true
+    api_name: id
   - !ruby/object:Api::Type::ResourceRef
     name: 'type'
     resource: 'DiskType'
@@ -433,7 +439,6 @@ properties:
     description: |
       Whether this disk is using confidential compute mode.
       Note: Only supported on hyperdisk skus, disk_encryption_key is required when setting to true
-    min_version: beta
     required: false
     default_from_api: true
   - !ruby/object:Api::Type::Boolean

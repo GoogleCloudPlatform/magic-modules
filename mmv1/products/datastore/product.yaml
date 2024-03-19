@@ -19,10 +19,6 @@ versions:
     base_url: https://datastore.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/datastore
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Cloud Datastore API
-    url: https://console.cloud.google.com/apis/library/datastore.googleapis.com
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'

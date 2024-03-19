@@ -18,7 +18,7 @@
 
 <%= lines(autogen_notice(:go, pwd)) -%>
 
-package <%= product_ns.downcase -%>
+package <%= object.__product.name .downcase -%>
 
 import (
 	"fmt"
@@ -31,14 +31,14 @@ import (
 	"<%= import_path() -%>/tpgresource"
 	transport_tpg "<%= import_path() -%>/transport"
 )
-<% resource_name = product_ns + object.name -%>
+<% resource_name = object.__product.name  + object.name -%>
 <%
 resource_uri = object.iam_policy.base_url || object.self_link_uri
 parent_resource_name = object.iam_policy.parent_resource_attribute || object.name.underscore
 resource_params = extract_identifiers(resource_uri.gsub('{{name}}', "{{#{parent_resource_name}}}"))
 -%>
 
-var <%= resource_name -%>IamSchema = map[string]*schema.Schema{
+var <%= object.resource_name -%>IamSchema = map[string]*schema.Schema{
 <% resource_params.each_with_index do |param, i| -%>
 	"<%= param.underscore -%>": {
 		Type:             schema.TypeString,
@@ -54,7 +54,7 @@ var <%= resource_name -%>IamSchema = map[string]*schema.Schema{
 <% if object.iam_policy.custom_diff_suppress.nil? -%>
 		DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 <% else -%>
-		DiffSuppressFunc: <%= resource_name -%>DiffSuppress,
+		DiffSuppressFunc: <%= object.resource_name -%>DiffSuppress,
 <% end -%>
 <% end # param == object.name -%>
 	},
@@ -65,7 +65,7 @@ var <%= resource_name -%>IamSchema = map[string]*schema.Schema{
 <%= lines(compile(pwd + '/' + object.iam_policy.custom_diff_suppress)) -%>
 <% end -%>
 
-type <%= resource_name -%>IamUpdater struct {
+type <%= object.resource_name -%>IamUpdater struct {
 <% resource_params.each do |param| -%>
 	<%= param.camelize(:lower) -%> string
 <% end # resource_params.each -%>
@@ -74,7 +74,7 @@ type <%= resource_name -%>IamUpdater struct {
 }
 
 <% provider_default_values = ['project', 'location', 'region', 'zone'] -%>
-func <%= resource_name -%>IamUpdaterProducer(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (tpgiamresource.ResourceIamUpdater, error) {
+func <%= object.resource_name -%>IamUpdaterProducer(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (tpgiamresource.ResourceIamUpdater, error) {
 	values := make(map[string]string)
 
 <% resource_params.each do |param| -%>
@@ -106,7 +106,7 @@ func <%= resource_name -%>IamUpdaterProducer(d tpgresource.TerraformResourceData
 		values[k] = v
 	}
 
-	u := &<%= resource_name -%>IamUpdater{
+	u := &<%= object.resource_name -%>IamUpdater{
 <% resource_params.each do |param| -%>
 		<%= param.camelize(:lower) -%>: values["<%= param -%>"],
 <% end -%>
@@ -137,7 +137,7 @@ func <%= resource_name -%>IamUpdaterProducer(d tpgresource.TerraformResourceData
 	return u, nil
 }
 
-func <%= resource_name -%>IdParseFunc(d *schema.ResourceData, config *transport_tpg.Config) error {
+func <%= object.resource_name -%>IdParseFunc(d *schema.ResourceData, config *transport_tpg.Config) error {
 	values := make(map[string]string)
 
 <% resource_params.each do |param| -%>
@@ -159,7 +159,7 @@ func <%= resource_name -%>IdParseFunc(d *schema.ResourceData, config *transport_
     values[k] = v
 	}
 
-	u := &<%= resource_name -%>IamUpdater{
+	u := &<%= object.resource_name -%>IamUpdater{
 <% resource_params.each do |param| -%>
 		<%= param.camelize(:lower) -%>: values["<%= param -%>"],
 <% end -%>
@@ -181,7 +181,7 @@ func <%= resource_name -%>IdParseFunc(d *schema.ResourceData, config *transport_
 	return nil
 }
 
-func (u *<%= resource_name -%>IamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
+func (u *<%= object.resource_name -%>IamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
 	url, err := u.qualify<%= object.name -%>Url("<%= object.iam_policy.fetch_iam_policy_method -%>")
 	if err != nil {
 		return nil, err
@@ -246,7 +246,7 @@ func (u *<%= resource_name -%>IamUpdater) GetResourceIamPolicy() (*cloudresource
 	return out, nil
 }
 
-func (u *<%= resource_name -%>IamUpdater) SetResourceIamPolicy(policy *cloudresourcemanager.Policy) error {
+func (u *<%= object.resource_name -%>IamUpdater) SetResourceIamPolicy(policy *cloudresourcemanager.Policy) error {
 	json, err := tpgresource.ConvertToMap(policy)
 	if err != nil {
 		return err
@@ -306,7 +306,7 @@ func (u *<%= resource_name -%>IamUpdater) SetResourceIamPolicy(policy *cloudreso
 
 <% import_url = resource_uri.gsub(/({{)\%?(\w+)(}})/, '%s') -%>
 <% string_qualifiers = extract_identifiers(resource_uri.gsub('{{name}}', "{{#{parent_resource_name}}}")).map{|param| "u.#{param.camelize(:lower)}"}.join(', ') -%>
-func (u *<%= resource_name -%>IamUpdater) qualify<%= object.name -%>Url(methodIdentifier string) (string, error) {
+func (u *<%= object.resource_name -%>IamUpdater) qualify<%= object.name -%>Url(methodIdentifier string) (string, error) {
 	urlTemplate := fmt.Sprintf("{{<%= object.__product.name -%>BasePath}}%s<%= object.iam_policy.method_name_separator -%>%s", fmt.Sprintf("<%= import_url -%>", <%= string_qualifiers -%>), methodIdentifier)
   url, err := tpgresource.ReplaceVars(u.d, u.Config, urlTemplate)
   if err != nil {
@@ -315,14 +315,14 @@ func (u *<%= resource_name -%>IamUpdater) qualify<%= object.name -%>Url(methodId
   return url, nil
 }
 
-func (u *<%= resource_name -%>IamUpdater) GetResourceId() string {
+func (u *<%= object.resource_name -%>IamUpdater) GetResourceId() string {
 	return fmt.Sprintf("<%= import_url -%>", <%= string_qualifiers -%>)
 }
 
 func (u *<%= resource_name -%>IamUpdater) GetMutexKey() string {
-	return fmt.Sprintf("iam-<%= product_ns.downcase -%>-<%= object.name.downcase -%>-%s", u.GetResourceId())
+	return fmt.Sprintf("iam-<%= object.__product.name.downcase -%>-<%= object.name.downcase -%>-%s", u.GetResourceId())
 }
 
 func (u *<%= resource_name -%>IamUpdater) DescribeResource() string {
-	return fmt.Sprintf("<%= product_ns.downcase -%> <%= object.name.downcase -%> %q", u.GetResourceId())
+	return fmt.Sprintf("<%= object.__product.name.downcase -%> <%= object.name.downcase -%> %q", u.GetResourceId())
 }

@@ -317,8 +317,7 @@ The optional `settings.active_directory_config` subblock supports:
 
 The optional `settings.data_cache_config` subblock supports:
 
-* `data_cache_enabled` - (Optional) Whether data cache is enabled for the instance. Defaults to `false`
-    Can only be used with MYSQL.
+* `data_cache_enabled` - (Optional) Whether data cache is enabled for the instance. Defaults to `false`. Can be used with MYSQL and PostgreSQL only.
 
 The optional `settings.deny_maintenance_period` subblock supports:
 
@@ -372,7 +371,12 @@ Specifying a network enables private IP.
 At least `ipv4_enabled` must be enabled or a `private_network` must be configured.
 This setting can be updated, but it cannot be removed after it is set.
 
-* `require_ssl` - (Optional) Whether SSL connections over IP are enforced or not.
+* `require_ssl` - (Optional) Whether SSL connections over IP are enforced or not. To change this field, also set the corresponding value in `ssl_mode`.
+
+* `ssl_mode` - (Optional) Specify how SSL connection should be enforced in DB connections. This field provides more SSL enforcment options compared to `require_ssl`. To change this field, also set the correspoding value in `require_ssl`.
+    * For PostgreSQL instances, the value pairs are listed in the [API reference doc](https://cloud.google.com/sql/docs/postgres/admin-api/rest/v1beta4/instances#ipconfiguration) for `ssl_mode` field.
+    * For MySQL instances, use the same value pairs as the PostgreSQL instances.
+    * For SQL Server instances, set it to `ALLOW_UNENCRYPTED_AND_ENCRYPTED` when `require_ssl=false` and `ENCRYPTED_ONLY` otherwise.
 
 * `allocated_ip_range` - (Optional) The name of the allocated ip range for the private ip CloudSQL instance. For example: "google-managed-services-default". If set, the instance ip will be created in the allocated range. The range name must comply with [RFC 1035](https://datatracker.ietf.org/doc/html/rfc1035). Specifically, the name must be 1-63 characters long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])?.
 
@@ -513,6 +517,8 @@ exported:
 * `connection_name` - The connection name of the instance to be used in
 connection strings. For example, when connecting with [Cloud SQL Proxy](https://cloud.google.com/sql/docs/mysql/connect-admin-proxy).
 
+* `dsn_name` - The DNS name of the instance. See [Connect to an instance using Private Service Connect](https://cloud.google.com/sql/docs/mysql/configure-private-service-connect#view-summary-information-cloud-sql-instances-psc-enabled) for more details.
+
 * `service_account_email_address` - The service account email address assigned to the
 instance.
 
@@ -545,6 +551,8 @@ a workaround for an [issue fixed in Terraform 0.12](https://github.com/hashicorp
 but also provides a convenient way to access an IP of a specific type without
 performing filtering in a Terraform config.
 
+* `psc_service_attachment_link` - the URI that points to the service attachment of the instance.
+
 * `instance_type` - The type of the instance. The supported values are `SQL_INSTANCE_TYPE_UNSPECIFIED`, `CLOUD_SQL_INSTANCE`, `ON_PREMISES_INSTANCE` and `READ_REPLICA_INSTANCE`.
 
 ~> **NOTE:** Users can upgrade a read replica instance to a stand-alone Cloud SQL instance with the help of `instance_type`. To promote, users have to set the `instance_type` property as `CLOUD_SQL_INSTANCE` and remove/unset `master_instance_name` and `replica_configuration` from instance configuration. This operation might cause your instance to restart.
@@ -575,11 +583,25 @@ performing filtering in a Terraform config.
 
 Database instances can be imported using one of any of these accepted formats:
 
-```
-$ terraform import google_sql_database_instance.main projects/{{project}}/instances/{{name}}
-$ terraform import google_sql_database_instance.main {{project}}/{{name}}
-$ terraform import google_sql_database_instance.main {{name}}
+* `projects/{{project}}/instances/{{name}}`
+* `{{project}}/{{name}}`
+* `{{name}}`
 
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import Database instances using one of the formats above. For example:
+
+```tf
+import {
+  id = "projects/{{project}}/instances/{{name}}"
+  to = google_sql_database_instance.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), Database instances can be imported using one of the formats above. For example:
+
+```
+$ terraform import google_sql_database_instance.default projects/{{project}}/instances/{{name}}
+$ terraform import google_sql_database_instance.default {{project}}/{{name}}
+$ terraform import google_sql_database_instance.default {{name}}
 ```
 
 ~> **NOTE:** Some fields (such as `replica_configuration`) won't show a diff if they are unset in

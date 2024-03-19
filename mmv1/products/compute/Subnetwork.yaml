@@ -116,6 +116,13 @@ examples:
     vars:
       subnetwork_name: 'subnet-purpose-test-subnetwork'
       network_name: 'subnet-purpose-test-network'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'subnetwork_cidr_overlap'
+    min_version: beta
+    primary_resource_id: 'subnetwork-cidr-overlap'
+    vars:
+      subnetwork_name: 'subnet-cidr-overlap'
+      network_name: 'net-cidr-overlap'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -385,6 +392,19 @@ properties:
       The internal IPv6 address range that is assigned to this subnetwork.
   - !ruby/object:Api::Type::String
     name: 'externalIpv6Prefix'
-    output: true
+    default_from_api: true
     description: |
       The range of external IPv6 addresses that are owned by this subnetwork.
+  - !ruby/object:Api::Type::Boolean
+    name: 'allowSubnetCidrRoutesOverlap'
+    default_from_api: true
+    update_verb: :PATCH
+    update_url: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+    fingerprint_name: 'fingerprint'
+    send_empty_value: true
+    min_version: beta
+    description: |
+      Typically packets destined to IPs within the subnetwork range that do not match
+      existing resources are dropped and prevented from leaving the VPC.
+      Setting this field to true will allow these packets to match dynamic routes injected
+      via BGP even if their destinations match existing subnet ranges.

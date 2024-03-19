@@ -73,19 +73,19 @@ func fieldRule_ChangingType_func(old, new *schema.Schema, mc MessageContext) str
 
 var fieldRule_BecomingRequired = FieldRule{
 	name:        "Field becoming Required Field",
-	definition:  "A field cannot become or be added as required. Existing configs may not have this field defined thus breaking them in sequential plan or applies. If you are adding Required to a field so a block won't remain empty, this can cause two issues. First if it's a singular nested field the block may gain more fields later and it's not clear whether the field is actually required so it may be misinterpreted by future contributors. Second if users are defining empty blocks in existing configurations this change will break them. Consider these points in admittance of this type of change.",
+	definition:  "A field cannot become required as existing configs may not have this field defined. Thus, breaking configs in sequential plan or applies. If you are adding Required to a field so a block won't remain empty, this can cause two issues. First if it's a singular nested field the block may gain more fields later and it's not clear whether the field is actually required so it may be misinterpreted by future contributors. Second if users are defining empty blocks in existing configurations this change will break them. Consider these points in admittance of this type of change.",
 	message:     "Field {{field}} changed from optional to required on {{resource}}",
 	identifier:  "field-optional-to-required",
 	isRuleBreak: fieldRule_BecomingRequired_func,
 }
 
 func fieldRule_BecomingRequired_func(old, new *schema.Schema, mc MessageContext) string {
-	// Ignore for removed fields
-	if new == nil {
+	// Ignore for added / removed fields
+	if old == nil || new == nil {
 		return ""
 	}
 	message := mc.message
-	if (old == nil || !old.Required) && new.Required {
+	if !old.Required && new.Required {
 		return populateMessageContext(message, mc)
 	}
 

@@ -1,5 +1,4 @@
 resource "google_vmwareengine_cluster" "<%= ctx[:primary_resource_id] %>" {
-  provider = google-beta
   name     = "<%= ctx[:vars]['name'] %>"
   parent   = google_vmwareengine_private_cloud.cluster-pc.id
   node_type_configs {
@@ -10,7 +9,6 @@ resource "google_vmwareengine_cluster" "<%= ctx[:primary_resource_id] %>" {
 }
 
 resource "google_vmwareengine_private_cloud" "cluster-pc" {
-  provider    = google-beta
   location    = "<%= ctx[:test_env_vars]['region'] %>-a"
   name        = "<%= ctx[:vars]['private_cloud_id'] %>"
   description = "Sample test PC."
@@ -30,9 +28,8 @@ resource "google_vmwareengine_private_cloud" "cluster-pc" {
 }
 
 resource "google_vmwareengine_network" "cluster-nw" {
-  provider    = google-beta
-  name        = "<%= ctx[:test_env_vars]['region'] %>-default"
-  location    = "<%= ctx[:test_env_vars]['region'] %>"
-  type        = "LEGACY"
+  name        = "<%= ctx[:vars]['network_id'] %>"
+  type        = "STANDARD"
+  location    = "global"
   description = "PC network description."
 }

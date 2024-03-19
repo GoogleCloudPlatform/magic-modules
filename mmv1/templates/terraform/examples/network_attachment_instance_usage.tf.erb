@@ -36,8 +36,10 @@ resource "google_compute_instance" "default" {
     }
 
     network_interface {
-        network = google_compute_network.default.id
-        subnetwork = google_compute_subnetwork.default.id
-        network_attachment = google_compute_network_attachment.default.name
+		network = "default"
+	}
+
+    network_interface {
+        network_attachment = google_compute_network_attachment.default.self_link
     }
 }

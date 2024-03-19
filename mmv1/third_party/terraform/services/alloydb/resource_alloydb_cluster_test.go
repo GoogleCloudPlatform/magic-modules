@@ -491,7 +491,7 @@ resource "google_alloydb_cluster" "default" {
   encryption_config {
     kms_key_name = google_kms_crypto_key.key.id
   }
-  depends_on = [google_kms_crypto_key_iam_binding.crypto_key]
+  depends_on = [google_kms_crypto_key_iam_member.crypto_key]
 }
 resource "google_compute_network" "default" {
   name = "tf-test-alloydb-cluster%{random_suffix}"
@@ -505,12 +505,10 @@ resource "google_kms_crypto_key" "key" {
   name     = "%{key_name}"
   key_ring = google_kms_key_ring.keyring.id
 }
-resource "google_kms_crypto_key_iam_binding" "crypto_key" {
+resource "google_kms_crypto_key_iam_member" "crypto_key" {
   crypto_key_id = google_kms_crypto_key.key.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  members = [
-	"serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com",
-  ]
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com"
 }
 `, context)
 }
@@ -582,7 +580,7 @@ resource "google_alloydb_cluster" "default" {
   lifecycle {
 	prevent_destroy = true
   }
-  depends_on = [google_kms_crypto_key_iam_binding.crypto_key]
+  depends_on = [google_kms_crypto_key_iam_member.crypto_key]
 }
 
 resource "google_compute_network" "default" {
@@ -601,12 +599,10 @@ resource "google_kms_crypto_key" "key" {
   key_ring = google_kms_key_ring.keyring.id
 }
 
-resource "google_kms_crypto_key_iam_binding" "crypto_key" {
+resource "google_kms_crypto_key_iam_member" "crypto_key" {
   crypto_key_id = google_kms_crypto_key.key.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  members = [
-	"serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com",
-  ]
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com"
 }
 `, context)
 }
@@ -632,9 +628,9 @@ resource "google_alloydb_cluster" "default" {
     }
   }
   lifecycle {
-	prevent_destroy = true
+    prevent_destroy = true
   }
-  depends_on = [google_kms_crypto_key_iam_binding.crypto_key]
+  depends_on = [google_kms_crypto_key_iam_member.crypto_key]
 }
 
 resource "google_compute_network" "default" {
@@ -654,24 +650,20 @@ resource "google_kms_crypto_key" "key" {
 }
 
 resource "google_kms_crypto_key" "key2" {
-	name     = "%{key_name}-2"
-	key_ring = google_kms_key_ring.keyring.id
+  name     = "%{key_name}-2"
+  key_ring = google_kms_key_ring.keyring.id
 }
 
-resource "google_kms_crypto_key_iam_binding" "crypto_key" {
+resource "google_kms_crypto_key_iam_member" "crypto_key" {
   crypto_key_id = google_kms_crypto_key.key.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  members = [
-	"serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com",
-  ]
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com"
 }
 
-resource "google_kms_crypto_key_iam_binding" "crypto_key2" {
-	crypto_key_id = google_kms_crypto_key.key2.id
-	role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-	members = [
-	  "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com",
-	]
+resource "google_kms_crypto_key_iam_member" "crypto_key2" {
+  crypto_key_id = google_kms_crypto_key.key2.id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com"
 }
 `, context)
 }
@@ -696,7 +688,7 @@ resource "google_alloydb_cluster" "default" {
       retention_period = "510s"
     }
   }
-  depends_on = [google_kms_crypto_key_iam_binding.crypto_key]
+  depends_on = [google_kms_crypto_key_iam_member.crypto_key]
 }
 
 resource "google_compute_network" "default" {
@@ -720,20 +712,16 @@ resource "google_kms_crypto_key" "key2" {
 	key_ring = google_kms_key_ring.keyring.id
 }
 
-resource "google_kms_crypto_key_iam_binding" "crypto_key" {
+resource "google_kms_crypto_key_iam_member" "crypto_key" {
   crypto_key_id = google_kms_crypto_key.key.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  members = [
-	"serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com",
-  ]
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com"
 }
 
-resource "google_kms_crypto_key_iam_binding" "crypto_key2" {
-	crypto_key_id = google_kms_crypto_key.key2.id
-	role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-	members = [
-	  "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com",
-	]
+resource "google_kms_crypto_key_iam_member" "crypto_key2" {
+  crypto_key_id = google_kms_crypto_key.key2.id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com"
 }
 `, context)
 }
@@ -1042,7 +1030,7 @@ resource "google_alloydb_cluster" "default" {
   lifecycle {
 	prevent_destroy = true
   }
-  depends_on = [google_kms_crypto_key_iam_binding.crypto_key]
+  depends_on = [google_kms_crypto_key_iam_member.crypto_key]
 }
 
 resource "google_compute_network" "default" {
@@ -1051,12 +1039,10 @@ resource "google_compute_network" "default" {
 
 data "google_project" "project" {}
 
-resource "google_kms_crypto_key_iam_binding" "crypto_key" {
+resource "google_kms_crypto_key_iam_member" "crypto_key" {
   crypto_key_id = "%{key_name}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  members = [
-    "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com",
-  ]
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com"
 }
 `, context)
 }
@@ -1074,7 +1060,7 @@ resource "google_alloydb_cluster" "default" {
       kms_key_name = "%{key_name}"
     }
   }
-  depends_on = [google_kms_crypto_key_iam_binding.crypto_key]
+  depends_on = [google_kms_crypto_key_iam_member.crypto_key]
 }
 
 resource "google_compute_network" "default" {
@@ -1083,12 +1069,10 @@ resource "google_compute_network" "default" {
 
 data "google_project" "project" {}
 
-resource "google_kms_crypto_key_iam_binding" "crypto_key" {
+resource "google_kms_crypto_key_iam_member" "crypto_key" {
 	crypto_key_id = "%{key_name}"
 	role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-	members = [
-	  "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com",
-	]
+	member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com"
   }
 `, context)
 }

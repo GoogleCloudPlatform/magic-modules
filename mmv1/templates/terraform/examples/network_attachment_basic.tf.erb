@@ -35,16 +35,16 @@ resource "google_compute_subnetwork" "default" {
 
 resource "google_project" "rejected_producer_project" {
     provider = google-beta
-    project_id      = "prj-rejected%{random_suffix}"
-    name            = "prj-rejected%{random_suffix}"
+    project_id      = "<%= ctx[:vars]['rejected_producer_project_name'] %>"
+    name            = "<%= ctx[:vars]['rejected_producer_project_name'] %>"
     org_id          = "<%= ctx[:test_env_vars]['org_id'] %>"
     billing_account = "<%= ctx[:test_env_vars]['billing_account'] %>"
 }
 
 resource "google_project" "accepted_producer_project" {
     provider = google-beta
-    project_id      = "prj-accepted%{random_suffix}"
-    name            = "prj-accepted%{random_suffix}"
+    project_id      = "<%= ctx[:vars]['accepted_producer_project_name'] %>"
+    name            = "<%= ctx[:vars]['accepted_producer_project_name'] %>"
     org_id          = "<%= ctx[:test_env_vars]['org_id'] %>"
     billing_account = "<%= ctx[:test_env_vars]['billing_account'] %>"
 }

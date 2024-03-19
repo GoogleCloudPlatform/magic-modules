@@ -26,8 +26,28 @@ references:
   guides:
     "Use AddressGroups": "https://cloud.google.com/vpc/docs/use-address-groups-firewall-policies"
   api: "https://cloud.google.com/traffic-director/docs/reference/network-security/rest/v1beta1/organizations.locations.addressGroups"
-# Prevent the operation from being generated so we can call the custom one.
-autogen_async: false
+autogen_async: true
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 20
+      update_minutes: 20
+      delete_minutes: 20
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'
+  include_project: true
 import_format: ["{{%parent}}/locations/{{location}}/addressGroups/{{name}}"]
 examples:
   - !ruby/object:Provider::Terraform::Examples
@@ -51,11 +71,6 @@ examples:
       resource_name: "my-address-groups"
     test_env_vars:
       project: :PROJECT_NAME
-custom_code:
-  !ruby/object:Provider::Terraform::CustomCode  # Calling custom operation that are different from other network security resources.
-  post_create: templates/terraform/post_create/network_security_address_group_operation.go.erb
-  post_update: templates/terraform/post_update/network_security_address_group_operation.go.erb
-  post_delete: templates/terraform/post_delete/network_security_address_group_operation.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: parent

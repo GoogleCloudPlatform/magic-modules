@@ -13,14 +13,15 @@
 
 require 'api/object'
 require 'google/string_utils'
+require 'provider/terraform/validation'
 
 module Api
   # Represents a property type
-  class Type < Api::Object::Named
+  class Type < Api::NamedObject
     # The list of properties (attr_reader) that can be overridden in
     # <provider>.yaml.
     module Fields
-      include Api::Object::Named::Properties
+      include Api::NamedObject::Properties
 
       attr_reader :default_value
       attr_accessor :description
@@ -36,13 +37,25 @@ module Api
       # a different version.
       attr_reader :removed_message
 
-      attr_reader :output # If set value will not be sent to server on sync
-      attr_reader :immutable # If set to true value is used only on creation
+      # If set value will not be sent to server on sync.
+      # For nested fields, this also needs to be set on each descendant (ie. self,
+      # child, etc.).
+      attr_reader :output
+
+      # If set to true, changes in the field's value require recreating the
+      # resource.
+      # For nested fields, this only applies at the current level. This means
+      # it should be explicitly added to each field that needs the ForceNew
+      # behavior.
+      attr_accessor :immutable
 
       # url_param_only will not send the field in the resource body and will
       # not attempt to read the field from the API response.
       # NOTE - this doesn't work for nested fields
       attr_reader :url_param_only
+
+      # For nested fields, this only applies within the parent.
+      # For example, an optional parent can contain a required child.
       attr_reader :required
 
       # [Additional query Parameters to append to GET calls.
@@ -121,6 +134,9 @@ module Api
       # if true, then we get the default value from the Google API if no value
       # is set in the terraform configuration for this field.
       # It translates to setting the field to Computed & Optional in the schema.
+      # For nested fields, this only applies at the current level. This means
+      # it should be explicitly added to each field that needs the defaulting
+      # behavior.
       attr_reader :default_from_api
 
       # https://github.com/hashicorp/terraform/pull/20837
@@ -409,7 +425,7 @@ module Api
     end
 
     def exact_version
-      return nil if @exact_version.nil? || @exact_version.blank?
+      return nil if @exact_version.nil? || @exact_version.empty?
 
       @__resource.__product.version_obj(@exact_version)
     end
@@ -451,16 +467,6 @@ module Api
     end
 
     private
-
-    # A constant value to be provided as field
-    class Constant < Type
-      attr_reader :value
-
-      def validate
-        @description = "This is always #{value}."
-        super
-      end
-    end
 
     # Represents a primitive (non-composite) type.
     class Primitive < Type
@@ -625,21 +631,6 @@ module Api
       end
     end
 
-    # Represents a 'selfLink' property, which returns the URI of the resource.
-    class SelfLink < FetchedExternal
-      EXPORT_KEY = 'selfLink'.freeze
-
-      attr_reader :resource
-
-      def name
-        EXPORT_KEY
-      end
-
-      def out_name
-        EXPORT_KEY.underscore
-      end
-    end
-
     # Represents a reference to another resource
     class ResourceRef < Type
       # The fields which can be overridden in provider.yaml.
@@ -786,6 +777,51 @@ module Api
       def validate
         super
         check :ignore_write, type: :boolean, default: false
+
+        return if @__resource.__product.nil?
+
+        product_name = @__resource.__product.name
+        resource_name = @__resource.name
+
+        if lineage == 'labels' || lineage == 'metadata.labels' ||
+           lineage == 'configuration.labels'
+          if !(is_a? Api::Type::KeyValueLabels) &&
+             # The label value must be empty string, so skip this resource
+             !(product_name == 'CloudIdentity' && resource_name == 'Group') &&
+
+             # The "labels" field has type Array, so skip this resource
+             !(product_name == 'DeploymentManager' && resource_name == 'Deployment') &&
+
+             # https://github.com/hashicorp/terraform-provider-google/issues/16219
+             !(product_name == 'Edgenetwork' && resource_name == 'Network') &&
+
+             # https://github.com/hashicorp/terraform-provider-google/issues/16219
+             !(product_name == 'Edgenetwork' && resource_name == 'Subnet') &&
+
+             # "userLabels" is the resource labels field
+             !(product_name == 'Monitoring' && resource_name == 'NotificationChannel') &&
+
+             # The "labels" field has type Array, so skip this resource
+             !(product_name == 'Monitoring' && resource_name == 'MetricDescriptor')
+            raise "Please use type KeyValueLabels for field #{lineage} " \
+                  "in resource #{product_name}/#{resource_name}"
+          end
+        elsif is_a? Api::Type::KeyValueLabels
+          raise "Please don't use type KeyValueLabels for field #{lineage} " \
+                "in resource #{product_name}/#{resource_name}"
+        end
+
+        if lineage == 'annotations' || lineage == 'metadata.annotations'
+          if !(is_a? Api::Type::KeyValueAnnotations) &&
+             # The "annotations" field has "ouput: true", so skip this eap resource
+             !(product_name == 'Gkeonprem' && resource_name == 'BareMetalAdminClusterEnrollment')
+            raise "Please use type KeyValueAnnotations for field #{lineage} " \
+                  "in resource #{product_name}/#{resource_name}"
+          end
+        elsif is_a? Api::Type::KeyValueAnnotations
+          raise "Please don't use type KeyValueAnnotations for field #{lineage} " \
+                "in resource #{product_name}/#{resource_name}"
+        end
       end
 
       def field_min_version

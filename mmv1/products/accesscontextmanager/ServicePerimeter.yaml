@@ -71,6 +71,9 @@ examples:
     primary_resource_id: 'service-perimeter'
     vars:
       service_perimeter_name: 'restrict_bigquery_dryrun_storage'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'access_context_manager_service_perimeter_granular_controls'
+    skip_test: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/access_level_never_send_parent.go.erb
   custom_import: templates/terraform/custom_import/set_access_policy_parent_from_self_link.go.erb
@@ -240,9 +243,10 @@ properties:
                   item_type: Api::Type::String
                   is_set: true
                   description: |
-                    A list of identities that are allowed access through this ingress policy.
-                    Should be in the format of email address. The email address should represent
-                    individual user or service account only.
+                    'A list of identities that are allowed access through this `IngressPolicy`.
+                    To specify an identity or identity group, use the IAM v1
+                    format specified [here](https://cloud.google.com/iam/docs/principal-identifiers.md#v1).
+                    The following prefixes are supprted: user, group, serviceAccount, principal, and principalSet.'
                 - !ruby/object:Api::Type::Array
                   name: 'sources'
                   description: |
@@ -347,11 +351,27 @@ properties:
                     - :ANY_USER_ACCOUNT
                     - :ANY_SERVICE_ACCOUNT
                 - !ruby/object:Api::Type::Array
+                  name: 'sources'
+                  description: 'Sources that this EgressPolicy authorizes access from.'
+                  item_type: !ruby/object:Api::Type::NestedObject
+                    properties:
+                      - !ruby/object:Api::Type::String
+                        name: 'accessLevel'
+                        description: 'An AccessLevel resource name that allows resources outside the ServicePerimeter to be accessed from the inside.'
+                - !ruby/object:Api::Type::Enum
+                  name: 'sourceRestriction'
+                  description: 'Whether to enforce traffic restrictions based on `sources` field. If the `sources` field is non-empty, then this field must be set to `SOURCE_RESTRICTION_ENABLED`.'
+                  values:
+                    - :SOURCE_RESTRICTION_UNSPECIFIED
+                    - :SOURCE_RESTRICTION_ENABLED
+                    - :SOURCE_RESTRICTION_DISABLED
+                - !ruby/object:Api::Type::Array
                   name: 'identities'
                   description: |
-                    A list of identities that are allowed access through this `EgressPolicy`.
-                    Should be in the format of email address. The email address should
-                    represent individual user or service account only.
+                    'A list of identities that are allowed access through this `EgressPolicy`.
+                    To specify an identity or identity group, use the IAM v1
+                    format specified [here](https://cloud.google.com/iam/docs/principal-identifiers.md#v1).
+                    The following prefixes are supprted: user, group, serviceAccount, principal, and principalSet.'
                   is_set: true
                   item_type: Api::Type::String
             - !ruby/object:Api::Type::NestedObject
@@ -513,9 +533,10 @@ properties:
                   item_type: Api::Type::String
                   is_set: true
                   description: |
-                    A list of identities that are allowed access through this ingress policy.
-                    Should be in the format of email address. The email address should represent
-                    individual user or service account only.
+                    'A list of identities that are allowed access through this `IngressPolicy`.
+                    To specify an identity or identity group, use the IAM v1
+                    format specified [here](https://cloud.google.com/iam/docs/principal-identifiers.md#v1).
+                    The following prefixes are supprted: user, group, serviceAccount, principal, and principalSet.'
                 - !ruby/object:Api::Type::Array
                   name: 'sources'
                   description: |
@@ -620,11 +641,27 @@ properties:
                     - :ANY_USER_ACCOUNT
                     - :ANY_SERVICE_ACCOUNT
                 - !ruby/object:Api::Type::Array
+                  name: 'sources'
+                  description: 'Sources that this EgressPolicy authorizes access from.'
+                  item_type: !ruby/object:Api::Type::NestedObject
+                    properties:
+                      - !ruby/object:Api::Type::String
+                        name: 'accessLevel'
+                        description: 'An AccessLevel resource name that allows resources outside the ServicePerimeter to be accessed from the inside.'
+                - !ruby/object:Api::Type::Enum
+                  name: 'sourceRestriction'
+                  description: 'Whether to enforce traffic restrictions based on `sources` field. If the `sources` field is non-empty, then this field must be set to `SOURCE_RESTRICTION_ENABLED`.'
+                  values:
+                    - :SOURCE_RESTRICTION_UNSPECIFIED
+                    - :SOURCE_RESTRICTION_ENABLED
+                    - :SOURCE_RESTRICTION_DISABLED
+                - !ruby/object:Api::Type::Array
                   name: 'identities'
                   description: |
-                    A list of identities that are allowed access through this `EgressPolicy`.
-                    Should be in the format of email address. The email address should
-                    represent individual user or service account only.
+                    'A list of identities that are allowed access through this `EgressPolicy`.
+                    To specify an identity or identity group, use the IAM v1
+                    format specified [here](https://cloud.google.com/iam/docs/principal-identifiers.md#v1).
+                    The following prefixes are supprted: user, group, serviceAccount, principal, and principalSet.'
                   item_type: Api::Type::String
                   is_set: true
             - !ruby/object:Api::Type::NestedObject

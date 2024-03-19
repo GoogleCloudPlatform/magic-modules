@@ -45,6 +45,21 @@ examples:
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
+    skip_test: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'alloydb_backup_basic_test'
+    primary_resource_id: 'default'
+    vars:
+      alloydb_backup_id: 'alloydb-backup'
+      alloydb_cluster_name: 'alloydb-cluster'
+      alloydb_instance_name: 'alloydb-instance'
+      network_name: 'alloydb-network'
+    test_vars_overrides:
+      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1")'
+    ignore_read_extra:
+      - 'reconciling'
+      - 'update_time'
+    skip_docs: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'alloydb_backup_full'
     primary_resource_id: 'default'
@@ -56,6 +71,23 @@ examples:
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
+    skip_test: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'alloydb_backup_full_test'
+    primary_resource_id: 'default'
+    vars:
+      alloydb_backup_id: 'alloydb-backup'
+      alloydb_cluster_name: 'alloydb-cluster'
+      alloydb_instance_name: 'alloydb-instance'
+      network_name: 'alloydb-network'
+    test_vars_overrides:
+      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1")'
+    ignore_read_extra:
+      - 'reconciling'
+      - 'update_time'
+    # https://github.com/hashicorp/terraform-provider-google/issues/16231
+    skip_vcr: true
+    skip_docs: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/alloydb_backup.erb
 parameters:
@@ -106,7 +138,7 @@ properties:
     description: |
       Output only. Delete time stamp. A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
       Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       User-defined labels for the alloydb backup. An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
@@ -178,7 +210,7 @@ properties:
     name: 'etag'
     output: true
     description: 'For Resource freshness validation (https://google.aip.dev/154)'
-  - !ruby/object:Api::Type::KeyValuePairs
+  - !ruby/object:Api::Type::KeyValueAnnotations
     name: 'annotations'
     description: |
       Annotations to allow client tools to store small amount of arbitrary data. This is distinct from labels. https://google.aip.dev/128

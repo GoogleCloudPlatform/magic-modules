@@ -128,8 +128,6 @@ func main() {
 	if err := os.MkdirAll(dirPath, os.ModePerm); err != nil {
 		glog.Error(fmt.Errorf("error creating Terraform tpgdclresource directory %v: %v", dirPath, err))
 	}
-
-	copyHandwrittenFiles(*cPath, *oPath)
 }
 
 func skipResource(r *Resource) bool {

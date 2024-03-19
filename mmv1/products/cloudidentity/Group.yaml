@@ -128,6 +128,37 @@ properties:
     description: |
       An extended description to help users determine the purpose of a Group.
       Must not be longer than 4,096 characters.
+  - !ruby/object:Api::Type::Array
+    name: 'additionalGroupKeys'
+    output: true
+    description: 'Additional group keys associated with the Group'
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'id'
+          output: true
+          description: |
+            The ID of the entity.
+
+            For Google-managed entities, the id must be the email address of an existing
+            group or user.
+
+            For external-identity-mapped entities, the id must be a string conforming
+            to the Identity Source's requirements.
+
+            Must be unique within a namespace.
+        - !ruby/object:Api::Type::String
+          name: 'namespace'
+          output: true
+          description: |
+            The namespace in which the entity exists.
+
+            If not specified, the EntityKey represents a Google-managed entity
+            such as a Google user or a Google Group.
+
+            If specified, the EntityKey represents an external-identity-mapped group.
+            The namespace must correspond to an identity source created in Admin Console
+            and must be in the form of `identitysources/{identity_source_id}`.
   - !ruby/object:Api::Type::String
     name: 'createTime'
     output: true

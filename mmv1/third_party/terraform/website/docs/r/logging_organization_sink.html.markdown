@@ -46,13 +46,13 @@ The following arguments are supported:
 
 * `org_id` - (Required) The numeric ID of the organization to be exported to the sink.
 
-* `destination` - (Required) The destination of the sink (or, in other words, where logs are written to). Can be a
-    Cloud Storage bucket, a PubSub topic, a BigQuery dataset or a Cloud Logging bucket. Examples:
+* `destination` - (Required) The destination of the sink (or, in other words, where logs are written to). Can be a Cloud Storage bucket, a PubSub topic, a BigQuery dataset, a Cloud Logging bucket, or a Google Cloud project. Examples:
 
     - `storage.googleapis.com/[GCS_BUCKET]`
     - `bigquery.googleapis.com/projects/[PROJECT_ID]/datasets/[DATASET]`
     - `pubsub.googleapis.com/projects/[PROJECT_ID]/topics/[TOPIC_ID]`
-    - `logging.googleapis.com/projects/[PROJECT_ID]]/locations/global/buckets/[BUCKET_ID]`
+    - `logging.googleapis.com/projects/[PROJECT_ID]/locations/global/buckets/[BUCKET_ID]`
+    - `logging.googleapis.com/projects/[PROJECT_ID]`
 
     The writer associated with the sink must have access to write to the above resource.
 
@@ -100,6 +100,19 @@ exported:
 
 Organization-level logging sinks can be imported using this format:
 
+* `organizations/{{organization_id}}/sinks/{{sink_id}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import organization-level logging sinks using one of the formats above. For example:
+
+```tf
+import {
+  id = "organizations/{{organization_id}}/sinks/{{sink_id}}"
+  to = google_logging_organization_sink.default
+}
 ```
-$ terraform import google_logging_organization_sink.my_sink organizations/{{organization_id}}/sinks/{{sink_id}}
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), organization-level logging sinks can be imported using one of the formats above. For example:
+
+```
+$ terraform import google_logging_organization_sink.default organizations/{{organization_id}}/sinks/{{sink_id}}
 ```

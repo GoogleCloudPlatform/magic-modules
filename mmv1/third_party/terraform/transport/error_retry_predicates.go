@@ -320,6 +320,30 @@ func DatastoreIndex409Contention(err error) (bool, string) {
 	return false, ""
 }
 
+// relevant for firestore in datastore mode
+func FirestoreField409RetryUnderlyingDataChanged(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 409 && strings.Contains(gerr.Body, "Please retry, underlying data changed") {
+			return true, "underlying data changed - retrying"
+		}
+	}
+	return false, ""
+}
+
+// relevant for firestore in datastore mode
+func FirestoreIndex409Retry(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 409 {
+		if strings.Contains(gerr.Body, "Aborted due to cross-transaction contention") {
+			return true, "aborted due to cross-transaction contention - retrying"
+		}
+
+		if strings.Contains(gerr.Body, "Please retry, underlying data changed") {
+			return true, "underlying data changed - retrying"
+		}
+	}
+	return false, ""
+}
+
 func IapClient409Operation(err error) (bool, string) {
 	if gerr, ok := err.(*googleapi.Error); ok {
 		if gerr.Code == 409 && strings.Contains(strings.ToLower(gerr.Body), "operation was aborted") {
@@ -496,4 +520,15 @@ func IsForbiddenIamServiceAccountRetryableError(opType string) RetryErrorPredica
 		}
 		return false, ""
 	}
+}
+
+// Retry the creation of `google_vmwareengine_external_address` resource if the network policy's
+// External IP field is not active yet.
+func ExternalIpServiceNotActive(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 400 && strings.Contains(gerr.Body, "External IP address network service is not active in the provided network policy") {
+			return true, "Waiting for external ip service to be enabled"
+		}
+	}
+	return false, ""
 }

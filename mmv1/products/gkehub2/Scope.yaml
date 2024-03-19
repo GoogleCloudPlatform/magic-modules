@@ -56,8 +56,10 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'gkehub_scope_basic'
-    primary_resource_name: 'fmt.Sprintf("tf-test-scope%s", context["random_suffix"])'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-scope%s", context["random_suffix"])'
     primary_resource_id: 'scope'
+    vars:
+      resource_name: 'my-scope'
     test_env_vars:
       project: :PROJECT_NAME
 # Skip sweeper gen since this is a child resource.
@@ -115,6 +117,14 @@ properties:
           - :READY
           - :DELETING
           - :UPDATING
+  - !ruby/object:Api::Type::KeyValuePairs
+    name: 'namespaceLabels'
+    description: |
+      Scope-level cluster namespace labels. For the member clusters bound
+      to the Scope, these labels are applied to each namespace under the
+      Scope. Scope-level labels take precedence over Namespace-level
+      labels (`namespace_labels` in the Fleet Namespace resource) if they
+      share a key. Keys and values must be Kubernetes-conformant.
   - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |

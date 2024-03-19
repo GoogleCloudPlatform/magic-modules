@@ -3,7 +3,7 @@ package rules
 import (
 	"fmt"
 
-	"github.com/GoogleCloudPlatform/magic-modules/.ci/diff-processor/constants"
+	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/constants"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 

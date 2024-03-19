@@ -8,6 +8,9 @@ resource "google_container_aws_cluster" "primary" {
     admin_users {
       username = "{{test_service_account}}"
     }
+    admin_groups {
+      group = "group@domain.com"
+    }
   }
 
   aws_region = "{{aws_region}}"

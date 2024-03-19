@@ -200,7 +200,6 @@ properties:
       Labels to apply to this address.  A list of key->value pairs.
     update_verb: :POST
     update_url: 'projects/{{project}}/regions/{{region}}/addresses/{{name}}/setLabels'
-    min_version: beta
   - !ruby/object:Api::Type::Fingerprint
     name: 'labelFingerprint'
     description: |
@@ -208,7 +207,6 @@ properties:
       internally during updates.
     update_url: 'projects/{{project}}/regions/{{region}}/addresses/{{name}}/setLabels'
     update_verb: :POST
-    min_version: beta
   - !ruby/object:Api::Type::ResourceRef
     name: 'network'
     resource: 'Network'

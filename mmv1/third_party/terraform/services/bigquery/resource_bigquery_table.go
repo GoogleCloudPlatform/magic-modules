@@ -528,7 +528,7 @@ func ResourceBigQueryTable() *schema.Resource {
 							Default:      "NONE",
 							Description:  `The compression type of the data source. Valid values are "NONE" or "GZIP".`,
 						},
-						// Schema: Optional] The schema for the  data.
+						// Schema: [Optional] The schema for the data.
 						// Schema is required for CSV and JSON formats if autodetect is not on.
 						// Schema is disallowed for Google Cloud Bigtable, Cloud Datastore backups, Avro, Iceberg, ORC, and Parquet formats.
 						"schema": {
@@ -789,7 +789,7 @@ func ResourceBigQueryTable() *schema.Resource {
 			"max_staleness": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: `The maximum staleness of data that could be returned when the table (or stale MV) is queried. Staleness encoded as a string encoding of sql IntervalValue type.`,
+				Description: `The maximum staleness of data that could be returned when the table (or stale MV) is queried. Staleness encoded as a string encoding of [SQL IntervalValue type](https://cloud.google.com/bigquery/docs/reference/standard-sql/data-types#interval_type).`,
 			},
 
 			// Labels: [Experimental] The labels associated with this table. You can
@@ -821,7 +821,6 @@ func ResourceBigQueryTable() *schema.Resource {
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			// Schema: [Optional] Describes the schema of this table.
-			// Schema is mutually exclusive with View and Materialized View.
 			"schema": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -833,10 +832,8 @@ func ResourceBigQueryTable() *schema.Resource {
 				},
 				DiffSuppressFunc: bigQueryTableSchemaDiffSuppress,
 				Description:      `A JSON schema for the table.`,
-				ConflictsWith:    []string{"view", "materialized_view"},
 			},
 			// View: [Optional] If specified, configures this table as a view.
-			// View is mutually exclusive with Schema and Materialized View.
 			"view": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -863,11 +860,9 @@ func ResourceBigQueryTable() *schema.Resource {
 						},
 					},
 				},
-				ConflictsWith: []string{"schema", "materialized_view"},
 			},
 
 			// Materialized View: [Optional] If specified, configures this table as a materialized view.
-			// Materialized View is mutually exclusive with Schema and View.
 			"materialized_view": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -892,7 +887,7 @@ func ResourceBigQueryTable() *schema.Resource {
 							Type:        schema.TypeInt,
 							Default:     1800000,
 							Optional:    true,
-							Description: `Specifies maximum frequency at which this materialized view will be refreshed. The default is 1800000`,
+							Description: `Specifies maximum frequency at which this materialized view will be refreshed. The default is 1800000.`,
 						},
 
 						"allow_non_incremental_definition": {
@@ -912,7 +907,6 @@ func ResourceBigQueryTable() *schema.Resource {
 						},
 					},
 				},
-				ConflictsWith: []string{"schema", "view"},
 			},
 
 			// TimePartitioning: [Experimental] If specified, configures time-based
@@ -959,9 +953,11 @@ func ResourceBigQueryTable() *schema.Resource {
 						// require a partition filter that can be used for partition elimination to be
 						// specified.
 						"require_partition_filter": {
-							Type:        schema.TypeBool,
-							Optional:    true,
-							Description: `If set to true, queries over this table require a partition filter that can be used for partition elimination to be specified.`,
+							Type:          schema.TypeBool,
+							Optional:      true,
+							Description:   `If set to true, queries over this table require a partition filter that can be used for partition elimination to be specified.`,
+							Deprecated:    `This field is deprecated and will be removed in a future major release; please use the top level field with the same name instead.`,
+							ConflictsWith: []string{"require_partition_filter"},
 						},
 					},
 				},
@@ -1018,6 +1014,16 @@ func ResourceBigQueryTable() *schema.Resource {
 						},
 					},
 				},
+			},
+
+			// RequirePartitionFilter: [Optional] If set to true, queries over this table
+			// require a partition filter that can be used for partition elimination to be
+			// specified.
+			"require_partition_filter": {
+				Type:          schema.TypeBool,
+				Optional:      true,
+				Description:   `If set to true, queries over this table require a partition filter that can be used for partition elimination to be specified.`,
+				ConflictsWith: []string{"time_partitioning.0.require_partition_filter"},
 			},
 
 			// Clustering: [Optional] Specifies column names to use for data clustering.  Up to four
@@ -1244,6 +1250,43 @@ func ResourceBigQueryTable() *schema.Resource {
 					},
 				},
 			},
+			// TableReplicationInfo: [Optional] Replication info of a table created using `AS REPLICA` DDL like: `CREATE MATERIALIZED VIEW mv1 AS REPLICA OF src_mv`.
+			"table_replication_info": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				ForceNew:    true,
+				MaxItems:    1,
+				Description: `Replication info of a table created using "AS REPLICA" DDL like: "CREATE MATERIALIZED VIEW mv1 AS REPLICA OF src_mv".`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"source_project_id": {
+							Type:        schema.TypeString,
+							Required:    true,
+							ForceNew:    true,
+							Description: `The ID of the source project.`,
+						},
+						"source_dataset_id": {
+							Type:        schema.TypeString,
+							Required:    true,
+							ForceNew:    true,
+							Description: `The ID of the source dataset.`,
+						},
+						"source_table_id": {
+							Type:        schema.TypeString,
+							Required:    true,
+							ForceNew:    true,
+							Description: `The ID of the source materialized view.`,
+						},
+						"replication_interval_ms": {
+							Type:        schema.TypeInt,
+							Default:     300000,
+							Optional:    true,
+							ForceNew:    true,
+							Description: `The interval at which the source materialized view is polled for updates. The default is 300000.`,
+						},
+					},
+				},
+			},
 		},
 		UseJSONNumber: true,
 	}
@@ -1338,6 +1381,10 @@ func resourceTable(d *schema.ResourceData, meta interface{}) (*bigquery.Table, e
 		table.RangePartitioning = rangePartitioning
 	}
 
+	if v, ok := d.GetOk("require_partition_filter"); ok {
+		table.RequirePartitionFilter = v.(bool)
+	}
+
 	if v, ok := d.GetOk("clustering"); ok {
 		table.Clustering = &bigquery.Clustering{
 			Fields:          tpgresource.ConvertStringArr(v.([]interface{})),
@@ -1376,15 +1423,80 @@ func resourceBigQueryTableCreate(d *schema.ResourceData, meta interface{}) error
 
 	datasetID := d.Get("dataset_id").(string)
 
-	log.Printf("[INFO] Creating BigQuery table: %s", table.TableReference.TableId)
+	if v, ok := d.GetOk("table_replication_info"); ok {
+		if table.Schema != nil || table.View != nil || table.MaterializedView != nil {
+			return errors.New("Schema, view, or materialized view cannot be specified when table replication info is present")
+		}
 
-	res, err := config.NewBigQueryClient(userAgent).Tables.Insert(project, datasetID, table).Do()
-	if err != nil {
-		return err
+		replicationDDL := fmt.Sprintf("CREATE MATERIALIZED VIEW %s.%s.%s", d.Get("project").(string), d.Get("dataset_id").(string), d.Get("table_id").(string))
+
+		tableReplicationInfo := expandTableReplicationInfo(v)
+		replicationIntervalMs := tableReplicationInfo["replication_interval_ms"].(int64)
+		if replicationIntervalMs > 0 {
+			replicationIntervalSeconds := replicationIntervalMs / 1000
+			replicationDDL = fmt.Sprintf("%s OPTIONS(replication_interval_seconds=%d)", replicationDDL, replicationIntervalSeconds)
+		}
+
+		replicationDDL = fmt.Sprintf("%s AS REPLICA OF %s.%s.%s", replicationDDL, tableReplicationInfo["source_project_id"], tableReplicationInfo["source_dataset_id"], tableReplicationInfo["source_table_id"])
+		useLegacySQL := false
+
+		req := &bigquery.QueryRequest{
+			Query:        replicationDDL,
+			UseLegacySql: &useLegacySQL,
+		}
+
+		log.Printf("[INFO] Creating a replica materialized view with DDL: '%s'", replicationDDL)
+
+		_, err := config.NewBigQueryClient(userAgent).Jobs.Query(project, req).Do()
+
+		id := fmt.Sprintf("projects/%s/datasets/%s/tables/%s", project, datasetID, d.Get("table_id").(string))
+		if err != nil {
+			if deleteErr := resourceBigQueryTableDelete(d, meta); deleteErr != nil {
+				log.Printf("[INFO] Unable to clean up table %s: %s", id, deleteErr)
+			}
+			return err
+		}
+
+		log.Printf("[INFO] BigQuery table %s has been created", id)
+		d.SetId(id)
+
+		return resourceBigQueryTableRead(d, meta)
 	}
 
-	log.Printf("[INFO] BigQuery table %s has been created", res.Id)
-	d.SetId(fmt.Sprintf("projects/%s/datasets/%s/tables/%s", res.TableReference.ProjectId, res.TableReference.DatasetId, res.TableReference.TableId))
+	if table.View != nil && table.Schema != nil {
+
+		log.Printf("[INFO] Removing schema from table definition because BigQuery does not support setting schema on view creation")
+		schemaBack := table.Schema
+		table.Schema = nil
+
+		log.Printf("[INFO] Creating BigQuery table: %s without schema", table.TableReference.TableId)
+
+		res, err := config.NewBigQueryClient(userAgent).Tables.Insert(project, datasetID, table).Do()
+		if err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] BigQuery table %s has been created", res.Id)
+		d.SetId(fmt.Sprintf("projects/%s/datasets/%s/tables/%s", res.TableReference.ProjectId, res.TableReference.DatasetId, res.TableReference.TableId))
+
+		table.Schema = schemaBack
+		log.Printf("[INFO] Updating BigQuery table: %s with schema", table.TableReference.TableId)
+		if _, err = config.NewBigQueryClient(userAgent).Tables.Update(project, datasetID, res.TableReference.TableId, table).Do(); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] BigQuery table %s has been updated with schema", res.Id)
+	} else {
+		log.Printf("[INFO] Creating BigQuery table: %s", table.TableReference.TableId)
+
+		res, err := config.NewBigQueryClient(userAgent).Tables.Insert(project, datasetID, table).Do()
+		if err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] BigQuery table %s has been created", res.Id)
+		d.SetId(fmt.Sprintf("projects/%s/datasets/%s/tables/%s", res.TableReference.ProjectId, res.TableReference.DatasetId, res.TableReference.TableId))
+	}
 
 	return resourceBigQueryTableRead(d, meta)
 }
@@ -1469,6 +1581,14 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error setting type: %s", err)
 	}
 
+	// determine whether the deprecated require_partition_filter field is used
+	use_old_rpf := false
+	if _, ok := d.GetOk("time_partitioning.0.require_partition_filter"); ok {
+		use_old_rpf = true
+	} else if err := d.Set("require_partition_filter", res.RequirePartitionFilter); err != nil {
+		return fmt.Errorf("Error setting require_partition_filter: %s", err)
+	}
+
 	if res.ExternalDataConfiguration != nil {
 		externalDataConfiguration, err := flattenExternalDataConfiguration(res.ExternalDataConfiguration)
 		if err != nil {
@@ -1499,7 +1619,7 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if res.TimePartitioning != nil {
-		if err := d.Set("time_partitioning", flattenTimePartitioning(res.TimePartitioning)); err != nil {
+		if err := d.Set("time_partitioning", flattenTimePartitioning(res.TimePartitioning, use_old_rpf)); err != nil {
 			return err
 		}
 	}
@@ -1551,6 +1671,32 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 
 		if err := d.Set("table_constraints", table_constraints); err != nil {
 			return fmt.Errorf("Error setting table constraints: %s", err)
+		}
+	}
+
+	// TODO: Update when the Get API fields for TableReplicationInfo are available in the client library.
+	url, err := tpgresource.ReplaceVars(d, config, "{{BigQueryBasePath}}projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}")
+	if err != nil {
+		return err
+	}
+
+	log.Printf("[INFO] Reading BigQuery table through API: %s", url)
+
+	getRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
+	if err != nil {
+		return err
+	}
+
+	if v, ok := getRes["tableReplicationInfo"]; ok {
+		tableReplicationInfo := flattenTableReplicationInfo(v.(map[string]interface{}))
+
+		if err := d.Set("table_replication_info", tableReplicationInfo); err != nil {
+			return fmt.Errorf("Error setting table replication info: %s", err)
 		}
 	}
 
@@ -2084,6 +2230,10 @@ func flattenEncryptionConfiguration(ec *bigquery.EncryptionConfiguration) []map[
 	re := regexp.MustCompile(`(projects/.*/locations/.*/keyRings/.*/cryptoKeys/.*)/cryptoKeyVersions/.*`)
 	paths := re.FindStringSubmatch(ec.KmsKeyName)
 
+	if len(ec.KmsKeyName) == 0 {
+		return nil
+	}
+
 	if len(paths) > 0 {
 		return []map[string]interface{}{
 			{
@@ -2097,7 +2247,7 @@ func flattenEncryptionConfiguration(ec *bigquery.EncryptionConfiguration) []map[
 	return []map[string]interface{}{{"kms_key_name": ec.KmsKeyName, "kms_key_version": ""}}
 }
 
-func flattenTimePartitioning(tp *bigquery.TimePartitioning) []map[string]interface{} {
+func flattenTimePartitioning(tp *bigquery.TimePartitioning, use_old_rpf bool) []map[string]interface{} {
 	result := map[string]interface{}{"type": tp.Type}
 
 	if tp.Field != "" {
@@ -2108,7 +2258,7 @@ func flattenTimePartitioning(tp *bigquery.TimePartitioning) []map[string]interfa
 		result["expiration_ms"] = tp.ExpirationMs
 	}
 
-	if tp.RequirePartitionFilter {
+	if tp.RequirePartitionFilter && use_old_rpf {
 		result["require_partition_filter"] = tp.RequirePartitionFilter
 	}
 
@@ -2335,6 +2485,56 @@ func flattenTableConstraints(edc *bigquery.TableConstraints) []map[string]interf
 	}
 	if edc.ForeignKeys != nil {
 		result["foreign_keys"] = flattenForeignKeys(edc.ForeignKeys)
+	}
+
+	return []map[string]interface{}{result}
+}
+
+func expandTableReplicationInfo(cfg interface{}) map[string]interface{} {
+	raw := cfg.([]interface{})[0].(map[string]interface{})
+
+	result := map[string]interface{}{}
+
+	if v, ok := raw["source_project_id"]; ok {
+		result["source_project_id"] = v.(string)
+	}
+
+	if v, ok := raw["source_dataset_id"]; ok {
+		result["source_dataset_id"] = v.(string)
+	}
+
+	if v, ok := raw["source_table_id"]; ok {
+		result["source_table_id"] = v.(string)
+	}
+
+	if v, ok := raw["replication_interval_ms"]; ok {
+		result["replication_interval_ms"] = int64(v.(int))
+	}
+
+	return result
+}
+
+func flattenTableReplicationInfo(tableReplicationInfo map[string]interface{}) []map[string]interface{} {
+	result := map[string]interface{}{}
+
+	if v, ok := tableReplicationInfo["sourceTable"]; ok {
+		sourceTable := v.(map[string]interface{})
+		if v, ok := sourceTable["projectId"]; ok {
+			result["source_project_id"] = v.(string)
+		}
+		if v, ok := sourceTable["datasetId"]; ok {
+			result["source_dataset_id"] = v.(string)
+		}
+		if v, ok := sourceTable["tableId"]; ok {
+			result["source_table_id"] = v.(string)
+		}
+	}
+
+	if v, ok := tableReplicationInfo["replicationIntervalMs"]; ok {
+		replicationIntervalMs := v.(string)
+		if i, err := strconv.Atoi(replicationIntervalMs); err == nil {
+			result["replication_interval_ms"] = int64(i)
+		}
 	}
 
 	return []map[string]interface{}{result}

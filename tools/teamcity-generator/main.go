@@ -88,7 +88,9 @@ func readAllServicePackages(providerDir string) ([]string, error) {
 	var services = make([]string, 0)
 
 	for _, p := range packages {
-		services = append(services, p.Name())
+		if p.IsDir() {
+			services = append(services, p.Name())
+		}
 	}
 	if len(services) == 0 {
 		return nil, fmt.Errorf("found 0 service packages in %s", providerDir)

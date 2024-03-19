@@ -153,16 +153,16 @@ The following arguments are supported:
 * `auto_healing_policies` - (Optional) The autohealing policies for this managed instance
 group. You can specify only one value. Structure is [documented below](#nested_auto_healing_policies). For more information, see the [official documentation](https://cloud.google.com/compute/docs/instance-groups/creating-groups-of-managed-instances#monitoring_groups).
 
-* `all_instances_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+* `all_instances_config` - (Optional)
   Properties to set on all instances in the group. After setting
   allInstancesConfig on the group, you must update the group's instances to
   apply the configuration.
 
 * `stateful_disk` - (Optional) Disks created on the instances that will be preserved on instance delete, update, etc. Structure is [documented below](#nested_stateful_disk). For more information see the [official documentation](https://cloud.google.com/compute/docs/instance-groups/configuring-stateful-disks-in-migs).
 
-* `stateful_internal_ip` - (Optional, [Beta](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_versions.html)) Internal network IPs assigned to the instances that will be preserved on instance delete, update, etc. This map is keyed with the network interface name. Structure is [documented below](#nested_stateful_internal_ip).
+* `stateful_internal_ip` - (Optional) Internal network IPs assigned to the instances that will be preserved on instance delete, update, etc. This map is keyed with the network interface name. Structure is [documented below](#nested_stateful_internal_ip).
 
-* `stateful_external_ip` - (Optional, [Beta](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_versions.html)) External network IPs assigned to the instances that will be preserved on instance delete, update, etc. This map is keyed with the network interface name. Structure is [documented below](#nested_stateful_external_ip).
+* `stateful_external_ip` - (Optional) External network IPs assigned to the instances that will be preserved on instance delete, update, etc. This map is keyed with the network interface name. Structure is [documented below](#nested_stateful_external_ip).
 
 * `update_policy` - (Optional) The update policy for this managed instance group. Structure is [documented below](#nested_update_policy). For more information, see the [official documentation](https://cloud.google.com/compute/docs/instance-groups/updating-managed-instance-groups) and [API](https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroupManagers/patch)
 
@@ -205,12 +205,13 @@ update_policy {
 
 ```hcl
 instance_lifecycle_policy {
-  force_update_on_repair = "YES"
+  force_update_on_repair    = "YES"
+  default_action_on_failure = "DO_NOTHING"
 }
 ```
 
-* `force_update_on_repair` - (Optional, (https://terraform.io/docs/providers/google/guides/provider_versions.html)), Specifies whether to apply the group's latest configuration when repairing a VM. Valid options are: `YES`, `NO`. If `YES` and you updated the group's instance template or per-instance configurations after the VM was created, then these changes are applied when VM is repaired. If `NO` (default), then updates are applied in accordance with the group's update policy type.
-
+* `force_update_on_repair` - (Optional), Specifies whether to apply the group's latest configuration when repairing a VM. Valid options are: `YES`, `NO`. If `YES` and you updated the group's instance template or per-instance configurations after the VM was created, then these changes are applied when VM is repaired. If `NO` (default), then updates are applied in accordance with the group's update policy type.
+* `default_action_on_failure` - (Optional), Default behavior for all instance or health check failures. Valid options are: `REPAIR`, `DO_NOTHING`. If `DO_NOTHING` then instances will not be repaired. If `REPAIR` (default), then failed instances will be repaired.
 - - -
 
 <a name="nested_all_instances_config"></a>The `all_instances_config` block supports:
@@ -226,9 +227,9 @@ all_instances_config {
 }
 ```
 
-* `metadata` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)), The metadata key-value pairs that you want to patch onto the instance. For more information, see [Project and instance metadata](https://cloud.google.com/compute/docs/metadata#project_and_instance_metadata).
+* `metadata` - (Optional), The metadata key-value pairs that you want to patch onto the instance. For more information, see [Project and instance metadata](https://cloud.google.com/compute/docs/metadata#project_and_instance_metadata).
 
-* `labels` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)), The label key-value pairs that you want to patch onto the instance.
+* `labels` - (Optional), The label key-value pairs that you want to patch onto the instance.
 
 - - -
 
@@ -312,6 +313,8 @@ exported:
 
 * `id` - an identifier for the resource with format `projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{name}}`
 
+* `creation_timestamp` - Creation timestamp in RFC3339 text format.
+
 * `fingerprint` - The fingerprint of the instance group manager.
 
 * `instance_group` - The full URL of the instance group created by the manager.
@@ -326,17 +329,25 @@ The `status` block holds:
 
 * `version_target` - A status of consistency of Instances' versions with their target version specified by version field on Instance Group Manager.
 
+* `all_instances_config` - Status of all-instances configuration on the group.
+
+* `stateful` - Stateful status of the given Instance Group Manager.
+
 The `version_target` block holds:
 
 * `version_target` - A bit indicating whether version target has been reached in this managed instance group, i.e. all instances are in their target version. Instances' target version are specified by version field on Instance Group Manager.
 
-* `stateful` - Stateful status of the given Instance Group Manager.
+The `all_instances_config` block holds:
+
+* `effective` -  A bit indicating whether this configuration has been applied to all managed instances in the group.
+
+* `current_revision` - Current all-instances configuration revision. This value is in RFC3339 text format.
 
 The `stateful` block holds:
 
 * `has_stateful_config` - A bit indicating whether the managed instance group has stateful configuration, that is, if you have configured any items in a stateful policy or in per-instance configs. The group might report that it has no stateful config even when there is still some preserved state on a managed instance, for example, if you have deleted all PICs but not yet applied those deletions.
 
-* `per_instance_configs` - Status of per-instance configs on the instance.
+* `per_instance_configs` - Status of per-instance configs on the instances.
 
 The `per_instance_configs` block holds:
 
@@ -357,8 +368,25 @@ This resource provides the following
 Instance group managers can be imported using any of these accepted formats:
 
 ```
-$ terraform import google_compute_instance_group_manager.appserver projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{name}}
-$ terraform import google_compute_instance_group_manager.appserver {{project}}/{{zone}}/{{name}}
-$ terraform import google_compute_instance_group_manager.appserver {{project}}/{{name}}
-$ terraform import google_compute_instance_group_manager.appserver {{name}}
+* `projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{name}}`
+* `{{project}}/{{zone}}/{{name}}`
+* `{{project}}/{{name}}`
+* `{{name}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import instance group managers using one of the formats above. For example:
+
+```tf
+import {
+  id = "projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{name}}"
+  to = google_compute_instance_group_manager.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), instance group managers can be imported using one of the formats above. For example:
+
+```
+$ terraform import google_compute_instance_group_manager.default projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{name}}
+$ terraform import google_compute_instance_group_manager.default {{project}}/{{zone}}/{{name}}
+$ terraform import google_compute_instance_group_manager.default {{project}}/{{name}}
+$ terraform import google_compute_instance_group_manager.default {{name}}
 ```

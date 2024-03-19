@@ -13,7 +13,6 @@
 
 --- !ruby/object:Api::Resource
 name: 'VmwareCluster'
-min_version: beta
 base_url: 'projects/{{project}}/locations/{{location}}/vmwareClusters'
 create_url: 'projects/{{project}}/locations/{{location}}/vmwareClusters?vmware_cluster_id={{name}}'
 update_url: 'projects/{{project}}/locations/{{location}}/vmwareClusters/{{name}}'
@@ -34,7 +33,6 @@ timeouts: !ruby/object:Api::Timeouts
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'gkeonprem_vmware_cluster_basic'
-    min_version: beta
     primary_resource_id: 'cluster-basic'
     vars:
       name: 'cluster-basic'
@@ -42,7 +40,6 @@ examples:
       project: 'fake-backend-360322'
   - !ruby/object:Provider::Terraform::Examples
     name: 'gkeonprem_vmware_cluster_f5lb'
-    min_version: beta
     primary_resource_id: 'cluster-f5lb'
     vars:
       name: 'cluster-f5lb'
@@ -50,7 +47,6 @@ examples:
       project: 'fake-backend-360322'
   - !ruby/object:Provider::Terraform::Examples
     name: 'gkeonprem_vmware_cluster_manuallb'
-    min_version: beta
     primary_resource_id: 'cluster-manuallb'
     vars:
       name: 'cluster-manuallb'
@@ -256,7 +252,8 @@ properties:
         description:
           vcenter_network specifies vCenter network name. Inherited from the
           admin cluster.
-        output: true
+        immutable: true
+        default_from_api: true
       - !ruby/object:Api::Type::NestedObject
         name: 'hostConfig'
         description:
@@ -628,33 +625,26 @@ properties:
     description: |
       VmwareVCenterConfig specifies vCenter config for the user cluster.
       Inherited from the admin cluster.
-    output: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'resourcePool'
         description: The name of the vCenter resource pool for the user cluster.
-        output: true
       - !ruby/object:Api::Type::String
         name: 'datastore'
         description: The name of the vCenter datastore for the user cluster.
-        output: true
       - !ruby/object:Api::Type::String
         name: 'datacenter'
         description: The name of the vCenter datacenter for the user cluster.
-        output: true
       - !ruby/object:Api::Type::String
         name: 'cluster'
         description: The name of the vCenter cluster for the user cluster.
-        output: true
       - !ruby/object:Api::Type::String
         name: 'folder'
         description: The name of the vCenter folder for the user cluster.
-        output: true
       - !ruby/object:Api::Type::String
         name: 'caCertData'
         description:
           Contains the vCenter CA certificate public key for SSL verification.
-        output: true
       - !ruby/object:Api::Type::String
         name: 'address'
         description: The vCenter IP address.
@@ -662,7 +652,6 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'storagePolicyName'
         description: The name of the vCenter storage policy for the user cluster.
-        output: true
   - !ruby/object:Api::Type::NestedObject
     name: status
     description: ResourceStatus representing detailed cluster state.

@@ -120,7 +120,12 @@ The following arguments are supported:
 
 * `encryption` - (Optional) The bucket's encryption configuration. Structure is [documented below](#nested_encryption).
 
+* `enable_object_retention` - (Optional, Default: false) Enables [object retention](https://cloud.google.com/storage/docs/object-lock) on a storage bucket.
+
+
 * `requester_pays` - (Optional, Default: false) Enables [Requester Pays](https://cloud.google.com/storage/docs/requester-pays) on a storage bucket.
+
+* `rpo` - (Optional) The recovery point objective for cross-region replication of the bucket. Applicable only for dual and multi-region buckets. `"DEFAULT"` sets default replication. `"ASYNC_TURBO"` value enables turbo replication, valid for dual-region buckets only. See [Turbo Replication](https://cloud.google.com/storage/docs/managing-turbo-replication) for more information. If rpo is not specified at bucket creation, it defaults to `"DEFAULT"` for dual and multi-region buckets. **NOTE** If used with single-region bucket, It will throw an error.
 
 * `uniform_bucket_level_access` - (Optional, Default: false) Enables [Uniform bucket-level access](https://cloud.google.com/storage/docs/uniform-bucket-level-access) access to a bucket.
 
@@ -143,6 +148,8 @@ The following arguments are supported:
 <a name="nested_condition"></a>The `condition` block supports the following elements, and requires at least one to be defined. If you specify multiple conditions in a rule, an object has to match all of the conditions for the action to be taken:
 
 * `age` - (Optional) Minimum age of an object in days to satisfy this condition.
+
+* `no_age` - (Optional) While set `true`, `age` value will be omitted. **Note** Required to set `true` when `age` is unset in the config file.  
 
 * `created_before` - (Optional) A date in the RFC 3339 format YYYY-MM-DD. This condition is satisfied when an object is created before midnight of the specified date in UTC.
 
@@ -167,6 +174,8 @@ The following arguments are supported:
 <a name="nested_autoclass"></a>The `autoclass` block supports:
 
 * `enabled` - (Required) While set to `true`, autoclass automatically transitions objects in your bucket to appropriate storage classes based on each object's access pattern.
+
+* `terminal_storage_class` - (Optional) The storage class that objects in the bucket eventually transition to if they are not read for a certain length of time. Supported values include: `NEARLINE`, `ARCHIVE`.
 
 <a name="nested_versioning"></a>The `versioning` block supports:
 
@@ -249,11 +258,23 @@ passed to the import command it will be inferred from the provider block or envi
 If it cannot be inferred it will be queried from the Compute API (this will fail if the API is
 not enabled).
 
-e.g.
+* `{{project_id}}/{{bucket}}`
+* `{{bucket}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import Storage buckets using one of the formats above. For example:
+
+```tf
+import {
+  id = "{{project_id}}/{{bucket}}"
+  to = google_storage_bucket.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), Storage buckets can be imported using one of the formats above. For example:
 
 ```
-$ terraform import google_storage_bucket.image-store image-store-bucket
-$ terraform import google_storage_bucket.image-store tf-test-project/image-store-bucket
+$ terraform import google_storage_bucket.default {{bucket}}
+$ terraform import google_storage_bucket.default {{project_id}}/{{bucket}}
 ```
 
 ~> **Note:** Terraform will import this resource with `force_destroy` set to

@@ -533,6 +533,86 @@ func TestAccComputeRouterNat_withPrivateNatAndRules(t *testing.T) {
 		},
 	})
 }
+
+func TestAccComputeRouterNat_withPrivateNatAndEmptyAction(t *testing.T) {
+	t.Parallel()
+
+	testId := acctest.RandString(t, 10)
+	routerName := fmt.Sprintf("tf-test-router-private-nat-%s", testId)
+	hubName := fmt.Sprintf("%s-hub", routerName)
+	pEnv := envvar.GetTestProjectFromEnv()
+	ruleDescription := acctest.RandString(t, 10)
+	match := fmt.Sprintf("nexthop.hub == '//networkconnectivity.googleapis.com/projects/%s/locations/global/hubs/%s'", pEnv, hubName)
+	activeRangesNetworkOne := "google_compute_subnetwork.subnet1.self_link"
+	drainRangesEmpty := ""
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRouterNatDestroyProducer(t),
+		Steps: []resource.TestStep{
+			// (ERROR): Creation with empty action should fail
+			{
+				Config:      testAccComputeRouterNatRulesBasic_privateNatWithRuleAndEmptyAction(routerName, hubName, 100, ruleDescription, match),
+				ExpectError: regexp.MustCompile("The rule for PRIVATE nat type must contain an action with source_nat_active_ranges set"),
+			},
+			// Create NAT with action and active ranges set
+			{
+				Config: testAccComputeRouterNatRulesBasic_privateNatWithRuleAndActiveDrainRange(routerName, hubName, 100, ruleDescription, match, activeRangesNetworkOne, drainRangesEmpty),
+			},
+			{
+				ResourceName:      "google_compute_router_nat.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// (ERROR) - Updating the rule by removing the action should fail
+			{
+				Config:      testAccComputeRouterNatRulesBasic_privateNatWithRuleAndEmptyAction(routerName, hubName, 100, ruleDescription, match),
+				ExpectError: regexp.MustCompile("The rule for PRIVATE nat type must contain an action with source_nat_active_ranges set"),
+			},
+		},
+	})
+}
+
+func TestAccComputeRouterNat_withPrivateNatAndEmptyActionActiveRanges(t *testing.T) {
+	t.Parallel()
+
+	testId := acctest.RandString(t, 10)
+	routerName := fmt.Sprintf("tf-test-router-private-nat-%s", testId)
+	hubName := fmt.Sprintf("%s-hub", routerName)
+	pEnv := envvar.GetTestProjectFromEnv()
+	ruleDescription := acctest.RandString(t, 10)
+	match := fmt.Sprintf("nexthop.hub == '//networkconnectivity.googleapis.com/projects/%s/locations/global/hubs/%s'", pEnv, hubName)
+	activeRangesNetworkOne := "google_compute_subnetwork.subnet1.self_link"
+	drainRangesEmpty := ""
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRouterNatDestroyProducer(t),
+		Steps: []resource.TestStep{
+			// (ERROR): Creation with empty action active ranges should fail
+			{
+				Config:      testAccComputeRouterNatRulesBasic_privateNatWithRuleAndEmptyActionActiveRanges(routerName, hubName, 100, ruleDescription, match),
+				ExpectError: regexp.MustCompile("The rule for PRIVATE nat type must contain an action with source_nat_active_ranges set"),
+			},
+			// Create NAT with action and active ranges set
+			{
+				Config: testAccComputeRouterNatRulesBasic_privateNatWithRuleAndActiveDrainRange(routerName, hubName, 100, ruleDescription, match, activeRangesNetworkOne, drainRangesEmpty),
+			},
+			{
+				ResourceName:      "google_compute_router_nat.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// (ERROR) - Updating the rule by erasing the action active ranges should fail
+			{
+				Config:      testAccComputeRouterNatRulesBasic_privateNatWithRuleAndEmptyActionActiveRanges(routerName, hubName, 100, ruleDescription, match),
+				ExpectError: regexp.MustCompile("The rule for PRIVATE nat type must contain an action with source_nat_active_ranges set"),
+			},
+		},
+	})
+}
 <% end -%>
 
 func testAccCheckComputeRouterNatDestroyProducer(t *testing.T) func(s *terraform.State) error {
@@ -1599,6 +1679,9 @@ resource "google_compute_router" "foobar" {
   name     = "%s"
   region   = google_compute_subnetwork.subnet1.region
   network  = google_compute_network.foobar.self_link
+  depends_on = [
+    google_network_connectivity_spoke.primary
+  ]
 }
 `, routerName, routerName, routerName, routerName, routerName, hubName, routerName, routerName)
 }
@@ -1653,6 +1736,64 @@ resource "google_compute_router_nat" "foobar" {
   }
 }
 `, testAccComputeRouterNatBaseResourcesWithPrivateNatSubnetworks(routerName, hubName), routerName, ruleNumber, ruleDescription, match, activeRanges, drainRanges)
+}
+
+func testAccComputeRouterNatRulesBasic_privateNatWithRuleAndEmptyAction(routerName, hubName string, ruleNumber int, ruleDescription, match string) string {
+	return fmt.Sprintf(`
+%s
+
+resource "google_compute_router_nat" "foobar" {
+  name                                = "%s"
+  router                              = google_compute_router.foobar.name
+  region                              = google_compute_router.foobar.region
+  source_subnetwork_ip_ranges_to_nat  = "LIST_OF_SUBNETWORKS"
+  type                                = "PRIVATE" 
+  enable_dynamic_port_allocation      = false
+  enable_endpoint_independent_mapping = false
+  min_ports_per_vm = 32
+  subnetwork {
+    name                    = google_compute_subnetwork.subnet1.id
+    source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
+  }
+
+  rules {
+    rule_number = %d
+    description = "%s"
+    match       = "%s"
+    # action is missing
+  }
+}
+`, testAccComputeRouterNatBaseResourcesWithPrivateNatSubnetworks(routerName, hubName), routerName, ruleNumber, ruleDescription, match)
+}
+
+func testAccComputeRouterNatRulesBasic_privateNatWithRuleAndEmptyActionActiveRanges(routerName, hubName string, ruleNumber int, ruleDescription, match string) string {
+	return fmt.Sprintf(`
+%s
+
+resource "google_compute_router_nat" "foobar" {
+  name                                = "%s"
+  router                              = google_compute_router.foobar.name
+  region                              = google_compute_router.foobar.region
+  source_subnetwork_ip_ranges_to_nat  = "LIST_OF_SUBNETWORKS"
+  type                                = "PRIVATE" 
+  enable_dynamic_port_allocation      = false
+  enable_endpoint_independent_mapping = false
+  min_ports_per_vm = 32
+  subnetwork {
+    name                    = google_compute_subnetwork.subnet1.id
+    source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
+  }
+
+  rules {
+    rule_number = %d
+    description = "%s"
+    match       = "%s"
+    action {
+      source_nat_active_ranges = []
+    }
+  }
+}
+`, testAccComputeRouterNatBaseResourcesWithPrivateNatSubnetworks(routerName, hubName), routerName, ruleNumber, ruleDescription, match)
 }
 
 <% end -%>

@@ -1123,6 +1123,79 @@ properties:
 
                       A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to
                       nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+          - !ruby/object:Api::Type::Array
+            name: 'mavenArtifacts'
+            description: |
+              A Maven artifact to upload to Artifact Registry upon successful completion of all build steps.
+
+              The location and generation of the uploaded objects will be stored in the Build resource's results field.
+
+              If any objects fail to be pushed, the build is marked FAILURE.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'repository'
+                  description: |
+                    Artifact Registry repository, in the form "https://$REGION-maven.pkg.dev/$PROJECT/$REPOSITORY"
+
+                    Artifact in the workspace specified by path will be uploaded to Artifact Registry with this location as a prefix.
+                - !ruby/object:Api::Type::String
+                  name: 'path'
+                  description: |
+                    Path to an artifact in the build's workspace to be uploaded to Artifact Registry. This can be either an absolute path, e.g. /workspace/my-app/target/my-app-1.0.SNAPSHOT.jar or a relative path from /workspace, e.g. my-app/target/my-app-1.0.SNAPSHOT.jar.
+                - !ruby/object:Api::Type::String
+                  name: 'artifactId'
+                  description: |
+                    Maven artifactId value used when uploading the artifact to Artifact Registry.
+                - !ruby/object:Api::Type::String
+                  name: 'groupId'
+                  description: |
+                    Maven groupId value used when uploading the artifact to Artifact Registry.
+                - !ruby/object:Api::Type::String
+                  name: 'version'
+                  description: |
+                    Maven version value used when uploading the artifact to Artifact Registry.
+          - !ruby/object:Api::Type::Array
+            name: 'pythonPackages'
+            description: |
+              Python package to upload to Artifact Registry upon successful completion of all build steps. A package can encapsulate multiple objects to be uploaded to a single repository.
+
+              The location and generation of the uploaded objects will be stored in the Build resource's results field.
+
+              If any objects fail to be pushed, the build is marked FAILURE.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'repository'
+                  description: |
+                    Artifact Registry repository, in the form "https://$REGION-python.pkg.dev/$PROJECT/$REPOSITORY"
+
+                    Files in the workspace matching any path pattern will be uploaded to Artifact Registry with this location as a prefix.
+                - !ruby/object:Api::Type::Array
+                  name: 'paths'
+                  item_type: Api::Type::String
+                  description: |
+                    Path globs used to match files in the build's workspace. For Python/ Twine, this is usually dist/*, and sometimes additionally an .asc file.
+          - !ruby/object:Api::Type::Array
+            name: 'npmPackages'
+            description: |
+              Npm package to upload to Artifact Registry upon successful completion of all build steps.
+
+              The location and generation of the uploaded objects will be stored in the Build resource's results field.
+
+              If any objects fail to be pushed, the build is marked FAILURE.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'repository'
+                  description: |
+                    Artifact Registry repository, in the form "https://$REGION-npm.pkg.dev/$PROJECT/$REPOSITORY"
+
+                    Npm package in the workspace specified by path will be zipped and uploaded to Artifact Registry with this location as a prefix.
+                - !ruby/object:Api::Type::String
+                  name: 'packagePath'
+                  description: |
+                    Path to the package.json. e.g. workspace/path/to/package
       - !ruby/object:Api::Type::NestedObject
         name: 'options'
         description: |

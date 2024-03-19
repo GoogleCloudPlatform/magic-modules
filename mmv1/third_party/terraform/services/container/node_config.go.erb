@@ -72,7 +72,6 @@ func schemaNodeConfig() *schema.Schema {
 					Type:         schema.TypeInt,
 					Optional:     true,
 					Computed:     true,
-					ForceNew:     true,
 					ValidateFunc: validation.IntAtLeast(10),
 					Description:  `Size of the disk attached to each node, specified in GB. The smallest allowed disk size is 10GB.`,
 				},
@@ -81,7 +80,6 @@ func schemaNodeConfig() *schema.Schema {
 					Type:         schema.TypeString,
 					Optional:     true,
 					Computed:     true,
-					ForceNew:     true,
 					Description:  `Type of the disk attached to each node. Such as pd-standard, pd-balanced or pd-ssd`,
 				},
 
@@ -283,7 +281,6 @@ func schemaNodeConfig() *schema.Schema {
 					Type:     schema.TypeString,
 					Optional: true,
 					Computed: true,
-					ForceNew: true,
 					Description: `The name of a Google Compute Engine machine type.`,
 				},
 
@@ -413,26 +410,22 @@ func schemaNodeConfig() *schema.Schema {
 				"taint": {
 					Type:        schema.TypeList,
 					Optional:    true,
-					ForceNew:    true,
 					Description: `List of Kubernetes taints to be applied to each node.`,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"key": {
 								Type:     schema.TypeString,
 								Required: true,
-								ForceNew: true,
 								Description: `Key for taint.`,
 							},
 							"value": {
 								Type:     schema.TypeString,
 								Required: true,
-								ForceNew: true,
 								Description: `Value for taint.`,
 							},
 							"effect": {
 								Type:         schema.TypeString,
 								Required:     true,
-								ForceNew:     true,
 								ValidateFunc: validation.StringInSlice([]string{"NO_SCHEDULE", "PREFER_NO_SCHEDULE", "NO_EXECUTE"}, false),
 								Description: `Effect for taint.`,
 							},
@@ -551,9 +544,17 @@ func schemaNodeConfig() *schema.Schema {
 						Schema: map[string]*schema.Schema{
 							"sysctls": {
 								Type:     schema.TypeMap,
-								Required: true,
+								Optional: true,
 								Elem:     &schema.Schema{Type: schema.TypeString},
 								Description: `The Linux kernel parameters to be applied to the nodes and all pods running on the nodes.`,
+							},
+							"cgroup_mode": {
+								Type:             schema.TypeString,
+								Optional:         true,
+								Computed:         true,
+								ValidateFunc:     validation.StringInSlice([]string{"CGROUP_MODE_UNSPECIFIED", "CGROUP_MODE_V1", "CGROUP_MODE_V2"}, false),
+								Description:      `cgroupMode specifies the cgroup mode to be used on the node.`,
+								DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("CGROUP_MODE_UNSPECIFIED"),
 							},
 						},
 					},
@@ -673,6 +674,17 @@ func schemaNodeConfig() *schema.Schema {
 							},
 						},
 					},
+				},
+				"resource_manager_tags": {
+					Type:        schema.TypeMap,
+					Optional:    true,
+					Description: `A map of resource manager tags. Resource manager tag keys and values have the same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/456. The field is ignored (both PUT & PATCH) when empty.`,
+				},
+				"enable_confidential_storage": {
+						Type:     schema.TypeBool,
+						Optional: true,
+						ForceNew: true,
+						Description: `If enabled boot disks are configured with confidential mode.`,
 				},
 			},
 		},
@@ -875,6 +887,10 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 		nc.ResourceLabels = m
 	}
 
+	if v, ok := nodeConfig["resource_manager_tags"]; ok && len(v.(map[string]interface{})) > 0 {
+		nc.ResourceManagerTags = expandResourceManagerTags(v)
+	}
+
 	if v, ok := nodeConfig["tags"]; ok {
 		tagsList := v.([]interface{})
 		tags := []string{}
@@ -960,6 +976,10 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 		nc.SoleTenantConfig = expandSoleTenantConfig(v)
 	}
 
+	if v,ok := nodeConfig["enable_confidential_storage"]; ok {
+		nc.EnableConfidentialStorage = v.(bool)
+	}
+	
 	<% unless version == "ga" -%>
 	if v, ok := nodeConfig["host_maintenance_policy"]; ok {
 		nc.HostMaintenancePolicy = expandHostMaintenancePolicy(v)
@@ -971,6 +991,19 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 	}
 
 	return nc
+}
+
+func expandResourceManagerTags(v interface{}) *container.ResourceManagerTags {
+	rmts := make(map[string]string)
+
+	if v != nil {
+		rmts = tpgresource.ConvertStringMap(v.(map[string]interface{}))
+	}
+
+	return &container.ResourceManagerTags{
+		Tags:            rmts,
+		ForceSendFields: []string{"Tags"},
+	}
 }
 
 func expandWorkloadMetadataConfig(v interface{}) *container.WorkloadMetadataConfig {
@@ -1030,17 +1063,39 @@ func expandLinuxNodeConfig(v interface{}) *container.LinuxNodeConfig {
 		return &container.LinuxNodeConfig{}
 	}
 	cfg := ls[0].(map[string]interface{})
+
+	linuxNodeConfig := &container.LinuxNodeConfig{}
+	sysctls := expandSysctls(cfg)
+	if sysctls != nil {
+		linuxNodeConfig.Sysctls = sysctls
+	}
+	cgroupMode := expandCgroupMode(cfg)
+	if len(cgroupMode) != 0 {
+		linuxNodeConfig.CgroupMode = cgroupMode
+	}
+
+	return linuxNodeConfig
+}
+
+func expandSysctls(cfg map[string]interface{}) map[string]string {
 	sysCfgRaw, ok := cfg["sysctls"]
 	if !ok {
 		return nil
 	}
-	m := make(map[string]string)
+	sysctls := make(map[string]string)
 	for k, v := range sysCfgRaw.(map[string]interface{}) {
-		m[k] = v.(string)
+		sysctls[k] = v.(string)
 	}
-	return &container.LinuxNodeConfig{
-		Sysctls: m,
+	return sysctls
+}
+
+func expandCgroupMode(cfg map[string]interface{}) string {
+	cgroupMode, ok := cfg["cgroup_mode"]
+	if !ok {
+		return ""
 	}
+
+	return cgroupMode.(string)
 }
 
 func expandSoleTenantConfig(v interface{}) *container.SoleTenantConfig {
@@ -1176,6 +1231,8 @@ func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]inte
 		"advanced_machine_features": flattenAdvancedMachineFeaturesConfig(c.AdvancedMachineFeatures),
 		"sole_tenant_config":        flattenSoleTenantConfig(c.SoleTenantConfig),
 		"fast_socket":               flattenFastSocket(c.FastSocket),
+		"resource_manager_tags":     flattenResourceManagerTags(c.ResourceManagerTags),
+		"enable_confidential_storage": c.EnableConfidentialStorage,
 	})
 
 	if len(c.OauthScopes) > 0 {
@@ -1183,6 +1240,19 @@ func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]inte
 	}
 
 	return config
+}
+
+func flattenResourceManagerTags(c *container.ResourceManagerTags) map[string]interface{} {
+	rmt := make(map[string]interface{})
+
+	if c != nil {
+		for k, v := range c.Tags {
+			rmt[k] = v
+		}
+
+	}
+
+	return rmt
 }
 
 func flattenAdvancedMachineFeaturesConfig(c *container.AdvancedMachineFeatures) []map[string]interface{} {
@@ -1428,7 +1498,8 @@ func flattenLinuxNodeConfig(c *container.LinuxNodeConfig) []map[string]interface
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"sysctls": c.Sysctls,
+			"sysctls":     c.Sysctls,
+			"cgroup_mode": c.CgroupMode,
 		})
 	}
 	return result

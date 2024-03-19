@@ -939,8 +939,8 @@ func resourceContainerClusterResourceV1() *schema.Resource {
 							Type:             schema.TypeString,
 							Optional:         true,
 							Computed:         true,
-							ValidateFunc:     validation.StringInSlice([]string{"VULNERABILITY_DISABLED", "VULNERABILITY_BASIC", "VULNERABILITY_MODE_UNSPECIFIED"}, false),
-							Description:      `Sets the mode of the Kubernetes security posture API's workload vulnerability scanning. Available options include VULNERABILITY_DISABLED and VULNERABILITY_BASIC.`,
+							ValidateFunc:     validation.StringInSlice([]string{"VULNERABILITY_DISABLED", "VULNERABILITY_BASIC", "VULNERABILITY_ENTERPRISE", "VULNERABILITY_MODE_UNSPECIFIED"}, false),
+							Description:      `Sets the mode of the Kubernetes security posture API's workload vulnerability scanning. Available options include VULNERABILITY_DISABLED, VULNERABILITY_BASIC and VULNERABILITY_ENTERPRISE.`,
 							DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("VULNERABILITY_MODE_UNSPECIFIED"),
 						},
 					},
@@ -995,6 +995,11 @@ func resourceContainerClusterResourceV1() *schema.Resource {
 										Type:        schema.TypeBool,
 										Required:    true,
 										Description: `Whether or not the advanced datapath metrics are enabled.`,
+									},
+									"enable_relay": {
+										Type:        schema.TypeBool,
+										Optional:    true,
+										Description: `Whether or not Relay is enabled.`,
 									},
 									"relay_mode": {
 										Type:         schema.TypeString,
@@ -1551,7 +1556,6 @@ func resourceContainerClusterResourceV1() *schema.Resource {
 				},
 			},
 
-<% unless version == 'ga' -%>
 			"identity_service_config": {
 				Type:     schema.TypeList,
 				MaxItems: 1,
@@ -1568,7 +1572,6 @@ func resourceContainerClusterResourceV1() *schema.Resource {
 					},
 				},
 			},
-<% end -%>
 
 	"service_external_ips_config": {
 		Type:        schema.TypeList,
@@ -1795,7 +1798,6 @@ func resourceContainerClusterResourceV1() *schema.Resource {
 				Type:        schema.TypeList,
 				Optional:    true,
 				MaxItems:    1,
-				ForceNew:    true,
 				DiffSuppressFunc: suppressDiffForAutopilot,
 				Description: `Configuration for Cloud DNS for Kubernetes Engine.`,
 				Elem: &schema.Resource{

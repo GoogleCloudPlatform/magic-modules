@@ -23,6 +23,10 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 description: |
   The PrivateConnection resource is used to establish private connectivity between Datastream and a customer's network.
 immutable: true
+schema_version: 1
+state_upgraders: true
+# Skipping the sweeper since the resource needs force-deletion
+skip_sweeper: true
 id_format: projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}
 import_format:
   [

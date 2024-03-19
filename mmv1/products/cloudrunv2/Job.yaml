@@ -59,6 +59,11 @@ examples:
     vars:
       cloud_run_job_name: 'cloudrun-job'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudrunv2_job_limits'
+    primary_resource_id: 'default'
+    vars:
+      cloud_run_job_name: 'cloudrun-job'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'cloudrunv2_job_sql'
     primary_resource_id: 'default'
     primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-srv%s\",
@@ -111,6 +116,7 @@ examples:
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
+    required: true
     immutable: true
     url_param_only: true
     description: The location of the cloud run job
@@ -336,7 +342,7 @@ properties:
                     - !ruby/object:Api::Type::KeyValuePairs
                       name: 'limits'
                       description: |-
-                        Only memory and CPU are supported. Note: The only supported values for CPU are '1', '2', '4', and '8'. Setting 4 CPU requires at least 2Gi of memory. The values of the map is string form of the 'quantity' k8s type: https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
+                        Only memory and CPU are supported. Use key `cpu` for CPU limit and `memory` for memory limit. Note: The only supported values for CPU are '1', '2', '4', and '8'. Setting 4 CPU requires at least 2Gi of memory. The values of the map is string form of the 'quantity' k8s type: https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
                       default_from_api: true
                 - !ruby/object:Api::Type::Array
                   name: 'ports'
@@ -393,6 +399,7 @@ properties:
                   #   - template.0.template.0.volumes.0.secret
                   #   - template.0.template.0.volumes.0.cloudSqlInstance
                   #   - template.0.template.0.volumes.0.emptyDir
+                  #   - template.0.volumes.0.gcs
                   properties:
                     - !ruby/object:Api::Type::String
                       name: 'secret'
@@ -431,6 +438,7 @@ properties:
                   #   - template.0.template.0.volumes.0.secret
                   #   - template.0.template.0.volumes.0.cloudSqlInstance
                   #   - template.0.template.0.volumes.0.emptyDir
+                  #   - template.0.volumes.0.gcs
                   properties:
                     - !ruby/object:Api::Type::Array
                       name: 'instances'
@@ -446,6 +454,7 @@ properties:
                   #   - template.0.template.0.volumes.0.secret
                   #   - template.0.template.0.volumes.0.cloudSqlInstance
                   #   - template.0.template.0.volumes.0.emptyDir
+                  #   - template.0.volumes.0.gcs
                   properties:
                     - !ruby/object:Api::Type::Enum
                       name: 'medium'
@@ -458,6 +467,26 @@ properties:
                       name: 'sizeLimit'
                       description: |-
                           Limit on the storage usable by this EmptyDir volume. The size limit is also applicable for memory medium. The maximum usage on memory medium EmptyDir would be the minimum value between the SizeLimit specified here and the sum of memory limits of all containers in a pod. This field's values are of the 'Quantity' k8s type: https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/. The default is nil which means that the limit is undefined. More info: https://kubernetes.io/docs/concepts/storage/volumes/#emptydir.
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'gcs'
+                  description: |-
+                    Cloud Storage bucket mounted as a volume using GCSFuse. This feature requires the launch stage to be set to ALPHA or BETA.
+                  min_version: beta
+                  # exactly_one_of:
+                  #   - template.0.volumes.0.secret
+                  #   - template.0.volumes.0.cloudSqlInstance
+                  #   - template.0.volumes.0.emptyDir
+                  #   - template.0.volumes.0.gcs
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'bucket'
+                      required: true
+                      description: |-
+                        Name of the cloud storage bucket to back the volume. The resource service account must have permission to access the bucket.
+                    - !ruby/object:Api::Type::Boolean
+                      name: 'readOnly'
+                      description: |-
+                        If true, mount this volume as read-only in all mounts. If false, mount this volume as read-write.
           - !ruby/object:Api::Type::String
             name: 'timeout'
             description: |-

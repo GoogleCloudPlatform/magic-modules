@@ -45,6 +45,20 @@ func TestAccRedisCluster_updateReplicaCount(t *testing.T) {
 				// clean up the resource
 				Config: createOrUpdateRedisCluster(name /* replicaCount = */, 2 /* shardCount = */, 3, false),
 			},
+			{
+				// update replica count to 0
+				Config: createOrUpdateRedisCluster(name /* replicaCount = */, 0 /* shardCount = */, 3, true),
+			},
+			{
+				ResourceName:      "google_redis_cluster.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"psc_configs"},
+			},
+			{
+				// clean up the resource
+				Config: createOrUpdateRedisCluster(name /* replicaCount = */, 0 /* shardCount = */, 3, false),
+			},
 		},
 	})
 }

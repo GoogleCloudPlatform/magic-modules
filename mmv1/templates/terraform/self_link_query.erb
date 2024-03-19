@@ -12,14 +12,14 @@
 	for _, item := range listObj {
 	<% object.identity.each do |prop| -%>
 		<% if settable_properties.include?(prop) -%>
-		this<%= titlelize_property(prop) -%>, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
+		this<%= titlelize_property(prop) -%>, err := expand<%= object.resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
 		if err != nil {
 			return err
 		}
 		<% else -%>
 			this<%= titlelize_property(prop) -%> := d.Get("<%= prop.name.underscore -%>")
 		<% end -%>
-		that<%= titlelize_property(prop) -%> := flatten<%= resource_name -%><%= titlelize_property(prop) -%>(item["<%= prop.api_name -%>"], d, config)
+		that<%= titlelize_property(prop) -%> := flatten<%= object.resource_name -%><%= titlelize_property(prop) -%>(item["<%= prop.api_name -%>"], d, config)
 		log.Printf("[DEBUG] Checking equality of %#v, %#v", that<%= titlelize_property(prop) -%>, this<%= titlelize_property(prop) -%>)
 		if !reflect.DeepEqual(that<%= titlelize_property(prop) -%>, this<%= titlelize_property(prop) -%>) {
 			continue
@@ -30,7 +30,7 @@
 	}
 	if res == nil {
 		// Object isn't there any more - remove it from the state.
-		log.Printf("[DEBUG] Removing <%= resource_name -%> because it couldn't be matched.")
+		log.Printf("[DEBUG] Removing <%= object.resource_name -%> because it couldn't be matched.")
 		d.SetId("")
 		return nil
 	}

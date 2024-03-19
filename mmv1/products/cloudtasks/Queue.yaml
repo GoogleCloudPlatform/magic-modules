@@ -27,12 +27,6 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
 id_format: 'projects/{{project}}/locations/{{location}}/queues/{{name}}'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: 'templates/terraform/constants/cloud_tasks_retry_config_custom_diff.go'
-docs: !ruby/object:Provider::Terraform::Docs
-  warning: |
-    This resource requires an App Engine application to be created on the
-    project you're provisioning it on. If you haven't already enabled it, you
-    can create a `google_app_engine_application` resource to do so. This
-    resource's location will be the same as the App Engine location specified.
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'queue_basic'

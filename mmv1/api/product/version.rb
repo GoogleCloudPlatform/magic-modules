@@ -14,17 +14,17 @@
 require 'api/object'
 
 module Api
-  class Product < Api::Object::Named
+  class Product < Api::NamedObject
     # A version of the API for a given product / API group
     # In GCP, different product versions are generally ordered where alpha is
     # a superset of beta, and beta a superset of GA. Each version will have a
     # different version url.
-    class Version < Api::Object::Named
+    class Version < Api::NamedObject
       include Comparable
 
       attr_reader :cai_base_url
-      attr_reader :base_url
-      attr_reader :name
+      attr_accessor :base_url
+      attr_accessor :name
 
       ORDER = %w[ga beta alpha private].freeze
 

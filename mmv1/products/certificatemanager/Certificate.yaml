@@ -71,6 +71,30 @@ examples:
     primary_resource_id: 'default'
     vars:
       cert_name: 'self-managed-cert'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'certificate_manager_google_managed_certificate_issuance_config_all_regions'
+    primary_resource_id: 'default'
+    vars:
+      cert_name: 'issuance-config-cert'
+      ca_name: 'ca-authority'
+      pool_name: 'ca-pool'
+      issuance_config_name: 'issuance-config'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'certificate_manager_google_managed_certificate_dns_all_regions'
+    primary_resource_id: 'default'
+    vars:
+      dns_auth_name: 'dns-auth'
+      dns_auth_subdomain: 'subdomain'
+      dns_auth_name2: 'dns-auth2'
+      dns_auth_subdomain2: 'subdomain2'
+      cert_name: 'dns-cert'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'certificate_manager_google_managed_regional_certificate_dns_auth'
+    primary_resource_id: 'default'
+    vars:
+      dns_auth_name: 'dns-auth'
+      dns_auth_subdomain: 'subdomain'
+      cert_name: 'dns-cert'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/cert_manager.erb
 parameters:
@@ -107,11 +131,11 @@ properties:
       DEFAULT: Certificates with default scope are served from core Google data centers.
       If unsure, choose this option.
 
-      EDGE_CACHE: Certificates with scope EDGE_CACHE are special-purposed certificates,
-      served from non-core Google data centers.
+      EDGE_CACHE: Certificates with scope EDGE_CACHE are special-purposed certificates, served from Edge Points of Presence.
+      See https://cloud.google.com/vpc/docs/edge-locations.
 
       ALL_REGIONS: Certificates with ALL_REGIONS scope are served from all GCP regions (You can only use ALL_REGIONS with global certs).
-      see https://cloud.google.com/compute/docs/regions-zones
+      See https://cloud.google.com/compute/docs/regions-zones
     default_value: DEFAULT
     diff_suppress_func: 'certManagerDefaultScopeDiffSuppress'
   - !ruby/object:Api::Type::NestedObject

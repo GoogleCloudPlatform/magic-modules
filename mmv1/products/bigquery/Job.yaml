@@ -17,6 +17,8 @@ kind: 'bigquery#job'
 base_url: projects/{{project}}/jobs
 self_link: projects/{{project}}/jobs/{{job_id}}?location={{location}}
 immutable: true
+schema_version: 1
+state_upgraders: true
 description: |
   Jobs are actions that BigQuery runs on your behalf to load data, export data, query data, or copy data.
   Once a BigQuery job is created, it cannot be changed or deleted.

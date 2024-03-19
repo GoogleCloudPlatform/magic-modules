@@ -21,7 +21,3 @@ versions:
     base_url: https://servicemanagement.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloudplatform
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Service Management API
-    url: https://console.cloud.google.com/apis/library/servicemanagement.googleapis.com/

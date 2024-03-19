@@ -19,9 +19,8 @@ versions:
   - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://bigquery.googleapis.com/bigquery/v2/
+  - !ruby/object:Api::Product::Version
+    name: beta
+    base_url: https://bigquery.googleapis.com/bigquery/v2/
 scopes:
   - https://www.googleapis.com/auth/bigquery
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: BigQuery API
-    url: https://console.cloud.google.com/apis/library/bigquery.googleapis.com/

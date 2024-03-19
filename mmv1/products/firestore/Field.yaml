@@ -20,6 +20,8 @@ immutable: false
 update_verb: :PATCH
 update_mask: true
 create_verb: :PATCH
+error_retry_predicates:
+  ["transport_tpg.FirestoreField409RetryUnderlyingDataChanged"]
 description: |
   Represents a single field in the database.
   Fields are grouped by their "Collection Group", which represent all collections
@@ -46,6 +48,7 @@ async: !ruby/object:Api::OpAsync
     path: 'error'
     message: 'message'
 autogen_async: true
+# Sweeper skipped as this resource has customized deletion.
 skip_sweeper: true
 import_format: ['{{name}}']
 docs: !ruby/object:Provider::Terraform::Docs
@@ -58,18 +61,33 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'firestore_field_basic'
     primary_resource_id: 'basic'
+    vars:
+      database_id: 'database-id'
+      delete_protection_state: "DELETE_PROTECTION_ENABLED"
     test_env_vars:
-      project_id: :FIRESTORE_PROJECT_NAME
+      project_id: :PROJECT_NAME
+    test_vars_overrides:
+      delete_protection_state: '"DELETE_PROTECTION_DISABLED"'
   - !ruby/object:Provider::Terraform::Examples
     name: 'firestore_field_timestamp'
     primary_resource_id: 'timestamp'
+    vars:
+      database_id: 'database-id'
+      delete_protection_state: "DELETE_PROTECTION_ENABLED"
     test_env_vars:
-      project_id: :FIRESTORE_PROJECT_NAME
+      project_id: :PROJECT_NAME
+    test_vars_overrides:
+      delete_protection_state: '"DELETE_PROTECTION_DISABLED"'
   - !ruby/object:Provider::Terraform::Examples
     name: 'firestore_field_match_override'
     primary_resource_id: 'match_override'
+    vars:
+      database_id: 'database-id'
+      delete_protection_state: "DELETE_PROTECTION_ENABLED"
     test_env_vars:
-      project_id: :FIRESTORE_PROJECT_NAME
+      project_id: :PROJECT_NAME
+    test_vars_overrides:
+      delete_protection_state: '"DELETE_PROTECTION_DISABLED"'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/index_self_link_as_name_set_project.go.erb
   encoder: templates/terraform/encoders/firestore_field.go.erb
@@ -154,13 +172,13 @@ properties:
     name: ttlConfig
     custom_expand: templates/terraform/custom_expand/empty_object_if_set.go.erb
     description: |
-      If set, this field is configured for TTL deletion.
+       The TTL configuration for this Field. If set to an empty block (i.e. `ttl_config {}`), a TTL policy is configured based on the field. If unset, a TTL policy is not configured (or will be disabled upon updating the resource).
     send_empty_value: true
     properties:
       - !ruby/object:Api::Type::Enum
         name: state
         description: |
-          The state of the TTL configuration.
+          The state of TTL (time-to-live) configuration for documents that have this Field set.
         output: true
         values:
           - :CREATING

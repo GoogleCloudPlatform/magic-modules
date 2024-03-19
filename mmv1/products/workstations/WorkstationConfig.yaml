@@ -213,6 +213,7 @@ properties:
       - 'host.gceInstance.shieldedInstanceConfig.enableIntegrityMonitoring'
       - 'host.gceInstance.confidentialInstanceConfig.enableConfidentialCompute'
       - 'host.gceInstance.accelerators'
+      - 'host.gceInstance.disableSsh'
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'gceInstance'
@@ -257,6 +258,10 @@ properties:
             name: 'disablePublicIpAddresses'
             description: |
               Whether instances have no public IP address.
+          - !ruby/object:Api::Type::Boolean
+            name: 'disableSsh'
+            description: |
+              Whether to disable SSH access to the VM.
           - !ruby/object:Api::Type::Boolean
             name: 'enableNestedVirtualization'
             description: |
@@ -364,6 +369,48 @@ properties:
               description: |
                 Name of the snapshot to use as the source for the disk. This can be the snapshot's `self_link`, `id`, or a string in the format of `projects/{project}/global/snapshots/{snapshot}`. If set, `sizeGb` and `fsType` must be empty. Can only be updated if it has an existing value.
               # TODO(esu): Add conflicting fields once complex lists are supported.
+  - !ruby/object:Api::Type::Array
+    name: 'ephemeralDirectories'
+    description: |
+      Ephemeral directories which won't persist across workstation sessions.
+    default_from_api: true
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'mountPath'
+          description: |
+            Location of this directory in the running workstation.
+          default_from_api: true
+        - !ruby/object:Api::Type::NestedObject
+          name: 'gcePd'
+          description: |
+            An EphemeralDirectory backed by a Compute Engine persistent disk.
+          default_from_api: true
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'diskType'
+              description: |
+                Type of the disk to use. Defaults to `"pd-standard"`.
+              default_from_api: true
+            - !ruby/object:Api::Type::String
+              name: 'sourceSnapshot'
+              description: |
+                Name of the snapshot to use as the source for the disk.
+
+                Must be empty if `sourceImage` is set.
+                Must be empty if `read_only` is false.
+                Updating `source_snapshot` will update content in the ephemeral directory after the workstation is restarted.
+            - !ruby/object:Api::Type::String
+              name: 'sourceImage'
+              description: |
+                Name of the disk image to use as the source for the disk.
+
+                Must be empty `sourceSnapshot` is set.
+                Updating `sourceImage` will update content in the ephemeral directory after the workstation is restarted.
+            - !ruby/object:Api::Type::Boolean
+              name: 'readOnly'
+              description: |
+                Whether the disk is read only. If true, the disk may be shared by multiple VMs and `sourceSnapshot` must be set.
   - !ruby/object:Api::Type::NestedObject
     name: 'container'
     description: |
@@ -428,11 +475,31 @@ properties:
         description: |
           The service account to use with the specified KMS key.
         required: true
+  - !ruby/object:Api::Type::Array
+    name: 'readinessChecks'
+    description: |
+      Readiness checks to be performed on a workstation.
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'path'
+          description: |
+            Path to which the request should be sent.
+          required: true
+        - !ruby/object:Api::Type::Integer
+          name: 'port'
+          description: |
+            Port to which the request should be sent.
+          required: true
   - !ruby/object:Api::Type::Boolean
     name: 'degraded'
     description: |
       Whether this resource is in degraded mode, in which case it may require user action to restore full functionality. Details can be found in the conditions field.
     output: true
+  - !ruby/object:Api::Type::Boolean
+    name: 'disableTcpConnections'
+    description: |
+      Disables support for plain TCP connections in the workstation. By default the service supports TCP connections via a websocket relay. Setting this option to true disables that relay, which prevents the usage of services that require plain tcp connections, such as ssh. When enabled, all communication must occur over https or wss.
   - !ruby/object:Api::Type::Array
     name: 'conditions'
     description: |-

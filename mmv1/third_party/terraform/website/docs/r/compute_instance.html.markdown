@@ -15,13 +15,13 @@ and
 
 ```hcl
 resource "google_service_account" "default" {
-  account_id   = "service_account_id"
-  display_name = "Service Account"
+  account_id   = "my-custom-sa"
+  display_name = "Custom SA for VM Instance"
 }
 
 resource "google_compute_instance" "default" {
-  name         = "test"
-  machine_type = "e2-medium"
+  name         = "my-instance"
+  machine_type = "n2-standard-2"
   zone         = "us-central1-a"
 
   tags = ["foo", "bar"]
@@ -37,7 +37,7 @@ resource "google_compute_instance" "default" {
 
   // Local SSD disk
   scratch_disk {
-    interface = "SCSI"
+    interface = "NVME"
   }
 
   network_interface {
@@ -73,9 +73,9 @@ The following arguments are supported:
 
     **Note:** If you want to update this value (resize the VM) after initial creation, you must set [`allow_stopping_for_update`](#allow_stopping_for_update) to `true`.
 
-    [Custom machine types][custom-vm-types] can be formatted as `custom-NUMBER_OF_CPUS-AMOUNT_OF_MEMORY_MB`, e.g. `custom-6-20480` for 6 vCPU and 20GB of RAM.
+    [Custom machine types](https://cloud.google.com/dataproc/docs/concepts/compute/custom-machine-types) can be formatted as `custom-NUMBER_OF_CPUS-AMOUNT_OF_MEMORY_MB`, e.g. `custom-6-20480` for 6 vCPU and 20GB of RAM.
 
-    There is a limit of 6.5 GB per CPU unless you add [extended memory][extended-custom-vm-type]. You must do this explicitly by adding the suffix `-ext`, e.g. `custom-2-15360-ext` for 2 vCPU and 15 GB of memory.
+    There is a limit of 6.5 GB per CPU unless you add [extended memory](https://cloud.google.com/compute/docs/instances/creating-instance-with-custom-machine-type#extendedmemory). You must do this explicitly by adding the suffix `-ext`, e.g. `custom-2-15360-ext` for 2 vCPU and 15 GB of memory.
 
 * `name` - (Required) A unique name for the resource, required by GCE.
     Changing this forces a new resource to be created.
@@ -249,6 +249,25 @@ is desired, you will need to modify your state file manually using
 
 * `resource_manager_tags` - (Optional) A tag is a key-value pair that can be attached to a Google Cloud resource. You can use tags to conditionally allow or deny policies based on whether a resource has a specific tag. This value is not returned by the API. In Terraform, this value cannot be updated and changing it will recreate the resource.
 
+* `provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk.
+    This sets the number of I/O operations per second that the disk can handle.
+    For more details,see the [Hyperdisk documentation](https://cloud.google.com/compute/docs/disks/hyperdisks).
+    Note: Updating currently is only supported for hyperdisk skus via disk update
+    api/gcloud without the need to delete and recreate the disk, hyperdisk allows
+    for an update of IOPS every 4 hours. To update your hyperdisk more frequently,
+    you'll need to manually delete and recreate it.
+
+* `provisioned_throughput` - (Optional) Indicates how much throughput to provision for the disk.
+    This sets the number of throughput mb per second that the disk can handle.
+    For more details,see the [Hyperdisk documentation](https://cloud.google.com/compute/docs/disks/hyperdisks).
+    Note: Updating currently is only supported for hyperdisk skus via disk update
+    api/gcloud without the need to delete and recreate the disk, hyperdisk allows
+    for an update of throughput every 4 hours. To update your hyperdisk more
+    frequently, you'll need to manually delete and recreate it.
+
+* `enable_confidential_compute` - (Optional) Whether this disk is using confidential compute mode.
+    Note: Only supported on hyperdisk skus, disk_encryption_key is required when setting to true.
+
 <a name="nested_scratch_disk"></a>The `scratch_disk` block supports:
 
 * `interface` - (Required) The disk interface to use for attaching this disk; either SCSI or NVME.
@@ -337,7 +356,7 @@ specified, then this instance will have no external IPv6 Internet access. Struct
     See [the docs](https://cloud.google.com/compute/docs/instances/create-ptr-record) for how
     to become verified as a domain owner.
 
-* `network_tier` - (Optional) The [networking tier][network-tier] used for configuring this instance.
+* `network_tier` - (Optional) The [networking tier](https://cloud.google.com/network-tiers/docs/overview) used for configuring this instance.
     This field can take the following values: PREMIUM, FIXED_STANDARD or STANDARD. If this field is
     not specified, it is assumed to be PREMIUM.
 
@@ -422,7 +441,6 @@ specified, then this instance will have no external IPv6 Internet access. Struct
    sec/min * 60 min/hr * 24 hr/day * 365.25 days/year * 10000 years.
 
 * `maintenance_interval` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) Specifies the frequency of planned maintenance events. The accepted values are: `PERIODIC`.
-<a name="nested_guest_accelerator"></a>The `guest_accelerator` block supports:
 
 * `local_ssd_recovery_timeout` -  (Optional) (https://terraform.io/docs/providers/google/guides/provider_versions.html) Specifies the maximum amount of time a Local Ssd Vm should wait while recovery of the Local Ssd state is attempted. Its value should be in between 0 and 168 hours with hour granularity and the default value being 1 hour. Structure is [documented below](#nested_local_ssd_recovery_timeout).
 <a name="nested_local_ssd_recovery_timeout"></a>The `local_ssd_recovery_timeout` block supports:
@@ -435,6 +453,8 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 * `seconds` - (Required) Span of time at a resolution of a second. Must be from 0 to
    315,576,000,000 inclusive. Note: these bounds are computed from: 60
    sec/min * 60 min/hr * 24 hr/day * 365.25 days/year * 10000 years.
+
+<a name="nested_guest_accelerator"></a>The `guest_accelerator` block supports:
 
 * `type` (Required) - The accelerator type resource to expose to this instance. E.g. `nvidia-tesla-k80`.
 
@@ -466,7 +486,9 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 <a name="nested_confidential_instance_config"></a>The `confidential_instance_config` block supports:
 
-* `enable_confidential_compute` (Optional) Defines whether the instance should have confidential compute enabled. [`on_host_maintenance`](#on_host_maintenance) has to be set to TERMINATE or this will fail to create the VM.
+* `enable_confidential_compute` (Optional) Defines whether the instance should have confidential compute enabled with AMD SEV. [`on_host_maintenance`](#on_host_maintenance) has to be set to TERMINATE or this will fail to create the VM.
+
+* `confidential_instance_type` (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) Defines the confidential computing technology the instance uses. SEV is an AMD feature. One of the following values: `SEV`, `SEV_SNP`. [`on_host_maintenance`](#on_host_maintenance) has to be set to TERMINATE or this will fail to create the VM. If `SEV_SNP`, currently [`min_cpu_platform`](#min_cpu_platform) has to be set to `"AMD Milan"` or this will fail to create the VM.
 
 <a name="nested_advanced_machine_features"></a>The `advanced_machine_features` block supports:
 
@@ -547,12 +569,23 @@ This resource provides the following
 
 Instances can be imported using any of these accepted formats:
 
+* `projects/{{project}}/zones/{{zone}}/instances/{{name}}`
+* `{{project}}/{{zone}}/{{name}}`
+* `{{name}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import instances using one of the formats above. For example:
+
+```tf
+import {
+  id = "projects/{{project}}/zones/{{zone}}/instances/{{name}}"
+  to = google_compute_instance.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), instances can be imported using one of the formats above. For example:
+
 ```
 $ terraform import google_compute_instance.default projects/{{project}}/zones/{{zone}}/instances/{{name}}
 $ terraform import google_compute_instance.default {{project}}/{{zone}}/{{name}}
 $ terraform import google_compute_instance.default {{name}}
 ```
-
-[custom-vm-types]: https://cloud.google.com/dataproc/docs/concepts/compute/custom-machine-types
-[network-tier]: https://cloud.google.com/network-tiers/docs/overview
-[extended-custom-vm-type]: https://cloud.google.com/compute/docs/instances/creating-instance-with-custom-machine-type#extendedmemory

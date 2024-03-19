@@ -3,7 +3,7 @@ package rules
 import (
 	"testing"
 
-	"github.com/GoogleCloudPlatform/magic-modules/.ci/diff-processor/diff"
+	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"

@@ -87,7 +87,7 @@ examples:
       # Resource creation race
     skip_vcr: true
   - !ruby/object:Provider::Terraform::Examples
-    name: 'apigee_environment_nodeconfig_test'
+    name: 'apigee_environment_type_test'
     primary_resource_id: 'apigee_environment'
     primary_resource_name: "fmt.Sprintf(\"organizations/tf-test%s\",
       context[\"random_suffix\"\
@@ -184,3 +184,16 @@ properties:
           The current total number of gateway nodes that each environment currently has across
           all instances.
         output: true
+  - !ruby/object:Api::Type::Enum
+    name: 'type'
+    description: |
+      Types that can be selected for an Environment. Each of the types are
+      limited by capability and capacity. Refer to Apigee's public documentation
+      to understand about each of these types in details.
+      An Apigee org can support heterogeneous Environments.
+    default_from_api: true
+    values:
+      - 'ENVIRONMENT_TYPE_UNSPECIFIED'
+      - 'BASE'
+      - 'INTERMEDIATE'
+      - 'COMPREHENSIVE'

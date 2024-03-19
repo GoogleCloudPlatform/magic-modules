@@ -15,10 +15,9 @@ require 'uri'
 require 'api/object'
 require 'compile/core'
 require 'google/golang_utils'
-require 'provider/abstract_core'
 
 module Provider
-  class Terraform < Provider::AbstractCore
+  class Terraform
     # Virtual fields are Terraform-only fields that control Terraform's
     # behaviour. They don't map to underlying API fields (although they
     # may map to parameters), and will require custom code to be added to
@@ -33,7 +32,7 @@ module Provider
     # Both are resource level fields and do not make sense, and are also not
     # supported, for nested fields. Nested fields that shouldn't be included
     # in API payloads are better handled with custom expand/encoder logic.
-    class VirtualFields < Api::Object
+    class VirtualFields < Google::YamlValidator
       include Compile::Core
       include Google::GolangUtils
 
@@ -49,12 +48,17 @@ module Provider
       # The default value for the field (defaults to false)
       attr_reader :default_value
 
+      # If set to true, changes in the field's value require recreating the
+      # resource.
+      attr_reader :immutable
+
       def validate
         super
         check :name, type: String, required: true
         check :description, type: String, required: true
         check :type, type: Class, default: Api::Type::Boolean
         check :default_value, default: false
+        check :immutable, default: false
       end
     end
   end

@@ -172,6 +172,9 @@ cluster.
 * `placement_policy` - (Optional) Specifies a custom placement policy for the
   nodes.
 
+* `queued_provisioning` - (Optional) Specifies node pool-level settings of queued provisioning.
+    Structure is [documented below](#nested_queued_provisioning).
+
 <a name="nested_autoscaling"></a>The `autoscaling` block supports (either total or per zone limits are required):
 
 * `min_node_count` - (Optional) Minimum number of nodes per zone in the NodePool.
@@ -275,6 +278,10 @@ cluster.
 
 * `tpu_topology` - (Optional) The [TPU placement topology](https://cloud.google.com/tpu/docs/types-topologies#tpu_topologies) for pod slice node pool.
 
+<a name="nested_queued_provisioning"></a> The `queued_provisioning` block supports:
+
+* `enabled` (Required) - Makes nodes obtainable through the [ProvisioningRequest API](https://cloud.google.com/kubernetes-engine/docs/how-to/provisioningrequest) exclusively.
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are exported:
@@ -300,8 +307,22 @@ In addition to the arguments listed above, the following computed attributes are
 Node pools can be imported using the `project`, `location`, `cluster` and `name`. If
 the project is omitted, the project value in the provider configuration will be used. Examples:
 
-```
-$ terraform import google_container_node_pool.mainpool my-gcp-project/us-east1-a/my-cluster/main-pool
+* `{{project_id}}/{{location}}/{{cluster_id}}/{{pool_id}}`
+* `{{location}}/{{cluster_id}}/{{pool_id}}`
 
-$ terraform import google_container_node_pool.mainpool us-east1/my-cluster/main-pool
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import node pools using one of the formats above. For example:
+
+```tf
+import {
+  id = "{{project_id}}/{{location}}/{{cluster_id}}/{{pool_id}}"
+  to = google_container_node_pool.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), node pools can be imported using one of the formats above. For example:
+
+```
+$ terraform import google_container_node_pool.default {{project_id}}/{{location}}/{{cluster_id}}/{{pool_id}}
+
+$ terraform import google_container_node_pool.default {{location}}/{{cluster_id}}/{{pool_id}}
 ```

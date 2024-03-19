@@ -1,0 +1,17 @@
+resource "google_logging_organization_settings" "<%= ctx[:primary_resource_id] %>" {
+  disable_default_sink = true
+  kms_key_name         = "<%= ctx[:vars]['key_name'] %>"
+  organization         = "<%= ctx[:test_env_vars]['org_id'] %>"
+  storage_location     = "us-central1"
+  depends_on           = [ google_kms_crypto_key_iam_member.iam ]
+}
+
+data "google_logging_organization_settings" "settings" {
+  organization = "<%= ctx[:test_env_vars]['org_id'] %>"
+}
+
+resource "google_kms_crypto_key_iam_member" "iam" {
+  crypto_key_id = "<%= ctx[:vars]['key_name'] %>"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:${data.google_logging_organization_settings.settings.kms_service_account_id}"
+}

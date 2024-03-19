@@ -105,6 +105,8 @@ examples:
       spoke_name: 'my-spoke'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: 'templates/terraform/constants/router_nat.go.erb'
+  pre_create: 'templates/terraform/constants/router_nat_validate_action_active_range.go.erb'
+  pre_update: 'templates/terraform/constants/router_nat_validate_action_active_range.go.erb'
 custom_diff: [
   'resourceComputeRouterNatDrainNatIpsCustomDiff',
 ]
@@ -234,7 +236,8 @@ properties:
   - !ruby/object:Api::Type::Integer
     name: minPortsPerVm
     description: |
-      Minimum number of ports allocated to a VM from this NAT.
+      Minimum number of ports allocated to a VM from this NAT. Defaults to 64 for static port allocation and 32 dynamic port allocation if not set.
+    default_from_api: true
   - !ruby/object:Api::Type::Integer
     name: maxPortsPerVm
     description: |

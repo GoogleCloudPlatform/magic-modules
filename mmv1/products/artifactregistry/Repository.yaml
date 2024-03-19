@@ -96,12 +96,22 @@ examples:
       description: 'example remote yum repository'
   - !ruby/object:Provider::Terraform::Examples
     name: 'artifact_registry_repository_cleanup'
-    min_version: beta
     primary_resource_id: 'my-repo'
     vars:
       repository_id: 'my-repository'
       description: 'example docker repository with cleanup policies'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'artifact_registry_repository_remote_custom'
+    primary_resource_id: 'my-repo'
+    vars:
+      repository_id: 'example-custom-remote'
+      description: 'example remote docker repository with credentials'
+      secret_id: 'example-secret'
+      secret_resource_id: 'example-custom-remote-secret'
+      username: 'remote-username'
+      secret_data: 'remote-password'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/artifact_registry_repository.go.erb
   encoder: templates/terraform/encoders/location_from_region.go.erb
 properties:
   - !ruby/object:Api::Type::String
@@ -138,7 +148,7 @@ properties:
       [alpha user group](https://cloud.google.com/artifact-registry/docs/supported-formats#alpha-access).
     required: true
     immutable: true
-    diff_suppress_func: 'tpgresource.CompareCaseInsensitive'
+    diff_suppress_func: 'tpgresource.CaseDiffSuppress'
   - !ruby/object:Api::Type::String
     name: description
     description: |-
@@ -171,6 +181,7 @@ properties:
     name: 'dockerConfig'
     description: |-
       Docker repository config contains repository level configuration for the repositories of docker type.
+    allow_empty_object: true
     properties:
       - !ruby/object:Api::Type::Boolean
         name: 'immutableTags'
@@ -221,6 +232,7 @@ properties:
     properties:
       - !ruby/object:Api::Type::Array
         name: 'upstreamPolicies'
+        diff_suppress_func: 'upstreamPoliciesDiffSuppress'
         description: |-
           Policies that configure the upstream artifacts distributed by the Virtual
           Repository. Upstream policies cannot be set on a standard repository.
@@ -241,7 +253,6 @@ properties:
                 Entries with a greater priority value take precedence in the pull order.
   - !ruby/object:Api::Type::Map
     name: 'cleanupPolicies'
-    min_version: beta
     description: |-
       Cleanup policies for this repository. Cleanup policies indicate when
       certain package versions can be automatically deleted.
@@ -251,11 +262,9 @@ properties:
     key_description: |-
       The policy ID. Must be unique within a repository.
     value_type: !ruby/object:Api::Type::NestedObject
-      min_version: beta
       properties:
         - !ruby/object:Api::Type::Enum
           name: action
-          min_version: beta
           description: |-
             Policy action.
           values:
@@ -263,14 +272,12 @@ properties:
             - :KEEP
         - !ruby/object:Api::Type::NestedObject
           name: condition
-          min_version: beta
           description: |-
             Policy condition for matching versions.
           # TODO (jrsb): exactly_one_of: condition, mostRecentVersions
           properties:
             - !ruby/object:Api::Type::Enum
               name: tagState
-              min_version: beta
               description: |-
                 Match versions by tag status.
               values:
@@ -280,37 +287,31 @@ properties:
               default_value: :ANY
             - !ruby/object:Api::Type::Array
               name: tagPrefixes
-              min_version: beta
               description: |-
                 Match versions by tag prefix. Applied on any prefix match.
               item_type: Api::Type::String
             - !ruby/object:Api::Type::Array
               name: versionNamePrefixes
-              min_version: beta
               description: |-
                 Match versions by version name prefix. Applied on any prefix match.
               item_type: Api::Type::String
             - !ruby/object:Api::Type::Array
               name: packageNamePrefixes
-              min_version: beta
               description: |-
                 Match versions by package prefix. Applied on any prefix match.
               item_type: Api::Type::String
             - !ruby/object:Api::Type::String
               name: olderThan
-              min_version: beta
               description: |-
                 Match versions older than a duration.
               diff_suppress_func: 'tpgresource.DurationDiffSuppress'
             - !ruby/object:Api::Type::String
               name: newerThan
-              min_version: beta
               description: |-
                 Match versions newer than a duration.
               diff_suppress_func: 'tpgresource.DurationDiffSuppress'
         - !ruby/object:Api::Type::NestedObject
           name: mostRecentVersions
-          min_version: beta
           description: |-
             Policy condition for retaining a minimum number of versions. May only be
             specified with a Keep action.
@@ -318,13 +319,11 @@ properties:
           properties:
             - !ruby/object:Api::Type::Array
               name: packageNamePrefixes
-              min_version: beta
               description: |-
                 Match versions by package prefix. Applied on any prefix match.
               item_type: Api::Type::String
             - !ruby/object:Api::Type::Integer
               name: keepCount
-              min_version: beta
               description: |-
                 Minimum number of versions to keep.
   - !ruby/object:Api::Type::NestedObject
@@ -502,12 +501,34 @@ properties:
                 name: 'repositoryPath'
                 required: true
                 description: |-
-                  Specific repository from the base, e.g. `"8-stream/BaseOs/x86_64/os"`
+                  Specific repository from the base, e.g. `"centos/8-stream/BaseOS/x86_64/os"`
                 immutable: true
-
+      - !ruby/object:Api::Type::NestedObject
+        name: 'upstreamCredentials'
+        description: |-
+          The credentials used to access the remote repository.
+        immutable: true
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'usernamePasswordCredentials'
+            description: |-
+              Use username and password to access the remote repository.
+            immutable: true
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'username'
+                description: |-
+                  The username to access the remote repository.
+                immutable: true
+              - !ruby/object:Api::Type::String
+                name: 'passwordSecretVersion'
+                description: |-
+                  The Secret Manager key version that holds the password to access the
+                  remote repository. Must be in the format of
+                  `projects/{project}/secrets/{secret}/versions/{version}`.
+                immutable: true
   - !ruby/object:Api::Type::Boolean
     name: 'cleanupPolicyDryRun'
-    min_version: beta
     description: |-
       If true, the cleanup pipeline is prevented from deleting versions in this
       repository.

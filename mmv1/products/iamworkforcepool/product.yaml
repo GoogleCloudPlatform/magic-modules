@@ -24,10 +24,6 @@ versions:
     base_url: https://iam.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/iam
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Identity and Access Management (IAM) API
-    url: https://console.cloud.google.com/apis/library/iam.googleapis.com/
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'

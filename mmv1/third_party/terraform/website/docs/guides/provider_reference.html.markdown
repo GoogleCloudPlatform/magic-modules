@@ -1,7 +1,7 @@
 ---
-page_title: "Google Provider Configuration Reference"
+page_title: "Google Cloud Provider Configuration Reference"
 description: |-
-  Configuration reference for the Google provider for Terraform.
+  Configuration reference for the Terraform provider for Google Cloud.
 ---
 
 # Google Provider Configuration Reference
@@ -240,6 +240,66 @@ following ordered by precedence.
     * GCLOUD_ZONE
     * CLOUDSDK_COMPUTE_ZONE
 
+---
+
+* `default_labels` (Optional) Labels that will be applied to all resources
+with a top level `labels` field or a `labels` field nested inside a top level
+`metadata` field. Setting the same key as a default label at the resource level
+will override the default value for that label. These values will be recorded in 
+individual resource plans through the `terraform_labels` and `effective_labels`
+fields.
+
+```
+provider "google" {
+  default_labels = {
+    my_global_key = "one"
+    my_default_key = "two"
+  }
+}
+
+resource "google_compute_address" "my_address" {
+  name     = "my-address"
+
+  labels = {
+    my_key = "three"
+    # overrides provider-wide setting
+    my_default_key = "four"
+  }
+}
+```
+
+---
+
+* `add_terraform_attribution_label` (Optional) Whether to add a label to
+resources indicating that the resource was provisioned using Terraform. When
+set to `true` the label `goog-terraform-provisioned = true` will be added
+automatically to resources, and will be returned in the `terraform_labels`
+and `effective_labels` fields. This makes it possible to distinguish Terraform
+resources when using other tools like Cloud Console or gcloud.
+
+The default value is `false`. No label will be added unless the provider is
+explicitly configured to do so by setting the value to `true`.
+
+---
+
+* `terraform_attribution_label_addition_strategy` (Optional) In conjunction
+with `add_terraform_attribution_label` this determines when the
+`goog-terraform-provisioned = true` label will be added to resources. There
+are two possible values: `CREATION_ONLY` (the default value) will only add
+the label to newly created resources; and `PROACTIVE`, which will add the
+label to all resources with `labels` during the next `terraform apply`.
+
+If `add_terraform_attribution_label` is `false`, this configuration is
+ignored. This example configuration adds the label to resources every
+time `terraform apply` is run:
+
+```
+provider "google" {
+  add_terraform_attribution_label               = true
+  terraform_attribution_label_addition_strategy = "PROACTIVE"
+}
+```
+
 ## Advanced Settings Configuration
 
 * `request_timeout` - (Optional) A duration string controlling the amount of time
@@ -284,6 +344,10 @@ and [config.go](https://github.com/hashicorp/terraform-provider-google-beta/blob
 Support for custom endpoints is on a best-effort basis. The underlying
 endpoint and default values for a resource can be changed at any time without
 being considered a breaking change.
+
+---
+
+* `universe_domain` - (Optional) Specify the GCP universe to deploy in.
 
 ---
 

@@ -49,7 +49,7 @@ For more information about types of resources and the generation process overall
 1. Using an editor of your choice, in the appropriate [product folder]({{<ref "/get-started/how-magic-modules-works.md#mmv1" >}}), create a file called `RESOURCE_NAME.yaml`. Replace `RESOURCE_NAME` with the name of the API resource you are adding support for. For example, a configuration file for [NatAddress](https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.natAddresses) would be called `NatAddress.yaml`.
 2. Copy the following template into the new file:
    ```yaml
-   # Copyright 2023 Google Inc.
+   # Copyright 2024 Google Inc.
    # Licensed under the Apache License, Version 2.0 (the "License");
    # you may not use this file except in compliance with the License.
    # You may obtain a copy of the License at
@@ -205,10 +205,10 @@ For more information about types of resources and the generation process overall
      - Change the file suffix to `.go.erb`
      - Add `<% autogen_exception -%>` to the top of the file
      - Wrap each beta-only test in a separate version guard: `<% unless version == 'ga' -%>...<% else -%>...<% end -%>`
-5. Register the resource in [`magic-modules/mmv1/third_party/terraform/utils/provider.go.erb`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/utils/provider.go.erb) under "START handwritten resources"
+5. Register the resource `handwrittenResources` in [`magic-modules/mmv1/third_party/terraform/provider/provider_mmv1_resources.go.erb`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/provider/provider_mmv1_resources.go.erb)
    - Add a version guard for any beta-only resources.
 6. Optional: Complete other handwritten tasks that require the MMv1 configuration file.
-    - [Add resource tests]({{< ref "/develop/test.md" >}})
+    - [Add resource tests]({{< ref "/develop/test/test.md" >}})
     - [Add IAM support]({{<ref "#add-iam-support" >}})
 7. Delete the MMv1 configuration file.
 {{< /tab >}}
@@ -216,126 +216,165 @@ For more information about types of resources and the generation process overall
 
 ## Add fields
 
+In general, Terraform resources should implement all configurable fields and all read-only fields.
+Even fields that seem like they would not be useful in Terraform (like update time or etag) often
+end up being requested by users, so it's usually easier to just add them all at once. However,
+optional or read-only fields can be omitted when adding a resource if they would require significant
+additional work to implement.
+
 {{< tabs "fields" >}}
 {{< tab "MMv1" >}}
 1. For each API field, copy the following template into the resource's `properties` attribute. Be sure to indent appropriately.
 
+{{< tabs "MMv1 types" >}}
+{{< tab "Simple" >}}
 ```yaml
-# Supported types: String, Integer, Boolean, Double, Enum,
-# ResourceRef (link to a GCP resource), KeyValuePairs (string -> string map),
-# Array, and NestedObject
 - !ruby/object:Api::Type::String
   name: 'API_FIELD_NAME'
   description: |
     MULTILINE_FIELD_DESCRIPTION
-  # Marks the field (and any subfields) as beta-only. Ensure a beta version block
-  # is present in provider.yaml. Do not use if an ancestor field (or the overall
-  # resource) is already marked as beta-only.
-  # min_version: beta
+  min_version: beta
+  immutable: true
+  required: true
+  output: true
+  conflicts:
+    - field_one
+    - nested_object.0.nested_field
+  exactly_one_of:
+    - field_one
+    - nested_object.0.nested_field
 
-  # If true, the field (and any subfields) are considered immutable - that is,
-  # only settable on create. If unset or false, the field is still considered
-  # immutable if any ancestor field (or the overall resource) is immutable,
-  # unless `update_url` is set.
-  # immutable: true
-
-  # If set, changes to the field's value trigger a separate call to a specific
-  # API method for updating the field's value. The field is not considered
-  # immutable even if an ancestor field (or the overall resource) is immutable.
-  # Terraform field names enclosed in double curly braces are replaced with the
-  # field values from the resource at runtime.
-  # update_url: 'projects/{{project}}/locations/{{location}}/resourcenames/{{name}}/setFieldName'
-
-  # If update_url is also set, overrides the verb used to update this specific
-  # field. Allowed values: :POST, :PUT, :PATCH. Default: Resource's update_verb
-  # (which defaults to :PUT if unset).
-  # update_verb: :POST
-
-  # If true, the field is required. If unset or false, the field is optional.
-  # required: true
-
-  # If true, the field is output-only - that is, it cannot be configured by the
-  # user. If unset or false, the field is configurable.
-  # output: true
-
-  # If true, the provider sets the field's value in the resource state based only
-  # on the user's configuration. If false or unset, the provider sets the field's
-  # value in the resource state based on the API response. Only use this attribute
-  # if the field cannot be read from GCP due to either API or provider constraints.
-  # ignore_read: true
-
-  # Sets a client-side default value for the field. This should be used if the
-  # API has a default value that applies in all cases and is stable. Removing
-  # or changing a default value is a breaking change. If unset, the field defaults
-  # to an "empty" value (such as zero, false, or an empty string).
-  # default_value: DEFAULT_VALUE
-
-  # If true, and the field is either not set or set to an "empty" value (such as
-  # zero, false, or empty strings), the provider accepts any value returned from
-  # the API as the value for the field. If false, and the field is either not set
-  # or set to an "empty" value, the provider treats the field's `default_value`
-  # as the value for the field and shows a diff if the API returns any other
-  # value for the field. This attribute is useful for complex or
-  # frequently-changed API-side defaults, but provides less useful information at
-  # plan time than `default_value` and causes the provider to ignore user
-  # configurations that explicitly set the field to an "empty" value.
-  # `default_from_api` and `send_empty_value` cannot both be true on the same field.
-  # default_from_api: true
-
-  # If true, the provider sends "empty" values (such as zero, false, or empty
-  # strings) to the API if set explicitly in the user's configuration. If false,
-  # "empty" values cause the field to be omitted entirely from the API request.
-  # This attribute is useful for fields where the API would behave differently
-  # for an "empty" value vs no value for a particular field - for example,
-  # boolean fields that have an API-side default of true.
-  # `send_empty_value` and `default_from_api` cannot both be true on the same field.
-  # send_empty_value: true
-
-  # Specifies a list of fields (excluding the current field) that cannot be
-  # specified at the same time as the current field. Must be set separately on
-  # all listed fields.
-  # conflicts:
-  #   - field_one
-  #   - nested_object.0.nested_field
-
-  # Specifies a list of fields (including the current field) that cannot be
-  # specified at the same time (but at least one of which must be set). Must be
-  # set separately on all listed fields.
-  # exactly_one_of:
-  #   - field_one
-  #   - nested_object.0.nested_field
-
-  # Enum only. Sets allowed values as ruby "literal constants" (prefixed with a
-  # colon). If the allowed values change frequently, use a String field instead
-  # to allow better forwards-compatibility, and link to API documentation
-  # stating the current allowed values in the String field's description. Do not
-  # include UNSPECIFIED values in this list.
-  # values:
-  #   - :VALUE_ONE
-  #   - :VALUE_TWO
-
-  # Array only. Sets the expected type of the items in the array. Primitives
-  # should use the name of the primitive class as a string; other types should
-  # define the attributes of the nested type.
-  # item_type: Api::Type::String
-  # item_type: !ruby/object:Api::Type::Enum
-  #   name: 'required but unused'
-  #   description: 'required but unused'
-  #   values:
-  #     - :VALUE_ONE
-  #     - :VALUE_TWO
-
-  # NestedObject only. Defines fields nested inside the current field.
-  # properties:
-  #   - !ruby/object:Api::Type::String
-  #     name: 'FIELD_NAME'
-  #     description: |
-  #       MULTI_LINE_FIELD_DESCRIPTION
 ```
-2. Modify the field configuration according to the API documentation and behavior.
-3. Delete all remaining comments in the field configuration (including attribute descriptions) that were copied from the above template.
 
-> **Note:** The template includes the most commonly-used fields. For a comprehensive reference, see [Field reference ↗]({{<ref "/reference/field-reference.md" >}}).
+Replace `String` in the field type with one of the following options:
+
+- `String`
+- `Integer`
+- `Boolean`
+- `Double`
+- `KeyValuePairs` (string -> string map)
+- `KeyValueLabels` (for standard resource 'labels' field)
+- `KeyValueAnnotations` (for standard resource 'annotations' field)
+{{< /tab >}}
+{{< tab "Enum" >}}
+```yaml
+- !ruby/object:Api::Type::Enum
+  name: 'API_FIELD_NAME'
+  description: |
+    MULTILINE_FIELD_DESCRIPTION
+  min_version: beta
+  immutable: true
+  required: true
+  output: true
+  conflicts:
+    - field_one
+    - nested_object.0.nested_field
+  exactly_one_of:
+    - field_one
+    - nested_object.0.nested_field
+  values:
+    - :VALUE_ONE
+    - :VALUE_TWO
+```
+{{< /tab >}}
+{{< tab "ResourceRef" >}}
+```yaml
+- !ruby/object:Api::Type::ResourceRef
+  name: 'API_FIELD_NAME'
+  description: |
+    MULTILINE_FIELD_DESCRIPTION
+  min_version: beta
+  immutable: true
+  required: true
+  output: true
+  conflicts:
+    - field_one
+    - nested_object.0.nested_field
+  exactly_one_of:
+    - field_one
+    - nested_object.0.nested_field
+  resource: 'ResourceName'
+  imports: 'name'
+```
+{{< /tab >}}
+{{< tab "Array" >}}
+```yaml
+- !ruby/object:Api::Type::Array
+  name: 'API_FIELD_NAME'
+  description: |
+    MULTILINE_FIELD_DESCRIPTION
+  min_version: beta
+  immutable: true
+  required: true
+  output: true
+  conflicts:
+    - field_one
+    - nested_object.0.nested_field
+  exactly_one_of:
+    - field_one
+    - nested_object.0.nested_field
+  # Array of primitives
+  item_type: Api::Type::String
+
+  # Array of nested objects
+  item_type: !ruby/object:Api::Type::NestedObject
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'FIELD_NAME'
+        description: |
+          MULTI_LINE_FIELD_DESCRIPTION
+```
+{{< /tab >}}
+{{< tab "NestedObject" >}}
+```yaml
+- !ruby/object:Api::Type::Array
+  name: 'API_FIELD_NAME'
+  description: |
+    MULTILINE_FIELD_DESCRIPTION
+  min_version: beta
+  immutable: true
+  required: true
+  output: true
+  conflicts:
+    - field_one
+    - nested_object.0.nested_field
+  exactly_one_of:
+    - field_one
+    - nested_object.0.nested_field
+  properties:
+    - !ruby/object:Api::Type::String
+      name: 'FIELD_NAME'
+      description: |
+        MULTI_LINE_FIELD_DESCRIPTION
+```
+{{< /tab >}}
+{{< tab "Map" >}}
+```yaml
+  - !ruby/object:Api::Type::Map
+    name: 'API_FIELD_NAME'
+    description: |
+      MULTILINE_FIELD_DESCRIPTION
+    key_name: KEY_NAME
+    key_description: |
+      MULTILINE_KEY_FIELD_DESCRIPTION
+    value_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'FIELD_NAME'
+          description: |
+            MULTI_LINE_FIELD_DESCRIPTION
+```
+
+This type is only used for string -> complex type mappings, use "KeyValuePairs" for simple mappings. Complex maps can't be represented natively in Terraform, and this type is transformed into an associative array (TypeSet) with the key merged into the object alongside other top-level fields.
+
+For `key_name` and `key_description`, provide a domain-appropriate name and description. For example, a map that references a specific type of resource would generally use the singular resource kind as the key name (such as "topic" for PubSub Topic) and a descriptor of the expected format depending on the context (such as resourceId vs full resource name).
+
+{{< /tab >}}
+{{< /tabs >}}
+
+2. Modify the field configuration according to the API documentation and behavior.
+
+> **Note:** The templates in this section only include the most commonly-used fields. For a comprehensive reference, see [MMv1 field reference]({{<ref "/develop/field-reference.md" >}}). For information about modifying the values sent and received for a field, see [Modify the API request or response]({{<ref "/develop/custom-code#modify-the-api-request-or-response" >}}).
 {{< /tab >}}
 {{< tab "Handwritten" >}}
 1. Add the field to the handwritten resource's schema.
@@ -414,6 +453,7 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
    - `self_link` (set to same value as `base_url`)
    - `id_format` (set to same value as `base_url`)
    - `import_format` (including `base_url` value)
+   - `exclude_resource` (set to `true`)
    - `properties`
 2. Follow the MMv1 directions in [Add fields]({{<ref "#add-fields" >}}) to add only the fields used by base_url.
 3. Follow the MMv1 directions in this section to add IAM support.
@@ -432,7 +472,7 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
      - Change the file suffix to `.go.erb`
      - Add `<% autogen_exception -%>` to the top of the file
      - Wrap each beta-only code block (including any imports) in a separate version guard: `<% unless version == 'ga' -%>...<% else -%>...<% end -%>`
-4. Register the binding, member, and policy resources in [`magic-modules/mmv1/third_party/terraform/utils/provider.go.erb`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/utils/provider.go.erb) under "START non-generated IAM resources"
+4. Register the binding, member, and policy resources `handwrittenIAMResources` in [`magic-modules/mmv1/third_party/terraform/provider/provider_mmv1_resources.go.erb`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/provider/provider_mmv1_resources.go.erb)
    - Add a version guard for any beta-only resources.
 {{< /tab >}}
 {{< /tabs >}}
@@ -460,5 +500,5 @@ Documentation is autogenerated based on the resource and field configurations. T
 ## What's next?
 
 - [Add custom resource code]({{< ref "/develop/custom-code.md" >}})
-- [Add tests]({{< ref "/develop/test.md" >}})
-- [Run tests]({{< ref "/develop/run-tests.md" >}})
+- [Add tests]({{< ref "/develop/test/test.md" >}})
+- [Run tests]({{< ref "/develop/test/run-tests.md" >}})

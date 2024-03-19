@@ -1,0 +1,12 @@
+resource "google_looker_instance" "<%= ctx[:primary_resource_id] %>" {
+  name              = "<%= ctx[:vars]["instance_name"] %>"
+  platform_edition  = "LOOKER_CORE_STANDARD"
+  region            = "us-central1"
+  oauth_config {
+    client_id = "<%= ctx[:vars]["client_id"] %>"
+    client_secret = "<%= ctx[:vars]["client_secret"] %>"
+  }
+  custom_domain {
+    domain = "<%= ctx[:vars]["custom_domain"] %>.com"
+  }
+}

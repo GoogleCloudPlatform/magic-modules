@@ -78,6 +78,20 @@ examples:
     vars:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'bigquery_dataset_external_reference_aws'
+    primary_resource_id: 'dataset'
+    min_version: beta
+    skip_docs: true
+    vars:
+      dataset_id: 'example_dataset'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'bigquery_dataset_external_reference_aws_docs'
+    primary_resource_id: 'dataset'
+    min_version: beta
+    skip_test: true
+    vars:
+      dataset_id: 'example_dataset'
 virtual_fields:
   - !ruby/object:Api::Type::Boolean
     name: 'delete_contents_on_destroy'
@@ -140,6 +154,11 @@ properties:
 
 
             * `allAuthenticatedUsers`: All authenticated BigQuery users.
+        - !ruby/object:Api::Type::String
+          name: 'iamMember'
+          description: |
+            Some other type of member that appears in the IAM Policy but isn't a user,
+            group, domain, or special group. For example: `allUsers`
         - !ruby/object:Api::Type::String
           name: 'userByEmail'
           description: |
@@ -286,6 +305,26 @@ properties:
     description: |
       A hash of the resource.
     output: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'externalDatasetReference'
+    description: |
+     Information about the external metadata storage where the dataset is defined.
+    min_version: beta
+    immutable: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'externalSource'
+        description: |
+          External source that backs this dataset.
+        required: true
+        immutable: true
+      - !ruby/object:Api::Type::String
+        name: 'connection'
+        description: |
+          The connection id that is used to access the externalSource.
+          Format: projects/{projectId}/locations/{locationId}/connections/{connectionId}
+        required: true
+        immutable: true
   - !ruby/object:Api::Type::String
     name: 'friendlyName'
     description: A descriptive name for the dataset

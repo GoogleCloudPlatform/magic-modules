@@ -10,7 +10,8 @@
       "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
       "data": {
         "autoCreateSubnetworks": false,
-        "name": "network-1"
+        "name": "network-1",
+        "networkFirewallPolicyEnforcementOrder": "AFTER_CLASSIC_FIREWALL"
       }
     }
   },
@@ -25,7 +26,8 @@
       "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
       "data": {
         "autoCreateSubnetworks": false,
-        "name": "network-2"
+        "name": "network-2",
+        "networkFirewallPolicyEnforcementOrder": "AFTER_CLASSIC_FIREWALL"
       }
     }
   },

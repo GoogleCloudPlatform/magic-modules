@@ -1,0 +1,24 @@
+resource "google_network_security_security_profile" "<%= ctx[:primary_resource_id] %>" {
+  provider    = google-beta
+  name        = "<%= ctx[:vars]['resource_name'] %>"
+  parent      = "organizations/<%= ctx[:test_env_vars]['org_id'] %>"
+  description = "my description"
+  type        = "THREAT_PREVENTION"
+
+  threat_prevention_profile {
+    severity_overrides {
+      action   = "ALLOW"
+      severity = "INFORMATIONAL"
+    }
+
+    severity_overrides {
+      action   = "DENY"
+      severity = "HIGH"
+    }
+
+    threat_overrides {
+      action    = "ALLOW"
+      threat_id = "280647"
+    }
+  }
+}

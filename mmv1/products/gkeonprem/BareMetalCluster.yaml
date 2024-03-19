@@ -12,7 +12,6 @@
 # limitations under the License.
 --- !ruby/object:Api::Resource
 name: "BareMetalCluster"
-min_version: beta
 base_url: "projects/{{project}}/locations/{{location}}/bareMetalClusters"
 create_url: "projects/{{project}}/locations/{{location}}/bareMetalClusters?bare_metal_cluster_id={{name}}"
 update_url: "projects/{{project}}/locations/{{location}}/bareMetalClusters/{{name}}"
@@ -32,7 +31,6 @@ timeouts: !ruby/object:Api::Timeouts
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "gkeonprem_bare_metal_cluster_basic"
-    min_version: beta
     primary_resource_id: "cluster-basic"
     vars:
       name: "my-cluster"
@@ -40,7 +38,6 @@ examples:
       project: "fake-backend-360322"
   - !ruby/object:Provider::Terraform::Examples
     name: "gkeonprem_bare_metal_cluster_manuallb"
-    min_version: beta
     primary_resource_id: "cluster-manuallb"
     vars:
       name: "cluster-manuallb"
@@ -48,7 +45,6 @@ examples:
       project: "fake-backend-360322"
   - !ruby/object:Provider::Terraform::Examples
     name: "gkeonprem_bare_metal_cluster_bgplb"
-    min_version: beta
     primary_resource_id: "cluster-bgplb"
     vars:
       name: "cluster-bgplb"

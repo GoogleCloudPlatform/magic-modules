@@ -1,6 +1,6 @@
 ---
 title: "Add custom resource code"
-weight: 31
+weight: 32
 ---
 
 # Add custom resource code
@@ -243,5 +243,5 @@ See [Add documentation (Handwritten)]({{< ref "/develop/resource#add-documentati
 
 ## What's next?
 
-- [Add tests]({{< ref "/develop/test.md" >}})
-- [Run tests]({{< ref "/develop/run-tests.md" >}})
+- [Add tests]({{< ref "/develop/test/test.md" >}})
+- [Run tests]({{< ref "/develop/test/run-tests.md" >}})

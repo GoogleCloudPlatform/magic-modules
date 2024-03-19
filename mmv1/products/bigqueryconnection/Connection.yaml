@@ -111,14 +111,20 @@ examples:
     vars:
       connection_id: 'my-connection'
       database: 'projects/project/instances/instance/databases/database'
+      database_role: 'database_role'
   - !ruby/object:Provider::Terraform::Examples
-    name: 'bigquery_connection_cloudspanner_analytics'
+    name: 'bigquery_connection_cloudspanner_databoost'
     pull_external: true
-    skip_docs: true
     primary_resource_id: 'connection'
     vars:
       connection_id: 'my-connection'
       database: 'projects/project/instances/instance/databases/database'
+  - !ruby/object:Provider::Terraform::Examples
+    name: "bigquery_connection_spark"
+    region_override: "US"
+    primary_resource_id: "connection"
+    vars:
+      connection_id: "my-connection"
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -167,6 +173,7 @@ properties:
       - azure
       - cloud_spanner
       - cloud_resource
+      - spark
     properties:
       - !ruby/object:Api::Type::String
         name: 'instanceId'
@@ -216,6 +223,7 @@ properties:
       - azure
       - cloud_spanner
       - cloud_resource
+      - spark
     update_mask_fields:
       - 'aws.access_role.iam_role_id'
     properties:
@@ -248,6 +256,7 @@ properties:
       - azure
       - cloud_spanner
       - cloud_resource
+      - spark
     update_mask_fields:
       - 'azure.customer_tenant_id'
       - 'azure.federated_application_client_id'
@@ -295,22 +304,53 @@ properties:
       - azure
       - cloud_spanner
       - cloud_resource
+      - spark
     properties:
       - !ruby/object:Api::Type::String
         name: 'database'
         description:
-          Cloud Spanner database in the form `project/instance/database'
+          Cloud Spanner database in the form `project/instance/database'.
         required: true
       - !ruby/object:Api::Type::Boolean
         name: 'useParallelism'
         description:
-          If parallelism should be used when reading from Cloud Spanner
+          If parallelism should be used when reading from Cloud Spanner.
+      - !ruby/object:Api::Type::Integer
+        name: 'maxParallelism'
+        description:
+          Allows setting max parallelism per query when executing on Spanner independent compute
+          resources. If unspecified, default values of parallelism are chosen that are dependent on
+          the Cloud Spanner instance configuration. `useParallelism` and `useDataBoost` must be set
+          when setting max parallelism.
+        required_with:
+          - cloudSpanner.0.useDataBoost
+          - cloudSpanner.0.useParallelism
+      - !ruby/object:Api::Type::Boolean
+        name: 'useDataBoost'
+        description:
+          If set, the request will be executed via Spanner independent compute resources.
+          `use_parallelism` must be set when using data boost.
+        required_with:
+          - cloudSpanner.0.useParallelism
+      - !ruby/object:Api::Type::String
+        name: 'databaseRole'
+        description:
+          Cloud Spanner database role for fine-grained access control. The Cloud Spanner admin
+          should have provisioned the database role with appropriate permissions, such as `SELECT`
+          and `INSERT`. Other users should only use roles provided by their Cloud Spanner admins.
+          The database role name must start with a letter, and can only contain letters, numbers,
+          and underscores. For more details, see https://cloud.google.com/spanner/docs/fgac-about.
+        validation: !ruby/object:Provider::Terraform::Validation
+          regex: '^[a-zA-Z][a-zA-Z0-9_]*$'
       - !ruby/object:Api::Type::Boolean
         name: 'useServerlessAnalytics'
         description:
           If the serverless analytics service should be used to read data from
-          Cloud Spanner. useParallelism must be set when using serverless
-          analytics
+          Cloud Spanner. `useParallelism` must be set when using serverless
+          analytics.
+        deprecation_message: >-
+          `useServerlessAnalytics` is deprecated and will be removed in a future major release. Use
+          `useDataBoost` instead.
   - !ruby/object:Api::Type::NestedObject
     name: cloudResource
     description:
@@ -322,6 +362,7 @@ properties:
       - azure
       - cloud_spanner
       - cloud_resource
+      - spark
     send_empty_value: true
     properties:
       - !ruby/object:Api::Type::String
@@ -330,3 +371,35 @@ properties:
           The account ID of the service created for the purpose of this
           connection.
         output: true
+  - !ruby/object:Api::Type::NestedObject
+    name: spark
+    description: Container for connection properties to execute stored procedures for Apache Spark.
+      resources.
+    exactly_one_of:
+      - cloud_sql
+      - aws
+      - azure
+      - cloud_spanner
+      - cloud_resource
+      - spark
+    send_empty_value: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'serviceAccountId'
+        description: The account ID of the service created for the purpose of this
+          connection.
+        output: true
+      - !ruby/object:Api::Type::NestedObject
+        name: metastoreServiceConfig
+        description: Dataproc Metastore Service configuration for the connection.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: metastoreService
+            description: Resource name of an existing Dataproc Metastore service in the form of projects/[projectId]/locations/[region]/services/[serviceId].
+      - !ruby/object:Api::Type::NestedObject
+        name: sparkHistoryServerConfig
+        description: Spark History Server configuration for the connection.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: dataprocCluster
+            description: Resource name of an existing Dataproc Cluster to act as a Spark History Server for the connection if the form of projects/[projectId]/regions/[region]/clusters/[cluster_name].

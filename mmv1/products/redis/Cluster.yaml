@@ -18,12 +18,11 @@ description: |
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/memorystore/docs/cluster/'
-  api: 'https://cloud.google.com/memorystore/docs/cluster/reference/rest/v1beta1/projects.locations.clusters'
+  api: 'https://cloud.google.com/memorystore/docs/cluster/reference/rest/v1/projects.locations.clusters'
 timeouts: !ruby/object:Api::Timeouts
   insert_minutes: 60
   update_minutes: 120
   delete_minutes: 30
-min_version: beta
 base_url: 'projects/{{project}}/locations/{{region}}/clusters'
 self_link: 'projects/{{project}}/locations/{{region}}/clusters/{{name}}'
 create_url: 'projects/{{project}}/locations/{{region}}/clusters?clusterId={{name}}'
@@ -52,13 +51,17 @@ parameters:
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "redis_cluster_ha"
-    min_version: beta
     primary_resource_id: "cluster-ha"
     vars:
       cluster_name: "ha-cluster"
       policy_name: "mypolicy"
       subnet_name: "mysubnet"
       network_name: "mynetwork"
+      prevent_destroy: 'true'
+    test_vars_overrides:
+      prevent_destroy: 'false'
+    oics_vars_overrides:
+      prevent_destroy: 'false'
 properties:
   - !ruby/object:Api::Type::Time
     name: createTime
@@ -199,6 +202,7 @@ properties:
     description: |
       Optional. The number of replica nodes per shard.
     required: false
+    send_empty_value: true
   - !ruby/object:Api::Type::Integer
     name: sizeGb
     description: |

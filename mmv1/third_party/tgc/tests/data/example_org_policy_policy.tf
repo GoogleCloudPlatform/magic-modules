@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     google = {
-      source = "hashicorp/google"
+      source = "hashicorp/google-beta"
       version = "~> {{.Provider.version}}"
     }
   }
@@ -41,8 +41,8 @@ resource "google_org_policy_policy" "project_policy" {
         location    = "sample-location.log"
         title       = "sample-condition"
       }
-      
-    
+
+
       values {
         allowed_values = ["projects/allowed-project1", "projects/allowed-project2"]
         denied_values  = ["projects/denied-project"]

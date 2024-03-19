@@ -15,7 +15,7 @@
 name: 'Config'
 base_url: projects/{{project}}/locations/{{location}}/transferConfigs?serviceAccountName={{service_account_name}}
 self_link: '{{name}}'
-update_url: "{{name}}?serviceAccountName={{service_account_name}}&updateMask=serviceAccountName,displayName,destinationDatasetId,schedule,scheduleOptions,emailPreferences,notificationPubsubTopic,dataRefreshWindowDays,disabled,params"
+update_url: "{{name}}?serviceAccountName={{service_account_name}}"
 update_verb: :PATCH
 description: |
   Represents a data transfer configuration. A transfer configuration
@@ -33,6 +33,7 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/bigquery_data_transfer.go.erb
   custom_import: templates/terraform/custom_import/bigquery_data_transfer_self_link_as_name_set_location.go.erb
   post_create: templates/terraform/post_create/set_computed_name.erb
+  pre_update: templates/terraform/pre_update/bigquerydatatransfer_config.erb
 custom_diff: [
   'sensitiveParamCustomizeDiff',
   'paramsCustomizeDiff',

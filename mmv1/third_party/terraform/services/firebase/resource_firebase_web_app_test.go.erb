@@ -66,25 +66,13 @@ resource "google_apikeys_key" "key1" {
 	name         = "tf-test-api-key1%{random_suffix}"
 	display_name = "Test api key 1"
 	project      = "%{project_id}"
-
-	restrictions {
-		browser_key_restrictions {
-			allowed_referrers = ["*"]
-		}
-	}
 }
 
 resource "google_apikeys_key" "key2" {
 	provider     = google-beta
 	name         = "tf-test-api-key2%{random_suffix}"
 	display_name = "Test api key 2"
-	project      = google_project.default.project_id
-
-	restrictions {
-		browser_key_restrictions {
-			allowed_referrers = ["*"]
-		}
-	}
+	project      = "%{project_id}"
 }
 
 resource "google_firebase_web_app" "default" {

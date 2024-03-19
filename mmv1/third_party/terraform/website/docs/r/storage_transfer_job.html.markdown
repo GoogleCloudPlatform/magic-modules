@@ -112,6 +112,8 @@ resource "google_storage_transfer_job" "s3-bucket-nightly-backup" {
 
 The following arguments are supported:
 
+* `name` - (Optional) The name of the Transfer Job. This name must start with "transferJobs/" prefix and end with a letter or a number, and should be no more than 128 characters ( `transferJobs/^(?!OPI)[A-Za-z0-9-._~]*[A-Za-z0-9]$` ). For transfers involving PosixFilesystem, this name must start with transferJobs/OPI specifically ( `transferJobs/OPI^[A-Za-z0-9-._~]*[A-Za-z0-9]$` ). For all other transfer types, this name must not start with transferJobs/OPI. Default the provider will assign a random unique name with `transferJobs/{{name}}` format, where `name` is a numeric value.
+
 * `description` - (Required) Unique description to identify the Transfer Job.
 
 * `transfer_spec` - (Required) Transfer specification. Structure [documented below](#nested_transfer_spec).
@@ -245,7 +247,9 @@ The `aws_access_key` block supports:
 
 * `path` - (Required) Root path to transfer objects. Must be an empty string or full path name that ends with a '/'. This field is treated as an object prefix. As such, it should generally not begin with a '/'.
 
-* `azure_credentials` - (Required) Credentials used to authenticate API requests to Azure block.
+* `credentials_secret` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Full Resource name of a secret in Secret Manager containing [SAS Credentials in JSON form](https://cloud.google.com/storage-transfer/docs/reference/rest/v1/TransferSpec#azureblobstoragedata:~:text=begin%20with%20a%20%27/%27.-,credentialsSecret,-string). Service Agent for Storage Transfer must have permissions to access secret. If credentials_secret is specified, do not specify azure_credentials.`,
+
+* `azure_credentials` - (Required in GA, Optional in [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Credentials used to authenticate API requests to Azure block.
 
 The `azure_credentials` block supports:
 
@@ -292,8 +296,21 @@ exported:
 
 ## Import
 
-Storage buckets can be imported using the Transfer Job's `project` and `name` without the `transferJob/` prefix, e.g.
+Storage Transfer Jobs can be imported using the Transfer Job's `project` and `name` (without the `transferJob/` prefix), e.g.
+
+* `{{project_id}}/{{name}}`, where `name` is a numeric value.
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import Storage Transfer Jobs using one of the formats above. For example:
+
+```tf
+import {
+  id = "{{project_id}}/{{name}}"
+  to = google_storage_transfer_job.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), Storage Transfer Jobs can be imported using one of the formats above. For example:
 
 ```
-$ terraform import google_storage_transfer_job.nightly-backup-transfer-job my-project-1asd32/8422144862922355674
+$ terraform import google_storage_transfer_job.default {{project_id}}/123456789
 ```

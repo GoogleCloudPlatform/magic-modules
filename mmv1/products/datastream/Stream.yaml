@@ -67,6 +67,8 @@ examples:
       destination_connection_profile_id: 'destination-profile'
     test_vars_overrides:
       deletion_protection: 'false'
+    oics_vars_overrides:
+      deletion_protection: 'false'
   - !ruby/object:Provider::Terraform::Examples
     name: 'datastream_stream_full'
     pull_external: true
@@ -87,6 +89,8 @@ examples:
     test_vars_overrides:
       deletion_protection: 'false'
       stream_cmek: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+    oics_vars_overrides:
+      deletion_protection: 'false'
   - !ruby/object:Provider::Terraform::Examples
     name: 'datastream_stream_postgresql'
     primary_resource_id: 'default'
@@ -136,7 +140,8 @@ examples:
       deletion_protection: 'false'
       bigquery_destination_table_kms_key_name:
         'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
-
+    oics_vars_overrides:
+      deletion_protection: 'false'
 parameters:
   - !ruby/object:Api::Type::String
     name: streamId

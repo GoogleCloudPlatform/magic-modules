@@ -27,10 +27,6 @@ versions:
     base_url: https://notebooks.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Cloud Notebooks API
-    url: https://console.cloud.google.com/apis/api/notebooks.googleapis.com
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     base_url: '{{op_id}}'
