@@ -197,105 +197,105 @@ properties:
                             # The fields below are necessary to include the "otherTables" filter in the payload
                           send_empty_value: true
                           allow_empty_object: true
-              - !ruby/object:Api::Type::NestedObject
-                name: conditions
-                description: In addition to matching the filter, these conditions must be true before a profile is generated
-                properties:
-                  - !ruby/object:Api::Type::String
-                    name: createdAfter
-                    description: A timestamp in RFC3339 UTC "Zulu" format with nanosecond resolution and upto nine fractional digits.
-                  - !ruby/object:Api::Type::NestedObject
-                    name: orConditions
-                    description: At least one of the conditions must be true for a table to be scanned.
-                    properties:
-                      - !ruby/object:Api::Type::String
-                        name: minAge
-                        description: Duration format. The minimum age a table must have before Cloud DLP can profile it. value greater than 1.
-                      - !ruby/object:Api::Type::Integer
-                        name: minRowCount
-                        description: Minimum number of rows that should be present before Cloud DLP profiles as a table.
-                  - !ruby/object:Api::Type::NestedObject
-                    name: types
-                    description: Restrict discovery to specific table type
-                    properties:
-                      - !ruby/object:Api::Type::Array
-                        name: types
-                        description: A set of BiqQuery table types
-                        item_type: !ruby/object:Api::Type::Enum
-                          name: 'undefined'
-                          description: |
-                            This field only has a name and description because of MM
-                            limitations. It should not appear in downstreams.
+                - !ruby/object:Api::Type::NestedObject
+                  name: conditions
+                  description: In addition to matching the filter, these conditions must be true before a profile is generated
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: createdAfter
+                      description: A timestamp in RFC3339 UTC "Zulu" format with nanosecond resolution and upto nine fractional digits.
+                    - !ruby/object:Api::Type::NestedObject
+                      name: orConditions
+                      description: At least one of the conditions must be true for a table to be scanned.
+                      properties:
+                        - !ruby/object:Api::Type::String
+                          name: minAge
+                          description: Duration format. The minimum age a table must have before Cloud DLP can profile it. value greater than 1.
+                        - !ruby/object:Api::Type::Integer
+                          name: minRowCount
+                          description: Minimum number of rows that should be present before Cloud DLP profiles as a table.
+                    - !ruby/object:Api::Type::NestedObject
+                      name: types
+                      description: Restrict discovery to specific table type
+                      properties:
+                        - !ruby/object:Api::Type::Array
+                          name: types
+                          description: A set of BiqQuery table types
+                          item_type: !ruby/object:Api::Type::Enum
+                            name: 'undefined'
+                            description: |
+                              This field only has a name and description because of MM
+                              limitations. It should not appear in downstreams.
+                            values:
+                              - :BIG_QUERY_TABLE_TYPE_UNSPECIFIED
+                              - :BIG_QUERY_TABLE_TYPE_TABLE
+                              - :BIG_QUERY_TABLE_TYPE_EXTERNAL_BIG_LAKE
+                    - !ruby/object:Api::Type::Enum
+                      name: typeCollection
+                      description: Restrict discovery to categories of table types. Currently view, materialized view, snapshot and non-biglake external tables are supported.
+                      values:
+                        - :BIG_QUERY_COLLECTION_UNSPECIFIED
+                        - :BIG_QUERY_COLLECTION_ALL_TYPES
+                        - :BIG_QUERY_COLLECTION_ONLY_SUPPORTED_TYPES
+                - !ruby/object:Api::Type::NestedObject
+                  name: cadence
+                  description: How often and when to update profiles. New tables that match both the fiter and conditions are scanned as quickly as possible depending on system capacity.
+                  properties:
+                    - !ruby/object:Api::Type::NestedObject
+                      name: schemaModifiedCadence
+                      description: Governs when to update data profiles when a schema is modified
+                      properties:
+                        - !ruby/object:Api::Type::Array
+                          name: 'types'
+                          description: The type of events to consider when deciding if the table's schema has been modified and should have the profile updated. Defaults to NEW_COLUMN.
+                          item_type: !ruby/object:Api::Type::Enum
+                            name: 'undefined'
+                            description: |
+                              This field only has a name and description because of MM
+                              limitations. It should not appear in downstreams.
+                            values:
+                              - :SCHEMA_MODIFICATION_UNSPECIFIED
+                              - :SCHEMA_NEW_COLUMN
+                              - :SCHEMA_REMOVED_COLUMNS
+                        - !ruby/object:Api::Type::Enum
+                          name: 'frequency'
+                          description: How frequently profiles may be updated when schemas are modified. Default to monthly
                           values:
-                            - :BIG_QUERY_TABLE_TYPE_UNSPECIFIED
-                            - :BIG_QUERY_TABLE_TYPE_TABLE
-                            - :BIG_QUERY_TABLE_TYPE_EXTERNAL_BIG_LAKE
-                  - !ruby/object:Api::Type::Enum
-                    name: typeCollection
-                    description: Restrict discovery to categories of table types. Currently view, materialized view, snapshot and non-biglake external tables are supported.
-                    values:
-                      - :BIG_QUERY_COLLECTION_UNSPECIFIED
-                      - :BIG_QUERY_COLLECTION_ALL_TYPES
-                      - :BIG_QUERY_COLLECTION_ONLY_SUPPORTED_TYPES
-              - !ruby/object:Api::Type::NestedObject
-                name: cadence
-                description: How often and when to update profiles. New tables that match both the fiter and conditions are scanned as quickly as possible depending on system capacity.
-                properties:
-                  - !ruby/object:Api::Type::NestedObject
-                    name: schemaModifiedCadence
-                    description: Governs when to update data profiles when a schema is modified
-                    properties:
-                      - !ruby/object:Api::Type::Array
-                        name: 'types'
-                        description: The type of events to consider when deciding if the table's schema has been modified and should have the profile updated. Defaults to NEW_COLUMN.
-                        item_type: !ruby/object:Api::Type::Enum
-                          name: 'undefined'
-                          description: |
-                            This field only has a name and description because of MM
-                            limitations. It should not appear in downstreams.
+                            - :UPDATE_FREQUENCY_UNSPECIFIED
+                            - :UPDATE_FREQUENCY_NEVER
+                            - :UPDATE_FREQUENCY_DAILY
+                            - :UPDATE_FREQUENCY_MONTHLY
+                    - !ruby/object:Api::Type::NestedObject
+                      name: 'tableModifiedCadence'
+                      description: Governs when to update profile when a table is modified.
+                      properties:
+                        - !ruby/object:Api::Type::Array
+                          name: 'types'
+                          description: 'The type of events to consider when deciding if the table has been modified and should have the profile updated. Defaults to MODIFIED_TIMESTAMP'
+                          item_type: !ruby/object:Api::Type::Enum
+                            name: 'undefined'
+                            description: |
+                              This field only has a name and description because of MM
+                              limitations. It should not appear in downstreams.
+                            values:
+                              - TABLE_MODIFICATION_UNSPECIFIED
+                              - TABLE_MODIFIED_TIMESTAMP
+                        - !ruby/object:Api::Type::Enum
+                          name: 'frequency'
+                          description: 'How frequently data profiles can be updated when tables are modified. Defaults to never.'
                           values:
-                            - :SCHEMA_MODIFICATION_UNSPECIFIED
-                            - :SCHEMA_NEW_COLUMN
-                            - :SCHEMA_REMOVED_COLUMNS
-                      - !ruby/object:Api::Type::Enum
-                        name: 'frequency'
-                        description: How frequently profiles may be updated when schemas are modified. Default to monthly
-                        values:
-                          - :UPDATE_FREQUENCY_UNSPECIFIED
-                          - :UPDATE_FREQUENCY_NEVER
-                          - :UPDATE_FREQUENCY_DAILY
-                          - :UPDATE_FREQUENCY_MONTHLY
-                  - !ruby/object:Api::Type::NestedObject
-                    name: 'tableModifiedCadence'
-                    description: Governs when to update profile when a table is modified.
-                    properties:
-                      - !ruby/object:Api::Type::Array
-                        name: 'types'
-                        description: 'The type of events to consider when deciding if the table has been modified and should have the profile updated. Defaults to MODIFIED_TIMESTAMP'
-                        item_type: !ruby/object:Api::Type::Enum
-                          name: 'undefined'
-                          description: |
-                            This field only has a name and description because of MM
-                            limitations. It should not appear in downstreams.
-                          values:
-                            - TABLE_MODIFICATION_UNSPECIFIED
-                            - TABLE_MODIFIED_TIMESTAMP
-                      - !ruby/object:Api::Type::Enum
-                        name: 'frequency'
-                        description: 'How frequently data profiles can be updated when tables are modified. Defaults to never.'
-                        values:
-                          - :UPDATE_FREQUENCY_UNSPECIFIED
-                          - :UPDATE_FREQUENCY_NEVER
-                          - :UPDATE_FREQUENCY_DAILY
-                          - :UPDATE_FREQUENCY_MONTHLY
-              - !ruby/object:Api::Type::NestedObject
-                name: disabled
-                description: 'Tables that match this filter will not have profiles created.'
-                properties:
-                  []  # Meant to be an empty object with no properties - see here : https://cloud.google.com/sensitive-data-protection/docs/reference/rest/v2/organizations.locations.discoveryConfigs#disabled
-                  # The fields below are necessary to include the "disabled" filter in the payload
-                send_empty_value: true
-                allow_empty_object: true
+                            - :UPDATE_FREQUENCY_UNSPECIFIED
+                            - :UPDATE_FREQUENCY_NEVER
+                            - :UPDATE_FREQUENCY_DAILY
+                            - :UPDATE_FREQUENCY_MONTHLY
+                - !ruby/object:Api::Type::NestedObject
+                  name: disabled
+                  description: 'Tables that match this filter will not have profiles created.'
+                  properties:
+                    []  # Meant to be an empty object with no properties - see here : https://cloud.google.com/sensitive-data-protection/docs/reference/rest/v2/organizations.locations.discoveryConfigs#disabled
+                    # The fields below are necessary to include the "disabled" filter in the payload
+                  send_empty_value: true
+                  allow_empty_object: true
       - !ruby/object:Api::Type::Array
         name: 'errors'
         description: Output only. A stream of errors encountered when the config was activated. Repeated errors may result in the config automatically being paused. Output only field. Will return the last 100 errors. Whenever the config is modified this list will be cleared.
