@@ -13,6 +13,7 @@
 package api
 
 import (
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/provider/terraform"
 )
@@ -267,9 +268,65 @@ type Resource struct {
 	// Add a deprecation message for a resource that's been deprecated in the API.
 	DeprecationMessage string `yaml:"deprecation_message"`
 
-	Properties []Type
+	Properties []*Type
 
-	Parameters []Type
+	Parameters []*Type
+
+	ProductMetadata *Product
 }
 
 // TODO: rewrite functions
+func (r *Resource) Validate() {
+	// TODO Q1 Rewrite super
+	// super
+
+	r.setResourceMetada(r.Parameters)
+	r.setResourceMetada(r.Properties)
+}
+
+func (r *Resource) setResourceMetada(properties []*Type) {
+	if properties == nil {
+		return
+	}
+
+	for _, property := range properties {
+		property.ResourceMetadata = r
+	}
+}
+
+// ====================
+// Version-related methods
+// ====================
+
+func (r Resource) MinVersionObj() *product.Version {
+	if r.MinVersion != "" {
+		return r.ProductMetadata.versionObj(r.MinVersion)
+	} else {
+		return r.ProductMetadata.lowestVersion()
+	}
+}
+
+func (r Resource) NotInVersion(version *product.Version) bool {
+	return version.CompareTo(r.MinVersionObj()) < 0
+}
+
+// Recurses through all nested properties and parameters and changes their
+// 'exclude' instance variable if the property is at a version below the
+// one that is passed in.
+func (r *Resource) ExcludeIfNotInVersion(version *product.Version) {
+	if !r.Exclude {
+		r.Exclude = r.NotInVersion(version)
+	}
+
+	if r.Properties != nil {
+		for _, p := range r.Properties {
+			p.ExcludeIfNotInVersion(version)
+		}
+	}
+
+	if r.Parameters != nil {
+		for _, p := range r.Parameters {
+			p.ExcludeIfNotInVersion(version)
+		}
+	}
+}
