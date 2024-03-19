@@ -500,6 +500,7 @@ properties:
             - :SEV_SNP_CAPABLE
             - :SUSPEND_RESUME_COMPATIBLE
             - :TDX_CAPABLE
+            - :SEV_LIVE_MIGRATABLE_V2
   - !ruby/object:Api::Type::Array
     name: 'licenses'
     description: Any applicable license URI.
