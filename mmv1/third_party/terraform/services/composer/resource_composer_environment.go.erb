@@ -3,6 +3,7 @@ package composer
 
 import (
 	"fmt"
+	"net"
 	"log"
 	"regexp"
 	"strings"
@@ -390,6 +391,7 @@ func ResourceComposerEnvironment() *schema.Resource {
 										Computed:         true,
 										Optional:         true,
 										ForceNew:         true,
+										ValidateFunc:     validateComposerInternalIpv4CidrBlock,
 										Description:      `IPv4 cidr range that will be used by Composer internal components.`,
 									},
 <% end -%>
@@ -3106,4 +3108,18 @@ func versionValidationCustomizeDiffFunc(ctx context.Context, d *schema.ResourceD
 		}
 	}
 	return nil
+}
+
+func validateComposerInternalIpv4CidrBlock(v any, k string) (warns []string, errs []error) {
+	cidr_range := v.(string)
+	_, ip_net, err := net.ParseCIDR(cidr_range)
+	if err != nil {
+		errs = append(errs, fmt.Errorf("Invalid CIDR range: %s", err))
+		return
+	}
+	ones, _ := ip_net.Mask.Size()
+	if ones != 20 {
+		errs = append(errs, fmt.Errorf("Composer Internal IPv4 CIDR range must have size /20"))
+	}
+	return
 }
