@@ -26,11 +26,12 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/GoogleCloudPlatform/magic-modules/tools/issue-labeler/labeler"
 	"magician/exec"
 	"magician/github"
 	"magician/provider"
 	"magician/source"
+
+	"github.com/GoogleCloudPlatform/magic-modules/tools/issue-labeler/labeler"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/exp/maps"
@@ -349,35 +350,17 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	}
 
 	// Run missing test detector (currently only for beta)
-	missingTestsPath := mmLocalPath
 	for _, repo := range []source.Repo{tpgbRepo} {
 		if !repo.Cloned {
 			fmt.Println("Skipping missing tests; repo failed to clone: ", repo.Name)
 			continue
 		}
-		missingTests, err := detectMissingTests(missingTestsPath, repo.Path, oldBranch, rnr)
+		missingTests, err := detectMissingTests(diffProcessorPath, repo.Path, rnr)
 		if err != nil {
 			fmt.Println("Error running missing test detector: ", err)
 			errors[repo.Title] = append(errors[repo.Title], "The missing test detector failed to run.")
 		}
 		data.MissingTests = missingTests
-	}
-
-	// Run unit tests for missing test detector (currently only for beta)
-	if pathChanged("tools/missing-test-detector", tpgbRepo.ChangedFiles) {
-		fmt.Printf("Found diffs in missing test detector:\n%s\nRunning tests.\n", diffs)
-		if err = runMissingTestUnitTests(
-			mmLocalPath,
-			tpgbRepo.Path,
-			targetURL,
-			commitSha,
-			prNumber,
-			gh,
-			rnr,
-		); err != nil {
-			fmt.Println("Error running missing test detector unit tests: ", err)
-			errors["Other"] = append(errors["Other"], "Missing test detector unit tests failed to run.")
-		}
 	}
 
 	// Add errors to data as an ordered list
@@ -475,97 +458,17 @@ func changedSchemaResources(diffProcessorPath string, rnr ExecRunner) ([]string,
 // Run the missing test detector and return the results.
 // Returns an empty string unless there are missing tests.
 // Error will be nil unless an error occurs during setup.
-func detectMissingTests(mmLocalPath, tpgbLocalPath, oldBranch string, rnr ExecRunner) (string, error) {
-	tpgbLocalPathOld := tpgbLocalPath + "old"
-
-	if err := rnr.Copy(tpgbLocalPath, tpgbLocalPathOld); err != nil {
+func detectMissingTests(diffProcessorPath, tpgbLocalPath string, rnr ExecRunner) (string, error) {
+	if err := rnr.PushDir(diffProcessorPath); err != nil {
 		return "", err
 	}
 
-	if err := rnr.PushDir(tpgbLocalPathOld); err != nil {
-		return "", err
-	}
-	if _, err := rnr.Run("git", []string{"checkout", "origin/" + oldBranch}, nil); err != nil {
-		return "", err
-	}
-
-	if err := updatePackageName("old", tpgbLocalPathOld, rnr); err != nil {
-		return "", err
-	}
-	if err := updatePackageName("new", tpgbLocalPath, rnr); err != nil {
-		return "", err
-	}
-	if err := rnr.PopDir(); err != nil {
-		return "", err
-	}
-
-	missingTestDetectorPath := filepath.Join(mmLocalPath, "tools", "missing-test-detector")
-	if err := rnr.PushDir(missingTestDetectorPath); err != nil {
-		return "", err
-	}
-	if _, err := rnr.Run("go", []string{"mod", "edit", "-replace", fmt.Sprintf("google/provider/%s=%s", "new", tpgbLocalPath)}, nil); err != nil {
-		fmt.Printf("Error running go mod edit: %v\n", err)
-	}
-	if _, err := rnr.Run("go", []string{"mod", "edit", "-replace", fmt.Sprintf("google/provider/%s=%s", "old", tpgbLocalPathOld)}, nil); err != nil {
-		fmt.Printf("Error running go mod edit: %v\n", err)
-	}
-	if _, err := rnr.Run("go", []string{"mod", "tidy"}, nil); err != nil {
-		fmt.Printf("Error running go mod tidy: %v\n", err)
-	}
-	missingTests, err := rnr.Run("go", []string{"run", ".", fmt.Sprintf("-services-dir=%s/google-beta/services", tpgbLocalPath)}, nil)
+	output, err := rnr.Run("bin/diff-processor", []string{"detect-missing-tests", fmt.Sprintf("-services-dir=%s/google-beta/services", tpgbLocalPath)}, nil)
 	if err != nil {
-		fmt.Printf("Error running missing test detector: %v\n", err)
-		missingTests = ""
-	} else {
-		fmt.Printf("Successfully ran missing test detector:\n%s\n", missingTests)
+		return "", err
 	}
-	return missingTests, rnr.PopDir()
-}
 
-// Update the provider package name to the given name in the given path.
-// name should be either "old" or "new".
-func updatePackageName(name, path string, rnr ExecRunner) error {
-	oldPackageName := "github.com/hashicorp/terraform-provider-google-beta"
-	newPackageName := "google/provider/" + name
-	fmt.Printf("Updating package name in %s from %s to %s\n", path, oldPackageName, newPackageName)
-	if err := rnr.PushDir(path); err != nil {
-		return err
-	}
-	if _, err := rnr.Run("find", []string{".", "-type", "f", "-name", "*.go", "-exec", "sed", "-i.bak", fmt.Sprintf("s~%s~%s~g", oldPackageName, newPackageName), "{}", "+"}, nil); err != nil {
-		return fmt.Errorf("error running find: %v\n", err)
-	}
-	if _, err := rnr.Run("sed", []string{"-i.bak", fmt.Sprintf("s|%s|%s|g", oldPackageName, newPackageName), "go.mod"}, nil); err != nil {
-		return fmt.Errorf("error running sed: %v\n", err)
-	}
-	if _, err := rnr.Run("sed", []string{"-i.bak", fmt.Sprintf("s|%s|%s|g", oldPackageName, newPackageName), "go.sum"}, nil); err != nil {
-		return fmt.Errorf("error running sed: %v\n", err)
-	}
-	return rnr.PopDir()
-}
-
-// Run unit tests for the missing test detector.
-// Report results using Github API.
-func runMissingTestUnitTests(mmLocalPath, tpgbLocalPath, targetURL, commitSha string, prNumber int, gh GithubClient, rnr ExecRunner) error {
-	missingTestDetectorPath := filepath.Join(mmLocalPath, "tools", "missing-test-detector")
-	rnr.PushDir(missingTestDetectorPath)
-	if _, err := rnr.Run("go", []string{"mod", "tidy"}, nil); err != nil {
-		fmt.Printf("error running go mod tidy in %s: %v\n", missingTestDetectorPath, err)
-	}
-	servicesDir := filepath.Join(tpgbLocalPath, "google-beta", "services")
-	state := "success"
-	if _, err := rnr.Run("go", []string{"test"}, map[string]string{
-		"SERVICES_DIR": servicesDir,
-		// Passthrough vars required for a valid build environment.
-		"GOPATH": os.Getenv("GOPATH"),
-		"HOME":   os.Getenv("HOME"),
-	}); err != nil {
-		fmt.Printf("error from running go test in %s: %v\n", missingTestDetectorPath, err)
-		state = "failure"
-	}
-	if err := gh.PostBuildStatus(strconv.Itoa(prNumber), "unit-tests-missing-test-detector", state, targetURL, commitSha); err != nil {
-		return err
-	}
-	return rnr.PopDir()
+	return output, rnr.PopDir()
 }
 
 func formatDiffComment(data diffCommentData) (string, error) {
