@@ -14,7 +14,12 @@
 package api
 
 import (
+	"fmt"
+	"log"
+	"reflect"
+
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 )
 
 // require 'api/object'
@@ -120,18 +125,19 @@ type Type struct {
 	RequiredWith []string `yaml:"required_with"`
 
 	// Can only be overridden - we should never set this ourselves.
-	// TODO: set a specific type intead of interface{}
-	NewType interface{}
+	NewType string
 
 	// A pattern that maps expected user input to expected API input.
 	// TODO: remove?
 	Pattern string
 
-	Properties []Type
+	Properties []*Type
 
 	EnumValues []string `yaml:"enum_values"`
 
 	ItemType string `yaml:"item_type"`
+
+	Resource string
 
 	// ====================
 	// Terraform Overrides
@@ -305,11 +311,15 @@ const MAX_NAME = 20
 // object. eg: parent.meta.label.foo
 // The only intended purpose is to allow better error messages. Some objects
 // and at some points in the build this doesn't output a valid output.
-// func (t *Type) lineage() {
-// return name&.underscore if __parent.nil?
 
-// "//{__parent.lineage}.//{name&.underscore}"
-// }
+// def lineage
+func (t *Type) Lineage() string {
+	if t.ParentMetadata == nil {
+		return google.Underscore(t.Name)
+	}
+
+	return fmt.Sprintf("%s.%s", t.ParentMetadata.Lineage(), google.Underscore(t.Name))
+}
 
 // Prints the access path of the field in the configration eg: metadata.0.labels
 // The only intended purpose is to get the value of the labes field by calling d.Get().
@@ -445,6 +455,7 @@ const MAX_NAME = 20
 //   // @__parent
 // }
 
+// def min_version
 func (t *Type) MinVersionObj() *product.Version {
 	if t.MinVersion != "" {
 		return t.ResourceMetadata.ProductMetadata.versionObj(t.MinVersion)
@@ -453,6 +464,7 @@ func (t *Type) MinVersionObj() *product.Version {
 	}
 }
 
+// def exact_version
 func (t *Type) exactVersionObj() *product.Version {
 	if t.ExactVersion == "" {
 		return nil
@@ -461,6 +473,7 @@ func (t *Type) exactVersionObj() *product.Version {
 	return t.ResourceMetadata.ProductMetadata.versionObj(t.ExactVersion)
 }
 
+// def exclude_if_not_in_version!(version)
 func (t *Type) ExcludeIfNotInVersion(version *product.Version) {
 	if !t.Exclude {
 		if versionObj := t.exactVersionObj(); versionObj != nil {
@@ -473,14 +486,24 @@ func (t *Type) ExcludeIfNotInVersion(version *product.Version) {
 	}
 }
 
-// // Overriding is_a? to enable class overrides.
-// // Ruby does not let you natively change types, so this is the next best
-// // thing.
-// func (t *Type) is_a?(clazz) {
-//   // return Module.const_get(@new_type).new.is_a?(clazz) if @new_type
+// Overriding is_a? to enable class overrides.
+// Ruby does not let you natively change types, so this is the next best
+// thing.
 
-//   // super(clazz)
-// }
+// TODO Q1: check the type of superclasses of property t
+// func (t *Type) is_a?(clazz) {
+func (t *Type) IsA(clazz string) bool {
+	if clazz == "" {
+		log.Fatalf("class cannot be empty")
+	}
+
+	if t.NewType != "" {
+		return t.NewType == clazz
+	}
+
+	return reflect.TypeOf(t).Name() == fmt.Sprintf("main.%s", clazz)
+	// super(clazz)
+}
 
 // // Overriding class to enable class overrides.
 // // Ruby does not let you natively change types, so this is the next best
@@ -489,11 +512,6 @@ func (t *Type) ExcludeIfNotInVersion(version *product.Version) {
 //   // return Module.const_get(@new_type) if @new_type
 
 //   // super
-// }
-
-// // Returns nested properties for this property.
-// func (t *Type) nested_properties() {
-//   // nil
 // }
 
 // func (t *Type) removed() {
@@ -634,12 +652,12 @@ func (t *Type) ExcludeIfNotInVersion(version *product.Version) {
 //       if @item_type.is_a? NestedObject
 //   end
 
-//   func (t *Type) nested_properties
-//     return @item_type.nested_properties.reject(&:exclude) \
-//       if @item_type.is_a?(Api::Type::NestedObject)
+// func (t *Type) nested_properties
+// return @item_type.nested_properties.reject(&:exclude) \
+// 	if @item_type.is_a?(Api::Type::NestedObject)
 
-//     super
-//   end
+// super
+// end
 
 //   func (t *Type) item_type_class
 //     return @item_type \
@@ -726,12 +744,15 @@ func (t *Type) ExcludeIfNotInVersion(version *product.Version) {
 //     return props.first unless props.empty?
 //   end
 
-//   func (t *Type) resource_ref
-//     product = @__resource.__product
-//     resources = product.objects.select { |obj| obj.name == @resource }
+// func (t *Type) resource_ref
+func (t *Type) ResourceRef() *Resource {
+	product := t.ResourceMetadata.ProductMetadata
+	resources := google.Select(product.Objects, func(obj *Resource) bool {
+		return obj.Name == t.Resource
+	})
 
-//     resources[0]
-//   end
+	return resources[0]
+}
 
 //   func (t *Type) property_class
 //     type = property_ns_prefix
@@ -783,27 +804,37 @@ func (t *Type) ExcludeIfNotInVersion(version *product.Version) {
 //     @properties
 //   end
 
-//   func (t *Type) properties
-//     raise "Field '//{lineage}' properties are nil!" if @properties.nil?
+// func (t *Type) properties
+func (t *Type) UserProperties() []*Type {
+	if t.Properties == nil {
+		log.Fatalf("Field '{%s}' properties are nil!", t.Lineage())
+	}
 
-//     @properties.reject(&:exclude)
-//   end
+	return google.Reject(t.Properties, func(p *Type) bool {
+		return p.Exclude
+	})
+}
 
-//   func (t *Type) nested_properties
-//     properties
-//   end
+// func (t *Type) nested_properties
+func (t *Type) NestedProperties() []*Type {
+	return t.UserProperties()
+}
 
-//   // Returns the list of top-level properties once any nested objects with
-//   // flatten_object set to true have been collapsed
-//   func (t *Type) root_properties
-//     properties.flat_map do |p|
-//       if p.flatten_object
-//         p.root_properties
-//       else
-//         p
-//       end
-//     end
-//   end
+// Returns the list of top-level properties once any nested objects with
+// flatten_object set to true have been collapsed
+//
+//	func (t *Type) root_properties
+func (t *Type) RootProperties() []*Type {
+	props := make([]*Type, 0)
+	for _, p := range t.UserProperties() {
+		if p.FlattenObject {
+			props = google.Concat(props, p.RootProperties())
+		} else {
+			props = append(props, p)
+		}
+	}
+	return props
+}
 
 //   func (t *Type) exclude_if_not_in_version!(version)
 //     super

@@ -67,7 +67,7 @@ type Product struct {
 
 	OperationRetry string `yaml:"operation_retry"`
 
-	Async OpAsync
+	Async *OpAsync
 
 	LegacyName string `yaml:"legacy_name"`
 
@@ -211,21 +211,21 @@ func (p *Product) SetPropertiesBasedOnVersion(version *product.Version) {
 	p.BaseUrl = version.BaseUrl
 }
 
-//   // ====================
-//   // Debugging Methods
-//   // ====================
+// ====================
+// Debugging Methods
+// ====================
 
 //   def to_s
 //     // relies on the custom to_json definitions
 //     JSON.pretty_generate(self)
 //   end
 
-//   // Prints a dot notation path to where the field is nested within the parent
-//   // object when called on a property. eg: parent.meta.label.foo
-//   // Redefined on Product to terminate the calls up the parent chain.
-//   def lineage
-//     name
-//   end
+// Prints a dot notation path to where the field is nested within the parent
+// object when called on a property. eg: parent.meta.label.foo
+// Redefined on Product to terminate the calls up the parent chain.
+func (p Product) Lineage() string {
+	return p.Name
+}
 
 //   def to_json(opts = nil)
 //     json_out = {}
