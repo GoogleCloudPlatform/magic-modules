@@ -32,6 +32,23 @@ type NamedObject struct {
 	ApiName string `yaml:"api_name"`
 }
 
+// func (obj *NamedObject) UnmarshalYAML(n *yaml.Node) error {
+// 	log.Printf("zhenhuatest12 object here")
+
+// 	// type alias *NamedObject
+// 	err := n.Decode(obj)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	log.Printf("zhenhuatest12 tmp %#v", obj)
+// 	// obj.Name = tmp.Name
+// 	// if tmp.ApiName == "" {
+// 	obj.ApiName = "test"
+
+// 	return nil
+// }
+
 // func (n *Named) string_array(arr) {
 // types = arr.map(&:class).uniq
 // types.size == 1 && types[0] == String

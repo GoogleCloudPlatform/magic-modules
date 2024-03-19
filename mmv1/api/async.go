@@ -17,9 +17,6 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 )
 
-// require 'api/object'
-// require 'api/timeout'
-
 // Base class from which other Async classes can inherit.
 type Async struct {
 	// Embed YamlValidator object
@@ -95,6 +92,12 @@ type OpAsync struct {
 	Actions []string
 }
 
+func NewOpAsync() *OpAsync {
+	oa := new(OpAsync)
+	oa.Operation = NewOpAsyncOperation()
+	return oa
+}
+
 // def initialize(operation, result, status, error)
 //   super()
 //   @operation = operation
@@ -104,15 +107,20 @@ type OpAsync struct {
 // end
 
 // def validate
-//   super
+func (oa *OpAsync) Validate() {
+	//   super
 
-//   check :operation, type: Operation, required: true
-//   check :result, type: Result, default: Result.new
-//   check :status, type: Status
-//   check :error, type: Error
-//   check :actions, default: %w[create delete update], type: ::Array, item_type: ::String
-//   check :include_project, type: :boolean, default: false
-// end
+	if oa.Operation == nil {
+		oa.Operation = NewOpAsyncOperation()
+	}
+	oa.Operation.Validate()
+	// check :operation, type: Operation, required: true
+	// check :result, type: Result, default: Result.new
+	// check :status, type: Status
+	// check :error, type: Error
+	// check :actions, default: %w[create delete update], type: ::Array, item_type: ::String
+	// check :include_project, type: :boolean, default: false
+}
 
 // The main implementation of Operation,
 // corresponding to common GCP Operation resources.
@@ -134,25 +142,31 @@ type OpAsyncOperation struct {
 }
 
 // def initialize(path, base_url, wait_ms, timeouts)
-//   super()
-//   @path = path
-//   @base_url = base_url
-//   @wait_ms = wait_ms
-//   @timeouts = timeouts
-// end
+func NewOpAsyncOperation() *OpAsyncOperation {
+	//   super()
+	op := new(OpAsyncOperation)
+	op.Timeouts = NewTimeouts()
+	return op
+}
 
 // def validate
-//   super
+func (op *OpAsyncOperation) Validate() {
+	//   super
 
-//   check :kind, type: String
-//   check :path, type: String
-//   check :base_url, type: String
-//   check :wait_ms, type: Integer
+	if op.Timeouts == nil {
+		op.Timeouts = NewTimeouts()
+	}
+	op.Timeouts.Validate()
 
-//   check :full_url, type: String
+	//   check :kind, type: String
+	//   check :path, type: String
+	//   check :base_url, type: String
+	//   check :wait_ms, type: Integer
 
-//   conflicts %i[base_url full_url]
-// end
+	//   check :full_url, type: String
+
+	// conflicts %i[base_url full_url]
+}
 
 // Represents the results of an Operation request
 type OpAsyncResult struct {

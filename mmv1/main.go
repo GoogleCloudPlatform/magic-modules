@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -103,8 +104,8 @@ func main() {
 			yamlValidator.Parse(productYaml, productApi)
 
 			// TODO Q1: remove these lines, which are for debugging
-			// prod, _ := json.Marshal(productApi)
-			// log.Printf("prod %s", string(prod))
+			prod, _ := json.Marshal(productApi)
+			log.Printf("prod %s", string(prod))
 
 			if !productApi.ExistsAtVersionOrLower(*version) {
 				log.Printf("%s does not have a '%s' version, skipping", productName, *version)
@@ -134,11 +135,11 @@ func main() {
 				resource := &api.Resource{}
 				yamlValidator.Parse(resourceYaml, resource)
 
+				resource.Properties = resource.AddLabelsRelatedFields(resource.PropertiesWithExcluded(), nil)
+
 				// TODO Q1: remove these lines, which are for debugging
 				// res, _ := json.Marshal(resource)
 				// log.Printf("resource %s", string(res))
-
-				// TODO Q1: add labels related fields
 
 				resource.Validate()
 				resources = append(resources, resource)
@@ -152,8 +153,11 @@ func main() {
 				return resources[i].Name < resources[j].Name
 			})
 
-			productApi.Objects = resources
+			// productApi.Objects = resources
 			productApi.Validate()
+
+			prod1, _ := json.Marshal(productApi)
+			log.Printf("prod1 %s", string(prod1))
 
 			// TODO Q2: set other providers via flag
 			providerToGenerate := provider.NewTerraform(productApi, *version)

@@ -223,6 +223,12 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
           resource.properties_with_excluded, nil
         )
         resource.validate
+
+        if product_name == "products/datafusion" && resource.name == "Instance"
+          Google::LOGGER.info \
+          "#{resource.name} #{resource}"
+        end
+
         resources.push(resource)
       rescue StandardError => e
         Google::LOGGER.error "Failed to compile using override #{override_path}: #{e}"
@@ -234,6 +240,11 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
   end
 
   product_api&.validate
+
+  if product_name == "products/datafusion"
+    Google::LOGGER.info \
+    "#{product_name} #{product_api}"
+  end
 
   if force_provider.nil?
     provider = \

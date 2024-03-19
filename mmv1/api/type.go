@@ -21,10 +21,6 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 )
 
-// require 'api/object'
-// require 'google/string_utils'
-// require 'provider/terraform/validation'
-
 // Represents a property type
 type Type struct {
 	NamedObject `yaml:",inline"`
@@ -210,6 +206,11 @@ type Type struct {
 	// A description of the key's format. Used in Terraform to describe
 	// the field in documentation.
 	KeyDescription string `yaml:"key_description`
+
+	// ====================
+	// KeyValuePairs Fields
+	// ====================
+	IgnoreWrite bool `yaml:"ignore_write`
 
 	// ====================
 	// Schema Modifications
@@ -878,10 +879,85 @@ func (t *Type) RootProperties() []*Type {
 //   end
 // end
 
-// // An array of string -> string key -> value pairs, such as labels.
-// // While this is technically a map, it's split out because it's a much
-// // simpler property to generate and means we can avoid conditional logic
-// // in Map.
+// An array of string -> string key -> value pairs, such as labels.
+// While this is technically a map, it's split out because it's a much
+// simpler property to generate and means we can avoid conditional logic
+// in Map.
+type KeyValuePairs struct {
+	pType       string
+	name        string
+	output      bool
+	apiName     string
+	description string
+	minVersion  string
+	updateVerb  string
+	updateUrl   string
+	immutable   bool
+	ignoreWrite bool
+}
+
+func NewProperty(name, apiName string, options []func(*Type)) *Type {
+	p := &Type{
+		NamedObject: NamedObject{
+			Name:    name,
+			ApiName: apiName,
+		},
+	}
+
+	for _, option := range options {
+		option(p)
+	}
+	return p
+}
+
+func propertyWithType(t string) func(*Type) {
+	return func(p *Type) {
+		p.Type = t
+	}
+}
+
+func propertyWithOutput(output bool) func(*Type) {
+	return func(p *Type) {
+		p.Output = output
+	}
+}
+
+func propertyWithDescription(description string) func(*Type) {
+	return func(p *Type) {
+		p.Description = description
+	}
+}
+
+func propertyWithMinVersion(minVersion string) func(*Type) {
+	return func(p *Type) {
+		p.MinVersion = minVersion
+	}
+}
+
+func propertyWithUpdateVerb(updateVerb string) func(*Type) {
+	return func(p *Type) {
+		p.UpdateVerb = updateVerb
+	}
+}
+
+func propertyWithUpdateUrl(updateUrl string) func(*Type) {
+	return func(p *Type) {
+		p.UpdateUrl = updateUrl
+	}
+}
+
+func propertyWithImmutable(immutable bool) func(*Type) {
+	return func(p *Type) {
+		p.Immutable = immutable
+	}
+}
+
+func propertyWithIgnoreWrite(ignoreWrite bool) func(*Type) {
+	return func(p *Type) {
+		p.IgnoreWrite = ignoreWrite
+	}
+}
+
 // class KeyValuePairs < Composite
 //   // Ignore writing the "effective_labels" and "effective_annotations" fields to API.
 //   ignore_write
@@ -951,10 +1027,10 @@ func (t *Type) RootProperties() []*Type {
 //     end
 //   end
 
-//   func (t *Type) field_min_version
-//     @min_version
-//   end
-// end
+// def field_min_version
+func (t Type) fieldMinVersion() string {
+	return t.MinVersion
+}
 
 // // An array of string -> string key -> value pairs used specifically for the "labels" field.
 // // The field name with this type should be "labels" literally.

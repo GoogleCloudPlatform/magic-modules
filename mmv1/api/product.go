@@ -22,12 +22,6 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-// require 'api/object'
-// require 'api/product/version'
-// require 'google/logger'
-// require 'compile/core'
-// require 'json'
-
 // Represents a product to be managed
 type Product struct {
 	NamedObject `yaml:",inline"`
@@ -83,6 +77,11 @@ func (p *Product) Validate() {
 
 	p.SetApiName()
 	p.SetDisplayName()
+
+	if p.Async == nil {
+		p.Async = NewOpAsync()
+	}
+	p.Async.Validate()
 }
 
 // def validate
@@ -113,7 +112,9 @@ func (p *Product) Validate() {
 
 func (p *Product) SetApiName() {
 	// The name of the product's API; "compute", "accesscontextmanager"
-	p.ApiName = strings.ToLower(p.Name)
+	if p.ApiName == "" {
+		p.ApiName = strings.ToLower(p.Name)
+	}
 }
 
 // The product full name is the "display name" in string form intended for
