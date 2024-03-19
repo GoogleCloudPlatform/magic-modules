@@ -110,30 +110,20 @@ class SweeperTests {
         val project = googleCloudRootProject(testContextParameters())
 
         // Find GA nightly test project's service sweeper
-        val gaNightlyTestProject = getSubProject(project, gaProjectName, nightlyTestsProjectName)
-        val sweeperGa: BuildType? = gaNightlyTestProject!!.buildTypes.find { p-> p.name == ServiceSweeperName}
-        if (sweeperGa == null) {
-            Assert.fail("Could not find the sweeper build in the Google (GA) Nightly Test project")
-        }
+        val gaNightlyTests: Project = getSubProject(project, gaProjectName, nightlyTestsProjectName)
+        val sweeperGa: BuildType = getBuildFromProject(gaNightlyTests, ServiceSweeperName)
 
         // Find Beta nightly test project's service sweeper
-        val betaNightlyTestProject = getSubProject(project, betaProjectName, nightlyTestsProjectName)
-        val sweeperBeta: BuildType? = betaNightlyTestProject!!.buildTypes.find { p-> p.name == ServiceSweeperName}
-        if (sweeperBeta == null) {
-            Assert.fail("Could not find the sweeper build in the Google (Beta) Nightly Test project")
-        }
+        val betaNightlyTests : Project = getSubProject(project, betaProjectName, nightlyTestsProjectName)
+        val sweeperBeta: BuildType = getBuildFromProject(betaNightlyTests, ServiceSweeperName)
 
         // Find Project sweeper project's build
-        val projectSweeperProject: Project? =  project.subProjects.find { p->  p.name == projectSweeperProjectName}
+        val projectSweeperProject : Project? =  project.subProjects.find { p->  p.name == projectSweeperProjectName}
         if (projectSweeperProject == null) {
             Assert.fail("Could not find the Project Sweeper project")
         }
-        val projectSweeper: BuildType? = projectSweeperProject!!.buildTypes.find { p-> p.name == ProjectSweeperName}
-        if (projectSweeper == null) {
-            Assert.fail("Could not find the sweeper build in the Google (Beta) Nightly Test project")
-        }
-
-
+        val projectSweeper: BuildType = getBuildFromProject(projectSweeperProject!!, ProjectSweeperName)
+        
         // Check only one schedule trigger is on the builds in question
         assertTrue(sweeperGa!!.triggers.items.size == 1)
         assertTrue(sweeperBeta!!.triggers.items.size == 1)
