@@ -56,9 +56,14 @@ func SetDataSourceLabels(d *schema.ResourceData) error {
 }
 
 func SetLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
-	raw := d.Get("labels")
+	labelKey := "labels"
+	raw := d.Get(labelKey)
 	if raw == nil {
-		return nil
+		if d.Get("user_labels") {
+			labelKey = "user_labels"
+		} else {
+			return nil
+		}
 	}
 
 	if d.Get("terraform_labels") == nil {
@@ -71,7 +76,7 @@ func SetLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) 
 
 	// If "labels" field is computed, set "terraform_labels" and "effective_labels" to computed.
 	// https://github.com/hashicorp/terraform-provider-google/issues/16217
-	if !d.GetRawPlan().GetAttr("labels").IsWhollyKnown() {
+	if !d.GetRawPlan().GetAttr(labelKey).IsWhollyKnown() {
 		if err := d.SetNewComputed("terraform_labels"); err != nil {
 			return fmt.Errorf("error setting terraform_labels to computed: %w", err)
 		}
