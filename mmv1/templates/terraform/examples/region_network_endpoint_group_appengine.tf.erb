@@ -1,17 +1,61 @@
 // App Engine Example
+resource "google_project" "my_project" {
+ name = "<%= ctx[:vars]['project'] %>"
+ project_id = "<%= ctx[:vars]['project'] %>"
+ org_id = "<%= ctx[:test_env_vars]['org_id'] %>"
+ billing_account = "<%= ctx[:test_env_vars]['billing_account'] %>"
+}
+
+resource "google_app_engine_application" "app" {
+  project     = google_project.my_project.project_id
+  location_id = "us-central"
+}
+
+resource "google_project_service" "service" {
+  project = google_project.my_project.project_id
+  service = "appengineflex.googleapis.com"
+
+  disable_dependent_services = false
+}
+
+resource "google_service_account" "custom_service_account" {
+  project      = google_project_service.service.project
+  account_id   = "<%= ctx[:vars]['account_id'] %>"
+  display_name = "Custom Service Account"
+}
+
+resource "google_project_iam_member" "gae_api" {
+  project = google_project_service.service.project
+  role    = "roles/compute.networkUser"
+  member  = "serviceAccount:${google_service_account.custom_service_account.email}"
+}
+
+resource "google_project_iam_member" "logs_writer" {
+  project = google_project_service.service.project
+  role    = "roles/logging.logWriter"
+  member  = "serviceAccount:${google_service_account.custom_service_account.email}"
+}
+
+resource "google_project_iam_member" "storage_viewer" {
+  project = google_project_service.service.project
+  role    = "roles/storage.objectViewer"
+  member  = "serviceAccount:${google_service_account.custom_service_account.email}"
+}
+
 resource "google_compute_region_network_endpoint_group" "<%= ctx[:primary_resource_id] %>" {
   name                  = "<%= ctx[:vars]['neg_name'] %>"
   network_endpoint_type = "SERVERLESS"
   region                = "us-central1"
   app_engine {
-    service = google_app_engine_flexible_app_version.<%= ctx[:primary_resource_id] %>.service
-    version = google_app_engine_flexible_app_version.<%= ctx[:primary_resource_id] %>.version_id
+    service = google_app_engine_flexible_app_version.<%= ctx[:vars]['app_version_name'] %>.service
+    version = google_app_engine_flexible_app_version.<%= ctx[:vars]['app_version_name'] %>.version_id
   }
 }
 
-resource "google_app_engine_flexible_app_version" "<%= ctx[:primary_resource_id] %>" {
+resource "google_app_engine_flexible_app_version" "<%= ctx[:vars]['app_version_name'] %>" {
   version_id = "v1"
-  service    = "appengine-network-endpoint-group"
+  project    = google_project_iam_member.gae_api.project
+  service    = "default"
   runtime    = "nodejs"
 
   entrypoint {
@@ -20,7 +64,7 @@ resource "google_app_engine_flexible_app_version" "<%= ctx[:primary_resource_id]
 
   deployment {
     zip {
-      source_url = "https://storage.googleapis.com/${google_storage_bucket.<%= ctx[:primary_resource_id] %>.name}/${google_storage_bucket_object.<%= ctx[:primary_resource_id] %>.name}"
+      source_url = "https://storage.googleapis.com/${google_storage_bucket.bucket.name}/${google_storage_bucket_object.object.name}"
     }
   }
 
@@ -55,16 +99,19 @@ resource "google_app_engine_flexible_app_version" "<%= ctx[:primary_resource_id]
     }
   }
 
-  delete_service_on_destroy = true
+  noop_on_destroy = true
+  service_account = google_service_account.custom_service_account.email
 }
 
-resource "google_storage_bucket" "<%= ctx[:primary_resource_id] %>" {
-  name     = "<%= ctx[:vars]['neg_name'] %>"
+resource "google_storage_bucket" "bucket" {
+  project  = google_project.my_project.project_id
+  name     = "<%= ctx[:vars]['bucket_name'] %>"
   location = "US"
+  uniform_bucket_level_access = true
 }
 
-resource "google_storage_bucket_object" "<%= ctx[:primary_resource_id] %>" {
+resource "google_storage_bucket_object" "object" {
   name   = "hello-world.zip"
-  bucket = google_storage_bucket.<%= ctx[:primary_resource_id] %>.name
+  bucket = google_storage_bucket.bucket.name
   source = "./test-fixtures/hello-world.zip"
 }
