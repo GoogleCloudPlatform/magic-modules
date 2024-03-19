@@ -110,7 +110,6 @@ properties:
                   name: event
                   description: The type of event that triggers a Pub/Sub. At most one PubSubNotification per EventType is permitted.
                   values:
-                    - :EVENT_TYPE_UNSPECIFIED
                     - :NEW_PROFILE
                     - :CHANGED_PROFILE
                     - :SCORE_INCREASED
@@ -127,7 +126,6 @@ properties:
                           name: logicalOperator
                           description: The operator to apply to the collection of conditions
                           values:
-                            - :LOGICAL_OPERATOR_UNSPECIFIED
                             - :OR
                             - :AND
                         - !ruby/object:Api::Type::NestedObject
@@ -137,21 +135,18 @@ properties:
                               name: minimumRiskScore
                               description: The minimum data risk score that triggers the condition.
                               values:
-                                - :PROFILE_SCORE_BUCKET_UNSPECIFIED
                                 - :HIGH
                                 - :MEDIUM_OR_HIGH
                             - !ruby/object:Api::Type::Enum
                               name: minimumSensitivityScore
                               description: The minimum sensitivity level that triggers the condition.
                               values:
-                                - :PROFILE_SCORE_BUCKET_UNSPECIFIED
                                 - :HIGH
                                 - :MEDIUM_OR_HIGH
                 - !ruby/object:Api::Type::Enum
                   name: detailOfMessage
                   description: How much data to include in the pub/sub message.
                   values:
-                    - :DETAIL_LEVEL_UNSPECIFIED
                     - :TABLE_PROFILE
                     - :RESOURCE_NAME
       - !ruby/object:Api::Type::Array
@@ -227,14 +222,12 @@ properties:
                               This field only has a name and description because of MM
                               limitations. It should not appear in downstreams.
                             values:
-                              - :BIG_QUERY_TABLE_TYPE_UNSPECIFIED
                               - :BIG_QUERY_TABLE_TYPE_TABLE
                               - :BIG_QUERY_TABLE_TYPE_EXTERNAL_BIG_LAKE
                     - !ruby/object:Api::Type::Enum
                       name: typeCollection
                       description: Restrict discovery to categories of table types. Currently view, materialized view, snapshot and non-biglake external tables are supported.
                       values:
-                        - :BIG_QUERY_COLLECTION_UNSPECIFIED
                         - :BIG_QUERY_COLLECTION_ALL_TYPES
                         - :BIG_QUERY_COLLECTION_ONLY_SUPPORTED_TYPES
                 - !ruby/object:Api::Type::NestedObject
@@ -254,14 +247,12 @@ properties:
                               This field only has a name and description because of MM
                               limitations. It should not appear in downstreams.
                             values:
-                              - :SCHEMA_MODIFICATION_UNSPECIFIED
                               - :SCHEMA_NEW_COLUMN
                               - :SCHEMA_REMOVED_COLUMNS
                         - !ruby/object:Api::Type::Enum
                           name: 'frequency'
                           description: How frequently profiles may be updated when schemas are modified. Default to monthly
                           values:
-                            - :UPDATE_FREQUENCY_UNSPECIFIED
                             - :UPDATE_FREQUENCY_NEVER
                             - :UPDATE_FREQUENCY_DAILY
                             - :UPDATE_FREQUENCY_MONTHLY
@@ -278,13 +269,11 @@ properties:
                               This field only has a name and description because of MM
                               limitations. It should not appear in downstreams.
                             values:
-                              - TABLE_MODIFICATION_UNSPECIFIED
                               - TABLE_MODIFIED_TIMESTAMP
                         - !ruby/object:Api::Type::Enum
                           name: 'frequency'
                           description: 'How frequently data profiles can be updated when tables are modified. Defaults to never.'
                           values:
-                            - :UPDATE_FREQUENCY_UNSPECIFIED
                             - :UPDATE_FREQUENCY_NEVER
                             - :UPDATE_FREQUENCY_DAILY
                             - :UPDATE_FREQUENCY_MONTHLY
@@ -331,6 +320,5 @@ properties:
         name: status
         description: Required. A status for this configuration
         values:
-          - :STATUS_UNSPECIFIED
           - :RUNNING
           - :PAUSED
