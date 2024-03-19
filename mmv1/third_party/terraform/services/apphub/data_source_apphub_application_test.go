@@ -21,6 +21,9 @@ func TestDataSourceApphubApplication_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testDataSourceApphubApplication_basic(context),
+				Check: resource.ComposeTestCheckFunc(
+					acctest.CheckDataSourceStateMatchesResourceState("data.google_apphub_application.example_data", "google_apphub_application.example"),
+				),
 			},
 		},
 	})
