@@ -41,7 +41,7 @@ func TestAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_up
 				ResourceName:            "google_cloud_quotas_quota_preference.my_preference",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"parent", "quota_preference_id", "ignore_safety_checks", "contact_email", "justification", "quota_config.0.annotation"},
+				ImportStateVerifyIgnore: []string{"parent", "quota_preference_id", "ignore_safety_checks", "contact_email", "justification", "quota_config.0.annotations"},
 			},
 			{
 				Config: testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_decreaseQuota(context),
@@ -50,7 +50,7 @@ func TestAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_up
 				ResourceName:            "google_cloud_quotas_quota_preference.my_preference",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"parent", "quota_preference_id", "ignore_safety_checks", "contact_email", "justification", "quota_config.0.annotation"},
+				ImportStateVerifyIgnore: []string{"parent", "quota_preference_id", "ignore_safety_checks", "contact_email", "justification", "quota_config.0.annotations"},
 			},
 		},
 	})
