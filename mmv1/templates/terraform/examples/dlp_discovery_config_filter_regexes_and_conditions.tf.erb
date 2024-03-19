@@ -1,0 +1,43 @@
+resource "google_data_loss_prevention_discovery_config" "<%= ctx[:primary_resource_id] %>" {
+	parent = "projects/<%= ctx[:test_env_vars]['project'] %>"
+
+    targets {
+        big_query_target {
+            filter {
+                tables {
+                    include_regexes {
+                        patterns {
+                            project_id_regex = ".*"
+                            dataset_id_regex = ".*"
+                            table_id_regex = ".*"
+                        }
+                    }
+                }
+            }
+            conditions {
+                created_after {
+                    seconds = 1
+                    nanos = 1
+                }
+                types {
+                    types = ["BIG_QUERY_TABLE_TYPE_TABLE", "BIG_QUERY_TABLE_TYPE_EXTERNAL_BIG_LAKE"]
+                }
+                or_conditions {
+                    min_row_count = 10
+                    min_age {
+                        seconds = 1
+                        nanos = 1
+                    }
+                }
+            }
+        }
+    }
+    targets {
+        big_query_target {
+            filter {
+                other_tables {}
+            }
+        }
+    }
+    inspect_templates = ["FAKE"]    
+}

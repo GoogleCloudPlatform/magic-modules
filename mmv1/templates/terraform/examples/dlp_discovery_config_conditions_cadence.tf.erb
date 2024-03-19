@@ -1,0 +1,31 @@
+resource "google_data_loss_prevention_discovery_config" "<%= ctx[:primary_resource_id] %>" {
+	parent = "projects/<%= ctx[:test_env_vars]['project'] %>"
+
+    targets {
+        big_query_target {
+            filter {
+                other_tables {}
+            }
+            conditions {
+                type_collection = "BIG_QUERY_COLLECTION_ALL_TYPES"
+            }
+            cadence {
+                schema_modified_cadence {
+                    types = ["SCHEMA_NEW_COLUMNS"]
+                    frequency = "UPDATE_FREQUENCY_DAILY"
+                }
+                table_modified_cadence {
+                    types = ["TABLE_MODIFIED_TIMESTAMP"]
+                    frequency = "UPDATE_FREQUENCY_DAILY"
+                }
+            }
+        }
+    }
+    org_config {
+        project_id = "<%= ctx[:test_env_vars]['project'] %>"
+        location {
+            organization_id = "<%= ctx[:test_env_vars]['organization'] %>"
+        }
+    }
+    inspect_templates = ["FAKE"]    
+}
