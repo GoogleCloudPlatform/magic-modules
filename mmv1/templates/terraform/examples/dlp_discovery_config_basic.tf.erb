@@ -1,0 +1,13 @@
+resource "google_data_loss_prevention_discovery_config" "<%= ctx[:primary_resource_id] %>" {
+	parent = "projects/<%= ctx[:test_env_vars]['project'] %>"
+
+    targets {
+        big_query_target {
+            filter {
+                other_tables {}
+            }
+        }
+
+    }
+    inspect_templates = ["FAKE"]    
+}
