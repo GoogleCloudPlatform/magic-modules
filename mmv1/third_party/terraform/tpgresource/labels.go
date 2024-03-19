@@ -61,6 +61,7 @@ func SetLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) 
 	if raw == nil {
 		if d.Get("user_labels") {
 			labelKey = "user_labels"
+			raw := d.Get(labelKey)
 		} else {
 			return nil
 		}
