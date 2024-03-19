@@ -53,14 +53,8 @@ func TestAccNetworkSecurityFirewallEndpoints_basic(t *testing.T) {
 
 func testAccNetworkSecurityFirewallEndpoints_basic(orgId string, billingProjectId string, randomSuffix string) string {
 	return fmt.Sprintf(`
-provider "google-beta" {
-  alias                 = "user-project-override"
-  user_project_override = true
-  billing_project = "%[3]s"
-}
-
 resource "google_network_security_firewall_endpoint" "foobar" {
-  provider = google-beta.user-project-override
+  provider = google-beta
 
   name     = "tf-test-my-firewall-endpoint%[1]s"
   parent   = "organizations/%[2]s"
@@ -76,14 +70,8 @@ resource "google_network_security_firewall_endpoint" "foobar" {
 
 func testAccNetworkSecurityFirewallEndpoints_update(orgId string, billingProjectId string, randomSuffix string) string {
 	return fmt.Sprintf(`
-provider "google-beta" {
-  alias                 = "user-project-override"
-  user_project_override = true
-  billing_project = "%[3]s"
-}
-
 resource "google_network_security_firewall_endpoint" "foobar" {
-  provider = google-beta.user-project-override
+  provider = google-beta
 
   name     = "tf-test-my-firewall-endpoint%[1]s"
   parent   = "organizations/%[2]s"
@@ -108,8 +96,6 @@ func testAccCheckNetworkSecurityFirewallEndpointDestroyProducer(t *testing.T) fu
 			}
 
 			config := acctest.GoogleProviderConfig(t)
-			config.UserProjectOverride = true
-			config.BillingProject = envvar.GetTestProjectFromEnv()
 
 			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{NetworkSecurityBasePath}}{{parent}}/locations/{{location}}/firewallEndpoints/{{name}}")
 			if err != nil {
