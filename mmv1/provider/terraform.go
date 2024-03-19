@@ -14,9 +14,15 @@
 package provider
 
 import (
+	"fmt"
 	"log"
+	"os"
+	"path"
+	"strings"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 )
 
 const TERRAFORM_PROVIDER_GA = "github.com/hashicorp/terraform-provider-google"
@@ -32,52 +38,159 @@ type Terraform struct {
 	IAMResourceCount int
 
 	ResourcesForVersion []api.Resource
+
+	TargetVersionName string
+
+	Version product.Version
+
+	Product api.Product
 }
 
-func NewTerraform(product *api.Product) *Terraform {
-	t := Terraform{ResourceCount: 0, IAMResourceCount: 0}
+func NewTerraform(product *api.Product, versionName string) *Terraform {
+	t := Terraform{
+		ResourceCount:     0,
+		IAMResourceCount:  0,
+		Product:           *product,
+		TargetVersionName: versionName,
+		Version:           *product.VersionObjOrClosest(versionName)}
 
-	// TODO Q1
-	//      @target_version_name = version_name
-	//
-	//      @version = @api.version_obj_or_closest(version_name)
-	//      @api.set_properties_based_on_version(@version)
+	t.Product.SetPropertiesBasedOnVersion(&t.Version)
 
 	return &t
 }
 
-//
-//    # Main entry point for generation.
-//    def generate(output_folder, types, product_path, dump_yaml, generate_code, generate_docs)
-
-//    end
-
 func (t *Terraform) Generate(outputFolder, productPath string, generateCode, generateDocs bool) {
-	log.Printf("Generate function called with %s %s %t %t", outputFolder, productPath, generateCode, generateDocs)
+	if err := os.MkdirAll(outputFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating output directory %v: %v", outputFolder, err))
+	}
 
-	// TODO Q1
-	//      generate_objects(output_folder, types, generate_code, generate_docs)
+	t.GenerateObjects(outputFolder, generateCode, generateDocs)
+
+	if generateCode {
+		t.GenerateOperation(outputFolder)
+	}
+}
+
+func (t *Terraform) GenerateObjects(outputFolder string, generateCode, generateDocs bool) {
+	for _, object := range t.Product.Objects {
+		// 		TODO Q2: Exclude objects
+		//        if !types.empty? && !types.include?(object.name)
+		//          Google::LOGGER.info "Excluding #{object.name} per user request"
+		//        elsif types.empty? && object.exclude
+		//          Google::LOGGER.info "Excluding #{object.name} per API catalog"
+		//        elsif types.empty? && object.not_in_version?(@version)
+		//          Google::LOGGER.info "Excluding #{object.name} per API version"
+		//        else
+		//          Google::LOGGER.info "Generating #{object.name}"
+		//          # exclude_if_not_in_version must be called in order to filter out
+		//          # beta properties that are nested within GA resources
+		//          object.exclude_if_not_in_version!(@version)
+		//
+		//          # Make object immutable.
+		//          object.freeze
+		//          object.all_user_properties.each(&:freeze)
+
+		t.GenerateObject(*object, outputFolder, t.TargetVersionName, generateCode, generateDocs)
+	}
+}
+
+func (t *Terraform) GenerateObject(object api.Resource, outputFolder, productPath string, generateCode, generateDocs bool) {
+
+	templateData := NewTemplateData(outputFolder, t.Version)
+
+	if !object.ExcludeResource {
+		log.Printf("Generating %s resource", object.Name)
+		t.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
+
+		if generateCode {
+			log.Printf("Generating %s tests", object.Name)
+			// TODO Q2
+			//	    generate_resource_tests(pwd, data.clone)
+			//	    generate_resource_sweepers(pwd, data.clone)
+		}
+	}
+
+	// TODO Q2
+	//	# if iam_policy is not defined or excluded, don't generate it
+	//	return if object.iam_policy.nil? || object.iam_policy.exclude
 	//
-	//      FileUtils.mkpath output_folder
-	//      pwd = Dir.pwd
-	//      if generate_code
-	//        Dir.chdir output_folder
+	//	FileUtils.mkpath output_folder
+	//	Dir.chdir output_folder
+	//	Google::LOGGER.debug "Generating #{object.name} IAM policy"
+	//	generate_iam_policy(pwd, data.clone, generate_code, generate_docs)
+	//	Dir.chdir pwd
 	//
-	//        generate_operation(pwd, output_folder, types)
-	//        Dir.chdir pwd
-	//      end
+	// end
+}
+
+func (t *Terraform) GenerateResource(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
+	if generateCode {
+		productName := t.Product.ApiName
+		targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
+
+		if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+			log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+		}
+
+		targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s.go", t.FullResourceName(object)))
+
+		templateData.GenerateResourceFile(targetFilePath, object)
+	}
+
+	if generateDocs {
+		templateData.GenerateDocumentationFile(outputFolder, object)
+	}
+}
+
+func (t *Terraform) GenerateOperation(outputFolder string) {
+
+	// TODO Q2
+	//    def generate_operation(pwd, output_folder, _types)
+	//      return if @api.objects.select(&:autogen_async).empty?
 	//
-	//      # Write a file with the final version of the api, after overrides
-	//      # have been applied.
-	//      return unless dump_yaml
+	//      product_name = @api.api_name
+	//      product_name_underscore = @api.name.underscore
+	//      data = build_object_data(pwd, @api.objects.first, output_folder, @target_version_name)
 	//
-	//      raise 'Path to output the final yaml was not specified.' \
-	//        if product_path.nil? || product_path == ''
+	//      data.object = @api.objects.select(&:autogen_async).first
 	//
-	//      File.open("#{product_path}/final_api.yaml", 'w') do |file|
-	//        file.write("# This is a generated file, its contents will be overwritten.\n")
-	//        file.write(YAML.dump(@api))
-	//      end
+	//      data.async = data.object.async
+	//      target_folder = File.join(folder_name(data.version), 'services', product_name)
+	//      FileUtils.mkpath target_folder
+	//      data.generate(pwd,
+	//                    'templates/terraform/operation.go.erb',
+	//                    "#{target_folder}/#{product_name_underscore}_operation.go",
+	//                    self)
+	//    end
+}
+
+func (t *Terraform) FolderName() string {
+	if t.Version.Name == "ga" {
+		return "google"
+	}
+	return "google-beta"
+}
+
+func (t *Terraform) FullResourceName(object api.Resource) string {
+	if object.LegacyName != "" {
+		return strings.Replace(object.LegacyName, "google_", "", 1)
+	}
+
+	var name string
+	if object.FilenameOverride != "" {
+		name = object.FilenameOverride
+	} else {
+		name = google.Underscore(object.Name)
+	}
+
+	var productName string
+	if t.Product.LegacyName != "" {
+		productName = t.Product.LegacyName
+	} else {
+		productName = google.Underscore(t.Product.Name)
+	}
+
+	return fmt.Sprintf("%s_%s", productName, name)
 }
 
 //
@@ -323,66 +436,6 @@ func (t *Terraform) Generate(outputFolder, productPath string, generateCode, gen
 //        end
 //      end
 //      services
-//    end
-//
-//    def generate_objects(output_folder, types, generate_code, generate_docs)
-//      (@api.objects || []).each do |object|
-//        if !types.empty? && !types.include?(object.name)
-//          Google::LOGGER.info "Excluding #{object.name} per user request"
-//        elsif types.empty? && object.exclude
-//          Google::LOGGER.info "Excluding #{object.name} per API catalog"
-//        elsif types.empty? && object.not_in_version?(@version)
-//          Google::LOGGER.info "Excluding #{object.name} per API version"
-//        else
-//          Google::LOGGER.info "Generating #{object.name}"
-//          # exclude_if_not_in_version must be called in order to filter out
-//          # beta properties that are nested within GA resources
-//          object.exclude_if_not_in_version!(@version)
-//
-//          # Make object immutable.
-//          object.freeze
-//          object.all_user_properties.each(&:freeze)
-//
-//          generate_object object, output_folder, @target_version_name, generate_code, generate_docs
-//        end
-//        # Uncomment for go YAML
-//        # generate_object_modified object, output_folder, @target_version_name
-//      end
-//    end
-//
-//    def generate_object(object, output_folder, version_name, generate_code, generate_docs)
-//      pwd = Dir.pwd
-//      data = build_object_data(pwd, object, output_folder, version_name)
-//      unless object.exclude_resource
-//        FileUtils.mkpath output_folder
-//        Dir.chdir output_folder
-//        Google::LOGGER.debug "Generating #{object.name} resource"
-//        generate_resource(pwd, data.clone, generate_code, generate_docs)
-//        if generate_code
-//          Google::LOGGER.debug "Generating #{object.name} tests"
-//          generate_resource_tests(pwd, data.clone)
-//          generate_resource_sweepers(pwd, data.clone)
-//        end
-//        Dir.chdir pwd
-//      end
-//      # if iam_policy is not defined or excluded, don't generate it
-//      return if object.iam_policy.nil? || object.iam_policy.exclude
-//
-//      FileUtils.mkpath output_folder
-//      Dir.chdir output_folder
-//      Google::LOGGER.debug "Generating #{object.name} IAM policy"
-//      generate_iam_policy(pwd, data.clone, generate_code, generate_docs)
-//      Dir.chdir pwd
-//    end
-//
-//    def generate_object_modified(object, output_folder, version_name)
-//      pwd = Dir.pwd
-//      data = build_object_data(pwd, object, output_folder, version_name)
-//      FileUtils.mkpath output_folder
-//      Dir.chdir output_folder
-//      Google::LOGGER.debug "Generating #{object.name} rewrite yaml"
-//      generate_newyaml(pwd, data.clone)
-//      Dir.chdir pwd
 //    end
 //
 //    def generate_newyaml(pwd, data)
@@ -720,25 +773,6 @@ func (t *Terraform) Generate(outputFolder, productPath string, generateCode, gen
 //      version == 'ga' ? 'google' : "google-#{version}"
 //    end
 //
-//    # This function uses the resource.erb template to create one file
-//    # per resource. The resource.erb template forms the basis of a single
-//    # GCP Resource on Terraform.
-//    def generate_resource(pwd, data, generate_code, generate_docs)
-//      if generate_code
-//        # @api.api_name is the service folder name
-//        product_name = @api.api_name
-//        target_folder = File.join(folder_name(data.version), 'services', product_name)
-//        FileUtils.mkpath target_folder
-//        data.generate(pwd,
-//                      '/templates/terraform/resource.erb',
-//                      "#{target_folder}/resource_#{full_resource_name(data)}.go",
-//                      self)
-//      end
-//
-//      return unless generate_docs
-//
-//      generate_documentation(pwd, data)
-//    end
 //
 //    def generate_documentation(pwd, data)
 //      target_folder = data.output_folder
@@ -783,24 +817,6 @@ func (t *Terraform) Generate(outputFolder, productPath string, generateCode, gen
 //      data.generate(pwd,
 //                    'templates/terraform/sweeper_file.go.erb',
 //                    file_name,
-//                    self)
-//    end
-//
-//    def generate_operation(pwd, output_folder, _types)
-//      return if @api.objects.select(&:autogen_async).empty?
-//
-//      product_name = @api.api_name
-//      product_name_underscore = @api.name.underscore
-//      data = build_object_data(pwd, @api.objects.first, output_folder, @target_version_name)
-//
-//      data.object = @api.objects.select(&:autogen_async).first
-//
-//      data.async = data.object.async
-//      target_folder = File.join(folder_name(data.version), 'services', product_name)
-//      FileUtils.mkpath target_folder
-//      data.generate(pwd,
-//                    'templates/terraform/operation.go.erb',
-//                    "#{target_folder}/#{product_name_underscore}_operation.go",
 //                    self)
 //    end
 //
@@ -850,15 +866,6 @@ func (t *Terraform) Generate(outputFolder, productPath string, generateCode, gen
 //      data.generate(pwd, 'templates/terraform/datasource_iam.html.markdown.erb', filepath, self)
 //    end
 //
-//    def build_object_data(_pwd, object, output_folder, version)
-//      TerraformProductFileTemplate.file_for_resource(
-//        output_folder,
-//        object,
-//        version,
-//        build_env
-//      )
-//    end
-//
 //    def extract_identifiers(url)
 //      url.scan(/\{\{%?(\w+)\}\}/).flatten
 //    end
@@ -870,15 +877,6 @@ func (t *Terraform) Generate(outputFolder, productPath string, generateCode, gen
 //      object.id_format || object.self_link_uri
 //    end
 //
-//    def full_resource_name(data)
-//      if data.object.legacy_name
-//        data.object.legacy_name.sub(/^google_/, '')
-//      else
-//        name = data.object.filename_override || data.object.name.underscore
-//        product_name = data.product.legacy_name || data.product.name.underscore
-//        "#{product_name}_#{name}"
-//      end
-//    end
 //
 //    # Returns the extension for DCL packages for the given version. This is needed
 //    # as the DCL uses "alpha" for preview resources, while we use "private"

@@ -20,23 +20,15 @@ import (
 
 // // Helper class to process and mutate strings.
 // class StringUtils
-//   // Converts string from camel case to underscore
-//   def self.underscore(source)
-//     source.gsub(/::/, '/')
-//           .gsub(/([A-Z]+)([A-Z][a-z])/, '\1_\2')
-//           .gsub(/([a-z\d])([A-Z])/, '\1_\2')
-//           .tr('-', '_')
-//           .tr('.', '_')
-//           .downcase
-//   end
-
-//   // Converts from PascalCase to Space Separated
-//   def self.space_separated(source)
-//     tmp = source.gsub(/([A-Z]+)([A-Z][a-z])/, '\1 \2')
-//                 .gsub(/([a-z\d])([A-Z])/, '\1 \2')
-//                 .downcase
-//     tmp[0].upcase.concat(tmp[1..])
-//   end
+// Converts string from camel case to underscore
+func Underscore(source string) string {
+	tmp := regexp.MustCompile(`([A-Z]+)([A-Z][a-z])`).ReplaceAllString(source, "${1}_${2}")
+	tmp = regexp.MustCompile(`([a-z\d])([A-Z])`).ReplaceAllString(tmp, "${1}_${2}")
+	tmp = strings.Replace(tmp, "-", "_", 1)
+	tmp = strings.Replace(tmp, ".", "_", 1)
+	tmp = strings.ToLower(tmp)
+	return tmp
+}
 
 // Converts from PascalCase to Space Separated
 // For example, converts "AccessApproval" to "Access Approval"
