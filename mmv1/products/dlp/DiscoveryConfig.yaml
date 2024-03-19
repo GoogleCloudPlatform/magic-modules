@@ -33,6 +33,34 @@ examples:
     primary_resource_id: 'basic'
     test_env_vars:
       project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dlp_discovery_config_actions'
+    primary_resource_id: 'actions'
+    test_env_vars:
+      project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dlp_discovery_config_org_running'
+    primary_resource_id: 'org_running'
+    test_env_vars:
+      project: :PROJECT_NAME
+      organization: :ORG_ID
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dlp_discovery_config_org_folder_paused'
+    primary_resource_id: 'org_folder_paused'
+    test_env_vars:
+      project: :PROJECT_NAME
+      organization: :ORG_ID
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dlp_discovery_config_conditions_cadence'
+    primary_resource_id: 'conditions_cadence'
+    test_env_vars:
+      project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dlp_discovery_config_filter_regexes_and_conditions'
+    primary_resource_id: 'filter_regexes_and_conditions'
+    test_env_vars:
+      project: :PROJECT_NAME
+
 parameters:
   - !ruby/object:Api::Type::String
     name: 'parent'
