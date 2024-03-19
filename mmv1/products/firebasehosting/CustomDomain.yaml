@@ -126,7 +126,7 @@ virtual_fields:
 properties:
   - !ruby/object:Api::Type::String
     name: name
-    pattern: projects/{{project}}/sites/{{site_id}}/customDomains/{{custom_domain}}
+    
     description: |
       The fully-qualified name of the `CustomDomain`.
     output: true
