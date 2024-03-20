@@ -2,7 +2,7 @@ data "google_project" "test_project" {
 }
 
 resource "google_kms_key_ring" "keyring" {
-  name = "tf-test-keyring"
+  name     = "<%= ctx[:vars]['key_ring_name'] %>"
   location = "us-central1"
 }
 
