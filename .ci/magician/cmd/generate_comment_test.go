@@ -98,7 +98,6 @@ func TestExecGenerateComment(t *testing.T) {
 			{"/mock/dir/magic-modules/tools/missing-test-detector", "go", []string{"mod", "edit", "-replace", "google/provider/old=/mock/dir/tpgbold"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/tools/missing-test-detector", "go", []string{"mod", "tidy"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/tools/missing-test-detector", "go", []string{"run", ".", "-services-dir=/mock/dir/tpgb/google-beta/services"}, map[string]string(nil)},
-			{"/mock/dir/magic-modules", "git", []string{"diff", "HEAD", "origin/main", "tools/missing-test-detector"}, map[string]string(nil)},
 		},
 	} {
 		if actualCalls, ok := mr.Calls(method); !ok {
@@ -248,6 +247,60 @@ func TestFormatDiffComment(t *testing.T) {
 			for _, s := range tc.notExpectedStrings {
 				assert.NotContains(t, comment, s)
 			}
+		})
+	}
+}
+
+func TestPathChanged(t *testing.T) {
+	cases := map[string]struct {
+		path         string
+		changedFiles []string
+		want         bool
+	}{
+		"no changed files": {
+			path:         "path/to/folder/file.go",
+			changedFiles: []string{},
+			want:         false,
+		},
+		"path matches exactly": {
+			path:         "path/to/folder/file.go",
+			changedFiles: []string{"path/to/folder/file.go"},
+			want:         true,
+		},
+		"path matches files in a folder": {
+			path:         "path/to/folder/",
+			changedFiles: []string{"path/to/folder/file.go"},
+			want:         true,
+		},
+		"path matches partial folder name": {
+			path:         "path/to/folder",
+			changedFiles: []string{"path/to/folder2/file.go"},
+			want:         true,
+		},
+		"path matches second item in list": {
+			path:         "path/to/folder/",
+			changedFiles: []string{"path/to/folder2/file.go", "path/to/folder/file.go"},
+			want:         true,
+		},
+		"path doesn't match files in a different folder": {
+			path:         "path/to/folder/",
+			changedFiles: []string{"path/to/folder2/file.go"},
+			want:         false,
+		},
+		"path doesn't match multiple items": {
+			path:         "path/to/folder/",
+			changedFiles: []string{"path/to/folder2/file.go", "path/to/folder3"},
+			want:         false,
+		},
+	}
+
+	for tn, tc := range cases {
+		tc := tc
+		t.Run(tn, func(t *testing.T) {
+			t.Parallel()
+
+			got := pathChanged(tc.path, tc.changedFiles)
+			assert.Equal(t, tc.want, got)
 		})
 	}
 }

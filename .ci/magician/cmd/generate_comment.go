@@ -326,18 +326,21 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 		data.MissingTests = missingTests
 	}
 
-	// Run unit tests for missing test detector
-	if err = runMissingTestUnitTests(
-		mmLocalPath,
-		tpgbRepo.Path,
-		targetURL,
-		commitSha,
-		prNumber,
-		gh,
-		rnr,
-	); err != nil {
-		fmt.Println("Error running missing test detector unit tests: ", err)
-		errors["Other"] = append(errors["Other"], "Missing test detector unit tests failed to run.")
+	// Run unit tests for missing test detector (currently only for beta)
+	if pathChanged("tools/missing-test-detector", tpgbRepo.ChangedFiles) {
+		fmt.Printf("Found diffs in missing test detector:\n%s\nRunning tests.\n", diffs)
+		if err = runMissingTestUnitTests(
+			mmLocalPath,
+			tpgbRepo.Path,
+			targetURL,
+			commitSha,
+			prNumber,
+			gh,
+			rnr,
+		); err != nil {
+			fmt.Println("Error running missing test detector unit tests: ", err)
+			errors["Other"] = append(errors["Other"], "Missing test detector unit tests failed to run.")
+		}
 	}
 
 	// Add errors to data as an ordered list
@@ -523,21 +526,6 @@ func updatePackageName(name, path string, rnr ExecRunner) error {
 // Run unit tests for the missing test detector.
 // Report results using Github API.
 func runMissingTestUnitTests(mmLocalPath, tpgbLocalPath, targetURL, commitSha string, prNumber int, gh GithubClient, rnr ExecRunner) error {
-	if err := rnr.PushDir(mmLocalPath); err != nil {
-		return err
-	}
-
-	diffs, err := rnr.Run("git", []string{"diff", "HEAD", "origin/main", "tools/missing-test-detector"}, nil)
-	if err != nil {
-		return err
-	}
-	if diffs == "" {
-		// Short-circuit if there are no changes to the missing test detector
-		return rnr.PopDir()
-	}
-
-	fmt.Printf("Found diffs in missing test detector:\n%s\nRunning tests.\n", diffs)
-
 	missingTestDetectorPath := filepath.Join(mmLocalPath, "tools", "missing-test-detector")
 	rnr.PushDir(missingTestDetectorPath)
 	if _, err := rnr.Run("go", []string{"mod", "tidy"}, nil); err != nil {
@@ -571,6 +559,15 @@ func formatDiffComment(data diffCommentData) (string, error) {
 		return "", err
 	}
 	return sb.String(), nil
+}
+
+func pathChanged(path string, changedFiles []string) bool {
+	for _, f := range changedFiles {
+		if strings.HasPrefix(f, path) {
+			return true
+		}
+	}
+	return false
 }
 
 func init() {
