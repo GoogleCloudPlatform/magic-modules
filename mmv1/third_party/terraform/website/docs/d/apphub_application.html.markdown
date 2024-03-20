@@ -1,5 +1,5 @@
 ---
-subcategory: "Apphub"
+subcategory: "App Hub"
 description: |-
   Application is a functional grouping of Services and Workloads that helps achieve a desired end-to-end business functionality.
 ---
