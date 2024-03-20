@@ -251,6 +251,136 @@ func TestFormatDiffComment(t *testing.T) {
 	}
 }
 
+func TestFileToResource(t *testing.T) {
+	cases := map[string]struct {
+		path string
+		want string
+	}{
+		// Resource go files
+		"files outside services directory are not resources": {
+			path: "/google-beta/tpgiamresource/resource_iam_binding.go",
+			want: "",
+		},
+		"non-go files in service directories are not resources": {
+			path: "/google-beta/services/firebaserules/resource_firebaserules_release.html.markdown",
+			want: "",
+		},
+		"resource file": {
+			path: "/google-beta/services/firebaserules/resource_firebaserules_release.go",
+			want: "google_firebaserules_release",
+		},
+		"resource iam file": {
+			path: "/google/services/kms/iam_kms_crypto_key.go",
+			want: "google_kms_crypto_key",
+		},
+		"resource generated test file": {
+			path: "/google-beta/services/containeraws/resource_container_aws_node_pool_generated_test.go",
+			want: "google_container_aws_node_pool",
+		},
+		"resource handwritten test file": {
+			path: "/google-beta/services/oslogin/resource_os_login_ssh_public_key_test.go",
+			want: "google_os_login_ssh_public_key",
+		},
+		"resource internal_test file": {
+			path: "/google/services/redis/resource_redis_instance_internal_test.go",
+			want: "google_redis_instance",
+		},
+		"resource sweeper file": {
+			path: "/google-beta/services/sql/resource_sql_source_representation_instance_sweeper.go",
+			want: "google_sql_source_representation_instance",
+		},
+		"resource iam handwritten test file": {
+			path: "/google-beta/services/bigtable/resource_bigtable_instance_iam_test.go",
+			want: "google_bigtable_instance",
+		},
+		"resource iam generated test file": {
+			path: "/google-beta/services/privateca/iam_privateca_ca_pool_generated_test.go",
+			want: "google_privateca_ca_pool",
+		},
+		"resource ignore google_ prefix": {
+			path: "/google-beta/services/resourcemanager/resource_google_project_sweeper.go",
+			want: "google_project",
+		},
+		"resource starting with iam_": {
+			path: "/google-beta/services/iam2/resource_iam_access_boundary_policy.go",
+			want: "google_iam_access_boundary_policy",
+		},
+
+		// Datasource files
+		"datasource file": {
+			path: "/google/services/dns/data_source_dns_keys.go",
+			want: "google_dns_keys",
+		},
+		"datasource handwritten test file": {
+			path: "/google-beta/services/monitoring/data_source_monitoring_service_test.go",
+			want: "google_monitoring_service",
+		},
+		// Future-proofing
+		"datasource generated test file": {
+			path: "/google-beta/services/alloydb/data_source_alloydb_locations_generated_test.go",
+			want: "google_alloydb_locations",
+		},
+		"datasource internal_test file": {
+			path: "/google/services/storage/data_source_storage_object_signed_url_internal_test.go",
+			want: "google_storage_object_signed_url",
+		},
+		"datasource ignore google_ prefix": {
+			path: "/google-beta/services/certificatemanager/data_source_google_certificate_manager_certificate_map_test.go",
+			want: "google_certificate_manager_certificate_map",
+		},
+		"datasource starting with iam_": {
+			path: "/google-beta/services/resourcemanager/data_source_iam_policy_test.go",
+			want: "google_iam_policy",
+		},
+
+		// Resource documentation
+		"files outside /r or /d directories are not resources": {
+			path: "/website/docs/guides/common_issues.html.markdown",
+			want: "",
+		},
+		"non-markdown files are not resources": {
+			path: "/website/docs/r/access_context_manager_access_level.go",
+			want: "",
+		},
+		"resource docs": {
+			path: "/website/docs/r/firestore_document.html.markdown",
+			want: "google_firestore_document",
+		},
+		"resource docs ignore google_ prefix": {
+			path: "/website/docs/r/google_project_service.html.markdown",
+			want: "google_project_service",
+		},
+		"resource docs starting with iam_": {
+			path: "/website/docs/r/iam_deny_policy.html.markdown",
+			want: "google_iam_deny_policy",
+		},
+
+		// Datasource documentation
+		"datasource docs": {
+			path: "/website/docs/d/beyondcorp_app_gateway.html.markdown",
+			want: "google_beyondcorp_app_gateway",
+		},
+		"datasource docs ignore google_ prefix": {
+			path: "/website/docs/d/google_vertex_ai_index.html.markdown",
+			want: "google_vertex_ai_index",
+		},
+		"datasource docs starting with iam_": {
+			path: "/website/docs/d/iam_role.html.markdown",
+			want: "google_iam_role",
+		},
+	}
+
+	for tn, tc := range cases {
+		tc := tc
+		t.Run(tn, func(t *testing.T) {
+			t.Parallel()
+
+			got := fileToResource(tc.path)
+			assert.Equal(t, tc.want, got)
+		})
+	}
+}
+
 func TestPathChanged(t *testing.T) {
 	cases := map[string]struct {
 		path         string

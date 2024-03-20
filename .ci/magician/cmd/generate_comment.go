@@ -25,6 +25,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/GoogleCloudPlatform/magic-modules/tools/issue-labeler/labeler"
 	"magician/exec"
 	"magician/github"
 	"magician/provider"
@@ -240,8 +241,11 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	}
 	for _, repo := range []source.Repo{tpgRepo, tpgbRepo} {
 		if !repo.Cloned {
-			fmt.Println("Skipping breaking changes; repo failed to clone: ", repo.Name)
+			fmt.Println("Skipping diff processor; repo failed to clone: ", repo.Name)
 			continue
+		}
+		if len(repo.ChangedFiles) == 0 {
+			fmt.Println("Skipping diff processor; no diff: ", repo.Name)
 		}
 		err = buildDiffProcessor(diffProcessorPath, repo.Path, diffProcessorEnv, rnr)
 		if err != nil {
@@ -282,6 +286,29 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	breakingChangesSlice := maps.Keys(uniqueBreakingChanges)
 	sort.Strings(breakingChangesSlice)
 	data.BreakingChanges = breakingChangesSlice
+
+	// Compute additional service labels based on changed files
+	regexpLabels, err := labeler.BuildRegexLabels(labeler.EnrolledTeamsYaml)
+	if err != nil {
+		fmt.Println("error building regexp labels: ", err)
+		errors["Other"] = append(errors["Other"], "Failed to parse service label mapping")
+	} else {
+		for _, repo := range []source.Repo{tpgRepo, tpgbRepo} {
+			if !repo.Cloned {
+				fmt.Println("Skipping changed file service labels; repo failed to clone: ", repo.Name)
+				continue
+			}
+			affectedResources := map[string]struct{}{}
+			for _, path := range repo.ChangedFiles {
+				if r := fileToResource(path); r != "" {
+					affectedResources[r] = struct{}{}
+				}
+			}
+			for _, label := range labeler.ComputeLabels(maps.Keys(affectedResources), regexpLabels) {
+				uniqueServiceLabels[label] = struct{}{}
+			}
+		}
+	}
 
 	// Add service labels to PR
 	if len(uniqueServiceLabels) > 0 {
@@ -559,6 +586,32 @@ func formatDiffComment(data diffCommentData) (string, error) {
 		return "", err
 	}
 	return sb.String(), nil
+}
+
+func fileToResource(path string) string {
+	// Must be a Go file
+	path, isResource := strings.CutSuffix(path, ".go")
+	if !isResource {
+		return ""
+	}
+	// Only consider the end of the path
+	path = path[strings.LastIndex(path, "/")+1:]
+	// Must start with `resource_` or `iam_`
+	if !strings.HasPrefix(path, "resource_") && !strings.HasPrefix(path, "iam_") {
+		return ""
+	}
+	if !isResource {
+		return ""
+	}
+	// Remove prefixes for iam & resources
+	path, _ = strings.CutPrefix(path, "resource_")
+	path, _ = strings.CutPrefix(path, "iam_")
+	// Remove prefixes & suffixes for test files, iam, and sweepers
+	path, _ = strings.CutSuffix(path, "_generated_test")
+	path, _ = strings.CutSuffix(path, "_iam_test")
+	path, _ = strings.CutSuffix(path, "_test")
+	path, _ = strings.CutSuffix(path, "_sweeper")
+	return "google_" + path
 }
 
 func pathChanged(path string, changedFiles []string) bool {
