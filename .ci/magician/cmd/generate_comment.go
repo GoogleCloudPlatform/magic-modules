@@ -355,12 +355,23 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			fmt.Println("Skipping missing tests; repo failed to clone: ", repo.Name)
 			continue
 		}
+		err = buildDiffProcessor(diffProcessorPath, repo.Path, diffProcessorEnv, rnr)
+		if err != nil {
+			fmt.Println("building diff processor: ", err)
+			errors[repo.Title] = append(errors[repo.Title], "The diff processor failed to build. This is usually due to the downstream provider failing to compile.")
+			continue
+		}
 		missingTests, err := detectMissingTests(diffProcessorPath, repo.Path, rnr)
 		if err != nil {
 			fmt.Println("Error running missing test detector: ", err)
 			errors[repo.Title] = append(errors[repo.Title], "The missing test detector failed to run.")
 		}
 		data.MissingTests = missingTests
+		err = cleanDiffProcessor(diffProcessorPath, rnr)
+		if err != nil {
+			fmt.Println("cleaning up diff processor: ", err)
+			errors[repo.Title] = append(errors[repo.Title], "The diff processor failed to clean up properly.")
+		}
 	}
 
 	// Add errors to data as an ordered list
