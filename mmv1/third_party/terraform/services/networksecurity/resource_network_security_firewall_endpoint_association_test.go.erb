@@ -5,6 +5,7 @@ package networksecurity_test
 import (
 	"fmt"
 	"strings"
+	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -22,6 +23,10 @@ func TestAccNetworkSecurityFirewallEndpointAssociations_basic(t *testing.T) {
 
 	orgId := envvar.GetTestOrgFromEnv(t)
 	randomSuffix := acctest.RandString(t, 10)
+  billingProjectId := envvar.GetTestProjectFromEnv()
+  projectNumberId := envvar.GetTestProjectNumberFromEnv()
+
+  testResourceName := "google_network_security_firewall_endpoint_association.foobar"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -29,19 +34,19 @@ func TestAccNetworkSecurityFirewallEndpointAssociations_basic(t *testing.T) {
 		CheckDestroy:             testAccCheckNetworkSecurityFirewallEndpointDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkSecurityFirewallEndpointAssociation_basic(randomSuffix, orgId, ),
+				Config: testAccNetworkSecurityFirewallEndpointAssociation_basic(randomSuffix, orgId, billingProjectId, projectNumberId),
 			},
 			{
-				ResourceName:            "google_network_security_firewall_endpoint_association.foobar",
+				ResourceName:            testResourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			{
-				Config: testAccNetworkSecurityFirewallEndpointAssociation_update(randomSuffix, orgId, ),
+				Config: testAccNetworkSecurityFirewallEndpointAssociation_update(randomSuffix, orgId, billingProjectId, projectNumberId, false),
 			},
 			{
-				ResourceName:            "google_network_security_firewall_endpoint_association.foobar",
+				ResourceName:            testResourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
@@ -50,66 +55,127 @@ func TestAccNetworkSecurityFirewallEndpointAssociations_basic(t *testing.T) {
 	})
 }
 
-func testAccNetworkSecurityFirewallEndpointAssociation_basic(randomSuffix string, orgId string) string {
+func TestAccNetworkSecurityFirewallEndpointAssociations_disabled(t *testing.T) {
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	orgId := envvar.GetTestOrgFromEnv(t)
+	randomSuffix := acctest.RandString(t, 10)
+  billingProjectId := envvar.GetTestProjectFromEnv()
+  projectNumberId := envvar.GetTestProjectNumberFromEnv()
+
+  testResourceName := "google_network_security_firewall_endpoint_association.foobar"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckNetworkSecurityFirewallEndpointDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkSecurityFirewallEndpointAssociation_basic(randomSuffix, orgId, billingProjectId, projectNumberId),
+        Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(testResourceName, "disabled", "false"),
+				),
+			},
+			{
+				ResourceName:            testResourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				Config: testAccNetworkSecurityFirewallEndpointAssociation_update(randomSuffix, orgId, billingProjectId, projectNumberId, true),
+        Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(testResourceName, "disabled", "true"),
+				),
+			},
+			{
+				ResourceName:            testResourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+      {
+				Config: testAccNetworkSecurityFirewallEndpointAssociation_update(randomSuffix, orgId, billingProjectId, projectNumberId, false),
+        Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(testResourceName, "disabled", "false"),
+				),
+			},
+			{
+				ResourceName:            testResourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccNetworkSecurityFirewallEndpointAssociation_basic(randomSuffix string, orgId string, billingProjectId string, projectNumberId string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "foobar" {
-	provider                = google-beta
-    name                    = "tf-test-my-vpc%s"
+	provider                  = google-beta
+    name                    = "tf-test-my-vpc%[2]s"
     auto_create_subnetworks = false
 }
 
 resource "google_network_security_firewall_endpoint" "foobar" {
-    provider = google-beta
-    name     = "tf-test-my-firewall-endpoint%s"
-    parent   = "organizations/%s"
-    location = "us-central1-a"
+    provider           = google-beta
+    name               = "tf-test-my-firewall-endpoint%[2]s"
+    parent             = "organizations/%[3]s"
+    location           = "us-central1-a"
+    billing_project_id = "%[1]s"
 }
 
 # TODO: add tlsInspectionPolicy once resource is ready
 resource "google_network_security_firewall_endpoint_association" "foobar" {
     provider          = google-beta
-    name              = "tf-test-my-firewall-endpoint%s"
-    parent            = "organizations/%s"
+    name              = "tf-test-my-firewall-endpoint-association%[2]s"
+    parent            = "projects/%[1]s"
     location          = "us-central1-a"
     firewall_endpoint = google_network_security_firewall_endpoint.foobar.id
-    network           = google_compute_network.foobar.id
+    network           = "projects/%[4]s/global/networks/tf-test-my-vpc%[2]s"
 
     labels = {
         foo = "bar"
     }
+    depends_on = [google_network_security_firewall_endpoint.foobar, google_compute_network.foobar]
 }
-`, randomSuffix, randomSuffix, orgId, randomSuffix, orgId)
+`, billingProjectId, randomSuffix, orgId, projectNumberId)
 }
 
-func testAccNetworkSecurityFirewallEndpointAssociation_update(randomSuffix string, orgId string) string {
+func testAccNetworkSecurityFirewallEndpointAssociation_update(randomSuffix string, orgId string, billingProjectId string, projectNumberId string, disabled bool) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "foobar" {
-	provider                = google-beta
-    name                    = "tf-test-my-vpc%s"
+	provider                  = google-beta
+    name                    = "tf-test-my-vpc%[2]s"
     auto_create_subnetworks = false
 }
 
 resource "google_network_security_firewall_endpoint" "foobar" {
-    provider = google-beta
-    name     = "tf-test-my-firewall-endpoint%s"
-    parent   = "organizations/%s"
-    location = "us-central1-a"
+    provider           = google-beta
+    name               = "tf-test-my-firewall-endpoint%[2]s"
+    parent             = "organizations/%[3]s"
+    location           = "us-central1-a"
+    billing_project_id = "%[1]s"
 }
 
 # TODO: add tlsInspectionPolicy once resource is ready
 resource "google_network_security_firewall_endpoint_association" "foobar" {
     provider          = google-beta
-    name              = "tf-test-my-firewall-endpoint%s"
-    parent            = "organizations/%s"
+    name              = "tf-test-my-firewall-endpoint-association%[2]s"
+    parent            = "projects/%[1]s"
     location          = "us-central1-a"
     firewall_endpoint = google_network_security_firewall_endpoint.foobar.id
-    network           = google_compute_network.foobar.id
+    network           = "projects/%[4]s/global/networks/tf-test-my-vpc%[2]s"
+    disabled          = "%[5]s"
 
     labels = {
         foo = "bar-updated"
     }
+    depends_on = [google_network_security_firewall_endpoint.foobar, google_compute_network.foobar]
 }
-`, randomSuffix, randomSuffix, orgId, randomSuffix, orgId)
+`, billingProjectId, randomSuffix, orgId, projectNumberId, strconv.FormatBool(disabled))
 }
 
 func testAccCheckNetworkSecurityFirewallEndpointAssociationDestroyProducer(t *testing.T) func(s *terraform.State) error {
