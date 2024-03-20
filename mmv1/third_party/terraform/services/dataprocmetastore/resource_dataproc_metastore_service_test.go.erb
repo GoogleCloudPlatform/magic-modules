@@ -156,7 +156,7 @@ resource "google_dataproc_metastore_service" "backup" {
     time_zone       = "UTC"
     backup_location = "gs://${google_storage_bucket.bucket.name}"
   }
-
+  
   labels = {
     env = "test"
   }
@@ -165,4 +165,6 @@ resource "google_dataproc_metastore_service" "backup" {
 resource "google_storage_bucket" "bucket" {
   name     = "backup%{random_suffix}"
   location = "us-central1"
+}
+`, context)
 }
