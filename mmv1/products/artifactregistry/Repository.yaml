@@ -104,20 +104,20 @@ examples:
     name: 'artifact_registry_repository_remote_dockerhub_auth'
     primary_resource_id: 'my-repo'
     vars:
-      repository_id: 'example-custom-remote'
-      description: 'example remote docker repository with credentials'
+      repository_id: 'example-dockerhub-remote'
+      description: 'example remote dockerhub repository with credentials'
       secret_id: 'example-secret'
-      secret_resource_id: 'example-custom-remote-secret'
+      secret_resource_id: 'example-remote-secret'
       username: 'remote-username'
       secret_data: 'remote-password'
   - !ruby/object:Provider::Terraform::Examples
     name: 'artifact_registry_repository_remote_docker_custom_auth'
     primary_resource_id: 'my-repo'
     vars:
-      repository_id: 'example-custom-remote'
-      description: 'example remote docker repository with credentials'
+      repository_id: 'example-docker-custom-remote'
+      description: 'example remote custom docker repository with credentials'
       secret_id: 'example-secret'
-      secret_resource_id: 'example-custom-remote-secret'
+      secret_resource_id: 'example-remote-secret'
       username: 'remote-username'
       secret_data: 'remote-password'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -398,8 +398,6 @@ properties:
         properties:
           - !ruby/object:Api::Type::Enum
             name: 'publicRepository'
-            exactly_one_of:
-              - remoteRepositoryConfig.0.docker_repository.0.public_repository
             description: |-
               Address of the remote repository.
             immutable: true
@@ -435,8 +433,6 @@ properties:
         properties:
           - !ruby/object:Api::Type::Enum
             name: 'publicRepository'
-            exactly_one_of:
-              - remoteRepositoryConfig.0.maven_repository.0.public_repository
             description: |-
               Address of the remote repository.
             immutable: true
@@ -472,8 +468,6 @@ properties:
         properties:
           - !ruby/object:Api::Type::Enum
             name: 'publicRepository'
-            exactly_one_of:
-              - remoteRepositoryConfig.0.npm_repository.0.public_repository
             description: |-
               Address of the remote repository.
             immutable: true
@@ -509,8 +503,6 @@ properties:
         properties:
           - !ruby/object:Api::Type::Enum
             name: 'publicRepository'
-            exactly_one_of:
-              - remoteRepositoryConfig.0.python_repository.0.public_repository
             description: |-
               Address of the remote repository.
             immutable: true
