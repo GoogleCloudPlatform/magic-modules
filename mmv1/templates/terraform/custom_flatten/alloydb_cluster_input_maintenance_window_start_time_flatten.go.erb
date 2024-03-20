@@ -18,15 +18,15 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
 	}
 	original := v.(map[string]interface{})
     transformed := map[string]interface{}{
-        "hours": flattenAlloydbClusterMaintenanceUpdatePolicyTimeHours(original["hours"], d, config),
-        "minutes": flattenAlloydbClusterMaintenanceUpdatePolicyTimeMinutes(original["minutes"], d, config),
-        "seconds": flattenAlloydbClusterMaintenanceUpdatePolicyTimeSeconds(original["seconds"], d, config),
-        "nanos": flattenAlloydbClusterMaintenanceUpdatePolicyTimeNanos(original["nanos"], d, config),
+        "hours": flattenAlloydbClusterMaintenanceWindowStartTimeHours(original["hours"], d, config),
+        "minutes": flattenAlloydbClusterMaintenanceWindowStartTimeMinutes(original["minutes"], d, config),
+        "seconds": flattenAlloydbClusterMaintenanceWindowStartTimeSeconds(original["seconds"], d, config),
+        "nanos": flattenAlloydbClusterMaintenanceWindowStartTimeNanos(original["nanos"], d, config),
     }
 	return transformed 
 }
 
-func flattenAlloydbClusterMaintenanceUpdatePolicyTimeHours(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+func flattenAlloydbClusterMaintenanceWindowStartTimeHours(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
     // Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
 		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
@@ -49,7 +49,7 @@ func flattenAlloydbClusterMaintenanceUpdatePolicyTimeHours(v interface{}, d *sch
 	return v // let terraform core handle it otherwise
 }
 
-func flattenAlloydbClusterMaintenanceUpdatePolicyTimeMinutes(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+func flattenAlloydbClusterMaintenanceWindowStartTimeMinutes(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
 		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
@@ -72,7 +72,7 @@ func flattenAlloydbClusterMaintenanceUpdatePolicyTimeMinutes(v interface{}, d *s
 	return v // let terraform core handle it otherwise
 }
 
-func flattenAlloydbClusterMaintenanceUpdatePolicyTimeSeconds(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+func flattenAlloydbClusterMaintenanceWindowStartTimeSeconds(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
 		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
@@ -95,7 +95,7 @@ func flattenAlloydbClusterMaintenanceUpdatePolicyTimeSeconds(v interface{}, d *s
 	return v // let terraform core handle it otherwise
 }
 
-func flattenAlloydbClusterMaintenanceUpdatePolicyTimeNanos(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+func flattenAlloydbClusterMaintenanceWindowStartTimeNanos(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
 		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
