@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
         with:
           fetch-depth: 0
       - name: "Check for New Services"
@@ -48,7 +48,7 @@ jobs:
         run: echo "GOOGLE_BETA_REPO_PATH=${{ env.OUTPUT_PATH}}" >> $GITHUB_ENV
       - name: Checkout Repository
         if: steps.generate.outcome == 'success'
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
       - name: Check that new services have been added to the TeamCity configuration code
         if: steps.generate.outcome == 'success'
         run: |
