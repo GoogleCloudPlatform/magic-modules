@@ -463,7 +463,7 @@ func detectMissingTests(diffProcessorPath, tpgbLocalPath string, rnr ExecRunner)
 		return "", err
 	}
 
-	output, err := rnr.Run("bin/diff-processor", []string{"detect-missing-tests", fmt.Sprintf("-services-dir=%s/google-beta/services", tpgbLocalPath)}, nil)
+	output, err := rnr.Run("bin/diff-processor", []string{"detect-missing-tests", fmt.Sprintf("%s/google-beta/services", tpgbLocalPath)}, nil)
 	if err != nil {
 		return "", err
 	}
