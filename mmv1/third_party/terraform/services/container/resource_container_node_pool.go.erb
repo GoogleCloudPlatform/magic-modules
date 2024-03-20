@@ -207,7 +207,6 @@ var schemaNodePool = map[string]*schema.Schema{
 		},
 	},
 
-<% unless version == 'ga' -%>
 	"queued_provisioning": {
 		Type:        schema.TypeList,
 		Optional:    true,
@@ -225,7 +224,6 @@ var schemaNodePool = map[string]*schema.Schema{
 			},
 		},
 	},
-<% end -%>
 
 	"max_pods_per_node": &schema.Schema{
 		Type:        schema.TypeInt,
@@ -988,7 +986,6 @@ func expandNodePool(d *schema.ResourceData, prefix string) (*container.NodePool,
 		}
 	}
 
-<% unless version == 'ga' -%>
 	if v, ok := d.GetOk(prefix + "queued_provisioning"); ok {
 		if v.([]interface{}) != nil && v.([]interface{})[0] != nil {
 			queued_provisioning := v.([]interface{})[0].(map[string]interface{})
@@ -997,7 +994,6 @@ func expandNodePool(d *schema.ResourceData, prefix string) (*container.NodePool,
 			}
 		}
 	}
-<% end -%>
 
 	if v, ok := d.GetOk(prefix + "max_pods_per_node"); ok {
 		np.MaxPodsConstraint = &container.MaxPodsConstraint{
@@ -1192,7 +1188,6 @@ func flattenNodePool(d *schema.ResourceData, config *transport_tpg.Config, np *c
 		}
 	}
 
-<% unless version == 'ga' -%>
 	if np.QueuedProvisioning != nil {
 		nodePool["queued_provisioning"] = []map[string]interface{}{
 			{
@@ -1200,7 +1195,6 @@ func flattenNodePool(d *schema.ResourceData, config *transport_tpg.Config, np *c
 			},
 		}
 	}
-<% end -%>
 
 	if np.MaxPodsConstraint != nil {
 		nodePool["max_pods_per_node"] = np.MaxPodsConstraint.MaxPodsPerNode

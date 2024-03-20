@@ -26,7 +26,7 @@ type Async struct {
 	google.YamlValidator
 
 	// Describes an operation
-	Operation Operation
+	Operation *Operation
 
 	// The list of methods where operations are used.
 	Actions []string
@@ -50,7 +50,7 @@ type Operation struct {
 	// Contains information about an long-running operation, to make
 	// requests for the state of an operation.
 
-	Timeouts Timeouts
+	Timeouts *Timeouts
 
 	Result Result
 }
@@ -66,7 +66,7 @@ type Result struct {
 
 	// Contains information about the result of an Operation
 
-	ResourceInsideResponse bool
+	ResourceInsideResponse bool `yaml:"resource_inside_response"`
 }
 
 // def validate
@@ -79,7 +79,7 @@ type OpAsync struct {
 	// TODO: Should embed Async or not?
 	// < Async
 
-	Operation OpAsyncOperation
+	Operation *OpAsyncOperation
 
 	Result OpAsyncResult
 
@@ -127,7 +127,7 @@ type OpAsyncOperation struct {
 
 	WaitMs int `yaml:"wait_ms"`
 
-	Timeouts Timeouts
+	Timeouts *Timeouts
 
 	// Use this if the resource includes the full operation url.
 	FullUrl string `yaml:"full_url"`

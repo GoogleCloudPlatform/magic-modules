@@ -327,6 +327,7 @@ service/filestore:
   resources:
   - google_filestore_.*
 service/firebase:
+  team: firebase-terraform
   resources:
   - google_firebase_.*
   - google_firebaserules_.*
@@ -529,6 +530,7 @@ service/redis-instance:
   resources:
   - google_redis_instance
 service/run:
+  team: cloud-run-control-plane
   resources:
   - google_cloud_run_.*
   - google_cloud_run_v2_.*

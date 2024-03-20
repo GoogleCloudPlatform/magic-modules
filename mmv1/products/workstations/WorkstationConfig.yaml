@@ -109,6 +109,13 @@ examples:
       workstation_cluster_name: 'workstation-cluster'
       workstation_config_name: 'workstation-config'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'workstation_config_boost'
+    min_version: beta
+    primary_resource_id: 'default'
+    vars:
+      workstation_cluster_name: 'workstation-cluster'
+      workstation_config_name: 'workstation-config'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'workstation_config_encryption_key'
     min_version: beta
     primary_resource_id: 'default'
@@ -213,6 +220,7 @@ properties:
       - 'host.gceInstance.shieldedInstanceConfig.enableIntegrityMonitoring'
       - 'host.gceInstance.confidentialInstanceConfig.enableConfidentialCompute'
       - 'host.gceInstance.accelerators'
+      - 'host.gceInstance.boostConfigs'
       - 'host.gceInstance.disableSsh'
     properties:
       - !ruby/object:Api::Type::NestedObject
@@ -319,6 +327,37 @@ properties:
                   description: |
                     Number of accelerator cards exposed to the instance.
                   required: true
+          - !ruby/object:Api::Type::Array
+            name: 'boostConfigs'
+            description: |
+              A list of the boost configurations that workstations created using this workstation configuration are allowed to use.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'id'
+                  description: |
+                    The id to be used for the boost config.
+                  required: true
+                - !ruby/object:Api::Type::String
+                  name: 'machineType'
+                  description: |
+                    The type of machine that boosted VM instances will use—for example, e2-standard-4. For more information about machine types that Cloud Workstations supports, see the list of available machine types https://cloud.google.com/workstations/docs/available-machine-types. Defaults to e2-standard-4.
+                - !ruby/object:Api::Type::Array
+                  name: 'accelerators'
+                  description: |
+                    An accelerator card attached to the boost instance.
+                  item_type: !ruby/object:Api::Type::NestedObject
+                    properties:
+                      - !ruby/object:Api::Type::String
+                        name: 'type'
+                        description: |
+                          Type of accelerator resource to attach to the instance, for example, "nvidia-tesla-p100".
+                        required: true
+                      - !ruby/object:Api::Type::Integer
+                        name: 'count'
+                        description: |
+                          Number of accelerator cards exposed to the instance.
+                        required: true
   - !ruby/object:Api::Type::Array
     name: 'persistentDirectories'
     description: |

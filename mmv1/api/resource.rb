@@ -389,11 +389,6 @@ module Api
       nested
     end
 
-    # Returns all resourcerefs at any depth
-    def all_resourcerefs
-      resourcerefs_for_properties(all_user_properties, self)
-    end
-
     # All settable properties in the resource.
     # Fingerprints aren't *really" settable properties, but they behave like one.
     # At Create, they have no value but they can just be read in anyways, and after a Read
@@ -425,6 +420,10 @@ module Api
       end
     end
 
+    def sensitive_props
+      all_nested_properties(root_properties).select(&:sensitive)
+    end
+
     # Return the product-level async object, or the resource-specific one
     # if one exists.
     def async
@@ -444,18 +443,6 @@ module Api
       else
         props.select { |p| @identity.include?(p.name) }.sort_by { |p| @identity.index p.name }
       end
-    end
-
-    def kind?
-      !@kind.nil?
-    end
-
-    def encoder?
-      !@transport&.encoder.nil?
-    end
-
-    def decoder?
-      !@transport&.decoder.nil?
     end
 
     def add_labels_related_fields(props, parent)
@@ -636,10 +623,6 @@ Please refer to the field `effective_#{title}` for all of the #{title} present o
       @base_url
     end
 
-    def full_create_url
-      [@__product.base_url, create_uri].flatten.join
-    end
-
     def create_uri
       if @create_url.nil?
         if @create_verb.nil? || @create_verb == :POST
@@ -650,10 +633,6 @@ Please refer to the field `effective_#{title}` for all of the #{title} present o
       else
         @create_url
       end
-    end
-
-    def full_delete_url
-      [@__product.base_url, delete_uri].flatten.join
     end
 
     def delete_uri
@@ -769,42 +748,6 @@ Please refer to the field `effective_#{title}` for all of the #{title} present o
         raise "Missing property/parameter for identity #{i}" \
           if all_user_properties.select { |p| p.name == i }.empty?
       end
-    end
-
-    # Given an array of properties, return all ResourceRefs contained within
-    # Requires:
-    #   props- a list of props
-    #   original_object - the original object containing props. This is to
-    #                     avoid self-referencing objects.
-    def resourcerefs_for_properties(props, original_obj)
-      rrefs = []
-      props.each do |p|
-        # We need to recurse on ResourceRefs to get all levels
-        # We do not want to recurse on resourcerefs of type self to avoid
-        # infinite loop.
-        if p.is_a? Api::Type::ResourceRef
-          # We want to avoid a circular reference
-          # This reference may be the next reference or have some number of refs
-          # in between it.
-          next if p.resource_ref == original_obj
-          next if p.resource_ref == p.__resource
-
-          rrefs << p
-          rrefs.concat(resourcerefs_for_properties(p.resource_ref
-                                                    .required_properties,
-                                                   original_obj))
-        elsif !p.nested_properties.nil?
-          rrefs.concat(resourcerefs_for_properties(p.nested_properties, original_obj))
-        elsif p.is_a? Api::Type::Array
-          if p.item_type.is_a? Api::Type::ResourceRef
-            rrefs << p.item_type
-            rrefs.concat(resourcerefs_for_properties(p.item_type.resource_ref
-                                                      .required_properties,
-                                                     original_obj))
-          end
-        end
-      end
-      rrefs.uniq
     end
   end
 end

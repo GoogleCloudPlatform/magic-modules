@@ -8,7 +8,7 @@ func DCLToTerraformReference(product DCLPackageName, resource miscellaneousNameS
         return "", fmt.Errorf("unimplemented - did you run `make serialize`?")
 }
 
-func ConvertSampleJSONToHCL(product DCLPackageName, resource miscellaneousNameSnakeCase, version string, hasGAEquivalent bool, b []byte) (string, error) {
+func ConvertSampleJSONToHCL(product DCLPackageName, resource miscellaneousNameSnakeCase, version string, hasGAEquivalent, makeLongForm bool, b []byte) (string, error) {
         return "", fmt.Errorf("unimplemented - did you run `make serialize`?")
 }
 

@@ -20,6 +20,7 @@ func TestAccNetworkSecurityFirewallEndpoints_basic(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
+	billingProjectId := envvar.GetTestProjectFromEnv()
 	orgId := envvar.GetTestOrgFromEnv(t)
 	randomSuffix := acctest.RandString(t, 10)
 
@@ -29,7 +30,7 @@ func TestAccNetworkSecurityFirewallEndpoints_basic(t *testing.T) {
 		CheckDestroy:             testAccCheckNetworkSecurityFirewallEndpointDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkSecurityFirewallEndpoints_basic(orgId, randomSuffix),
+				Config: testAccNetworkSecurityFirewallEndpoints_basic(orgId, billingProjectId, randomSuffix),
 			},
 			{
 				ResourceName:            "google_network_security_firewall_endpoint.foobar",
@@ -38,7 +39,7 @@ func TestAccNetworkSecurityFirewallEndpoints_basic(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			{
-				Config: testAccNetworkSecurityFirewallEndpoints_update(orgId, randomSuffix),
+				Config: testAccNetworkSecurityFirewallEndpoints_update(orgId, billingProjectId, randomSuffix),
 			},
 			{
 				ResourceName:            "google_network_security_firewall_endpoint.foobar",
@@ -50,34 +51,38 @@ func TestAccNetworkSecurityFirewallEndpoints_basic(t *testing.T) {
 	})
 }
 
-func testAccNetworkSecurityFirewallEndpoints_basic(orgId string, randomSuffix string) string {
+func testAccNetworkSecurityFirewallEndpoints_basic(orgId string, billingProjectId string, randomSuffix string) string {
 	return fmt.Sprintf(`
 resource "google_network_security_firewall_endpoint" "foobar" {
-    provider = google-beta
-    name     = "tf-test-my-firewall-endpoint%s"
-    parent   = "organizations/%s"
-    location = "us-central1-a"
+  provider = google-beta
 
-    labels = {
-        foo = "bar"
-    }
+  name     = "tf-test-my-firewall-endpoint%[1]s"
+  parent   = "organizations/%[2]s"
+  location = "us-central1-a"
+  billing_project_id = "%[3]s"
+
+  labels = {
+    foo = "bar"
+  }
 }
-`, randomSuffix, orgId)
+`, randomSuffix, orgId, billingProjectId)
 }
 
-func testAccNetworkSecurityFirewallEndpoints_update(orgId string, randomSuffix string) string {
+func testAccNetworkSecurityFirewallEndpoints_update(orgId string, billingProjectId string, randomSuffix string) string {
 	return fmt.Sprintf(`
 resource "google_network_security_firewall_endpoint" "foobar" {
-    provider = google-beta
-    name     = "tf-test-my-firewall-endpoint%s"
-    parent   = "organizations/%s"
-    location = "us-central1-a"
+  provider = google-beta
 
-    labels = {
-        foo = "bar-updated"
-    }
+  name     = "tf-test-my-firewall-endpoint%[1]s"
+  parent   = "organizations/%[2]s"
+  location = "us-central1-a"
+  billing_project_id = "%[3]s"
+
+  labels = {
+    foo = "bar-updated"
+  }
 }
-`, randomSuffix, orgId)
+`, randomSuffix, orgId, billingProjectId)
 }
 
 func testAccCheckNetworkSecurityFirewallEndpointDestroyProducer(t *testing.T) func(s *terraform.State) error {

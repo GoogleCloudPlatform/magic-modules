@@ -120,8 +120,6 @@ properties:
       the values 1d, 24h, 1440m, and 86400s are equivalent. Default value is 1h.
       If this property is used, you must avoid adding new DDL statements to `ddl` that
       update the database's version_retention_period.
-    validation: !ruby/object:Provider::Terraform::Validation
-      function: ValidateDatabaseRetentionPeriod
     default_from_api: true
   - !ruby/object:Api::Type::Array
     name: 'ddl'

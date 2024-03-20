@@ -15,7 +15,11 @@
  */
 package cmd
 
-import "magician/github"
+import (
+	"errors"
+
+	"magician/github"
+)
 
 type mockGithub struct {
 	pullRequest        github.PullRequest
@@ -53,6 +57,9 @@ func (m *mockGithub) GetPullRequestPreviousReviewers(prNumber string) ([]github.
 
 func (m *mockGithub) GetTeamMembers(organization, team string) ([]github.User, error) {
 	m.calledMethods["GetTeamMembers"] = append(m.calledMethods["GetTeamMembers"], []any{organization, team})
+	if team == "" {
+		return nil, errors.New("No team members set")
+	}
 	return m.teamMembers[team], nil
 }
 

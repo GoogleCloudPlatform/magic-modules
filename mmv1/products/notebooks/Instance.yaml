@@ -393,6 +393,7 @@ properties:
       The Compute Engine tags to add to instance.
     item_type: Api::Type::String
     default_from_api: true
+    diff_suppress_func: NotebooksInstanceTagsDiffSuppress
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'metadata'
     description: |

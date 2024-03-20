@@ -476,6 +476,80 @@ func testAccWorkstationsWorkstationConfig_serviceAccount(context map[string]inte
 `, context)
 }
 
+func TestAccWorkstationsWorkstationConfig_boost(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckWorkstationsWorkstationConfigDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccWorkstationsWorkstationConfig_boost(context),
+			},
+			{
+				ResourceName:            "google_workstations_workstation_cluster.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag"},
+			},
+		},
+	})
+}
+
+func testAccWorkstationsWorkstationConfig_boost(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+  resource "google_compute_network" "default" {
+    provider                = google-beta
+    name                    = "tf-test-workstation-cluster%{random_suffix}"
+    auto_create_subnetworks = false
+  }
+  
+  resource "google_compute_subnetwork" "default" {
+    provider      = google-beta
+    name          = "tf-test-workstation-cluster%{random_suffix}"
+    ip_cidr_range = "10.0.0.0/24"
+    region        = "us-central1"
+    network       = google_compute_network.default.name
+  }
+  
+  resource "google_workstations_workstation_cluster" "default" {
+    provider                   = google-beta
+    workstation_cluster_id     = "tf-test-workstation-cluster%{random_suffix}"
+    network                    = google_compute_network.default.id
+    subnetwork                 = google_compute_subnetwork.default.id
+    location                   = "us-central1"
+  }
+
+  resource "google_workstations_workstation_config" "default" {
+    provider               = google-beta
+    workstation_config_id  = "tf-test-workstation-config%{random_suffix}"
+    workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
+    location               = "us-central1"
+    host {
+      gce_instance {
+        boost_configs {
+          id           = "boost-1"
+          machine_type = "n1-standard-2"
+          accelerators {
+            type  = "nvidia-tesla-t4"
+            count = 1
+          }
+        }
+        boost_configs {
+          id           = "boost-1"
+          machine_type = "e2-standard-2"
+        }
+      }
+    }
+  }
+`, context)
+}
+
 func TestAccWorkstationsWorkstationConfig_disableTcpConnections(t *testing.T) {
 	t.Parallel()
 
@@ -885,6 +959,11 @@ resource "google_workstations_workstation_config" "default" {
 
       confidential_instance_config {
         enable_confidential_compute = true
+      }
+ 
+      boost_configs {
+        id           = "boost-1"
+        machine_type = "n2d-standard-2"
       }
     }
   }

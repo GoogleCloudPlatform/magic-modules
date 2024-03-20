@@ -46,6 +46,9 @@ type Sample struct {
 	// in the testcase. (if the test doesn't have a ga version of the test)
 	HasGAEquivalent bool
 
+	// LongForm is whether this sample is a copy with long form fields expanded to include `/`
+	LongForm bool
+
 	// SamplesPath is the path to the directory where the original sample data is stored
 	SamplesPath Filepath
 
@@ -165,7 +168,7 @@ func findDCLReferencePackage(product SnakeCaseProductName) (DCLPackageName, erro
 }
 
 // BuildDependency produces a Dependency using a file and filename
-func BuildDependency(fileName string, product SnakeCaseProductName, localname, version string, hasGAEquivalent bool, b []byte) (*Dependency, error) {
+func BuildDependency(fileName string, product SnakeCaseProductName, localname, version string, hasGAEquivalent, makeLongForm bool, b []byte) (*Dependency, error) {
 	// Miscellaneous name rather than "resource name" because this is the name in the sample json file - which might not match the TF name!
 	// we have to account for that.
 	var resourceName miscellaneousNameSnakeCase
@@ -194,7 +197,7 @@ func BuildDependency(fileName string, product SnakeCaseProductName, localname, v
 		return nil, fmt.Errorf("Error generating sample dependency reference %s: %s", fileName, err)
 	}
 
-	block, err := ConvertSampleJSONToHCL(packageName, resourceName, version, hasGAEquivalent, b)
+	block, err := ConvertSampleJSONToHCL(packageName, resourceName, version, hasGAEquivalent, makeLongForm, b)
 	if err != nil {
 		glog.Errorf("failed to convert %q", fileName)
 		return nil, fmt.Errorf("Error generating sample dependency %s: %s", fileName, err)
@@ -223,7 +226,7 @@ func (s *Sample) generateSampleDependencyWithName(fileName, localname string) De
 	dependencyBytes, err := ioutil.ReadFile(path.Join(string(s.SamplesPath), fileName))
 	version := s.resourceReference.versionMetadata.V
 	product := s.resourceReference.productMetadata.ProductName
-	d, err := BuildDependency(fileName, product, localname, version, s.HasGAEquivalent, dependencyBytes)
+	d, err := BuildDependency(fileName, product, localname, version, s.HasGAEquivalent, s.LongForm, dependencyBytes)
 	if err != nil {
 		glog.Exit(err)
 	}
