@@ -16,6 +16,7 @@ resource "google_dataproc_metastore_service" "<%= ctx[:primary_resource_id] %>" 
   scheduled_backup {
     enabled         = true
     cron_schedule   = "0 0 * * *"
+    time_zone       = "UTC"
     backup_location = "gs://${google_storage_bucket.bucket.name}"
   }
 

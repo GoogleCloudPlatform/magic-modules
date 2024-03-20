@@ -259,7 +259,7 @@ properties:
         name: 'timeZone'
         description: |
           Specifies the time zone to be used when interpreting cronSchedule. Must be a time zone name from the time zone database (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones), e.g. America/Los_Angeles or Africa/Abidjan. If left unspecified, the default is UTC.
-        default_value: 'UTC'
+        default_from_api: true
       - !ruby/object:Api::Type::String
         name: 'backupLocation'
         description: |
