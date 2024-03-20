@@ -166,7 +166,7 @@ group. You can specify only one value. Structure is [documented below](#nested_a
 
 * `update_policy` - (Optional) The update policy for this managed instance group. Structure is [documented below](#nested_update_policy). For more information, see the [official documentation](https://cloud.google.com/compute/docs/instance-groups/updating-managed-instance-groups) and [API](https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroupManagers/patch).
 
-* `params` - (Optional [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Stores additional params passed with the request, but not persisted as part of resource payload. Structure is [documented below](#nested_params). For more information, see [API](https://cloud.google.com/compute/docs/reference/rest/beta/instanceGroupManagers/insert).
+* `params` - (Optional [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Input only additional params for instance group manager creation. Structure is [documented below](#nested_params). For more information, see [API](https://cloud.google.com/compute/docs/reference/rest/beta/instanceGroupManagers/insert).
 
 - - -
 
@@ -318,7 +318,7 @@ params{
 }
 ```
 
-* `resource_manager_tags` - (Optional) Specifies a list of resource manager tags to apply to the instance group manager. A resource manager tag is a key-value pair. You can attach exactly one value to an instance group manager for a given key. An instance group manager can have a maximum of 50 key-value pairs attached.
+* `resource_manager_tags` - (Optional) Resource manager tags to bind to the managed instance group. The tags are key-value pairs. Keys must be in the format tagKeys/123 and values in the format tagValues/456. For more information, see [Manage tags for resources](https://cloud.google.com/compute/docs/tag-resources)
 
 ## Attributes Reference
 
