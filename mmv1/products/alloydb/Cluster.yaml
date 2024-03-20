@@ -497,6 +497,127 @@ properties:
         description: |
           Name of the primary cluster must be in the format
           'projects/{project}/locations/{location}/clusters/{cluster_id}'
+  - !ruby/object:Api::Type::NestedObject
+    name: 'maintenanceUpdatePolicy'
+    description: | 
+      MaintenanceUpdatePolicy defines the policy for system updates.
+    properties:
+      - !ruby/object:Api::Type::Array
+        name: 'maintenanceWindows'
+        description: |
+          Preferred windows to perform maintenance. Currently limited to 1.
+        item_type: !ruby/object:Api::Type::NestedObject
+          name: 'maintenanceWindow'
+          description: |
+            specifies a preferred day and time for maintenance.
+          properties:
+            - !ruby/object:Api::Type::Enum
+              name: 'day'
+              description: |
+                Preferred day of the week for maintenance, e.g. MONDAY, TUESDAY, etc.
+              values:
+                - :MONDAY
+                - :TUESDAY
+                - :WEDNESDAY
+                - :THURSDAY
+                - :FRIDAY
+                - :SATURDAY
+                - :SUNDAY
+            - !ruby/object:Api::Type::NestedObject
+              name: 'startTime'
+              description: |
+                Preferred time to start the maintenance operation on the specified day. Maintenance will start within 1 hour of this time.
+              properties:
+                - !ruby/object:Api::Type::Integer
+                  name: hours
+                  description: |
+                    Hours of day in 24 hour format. Should be from 0 to 23.
+                - !ruby/object:Api::Type::Integer
+                  name: minutes
+                  description: |
+                    Minutes of hour of day. Currently, only the value 0 is supported.
+                - !ruby/object:Api::Type::Integer
+                  name: seconds
+                  description: |
+                    Seconds of minutes of the time. Currently, only the value 0 is supported.
+                - !ruby/object:Api::Type::Integer
+                  name: nanos
+                  description: |
+                    Fractions of seconds in nanoseconds. Currently, only the value 0 is supported.
+      - !ruby/object:Api::Type::Array
+        name: 'denyMaintenancePeriods'
+        description: |
+          Periods to deny maintenance. Currently limited to 1.
+        item_type: !ruby/object:Api::Type::NestedObject
+          name: 'denyMaintenancePeriod'
+          description: |
+            DenyMaintenancePeriod definition. Excepting emergencies, maintenance will not be scheduled to start within this deny period. The start_date must be less than the end_date.
+          properties:
+            - !ruby/object:Api::Type::NestedObject
+              name: 'startDate'
+              custom_flatten: 'templates/terraform/custom_flatten/alloydb_cluster_input_maintenance_update_policy_date_flatten.go.erb'
+              description: |
+                Deny period start date.
+                This can be:
+                * A full date, with non-zero year, month and day values.
+                * A month and day value, with a zero year for recurring.
+                Date matching this period will have to be the same or after the start.
+              properties:
+                - !ruby/object:Api::Type::Integer
+                  name: year
+                  description: |
+                    Year of the date. Must be from 1 to 9999, or 0 to specify a date without a year.
+                - !ruby/object:Api::Type::Integer
+                  name: month
+                  description: |
+                    Month of a year. Must be from 1 to 12, or 0 to specify a year without a month and day.
+                - !ruby/object:Api::Type::Integer
+                  name: day
+                  description: |
+                    Day of a month. Must be from 1 to 31 and valid for the year and month, or 0 to specify a year by itself or a year and month where the day isn't significant.
+            - !ruby/object:Api::Type::NestedObject
+              name: 'endDate'
+              custom_flatten: 'templates/terraform/custom_flatten/alloydb_cluster_input_maintenance_update_policy_date_flatten.go.erb'
+              description: |
+                Deny period end date.
+                This can be:
+                * A full date, with non-zero year, month and day values.
+                * A month and day value, with a zero year for recurring.
+                Date matching this period will have to be before the end.
+              properties:
+                - !ruby/object:Api::Type::Integer
+                  name: year
+                  description: |
+                    Year of the date. Must be from 1 to 9999, or 0 to specify a date without a year.
+                - !ruby/object:Api::Type::Integer
+                  name: month
+                  description: |
+                    Month of a year. Must be from 1 to 12, or 0 to specify a year without a month and day.
+                - !ruby/object:Api::Type::Integer
+                  name: day
+                  description: |
+                    Day of a month. Must be from 1 to 31 and valid for the year and month, or 0 to specify a year by itself or a year and month where the day isn't significant.
+            - !ruby/object:Api::Type::NestedObject
+              name: 'time'
+              description: |
+                Time in UTC when the deny period starts on start_date and ends on end_date.
+              properties:
+                - !ruby/object:Api::Type::Integer
+                  name: hours
+                  description: |
+                    Hours of day in 24 hour format. Should be from 0 to 23.
+                - !ruby/object:Api::Type::Integer
+                  name: minutes
+                  description: |
+                    Minutes of hour of day. Currently, only the value 0 is supported.
+                - !ruby/object:Api::Type::Integer
+                  name: seconds
+                  description: |
+                    Seconds of minutes of the time. Currently, only the value 0 is supported.
+                - !ruby/object:Api::Type::Integer
+                  name: nanos
+                  description: |
+                    Fractions of seconds in nanoseconds. Currently, only the value 0 is supported.
 virtual_fields:
   - !ruby/object:Api::Type::Enum
     name: 'deletion_policy'

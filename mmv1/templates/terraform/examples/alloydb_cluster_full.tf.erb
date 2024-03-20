@@ -39,6 +39,41 @@ resource "google_alloydb_cluster" "<%= ctx[:primary_resource_id] %>" {
     }
   }
 
+   maintenance_update_policy {
+    maintenance_windows = [
+      {
+        day = "WEDNESDAY"
+        start_time {
+          hours = 12
+          minutes = 0
+          seconds = 0
+          nanos = 0
+        }
+      }
+    ]
+
+    deny_maintenance_periods = [
+      {
+        start_date {
+          year = 2024
+          month = 3
+          day = 18
+        }
+        end_date {
+          year = 2024
+          month = 3
+          day = 25
+        }
+        time {
+          hours = 12
+          minutes = 34
+          seconds = 56
+          nanos = 0
+        }
+      }
+    ]
+   }
+
   labels = {
     test = "<%= ctx[:vars]['alloydb_cluster_name'] %>"
   }
