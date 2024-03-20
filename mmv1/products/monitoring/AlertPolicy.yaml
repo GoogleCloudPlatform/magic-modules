@@ -926,6 +926,7 @@ properties:
             name: period
             description: |
               Not more than one notification per period.
+              A duration in seconds with up to nine fractional digits, terminated by 's'. Example "60.5s".
       - !ruby/object:Api::Type::String
         name: autoClose
         description: |
