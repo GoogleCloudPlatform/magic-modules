@@ -587,6 +587,7 @@ properties:
                 immutable: true
       - !ruby/object:Api::Type::Boolean
         name: 'disableUpstreamValidation'
+        ignore_read: true
         description: |-
           If true, the remote repository upstream and upstream credentials will
           not be validated.
