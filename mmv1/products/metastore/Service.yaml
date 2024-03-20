@@ -250,7 +250,7 @@ properties:
         name: 'enabled'
         description: |
           Defines whether the scheduled backup is enabled. The default value is false.
-        default_value: false
+        default_from_api: true
       - !ruby/object:Api::Type::String
         name: 'cronSchedule'
         description: |
