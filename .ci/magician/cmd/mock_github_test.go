@@ -73,8 +73,8 @@ func (m *mockGithub) PostComment(prNumber string, comment string) error {
 	return nil
 }
 
-func (m *mockGithub) AddLabel(prNumber string, label string) error {
-	m.calledMethods["AddLabel"] = append(m.calledMethods["AddLabel"], []any{prNumber, label})
+func (m *mockGithub) AddLabels(prNumber string, labels []string) error {
+	m.calledMethods["AddLabels"] = append(m.calledMethods["AddLabels"], []any{prNumber, labels})
 	return nil
 }
 
