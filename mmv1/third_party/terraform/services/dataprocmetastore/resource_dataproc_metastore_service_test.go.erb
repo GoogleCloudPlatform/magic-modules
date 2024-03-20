@@ -53,7 +53,7 @@ resource "google_dataproc_metastore_service" "my_metastore" {
 `, name, tier)
 }
 
-func TestAccDataprocMetastoreService_dataprocMetastoreServiceScheduledBackupExample(t *testing.T) {
+func TestAccDataprocMetastoreService_dataprocMetastoreServiceScheduledBackupExampleUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -156,7 +156,7 @@ resource "google_dataproc_metastore_service" "backup" {
     time_zone       = "UTC"
     backup_location = "gs://${google_storage_bucket.bucket.name}"
   }
-  
+
   labels = {
     env = "test"
   }
