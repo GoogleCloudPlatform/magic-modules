@@ -264,7 +264,7 @@ properties:
         name: 'backupLocation'
         description: |
           A Cloud Storage URI of a folder, in the format gs://<bucket_name>/<path_inside_bucket>. A sub-folder <backup_folder> containing backup files will be stored below it.
-        required: true  
+        required: true
   - !ruby/object:Api::Type::NestedObject
     name: 'maintenanceWindow'
     description: |
