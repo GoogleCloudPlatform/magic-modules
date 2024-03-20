@@ -429,6 +429,7 @@ func TestAccInstanceGroupManager_resourceManagerTags(t *testing.T) {
 	t.Parallel()
 
 	tag_name := fmt.Sprintf("tf-test-igm-%s", acctest.RandString(t, 10))
+	template_name := fmt.Sprintf("tf-test-igm-%s", acctest.RandString(t, 10))
 	igm_name := fmt.Sprintf("tf-test-igm-%s", acctest.RandString(t, 10))
 	project_id := envvar.GetTestProjectFromEnv()
 
@@ -438,7 +439,7 @@ func TestAccInstanceGroupManager_resourceManagerTags(t *testing.T) {
 		CheckDestroy:             testAccCheckInstanceGroupManagerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccInstanceGroupManager_resourceManagerTags(tag_name, igm_name, project_id),
+				Config: testAccInstanceGroupManager_resourceManagerTags(template_name, tag_name, igm_name, project_id),
 			},
 			{
 				ResourceName:            "google_compute_instance_group_manager.igm-tags",
@@ -1843,7 +1844,7 @@ resource "google_compute_per_instance_config" "per-instance" {
 `, template, target, igm, perInstanceConfig)
 }
 
-func testAccInstanceGroupManager_resourceManagerTags(tag_name, igm_name, project_id string) string {
+func testAccInstanceGroupManager_resourceManagerTags(template_name, tag_name, igm_name, project_id string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family  = "debian-11"
@@ -1851,6 +1852,7 @@ data "google_compute_image" "my_image" {
 }
 
 resource "google_compute_instance_template" "igm-tags" {
+  name           = "%s"
   description    = "Terraform test instance template."
   machine_type   = "e2-medium"
 
@@ -1893,6 +1895,6 @@ resource "google_compute_instance_group_manager" "igm-tags" {
     }
   }
 }
-`, project_id, tag_name, tag_name, igm_name)
+`, template_name, project_id, tag_name, tag_name, igm_name)
 }
 
