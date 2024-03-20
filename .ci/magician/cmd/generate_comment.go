@@ -44,7 +44,7 @@ var (
 type Diff struct {
 	Title     string
 	Repo      string
-	DiffStats string
+	ShortStat string
 }
 
 type Errors struct {
@@ -187,31 +187,41 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	for _, repo := range []*source.Repo{&tpgRepo, &tpgbRepo, &tgcRepo, &tfoicsRepo} {
 		errors[repo.Title] = []string{}
 		repo.Branch = newBranch
+		repo.Cloned = true
 		if err := ctlr.Clone(repo); err != nil {
-			fmt.Println("Failed to clone repo: ", err)
-			errors[repo.Title] = append(errors[repo.Title], "Failed to clone repo")
-		} else {
-			repo.Cloned = true
+			fmt.Println("Failed to clone repo at new branch: ", err)
+			errors[repo.Title] = append(errors[repo.Title], "Failed to clone repo at new branch")
+			repo.Cloned = false
+		}
+		if err := ctlr.Fetch(repo, oldBranch); err != nil {
+			fmt.Println("Failed to fetch old branch: ", err)
+			errors[repo.Title] = append(errors[repo.Title], "Failed to clone repo at old branch")
+			repo.Cloned = false
 		}
 	}
 
 	diffs := []Diff{}
-	for _, repo := range []source.Repo{tpgRepo, tpgbRepo, tgcRepo, tfoicsRepo} {
+	for _, repo := range []*source.Repo{&tpgRepo, &tpgbRepo, &tgcRepo, &tfoicsRepo} {
 		if !repo.Cloned {
 			fmt.Println("Skipping diff; repo failed to clone: ", repo.Name)
 			continue
 		}
-		diffStats, err := computeDiff(&repo, oldBranch, ctlr)
+		shortStat, err := ctlr.DiffShortStat(repo, oldBranch, newBranch)
 		if err != nil {
-			fmt.Println("diffing repo: ", err)
-			errors[repo.Title] = append(errors[repo.Title], "Failed to compute repo diff stats")
+			fmt.Println("diffing repo shortstats: ", err)
+			errors[repo.Title] = append(errors[repo.Title], "Failed to compute repo diff short stats")
 		}
-		if diffStats != "" {
+		if shortStat != "" {
 			diffs = append(diffs, Diff{
 				Title:     repo.Title,
 				Repo:      repo.Name,
-				DiffStats: diffStats,
+				ShortStat: shortStat,
 			})
+			repo.ChangedFiles, err = ctlr.DiffNameOnly(repo, oldBranch, newBranch)
+			if err != nil {
+				fmt.Println("diffing repo nameonly: ", err)
+				errors[repo.Title] = append(errors[repo.Title], "Failed to compute repo changed filenames")
+			}
 		}
 	}
 	data.Diffs = diffs
@@ -360,18 +370,6 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 		fmt.Println("Comment: ", message)
 		os.Exit(1)
 	}
-}
-
-func computeDiff(repo *source.Repo, oldBranch string, ctlr *source.Controller) (string, error) {
-	if err := ctlr.Fetch(repo, oldBranch); err != nil {
-		return "", err
-	}
-	// Get shortstat summary of the diff
-	diff, err := ctlr.Diff(repo, oldBranch, repo.Branch)
-	if err != nil {
-		return "", err
-	}
-	return strings.TrimSuffix(diff, "\n"), nil
 }
 
 // Build the diff processor for tpg or tpgb
