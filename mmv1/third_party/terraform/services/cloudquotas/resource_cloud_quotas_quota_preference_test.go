@@ -59,10 +59,10 @@ func TestAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_up
 func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 		resource "google_project" "new_project" {
-			project_id 		= "tf-test%{random_suffix}"
-			name       		= "tf-test%{random_suffix}"
-			org_id			= "%{org_id}"
-			billing_account	= "%{billing_account}"
+			project_id      = "tf-test%{random_suffix}"
+			name            = "tf-test%{random_suffix}"
+			org_id          = "%{org_id}"
+			billing_account = "%{billing_account}"
 		}
 
 		resource "google_project_service" "cloudquotas" {
@@ -88,17 +88,17 @@ func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_ba
 		}
 
 		resource "google_cloud_quotas_quota_preference" "my_preference"{
-			parent					= "projects/${google_project.new_project.project_id}"
-			name 					= "compute_googleapis_com-CPUS-per-project_us-central1"
-			dimensions				= { region = "us-central1" }
-			service					= "compute.googleapis.com"
-			quota_id				= "CPUS-per-project-region"
-			contact_email			= "testuser@gmail.com"
+			parent                = "projects/${google_project.new_project.project_id}"
+			name                  = "compute_googleapis_com-CPUS-per-project_us-central1"
+			dimensions            = { region = "us-central1" }
+			service               = "compute.googleapis.com"
+			quota_id              = "CPUS-per-project-region"
+			contact_email         = "testuser@gmail.com"
 			quota_config  {
-				preferred_value		= 70
+				preferred_value   = 70
 			}
-			ignore_safety_checks	= "QUOTA_DECREASE_PERCENTAGE_TOO_HIGH"
-			depends_on				= [
+			ignore_safety_checks  = "QUOTA_DECREASE_PERCENTAGE_TOO_HIGH"
+			depends_on            = [
 				time_sleep.wait_120_seconds
 			]
 		}
@@ -108,10 +108,10 @@ func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_ba
 func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_increaseQuota(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 		resource "google_project" "new_project" {
-			project_id 		= "tf-test%{random_suffix}"
-			name       		= "tf-test%{random_suffix}"
-			org_id			= "%{org_id}"
-			billing_account	= "%{billing_account}"
+			project_id      = "tf-test%{random_suffix}"
+			name            = "tf-test%{random_suffix}"
+			org_id          = "%{org_id}"
+			billing_account = "%{billing_account}"
 		}
 
 		resource "google_project_service" "cloudquotas" {
@@ -132,13 +132,13 @@ func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_in
 		}
 
 		resource "google_cloud_quotas_quota_preference" "my_preference"{
-			contact_email		= "testinguser2@google.com"
-			justification		= "Ignore. Increase quota for Terraform testing."
+			contact_email       = "testinguser2@google.com"
+			justification       = "Ignore. Increase quota for Terraform testing."
 			quota_config  {
 				preferred_value = 72
-				annotations 	= { label = "terraform" }
+				annotations     = { label = "terraform" }
 			}
-			depends_on			= [google_project_service.billing]
+			depends_on          = [google_project_service.billing]
 		}
 	`, context)
 }
@@ -146,10 +146,10 @@ func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_in
 func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_decreaseQuota(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 		resource "google_project" "new_project" {
-			project_id 		= "tf-test%{random_suffix}"
-			name       		= "tf-test%{random_suffix}"
-			org_id			= "%{org_id}"
-			billing_account	= "%{billing_account}"
+			project_id      = "tf-test%{random_suffix}"
+			name            = "tf-test%{random_suffix}"
+			org_id          = "%{org_id}"
+			billing_account = "%{billing_account}"
 		}
 
 		resource "google_project_service" "cloudquotas" {
@@ -170,11 +170,11 @@ func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_de
 		}
 
 		resource "google_cloud_quotas_quota_preference" "my_preference"{
-			ignore_safety_checks	= "QUOTA_DECREASE_PERCENTAGE_TOO_HIGH"
+			ignore_safety_checks = "QUOTA_DECREASE_PERCENTAGE_TOO_HIGH"
 			quota_config  {
-				preferred_value		= 65
+				preferred_value  = 65
 			}
-			depends_on				= [google_project_service.billing]
+			depends_on           = [google_project_service.billing]
 		}
 	`, context)
 }
