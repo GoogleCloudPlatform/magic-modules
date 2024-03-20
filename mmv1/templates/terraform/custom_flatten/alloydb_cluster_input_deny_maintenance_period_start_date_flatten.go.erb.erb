@@ -18,14 +18,14 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
 	}
 	original := v.(map[string]interface{})
     transformed := map[string]interface{}{
-        "year": flattenAlloydbClusterMaintenanceUpdatePolicyDateYear(original["year"], d, config),
-        "month": flattenAlloydbClusterMaintenanceUpdatePolicyDateMonth(original["month"], d, config),
-        "day": flattenAlloydbClusterMaintenanceUpdatePolicyDateDay(original["day"], d, config),
+        "year": flattenAlloydbClusterDenyMaintenancePeriodStartDateYear(original["year"], d, config),
+        "month": flattenAlloydbClusterDenyMaintenancePeriodStartDateMonth(original["month"], d, config),
+        "day": flattenAlloydbClusterDenyMaintenancePeriodStartDateDay(original["day"], d, config),
     }
 	return transformed 
 }
 
-func flattenAlloydbClusterMaintenanceUpdatePolicyDateYear(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+func flattenAlloydbClusterDenyMaintenancePeriodStartDateYear(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
     // Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
 		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
@@ -48,7 +48,7 @@ func flattenAlloydbClusterMaintenanceUpdatePolicyDateYear(v interface{}, d *sche
 	return v // let terraform core handle it otherwise
 }
 
-func flattenAlloydbClusterMaintenanceUpdatePolicyDateMonth(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+func flattenAlloydbClusterDenyMaintenancePeriodStartDateMonth(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
     // Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
 		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
@@ -71,7 +71,7 @@ func flattenAlloydbClusterMaintenanceUpdatePolicyDateMonth(v interface{}, d *sch
 	return v // let terraform core handle it otherwise
 }
 
-func flattenAlloydbClusterMaintenanceUpdatePolicyDateDay(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+func flattenAlloydbClusterDenyMaintenancePeriodStartDateDay(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
     // Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
 		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {

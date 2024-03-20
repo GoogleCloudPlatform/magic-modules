@@ -25,13 +25,12 @@ if backupSource != nil || continuousBackupSource != nil {
 
 	// Copy obj which contains the cluster into a cluster map
 	cluster := make(map[string]interface{})
-	for k,v := range obj {
+	for k, v := range obj {
 		cluster[k] = v
 	}
 	restoreClusterRequestBody["cluster"] = cluster
 	obj = restoreClusterRequestBody
 }
-
 
 // Read the secondary cluster config to call the api for creating secondary cluster
 
@@ -51,7 +50,7 @@ if clusterType == "SECONDARY" {
 		// Use createsecondary API if this is a secondary cluster
 		url = strings.Replace(url, "clusters?clusterId", "clusters:createsecondary?cluster_id", 1)
 
-	// Validation error if secondary_config is not defined
+		// Validation error if secondary_config is not defined
 	} else {
 		return fmt.Errorf("Error creating cluster. Can not create secondary cluster without secondary_config field.")
 	}
@@ -65,21 +64,21 @@ if secondaryConfig != nil {
 }
 
 // Read the maintenance update policy config from obj and validate the input variables
-var maintenanceUpdatePolicy interface{}
+var maintenanceUpdatePolicy map[string]interface{}
 if val, ok := obj["maintenanceUpdatePolicy"]; ok {
 	maintenanceUpdatePolicy = val.(map[string]interface{})
-    
+
 	// Validate maintenance window variables
 	if maintenanceUpdatePolicy["maintenanceWindows"] != nil {
-	  mws := maintenanceUpdatePolicy["maintenanceWindows"].([]interface{})
-	  for _, mw := range mws {
-		maintenanceWindow := mw.(map[string]interface{})
-		if maintenanceWindow["day"] == nil || maintenanceWindow["startTime"] == nil {
-			return fmt.Errorf("Error creating cluster. Both \"day\" and \"startTime\" are required if attempting to configure maintenance windows, otherwiese remove the maintenance_windows.")
+		mws := maintenanceUpdatePolicy["maintenanceWindows"].([]interface{})
+		for _, mw := range mws {
+			maintenanceWindow := mw.(map[string]interface{})
+			if maintenanceWindow["day"] == nil || maintenanceWindow["startTime"] == nil {
+				return fmt.Errorf("Error creating cluster. Both \"day\" and \"startTime\" are required if attempting to configure maintenance windows, otherwiese remove the maintenance_windows.")
+			}
 		}
-	  }
 	}
-	
+
 	// Validate deny maintenance period variables
 	if maintenanceUpdatePolicy["denyMaintenancePeriods"] != nil {
 		dps := maintenanceUpdatePolicy["denyMaintenancePeriods"].([]interface{})
