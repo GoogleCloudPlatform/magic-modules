@@ -103,8 +103,6 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'artifact_registry_repository_remote_custom'
     primary_resource_id: 'my-repo'
-    ignore_read_extra:
-      - 'disable_upstream_validation'
     vars:
       repository_id: 'example-custom-remote'
       description: 'example remote docker repository with credentials'
@@ -531,8 +529,7 @@ properties:
                 immutable: true
       - !ruby/object:Api::Type::Boolean
         name: 'disableUpstreamValidation'
-        custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
-        default_value: false
+        ignore_read: true
         description: |-
           If true, the remote repository upstream and upstream credentials will
           not be validated.
