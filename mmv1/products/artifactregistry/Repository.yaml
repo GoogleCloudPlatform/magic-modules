@@ -101,7 +101,17 @@ examples:
       repository_id: 'my-repository'
       description: 'example docker repository with cleanup policies'
   - !ruby/object:Provider::Terraform::Examples
-    name: 'artifact_registry_repository_remote_custom'
+    name: 'artifact_registry_repository_remote_dockerhub_auth'
+    primary_resource_id: 'my-repo'
+    vars:
+      repository_id: 'example-custom-remote'
+      description: 'example remote docker repository with credentials'
+      secret_id: 'example-secret'
+      secret_resource_id: 'example-custom-remote-secret'
+      username: 'remote-username'
+      secret_data: 'remote-password'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'artifact_registry_repository_remote_docker_custom_auth'
     primary_resource_id: 'my-repo'
     vars:
       repository_id: 'example-custom-remote'
@@ -393,9 +403,23 @@ properties:
             description: |-
               Address of the remote repository.
             immutable: true
+            conflicts:
+              - remoteRepositoryConfig.0.docker_repository.0.custom_repository
             values:
               - :DOCKER_HUB
-            default_value: :DOCKER_HUB
+          - !ruby/object:Api::Type::NestedObject
+            name: 'customRepository'
+            description: |-
+              Settings for a remote repository with a custom uri.
+            immutable: true
+            conflicts:
+              - remoteRepositoryConfig.0.docker_repository.0.public_repository
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'uri'
+                description: |-
+                  Specific uri to the registry, e.g. `"https://registry-1.docker.io"`
+                immutable: true
       - !ruby/object:Api::Type::NestedObject
         name: 'mavenRepository'
         exactly_one_of:
@@ -416,9 +440,23 @@ properties:
             description: |-
               Address of the remote repository.
             immutable: true
+            conflicts:
+              - remoteRepositoryConfig.0.maven_repository.0.custom_repository
             values:
               - :MAVEN_CENTRAL
-            default_value: :MAVEN_CENTRAL
+          - !ruby/object:Api::Type::NestedObject
+            name: 'customRepository'
+            description: |-
+              Settings for a remote repository with a custom uri.
+            immutable: true
+            conflicts:
+              - remoteRepositoryConfig.0.maven_repository.0.public_repository
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'uri'
+                description: |-
+                  Specific uri to the registry, e.g. `"https://repo.maven.apache.org/maven2"`
+                immutable: true
       - !ruby/object:Api::Type::NestedObject
         name: 'npmRepository'
         exactly_one_of:
@@ -439,9 +477,23 @@ properties:
             description: |-
               Address of the remote repository.
             immutable: true
+            conflicts:
+              - remoteRepositoryConfig.0.npm_repository.0.custom_repository
             values:
               - :NPMJS
-            default_value: :NPMJS
+          - !ruby/object:Api::Type::NestedObject
+            name: 'customRepository'
+            description: |-
+              Settings for a remote repository with a custom uri.
+            immutable: true
+            conflicts:
+              - remoteRepositoryConfig.0.npm_repository.0.public_repository
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'uri'
+                description: |-
+                  Specific uri to the registry, e.g. `"https://registry.npmjs.org"`
+                immutable: true
       - !ruby/object:Api::Type::NestedObject
         name: 'pythonRepository'
         exactly_one_of:
@@ -462,9 +514,23 @@ properties:
             description: |-
               Address of the remote repository.
             immutable: true
+            conflicts:
+              - remoteRepositoryConfig.0.python_repository.0.custom_repository
             values:
               - :PYPI
-            default_value: :PYPI
+          - !ruby/object:Api::Type::NestedObject
+            name: 'customRepository'
+            description: |-
+              Settings for a remote repository with a custom uri.
+            immutable: true
+            conflicts:
+              - remoteRepositoryConfig.0.python_repository.0.public_repository
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'uri'
+                description: |-
+                  Specific uri to the registry, e.g. `"https://pypi.io"`
+                immutable: true
       - !ruby/object:Api::Type::NestedObject
         name: 'yumRepository'
         exactly_one_of:
