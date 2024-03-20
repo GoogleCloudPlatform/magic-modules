@@ -68,28 +68,23 @@ func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_ba
 		resource "google_project_service" "cloudquotas" {
 			project  	= google_project.new_project.project_id
 			service 	= "cloudquotas.googleapis.com"
-			depends_on	= [google_project.new_project]
 		}
 
 		resource "google_project_service" "compute" {
 			project  	= google_project.new_project.project_id
 			service 	= "compute.googleapis.com"
-			depends_on	= [google_project.new_project]
+			depends_on	= [google_project_service.cloudquotas]
 		}
 
 		resource "google_project_service" "billing" {
 			project  	= google_project.new_project.project_id
 			service 	= "cloudbilling.googleapis.com"
-			depends_on	= [google_project.new_project]
+			depends_on	= [google_project_service.compute]
 		}
 		
 		resource "time_sleep" "wait_120_seconds" {
 			create_duration	= "120s"
-			depends_on		= [
-				google_project_service.cloudquotas,
-				google_project_service.compute,
-				google_project_service.billing, 
-			]
+			depends_on		= [google_project_service.billing]
 		}
 
 		resource "google_cloud_quotas_quota_preference" "my_preference"{
@@ -122,19 +117,18 @@ func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_in
 		resource "google_project_service" "cloudquotas" {
 			project  	= google_project.new_project.project_id
 			service 	= "cloudquotas.googleapis.com"
-			depends_on	= [google_project.new_project]
 		}
 
 		resource "google_project_service" "compute" {
 			project  	= google_project.new_project.project_id
 			service 	= "compute.googleapis.com"
-			depends_on	= [google_project.new_project]
+			depends_on	= [google_project_service.cloudquotas]
 		}
 
 		resource "google_project_service" "billing" {
 			project  	= google_project.new_project.project_id
 			service 	= "cloudbilling.googleapis.com"
-			depends_on	= [google_project.new_project]
+			depends_on	= [google_project_service.compute]
 		}
 
 		resource "google_cloud_quotas_quota_preference" "my_preference"{
@@ -144,11 +138,7 @@ func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_in
 				preferred_value = 72
 				annotations 	= { label = "terraform" }
 			}
-			depends_on		= [
-				google_project_service.cloudquotas,
-				google_project_service.compute,
-				google_project_service.billing, 
-			]
+			depends_on			= [google_project_service.billing]
 		}
 	`, context)
 }
@@ -165,19 +155,18 @@ func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_de
 		resource "google_project_service" "cloudquotas" {
 			project  	= google_project.new_project.project_id
 			service 	= "cloudquotas.googleapis.com"
-			depends_on	= [google_project.new_project]
 		}
 
 		resource "google_project_service" "compute" {
 			project  	= google_project.new_project.project_id
 			service 	= "compute.googleapis.com"
-			depends_on	= [google_project.new_project]
+			depends_on	= [google_project_service.cloudquotas]
 		}
 
 		resource "google_project_service" "billing" {
 			project  	= google_project.new_project.project_id
 			service 	= "cloudbilling.googleapis.com"
-			depends_on	= [google_project.new_project]
+			depends_on	= [google_project_service.compute]
 		}
 
 		resource "google_cloud_quotas_quota_preference" "my_preference"{
@@ -185,11 +174,7 @@ func testAccCloudQuotasQuotaPreference_cloudquotasQuotaPreferenceBasicExample_de
 			quota_config  {
 				preferred_value		= 65
 			}
-			depends_on				= [
-				google_project_service.cloudquotas,
-				google_project_service.compute,
-				google_project_service.billing, 
-			]
+			depends_on				= [google_project_service.billing]
 		}
 	`, context)
 }
