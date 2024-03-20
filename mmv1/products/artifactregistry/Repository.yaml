@@ -527,6 +527,11 @@ properties:
                   remote repository. Must be in the format of
                   `projects/{project}/secrets/{secret}/versions/{version}`.
                 immutable: true
+      - !ruby/object:Api::Type::Boolean
+        name: 'disableUpstreamValidation'
+        description: |-
+          If true, the remote repository upstream and upstream credentials will
+          not be validated.
   - !ruby/object:Api::Type::Boolean
     name: 'cleanupPolicyDryRun'
     description: |-
