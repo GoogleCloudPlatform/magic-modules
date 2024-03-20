@@ -70,7 +70,7 @@ func NewMockRunner() MockRunner {
 			"/mock/dir/magic-modules git [diff HEAD origin/main tools/missing-test-detector] map[]":                                                                                               "",
 			"/mock/dir/magic-modules/tools/diff-processor bin/diff-processor [breaking-changes] map[]":                                                                                            "",
 			"/mock/dir/magic-modules/tools/diff-processor make [build] " + sortedEnvString(diffProcessorEnv):                                                                                      "",
-			"/mock/dir/magic-modules/tools/diff-processor bin/diff-processor [add-labels 123456] map[GITHUB_TOKEN_MAGIC_MODULES:*******]":                                                         "",
+			"/mock/dir/magic-modules/tools/diff-processor bin/diff-processor [changed-schema-labels] map[]":                                                                                       "[\"service/google-x\"]",
 			"/mock/dir/magic-modules/tools/missing-test-detector go [mod edit -replace google/provider/new=/mock/dir/tpgb] map[]":                                                                 "",
 			"/mock/dir/magic-modules/tools/missing-test-detector go [mod edit -replace google/provider/old=/mock/dir/tpgbold] map[]":                                                              "",
 			"/mock/dir/magic-modules/tools/missing-test-detector go [mod tidy] map[]":                                                                                                             "",

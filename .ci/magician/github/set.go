@@ -74,16 +74,16 @@ func (gh *Client) RequestPullRequestReviewer(prNumber, assignee string) error {
 	return nil
 }
 
-func (gh *Client) AddLabel(prNumber, label string) error {
+func (gh *Client) AddLabels(prNumber string, labels []string) error {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/%s/labels", prNumber)
 
 	body := map[string][]string{
-		"labels": {label},
+		"labels": labels,
 	}
 	err := utils.RequestCall(url, "POST", gh.token, nil, body)
 
 	if err != nil {
-		return fmt.Errorf("failed to add %s label: %s", label, err)
+		return fmt.Errorf("failed to add %q labels: %s", labels, err)
 	}
 
 	return nil

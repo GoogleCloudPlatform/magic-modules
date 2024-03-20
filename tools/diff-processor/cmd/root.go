@@ -21,7 +21,7 @@ func newRootCmd() (*cobra.Command, *rootOptions, error) {
 		SilenceErrors: true,
 	}
 	cmd.AddCommand(newBreakingChangesCmd(o))
-	cmd.AddCommand(newAddLabelsCmd(o))
+	cmd.AddCommand(newChangedSchemaLabelsCmd(o))
 	return cmd, o, nil
 }
 
