@@ -17,11 +17,11 @@ import projects.googleCloudRootProject
 class BuildConfigurationFeatureTests {
     @Test
     fun buildShouldFailOnError() {
-        val project = googleCloudRootProject(testContextParameters())
+        val root = googleCloudRootProject(testContextParameters())
 
-        val gaProject = getSubProject(project, gaProjectName)
-        val betaProject = getSubProject(project, betaProjectName)
-        val projectSweeperProject = getSubProject(project, projectSweeperProjectName)
+        val gaProject = getSubProject(root, gaProjectName)
+        val betaProject = getSubProject(root, betaProjectName)
+        val projectSweeperProject = getSubProject(root, projectSweeperProjectName)
 
         (gaProject.subProjects + betaProject.subProjects + projectSweeperProject.subProjects).forEach{p ->
             p.buildTypes.forEach{bt ->
@@ -32,11 +32,11 @@ class BuildConfigurationFeatureTests {
 
     @Test
     fun buildShouldHaveGoTestFeature() {
-        val project = googleCloudRootProject(testContextParameters())
+        val root = googleCloudRootProject(testContextParameters())
 
-        val gaProject = getSubProject(project, gaProjectName)
-        val betaProject = getSubProject(project, betaProjectName)
-        val projectSweeperProject = getSubProject(project, projectSweeperProjectName)
+        val gaProject = getSubProject(root, gaProjectName)
+        val betaProject = getSubProject(root, betaProjectName)
+        val projectSweeperProject = getSubProject(root, projectSweeperProjectName)
 
         (gaProject.subProjects + betaProject.subProjects + projectSweeperProject.subProjects).forEach{p ->
             var exists: ArrayList<Boolean> = arrayListOf()

@@ -15,11 +15,11 @@ import projects.googleCloudRootProject
 class VcsTests {
     @Test
     fun buildsHaveCleanCheckOut() {
-        val project = googleCloudRootProject(testContextParameters())
+        val root = googleCloudRootProject(testContextParameters())
 
-        val gaProject = getSubProject(project, gaProjectName)
-        val betaProject = getSubProject(project, betaProjectName)
-        val projectSweeperProject = getSubProject(project, betaProjectName)
+        val gaProject = getSubProject(root, gaProjectName)
+        val betaProject = getSubProject(root, betaProjectName)
+        val projectSweeperProject = getSubProject(root, betaProjectName)
 
         val allProjects = arrayListOf(gaProject, betaProject, projectSweeperProject)
 

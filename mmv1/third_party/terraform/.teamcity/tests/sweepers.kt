@@ -21,10 +21,10 @@ import projects.googleCloudRootProject
 class SweeperTests {
     @Test
     fun projectSweeperDoesNotSkipProjectSweep() {
-        val project = googleCloudRootProject(testContextParameters())
+        val root = googleCloudRootProject(testContextParameters())
 
         // Find Project sweeper project
-        val projectSweeperProject = getSubProject(project, projectSweeperProjectName)
+        val projectSweeperProject = getSubProject(root, projectSweeperProjectName)
 
         // For the project sweeper to be skipped, SKIP_PROJECT_SWEEPER needs a value
         // See https://github.com/GoogleCloudPlatform/magic-modules/blob/501429790939717ca6dce76dbf4b1b82aef4e9d9/mmv1/third_party/terraform/services/resourcemanager/resource_google_project_sweeper.go#L18-L26
@@ -37,17 +37,17 @@ class SweeperTests {
 
     @Test
     fun serviceSweepersSkipProjectSweeper() {
-        val project = googleCloudRootProject(testContextParameters())
+        val root = googleCloudRootProject(testContextParameters())
 
         // Find GA nightly test project
-        val gaNightlyTestProject = getNestedProjectFromRoot(project, gaProjectName, nightlyTestsProjectName)
+        val gaNightlyTestProject = getNestedProjectFromRoot(root, gaProjectName, nightlyTestsProjectName)
         // Find GA MM Upstream project
-        val gaMmUpstreamProject = getNestedProjectFromRoot(project, gaProjectName, mmUpstreamProjectName)
+        val gaMmUpstreamProject = getNestedProjectFromRoot(root, gaProjectName, mmUpstreamProjectName)
 
         // Find Beta nightly test project
-        val betaNightlyTestProject = getNestedProjectFromRoot(project, betaProjectName, nightlyTestsProjectName)
+        val betaNightlyTestProject = getNestedProjectFromRoot(root, betaProjectName, nightlyTestsProjectName)
         // Find Beta MM Upstream project
-        val betaMmUpstreamProject = getNestedProjectFromRoot(project, betaProjectName, mmUpstreamProjectName)
+        val betaMmUpstreamProject = getNestedProjectFromRoot(root, betaProjectName, mmUpstreamProjectName)
 
         val allProjects: ArrayList<Project> = arrayListOf(gaNightlyTestProject, gaMmUpstreamProject, betaNightlyTestProject, betaMmUpstreamProject)
         allProjects.forEach{ project ->
@@ -64,10 +64,10 @@ class SweeperTests {
 
     @Test
     fun gaNightlyProjectServiceSweeperRunsInGoogle() {
-        val project = googleCloudRootProject(testContextParameters())
+        val root = googleCloudRootProject(testContextParameters())
 
         // Find GA nightly test project
-        val gaNightlyTestProject = getNestedProjectFromRoot(project, gaProjectName, nightlyTestsProjectName)
+        val gaNightlyTestProject = getNestedProjectFromRoot(root, gaProjectName, nightlyTestsProjectName)
 
         // Find sweeper inside
         val sweeper = getBuildFromProject(gaNightlyTestProject, ServiceSweeperName)
@@ -79,10 +79,10 @@ class SweeperTests {
 
     @Test
     fun betaNightlyProjectServiceSweeperRunsInGoogleBeta() {
-        val project = googleCloudRootProject(testContextParameters())
+        val root = googleCloudRootProject(testContextParameters())
 
         // Find Beta nightly test project
-        val betaNightlyTestProject = getNestedProjectFromRoot(project, betaProjectName, nightlyTestsProjectName)
+        val betaNightlyTestProject = getNestedProjectFromRoot(root, betaProjectName, nightlyTestsProjectName)
 
         // Find sweeper inside
         val sweeper: BuildType = getBuildFromProject(betaNightlyTestProject, ServiceSweeperName)

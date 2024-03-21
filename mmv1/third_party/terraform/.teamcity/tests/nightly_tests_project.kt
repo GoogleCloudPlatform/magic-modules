@@ -17,13 +17,13 @@ import projects.googleCloudRootProject
 class NightlyTestProjectsTests {
     @Test
     fun allBuildsShouldHaveTrigger() {
-        val project = googleCloudRootProject(testContextParameters())
+        val root = googleCloudRootProject(testContextParameters())
 
         // Find GA nightly test project
-        var gaNightlyTestProject = getNestedProjectFromRoot(project, gaProjectName, nightlyTestsProjectName)
+        var gaNightlyTestProject = getNestedProjectFromRoot(root, gaProjectName, nightlyTestsProjectName)
 
         // Find Beta nightly test project
-        var betaNightlyTestProject = getNestedProjectFromRoot(project, betaProjectName, nightlyTestsProjectName)
+        var betaNightlyTestProject = getNestedProjectFromRoot(root, betaProjectName, nightlyTestsProjectName)
 
         // Make assertions about builds in both nightly test projects
         (gaNightlyTestProject.buildTypes + betaNightlyTestProject.buildTypes).forEach{bt ->
