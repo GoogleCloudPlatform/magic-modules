@@ -51,7 +51,7 @@ func TestAccRedisCluster_updateReplicaCount(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// create cluster with replica count 1
-				Config: createOrUpdateRedisCluster(name /* replicaCount = */, 1 /* shardCount = */, 3, true, /* nodeType = */ "NODE_TYPE_UNSPECIFIED"),
+				Config: createOrUpdateRedisCluster(name /* replicaCount = */, 1 /* shardCount = */, 3, true, /* nodeType = */ ""),
 			},
 			{
 				ResourceName:      "google_redis_cluster.test",
@@ -61,7 +61,7 @@ func TestAccRedisCluster_updateReplicaCount(t *testing.T) {
 			},
 			{
 				// update replica count to 2
-				Config: createOrUpdateRedisCluster(name /* replicaCount = */, 2 /* shardCount = */, 3, true, /*nodeType = */ "NODE_TYPE_UNSPECIFIED"),
+				Config: createOrUpdateRedisCluster(name /* replicaCount = */, 2 /* shardCount = */, 3, true, /*nodeType = */ ""),
 			},
 			{
 				ResourceName:      "google_redis_cluster.test",
@@ -71,11 +71,11 @@ func TestAccRedisCluster_updateReplicaCount(t *testing.T) {
 			},
 			{
 				// clean up the resource
-				Config: createOrUpdateRedisCluster(name /* replicaCount = */, 2 /* shardCount = */, 3, false, /*nodeType = */ "NODE_TYPE_UNSPECIFIED"),
+				Config: createOrUpdateRedisCluster(name /* replicaCount = */, 2 /* shardCount = */, 3, false, /*nodeType = */ ""),
 			},
 			{
 				// update replica count to 0
-				Config: createOrUpdateRedisCluster(name /* replicaCount = */, 0 /* shardCount = */, 3, true, /*nodeType = */ "NODE_TYPE_UNSPECIFIED"),
+				Config: createOrUpdateRedisCluster(name /* replicaCount = */, 0 /* shardCount = */, 3, true, /*nodeType = */ ""),
 			},
 			{
 				ResourceName:      "google_redis_cluster.test",
@@ -85,7 +85,7 @@ func TestAccRedisCluster_updateReplicaCount(t *testing.T) {
 			},
 			{
 				// clean up the resource
-				Config: createOrUpdateRedisCluster(name /* replicaCount = */, 0 /* shardCount = */, 3, false, /*nodeType = */ "NODE_TYPE_UNSPECIFIED"),
+				Config: createOrUpdateRedisCluster(name /* replicaCount = */, 0 /* shardCount = */, 3, false, /*nodeType = */ ""),
 			},
 		},
 	})
