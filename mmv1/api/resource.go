@@ -13,8 +13,14 @@
 package api
 
 import (
+	"fmt"
+	"strings"
+
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/provider/terraform"
+	"golang.org/x/exp/slices"
 )
 
 type Resource struct {
@@ -63,13 +69,13 @@ type Resource struct {
 	// ====================
 	//
 	// [Optional] The "identity" URL of the resource. Defaults to:
-	// * base_url when the create_verb is :POST
-	// * self_link when the create_verb is :PUT  or :PATCH
+	// * base_url when the create_verb is POST
+	// * self_link when the create_verb is PUT  or PATCH
 	SelfLink string `yaml:"self_link"`
 
 	// [Optional] The URL used to creating the resource. Defaults to:
-	// * collection url when the create_verb is :POST
-	// * self_link when the create_verb is :PUT or :PATCH
+	// * collection url when the create_verb is POST
+	// * self_link when the create_verb is PUT or PATCH
 	CreateUrl string `yaml:"create_url"`
 
 	// [Optional] The URL used to delete the resource. Defaults to the self
@@ -79,16 +85,16 @@ type Resource struct {
 	// [Optional] The URL used to update the resource. Defaults to the self
 	// link.
 	UpdateUrl string `yaml:"update_url"`
-	// [Optional] The HTTP verb used during create. Defaults to :POST.
+	// [Optional] The HTTP verb used during create. Defaults to POST.
 	CreateVerb string `yaml:"create_verb"`
 
-	// [Optional] The HTTP verb used during read. Defaults to :GET.
+	// [Optional] The HTTP verb used during read. Defaults to GET.
 	ReadVerb string `yaml:"read_verb"`
 
-	// [Optional] The HTTP verb used during update. Defaults to :PUT.
+	// [Optional] The HTTP verb used during update. Defaults to PUT.
 	UpdateVerb string `yaml:"update_verb"`
 
-	// [Optional] The HTTP verb used during delete. Defaults to :DELETE.
+	// [Optional] The HTTP verb used during delete. Defaults to DELETE.
 	DeleteVerb string `yaml:"delete_verb"`
 
 	// [Optional] Additional Query Parameters to append to GET. Defaults to ""
@@ -203,7 +209,7 @@ type Resource struct {
 	// If true, skip sweeper generation for this resource
 	SkipSweeper bool `yaml:"skip_sweeper"`
 
-	Timeouts Timeouts
+	Timeouts *Timeouts
 
 	// An array of function names that determine whether an error is retryable.
 	ErrorRetryPredicates []string `yaml:"error_retry_predicates"`
@@ -267,6 +273,8 @@ type Resource struct {
 	// Add a deprecation message for a resource that's been deprecated in the API.
 	DeprecationMessage string `yaml:"deprecation_message"`
 
+	Async *OpAsync
+
 	Properties []*Type
 
 	Parameters []*Type
@@ -291,4 +299,468 @@ func (r *Resource) setResourceMetada(properties []*Type) {
 	for _, property := range properties {
 		property.ResourceMetadata = r
 	}
+}
+
+// ====================
+// Custom Getters and Setters
+// ====================
+
+// Returns all properties and parameters including the ones that are
+// excluded. This is used for PropertyOverride validation
+
+// TODO: remove the ruby function name
+// def all_properties
+func (r Resource) AllProperties() []*Type {
+	return google.Concat(r.Properties, r.Parameters)
+}
+
+// def properties_with_excluded
+func (r Resource) PropertiesWithExcluded() []*Type {
+	return r.Properties
+}
+
+// def properties
+func (r Resource) UserProperites() []*Type {
+	return google.Reject(r.Properties, func(p *Type) bool {
+		return p.Exclude
+	})
+}
+
+// def parameters
+func (r Resource) UserParameters() []*Type {
+	return google.Reject(r.Parameters, func(p *Type) bool {
+		return p.Exclude
+	})
+}
+
+// Return the user-facing properties in client tools; this ends up meaning
+// both properties and parameters but without any that are excluded due to
+// version mismatches or manual exclusion
+
+// def all_user_properties
+func (r Resource) AllUserProperties() []*Type {
+	return google.Concat(r.UserProperites(), r.UserParameters())
+}
+
+// def required_properties
+func (r Resource) RequiredProperties() []*Type {
+	return google.Select(r.AllUserProperties(), func(p *Type) bool {
+		return p.Required
+	})
+}
+
+// def all_nested_properties(props)
+func allNestedProperties(props []*Type) []*Type {
+	nested := props
+	for _, prop := range props {
+		if nestedProperties := prop.NestedProperties(); !prop.FlattenObject && nestedProperties != nil {
+			nested = google.Concat(nested, allNestedProperties(nestedProperties))
+		}
+	}
+
+	return nested
+}
+
+// sensitive_props
+func (r Resource) SensitiveProps() []*Type {
+	props := allNestedProperties(r.RootProperties())
+	return google.Select(props, func(p *Type) bool {
+		return p.Sensitive
+	})
+}
+
+// All settable properties in the resource.
+// Fingerprints aren't *really" settable properties, but they behave like one.
+// At Create, they have no value but they can just be read in anyways, and after a Read
+// they will need to be set in every Update.
+
+// def settable_properties
+func (r Resource) settableProperties() []*Type {
+	props := make([]*Type, 0)
+
+	props = google.Reject(r.AllUserProperties(), func(v *Type) bool {
+		return v.Output && !v.IsA("Fingerprint") && !v.IsA("KeyValueEffectiveLabels")
+	})
+
+	props = google.Reject(props, func(v *Type) bool {
+		return v.UrlParamOnly
+	})
+
+	props = google.Reject(props, func(v *Type) bool {
+		return v.IsA("KeyValueLabels") || v.IsA("KeyValueAnnotations")
+	})
+
+	return props
+}
+
+// Properties that will be returned in the API body
+
+// def gettable_properties
+func (r Resource) GettableProperties() []*Type {
+	return google.Reject(r.AllUserProperties(), func(v *Type) bool {
+		return v.UrlParamOnly
+	})
+}
+
+// Returns the list of top-level properties once any nested objects with flatten_object
+// set to true have been collapsed
+
+// def root_properties
+func (r Resource) RootProperties() []*Type {
+	props := make([]*Type, 0)
+
+	for _, p := range r.AllUserProperties() {
+		if p.FlattenObject {
+			props = google.Concat(props, p.RootProperties())
+		} else {
+			props = append(props, p)
+		}
+	}
+	return props
+}
+
+// Return the product-level async object, or the resource-specific one
+// if one exists.
+
+// def async
+func (r Resource) GetAsync() *OpAsync {
+	if r.Async != nil {
+		return r.Async
+	}
+
+	return r.ProductMetadata.Async
+}
+
+// Return the resource-specific identity properties, or a best guess of the
+// `name` value for the resource.
+
+// def identity
+func (r Resource) GetIdentity() []*Type {
+	props := r.AllUserProperties()
+
+	if r.Identity != nil {
+		identities := google.Select(props, func(p *Type) bool {
+			return slices.Contains(r.Identity, p.Name)
+		})
+
+		slices.SortFunc(identities, func(a, b *Type) int {
+			return slices.Index(r.Identity, a.Name) - slices.Index(r.Identity, b.Name)
+		})
+
+		return identities
+	}
+
+	return google.Select(props, func(p *Type) bool {
+		return p.Name == "name"
+	})
+
+}
+
+// TODO Q1
+// def add_labels_related_fields(props, parent)
+//   props.each do |p|
+// 	if p.is_a? Api::Type::KeyValueLabels
+// 	  add_labels_fields(props, parent, p)
+// 	elsif p.is_a? Api::Type::KeyValueAnnotations
+// 	  add_annotations_fields(props, parent, p)
+// 	elsif (p.is_a? Api::Type::NestedObject) && !p.all_properties.nil?
+// 	  p.properties = add_labels_related_fields(p.all_properties, p)
+// 	end
+//   end
+//   props
+// end
+
+// def add_labels_fields(props, parent, labels)
+//   @custom_diff ||= []
+//   if parent.nil? || parent.flatten_object
+// 	@custom_diff.append('tpgresource.SetLabelsDiff')
+//   elsif parent.name == 'metadata'
+// 	@custom_diff.append('tpgresource.SetMetadataLabelsDiff')
+//   end
+
+//   props << build_terraform_labels_field('labels', parent, labels)
+//   props << build_effective_labels_field('labels', labels)
+
+//   // The effective_labels field is used to write to API, instead of the labels field.
+//   labels.ignore_write = true
+//   labels.description = "//{labels.description}\n\n//{get_labels_field_note(labels.name)}"
+//   return unless parent.nil?
+
+//   labels.immutable = false
+// end
+
+// def add_annotations_fields(props, parent, annotations)
+//   // The effective_annotations field is used to write to API,
+//   // instead of the annotations field.
+//   annotations.ignore_write = true
+//   note = get_labels_field_note(annotations.name)
+//   annotations.description = "//{annotations.description}\n\n//{note}"
+
+//   @custom_diff ||= []
+//   if parent.nil?
+// 	@custom_diff.append('tpgresource.SetAnnotationsDiff')
+//   elsif parent.name == 'metadata'
+// 	@custom_diff.append('tpgresource.SetMetadataAnnotationsDiff')
+//   end
+
+//   props << build_effective_labels_field('annotations', annotations)
+// end
+
+// def build_effective_labels_field(name, labels)
+//   description = "All of //{name} (key/value pairs)\
+// present on the resource in GCP, including the //{name} configured through Terraform,\
+// other clients and services."
+
+//   Api::Type::KeyValueEffectiveLabels.new(
+// 	name: "effective//{name.capitalize}",
+// 	output: true,
+// 	api_name: name,
+// 	description:,
+// 	min_version: labels.field_min_version,
+// 	update_verb: labels.update_verb,
+// 	update_url: labels.update_url,
+// 	immutable: labels.immutable
+//   )
+// end
+
+// def build_terraform_labels_field(name, parent, labels)
+//   description = "The combination of //{name} configured directly on the resource
+// and default //{name} configured on the provider."
+
+//   immutable = if parent.nil?
+// 				false
+// 			  else
+// 				labels.immutable
+// 			  end
+
+//   Api::Type::KeyValueTerraformLabels.new(
+// 	name: "terraform//{name.capitalize}",
+// 	output: true,
+// 	api_name: name,
+// 	description:,
+// 	min_version: labels.field_min_version,
+// 	ignore_write: true,
+// 	update_url: labels.update_url,
+// 	immutable:
+//   )
+// end
+
+// // Check if the resource has root "labels" field
+// def root_labels?
+//   root_properties.each do |p|
+// 	return true if p.is_a? Api::Type::KeyValueLabels
+//   end
+//   false
+// end
+
+// // Return labels fields that should be added to ImportStateVerifyIgnore
+// def ignore_read_labels_fields(props)
+//   fields = []
+//   props.each do |p|
+// 	if (p.is_a? Api::Type::KeyValueLabels) ||
+// 	   (p.is_a? Api::Type::KeyValueTerraformLabels) ||
+// 	   (p.is_a? Api::Type::KeyValueAnnotations)
+// 	  fields << p.terraform_lineage
+// 	elsif (p.is_a? Api::Type::NestedObject) && !p.all_properties.nil?
+// 	  fields.concat(ignore_read_labels_fields(p.all_properties))
+// 	end
+//   end
+//   fields
+// end
+
+// def get_labels_field_note(title)
+//   "**Note**: This field is non-authoritative, and will only manage the //{title} present " \
+// "in your configuration.
+// Please refer to the field `effective_//{title}` for all of the //{title} present on the resource."
+// end
+
+// ====================
+// Version-related methods
+// ====================
+
+// def min_version
+func (r Resource) MinVersionObj() *product.Version {
+	if r.MinVersion != "" {
+		return r.ProductMetadata.versionObj(r.MinVersion)
+	} else {
+		return r.ProductMetadata.lowestVersion()
+	}
+}
+
+// def not_in_version?(version)
+func (r Resource) NotInVersion(version *product.Version) bool {
+	return version.CompareTo(r.MinVersionObj()) < 0
+}
+
+// Recurses through all nested properties and parameters and changes their
+// 'exclude' instance variable if the property is at a version below the
+// one that is passed in.
+
+// def exclude_if_not_in_version!(version)
+func (r *Resource) ExcludeIfNotInVersion(version *product.Version) {
+	if !r.Exclude {
+		r.Exclude = r.NotInVersion(version)
+	}
+
+	if r.Properties != nil {
+		for _, p := range r.Properties {
+			p.ExcludeIfNotInVersion(version)
+		}
+	}
+
+	if r.Parameters != nil {
+		for _, p := range r.Parameters {
+			p.ExcludeIfNotInVersion(version)
+		}
+	}
+}
+
+// ====================
+// URL-related methods
+// ====================
+
+// Returns the "self_link_url" which is generally really the resource's GET
+// URL. In older resources generally, this was the self_link value & was the
+// product.base_url + resource.base_url + '/name'
+// In newer resources there is much less standardisation in terms of value.
+// Generally for them though, it's the product.base_url + resource.name
+
+// def self_link_url
+func (r Resource) SelfLinkUrl() string {
+	s := []string{r.ProductMetadata.BaseUrl, r.SelfLinkUri()}
+	return strings.Join(s, "")
+}
+
+// Returns the partial uri / relative path of a resource. In newer resources,
+// this is the name. This fn is named self_link_uri for consistency, but
+// could otherwise be considered to be "path"
+
+// def self_link_uri
+func (r Resource) SelfLinkUri() string {
+	// If the terms in this are not snake-cased, this will require
+	// an override in Terraform.
+	if r.SelfLink != "" {
+		return r.SelfLink
+	}
+
+	return strings.Join([]string{r.BaseUrl, "{{name}}"}, "/")
+}
+
+// def collection_url
+func (r Resource) CollectionUrl() string {
+	s := []string{r.ProductMetadata.BaseUrl, r.collectionUri()}
+	return strings.Join(s, "")
+}
+
+// def collection_uri
+func (r Resource) collectionUri() string {
+	return r.BaseUrl
+}
+
+// def create_uri
+func (r Resource) CreateUri() string {
+	if r.CreateUrl != "" {
+		return r.CreateUrl
+	}
+
+	if r.CreateVerb == "" || r.CreateVerb == "POST" {
+		return r.collectionUri()
+	}
+
+	return r.SelfLinkUri()
+}
+
+// def delete_uri
+func (r Resource) DeleteUri() string {
+	if r.DeleteUrl != "" {
+		return r.DeleteUrl
+	}
+
+	return r.SelfLinkUri()
+}
+
+// def resource_name
+func (r Resource) ResourceName() string {
+	return fmt.Sprintf("%s%s", r.ProductMetadata.Name, r.Name)
+}
+
+// Filter the properties to keep only the ones don't have custom update
+// method and group them by update url & verb.
+
+// def properties_without_custom_update(properties)
+func propertiesWithoutCustomUpdate(properties []*Type) []*Type {
+	return google.Select(properties, func(p *Type) bool {
+		return p.UpdateUrl == "" || p.UpdateVerb == "" || p.UpdateVerb == "NOOP"
+	})
+}
+
+// def update_body_properties
+func (r Resource) UpdateBodyProperties() []*Type {
+	updateProp := propertiesWithoutCustomUpdate(r.settableProperties())
+	if r.UpdateVerb == "PATCH" {
+		updateProp = google.Reject(updateProp, func(p *Type) bool {
+			return p.Immutable
+		})
+	}
+	return updateProp
+}
+
+// Handwritten TF Operation objects will be shaped like accessContextManager
+// while the Google Go Client will have a name like accesscontextmanager
+
+// def client_name_pascal
+func (r Resource) ClientNamePascal() string {
+	clientName := r.ProductMetadata.ClientName
+	if clientName == "" {
+		clientName = r.ProductMetadata.Name
+	}
+
+	return google.Camelize(clientName, "upper")
+}
+
+// In order of preference, use TF override,
+// general defined timeouts, or default Timeouts
+
+// def timeouts
+func (r Resource) GetTimeouts() *Timeouts {
+	timeoutsFiltered := r.Timeouts
+	if timeoutsFiltered == nil {
+		if async := r.GetAsync(); async != nil && async.Operation != nil {
+			timeoutsFiltered = async.Operation.Timeouts
+		}
+
+		if timeoutsFiltered == nil {
+			timeoutsFiltered = NewTimeouts()
+		}
+	}
+
+	return timeoutsFiltered
+}
+
+// def project?
+func (r Resource) HasProject() bool {
+	return strings.Contains(r.BaseUrl, "{{project}}") || strings.Contains(r.CreateUrl, "{{project}}")
+}
+
+// def region?
+func (r Resource) HasRegion() bool {
+	return strings.Contains(r.BaseUrl, "{{region}}") || strings.Contains(r.CreateUrl, "{{region}}")
+}
+
+// def zone?
+func (r Resource) HasZone() bool {
+	return strings.Contains(r.BaseUrl, "{{zone}}") || strings.Contains(r.CreateUrl, "{{zone}}")
+}
+
+// ====================
+// Debugging Methods
+// ====================
+
+// Prints a dot notation path to where the field is nested within the parent
+// object when called on a property. eg: parent.meta.label.foo
+// Redefined on Resource to terminate the calls up the parent chain.
+
+// def lineage
+func (r Resource) Lineage() string {
+	return r.Name
 }

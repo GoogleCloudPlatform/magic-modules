@@ -53,13 +53,13 @@ jobs:
         "state": "pending"
         }'
     - name: Checkout Repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
       with:
         repository: ${{ github.event.inputs.owner }}/${{ github.event.inputs.repo }}
         ref: ${{ github.event.inputs.branch }}
         fetch-depth: 2
     - name: Cache Go modules and build cache
-      uses: actions/cache@v3
+      uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
       with:
         path: |
           ~/go/pkg/mod
@@ -78,9 +78,9 @@ jobs:
         fi
     - name: Set up Go
       if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
-      uses: actions/setup-go@v4
+      uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
       with:
-        go-version: '^1.20'
+        go-version: '^1.21'
     - name: Build Terraform Google Conversion
       if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |
