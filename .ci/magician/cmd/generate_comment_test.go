@@ -305,6 +305,10 @@ func TestFileToResource(t *testing.T) {
 			path: "/google-beta/services/iam2/resource_iam_access_boundary_policy.go",
 			want: "google_iam_access_boundary_policy",
 		},
+		"resource file without starting slash": {
+			path: "google-beta/services/firebaserules/resource_firebaserules_release.go",
+			want: "google_firebaserules_release",
+		},
 
 		// Datasource files
 		"datasource file": {
@@ -332,6 +336,10 @@ func TestFileToResource(t *testing.T) {
 			path: "/google-beta/services/resourcemanager/data_source_iam_policy_test.go",
 			want: "google_iam_policy",
 		},
+		"datasource file without starting slash": {
+			path: "google/services/dns/data_source_dns_keys.go",
+			want: "google_dns_keys",
+		},
 
 		// Resource documentation
 		"files outside /r or /d directories are not resources": {
@@ -354,6 +362,10 @@ func TestFileToResource(t *testing.T) {
 			path: "/website/docs/r/iam_deny_policy.html.markdown",
 			want: "google_iam_deny_policy",
 		},
+		"resource docs without starting slash": {
+			path: "website/docs/d/cloudbuild_trigger.html.markdown",
+			want: "google_cloudbuild_trigger",
+		},
 
 		// Datasource documentation
 		"datasource docs": {
@@ -367,6 +379,10 @@ func TestFileToResource(t *testing.T) {
 		"datasource docs starting with iam_": {
 			path: "/website/docs/d/iam_role.html.markdown",
 			want: "google_iam_role",
+		},
+		"datasource docs without starting slash": {
+			path: "website/docs/d/beyondcorp_app_gateway.html.markdown",
+			want: "google_beyondcorp_app_gateway",
 		},
 	}
 

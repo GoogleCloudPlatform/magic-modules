@@ -593,7 +593,7 @@ func formatDiffComment(data diffCommentData) (string, error) {
 }
 
 var resourceFileRegexp = regexp.MustCompile(`^.*/services/[^/]+/(?:data_source_|resource_|iam_)(.*?)(?:_test|_sweeper|_iam_test|_generated_test|_internal_test)?.go`)
-var resourceDocsRegexp = regexp.MustCompile(`^.*/website/docs/(?:r|d)/(.*).html.markdown`)
+var resourceDocsRegexp = regexp.MustCompile(`^.*website/docs/(?:r|d)/(.*).html.markdown`)
 
 func fileToResource(path string) string {
 	var submatches []string
