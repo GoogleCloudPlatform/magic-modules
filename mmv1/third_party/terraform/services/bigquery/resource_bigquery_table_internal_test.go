@@ -523,12 +523,18 @@ var testUnitBigQueryDataTableIsChangableTestCases = []testUnitBigQueryDataTableJ
 		name:       "orderOfArrayChangesAndNameChanges",
 		jsonOld:    "[{\"name\": \"value1\", \"type\" : \"INTEGER\", \"mode\" : \"NULLABLE\", \"description\" : \"someVal\" }, {\"name\": \"value2\", \"type\" : \"BOOLEAN\", \"mode\" : \"NULLABLE\", \"description\" : \"someVal\" }]",
 		jsonNew:    "[{\"name\": \"value3\", \"type\" : \"BOOLEAN\", \"mode\" : \"NULLABLE\", \"description\" : \"newVal\" },  {\"name\": \"value1\", \"type\" : \"INTEGER\", \"mode\" : \"NULLABLE\", \"description\" : \"someVal\" }]",
-		changeable: true,
+		changeable: false,
 	},
 	{
 		name:       "renameRequiredColumn",
 		jsonOld:    "[{\"name\": \"value1\", \"type\" : \"INTEGER\", \"mode\" : \"REQUIRED\", \"description\" : \"someVal\" }]",
 		jsonNew:    "[{\"name\": \"value3\", \"type\" : \"INTEGER\", \"mode\" : \"REQUIRED\", \"description\" : \"someVal\" }]",
+		changeable: false,
+	},
+	{
+		name:       "renameNullableColumn",
+		jsonOld:    "[{\"name\": \"value1\", \"type\" : \"INTEGER\", \"mode\" : \"NULLABLE\", \"description\" : \"someVal\" }]",
+		jsonNew:    "[{\"name\": \"value3\", \"type\" : \"INTEGER\", \"mode\" : \"NULLABLE\", \"description\" : \"someVal\" }]",
 		changeable: false,
 	},
 	{
@@ -565,7 +571,7 @@ var testUnitBigQueryDataTableIsChangableTestCases = []testUnitBigQueryDataTableJ
 func TestUnitBigQueryDataTable_schemaIsChangable(t *testing.T) {
 	t.Parallel()
 	// Only top level column drops are changeable
-	skipNested := map[string]bool{"arraySizeDecreases": true, "orderOfArrayChangesAndNameChanges": true, "typeModeReqToNullAndColumnDropped": true}
+	skipNested := map[string]bool{"arraySizeDecreases": true, "typeModeReqToNullAndColumnDropped": true}
 	for _, testcase := range testUnitBigQueryDataTableIsChangableTestCases {
 		testcase.check(t)
 		if !skipNested[testcase.name] {

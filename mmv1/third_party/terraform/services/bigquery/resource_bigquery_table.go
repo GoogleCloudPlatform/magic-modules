@@ -261,6 +261,7 @@ func resourceBigQueryTableSchemaIsChangeable(old, new interface{}, topLevel bool
 	case []interface{}:
 		arrayOld := old.([]interface{})
 		arrayNew, ok := new.([]interface{})
+		droppedColumns := 0
 		if !ok {
 			// if not both arrays not changeable
 			return false, nil
@@ -285,11 +286,12 @@ func resourceBigQueryTableSchemaIsChangeable(old, new interface{}, topLevel bool
 			}
 		}
 		for key := range mapOld {
-			// dropping top level fields can happen in-place
+			// dropping top level columns can happen in-place
 			if _, ok := mapNew[key]; !ok {
 				if !topLevel {
 					return false, nil
 				}
+				droppedColumns += 1
 				continue
 			}
 			if isChangable, err :=
@@ -297,7 +299,8 @@ func resourceBigQueryTableSchemaIsChangeable(old, new interface{}, topLevel bool
 				return false, err
 			}
 		}
-		return true, nil
+		// only pure column drops allowed
+		return (droppedColumns == 0) || (len(arrayOld) == len(arrayNew)+droppedColumns), nil
 	case map[string]interface{}:
 		objectOld := old.(map[string]interface{})
 		objectNew, ok := new.(map[string]interface{})
