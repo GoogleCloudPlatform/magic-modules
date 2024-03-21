@@ -278,3 +278,21 @@ properties:
             values:
               - :ENCRYPTED_ONLY
               - :ALLOW_UNENCRYPTED_AND_ENCRYPTED
+  - !ruby/object:Api::Type::NestedObject
+    name: 'networkConfig'
+    description: |
+      Instance level network configuration.
+    properties:
+      - !ruby/object:Api::Type::Array
+        name: 'authorizedExternalNetworks'
+        description: |
+          A list of external networks authorized to access this instance.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'cidrRange'
+              description: 'CIDR range for one authorized network of the instance.'
+      - !ruby/object:Api::Type::Boolean
+        name: enablePublicIp
+        description: |
+          Enabling public ip for the instance.
