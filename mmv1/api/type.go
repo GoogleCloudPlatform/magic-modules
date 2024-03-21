@@ -135,7 +135,7 @@ type Type struct {
 
 	EnumValues []string `yaml:"enum_values"`
 
-	ItemType string `yaml:"item_type"`
+	ItemType *Type `yaml:"item_type"`
 
 	Resource string
 
