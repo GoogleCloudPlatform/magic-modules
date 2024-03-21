@@ -301,10 +301,8 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 				continue
 			}
 			for _, path := range repo.ChangedFiles {
-				fmt.Println("Checking file: ", path)
 				if r := fileToResource(path); r != "" {
 					affectedResources[r] = struct{}{}
-					fmt.Println("-- Resource: ", r)
 				}
 			}
 		}
