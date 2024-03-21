@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -289,6 +290,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 
 	// Compute additional service labels based on changed files
 	regexpLabels, err := labeler.BuildRegexLabels(labeler.EnrolledTeamsYaml)
+	affectedResources := map[string]struct{}{}
 	if err != nil {
 		fmt.Println("error building regexp labels: ", err)
 		errors["Other"] = append(errors["Other"], "Failed to parse service label mapping")
@@ -298,16 +300,15 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 				fmt.Println("Skipping changed file service labels; repo failed to clone: ", repo.Name)
 				continue
 			}
-			affectedResources := map[string]struct{}{}
 			for _, path := range repo.ChangedFiles {
 				if r := fileToResource(path); r != "" {
 					affectedResources[r] = struct{}{}
 				}
 			}
-			for _, label := range labeler.ComputeLabels(maps.Keys(affectedResources), regexpLabels) {
-				uniqueServiceLabels[label] = struct{}{}
-			}
 		}
+	}
+	for _, label := range labeler.ComputeLabels(maps.Keys(affectedResources), regexpLabels) {
+		uniqueServiceLabels[label] = struct{}{}
 	}
 
 	// Add service labels to PR
@@ -588,30 +589,29 @@ func formatDiffComment(data diffCommentData) (string, error) {
 	return sb.String(), nil
 }
 
+var resourceFileRegexp = regexp.MustCompile(`^.*/services/[^/]+/(?:data_source_|resource_|iam_)(.*?)(?:_test|_sweeper|_iam_test|_generated_test|_internal_test)?.go`)
+var resourceDocsRegexp = regexp.MustCompile(`^.*/website/docs/(?:r|d)/(.*).html.markdown`)
+
 func fileToResource(path string) string {
-	// Must be a Go file
-	path, isResource := strings.CutSuffix(path, ".go")
-	if !isResource {
+	var submatches []string
+	if strings.HasSuffix(path, ".go") {
+		submatches = resourceFileRegexp.FindStringSubmatch(path)
+	} else if strings.HasSuffix(path, ".html.markdown") {
+		submatches = resourceDocsRegexp.FindStringSubmatch(path)
+	}
+
+	if len(submatches) == 0 {
 		return ""
 	}
-	// Only consider the end of the path
-	path = path[strings.LastIndex(path, "/")+1:]
-	// Must start with `resource_` or `iam_`
-	if !strings.HasPrefix(path, "resource_") && !strings.HasPrefix(path, "iam_") {
-		return ""
+
+	// The regexes will each return the resource name as the first
+	// submatch, stripping any prefixes or suffixes.
+	resource := submatches[1]
+
+	if !strings.HasPrefix(resource, "google_") {
+		resource = "google_" + resource
 	}
-	if !isResource {
-		return ""
-	}
-	// Remove prefixes for iam & resources
-	path, _ = strings.CutPrefix(path, "resource_")
-	path, _ = strings.CutPrefix(path, "iam_")
-	// Remove prefixes & suffixes for test files, iam, and sweepers
-	path, _ = strings.CutSuffix(path, "_generated_test")
-	path, _ = strings.CutSuffix(path, "_iam_test")
-	path, _ = strings.CutSuffix(path, "_test")
-	path, _ = strings.CutSuffix(path, "_sweeper")
-	return "google_" + path
+	return resource
 }
 
 func pathChanged(path string, changedFiles []string) bool {
