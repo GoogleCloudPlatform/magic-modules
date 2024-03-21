@@ -6,7 +6,6 @@ description: |-
 
 # google\_cloudbuild\_trigger
 
-UPDATE
 To get more information about Cloudbuild Trigger, see:
 
 * [API documentation](https://cloud.google.com/build/docs/api/reference/rest/v1/projects.triggers)
