@@ -262,12 +262,6 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 		for _, serviceLabel := range serviceLabels {
 			uniqueServiceLabels[serviceLabel] = struct{}{}
 		}
-
-		err = cleanDiffProcessor(diffProcessorPath, rnr)
-		if err != nil {
-			fmt.Println("cleaning up diff processor: ", err)
-			errors[repo.Title] = append(errors[repo.Title], "The diff processor failed to clean up properly.")
-		}
 	}
 	breakingChangesSlice := maps.Keys(uniqueBreakingChanges)
 	sort.Strings(breakingChangesSlice)
@@ -376,6 +370,11 @@ func computeDiff(repo *source.Repo, oldBranch string, ctlr *source.Controller) (
 
 // Build the diff processor for tpg or tpgb
 func buildDiffProcessor(diffProcessorPath, providerLocalPath string, env map[string]string, rnr ExecRunner) error {
+	for _, path := range []string{"old", "new", "bin"} {
+		if err := rnr.RemoveAll(filepath.Join(diffProcessorPath, path)); err != nil {
+			return err
+		}
+	}
 	if err := rnr.PushDir(diffProcessorPath); err != nil {
 		return err
 	}
@@ -440,15 +439,6 @@ func changedSchemaLabels(prNumber int, currentLabels []string, diffProcessorPath
 		return nil, err
 	}
 	return labels, nil
-}
-
-func cleanDiffProcessor(diffProcessorPath string, rnr ExecRunner) error {
-	for _, path := range []string{"old", "new", "bin"} {
-		if err := rnr.RemoveAll(filepath.Join(diffProcessorPath, path)); err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 // Run the missing test detector and return the results.
