@@ -301,12 +301,15 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 				continue
 			}
 			for _, path := range repo.ChangedFiles {
+				fmt.Println("Checking file: ", path)
 				if r := fileToResource(path); r != "" {
 					affectedResources[r] = struct{}{}
+					fmt.Println("-- Resource: ", r)
 				}
 			}
 		}
 	}
+	fmt.Printf("affected resources based on changed files: %v\n", maps.Keys(affectedResources))
 	for _, label := range labeler.ComputeLabels(maps.Keys(affectedResources), regexpLabels) {
 		uniqueServiceLabels[label] = struct{}{}
 	}
