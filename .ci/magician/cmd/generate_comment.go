@@ -237,30 +237,29 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 		if err != nil {
 			fmt.Println("building diff processor: ", err)
 			errors[repo.Title] = append(errors[repo.Title], "The diff processor failed to build. This is usually due to the downstream provider failing to compile.")
-			continue
-		}
+		} else {
+			breakingChanges, err := computeBreakingChanges(diffProcessorPath, rnr)
+			if err != nil {
+				fmt.Println("computing breaking changes: ", err)
+				errors[repo.Title] = append(errors[repo.Title], "The diff processor crashed while computing breaking changes. This is usually due to the downstream provider failing to compile.")
+			}
+			for _, breakingChange := range breakingChanges {
+				uniqueBreakingChanges[breakingChange] = struct{}{}
+			}
 
-		breakingChanges, err := computeBreakingChanges(diffProcessorPath, rnr)
-		if err != nil {
-			fmt.Println("computing breaking changes: ", err)
-			errors[repo.Title] = append(errors[repo.Title], "The diff processor crashed while computing breaking changes. This is usually due to the downstream provider failing to compile.")
-		}
-		for _, breakingChange := range breakingChanges {
-			uniqueBreakingChanges[breakingChange] = struct{}{}
-		}
-
-		// If fetching the PR failed, Labels will be empty
-		labels := make([]string, len(pullRequest.Labels))
-		for i, label := range pullRequest.Labels {
-			labels[i] = label.Name
-		}
-		serviceLabels, err := changedSchemaLabels(prNumber, labels, diffProcessorPath, gh, rnr)
-		if err != nil {
-			fmt.Println("computing changed schema labels: ", err)
-			errors[repo.Title] = append(errors[repo.Title], "The diff processor crashed while computing changed schema labels.")
-		}
-		for _, serviceLabel := range serviceLabels {
-			uniqueServiceLabels[serviceLabel] = struct{}{}
+			// If fetching the PR failed, Labels will be empty
+			labels := make([]string, len(pullRequest.Labels))
+			for i, label := range pullRequest.Labels {
+				labels[i] = label.Name
+			}
+			serviceLabels, err := changedSchemaLabels(prNumber, labels, diffProcessorPath, gh, rnr)
+			if err != nil {
+				fmt.Println("computing changed schema labels: ", err)
+				errors[repo.Title] = append(errors[repo.Title], "The diff processor crashed while computing changed schema labels.")
+			}
+			for _, serviceLabel := range serviceLabels {
+				uniqueServiceLabels[serviceLabel] = struct{}{}
+			}
 		}
 
 		err = cleanDiffProcessor(diffProcessorPath, rnr)
