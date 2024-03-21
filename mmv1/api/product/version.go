@@ -13,6 +13,10 @@
 
 package product
 
+import (
+	"golang.org/x/exp/slices"
+)
+
 // require 'api/object'
 
 var ORDER = []string{"ga", "beta", "alpha", "private"}
@@ -50,3 +54,7 @@ type Version struct {
 // def <=>(other)
 //   ORDER.index(name) <=> ORDER.index(other.name) if other.is_a?(Version)
 // end
+
+func (v *Version) CompareTo(other *Version) int {
+	return slices.Index(ORDER, v.Name) - slices.Index(ORDER, other.Name)
+}
