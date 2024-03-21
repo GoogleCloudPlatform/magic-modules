@@ -466,14 +466,6 @@ module Provider
       end
     end
 
-    # Filter the properties to keep only the ones don't have custom update
-    # method and group them by update url & verb.
-    def properties_without_custom_update(properties)
-      properties.select do |p|
-        p.update_url.nil? || p.update_verb.nil? || p.update_verb == :NOOP
-      end
-    end
-
     # Takes a update_url and returns the list of custom updatable properties
     # that can be updated at that URL. This allows flattened objects
     # to determine which parent property in the API should be updated with

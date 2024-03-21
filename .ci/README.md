@@ -42,18 +42,17 @@ Don't panic - this is all quite safe and we have fixed it before.  We store the 
 
 It's possible for a job to be cancelled or fail in the middle of pushing downstreams in a transient way.  The sorts of failures that happen at scale - lightning strikes a datacenter (ours or GitHub's!) or some other unlikely misfortune happens.  This has a chance to cause a hiccup in the downstream history, but isn't dangerous.  If that happens, the sync tags may need to be manually updated to sit at the same commit, just before the commit which needs to be generated, or some failed tasks might need to be run by hand.
 
-Updating the sync tags is done like this:
-First, check their state: `git fetch origin && git rev-parse origin/tpg-sync origin/tpgb-sync origin/tf-oics-sync origin/tgc-sync` will list the commits for each of the sync tags.
-(If you have changed the name of the `googlecloudplatform/magic-modules` remote from `origin`, substitute that name instead)
+First, check their state: `git fetch origin && git rev-parse origin/tpg-sync origin/tpgb-sync origin/tf-oics-sync origin/tgc-sync` will list the commits for each of the sync tags. (If you have changed the name of the `GoogleCloudPlatform/magic-modules` remote from `origin`, substitute that name instead, such as `git fetch upstream && git rev-parse upstream/tpg-sync upstream/tpgb-sync upstream/tf-oics-sync upstream/tgc-sync`)
+
 In normal, steady-state operation, these tags will all be identical.  When a failure occurs, some of them may be one commit ahead of the others.  It is rare for any of them to be 2 or more commits ahead of any other.  If some of them are one commit ahead of the others, and there is no pusher task currently running, this means you need to reset them by hand and rerun the failed jobs.  If they diverge by more than one commit, or a pusher task is currently running, you will need to manually run missing tasks.
 
 ### Divergence by zero commits
 
-Just click retry on the failed job in Cloud Build.  Yay!
+Just click retry on the failed job in Cloud Build. This is fairly rare, as most failures involve a step failing after another has already succeeded.
 
 ### Divergence by exactly one commit.
 
-Find which commit caused the error.  This will usually be easy - cloud build lists the commit which triggered a build, so you can probably just use that one.  You need to set all the sync tags to the parent of that commit.  Say the commit which caused the error is `12345abc`.  You can find the parent of that commit with `git rev-parse 12345abc~` (note the `~` suffix).  Some of the sync tags are likely set to this value already.  For the remainder, simply perform a git push.  Assuming that the parent commit is `98765fed`, that would be, e.g. `git push origin 98765fed:tf-validator-sync`.
+Find which commit caused the error.  This will usually be easy - cloud build lists the commit which triggered a build, so you can probably just use that one.  You need to set all the sync tags to the parent of that commit.  Say the commit which caused the error is `12345abc`.  You can find the parent of that commit with `git rev-parse 12345abc~` (note the `~` suffix).  Some of the sync tags are likely set to this value already.  For the remainder, simply perform a git push.  Assuming that the parent commit is `98765fed`, that would be, e.g. `git push -f origin 98765fed:tf-validator-sync`.
 
 If you are unlucky, there may be open PRs - this only happens if the failure occurred during the ~5 second period surrounding the merging of one of the downstreams.  Close those PRs before proceeding to the final step.
 
