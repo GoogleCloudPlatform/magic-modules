@@ -75,9 +75,9 @@ examples:
       project: 'appeng-flex'
       account_id: 'my-account'
       neg_name: 'appengine-neg'
-#    test_env_vars:
-#      org_id: :ORG_ID
-#      billing_account: :BILLING_ACCT
+    test_env_vars:
+      org_id: :ORG_ID
+      billing_account: :BILLING_ACCT
   - !ruby/object:Provider::Terraform::Examples
     name: 'region_network_endpoint_group_appengine_empty'
     primary_resource_id: 'appengine_neg'
