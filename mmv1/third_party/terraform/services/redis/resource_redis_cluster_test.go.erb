@@ -104,7 +104,7 @@ func TestAccRedisCluster_updateShardCount(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// create cluster with shard count 3
-				Config: createOrUpdateRedisCluster(name /* replicaCount = */, 1 /* shardCount = */, 3, true, /*nodeType = */ "NODE_TYPE_UNSPECIFIED"),
+				Config: createOrUpdateRedisCluster(name /* replicaCount = */, 1 /* shardCount = */, 3, true, /*nodeType = */ ""),
 			},
 			{
 				ResourceName:      "google_redis_cluster.test",
@@ -115,7 +115,7 @@ func TestAccRedisCluster_updateShardCount(t *testing.T) {
 			},
 			{
 				// update shard count to 5
-				Config: createOrUpdateRedisCluster(name /* replicaCount = */, 1 /* shardCount = */, 5, true, /*nodeType = */ "NODE_TYPE_UNSPECIFIED"),
+				Config: createOrUpdateRedisCluster(name /* replicaCount = */, 1 /* shardCount = */, 5, true, /*nodeType = */ ""),
 			},
 			{
 				ResourceName:      "google_redis_cluster.test",
@@ -125,7 +125,7 @@ func TestAccRedisCluster_updateShardCount(t *testing.T) {
 			},
 			{
 				// clean up the resource
-				Config: createOrUpdateRedisCluster(name /* replicaCount = */, 1 /* shardCount = */, 5, false, /* nodeType = */ "NODE_TYPE_UNSPECIFIED"),
+				Config: createOrUpdateRedisCluster(name /* replicaCount = */, 1 /* shardCount = */, 5, false, /* nodeType = */ ""),
 			},
 		},
 	})
