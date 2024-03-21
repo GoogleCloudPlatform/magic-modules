@@ -125,17 +125,17 @@ class SweeperTests {
         val projectSweeper: BuildType = getBuildFromProject(projectSweeperProject!!, ProjectSweeperName)
         
         // Check only one schedule trigger is on the builds in question
-        assertTrue(sweeperGa!!.triggers.items.size == 1)
-        assertTrue(sweeperBeta!!.triggers.items.size == 1)
-        assertTrue(projectSweeper!!.triggers.items.size == 1)
+        assertTrue(sweeperGa.triggers.items.size == 1)
+        assertTrue(sweeperBeta.triggers.items.size == 1)
+        assertTrue(projectSweeper.triggers.items.size == 1)
 
         // Assert that the hour value that sweeper builds are triggered at is less than the hour value that project sweeper builds are triggered at
         // i.e. sweeper builds are triggered first
-        val stGa = sweeperGa!!.triggers.items[0] as ScheduleTrigger
+        val stGa = sweeperGa.triggers.items[0] as ScheduleTrigger
         val cronGa = stGa.schedulingPolicy as ScheduleTrigger.SchedulingPolicy.Cron
-        val stBeta = sweeperBeta!!.triggers.items[0] as ScheduleTrigger
+        val stBeta = sweeperBeta.triggers.items[0] as ScheduleTrigger
         val cronBeta = stBeta.schedulingPolicy as ScheduleTrigger.SchedulingPolicy.Cron
-        val stProject = projectSweeper!!.triggers.items[0] as ScheduleTrigger
+        val stProject = projectSweeper.triggers.items[0] as ScheduleTrigger
         val cronProject = stProject.schedulingPolicy as ScheduleTrigger.SchedulingPolicy.Cron
         assertTrue("Service sweeper for the GA Nightly Test project is triggered at an earlier hour than the project sweeper", cronGa.hours.toString() < cronProject.hours.toString()) // Values are strings like "11", "12"
         assertTrue("Service sweeper for the Beta Nightly Test project is triggered at an earlier hour than the project sweeper", cronBeta.hours.toString() < cronProject.hours.toString() )
