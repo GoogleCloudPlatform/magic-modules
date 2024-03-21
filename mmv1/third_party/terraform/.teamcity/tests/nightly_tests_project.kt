@@ -20,10 +20,10 @@ class NightlyTestProjectsTests {
         val project = googleCloudRootProject(testContextParameters())
 
         // Find GA nightly test project
-        var gaNightlyTestProject = getSubProject(project, gaProjectName, nightlyTestsProjectName)
+        var gaNightlyTestProject = getNestedProjectFromRoot(project, gaProjectName, nightlyTestsProjectName)
 
         // Find Beta nightly test project
-        var betaNightlyTestProject = getSubProject(project, betaProjectName, nightlyTestsProjectName)
+        var betaNightlyTestProject = getNestedProjectFromRoot(project, betaProjectName, nightlyTestsProjectName)
 
         // Make assertions about builds in both nightly test projects
         (gaNightlyTestProject.buildTypes + betaNightlyTestProject.buildTypes).forEach{bt ->

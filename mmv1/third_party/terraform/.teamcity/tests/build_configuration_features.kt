@@ -18,18 +18,12 @@ class BuildConfigurationFeatureTests {
     @Test
     fun buildShouldFailOnError() {
         val project = googleCloudRootProject(testContextParameters())
-        // Find Google (GA) project
-        var gaProject: Project? =  project.subProjects.find { p->  p.name == gaProjectName}
-        if (gaProject == null) {
-            fail("Could not find the Google (GA) project")
-        }
-        // Find Google Beta project
-        var betaProject: Project? =  project.subProjects.find { p->  p.name == betaProjectName}
-        if (betaProject == null) {
-            fail("Could not find the Google (GA) project")
-        }
 
-        (gaProject!!.subProjects + betaProject!!.subProjects).forEach{p ->
+        val gaProject = getSubProject(project, gaProjectName)
+        val betaProject = getSubProject(project, betaProjectName)
+        val projectSweeperProject = getSubProject(project, projectSweeperProjectName)
+
+        (gaProject.subProjects + betaProject.subProjects + projectSweeperProject.subProjects).forEach{p ->
             p.buildTypes.forEach{bt ->
                 assertTrue("Build '${bt.id}' should fail on errors!", bt.failureConditions.errorMessage)
             }
@@ -39,18 +33,12 @@ class BuildConfigurationFeatureTests {
     @Test
     fun buildShouldHaveGoTestFeature() {
         val project = googleCloudRootProject(testContextParameters())
-        // Find Google (GA) project
-        var gaProject: Project? =  project.subProjects.find { p->  p.name == gaProjectName}
-        if (gaProject == null) {
-            fail("Could not find the Google (GA) project")
-        }
-        // Find Google Beta project
-        var betaProject: Project? =  project.subProjects.find { p->  p.name == betaProjectName}
-        if (betaProject == null) {
-            fail("Could not find the Google (GA) project")
-        }
 
-        (gaProject!!.subProjects + betaProject!!.subProjects).forEach{p ->
+        val gaProject = getSubProject(project, gaProjectName)
+        val betaProject = getSubProject(project, betaProjectName)
+        val projectSweeperProject = getSubProject(project, projectSweeperProjectName)
+
+        (gaProject.subProjects + betaProject.subProjects + projectSweeperProject.subProjects).forEach{p ->
             var exists: ArrayList<Boolean> = arrayListOf()
             p.buildTypes.forEach{bt ->
                 bt.features.items.forEach { f ->
