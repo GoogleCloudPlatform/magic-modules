@@ -18,7 +18,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d t
 	}
 
 	original := v.(map[string]interface{})
-    transformed := map[string]interface{}
+    transformed := make(map[string]interface{})
 	val, err := expandAlloydbClusterDenyMaintenancePeriodTimeHours(original["hours"], d, config)
 	if err != nil {
 		return nil, err
@@ -42,7 +42,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d t
 	return transformed, nil 
 }
 
-func expandAlloydbClusterDenyMaintenancePeriodTimeHours(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandAlloydbClusterDenyMaintenancePeriodTimeHours(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
     // Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
 		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
@@ -65,7 +65,7 @@ func expandAlloydbClusterDenyMaintenancePeriodTimeHours(v interface{}, d *schema
 	return v, nil // let terraform core handle it otherwise
 }
 
-func expandAlloydbClusterDenyMaintenancePeriodTimeMinutes(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandAlloydbClusterDenyMaintenancePeriodTimeMinutes(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
 		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
@@ -88,7 +88,7 @@ func expandAlloydbClusterDenyMaintenancePeriodTimeMinutes(v interface{}, d *sche
 	return v, nil // let terraform core handle it otherwise
 }
 
-func expandAlloydbClusterDenyMaintenancePeriodTimeSeconds(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandAlloydbClusterDenyMaintenancePeriodTimeSeconds(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
 		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
@@ -111,7 +111,7 @@ func expandAlloydbClusterDenyMaintenancePeriodTimeSeconds(v interface{}, d *sche
 	return v, nil // let terraform core handle it otherwise
 }
 
-func expandAlloydbClusterDenyMaintenancePeriodTimeNanos(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandAlloydbClusterDenyMaintenancePeriodTimeNanos(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
 		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {

@@ -30,9 +30,6 @@ func flattenAlloydbClusterMaintenanceWindowStartTimeHours(v interface{}, d *sche
     // Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
 		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
-            if intVal < 0 || intVal > 23 {
-                return fmt.Errorf("Error configuring hours: %d. Value has to be from 0 to 23.", intVal)
-            }
 			return intVal
 		}
 	}
@@ -40,9 +37,6 @@ func flattenAlloydbClusterMaintenanceWindowStartTimeHours(v interface{}, d *sche
 	// number values are represented as float64
 	if floatVal, ok := v.(float64); ok {
 		intVal := int(floatVal)
-		if intVal < 0 || intVal > 23 {
-			return fmt.Errorf("Error configuring hours: %d. Value has to be from 0 to 23.", intVal)
-		}
 		return intVal
 	}
 
@@ -53,9 +47,6 @@ func flattenAlloydbClusterMaintenanceWindowStartTimeMinutes(v interface{}, d *sc
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
 		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
-            if intVal < 0 || intVal > 59 {
-                return fmt.Errorf("Error configuring minutes: %d. Value has to be from 0 to 59.", intVal)
-            }
 			return intVal
 		}
 	}
@@ -76,9 +67,6 @@ func flattenAlloydbClusterMaintenanceWindowStartTimeSeconds(v interface{}, d *sc
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
 		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
-            if intVal < 0 || intVal > 59 {
-                return fmt.Errorf("Error configuring seconds: %d. Value has to be from 0 to 59.", intVal)
-            }
 			return intVal
 		}
 	}
@@ -86,9 +74,6 @@ func flattenAlloydbClusterMaintenanceWindowStartTimeSeconds(v interface{}, d *sc
 	// number values are represented as float64
 	if floatVal, ok := v.(float64); ok {
 		intVal := int(floatVal)
-		if intVal < 0 || intVal > 59 {
-			return fmt.Errorf("Error configuring seconds: %d. Value has to be from 0 to 59.", intVal)
-		}
 		return intVal
 	}
 
