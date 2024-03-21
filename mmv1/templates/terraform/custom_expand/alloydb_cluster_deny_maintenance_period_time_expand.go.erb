@@ -1,0 +1,129 @@
+<%- # the license inside this block applies to this file
+	# Copyright 2024 Google Inc.
+	# Licensed under the Apache License, Version 2.0 (the "License");
+	# you may not use this file except in compliance with the License.
+	# You may obtain a copy of the License at
+	#
+	#     http://www.apache.org/licenses/LICENSE-2.0
+	#
+	# Unless required by applicable law or agreed to in writing, software
+	# distributed under the License is distributed on an "AS IS" BASIS,
+	# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	# See the License for the specific language governing permissions and
+	# limitations under the License.
+-%>
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	if v == nil {
+		return nil, nil
+	}
+
+	original := v.(map[string]interface{})
+    transformed := map[string]interface{}
+	val, err := expandAlloydbClusterDenyMaintenancePeriodTimeHours(original["hours"], d, config)
+	if err != nil {
+		return nil, err
+	}
+	transformed["hours"] = val
+	val, err = expandAlloydbClusterDenyMaintenancePeriodTimeMinutes(original["minutes"], d, config)
+	if err != nil {
+		return nil, err
+	}
+	transformed["minutes"] = val
+	val, err = expandAlloydbClusterDenyMaintenancePeriodTimeSeconds(original["seconds"], d, config)
+	if err != nil {
+		return nil, err
+	}
+    transformed["seconds"] = val
+	val, err = expandAlloydbClusterDenyMaintenancePeriodTimeNanos(original["nanos"], d, config)
+	if err != nil {
+		return nil, err
+	}
+	transformed["nanos"] = val
+	return transformed, nil 
+}
+
+func expandAlloydbClusterDenyMaintenancePeriodTimeHours(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) (interface{}, error) {
+    // Handles the string fixed64 format
+	if strVal, ok := v.(string); ok {
+		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
+            if intVal < 0 || intVal > 23 {
+                return nil, fmt.Errorf("Error configuring hours: %d. Value has to be from 0 to 23.", intVal)
+            }
+			return intVal, nil
+		}
+	}
+
+	// number values are represented as float64
+	if floatVal, ok := v.(float64); ok {
+		intVal := int(floatVal)
+		if intVal < 0 || intVal > 23 {
+			return nil, fmt.Errorf("Error configuring hours: %d. Value has to be from 0 to 23.", intVal)
+		}
+		return intVal, nil
+	}
+
+	return v, nil // let terraform core handle it otherwise
+}
+
+func expandAlloydbClusterDenyMaintenancePeriodTimeMinutes(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) (interface{}, error) {
+	// Handles the string fixed64 format
+	if strVal, ok := v.(string); ok {
+		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
+            if intVal < 0 || intVal > 59 {
+                return nil, fmt.Errorf("Error configuring minutes: %d. Value has to be from 0 to 59.", intVal)
+            }
+			return intVal, nil
+		}
+	}
+
+	// number values are represented as float64
+	if floatVal, ok := v.(float64); ok {
+		intVal := int(floatVal)
+		if intVal < 0 || intVal > 59 {
+			return nil, fmt.Errorf("Error configuring minutes: %d. Value has to be from 0 to 59.", intVal)
+		}
+		return intVal, nil
+	}
+
+	return v, nil // let terraform core handle it otherwise
+}
+
+func expandAlloydbClusterDenyMaintenancePeriodTimeSeconds(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) (interface{}, error) {
+	// Handles the string fixed64 format
+	if strVal, ok := v.(string); ok {
+		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
+            if intVal < 0 || intVal > 59 {
+                return nil, fmt.Errorf("Error configuring seconds: %d. Value has to be from 0 to 59.", intVal)
+            }
+			return intVal, nil
+		}
+	}
+
+	// number values are represented as float64
+	if floatVal, ok := v.(float64); ok {
+		intVal := int(floatVal)
+		if intVal < 0 || intVal > 59 {
+			return nil, fmt.Errorf("Error configuring seconds: %d. Value has to be from 0 to 59.", intVal)
+		}
+		return intVal, nil
+	}
+
+	return v, nil // let terraform core handle it otherwise
+}
+
+func expandAlloydbClusterDenyMaintenancePeriodTimeNanos(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) (interface{}, error) {
+	// Handles the string fixed64 format
+	if strVal, ok := v.(string); ok {
+		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
+			return intVal, nil
+		}
+	}
+
+	// number values are represented as float64
+	if floatVal, ok := v.(float64); ok {
+		intVal := int(floatVal)
+		return intVal, nil
+	}
+
+	return v, nil // let terraform core handle it otherwise
+}

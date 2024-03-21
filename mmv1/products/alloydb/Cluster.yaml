@@ -525,6 +525,7 @@ properties:
                 - :SUNDAY
             - !ruby/object:Api::Type::NestedObject
               name: 'startTime'
+              custom_expand: 'templates/terraform/custom_expand/alloydb_cluster_input_maintenance_window_start_time_expand.go.erb'
               custom_flatten: 'templates/terraform/custom_flatten/alloydb_cluster_input_maintenance_window_start_time_flatten.go.erb'
               description: |
                 Preferred time to start the maintenance operation on the specified day. Maintenance will start within 1 hour of this time.
@@ -556,6 +557,7 @@ properties:
           properties:
             - !ruby/object:Api::Type::NestedObject
               name: 'startDate'
+              custom_expand: 'templates/terraform/custom_expand/alloydb_cluster_deny_maintenance_period_start_date_expand.go.erb'
               custom_flatten: 'templates/terraform/custom_flatten/alloydb_cluster_input_deny_maintenance_period_start_date_flatten.go.erb'
               description: |
                 Deny period start date.
@@ -578,6 +580,7 @@ properties:
                     Day of a month. Must be from 1 to 31 and valid for the year and month, or 0 to specify a year by itself or a year and month where the day isn't significant.
             - !ruby/object:Api::Type::NestedObject
               name: 'endDate'
+              custom_expand: 'templates/terraform/custom_expand/alloydb_cluster_deny_maintenance_period_end_date_expand.go.erb'
               custom_flatten: 'templates/terraform/custom_flatten/alloydb_cluster_input_deny_maintenance_period_end_date_flatten.go.erb'
               description: |
                 Deny period end date.
@@ -600,6 +603,7 @@ properties:
                     Day of a month. Must be from 1 to 31 and valid for the year and month, or 0 to specify a year by itself or a year and month where the day isn't significant.
             - !ruby/object:Api::Type::NestedObject
               name: 'time'
+              custom_expand: 'templates/terraform/custom_expand/alloydb_cluster_deny_maintenance_period_time_expand.go.erb'
               custom_flatten: 'templates/terraform/custom_flatten/alloydb_cluster_input_deny_maintenance_period_time_flatten.go.erb'
               description: |
                 Time in UTC when the deny period starts on start_date and ends on end_date.
