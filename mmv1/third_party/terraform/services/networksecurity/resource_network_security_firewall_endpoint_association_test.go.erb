@@ -24,9 +24,9 @@ func TestAccNetworkSecurityFirewallEndpointAssociations_basic(t *testing.T) {
 	context := map[string]interface{}{
 		"orgId":  envvar.GetTestOrgFromEnv(t),
 		"randomSuffix": acctest.RandString(t, 10),
-    "billingProjectId": envvar.GetTestProjectFromEnv(),
-    "projectNumberId": envvar.GetTestProjectNumberFromEnv(),
-    "disabled": strconv.FormatBool(false),
+		"billingProjectId": envvar.GetTestProjectFromEnv(),
+		"projectNumberId": envvar.GetTestProjectNumberFromEnv(),
+		"disabled": strconv.FormatBool(false),
 	}
 
   testResourceName := "google_network_security_firewall_endpoint_association.foobar"
@@ -124,32 +124,32 @@ func testContextMapDisabledField(context map[string]interface{}, disabled bool) 
 func testAccNetworkSecurityFirewallEndpointAssociation_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_network" "foobar" {
-	provider                  = google-beta
-    name                    = "tf-test-my-vpc%{randomSuffix}"
-    auto_create_subnetworks = false
+  provider                = google-beta
+  name                    = "tf-test-my-vpc%{randomSuffix}"
+  auto_create_subnetworks = false
 }
 
 resource "google_network_security_firewall_endpoint" "foobar" {
-    provider           = google-beta
-    name               = "tf-test-my-firewall-endpoint%{randomSuffix}"
-    parent             = "organizations/%{orgId}"
-    location           = "us-central1-a"
-    billing_project_id = "%{billingProjectId}"
+  provider           = google-beta
+  name               = "tf-test-my-firewall-endpoint%{randomSuffix}"
+  parent             = "organizations/%{orgId}"
+  location           = "us-central1-a"
+  billing_project_id = "%{billingProjectId}"
 }
 
 # TODO: add tlsInspectionPolicy once resource is ready
 resource "google_network_security_firewall_endpoint_association" "foobar" {
-    provider          = google-beta
-    name              = "tf-test-my-firewall-endpoint-association%{randomSuffix}"
-    parent            = "projects/%{billingProjectId}"
-    location          = "us-central1-a"
-    firewall_endpoint = google_network_security_firewall_endpoint.foobar.id
-    network           = "projects/%{projectNumberId}/global/networks/tf-test-my-vpc%{randomSuffix}"
+  provider          = google-beta
+  name              = "tf-test-my-firewall-endpoint-association%{randomSuffix}"
+  parent            = "projects/%{billingProjectId}"
+  location          = "us-central1-a"
+  firewall_endpoint = google_network_security_firewall_endpoint.foobar.id
+  network           = "projects/%{projectNumberId}/global/networks/tf-test-my-vpc%{randomSuffix}"
 
-    labels = {
-        foo = "bar"
-    }
-    depends_on = [google_network_security_firewall_endpoint.foobar, google_compute_network.foobar]
+  labels = {
+    foo = "bar"
+  }
+  depends_on = [google_network_security_firewall_endpoint.foobar, google_compute_network.foobar]
 }
 `, context)
 }
@@ -158,32 +158,32 @@ func testAccNetworkSecurityFirewallEndpointAssociation_update(context map[string
 	return acctest.Nprintf(`
 resource "google_compute_network" "foobar" {
 	provider                  = google-beta
-    name                    = "tf-test-my-vpc%{randomSuffix}"
-    auto_create_subnetworks = false
+  name                    = "tf-test-my-vpc%{randomSuffix}"
+  auto_create_subnetworks = false
 }
 
 resource "google_network_security_firewall_endpoint" "foobar" {
-    provider           = google-beta
-    name               = "tf-test-my-firewall-endpoint%{randomSuffix}"
-    parent             = "organizations/%{orgId}"
-    location           = "us-central1-a"
-    billing_project_id = "%{billingProjectId}"
+  provider           = google-beta
+  name               = "tf-test-my-firewall-endpoint%{randomSuffix}"
+  parent             = "organizations/%{orgId}"
+  location           = "us-central1-a"
+  billing_project_id = "%{billingProjectId}"
 }
 
 # TODO: add tlsInspectionPolicy once resource is ready
 resource "google_network_security_firewall_endpoint_association" "foobar" {
-    provider          = google-beta
-    name              = "tf-test-my-firewall-endpoint-association%{randomSuffix}"
-    parent            = "projects/%{billingProjectId}"
-    location          = "us-central1-a"
-    firewall_endpoint = google_network_security_firewall_endpoint.foobar.id
-    network           = "projects/%{projectNumberId}/global/networks/tf-test-my-vpc%{randomSuffix}"
-    disabled          = "%{disabled}"
+  provider          = google-beta
+  name              = "tf-test-my-firewall-endpoint-association%{randomSuffix}"
+  parent            = "projects/%{billingProjectId}"
+  location          = "us-central1-a"
+  firewall_endpoint = google_network_security_firewall_endpoint.foobar.id
+  network           = "projects/%{projectNumberId}/global/networks/tf-test-my-vpc%{randomSuffix}"
+  disabled          = "%{disabled}"
 
-    labels = {
-        foo = "bar-updated"
-    }
-    depends_on = [google_network_security_firewall_endpoint.foobar, google_compute_network.foobar]
+  labels = {
+    foo = "bar-updated"
+  }
+  depends_on = [google_network_security_firewall_endpoint.foobar, google_compute_network.foobar]
 }
 `, context)
 }
