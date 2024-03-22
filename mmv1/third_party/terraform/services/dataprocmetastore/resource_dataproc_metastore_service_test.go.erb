@@ -153,7 +153,7 @@ resource "google_dataproc_metastore_service" "backup" {
   scheduled_backup {
     enabled         = true
     cron_schedule   = "0 0 * * 0"
-    time_zone       = "UTC"
+    time_zone       = "America/Los_Angeles"
     backup_location = "gs://${google_storage_bucket.bucket.name}"
   }
 
