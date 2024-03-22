@@ -45,7 +45,7 @@ func TestAccBigQueryTable_Basic(t *testing.T) {
 	})
 }
 
-func TestAccBigQueryTable_DropColumn(t *testing.T) {
+func TestAccBigQueryTable_DropColumns(t *testing.T) {
 	t.Parallel()
 
 	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
@@ -57,7 +57,7 @@ func TestAccBigQueryTable_DropColumn(t *testing.T) {
 		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBigQueryTableTimePartitioning(datasetID, tableID, "DAY"),
+				Config: testAccBigQueryTableTimePartitioningDropColumns(datasetID, tableID),
 			},
 			{
 				ResourceName:            "google_bigquery_table.test",
@@ -66,7 +66,7 @@ func TestAccBigQueryTable_DropColumn(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testAccBigQueryTableTimePartitioningDropColumn(datasetID, tableID, "DAY"),
+				Config: testAccBigQueryTableTimePartitioningDropColumnsUpdate(datasetID, tableID),
 			},
 			{
 				ResourceName:            "google_bigquery_table.test",
@@ -1792,7 +1792,7 @@ EOH
 `, datasetID, tableID, partitioningType)
 }
 
-func testAccBigQueryTableTimePartitioningDropColumn(datasetID, tableID, partitioningType string) string {
+func testAccBigQueryTableTimePartitioningDropColumns(datasetID, tableID string) string {
 	return fmt.Sprintf(`
 resource "google_bigquery_dataset" "test" {
   dataset_id = "%s"
@@ -1803,13 +1803,6 @@ resource "google_bigquery_table" "test" {
   table_id   = "%s"
   dataset_id = google_bigquery_dataset.test.dataset_id
 
-  time_partitioning {
-    type                     = "%s"
-    field                    = "ts"
-    expiration_ms            = 1000
-  }
-  require_partition_filter = true
-  clustering = ["some_int", "some_string"]
   schema     = <<EOH
 [
   {
@@ -1823,36 +1816,36 @@ resource "google_bigquery_table" "test" {
   {
     "name": "some_int",
     "type": "INTEGER"
-  },
-  {
-    "name": "some_int3",
-    "type": "INTEGER"
-  },
-  {
-    "name": "city",
-    "type": "RECORD",
-    "fields": [
-  {
-    "name": "id",
-    "type": "INTEGER"
-  },
-  {
-    "name": "coord",
-    "type": "RECORD",
-    "fields": [
-    {
-    "name": "lon",
-    "type": "FLOAT"
-    }
-    ]
-  }
-    ]
   }
 ]
 EOH
 
 }
-`, datasetID, tableID, partitioningType)
+`, datasetID, tableID)
+}
+
+func testAccBigQueryTableTimePartitioningDropColumnsUpdate(datasetID, tableID string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "test" {
+  dataset_id = "%s"
+}
+
+resource "google_bigquery_table" "test" {
+  deletion_protection = false
+  table_id   = "%s"
+  dataset_id = google_bigquery_dataset.test.dataset_id
+
+  schema     = <<EOH
+[
+  {
+    "name": "ts",
+    "type": "TIMESTAMP"
+  }
+]
+EOH
+
+}
+`, datasetID, tableID)
 }
 
 func testAccBigQueryTableKms(cryptoKeyName, datasetID, tableID string) string {

@@ -1705,6 +1705,12 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
+type TableInfo struct {
+	project   string
+	datasetID string
+	tableID   string
+}
+
 func resourceBigQueryTableUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
@@ -1727,7 +1733,25 @@ func resourceBigQueryTableUpdate(d *schema.ResourceData, meta interface{}) error
 	datasetID := d.Get("dataset_id").(string)
 	tableID := d.Get("table_id").(string)
 
-	oldTable, err := config.NewBigQueryClient(userAgent).Tables.Get(project, datasetID, tableID).Do()
+	tableInfo := &TableInfo{
+		project:   project,
+		datasetID: datasetID,
+		tableID:   tableID,
+	}
+
+	if err = resourceBigQueryTableColumnDrop(config, userAgent, table, tableInfo); err != nil {
+		return err
+	}
+
+	if _, err = config.NewBigQueryClient(userAgent).Tables.Update(project, datasetID, tableID, table).Do(); err != nil {
+		return err
+	}
+
+	return resourceBigQueryTableRead(d, meta)
+}
+
+func resourceBigQueryTableColumnDrop(config *transport_tpg.Config, userAgent string, table *bigquery.Table, tableInfo *TableInfo) error {
+	oldTable, err := config.NewBigQueryClient(userAgent).Tables.Get(tableInfo.project, tableInfo.datasetID, tableInfo.tableID).Do()
 	if err != nil {
 		return err
 	}
@@ -1745,27 +1769,24 @@ func resourceBigQueryTableUpdate(d *schema.ResourceData, meta interface{}) error
 	}
 
 	if len(droppedColumns) > 0 {
-		droppedColumnsString := strings.Join(droppedColumns, " ")
-		log.Printf("[INFO] Dropping columns in-place: %s", droppedColumnsString)
+		droppedColumnsString := strings.Join(droppedColumns, ", DROP COLUMN ")
 
-		dropColumnsDDL := fmt.Sprintf("ALTER TABLE `%s.%s.%s` DROP COLUMN `%s`", d.Get("project").(string), d.Get("dataset_id").(string), d.Get("table_id").(string), droppedColumnsString)
+		dropColumnsDDL := fmt.Sprintf("ALTER TABLE `%s.%s.%s` DROP COLUMN %s", tableInfo.project, tableInfo.datasetID, tableInfo.tableID, droppedColumnsString)
+		log.Printf("[INFO] Dropping columns in-place: %s", dropColumnsDDL)
+
 		useLegacySQL := false
 		req := &bigquery.QueryRequest{
 			Query:        dropColumnsDDL,
 			UseLegacySql: &useLegacySQL,
 		}
 
-		_, err = config.NewBigQueryClient(userAgent).Jobs.Query(project, req).Do()
+		_, err = config.NewBigQueryClient(userAgent).Jobs.Query(tableInfo.project, req).Do()
 		if err != nil {
 			return err
 		}
 	}
 
-	if _, err = config.NewBigQueryClient(userAgent).Tables.Update(project, datasetID, tableID, table).Do(); err != nil {
-		return err
-	}
-
-	return resourceBigQueryTableRead(d, meta)
+	return nil
 }
 
 func resourceBigQueryTableDelete(d *schema.ResourceData, meta interface{}) error {

@@ -428,7 +428,7 @@ func (testcase *testUnitBigQueryDataTableJSONChangeableTestCase) check(t *testin
 	}
 }
 
-var testUnitBigQueryDataTableIsChangableTestCases = []testUnitBigQueryDataTableJSONChangeableTestCase{
+var testUnitBigQueryDataTableIsChangeableTestCases = []testUnitBigQueryDataTableJSONChangeableTestCase{
 	{
 		name:       "defaultEquality",
 		jsonOld:    "[{\"name\": \"someValue\", \"type\" : \"INTEGER\", \"mode\" : \"NULLABLE\", \"description\" : \"someVal\" }]",
@@ -517,8 +517,6 @@ var testUnitBigQueryDataTableIsChangableTestCases = []testUnitBigQueryDataTableJ
 		jsonNew:    "[{\"name\": \"value2\", \"type\" : \"BOOLEAN\", \"mode\" : \"NULLABLE\", \"description\" : \"newVal\" },  {\"name\": \"value1\", \"type\" : \"INTEGER\", \"mode\" : \"NULLABLE\", \"description\" : \"someVal\" }]",
 		changeable: true,
 	},
-	// This is changeable but it is currently treated by terraform as
-	// the renamed column being dropped and a new column added
 	{
 		name:       "orderOfArrayChangesAndNameChanges",
 		jsonOld:    "[{\"name\": \"value1\", \"type\" : \"INTEGER\", \"mode\" : \"NULLABLE\", \"description\" : \"someVal\" }, {\"name\": \"value2\", \"type\" : \"BOOLEAN\", \"mode\" : \"NULLABLE\", \"description\" : \"someVal\" }]",
@@ -568,12 +566,18 @@ var testUnitBigQueryDataTableIsChangableTestCases = []testUnitBigQueryDataTableJ
 	},
 }
 
-func TestUnitBigQueryDataTable_schemaIsChangable(t *testing.T) {
+func TestUnitBigQueryDataTable_schemaIsChangeable(t *testing.T) {
+	t.Parallel()
+	for _, testcase := range testUnitBigQueryDataTableIsChangeableTestCases {
+		testcase.check(t)
+	}
+}
+
+func TestUnitBigQueryDataTable_schemaIsChangeableNested(t *testing.T) {
 	t.Parallel()
 	// Only top level column drops are changeable
 	skipNested := map[string]bool{"arraySizeDecreases": true, "typeModeReqToNullAndColumnDropped": true}
-	for _, testcase := range testUnitBigQueryDataTableIsChangableTestCases {
-		testcase.check(t)
+	for _, testcase := range testUnitBigQueryDataTableIsChangeableTestCases {
 		if !skipNested[testcase.name] {
 			testcaseNested := &testUnitBigQueryDataTableJSONChangeableTestCase{
 				testcase.name + "Nested",
