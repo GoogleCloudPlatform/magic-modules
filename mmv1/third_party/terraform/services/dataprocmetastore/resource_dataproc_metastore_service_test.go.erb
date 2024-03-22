@@ -163,7 +163,7 @@ resource "google_dataproc_metastore_service" "backup" {
 }
 
 resource "google_storage_bucket" "bucket" {
-  name     = "backup%{random_suffix}"
+  name     = "tf-test-backup%{random_suffix}"
   location = "us-central1"
 }
 `, context)
