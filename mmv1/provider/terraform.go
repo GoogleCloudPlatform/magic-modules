@@ -127,18 +127,20 @@ func (t *Terraform) GenerateResource(object api.Resource, templateData TemplateD
 	if generateCode {
 		productName := t.Product.ApiName
 		targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
-
 		if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
 			log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
 		}
-
 		targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s.go", t.FullResourceName(object)))
-
 		templateData.GenerateResourceFile(targetFilePath, object)
 	}
 
 	if generateDocs {
-		templateData.GenerateDocumentationFile(outputFolder, object)
+		targetFolder := path.Join(outputFolder, "website", "docs", "r")
+		if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+			log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+		}
+		targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s.html.markdown", t.FullResourceName(object)))
+		templateData.GenerateDocumentationFile(targetFilePath, object)
 	}
 }
 
