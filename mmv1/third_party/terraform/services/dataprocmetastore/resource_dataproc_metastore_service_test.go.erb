@@ -136,7 +136,7 @@ resource "google_dataproc_metastore_service" "default" {
 func testAccDataprocMetastoreService_dataprocMetastoreServiceScheduledBackupExampleUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_dataproc_metastore_service" "backup" {
-  service_id = "backup%{random_suffix}"
+  service_id = "tf-test-backup%{random_suffix}"
   location   = "us-central1"
   port       = 9080
   tier       = "DEVELOPER"
