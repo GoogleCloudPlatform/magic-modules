@@ -24,7 +24,7 @@ func TestAccDataSourceGoogleTagsTagValues_default(t *testing.T) {
 			{
 				Config: testAccDataSourceGoogleTagsTagValuesConfig(parent, keyShortName, shortName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccDataSourceGoogleTagsTagValuesCheck("data.google_tags_tag_value.my_tag_value", "google_tags_tag_value.norfqux"),
+					testAccDataSourceGoogleTagsTagValuesCheck("data.google_tags_tag_values.my_tag_values", "google_tags_tag_value.norfqux"),
 				),
 			},
 		},
@@ -45,7 +45,7 @@ func TestAccDataSourceGoogleTagsTagValues_dot(t *testing.T) {
 			{
 				Config: testAccDataSourceGoogleTagsTagValuesConfig(parent, keyShortName, shortName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccDataSourceGoogleTagsTagValuesCheck("data.google_tags_tag_value.my_tag_value", "google_tags_tag_value.norfqux"),
+					testAccDataSourceGoogleTagsTagValuesCheck("data.google_tags_tag_values.my_tag_values", "google_tags_tag_value.norfqux"),
 				),
 			},
 		},
@@ -94,7 +94,7 @@ resource "google_tags_tag_value" "norfqux" {
   short_name = "%s"
 }
 
-data "google_tags_tag_values" "my_tag_value" {
+data "google_tags_tag_values" "my_tag_values" {
   parent     = google_tags_tag_value.norfqux.parent
 }
 `, parent, keyShortName, shortName)

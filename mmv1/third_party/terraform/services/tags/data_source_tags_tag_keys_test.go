@@ -43,7 +43,7 @@ func TestAccDataSourceGoogleTagsTagKeys_dot(t *testing.T) {
 			{
 				Config: testAccDataSourceGoogleTagsTagKeysConfig(parent, shortName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccDataSourceGoogleTagsTagKeysCheck("data.google_tags_tag_keys.my_tag_key", "google_tags_tag_key.foobar"),
+					testAccDataSourceGoogleTagsTagKeysCheck("data.google_tags_tag_keys.my_tag_keys", "google_tags_tag_key.foobar"),
 				),
 			},
 		},
@@ -87,7 +87,7 @@ resource "google_tags_tag_key" "foobar" {
   short_name = "%s"
 }
 
-data "google_tags_tag_keys" "my_tag_key" {
+data "google_tags_tag_keys" "my_tag_keys" {
   parent     = google_tags_tag_key.foobar.parent
 }
 `, parent, shortName)
