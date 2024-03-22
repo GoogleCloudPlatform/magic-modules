@@ -764,3 +764,10 @@ func (r Resource) HasZone() bool {
 func (r Resource) Lineage() string {
 	return r.Name
 }
+
+func (r Resource) TerraformName() string {
+	if r.LegacyName != "" {
+		return r.LegacyName
+	}
+	return fmt.Sprintf("google_%s_%s", r.ProductMetadata.TerraformName(), google.Underscore(r.Name))
+}
