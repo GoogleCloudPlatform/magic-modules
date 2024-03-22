@@ -116,7 +116,6 @@ properties:
       The nodeType for the Redis cluster.
       If not provided, REDIS_HIGHMEM_MEDIUM will be used as default
     values:
-      - :NODE_TYPE_UNSPECIFIED
       - :REDIS_SHARED_CORE_NANO
       - :REDIS_HIGHMEM_MEDIUM
       - :REDIS_HIGHMEM_XLARGE
