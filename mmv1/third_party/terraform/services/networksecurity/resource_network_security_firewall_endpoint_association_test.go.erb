@@ -29,7 +29,7 @@ func TestAccNetworkSecurityFirewallEndpointAssociations_basic(t *testing.T) {
 		"disabled": strconv.FormatBool(false),
 	}
 
-  testResourceName := "google_network_security_firewall_endpoint_association.foobar"
+	testResourceName := "google_network_security_firewall_endpoint_association.foobar"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -100,7 +100,7 @@ func TestAccNetworkSecurityFirewallEndpointAssociations_disabled(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
-      {
+			{
 				Config: testAccNetworkSecurityFirewallEndpointAssociation_update(testContextMapDisabledField(context, false)),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(testResourceName, "disabled", "false"),
@@ -117,8 +117,8 @@ func TestAccNetworkSecurityFirewallEndpointAssociations_disabled(t *testing.T) {
 }
 
 func testContextMapDisabledField(context map[string]interface{}, disabled bool) map[string]interface{} {
-  context["disabled"] = strconv.FormatBool(disabled)
-  return context
+	context["disabled"] = strconv.FormatBool(disabled)
+	return context
 }
 
 func testAccNetworkSecurityFirewallEndpointAssociation_basic(context map[string]interface{}) string {
@@ -157,7 +157,7 @@ resource "google_network_security_firewall_endpoint_association" "foobar" {
 func testAccNetworkSecurityFirewallEndpointAssociation_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_network" "foobar" {
-	provider                  = google-beta
+  provider                = google-beta
   name                    = "tf-test-my-vpc%{randomSuffix}"
   auto_create_subnetworks = false
 }
