@@ -58,7 +58,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
 
-      - run: go install golang.org/x/tools/cmd/goimports@latest
+      - run: go install golang.org/x/tools/cmd/goimports@7656c4c657688cae30795365d2a5f30d6f18be7f # v0.19.0
 
       - name: Build ${{ inputs.repo  }}
         run: |
