@@ -68,16 +68,21 @@ func testAccDataSourceGoogleTagsTagValuesCheck(data_source_name string, resource
 		rs_attr := rs.Primary.Attributes
 		tag_value_attrs_to_test := []string{"parent", "short_name", "name", "namespaced_name", "create_time", "update_time", "description"}
 
-		for _, attr_to_check := range tag_value_attrs_to_test {
-			if ds_attr[attr_to_check] != rs_attr[attr_to_check] {
-				return fmt.Errorf(
-					"%s is %s; want %s",
-					attr_to_check,
-					ds_attr[attr_to_check],
-					rs_attr[attr_to_check],
-				)
+		values := ds.Primary.Attributes["values"]
+
+		for _, value := range values {
+			for _, attr_to_check := range tag_value_attrs_to_test {
+				if value[attr_to_check] != rs_attr[attr_to_check] {
+					return fmt.Errorf(
+						"%s is %s; want %s",
+						attr_to_check,
+						value[attr_to_check],
+						rs_attr[attr_to_check],
+					)
+				}
 			}
 		}
+
 		return nil
 	}
 }
