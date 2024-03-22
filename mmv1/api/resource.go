@@ -829,6 +829,18 @@ func (r Resource) HasZone() bool {
 	return strings.Contains(r.BaseUrl, "{{zone}}") || strings.Contains(r.CreateUrl, "{{zone}}")
 }
 
+// resource functions needed for template that previously existed in terraform.go but due to how files are being inherited here it was easier to put in here
+// taken wholesale from tpgtools
+func (r Resource) Updatable() bool {
+	for _, p := range r.AllProperties() {
+		if !p.ForceNew && !(!p.Optional && p.Computed) {
+			return true
+		}
+	}
+	return false
+}
+
+
 // ====================
 // Debugging Methods
 // ====================
