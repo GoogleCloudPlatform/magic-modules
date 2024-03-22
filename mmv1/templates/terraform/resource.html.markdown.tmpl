@@ -25,6 +25,41 @@
 #     .github/CONTRIBUTING.md.
 #
 # ----------------------------------------------------------------------------
-
-{{$.ProductMetadata.Name}} {{$.Name}}
+subcategory: "{{$.ProductMetadata.DisplayName}}"
+description: |-
+  {{$.Description -}}
 ---
+
+# {{$.TerraformName}}
+{{- if $.DeprecationMessage }}
+~> **Warning:** {{$.DeprecationMessage}}
+{{- end }}
+
+{{$.Description}}
+
+{{- if eq $.MinVersion "beta"}}
+~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
+See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
+{{- end }}
+{{ if $.References}}
+To get more information about {{$.Name}}, see:
+
+	{{- if $.References.Api}}
+
+* [API documentation]({{$.References.Api}})
+	{{- end }}
+	{{- if $.References.Guides}}
+* How-to Guides
+		{{- range $title, $link := $.References.Guides }}
+    * [{{$title}}]({{$link}})
+		{{- end }}
+	{{- end }}
+{{- end }}
+{{- if $.Docs.Warning}}
+
+~> **Warning:** {{$.Docs.Warning}}
+{{- end }}
+{{- if $.Docs.Note}}
+
+~> **Note:** {{$.Docs.Note}}
+{{- end }}

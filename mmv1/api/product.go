@@ -211,6 +211,13 @@ func (p *Product) SetPropertiesBasedOnVersion(version *product.Version) {
 	p.BaseUrl = version.BaseUrl
 }
 
+func (p *Product) TerraformName() string {
+	if p.LegacyName != "" {
+		return google.Underscore(p.LegacyName)
+	}
+	return google.Underscore(p.Name)
+}
+
 // ====================
 // Debugging Methods
 // ====================
