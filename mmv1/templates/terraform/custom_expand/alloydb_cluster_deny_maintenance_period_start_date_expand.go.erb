@@ -23,12 +23,12 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d t
 		return nil, err
 	}
 	transformed["year"] = val
-	val, err = expandAlloydbClusterDenyMaintenancePeriodStartDateMonth(original["month"], d, config),
+	val, err = expandAlloydbClusterDenyMaintenancePeriodStartDateMonth(original["month"], d, config)
 	if err != nil {
 		return nil, err
 	}
 	transformed["month"] = val
-    val, err = expandAlloydbClusterDenyMaintenancePeriodStartDateDay(original["day"], d, config),
+    val, err = expandAlloydbClusterDenyMaintenancePeriodStartDateDay(original["day"], d, config)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +82,7 @@ func expandAlloydbClusterDenyMaintenancePeriodStartDateMonth(v interface{}, d tp
 	return v, nil // let terraform core handle it otherwise
 }
 
-func flattenAlloydbClusterDenyMaintenancePeriodStartDateDay(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandAlloydbClusterDenyMaintenancePeriodStartDateDay(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
     // Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
 		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {

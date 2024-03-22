@@ -23,12 +23,12 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d t
 		return nil, err
 	}
 	transformed["year"] = val
-	val, err = expandAlloydbClusterDenyMaintenancePeriodEndDateMonth(original["month"], d, config),
+	val, err = expandAlloydbClusterDenyMaintenancePeriodEndDateMonth(original["month"], d, config)
 	if err != nil {
 		return nil, err
 	}
 	transformed["month"] = val
-    val, err = expandAlloydbClusterDenyMaintenancePeriodEndDateDay(original["day"], d, config),
+    val, err = expandAlloydbClusterDenyMaintenancePeriodEndDateDay(original["day"], d, config)
 	if err != nil {
 		return nil, err
 	}
