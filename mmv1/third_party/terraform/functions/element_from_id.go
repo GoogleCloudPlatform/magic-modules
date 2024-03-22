@@ -3,10 +3,10 @@ package functions
 import (
 	"context"
 	"fmt"
+	"log"
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework/function"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 // ValidateElementFromIdArguments is reusable validation logic used in provider-defined functions that use the GetElementFromId function
@@ -20,7 +20,7 @@ func ValidateElementFromIdArguments(ctx context.Context, input string, regex *re
 
 	// >1 matches means input usable but not ideal; debug log
 	if len(submatches) > 1 {
-		tflog.Debug(ctx, fmt.Sprintf("Provider-defined function %s was called with input string: %s. This contains more than one match for the pattern %s. Terraform will use the first found match.", functionName, input, pattern))
+		log.Printf("[DEBUG] Provider-defined function %s was called with input string: %s. This contains more than one match for the pattern %s. Terraform will use the first found match.", functionName, input, pattern)
 	}
 
 	return nil
