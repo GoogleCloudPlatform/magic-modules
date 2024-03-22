@@ -566,20 +566,6 @@ module Api
         check :max_size, type: ::Integer
       end
 
-      def property_class
-        case @item_type
-        when NestedObject, ResourceRef
-          type = @item_type.property_class
-        when Enum
-          raise 'aaaa'
-        else
-          type = property_ns_prefix
-          type << get_type(@item_type).new(@name).type
-        end
-        type[-1] = "#{type[-1].camelize(:upper)}Array"
-        type
-      end
-
       def exclude_if_not_in_version!(version)
         super
         @item_type.exclude_if_not_in_version!(version) \
@@ -657,24 +643,11 @@ module Api
         check_resource_ref_property_exists
       end
 
-      def property
-        props = resource_ref.all_user_properties
-                            .select { |prop| prop.name == @imports }
-        return props.first unless props.empty?
-      end
-
       def resource_ref
         product = @__resource.__product
         resources = product.objects.select { |obj| obj.name == @resource }
 
         resources[0]
-      end
-
-      def property_class
-        type = property_ns_prefix
-        type << [@resource, @imports, 'Ref']
-        type[-1] = type[-1].join('_').camelize(:upper)
-        type
       end
 
       private
@@ -706,13 +679,6 @@ module Api
           p.set_variable(self, :__parent)
         end
         check :properties, type: ::Array, item_type: Api::Type, required: true
-      end
-
-      def property_class
-        type = property_ns_prefix
-        type << [@__resource.name, @name]
-        type[-1] = type[-1].join('_').camelize(:upper)
-        type
       end
 
       # Returns all properties including the ones that are excluded
