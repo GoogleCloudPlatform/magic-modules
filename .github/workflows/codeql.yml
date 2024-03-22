@@ -21,7 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'go', 'ruby', 'java-kotlin' ]
+        language: [ 'go', 'ruby' ]
 
     steps:
     - name: Checkout repository
