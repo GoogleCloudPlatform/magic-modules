@@ -45,6 +45,10 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/compute_target_https_proxy.go.erb
+  # update_encoder is usually the same as encoder by default. This resource is an uncommon case where the whole resource
+  # is marked to be immutable, but we have a field specific update that overrides it (e.g certifiacteManagerCertificates). 
+  # This causes the encoder logic to not be applied during update.
+  update_encoder: templates/terraform/encoders/compute_target_https_proxy.go.erb
   decoder: templates/terraform/decoders/compute_target_https_proxy.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
