@@ -2259,9 +2259,9 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		NetworkConfig: &container.NetworkConfig{
 			EnableIntraNodeVisibility:            d.Get("enable_intranode_visibility").(bool),
 			DefaultSnatStatus:                    expandDefaultSnatStatus(d.Get("default_snat_status")),
-		    DatapathProvider:                     d.Get("datapath_provider").(string),
+			DatapathProvider:                     d.Get("datapath_provider").(string),
 			EnableCiliumClusterwideNetworkPolicy: d.Get("enable_cilium_clusterwide_network_policy").(bool),
-			PrivateIpv6GoogleAccess:              d.Get("private_ipv6_google_access").(string),
+			PrivateIpv6GoogleAccess:              d.Get("private_ipv6_google_access")54.(string),
 			EnableL4ilbSubsetting:                d.Get("enable_l4_ilb_subsetting").(bool),
 			DnsConfig:                            expandDnsConfig(d.Get("dns_config")),
 			GatewayApiConfig:                     expandGatewayApiConfig(d.Get("gateway_api_config")),
@@ -3306,7 +3306,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		enabled := d.Get("enable_cilium_clusterwide_network_policy").(bool)
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
-				desiredEnableCiliumClusterwideNetworkPolicy: enabled,
+				DesiredEnableCiliumClusterwideNetworkPolicy: enabled,
 			},
 		}
 		updateF := updateFunc(req, "updating cilium clusterwide network policy")
