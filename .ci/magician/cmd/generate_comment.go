@@ -16,17 +16,19 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
-	"magician/exec"
-	"magician/github"
-	"magician/provider"
-	"magician/source"
 	"os"
 	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
 	"text/template"
+
+	"magician/exec"
+	"magician/github"
+	"magician/provider"
+	"magician/source"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/exp/maps"
@@ -141,6 +143,14 @@ func listGCEnvironmentVariables() string {
 }
 
 func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, projectId, commitSha string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller) {
+	errors := map[string][]string{"Other": []string{}}
+
+	pullRequest, err := gh.GetPullRequest(strconv.Itoa(prNumber))
+	if err != nil {
+		fmt.Printf("Error getting pull request: %v\n", err)
+		errors["Other"] = append(errors["Other"], "Failed to fetch PR data")
+	}
+
 	newBranch := fmt.Sprintf("auto-pr-%d", prNumber)
 	oldBranch := fmt.Sprintf("auto-pr-%d-old", prNumber)
 	wd := rnr.GetCWD()
@@ -174,8 +184,6 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	data := diffCommentData{
 		PrNumber: prNumber,
 	}
-	errors := map[string][]string{"Other": []string{}}
-	var err error
 	for _, repo := range []*source.Repo{&tpgRepo, &tpgbRepo, &tgcRepo, &tfoicsRepo} {
 		errors[repo.Title] = []string{}
 		repo.Branch = newBranch
@@ -210,6 +218,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 
 	// The breaking changes are unique across both provider versions
 	uniqueBreakingChanges := map[string]struct{}{}
+	uniqueServiceLabels := map[string]struct{}{}
 	diffProcessorPath := filepath.Join(mmLocalPath, "tools", "diff-processor")
 	diffProcessorEnv := map[string]string{
 		"OLD_REF": oldBranch,
@@ -240,39 +249,43 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			uniqueBreakingChanges[breakingChange] = struct{}{}
 		}
 
-		addLabelsEnv := map[string]string{
-			"GITHUB_TOKEN_MAGIC_MODULES": ghTokenMagicModules,
+		// If fetching the PR failed, Labels will be empty
+		labels := make([]string, len(pullRequest.Labels))
+		for i, label := range pullRequest.Labels {
+			labels[i] = label.Name
 		}
-		err = addLabels(prNumber, diffProcessorPath, addLabelsEnv, rnr)
+		serviceLabels, err := changedSchemaLabels(prNumber, labels, diffProcessorPath, gh, rnr)
 		if err != nil {
-			fmt.Println("adding service labels: ", err)
-			errors[repo.Title] = append(errors[repo.Title], "The diff processor crashed while adding labels.")
+			fmt.Println("computing changed schema labels: ", err)
+			errors[repo.Title] = append(errors[repo.Title], "The diff processor crashed while computing changed schema labels.")
 		}
-		err = cleanDiffProcessor(diffProcessorPath, rnr)
-		if err != nil {
-			fmt.Println("cleaning up diff processor: ", err)
-			errors[repo.Title] = append(errors[repo.Title], "The diff processor failed to clean up properly.")
+		for _, serviceLabel := range serviceLabels {
+			uniqueServiceLabels[serviceLabel] = struct{}{}
 		}
 	}
 	breakingChangesSlice := maps.Keys(uniqueBreakingChanges)
 	sort.Strings(breakingChangesSlice)
 	data.BreakingChanges = breakingChangesSlice
 
+	// Add service labels to PR
+	if len(uniqueServiceLabels) > 0 {
+		serviceLabelsSlice := maps.Keys(uniqueServiceLabels)
+		sort.Strings(serviceLabelsSlice)
+		if err = gh.AddLabels(strconv.Itoa(prNumber), serviceLabelsSlice); err != nil {
+			fmt.Printf("Error posting new service labels %q: %s", serviceLabelsSlice, err)
+			errors["Other"] = append(errors["Other"], "Failed to update service labels")
+		}
+	}
+
 	// Update breaking changes status on PR
 	breakingState := "success"
 	if len(uniqueBreakingChanges) > 0 {
 		breakingState = "failure"
-
-		pullRequest, err := gh.GetPullRequest(strconv.Itoa(prNumber))
-		if err != nil {
-			fmt.Printf("Error getting pull request: %v\n", err)
-			errors["Other"] = append(errors["Other"], "Failed to check for `override-breaking-change` label")
-		} else {
-			for _, label := range pullRequest.Labels {
-				if label.Name == allowBreakingChangesLabel {
-					breakingState = "success"
-					break
-				}
+		// If fetching the PR failed, Labels will be empty
+		for _, label := range pullRequest.Labels {
+			if label.Name == allowBreakingChangesLabel {
+				breakingState = "success"
+				break
 			}
 		}
 	}
@@ -357,6 +370,11 @@ func computeDiff(repo *source.Repo, oldBranch string, ctlr *source.Controller) (
 
 // Build the diff processor for tpg or tpgb
 func buildDiffProcessor(diffProcessorPath, providerLocalPath string, env map[string]string, rnr ExecRunner) error {
+	for _, path := range []string{"old", "new", "bin"} {
+		if err := rnr.RemoveAll(filepath.Join(diffProcessorPath, path)); err != nil {
+			return err
+		}
+	}
 	if err := rnr.PushDir(diffProcessorPath); err != nil {
 		return err
 	}
@@ -387,25 +405,40 @@ func computeBreakingChanges(diffProcessorPath string, rnr ExecRunner) ([]string,
 	return strings.Split(strings.TrimSuffix(output, "\n"), "\n"), rnr.PopDir()
 }
 
-func addLabels(prNumber int, diffProcessorPath string, env map[string]string, rnr ExecRunner) error {
+func changedSchemaLabels(prNumber int, currentLabels []string, diffProcessorPath string, gh GithubClient, rnr ExecRunner) ([]string, error) {
 	if err := rnr.PushDir(diffProcessorPath); err != nil {
-		return err
+		return nil, err
 	}
-	output, err := rnr.Run("bin/diff-processor", []string{"add-labels", strconv.Itoa(prNumber)}, env)
-	fmt.Println(output)
-	if err != nil {
-		return err
-	}
-	return rnr.PopDir()
-}
 
-func cleanDiffProcessor(diffProcessorPath string, rnr ExecRunner) error {
-	for _, path := range []string{"old", "new", "bin"} {
-		if err := rnr.RemoveAll(filepath.Join(diffProcessorPath, path)); err != nil {
-			return err
+	// short-circuit if service labels have already been added to the PR
+	hasServiceLabels := false
+	oldLabels := make(map[string]struct{}, len(currentLabels))
+	for _, label := range currentLabels {
+		oldLabels[label] = struct{}{}
+		if strings.HasPrefix(label, "service/") {
+			hasServiceLabels = true
 		}
 	}
-	return nil
+	if hasServiceLabels {
+		return nil, nil
+	}
+
+	output, err := rnr.Run("bin/diff-processor", []string{"changed-schema-labels"}, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println("Labels for changed schema: " + output)
+
+	var labels []string
+	if err = json.Unmarshal([]byte(output), &labels); err != nil {
+		return nil, err
+	}
+
+	if err = rnr.PopDir(); err != nil {
+		return nil, err
+	}
+	return labels, nil
 }
 
 // Run the missing test detector and return the results.

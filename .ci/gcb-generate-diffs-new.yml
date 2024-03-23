@@ -208,7 +208,7 @@ steps:
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
       id: tgc-test-integration
-      entrypoint: '/workspace/.ci/scripts/go-plus/tgc-tester-integration/test_tgc_integration.sh'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       allowFailure: true
       secretEnv: ["GITHUB_TOKEN_MAGIC_MODULES"]
       waitFor: ["tpgb-head", "tpgb-base", "tgc-head", "tgc-base"]
@@ -218,12 +218,13 @@ steps:
         - TEST_ANCESTRY=$_VALIDATOR_TEST_ANCESTRY
         - TEST_ORG_ID=$_VALIDATOR_TEST_ORG
       args:
-          - $_PR_NUMBER
-          - $COMMIT_SHA
-          - $BUILD_ID
-          - $PROJECT_ID
-          - "18"  # Build step
-          - terraform-google-conversion
+        - 'test-tgc-integration'
+        - $_PR_NUMBER
+        - $COMMIT_SHA
+        - $BUILD_ID
+        - $PROJECT_ID
+        - "18"  # Build step
+        - terraform-google-conversion
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
       id: tpgb-test
@@ -282,6 +283,7 @@ timeout: 20000s
 options:
     machineType: 'N1_HIGHCPU_32'
 
+logsBucket: 'gs://cloudbuild-generate-diffs-logs'
 availableSecrets:
   secretManager:
     - versionName: projects/673497134629/secrets/github-magician-token-generate-diffs-downstreams/versions/latest
