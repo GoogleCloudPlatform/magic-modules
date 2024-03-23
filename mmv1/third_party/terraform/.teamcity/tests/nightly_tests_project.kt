@@ -36,6 +36,13 @@ class NightlyTestProjectsTests {
                 }
             }
             assertTrue("Build configuration `${bt.name}` contains a CRON trigger", found)
+
+            // Check that nightly test is being ran on main branch
+            var isDefault: Boolean = false
+            if (bt.triggers.vcs.branchFilter == "+:ref/head/main"){
+                isDefault = true
+            }
+            assertTrue("Build configuration `${bt.name} is using the default branch", isDefault)
         }
     }
 }
