@@ -6261,7 +6261,7 @@ func flattenNodePoolAutoConfig(c *container.NodePoolAutoConfig) []map[string]int
 	if c.NetworkTags != nil {
 		result["network_tags"] = flattenNodePoolAutoConfigNetworkTags(c.NetworkTags)
 	}
-		if c.ResourceManagerTags != nil {
+	if c.ResourceManagerTags != nil {
 		result["resource_manager_tags"] = flattenResourceManagerTags(c.ResourceManagerTags)
 	}
 
