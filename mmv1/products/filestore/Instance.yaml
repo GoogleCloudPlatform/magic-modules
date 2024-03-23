@@ -82,7 +82,6 @@ properties:
       The resource name of the instance.
     required: true
     url_param_only: true
-    
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   - !ruby/object:Api::Type::String
     name: 'description'

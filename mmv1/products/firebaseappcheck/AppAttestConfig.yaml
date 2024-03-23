@@ -78,7 +78,6 @@ properties:
     description: |
       The relative resource name of the App Attest configuration object
     output: true
-    
   - !ruby/object:Api::Type::String
     name: tokenTtl
     description: |

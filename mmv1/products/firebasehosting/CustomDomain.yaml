@@ -126,7 +126,6 @@ virtual_fields:
 properties:
   - !ruby/object:Api::Type::String
     name: name
-    
     description: |
       The fully-qualified name of the `CustomDomain`.
     output: true

@@ -70,7 +70,6 @@ properties:
     required: true
     immutable: true
     url_param_only: true
-    
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |

@@ -65,7 +65,6 @@ parameters:
 properties:
   - !ruby/object:Api::Type::String
     name: name
-    
     description: |
       The fully-qualified resource name for the channel, in the format:
       sites/SITE_ID/channels/CHANNEL_ID

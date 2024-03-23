@@ -120,7 +120,6 @@ properties:
     required: true
     immutable: true
     url_param_only: true
-    
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   - !ruby/object:Api::Type::NestedObject
     name: gceSetup
@@ -132,7 +131,6 @@ properties:
         default_from_api: true
         description: |
           Optional. The machine type of the VM instance. https://cloud.google.com/compute/docs/machine-resource
-        
         diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
       - !ruby/object:Api::Type::Array

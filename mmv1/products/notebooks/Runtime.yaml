@@ -111,7 +111,6 @@ properties:
     required: true
     immutable: true
     url_param_only: true
-    
   - !ruby/object:Api::Type::NestedObject
     name: 'virtualMachine'
     exactly_one_of:

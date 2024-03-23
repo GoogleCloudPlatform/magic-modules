@@ -42,7 +42,6 @@ parameters:
       The name of the runtime config.
     required: true
     immutable: true
-    
 properties:
   - !ruby/object:Api::Type::String
     name: 'description'
