@@ -1,0 +1,26 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+# API resource name
+name: 'google_org_policy_policy'
+base_url: projects/{{project}}
+self_link: projects/{{project}}
+# Resource description for the provider documentation.
+description: |
+  The Org Policy API allows users to configure governance rules on their GCP resources across the Cloud Resource Hierarchy.  
+references: !ruby/object:Api::Resource::ReferenceLinks
+ name: 'storageBillingModel'
+    description: |
+      In resource "google_org_policy_policy" to resolve the [permadiff](https://github.com/hashicorp/terraform-provider-google/issues/12363), we have changed data-type of filed "rules" from "TypeList" to "TypeSet"  in file resource_org_policy_policy.go
+  api: 'https://console.cloud.google.com/marketplace/product/google/orgpolicy.googleapis.com'
