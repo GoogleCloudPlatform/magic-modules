@@ -96,6 +96,12 @@ var PapDescriptionEnvVars = []string{
 	"GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION",
 }
 
+// This value is the runtime version used for tpu v2 vm tests setup to fix the limited capacity issue.
+// This is only used during integration tests and should not be exposed to the public
+var TpuV2VmRuntimeVersionEnvVars = []string{
+	"GOOGLE_TPU_V2_VM_RUNTIME_VERSION",
+}
+
 // AccTestPreCheck ensures at least one of the project env variables is set.
 func GetTestProjectNumberFromEnv() string {
 	return transport_tpg.MultiEnvSearch(ProjectNumberEnvVars)
@@ -192,6 +198,11 @@ func GetTestServiceAccountFromEnv(t *testing.T) string {
 func GetTestPublicAdvertisedPrefixDescriptionFromEnv(t *testing.T) string {
 	SkipIfEnvNotSet(t, PapDescriptionEnvVars...)
 	return transport_tpg.MultiEnvSearch(PapDescriptionEnvVars)
+}
+
+func GetTestTpuV2VmRuntimeVersionFromEnv(t *testing.T) string {
+	SkipIfEnvNotSet(t, TpuV2VmRuntimeVersionEnvVars...)
+	return transport_tpg.MultiEnvSearch(TpuV2VmRuntimeVersionEnvVars)
 }
 
 func SkipIfEnvNotSet(t *testing.T, envs ...string) {

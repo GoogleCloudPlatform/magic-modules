@@ -55,6 +55,8 @@ examples:
     primary_resource_id: 'tpu'
     vars:
       vm_name: 'test-tpu'
+    test_env_vars:
+      vm_runtime_version: :VM_RUNTIME_VERSION
   - !ruby/object:Provider::Terraform::Examples
     name: 'tpu_v2_vm_full'
     min_version: 'beta'
@@ -66,6 +68,8 @@ examples:
       subnet_name: 'tpu-subnet'
       sa_id: 'tpu-sa'
       disk_name: 'tpu-disk'
+    test_env_vars:
+      vm_runtime_version: :VM_RUNTIME_VERSION
 parameters:
   - !ruby/object:Api::Type::String
     name: 'zone'
