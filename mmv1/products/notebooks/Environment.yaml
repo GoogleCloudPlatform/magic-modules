@@ -38,7 +38,6 @@ properties:
     required: true
     immutable: true
     url_param_only: true
-    pattern: projects/{{project}}/locations/{{location}}/environments/{{name}}
   - !ruby/object:Api::Type::ResourceRef
     name: 'location'
     description: 'A reference to the zone where the machine resides.'
