@@ -39,6 +39,7 @@ type Async struct {
 //   check :actions, default: %w[create delete update], type: ::Array, item_type: ::String
 // end
 
+// TODO Q2
 // def allow?(method)
 //   @actions.include?(method.downcase)
 // end
