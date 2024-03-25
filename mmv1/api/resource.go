@@ -383,6 +383,16 @@ func (r Resource) SensitiveProps() []*Type {
 	})
 }
 
+func (r Resource) SensitivePropsToString() string {
+	var props []string
+
+	for _, prop := range r.SensitiveProps() {
+		props = append(props, fmt.Sprintf("`%s`", prop.Lineage()))
+	}
+
+	return strings.Join(props, ", ")
+}
+
 // All settable properties in the resource.
 // Fingerprints aren't *really" settable properties, but they behave like one.
 // At Create, they have no value but they can just be read in anyways, and after a Read
