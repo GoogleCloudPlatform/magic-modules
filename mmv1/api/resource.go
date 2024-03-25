@@ -421,7 +421,7 @@ func (r Resource) SensitivePropsToString() string {
 // they will need to be set in every Update.
 
 // def settable_properties
-func (r Resource) settableProperties() []*Type {
+func (r Resource) SettableProperties() []*Type {
 	props := make([]*Type, 0)
 
 	props = google.Reject(r.AllUserProperties(), func(v *Type) bool {
