@@ -25,6 +25,8 @@ var outputPath = flag.String("output", "", "path to output generated files to")
 // Example usage: --version beta
 var version = flag.String("version", "", "optional version name. If specified, this version is preferred for resource generation when applicable")
 
+var product = flag.String("product", "", "optional product name. If specified, this product is used to generate the resources under the product when applicable")
+
 func main() {
 	flag.Parse()
 	var generateCode = true
@@ -38,11 +40,14 @@ func main() {
 		log.Fatalf("No version specified")
 	}
 
-	// TODO Q1: allow specifying one product (flag or hardcoded)
-	// var productsToGenerate []string
-	// var allProducts = true
-	var productsToGenerate = []string{"products/datafusion"}
+	var productsToGenerate []string
 	var allProducts = false
+	if product == nil || *product == "" {
+		allProducts = true
+	} else {
+		var productToGenerate = fmt.Sprintf("products/%s", *product)
+		productsToGenerate = []string{productToGenerate}
+	}
 
 	var allProductFiles []string = make([]string, 0)
 
@@ -134,11 +139,11 @@ func main() {
 				resource := &api.Resource{}
 				yamlValidator.Parse(resourceYaml, resource)
 
+				resource.Properties = resource.AddLabelsRelatedFields(resource.PropertiesWithExcluded(), nil)
+
 				// TODO Q1: remove these lines, which are for debugging
 				// res, _ := json.Marshal(resource)
 				// log.Printf("resource %s", string(res))
-
-				// TODO Q1: add labels related fields
 
 				resource.Validate()
 				resources = append(resources, resource)
