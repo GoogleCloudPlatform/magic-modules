@@ -14,8 +14,6 @@
 <%  unless !property.schema_config_mode_attr -%>
     schema_config_mode_attr: <%= property.schema_config_mode_attr %>
 <%  end -%>
-<%  unless property.pattern.nil? -%>
-    pattern: '<%= property.pattern %>'
 <%  end -%>
 <%  unless !property.exclude -%>
     exclude: <%= property.exclude %>
