@@ -1,0 +1,188 @@
+{{/*# The license inside this block applies to this file.
+  # Copyright 2017 Google Inc.
+  # Licensed under the Apache License, Version 2.0 (the "License");
+  # you may not use this file except in compliance with the License.
+  # You may obtain a copy of the License at
+  #
+  #     http://www.apache.org/licenses/LICENSE-2.0
+  #
+  # Unless required by applicable law or agreed to in writing, software
+  # distributed under the License is distributed on an "AS IS" BASIS,
+  # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  # See the License for the specific language governing permissions and
+  # limitations under the License.
+*/}}
+
+{{ if .FlattenObject -}}
+	##TODO order props?
+	{{- range $prop := .Properties }}
+		{{template "SchemaFields" $prop}}
+	{{ end -}}
+{{ else }}
+"{{underscore .Name -}}": {
+  {{ if .IsSet -}}
+  Type: schema.TypeSet,
+  {{ else -}}
+  Type: {{ .Type }},
+  {{ end -}}
+{{ if .DefaultFromApi -}}
+	Computed: true,
+	Optional: true,
+	{{ if .SchemaConfigModeAttr -}}
+	ConfigMode: schema.SchemaConfigModeAttr,
+	{{ end -}}
+{{ else if .Required -}}
+  Required: true,
+{{ else if .Output -}}
+  Computed: true,
+{{ else -}}
+  Optional: true,
+{{ end -}}
+{{ if .DeprecationMessage -}}
+  Deprecated: "{{ .DeprecationMessage }}",
+{{ end -}}
+{{ if .Immutable -}}
+  ForceNew: true,
+{{ end -}}
+{{ if .Validation -}}
+	{{ if .Validation.Regex -}}
+  ValidateFunc: verify.ValidateRegexp(`{{ .Validation.Regex -}}`),
+	{{ else if Validation.F -}}
+  ValidateFunc: {{ .Validation.Function -}},
+	{{ end  -}}
+{{ end -}}
+
+
+*/}}
+{{ if and (eq .Type "Enum") (not output) -}}
+{{
+	enum_values = .values
+	enum_values.push "" unless .required
+-}}
+	ValidateFunc: verify.ValidateEnum([]string{"{{= enum_values.join '","' -}}"}),
+{{ end -}}
+{{ if .DiffSuppressFunc -}}
+  DiffSuppressFunc: {{ .DiffSuppressFunc }},
+{{ else if eq .Type "ResourceRef" -}}
+  DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
+{{ end -}}
+{{ if .StateFunc -}}
+	StateFunc: {{ .StateFunc }},
+{{ end -}}
+{{ enum_values_description = "" -}}
+{{ if .is_a?(Api::Type::Array) && .item_type.is_a?(Api::Type::Enum) && !.output && !.item_type.skip_docs_values -}}
+{{ unless .item_type.default_value.nil? || .item_type.default_value == "" -}}
+{{ enum_values_description += " Default value: \"#{.item_type.default_value}\"" -}}
+{{ end -}}
+{{ enum_values_description += " Possible values: [" -}}
+{{ enum_values_description += .item_type.values.select { |v| v != "" }.map { |v| "\"#{v}\"" }.join(', ') -}}
+{{ enum_values_description += "]" -}}
+{{ elsif .is_a?(Api::Type::Enum) && !.output -}}
+{{ unless .default_value.nil? || .default_value == "" -}}
+{{ enum_values_description += " Default value: \"#{.default_value}\"" -}}
+{{ end -}}
+{{ enum_values_description += " Possible values: [" -}}
+{{ enum_values_description += .values.select { |v| v != "" }.map { |v| "\"#{v}\"" }.join(', ') -}}
+{{ enum_values_description += "]" -}}
+{{ end -}}
+	Description: `{{= .description.strip.gsub("`", "'") + enum_values_description -}}`,
+{{ if .is_a?(Api::Type::NestedObject) -}}
+  {{ unless .output -}}
+  MaxItems: 1,
+  {{ end -}}
+  Elem: &schema.Resource{
+    Schema: map[string]*schema.Schema{
+      {{ order_properties(.properties).each do |prop| -}}
+        {{= lines(build_schema_property(prop, object, pwd)) -}}
+      {{ end -}}
+    },
+  },
+{{ elsif .is_a?(Api::Type::Array) -}}
+  {{ unless .min_size.nil? -}}
+      MinItems: {{= .min_size }},
+  {{ end -}}
+  {{ unless .max_size.nil? -}}
+      MaxItems: {{= .max_size }},
+  {{ end -}}
+  {{ if .item_type.is_a?(Api::Type::NestedObject) -}}
+    {{ if .is_set -}}
+      Elem: {{= namespace_property_from_object(property, object) -}}Schema(),
+    {{ else -}}
+      Elem: &schema.Resource{
+        Schema: map[string]*schema.Schema{
+          {{ order_properties(.item_type.properties).each do |prop| -}}
+            {{= lines(build_schema_property(prop, object, pwd)) -}}
+          {{ end -}}
+        },
+      },
+    {{ end -}}
+  {{ elsif .item_type.is_a?(String) # Basic type like Api::Type::String -}}
+      Elem: &schema.Schema{
+        Type: {{= tf_types[.item_type_class] -}},
+      },
+  {{ elsif .item_type.is_a?(Api::Type::Enum) -}}
+      Elem: &schema.Schema{
+        Type: {{= tf_types[.item_type.class] -}},
+        ValidateFunc: verify.ValidateEnum([]string{"{{= .item_type.values.join '","' -}}"}),
+      },
+  {{ else # array of basic types -}}
+      Elem: &schema.Schema{
+        Type: {{= tf_types[.item_type.class] -}},
+    {{ if .item_type.is_a?(Api::Type::ResourceRef) -}}
+        DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
+    {{ end -}}
+      },
+  {{ end -}}
+  {{ if .is_set -}}
+    {{ if !.set_hash_func.nil? -}}
+    Set: {{= .set_hash_func -}},
+    {{ elsif .item_type.is_a?(String) or .item_type.is_a?(Api::Type::Enum) -}}
+    Set: schema.HashString,
+    {{ else -}}
+    // Default schema.HashSchema is used.
+    {{ end -}}
+  {{ end -}}
+{{ elsif .is_a?(Api::Type::KeyValuePairs) -}}
+  Elem: &schema.Schema{Type: schema.TypeString},
+{{ elsif .is_a?(Api::Type::Map) -}}
+	Elem: &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"{{= .key_name -}}": {
+				Type:     schema.TypeString,
+				Required: true,
+				{{ if !.diff_suppress_func.nil? -}}
+					DiffSuppressFunc: {{= .key_diff_suppress_func }},
+				{{ end -}}
+				{{ if force_new?(property, object) -}}
+				ForceNew: true,
+				{{ end -}}
+			},
+			{{ order_properties(.value_type.properties).each do |prop| -}}
+				{{= lines(build_schema_property(prop, object, pwd)) -}}
+			{{ end -}}
+		},
+	},
+	{{ if !.set_hash_func.nil? -}}
+	Set: {{= .set_hash_func -}},
+	{{ end -}}
+{{ end -}}
+{{ if .sensitive -}}
+    Sensitive: true,
+{{ end -}}
+{{ unless .default_value.nil? -}}
+    Default: {{= go_literal(.default_value) -}},
+{{ end -}}
+{{ unless .conflicting().empty? -}}
+    ConflictsWith: {{= go_literal(.conflicting.map  {|sp| get_property_schema_path(sp, object) }.compact) -}},
+{{ end -}}
+{{ unless .at_least_one_of_list().empty? -}}
+    AtLeastOneOf: {{= go_literal(.at_least_one_of_list.map {|sp| get_property_schema_path(sp, object) }.compact) -}},
+{{ end -}}
+{{ unless .exactly_one_of_list().empty? -}}
+    ExactlyOneOf: {{= go_literal(.exactly_one_of_list.map {|sp| get_property_schema_path(sp, object) }.compact) -}},
+{{ end -}}
+{{ unless .required_with_list().empty? -}}
+    RequiredWith: {{= go_literal(.required_with_list.map {|sp| get_property_schema_path(sp, object) }.compact) -}},
+{{ end -}}
+},
+{{ end -}}
