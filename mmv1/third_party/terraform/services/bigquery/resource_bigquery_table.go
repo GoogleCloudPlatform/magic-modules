@@ -261,6 +261,7 @@ func resourceBigQueryTableSchemaIsChangeable(old, new interface{}, topLevel bool
 	case []interface{}:
 		arrayOld := old.([]interface{})
 		arrayNew, ok := new.([]interface{})
+		sameNameColumns := 0
 		droppedColumns := 0
 		if !ok {
 			// if not both arrays not changeable
@@ -298,9 +299,13 @@ func resourceBigQueryTableSchemaIsChangeable(old, new interface{}, topLevel bool
 				resourceBigQueryTableSchemaIsChangeable(mapOld[key], mapNew[key], false); err != nil || !isChangable {
 				return false, err
 			}
+			if topLevel {
+				sameNameColumns += 1
+			}
 		}
 		// only pure column drops allowed
-		return (droppedColumns == 0) || (len(arrayOld) == len(arrayNew)+droppedColumns), nil
+		newColumns := len(arrayNew) - sameNameColumns
+		return (droppedColumns == 0) || (newColumns == 0), nil
 	case map[string]interface{}:
 		objectOld := old.(map[string]interface{})
 		objectNew, ok := new.(map[string]interface{})
@@ -1705,7 +1710,7 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-type TableInfo struct {
+type TableReference struct {
 	project   string
 	datasetID string
 	tableID   string
@@ -1733,13 +1738,13 @@ func resourceBigQueryTableUpdate(d *schema.ResourceData, meta interface{}) error
 	datasetID := d.Get("dataset_id").(string)
 	tableID := d.Get("table_id").(string)
 
-	tableInfo := &TableInfo{
+	tableReference := &TableReference{
 		project:   project,
 		datasetID: datasetID,
 		tableID:   tableID,
 	}
 
-	if err = resourceBigQueryTableColumnDrop(config, userAgent, table, tableInfo); err != nil {
+	if err = resourceBigQueryTableColumnDrop(config, userAgent, table, tableReference); err != nil {
 		return err
 	}
 
@@ -1750,8 +1755,8 @@ func resourceBigQueryTableUpdate(d *schema.ResourceData, meta interface{}) error
 	return resourceBigQueryTableRead(d, meta)
 }
 
-func resourceBigQueryTableColumnDrop(config *transport_tpg.Config, userAgent string, table *bigquery.Table, tableInfo *TableInfo) error {
-	oldTable, err := config.NewBigQueryClient(userAgent).Tables.Get(tableInfo.project, tableInfo.datasetID, tableInfo.tableID).Do()
+func resourceBigQueryTableColumnDrop(config *transport_tpg.Config, userAgent string, table *bigquery.Table, tableReference *TableReference) error {
+	oldTable, err := config.NewBigQueryClient(userAgent).Tables.Get(tableReference.project, tableReference.datasetID, tableReference.tableID).Do()
 	if err != nil {
 		return err
 	}
@@ -1771,7 +1776,7 @@ func resourceBigQueryTableColumnDrop(config *transport_tpg.Config, userAgent str
 	if len(droppedColumns) > 0 {
 		droppedColumnsString := strings.Join(droppedColumns, ", DROP COLUMN ")
 
-		dropColumnsDDL := fmt.Sprintf("ALTER TABLE `%s.%s.%s` DROP COLUMN %s", tableInfo.project, tableInfo.datasetID, tableInfo.tableID, droppedColumnsString)
+		dropColumnsDDL := fmt.Sprintf("ALTER TABLE `%s.%s.%s` DROP COLUMN %s", tableReference.project, tableReference.datasetID, tableReference.tableID, droppedColumnsString)
 		log.Printf("[INFO] Dropping columns in-place: %s", dropColumnsDDL)
 
 		useLegacySQL := false
@@ -1780,7 +1785,7 @@ func resourceBigQueryTableColumnDrop(config *transport_tpg.Config, userAgent str
 			UseLegacySql: &useLegacySQL,
 		}
 
-		_, err = config.NewBigQueryClient(userAgent).Jobs.Query(tableInfo.project, req).Do()
+		_, err = config.NewBigQueryClient(userAgent).Jobs.Query(tableReference.project, req).Do()
 		if err != nil {
 			return err
 		}

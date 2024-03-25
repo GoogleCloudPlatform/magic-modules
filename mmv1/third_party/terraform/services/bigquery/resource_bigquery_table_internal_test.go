@@ -576,16 +576,18 @@ func TestUnitBigQueryDataTable_schemaIsChangeable(t *testing.T) {
 func TestUnitBigQueryDataTable_schemaIsChangeableNested(t *testing.T) {
 	t.Parallel()
 	// Only top level column drops are changeable
-	skipNested := map[string]bool{"arraySizeDecreases": true, "typeModeReqToNullAndColumnDropped": true}
+	customNestedValues := map[string]bool{"arraySizeDecreases": false, "typeModeReqToNullAndColumnDropped": false}
 	for _, testcase := range testUnitBigQueryDataTableIsChangeableTestCases {
-		if !skipNested[testcase.name] {
-			testcaseNested := &testUnitBigQueryDataTableJSONChangeableTestCase{
-				testcase.name + "Nested",
-				fmt.Sprintf("[{\"name\": \"someValue\", \"type\" : \"INTEGER\", \"fields\" : %s }]", testcase.jsonOld),
-				fmt.Sprintf("[{\"name\": \"someValue\", \"type\" : \"INT64\", \"fields\" : %s }]", testcase.jsonNew),
-				testcase.changeable,
-			}
-			testcaseNested.check(t)
+		changeable, ok := customNestedValues[testcase.name]
+		if !ok {
+			changeable = testcase.changeable
 		}
+		testcaseNested := &testUnitBigQueryDataTableJSONChangeableTestCase{
+			testcase.name + "Nested",
+			fmt.Sprintf("[{\"name\": \"someValue\", \"type\" : \"INTEGER\", \"fields\" : %s }]", testcase.jsonOld),
+			fmt.Sprintf("[{\"name\": \"someValue\", \"type\" : \"INT64\", \"fields\" : %s }]", testcase.jsonNew),
+			changeable,
+		}
+		testcaseNested.check(t)
 	}
 }
