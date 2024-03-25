@@ -72,7 +72,6 @@ properties:
     description: |
       The relative resource name of the Play Integrity configuration object
     output: true
-    pattern: projects/{{project}}/apps/{{app_id}}/playIntegrityConfig
   - !ruby/object:Api::Type::String
     name: tokenTtl
     description: |
