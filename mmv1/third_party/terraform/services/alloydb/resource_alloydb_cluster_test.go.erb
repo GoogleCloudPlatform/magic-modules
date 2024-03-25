@@ -1,3 +1,4 @@
+<% autogen_exception -%>
 package alloydb_test
 
 import (
@@ -1169,16 +1170,17 @@ resource "google_compute_global_address" "private_ip_alloc" {
 `, context)
 }
 
+<% unless version == "ga" -%>
 func TestAccAlloydbCluster_withMaintenanceWindowsAndDenyPeriod(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandSting(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1197,6 +1199,7 @@ func TestAccAlloydbCluster_withMaintenanceWindowsAndDenyPeriod(t *testing.T) {
 func testAccAlloydbCluster_withMaintenanceWindowAndDenyPeriod(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "default" {
+  provider   = google-beta
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
   network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
@@ -1205,7 +1208,7 @@ resource "google_alloydb_cluster" "default" {
     maintenance_windows = [
       {
         day = "WEDNESDAY"
-        start_time {
+        start_time = {
           hours = 12
           minutes = 0
           seconds = 0
@@ -1216,17 +1219,17 @@ resource "google_alloydb_cluster" "default" {
 
     deny_maintenance_periods = [
       {
-        start_date {
+        start_date = {
           year = 2024
           month = 3
           day = 18
         }
-        end_date {
+        end_date = {
           year = 2024
           month = 3
           day = 25
         }
-        time {
+        time = {
           hours = 12
           minutes = 34
           seconds = 56
@@ -1249,9 +1252,10 @@ data "google_project" "project" {
 }
 
 resource "google_compute_network" "default" {
-  name = "tf-test-alloydb-cluster%{random_suffix}"
+  provider = google-beta
+  name     = "tf-test-alloydb-cluster%{random_suffix}"
 }
-}	
+	
 `, context)
 }
 
@@ -1259,12 +1263,12 @@ func TestAccAlloydbCluster_withMaintenanceWindowsAndDenyPeriodMissingFields(t *t
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandSting(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1282,6 +1286,7 @@ func TestAccAlloydbCluster_withMaintenanceWindowsAndDenyPeriodMissingFields(t *t
 func testAccAlloydbCluster_withMaintenanceWindowAndDenyPeriodMisingStartTime(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "default" {
+  provider   = google-beta
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
   network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
@@ -1295,17 +1300,17 @@ resource "google_alloydb_cluster" "default" {
 
     deny_maintenance_periods = [
       {
-        start_date {
+        start_date = {
           year = 2024
           month = 3
           day = 18
         }
-        end_date {
+        end_date = {
           year = 2024
           month = 3
           day = 25
         }
-        time {
+        time = {
           hours = 12
           minutes = 34
           seconds = 56
@@ -1328,8 +1333,9 @@ data "google_project" "project" {
 }
 
 resource "google_compute_network" "default" {
-  name = "tf-test-alloydb-cluster%{random_suffix}"
-}
+  provider = google-beta
+  name     = "tf-test-alloydb-cluster%{random_suffix}"
+
 }	
 `, context)
 }
@@ -1337,6 +1343,7 @@ resource "google_compute_network" "default" {
 func testAccAlloydbCluster_withMaintenanceWindowAndDenyPeriodMisingEndDate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "default" {
+  provider   = google-beta
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
   network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
@@ -1345,7 +1352,7 @@ resource "google_alloydb_cluster" "default" {
     maintenance_windows = [
       {
         day = "WEDNESDAY"
-        start_time {
+        start_time = {
           hours = 12
           minutes = 0
           seconds = 0
@@ -1356,12 +1363,12 @@ resource "google_alloydb_cluster" "default" {
 
     deny_maintenance_periods = [
       {
-        start_date {
+        start_date = {
           year = 2024
           month = 3
           day = 18
         }
-        time {
+        time = {
           hours = 12
           minutes = 34
           seconds = 56
@@ -1384,8 +1391,9 @@ data "google_project" "project" {
 }
 
 resource "google_compute_network" "default" {
-  name = "tf-test-alloydb-cluster%{random_suffix}"
-}
+  provider = google-beta
+  name     = "tf-test-alloydb-cluster%{random_suffix}"
 }	
 `, context)
 }
+<% end -%>

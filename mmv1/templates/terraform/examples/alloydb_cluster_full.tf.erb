@@ -43,7 +43,7 @@ resource "google_alloydb_cluster" "<%= ctx[:primary_resource_id] %>" {
     maintenance_windows = [
       {
         day = "WEDNESDAY"
-        start_time {
+        start_time = {
           hours = 12
           minutes = 0
           seconds = 0
@@ -54,17 +54,17 @@ resource "google_alloydb_cluster" "<%= ctx[:primary_resource_id] %>" {
 
     deny_maintenance_periods = [
       {
-        start_date {
+        start_date = {
           year = 2024
           month = 3
           day = 18
         }
-        end_date {
+        end_date = {
           year = 2024
           month = 3
           day = 25
         }
-        time {
+        time = {
           hours = 12
           minutes = 34
           seconds = 56
