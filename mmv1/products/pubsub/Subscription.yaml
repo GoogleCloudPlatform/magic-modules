@@ -92,7 +92,6 @@ properties:
     description: 'Name of the subscription.'
     required: true
     immutable: true
-    pattern: 'projects/{{project}}/subscriptions/{{name}}'
     custom_expand: templates/terraform/custom_expand/shortname_to_url.go.erb
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::ResourceRef
@@ -105,7 +104,6 @@ properties:
       the topic is in the same project as the subscription.
     required: true
     immutable: true
-    pattern: 'projects/{{project}}/topics/{{topic}}'
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     custom_expand: templates/terraform/custom_expand/computed_subscription_topic.erb
   - !ruby/object:Api::Type::KeyValueLabels
