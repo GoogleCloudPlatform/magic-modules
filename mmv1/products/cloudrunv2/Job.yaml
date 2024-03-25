@@ -128,7 +128,6 @@ properties:
     url_param_only: true
     description: |
       Name of the Job.
-    pattern: projects/{{project}}/locations/{{location}}/jobs/{{name}}
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
