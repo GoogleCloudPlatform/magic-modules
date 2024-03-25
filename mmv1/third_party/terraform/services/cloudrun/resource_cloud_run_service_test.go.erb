@@ -1273,6 +1273,28 @@ func TestAccCloudRunService_csiVolume(t *testing.T) {
                         },
       })
     }
+func TestAccCloudRunService_nfsVolume(t *testing.T) {
+	t.Parallel()
+
+	project := envvar.GetTestProjectFromEnv()
+	suffix := acctest.RandString(t, 6)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCloudRunService_cloudRunServiceWithFilestoreVolume(suffix, project),
+			},
+			{
+				ResourceName:            "google_cloud_run_service.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "metadata.0.annotations", "metadata.0.labels", "metadata.0.terraform_labels", "status.0.conditions"},
+			},
+    },
+  })
+}
 
 
 func testAccCloudRunService_cloudRunServiceWithEmptyDirVolume(name, project string) string {
@@ -1364,6 +1386,87 @@ resource "google_cloud_run_service" "default" {
   }
 }
 `, name, project)
+}
+
+func testAccCloudRunService_cloudRunServiceWithFilestoreVolume(suffix, project string) string {
+	return acctest.Nprintf(`
+resource "google_compute_subnetwork" "test_subnet" {
+  provider = google-beta
+  name          = "tf-test-cloudrun-subnet-%{suffix}"
+  ip_cidr_range = "10.2.0.0/24"
+  region        = "us-central1"
+  network       = google_compute_network.test_network.id
+}
+resource "google_compute_network" "test_network" {
+  provider = google-beta
+  name = "tf-test-cloudrun-network-%{suffix}"
+  auto_create_subnetworks = false
+}
+resource "google_filestore_instance" "nfs_share" {
+ provider = google-beta  
+  name     = "tf-test-cloudrun-fstore-%{suffix}"
+  zone = "us-central1-b"
+  tier     = "BASIC_HDD"
+
+  file_shares {
+    capacity_gb = 1024
+    name        = "share1"
+  }
+
+  networks {
+    network = "${google_compute_network.test_network.name}"
+    modes   = ["MODE_IPV4"]
+  }
+}  
+resource "google_cloud_run_service" "default" {
+  provider = google-beta
+  name     = "tf-test-cloudrun-svc-%{suffix}"
+  location = "us-central1"
+
+  metadata {
+    namespace = "%{project}"
+    annotations = {
+      generated-by = "magic-modules"
+      "run.googleapis.com/launch-stage" = "BETA"
+    }
+  }
+
+  template {
+    metadata {
+      annotations = {
+        "run.googleapis.com/execution-environment" = "gen2"
+        "run.googleapis.com/network-interfaces" = "[{\"network\": \"${google_compute_network.test_network.id}\", \"subnetwork\": \"${google_compute_subnetwork.test_subnet.name}\"}]"
+        "run.googleapis.com/vpc-access-egress" = "private-ranges-only"
+      }
+    }
+    spec {
+      containers {
+        image = "gcr.io/cloudrun/hello"
+        volume_mounts {
+          name = "vol1"
+          mount_path = "/mnt/vol1"
+        }
+      }
+      volumes {
+        name = "vol1"
+        nfs {
+          server = google_filestore_instance.nfs_share.networks[0].ip_addresses[0]
+          path = "/${google_filestore_instance.nfs_share.file_shares[0].name}"
+        }
+      }
+    }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      metadata.0.annotations,
+    ]
+  }
+}
+`, map[string]interface{}{
+  "suffix": suffix,
+  "project": project,
+})
 }
 
 <% end -%>
