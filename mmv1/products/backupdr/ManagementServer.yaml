@@ -87,7 +87,6 @@ properties:
           description: |
             Network with format `projects/{{project_id}}/global/networks/{{network_id}}`
           required: true
-          pattern: projects/{{project}}/global/networks/{{network}}
         - !ruby/object:Api::Type::Enum
           name: 'peeringMode'
           description: |
