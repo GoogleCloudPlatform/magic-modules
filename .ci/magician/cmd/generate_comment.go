@@ -267,6 +267,21 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 		}
 
 		affectedResources, err := changedSchemaResources(diffProcessorPath, rnr)
+		if repo.Name == "terraform-provider-google-beta" {
+			// Run missing test detector (currently only for beta)
+			missingTests, err := detectMissingTests(diffProcessorPath, repo.Path, rnr)
+			if err != nil {
+				fmt.Println("Error running missing test detector: ", err)
+				errors[repo.Title] = append(errors[repo.Title], "The missing test detector failed to run.")
+			}
+			data.MissingTests = missingTests
+		}
+
+		// If fetching the PR failed, Labels will be empty
+		labels := make([]string, len(pullRequest.Labels))
+		for i, label := range pullRequest.Labels {
+			labels[i] = label.Name
+		}
 		if err != nil {
 			fmt.Println("computing changed resource schemas: ", err)
 			errors[repo.Title] = append(errors[repo.Title], "The diff processor crashed while computing changed resource schemas.")
@@ -347,26 +362,6 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	if err = gh.PostBuildStatus(strconv.Itoa(prNumber), "terraform-provider-breaking-change-test", breakingState, targetURL, commitSha); err != nil {
 		fmt.Printf("Error posting build status for pr %d commit %s: %v\n", prNumber, commitSha, err)
 		errors["Other"] = append(errors["Other"], "Failed to update breaking-change status check with state: "+breakingState)
-	}
-
-	// Run missing test detector (currently only for beta)
-	for _, repo := range []source.Repo{tpgbRepo} {
-		if !repo.Cloned {
-			fmt.Println("Skipping missing tests; repo failed to clone: ", repo.Name)
-			continue
-		}
-		err = buildDiffProcessor(diffProcessorPath, repo.Path, diffProcessorEnv, rnr)
-		if err != nil {
-			fmt.Println("building diff processor: ", err)
-			errors[repo.Title] = append(errors[repo.Title], "The diff processor failed to build. This is usually due to the downstream provider failing to compile.")
-			continue
-		}
-		missingTests, err := detectMissingTests(diffProcessorPath, repo.Path, rnr)
-		if err != nil {
-			fmt.Println("Error running missing test detector: ", err)
-			errors[repo.Title] = append(errors[repo.Title], "The missing test detector failed to run.")
-		}
-		data.MissingTests = missingTests
 	}
 
 	// Add errors to data as an ordered list
