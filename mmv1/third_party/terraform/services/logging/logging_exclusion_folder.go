@@ -16,7 +16,7 @@ var FolderLoggingExclusionSchema = map[string]*schema.Schema{
 		Type:             schema.TypeString,
 		Required:         true,
 		ForceNew:         true,
-		DiffSuppressFunc: tpgresource.OptionalPrefixSuppress("folders/"),
+		DiffSuppressFunc: optionalPrefixSuppress("folders/"),
 	},
 }
 
