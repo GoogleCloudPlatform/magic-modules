@@ -1,16 +1,19 @@
-{{- /* Copyright 2024 Google LLC. All Rights Reserved.
+{{define "SchemaFields"}} .Name {{end}}
+{{define "SchemaSubResource"}} .Name {{end}}
+{{/* the license inside this block applies to this file
+  Copyright 2024 Google LLC. All Rights Reserved.
 
-	Licensed under the Apache License, Version 2.0 (the "License");
-	you may not use this file except in compliance with the License.
-	You may obtain a copy of the License at
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
 
-			http://www.apache.org/licenses/LICENSE-2.0
+      http://www.apache.org/licenses/LICENSE-2.0
 
-	Unless required by applicable law or agreed to in writing, software
-	distributed under the License is distributed on an "AS IS" BASIS,
-	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-	See the License for the specific language governing permissions and
-	limitations under the License. */ -}}
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License. */}}
 // Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
 
@@ -28,4 +31,149 @@
 //
 // ----------------------------------------------------------------------------
 
-// {{$.ProductMetadata.Name}} {{$.Name}}
+package {{ $.ProductMetadata.Name .downcase -}}
+
+import (
+
+    "fmt"
+    "log"
+    "reflect"
+{{if !$.Immutable && $.UpdateMask -}}
+    "strings"
+{{- end}}
+    "time"
+
+    # We list all the v2 imports here, because we run 'goimports' to guess the correct
+    # set of imports, which will never guess the major version correctly.
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
+
+    "{{ ##TODO: importpath() method/attribute ## -}}/tpgresource"
+    transport_tpg "{{ ##TODO: importpath() method/attribute ## -}}/transport"
+    "{{ ##TODO: importpath() method/attribute ## -}}/verify"
+
+{{ if google.Select(google.Reject($.GettableProperties(), func(p *Type) bool { return p.IgnoreRead }), func(p *Type) bool { return p.FlattenObject }) }}
+    "google.golang.org/api/googleapi"
+{{- end}}
+)
+
+{{if $.CustomCode.Constants}} ##TODO Q2 function to compile custom code lines {{- end}}
+
+func Resource{{ $.ResourceName() -}}() *schema.Resource {
+    return &schema.Resource{
+        Create: resource{{ $.ResourceName() -}}Create,
+        Read: resource{{ $.ResourceName() -}}Read,
+{{if $.Updatable() -}}                                           {{/* ##TODO Q2 || $.root_labels? -}} */}}
+        Update: resource{{ $.ResourceName() -}}Update,
+{{- end}}
+        Delete: resource{{ $.ResourceName() -}}Delete,
+
+{{  unless $.ExcludeImport -}}
+        Importer: &schema.ResourceImporter{
+            State: resource{{ $.ResourceName() -}}Import,
+        },
+{{- end}}
+
+        Timeouts: &schema.ResourceTimeout {
+            Create: schema.DefaultTimeout({{ $.Timeouts.InsertMinutes -}} * time.Minute),
+{{if $.Updatable() -}}                                           {{/* ##TODO Q2 || $.root_labels? -}} */}}
+            Update: schema.DefaultTimeout({{ $.Timeouts.UpdateMinutes -}} * time.Minute),
+{{- end}}
+            Delete: schema.DefaultTimeout({{ $.Timeouts.DeleteMinutes -}} * time.Minute),
+        },
+
+{{if $.SchemaVersion -}}
+        SchemaVersion: {{ $.SchemaVersion -}},
+{{- end}}
+{{if $.MigrateState -}}
+        MigrateState: {{ $.MigrateState -}},
+{{- end}}
+{{if $.StateUpgraders -}}
+
+        StateUpgraders: []schema.StateUpgrader{
+{{-       range $v := $.SchemaVersions }}
+          {
+            Type:    resource{{$.PathType}}ResourceV{{$v}}().CoreConfigSchema().ImpliedType(),
+            Upgrade: Resource{{$.PathType}}UpgradeV{{$v}},
+            Version: {{$v}},
+          },
+{{-       end }}
+        },
+{{- end }}
+{{if (($.Project? || $.Region? || $.Zone?) && !$.SkipDefaultCdiff) || $.CustomDiff.len() > 0 -}}
+        CustomizeDiff: customdiff.All(
+{{if $.CustomDiff -}}
+{{          for cdiff in $.CustomDiff-}}
+        {{ cdiff%>,
+{{- end}}
+{{- end}}
+{{if $.Project? && !$.SkipDefaultCdiff -}}
+            tpgresource.DefaultProviderProject,
+{{- end}}
+{{if $.Region? && !$.SkipDefaultCdiff  -}}
+            tpgresource.DefaultProviderRegion,
+{{- end}}
+{{if $.Zone? && !$.SkipDefaultCdiff  -}}
+            tpgresource.DefaultProviderZone,
+{{- end}}
+        ),
+{{- end}}
+
+{{if $.DeprecationMessage %>
+        DeprecationMessage: "{{ $.DeprecationMessage -}}",
+{{- end}}
+
+        Schema: map[string]*schema.Schema{
+##TODO order props?
+{{- range $prop := $.AllUserProperties() }}
+{{template "SchemaFields" $prop}}
+{{- end }}
+{{- if $.VirtualFields -}}
+{{-   range $field := $.VirtualFields }}
+            "{{ $field.Name -}}": {
+                Type: schema.{{ $field.ItemType -}},
+                Optional: true,
+{{      if $field.Immutable -}}
+                ForceNew: true,
+{{-     end}}
+{{      if $field.DefaultValue -}}
+                Default:  {{ $field.Default_Value -}},
+{{-     end}}
+                Description: `{{ $field.Description -}}`,
+            },
+{{-   end}}
+{{- end}}
+
+ ##TODO Q2 function to compile custom code lines ($.CustomCode.extra_schema_entry)
+
+{{if $.Project? -}}
+            "project": {
+                Type:     schema.TypeString,
+                Optional: true,
+                Computed: true,
+                ForceNew: true,
+            },
+{{- end}}
+{{if $.HasSelfLink() -}}
+            "self_link": {
+                Type:     schema.TypeString,
+                Computed: true,
+            },
+{{- end}}
+        },
+        UseJSONNumber: true,
+    }
+}
+
+{{- range $prop := $.AllUserProperties() }}
+{{if $prop.Type == Array && $prop.IsSet && $prop.ItemType == NestedObject}}
+{{template "SchemaSubResource" $prop}}
+{{end}}
+{{- end}}

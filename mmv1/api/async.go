@@ -47,6 +47,7 @@ type Async struct {
 //   check :actions, default: %w[create delete update], type: ::Array, item_type: ::String
 // end
 
+// TODO Q2
 // def allow?(method)
 func (a Async) Allow(method string) bool {
 	return slices.Contains(a.Actions, strings.ToLower(method))
