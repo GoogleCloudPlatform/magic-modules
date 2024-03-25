@@ -26,7 +26,6 @@ func TestAccFirebaseAppCheckServiceConfig_firebaseAppCheckServiceConfigUpdate(t 
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckFirebaseAppCheckServiceConfigDestroyProducer(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
-			"random": {},
 			"time":   {},
 		},
 		Steps: []resource.TestStep{
@@ -86,6 +85,9 @@ resource "google_project_service" "database" {
   project  = google_project.default.project_id
   service  = "firebasedatabase.googleapis.com"
   disable_on_destroy = false
+  depends_on = [
+    google_project_service.firebase,
+  ]
 }
 
 resource "google_project_service" "appcheck" {
@@ -93,6 +95,9 @@ resource "google_project_service" "appcheck" {
   project  = google_project.default.project_id
   service  = "firebaseappcheck.googleapis.com"
   disable_on_destroy = false
+  depends_on = [
+    google_project_service.database,
+  ]
 }
 
 resource "google_firebase_project" "default" {
@@ -100,8 +105,6 @@ resource "google_firebase_project" "default" {
   project  = google_project.default.project_id
 
   depends_on = [
-    google_project_service.firebase,
-    google_project_service.database,
     google_project_service.appcheck,
   ]
 }
