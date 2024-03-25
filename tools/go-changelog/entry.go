@@ -19,19 +19,6 @@ import (
 	"github.com/go-git/go-git/v5/storage/memory"
 )
 
-var TypeValues = []string{
-	"enhancement",
-	"improvement",
-	"feature",
-	"bug",
-	"note",
-	"none",
-	"new-resource",
-	"new-datasource",
-	"deprecation",
-	"breaking-change",
-}
-
 type Entry struct {
 	Issue string
 	Body  string
@@ -48,8 +35,11 @@ type EntryList struct {
 type EntryErrorCode string
 
 const (
-	EntryErrorNotFound     EntryErrorCode = "NOT_FOUND"
-	EntryErrorUnknownTypes EntryErrorCode = "UNKNOWN_TYPES"
+	EntryErrorNotFound                         EntryErrorCode = "NOT_FOUND"
+	EntryErrorUnknownTypes                     EntryErrorCode = "UNKNOWN_TYPES"
+	EntryErrorInvalidNewReourceFormat          EntryErrorCode = "INVALID_NEW_RESOURCE_FORMAT"
+	EntryErrorMultipleLines                    EntryErrorCode = "MULTIPLE_LINES"
+	EntryErrorInvalidEnhancementOrBugFixFormat EntryErrorCode = "INVALID_ENHANCEMENT_OR_BUGFIX_FORMAT"
 )
 
 type EntryValidationError struct {
@@ -62,35 +52,95 @@ func (e *EntryValidationError) Error() string {
 	return e.message
 }
 
+// var newResourceRegexp = regexp.MustCompile("`google_[a-z0-9_]+`")
+// var newlineRegexp = regexp.MustCompile(`\n`)
+// var enhancementOrBugFixRegexp = regexp.MustCompile(`^[a-z0-9]+: .+$`)
+
 // Validates that an Entry body contains properly formatted changelog notes
-func (e *Entry) Validate() *EntryValidationError {
+func (e *Entry) Validate() []*EntryValidationError {
 	notes := NotesFromEntry(*e)
 
+	var errors []*EntryValidationError
+
+	fmt.Println("Checking if changelog entry exists")
 	if len(notes) < 1 {
-		return &EntryValidationError{
+		errors = append(errors, &EntryValidationError{
 			message: fmt.Sprintf("no changelog entry found in: %s", string(e.Body)),
 			Code:    EntryErrorNotFound,
-		}
+		})
+		return errors
 	}
 
-	var unknownTypes []string
+	// var unknownTypes []string
 	for _, note := range notes {
-		if !TypeValid(note.Type) {
-			unknownTypes = append(unknownTypes, note.Type)
+		fmt.Println(note)
+		err := note.Validate()
+		if err != nil {
+			errors = append(errors, err)
 		}
+		// fmt.Println("Checking for invalid types")
+		// if !TypeValid(note.Type) {
+		// 	// unknownTypes = append(unknownTypes, note.Type)
+		// 	fmt.Println("error: EntryErrorUnknownTypes")
+		// 	errors = append(errors, &EntryValidationError{
+		// 		message: fmt.Sprintf("unknown changelog types %v: please use only the configured changelog entry types: %v", note.Type, TypeValues),
+		// 		Code:    EntryErrorUnknownTypes,
+		// 		Details: map[string]interface{}{
+		// 			"type": note.Type,
+		// 			"note": note.Body,
+		// 		},
+		// 	})
+		// 	continue
+		// }
+
+		// fmt.Println("Checking for newlines")
+		// if newlineRegexp.MatchString(note.Body) {
+		// 	fmt.Println("error: EntryErrorMultipleLines")
+		// 	errors = append(errors, &EntryValidationError{
+		// 		message: fmt.Sprintf("multiple lines are found in changelog entry %v: Please only have one CONTENT line per release note block. Use multiple blocks if there are multiple related changes in a single PR.", note.Body),
+		// 		Code:    EntryErrorMultipleLines,
+		// 		Details: map[string]interface{}{
+		// 			"type": note.Type,
+		// 			"note": note.Body,
+		// 		},
+		// 	})
+		// 	continue
+		// }
+
+		// fmt.Println("Checking for resource/datasource format")
+		// if note.Type == "new-resource" || note.Type == "new-datasource" {
+		// 	if !newResourceRegexp.MatchString(note.Body) {
+		// 		fmt.Println("error: EntryErrorInvalidNewReourceFormat")
+		// 		errors = append(errors, &EntryValidationError{
+		// 			message: fmt.Sprintf("invalid resource/datasource format in changelog entry %v: Please follow format in https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/#type-specific-guidelines-and-examples", note.Body),
+		// 			Code:    EntryErrorInvalidNewReourceFormat,
+		// 			Details: map[string]interface{}{
+		// 				"type": note.Type,
+		// 				"note": note.Body,
+		// 			},
+		// 		})
+		// 		continue
+		// 	}
+		// }
+
+		// fmt.Println("Checking for enhancement/bug fix format")
+		// if note.Type == "enhancement" || note.Type == "bug" {
+		// 	if !enhancementOrBugFixRegexp.MatchString(note.Body) {
+		// 		fmt.Println("error: EntryErrorInvalidEnhancementOrBugFixFormat")
+		// 		errors = append(errors, &EntryValidationError{
+		// 			message: fmt.Sprintf("invalid enhancement/bug fix format in changelog entry %v: Please follow format in https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/#type-specific-guidelines-and-examples", note.Body),
+		// 			Code:    EntryErrorInvalidEnhancementOrBugFixFormat,
+		// 			Details: map[string]interface{}{
+		// 				"type": note.Type,
+		// 				"note": note.Body,
+		// 			},
+		// 		})
+		// 		continue
+		// 	}
+		// }
 	}
 
-	if len(unknownTypes) > 0 {
-		return &EntryValidationError{
-			message: fmt.Sprintf("unknown changelog types %v: please use only the configured changelog entry types: %v", unknownTypes, TypeValues),
-			Code:    EntryErrorUnknownTypes,
-			Details: map[string]interface{}{
-				"unknownTypes": unknownTypes,
-			},
-		}
-	}
-
-	return nil
+	return errors
 }
 
 // NewEntryList returns an EntryList with capacity c
@@ -269,11 +319,23 @@ func Diff(repo, ref1, ref2, dir string) (*EntryList, error) {
 	return entries, nil
 }
 
-func TypeValid(Type string) bool {
-	for _, a := range TypeValues {
-		if a == Type {
-			return true
-		}
-	}
-	return false
-}
+// func NoteNewResourceValid(Note string) bool {
+// 	matched, _ := regexp.MatchString("`google_[\\w*]+`", Note)
+// 	fmt.Println("/////////////////////////////////")
+// 	fmt.Println("new resource", matched)
+// 	fmt.Println("/////////////////////////////////")
+// 	return matched
+// }
+
+// func NoteNoNewlineValid(Note string) bool {
+// 	matched, _ := regexp.MatchString(".*\r?\n", Note)
+// 	return !matched
+// }
+
+// func NoteEnhancementOrBugFixValid(Note string) bool {
+// 	matched, _ := regexp.MatchString("\\w*\\: ", Note)
+// 	fmt.Println("/////////////////////////////////")
+// 	fmt.Println("new enhancement", matched)
+// 	fmt.Println("/////////////////////////////////")
+// 	return matched
+// }
