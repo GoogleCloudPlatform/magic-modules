@@ -37,9 +37,9 @@ var textInBodyREs = []*regexp.Regexp{
 	regexp.MustCompile("(?ms)^```releasenote:(?P<type>[^\r\n]*)\r?\n?(?P<note>.*?)\r?\n?```"),
 }
 
+var enhancementOrBugFixRegexp = regexp.MustCompile(`^[a-z0-9]+: .+$`)
 var newResourceRegexp = regexp.MustCompile("`google_[a-z0-9_]+`")
 var newlineRegexp = regexp.MustCompile(`\n`)
-var enhancementOrBugFixRegexp = regexp.MustCompile(`^[a-z0-9]+: .+$`)
 
 func NotesFromEntry(entry Entry) []Note {
 	var res []Note
@@ -84,14 +84,12 @@ func NotesFromEntry(entry Entry) []Note {
 	return res
 }
 
+// Validates if a changelog note is properly formatted
 func (n *Note) Validate() *EntryValidationError {
 	typ := n.Type
 	content := n.Body
 
-	fmt.Println("Checking for invalid types")
 	if !TypeValid(typ) {
-		// unknownTypes = append(unknownTypes, typ)
-		fmt.Println("error: EntryErrorUnknownTypes")
 		return &EntryValidationError{
 			message: fmt.Sprintf("unknown changelog types %v: please use only the configured changelog entry types: %v", typ, content),
 			Code:    EntryErrorUnknownTypes,
@@ -102,9 +100,7 @@ func (n *Note) Validate() *EntryValidationError {
 		}
 	}
 
-	fmt.Println("Checking for newlines")
 	if newlineRegexp.MatchString(content) {
-		fmt.Println("error: EntryErrorMultipleLines")
 		return &EntryValidationError{
 			message: fmt.Sprintf("multiple lines are found in changelog entry %v: Please only have one CONTENT line per release note block. Use multiple blocks if there are multiple related changes in a single PR.", content),
 			Code:    EntryErrorMultipleLines,
@@ -115,10 +111,8 @@ func (n *Note) Validate() *EntryValidationError {
 		}
 	}
 
-	fmt.Println("Checking for resource/datasource format")
 	if typ == "new-resource" || typ == "new-datasource" {
 		if !newResourceRegexp.MatchString(content) {
-			fmt.Println("error: EntryErrorInvalidNewReourceFormat")
 			return &EntryValidationError{
 				message: fmt.Sprintf("invalid resource/datasource format in changelog entry %v: Please follow format in https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/#type-specific-guidelines-and-examples", content),
 				Code:    EntryErrorInvalidNewReourceFormat,
@@ -130,10 +124,8 @@ func (n *Note) Validate() *EntryValidationError {
 		}
 	}
 
-	fmt.Println("Checking for enhancement/bug fix format")
 	if typ == "enhancement" || typ == "bug" {
 		if !enhancementOrBugFixRegexp.MatchString(content) {
-			fmt.Println("error: EntryErrorInvalidEnhancementOrBugFixFormat")
 			return &EntryValidationError{
 				message: fmt.Sprintf("invalid enhancement/bug fix format in changelog entry %v: Please follow format in https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/#type-specific-guidelines-and-examples", content),
 				Code:    EntryErrorInvalidEnhancementOrBugFixFormat,

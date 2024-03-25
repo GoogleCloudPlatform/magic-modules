@@ -52,17 +52,12 @@ func (e *EntryValidationError) Error() string {
 	return e.message
 }
 
-// var newResourceRegexp = regexp.MustCompile("`google_[a-z0-9_]+`")
-// var newlineRegexp = regexp.MustCompile(`\n`)
-// var enhancementOrBugFixRegexp = regexp.MustCompile(`^[a-z0-9]+: .+$`)
-
 // Validates that an Entry body contains properly formatted changelog notes
 func (e *Entry) Validate() []*EntryValidationError {
 	notes := NotesFromEntry(*e)
 
 	var errors []*EntryValidationError
 
-	fmt.Println("Checking if changelog entry exists")
 	if len(notes) < 1 {
 		errors = append(errors, &EntryValidationError{
 			message: fmt.Sprintf("no changelog entry found in: %s", string(e.Body)),
@@ -71,73 +66,11 @@ func (e *Entry) Validate() []*EntryValidationError {
 		return errors
 	}
 
-	// var unknownTypes []string
 	for _, note := range notes {
-		fmt.Println(note)
 		err := note.Validate()
 		if err != nil {
 			errors = append(errors, err)
 		}
-		// fmt.Println("Checking for invalid types")
-		// if !TypeValid(note.Type) {
-		// 	// unknownTypes = append(unknownTypes, note.Type)
-		// 	fmt.Println("error: EntryErrorUnknownTypes")
-		// 	errors = append(errors, &EntryValidationError{
-		// 		message: fmt.Sprintf("unknown changelog types %v: please use only the configured changelog entry types: %v", note.Type, TypeValues),
-		// 		Code:    EntryErrorUnknownTypes,
-		// 		Details: map[string]interface{}{
-		// 			"type": note.Type,
-		// 			"note": note.Body,
-		// 		},
-		// 	})
-		// 	continue
-		// }
-
-		// fmt.Println("Checking for newlines")
-		// if newlineRegexp.MatchString(note.Body) {
-		// 	fmt.Println("error: EntryErrorMultipleLines")
-		// 	errors = append(errors, &EntryValidationError{
-		// 		message: fmt.Sprintf("multiple lines are found in changelog entry %v: Please only have one CONTENT line per release note block. Use multiple blocks if there are multiple related changes in a single PR.", note.Body),
-		// 		Code:    EntryErrorMultipleLines,
-		// 		Details: map[string]interface{}{
-		// 			"type": note.Type,
-		// 			"note": note.Body,
-		// 		},
-		// 	})
-		// 	continue
-		// }
-
-		// fmt.Println("Checking for resource/datasource format")
-		// if note.Type == "new-resource" || note.Type == "new-datasource" {
-		// 	if !newResourceRegexp.MatchString(note.Body) {
-		// 		fmt.Println("error: EntryErrorInvalidNewReourceFormat")
-		// 		errors = append(errors, &EntryValidationError{
-		// 			message: fmt.Sprintf("invalid resource/datasource format in changelog entry %v: Please follow format in https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/#type-specific-guidelines-and-examples", note.Body),
-		// 			Code:    EntryErrorInvalidNewReourceFormat,
-		// 			Details: map[string]interface{}{
-		// 				"type": note.Type,
-		// 				"note": note.Body,
-		// 			},
-		// 		})
-		// 		continue
-		// 	}
-		// }
-
-		// fmt.Println("Checking for enhancement/bug fix format")
-		// if note.Type == "enhancement" || note.Type == "bug" {
-		// 	if !enhancementOrBugFixRegexp.MatchString(note.Body) {
-		// 		fmt.Println("error: EntryErrorInvalidEnhancementOrBugFixFormat")
-		// 		errors = append(errors, &EntryValidationError{
-		// 			message: fmt.Sprintf("invalid enhancement/bug fix format in changelog entry %v: Please follow format in https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/#type-specific-guidelines-and-examples", note.Body),
-		// 			Code:    EntryErrorInvalidEnhancementOrBugFixFormat,
-		// 			Details: map[string]interface{}{
-		// 				"type": note.Type,
-		// 				"note": note.Body,
-		// 			},
-		// 		})
-		// 		continue
-		// 	}
-		// }
 	}
 
 	return errors
@@ -318,24 +251,3 @@ func Diff(repo, ref1, ref2, dir string) (*EntryList, error) {
 	entries.SortByIssue()
 	return entries, nil
 }
-
-// func NoteNewResourceValid(Note string) bool {
-// 	matched, _ := regexp.MatchString("`google_[\\w*]+`", Note)
-// 	fmt.Println("/////////////////////////////////")
-// 	fmt.Println("new resource", matched)
-// 	fmt.Println("/////////////////////////////////")
-// 	return matched
-// }
-
-// func NoteNoNewlineValid(Note string) bool {
-// 	matched, _ := regexp.MatchString(".*\r?\n", Note)
-// 	return !matched
-// }
-
-// func NoteEnhancementOrBugFixValid(Note string) bool {
-// 	matched, _ := regexp.MatchString("\\w*\\: ", Note)
-// 	fmt.Println("/////////////////////////////////")
-// 	fmt.Println("new enhancement", matched)
-// 	fmt.Println("/////////////////////////////////")
-// 	return matched
-// }

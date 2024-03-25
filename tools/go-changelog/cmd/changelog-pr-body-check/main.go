@@ -5,6 +5,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -59,28 +60,21 @@ func main() {
 
 	if errors := entry.Validate(); errors != nil {
 		log.Printf("error parsing changelog entry in %s: %s", entry.Issue, errors)
-		body := "Oops! Some errors are detected for your changelog entries:"
-		for _, err := range errors {
+		body := "\nOops! Some errors are detected for your changelog entries:"
+		for i, err := range errors {
 			switch err.Code {
 			case changelog.EntryErrorNotFound:
-				body += "\n\nIt looks like no changelog entry is attached to" +
-					" this PR. Please include a release note block" +
-					" in the PR body, as described in https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/"
+				body += fmt.Sprintf("\n\n Issue %d: It looks like no changelog entry is attached to this PR. Please include a release note block in the PR body, as described in https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/", i+1)
 			case changelog.EntryErrorUnknownTypes:
-				body += "\n\nunknown changelog types " + err.Details["type"].(string)
-				body += "\nPlease only use the types listed in https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/."
+				body += fmt.Sprintf("\n\n Issue %d: unknown changelog types %v \nPlease only use the types listed in https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/.", i+1, err.Details["type"].(string))
 			case changelog.EntryErrorMultipleLines:
-				body += "\n\nmultiple lines are found in changelog entry: " + err.Details["note"].(string)
-				body += "\nPlease only have one CONTENT line per release note block. Use multiple blocks if there are multiple related changes in a single PR."
+				body += fmt.Sprintf("\n\n Issue %d: multiple lines are found in changelog entry: %v \nPlease only have one CONTENT line per release note block. Use multiple blocks if there are multiple related changes in a single PR.", i+1, err.Details["note"].(string))
 			case changelog.EntryErrorInvalidNewReourceFormat:
-				body += "\n\ninvalid resource/datasource format in changelog entry: " + err.Details["note"].(string)
-				body += "\nPlease follow format in https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/#type-specific-guidelines-and-examples."
+				body += fmt.Sprintf("\n\n Issue %d: invalid resource/datasource format in changelog entry: %v \nPlease follow format in https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/#type-specific-guidelines-and-examples.", i+1, err.Details["note"].(string))
 			case changelog.EntryErrorInvalidEnhancementOrBugFixFormat:
-				body += "\n\ninvalid enhancement/bug fix format in changelog entry: " + err.Details["note"].(string)
-				body += "\nPlease follow format in https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/#type-specific-guidelines-and-examples."
+				body += fmt.Sprintf("\n\n Issue %d: invalid enhancement/bug fix format in changelog entry: %v \nPlease follow format in https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/#type-specific-guidelines-and-examples.", i+1, err.Details["note"].(string))
 			}
 		}
-		// fmt.Println(body)
-		// log.Fatal(body)
+		log.Fatal(body)
 	}
 }
