@@ -69,7 +69,7 @@ func main() {
 				body += fmt.Sprintf("\n\n Issue %d: unknown changelog types %v \nPlease only use the types listed in https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/.", i+1, err.Details["type"].(string))
 			case changelog.EntryErrorMultipleLines:
 				body += fmt.Sprintf("\n\n Issue %d: multiple lines are found in changelog entry: %v \nPlease only have one CONTENT line per release note block. Use multiple blocks if there are multiple related changes in a single PR.", i+1, err.Details["note"].(string))
-			case changelog.EntryErrorInvalidNewReourceFormat:
+			case changelog.EntryErrorInvalidNewReourceOrDatasourceFormat:
 				body += fmt.Sprintf("\n\n Issue %d: invalid resource/datasource format in changelog entry: %v \nPlease follow format in https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/#type-specific-guidelines-and-examples.", i+1, err.Details["note"].(string))
 			case changelog.EntryErrorInvalidEnhancementOrBugFixFormat:
 				body += fmt.Sprintf("\n\n Issue %d: invalid enhancement/bug fix format in changelog entry: %v \nPlease follow format in https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/#type-specific-guidelines-and-examples.", i+1, err.Details["note"].(string))

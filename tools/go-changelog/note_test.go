@@ -4,7 +4,6 @@
 package changelog
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 )
@@ -45,7 +44,7 @@ func TestValidateNote(t *testing.T) {
 				Body: "google_new_resource",
 			},
 			expectedError: &EntryValidationError{
-				Code: EntryErrorInvalidNewReourceFormat,
+				Code: EntryErrorInvalidNewReourceOrDatasourceFormat,
 			},
 		},
 		"invalid new resource/datasource changelog format: missing google prefix": {
@@ -54,7 +53,7 @@ func TestValidateNote(t *testing.T) {
 				Body: "`new_datasource`",
 			},
 			expectedError: &EntryValidationError{
-				Code: EntryErrorInvalidNewReourceFormat,
+				Code: EntryErrorInvalidNewReourceOrDatasourceFormat,
 			},
 		},
 		"invalid new resource/datasource changelog format: including spaces": {
@@ -63,7 +62,7 @@ func TestValidateNote(t *testing.T) {
 				Body: "`google new datasource`",
 			},
 			expectedError: &EntryValidationError{
-				Code: EntryErrorInvalidNewReourceFormat,
+				Code: EntryErrorInvalidNewReourceOrDatasourceFormat,
 			},
 		},
 		"valid enhancement/bug fix changelog format": {
@@ -97,7 +96,6 @@ func TestValidateNote(t *testing.T) {
 		tc := tc
 		t.Run(tn, func(t *testing.T) {
 			t.Parallel()
-			fmt.Println(tc.changelogNote)
 			actualError := tc.changelogNote.Validate()
 			if actualError != nil && tc.expectedError != nil {
 				if !reflect.DeepEqual(actualError.Code, tc.expectedError.Code) {

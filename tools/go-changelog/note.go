@@ -38,7 +38,7 @@ var textInBodyREs = []*regexp.Regexp{
 }
 
 var enhancementOrBugFixRegexp = regexp.MustCompile(`^[a-z0-9]+: .+$`)
-var newResourceRegexp = regexp.MustCompile("`google_[a-z0-9_]+`")
+var newResourceOrDatasourceRegexp = regexp.MustCompile("`google_[a-z0-9_]+`")
 var newlineRegexp = regexp.MustCompile(`\n`)
 
 func NotesFromEntry(entry Entry) []Note {
@@ -112,10 +112,10 @@ func (n *Note) Validate() *EntryValidationError {
 	}
 
 	if typ == "new-resource" || typ == "new-datasource" {
-		if !newResourceRegexp.MatchString(content) {
+		if !newResourceOrDatasourceRegexp.MatchString(content) {
 			return &EntryValidationError{
 				message: fmt.Sprintf("invalid resource/datasource format in changelog entry %v: Please follow format in https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/#type-specific-guidelines-and-examples", content),
-				Code:    EntryErrorInvalidNewReourceFormat,
+				Code:    EntryErrorInvalidNewReourceOrDatasourceFormat,
 				Details: map[string]interface{}{
 					"type": typ,
 					"note": content,

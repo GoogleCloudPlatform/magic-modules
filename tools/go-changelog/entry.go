@@ -35,11 +35,11 @@ type EntryList struct {
 type EntryErrorCode string
 
 const (
-	EntryErrorNotFound                         EntryErrorCode = "NOT_FOUND"
-	EntryErrorUnknownTypes                     EntryErrorCode = "UNKNOWN_TYPES"
-	EntryErrorInvalidNewReourceFormat          EntryErrorCode = "INVALID_NEW_RESOURCE_FORMAT"
-	EntryErrorMultipleLines                    EntryErrorCode = "MULTIPLE_LINES"
-	EntryErrorInvalidEnhancementOrBugFixFormat EntryErrorCode = "INVALID_ENHANCEMENT_OR_BUGFIX_FORMAT"
+	EntryErrorNotFound                            EntryErrorCode = "NOT_FOUND"
+	EntryErrorUnknownTypes                        EntryErrorCode = "UNKNOWN_TYPES"
+	EntryErrorInvalidNewReourceOrDatasourceFormat EntryErrorCode = "INVALID_NEW_RESOURCE_OR_DATASOURCE_FORMAT"
+	EntryErrorMultipleLines                       EntryErrorCode = "MULTIPLE_LINES"
+	EntryErrorInvalidEnhancementOrBugFixFormat    EntryErrorCode = "INVALID_ENHANCEMENT_OR_BUGFIX_FORMAT"
 )
 
 type EntryValidationError struct {
