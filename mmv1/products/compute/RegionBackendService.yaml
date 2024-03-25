@@ -744,6 +744,13 @@ properties:
     set_hash_func: 'tpgresource.SelfLinkRelativePathHash'
     custom_flatten: templates/terraform/custom_flatten/guard_self_link_array.go.erb
     item_type: Api::Type::String
+  - !ruby/object:Api::Type::Integer
+    name: 'generated_id'
+    api_name: 'id'
+    description:
+      'The unique identifier for the resource. This identifier is defined by the
+      server.'
+    output: true
   - !ruby/object:Api::Type::NestedObject
     name: 'iap'
     description: Settings for enabling Cloud Identity Aware Proxy

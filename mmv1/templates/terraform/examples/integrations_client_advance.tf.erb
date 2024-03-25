@@ -1,0 +1,34 @@
+data "google_project" "test_project" {
+}
+
+resource "google_kms_key_ring" "keyring" {
+  name     = "<%= ctx[:vars]['key_ring_name'] %>"
+  location = "us-central1"
+}
+
+resource "google_kms_crypto_key" "cryptokey" {
+  name = "crypto-key-example"
+  key_ring = google_kms_key_ring.keyring.id
+  rotation_period = "7776000s"
+  depends_on = [google_kms_key_ring.keyring]
+}
+
+resource "google_kms_crypto_key_version" "test_key" {
+  crypto_key = google_kms_crypto_key.cryptokey.id
+  depends_on = [google_kms_crypto_key.cryptokey]
+}
+
+resource "google_integrations_client" "<%= ctx[:primary_resource_id] %>" {
+  location = "us-central1"
+  create_sample_workflows = true
+  provision_gmek = true
+  run_as_service_account = "radndom-service-account"
+  cloud_kms_config {
+    kms_location = "us-central1"
+    kms_ring = google_kms_key_ring.keyring.id
+    key = google_kms_crypto_key.cryptokey.id
+    key_version = google_kms_crypto_key_version.test_key.id
+    kms_project_id = data.google_project.test_project.id
+  }
+  depends_on = [google_kms_crypto_key_version.test_key]
+}

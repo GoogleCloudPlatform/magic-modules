@@ -92,8 +92,8 @@ func TestExecMembershipChecker_AmbiguousUserFlow(t *testing.T) {
 
 	execMembershipChecker("pr1", "sha1", gh, cb)
 
-	method := "AddLabel"
-	expected := [][]any{{"pr1", "awaiting-approval"}}
+	method := "AddLabels"
+	expected := [][]any{{"pr1", []string{"awaiting-approval"}}}
 	if calls, ok := gh.calledMethods[method]; !ok {
 		t.Fatal("Label wasn't posted to pull request")
 	} else if !reflect.DeepEqual(calls, expected) {

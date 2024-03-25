@@ -76,8 +76,7 @@ func ComputeLabels(resources []string, regexpLabels []RegexpLabel) []string {
 		}
 	}
 
-	var labels []string
-
+	labels := []string{}
 	for label := range labelSet {
 		labels = append(labels, label)
 	}

@@ -116,7 +116,8 @@ constraints are in effect."
     allowed regions. An empty list means that no regions are allowed,
     and is not a valid configuration."
         required: true
-        item_type: Api::Type::String
+        item_type:
+          type: String
   - name: 'schemaSettings'
     type: NestedObject
     description: "Settings for validating messages published against a schema."

@@ -279,20 +279,21 @@ able to access the public internet."
 
 If accelerators are enabled it is possible a permadiff will be created with the Options field.
 Users will need to either manually update their state file to include these diffed options, or include the field in a [lifecycle ignore changes block](https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle#ignore_changes)."
-    item_type: NestedObject
-    properties:
-      - name: 'acceleratorType'
-        type: Enum
-        description: "The type of an accelator for a CDF instance."
-        required: true
-        enum_values:
-          - 'CDC'
-          - 'HEALTHCARE'
-          - 'CCAI_INSIGHTS'
-      - name: 'state'
-        type: Enum
-        description: "The type of an accelator for a CDF instance."
-        required: true
-        enum_values:
-          - 'ENABLED'
-          - 'DISABLED'
+    item_type:
+      properties:
+        - name: 'acceleratorType'
+          type: Enum
+          description: "The type of an accelator for a CDF instance."
+          required: true
+          enum_values:
+            - 'CDC'
+            - 'HEALTHCARE'
+            - 'CCAI_INSIGHTS'
+        - name: 'state'
+          type: Enum
+          description: "The type of an accelator for a CDF instance."
+          required: true
+          enum_values:
+            - 'ENABLED'
+            - 'DISABLED'
+      type: NestedObject
