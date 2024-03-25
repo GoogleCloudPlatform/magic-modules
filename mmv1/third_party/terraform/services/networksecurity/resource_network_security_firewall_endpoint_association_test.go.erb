@@ -25,7 +25,6 @@ func TestAccNetworkSecurityFirewallEndpointAssociations_basic(t *testing.T) {
 		"orgId":  envvar.GetTestOrgFromEnv(t),
 		"randomSuffix": acctest.RandString(t, 10),
 		"billingProjectId": envvar.GetTestProjectFromEnv(),
-		"projectNumberId": envvar.GetTestProjectNumberFromEnv(),
 		"disabled": strconv.FormatBool(false),
 	}
 
@@ -66,7 +65,6 @@ func TestAccNetworkSecurityFirewallEndpointAssociations_disabled(t *testing.T) {
 		"orgId":  envvar.GetTestOrgFromEnv(t),
 		"randomSuffix": acctest.RandString(t, 10),
 		"billingProjectId": envvar.GetTestProjectFromEnv(),
-		"projectNumberId": envvar.GetTestProjectNumberFromEnv(),
 	}
 
 	testResourceName := "google_network_security_firewall_endpoint_association.foobar"
@@ -144,12 +142,11 @@ resource "google_network_security_firewall_endpoint_association" "foobar" {
   parent            = "projects/%{billingProjectId}"
   location          = "us-central1-a"
   firewall_endpoint = google_network_security_firewall_endpoint.foobar.id
-  network           = "projects/%{projectNumberId}/global/networks/tf-test-my-vpc%{randomSuffix}"
+  network           = google_compute_network.foobar.id
 
   labels = {
     foo = "bar"
   }
-  depends_on = [google_network_security_firewall_endpoint.foobar, google_compute_network.foobar]
 }
 `, context)
 }
@@ -177,13 +174,12 @@ resource "google_network_security_firewall_endpoint_association" "foobar" {
   parent            = "projects/%{billingProjectId}"
   location          = "us-central1-a"
   firewall_endpoint = google_network_security_firewall_endpoint.foobar.id
-  network           = "projects/%{projectNumberId}/global/networks/tf-test-my-vpc%{randomSuffix}"
+  network           = google_compute_network.foobar.id
   disabled          = "%{disabled}"
 
   labels = {
     foo = "bar-updated"
   }
-  depends_on = [google_network_security_firewall_endpoint.foobar, google_compute_network.foobar]
 }
 `, context)
 }
