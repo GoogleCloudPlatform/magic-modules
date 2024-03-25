@@ -764,7 +764,7 @@ func propertiesWithoutCustomUpdate(properties []*Type) []*Type {
 
 // def update_body_properties
 func (r Resource) UpdateBodyProperties() []*Type {
-	updateProp := propertiesWithoutCustomUpdate(r.settableProperties())
+	updateProp := propertiesWithoutCustomUpdate(r.SettableProperties())
 	if r.UpdateVerb == "PATCH" {
 		updateProp = google.Reject(updateProp, func(p *Type) bool {
 			return p.Immutable
@@ -833,7 +833,7 @@ func (r Resource) HasZone() bool {
 // taken wholesale from tpgtools
 func (r Resource) Updatable() bool {
 	for _, p := range r.AllProperties() {
-		if !p.ForceNew && !(!p.Optional && p.Computed) {
+		if !p.Immutable && !(p.Required && p.DefaultFromApi) {
 			return true
 		}
 	}
@@ -861,6 +861,7 @@ func (r Resource) TerraformName() string {
 	return fmt.Sprintf("google_%s_%s", r.ProductMetadata.TerraformName(), google.Underscore(r.Name))
 }
 
+<<<<<<< HEAD
 func (r Resource) ImportIdFormatsFromResource() []string {
 	return ImportIdFormats(r.ImportFormat, r.Identity, r.BaseUrl)
 }
@@ -960,4 +961,19 @@ func (r Resource) GetIdFormat() string {
 		idFormat = r.SelfLinkUri()
 	}
 	return idFormat
+=======
+// ====================
+// Template Methods
+// ====================
+
+// Prints a dot notation path to where the field is nested within the parent
+// object when called on a property. eg: parent.meta.label.foo
+// Redefined on Resource to terminate the calls up the parent chain.
+
+
+// checks a resource for if it has properties that have FlattenObject=true on fields where IgnoreRead=false
+// used to decide whether or not to import "google.golang.org/api/googleapi"
+func (r Resource) FlattenedProperties() []*Type {
+	return google.Select(google.Reject(r.GettableProperties(), func(p *Type) bool { return p.IgnoreRead }), func(p *Type) bool { return p.FlattenObject })
+>>>>>>> 81572215c (errors resolved)
 }
