@@ -74,11 +74,19 @@ resource "google_project" "default" {
   }
 }
 
+# It takes a while for the new project to be ready for APIs
+resource "time_sleep" "wait_10s" {
+  depends_on      = [google_project.default]
+  create_duration = "10s"
+}
+
 resource "google_project_service" "firebase" {
   provider = google-beta
   project  = google_project.default.project_id
   service  = "firebase.googleapis.com"
   disable_on_destroy = false
+
+  depends = [time_sleep.wait_10s]
 }
 
 resource "google_project_service" "database" {
@@ -86,6 +94,8 @@ resource "google_project_service" "database" {
   project  = google_project.default.project_id
   service  = "firebasedatabase.googleapis.com"
   disable_on_destroy = false
+
+  depends = [time_sleep.wait_10s]
 }
 
 resource "google_project_service" "appcheck" {
@@ -93,6 +103,8 @@ resource "google_project_service" "appcheck" {
   project  = google_project.default.project_id
   service  = "firebaseappcheck.googleapis.com"
   disable_on_destroy = false
+
+  depends = [time_sleep.wait_10s]
 }
 
 resource "google_firebase_project" "default" {
