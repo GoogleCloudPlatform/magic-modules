@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -16,14 +17,26 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/provider"
 )
 
+// TODO Q2: additional flags
+
+// Example usage: --output $GOPATH/src/github.com/terraform-providers/terraform-provider-google-beta
+var outputPath = flag.String("output", "", "path to output generated files to")
+
+// Example usage: --version beta
+var version = flag.String("version", "", "optional version name. If specified, this version is preferred for resource generation when applicable")
+
 func main() {
-	// TODO Q2: parse flags
-	var version = "beta"
-	var outputPath = "."
+	flag.Parse()
 	var generateCode = true
 	var generateDocs = true
 
-	log.Printf("Initiating go MM compiler")
+	if outputPath == nil || *outputPath == "" {
+		log.Fatalf("No output path specified")
+	}
+
+	if version == nil || *version == "" {
+		log.Fatalf("No version specified")
+	}
 
 	// TODO Q1: allow specifying one product (flag or hardcoded)
 	// var productsToGenerate []string
@@ -51,8 +64,8 @@ func main() {
 		log.Fatalf("No product.yaml file found.")
 	}
 
-	log.Printf("Generating MM output to '%s'", outputPath)
-	log.Printf("Using %s version", version)
+	log.Printf("Generating MM output to '%s'", *outputPath)
+	log.Printf("Using %s version", *version)
 
 	// Building compute takes a long time and can't be parallelized within the product
 	// so lets build it first
@@ -93,8 +106,8 @@ func main() {
 			// prod, _ := json.Marshal(productApi)
 			// log.Printf("prod %s", string(prod))
 
-			if !productApi.ExistsAtVersionOrLower(version) {
-				log.Printf("%s does not have a '%s' version, skipping", productName, version)
+			if !productApi.ExistsAtVersionOrLower(*version) {
+				log.Printf("%s does not have a '%s' version, skipping", productName, *version)
 				continue
 			}
 
@@ -132,7 +145,7 @@ func main() {
 			}
 
 			// TODO Q2: override resources
-			log.Printf("resources before sorting %#v", resources)
+			// log.Printf("resources before sorting %#v", resources)
 
 			// Sort resources by name
 			sort.Slice(resources, func(i, j int) bool {
@@ -143,7 +156,7 @@ func main() {
 			productApi.Validate()
 
 			// TODO Q2: set other providers via flag
-			providerToGenerate := provider.NewTerraform(productApi)
+			providerToGenerate := provider.NewTerraform(productApi, *version)
 
 			if !slices.Contains(productsToGenerate, productName) {
 				log.Printf("%s not specified, skipping generation", productName)
@@ -151,7 +164,7 @@ func main() {
 			}
 
 			log.Printf("%s: Generating files", productName)
-			providerToGenerate.Generate(outputPath, productName, generateCode, generateDocs)
+			providerToGenerate.Generate(*outputPath, productName, generateCode, generateDocs)
 		}
 
 		// TODO Q2: copy common files
