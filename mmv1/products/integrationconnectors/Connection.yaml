@@ -737,10 +737,6 @@ properties:
                   description: |
                     port number
                 - !ruby/object:Api::Type::String
-                  name: "serviceAttachment"
-                  description: |
-                    Service Attachment
-                - !ruby/object:Api::Type::String
                   name: "host"
                   description: |
                     Host
