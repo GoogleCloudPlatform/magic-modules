@@ -1,0 +1,13 @@
+data "google_project" "test_project" {
+}
+
+resource "google_integration_connectors_managed_zone" "<%= ctx[:primary_resource_id] %>" {
+  name     = "<%= ctx[:vars]['managed_zone_name'] %>"
+  description = "tf created description"
+  labels = {
+    intent = "example"
+  }
+  target_project="connectors-example"
+  target_vpc="default"
+  dns="connectors.example.com."
+}
