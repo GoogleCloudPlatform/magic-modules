@@ -17,9 +17,6 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 )
 
-// require 'api/object'
-// require 'api/timeout'
-
 // Base class from which other Async classes can inherit.
 type Async struct {
 	// Embed YamlValidator object
@@ -95,6 +92,13 @@ type OpAsync struct {
 	Actions []string
 }
 
+func NewOpAsync() *OpAsync {
+	oa := new(OpAsync)
+	oa.Operation = NewOpAsyncOperation()
+	oa.Actions = []string{"create", "delete", "update"}
+	return oa
+}
+
 // def initialize(operation, result, status, error)
 //   super()
 //   @operation = operation
@@ -134,12 +138,12 @@ type OpAsyncOperation struct {
 }
 
 // def initialize(path, base_url, wait_ms, timeouts)
-//   super()
-//   @path = path
-//   @base_url = base_url
-//   @wait_ms = wait_ms
-//   @timeouts = timeouts
-// end
+func NewOpAsyncOperation() *OpAsyncOperation {
+	//   super()
+	op := new(OpAsyncOperation)
+	op.Timeouts = NewTimeouts()
+	return op
+}
 
 // def validate
 //   super
