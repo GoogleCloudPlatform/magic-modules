@@ -113,7 +113,7 @@ Leave this field blank to advertise no custom groups.`,
 				},
 			},
 			"advertised_ip_ranges": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Description: `User-specified list of individual IP ranges to advertise in
 custom mode. This field can only be populated if advertiseMode
@@ -1095,8 +1095,9 @@ func expandNestedComputeRouterBgpPeerAdvertisedGroups(v interface{}, d tpgresour
 }
 
 func expandNestedComputeRouterBgpPeerAdvertisedIpRanges(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	v = v.(*Schema.Set).List()
 	l := v.([]interface{})
-	req := make([]interface{}, 0, len(l))
+	req := make(map[string]interface{}, 0, len(l))
 	for _, raw := range l {
 		if raw == nil {
 			continue
