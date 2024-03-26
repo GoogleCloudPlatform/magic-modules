@@ -1921,10 +1921,10 @@ func ResourceContainerCluster() *schema.Resource {
 				DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("DATAPATH_PROVIDER_UNSPECIFIED"),
 			},
 			"enable_cilium_clusterwide_network_policy": {
-				Type: schema.TypeBool,
-				Optional: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
 				Description: `Whether Cilium cluster-wide network policy is enabled on this cluster.`,
-				Default: false,
+				Default:     false,
 			},
 			"enable_intranode_visibility": {
 			   Type: schema.TypeBool,
@@ -2261,13 +2261,13 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			DefaultSnatStatus:                    expandDefaultSnatStatus(d.Get("default_snat_status")),
 			DatapathProvider:                     d.Get("datapath_provider").(string),
 			EnableCiliumClusterwideNetworkPolicy: d.Get("enable_cilium_clusterwide_network_policy").(bool),
-			PrivateIpv6GoogleAccess:              d.Get("private_ipv6_google_access")54.(string),
+			PrivateIpv6GoogleAccess:              d.Get("private_ipv6_google_access").(string),
 			EnableL4ilbSubsetting:                d.Get("enable_l4_ilb_subsetting").(bool),
 			DnsConfig:                            expandDnsConfig(d.Get("dns_config")),
 			GatewayApiConfig:                     expandGatewayApiConfig(d.Get("gateway_api_config")),
 <% unless version == "ga" -%>
-			EnableMultiNetworking:     d.Get("enable_multi_networking").(bool),
-			EnableFqdnNetworkPolicy:   d.Get("enable_fqdn_network_policy").(bool),
+			EnableMultiNetworking:                d.Get("enable_multi_networking").(bool),
+			EnableFqdnNetworkPolicy:              d.Get("enable_fqdn_network_policy").(bool),
 <% end -%>
 	    },
 		MasterAuth:     expandMasterAuth(d.Get("master_auth")),
