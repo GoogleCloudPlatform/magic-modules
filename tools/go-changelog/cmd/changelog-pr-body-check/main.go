@@ -59,7 +59,6 @@ func main() {
 	}
 
 	if errors := entry.Validate(); errors != nil {
-		log.Printf("error parsing changelog entry in %s: %s", entry.Issue, errors)
 		body := "\nOops! Some errors are detected for your changelog entries:"
 		for i, err := range errors {
 			switch err.Code {

@@ -64,7 +64,6 @@ func NotesFromEntry(entry Entry) []Note {
 				}
 			}
 
-			// note = strings.TrimSpace(note)
 			typ = strings.TrimSpace(typ)
 
 			if note == "" && typ == "" {
