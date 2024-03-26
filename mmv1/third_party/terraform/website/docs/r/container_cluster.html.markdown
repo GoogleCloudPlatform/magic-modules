@@ -448,6 +448,11 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
 *  `config_connector_config` -  (Optional).
     The status of the ConfigConnector addon. It is disabled by default; Set `enabled = true` to enable.
 
+*  `stateful_ha_config` - (Optional).
+    The status of the Stateful HA addon, which provides automatic configurable failover for stateful applications.
+    It is disabled by default for Standard clusters. Set `enabled = true` to enable.
+    It is enabled by default for Autopilot clusters. Set `enabled = true` to enable it explicitly.
+
 
 This example `addons_config` disables two addons:
 
