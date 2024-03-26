@@ -10502,3 +10502,134 @@ resource "google_container_cluster" "with_autopilot" {
 }
 `, projectID, randomSuffix, clusterName, networkName, subnetworkName)
 }
+
+func TestAccContainerCluster_privateRegistry(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_privateRegistryEnabled(clusterName, networkName, subnetworkName),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_container_cluster.primary",
+						"node_pool_defaults.0.node_config_defaults.0.containerd_config.0.private_registry_access_config.0.enabled",
+						"true",
+					),
+					resource.TestCheckResourceAttr(
+						"google_container_cluster.primary",
+						"node_pool_defaults.0.node_config_defaults.0.containerd_config.0.private_registry_access_config.0.certificate_authority_domain_config.#",
+						"2",
+					),
+					// First CA config
+					resource.TestCheckResourceAttr(
+						"google_container_cluster.primary",
+						"node_pool_defaults.0.node_config_defaults.0.containerd_config.0.private_registry_access_config.0.certificate_authority_domain_config.0.fqdns.0",
+						"my.custom.domain",
+					),
+					resource.TestCheckResourceAttr(
+						"google_container_cluster.primary",
+						"node_pool_defaults.0.node_config_defaults.0.containerd_config.0.private_registry_access_config.0.certificate_authority_domain_config.0.gcp_secret_manager_certificate_config.0.secret_uri",
+						"projects/0000000000/secrets/my-cert/versions/1",
+					),
+					// Second CA config
+					resource.TestCheckResourceAttr(
+						"google_container_cluster.primary",
+						"node_pool_defaults.0.node_config_defaults.0.containerd_config.0.private_registry_access_config.0.certificate_authority_domain_config.1.fqdns.0",
+						"10.1.2.32",
+					),
+					resource.TestCheckResourceAttr(
+						"google_container_cluster.primary",
+						"node_pool_defaults.0.node_config_defaults.0.containerd_config.0.private_registry_access_config.0.certificate_authority_domain_config.1.gcp_secret_manager_certificate_config.0.secret_uri",
+						"projects/0000000000/secrets/my-other-cert/versions/latest",
+					),
+				),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_privateRegistryDisabled(clusterName, networkName, subnetworkName),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_container_cluster.primary",
+						"node_pool_defaults.0.node_config_defaults.0.containerd_config.0.private_registry_access_config.0.enabled",
+						"false",
+					),
+					resource.TestCheckResourceAttr(
+						"google_container_cluster.primary",
+						"node_pool_defaults.0.node_config_defaults.0.containerd_config.0.private_registry_access_config.0.certificate_authority_domain_config.#",
+						"0",
+					),
+				),
+			},
+		},
+	})
+}
+
+func testAccContainerCluster_privateRegistryEnabled(name, networkName, subnetworkName string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  deletion_protection = false
+  network    = "%s"
+  subnetwork    = "%s"
+
+  node_pool_defaults {
+    node_config_defaults {
+      containerd_config {
+        private_registry_access_config {
+          enabled = true
+          certificate_authority_domain_config {
+            fqdns = [ "my.custom.domain" ]
+            gcp_secret_manager_certificate_config {
+              secret_uri = "projects/0000000000/secrets/my-cert/versions/1"
+            }
+          }
+		  certificate_authority_domain_config {
+            fqdns = [ "10.1.2.32" ]
+            gcp_secret_manager_certificate_config {
+              secret_uri = "projects/0000000000/secrets/my-other-cert/versions/latest"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+`, name, networkName, subnetworkName)
+}
+
+func testAccContainerCluster_privateRegistryDisabled(name, networkName, subnetworkName string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  deletion_protection = false
+  network    = "%s"
+  subnetwork    = "%s"
+  
+  node_pool_defaults {
+    node_config_defaults {
+      containerd_config {
+        private_registry_access_config {
+          enabled = false
+        }
+      }
+    }
+  }
+}
+`, name, networkName, subnetworkName)
+}
