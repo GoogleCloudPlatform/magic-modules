@@ -75,7 +75,7 @@ examples:
       routine_id: 'routine_id'
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_routine_data_governance_type'
-    primary_resource_id: 'data_governance_type'
+    primary_resource_id: 'custom_masking_routine'
     vars:
       dataset_id: 'dataset_id'
       routine_id: 'routine_id'
