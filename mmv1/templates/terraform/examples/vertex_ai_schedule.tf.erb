@@ -1,0 +1,42 @@
+resource "google_vertex_ai_schedule" "schedule" {
+  display_name             = "<%= ctx[:vars]['display_name'] %>"
+  # start_time
+  # end_time
+  max_run_count            = "<%= ctx[:vars]['max_run_count'] %>"
+  max_concurrent_run_count = "<%= ctx[:vars]['max__concurrent_run_count'] %>"
+  allow_queueing           = "<%= ctx[:vars]['allow_queueing'] %>"
+  time_specification {
+    cron                   = "<%= ctx[:vars]['cron'] %>"
+  }
+  request {
+    create_pipeline_job_request {
+      parent                = "<%= ctx[:vars]['parent'] %>"
+      pipeline_job {
+        display_name        = "<%= ctx[:vars]['pipeline_job_display_name'] %>"
+        pipeline_spec {
+          # TODO
+        }
+        labels = {
+          "foo" = "bar"
+        }
+        runtime_config {
+          parameters {
+            # TODO
+          }
+          gcs_output_directory = "<%= ctx[:vars]['gcs_output_directory'] %>"
+          parameter_values {
+            # TODO
+          }
+          failure_policy = "<%= ctx[:vars]['failure_policy'] %>"
+          input_artifacts {
+            # TODO
+          }
+        }
+        service_account = "<%= ctx[:vars]['service_account'] %>"
+        network         = "<%= ctx[:vars]['network'] %>"
+        template_uri    = "<%= ctx[:vars]['template_uri'] %>"
+      }
+      pipeline_job_id       = "<%= ctx[:vars]['pipeline_job_id'] %>"
+    }
+  }
+}

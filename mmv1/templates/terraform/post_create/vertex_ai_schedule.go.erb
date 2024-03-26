@@ -1,0 +1,30 @@
+endpoint := "resume" // Default to enabled
+logSuccessMsg := "Schedule state has been set to ACTIVE"
+reqBody := make(map[string]interface{})
+if paused, pausedOk := d.GetOk("paused"); pausedOk && paused.(bool) {
+	endpoint = "pause"
+	logSuccessMsg = "Schedule state has been set to PAUSED"
+} else if catchUp, catchUpOk := d.GetOk("catchUp"); catchUpOk && catchUp.(bool) {
+	reqBody["catchUp"] = catchUp
+}
+
+linkTmpl := fmt.Sprintf("{{VertexAIBasePath}projects/{{project}}/locations/{{region}}/schedules/{{name}}:%s", endpoint)
+url, err = tpgresource.ReplaceVars(d, config, linkTmpl)
+if err != nil {
+	return err
+}
+
+_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config: config,
+	Method: "POST",
+	Project: billingProject,
+	RawURL: url,
+	UserAgent: userAgent,
+	Body: reqBody,
+	Timeout: d.Timeout(schema.TimeoutUpdate),
+})
+if err != nil {
+	return fmt.Errorf("Error setting Vertex Schedule status: %s", err)
+}
+
+log.Printf("[DEBUG] Finished updating Schedule %q status: %s", d.Id(), logSuccessMsg)
