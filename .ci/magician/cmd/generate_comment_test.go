@@ -20,9 +20,8 @@ import (
 	"reflect"
 	"testing"
 
-	"magician/source"
-
 	"github.com/stretchr/testify/assert"
+	"magician/source"
 )
 
 func TestExecGenerateComment(t *testing.T) {

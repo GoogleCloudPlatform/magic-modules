@@ -24,8 +24,9 @@ base_url: 'projects/{{project}}/locations/{{location}}/clients'
 self_link: 'projects/{{project}}/locations/{{location}}/clients'
 immutable: true
 create_url: 'projects/{{project}}/locations/{{location}}/clients:provision'
+delete_url: 'projects/{{project}}/locations/{{location}}/clients:deprovision'
+delete_verb: :POST
 autogen_async: false
-skip_delete: true
 import_format:
   [
     'projects/{{project}}/locations/{{location}}/clients',
