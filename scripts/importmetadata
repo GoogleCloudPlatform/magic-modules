@@ -1,0 +1,228 @@
+#!/bin/bash
+# Generates an import format metadata file
+# Requires a built provider to reference, defaults to
+# $GOPATH/src/github.com/hashicorp/<tpg ga or beta>/...
+# 
+# Produces via following priorities:
+# Checks for all output .go resources with a declared Importer: in schema
+# Checks if it uses standard tpgresource.ParseImportId() functions, if so converts that regex
+# Checks if uses schema.ImportStatePassThrough(), if it has a hardcoded return based on how ID is constructed in the resource
+# Anything else is non standard -- will take from MD files 
+#
+# Expecting to see a resource and it's not being generated? Please reach out to nickelliot@google.com
+
+shopt -s nullglob
+
+if [ -z "$1" ]
+then
+	basepath="$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta"
+else
+	basepath=$1
+fi
+if [[ $basepath =~ google-[^-\/]* ]]
+then
+	servicepath="${basepath}/${BASH_REMATCH[0]}"
+else
+	echo "basepath must contain reference to a google provider'"
+	exit 1
+fi
+echo "# $resource_type: [list-of-acceptable-import-templates]"
+echo "{"
+
+for file in $(find $servicepath/services/**/resource_*.go -type f -print); do
+	importable=$(ggrep -Pzo 'Importer:' $file)
+	product=
+	shortfile="$(basename $file .go)"
+	resource=${shortfile/resource/google}
+
+#does not work for GCP meta resources and we need to prune the extra google
+	resource=${resource/google_google_/google_}
+
+    if [ -z "$importable"  ]
+    then
+
+##############################################
+#resources with shared importing configuration
+#logging has imports configured in MD files
+		importable=$(ggrep -Pzo 'return ResourceLoggingBucketConfig' $file)
+		if [ -z "$importable"  ]
+    	then
+#			echo -n \	\"$resource\"\:
+#			echo \	not importable
+
+# NOT IMPORTABLE RESOURCES
+			continue
+		else
+#logging bucket config uses MD files
+#needs to extract formats from MD files
+			resourcenogoog=${resource/google_/}
+			resourcemd=$basepath/website/docs/r/$resourcenogoog.html.markdown
+	    	if [ -f "$resourcemd" ]
+	    	then
+				importformat=$(ggrep -Pzo '```\n\$ terraform import(.*\n)*?```' $resourcemd)
+				if [ -z "$importformat"  ]
+	    		then
+					echo -n \	\"$resource\"\:
+					echo \	NON STANDARD MD LOGGING
+#	    		else
+					echo -n \	\"$resource\"\:
+					importformat=$(sed -e 's|``` \$ terraform import [^.]*\.[^[[:space:]]* |\[\"|g'  <<< $importformat)
+					importformat=$(sed -e 's| \$ terraform import [^.]*\.[^[[:space:]]* |", "|g'  <<< $importformat)
+					importformat=$(sed -e 's| ```|\"\]|g'  <<< $importformat)
+			    	echo \ "$importformat"
+		    	fi
+		    fi
+		fi
+##############################################
+    else
+
+# checks for tpgresource.parseimportid, standard output for all .yaml generated resources
+		importformat=$(ggrep -Pzo 'tpgresource\.ParseImportId\(\n*?[ \t]*?\[]string{\n*?([ \t]*".*?",\n)*.*?}' $file)
+
+	    if [ -z "$importformat"  ]
+	    then
+
+# checks for passthrough, another frequent method of collecting resource
+			imppassthrough=$(ggrep -Pzo 'Importer: &schema\.ResourceImporter{.*\n.*State: schema\.ImportStatePassthrough,\n[ \t]*}' $file)
+			if [ -z "$imppassthrough"  ]
+			then
+# if not passthrough or standard, will attempt to pull from MD
+				resourcenogoog=${resource/google_/}
+				resourcemd=$basepath/website/docs/r/$resourcenogoog.html.markdown
+				if [ -f "$resourcemd" ]
+		    	then
+					importformat=$(ggrep -Pzos '```\n\$ terraform import(.*\n)*?```' $resourcemd)
+					if [ -z "$importformat"  ]
+		    		then
+						echo -n \	\"$resource\"\:
+						echo \	"???"
+		    		else
+						echo -n \	\"$resource\"\:
+						importformat=$(sed -e 's|``` \$ terraform import [^.]*\.[^[[:space:]]* |\[\"|g'  <<< $importformat)
+						importformat=$(sed -e 's| \$ terraform import [^.]*\.[^[[:space:]]* |", "|g'  <<< $importformat)
+						importformat=$(sed -e 's| ```|\"\]|g'  <<< $importformat)
+				    	echo \ "$importformat"
+			    	fi
+		    	else
+# need to do a different check for google_* resources
+	    			resourcemd=$basepath/website/docs/r/$resource.html.markdown
+					importformat=$(ggrep -Pzos '```\n\$ terraform import(.*\n)*?```' $resourcemd)
+					if [ -z "$importformat"  ]
+    				then
+						case $resource in
+						google_folder)
+							echo -n \	\"$resource\"\:
+							echo \ '["folders/{{folder_id}}", "{{folder_id}}"]'
+							;;
+						google_logging_bucket_config)
+# fake logging resources
+							;;
+						google_logging_exclusion)
+# fake logging resources
+							;;
+						*)
+		#resource needs to be hardcoded into this script for support
+							echo -n "$resource: "
+							echo "-- $resourcenogoog: "
+							echo \ NOT CONFIGURED 
+						esac
+					else
+						echo -n \	\"$resource\"\:
+						importformat=$(sed -e 's|``` \$ terraform import [^.]*\.[^[[:space:]]* |\[\"|g'  <<< $importformat)
+						importformat=$(sed -e 's| \$ terraform import [^.]*\.[^[[:space:]]* |", "|g'  <<< $importformat)
+						importformat=$(sed -e 's| ```|\"\]|g'  <<< $importformat)
+				    	echo \ "$importformat"
+				    fi
+			    fi
+		    else
+# ImportStatePassthrough resources want generically "id", which can be a single field (usually project id), or multiple combined. there is no consistent format to programatically generate formats based on existing files or markdown.
+#as this is functionally unusable for automatically creating this metadata format, all of these resources need to be hardcoded
+
+				case $resource in
+				google_app_engine_application)
+					echo -n \	\"$resource\"\:
+					echo \ '["{{project}}"]'
+					;;
+				google_compute_project_default_network_tier)
+					echo -n \	\"$resource\"\:
+					echo \ '["{{project}}"]'
+					;;
+				google_compute_project_metadata)
+					echo -n \	\"$resource\"\:
+					echo \ '["{{project}}"]'
+					;;
+				google_compute_project_metadata_item)
+					echo -n \	\"$resource\"\:
+					echo \ '["{{key}}"]'
+					;;
+				google_compute_shared_vpc_host_project)
+					echo -n \	\"$resource\"\:
+					echo \ '["{{project}}"]'
+					;;
+				google_compute_shared_vpc_service_project)
+					echo -n \	\"$resource\"\:
+					echo \ '["{{host_project}}/{{service_project}}"]'
+					;;
+				google_dataflow_job)
+					echo -n \	\"$resource\"\:
+					echo \ '["{{job_id}}"]'
+					;;
+				google_billing_subaccount)
+					echo -n \	\"$resource\"\:
+					echo \ '["billingAccounts/{{master_billing_account}}"]'
+					;;
+				google_organization_iam_custom_role)
+					echo -n \	\"$resource\"\:
+					echo \ '["organizations/{{org_id}}/roles/{{role_id}}"]'
+					;;
+				google_storage_notification)
+					echo -n \	\"$resource\"\:
+					echo \ '["{{notification_id}}", "{{bucket}}/notificationConfigs/{{id}}"]'
+					;;
+				google_dataflow_flex_template_job)
+#code checks for importstatepassthrough but officially does not support importing so we proceed with no entry
+					;;
+				google_compute_disk_async_replication)
+#code checks for importstatepassthrough but officially does not support importing so we proceed with no entry
+					;;
+				*)
+#resource needs to be hardcoded into this script for support
+					echo -n "$resource: "
+					echo \ NOT CONFIGURED
+#					exit 1
+				esac
+			fi
+	    else
+			echo -n \	\"$resource\"\:
+			importformat=${importformat/tpgresource.ParseImportId\(\[\]string\{/\[}
+			importformat=${importformat/\}/]}
+			importformat=${importformat//(?P</\{\{}}
+			importformat=${importformat//\>\[\^\/\]\+\)/\}\}}
+			importformat=${importformat//\>\[\^\/\]\+\)/\}}
+#covering multiple formatting edge cases
+			importformat=${importformat//\>\[\^ \]\+\)/\}\}}
+			importformat=${importformat//\>\.\+\)/\}\}}
+			importformat=${importformat/\]\}/\]}
+			importformat=${importformat//\>\[\^\/\]\*\)/\}\}} [^/]*
+
+			importformat=$(sed -e 's|, \]|\]|g'  <<< $importformat)
+			importformat=$(sed -e 's|\[ \"|\[\"|g'  <<< $importformat)
+
+			importformat=${importformat//\^/}
+			importformat=${importformat//\$/}
+	    	echo \ "$importformat"
+	    fi
+	    iamname=${resource/google/iam}
+	    iamservice=$(basename $(dirname $file))
+	    if [ -f "$servicepath/services/$iamservice/$iamname.go" ]
+	    then
+			echo -n \	\"${resource}_iam_policy\"\:
+	    	echo \ "$importformat"
+			echo -n \	\"${resource}_iam_binding\"\:
+	    	echo \ ${importformat//\}\}\"/\}\} \{\{role\}\}\"}
+			echo -n \	\"${resource}_iam_member\"\:
+	    	echo \ ${importformat//\}\}\"/\}\} \{\{role\}\} \{\{member\}\}\"}
+	    fi
+	fi
+done
+echo "}"
