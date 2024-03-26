@@ -51,7 +51,7 @@ examples:
     vars:
       network_name: 'looker-network'
       kms_key_ring_name: 'looker-kms-ring'
-      kms_key_name: 'looker-kms-key'
+      kms_key_name: 'projects/YOURPROJECT/locations/LOCATION/keyRings/KEYRING/cryptoKeys/looker-kms-key'
       address_name: 'looker-range'
       instance_name: 'my-instance'
       client_id: 'my-client-id'
@@ -63,7 +63,7 @@ examples:
     vars:
       network_name: 'looker-network'
       kms_key_ring_name: 'looker-kms-ring'
-      kms_key_name: 'looker-kms-key'
+      kms_key_name: 'projects/YOURPROJECT/locations/LOCATION/keyRings/KEYRING/cryptoKeys/looker-kms-key'
       address_name: 'looker-range'
       instance_name: 'my-instance'
       client_id: 'my-client-id'
@@ -344,6 +344,7 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: oauthConfig
     ignore_read: true
+    required: true
     description: |
       Looker Instance OAuth login settings.
     properties:
