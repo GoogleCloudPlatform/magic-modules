@@ -247,6 +247,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 		}
 		if len(repo.ChangedFiles) == 0 {
 			fmt.Println("Skipping diff processor; no diff: ", repo.Name)
+			continue
 		}
 		err = buildDiffProcessor(diffProcessorPath, repo.Path, diffProcessorEnv, rnr)
 		if err != nil {
