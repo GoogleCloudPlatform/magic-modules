@@ -17,7 +17,6 @@ import (
 )
 
 func TestAccNetworkSecurityFirewallEndpoints_basic(t *testing.T) {
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	billingProjectId := envvar.GetTestProjectFromEnv()

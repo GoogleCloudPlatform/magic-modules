@@ -17,7 +17,6 @@ import (
 )
 
 func TestAccNetworkSecurityFirewallEndpointAssociations_basic(t *testing.T) {
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	orgId := envvar.GetTestOrgFromEnv(t)
