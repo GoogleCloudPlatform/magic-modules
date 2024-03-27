@@ -499,7 +499,6 @@ properties:
           'projects/{project}/locations/{location}/clusters/{cluster_id}'
   - !ruby/object:Api::Type::NestedObject
     name: 'maintenanceUpdatePolicy'
-    min_version: beta
     description: | 
       MaintenanceUpdatePolicy defines the policy for system updates.
     properties:

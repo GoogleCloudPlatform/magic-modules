@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package alloydb_test
 
 import (
@@ -1170,7 +1169,6 @@ resource "google_compute_global_address" "private_ip_alloc" {
 `, context)
 }
 
-<% unless version == "ga" -%>
 func TestAccAlloydbCluster_withMaintenanceWindowsAndDenyPeriod(t *testing.T) {
 	t.Parallel()
 
@@ -1205,46 +1203,34 @@ resource "google_alloydb_cluster" "default" {
   network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
   
   maintenance_update_policy {
-    maintenance_windows = [
-      {
+    maintenance_windows {
         day = "WEDNESDAY"
-        start_time = {
+        start_time {
           hours = 12
           minutes = 0
           seconds = 0
           nanos = 0
         }
       }
-    ]
 
-    deny_maintenance_periods = [
-      {
-        start_date = {
-          year = 2024
+    deny_maintenance_periods {
+        start_date {
+          year = 2050
           month = 3
           day = 18
         }
-        end_date = {
-          year = 2024
+        end_date {
+          year = 2050
           month = 3
-          day = 25
+          day = 19
         }
-        time = {
+        time {
           hours = 12
           minutes = 34
           seconds = 56
           nanos = 0
         }
       }
-    ]
-  }
-
-  labels = {
-	foo = "bar" 
-  }
-
-  lifecycle {
-    prevent_destroy = true
   }
 }
 
@@ -1255,7 +1241,8 @@ resource "google_compute_network" "default" {
   provider = google-beta
   name     = "tf-test-alloydb-cluster%{random_suffix}"
 }
-	
+
+provider "google-beta" {}
 `, context)
 }
 
@@ -1292,40 +1279,28 @@ resource "google_alloydb_cluster" "default" {
   network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
   
   maintenance_update_policy {
-    maintenance_windows = [
-      {
+    maintenance_windows {
         day = "WEDNESDAY"
       }
-    ]
 
-    deny_maintenance_periods = [
-      {
-        start_date = {
+    deny_maintenance_periods {
+        start_date {
           year = 2024
           month = 3
           day = 18
         }
-        end_date = {
+        end_date {
           year = 2024
           month = 3
           day = 25
         }
-        time = {
+        time {
           hours = 12
           minutes = 34
           seconds = 56
           nanos = 0
         }
       }
-    ]
-  }
-
-  labels = {
-	foo = "bar" 
-  }
-
-  lifecycle {
-    prevent_destroy = true
   }
 }
 
@@ -1349,41 +1324,29 @@ resource "google_alloydb_cluster" "default" {
   network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
   
   maintenance_update_policy {
-    maintenance_windows = [
-      {
+    maintenance_windows {
         day = "WEDNESDAY"
-        start_time = {
+        start_time {
           hours = 12
           minutes = 0
           seconds = 0
           nanos = 0
         }
       }
-    ]
 
-    deny_maintenance_periods = [
-      {
-        start_date = {
+    deny_maintenance_periods {
+        start_date {
           year = 2024
           month = 3
           day = 18
         }
-        time = {
+        time {
           hours = 12
           minutes = 34
           seconds = 56
           nanos = 0
         }
       }
-    ]
-  }
-
-  labels = {
-	foo = "bar" 
-  }
-
-  lifecycle {
-    prevent_destroy = true
   }
 }
 
@@ -1396,4 +1359,3 @@ resource "google_compute_network" "default" {
 }	
 `, context)
 }
-<% end -%>

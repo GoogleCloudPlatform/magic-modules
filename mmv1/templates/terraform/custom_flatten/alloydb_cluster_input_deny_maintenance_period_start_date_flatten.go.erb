@@ -22,7 +22,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
         "month": flattenAlloydbClusterDenyMaintenancePeriodStartDateMonth(original["month"], d, config),
         "day": flattenAlloydbClusterDenyMaintenancePeriodStartDateDay(original["day"], d, config),
     }
-	return transformed 
+	return []interface{}{transformed}  
 }
 
 func flattenAlloydbClusterDenyMaintenancePeriodStartDateYear(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {

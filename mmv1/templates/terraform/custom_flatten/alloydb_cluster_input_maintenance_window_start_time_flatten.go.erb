@@ -23,7 +23,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
         "seconds": flattenAlloydbClusterMaintenanceWindowStartTimeSeconds(original["seconds"], d, config),
         "nanos": flattenAlloydbClusterMaintenanceWindowStartTimeNanos(original["nanos"], d, config),
     }
-	return transformed 
+	return []interface{}{transformed}
 }
 
 func flattenAlloydbClusterMaintenanceWindowStartTimeHours(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
