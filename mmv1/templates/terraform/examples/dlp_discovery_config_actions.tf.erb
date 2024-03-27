@@ -1,0 +1,37 @@
+resource "google_data_loss_prevention_discovery_config" "<%= ctx[:primary_resource_id] %>" {
+	parent = "projects/<%= ctx[:test_env_vars]['project'] %>"
+
+    targets {
+        big_query_target {
+            filter {
+                other_tables {}
+            }
+        }
+    }
+    actions {
+        export_data {
+            profile_table {
+                project_id = "project"
+                dataset_id = "dataset"
+                table_id = "table"
+            }
+        }
+    }
+    actions { 
+        pub_sub_notification {
+                topic = "fake-topic"
+                event = "NEW_PROFILE"
+                pub_sub_condition {
+                    expressions {
+                        logical_operator = "OR"
+                        conditions {
+                            minimum_risk_score = "HIGH"
+                            minimum_sensitivity_score = "HIGH"
+                        }
+                    }
+                }
+                detail_of_message = "TABLE_PROFILE"
+            }
+    }
+    inspect_templates = ["FAKE"]    
+}
