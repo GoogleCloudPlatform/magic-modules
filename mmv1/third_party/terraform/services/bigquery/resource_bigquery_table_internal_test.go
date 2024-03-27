@@ -389,10 +389,11 @@ func TestBigQueryTableSchemaDiffSuppress(t *testing.T) {
 }
 
 type testUnitBigQueryDataTableJSONChangeableTestCase struct {
-	name       string
-	jsonOld    string
-	jsonNew    string
-	changeable bool
+	name            string
+	jsonOld         string
+	jsonNew         string
+	isExternalTable bool
+	changeable      bool
 }
 
 func (testcase *testUnitBigQueryDataTableJSONChangeableTestCase) check(t *testing.T) {
@@ -403,7 +404,7 @@ func (testcase *testUnitBigQueryDataTableJSONChangeableTestCase) check(t *testin
 	if err := json.Unmarshal([]byte(testcase.jsonNew), &new); err != nil {
 		t.Fatalf("unable to unmarshal json - %v", err)
 	}
-	changeable, err := resourceBigQueryTableSchemaIsChangeable(old, new, true)
+	changeable, err := resourceBigQueryTableSchemaIsChangeable(old, new, testcase.isExternalTable, true)
 	if err != nil {
 		t.Errorf("%s failed unexpectedly: %s", testcase.name, err)
 	}
@@ -418,6 +419,11 @@ func (testcase *testUnitBigQueryDataTableJSONChangeableTestCase) check(t *testin
 
 	d.Before["schema"] = testcase.jsonOld
 	d.After["schema"] = testcase.jsonNew
+
+	if testcase.isExternalTable {
+		d.Before["external_data_configuration"] = ""
+		d.After["external_data_configuration"] = ""
+	}
 
 	err = resourceBigQueryTableSchemaCustomizeDiffFunc(d)
 	if err != nil {
@@ -446,6 +452,13 @@ var testUnitBigQueryDataTableIsChangeableTestCases = []testUnitBigQueryDataTable
 		jsonOld:    "[{\"name\": \"someValue\", \"type\" : \"INTEGER\", \"mode\" : \"NULLABLE\", \"description\" : \"someVal\" }, {\"name\": \"asomeValue\", \"type\" : \"INTEGER\", \"mode\" : \"NULLABLE\", \"description\" : \"someVal\" }]",
 		jsonNew:    "[{\"name\": \"someValue\", \"type\" : \"INTEGER\", \"mode\" : \"NULLABLE\", \"description\" : \"someVal\" }]",
 		changeable: true,
+	},
+	{
+		name:            "externalArraySizeDecreases",
+		jsonOld:         "[{\"name\": \"someValue\", \"type\" : \"INTEGER\", \"mode\" : \"NULLABLE\", \"description\" : \"someVal\" }, {\"name\": \"asomeValue\", \"type\" : \"INTEGER\", \"mode\" : \"NULLABLE\", \"description\" : \"someVal\" }]",
+		jsonNew:         "[{\"name\": \"someValue\", \"type\" : \"INTEGER\", \"mode\" : \"NULLABLE\", \"description\" : \"someVal\" }]",
+		isExternalTable: true,
+		changeable:      false,
 	},
 	{
 		name:       "descriptionChanges",
@@ -586,6 +599,7 @@ func TestUnitBigQueryDataTable_schemaIsChangeableNested(t *testing.T) {
 			testcase.name + "Nested",
 			fmt.Sprintf("[{\"name\": \"someValue\", \"type\" : \"INTEGER\", \"fields\" : %s }]", testcase.jsonOld),
 			fmt.Sprintf("[{\"name\": \"someValue\", \"type\" : \"INT64\", \"fields\" : %s }]", testcase.jsonNew),
+			testcase.isExternalTable,
 			changeable,
 		}
 		testcaseNested.check(t)

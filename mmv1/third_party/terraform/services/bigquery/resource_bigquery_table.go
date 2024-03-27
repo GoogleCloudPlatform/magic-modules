@@ -256,7 +256,7 @@ func bigQueryTableNormalizePolicyTags(val interface{}) interface{} {
 
 // Compares two existing schema implementations and decides if
 // it is changeable.. pairs with a force new on not changeable
-func resourceBigQueryTableSchemaIsChangeable(old, new interface{}, topLevel bool) (bool, error) {
+func resourceBigQueryTableSchemaIsChangeable(old, new interface{}, isExternalTable bool, topLevel bool) (bool, error) {
 	switch old.(type) {
 	case []interface{}:
 		arrayOld := old.([]interface{})
@@ -288,15 +288,16 @@ func resourceBigQueryTableSchemaIsChangeable(old, new interface{}, topLevel bool
 		}
 		for key := range mapOld {
 			// dropping top level columns can happen in-place
+			// but this doesn't apply to external tables
 			if _, ok := mapNew[key]; !ok {
-				if !topLevel {
+				if !topLevel || isExternalTable {
 					return false, nil
 				}
 				droppedColumns += 1
 				continue
 			}
 			if isChangable, err :=
-				resourceBigQueryTableSchemaIsChangeable(mapOld[key], mapNew[key], false); err != nil || !isChangable {
+				resourceBigQueryTableSchemaIsChangeable(mapOld[key], mapNew[key], isExternalTable, false); err != nil || !isChangable {
 				return false, err
 			}
 			if topLevel {
@@ -344,7 +345,7 @@ func resourceBigQueryTableSchemaIsChangeable(old, new interface{}, topLevel bool
 					return false, nil
 				}
 			case "fields":
-				return resourceBigQueryTableSchemaIsChangeable(valOld, valNew, false)
+				return resourceBigQueryTableSchemaIsChangeable(valOld, valNew, isExternalTable, false)
 
 				// other parameters: description, policyTags and
 				// policyTags.names[] are changeable
@@ -383,7 +384,8 @@ func resourceBigQueryTableSchemaCustomizeDiffFunc(d tpgresource.TerraformResourc
 			// same as above
 			log.Printf("[DEBUG] unable to unmarshal json customized diff - %v", err)
 		}
-		isChangeable, err := resourceBigQueryTableSchemaIsChangeable(old, new, true)
+		_, isExternalTable := d.GetOk("external_data_configuration")
+		isChangeable, err := resourceBigQueryTableSchemaIsChangeable(old, new, isExternalTable, true)
 		if err != nil {
 			return err
 		}
