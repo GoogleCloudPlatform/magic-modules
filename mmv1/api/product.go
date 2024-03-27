@@ -17,16 +17,12 @@ import (
 	"log"
 	"strings"
 
+	"gopkg.in/yaml.v3"
+
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"golang.org/x/exp/slices"
 )
-
-// require 'api/object'
-// require 'api/product/version'
-// require 'google/logger'
-// require 'compile/core'
-// require 'json'
 
 // Represents a product to be managed
 type Product struct {
@@ -74,15 +70,29 @@ type Product struct {
 	ClientName string `yaml:"client_name"`
 }
 
-func (p *Product) Validate() {
-	// TODO Q1 Rewrite super
-	//     super
-	for _, o := range p.Objects {
-		o.ProductMetadata = p
+func (p *Product) UnmarshalYAML(n *yaml.Node) error {
+	p.Async = NewOpAsync()
+
+	type productAlias Product
+	aliasObj := (*productAlias)(p)
+
+	err := n.Decode(&aliasObj)
+	if err != nil {
+		return err
 	}
 
 	p.SetApiName()
 	p.SetDisplayName()
+
+	return nil
+}
+
+func (p *Product) Validate() {
+	// TODO Q2 Rewrite super
+	//     super
+	for _, o := range p.Objects {
+		o.ProductMetadata = p
+	}
 }
 
 // def validate
