@@ -1,4 +1,6 @@
+<% autogen_exception -%>
 package firebaseappcheck_test
+<% unless version == 'ga' -%>
 
 import (
 	"testing"
@@ -9,49 +11,50 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestAccFirebaseAppCheckRecaptchaV3Config_firebaseAppCheckRecaptchaV3ConfigUpdate(t *testing.T) {
+func TestAccFirebaseAppCheckRecaptchaEnterpriseConfig_firebaseAppCheckRecaptchaEnterpriseConfigUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
 		"project_id":    envvar.GetTestProjectFromEnv(),
 		"token_ttl":     "7200s",
-		"site_secret":   "6Lf9YnQpAAAAAC3-MHmdAllTbPwTZxpUw5d34YzX",
+		"site_key":      "6LdpMXIpAAAAANkwWQPgEdjEhal7ugkH9RK9ytuw",
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	contextUpdated := map[string]interface{}{
 		"project_id":    envvar.GetTestProjectFromEnv(),
 		"token_ttl":     "3800s",
-		"site_secret":   "7Lf9YnQpAAAAAC3-MHmdAllTbPwTZxpUw5d34YzX",
+		"site_key":      "7LdpMXIpAAAAANkwWQPgEdjEhal7ugkH9RK9ytuw",
 		"random_suffix": context["random_suffix"],
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"random": {},
 			"time":   {},
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFirebaseAppCheckRecaptchaV3Config_firebaseAppCheckRecaptchaV3ConfigBasicExample(context),
+				Config: testAccFirebaseAppCheckRecaptchaEnterpriseConfig_firebaseAppCheckRecaptchaEnterpriseConfigBasicExample(context),
 			},
 			{
-				ResourceName:            "google_firebase_app_check_recaptcha_v3_config.default",
+				ResourceName:            "google_firebase_app_check_recaptcha_enterprise_config.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"site_secret", "app_id"},
+				ImportStateVerifyIgnore: []string{"app_id"},
 			},
 			{
-				Config: testAccFirebaseAppCheckRecaptchaV3Config_firebaseAppCheckRecaptchaV3ConfigBasicExample(contextUpdated),
+				Config: testAccFirebaseAppCheckRecaptchaEnterpriseConfig_firebaseAppCheckRecaptchaEnterpriseConfigBasicExample(contextUpdated),
 			},
 			{
-				ResourceName:            "google_firebase_app_check_recaptcha_v3_config.default",
+				ResourceName:            "google_firebase_app_check_recaptcha_enterprise_config.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"site_secret", "app_id"},
+				ImportStateVerifyIgnore: []string{"app_id"},
 			},
 		},
 	})
 }
+<% end -%>
