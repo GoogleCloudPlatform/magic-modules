@@ -27,17 +27,30 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 # Skipping sweeper since this is a child resource.
 skip_sweeper: true
 description: 'Describes a view over log entries in a bucket.'
+iam_policy: !ruby/object:Api::Resource::IamPolicy
+  skip_import_test: true
+  parent_resource_attribute: 'name'
+  import_format: ['{{%parent}}/locations/{{location}}/buckets/{{bucket}}/views/{{name}}', '{{name}}']
+  allowed_iam_role: 'roles/logging.admin'
+  method_name_separator: ':'
+  fetch_iam_policy_verb: :POST
+  iam_conditions_request_type: :REQUEST_BODY
+  min_version: beta
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'logging_log_view_basic'
     primary_resource_id: 'logging_log_view'
     vars:
-      log_view_name: 'my-view'
+      log_view_id: 'my-log-view'
+      log_bucket_id: 'my-log-bucket'
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
     name: 'logging_log_view_long_name'
     primary_resource_id: 'logging_log_view'
+    vars:
+      log_view_id: 'my-log-view'
+      log_bucket_id: 'my-log-bucket'
     test_env_vars:
       project: :PROJECT_NAME
     skip_docs: true
