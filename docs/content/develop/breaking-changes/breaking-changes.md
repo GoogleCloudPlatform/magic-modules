@@ -79,7 +79,7 @@ For more information, see
     and modifying examples and modules may achieve the intended effect with a smaller blast radius.
 * <a name="field-changing-data-format"></a> Modifying how field data is stored in state
   * For example, changing the case of a value returned by the API in a flattener or decorder
-* Removing diff suppression from a field.
+* <a name="field-removing-diff-suppress"></a> Removing diff suppression from a field.
   * For MMv1 resources, removing `diff_suppress_func` from a field.
   * For handwritten resources, removing `DiffSuppressFunc` from a field.
 * Removing update support from a field.
