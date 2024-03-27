@@ -366,11 +366,12 @@ func resourceDataflowFlexJobSetupEnv(d *schema.ResourceData, config *transport_t
 		delete(updatedParameters, "enableStreamingEngine")
 		e := strings.ToLower(p.(string))
 		switch e {
-		case "true", "1":
+		case "true":
 			enableStreamingEngine = true
-		case "false", "0":
+		case "false":
 			enableStreamingEngine = false
 		default:
+			log.Printf("[DEBUG] Map entry `parameters.enableStreamingEngine` has unexpected value `%s`. It should be either \"true\" or \"false\". Defaulting to false boolean value instead.", e)
 			enableStreamingEngine = false
 		}
 	} else {
