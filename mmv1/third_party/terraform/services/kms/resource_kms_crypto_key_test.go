@@ -576,6 +576,12 @@ func TestAccKmsCryptoKeyVersion_externalProtectionLevelOptions(t *testing.T) {
 }
 
 func TestAccKmsCryptoKeyVersion_externalProtectionLevelOptionsVpc(t *testing.T) {
+	// This test relies on manual steps to set up the EkmConnection used for the
+	// CryptoKeyVersion creation, which means we can't spin up a temporary project.
+	// We also can't use bootstrapped keys because that would defeat the purpose of
+	// this key creation test, so we skip this test for VCR to avoid KMS resource
+	// accumulation in the TF test project (since KMS resources can't be deleted).
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	projectId := envvar.GetTestProjectFromEnv()
