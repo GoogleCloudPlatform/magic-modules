@@ -91,9 +91,19 @@ Template.
 
 - - -
 
+* `additional_experiments` - (Optional) TODO
+
+* `autoscaling_algorithm` - (Optional) TODO
+
 * `parameters` - (Optional) Key/Value pairs to be passed to the Dataflow job (as
 used in the template). Additional [pipeline options](https://cloud.google.com/dataflow/docs/guides/specifying-exec-params#setting-other-cloud-dataflow-pipeline-options)
 such as `serviceAccount`, `workerMachineType`, etc can be specified here.
+
+* `enable_streaming_engine` - (Optional) TODO
+
+* `ip_configuration` - (Optional) TODO
+
+* `kms_key_name` - (Optional) TODO
 
 * `labels` - (Optional) User labels to be specified for the job. Keys and values
 should follow the restrictions specified in the [labeling restrictions](https://cloud.google.com/compute/docs/labeling-resources#restrictions)
@@ -106,21 +116,39 @@ page.
 * `effective_labels` -
   All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.
 
+* `launcher_machine_type` - (Optional) TODO
+
+* `machine_type` - (Optional) TODO
+
+* `max_workers` - (Optional) TODO
+
+* `network` - (Optional) TODO
+
+* `num_workers` - (Optional) TODO
+
 * `on_delete` - (Optional) One of "drain" or "cancel". Specifies behavior of
 deletion during `terraform destroy`.  See above note.
-
-* `skip_wait_on_job_termination` - (Optional)  If set to `true`, terraform will
-treat `DRAINING` and `CANCELLING` as terminal states when deleting the resource,
-and will remove the resource from terraform state and move on.  See above note.
 
 * `project` - (Optional) The project in which the resource belongs. If it is not
 provided, the provider project is used.
 
 * `region` - (Optional) The region in which the created job should run.
 
+* `sdk_container_image` - (Optional) TODO
+
 * `service_account_email` - (Optional) Service account email to run the workers as.
 
+* `skip_wait_on_job_termination` - (Optional)  If set to `true`, terraform will
+treat `DRAINING` and `CANCELLING` as terminal states when deleting the resource,
+and will remove the resource from terraform state and move on.  See above note.
+
+* `staging_location` - (Optional) TODO
+
 * `subnetwork` - (Optional) Compute Engine subnetwork for launching instances to run your pipeline.
+
+* `temp_location` - (Optional) TODO
+
+* `transform_name_mapping` - (Optional) TODO
 
 ## Attributes Reference
 In addition to the arguments listed above, the following computed attributes are exported:
