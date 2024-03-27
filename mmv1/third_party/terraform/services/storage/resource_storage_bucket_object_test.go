@@ -457,6 +457,72 @@ func TestAccStorageObject_retention(t *testing.T) {
 	})
 }
 
+func TestResourceStorageBucketObjectUpdate_ContentChange(t *testing.T) {
+	t.Parallel()
+
+	bucketName := acctest.TestBucketName(t)
+	initialContent := []byte("initial content")
+	updatedContent := []byte("updated content")
+	h := md5.New()
+	if _, err := h.Write(initialContent); err != nil {
+		t.Errorf("error calculating md5: %v", err)
+	}
+	dataMd5 := base64.StdEncoding.EncodeToString(h.Sum(nil))
+
+	// Create the initial object
+	createObject := func(content []byte) {
+		testFile := getNewTmpTestFile(t, "tf-test")
+		if err := ioutil.WriteFile(testFile.Name(), content, 0644); err != nil {
+			t.Errorf("error writing file: %v", err)
+		}
+
+		acctest.VcrTest(t, resource.TestCase{
+			PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+			ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+			CheckDestroy:             testAccStorageObjectDestroyProducer(t),
+			Steps: []resource.TestStep{
+				{
+					Config: testGoogleStorageBucketsObjectBasic(bucketName, testFile.Name()),
+					Check:  testAccCheckGoogleStorageObject(t, bucketName, objectName, dataMd5),
+				},
+			},
+		})
+	}
+
+	// Update the object content and verify
+	updateObject := func(content []byte) {
+		testFile := getNewTmpTestFile(t, "tf-test")
+		if err := ioutil.WriteFile(testFile.Name(), content, 0644); err != nil {
+			t.Errorf("error writing file: %v", err)
+		}
+
+		acctest.VcrTest(t, resource.TestCase{
+			PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+			ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+			CheckDestroy:             testAccStorageObjectDestroyProducer(t),
+			Steps: []resource.TestStep{
+				{
+					Config: testGoogleStorageBucketsObjectBasic(bucketName, testFile.Name()),
+					Check: resource.ComposeTestCheckFunc(
+						testAccCheckGoogleStorageObject(t, bucketName, objectName, dataMd5),
+						resource.TestCheckResourceAttr(
+							"google_storage_bucket_object.object",
+							"content",
+							string(updatedContent),
+						),
+					),
+				},
+			},
+		})
+	}
+
+	// Create the initial object
+	createObject(initialContent)
+
+	// Update the object content and verify
+	updateObject(updatedContent)
+}
+
 func testAccCheckGoogleStorageObject(t *testing.T, bucket, object, md5 string) resource.TestCheckFunc {
 	return testAccCheckGoogleStorageObjectWithEncryption(t, bucket, object, md5, "")
 }
