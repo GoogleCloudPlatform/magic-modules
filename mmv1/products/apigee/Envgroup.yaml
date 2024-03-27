@@ -49,7 +49,7 @@ examples:
     name: 'apigee_environment_group_basic'
     vars:
       envgroup_name: 'my-envgroup'
-    skip_test:
+    exclude_test:
       true
       # This is a more verbose version of the above that creates all
       # the resources needed for the acceptance test.
