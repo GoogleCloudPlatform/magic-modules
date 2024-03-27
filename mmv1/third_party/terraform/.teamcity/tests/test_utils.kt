@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MPL-2.0
  */
 
-// This file is controlled by MMv1, any changes made here will be overwritten
+// This file is maintained in the GoogleCloudPlatform/magic-modules repository and copied into the downstream provider repositories. Any changes to this file in the downstream will be overwritten.
 
 package tests
 
@@ -14,7 +14,7 @@ import org.junit.Assert
 const val gaProjectName = "Google"
 const val betaProjectName = "Google Beta"
 const val nightlyTestsProjectName = "Nightly Tests"
-const val mmUpstreamProjectName = "MM Upstream Testing"
+const val mmUpstreamProjectName = "Upstream MM Testing"
 const val projectSweeperProjectName = "Project Sweeper"
 
 fun testContextParameters(): AllContextParameters {

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MPL-2.0
  */
 
-// This file is controlled by MMv1, any changes made here will be overwritten
+// This file is maintained in the GoogleCloudPlatform/magic-modules repository and copied into the downstream provider repositories. Any changes to this file in the downstream will be overwritten.
 
 // Provider name that matches the name in the Registry
 const val ProviderNameGa = "google"
@@ -16,7 +16,7 @@ const val DefaultStartHour = 4
 const val DefaultParallelism = 6
 
 // specifies the default version of Terraform Core which should be used for testing
-const val DefaultTerraformCoreVersion = "1.2.5"
+const val DefaultTerraformCoreVersion = "1.8.0-rc1" // TODO(SarahFrench) - update to 1.8.0 once it's gone GA
 
 // This represents a cron view of days of the week
 const val DefaultDaysOfWeek = "*"

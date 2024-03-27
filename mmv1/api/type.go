@@ -13,9 +13,13 @@
 
 package api
 
-// require 'api/object'
-// require 'google/string_utils'
-// require 'provider/terraform/validation'
+import (
+	"fmt"
+	"log"
+
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
+)
 
 // Represents a property type
 type Type struct {
@@ -116,18 +120,25 @@ type Type struct {
 	RequiredWith []string `yaml:"required_with"`
 
 	// Can only be overridden - we should never set this ourselves.
-	// TODO: set a specific type intead of interface{}
-	NewType interface{}
+	NewType string
 
 	// A pattern that maps expected user input to expected API input.
 	// TODO: remove?
 	Pattern string
 
-	Properties []Type
+	Properties []*Type
 
 	EnumValues []string `yaml:"enum_values"`
 
-	ItemType string `yaml:"item_type"`
+	// ====================
+	// Array Fields
+	// ====================
+	ItemType *Type `yaml:"item_type"`
+	MinSize  int   `yaml:"min_size"`
+	MaxSize  int   `yaml:"max_size"`
+
+	Resource string
+	Imports  string
 
 	// ====================
 	// Terraform Overrides
@@ -181,6 +192,27 @@ type Type struct {
 	KeyDiffSuppressFunc string `yaml:"key_diff_suppress_func"`
 
 	// ====================
+	// Map Fields
+	// ====================
+	// The type definition of the contents of the map.
+	ValueType *Type `yaml:"value_type"`
+
+	// While the API doesn't give keys an explicit name, we specify one
+	// because in Terraform the key has to be a property of the object.
+	//
+	// The name of the key. Used in the Terraform schema as a field name.
+	KeyName string `yaml:"key_name`
+
+	// A description of the key's format. Used in Terraform to describe
+	// the field in documentation.
+	KeyDescription string `yaml:"key_description`
+
+	// ====================
+	// KeyValuePairs Fields
+	// ====================
+	IgnoreWrite bool `yaml:"ignore_write`
+
+	// ====================
 	// Schema Modifications
 	// ====================
 	// Schema modifications change the schema of a resource in some
@@ -231,10 +263,9 @@ type Type struct {
 	// just as they are in the standard flattener template.
 	CustomFlatten string `yaml:"custom_flatten"`
 
-	__resource Resource
+	ResourceMetadata *Resource
 
-	// TODO: set a specific type intead of interface{}
-	__parent interface{} // is nil for top-level properties
+	ParentMetadata *Type // is nil for top-level properties
 }
 
 const MAX_NAME = 20
@@ -302,19 +333,26 @@ const MAX_NAME = 20
 // object. eg: parent.meta.label.foo
 // The only intended purpose is to allow better error messages. Some objects
 // and at some points in the build this doesn't output a valid output.
-// func (t *Type) lineage() {
-// return name&.underscore if __parent.nil?
 
-// "//{__parent.lineage}.//{name&.underscore}"
-// }
+// def lineage
+func (t Type) Lineage() string {
+	if t.ParentMetadata == nil {
+		return google.Underscore(t.Name)
+	}
+
+	return fmt.Sprintf("%s.%s", t.ParentMetadata.Lineage(), google.Underscore(t.Name))
+}
 
 // Prints the access path of the field in the configration eg: metadata.0.labels
 // The only intended purpose is to get the value of the labes field by calling d.Get().
 // func (t *Type) terraform_lineage() {
-// return name&.underscore if __parent.nil? || __parent.flatten_object
+func (t Type) TerraformLineage() string {
+	if t.ParentMetadata == nil || t.ParentMetadata.FlattenObject {
+		return google.Underscore(t.Name)
+	}
 
-// "//{__parent.terraform_lineage}.0.//{name&.underscore}"
-// }
+	return fmt.Sprintf("%s.0.%s", t.ParentMetadata.TerraformLineage(), google.Underscore(t.Name))
+}
 
 // func (t *Type) to_json(opts) {
 // ignore fields that will contain references to parent resources and
@@ -381,10 +419,13 @@ const MAX_NAME = 20
 
 // Returns list of properties that are in conflict with this property.
 // func (t *Type) conflicting() {
-// return [] unless @__resource
+func (t Type) Conflicting() []string {
+	if t.ResourceMetadata == nil {
+		return []string{}
+	}
 
-// @conflicts
-// }
+	return t.Conflicts
+}
 
 // Checks that all properties that needs at least one of their fields actually exist.
 // This currently just returns if empty, because we don't want to do the check, since
@@ -397,10 +438,13 @@ const MAX_NAME = 20
 
 // Returns list of properties that needs at least one of their fields set.
 // func (t *Type) at_least_one_of_list() {
-// return [] unless @__resource
+func (t Type) AtLeastOneOfList() []string {
+	if t.ResourceMetadata == nil {
+		return []string{}
+	}
 
-// @at_least_one_of
-// }
+	return t.AtLeastOneOf
+}
 
 // Checks that all properties that needs exactly one of their fields actually exist.
 // This currently just returns if empty, because we don't want to do the check, since
@@ -413,10 +457,13 @@ const MAX_NAME = 20
 
 // Returns list of properties that needs exactly one of their fields set.
 // func (t *Type) exactly_one_of_list() {
-// return [] unless @__resource
+func (t Type) ExactlyOneOfList() []string {
+	if t.ResourceMetadata == nil {
+		return []string{}
+	}
 
-// @exactly_one_of
-// }
+	return t.ExactlyOneOf
+}
 
 // Checks that all properties that needs required with their fields actually exist.
 // This currently just returns if empty, because we don't want to do the check, since
@@ -429,46 +476,75 @@ const MAX_NAME = 20
 
 // Returns list of properties that needs required with their fields set.
 // func (t *Type) required_with_list() {
-//   // return [] unless @__resource
+func (t Type) RequiredWithList() []string {
+	if t.ResourceMetadata == nil {
+		return []string{}
+	}
 
-//   // @required_with
-// }
+	return t.RequiredWith
+}
 
-// func (t *Type) type() {
-//   // self.class.name.split('::').last
-// }
+func (t Type) Parent() *Type {
+	return t.ParentMetadata
+}
 
-// func (t *Type) parent() {
-//   // @__parent
-// }
+// def min_version
+func (t Type) MinVersionObj() *product.Version {
+	if t.MinVersion != "" {
+		return t.ResourceMetadata.ProductMetadata.versionObj(t.MinVersion)
+	} else {
+		return t.ResourceMetadata.MinVersionObj()
+	}
+}
 
-// func (t *Type) min_version() {
-//   // if @min_version.nil?
-//   //   @__resource.min_version
-//   // else
-//   //   @__resource.__product.version_obj(@min_version)
-//   // end
-// }
+// def exact_version
+func (t *Type) exactVersionObj() *product.Version {
+	if t.ExactVersion == "" {
+		return nil
+	}
 
-// func (t *Type) exact_version() {
-//   // return nil if @exact_version.nil? || @exact_version.empty?
+	return t.ResourceMetadata.ProductMetadata.versionObj(t.ExactVersion)
+}
 
-//   // @__resource.__product.version_obj(@exact_version)
-// }
+// def exclude_if_not_in_version!(version)
+func (t *Type) ExcludeIfNotInVersion(version *product.Version) {
+	if !t.Exclude {
+		if versionObj := t.exactVersionObj(); versionObj != nil {
+			t.Exclude = versionObj.CompareTo(version) != 0
+		}
 
-// func (t *Type) exclude_if_not_in_version!(version) {
-//   // @exclude ||= exact_version != version unless exact_version.nil?
-//   // @exclude ||= version < min_version
-// }
+		if !t.Exclude {
+			t.Exclude = version.CompareTo(t.MinVersionObj()) < 0
+		}
+	}
 
-// // Overriding is_a? to enable class overrides.
-// // Ruby does not let you natively change types, so this is the next best
-// // thing.
+	if t.IsA("NestedObject") {
+		for _, p := range t.Properties {
+			p.ExcludeIfNotInVersion(version)
+		}
+	} else if t.IsA("Array") && t.ItemType.IsA("NestedObject") {
+		t.ItemType.ExcludeIfNotInVersion(version)
+	}
+}
+
+// Overriding is_a? to enable class overrides.
+// Ruby does not let you natively change types, so this is the next best
+// thing.
+
+// TODO Q1: check the type of superclasses of property t
 // func (t *Type) is_a?(clazz) {
-//   // return Module.const_get(@new_type).new.is_a?(clazz) if @new_type
+func (t Type) IsA(clazz string) bool {
+	if clazz == "" {
+		log.Fatalf("class cannot be empty")
+	}
 
-//   // super(clazz)
-// }
+	if t.NewType != "" {
+		return t.NewType == clazz
+	}
+
+	return t.Type == clazz
+	// super(clazz)
+}
 
 // // Overriding class to enable class overrides.
 // // Ruby does not let you natively change types, so this is the next best
@@ -479,18 +555,38 @@ const MAX_NAME = 20
 //   // super
 // }
 
-// // Returns nested properties for this property.
-// func (t *Type) nested_properties() {
-//   // nil
-// }
+// Returns nested properties for this property.
+// def nested_properties
+func (t Type) NestedProperties() []*Type {
+	props := make([]*Type, 0)
 
-// func (t *Type) removed() {
-//   // !(@removed_message.nil? || @removed_message == '')
-// }
+	switch {
+	case t.IsA("Array"):
+		if t.ItemType.IsA("NestedObject") {
+			props = google.Reject(t.ItemType.NestedProperties(), func(p *Type) bool {
+				return t.Exclude
+			})
+		}
+	case t.IsA("NestedObject"):
+		props = t.UserProperties()
+	case t.IsA("Map"):
+		props = google.Reject(t.ValueType.NestedProperties(), func(p *Type) bool {
+			return t.Exclude
+		})
+	default:
+	}
+	return props
+}
 
-// func (t *Type) deprecated() {
-//   // !(@deprecation_message.nil? || @deprecation_message == '')
-// }
+// def removed?
+func (t Type) Removed() bool {
+	return t.RemovedMessage != ""
+}
+
+// def deprecated?
+func (t Type) Deprecated() bool {
+	return t.DeprecationMessage != ""
+}
 
 // // private
 
@@ -602,40 +698,28 @@ const MAX_NAME = 20
 //     check :max_size, type: ::Integer
 //   end
 
-//   func (t *Type) property_class
-//     case @item_type
-//     when NestedObject, ResourceRef
-//       type = @item_type.property_class
-//     when Enum
-//       raise 'aaaa'
-//     else
-//       type = property_ns_prefix
-//       type << get_type(@item_type).new(@name).type
-//     end
-//     type[-1] = "//{type[-1].camelize(:upper)}Array"
-//     type
-//   end
-
 //   func (t *Type) exclude_if_not_in_version!(version)
 //     super
 //     @item_type.exclude_if_not_in_version!(version) \
 //       if @item_type.is_a? NestedObject
 //   end
 
-//   func (t *Type) nested_properties
-//     return @item_type.nested_properties.reject(&:exclude) \
-//       if @item_type.is_a?(Api::Type::NestedObject)
+// func (t *Type) nested_properties
+// return @item_type.nested_properties.reject(&:exclude) \
+// 	if @item_type.is_a?(Api::Type::NestedObject)
 
-//     super
-//   end
-
-//   func (t *Type) item_type_class
-//     return @item_type \
-//       if @item_type.instance_of?(Class)
-
-//     Object.const_get(@item_type)
-//   end
+// super
 // end
+
+// This function is for array field
+// def item_type_class
+func (t Type) ItemTypeClass() string {
+	if !t.IsA("Array") {
+		return ""
+	}
+
+	return t.ItemType.Type
+}
 
 // // Represents an enum, and store is valid values
 // class Enum < Primitive
@@ -708,25 +792,19 @@ const MAX_NAME = 20
 //     check_resource_ref_property_exists
 //   end
 
-//   func (t *Type) property
-//     props = resource_ref.all_user_properties
-//                         .select { |prop| prop.name == @imports }
-//     return props.first unless props.empty?
-//   end
+// func (t *Type) resource_ref
+func (t Type) ResourceRef() *Resource {
+	if !t.IsA("ResourceRef") {
+		return nil
+	}
 
-//   func (t *Type) resource_ref
-//     product = @__resource.__product
-//     resources = product.objects.select { |obj| obj.name == @resource }
+	product := t.ResourceMetadata.ProductMetadata
+	resources := google.Select(product.Objects, func(obj *Resource) bool {
+		return obj.Name == t.Resource
+	})
 
-//     resources[0]
-//   end
-
-//   func (t *Type) property_class
-//     type = property_ns_prefix
-//     type << [@resource, @imports, 'Ref']
-//     type[-1] = type[-1].join('_').camelize(:upper)
-//     type
-//   end
+	return resources[0]
+}
 
 //   private
 
@@ -758,40 +836,42 @@ const MAX_NAME = 20
 //     check :properties, type: ::Array, item_type: Api::Type, required: true
 //   end
 
-//   func (t *Type) property_class
-//     type = property_ns_prefix
-//     type << [@__resource.name, @name]
-//     type[-1] = type[-1].join('_').camelize(:upper)
-//     type
-//   end
+// Returns all properties including the ones that are excluded
+// This is used for PropertyOverride validation
+// def all_properties
+func (t Type) AllProperties() []*Type {
+	return t.Properties
+}
 
-//   // Returns all properties including the ones that are excluded
-//   // This is used for PropertyOverride validation
-//   func (t *Type) all_properties
-//     @properties
-//   end
+// func (t *Type) properties
+func (t Type) UserProperties() []*Type {
+	if t.IsA("NestedObject") {
+		if t.Properties == nil {
+			log.Fatalf("Field '{%s}' properties are nil!", t.Lineage())
+		}
 
-//   func (t *Type) properties
-//     raise "Field '//{lineage}' properties are nil!" if @properties.nil?
+		return google.Reject(t.Properties, func(p *Type) bool {
+			return p.Exclude
+		})
+	}
+	return nil
+}
 
-//     @properties.reject(&:exclude)
-//   end
-
-//   func (t *Type) nested_properties
-//     properties
-//   end
-
-//   // Returns the list of top-level properties once any nested objects with
-//   // flatten_object set to true have been collapsed
-//   func (t *Type) root_properties
-//     properties.flat_map do |p|
-//       if p.flatten_object
-//         p.root_properties
-//       else
-//         p
-//       end
-//     end
-//   end
+// Returns the list of top-level properties once any nested objects with
+// flatten_object set to true have been collapsed
+//
+//	func (t *Type) root_properties
+func (t *Type) RootProperties() []*Type {
+	props := make([]*Type, 0)
+	for _, p := range t.UserProperties() {
+		if p.FlattenObject {
+			props = google.Concat(props, p.RootProperties())
+		} else {
+			props = append(props, p)
+		}
+	}
+	return props
+}
 
 //   func (t *Type) exclude_if_not_in_version!(version)
 //     super
@@ -799,10 +879,73 @@ const MAX_NAME = 20
 //   end
 // end
 
-// // An array of string -> string key -> value pairs, such as labels.
-// // While this is technically a map, it's split out because it's a much
-// // simpler property to generate and means we can avoid conditional logic
-// // in Map.
+// An array of string -> string key -> value pairs, such as labels.
+// While this is technically a map, it's split out because it's a much
+// simpler property to generate and means we can avoid conditional logic
+// in Map.
+
+func NewProperty(name, apiName string, options []func(*Type)) *Type {
+	p := &Type{
+		NamedObject: NamedObject{
+			Name:    name,
+			ApiName: apiName,
+		},
+	}
+
+	for _, option := range options {
+		option(p)
+	}
+	return p
+}
+
+func propertyWithType(t string) func(*Type) {
+	return func(p *Type) {
+		p.Type = t
+	}
+}
+
+func propertyWithOutput(output bool) func(*Type) {
+	return func(p *Type) {
+		p.Output = output
+	}
+}
+
+func propertyWithDescription(description string) func(*Type) {
+	return func(p *Type) {
+		p.Description = description
+	}
+}
+
+func propertyWithMinVersion(minVersion string) func(*Type) {
+	return func(p *Type) {
+		p.MinVersion = minVersion
+	}
+}
+
+func propertyWithUpdateVerb(updateVerb string) func(*Type) {
+	return func(p *Type) {
+		p.UpdateVerb = updateVerb
+	}
+}
+
+func propertyWithUpdateUrl(updateUrl string) func(*Type) {
+	return func(p *Type) {
+		p.UpdateUrl = updateUrl
+	}
+}
+
+func propertyWithImmutable(immutable bool) func(*Type) {
+	return func(p *Type) {
+		p.Immutable = immutable
+	}
+}
+
+func propertyWithIgnoreWrite(ignoreWrite bool) func(*Type) {
+	return func(p *Type) {
+		p.IgnoreWrite = ignoreWrite
+	}
+}
+
 // class KeyValuePairs < Composite
 //   // Ignore writing the "effective_labels" and "effective_annotations" fields to API.
 //   ignore_write
@@ -872,10 +1015,10 @@ const MAX_NAME = 20
 //     end
 //   end
 
-//   func (t *Type) field_min_version
-//     @min_version
-//   end
-// end
+// def field_min_version
+func (t Type) fieldMinVersion() string {
+	return t.MinVersion
+}
 
 // // An array of string -> string key -> value pairs used specifically for the "labels" field.
 // // The field name with this type should be "labels" literally.
@@ -967,11 +1110,11 @@ const MAX_NAME = 20
 //   Module.const_get(type)
 // end
 
-// func (t *Type) property_ns_prefix
-//   [
-//     'Google',
-//     @__resource.__product.name.camelize(:upper),
-//     'Property'
-//   ]
-// end
-// end
+// def property_ns_prefix
+func (t Type) PropertyNsPrefix() []string {
+	return []string{
+		"Google",
+		google.Camelize(t.ResourceMetadata.ProductMetadata.Name, "upper"),
+		"Property",
+	}
+}

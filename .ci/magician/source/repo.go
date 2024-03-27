@@ -8,13 +8,13 @@ import (
 )
 
 type Repo struct {
-	Name        string // Name in GitHub (e.g. magic-modules)
-	Title       string // Title for display (e.g. Magic Modules)
-	Branch      string // Branch to clone, optional
-	Owner       string // Owner of repo, optional
-	Path        string // local Path once cloned, including Name
-	Version     provider.Version
-	DiffCanFail bool // whether to allow the command to continue if cloning or diffing the repo fails
+	Name    string // Name in GitHub (e.g. magic-modules)
+	Title   string // Title for display (e.g. Magic Modules)
+	Branch  string // Branch to clone, optional
+	Owner   string // Owner of repo, optional
+	Path    string // local Path once cloned, including Name
+	Version provider.Version
+	Cloned  bool
 }
 
 type Controller struct {

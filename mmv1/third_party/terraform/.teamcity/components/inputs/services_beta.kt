@@ -3,7 +3,15 @@
  * SPDX-License-Identifier: MPL-2.0
  */
 
-// This file is controlled by MMv1, any changes made here will be overwritten
+// This file is maintained in the GoogleCloudPlatform/magic-modules repository and copied into the downstream provider repositories. Any changes to this file in the downstream will be overwritten.
+
+/*
+  NOTE: This file is manually curated - any new service packages added to the provider codebase will need to be accompanied with a change in this file.
+        When adding new entires make sure to ensure the path value is correct for TPG or TPGB
+
+        For this file, services_beta.kt, please ensure paths are like:
+            "./google-beta/services/accessapproval"
+*/
 
 package generated
 
@@ -47,6 +55,11 @@ var ServicesListBeta = mapOf(
         "name" to "appengine",
         "displayName" to "Appengine",
         "path" to "./google-beta/services/appengine"
+    ),
+    "apphub" to mapOf(
+        "name" to "apphub",
+        "displayName" to "Apphub",
+        "path" to "./google-beta/services/apphub"
     ),
     "artifactregistry" to mapOf(
         "name" to "artifactregistry",
@@ -172,6 +185,11 @@ var ServicesListBeta = mapOf(
         "name" to "cloudids",
         "displayName" to "Cloudids",
         "path" to "./google-beta/services/cloudids"
+    ),
+    "cloudquotas" to mapOf(
+        "name" to "cloudquotas",
+        "displayName" to "Cloudquotas",
+        "path" to "./google-beta/services/cloudquotas"
     ),
     "cloudrun" to mapOf(
         "name" to "cloudrun",
@@ -447,6 +465,11 @@ var ServicesListBeta = mapOf(
         "name" to "integrationconnectors",
         "displayName" to "Integrationconnectors",
         "path" to "./google-beta/services/integrationconnectors"
+    ),
+    "integrations" to mapOf(
+        "name" to "integrations",
+        "displayName" to "Applicationintegration",
+        "path" to "./google-beta/services/integrations"
     ),
     "kms" to mapOf(
         "name" to "kms",

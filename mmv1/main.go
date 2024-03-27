@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -16,20 +17,37 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/provider"
 )
 
+// TODO Q2: additional flags
+
+// Example usage: --output $GOPATH/src/github.com/terraform-providers/terraform-provider-google-beta
+var outputPath = flag.String("output", "", "path to output generated files to")
+
+// Example usage: --version beta
+var version = flag.String("version", "", "optional version name. If specified, this version is preferred for resource generation when applicable")
+
+var product = flag.String("product", "", "optional product name. If specified, the resources under the specific product will be generated. Otherwise, resources under all products will be generated.")
+
 func main() {
-	// TODO Q2: parse flags
-	var version = "beta"
-	var outputPath = "."
+	flag.Parse()
 	var generateCode = true
 	var generateDocs = true
 
-	log.Printf("Initiating go MM compiler")
+	if outputPath == nil || *outputPath == "" {
+		log.Fatalf("No output path specified")
+	}
 
-	// TODO Q1: allow specifying one product (flag or hardcoded)
-	// var productsToGenerate []string
-	// var allProducts = true
-	var productsToGenerate = []string{"products/datafusion"}
+	if version == nil || *version == "" {
+		log.Fatalf("No version specified")
+	}
+
+	var productsToGenerate []string
 	var allProducts = false
+	if product == nil || *product == "" {
+		allProducts = true
+	} else {
+		var productToGenerate = fmt.Sprintf("products/%s", *product)
+		productsToGenerate = []string{productToGenerate}
+	}
 
 	var allProductFiles []string = make([]string, 0)
 
@@ -51,8 +69,8 @@ func main() {
 		log.Fatalf("No product.yaml file found.")
 	}
 
-	log.Printf("Generating MM output to '%s'", outputPath)
-	log.Printf("Using %s version", version)
+	log.Printf("Generating MM output to '%s'", *outputPath)
+	log.Printf("Using %s version", *version)
 
 	// Building compute takes a long time and can't be parallelized within the product
 	// so lets build it first
@@ -77,24 +95,17 @@ func main() {
 		// TODO Q2: product overrides
 
 		if _, err := os.Stat(productYamlPath); err == nil {
-			// TODO Q1: remove these lines, which are for debugging
-			// log.Printf("productYamlPath %#v", productYamlPath)
-
-			var resources []api.Resource
+			var resources []*api.Resource = make([]*api.Resource, 0)
 
 			productYaml, err := os.ReadFile(productYamlPath)
 			if err != nil {
 				log.Fatalf("Cannot open the file: %v", productYaml)
 			}
-			productApi := api.Product{}
-			yamlValidator.Parse(productYaml, &productApi)
+			productApi := &api.Product{}
+			yamlValidator.Parse(productYaml, productApi)
 
-			// TODO Q1: remove these lines, which are for debugging
-			// prod, _ := json.Marshal(&productApi)
-			// log.Printf("prod %s", string(prod))
-
-			if !productApi.ExistsAtVersionOrLower(version) {
-				log.Printf("%s does not have a '%s' version, skipping", productName, version)
+			if !productApi.ExistsAtVersionOrLower(*version) {
+				log.Printf("%s does not have a '%s' version, skipping", productName, *version)
 				continue
 			}
 
@@ -112,39 +123,40 @@ func main() {
 					continue
 				}
 
-				// TODO Q1: remove these lines, which are for debugging
-				// log.Printf(" resourceYamlPath %s", resourceYamlPath)
 				resourceYaml, err := os.ReadFile(resourceYamlPath)
 				if err != nil {
 					log.Fatalf("Cannot open the file: %v", resourceYamlPath)
 				}
-				resource := api.Resource{}
-				yamlValidator.Parse(resourceYaml, &resource)
+				resource := &api.Resource{}
+				yamlValidator.Parse(resourceYaml, resource)
 
-				// TODO Q1: remove these lines, which are for debugging
-				// res, _ := json.Marshal(&resource)
-				// log.Printf("resource %s", string(res))
+				resource.Properties = resource.AddLabelsRelatedFields(resource.PropertiesWithExcluded(), nil)
 
-				// TODO Q1: add labels related fields
-
+				resource.Validate()
 				resources = append(resources, resource)
 			}
 
 			// TODO Q2: override resources
+			// log.Printf("resources before sorting %#v", resources)
 
-			// TODO Q1: sort resources by name and set in product
+			// Sort resources by name
+			sort.Slice(resources, func(i, j int) bool {
+				return resources[i].Name < resources[j].Name
+			})
+
+			productApi.Objects = resources
+			productApi.Validate()
 
 			// TODO Q2: set other providers via flag
-			providerToGenerate := provider.NewTerraform(productApi)
+			providerToGenerate := provider.NewTerraform(productApi, *version)
 
 			if !slices.Contains(productsToGenerate, productName) {
 				log.Printf("%s not specified, skipping generation", productName)
 				continue
 			}
 
-			// TODO Q1: generate templates
 			log.Printf("%s: Generating files", productName)
-			providerToGenerate.Generate(outputPath, productName, generateCode, generateDocs)
+			providerToGenerate.Generate(*outputPath, productName, generateCode, generateDocs)
 		}
 
 		// TODO Q2: copy common files
