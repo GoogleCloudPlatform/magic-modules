@@ -556,6 +556,7 @@ func TestAccDataflowJob_withAttributionLabelProactive(t *testing.T) {
 }
 
 // Test implementation of enabling streaming engine via parameters or via argument in resource block
+// NOTE: these fields are immutable, so the resource is being recreated between both test steps.
 func TestAccDataflowFlexTemplateJob_enableStreamingEngine(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
