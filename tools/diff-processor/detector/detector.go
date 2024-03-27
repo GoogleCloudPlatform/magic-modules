@@ -22,7 +22,7 @@ type FieldSet map[string]struct{}
 // ResourceChanges is a nested map with field names as keys and Field objects
 // as bottom-level values.
 // Fields are assumed not to be covered until detected in a test.
-type ResourceChanges map[string]any
+type ResourceChanges map[string]Field
 
 type Field struct {
 	// Added is true when the field is newly added between oldProvider and newProvider.
