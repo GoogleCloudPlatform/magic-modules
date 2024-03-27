@@ -303,7 +303,8 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	if err != nil {
 		fmt.Println("error building regexp labels: ", err)
 		errors["Other"] = append(errors["Other"], "Failed to parse service label mapping")
-	} else {
+	}
+	if len(regexpLabels) > 0 {
 		for _, label := range labeler.ComputeLabels(maps.Keys(affectedResources), regexpLabels) {
 			uniqueServiceLabels[label] = struct{}{}
 		}
