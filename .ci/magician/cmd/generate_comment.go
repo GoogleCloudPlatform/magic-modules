@@ -279,6 +279,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	data.BreakingChanges = breakingChangesSlice
 
 	// Compute affected resources based on changed files
+	changedFilesAffectedResources := map[string]struct{}{}
 	for _, repo := range []source.Repo{tpgRepo, tpgbRepo} {
 		if !repo.Cloned {
 			fmt.Println("Skipping changed file service labels; repo failed to clone: ", repo.Name)
@@ -287,10 +288,11 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 		for _, path := range repo.ChangedFiles {
 			if r := fileToResource(path); r != "" {
 				uniqueAffectedResources[r] = struct{}{}
+				changedFilesAffectedResources[r] = struct{}{}
 			}
 		}
 	}
-	fmt.Printf("affected resources based on changed files: %v\n", maps.Keys(uniqueAffectedResources))
+	fmt.Printf("affected resources based on changed files: %v\n", maps.Keys(changedFilesAffectedResources))
 
 	// Compute service labels based on affected resources
 	uniqueServiceLabels := map[string]struct{}{}
