@@ -1,7 +1,6 @@
 package detector
 
 import (
-	"fmt"
 	"sort"
 	"strings"
 
@@ -22,7 +21,7 @@ type FieldSet map[string]struct{}
 // ResourceChanges is a nested map with field names as keys and Field objects
 // as bottom-level values.
 // Fields are assumed not to be covered until detected in a test.
-type ResourceChanges map[string]Field
+type ResourceChanges map[string]*Field
 
 type Field struct {
 	// Added is true when the field is newly added between oldProvider and newProvider.
@@ -90,12 +89,8 @@ func getMissingTestsForChanges(changedFields map[string]ResourceChanges, allTest
 
 func markCoverage(fieldCoverage ResourceChanges, config reader.Resource) error {
 	for fieldName := range config {
-		if coverage, ok := fieldCoverage[fieldName]; ok {
-			if field, ok := coverage.(*Field); ok {
-				field.Tested = true
-			} else {
-				return fmt.Errorf("found unexpected %T in field %q", coverage, fieldName)
-			}
+		if field, ok := fieldCoverage[fieldName]; ok {
+			field.Tested = true
 		}
 	}
 	return nil
@@ -103,11 +98,9 @@ func markCoverage(fieldCoverage ResourceChanges, config reader.Resource) error {
 
 func untestedFields(fieldCoverage ResourceChanges) []string {
 	fields := make([]string, 0)
-	for key, coverage := range fieldCoverage {
-		if field, ok := coverage.(*Field); ok {
-			if !field.Tested {
-				fields = append(fields, key)
-			}
+	for key, field := range fieldCoverage {
+		if !field.Tested {
+			fields = append(fields, key)
 		}
 	}
 	return fields
