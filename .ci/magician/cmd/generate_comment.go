@@ -210,8 +210,8 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 		}
 		shortStat, err := ctlr.DiffShortStat(repo, oldBranch, newBranch)
 		if err != nil {
-			fmt.Println("diffing repo shortstats: ", err)
-			errors[repo.Title] = append(errors[repo.Title], "Failed to compute repo diff short stats")
+			fmt.Println("Failed to compute repo diff --shortstat: ", err)
+			errors[repo.Title] = append(errors[repo.Title], "Failed to compute repo diff shortstats")
 		}
 		if shortStat != "" {
 			diffs = append(diffs, Diff{
@@ -221,7 +221,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			})
 			repo.ChangedFiles, err = ctlr.DiffNameOnly(repo, oldBranch, newBranch)
 			if err != nil {
-				fmt.Println("diffing repo nameonly: ", err)
+				fmt.Println("Failed to compute repo diff --name-only: ", err)
 				errors[repo.Title] = append(errors[repo.Title], "Failed to compute repo changed filenames")
 			}
 		}
