@@ -11,21 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package terraform
+package resource
 
 import (
-	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-)
+	"fmt"
 
-// require 'uri'
-// require 'api/object'
-// require 'compile/core'
-// require 'google/golang_utils'
+	"gopkg.in/yaml.v3"
+)
 
 // Generates configs to be shown as examples in docs and outputted as tests
 // from a shared template
 type Examples struct {
-	google.YamlValidator
+	// google.YamlValidator
 
 	// include Compile::Core
 	// include Google::GolangUtils
@@ -41,14 +38,14 @@ type Examples struct {
 	// resource "google_compute_address" {{primary_resource_id}} {
 	//   ...
 	// }
-	PrimaryResourceId string
+	PrimaryResourceId string `yaml:"primary_resource_id"`
 
 	// Optional resource type of the "primary" resource. Used in import tests.
 	// If set, this will override the default resource type implied from the
 	// object parent
-	PrimaryResourceType string
+	PrimaryResourceType string `yaml:"primary_resource_type"`
 
-	// vars is a Hash from template variable names to output variable names.
+	// Vars is a Hash from template variable names to output variable names.
 	// It will use the provided value as a prefix for generated tests, and
 	// insert it into the docs verbatim.
 	Vars map[string]string
@@ -73,7 +70,7 @@ type Examples struct {
 	//  - :CUST_ID
 	//  - :IDENTITY_USER
 	// This list corresponds to the `get*FromEnv` methods in provider_test.go.
-	TestEnvVars map[string]string
+	TestEnvVars map[string]string `yaml:"test_env_vars"`
 
 	// Hash to provider custom override values for generating test config
 	// If field my-var is set in this hash, it will replace vars[my-var] in
@@ -92,11 +89,11 @@ type Examples struct {
 	//         "network": nameOfVpc
 	//         ...
 	//       }
-	TestVarsOverrides map[string]string
+	TestVarsOverrides map[string]string `yaml:"test_vars_overrides"`
 
 	// Hash to provider custom override values for generating oics config
 	// See test_vars_overrides for more details
-	OicsVarsOverrides map[string]string
+	OicsVarsOverrides map[string]string `yaml:"oics_vars_overrides"`
 
 	// The version name of of the example's version if it's different than the
 	// resource version, eg. `beta`
@@ -115,44 +112,58 @@ type Examples struct {
 	// explicit provider block should be defined. While the tests @ 0.12 will
 	// use `google-beta` automatically, past Terraform versions required an
 	// explicit block.
-	MinVersion string
+	MinVersion string `yaml:"min_version"`
 
 	// Extra properties to ignore read on during import.
 	// These properties will likely be custom code.
-	IgnoreReadExtra []string
+	IgnoreReadExtra []string `yaml:"ignore_read_extra"`
 
 	// Whether to skip generating tests for this resource
-	SkipTest bool
+	SkipTest bool `yaml:"skip_test"`
 
 	// Whether to skip generating docs for this example
-	SkipDocs bool
+	SkipDocs bool `yaml:"skip_docs"`
 
 	// Whether to skip import tests for this example
-	SkipImportTest bool
+	SkipImportTest bool `yaml:"skip_import_test"`
 
 	// The name of the primary resource for use in IAM tests. IAM tests need
 	// a reference to the primary resource to create IAM policies for
-	PrimaryResourceName string
+	PrimaryResourceName string `yaml:"primary_resource_name"`
 
 	// The name of the location/region override for use in IAM tests. IAM
 	// tests may need this if the location is not inherited on the resource
 	// for one reason or another
-	RegionOverride string
+	RegionOverride string `yaml:"region_override"`
 
 	// The path to this example's Terraform config.
 	// Defaults to `templates/terraform/examples/{{name}}.tf.erb`
-	ConfigPath string
+	ConfigPath string `yaml:"config_path"`
 
 	// If the example should be skipped during VCR testing.
 	// This is the case when something about the resource or config causes VCR to fail for example
 	// a resource with a unique identifier generated within the resource via resource.UniqueId()
 	// Or a config with two fine grained resources that have a race condition during create
-	SkipVcr bool
+	SkipVcr bool `yaml:"skip_vcr"`
 
 	// Set for false by default. Set to true if you need to pull external provider for your
 	// testcase. Think before adding as there is latency and adds an external dependency to
 	// your test so avoid if you can.
-	PullExternal bool
+	PullExternal bool `yaml:"pull_external"`
+}
+
+func (e *Examples) UnmarshalYAML(n *yaml.Node) error {
+	type exampleAlias Examples
+	aliasObj := (*exampleAlias)(e)
+
+	err := n.Decode(&aliasObj)
+	if err != nil {
+		return err
+	}
+
+	e.ConfigPath = fmt.Sprintf("templates/terraform/examples/%s.tf.erb", e.Name)
+
+	return nil
 }
 
 // func (e *Examples) config_documentation(pwd) {

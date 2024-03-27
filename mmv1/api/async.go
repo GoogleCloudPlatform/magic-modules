@@ -17,16 +17,13 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 )
 
-// require 'api/object'
-// require 'api/timeout'
-
 // Base class from which other Async classes can inherit.
 type Async struct {
 	// Embed YamlValidator object
 	google.YamlValidator
 
 	// Describes an operation
-	Operation Operation
+	Operation *Operation
 
 	// The list of methods where operations are used.
 	Actions []string
@@ -50,7 +47,7 @@ type Operation struct {
 	// Contains information about an long-running operation, to make
 	// requests for the state of an operation.
 
-	Timeouts Timeouts
+	Timeouts *Timeouts
 
 	Result Result
 }
@@ -79,7 +76,7 @@ type OpAsync struct {
 	// TODO: Should embed Async or not?
 	// < Async
 
-	Operation OpAsyncOperation
+	Operation *OpAsyncOperation
 
 	Result OpAsyncResult
 
@@ -93,6 +90,13 @@ type OpAsync struct {
 
 	// The list of methods where operations are used.
 	Actions []string
+}
+
+func NewOpAsync() *OpAsync {
+	oa := new(OpAsync)
+	oa.Operation = NewOpAsyncOperation()
+	oa.Actions = []string{"create", "delete", "update"}
+	return oa
 }
 
 // def initialize(operation, result, status, error)
@@ -127,19 +131,19 @@ type OpAsyncOperation struct {
 
 	WaitMs int `yaml:"wait_ms"`
 
-	Timeouts Timeouts
+	Timeouts *Timeouts
 
 	// Use this if the resource includes the full operation url.
 	FullUrl string `yaml:"full_url"`
 }
 
 // def initialize(path, base_url, wait_ms, timeouts)
-//   super()
-//   @path = path
-//   @base_url = base_url
-//   @wait_ms = wait_ms
-//   @timeouts = timeouts
-// end
+func NewOpAsyncOperation() *OpAsyncOperation {
+	//   super()
+	op := new(OpAsyncOperation)
+	op.Timeouts = NewTimeouts()
+	return op
+}
 
 // def validate
 //   super

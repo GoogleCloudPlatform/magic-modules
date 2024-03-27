@@ -17,8 +17,6 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 )
 
-// require 'api/object'
-
 // Default timeout for all operation types is 20, the Terraform default (https://www.terraform.io/plugin/sdkv2/resources/retries-and-customizable-timeouts)
 // minutes. This can be overridden for each resource.
 const DEFAULT_INSERT_TIMEOUT_MINUTES = 20
@@ -28,11 +26,8 @@ const DEFAULT_DELETE_TIMEOUT_MINUTES = 20
 // Provides timeout information for the different operation types
 type Timeouts struct {
 	google.YamlValidator
-
 	InsertMinutes int `yaml:"insert_minutes"`
-
 	UpdateMinutes int `yaml:"update_minutes"`
-
 	DeleteMinutes int `yaml:"delete_minutes"`
 }
 
@@ -41,6 +36,14 @@ type Timeouts struct {
 
 //   validate
 // end
+
+func NewTimeouts() *Timeouts {
+	return &Timeouts{
+		InsertMinutes: DEFAULT_INSERT_TIMEOUT_MINUTES,
+		UpdateMinutes: DEFAULT_UPDATE_TIMEOUT_MINUTES,
+		DeleteMinutes: DEFAULT_DELETE_TIMEOUT_MINUTES,
+	}
+}
 
 // def validate
 //   super
