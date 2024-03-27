@@ -283,28 +283,30 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	sort.Strings(breakingChangesSlice)
 	data.BreakingChanges = breakingChangesSlice
 
-	// Compute additional service labels based on changed files
-	regexpLabels, err := labeler.BuildRegexLabels(labeler.EnrolledTeamsYaml)
+	// Compute affected resources based on changed files
 	affectedResources := map[string]struct{}{}
-	if err != nil {
-		fmt.Println("error building regexp labels: ", err)
-		errors["Other"] = append(errors["Other"], "Failed to parse service label mapping")
-	} else {
-		for _, repo := range []source.Repo{tpgRepo, tpgbRepo} {
-			if !repo.Cloned {
-				fmt.Println("Skipping changed file service labels; repo failed to clone: ", repo.Name)
-				continue
-			}
-			for _, path := range repo.ChangedFiles {
-				if r := fileToResource(path); r != "" {
-					affectedResources[r] = struct{}{}
-				}
+	for _, repo := range []source.Repo{tpgRepo, tpgbRepo} {
+		if !repo.Cloned {
+			fmt.Println("Skipping changed file service labels; repo failed to clone: ", repo.Name)
+			continue
+		}
+		for _, path := range repo.ChangedFiles {
+			if r := fileToResource(path); r != "" {
+				affectedResources[r] = struct{}{}
 			}
 		}
 	}
 	fmt.Printf("affected resources based on changed files: %v\n", maps.Keys(affectedResources))
-	for _, label := range labeler.ComputeLabels(maps.Keys(affectedResources), regexpLabels) {
-		uniqueServiceLabels[label] = struct{}{}
+
+	// Compute additional service labels based on affected resources
+	regexpLabels, err := labeler.BuildRegexLabels(labeler.EnrolledTeamsYaml)
+	if err != nil {
+		fmt.Println("error building regexp labels: ", err)
+		errors["Other"] = append(errors["Other"], "Failed to parse service label mapping")
+	} else {
+		for _, label := range labeler.ComputeLabels(maps.Keys(affectedResources), regexpLabels) {
+			uniqueServiceLabels[label] = struct{}{}
+		}
 	}
 
 	// Add service labels to PR
