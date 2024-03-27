@@ -16,7 +16,7 @@ package google
 import (
 	"log"
 
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 // A helper class to validate contents coming from YAML files.

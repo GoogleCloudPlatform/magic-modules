@@ -19,8 +19,8 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-	"github.com/GoogleCloudPlatform/magic-modules/mmv1/provider/terraform"
 	"golang.org/x/exp/slices"
+	"gopkg.in/yaml.v3"
 )
 
 type Resource struct {
@@ -175,9 +175,9 @@ type Resource struct {
 	// will allow that token to hold multiple /'s.
 	ImportFormat []string `yaml:"import_format"`
 
-	CustomCode terraform.CustomCode `yaml:"custom_code"`
+	CustomCode resource.CustomCode `yaml:"custom_code"`
 
-	Docs terraform.Docs
+	Docs resource.Docs
 
 	// This block inserts entries into the customdiff.All() block in the
 	// resource schema -- the code for these custom diff functions must
@@ -190,7 +190,7 @@ type Resource struct {
 
 	// Examples in documentation. Backed by generated tests, and have
 	// corresponding OiCS walkthroughs.
-	Examples []terraform.Examples
+	Examples []resource.Examples
 
 	// Virtual fields on the Terraform resource. Usage and differences from url_param_only
 	// are documented in provider/terraform/virtual_fields.rb
@@ -280,6 +280,26 @@ type Resource struct {
 	Parameters []*Type
 
 	ProductMetadata *Product
+}
+
+func (r *Resource) UnmarshalYAML(n *yaml.Node) error {
+	r.CreateVerb = "POST"
+	r.ReadVerb = "GET"
+	r.DeleteVerb = "DELETE"
+	r.UpdateVerb = "PUT"
+
+	type resourceAlias Resource
+	aliasObj := (*resourceAlias)(r)
+
+	err := n.Decode(&aliasObj)
+	if err != nil {
+		return err
+	}
+
+	r.ApiName = r.Name
+	r.CollectionUrlKey = google.Camelize(google.Plural(r.Name), "lower")
+
+	return nil
 }
 
 // TODO: rewrite functions
