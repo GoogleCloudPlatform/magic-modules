@@ -28,7 +28,7 @@ provider "google" {
 }
 
 resource "google_bigquery_dataset" "default" {
-  dataset_id                  = "test-dataset"
+  dataset_id                  = "test_dataset"
   location                    = "EU"
   default_table_expiration_ms = 3600000
 

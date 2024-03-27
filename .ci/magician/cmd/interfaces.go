@@ -30,7 +30,7 @@ type GithubClient interface {
 	PostBuildStatus(prNumber, title, state, targetURL, commitSha string) error
 	PostComment(prNumber, comment string) error
 	RequestPullRequestReviewer(prNumber, assignee string) error
-	AddLabel(prNumber, label string) error
+	AddLabels(prNumber string, labels []string) error
 	RemoveLabel(prNumber, label string) error
 	CreateWorkflowDispatchEvent(workflowFileName string, inputs map[string]any) error
 }

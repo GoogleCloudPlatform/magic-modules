@@ -19,8 +19,13 @@ var changelogExp = regexp.MustCompile("(?s)```release-note.*?```")
 
 var gdEnvironmentVariables = [...]string{
 	"BASE_BRANCH",
-	"GITHUB_TOKEN",
 	"GOPATH",
+}
+
+var gdTokenEnvironmentVariables = [...]string{
+	"GITHUB_TOKEN_CLASSIC",
+	"GITHUB_TOKEN_DOWNSTREAMS",
+	"GITHUB_TOKEN",
 }
 
 var generateDownstreamCmd = &cobra.Command{
@@ -47,13 +52,34 @@ var generateDownstreamCmd = &cobra.Command{
 			env[ev] = val
 		}
 
-		gh := github.NewClient()
+		var githubToken string
+		for _, ev := range gdTokenEnvironmentVariables {
+			val, ok := os.LookupEnv(ev)
+			if ok {
+				env[ev] = val
+				githubToken = val
+				break
+			}
+		}
+
+		gh := github.NewClient(githubToken)
 		rnr, err := exec.NewRunner()
 		if err != nil {
 			fmt.Println("Error creating a runner: ", err)
 			os.Exit(1)
 		}
-		ctlr := source.NewController(env["GOPATH"], "modular-magician", env["GITHUB_TOKEN"], rnr)
+		ctlr := source.NewController(env["GOPATH"], "modular-magician", githubToken, rnr)
+		oldToken := os.Getenv("GITHUB_TOKEN")
+		if err := os.Setenv("GITHUB_TOKEN", githubToken); err != nil {
+			fmt.Println("Error setting GITHUB_TOKEN environment variable: ", err)
+			os.Exit(1)
+		}
+		defer func() {
+			if err := os.Setenv("GITHUB_TOKEN", oldToken); err != nil {
+				fmt.Println("Error setting GITHUB_TOKEN environment variable: ", err)
+				os.Exit(1)
+			}
+		}()
 
 		if len(args) != 4 {
 			fmt.Printf("Wrong number of arguments %d, expected 4\n", len(args))
@@ -109,25 +135,34 @@ func execGenerateDownstream(baseBranch, command, repo, version, ref string, gh G
 		os.Exit(1)
 	}
 
-	if command == "downstream" {
-		pullRequest, err := getPullRequest(baseBranch, ref, gh)
+	commitErr := createCommit(scratchRepo, commitMessage, rnr)
+	if commitErr != nil {
+		fmt.Println("Error creating commit: ", commitErr)
+	}
+
+	var pullRequest *github.PullRequest
+	if commitErr == nil && command == "downstream" {
+		pullRequest, err = getPullRequest(baseBranch, ref, gh)
 		if err != nil {
 			fmt.Println("Error getting pull request: ", err)
 			os.Exit(1)
 		}
-
-		if err := pushCommit(downstreamRepo, scratchRepo, pullRequest, baseBranch, commitMessage, ref, gh, rnr, ctlr); err != nil {
-			fmt.Println("Error pushing commit: ", err)
-			os.Exit(1)
+		if repo == "terraform" {
+			if err := addChangelogEntry(pullRequest, rnr); err != nil {
+				fmt.Println("Error adding changelog entry: ", err)
+				os.Exit(1)
+			}
 		}
+	}
 
+	if _, err := rnr.Run("git", []string{"push", ctlr.URL(scratchRepo), scratchRepo.Branch, "-f"}, nil); err != nil {
+		fmt.Println("Error pushing commit: ", err)
+		os.Exit(1)
+	}
+
+	if commitErr == nil && command == "downstream" {
 		if err := mergePullRequest(downstreamRepo, scratchRepo, pullRequest, rnr, gh); err != nil {
 			fmt.Println("Error merging pull request: ", err)
-			os.Exit(1)
-		}
-	} else {
-		if _, err := rnr.Run("git", []string{"push", ctlr.URL(scratchRepo), scratchRepo.Branch, "-f"}, nil); err != nil {
-			fmt.Println("Error pushing to scratch repo: ", err)
 			os.Exit(1)
 		}
 	}
@@ -264,7 +299,7 @@ func getPullRequest(baseBranch, ref string, gh GithubClient) (*github.PullReques
 	return nil, fmt.Errorf("no pr found with merge commit sha %s and base branch %s", ref, baseBranch)
 }
 
-func pushCommit(downstreamRepo, scratchRepo *source.Repo, pullRequest *github.PullRequest, baseBranch, commitMessage, ref string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller) error {
+func createCommit(scratchRepo *source.Repo, commitMessage string, rnr ExecRunner) error {
 	if err := rnr.PushDir(scratchRepo.Path); err != nil {
 		return err
 	}
@@ -280,33 +315,23 @@ func pushCommit(downstreamRepo, scratchRepo *source.Repo, pullRequest *github.Pu
 	}
 
 	if _, err := rnr.Run("git", []string{"commit", "--signoff", "-m", commitMessage}, nil); err != nil {
-		if strings.Contains(err.Error(), "nothing to commit, working tree clean") {
-			if _, err := rnr.Run("git", []string{"push", ctlr.URL(scratchRepo), scratchRepo.Branch, "-f"}, nil); err != nil {
-				return err
-			}
-			return nil
-		}
 		return err
 	}
 
-	if downstreamRepo.Title == "terraform" {
-		// Add the changelog entry.
-		rnr.Mkdir(".changelog")
-		if err := rnr.WriteFile(filepath.Join(".changelog", fmt.Sprintf("%d.txt", pullRequest.Number)), strings.Join(changelogExp.FindAllString(pullRequest.Body, -1), "\n")); err != nil {
-			return err
-		}
-		if _, err := rnr.Run("git", []string{"add", "."}, nil); err != nil {
-			return err
-		}
-		if _, err := rnr.Run("git", []string{"commit", "--signoff", "--amend", "--no-edit"}, nil); err != nil {
-			return err
-		}
-	}
+	return nil
+}
 
-	if _, err := rnr.Run("git", []string{"push", ctlr.URL(scratchRepo), scratchRepo.Branch, "-f"}, nil); err != nil {
+func addChangelogEntry(pullRequest *github.PullRequest, rnr ExecRunner) error {
+	rnr.Mkdir(".changelog")
+	if err := rnr.WriteFile(filepath.Join(".changelog", fmt.Sprintf("%d.txt", pullRequest.Number)), strings.Join(changelogExp.FindAllString(pullRequest.Body, -1), "\n")); err != nil {
 		return err
 	}
-
+	if _, err := rnr.Run("git", []string{"add", "."}, nil); err != nil {
+		return err
+	}
+	if _, err := rnr.Run("git", []string{"commit", "--signoff", "--amend", "--no-edit"}, nil); err != nil {
+		return err
+	}
 	return nil
 }
 

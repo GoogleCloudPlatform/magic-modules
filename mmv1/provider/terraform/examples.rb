@@ -157,6 +157,7 @@ module Provider
           ORG_ID: '123456789',
           ORG_DOMAIN: 'example.com',
           ORG_TARGET: '123456789',
+          PROJECT_NUMBER: '1111111111111',
           BILLING_ACCT: '000000-0000000-0000000-000000',
           MASTER_BILLING_ACCT: '000000-0000000-0000000-000000',
           SERVICE_ACCT: 'my@service-account.com',

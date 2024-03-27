@@ -148,7 +148,7 @@ properties:
       [alpha user group](https://cloud.google.com/artifact-registry/docs/supported-formats#alpha-access).
     required: true
     immutable: true
-    diff_suppress_func: 'tpgresource.CompareCaseInsensitive'
+    diff_suppress_func: 'tpgresource.CaseDiffSuppress'
   - !ruby/object:Api::Type::String
     name: description
     description: |-
@@ -181,6 +181,7 @@ properties:
     name: 'dockerConfig'
     description: |-
       Docker repository config contains repository level configuration for the repositories of docker type.
+    allow_empty_object: true
     properties:
       - !ruby/object:Api::Type::Boolean
         name: 'immutableTags'

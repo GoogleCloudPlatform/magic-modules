@@ -358,7 +358,7 @@ func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Conf
 			"stack_type":          iface.StackType,
 			"ipv6_access_config": flattenIpv6AccessConfigs(iface.Ipv6AccessConfigs),
 			"ipv6_address":        iface.Ipv6Address,
-			"queue_count":         iface.QueueCount,
+			"queue_count":         iface.QueueCount,			
 		}
 		// Instance template interfaces never have names, so they're absent
 		// in the instance template network_interface schema. We want to use the
@@ -371,7 +371,7 @@ func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Conf
 			internalIP = iface.NetworkIP
 		}
 
-		<% if version == "beta" -%>
+		<% unless version == 'ga' -%>
 		if iface.NetworkAttachment != "" {
 			networkAttachment, err := tpgresource.GetRelativePath(iface.NetworkAttachment)
 			if err != nil {
@@ -447,7 +447,7 @@ func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transp
 		data := raw.(map[string]interface{})
 
 
-		<% if version == "beta" -%>
+		<% unless version == 'ga' -%>
 		var networkAttachment = ""
 		network := data["network"].(string)
 		subnetwork := data["subnetwork"].(string)
@@ -483,7 +483,7 @@ func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transp
 		ifaces[i] = &compute.NetworkInterface{
 			NetworkIP:         data["network_ip"].(string),
 			Network:           nf.RelativeLink(),
-			<% if version == "beta" -%>
+			<% unless version == 'ga' -%>
 			NetworkAttachment: networkAttachment,
 			<% end -%>
 			Subnetwork:        sf.RelativeLink(),
@@ -577,16 +577,22 @@ func expandConfidentialInstanceConfig(d tpgresource.TerraformResourceData) *comp
 	prefix := "confidential_instance_config.0"
 	return &compute.ConfidentialInstanceConfig{
 		EnableConfidentialCompute: d.Get(prefix + ".enable_confidential_compute").(bool),
+		<% unless version == "ga" %>
+		ConfidentialInstanceType: d.Get(prefix + ".confidential_instance_type").(string),
+		<% end %>
 	}
 }
 
-func flattenConfidentialInstanceConfig(ConfidentialInstanceConfig *compute.ConfidentialInstanceConfig) []map[string]bool {
+func flattenConfidentialInstanceConfig(ConfidentialInstanceConfig *compute.ConfidentialInstanceConfig) []map[string]interface{} {
 	if ConfidentialInstanceConfig == nil {
 		return nil
 	}
 
-	return []map[string]bool{{
+	return []map[string]interface{}{{
 		"enable_confidential_compute": ConfidentialInstanceConfig.EnableConfidentialCompute,
+		<% unless version == "ga" %>
+		"confidential_instance_type": ConfidentialInstanceConfig.ConfidentialInstanceType,
+		<% end %>
 	}}
 }
 
