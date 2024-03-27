@@ -70,39 +70,14 @@ func TestAccVmwareengineCluster_vmwareEngineClusterUpdate(t *testing.T) {
 func testVmwareEngineClusterConfig(context map[string]interface{}, nodeCount int) string {
 	context["node_count"] = nodeCount
 	return acctest.Nprintf(`
-resource "google_project" "project" {
-  project_id      = "tf-test%{random_suffix}"
-  name            = "tf-test%{random_suffix}"
-  org_id          = "%{org_id}"
-  billing_account = "%{billing_account}"
-}
-
-resource "google_project_service" "vmwareengine" {
-  project = google_project.project.project_id
-  service = "vmwareengine.googleapis.com"
-}
-
-resource "time_sleep" "sleep" {
-  create_duration = "1m"
-  depends_on = [
-    google_project_service.vmwareengine,
-  ]
-}
-
 resource "google_vmwareengine_network" "cluster-nw" {
-  project = google_project.project.project_id
   name        = "tf-test-cluster-nw%{random_suffix}"
   location    = "global"
   type        = "STANDARD"
   description = "PC network description."
-
-  depends_on = [
-    time_sleep.sleep # Sleep allows permissions in the new project to propagate
-  ]
 }
 
 resource "google_vmwareengine_private_cloud" "cluster-pc" {
-  project = google_project.project.project_id
   location    = "%{region}-a"
   name        = "tf-test-cluster-pc%{random_suffix}"
   description = "Sample test PC."
