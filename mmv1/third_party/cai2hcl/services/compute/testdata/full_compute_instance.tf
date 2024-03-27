@@ -85,7 +85,7 @@ resource "google_compute_instance" "test1" {
 
   network_interface {
     ipv6_access_config {
-      external_ipv6               = "2001:0000:130F:0000:0000:09C0:876A:130B"
+      external_ipv6               = "0000:00000:00000:00000:00000:00000:00000:1"
       external_ipv6_prefix_length = "96"
       network_tier                = "PREMIUM"
     }

@@ -119,7 +119,7 @@
           {
             "ipv6AccessConfigs": [
               {
-                "externalIpv6": "2001:0000:130F:0000:0000:09C0:876A:130B",
+                "externalIpv6": "0000:00000:00000:00000:00000:00000:00000:1",
                 "externalIpv6PrefixLength": 96,
                 "networkTier": "PREMIUM"
               }
