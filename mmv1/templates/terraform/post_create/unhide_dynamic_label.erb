@@ -1,0 +1,4 @@
+<%= lines(compile(pwd + '/templates/terraform/post_create/set_computed_name.erb')) -%>
+	if is_dynamic {
+		labelsProp[dynamic_label] = dynamic_value
+	}
