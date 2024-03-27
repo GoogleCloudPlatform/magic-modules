@@ -15,21 +15,20 @@ resource "google_container_cluster" "cluster" {
   name               = "my-cluster"
   location           = "us-central1-a"
   initial_node_count = 1
-}
-
-resource "google_gke_hub_membership" "membership" {
-  membership_id = "my-membership"
-  endpoint {
-    gke_cluster {
-      resource_link = "//container.googleapis.com/${google_container_cluster.cluster.id}"
-    }
+  # Register this cluster to a fleet by specifying a fleet project ID.
+  # This will automatically set up an implicit fleet membership resource which you can access in `google_gke_hub_feature_membership`.
+  # Alternatively, you could manually set up an explicit fleet membership using `google_gke_hub_membership`.
+  # See examples - Config Management with the legacy `google_gke_hub_membership` resource.
+  fleet {
+    # If you are registering the cluster to a fleet in the same project of the cluster,
+    # this will be the project ID of your cluster project.
+    project = "my-fleet-project-name"
   }
 }
 
 resource "google_gke_hub_feature" "feature" {
   name = "configmanagement"
   location = "global"
-
   labels = {
     foo = "bar"
   }
@@ -38,7 +37,10 @@ resource "google_gke_hub_feature" "feature" {
 resource "google_gke_hub_feature_membership" "feature_member" {
   location = "global"
   feature = google_gke_hub_feature.feature.name
-  membership = google_gke_hub_membership.membership.membership_id
+
+  membership = google_container_cluster.fleet.0.membership_id
+  membership_location = google_container_cluster.fleet.0.membership_location
+
   configmanagement {
     version = "1.6.2"
     config_sync {
@@ -49,6 +51,7 @@ resource "google_gke_hub_feature_membership" "feature_member" {
   }
 }
 ```
+
 ## Example Usage - Config Management with OCI
 
 ```hcl
@@ -56,14 +59,8 @@ resource "google_container_cluster" "cluster" {
   name               = "my-cluster"
   location           = "us-central1-a"
   initial_node_count = 1
-}
-
-resource "google_gke_hub_membership" "membership" {
-  membership_id = "my-membership"
-  endpoint {
-    gke_cluster {
-      resource_link = "//container.googleapis.com/${google_container_cluster.cluster.id}"
-    }
+  fleet {
+    project = "my-fleet-project-name"
   }
 }
 
@@ -79,7 +76,10 @@ resource "google_gke_hub_feature" "feature" {
 resource "google_gke_hub_feature_membership" "feature_member" {
   location = "global"
   feature = google_gke_hub_feature.feature.name
-  membership = google_gke_hub_membership.membership.membership_id
+
+  membership = google_container_cluster.fleet.0.membership_id
+  membership_location = google_container_cluster.fleet.0.membership_location
+
   configmanagement {
     version = "1.15.1"
     config_sync {
@@ -114,14 +114,8 @@ resource "google_container_cluster" "cluster" {
   name               = "my-cluster"
   location           = "us-central1-a"
   initial_node_count = 1
-}
-
-resource "google_gke_hub_membership" "membership" {
-  membership_id = "my-membership"
-  endpoint {
-    gke_cluster {
-      resource_link = "//container.googleapis.com/${google_container_cluster.cluster.id}"
-    }
+  fleet {
+    project = "my-fleet-project-name"
   }
 }
 
@@ -133,53 +127,12 @@ resource "google_gke_hub_feature" "feature" {
 resource "google_gke_hub_feature_membership" "feature_member" {
   location = "global"
   feature = google_gke_hub_feature.feature.name
-  membership = google_gke_hub_membership.membership.membership_id
+
+  membership = google_container_cluster.fleet.0.membership_id
+  membership_location = google_container_cluster.fleet.0.membership_location
+
   mesh {
     management = "MANAGEMENT_AUTOMATIC"
-  }
-}
-```
-
-## Example Usage - Config Management with Regional Membership
-
-```hcl
-resource "google_container_cluster" "cluster" {
-  name               = "my-cluster"
-  location           = "us-central1-a"
-  initial_node_count = 1
-}
-
-resource "google_gke_hub_membership" "membership" {
-  membership_id = "my-membership"
-  location      = "us-central1"
-  endpoint {
-    gke_cluster {
-      resource_link = "//container.googleapis.com/${google_container_cluster.cluster.id}"
-    }
-  }
-}
-
-resource "google_gke_hub_feature" "feature" {
-  name = "configmanagement"
-  location = "global"
-
-  labels = {
-    foo = "bar"
-  }
-}
-
-resource "google_gke_hub_feature_membership" "feature_member" {
-  location = "global"
-  feature = google_gke_hub_feature.feature.name
-  membership = google_gke_hub_membership.membership.membership_id
-  membership_location = google_gke_hub_membership.membership.location
-  configmanagement {
-    version = "1.6.2"
-    config_sync {
-      git {
-        sync_repo = "https://github.com/hashicorp/terraform"
-      }
-    }
   }
 }
 ```
@@ -191,14 +144,8 @@ resource "google_container_cluster" "cluster" {
   name               = "my-cluster"
   location           = "us-central1-a"
   initial_node_count = 1
-}
-
-resource "google_gke_hub_membership" "membership" {
-  membership_id = "my-membership"
-  endpoint {
-    gke_cluster {
-      resource_link = "//container.googleapis.com/${google_container_cluster.cluster.id}"
-    }
+  fleet {
+    project = "my-fleet-project-name"
   }
 }
 
@@ -210,7 +157,10 @@ resource "google_gke_hub_feature" "feature" {
 resource "google_gke_hub_feature_membership" "feature_member" {
   location = "global"
   feature = google_gke_hub_feature.feature.name
-  membership = google_gke_hub_membership.membership.membership_id
+
+  membership = google_container_cluster.fleet.0.membership_id
+  membership_location = google_container_cluster.fleet.0.membership_location
+
   policycontroller {
     policy_controller_hub_config {
       install_spec = "INSTALL_SPEC_ENABLED"
@@ -226,14 +176,8 @@ resource "google_container_cluster" "cluster" {
   name               = "my-cluster"
   location           = "us-central1-a"
   initial_node_count = 1
-}
-
-resource "google_gke_hub_membership" "membership" {
-  membership_id = "my-membership"
-  endpoint {
-    gke_cluster {
-      resource_link = "//container.googleapis.com/${google_container_cluster.cluster.id}"
-    }
+  fleet {
+    project = "my-fleet-project-name"
   }
 }
 
@@ -245,7 +189,10 @@ resource "google_gke_hub_feature" "feature" {
 resource "google_gke_hub_feature_membership" "feature_member" {
   location = "global"
   feature = google_gke_hub_feature.feature.name
-  membership = google_gke_hub_membership.membership.membership_id
+
+  membership = google_container_cluster.fleet.0.membership_id
+  membership_location = google_container_cluster.fleet.0.membership_location
+
   policycontroller {
     policy_controller_hub_config {
       install_spec = "INSTALL_SPEC_SUSPENDED"
@@ -261,6 +208,51 @@ resource "google_gke_hub_feature_membership" "feature_member" {
       mutation_enabled = true
     }
     version = "1.17.0"
+  }
+}
+```
+
+## Example Usage - Config Management with the legacy `google_gke_hub_membership` resource
+
+```hcl
+resource "google_container_cluster" "cluster" {
+  name               = "my-cluster"
+  location           = "us-central1-a"
+  initial_node_count = 1
+}
+
+# Manually configure a membership resource for the cluster.
+resource "google_gke_hub_membership" "membership" {
+  membership_id = "my-membership"
+  endpoint {
+    gke_cluster {
+      resource_link = "//container.googleapis.com/${google_container_cluster.cluster.id}"
+    }
+  }
+}
+
+resource "google_gke_hub_feature" "feature" {
+  name = "configmanagement"
+  location = "global"
+  labels = {
+    foo = "bar"
+  }
+}
+
+resource "google_gke_hub_feature_membership" "feature_member" {
+  location = "global"
+  feature = google_gke_hub_feature.feature.name
+
+  membership = google_gke_hub_membership.membership.membership_id
+  membership_location = google_gke_hub_membership.membership.location
+
+  configmanagement {
+    version = "1.6.2"
+    config_sync {
+      git {
+        sync_repo = "https://github.com/hashicorp/terraform"
+      }
+    }
   }
 }
 ```
