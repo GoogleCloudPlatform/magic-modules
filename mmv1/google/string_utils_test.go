@@ -62,42 +62,42 @@ func TestStringPlural(t *testing.T) {
 		expected    string
 	}{
 		{
-			description: "Plura normal string",
+			description: "Plural normal string",
 			term:        "apple",
 			expected:    "apples",
 		},
 		{
-			description: "Plura string ending with ies",
+			description: "Plural string ending with ies",
 			term:        "policies",
 			expected:    "policies",
 		},
 		{
-			description: "Plura snakecase string ending with es",
+			description: "Plural snakecase string ending with es",
 			term:        "indices",
 			expected:    "indices",
 		},
 		{
-			description: "Plura snakecase string ending with ex",
+			description: "Plural snakecase string ending with ex",
 			term:        "index",
 			expected:    "indices",
 		},
 		{
-			description: "Plura snakecase string ending with esh",
+			description: "Plural snakecase string ending with esh",
 			term:        "mesh",
 			expected:    "meshes",
 		},
 		{
-			description: "Plura snakecase string ending with y",
+			description: "Plural snakecase string ending with y",
 			term:        "policy",
 			expected:    "policies",
 		},
 		{
-			description: "Plura snakecase string ending with ey",
+			description: "Plural snakecase string ending with ey",
 			term:        "key",
 			expected:    "keys",
 		},
 		{
-			description: "Plura snakecase string ending with ay",
+			description: "Plural snakecase string ending with ay",
 			term:        "gateway",
 			expected:    "gateways",
 		},
