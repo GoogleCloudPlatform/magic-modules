@@ -67,16 +67,19 @@ func TestExecGenerateComment(t *testing.T) {
 		},
 		"Run": {
 			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-123456", "https://modular-magician:*******@github.com/modular-magician/terraform-provider-google", "/mock/dir/tpg"}, map[string]string(nil)},
-			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-123456", "https://modular-magician:*******@github.com/modular-magician/terraform-provider-google-beta", "/mock/dir/tpgb"}, map[string]string(nil)},
-			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-123456", "https://modular-magician:*******@github.com/modular-magician/terraform-google-conversion", "/mock/dir/tgc"}, map[string]string(nil)},
-			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-123456", "https://modular-magician:*******@github.com/modular-magician/docs-examples", "/mock/dir/tfoics"}, map[string]string(nil)},
 			{"/mock/dir/tpg", "git", []string{"fetch", "origin", "auto-pr-123456-old"}, map[string]string(nil)},
-			{"/mock/dir/tpg", "git", []string{"diff", "origin/auto-pr-123456-old", "origin/auto-pr-123456", "--shortstat"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-123456", "https://modular-magician:*******@github.com/modular-magician/terraform-provider-google-beta", "/mock/dir/tpgb"}, map[string]string(nil)},
 			{"/mock/dir/tpgb", "git", []string{"fetch", "origin", "auto-pr-123456-old"}, map[string]string(nil)},
-			{"/mock/dir/tpgb", "git", []string{"diff", "origin/auto-pr-123456-old", "origin/auto-pr-123456", "--shortstat"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-123456", "https://modular-magician:*******@github.com/modular-magician/terraform-google-conversion", "/mock/dir/tgc"}, map[string]string(nil)},
 			{"/mock/dir/tgc", "git", []string{"fetch", "origin", "auto-pr-123456-old"}, map[string]string(nil)},
-			{"/mock/dir/tgc", "git", []string{"diff", "origin/auto-pr-123456-old", "origin/auto-pr-123456", "--shortstat"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-123456", "https://modular-magician:*******@github.com/modular-magician/docs-examples", "/mock/dir/tfoics"}, map[string]string(nil)},
 			{"/mock/dir/tfoics", "git", []string{"fetch", "origin", "auto-pr-123456-old"}, map[string]string(nil)},
+			{"/mock/dir/tpg", "git", []string{"diff", "origin/auto-pr-123456-old", "origin/auto-pr-123456", "--shortstat"}, map[string]string(nil)},
+			{"/mock/dir/tpg", "git", []string{"diff", "origin/auto-pr-123456-old", "origin/auto-pr-123456", "--name-only"}, map[string]string(nil)},
+			{"/mock/dir/tpgb", "git", []string{"diff", "origin/auto-pr-123456-old", "origin/auto-pr-123456", "--shortstat"}, map[string]string(nil)},
+			{"/mock/dir/tpgb", "git", []string{"diff", "origin/auto-pr-123456-old", "origin/auto-pr-123456", "--name-only"}, map[string]string(nil)},
+			{"/mock/dir/tgc", "git", []string{"diff", "origin/auto-pr-123456-old", "origin/auto-pr-123456", "--shortstat"}, map[string]string(nil)},
+			{"/mock/dir/tgc", "git", []string{"diff", "origin/auto-pr-123456-old", "origin/auto-pr-123456", "--name-only"}, map[string]string(nil)},
 			{"/mock/dir/tfoics", "git", []string{"diff", "origin/auto-pr-123456-old", "origin/auto-pr-123456", "--shortstat"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/tools/diff-processor", "make", []string{"build"}, diffProcessorEnv},
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"breaking-changes"}, map[string]string(nil)},
@@ -95,7 +98,6 @@ func TestExecGenerateComment(t *testing.T) {
 			{"/mock/dir/magic-modules/tools/missing-test-detector", "go", []string{"mod", "edit", "-replace", "google/provider/old=/mock/dir/tpgbold"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/tools/missing-test-detector", "go", []string{"mod", "tidy"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/tools/missing-test-detector", "go", []string{"run", ".", "-services-dir=/mock/dir/tpgb/google-beta/services"}, map[string]string(nil)},
-			{"/mock/dir/magic-modules", "git", []string{"diff", "HEAD", "origin/main", "tools/missing-test-detector"}, map[string]string(nil)},
 		},
 	} {
 		if actualCalls, ok := mr.Calls(method); !ok {
@@ -173,12 +175,12 @@ func TestFormatDiffComment(t *testing.T) {
 					{
 						Title:     "Repo 1",
 						Repo:      "repo-1",
-						DiffStats: "+1 added, -1 removed",
+						ShortStat: "+1 added, -1 removed",
 					},
 					{
 						Title:     "Repo 2",
 						Repo:      "repo-2",
-						DiffStats: "+2 added, -2 removed",
+						ShortStat: "+2 added, -2 removed",
 					},
 				},
 			},
@@ -245,6 +247,206 @@ func TestFormatDiffComment(t *testing.T) {
 			for _, s := range tc.notExpectedStrings {
 				assert.NotContains(t, comment, s)
 			}
+		})
+	}
+}
+
+func TestFileToResource(t *testing.T) {
+	cases := map[string]struct {
+		path string
+		want string
+	}{
+		// Resource go files
+		"files outside services directory are not resources": {
+			path: "/google-beta/tpgiamresource/resource_iam_binding.go",
+			want: "",
+		},
+		"non-go files in service directories are not resources": {
+			path: "/google-beta/services/firebaserules/resource_firebaserules_release.html.markdown",
+			want: "",
+		},
+		"resource file": {
+			path: "/google-beta/services/firebaserules/resource_firebaserules_release.go",
+			want: "google_firebaserules_release",
+		},
+		"resource iam file": {
+			path: "/google/services/kms/iam_kms_crypto_key.go",
+			want: "google_kms_crypto_key",
+		},
+		"resource generated test file": {
+			path: "/google-beta/services/containeraws/resource_container_aws_node_pool_generated_test.go",
+			want: "google_container_aws_node_pool",
+		},
+		"resource handwritten test file": {
+			path: "/google-beta/services/oslogin/resource_os_login_ssh_public_key_test.go",
+			want: "google_os_login_ssh_public_key",
+		},
+		"resource internal_test file": {
+			path: "/google/services/redis/resource_redis_instance_internal_test.go",
+			want: "google_redis_instance",
+		},
+		"resource sweeper file": {
+			path: "/google-beta/services/sql/resource_sql_source_representation_instance_sweeper.go",
+			want: "google_sql_source_representation_instance",
+		},
+		"resource iam handwritten test file": {
+			path: "/google-beta/services/bigtable/resource_bigtable_instance_iam_test.go",
+			want: "google_bigtable_instance",
+		},
+		"resource iam generated test file": {
+			path: "/google-beta/services/privateca/iam_privateca_ca_pool_generated_test.go",
+			want: "google_privateca_ca_pool",
+		},
+		"resource ignore google_ prefix": {
+			path: "/google-beta/services/resourcemanager/resource_google_project_sweeper.go",
+			want: "google_project",
+		},
+		"resource starting with iam_": {
+			path: "/google-beta/services/iam2/resource_iam_access_boundary_policy.go",
+			want: "google_iam_access_boundary_policy",
+		},
+		"resource file without starting slash": {
+			path: "google-beta/services/firebaserules/resource_firebaserules_release.go",
+			want: "google_firebaserules_release",
+		},
+
+		// Datasource files
+		"datasource file": {
+			path: "/google/services/dns/data_source_dns_keys.go",
+			want: "google_dns_keys",
+		},
+		"datasource handwritten test file": {
+			path: "/google-beta/services/monitoring/data_source_monitoring_service_test.go",
+			want: "google_monitoring_service",
+		},
+		// Future-proofing
+		"datasource generated test file": {
+			path: "/google-beta/services/alloydb/data_source_alloydb_locations_generated_test.go",
+			want: "google_alloydb_locations",
+		},
+		"datasource internal_test file": {
+			path: "/google/services/storage/data_source_storage_object_signed_url_internal_test.go",
+			want: "google_storage_object_signed_url",
+		},
+		"datasource ignore google_ prefix": {
+			path: "/google-beta/services/certificatemanager/data_source_google_certificate_manager_certificate_map_test.go",
+			want: "google_certificate_manager_certificate_map",
+		},
+		"datasource starting with iam_": {
+			path: "/google-beta/services/resourcemanager/data_source_iam_policy_test.go",
+			want: "google_iam_policy",
+		},
+		"datasource file without starting slash": {
+			path: "google/services/dns/data_source_dns_keys.go",
+			want: "google_dns_keys",
+		},
+
+		// Resource documentation
+		"files outside /r or /d directories are not resources": {
+			path: "/website/docs/guides/common_issues.html.markdown",
+			want: "",
+		},
+		"non-markdown files are not resources": {
+			path: "/website/docs/r/access_context_manager_access_level.go",
+			want: "",
+		},
+		"resource docs": {
+			path: "/website/docs/r/firestore_document.html.markdown",
+			want: "google_firestore_document",
+		},
+		"resource docs ignore google_ prefix": {
+			path: "/website/docs/r/google_project_service.html.markdown",
+			want: "google_project_service",
+		},
+		"resource docs starting with iam_": {
+			path: "/website/docs/r/iam_deny_policy.html.markdown",
+			want: "google_iam_deny_policy",
+		},
+		"resource docs without starting slash": {
+			path: "website/docs/d/cloudbuild_trigger.html.markdown",
+			want: "google_cloudbuild_trigger",
+		},
+
+		// Datasource documentation
+		"datasource docs": {
+			path: "/website/docs/d/beyondcorp_app_gateway.html.markdown",
+			want: "google_beyondcorp_app_gateway",
+		},
+		"datasource docs ignore google_ prefix": {
+			path: "/website/docs/d/google_vertex_ai_index.html.markdown",
+			want: "google_vertex_ai_index",
+		},
+		"datasource docs starting with iam_": {
+			path: "/website/docs/d/iam_role.html.markdown",
+			want: "google_iam_role",
+		},
+		"datasource docs without starting slash": {
+			path: "website/docs/d/beyondcorp_app_gateway.html.markdown",
+			want: "google_beyondcorp_app_gateway",
+		},
+	}
+
+	for tn, tc := range cases {
+		tc := tc
+		t.Run(tn, func(t *testing.T) {
+			t.Parallel()
+
+			got := fileToResource(tc.path)
+			assert.Equal(t, tc.want, got)
+		})
+	}
+}
+
+func TestPathChanged(t *testing.T) {
+	cases := map[string]struct {
+		path         string
+		changedFiles []string
+		want         bool
+	}{
+		"no changed files": {
+			path:         "path/to/folder/file.go",
+			changedFiles: []string{},
+			want:         false,
+		},
+		"path matches exactly": {
+			path:         "path/to/folder/file.go",
+			changedFiles: []string{"path/to/folder/file.go"},
+			want:         true,
+		},
+		"path matches files in a folder": {
+			path:         "path/to/folder/",
+			changedFiles: []string{"path/to/folder/file.go"},
+			want:         true,
+		},
+		"path matches partial folder name": {
+			path:         "path/to/folder",
+			changedFiles: []string{"path/to/folder2/file.go"},
+			want:         true,
+		},
+		"path matches second item in list": {
+			path:         "path/to/folder/",
+			changedFiles: []string{"path/to/folder2/file.go", "path/to/folder/file.go"},
+			want:         true,
+		},
+		"path doesn't match files in a different folder": {
+			path:         "path/to/folder/",
+			changedFiles: []string{"path/to/folder2/file.go"},
+			want:         false,
+		},
+		"path doesn't match multiple items": {
+			path:         "path/to/folder/",
+			changedFiles: []string{"path/to/folder2/file.go", "path/to/folder3"},
+			want:         false,
+		},
+	}
+
+	for tn, tc := range cases {
+		tc := tc
+		t.Run(tn, func(t *testing.T) {
+			t.Parallel()
+
+			got := pathChanged(tc.path, tc.changedFiles)
+			assert.Equal(t, tc.want, got)
 		})
 	}
 }
