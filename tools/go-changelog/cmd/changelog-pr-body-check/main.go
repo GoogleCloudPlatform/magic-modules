@@ -5,6 +5,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -57,31 +58,23 @@ func main() {
 		Body:  pullRequest.GetBody(),
 	}
 
-	if err := entry.Validate(); err != nil {
-		log.Printf("error parsing changelog entry in %s: %s", entry.Issue, err)
-		switch err.Code {
-		case changelog.EntryErrorNotFound:
-			body := "Oops! It looks like no changelog entry is attached to" +
-				" this PR. Please include a release note block" +
-				" in the PR body, as described in https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/"
-			log.Fatal(body)
-		case changelog.EntryErrorUnknownTypes:
-			unknownTypes := err.Details["unknownTypes"].([]string)
-
-			body := "Oops! It looks like you're using"
-			if len(unknownTypes) == 1 {
-				body += " an"
+	if errors := entry.Validate(); errors != nil {
+		log.Printf("error parsing changelog entry in %s: %s", entry.Issue, errors)
+		body := "\nOops! Some errors are detected for your changelog entries:"
+		for i, err := range errors {
+			switch err.Code {
+			case changelog.EntryErrorNotFound:
+				body += fmt.Sprintf("\n\n Issue %d: It looks like no changelog entry is attached to this PR. Please include a release note block in the PR body, as described in https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/", i+1)
+			case changelog.EntryErrorUnknownTypes:
+				body += fmt.Sprintf("\n\n Issue %d: unknown changelog types %v \nPlease only use the types listed in https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/.", i+1, err.Details["type"].(string))
+			case changelog.EntryErrorMultipleLines:
+				body += fmt.Sprintf("\n\n Issue %d: multiple lines are found in changelog entry: %v \nPlease only have one CONTENT line per release note block. Use multiple blocks if there are multiple related changes in a single PR.", i+1, err.Details["note"].(string))
+			case changelog.EntryErrorInvalidNewReourceOrDatasourceFormat:
+				body += fmt.Sprintf("\n\n Issue %d: invalid resource/datasource format in changelog entry: %v \nPlease follow format in https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/#type-specific-guidelines-and-examples.", i+1, err.Details["note"].(string))
+			case changelog.EntryErrorInvalidEnhancementOrBugFixFormat:
+				body += fmt.Sprintf("\n\n Issue %d: invalid enhancement/bug fix format in changelog entry: %v \nPlease follow format in https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/#type-specific-guidelines-and-examples.", i+1, err.Details["note"].(string))
 			}
-			body += " unknown release-note type"
-			if len(unknownTypes) > 1 {
-				body += "s"
-			}
-			body += " in your changelog entries:"
-			for _, t := range unknownTypes {
-				body += "\n* " + t
-			}
-			body += "\n\nPlease only use the types listed in https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/."
-			log.Fatal(body)
 		}
+		log.Fatal(body)
 	}
 }
