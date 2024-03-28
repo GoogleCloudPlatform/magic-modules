@@ -8542,19 +8542,10 @@ func testAccContainerCluster_withDatabaseEncryption(clusterName string, kmsData 
 data "google_project" "project" {
 }
 
-data "google_iam_policy" "test_kms_binding" {
-  binding {
-    role = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-
-    members = [
-      "serviceAccount:service-${data.google_project.project.number}@container-engine-robot.iam.gserviceaccount.com",
-    ]
-  }
-}
-
-resource "google_kms_key_ring_iam_policy" "test_key_ring_iam_policy" {
+resource "google_kms_key_ring_iam_member" "test_key_ring_iam_policy" {
   key_ring_id = "%[1]s"
-  policy_data = data.google_iam_policy.test_kms_binding.policy_data
+  role = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member = "serviceAccount:service-${data.google_project.project.number}@container-engine-robot.iam.gserviceaccount.com"
 }
 
 data "google_kms_key_ring_iam_policy" "test_key_ring_iam_policy" {
@@ -8914,12 +8905,10 @@ resource "google_service_account" "service_account" {
 	display_name = "Service Account"
 }
 
-resource "google_project_iam_binding" "project" {
+resource "google_project_iam_member" "project" {
 	project = "%[2]s"
 	role    = "roles/container.nodeServiceAccount"
-	members = [
-		"serviceAccount:%[1]s@%[2]s.iam.gserviceaccount.com",
-	]
+	member = "serviceAccount:%[1]s@%[2]s.iam.gserviceaccount.com"
 }`, serviceAccount, projectID)
 
 		clusterAutoscaling = fmt.Sprintf(`
