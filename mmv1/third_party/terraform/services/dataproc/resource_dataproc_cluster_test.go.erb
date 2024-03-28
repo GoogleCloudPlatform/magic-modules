@@ -1347,20 +1347,32 @@ resource "google_container_cluster" "primary" {
   deletion_protection = false
 }
 
-resource "google_project_iam_binding" "workloadidentity" {
+resource "google_project_iam_member" "workloadidentity1" {
   project = "%s"
   role    = "roles/iam.workloadIdentityUser"
 
-  members = [
-    "serviceAccount:${data.google_project.project.project_id}.svc.id.goog[tf-test-dproc-%s/agent]",
-    "serviceAccount:${data.google_project.project.project_id}.svc.id.goog[tf-test-dproc-%s/spark-driver]",
-    "serviceAccount:${data.google_project.project.project_id}.svc.id.goog[tf-test-dproc-%s/spark-executor]",
-  ]
+  member = "serviceAccount:${data.google_project.project.project_id}.svc.id.goog[tf-test-dproc-%s/agent]"
+}
+
+resource "google_project_iam_member" "workloadidentity2" {
+  project = "%s"
+  role    = "roles/iam.workloadIdentityUser"
+
+  member = "serviceAccount:${data.google_project.project.project_id}.svc.id.goog[tf-test-dproc-%s/spark-driver]"
+}
+
+resource "google_project_iam_member" "workloadidentity3" {
+  project = "%s"
+  role    = "roles/iam.workloadIdentityUser"
+
+  member = "serviceAccount:${data.google_project.project.project_id}.svc.id.goog[tf-test-dproc-%s/spark-executor]"
 }
 
 resource "google_dataproc_cluster" "virtual_cluster" {
 	depends_on = [
-	  google_project_iam_binding.workloadidentity
+	  google_project_iam_member.workloadidentity1,
+	  google_project_iam_member.workloadidentity2,
+	  google_project_iam_member.workloadidentity3,
 	]
   
 	name   	= "tf-test-dproc-%s"
