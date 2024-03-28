@@ -66,8 +66,18 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'region_network_endpoint_group_appengine'
     primary_resource_id: 'appengine_neg'
+    ignore_read_extra:
+      - 'noop_on_destroy'
+      - 'deployment.0.zip'
     vars:
+      bucket_name: 'appengine-static-content'
+      app_version_name: 'appengine-version'
+      project: 'appeng-flex'
+      account_id: 'my-account'
       neg_name: 'appengine-neg'
+    test_env_vars:
+      org_id: :ORG_ID
+      billing_account: :BILLING_ACCT
   - !ruby/object:Provider::Terraform::Examples
     name: 'region_network_endpoint_group_appengine_empty'
     primary_resource_id: 'appengine_neg'
