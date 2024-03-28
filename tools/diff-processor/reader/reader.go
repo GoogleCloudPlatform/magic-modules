@@ -350,6 +350,7 @@ func readConfigStr(configStr string) (Step, error) {
 		if err != nil {
 			errs = append(errs, err)
 		}
+		resourceConfig = flattenResource(resourceConfig, "")
 		m[block.Labels[0]][block.Labels[1]] = resourceConfig
 	}
 	if len(errs) > 0 {
@@ -404,4 +405,26 @@ func mergeResources(a, b Resource) {
 			a[k] = bv
 		}
 	}
+}
+
+func flattenResource(r Resource, parent string) Resource {
+	flattened := make(Resource)
+
+	if parent != "" {
+		parent += "."
+	}
+
+	for fieldName, fieldValue := range r {
+		key := parent + fieldName
+		nestedObject, _ := fieldValue.(Resource)
+		if nestedObject != nil {
+			for childKey, childField := range flattenResource(nestedObject, key) {
+				flattened[childKey] = childField
+			}
+		} else {
+			flattened[key] = fieldValue
+		}
+	}
+
+	return flattened
 }
