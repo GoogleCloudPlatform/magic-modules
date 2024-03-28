@@ -14,6 +14,7 @@
 package google
 
 import (
+	"fmt"
 	"log"
 	"regexp"
 	"strings"
@@ -33,57 +34,77 @@ func Underscore(source string) string {
 }
 
 // Converts from PascalCase to Space Separated
-// For example, converts "AccessApproval" to "Access Approval"
+// For example, converts "AccessApproval" to "Access approval"
 func SpaceSeparated(source string) string {
 	tmp := regexp.MustCompile(`([A-Z]+)([A-Z][a-z])`).ReplaceAllString(source, "${1} ${2}")
 	tmp = regexp.MustCompile(`([a-z\d])([A-Z])`).ReplaceAllString(tmp, "${1} ${2}")
 	tmp = strings.ToLower(tmp)
-	tmp = strings.Title(tmp)
+
+	// Capitalize the first letter
+	if len(tmp) != 0 {
+		r := []rune(tmp)
+		r[0] = unicode.ToUpper(r[0])
+		tmp = string(r)
+	}
 	return tmp
 }
 
-//   // Converts a string to space-separated capitalized words
-//   def self.title(source)
-//     ss = space_separated(source)
-//     ss.gsub(/\b(?<!\w['’`()])[a-z]/, &:capitalize)
-//   end
+// // Converts a string to space-separated capitalized words
+// def self.title(source)
+func SpaceSeparatedTitle(source string) string {
+	ss := SpaceSeparated(source)
+	return strings.Title(ss)
+}
 
-//   // rubocop:disable Style/SafeNavigation // support Ruby < 2.3.0
-//   def self.symbolize(key)
-//     key.to_sym unless key.nil?
-//   end
-//   // rubocop:enable Style/SafeNavigation
+// Returns all the characters up until the period (.) or returns text
+// unchanged if there is no period.
+//
+//	def self.first_sentence(text)
+func FirstSentence(text string) string {
+	re := regexp.MustCompile(`[.?!]`)
+	periodPos := re.FindStringIndex(text)
+	if periodPos == nil {
+		return text
+	}
 
-//   // Returns all the characters up until the period (.) or returns text
-//   // unchanged if there is no period.
-//   def self.first_sentence(text)
-//     period_pos = text.index(/[.?!]/)
-//     return text if period_pos.nil?
+	return text[:periodPos[0]+1]
+}
 
-//     text[0, period_pos + 1]
-//   end
+// Returns the plural form of a word
+func Plural(source string) string {
+	// policies -> policies
+	// indices -> indices
+	if strings.HasSuffix(source, "ies") || strings.HasSuffix(source, "es") {
+		return source
+	}
 
-//   // Returns the plural form of a word
-//   def self.plural(source)
-//     // policies -> policies
-//     // indices -> indices
-//     return source if source.end_with?('ies') || source.end_with?('es')
+	// index -> indices
+	if strings.HasSuffix(source, "ex") {
+		re := regexp.MustCompile("ex$")
+		result := re.ReplaceAllString(source, "")
+		return fmt.Sprintf("%sices", result)
+	}
 
-//     // index -> indices
-//     return "//{source.gsub(/ex$/, '')}ices" if source.end_with?('ex')
+	// mesh -> meshes
+	if strings.HasSuffix(source, "esh") {
+		return fmt.Sprintf("%ses", source)
+	}
 
-//     // mesh -> meshes
-//     return "//{source}es" if source.end_with?('esh')
+	// key -> keys
+	// gateway -> gateways
+	if strings.HasSuffix(source, "ey") || strings.HasSuffix(source, "ay") {
+		return fmt.Sprintf("%ss", source)
+	}
 
-//     // key -> keys
-//     // gateway -> gateways
-//     return "//{source}s" if source.end_with?('ey') || source.end_with?('ay')
+	// policy -> policies
+	if strings.HasSuffix(source, "y") {
+		re := regexp.MustCompile("y$")
+		result := re.ReplaceAllString(source, "")
+		return fmt.Sprintf("%sies", result)
+	}
 
-//     // policy -> policies
-//     return "//{source.gsub(/y$/, '')}ies" if source.end_with?('y')
-
-//     "//{source}s"
-//   end
+	return fmt.Sprintf("%ss", source)
+}
 
 func Camelize(term string, firstLetter string) string {
 	if firstLetter != "upper" && firstLetter != "lower" {

@@ -312,3 +312,15 @@ properties:
       - :IPV4_IPV6
       - :IPV4_ONLY
     default_from_api: true
+  - !ruby/object:Api::Type::String
+    name: 'cloudRouterIpv6Address'
+    description: |
+      IPv6 address + prefix length to be configured on Cloud Router
+      Interface for this interconnect attachment.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'customerRouterIpv6Address'
+    description: |
+      IPv6 address + prefix length to be configured on the customer
+      router subinterface for this interconnect attachment.
+    output: true

@@ -51,7 +51,6 @@ properties:
       "PIPELINE_ID is the ID of the pipeline. Must be unique for the selected project and location."
     required: true
     immutable: true
-    pattern: projects/{{project}}/locations/{{region}}/functions/{{name}}
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
     custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
   - !ruby/object:Api::Type::String

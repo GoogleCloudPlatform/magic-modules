@@ -81,7 +81,6 @@ properties:
     description: |
       The fully-qualified resource name of the service enforcement configuration.
     output: true
-    pattern: projects/{{project}}/services/{{service_id}}
   - !ruby/object:Api::Type::Enum
     name: enforcementMode
     description: |

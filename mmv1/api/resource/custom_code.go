@@ -11,20 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package terraform
-
-import (
-	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-)
-
-// require 'uri'
-// require 'api/object'
-// require 'compile/core'
-// require 'google/golang_utils'
+package resource
 
 // Inserts custom code into terraform resources.
 type CustomCode struct {
-	google.YamlValidator
+	// google.YamlValidator
 
 	// Collection of fields allowed in the CustomCode section for
 	// Terraform.
@@ -39,9 +30,7 @@ type CustomCode struct {
 	// Extra Schema Entries go below all other schema entries in the
 	// resource's Resource.Schema map.  They should be formatted as
 	// entries in the map, e.g. `"foo": &schema.Schema{ ... },`.
-
-	// attr_reader :
-	ExtraSchemaEntry string
+	ExtraSchemaEntry string `yaml:"extra_schema_entry"`
 
 	// ====================
 	// Encoders & Decoders
@@ -54,8 +43,6 @@ type CustomCode struct {
 	// Because the call signature of this function cannot be changed,
 	// the template will place the function header and closing } for
 	// you, and your custom code template should *not* include them.
-
-	// attr_reader :
 	Encoder string
 
 	// The update encoder is the encoder used in Update - if one is
@@ -65,16 +52,12 @@ type CustomCode struct {
 	// Update encoders are only used if object.input is false,
 	// because when object.input is true, only individual fields
 	// can be updated - in that case, use a custom expander.
-
-	// attr_reader :
-	UpdateEncoder string
+	UpdateEncoder string `yaml:"update_encoder"`
 
 	// The decoder is the opposite of the encoder - it's called
 	// after the Read succeeds, rather than before Create / Update
 	// are called.  Like with encoders, the decoder should not
 	// include the function header or closing }.
-
-	// attr_reader :
 	Decoder string
 
 	// =====================
@@ -84,104 +67,74 @@ type CustomCode struct {
 	// things like methods that will be referred to by name elsewhere
 	// (e.g. "fooBarDiffSuppress") and regexes that are necessarily
 	// exported (e.g. "fooBarValidationRegex").
-
-	// attr_reader :
 	Constants string
 
 	// This code is run before the Create call happens.  It's placed
 	// in the Create function, just before the Create call is made.
-
-	// attr_reader :
-	PreCreate string
+	PreCreate string `yaml:"pre_create"`
 
 	// This code is run after the Create call succeeds.  It's placed
 	// in the Create function directly without modification.
-
-	// attr_reader :
-	PostCreate string
+	PostCreate string `yaml:"post_create"`
 
 	// This code is run after the Create call fails before the error is
 	// returned. It's placed in the Create function directly without
 	// modification.
-
-	// attr_reader :
-	PostCreateFailure string
+	PostCreateFailure string `yaml:"post_create_failure"`
 
 	// This code replaces the entire contents of the Create call. It
 	// should be used for resources that don't have normal creation
 	// semantics that cannot be supported well by other MM features.
-
-	// attr_reader :
-	CustomCreate string
+	CustomCreate string `yaml:"custom_create"`
 
 	// This code is run before the Read call happens.  It's placed
 	// in the Read function.
-
-	// attr_reader :
-	PreRead string
+	PreRead string `yaml:"pre_read"`
 
 	// This code is run before the Update call happens.  It's placed
 	// in the Update function, just after the encoder call, before
 	// the Update call.  Just like the encoder, it is only used if
 	// object.input is false.
-
-	// attr_reader :
-	PreUpdate string
+	PreUpdate string `yaml:"pre_update"`
 
 	// This code is run after the Update call happens.  It's placed
 	// in the Update function, just after the call succeeds.
 	// Just like the encoder, it is only used if object.input is
 	// false.
-
-	// attr_reader :
-	PostUpdate string
+	PostUpdate string `yaml:"post_update"`
 
 	// This code replaces the entire contents of the Update call. It
 	// should be used for resources that don't have normal update
 	// semantics that cannot be supported well by other MM features.
-
-	// attr_reader :
-	CustomUpdate string
+	CustomUpdate string `yaml:"custom_update"`
 
 	// This code is run just before the Delete call happens.  It's
 	// useful to prepare an object for deletion, e.g. by detaching
 	// a disk before deleting it.
-
-	// attr_reader :
-	PreDelete string
+	PreDelete string `yaml:"pre_delete"`
 
 	// This code is run just after the Delete call happens.
-
-	// attr_reader :
-	PostDelete string
+	PostDelete string `yaml:"post_delete"`
 
 	// This code replaces the entire delete method.  Since the delete
 	// method's function header can't be changed, the template
 	// inserts that for you - do not include it in your custom code.
-
-	// attr_reader :
-	CustomDelete string
+	CustomDelete string `yaml:"custom_delete"`
 
 	// This code replaces the entire import method.  Since the import
 	// method's function header can't be changed, the template
 	// inserts that for you - do not include it in your custom code.
-
-	// attr_reader :
-	CustomImport string
+	CustomImport string `yaml:"custom_import"`
 
 	// This code is run just after the import method succeeds - it
 	// is useful for parsing attributes that are necessary for
 	// the Read() method to succeed.
-
-	// attr_reader :
-	PostImport string
+	PostImport string `yaml:"post_import"`
 
 	// This code is run in the generated test file to check that the
 	// resource was successfully deleted. Use this if the API responds
 	// with a success HTTP code for deleted resources
-
-	// attr_reader :
-	TestCheckDestroy string
+	TestCheckDestroy string `yaml:"test_check_destroy"`
 }
 
 // def validate

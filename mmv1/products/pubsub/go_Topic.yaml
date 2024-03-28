@@ -79,7 +79,6 @@ properties:
   - name: 'name'
     type: String
     description: "Name of the topic."
-    pattern: 'projects/{{project}}/topics/{{name}}'
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
