@@ -56,11 +56,11 @@ func (gh *Client) PostComment(prNumber, comment string) error {
 	return nil
 }
 
-func (gh *Client) RequestPullRequestReviewer(prNumber, assignee string) error {
+func (gh *Client) RequestPullRequestReviewers(prNumber string, reviewers []string) error {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/%s/requested_reviewers", prNumber)
 
 	body := map[string][]string{
-		"reviewers":      {assignee},
+		"reviewers":      reviewers,
 		"team_reviewers": {},
 	}
 
@@ -69,7 +69,7 @@ func (gh *Client) RequestPullRequestReviewer(prNumber, assignee string) error {
 		return err
 	}
 
-	fmt.Printf("Successfully added reviewer %s to pull request %s\n", assignee, prNumber)
+	fmt.Printf("Successfully added reviewers %v to pull request %s\n", reviewers, prNumber)
 
 	return nil
 }
