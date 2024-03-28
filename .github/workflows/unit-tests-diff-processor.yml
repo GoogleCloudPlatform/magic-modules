@@ -6,7 +6,6 @@ on:
   pull_request:
     paths:
       - 'tools/diff-processor/**'
-      - '.github/workflows/unit-tests-diff-processor.yml'
 
 jobs:
   test:
@@ -31,6 +30,7 @@ jobs:
           go test -v ./...
 
       - name: Build with TPGB
+        run: |
           cd tools/diff-processor
           make clone OWNER_REPO=hashicorp/terraform-provider-google-beta DEPTH=1
           make build OLD_REF=main NEW_REF=main
