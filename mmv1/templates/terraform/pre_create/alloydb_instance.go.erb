@@ -3,3 +3,18 @@
 if instanceType := d.Get("instance_type"); instanceType == "SECONDARY" {
   url = strings.Replace(url, "instances?instanceId", "instances:createsecondary?instanceId", 1)
 }
+
+<% unless version == 'ga' -%>
+if val, ok := obj["networkConfig"]; ok {
+  networkConfig := val.(map[string]interface{})
+  if val, ok = networkConfig["enablePublicIp"]; ok {
+    // public IPs can only be enabled after creation
+    // we will temporarily remove it from the creation request, and update
+    // the value in post_create
+    delete(networkConfig, "enablePublicIp")
+  }
+  if val, ok = networkConfig["authorizedExternalNetworks"]; ok {
+    delete(networkConfig, "authorizedExternalNetworks")
+  }
+}
+<% end -%>
