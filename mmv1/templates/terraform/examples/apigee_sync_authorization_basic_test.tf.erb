@@ -34,5 +34,5 @@ resource "google_apigee_sync_authorization" "<%= ctx[:primary_resource_id] %>" {
   identities = [
     "serviceAccount:${google_service_account.service_account.email}",
   ]
-  depends_on = [google_project_iam_binding.synchronizer-iam]
+  depends_on = [google_project_iam_member.synchronizer-iam]
 }
