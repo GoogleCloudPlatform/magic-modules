@@ -58,7 +58,7 @@ steps:
           git apply ./tools.diff --allow-empty
         fi
 
-  - name: "gcr.io/graphite-docker-images/go-plus"
+  - name: "gcr.io/graphite-docker-images/go-plus:stephenrlewis"
     entrypoint: "/workspace/.ci/scripts/go-plus/magician/exec.sh"
     id: contributor-membership-checker
     secretEnv:
