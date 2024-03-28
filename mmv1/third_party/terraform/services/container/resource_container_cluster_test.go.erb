@@ -10190,7 +10190,7 @@ resource "google_project_iam_member" "tagUser1" {
 resource "google_project_iam_member" "tagUser2" {
   project = "%[1]s"
   role    = "roles/resourcemanager.tagUser"
-  members = "serviceAccount:${data.google_project.project.number}@cloudservices.gserviceaccount.com"
+  member = "serviceAccount:${data.google_project.project.number}@cloudservices.gserviceaccount.com"
 
   depends_on = [google_project_iam_member.tagHoldAdmin]
 }
