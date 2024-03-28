@@ -1359,6 +1359,9 @@ resource "google_project_iam_member" "workloadidentity2" {
   role    = "roles/iam.workloadIdentityUser"
 
   member = "serviceAccount:${data.google_project.project.project_id}.svc.id.goog[tf-test-dproc-%s/spark-driver]"
+  depends_on = [
+    google_project_iam_member.workloadidentity1,
+  ]
 }
 
 resource "google_project_iam_member" "workloadidentity3" {
@@ -1366,37 +1369,40 @@ resource "google_project_iam_member" "workloadidentity3" {
   role    = "roles/iam.workloadIdentityUser"
 
   member = "serviceAccount:${data.google_project.project.project_id}.svc.id.goog[tf-test-dproc-%s/spark-executor]"
+  depends_on = [
+    google_project_iam_member.workloadidentity2,
+  ]
 }
 
 resource "google_dataproc_cluster" "virtual_cluster" {
-	depends_on = [
-	  google_project_iam_member.workloadidentity1,
-	  google_project_iam_member.workloadidentity2,
-	  google_project_iam_member.workloadidentity3,
-	]
+  depends_on = [
+    google_project_iam_member.workloadidentity1,
+    google_project_iam_member.workloadidentity2,
+    google_project_iam_member.workloadidentity3,
+  ]
   
-	name   	= "tf-test-dproc-%s"
-	region  = "us-central1"
+  name    = "tf-test-dproc-%s"
+  region  = "us-central1"
   
-	virtual_cluster_config {
-	  kubernetes_cluster_config {
-		kubernetes_namespace = "tf-test-dproc-%s"
-		kubernetes_software_config {
-		  component_version = {
-			"SPARK": "3.1-dataproc-7",
-		  }
-		}
-		gke_cluster_config {
-		  gke_cluster_target = google_container_cluster.primary.id
-		  node_pool_target {
-			node_pool = "tf-test-gke-np-%s"
-			roles = [
-			  "DEFAULT"
-			]
-		  }
-		} 
-	  }
-	}
+  virtual_cluster_config {
+    kubernetes_cluster_config {
+    kubernetes_namespace = "tf-test-dproc-%s"
+    kubernetes_software_config {
+      component_version = {
+      "SPARK": "3.1-dataproc-7",
+      }
+    }
+    gke_cluster_config {
+      gke_cluster_target = google_container_cluster.primary.id
+      node_pool_target {
+      node_pool = "tf-test-gke-np-%s"
+      roles = [
+        "DEFAULT"
+      ]
+      }
+    } 
+    }
+  }
   }
 `, projectID, rnd, networkName, subnetworkName, projectID, projectID, projectID, rnd, rnd, rnd, rnd, rnd, rnd)
 }
