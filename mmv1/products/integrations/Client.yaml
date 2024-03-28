@@ -48,7 +48,7 @@ properties:
     description: |
       Cloud KMS config for AuthModule to encrypt/decrypt credentials.
     immutable: true
-    url_param_only: true
+    ignore_read: true
     properties:
       - !ruby/object:Api::Type::String
         name: "kmsLocation"
@@ -88,19 +88,19 @@ properties:
     description: |
       Indicates if sample workflow should be created along with provisioning.
     immutable: true
-    url_param_only: true
+    ignore_read: true
   - !ruby/object:Api::Type::Boolean
     name: 'provisionGmek'
     description: |
       Indicates provision with GMEK or CMEK.
     immutable: true
-    url_param_only: true
+    ignore_read: true
   - !ruby/object:Api::Type::String
     name: 'runAsServiceAccount'
     description: |
       User input run-as service account, if empty, will bring up a new default service account.
     immutable: true
-    url_param_only: true
+    ignore_read: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "integrations_client_basic"
