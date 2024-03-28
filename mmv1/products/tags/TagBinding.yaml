@@ -48,6 +48,19 @@ examples:
       project_id: '"tf-test-" + acctest.RandString(t, 10)'
     test_env_vars:
       org_id: :ORG_ID
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'tag_binding_with_namespaced_value'
+    primary_resource_id: 'binding_with_value'
+    vars:
+      key_short_name: 'keyname'
+      value_short_name: 'valuename'
+      project_id: project_id
+    test_vars_overrides:
+      key_short_name: '"tf-test-key-" + acctest.RandString(t, 10)'
+      value_short_name: '"tf-test-value-" + acctest.RandString(t, 10)'
+      project_id: '"tf-test-" + acctest.RandString(t, 10)'
+    test_env_vars:
+      org_id: :ORG_ID
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -61,7 +74,17 @@ properties:
       The full resource name of the resource the TagValue is bound to. E.g. //cloudresourcemanager.googleapis.com/projects/123
     required: true
   - !ruby/object:Api::Type::String
+    name: tagValueNamespacedName
+    description: |
+      The namespaced name for the TagValue of the TagBinding. Must be in the format {parent_id}/{tag_key_short_name}/{shortName}.
+      For methods that support TagValue namespaced name, only one of tagValueNamespacedName or tagValue may be filled. Requests with both fields will be rejected.
+    exactly_one_of:
+      - tagValueNamespacedName
+      - tagValue
+  - !ruby/object:Api::Type::String
     name: tagValue
     description: |
       The TagValue of the TagBinding. Must be of the form tagValues/456.
-    required: true
+    exactly_one_of:
+      - tagValueNamespacedName
+      - tagValue
