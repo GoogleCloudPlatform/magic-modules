@@ -6,6 +6,7 @@ on:
   pull_request:
     paths:
       - 'tools/diff-processor/**'
+      - '.github/workflows/unit-tests-diff-processor.yml'
 
 jobs:
   test:
