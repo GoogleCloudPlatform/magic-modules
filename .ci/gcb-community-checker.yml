@@ -58,7 +58,7 @@ steps:
           git apply ./tools.diff --allow-empty
         fi
 
-  - name: 'gcr.io/graphite-docker-images/go-plus:stephenrlewis'
+  - name: 'gcr.io/graphite-docker-images/go-plus'
     entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
     id: community-checker
     secretEnv: ["GITHUB_TOKEN_MAGIC_MODULES", "GENERATE_DIFFS_TRIGGER"]

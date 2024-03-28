@@ -177,7 +177,7 @@ steps:
               git push https://modular-magician:$$GITHUB_TOKEN_CLASSIC@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tf-oics-sync-$BRANCH_NAME
             fi
 
-    - name: 'gcr.io/graphite-docker-images/go-plus:stephenrlewis'
+    - name: 'gcr.io/graphite-docker-images/go-plus'
       entrypoint: '/workspace/.ci/scripts/go-plus/vcr-cassette-merger/vcr_merge.sh'
       secretEnv: ["GITHUB_TOKEN_CLASSIC", "GOOGLE_PROJECT"]
       id: vcr-merge
@@ -187,7 +187,7 @@ steps:
       args:
           - $COMMIT_SHA
 
-    - name: 'gcr.io/graphite-docker-images/go-plus:stephenrlewis'
+    - name: 'gcr.io/graphite-docker-images/go-plus'
       id: magician-check-vcr-cassettes
       waitFor: ["vcr-merge"]
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
