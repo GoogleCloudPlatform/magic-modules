@@ -144,8 +144,8 @@ func TestExecRequestServiceReviewersMembershipChecker(t *testing.T) {
 			execRequestServiceReviewers("1", gh, enrolledTeamsYaml)
 
 			actualReviewers := []string{}
-			for _, args := range gh.calledMethods["RequestPullRequestReviewer"] {
-				actualReviewers = append(actualReviewers, args[1].(string))
+			for _, args := range gh.calledMethods["RequestPullRequestReviewers"] {
+				actualReviewers = append(actualReviewers, args[1].([]string)...)
 			}
 
 			if tc.expectSpecificReviewers != nil {

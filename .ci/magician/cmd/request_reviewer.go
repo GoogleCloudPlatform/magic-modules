@@ -83,12 +83,10 @@ func execRequestReviewer(prNumber string, gh GithubClient) {
 
 		reviewersToRequest, newPrimaryReviewer := github.ChooseCoreReviewers(requestedReviewers, previousReviewers)
 
-		for _, reviewer := range reviewersToRequest {
-			err = gh.RequestPullRequestReviewer(prNumber, reviewer)
-			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
-			}
+		err = gh.RequestPullRequestReviewers(prNumber, reviewersToRequest)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
 		}
 
 		if newPrimaryReviewer != "" {
