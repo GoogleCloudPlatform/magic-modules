@@ -94,21 +94,18 @@ class SweeperTests {
 
     @Test
     fun projectSweepersRunAfterServiceSweepers() {
-        val project = googleCloudRootProject(testContextParameters())
+        val root = googleCloudRootProject(testContextParameters())
 
         // Find GA nightly test project's service sweeper
-        val gaNightlyTests: Project = getSubProject(project, gaProjectName, nightlyTestsProjectName)
+        val gaNightlyTests: Project = getNestedProjectFromRoot(root, gaProjectName, nightlyTestsProjectName)
         val sweeperGa: BuildType = getBuildFromProject(gaNightlyTests, ServiceSweeperName)
 
         // Find Beta nightly test project's service sweeper
-        val betaNightlyTests : Project = getSubProject(project, betaProjectName, nightlyTestsProjectName)
+        val betaNightlyTests : Project = getNestedProjectFromRoot(root, betaProjectName, nightlyTestsProjectName)
         val sweeperBeta: BuildType = getBuildFromProject(betaNightlyTests, ServiceSweeperName)
 
         // Find Project sweeper project's build
-        val projectSweeperProject : Project? =  project.subProjects.find { p->  p.name == projectSweeperProjectName}
-        if (projectSweeperProject == null) {
-            Assert.fail("Could not find the Project Sweeper project")
-        }
+        val projectSweeperProject = getSubProject(root, projectSweeperProjectName)
         val projectSweeper: BuildType = getBuildFromProject(projectSweeperProject!!, ProjectSweeperName)
         
         // Check only one schedule trigger is on the builds in question
