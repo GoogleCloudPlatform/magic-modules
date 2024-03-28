@@ -1398,7 +1398,7 @@ resource "google_dataproc_cluster" "virtual_cluster" {
 	  }
 	}
   }
-`, projectID, rnd, networkName, subnetworkName, projectID, rnd, rnd, rnd, rnd, rnd, rnd)
+`, projectID, rnd, networkName, subnetworkName, projectID, projectID, projectID, rnd, rnd, rnd, rnd, rnd, rnd)
 }
 
 func testAccCheckDataprocGkeClusterNodePoolsHaveRoles(cluster *dataproc.Cluster, roles ...string) func(s *terraform.State) error {
