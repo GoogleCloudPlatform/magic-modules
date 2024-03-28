@@ -14,7 +14,7 @@
 --- !ruby/object:Api::Resource
 name: 'FirewallEndpointAssociation'
 base_url: '{{parent}}/locations/{{location}}/firewallEndpointAssociations'
-create_url: '{{parent}}/locations/{{location}}/firewallEndpointAssociations?firewallEndpointId={{name}}'
+create_url: '{{parent}}/locations/{{location}}/firewallEndpointAssociations?firewallEndpointAssociationId={{name}}'
 self_link: '{{parent}}/locations/{{location}}/firewallEndpointAssociations/{{name}}'
 min_version: beta
 update_verb: :PATCH
