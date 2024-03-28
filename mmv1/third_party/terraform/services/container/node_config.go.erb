@@ -979,7 +979,7 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 	if v,ok := nodeConfig["enable_confidential_storage"]; ok {
 		nc.EnableConfidentialStorage = v.(bool)
 	}
-	
+
 	<% unless version == "ga" -%>
 	if v, ok := nodeConfig["host_maintenance_policy"]; ok {
 		nc.HostMaintenancePolicy = expandHostMaintenancePolicy(v)
@@ -1249,7 +1249,6 @@ func flattenResourceManagerTags(c *container.ResourceManagerTags) map[string]int
 		for k, v := range c.Tags {
 			rmt[k] = v
 		}
-
 	}
 
 	return rmt
