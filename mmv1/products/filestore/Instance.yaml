@@ -98,6 +98,15 @@ properties:
       Possible values include: STANDARD, PREMIUM, BASIC_HDD, BASIC_SSD, HIGH_SCALE_SSD, ZONAL, REGIONAL and ENTERPRISE
     required: true
     immutable: true
+  - !ruby/object:Api::Type::Enum
+    name: 'protocol'
+    description: |
+      Either NFSv3, for using NFS version 3 as file sharing protocol,
+      or NFSv4.1, for using NFS version 4.1 as file sharing protocol. The default is NFSv3.
+    default_value: :NFS_V3
+    values:
+      - :NFS_V3
+      - :NFS_V4_1
   - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
