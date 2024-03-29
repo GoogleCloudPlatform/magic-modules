@@ -144,7 +144,6 @@ properties:
         description: |
           Prevent instances from receiving an ephemeral external IP address.
         min_version: beta
-        required: false
         default_value: :external
         values:
           - :external
