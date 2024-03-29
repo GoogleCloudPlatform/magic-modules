@@ -58,7 +58,7 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
 `, context)
 }
 
-func testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfig(context map[string]interface{}) string {
+func testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_data_loss_prevention_discovery_config" "basic" {
 	parent = "projects/%{project}"
