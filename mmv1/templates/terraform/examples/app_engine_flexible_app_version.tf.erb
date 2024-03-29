@@ -62,11 +62,11 @@ resource "google_app_engine_flexible_app_version" "<%= ctx[:primary_resource_id]
   }
 
   readiness_check {
-    path = "/trigger"
+    path = "/"
   }
 
   env_variables = {
-    port = "8080"
+    port = "80"
   }
 
   handlers {
