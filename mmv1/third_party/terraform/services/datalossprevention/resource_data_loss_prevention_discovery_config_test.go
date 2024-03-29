@@ -22,7 +22,7 @@ func TestAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigUpdate(t *testin
 		CheckDestroy:             testAccCheckDataLossPreventionDiscoveryConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigBasicExample(context),
+				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigStart(context),
 			},
 			{
 				ResourceName:      "google_data_loss_prevention_discovery_config.basic",
@@ -41,7 +41,7 @@ func TestAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigUpdate(t *testin
 	})
 }
 
-func testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigBasicExample(context map[string]interface{}) string {
+func testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigStart(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_data_loss_prevention_discovery_config" "basic" {
 	parent = "projects/%{project}"
