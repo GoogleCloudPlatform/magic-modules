@@ -2,6 +2,7 @@ package tags_test
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -66,20 +67,22 @@ func testAccDataSourceGoogleTagsTagValuesCheck(data_source_name string, resource
 
 		ds_attr := ds.Primary.Attributes
 		rs_attr := rs.Primary.Attributes
-		tag_value_attrs_to_test := []string{"parent", "short_name", "name", "namespaced_name", "create_time", "update_time", "description"}
+		tag_value_attrs_to_test := []string{"parent", "name", "namespaced_name", "create_time", "update_time", "description"}
 
-		values := ds.Primary.Attributes["values"]
-
-		for _, value := range values {
-			for _, attr_to_check := range tag_value_attrs_to_test {
-				if value[attr_to_check] != rs_attr[attr_to_check] {
-					return fmt.Errorf(
-						"%s is %s; want %s",
-						attr_to_check,
-						value[attr_to_check],
-						rs_attr[attr_to_check],
-					)
-				}
+		for _, attr_to_check := range tag_value_attrs_to_test {
+			data := ""
+			if attr_to_check == "name" {
+				data = strings.Split(ds_attr[fmt.Sprintf("values.0.%s", attr_to_check)], "/")[1]
+			} else {
+				data = ds_attr[fmt.Sprintf("values.0.%s", attr_to_check)]
+			}
+			if data != rs_attr[attr_to_check] {
+				return fmt.Errorf(
+					"%s is %s; want %s",
+					attr_to_check,
+					data,
+					rs_attr[attr_to_check],
+				)
 			}
 		}
 
