@@ -864,20 +864,6 @@ module Api
       end
     end
 
-    # Support for schema ValidateFunc functionality.
-    class Validation < Object
-      # Ensures the value matches this regex
-      attr_reader :regex
-      attr_reader :function
-
-      def validate
-        super
-
-        check :regex, type: String
-        check :function, type: String
-      end
-    end
-
     def type?(type)
       type.is_a?(Type) || !get_type(type).nil?
     end
