@@ -1,0 +1,29 @@
+name: unit-tests-go-changelog
+
+permissions: read-all
+
+on:
+  pull_request:
+    paths:
+      - 'tools/go-changelog/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '^1.21.0'
+      
+      - name: Build
+        run: |
+          cd repo/tools/go-changelog/cmd/changelog-pr-body-check
+          go build
+
+      - name: Test
+        run: |
+          cd repo/tools/go-changelog
+          go test -v ./...
