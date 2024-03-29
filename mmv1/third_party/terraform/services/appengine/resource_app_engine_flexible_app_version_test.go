@@ -121,6 +121,7 @@ resource "google_app_engine_flexible_app_version" "foo" {
   network {
     name       = "default"
     subnetwork = "default"
+    instance_ip_mode = "external"
   }
 
   instance_class = "B1"
@@ -234,6 +235,7 @@ resource "google_app_engine_flexible_app_version" "foo" {
   network {
     name       = "default"
     subnetwork = "default"
+    instance_ip_mode = "internal"
   }
 
   instance_class = "B2"
