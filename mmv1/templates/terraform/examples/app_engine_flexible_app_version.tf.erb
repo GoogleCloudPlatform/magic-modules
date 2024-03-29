@@ -62,7 +62,7 @@ resource "google_app_engine_flexible_app_version" "<%= ctx[:primary_resource_id]
   }
 
   readiness_check {
-    path = "/"
+    path = "/trigger"
   }
 
   env_variables = {
