@@ -148,7 +148,7 @@ properties:
         default_value: :external
         values:
           - :external
-          - :internal          
+          - :internal
       - !ruby/object:Api::Type::String
         name: 'instanceTag'
         description: |
