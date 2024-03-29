@@ -30,7 +30,7 @@ func TestAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigUpdate(t *testin
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigBasicExample(context),
+				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigUpdate(context),
 			},
 			{
 				ResourceName:      "google_data_loss_prevention_discovery_config.basic",
@@ -54,6 +54,29 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
         }
     }
     inspect_templates = ["FAKE"]
+}
+`, context)
+}
+
+func testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfig(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_data_loss_prevention_discovery_config" "basic" {
+	parent = "projects/%{project}"
+
+    targets {
+        big_query_target {
+            filter {
+                other_tables {}
+            }
+			conditions {
+				or_conditions {
+					min_row_count = 10
+					minAge = "10800s"
+				}
+			}
+        }
+    }
+    inspect_templates = ["FAKE_NEW"]
 }
 `, context)
 }
