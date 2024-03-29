@@ -108,7 +108,7 @@ properties:
     name: 'protocol'
     description: |
       Either NFSv3, for using NFS version 3 as file sharing protocol,
-      or NFSv4.1, for using NFS version 4.1 as file sharing protocol. 
+      or NFSv4.1, for using NFS version 4.1 as file sharing protocol.
       NFSv4.1 can be used with HIGH_SCALE_SSD, ZONAL, REGIONAL and ENTERPRISE.
       The default is NFSv3.
     default_value: :NFS_V3
