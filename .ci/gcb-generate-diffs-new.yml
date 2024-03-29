@@ -277,6 +277,8 @@ steps:
       args:
           - 'request-service-reviewers'
           - $_PR_NUMBER
+      env:
+        - COMMIT_SHA=$COMMIT_SHA
 
 # Long timeout to enable waiting on VCR test
 timeout: 20000s
