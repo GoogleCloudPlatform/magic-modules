@@ -364,11 +364,11 @@ func (r Resource) RequiredProperties() []*Type {
 }
 
 // def all_nested_properties(props)
-func allNestedProperties(props []*Type) []*Type {
+func (r Resource) AllNestedProperties(props []*Type) []*Type {
 	nested := props
 	for _, prop := range props {
 		if nestedProperties := prop.NestedProperties(); !prop.FlattenObject && nestedProperties != nil {
-			nested = google.Concat(nested, allNestedProperties(nestedProperties))
+			nested = google.Concat(nested, r.AllNestedProperties(nestedProperties))
 		}
 	}
 
@@ -377,10 +377,20 @@ func allNestedProperties(props []*Type) []*Type {
 
 // sensitive_props
 func (r Resource) SensitiveProps() []*Type {
-	props := allNestedProperties(r.RootProperties())
+	props := r.AllNestedProperties(r.RootProperties())
 	return google.Select(props, func(p *Type) bool {
 		return p.Sensitive
 	})
+}
+
+func (r Resource) SensitivePropsToString() string {
+	var props []string
+
+	for _, prop := range r.SensitiveProps() {
+		props = append(props, fmt.Sprintf("`%s`", prop.Lineage()))
+	}
+
+	return strings.Join(props, ", ")
 }
 
 // All settable properties in the resource.

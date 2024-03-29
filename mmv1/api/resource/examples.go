@@ -15,6 +15,7 @@ package resource
 
 import (
 	"fmt"
+	"net/url"
 
 	"gopkg.in/yaml.v3"
 )
@@ -275,21 +276,25 @@ func (e *Examples) UnmarshalYAML(n *yaml.Node) error {
 // substitute_example_paths body
 // }
 
-// func (e *Examples) oics_link() {
-// hash = {
-//   cloudshell_git_repo: 'https://github.com/terraform-google-modules/docs-examples.git',
-//   cloudshell_working_dir: @name,
-//   cloudshell_image: 'gcr.io/cloudshell-images/cloudshell:latest',
-//   open_in_editor: 'main.tf',
-//   cloudshell_print: './motd',
-//   cloudshell_tutorial: './tutorial.md'
-// }
-// URI::HTTPS.build(
-//   host: 'console.cloud.google.com',
-//   path: '/cloudshell/open',
-//   query: URI.encode_www_form(hash)
-// )
-// }
+func (e *Examples) OiCSLink() string {
+	v := url.Values{}
+	// TODO Q2: Values.Encode() sorts the values by key alphabetically. This will produce
+	//			diffs for every URL when we convert to using this function. We should sort the
+	// 			Ruby-version query alphabetically beforehand to remove these diffs.
+	v.Add("cloudshell_git_repo", "https://github.com/terraform-google-modules/docs-examples.git")
+	v.Add("cloudshell_working_dir", e.Name)
+	v.Add("cloudshell_image", "gcr.io/cloudshell-images/cloudshell:latest")
+	v.Add("open_in_editor", "main.tf")
+	v.Add("cloudshell_print", "./motd")
+	v.Add("cloudshell_tutorial", "./tutorial.md")
+	u := url.URL{
+		Scheme:   "https",
+		Host:     "console.cloud.google.com",
+		Path:     "/cloudshell/open",
+		RawQuery: v.Encode(),
+	}
+	return u.String()
+}
 
 // rubocop:disable Layout/LineLength
 // func (e *Examples) substitute_test_paths(config) {
