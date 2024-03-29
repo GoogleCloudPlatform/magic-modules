@@ -120,7 +120,7 @@ func main() {
 				api.Compile(resourceYamlPath, resource)
 
 				resource.Properties = resource.AddLabelsRelatedFields(resource.PropertiesWithExcluded(), nil)
-
+				resource.SetDefault(productApi)
 				resource.Validate()
 				resources = append(resources, resource)
 			}

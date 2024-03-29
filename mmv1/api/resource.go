@@ -306,18 +306,12 @@ func (r *Resource) UnmarshalYAML(n *yaml.Node) error {
 func (r *Resource) Validate() {
 	// TODO Q1 Rewrite super
 	// super
-
-	r.setResourceMetada(r.Parameters)
-	r.setResourceMetada(r.Properties)
 }
 
-func (r *Resource) setResourceMetada(properties []*Type) {
-	if properties == nil {
-		return
-	}
-
-	for _, property := range properties {
-		property.ResourceMetadata = r
+func (r *Resource) SetDefault(product *Product) {
+	r.ProductMetadata = product
+	for _, property := range r.AllProperties() {
+		property.SetDefault(r)
 	}
 }
 
