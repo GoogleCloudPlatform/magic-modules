@@ -15,19 +15,19 @@ data "google_app_engine_default_service_account" "default" {
 }
 
 resource "google_project_iam_member" "gae_api" {
-  project = google_project_service.service.project
+  project = google_project.project.project_id
   role    = "roles/compute.networkUser"
   member  = "serviceAccount:${data.google_app_engine_default_service_account.default.email}"
 }
 
 resource "google_project_iam_member" "logs_writer" {
-  project = google_project_service.service.project
+  project = google_project.project.project_id
   role    = "roles/logging.logWriter"
   member  = "serviceAccount:${data.google_app_engine_default_service_account.default.email}"
 }
 
 resource "google_project_iam_member" "storage_viewer" {
-  project = google_project_service.service.project
+  project = google_project.project.project_id
   role    = "roles/storage.objectViewer"
   member  = "serviceAccount:${data.google_app_engine_default_service_account.default.email}"
 }
