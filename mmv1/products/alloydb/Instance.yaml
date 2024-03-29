@@ -297,4 +297,3 @@ properties:
         name: enablePublicIp
         description: |
           Enabling public ip for the instance.
-        # send_empty_value: true
