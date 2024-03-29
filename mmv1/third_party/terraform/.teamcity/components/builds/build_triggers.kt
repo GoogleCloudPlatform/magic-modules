@@ -7,6 +7,7 @@
 
 package builds
 
+import DefaultBranchName
 import DefaultDaysOfMonth
 import DefaultDaysOfWeek
 import DefaultStartHour
@@ -26,7 +27,7 @@ fun Triggers.runNightly(config: NightlyTriggerConfiguration) {
 
     schedule{
         enabled = config.nightlyTestsEnabled
-        branchFilter = "+:" + branch // returns "+:/refs/heads/main" if default
+        branchFilter = "+:" + config.branch // returns "+:/refs/heads/main" if default
         triggerBuild = always() // Run build even if no new commits/pending changes
         withPendingChangesOnly = false
         enforceCleanCheckout = true
