@@ -19,8 +19,8 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-	"github.com/GoogleCloudPlatform/magic-modules/mmv1/provider/terraform"
 	"golang.org/x/exp/slices"
+	"gopkg.in/yaml.v3"
 )
 
 type Resource struct {
@@ -175,9 +175,9 @@ type Resource struct {
 	// will allow that token to hold multiple /'s.
 	ImportFormat []string `yaml:"import_format"`
 
-	CustomCode terraform.CustomCode `yaml:"custom_code"`
+	CustomCode resource.CustomCode `yaml:"custom_code"`
 
-	Docs terraform.Docs
+	Docs resource.Docs
 
 	// This block inserts entries into the customdiff.All() block in the
 	// resource schema -- the code for these custom diff functions must
@@ -190,7 +190,7 @@ type Resource struct {
 
 	// Examples in documentation. Backed by generated tests, and have
 	// corresponding OiCS walkthroughs.
-	Examples []terraform.Examples
+	Examples []resource.Examples
 
 	// Virtual fields on the Terraform resource. Usage and differences from url_param_only
 	// are documented in provider/terraform/virtual_fields.rb
@@ -282,22 +282,36 @@ type Resource struct {
 	ProductMetadata *Product
 }
 
+func (r *Resource) UnmarshalYAML(n *yaml.Node) error {
+	r.CreateVerb = "POST"
+	r.ReadVerb = "GET"
+	r.DeleteVerb = "DELETE"
+	r.UpdateVerb = "PUT"
+
+	type resourceAlias Resource
+	aliasObj := (*resourceAlias)(r)
+
+	err := n.Decode(&aliasObj)
+	if err != nil {
+		return err
+	}
+
+	r.ApiName = r.Name
+	r.CollectionUrlKey = google.Camelize(google.Plural(r.Name), "lower")
+
+	return nil
+}
+
 // TODO: rewrite functions
 func (r *Resource) Validate() {
 	// TODO Q1 Rewrite super
 	// super
-
-	r.setResourceMetada(r.Parameters)
-	r.setResourceMetada(r.Properties)
 }
 
-func (r *Resource) setResourceMetada(properties []*Type) {
-	if properties == nil {
-		return
-	}
-
-	for _, property := range properties {
-		property.ResourceMetadata = r
+func (r *Resource) SetDefault(product *Product) {
+	r.ProductMetadata = product
+	for _, property := range r.AllProperties() {
+		property.SetDefault(r)
 	}
 }
 
@@ -456,123 +470,145 @@ func (r Resource) GetIdentity() []*Type {
 
 }
 
-// TODO Q1
 // def add_labels_related_fields(props, parent)
-//   props.each do |p|
-// 	if p.is_a? Api::Type::KeyValueLabels
-// 	  add_labels_fields(props, parent, p)
-// 	elsif p.is_a? Api::Type::KeyValueAnnotations
-// 	  add_annotations_fields(props, parent, p)
-// 	elsif (p.is_a? Api::Type::NestedObject) && !p.all_properties.nil?
-// 	  p.properties = add_labels_related_fields(p.all_properties, p)
-// 	end
-//   end
-//   props
-// end
+func (r *Resource) AddLabelsRelatedFields(props []*Type, parent *Type) []*Type {
+	for _, p := range props {
+		if p.IsA("KeyValueLabels") {
+			props = r.addLabelsFields(props, parent, p)
+		} else if p.IsA("KeyValueAnnotations") {
+			props = r.addAnnotationsFields(props, parent, p)
+		} else if p.IsA("NestedObject") && len(p.AllProperties()) > 0 {
+			p.Properties = r.AddLabelsRelatedFields(p.AllProperties(), p)
+		}
+	}
+	return props
+}
 
 // def add_labels_fields(props, parent, labels)
-//   @custom_diff ||= []
-//   if parent.nil? || parent.flatten_object
-// 	@custom_diff.append('tpgresource.SetLabelsDiff')
-//   elsif parent.name == 'metadata'
-// 	@custom_diff.append('tpgresource.SetMetadataLabelsDiff')
-//   end
+func (r *Resource) addLabelsFields(props []*Type, parent *Type, labels *Type) []*Type {
+	if parent == nil || parent.FlattenObject {
+		r.CustomDiff = append(r.CustomDiff, "tpgresource.SetLabelsDiff")
+	} else if parent.Name == "metadata" {
+		r.CustomDiff = append(r.CustomDiff, "tpgresource.SetMetadataLabelsDiff")
+	}
 
-//   props << build_terraform_labels_field('labels', parent, labels)
-//   props << build_effective_labels_field('labels', labels)
+	terraformLabelsField := buildTerraformLabelsField("labels", parent, labels)
+	effectiveLabelsField := buildEffectiveLabelsField("labels", labels)
+	props = append(props, terraformLabelsField, effectiveLabelsField)
 
-//   // The effective_labels field is used to write to API, instead of the labels field.
-//   labels.ignore_write = true
-//   labels.description = "//{labels.description}\n\n//{get_labels_field_note(labels.name)}"
-//   return unless parent.nil?
+	// The effective_labels field is used to write to API, instead of the labels field.
+	labels.IgnoreWrite = true
+	labels.Description = fmt.Sprintf("%s\n\n%s", labels.Description, getLabelsFieldNote(labels.Name))
 
-//   labels.immutable = false
-// end
+	if parent == nil {
+		labels.Immutable = false
+	}
+
+	return props
+}
 
 // def add_annotations_fields(props, parent, annotations)
-//   // The effective_annotations field is used to write to API,
-//   // instead of the annotations field.
-//   annotations.ignore_write = true
-//   note = get_labels_field_note(annotations.name)
-//   annotations.description = "//{annotations.description}\n\n//{note}"
+func (r *Resource) addAnnotationsFields(props []*Type, parent *Type, annotations *Type) []*Type {
 
-//   @custom_diff ||= []
-//   if parent.nil?
-// 	@custom_diff.append('tpgresource.SetAnnotationsDiff')
-//   elsif parent.name == 'metadata'
-// 	@custom_diff.append('tpgresource.SetMetadataAnnotationsDiff')
-//   end
+	// The effective_annotations field is used to write to API,
+	// instead of the annotations field.
+	annotations.IgnoreWrite = true
+	annotations.Description = fmt.Sprintf("%s\n\n%s", annotations.Description, getLabelsFieldNote(annotations.Name))
 
-//   props << build_effective_labels_field('annotations', annotations)
-// end
+	if parent == nil {
+		r.CustomDiff = append(r.CustomDiff, "tpgresource.SetAnnotationsDiff")
+	} else if parent.Name == "metadata" {
+		r.CustomDiff = append(r.CustomDiff, "tpgresource.SetMetadataAnnotationsDiff")
+	}
+
+	effectiveAnnotationsField := buildEffectiveLabelsField("annotations", annotations)
+	props = append(props, effectiveAnnotationsField)
+	return props
+}
 
 // def build_effective_labels_field(name, labels)
-//   description = "All of //{name} (key/value pairs)\
-// present on the resource in GCP, including the //{name} configured through Terraform,\
-// other clients and services."
+func buildEffectiveLabelsField(name string, labels *Type) *Type {
+	description := fmt.Sprintf("All of %s (key/value pairs) present on the resource in GCP, "+
+		"including the %s configured through Terraform, other clients and services.", name, name)
 
-//   Api::Type::KeyValueEffectiveLabels.new(
-// 	name: "effective//{name.capitalize}",
-// 	output: true,
-// 	api_name: name,
-// 	description:,
-// 	min_version: labels.field_min_version,
-// 	update_verb: labels.update_verb,
-// 	update_url: labels.update_url,
-// 	immutable: labels.immutable
-//   )
-// end
+	t := "KeyValueEffectiveLabels"
+	if name == "annotations" {
+		t = "KeyValueEffectiveAnnotations"
+	}
+
+	n := fmt.Sprintf("effective%s", strings.Title(name))
+
+	options := []func(*Type){
+		propertyWithType(t),
+		propertyWithOutput(true),
+		propertyWithDescription(description),
+		propertyWithMinVersion(labels.fieldMinVersion()),
+		propertyWithUpdateVerb(labels.UpdateVerb),
+		propertyWithUpdateUrl(labels.UpdateUrl),
+		propertyWithImmutable(labels.Immutable),
+	}
+	return NewProperty(n, name, options)
+}
 
 // def build_terraform_labels_field(name, parent, labels)
-//   description = "The combination of //{name} configured directly on the resource
-// and default //{name} configured on the provider."
+func buildTerraformLabelsField(name string, parent *Type, labels *Type) *Type {
+	description := fmt.Sprintf("The combination of %s configured directly on the resource "+
+		"and default %s configured on the provider.", name, name)
 
-//   immutable = if parent.nil?
-// 				false
-// 			  else
-// 				labels.immutable
-// 			  end
+	immutable := false
+	if parent != nil {
+		immutable = labels.Immutable
+	}
 
-//   Api::Type::KeyValueTerraformLabels.new(
-// 	name: "terraform//{name.capitalize}",
-// 	output: true,
-// 	api_name: name,
-// 	description:,
-// 	min_version: labels.field_min_version,
-// 	ignore_write: true,
-// 	update_url: labels.update_url,
-// 	immutable:
-//   )
-// end
+	n := fmt.Sprintf("terraform%s", strings.Title(name))
+
+	options := []func(*Type){
+		propertyWithType("KeyValueTerraformLabels"),
+		propertyWithOutput(true),
+		propertyWithDescription(description),
+		propertyWithMinVersion(labels.fieldMinVersion()),
+		propertyWithIgnoreWrite(true),
+		propertyWithUpdateUrl(labels.UpdateUrl),
+		propertyWithImmutable(immutable),
+	}
+	return NewProperty(n, name, options)
+}
 
 // // Check if the resource has root "labels" field
 // def root_labels?
-//   root_properties.each do |p|
-// 	return true if p.is_a? Api::Type::KeyValueLabels
-//   end
-//   false
-// end
+func (r Resource) RootLabels() bool {
+	for _, p := range r.RootProperties() {
+		if p.IsA("KeyValueLabels") {
+			return true
+		}
+	}
+	return false
+}
 
 // // Return labels fields that should be added to ImportStateVerifyIgnore
 // def ignore_read_labels_fields(props)
-//   fields = []
-//   props.each do |p|
-// 	if (p.is_a? Api::Type::KeyValueLabels) ||
-// 	   (p.is_a? Api::Type::KeyValueTerraformLabels) ||
-// 	   (p.is_a? Api::Type::KeyValueAnnotations)
-// 	  fields << p.terraform_lineage
-// 	elsif (p.is_a? Api::Type::NestedObject) && !p.all_properties.nil?
-// 	  fields.concat(ignore_read_labels_fields(p.all_properties))
-// 	end
-//   end
-//   fields
-// end
+func (r Resource) IgnoreReadLabelsFields(props []*Type) []string {
+	fields := make([]string, 0)
+	for _, p := range props {
+		if p.IsA("KeyValueLabels") ||
+			p.IsA("KeyValueTerraformLabels") ||
+			p.IsA("KeyValueAnnotations") {
+			fields = append(fields, p.TerraformLineage())
+		} else if p.IsA("NestedObject") && len(p.AllProperties()) > 0 {
+			fields = google.Concat(fields, r.IgnoreReadLabelsFields(p.AllProperties()))
+		}
+	}
+	return fields
+}
 
 // def get_labels_field_note(title)
-//   "**Note**: This field is non-authoritative, and will only manage the //{title} present " \
-// "in your configuration.
-// Please refer to the field `effective_//{title}` for all of the //{title} present on the resource."
-// end
+func getLabelsFieldNote(title string) string {
+	return fmt.Sprintf(
+		"**Note**: This field is non-authoritative, and will only manage the %s present "+
+			"in your configuration.\n"+
+			"Please refer to the field `effective_%s` for all of the %s present on the resource.",
+		title, title, title)
+}
 
 // ====================
 // Version-related methods
@@ -763,4 +799,11 @@ func (r Resource) HasZone() bool {
 // def lineage
 func (r Resource) Lineage() string {
 	return r.Name
+}
+
+func (r Resource) TerraformName() string {
+	if r.LegacyName != "" {
+		return r.LegacyName
+	}
+	return fmt.Sprintf("google_%s_%s", r.ProductMetadata.TerraformName(), google.Underscore(r.Name))
 }

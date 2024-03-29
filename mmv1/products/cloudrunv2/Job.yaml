@@ -23,6 +23,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/run/docs/reference/rest/v2/projects.locations.jobs'
 description: |
   A Cloud Run Job resource that references a container image which is run to completion.
+taint_resource_on_failed_create: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
@@ -128,7 +129,6 @@ properties:
     url_param_only: true
     description: |
       Name of the Job.
-    pattern: projects/{{project}}/locations/{{location}}/jobs/{{name}}
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
