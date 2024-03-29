@@ -29,8 +29,8 @@ type GithubClient interface {
 	MergePullRequest(owner, repo, prNumber string) error
 	PostBuildStatus(prNumber, title, state, targetURL, commitSha string) error
 	PostComment(prNumber, comment string) error
-	RequestPullRequestReviewer(prNumber, assignee string) error
-	AddLabel(prNumber, label string) error
+	RequestPullRequestReviewers(prNumber string, reviewers []string) error
+	AddLabels(prNumber string, labels []string) error
 	RemoveLabel(prNumber, label string) error
 	CreateWorkflowDispatchEvent(workflowFileName string, inputs map[string]any) error
 }

@@ -53,7 +53,6 @@ The following attributes are exported:
 <a name="nested_dimensions_infos"></a> The `dimensions_infos` block supports:
 * `dimensions` - The map of dimensions for this dimensions info. The key of a map entry is "region", "zone" or the name of a service specific dimension, and the value of a map entry is the value of the dimension. If a dimension does not appear in the map of dimensions, the dimensions info applies to all the dimension values except for those that have another DimenisonInfo instance configured for the specific value. Example: {"provider" : "Foo Inc"} where "provider" is a service specific dimension of a quota.
 
-  An object containing a list of "key": value pairs, for example: `{ "name": "wrench", "mass": "1.3kg", "count": "3" }`.
 * `details` - The quota details for a map of dimensions.
 * `applicable_locations` - The applicable regions or zones of this dimensions info. The field will be set to `['global']` for quotas that are not per region or per zone. Otherwise, it will be set to the list of locations this dimension info is applicable to.
 

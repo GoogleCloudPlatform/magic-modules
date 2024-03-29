@@ -17,16 +17,12 @@ import (
 	"log"
 	"strings"
 
+	"gopkg.in/yaml.v3"
+
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"golang.org/x/exp/slices"
 )
-
-// require 'api/object'
-// require 'api/product/version'
-// require 'google/logger'
-// require 'compile/core'
-// require 'json'
 
 // Represents a product to be managed
 type Product struct {
@@ -67,22 +63,33 @@ type Product struct {
 
 	OperationRetry string `yaml:"operation_retry"`
 
-	Async OpAsync
+	Async *OpAsync
 
 	LegacyName string `yaml:"legacy_name"`
 
 	ClientName string `yaml:"client_name"`
 }
 
-func (p *Product) Validate() {
-	// TODO Q1 Rewrite super
-	//     super
-	for _, o := range p.Objects {
-		o.ProductMetadata = p
+func (p *Product) UnmarshalYAML(n *yaml.Node) error {
+	p.Async = NewOpAsync()
+
+	type productAlias Product
+	aliasObj := (*productAlias)(p)
+
+	err := n.Decode(&aliasObj)
+	if err != nil {
+		return err
 	}
 
 	p.SetApiName()
 	p.SetDisplayName()
+
+	return nil
+}
+
+func (p *Product) Validate() {
+	// TODO Q2 Rewrite super
+	//     super
 }
 
 // def validate
@@ -211,21 +218,28 @@ func (p *Product) SetPropertiesBasedOnVersion(version *product.Version) {
 	p.BaseUrl = version.BaseUrl
 }
 
-//   // ====================
-//   // Debugging Methods
-//   // ====================
+func (p *Product) TerraformName() string {
+	if p.LegacyName != "" {
+		return google.Underscore(p.LegacyName)
+	}
+	return google.Underscore(p.Name)
+}
+
+// ====================
+// Debugging Methods
+// ====================
 
 //   def to_s
 //     // relies on the custom to_json definitions
 //     JSON.pretty_generate(self)
 //   end
 
-//   // Prints a dot notation path to where the field is nested within the parent
-//   // object when called on a property. eg: parent.meta.label.foo
-//   // Redefined on Product to terminate the calls up the parent chain.
-//   def lineage
-//     name
-//   end
+// Prints a dot notation path to where the field is nested within the parent
+// object when called on a property. eg: parent.meta.label.foo
+// Redefined on Product to terminate the calls up the parent chain.
+func (p Product) Lineage() string {
+	return p.Name
+}
 
 //   def to_json(opts = nil)
 //     json_out = {}

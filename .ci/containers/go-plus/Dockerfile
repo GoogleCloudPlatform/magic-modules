@@ -20,10 +20,6 @@ ENV GOCACHE=/go/cache
 COPY --from=builder /go/pkg/mod /go/pkg/mod
 COPY --from=builder /go/cache /go/cache
 
-# Set up Github SSH cloning.
-RUN ssh-keyscan github.com >> /known_hosts
-RUN echo "UserKnownHostsFile /known_hosts" >> /etc/ssh/ssh_config
-
 RUN apt-get update && \
     apt-get install -y git jq unzip parallel curl && \
     echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
