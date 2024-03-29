@@ -107,7 +107,7 @@ resource "google_app_engine_flexible_app_version" "foo" {
   }
 
   liveness_check {
-    path = "alive2"
+    path = "alive"
   }
 
   readiness_check {
