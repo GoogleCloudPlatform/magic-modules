@@ -20,10 +20,10 @@ jobs:
       
       - name: Build
         run: |
-          cd repo/tools/go-changelog/cmd/changelog-pr-body-check
+          cd tools/go-changelog/cmd/changelog-pr-body-check
           go build
 
       - name: Test
         run: |
-          cd repo/tools/go-changelog
+          cd tools/go-changelog
           go test -v ./...
