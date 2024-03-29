@@ -1,0 +1,18 @@
+// If the user is disabling Public IP and still has authorized external networks
+// set or is trying to update it, throw a more helpful error message.
+if d.HasChange("network_config.0.enable_public_ip") && d.Get("network_config.0.enable_public_ip") == false {
+  _, new := d.GetChange("network_config.0.authorized_external_networks")
+  if d.HasChange("network_config.0.authorized_external_networks") && !tpgresource.IsEmptyValue(reflect.ValueOf(new)) {
+    return fmt.Errorf("Cannot update an instance's authorized networks and disable Public IP. You must do one or the other. Note, that if you are disabling Public IP you should also remove the authorized networks as well.")
+  }
+
+  var nc map[string]interface{}
+  if obj["networkConfig"] == nil {
+    nc = make(map[string]interface{})
+  } else {
+    nc = obj["networkConfig"].(map[string]interface{})
+  }
+  if networkConfig["authorizedExternalNetworks"] != nil {
+    return fmt.Errorf("Cannot disable Public IP while there are authorized networks set. Please also remove the authorized networks, and then retry.")
+  }
+}

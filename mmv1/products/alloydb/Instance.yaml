@@ -55,6 +55,7 @@ autogen_async: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/alloydb_instance.go.erb
   pre_create: templates/terraform/pre_create/alloydb_instance.go.erb
+  pre_update: templates/terraform/pre_update/alloydb_instance.go.erb
   pre_delete: templates/terraform/pre_delete/alloydb_instance.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
@@ -296,3 +297,4 @@ properties:
         name: enablePublicIp
         description: |
           Enabling public ip for the instance.
+        # send_empty_value: true
