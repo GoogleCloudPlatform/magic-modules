@@ -90,9 +90,6 @@ func (p *Product) UnmarshalYAML(n *yaml.Node) error {
 func (p *Product) Validate() {
 	// TODO Q2 Rewrite super
 	//     super
-	for _, o := range p.Objects {
-		o.ProductMetadata = p
-	}
 }
 
 // def validate
