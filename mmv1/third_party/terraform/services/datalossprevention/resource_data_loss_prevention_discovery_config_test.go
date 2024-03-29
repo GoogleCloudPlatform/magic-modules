@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigBasicExample(t *testing.T) {
+func TestAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -25,10 +25,17 @@ func TestAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigBasicExample(t *
 				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigBasicExample(context),
 			},
 			{
-				ResourceName:            "google_data_loss_prevention_discovery_config.basic",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"parent"},
+				ResourceName:      "google_data_loss_prevention_discovery_config.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigBasicExample(context),
+			},
+			{
+				ResourceName:      "google_data_loss_prevention_discovery_config.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
