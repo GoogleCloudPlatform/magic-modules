@@ -139,6 +139,16 @@ properties:
         description: |
           List of ports, or port pairs, to forward from the virtual machine to the application container.
         item_type: Api::Type::String
+      - !ruby/object:Api::Type::Enum
+        name: 'instanceIpMode'
+        description: |
+          Prevent instances from receiving an ephemeral external IP address.
+        min_version: beta
+        required: false
+        default_value: :external
+        values:
+          - :external
+          - :internal          
       - !ruby/object:Api::Type::String
         name: 'instanceTag'
         description: |
