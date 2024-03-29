@@ -22,7 +22,6 @@ func MetadataRetryWrapper(update func() error) error {
 	return transport_tpg.MetadataRetryWrapper(update)
 }
 
-// Force generation
 // Update the metadata (serverMD) according to the provided diff (oldMDMap v
 // newMDMap).
 func MetadataUpdate(oldMDMap map[string]interface{}, newMDMap map[string]interface{}, serverMD *compute.Metadata) {
