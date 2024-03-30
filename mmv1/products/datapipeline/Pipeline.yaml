@@ -31,6 +31,8 @@ examples:
     primary_resource_name:
       'fmt.Sprintf("tf-test-my-pipeline%s", context["random_suffix"])'
     primary_resource_id: 'primary'
+    ignore_read_extra:
+      - 'schedule_info.0.next_job_time'
     vars:
       pipeline_name: 'my-pipeline'
       account_id: 'my-account'
@@ -49,7 +51,6 @@ properties:
       "PIPELINE_ID is the ID of the pipeline. Must be unique for the selected project and location."
     required: true
     immutable: true
-    pattern: projects/{{project}}/locations/{{region}}/functions/{{name}}
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
     custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
   - !ruby/object:Api::Type::String
@@ -393,6 +394,7 @@ properties:
     description: |
       Optional. A service account email to be used with the Cloud Scheduler job. If not specified, the default compute engine service account will be used.
     immutable: true
+    default_from_api: true
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'pipelineSources'
     description: |

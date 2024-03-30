@@ -1,7 +1,7 @@
 # tpgtools
 
 `tpgtools` is the generator responsible for creating DCL-based resources in the
-Terraform Google Provider (TPG). The DCL provides
+Terraform provider for Google Cloud (TPG). The DCL provides
 [OpenAPI schema objects](https://swagger.io/specification/#schema-object) to
 describe the available types, and `tpgtools` uses those to construct Terraform
 resource schemas.
@@ -55,7 +55,7 @@ go run . --path "api" --overrides "overrides" --output ~/some/dir --mode "serial
 ## New Resource Guide
 
 This guide is written to document the process for adding a resource to the
-Google Terraform Provider (TPG) after it has been added to the
+Terraform provider for Google Cloud (TPG) after it has been added to the
 [DCL](https://github.com/GoogleCloudPlatform/declarative-resource-client-library).
 
 ### Adding Resource Overrides

@@ -97,6 +97,7 @@ var (
 	forceNewClusterNodeConfigFields = []string{
 		"labels",
 		"workload_metadata_config",
+		"resource_manager_tags",
 	}
 
 	suppressDiffForAutopilot = schema.SchemaDiffSuppressFunc(func(k, oldValue, newValue string, d *schema.ResourceData) bool {
@@ -1197,7 +1198,7 @@ func ResourceContainerCluster() *schema.Resource {
 							Type:        schema.TypeList,
 							Optional:    true,
 							Computed:    true,
-							MaxItems:    2,
+							MaxItems:    1,
 							Description: `Configuration of Advanced Datapath Observability features.`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -1206,12 +1207,21 @@ func ResourceContainerCluster() *schema.Resource {
 										Required:    true,
 										Description: `Whether or not the advanced datapath metrics are enabled.`,
 									},
+									"enable_relay": {
+										Type:          schema.TypeBool,
+										Optional:      true,
+										Description:   `Whether or not Relay is enabled.`,
+										Default:       false,
+										ConflictsWith: []string{"monitoring_config.0.advanced_datapath_observability_config.0.relay_mode"},
+									},
 									"relay_mode": {
-										Type:         schema.TypeString,
-										Optional:     true,
-										Computed:     true,
-										Description:  `Mode used to make Relay available.`,
-										ValidateFunc: validation.StringInSlice([]string{"DISABLED", "INTERNAL_VPC_LB", "EXTERNAL_LB"}, false),
+										Type:          schema.TypeString,
+										Optional:      true,
+										Computed:      true,
+										Deprecated:    "Deprecated in favor of enable_relay field. Remove this attribute's configuration as this field will be removed in the next major release and enable_relay will become a required field.",
+										Description:   `Mode used to make Relay available.`,
+										ValidateFunc:  validation.StringInSlice([]string{"DISABLED", "INTERNAL_VPC_LB", "EXTERNAL_LB"}, false),
+										ConflictsWith: []string{"monitoring_config.0.advanced_datapath_observability_config.0.enable_relay"},
 									},
 								},
 							},
@@ -1415,11 +1425,11 @@ func ResourceContainerCluster() *schema.Resource {
 			"node_pool_defaults": clusterSchemaNodePoolDefaults(),
 
 			"node_pool_auto_config": {
-				Type:             schema.TypeList,
-				Optional:         true,
-				Computed:         true,
-				MaxItems:         1,
-				Description:      `Node pool configs that apply to all auto-provisioned node pools in autopilot clusters and node auto-provisioning enabled clusters.`,
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				MaxItems:    1,
+				Description: `Node pool configs that apply to all auto-provisioned node pools in autopilot clusters and node auto-provisioning enabled clusters.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"network_tags": {
@@ -1437,6 +1447,11 @@ func ResourceContainerCluster() *schema.Resource {
 									},
 								},
 							},
+						},
+						"resource_manager_tags": {
+							Type:        schema.TypeMap,
+							Optional:    true,
+							Description: `A map of resource manager tags. Resource manager tag keys and values have the same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/456. The field is ignored (both PUT & PATCH) when empty.`,
 						},
 					},
 				},
@@ -1674,7 +1689,7 @@ func ResourceContainerCluster() *schema.Resource {
 							Optional:     true,
 							ForceNew:     true,
 							AtLeastOneOf: privateClusterConfigKeys,
-							DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
+							DiffSuppressFunc: containerClusterPrivateClusterConfigSuppress,
 							Description: `Subnetwork in cluster's network where master's endpoint will be provisioned.`,
 						},
 						"public_endpoint": {
@@ -2060,16 +2075,26 @@ func ResourceContainerCluster() *schema.Resource {
 							Optional:          true,
 							Description:       `The Fleet host project of the cluster.`,
 						},
-                                          	"membership": {
-                                                	Type:             schema.TypeString,
-                                                	Computed:         true,
-                                                	Description:      `Full resource name of the registered fleet membership of the cluster.`,
-                                          	},
-                                          	"pre_registered": {
-                                                	Type:             schema.TypeBool,
-                                                	Computed:         true,
-                                                	Description:      `Whether the cluster has been registered via the fleet API.`,
-                                          	},
+						"membership": {
+							Type:             schema.TypeString,
+							Computed:         true,
+							Description:      `Full resource name of the registered fleet membership of the cluster.`,
+						},
+						"pre_registered": {
+							Type:             schema.TypeBool,
+							Computed:         true,
+							Description:      `Whether the cluster has been registered via the fleet API.`,
+						},
+						"membership_id": {
+							Type:             schema.TypeString,
+							Computed:         true,
+							Description:      `Short name of the fleet membership, for example "member-1".`,
+						},
+						"membership_location": {
+							Type:             schema.TypeString,
+							Computed:         true,
+							Description:      `Location of the fleet membership, for example "us-central1".`,
+						},
 					},
 				},
 			},
@@ -4142,6 +4167,24 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s node pool auto config network tags have been updated", d.Id())
 	}
 
+	if d.HasChange("node_pool_auto_config.0.resource_manager_tags") {
+		rmtags := d.Get("node_pool_auto_config.0.resource_manager_tags")
+
+		req := &container.UpdateClusterRequest{
+			Update: &container.ClusterUpdate{
+				DesiredNodePoolAutoConfigResourceManagerTags: expandResourceManagerTags(rmtags),
+			},
+		}
+
+		updateF := updateFunc(req, "updating GKE cluster node pool auto config resource manager tags")
+		// Call update serially.
+		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] GKE cluster %s node pool auto config resource manager tags have been updated", d.Id())
+	}
+
 	d.Partial(false)
 
 <% unless version == 'ga' -%>
@@ -5247,7 +5290,7 @@ func expandFleet(configured interface{}) *container.Fleet {
 	return &container.Fleet{
 		Project: config["project"].(string),
 	}
-}  
+}
 
 func expandEnableK8sBetaApis(configured interface{}, enabledAPIs []string) *container.K8sBetaAPIConfig {
 	l := configured.([]interface{})
@@ -5316,7 +5359,18 @@ func expandMonitoringConfig(configured interface{}) *container.MonitoringConfig 
 
 		mc.AdvancedDatapathObservabilityConfig = &container.AdvancedDatapathObservabilityConfig{
 			EnableMetrics: advanced_datapath_observability_config["enable_metrics"].(bool),
-			RelayMode: advanced_datapath_observability_config["relay_mode"].(string),
+		}
+
+		enable_relay := advanced_datapath_observability_config["enable_relay"].(bool)
+		relay_mode := advanced_datapath_observability_config["relay_mode"].(string)
+		if enable_relay {
+			mc.AdvancedDatapathObservabilityConfig.EnableRelay = enable_relay
+		} else if relay_mode == "INTERNAL_VPC_LB" || relay_mode == "EXTERNAL_LB" {
+			mc.AdvancedDatapathObservabilityConfig.RelayMode = relay_mode
+		} else {
+			mc.AdvancedDatapathObservabilityConfig.EnableRelay = enable_relay
+			mc.AdvancedDatapathObservabilityConfig.RelayMode = "DISABLED"
+			mc.AdvancedDatapathObservabilityConfig.ForceSendFields = []string{"EnableRelay"}
 		}
 	}
 
@@ -5394,6 +5448,11 @@ func expandNodePoolAutoConfig(configured interface{}) *container.NodePoolAutoCon
 	if v, ok := config["network_tags"]; ok && len(v.([]interface{})) > 0 {
 		npac.NetworkTags = expandNodePoolAutoConfigNetworkTags(v)
 	}
+
+	if v, ok := config["resource_manager_tags"]; ok && len(v.(map[string]interface{})) > 0 {
+		npac.ResourceManagerTags = expandResourceManagerTags(v)
+	}
+
 	return npac
 }
 
@@ -6088,16 +6147,27 @@ func flattenGatewayApiConfig(c *container.GatewayAPIConfig) []map[string]interfa
 }
 
 func flattenFleet(c *container.Fleet) []map[string]interface{} {
-      if c == nil {
-                return nil
-      }         
-      return []map[string]interface{}{
-                {
-                      "project": c.Project,
-                      "membership": c.Membership,
-		      "pre_registered": c.PreRegistered,
-                },
-      }       
+	if c == nil {
+		return nil
+	}
+
+	// Parse membership_id and membership_location from full membership name.
+	var membership_id, membership_location string
+	membershipRE := regexp.MustCompile(`^(//[a-zA-Z0-9\.\-]+)?/?projects/([^/]+)/locations/([a-zA-Z0-9\-]+)/memberships/([^/]+)$`)
+	if match := membershipRE.FindStringSubmatch(c.Membership); match != nil {
+		membership_id = match[4]
+		membership_location = match[3]
+	}
+
+	return []map[string]interface{}{
+		{
+			"project": c.Project,
+			"membership": c.Membership,
+			"membership_id": membership_id,
+			"membership_location": membership_location,
+			"pre_registered": c.PreRegistered,
+		},
+	}
 }
 
 func flattenEnableK8sBetaApis(c *container.K8sBetaAPIConfig) []map[string]interface{} {
@@ -6143,10 +6213,33 @@ func flattenMonitoringConfig(c *container.MonitoringConfig) []map[string]interfa
 }
 
 func flattenAdvancedDatapathObservabilityConfig(c *container.AdvancedDatapathObservabilityConfig) []map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+
+	if c.EnableRelay {
+		return []map[string]interface{}{
+			{
+				"enable_metrics": c.EnableMetrics,
+				"enable_relay":   c.EnableRelay,
+			},
+		}
+	}
+
+	if c.RelayMode == "INTERNAL_VPC_LB" || c.RelayMode == "EXTERNAL_LB" {
+		return []map[string]interface{}{
+			{
+				"enable_metrics": c.EnableMetrics,
+				"relay_mode":     c.RelayMode,
+			},
+		}
+	}
+
 	return []map[string]interface{}{
 		{
 			"enable_metrics": c.EnableMetrics,
-			"relay_mode": 	 c.RelayMode,
+			"enable_relay":   false,
+			"relay_mode":     "DISABLED",
 		},
 	}
 }
@@ -6167,6 +6260,9 @@ func flattenNodePoolAutoConfig(c *container.NodePoolAutoConfig) []map[string]int
 	result := make(map[string]interface{})
 	if c.NetworkTags != nil {
 		result["network_tags"] = flattenNodePoolAutoConfigNetworkTags(c.NetworkTags)
+	}
+	if c.ResourceManagerTags != nil {
+		result["resource_manager_tags"] = flattenResourceManagerTags(c.ResourceManagerTags)
 	}
 
 	return []map[string]interface{}{result}
@@ -6321,6 +6417,14 @@ func containerClusterPrivateClusterConfigSuppress(k, old, new string, d *schema.
 		return suppressNodes && !hasSubnet
 	} else if k == "private_cluster_config.#" {
 		return suppressEndpoint && suppressNodes && !hasSubnet && !hasGlobalAccessConfig
+	} else if k == "private_cluster_config.0.private_endpoint_subnetwork" {
+		// Before regular compare, for the sake of private flexible cluster,
+		// suppress diffs in private_endpoint_subnetwork when
+		//   master_ipv4_cidr_block is set
+		//   && private_endpoint_subnetwork is unset in terraform (new value == "")
+		//   && private_endpoint_subnetwork is returned from resource (old value != "")
+		_, hasMasterCidr := d.GetOk("private_cluster_config.0.master_ipv4_cidr_block")
+		return (hasMasterCidr && new == "" && old != "") || tpgresource.CompareSelfLinkOrResourceName(k, old, new, d)
 	}
 	return false
 }

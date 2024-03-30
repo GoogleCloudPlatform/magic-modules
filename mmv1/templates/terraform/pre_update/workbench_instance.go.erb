@@ -1,34 +1,15 @@
 name := d.Get("name").(string)
-if d.HasChange("gce_setup.0.machine_type") || d.HasChange("gce_setup.0.accelerator_configs") {
+if d.HasChange("gce_setup.0.machine_type") || d.HasChange("gce_setup.0.accelerator_configs")  || d.HasChange("gce_setup.0.shielded_instance_config"){
   state := d.Get("state").(string)
+
   if state != "STOPPED" {
-    stopURL, err := tpgresource.ReplaceVars(d, config, "{{WorkbenchBasePath}}projects/{{project}}/locations/{{location}}/instances/{{name}}:stop")
-	  if err != nil {
-		  return err
-	  }
-
-    log.Printf("[DEBUG] Stopping Workbench Instance: %q", name)
-
-    emptyReqBody := make(map[string]interface{})
-
-    dRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-                                            Config: config,
-                                            Method: "POST",
-                                            Project: billingProject,
-                                            RawURL: stopURL,
-                                            UserAgent: userAgent,
-                                            Body: emptyReqBody,
-                                          })
+    dRes, err := modifyWorkbenchInstanceState(config, d, project, billingProject, userAgent, "stop")
     if err != nil {
-      return fmt.Errorf("Error Stopping Workbench Instance: %s", err)
+      return err
     }
 
-    var opRes map[string]interface{}
-    err = WorkbenchOperationWaitTimeWithResponse(
-      config, dRes, &opRes, project, "Stopping Workbench Instance", userAgent,
-      d.Timeout(schema.TimeoutUpdate))
-    if err != nil {
-      return fmt.Errorf("Error waiting to stop Workbench Instance: %s", err)
+    if err := waitForWorkbenchOperation(config, d, project, billingProject, userAgent, dRes); err != nil {
+      return fmt.Errorf("Error stopping Workbench Instance: %s", err)
     }
 
   } else {
@@ -46,6 +27,9 @@ if d.HasChange("gce_setup.0.machine_type") {
 }
 if d.HasChange("gce_setup.0.accelerator_configs") {
     newUpdateMask = append(newUpdateMask, "gce_setup.accelerator_configs")
+}
+if d.HasChange("gce_setup.0.shielded_instance_config") {
+    newUpdateMask = append(newUpdateMask, "gce_setup.shielded_instance_config")
 }
 if d.HasChange("gce_setup.0.metadata") {
     newUpdateMask = append(newUpdateMask, "gceSetup.metadata")

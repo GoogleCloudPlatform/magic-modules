@@ -377,6 +377,8 @@ module Provider
 
           generate_object object, output_folder, @target_version_name, generate_code, generate_docs
         end
+        # Uncomment for go YAML
+        # generate_object_modified object, output_folder, @target_version_name
       end
     end
 
@@ -395,7 +397,6 @@ module Provider
         end
         Dir.chdir pwd
       end
-
       # if iam_policy is not defined or excluded, don't generate it
       return if object.iam_policy.nil? || object.iam_policy.exclude
 
@@ -404,6 +405,33 @@ module Provider
       Google::LOGGER.debug "Generating #{object.name} IAM policy"
       generate_iam_policy(pwd, data.clone, generate_code, generate_docs)
       Dir.chdir pwd
+    end
+
+    def generate_object_modified(object, output_folder, version_name)
+      pwd = Dir.pwd
+      data = build_object_data(pwd, object, output_folder, version_name)
+      FileUtils.mkpath output_folder
+      Dir.chdir output_folder
+      Google::LOGGER.debug "Generating #{object.name} rewrite yaml"
+      generate_newyaml(pwd, data.clone)
+      Dir.chdir pwd
+    end
+
+    def generate_newyaml(pwd, data)
+      # @api.api_name is the service folder name
+      product_name = @api.api_name
+      target_folder = File.join(folder_name(data.version), 'services', product_name)
+      FileUtils.mkpath target_folder
+      data.generate(pwd,
+                    '/templates/terraform/yaml_conversion.erb',
+                    "#{target_folder}/go_#{data.object.name}.yaml",
+                    self)
+      return if File.exist?("#{target_folder}/go_product.yaml")
+
+      data.generate(pwd,
+                    '/templates/terraform/product_yaml_conversion.erb',
+                    "#{target_folder}/go_product.yaml",
+                    self)
     end
 
     def build_env
@@ -435,14 +463,6 @@ module Provider
           update_id: p.update_id,
           fingerprint_name: p.fingerprint_name
         }
-      end
-    end
-
-    # Filter the properties to keep only the ones don't have custom update
-    # method and group them by update url & verb.
-    def properties_without_custom_update(properties)
-      properties.select do |p|
-        p.update_url.nil? || p.update_verb.nil? || p.update_verb == :NOOP
       end
     end
 
@@ -545,13 +565,21 @@ module Provider
     end
 
     def force_new?(property, resource)
-      ((!property.output || property.is_a?(Api::Type::KeyValueEffectiveLabels)) &&
-        (property.immutable || (resource.immutable && property.update_url.nil? &&
-                              property.immutable.nil? &&
-                            (property.parent.nil? ||
-                             force_new?(property.parent, resource))))) ||
+      (
+        (!property.output || property.is_a?(Api::Type::KeyValueEffectiveLabels)) &&
+        (property.immutable ||
+          (resource.immutable && property.update_url.nil? && property.immutable.nil? &&
+            (property.parent.nil? ||
+              (force_new?(property.parent, resource) &&
+               !(property.parent.flatten_object && property.is_a?(Api::Type::KeyValueLabels))
+              )
+            )
+          )
+        )
+      ) ||
         (property.is_a?(Api::Type::KeyValueTerraformLabels) &&
-          !updatable?(resource, resource.all_user_properties))
+          !updatable?(resource, resource.all_user_properties) && !resource.root_labels?
+        )
     end
 
     # Returns tuples of (fieldName, list of update masks) for

@@ -21,14 +21,16 @@ import (
 
 type GithubClient interface {
 	GetPullRequest(prNumber string) (github.PullRequest, error)
+	GetPullRequests(state, base, sort, direction string) ([]github.PullRequest, error)
 	GetPullRequestRequestedReviewers(prNumber string) ([]github.User, error)
 	GetPullRequestPreviousReviewers(prNumber string) ([]github.User, error)
 	GetUserType(user string) github.UserType
 	GetTeamMembers(organization, team string) ([]github.User, error)
+	MergePullRequest(owner, repo, prNumber string) error
 	PostBuildStatus(prNumber, title, state, targetURL, commitSha string) error
 	PostComment(prNumber, comment string) error
-	RequestPullRequestReviewer(prNumber, assignee string) error
-	AddLabel(prNumber, label string) error
+	RequestPullRequestReviewers(prNumber string, reviewers []string) error
+	AddLabels(prNumber string, labels []string) error
 	RemoveLabel(prNumber, label string) error
 	CreateWorkflowDispatchEvent(workflowFileName string, inputs map[string]any) error
 }
@@ -42,9 +44,11 @@ type CloudbuildClient interface {
 type ExecRunner interface {
 	GetCWD() string
 	Copy(src, dest string) error
+	Mkdir(path string) error
 	RemoveAll(path string) error
 	PushDir(path string) error
 	PopDir() error
+	WriteFile(name, data string) error
 	Run(name string, args []string, env map[string]string) (string, error)
 	MustRun(name string, args []string, env map[string]string) string
 }

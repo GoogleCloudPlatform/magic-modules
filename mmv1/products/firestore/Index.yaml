@@ -59,20 +59,19 @@ examples:
     name: 'firestore_index_basic'
     primary_resource_id:
       'my-index'
-      # This example relies on a well-known collection having been created and
-      # Firestore being enabled on the project. We can't do that automatically
-      # so we need a pre-created project.
+    vars:
+      database_id: "database-id"
     test_env_vars:
-      project_id: :FIRESTORE_PROJECT_NAME
+      project_id: :PROJECT_NAME
+    pull_external: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'firestore_index_datastore_mode'
     primary_resource_id:
-      'my-datastore-mode-index'
-      # This example relies on a well-known collection having been created and
-      # Firestore being enabled on the project. We can't do that automatically
-      # so we need a pre-created project.
+      'my-index'
+    vars:
+      database_id: "database-id-dm"
     test_env_vars:
-      project_id: :FIRESTORE_PROJECT_NAME
+      project_id: :PROJECT_NAME
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/index_self_link_as_name_set_project.go.erb
   encoder: templates/terraform/encoders/index.go.erb

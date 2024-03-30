@@ -18,7 +18,6 @@ package github
 import (
 	"fmt"
 	utils "magician/utility"
-	"net/http"
 )
 
 func (gh *Client) PostBuildStatus(prNumber, title, state, targetURL, commitSha string) error {
@@ -30,7 +29,7 @@ func (gh *Client) PostBuildStatus(prNumber, title, state, targetURL, commitSha s
 		"target_url": targetURL,
 	}
 
-	_, err := utils.RequestCall(url, "POST", gh.token, nil, postBody)
+	err := utils.RequestCall(url, "POST", gh.token, nil, postBody)
 	if err != nil {
 		return err
 	}
@@ -47,13 +46,9 @@ func (gh *Client) PostComment(prNumber, comment string) error {
 		"body": comment,
 	}
 
-	reqStatusCode, err := utils.RequestCall(url, "POST", gh.token, nil, body)
+	err := utils.RequestCall(url, "POST", gh.token, nil, body)
 	if err != nil {
 		return err
-	}
-
-	if reqStatusCode != http.StatusCreated {
-		return fmt.Errorf("error posting comment for PR %s", prNumber)
 	}
 
 	fmt.Printf("Successfully posted comment to pull request %s\n", prNumber)
@@ -61,38 +56,34 @@ func (gh *Client) PostComment(prNumber, comment string) error {
 	return nil
 }
 
-func (gh *Client) RequestPullRequestReviewer(prNumber, assignee string) error {
+func (gh *Client) RequestPullRequestReviewers(prNumber string, reviewers []string) error {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/%s/requested_reviewers", prNumber)
 
 	body := map[string][]string{
-		"reviewers":      {assignee},
+		"reviewers":      reviewers,
 		"team_reviewers": {},
 	}
 
-	reqStatusCode, err := utils.RequestCall(url, "POST", gh.token, nil, body)
+	err := utils.RequestCall(url, "POST", gh.token, nil, body)
 	if err != nil {
 		return err
 	}
 
-	if reqStatusCode != http.StatusCreated {
-		return fmt.Errorf("error adding reviewer for PR %s", prNumber)
-	}
-
-	fmt.Printf("Successfully added reviewer %s to pull request %s\n", assignee, prNumber)
+	fmt.Printf("Successfully added reviewers %v to pull request %s\n", reviewers, prNumber)
 
 	return nil
 }
 
-func (gh *Client) AddLabel(prNumber, label string) error {
+func (gh *Client) AddLabels(prNumber string, labels []string) error {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/%s/labels", prNumber)
 
 	body := map[string][]string{
-		"labels": {label},
+		"labels": labels,
 	}
-	_, err := utils.RequestCall(url, "POST", gh.token, nil, body)
+	err := utils.RequestCall(url, "POST", gh.token, nil, body)
 
 	if err != nil {
-		return fmt.Errorf("failed to add %s label: %s", label, err)
+		return fmt.Errorf("failed to add %q labels: %s", labels, err)
 	}
 
 	return nil
@@ -101,7 +92,7 @@ func (gh *Client) AddLabel(prNumber, label string) error {
 
 func (gh *Client) RemoveLabel(prNumber, label string) error {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/%s/labels/%s", prNumber, label)
-	_, err := utils.RequestCall(url, "DELETE", gh.token, nil, nil)
+	err := utils.RequestCall(url, "DELETE", gh.token, nil, nil)
 
 	if err != nil {
 		return fmt.Errorf("failed to remove %s label: %s", label, err)
@@ -112,20 +103,31 @@ func (gh *Client) RemoveLabel(prNumber, label string) error {
 
 func (gh *Client) CreateWorkflowDispatchEvent(workflowFileName string, inputs map[string]any) error {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/actions/workflows/%s/dispatches", workflowFileName)
-	resp, err := utils.RequestCall(url, "POST", gh.token, nil, map[string]any{
+	err := utils.RequestCall(url, "POST", gh.token, nil, map[string]any{
 		"ref":    "main",
 		"inputs": inputs,
 	})
-
-	if resp != 200 && resp != 204 {
-		return fmt.Errorf("server returned %d creating workflow dispatch event", resp)
-	}
 
 	if err != nil {
 		return fmt.Errorf("failed to create workflow dispatch event: %s", err)
 	}
 
-	fmt.Printf("Successfully created workflow dispatch event for %s with inputs %v", workflowFileName, inputs)
+	fmt.Printf("Successfully created workflow dispatch event for %s with inputs %v\n", workflowFileName, inputs)
+
+	return nil
+}
+
+func (gh *Client) MergePullRequest(owner, repo, prNumber string) error {
+	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/pulls/%s/merge", owner, repo, prNumber)
+	err := utils.RequestCall(url, "PUT", gh.token, nil, map[string]any{
+		"merge_method": "squash",
+	})
+
+	if err != nil {
+		return fmt.Errorf("failed to merge pull request: %s", err)
+	}
+
+	fmt.Printf("Successfully merged pull request %s\n", prNumber)
 
 	return nil
 }

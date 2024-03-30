@@ -251,8 +251,7 @@ is desired, you will need to modify your state file manually using
 
 * `provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk.
     This sets the number of I/O operations per second that the disk can handle.
-    Values must be between 10,000 and 120,000. For more details,see the 
-    [Extreme persistent disk documentation](https://cloud.google.com/compute/docs/disks/extreme-persistent-disk).
+    For more details,see the [Hyperdisk documentation](https://cloud.google.com/compute/docs/disks/hyperdisks).
     Note: Updating currently is only supported for hyperdisk skus via disk update
     api/gcloud without the need to delete and recreate the disk, hyperdisk allows
     for an update of IOPS every 4 hours. To update your hyperdisk more frequently,
@@ -260,10 +259,14 @@ is desired, you will need to modify your state file manually using
 
 * `provisioned_throughput` - (Optional) Indicates how much throughput to provision for the disk.
     This sets the number of throughput mb per second that the disk can handle.
-    Values must be between 1 and 7,124. Note: Updating currently is only supported
-    for hyperdisk skus via disk update api/gcloud without the need to delete and
-    recreate the disk, hyperdisk allows for an update of throughput every 4 hours.
-    To update your hyperdisk more frequently, you'll need to manually delete and recreate it.
+    For more details,see the [Hyperdisk documentation](https://cloud.google.com/compute/docs/disks/hyperdisks).
+    Note: Updating currently is only supported for hyperdisk skus via disk update
+    api/gcloud without the need to delete and recreate the disk, hyperdisk allows
+    for an update of throughput every 4 hours. To update your hyperdisk more
+    frequently, you'll need to manually delete and recreate it.
+
+* `enable_confidential_compute` - (Optional) Whether this disk is using confidential compute mode.
+    Note: Only supported on hyperdisk skus, disk_encryption_key is required when setting to true.
 
 <a name="nested_scratch_disk"></a>The `scratch_disk` block supports:
 
@@ -438,7 +441,6 @@ specified, then this instance will have no external IPv6 Internet access. Struct
    sec/min * 60 min/hr * 24 hr/day * 365.25 days/year * 10000 years.
 
 * `maintenance_interval` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) Specifies the frequency of planned maintenance events. The accepted values are: `PERIODIC`.
-<a name="nested_guest_accelerator"></a>The `guest_accelerator` block supports:
 
 * `local_ssd_recovery_timeout` -  (Optional) (https://terraform.io/docs/providers/google/guides/provider_versions.html) Specifies the maximum amount of time a Local Ssd Vm should wait while recovery of the Local Ssd state is attempted. Its value should be in between 0 and 168 hours with hour granularity and the default value being 1 hour. Structure is [documented below](#nested_local_ssd_recovery_timeout).
 <a name="nested_local_ssd_recovery_timeout"></a>The `local_ssd_recovery_timeout` block supports:
@@ -451,6 +453,8 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 * `seconds` - (Required) Span of time at a resolution of a second. Must be from 0 to
    315,576,000,000 inclusive. Note: these bounds are computed from: 60
    sec/min * 60 min/hr * 24 hr/day * 365.25 days/year * 10000 years.
+
+<a name="nested_guest_accelerator"></a>The `guest_accelerator` block supports:
 
 * `type` (Required) - The accelerator type resource to expose to this instance. E.g. `nvidia-tesla-k80`.
 
@@ -482,7 +486,9 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 <a name="nested_confidential_instance_config"></a>The `confidential_instance_config` block supports:
 
-* `enable_confidential_compute` (Optional) Defines whether the instance should have confidential compute enabled. [`on_host_maintenance`](#on_host_maintenance) has to be set to TERMINATE or this will fail to create the VM.
+* `enable_confidential_compute` (Optional) Defines whether the instance should have confidential compute enabled with AMD SEV. [`on_host_maintenance`](#on_host_maintenance) has to be set to TERMINATE or this will fail to create the VM.
+
+* `confidential_instance_type` (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) Defines the confidential computing technology the instance uses. SEV is an AMD feature. One of the following values: `SEV`, `SEV_SNP`. [`on_host_maintenance`](#on_host_maintenance) has to be set to TERMINATE or this will fail to create the VM. If `SEV_SNP`, currently [`min_cpu_platform`](#min_cpu_platform) has to be set to `"AMD Milan"` or this will fail to create the VM.
 
 <a name="nested_advanced_machine_features"></a>The `advanced_machine_features` block supports:
 

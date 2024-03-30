@@ -1,5 +1,35 @@
+resource "google_project" "project" {
+  project_id = "<%= ctx[:vars]['project_id'] %>"
+  name       = "<%= ctx[:vars]['project_id'] %>"
+  org_id     = "<%= ctx[:test_env_vars]['org_id'] %>"
+}
+
+resource "time_sleep" "wait_60_seconds" {
+  depends_on = [google_project.project]
+
+  create_duration = "60s"
+}
+
+resource "google_project_service" "firestore" {
+  project = google_project.project.project_id
+  service = "firestore.googleapis.com"
+
+  # Needed for CI tests for permissions to propagate, should not be needed for actual usage
+  depends_on = [time_sleep.wait_60_seconds]
+}
+
+resource "google_firestore_database" "database" {
+  project     = google_project.project.project_id
+  name        = "(default)"
+  location_id = "nam5"
+  type        = "FIRESTORE_NATIVE"
+
+  depends_on = [google_project_service.firestore]
+}
+
 resource "google_firestore_document" "<%= ctx[:primary_resource_id] %>" {
-  project     = "<%= ctx[:test_env_vars]['project_id'] %>"
+  project     = google_project.project.project_id
+  database    = google_firestore_database.database.name
   collection  = "somenewcollection"
   document_id = "<%= ctx[:vars]['document_id'] %>"
   fields      = "{\"something\":{\"mapValue\":{\"fields\":{\"akey\":{\"stringValue\":\"avalue\"}}}}}"

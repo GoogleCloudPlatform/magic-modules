@@ -1,12 +1,12 @@
 ---
-page_title: "Terraform Google Provider 5.0.0 Upgrade Guide"
+page_title: "Terraform provider for Google Cloud 5.0.0 Upgrade Guide"
 description: |-
-  Terraform Google Provider 5.0.0 Upgrade Guide
+  Terraform provider for Google Cloud 5.0.0 Upgrade Guide
 ---
 
-# Terraform Google Provider 5.0.0 Upgrade Guide
+# Terraform provider for Google Cloud 5.0.0 Upgrade Guide
 
-The `5.0.0` release of the Google provider for Terraform is a major version and
+The `5.0.0` release of the Terraform provider for Google Cloud is a major version and
 includes some changes that you will need to consider when upgrading. This guide
 is intended to help with that process and focuses only on the changes necessary
 to upgrade from the final `4.X` series release to `5.0.0`.
@@ -113,8 +113,8 @@ included in requests to the API. Replacing those labels' values with `_` or
 `true` are recommended.
 
 Not all of Google Cloud resources support labels and annotations. Please check
-the Terraform Google provider resource documentation to figure out if a given
-resource supports `labels` or `annotations` fields.
+the resource documentation to figure out if a given resource supports `labels`
+or `annotations` fields.
 
 #### Provider default labels
 
@@ -188,7 +188,7 @@ Provider-level default annotations are not supported at this time.
 
 #### Resource labels
 
-Previously, `labels` and `annotations` fields in the Terraform Google provider
+Previously, `labels` and `annotations` fields in the Google Cloud provider
 were authoritative and Terraform thought it was the only owner of the fields.
 This model worked well initially, but with the introduction of system labels and
 other client-managed labels, Terraform would conflict with their labels and show
@@ -241,6 +241,22 @@ and `terraform_labels` will now be present. All of these three fields include
 all of the labels present on the resource in GCP including the labels configured
 through Terraform, the system, and other clients, equivalent to
 `effective_labels` on the resource.
+
+### How to make Terraform Cloud's Drift Detection feature compatible with the new implementation of labels
+
+In <5.0.0, Drift Detection was possible for labels but would lead to some confusion for users due to GCP often adding labels to itself. This resulted in Drift Detection not being 100% correct of the time.
+
+In order to detect drift, it's recommended to use Terraform's `check` block to compare the number of labels in both `effective_labels` and `terraform_labels`. A mismatch would only happen if drift is present, the following code would run this check on applicable resources.
+ ```
+ check "google_storage_bucket" {
+  assert {
+    condition = length(google_storage_bucket.drift.effective_labels) == length(google_storage_bucket.drift.terraform_labels)
+    error_message = "Drift Detected"
+  }
+}
+ ```
+
+~> **Note:** This would reintroduce the original problem with Drift Detection where it's not 100% correct with labels. Users will need to determine if the change comes from GCP and update their Terraform configuration assuming it's a stable GCP created label.
 
 #### Resource annotations
 

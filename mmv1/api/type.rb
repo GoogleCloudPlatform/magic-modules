@@ -17,11 +17,11 @@ require 'provider/terraform/validation'
 
 module Api
   # Represents a property type
-  class Type < Api::Object::Named
+  class Type < Api::NamedObject
     # The list of properties (attr_reader) that can be overridden in
     # <provider>.yaml.
     module Fields
-      include Api::Object::Named::Properties
+      include Api::NamedObject::Properties
 
       attr_reader :default_value
       attr_accessor :description
@@ -47,7 +47,7 @@ module Api
       # For nested fields, this only applies at the current level. This means
       # it should be explicitly added to each field that needs the ForceNew
       # behavior.
-      attr_reader :immutable
+      attr_accessor :immutable
 
       # url_param_only will not send the field in the resource body and will
       # not attempt to read the field from the API response.
@@ -468,16 +468,6 @@ module Api
 
     private
 
-    # A constant value to be provided as field
-    class Constant < Type
-      attr_reader :value
-
-      def validate
-        @description = "This is always #{value}."
-        super
-      end
-    end
-
     # Represents a primitive (non-composite) type.
     class Primitive < Type
     end
@@ -576,20 +566,6 @@ module Api
         check :max_size, type: ::Integer
       end
 
-      def property_class
-        case @item_type
-        when NestedObject, ResourceRef
-          type = @item_type.property_class
-        when Enum
-          raise 'aaaa'
-        else
-          type = property_ns_prefix
-          type << get_type(@item_type).new(@name).type
-        end
-        type[-1] = "#{type[-1].camelize(:upper)}Array"
-        type
-      end
-
       def exclude_if_not_in_version!(version)
         super
         @item_type.exclude_if_not_in_version!(version) \
@@ -641,21 +617,6 @@ module Api
       end
     end
 
-    # Represents a 'selfLink' property, which returns the URI of the resource.
-    class SelfLink < FetchedExternal
-      EXPORT_KEY = 'selfLink'.freeze
-
-      attr_reader :resource
-
-      def name
-        EXPORT_KEY
-      end
-
-      def out_name
-        EXPORT_KEY.underscore
-      end
-    end
-
     # Represents a reference to another resource
     class ResourceRef < Type
       # The fields which can be overridden in provider.yaml.
@@ -682,24 +643,11 @@ module Api
         check_resource_ref_property_exists
       end
 
-      def property
-        props = resource_ref.all_user_properties
-                            .select { |prop| prop.name == @imports }
-        return props.first unless props.empty?
-      end
-
       def resource_ref
         product = @__resource.__product
         resources = product.objects.select { |obj| obj.name == @resource }
 
         resources[0]
-      end
-
-      def property_class
-        type = property_ns_prefix
-        type << [@resource, @imports, 'Ref']
-        type[-1] = type[-1].join('_').camelize(:upper)
-        type
       end
 
       private
@@ -731,13 +679,6 @@ module Api
           p.set_variable(self, :__parent)
         end
         check :properties, type: ::Array, item_type: Api::Type, required: true
-      end
-
-      def property_class
-        type = property_ns_prefix
-        type << [@__resource.name, @name]
-        type[-1] = type[-1].join('_').camelize(:upper)
-        type
       end
 
       # Returns all properties including the ones that are excluded
@@ -920,20 +861,6 @@ module Api
 
       def nested_properties
         @value_type.nested_properties.reject(&:exclude)
-      end
-    end
-
-    # Support for schema ValidateFunc functionality.
-    class Validation < Object
-      # Ensures the value matches this regex
-      attr_reader :regex
-      attr_reader :function
-
-      def validate
-        super
-
-        check :regex, type: String
-        check :function, type: String
       end
     end
 

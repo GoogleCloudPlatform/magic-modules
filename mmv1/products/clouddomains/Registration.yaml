@@ -1,0 +1,454 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'Registration'
+description: |
+  Registers a new domain name and creates a corresponding Registration resource.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Register a domain with Cloud Domains': 'https://cloud.google.com/domains/docs/buy-register-domain'
+  api: 'https://cloud.google.com/domains/docs/reference/rest/v1/projects.locations.registrations'
+base_url: 'projects/{{project}}/locations/{{location}}/registrations'
+self_link: 'projects/{{project}}/locations/{{location}}/registrations/{{domain_name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/registrations:register'
+import_format: ['projects/{{project}}/locations/{{location}}/registrations/{{domain_name}}']
+immutable: true
+# Cannot be deleted
+skip_delete: true
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/clouddomains_registration.go.erb
+  post_create: templates/terraform/post_create/clouddomains_registration.go.erb
+  encoder: templates/terraform/encoders/clouddomains_registration.go.erb
+docs: !ruby/object:Provider::Terraform::Docs
+  warning: |
+    The Terraform implementation of this resource will not actually delete a Registration during
+    `terraform destroy`. Instead it will "abandon" the resource and remove it from state.
+    For information on deleting a registered domain, see https://cloud.google.com/domains/docs/delete-domain
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+    resource_inside_response: false
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'
+id_format: 'projects/{{project}}/locations/{{location}}/registrations/{{domain_name}}'
+autogen_async: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "clouddomains_registration_full"
+    primary_resource_id: "my_registration"
+    # Must be tested in staging environment with all-time unique domains
+    skip_test: true
+    # ignore_read_extra:
+    #   - 'contact_settings.0.registrant_contact.0.phone_number'
+    #   - 'contact_settings.0.registrant_contact.0.fax_number'
+    #   - 'contact_settings.0.registrant_contact.0.postal_address'
+    #   - 'contact_settings.0.admin_contact.0.phone_number'
+    #   - 'contact_settings.0.admin_contact.0.fax_number'
+    #   - 'contact_settings.0.admin_contact.0.postal_address'
+    #   - 'contact_settings.0.technical_contact.0.phone_number'
+    #   - 'contact_settings.0.technical_contact.0.fax_number'
+    #   - 'contact_settings.0.technical_contact.0.postal_address'
+parameters:
+  - !ruby/object:Api::Type::String
+    name: location
+    url_param_only: true
+    description: "The location for the resource"
+    required: true
+  - !ruby/object:Api::Type::String
+    name: domainName
+    description: "Required. The domain name. Unicode domain names must be expressed in Punycode format."
+    required: true
+properties:
+  - !ruby/object:Api::Type::String
+    name: name
+    description: "Output only. Name of the Registration resource, in the format projects/*/locations/*/registrations/<domain_name>."
+    output: true
+  - !ruby/object:Api::Type::String
+    name: createTime
+    description: "Output only. Time at which the automation was created."
+    output: true
+  - !ruby/object:Api::Type::String
+    name: expireTime
+    description: "Output only. Time at which the automation was updated."
+    output: true
+  - !ruby/object:Api::Type::String
+    name: state
+    output: true
+    description: Output only. The current state of the Registration.
+  - !ruby/object:Api::Type::Array
+    name: issues
+    description: Output only. The set of issues with the Registration that require attention.
+    item_type: Api::Type::String
+    output: true
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: labels
+    description: Set of labels associated with the Registration.
+  - !ruby/object:Api::Type::Array
+    name: domainNotices
+    description: The list of domain notices that you acknowledge. Possible value is HSTS_PRELOADED
+    item_type: Api::Type::String
+    ignore_read: true
+  - !ruby/object:Api::Type::Array
+    name: contactNotices
+    description: The list of contact notices that the caller acknowledges. Possible value is PUBLIC_CONTACT_DATA_ACKNOWLEDGEMENT
+    item_type: Api::Type::String
+    ignore_read: true
+  - !ruby/object:Api::Type::NestedObject
+    name: yearlyPrice
+    required: true
+    ignore_read: true
+    description: |
+      Required. Yearly price to register or renew the domain. The value that should be put here can be obtained from
+      registrations.retrieveRegisterParameters or registrations.searchDomains calls.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: currencyCode
+        description: The three-letter currency code defined in ISO 4217.
+      - !ruby/object:Api::Type::String
+        name: units
+        description: The whole units of the amount. For example if currencyCode is "USD", then 1 unit is one US dollar.
+  - !ruby/object:Api::Type::Array
+    name: supportedPrivacy
+    description: Output only. Set of options for the contactSettings.privacy field that this Registration supports.
+    item_type: Api::Type::String
+    output: true
+  - !ruby/object:Api::Type::String
+    name: registerFailureReason
+    output: true
+    description: Output only. The reason the domain registration failed. Only set for domains in REGISTRATION_FAILED state.
+  - !ruby/object:Api::Type::NestedObject
+    name: managementSettings
+    description: "Settings for management of the Registration, including renewal, billing, and transfer"
+    default_from_api: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: renewalMethod
+        output: true
+        description: |
+          Output only. The actual renewal method for this Registration. When preferredRenewalMethod is set to AUTOMATIC_RENEWAL,
+          the actual renewalMethod can be equal to RENEWAL_DISABLED—for example, when there are problems with the billing account
+          or reported domain abuse. In such cases, check the issues field on the Registration. After the problem is resolved, the
+          renewalMethod is automatically updated to preferredRenewalMethod in a few hours.
+      - !ruby/object:Api::Type::String
+        name: preferredRenewalMethod
+        default_from_api: true
+        at_least_one_of:
+          - managementSettings.0.preferredRenewalMethod
+          - managementSettings.0.transferLockState
+        description: |
+          The desired renewal method for this Registration. The actual renewalMethod is automatically updated to reflect this choice.
+          If unset or equal to RENEWAL_METHOD_UNSPECIFIED, the actual renewalMethod is treated as if it were set to AUTOMATIC_RENEWAL.
+          You cannot use RENEWAL_DISABLED during resource creation, and you can update the renewal status only when the Registration
+          resource has state ACTIVE or SUSPENDED.
+
+          When preferredRenewalMethod is set to AUTOMATIC_RENEWAL, the actual renewalMethod can be set to RENEWAL_DISABLED in case of
+          problems with the billing account or reported domain abuse. In such cases, check the issues field on the Registration. After
+          the problem is resolved, the renewalMethod is automatically updated to preferredRenewalMethod in a few hours.
+      - !ruby/object:Api::Type::String
+        name: transferLockState
+        default_from_api: true
+        at_least_one_of:
+          - managementSettings.0.preferredRenewalMethod
+          - managementSettings.0.transferLockState
+        description: Controls whether the domain can be transferred to another registrar. Values are UNLOCKED or LOCKED.
+  - !ruby/object:Api::Type::NestedObject
+    name: dnsSettings
+    description: Settings controlling the DNS configuration of the Registration.
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: customDns
+        description: Configuration for an arbitrary DNS provider.
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: nameServers
+            required: true
+            description: |
+              Required. A list of name servers that store the DNS zone for this domain. Each name server is a domain
+              name, with Unicode domain names expressed in Punycode format.
+            item_type: Api::Type::String
+          - !ruby/object:Api::Type::Array
+            name: dsRecords
+            description: |
+              The list of DS records for this domain, which are used to enable DNSSEC. The domain's DNS provider can provide
+              the values to set here. If this field is empty, DNSSEC is disabled.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::Integer
+                  name: keyTag
+                  description: The key tag of the record. Must be set in range 0 -- 65535.
+                - !ruby/object:Api::Type::String
+                  name: algorithm
+                  description: The algorithm used to generate the referenced DNSKEY.
+                - !ruby/object:Api::Type::String
+                  name: digestType
+                  description: The hash function used to generate the digest of the referenced DNSKEY.
+                - !ruby/object:Api::Type::String
+                  name: digest
+                  description: The digest generated from the referenced DNSKEY.
+      - !ruby/object:Api::Type::Array
+        name: "glueRecords"
+        description: "The list of glue records for this Registration. Commonly empty."
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: hostName
+              description: "Required. Domain name of the host in Punycode format."
+              required: true
+            - !ruby/object:Api::Type::Array
+              name: ipv4Addresses
+              description: |
+                List of IPv4 addresses corresponding to this host in the standard decimal format (e.g. 198.51.100.1).
+                At least one of ipv4_address and ipv6_address must be set.
+              item_type: Api::Type::String
+            - !ruby/object:Api::Type::Array
+              name: ipv6Addresses
+              description: |
+                List of IPv4 addresses corresponding to this host in the standard decimal format (e.g. 198.51.100.1).
+                At least one of ipv4_address and ipv6_address must be set.
+              item_type: Api::Type::String
+  - !ruby/object:Api::Type::NestedObject
+    name: contactSettings
+    description: Required. Settings for contact information linked to the Registration.
+    required: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: privacy
+        required: true
+        description: |
+          Required. Privacy setting for the contacts associated with the Registration.
+          Values are PUBLIC_CONTACT_DATA, PRIVATE_CONTACT_DATA, and REDACTED_CONTACT_DATA
+      - !ruby/object:Api::Type::NestedObject
+        name: registrantContact
+        required: true
+        # ignore read on phone and fax numbers. Need to use custom flatten because ignore_read doesn't work with nested fields
+        custom_flatten: templates/terraform/custom_flatten/clouddomains_ignore_numbers_registrant.go.erb
+        description: |
+          Caution: Anyone with access to this email address, phone number, and/or postal address can take control of the domain.
+
+          Warning: For new Registrations, the registrant receives an email confirmation that they must complete within 15 days to
+          avoid domain suspension.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: email
+            required: true
+            description: Required. Email address of the contact.
+          - !ruby/object:Api::Type::String
+            name: phoneNumber
+            required: true
+            description: Required. Phone number of the contact in international format. For example, "+1-800-555-0123".
+          - !ruby/object:Api::Type::String
+            name: faxNumber
+            description: Fax number of the contact in international format. For example, "+1-800-555-0123".
+          - !ruby/object:Api::Type::NestedObject
+            name: postalAddress
+            required: true
+            description: Required. Postal address of the contact.
+            properties:
+              - !ruby/object:Api::Type::String
+                name: regionCode
+                required: true
+                description: |
+                  Required. CLDR region code of the country/region of the address. This is never inferred and it is up to the user to
+                  ensure the value is correct. See https://cldr.unicode.org/ and
+                  https://www.unicode.org/cldr/charts/30/supplemental/territory_information.html for details. Example: "CH" for Switzerland.
+              - !ruby/object:Api::Type::String
+                name: postalCode
+                description: |
+                  Postal code of the address. Not all countries use or require postal codes to be present, but where they are used,
+                  they may trigger additional validation with other parts of the address (e.g. state/zip validation in the U.S.A.).
+              - !ruby/object:Api::Type::String
+                name: administrativeArea
+                description: |
+                  Highest administrative subdivision which is used for postal addresses of a country or region. For example, this can be a state,
+                  a province, an oblast, or a prefecture. Specifically, for Spain this is the province and not the autonomous community
+                  (e.g. "Barcelona" and not "Catalonia"). Many countries don't use an administrative area in postal addresses. E.g. in Switzerland
+                  this should be left unpopulated.
+              - !ruby/object:Api::Type::String
+                name: locality
+                description: |
+                  Generally refers to the city/town portion of the address. Examples: US city, IT comune, UK post town. In regions of the world
+                  where localities are not well defined or do not fit into this structure well, leave locality empty and use addressLines.
+              - !ruby/object:Api::Type::String
+                name: organization
+                description: |
+                  The name of the organization at the address.
+              - !ruby/object:Api::Type::Array
+                name: addressLines
+                description: |
+                  Unstructured address lines describing the lower levels of an address.
+                  Because values in addressLines do not have type information and may sometimes contain multiple values in a single
+                  field (e.g. "Austin, TX"), it is important that the line order is clear. The order of address lines should be
+                  "envelope order" for the country/region of the address. In places where this can vary (e.g. Japan), address_language
+                  is used to make it explicit (e.g. "ja" for large-to-small ordering and "ja-Latn" or "en" for small-to-large). This way,
+                  the most specific line of an address can be selected based on the language.
+                item_type: Api::Type::String
+              - !ruby/object:Api::Type::Array
+                name: recipients
+                description: |
+                  The recipient at the address. This field may, under certain circumstances, contain multiline information. For example,
+                  it might contain "care of" information.
+                item_type: Api::Type::String
+      - !ruby/object:Api::Type::NestedObject
+        name: adminContact
+        required: true
+        # ignore read on phone and fax numbers. Need to use custom flatten because ignore_read doesn't work with nested fields
+        custom_flatten: templates/terraform/custom_flatten/clouddomains_ignore_numbers_admin.go.erb
+        description: |
+          Caution: Anyone with access to this email address, phone number, and/or postal address can take control of the domain.
+
+          Warning: For new Registrations, the registrant receives an email confirmation that they must complete within 15 days to
+          avoid domain suspension.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: email
+            required: true
+            description: Required. Email address of the contact.
+          - !ruby/object:Api::Type::String
+            name: phoneNumber
+            required: true
+            description: Required. Phone number of the contact in international format. For example, "+1-800-555-0123".
+          - !ruby/object:Api::Type::String
+            name: faxNumber
+            description: Fax number of the contact in international format. For example, "+1-800-555-0123".
+          - !ruby/object:Api::Type::NestedObject
+            name: postalAddress
+            required: true
+            description: Required. Postal address of the contact.
+            properties:
+              - !ruby/object:Api::Type::String
+                name: regionCode
+                required: true
+                description: |
+                  Required. CLDR region code of the country/region of the address. This is never inferred and it is up to the user to
+                  ensure the value is correct. See https://cldr.unicode.org/ and
+                  https://www.unicode.org/cldr/charts/30/supplemental/territory_information.html for details. Example: "CH" for Switzerland.
+              - !ruby/object:Api::Type::String
+                name: postalCode
+                description: |
+                  Postal code of the address. Not all countries use or require postal codes to be present, but where they are used,
+                  they may trigger additional validation with other parts of the address (e.g. state/zip validation in the U.S.A.).
+              - !ruby/object:Api::Type::String
+                name: administrativeArea
+                description: |
+                  Highest administrative subdivision which is used for postal addresses of a country or region. For example, this can be a state,
+                  a province, an oblast, or a prefecture. Specifically, for Spain this is the province and not the autonomous community
+                  (e.g. "Barcelona" and not "Catalonia"). Many countries don't use an administrative area in postal addresses. E.g. in Switzerland
+                  this should be left unpopulated.
+              - !ruby/object:Api::Type::String
+                name: locality
+                description: |
+                  Generally refers to the city/town portion of the address. Examples: US city, IT comune, UK post town. In regions of the world
+                  where localities are not well defined or do not fit into this structure well, leave locality empty and use addressLines.
+              - !ruby/object:Api::Type::String
+                name: organization
+                description: |
+                  The name of the organization at the address.
+              - !ruby/object:Api::Type::Array
+                name: addressLines
+                description: |
+                  Unstructured address lines describing the lower levels of an address.
+                  Because values in addressLines do not have type information and may sometimes contain multiple values in a single
+                  field (e.g. "Austin, TX"), it is important that the line order is clear. The order of address lines should be
+                  "envelope order" for the country/region of the address. In places where this can vary (e.g. Japan), address_language
+                  is used to make it explicit (e.g. "ja" for large-to-small ordering and "ja-Latn" or "en" for small-to-large). This way,
+                  the most specific line of an address can be selected based on the language.
+                item_type: Api::Type::String
+              - !ruby/object:Api::Type::Array
+                name: recipients
+                description: |
+                  The recipient at the address. This field may, under certain circumstances, contain multiline information. For example,
+                  it might contain "care of" information.
+                item_type: Api::Type::String
+      - !ruby/object:Api::Type::NestedObject
+        name: technicalContact
+        required: true
+        # ignore read on phone and fax numbers. Need to use custom flatten because ignore_read doesn't work with nested fields
+        custom_flatten: templates/terraform/custom_flatten/clouddomains_ignore_numbers_technical.go.erb
+        description: |
+          Caution: Anyone with access to this email address, phone number, and/or postal address can take control of the domain.
+
+          Warning: For new Registrations, the registrant receives an email confirmation that they must complete within 15 days to
+          avoid domain suspension.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: email
+            required: true
+            description: Required. Email address of the contact.
+          - !ruby/object:Api::Type::String
+            name: phoneNumber
+            required: true
+            description: Required. Phone number of the contact in international format. For example, "+1-800-555-0123".
+          - !ruby/object:Api::Type::String
+            name: faxNumber
+            description: Fax number of the contact in international format. For example, "+1-800-555-0123".
+          - !ruby/object:Api::Type::NestedObject
+            name: postalAddress
+            required: true
+            description: Required. Postal address of the contact.
+            properties:
+              - !ruby/object:Api::Type::String
+                name: regionCode
+                required: true
+                description: |
+                  Required. CLDR region code of the country/region of the address. This is never inferred and it is up to the user to
+                  ensure the value is correct. See https://cldr.unicode.org/ and
+                  https://www.unicode.org/cldr/charts/30/supplemental/territory_information.html for details. Example: "CH" for Switzerland.
+              - !ruby/object:Api::Type::String
+                name: postalCode
+                description: |
+                  Postal code of the address. Not all countries use or require postal codes to be present, but where they are used,
+                  they may trigger additional validation with other parts of the address (e.g. state/zip validation in the U.S.A.).
+              - !ruby/object:Api::Type::String
+                name: administrativeArea
+                description: |
+                  Highest administrative subdivision which is used for postal addresses of a country or region. For example, this can be a state,
+                  a province, an oblast, or a prefecture. Specifically, for Spain this is the province and not the autonomous community
+                  (e.g. "Barcelona" and not "Catalonia"). Many countries don't use an administrative area in postal addresses. E.g. in Switzerland
+                  this should be left unpopulated.
+              - !ruby/object:Api::Type::String
+                name: locality
+                description: |
+                  Generally refers to the city/town portion of the address. Examples: US city, IT comune, UK post town. In regions of the world
+                  where localities are not well defined or do not fit into this structure well, leave locality empty and use addressLines.
+              - !ruby/object:Api::Type::String
+                name: organization
+                description: |
+                  The name of the organization at the address.
+              - !ruby/object:Api::Type::Array
+                name: addressLines
+                description: |
+                  Unstructured address lines describing the lower levels of an address.
+                  Because values in addressLines do not have type information and may sometimes contain multiple values in a single
+                  field (e.g. "Austin, TX"), it is important that the line order is clear. The order of address lines should be
+                  "envelope order" for the country/region of the address. In places where this can vary (e.g. Japan), address_language
+                  is used to make it explicit (e.g. "ja" for large-to-small ordering and "ja-Latn" or "en" for small-to-large). This way,
+                  the most specific line of an address can be selected based on the language.
+                item_type: Api::Type::String
+              - !ruby/object:Api::Type::Array
+                name: recipients
+                description: |
+                  The recipient at the address. This field may, under certain circumstances, contain multiline information. For example,
+                  it might contain "care of" information.
+                item_type: Api::Type::String

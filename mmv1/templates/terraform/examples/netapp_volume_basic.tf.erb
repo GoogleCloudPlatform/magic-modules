@@ -1,0 +1,21 @@
+resource "google_netapp_storage_pool" "default" {
+  name = "<%= ctx[:vars]['pool_name'] %>"
+  location = "us-west2"
+  service_level = "PREMIUM"
+  capacity_gib = "2048"
+  network = data.google_compute_network.default.id
+}
+
+resource "google_netapp_volume" "<%= ctx[:primary_resource_id] %>" {
+  location = "us-west2"
+  name = "<%= ctx[:vars]['volume_name'] %>"
+  capacity_gib = "100"
+  share_name = "<%= ctx[:vars]['volume_name'] %>"
+  storage_pool = google_netapp_storage_pool.default.name
+  protocols = ["NFSV3"]
+  deletion_policy = "DEFAULT"
+}
+
+data "google_compute_network" "default" {
+  name = "<%= ctx[:vars]['network_name'] %>"
+}

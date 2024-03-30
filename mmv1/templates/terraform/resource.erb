@@ -57,7 +57,7 @@ func Resource<%= object.resource_name -%>() *schema.Resource {
     return &schema.Resource{
         Create: resource<%= object.resource_name -%>Create,
         Read: resource<%= object.resource_name -%>Read,
-<%  if updatable?(object,  object.all_user_properties) -%>
+<%  if updatable?(object, object.all_user_properties) || object.root_labels? -%>
         Update: resource<%= object.resource_name -%>Update,
 <%  end -%>
         Delete: resource<%= object.resource_name -%>Delete,
@@ -70,7 +70,7 @@ func Resource<%= object.resource_name -%>() *schema.Resource {
 
         Timeouts: &schema.ResourceTimeout {
             Create: schema.DefaultTimeout(<%= object.timeouts.insert_minutes -%> * time.Minute),
-<%  if updatable?(object, object.all_user_properties) -%>
+<%  if updatable?(object, object.all_user_properties) || object.root_labels? -%>
             Update: schema.DefaultTimeout(<%= object.timeouts.update_minutes -%> * time.Minute),
 <%  end -%>
             Delete: schema.DefaultTimeout(<%= object.timeouts.delete_minutes -%> * time.Minute),
@@ -973,7 +973,12 @@ if len(updateMask) > 0 {
     return resource<%= object.resource_name -%>Read(d, meta)
 <%  end # if custom_update -%>
 }
-<%  end # if updatable? -%>
+<% elsif object.root_labels? # if updatable? -%>
+func resource<%= object.resource_name -%>Update(d *schema.ResourceData, meta interface{}) error {
+    // Only the root field "labels" and "terraform_labels" are mutable
+    return resource<%= object.resource_name -%>Read(d, meta)
+}
+<%  end -%>
 
 func resource<%= object.resource_name -%>Delete(d *schema.ResourceData, meta interface{}) error {
 <%  if object.async&.is_a?(Api::OpAsync) && object.async.include_project && object.async&.allow?('delete') -%>
@@ -1027,7 +1032,6 @@ func resource<%= object.resource_name -%>Delete(d *schema.ResourceData, meta int
 
 <%# If the deletion of the object requires sending a request body, the custom code will set 'obj' -%>
     var obj map[string]interface{}
-<%= lines(compile(pwd + '/' + object.custom_code.pre_delete)) if object.custom_code.pre_delete -%>
 <%      if object.nested_query&.modify_by_patch -%>
 <%# Keep this after mutex - patch request data relies on current resource state %>
     obj, err = resource<%= object.resource_name -%>PatchDeleteEncoder(d, meta, obj)
@@ -1042,19 +1046,19 @@ func resource<%= object.resource_name -%>Delete(d *schema.ResourceData, meta int
 <%        end -%>
 <%      end -%>
 <%      if object.supports_indirect_user_project_override -%>
-
     if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
         billingProject = parts[1]
     }
-
 <%      end -%>
-    log.Printf("[DEBUG] Deleting <%= object.name -%> %q", d.Id())
 
     // err == nil indicates that the billing_project value was found
     if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
       billingProject = bp
     }
 
+<%= lines(compile(pwd + '/' + object.custom_code.pre_delete)) if object.custom_code.pre_delete -%>
+
+    log.Printf("[DEBUG] Deleting <%= object.name -%> %q", d.Id())
     res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
         Config: config,
         Method: "<%= object.delete_verb.to_s.upcase -%>",

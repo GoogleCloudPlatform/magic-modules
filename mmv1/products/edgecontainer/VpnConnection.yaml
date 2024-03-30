@@ -15,6 +15,7 @@
 name: "VpnConnection"
 base_url: "projects/{{project}}/locations/{{location}}/vpnConnections"
 create_url: "projects/{{project}}/locations/{{location}}/vpnConnections?vpnConnectionId={{name}}"
+self_link: 'projects/{{project}}/locations/{{location}}/vpnConnections/{{name}}'
 description: "A VPN connection"
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
@@ -40,7 +41,6 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: "error"
     message: "message"
-import_format: ["projects/{{project}}/locations/{{location}}/vpnConnections"]
 autogen_async: true
 examples:
   # Skip the vpnconnection test as we only have limited machine resources, and the vpn connection is not a critical feature.

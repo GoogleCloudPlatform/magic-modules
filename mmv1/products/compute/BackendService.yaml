@@ -57,6 +57,13 @@ examples:
       backend_service_name: 'backend-service'
       http_health_check_name: 'health-check'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'backend_service_external_iap'
+    primary_resource_id: 'default'
+    vars:
+      backend_service_name: 'tf-test-backend-service-external'
+    ignore_read_extra:
+      - 'iap.0.oauth2_client_secret'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'backend_service_cache_simple'
     primary_resource_id: 'default'
     vars:
