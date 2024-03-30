@@ -315,7 +315,7 @@ properties:
           - !ruby/object:Api::Type::String
             name: 'connector'
             description: |-
-              VPC Access connector name. Format: projects/{project}/locations/{location}/connectors/{connector}, where {project} can be project id or number.
+              VPC Access connector name.
           - !ruby/object:Api::Type::Enum
             name: 'egress'
             description: |-
