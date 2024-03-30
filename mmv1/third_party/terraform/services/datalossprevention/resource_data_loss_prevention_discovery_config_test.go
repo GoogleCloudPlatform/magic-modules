@@ -41,6 +41,139 @@ func TestAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigUpdate(t *testin
 	})
 }
 
+func TestAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigUpdateOrg(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"organization":  envvar.GetTestOrgFromEnv(t),
+		"project":       envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataLossPreventionDiscoveryConfigDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigOrgRunning(context),
+			},
+			{
+				ResourceName:      "google_data_loss_prevention_discovery_config.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigOrgFolderPaused(context),
+			},
+			{
+				ResourceName:      "google_data_loss_prevention_discovery_config.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigUpdateActions(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataLossPreventionDiscoveryConfigDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigStart(context),
+			},
+			{
+				ResourceName:      "google_data_loss_prevention_discovery_config.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigActions(context),
+			},
+			{
+				ResourceName:      "google_data_loss_prevention_discovery_config.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigUpdateConditions(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataLossPreventionDiscoveryConfigDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigStart(context),
+			},
+			{
+				ResourceName:      "google_data_loss_prevention_discovery_config.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigConditionsCadence(context),
+			},
+			{
+				ResourceName:      "google_data_loss_prevention_discovery_config.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigUpdateFilter(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataLossPreventionDiscoveryConfigDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigStart(context),
+			},
+			{
+				ResourceName:      "google_data_loss_prevention_discovery_config.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigFilterRegexesAndConditions(context),
+			},
+			{
+				ResourceName:      "google_data_loss_prevention_discovery_config.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigStart(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_data_loss_prevention_discovery_config" "basic" {
