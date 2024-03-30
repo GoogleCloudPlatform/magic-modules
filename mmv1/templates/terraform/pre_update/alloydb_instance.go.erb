@@ -12,7 +12,7 @@ if d.HasChange("network_config.0.enable_public_ip") && d.Get("network_config.0.e
   } else {
     nc = obj["networkConfig"].(map[string]interface{})
   }
-  if networkConfig["authorizedExternalNetworks"] != nil {
+  if nc["authorizedExternalNetworks"] != nil {
     return fmt.Errorf("Cannot disable Public IP while there are authorized networks set. Please also remove the authorized networks, and then retry.")
   }
 }

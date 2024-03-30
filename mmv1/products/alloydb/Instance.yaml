@@ -297,3 +297,10 @@ properties:
         name: enablePublicIp
         description: |
           Enabling public ip for the instance.
+  - !ruby/object:Api::Type::String
+    name: 'publicIpAddress'
+    output: true
+    description: |
+      The public IP addresses for the Instance. This is available ONLY when
+      networkConfig.enablePublicIp is set. This is the connection endpoint for
+      an end-user application.
