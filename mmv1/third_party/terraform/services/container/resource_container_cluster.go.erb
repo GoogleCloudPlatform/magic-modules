@@ -1448,6 +1448,11 @@ func ResourceContainerCluster() *schema.Resource {
 								},
 							},
 						},
+						"resource_manager_tags": {
+							Type:        schema.TypeMap,
+							Optional:    true,
+							Description: `A map of resource manager tags. Resource manager tag keys and values have the same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/456. The field is ignored (both PUT & PATCH) when empty.`,
+						},
 					},
 				},
 			},
@@ -1684,7 +1689,7 @@ func ResourceContainerCluster() *schema.Resource {
 							Optional:     true,
 							ForceNew:     true,
 							AtLeastOneOf: privateClusterConfigKeys,
-							DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
+							DiffSuppressFunc: containerClusterPrivateClusterConfigSuppress,
 							Description: `Subnetwork in cluster's network where master's endpoint will be provisioned.`,
 						},
 						"public_endpoint": {
@@ -4162,6 +4167,24 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s node pool auto config network tags have been updated", d.Id())
 	}
 
+	if d.HasChange("node_pool_auto_config.0.resource_manager_tags") {
+		rmtags := d.Get("node_pool_auto_config.0.resource_manager_tags")
+
+		req := &container.UpdateClusterRequest{
+			Update: &container.ClusterUpdate{
+				DesiredNodePoolAutoConfigResourceManagerTags: expandResourceManagerTags(rmtags),
+			},
+		}
+
+		updateF := updateFunc(req, "updating GKE cluster node pool auto config resource manager tags")
+		// Call update serially.
+		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] GKE cluster %s node pool auto config resource manager tags have been updated", d.Id())
+	}
+
 	d.Partial(false)
 
 <% unless version == 'ga' -%>
@@ -5426,6 +5449,10 @@ func expandNodePoolAutoConfig(configured interface{}) *container.NodePoolAutoCon
 		npac.NetworkTags = expandNodePoolAutoConfigNetworkTags(v)
 	}
 
+	if v, ok := config["resource_manager_tags"]; ok && len(v.(map[string]interface{})) > 0 {
+		npac.ResourceManagerTags = expandResourceManagerTags(v)
+	}
+
 	return npac
 }
 
@@ -6234,6 +6261,9 @@ func flattenNodePoolAutoConfig(c *container.NodePoolAutoConfig) []map[string]int
 	if c.NetworkTags != nil {
 		result["network_tags"] = flattenNodePoolAutoConfigNetworkTags(c.NetworkTags)
 	}
+	if c.ResourceManagerTags != nil {
+		result["resource_manager_tags"] = flattenResourceManagerTags(c.ResourceManagerTags)
+	}
 
 	return []map[string]interface{}{result}
 }
@@ -6387,6 +6417,14 @@ func containerClusterPrivateClusterConfigSuppress(k, old, new string, d *schema.
 		return suppressNodes && !hasSubnet
 	} else if k == "private_cluster_config.#" {
 		return suppressEndpoint && suppressNodes && !hasSubnet && !hasGlobalAccessConfig
+	} else if k == "private_cluster_config.0.private_endpoint_subnetwork" {
+		// Before regular compare, for the sake of private flexible cluster,
+		// suppress diffs in private_endpoint_subnetwork when
+		//   master_ipv4_cidr_block is set
+		//   && private_endpoint_subnetwork is unset in terraform (new value == "")
+		//   && private_endpoint_subnetwork is returned from resource (old value != "")
+		_, hasMasterCidr := d.GetOk("private_cluster_config.0.master_ipv4_cidr_block")
+		return (hasMasterCidr && new == "" && old != "") || tpgresource.CompareSelfLinkOrResourceName(k, old, new, d)
 	}
 	return false
 }

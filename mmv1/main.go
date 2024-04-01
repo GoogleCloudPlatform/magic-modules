@@ -13,7 +13,6 @@ import (
 	"golang.org/x/exp/slices"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
-	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/provider"
 )
 
@@ -24,6 +23,8 @@ var outputPath = flag.String("output", "", "path to output generated files to")
 
 // Example usage: --version beta
 var version = flag.String("version", "", "optional version name. If specified, this version is preferred for resource generation when applicable")
+
+var product = flag.String("product", "", "optional product name. If specified, the resources under the specific product will be generated. Otherwise, resources under all products will be generated.")
 
 func main() {
 	flag.Parse()
@@ -38,11 +39,14 @@ func main() {
 		log.Fatalf("No version specified")
 	}
 
-	// TODO Q1: allow specifying one product (flag or hardcoded)
-	// var productsToGenerate []string
-	// var allProducts = true
-	var productsToGenerate = []string{"products/datafusion"}
+	var productsToGenerate []string
 	var allProducts = false
+	if product == nil || *product == "" {
+		allProducts = true
+	} else {
+		var productToGenerate = fmt.Sprintf("products/%s", *product)
+		productsToGenerate = []string{productToGenerate}
+	}
 
 	var allProductFiles []string = make([]string, 0)
 
@@ -76,8 +80,6 @@ func main() {
 		return false
 	})
 
-	yamlValidator := google.YamlValidator{}
-
 	for _, productName := range allProductFiles {
 		productYamlPath := path.Join(productName, "go_product.yaml")
 
@@ -90,21 +92,10 @@ func main() {
 		// TODO Q2: product overrides
 
 		if _, err := os.Stat(productYamlPath); err == nil {
-			// TODO Q1: remove these lines, which are for debugging
-			// log.Printf("productYamlPath %#v", productYamlPath)
-
 			var resources []*api.Resource = make([]*api.Resource, 0)
 
-			productYaml, err := os.ReadFile(productYamlPath)
-			if err != nil {
-				log.Fatalf("Cannot open the file: %v", productYaml)
-			}
 			productApi := &api.Product{}
-			yamlValidator.Parse(productYaml, productApi)
-
-			// TODO Q1: remove these lines, which are for debugging
-			// prod, _ := json.Marshal(productApi)
-			// log.Printf("prod %s", string(prod))
+			api.Compile(productYamlPath, productApi)
 
 			if !productApi.ExistsAtVersionOrLower(*version) {
 				log.Printf("%s does not have a '%s' version, skipping", productName, *version)
@@ -125,27 +116,16 @@ func main() {
 					continue
 				}
 
-				// TODO Q1: remove these lines, which are for debugging
-				// log.Printf(" resourceYamlPath %s", resourceYamlPath)
-				resourceYaml, err := os.ReadFile(resourceYamlPath)
-				if err != nil {
-					log.Fatalf("Cannot open the file: %v", resourceYamlPath)
-				}
 				resource := &api.Resource{}
-				yamlValidator.Parse(resourceYaml, resource)
+				api.Compile(resourceYamlPath, resource)
 
-				// TODO Q1: remove these lines, which are for debugging
-				// res, _ := json.Marshal(resource)
-				// log.Printf("resource %s", string(res))
-
-				// TODO Q1: add labels related fields
-
+				resource.Properties = resource.AddLabelsRelatedFields(resource.PropertiesWithExcluded(), nil)
+				resource.SetDefault(productApi)
 				resource.Validate()
 				resources = append(resources, resource)
 			}
 
 			// TODO Q2: override resources
-			// log.Printf("resources before sorting %#v", resources)
 
 			// Sort resources by name
 			sort.Slice(resources, func(i, j int) bool {
