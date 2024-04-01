@@ -28,11 +28,11 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'parallelstore_instance_basic'
     primary_resource_id: 'instance'
+    min_version: 'beta'
     vars:
       name: 'instance'
       network_name: 'network'
       address_name: 'address'
-    min_version: beta
 properties:
 - !ruby/object:Api::Type::String
   name: name
@@ -108,22 +108,22 @@ properties:
   immutable: true
   output: true
 parameters:
-- !ruby/object:Api::Type::String
-  name: location
-  description: "Part of `parent`. See documentation of `projectsId`."
-  url_param_only: true
-  required: true
-  immutable: true
-- !ruby/object:Api::Type::String
-  name: instanceId
-  description: "Required. The logical name of the Parallelstore instance in the user
-    project with the\nfollowing restrictions:\n\n* Must contain only lowercase letters,
-    numbers, and hyphens.\n* Must start with a letter.\n* Must be between 1-63 characters.\n*
-    Must end with a number or a letter.\n* Must be unique within the customer project
-    / location "
-  url_param_only: true
-  required: true
-  immutable: true
+  - !ruby/object:Api::Type::String
+    name: location
+    description: "Part of `parent`. See documentation of `projectsId`."
+    url_param_only: true
+    required: true
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: instanceId
+    description: "Required. The logical name of the Parallelstore instance in the user
+      project with the\nfollowing restrictions:\n\n* Must contain only lowercase letters,
+      numbers, and hyphens.\n* Must start with a letter.\n* Must be between 1-63 characters.\n*
+      Must end with a number or a letter.\n* Must be unique within the customer project
+      / location "
+    url_param_only: true
+    required: true
+    immutable: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: name
