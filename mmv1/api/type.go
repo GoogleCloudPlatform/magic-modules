@@ -16,6 +16,7 @@ package api
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
@@ -129,6 +130,8 @@ type Type struct {
 	Properties []*Type
 
 	EnumValues []string `yaml:"enum_values"`
+
+	SkipDocsValues bool `yaml:"skip_docs_values"`
 
 	// ====================
 	// Array Fields
@@ -397,6 +400,16 @@ func (t Type) TerraformLineage() string {
 	}
 
 	return fmt.Sprintf("%s.0.%s", t.ParentMetadata.TerraformLineage(), google.Underscore(t.Name))
+}
+
+func (t Type) EnumValuesToString() string {
+	var values []string
+
+	for _, val := range t.EnumValues {
+		values = append(values, fmt.Sprintf("`%s`", val))
+	}
+
+	return strings.Join(values, ", ")
 }
 
 // func (t *Type) to_json(opts) {
