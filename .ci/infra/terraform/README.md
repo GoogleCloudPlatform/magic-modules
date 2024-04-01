@@ -57,7 +57,6 @@ Quotas that will need to be adjusted to support all tests:
 - Cloud Workstation cluster quota in `us-central1`
 - VMWare Engine nodes per region in `southamerica-west1`
 - VMWare Engine nodes across regions
-- Looker `StandardSubscriptionInstancesPerProjectPerRegion`. This must be requested manually from their team, and can't be self-served in the Cloud Console.
 - Looker `EnterpriseSubscriptionInstancesPerProjectPerRegion`. This must be requested manually from their team, and can't be self-served in the Cloud Console.
 - aiplatform.googleapis.com/feature_store_online_serving_nodes (us-central1)
 - compute.googleapis.com/firewalls
