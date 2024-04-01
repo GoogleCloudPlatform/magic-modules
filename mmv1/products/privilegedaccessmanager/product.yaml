@@ -13,9 +13,9 @@
 
 --- !ruby/object:Api::Product
 versions:
-- !ruby/object:Api::Product::Version
-  base_url: https://privilegedaccessmanager.googleapis.com/v1beta/
-  name: beta
+  - !ruby/object:Api::Product::Version
+    base_url: https://privilegedaccessmanager.googleapis.com/v1beta/
+    name: beta
 name: PrivilegedAccessManager
 display_name: Privileged Access Manager
 scopes:
