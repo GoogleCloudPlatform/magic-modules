@@ -18,18 +18,18 @@ create_url: "{{parent}}/locations/{{location}}/entitlements?entitlementId={{enti
 self_link: "{{parent}}/locations/{{location}}/entitlements/{{entitlement_id}}"
 id_format: "{{parent}}/locations/{{location}}/entitlements/{{entitlement_id}}"
 import_format:
-- "{{parent}}/locations/{{location}}/entitlements/{{entitlement_id}}"
+  - "{{parent}}/locations/{{location}}/entitlements/{{entitlement_id}}"
 update_verb: :PATCH
 update_mask: true
 
 description: |
   An Entitlement defines the eligibility of a set of users to obtain a predefined access for some time possibly after going through an approval workflow.
 autogen_async: true
-properties: 
+properties:
   - !ruby/object:Api::Type::String
-    name: name 
+    name: name
     description: |
-      Output Only. The entitlement's name follows a hierarchical structure, comprising the organization, folder, or project, alongside the region and a unique entitlement ID. 
+      Output Only. The entitlement's name follows a hierarchical structure, comprising the organization, folder, or project, alongside the region and a unique entitlement ID.
       Formats: organizations/{organization-number}/locations/{region}/entitlements/{entitlement-id}, folders/{folder-number}/locations/{region}/entitlements/{entitlement-id}, and projects/{project-id|project-number}/locations/{region}/entitlements/{entitlement-id}.
     output: true
   - !ruby/object:Api::Type::String
@@ -45,19 +45,19 @@ properties:
       Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
     output: true
   - !ruby/object:Api::Type::Array
-      name: eligibleUsers
-      description: |
-        Who can create Grants using Entitlement. This list should contain at most one entry
-      required: true
-      item_type: !ruby/object:Api::Type::NestedObject
-        properties:
-          - !ruby/object:Api::Type::Array 
-              name: principals
-              is_set: true
-              required: true
-              description: |
-                Users who are being allowed for the operation. Each entry should be a valid v1 IAM Principal Identifier. Format for these is documented at "https://cloud.google.com/iam/docs/principal-identifiers#v1"
-              item_type: Api::Type::String
+    name: eligibleUsers
+    description: |
+      Who can create Grants using Entitlement. This list should contain at most one entry
+    required: true
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::Array
+          name: principals
+          is_set: true
+          required: true
+          description: |
+            Users who are being allowed for the operation. Each entry should be a valid v1 IAM Principal Identifier. Format for these is documented at "https://cloud.google.com/iam/docs/principal-identifiers#v1"
+          item_type: Api::Type::String
   - !ruby/object:Api::Type::NestedObject
     name: approvalWorkflow
     description: |
@@ -67,7 +67,7 @@ properties:
       - !ruby/object:Api::Type::NestedObject
         name: manualApprovals
         description: |
-          A manual approval workflow where users who are designated as approvers need to call the ApproveGrant/DenyGrant APIs for an Grant. 
+          A manual approval workflow where users who are designated as approvers need to call the ApproveGrant/DenyGrant APIs for an Grant.
           The workflow can consist of multiple serial steps where each step defines who can act as Approver in that step and how many of those users should approve before the workflow moves to the next step.
           This can be used to create approval workflows such as
           * Require an approval from any user in a group G.
@@ -114,7 +114,7 @@ properties:
     name: privilegedAccess
     description: |
       Privileged access that this service can be used to gate.
-    required: true                 
+    required: true
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: gcpIamAccess
@@ -146,11 +146,11 @@ properties:
       The maximum amount of time for which access would be granted for a request.
       A requester can choose to ask for access for less than this duration butnever more
       Format: calculate the time in seconds and concatenate it with 's' i.e. 2 hours = "7200s", 45 minutes = "2700s"
-    required: true      
+    required: true
   - !ruby/object:Api::Type::String
     name: state
     description: Output only. The current state of the Entitlement.
-    output: true 
+    output: true
   - !ruby/object:Api::Type::Fingerprint
     name: etag
     description: |
@@ -183,7 +183,7 @@ properties:
         conflicts:
           - not_mandatory
   - !ruby/object:Api::Type::NestedObject
-    name: additionalNotificationTargets 
+    name: additionalNotificationTargets
     description: |
       AdditionalNotificationTargets includes email addresses to be notified.
     properties:
@@ -195,25 +195,25 @@ properties:
       - !ruby/object:Api::Type::Array
         name: requesterEmailRecipients
         item_type: Api::Type::String
-        description: | 
+        description: |
           Optional. Additional email address to be notified about an eligible entitlement.
 parameters:
-- !ruby/object:Api::Type::String
-  name: location
-  description: "TODO"
-  url_param_only: true
-  required: true
-  immutable: true
-- !ruby/object:Api::Type::String
-  name: entitlementId
-  description: "TODO"
-  url_param_only: true
-  required: true 
-  immutable: true
-- !ruby/object:Api::Type::String
-  name: parent
-  immutable: true
-  required: true
-  url_param_only: true
-  description: |
-    Format: project/{project_id} or organization/{organization_number} or folder/{folder_number}
+  - !ruby/object:Api::Type::String
+    name: location
+    description: "TODO"
+    url_param_only: true
+    required: true
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: entitlementId
+    description: "TODO"
+    url_param_only: true
+    required: true
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: parent
+    immutable: true
+    required: true
+    url_param_only: true
+    description: |
+      Format: project/{project_id} or organization/{organization_number} or folder/{folder_number}
