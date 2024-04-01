@@ -273,7 +273,7 @@ type Resource struct {
 	// Add a deprecation message for a resource that's been deprecated in the API.
 	DeprecationMessage string `yaml:"deprecation_message"`
 
-	Async *OpAsync
+	Async *Async
 
 	Properties []*Type
 
@@ -447,7 +447,7 @@ func (r Resource) RootProperties() []*Type {
 // if one exists.
 
 // def async
-func (r Resource) GetAsync() *OpAsync {
+func (r Resource) GetAsync() *Async {
 	if r.Async != nil {
 		return r.Async
 	}
