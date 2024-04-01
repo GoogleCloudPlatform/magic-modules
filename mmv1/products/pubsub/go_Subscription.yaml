@@ -35,6 +35,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
+  type: "PollAsync"
   check_response_func_existence: 'transport_tpg.PollCheckForExistence'
   check_response_func_absence: 'transport_tpg.PollCheckForAbsence'
   suppress_error: true
@@ -97,7 +98,6 @@ properties:
   - name: 'name'
     type: String
     description: "Name of the subscription."
-    pattern: 'projects/{{project}}/subscriptions/{{name}}'
     required: true
     immutable: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
@@ -107,7 +107,6 @@ properties:
     description: "A reference to a Topic resource, of the form projects/{project}/topics/{{name}}
 (as in the id property of a google_pubsub_topic), or just a topic name if
 the topic is in the same project as the subscription."
-    pattern: 'projects/{{project}}/topics/{{topic}}'
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'

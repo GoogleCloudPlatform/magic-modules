@@ -72,6 +72,7 @@ steps:
         - $_HEAD_BRANCH
         - $_BASE_BRANCH
 
+logsBucket: 'gs://cloudbuild-community-checker-logs'
 availableSecrets:
   secretManager:
     - versionName: projects/673497134629/secrets/github-magician-token-generate-diffs-magic-modules/versions/latest
