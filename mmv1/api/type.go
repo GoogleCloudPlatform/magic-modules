@@ -19,6 +19,7 @@ import (
 	"strings"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 )
 
@@ -164,7 +165,7 @@ type Type struct {
 	IgnoreRead bool `yaml:"ignore_read"`
 
 	// Adds a ValidateFunc to the schema
-	Validation bool
+	Validation resource.Validation
 
 	// Indicates that this is an Array that should have Set diff semantics.
 	UnorderedList bool `yaml:"unordered_list"`
