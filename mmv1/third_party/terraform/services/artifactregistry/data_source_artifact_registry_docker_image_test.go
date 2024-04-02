@@ -30,8 +30,8 @@ func TestAccDataSourceArtifactRegistryDockerImage(t *testing.T) {
 					// Data source using a digest
 					checkDigestDataSources(
 						resourceName+"Digest",
-						"projects/cloudrun/locations/us/repositories/container/dockerImages/hello@sha256:77cb9fbc6a667b8bfdbeca4c49e7703d825746eba53b736f0318bb7712828821",
-						"us-docker.pkg.dev/cloudrun/container/hello@sha256:77cb9fbc6a667b8bfdbeca4c49e7703d825746eba53b736f0318bb7712828821",
+						"projects/cloudrun/locations/us/repositories/container/dockerImages/hello@sha256:7a6e0dfb0142464ce0ba14a2cfcac75e383e36f39f47539c870132c826314ad6",
+						"us-docker.pkg.dev/cloudrun/container/hello@sha256:7a6e0dfb0142464ce0ba14a2cfcac75e383e36f39f47539c870132c826314ad6",
 					),
 					resource.TestCheckResourceAttrSet(resourceName+"Digest", "image_size_bytes"),
 					validateTimeStamps(resourceName+"Digest"),
@@ -73,7 +73,7 @@ data "google_artifact_registry_docker_image" "testDigest" {
 	project       = "cloudrun"
 	location      = "us"
 	repository_id = "container"
-	image_name    = "hello@sha256:77cb9fbc6a667b8bfdbeca4c49e7703d825746eba53b736f0318bb7712828821"
+	image_name    = "hello@sha256:7a6e0dfb0142464ce0ba14a2cfcac75e383e36f39f47539c870132c826314ad6"
 }
 
 data "google_artifact_registry_docker_image" "testUrlTag" {
