@@ -15,6 +15,7 @@
 name: Entitlement
 base_url: "{{parent}}/locations/{{location}}/entitlements"
 create_url: "{{parent}}/locations/{{location}}/entitlements?entitlementId={{entitlement_id}}"
+delete_url: "{{parent}}/locations/{{location}}/entitlements/{{entitlement_id}}?force=true"
 self_link: "{{parent}}/locations/{{location}}/entitlements/{{entitlement_id}}"
 id_format: "{{parent}}/locations/{{location}}/entitlements/{{entitlement_id}}"
 import_format:
