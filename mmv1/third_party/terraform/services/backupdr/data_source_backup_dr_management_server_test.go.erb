@@ -4,9 +4,13 @@ package backupdr_test
 
 import (
 	"testing"
-
+	"fmt"
+	"strings"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 )
 
 func TestAccDataSourceGoogleBackupDRManagementServer_basic(t *testing.T) {
