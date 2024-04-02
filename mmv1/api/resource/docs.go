@@ -11,20 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package terraform
-
-import (
-	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-)
-
-// require 'uri'
-// require 'api/object'
-// require 'compile/core'
-// require 'google/golang_utils'
+package resource
 
 // Inserts custom strings into terraform resource docs.
 type Docs struct {
-	google.YamlValidator
+	// google.YamlValidator
 
 	// All these values should be strings, which will be inserted
 	// directly into the terraform resource documentation.  The

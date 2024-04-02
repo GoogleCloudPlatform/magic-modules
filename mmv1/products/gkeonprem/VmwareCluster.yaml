@@ -534,6 +534,9 @@ properties:
   - !ruby/object:Api::Type::Boolean
     name: 'enableControlPlaneV2'
     description: Enable control plane V2. Default to false.
+  - !ruby/object:Api::Type::Boolean
+    name: 'disableBundledIngress'
+    description: Disable bundled ingress.
   - !ruby/object:Api::Type::NestedObject
     name: 'upgradePolicy'
     description: Specifies upgrade policy for the cluster.
