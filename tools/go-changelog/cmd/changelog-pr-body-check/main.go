@@ -60,7 +60,7 @@ func main() {
 
 	if errors := entry.Validate(); errors != nil {
 		body := "\nOops! Some errors are detected for your changelog entries:\n"
-		body := "\nThis is to test if the check is using PR's updated version\n"
+		body += "\nThis is to test if the check is using PR's updated version\n"
 		for i, err := range errors {
 			body += fmt.Sprintf("\n* Issue %d\n", i+1)
 			if err.Details != nil {
