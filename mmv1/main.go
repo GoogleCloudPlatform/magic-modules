@@ -13,7 +13,6 @@ import (
 	"golang.org/x/exp/slices"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
-	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/provider"
 )
 
@@ -81,8 +80,6 @@ func main() {
 		return false
 	})
 
-	yamlValidator := google.YamlValidator{}
-
 	for _, productName := range allProductFiles {
 		productYamlPath := path.Join(productName, "go_product.yaml")
 
@@ -97,12 +94,8 @@ func main() {
 		if _, err := os.Stat(productYamlPath); err == nil {
 			var resources []*api.Resource = make([]*api.Resource, 0)
 
-			productYaml, err := os.ReadFile(productYamlPath)
-			if err != nil {
-				log.Fatalf("Cannot open the file: %v", productYaml)
-			}
 			productApi := &api.Product{}
-			yamlValidator.Parse(productYaml, productApi)
+			api.Compile(productYamlPath, productApi)
 
 			if !productApi.ExistsAtVersionOrLower(*version) {
 				log.Printf("%s does not have a '%s' version, skipping", productName, *version)
@@ -123,21 +116,16 @@ func main() {
 					continue
 				}
 
-				resourceYaml, err := os.ReadFile(resourceYamlPath)
-				if err != nil {
-					log.Fatalf("Cannot open the file: %v", resourceYamlPath)
-				}
 				resource := &api.Resource{}
-				yamlValidator.Parse(resourceYaml, resource)
+				api.Compile(resourceYamlPath, resource)
 
 				resource.Properties = resource.AddLabelsRelatedFields(resource.PropertiesWithExcluded(), nil)
-
+				resource.SetDefault(productApi)
 				resource.Validate()
 				resources = append(resources, resource)
 			}
 
 			// TODO Q2: override resources
-			// log.Printf("resources before sorting %#v", resources)
 
 			// Sort resources by name
 			sort.Slice(resources, func(i, j int) bool {
