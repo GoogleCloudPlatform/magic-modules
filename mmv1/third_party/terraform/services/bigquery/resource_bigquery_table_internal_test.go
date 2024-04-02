@@ -591,10 +591,11 @@ func TestUnitBigQueryDataTable_schemaIsChangeableNested(t *testing.T) {
 	// Only top level column drops are changeable
 	customNestedValues := map[string]bool{"arraySizeDecreases": false, "typeModeReqToNullAndColumnDropped": false}
 	for _, testcase := range testUnitBigQueryDataTableIsChangeableTestCases {
-		changeable, ok := customNestedValues[testcase.name]
-		if !ok {
-			changeable = testcase.changeable
+		changeable := testcase.changeable
+		if overrideValue, ok := customNestedValues[testcase.name]; ok {
+			changeable = overrideValue
 		}
+
 		testcaseNested := &testUnitBigQueryDataTableJSONChangeableTestCase{
 			testcase.name + "Nested",
 			fmt.Sprintf("[{\"name\": \"someValue\", \"type\" : \"INTEGER\", \"fields\" : %s }]", testcase.jsonOld),
