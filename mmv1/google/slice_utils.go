@@ -13,8 +13,6 @@
 
 package google
 
-import "reflect"
-
 // Returns a new slice containing all of the elements
 // for which the test function returns true in the original slice
 func Select[T any](S []T, test func(T) bool) (ret []T) {
@@ -40,19 +38,4 @@ func Reject[T any](S []T, test func(T) bool) (ret []T) {
 // Concat two slices
 func Concat[T any](S1 []T, S2 []T) (ret []T) {
 	return append(S1, S2...)
-}
-
-// Remove element "value" from array
-func Remove[T any](S []T, value T) (ret []T) {
-	index := -1
-	for i, s := range S {
-		if reflect.DeepEqual(s, value) {
-			index = i
-			break
-		}
-	}
-	if index == -1 {
-		return S
-	}
-	return append(S[:index], S[index+1:]...)
 }
