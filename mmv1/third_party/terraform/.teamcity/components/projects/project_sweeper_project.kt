@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MPL-2.0
  */
 
-// This file is controlled by MMv1, any changes made here will be overwritten
+// This file is maintained in the GoogleCloudPlatform/magic-modules repository and copied into the downstream provider repositories. Any changes to this file in the downstream will be overwritten.
 
 package projects
 
@@ -12,7 +12,7 @@ import SharedResourceNameBeta
 import SharedResourceNameGa
 import SharedResourceNameVcr
 import builds.*
-import generated.SweepersList
+import generated.SweepersListGa
 import jetbrains.buildServer.configs.kotlin.Project
 import replaceCharsId
 import vcs_roots.HashiCorpVCSRootGa
@@ -31,7 +31,7 @@ fun projectSweeperSubProject(allConfig: AllContextParameters): Project {
 
     // Create build config for sweeping project resources
     // Uses the HashiCorpVCSRootGa VCS Root so that the latest sweepers in hashicorp/terraform-provider-google are used
-    val serviceSweeperConfig = BuildConfigurationForProjectSweeper("N/A", ProjectSweeperName, SweepersList, projectId, HashiCorpVCSRootGa, sharedResources, gaConfig)
+    val serviceSweeperConfig = BuildConfigurationForProjectSweeper("N/A", ProjectSweeperName, SweepersListGa, projectId, HashiCorpVCSRootGa, sharedResources, gaConfig)
     val trigger  = NightlyTriggerConfiguration(startHour=12)
     serviceSweeperConfig.addTrigger(trigger)
 

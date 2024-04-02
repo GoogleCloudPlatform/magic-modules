@@ -21,6 +21,7 @@ resource "google_gkeonprem_vmware_cluster" "<%= ctx[:primary_resource_id] %>" {
         gateway="test-gateway"
       }
     }
+    vcenter_network = "test-vcenter-network"
   }
   control_plane_node {
      cpus = 4
@@ -48,6 +49,7 @@ resource "google_gkeonprem_vmware_cluster" "<%= ctx[:primary_resource_id] %>" {
   }
   vm_tracking_enabled = true
   enable_control_plane_v2 = true
+  disable_bundled_ingress = true
   authorization {
     admin_users {
       username = "testuser@gmail.com"

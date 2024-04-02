@@ -1,5 +1,5 @@
 name := d.Get("name").(string)
-if d.HasChange("gce_setup.0.machine_type") || d.HasChange("gce_setup.0.accelerator_configs") {
+if d.HasChange("gce_setup.0.machine_type") || d.HasChange("gce_setup.0.accelerator_configs")  || d.HasChange("gce_setup.0.shielded_instance_config"){
   state := d.Get("state").(string)
 
   if state != "STOPPED" {
@@ -27,6 +27,9 @@ if d.HasChange("gce_setup.0.machine_type") {
 }
 if d.HasChange("gce_setup.0.accelerator_configs") {
     newUpdateMask = append(newUpdateMask, "gce_setup.accelerator_configs")
+}
+if d.HasChange("gce_setup.0.shielded_instance_config") {
+    newUpdateMask = append(newUpdateMask, "gce_setup.shielded_instance_config")
 }
 if d.HasChange("gce_setup.0.metadata") {
     newUpdateMask = append(newUpdateMask, "gceSetup.metadata")

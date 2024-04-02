@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MPL-2.0
  */
 
-// This file is controlled by MMv1, any changes made here will be overwritten
+// This file is maintained in the GoogleCloudPlatform/magic-modules repository and copied into the downstream provider repositories. Any changes to this file in the downstream will be overwritten.
 
 package projects.reused
 
@@ -13,10 +13,12 @@ import ProviderNameGa
 import ServiceSweeperName
 import SharedResourceNameVcr
 import builds.*
-import generated.PackagesList
-import generated.ServicesListGa
+import generated.PackagesListBeta
+import generated.PackagesListGa
 import generated.ServicesListBeta
-import generated.SweepersList
+import generated.ServicesListGa
+import generated.SweepersListBeta
+import generated.SweepersListGa
 import jetbrains.buildServer.configs.kotlin.BuildType
 import jetbrains.buildServer.configs.kotlin.Project
 import jetbrains.buildServer.configs.kotlin.vcs.GitVcsRoot
@@ -36,13 +38,19 @@ fun mmUpstream(parentProject: String, providerName: String, vcsRoot: GitVcsRoot,
     val packageBuildConfigs = BuildConfigurationsForPackages(allPackages, providerName, projectId, vcsRoot, sharedResources, config)
 
     // Create build config for sweeping the VCR test project - everything except projects
-    val serviceSweeperConfig = BuildConfigurationForServiceSweeper(providerName, ServiceSweeperName, SweepersList, projectId, vcsRoot, sharedResources, config)
+    var sweepersList: Map<String,Map<String,String>>
+    when(providerName) {
+        ProviderNameGa -> sweepersList = SweepersListGa
+        ProviderNameBeta -> sweepersList = SweepersListBeta
+        else -> throw Exception("Provider name not supplied when generating a nightly test subproject")
+    }
+    val serviceSweeperConfig = BuildConfigurationForServiceSweeper(providerName, ServiceSweeperName, sweepersList, projectId, vcsRoot, sharedResources, config)
     val trigger  = NightlyTriggerConfiguration(startHour=12)
     serviceSweeperConfig.addTrigger(trigger) // Only the sweeper is on a schedule in this project
 
     return Project {
         id(projectId)
-        name = "MM Upstream Testing"
+        name = "Upstream MM Testing"
         description = "A project connected to the modular-magician/terraform-provider-${providerName} repository, to let users trigger ad-hoc builds against branches for PRs"
 
         // Register build configs in the project
@@ -60,10 +68,10 @@ fun mmUpstream(parentProject: String, providerName: String, vcsRoot: GitVcsRoot,
 fun getAllPackageInProviderVersion(providerName: String): Map<String, Map<String,String>> {
     var allPackages: Map<String, Map<String, String>> = mapOf()
     if (providerName == ProviderNameGa){
-        allPackages = PackagesList + ServicesListGa
+        allPackages = PackagesListGa + ServicesListGa
     }
     if (providerName == ProviderNameBeta){
-        allPackages = PackagesList + ServicesListBeta
+        allPackages = PackagesListBeta + ServicesListBeta
     }
     return allPackages
 }

@@ -41,6 +41,13 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  encoder: templates/terraform/encoders/compute_region_target_https_proxy.go.erb
+  # update_encoder is usually the same as encoder by default. This resource is an uncommon case where the whole resource
+  # is marked to be immutable, but we have a field specific update that overrides it (e.g certifiacteManagerCertificates).
+  # This causes the encoder logic to not be applied during update.
+  update_encoder: templates/terraform/encoders/compute_region_target_https_proxy.go.erb
+  decoder: templates/terraform/decoders/compute_region_target_https_proxy.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'region_target_https_proxy_basic'
@@ -51,6 +58,14 @@ examples:
       region_url_map_name: 'url-map'
       region_backend_service_name: 'backend-service'
       region_health_check_name: 'http-health-check'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'region_target_https_proxy_certificate_manager_certificate'
+    primary_resource_id: 'default'
+    vars:
+      region_target_https_proxy_name: 'target-http-proxy'
+      certificate_manager_certificate_name: 'my-certificate'
+      region_url_map_name: 'url-map'
+      region_backend_service_name: 'backend-service'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
@@ -110,12 +125,25 @@ properties:
   #   update_url:
   #     'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setQuicOverride'
   - !ruby/object:Api::Type::Array
+    name: 'certificateManagerCertificates'
+    description: |
+      URLs to certificate manager certificate resources that are used to authenticate connections between users and the load balancer.
+      Currently, you may specify up to 15 certificates. Certificate manager certificates do not apply when the load balancing scheme is set to INTERNAL_SELF_MANAGED.
+      sslCertificates and certificateManagerCertificates fields can not be defined together.
+      Accepted format is `//certificatemanager.googleapis.com/projects/{project}/locations/{location}/certificates/{resourceName}` or just the self_link `projects/{project}/locations/{location}/certificates/{resourceName}`
+    update_verb: :POST
+    update_url: 'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setSslCertificates'
+    item_type: Api::Type::String
+    custom_expand: 'templates/terraform/custom_expand/certificate_manager_certificate_construct_full_url.go.erb'
+    diff_suppress_func: 'tpgresource.CompareResourceNames'
+    conflicts:
+      - ssl_certificates
+  - !ruby/object:Api::Type::Array
     name: 'sslCertificates'
     description: |
-      A list of RegionSslCertificate resources that are used to authenticate
-      connections between users and the load balancer. Currently, exactly
-      one SSL certificate must be specified.
-    required: true
+      URLs to SslCertificate resources that are used to authenticate connections between users and the load balancer.
+      At least one SSL certificate must be specified. Currently, you may specify up to 15 SSL certificates.
+      sslCertificates do not apply when the load balancing scheme is set to INTERNAL_SELF_MANAGED.
     update_verb: :POST
     update_url: 'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setSslCertificates'
     item_type: !ruby/object:Api::Type::ResourceRef
@@ -124,6 +152,8 @@ properties:
       imports: 'selfLink'
       description: 'The SSL certificates used by this TargetHttpsProxy'
     custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
+    conflicts:
+      - certificate_manager_certificates
   - !ruby/object:Api::Type::ResourceRef
     name: 'sslPolicy'
     resource: 'RegionSslPolicy'

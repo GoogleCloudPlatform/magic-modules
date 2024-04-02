@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MPL-2.0
  */
 
-// This file is controlled by MMv1, any changes made here will be overwritten
+// This file is maintained in the GoogleCloudPlatform/magic-modules repository and copied into the downstream provider repositories. Any changes to this file in the downstream will be overwritten.
 
 package tests
 
@@ -19,26 +19,13 @@ class NightlyTestProjectsTests {
         val project = googleCloudRootProject(testContextParameters())
 
         // Find GA nightly test project
-        var gaProject: Project? =  project.subProjects.find { p->  p.name == gaProjectName}
-        if (gaProject == null) {
-            Assert.fail("Could not find the Google (GA) project")
-        }
-        var gaNightlyTestProject: Project? = gaProject!!.subProjects.find { p->  p.name == nightlyTestsProjectName}
-        if (gaNightlyTestProject == null) {
-            Assert.fail("Could not find the Google (GA) Nightly Test project")
-        }
+        var gaNightlyTestProject = getSubProject(project, gaProjectName, nightlyTestsProjectName)
 
         // Find Beta nightly test project
-        var betaProject: Project? =  project.subProjects.find { p->  p.name == betaProjectName}
-        if (betaProject == null) {
-            Assert.fail("Could not find the Google (Beta) project")
-        }
-        var betaNightlyTestProject: Project? = betaProject!!.subProjects.find { p->  p.name == nightlyTestsProjectName}
-        if (betaNightlyTestProject == null) {
-            Assert.fail("Could not find the Google (GA) Nightly Test project")
-        }
+        var betaNightlyTestProject = getSubProject(project, betaProjectName, nightlyTestsProjectName)
 
-        (gaNightlyTestProject!!.buildTypes + betaNightlyTestProject!!.buildTypes).forEach{bt ->
+        // Make assertions about builds in both nightly test projects
+        (gaNightlyTestProject.buildTypes + betaNightlyTestProject.buildTypes).forEach{bt ->
             assertTrue("Build configuration `${bt.name}` contains at least one trigger", bt.triggers.items.isNotEmpty())
              // Look for at least one CRON trigger
             var found: Boolean = false
