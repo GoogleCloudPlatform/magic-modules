@@ -87,7 +87,7 @@ func TestExecGenerateComment(t *testing.T) {
 			{"/mock/dir/magic-modules/tools/diff-processor", "make", []string{"build"}, diffProcessorEnv},
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"breaking-changes"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"detect-missing-tests", "/mock/dir/tpgb/google-beta/services"}, map[string]string(nil)},
-			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"changed-schema-labels"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"changed-schema-resources"}, map[string]string(nil)},
 		},
 	} {
 		if actualCalls, ok := mr.Calls(method); !ok {

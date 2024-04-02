@@ -266,7 +266,6 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			uniqueBreakingChanges[breakingChange] = struct{}{}
 		}
 
-		affectedResources, err := changedSchemaResources(diffProcessorPath, rnr)
 		if repo.Name == "terraform-provider-google-beta" {
 			// Run missing test detector (currently only for beta)
 			missingTests, err := detectMissingTests(diffProcessorPath, repo.Path, rnr)
@@ -277,11 +276,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			data.MissingTests = missingTests
 		}
 
-		// If fetching the PR failed, Labels will be empty
-		labels := make([]string, len(pullRequest.Labels))
-		for i, label := range pullRequest.Labels {
-			labels[i] = label.Name
-		}
+		affectedResources, err := changedSchemaResources(diffProcessorPath, rnr)
 		if err != nil {
 			fmt.Println("computing changed resource schemas: ", err)
 			errors[repo.Title] = append(errors[repo.Title], "The diff processor crashed while computing changed resource schemas.")
