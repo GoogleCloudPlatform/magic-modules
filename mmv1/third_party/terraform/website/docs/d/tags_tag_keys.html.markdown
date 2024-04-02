@@ -56,6 +56,6 @@ In addition to the arguments listed above, the following attributes are exported
 * `purpose` -
   A purpose denotes that this Tag is intended for use in policies of a specific policy engine, and will involve that policy engine in management operations involving this Tag. A purpose does not grant a policy engine exclusive rights to the Tag, and it may be referenced by other policy engines.
 
-* `porpose_data` - 
+* `purpose_data` - 
   Purpose data corresponds to the policy system that the tag is intended for. See documentation for Purpose for formatting of this field.
 
