@@ -19,8 +19,8 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-	"github.com/GoogleCloudPlatform/magic-modules/mmv1/provider/terraform"
 	"golang.org/x/exp/slices"
+	"gopkg.in/yaml.v3"
 )
 
 type Resource struct {
@@ -175,9 +175,9 @@ type Resource struct {
 	// will allow that token to hold multiple /'s.
 	ImportFormat []string `yaml:"import_format"`
 
-	CustomCode terraform.CustomCode `yaml:"custom_code"`
+	CustomCode resource.CustomCode `yaml:"custom_code"`
 
-	Docs terraform.Docs
+	Docs resource.Docs
 
 	// This block inserts entries into the customdiff.All() block in the
 	// resource schema -- the code for these custom diff functions must
@@ -190,7 +190,7 @@ type Resource struct {
 
 	// Examples in documentation. Backed by generated tests, and have
 	// corresponding OiCS walkthroughs.
-	Examples []terraform.Examples
+	Examples []resource.Examples
 
 	// Virtual fields on the Terraform resource. Usage and differences from url_param_only
 	// are documented in provider/terraform/virtual_fields.rb
@@ -273,7 +273,7 @@ type Resource struct {
 	// Add a deprecation message for a resource that's been deprecated in the API.
 	DeprecationMessage string `yaml:"deprecation_message"`
 
-	Async *OpAsync
+	Async *Async
 
 	Properties []*Type
 
@@ -282,22 +282,36 @@ type Resource struct {
 	ProductMetadata *Product
 }
 
+func (r *Resource) UnmarshalYAML(n *yaml.Node) error {
+	r.CreateVerb = "POST"
+	r.ReadVerb = "GET"
+	r.DeleteVerb = "DELETE"
+	r.UpdateVerb = "PUT"
+
+	type resourceAlias Resource
+	aliasObj := (*resourceAlias)(r)
+
+	err := n.Decode(&aliasObj)
+	if err != nil {
+		return err
+	}
+
+	r.ApiName = r.Name
+	r.CollectionUrlKey = google.Camelize(google.Plural(r.Name), "lower")
+
+	return nil
+}
+
 // TODO: rewrite functions
 func (r *Resource) Validate() {
 	// TODO Q1 Rewrite super
 	// super
-
-	r.setResourceMetada(r.Parameters)
-	r.setResourceMetada(r.Properties)
 }
 
-func (r *Resource) setResourceMetada(properties []*Type) {
-	if properties == nil {
-		return
-	}
-
-	for _, property := range properties {
-		property.ResourceMetadata = r
+func (r *Resource) SetDefault(product *Product) {
+	r.ProductMetadata = product
+	for _, property := range r.AllProperties() {
+		property.SetDefault(r)
 	}
 }
 
@@ -350,11 +364,11 @@ func (r Resource) RequiredProperties() []*Type {
 }
 
 // def all_nested_properties(props)
-func allNestedProperties(props []*Type) []*Type {
+func (r Resource) AllNestedProperties(props []*Type) []*Type {
 	nested := props
 	for _, prop := range props {
 		if nestedProperties := prop.NestedProperties(); !prop.FlattenObject && nestedProperties != nil {
-			nested = google.Concat(nested, allNestedProperties(nestedProperties))
+			nested = google.Concat(nested, r.AllNestedProperties(nestedProperties))
 		}
 	}
 
@@ -363,10 +377,20 @@ func allNestedProperties(props []*Type) []*Type {
 
 // sensitive_props
 func (r Resource) SensitiveProps() []*Type {
-	props := allNestedProperties(r.RootProperties())
+	props := r.AllNestedProperties(r.RootProperties())
 	return google.Select(props, func(p *Type) bool {
 		return p.Sensitive
 	})
+}
+
+func (r Resource) SensitivePropsToString() string {
+	var props []string
+
+	for _, prop := range r.SensitiveProps() {
+		props = append(props, fmt.Sprintf("`%s`", prop.Lineage()))
+	}
+
+	return strings.Join(props, ", ")
 }
 
 // All settable properties in the resource.
@@ -423,7 +447,7 @@ func (r Resource) RootProperties() []*Type {
 // if one exists.
 
 // def async
-func (r Resource) GetAsync() *OpAsync {
+func (r Resource) GetAsync() *Async {
 	if r.Async != nil {
 		return r.Async
 	}

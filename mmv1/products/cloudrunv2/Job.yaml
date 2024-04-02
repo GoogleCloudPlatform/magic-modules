@@ -23,6 +23,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/run/docs/reference/rest/v2/projects.locations.jobs'
 description: |
   A Cloud Run Job resource that references a container image which is run to completion.
+taint_resource_on_failed_create: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
@@ -399,6 +400,7 @@ properties:
                   #   - template.0.template.0.volumes.0.cloudSqlInstance
                   #   - template.0.template.0.volumes.0.emptyDir
                   #   - template.0.volumes.0.gcs
+                  #   - template.0.volumes.0.nfs
                   properties:
                     - !ruby/object:Api::Type::String
                       name: 'secret'
@@ -438,6 +440,7 @@ properties:
                   #   - template.0.template.0.volumes.0.cloudSqlInstance
                   #   - template.0.template.0.volumes.0.emptyDir
                   #   - template.0.volumes.0.gcs
+                  #   - template.0.volumes.0.nfs
                   properties:
                     - !ruby/object:Api::Type::Array
                       name: 'instances'
@@ -454,6 +457,7 @@ properties:
                   #   - template.0.template.0.volumes.0.cloudSqlInstance
                   #   - template.0.template.0.volumes.0.emptyDir
                   #   - template.0.volumes.0.gcs
+                  #   - template.0.volumes.0.nfs
                   properties:
                     - !ruby/object:Api::Type::Enum
                       name: 'medium'
@@ -476,6 +480,7 @@ properties:
                   #   - template.0.volumes.0.cloudSqlInstance
                   #   - template.0.volumes.0.emptyDir
                   #   - template.0.volumes.0.gcs
+                  #   - template.0.volumes.0.nfs
                   properties:
                     - !ruby/object:Api::Type::String
                       name: 'bucket'
@@ -486,6 +491,31 @@ properties:
                       name: 'readOnly'
                       description: |-
                         If true, mount this volume as read-only in all mounts. If false, mount this volume as read-write.
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'nfs'
+                  description: |-
+                    NFS share mounted as a volume. This feature requires the launch stage to be set to ALPHA or BETA.
+                  min_version: beta
+                  # exactly_one_of:
+                  #   - template.0.volumes.0.secret
+                  #   - template.0.volumes.0.cloudSqlInstance
+                  #   - template.0.volumes.0.emptyDir
+                  #   - template.0.volumes.0.gcs
+                  #   - template.0.volumes.0.nfs
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'server'
+                      required: true
+                      description: |-
+                        Hostname or IP address of the NFS server.
+                    - !ruby/object:Api::Type::String
+                      name: 'path'
+                      description: |-
+                        Path that is exported by the NFS server.
+                    - !ruby/object:Api::Type::Boolean
+                      name: 'readOnly'
+                      description: |-
+                        If true, mount this volume as read-only in all mounts.
           - !ruby/object:Api::Type::String
             name: 'timeout'
             description: |-
