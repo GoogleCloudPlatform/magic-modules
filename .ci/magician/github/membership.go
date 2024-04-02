@@ -46,10 +46,24 @@ var (
 	trustedContributors = []string{}
 
 	// This is for reviewers who are "on vacation": will not receive new review assignments but will still receive re-requests for assigned PRs.
-	onVacationReviewers = []string{}
+	onVacationReviewers = []onVacationReviewer{
+		{
+			id:        "SarahFrench",
+			startDate: time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
+			endDate:   time.Date(2000, 1, 2, 0, 0, 0, 0, time.UTC),
+		},
+	}
+
+	timeNow = time.Now
 )
 
 type UserType int64
+
+type onVacationReviewer struct {
+	id        string
+	startDate time.Time
+	endDate   time.Time
+}
 
 const (
 	CommunityUserType UserType = iota
@@ -100,10 +114,7 @@ func isOrgMember(author, org, githubToken string) bool {
 	url := fmt.Sprintf("https://api.github.com/orgs/%s/members/%s", org, author)
 	err := utils.RequestCall(url, "GET", githubToken, nil, nil)
 
-	if err != nil {
-		return false
-	}
-	return true
+	return err == nil
 }
 
 func GetRandomReviewer() string {
@@ -114,5 +125,21 @@ func GetRandomReviewer() string {
 }
 
 func AvailableReviewers() []string {
-	return utils.Removes(reviewerRotation, onVacationReviewers)
+	var availableReviewers []string
+	for _, id := range reviewerRotation {
+		if !onVacation(id) {
+			availableReviewers = append(availableReviewers, id)
+		}
+	}
+	return availableReviewers
+}
+
+func onVacation(id string) bool {
+	nowTime := timeNow().UTC()
+	for _, reviewer := range onVacationReviewers {
+		if reviewer.id == id && nowTime.After(reviewer.startDate.UTC()) && nowTime.Before(reviewer.endDate.UTC()) {
+			return true
+		}
+	}
+	return false
 }

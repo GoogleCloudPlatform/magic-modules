@@ -17,7 +17,9 @@ package github
 
 import (
 	"testing"
+	"time"
 
+	"github.com/google/go-cmp/cmp"
 	"golang.org/x/exp/slices"
 )
 
@@ -31,8 +33,70 @@ func TestTrustedContributors(t *testing.T) {
 
 func TestOnVacationReviewers(t *testing.T) {
 	for _, member := range onVacationReviewers {
-		if !slices.Contains(reviewerRotation, member) {
+		if !slices.Contains(reviewerRotation, member.id) {
 			t.Fatalf(`%v is not on reviewerRotation list`, member)
 		}
 	}
+}
+
+func TestAvailableReviewers(t *testing.T) {
+	tests := []struct {
+		name       string
+		rotation   []string
+		onVacation []onVacationReviewer
+		timeNow    func() time.Time
+		want       []string
+	}{
+		{
+			name:     "id in vacation",
+			rotation: []string{"id1", "id2"},
+			onVacation: []onVacationReviewer{
+				{
+					id:        "id2",
+					startDate: time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
+					endDate:   time.Date(2000, 1, 2, 0, 0, 0, 0, time.UTC),
+				},
+			},
+			timeNow: func() time.Time {
+				return time.Date(2000, 1, 1, 3, 0, 0, 0, time.UTC)
+			},
+			want: []string{"id1"},
+		},
+		{
+			name:     "id not in vacation",
+			rotation: []string{"id1", "id2"},
+			onVacation: []onVacationReviewer{
+				{
+					id:        "id2",
+					startDate: time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
+					endDate:   time.Date(2000, 1, 2, 0, 0, 0, 0, time.UTC),
+				},
+			},
+			timeNow: func() time.Time {
+				return time.Date(2000, 1, 10, 3, 0, 0, 0, time.UTC)
+			},
+			want: []string{"id1", "id2"},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			origRotation := reviewerRotation
+			origOnVacation := onVacationReviewers
+			origTimeNow := timeNow
+			reviewerRotation = test.rotation
+			onVacationReviewers = test.onVacation
+			timeNow = test.timeNow
+			defer func() {
+				reviewerRotation = origRotation
+				onVacationReviewers = origOnVacation
+				timeNow = origTimeNow
+			}()
+
+			got := AvailableReviewers()
+			if diff := cmp.Diff(test.want, got); diff != "" {
+				t.Errorf("AvailableReviewers() got diff: %s", diff)
+			}
+		})
+	}
+
 }
