@@ -62,17 +62,15 @@ func TestAccDataSourceArtifactRegistryDockerImage(t *testing.T) {
 // https://console.cloud.google.com/artifacts/docker/go-containerregistry/us/gcr.io
 // Currently, gcr.io does not provide a imageSizeBytes or buildTime field in the JSON response
 const testAccDataSourceArtifactRegistryDockerImageConfig = `
-provider "google" {
-	project = "cloudrun"
-}
-
 data "google_artifact_registry_docker_image" "testTag" {
+	project       = "cloudrun"
 	location      = "us"
 	repository_id = "container"
 	image_name    = "hello:latest"
 }
 
 data "google_artifact_registry_docker_image" "testDigest" {
+	project       = "cloudrun"
 	location      = "us"
 	repository_id = "container"
 	image_name    = "hello@sha256:77cb9fbc6a667b8bfdbeca4c49e7703d825746eba53b736f0318bb7712828821"
