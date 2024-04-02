@@ -58,6 +58,7 @@ examples:
       resource_name: 'my-firewall-endpoint'
     test_env_vars:
       org_id: :ORG_ID
+      project: :PROJECT_NAME
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
