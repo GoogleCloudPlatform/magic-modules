@@ -45,7 +45,7 @@ func main() {
 
 	////////////////////////////////////////////////////////////////////////////////
 
-	filePath := fmt.Sprintf("mmv1/third_party/terraform/.teamcity/components/inputs/%s.kt", *serviceFile) 
+	filePath := fmt.Sprintf("mmv1/third_party/terraform/.teamcity/components/inputs/%s.kt", *serviceFile)
 	f, err := os.Open(fmt.Sprintf("../../%s", filePath)) // Need to make path relative to where the script is called
 	if err != nil {
 		panic(err)
