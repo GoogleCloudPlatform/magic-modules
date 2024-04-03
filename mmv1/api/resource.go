@@ -14,6 +14,7 @@ package api
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
@@ -828,4 +829,72 @@ func (r Resource) TerraformName() string {
 		return r.LegacyName
 	}
 	return fmt.Sprintf("google_%s_%s", r.ProductMetadata.TerraformName(), google.Underscore(r.Name))
+}
+
+func (r Resource) ImportIdFormatsFromResource() []string {
+	return ImportIdFormats(r.ImportFormat, r.Identity, r.BaseUrl)
+}
+
+// Returns a list of import id formats for a given resource. If an id
+// contains provider-default values, this fn will return formats both
+// including and omitting the value.
+//
+// If a resource has an explicit import_format value set, that will be the
+// base import url used. Next, the values of `identity` will be used to
+// construct a URL. Finally, `{{name}}` will be used by default.
+//
+// For instance, if the resource base url is:
+//
+//	projects/{{project}}/global/networks
+//
+// It returns 3 formats:
+// a) self_link: projects/{{project}}/global/networks/{{name}}
+// b) short id: {{project}}/{{name}}
+// c) short id w/o defaults: {{name}}
+func ImportIdFormats(importFormat, identity []string, baseUrl string) []string {
+	var idFormats []string
+	if len(importFormat) == 0 {
+		underscoredBaseUrl := baseUrl
+		// TODO Q2: underscore base url needed?
+		// underscored_base_url = base_url.gsub(
+		//     /{{[[:word:]]+}}/, &:underscore
+		//   )
+		if len(identity) == 0 {
+			idFormats = []string{fmt.Sprintf("%s/{{name}}", underscoredBaseUrl)}
+		} else {
+			var transformedIdentity []string
+			for _, id := range identity {
+				transformedIdentity = append(transformedIdentity, fmt.Sprintf("{{%s}}", id))
+			}
+			identityPath := strings.Join(transformedIdentity, "/")
+			idFormats = []string{fmt.Sprintf("%s/{{name}}", identityPath)}
+		}
+	} else {
+		idFormats = importFormat
+	}
+
+	// short id: {{project}}/{{zone}}/{{name}}
+	fieldMarkers := regexp.MustCompile(`{{[[:word:]]+}}`).FindAllString(idFormats[0], -1)
+	shortIdFormat := strings.Join(fieldMarkers, "/")
+
+	// short ids without fields with provider-level defaults:
+
+	// without project
+	fieldMarkers = slices.DeleteFunc(fieldMarkers, func(s string) bool { return s == "{{project}}" })
+	shortIdDefaultProjectFormat := strings.Join(fieldMarkers, "/")
+
+	// without project or location
+	fieldMarkers = slices.DeleteFunc(fieldMarkers, func(s string) bool { return s == "{{region}}" })
+	fieldMarkers = slices.DeleteFunc(fieldMarkers, func(s string) bool { return s == "{{zone}}" })
+	shortIdDefaultFormat := strings.Join(fieldMarkers, "/")
+
+	// If the id format can include `/` characters we cannot allow short forms such as:
+	// `{{project}}/{{%name}}` as there is no way to differentiate between
+	// project-name/resource-name and resource-name/with-slash
+	if !strings.Contains(idFormats[0], "%") {
+		idFormats = append(idFormats, shortIdFormat, shortIdDefaultProjectFormat, shortIdDefaultFormat)
+	}
+
+	// TODO Q2:  id_formats.uniq.reject(&:empty?).sort_by { |i| [i.count('/'), i.count('{{')] }.reverse
+	return idFormats
 }
