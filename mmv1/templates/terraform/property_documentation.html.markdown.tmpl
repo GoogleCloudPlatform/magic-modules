@@ -21,25 +21,26 @@
   (Deprecated)
     {{- end}}
   {{- end }}
-{{- end }}
-    {{ $.Description }}
-{{- if and (and ($.IsA "Array") ($.ItemType.IsA "Enum")) (and (not $.Output) (not $.ItemType.SkipDocsValues))}}
-  {{- if not (or $.ItemType.DefaultValue (eq $.ItemType.DefaultValue "")) }}
-  Default value is [`{{ $.ItemType.DefaultValue }}`].
+  {{ $.Description }}
+  {{- if and (and ($.IsA "Array") ($.ItemType.IsA "Enum")) (and (not $.Output) (not $.ItemType.SkipDocsValues))}}
+    {{- if not (or $.ItemType.DefaultValue (eq $.ItemType.DefaultValue "")) }}
+    Default value is [`{{ $.ItemType.DefaultValue }}`].
+    {{- end }}
+    Each value may be one of: {{ $.ItemType.EnumValuesToString }}.
+  {{- else if and ($.IsA "Enum") (and (not $.Output) (not (and $.ItemType $.ItemType.SkipDocsValues)))}}
+    {{- if not (or $.DefaultValue (eq $.DefaultValue "")) }}
+    Default value is [`{{ $.DefaultValue }}`].
+    {{- end }}
+    Possible values are: {{ $.EnumValuesToString }}.
   {{- end }}
-  Each value may be one of: {{ $.ItemType.EnumValuesToString }}.
-{{- else if and ($.IsA "Enum") (and (not $.Output) (not $.ItemType.SkipDocsValues))}}
-  {{- if not (or $.DefaultValue (eq $.DefaultValue "")) }}
-  Default value is [`{{ $.DefaultValue }}`].
+  {{- if $.Sensitive }}
+    **Note**: This property is sensitive and will not be displayed in the plan.
   {{- end }}
-  Possible values are: {{ $.EnumValuesToString }}.
-{{- end }}
-{{- if $.Sensitive }}
-  **Note**: This property is sensitive and will not be displayed in the plan.
-{{- end }}
-{{- if and (not $.FlattenObject) $.NestedProperties }}
+  {{- if and (not $.FlattenObject) $.NestedProperties }}
   Structure is [documented below](#nested_{{ underscore $.Name }}).
-{{- end }}
-{{- if $.DeprecationMessage }}
+  {{- end }}
+  {{- if $.DeprecationMessage }}
+
   ~> **Warning:** {{ $.DeprecationMessage }}
-{{- end }}
+  {{- end }}
+{{ end }}
