@@ -779,9 +779,7 @@ func TestAccComputeInstanceTemplate_ConfidentialInstanceConfigMain(t *testing.T)
 	t.Parallel()
 
 	var instanceTemplate compute.InstanceTemplate
-	<% unless version == "ga" -%>
 	var instanceTemplate2 compute.InstanceTemplate
-	<% end -%>
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -793,13 +791,10 @@ func TestAccComputeInstanceTemplate_ConfidentialInstanceConfigMain(t *testing.T)
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(t, "google_compute_instance_template.foobar", &instanceTemplate),
 					testAccCheckComputeInstanceTemplateHasConfidentialInstanceConfig(&instanceTemplate, true, "SEV"),
-					<% unless version == "ga" -%>
 					testAccCheckComputeInstanceTemplateExists(t, "google_compute_instance_template.foobar2", &instanceTemplate2),
 					testAccCheckComputeInstanceTemplateHasConfidentialInstanceConfig(&instanceTemplate2, true, ""),
-					<% end -%>
 				),
 			},
-			<% unless version == "ga" -%>
 			{
 				Config: testAccComputeInstanceTemplateConfidentialInstanceConfigNoEnable(acctest.RandString(t, 10), "AMD Milan", "SEV_SNP"),
 				Check: resource.ComposeTestCheckFunc(
@@ -809,7 +804,6 @@ func TestAccComputeInstanceTemplate_ConfidentialInstanceConfigMain(t *testing.T)
 					testAccCheckComputeInstanceTemplateHasConfidentialInstanceConfig(&instanceTemplate2, false, "SEV_SNP"),
 				),
 			},
-			<% end -%>
 		},
 	})
 }
@@ -1987,11 +1981,9 @@ func testAccCheckComputeInstanceTemplateHasConfidentialInstanceConfig(instanceTe
 		if instanceTemplate.Properties.ConfidentialInstanceConfig.EnableConfidentialCompute != EnableConfidentialCompute {
 			return fmt.Errorf("Wrong ConfidentialInstanceConfig EnableConfidentialCompute: expected %t, got, %t", EnableConfidentialCompute, instanceTemplate.Properties.ConfidentialInstanceConfig.EnableConfidentialCompute)
 		}
-		<% unless version == "ga" -%>
 		if instanceTemplate.Properties.ConfidentialInstanceConfig.ConfidentialInstanceType != ConfidentialInstanceType {
 			return fmt.Errorf("Wrong ConfidentialInstanceConfig ConfidentialInstanceType: expected %s, got, %s", ConfidentialInstanceType, instanceTemplate.Properties.ConfidentialInstanceConfig.ConfidentialInstanceType)
 		}
-		<% end -%>
 
 		return nil
 	}
@@ -3312,9 +3304,7 @@ resource "google_compute_instance_template" "foobar" {
 
   confidential_instance_config {
     enable_confidential_compute       = true
-<% unless version == "ga" -%>
     confidential_instance_type        = %q
-<% end -%>
   }
 
   scheduling {
@@ -3323,7 +3313,6 @@ resource "google_compute_instance_template" "foobar" {
 
 }
 
-<% unless version == "ga" -%>
 resource "google_compute_instance_template" "foobar2" {
   name         = "tf-test-instance2-template-%s"
   machine_type = "n2d-standard-2"
@@ -3347,15 +3336,9 @@ resource "google_compute_instance_template" "foobar2" {
   }
 
 }
-<% end -%>
-<% if version == "ga" -%>
-`, suffix)
-<% else -%>
 `, suffix, confidentialInstanceType, suffix)
-<% end -%>
 }
 
-<% unless version == "ga" -%>
 func testAccComputeInstanceTemplateConfidentialInstanceConfigNoEnable(suffix string, minCpuPlatform, confidentialInstanceType string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image2" {
@@ -3416,7 +3399,6 @@ resource "google_compute_instance_template" "foobar4" {
 }
 `, suffix, minCpuPlatform, confidentialInstanceType, suffix, minCpuPlatform, confidentialInstanceType)
 }
-<% end -%>
 
 func testAccComputeInstanceTemplateAdvancedMachineFeatures(suffix string) string {
 	return fmt.Sprintf(`
