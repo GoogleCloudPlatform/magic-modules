@@ -16,8 +16,10 @@ package api
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 )
 
@@ -130,13 +132,20 @@ type Type struct {
 
 	EnumValues []string `yaml:"enum_values"`
 
+	SkipDocsValues bool `yaml:"skip_docs_values"`
+
 	// ====================
 	// Array Fields
 	// ====================
 	ItemType *Type `yaml:"item_type"`
 	MinSize  int   `yaml:"min_size"`
 	MaxSize  int   `yaml:"max_size"`
+	// __name
+	ParentName string
 
+	// ====================
+	// ResourceRef Fields
+	// ====================
 	Resource string
 	Imports  string
 
@@ -156,7 +165,7 @@ type Type struct {
 	IgnoreRead bool `yaml:"ignore_read"`
 
 	// Adds a ValidateFunc to the schema
-	Validation bool
+	Validation resource.Validation
 
 	// Indicates that this is an Array that should have Set diff semantics.
 	UnorderedList bool `yaml:"unordered_list"`
@@ -270,7 +279,51 @@ type Type struct {
 
 const MAX_NAME = 20
 
-// func (t *Type) validate() {
+func (t *Type) SetDefault(r *Resource) {
+	t.ResourceMetadata = r
+	if t.UpdateVerb == "" {
+		t.UpdateVerb = t.ResourceMetadata.UpdateVerb
+	}
+
+	switch {
+	case t.IsA("Array"):
+		t.ItemType.ParentName = t.Name
+		t.ItemType.ParentMetadata = t.ParentMetadata
+		t.ItemType.SetDefault(r)
+	case t.IsA("Map"):
+		t.KeyExpander = "tpgresource.ExpandString"
+		t.ValueType.ParentName = t.Name
+		t.ValueType.ParentMetadata = t.ParentMetadata
+		t.ValueType.SetDefault(r)
+	case t.IsA("NestedObject"):
+		if t.Name == "" {
+			t.Name = t.ParentName
+		}
+
+		if t.Description == "" {
+			t.Description = "A nested object resource"
+		}
+
+		for _, p := range t.Properties {
+			p.ParentMetadata = t
+			p.SetDefault(r)
+		}
+	case t.IsA("ResourceRef"):
+		if t.Name == "" {
+			t.Name = t.Resource
+		}
+
+		if t.Description == "" {
+			t.Description = fmt.Sprintf("A reference to %s resource", t.Resource)
+		}
+	default:
+	}
+
+	if t.ApiName == "" {
+		t.ApiName = t.Name
+	}
+}
+
 // super
 // check :description, type: ::String, required: true
 // check :exclude, type: :boolean, default: false, required: true
@@ -352,6 +405,16 @@ func (t Type) TerraformLineage() string {
 	}
 
 	return fmt.Sprintf("%s.0.%s", t.ParentMetadata.TerraformLineage(), google.Underscore(t.Name))
+}
+
+func (t Type) EnumValuesToString() string {
+	var values []string
+
+	for _, val := range t.EnumValues {
+		values = append(values, fmt.Sprintf("`%s`", val))
+	}
+
+	return strings.Join(values, ", ")
 }
 
 // func (t *Type) to_json(opts) {
