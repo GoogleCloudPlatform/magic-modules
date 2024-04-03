@@ -6,6 +6,7 @@ on:
   pull_request:
     paths:
       - 'tools/diff-processor/**'
+      - '.github/workflows/unit-tests-diff-processor.yml'
 
 jobs:
   test:
@@ -18,13 +19,24 @@ jobs:
         with:
           go-version: '^1.21.0'
 
-      - name: Build
+      - name: Build with TPG
         run: |
           cd tools/diff-processor
           make clone OWNER_REPO=hashicorp/terraform-provider-google DEPTH=1
           make build OLD_REF=main NEW_REF=main
 
-      - name: Test
+      - name: Test with TPG
+        run: |
+          cd tools/diff-processor
+          go test -v ./...
+
+      - name: Build with TPGB
+        run: |
+          cd tools/diff-processor
+          make clone OWNER_REPO=hashicorp/terraform-provider-google-beta DEPTH=1
+          make build OLD_REF=main NEW_REF=main
+
+      - name: Test with TPGB
         run: |
           cd tools/diff-processor
           go test -v ./...
