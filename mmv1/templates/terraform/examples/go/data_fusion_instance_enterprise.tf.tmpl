@@ -1,0 +1,7 @@
+resource "google_data_fusion_instance" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "instance_name"}}"
+  region = "us-central1"
+  type = "ENTERPRISE"
+  enable_rbac = true
+  {{index $.Vars "prober_test_run"}}
+}
