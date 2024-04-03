@@ -83,10 +83,11 @@ values will be stored in the raw state as plain text: {{ $.SensitivePropsToStrin
 
 
 ```hcl
-{{ $e.HCLText -}}
+{{ $e.HCLText }}
 ```
 	{{- end }}
 {{- end }}
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -138,7 +139,6 @@ In addition to the arguments listed above, the following computed attributes are
 {{- if $.HasSelfLink }}
 * `self_link` - The URI of the created resource.
 {{- end }}
-
 {{ range $p := $.AllNestedProperties $.RootProperties }}
 	{{- if $p.Output }}
 {{- template "nestedPropertyDocumentation" $p -}}
