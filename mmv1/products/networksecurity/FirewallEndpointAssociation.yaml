@@ -14,7 +14,7 @@
 --- !ruby/object:Api::Resource
 name: 'FirewallEndpointAssociation'
 base_url: '{{parent}}/locations/{{location}}/firewallEndpointAssociations'
-create_url: '{{parent}}/locations/{{location}}/firewallEndpointAssociations?firewallEndpointId={{name}}'
+create_url: '{{parent}}/locations/{{location}}/firewallEndpointAssociations?firewallEndpointAssociationId={{name}}'
 self_link: '{{parent}}/locations/{{location}}/firewallEndpointAssociations/{{name}}'
 min_version: beta
 update_verb: :PATCH
@@ -93,6 +93,14 @@ properties:
     name: 'labels'
     description: |
       A map of key/value label pairs to assign to the resource.
+  - !ruby/object:Api::Type::Boolean
+    name: 'disabled'
+    default_value: false
+    description: |
+      Whether the association is disabled. True indicates that traffic will not be intercepted.
+
+      ~> **Note:** The API will reject the request if this value is set to true when creating the resource,
+      otherwise on an update the association can be disabled.
   - !ruby/object:Api::Type::String
     name: 'selfLink'
     description: |
