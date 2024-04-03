@@ -601,6 +601,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Runtimeconfig",
         "path" to "./google-beta/services/runtimeconfig"
     ),
+    "seclm" to mapOf(
+        "name" to "seclm",
+        "displayName" to "SecLM",
+        "path" to "./google-beta/services/seclm"
+    ),
     "secretmanager" to mapOf(
         "name" to "secretmanager",
         "displayName" to "Secretmanager",

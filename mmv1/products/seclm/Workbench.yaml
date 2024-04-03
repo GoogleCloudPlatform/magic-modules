@@ -30,7 +30,7 @@ examples:
 properties:
   - !ruby/object:Api::Type::String
     name: name
-    description: 'Identifier. name of resource '
+    description: 'Identifier. name of resource'
     output: true
   - !ruby/object:Api::Type::String
     name: createTime
