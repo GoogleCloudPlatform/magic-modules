@@ -37,7 +37,6 @@ type GithubClient interface {
 
 type CloudbuildClient interface {
 	ApproveCommunityChecker(prNumber, commitSha string) error
-	GetAwaitingApprovalBuildLink(prNumber, commitSha string) (string, error)
 	TriggerMMPresubmitRuns(commitSha string, substitutions map[string]string) error
 }
 
