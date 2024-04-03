@@ -155,8 +155,7 @@ This resource provides the following
 [Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options:
 
 - `create` - Default is {{$.Timeouts.InsertMinutes}} minutes.
-{{/*TODO: <% if updatable?(object, properties) || object.root_labels? -%> */}}
-- `update` - Default is {{$.Timeouts.UpdateMinutes}} minutes.
+- `update` - Default is {{$.Timeouts.UpdateMinutes}} minutes.{{/*TODO: <% if updatable?(object, properties) || object.root_labels? -%> */}}
 - `delete` - Default is {{$.Timeouts.DeleteMinutes}} minutes.
 
 ## Import
@@ -165,6 +164,33 @@ This resource provides the following
 This resource does not support import.
 {{ else }}
 
-{{$.Name}} can be imported using any of these accepted formats:
 
+{{$.Name}} can be imported using any of these accepted formats:
+{{ range $idFormat := $.ImportIdFormatsFromResource }}
+* `{{$idFormat}}`
+{{- end }}
+
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import {{$.Name}} using one of the formats above. For example:
+
+```tf
+import {
+  id = "{{ index $.ImportIdFormatsFromResource 0 }}"
+  to = {{$.TerraformName}}.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), {{$.Name}} can be imported using one of the formats above. For example:
+
+```
+	{{- range $idFormat := $.ImportIdFormatsFromResource }}
+$ terraform import {{$.TerraformName}}.default {{$idFormat}}
+	{{- end }}
+```
 {{ end }}
+
+{{- if or (contains $.BaseUrl "{{project}}") $.SupportsIndirectUserProjectOverride}}
+## User Project Overrides
+
+This resource supports [User Project Overrides](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#user_project_override).
+{{- end }}
