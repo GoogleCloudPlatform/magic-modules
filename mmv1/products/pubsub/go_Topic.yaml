@@ -34,6 +34,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
+  type: "PollAsync"
   check_response_func_existence: 'transport_tpg.PollCheckForExistence'
   check_response_func_absence: 'transport_tpg.PollCheckForAbsence'
   suppress_error: true
@@ -79,7 +80,6 @@ properties:
   - name: 'name'
     type: String
     description: "Name of the topic."
-    pattern: 'projects/{{project}}/topics/{{name}}'
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
