@@ -13,17 +13,13 @@
 
 package api
 
-import (
-	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-)
-
 // require 'google/extensions'
 // require 'google/logger'
 // require 'google/yaml_validator'
 
 // Represents an object that has a (mandatory) name
 type NamedObject struct {
-	google.YamlValidator
+	// google.YamlValidator
 
 	Name string
 

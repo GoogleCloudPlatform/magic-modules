@@ -318,6 +318,10 @@ func (t *Type) SetDefault(r *Resource) {
 		}
 	default:
 	}
+
+	if t.ApiName == "" {
+		t.ApiName = t.Name
+	}
 }
 
 // super
