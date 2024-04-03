@@ -326,6 +326,9 @@ func (r *Resource) SetDefault(product *Product) {
 	for _, property := range r.AllProperties() {
 		property.SetDefault(r)
 	}
+	if r.IdFormat == "" {
+		r.IdFormat = r.SelfLinkUri()
+	}
 }
 
 // ====================
