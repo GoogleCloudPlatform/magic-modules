@@ -1,0 +1,7 @@
+resource "google_sec_lm_workbench" "<%= ctx[:primary_resource_id] %>" {
+  workbench_id = "<%= ctx[:vars]['workbench_name'] %>"
+  location = "us-central1"
+  labels = {
+    foo = "bar"
+  }
+}

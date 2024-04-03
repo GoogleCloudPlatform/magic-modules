@@ -1,0 +1,9 @@
+--- !ruby/object:Api::Product
+versions:
+- !ruby/object:Api::Product::Version
+  base_url: https://seclm.googleapis.com/v1/
+  name: ga
+name: SecLM
+display_name: SecLM
+scopes:
+- https://www.googleapis.com/auth/cloud-platform

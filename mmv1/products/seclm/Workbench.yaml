@@ -1,0 +1,65 @@
+--- !ruby/object:Api::Resource
+base_url: projects/{{project}}/locations/{{location}}/workbenches
+create_url: projects/{{project}}/locations/{{location}}/workbenches?workbenchId={{workbench_id}}
+self_link: projects/{{project}}/locations/{{location}}/workbenches/{{workbench_id}}
+id_format: projects/{{project}}/locations/{{location}}/workbenches/{{workbench_id}}
+import_format:
+- projects/{{project}}/locations/{{location}}/workbenches/{{workbench_id}}
+name: Workbench
+description: Description
+update_verb: :PATCH
+update_mask: true
+autogen_async: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'sec_lm_workbench_basic'
+    vars:
+      workbench_name: 'my-workbench-name'
+properties:
+  - !ruby/object:Api::Type::String
+    name: name
+    description: 'Identifier. name of resource '
+    output: true
+  - !ruby/object:Api::Type::String
+    name: createTime
+    description: 'Output only. [Output only] Create time stamp '
+    output: true
+  - !ruby/object:Api::Type::String
+    name: updateTime
+    description: 'Output only. [Output only] Update time stamp '
+    output: true
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: labels
+    description: 'Optional. Labels as key value pairs '
+  parameters:
+  - !ruby/object:Api::Type::String
+    name: location
+    description: " "
+    url_param_only: true
+    required: true
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: workbenchId
+    description: "Required. Id of the requesting object\nIf auto-generating Id server-side,
+      remove this field and\nworkbench_id from the method_signature of Create RPC "
+    url_param_only: true
+    required: true
+    immutable: true
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: name
+    base_url: "{{op_id}}"
+    wait_ms: 1000
+    timeouts:
+  result: !ruby/object:Api::OpAsync::Result
+    path: response
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: done
+    complete: true
+    allowed:
+    - true
+    - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: error
+    message: message
