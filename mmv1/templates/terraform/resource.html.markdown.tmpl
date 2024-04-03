@@ -82,7 +82,9 @@ values will be stored in the raw state as plain text: {{ $.SensitivePropsToStrin
 ## Example Usage - {{ title (camelize $e.Name "upper" )}}
 
 
-{{/*TODO: example HCL*/}}
+```hcl
+{{ $e.HCLText -}}
+```
 	{{- end }}
 {{- end }}
 ## Argument Reference
