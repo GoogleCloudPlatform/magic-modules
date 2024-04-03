@@ -78,6 +78,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: name
     description: Unique resource name for the DiscoveryConfig, assigned by the service when the DiscoveryConfig is created.
+    output: true
   - !ruby/object:Api::Type::String
     name: displayName
     description: Display Name (max 1000 Chars)
@@ -208,14 +209,14 @@ properties:
                               - !ruby/object:Api::Type::String
                                 name: tableIdRegex
                                 description: if unset, this property matches all tables
-                    - !ruby/object:Api::Type::NestedObject
-                      name: otherTables
-                      description: Catch-all. This should always be the last filter in the list because anything above it will apply first.
-                      properties:
-                        []  # Meant to be an empty object with no properties - see here : https://cloud.google.com/sensitive-data-protection/docs/reference/rest/v2/organizations.locations.discoveryConfigs#allotherbigquerytables
-                        # The fields below are necessary to include the "otherTables" filter in the payload
-                      send_empty_value: true
-                      allow_empty_object: true
+                - !ruby/object:Api::Type::NestedObject
+                  name: otherTables
+                  description: Catch-all. This should always be the last filter in the list because anything above it will apply first.
+                  properties:
+                    []  # Meant to be an empty object with no properties - see here : https://cloud.google.com/sensitive-data-protection/docs/reference/rest/v2/organizations.locations.discoveryConfigs#allotherbigquerytables
+                    # The fields below are necessary to include the "otherTables" filter in the payload
+                  send_empty_value: true
+                  allow_empty_object: true
             - !ruby/object:Api::Type::NestedObject
               name: conditions
               description: In addition to matching the filter, these conditions must be true before a profile is generated
@@ -343,6 +344,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: lastRunTime
     description: Output only. The timestamp of the last time this config was executed
+    output: true
   - !ruby/object:Api::Type::Enum
     name: status
     description: Required. A status for this configuration
