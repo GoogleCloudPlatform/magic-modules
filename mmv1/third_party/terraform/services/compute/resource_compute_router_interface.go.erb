@@ -88,7 +88,8 @@ func ResourceComputeRouterInterface() *schema.Resource {
 			"ip_version": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ForceNew:       true,
+				ForceNew:     true,
+				Computed:     true,
 				ValidateFunc: verify.ValidateEnum([]string{"IPV4", "IPV6"}),
 				Description:  `IP version of this interface.`,
 			},
