@@ -1,0 +1,22 @@
+resource "google_privileged_access_manager_entitlement" "<%= ctx[:primary_resource_id] %>" {
+    provider =  google-beta
+    entitlement_id = "<%= ctx[:vars]['entitlement_id'] %>"
+    location = "global"
+    max_request_duration = "43200s"
+    parent = "projects/itsvarsharma-pam-testing"
+    requester_justification_config {    
+        unstructured{}
+    }
+    eligible_users {
+        principals = ["serviceAccount:test2102@itsvarsharma-pam-testing.iam.gserviceaccount.com"]
+    }
+    privileged_access{
+        gcp_iam_access{
+            role_bindings{
+                role = "roles/storage.admin"
+            }
+            resource = "//cloudresourcemanager.googleapis.com/projects/itsvarsharma-pam-testing"
+            resource_type = "cloudresourcemanager.googleapis.com/Project"
+        }
+    }
+}
