@@ -178,6 +178,7 @@ func testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigStart(context ma
 	return acctest.Nprintf(`
 resource "google_data_loss_prevention_discovery_config" "basic" {
 	parent = "projects/%{project}"
+	display_name = "display name"
 
     targets {
         big_query_target {
