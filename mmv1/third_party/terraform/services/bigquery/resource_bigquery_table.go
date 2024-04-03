@@ -296,15 +296,17 @@ func resourceBigQueryTableSchemaIsChangeable(old, new interface{}, isExternalTab
 				droppedColumns += 1
 				continue
 			}
-			if isChangable, err :=
-				resourceBigQueryTableSchemaIsChangeable(mapOld[key], mapNew[key], isExternalTable, false); err != nil || !isChangable {
+
+			isChangable, err := resourceBigQueryTableSchemaIsChangeable(mapOld[key], mapNew[key], isExternalTable, false)
+			if err != nil || !isChangable {
 				return false, err
-			}
-			if topLevel {
+			} else if isChangable && topLevel {
+				// top level column that exists in the new schema
 				sameNameColumns += 1
 			}
 		}
-		// only pure column drops allowed
+		// in-place column dropping alongside column additions is not allowed
+		// as of now because user intention can be ambiguous (e.g. column renaming)
 		newColumns := len(arrayNew) - sameNameColumns
 		return (droppedColumns == 0) || (newColumns == 0), nil
 	case map[string]interface{}:
