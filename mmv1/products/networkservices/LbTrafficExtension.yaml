@@ -19,7 +19,6 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Configure a traffic extension': 'https://cloud.google.com/service-extensions/docs/configure-callout#configure_a_traffic_extension'
   api: 'https://cloud.google.com/service-extensions/docs/reference/rest/v1beta1/projects.locations.lbTrafficExtensions'
-min_version: beta
 base_url: 'projects/{{project}}/locations/{{location}}/lbTrafficExtensions'
 self_link: 'projects/{{project}}/locations/{{location}}/lbTrafficExtensions/{{name}}'
 timeouts: !ruby/object:Api::Timeouts
@@ -51,7 +50,6 @@ examples:
       fw_allow_iap_hc_name: 'l7-ilb-fw-allow-iap-hc'
       fw_allow_ilb_to_backends_name: 'l7-ilb-fw-allow-ilb-to-backends'
       vm_test_name: 'l7-ilb-test-vm'
-    min_version: beta
     ignore_read_extra:
       - 'port_range'
       - 'target'
