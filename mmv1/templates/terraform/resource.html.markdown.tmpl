@@ -89,32 +89,29 @@ values will be stored in the raw state as plain text: {{ $.SensitivePropsToStrin
 
 The following arguments are supported:
 
-{{- range $p := $.RootProperties }}
+{{ range $p := $.RootProperties }}
 	{{- if $p.Required }}
-{{ template "propertyDocumentation" $p }}
-	{{- end}}
+{{- template "propertyDocumentation" $p }}
+	{{- end }}
 {{- end }}
 
 {{- range $p := $.AllNestedProperties $.RootProperties }}
 	{{- if $p.Required }}
-{{/*TODO: build_nested_property_documentation */}}
-{{ template "propertyDocumentation" $p }}
+{{- template "nestedPropertyDocumentation" $p}}
 	{{- end}}
 {{- end }}
 
 - - -
 
-{{- range $p := $.RootProperties }}
+{{ range $p := $.RootProperties }}
 	{{- if and (not $p.Required) (not $p.Output) }}
-{{ template "propertyDocumentation" $p }}
-	{{- end}}
+{{- template "propertyDocumentation" $p -}}
+	{{- end }}
 {{- end }}
 {{- if or (contains $.BaseUrl "{{project}}") (contains $.CreateUrl "{{project}}")}}
-
 * `project` - (Optional) The ID of the project in which the resource belongs.
     If it is not provided, the provider project is used.
 {{- end }}
-
 {{ range $f := $.VirtualFields }}
 * `{{$f.Name}}` - (Optional) {{$f.Description}}
 {{- end }}
@@ -123,19 +120,17 @@ The following arguments are supported:
 {{- end }}
 {{- range $p := $.AllNestedProperties $.RootProperties }}
 	{{- if and (not $p.Required) (not $p.Output) }}
-{{/*TODO: build_nested_property_documentation */}}
-{{ template "propertyDocumentation" $p }}
-	{{- end}}
+{{- template "nestedPropertyDocumentation" $p -}}
+{{ end}}
 {{- end }}
-
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are exported:
 
 * `id` - an identifier for the resource with format `{{$.IdFormat}}`
-{{- range $p := $.RootProperties }}
+{{ range $p := $.RootProperties }}
 	{{- if $p.Output }}
-{{ template "propertyDocumentation" $p }}
+{{- template "propertyDocumentation" $p -}}
 	{{- end}}
 {{- end }}
 {{- if $.HasSelfLink }}
@@ -144,18 +139,16 @@ In addition to the arguments listed above, the following computed attributes are
 
 {{ range $p := $.AllNestedProperties $.RootProperties }}
 	{{- if $p.Output }}
-{{/*TODO: build_nested_property_documentation */}}
-{{ template "propertyDocumentation" $p }}
-	{{- end}}
+{{- template "nestedPropertyDocumentation" $p -}}
+	{{- end }}
 {{- end }}
-
 ## Timeouts
 
 This resource provides the following
 [Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options:
 
 - `create` - Default is {{$.Timeouts.InsertMinutes}} minutes.
-- `update` - Default is {{$.Timeouts.UpdateMinutes}} minutes.{{/*TODO: <% if updatable?(object, properties) || object.root_labels? -%> */}}
+- `update` - Default is {{$.Timeouts.UpdateMinutes}} minutes.{{/*TODO Q2: <% if updatable?(object, properties) || object.root_labels? -%> */}}
 - `delete` - Default is {{$.Timeouts.DeleteMinutes}} minutes.
 
 ## Import
