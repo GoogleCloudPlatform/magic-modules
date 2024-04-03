@@ -67,6 +67,7 @@ properties:
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: manualApprovals
+        required: true
         description: |
           A manual approval workflow where users who are designated as approvers need to call the ApproveGrant/DenyGrant APIs for an Grant.
           The workflow can consist of multiple serial steps where each step defines who can act as Approver in that step and how many of those users should approve before the workflow moves to the next step.
