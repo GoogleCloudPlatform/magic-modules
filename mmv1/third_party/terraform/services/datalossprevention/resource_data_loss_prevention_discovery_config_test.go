@@ -354,19 +354,13 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
                 }
             }
             conditions {
-                created_after {
-                    seconds = 1
-                    nanos = 1
-                }
+                created_after = "2023-10-02T15:01:23Z"
                 types {
                     types = ["BIG_QUERY_TABLE_TYPE_TABLE", "BIG_QUERY_TABLE_TYPE_EXTERNAL_BIG_LAKE"]
                 }
                 or_conditions {
                     min_row_count = 10
-                    min_age {
-                        seconds = 1
-                        nanos = 1
-                    }
+                    min_age = "10d"
                 }
             }
         }

@@ -230,7 +230,7 @@ properties:
                   properties:
                     - !ruby/object:Api::Type::String
                       name: minAge
-                      description: Duration format. The minimum age a table must have before Cloud DLP can profile it. value greater than 1.
+                      description: Duration format. The minimum age a table must have before Cloud DLP can profile it. Value greater than 1.
                     - !ruby/object:Api::Type::Integer
                       name: minRowCount
                       description: Minimum number of rows that should be present before Cloud DLP profiles as a table.
