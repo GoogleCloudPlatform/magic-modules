@@ -1207,6 +1207,9 @@ resource "google_alloydb_cluster" "default" {
       day = "WEDNESDAY"
       start_time {
         hours = 12
+        minutes = 0
+        seconds = 0
+        nanos = 0
       }
     }
   }
