@@ -713,9 +713,6 @@ func testAccComputeRouterPeerWithMd5AuthKey(routerName string) string {
     advertised_route_priority = 100
     interface                 = google_compute_router_interface.foobar.name
     peer_ip_address           = "169.254.3.2"
-    <% unless version == 'ga' -%>
-    enable_ipv4               = true
-    <% end -%>
     md5_authentication_key {
       name = "%s-peer-key"
       key = "%s-peer-key-value"
@@ -730,9 +727,6 @@ func testAccComputeRouterPeerWithMd5AuthKey(routerName string) string {
     advertised_route_priority = 100
     interface                 = google_compute_router_interface.foobar1.name
     peer_ip_address           = "169.254.4.2"
-    <% unless version == 'ga' -%>
-    enable_ipv4               = true
-    <% end -%>
     md5_authentication_key {
       name = "%s-peer1-key"
       key = "%s-peer1-key-value"
@@ -838,9 +832,6 @@ func testAccComputeRouterPeerWithMd5AuthKeyUpdate(routerName string) string {
     advertised_route_priority = 100
     interface                 = google_compute_router_interface.foobar.name
     peer_ip_address           = "169.254.3.2"
-    <% unless version == 'ga' -%>
-    enable_ipv4               = true
-    <% end -%>
     md5_authentication_key {
       name = "%s-peer-key"
       key = "%s-peer-key-value"
@@ -855,9 +846,6 @@ func testAccComputeRouterPeerWithMd5AuthKeyUpdate(routerName string) string {
     advertised_route_priority = 100
     interface                 = google_compute_router_interface.foobar1.name
     peer_ip_address           = "169.254.4.2"
-    <% unless version == 'ga' -%>
-    enable_ipv4               = true
-    <% end -%>
     md5_authentication_key {
       name = "%s-peer1-key"
       key = "%s-peer1-key-value-changed"
@@ -1501,10 +1489,6 @@ resource "google_compute_router_peer" "foobar" {
   peer_asn                  = 65515
   advertised_route_priority = 100
   interface                 = google_compute_router_interface.foobar.name
-  <% unless version == 'ga' -%>
-  enable_ipv4               = true
-  <% end -%>
-
   enable_ipv6               = %v
 
 }
@@ -1581,9 +1565,6 @@ resource "google_compute_router_peer" "foobar" {
   peer_asn                  = 65515
   advertised_route_priority = 100
   interface                 = google_compute_router_interface.foobar.name
-  <% unless version == 'ga' -%>
-  enable_ipv4               = true
-  <% end -%>
   enable_ipv6               = %v
   ipv6_nexthop_address      = "2600:2d00:0000:0002:0000:0000:0000:0001"
   peer_ipv6_nexthop_address = "2600:2d00:0:2::2"
