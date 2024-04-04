@@ -6,6 +6,7 @@ import (
 
 	"google.golang.org/api/dns/v1"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -37,6 +38,17 @@ type GoogleDnsManagedZonesModel struct {
 	Id           types.String `tfsdk:"id"`
 	Project      types.String `tfsdk:"project"`
 	ManagedZones types.List   `tfsdk:"managed_zones"`
+}
+
+type GoogleDnsManagedZoneModel struct {
+	Id            types.String `tfsdk:"id"`
+	DnsName       types.String `tfsdk:"dns_name"`
+	Name          types.String `tfsdk:"name"`
+	Description   types.String `tfsdk:"description"`
+	ManagedZoneId types.Int64  `tfsdk:"managed_zone_id"`
+	NameServers   types.List   `tfsdk:"name_servers"`
+	Visibility    types.String `tfsdk:"visibility"`
+	Project       types.String `tfsdk:"project"`
 }
 
 func (d *GoogleDnsManagedZonesDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -239,4 +251,19 @@ func flattenManagedZones(ctx context.Context, managedZones []*dns.ManagedZone, p
 	}
 
 	return zones, diags
+}
+
+func getDnsManagedZoneAttrs() map[string]attr.Type {
+	dnsManagedZoneAttrs := map[string]attr.Type{
+		"name":            types.StringType,
+		"project":         types.StringType,
+		"dns_name":        types.StringType,
+		"description":     types.StringType,
+		"managed_zone_id": types.Int64Type,
+		"name_servers":    types.ListType{}.WithElementType(types.StringType),
+		"visibility":      types.StringType,
+		"id":              types.StringType,
+	}
+
+	return dnsManagedZoneAttrs
 }

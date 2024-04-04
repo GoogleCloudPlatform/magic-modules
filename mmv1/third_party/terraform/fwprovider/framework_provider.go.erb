@@ -283,10 +283,7 @@ func (p *FrameworkProvider) DataSources(_ context.Context) []func() datasource.D
     return []func() datasource.DataSource{
         resourcemanager.NewGoogleClientConfigDataSource,
         resourcemanager.NewGoogleClientOpenIDUserinfoDataSource,
-        dns.NewGoogleDnsManagedZoneDataSource,
         dns.NewGoogleDnsManagedZonesDataSource,
-        dns.NewGoogleDnsRecordSetDataSource,
-        dns.NewGoogleDnsKeysDataSource,
         <% unless version == 'ga' -%>
         firebase.NewGoogleFirebaseAndroidAppConfigDataSource,
         firebase.NewGoogleFirebaseAppleAppConfigDataSource,

@@ -3,11 +3,16 @@ package dns_test
 import (
 	"fmt"
 	"regexp"
+	"strings"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/fwresource"
+	"github.com/hashicorp/terraform-provider-google/google/fwtransport"
 )
 
 func TestAccDataSourceDnsManagedZones_basic(t *testing.T) {
@@ -64,4 +69,39 @@ resource "google_dns_managed_zone" "two" {
 data "google_dns_managed_zones" "qa" {
 }
 `, context)
+}
+
+// testAccCheckDNSManagedZoneDestroyProducerFramework is the framework version of the generated testAccCheckDNSManagedZoneDestroyProducer
+// when we automate this, we'll use the automated version and can get rid of this
+func testAccCheckDNSManagedZoneDestroyProducerFramework(t *testing.T) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		for name, rs := range s.RootModule().Resources {
+			if rs.Type != "google_dns_managed_zone" {
+				continue
+			}
+			if strings.HasPrefix(name, "data.") {
+				continue
+			}
+
+			p := acctest.GetFwTestProvider(t)
+
+			url, err := fwresource.ReplaceVarsForFrameworkTest(&p.FrameworkProvider.FrameworkProviderConfig, rs, "{{DNSBasePath}}projects/{{project}}/managedZones/{{name}}")
+			if err != nil {
+				return err
+			}
+
+			billingProject := ""
+
+			if !p.BillingProject.IsNull() && p.BillingProject.String() != "" {
+				billingProject = p.BillingProject.String()
+			}
+
+			_, diags := fwtransport.SendFrameworkRequest(&p.FrameworkProvider.FrameworkProviderConfig, "GET", billingProject, url, p.UserAgent, nil)
+			if !diags.HasError() {
+				return fmt.Errorf("DNSManagedZone still exists at %s", url)
+			}
+		}
+
+		return nil
+	}
 }
