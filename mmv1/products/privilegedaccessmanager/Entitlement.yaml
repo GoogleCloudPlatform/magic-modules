@@ -227,4 +227,3 @@ parameters:
       Format: project/{project_id} or organization/{organization_number} or folder/{folder_number}
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_update: templates/terraform/pre_update/privileged_access_manager_entitlement.go.erb
-  
