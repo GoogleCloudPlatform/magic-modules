@@ -41,21 +41,6 @@ func (cb *Client) ApproveCommunityChecker(prNumber, commitSha string) error {
 	return nil
 }
 
-func (cb *Client) GetAwaitingApprovalBuildLink(prNumber, commitSha string) (string, error) {
-	buildId, err := getPendingBuildId(PROJECT_ID, commitSha)
-	if err != nil {
-		return "", err
-	}
-
-	if buildId == "" {
-		return "", fmt.Errorf("failed to find pending build for PR %s", prNumber)
-	}
-
-	targetUrl := fmt.Sprintf("https://console.cloud.google.com/cloud-build/builds;region=global/%s?project=%s", buildId, PROJECT_ID)
-
-	return targetUrl, nil
-}
-
 func getPendingBuildId(projectId, commitSha string) (string, error) {
 	COMMUNITY_CHECKER_TRIGGER, ok := os.LookupEnv("COMMUNITY_CHECKER_TRIGGER")
 	if !ok {
