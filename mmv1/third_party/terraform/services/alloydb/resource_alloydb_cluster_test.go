@@ -1214,12 +1214,13 @@ resource "google_alloydb_cluster" "default" {
     }
   }
 }
-data "google_project" "project" {
-}
+
 resource "google_compute_network" "default" {
   provider = google-beta
   name     = "tf-test-alloydb-cluster%{random_suffix}"
 }
+
+data "google_project" "project" {}
 provider "google-beta" {}
 `, context)
 }
@@ -1238,11 +1239,11 @@ func TestAccAlloydbCluster_withMaintenanceWindowsMissingFields(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccAlloydbCluster_withMaintenanceWindowMissingStartTime(context),
-				ExpectError: regexp.MustCompile("Error creating cluster. Both \"day\" and \"startTime\" are required if attempting to configure maintenance windows, otherwiese remove the maintenance_windows."),
+				ExpectError: regexp.MustCompile("Error: Insufficient start_time blocks"),
 			},
 			{
 				Config:      testAccAlloydbCluster_withMaintenanceWindowMissingDay(context),
-				ExpectError: regexp.MustCompile("Error creating cluster. Both \"day\" and \"startTime\" are required if attempting to configure maintenance windows, otherwiese remove the maintenance_windows."),
+				ExpectError: regexp.MustCompile("Error: Missing required argument"),
 			},
 		},
 	})
@@ -1262,12 +1263,13 @@ resource "google_alloydb_cluster" "default" {
     }
   }
 }
-data "google_project" "project" {
-}
+
 resource "google_compute_network" "default" {
   provider = google-beta
   name     = "tf-test-alloydb-cluster%{random_suffix}"
-}	
+}
+
+data "google_project" "project" {}
 `, context)
 }
 
@@ -1290,11 +1292,12 @@ resource "google_alloydb_cluster" "default" {
     }
   }
 }
-data "google_project" "project" {
-}
+
 resource "google_compute_network" "default" {
   provider = google-beta
   name     = "tf-test-alloydb-cluster%{random_suffix}"
-}	
+}
+
+data "google_project" "project" {}
 `, context)
 }

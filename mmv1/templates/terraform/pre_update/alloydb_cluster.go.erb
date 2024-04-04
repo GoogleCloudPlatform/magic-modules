@@ -70,22 +70,3 @@ if d.HasChange("cluster_type") && d.Get("cluster_type") == "PRIMARY" {
 	log.Printf("[DEBUG] Finished promoting Cluster %q: %#v", d.Id(), res)
 
 }
-
-// Validate maintenance update policy config
-if d.HasChange("maintenanceUpdatePolicy") {
-	var maintenanceUpdatePolicy map[string]interface{}
-	if val, ok := obj["maintenanceUpdatePolicy"]; ok {
-		maintenanceUpdatePolicy = val.(map[string]interface{})
-
-		// Validate maintenance window variables
-		if maintenanceUpdatePolicy["maintenanceWindows"] != nil {
-			mws := maintenanceUpdatePolicy["maintenanceWindows"].([]interface{})
-			for _, mw := range mws {
-				maintenanceWindow := mw.(map[string]interface{})
-				if maintenanceWindow["day"] == nil || maintenanceWindow["startTime"] == nil {
-					return fmt.Errorf("Error updating cluster. Both \"day\" and \"startTime\" are required if attempting to configure maintenance windows, otherwiese remove the maintenance_windows.")
-				}
-			}
-		}
-	}
-}
