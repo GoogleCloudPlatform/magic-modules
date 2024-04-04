@@ -92,6 +92,9 @@ func TestExecRequestReviewer(t *testing.T) {
 
 			if tc.expectSpecificReviewers != nil {
 				assert.ElementsMatch(t, tc.expectSpecificReviewers, actualReviewers)
+				if len(tc.expectSpecificReviewers) == 0 {
+					assert.Len(t, gh.calledMethods["RequestPullRequestReviewers"], 0)
+				}
 			}
 			if tc.expectReviewersFromList != nil {
 				for _, reviewer := range actualReviewers {
