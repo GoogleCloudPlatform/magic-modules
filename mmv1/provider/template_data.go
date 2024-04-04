@@ -26,6 +26,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/golang/glog"
 )
 
@@ -45,12 +46,11 @@ type TemplateData struct {
 }
 
 var TemplateFunctions = template.FuncMap{
-	"title": strings.Title,
-	// "patternToRegex":                  PatternToRegex,
-	"replace": strings.Replace,
-	// "isLastIndex":                     isLastIndex,
-	// "escapeDescription":               escapeDescription,
-	// "shouldAllowForwardSlashInFormat": shouldAllowForwardSlashInFormat,
+	"title":      google.SpaceSeparatedTitle,
+	"replace":    strings.Replace,
+	"camelize":   google.Camelize,
+	"underscore": google.Underscore,
+	"contains":   strings.Contains,
 }
 
 var GA_VERSION = "ga"
@@ -75,21 +75,29 @@ func NewTemplateData(outputFolder string, version product.Version) *TemplateData
 }
 
 func (td *TemplateData) GenerateResourceFile(filePath string, resource api.Resource) {
-	td.GenerateFile(filePath, "templates/terraform/resource.go.tmpl", resource, true)
+	templatePath := "templates/terraform/resource.go.tmpl"
+	templates := []string{
+		templatePath,
+	}
+	td.GenerateFile(filePath, templatePath, resource, true, templates...)
 }
 
 func (td *TemplateData) GenerateDocumentationFile(filePath string, resource api.Resource) {
-	td.GenerateFile(filePath, "templates/terraform/resource.html.markdown.tmpl", resource, false)
+	templatePath := "templates/terraform/resource.html.markdown.tmpl"
+	templates := []string{
+		"templates/terraform/property_documentation.html.markdown.tmpl",
+		"templates/terraform/nested_property_documentation.html.markdown.tmpl",
+		templatePath,
+	}
+	td.GenerateFile(filePath, templatePath, resource, false, templates...)
 }
 
-func (td *TemplateData) GenerateFile(filePath, templatePath string, resource api.Resource, goFormat bool) {
+func (td *TemplateData) GenerateFile(filePath, templatePath string, resource api.Resource, goFormat bool, templates ...string) {
 	log.Printf("Generating %s", filePath)
 
 	templateFileName := filepath.Base(templatePath)
 
-	tmpl, err := template.New(templateFileName).Funcs(TemplateFunctions).ParseFiles(
-		templatePath,
-	)
+	tmpl, err := template.New(templateFileName).Funcs(TemplateFunctions).ParseFiles(templates...)
 	if err != nil {
 		glog.Exit(err)
 	}

@@ -510,7 +510,7 @@ properties:
     name: 'deployment'
     description: |
       Code and application artifacts that make up this version.
-    custom_flatten: templates/terraform/custom_flatten/app_version.go.erb
+    ignore_read: true
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'zip'

@@ -14,8 +14,13 @@
 package resource
 
 import (
+	"bytes"
 	"fmt"
+	"net/url"
+	"path/filepath"
+	"text/template"
 
+	"github.com/golang/glog"
 	"gopkg.in/yaml.v3"
 )
 
@@ -150,6 +155,8 @@ type Examples struct {
 	// testcase. Think before adding as there is latency and adds an external dependency to
 	// your test so avoid if you can.
 	PullExternal bool `yaml:"pull_external"`
+
+	HCLText string
 }
 
 func (e *Examples) UnmarshalYAML(n *yaml.Node) error {
@@ -161,9 +168,30 @@ func (e *Examples) UnmarshalYAML(n *yaml.Node) error {
 		return err
 	}
 
-	e.ConfigPath = fmt.Sprintf("templates/terraform/examples/%s.tf.erb", e.Name)
+	e.ConfigPath = fmt.Sprintf("templates/terraform/examples/go/%s.tf.tmpl", e.Name)
+	e.SetHCLText()
 
 	return nil
+}
+
+func (e *Examples) SetHCLText() {
+	templatePath := e.ConfigPath
+	templates := []string{
+		templatePath,
+	}
+	templateFileName := filepath.Base(templatePath)
+
+	tmpl, err := template.New(templateFileName).ParseFiles(templates...)
+	if err != nil {
+		glog.Exit(err)
+	}
+
+	contents := bytes.Buffer{}
+	if err = tmpl.ExecuteTemplate(&contents, templateFileName, e); err != nil {
+		glog.Exit(err)
+	}
+
+	e.HCLText = contents.String()
 }
 
 // func (e *Examples) config_documentation(pwd) {
@@ -275,21 +303,25 @@ func (e *Examples) UnmarshalYAML(n *yaml.Node) error {
 // substitute_example_paths body
 // }
 
-// func (e *Examples) oics_link() {
-// hash = {
-//   cloudshell_git_repo: 'https://github.com/terraform-google-modules/docs-examples.git',
-//   cloudshell_working_dir: @name,
-//   cloudshell_image: 'gcr.io/cloudshell-images/cloudshell:latest',
-//   open_in_editor: 'main.tf',
-//   cloudshell_print: './motd',
-//   cloudshell_tutorial: './tutorial.md'
-// }
-// URI::HTTPS.build(
-//   host: 'console.cloud.google.com',
-//   path: '/cloudshell/open',
-//   query: URI.encode_www_form(hash)
-// )
-// }
+func (e *Examples) OiCSLink() string {
+	v := url.Values{}
+	// TODO Q2: Values.Encode() sorts the values by key alphabetically. This will produce
+	//			diffs for every URL when we convert to using this function. We should sort the
+	// 			Ruby-version query alphabetically beforehand to remove these diffs.
+	v.Add("cloudshell_git_repo", "https://github.com/terraform-google-modules/docs-examples.git")
+	v.Add("cloudshell_working_dir", e.Name)
+	v.Add("cloudshell_image", "gcr.io/cloudshell-images/cloudshell:latest")
+	v.Add("open_in_editor", "main.tf")
+	v.Add("cloudshell_print", "./motd")
+	v.Add("cloudshell_tutorial", "./tutorial.md")
+	u := url.URL{
+		Scheme:   "https",
+		Host:     "console.cloud.google.com",
+		Path:     "/cloudshell/open",
+		RawQuery: v.Encode(),
+	}
+	return u.String()
+}
 
 // rubocop:disable Layout/LineLength
 // func (e *Examples) substitute_test_paths(config) {

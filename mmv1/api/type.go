@@ -16,8 +16,10 @@ package api
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 )
 
@@ -130,6 +132,8 @@ type Type struct {
 
 	EnumValues []string `yaml:"enum_values"`
 
+	SkipDocsValues bool `yaml:"skip_docs_values"`
+
 	// ====================
 	// Array Fields
 	// ====================
@@ -161,7 +165,7 @@ type Type struct {
 	IgnoreRead bool `yaml:"ignore_read"`
 
 	// Adds a ValidateFunc to the schema
-	Validation bool
+	Validation resource.Validation
 
 	// Indicates that this is an Array that should have Set diff semantics.
 	UnorderedList bool `yaml:"unordered_list"`
@@ -314,6 +318,10 @@ func (t *Type) SetDefault(r *Resource) {
 		}
 	default:
 	}
+
+	if t.ApiName == "" {
+		t.ApiName = t.Name
+	}
 }
 
 // super
@@ -397,6 +405,16 @@ func (t Type) TerraformLineage() string {
 	}
 
 	return fmt.Sprintf("%s.0.%s", t.ParentMetadata.TerraformLineage(), google.Underscore(t.Name))
+}
+
+func (t Type) EnumValuesToString() string {
+	var values []string
+
+	for _, val := range t.EnumValues {
+		values = append(values, fmt.Sprintf("`%s`", val))
+	}
+
+	return strings.Join(values, ", ")
 }
 
 // func (t *Type) to_json(opts) {
