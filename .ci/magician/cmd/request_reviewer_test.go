@@ -17,13 +17,15 @@
 package cmd
 
 import (
-	"github.com/stretchr/testify/assert"
 	"magician/github"
 	"testing"
+	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestExecRequestReviewer(t *testing.T) {
-	availableReviewers := github.AvailableReviewers()
+	availableReviewers := github.AvailableReviewers(time.Now())
 	cases := map[string]struct {
 		pullRequest             github.PullRequest
 		requestedReviewers      []string

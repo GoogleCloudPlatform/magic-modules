@@ -47,14 +47,13 @@ var (
 
 	// This is for reviewers who are "on vacation": will not receive new review assignments but will still receive re-requests for assigned PRs.
 	onVacationReviewers = []onVacationReviewer{
-		{
-			id:        "SarahFrench",
-			startDate: time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
-			endDate:   time.Date(2000, 1, 2, 0, 0, 0, 0, time.UTC),
-		},
+		// example:
+		// {
+		// 	id: "xyz",
+		// 	startDate: time.Date(2024, 3, 29, 3, 0, 0, 0, time.UTC),
+		// 	endDate:   time.Date(2024, 4, 2, 10, 0, 0, 0, time.UTC),
+		// },
 	}
-
-	timeNow = time.Now
 )
 
 type UserType int64
@@ -118,26 +117,30 @@ func isOrgMember(author, org, githubToken string) bool {
 }
 
 func GetRandomReviewer() string {
-	availableReviewers := AvailableReviewers()
-	rand.Seed(time.Now().UnixNano())
+	availableReviewers := AvailableReviewers(time.Now())
 	reviewer := availableReviewers[rand.Intn(len(availableReviewers))]
 	return reviewer
 }
 
-func AvailableReviewers() []string {
-	var availableReviewers []string
-	for _, id := range reviewerRotation {
-		if !onVacation(id) {
-			availableReviewers = append(availableReviewers, id)
-		}
-	}
-	return availableReviewers
+func AvailableReviewers(nowTime time.Time) []string {
+	onVacationList := OnVacationReviewers(nowTime)
+	return utils.Removes(reviewerRotation, onVacationList)
 }
 
-func onVacation(id string) bool {
-	nowTime := timeNow().UTC()
+func OnVacationReviewers(nowTime time.Time) []string {
+	var onVacationList []string
+	for _, id := range reviewerRotation {
+		if onVacation(id, nowTime) {
+			onVacationList = append(onVacationList, id)
+		}
+	}
+	return onVacationList
+}
+
+func onVacation(id string, nowTime time.Time) bool {
+	now := nowTime.UTC()
 	for _, reviewer := range onVacationReviewers {
-		if reviewer.id == id && nowTime.After(reviewer.startDate.UTC()) && nowTime.Before(reviewer.endDate.UTC()) {
+		if reviewer.id == id && now.After(reviewer.startDate.UTC()) && now.Before(reviewer.endDate.UTC()) {
 			return true
 		}
 	}

@@ -44,55 +44,61 @@ func TestAvailableReviewers(t *testing.T) {
 		name       string
 		rotation   []string
 		onVacation []onVacationReviewer
-		timeNow    func() time.Time
+		timeNow    time.Time
 		want       []string
 	}{
 		{
-			name:     "id in vacation",
+			name:     "reviewers on vacation are excluded",
 			rotation: []string{"id1", "id2"},
 			onVacation: []onVacationReviewer{
 				{
 					id:        "id2",
-					startDate: time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
-					endDate:   time.Date(2000, 1, 2, 0, 0, 0, 0, time.UTC),
+					startDate: time.Date(2024, 3, 29, 0, 0, 0, 0, time.UTC),
+					endDate:   time.Date(2024, 4, 2, 0, 0, 0, 0, time.UTC),
 				},
 			},
-			timeNow: func() time.Time {
-				return time.Date(2000, 1, 1, 3, 0, 0, 0, time.UTC)
-			},
-			want: []string{"id1"},
+			timeNow: time.Date(2024, 4, 1, 0, 0, 0, 0, time.UTC),
+			want:    []string{"id1"},
 		},
 		{
-			name:     "id not in vacation",
+			name:     "reviewers are included after vacation ends",
 			rotation: []string{"id1", "id2"},
 			onVacation: []onVacationReviewer{
 				{
 					id:        "id2",
-					startDate: time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
-					endDate:   time.Date(2000, 1, 2, 0, 0, 0, 0, time.UTC),
+					startDate: time.Date(2024, 3, 29, 0, 0, 0, 0, time.UTC),
+					endDate:   time.Date(2024, 4, 2, 0, 0, 0, 0, time.UTC),
 				},
 			},
-			timeNow: func() time.Time {
-				return time.Date(2000, 1, 10, 3, 0, 0, 0, time.UTC)
+			timeNow: time.Date(2024, 4, 2, 10, 0, 0, 0, time.UTC),
+			want:    []string{"id1", "id2"},
+		},
+		{
+			name:     "reviewers are included before vacation starts",
+			rotation: []string{"id1", "id2"},
+			onVacation: []onVacationReviewer{
+				{
+					id:        "id2",
+					startDate: time.Date(2024, 3, 29, 0, 0, 0, 0, time.UTC),
+					endDate:   time.Date(2024, 4, 2, 0, 0, 0, 0, time.UTC),
+				},
 			},
-			want: []string{"id1", "id2"},
+			timeNow: time.Date(2024, 3, 28, 10, 0, 0, 0, time.UTC),
+			want:    []string{"id1", "id2"},
 		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			origRotation := reviewerRotation
 			origOnVacation := onVacationReviewers
-			origTimeNow := timeNow
 			reviewerRotation = test.rotation
 			onVacationReviewers = test.onVacation
-			timeNow = test.timeNow
 			defer func() {
 				reviewerRotation = origRotation
 				onVacationReviewers = origOnVacation
-				timeNow = origTimeNow
 			}()
 
-			got := AvailableReviewers()
+			got := AvailableReviewers(test.timeNow)
 			if diff := cmp.Diff(test.want, got); diff != "" {
 				t.Errorf("AvailableReviewers() got diff: %s", diff)
 			}

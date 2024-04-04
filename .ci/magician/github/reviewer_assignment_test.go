@@ -17,9 +17,9 @@ package github
 
 import (
 	"fmt"
-	utils "magician/utility"
 	"strings"
 	"testing"
+	"time"
 
 	"golang.org/x/exp/slices"
 )
@@ -34,7 +34,7 @@ func TestChooseCoreReviewers(t *testing.T) {
 		"no previous review requests assigns new reviewer from team": {
 			RequestedReviewers:      []User{},
 			PreviousReviewers:       []User{},
-			ExpectReviewersFromList: utils.Removes(reviewerRotation, AvailableReviewers()),
+			ExpectReviewersFromList: AvailableReviewers(time.Now()),
 			ExpectPrimaryReviewer:   true,
 		},
 		"requested reviewer from team means that primary reviewer was already selected": {
@@ -56,7 +56,7 @@ func TestChooseCoreReviewers(t *testing.T) {
 		"previously involved reviewers that are not team members are ignored": {
 			RequestedReviewers:      []User{},
 			PreviousReviewers:       []User{User{Login: "foobar"}},
-			ExpectReviewersFromList: utils.Removes(reviewerRotation, AvailableReviewers()),
+			ExpectReviewersFromList: AvailableReviewers(time.Now()),
 			ExpectPrimaryReviewer:   true,
 		},
 		"only previously involved team member reviewers will have review requested": {
