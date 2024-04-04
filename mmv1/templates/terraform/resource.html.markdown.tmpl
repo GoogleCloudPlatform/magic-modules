@@ -82,39 +82,39 @@ values will be stored in the raw state as plain text: {{ $.SensitivePropsToStrin
 ## Example Usage - {{ title (camelize $e.Name "upper" )}}
 
 
-{{/*TODO: example HCL*/}}
+```hcl
+{{ $e.HCLText }}
+```
 	{{- end }}
 {{- end }}
+
 ## Argument Reference
 
 The following arguments are supported:
 
-{{- range $p := $.RootProperties }}
+{{ range $p := $.RootProperties }}
 	{{- if $p.Required }}
-{{ template "propertyDocumentation" $p }}
-	{{- end}}
+{{- template "propertyDocumentation" $p }}
+	{{- end }}
 {{- end }}
 
 {{- range $p := $.AllNestedProperties $.RootProperties }}
 	{{- if $p.Required }}
-{{/*TODO: build_nested_property_documentation */}}
-{{ template "propertyDocumentation" $p }}
+{{- template "nestedPropertyDocumentation" $p}}
 	{{- end}}
 {{- end }}
 
 - - -
 
-{{- range $p := $.RootProperties }}
+{{ range $p := $.RootProperties }}
 	{{- if and (not $p.Required) (not $p.Output) }}
-{{ template "propertyDocumentation" $p }}
-	{{- end}}
+{{- template "propertyDocumentation" $p -}}
+	{{- end }}
 {{- end }}
 {{- if or (contains $.BaseUrl "{{project}}") (contains $.CreateUrl "{{project}}")}}
-
 * `project` - (Optional) The ID of the project in which the resource belongs.
     If it is not provided, the provider project is used.
 {{- end }}
-
 {{ range $f := $.VirtualFields }}
 * `{{$f.Name}}` - (Optional) {{$f.Description}}
 {{- end }}
@@ -123,40 +123,34 @@ The following arguments are supported:
 {{- end }}
 {{- range $p := $.AllNestedProperties $.RootProperties }}
 	{{- if and (not $p.Required) (not $p.Output) }}
-{{/*TODO: build_nested_property_documentation */}}
-{{ template "propertyDocumentation" $p }}
-	{{- end}}
+{{- template "nestedPropertyDocumentation" $p -}}
+{{ end}}
 {{- end }}
-
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are exported:
 
 * `id` - an identifier for the resource with format `{{$.IdFormat}}`
-{{- range $p := $.RootProperties }}
+{{ range $p := $.RootProperties }}
 	{{- if $p.Output }}
-{{ template "propertyDocumentation" $p }}
+{{- template "propertyDocumentation" $p -}}
 	{{- end}}
 {{- end }}
 {{- if $.HasSelfLink }}
 * `self_link` - The URI of the created resource.
 {{- end }}
-
 {{ range $p := $.AllNestedProperties $.RootProperties }}
 	{{- if $p.Output }}
-{{/*TODO: build_nested_property_documentation */}}
-{{ template "propertyDocumentation" $p }}
-	{{- end}}
+{{- template "nestedPropertyDocumentation" $p -}}
+	{{- end }}
 {{- end }}
-
 ## Timeouts
 
 This resource provides the following
 [Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options:
 
 - `create` - Default is {{$.Timeouts.InsertMinutes}} minutes.
-{{/*TODO: <% if updatable?(object, properties) || object.root_labels? -%> */}}
-- `update` - Default is {{$.Timeouts.UpdateMinutes}} minutes.
+- `update` - Default is {{$.Timeouts.UpdateMinutes}} minutes.{{/*TODO Q2: <% if updatable?(object, properties) || object.root_labels? -%> */}}
 - `delete` - Default is {{$.Timeouts.DeleteMinutes}} minutes.
 
 ## Import
@@ -165,6 +159,33 @@ This resource provides the following
 This resource does not support import.
 {{ else }}
 
-{{$.Name}} can be imported using any of these accepted formats:
 
+{{$.Name}} can be imported using any of these accepted formats:
+{{ range $idFormat := $.ImportIdFormatsFromResource }}
+* `{{$idFormat}}`
+{{- end }}
+
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import {{$.Name}} using one of the formats above. For example:
+
+```tf
+import {
+  id = "{{ index $.ImportIdFormatsFromResource 0 }}"
+  to = {{$.TerraformName}}.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), {{$.Name}} can be imported using one of the formats above. For example:
+
+```
+	{{- range $idFormat := $.ImportIdFormatsFromResource }}
+$ terraform import {{$.TerraformName}}.default {{$idFormat}}
+	{{- end }}
+```
 {{ end }}
+
+{{- if or (contains $.BaseUrl "{{project}}") $.SupportsIndirectUserProjectOverride}}
+## User Project Overrides
+
+This resource supports [User Project Overrides](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#user_project_override).
+{{- end }}
