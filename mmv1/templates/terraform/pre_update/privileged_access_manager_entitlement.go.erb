@@ -1,0 +1,11 @@
+approvalWorkflowProp, err := expandPrivilegedAccessManagerEntitlementApprovalWorkflow(d.Get("approval_workflow"), d, config)
+	if err != nil {
+		return err
+	} else if v, ok := d.GetOkExists("approval_workflow"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, approvalWorkflowProp)) {
+		obj["approvalWorkflow"] = approvalWorkflowProp
+	}
+
+
+	if d.HasChange("approval_workflow") {
+		updateMask = append(updateMask, "approvalWorkflow")
+	}
