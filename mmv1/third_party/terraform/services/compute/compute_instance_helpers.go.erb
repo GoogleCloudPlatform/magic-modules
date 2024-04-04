@@ -577,9 +577,9 @@ func expandConfidentialInstanceConfig(d tpgresource.TerraformResourceData) *comp
 	prefix := "confidential_instance_config.0"
 	return &compute.ConfidentialInstanceConfig{
 		EnableConfidentialCompute: d.Get(prefix + ".enable_confidential_compute").(bool),
-		<% unless version == "ga" %>
+		<% unless version == "ga" -%>
 		ConfidentialInstanceType: d.Get(prefix + ".confidential_instance_type").(string),
-		<% end %>
+		<% end -%>
 	}
 }
 
@@ -590,9 +590,9 @@ func flattenConfidentialInstanceConfig(ConfidentialInstanceConfig *compute.Confi
 
 	return []map[string]interface{}{{
 		"enable_confidential_compute": ConfidentialInstanceConfig.EnableConfidentialCompute,
-		<% unless version == "ga" %>
+		<% unless version == "ga" -%>
 		"confidential_instance_type": ConfidentialInstanceConfig.ConfidentialInstanceType,
-		<% end %>
+		<% end -%>
 	}}
 }
 
