@@ -77,6 +77,7 @@ func flattenZones(items []*dns.ManagedZone, project string) []map[string]interfa
 	for _, item := range items {
 		if item != nil {
 			data := map[string]interface{}{
+				"id":              fmt.Sprintf("projects/%s/managedZones/%s", project, item.Name), // Matches construction in singlur data source
 				"dns_name":        item.DnsName,
 				"name":            item.Name,
 				"managed_zone_id": item.Id,
