@@ -48,7 +48,6 @@ parameters:
 properties:
   - !ruby/object:Api::Type::String
     name: name
-    pattern: projects/{{project}}/buckets/{{bucket_id}}
     description:
       Resource name of the bucket in the format
       projects/PROJECT_IDENTIFIER/buckets/BUCKET_ID

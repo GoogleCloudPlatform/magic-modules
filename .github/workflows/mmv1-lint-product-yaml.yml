@@ -30,7 +30,7 @@ jobs:
           fi
       - name: Install yamllint
         if: ${{ !failure() && steps.pull_request.outputs.yamlfiles != '' }}
-        run: pip install yamllint
+        run: pip install yamllint==1.32.0 pyyaml==6.0.1 pathspec==0.12.1 --no-deps
       - name: Lint YAML files
         if: ${{ !failure() && steps.pull_request.outputs.yamlfiles != '' }}
         run: yamllint -c repo/.yamllint ${{steps.pull_request.outputs.yamlfiles}}
