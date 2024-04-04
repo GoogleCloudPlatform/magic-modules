@@ -1182,7 +1182,7 @@ func TestAccAlloydbCluster_withMaintenanceWindows(t *testing.T) {
 		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAlloydbCluster_withMaintenanceWindow(context),
+				Config: testAccAlloydbCluster_withMaintenanceWindows(context),
 			},
 			{
 				ResourceName:            "google_alloydb_cluster.default",
@@ -1194,7 +1194,7 @@ func TestAccAlloydbCluster_withMaintenanceWindows(t *testing.T) {
 	})
 }
 
-func testAccAlloydbCluster_withMaintenanceWindow(context map[string]interface{}) string {
+func testAccAlloydbCluster_withMaintenanceWindows(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "default" {
   provider   = google-beta
@@ -1207,9 +1207,6 @@ resource "google_alloydb_cluster" "default" {
       day = "WEDNESDAY"
       start_time {
         hours = 12
-        minutes = 0
-        seconds = 0
-        nanos = 0
       }
     }
   }
