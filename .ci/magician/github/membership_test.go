@@ -39,7 +39,16 @@ func TestOnVacationReviewers(t *testing.T) {
 	}
 }
 
-func TestAvailableReviewers(t *testing.T) {
+func TestAvailable(t *testing.T) {
+	newYork, err := time.LoadLocation("America/New_York")
+	if err != nil {
+		t.Fatal(err)
+	}
+	la, err := time.LoadLocation("America/Los_Angeles")
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	tests := []struct {
 		name       string
 		rotation   []string
@@ -48,16 +57,29 @@ func TestAvailableReviewers(t *testing.T) {
 		want       []string
 	}{
 		{
-			name:     "reviewers on vacation are excluded",
+			name:     "reviewers on vacation start date are excluded",
 			rotation: []string{"id1", "id2"},
 			onVacation: []onVacationReviewer{
 				{
 					id:        "id2",
-					startDate: time.Date(2024, 3, 29, 0, 0, 0, 0, time.UTC),
-					endDate:   time.Date(2024, 4, 2, 0, 0, 0, 0, time.UTC),
+					startDate: newDate(2024, 3, 29, time.UTC),
+					endDate:   newDate(2024, 4, 2, time.UTC),
 				},
 			},
-			timeNow: time.Date(2024, 4, 1, 0, 0, 0, 0, time.UTC),
+			timeNow: time.Date(2024, 3, 29, 0, 0, 0, 0, time.UTC),
+			want:    []string{"id1"},
+		},
+		{
+			name:     "reviewers on vacation end date are excluded",
+			rotation: []string{"id1", "id2"},
+			onVacation: []onVacationReviewer{
+				{
+					id:        "id2",
+					startDate: newDate(2024, 3, 29, time.UTC),
+					endDate:   newDate(2024, 4, 2, time.UTC),
+				},
+			},
+			timeNow: time.Date(2024, 4, 2, 10, 0, 0, 0, time.UTC),
 			want:    []string{"id1"},
 		},
 		{
@@ -66,11 +88,11 @@ func TestAvailableReviewers(t *testing.T) {
 			onVacation: []onVacationReviewer{
 				{
 					id:        "id2",
-					startDate: time.Date(2024, 3, 29, 0, 0, 0, 0, time.UTC),
-					endDate:   time.Date(2024, 4, 2, 0, 0, 0, 0, time.UTC),
+					startDate: newDate(2024, 3, 29, time.UTC),
+					endDate:   newDate(2024, 4, 2, time.UTC),
 				},
 			},
-			timeNow: time.Date(2024, 4, 2, 10, 0, 0, 0, time.UTC),
+			timeNow: time.Date(2024, 4, 3, 0, 0, 0, 0, time.UTC),
 			want:    []string{"id1", "id2"},
 		},
 		{
@@ -79,28 +101,33 @@ func TestAvailableReviewers(t *testing.T) {
 			onVacation: []onVacationReviewer{
 				{
 					id:        "id2",
-					startDate: time.Date(2024, 3, 29, 0, 0, 0, 0, time.UTC),
-					endDate:   time.Date(2024, 4, 2, 0, 0, 0, 0, time.UTC),
+					startDate: newDate(2024, 3, 29, time.UTC),
+					endDate:   newDate(2024, 4, 2, time.UTC),
 				},
 			},
-			timeNow: time.Date(2024, 3, 28, 10, 0, 0, 0, time.UTC),
+			timeNow: time.Date(2024, 3, 28, 23, 0, 0, 0, time.UTC),
 			want:    []string{"id1", "id2"},
+		},
+		{
+			name:     "reviewers are excluded since vacation still not ends in the specified time zone",
+			rotation: []string{"id1", "id2"},
+			onVacation: []onVacationReviewer{
+				{
+					id:        "id2",
+					startDate: newDate(2024, 3, 29, la),
+					endDate:   newDate(2024, 4, 2, la),
+				},
+			},
+			// it's still 2024-04-02 in LA time zone
+			timeNow: time.Date(2024, 4, 3, 0, 0, 0, 0, newYork),
+			want:    []string{"id1"},
 		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			origRotation := reviewerRotation
-			origOnVacation := onVacationReviewers
-			reviewerRotation = test.rotation
-			onVacationReviewers = test.onVacation
-			defer func() {
-				reviewerRotation = origRotation
-				onVacationReviewers = origOnVacation
-			}()
-
-			got := AvailableReviewers(test.timeNow)
+			got := available(test.timeNow, test.rotation, test.onVacation)
 			if diff := cmp.Diff(test.want, got); diff != "" {
-				t.Errorf("AvailableReviewers() got diff: %s", diff)
+				t.Errorf("available(%v, %v, %v) got diff: %s", test.timeNow, test.rotation, test.onVacation, diff)
 			}
 		})
 	}

@@ -46,22 +46,41 @@ var (
 	trustedContributors = []string{}
 
 	// This is for reviewers who are "on vacation": will not receive new review assignments but will still receive re-requests for assigned PRs.
+	// User can specify the time zone like this, and following the example below:
+	// pdtLoc, _           = time.LoadLocation("America/Los_Angeles")
 	onVacationReviewers = []onVacationReviewer{
-		// example:
+		// Example: taking vacation from 2024-03-28 to 2024-04-02 in pdt time zone.
+		// both ends are inclusive:
 		// {
-		// 	id: "xyz",
-		// 	startDate: time.Date(2024, 3, 29, 3, 0, 0, 0, time.UTC),
-		// 	endDate:   time.Date(2024, 4, 2, 10, 0, 0, 0, time.UTC),
+		// 	id:        "xyz",
+		// 	startDate: newDate(2024, 3, 28, pdtLoc),
+		// 	endDate:   newDate(2024, 4, 2, pdtLoc),
 		// },
 	}
 )
 
 type UserType int64
 
+type date struct {
+	year  int
+	month int
+	day   int
+	loc   *time.Location
+}
+
 type onVacationReviewer struct {
 	id        string
-	startDate time.Time
-	endDate   time.Time
+	startDate date
+	endDate   date
+}
+
+func newDate(year, month, day int, loc *time.Location) date {
+	return date{
+		year:  year,
+		month: month,
+		day:   day,
+		loc:   loc,
+	}
 }
 
 const (
@@ -117,32 +136,30 @@ func isOrgMember(author, org, githubToken string) bool {
 }
 
 func GetRandomReviewer() string {
-	availableReviewers := AvailableReviewers(time.Now())
+	availableReviewers := AvailableReviewers()
 	reviewer := availableReviewers[rand.Intn(len(availableReviewers))]
 	return reviewer
 }
 
-func AvailableReviewers(nowTime time.Time) []string {
-	onVacationList := OnVacationReviewers(nowTime)
-	return utils.Removes(reviewerRotation, onVacationList)
+func AvailableReviewers() []string {
+	return available(time.Now(), reviewerRotation, onVacationReviewers)
 }
 
-func OnVacationReviewers(nowTime time.Time) []string {
+func available(nowTime time.Time, allReviewers []string, vacationList []onVacationReviewer) []string {
+	onVacationList := onVacation(nowTime, vacationList)
+	return utils.Removes(allReviewers, onVacationList)
+}
+
+func onVacation(nowTime time.Time, vacationList []onVacationReviewer) []string {
+	now := nowTime.UTC()
 	var onVacationList []string
-	for _, id := range reviewerRotation {
-		if onVacation(id, nowTime) {
-			onVacationList = append(onVacationList, id)
+	for _, reviewer := range vacationList {
+		start := time.Date(reviewer.startDate.year, time.Month(reviewer.startDate.month), reviewer.startDate.day, 0, 0, 0, 0, reviewer.startDate.loc)
+		end := time.Date(reviewer.endDate.year, time.Month(reviewer.endDate.month), reviewer.endDate.day, 0, 0, 0, 0, reviewer.endDate.loc).AddDate(0, 0, 1).Add(-1 * time.Millisecond)
+		if now.Before(start.UTC()) || now.After(end.UTC()) {
+			continue
 		}
+		onVacationList = append(onVacationList, reviewer.id)
 	}
 	return onVacationList
-}
-
-func onVacation(id string, nowTime time.Time) bool {
-	now := nowTime.UTC()
-	for _, reviewer := range onVacationReviewers {
-		if reviewer.id == id && now.After(reviewer.startDate.UTC()) && now.Before(reviewer.endDate.UTC()) {
-			return true
-		}
-	}
-	return false
 }
