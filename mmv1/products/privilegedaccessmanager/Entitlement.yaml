@@ -67,6 +67,7 @@ properties:
           item_type: Api::Type::String
   - !ruby/object:Api::Type::NestedObject
     name: approvalWorkflow
+    immutable: true
     description: |
       The approvals needed before access will be granted to a requester.
       No approvals will be needed if this field is null. Different types of approval workflows that can be used to gate privileged access granting.
