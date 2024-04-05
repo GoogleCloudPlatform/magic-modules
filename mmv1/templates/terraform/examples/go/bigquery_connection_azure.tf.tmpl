@@ -1,0 +1,10 @@
+resource "google_bigquery_connection" "{{$.PrimaryResourceId}}" {
+   connection_id = "{{index $.Vars "connection_id"}}"
+   location      = "azure-eastus2"
+   friendly_name = "👋"
+   description   = "a riveting description"
+   azure {
+      customer_tenant_id = "{{index $.Vars "customer_tenant_id"}}"
+      federated_application_client_id = "{{index $.Vars "federated_application_client_id"}}"
+   }
+}
