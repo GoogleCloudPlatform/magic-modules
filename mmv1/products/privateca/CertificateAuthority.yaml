@@ -653,6 +653,8 @@ properties:
           subordinate CertificateAuthority. This field is used for information
           and usability purposes only. The resource name is in the format
           `projects/*/locations/*/caPools/*/certificateAuthorities/*`.
+        # certificateAuthority is not included in the response since the sub-CA is activated via specifing pemIssuerChain
+        custom_flatten: 'templates/terraform/custom_flatten/privateca_certificate_authority_subordinate_config_certificate_authority.go.erb'
         exactly_one_of:
           - subordinate_config.0.certificate_authority
           - subordinate_config.0.pem_issuer_chain
@@ -662,6 +664,7 @@ properties:
         description: |
           Contains the PEM certificate chain for the issuers of this CertificateAuthority,
           but not pem certificate for this CA itself.
+        default_from_api: true
         exactly_one_of:
           - subordinate_config.0.certificate_authority
           - subordinate_config.0.pem_issuer_chain
