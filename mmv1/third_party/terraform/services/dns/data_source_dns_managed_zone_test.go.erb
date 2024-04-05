@@ -35,6 +35,9 @@ func TestAccDataSourceDnsManagedZone_basic(t *testing.T) {
 						"cloud_logging_config.#":                {},
 						"cloud_logging_config.0.%":              {},
 						"cloud_logging_config.0.enable_logging": {},
+<% unless version == "ga" -%>
+						"reverse_lookup":                        {},
+<% end -%>
 					},
 				),
 			},
@@ -45,9 +48,9 @@ func TestAccDataSourceDnsManagedZone_basic(t *testing.T) {
 func testAccDataSourceDnsManagedZone_basic(managedZoneName string) string {
 	return fmt.Sprintf(`
 resource "google_dns_managed_zone" "foo" {
-  name        = "tf-test-zone-%s"
-  dns_name    = "tf-test-zone-%s.hashicorptest.com."
-  description = "tf test DNS zone"
+  name        = "tf-test-qa-zone-%s"
+  dns_name    = "qa.gcp.tfacc.hashicorptest.com."
+  description = "QA DNS zone"
 }
 
 data "google_dns_managed_zone" "qa" {
