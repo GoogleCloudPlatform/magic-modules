@@ -55,7 +55,6 @@ properties:
     output: true
   - !ruby/object:Api::Type::KeyValueLabels
     name: labels
-    api_name:
     description: "Cloud Labels are a flexible and lightweight mechanism for
       organizing cloud\nresources into groups that reflect a customer's organizational
       needs and\ndeployment strategies. Cloud Labels can be used to filter collections
