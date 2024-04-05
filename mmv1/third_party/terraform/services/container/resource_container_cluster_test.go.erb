@@ -4503,6 +4503,57 @@ func TestAccContainerCluster_withSecurityPostureConfig(t *testing.T) {
 	})
 }
 
+func TestAccContainerCluster_withComplianceConfig(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_EnableComplianceConfigWithDefaultStandards(clusterName, networkName, subnetworkName),
+			},
+			{
+				ResourceName:      "google_container_cluster.with_compliance_config",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_UpdateToEmptyStandardNotAllowed(clusterName, networkName, subnetworkName),
+				ExpectError: regexp.MustCompile(`Missing required argument`),
+			},
+			{
+				Config: testAccContainerCluster_UpdateToRepeatedStandardNotAllowed(clusterName, networkName, subnetworkName),
+				ExpectError: regexp.MustCompile(`Duplicate compliance standard .* found`),
+			},
+			{
+				Config: testAccContainerCluster_UpdateComplianceConfigToExplicitStandards(clusterName, networkName, subnetworkName),
+			},
+			{
+				ResourceName:      "google_container_cluster.with_compliance_config",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_DisableComplianceConfig(clusterName, networkName, subnetworkName),
+			},
+			{
+				ResourceName:      "google_container_cluster.with_compliance_config",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
 func TestAccContainerCluster_withFleetConfig(t *testing.T) {
 	t.Parallel()
 
@@ -4684,6 +4735,99 @@ resource "google_container_cluster" "with_security_posture_config" {
   security_posture_config {
 	mode = "DISABLED"
 	vulnerability_mode = "VULNERABILITY_DISABLED"
+  }
+  deletion_protection = false
+  network    = "%s"
+  subnetwork    = "%s"
+}
+`, resource_name, networkName, subnetworkName)
+}
+
+func testAccContainerCluster_EnableComplianceConfigWithDefaultStandards(resource_name, networkName, subnetworkName string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_compliance_config" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  compliance_config {
+		mode = "ENABLED"
+  }
+  deletion_protection = false
+  network    = "%s"
+  subnetwork    = "%s"
+}
+`, resource_name, networkName, subnetworkName)
+}
+
+func testAccContainerCluster_UpdateComplianceConfigToExplicitStandards(resource_name, networkName, subnetworkName string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_compliance_config" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  compliance_config {
+		mode = "ENABLED"
+		compliance_standards {
+			standard = "pss-baseline"
+		}
+		compliance_standards {
+			standard = "cis-gke-v1.5.0"
+		}
+  }
+  deletion_protection = false
+  network    = "%s"
+  subnetwork    = "%s"
+}
+`, resource_name, networkName, subnetworkName)
+}
+
+func testAccContainerCluster_UpdateToEmptyStandardNotAllowed(resource_name, networkName, subnetworkName string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_compliance_config" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  compliance_config {
+		mode = "ENABLED"
+		compliance_standards {}
+  }
+  deletion_protection = false
+  network    = "%s"
+  subnetwork    = "%s"
+}
+`, resource_name, networkName, subnetworkName)
+}
+
+func testAccContainerCluster_UpdateToRepeatedStandardNotAllowed(resource_name, networkName, subnetworkName string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_compliance_config" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  compliance_config {
+		mode = "ENABLED"
+		compliance_standards {
+			standard = "pss-baseline"
+		}
+		compliance_standards {
+			standard = "pss-baseline"
+		}
+  }
+  deletion_protection = false
+  network    = "%s"
+  subnetwork    = "%s"
+}
+`, resource_name, networkName, subnetworkName)
+}
+
+func testAccContainerCluster_DisableComplianceConfig(resource_name, networkName, subnetworkName string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_compliance_config" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  compliance_config {
+		mode = "DISABLED"
   }
   deletion_protection = false
   network    = "%s"
