@@ -31,6 +31,16 @@ func TestAccRedisCluster_createClusterWithNodeType(t *testing.T) {
                                 ImportStateVerifyIgnore: []string{"psc_configs"},
                         },
                         {
+								// set deletion protection to false
+                                Config: createOrUpdateRedisCluster(name, /* replicaCount = */ 0, /* shardCount = */ 3, false, /*nodeType = */ "REDIS_STANDARD_SMALL"),
+                        },
+                        {
+                                ResourceName:      "google_redis_cluster.test",
+                                ImportState:       true,
+                                ImportStateVerify: true,
+                                ImportStateVerifyIgnore: []string{"psc_configs"},
+                        },
+                        {
                                 // clean up the resource
                                 Config: createOrUpdateRedisCluster(name, /* replicaCount = */ 0, /* shardCount = */ 3, false, /*nodeType = */ "REDIS_STANDARD_SMALL"),
                         },
@@ -70,6 +80,16 @@ func TestAccRedisCluster_updateReplicaCount(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"psc_configs"},
 			},
 			{
+				// set deletion protection to false
+				Config: createOrUpdateRedisCluster(name, /* replicaCount = */ 2, /* shardCount = */ 3, false, /*nodeType = */ ""),
+			},
+			{
+					ResourceName:      "google_redis_cluster.test",
+					ImportState:       true,
+					ImportStateVerify: true,
+					ImportStateVerifyIgnore: []string{"psc_configs"},
+			},
+			{
 				// clean up the resource
 				Config: createOrUpdateRedisCluster(name, /* replicaCount = */ 2, /* shardCount = */ 3, false, /*nodeType = */ ""),
 			},
@@ -82,6 +102,16 @@ func TestAccRedisCluster_updateReplicaCount(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{"psc_configs"},
+			},
+			{
+				// set deletion protection to false
+				Config: createOrUpdateRedisCluster(name /* replicaCount = */, 0 /* shardCount = */, 3, false, /*nodeType = */ ""),
+			},
+			{
+					ResourceName:      "google_redis_cluster.test",
+					ImportState:       true,
+					ImportStateVerify: true,
+					ImportStateVerifyIgnore: []string{"psc_configs"},
 			},
 			{
 				// clean up the resource
@@ -122,6 +152,16 @@ func TestAccRedisCluster_updateShardCount(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{"psc_configs"},
+			},
+			{
+				// set deletion protection to false
+				Config: createOrUpdateRedisCluster(name /* replicaCount = */, 1 /* shardCount = */, 5, false, /* nodeType = */ ""),
+			},
+			{
+					ResourceName:      "google_redis_cluster.test",
+					ImportState:       true,
+					ImportStateVerify: true,
+					ImportStateVerifyIgnore: []string{"psc_configs"},
 			},
 			{
 				// clean up the resource
