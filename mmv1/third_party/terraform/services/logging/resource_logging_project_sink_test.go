@@ -13,6 +13,8 @@ import (
 func TestAccLoggingProjectSink_basic(t *testing.T) {
 	t.Parallel()
 
+	orgId := envvar.GetTestOrgFromEnv(t)
+	projectId = "tf-test" + acctest.RandString(t, 10)
 	sinkName := "tf-test-sink-" + acctest.RandString(t, 10)
 	bucketName := "tf-test-sink-bucket-" + acctest.RandString(t, 10)
 
@@ -22,7 +24,7 @@ func TestAccLoggingProjectSink_basic(t *testing.T) {
 		CheckDestroy:             testAccCheckLoggingProjectSinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLoggingProjectSink_basic(sinkName, envvar.GetTestProjectFromEnv(), bucketName),
+				Config: testAccLoggingProjectSink_basic(projectId, orgId, sinkName, bucketName),
 			},
 			{
 				ResourceName:      "google_logging_project_sink.basic",
@@ -36,6 +38,8 @@ func TestAccLoggingProjectSink_basic(t *testing.T) {
 func TestAccLoggingProjectSink_default(t *testing.T) {
 	t.Parallel()
 
+	orgId := envvar.GetTestOrgFromEnv(t)
+	projectId = "tf-test" + acctest.RandString(t, 10)
 	sinkName := "_Default"
 	bucketName := "tf-test-sink-bucket-" + acctest.RandString(t, 10)
 
@@ -44,7 +48,7 @@ func TestAccLoggingProjectSink_default(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLoggingProjectSink_basic(sinkName, envvar.GetTestProjectFromEnv(), bucketName),
+				Config: testAccLoggingProjectSink_basic(projectId, orgId, sinkName, bucketName),
 			},
 			{
 				ResourceName:      "google_logging_project_sink.basic",
@@ -363,20 +367,26 @@ func testAccCheckLoggingProjectSinkDestroyProducer(t *testing.T) func(s *terrafo
 	}
 }
 
-func testAccLoggingProjectSink_basic(name, project, bucketName string) string {
+func testAccLoggingProjectSink_basic(projectId, orgId, sinkName, bucketName string) string {
 	return fmt.Sprintf(`
+resource "google_project" "project" {
+	project_id = "%s"
+	org_id = "%s"
+}
+
 resource "google_logging_project_sink" "basic" {
   name        = "%s"
-  project     = "%s"
+  project     = google_project.project.project_id
   destination = "storage.googleapis.com/${google_storage_bucket.gcs-bucket.name}"
-  filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
+  filter      = "logName=\"projects/${google_project.project.project_id}/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
 }
 
 resource "google_storage_bucket" "gcs-bucket" {
   name     = "%s"
+  project  = google_project.project.project_id
   location = "US"
 }
-`, name, project, project, bucketName)
+`, projectId, orgId, sinkName, bucketName)
 }
 
 func testAccLoggingProjectSink_described(name, project, bucketName string) string {
