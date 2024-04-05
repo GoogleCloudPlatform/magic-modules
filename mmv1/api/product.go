@@ -28,8 +28,6 @@ import (
 type Product struct {
 	NamedObject `yaml:",inline"`
 
-	// include Compile::Core
-
 	// Inherited:
 	// The name of the product's API capitalised in the appropriate places.
 	// This isn't just the API name because it doesn't meaningfully separate
@@ -63,7 +61,7 @@ type Product struct {
 
 	OperationRetry string `yaml:"operation_retry"`
 
-	Async *OpAsync
+	Async *Async
 
 	LegacyName string `yaml:"legacy_name"`
 
@@ -71,7 +69,7 @@ type Product struct {
 }
 
 func (p *Product) UnmarshalYAML(n *yaml.Node) error {
-	p.Async = NewOpAsync()
+	p.Async = NewAsync()
 
 	type productAlias Product
 	aliasObj := (*productAlias)(p)
