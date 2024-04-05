@@ -1157,6 +1157,40 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
+			"compliance_config": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Computed:    true,
+				Description: `Defines the config needed to enable/disable features for Compliance Posture`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"mode": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							Computed:         true,
+							ValidateFunc:     validation.StringInSlice([]string{"DISABLED", "ENABLED"}, false),
+							Description:      `Defines the enablement mode for Compliance Posture.`,
+							DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("MODE_UNSPECIFIED"),
+						},
+						"compliance_standards": {
+							Type:             schema.TypeList,
+							Optional:         true,
+							Computed:         true,
+							Description:      `List of enabled compliance standards.`,
+              Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"standard": {
+										Type: schema.TypeString,
+										Required: true,
+										Description: `Name of the compliance standard.`,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 			"monitoring_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -2431,6 +2465,10 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		cluster.SecurityPostureConfig = expandSecurityPostureConfig(v)
 	}
 
+	if v, ok := d.GetOk("compliance_config"); ok {
+		cluster.CompliancePostureConfig = expandCompliancePostureConfig(v)
+	}
+
   needUpdateAfterCreate := false
 
 	// For now PSC based cluster don't support `enable_private_endpoint` on `create`, but only on `update` API call.
@@ -2931,6 +2969,10 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
         }
 
 	if err := d.Set("security_posture_config", flattenSecurityPostureConfig(cluster.SecurityPostureConfig)); err != nil {
+		return err
+	}
+
+	if err := d.Set("compliance_config", flattenCompliancePostureConfig(cluster.CompliancePostureConfig)); err != nil {
 		return err
 	}
 
@@ -4171,6 +4213,20 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s Security Posture Config has been updated to %#v", d.Id(), req.Update.DesiredSecurityPostureConfig)
 	}
 
+	if d.HasChange("compliance_config") {
+		req := &container.UpdateClusterRequest{
+			Update: &container.ClusterUpdate{
+				DesiredCompliancePostureConfig: expandCompliancePostureConfig(d.Get("compliance_config")),
+			},
+		}
+		updateF := updateFunc(req, "updating GKE cluster master Compliance Posture Config")
+		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] GKE cluster %s Compliance Config has been updated to %#v", d.Id(), req.Update.DesiredCompliancePostureConfig)
+	}
+
 	if d.HasChange("node_pool_auto_config.0.network_tags.0.tags") {
 		tags := d.Get("node_pool_auto_config.0.network_tags.0.tags").([]interface{})
 
@@ -4904,6 +4960,95 @@ func flattenSecurityPostureConfig(spc *container.SecurityPostureConfig) []map[st
 	result["vulnerability_mode"] = spc.VulnerabilityMode
 
 	return []map[string]interface{}{result}
+}
+
+func expandCompliancePostureConfig(configured interface{}) *container.CompliancePostureConfig {
+	l := configured.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil
+	}
+
+	cpc := &container.CompliancePostureConfig{}
+	cpConfig := l[0].(map[string]interface{})
+	if v, ok := cpConfig["mode"]; ok {
+		cpc.Mode = v.(string)
+	}
+
+	if v, ok := cpConfig["compliance_standards"]; ok {
+		cpc.ComplianceStandards = expandCompliancePostureConfigComplianceStandardList(v)
+	}
+	return cpc
+}
+
+func flattenCompliancePostureConfig(cpc *container.CompliancePostureConfig) []map[string]interface{} {
+	if cpc == nil {
+		return nil
+	}
+	result := make(map[string]interface{})
+
+	result["mode"] = cpc.Mode
+
+	if cs := flattenCompliancePostureConfigComplianceStandardList(cpc.ComplianceStandards); cs != nil {
+		result["compliance_standards"] = cs
+	}
+
+	return []map[string]interface{}{result}
+}
+
+func expandCompliancePostureConfigComplianceStandardList(configured interface{}) []*container.ComplianceStandard {
+
+	l := configured.([]interface{})
+	if len(l) == 0 {
+		return nil
+	}
+
+	standardsList := []*container.ComplianceStandard{}
+	for _, s := range l {
+		standardsList = append(standardsList, expandCompliancePostureConfigComplianceStandard(s))
+	}
+
+	return standardsList
+}
+
+func expandCompliancePostureConfigComplianceStandard(configured interface{}) *container.ComplianceStandard {
+	if configured == nil {
+		return nil
+	}
+
+	result := &container.ComplianceStandard{}
+	conf := configured.(map[string]interface{})
+	if v, ok := conf["standard"]; ok {
+		result.Standard = v.(string)
+	}
+
+	return result
+}
+
+func flattenCompliancePostureConfigComplianceStandardList(csl []*container.ComplianceStandard) []interface{} {
+	if len(csl) == 0 {
+		return nil
+	}
+
+	result := []interface{}{}
+	for _, cs := range csl {
+		if cs == nil {
+			continue
+		}
+		result = append(result, flattenCompliancePostureConfigComplianceStandard(cs))
+	}
+
+	return result
+}
+
+func flattenCompliancePostureConfigComplianceStandard(cs *container.ComplianceStandard) interface{} {
+	if cs == nil {
+		return nil
+	}
+	result := make(map[string]interface{})
+
+	result["standard"] = cs.Standard
+
+	return result
 }
 
 func flattenAdditionalPodRangesConfig(ipAllocationPolicy *container.IPAllocationPolicy) []map[string]interface{} {
