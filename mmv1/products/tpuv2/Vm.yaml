@@ -68,7 +68,7 @@ examples:
       disk_name: 'tpu-disk'
   - !ruby/object:Provider::Terraform::Examples
     name: 'tpu_v2_vm_v5p'
-    min_version: 'V5P'
+    min_version: 'beta'
     primary_resource_id: 'tpu'
     vars:
       vm_name: 'test-tpu'
