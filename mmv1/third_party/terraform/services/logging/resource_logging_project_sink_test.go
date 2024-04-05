@@ -14,7 +14,7 @@ func TestAccLoggingProjectSink_basic(t *testing.T) {
 	t.Parallel()
 
 	orgId := envvar.GetTestOrgFromEnv(t)
-	projectId = "tf-test" + acctest.RandString(t, 10)
+	projectId := "tf-test" + acctest.RandString(t, 10)
 	sinkName := "tf-test-sink-" + acctest.RandString(t, 10)
 	bucketName := "tf-test-sink-bucket-" + acctest.RandString(t, 10)
 
@@ -39,7 +39,7 @@ func TestAccLoggingProjectSink_default(t *testing.T) {
 	t.Parallel()
 
 	orgId := envvar.GetTestOrgFromEnv(t)
-	projectId = "tf-test" + acctest.RandString(t, 10)
+	projectId := "tf-test" + acctest.RandString(t, 10)
 	sinkName := "_Default"
 	bucketName := "tf-test-sink-bucket-" + acctest.RandString(t, 10)
 
