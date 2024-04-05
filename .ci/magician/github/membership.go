@@ -151,12 +151,11 @@ func available(nowTime time.Time, allReviewers []string, vacationList []onVacati
 }
 
 func onVacation(nowTime time.Time, vacationList []onVacationReviewer) []string {
-	now := nowTime.UTC()
 	var onVacationList []string
 	for _, reviewer := range vacationList {
 		start := time.Date(reviewer.startDate.year, time.Month(reviewer.startDate.month), reviewer.startDate.day, 0, 0, 0, 0, reviewer.startDate.loc)
 		end := time.Date(reviewer.endDate.year, time.Month(reviewer.endDate.month), reviewer.endDate.day, 0, 0, 0, 0, reviewer.endDate.loc).AddDate(0, 0, 1).Add(-1 * time.Millisecond)
-		if now.Before(start.UTC()) || now.After(end.UTC()) {
+		if nowTime.Before(start) || nowTime.After(end) {
 			continue
 		}
 		onVacationList = append(onVacationList, reviewer.id)
