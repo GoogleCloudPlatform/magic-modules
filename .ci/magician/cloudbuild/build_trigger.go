@@ -21,6 +21,7 @@ import (
 	"os"
 
 	cloudbuildv1 "google.golang.org/api/cloudbuild/v1"
+	"github.com/davecgh/go-spew/spew"
 )
 
 func (cb *Client) TriggerMMPresubmitRuns(commitSha string, substitutions map[string]string) error {
@@ -53,6 +54,8 @@ func triggerCloudBuildRun(projectId, triggerId, repoName, commitSha string, subs
 
 	_, err = c.Projects.Triggers.Run(projectId, triggerId, repoSource).Do()
 	if err != nil {
+		fmt.Println("Error running trigger")
+		spew.Dump(err)
 		return fmt.Errorf("failed to create Cloud Build run: %s", err)
 	}
 
