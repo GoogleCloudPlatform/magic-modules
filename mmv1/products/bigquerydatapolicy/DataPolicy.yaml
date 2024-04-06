@@ -57,7 +57,6 @@ examples:
       data_policy_id: 'data_policy'
       taxonomy: 'taxonomy'
       dataset_id: 'dataset_id'
-      routine_id: 'routine_id'
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -116,5 +115,6 @@ properties:
           - data_masking_policy.0.predefined_expression
           - data_masking_policy.0.routine
         name: routine
+        diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
         description: |-
           The name of the BigQuery routine that contains the custom masking routine, in the format of projects/{projectNumber}/datasets/{dataset_id}/routines/{routine_id}.
