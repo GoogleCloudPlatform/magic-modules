@@ -385,6 +385,7 @@ resource "google_project_service" "logging_service" {
 
 resource "google_logging_project_sink" "basic" {
   name        = "%s"
+  disabled    = false
   project     = google_project_service.logging_service.project
   destination = "storage.googleapis.com/${google_storage_bucket.gcs-bucket.name}"
   filter      = "logName=\"projects/${google_project.project.project_id}/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
