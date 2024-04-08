@@ -17,9 +17,10 @@
 package cmd
 
 import (
-	"github.com/stretchr/testify/assert"
 	"magician/github"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestExecRequestReviewer(t *testing.T) {
