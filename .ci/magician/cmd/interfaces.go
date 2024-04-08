@@ -29,7 +29,7 @@ type GithubClient interface {
 	MergePullRequest(owner, repo, prNumber string) error
 	PostBuildStatus(prNumber, title, state, targetURL, commitSha string) error
 	PostComment(prNumber, comment string) error
-	RequestPullRequestReviewer(prNumber, assignee string) error
+	RequestPullRequestReviewers(prNumber string, reviewers []string) error
 	AddLabels(prNumber string, labels []string) error
 	RemoveLabel(prNumber, label string) error
 	CreateWorkflowDispatchEvent(workflowFileName string, inputs map[string]any) error
@@ -37,7 +37,6 @@ type GithubClient interface {
 
 type CloudbuildClient interface {
 	ApproveCommunityChecker(prNumber, commitSha string) error
-	GetAwaitingApprovalBuildLink(prNumber, commitSha string) (string, error)
 	TriggerMMPresubmitRuns(commitSha string, substitutions map[string]string) error
 }
 

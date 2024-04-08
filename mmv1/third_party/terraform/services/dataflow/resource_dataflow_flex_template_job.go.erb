@@ -364,7 +364,15 @@ func resourceDataflowFlexJobSetupEnv(d *schema.ResourceData, config *transport_t
 	var enableStreamingEngine bool
 	if p, ok := d.GetOk("parameters.enableStreamingEngine"); ok {
 		delete(updatedParameters, "enableStreamingEngine")
-		enableStreamingEngine = p.(bool)
+		e := strings.ToLower(p.(string))
+		switch e {
+		case "true":
+			enableStreamingEngine = true
+		case "false":
+			enableStreamingEngine = false
+		default:
+			return dataflow.FlexTemplateRuntimeEnvironment{}, nil, fmt.Errorf("error when handling parameters.enableStreamingEngine value: expected value to be true or false but got value `%s`", e)
+		}
 	} else {
 		if v, ok := d.GetOk("enable_streaming_engine"); ok {
 			enableStreamingEngine = v.(bool)

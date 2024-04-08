@@ -86,12 +86,15 @@ func TestExecRequestReviewer(t *testing.T) {
 			execRequestReviewer("1", gh)
 
 			actualReviewers := []string{}
-			for _, args := range gh.calledMethods["RequestPullRequestReviewer"] {
-				actualReviewers = append(actualReviewers, args[1].(string))
+			for _, args := range gh.calledMethods["RequestPullRequestReviewers"] {
+				actualReviewers = append(actualReviewers, args[1].([]string)...)
 			}
 
 			if tc.expectSpecificReviewers != nil {
 				assert.ElementsMatch(t, tc.expectSpecificReviewers, actualReviewers)
+				if len(tc.expectSpecificReviewers) == 0 {
+					assert.Len(t, gh.calledMethods["RequestPullRequestReviewers"], 0)
+				}
 			}
 			if tc.expectReviewersFromList != nil {
 				for _, reviewer := range actualReviewers {

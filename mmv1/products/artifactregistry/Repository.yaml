@@ -103,6 +103,10 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'artifact_registry_repository_remote_dockerhub_auth'
     primary_resource_id: 'my-repo'
+    # Ignore this field as it is INPUT_ONLY. AR will not return this in the
+    # response.
+    ignore_read_extra:
+      - 'remote_repository_config.0.disable_upstream_validation'
     vars:
       repository_id: 'example-dockerhub-remote'
       description: 'example remote dockerhub repository with credentials'
@@ -113,6 +117,10 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'artifact_registry_repository_remote_docker_custom_auth'
     primary_resource_id: 'my-repo'
+    # Ignore this field as it is INPUT_ONLY. AR will not return this in the
+    # response.
+    ignore_read_extra:
+      - 'remote_repository_config.0.disable_upstream_validation'
     vars:
       repository_id: 'example-docker-custom-remote'
       description: 'example remote custom docker repository with credentials'
@@ -587,7 +595,9 @@ properties:
                 immutable: true
       - !ruby/object:Api::Type::Boolean
         name: 'disableUpstreamValidation'
-        ignore_read: true
+        # Ignore read on this field because it is INPUT_ONLY.
+        # Need to use custom flatten because ignore_read doesn't work with nested fields.
+        custom_flatten: 'templates/terraform/custom_flatten/artifactregistry_rr_disable_upstream_validation.go.erb'
         description: |-
           If true, the remote repository upstream and upstream credentials will
           not be validated.

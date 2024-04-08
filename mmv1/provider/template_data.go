@@ -19,12 +19,14 @@ import (
 	"go/format"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"text/template"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/golang/glog"
 )
 
@@ -44,12 +46,11 @@ type TemplateData struct {
 }
 
 var TemplateFunctions = template.FuncMap{
-	"title": strings.Title,
-	// "patternToRegex":                  PatternToRegex,
-	"replace": strings.Replace,
-	// "isLastIndex":                     isLastIndex,
-	// "escapeDescription":               escapeDescription,
-	// "shouldAllowForwardSlashInFormat": shouldAllowForwardSlashInFormat,
+	"title":      google.SpaceSeparatedTitle,
+	"replace":    strings.Replace,
+	"camelize":   google.Camelize,
+	"underscore": google.Underscore,
+	"contains":   strings.Contains,
 }
 
 var GA_VERSION = "ga"
@@ -74,38 +75,55 @@ func NewTemplateData(outputFolder string, version product.Version) *TemplateData
 }
 
 func (td *TemplateData) GenerateResourceFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/resource.go.tmpl"
+	templates := []string{
+		templatePath,
+	}
+	td.GenerateFile(filePath, templatePath, resource, true, templates...)
+}
 
+func (td *TemplateData) GenerateDocumentationFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/resource.html.markdown.tmpl"
+	templates := []string{
+		"templates/terraform/property_documentation.html.markdown.tmpl",
+		"templates/terraform/nested_property_documentation.html.markdown.tmpl",
+		templatePath,
+	}
+	td.GenerateFile(filePath, templatePath, resource, false, templates...)
+}
+
+func (td *TemplateData) GenerateFile(filePath, templatePath string, resource api.Resource, goFormat bool, templates ...string) {
 	log.Printf("Generating %s", filePath)
 
-	tmpl, err := template.New("resource.go.tmpl").Funcs(TemplateFunctions).ParseFiles(
-		"templates/terraform/resource.go.tmpl",
-	)
+	templateFileName := filepath.Base(templatePath)
+
+	tmpl, err := template.New(templateFileName).Funcs(TemplateFunctions).ParseFiles(templates...)
 	if err != nil {
 		glog.Exit(err)
 	}
 
 	contents := bytes.Buffer{}
-	if err = tmpl.ExecuteTemplate(&contents, "resource.go.tmpl", resource); err != nil {
+	if err = tmpl.ExecuteTemplate(&contents, templateFileName, resource); err != nil {
 		glog.Exit(err)
 	}
 
+	sourceByte := contents.Bytes()
+	// Replace import path based on version (beta/alpha)
+	if td.TerraformResourceDirectory != "google" {
+		sourceByte = bytes.Replace(sourceByte, []byte("github.com/hashicorp/terraform-provider-google/google"), []byte(td.TerraformProviderModule+"/"+td.TerraformResourceDirectory), -1)
+	}
+
+	if goFormat {
+		sourceByte, err = format.Source(sourceByte)
+		if err != nil {
+			glog.Error(fmt.Errorf("error formatting %s", filePath))
+		}
+	}
+
+	err = os.WriteFile(filePath, sourceByte, 0644)
 	if err != nil {
 		glog.Exit(err)
 	}
-
-	formatted, err := td.FormatSource(&contents)
-	if err != nil {
-		glog.Error(fmt.Errorf("error formatting %s", filePath))
-	}
-
-	err = os.WriteFile(filePath, formatted, 0644)
-	if err != nil {
-		glog.Exit(err)
-	}
-}
-
-func (td *TemplateData) GenerateDocumentationFile(filePath string, resource api.Resource) {
-
 }
 
 //     # path is the output name of the file
@@ -178,18 +196,3 @@ func (td *TemplateData) GenerateDocumentationFile(filePath string, resource api.
 //     end
 //   end
 // end
-
-func (td *TemplateData) FormatSource(source *bytes.Buffer) ([]byte, error) {
-	sourceByte := source.Bytes()
-	// Replace import path based on version (beta/alpha)
-	if td.TerraformResourceDirectory != "google" {
-		sourceByte = bytes.Replace(sourceByte, []byte("github.com/hashicorp/terraform-provider-google/google"), []byte(td.TerraformProviderModule+"/"+td.TerraformResourceDirectory), -1)
-	}
-
-	output, err := format.Source(sourceByte)
-	if err != nil {
-		return []byte(source.String()), err
-	}
-
-	return output, nil
-}
