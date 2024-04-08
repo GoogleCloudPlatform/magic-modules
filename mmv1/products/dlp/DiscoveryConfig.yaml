@@ -61,7 +61,9 @@ examples:
     primary_resource_id: 'filter_regexes_and_conditions'
     test_env_vars:
       project: :PROJECT_NAME
-
+encoder: templates/terraform/encoders/wrap_object.go.erb
+decoder: templates/terraform/decoders/unwrap_resource.go.erb
+update_encoder: templates/terraform/encoders/wrap_object.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: 'parent'
