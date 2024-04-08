@@ -3,17 +3,27 @@ The docker images located in this folder are used by multiple builds for magic m
 
 ## Naming Convention
 
-The images are named with the languages they contain and the images are versioned with tags that indicate the version of each language contained. eg: the image `go-ruby-python` with a tag of `1.11.5-2.6.0-2.7` indicates that the image has `go 1.11.5`, `ruby 2.6.0` and `python 2.7`.
+The images are named according to their use. We have a small number of images that get reused in multiple places, based around sets of requirements shared by different parts of the build pipeline. The images are:
 
-If there are multiple images with the same language version but different libraries (gems), a `v#` is appended to differentiate. eg: `1.11.5-2.6.0-2.7-v6`
+- `gcr.io/graphite-docker-images/bash-plus`
+- `gcr.io/graphite-docker-images/build-environment`
+- `gcr.io/graphite-docker-images/go-plus`
 
 ## Updating a docker image
-The Dockerfile should be updated, then the image rebuilt and pushed to the container registry stored at the `graphite-docker-images` GCP project. To update any of the images:
+
+Before you begin, set up Docker (including configuring it to [authenticate with gcloud](https://cloud.google.com/container-registry/docs/advanced-authentication#gcloud-helper)).
 
 1. Make changes to the Dockerfile
-2. Configure docker to use gcloud auth: `gcloud auth configure-docker`
-3. Build the image: `docker build . --tag gcr.io/graphite-docker-images/go-ruby-python`
-4. Find the new image's id: `docker images`
-5. Add the appropriate tag `docker tag ac37c0af8ce7 gcr.io/graphite-docker-images/go-ruby-python:1.11.5-2.6.0-2.7-v6`
-6. Push the image: `docker push gcr.io/graphite-docker-images/go-ruby-python:1.11.5-2.6.0-2.7-v6`
-7. Check the UI and ensure the new version is available and tagged at `latest`. It must be tagged `latest` for the Kokoro builds to get the correct version.
+2. Build the image with the `testing` tag:
+   ```bash
+   sudo docker build . --tag gcr.io/graphite-docker-images/bash-plus:testing
+   ```
+3. Push the image:
+   ```bash
+   sudo docker push gcr.io/graphite-docker-images/bash-plus:testing
+   ```
+4. Update cloudbuild yaml files to reference the image you just pushed by adding the `:testing` suffix
+5. Update files that will cause the cloudbuild yaml changes (and therefore your changes) to be exercised
+   - Tip: Modifying `mmv1/third_party/terraform/services/compute/metadata.go.erb` will trigger builds for TPG, TPGB, and TGC.
+6. Create a PR with these changes.
+7. Verify that the cloudbuild steps that should use your testing image _are_ using your testing image (in the Execution Details tab for the step.)

@@ -1,6 +1,6 @@
 [
   {
-    "name": "//bigquery.googleapis.com/projects/{{.Provider.project}}/datasets/test-dataset",
+    "name": "//bigquery.googleapis.com/projects/{{.Provider.project}}/datasets/test_dataset",
     "asset_type": "bigquery.googleapis.com/Dataset",
     "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
     "resource": {
@@ -11,7 +11,7 @@
       "data": {
         "friendlyName": "",
         "datasetReference": {
-          "datasetId": "test-dataset"
+          "datasetId": "test_dataset"
         },
         "labels": {
           "env": "dev"

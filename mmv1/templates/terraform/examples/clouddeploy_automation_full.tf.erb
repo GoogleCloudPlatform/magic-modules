@@ -1,5 +1,4 @@
 resource "google_clouddeploy_automation" "<%= ctx[:primary_resource_id] %>" {
-  provider = google-beta
   name     = "<%= ctx[:vars]['automation'] %>"
   location = "us-central1"
   delivery_pipeline = google_clouddeploy_delivery_pipeline.pipeline.name
@@ -40,7 +39,6 @@ resource "google_clouddeploy_automation" "<%= ctx[:primary_resource_id] %>" {
 }
 
 resource "google_clouddeploy_delivery_pipeline" "pipeline" {
-  provider = google-beta
   name = "<%= ctx[:vars]['delivery_pipeline'] %>"
   location = "us-central1"
   serial_pipeline  {

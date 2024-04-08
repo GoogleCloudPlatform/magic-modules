@@ -8,8 +8,8 @@
 - type: DIFF_SUPPRESS_FUNC
   field: control_plane.root_volume.volume_type
   details:
-    diffsuppressfunc: tpgresource.CompareCaseInsensitive
+    diffsuppressfunc: tpgresource.CaseDiffSuppress
 - type: DIFF_SUPPRESS_FUNC
   field: control_plane.main_volume.volume_type
   details:
-    diffsuppressfunc: tpgresource.CompareCaseInsensitive
+    diffsuppressfunc: tpgresource.CaseDiffSuppress

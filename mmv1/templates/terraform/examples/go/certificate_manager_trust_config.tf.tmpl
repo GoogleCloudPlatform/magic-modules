@@ -1,0 +1,18 @@
+resource "google_certificate_manager_trust_config" "{{$.PrimaryResourceId}}" {
+  name        = "{{index $.Vars "trust_config_name"}}"
+  description = "sample description for the trust config"
+  location    = "us-central1"
+
+  trust_stores {
+    trust_anchors { 
+      pem_certificate = file("test-fixtures/cert.pem")
+    }
+    intermediate_cas { 
+      pem_certificate = file("test-fixtures/cert.pem")
+    }
+  }
+
+  labels = {
+    foo = "bar"
+  }
+}
