@@ -14,6 +14,7 @@ require (
 )
 
 require (
+	github.com/google/go-cmp v0.5.9
 	github.com/otiai10/copy v1.12.0
 	github.com/stretchr/testify v1.8.4
 	gopkg.in/yaml.v2 v2.4.0
