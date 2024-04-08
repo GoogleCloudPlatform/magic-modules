@@ -86,6 +86,7 @@ examples:
       deletion_protection: 'false'
     ignore_read_extra:
       - 'deletion_protection'
+      - 'subordinate_config.0.certificate_authority'
   - !ruby/object:Provider::Terraform::Examples
     # Skip test because it depends on a beta resource, but PrivateCA does
     # not have a beta endpoint
