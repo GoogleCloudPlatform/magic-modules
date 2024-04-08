@@ -1,0 +1,12 @@
+resource "google_compute_region_commitment" "foobar" {
+  name = "{{index $.Vars "region_commitment_name"}}"
+  plan = "THIRTY_SIX_MONTH"
+  resources {
+      type = "VCPU"
+      amount = "4"
+  }
+  resources {
+      type = "MEMORY"
+      amount = "9"
+  }
+}
