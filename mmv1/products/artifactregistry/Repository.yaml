@@ -103,8 +103,10 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'artifact_registry_repository_remote_custom'
     primary_resource_id: 'my-repo'
+    # Ignore this field as it is INPUT_ONLY. AR will not return this in the
+    # response.
     ignore_read_extra:
-      - 'disable_upstream_validation'
+      - 'remote_repository_config.0.disable_upstream_validation'
     vars:
       repository_id: 'example-custom-remote'
       description: 'example remote docker repository with credentials'
@@ -531,6 +533,8 @@ properties:
                 immutable: true
       - !ruby/object:Api::Type::Boolean
         name: 'disableUpstreamValidation'
+        # Ignore read on this field because it is INPUT_ONLY.
+        # Need to use custom flatten because ignore_read doesn't work with nested fields.
         custom_flatten: 'templates/terraform/custom_flatten/artifactregistry_rr_disable_upstream_validation.go.erb'
         description: |-
           If true, the remote repository upstream and upstream credentials will
