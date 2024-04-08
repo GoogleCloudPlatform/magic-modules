@@ -13,8 +13,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	<% if version == "ga" -%>
-	<% else -%>
+	<% unless version == "ga" -%>
 	"github.com/hashicorp/terraform-provider-google/google/verify"
 	<% end -%>
 	"google.golang.org/api/googleapi"
