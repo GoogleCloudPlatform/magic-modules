@@ -179,7 +179,7 @@ func TestAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigUpdateFilter(t *
 func testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigStart(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_data_loss_prevention_discovery_config" "basic" {
-	parent = "projects/%{project}"
+	parent = "projects/%{project}/locations/us"
 	display_name = "display name"
 
     targets {
@@ -197,7 +197,7 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
 func testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_data_loss_prevention_discovery_config" "basic" {
-	parent = "projects/%{project}"
+	parent = "projects/%{project}/locations/us"
 
     targets {
         big_query_target {

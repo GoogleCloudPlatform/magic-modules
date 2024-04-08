@@ -66,11 +66,9 @@ parameters:
   - !ruby/object:Api::Type::String
     name: 'parent'
     description: |
-      The parent of the inspect template in any of the following formats:
+      The parent of the discovery config in any of the following formats:
 
-      * `projects/{{project}}`
       * `projects/{{project}}/locations/{{location}}`
-      * `organizations/{{organization_id}}`
       * `organizations/{{organization_id}}/locations/{{location}}`
     required: true
     immutable: true
