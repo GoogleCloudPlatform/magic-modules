@@ -25,17 +25,19 @@ func TestAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigUpdate(t *testin
 				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigStart(context),
 			},
 			{
-				ResourceName:      "google_data_loss_prevention_discovery_config.basic",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_data_loss_prevention_discovery_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parent"},
 			},
 			{
 				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigUpdate(context),
 			},
 			{
-				ResourceName:      "google_data_loss_prevention_discovery_config.basic",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_data_loss_prevention_discovery_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parent"},
 			},
 		},
 	})

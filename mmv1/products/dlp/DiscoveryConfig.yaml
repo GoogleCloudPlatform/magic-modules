@@ -15,9 +15,10 @@
 # API resource name
 name: 'DiscoveryConfig'
 base_url: '{{parent}}/discoveryConfigs'
-self_link: '{{parent}}/discoveryConfigs'
+self_link: '{{parent}}/discoveryConfigs/{{name}}'
 create_url: '{{parent}}/discoveryConfigs'
 create_verb: :POST
+update_verb: :PATCH
 update_mask: true
 # Resource description for the provider documentation.
 description: |
