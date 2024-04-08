@@ -32,15 +32,6 @@ func ipv6RepresentationDiffSuppress(_, old, new string, d *schema.ResourceData) 
 	return oldIp.Equal(newIp)
 }
 
-func isIPv4Address(input string) bool {
-	ip := net.ParseIP(input)
-	return ip != nil && ip.To4() != nil
-}
-
-func interfaceToString(value interface{}) string {
-	return fmt.Sprintf("%v", value)
-}
-
 func ResourceComputeRouterBgpPeer() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceComputeRouterBgpPeerCreate,
@@ -1142,7 +1133,6 @@ func flattenNestedComputeRouterBgpPeerEnableIpv6(v interface{}, d *schema.Resour
 
 <% unless version == 'ga' -%>
 func flattenNestedComputeRouterBgpPeerEnableIpv4(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	log.Printf("[DEBUG] printing value for enable_ipv4 that we are going to set %v)", v)
 	return v
 }
 

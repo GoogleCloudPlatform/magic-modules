@@ -157,32 +157,7 @@ func TestAccComputeRouter_updateAddRemoveBGP(t *testing.T) {
 }
 
 <% unless version == 'ga' -%>
-func TestAccCompouteRouter_addIdentifierRangeBgp(t *testing.T){
-	t.Parallel()
-
-	testId := acctest.RandString(t, 10)
-	routerName := fmt.Sprintf("tf-test-router-%s", testId)
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-		CheckDestroy:             testAccCheckComputeRouterDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeRouter_addIdentifierRangeBgp(routerName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_compute_router.foobar", "bgp.0.identifier_range", "169.254.8.8/29"),
-				),
-			},
-			{
-				ResourceName:      "google_compute_router.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
-func TestAccComputeRouter_updateIdentifierRangeBgp(t *testing.T) {
+func TestAccComputeRouter_addAndUpdateIdentifierRangeBgp(t *testing.T) {
 	t.Parallel()
 
 	testId := acctest.RandString(t, 10)

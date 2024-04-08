@@ -208,34 +208,7 @@ func TestAccComputeRouterPeer_Ipv6Basic(t *testing.T) {
 }
 
 <% unless version == 'ga' -%>
-func TestAccComputeRouterPeer_Ipv4Basic(t *testing.T) {
-	t.Parallel()
-
-	routerName := fmt.Sprintf("tf-test-router-%s", acctest.RandString(t, 10))
-	resourceName := "google_compute_router_peer.foobar"
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-		CheckDestroy:             testAccCheckComputeRouterPeerDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeRouterPeerIpv4(routerName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeRouterPeerExists(
-						t, resourceName),
-					resource.TestCheckResourceAttr(resourceName, "enable_ipv4", "true"),
-				),
-			},
-			{
-				ResourceName:      resourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
-func TestAccComputeRouterPeer_UpdateIpv4(t *testing.T) {
+func TestAccComputeRouterPeer_Ipv4BasicCreateUpdate(t *testing.T) {
   t.Parallel()
 
   routerName := fmt.Sprintf("tf-test-router-%s", acctest.RandString(t, 10))
@@ -250,7 +223,7 @@ func TestAccComputeRouterPeer_UpdateIpv4(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRouterPeerExists(
 						t, resourceName),
-					resource.TestCheckResourceAttr(resourceName, "enable_ipv6", "true"),
+					resource.TestCheckResourceAttr(resourceName, "enable_ipv4", "true"),
 				),
 			},
 			{
@@ -264,6 +237,8 @@ func TestAccComputeRouterPeer_UpdateIpv4(t *testing.T) {
 					testAccCheckComputeRouterPeerExists(
 						t, resourceName),
 					resource.TestCheckResourceAttr(resourceName, "enable_ipv4", "true"),
+          resource.TestCheckResourceAttr(resourceName, "ipv4_nexthop_address", "169.254.1.2"),
+          resource.TestCheckResourceAttr(resourceName, "peer_ipv4_nexthop_address", "169.254.1.1"),
 				),
 			},
 			{
