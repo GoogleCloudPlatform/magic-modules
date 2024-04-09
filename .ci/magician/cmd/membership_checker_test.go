@@ -92,18 +92,10 @@ func TestExecMembershipChecker_AmbiguousUserFlow(t *testing.T) {
 
 	execMembershipChecker("pr1", "sha1", gh, cb)
 
-	method := "AddLabel"
-	expected := [][]any{{"pr1", "awaiting-approval"}}
+	method := "AddLabels"
+	expected := [][]any{{"pr1", []string{"awaiting-approval"}}}
 	if calls, ok := gh.calledMethods[method]; !ok {
 		t.Fatal("Label wasn't posted to pull request")
-	} else if !reflect.DeepEqual(calls, expected) {
-		t.Fatalf("Wrong calls for %s, got %v, expected %v", method, calls, expected)
-	}
-
-	method = "GetAwaitingApprovalBuildLink"
-	expected = [][]any{{"pr1", "sha1"}}
-	if calls, ok := cb.calledMethods[method]; !ok {
-		t.Fatal("Awaiting approval build link wasn't gotten from pull request")
 	} else if !reflect.DeepEqual(calls, expected) {
 		t.Fatalf("Wrong calls for %s, got %v, expected %v", method, calls, expected)
 	}

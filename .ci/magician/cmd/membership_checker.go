@@ -83,18 +83,7 @@ func execMembershipChecker(prNumber, commitSha string, gh GithubClient, cb Cloud
 			os.Exit(1)
 		}
 	} else {
-		gh.AddLabel(prNumber, "awaiting-approval")
-		targetUrl, err := cb.GetAwaitingApprovalBuildLink(prNumber, commitSha)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
-		err = gh.PostBuildStatus(prNumber, "Approve Build", "success", targetUrl, commitSha)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		gh.AddLabels(prNumber, []string{"awaiting-approval"})
 	}
 }
 

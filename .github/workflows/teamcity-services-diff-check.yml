@@ -9,13 +9,13 @@ on:
       - 'mmv1/third_party/terraform/.teamcity/components/inputs/services_beta.kt'
       - 'mmv1/products/**'
 jobs:
-  check-pr:
+  teamcity-services-diff-check:
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     runs-on: ubuntu-22.04
-    outputs:
-      services: ${{steps.services.outputs.services}}
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
         with:
           fetch-depth: 0
       - name: "Check for New Services"
@@ -24,61 +24,37 @@ jobs:
           newServices=$(($(git diff --name-only --diff-filter=A origin/main HEAD | grep -P "mmv1/products/.*/product.yaml" | wc -l)))
           echo "services=$newServices" >> "${GITHUB_OUTPUT}"
           if [ "$newServices" = "0" ];then
-          echo "No new service found." 
+          echo "No new service found."
           fi
-  terraform-provider-google:
-    if: ${{needs.check-pr.outputs.services != '0'}}
-    needs: check-pr
-    uses: ./.github/workflows/build-downstream.yml
-    with:
-      repo: 'terraform-provider-google'
-
-  terraform-provider-google-beta:
-    if: ${{needs.check-pr.outputs.services != '0'}} 
-    needs: check-pr
-    uses: ./.github/workflows/build-downstream.yml
-    with:
-      repo: 'terraform-provider-google-beta'
-
-  teamcity-services-diff-check:
-    needs: [terraform-provider-google, terraform-provider-google-beta]
-    runs-on: ubuntu-22.04
-    steps:
+      - name: TeamCity Google Provider Generate
+        id: generate
+        if: ${{steps.services.outputs.services != '0'}}
+        uses: ./.github/actions/build-downstream
+        with:
+          repo: 'terraform-provider-google'
+          token: '$GITHUB_TOKEN'
+        # The path where GA/Beta providers are generated is grabbed from the OUTPUT_PATH that's set in build_downstream.yaml
+        # export OUTPUT_PATH=$GOPATH/src/github.com/$UPSTREAM_OWNER/$GH_REPO
+        # OUTPUT_PATH changes after each generate (GA/beta)
+      - name: Set GOOGLE_REPO_PATH to path where GA provider was generated
+        run: echo "GOOGLE_REPO_PATH=${{ env.OUTPUT_PATH}}" >> $GITHUB_ENV
+      - name: TeamCity Google Beta Provider Generate
+        if: steps.generate.outcome == 'success'
+        uses: ./.github/actions/build-downstream
+        with:
+          repo: 'terraform-provider-google-beta'
+          token: '$GITHUB_TOKEN'
+      - name: Set GOOGLE_BETA_REPO_PATH to path where beta provider was generated
+        run: echo "GOOGLE_BETA_REPO_PATH=${{ env.OUTPUT_PATH}}" >> $GITHUB_ENV
       - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Setup Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: '^1.20'
-
-      - name: Download built artifacts - GA provider
-        uses: actions/download-artifact@v2
-        with:
-          name: artifact-terraform-provider-google
-          path: artifacts
-
-      - name: Unzip the artifacts and delete the zip
-        run: |
-          unzip -o artifacts/output.zip -d ./provider
-          rm artifacts/output.zip
-
-      - name: Download built artifacts - Beta provider
-        uses: actions/download-artifact@v2
-        with:
-          name: artifact-terraform-provider-google-beta
-          path: artifacts
-
-      - name: Unzip the artifacts and delete the zip
-        run: |
-          unzip -o artifacts/output.zip -d ./provider
-          rm artifacts/output.zip
-
+        if: steps.generate.outcome == 'success'
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
       - name: Check that new services have been added to the TeamCity configuration code
+        if: steps.generate.outcome == 'success'
         run: |
           # Create lists of service packages in providers
-          ls provider/google/services > tools/teamcity-diff-check/services_ga.txt
-          ls provider/google-beta/services > tools/teamcity-diff-check/services_beta.txt
+          ls ${{env.GOOGLE_REPO_PATH}}/google/services > tools/teamcity-diff-check/services_ga.txt
+          ls ${{env.GOOGLE_BETA_REPO_PATH}}/google-beta/services > tools/teamcity-diff-check/services_beta.txt
 
           # Run tool to compare service packages in the providers vs those listed in TeamCity config files
           cd tools/teamcity-diff-check

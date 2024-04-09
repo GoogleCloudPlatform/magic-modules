@@ -14,22 +14,19 @@
 package api
 
 import (
+	"log"
+	"strings"
+
+	"gopkg.in/yaml.v3"
+
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"golang.org/x/exp/slices"
 )
 
-// require 'api/object'
-// require 'api/product/version'
-// require 'google/logger'
-// require 'compile/core'
-// require 'json'
-
 // Represents a product to be managed
 type Product struct {
 	NamedObject `yaml:",inline"`
-
-	// include Compile::Core
 
 	// Inherited:
 	// The name of the product's API capitalised in the appropriate places.
@@ -50,7 +47,7 @@ type Product struct {
 
 	// The API versions of this product
 
-	Versions []product.Version
+	Versions []*product.Version
 
 	// The base URL for the service API endpoint
 	// For example: `https://www.googleapis.com/compute/v1/`
@@ -64,19 +61,33 @@ type Product struct {
 
 	OperationRetry string `yaml:"operation_retry"`
 
-	Async OpAsync
+	Async *Async
 
 	LegacyName string `yaml:"legacy_name"`
 
 	ClientName string `yaml:"client_name"`
 }
 
-func (p *Product) Validate() {
-	// TODO Q1 Rewrite super
-	//     super
-	for _, o := range p.Objects {
-		o.ProductMetadata = p
+func (p *Product) UnmarshalYAML(n *yaml.Node) error {
+	p.Async = NewAsync()
+
+	type productAlias Product
+	aliasObj := (*productAlias)(p)
+
+	err := n.Decode(&aliasObj)
+	if err != nil {
+		return err
 	}
+
+	p.SetApiName()
+	p.SetDisplayName()
+
+	return nil
+}
+
+func (p *Product) Validate() {
+	// TODO Q2 Rewrite super
+	//     super
 }
 
 // def validate
@@ -101,73 +112,82 @@ func (p *Product) Validate() {
 //     check :versions, type: Array, item_type: Api::Product::Version, required: true
 //   end
 
-//   // ====================
-//   // Custom Getters
-//   // ====================
+// ====================
+// Custom Setters
+// ====================
 
-//   // The name of the product's API; "compute", "accesscontextmanager"
-//   def api_name
-//     name.downcase
-//   end
+func (p *Product) SetApiName() {
+	// The name of the product's API; "compute", "accesscontextmanager"
+	p.ApiName = strings.ToLower(p.Name)
+}
 
 // The product full name is the "display name" in string form intended for
 // users to read in documentation; "Google Compute Engine", "Cloud Bigtable"
-func (p Product) GetDisplayName() string {
+func (p *Product) SetDisplayName() {
 	if p.DisplayName == "" {
-		return google.SpaceSeparated(p.Name)
+		p.DisplayName = google.SpaceSeparated(p.Name)
 	}
-
-	return p.DisplayName
 }
 
-//   // Most general version that exists for the product
-//   // If GA is present, use that, else beta, else alpha
-//   def lowest_version
-//     Version::ORDER.each do |ordered_version_name|
-//       @versions.each do |product_version|
-//         return product_version if ordered_version_name == product_version.name
-//       end
-//     end
-//     raise "Unable to find lowest version for product //{display_name}"
-//   end
+// ====================
+// Version-related methods
+// ====================
 
-//   def version_obj(name)
-//     @versions.each do |v|
-//       return v if v.name == name
-//     end
+// Most general version that exists for the product
+// If GA is present, use that, else beta, else alpha
+func (p Product) lowestVersion() *product.Version {
+	for _, orderedVersionName := range product.ORDER {
+		for _, productVersion := range p.Versions {
+			if orderedVersionName == productVersion.Name {
+				return productVersion
+			}
+		}
+	}
 
-//     raise "API version '//{name}' does not exist for product '//{@name}'"
-//   end
+	log.Fatalf("Unable to find lowest version for product %s", p.DisplayName)
+	return nil
+}
 
-//   // Get the version of the object specified by the version given if present
-//   // Or else fall back to the closest version in the chain defined by Version::ORDER
-//   def version_obj_or_closest(name)
-//     return version_obj(name) if exists_at_version(name)
+func (p Product) versionObj(name string) *product.Version {
+	for _, v := range p.Versions {
+		if v.Name == name {
+			return v
+		}
+	}
 
-//     // versions should fall back to the closest version to them that exists
-//     name ||= Version::ORDER[0]
-//     lower_versions = Version::ORDER[0..Version::ORDER.index(name)]
+	log.Fatalf("API version '%s' does not exist for product '%s'", name, p.Name)
+	return nil
+}
 
-//     lower_versions.reverse_each do |version|
-//       return version_obj(version) if exists_at_version(version)
-//     end
+// Get the version of the object specified by the version given if present
+// Or else fall back to the closest version in the chain defined by product.ORDER
+func (p Product) VersionObjOrClosest(name string) *product.Version {
+	if p.ExistsAtVersion(name) {
+		return p.versionObj(name)
+	}
 
-//     raise "Could not find object for version //{name} and product //{display_name}"
-//   end
+	// versions should fall back to the closest version to them that exists
+	if name == "" {
+		name = product.ORDER[0]
+	}
 
-//   def exists_at_version_or_lower(name)
-//     // Versions aren't normally going to be empty since products need a
-//     // base_url. This nil check exists for atypical products, like _bundle.
-//     return true if @versions.nil?
+	lowerVersions := make([]string, 0)
+	for _, v := range product.ORDER {
+		lowerVersions = append(lowerVersions, v)
+		if v == name {
+			break
+		}
+	}
 
-//     name ||= Version::ORDER[0]
-//     return false unless Version::ORDER.include?(name)
+	for i := len(lowerVersions) - 1; i >= 0; i-- {
+		if p.ExistsAtVersion(lowerVersions[i]) {
+			return p.versionObj(lowerVersions[i])
+		}
+	}
 
-//     (0..Version::ORDER.index(name)).each do |i|
-//       return true if exists_at_version(Version::ORDER[i])
-//     end
-//     false
-//   end
+	log.Fatalf("Could not find object for version %s and product %s", name, p.DisplayName)
+	return nil
+}
 
 func (p *Product) ExistsAtVersionOrLower(name string) bool {
 	if !slices.Contains(product.ORDER, name) {
@@ -192,36 +212,32 @@ func (p *Product) ExistsAtVersion(name string) bool {
 	return false
 }
 
-//   def exists_at_version(name)
-//     // Versions aren't normally going to be empty since products need a
-//     // base_url. This nil check exists for atypical products, like _bundle.
-//     return true if @versions.nil?
+func (p *Product) SetPropertiesBasedOnVersion(version *product.Version) {
+	p.BaseUrl = version.BaseUrl
+}
 
-//     @versions.any? { |v| v.name == name }
-//   end
+func (p *Product) TerraformName() string {
+	if p.LegacyName != "" {
+		return google.Underscore(p.LegacyName)
+	}
+	return google.Underscore(p.Name)
+}
 
-//   // Not a conventional setter, so ignore rubocop's warning
-//   // rubocop:disable Naming/AccessorMethodName
-//   def set_properties_based_on_version(version)
-//     @base_url = version.base_url
-//   end
-//   // rubocop:enable Naming/AccessorMethodName
-
-//   // ====================
-//   // Debugging Methods
-//   // ====================
+// ====================
+// Debugging Methods
+// ====================
 
 //   def to_s
 //     // relies on the custom to_json definitions
 //     JSON.pretty_generate(self)
 //   end
 
-//   // Prints a dot notation path to where the field is nested within the parent
-//   // object when called on a property. eg: parent.meta.label.foo
-//   // Redefined on Product to terminate the calls up the parent chain.
-//   def lineage
-//     name
-//   end
+// Prints a dot notation path to where the field is nested within the parent
+// object when called on a property. eg: parent.meta.label.foo
+// Redefined on Product to terminate the calls up the parent chain.
+func (p Product) Lineage() string {
+	return p.Name
+}
 
 //   def to_json(opts = nil)
 //     json_out = {}
