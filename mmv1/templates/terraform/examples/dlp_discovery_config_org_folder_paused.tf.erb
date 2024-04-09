@@ -1,5 +1,5 @@
 resource "google_data_loss_prevention_discovery_config" "<%= ctx[:primary_resource_id] %>" {
-	parent = "organizations/<%= ctx[:test_env_vars]['organization'] %>"
+	parent = "organizations/<%= ctx[:test_env_vars]['organization'] %>/locations/us"
 
     targets {
         big_query_target {
@@ -14,6 +14,6 @@ resource "google_data_loss_prevention_discovery_config" "<%= ctx[:primary_resour
             folder_id = 123
         }
     }
-    inspect_templates = ["FAKE"]    
+    inspect_templates = ["projects/%{project}/locations/us/inspectTemplates/test"]    
     status = "PAUSED"
 }

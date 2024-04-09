@@ -275,7 +275,7 @@ properties:
                           This field only has a name and description because of MM
                           limitations. It should not appear in downstreams.
                         values:
-                          - :SCHEMA_NEW_COLUMN
+                          - :SCHEMA_NEW_COLUMNS
                           - :SCHEMA_REMOVED_COLUMNS
                     - !ruby/object:Api::Type::Enum
                       name: 'frequency'

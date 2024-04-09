@@ -189,7 +189,7 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
             }
         }
     }
-    inspect_templates = ["FAKE"]
+    inspect_templates = ["projects/%{project}/locations/us/inspectTemplates/test"]
 }
 `, context)
 }
@@ -212,7 +212,7 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
 			}
         }
     }
-    inspect_templates = ["FAKE_NEW"]
+    inspect_templates = ["projects/%{project}/locations/us/inspectTemplates/test-new"]
 }
 `, context)
 }
@@ -220,7 +220,7 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
 func testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigActions(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_data_loss_prevention_discovery_config" "basic" {
-	parent = "projects/%{project}"
+	parent = "projects/%{project}/locations/us"
 
     targets {
         big_query_target {
@@ -254,7 +254,7 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
                 detail_of_message = "TABLE_PROFILE"
             }
     }
-    inspect_templates = ["FAKE"]
+    inspect_templates = ["projects/%{project}/locations/us/inspectTemplates/test"]
 }
 `, context)
 }
@@ -262,7 +262,7 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
 func testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigOrgRunning(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_data_loss_prevention_discovery_config" "basic" {
-	parent = "organizations/%{organization}"
+	parent = "organizations/%{organization}/locations/us"
 
     targets {
         big_query_target {
@@ -277,7 +277,7 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
 			organization_id = "%{organization}"
 		}
 	}
-    inspect_templates = ["FAKE"]
+    inspect_templates = ["projects/%{project}/locations/us/inspectTemplates/test"]
 	status = "RUNNING"
 }
 `, context)
@@ -286,7 +286,7 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
 func testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigOrgFolderPaused(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_data_loss_prevention_discovery_config" "basic" {
-	parent = "organizations/%{organization}"
+	parent = "organizations/%{organization}/locations/us"
 
     targets {
         big_query_target {
@@ -301,7 +301,7 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
 			folder_id = 123
 		}
 	}
-    inspect_templates = ["FAKE"]
+    inspect_templates = ["projects/%{project}/locations/us/inspectTemplates/test"]
 	status = "PAUSED"
 }
 `, context)
@@ -310,7 +310,7 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
 func testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigConditionsCadence(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_data_loss_prevention_discovery_config" "basic" {
-	parent = "projects/%{project}"
+	parent = "projects/%{project}/locations/us"
 
 	targets {
         big_query_target {
@@ -332,7 +332,7 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
             }
         }
     }
-    inspect_templates = ["FAKE_NEW"]
+    inspect_templates = ["projects/%{project}/locations/us/inspectTemplates/test-new"]
 }
 `, context)
 }
@@ -340,7 +340,7 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
 func testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigFilterRegexesAndConditions(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_data_loss_prevention_discovery_config" "basic" {
-	parent = "projects/%{project}"
+	parent = "projects/%{project}/locations/us"
 
 	targets {
         big_query_target {
@@ -374,7 +374,7 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
             }
         }
     }
-    inspect_templates = ["FAKE_NEW"]
+    inspect_templates = ["projects/%{project}/locations/us/inspectTemplates/test-new"]
 }
 `, context)
 }
