@@ -12,48 +12,21 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-var enrolledTeamsYaml = []byte(`
-service/google-x:
-  resources:
-  - google_x_resource
-service/google-z:
-  resources:
-  - google_z_resource`)
-
-func TestChangedSchemaLabelsCmdRun(t *testing.T) {
+func TestChangedSchemaResourcesCmdRun(t *testing.T) {
 	cases := map[string]struct {
-		args           []string
-		oldResourceMap map[string]*schema.Resource
-		newResourceMap map[string]*schema.Resource
-		expectedLabels []string
-		expectError    bool
+		args              []string
+		oldResourceMap    map[string]*schema.Resource
+		newResourceMap    map[string]*schema.Resource
+		expectedResources []string
+		expectError       bool
 	}{
 		"empty resource map": {
-			args:           []string{"12345"},
-			oldResourceMap: map[string]*schema.Resource{},
-			newResourceMap: map[string]*schema.Resource{},
-			expectedLabels: nil,
+			args:              []string{"12345"},
+			oldResourceMap:    map[string]*schema.Resource{},
+			newResourceMap:    map[string]*schema.Resource{},
+			expectedResources: nil,
 		},
-		"resource changed that doesn't match mapping": {
-			args: []string{"12345"},
-			oldResourceMap: map[string]*schema.Resource{
-				"google_y_resource": {
-					Schema: map[string]*schema.Schema{
-						"field_a": {Description: "beep", Optional: true},
-						"field_b": {Description: "beep", Optional: true},
-					},
-				},
-			},
-			newResourceMap: map[string]*schema.Resource{
-				"google_y_resource": {
-					Schema: map[string]*schema.Schema{
-						"field_a": {Description: "beep", Required: true},
-					},
-				},
-			},
-			expectedLabels: nil,
-		},
-		"resource matches mapping but isn't changed": {
+		"resource isn't changed": {
 			args: []string{"12345"},
 			oldResourceMap: map[string]*schema.Resource{
 				"google_x_resource": {
@@ -71,9 +44,9 @@ func TestChangedSchemaLabelsCmdRun(t *testing.T) {
 					},
 				},
 			},
-			expectedLabels: nil,
+			expectedResources: nil,
 		},
-		"resource changed that matches mapping": {
+		"resource is changed": {
 			args: []string{"12345"},
 			oldResourceMap: map[string]*schema.Resource{
 				"google_x_resource": {
@@ -90,9 +63,9 @@ func TestChangedSchemaLabelsCmdRun(t *testing.T) {
 					},
 				},
 			},
-			expectedLabels: []string{"service/google-x"},
+			expectedResources: []string{"google_x_resource"},
 		},
-		"resources changed that match multiple mappings": {
+		"multiple resources are changed": {
 			args: []string{"12345"},
 			oldResourceMap: map[string]*schema.Resource{
 				"google_x_resource": {
@@ -120,7 +93,38 @@ func TestChangedSchemaLabelsCmdRun(t *testing.T) {
 					},
 				},
 			},
-			expectedLabels: []string{"service/google-x", "service/google-z"},
+			expectedResources: []string{"google_x_resource", "google_z_resource"},
+		},
+		"multiple resources but not all are changed": {
+			args: []string{"12345"},
+			oldResourceMap: map[string]*schema.Resource{
+				"google_x_resource": {
+					Schema: map[string]*schema.Schema{
+						"field_a": {Description: "beep", Optional: true},
+						"field_b": {Description: "beep", Optional: true},
+					},
+				},
+				"google_z_resource": {
+					Schema: map[string]*schema.Schema{
+						"field_a": {Description: "beep", Optional: true},
+						"field_b": {Description: "beep", Optional: true},
+					},
+				},
+			},
+			newResourceMap: map[string]*schema.Resource{
+				"google_x_resource": {
+					Schema: map[string]*schema.Schema{
+						"field_a": {Description: "beep", Required: true},
+					},
+				},
+				"google_z_resource": {
+					Schema: map[string]*schema.Schema{
+						"field_a": {Description: "beep", Optional: true},
+						"field_b": {Description: "beep", Optional: true},
+					},
+				},
+			},
+			expectedResources: []string{"google_x_resource"},
 		},
 	}
 
@@ -130,12 +134,11 @@ func TestChangedSchemaLabelsCmdRun(t *testing.T) {
 			t.Parallel()
 
 			var buf bytes.Buffer
-			o := changedSchemaLabelsOptions{
+			o := changedSchemaResourcesOptions{
 				computeSchemaDiff: func() diff.SchemaDiff {
 					return diff.ComputeSchemaDiff(tc.oldResourceMap, tc.newResourceMap)
 				},
-				enrolledTeamsYaml: enrolledTeamsYaml,
-				stdout:            &buf,
+				stdout: &buf,
 			}
 
 			err := o.run()
@@ -148,14 +151,14 @@ func TestChangedSchemaLabelsCmdRun(t *testing.T) {
 
 			out := make([]byte, buf.Len())
 			buf.Read(out)
-			var gotLabels []string
-			if err = json.Unmarshal(out, &gotLabels); err != nil {
+			var gotResources []string
+			if err = json.Unmarshal(out, &gotResources); err != nil {
 				t.Fatalf("Unable to unmarshal labels (%q): %s", out, err)
 			}
 
 			less := func(a, b string) bool { return a < b }
-			if (len(tc.expectedLabels) > 0 || len(gotLabels) > 0) && !cmp.Equal(tc.expectedLabels, gotLabels, cmpopts.SortSlices(less)) {
-				t.Errorf("Unexpected final labels. Want %q, got %q", tc.expectedLabels, gotLabels)
+			if (len(tc.expectedResources) > 0 || len(gotResources) > 0) && !cmp.Equal(tc.expectedResources, gotResources, cmpopts.SortSlices(less)) {
+				t.Errorf("Unexpected final labels. Want %q, got %q", tc.expectedResources, gotResources)
 			}
 		})
 	}
