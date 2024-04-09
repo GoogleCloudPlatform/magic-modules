@@ -229,8 +229,8 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	data.Diffs = diffs
 
 	// The breaking changes are unique across both provider versions
+	uniqueAffectedResources := map[string]struct{}{}
 	uniqueBreakingChanges := map[string]struct{}{}
-	uniqueServiceLabels := map[string]struct{}{}
 	diffProcessorPath := filepath.Join(mmLocalPath, "tools", "diff-processor")
 	diffProcessorEnv := map[string]string{
 		"OLD_REF": oldBranch,
@@ -265,18 +265,13 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			uniqueBreakingChanges[breakingChange] = struct{}{}
 		}
 
-		// If fetching the PR failed, Labels will be empty
-		labels := make([]string, len(pullRequest.Labels))
-		for i, label := range pullRequest.Labels {
-			labels[i] = label.Name
-		}
-		serviceLabels, err := changedSchemaLabels(prNumber, labels, diffProcessorPath, gh, rnr)
+		affectedResources, err := changedSchemaResources(diffProcessorPath, rnr)
 		if err != nil {
-			fmt.Println("computing changed schema labels: ", err)
-			errors[repo.Title] = append(errors[repo.Title], "The diff processor crashed while computing changed schema labels.")
+			fmt.Println("computing changed resource schemas: ", err)
+			errors[repo.Title] = append(errors[repo.Title], "The diff processor crashed while computing changed resource schemas.")
 		}
-		for _, serviceLabel := range serviceLabels {
-			uniqueServiceLabels[serviceLabel] = struct{}{}
+		for _, resource := range affectedResources {
+			uniqueAffectedResources[resource] = struct{}{}
 		}
 	}
 	breakingChangesSlice := maps.Keys(uniqueBreakingChanges)
@@ -284,7 +279,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	data.BreakingChanges = breakingChangesSlice
 
 	// Compute affected resources based on changed files
-	affectedResources := map[string]struct{}{}
+	changedFilesAffectedResources := map[string]struct{}{}
 	for _, repo := range []source.Repo{tpgRepo, tpgbRepo} {
 		if !repo.Cloned {
 			fmt.Println("Skipping changed file service labels; repo failed to clone: ", repo.Name)
@@ -292,31 +287,46 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 		}
 		for _, path := range repo.ChangedFiles {
 			if r := fileToResource(path); r != "" {
-				affectedResources[r] = struct{}{}
+				uniqueAffectedResources[r] = struct{}{}
+				changedFilesAffectedResources[r] = struct{}{}
 			}
 		}
 	}
-	fmt.Printf("affected resources based on changed files: %v\n", maps.Keys(affectedResources))
+	fmt.Printf("affected resources based on changed files: %v\n", maps.Keys(changedFilesAffectedResources))
 
-	// Compute additional service labels based on affected resources
+	// Compute service labels based on affected resources
+	uniqueServiceLabels := map[string]struct{}{}
 	regexpLabels, err := labeler.BuildRegexLabels(labeler.EnrolledTeamsYaml)
 	if err != nil {
 		fmt.Println("error building regexp labels: ", err)
 		errors["Other"] = append(errors["Other"], "Failed to parse service label mapping")
 	}
 	if len(regexpLabels) > 0 {
-		for _, label := range labeler.ComputeLabels(maps.Keys(affectedResources), regexpLabels) {
+		for _, label := range labeler.ComputeLabels(maps.Keys(uniqueAffectedResources), regexpLabels) {
 			uniqueServiceLabels[label] = struct{}{}
 		}
 	}
 
-	// Add service labels to PR
+	// Add service labels to PR if it doesn't already have service labels
 	if len(uniqueServiceLabels) > 0 {
-		serviceLabelsSlice := maps.Keys(uniqueServiceLabels)
-		sort.Strings(serviceLabelsSlice)
-		if err = gh.AddLabels(strconv.Itoa(prNumber), serviceLabelsSlice); err != nil {
-			fmt.Printf("Error posting new service labels %q: %s", serviceLabelsSlice, err)
-			errors["Other"] = append(errors["Other"], "Failed to update service labels")
+		// short-circuit if service labels have already been added to the PR
+		hasServiceLabels := false
+		for _, label := range pullRequest.Labels {
+			if strings.HasPrefix(label.Name, "service/") {
+				hasServiceLabels = true
+			}
+		}
+		if !hasServiceLabels {
+			serviceLabelsSlice := maps.Keys(uniqueServiceLabels)
+			sort.Strings(serviceLabelsSlice)
+			if len(serviceLabelsSlice) > 3 {
+				// Treat this as a cross-provider change
+				serviceLabelsSlice = []string{"service/terraform"}
+			}
+			if err = gh.AddLabels(strconv.Itoa(prNumber), serviceLabelsSlice); err != nil {
+				fmt.Printf("Error posting new service labels %q: %s", serviceLabelsSlice, err)
+				errors["Other"] = append(errors["Other"], "Failed to update service labels")
+			}
 		}
 	}
 
@@ -439,30 +449,17 @@ func computeBreakingChanges(diffProcessorPath string, rnr ExecRunner) ([]string,
 	return strings.Split(strings.TrimSuffix(output, "\n"), "\n"), rnr.PopDir()
 }
 
-func changedSchemaLabels(prNumber int, currentLabels []string, diffProcessorPath string, gh GithubClient, rnr ExecRunner) ([]string, error) {
+func changedSchemaResources(diffProcessorPath string, rnr ExecRunner) ([]string, error) {
 	if err := rnr.PushDir(diffProcessorPath); err != nil {
 		return nil, err
 	}
 
-	// short-circuit if service labels have already been added to the PR
-	hasServiceLabels := false
-	oldLabels := make(map[string]struct{}, len(currentLabels))
-	for _, label := range currentLabels {
-		oldLabels[label] = struct{}{}
-		if strings.HasPrefix(label, "service/") {
-			hasServiceLabels = true
-		}
-	}
-	if hasServiceLabels {
-		return nil, nil
-	}
-
-	output, err := rnr.Run("bin/diff-processor", []string{"changed-schema-labels"}, nil)
+	output, err := rnr.Run("bin/diff-processor", []string{"changed-schema-resources"}, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	fmt.Println("Labels for changed schema: " + output)
+	fmt.Println("Resources with changed schemas: " + output)
 
 	var labels []string
 	if err = json.Unmarshal([]byte(output), &labels); err != nil {
