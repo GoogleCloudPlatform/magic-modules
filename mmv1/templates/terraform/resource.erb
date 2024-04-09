@@ -267,6 +267,7 @@ func resource<%= object.resource_name -%>Create(d *schema.ResourceData, meta int
       billingProject = bp
     }
 
+    headers := make(http.Header)
 <%= lines(compile(pwd + '/' + object.custom_code.pre_create)) if object.custom_code.pre_create -%>
     res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
         Config: config,
@@ -276,6 +277,7 @@ func resource<%= object.resource_name -%>Create(d *schema.ResourceData, meta int
         UserAgent: userAgent,
         Body: obj,
         Timeout: d.Timeout(schema.TimeoutCreate),
+        Headers: headers,
 <%    if object.error_retry_predicates -%>
         ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_retry_predicates.join(',') -%>},
 <%    end -%>
@@ -539,6 +541,7 @@ func resource<%= object.resource_name -%>Read(d *schema.ResourceData, meta inter
       billingProject = bp
     }
 
+    headers := make(http.Header)
     <%= lines(compile(pwd + '/' + object.custom_code.pre_read)) if object.custom_code.pre_read -%>
     res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
         Config: config,
@@ -546,6 +549,7 @@ func resource<%= object.resource_name -%>Read(d *schema.ResourceData, meta inter
         Project: billingProject,
         RawURL: url,
         UserAgent: userAgent,
+        Headers: headers,
 <%  if object.error_retry_predicates -%>
         ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_retry_predicates.join(',') -%>},
 <%  end -%>
@@ -737,6 +741,7 @@ func resource<%= object.resource_name -%>Update(d *schema.ResourceData, meta int
     }
 
     log.Printf("[DEBUG] Updating <%= object.name -%> %q: %#v", d.Id(), obj)
+    headers := make(http.Header)
 <%= lines(compile(pwd + '/templates/terraform/update_mask.erb')) if object.update_mask -%>
 <%= lines(compile(pwd + '/' + object.custom_code.pre_update)) if object.custom_code.pre_update -%>
 <%      if object.nested_query&.modify_by_patch -%>
@@ -769,6 +774,7 @@ if len(updateMask) > 0 {
         UserAgent: userAgent,
         Body: obj,
         Timeout: d.Timeout(schema.TimeoutUpdate),
+        Headers: headers,
 <%      if object.error_retry_predicates -%>
         ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_retry_predicates.join(',') -%>},
 <%      end -%>
@@ -911,6 +917,8 @@ if len(updateMask) > 0 {
         }
 
 
+
+        headers := make(http.Header)
 <%= lines(compile(pwd + '/' + object.custom_code.pre_update)) if object.custom_code.pre_update -%>
 <%        if object.supports_indirect_user_project_override -%>
         if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
@@ -931,6 +939,7 @@ if len(updateMask) > 0 {
             UserAgent: userAgent,
             Body: obj,
             Timeout: d.Timeout(schema.TimeoutUpdate),
+            Headers: headers,
 <%        if object.error_retry_predicates -%>
             ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_retry_predicates.join(',') -%>},
 <%        end -%>
@@ -1056,6 +1065,7 @@ func resource<%= object.resource_name -%>Delete(d *schema.ResourceData, meta int
       billingProject = bp
     }
 
+    headers := make(http.Header)
 <%= lines(compile(pwd + '/' + object.custom_code.pre_delete)) if object.custom_code.pre_delete -%>
 
     log.Printf("[DEBUG] Deleting <%= object.name -%> %q", d.Id())
@@ -1067,6 +1077,7 @@ func resource<%= object.resource_name -%>Delete(d *schema.ResourceData, meta int
         UserAgent: userAgent,
         Body: obj,
         Timeout: d.Timeout(schema.TimeoutDelete),
+        Headers: headers,
 <%      if object.error_retry_predicates -%>
         ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{<%= object.error_retry_predicates.join(',') -%>},
 <%      end -%>
