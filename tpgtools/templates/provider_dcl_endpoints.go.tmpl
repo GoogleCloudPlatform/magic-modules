@@ -32,7 +32,6 @@
 package transport
 
 import (
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	framework_schema "github.com/hashicorp/terraform-plugin-framework/provider/schema"
@@ -104,15 +103,5 @@ func ProviderDCLConfigure(d *schema.ResourceData, config *Config) interface{} {
 	config.GKEHubFeatureBasePath = "https://gkehub.googleapis.com/v1beta1/"
 	config.RecaptchaEnterpriseBasePath = "https://recaptchaenterprise.googleapis.com/v1/"
 
-	if config.UniverseDomain != "" && config.UniverseDomain != "googleapis.com" {
-		config.ApikeysBasePath = strings.ReplaceAll(config.ApikeysBasePath, "googleapis.com", config.UniverseDomain)
-		config.AssuredWorkloadsBasePath = strings.ReplaceAll(config.AssuredWorkloadsBasePath, "googleapis.com", config.UniverseDomain)
-		config.CloudBuildWorkerPoolBasePath = strings.ReplaceAll(config.CloudBuildWorkerPoolBasePath, "googleapis.com", config.UniverseDomain)
-		config.CloudResourceManagerBasePath = strings.ReplaceAll(config.CloudResourceManagerBasePath, "googleapis.com", config.UniverseDomain)
-		config.EventarcBasePath = strings.ReplaceAll(config.EventarcBasePath, "googleapis.com", config.UniverseDomain)
-		config.FirebaserulesBasePath = strings.ReplaceAll(config.FirebaserulesBasePath, "googleapis.com", config.UniverseDomain)
-		config.GKEHubFeatureBasePath = strings.ReplaceAll(config.GKEHubFeatureBasePath, "googleapis.com", config.UniverseDomain)
-		config.RecaptchaEnterpriseBasePath = strings.ReplaceAll(config.RecaptchaEnterpriseBasePath, "googleapis.com", config.UniverseDomain)
-	}
 	return config
 }
