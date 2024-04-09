@@ -1,0 +1,49 @@
+resource "google_project" "default" {
+  project_id = "{{index $.Vars "project_id"}}"
+  name       = "{{index $.Vars "project_id"}}"
+  org_id     = "{{index $.TestEnvVars "org_id"}}"
+  billing_account =  "{{index $.TestEnvVars "billing_acct"}}"
+  labels = {
+    firebase = "enabled"
+  }
+}
+
+resource "google_project_service" "identitytoolkit" {
+  project = google_project.default.project_id
+  service = "identitytoolkit.googleapis.com"
+}
+
+
+resource "google_identity_platform_config" "default" {
+  project = google_project.default.project_id
+  client {
+    permissions {
+      disabled_user_deletion = false
+      disabled_user_signup   = true
+    }
+  }
+
+  mfa {
+    enabled_providers = ["PHONE_SMS"]
+    provider_configs {
+      state = "ENABLED"
+      totp_provider_config {
+        adjacent_intervals = 3
+      }
+    }
+    state = "ENABLED"
+  }
+  monitoring {
+    request_logging {
+      enabled = true
+    }
+  }
+  multi_tenant {
+    allow_tenants           = true
+    default_tenant_location = "organizations/{{index $.TestEnvVars "org_id"}}"
+  }
+
+  depends_on = [
+    google_project_service.identitytoolkit
+  ]
+}
