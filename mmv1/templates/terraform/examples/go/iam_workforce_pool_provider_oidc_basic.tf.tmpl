@@ -1,0 +1,27 @@
+resource "google_iam_workforce_pool" "pool" {
+  workforce_pool_id = "{{index $.Vars "workforce_pool_id"}}"
+  parent            = "organizations/{{index $.TestEnvVars "org_id"}}"
+  location          = "global"
+}
+
+resource "google_iam_workforce_pool_provider" "{{$.PrimaryResourceId}}" {
+  workforce_pool_id  = google_iam_workforce_pool.pool.workforce_pool_id
+  location           = google_iam_workforce_pool.pool.location
+  provider_id        = "{{index $.Vars "provider_id"}}"
+  attribute_mapping  = {
+    "google.subject" = "assertion.sub"
+  }
+  oidc {
+    issuer_uri       = "https://accounts.thirdparty.com"
+    client_id        = "client-id"
+    client_secret {
+      value {
+        plain_text = "client-secret"
+      }
+    }
+    web_sso_config {
+      response_type             = "CODE"
+      assertion_claims_behavior = "MERGE_USER_INFO_OVER_ID_TOKEN_CLAIMS"
+    }
+  }
+}
