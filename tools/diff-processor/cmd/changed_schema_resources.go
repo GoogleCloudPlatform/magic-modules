@@ -14,7 +14,7 @@ import (
 	"golang.org/x/exp/maps"
 )
 
-const changedSchemaResourcesDesc = `Compute service labels based on schema changes.`
+const changedSchemaResourcesDesc = `Compute list of resources with changed schemas.`
 
 type changedSchemaResourcesOptions struct {
 	rootOptions       *rootOptions
