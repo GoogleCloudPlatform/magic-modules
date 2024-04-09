@@ -1,0 +1,7 @@
+resource "google_firebase_hosting_custom_domain" "default" {
+  provider = google-beta
+
+  project  = "{{index $.TestEnvVars "project_id"}}"
+  site_id = "{{index $.Vars "site_id"}}"
+  custom_domain = "{{index $.Vars "custom_domain"}}"
+}
