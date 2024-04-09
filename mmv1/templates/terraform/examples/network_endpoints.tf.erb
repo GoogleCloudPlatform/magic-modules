@@ -19,7 +19,7 @@ data "google_compute_image" "my_image" {
 }
 
 resource "google_compute_instance" "endpoint-instance1" {
-  name         = "<%= ctx[:vars]['instance_name'] + '1' %>"
+  name         = "<%= ctx[:vars]['instance_name'] %>1"
   machine_type = "e2-medium"
 
   boot_disk {
@@ -36,7 +36,7 @@ resource "google_compute_instance" "endpoint-instance1" {
 }
 
 resource "google_compute_instance" "endpoint-instance2" {
-  name         = "<%= ctx[:vars]['instance_name'] + '2' %>"
+  name         = "<%= ctx[:vars]['instance_name'] %>2"
   machine_type = "e2-medium"
 
   boot_disk {
