@@ -192,7 +192,9 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'apiConsumerDataLocation'
     description: |
-      This field is needed only for customers with control plane in US or EU. Apigee stores some control plane data only in single region. This field determines which single region Apigee should use. For example: "us-west1" when control plane is in US or "europe-west2" when control plane is in EU.
+      This field is needed only for customers using non-default data residency regions.
+      Apigee stores some control plane data only in single region.
+      This field determines which single region Apigee should use.
     immutable: true
   - !ruby/object:Api::Type::String
     name: 'apiConsumerDataEncryptionKeyName'
@@ -203,6 +205,7 @@ properties:
     name: 'controlPlaneEncryptionKeyName'
     description: |
       Cloud KMS key name used for encrypting control plane data that is stored in a multi region.
+      Only used for the data residency region "US" or "EU".
     immutable: true
   - !ruby/object:Api::Type::String
     name: 'authorizedNetwork'
