@@ -61,7 +61,7 @@ func resourceGoogleProjectIamMemberRemoveCreate(d *schema.ResourceData, meta int
 		for _, existingMember := range bind.Members {
 			if member == existingMember {
 				if role == bind.Role {
-					bind.Role = "role/viewer"
+					bind.Role = "role/remove"
 					updateRequest := &cloudresourcemanager.SetIamPolicyRequest{
 						Policy:     iamPolicy,
 						UpdateMask: "bindings",
@@ -76,7 +76,7 @@ func resourceGoogleProjectIamMemberRemoveCreate(d *schema.ResourceData, meta int
 			}
 		}
 	}
-	d.SetId(fmt.Sprintf("%s/%s", project, member))
+	d.SetId(fmt.Sprintf("%s/%s/%s", project, member, role))
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, d.Id())
 	}
@@ -85,13 +85,7 @@ func resourceGoogleProjectIamMemberRemoveCreate(d *schema.ResourceData, meta int
 }
 
 func resourceGoogleProjectIamMemberRemoveRead(d *schema.ResourceData, meta interface{}) error {
-	/*
-	config := meta.(*transport_tpg.Config)
-	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
-	if err != nil {
-		return err
-	}
-	*/
+
 	project := d.Get("project").(string)
 	role:= d.Get("role").(string)
 	member:= d.Get("member").(string)
