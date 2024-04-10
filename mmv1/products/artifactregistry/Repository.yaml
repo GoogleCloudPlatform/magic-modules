@@ -131,6 +131,7 @@ examples:
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/artifact_registry_repository.go.erb
   encoder: templates/terraform/encoders/location_from_region.go.erb
+  pre_create: templates/terraform/pre_create/artifact_registry_remote_repository.go.erb
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -413,6 +414,7 @@ properties:
               - remoteRepositoryConfig.0.docker_repository.0.custom_repository
             values:
               - :DOCKER_HUB
+            default_value: :DOCKER_HUB
           - !ruby/object:Api::Type::NestedObject
             name: 'customRepository'
             description: |-

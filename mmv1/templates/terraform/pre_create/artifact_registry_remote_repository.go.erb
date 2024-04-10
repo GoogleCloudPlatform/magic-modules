@@ -1,0 +1,9 @@
+// If custom repository field is set, delete the default value from the public repository.
+// This will be cleaned up in the next major terraform release.
+if _, isdcr := d.GetOk("remote_repository_config.0.docker_repository.0.custom_repository"); isdcr {
+  cfg := obj["remoteRepositoryConfig"].(map[string]interface{})
+  repo := cfg["dockerRepository"].(map[string]interface{})
+  delete(repo, "publicRepository")
+  // cfg["dockerRepository"] = repo
+  // bj["remoteRepositoryConfig"] = cfg
+}
