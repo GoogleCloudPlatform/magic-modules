@@ -9,6 +9,41 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
+func TestAccBigqueryDatasetIamMember_afterDatasetCreation(t *testing.T) {
+	t.Parallel()
+
+	projectID := envvar.GetTestProjectFromEnv()
+	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	authDatasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	saID := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	expected := map[string]interface{}{
+		"dataset": map[string]interface{}{
+			"dataset": map[string]interface{}{
+				"projectId": projectID,
+				"datasetId": authDatasetID,
+			},
+			"targetTypes": []interface{}{"VIEWS"},
+		},
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigqueryDatasetIamMember_afterDatasetAccessCreation(projectID, datasetID, authDatasetID, saID),
+				Check:  testAccCheckBigQueryDatasetAccessPresent(t, "google_bigquery_dataset.dataset", expected),
+			},
+			{
+				// Destroy step instead of CheckDestroy so we can check the access is removed without deleting the dataset
+				Config: testAccBigqueryDatasetIamMember_destroy(datasetID),
+				Check:  testAccCheckBigQueryDatasetAccessAbsent(t, "google_bigquery_dataset.dataset", expected),
+			},
+		},
+	})
+}
+
 func TestAccBigqueryDatasetIamMember_serviceAccount(t *testing.T) {
 	t.Parallel()
 
@@ -89,6 +124,38 @@ resource "google_service_account" "bqviewer" {
   account_id = "%s"
 }
 `, datasetID, saID)
+}
+
+func testAccBigqueryDatasetIamMember_afterDatasetAccessCreation(projectID, datasetID, authDatasetID, saID string) string {
+	return fmt.Sprintf(`
+
+resource "google_bigquery_dataset" "auth_dataset" {
+	dataset_id = "%s"
+}
+
+resource "google_bigquery_dataset" "dataset" {
+  dataset_id = "%s"
+  access {
+    dataset {
+      dataset {
+        project_id = "%s"
+        dataset_id = google_bigquery_dataset.auth_dataset.dataset_id
+      }
+      target_types = ["VIEWS"]
+    }
+  }
+}
+
+resource "google_service_account" "bqviewer" {
+  account_id = "%s"
+}
+
+resource "google_bigquery_dataset_iam_member" "access" {
+  dataset_id    = google_bigquery_dataset.dataset.dataset_id
+  role          = "roles/viewer"
+  member        = "serviceAccount:${google_service_account.bqviewer.email}"
+}
+`, authDatasetID, datasetID, projectID, saID)
 }
 
 func testAccBigqueryDatasetIamMember_iamMember(datasetID, wifIDs string) string {
