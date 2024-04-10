@@ -24,6 +24,7 @@ import (
 
     "fmt"
     "log"
+    "net/http"
     "reflect"
 <%  if updatable?(object, object.root_properties) && object.update_mask -%>
     "strings"

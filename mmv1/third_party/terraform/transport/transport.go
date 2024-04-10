@@ -31,6 +31,9 @@ type SendRequestOptions struct {
 
 func SendRequest(opt SendRequestOptions) (map[string]interface{}, error) {
 	reqHeaders := opt.Headers
+	if reqHeaders == nil {
+		reqHeaders = make(http.Header)
+	}
 	reqHeaders.Set("User-Agent", opt.UserAgent)
 	reqHeaders.Set("Content-Type", "application/json")
 
