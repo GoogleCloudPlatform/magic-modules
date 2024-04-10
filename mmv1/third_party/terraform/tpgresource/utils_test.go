@@ -40,56 +40,56 @@ var fictionalSchema = map[string]*schema.Schema{
 }
 
 func TestSortByConfigOrder(t *testing.T) {
-	cases := map[string]struct{
-		configData, apiData []string,
-		want []string,
-		wantError bool,
+	cases := map[string]struct {
+		configData, apiData []string
+		want                []string
+		wantError           bool
 	}{
 		"empty config data and api data": {
 			configData: []string{},
-			apiData: []string{},
-			want: []string{},
+			apiData:    []string{},
+			want:       []string{},
 		},
 		"config data with empty api data": {
 			configData: []string{"one", "two"},
-			apiData: []string{},
-			want: []string{},
+			apiData:    []string{},
+			want:       []string{},
 		},
 		"empty config data with api data": {
 			configData: []string{},
-			apiData: []string{"one", "two", "three"},
-			want: []string{"one", "three", "two"},
+			apiData:    []string{"one", "two", "three"},
+			want:       []string{"one", "three", "two"},
 		},
 		"config data and api data that do not overlap": {
 			configData: []string{"foo", "bar"},
-			apiData: []string{"one", "two", "three"},
-			want: []string{"one", "three", "two"},
+			apiData:    []string{"one", "two", "three"},
+			want:       []string{"one", "three", "two"},
 		},
 		"config order is preserved": {
 			configData: []string{"foo", "two", "bar", "baz"},
-			apiData: []string{"one", "two", "three", "bar"},
-			want: []string{"two", "bar", "one", "three"},
+			apiData:    []string{"one", "two", "three", "bar"},
+			want:       []string{"two", "bar", "one", "three"},
 		},
 		"config data and api data overlap completely": {
 			configData: []string{"foo", "bar", "baz", "one", "two", "three"},
-			apiData: []string{"baz", "two", "one", "bar", "three", "foo"},
-			want: []string{"foo", "bar", "baz", "one", "two", "three"},
+			apiData:    []string{"baz", "two", "one", "bar", "three", "foo"},
+			want:       []string{"foo", "bar", "baz", "one", "two", "three"},
 		},
 		"config data contains duplicates": {
 			configData: []string{"one", "one"},
-			apiData: []string{},
-			wantError: true,
+			apiData:    []string{},
+			wantError:  true,
 		},
 		"api data contains duplicates": {
 			configData: []string{},
-			apiData: []string{"one", "one"},
-			wantError: true,
+			apiData:    []string{"one", "one"},
+			wantError:  true,
 		},
 	}
 
 	for tn, tc := range cases {
 		tc := tc
-		t.Run(fmt.Sprintf("strings/%s", tn), func (t *testing.T) {
+		t.Run(fmt.Sprintf("strings/%s", tn), func(t *testing.T) {
 			t.Parallel()
 			sorted, err := SortStringsByConfigOrder(tc.configData, tc.apiData)
 			if err != nil {
@@ -104,18 +104,18 @@ func TestSortByConfigOrder(t *testing.T) {
 			}
 		})
 
-		t.Run(fmt.Sprintf("maps/%s", tn), func (t *testing.T) {
+		t.Run(fmt.Sprintf("maps/%s", tn), func(t *testing.T) {
 			t.Parallel()
 			configData := []map[string]interface{}{}
 			for _, item := range tc.configData {
 				configData = append(configData, map[string]interface{}{
-					"value": item
+					"value": item,
 				})
 			}
 			apiData := []map[string]interface{}{}
 			for _, item := range tc.apiData {
 				apiData = append(apiData, map[string]interface{}{
-					"value": item
+					"value": item,
 				})
 			}
 			sorted, err := SortMapsByConfigOrder(configData, apiData, "value")
@@ -135,18 +135,18 @@ func TestSortByConfigOrder(t *testing.T) {
 
 func TestSortMapsByConfigOrder(t *testing.T) {
 	// most cases are covered by TestSortByConfigOrder; this covers map-specific cases.
-	cases := struct{
-		configData, apiData []map[string]interface{},
-		idKey string,
-		wantError bool,
-		want []map[string]interface{},
+	cases := struct {
+		configData, apiData []map[string]interface{}
+		idKey               string
+		wantError           bool
+		want                []map[string]interface{}
 	}{
 		"config data is malformed": {
 			configData: map[string]interface{}{
 				"foo": "one",
 			},
-			apiData: map[string]interface{}{},
-			idKey: "bar",
+			apiData:   map[string]interface{}{},
+			idKey:     "bar",
 			wantError: true,
 		},
 		"api data is malformed": {
@@ -154,14 +154,14 @@ func TestSortMapsByConfigOrder(t *testing.T) {
 			apiData: map[string]interface{}{
 				"foo": "one",
 			},
-			idKey: "bar",
+			idKey:     "bar",
 			wantError: true,
 		},
 	}
 
 	for tn, tc := range cases {
 		tc := tc
-		t.Run(tn, func (t *testing.T) {
+		t.Run(tn, func(t *testing.T) {
 			t.Parallel()
 			sorted, err := SortMapsByConfigOrder(tc.configData, tc.apiData, tc.idKey)
 			if err != nil {
