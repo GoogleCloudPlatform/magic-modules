@@ -1,0 +1,35 @@
+data "google_project" "project" {
+  provider  = google-beta
+}
+
+resource "google_compute_network" "{{$.PrimaryResourceId}}" {
+  provider  = google-beta
+  name      = "{{index $.Vars "network_name"}}"
+}
+
+resource "google_service_directory_namespace" "{{$.PrimaryResourceId}}" {
+  provider     = google-beta
+  namespace_id = "{{index $.Vars "namespace_id"}}"
+  location     = "us-central1"
+}
+
+resource "google_service_directory_service" "{{$.PrimaryResourceId}}" {
+  provider   = google-beta
+  service_id = "{{index $.Vars "service_id"}}"
+  namespace  = google_service_directory_namespace.{{$.PrimaryResourceId}}.id
+}
+
+resource "google_service_directory_endpoint" "{{$.PrimaryResourceId}}" {
+  provider    = google-beta
+  endpoint_id = "{{index $.Vars "endpoint_id"}}"
+  service     = google_service_directory_service.{{$.PrimaryResourceId}}.id
+
+  metadata = {
+    stage  = "prod"
+    region = "us-central1"
+  }
+
+  network = "projects/${data.google_project.project.number}/locations/global/networks/${google_compute_network.{{$.PrimaryResourceId}}.name}"
+  address = "1.2.3.4"
+  port    = 5353
+}
