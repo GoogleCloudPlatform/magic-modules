@@ -11,9 +11,9 @@ import (
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
-	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
-	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"google.golang.org/api/googleapi"
 	"google.golang.org/grpc/codes"
