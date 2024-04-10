@@ -1,0 +1,137 @@
+<% autogen_exception -%>
+package privilegedaccessmanager_test
+<% unless version == 'ga' -%>
+
+import (
+	"fmt"
+	"strings"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+)
+
+func TestAccPrivilegedAccessManagerEntitlement_update(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckPrivilegedAccessManagerEntitlementDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPrivilegedAccessManagerEntitlement_basic(context),
+			},
+			{
+				ResourceName:            "google_privileged_access_manager_entitlement.tf_entitlement",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "entitlement_id", "parent"},
+			},
+			{
+				Config: testAccPrivilegedAccessManagerEntitlement_update(context),
+			},
+			{
+				ResourceName:            "google_privileged_access_manager_entitlement.tf_entitlement",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "entitlement_id", "parent"},
+			},
+		},
+	})
+}
+
+func testAccPrivilegedAccessManagerEntitlement_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+	resource "google_privileged_access_manager_entitlement" "tf_entitlement" {
+		provider =  google-beta
+		entitlement_id = "tf_test_example_entitlement%{random_suffix}"
+		location = "global"
+		max_request_duration = "43200s"
+		parent = "projects/itsvarsharma-pam-testing"
+		requester_justification_config {    
+			unstructured{}
+		}
+		eligible_users {
+			principals = ["serviceAccount:test2102@itsvarsharma-pam-testing.iam.gserviceaccount.com"]
+		}
+		privileged_access{
+			gcp_iam_access{
+				role_bindings{
+					role = "roles/storage.admin"
+				}
+				resource = "//cloudresourcemanager.googleapis.com/projects/itsvarsharma-pam-testing"
+				resource_type = "cloudresourcemanager.googleapis.com/Project"
+			}
+		}
+		approval_workflow{
+			manual_approvals{
+				require_approver_justification = false
+				steps{
+					approvers{
+						principals = ["user:itsvarsharma@google.com"]
+					}
+					approvals_needed = 1
+					approver_email_recipients = []
+				}
+			}
+		}
+		additional_notification_targets {
+			admin_email_recipients     = []
+			requester_email_recipients = []
+		}
+	}
+`, context)
+}
+
+func testAccPrivilegedAccessManagerEntitlement_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+	resource "google_privileged_access_manager_entitlement" "tf_entitlement" {
+		provider =  google-beta
+		entitlement_id = "tf_test_example_entitlement%{random_suffix}"
+		location = "global"
+		max_request_duration = "4320s"
+		parent = "projects/itsvarsharma-pam-testing"
+		requester_justification_config {    
+			not_mandatory{}
+		}
+		eligible_users {
+			principals = ["serviceAccount:test2102@itsvarsharma-pam-testing.iam.gserviceaccount.com"]
+		}
+		privileged_access{
+			gcp_iam_access{
+				role_bindings{
+					role = "roles/storage.admin"
+				}
+				resource = "//cloudresourcemanager.googleapis.com/projects/itsvarsharma-pam-testing"
+				resource_type = "cloudresourcemanager.googleapis.com/Project"
+			}
+		}
+		approval_workflow{
+			manual_approvals{
+				require_approver_justification = false
+				steps{
+					approvers{
+						principals = ["user:itsvarsharma@google.com"]
+					}
+					approvals_needed = 1
+					approver_email_recipients = []
+				}
+			}
+		}
+		additional_notification_targets {
+			admin_email_recipients     = []
+			requester_email_recipients = []
+		}
+	}
+`, context)
+}
+
+<% end -%>
