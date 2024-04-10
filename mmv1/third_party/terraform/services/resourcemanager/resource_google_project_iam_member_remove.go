@@ -46,10 +46,10 @@ func ResourceGoogleProjectIamMemberRemove() *schema.Resource {
 
 func resourceGoogleProjectIamMemberRemoveCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	
-	project:= d.Get("project").(string)
+
+	project := d.Get("project").(string)
 	role := d.Get("role").(string)
-	member:= d.Get("member").(string)
+	member := d.Get("member").(string)
 
 	iamPolicy, err := config.NewResourceManagerClient(config.UserAgent).Projects.GetIamPolicy(project,
 		&cloudresourcemanager.GetIamPolicyRequest{
@@ -87,8 +87,8 @@ func resourceGoogleProjectIamMemberRemoveCreate(d *schema.ResourceData, meta int
 func resourceGoogleProjectIamMemberRemoveRead(d *schema.ResourceData, meta interface{}) error {
 
 	project := d.Get("project").(string)
-	role:= d.Get("role").(string)
-	member:= d.Get("member").(string)
+	role := d.Get("role").(string)
+	member := d.Get("member").(string)
 
 	if err := d.Set("role", role); err != nil {
 		return fmt.Errorf("Error setting role: %s", err)

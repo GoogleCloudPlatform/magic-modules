@@ -13,7 +13,7 @@ func TestAccProjectIamMemberRemove_basic(t *testing.T) {
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
-	members:= "user:gterraformtest7@gmail.com"
+	members := "user:gterraformtest7@gmail.com"
 	random_suffix := acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
