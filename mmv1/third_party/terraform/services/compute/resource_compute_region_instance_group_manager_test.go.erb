@@ -9,7 +9,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+  <% unless version == "ga" -%>
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+  <% end -%>
 )
 
 func TestAccRegionInstanceGroupManager_basic(t *testing.T) {
@@ -394,6 +396,7 @@ func TestAccRegionInstanceGroupManager_APISideListRecordering(t *testing.T) {
 	})
 }
 
+<% unless version == "ga" -%>
 func TestAccRegionInstanceGroupManager_resourceManagerTags(t *testing.T) {
 	t.Parallel()
 
@@ -419,6 +422,7 @@ func TestAccRegionInstanceGroupManager_resourceManagerTags(t *testing.T) {
 		},
 	})
 }
+<% end -%>
 
 func testAccCheckRegionInstanceGroupManagerDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
@@ -1711,6 +1715,7 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
 `, context)
 }
 
+<% unless version == "ga" -%>
 func testAccRegionInstanceGroupManager_resourceManagerTags(template_name, tag_name, igm_name, project_id string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -1764,3 +1769,4 @@ resource "google_compute_region_instance_group_manager" "rigm-tags" {
 }
 `, template_name, project_id, tag_name, tag_name, igm_name)
 }
+<% end -%>
