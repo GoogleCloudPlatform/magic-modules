@@ -317,3 +317,29 @@ func TestValidateIAMCustomRoleIDRegex(t *testing.T) {
 		t.Errorf("Failed to validate IAMCustomRole IDs: %v", es)
 	}
 }
+
+func TestValidateGCSName(t *testing.T) {
+	x := []StringValidationTestCase{
+		// No errors
+		{TestName: "basic", Value: "foo-bar"},
+		{TestName: "begins with number", Value: "1foo-bar"},
+		{TestName: "almost an ip", Value: "192.168.5.foo"},
+
+		// With errors
+		{TestName: "has &", Value: "foo-&bar", ExpectError: true},
+		{TestName: "has upper case", Value: "foo-Bar", ExpectError: true},
+		{TestName: "begins with -", Value: "-foo-Bar", ExpectError: true},
+		{TestName: "less than 3 chars", Value: "fo", ExpectError: true},
+		{TestName: "greater than 63 chars with no .", Value: "my-really-long-bucket-name-with-invalid-that-does-not-contain-a-period", ExpectError: true},
+		{TestName: "greater than 63 chars between .", Value: "my.really-long-bucket-name-with-invalid-that-does-contain-a-period-but.is-too-long", ExpectError: true},
+		{TestName: "has goog prefix", Value: "goog-foobar", ExpectError: true},
+		{TestName: "almost an ip", Value: "192.168.5.1", ExpectError: true},
+		{TestName: "contains google", Value: "foo-google-bar", ExpectError: true},
+		{TestName: "contains close misspelling of google", Value: "foo-go0gle-bar", ExpectError: true},
+	}
+
+	es := TestStringValidationCases(x, ValidateGCSName)
+	if len(es) > 0 {
+		t.Errorf("Failed to validate GCS names: %v", es)
+	}
+}
