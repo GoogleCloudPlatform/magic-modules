@@ -1,11 +1,11 @@
-package main
+package detector
 
 import (
-	"fmt"
 	"sort"
 	"strings"
 
-	"github.com/GoogleCloudPlatform/magic-modules/tools/missing-test-detector/reader"
+	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
+	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/reader"
 	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -18,9 +18,44 @@ type MissingTestInfo struct {
 
 type FieldSet map[string]struct{}
 
+// ResourceChanges is a nested map with field names as keys and Field objects
+// as bottom-level values.
+// Fields are assumed not to be covered until detected in a test.
+type ResourceChanges map[string]*Field
+
+type Field struct {
+	// Added is true when the field is newly added between oldProvider and newProvider.
+	Added bool
+	// Changed is true when the field type has changed between oldProvider and newProvider.
+	Changed bool
+	// Tested is true when a test has been found that includes the field.
+	Tested bool
+}
+
 // Detect missing tests for the given resource changes map in the given slice of tests.
 // Return a map of resource names to missing test info about that resource.
-func detectMissingTests(changedFields map[string]ResourceChanges, allTests []*reader.Test) (map[string]*MissingTestInfo, error) {
+func DetectMissingTests(schemaDiff diff.SchemaDiff, allTests []*reader.Test) (map[string]*MissingTestInfo, error) {
+	changedFields := getChangedFieldsFromSchemaDiff(schemaDiff)
+	return getMissingTestsForChanges(changedFields, allTests)
+}
+
+func getChangedFieldsFromSchemaDiff(schemaDiff diff.SchemaDiff) map[string]ResourceChanges {
+	changedFields := make(map[string]ResourceChanges)
+	for resource, resourceDiff := range schemaDiff {
+		resourceChanges := make(ResourceChanges)
+		for field, fieldDiff := range resourceDiff.Fields {
+			if fieldDiff.Old == nil {
+				resourceChanges[field] = &Field{Added: true}
+			} else {
+				resourceChanges[field] = &Field{Changed: true}
+			}
+		}
+		changedFields[resource] = resourceChanges
+	}
+	return changedFields
+}
+
+func getMissingTestsForChanges(changedFields map[string]ResourceChanges, allTests []*reader.Test) (map[string]*MissingTestInfo, error) {
 	resourceNamesToTests := make(map[string][]string)
 	for _, test := range allTests {
 		for _, step := range test.Steps {
@@ -39,7 +74,7 @@ func detectMissingTests(changedFields map[string]ResourceChanges, allTests []*re
 	}
 	missingTests := make(map[string]*MissingTestInfo)
 	for resourceName, fieldCoverage := range changedFields {
-		untested := untestedFields(fieldCoverage, nil)
+		untested := untestedFields(fieldCoverage)
 		sort.Strings(untested)
 		if len(untested) > 0 {
 			missingTests[resourceName] = &MissingTestInfo{
@@ -53,33 +88,19 @@ func detectMissingTests(changedFields map[string]ResourceChanges, allTests []*re
 }
 
 func markCoverage(fieldCoverage ResourceChanges, config reader.Resource) error {
-	for fieldName, fieldValue := range config {
-		if coverage, ok := fieldCoverage[fieldName]; ok {
-			if field, ok := coverage.(*Field); ok {
-				field.Tested = true
-			} else if objectCoverage, ok := coverage.(ResourceChanges); ok {
-				if fieldValueConfig, ok := fieldValue.(reader.Resource); ok {
-					if err := markCoverage(objectCoverage, fieldValueConfig); err != nil {
-						return fmt.Errorf("error parsing %q: %s", fieldName, err)
-					}
-				}
-			} else {
-				return fmt.Errorf("found unexpected %T in field %q", coverage, fieldName)
-			}
+	for fieldName := range config {
+		if field, ok := fieldCoverage[fieldName]; ok {
+			field.Tested = true
 		}
 	}
 	return nil
 }
 
-func untestedFields(fieldCoverage ResourceChanges, path []string) []string {
+func untestedFields(fieldCoverage ResourceChanges) []string {
 	fields := make([]string, 0)
-	for fieldName, coverage := range fieldCoverage {
-		if field, ok := coverage.(*Field); ok {
-			if !field.Tested {
-				fields = append(fields, strings.Join(append(path, fieldName), "."))
-			}
-		} else if objectCoverage, ok := coverage.(ResourceChanges); ok {
-			fields = append(fields, untestedFields(objectCoverage, append(path, fieldName))...)
+	for key, field := range fieldCoverage {
+		if !field.Tested {
+			fields = append(fields, key)
 		}
 	}
 	return fields
