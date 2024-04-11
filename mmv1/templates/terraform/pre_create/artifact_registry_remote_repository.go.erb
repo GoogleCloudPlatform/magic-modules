@@ -1,7 +1,35 @@
-// If custom repository field is set, delete the default value from the public repository.
-// This will be cleaned up in the next major terraform release.
-if _, isdcr := d.GetOk("remote_repository_config.0.docker_repository.0.custom_repository"); isdcr {
-  rrcfg := obj["remoteRepositoryConfig"].(map[string]interface{})
-  repo := rrcfg["dockerRepository"].(map[string]interface{})
-  delete(repo, "publicRepository")
+// This file should be deleted in the next major terraform release, alongside
+// the default values for 'publicRepository'.
+
+// deletePublicRepoIfCustom deletes the publicRepository key for a given
+// pkg type from the remote repository config if customRepository is set.
+//
+// It returns an error if publicRepository is not set to the default value
+// when customRepository is set.
+deletePublicRepoIfCustom := func(pkgType string, defaultVal string) error {
+  if _, ok := d.GetOk(fmt.Sprintf("remote_repository_config.0.%s_repository.0.custom_repository", pkgType)); ok {
+    rrcfg := obj["remoteRepositoryConfig"].(map[string]interface{})
+    repo := rrcfg[fmt.Sprintf("%sRepository", pkgType)].(map[string]interface{})
+    // Lets first verify publicRepository is actually the default value.
+    if repo["publicRepository"].(string) != defaultVal {
+      return fmt.Errorf("Error creating Repository request: remoteRepositoryConfig.%sRepository.publicRepository cannot be set when customRepository is set.", pkgType)
+    }
+    delete(repo, "publicRepository")
+  }
+  return nil
+}
+
+// If custom repository field is set, delete the default value from the public
+// repository.
+if err := deletePublicRepoIfCustom("docker", "DOCKER_HUB"); err != nil {
+  return err
+}
+if err := deletePublicRepoIfCustom("maven", "MAVEN_CENTRAL"); err != nil {
+  return err
+}
+if err := deletePublicRepoIfCustom("npm", "NPMJS"); err != nil {
+  return err
+}
+if err := deletePublicRepoIfCustom("python", "PYPI"); err != nil {
+  return err
 }

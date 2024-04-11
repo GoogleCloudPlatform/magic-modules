@@ -115,7 +115,7 @@ examples:
       username: 'remote-username'
       secret_data: 'remote-password'
   - !ruby/object:Provider::Terraform::Examples
-    name: 'artifact_registry_repository_remote_docker_custom_auth'
+    name: 'artifact_registry_repository_remote_docker_custom_with_auth'
     primary_resource_id: 'my-repo'
     ignore_read_extra:
       # Ignore this field as it is INPUT_ONLY. AR will not return this in the
@@ -127,6 +127,57 @@ examples:
     vars:
       repository_id: 'example-docker-custom-remote'
       description: 'example remote custom docker repository with credentials'
+      secret_id: 'example-secret'
+      secret_resource_id: 'example-remote-secret'
+      username: 'remote-username'
+      secret_data: 'remote-password'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'artifact_registry_repository_remote_maven_custom_with_auth'
+    primary_resource_id: 'my-repo'
+    ignore_read_extra:
+      # Ignore this field as it is INPUT_ONLY. AR will not return this in the
+      # response.
+      - 'remote_repository_config.0.disable_upstream_validation'
+      # Ignore this field because we have custom logic to ignore it when
+      # custom_repository is set (needed because of the default value)
+      - 'remote_repository_config.0.maven_repository.0.public_repository'
+    vars:
+      repository_id: 'example-maven-custom-remote'
+      description: 'example remote custom maven repository with credentials'
+      secret_id: 'example-secret'
+      secret_resource_id: 'example-remote-secret'
+      username: 'remote-username'
+      secret_data: 'remote-password'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'artifact_registry_repository_remote_npm_custom_with_auth'
+    primary_resource_id: 'my-repo'
+    ignore_read_extra:
+      # Ignore this field as it is INPUT_ONLY. AR will not return this in the
+      # response.
+      - 'remote_repository_config.0.disable_upstream_validation'
+      # Ignore this field because we have custom logic to ignore it when
+      # custom_repository is set (needed because of the default value)
+      - 'remote_repository_config.0.npm_repository.0.public_repository'
+    vars:
+      repository_id: 'example-npm-custom-remote'
+      description: 'example remote custom npm repository with credentials'
+      secret_id: 'example-secret'
+      secret_resource_id: 'example-remote-secret'
+      username: 'remote-username'
+      secret_data: 'remote-password'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'artifact_registry_repository_remote_python_custom_with_auth'
+    primary_resource_id: 'my-repo'
+    ignore_read_extra:
+      # Ignore this field as it is INPUT_ONLY. AR will not return this in the
+      # response.
+      - 'remote_repository_config.0.disable_upstream_validation'
+      # Ignore this field because we have custom logic to ignore it when
+      # custom_repository is set (needed because of the default value)
+      - 'remote_repository_config.0.python_repository.0.public_repository'
+    vars:
+      repository_id: 'example-python-custom-remote'
+      description: 'example remote custom python repository with credentials'
       secret_id: 'example-secret'
       secret_resource_id: 'example-remote-secret'
       username: 'remote-username'
@@ -454,6 +505,8 @@ properties:
               - remoteRepositoryConfig.0.maven_repository.0.custom_repository
             values:
               - :MAVEN_CENTRAL
+            default_value: :MAVEN_CENTRAL
+            custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
           - !ruby/object:Api::Type::NestedObject
             name: 'customRepository'
             description: |-
@@ -489,6 +542,8 @@ properties:
               - remoteRepositoryConfig.0.npm_repository.0.custom_repository
             values:
               - :NPMJS
+            default_value: :NPMJS
+            custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
           - !ruby/object:Api::Type::NestedObject
             name: 'customRepository'
             description: |-
@@ -524,6 +579,8 @@ properties:
               - remoteRepositoryConfig.0.python_repository.0.custom_repository
             values:
               - :PYPI
+            default_value: :PYPI
+            custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
           - !ruby/object:Api::Type::NestedObject
             name: 'customRepository'
             description: |-

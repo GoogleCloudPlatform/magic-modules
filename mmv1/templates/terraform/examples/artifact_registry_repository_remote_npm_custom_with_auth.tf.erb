@@ -22,14 +22,14 @@ resource "google_artifact_registry_repository" "<%= ctx[:primary_resource_id] %>
   location      = "us-central1"
   repository_id = "<%= ctx[:vars]['repository_id'] %>"
   description   = "<%= ctx[:vars]['description'] %>"
-  format        = "DOCKER"
+  format        = "NPM"
   mode          = "REMOTE_REPOSITORY"
   remote_repository_config {
-    description = "docker hub with custom credentials"
+    description = "custom npm with credentials"
     disable_upstream_validation = true
-    docker_repository {
+    npm_repository {
       custom_repository {
-        uri = "https://registry-1.docker.io"
+        uri = "https://my.npm.registry"
       }
     }
     upstream_credentials {
