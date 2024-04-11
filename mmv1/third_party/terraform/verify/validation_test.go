@@ -327,8 +327,8 @@ func TestValidateGCSName(t *testing.T) {
 
 		// With errors
 		{TestName: "has &", Value: "foo-&bar", ExpectError: true},
-		{TestName: "has upper case", Value: "foo-Bar", ExpectError: true},
-		{TestName: "begins with -", Value: "-foo-Bar", ExpectError: true},
+		{TestName: "has upper case", Value: "foo-bar", ExpectError: true},
+		{TestName: "begins with -", Value: "-foo-bar", ExpectError: true},
 		{TestName: "less than 3 chars", Value: "fo", ExpectError: true},
 		{TestName: "greater than 63 chars with no .", Value: "my-really-long-bucket-name-with-invalid-that-does-not-contain-a-period", ExpectError: true},
 		{TestName: "greater than 63 chars between .", Value: "my.really-long-bucket-name-with-invalid-that-does-contain-a-period-but.is-too-long", ExpectError: true},

@@ -77,9 +77,9 @@ var (
 
 	// Format of GCS Bucket Name
 	// https://cloud.google.com/storage/docs/naming-buckets
-	GCSNameValidChars     = "^[a-z|0-9|\\-|\\_|\\.]*$"
+	GCSNameValidChars     = "^[a-z0-9_.-]*$"
 	GCSNameStartEndChars  = "^[a-z|0-9].*[a-z|0-9]$"
-	GCSNameLength         = "^[a-z0-9][a-z0-9_.-]{1,220}[a-z0-9]"
+	GCSNameLength         = "^.{3,222}"
 	GCSNameLengthSplit    = "^.{0,63}$"
 	GCSNameCidr           = "^[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}$"
 	GCSNameGoogPrefix     = "^goog.*$"
@@ -112,14 +112,12 @@ func ValidateGCSName(v interface{}, k string) (ws []string, errors []error) {
 		errors = append(errors, fmt.Errorf("%q name value must start and end with a number or letter", value))
 	}
 
-	valid := regexp.MustCompile(GCSNameLength).MatchString(value)
-	if !valid {
+	if !regexp.MustCompile(GCSNameLength).MatchString(value) {
 		errors = append(errors, fmt.Errorf("%q name value must contain 3-63 characters. Names containing dots can contain up to 222 characters, but each dot-separated component can be no longer than 63 characters", value))
 	}
 
 	for _, str := range strings.Split(value, ".") {
-		valid := regexp.MustCompile(GCSNameLengthSplit).MatchString(str)
-		if !valid {
+		if !regexp.MustCompile(GCSNameLengthSplit).MatchString(str) {
 			errors = append(errors, fmt.Errorf("%q name value must contain 3-63 characters. Names containing dots can contain up to 222 characters, but each dot-separated component can be no longer than 63 characters", value))
 		}
 	}
