@@ -27,4 +27,4 @@ jobs:
       - name: Check for invalid version guards
         run: |
           cd repo/tools/template-check
-          git diff --name-only origin/${{ github.base_ref }} ../../*.erb | sed 's=^=../../=g' | go run main.go
+          git diff --name-only --diff-filter=d origin/${{ github.base_ref }} ../../*.erb | sed 's=^=../../=g' | go run main.go
