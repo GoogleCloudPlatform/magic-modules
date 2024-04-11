@@ -8,11 +8,12 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigUpdate(t *testing.T) {
+func TestAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigUpdateBasic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
 		"project":       envvar.GetTestProjectFromEnv(),
+		"location":      envvar.GetTestRegionFromEnv(),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -178,9 +179,39 @@ func TestAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigUpdateFilter(t *
 
 func testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigStart(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+
+resource "google_data_loss_prevention_inspect_template" "basic" {
+	parent = "projects/%{project}"
+	description = "Description"
+	display_name = "Display"
+
+	inspect_config {
+		info_types {
+			name = "EMAIL_ADDRESS"
+		}
+		info_types {
+			name    = "PERSON_NAME"
+			version = "latest"
+		}
+		info_types {
+			name = "LAST_NAME"
+		}
+		info_types {
+			name = "DOMAIN_NAME"
+		}
+		info_types {
+			name = "PHONE_NUMBER"
+		}
+		info_types {
+			name = "FIRST_NAME"
+		}
+	}
+}
+
 resource "google_data_loss_prevention_discovery_config" "basic" {
-	parent = "projects/%{project}/locations/us"
+	parent = "projects/%{project}/locations/%{location}"
 	display_name = "display name"
+	status = "RUNNING"
 
     targets {
         big_query_target {
@@ -189,15 +220,55 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
             }
         }
     }
-    inspect_templates = ["projects/%{project}/locations/us/inspectTemplates/test"]
+    inspect_templates = ["projects/%{project}/inspectTemplates/${google_data_loss_prevention_inspect_template.basic.name}"]
 }
 `, context)
 }
 
 func testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_data_loss_prevention_inspect_template" "custom_type" {
+	parent = "projects/%{project}"
+	description = "Description"
+	display_name = "Display"
+
+	inspect_config {
+		custom_info_types {
+			info_type {
+				name = "MY_CUSTOM_TYPE"
+			}
+
+			likelihood = "UNLIKELY"
+
+			regex {
+				pattern = "test*"
+			}
+		}
+		info_types {
+			name = "EMAIL_ADDRESS"
+		}
+		info_types {
+			name    = "PERSON_NAME"
+			version = "latest"
+		}
+		info_types {
+			name = "LAST_NAME"
+		}
+		info_types {
+			name = "DOMAIN_NAME"
+		}
+		info_types {
+			name = "PHONE_NUMBER"
+		}
+		info_types {
+			name = "FIRST_NAME"
+		}
+	}
+}
+
 resource "google_data_loss_prevention_discovery_config" "basic" {
-	parent = "projects/%{project}/locations/us"
+	parent = "projects/%{project}/locations/%{location}"
+	status = "RUNNING"
 
     targets {
         big_query_target {
@@ -212,7 +283,7 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
 			}
         }
     }
-    inspect_templates = ["projects/%{project}/locations/us/inspectTemplates/test-new"]
+    inspect_templates = ["projects/%{project}/inspectTemplates/${google_data_loss_prevention_inspect_template.custom_type.name}]
 }
 `, context)
 }

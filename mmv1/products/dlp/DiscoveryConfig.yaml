@@ -14,9 +14,9 @@
 --- !ruby/object:Api::Resource
 # API resource name
 name: 'DiscoveryConfig'
-base_url: '{{parent}}/discoveryConfigs'
-self_link: '{{parent}}/discoveryConfigs/{{name}}'
-create_url: '{{parent}}/discoveryConfigs'
+base_url: 'projects/{{project}}/locations/{{location}}/discoveryConfigs'
+self_link: 'projects/{{project}}/locations/{{location}}/discoveryConfigs/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/discoveryConfigs'
 create_verb: :POST
 update_verb: :PATCH
 update_mask: true
@@ -27,13 +27,14 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Schedule inspection scan': 'https://cloud.google.com/dlp/docs/schedule-inspection-scan'
   api: 'https://cloud.google.com/dlp/docs/reference/rest/v2/projects.locations.discoveryConfigs'
-id_format: '{{parent}}/discoveryConfigs/{{name}}'
+id_format: 'projects/{{project}}/locations/{{location}}/discoveryConfigs/{{name}}'
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dlp_discovery_config_basic'
     primary_resource_id: 'basic'
     test_env_vars:
       project: :PROJECT_NAME
+      location: :REGION
   - !ruby/object:Provider::Terraform::Examples
     name: 'dlp_discovery_config_actions'
     primary_resource_id: 'actions'
