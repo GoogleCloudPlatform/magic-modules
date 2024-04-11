@@ -29,7 +29,6 @@ func TestAccDataLossPreventionDiscoveryConfig_Update(t *testing.T) {
 }
 
 func testAccDataLossPreventionDiscoveryConfig_BasicUpdate(t *testing.T) {
-	// t.Parallel()
 
 	context := map[string]interface{}{
 		"project":       envvar.GetTestProjectFromEnv(),
@@ -65,7 +64,6 @@ func testAccDataLossPreventionDiscoveryConfig_BasicUpdate(t *testing.T) {
 }
 
 func testAccDataLossPreventionDiscoveryConfig_OrgUpdate(t *testing.T) {
-	// t.Parallel()
 
 	context := map[string]interface{}{
 		"organization":  envvar.GetTestOrgFromEnv(t),
@@ -102,7 +100,6 @@ func testAccDataLossPreventionDiscoveryConfig_OrgUpdate(t *testing.T) {
 }
 
 func testAccDataLossPreventionDiscoveryConfig_ActionsUpdate(t *testing.T) {
-	// t.Parallel()
 
 	context := map[string]interface{}{
 		"project":       envvar.GetTestProjectFromEnv(),
@@ -147,7 +144,6 @@ func testAccDataLossPreventionDiscoveryConfig_ActionsUpdate(t *testing.T) {
 }
 
 func testAccDataLossPreventionDiscoveryConfig_ConditionsCadenceUpdate(t *testing.T) {
-	// t.Parallel()
 
 	context := map[string]interface{}{
 		"project":       envvar.GetTestProjectFromEnv(),
@@ -183,7 +179,6 @@ func testAccDataLossPreventionDiscoveryConfig_ConditionsCadenceUpdate(t *testing
 }
 
 func testAccDataLossPreventionDiscoveryConfig_FilterUpdate(t *testing.T) {
-	// t.Parallel()
 
 	context := map[string]interface{}{
 		"project":       envvar.GetTestProjectFromEnv(),
