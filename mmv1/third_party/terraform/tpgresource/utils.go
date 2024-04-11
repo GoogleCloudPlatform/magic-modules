@@ -259,6 +259,7 @@ func SortStringsByConfigOrder(configData, apiData []string) ([]string, error) {
 		if ok {
 			return nil, fmt.Errorf("apiData element at %d has duplicate value `%s`", index, item)
 		}
+		apiSeen[item] = struct{}{}
 		configIndex, found := configOrder[item]
 		if found {
 			byConfigIndex[configIndex] = item

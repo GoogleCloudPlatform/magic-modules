@@ -89,7 +89,7 @@ func TestSortByConfigOrder(t *testing.T) {
 		tc := tc
 		t.Run(fmt.Sprintf("strings/%s", tn), func(t *testing.T) {
 			t.Parallel()
-			sorted, err := SortStringsByConfigOrder(tc.configData, tc.apiData)
+			sorted, err := tpgresource.SortStringsByConfigOrder(tc.configData, tc.apiData)
 			if err != nil {
 				if !tc.wantError {
 					t.Fatalf("Unexpected error: %s", err)
@@ -97,7 +97,7 @@ func TestSortByConfigOrder(t *testing.T) {
 			} else if tc.wantError {
 				t.Fatalf("Wanted error, got none")
 			}
-			if !tc.wantError && sorted != tc.want {
+			if !tc.wantError && (len(sorted) > 0 || len(tc.want) > 0) && !reflect.DeepEqual(sorted, tc.want) {
 				t.Fatalf("sorted result is incorrect. want %v, got %v", tc.want, sorted)
 			}
 		})
@@ -116,7 +116,13 @@ func TestSortByConfigOrder(t *testing.T) {
 					"value": item,
 				})
 			}
-			sorted, err := SortMapsByConfigOrder(configData, apiData, "value")
+			want := []map[string]interface{}{}
+			for _, item := range tc.want {
+				want = append(want, map[string]interface{}{
+					"value": item,
+				})
+			}
+			sorted, err := tpgresource.SortMapsByConfigOrder(configData, apiData, "value")
 			if err != nil {
 				if !tc.wantError {
 					t.Fatalf("Unexpected error: %s", err)
@@ -124,8 +130,8 @@ func TestSortByConfigOrder(t *testing.T) {
 			} else if tc.wantError {
 				t.Fatalf("Wanted error, got none")
 			}
-			if !tc.wantError && sorted != tc.want {
-				t.Fatalf("sorted result is incorrect. want %v, got %v", tc.want, sorted)
+			if !tc.wantError && (len(sorted) > 0 || len(want) > 0) && !reflect.DeepEqual(sorted, want) {
+				t.Fatalf("sorted result is incorrect. want %v, got %v", want, sorted)
 			}
 		})
 	}
@@ -133,24 +139,26 @@ func TestSortByConfigOrder(t *testing.T) {
 
 func TestSortMapsByConfigOrder(t *testing.T) {
 	// most cases are covered by TestSortByConfigOrder; this covers map-specific cases.
-	cases := struct {
+	cases := map[string]struct {
 		configData, apiData []map[string]interface{}
 		idKey               string
 		wantError           bool
 		want                []map[string]interface{}
 	}{
 		"config data is malformed": {
-			configData: map[string]interface{}{
+			configData: []map[string]interface{}{{
 				"foo": "one",
 			},
-			apiData:   map[string]interface{}{},
+			},
+			apiData:   []map[string]interface{}{},
 			idKey:     "bar",
 			wantError: true,
 		},
 		"api data is malformed": {
-			configData: map[string]interface{}{},
-			apiData: map[string]interface{}{
+			configData: []map[string]interface{}{},
+			apiData: []map[string]interface{}{{
 				"foo": "one",
+			},
 			},
 			idKey:     "bar",
 			wantError: true,
@@ -161,7 +169,7 @@ func TestSortMapsByConfigOrder(t *testing.T) {
 		tc := tc
 		t.Run(tn, func(t *testing.T) {
 			t.Parallel()
-			sorted, err := SortMapsByConfigOrder(tc.configData, tc.apiData, tc.idKey)
+			sorted, err := tpgresource.SortMapsByConfigOrder(tc.configData, tc.apiData, tc.idKey)
 			if err != nil {
 				if !tc.wantError {
 					t.Fatalf("Unexpected error: %s", err)
@@ -169,7 +177,7 @@ func TestSortMapsByConfigOrder(t *testing.T) {
 			} else if tc.wantError {
 				t.Fatalf("Wanted error, got none")
 			}
-			if !tc.wantError && sorted != tc.want {
+			if !tc.wantError && (len(sorted) > 0 || len(tc.want) > 0) && !reflect.DeepEqual(sorted, tc.want) {
 				t.Fatalf("sorted result is incorrect. want %v, got %v", tc.want, sorted)
 			}
 		})
