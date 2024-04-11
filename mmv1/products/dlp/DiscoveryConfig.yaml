@@ -14,13 +14,13 @@
 --- !ruby/object:Api::Resource
 # API resource name
 name: 'DiscoveryConfig'
-base_url: 'projects/{{project}}/locations/{{location}}/discoveryConfigs'
-self_link: 'projects/{{project}}/locations/{{location}}/discoveryConfigs/{{name}}'
-create_url: 'projects/{{project}}/locations/{{location}}/discoveryConfigs'
+base_url: '{{parent}}/discoveryConfigs'
+self_link: '{{parent}}/discoveryConfigs/{{name}}'
+create_url: '{{parent}}/discoveryConfigs'
 create_verb: :POST
 update_verb: :PATCH
 update_mask: true
-delete_url: 'projects/{{project}}/locations/{{location}}/discoveryConfigs/{{name}}'
+delete_url: '{{parent}}/discoveryConfigs/{{name}}'
 # Resource description for the provider documentation.
 description: |
   Configuration for discovery to scan resources for profile generation. Only one discovery configuration may exist per organization, folder, or project.
@@ -28,7 +28,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Schedule inspection scan': 'https://cloud.google.com/dlp/docs/schedule-inspection-scan'
   api: 'https://cloud.google.com/dlp/docs/reference/rest/v2/projects.locations.discoveryConfigs'
-id_format: 'projects/{{project}}/locations/{{location}}/discoveryConfigs/{{name}}'
+id_format: '{{parent}}/discoveryConfigs/{{name}}'
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dlp_discovery_config_basic'
@@ -66,6 +66,7 @@ examples:
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/wrap_object.go.erb
   decoder: templates/terraform/decoders/unwrap_resource.go.erb
+  custom_import: templates/terraform/custom_import/dlp_import.go.erb
   update_encoder: templates/terraform/encoders/wrap_object.go.erb
 parameters:
   - !ruby/object:Api::Type::String
