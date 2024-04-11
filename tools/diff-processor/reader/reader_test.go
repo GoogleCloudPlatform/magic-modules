@@ -34,13 +34,9 @@ func TestReadCoveredResourceTestFile(t *testing.T) {
 	} else if coveredResource, ok := coveredResources["resource"]; !ok {
 		t.Errorf("did not find a covered resource in %v", coveredResources)
 	} else if expectedResource := (Resource{
-		"field_one": "\"value-one\"",
-		"field_four": Resource{
-			"field_five": Resource{
-				"field_six": "true",
-			},
-		},
-		"field_seven": "true",
+		"field_four.field_five.field_six": "true",
+		"field_one":                       "\"value-one\"",
+		"field_seven":                     "true",
 	}); !reflect.DeepEqual(coveredResource, expectedResource) {
 		t.Errorf("found wrong fields in covered resource config: %#v, expected %#v", coveredResource, expectedResource)
 	}
@@ -125,9 +121,7 @@ func TestReadSerialResourceTestFile(t *testing.T) {
 				{
 					"serial_resource": {
 						"resource": {
-							"field_two": Resource{
-								"field_three": "\"value-two\"",
-							},
+							"field_two.field_three": "\"value-two\"",
 						},
 					},
 				},
@@ -162,9 +156,7 @@ func TestReadCrossFileTests(t *testing.T) {
 				{
 					"serial_resource": {
 						"resource": {
-							"field_two": Resource{
-								"field_three": "\"value-two\"",
-							},
+							"field_two.field_three": "\"value-two\"",
 						},
 					},
 				},
@@ -209,5 +201,49 @@ func TestReadHelperFunctionCall(t *testing.T) {
 	}
 	if !reflect.DeepEqual(tests[0], expectedTest) {
 		t.Errorf("found unexpected tests using helper function: %v, expected %v", tests[0], expectedTest)
+	}
+}
+
+func TestFlattenResource(t *testing.T) {
+	for _, tc := range []struct {
+		name        string
+		unflattened Resource
+		flattened   Resource
+	}{
+		{
+			name:        "empty-resource",
+			unflattened: Resource{},
+			flattened:   Resource{},
+		},
+		{
+			name: "no-nested-fields",
+			unflattened: Resource{
+				"a": "b",
+				"c": "d",
+			},
+			flattened: Resource{
+				"a": "b",
+				"c": "d",
+			},
+		},
+		{
+			name: "nested-fields",
+			unflattened: Resource{
+				"a": Resource{
+					"b": Resource{
+						"c": "d",
+					},
+				},
+				"e": "f",
+			},
+			flattened: Resource{
+				"a.b.c": "d",
+				"e":     "f",
+			},
+		},
+	} {
+		if got := flattenResource(tc.unflattened, ""); !reflect.DeepEqual(got, tc.flattened) {
+			t.Errorf("unexpected result of flattening in test %s, expected %v, got %v", tc.name, tc.flattened, got)
+		}
 	}
 }

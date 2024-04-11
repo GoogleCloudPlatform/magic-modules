@@ -29,6 +29,8 @@ jobs:
         run: |
           cd tools/diff-processor
           go test -v ./...
+        env:
+          SERVICES_DIR: tools/diff-processor/new/google/services
 
       - name: Build with TPGB
         run: |
@@ -40,3 +42,5 @@ jobs:
         run: |
           cd tools/diff-processor
           go test -v ./...
+        env:
+          SERVICES_DIR: tools/diff-processor/new/google/services
