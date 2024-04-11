@@ -3,10 +3,8 @@ package resourcemanager
 import (
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
-	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
@@ -17,10 +15,6 @@ func ResourceGoogleProjectIamMemberRemove() *schema.Resource {
 		Read:   resourceGoogleProjectIamMemberRemoveRead,
 		Delete: resourceGoogleProjectIamMemberRemoveDelete,
 
-		CustomizeDiff: customdiff.All(
-			tpgresource.DefaultProviderProject,
-		),
-
 		Schema: map[string]*schema.Schema{
 			"role": {
 				Type:     schema.TypeString,
@@ -29,8 +23,8 @@ func ResourceGoogleProjectIamMemberRemove() *schema.Resource {
 			},
 			"project": {
 				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
+				ForceNew:    true,
+				Required:    true,
 				Description: `The project that the service account will be created in. Defaults to the provider project configuration.`,
 			},
 			"member": {

@@ -1,12 +1,12 @@
 ---
 subcategory: "Cloud Platform"
 description: |-
- Allows removal of a binding policy.
+ Allows removal of a member:role pairing from an IAM policy.
 ---
 
 # google\_project\_iam\member\_remove
 
-Allows removal of a binding policy. For more information see
+Allows removal of a member:role pairing from an IAM policy. For more information see
 [the official documentation](https://cloud.google.com/iam/docs/granting-changing-revoking-access)
 and
 [API](https://cloud.google.com/resource-manager/reference/rest/v1/projects/setIamPolicy).
