@@ -119,6 +119,7 @@ func main() {
 				resource := &api.Resource{}
 				api.Compile(resourceYamlPath, resource)
 
+				resource.TargetVersionName = *version
 				resource.Properties = resource.AddLabelsRelatedFields(resource.PropertiesWithExcluded(), nil)
 				resource.SetDefault(productApi)
 				resource.Validate()
