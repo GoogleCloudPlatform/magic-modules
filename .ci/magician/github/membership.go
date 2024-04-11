@@ -61,6 +61,11 @@ var (
       startDate: newDate(2024, 4, 5, pdtLoc),
       endDate: newDate(2024, 4, 10, pdtLoc),
     },
+	{
+	  id: "hao-nan-li",
+	  startDate: newDate(2024, 4, 15, pdtLoc),
+	  endDate: newDate(2024, 6, 14, pdtLoc),
+	},
 	}
 )
 
