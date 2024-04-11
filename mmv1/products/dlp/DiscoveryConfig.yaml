@@ -95,7 +95,7 @@ properties:
     name: displayName
     description: Display Name (max 1000 Chars)
   - !ruby/object:Api::Type::NestedObject
-    name: 'OrgConfig'
+    name: 'orgConfig'
     properties:
       - !ruby/object:Api::Type::String
         name: projectId
