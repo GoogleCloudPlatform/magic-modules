@@ -1,3 +1,13 @@
 if err := waitForWorkbenchInstanceActive(d, config, d.Timeout(schema.TimeoutCreate) - time.Minute); err != nil {
   return fmt.Errorf("Workbench instance %q did not reach ACTIVE state: %q", d.Get("name").(string), err)
 }
+
+if p, ok := d.GetOk("desired_state"); ok && p.(string) == "STOPPED" {
+  dRes, err := modifyWorkbenchInstanceState(config, d, project, billingProject, userAgent, "stop")
+  if err != nil {
+    return err
+  }
+  if err := waitForWorkbenchOperation(config, d, project, billingProject, userAgent, dRes); err != nil {
+    return fmt.Errorf("Error stopping Workbench Instance: %s", err)
+  }
+}

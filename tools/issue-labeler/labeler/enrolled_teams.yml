@@ -13,6 +13,8 @@ service/aiplatform-dataset:
 service/aiplatform-featurestore:
   resources:
   - google_vertex_ai_featurestore.*
+  - google_vertex_ai_feature_group.*
+  - google_vertex_ai_feature_online_store.*
 service/aiplatform-matching-engine:
   resources:
   - google_vertex_ai_index.*
@@ -42,6 +44,7 @@ service/appengine:
   resources:
   - google_app_engine_.*
 service/artifactregistry:
+  team: artifact-registry
   resources:
   - google_artifact_registry_.*
 service/assuredworkloads:
@@ -178,6 +181,7 @@ service/compute-l7-load-balancer:
   - google_compute_target_https_proxy
   - google_compute_region_target_https_proxy
 service/compute-managed:
+  team: gcp-managed-instance-groups-terraform
   resources:
   - google_compute_instance_group_manager.*
   - google_compute_region_instance_group_manager.*
@@ -192,6 +196,7 @@ service/compute-network-peering:
 service/compute-networking-ig:
   resources:
   - google_compute_instance_group
+  - google_compute_instance_group_membership
   - google_compute_instance_group_named_port
   - google_compute_region_instance_group
 service/compute-networking-neg:
@@ -210,13 +215,10 @@ service/compute-pd:
   - google_compute_image.*
   - google_compute_snapshot.*
   - google_compute_machine_image.*
-service/compute-private-service-connect-published-service:
-  resources:
-  - google_compute_service_attachment
 service/compute-projects:
   resources:
   - google_project_usage_export_bucket
-service/compute-regional-pass-through-load-balancer:
+service/compute-regional-pass-through-lb:
   resources:
   - google_compute_target_instance
   - google_compute_target_pool
@@ -326,6 +328,7 @@ service/filestore:
   resources:
   - google_filestore_.*
 service/firebase:
+  team: firebase-terraform
   resources:
   - google_firebase_.*
   - google_firebaserules_.*
@@ -447,6 +450,8 @@ service/network-security:
 service/network-security-distributed-firewall:
   resources:
   - google_network_security_address_group
+  - google_network_security_firewall_endpoint.*
+  - google_network_security_security_profile.*
   - google_compute_firewall.*
   - google_compute_network_firewall_policy.*
   - google_compute_organization_security_policy.*
@@ -501,6 +506,9 @@ service/policy-based-routing:
 service/private-service-connect-interfaces:
   resources:
   - google_compute_network_attachment
+service/private-service-connect-published-service:
+  resources:
+  - google_compute_service_attachment
 service/privateca:
   resources:
   - google_privateca_.*
@@ -525,15 +533,22 @@ service/redis-instance:
   resources:
   - google_redis_instance
 service/run:
+  team: cloud-run-control-plane
   resources:
   - google_cloud_run_.*
   - google_cloud_run_v2_.*
 service/secretmanager:
   resources:
   - google_secret_manager_.*
+service/securesourcemanager:
+  resources:
+  - google_secure_source_manager_.*
 service/securitycenter:
   resources:
   - google_scc_.*
+service/securityposture:
+  resources:
+  - google_securityposture_.*
 service/service-networking:
   resources:
   - google_service_networking_connection
@@ -555,7 +570,21 @@ service/spanner:
   - google_spanner_.*
 service/sqladmin:
   resources:
-  - google_sql_.*
+  - google_sql_database
+  - google_sql_database_instance
+  - google_sql_database_instances
+  - google_sql_databases
+  - google_sql_source_representation_instance
+  - google_sql_tiers
+  - google_sql_user
+service/sqladmin-dp:
+  resources:
+  - google_sql_backup_run
+  - google_sql_database_instance_latest_recovery_time
+service/sqladmin-security:
+  resources:
+  - google_sql_ca_certs
+  - google_sql_ssl_cert
 service/storage:
   resources:
   - google_storage_.*

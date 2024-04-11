@@ -6,22 +6,21 @@ description: |-
 
 # google\_container\_cluster
 
--> Visit the [Provision a GKE Cluster (Google Cloud)](https://learn.hashicorp.com/tutorials/terraform/gke?in=terraform/kubernetes&utm_source=WEBSITE&utm_medium=WEB_IO&utm_offer=ARTICLE_PAGE&utm_content=DOCS) Learn tutorial to learn how to provision and interact
-with a GKE cluster.
+Manages a Google Kubernetes Engine (GKE) cluster.
 
--> See the [Using GKE with Terraform](/docs/providers/google/guides/using_gke_with_terraform.html)
-guide for more information about using GKE with Terraform.
+To get more information about GKE clusters, see:
+  * [The API reference](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1beta1/projects.locations.clusters)
+  * How-to guides
+    * [GKE overview](https://cloud.google.com/kubernetes-engine/docs/concepts/kubernetes-engine-overview)
+    * [About cluster configuration choices](https://cloud.google.com/kubernetes-engine/docs/concepts/types-of-clusters)
+  * Terraform guidance
+    * [Using GKE with Terraform](/docs/providers/google/guides/using_gke_with_terraform.html)
+    * [Provision a GKE Cluster (Google Cloud) Learn tutorial](https://learn.hashicorp.com/tutorials/terraform/gke?in=terraform/kubernetes&utm_source=WEBSITE&utm_medium=WEB_IO&utm_offer=ARTICLE_PAGE&utm_content=DOCS)
 
-Manages a Google Kubernetes Engine (GKE) cluster. For more information see
-[the official documentation](https://cloud.google.com/container-engine/docs/clusters)
-and [the API reference](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1beta1/projects.locations.clusters).
+-> On version 5.0.0+ of the provider, you must explicitly set `deletion_protection = false`
+and run `terraform apply` to write the field to state in order to destroy a cluster.
 
--> **Note**: On version 5.0.0+ of the provider, you must explicitly set `deletion_protection=false`
-(and run `terraform apply` to write the field to state) in order to destroy a cluster.
-It is recommended to not set this field (or set it to true) until you're ready to destroy.
-
-~> **Warning:** All arguments and attributes, including basic auth username and
-passwords as well as certificate outputs will be stored in the raw state as
+~> All arguments and attributes (including certificate outputs) will be stored in the raw state as
 plaintext. [Read more about sensitive data in state](https://www.terraform.io/language/state/sensitive-data).
 
 ## Example Usage - with a separately managed node pool (recommended)
@@ -365,6 +364,9 @@ subnetwork in which the cluster's instances are launched.
 * `datapath_provider` - (Optional)
     The desired datapath provider for this cluster. This is set to `LEGACY_DATAPATH` by default, which uses the IPTables-based kube-proxy implementation. Set to `ADVANCED_DATAPATH` to enable Dataplane v2.
 
+* `enable_cilium_clusterwide_network_policy` - (Optional)
+    Whether CiliumClusterWideNetworkPolicy is enabled on this cluster. Defaults to false.
+
 * `default_snat_status` - (Optional)
   [GKE SNAT](https://cloud.google.com/kubernetes-engine/docs/how-to/ip-masquerade-agent#how_ipmasq_works) DefaultSnatStatus contains the desired state of whether default sNAT should be disabled on the cluster, [API doc](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1beta1/projects.locations.clusters#networkconfig). Structure is [documented below](#nested_default_snat_status)
 
@@ -449,6 +451,9 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
 *  `config_connector_config` -  (Optional).
     The status of the ConfigConnector addon. It is disabled by default; Set `enabled = true` to enable.
 
+*  `stateful_ha_config` - (Optional).
+    The status of the Stateful HA addon, which provides automatic configurable failover for stateful applications.
+    It is disabled by default for Standard clusters. Set `enabled = true` to enable.
 
 This example `addons_config` disables two addons:
 
@@ -520,7 +525,7 @@ in addition to node auto-provisioning. Structure is [documented below](#nested_r
 GKE Autopilot clusters.
 Structure is [documented below](#nested_auto_provisioning_defaults).
 
-* `autoscaling_profile` - (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)) Configuration
+* `autoscaling_profile` - (Optional) Configuration
 options for the [Autoscaling profile](https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-autoscaler#autoscaling_profiles)
 feature, which lets you choose whether the cluster autoscaler should optimize for resource utilization or resource availability
 when deciding to remove nodes from a cluster. Can be `BALANCED` or `OPTIMIZE_UTILIZATION`. Defaults to `BALANCED`.
@@ -618,6 +623,7 @@ This block also contains several computed attributes, documented below.
 <a name="nested_advanced_datapath_observability_config"></a>The `advanced_datapath_observability_config` block supports:
 
 * `enable_metrics` - (Required) Whether or not to enable advanced datapath metrics.
+* `enable_relay` - (Optional) Whether or not Relay is enabled.
 * `relay_mode` - (Optional) Mode used to make Relay available.
 
 <a name="nested_maintenance_policy"></a>The `maintenance_policy` block supports:
@@ -790,8 +796,7 @@ The `master_authorized_networks_config.cidr_blocks` block supports:
 * `disk_type` - (Optional) Type of the disk attached to each node
     (e.g. 'pd-standard', 'pd-balanced' or 'pd-ssd'). If unspecified, the default disk type is 'pd-standard'
 
-* `enable_confidential_storage` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
-Enabling Confidential Storage will create boot disk with confidential mode. It is disabled by default.
+* `enable_confidential_storage` - (Optional) Enabling Confidential Storage will create boot disk with confidential mode. It is disabled by default.
 
 * `ephemeral_storage_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Parameters for the ephemeral storage filesystem. If unspecified, ephemeral storage is backed by the boot disk. Structure is [documented below](#nested_ephemeral_storage_config).
 
@@ -905,6 +910,8 @@ gvnic {
 * `tags` - (Optional) The list of instance tags applied to all nodes. Tags are used to identify
     valid sources or targets for network firewalls.
 
+* `resource_manager_tags` - (Optional) A map of resource manager tag keys and values to be attached to the nodes for managing Compute Engine firewalls using Network Firewall Policies. Tags must be according to specifications found [here](https://cloud.google.com/vpc/docs/tags-firewalls-overview#specifications). A maximum of 5 tag key-value pairs can be specified. Existing tags will be replaced with new values. Tags must be in one of the following formats ([KEY]=[VALUE]) 1. `tagKeys/{tag_key_id}=tagValues/{tag_value_id}` 2. `{org_id}/{tag_key_name}={tag_value_name}` 3. `{project_id}/{tag_key_name}={tag_value_name}`.
+
 * `taint` - (Optional) A list of
 [Kubernetes taints](https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/)
 to apply to nodes. This field will only report drift on taint keys that are
@@ -998,7 +1005,7 @@ sole_tenant_config {
 * `count` (Required) - The number of the guest accelerator cards exposed to this instance.
 
 * `gpu_driver_installation_config` (Optional) - Configuration for auto installation of GPU driver. Structure is [documented below](#nested_gpu_driver_installation_config).
-  
+
 * `gpu_partition_size` (Optional) - Size of partitions to create on the GPU. Valid values are described in the NVIDIA mig [user guide](https://docs.nvidia.com/datacenter/tesla/mig-user-guide/#partitioning).
 
 * `gpu_sharing_config` (Optional) - Configuration for GPU sharing. Structure is [documented below](#nested_gpu_sharing_config).
@@ -1031,6 +1038,8 @@ workload_identity_config {
 ```
 
 <a name="nested_node_pool_auto_config"></a>The `node_pool_auto_config` block supports:
+
+* `resource_manager_tags` - (Optional) A map of resource manager tag keys and values to be attached to the nodes for managing Compute Engine firewalls using Network Firewall Policies. Tags must be according to specifications found [here](https://cloud.google.com/vpc/docs/tags-firewalls-overview#specifications). A maximum of 5 tag key-value pairs can be specified. Existing tags will be replaced with new values. Tags must be in one of the following formats ([KEY]=[VALUE]) 1. `tagKeys/{tag_key_id}=tagValues/{tag_value_id}` 2. `{org_id}/{tag_key_name}={tag_value_name}` 3. `{project_id}/{tag_key_name}={tag_value_name}`.
 
 * `network_tags` (Optional) - The network tag config for the cluster's automatically provisioned node pools.
 
@@ -1110,6 +1119,8 @@ subnet. See [Private Cluster Limitations](https://cloud.google.com/kubernetes-en
 for more details. This field only applies to private clusters, when
 `enable_private_nodes` is `true`.
 
+* `private_endpoint_subnetwork` - (Optional) Subnetwork in cluster's network where master's endpoint will be provisioned.
+
 * `master_global_access_config` (Optional) - Controls cluster master global
 access settings. If unset, Terraform will no longer manage this field and will
 not modify the previously-set value. Structure is [documented below](#nested_master_global_access_config).
@@ -1119,8 +1130,6 @@ In addition, the `private_cluster_config` allows access to the following read-on
 * `peering_name` - The name of the peering between this cluster and the Google owned VPC.
 
 * `private_endpoint` - The internal IP address of this cluster's master endpoint.
-
-* `private_endpoint_subnetwork` - Subnetwork in cluster's network where master's endpoint will be provisioned.
 
 * `public_endpoint` - The external IP address of this cluster's master endpoint.
 
@@ -1345,7 +1354,11 @@ exported:
 
 * `node_config.0.effective_taints` - List of kubernetes taints applied to each node. Structure is [documented above](#nested_taint).
 
-* `fleet.0.membership` - The resource name of the fleet Membership resource associated to this cluster with format `//gkehub.googleapis.com/projects/{{project}}/locations/{{location}}/memberships/{{name}}`. See the official doc for [fleet management](https://cloud.google.com/kubernetes-engine/docs/fleets-overview). 
+* `fleet.0.membership` - The resource name of the fleet Membership resource associated to this cluster with format `//gkehub.googleapis.com/projects/{{project}}/locations/{{location}}/memberships/{{name}}`. See the official doc for [fleet management](https://cloud.google.com/kubernetes-engine/docs/fleets-overview).
+
+* `fleet.0.membership_id` - The short name of the fleet membership, extracted from `fleet.0.membership`. You can use this field to configure `membership_id` under [google_gkehub_feature_membership](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/gke_hub_feature_membership).
+
+* `fleet.0.membership_location` - The location of the fleet membership,  extracted from `fleet.0.membership`. You can use this field to configure `membership_location` under [google_gkehub_feature_membership](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/gke_hub_feature_membership).
 
 ## Timeouts
 

@@ -1,9 +1,6 @@
 name: TGC Build and Unit Test
 
-permissions:
-  actions: read
-  contents: read
-  statuses: write
+permissions: read-all
 
 env:
   status_suffix: "-build-and-unit-tests"
@@ -32,33 +29,11 @@ concurrency:
 
 jobs:
   build-and-unit-test:
+    permissions:
+      statuses: write
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v3
-      with:
-        repository: ${{ github.event.inputs.owner }}/${{ github.event.inputs.repo }}
-        ref: ${{ github.event.inputs.branch }}
-        fetch-depth: 2
-    - name: Cache Go modules and build cache
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/go/pkg/mod
-        key: ${{ runner.os }}-test-${{ github.event.inputs.repo }}-${{ hashFiles('go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-test-${{ github.event.inputs.repo }}-${{ hashFiles('go.sum') }}
-          ${{ runner.os }}-test-${{ github.event.inputs.repo }}-
-    - name: Check for Code Changes
-      id: pull_request
-      run: |
-        gofiles=$(git diff --name-only HEAD~1 | { grep -e "\.go$" -e "go.mod$" -e "go.sum$" || test $? = 1; })
-        if [ -z "$gofiles" ]; then
-          echo "has_changes=false" >> $GITHUB_OUTPUT
-        else
-          echo "has_changes=true" >> $GITHUB_OUTPUT
-        fi
     - name: Get Job URL
       if: ${{ !cancelled() }}
       id: get_job
@@ -77,11 +52,26 @@ jobs:
         "target_url": "${{ steps.get_job.outputs.url }}",
         "state": "pending"
         }'
+    - name: Checkout Repository
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
+      with:
+        repository: ${{ github.event.inputs.owner }}/${{ github.event.inputs.repo }}
+        ref: ${{ github.event.inputs.branch }}
+        fetch-depth: 2
+    - name: Check for Code Changes
+      id: pull_request
+      run: |
+        gofiles=$(git diff --name-only HEAD~1 | { grep -e "\.go$" -e "go.mod$" -e "go.sum$" || test $? = 1; })
+        if [ -z "$gofiles" ]; then
+          echo "has_changes=false" >> $GITHUB_OUTPUT
+        else
+          echo "has_changes=true" >> $GITHUB_OUTPUT
+        fi
     - name: Set up Go
       if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
-      uses: actions/setup-go@v3
+      uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
       with:
-        go-version: '^1.20'
+        go-version: '^1.21'
     - name: Build Terraform Google Conversion
       if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |

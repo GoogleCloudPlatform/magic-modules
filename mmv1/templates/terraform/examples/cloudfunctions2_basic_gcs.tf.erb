@@ -91,7 +91,6 @@ resource "google_cloudfunctions2_function" "<%= ctx[:primary_resource_id] %>" {
   }
 
   event_trigger {
-    trigger_region = "us-central1" # The trigger must be in the same location as the bucket
     event_type = "google.cloud.storage.object.v1.finalized"
     retry_policy = "RETRY_POLICY_RETRY"
     service_account_email = google_service_account.account.email
