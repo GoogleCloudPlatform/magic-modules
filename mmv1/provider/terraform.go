@@ -150,6 +150,7 @@ func (t *Terraform) GenerateResourceTests(object api.Resource, templateData Temp
 		if !example.SkipTest {
 			if object.ProductMetadata.VersionObjOrClosest(t.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(example.MinVersion)) > 0 {
 				eligibleExample = true
+				break
 			}
 		}
 	}

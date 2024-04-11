@@ -93,7 +93,7 @@ func (td *TemplateData) GenerateDocumentationFile(filePath string, resource api.
 }
 
 func (td *TemplateData) GenerateTestFile(filePath string, resource api.Resource) {
-	templatePath := "templates/terraform/examples/go/test_file.go.tmpl"
+	templatePath := "templates/terraform/examples/base_configs/test_file.go.tmpl"
 	templates := []string{
 		// "templates/terraform//env_var_context.go.tmpl",
 		templatePath,
