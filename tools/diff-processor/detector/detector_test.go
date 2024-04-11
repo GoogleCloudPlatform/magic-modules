@@ -1,14 +1,51 @@
-package main
+package detector
 
 import (
 	"reflect"
 	"testing"
 
-	"github.com/GoogleCloudPlatform/magic-modules/tools/missing-test-detector/reader"
+	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
+	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/reader"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func TestDetectMissingTests(t *testing.T) {
-	allTests, errs := reader.ReadAllTests("reader/testdata")
+func TestGetChangedFieldsFromSchemaDiff(t *testing.T) {
+	for _, test := range []struct {
+		name          string
+		schemaDiff    diff.SchemaDiff
+		changedFields map[string]ResourceChanges
+	}{
+		{
+			name: "covered-resource",
+			schemaDiff: diff.SchemaDiff{
+				"covered_resource": diff.ResourceDiff{
+					Fields: map[string]diff.FieldDiff{
+						"field_one": {},
+						"field_two.field_three": {
+							Old: &schema.Schema{},
+						},
+						"field_four.field_five.field_six": {},
+					},
+				},
+			},
+			changedFields: map[string]ResourceChanges{
+				"covered_resource": {
+					"field_one":                       &Field{Added: true},
+					"field_two.field_three":           &Field{Changed: true},
+					"field_four.field_five.field_six": &Field{Added: true},
+				},
+			},
+		},
+	} {
+		if changedFields := getChangedFieldsFromSchemaDiff(test.schemaDiff); !reflect.DeepEqual(changedFields, test.changedFields) {
+			t.Errorf("got unexpected changed fields: %v, expected %v", changedFields, test.changedFields)
+		}
+	}
+
+}
+
+func TestGetMissingTestsForChanges(t *testing.T) {
+	allTests, errs := reader.ReadAllTests("../reader/testdata")
 	if len(errs) > 0 {
 		t.Errorf("errors reading tests before testing detect missing tests: %v", errs)
 	}
@@ -21,15 +58,9 @@ func TestDetectMissingTests(t *testing.T) {
 			name: "covered-resource",
 			changedFields: map[string]ResourceChanges{
 				"covered_resource": {
-					"field_one": &Field{Added: true},
-					"field_two": ResourceChanges{
-						"field_three": &Field{Changed: true},
-					},
-					"field_four": ResourceChanges{
-						"field_five": ResourceChanges{
-							"field_six": &Field{Added: true},
-						},
-					},
+					"field_one":                       &Field{Added: true},
+					"field_two.field_three":           &Field{Changed: true},
+					"field_four.field_five.field_six": &Field{Added: true},
 				},
 			},
 		},
@@ -37,15 +68,9 @@ func TestDetectMissingTests(t *testing.T) {
 			name: "uncovered-resource",
 			changedFields: map[string]ResourceChanges{
 				"uncovered_resource": {
-					"field_one": &Field{Changed: true},
-					"field_two": ResourceChanges{
-						"field_three": &Field{Added: true},
-					},
-					"field_four": ResourceChanges{
-						"field_five": ResourceChanges{
-							"field_six": &Field{Changed: true},
-						},
-					},
+					"field_one":                       &Field{Changed: true},
+					"field_two.field_three":           &Field{Added: true},
+					"field_four.field_five.field_six": &Field{Changed: true},
 				},
 			},
 			expectedMissingTests: map[string]MissingTestInfo{
@@ -95,15 +120,9 @@ func TestDetectMissingTests(t *testing.T) {
 					"field_one": &Field{Added: true},
 				},
 				"uncovered_resource": {
-					"field_one": &Field{Changed: true},
-					"field_two": ResourceChanges{
-						"field_three": &Field{Added: true},
-					},
-					"field_four": ResourceChanges{
-						"field_five": ResourceChanges{
-							"field_six": &Field{Changed: true},
-						},
-					},
+					"field_one":                       &Field{Changed: true},
+					"field_two.field_three":           &Field{Added: true},
+					"field_four.field_five.field_six": &Field{Changed: true},
 				},
 			},
 			expectedMissingTests: map[string]MissingTestInfo{
@@ -129,7 +148,7 @@ func TestDetectMissingTests(t *testing.T) {
 			},
 		},
 	} {
-		missingTests, err := detectMissingTests(test.changedFields, allTests)
+		missingTests, err := getMissingTestsForChanges(test.changedFields, allTests)
 		if err != nil {
 			t.Errorf("error detecting missing tests for %s: %s", test.name, err)
 		}
