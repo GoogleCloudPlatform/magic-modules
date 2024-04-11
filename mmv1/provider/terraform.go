@@ -104,8 +104,8 @@ func (t *Terraform) GenerateObject(object api.Resource, outputFolder, productPat
 
 		if generateCode {
 			log.Printf("Generating %s tests", object.Name)
+			t.GenerateResourceTests(object, *templateData, outputFolder)
 			// TODO Q2
-			//	    generate_resource_tests(pwd, data.clone)
 			//	    generate_resource_sweepers(pwd, data.clone)
 		}
 	}
@@ -142,6 +142,29 @@ func (t *Terraform) GenerateResource(object api.Resource, templateData TemplateD
 		targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s.html.markdown", t.FullResourceName(object)))
 		templateData.GenerateDocumentationFile(targetFilePath, object)
 	}
+}
+
+func (t *Terraform) GenerateResourceTests(object api.Resource, templateData TemplateData, outputFolder string) {
+	eligibleExample := false
+	for _, example := range object.Examples {
+		if !example.SkipTest {
+			if object.ProductMetadata.VersionObjOrClosest(t.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(example.MinVersion)) > 0 {
+				eligibleExample = true
+				break
+			}
+		}
+	}
+	if !eligibleExample {
+		return
+	}
+
+	productName := t.Product.ApiName
+	targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
+	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+	}
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s_generated_test.go", t.FullResourceName(object)))
+	templateData.GenerateTestFile(targetFilePath, object)
 }
 
 func (t *Terraform) GenerateOperation(outputFolder string) {
@@ -403,16 +426,6 @@ func (t *Terraform) FullResourceName(object api.Resource) string {
 //      File.write("#{output_folder}/#{target}", data)
 //    end
 //
-//    def import_path
-//      case @target_version_name
-//      when 'ga'
-//        "#{TERRAFORM_PROVIDER_GA}/#{RESOURCE_DIRECTORY_GA}"
-//      when 'beta'
-//        "#{TERRAFORM_PROVIDER_BETA}/#{RESOURCE_DIRECTORY_BETA}"
-//      else
-//        "#{TERRAFORM_PROVIDER_PRIVATE}/#{RESOURCE_DIRECTORY_PRIVATE}"
-//      end
-//    end
 //
 //    # Gets the list of services dependent on the version ga, beta, and private
 //    # If there are some resources of a servcie is in GA,
