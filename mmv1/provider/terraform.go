@@ -18,6 +18,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"reflect"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
@@ -55,6 +56,9 @@ func NewTerraform(product *api.Product, versionName string) *Terraform {
 		Version:           *product.VersionObjOrClosest(versionName)}
 
 	t.Product.SetPropertiesBasedOnVersion(&t.Version)
+	for _, r := range t.Product.Objects {
+		r.SetCompiler(reflect.TypeOf(t).Name())
+	}
 
 	return &t
 }

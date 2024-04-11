@@ -1,0 +1,6 @@
+func vmwareenginePrivateCloudStandardTypeDiffSuppressFunc(_, old, new string, _ *schema.ResourceData) bool {
+	if (old == "STANDARD" && new == "") || (old == "" && new == "STANDARD") {
+		return true
+	}
+	return false
+}
