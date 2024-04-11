@@ -133,6 +133,15 @@ func testAccDataLossPreventionDiscoveryConfig_ActionsUpdate(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"parent", "last_run_time"},
 			},
+			{
+				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigActionsSensitivity(context),
+			},
+			{
+				ResourceName:            "google_data_loss_prevention_discovery_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parent", "last_run_time"},
+			},
 		},
 	})
 }
@@ -337,6 +346,65 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
 					logical_operator = "OR"
 					conditions { 
 						minimum_risk_score = "HIGH" 
+					}
+				}
+			}
+			detail_of_message = "TABLE_PROFILE"
+		}
+    }
+    inspect_templates = ["projects/%{project}/inspectTemplates/${google_data_loss_prevention_inspect_template.basic.name}"]
+}
+`, context)
+}
+
+func testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigActionsSensitivity(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_data_loss_prevention_inspect_template" "basic" {
+	parent = "projects/%{project}"
+	description = "Description"
+	display_name = "Display"
+
+	inspect_config {
+		info_types {
+			name = "EMAIL_ADDRESS"
+		}
+	}
+}
+
+resource "google_pubsub_topic" "basic" {
+	name = "test-topic"
+}
+
+resource "google_data_loss_prevention_discovery_config" "basic" {
+	parent = "projects/%{project}/locations/%{location}"
+	location = "%{location}"
+	status = "RUNNING"
+
+    targets {
+        big_query_target {
+            filter {
+                other_tables {}
+            }
+        }
+    }
+	actions {
+        export_data {
+            profile_table {
+                project_id = "project"
+                dataset_id = "dataset"
+                table_id = "table"
+            }
+        }
+    }
+    actions { 
+        pub_sub_notification {
+			topic = "projects/%{project}/topics/${google_pubsub_topic.basic.name}"
+			event = "NEW_PROFILE"
+			pubsub_condition {
+				expressions {
+					logical_operator = "OR"
+					conditions { 
+						minimum_sensitivity_score = "HIGH" 
 					}
 				}
 			}
