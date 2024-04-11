@@ -780,6 +780,15 @@ func (r Resource) ClientNamePascal() string {
 	return google.Camelize(clientName, "upper")
 }
 
+func (r Resource) PackageName() string {
+	clientName := r.ProductMetadata.ClientName
+	if clientName == "" {
+		clientName = r.ProductMetadata.Name
+	}
+
+	return strings.ToLower(clientName)
+}
+
 // In order of preference, use TF override,
 // general defined timeouts, or default Timeouts
 
@@ -900,4 +909,21 @@ func ImportIdFormats(importFormat, identity []string, baseUrl string) []string {
 
 	// TODO Q2:  id_formats.uniq.reject(&:empty?).sort_by { |i| [i.count('/'), i.count('{{')] }.reverse
 	return idFormats
+}
+
+func (r Resource) IgnoreReadPropertiesToString(e resource.Examples) string {
+	var props []string
+	for _, tp := range r.AllUserProperties() {
+		if tp.UrlParamOnly || tp.IgnoreRead || tp.IsA("ResourceRef") {
+			props = append(props, fmt.Sprintf("\"%s\"", google.Underscore(tp.Name)))
+		}
+	}
+	for _, tp := range e.IgnoreReadExtra {
+		props = append(props, fmt.Sprintf("\"%s\"", google.Underscore(tp)))
+	}
+	for _, tp := range r.IgnoreReadLabelsFields(r.PropertiesWithExcluded()) {
+		props = append(props, fmt.Sprintf("\"%s\"", google.Underscore(tp)))
+	}
+
+	return fmt.Sprintf("[]string{%s}", strings.Join(props, ", "))
 }
