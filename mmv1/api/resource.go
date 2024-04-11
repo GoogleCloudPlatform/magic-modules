@@ -293,6 +293,12 @@ type Resource struct {
 	Parameters []*Type
 
 	ProductMetadata *Product
+
+	// The version name provided by the user through CI
+	TargetVersionName string
+
+	// The compiler to generate the downstream files, for example "terraformgoogleconversion-codegen".
+	Compiler string
 }
 
 func (r *Resource) UnmarshalYAML(n *yaml.Node) error {
@@ -926,4 +932,8 @@ func (r Resource) IgnoreReadPropertiesToString(e resource.Examples) string {
 	}
 
 	return fmt.Sprintf("[]string{%s}", strings.Join(props, ", "))
+}
+
+func (r *Resource) SetCompiler(t string) {
+	r.Compiler = fmt.Sprintf("%s-codegen", strings.ToLower(t))
 }
