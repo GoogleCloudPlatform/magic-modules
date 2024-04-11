@@ -98,7 +98,7 @@ func TestSortByConfigOrder(t *testing.T) {
 				t.Fatalf("Wanted error, got none")
 			}
 			if !tc.wantError && sorted != tc.want {
-				t.Fatalf("sorted result is incorrect. want %v, got %v", sorted, tc.want)
+				t.Fatalf("sorted result is incorrect. want %v, got %v", tc.want, sorted)
 			}
 		})
 
@@ -125,7 +125,7 @@ func TestSortByConfigOrder(t *testing.T) {
 				t.Fatalf("Wanted error, got none")
 			}
 			if !tc.wantError && sorted != tc.want {
-				t.Fatalf("sorted result is incorrect. want %v, got %v", sorted, tc.want)
+				t.Fatalf("sorted result is incorrect. want %v, got %v", tc.want, sorted)
 			}
 		})
 	}
@@ -170,7 +170,7 @@ func TestSortMapsByConfigOrder(t *testing.T) {
 				t.Fatalf("Wanted error, got none")
 			}
 			if !tc.wantError && sorted != tc.want {
-				t.Fatalf("sorted result is incorrect. want %v, got %v", sorted, tc.want)
+				t.Fatalf("sorted result is incorrect. want %v, got %v", tc.want, sorted)
 			}
 		})
 	}
