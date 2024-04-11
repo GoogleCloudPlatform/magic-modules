@@ -20,6 +20,7 @@ import (
 	"path/filepath"
 	"text/template"
 
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/golang/glog"
 	"gopkg.in/yaml.v3"
 )
@@ -321,6 +322,18 @@ func (e *Examples) OiCSLink() string {
 		RawQuery: v.Encode(),
 	}
 	return u.String()
+}
+
+func (e *Examples) TestSlug(productName, resourceName string) string {
+	ret := fmt.Sprintf("%s%s_%sExample", productName, resourceName, google.Camelize(e.Name, "upper"))
+	return ret
+}
+
+func (e *Examples) ResourceType(terraformName string) string {
+	if e.PrimaryResourceType != "" {
+		return e.PrimaryResourceType
+	}
+	return terraformName
 }
 
 // rubocop:disable Layout/LineLength
