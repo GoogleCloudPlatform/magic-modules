@@ -8,8 +8,28 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigUpdateBasic(t *testing.T) {
-	t.Parallel()
+func TestAccDataLossPreventionDiscoveryConfig_Update(t *testing.T) {
+	testCases := map[string]func(t *testing.T){
+		"basic":      testAccDataLossPreventionDiscoveryConfig_BasicUpdate,
+		"org":        testAccDataLossPreventionDiscoveryConfig_OrgUpdate,
+		"actions":    testAccDataLossPreventionDiscoveryConfig_ActionsUpdate,
+		"conditions": testAccDataLossPreventionDiscoveryConfig_ConditionsCadenceUpdate,
+		"filter":     testAccDataLossPreventionDiscoveryConfig_FilterUpdate,
+	}
+	for name, tc := range testCases {
+		// shadow the tc variable into scope so that when
+		// the loop continues, if t.Run hasn't executed tc(t)
+		// yet, we don't have a race condition
+		// see https://github.com/golang/go/wiki/CommonMistakes#using-goroutines-on-loop-iterator-variables
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			tc(t)
+		})
+	}
+}
+
+func testAccDataLossPreventionDiscoveryConfig_BasicUpdate(t *testing.T) {
+	// t.Parallel()
 
 	context := map[string]interface{}{
 		"project":       envvar.GetTestProjectFromEnv(),
@@ -29,7 +49,7 @@ func TestAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigUpdateBasic(t *t
 				ResourceName:            "google_data_loss_prevention_discovery_config.basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"parent"},
+				ImportStateVerifyIgnore: []string{"parent", "last_run_time"},
 			},
 			{
 				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigUpdate(context),
@@ -38,18 +58,19 @@ func TestAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigUpdateBasic(t *t
 				ResourceName:            "google_data_loss_prevention_discovery_config.basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"parent"},
+				ImportStateVerifyIgnore: []string{"parent", "last_run_time"},
 			},
 		},
 	})
 }
 
-func TestAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigUpdateOrg(t *testing.T) {
-	t.Parallel()
+func testAccDataLossPreventionDiscoveryConfig_OrgUpdate(t *testing.T) {
+	// t.Parallel()
 
 	context := map[string]interface{}{
 		"organization":  envvar.GetTestOrgFromEnv(t),
 		"project":       envvar.GetTestProjectFromEnv(),
+		"location":      envvar.GetTestRegionFromEnv(),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -62,27 +83,30 @@ func TestAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigUpdateOrg(t *tes
 				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigOrgRunning(context),
 			},
 			{
-				ResourceName:      "google_data_loss_prevention_discovery_config.basic",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_data_loss_prevention_discovery_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parent", "last_run_time"},
 			},
 			{
 				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigOrgFolderPaused(context),
 			},
 			{
-				ResourceName:      "google_data_loss_prevention_discovery_config.basic",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_data_loss_prevention_discovery_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parent", "last_run_time"},
 			},
 		},
 	})
 }
 
-func TestAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigUpdateActions(t *testing.T) {
-	t.Parallel()
+func testAccDataLossPreventionDiscoveryConfig_ActionsUpdate(t *testing.T) {
+	// t.Parallel()
 
 	context := map[string]interface{}{
 		"project":       envvar.GetTestProjectFromEnv(),
+		"location":      envvar.GetTestRegionFromEnv(),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -95,27 +119,30 @@ func TestAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigUpdateActions(t 
 				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigStart(context),
 			},
 			{
-				ResourceName:      "google_data_loss_prevention_discovery_config.basic",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_data_loss_prevention_discovery_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parent", "last_run_time"},
 			},
 			{
 				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigActions(context),
 			},
 			{
-				ResourceName:      "google_data_loss_prevention_discovery_config.basic",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_data_loss_prevention_discovery_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parent", "last_run_time"},
 			},
 		},
 	})
 }
 
-func TestAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigUpdateConditions(t *testing.T) {
-	t.Parallel()
+func testAccDataLossPreventionDiscoveryConfig_ConditionsCadenceUpdate(t *testing.T) {
+	// t.Parallel()
 
 	context := map[string]interface{}{
 		"project":       envvar.GetTestProjectFromEnv(),
+		"location":      envvar.GetTestRegionFromEnv(),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -128,27 +155,30 @@ func TestAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigUpdateConditions
 				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigStart(context),
 			},
 			{
-				ResourceName:      "google_data_loss_prevention_discovery_config.basic",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_data_loss_prevention_discovery_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parent", "last_run_time"},
 			},
 			{
 				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigConditionsCadence(context),
 			},
 			{
-				ResourceName:      "google_data_loss_prevention_discovery_config.basic",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_data_loss_prevention_discovery_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parent", "last_run_time"},
 			},
 		},
 	})
 }
 
-func TestAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigUpdateFilter(t *testing.T) {
-	t.Parallel()
+func testAccDataLossPreventionDiscoveryConfig_FilterUpdate(t *testing.T) {
+	// t.Parallel()
 
 	context := map[string]interface{}{
 		"project":       envvar.GetTestProjectFromEnv(),
+		"location":      envvar.GetTestRegionFromEnv(),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -161,17 +191,19 @@ func TestAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigUpdateFilter(t *
 				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigStart(context),
 			},
 			{
-				ResourceName:      "google_data_loss_prevention_discovery_config.basic",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_data_loss_prevention_discovery_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parent", "last_run_time"},
 			},
 			{
 				Config: testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigFilterRegexesAndConditions(context),
 			},
 			{
-				ResourceName:      "google_data_loss_prevention_discovery_config.basic",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_data_loss_prevention_discovery_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parent", "last_run_time"},
 			},
 		},
 	})
@@ -179,7 +211,6 @@ func TestAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigUpdateFilter(t *
 
 func testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigStart(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-
 resource "google_data_loss_prevention_inspect_template" "basic" {
 	parent = "projects/%{project}"
 	description = "Description"
@@ -189,27 +220,12 @@ resource "google_data_loss_prevention_inspect_template" "basic" {
 		info_types {
 			name = "EMAIL_ADDRESS"
 		}
-		info_types {
-			name    = "PERSON_NAME"
-			version = "latest"
-		}
-		info_types {
-			name = "LAST_NAME"
-		}
-		info_types {
-			name = "DOMAIN_NAME"
-		}
-		info_types {
-			name = "PHONE_NUMBER"
-		}
-		info_types {
-			name = "FIRST_NAME"
-		}
 	}
 }
 
 resource "google_data_loss_prevention_discovery_config" "basic" {
 	parent = "projects/%{project}/locations/%{location}"
+	location = "%{location}"
 	display_name = "display name"
 	status = "RUNNING"
 
@@ -247,27 +263,12 @@ resource "google_data_loss_prevention_inspect_template" "custom_type" {
 		info_types {
 			name = "EMAIL_ADDRESS"
 		}
-		info_types {
-			name    = "PERSON_NAME"
-			version = "latest"
-		}
-		info_types {
-			name = "LAST_NAME"
-		}
-		info_types {
-			name = "DOMAIN_NAME"
-		}
-		info_types {
-			name = "PHONE_NUMBER"
-		}
-		info_types {
-			name = "FIRST_NAME"
-		}
 	}
 }
 
 resource "google_data_loss_prevention_discovery_config" "basic" {
 	parent = "projects/%{project}/locations/%{location}"
+	location = "%{location}"
 	status = "RUNNING"
 
     targets {
@@ -278,20 +279,38 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
 			conditions {
 				or_conditions {
 					min_row_count = 10
-					minAge = "10800s"
+					min_age = "10800s"
 				}
 			}
         }
     }
-    inspect_templates = ["projects/%{project}/inspectTemplates/${google_data_loss_prevention_inspect_template.custom_type.name}]
+    inspect_templates = ["projects/%{project}/inspectTemplates/${google_data_loss_prevention_inspect_template.custom_type.name}"]
 }
 `, context)
 }
 
 func testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigActions(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_data_loss_prevention_inspect_template" "basic" {
+	parent = "projects/%{project}"
+	description = "Description"
+	display_name = "Display"
+
+	inspect_config {
+		info_types {
+			name = "EMAIL_ADDRESS"
+		}
+	}
+}
+
+resource "google_pubsub_topic" "basic" {
+	name = "test-topic"
+}
+
 resource "google_data_loss_prevention_discovery_config" "basic" {
-	parent = "projects/%{project}/locations/us"
+	parent = "projects/%{project}/locations/%{location}"
+	location = "%{location}"
+	status = "RUNNING"
 
     targets {
         big_query_target {
@@ -311,29 +330,41 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
     }
     actions { 
         pub_sub_notification {
-                topic = "fake-topic"
-                event = "NEW_PROFILE"
-                pub_sub_condition {
-                    expressions {
-                        logical_operator = "OR"
-                        conditions {
-                            minimum_risk_score = "HIGH"
-                            minimum_sensitivity_score = "HIGH"
-                        }
-                    }
-                }
-                detail_of_message = "TABLE_PROFILE"
-            }
+			topic = "projects/%{project}/topics/${google_pubsub_topic.basic.name}"
+			event = "NEW_PROFILE"
+			pubsub_condition {
+				expressions {
+					logical_operator = "OR"
+					conditions { 
+						minimum_risk_score = "HIGH" 
+					}
+				}
+			}
+			detail_of_message = "TABLE_PROFILE"
+		}
     }
-    inspect_templates = ["projects/%{project}/locations/us/inspectTemplates/test"]
+    inspect_templates = ["projects/%{project}/inspectTemplates/${google_data_loss_prevention_inspect_template.basic.name}"]
 }
 `, context)
 }
 
 func testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigOrgRunning(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_data_loss_prevention_inspect_template" "basic" {
+	parent = "projects/%{project}"
+	description = "Description"
+	display_name = "Display"
+
+	inspect_config {
+		info_types {
+			name = "EMAIL_ADDRESS"
+		}
+	}
+}
+
 resource "google_data_loss_prevention_discovery_config" "basic" {
-	parent = "organizations/%{organization}/locations/us"
+	parent = "organizations/%{organization}/locations/%{location}"
+	location = "%{location}"
 
     targets {
         big_query_target {
@@ -348,7 +379,7 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
 			organization_id = "%{organization}"
 		}
 	}
-    inspect_templates = ["projects/%{project}/locations/us/inspectTemplates/test"]
+    inspect_templates = ["projects/%{project}/inspectTemplates/${google_data_loss_prevention_inspect_template.basic.name}"]
 	status = "RUNNING"
 }
 `, context)
@@ -356,8 +387,21 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
 
 func testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigOrgFolderPaused(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_data_loss_prevention_inspect_template" "basic" {
+	parent = "projects/%{project}"
+	description = "Description"
+	display_name = "Display"
+
+	inspect_config {
+		info_types {
+			name = "EMAIL_ADDRESS"
+		}
+	}
+}
+
 resource "google_data_loss_prevention_discovery_config" "basic" {
-	parent = "organizations/%{organization}/locations/us"
+	parent = "organizations/%{organization}/locations/%{location}"
+	location = "%{location}"
 
     targets {
         big_query_target {
@@ -372,7 +416,7 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
 			folder_id = 123
 		}
 	}
-    inspect_templates = ["projects/%{project}/locations/us/inspectTemplates/test"]
+    inspect_templates = ["projects/%{project}/inspectTemplates/${google_data_loss_prevention_inspect_template.basic.name}"]
 	status = "PAUSED"
 }
 `, context)
@@ -380,8 +424,22 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
 
 func testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigConditionsCadence(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_data_loss_prevention_inspect_template" "basic" {
+	parent = "projects/%{project}"
+	description = "Description"
+	display_name = "Display"
+
+	inspect_config {
+		info_types {
+			name = "EMAIL_ADDRESS"
+		}
+	}
+}
+
 resource "google_data_loss_prevention_discovery_config" "basic" {
-	parent = "projects/%{project}/locations/us"
+	parent = "projects/%{project}/locations/%{location}"
+	location = "%{location}"
+	status = "RUNNING"
 
 	targets {
         big_query_target {
@@ -403,15 +461,29 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
             }
         }
     }
-    inspect_templates = ["projects/%{project}/locations/us/inspectTemplates/test-new"]
+    inspect_templates = ["projects/%{project}/inspectTemplates/${google_data_loss_prevention_inspect_template.basic.name}"]
 }
 `, context)
 }
 
 func testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigFilterRegexesAndConditions(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_data_loss_prevention_inspect_template" "basic" {
+	parent = "projects/%{project}"
+	description = "Description"
+	display_name = "Display"
+
+	inspect_config {
+		info_types {
+			name = "EMAIL_ADDRESS"
+		}
+	}
+}
+
 resource "google_data_loss_prevention_discovery_config" "basic" {
-	parent = "projects/%{project}/locations/us"
+	parent = "projects/%{project}/locations/%{location}"
+	location = "%{location}"
+	status = "RUNNING"
 
 	targets {
         big_query_target {
@@ -433,7 +505,7 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
                 }
                 or_conditions {
                     min_row_count = 10
-                    min_age = "10d"
+                    min_age = "21600s"
                 }
             }
         }
@@ -445,7 +517,7 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
             }
         }
     }
-    inspect_templates = ["projects/%{project}/locations/us/inspectTemplates/test-new"]
+    inspect_templates = ["projects/%{project}/inspectTemplates/${google_data_loss_prevention_inspect_template.basic.name}"]
 }
 `, context)
 }

@@ -20,6 +20,7 @@ create_url: 'projects/{{project}}/locations/{{location}}/discoveryConfigs'
 create_verb: :POST
 update_verb: :PATCH
 update_mask: true
+delete_url: 'projects/{{project}}/locations/{{location}}/discoveryConfigs/{{name}}'
 # Resource description for the provider documentation.
 description: |
   Configuration for discovery to scan resources for profile generation. Only one discovery configuration may exist per organization, folder, or project.
@@ -74,6 +75,13 @@ parameters:
 
       * `projects/{{project}}/locations/{{location}}`
       * `organizations/{{organization_id}}/locations/{{location}}`
+    required: true
+    immutable: true
+    url_param_only: true
+  - !ruby/object:Api::Type::String
+    name: 'location'
+    description: |
+      Location to create the discovery config in.
     required: true
     immutable: true
     url_param_only: true
@@ -144,7 +152,7 @@ properties:
                 - :SCORE_INCREASED
                 - :ERROR_CHANGED
             - !ruby/object:Api::Type::NestedObject
-              name: pubSubCondition
+              name: pubsubCondition
               description: Conditions for triggering pubsub
               properties:
                 - !ruby/object:Api::Type::NestedObject
@@ -157,21 +165,23 @@ properties:
                       values:
                         - :OR
                         - :AND
-                    - !ruby/object:Api::Type::NestedObject
+                    - !ruby/object:Api::Type::Array
                       name: conditions
-                      properties:
-                        - !ruby/object:Api::Type::Enum
-                          name: minimumRiskScore
-                          description: The minimum data risk score that triggers the condition.
-                          values:
-                            - :HIGH
-                            - :MEDIUM_OR_HIGH
-                        - !ruby/object:Api::Type::Enum
-                          name: minimumSensitivityScore
-                          description: The minimum sensitivity level that triggers the condition.
-                          values:
-                            - :HIGH
-                            - :MEDIUM_OR_HIGH
+                      description: Conditions to apply to the expression
+                      item_type: !ruby/object:Api::Type::NestedObject
+                        properties:
+                          - !ruby/object:Api::Type::Enum
+                            name: minimumRiskScore
+                            description: The minimum data risk score that triggers the condition.
+                            values:
+                              - :HIGH
+                              - :MEDIUM_OR_HIGH
+                          - !ruby/object:Api::Type::Enum
+                            name: minimumSensitivityScore
+                            description: The minimum sensitivity level that triggers the condition.
+                            values:
+                              - :HIGH
+                              - :MEDIUM_OR_HIGH
             - !ruby/object:Api::Type::Enum
               name: detailOfMessage
               description: How much data to include in the pub/sub message.
