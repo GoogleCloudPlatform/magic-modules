@@ -55,7 +55,7 @@ func resourceGoogleProjectIamMemberRemoveCreate(d *schema.ResourceData, meta int
 		for _, existingMember := range bind.Members {
 			if member == existingMember {
 				if role == bind.Role {
-					bind.Role = "role/remove"
+					existingMember = ""
 					updateRequest := &cloudresourcemanager.SetIamPolicyRequest{
 						Policy:     iamPolicy,
 						UpdateMask: "bindings",
