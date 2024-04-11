@@ -14,5 +14,4 @@ resource "google_bigquery_routine" "custom_masking_routine" {
 	  data_type = "{\"typeKind\" :  \"STRING\"}"
 	} 
 	return_type = "{\"typeKind\" :  \"STRING\"}"
-  }
-  
+}
