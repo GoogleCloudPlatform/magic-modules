@@ -30,7 +30,7 @@ func deleteSpannerBackups(d *schema.ResourceData, config *transport_tpg.Config, 
 
 		log.Printf("[DEBUG] Found backups for resource %q: %#v)", d.Id(), item)
 
-		path := "{{SpannerBasePath}}" + backupName
+		path := "{{"{{"}}SpannerBasePath{{"}}"}}" + backupName
 
 		url, err := tpgresource.ReplaceVars(d, config, path)
 		if err != nil {
