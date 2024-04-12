@@ -52,6 +52,7 @@ var TemplateFunctions = template.FuncMap{
 	"contains":   strings.Contains,
 	"join":       strings.Join,
 	"lower": strings.ToLower,
+	"underscore": google.Underscore,
 }
 
 var GA_VERSION = "ga"
