@@ -16,7 +16,7 @@
 	} else {
 		return nil, fmt.Errorf("Unexpected import id: %s, expected form {{"{{"}}parent{{"}}"}}/{{camelize $.Name "lower"}}/{{"{{"}}name{{"}}"}}", d.Get("name").(string))
 	}
-	// Remove "/<%= object.name.camelize(:lower) -%>/{{name}}" from the id
+	// Remove "/{{camelize $.Name "lower"}}/{{"{{"}}name{{"}}"}}" from the id
 	parts = parts[:len(parts)-2]
 	if err := d.Set("parent", strings.Join(parts, "/")); err != nil {
 		return nil, fmt.Errorf("Error setting parent: %s", err)
