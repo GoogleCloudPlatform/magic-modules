@@ -101,10 +101,7 @@ func TestAccDataSourceDNSKeys_basic_AdcAuth(t *testing.T) {
 	acctest.SkipIfVcr(t) // Uses external providers
 	t.Parallel()
 
-	creds := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
-	if creds == "" {
-		t.Fatalf("GOOGLE_APPLICATION_CREDENTIALS must be set for acceptance tests that are dependent on ADCs")
-	}
+	creds := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS") // PreCheck assertion handles checking this is set
 
 	dnsZoneName := fmt.Sprintf("data-dnskey-test-%s", acctest.RandString(t, 10))
 
