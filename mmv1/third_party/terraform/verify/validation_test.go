@@ -324,6 +324,7 @@ func TestValidateGCSName(t *testing.T) {
 		{TestName: "basic", Value: "foo-bar"},
 		{TestName: "begins with number", Value: "1foo-bar"},
 		{TestName: "almost an ip", Value: "192.168.5.foo"},
+		{TestName: "has underscore", Value: "foo-bar_baz"},
 
 		// With errors
 		{TestName: "has &", Value: "foo-&bar", ExpectError: true},
