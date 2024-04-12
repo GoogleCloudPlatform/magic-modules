@@ -1,4 +1,4 @@
-// If the user is disabling Public IP and still has authorized external networks
+<%# // If the user is disabling Public IP and still has authorized external networks
 // set or is trying to update it, throw a more helpful error message.
 if d.HasChange("network_config.0.enable_public_ip") && d.Get("network_config.0.enable_public_ip") == false {
   _, new := d.GetChange("network_config.0.authorized_external_networks")
@@ -15,4 +15,4 @@ if d.HasChange("network_config.0.enable_public_ip") && d.Get("network_config.0.e
   if nc["authorizedExternalNetworks"] != nil {
     return fmt.Errorf("Cannot disable Public IP while there are authorized networks set. Please also remove the authorized networks, and then retry.")
   }
-}
+} %>

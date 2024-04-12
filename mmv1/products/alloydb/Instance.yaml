@@ -53,10 +53,12 @@ import_format: ['projects/{{project}}/locations/{{location}}/clusters/{{cluster}
 skip_sweeper: true
 autogen_async: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  # encoder: templates/terraform/encoders/alloydb_instance.erb
   custom_import: templates/terraform/custom_import/alloydb_instance.go.erb
   pre_create: templates/terraform/pre_create/alloydb_instance.go.erb
-  pre_update: templates/terraform/pre_update/alloydb_instance.go.erb
+  # pre_update: templates/terraform/pre_update/alloydb_instance.go.erb
   pre_delete: templates/terraform/pre_delete/alloydb_instance.go.erb
+  post_create: templates/terraform/post_create/alloydb_instance.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'alloydb_instance_basic'
@@ -287,7 +289,11 @@ properties:
       - !ruby/object:Api::Type::Array
         name: 'authorizedExternalNetworks'
         description: |
-          A list of external networks authorized to access this instance.
+          A list of external networks authorized to access this instance. This
+          field is only allowed to be set when `enable_public_ip` is set to
+          true.
+        required_with:
+          - networkConfig.0.enablePublicIp
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::String
@@ -296,11 +302,13 @@ properties:
       - !ruby/object:Api::Type::Boolean
         name: enablePublicIp
         description: |
-          Enabling public ip for the instance.
+          Enabling public ip for the instance. If a user wishes to disable this,
+          please also clear the list of the authorized external networks set on
+          the same instance.
   - !ruby/object:Api::Type::String
     name: 'publicIpAddress'
     output: true
     description: |
       The public IP addresses for the Instance. This is available ONLY when
-      networkConfig.enablePublicIp is set. This is the connection endpoint for
-      an end-user application.
+      networkConfig.enablePublicIp is set to true. This is the connection
+      endpoint for an end-user application.

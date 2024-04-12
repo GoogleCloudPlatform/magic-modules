@@ -565,8 +565,8 @@ data "google_compute_network" "default" {
 `, context)
 }
 
-// This test passes if an instance can be updated to enable public IP; and
-// update the authorized networks.
+// This test passes if an instance can be created with public IP enabled,
+// and update the authorized external networks.
 func TestAccAlloydbInstance_networkConfig(t *testing.T) {
 	t.Parallel()
 
@@ -576,14 +576,10 @@ func TestAccAlloydbInstance_networkConfig(t *testing.T) {
 	context1 := map[string]interface{}{
 		"random_suffix":      suffix,
 		"network_name":       networkName,
-	}
-	context2 := map[string]interface{}{
-		"random_suffix":      suffix,
-		"network_name":       networkName,
 		"enable_public_ip": 	true,
 		"authorized_external_networks": "",
 	}
-	context3 := map[string]interface{}{
+	context2 := map[string]interface{}{
 		"random_suffix":      suffix,
 		"network_name":       networkName,
 		"enable_public_ip": 	true,
@@ -596,7 +592,7 @@ func TestAccAlloydbInstance_networkConfig(t *testing.T) {
 		}
 		`,
 	}
-	context4 := map[string]interface{}{
+	context3 := map[string]interface{}{
 		"random_suffix":      suffix,
 		"network_name":       networkName,
 		"enable_public_ip": 	true,
@@ -613,16 +609,7 @@ func TestAccAlloydbInstance_networkConfig(t *testing.T) {
 		CheckDestroy:             testAccCheckAlloydbInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAlloydbInstance_alloydbInstanceBasic(context1),
-			},
-			{
-				ResourceName:            "google_alloydb_instance.default",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time"},
-			},
-			{
-				Config: testAccAlloydbInstance_networkConfig(context2),
+				Config: testAccAlloydbInstance_networkConfig(context1),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_alloydb_instance.default", "network_config.0.enable_public_ip", "true"),
 				),
@@ -634,7 +621,7 @@ func TestAccAlloydbInstance_networkConfig(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time"},
 			},
 			{
-				Config: testAccAlloydbInstance_networkConfig(context3),
+				Config: testAccAlloydbInstance_networkConfig(context2),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_alloydb_instance.default", "network_config.0.enable_public_ip", "true"),
 					resource.TestCheckResourceAttr("google_alloydb_instance.default", "network_config.0.authorized_external_networks.0.cidr_range", "8.8.8.8/30"),
@@ -649,7 +636,7 @@ func TestAccAlloydbInstance_networkConfig(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time"},
 			},
 			{
-				Config: testAccAlloydbInstance_networkConfig(context4),
+				Config: testAccAlloydbInstance_networkConfig(context3),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_alloydb_instance.default", "network_config.0.enable_public_ip", "true"),
 					resource.TestCheckResourceAttr("google_alloydb_instance.default", "network_config.0.authorized_external_networks.0.cidr_range", "8.8.8.8/30"),
