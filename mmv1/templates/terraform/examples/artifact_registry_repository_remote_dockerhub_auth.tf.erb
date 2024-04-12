@@ -26,6 +26,7 @@ resource "google_artifact_registry_repository" "<%= ctx[:primary_resource_id] %>
   mode          = "REMOTE_REPOSITORY"
   remote_repository_config {
     description = "docker hub with custom credentials"
+    disable_upstream_validation = true
     docker_repository {
       public_repository = "DOCKER_HUB"
     }
