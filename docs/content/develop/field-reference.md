@@ -225,6 +225,18 @@ Example:
   diff_suppress_func: 'tpgresource.CaseDiffSuppress'
 ```
 
+### `api_name`
+Specifies a name to use for communication with the API that is different than
+the name of the field in Terraform. In general, setting an `api_name` is not
+recommended, because it makes it more difficult for users and maintainers to
+understand how the resource maps to the underlying API.
+
+```yaml
+- !ruby/object:Api::Type::String
+  name: 'fieldOne'
+  api_name: 'otherFieldName'
+```
+
 ## `Enum` properties
 
 ### `values`
