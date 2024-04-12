@@ -966,10 +966,7 @@ func (r Resource) GetIdFormat() string {
 // Template Methods
 // ====================
 
-// Prints a dot notation path to where the field is nested within the parent
-// object when called on a property. eg: parent.meta.label.foo
-// Redefined on Resource to terminate the calls up the parent chain.
-
+// Functions that combine more niche pieces of resource data logic needed for resource generation that can not be otherwise performed in a format most coiuld easily parse.
 
 // checks a resource for if it has properties that have FlattenObject=true on fields where IgnoreRead=false
 // used to decide whether or not to import "google.golang.org/api/googleapi"
