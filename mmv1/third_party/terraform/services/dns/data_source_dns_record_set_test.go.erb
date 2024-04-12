@@ -12,7 +12,7 @@ import (
 func TestAcccDataSourceDnsRecordSet_basic(t *testing.T) {
 	t.Parallel()
 
-	randString := acctest.RandString(t, 10)
+	name := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -20,7 +20,7 @@ func TestAcccDataSourceDnsRecordSet_basic(t *testing.T) {
 		CheckDestroy:             testAccCheckDnsRecordSetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceDnsRecordSet_basic(randString),
+				Config: testAccDataSourceDnsRecordSet_basic(name),
 				Check: resource.ComposeTestCheckFunc(
 					acctest.CheckDataSourceStateMatchesResourceState("data.google_dns_record_set.rs", "google_dns_record_set.rs"),
 				),
