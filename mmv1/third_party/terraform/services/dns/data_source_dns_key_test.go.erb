@@ -97,58 +97,58 @@ data "google_dns_keys" "foo_dns_key_id" {
 
 // TestAccDataSourceDNSKeys_basic_AdcAuth is the same as TestAccDataSourceDNSKeys_basic but the test enforces that a developer runs this using
 // ADCs, supplied via GOOGLE_APPLICATION_CREDENTIALS. If any other credentials ENVs are set the PreCheck will fail.
-func TestAccDataSourceDNSKeys_basic_AdcAuth(t *testing.T) {
-	acctest.SkipIfVcr(t) // Uses external providers
-	t.Parallel()
+// Commented out until this test can run in TeamCity/CI.
+// func TestAccDataSourceDNSKeys_basic_AdcAuth(t *testing.T) {
+// 	acctest.SkipIfVcr(t) // Uses external providers
+// 	t.Parallel()
 
-	creds := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS") // PreCheck assertion handles checking this is set
+// 	creds := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS") // PreCheck assertion handles checking this is set
 
-	dnsZoneName := fmt.Sprintf("data-dnskey-test-%s", acctest.RandString(t, 10))
+// 	dnsZoneName := fmt.Sprintf("data-dnskey-test-%s", acctest.RandString(t, 10))
 
-	context := map[string]interface{}{
-		"credentials_path": creds,
-		"dns_zone_name":    dnsZoneName,
-		"dnssec_status":    "on",
-	}
+// 	context := map[string]interface{}{
+// 		"credentials_path": creds,
+// 		"dns_zone_name":    dnsZoneName,
+// 		"dnssec_status":    "on",
+// 	}
 
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck_AdcCredentialsOnly(t) }, // Note different than default
-		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducer(t),
-		Steps: []resource.TestStep{
-			// Check test fails with version of provider where data source is implemented with PF
-			{
-				ExternalProviders: map[string]resource.ExternalProvider{
-					"google": {
-						VersionConstraint: "4.60.0", // Muxed provider with dns data sources migrated to PF
-						Source:            "hashicorp/google",
-					},
-				},
-				ExpectError: regexp.MustCompile("Post \"https://oauth2.googleapis.com/token\": context canceled"),
-				Config:      testAccDataSourceDNSKeysConfig_AdcCredentials(context),
-				Check: resource.ComposeTestCheckFunc(
-					testAccDataSourceDNSKeysDSRecordCheck("data.google_dns_keys.foo_dns_key"),
-					resource.TestCheckResourceAttr("data.google_dns_keys.foo_dns_key", "key_signing_keys.#", "1"),
-					resource.TestCheckResourceAttr("data.google_dns_keys.foo_dns_key", "zone_signing_keys.#", "1"),
-					resource.TestCheckResourceAttr("data.google_dns_keys.foo_dns_key_id", "key_signing_keys.#", "1"),
-					resource.TestCheckResourceAttr("data.google_dns_keys.foo_dns_key_id", "zone_signing_keys.#", "1"),
-				),
-			},
-			// Test should pass with more recent code
-			{
-				ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-				Config:                   testAccDataSourceDNSKeysConfig_AdcCredentials(context),
-				Check: resource.ComposeTestCheckFunc(
-					testAccDataSourceDNSKeysDSRecordCheck("data.google_dns_keys.foo_dns_key"),
-					resource.TestCheckResourceAttr("data.google_dns_keys.foo_dns_key", "key_signing_keys.#", "1"),
-					resource.TestCheckResourceAttr("data.google_dns_keys.foo_dns_key", "zone_signing_keys.#", "1"),
-					resource.TestCheckResourceAttr("data.google_dns_keys.foo_dns_key_id", "key_signing_keys.#", "1"),
-					resource.TestCheckResourceAttr("data.google_dns_keys.foo_dns_key_id", "zone_signing_keys.#", "1"),
-				),
-			},
-		},
-	})
-}
-
+// 	acctest.VcrTest(t, resource.TestCase{
+// 		PreCheck:     func() { acctest.AccTestPreCheck_AdcCredentialsOnly(t) }, // Note different than default
+// 		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducer(t),
+// 		Steps: []resource.TestStep{
+// 			// Check test fails with version of provider where data source is implemented with PF
+// 			{
+// 				ExternalProviders: map[string]resource.ExternalProvider{
+// 					"google": {
+// 						VersionConstraint: "4.60.0", // Muxed provider with dns data sources migrated to PF
+// 						Source:            "hashicorp/google",
+// 					},
+// 				},
+// 				ExpectError: regexp.MustCompile("Post \"https://oauth2.googleapis.com/token\": context canceled"),
+// 				Config:      testAccDataSourceDNSKeysConfig_AdcCredentials(context),
+// 				Check: resource.ComposeTestCheckFunc(
+// 					testAccDataSourceDNSKeysDSRecordCheck("data.google_dns_keys.foo_dns_key"),
+// 					resource.TestCheckResourceAttr("data.google_dns_keys.foo_dns_key", "key_signing_keys.#", "1"),
+// 					resource.TestCheckResourceAttr("data.google_dns_keys.foo_dns_key", "zone_signing_keys.#", "1"),
+// 					resource.TestCheckResourceAttr("data.google_dns_keys.foo_dns_key_id", "key_signing_keys.#", "1"),
+// 					resource.TestCheckResourceAttr("data.google_dns_keys.foo_dns_key_id", "zone_signing_keys.#", "1"),
+// 				),
+// 			},
+// 			// Test should pass with more recent code
+// 			{
+// 				ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+// 				Config:                   testAccDataSourceDNSKeysConfig_AdcCredentials(context),
+// 				Check: resource.ComposeTestCheckFunc(
+// 					testAccDataSourceDNSKeysDSRecordCheck("data.google_dns_keys.foo_dns_key"),
+// 					resource.TestCheckResourceAttr("data.google_dns_keys.foo_dns_key", "key_signing_keys.#", "1"),
+// 					resource.TestCheckResourceAttr("data.google_dns_keys.foo_dns_key", "zone_signing_keys.#", "1"),
+// 					resource.TestCheckResourceAttr("data.google_dns_keys.foo_dns_key_id", "key_signing_keys.#", "1"),
+// 					resource.TestCheckResourceAttr("data.google_dns_keys.foo_dns_key_id", "zone_signing_keys.#", "1"),
+// 				),
+// 			},
+// 		},
+// 	})
+// }
 
 func testAccDataSourceDNSKeysConfig_AdcCredentials(context map[string]interface{}) string {
 	return acctest.Nprintf(`
