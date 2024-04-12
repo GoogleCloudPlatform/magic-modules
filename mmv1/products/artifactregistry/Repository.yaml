@@ -121,9 +121,6 @@ examples:
       # Ignore this field as it is INPUT_ONLY. AR will not return this in the
       # response.
       - 'remote_repository_config.0.disable_upstream_validation'
-      # Ignore this field because we have custom logic to ignore it when
-      # custom_repository is set (needed because of the default value)
-      - 'remote_repository_config.0.docker_repository.0.public_repository'
     vars:
       repository_id: 'example-docker-custom-remote'
       description: 'example remote custom docker repository with credentials'
@@ -138,9 +135,6 @@ examples:
       # Ignore this field as it is INPUT_ONLY. AR will not return this in the
       # response.
       - 'remote_repository_config.0.disable_upstream_validation'
-      # Ignore this field because we have custom logic to ignore it when
-      # custom_repository is set (needed because of the default value)
-      - 'remote_repository_config.0.maven_repository.0.public_repository'
     vars:
       repository_id: 'example-maven-custom-remote'
       description: 'example remote custom maven repository with credentials'
@@ -155,9 +149,6 @@ examples:
       # Ignore this field as it is INPUT_ONLY. AR will not return this in the
       # response.
       - 'remote_repository_config.0.disable_upstream_validation'
-      # Ignore this field because we have custom logic to ignore it when
-      # custom_repository is set (needed because of the default value)
-      - 'remote_repository_config.0.npm_repository.0.public_repository'
     vars:
       repository_id: 'example-npm-custom-remote'
       description: 'example remote custom npm repository with credentials'
@@ -172,9 +163,6 @@ examples:
       # Ignore this field as it is INPUT_ONLY. AR will not return this in the
       # response.
       - 'remote_repository_config.0.disable_upstream_validation'
-      # Ignore this field because we have custom logic to ignore it when
-      # custom_repository is set (needed because of the default value)
-      - 'remote_repository_config.0.python_repository.0.public_repository'
     vars:
       repository_id: 'example-python-custom-remote'
       description: 'example remote custom python repository with credentials'
