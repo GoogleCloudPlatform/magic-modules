@@ -321,21 +321,34 @@ func TestValidateIAMCustomRoleIDRegex(t *testing.T) {
 func TestValidateGCSName(t *testing.T) {
 	x := []StringValidationTestCase{
 		// No errors
-		{TestName: "basic", Value: "foo-bar"},
-		{TestName: "begins with number", Value: "1foo-bar"},
+		{TestName: "basic", Value: "foobar"},
+		{TestName: "has number", Value: "foobar1"},
+		{TestName: "all numbers", Value: "12345"},
+		{TestName: "all _", Value: "foo_bar_baz"},
+		{TestName: "all -", Value: "foo-bar-baz"},
+		{TestName: "begins with number", Value: "1foo-bar_baz"},
+		{TestName: "ends with number", Value: "foo-bar_baz1"},
 		{TestName: "almost an ip", Value: "192.168.5.foo"},
-		{TestName: "has underscore", Value: "foo-bar_baz"},
+		{TestName: "has _", Value: "foo-bar_baz"},
+		{TestName: "--", Value: "foo--bar"},
+		{TestName: "__", Value: "foo__bar"},
+		{TestName: "-goog", Value: "foo-goog"},
+		{TestName: ".goog", Value: "foo.goog"},
 
 		// With errors
-		{TestName: "has &", Value: "foo-&bar", ExpectError: true},
-		{TestName: "has uppercase", Value: "foo-Bar", ExpectError: true},
-		{TestName: "begins with -", Value: "-foo-bar", ExpectError: true},
+		{TestName: "invalid char $", Value: "foo$bar", ExpectError: true},
+		{TestName: "has uppercase", Value: "fooBar", ExpectError: true},
+		{TestName: "begins with -", Value: "-foobar", ExpectError: true},
+		{TestName: "ends with -", Value: "foobar-", ExpectError: true},
+		{TestName: "begins with _", Value: "_foobar", ExpectError: true},
+		{TestName: "ends with _", Value: "foobar_", ExpectError: true},
 		{TestName: "less than 3 chars", Value: "fo", ExpectError: true},
+		{TestName: "..", Value: "foo..bar", ExpectError: true},
 		{TestName: "greater than 63 chars with no .", Value: "my-really-long-bucket-name-with-invalid-that-does-not-contain-a-period", ExpectError: true},
 		{TestName: "greater than 63 chars between .", Value: "my.really-long-bucket-name-with-invalid-that-does-contain-a-period-but.is-too-long", ExpectError: true},
 		{TestName: "has goog prefix", Value: "goog-foobar", ExpectError: true},
 		{TestName: "almost an ip", Value: "192.168.5.1", ExpectError: true},
-		{TestName: "contains google", Value: "foo-google-bar", ExpectError: true},
+		{TestName: "contains google", Value: "foobar-google", ExpectError: true},
 		{TestName: "contains close misspelling of google", Value: "foo-go0gle-bar", ExpectError: true},
 	}
 
