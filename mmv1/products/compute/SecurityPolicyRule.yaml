@@ -62,12 +62,6 @@ examples:
     min_version: 'beta'
     vars:
       sec_policy_name: 'policywithmultiplerules'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'security_policy_rule_with_network_match'
-    primary_resource_id: 'policy_rule_network_match'
-    min_version: 'beta'
-    vars:
-      sec_policy_name: 'policyfornetworkmatch'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'security_policy'
