@@ -21,6 +21,8 @@ create_url: 'projects/{{project}}/regions/{{region}}/networkEdgeSecurityServices
 self_link: 'projects/{{project}}/regions/{{region}}/networkEdgeSecurityServices/{{name}}'
 update_verb: :PATCH
 update_mask: true
+# Skipping the sweeper since we need to sweep multiple regions
+skip_sweeper: true
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/armor/docs/advanced-network-ddos?hl=pt-br#activate_advanced_network_ddos_protection'
