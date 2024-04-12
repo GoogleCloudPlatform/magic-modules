@@ -156,7 +156,7 @@ properties:
   - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
-      Labels with user-defined metadata.
+      Labels with user-definned metadata.
       This field may contain up to 64 entries. Label keys and values may be no
       longer than 63 characters. Label keys must begin with a lowercase letter
       and may only contain lowercase letters, numeric characters, underscores,
