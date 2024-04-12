@@ -44,32 +44,37 @@ func resourceGoogleProjectIamMemberRemoveCreate(d *schema.ResourceData, meta int
 	project := d.Get("project").(string)
 	role := d.Get("role").(string)
 	member := d.Get("member").(string)
-
+	found := false
 	iamPolicy, err := config.NewResourceManagerClient(config.UserAgent).Projects.GetIamPolicy(project,
 		&cloudresourcemanager.GetIamPolicyRequest{
 			Options: &cloudresourcemanager.GetPolicyOptions{
 				RequestedPolicyVersion: tpgiamresource.IamPolicyVersion,
 			},
 		}).Do()
-	for _, bind := range iamPolicy.Bindings {
-		for _, existingMember := range bind.Members {
-			if member == existingMember {
-				if role == bind.Role {
-					existingMember = ""
-					updateRequest := &cloudresourcemanager.SetIamPolicyRequest{
-						Policy:     iamPolicy,
-						UpdateMask: "bindings",
-					}
-					_, err = config.NewResourceManagerClient(config.UserAgent).Projects.SetIamPolicy(project, updateRequest).Do()
-					if err != nil {
-						return fmt.Errorf("cannot update IAM binding policy on project %s: %v", project, err)
-					}
-				} else {
-					return fmt.Errorf("Could not find Member %s with the corresponding role %s.", member, role)
+
+	for i := 0; i < len(iamPolicy.Bindings); i++ {
+		for j := 0; j < len(iamPolicy.Bindings[i].Members); j++ {
+			if member == iamPolicy.Bindings[i].Members[j] {
+				if role == iamPolicy.Bindings[i].Role {
+					found = true
+					iamPolicy.Bindings[i].Members = append(iamPolicy.Bindings[i].Members[:j], iamPolicy.Bindings[i].Members[j+1:]...)
 				}
 			}
 		}
 	}
+
+	if found == false {
+		return fmt.Errorf("Could not find Member %s with the corresponding role %s.", member, role)
+	}
+	updateRequest := &cloudresourcemanager.SetIamPolicyRequest{
+		Policy:     iamPolicy,
+		UpdateMask: "bindings",
+	}
+	_, err = config.NewResourceManagerClient(config.UserAgent).Projects.SetIamPolicy(project, updateRequest).Do()
+	if err != nil {
+		return fmt.Errorf("cannot update IAM binding policy on project %s: %v", project, err)
+	}
+
 	d.SetId(fmt.Sprintf("%s/%s/%s", project, member, role))
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, d.Id())
