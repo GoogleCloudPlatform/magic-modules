@@ -286,8 +286,6 @@ options:
     machineType: 'N1_HIGHCPU_32'
 
 logsBucket: 'gs://cloudbuild-generate-diffs-logs'
-options:
-  logging: GCS_ONLY
 availableSecrets:
   secretManager:
     - versionName: projects/673497134629/secrets/github-magician-token-generate-diffs-downstreams/versions/latest
