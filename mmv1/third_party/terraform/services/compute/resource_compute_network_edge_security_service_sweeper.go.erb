@@ -40,6 +40,8 @@ func testSweepComputeNetworkEdgeSecurityService(region string) error {
 
 	regions := []string{"us-central1", "us-west2", "us-south1", "southamerica-west1", "europe-west1"}
 	for _, r := range regions {
+		log.Printf("[INFO][SWEEPER_LOG] Starting sweeper for %s in %s", resourceName, r)
+
 		// Setup variables to replace in list template
 		d := &tpgresource.ResourceDataMock{
 			FieldsInSchema: map[string]interface{}{
@@ -78,7 +80,7 @@ func testSweepComputeNetworkEdgeSecurityService(region string) error {
 
 		rl := resourceList.([]interface{})
 
-		log.Printf("[INFO][SWEEPER_LOG] Found %d items in %s list response.", len(rl), resourceName)
+		log.Printf("[INFO][SWEEPER_LOG] Found %d items in %s in %s list response.", len(rl), r, resourceName)
 		// Keep count of items that aren't sweepable for logging.
 		nonPrefixCount := 0
 		for _, ri := range rl {
@@ -119,7 +121,7 @@ func testSweepComputeNetworkEdgeSecurityService(region string) error {
 		}
 
 		if nonPrefixCount > 0 {
-			log.Printf("[INFO][SWEEPER_LOG] %d items were non-sweepable and skipped.", nonPrefixCount)
+			log.Printf("[INFO][SWEEPER_LOG] %d items in %s were non-sweepable and skipped.", nonPrefixCount, r)
 		}
 
 	}
