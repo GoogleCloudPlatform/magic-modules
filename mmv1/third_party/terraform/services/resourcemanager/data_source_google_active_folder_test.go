@@ -1,3 +1,5 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
 package resourcemanager_test
 
 import (
@@ -22,6 +24,29 @@ func TestAccDataSourceGoogleActiveFolder_default(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleActiveFolderConfig(parent, displayName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccDataSourceGoogleActiveFolderCheck("data.google_active_folder.my_folder", "google_folder.foobar"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccDataSourceGoogleActiveFolder_Search(t *testing.T) {
+	org := envvar.GetTestOrgFromEnv(t)
+
+	parent := fmt.Sprintf("organizations/%s", org)
+	displayName := "tf-test-" + acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataSourceGoogleActiveFolderConfig_Search(parent, displayName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataSourceGoogleActiveFolderCheck("data.google_active_folder.my_folder", "google_folder.foobar"),
 				),
@@ -110,6 +135,30 @@ resource "google_folder" "foobar" {
 data "google_active_folder" "my_folder" {
   parent       = google_folder.foobar.parent
   display_name = google_folder.foobar.display_name
+}
+`, parent, displayName)
+}
+
+func testAccDataSourceGoogleActiveFolderConfig_Search(parent string, displayName string) string {
+	return fmt.Sprintf(`
+resource "google_folder" "foobar" {
+  parent       = "%s"
+  display_name = "%s"
+}
+
+# Wait after folder creation to limit eventual consistency errors.
+resource "time_sleep" "wait_120_seconds" {
+  depends_on = [google_folder.foobar]
+
+  create_duration = "120s"
+}
+
+
+data "google_active_folder" "my_folder" {
+	depends_on = [time_sleep.wait_120_seconds]
+  parent       = google_folder.foobar.parent
+  display_name = google_folder.foobar.display_name
+	rest_method  = "SEARCH"
 }
 `, parent, displayName)
 }
