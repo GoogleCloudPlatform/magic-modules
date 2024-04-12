@@ -147,8 +147,14 @@ properties:
               properties:
                 - !ruby/object:Api::Type::String
                   name: role
-                  description: "Required. IAM role to be granted. https://cloud.google.com/iam/docs/roles-overview. "
+                  description: | 
+                    Required. IAM role to be granted. https://cloud.google.com/iam/docs/roles-overview.
                   required: true
+                - !ruby/object:Api::Type::String
+                  name: conditionExpression
+                  description: |
+                    The expression field of the IAM condition to be associated with the role. If specified, a user with an active grant for this entitlement would be able to access the resource only if this condition evaluates to true for their request.
+                    https://cloud.google.com/iam/docs/conditions-overview#attributes.
   - !ruby/object:Api::Type::String
     name: maxRequestDuration
     description: |
@@ -209,13 +215,17 @@ properties:
 parameters:
   - !ruby/object:Api::Type::String
     name: location
-    description: "TODO"
+    description: | 
+      The region of the Entitlement resource.
     url_param_only: true
     required: true
     immutable: true
   - !ruby/object:Api::Type::String
     name: entitlementId
-    description: "TODO"
+    description: |
+      The ID to use for this Entitlement. This will become the last part of the resource name. 
+      This value should be 4-63 characters, and valid characters are "[a-z]", "[0-9]", and "-". The first character should be from [a-z].
+      This value should be unique among all other Entitlements under the specified `parent`.
     url_param_only: true
     required: true
     immutable: true
