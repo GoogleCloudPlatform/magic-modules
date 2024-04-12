@@ -574,15 +574,15 @@ func TestAccAlloydbInstance_networkConfig(t *testing.T) {
 	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-networkconfig")
 
 	context1 := map[string]interface{}{
-		"random_suffix":      suffix,
-		"network_name":       networkName,
-		"enable_public_ip": 	true,
+		"random_suffix":                suffix,
+		"network_name":                 networkName,
+		"enable_public_ip":             true,
 		"authorized_external_networks": "",
 	}
 	context2 := map[string]interface{}{
-		"random_suffix":      suffix,
-		"network_name":       networkName,
-		"enable_public_ip": 	true,
+		"random_suffix":    suffix,
+		"network_name":     networkName,
+		"enable_public_ip": true,
 		"authorized_external_networks": `
 		authorized_external_networks {
 			cidr_range = "8.8.8.8/30"
@@ -593,10 +593,10 @@ func TestAccAlloydbInstance_networkConfig(t *testing.T) {
 		`,
 	}
 	context3 := map[string]interface{}{
-		"random_suffix":      suffix,
-		"network_name":       networkName,
-		"enable_public_ip": 	true,
-		"cidr_range": "8.8.8.8/30",
+		"random_suffix":    suffix,
+		"network_name":     networkName,
+		"enable_public_ip": true,
+		"cidr_range":       "8.8.8.8/30",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
