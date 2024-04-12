@@ -64,15 +64,16 @@ func resourceGoogleProjectIamMemberRemoveCreate(d *schema.ResourceData, meta int
 	}
 
 	if found == false {
-		return fmt.Errorf("Could not find Member %s with the corresponding role %s.", member, role)
-	}
-	updateRequest := &cloudresourcemanager.SetIamPolicyRequest{
-		Policy:     iamPolicy,
-		UpdateMask: "bindings",
-	}
-	_, err = config.NewResourceManagerClient(config.UserAgent).Projects.SetIamPolicy(project, updateRequest).Do()
-	if err != nil {
-		return fmt.Errorf("cannot update IAM binding policy on project %s: %v", project, err)
+		fmt.Printf("Could not find Member %s with the corresponding role %s.", member, role)
+	} else {
+		updateRequest := &cloudresourcemanager.SetIamPolicyRequest{
+			Policy:     iamPolicy,
+			UpdateMask: "bindings",
+		}
+		_, err = config.NewResourceManagerClient(config.UserAgent).Projects.SetIamPolicy(project, updateRequest).Do()
+		if err != nil {
+			return fmt.Errorf("cannot update IAM binding policy on project %s: %v", project, err)
+		}
 	}
 
 	d.SetId(fmt.Sprintf("%s/%s/%s", project, member, role))
