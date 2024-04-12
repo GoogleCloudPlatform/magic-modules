@@ -80,7 +80,7 @@ var (
 	GCSNameValidChars     = "^[a-z0-9_.-]*$"
 	GCSNameStartEndChars  = "^[a-z|0-9].*[a-z|0-9]$"
 	GCSNameLength         = "^.{3,222}"
-	GCSNameLengthSplit    = "^.{0,63}$"
+	GCSNameLengthSplit    = "^.{1,63}$"
 	GCSNameCidr           = "^[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}$"
 	GCSNameGoogPrefix     = "^goog.*$"
 	GCSNameContainsGoogle = "^.*google.*$"
