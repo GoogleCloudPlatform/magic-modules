@@ -149,16 +149,15 @@ resource "google_folder" "foobar" {
 # Wait after folder creation to limit eventual consistency errors.
 resource "time_sleep" "wait_120_seconds" {
   depends_on = [google_folder.foobar]
-
   create_duration = "120s"
 }
 
 
 data "google_active_folder" "my_folder" {
-	depends_on = [time_sleep.wait_120_seconds]
+  depends_on = [time_sleep.wait_120_seconds]
   parent       = google_folder.foobar.parent
   display_name = google_folder.foobar.display_name
-	rest_method  = "SEARCH"
+  rest_method  = "SEARCH"
 }
 `, parent, displayName)
 }
