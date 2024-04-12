@@ -596,7 +596,7 @@ func TestAccAlloydbInstance_networkConfig(t *testing.T) {
 		"random_suffix":      suffix,
 		"network_name":       networkName,
 		"enable_public_ip": 	true,
-		"authorized_external_networks": "8.8.8.8/30",
+		"cidr_range": "8.8.8.8/30",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
