@@ -25,18 +25,19 @@ func TestAccProjectIamMemberRemove_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckGoogleProjectIamMemberRemove_basic(random_suffix, org, members),
+				Config:             testAccCheckGoogleProjectIamMemberRemove_basic(random_suffix, org, members),
 				ExpectNonEmptyPlan: true,
 			},
 			{
-				Config: testAccCheckGoogleProjectIamMemberRemove_basic2(random_suffix, org, members),
+				Config:   testAccCheckGoogleProjectIamMemberRemove_basic2(random_suffix, org, members),
 				PlanOnly: true,
 			},
 			{
 				ResourceName:            "google_project_iam_binding.bar",
-				ImportStateId:           fmt.Sprintf("tf-test-%s/roles/editor", random_suffix),
+				ImportStateId:           fmt.Sprintf("tf-test-%s roles/editor", random_suffix),
 				ImportState:             true,
 				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag"},
 			},
 		},
 	})
@@ -58,18 +59,19 @@ func TestAccProjectIamMemberRemove_multipleMemberBinding(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckGoogleProjectIamMemberRemove_multipleMemberBinding(random_suffix, org, member_remove),
+				Config:             testAccCheckGoogleProjectIamMemberRemove_multipleMemberBinding(random_suffix, org, member_remove),
 				ExpectNonEmptyPlan: true,
 			},
 			{
-				Config: testAccCheckGoogleProjectIamMemberRemove_multipleMemberBinding2(random_suffix, org, member_remove),
+				Config:   testAccCheckGoogleProjectIamMemberRemove_multipleMemberBinding2(random_suffix, org, member_remove),
 				PlanOnly: true,
 			},
 			{
 				ResourceName:            "google_project_iam_binding.bar",
-				ImportStateId:           fmt.Sprintf("tf-test-%s/roles/editor", random_suffix),
+				ImportStateId:           fmt.Sprintf("tf-test-%s roles/editor", random_suffix),
 				ImportState:             true,
 				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag"},
 			},
 		},
 	})
