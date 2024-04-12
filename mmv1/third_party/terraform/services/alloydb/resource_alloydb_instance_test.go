@@ -596,11 +596,7 @@ func TestAccAlloydbInstance_networkConfig(t *testing.T) {
 		"random_suffix":      suffix,
 		"network_name":       networkName,
 		"enable_public_ip": 	true,
-		"authorized_external_networks": `
-		authorized_external_networks {
-			cidr_range = "8.8.8.8/30"
-		}
-		`,
+		"authorized_external_networks": "8.8.8.8/30",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -636,7 +632,7 @@ func TestAccAlloydbInstance_networkConfig(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time"},
 			},
 			{
-				Config: testAccAlloydbInstance_networkConfig(context3),
+				Config: testAccAlloydbInstance_networkConfigWithAnAuthNetwork(context3),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_alloydb_instance.default", "network_config.0.enable_public_ip", "true"),
 					resource.TestCheckResourceAttr("google_alloydb_instance.default", "network_config.0.authorized_external_networks.0.cidr_range", "8.8.8.8/30"),
@@ -663,6 +659,35 @@ resource "google_alloydb_instance" "default" {
   network_config {
     enable_public_ip = %{enable_public_ip}
     %{authorized_external_networks}
+  }	
+}
+
+resource "google_alloydb_cluster" "default" {
+  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
+  location   = "us-central1"
+  network    = data.google_compute_network.default.id
+}
+
+data "google_project" "project" {}
+
+data "google_compute_network" "default" {
+	name = "%{network_name}"
+}
+`, context)
+}
+
+func testAccAlloydbInstance_networkConfigWithAnAuthNetwork(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_instance" "default" {
+  cluster       = google_alloydb_cluster.default.name
+  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
+  instance_type = "PRIMARY"
+
+  network_config {
+    enable_public_ip = %{enable_public_ip}
+		authorized_external_networks {
+			cidr_range = %{cidr_range}
+		}
   }	
 }
 
