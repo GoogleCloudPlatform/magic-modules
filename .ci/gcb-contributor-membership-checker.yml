@@ -70,6 +70,8 @@ steps:
       - $COMMIT_SHA
 
 logsBucket: 'gs://cloudbuild-membership-checker-logs'
+options:
+  logging: GCS_ONLY
 availableSecrets:
   secretManager:
     - versionName: projects/673497134629/secrets/github-magician-token-generate-diffs-magic-modules/versions/latest
