@@ -349,7 +349,7 @@ subnetwork in which the cluster's instances are launched.
 * `enable_intranode_visibility` - (Optional)
     Whether Intra-node visibility is enabled for this cluster. This makes same node pod to pod traffic visible for VPC network.
 
-* `enable_l4_ilb_subsetting` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+* `enable_l4_ilb_subsetting` - (Optional)
     Whether L4ILB Subsetting is enabled for this cluster.
 
 * `enable_multi_networking` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
@@ -363,6 +363,9 @@ subnetwork in which the cluster's instances are launched.
 
 * `datapath_provider` - (Optional)
     The desired datapath provider for this cluster. This is set to `LEGACY_DATAPATH` by default, which uses the IPTables-based kube-proxy implementation. Set to `ADVANCED_DATAPATH` to enable Dataplane v2.
+
+* `enable_cilium_clusterwide_network_policy` - (Optional)
+    Whether CiliumClusterWideNetworkPolicy is enabled on this cluster. Defaults to false.
 
 * `default_snat_status` - (Optional)
   [GKE SNAT](https://cloud.google.com/kubernetes-engine/docs/how-to/ip-masquerade-agent#how_ipmasq_works) DefaultSnatStatus contains the desired state of whether default sNAT should be disabled on the cluster, [API doc](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1beta1/projects.locations.clusters#networkconfig). Structure is [documented below](#nested_default_snat_status)
@@ -448,6 +451,9 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
 *  `config_connector_config` -  (Optional).
     The status of the ConfigConnector addon. It is disabled by default; Set `enabled = true` to enable.
 
+*  `stateful_ha_config` - (Optional).
+    The status of the Stateful HA addon, which provides automatic configurable failover for stateful applications.
+    It is disabled by default for Standard clusters. Set `enabled = true` to enable.
 
 This example `addons_config` disables two addons:
 

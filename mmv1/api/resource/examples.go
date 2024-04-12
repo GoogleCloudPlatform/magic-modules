@@ -14,9 +14,14 @@
 package resource
 
 import (
+	"bytes"
 	"fmt"
 	"net/url"
+	"path/filepath"
+	"text/template"
 
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
+	"github.com/golang/glog"
 	"gopkg.in/yaml.v3"
 )
 
@@ -151,6 +156,8 @@ type Examples struct {
 	// testcase. Think before adding as there is latency and adds an external dependency to
 	// your test so avoid if you can.
 	PullExternal bool `yaml:"pull_external"`
+
+	HCLText string
 }
 
 func (e *Examples) UnmarshalYAML(n *yaml.Node) error {
@@ -162,9 +169,30 @@ func (e *Examples) UnmarshalYAML(n *yaml.Node) error {
 		return err
 	}
 
-	e.ConfigPath = fmt.Sprintf("templates/terraform/examples/%s.tf.erb", e.Name)
+	e.ConfigPath = fmt.Sprintf("templates/terraform/examples/go/%s.tf.tmpl", e.Name)
+	e.SetHCLText()
 
 	return nil
+}
+
+func (e *Examples) SetHCLText() {
+	templatePath := e.ConfigPath
+	templates := []string{
+		templatePath,
+	}
+	templateFileName := filepath.Base(templatePath)
+
+	tmpl, err := template.New(templateFileName).ParseFiles(templates...)
+	if err != nil {
+		glog.Exit(err)
+	}
+
+	contents := bytes.Buffer{}
+	if err = tmpl.ExecuteTemplate(&contents, templateFileName, e); err != nil {
+		glog.Exit(err)
+	}
+
+	e.HCLText = contents.String()
 }
 
 // func (e *Examples) config_documentation(pwd) {
@@ -294,6 +322,18 @@ func (e *Examples) OiCSLink() string {
 		RawQuery: v.Encode(),
 	}
 	return u.String()
+}
+
+func (e *Examples) TestSlug(productName, resourceName string) string {
+	ret := fmt.Sprintf("%s%s_%sExample", productName, resourceName, google.Camelize(e.Name, "upper"))
+	return ret
+}
+
+func (e *Examples) ResourceType(terraformName string) string {
+	if e.PrimaryResourceType != "" {
+		return e.PrimaryResourceType
+	}
+	return terraformName
 }
 
 // rubocop:disable Layout/LineLength
