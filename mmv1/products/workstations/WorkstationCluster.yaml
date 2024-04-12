@@ -117,7 +117,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: "controlPlaneIp"
     description: |
-      The private IP address of the control plane for this workstation cluster. 
+      The private IP address of the control plane for this workstation cluster.
       Workstation VMs need access to this IP address to work with the service, so make sure that your firewall rules allow egress from the workstation VMs to this address.
     output: true
   - !ruby/object:Api::Type::String
