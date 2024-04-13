@@ -148,7 +148,7 @@ properties:
               properties:
                 - !ruby/object:Api::Type::String
                   name: role
-                  description: | 
+                  description: |
                     Required. IAM role to be granted. https://cloud.google.com/iam/docs/roles-overview.
                   required: true
                 - !ruby/object:Api::Type::String
@@ -217,7 +217,7 @@ properties:
 parameters:
   - !ruby/object:Api::Type::String
     name: location
-    description: | 
+    description: |
       The region of the Entitlement resource.
     url_param_only: true
     required: true
@@ -225,7 +225,7 @@ parameters:
   - !ruby/object:Api::Type::String
     name: entitlementId
     description: |
-      The ID to use for this Entitlement. This will become the last part of the resource name. 
+      The ID to use for this Entitlement. This will become the last part of the resource name.
       This value should be 4-63 characters, and valid characters are "[a-z]", "[0-9]", and "-". The first character should be from [a-z].
       This value should be unique among all other Entitlements under the specified `parent`.
     url_param_only: true
