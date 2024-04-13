@@ -103,6 +103,7 @@ properties:
                     properties:
                       - !ruby/object:Api::Type::Array
                         name: principals
+                        min_size: 1
                         is_set: true
                         item_type: Api::Type::String
                         description: "Optional. Users who are being allowed for the operation. Each entry should be a valid v1 IAM Principal Identifier. Format for these is documented at: https://cloud.google.com/iam/docs/principal-identifiers#v1 "
@@ -199,6 +200,7 @@ properties:
           - not_mandatory
   - !ruby/object:Api::Type::NestedObject
     name: additionalNotificationTargets
+    allow_empty_object: true
     description: |
       AdditionalNotificationTargets includes email addresses to be notified.
     properties:
