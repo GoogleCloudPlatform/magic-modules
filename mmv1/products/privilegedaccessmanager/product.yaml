@@ -20,7 +20,6 @@ name: PrivilegedAccessManager
 display_name: Privileged Access Manager
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
-
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: name
