@@ -170,10 +170,10 @@ func ResourceComposerEnvironment() *schema.Resource {
 			tpgresource.DefaultProviderProject,
 			tpgresource.DefaultProviderRegion,
 			tpgresource.SetLabelsDiff,
+			customdiff.ValidateChange("config.0.software_config.0.image_version", imageVersionChangeValidationFunc),
 <% unless version == "ga" -%>
 			customdiff.ForceNewIf("config.0.node_config.0.network", forceNewCustomDiff("config.0.node_config.0.network")),
 			customdiff.ForceNewIf("config.0.node_config.0.subnetwork", forceNewCustomDiff("config.0.node_config.0.subnetwork")),
-			customdiff.ValidateChange("config.0.software_config.0.image_version", imageVersionChangeValidationFunc),
 			versionValidationCustomizeDiffFunc,
 <% end -%>
 		),
@@ -476,9 +476,7 @@ func ResourceComposerEnvironment() *schema.Resource {
 										Type:             schema.TypeString,
 										Computed:         true,
 										Optional:         true,
-<% if version == "ga" -%>
-										ForceNew:         true,
-<% end -%>
+										ForceNew:         false,
 										AtLeastOneOf:     composerSoftwareConfigKeys,
 										ValidateFunc:     verify.ValidateRegexp(composerEnvironmentVersionRegexp),
 										DiffSuppressFunc: composerImageVersionDiffSuppress,
@@ -1289,7 +1287,6 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 		}
 <% end -%>
 
-<% unless version == "ga" -%>
 		if d.HasChange("config.0.software_config.0.image_version") {
 			patchObj := &composer.Environment{
 				Config: &composer.EnvironmentConfig{
@@ -1304,7 +1301,6 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 				return err
 			}
 		}
-<% end -%>
 
 		if d.HasChange("config.0.software_config.0.scheduler_count") {
 			patchObj := &composer.Environment{
