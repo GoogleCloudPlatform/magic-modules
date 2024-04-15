@@ -35,7 +35,7 @@ func TestAccBigqueryDatapolicyDataPolicy_bigqueryDatapolicyDataPolicyUpdate(t *t
 	})
 }
 
-func TestAccBigqueryDatapolicyDataPolicy_bigqueryDatapolicyDataPolicyRoutineExample(t *testing.T) {
+func TestAccBigqueryDatapolicyDataPolicy_bigqueryDatapolicyDataPolicyRoutineUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
