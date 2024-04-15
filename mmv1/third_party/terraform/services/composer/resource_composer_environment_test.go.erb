@@ -2255,6 +2255,7 @@ resource "google_compute_subnetwork" "test" {
 
 `, envName, network, subnetwork)
 }
+//
 
 func testAccComposerEnvironment_composerV2HighResilience(envName, network, subnetwork string) string {
 	return fmt.Sprintf(`
