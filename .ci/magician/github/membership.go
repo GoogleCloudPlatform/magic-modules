@@ -56,11 +56,11 @@ var (
 		// 	startDate: newDate(2024, 3, 28, pdtLoc),
 		// 	endDate:   newDate(2024, 4, 2, pdtLoc),
 		// },
-    {
-      id: "trodge",
-      startDate: newDate(2024, 4, 5, pdtLoc),
-      endDate: newDate(2024, 4, 10, pdtLoc),
-    },
+		{
+			id:        "hao-nan-li",
+			startDate: newDate(2024, 4, 11, pdtLoc),
+			endDate:   newDate(2024, 6, 14, pdtLoc),
+		},
 	}
 )
 
