@@ -51,8 +51,8 @@ resource "google_privileged_access_manager_entitlement" "tf_entitlement" {
     entitlement_id = "tf_test_example_entitlement%{random_suffix}"
     location = "us-central1-a"
     max_request_duration = "43200s"
-    parent = "projects/%{project}"
-    requester_justification_config {    
+    parent = "projects/ci-test-project-188019"
+    requester_justification_config { 
         unstructured{}
     }
     eligible_users {
@@ -63,7 +63,7 @@ resource "google_privileged_access_manager_entitlement" "tf_entitlement" {
             role_bindings{
                 role = "roles/storage.admin"
             }
-            resource = "//cloudresourcemanager.googleapis.com/projects/itsvarsharma-pam-testing"
+            resource = "//cloudresourcemanager.googleapis.com/projects/ci-test-project-188019"
             resource_type = "cloudresourcemanager.googleapis.com/Project"
         }
     }
@@ -92,9 +92,9 @@ func testAccPrivilegedAccessManagerEntitlement_privilegedAccessManagerEntitlemen
 resource "google_privileged_access_manager_entitlement" "tf_entitlement" {
     provider =  google-beta
     entitlement_id = "tf_test_example_entitlement%{random_suffix}"
-    location = "us-central1-a"
+    location = "us-central1"
     max_request_duration = "43200s"
-    parent = "projects/%{project}"
+    parent = "projects/ci-test-project-188019"
     requester_justification_config {    
         unstructured{}
     }
@@ -106,7 +106,7 @@ resource "google_privileged_access_manager_entitlement" "tf_entitlement" {
             role_bindings{
                 role = "roles/storage.admin"
             }
-            resource = "//cloudresourcemanager.googleapis.com/projects/itsvarsharma-pam-testing"
+            resource = "//cloudresourcemanager.googleapis.com/projects/ci-test-project-188019"
             resource_type = "cloudresourcemanager.googleapis.com/Project"
         }
     }
