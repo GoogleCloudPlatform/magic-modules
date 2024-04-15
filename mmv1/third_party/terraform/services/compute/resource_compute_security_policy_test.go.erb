@@ -163,44 +163,6 @@ func TestAccComputeSecurityPolicy_update(t *testing.T) {
 	})
 }
 
-func TestAccComputeSecurityPolicy_patchRule(t *testing.T) {
-	t.Parallel()
-
-	spName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckComputeSecurityPolicyDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeSecurityPolicy_withRule(spName),
-			},
-			{
-				ResourceName:      "google_compute_security_policy.policy",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-      {
-				Config: testAccComputeSecurityPolicy_patchRule0(spName),
-			},
-			{
-				ResourceName:      "google_compute_security_policy.policy",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-      {
-				Config: testAccComputeSecurityPolicy_patchRule1(spName),
-			},
-			{
-				ResourceName:      "google_compute_security_policy.policy",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
 func TestAccComputeSecurityPolicy_withAdvancedOptionsConfig(t *testing.T) {
 	t.Parallel()
 
@@ -717,72 +679,6 @@ resource "google_compute_security_policy" "policy" {
       config {
         src_ip_ranges = ["10.0.0.0/24"]
       }
-    }
-    preview = true
-  }
-}
-`, spName)
-}
-
-func testAccComputeSecurityPolicy_patchRule0(spName string) string {
-	return fmt.Sprintf(`
-resource "google_compute_security_policy" "policy" {
-  name = "%s"
-
-  rule {
-    action   = "deny"
-    priority = "2147483647"
-    match {
-      versioned_expr = "SRC_IPS_V1"
-      config {
-        src_ip_ranges = ["*"]
-      }
-    }
-    description = "default rule"
-  }
-
-  rule {
-    action   = "deny"
-    priority = "2000"
-    match {
-      versioned_expr = "SRC_IPS_V1"
-      config {
-        src_ip_ranges = [
-           "5.5.5.5",
-           "6.6.6.6",
-        ]
-      }
-    }
-    preview = true
-  }
-}
-`, spName)
-}
-
-func testAccComputeSecurityPolicy_patchRule1(spName string) string {
-	return fmt.Sprintf(`
-resource "google_compute_security_policy" "policy" {
-  name = "%s"
-
-  rule {
-    action   = "allow"
-    priority = "2147483647"
-    match {
-      versioned_expr = "SRC_IPS_V1"
-      config {
-        src_ip_ranges = ["*"]
-      }
-    }
-    description = "default rule"
-  }
-
-  rule {
-    action   = "deny"
-    priority = "2000"
-    match {
-      expr {
-				expression = "has(request.headers['Host']) && (request.headers['Host'].contains('deny_value')) && request.path.matches('^/.*$')"
-			}
     }
     preview = true
   }

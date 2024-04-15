@@ -97,6 +97,28 @@ properties:
         values:
           - :SRC_IPS_V1
       - !ruby/object:Api::Type::NestedObject
+        name: 'expr'
+        description: |
+          User defined CEVAL expression. A CEVAL expression is used to specify match criteria such as origin.ip, source.region_code and contents in the request header.
+        properties:
+        - !ruby/object:Api::Type::String
+          name: 'expression'
+          required: true
+          description: |
+            Textual representation of an expression in Common Expression Language syntax. The application context of the containing message determines which well-known feature set of CEL is supported.
+        - !ruby/object:Api::Type::String
+          name: 'title'
+          description: |
+            Optional. Title for the expression, i.e. a short string describing its purpose. This can be used e.g. in UIs which allow to enter the expression.
+        - !ruby/object:Api::Type::String
+          name: 'description'
+          description: |
+            Optional. Description of the expression. This is a longer text which describes the expression, e.g. when hovered over it in a UI.
+        - !ruby/object:Api::Type::String
+          name: 'location'
+          description: |
+            Optional. String indicating the location of the expression for error reporting, e.g. a file name and a position in the file.
+      - !ruby/object:Api::Type::NestedObject
         name: 'config'
         description: |
           The configuration options available when specifying versionedExpr.
