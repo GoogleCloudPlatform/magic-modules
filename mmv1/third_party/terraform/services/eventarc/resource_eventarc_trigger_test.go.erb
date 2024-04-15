@@ -207,6 +207,7 @@ func TestAccEventarcTrigger_GKEDest(t *testing.T) {
 	context := map[string]interface{}{
 		"region":          region,
 		"random_suffix":   acctest.RandString(t, 10),
+		"project_name":    envvar.GetTestProjectFromEnv(),
 		"service_account": envvar.GetTestServiceAccountFromEnv(t),
 	}
 
@@ -229,6 +230,9 @@ func TestAccEventarcTrigger_GKEDest(t *testing.T) {
 
 func testAccEventarcTrigger_createTriggerWithGKEDest(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+data "google_project" "test_project" {
+	project_id  = "%{project_name}"
+}
 resource "google_container_cluster" "cluster" {
   name               = "tf-test-gkecluster%{random_suffix}"
   location           = "us-central1-a"
@@ -259,6 +263,9 @@ resource "google_eventarc_trigger" "primary" {
 		      path = "/route"
 		}
 
+	}
+	workload_identity_config {
+	  workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
 	}
 	service_account = "%{service_account}"
 
