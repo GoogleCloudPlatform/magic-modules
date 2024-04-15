@@ -18,7 +18,6 @@ resource "google_dataproc_metastore_service" "<%= ctx[:primary_resource_id] %>" 
 
   hive_metastore_config {
     version = "3.1.2"
-    endpoint_protocol = "GRPC"
   }
 
   network_config {
