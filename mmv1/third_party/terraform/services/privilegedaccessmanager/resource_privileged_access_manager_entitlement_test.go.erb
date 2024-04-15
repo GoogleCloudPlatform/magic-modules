@@ -49,9 +49,9 @@ func testAccPrivilegedAccessManagerEntitlement_privilegedAccessManagerEntitlemen
 resource "google_privileged_access_manager_entitlement" "tf_entitlement" {
     provider =  google-beta
     entitlement_id = "tf_test_example_entitlement%{random_suffix}"
-    location = "us-central1"
+    location = "%{location}"
     max_request_duration = "43200s"
-    parent = "projects/itsvarsharma-pam-testing"
+    parent = "projects/%{project}"
     requester_justification_config {    
         unstructured{}
     }
@@ -92,9 +92,9 @@ func testAccPrivilegedAccessManagerEntitlement_privilegedAccessManagerEntitlemen
 resource "google_privileged_access_manager_entitlement" "tf_entitlement" {
     provider =  google-beta
     entitlement_id = "tf_test_example_entitlement%{random_suffix}"
-    location = "us-central1"
+    location = "%{location}"
     max_request_duration = "43200s"
-    parent = "projects/itsvarsharma-pam-testing"
+    parent = "projects/%{project}"
     requester_justification_config {    
         unstructured{}
     }

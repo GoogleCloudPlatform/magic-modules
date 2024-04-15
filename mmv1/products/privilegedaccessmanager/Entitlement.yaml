@@ -33,6 +33,9 @@ examples:
     primary_resource_id: "tf_entitlement"
     vars:
       entitlement_id: "example_entitlement"
+    test_env_vars:
+      project: PROJECT_NAME
+      location: REGION
 properties:
   - !ruby/object:Api::Type::String
     name: name
