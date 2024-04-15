@@ -9,7 +9,7 @@ resource "google_workbench_instance" "<%= ctx[:primary_resource_id] %>" {
     }
     vm_image {
       project      = "deeplearning-platform-release"
-      family       = "tf-latest-gpu"
+      family       = "workbench-instances"
     }
   }
 }
