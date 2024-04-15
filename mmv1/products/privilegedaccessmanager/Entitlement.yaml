@@ -12,7 +12,6 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: Entitlement
 base_url: "{{parent}}/locations/{{location}}/entitlements"
 create_url: "{{parent}}/locations/{{location}}/entitlements?entitlementId={{entitlement_id}}"
 delete_url: "{{parent}}/locations/{{location}}/entitlements/{{entitlement_id}}?force=true"
@@ -20,10 +19,12 @@ self_link: "{{parent}}/locations/{{location}}/entitlements/{{entitlement_id}}"
 id_format: "{{parent}}/locations/{{location}}/entitlements/{{entitlement_id}}"
 import_format:
   - "{{parent}}/locations/{{location}}/entitlements/{{entitlement_id}}"
-update_verb: :PATCH
-update_mask: true
+name: Entitlement
 description: |
   An Entitlement defines the eligibility of a set of users to obtain a predefined access for some time possibly after going through an approval workflow.
+update_verb: :PATCH
+update_mask: true
+min_version: beta
 autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
