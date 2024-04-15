@@ -1,3 +1,4 @@
+<% autogen_exception -%>
 package bigquery_test
 
 import (
@@ -1552,6 +1553,46 @@ func TestAccBigQueryTable_TableReplicationInfo_WithReplicationInterval(t *testin
 	})
 }
 
+<% unless version == 'ga' -%>
+func TestAccBigQueryTable_ResourceTags(t *testing.T) {
+	t.Parallel()
+
+	projectID := envvar.GetTestProjectFromEnv()
+  datasetID := fmt.Sprintf("tf_test_dataset_%s", acctest.RandString(t, 10))
+	tableID := fmt.Sprintf("tf_test_table_%s", acctest.RandString(t, 10))
+	tagKeyName1 := fmt.Sprintf("tf_test_tag_key1_%s", acctest.RandString(t, 10))
+	tagValueName1 := fmt.Sprintf("tf_test_tag_value1_%s", acctest.RandString(t, 10))
+	tagKeyName2 := fmt.Sprintf("tf_test_tag_key2_%s", acctest.RandString(t, 10))
+	tagValueName2 := fmt.Sprintf("tf_test_tag_value2_%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryTableWithResourceTags(projectID, datasetID, tableID, tagKeyName1, tagValueName1),
+			},
+			{
+				ResourceName:            "google_bigquery_table.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccBigQueryTableWithResourceTagsUpdate(projectID, datasetID, tableID, tagKeyName1, tagValueName1, tagKeyName2, tagValueName2),
+			},
+			{
+				ResourceName:            "google_bigquery_table.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+<% end -%>
 func testAccCheckBigQueryExtData(t *testing.T, expectedQuoteChar string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
@@ -3921,6 +3962,93 @@ resource "time_sleep" "wait_10_seconds_last" {
 `, sourceDatasetID, sourceTableID, sourceMVJobID, sourceDatasetID, sourceMVID, sourceDatasetID, sourceTableID, projectID, sourceMVID, replicaDatasetID, replicaMVID, projectID, sourceMVID, replicationIntervalExpr, dropMVJobID, sourceDatasetID, sourceMVID)
 }
 
+<% unless version == 'ga' -%>
+func testAccBigQueryTableWithResourceTags(projectID, datasetID, tableID, tagKeyName, tagValueName string) string {
+	return fmt.Sprintf(`
+resource "google_tags_tag_key" "key" {
+  provider = google-beta
+
+  parent = "projects/%s"
+  short_name = "%s"
+}
+
+resource "google_tags_tag_value" "value" {
+  provider = google-beta
+
+  parent = "tagKeys/${google_tags_tag_key.key.name}"
+  short_name = "%s"
+}
+
+resource "google_bigquery_dataset" "test" {
+  provider = google-beta
+
+  dataset_id = "%s"
+}
+
+resource "google_bigquery_table" "test" {
+  provider = google-beta
+
+  deletion_protection = false
+  dataset_id = "${google_bigquery_dataset.test.dataset_id}"
+  table_id   = "%s"
+  resource_tags = {
+    "%s/%s" = "%s"
+  }
+}
+`, projectID, tagKeyName, tagValueName, datasetID, tableID, projectID, tagKeyName, tagValueName)
+}
+
+func testAccBigQueryTableWithResourceTagsUpdate(projectID, datasetID, tableID, tagKeyName1, tagValueName1, tagKeyName2, tagValueName2 string) string {
+	return fmt.Sprintf(`
+resource "google_tags_tag_key" "key1" {
+  provider = google-beta
+
+  parent = "projects/%s"
+  short_name = "%s"
+}
+
+resource "google_tags_tag_value" "value1" {
+  provider = google-beta
+
+  parent = "tagKeys/${google_tags_tag_key.key1.name}"
+  short_name = "%s"
+}
+
+resource "google_tags_tag_key" "key2" {
+  provider = google-beta
+
+  parent = "projects/%s"
+  short_name = "%s"
+}
+
+resource "google_tags_tag_value" "value2" {
+  provider = google-beta
+
+  parent = "tagKeys/${google_tags_tag_key.key2.name}"
+  short_name = "%s"
+}
+
+resource "google_bigquery_dataset" "test" {
+  provider = google-beta
+
+  dataset_id = "%s"
+}
+
+resource "google_bigquery_table" "test" {
+  provider = google-beta
+
+  deletion_protection = false
+  dataset_id = "${google_bigquery_dataset.test.dataset_id}"
+  table_id   = "%s"
+  resource_tags = {
+    "%s/%s" = "%s"
+    "%s/%s" = "%s"
+  }
+}
+`, projectID, tagKeyName1, tagValueName1, projectID, tagKeyName2, tagValueName2, datasetID, tableID, projectID, tagKeyName1, tagValueName1, projectID, tagKeyName2, tagValueName2)
+}
+
+<% end -%>
 var TEST_CSV = `lifelock,LifeLock,,web,Tempe,AZ,1-May-07,6850000,USD,b
 lifelock,LifeLock,,web,Tempe,AZ,1-Oct-06,6000000,USD,a
 lifelock,LifeLock,,web,Tempe,AZ,1-Jan-08,25000000,USD,c
