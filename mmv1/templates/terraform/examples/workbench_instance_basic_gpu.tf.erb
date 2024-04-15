@@ -8,7 +8,7 @@ resource "google_workbench_instance" "<%= ctx[:primary_resource_id] %>" {
       core_count   = 1
     }
     vm_image {
-      project      = "deeplearning-platform-release"
+      project      = "cloud-notebooks-managed"
       family       = "workbench-instances"
     }
   }
