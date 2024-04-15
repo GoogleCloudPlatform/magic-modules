@@ -40,7 +40,6 @@ func TestAccProjectIamMemberRemove_multipleMembersInBinding(t *testing.T) {
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
-	targetMember := "user:gterraformtest1@gmail.com"
 	randomSuffix := acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -67,7 +66,6 @@ func TestAccProjectIamMemberRemove_memberInMultipleBindings(t *testing.T) {
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
-	targetMember := "user:gterraformtest1@gmail.com"
 	randomSuffix := acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -79,11 +77,11 @@ func TestAccProjectIamMemberRemove_memberInMultipleBindings(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config:             testAccCheckGoogleProjectIamMemberRemove_multipleMemberBinding(randomSuffix, org, targetMember),
+				Config:             testAccCheckGoogleProjectIamMemberRemove_multipleMemberBinding(randomSuffix, org),
 				ExpectNonEmptyPlan: true, // Due to adding in binding, then removing in remove resource
 			},
 			{
-				Config:   testAccCheckGoogleProjectIamMemberRemove_multipleMemberBinding2(randomSuffix, org, targetMember),
+				Config:   testAccCheckGoogleProjectIamMemberRemove_multipleMemberBinding2(randomSuffix, org),
 				PlanOnly: true, // binding expects the membership to be removed. Any diff will fail the test due to PlanOnly.
 			},
 		},
