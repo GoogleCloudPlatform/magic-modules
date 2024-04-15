@@ -491,7 +491,7 @@ func TestAccComposerEnvironment_ComposerV2(t *testing.T) {
 	})
 }
 
-func TestAccComposerEnvironment_ComposerV2_Upgrades250To251TEST(t *testing.T) {
+func TestAccComposerEnvironment_UpdateComposerV2ImageVersion(t *testing.T) {
     t.Parallel()
 
     envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t))
@@ -507,7 +507,7 @@ func TestAccComposerEnvironment_ComposerV2_Upgrades250To251TEST(t *testing.T) {
                 Config: testAccComposerEnvironment_composerV250(envName, network, subnetwork),
             },
             {
-                Config: testAccComposerEnvironment_composerV2_latest(envName, network, subnetwork),
+                Config: testAccComposerEnvironment_composerV260(envName, network, subnetwork),
             },
             {
                 ResourceName:           "google_composer_environment.test",
@@ -520,7 +520,7 @@ func TestAccComposerEnvironment_ComposerV2_Upgrades250To251TEST(t *testing.T) {
             {
                 PlanOnly:					 true,
 				ExpectNonEmptyPlan: false,
-				Config:						 testAccComposerEnvironment_composerV2_latest(envName, network, subnetwork),
+				Config:						 testAccComposerEnvironment_composerV260(envName, network, subnetwork),
                 Check:                          testAccCheckClearComposerEnvironmentFirewalls(t, network),
             },
         },
@@ -2222,7 +2222,7 @@ resource "google_compute_subnetwork" "test" {
 `, envName, network, subnetwork)
 }
 
-func testAccComposerEnvironment_composerV2_latest(envName, network, subnetwork string) string {
+func testAccComposerEnvironment_composerV260(envName, network, subnetwork string) string {
 	return fmt.Sprintf(`
 resource "google_composer_environment" "test" {
   name   = "%s"
@@ -2235,7 +2235,7 @@ resource "google_composer_environment" "test" {
       }
 
       software_config {
-        image_version = "composer-2.5.1-airflow-2.6.3"
+        image_version = "composer-2.6.0-airflow-2.6.3"
       }
     }
 }
