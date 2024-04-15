@@ -135,22 +135,25 @@ properties:
         properties:
           - !ruby/object:Api::Type::String
             name: resourceType
-            description: 'Required. The type of this resource. '
+            description: |
+              The type of this resource.
             required: true
           - !ruby/object:Api::Type::String
             name: resource
-            description: 'Required. Name of the resource. '
+            description: |
+              Name of the resource.
             required: true
           - !ruby/object:Api::Type::Array
             name: roleBindings
-            description: 'Required. Role bindings to be created on successful grant. '
+            description: |
+              Role bindings to be created on successful grant.
             required: true
             item_type: !ruby/object:Api::Type::NestedObject
               properties:
                 - !ruby/object:Api::Type::String
                   name: role
                   description: |
-                    Required. IAM role to be granted. https://cloud.google.com/iam/docs/roles-overview.
+                    IAM role to be granted. https://cloud.google.com/iam/docs/roles-overview.
                   required: true
                 - !ruby/object:Api::Type::String
                   name: conditionExpression
