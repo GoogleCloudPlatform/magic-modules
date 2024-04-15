@@ -686,7 +686,7 @@ resource "google_alloydb_instance" "default" {
   network_config {
     enable_public_ip = %{enable_public_ip}
     authorized_external_networks {
-      cidr_range = %{cidr_range}
+      cidr_range = "%{cidr_range}"
     }
   }	
 }
