@@ -1,7 +1,7 @@
 resource "google_privileged_access_manager_entitlement" "<%= ctx[:primary_resource_id] %>" {
     provider =  google-beta
     entitlement_id = "<%= ctx[:vars]['entitlement_id'] %>"
-    location = "<%= ctx[:test_env_vars]['location'] %>"
+    location = "us-central1-a"
     max_request_duration = "43200s"
     parent = "projects/<%= ctx[:test_env_vars]['project'] %>"
     requester_justification_config {    

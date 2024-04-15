@@ -35,7 +35,6 @@ examples:
       entitlement_id: "example_entitlement"
     test_env_vars:
       project: PROJECT_NAME
-      location: REGION
 properties:
   - !ruby/object:Api::Type::String
     name: name
