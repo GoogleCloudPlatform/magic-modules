@@ -237,6 +237,9 @@ resource "google_container_cluster" "cluster" {
   name               = "tf-test-gkecluster%{random_suffix}"
   location           = "us-central1-a"
   initial_node_count = 1
+  workload_identity_config {
+    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
+  }
 }
 
 resource "google_eventarc_trigger" "primary" {
@@ -263,9 +266,6 @@ resource "google_eventarc_trigger" "primary" {
 		      path = "/route"
 		}
 
-	}
-	workload_identity_config {
-	  workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
 	}
 	service_account = "%{service_account}"
 
