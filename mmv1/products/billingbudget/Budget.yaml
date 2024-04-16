@@ -482,7 +482,7 @@ properties:
   - !ruby/object:Api::Type::Enum
     name: ownershipScope
     description: |
-      The ownership scope of the budget. The ownership scope and users' 
+      The ownership scope of the budget. The ownership scope and users'
       IAM permissions determine who has full access to the budget's data.
     values:
       - :OWNERSHIP_SCOPE_UNSPECIFIED
