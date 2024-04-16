@@ -27,7 +27,7 @@ func DataSourceGoogleActiveFolder() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"rest_method": {
+			"api_method": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Description:  "Provides the REST method through which to find the folder. LIST is recommended as it is strongly consistent.",
@@ -48,9 +48,9 @@ func dataSourceGoogleActiveFolderRead(d *schema.ResourceData, meta interface{}) 
 	var folderMatch *resourceManagerV3.Folder
 	parent := d.Get("parent").(string)
 	displayName := d.Get("display_name").(string)
-	restMethod := d.Get("rest_method").(string)
+	apiMethod := d.Get("api_method").(string)
 
-	if restMethod == "LIST" {
+	if apiMethod == "LIST" {
 		token := ""
 
 		for paginate := true; paginate; {

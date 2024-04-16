@@ -155,7 +155,7 @@ data "google_active_folder" "my_folder" {
   depends_on = [time_sleep.wait_120_seconds]
   parent       = google_folder.foobar.parent
   display_name = google_folder.foobar.display_name
-  rest_method  = "SEARCH"
+  api_method  = "SEARCH"
 }
 `, parent, displayName)
 }
