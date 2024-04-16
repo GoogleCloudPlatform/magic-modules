@@ -238,7 +238,7 @@ resource "google_container_cluster" "cluster" {
   location           = "us-central1-a"
   initial_node_count = 1
   workload_identity_config {
-    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
+    workload_pool = "${data.google_project.test_project.project_id}.svc.id.goog"
   }
 }
 
