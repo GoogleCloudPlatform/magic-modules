@@ -21,6 +21,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/service-extensions/docs/reference/rest/v1beta1/projects.locations.lbTrafficExtensions'
 base_url: 'projects/{{project}}/locations/{{location}}/lbTrafficExtensions'
 self_link: 'projects/{{project}}/locations/{{location}}/lbTrafficExtensions/{{name}}'
+min_version: beta
 timeouts: !ruby/object:Api::Timeouts
   insert_minutes: 20
   update_minutes: 20
@@ -35,7 +36,7 @@ async: !ruby/object:Api::OpAsync
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'network_services_lb_traffic_extension_basic'
-    primary_resource_id: 'google_network_services_lb_traffic_extension'
+    primary_resource_id: 'default'
     vars:
       ilb_network_name: 'l7-ilb-network'
       proxy_subnet_name: 'l7-ilb-proxy-subnet'
@@ -50,9 +51,6 @@ examples:
       fw_allow_iap_hc_name: 'l7-ilb-fw-allow-iap-hc'
       fw_allow_ilb_to_backends_name: 'l7-ilb-fw-allow-ilb-to-backends'
       vm_test_name: 'l7-ilb-test-vm'
-    ignore_read_extra:
-      - 'port_range'
-      - 'target'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -160,18 +158,15 @@ properties:
                   List of the HTTP headers to forward to the extension (from the client or backend).
                   If omitted, all headers are sent. Each element is a string indicating the header name.
                 item_type: Api::Type::String
-              - !ruby/object:Api::Type::Enum
+              - !ruby/object:Api::Type::Array
                 name: 'supportedEvents'
+                min_size: 1
                 description: |
                   A set of events during request or response processing for which this extension is called.
                   This field is required for the LbTrafficExtension resource. It's not relevant for the LbRouteExtension
-                  resource.
-                values:
-                  - :EVENT_TYPE_UNSPECIFIED
-                  - :REQUEST_HEADERS
-                  - :REQUEST_BODY
-                  - :RESPONSE_HEADERS
-                  - :RESPONSE_BODY
+                  resource. Possible values:`EVENT_TYPE_UNSPECIFIED`, `REQUEST_HEADERS`, `REQUEST_BODY`, `RESPONSE_HEADERS`,
+                  `RESPONSE_BODY`, `RESPONSE_BODY` and `RESPONSE_BODY`.
+                item_type: Api::Type::String
   - !ruby/object:Api::Type::Enum
     name: 'loadBalancingScheme'
     description: |

@@ -194,7 +194,7 @@ resource "google_compute_instance" "vm-test" {
 
 resource "google_network_services_lb_traffic_extension" "<%= ctx[:primary_resource_id] %>" {
     location   = "us-west1"
-    name       = "lb-traffic-extension"
+    name       = "<%= ctx[:vars]['lb_traffic_extension_name'] %>"
     provider      = google-beta
     forwarding_rules = ["https://www.googleapis.com/compute/v1/projects/myproj/regions/us-west1/forwardingRules/l7-ilb-forwarding-rule"]
     load_balancing_scheme = "INTERNAL_MANAGED"
