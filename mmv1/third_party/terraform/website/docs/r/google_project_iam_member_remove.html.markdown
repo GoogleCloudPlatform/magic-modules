@@ -14,6 +14,13 @@ resource from state, proposing re-adding it to correct the membership. Import is
 not supported- this resource will acquire the current policy and modify it as
 part of creating the resource.
 
+This resource will conflict with `google_project_iam_policy` and
+`google_project_iam_binding` resources that share a role, as well as
+`google_project_iam_member` resources that target the same membership. When
+multiple resources conflict the final state is not guaranteed to include or omit
+the membership. Subsequent `terraform apply` calls will always show a diff
+until the configuration is corrected.
+
 For more information see
 [the official documentation](https://cloud.google.com/iam/docs/granting-changing-revoking-access)
 and

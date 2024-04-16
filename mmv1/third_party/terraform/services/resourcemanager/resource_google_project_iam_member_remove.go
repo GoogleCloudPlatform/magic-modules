@@ -117,7 +117,7 @@ func resourceGoogleProjectIamMemberRemoveRead(d *schema.ResourceData, meta inter
 	}
 
 	if found {
-		fmt.Printf("[DEBUG] found policy for resource %v, removing from state", d.Id())
+		fmt.Printf("[DEBUG] found membership in project's policy  %v, removing from state", d.Id())
 		d.SetId("")
 	}
 
