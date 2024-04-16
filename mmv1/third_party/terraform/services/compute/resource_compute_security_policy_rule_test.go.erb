@@ -162,19 +162,6 @@ resource "google_compute_security_policy" "default" {
   description = "basic global security policy"
 }
 
-resource "google_compute_security_policy_rule" "policy_rule_default" {
-  security_policy = google_compute_security_policy.default.name
-  description     = "default rule"
-  action          = "allow"
-  priority         = "2147483647"
-  match {
-    versioned_expr = "SRC_IPS_V1"
-    config {
-      src_ip_ranges = ["*"]
-    }
-  }
-}
-
 resource "google_compute_security_policy_rule" "policy_rule" {
   security_policy = google_compute_security_policy.default.name
   description     = "basic description"
@@ -195,19 +182,6 @@ func testAccComputeSecurityPolicyRule_extPreUpdate(context map[string]interface{
 resource "google_compute_security_policy" "default" {
   name        = "tf-test%{random_suffix}"
   description = "basic global security policy"
-}
-
-resource "google_compute_security_policy_rule" "policy_rule_default" {
-  security_policy = google_compute_security_policy.default.name
-  description     = "default rule"
-  action          = "allow"
-  priority         = "2147483647"
-  match {
-    versioned_expr = "SRC_IPS_V1"
-    config {
-      src_ip_ranges = ["*"]
-    }
-  }
 }
 
 resource "google_compute_security_policy_rule" "policy_rule" {
@@ -231,20 +205,6 @@ func testAccComputeSecurityPolicyRule_extPosUpdateSamePriority(context map[strin
 resource "google_compute_security_policy" "default" {
   name        = "tf-test%{random_suffix}"
   description = "basic global security policy"
-}
-
-//keep this
-resource "google_compute_security_policy_rule" "policy_rule_default" {
-  security_policy = google_compute_security_policy.default.name
-  description     = "default rule"
-  action          = "allow"
-  priority         = "2147483647"
-  match {
-    versioned_expr = "SRC_IPS_V1"
-    config {
-      src_ip_ranges = ["*"]
-    }
-  }
 }
 
 //add this
@@ -284,20 +244,6 @@ func testAccComputeSecurityPolicyRule_extPosUpdate(context map[string]interface{
 resource "google_compute_security_policy" "default" {
   name        = "tf-test%{random_suffix}"
   description = "basic global security policy"
-}
-
-//keep this
-resource "google_compute_security_policy_rule" "policy_rule_default" {
-  security_policy = google_compute_security_policy.default.name
-  description     = "default rule"
-  action          = "allow"
-  priority         = "2147483647"
-  match {
-    versioned_expr = "SRC_IPS_V1"
-    config {
-      src_ip_ranges = ["*"]
-    }
-  }
 }
 
 //add this

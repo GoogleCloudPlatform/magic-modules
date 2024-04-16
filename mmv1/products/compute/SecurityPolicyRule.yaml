@@ -57,6 +57,14 @@ examples:
     vars:
       sec_policy_name: 'policyruletest'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'security_policy_rule_default_rule'
+    primary_resource_id: 'policy_rule'
+    min_version: 'beta'
+    skip_test: true
+    vars:
+      sec_policy_name: 'policyruletest'
+      project_id: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
     name: 'security_policy_rule_multiple_rules'
     primary_resource_id: 'policy_rule_one'
     min_version: 'beta'
