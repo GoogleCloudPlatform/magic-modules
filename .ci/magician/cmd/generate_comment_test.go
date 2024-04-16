@@ -20,8 +20,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"magician/source"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestExecGenerateComment(t *testing.T) {
@@ -55,7 +56,6 @@ func TestExecGenerateComment(t *testing.T) {
 			{"/mock/dir/tpg", "/mock/dir/magic-modules/tools/diff-processor/new"},
 			{"/mock/dir/tpgb", "/mock/dir/magic-modules/tools/diff-processor/old"},
 			{"/mock/dir/tpgb", "/mock/dir/magic-modules/tools/diff-processor/new"},
-			{"/mock/dir/tpgb", "/mock/dir/tpgbold"},
 		},
 		"RemoveAll": {
 			{"/mock/dir/magic-modules/tools/diff-processor/old"},
@@ -86,18 +86,8 @@ func TestExecGenerateComment(t *testing.T) {
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"changed-schema-resources"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/tools/diff-processor", "make", []string{"build"}, diffProcessorEnv},
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"breaking-changes"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"detect-missing-tests", "/mock/dir/tpgb/google-beta/services"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"changed-schema-resources"}, map[string]string(nil)},
-			{"/mock/dir/tpgbold", "git", []string{"checkout", "origin/auto-pr-123456-old"}, map[string]string(nil)},
-			{"/mock/dir/tpgbold", "find", []string{".", "-type", "f", "-name", "*.go", "-exec", "sed", "-i.bak", "s~github.com/hashicorp/terraform-provider-google-beta~google/provider/old~g", "{}", "+"}, map[string]string(nil)},
-			{"/mock/dir/tpgbold", "sed", []string{"-i.bak", "s|github.com/hashicorp/terraform-provider-google-beta|google/provider/old|g", "go.mod"}, map[string]string(nil)},
-			{"/mock/dir/tpgbold", "sed", []string{"-i.bak", "s|github.com/hashicorp/terraform-provider-google-beta|google/provider/old|g", "go.sum"}, map[string]string(nil)},
-			{"/mock/dir/tpgb", "find", []string{".", "-type", "f", "-name", "*.go", "-exec", "sed", "-i.bak", "s~github.com/hashicorp/terraform-provider-google-beta~google/provider/new~g", "{}", "+"}, map[string]string(nil)},
-			{"/mock/dir/tpgb", "sed", []string{"-i.bak", "s|github.com/hashicorp/terraform-provider-google-beta|google/provider/new|g", "go.mod"}, map[string]string(nil)},
-			{"/mock/dir/tpgb", "sed", []string{"-i.bak", "s|github.com/hashicorp/terraform-provider-google-beta|google/provider/new|g", "go.sum"}, map[string]string(nil)},
-			{"/mock/dir/magic-modules/tools/missing-test-detector", "go", []string{"mod", "edit", "-replace", "google/provider/new=/mock/dir/tpgb"}, map[string]string(nil)},
-			{"/mock/dir/magic-modules/tools/missing-test-detector", "go", []string{"mod", "edit", "-replace", "google/provider/old=/mock/dir/tpgbold"}, map[string]string(nil)},
-			{"/mock/dir/magic-modules/tools/missing-test-detector", "go", []string{"mod", "tidy"}, map[string]string(nil)},
-			{"/mock/dir/magic-modules/tools/missing-test-detector", "go", []string{"run", ".", "-services-dir=/mock/dir/tpgb/google-beta/services"}, map[string]string(nil)},
 		},
 	} {
 		if actualCalls, ok := mr.Calls(method); !ok {

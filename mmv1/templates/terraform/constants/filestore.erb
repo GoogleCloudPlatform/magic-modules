@@ -1,8 +1,0 @@
-<%# We have to change the name of 'file' to 'filestore' for magic-modules generation reasons.-%>
-import (
-<% if version == "ga" -%>
-  filestore "google.golang.org/api/file/v1beta1"
-<% else -%>
-  filestore "google.golang.org/api/file/v1"
-<% end -%>
-)
