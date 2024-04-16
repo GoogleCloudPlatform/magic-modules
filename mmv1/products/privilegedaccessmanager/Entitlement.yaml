@@ -93,21 +93,26 @@ properties:
             name: steps
             required: true
             description: |
-              Optional. List of approval steps in this workflow. These steps would be followed in the specified order sequentially.  1 step is supported for now.
+              List of approval steps in this workflow. These steps would be followed in the specified order sequentially.  1 step is supported for now.
             item_type: !ruby/object:Api::Type::NestedObject
               properties:
                 - !ruby/object:Api::Type::Array
                   name: approvers
+                  required: true
+                  min_size: 1
+                  max_size: 1
                   description: |
-                    Optional. The potential set of approvers in this step.This list should contain at most one entry.
+                    The potential set of approvers in this step.This list should contain at most one entry.
                   item_type: !ruby/object:Api::Type::NestedObject
                     properties:
                       - !ruby/object:Api::Type::Array
                         name: principals
                         min_size: 1
+                        max_size: 20
                         is_set: true
                         item_type: Api::Type::String
-                        description: "Optional. Users who are being allowed for the operation. Each entry should be a valid v1 IAM Principal Identifier. Format for these is documented at: https://cloud.google.com/iam/docs/principal-identifiers#v1 "
+                        description: |
+                          Users who are being allowed for the operation. Each entry should be a valid v1 IAM Principal Identifier. Format for these is documented at: https://cloud.google.com/iam/docs/principal-identifiers#v1
                 - !ruby/object:Api::Type::Integer
                   name: approvalsNeeded
                   description: |
