@@ -349,7 +349,7 @@ subnetwork in which the cluster's instances are launched.
 * `enable_intranode_visibility` - (Optional)
     Whether Intra-node visibility is enabled for this cluster. This makes same node pod to pod traffic visible for VPC network.
 
-* `enable_l4_ilb_subsetting` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+* `enable_l4_ilb_subsetting` - (Optional)
     Whether L4ILB Subsetting is enabled for this cluster.
 
 * `enable_multi_networking` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
@@ -451,6 +451,9 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
 *  `config_connector_config` -  (Optional).
     The status of the ConfigConnector addon. It is disabled by default; Set `enabled = true` to enable.
 
+*  `stateful_ha_config` - (Optional).
+    The status of the Stateful HA addon, which provides automatic configurable failover for stateful applications.
+    It is disabled by default for Standard clusters. Set `enabled = true` to enable.
 
 This example `addons_config` disables two addons:
 

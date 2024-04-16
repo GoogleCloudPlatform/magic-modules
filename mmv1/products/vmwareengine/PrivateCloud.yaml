@@ -297,3 +297,14 @@ properties:
     values:
       - :STANDARD
       - :TIME_LIMITED
+      - :STRETCHED
+
+  - !ruby/object:Api::Type::String
+    name: 'preferredZone'
+    description: |
+      The preferred single failure domain within a region.
+
+  - !ruby/object:Api::Type::String
+    name: 'secondaryZone'
+    description: |
+      The secondary single failure domain within a region.

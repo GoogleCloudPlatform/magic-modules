@@ -1,0 +1,7 @@
+resource "google_compute_region_security_policy" "{{$.PrimaryResourceId}}" {
+  provider    = google-beta
+
+  name        = "{{index $.Vars "sec_policy_name"}}"
+  description = "basic region security policy"
+  type        = "CLOUD_ARMOR"
+}
