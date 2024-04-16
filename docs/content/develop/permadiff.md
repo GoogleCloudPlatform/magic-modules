@@ -226,7 +226,7 @@ In tests, add the field to `ImportStateVerifyIgnore` on any relevant import step
 
 ## API returns a list in a different order than was sent {#list-order}
 
-For an Array of unique string values (or nested objects with unique string identifiers), use the `SortStringsByConfigOrder` or `SortMapsByConfigOrder` helper functions to sort the API response to match the order in the user's configuration. This will also simplify diffs if new values are added or removed.
+For an Array of unique string values (or nested objects with unique string identifiers), use the `SortStringsByConfigOrder` or `SortMapsByConfigOrder` helper functions to sort the API response to match the order in the user's configuration. This will also simplify diffs if new values are added or removed. Imported resources will not have access to a configuration, so the field will be sorted alphabetically. This means that tests for the resource need to ignore the field's import behavior via `ignore_read_extra` (for MMv1 examples) or [`ImportStateVerifyIgnore`](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/import#importstateverifyignore-1) (for handwritten tests).
 
 {{< tabs "diff_suppress_list" >}}
 
