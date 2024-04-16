@@ -1429,15 +1429,7 @@ func resourceTable(d *schema.ResourceData, meta interface{}) (*bigquery.Table, e
 	}
 
   <% unless version == 'ga' -%>
-	if v, ok := d.GetOk("resource_tags"); ok {
-		resourceTags := map[string]string{}
-
-		for k, v := range v.(map[string]interface{}) {
-			resourceTags[k] = v.(string)
-		}
-
-		table.ResourceTags = resourceTags
-	}
+	table.ResourceTags = tpgresource.ExpandStringMap(d, "resource_tags")
 
 	<% end -%>
 	return table, nil
@@ -1838,7 +1830,7 @@ func resourceBigQueryTableColumnDrop(config *transport_tpg.Config, userAgent str
 
 func resourceBigQueryTableDelete(d *schema.ResourceData, meta interface{}) error {
 	if d.Get("deletion_protection").(bool) {
-		return fmt.Errorf("cannot destroy instance without setting deletion_protection=false and running `terraform apply`")
+		return fmt.Errorf("cannot destroy table %v without setting deletion_protection=false and running `terraform apply`", d.Id())
 	}
 	<% unless version == 'ga' -%>
 	if v, ok := d.GetOk("resource_tags"); ok {
@@ -1848,7 +1840,7 @@ func resourceBigQueryTableDelete(d *schema.ResourceData, meta interface{}) error
 			resourceTags = append(resourceTags, fmt.Sprintf("%s:%s", k, v.(string)))
 		}
 
-		return fmt.Errorf("cannot destroy instance without clearing the following resource tags: %v", resourceTags)
+		return fmt.Errorf("cannot destroy table %v without clearing the following resource tags: %v", d.Id(), resourceTags)
 	}
 
 	<% end -%>
