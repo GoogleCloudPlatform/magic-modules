@@ -9,7 +9,7 @@
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	See the License for the specific language governing permissions and
 	limitations under the License.
-*/}}
+*/ -}}
 config := acctest.GoogleProviderConfig(t)
 
 url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}MonitoringBasePath{{"}}"}}v1/locations/global/metricsScopes/{{"{{"}}metrics_scope{{"}}"}}")
