@@ -11,6 +11,25 @@ resource "google_app_engine_application" "app" {
   location_id = "us-central"
 }
 
+resource "google_project_service" "appengine_service" {
+  project = google_project.my_project.project_id
+  service = "appengineflex.googleapis.com"
+
+  disable_dependent_services = false
+}
+
+resource "google_project_service" "compute" {
+  project = google_project.project.project_id
+  service = "compute.googleapis.com"
+}
+
+resource "google_project_service" "service" {
+  project = google_project.my_project.project_id
+  service = "appengineflex.googleapis.com"
+
+  disable_dependent_services = false
+}
+
 data "google_app_engine_default_service_account" "default" {
 }
 
