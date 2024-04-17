@@ -47,17 +47,23 @@ The following arguments are supported:
   The location or Compute Engine region for the environment.
 
 * `project` -
-  (Optional) The ID of the project in which the resource belongs.
+  (Optional)
+  The ID of the project in which the resource belongs.
   If it is not provided, the provider project is used.
-
-* `data` -
-  Optional. The "data" field of Kubernetes Secret, organized in key-value pairs, 
-  which can contain sensitive values such as a password, a token, or a key. 
-  The values for all keys have to be base64-encoded strings. 
-  For details see: https://kubernetes.io/docs/concepts/configuration/secret/
 
 * `environment` -
   Environment where the secret will be stored and used.
+
+* `data` -
+  (Optional) 
+  The "data" field of Kubernetes Secret, organized in key-value pairs,
+  which can contain sensitive values such as a password, a token, or a key. 
+  Content of this field will not be displayed in CLI output, 
+  but it will be stored in terraform state file. To protect sensitive data, 
+  follow the best practices outlined in the HashiCorp documentation: 
+  https://developer.hashicorp.com/terraform/language/state/sensitive-data.
+  The values for all keys have to be base64-encoded strings. 
+  For details see: https://kubernetes.io/docs/concepts/configuration/secret/
 
 
 
