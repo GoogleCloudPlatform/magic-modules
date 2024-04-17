@@ -7,6 +7,7 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
 	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/reader"
 	"github.com/hashicorp/hcl/v2/hclwrite"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/zclconf/go-cty/cty"
 )
 
@@ -39,11 +40,25 @@ func DetectMissingTests(schemaDiff diff.SchemaDiff, allTests []*reader.Test) (ma
 	return getMissingTestsForChanges(changedFields, allTests)
 }
 
+// Convert SchemaDiff object to map of ResourceChanges objects.
+// Also remove parent fields and output-only fields.
 func getChangedFieldsFromSchemaDiff(schemaDiff diff.SchemaDiff) map[string]ResourceChanges {
 	changedFields := make(map[string]ResourceChanges)
 	for resource, resourceDiff := range schemaDiff {
 		resourceChanges := make(ResourceChanges)
 		for field, fieldDiff := range resourceDiff.Fields {
+			if fieldDiff.New == nil {
+				// Skip deleted fields.
+				continue
+			}
+			if fieldDiff.New.Computed && !fieldDiff.New.Optional {
+				// Skip output-only fields.
+				continue
+			}
+			if _, ok := fieldDiff.New.Elem.(*schema.Resource); ok {
+				// Skip parent fields.
+				continue
+			}
 			if fieldDiff.Old == nil {
 				resourceChanges[field] = &Field{Added: true}
 			} else {
