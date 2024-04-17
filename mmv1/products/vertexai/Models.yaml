@@ -15,22 +15,22 @@
 name: Models
 base_url: projects/{{project}}/locations/{{region}}/models
 create_url: 'projects/{{project}}/locations/{{region}}/modelsPRE_CREATE_REPLACE_ME'
-immutable: true
+self_link: '{{model}}'
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'
   api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.models'
 description: |-
   A trained machine learning Model.
-id_format: '{{name}}'
-skip_sweeper: true
+id_format: '{{model}}'
 autogen_async: false
+exclude_import: true
 async: !ruby/object:Api::OpAsync
   actions:
     - create
     - delete
   operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
+    path: 'model'
     base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
@@ -48,7 +48,7 @@ async: !ruby/object:Api::OpAsync
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'vertex_ai_model_basic'
-    skip_test: true
+    skip_import_test: true
     primary_resource_id: 'model'
     vars:
       name: 'test-model'
@@ -67,9 +67,9 @@ properties:
     description:
       The name of the Model. This value may be up to 60 characters, and
       valid characters are [a-z0-9_]. The first character cannot be a number.
-    url_param_only: true
-    pattern: projects/{{project}}/locations/{{region}}/models/{{name}}
-    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+    output: true
+    # url_param_only: true
+    # custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::String
     name: 'description'
     description: Description of the Model.
@@ -119,25 +119,26 @@ properties:
         immutable: true
         description: |
           Points to a YAML file stored on Google Cloud Storage describing the format of a single prediction produced by this Model, which are returned via PredictResponse.predictions, ExplainResponse.explanations, and BatchPredictionJob.output_config.
-  - !ruby/object:Api::Type::NestedObject
+  - !ruby/object:Api::Type::Array
     name: 'supportedExportFormats'
     output: true
     description: |
       The formats in which this Model may be exported. If empty, this Model is not available for export.
-    properties:
-      - !ruby/object:Api::Type::String
-        name: id
-        output: true
-        description: |
-          The ID of the export format.
-      - !ruby/object:Api::Type::Enum
-        name: exportableContent
-        immutable: true
-        description: |
-          The content of this Model that may be exported.
-        values:
-          - :ARTIFACT
-          - :IMAGE
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: id
+          output: true
+          description: |
+            The ID of the export format.
+        - !ruby/object:Api::Type::Enum
+          name: exportableContent
+          immutable: true
+          description: |
+            The content of this Model that may be exported.
+          values:
+            - :ARTIFACT
+            - :IMAGE
   - !ruby/object:Api::Type::String
     name: 'trainerPipeline'
     output: true
@@ -419,7 +420,7 @@ properties:
   - !ruby/object:Api::Type::ResourceRef
     name: 'model'
     resource: 'Model'
-    imports: 'name'
+    imports: 'displayName'
     at_least_one_of: 
       - sourceModel
       - model
