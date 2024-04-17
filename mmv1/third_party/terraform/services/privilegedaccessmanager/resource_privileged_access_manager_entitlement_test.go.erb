@@ -15,6 +15,7 @@ func TestAccPrivilegedAccessManagerEntitlement_privilegedAccessManagerEntitlemen
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
+		"project_name":  envvar.GetTestProjectFromEnv(),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
