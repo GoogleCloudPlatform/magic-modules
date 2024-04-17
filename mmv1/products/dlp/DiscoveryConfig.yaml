@@ -1,0 +1,368 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+# API resource name
+name: 'DiscoveryConfig'
+base_url: '{{parent}}/discoveryConfigs'
+self_link: '{{parent}}/discoveryConfigs/{{name}}'
+create_url: '{{parent}}/discoveryConfigs'
+create_verb: :POST
+update_verb: :PATCH
+update_mask: true
+delete_url: '{{parent}}/discoveryConfigs/{{name}}'
+# Resource description for the provider documentation.
+description: |
+  Configuration for discovery to scan resources for profile generation. Only one discovery configuration may exist per organization, folder, or project.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Schedule inspection scan': 'https://cloud.google.com/dlp/docs/schedule-inspection-scan'
+  api: 'https://cloud.google.com/dlp/docs/reference/rest/v2/projects.locations.discoveryConfigs'
+id_format: '{{parent}}/discoveryConfigs/{{name}}'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dlp_discovery_config_basic'
+    primary_resource_id: 'basic'
+    test_env_vars:
+      project: :PROJECT_NAME
+      location: :REGION
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dlp_discovery_config_actions'
+    primary_resource_id: 'actions'
+    test_env_vars:
+      project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dlp_discovery_config_org_running'
+    primary_resource_id: 'org_running'
+    test_env_vars:
+      project: :PROJECT_NAME
+      organization: :ORG_ID
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dlp_discovery_config_org_folder_paused'
+    primary_resource_id: 'org_folder_paused'
+    test_env_vars:
+      project: :PROJECT_NAME
+      organization: :ORG_ID
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dlp_discovery_config_conditions_cadence'
+    primary_resource_id: 'conditions_cadence'
+    test_env_vars:
+      project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dlp_discovery_config_filter_regexes_and_conditions'
+    primary_resource_id: 'filter_regexes_and_conditions'
+    test_env_vars:
+      project: :PROJECT_NAME
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  encoder: templates/terraform/encoders/wrap_object.go.erb
+  decoder: templates/terraform/decoders/unwrap_resource.go.erb
+  custom_import: templates/terraform/custom_import/dlp_import.go.erb
+  update_encoder: templates/terraform/encoders/wrap_object.go.erb
+parameters:
+  - !ruby/object:Api::Type::String
+    name: 'parent'
+    description: |
+      The parent of the discovery config in any of the following formats:
+
+      * `projects/{{project}}/locations/{{location}}`
+      * `organizations/{{organization_id}}/locations/{{location}}`
+    required: true
+    immutable: true
+    url_param_only: true
+  - !ruby/object:Api::Type::String
+    name: 'location'
+    description: |
+      Location to create the discovery config in.
+    required: true
+    immutable: true
+    url_param_only: true
+properties:
+  - !ruby/object:Api::Type::String
+    name: name
+    description: Unique resource name for the DiscoveryConfig, assigned by the service when the DiscoveryConfig is created.
+    output: true
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+  - !ruby/object:Api::Type::String
+    name: displayName
+    description: Display Name (max 1000 Chars)
+  - !ruby/object:Api::Type::NestedObject
+    name: 'orgConfig'
+    properties:
+      - !ruby/object:Api::Type::String
+        name: projectId
+        description: The project that will run the scan. The DLP service account that exists within this project must have access to all resources that are profiled, and the cloud DLP API must be enabled.
+      - !ruby/object:Api::Type::NestedObject
+        name: location
+        description: The data to scan folder org or project
+        properties:
+          - !ruby/object:Api::Type::String
+            name: organizationId
+            description: The ID of an organization to scan
+          - !ruby/object:Api::Type::String
+            name: folderId
+            description: The ID for the folder within an organization to scan
+  - !ruby/object:Api::Type::Array
+    name: 'inspectTemplates'
+    description: Detection logic for profile generation
+    item_type: Api::Type::String
+  - !ruby/object:Api::Type::Array
+    name: 'actions'
+    description: Actions to execute at the completion of scanning
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::NestedObject
+          name: exportData
+          description: Export data profiles into a provided location
+          properties:
+            - !ruby/object:Api::Type::NestedObject
+              name: profileTable
+              description: Store all table and column profiles in an existing table or a new table in an existing dataset. Each re-generation will result in a new row in BigQuery
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: projectId
+                  description: The Google Cloud Platform project ID of the project containing the table. If omitted, the project ID is inferred from the API call.
+                - !ruby/object:Api::Type::String
+                  name: datasetId
+                  description: Dataset Id of the table
+                - !ruby/object:Api::Type::String
+                  name: tableId
+                  description: Name of the table
+        - !ruby/object:Api::Type::NestedObject
+          name: pubSubNotification
+          description: Publish a message into the Pub/Sub topic.
+          properties:
+            - !ruby/object:Api::Type::String
+              name: topic
+              description: Cloud Pub/Sub topic to send notifications to. Format is projects/{project}/topics/{topic}.
+            - !ruby/object:Api::Type::Enum
+              name: event
+              description: The type of event that triggers a Pub/Sub. At most one PubSubNotification per EventType is permitted.
+              values:
+                - :NEW_PROFILE
+                - :CHANGED_PROFILE
+                - :SCORE_INCREASED
+                - :ERROR_CHANGED
+            - !ruby/object:Api::Type::NestedObject
+              name: pubsubCondition
+              description: Conditions for triggering pubsub
+              properties:
+                - !ruby/object:Api::Type::NestedObject
+                  name: expressions
+                  description: An expression
+                  properties:
+                    - !ruby/object:Api::Type::Enum
+                      name: logicalOperator
+                      description: The operator to apply to the collection of conditions
+                      values:
+                        - :OR
+                        - :AND
+                    - !ruby/object:Api::Type::Array
+                      name: conditions
+                      description: Conditions to apply to the expression
+                      item_type: !ruby/object:Api::Type::NestedObject
+                        properties:
+                          - !ruby/object:Api::Type::Enum
+                            name: minimumRiskScore
+                            description: The minimum data risk score that triggers the condition.
+                            values:
+                              - :HIGH
+                              - :MEDIUM_OR_HIGH
+                          - !ruby/object:Api::Type::Enum
+                            name: minimumSensitivityScore
+                            description: The minimum sensitivity level that triggers the condition.
+                            values:
+                              - :HIGH
+                              - :MEDIUM_OR_HIGH
+            - !ruby/object:Api::Type::Enum
+              name: detailOfMessage
+              description: How much data to include in the pub/sub message.
+              values:
+                - :TABLE_PROFILE
+                - :RESOURCE_NAME
+  - !ruby/object:Api::Type::Array
+    name: 'targets'
+    description: Target to match against for determining what to scan and how frequently
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::NestedObject
+          name: bigQueryTarget
+          description: BigQuery target for Discovery. The first target to match a table will be the one applied.
+          properties:
+            - !ruby/object:Api::Type::NestedObject
+              name: filter
+              description: Required. The tables the discovery cadence applies to. The first target with a matching filter will be the one to apply to a table
+              properties:
+                - !ruby/object:Api::Type::NestedObject
+                  name: tables
+                  description: A specific set of tables for this filter to apply to. A table collection must be specified in only one filter per config.
+                  properties:
+                    - !ruby/object:Api::Type::NestedObject
+                      name: includeRegexes
+                      description: A collection of regular expressions to match a BQ table against.
+                      properties:
+                        - !ruby/object:Api::Type::Array
+                          name: 'patterns'
+                          description: A single BigQuery regular expression pattern to match against one or more tables, datasets, or projects that contain BigQuery tables.
+                          item_type: !ruby/object:Api::Type::NestedObject
+                            properties:
+                              - !ruby/object:Api::Type::String
+                                name: projectIdRegex
+                                description: For organizations, if unset, will match all projects. Has no effect for data profile configurations created within a project.
+                              - !ruby/object:Api::Type::String
+                                name: datasetIdRegex
+                                description: if unset, this property matches all datasets
+                              - !ruby/object:Api::Type::String
+                                name: tableIdRegex
+                                description: if unset, this property matches all tables
+                - !ruby/object:Api::Type::NestedObject
+                  name: otherTables
+                  description: Catch-all. This should always be the last filter in the list because anything above it will apply first.
+                  properties:
+                    []  # Meant to be an empty object with no properties - see here : https://cloud.google.com/sensitive-data-protection/docs/reference/rest/v2/organizations.locations.discoveryConfigs#allotherbigquerytables
+                    # The fields below are necessary to include the "otherTables" filter in the payload
+                  send_empty_value: true
+                  allow_empty_object: true
+            - !ruby/object:Api::Type::NestedObject
+              name: conditions
+              description: In addition to matching the filter, these conditions must be true before a profile is generated
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: createdAfter
+                  description: A timestamp in RFC3339 UTC "Zulu" format with nanosecond resolution and upto nine fractional digits.
+                - !ruby/object:Api::Type::NestedObject
+                  name: orConditions
+                  description: At least one of the conditions must be true for a table to be scanned.
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: minAge
+                      description: Duration format. The minimum age a table must have before Cloud DLP can profile it. Value greater than 1.
+                    - !ruby/object:Api::Type::Integer
+                      name: minRowCount
+                      description: Minimum number of rows that should be present before Cloud DLP profiles as a table.
+                - !ruby/object:Api::Type::NestedObject
+                  name: types
+                  description: Restrict discovery to specific table type
+                  properties:
+                    - !ruby/object:Api::Type::Array
+                      name: types
+                      description: A set of BiqQuery table types
+                      item_type: !ruby/object:Api::Type::Enum
+                        name: 'undefined'
+                        description: |
+                          This field only has a name and description because of MM
+                          limitations. It should not appear in downstreams.
+                        values:
+                          - :BIG_QUERY_TABLE_TYPE_TABLE
+                          - :BIG_QUERY_TABLE_TYPE_EXTERNAL_BIG_LAKE
+                - !ruby/object:Api::Type::Enum
+                  name: typeCollection
+                  description: Restrict discovery to categories of table types. Currently view, materialized view, snapshot and non-biglake external tables are supported.
+                  values:
+                    - :BIG_QUERY_COLLECTION_ALL_TYPES
+                    - :BIG_QUERY_COLLECTION_ONLY_SUPPORTED_TYPES
+            - !ruby/object:Api::Type::NestedObject
+              name: cadence
+              description: How often and when to update profiles. New tables that match both the fiter and conditions are scanned as quickly as possible depending on system capacity.
+              properties:
+                - !ruby/object:Api::Type::NestedObject
+                  name: schemaModifiedCadence
+                  description: Governs when to update data profiles when a schema is modified
+                  properties:
+                    - !ruby/object:Api::Type::Array
+                      name: 'types'
+                      description: The type of events to consider when deciding if the table's schema has been modified and should have the profile updated. Defaults to NEW_COLUMN.
+                      item_type: !ruby/object:Api::Type::Enum
+                        name: 'undefined'
+                        description: |
+                          This field only has a name and description because of MM
+                          limitations. It should not appear in downstreams.
+                        values:
+                          - :SCHEMA_NEW_COLUMNS
+                          - :SCHEMA_REMOVED_COLUMNS
+                    - !ruby/object:Api::Type::Enum
+                      name: 'frequency'
+                      description: How frequently profiles may be updated when schemas are modified. Default to monthly
+                      values:
+                        - :UPDATE_FREQUENCY_NEVER
+                        - :UPDATE_FREQUENCY_DAILY
+                        - :UPDATE_FREQUENCY_MONTHLY
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'tableModifiedCadence'
+                  description: Governs when to update profile when a table is modified.
+                  properties:
+                    - !ruby/object:Api::Type::Array
+                      name: 'types'
+                      description: 'The type of events to consider when deciding if the table has been modified and should have the profile updated. Defaults to MODIFIED_TIMESTAMP'
+                      item_type: !ruby/object:Api::Type::Enum
+                        name: 'undefined'
+                        description: |
+                          This field only has a name and description because of MM
+                          limitations. It should not appear in downstreams.
+                        values:
+                          - TABLE_MODIFIED_TIMESTAMP
+                    - !ruby/object:Api::Type::Enum
+                      name: 'frequency'
+                      description: 'How frequently data profiles can be updated when tables are modified. Defaults to never.'
+                      values:
+                        - :UPDATE_FREQUENCY_NEVER
+                        - :UPDATE_FREQUENCY_DAILY
+                        - :UPDATE_FREQUENCY_MONTHLY
+            - !ruby/object:Api::Type::NestedObject
+              name: disabled
+              description: 'Tables that match this filter will not have profiles created.'
+              properties:
+                []  # Meant to be an empty object with no properties - see here : https://cloud.google.com/sensitive-data-protection/docs/reference/rest/v2/organizations.locations.discoveryConfigs#disabled
+                # The fields below are necessary to include the "disabled" filter in the payload
+              send_empty_value: true
+              allow_empty_object: true
+  - !ruby/object:Api::Type::Array
+    name: 'errors'
+    description: Output only. A stream of errors encountered when the config was activated. Repeated errors may result in the config automatically being paused. Output only field. Will return the last 100 errors. Whenever the config is modified this list will be cleared.
+    output: true
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::NestedObject
+          name: details
+          description: Detailed error codes and messages.
+          properties:
+            - !ruby/object:Api::Type::Integer
+              name: code
+              description: The status code, which should be an enum value of google.rpc.Code.
+            - !ruby/object:Api::Type::String
+              name: message
+              description: A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the google.rpc.Status.details field, or localized by the client.
+            - !ruby/object:Api::Type::Array
+              name: 'details'
+              description: A list of messages that carry the error details.
+              item_type: Api::Type::KeyValuePairs
+        - !ruby/object:Api::Type::String
+          name: timestamp
+          description: The times the error occurred. List includes the oldest timestamp and the last 9 timestamps.
+  - !ruby/object:Api::Type::String
+    name: createTime
+    description: Output only. The creation timestamp of a DiscoveryConfig.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: updateTime
+    description: Output only. The last update timestamp of a DiscoveryConfig.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: lastRunTime
+    description: Output only. The timestamp of the last time this config was executed
+    output: true
+  - !ruby/object:Api::Type::Enum
+    name: status
+    description: Required. A status for this configuration
+    values:
+      - :RUNNING
+      - :PAUSED
