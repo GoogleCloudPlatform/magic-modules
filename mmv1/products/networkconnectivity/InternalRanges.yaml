@@ -92,6 +92,7 @@ properties:
       An optional description of this resource.
   - !ruby/object:Api::Type::String
     name: 'ipCidrRange'
+    default_from_api: true
     description: |
       The IP range that this internal range defines.
   - !ruby/object:Api::Type::ResourceRef
@@ -111,7 +112,6 @@ properties:
       - :EXTERNAL_TO_VPC
   - !ruby/object:Api::Type::Enum
     name: 'peering'
-    immutable: true
     required: true
     description: |
       The type of peering set for this internal range.
