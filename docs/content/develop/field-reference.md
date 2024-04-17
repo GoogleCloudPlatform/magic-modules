@@ -217,12 +217,55 @@ to use for this field. In many cases, a [custom flattener](https://googlecloudpl
 is preferred because it will allow the user to see a clearer diff when the field actually is being changed. See
 [Fix a permadiff]({{< ref "/develop/permadiff.md" >}}) for more information and best practices.
 
+The function specified can be a
+[provider-specific function](https://github.com/hashicorp/terraform-provider-google-beta/blob/main/google-beta/tpgresource/common_diff_suppress.go)
+(for example, `tgpresource.CaseDiffSuppress`) or a function defined in resource-specific
+[custom code]({{<ref "/develop/custom-code#add-reusable-variables-and-functions" >}}).
+
 Example:
 
 ```yaml
 - !ruby/object:Api::Type::String
   name: 'fieldOne'
   diff_suppress_func: 'tpgresource.CaseDiffSuppress'
+```
+
+### `validation`
+Controls the value set for the field's [`ValidateFunc`](https://developer.hashicorp.com/terraform/plugin/sdkv2/schemas/schema-behaviors#validatefunc).
+
+If `validation` is set on an Enum field, it will override the default validation (that the provided value is in the Enum's [`values`](#values)).
+
+This property has two mutually exclusive child properties:
+
+- `function`: The name of a
+  [validation function](https://developer.hashicorp.com/terraform/plugin/sdkv2/schemas/schema-behaviors#validatefunc)
+  to use for validation. The function can be a
+  [Terraform-provided function](https://pkg.go.dev/github.com/hashicorp/terraform-plugin-sdk/helper/validation)
+  (for example, `validation.IntAtLeast(0)`), a
+  [provider-specific function](https://github.com/hashicorp/terraform-provider-google-beta/blob/main/google-beta/verify/validation.go)
+  (for example, `verify.ValidateBase64String`), or a function defined in
+  resource-specific
+  [custom code]({{<ref "/develop/custom-code#add-reusable-variables-and-functions" >}}).
+- `regex`: A regex string to check values against. This can only be used on simple
+  String fields. It is equivalent to
+  [`function: verify.ValidateRegexp(REGEX_STRING)`](https://github.com/hashicorp/terraform-provider-google-beta/blob/0ef51142a4dd1c1a4fc308c1eb09dce307ebe5f5/google-beta/verify/validation.go#L425).
+
+Example: Provider-specific function
+
+```yaml
+- !ruby/object:Api::Type::String
+  name: 'fieldOne'
+  validation: !ruby/object:Provider::Terraform::Validation
+    function: 'verify.ValidateBase64String'
+```
+
+Example: Regex
+
+```yaml
+- !ruby/object:Api::Type::String
+  name: 'fieldOne'
+  validation: !ruby/object:Provider::Terraform::Validation
+    regex: '^[a-zA-Z][a-zA-Z0-9_]*$'
 ```
 
 ### `api_name`
@@ -245,6 +288,9 @@ colon). If the allowed values change frequently, use a String field instead
 to allow better forwards-compatibility, and link to API documentation
 stating the current allowed values in the String field's description. Do not
 include UNSPECIFIED values in this list.
+
+Enums will validate that the provided field is in the allowed list unless a
+custom [`validation`](#validation) is provided.
 
 Example:
 
