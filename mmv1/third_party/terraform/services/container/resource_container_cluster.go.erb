@@ -46,7 +46,7 @@ var (
 				Type: schema.TypeBool,
 				Optional: true,
 				Computed: true,
-				Description: `Whether master is accessbile via Google Compute Engine Public IP addresses.`,
+				Description: `Whether Kubernetes master is accessible via Google Compute Engine Public IPs.`,
 			},
 		},
 	}
@@ -1823,7 +1823,7 @@ func ResourceContainerCluster() *schema.Resource {
 				"enabled": {
 					Type:        schema.TypeBool,
 					Required:    true,
-					Description: `When enabled, services with exterenal ips specified will be allowed.`,
+					Description: `When enabled, services with external ips specified will be allowed.`,
 				},
 			},
 		},
