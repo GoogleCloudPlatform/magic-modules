@@ -136,7 +136,7 @@ properties:
     output: true
     description: |
       Output only. The list of resources that refer to this internal range.
-      Resources that use the internal range for their range allocation are referred to as users of the range. 
+      Resources that use the internal range for their range allocation are referred to as users of the range.
       Other resources mark themselves as users while doing so by creating a reference to this internal range. Having a user, based on this reference, prevents deletion of the internal range referred to. Can be empty.
   - !ruby/object:Api::Type::Array
     name: 'overlaps'
