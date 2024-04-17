@@ -277,7 +277,7 @@ The following arguments are supported:
 * `enable_geo_fencing` - (Optional) Specifies whether to enable fencing for geo queries.
 
 * `primary_backup` - (Optional) The configuration for a failover policy with global to regional failover. Queries are responded to with the global primary targets, but if none of the primary targets are healthy, then we fallback to a regional failover policy.
-    Structure is [document below](#nested_primary_backup).
+    Structure is [documented below](#nested_primary_backup).
 
 <a name="nested_wrr"></a>The `wrr` block supports:
 
