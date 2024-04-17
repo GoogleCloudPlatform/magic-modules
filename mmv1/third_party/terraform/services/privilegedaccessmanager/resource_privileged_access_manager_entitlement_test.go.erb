@@ -107,7 +107,7 @@ resource "google_privileged_access_manager_entitlement" "tf_entitlement" {
             role_bindings{
                 role = "roles/storage.admin"
             }
-            resource = "//cloudresourcemanager.googleapis.com/projects/ci-test-project-188019"
+            resource = "//cloudresourcemanager.googleapis.com/projects/%{project_name}"
             resource_type = "cloudresourcemanager.googleapis.com/Project"
         }
     }
