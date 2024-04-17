@@ -52,7 +52,7 @@ resource "google_privileged_access_manager_entitlement" "tf_entitlement" {
     entitlement_id = "tf_test_example_entitlement%{random_suffix}"
     location = "us-central1-a"
     max_request_duration = "43200s"
-    parent = "projects/ci-test-project-188019"
+    parent = "projects/%{project_name}"
     requester_justification_config { 
         unstructured{}
     }
