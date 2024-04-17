@@ -222,6 +222,17 @@ An update test is a test that creates the target resource and then makes updates
 {{< /tab >}}
 {{< /tabs >}}
 
+## Add unit tests
+
+A unit test verifies functionality that is not related to interactions with the API, such as
+[diff suppress functions]({{<ref "/develop/field-reference#diff_suppress_func" >}})),
+[validation functions]({{<ref "/develop/field-reference#validation" >}}),
+CustomizeDiff functions, and so on.
+
+Unit tests should be added to the appropriate folder in [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services) in the file called `resource_PRODUCT_RESOURCE_test.go`. (You may need to create this file if it does not already exist. Replace PRODUCT with the product name and RESOURCE with the resource name; it should match the name of the generated resource file.)
+
+Unit tests should be named like `TestFunctionName` - for example, `TestDiskImageDiffSuppress` tests the `DiskImageDiffSuppress` function.
+
 ## What's next?
 
 - [Run your tests]({{< ref "/develop/test/run-tests.md" >}})
