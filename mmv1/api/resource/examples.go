@@ -177,10 +177,14 @@ func (e *Examples) UnmarshalYAML(n *yaml.Node) error {
 	return nil
 }
 
+// Executes example templates for documentation and tests
 func (e *Examples) SetHCLText() {
 	e.DocumentationHCLText = ExecuteHCL(e)
 
 	copy := e
+	// Override vars to inject test values into configs - will have
+	//   - "a-example-var-value%{random_suffix}""
+	//   - "%{my_var}" for overrides that have custom Golang values
 	for key, value := range copy.Vars {
 		var newVal string
 		if strings.Contains(value, "-") {
@@ -188,14 +192,17 @@ func (e *Examples) SetHCLText() {
 		} else if strings.Contains(value, "_") {
 			newVal = fmt.Sprintf("tf_test_%s", value)
 		} else {
+			// Some vars like descriptions shouldn't have prefix
 			newVal = value
 		}
+		// Random suffix is 10 characters and standard name length <= 64
 		if len(newVal) > 54 {
 			newVal = newVal[:54]
 		}
 		copy.Vars[key] = fmt.Sprintf("%s%%{random_suffix}", newVal)
 	}
 
+	// Apply overrides from YAML
 	for key := range copy.TestVarsOverrides {
 		copy.Vars[key] = fmt.Sprintf("%%{%s}", key)
 	}
