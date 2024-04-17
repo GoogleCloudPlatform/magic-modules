@@ -286,7 +286,9 @@ var handwrittenResources = map[string]*schema.Resource{
 	"google_billing_subaccount":                    resourcemanager.ResourceBillingSubaccount(),
 	"google_cloudfunctions_function":               cloudfunctions.ResourceCloudFunctionsFunction(),
 	"google_composer_environment":                  composer.ResourceComposerEnvironment(),
+	<% unless version == 'ga' -%>
 	"google_composer_user_workloads_secret":        composer.ResourceComposerUserWorkloadsSecret(),
+	<% end -%>
 	"google_compute_attached_disk":                 compute.ResourceComputeAttachedDisk(),
 	"google_compute_instance":                      compute.ResourceComputeInstance(),
 	"google_compute_disk_async_replication":        compute.ResourceComputeDiskAsyncReplication(),
