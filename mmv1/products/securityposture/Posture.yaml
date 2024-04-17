@@ -44,8 +44,7 @@ examples:
     name: 'securityposture_posture_basic'
     primary_resource_id: 'posture1'
     vars:
-      posture_id: "posture_1"
-      deployment_id: "posture_deployment_1"
+      posture_id: "posture_example"
     test_env_vars:
       org_id: :ORG_ID
 parameters:
