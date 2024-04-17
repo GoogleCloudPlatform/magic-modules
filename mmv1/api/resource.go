@@ -937,3 +937,15 @@ func (r Resource) IgnoreReadPropertiesToString(e resource.Examples) string {
 func (r *Resource) SetCompiler(t string) {
 	r.Compiler = fmt.Sprintf("%s-codegen", strings.ToLower(t))
 }
+
+// Returns the id format of an object, or self_link_uri if none is explicitly defined
+// We prefer the long name of a resource as the id so that users can reference
+// resources in a standard way, and most APIs accept short name, long name or self_link
+// def id_format(object)
+func (r Resource) GetIdFormat() string {
+	idFormat := r.IdFormat
+	if idFormat == "" {
+		idFormat = r.SelfLinkUri()
+	}
+	return idFormat
+}
