@@ -10,7 +10,7 @@
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	See the License for the specific language governing permissions and
 	limitations under the License.
-*/}}
+*/ -}}
 
 type NetworkEndpointsNetworkEndpoint struct {
 	IPAddress string
@@ -64,7 +64,7 @@ func networkEndpointsPaginatedRead(d *schema.ResourceData, config *transport_tpg
 func networkEndpointsPaginatedMutate(d *schema.ResourceData, endpoints []interface{}, config *transport_tpg.Config, userAgent, url, project, billingProject string, chunkSize int, returnLastPage bool) ([]interface{}, error) {
 	// Pull out what this mutation is doing - either attachNetworkEndpoints or detachNetworkEndpoints
 	verb := url[len(url)-len("attachNetworkEndpoints"):]
-	id, err := tpgresource.ReplaceVars(d, config, "{{project}}/{{zone}}/{{network_endpoint_group}}/endpoints")
+	id, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}project{{"}}"}}/{{"{{"}}zone{{"}}"}}/{{"{{"}}network_endpoint_group{{"}}"}}/endpoints")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}
