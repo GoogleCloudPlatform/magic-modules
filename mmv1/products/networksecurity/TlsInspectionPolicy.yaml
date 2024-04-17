@@ -104,7 +104,6 @@ properties:
       - :TLS_1_1
       - :TLS_1_2
       - :TLS_1_3
-    default_value: :TLS_VERSION_UNSPECIFIED
   - !ruby/object:Api::Type::Enum
     name: 'tlsFeatureProfile'
     description: |
@@ -115,7 +114,6 @@ properties:
       - :PROFILE_MODERN
       - :PROFILE_RESTRICTED
       - :PROFILE_CUSTOM
-    default_value: :PROFILE_UNSPECIFIED
   - !ruby/object:Api::Type::String
     name: 'customTlsFeatures'
     description: |
