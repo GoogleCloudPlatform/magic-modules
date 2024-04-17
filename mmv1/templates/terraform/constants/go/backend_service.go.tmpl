@@ -9,7 +9,7 @@
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	See the License for the specific language governing permissions and
 	limitations under the License.
-*/}}
+*/ -}}
 // suppress changes on sample_rate if log_config is set to disabled.
 func suppressWhenDisabled(k, old, new string, d *schema.ResourceData) bool {
 	_, n := d.GetChange("log_config.0.enable")
