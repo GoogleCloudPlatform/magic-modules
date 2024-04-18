@@ -50,7 +50,9 @@ var TemplateFunctions = template.FuncMap{
 	"replace":    strings.Replace,
 	"camelize":   google.Camelize,
 	"underscore": google.Underscore,
+	"plural":     google.Plural,
 	"contains":   strings.Contains,
+	"join":       strings.Join,
 }
 
 var GA_VERSION = "ga"

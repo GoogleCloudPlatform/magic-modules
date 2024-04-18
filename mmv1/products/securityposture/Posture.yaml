@@ -23,18 +23,12 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Create and deploy a posture': 'https://cloud.google.com/security-command-center/docs/how-to-use-security-posture'
 import_format: ['{{%parent}}/locations/{{location}}/postures/{{posture_id}}']
 base_url: '{{parent}}/locations/{{location}}/postures'
-
 self_link: '{{parent}}/locations/{{location}}/postures/{{posture_id}}'
-
 create_url: '{{parent}}/locations/{{location}}/postures?postureId={{posture_id}}'
-
 update_url: '{{parent}}/locations/{{location}}/postures/{{posture_id}}?revisionId={{revision_id}}'
 update_verb: :PATCH
-
 update_mask: true
-
 delete_url: '{{parent}}/locations/{{location}}/postures/{{posture_id}}'
-
 autogen_async: true
 # Sets parameters for handling operations returned by the API.
 async: !ruby/object:Api::OpAsync
@@ -49,9 +43,10 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'securityposture_posture_basic'
     primary_resource_id: 'posture1'
+    vars:
+      posture_id: "posture_example"
     test_env_vars:
       org_id: :ORG_ID
-
 parameters:
   - !ruby/object:Api::Type::String
     name: 'parent'

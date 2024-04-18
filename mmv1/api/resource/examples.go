@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"net/url"
 	"path/filepath"
+	"strings"
 	"text/template"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
@@ -157,7 +158,8 @@ type Examples struct {
 	// your test so avoid if you can.
 	PullExternal bool `yaml:"pull_external"`
 
-	HCLText string
+	DocumentationHCLText string
+	TestHCLText          string
 }
 
 func (e *Examples) UnmarshalYAML(n *yaml.Node) error {
@@ -175,7 +177,40 @@ func (e *Examples) UnmarshalYAML(n *yaml.Node) error {
 	return nil
 }
 
+// Executes example templates for documentation and tests
 func (e *Examples) SetHCLText() {
+	e.DocumentationHCLText = ExecuteHCL(e)
+
+	copy := e
+	// Override vars to inject test values into configs - will have
+	//   - "a-example-var-value%{random_suffix}""
+	//   - "%{my_var}" for overrides that have custom Golang values
+	for key, value := range copy.Vars {
+		var newVal string
+		if strings.Contains(value, "-") {
+			newVal = fmt.Sprintf("tf-test-%s", value)
+		} else if strings.Contains(value, "_") {
+			newVal = fmt.Sprintf("tf_test_%s", value)
+		} else {
+			// Some vars like descriptions shouldn't have prefix
+			newVal = value
+		}
+		// Random suffix is 10 characters and standard name length <= 64
+		if len(newVal) > 54 {
+			newVal = newVal[:54]
+		}
+		copy.Vars[key] = fmt.Sprintf("%s%%{random_suffix}", newVal)
+	}
+
+	// Apply overrides from YAML
+	for key := range copy.TestVarsOverrides {
+		copy.Vars[key] = fmt.Sprintf("%%{%s}", key)
+	}
+
+	e.TestHCLText = ExecuteHCL(copy)
+}
+
+func ExecuteHCL(e *Examples) string {
 	templatePath := e.ConfigPath
 	templates := []string{
 		templatePath,
@@ -192,7 +227,13 @@ func (e *Examples) SetHCLText() {
 		glog.Exit(err)
 	}
 
-	e.HCLText = contents.String()
+	rs := contents.String()
+
+	if !strings.HasSuffix(rs, "\n") {
+		rs = fmt.Sprintf("%s\n", rs)
+	}
+
+	return rs
 }
 
 // func (e *Examples) config_documentation(pwd) {

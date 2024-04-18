@@ -290,6 +290,9 @@ var handwrittenResources = map[string]*schema.Resource{
 	"google_billing_subaccount":                    resourcemanager.ResourceBillingSubaccount(),
 	"google_cloudfunctions_function":               cloudfunctions.ResourceCloudFunctionsFunction(),
 	"google_composer_environment":                  composer.ResourceComposerEnvironment(),
+	<% unless version == 'ga' -%>
+	"google_composer_user_workloads_secret":        composer.ResourceComposerUserWorkloadsSecret(),
+	<% end -%>
 	"google_compute_attached_disk":                 compute.ResourceComputeAttachedDisk(),
 	"google_compute_instance":                      compute.ResourceComputeInstance(),
 	"google_compute_disk_async_replication":        compute.ResourceComputeDiskAsyncReplication(),
@@ -352,6 +355,7 @@ var handwrittenResources = map[string]*schema.Resource{
 	"google_project_default_service_accounts":      resourcemanager.ResourceGoogleProjectDefaultServiceAccounts(),
 	"google_project_service":                       resourcemanager.ResourceGoogleProjectService(),
 	"google_project_iam_custom_role":               resourcemanager.ResourceGoogleProjectIamCustomRole(),
+	"google_project_iam_member_remove":             resourcemanager.ResourceGoogleProjectIamMemberRemove(),
 	"google_project_organization_policy":           resourcemanager.ResourceGoogleProjectOrganizationPolicy(),
 	"google_project_usage_export_bucket":           compute.ResourceProjectUsageBucket(),
 	<% unless version == 'ga' -%>
