@@ -160,8 +160,17 @@ func execGenerateDownstream(baseBranch, command, repo, version, ref string, gh G
 		os.Exit(1)
 	}
 
+	prSha, err := rnr.Run("git", []string{"rev-parse", "HEAD"}, nil)
+	if err != nil {
+		fmt.Println("Error retrieving commit sha: ", err)
+		os.Exit(1)
+	}
+
+	prSha = strings.TrimSpace(prSha)
+	fmt.Printf("Commit sha on the scratch branch is: `%s`", prSha)
+
 	if commitErr == nil && command == "downstream" {
-		if err := mergePullRequest(downstreamRepo, scratchRepo, pullRequest, rnr, gh, ctlr); err != nil {
+		if err := mergePullRequest(downstreamRepo, scratchRepo, prSha, pullRequest, rnr, gh); err != nil {
 			fmt.Println("Error merging pull request: ", err)
 			os.Exit(1)
 		}
@@ -335,7 +344,7 @@ func addChangelogEntry(pullRequest *github.PullRequest, rnr ExecRunner) error {
 	return nil
 }
 
-func mergePullRequest(downstreamRepo, scratchRepo *source.Repo, pullRequest *github.PullRequest, rnr ExecRunner, gh GithubClient, ctlr *source.Controller) error {
+func mergePullRequest(downstreamRepo, scratchRepo *source.Repo, pullRequestSha string, pullRequest *github.PullRequest, rnr ExecRunner, gh GithubClient) error {
 	fmt.Printf(`Base: %s:%s
 Head: %s:%s
 `, downstreamRepo.Owner, downstreamRepo.Branch, scratchRepo.Owner, scratchRepo.Branch)
@@ -363,7 +372,6 @@ Head: %s:%s
 	newPRURLParts := strings.Split(newPRURL, "/")
 	newPRNumber := strings.TrimSuffix(newPRURLParts[len(newPRURLParts)-1], "\n")
 
-	scratchCommitSha, err := ctlr.GetCommitSHA(scratchRepo)
 	if err != nil {
 		return err
 	}
@@ -371,7 +379,7 @@ Head: %s:%s
 	// Wait a few seconds, then merge the PR.
 	time.Sleep(5 * time.Second)
 	fmt.Println("Merging PR ", newPRURL)
-	if err := gh.MergePullRequest(downstreamRepo.Owner, downstreamRepo.Name, newPRNumber, scratchCommitSha); err != nil {
+	if err := gh.MergePullRequest(downstreamRepo.Owner, downstreamRepo.Name, newPRNumber, pullRequestSha); err != nil {
 		return err
 	}
 	return nil

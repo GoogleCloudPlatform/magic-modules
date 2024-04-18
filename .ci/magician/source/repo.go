@@ -120,21 +120,3 @@ func (gc Controller) Cleanup(repo *Repo) error {
 	}
 	return nil
 }
-
-func (gc Controller) GetCommitSHA(repo *Repo) (string, error) {
-	if err := gc.rnr.PushDir(repo.Path); err != nil {
-		return "", err
-	}
-
-	output, err := gc.rnr.Run("git", []string{"rev-parse", "HEAD"}, nil)
-	if err != nil {
-		return "", fmt.Errorf("error getting commit SHA for %s: %v", repo.Name, err)
-	}
-
-	sha := strings.TrimSpace(output)
-	if err := gc.rnr.PopDir(); err != nil {
-		return "", err
-	}
-
-	return sha, nil
-}
