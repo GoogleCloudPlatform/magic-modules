@@ -1,6 +1,4 @@
 resource "google_compute_security_policy" "default" {
-  provider    = google-beta
-
   name        = "<%= ctx[:vars]['sec_policy_name'] %>"
   description = "basic global security policy"
   type        = "CLOUD_ARMOR"
@@ -12,8 +10,6 @@ resource "google_compute_security_policy" "default" {
 #   to = google_compute_security_policy_rule.default_rule
 # }
 resource "google_compute_security_policy_rule" "default_rule" {
-  provider = google-beta
-
   security_policy = google_compute_security_policy.default.name
   description     = "default rule"
   action          = "allow"
@@ -27,8 +23,6 @@ resource "google_compute_security_policy_rule" "default_rule" {
 }
 
 resource "google_compute_security_policy_rule" "<%= ctx[:primary_resource_id] %>" {
-  provider = google-beta
-
   security_policy = google_compute_security_policy.default.name
   description     = "new rule"
   priority        = 100
