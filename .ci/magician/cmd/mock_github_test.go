@@ -93,7 +93,7 @@ func (m *mockGithub) CreateWorkflowDispatchEvent(workflowFileName string, inputs
 	return nil
 }
 
-func (m *mockGithub) MergePullRequest(owner, repo, prNumber string) error {
-	m.calledMethods["MergePullRequest"] = append(m.calledMethods["MergePullRequest"], []any{owner, repo, prNumber})
+func (m *mockGithub) MergePullRequest(owner, repo, prNumber, commitSha string) error {
+	m.calledMethods["MergePullRequest"] = append(m.calledMethods["MergePullRequest"], []any{owner, repo, prNumber, commitSha})
 	return nil
 }
