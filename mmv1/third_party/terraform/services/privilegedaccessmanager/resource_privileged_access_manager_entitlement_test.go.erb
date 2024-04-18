@@ -63,6 +63,7 @@ resource "google_privileged_access_manager_entitlement" "tf_entitlement" {
         gcp_iam_access{
             role_bindings{
                 role = "roles/storage.admin"
+                condition_expression = ""
             }
             resource = "//cloudresourcemanager.googleapis.com/projects/%{project_name}"
             resource_type = "cloudresourcemanager.googleapis.com/Project"
@@ -106,6 +107,7 @@ resource "google_privileged_access_manager_entitlement" "tf_entitlement" {
         gcp_iam_access{
             role_bindings{
                 role = "roles/storage.admin"
+                condition_expression = ""
             }
             resource = "//cloudresourcemanager.googleapis.com/projects/%{project_name}"
             resource_type = "cloudresourcemanager.googleapis.com/Project"

@@ -107,6 +107,7 @@ properties:
                     properties:
                       - !ruby/object:Api::Type::Array
                         name: principals
+                        required: true
                         min_size: 1
                         max_size: 20
                         is_set: true

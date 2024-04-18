@@ -14,6 +14,7 @@ resource "google_privileged_access_manager_entitlement" "<%= ctx[:primary_resour
         gcp_iam_access{
             role_bindings{
                 role = "roles/storage.admin"
+                condition_expression = ""
             }
             resource = "//cloudresourcemanager.googleapis.com/projects/ci-test-project-188019"
             resource_type = "cloudresourcemanager.googleapis.com/Project"
