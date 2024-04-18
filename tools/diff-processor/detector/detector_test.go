@@ -20,11 +20,24 @@ func TestGetChangedFieldsFromSchemaDiff(t *testing.T) {
 			schemaDiff: diff.SchemaDiff{
 				"covered_resource": diff.ResourceDiff{
 					Fields: map[string]diff.FieldDiff{
-						"field_one": {},
+						"field_one": {
+							New: &schema.Schema{},
+						},
 						"field_two.field_three": {
+							New: &schema.Schema{},
 							Old: &schema.Schema{},
 						},
-						"field_four.field_five.field_six": {},
+						"field_four": {
+							New: &schema.Schema{
+								Elem: &schema.Resource{},
+							},
+						},
+						"field_four.field_five.field_six": {
+							New: &schema.Schema{},
+						},
+						"field_seven": {
+							New: &schema.Schema{Computed: true},
+						},
 					},
 				},
 			},
