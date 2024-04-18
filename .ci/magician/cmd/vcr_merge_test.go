@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"magician/github"
+	"os"
 	"strings"
 	"testing"
 
@@ -90,6 +91,58 @@ func TestExecVCRMerge(t *testing.T) {
 			}
 			if diff := cmp.Diff(want, got); diff != "" {
 				t.Fatalf("execVCRMerge() executed commands diff = %s\n want = %+v, got = %+v", diff, want, got)
+			}
+		})
+	}
+}
+
+func TestVCRMergeRunE(t *testing.T) {
+	testCases := []struct {
+		name    string
+		envVars map[string]string
+		errMsg  string
+	}{
+		{
+			name: "GITHUB_TOKEN_CLASSIC is missing in env var",
+			envVars: map[string]string{
+				"BASE_BRANCH": "main",
+			},
+		},
+		{
+			name: "BASE_BRANCH env var is not set",
+			envVars: map[string]string{
+				"GITHUB_TOKEN_CLASSIC": "123",
+			},
+		},
+		{
+			name: "BASE_BRANCH env var is empty",
+			envVars: map[string]string{
+				"GITHUB_TOKEN_CLASSIC": "123",
+				"BASE_BRANCH":          "",
+			},
+		},
+	}
+	for _, test := range testCases {
+		t.Run(test.name, func(t *testing.T) {
+			origEnvVars := make(map[string]string)
+			for k, v := range test.envVars {
+				if origVal, ok := os.LookupEnv(k); ok {
+					origEnvVars[k] = origVal
+				}
+				os.Setenv(k, v)
+			}
+			defer func() {
+				for k := range test.envVars {
+					if origVal, ok := origEnvVars[k]; ok {
+						os.Setenv(k, origVal)
+					} else {
+						os.Unsetenv(k)
+					}
+				}
+			}()
+			err := vcrMergeCmd.RunE(nil, []string{"sha"})
+			if err == nil || !strings.Contains(err.Error(), test.errMsg) {
+				t.Fatalf("vcrMergeCmd got %s, want error message with %q", err, test.errMsg)
 			}
 		})
 	}

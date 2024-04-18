@@ -23,69 +23,67 @@ var vcrMergeCmd = &cobra.Command{
 	2. Run gsutil to list, copy, and remove the vcr cassettes fixtures.
 	`,
 	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		reference := args[0]
 		fmt.Println("Reference commit SHA: ", reference)
+
 		githubToken, ok := os.LookupEnv("GITHUB_TOKEN_CLASSIC")
 		if !ok {
-			fmt.Println("Did not provide GITHUB_TOKEN_CLASSIC environment variable")
-			os.Exit(1)
-		}
-		rnr, err := exec.NewRunner()
-		if err != nil {
-			fmt.Println("Error creating Runner: ", err)
-			os.Exit(1)
+			return fmt.Errorf("did not provide GITHUB_TOKEN_CLASSIC environment variable")
 		}
 
 		baseBranch := os.Getenv("BASE_BRANCH")
 		if baseBranch == "" {
-			baseBranch = "main"
+			return fmt.Errorf("environment variable BASE_BRANCH is empty")
 		}
+
+		rnr, err := exec.NewRunner()
+		if err != nil {
+			return fmt.Errorf("error creating Runner: %w", err)
+		}
+
 		gh := github.NewClient(githubToken)
-		execVCRMerge(gh, reference, baseBranch, rnr)
+		return execVCRMerge(gh, reference, baseBranch, rnr)
 	},
 }
 
-func execVCRMerge(gh GithubClient, sha string, baseBranch string, runner source.Runner) {
+func execVCRMerge(gh GithubClient, sha string, baseBranch string, runner source.Runner) error {
 	arr, err := gh.GetPullRequests("closed", baseBranch, "updated", "desc")
 	if err != nil {
-		fmt.Println("Error getting pull requests: ", err)
-		os.Exit(1)
+		return fmt.Errorf("error getting pull requests: %w", err)
 	}
 	pr := findPRBySHA(sha, arr)
 	if pr == nil {
 		fmt.Printf("Not finding any matching PR with commit SHA %s\n", sha)
-		return
+		return nil
 	}
 
-	mergeCassettes(false, baseBranch, pr.Number, runner)
-	mergeCassettes(true, baseBranch, pr.Number, runner)
+	mergeCassettes("gs://ci-vcr-cassettes", baseBranch, fmt.Sprintf("refs/heads/auto-pr-%d", pr.Number), runner)
+	mergeCassettes("gs://ci-vcr-cassettes/beta", baseBranch, fmt.Sprintf("refs/heads/auto-pr-%d", pr.Number), runner)
+	return nil
 }
 
-func mergeCassettes(isBeta bool, baseBranch string, prNumber int, runner source.Runner) {
-	prefix := "gs://ci-vcr-cassettes"
-	if isBeta {
-		prefix = "gs://ci-vcr-cassettes/beta"
-	}
-	prPath := fmt.Sprintf("refs/heads/auto-pr-%d", prNumber)
+func mergeCassettes(basePath, baseBranch, prPath string, runner source.Runner) {
 	branchPath := ""
 	if baseBranch != "main" {
 		branchPath = "/refs/branches/" + baseBranch
 	}
 
-	lsPath := fmt.Sprintf("%s/%s/fixtures/", prefix, prPath)
-	err := listCassettes(lsPath, runner)
-	if err != nil {
+	if err := listCassettes(
+		fmt.Sprintf("%s/%s/fixtures/", basePath, prPath),
+		runner,
+	); err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	cpSrcPath := fmt.Sprintf("%s/%s/fixtures/*", prefix, prPath)
-	cpDestPath := fmt.Sprintf("%s%s/fixtures/", prefix, branchPath)
-	cpCassettes(cpSrcPath, cpDestPath, runner)
+	cpCassettes(
+		fmt.Sprintf("%s/%s/fixtures/*", basePath, prPath),
+		fmt.Sprintf("%s%s/fixtures/", basePath, branchPath),
+		runner,
+	)
 
-	rmDestPath := fmt.Sprintf("%s/%s/", prefix, prPath)
-	rmCassettes(rmDestPath, runner)
+	rmCassettes(fmt.Sprintf("%s/%s/", basePath, prPath), runner)
 }
 
 func listCassettes(path string, runner source.Runner) error {
