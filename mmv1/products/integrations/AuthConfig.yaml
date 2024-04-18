@@ -419,54 +419,42 @@ examples:
     primary_resource_id: "basic_example"
     vars:
       auth_config_name: 'test-authconfig'
-    test_vars_overrides:
-      client: 'acctest.BootstrapIntegrationsClient(t, "us-west1").Name'  # Added to ensure client exist
+    skip_test: true # This is already part of other examples.
   - !ruby/object:Provider::Terraform::Examples
     name: "integrations_auth_config_advance"
     primary_resource_id: "advance_example"
     vars:
       auth_config_name: 'test-authconfig'
-    test_vars_overrides:
-      client: 'acctest.BootstrapIntegrationsClient(t, "us-west1").Name'  # Added to ensure client exist
+    skip_docs: true
   - !ruby/object:Provider::Terraform::Examples
     name: "integrations_auth_config_username_and_password"
     primary_resource_id: "username_and_password_example"
     vars:
       auth_config_name: 'test-authconfig-username-and-password'
-    test_vars_overrides:
-      client: 'acctest.BootstrapIntegrationsClient(t, "us-west1").Name'  # Added to ensure client exist
     skip_docs: true
   - !ruby/object:Provider::Terraform::Examples
     name: "integrations_auth_config_oauth2_authorization_code"
     primary_resource_id: "oauth2_authotization_code_example"
     vars:
       auth_config_name: 'test-authconfig-oauth2-authorization-code'
-    test_vars_overrides:
-      client: 'acctest.BootstrapIntegrationsClient(t, "us-west1").Name'  # Added to ensure client exist
     skip_docs: true
   - !ruby/object:Provider::Terraform::Examples
     name: "integrations_auth_config_oauth2_client_credentials"
     primary_resource_id: "oauth2_client_credentials_example"
     vars:
       auth_config_name: 'test-authconfig-oauth2-client-credentials'
-    test_vars_overrides:
-      client: 'acctest.BootstrapIntegrationsClient(t, "us-west1").Name'  # Added to ensure client exist
     skip_docs: true
   - !ruby/object:Provider::Terraform::Examples
     name: "integrations_auth_config_jwt"
     primary_resource_id: "jwt_example"
     vars:
       auth_config_name: 'test-authconfig-jwt'
-    test_vars_overrides:
-      client: 'acctest.BootstrapIntegrationsClient(t, "us-west1").Name'  # Added to ensure client exist
     skip_docs: true
   - !ruby/object:Provider::Terraform::Examples
     name: "integrations_auth_config_auth_token"
     primary_resource_id: "auth_token_example"
     vars:
       auth_config_name: 'test-authconfig-auth-token'
-    test_vars_overrides:
-      client: 'acctest.BootstrapIntegrationsClient(t, "us-west1").Name'  # Added to ensure client exist
     skip_docs: true
   - !ruby/object:Provider::Terraform::Examples
     name: "integrations_auth_config_service_account"
@@ -474,8 +462,6 @@ examples:
     vars:
       auth_config_name: 'test-authconfig-service-account'
       service_account_id: sa
-    test_vars_overrides:
-      client: 'acctest.BootstrapIntegrationsClient(t, "us-west1").Name'  # Added to ensure client exist
     skip_docs: true
   - !ruby/object:Provider::Terraform::Examples
     name: "integrations_auth_config_oidc_token"
@@ -483,14 +469,10 @@ examples:
     vars:
       auth_config_name: 'test-authconfig-oidc-token'
       service_account_id: sa
-    test_vars_overrides:
-      client: 'acctest.BootstrapIntegrationsClient(t, "us-west1").Name'  # Added to ensure client exist
     skip_docs: true
   - !ruby/object:Provider::Terraform::Examples
     name: "integrations_auth_config_client_certificate_only"
     primary_resource_id: "client_certificate_example"
     vars:
       auth_config_name: 'test-authconfig-client-certificate'
-    test_vars_overrides:
-      client: 'acctest.BootstrapIntegrationsClient(t, "us-west1").Name'  # Added to ensure client exist
     skip_docs: true

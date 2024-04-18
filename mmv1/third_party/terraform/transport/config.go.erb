@@ -67,7 +67,6 @@ import (
 	healthcare "google.golang.org/api/healthcare/v1"
 	"google.golang.org/api/iam/v1"
 	iamcredentials "google.golang.org/api/iamcredentials/v1"
-	integrations "google.golang.org/api/integrations/v1"
 	cloudlogging "google.golang.org/api/logging/v2"
 	"google.golang.org/api/pubsub/v1"
 	runadminv2 "google.golang.org/api/run/v2"
@@ -1126,20 +1125,6 @@ func (c *Config) NewCloudRunV2Client(userAgent string) *runadminv2.Service {
 	clientRunAdminV2.BasePath = runAdminV2ClientBasePath
 
 	return clientRunAdminV2
-}
-
-func (c *Config) NewIntegrationsClient(userAgent string) *integrations.Service {
-	integrationsClientBasePath := RemoveBasePathVersion(RemoveBasePathVersion(c.IntegrationsBasePath))
-	log.Printf("[INFO] Instantiating Google Cloud Integrations client for path %s", integrationsClientBasePath)
-	clientIntegrations, err := integrations.NewService(c.Context, option.WithHTTPClient(c.Client))
-	if err != nil {
-		log.Printf("[WARN] Error creating client integrations: %s", err)
-		return nil
-	}
-	clientIntegrations.UserAgent = userAgent
-	clientIntegrations.BasePath = integrationsClientBasePath
-
-	return clientIntegrations
 }
 
 // StaticTokenSource is used to be able to identify static token sources without reflection.

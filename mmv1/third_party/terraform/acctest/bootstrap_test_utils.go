@@ -22,10 +22,8 @@ import (
 	"google.golang.org/api/cloudbilling/v1"
 	cloudkms "google.golang.org/api/cloudkms/v1"
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
-	"google.golang.org/api/googleapi"
 	iam "google.golang.org/api/iam/v1"
 	"google.golang.org/api/iamcredentials/v1"
-	integrations "google.golang.org/api/integrations/v1"
 	"google.golang.org/api/servicenetworking/v1"
 	"google.golang.org/api/serviceusage/v1"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
@@ -1305,38 +1303,4 @@ func SetupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 	accessToken := atResp.AccessToken
 
 	return accessToken, nil
-}
-
-type BootstrappedIntegrationsClient struct {
-	Name string
-}
-
-func BootstrapIntegrationsClient(t *testing.T, region string) BootstrappedIntegrationsClient {
-	config := BootstrapConfig(t)
-	if config == nil {
-		return BootstrappedIntegrationsClient{}
-	}
-
-	integrationsClient := config.NewIntegrationsClient(config.UserAgent)
-
-	project := envvar.GetTestProjectFromEnv()
-	parent := fmt.Sprintf("projects/%s/locations/%s", project, region)
-
-	_, err := integrationsClient.Projects.GetClientmetadata(parent).Do()
-	if err != nil {
-		if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
-			request := &integrations.GoogleCloudIntegrationsV1alphaProvisionClientRequest{}
-			opts := googleapi.QueryParameter("provisionGmek", "true")
-			_, err = integrationsClient.Projects.Locations.Clients.Provision(parent, request).Do(opts)
-			if err != nil {
-				t.Errorf("Unable to bootstrap Integrations client. Cannot provision client: %s", err)
-			}
-		} else {
-			t.Errorf("Unable to bootstrap KMS key. Cannot retrieve client: %s", err)
-		}
-	}
-
-	return BootstrappedIntegrationsClient{
-		Name: parent,
-	}
 }

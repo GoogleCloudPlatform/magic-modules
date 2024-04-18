@@ -1,5 +1,10 @@
+resource "google_integrations_client" "client" {
+  location = "asia-east2"
+  provision_gmek = true
+}
+
 resource "google_integrations_auth_config" "<%= ctx[:primary_resource_id] %>" {
-    location = "us-west1"
+    location = "asia-east2"
     display_name = "<%= ctx[:vars]['auth_config_name'] %>"
     description = "Test auth config created via terraform"
     visibility = "CLIENT_VISIBLE"
@@ -12,4 +17,5 @@ resource "google_integrations_auth_config" "<%= ctx[:primary_resource_id] %>" {
             password = "test-password"
         }
     }
+    depends_on = [google_integrations_client.client]
 }

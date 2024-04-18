@@ -1,5 +1,10 @@
+resource "google_integrations_client" "client" {
+  location = "us-west2"
+  provision_gmek = true
+}
+
 resource "google_integrations_auth_config" "<%= ctx[:primary_resource_id] %>" {
-    location = "us-west1"
+    location = "us-west2"
     display_name = "<%= ctx[:vars]['auth_config_name'] %>"
     description = "Test auth config created via terraform"
     decrypted_credential {
@@ -9,4 +14,5 @@ resource "google_integrations_auth_config" "<%= ctx[:primary_resource_id] %>" {
             token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
         }
     }
+    depends_on = [google_integrations_client.client]
 }

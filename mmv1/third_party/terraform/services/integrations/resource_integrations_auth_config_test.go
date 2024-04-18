@@ -12,7 +12,6 @@ func TestAccIntegrationsAuthConfig_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"client":        acctest.BootstrapIntegrationsClient(t, "us-west1").Name,
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -45,8 +44,13 @@ func TestAccIntegrationsAuthConfig_update(t *testing.T) {
 
 func testAccIntegrationsAuthConfig_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_integrations_client" "client" {
+	location = "southamerica-west1"
+	provision_gmek = true
+}
+
 resource "google_integrations_auth_config" "update_example" {
-    location = "us-west1"
+    location = "southamerica-west1"
     display_name = "tf-test-test-authconfig%{random_suffix}"
     description = "Test auth config created via terraform"
     visibility = "CLIENT_VISIBLE"
@@ -59,14 +63,20 @@ resource "google_integrations_auth_config" "update_example" {
             password = "test-password"
         }
     }
+    depends_on = [google_integrations_client.client]
 }
 `, context)
 }
 
 func testAccIntegrationsAuthConfig_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_integrations_client" "client" {
+	location = "southamerica-west1"
+	provision_gmek = true
+}
+
 resource "google_integrations_auth_config" "update_example" {
-    location = "us-west1"
+    location = "southamerica-west1"
     display_name = "tf-test-test-authconfig-update%{random_suffix}"
     description = "Test auth config updated via terraform"
     visibility = "CLIENT_VISIBLE"
@@ -125,6 +135,7 @@ UwKadZbfwbVF5ipu59UxfVE3lipf/mYePDqMkHVWv/8p+OnnJt9uKnyW8VSOu5uk
 EOT
 		passphrase = ""
     }
+    depends_on = [google_integrations_client.client]
 }
 `, context)
 }
