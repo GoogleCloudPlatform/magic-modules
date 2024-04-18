@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestAccApigeeEnvironment_apigeeEnvironmentTypeTestExampleUpdate(t *testing.T) {
+func TestAccApigeeEnvironment_apigeeEnvironmentPatchUpdateTestExampleUpdate(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
@@ -26,7 +26,7 @@ func TestAccApigeeEnvironment_apigeeEnvironmentTypeTestExampleUpdate(t *testing.
 		CheckDestroy: testAccCheckApigeeEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccApigeeEnvironment_apigeeEnvironmentTypeTestExample(context),
+				Config: testAccApigeeEnvironment_apigeeEnvironmentPatchUpdateTestExample(context),
 			},
 			{
 				ResourceName:            "google_apigee_environment.apigee_environment",
@@ -35,7 +35,7 @@ func TestAccApigeeEnvironment_apigeeEnvironmentTypeTestExampleUpdate(t *testing.
 				ImportStateVerifyIgnore: []string{"org_id"},
                         },
                         {
-                                Config: testAccApigeeEnvironment_apigeeEnvironmentTypeTestExampleUpdate(context),
+                                Config: testAccApigeeEnvironment_apigeeEnvironmentPatchUpdateTestExampleUpdate(context),
                         },
                         {
                                 ResourceName:            "google_apigee_environment.apigee_environment",
@@ -47,7 +47,7 @@ func TestAccApigeeEnvironment_apigeeEnvironmentTypeTestExampleUpdate(t *testing.
 	})
 }
 
-func testAccApigeeEnvironment_apigeeEnvironmentTypeTestExampleUpdate(context map[string]interface{}) string {
+func testAccApigeeEnvironment_apigeeEnvironmentPatchUpdateTestExampleUpdate(context map[string]interface{}) string {
         return acctest.Nprintf(`
 resource "google_project" "project" {
   provider = google-beta
@@ -170,6 +170,7 @@ resource "google_apigee_environment" "apigee_environment" {
   description  = "Apigee Environment"
   display_name = "tf-test%{random_suffix}"
   type         = "INTERMEDIATE"
+  forward_proxy_uri = "http://test:456"
 }
 `, context)
 }
