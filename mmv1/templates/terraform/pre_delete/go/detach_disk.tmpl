@@ -4,12 +4,12 @@ readRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 	Project: project,
 	RawURL: url,
 	UserAgent: userAgent,
-{{ if $.ErrorRetryPredicates -}}
+{{- if $.ErrorRetryPredicates }}
 	ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{ {{- join $.ErrorRetryPredicates "," -}} },
-{{ end -}}
-{{ if $.ErrorAbortPredicates -}}
+{{- end }}
+{{- if $.ErrorAbortPredicates }}
 	ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{ {{- join $.ErrorAbortPredicates "," -}} },
-{{ end -}}
+{{- end }}
 })
 if err != nil {
 	return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("ComputeDisk %q", d.Id()))
