@@ -372,10 +372,6 @@ Head: %s:%s
 	newPRURLParts := strings.Split(newPRURL, "/")
 	newPRNumber := strings.TrimSuffix(newPRURLParts[len(newPRURLParts)-1], "\n")
 
-	if err != nil {
-		return err
-	}
-
 	// Wait a few seconds, then merge the PR.
 	time.Sleep(5 * time.Second)
 	fmt.Println("Merging PR ", newPRURL)
