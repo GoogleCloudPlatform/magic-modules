@@ -265,6 +265,13 @@ properties:
     description: |
       The database engine major version. This is an optional field and it's populated at the Cluster creation time. This field cannot be changed after cluster creation.
   - !ruby/object:Api::Type::NestedObject
+    name: 'pscConfig'
+    description: 'Configuration for Private Service Connect (PSC) for the cluster.'
+    properties:
+      - !ruby/object:Api::Type::Boolean
+        name: 'pscEnabled'
+        description: 'Create an instance that allows connections from Private Service Connect endpoints to the instance.'
+  - !ruby/object:Api::Type::NestedObject
     name: 'initialUser'
     description: |
       Initial user to setup during cluster creation.
