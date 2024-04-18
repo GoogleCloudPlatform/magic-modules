@@ -861,7 +861,6 @@ func (r Resource) TerraformName() string {
 	return fmt.Sprintf("google_%s_%s", r.ProductMetadata.TerraformName(), google.Underscore(r.Name))
 }
 
-<<<<<<< HEAD
 func (r Resource) ImportIdFormatsFromResource() []string {
 	return ImportIdFormats(r.ImportFormat, r.Identity, r.BaseUrl)
 }
@@ -961,7 +960,7 @@ func (r Resource) GetIdFormat() string {
 		idFormat = r.SelfLinkUri()
 	}
 	return idFormat
-=======
+}
 // ====================
 // Template Methods
 // ====================
@@ -972,5 +971,4 @@ func (r Resource) GetIdFormat() string {
 // used to decide whether or not to import "google.golang.org/api/googleapi"
 func (r Resource) FlattenedProperties() []*Type {
 	return google.Select(google.Reject(r.GettableProperties(), func(p *Type) bool { return p.IgnoreRead }), func(p *Type) bool { return p.FlattenObject })
->>>>>>> 81572215c (errors resolved)
 }
