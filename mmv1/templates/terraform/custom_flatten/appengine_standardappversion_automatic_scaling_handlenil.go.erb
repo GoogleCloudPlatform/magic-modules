@@ -34,6 +34,7 @@ func flattenAppEngineStandardAppVersionAutomaticScaling(v interface{}, d *schema
 	transformed["standard_scheduler_settings"] =
 		flattenAppEngineStandardAppVersionAutomaticScalingStandardSchedulerSettings(original["standardSchedulerSettings"], d, config)
 
+	// begin handwritten code (all other parts of this file are forked from generated code)
 	// solve for the following diff when no scaling settings are configured:
 	//
 	// - automatic_scaling {
@@ -59,6 +60,7 @@ func flattenAppEngineStandardAppVersionAutomaticScaling(v interface{}, d *schema
 		transformed["standard_scheduler_settings"] == nil {
 		return nil
 	}
+	// end handwritten code
 
 	return []interface{}{transformed}
 }
