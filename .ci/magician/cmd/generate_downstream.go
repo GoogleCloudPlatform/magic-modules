@@ -150,7 +150,7 @@ func execGenerateDownstream(baseBranch, command, repo, version, ref string, gh G
 		}
 	}
 
-	commitSha, commitErr := createCommit(scratchRepo, commitMessage, rnr)
+	scratchCommitSha, commitErr := createCommit(scratchRepo, commitMessage, rnr)
 	if commitErr != nil {
 		fmt.Println("Error creating commit: ", commitErr)
 	}
@@ -161,7 +161,7 @@ func execGenerateDownstream(baseBranch, command, repo, version, ref string, gh G
 	}
 
 	if commitErr == nil && command == "downstream" {
-		if err := mergePullRequest(downstreamRepo, scratchRepo, commitSha, pullRequest, rnr, gh); err != nil {
+		if err := mergePullRequest(downstreamRepo, scratchRepo, scratchCommitSha, pullRequest, rnr, gh); err != nil {
 			fmt.Println("Error merging pull request: ", err)
 			os.Exit(1)
 		}
