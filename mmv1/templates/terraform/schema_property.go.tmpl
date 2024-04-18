@@ -1,30 +1,16 @@
-{{/*# The license inside this block applies to this file.
-  # Copyright 2017 Google Inc.
-  # Licensed under the Apache License, Version 2.0 (the "License");
-  # you may not use this file except in compliance with the License.
-  # You may obtain a copy of the License at
-  #
-  #     http://www.apache.org/licenses/LICENSE-2.0
-  #
-  # Unless required by applicable law or agreed to in writing, software
-  # distributed under the License is distributed on an "AS IS" BASIS,
-  # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  # See the License for the specific language governing permissions and
-  # limitations under the License.
-*/}}
-
-{{ if .FlattenObject -}}
+{{define "SchemaFields"}}
+{{- if .FlattenObject -}}
 	##TODO order props?
-	{{- range $prop := .Properties }}
-		{{template "SchemaFields" $prop}}
-	{{ end -}}
-{{ else }}
+	{{- range $prop := .Properties -}}
+		{{- template "SchemaFields" $prop -}}
+	{{- end -}}
+{{- else -}}
 "{{underscore .Name -}}": {
-  {{ if .IsSet -}}
+{{ if .IsSet -}}
   Type: schema.TypeSet,
-  {{ else -}}
+  {{- else -}}
   Type: {{ .Type }},
-  {{ end -}}
+  {{- end }}
 {{ if .DefaultFromApi -}}
 	Computed: true,
 	Optional: true,
@@ -47,19 +33,12 @@
 {{ if .Validation -}}
 	{{ if .Validation.Regex -}}
   ValidateFunc: verify.ValidateRegexp(`{{ .Validation.Regex -}}`),
-	{{ else if Validation.F -}}
+	{{ else if .Validation.Function -}}
   ValidateFunc: {{ .Validation.Function -}},
 	{{ end  -}}
 {{ end -}}
-
-
-*/}}
-{{ if and (eq .Type "Enum") (not output) -}}
-{{
-	enum_values = .values
-	enum_values.push "" unless .required
--}}
-	ValidateFunc: verify.ValidateEnum([]string{"{{= enum_values.join '","' -}}"}),
+{{ if and (eq .Type "Enum") (not .Output) -}}
+	ValidateFunc: verify.ValidateEnum([]string{"{{ .EnumValuesToString -}}"}),
 {{ end -}}
 {{ if .DiffSuppressFunc -}}
   DiffSuppressFunc: {{ .DiffSuppressFunc }},
@@ -69,120 +48,116 @@
 {{ if .StateFunc -}}
 	StateFunc: {{ .StateFunc }},
 {{ end -}}
-{{ enum_values_description = "" -}}
-{{ if .is_a?(Api::Type::Array) && .item_type.is_a?(Api::Type::Enum) && !.output && !.item_type.skip_docs_values -}}
-{{ unless .item_type.default_value.nil? || .item_type.default_value == "" -}}
-{{ enum_values_description += " Default value: \"#{.item_type.default_value}\"" -}}
+  Description: `{{ replace .Description "`" "'" -1 -}}
+{{ if and (eq .Type "Array") (eq .ItemType.Type "Enum") (not .Output) (not .ItemType.SkipDocsValues) -}}
+{{ if .ItemType.DefaultValue }}
+Default value: {{ .ItemType.DefaultValue -}}
 {{ end -}}
-{{ enum_values_description += " Possible values: [" -}}
-{{ enum_values_description += .item_type.values.select { |v| v != "" }.map { |v| "\"#{v}\"" }.join(', ') -}}
-{{ enum_values_description += "]" -}}
-{{ elsif .is_a?(Api::Type::Enum) && !.output -}}
-{{ unless .default_value.nil? || .default_value == "" -}}
-{{ enum_values_description += " Default value: \"#{.default_value}\"" -}}
+Possible values: ["{{ join .EnumValues "\",\"" }}"]
+{{ else if and (eq .Type "Enum") (not .Output) }}
+{{ if .DefaultValue -}}
+Default value: {{.DefaultValue }}
 {{ end -}}
-{{ enum_values_description += " Possible values: [" -}}
-{{ enum_values_description += .values.select { |v| v != "" }.map { |v| "\"#{v}\"" }.join(', ') -}}
-{{ enum_values_description += "]" -}}
-{{ end -}}
-	Description: `{{= .description.strip.gsub("`", "'") + enum_values_description -}}`,
-{{ if .is_a?(Api::Type::NestedObject) -}}
-  {{ unless .output -}}
+Possible values: ["{{ join .EnumValues "\",\"" }}"]
+{{- end -}}`,
+{{ if eq .Type "NestedObject" -}}
+  {{ if not .Output -}}
   MaxItems: 1,
   {{ end -}}
   Elem: &schema.Resource{
     Schema: map[string]*schema.Schema{
-      {{ order_properties(.properties).each do |prop| -}}
-        {{= lines(build_schema_property(prop, object, pwd)) -}}
-      {{ end -}}
+      {{- range $prop := $.Properties }}
+      {{template "SchemaFields" $prop}}
+      {{- end }}
     },
   },
-{{ elsif .is_a?(Api::Type::Array) -}}
-  {{ unless .min_size.nil? -}}
-      MinItems: {{= .min_size }},
+{{ else if eq .Type "Array" -}}
+  {{ if .MinSize -}}
+      MinItems: {{ .MinSize }},
   {{ end -}}
-  {{ unless .max_size.nil? -}}
-      MaxItems: {{= .max_size }},
+  {{ if .MaxSize -}}
+      MaxItems: {{ .MaxSize }},
   {{ end -}}
-  {{ if .item_type.is_a?(Api::Type::NestedObject) -}}
-    {{ if .is_set -}}
-      Elem: {{= namespace_property_from_object(property, object) -}}Schema(),
+  {{ if eq .ItemType.Type "NestedObject" -}}
+    {{ if .IsSet -}}
+      Elem: ##TODO NameSpacePropertyFromObject Schema(),
     {{ else -}}
       Elem: &schema.Resource{
         Schema: map[string]*schema.Schema{
-          {{ order_properties(.item_type.properties).each do |prop| -}}
-            {{= lines(build_schema_property(prop, object, pwd)) -}}
-          {{ end -}}
+            {{- range $prop := $.ItemType.Properties }}
+            {{template "SchemaFields" $prop}}
+            {{- end }}
         },
       },
     {{ end -}}
-  {{ elsif .item_type.is_a?(String) # Basic type like Api::Type::String -}}
+  {{ else if eq .ItemType.Type "String" -}}
       Elem: &schema.Schema{
-        Type: {{= tf_types[.item_type_class] -}},
+        Type: {{ .ItemTypeClass -}},
       },
-  {{ elsif .item_type.is_a?(Api::Type::Enum) -}}
+  {{ else if eq .ItemType.Type "Enum" -}}
       Elem: &schema.Schema{
-        Type: {{= tf_types[.item_type.class] -}},
-        ValidateFunc: verify.ValidateEnum([]string{"{{= .item_type.values.join '","' -}}"}),
+        Type: {{ .ItemTypeClass -}},
+        ValidateFunc: verify.ValidateEnum([]string{"{{ .ItemType.EnumValuesToString -}}"}),
       },
-  {{ else # array of basic types -}}
+  {{ else -}}
       Elem: &schema.Schema{
-        Type: {{= tf_types[.item_type.class] -}},
-    {{ if .item_type.is_a?(Api::Type::ResourceRef) -}}
+        Type: {{ .ItemTypeClass -}},
+    {{ if eq .ItemType.Type "ResourceRef" -}}
         DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
     {{ end -}}
       },
   {{ end -}}
-  {{ if .is_set -}}
-    {{ if !.set_hash_func.nil? -}}
-    Set: {{= .set_hash_func -}},
-    {{ elsif .item_type.is_a?(String) or .item_type.is_a?(Api::Type::Enum) -}}
+  {{ if .IsSet -}}
+    {{ if .SetHashFunc -}}
+    Set: {{ .SetHashFunc -}},
+    {{ else if or (eq .ItemType "String") (eq .ItemType.Type "Enum") -}}
     Set: schema.HashString,
     {{ else -}}
     // Default schema.HashSchema is used.
     {{ end -}}
   {{ end -}}
-{{ elsif .is_a?(Api::Type::KeyValuePairs) -}}
+{{ else if eq .Type "KeyValuePairs" -}}
   Elem: &schema.Schema{Type: schema.TypeString},
-{{ elsif .is_a?(Api::Type::Map) -}}
+{{ else if eq .Type "Map" -}}
 	Elem: &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			"{{= .key_name -}}": {
+			"{{ .KeyName -}}": {
 				Type:     schema.TypeString,
 				Required: true,
-				{{ if !.diff_suppress_func.nil? -}}
-					DiffSuppressFunc: {{= .key_diff_suppress_func }},
+				{{ if .DiffSuppressFunc -}}
+					DiffSuppressFunc: {{ .KeyDiffSuppressFunc }},
 				{{ end -}}
-				{{ if force_new?(property, object) -}}
+				{{ if .Immutable -}}
 				ForceNew: true,
 				{{ end -}}
 			},
-			{{ order_properties(.value_type.properties).each do |prop| -}}
-				{{= lines(build_schema_property(prop, object, pwd)) -}}
-			{{ end -}}
+      {{- range $prop := $.ValueType.Properties }}
+        {{template "SchemaFields" $prop}}
+      {{- end }}
 		},
 	},
-	{{ if !.set_hash_func.nil? -}}
-	Set: {{= .set_hash_func -}},
+	{{ if .SetHashFunc -}}
+	Set: {{ .SetHashFunc -}},
 	{{ end -}}
 {{ end -}}
-{{ if .sensitive -}}
+{{ if .Sensitive -}}
     Sensitive: true,
 {{ end -}}
-{{ unless .default_value.nil? -}}
-    Default: {{= go_literal(.default_value) -}},
+{{ if .DefaultValue -}}
+    Default: {{ .DefaultValue -}},
 {{ end -}}
-{{ unless .conflicting().empty? -}}
-    ConflictsWith: {{= go_literal(.conflicting.map  {|sp| get_property_schema_path(sp, object) }.compact) -}},
+{{ if .Conflicting -}}
+    ConflictsWith: {{ join .Conflicting ","  -}},
 {{ end -}}
-{{ unless .at_least_one_of_list().empty? -}}
-    AtLeastOneOf: {{= go_literal(.at_least_one_of_list.map {|sp| get_property_schema_path(sp, object) }.compact) -}},
+{{ if .AtLeastOneOfList -}}
+    AtLeastOneOf: {{ join .AtLeastOneOfList ","  -}},
 {{ end -}}
-{{ unless .exactly_one_of_list().empty? -}}
-    ExactlyOneOf: {{= go_literal(.exactly_one_of_list.map {|sp| get_property_schema_path(sp, object) }.compact) -}},
+{{ if .ExactlyOneOfList -}}
+    ExactlyOneOf: {{ join .ExactlyOneOfList ","  -}},
 {{ end -}}
-{{ unless .required_with_list().empty? -}}
-    RequiredWith: {{= go_literal(.required_with_list.map {|sp| get_property_schema_path(sp, object) }.compact) -}},
+{{ if .RequiredWithList -}}
+    RequiredWith: {{ join .RequiredWithList ","  -}},
 {{ end -}}
 },
 {{ end -}}
+{{end}}

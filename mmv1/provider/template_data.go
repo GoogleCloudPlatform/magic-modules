@@ -52,7 +52,6 @@ var TemplateFunctions = template.FuncMap{
 	"contains":   strings.Contains,
 	"join":       strings.Join,
 	"lower": strings.ToLower,
-	"underscore": google.Underscore,
 }
 
 var GA_VERSION = "ga"
@@ -79,6 +78,7 @@ func NewTemplateData(outputFolder string, version product.Version) *TemplateData
 func (td *TemplateData) GenerateResourceFile(filePath string, resource api.Resource) {
 	templatePath := "templates/terraform/resource.go.tmpl"
 	templates := []string{
+		"templates/terraform/schema_property.go.tmpl",
 		templatePath,
 	}
 	td.GenerateFile(filePath, templatePath, resource, true, templates...)
