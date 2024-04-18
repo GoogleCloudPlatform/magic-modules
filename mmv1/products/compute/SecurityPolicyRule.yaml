@@ -232,7 +232,7 @@ properties:
               name: 'requestQueryParam'
               api_name: 'requestQueryParamsToExclude'
               description: |
-                Request query parameter whose value will be excluded from inspection during preconfigured WAF evaluation. 
+                Request query parameter whose value will be excluded from inspection during preconfigured WAF evaluation.
                 Note that the parameter can be in the query string or in the POST body.
               item_type: !ruby/object:Api::Type::NestedObject
                 properties:
