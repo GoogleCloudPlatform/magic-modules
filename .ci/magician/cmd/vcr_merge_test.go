@@ -77,7 +77,11 @@ func TestExecVCRMerge(t *testing.T) {
 			if test.lsReturnedError {
 				runner.notifyError = true
 			}
-			execVCRMerge(githubClient, test.commitSha, test.baseBranch, runner)
+			err := execVCRMerge(githubClient, test.commitSha, test.baseBranch, runner)
+			if err != nil {
+				t.Fatalf("execVCRMerge = %s, want = nil", err)
+			}
+
 			got, ok := runner.Calls("Run")
 			if !ok && test.calledMethods != nil {
 				t.Fatalf("execVCRMerge() expect %d calls, got none", len(test.calledMethods))
