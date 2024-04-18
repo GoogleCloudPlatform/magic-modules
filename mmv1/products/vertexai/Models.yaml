@@ -422,13 +422,14 @@ properties:
       The resource name of the Model to copy. That Model must be in the same Project
   - !ruby/object:Api::Type::ResourceRef
     name: 'model'
-    resource: 'Model'
+    resource: 'Models'
     imports: 'displayName'
     at_least_one_of: 
       - sourceModel
       - model
     description: |
       The Model to create.
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::String
     name: 'modelID'
     description: |
@@ -437,3 +438,61 @@ properties:
     name: 'parentModel'
     description: |
       Specify this field to copy sourceModel into this existing Model as a new version.
+  - !ruby/object:Api::Type::Array
+    name: 'supportedDeploymentResourcesTypes'
+    output: true
+    description: |
+        When this Model is deployed, its prediction resources are described by the prediction_resources field of the Endpoint.deployed_models object.     item_type: !ruby/object:Api::Type::Enum
+    item_type: !ruby/object:Api::Type::Enum
+      name: deploymentResourcesType
+      immutable: true
+      description: |
+        The content of this Model that may be exported.
+      values:
+        - :DEDICATED_RESOURCES
+        - :AUTOMATIC_RESOURCES
+        - :SHARED_RESOURCES
+  - !ruby/object:Api::Type::Array
+    name: 'supportedInputStorageFormats'
+    output: true
+    description: |
+        The formats this Model supports in BatchPredictionJob.input_config. If PredictSchemata.instance_schema_uri exists, the instances should be given as per that schema.
+    item_type: Api::Type::String
+  - !ruby/object:Api::Type::Array
+    name: 'supportedOutputStorageFormats'
+    output: true
+    description: |
+        The formats this Model supports in BatchPredictionJob.input_config. If PredictSchemata.instance_schema_uri exists, the instances should be given as per that schema.
+    item_type: Api::Type::String
+  - !ruby/object:Api::Type::String
+    name: 'metadataArtifact'
+    description: The resource name of the Artifact that was created in MetadataStore when creating the Model.
+    output: true
+  - !ruby/object:Api::Type::Array
+    name: 'deployedModels'
+    output: true
+    description: The pointers to DeployedModels created from this Model. Note that Model could have been deployed to Endpoints in different Locations.
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'endpoint'
+          immutable: true
+          description: A resource name of an Endpoint.
+        - !ruby/object:Api::Type::String
+          name: 'deployedModelId'
+          immutable: true
+          description:  An ID of a DeployedModel in the above Endpoint.
+  - !ruby/object:Api::Type::Array
+    name: 'explanationSpec'
+    output: true
+    description: The pointers to DeployedModels created from this Model. Note that Model could have been deployed to Endpoints in different Locations.
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'endpoint'
+          immutable: true
+          description: A resource name of an Endpoint.
+        - !ruby/object:Api::Type::String
+          name: 'deployedModelId'
+          immutable: true
+          description:  An ID of a DeployedModel in the above Endpoint.
