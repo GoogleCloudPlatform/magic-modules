@@ -1,6 +1,5 @@
 <% autogen_exception -%>
 package compute_test
-<% unless version == 'ga' -%>
 
 import (
   "regexp"
@@ -97,6 +96,49 @@ func TestAccComputeSecurityPolicyRule_extendedUpdate(t *testing.T) {
       },
       {
         Config: testAccComputeSecurityPolicyRule_extPosUpdate(context),
+      },
+      {
+        ResourceName:      "google_compute_security_policy_rule.policy_rule",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+		},
+	})
+}
+
+func TestAccComputeSecurityPolicyRule_withPreconfiguredWafConfig(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeSecurityPolicyRuleDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeSecurityPolicyRule_withPreconfiguredWafConfig_create(context),
+			},
+      {
+        ResourceName:      "google_compute_security_policy_rule.policy_rule",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+      {
+        Config: testAccComputeSecurityPolicyRule_withPreconfiguredWafConfig_update(context),
+      },
+      {
+        ResourceName:      "google_compute_security_policy_rule.policy_rule",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+      {
+        Config: testAccComputeSecurityPolicyRule_withPreconfiguredWafConfig_clear(context),
+        Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckNoResourceAttr("google_compute_security_policy_rule.policy_rule", "preconfigured_waf_config.0"),
+				),
       },
       {
         ResourceName:      "google_compute_security_policy_rule.policy_rule",
@@ -277,4 +319,132 @@ resource "google_compute_security_policy_rule" "policy_rule" {
 }
 `, context)
 }
-<% end -%>
+
+func testAccComputeSecurityPolicyRule_withPreconfiguredWafConfig_create(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_security_policy" "policy" {
+  name        = "tf-test%{random_suffix}"
+  description = "Global security policy - create"
+}
+
+resource "google_compute_security_policy_rule" "policy_rule" {
+  security_policy = google_compute_security_policy.policy.name
+  description     = "Rule with preconfiguredWafConfig - create"
+  action   = "deny"
+  priority = "1000"
+  match {
+    expr {
+      expression = "evaluatePreconfiguredWaf('sqli-stable')"
+    }
+  }
+  preconfigured_waf_config {
+    exclusion {
+      request_cookie {
+        operator = "EQUALS_ANY"
+      }
+      request_header {
+        operator = "EQUALS"
+        value    = "Referer"
+      }
+      request_uri {
+        operator = "STARTS_WITH"
+        value    = "/admin"
+      }
+      request_query_param {
+        operator = "EQUALS"
+        value    = "password"
+      }
+      request_query_param {
+        operator = "STARTS_WITH"
+        value    = "freeform"
+      }
+      target_rule_set = "sqli-stable"
+    }
+    exclusion {
+      request_query_param {
+        operator = "CONTAINS"
+        value    = "password"
+      }
+      request_query_param {
+        operator = "STARTS_WITH"
+        value    = "freeform"
+      }
+      target_rule_set = "xss-stable"
+    }
+  }
+  preview = false
+}
+`, context)
+}
+
+func testAccComputeSecurityPolicyRule_withPreconfiguredWafConfig_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_security_policy" "policy" {
+  name        = "tf-test%{random_suffix}"
+  description = "Global security policy - update"
+}
+
+resource "google_compute_security_policy_rule" "policy_rule" {
+  security_policy = google_compute_security_policy.policy.name
+  description     = "Rule with preconfiguredWafConfig - update"
+  action   = "deny"
+  priority = "1000"
+  match {
+    expr {
+      expression = "evaluatePreconfiguredWaf('rce-stable') || evaluatePreconfiguredWaf('xss-stable')"
+    }
+  }
+  preconfigured_waf_config {
+    exclusion {
+      request_uri {
+        operator = "STARTS_WITH"
+        value    = "/admin"
+      }
+      target_rule_set = "rce-stable"
+    }
+    exclusion {
+      request_query_param {
+        operator = "CONTAINS"
+        value    = "password"
+      }
+      request_query_param {
+        operator = "STARTS_WITH"
+        value    = "freeform"
+      }
+      request_query_param {
+        operator = "EQUALS"
+        value    = "description"
+      }
+      target_rule_set = "xss-stable"
+      target_rule_ids = [
+        "owasp-crs-v030001-id941330-xss",
+        "owasp-crs-v030001-id941340-xss",
+      ]
+    }
+  }
+  preview = false
+}
+`, context)
+}
+
+func testAccComputeSecurityPolicyRule_withPreconfiguredWafConfig_clear(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_security_policy" "policy" {
+  name        = "tf-test%{random_suffix}"
+  description = "Global security policy - clear"
+}
+
+resource "google_compute_security_policy_rule" "policy_rule" {
+  security_policy = google_compute_security_policy.policy.name
+  description     = "Rule with preconfiguredWafConfig - clear"
+  action   = "deny"
+  priority = "1000"
+  match {
+    expr {
+      expression = "evaluatePreconfiguredWaf('rce-stable') || evaluatePreconfiguredWaf('xss-stable')"
+    }
+  }
+  preview = false
+}
+`, context)
+}
