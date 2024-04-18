@@ -117,10 +117,10 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 	}
 
 	if len(services) == 0 && !runFullVCR {
-		fmt.Println("Skipping tests: No go files changed")
+		fmt.Println("Skipping tests: No go files or test fixtures changed")
 		os.Exit(0)
 	}
-	fmt.Println("Running tests: Go files changed")
+	fmt.Println("Running tests: Go files or test fixtures changed")
 
 	if err := vt.FetchCassettes(provider.Beta, baseBranch, prNumber); err != nil {
 		fmt.Println("Error fetching cassettes: ", err)
@@ -281,7 +281,7 @@ Please fix these to complete your PR. If you believe these test failures to be i
 }
 
 func modifiedPackages(newBranch, oldBranch string, rnr ExecRunner) (map[string]struct{}, bool, error) {
-	fmt.Println("Checking for modified go files")
+	fmt.Println("Checking for modified go files or test fixtures")
 
 	if _, err := rnr.Run("git", []string{"fetch", "origin", fmt.Sprintf("%s:%s", oldBranch, oldBranch), "--depth", "1"}, nil); err != nil {
 
@@ -292,7 +292,7 @@ func modifiedPackages(newBranch, oldBranch string, rnr ExecRunner) (map[string]s
 	}
 	var goFiles []string
 	for _, line := range strings.Split(diffs, "\n") {
-		if strings.HasSuffix(line, ".go") || line == "go.mod" || line == "go.sum" {
+		if strings.HasSuffix(line, ".go") || strings.Contains(line, "test-fixtures") || line == "go.mod" || line == "go.sum" {
 			goFiles = append(goFiles, line)
 		}
 	}
