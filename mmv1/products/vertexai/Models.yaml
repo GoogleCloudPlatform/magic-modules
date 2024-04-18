@@ -15,14 +15,16 @@
 name: Models
 base_url: projects/{{project}}/locations/{{region}}/models
 create_url: 'projects/{{project}}/locations/{{region}}/modelsPRE_CREATE_REPLACE_ME'
-self_link: '{{model}}'
+delete_url: '{{name}}'
+self_link: '{{name}}'
+
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'
   api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.models'
 description: |-
   A trained machine learning Model.
-id_format: '{{model}}'
+id_format: '{{name}}'
 autogen_async: false
 exclude_import: true
 async: !ruby/object:Api::OpAsync
@@ -30,7 +32,7 @@ async: !ruby/object:Api::OpAsync
     - create
     - delete
   operation: !ruby/object:Api::OpAsync::Operation
-    path: 'model'
+    path: 'name'
     base_url: '{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
@@ -45,6 +47,9 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  decoder: templates/terraform/decoders/vertex_ai_models.go.erb
+  pre_create: templates/terraform/pre_create/vertex_ai_models.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'vertex_ai_model_basic'
@@ -52,8 +57,6 @@ examples:
     primary_resource_id: 'model'
     vars:
       name: 'test-model'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  pre_create: templates/terraform/pre_create/vertex_ai_models.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: region
@@ -69,7 +72,7 @@ properties:
       valid characters are [a-z0-9_]. The first character cannot be a number.
     output: true
     # url_param_only: true
-    # custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+    custom_flatten: templates/terraform/custom_flatten/vertex_ai_name_from_model.go.erb
   - !ruby/object:Api::Type::String
     name: 'description'
     description: Description of the Model.
