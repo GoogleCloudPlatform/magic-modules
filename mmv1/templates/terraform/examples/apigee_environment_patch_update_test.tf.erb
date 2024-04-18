@@ -119,4 +119,5 @@ resource "google_apigee_environment" "<%= ctx[:primary_resource_id] %>" {
   description  = "Apigee Environment"
   display_name = "tf-test%{random_suffix}"
   type         = "COMPREHENSIVE"
+  forward_proxy_uri = "http://test:123"
 }
