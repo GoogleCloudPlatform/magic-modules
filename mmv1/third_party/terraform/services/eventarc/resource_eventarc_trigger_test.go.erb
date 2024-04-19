@@ -262,9 +262,9 @@ resource "google_eventarc_trigger" "primary" {
 		gke {
 		      cluster = google_container_cluster.cluster.id
 		      location = google_container_cluster.cluster.location
-		      namespace = "eventarctrigger-namespace"
-		      service = "eventarc-trigger-cloudrun-anthos-1"
-		      path = "/route"
+		      namespace = "default"
+		      service = "kubernetes"
+		      path = "/"
 		}
 
 	}
