@@ -51,7 +51,7 @@ var TemplateFunctions = template.FuncMap{
 	"plural":     google.Plural,
 	"contains":   strings.Contains,
 	"join":       strings.Join,
-	"lower": strings.ToLower,
+	"lower": 	    strings.ToLower,
 }
 
 var GA_VERSION = "ga"
