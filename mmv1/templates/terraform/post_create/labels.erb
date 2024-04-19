@@ -19,7 +19,7 @@ if v, ok := d.GetOkExists("effective_labels"); !tpgresource.IsEmptyValue(reflect
 	labelFingerprintProp := d.Get("label_fingerprint")
 	obj["labelFingerprint"] = labelFingerprintProp
 
-	url, err = tpgresource.ReplaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>/setLabels")
+	url, err = tpgresource.ReplaceVars(d, config, "{{<%=object.__product.name-%>BasePath}}<%=object.self_link_uri-%>/setLabels")
 	if err != nil {
 		return err
 	}
