@@ -241,6 +241,8 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
+    validation: !ruby/object:Provider::Terraform::Validation
+      function: 'verify.ValidateRegexp(`^[a-z][a-z0-9-]{3,62}$`)'
   - !ruby/object:Api::Type::String
     name: parent
     immutable: true
