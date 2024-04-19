@@ -1,12 +1,12 @@
 ---
 subcategory: "Cloud Composer"
 description: |-
-  User workloads Secret used by Airflow tasks that run with Kubernetes executor or KubernetesPodOperator.
+  User workloads Secret used by Airflow tasks that run with Kubernetes Executor or KubernetesPodOperator.
 ---
 
 # google\_composer\_user\_workloads\_secret
 
-User workloads Secret used by Airflow tasks that run with Kubernetes executor or KubernetesPodOperator. 
+User workloads Secret used by Airflow tasks that run with Kubernetes Executor or KubernetesPodOperator. 
 Intended for Composer 3 Environments.
 
 ## Example Usage
