@@ -246,8 +246,8 @@ resource "google_app_engine_flexible_app_version" "foo" {
   }
 
   network {
-    name             = "custom"
-    subnetwork       = "custom"
+    name             = google_compute_network.network.name
+    subnetwork       = google_compute_subnetwork.subnetwork.name
     instance_ip_mode = "INTERNAL"
   }
 
