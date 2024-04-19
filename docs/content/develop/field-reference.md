@@ -251,7 +251,7 @@ This property has two mutually exclusive child properties:
   [`function: verify.ValidateRegexp(REGEX_STRING)`](https://github.com/hashicorp/terraform-provider-google-beta/blob/0ef51142a4dd1c1a4fc308c1eb09dce307ebe5f5/google-beta/verify/validation.go#L425).
 
 `validation` is not supported for Array fields (including sets); however, individual
-elements in the array can be validated using [`item_validation`]({{<ref "/develop/field-reference#item_validation"}}).
+elements in the array can be validated using [`item_validation`]({{<ref "/develop/field-reference#item_validation" >}}).
 
 Example: Provider-specific function
 
@@ -293,7 +293,7 @@ stating the current allowed values in the String field's description. Do not
 include UNSPECIFIED values in this list.
 
 Enums will validate that the provided field is in the allowed list unless a
-custom [`validation`](#validation) is provided.
+custom [`validation`]({{<ref "/develop/field-reference#validation" >}}) is provided.
 
 Example:
 
