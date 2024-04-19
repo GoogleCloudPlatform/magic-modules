@@ -14,7 +14,7 @@
 */}}
 {{define "SchemaFields"}}
 {{- if .FlattenObject -}}
-	##TODO order props?
+	//TODO order props?
 	{{- range $prop := .Properties -}}
 		{{- template "SchemaFields" $prop -}}
 	{{- end -}}
@@ -94,7 +94,7 @@ Possible values: ["{{ join .EnumValues "\",\"" }}"]
   {{ end -}}
   {{ if eq .ItemType.Type "NestedObject" -}}
     {{ if .IsSet -}}
-      Elem: ##TODO NameSpacePropertyFromObject Schema(),
+      Elem: //TODO NameSpacePropertyFromObject Schema(),
     {{ else -}}
       Elem: &schema.Resource{
         Schema: map[string]*schema.Schema{
