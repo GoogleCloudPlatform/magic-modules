@@ -342,6 +342,26 @@ item_type: !ruby/object:Api::Type::NestedObject
 Array only. Controls the [`ValidateFunc`](https://developer.hashicorp.com/terraform/plugin/sdkv2/schemas/schema-behaviors#validatefunc)
 used to validate individual items in the array. Behaves like [`validation`]({{<ref "/develop/field-reference#validation" >}}).
 
+Example: Provider-specific function
+
+```yaml
+- !ruby/object:Api::Type::Array
+  name: 'fieldOne'
+  item_type: Api::Type::String
+  item_validation: !ruby/object:Provider::Terraform::Validation
+    function: 'verify.ValidateBase64String'
+```
+
+Example: Regex
+
+```yaml
+- !ruby/object:Api::Type::Array
+  name: 'fieldOne'
+  item_type: Api::Type::String
+  item_validation: !ruby/object:Provider::Terraform::Validation
+    regex: '^[a-zA-Z][a-zA-Z0-9_]*$'
+```
+
 ## `NestedObject` properties
 
 ### `properties`
