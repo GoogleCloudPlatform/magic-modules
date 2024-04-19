@@ -15,8 +15,6 @@ package provider
 
 import (
 	"bytes"
-	"fmt"
-	"go/format"
 	"log"
 	"os"
 	"path/filepath"
@@ -53,6 +51,7 @@ var TemplateFunctions = template.FuncMap{
 	"plural":     google.Plural,
 	"contains":   strings.Contains,
 	"join":       strings.Join,
+	"lower": 	  strings.ToLower,
 }
 
 var GA_VERSION = "ga"
@@ -142,13 +141,13 @@ func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, g
 	if td.TerraformResourceDirectory != "google" {
 		sourceByte = bytes.Replace(sourceByte, []byte("github.com/hashicorp/terraform-provider-google/google"), []byte(td.TerraformProviderModule+"/"+td.TerraformResourceDirectory), -1)
 	}
-
-	if goFormat {
-		sourceByte, err = format.Source(sourceByte)
-		if err != nil {
-			glog.Error(fmt.Errorf("error formatting %s", filePath))
-		}
-	}
+	
+	// if goFormat {
+	// 	sourceByte, err = format.Source(sourceByte)
+	// 	if err != nil {
+	// 		glog.Error(fmt.Errorf("error formatting %s", filePath))
+	// 	}
+	// }
 
 	err = os.WriteFile(filePath, sourceByte, 0644)
 	if err != nil {
