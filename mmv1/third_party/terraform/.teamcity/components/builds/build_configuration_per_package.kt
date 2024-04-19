@@ -71,6 +71,7 @@ class PackageDetails(private val packageName: String, private val displayName: S
                 configureGoEnv()
                 downloadTerraformBinary()
                 runAcceptanceTests()
+                saveArtifactsToGCS()
             }
 
             features {

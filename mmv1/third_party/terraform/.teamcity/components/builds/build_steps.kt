@@ -132,3 +132,43 @@ fun BuildSteps.runAcceptanceTests() {
         })
     }
 }
+
+fun BuildSteps.saveArtifactsToGCS() {
+    step(ScriptBuildStep {
+        name = "Tasks after running nightly tests: push artifacts(debug logs) to GCS"
+        scriptContent = """
+            #!/bin/bash
+            echo "Post-test step - storge artifacts(debug logs) to GCS"
+
+            # Authenticate gcloud CLI
+            echo "${'$'}{GOOGLE_CREDENTIALS}" > google-account.json
+            chmod 600 google-account.json
+            gcloud auth activate-service-account --key-file=google-account.json
+
+            # Detect Trigger Method 
+            TRIGGERED_BY_USERNAME=%teamcity.build.triggeredBy.username%
+            BRANCH_NAME=%teamcity.build.branch%
+            if [[ "${'$'}TRIGGERED_BY_USERNAME" = "n/a" ]] ; then
+                echo "Build was triggered as part of automated testing. We know this because the `triggeredBy.username` value was `n/a`, value: ${'$'}{TRIGGERED_BY_USERNAME}"
+                FOLDER="nightly"
+            else
+                echo "Build was triggered manually. We know this because `triggeredBy.username` has a non- `n/a` value: ${'$'}{TRIGGERED_BY_USERNAME}"
+                FOLDER="manual/${'$'}BRANCH_NAME"
+            fi
+
+
+            # Copy logs to GCS
+            gsutil -m cp %teamcity.build.checkoutDir%/debug* gs://teamcity-nightly-logs/%PROVIDER_NAME%/${'$'}{FOLDER}/%env.BUILD_NUMBER%/
+
+            # Cleanup
+            rm google-account.json
+            gcloud auth application-default revoke
+            gcloud auth revoke --all
+
+            echo "Finished"
+        """.trimIndent()
+        // ${'$'} is required to allow creating a script in TeamCity that contains
+        // parts like ${GIT_HASH_SHORT} without having Kotlin syntax issues. For more info see:
+        // https://youtrack.jetbrains.com/issue/KT-2425/Provide-a-way-for-escaping-the-dollar-sign-symbol-in-multiline-strings-and-string-templates
+    })
+}
