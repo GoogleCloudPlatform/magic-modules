@@ -113,7 +113,7 @@ func Camelize(term string, firstLetter string) string {
 
 	res := term
 	if firstLetter == "upper" {
-		res = regexp.MustCompile(`^[a-z\d]*/`).ReplaceAllStringFunc(res, func(match string) string {
+		res = regexp.MustCompile(`^[a-z\d]*`).ReplaceAllStringFunc(res, func(match string) string {
 			return strings.Title(match)
 		})
 	} else {
