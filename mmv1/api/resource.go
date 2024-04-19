@@ -840,7 +840,6 @@ func (r Resource) Updatable() bool {
 	return false
 }
 
-
 // ====================
 // Debugging Methods
 // ====================
@@ -960,6 +959,8 @@ func (r Resource) GetIdFormat() string {
 		idFormat = r.SelfLinkUri()
 	}
 	return idFormat
+}
+
 // ====================
 // Template Methods
 // ====================
@@ -967,40 +968,6 @@ func (r Resource) GetIdFormat() string {
 // Prints a dot notation path to where the field is nested within the parent
 // object when called on a property. eg: parent.meta.label.foo
 // Redefined on Resource to terminate the calls up the parent chain.
-
-
-// checks a resource for if it has properties that have FlattenObject=true on fields where IgnoreRead=false
-// used to decide whether or not to import "google.golang.org/api/googleapi"
-func (r Resource) FlattenedProperties() []*Type {
-	return google.Select(google.Reject(r.GettableProperties(), func(p *Type) bool { return p.IgnoreRead }), func(p *Type) bool { return p.FlattenObject })
-}
-// ====================
-// Template Methods
-// ====================
-
-// Functions that combine more niche pieces of resource data logic needed for resource generation that can not be otherwise performed in a format most coiuld easily parse.
-
-// checks a resource for if it has properties that have FlattenObject=true on fields where IgnoreRead=false
-// used to decide whether or not to import "google.golang.org/api/googleapi"
-func (r Resource) FlattenedProperties() []*Type {
-	return google.Select(google.Reject(r.GettableProperties(), func(p *Type) bool { return p.IgnoreRead }), func(p *Type) bool { return p.FlattenObject })
-}
-// ====================
-// Template Methods
-// ====================
-
-// Functions that combine more niche pieces of resource data logic needed for resource generation that can not be otherwise performed in a format most coiuld easily parse.
-
-// checks a resource for if it has properties that have FlattenObject=true on fields where IgnoreRead=false
-// used to decide whether or not to import "google.golang.org/api/googleapi"
-func (r Resource) FlattenedProperties() []*Type {
-	return google.Select(google.Reject(r.GettableProperties(), func(p *Type) bool { return p.IgnoreRead }), func(p *Type) bool { return p.FlattenObject })
-}
-// ====================
-// Template Methods
-// ====================
-
-// Functions that combine more niche pieces of resource data logic needed for resource generation that can not be otherwise performed in a format most coiuld easily parse.
 
 // checks a resource for if it has properties that have FlattenObject=true on fields where IgnoreRead=false
 // used to decide whether or not to import "google.golang.org/api/googleapi"
