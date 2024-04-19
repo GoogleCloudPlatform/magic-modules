@@ -30,6 +30,7 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 		}
 	}
 
-{{"{{"}}"kms_key_name": kmsKeyName, "kms_key_version": ""{{"}}"}}
+	//	The key name was returned, no need to set the version
+	return []map[string]interface{}{{"{{"}}"kms_key_name": kmsKeyName, "kms_key_version": ""{{"}}"}}
 
 }

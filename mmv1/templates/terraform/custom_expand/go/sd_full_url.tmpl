@@ -3,7 +3,8 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
     return "", nil
   } else if strings.HasPrefix(v.(string), "https://") {
     return v, nil
-{{"{{"}}ServiceDirectoryBasePath{{"}}"}}" + v.(string))
+  }
+  url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ServiceDirectoryBasePath{{"}}"}}" + v.(string))
   if err != nil {
     return "", err
   }

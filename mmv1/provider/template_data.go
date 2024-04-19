@@ -112,8 +112,6 @@ func (td *TemplateData) GenerateDocumentationFile(filePath string, resource api.
 	templates := []string{
 		"templates/terraform/property_documentation.html.markdown.tmpl",
 		"templates/terraform/nested_property_documentation.html.markdown.tmpl",
-		"templates/terraform/expand_resource_ref.tmpl",
-		"templates/terraform/custom_flatten/go/bigquery_table_ref.go.tmpl",
 		templatePath,
 	}
 	td.GenerateFile(filePath, templatePath, resource, false, templates...)

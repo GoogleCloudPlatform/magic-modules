@@ -276,7 +276,8 @@ type Type struct {
 
 	ParentMetadata *Type // is nil for top-level properties
 
-	// The prefix used as part of the expand/flatten function name
+	// The prefix used as part of the property expand/flatten function name
+	// flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}
 	Prefix string
 }
 
@@ -425,6 +426,8 @@ func (t Type) TitlelizeProperty() string {
 	return google.Camelize(t.Name, "upper")
 }
 
+// If the Prefix field is already set, returns the value.
+// Otherwise, set the Prefix field and returns the value.
 func (t *Type) GetPrefix() string {
 	if t.Prefix == "" {
 		if t.ParentMetadata == nil {

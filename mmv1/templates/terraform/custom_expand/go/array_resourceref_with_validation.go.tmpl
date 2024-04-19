@@ -20,7 +20,7 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
     if raw == nil {
       return nil, fmt.Errorf("Invalid value for {{underscore $.Name}}: nil")
     }
-    f, err := {{ template "expandResourceRef" dict "VarName" "raw.(string)" "Property" $.ItemType }}
+    f, err := {{ template "expandResourceRef" dict "VarName" "raw.(string)" "ResourceRef" $.ItemType.ResourceRef "ResourceType" $.ItemType.ResourceType}}
     if err != nil {
       return nil, fmt.Errorf("Invalid value for {{underscore $.Name}}: %s", err)
     }

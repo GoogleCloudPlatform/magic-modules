@@ -11,7 +11,7 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */}}
-func flatten{{$.Property.GetPrefix}}{{$.Property.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil {
 		return nil
 	}

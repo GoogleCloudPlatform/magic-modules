@@ -14,11 +14,12 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
   if v == nil || v.(string) == "" {
     return "", nil
   }
-  f, err := {{ template "expandResourceRef" dict "VarName" "v.(string)" "Property" $ }}
+  f, err := {{ template "expandResourceRef" dict "VarName" "v.(string)" "ResourceRef" $.ResourceRef "ResourceType" $.ResourceType}}
   if err != nil {
     return nil, fmt.Errorf("Invalid value for {{underscore $.Name}}: %s", err)
   }
-{{"{{"}}ComputeBasePath{{"}}"}}"+f.RelativeLink())
+
+  url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}"+f.RelativeLink())
   if err != nil {
     return nil, err
   }

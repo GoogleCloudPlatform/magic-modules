@@ -19,7 +19,8 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
 	} else {
 		certName = resource.UniqueId()
 	}
-{{"{{"}}name{{"}}"}} into schema to set the ID using tpgresource.ReplaceVars
+
+	// We need to get the {{"{{"}}name{{"}}"}} into schema to set the ID using tpgresource.ReplaceVars
 	if err := d.Set("name", certName); err != nil {
 		return nil, fmt.Errorf("Error setting name: %s", err)
 	}

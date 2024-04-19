@@ -10,4 +10,4 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */}}
-{{- template "bigqueryTableRegexp" dict "PropPath" "extract.0.source_table.0.table_id" "Property" $}}
+{{- template "bigqueryTableRegexp" dict "PropPath" "extract.0.source_table.0.table_id" "GetPrefix" $.GetPrefix "TitlelizeProperty" $.TitlelizeProperty}}

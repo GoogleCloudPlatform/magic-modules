@@ -90,7 +90,8 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}NetworksNetworkUrl(v interface{
 		return "", nil
 	} else if strings.HasPrefix(v.(string), "https://") {
 		return v, nil
-{{"{{"}}ComputeBasePath{{"}}"}}"+v.(string))
+	}
+	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}"+v.(string))
 	if err != nil {
 		return "", err
 	}
