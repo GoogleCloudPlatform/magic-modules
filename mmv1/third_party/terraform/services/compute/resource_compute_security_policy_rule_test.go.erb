@@ -415,6 +415,10 @@ resource "google_compute_security_policy_rule" "policy_rule" {
         operator = "EQUALS"
         value    = "description"
       }
+      request_cookie {
+        operator = "CONTAINS"
+        value    = "TokenExpired"
+      }
       target_rule_set = "xss-stable"
       target_rule_ids = [
         "owasp-crs-v030001-id941330-xss",

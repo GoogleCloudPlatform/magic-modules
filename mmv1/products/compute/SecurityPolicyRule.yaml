@@ -110,18 +110,19 @@ properties:
             required: true
             description: |
               Textual representation of an expression in Common Expression Language syntax. The application context of the containing message determines which well-known feature set of CEL is supported.
-          - !ruby/object:Api::Type::String
-            name: 'title'
-            description: |
-              Optional. Title for the expression, i.e. a short string describing its purpose. This can be used e.g. in UIs which allow to enter the expression.
-          - !ruby/object:Api::Type::String
-            name: 'description'
-            description: |
-              Optional. Description of the expression. This is a longer text which describes the expression, e.g. when hovered over it in a UI.
-          - !ruby/object:Api::Type::String
-            name: 'location'
-            description: |
-              Optional. String indicating the location of the expression for error reporting, e.g. a file name and a position in the file.
+          # >> These fields are not yet supported, following the global security policy resource.
+          # - !ruby/object:Api::Type::String
+          #   name: 'title'
+          #   description: |
+          #     Optional. Title for the expression, i.e. a short string describing its purpose. This can be used e.g. in UIs which allow to enter the expression.
+          # - !ruby/object:Api::Type::String
+          #   name: 'description'
+          #   description: |
+          #     Optional. Description of the expression. This is a longer text which describes the expression, e.g. when hovered over it in a UI.
+          # - !ruby/object:Api::Type::String
+          #   name: 'location'
+          #   description: |
+          #     Optional. String indicating the location of the expression for error reporting, e.g. a file name and a position in the file.
       - !ruby/object:Api::Type::NestedObject
         name: 'config'
         description: |
@@ -286,74 +287,75 @@ properties:
     name: 'preview'
     description: |
       If set to true, the specified action is not enforced.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'networkMatch'
-    description: |
-      A match condition that incoming packets are evaluated against for CLOUD_ARMOR_NETWORK security policies. If it matches, the corresponding 'action' is enforced.
-      The match criteria for a rule consists of built-in match fields (like 'srcIpRanges') and potentially multiple user-defined match fields ('userDefinedFields').
-      Field values may be extracted directly from the packet or derived from it (e.g. 'srcRegionCodes'). Some fields may not be present in every packet (e.g. 'srcPorts'). A user-defined field is only present if the base header is found in the packet and the entire field is in bounds.
-      Each match field may specify which values can match it, listing one or more ranges, prefixes, or exact values that are considered a match for the field. A field value must be present in order to match a specified match field. If no match values are specified for a match field, then any field value is considered to match it, and it's not required to be present. For strings specifying '*' is also equivalent to match all.
-      For a packet to match a rule, all specified match fields must match the corresponding field values derived from the packet.
-      Example:
-      networkMatch: srcIpRanges: - "192.0.2.0/24" - "198.51.100.0/24" userDefinedFields: - name: "ipv4_fragment_offset" values: - "1-0x1fff"
-      The above match condition matches packets with a source IP in 192.0.2.0/24 or 198.51.100.0/24 and a user-defined field named "ipv4_fragment_offset" with a value between 1 and 0x1fff inclusive
-    update_mask_fields:
-      - 'network_match.userDefinedFields'
-      - 'network_match.srcIpRanges'
-      - 'network_match.destIpRanges'
-      - 'network_match.ipProtocols'
-      - 'network_match.srcPorts'
-      - 'network_match.destPorts'
-      - 'network_match.srcRegionCodes'
-      - 'network_match.srcAsns'
-    properties:
-      - !ruby/object:Api::Type::Array
-        name: 'userDefinedFields'
-        description: |
-          User-defined fields. Each element names a defined field and lists the matching values for that field.
-        item_type: !ruby/object:Api::Type::NestedObject
-          properties:
-            - !ruby/object:Api::Type::String
-              name: 'name'
-              description: |
-                Name of the user-defined field, as given in the definition.
-            - !ruby/object:Api::Type::Array
-              name: 'values'
-              description: |
-                Matching values of the field. Each element can be a 32-bit unsigned decimal or hexadecimal (starting with "0x") number (e.g. "64") or range (e.g. "0x400-0x7ff").
-              item_type: Api::Type::String
-      - !ruby/object:Api::Type::Array
-        name: 'srcIpRanges'
-        description: |
-          Source IPv4/IPv6 addresses or CIDR prefixes, in standard text format.
-        item_type: Api::Type::String
-      - !ruby/object:Api::Type::Array
-        name: 'destIpRanges'
-        description: |
-          Destination IPv4/IPv6 addresses or CIDR prefixes, in standard text format.
-        item_type: Api::Type::String
-      - !ruby/object:Api::Type::Array
-        name: 'ipProtocols'
-        description: |
-          IPv4 protocol / IPv6 next header (after extension headers). Each element can be an 8-bit unsigned decimal number (e.g. "6"), range (e.g. "253-254"), or one of the following protocol names: "tcp", "udp", "icmp", "esp", "ah", "ipip", or "sctp".
-        item_type: Api::Type::String
-      - !ruby/object:Api::Type::Array
-        name: 'srcPorts'
-        description: |
-          Source port numbers for TCP/UDP/SCTP. Each element can be a 16-bit unsigned decimal number (e.g. "80") or range (e.g. "0-1023").
-        item_type: Api::Type::String
-      - !ruby/object:Api::Type::Array
-        name: 'destPorts'
-        description: |
-          Destination port numbers for TCP/UDP/SCTP. Each element can be a 16-bit unsigned decimal number (e.g. "80") or range (e.g. "0-1023").
-        item_type: Api::Type::String
-      - !ruby/object:Api::Type::Array
-        name: 'srcRegionCodes'
-        description: |
-          Two-letter ISO 3166-1 alpha-2 country code associated with the source IP address.
-        item_type: Api::Type::String
-      - !ruby/object:Api::Type::Array
-        name: 'srcAsns'
-        description: |
-          BGP Autonomous System Number associated with the source IP address.
-        item_type: Api::Type::Integer
+  # These fields are used for security policies of the type CLOUD_ARMOR_NETWORK, this type is not supported by the global security policy resource.
+  #- !ruby/object:Api::Type::NestedObject
+  #  name: 'networkMatch'
+  #  description: |
+  #    A match condition that incoming packets are evaluated against for CLOUD_ARMOR_NETWORK security policies. If it matches, the corresponding 'action' is enforced.
+  #    The match criteria for a rule consists of built-in match fields (like 'srcIpRanges') and potentially multiple user-defined match fields ('userDefinedFields').
+  #    Field values may be extracted directly from the packet or derived from it (e.g. 'srcRegionCodes'). Some fields may not be present in every packet (e.g. 'srcPorts'). A user-defined field is only present if the base header is found in the packet and the entire field is in bounds.
+  #    Each match field may specify which values can match it, listing one or more ranges, prefixes, or exact values that are considered a match for the field. A field value must be present in order to match a specified match field. If no match values are specified for a match field, then any field value is considered to match it, and it's not required to be present. For strings specifying '*' is also equivalent to match all.
+  #    For a packet to match a rule, all specified match fields must match the corresponding field values derived from the packet.
+  #    Example:
+  #    networkMatch: srcIpRanges: - "192.0.2.0/24" - "198.51.100.0/24" userDefinedFields: - name: "ipv4_fragment_offset" values: - "1-0x1fff"
+  #    The above match condition matches packets with a source IP in 192.0.2.0/24 or 198.51.100.0/24 and a user-defined field named "ipv4_fragment_offset" with a value between 1 and 0x1fff inclusive
+  #  update_mask_fields:
+  #    - 'network_match.userDefinedFields'
+  #    - 'network_match.srcIpRanges'
+  #    - 'network_match.destIpRanges'
+  #    - 'network_match.ipProtocols'
+  #    - 'network_match.srcPorts'
+  #    - 'network_match.destPorts'
+  #    - 'network_match.srcRegionCodes'
+  #    - 'network_match.srcAsns'
+  #  properties:
+  #    - !ruby/object:Api::Type::Array
+  #      name: 'userDefinedFields'
+  #      description: |
+  #        User-defined fields. Each element names a defined field and lists the matching values for that field.
+  #      item_type: !ruby/object:Api::Type::NestedObject
+  #        properties:
+  #          - !ruby/object:Api::Type::String
+  #            name: 'name'
+  #            description: |
+  #              Name of the user-defined field, as given in the definition.
+  #          - !ruby/object:Api::Type::Array
+  #            name: 'values'
+  #            description: |
+  #              Matching values of the field. Each element can be a 32-bit unsigned decimal or hexadecimal (starting with "0x") number (e.g. "64") or range (e.g. "0x400-0x7ff").
+  #            item_type: Api::Type::String
+  #    - !ruby/object:Api::Type::Array
+  #      name: 'srcIpRanges'
+  #      description: |
+  #        Source IPv4/IPv6 addresses or CIDR prefixes, in standard text format.
+  #      item_type: Api::Type::String
+  #    - !ruby/object:Api::Type::Array
+  #      name: 'destIpRanges'
+  #      description: |
+  #        Destination IPv4/IPv6 addresses or CIDR prefixes, in standard text format.
+  #      item_type: Api::Type::String
+  #    - !ruby/object:Api::Type::Array
+  #      name: 'ipProtocols'
+  #      description: |
+  #        IPv4 protocol / IPv6 next header (after extension headers). Each element can be an 8-bit unsigned decimal number (e.g. "6"), range (e.g. "253-254"), or one of the following protocol names: "tcp", "udp", "icmp", "esp", "ah", "ipip", or "sctp".
+  #      item_type: Api::Type::String
+  #    - !ruby/object:Api::Type::Array
+  #      name: 'srcPorts'
+  #      description: |
+  #        Source port numbers for TCP/UDP/SCTP. Each element can be a 16-bit unsigned decimal number (e.g. "80") or range (e.g. "0-1023").
+  #      item_type: Api::Type::String
+  #    - !ruby/object:Api::Type::Array
+  #      name: 'destPorts'
+  #      description: |
+  #        Destination port numbers for TCP/UDP/SCTP. Each element can be a 16-bit unsigned decimal number (e.g. "80") or range (e.g. "0-1023").
+  #      item_type: Api::Type::String
+  #    - !ruby/object:Api::Type::Array
+  #      name: 'srcRegionCodes'
+  #      description: |
+  #        Two-letter ISO 3166-1 alpha-2 country code associated with the source IP address.
+  #      item_type: Api::Type::String
+  #    - !ruby/object:Api::Type::Array
+  #      name: 'srcAsns'
+  #      description: |
+  #        BGP Autonomous System Number associated with the source IP address.
+  #      item_type: Api::Type::Integer
