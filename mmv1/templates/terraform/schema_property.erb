@@ -114,7 +114,11 @@
     <% end -%>
   <% else # array of basic types -%>
       Elem: &schema.Schema{
-        Type: <%= tf_types[property.item_type_class] || tf_types[property.item_type.class] -%>,
+    <% if property.item_type.is_a?(String) # Basic type like Api::Type::String -%>
+        Type: <%= tf_types[property.item_type_class] -%>,
+    <% else -%>
+        Type: <%= tf_types[property.item_type.class] -%>,
+    <% end -%>
     <% if !property.output -%>
       <% if property.item_type.is_a?(Api::Type::ResourceRef) -%>
         DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
