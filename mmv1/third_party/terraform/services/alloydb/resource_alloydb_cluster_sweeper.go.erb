@@ -3,6 +3,7 @@ package alloydb
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"strings"
 	"testing"
@@ -89,7 +90,7 @@ func testSweepAlloydbCluster(region string) error {
 		// manual patch: use raw name for url instead of constructing it, so that resource locations are supplied through aggregated list
 		// manual patch: Using the force=true ensures that we delete instances as well.
 		name := obj["name"].(string)
-		shortname = tpgresource.GetResourceNameFromSelfLink(name)
+		shortname := tpgresource.GetResourceNameFromSelfLink(name)
 		// Skip resources that shouldn't be sweeped
 		if !sweeper.IsSweepableTestResource(shortname) {
 			nonPrefixCount++
