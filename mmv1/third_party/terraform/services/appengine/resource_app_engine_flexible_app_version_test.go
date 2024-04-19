@@ -119,8 +119,8 @@ resource "google_app_engine_flexible_app_version" "foo" {
   }
 
   network {
-    name       = "default"
-    subnetwork = "default"
+    name             = "default"
+    subnetwork       = "default"
     instance_ip_mode = "EXTERNAL"
   }
 
@@ -165,6 +165,19 @@ resource "google_project" "my_project" {
   project_id = "tf-test-appeng-flex%{random_suffix}"
   org_id = "%{org_id}"
   billing_account = "%{billing_account}"
+}
+
+resource "google_compute_network" "network" {
+  name                    = "custom"
+  auto_create_subnetworks = "false"
+}
+
+resource "google_compute_subnetwork" "subnetwork" {
+  name                     = "custom"
+  region                   = "us-central1"
+  network                  = google_compute_network.network.id
+  ip_cidr_range            = "10.0.0.0/16"
+  private_ip_google_access = true
 }
 
 resource "google_app_engine_application" "app" {
@@ -233,8 +246,8 @@ resource "google_app_engine_flexible_app_version" "foo" {
   }
 
   network {
-    name       = "default"
-    subnetwork = "default"
+    name             = "custom"
+    subnetwork       = "custom"
     instance_ip_mode = "INTERNAL"
   }
 
