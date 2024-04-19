@@ -296,7 +296,7 @@ func modifiedPackages(newBranch, oldBranch string, rnr ExecRunner) (map[string]s
 func modifiedPackagesFromDiffs(diffs []string) (map[string]struct{}, bool, error) {
 	var goFiles []string
 	for _, line := range diffs {
-		if strings.HasSuffix(line, ".go") || strings.Contains(line, "test-fixtures") || line == "go.mod" || line == "go.sum" {
+		if strings.HasSuffix(line, ".go") || strings.Contains(line, "test-fixtures") || strings.HasSuffix(line, "go.mod") || strings.HasSuffix(line, "go.sum") {
 			goFiles = append(goFiles, line)
 		}
 	}
