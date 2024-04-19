@@ -119,8 +119,6 @@ properties:
           allowed regions. An empty list means that no regions are allowed,
           and is not a valid configuration.
         item_type: Api::Type::String
-        item_validation: !ruby/object:Provider::Terraform::Validation
-          function: 'verify.ValidateBase64String'
         required: true
   - !ruby/object:Api::Type::NestedObject
     name: 'schemaSettings'
