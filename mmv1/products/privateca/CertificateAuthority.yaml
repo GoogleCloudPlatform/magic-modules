@@ -111,6 +111,26 @@ examples:
       deletion_protection: 'false'
     ignore_read_extra:
       - 'deletion_protection'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'privateca_certificate_authority_custom_ski'
+    primary_resource_id: 'default'
+      # Multiple IAM bindings on the same key cause non-determinism
+    skip_vcr: true
+    vars:
+      kms_key_name: 'projects/keys-project/locations/us-central1/keyRings/key-ring/cryptoKeys/crypto-key'
+      certificate_authority_id: 'my-certificate-authority'
+      pool_name: 'ca-pool'
+      pool_location: 'us-central1'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      kms_key_name:
+        'acctest.BootstrapKMSKeyWithPurposeInLocation(t, "ASYMMETRIC_SIGN",
+        "us-central1").CryptoKey.Name'
+      pool_name: 'acctest.BootstrapSharedCaPoolInLocation(t, "us-central1")'
+      pool_location: '"us-central1"'
+      deletion_protection: 'false'
+    ignore_read_extra:
+      - 'deletion_protection'
 virtual_fields:
   - !ruby/object:Api::Type::Boolean
     name: 'deletion_protection'
@@ -205,6 +225,19 @@ properties:
     required: true
     immutable: true
     properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: 'subjectKeyId'
+        description:
+          When specified this provides a custom SKI to be used in the certificate.
+          This should only be used to maintain a SKI of an existing CA originally
+          created outside CA service, which was not generated using method (1)
+          described in RFC 5280 section 4.2.1.2..
+        immutable: true
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'keyId'
+            description: The value of the KeyId in lowercase hexidecimal.
+            immutable: true
       - !ruby/object:Api::Type::NestedObject
         name: 'x509Config'
         required: true
