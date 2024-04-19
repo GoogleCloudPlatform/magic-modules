@@ -36,6 +36,13 @@ If you are familiar with Docker or Podman, you may want to use the experimental 
    rbenv install 3.1.0
    ```
 1. [Install go](https://go.dev/doc/install)
+1. Add the following values to your environment settings such as `.bashrc`:
+   ```bash
+   # Add GOPATH variable for convenience
+   export GOPATH=$(go env GOPATH)
+   # Add Go binaries to PATH
+   export PATH=$PATH:$(go env GOPATH)/bin
+   ```
 1. Install goimports
    ```bash
    go install golang.org/x/tools/cmd/goimports@latest
