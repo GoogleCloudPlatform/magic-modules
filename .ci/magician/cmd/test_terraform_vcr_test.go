@@ -39,8 +39,20 @@ func TestModifiedPackagesFromDiffs(t *testing.T) {
 			all:      true,
 		},
 		{
+			name:     "all-packages-go-mod",
+			diffs:    []string{"scripts/go.mod"},
+			packages: map[string]struct{}{},
+			all:      true,
+		},
+		{
+			name:     "all-packages-go-sum",
+			diffs:    []string{"go.sum"},
+			packages: map[string]struct{}{},
+			all:      true,
+		},
+		{
 			name:     "no-packages",
-			diffs:    []string{},
+			diffs:    []string{"website/docs/d/notebooks_runtime_iam_policy.html.markdown"},
 			packages: map[string]struct{}{},
 			all:      false,
 		},
