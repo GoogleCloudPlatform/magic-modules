@@ -130,10 +130,6 @@
         ValidateFunc: <%= property.item_validation.function -%>,
         <% end # !property.item_validation.regex.nil?  -%>
       <% elsif property.item_type.is_a?(Api::Type::Enum)  -%>
-        <%
-          enum_values = property.values
-          enum_values.push "" unless property.required
-        -%>
         ValidateFunc: verify.ValidateEnum([]string{"<%= property.item_type.values.join '","' -%>"}),
       <% end -%>
     <% end -%>
