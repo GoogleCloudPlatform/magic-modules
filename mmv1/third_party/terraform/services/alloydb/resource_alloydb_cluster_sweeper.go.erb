@@ -48,7 +48,7 @@ func testSweepAlloydbCluster(region string) error {
 		},
 	}
 
-        // manual change: use aggregated list instead of sweeper-specific location. This will clear secondary clusters.
+	// manual patch: use aggregated list instead of sweeper-specific location. This will clear secondary clusters.
 <% unless version == 'ga' -%>
 	listTemplate := strings.Split("https://alloydb.googleapis.com/v1beta/projects/{{project}}/locations/-/clusters", "?")[0]
 <% else -%>
