@@ -124,7 +124,7 @@ type Resource struct {
 	// often used to extract an object from a parent object or a collection.
 	// Note that if both nested_query and custom_code.decoder are provided,
 	// the decoder will be included within the code handling the nested query.
-	NestedQuery resource.NestedQuery `yaml:"nested_query"`
+	NestedQuery *resource.NestedQuery `yaml:"nested_query"`
 
 	// ====================
 	// IAM Configuration

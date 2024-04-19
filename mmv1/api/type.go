@@ -275,6 +275,9 @@ type Type struct {
 	ResourceMetadata *Resource
 
 	ParentMetadata *Type // is nil for top-level properties
+
+	// The prefix used as part of the expand/flatten function name
+	Prefix string
 }
 
 const MAX_NAME = 20
@@ -415,6 +418,36 @@ func (t Type) EnumValuesToString() string {
 	}
 
 	return strings.Join(values, ", ")
+}
+
+// def titlelize_property(property)
+func (t Type) TitlelizeProperty() string {
+	return google.Camelize(t.Name, "upper")
+}
+
+func (t *Type) GetPrefix() string {
+	if t.Prefix == "" {
+		if t.ParentMetadata == nil {
+			nestedPrefix := ""
+			if t.ResourceMetadata.NestedQuery != nil {
+				nestedPrefix = "Nested"
+			}
+
+			t.Prefix = fmt.Sprintf("%s%s", nestedPrefix, t.ResourceMetadata.ResourceName())
+		} else {
+			t.Prefix = fmt.Sprintf("%s%s", t.ParentMetadata.GetPrefix(), t.ParentMetadata.TitlelizeProperty())
+		}
+	}
+	return t.Prefix
+}
+
+func (t Type) ResourceType() string {
+	r := t.ResourceRef()
+	if r == nil {
+		return ""
+	}
+	path := strings.Split(r.BaseUrl, "/")
+	return path[len(path)-1]
 }
 
 // func (t *Type) to_json(opts) {
