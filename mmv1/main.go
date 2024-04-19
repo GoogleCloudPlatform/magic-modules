@@ -31,6 +31,8 @@ var product = flag.String("product", "", "optional product name. If specified, t
 var yamlMode = flag.Bool("yaml", false, "strictly copy text over from ruby yaml to go yaml")
 
 func main() {
+	convertTemplates()
+
 	flag.Parse()
 
 	if *yamlMode {
