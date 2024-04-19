@@ -233,7 +233,9 @@ Example:
 ### `validation`
 Controls the value set for the field's [`ValidateFunc`](https://developer.hashicorp.com/terraform/plugin/sdkv2/schemas/schema-behaviors#validatefunc).
 
-If `validation` is set on an Enum field, it will override the default validation (that the provided value is in the Enum's [`values`](#values)).
+For Enum fields, this will override the default validation (that the provided value is one of the enum [`values`](#values)).
+If you need additional validation on top of an enum, ensure that the supplied validation func also verifies the enum
+values are correct.
 
 This property has two mutually exclusive child properties:
 
@@ -342,6 +344,10 @@ item_type: !ruby/object:Api::Type::NestedObject
 Array only. Controls the [`ValidateFunc`](https://developer.hashicorp.com/terraform/plugin/sdkv2/schemas/schema-behaviors#validatefunc)
 used to validate individual items in the array. Behaves like [`validation`]({{<ref "/develop/field-reference#validation" >}}).
 
+For arrays of enums, this will override the default validation (that the provided value is one of the enum [`values`](#values)).
+If you need additional validation on top of an enum, ensure that the supplied validation func also verifies the enum
+values are correct.
+
 Example: Provider-specific function
 
 ```yaml
@@ -361,6 +367,21 @@ Example: Regex
   item_validation: !ruby/object:Provider::Terraform::Validation
     regex: '^[a-zA-Z][a-zA-Z0-9_]*$'
 ```
+
+Example: Enum
+
+```yaml
+- !ruby/object:Api::Type::Array
+  name: 'fieldOne'
+  item_type: !ruby/object:Api::Type::Enum
+    name: 'required but unused'
+    description: 'required but unused'
+    values:
+      - :VALUE_ONE
+      - :VALUE_TWO
+  item_validation: 'customFunction'
+```
+
 
 ## `NestedObject` properties
 
