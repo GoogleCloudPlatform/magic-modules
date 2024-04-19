@@ -79,6 +79,7 @@ func (td *TemplateData) GenerateResourceFile(filePath string, resource api.Resou
 	templatePath := "templates/terraform/resource.go.tmpl"
 	templates := []string{
 		"templates/terraform/schema_property.go.tmpl",
+		"templates/terraform/schema_subresource.go.tmpl",
 		templatePath,
 	}
 	td.GenerateFile(filePath, templatePath, resource, true, templates...)
