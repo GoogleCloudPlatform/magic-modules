@@ -250,6 +250,9 @@ This property has two mutually exclusive child properties:
   String fields. It is equivalent to
   [`function: verify.ValidateRegexp(REGEX_STRING)`](https://github.com/hashicorp/terraform-provider-google-beta/blob/0ef51142a4dd1c1a4fc308c1eb09dce307ebe5f5/google-beta/verify/validation.go#L425).
 
+`validation` is not supported for Array fields (including sets); however, individual
+elements in the array can be validated using [`item_validation`]({{<ref "/develop/field-reference#item_validation"}}).
+
 Example: Provider-specific function
 
 ```yaml
@@ -334,6 +337,10 @@ item_type: !ruby/object:Api::Type::NestedObject
       description: |
         MULTI_LINE_FIELD_DESCRIPTION
 ```
+
+### `item_validation`
+Array only. Controls the [`ValidateFunc`](https://developer.hashicorp.com/terraform/plugin/sdkv2/schemas/schema-behaviors#validatefunc)
+used to validate individual items in the array. Behaves like [`validation`]({{<ref "/develop/field-reference#validation" >}}).
 
 ## `NestedObject` properties
 
