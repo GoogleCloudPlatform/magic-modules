@@ -1169,7 +1169,7 @@ resource "google_compute_global_address" "private_ip_alloc" {
 `, context)
 }
 
-// Ensures cluster creation works with networkConfig and a specified allocated IP range.
+// Ensures cluster creation works with correctly specified maintenance update policy.
 func TestAccAlloydbCluster_withMaintenanceWindows(t *testing.T) {
 	t.Parallel()
 
@@ -1221,6 +1221,7 @@ resource "google_compute_network" "default" {
 `, context)
 }
 
+// Ensures cluster creation throws expected errors for incorrect configurations of maintenance update policy.
 func TestAccAlloydbCluster_withMaintenanceWindowsMissingFields(t *testing.T) {
 	t.Parallel()
 
