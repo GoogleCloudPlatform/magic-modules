@@ -50,7 +50,9 @@ var TemplateFunctions = template.FuncMap{
 	"replace":    strings.Replace,
 	"camelize":   google.Camelize,
 	"underscore": google.Underscore,
+	"plural":     google.Plural,
 	"contains":   strings.Contains,
+	"join":       strings.Join,
 }
 
 var GA_VERSION = "ga"
@@ -62,7 +64,7 @@ func NewTemplateData(outputFolder string, version product.Version) *TemplateData
 
 	if version.Name == GA_VERSION {
 		td.TerraformResourceDirectory = "google"
-		td.TerraformProviderModule = "github.com/hashicorp/terraform-provider-google/google"
+		td.TerraformProviderModule = "github.com/hashicorp/terraform-provider-google"
 	} else if version.Name == ALPHA_VERSION {
 		td.TerraformResourceDirectory = "google-private"
 		td.TerraformProviderModule = "internal/terraform-next"
@@ -92,7 +94,35 @@ func (td *TemplateData) GenerateDocumentationFile(filePath string, resource api.
 	td.GenerateFile(filePath, templatePath, resource, false, templates...)
 }
 
-func (td *TemplateData) GenerateFile(filePath, templatePath string, resource api.Resource, goFormat bool, templates ...string) {
+func (td *TemplateData) GenerateTestFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/examples/base_configs/test_file.go.tmpl"
+	templates := []string{
+		// "templates/terraform//env_var_context.go.tmpl",
+		templatePath,
+	}
+	tmplInput := TestInput{
+		Res:                    resource,
+		ImportPath:             td.ImportPath(),
+		PROJECT_NAME:           "my-project-name",
+		FIRESTORE_PROJECT_NAME: "my-project-name",
+		CREDENTIALS:            "my/credentials/filename.json",
+		REGION:                 "us-west1",
+		ORG_ID:                 "123456789",
+		ORG_DOMAIN:             "example.com",
+		ORG_TARGET:             "123456789",
+		PROJECT_NUMBER:         "1111111111111",
+		BILLING_ACCT:           "000000-0000000-0000000-000000",
+		MASTER_BILLING_ACCT:    "000000-0000000-0000000-000000",
+		SERVICE_ACCT:           "my@service-account.com",
+		CUST_ID:                "A01b123xz",
+		IDENTITY_USER:          "cloud_identity_user",
+		PAP_DESCRIPTION:        "description",
+	}
+
+	td.GenerateFile(filePath, templatePath, tmplInput, true, templates...)
+}
+
+func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, goFormat bool, templates ...string) {
 	log.Printf("Generating %s", filePath)
 
 	templateFileName := filepath.Base(templatePath)
@@ -103,7 +133,7 @@ func (td *TemplateData) GenerateFile(filePath, templatePath string, resource api
 	}
 
 	contents := bytes.Buffer{}
-	if err = tmpl.ExecuteTemplate(&contents, templateFileName, resource); err != nil {
+	if err = tmpl.ExecuteTemplate(&contents, templateFileName, input); err != nil {
 		glog.Exit(err)
 	}
 
@@ -196,3 +226,42 @@ func (td *TemplateData) GenerateFile(filePath, templatePath string, resource api
 //     end
 //   end
 // end
+
+//    def import_path
+//      case @target_version_name
+//      when 'ga'
+//        "#{TERRAFORM_PROVIDER_GA}/#{RESOURCE_DIRECTORY_GA}"
+//      when 'beta'
+//        "#{TERRAFORM_PROVIDER_BETA}/#{RESOURCE_DIRECTORY_BETA}"
+//      else
+//        "#{TERRAFORM_PROVIDER_PRIVATE}/#{RESOURCE_DIRECTORY_PRIVATE}"
+//      end
+//    end
+
+func (td *TemplateData) ImportPath() string {
+	if td.Version.Name == GA_VERSION {
+		return "github.com/hashicorp/terraform-provider-google/google"
+	} else if td.Version.Name == ALPHA_VERSION {
+		return "internal/terraform-next/google-private"
+	}
+	return "github.com/hashicorp/terraform-provider-google-beta/google-beta"
+}
+
+type TestInput struct {
+	Res                    api.Resource
+	ImportPath             string
+	PROJECT_NAME           string
+	FIRESTORE_PROJECT_NAME string
+	CREDENTIALS            string
+	REGION                 string
+	ORG_ID                 string
+	ORG_DOMAIN             string
+	ORG_TARGET             string
+	PROJECT_NUMBER         string
+	BILLING_ACCT           string
+	MASTER_BILLING_ACCT    string
+	SERVICE_ACCT           string
+	CUST_ID                string
+	IDENTITY_USER          string
+	PAP_DESCRIPTION        string
+}
