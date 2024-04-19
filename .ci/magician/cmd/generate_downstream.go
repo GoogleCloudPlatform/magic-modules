@@ -325,7 +325,7 @@ func createCommit(scratchRepo *source.Repo, commitMessage string, rnr ExecRunner
 	}
 
 	commitSha = strings.TrimSpace(commitSha)
-	fmt.Printf("Commit sha on the branch is: `%s`", commitSha)
+	fmt.Printf("Commit sha on the branch is: `%s`\n", commitSha)
 
 	return commitSha, err
 }
