@@ -15,8 +15,7 @@ package provider
 
 import (
 	"bytes"
-	"fmt"
-	"go/format"
+	"errors"
 	"log"
 	"os"
 	"path/filepath"
@@ -45,6 +44,23 @@ type TemplateData struct {
 	//     attr_accessor :env
 }
 
+// Build a map(map[string]interface{}) from a list of paramerter
+// The format of passed in parmeters are key1, value1, key2, value2 ...
+func wrapMultipleParams(params ...interface{}) (map[string]interface{}, error) {
+	if len(params)%2 != 0 {
+		return nil, errors.New("invalid number of arguments")
+	}
+	m := make(map[string]interface{}, len(params)/2)
+	for i := 0; i < len(params); i += 2 {
+		key, ok := params[i].(string)
+		if !ok {
+			return nil, errors.New("keys must be strings")
+		}
+		m[key] = params[i+1]
+	}
+	return m, nil
+}
+
 var TemplateFunctions = template.FuncMap{
 	"title":      google.SpaceSeparatedTitle,
 	"replace":    strings.Replace,
@@ -53,6 +69,9 @@ var TemplateFunctions = template.FuncMap{
 	"plural":     google.Plural,
 	"contains":   strings.Contains,
 	"join":       strings.Join,
+	"lower":      strings.ToLower,
+	"upper":      strings.ToUpper,
+	"dict":       wrapMultipleParams,
 }
 
 var GA_VERSION = "ga"
@@ -79,7 +98,11 @@ func NewTemplateData(outputFolder string, version product.Version) *TemplateData
 func (td *TemplateData) GenerateResourceFile(filePath string, resource api.Resource) {
 	templatePath := "templates/terraform/resource.go.tmpl"
 	templates := []string{
+		"templates/terraform/schema_property.go.tmpl",
+		"templates/terraform/schema_subresource.go.tmpl",
 		templatePath,
+		"templates/terraform/expand_resource_ref.tmpl",
+		"templates/terraform/custom_flatten/go/bigquery_table_ref.go.tmpl",
 	}
 	td.GenerateFile(filePath, templatePath, resource, true, templates...)
 }
@@ -143,12 +166,12 @@ func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, g
 		sourceByte = bytes.Replace(sourceByte, []byte("github.com/hashicorp/terraform-provider-google/google"), []byte(td.TerraformProviderModule+"/"+td.TerraformResourceDirectory), -1)
 	}
 
-	if goFormat {
-		sourceByte, err = format.Source(sourceByte)
-		if err != nil {
-			glog.Error(fmt.Errorf("error formatting %s", filePath))
-		}
-	}
+	// if goFormat {
+	// 	sourceByte, err = format.Source(sourceByte)
+	// 	if err != nil {
+	// 		glog.Error(fmt.Errorf("error formatting %s", filePath))
+	// 	}
+	// }
 
 	err = os.WriteFile(filePath, sourceByte, 0644)
 	if err != nil {
