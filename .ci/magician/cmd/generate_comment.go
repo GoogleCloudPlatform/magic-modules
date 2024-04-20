@@ -425,7 +425,11 @@ func computeBreakingChanges(diffProcessorPath string, rnr ExecRunner) ([]string,
 		return nil, nil
 	}
 
-	return strings.Split(strings.TrimSuffix(output, "\n"), "\n"), rnr.PopDir()
+	var changes []string
+	if err = json.Unmarshal([]byte(output), &changes); err != nil {
+		return nil, err
+	}
+	return changes, rnr.PopDir()
 }
 
 func changedSchemaResources(diffProcessorPath string, rnr ExecRunner) ([]string, error) {

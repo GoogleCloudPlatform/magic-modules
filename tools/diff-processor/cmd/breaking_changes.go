@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"encoding/json"
+	"fmt"
 	newProvider "google/provider/new/google/provider"
 	oldProvider "google/provider/old/google/provider"
 
@@ -43,11 +45,8 @@ func (o *breakingChangesOptions) run() error {
 	schemaDiff := o.computeSchemaDiff()
 	breakingChanges := rules.ComputeBreakingChanges(schemaDiff)
 	sort.Strings(breakingChanges)
-	for _, breakingChange := range breakingChanges {
-		_, err := o.stdout.Write([]byte(breakingChange + "\n"))
-		if err != nil {
-			return err
-		}
+	if err := json.NewEncoder(o.stdout).Encode(breakingChanges); err != nil {
+		return fmt.Errorf("Error encoding json: %w", err)
 	}
 	return nil
 }
