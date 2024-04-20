@@ -123,6 +123,13 @@ examples:
     vars:
       subnetwork_name: 'subnet-cidr-overlap'
       network_name: 'net-cidr-overlap'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'subnetwork_reserved_internal_range'
+    min_version: beta
+    primary_resource_id: 'subnetwork-reserved-internal-range'
+    vars:
+      subnetwork_name: 'subnetwork-reserved-internal-range'
+      network_name: 'network-reserved-internal-range'
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
