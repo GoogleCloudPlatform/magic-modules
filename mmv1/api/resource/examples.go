@@ -66,7 +66,6 @@ type Examples struct {
 	// test_env_vars is a Hash from template variable names to one of the
 	// following symbols:
 	//  - :PROJECT_NAME
-	//  - :FIRESTORE_PROJECT_NAME
 	//  - :CREDENTIALS
 	//  - :REGION
 	//  - :ORG_ID
@@ -239,7 +238,6 @@ func ExecuteHCL(e *Examples) string {
 // func (e *Examples) config_documentation(pwd) {
 // docs_defaults = {
 //   PROJECT_NAME: 'my-project-name',
-//   FIRESTORE_PROJECT_NAME: 'my-project-name',
 //   CREDENTIALS: 'my/credentials/filename.json',
 //   REGION: 'us-west1',
 //   ORG_ID: '123456789',
