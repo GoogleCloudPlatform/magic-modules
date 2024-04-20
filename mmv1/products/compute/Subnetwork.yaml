@@ -152,6 +152,12 @@ properties:
     update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}/expandIpCidrRange'
     validation: !ruby/object:Provider::Terraform::Validation
       function: 'verify.ValidateIpCidrRange'
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'reservedInternalRange'
+    description : |
+      The URL of the reserved internal range.
+    resource: 'InternalRange'
+    imports: 'selfLink'
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
@@ -246,6 +252,12 @@ properties:
             range. Provide this property when you create the subnetwork.
             Ranges must be unique and non-overlapping with all primary and
             secondary IP ranges within a network. Only IPv4 is supported.
+        - !ruby/object:Api::Type::ResourceRef
+          name: 'reservedInternalRange'
+          description: |
+            The URL of the reserved internal range.
+          resource: 'InternalRange'
+          imports: 'selfLink'
   - !ruby/object:Api::Type::Boolean
     name: 'privateIpGoogleAccess'
     description: |
