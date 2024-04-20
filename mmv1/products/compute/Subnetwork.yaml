@@ -154,7 +154,7 @@ properties:
       function: 'verify.ValidateIpCidrRange'
   - !ruby/object:Api::Type::ResourceRef
     name: 'reservedInternalRange'
-    description : |
+    description: |
       The URL of the reserved internal range.
     resource: 'InternalRange'
     imports: 'selfLink'
