@@ -66,6 +66,8 @@ properties:
           description: |
             Users who are being allowed for the operation. Each entry should be a valid v1 IAM Principal Identifier. Format for these is documented at "https://cloud.google.com/iam/docs/principal-identifiers#v1"
           item_type: Api::Type::String
+          item_validation: !ruby/object:Provider::Terraform::Validation
+            function: 'validateDeletedPrincipals'
   - !ruby/object:Api::Type::NestedObject
     name: approvalWorkflow
     immutable: true
@@ -112,6 +114,8 @@ properties:
                         max_size: 20
                         is_set: true
                         item_type: Api::Type::String
+                        item_validation: !ruby/object:Provider::Terraform::Validation
+                          function: 'validateDeletedPrincipals'
                         description: |
                           Users who are being allowed for the operation. Each entry should be a valid v1 IAM Principal Identifier. Format for these is documented at: https://cloud.google.com/iam/docs/principal-identifiers#v1
                 - !ruby/object:Api::Type::Integer
@@ -252,3 +256,4 @@ parameters:
       Format: project/{project_id} or organization/{organization_number} or folder/{folder_number}
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_update: templates/terraform/pre_update/privileged_access_manager_entitlement.go.erb
+  constants: templates/terraform/constants/privileged_access_manager_entitlement.go.erb
