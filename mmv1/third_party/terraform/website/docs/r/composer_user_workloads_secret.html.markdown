@@ -1,12 +1,16 @@
 ---
 subcategory: "Cloud Composer"
 description: |-
-  Kubernetes secret in Composer Environment workloads.
+  User workloads Secret used by Airflow tasks that run with Kubernetes Executor or KubernetesPodOperator.
 ---
 
 # google\_composer\_user\_workloads\_secret
 
-Provides a way to manage Kubernetes secret in Composer Environment workloads.
+~> **Warning:** These resources are in beta, and should be used with the terraform-provider-google-beta provider.
+See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
+
+User workloads Secret used by Airflow tasks that run with Kubernetes Executor or KubernetesPodOperator. 
+Intended for Composer 3 Environments.
 
 ## Example Usage
 
@@ -40,7 +44,7 @@ The following arguments are supported:
 
 * `name` -
   (Required)
-  Name of the Secret.
+  Name of the Kubernetes Secret.
 
 * `region` -
   (Optional)
@@ -52,7 +56,7 @@ The following arguments are supported:
   If it is not provided, the provider project is used.
 
 * `environment` -
-  Environment where the secret will be stored and used.
+  Environment where the Kubernetes Secret will be stored and used.
 
 * `data` -
   (Optional) 
