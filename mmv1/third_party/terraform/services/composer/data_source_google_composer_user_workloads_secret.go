@@ -40,23 +40,23 @@ func dataSourceGoogleComposerUserWorkloadsSecretRead(d *schema.ResourceData, met
 
 	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{region}}/environments/{{environment}}/userWorkloadsSecrets/{{name}}")
 	if err != nil {
-		return nil, fmt.Errorf("Error constructing id: %s", err)
+		return fmt.Errorf("Error constructing id: %s", err)
 	}
 	d.SetId(id)
 
 	// retrieve "data" in advance, because Read function won't do it.
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	res, err := config.NewComposerClient(userAgent).Projects.Locations.Environments.UserWorkloadsSecrets.Get(id).Do()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if err := d.Set("data", res.Data); err != nil {
-		return nil, fmt.Errorf("Error setting UserWorkloadsSecret Data: %s", err)
+		return fmt.Errorf("Error setting UserWorkloadsSecret Data: %s", err)
 	}
 
 	err = resourceComposerUserWorkloadsSecretRead(d, meta)
