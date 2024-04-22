@@ -266,7 +266,7 @@ func schemaNodeConfig() *schema.Schema {
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"disk_image": {
-								Type:         schema.TypeInt,
+								Type:         schema.TypeString,
 								Required:     true,
 								ForceNew:     true,
 								Description:  `Disk image to create the secondary boot disk from`,
