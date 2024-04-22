@@ -51,7 +51,7 @@ func testAccPrivilegedAccessManagerEntitlement_privilegedAccessManagerEntitlemen
 resource "google_privileged_access_manager_entitlement" "tfentitlement" {
     provider =  google-beta
     entitlement_id = "tf-test-example-entitlement%{random_suffix}"
-    location = "us-central1-a"
+    location = "global"
     max_request_duration = "43200s"
     parent = "projects/%{project_name}"
     requester_justification_config { 
@@ -95,7 +95,7 @@ func testAccPrivilegedAccessManagerEntitlement_privilegedAccessManagerEntitlemen
 resource "google_privileged_access_manager_entitlement" "tfentitlement" {
     provider =  google-beta
     entitlement_id = "tf-test-example-entitlement%{random_suffix}"
-    location = "us-central1"
+    location = "global"
     max_request_duration = "43200s"
     parent = "projects/%{project_name}"
     requester_justification_config {    
