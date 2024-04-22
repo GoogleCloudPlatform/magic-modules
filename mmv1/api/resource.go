@@ -124,7 +124,7 @@ type Resource struct {
 	// often used to extract an object from a parent object or a collection.
 	// Note that if both nested_query and custom_code.decoder are provided,
 	// the decoder will be included within the code handling the nested query.
-	NestedQuery resource.NestedQuery `yaml:"nested_query"`
+	NestedQuery *resource.NestedQuery `yaml:"nested_query"`
 
 	// ====================
 	// IAM Configuration
@@ -421,7 +421,7 @@ func (r Resource) SensitivePropsToString() string {
 // they will need to be set in every Update.
 
 // def settable_properties
-func (r Resource) settableProperties() []*Type {
+func (r Resource) SettableProperties() []*Type {
 	props := make([]*Type, 0)
 
 	props = google.Reject(r.AllUserProperties(), func(v *Type) bool {
@@ -764,7 +764,7 @@ func propertiesWithoutCustomUpdate(properties []*Type) []*Type {
 
 // def update_body_properties
 func (r Resource) UpdateBodyProperties() []*Type {
-	updateProp := propertiesWithoutCustomUpdate(r.settableProperties())
+	updateProp := propertiesWithoutCustomUpdate(r.SettableProperties())
 	if r.UpdateVerb == "PATCH" {
 		updateProp = google.Reject(updateProp, func(p *Type) bool {
 			return p.Immutable
@@ -827,6 +827,17 @@ func (r Resource) HasRegion() bool {
 // def zone?
 func (r Resource) HasZone() bool {
 	return strings.Contains(r.BaseUrl, "{{zone}}") || strings.Contains(r.CreateUrl, "{{zone}}")
+}
+
+// resource functions needed for template that previously existed in terraform.go but due to how files are being inherited here it was easier to put in here
+// taken wholesale from tpgtools
+func (r Resource) Updatable() bool {
+	for _, p := range r.AllProperties() {
+		if !p.Immutable && !(p.Required && p.DefaultFromApi) {
+			return true
+		}
+	}
+	return false
 }
 
 // ====================
@@ -948,4 +959,18 @@ func (r Resource) GetIdFormat() string {
 		idFormat = r.SelfLinkUri()
 	}
 	return idFormat
+}
+
+// ====================
+// Template Methods
+// ====================
+
+// Prints a dot notation path to where the field is nested within the parent
+// object when called on a property. eg: parent.meta.label.foo
+// Redefined on Resource to terminate the calls up the parent chain.
+
+// checks a resource for if it has properties that have FlattenObject=true on fields where IgnoreRead=false
+// used to decide whether or not to import "google.golang.org/api/googleapi"
+func (r Resource) FlattenedProperties() []*Type {
+	return google.Select(google.Reject(r.GettableProperties(), func(p *Type) bool { return p.IgnoreRead }), func(p *Type) bool { return p.FlattenObject })
 }
