@@ -246,7 +246,7 @@ parameters:
     required: true
     immutable: true
     validation: !ruby/object:Provider::Terraform::Validation
-      function: 'verify.ValidateRegexp(`^[a-z][a-z0-9-]{3,62}$`)'
+      function: validateEntitlementId
   - !ruby/object:Api::Type::String
     name: parent
     immutable: true
