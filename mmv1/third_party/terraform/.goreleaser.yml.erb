@@ -1,8 +1,8 @@
 <% autogen_exception -%>
 archives:
   - files:
-      # Only include built binary in archive
-      - 'none*'
+      # Only include built binary and license files are archived are archived
+      - 'LICENSE'
     format: zip
     name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
 builds:
