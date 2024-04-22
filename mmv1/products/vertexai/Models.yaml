@@ -482,17 +482,171 @@ properties:
           name: 'deployedModelId'
           immutable: true
           description:  An ID of a DeployedModel in the above Endpoint.
-  - !ruby/object:Api::Type::Array
+  - !ruby/object:Api::Type::NestedObject
     name: 'explanationSpec'
-    output: true
     description: The pointers to DeployedModels created from this Model. Note that Model could have been deployed to Endpoints in different Locations.
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: 'endpoint'
+        - !ruby/object:Api::Type::NestedObject
+          name: 'parameters' #ExplanationParameters
           immutable: true
           description: A resource name of an Endpoint.
-        - !ruby/object:Api::Type::String
-          name: 'deployedModelId'
+          item_type: !ruby/object:Api::Type::NestedObject
+            properties:
+              - !ruby/object:Api::Type::Integer
+                name: 'topK'
+                description: If populated, returns attributions for top K indices of outputs (defaults to 1). 
+                default_value: 1
+                immutable: true
+              - !ruby/object:Api::Type::Array
+                name: 'outputIndices'
+                description: If populated, only returns attributions that have outputIndex contained in outputIndices.
+                immutable: true
+              ## Union field method can be only one of the following
+              - !ruby/object:Api::Type::NestedObject
+                name: 'sampledShapleyAttribution'
+                description: An attribution method that approximates Shapley values for features that contribute to the label being predicted.
+                immutable: true
+                item_type: !ruby/object:Api::Type::NestedObject
+                  properties:
+                    - !ruby/object:Api::Type::Integer
+                      name: 'pathCount'
+                      description: The number of feature permutations to consider when approximating the Shapley values. Valid range of its value is [1, 50], inclusively.
+                      required: true
+              - !ruby/object:Api::Type::NestedObject
+                name: 'integratedGradientsAttribution'
+                description: An attribution method that computes Aumann-Shapley values taking advantage of the model's fully differentiable structure. 
+                item_type: !ruby/object:Api::Type::NestedObject
+                  properties:
+                    - !ruby/object:Api::Type::Integer
+                      name: 'stepCount'
+                      description: The number of feature permutations to consider when approximating the Shapley values. Valid range of its value is [1, 100], inclusively.
+                      required: true
+                    - !ruby/object:Api::Type::NestedObject
+                      name: 'smoothGradConfig'
+                      description: When enabled, the gradients are approximated by averaging the gradients from noisy samples in the vicinity of the inputs.
+                      item_type: !ruby/object:Api::Type::NestedObject
+                        properties:
+                          - !ruby/object:Api::Type::Integer
+                            name: 'noisySampleCount'
+                            description: The number of gradient samples to use for approximation. Valid range of its value is [1, 50].
+                            default_value: 3
+                          - !ruby/object:Api::Type::Double
+                            name: 'noiseSigma'
+                            description: This is a single float value and will be used to add noise to all the features. 
+                            default_value: 0.1
+                          - !ruby/object:Api::Type::NestedObject
+                            name: 'featureNoiseSigma'
+                            description: The number of gradient samples to use for approximation.
+                            item_type: !ruby/object:Api::Type::NestedObject
+                              properties:
+                                - !ruby/object:Api::Type::Array
+                                  name: 'noiseSigma'
+                                  description: The number of gradient samples to use for approximation.
+                                  item_type: !ruby/object:Api::Type::NestedObject
+                                    properties:
+                                      - !ruby/object:Api::Type::Integer
+                                        name: 'name'
+                                        description: The name of the input feature for which noise sigma is provided.
+                                      - !ruby/object:Api::Type::Double
+                                        name: 'sigma'
+                                        description: This represents the standard deviation of the Gaussian kernel that will be used to add noise to the feature prior to computing gradients.
+                                        default_value: 0.1
+                    - !ruby/object:Api::Type::NestedObject
+                      name: 'blurBaselineConfig'
+                      description: Config for IG with blur baseline.
+                      required: true
+                      item_type: !ruby/object:Api::Type::NestedObject
+                        properties:
+                          - !ruby/object:Api::Type::Double
+                            name: 'maxBlurSigma'
+                            description: The standard deviation of the blur kernel for the blurred baseline.
+              - !ruby/object:Api::Type::NestedObject
+                name: 'xraiAttribution'
+                description: An attribution method that redistributes Integrated Gradients attribution to segmented regions, taking advantage of the model's fully differentiable structure.
+                item_type: !ruby/object:Api::Type::NestedObject
+                  properties:
+                    - !ruby/object:Api::Type::Integer
+                      name: 'stepCount'
+                      description: The number of feature permutations to consider when approximating the Shapley values. Valid range of its value is [1, 100], inclusively.
+                      required: true
+                    - !ruby/object:Api::Type::NestedObject
+                      name: 'smoothGradConfig'
+                      description: When enabled, the gradients are approximated by averaging the gradients from noisy samples in the vicinity of the inputs.
+                      item_type: !ruby/object:Api::Type::NestedObject
+                        properties:
+                          - !ruby/object:Api::Type::Integer
+                            name: 'noisySampleCount'
+                            description: The number of gradient samples to use for approximation. Valid range of its value is [1, 50].
+                            default_value: 3
+                          - !ruby/object:Api::Type::Double
+                            name: 'noiseSigma'
+                            description: This is a single float value and will be used to add noise to all the features. 
+                            default_value: 0.1
+                          - !ruby/object:Api::Type::NestedObject
+                            name: 'featureNoiseSigma'
+                            description: The number of gradient samples to use for approximation.
+                            item_type: !ruby/object:Api::Type::NestedObject
+                              properties:
+                                - !ruby/object:Api::Type::Array
+                                  name: 'noiseSigma'
+                                  description: The number of gradient samples to use for approximation.
+                                  item_type: !ruby/object:Api::Type::NestedObject
+                                    properties:
+                                      - !ruby/object:Api::Type::Integer
+                                        name: 'name'
+                                        description: The name of the input feature for which noise sigma is provided.
+                                      - !ruby/object:Api::Type::Double
+                                        name: 'sigma'
+                                        description: This represents the standard deviation of the Gaussian kernel that will be used to add noise to the feature prior to computing gradients.
+                                        default_value: 0.1
+                    - !ruby/object:Api::Type::NestedObject
+                      name: 'blurBaselineConfig'
+                      description: Config for IG with blur baseline.
+                      required: true
+                      item_type: !ruby/object:Api::Type::NestedObject
+                        properties:
+                          - !ruby/object:Api::Type::Double
+                            name: 'maxBlurSigma'
+                            description: The standard deviation of the blur kernel for the blurred baseline.
+              - !ruby/object:Api::Type::NestedObject
+                name: 'examples'
+                description: Description of the Model.
+                item_type: !ruby/object:Api::Type::NestedObject
+                  properties:
+                    - !ruby/object:Api::Type::Integer
+                      name: 'neighborCount'
+                      description: The number of neighbors to return when querying for examples.
+                    - !ruby/object:Api::Type::NestedObject
+                      name: 'exampleGcsSource'
+                      description: The number of neighbors to return when querying for examples.
+                      properties:
+                        - !ruby/object:Api::Type::Enum
+                          name: 'dataFormat'
+                          description: 'The format in which instances are given, if not specified, assume its JSONL format. Currently only JSONL format is supported.'
+                          values:
+                            - :JSONL
+                        - !ruby/object:Api::Type::NestedObject
+                          name: 'gcsSource'
+                          description: 'The Cloud Storage location for the input instances.'
+                          properties:
+                            - !ruby/object:Api::Type::Array
+                              name: 'uris'
+                              required: true
+                              description: 'Google Cloud Storage URI(-s) to the input file(s). May contain wildcards.'
+                    - !ruby/object:Api::Type::Integer
+                      name: 'neighborCount'
+                      description: The number of neighbors to return when querying for examples.
+                      default_value: 1
+                      immutable: true
+                    - !ruby/object:Api::Type::Integer
+                      name: 'neighborCount'
+                      description: The number of neighbors to return when querying for examples.
+                      default_value: 1
+                      immutable: true
+        - !ruby/object:Api::Type::NestedObject
+          name: 'metadata' #ExplanationMetadata
           immutable: true
           description:  An ID of a DeployedModel in the above Endpoint.
+          item_type: !ruby/object:Api::Type::NestedObject
+            properties:
