@@ -1,0 +1,13 @@
+resource "google_logging_project_bucket_config" "{{$.PrimaryResourceId}}" {
+    project        = "{{index $.TestEnvVars "project"}}"
+    location       = "global"
+    retention_days = 30
+    bucket_id      = "_Default"
+}
+
+resource "google_logging_log_view" "{{$.PrimaryResourceId}}" {
+  name        = "{{index $.Vars "log_view_name"}}"
+  bucket      = google_logging_project_bucket_config.{{$.PrimaryResourceId}}.id
+  description = "A logging view configured with Terraform"
+  filter      = "SOURCE(\"projects/myproject\") AND resource.type = \"gce_instance\" AND LOG_ID(\"stdout\")"
+}

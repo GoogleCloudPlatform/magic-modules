@@ -89,7 +89,7 @@ func execRequestServiceReviewers(prNumber string, gh GithubClient, enrolledTeams
 			continue
 		}
 		teamCount += 1
-		if labelData, ok := enrolledTeams[label.Name]; ok {
+		if labelData, ok := enrolledTeams[label.Name]; ok && labelData.Team != "" {
 			githubTeamsSet[labelData.Team] = struct{}{}
 		}
 	}
@@ -123,10 +123,12 @@ func execRequestServiceReviewers(prNumber string, gh GithubClient, enrolledTeams
 		hasReviewer := false
 		reviewerPool := []string{}
 		for _, member := range members {
-			// Exclude PR author
-			if member.Login != pullRequest.User.Login {
-				reviewerPool = append(reviewerPool, member.Login)
+			// Skip PR author
+			if member.Login == pullRequest.User.Login {
+				continue
 			}
+
+			reviewerPool = append(reviewerPool, member.Login)
 			// Don't re-request review if there's an active review request
 			if _, ok := requestedReviewersSet[member.Login]; ok {
 				hasReviewer = true
@@ -142,12 +144,10 @@ func execRequestServiceReviewers(prNumber string, gh GithubClient, enrolledTeams
 		}
 	}
 
-	for _, reviewer := range reviewersToRequest {
-		err = gh.RequestPullRequestReviewer(prNumber, reviewer)
-		if err != nil {
-			fmt.Println(err)
-			exitCode = 1
-		}
+	err = gh.RequestPullRequestReviewers(prNumber, reviewersToRequest)
+	if err != nil {
+		fmt.Println(err)
+		exitCode = 1
 	}
 	if exitCode != 0 {
 		os.Exit(1)

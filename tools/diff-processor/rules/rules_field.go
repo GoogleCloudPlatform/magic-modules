@@ -27,6 +27,7 @@ var FieldRules = []FieldRule{
 	fieldRule_DefaultModification,
 	fieldRule_GrowingMin,
 	fieldRule_ShrinkingMax,
+	fieldRule_RemovingDiffSuppress,
 	fieldRule_ChangingFieldDataFormat,
 }
 
@@ -177,8 +178,11 @@ func fieldRule_GrowingMin_func(old, new *schema.Schema, mc MessageContext) strin
 		return ""
 	}
 	message := mc.message
-	if old.MinItems < new.MinItems {
+	if old.MinItems < new.MinItems || old.MinItems == 0 && new.MinItems > 0 {
 		oldMin := fmt.Sprint(old.MinItems)
+		if old.MinItems == 0 {
+			oldMin = "unset"
+		}
 		newMin := fmt.Sprint(new.MinItems)
 		message = strings.ReplaceAll(message, "{{oldMin}}", oldMin)
 		message = strings.ReplaceAll(message, "{{newMin}}", newMin)
@@ -201,12 +205,34 @@ func fieldRule_ShrinkingMax_func(old, new *schema.Schema, mc MessageContext) str
 		return ""
 	}
 	message := mc.message
-	if old.MaxItems > new.MaxItems {
-		oldMax := fmt.Sprint(old.MinItems)
-		newMax := fmt.Sprint(new.MinItems)
+	if old.MaxItems > new.MaxItems || old.MaxItems == 0 && new.MaxItems > 0 {
+		oldMax := fmt.Sprint(old.MaxItems)
+		if old.MaxItems == 0 {
+			oldMax = "unset"
+		}
+		newMax := fmt.Sprint(new.MaxItems)
 		message = strings.ReplaceAll(message, "{{oldMax}}", oldMax)
 		message = strings.ReplaceAll(message, "{{newMax}}", newMax)
 		return populateMessageContext(message, mc)
+	}
+	return ""
+}
+
+var fieldRule_RemovingDiffSuppress = FieldRule{
+	name:        "Removing Diff Suppress Function",
+	definition:  "Diff suppress functions cannot be removed. Otherwise terraform configurations that previously had no diffs would show diffs.",
+	message:     "Field {{field}} lost its diff suppress function",
+	identifier:  "field-removing-diff-suppress",
+	isRuleBreak: fieldRule_RemovingDiffSuppress_func,
+}
+
+func fieldRule_RemovingDiffSuppress_func(old, new *schema.Schema, mc MessageContext) string {
+	// ignore for added / removed fields
+	if old == nil || new == nil {
+		return ""
+	}
+	if old.DiffSuppressFunc != nil && new.DiffSuppressFunc == nil {
+		return populateMessageContext(mc.message, mc)
 	}
 	return ""
 }
