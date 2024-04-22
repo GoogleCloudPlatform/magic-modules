@@ -2,7 +2,7 @@ resource "google_compute_subnetwork" "subnetwork_with_reserved_internal_range" {
   name                    = "<%= ctx[:vars]['subnetwork_name'] %>"
   region                  = "us-central1"
   network                 = google_compute_network.default.id
-  reserved_internal_range = google_network_connectivity_internal_range.reserved_range.id
+  reserved_internal_range = google_network_connectivity_internal_range.reserved.id
 }
 
 resource "google_compute_network" "default" {
@@ -10,8 +10,8 @@ resource "google_compute_network" "default" {
   auto_create_subnetworks = false
 }
 
-resource "google_network_connectivity_internal_range" "reserved_range" {
-  name              = "reserved-range"
+resource "google_network_connectivity_internal_range" "reserved" {
+  name              = "reserved"
   network           = google_compute_network.default.id
   usage             = "FOR_VPC"
   peering           = "FOR_SELF"
