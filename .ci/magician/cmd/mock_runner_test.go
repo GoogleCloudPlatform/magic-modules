@@ -40,6 +40,7 @@ type mockRunner struct {
 	cmdResults    map[string]string
 	cwd           string
 	dirStack      *list.List
+	notifyError   bool
 }
 
 func sortedEnvString(env map[string]string) string {
@@ -149,6 +150,9 @@ func (mr *mockRunner) Run(name string, args []string, env map[string]string) (st
 	cmd := fmt.Sprintf("%s %s %v %s", mr.cwd, name, args, sortedEnvString(env))
 	if result, ok := mr.cmdResults[cmd]; ok {
 		return result, nil
+	}
+	if mr.notifyError {
+		return "", fmt.Errorf("unknown command %s", cmd)
 	}
 	fmt.Printf("unknown command %s\n", cmd)
 	return "", nil
