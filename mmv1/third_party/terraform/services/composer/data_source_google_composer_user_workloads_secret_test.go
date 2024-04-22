@@ -16,7 +16,7 @@ func TestAccDataSourceComposerUserWorkloadsSecret_basic(t *testing.T) {
 
 	context := map[string]interface{}{
 		"env_name": fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t)),
-		"secret_name": fmt.Sprintf("%s-%d", testComposerUserWorkloadsSecretPrefix, acctest.RandInt(t))
+		"secret_name": fmt.Sprintf("%s-%d", testComposerUserWorkloadsSecretPrefix, acctest.RandInt(t)),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

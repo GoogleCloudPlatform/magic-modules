@@ -38,7 +38,7 @@ func dataSourceGoogleComposerUserWorkloadsSecretRead(d *schema.ResourceData, met
 	secretName := d.Get("name").(string)
 	*/
 
-	id := err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{region}}/environments/{{environment}}/userWorkloadsSecrets/{{name}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{region}}/environments/{{environment}}/userWorkloadsSecrets/{{name}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}
