@@ -68,11 +68,8 @@ steps:
       - "membership-checker"
       - $_PR_NUMBER
       - $COMMIT_SHA
-      - $BRANCH_NAME
-      - $_HEAD_REPO_URL
-      - $_HEAD_BRANCH
-      - $_BASE_BRANCH
 
+logsBucket: 'gs://cloudbuild-membership-checker-logs'
 availableSecrets:
   secretManager:
     - versionName: projects/673497134629/secrets/github-magician-token-generate-diffs-magic-modules/versions/latest

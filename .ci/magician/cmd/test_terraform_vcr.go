@@ -15,8 +15,6 @@ import (
 )
 
 var ttvEnvironmentVariables = [...]string{
-	"GITHUB_TOKEN_DOWNSTREAMS",
-	"GITHUB_TOKEN_MAGIC_MODULES",
 	"GOCACHE",
 	"GOPATH",
 	"GOOGLE_BILLING_ACCOUNT",
@@ -53,6 +51,15 @@ var testTerraformVCRCmd = &cobra.Command{
 				os.Exit(1)
 			}
 			env[ev] = val
+		}
+
+		for _, tokenName := range []string{"GITHUB_TOKEN_DOWNSTREAMS", "GITHUB_TOKEN_MAGIC_MODULES"} {
+			val, ok := lookupGithubTokenOrFallback(tokenName)
+			if !ok {
+				fmt.Printf("Did not provide %s or GITHUB_TOKEN environment variable\n", tokenName)
+				os.Exit(1)
+			}
+			env[tokenName] = val
 		}
 
 		baseBranch := os.Getenv("BASE_BRANCH")
@@ -110,10 +117,10 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 	}
 
 	if len(services) == 0 && !runFullVCR {
-		fmt.Println("Skipping tests: No go files changed")
+		fmt.Println("Skipping tests: No go files or test fixtures changed")
 		os.Exit(0)
 	}
-	fmt.Println("Running tests: Go files changed")
+	fmt.Println("Running tests: Go files or test fixtures changed")
 
 	if err := vt.FetchCassettes(provider.Beta, baseBranch, prNumber); err != nil {
 		fmt.Println("Error fetching cassettes: ", err)
@@ -274,7 +281,7 @@ Please fix these to complete your PR. If you believe these test failures to be i
 }
 
 func modifiedPackages(newBranch, oldBranch string, rnr ExecRunner) (map[string]struct{}, bool, error) {
-	fmt.Println("Checking for modified go files")
+	fmt.Println("Checking for modified go files or test fixtures")
 
 	if _, err := rnr.Run("git", []string{"fetch", "origin", fmt.Sprintf("%s:%s", oldBranch, oldBranch), "--depth", "1"}, nil); err != nil {
 
@@ -283,9 +290,13 @@ func modifiedPackages(newBranch, oldBranch string, rnr ExecRunner) (map[string]s
 	if err != nil {
 		return nil, false, err
 	}
+	return modifiedPackagesFromDiffs(strings.Split(diffs, "\n"))
+}
+
+func modifiedPackagesFromDiffs(diffs []string) (map[string]struct{}, bool, error) {
 	var goFiles []string
-	for _, line := range strings.Split(diffs, "\n") {
-		if strings.HasSuffix(line, ".go") || line == "go.mod" || line == "go.sum" {
+	for _, line := range diffs {
+		if strings.HasSuffix(line, ".go") || strings.Contains(line, "test-fixtures") || strings.HasSuffix(line, "go.mod") || strings.HasSuffix(line, "go.sum") {
 			goFiles = append(goFiles, line)
 		}
 	}
