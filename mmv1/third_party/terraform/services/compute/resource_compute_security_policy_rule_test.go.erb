@@ -24,19 +24,19 @@ func TestAccComputeSecurityPolicyRule_basicUpdate(t *testing.T) {
 			{
 				Config: testAccComputeSecurityPolicyRule_preBasicUpdate(context),
 			},
-      {
-        ResourceName:      "google_compute_security_policy_rule.policy_rule",
-        ImportState:       true,
-        ImportStateVerify: true,
-      },
-      {
-        Config: testAccComputeSecurityPolicyRule_postBasicUpdate(context),
-      },
-      {
-        ResourceName:      "google_compute_security_policy_rule.policy_rule",
-        ImportState:       true,
-        ImportStateVerify: true,
-      },
+			{
+				ResourceName:      "google_compute_security_policy_rule.policy_rule",
+				ImportState:       true,
+      	ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeSecurityPolicyRule_postBasicUpdate(context),
+			},
+			{
+				ResourceName:      "google_compute_security_policy_rule.policy_rule",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -56,11 +56,11 @@ func TestAccComputeSecurityPolicyRule_withRuleExpr(t *testing.T) {
 			{
 				Config: testAccComputeSecurityPolicyRule_withRuleExpr(context),
 			},
-      {
-        ResourceName:      "google_compute_security_policy_rule.policy_rule",
-        ImportState:       true,
-        ImportStateVerify: true,
-      },
+			{
+				ResourceName:      "google_compute_security_policy_rule.policy_rule",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -80,28 +80,28 @@ func TestAccComputeSecurityPolicyRule_extendedUpdate(t *testing.T) {
 			{
 				Config: testAccComputeSecurityPolicyRule_extPreUpdate(context),
 			},
-      {
-        ResourceName:      "google_compute_security_policy_rule.policy_rule",
-        ImportState:       true,
-        ImportStateVerify: true,
-      },
-      {
-        Config: testAccComputeSecurityPolicyRule_extPosUpdateSamePriority(context),
-        ExpectError: regexp.MustCompile("Cannot have rules with the same priorities."),
+			{
+				ResourceName:      "google_compute_security_policy_rule.policy_rule",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
-      {
-        ResourceName:      "google_compute_security_policy_rule.policy_rule",
-        ImportState:       true,
-        ImportStateVerify: true,
-      },
-      {
-        Config: testAccComputeSecurityPolicyRule_extPosUpdate(context),
-      },
-      {
-        ResourceName:      "google_compute_security_policy_rule.policy_rule",
-        ImportState:       true,
-        ImportStateVerify: true,
-      },
+			{
+				Config: testAccComputeSecurityPolicyRule_extPosUpdateSamePriority(context),
+				ExpectError: regexp.MustCompile("Cannot have rules with the same priorities."),
+			},
+			{
+				ResourceName:      "google_compute_security_policy_rule.policy_rule",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeSecurityPolicyRule_extPosUpdate(context),
+			},
+			{
+				ResourceName:      "google_compute_security_policy_rule.policy_rule",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -121,30 +121,30 @@ func TestAccComputeSecurityPolicyRule_withPreconfiguredWafConfig(t *testing.T) {
 			{
 				Config: testAccComputeSecurityPolicyRule_withPreconfiguredWafConfig_create(context),
 			},
-      {
-        ResourceName:      "google_compute_security_policy_rule.policy_rule",
-        ImportState:       true,
-        ImportStateVerify: true,
-      },
-      {
-        Config: testAccComputeSecurityPolicyRule_withPreconfiguredWafConfig_update(context),
-      },
-      {
-        ResourceName:      "google_compute_security_policy_rule.policy_rule",
-        ImportState:       true,
-        ImportStateVerify: true,
-      },
-      {
-        Config: testAccComputeSecurityPolicyRule_withPreconfiguredWafConfig_clear(context),
-        Check: resource.ComposeTestCheckFunc(
+			{
+			  ResourceName:      "google_compute_security_policy_rule.policy_rule",
+			  ImportState:       true,
+			  ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeSecurityPolicyRule_withPreconfiguredWafConfig_update(context),
+			},
+			{
+				ResourceName:      "google_compute_security_policy_rule.policy_rule",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeSecurityPolicyRule_withPreconfiguredWafConfig_clear(context),
+				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckNoResourceAttr("google_compute_security_policy_rule.policy_rule", "preconfigured_waf_config.0"),
 				),
-      },
-      {
-        ResourceName:      "google_compute_security_policy_rule.policy_rule",
-        ImportState:       true,
-        ImportStateVerify: true,
-      },
+			},
+			{
+				ResourceName:      "google_compute_security_policy_rule.policy_rule",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
