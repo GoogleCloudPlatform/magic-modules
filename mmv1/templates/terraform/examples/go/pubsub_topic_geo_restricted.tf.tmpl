@@ -1,5 +1,5 @@
 resource "google_pubsub_topic" "{{$.PrimaryResourceId}}" {
-  name = "<%= ctx[:vars]['topic_name'] %>"
+  name = "{{index $.Vars "topic_name"}}"
 
   message_storage_policy {
     allowed_persistence_regions = [
