@@ -1331,15 +1331,14 @@ resource "google_storage_bucket_object" "schema" {
 EOF
 }
 
-resource "google_kms_key_ring" "keyring" {
+data "google_kms_key_ring" "keyring" {
   name     = "%s"
   location = "global"
 }
 
-resource "google_kms_crypto_key" "crypto_key" {
+data "google_kms_crypto_key" "crypto_key" {
   name            = "%s"
-  key_ring        = google_kms_key_ring.keyring.id
-  rotation_period = "100000s"
+  key_ring        = data.google_kms_key_ring.keyring.id
 }
 
 data "google_storage_bucket_object" "flex_template" {
@@ -1358,7 +1357,7 @@ resource "google_dataflow_flex_template_job" "flex_job_kms" {
   labels = {
    "my_labels" = "value"
   }
-  kms_key_name		= google_kms_crypto_key.crypto_key.id
+  kms_key_name		= data.google_kms_crypto_key.crypto_key.id
 
 }
 `, topicName, bucket, key_ring, crypto_key, job)
