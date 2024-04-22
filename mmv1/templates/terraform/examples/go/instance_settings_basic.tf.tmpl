@@ -1,7 +1,6 @@
 # [START instance_settings_basic]
 
 resource "google_compute_instance_settings" "{{$.PrimaryResourceId}}" {
-  provider = google-beta
   zone = "us-east7-b"
   metadata {
     items = {
