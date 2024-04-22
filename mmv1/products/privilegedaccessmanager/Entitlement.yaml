@@ -30,9 +30,9 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "privileged_access_manager_entitlement_basic"
     min_version: beta
-    primary_resource_id: "tf_entitlement"
+    primary_resource_id: "tfentitlement"
     vars:
-      entitlement_id: "example_entitlement"
+      entitlement_id: "example-entitlement"
 properties:
   - !ruby/object:Api::Type::String
     name: name
