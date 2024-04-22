@@ -14,13 +14,14 @@ package api
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-	"github.com/GoogleCloudPlatform/magic-modules/mmv1/provider/terraform"
 	"golang.org/x/exp/slices"
+	"gopkg.in/yaml.v3"
 )
 
 type Resource struct {
@@ -123,7 +124,7 @@ type Resource struct {
 	// often used to extract an object from a parent object or a collection.
 	// Note that if both nested_query and custom_code.decoder are provided,
 	// the decoder will be included within the code handling the nested query.
-	NestedQuery resource.NestedQuery `yaml:"nested_query"`
+	NestedQuery *resource.NestedQuery `yaml:"nested_query"`
 
 	// ====================
 	// IAM Configuration
@@ -175,9 +176,9 @@ type Resource struct {
 	// will allow that token to hold multiple /'s.
 	ImportFormat []string `yaml:"import_format"`
 
-	CustomCode terraform.CustomCode `yaml:"custom_code"`
+	CustomCode resource.CustomCode `yaml:"custom_code"`
 
-	Docs terraform.Docs
+	Docs resource.Docs
 
 	// This block inserts entries into the customdiff.All() block in the
 	// resource schema -- the code for these custom diff functions must
@@ -190,11 +191,23 @@ type Resource struct {
 
 	// Examples in documentation. Backed by generated tests, and have
 	// corresponding OiCS walkthroughs.
-	Examples []terraform.Examples
+	Examples []resource.Examples
 
-	// Virtual fields on the Terraform resource. Usage and differences from url_param_only
-	// are documented in provider/terraform/virtual_fields.rb
-	VirtualFields interface{} `yaml:"virtual_fields"`
+	// Virtual fields are Terraform-only fields that control Terraform's
+	// behaviour. They don't map to underlying API fields (although they
+	// may map to parameters), and will require custom code to be added to
+	// control them.
+	//
+	// Virtual fields are similar to url_param_only fields in that they create
+	// a schema entry which is not read from or submitted to the API. However
+	// virtual fields are meant to provide toggles for Terraform-specific behavior in a resource
+	// (eg: delete_contents_on_destroy) whereas url_param_only fields _should_
+	// be used for url construction.
+	//
+	// Both are resource level fields and do not make sense, and are also not
+	// supported, for nested fields. Nested fields that shouldn't be included
+	// in API payloads are better handled with custom expand/encoder logic.
+	VirtualFields []*Type `yaml:"virtual_fields"`
 
 	// If true, generates product operation handling logic.
 	AutogenAsync bool `yaml:"autogen_async"`
@@ -273,31 +286,54 @@ type Resource struct {
 	// Add a deprecation message for a resource that's been deprecated in the API.
 	DeprecationMessage string `yaml:"deprecation_message"`
 
-	Async *OpAsync
+	Async *Async
 
 	Properties []*Type
 
 	Parameters []*Type
 
 	ProductMetadata *Product
+
+	// The version name provided by the user through CI
+	TargetVersionName string
+
+	// The compiler to generate the downstream files, for example "terraformgoogleconversion-codegen".
+	Compiler string
+}
+
+func (r *Resource) UnmarshalYAML(n *yaml.Node) error {
+	r.CreateVerb = "POST"
+	r.ReadVerb = "GET"
+	r.DeleteVerb = "DELETE"
+	r.UpdateVerb = "PUT"
+
+	type resourceAlias Resource
+	aliasObj := (*resourceAlias)(r)
+
+	err := n.Decode(&aliasObj)
+	if err != nil {
+		return err
+	}
+
+	r.ApiName = r.Name
+	r.CollectionUrlKey = google.Camelize(google.Plural(r.Name), "lower")
+
+	return nil
 }
 
 // TODO: rewrite functions
 func (r *Resource) Validate() {
 	// TODO Q1 Rewrite super
 	// super
-
-	r.setResourceMetada(r.Parameters)
-	r.setResourceMetada(r.Properties)
 }
 
-func (r *Resource) setResourceMetada(properties []*Type) {
-	if properties == nil {
-		return
+func (r *Resource) SetDefault(product *Product) {
+	r.ProductMetadata = product
+	for _, property := range r.AllProperties() {
+		property.SetDefault(r)
 	}
-
-	for _, property := range properties {
-		property.ResourceMetadata = r
+	if r.IdFormat == "" {
+		r.IdFormat = r.SelfLinkUri()
 	}
 }
 
@@ -350,11 +386,11 @@ func (r Resource) RequiredProperties() []*Type {
 }
 
 // def all_nested_properties(props)
-func allNestedProperties(props []*Type) []*Type {
+func (r Resource) AllNestedProperties(props []*Type) []*Type {
 	nested := props
 	for _, prop := range props {
 		if nestedProperties := prop.NestedProperties(); !prop.FlattenObject && nestedProperties != nil {
-			nested = google.Concat(nested, allNestedProperties(nestedProperties))
+			nested = google.Concat(nested, r.AllNestedProperties(nestedProperties))
 		}
 	}
 
@@ -363,10 +399,20 @@ func allNestedProperties(props []*Type) []*Type {
 
 // sensitive_props
 func (r Resource) SensitiveProps() []*Type {
-	props := allNestedProperties(r.RootProperties())
+	props := r.AllNestedProperties(r.RootProperties())
 	return google.Select(props, func(p *Type) bool {
 		return p.Sensitive
 	})
+}
+
+func (r Resource) SensitivePropsToString() string {
+	var props []string
+
+	for _, prop := range r.SensitiveProps() {
+		props = append(props, fmt.Sprintf("`%s`", prop.Lineage()))
+	}
+
+	return strings.Join(props, ", ")
 }
 
 // All settable properties in the resource.
@@ -375,7 +421,7 @@ func (r Resource) SensitiveProps() []*Type {
 // they will need to be set in every Update.
 
 // def settable_properties
-func (r Resource) settableProperties() []*Type {
+func (r Resource) SettableProperties() []*Type {
 	props := make([]*Type, 0)
 
 	props = google.Reject(r.AllUserProperties(), func(v *Type) bool {
@@ -423,7 +469,7 @@ func (r Resource) RootProperties() []*Type {
 // if one exists.
 
 // def async
-func (r Resource) GetAsync() *OpAsync {
+func (r Resource) GetAsync() *Async {
 	if r.Async != nil {
 		return r.Async
 	}
@@ -718,7 +764,7 @@ func propertiesWithoutCustomUpdate(properties []*Type) []*Type {
 
 // def update_body_properties
 func (r Resource) UpdateBodyProperties() []*Type {
-	updateProp := propertiesWithoutCustomUpdate(r.settableProperties())
+	updateProp := propertiesWithoutCustomUpdate(r.SettableProperties())
 	if r.UpdateVerb == "PATCH" {
 		updateProp = google.Reject(updateProp, func(p *Type) bool {
 			return p.Immutable
@@ -738,6 +784,15 @@ func (r Resource) ClientNamePascal() string {
 	}
 
 	return google.Camelize(clientName, "upper")
+}
+
+func (r Resource) PackageName() string {
+	clientName := r.ProductMetadata.ClientName
+	if clientName == "" {
+		clientName = r.ProductMetadata.Name
+	}
+
+	return strings.ToLower(clientName)
 }
 
 // In order of preference, use TF override,
@@ -774,6 +829,17 @@ func (r Resource) HasZone() bool {
 	return strings.Contains(r.BaseUrl, "{{zone}}") || strings.Contains(r.CreateUrl, "{{zone}}")
 }
 
+// resource functions needed for template that previously existed in terraform.go but due to how files are being inherited here it was easier to put in here
+// taken wholesale from tpgtools
+func (r Resource) Updatable() bool {
+	for _, p := range r.AllProperties() {
+		if !p.Immutable && !(p.Required && p.DefaultFromApi) {
+			return true
+		}
+	}
+	return false
+}
+
 // ====================
 // Debugging Methods
 // ====================
@@ -792,4 +858,119 @@ func (r Resource) TerraformName() string {
 		return r.LegacyName
 	}
 	return fmt.Sprintf("google_%s_%s", r.ProductMetadata.TerraformName(), google.Underscore(r.Name))
+}
+
+func (r Resource) ImportIdFormatsFromResource() []string {
+	return ImportIdFormats(r.ImportFormat, r.Identity, r.BaseUrl)
+}
+
+// Returns a list of import id formats for a given resource. If an id
+// contains provider-default values, this fn will return formats both
+// including and omitting the value.
+//
+// If a resource has an explicit import_format value set, that will be the
+// base import url used. Next, the values of `identity` will be used to
+// construct a URL. Finally, `{{name}}` will be used by default.
+//
+// For instance, if the resource base url is:
+//
+//	projects/{{project}}/global/networks
+//
+// It returns 3 formats:
+// a) self_link: projects/{{project}}/global/networks/{{name}}
+// b) short id: {{project}}/{{name}}
+// c) short id w/o defaults: {{name}}
+func ImportIdFormats(importFormat, identity []string, baseUrl string) []string {
+	var idFormats []string
+	if len(importFormat) == 0 {
+		underscoredBaseUrl := baseUrl
+		// TODO Q2: underscore base url needed?
+		// underscored_base_url = base_url.gsub(
+		//     /{{[[:word:]]+}}/, &:underscore
+		//   )
+		if len(identity) == 0 {
+			idFormats = []string{fmt.Sprintf("%s/{{name}}", underscoredBaseUrl)}
+		} else {
+			var transformedIdentity []string
+			for _, id := range identity {
+				transformedIdentity = append(transformedIdentity, fmt.Sprintf("{{%s}}", id))
+			}
+			identityPath := strings.Join(transformedIdentity, "/")
+			idFormats = []string{fmt.Sprintf("%s/{{name}}", identityPath)}
+		}
+	} else {
+		idFormats = importFormat
+	}
+
+	// short id: {{project}}/{{zone}}/{{name}}
+	fieldMarkers := regexp.MustCompile(`{{[[:word:]]+}}`).FindAllString(idFormats[0], -1)
+	shortIdFormat := strings.Join(fieldMarkers, "/")
+
+	// short ids without fields with provider-level defaults:
+
+	// without project
+	fieldMarkers = slices.DeleteFunc(fieldMarkers, func(s string) bool { return s == "{{project}}" })
+	shortIdDefaultProjectFormat := strings.Join(fieldMarkers, "/")
+
+	// without project or location
+	fieldMarkers = slices.DeleteFunc(fieldMarkers, func(s string) bool { return s == "{{region}}" })
+	fieldMarkers = slices.DeleteFunc(fieldMarkers, func(s string) bool { return s == "{{zone}}" })
+	shortIdDefaultFormat := strings.Join(fieldMarkers, "/")
+
+	// If the id format can include `/` characters we cannot allow short forms such as:
+	// `{{project}}/{{%name}}` as there is no way to differentiate between
+	// project-name/resource-name and resource-name/with-slash
+	if !strings.Contains(idFormats[0], "%") {
+		idFormats = append(idFormats, shortIdFormat, shortIdDefaultProjectFormat, shortIdDefaultFormat)
+	}
+
+	// TODO Q2:  id_formats.uniq.reject(&:empty?).sort_by { |i| [i.count('/'), i.count('{{')] }.reverse
+	return idFormats
+}
+
+func (r Resource) IgnoreReadPropertiesToString(e resource.Examples) string {
+	var props []string
+	for _, tp := range r.AllUserProperties() {
+		if tp.UrlParamOnly || tp.IgnoreRead || tp.IsA("ResourceRef") {
+			props = append(props, fmt.Sprintf("\"%s\"", google.Underscore(tp.Name)))
+		}
+	}
+	for _, tp := range e.IgnoreReadExtra {
+		props = append(props, fmt.Sprintf("\"%s\"", google.Underscore(tp)))
+	}
+	for _, tp := range r.IgnoreReadLabelsFields(r.PropertiesWithExcluded()) {
+		props = append(props, fmt.Sprintf("\"%s\"", google.Underscore(tp)))
+	}
+
+	return fmt.Sprintf("[]string{%s}", strings.Join(props, ", "))
+}
+
+func (r *Resource) SetCompiler(t string) {
+	r.Compiler = fmt.Sprintf("%s-codegen", strings.ToLower(t))
+}
+
+// Returns the id format of an object, or self_link_uri if none is explicitly defined
+// We prefer the long name of a resource as the id so that users can reference
+// resources in a standard way, and most APIs accept short name, long name or self_link
+// def id_format(object)
+func (r Resource) GetIdFormat() string {
+	idFormat := r.IdFormat
+	if idFormat == "" {
+		idFormat = r.SelfLinkUri()
+	}
+	return idFormat
+}
+
+// ====================
+// Template Methods
+// ====================
+
+// Prints a dot notation path to where the field is nested within the parent
+// object when called on a property. eg: parent.meta.label.foo
+// Redefined on Resource to terminate the calls up the parent chain.
+
+// checks a resource for if it has properties that have FlattenObject=true on fields where IgnoreRead=false
+// used to decide whether or not to import "google.golang.org/api/googleapi"
+func (r Resource) FlattenedProperties() []*Type {
+	return google.Select(google.Reject(r.GettableProperties(), func(p *Type) bool { return p.IgnoreRead }), func(p *Type) bool { return p.FlattenObject })
 }
