@@ -489,8 +489,8 @@ properties:
       properties:
         - !ruby/object:Api::Type::NestedObject
           name: 'parameters' #ExplanationParameters
-          immutable: true
-          description: A resource name of an Endpoint.
+          required: true
+          description: Parameters that configure explaining of the Model's predictions.
           item_type: !ruby/object:Api::Type::NestedObject
             properties:
               - !ruby/object:Api::Type::Integer
@@ -768,7 +768,93 @@ properties:
                       immutable: true
         - !ruby/object:Api::Type::NestedObject
           name: 'metadata' #ExplanationMetadata
-          immutable: true
-          description:  An ID of a DeployedModel in the above Endpoint.
+          description: metadata describing the Model's input and output for explanation.
           item_type: !ruby/object:Api::Type::NestedObject
             properties:
+              - !ruby/object:Api::Type::Map
+                name: 'inputs'
+                key_name: 'name'
+                description: The resource name of the Artifact that was created in MetadataStore when creating the Model.
+                required: true
+                value_type: !ruby/object:Api::Type::NestedObject
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'sha1Sum'
+                      description: |
+                        SHA1 checksum of the file
+                    - !ruby/object:Api::Type::String
+                      name: 'inputTensorName'
+                      description: |
+                        name of the input tensor for this feature. Required and is only applicable to Vertex AI-provided images for Tensorflow.
+                    - !ruby/object:Api::Type::Enum
+                      name: 'encoding'
+                      description: |
+                        Source URL
+                    - !ruby/object:Api::Type::String
+                      name: 'sourceUrl'
+                      required: true
+                      description: |
+                        Source URL
+                    - !ruby/object:Api::Type::String
+                      name: 'sourceUrl'
+                      required: true
+                      description: |
+                        Source URL
+                    - !ruby/object:Api::Type::String
+                      name: 'sourceUrl'
+                      required: true
+                      description: |
+                        Source URL
+                    - !ruby/object:Api::Type::String
+                      name: 'sourceUrl'
+                      required: true
+                      description: |
+                        Source URL
+                    - !ruby/object:Api::Type::String
+                      name: 'sourceUrl'
+                      required: true
+                      description: |
+                        Source URL
+                    - !ruby/object:Api::Type::String
+                      name: 'sourceUrl'
+                      required: true
+                      description: |
+                        Source URL
+                    - !ruby/object:Api::Type::String
+                      name: 'sourceUrl'
+                      required: true
+                      description: |
+                        Source URL
+                    - !ruby/object:Api::Type::String
+                      name: 'sourceUrl'
+                      required: true
+                      description: |
+                        Source URL
+                    - !ruby/object:Api::Type::String
+                      name: 'sourceUrl'
+                      required: true
+                      description: |
+                        Source URL
+              - !ruby/object:Api::Type::Map
+                name: 'metadataArtifact'
+                key_name: 'name'
+                description: The resource name of the Artifact that was created in MetadataStore when creating the Model.
+                required: true
+                value_type: !ruby/object:Api::Type::NestedObject
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'sha1Sum'
+                      description: |
+                        SHA1 checksum of the file
+                    - !ruby/object:Api::Type::String
+                      name: 'sourceUrl'
+                      required: true
+                      description: |
+                        Source URL
+              - !ruby/object:Api::Type::String
+                name: 'featureAttributionsSchemaUri'
+                description: Points to a YAML file stored on Google Cloud Storage describing the format of the feature attributions. 
+                output: true
+              - !ruby/object:Api::Type::String
+                name: 'latentSpaceSource'
+                description: name of the source to generate embeddings for example based explanations.
