@@ -3,12 +3,12 @@ resource "google_privileged_access_manager_entitlement" "<%= ctx[:primary_resour
     entitlement_id = "<%= ctx[:vars]['entitlement_id'] %>"
     location = "global"
     max_request_duration = "43200s"
-    parent = "projects/ci-test-project-188019"
+    parent = "projects/<%= ctx[:test_env_vars]['project'] %>"
     requester_justification_config {    
         unstructured{}
     }
     eligible_users {
-        principals = ["serviceAccount:test2102@itsvarsharma-pam-testing.iam.gserviceaccount.com"]
+        principals = ["user:gkmr@google.com"]
     }
     privileged_access{
         gcp_iam_access{
@@ -16,7 +16,7 @@ resource "google_privileged_access_manager_entitlement" "<%= ctx[:primary_resour
                 role = "roles/storage.admin"
                 condition_expression = ""
             }
-            resource = "//cloudresourcemanager.googleapis.com/projects/ci-test-project-188019"
+            resource = "//cloudresourcemanager.googleapis.com/projects//<%= ctx[:test_env_vars]['project'] %>"
             resource_type = "cloudresourcemanager.googleapis.com/Project"
         }
     }

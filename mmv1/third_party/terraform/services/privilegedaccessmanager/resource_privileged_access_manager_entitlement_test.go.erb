@@ -55,33 +55,33 @@ resource "google_privileged_access_manager_entitlement" "tfentitlement" {
     max_request_duration = "43200s"
     parent = "projects/%{project_name}"
     requester_justification_config { 
-        unstructured{}
+      unstructured{}
     }
     eligible_users {
-        principals = ["serviceAccount:test2102@itsvarsharma-pam-testing.iam.gserviceaccount.com"]
+      principals = ["user:gkmr@google.com"]
     }
     privileged_access{
-        gcp_iam_access{
-            role_bindings{
-                role = "roles/storage.admin"
-                condition_expression = ""
-            }
-            resource = "//cloudresourcemanager.googleapis.com/projects/%{project_name}"
-            resource_type = "cloudresourcemanager.googleapis.com/Project"
+      gcp_iam_access{
+        role_bindings{
+          role = "roles/storage.admin"
+          condition_expression = ""
         }
+        resource = "//cloudresourcemanager.googleapis.com/projects/%{project_name}"
+        resource_type = "cloudresourcemanager.googleapis.com/Project"
+      }
     }
     additional_notification_targets {
-    admin_email_recipients     = ["user@example.com"]
-    requester_email_recipients = ["user@example.com"]
+      admin_email_recipients     = ["user@example.com"]
+      requester_email_recipients = ["user@example.com"]
     }
     approval_workflow {
     manual_approvals {
       require_approver_justification = true
       steps {
         approvals_needed          = 1
-        approver_email_recipients = []
-        approvers {
-          principals = ["user:itsvarsharma@google.com"]
+          approver_email_recipients = ["user@example.com"]
+          approvers {
+            principals = ["user:itsvarsharma@google.com"]
         }
       }
     }
@@ -96,36 +96,36 @@ resource "google_privileged_access_manager_entitlement" "tfentitlement" {
     provider =  google-beta
     entitlement_id = "tf-test-example-entitlement%{random_suffix}"
     location = "global"
-    max_request_duration = "43200s"
+    max_request_duration = "4300s"
     parent = "projects/%{project_name}"
     requester_justification_config {    
-        unstructured{}
+      not_mandatory{}
     }
     eligible_users {
-        principals = ["serviceAccount:test2102@itsvarsharma-pam-testing.iam.gserviceaccount.com"]
+      principals = ["user:itsvarsharma@google.com]
     }
     privileged_access{
-        gcp_iam_access{
-            role_bindings{
-                role = "roles/storage.admin"
-                condition_expression = ""
-            }
-            resource = "//cloudresourcemanager.googleapis.com/projects/%{project_name}"
-            resource_type = "cloudresourcemanager.googleapis.com/Project"
+      gcp_iam_access{
+        role_bindings{
+          role = "roles/storage.admin"
+          condition_expression = ""
         }
+        resource = "//cloudresourcemanager.googleapis.com/projects/%{project_name}"
+        resource_type = "cloudresourcemanager.googleapis.com/Project"
+      }
     }
     additional_notification_targets {
-    admin_email_recipients     = ["user@example.com"]
-    requester_email_recipients = ["user@example.com"]
+      admin_email_recipients     = ["user1@example.com"]
+      requester_email_recipients = ["user2@example.com"]
     }
     approval_workflow {
     manual_approvals {
-      require_approver_justification = true
+      require_approver_justification = false
       steps {
         approvals_needed          = 1
-        approver_email_recipients = ["user@example.com"]
-        approvers {
-          principals = ["user:itsvarsharma@google.com"]
+          approver_email_recipients = ["user3@example.com"]
+          approvers {
+            principals = ["user:gkmr@google.com"]
         }
       }
     }

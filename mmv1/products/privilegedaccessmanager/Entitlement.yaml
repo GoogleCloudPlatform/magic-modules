@@ -32,6 +32,8 @@ examples:
     primary_resource_id: "tfentitlement"
     vars:
       entitlement_id: "example-entitlement"
+    test_env_vars:
+      project: :PROJECT_NAME
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -110,7 +112,6 @@ properties:
                         name: principals
                         required: true
                         min_size: 1
-                        max_size: 20
                         is_set: true
                         item_type: Api::Type::String
                         item_validation: !ruby/object:Provider::Terraform::Validation
@@ -128,6 +129,7 @@ properties:
                 - !ruby/object:Api::Type::Array
                   name: approverEmailRecipients
                   item_type: Api::Type::String
+                  is_set: true
                   description: |
                     Optional. Additional email addresses to be notified when a grant is pending approval.
   - !ruby/object:Api::Type::NestedObject
@@ -220,6 +222,7 @@ properties:
     properties:
       - !ruby/object:Api::Type::Array
         name: adminEmailRecipients
+        is_set: true
         description: |
           Optional. Additional email addresses to be notified when a principal(requester) is granted access.
         item_type: Api::Type::String
@@ -227,6 +230,7 @@ properties:
       - !ruby/object:Api::Type::Array
         name: requesterEmailRecipients
         item_type: Api::Type::String
+        is_set: true
         description: |
           Optional. Additional email address to be notified about an eligible entitlement.
         allow_empty_object: true
