@@ -8,7 +8,7 @@ resource "google_clouddeploy_custom_target_type" "<%= ctx[:primary_resource_id] 
       include_skaffold_modules {
         configs = ["my-config"]
         gcbRepo {
-            repo = "projects/777/locations/us-central1/connections/git/repositories/repo1"
+            repository = "projects/777/locations/us-central1/connections/git/repositories/repo"
             path = "configs/skaffold.yaml"
             ref = "main"
         }
