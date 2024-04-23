@@ -83,7 +83,7 @@ resource "google_compute_region_backend_service" "default" {
   protocol    = "HTTP"
   timeout_sec = 10
 
-  load_balancing_scheme = "EXTERNAL"
+  load_balancing_scheme = "INTERNAL_MANAGED"
 
   health_checks = [google_compute_region_health_check.default.id]
 }
