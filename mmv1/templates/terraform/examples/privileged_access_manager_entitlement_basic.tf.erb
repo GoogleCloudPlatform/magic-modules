@@ -16,7 +16,7 @@ resource "google_privileged_access_manager_entitlement" "<%= ctx[:primary_resour
                 role = "roles/storage.admin"
                 condition_expression = ""
             }
-            resource = "//cloudresourcemanager.googleapis.com/projects//<%= ctx[:test_env_vars]['project'] %>"
+            resource = "//cloudresourcemanager.googleapis.com/projects/<%= ctx[:test_env_vars]['project'] %>"
             resource_type = "cloudresourcemanager.googleapis.com/Project"
         }
     }
