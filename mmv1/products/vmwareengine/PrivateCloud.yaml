@@ -199,6 +199,20 @@ properties:
                 This number must always be one of `nodeType.availableCustomCoreCounts`.
                 If zero is provided max value from `nodeType.availableCustomCoreCounts` will be used.
                 This cannot be changed once the PrivateCloud is created.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'stretchedClusterConfig'
+        description: |
+          The stretched cluster configuration for the private cloud.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'preferredLocation'
+            description: |
+              Zone that will remain operational when connection between the two zones is lost.
+          - !ruby/object:Api::Type::String
+            name: 'secondaryLocation'
+            description: |
+              Additional zone for a higher level of availability and load balancing.
+
 
   - !ruby/object:Api::Type::NestedObject
     name: 'hcx'
@@ -298,13 +312,3 @@ properties:
       - :STANDARD
       - :TIME_LIMITED
       - :STRETCHED
-
-  - !ruby/object:Api::Type::String
-    name: 'preferredZone'
-    description: |
-      The preferred single failure domain within a region.
-
-  - !ruby/object:Api::Type::String
-    name: 'secondaryZone'
-    description: |
-      The secondary single failure domain within a region.
