@@ -634,11 +634,133 @@ properties:
                               name: 'uris'
                               required: true
                               description: 'Google Cloud Storage URI(-s) to the input file(s). May contain wildcards.'
-                    - !ruby/object:Api::Type::Integer
-                      name: 'neighborCount'
+                              item_type: Api::Type::String
+                    - !ruby/object:Api::Type::NestedObject
+                      name: 'nearestNeighborSearchConfig'
                       description: The number of neighbors to return when querying for examples.
-                      default_value: 1
-                      immutable: true
+                      exactly_one_of:
+                        - presets
+                        - nearestNeighborSearchConfig
+                      properties:
+                        - !ruby/object:Api::Type::String
+                          name: 'contentsDeltaUri'
+                          required: true
+                          description: |-
+                            Allows inserting, updating  or deleting the contents of the Matching Engine Index.
+                            The string must be a valid Cloud Storage directory path. If this
+                            field is set when calling IndexService.UpdateIndex, then no other
+                            Index field can be also updated as part of the same call.
+                            The expected structure and format of the files this URI points to is
+                            described at https://cloud.google.com/vertex-ai/docs/matching-engine/using-matching-engine#input-data-format
+                          custom_flatten: templates/terraform/custom_flatten/vertex_ai_index_ignore_contents_delta_uri.go.erb
+                        - !ruby/object:Api::Type::Boolean
+                          name: 'isCompleteOverwrite'
+                          description: |-
+                            If this field is set together with contentsDeltaUri when calling IndexService.UpdateIndex,
+                            then existing content of the Index will be replaced by the data from the contentsDeltaUri.
+                          default_value: false
+                          custom_flatten: templates/terraform/custom_flatten/vertex_ai_index_ignore_is_complete_overwrite.go.erb
+                        - !ruby/object:Api::Type::NestedObject
+                          name: 'config'
+                          immutable: true
+                          description: The configuration of the Matching Engine Index.
+                          properties:
+                            - !ruby/object:Api::Type::Integer
+                              name: 'dimensions'
+                              description: The number of dimensions of the input vectors.
+                              required: true
+                            - !ruby/object:Api::Type::Integer
+                              name: 'approximateNeighborsCount'
+                              description: |-
+                                The default number of neighbors to find via approximate search before exact reordering is
+                                performed. Exact reordering is a procedure where results returned by an
+                                approximate search algorithm are reordered via a more expensive distance computation.
+                                Required if tree-AH algorithm is used.
+                            - !ruby/object:Api::Type::String
+                              name: 'shardSize'
+                              description: |-
+                                Index data is split into equal parts to be processed. These are called "shards".
+                                The shard size must be specified when creating an index. The value must be one of the followings:
+                                * SHARD_SIZE_SMALL: Small (2GB)
+                                * SHARD_SIZE_MEDIUM: Medium (20GB)
+                                * SHARD_SIZE_LARGE: Large (50GB)
+                              immutable: true
+                              default_from_api: true
+                            - !ruby/object:Api::Type::String
+                              name: 'distanceMeasureType'
+                              description: |-
+                                The distance measure used in nearest neighbor search. The value must be one of the followings:
+                                * SQUARED_L2_DISTANCE: Euclidean (L_2) Distance
+                                * L1_DISTANCE: Manhattan (L_1) Distance
+                                * COSINE_DISTANCE: Cosine Distance. Defined as 1 - cosine similarity.
+                                * DOT_PRODUCT_DISTANCE: Dot Product Distance. Defined as a negative of the dot product
+                              default_value: 'DOT_PRODUCT_DISTANCE'
+                            - !ruby/object:Api::Type::String
+                              name: 'featureNormType'
+                              description: |-
+                                Type of normalization to be carried out on each vector. The value must be one of the followings:
+                                * UNIT_L2_NORM: Unit L2 normalization type
+                                * NONE: No normalization type is specified.
+                              default_value: 'NONE'
+                              ignore_read: true
+                            - !ruby/object:Api::Type::NestedObject
+                              name: 'algorithmConfig'
+                              description:
+                                The configuration with regard to the algorithms used for efficient
+                                search.
+                              properties:
+                                - !ruby/object:Api::Type::NestedObject
+                                  name: 'treeAhConfig'
+                                  exactly_one_of:
+                                    - treeAhConfig
+                                    - bruteForceConfig
+                                  description: |-
+                                    Configuration options for using the tree-AH algorithm (Shallow tree + Asymmetric Hashing).
+                                    Please refer to this paper for more details: https://arxiv.org/abs/1908.10396
+                                  properties:
+                                    - !ruby/object:Api::Type::Integer
+                                      name: 'leafNodeEmbeddingCount'
+                                      description:
+                                        Number of embeddings on each leaf node. The default value
+                                        is 1000 if not set.
+                                      default_value: 1000
+                                    - !ruby/object:Api::Type::Integer
+                                      name: 'leafNodesToSearchPercent'
+                                      description: |-
+                                        The default percentage of leaf nodes that any query may be searched. Must be in
+                                        range 1-100, inclusive. The default value is 10 (means 10%) if not set.
+                                      default_value: 10
+                                - !ruby/object:Api::Type::NestedObject
+                                  name: 'bruteForceConfig'
+                                  allow_empty_object: true
+                                  send_empty_value: true
+                                  properties: []
+                                  exactly_one_of:
+                                    - treeAhConfig
+                                    - bruteForceConfig
+                                  description: |-
+                                    Configuration options for using brute force search, which simply implements the
+                                    standard linear search in the database for each query.
+                    - !ruby/object:Api::Type::NestedObject
+                      name: 'presets'
+                      exactly_one_of:
+                        - presets
+                        - nearestNeighborSearchConfig
+                      description: Simplified preset configuration, which automatically sets configuration values based on the desired query speed-precision trade-off and modality.
+                      properties:
+                        - !ruby/object:Api::Type::Enum
+                          name: 'modality'
+                          description: The modality of the uploaded model, which automatically configures the distance measurement and feature normalization for the underlying example index and queries
+                          values:
+                            - :IMAGE
+                            - :TEXT
+                            - :TABULAR
+                        - !ruby/object:Api::Type::Enum
+                          name: 'query'
+                          description: Preset option controlling parameters for speed-precision trade-off when querying for examples. If omitted, defaults to PRECISE.
+                          values:
+                            - :PRECISE
+                            - :FAST
                     - !ruby/object:Api::Type::Integer
                       name: 'neighborCount'
                       description: The number of neighbors to return when querying for examples.
