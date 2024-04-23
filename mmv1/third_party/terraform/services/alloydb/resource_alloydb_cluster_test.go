@@ -1224,6 +1224,7 @@ resource "google_compute_network" "default" {
 // Ensures cluster creation throws expected errors for incorrect configurations of maintenance update policy.
 func TestAccAlloydbCluster_withMaintenanceWindowsMissingFields(t *testing.T) {
 	t.Parallel()
+	acctest.SkipIfVcr(t)
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
