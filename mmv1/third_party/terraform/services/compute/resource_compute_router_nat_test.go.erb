@@ -484,6 +484,9 @@ func TestAccComputeRouterNat_AutoNetworkTier(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:            testAccComputeRouterNatWitAutoNetworkTier(routerName, hubName),
+			},
+			{
+				 // implicitly full ImportStateId
 				ResourceName:      "google_compute_router_nat.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
