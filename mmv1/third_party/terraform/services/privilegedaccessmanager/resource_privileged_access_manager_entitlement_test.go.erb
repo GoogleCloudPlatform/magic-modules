@@ -71,8 +71,8 @@ resource "google_privileged_access_manager_entitlement" "tfentitlement" {
         }
     }
     additional_notification_targets {
-    admin_email_recipients     = []
-    requester_email_recipients = []
+    admin_email_recipients     = ["user@example.com"]
+    requester_email_recipients = ["user@example.com"]
     }
     approval_workflow {
     manual_approvals {
@@ -115,15 +115,15 @@ resource "google_privileged_access_manager_entitlement" "tfentitlement" {
         }
     }
     additional_notification_targets {
-    admin_email_recipients     = []
-    requester_email_recipients = []
+    admin_email_recipients     = ["user@example.com"]
+    requester_email_recipients = ["user@example.com"]
     }
     approval_workflow {
     manual_approvals {
       require_approver_justification = true
       steps {
         approvals_needed          = 1
-        approver_email_recipients = []
+        approver_email_recipients = ["user@example.com"]
         approvers {
           principals = ["user:itsvarsharma@google.com"]
         }
