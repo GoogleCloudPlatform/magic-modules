@@ -37,7 +37,7 @@ resource "google_composer_environment" "test" {
 	name   = "%{env_name}"
 	config {
 		software_config {
-			image_version = "composer-1-airflow-2"
+			image_version = "composer-3-airflow-2"
 		}
 	}
 }
@@ -50,8 +50,8 @@ resource "google_composer_user_workloads_secret" "test" {
   }
 }
 data "google_composer_user_workloads_secret" "test" {
-	name   = google_composer_user_workloads_secret.test.name
-	region = google_composer_environment.test.region
+	name        = google_composer_user_workloads_secret.test.name
+	environment = google_composer_environment.test.name
 }
 `, context)
 }
