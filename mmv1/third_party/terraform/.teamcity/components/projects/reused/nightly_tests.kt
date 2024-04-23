@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MPL-2.0
  */
 
-// This file is controlled by MMv1, any changes made here will be overwritten
+// This file is maintained in the GoogleCloudPlatform/magic-modules repository and copied into the downstream provider repositories. Any changes to this file in the downstream will be overwritten.
 
 package projects.reused
 
@@ -14,8 +14,8 @@ import ServiceSweeperName
 import SharedResourceNameBeta
 import SharedResourceNameGa
 import builds.*
-import generated.PackagesList
-import generated.SweepersList
+import generated.SweepersListBeta
+import generated.SweepersListGa
 import jetbrains.buildServer.configs.kotlin.Project
 import jetbrains.buildServer.configs.kotlin.vcs.GitVcsRoot
 import replaceCharsId
@@ -44,8 +44,14 @@ fun nightlyTests(parentProject:String, providerName: String, vcsRoot: GitVcsRoot
     }
 
     // Create build config for sweeping the nightly test project
-    val serviceSweeperConfig = BuildConfigurationForServiceSweeper(providerName, ServiceSweeperName, SweepersList, projectId, vcsRoot, sharedResources, config)
-    val sweeperTrigger  = NightlyTriggerConfiguration(startHour=12)  // Override hour
+    var sweepersList: Map<String,Map<String,String>>
+    when(providerName) {
+        ProviderNameGa -> sweepersList = SweepersListGa
+        ProviderNameBeta -> sweepersList = SweepersListBeta
+        else -> throw Exception("Provider name not supplied when generating a nightly test subproject")
+    }
+    val serviceSweeperConfig = BuildConfigurationForServiceSweeper(providerName, ServiceSweeperName, sweepersList, projectId, vcsRoot, sharedResources, config)
+    val sweeperTrigger  = NightlyTriggerConfiguration(startHour=11)  // Override hour
     serviceSweeperConfig.addTrigger(sweeperTrigger)
 
     return Project {

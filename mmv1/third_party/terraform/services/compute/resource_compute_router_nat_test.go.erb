@@ -410,6 +410,88 @@ func TestAccComputeRouterNat_withNatRules(t *testing.T) {
 	})
 }
 
+func TestAccComputeRouterNat_withEndpointTypes(t *testing.T) {
+	t.Parallel()
+
+	testId := acctest.RandString(t, 10)
+	routerName := fmt.Sprintf("tf-test-router-nat-%s", testId)
+	testResourceName := "google_compute_router_nat.foobar"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRouterNatDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRouterNatBasic(routerName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(testResourceName, "endpoint_types.0", "ENDPOINT_TYPE_VM"),
+				),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRouterNatUpdateEndpointType(routerName, "ENDPOINT_TYPE_SWG"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(testResourceName, "endpoint_types.0", "ENDPOINT_TYPE_SWG"),
+				),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRouterNatUpdateEndpointType(routerName, "ENDPOINT_TYPE_VM"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(testResourceName, "endpoint_types.0", "ENDPOINT_TYPE_VM"),
+				),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRouterNatUpdateEndpointType(routerName, "ENDPOINT_TYPE_MANAGED_PROXY_LB"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(testResourceName, "endpoint_types.0", "ENDPOINT_TYPE_MANAGED_PROXY_LB"),
+				),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccComputeRouterNat_AutoNetworkTier(t *testing.T) {
+	t.Parallel()
+
+	testId := acctest.RandString(t, 10)
+	routerName := fmt.Sprintf("tf-test-router-private-nat-%s", testId)
+	hubName := fmt.Sprintf("%s-hub", routerName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRouterNatDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config:            testAccComputeRouterNatWitAutoNetworkTier(routerName, hubName),
+				ResourceName:      "google_compute_router_nat.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 <% unless version == 'ga' -%>
 func TestAccComputeRouterNat_withPrivateNat(t *testing.T) {
 	t.Parallel()
@@ -569,28 +651,6 @@ func TestAccComputeRouterNat_withPrivateNatAndEmptyAction(t *testing.T) {
 			{
 				Config:      testAccComputeRouterNatRulesBasic_privateNatWithRuleAndEmptyAction(routerName, hubName, 100, ruleDescription, match),
 				ExpectError: regexp.MustCompile("The rule for PRIVATE nat type must contain an action with source_nat_active_ranges set"),
-			},
-		},
-	})
-}
-
-func TestAccComputeRouterNat_AutoNetworkTier(t *testing.T) {
-	t.Parallel()
-
-	testId := acctest.RandString(t, 10)
-	routerName := fmt.Sprintf("tf-test-router-private-nat-%s", testId)
-	hubName := fmt.Sprintf("%s-hub", routerName)
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckComputeRouterNatDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config:            testAccComputeRouterNatWitAutoNetworkTier(routerName, hubName),
-				ResourceName:      "google_compute_router_nat.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
 			},
 		},
 	})
@@ -837,6 +897,40 @@ resource "google_compute_router_nat" "foobar" {
   }
 }
 `, routerName, routerName, routerName, routerName, routerName)
+}
+
+func testAccComputeRouterNatUpdateEndpointType(routerName string, endpointType string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "foobar" {
+  name = "%[1]s-net"
+}
+
+resource "google_compute_subnetwork" "foobar" {
+  name          = "%[1]s-subnet"
+  network       = google_compute_network.foobar.self_link
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "us-central1"
+}
+
+resource "google_compute_router" "foobar" {
+  name    = "%[1]s"
+  region  = google_compute_subnetwork.foobar.region
+  network = google_compute_network.foobar.self_link
+}
+
+resource "google_compute_router_nat" "foobar" {
+  name                               = "%[1]s"
+  router                             = google_compute_router.foobar.name
+  region                             = google_compute_router.foobar.region
+  nat_ip_allocate_option             = "AUTO_ONLY"
+  source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
+  endpoint_types                     = [ "%[2]s" ]
+  log_config {
+    enable = true
+    filter = "ERRORS_ONLY"
+  }
+}
+`, routerName, endpointType)
 }
 
 func testAccComputeRouterNatUpdateToNatIPsId(routerName string) string {
@@ -1701,6 +1795,9 @@ resource "google_compute_router" "foobar" {
   name     = "%s"
   region   = google_compute_subnetwork.subnet1.region
   network  = google_compute_network.foobar.self_link
+  depends_on = [
+    google_network_connectivity_spoke.primary
+  ]
 }
 `, routerName, routerName, routerName, routerName, routerName, hubName, routerName, routerName)
 }
@@ -1815,6 +1912,8 @@ resource "google_compute_router_nat" "foobar" {
 `, testAccComputeRouterNatBaseResourcesWithPrivateNatSubnetworks(routerName, hubName), routerName, ruleNumber, ruleDescription, match)
 }
 
+<% end -%>
+
 func testAccComputeRouterNatWitAutoNetworkTier(routerName, hubName string) string {
 	return fmt.Sprintf(`
 %s
@@ -1830,6 +1929,3 @@ resource "google_compute_router_nat" "foobar" {
 }
 `, testAccComputeRouterNatBaseResourcesWithPrivateNatSubnetworks(routerName, hubName), routerName)
 }
-
-
-<% end -%>

@@ -48,7 +48,12 @@ var requestReviewerCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		prNumber := args[0]
 		fmt.Println("PR Number: ", prNumber)
-		gh := github.NewClient()
+		githubToken, ok := os.LookupEnv("GITHUB_TOKEN")
+		if !ok {
+			fmt.Println("Did not provide GITHUB_TOKEN environment variable")
+			os.Exit(1)
+		}
+		gh := github.NewClient(githubToken)
 		execRequestReviewer(prNumber, gh)
 	},
 }
@@ -78,8 +83,8 @@ func execRequestReviewer(prNumber string, gh GithubClient) {
 
 		reviewersToRequest, newPrimaryReviewer := github.ChooseCoreReviewers(requestedReviewers, previousReviewers)
 
-		for _, reviewer := range reviewersToRequest {
-			err = gh.RequestPullRequestReviewer(prNumber, reviewer)
+		if len(reviewersToRequest) > 0 {
+			err = gh.RequestPullRequestReviewers(prNumber, reviewersToRequest)
 			if err != nil {
 				fmt.Println(err)
 				os.Exit(1)

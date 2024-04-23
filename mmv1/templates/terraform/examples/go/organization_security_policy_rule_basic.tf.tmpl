@@ -1,0 +1,28 @@
+resource "google_compute_organization_security_policy" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  display_name = "tf-test%{random_suffix}"
+  parent       = "organizations/{{index $.TestEnvVars "org_id"}}"
+}
+
+resource "google_compute_organization_security_policy_rule" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+
+  policy_id = google_compute_organization_security_policy.{{$.PrimaryResourceId}}.id
+  action = "allow"
+
+  direction = "INGRESS"
+  enable_logging = true
+  match {
+    config {
+      src_ip_ranges = ["192.168.0.0/16", "10.0.0.0/8"]
+      layer4_config {
+        ip_protocol = "tcp"
+        ports = ["22"]
+      }
+      layer4_config {
+        ip_protocol = "icmp"
+      }
+    }
+  }
+  priority = 100
+}

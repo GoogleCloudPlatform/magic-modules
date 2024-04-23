@@ -2,6 +2,8 @@ package bigquery_test
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -91,6 +93,55 @@ func TestAccBigQueryDataset_basic(t *testing.T) {
 				ResourceName:      "google_bigquery_dataset.test",
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccBigQueryDataset_withComputedLabels(t *testing.T) {
+	// Skip it in VCR test because of the randomness of uuid in "labels" field
+	// which causes the replaying mode after recording mode failing in VCR test
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {},
+		},
+		CheckDestroy: testAccCheckBigQueryDatasetDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryDataset(datasetID),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "labels.%", "2"),
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "labels.env", "foo"),
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "labels.default_table_expiration_ms", "3600000"),
+
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "effective_labels.%", "2"),
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "effective_labels.env", "foo"),
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "effective_labels.default_table_expiration_ms", "3600000"),
+				),
+			},
+			{
+				ResourceName:      "google_bigquery_dataset.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// The labels field in the state is decided by the configuration.
+				// During importing, the configuration is unavailable, so the labels field in the state after importing is empty.
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				Config: testAccBigQueryDatasetUpdated_withComputedLabels(datasetID),
+			},
+			{
+				ResourceName:            "google_bigquery_dataset.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 		},
 	})
@@ -326,6 +377,47 @@ func TestAccBigQueryDataset_storageBillModel(t *testing.T) {
 	})
 }
 
+func TestAccBigQueryDataset_invalidCharacterInID(t *testing.T) {
+	t.Parallel()
+	// Not an acceptance test.
+	acctest.SkipIfVcr(t)
+
+	datasetID := fmt.Sprintf("tf_test_%s-with-hyphens", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigQueryDatasetDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccBigQueryDataset(datasetID),
+				ExpectError: regexp.MustCompile("must contain only letters.+numbers.+or underscores.+"),
+			},
+		},
+	})
+}
+
+func TestAccBigQueryDataset_invalidLongID(t *testing.T) {
+	t.Parallel()
+	// Not an acceptance test.
+	acctest.SkipIfVcr(t)
+
+	datasetSuffix := acctest.RandString(t, 10)
+	datasetID := fmt.Sprintf("tf_test_%s", strings.Repeat(datasetSuffix, 200))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigQueryDatasetDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccBigQueryDataset(datasetID),
+				ExpectError: regexp.MustCompile(".+cannot be greater than 1,024 characters"),
+			},
+		},
+	})
+}
+
 func testAccAddTable(t *testing.T, datasetID string, tableID string) resource.TestCheckFunc {
 	// Not actually a check, but adds a table independently of terraform
 	return func(s *terraform.State) error {
@@ -444,6 +536,27 @@ resource "google_bigquery_dataset" "test" {
 
   labels = {
     env                         = "bar"
+    default_table_expiration_ms = 7200000
+  }
+}
+`, datasetID)
+}
+
+func testAccBigQueryDatasetUpdated_withComputedLabels(datasetID string) string {
+	return fmt.Sprintf(`
+resource "random_uuid" "test" {
+}
+
+resource "google_bigquery_dataset" "test" {
+  dataset_id                      = "%s"
+  # friendly_name                   = "bar"
+  description                     = "This is a bar description"
+  location                        = "EU"
+  default_partition_expiration_ms = 7200000
+  default_table_expiration_ms     = 7200000
+
+  labels = {
+    env                         = "${random_uuid.test.result}"
     default_table_expiration_ms = 7200000
   }
 }

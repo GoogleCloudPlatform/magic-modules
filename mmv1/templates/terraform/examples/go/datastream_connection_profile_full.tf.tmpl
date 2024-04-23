@@ -1,0 +1,20 @@
+resource "google_datastream_connection_profile" "{{$.PrimaryResourceId}}" {
+	display_name          = "Connection profile"
+	location              = "us-central1"
+	connection_profile_id = "{{index $.Vars "connection_profile_id"}}"
+
+	gcs_profile {
+		bucket    = "my-bucket"
+		root_path = "/path"
+	}
+
+	forward_ssh_connectivity {
+		hostname = "google.com"
+		username = "my-user"
+		port     = 8022
+		password = "swordfish"
+	}
+	labels = {
+		key = "value"
+	}
+}
