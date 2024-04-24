@@ -247,6 +247,7 @@ properties:
         Create an instance that allows connections from Private Service Connect endpoints to the instance.
       required: true
       immutable: true
+      min_version: beta
     min_version: beta
   - !ruby/object:Api::Type::String
     name: 'displayName'

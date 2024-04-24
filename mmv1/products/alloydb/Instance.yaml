@@ -315,12 +315,14 @@ properties:
     description:
       'The configuration for Private Service Connect (PSC) for the instance.'
     default_from_api: true
+    min_version: beta
     properties:
     - !ruby/object:Api::Type::String
       name: 'serviceAttachmentLink'
       description: "The service attachment created when Private Service Connect (PSC) is enabled for the instance. The name of the resource will be in the format of projects/<alloydb-tenant-project-number>/regions/<region-name>/serviceAttachments/<service-attachment-name>"
       default_from_api: true
       output: true
+      min_version: beta
     - !ruby/object:Api::Type::Array
       name: allowedConsumerProjects
       item_type: Api::Type::String
@@ -328,8 +330,10 @@ properties:
         List of consumer projects that are allowed to create PSC endpoints to service-attachments to this instance.
       output: true
       default_from_api: true
+      min_version: beta
     - !ruby/object:Api::Type::String
       name: 'pscDnsName'
       description: "The DNS name of the instance for PSC connectivity. Name convention: ...alloydb-psc.goog"
       default_from_api: true
       output: true
+      min_version: beta
