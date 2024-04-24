@@ -241,13 +241,13 @@ properties:
     description: |
       PscConfig contains PSC related configuration at a cluster level.
     properties:
-    - !ruby/object:Api::Type::Boolean
-      name: 'pscEnabled'
-      description: |
-        Create an instance that allows connections from Private Service Connect endpoints to the instance.
-      required: true
-      immutable: true
-      min_version: beta
+      - !ruby/object:Api::Type::Boolean
+        name: 'pscEnabled'
+        description: |
+          Create an instance that allows connections from Private Service Connect endpoints to the instance.
+        required: true
+        immutable: true
+        min_version: beta
     min_version: beta
   - !ruby/object:Api::Type::String
     name: 'displayName'
