@@ -1,6 +1,6 @@
 resource "google_document_ai_warehouse_document_schema" "example_datetime" {
   project_number = data.google_project.project.number
-  display_name   = "test-property-date_time"
+  display_name   = "test-property-date_time2"
   location       = "us"
 
   property_definitions {
