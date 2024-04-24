@@ -236,6 +236,18 @@ properties:
         description: |
           The name of the allocated IP range for the private IP AlloyDB cluster. For example: "google-managed-services-default".
           If set, the instance IPs for this cluster will be created in the allocated range.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'pscConfig'
+    description: |
+      PscConfig contains PSC related configuration at a cluster level.
+    properties:
+    - !ruby/object:Api::Type::Boolean
+      name: 'pscEnabled'
+      description: |
+        Create an instance that allows connections from Private Service Connect endpoints to the instance.
+      required: true
+      immutable: true
+    min_version: beta
   - !ruby/object:Api::Type::String
     name: 'displayName'
     description: |
