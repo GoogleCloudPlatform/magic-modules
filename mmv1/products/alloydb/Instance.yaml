@@ -48,7 +48,7 @@ async: !ruby/object:Api::OpAsync
     path: 'error'
     message: 'message'
   include_project: true
-import_format: [ 'projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/instances/{{instance_id}}' ]
+import_format: ['projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/instances/{{instance_id}}']
 # Skipping the sweeper because instances will be deleted during cluster sweeps
 skip_sweeper: true
 autogen_async: true
