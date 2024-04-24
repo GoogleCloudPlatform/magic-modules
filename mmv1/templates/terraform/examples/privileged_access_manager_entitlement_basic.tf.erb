@@ -8,13 +8,13 @@ resource "google_privileged_access_manager_entitlement" "<%= ctx[:primary_resour
         unstructured{}
     }
     eligible_users {
-        principals = ["user:gkmr@google.com"]
+        principals = ["group:test@google.com"]
     }
     privileged_access{
         gcp_iam_access{
             role_bindings{
                 role = "roles/storage.admin"
-                condition_expression = ""
+                condition_expression = 'request.time < timestamp("2024-04-23T18:30:00.000Z")'
             }
             resource = "//cloudresourcemanager.googleapis.com/projects/<%= ctx[:test_env_vars]['project'] %>"
             resource_type = "cloudresourcemanager.googleapis.com/Project"
@@ -31,7 +31,7 @@ resource "google_privileged_access_manager_entitlement" "<%= ctx[:primary_resour
         approvals_needed          = 1
         approver_email_recipients = ["user@example.com"]
         approvers {
-          principals = ["user:itsvarsharma@google.com"]
+          principals = ["group:test@google.com"]
         }
       }
     }
