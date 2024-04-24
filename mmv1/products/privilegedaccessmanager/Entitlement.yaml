@@ -123,8 +123,8 @@ properties:
                   description: |
                     Required. How many users from the above list need to approve.
                     If there are not enough distinct users in the list above then the workflow
-                    will indefinitely block. Should always be greater than 0. 1 is the only
-                    supported value for now.
+                    will indefinitely block. Should always be greater than 0. Currently 1 is the only
+                    supported value.
                   default_value: 1
                 - !ruby/object:Api::Type::Array
                   name: approverEmailRecipients
