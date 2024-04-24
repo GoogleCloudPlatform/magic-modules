@@ -276,7 +276,6 @@ func schemaNodeConfig() *schema.Schema {
 								Optional:     true,
 								ForceNew:     true,
 								Description:  `Mode for how the secondary boot disk is used.`,
-								ValidateFunc: validation.StringInSlice([]string{"CONTAINER_IMAGE_CACHE"}, false),
               				},
 						},
 					},
