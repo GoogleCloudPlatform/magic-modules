@@ -105,7 +105,7 @@ properties:
                   min_size: 1
                   max_size: 1
                   description: |
-                    The potential set of approvers in this step.This list should contain at most one entry.
+                    The potential set of approvers in this step. This list should contain at only one entry.
                   item_type: !ruby/object:Api::Type::NestedObject
                     properties:
                       - !ruby/object:Api::Type::Array
