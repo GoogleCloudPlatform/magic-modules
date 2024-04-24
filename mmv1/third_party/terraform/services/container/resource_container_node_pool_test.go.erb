@@ -1694,8 +1694,8 @@ resource "google_container_node_pool" "np" {
   		enabled = true
 	}
     secondary_boot_disks {
-      disk_image = "global/images/example-image"
-      mode = "CONTAINER_IMAGE_CACHE"
+      disk_image = ""
+      mode = "DATA"
     }
   }
 }
