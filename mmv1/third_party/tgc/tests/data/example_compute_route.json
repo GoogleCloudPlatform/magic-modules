@@ -1,0 +1,36 @@
+[
+    {
+        "name": "//compute.googleapis.com/projects/{{.Provider.project}}/global/networks/compute-network",
+        "asset_type": "compute.googleapis.com/Network",
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+        "resource": {
+            "version": "beta",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
+            "discovery_name": "Network",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "autoCreateSubnetworks": true,
+                "name": "compute-network",
+                "networkFirewallPolicyEnforcementOrder": "AFTER_CLASSIC_FIREWALL"
+            }
+        }
+    },
+    {
+        "name": "//compute.googleapis.com/projects/{{.Provider.project}}/global/routes/network-route",
+        "asset_type": "compute.googleapis.com/Route",
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+        "resource": {
+            "version": "beta",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
+            "discovery_name": "Route",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "destRange": "15.0.0.0/24",
+                "name": "network-route",
+                "network": "projects/{{.Provider.project}}/global/networks/compute-network",
+                "nextHopIp": "10.132.1.5",
+                "priority": 100
+            }
+        }
+    }
+]
