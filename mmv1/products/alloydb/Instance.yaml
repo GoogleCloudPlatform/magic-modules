@@ -254,7 +254,6 @@ properties:
       - !ruby/object:Api::Type::Integer
         name: 'cpuCount'
         description: "The number of CPU's in the VM instance."
-
         default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: 'clientConnectionConfig'
@@ -310,3 +309,27 @@ properties:
       The public IP addresses for the Instance. This is available ONLY when
       networkConfig.enablePublicIp is set to true. This is the connection
       endpoint for an end-user application.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'pscInstanceConfig'
+    output: true
+    description:
+      'The configuration for Private Service Connect (PSC) for the instance.'
+    default_from_api: true
+    properties:
+    - !ruby/object:Api::Type::String
+      name: 'serviceAttachmentLink'
+      description: "The service attachment created when Private Service Connect (PSC) is enabled for the instance. The name of the resource will be in the format of projects/<alloydb-tenant-project-number>/regions/<region-name>/serviceAttachments/<service-attachment-name>"
+      default_from_api: true
+      output: true
+    - !ruby/object:Api::Type::Array
+      name: allowedConsumerProjects
+      item_type: Api::Type::String
+      description: |
+        List of consumer projects that are allowed to create PSC endpoints to service-attachments to this instance.
+      output: true
+      default_from_api: true
+    - !ruby/object:Api::Type::String
+      name: 'pscDnsName'
+      description: "The DNS name of the instance for PSC connectivity. Name convention: ...alloydb-psc.goog"
+      default_from_api: true
+      output: true
