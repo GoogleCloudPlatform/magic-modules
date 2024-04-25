@@ -1695,7 +1695,7 @@ resource "google_container_node_pool" "np" {
 	}
     secondary_boot_disks {
       disk_image = ""
-      mode = "DATA"
+      mode = "CONTAINER_IMAGE_CACHE"
     }
   }
 }
