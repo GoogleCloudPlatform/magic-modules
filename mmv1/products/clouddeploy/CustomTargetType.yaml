@@ -72,6 +72,12 @@ examples:
     primary_resource_name: 'fmt.Sprintf("tf-test-my-custom-target-type%s", context["random_suffix"])'
     vars:
       custom_target_type_name: "my-custom-target-type"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "clouddeploy_custom_target_type_gcb_repo_skaffold_modules"
+    primary_resource_id: "custom-target-type"
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-custom-target-type%s", context["random_suffix"])'
+    vars:
+      custom_target_type_name: "my-custom-target-type"
 parameters:
   - !ruby/object:Api::Type::String
     name: "location"
