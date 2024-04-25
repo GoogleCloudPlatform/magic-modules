@@ -303,4 +303,3 @@ properties:
           send_empty_value: true
           allow_empty_object: true
           properties: []
-            
