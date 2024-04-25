@@ -298,6 +298,7 @@ module "project-services" {
     "oslogin.googleapis.com",
     "parallelstore.googleapis.com",
     "privateca.googleapis.com",
+    "privilegedaccessmanager.googleapis.com",
     "pubsub.googleapis.com",
     "pubsublite.googleapis.com",
     "publicca.googleapis.com",
