@@ -1,0 +1,13 @@
+if v, ok := res["sslSettings"]; ok {
+  original := v.(map[string]interface{})
+
+  // sslManagementType does not get returned with the beta endpoint when set to "AUTOMATIC"
+  // Hence if pendingManagedCertificateId is set and sslManagementType is not, enforce sslManagementType to "AUTOMATIC"
+  if _, ok := original["pendingManagedCertificateId"]; ok {
+    if _, ok := original["sslManagementType"]; !ok {
+      original["sslManagementType"] = "AUTOMATIC"
+    }
+  }
+  
+  res["sslSettings"] = original
+}
