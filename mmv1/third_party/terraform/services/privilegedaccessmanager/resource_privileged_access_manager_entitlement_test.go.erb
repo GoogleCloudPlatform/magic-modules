@@ -64,7 +64,7 @@ resource "google_privileged_access_manager_entitlement" "tfentitlement" {
       gcp_iam_access{
         role_bindings{
           role = "roles/storage.admin"
-          condition_expression = "request.time < timestamp("2024-04-23T18:30:00.000Z")"
+          condition_expression = "request.time < timestamp(\"2024-04-23T18:30:00.000Z\")"
         }
         resource = "//cloudresourcemanager.googleapis.com/projects/%{project_name}"
         resource_type = "cloudresourcemanager.googleapis.com/Project"
@@ -108,7 +108,7 @@ resource "google_privileged_access_manager_entitlement" "tfentitlement" {
       gcp_iam_access{
         role_bindings{
           role = "roles/storage.admin"
-          condition_expression = "request.time < timestamp("2024-04-23T18:30:00.000Z")"
+          condition_expression = "request.time < timestamp(\"2024-04-23T18:30:00.000Z\")"
         }
         resource = "//cloudresourcemanager.googleapis.com/projects/%{project_name}"
         resource_type = "cloudresourcemanager.googleapis.com/Project"
