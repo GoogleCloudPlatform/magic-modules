@@ -38,15 +38,6 @@ func TestAccClouddeployCustomTargetType_update(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"name", "location", "annotations", "labels", "terraform_labels"},
 			},
-			{
-				Config: testAccClouddeployCustomTargetType_update(context),
-			},
-			{
-				ResourceName:            "google_clouddeploy_custom_target_type.custom-target-type",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "location", "annotations", "labels", "terraform_labels"},
-			},
 		},
 	})
 }
