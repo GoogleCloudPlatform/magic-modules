@@ -92,7 +92,7 @@ resource "google_clouddeploy_custom_target_type" "custom-target-type" {
       include_skaffold_modules {
         configs = ["my-config3"]
         google_cloud_build_repo_v2 {
-	  projectID = "777"
+	  project_id = "777"
 	  region = "us-central1"
 	  connection = "git"
 	  repo = "repo"
