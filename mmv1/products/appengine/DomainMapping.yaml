@@ -48,7 +48,7 @@ examples:
     name: 'app_engine_domain_mapping_basic'
     primary_resource_id: 'domain_mapping'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  decoder: templates/terraform/decoder/app_engine_domain_mapping.go.erb
+  decoder: templates/terraform/decoders/app_engine_domain_mapping.go.erb
 parameters:
   - !ruby/object:Api::Type::Enum
     name: 'overrideStrategy'
