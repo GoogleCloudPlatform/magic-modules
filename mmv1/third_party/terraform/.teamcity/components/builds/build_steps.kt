@@ -156,7 +156,6 @@ fun BuildSteps.saveArtifactsToGCS() {
                 FOLDER="manual/${'$'}BRANCH_NAME"
             fi
 
-
             # Copy logs to GCS
             gsutil -m cp %teamcity.build.checkoutDir%/debug* gs://teamcity-nightly-logs/%PROVIDER_NAME%/${'$'}{FOLDER}/%env.BUILD_NUMBER%/
 
