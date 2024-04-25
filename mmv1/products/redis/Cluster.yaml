@@ -231,3 +231,9 @@ properties:
     description: |
       Required. Number of shards for the Redis cluster.
     required: true
+  - !ruby/object:Api::Type::KeyValuePairs
+    name: 'redisConfigs'
+    description: |
+      Configure Redis Cluster behavior using a subset of native Redis configuration parameters.
+      Please check Memorystore documentation for the list of supported parameters:
+      https://cloud.google.com/memorystore/docs/cluster/supported-instance-configurations
