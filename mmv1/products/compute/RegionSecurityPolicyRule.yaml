@@ -346,7 +346,7 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'enforceOnKeyName'
         description: |
-          Rate limit key name applicable only for the following key types: 
+          Rate limit key name applicable only for the following key types:
           HTTP_HEADER -- Name of the HTTP header whose value is taken as the key value.
           HTTP_COOKIE -- Name of the HTTP cookie whose value is taken as the key value.
       - !ruby/object:Api::Type::Array
