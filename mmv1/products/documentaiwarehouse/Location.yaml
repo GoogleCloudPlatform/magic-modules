@@ -23,7 +23,7 @@ description: |
 id_format: 'projects/{{project_number}}/locations/{{location}}'
 autogen_async: true
 async: !ruby/object:Api::OpAsync
-  actions: ['create'] 
+  actions: ['create']
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
     base_url: '{{op_id}}'
