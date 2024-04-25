@@ -11,14 +11,9 @@ provider "google" {
   {{if .Provider.credentials }}credentials = "{{.Provider.credentials}}"{{end}}
 }
 
-resource "google_compute_route" "default" {
-  name        = "network-route"
-  dest_range  = "15.0.0.0/24"
-  network     = google_compute_network.default.name
-  next_hop_ip = "10.132.1.5"
-  priority    = 100
-}
-
-resource "google_compute_network" "default" {
-  name = "compute-network"
+resource "google_compute_route" "my_route" {
+  name         = "my-route"
+  dest_range   = "10.1.0.0/16"
+  next_hop_ip  = "10.0.0.1"
+  network      = "my-network"
 }
