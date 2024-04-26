@@ -10,32 +10,29 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func DataSourceGoogleStorageBucketObjects() *schema.Resource {
+func DataSourceGoogleStorageBuckets() *schema.Resource {
 	return &schema.Resource{
-		Read: datasourceGoogleStorageBucketObjectsRead,
+		Read: datasourceGoogleStorageBucketsRead,
 		Schema: map[string]*schema.Schema{
-			"bucket": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"match_glob": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
 			"prefix": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"bucket_objects": {
+			"project": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"buckets": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"content_type": {
-							Type:     schema.TypeString,
+						"labels": {
+							Type:     schema.TypeMap,
 							Computed: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
-						"media_link": {
+						"location": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -58,7 +55,7 @@ func DataSourceGoogleStorageBucketObjects() *schema.Resource {
 	}
 }
 
-func datasourceGoogleStorageBucketObjectsRead(d *schema.ResourceData, meta interface{}) error {
+func datasourceGoogleStorageBucketsRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -66,17 +63,14 @@ func datasourceGoogleStorageBucketObjectsRead(d *schema.ResourceData, meta inter
 	}
 
 	params := make(map[string]string)
-	bucketObjects := make([]map[string]interface{}, 0)
+	buckets := make([]map[string]interface{}, 0)
 
 	for {
-		bucket := d.Get("bucket").(string)
-		url, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{StorageBasePath}}b/%s/o", bucket))
-		if err != nil {
-			return err
-		}
+		url := "https://storage.googleapis.com/storage/v1/b"
 
-		if v, ok := d.GetOk("match_glob"); ok {
-			params["matchGlob"] = v.(string)
+		params["project"], err = tpgresource.GetProject(d, config)
+		if err != nil {
+			return fmt.Errorf("Error fetching project for bucket: %s", err)
 		}
 
 		if v, ok := d.GetOk("prefix"); ok {
@@ -95,11 +89,11 @@ func datasourceGoogleStorageBucketObjectsRead(d *schema.ResourceData, meta inter
 			UserAgent: userAgent,
 		})
 		if err != nil {
-			return fmt.Errorf("Error retrieving bucket objects: %s", err)
+			return fmt.Errorf("Error retrieving buckets: %s", err)
 		}
 
-		pageBucketObjects := flattenDatasourceGoogleBucketObjectsList(res["items"])
-		bucketObjects = append(bucketObjects, pageBucketObjects...)
+		pageBuckets := flattenDatasourceGoogleBucketsList(res["items"])
+		buckets = append(buckets, pageBuckets...)
 
 		pToken, ok := res["nextPageToken"]
 		if ok && pToken != nil && pToken.(string) != "" {
@@ -109,31 +103,31 @@ func datasourceGoogleStorageBucketObjectsRead(d *schema.ResourceData, meta inter
 		}
 	}
 
-	if err := d.Set("bucket_objects", bucketObjects); err != nil {
-		return fmt.Errorf("Error retrieving bucket_objects: %s", err)
+	if err := d.Set("buckets", buckets); err != nil {
+		return fmt.Errorf("Error retrieving buckets: %s", err)
 	}
 
-	d.SetId(d.Get("bucket").(string))
+	d.SetId(params["project"])
 
 	return nil
 }
 
-func flattenDatasourceGoogleBucketObjectsList(v interface{}) []map[string]interface{} {
+func flattenDatasourceGoogleBucketsList(v interface{}) []map[string]interface{} {
 	if v == nil {
 		return make([]map[string]interface{}, 0)
 	}
 
 	ls := v.([]interface{})
-	bucketObjects := make([]map[string]interface{}, 0, len(ls))
+	buckets := make([]map[string]interface{}, 0, len(ls))
 	for _, raw := range ls {
 		o := raw.(map[string]interface{})
 
-		var mContentType, mMediaLink, mName, mSelfLink, mStorageClass interface{}
-		if oContentType, ok := o["contentType"]; ok {
-			mContentType = oContentType
+		var mLabels, mLocation, mName, mSelfLink, mStorageClass interface{}
+		if oLabels, ok := o["labels"]; ok {
+			mLabels = oLabels
 		}
-		if oMediaLink, ok := o["mediaLink"]; ok {
-			mMediaLink = oMediaLink
+		if oLocation, ok := o["location"]; ok {
+			mLocation = oLocation
 		}
 		if oName, ok := o["name"]; ok {
 			mName = oName
@@ -144,14 +138,14 @@ func flattenDatasourceGoogleBucketObjectsList(v interface{}) []map[string]interf
 		if oStorageClass, ok := o["storageClass"]; ok {
 			mStorageClass = oStorageClass
 		}
-		bucketObjects = append(bucketObjects, map[string]interface{}{
-			"content_type":  mContentType,
-			"media_link":    mMediaLink,
+		buckets = append(buckets, map[string]interface{}{
+			"labels":        mLabels,
+			"location":      mLocation,
 			"name":          mName,
 			"self_link":     mSelfLink,
 			"storage_class": mStorageClass,
 		})
 	}
 
-	return bucketObjects
+	return buckets
 }
