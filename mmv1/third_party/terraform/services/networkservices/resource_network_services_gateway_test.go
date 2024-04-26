@@ -170,13 +170,13 @@ resource "google_network_services_gateway" "default" {
 }
 
 func TestAccNetworkServicesGateway_updateSwp(t *testing.T) {
-  cmName := fmt.Sprintf("tf-test-gateway-swp-cm-%s", acctest.RandString(t, 10))
+	cmName := fmt.Sprintf("tf-test-gateway-swp-cm-%s", acctest.RandString(t, 10))
 	netName := fmt.Sprintf("tf-test-gateway-swp-net-%s", acctest.RandString(t, 10))
 	subnetName := fmt.Sprintf("tf-test-gateway-swp-subnet-%s", acctest.RandString(t, 10))
 	pSubnetName := fmt.Sprintf("tf-test-gateway-swp-proxyonly-%s", acctest.RandString(t, 10))
 	policyName := fmt.Sprintf("tf-test-gateway-swp-policy-%s", acctest.RandString(t, 10))
 	ruleName := fmt.Sprintf("tf-test-gateway-swp-rule-%s", acctest.RandString(t, 10))
-  gatewayScope := fmt.Sprintf("tf-test-gateway-swp-scope-%s", acctest.RandString(t, 10))
+	gatewayScope := fmt.Sprintf("tf-test-gateway-swp-scope-%s", acctest.RandString(t, 10))
 	gatewayName := fmt.Sprintf("tf-test-gateway-swp-%s", acctest.RandString(t, 10))
 	// updates
 	newCmName := fmt.Sprintf("tf-test-gateway-swp-newcm-%s", acctest.RandString(t, 10))
@@ -195,7 +195,7 @@ func TestAccNetworkServicesGateway_updateSwp(t *testing.T) {
 				ResourceName:            "google_network_services_gateway.foobar",
 				ImportState:             true,
 				ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"name", "location", "delete_swg_autogen_router_on_destroy"},
+				ImportStateVerifyIgnore: []string{"name", "location", "delete_swg_autogen_router_on_destroy"},
 			},
 			{
 				Config: testAccNetworkServicesGateway_updateSwp(cmName, newCmName, netName, subnetName, pSubnetName, policyName, newPolicyName, ruleName, newRuleName, gatewayName, gatewayScope),
@@ -204,7 +204,7 @@ func TestAccNetworkServicesGateway_updateSwp(t *testing.T) {
 				ResourceName:            "google_network_services_gateway.foobar",
 				ImportState:             true,
 				ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"name", "location", "delete_swg_autogen_router_on_destroy"},
+				ImportStateVerifyIgnore: []string{"name", "location", "delete_swg_autogen_router_on_destroy"},
 			},
 		},
 	})
