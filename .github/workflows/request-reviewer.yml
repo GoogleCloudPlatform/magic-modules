@@ -9,13 +9,13 @@ on:
       - ready_for_review
       - reopened
       - synchronize
-    branches:
-      - 'main'
-      - 'FEATURE-BRANCH-*'
+  issue_comment:
+    types:
+      - created
 
 jobs:
   request-review:
-    if: github.event.pull_request.draft == false
+    if: github.event.pull_request && github.event.pull_request.draft == false && (github.event.sender.login == github.event.pull_request.user.login || github.event.action != 'created')
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
