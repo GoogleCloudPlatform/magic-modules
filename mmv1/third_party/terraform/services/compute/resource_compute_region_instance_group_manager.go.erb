@@ -95,6 +95,46 @@ func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
 				},
 			},
 
+      "instance_flexibility_policy": {
+        Type:        schema.TypeList,
+        Optional:    true,
+        MaxItems:    1,
+        Description: `The flexibility policy for this managed instance group. Instance flexibility allowing MIG to create VMs from multiple types of machines. Instance flexibility configuration on MIG overrides instance template configuration.`,
+        Elem: &schema.Resource{
+          Schema: map[string]*schema.Schema{
+            "instance_selections": {
+              Type:        schema.TypeSet,
+              Optional:    true,
+              Description: `Named instance selections configuring properties that the group will use when creating new VMs.`,
+              Elem: &schema.Resource{
+                Schema: map[string]*schema.Schema{
+                  "name": {
+                    Type:        schema.TypeString,
+                    Required:    true,
+                    Description: `Instance selection name.`,
+                  },
+
+                  "rank": {
+                    Type:        schema.TypeInt,
+                    Optional:    true,
+                    Description: `Preference of this instance selection. Lower number means higher preference. MIG will first try to create a VM based on the machine-type with lowest rank and fallback to next rank based on availability. Machine types and instance selections with the same rank have the same preference.`,
+                  },
+
+                  "machine_types": {
+                    Type:     schema.TypeSet,
+                    Required:    true,
+                    Elem: &schema.Schema{
+                      Type: schema.TypeString,
+                    },
+                    Description: `Full machine-type names, e.g. "n1-standard-16"`,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+
 			"name": {
 				Type:        schema.TypeString,
 				Required:    true,

@@ -1493,6 +1493,22 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
     interface_name = "nic1"
     delete_rule = "NEVER"
   }
+  instance_flexibility_policy {
+    instance_selections {
+      name = "instance_selection_name_1"
+      rank = 2
+      machine_types{
+        "n1-standard-16"
+      }
+    }
+    instance_selections {
+      name = "instance_selection_name_1"
+      rank = 1
+      machine_types{
+        "n1-standard-1", "n4-standard-2"
+      }
+    }
+  }
 }
 `, network, template, igm)
 }

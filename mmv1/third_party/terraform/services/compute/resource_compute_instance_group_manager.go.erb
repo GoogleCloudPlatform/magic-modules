@@ -1183,6 +1183,31 @@ func expandStatefulIps(statefulIP []interface{}) map[string]compute.StatefulPoli
 	return statefulIpsMap
 }
 
+func expandInstanceFlexibilityPolicy(instanceFlexibilityPolicyData []any) *compute.InstanceGroupManagerInstanceFlexibilityPolicy {
+	instanceFlexibilityPolicy := &compute.InstanceGroupManagerInstanceFlexibilityPolicy{}
+	if instanceFlexibilityPolicyData == nil {
+		return instanceFlexibilityPolicy
+	}
+	for _, raw := range instanceFlexibilityPolicyData {
+		data := raw.(map[string]any)
+		instanceFlexibilityPolicy.InstanceSelections = expandInstanceSelections(data["instance_selections"].([]any))
+	}
+	return instanceFlexibilityPolicy
+}
+
+func expandInstanceSelections(instanceSelections []any) map[string]compute.InstanceGroupManagerInstanceFlexibilityPolicyInstanceSelection {
+	instanceSelectionsMap := make(map[string]compute.InstanceGroupManagerInstanceFlexibilityPolicyInstanceSelection)
+	for _, raw := range instanceSelections {
+		data := raw.(map[string]any)
+		instanceSelection := compute.InstanceGroupManagerInstanceFlexibilityPolicyInstanceSelection{
+			Rank:         data["rank"].(int64),
+			MachineTypes: tpgresource.ConvertStringSet(data["machine_types"].(*schema.Set)),
+		}
+		instanceSelectionsMap[data["name"].(string)] = instanceSelection
+	}
+	return instanceSelectionsMap
+}
+
 func expandVersions(configured []interface{}) []*compute.InstanceGroupManagerVersion {
 	versions := make([]*compute.InstanceGroupManagerVersion, 0, len(configured))
 	for _, raw := range configured {
