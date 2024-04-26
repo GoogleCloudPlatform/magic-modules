@@ -299,8 +299,9 @@ func TestAccDataflowFlexTemplateJob_withKmsKey(t *testing.T) {
 
 	randStr := acctest.RandString(t, 10)
 	job := "tf-test-dataflow-job-" + randStr
-	key_ring := "tf-test-dataflow-kms-ring-" + randStr
-	crypto_key := "tf-test-dataflow-kms-key-" + randStr
+	kms := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
+	key_ring := kms.KeyRing.Name
+	crypto_key := kms.CryptoKey.Name
 	bucket := "tf-test-dataflow-bucket-" + randStr
 	topic := "tf-test-topic" + randStr
 
