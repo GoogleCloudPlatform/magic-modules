@@ -54,11 +54,13 @@ resource "google_project" "my_project" {
 }
 
 resource "google_compute_network" "network" {
+  project                 = google_project.my_project.project_id
   name                    = "custom"
   auto_create_subnetworks = "false"
 }
 
 resource "google_compute_subnetwork" "subnetwork" {
+  project                  = google_project.my_project.project_id
   name                     = "custom"
   region                   = "us-central1"
   network                  = google_compute_network.network.id
@@ -181,11 +183,13 @@ resource "google_project" "my_project" {
 }
 
 resource "google_compute_network" "network" {
+  project                 = google_project.my_project.project_id
   name                    = "custom"
   auto_create_subnetworks = "false"
 }
 
 resource "google_compute_subnetwork" "subnetwork" {
+  project                  = google_project.my_project.project_id
   name                     = "custom"
   region                   = "us-central1"
   network                  = google_compute_network.network.id
