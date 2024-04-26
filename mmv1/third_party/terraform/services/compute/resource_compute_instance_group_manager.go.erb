@@ -1190,7 +1190,7 @@ func expandInstanceFlexibilityPolicy(instanceFlexibilityPolicyData []any) *compu
 	}
 	for _, raw := range instanceFlexibilityPolicyData {
 		data := raw.(map[string]any)
-		instanceFlexibilityPolicy.InstanceSelections = expandInstanceSelections(data["instance_selections"].([]any))
+		instanceFlexibilityPolicy.InstanceSelections = expandInstanceSelections(data["instance_selections"].(*schema.Set).List())
 	}
 	return instanceFlexibilityPolicy
 }
@@ -1200,7 +1200,7 @@ func expandInstanceSelections(instanceSelections []any) map[string]compute.Insta
 	for _, raw := range instanceSelections {
 		data := raw.(map[string]any)
 		instanceSelection := compute.InstanceGroupManagerInstanceFlexibilityPolicyInstanceSelection{
-			Rank:         data["rank"].(int64),
+			Rank:         int64(data["rank"].(int)),
 			MachineTypes: tpgresource.ConvertStringSet(data["machine_types"].(*schema.Set)),
 		}
 		instanceSelectionsMap[data["name"].(string)] = instanceSelection

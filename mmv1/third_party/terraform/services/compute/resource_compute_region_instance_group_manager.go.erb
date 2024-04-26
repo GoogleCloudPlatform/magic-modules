@@ -623,6 +623,7 @@ func resourceComputeRegionInstanceGroupManagerCreate(d *schema.ResourceData, met
 		TargetPools:                 tpgresource.ConvertStringSet(d.Get("target_pools").(*schema.Set)),
 		AutoHealingPolicies:         expandAutoHealingPolicies(d.Get("auto_healing_policies").([]interface{})),
 		Versions:                    expandVersions(d.Get("version").([]interface{})),
+		InstanceFlexibilityPolicy:   expandInstanceFlexibilityPolicy(d.Get("instance_flexibility_policy").([]any)),
 		UpdatePolicy:                expandRegionUpdatePolicy(d.Get("update_policy").([]interface{})),
 		InstanceLifecyclePolicy:     expandInstanceLifecyclePolicy(d.Get("instance_lifecycle_policy").([]interface{})),
 		AllInstancesConfig:          expandAllInstancesConfig(nil, d.Get("all_instances_config").([]interface{})),
@@ -815,6 +816,9 @@ func resourceComputeRegionInstanceGroupManagerRead(d *schema.ResourceData, meta 
 	if err := d.Set("version", flattenVersions(manager.Versions)); err != nil {
 		return err
 	}
+	if err := d.Set("instance_flexibility_policy", flattenInstanceFlexibilityPolicy(manager.InstanceFlexibilityPolicy)); err != nil {
+    return err
+  }
 	if err := d.Set("update_policy", flattenRegionUpdatePolicy(manager.UpdatePolicy)); err != nil {
 		return fmt.Errorf("Error setting update_policy in state: %s", err.Error())
 	}
@@ -885,6 +889,11 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
 
 	if d.HasChange("version") {
 		updatedManager.Versions = expandVersions(d.Get("version").([]interface{}))
+		change = true
+	}
+
+  if d.HasChange("instance_flexibility_policy") {
+		updatedManager.InstanceFlexibilityPolicy = expandInstanceFlexibilityPolicy(d.Get("instance_flexibility_policy").([]any))
 		change = true
 	}
 
