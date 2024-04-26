@@ -80,6 +80,14 @@ resource "google_clouddeploy_custom_target_type" "custom-target-type" {
           ref = "main"
         }
       }
+      include_skaffold_modules {
+        configs = ["my-config3"]
+        googleCloudBuildRepo {
+          repository = "projects/777/locations/us-central1/connections/git/repositories/example"
+          path = "configs/skaffold.yaml"
+          ref = "main"
+        }
+      }
     }
 }
 `, context)
