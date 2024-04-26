@@ -1190,7 +1190,7 @@ func expandInstanceFlexibilityPolicy(instanceFlexibilityPolicyData []any) *compu
 	}
 	for _, raw := range instanceFlexibilityPolicyData {
 		data := raw.(map[string]any)
-		instanceFlexibilityPolicy.InstanceSelections = expandInstanceSelections(data["instance_selections"].([]any))
+		instanceFlexibilityPolicy.InstanceSelections = expandInstanceSelections(data["instance_selections"].(*schema.Set).List())
 	}
 	return instanceFlexibilityPolicy
 }
@@ -1200,7 +1200,7 @@ func expandInstanceSelections(instanceSelections []any) map[string]compute.Insta
 	for _, raw := range instanceSelections {
 		data := raw.(map[string]any)
 		instanceSelection := compute.InstanceGroupManagerInstanceFlexibilityPolicyInstanceSelection{
-			Rank:         data["rank"].(int64),
+			Rank:         int64(data["rank"].(int)),
 			MachineTypes: tpgresource.ConvertStringSet(data["machine_types"].(*schema.Set)),
 		}
 		instanceSelectionsMap[data["name"].(string)] = instanceSelection
@@ -1386,6 +1386,28 @@ func flattenStatefulPolicyStatefulIps(d *schema.ResourceData, ipfieldName string
 		return apiData
 	}
 	return sorted
+}
+
+func flattenInstanceFlexibilityPolicy(instanceFlexibilityPolicy *compute.InstanceGroupManagerInstanceFlexibilityPolicy) []map[string]any {
+	results := []map[string]any{}
+	if instanceFlexibilityPolicy != nil {
+		ifp := map[string]any{}
+		ifp["instance_selections"] = flattenInstanceSelections(instanceFlexibilityPolicy.InstanceSelections)
+		results = append(results, ifp)
+	}
+	return results
+}
+
+func flattenInstanceSelections(instanceSelections map[string]compute.InstanceGroupManagerInstanceFlexibilityPolicyInstanceSelection) []map[string]any {
+	results := make([]map[string]any, 0, len(instanceSelections))
+	for instanceSelectionName, instanceSelection := range instanceSelections {
+		instanceSelectionMap := make(map[string]any)
+		instanceSelectionMap["name"] = instanceSelectionName
+		instanceSelectionMap["rank"] = instanceSelection.Rank
+		instanceSelectionMap["machine_types"] = instanceSelection.MachineTypes
+		results = append(results, instanceSelectionMap)
+	}
+	return results
 }
 
 func flattenUpdatePolicy(updatePolicy *compute.InstanceGroupManagerUpdatePolicy) []map[string]interface{} {
