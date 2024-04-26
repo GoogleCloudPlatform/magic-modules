@@ -150,14 +150,14 @@ fun BuildSteps.saveArtifactsToGCS() {
             BRANCH_NAME=%teamcity.build.branch%
             if [[ "${'$'}TRIGGERED_BY_USERNAME" = "n/a" ]] ; then
                 echo "Build was triggered as part of automated testing. We know this because the `triggeredBy.username` value was `n/a`, value: ${'$'}{TRIGGERED_BY_USERNAME}"
-                FOLDER="nightly"
+                FOLDER="nightly/%teamcity.project.id%"
             else
                 echo "Build was triggered manually. We know this because `triggeredBy.username` has a non- `n/a` value: ${'$'}{TRIGGERED_BY_USERNAME}"
-                FOLDER="manual/${'$'}BRANCH_NAME"
+                FOLDER="manual/%teamcity.project.id%/${'$'}BRANCH_NAME"
             fi
 
             # Copy logs to GCS
-            gsutil -m cp %teamcity.build.checkoutDir%/debug* gs://teamcity-nightly-logs/%PROVIDER_NAME%/${'$'}{FOLDER}/%env.BUILD_NUMBER%/
+            gsutil -m cp %teamcity.build.checkoutDir%/debug* gs://teamcity-nightly-logs/${'$'}{FOLDER}/%env.BUILD_NUMBER%/
 
             # Cleanup
             rm google-account.json

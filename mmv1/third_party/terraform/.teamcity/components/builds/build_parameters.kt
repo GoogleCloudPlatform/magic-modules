@@ -244,7 +244,7 @@ fun ParametrizedWithType.terraformLoggingParameters(providerName: String) {
 
     // Set where logs are sent
     text("PROVIDER_NAME", providerName)
-    text("env.TF_LOG_PATH_MASK", "%system.teamcity.build.checkoutDir%/debug-%PROVIDER_NAME%-%env.BUILD_NUMBER%-%s.txt") // .txt extension used to make artifacts open in browser, instead of download
+    text("env.TF_LOG_PATH_MASK", "%system.teamcity.build.checkoutDir%/debug-%PROVIDER_NAME%-%env.BUILD_NUMBER%-%teamcity.build.counter%-%s.txt") // .txt extension used to make artifacts open in browser, instead of download
 }
 
 fun ParametrizedWithType.readOnlySettings() {
