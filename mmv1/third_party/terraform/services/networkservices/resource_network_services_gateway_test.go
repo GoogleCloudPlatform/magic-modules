@@ -163,7 +163,7 @@ resource "google_network_services_gateway" "default" {
   subnetwork                           = google_compute_subnetwork.default.id
   delete_swg_autogen_router_on_destroy = true
   depends_on                           = [google_compute_subnetwork.proxyonlysubnet]
-  }
+}
 `, context)
 
 	return config
@@ -184,26 +184,26 @@ func TestAccNetworkServicesGateway_updateSwp(t *testing.T) {
 	newRuleName := fmt.Sprintf("tf-test-gateway-swp-newrule-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckNetworkServicesGatewayDestroyProducer(t),
+		CheckDestroy:             testAccCheckNetworkServicesGatewayDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkServicesGateway_basicSwp(cmName, netName, subnetName, pSubnetName, policyName, ruleName, gatewayName, gatewayScope),
 			},
 			{
-				ResourceName:      "google_network_services_gateway.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_network_services_gateway.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
         ImportStateVerifyIgnore: []string{"name", "location", "delete_swg_autogen_router_on_destroy"},
 			},
 			{
 				Config: testAccNetworkServicesGateway_updateSwp(cmName, newCmName, netName, subnetName, pSubnetName, policyName, newPolicyName, ruleName, newRuleName, gatewayName, gatewayScope),
 			},
 			{
-				ResourceName:      "google_network_services_gateway.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_network_services_gateway.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
         ImportStateVerifyIgnore: []string{"name", "location", "delete_swg_autogen_router_on_destroy"},
 			},
 		},
@@ -217,7 +217,7 @@ resource "google_certificate_manager_certificate" "default" {
   location    = "us-east1"
   self_managed {
     pem_certificate = file("test-fixtures/cert.pem")
-	pem_private_key = file("test-fixtures/private-key.pem")
+	  pem_private_key = file("test-fixtures/private-key.pem")
   }
 }
 
@@ -246,8 +246,8 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_network_security_gateway_security_policy" "default" {
-  name        = "%s"
-  location    = "us-east1"
+  name     = "%s"
+  location = "us-east1"
 }
 
 resource "google_network_security_gateway_security_policy_rule" "default" {
@@ -274,8 +274,8 @@ resource "google_network_services_gateway" "foobar" {
   subnetwork                           = google_compute_subnetwork.default.id
   delete_swg_autogen_router_on_destroy = true
   depends_on                           = [google_compute_subnetwork.proxyonlysubnet]
-
 }
+
 `, cmName, netName, subnetName, pSubnetName, policyName, ruleName, gatewayName, gatewayScope)
 }
 
@@ -286,7 +286,7 @@ resource "google_certificate_manager_certificate" "default" {
   location    = "us-east1"
   self_managed {
     pem_certificate = file("test-fixtures/cert.pem")
-	pem_private_key = file("test-fixtures/private-key.pem")
+	  pem_private_key = file("test-fixtures/private-key.pem")
   }
 }
 
@@ -295,7 +295,7 @@ resource "google_certificate_manager_certificate" "newcm" {
   location    = "us-east1"
   self_managed {
     pem_certificate = file("test-fixtures/cert.pem")
-	pem_private_key = file("test-fixtures/private-key.pem")
+	  pem_private_key = file("test-fixtures/private-key.pem")
   }
 }
 
@@ -324,8 +324,8 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_network_security_gateway_security_policy" "default" {
-  name        = "%s"
-  location    = "us-east1"
+  name     = "%s"
+  location = "us-east1"
 }
 
 resource "google_network_security_gateway_security_policy_rule" "default" {
@@ -339,8 +339,8 @@ resource "google_network_security_gateway_security_policy_rule" "default" {
 }
 
 resource "google_network_security_gateway_security_policy" "newpolicy" {
-  name        = "%s"
-  location    = "us-east1"
+  name     = "%s"
+  location = "us-east1"
 }
 
 resource "google_network_security_gateway_security_policy_rule" "newrule" {
@@ -361,13 +361,14 @@ resource "google_network_services_gateway" "foobar" {
   ports                                = [443]
   description                          = "updated description"
   scope                                = "%s"
-  certificate_urls                     = [google_certificate_manager_certificate.default.id, google_certificate_manager_certificate.newcm.id]
+  certificate_urls                     = [google_certificate_manager_certificate.newcm.id]
   gateway_security_policy              = google_network_security_gateway_security_policy.newpolicy.id
   network                              = google_compute_network.default.id
   subnetwork                           = google_compute_subnetwork.default.id
   delete_swg_autogen_router_on_destroy = true
   depends_on                           = [google_compute_subnetwork.proxyonlysubnet]
 }
+
 `, cmName, newCmName, netName, subnetName, pSubnetName, policyName, newPolicyName, ruleName, newRuleName, gatewayName, gatewayScope)
 }
 
@@ -418,7 +419,7 @@ resource "google_certificate_manager_certificate" "default" {
   location    = "us-west1"
   self_managed {
     pem_certificate = file("test-fixtures/cert.pem")
-	pem_private_key = file("test-fixtures/private-key.pem")
+	  pem_private_key = file("test-fixtures/private-key.pem")
   }
 }
 
@@ -512,7 +513,7 @@ resource "google_certificate_manager_certificate" "default" {
   location    = "us-west1"
   self_managed {
     pem_certificate = file("test-fixtures/cert.pem")
-	pem_private_key = file("test-fixtures/private-key.pem")
+	  pem_private_key = file("test-fixtures/private-key.pem")
   }
 }
 
@@ -541,8 +542,8 @@ resource "google_compute_subnetwork" "subnet1" {
 }
 
 resource "google_network_security_gateway_security_policy" "default" {
-  name        = "%s"
-  location    = "us-west1"
+  name     = "%s"
+  location = "us-west1"
 }
 
 resource "google_network_security_gateway_security_policy_rule" "default" {
@@ -663,8 +664,8 @@ resource "google_compute_subnetwork" "subnet1" {
 }
 
 resource "google_network_security_gateway_security_policy" "default" {
-  name        = "%s"
-  location    = "us-west2"
+  name     = "%s"
+  location = "us-west2"
 }
 
 resource "google_network_security_gateway_security_policy_rule" "default" {
@@ -772,8 +773,8 @@ resource "google_compute_subnetwork" "subnet1" {
 }
 
 resource "google_network_security_gateway_security_policy" "default" {
-  name        = "%s"
-  location    = "us-west2"
+  name     = "%s"
+  location = "us-west2"
 }
 
 resource "google_network_security_gateway_security_policy_rule" "default" {
@@ -884,8 +885,8 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_network_security_gateway_security_policy" "default" {
-  name        = "%s"
-  location    = "us-central1"
+  name     = "%s"
+  location = "us-central1"
 }
 
 resource "google_network_security_gateway_security_policy_rule" "default" {
