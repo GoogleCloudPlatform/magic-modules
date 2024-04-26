@@ -1,3 +1,7 @@
+data "google_project" "project" {
+  provider = google-beta
+}
+
 resource "google_privateca_ca_pool" "default" {
   provider = google-beta
   name      = "<%= ctx[:vars]['privateca_ca_pool_name'] %>"
@@ -75,11 +79,58 @@ resource "google_privateca_ca_pool_iam_member" "tls_inspection_permission" {
   member = "serviceAccount:${google_project_service_identity.ns_sa.email}"
 }
 
+resource "google_certificate_manager_trust_config" "default" {
+  provider    = google-beta
+  name        = "<%= ctx[:vars]['trust_config_name'] %>"
+  description = "sample trust config description"
+  location    = "us-central1"
+
+  trust_stores {
+    trust_anchors {
+      pem_certificate = file("test-fixtures/ca_cert.pem")
+    }
+    intermediate_cas {
+      pem_certificate = file("test-fixtures/ca_cert.pem")
+    }
+  }
+
+  labels = {
+    foo = "bar"
+  }
+}
+
 resource "google_network_security_tls_inspection_policy" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
   name     = "<%= ctx[:vars]['resource_name'] %>"
   location = "us-central1"
   ca_pool  = google_privateca_ca_pool.default.id
   exclude_public_ca_set = false
-  depends_on = [google_privateca_ca_pool.default, google_privateca_certificate_authority.default, google_privateca_ca_pool_iam_member.tls_inspection_permission]
+
+  min_tls_version     = "TLS_1_0"
+  trust_config        = google_certificate_manager_trust_config.default.id
+  tls_feature_profile = "PROFILE_CUSTOM"
+  custom_tls_features = [
+    "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA",
+    "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
+    "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA",
+    "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
+    "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256",
+    "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA",
+    "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+    "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
+    "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+    "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256",
+    "TLS_RSA_WITH_3DES_EDE_CBC_SHA",
+    "TLS_RSA_WITH_AES_128_CBC_SHA",
+    "TLS_RSA_WITH_AES_128_GCM_SHA256",
+    "TLS_RSA_WITH_AES_256_CBC_SHA",
+    "TLS_RSA_WITH_AES_256_GCM_SHA384",
+  ]
+
+  depends_on = [
+    google_privateca_ca_pool.default,
+    google_privateca_certificate_authority.default,
+    google_privateca_ca_pool_iam_member.tls_inspection_permission,
+    google_certificate_manager_trust_config.default
+  ]
 }
