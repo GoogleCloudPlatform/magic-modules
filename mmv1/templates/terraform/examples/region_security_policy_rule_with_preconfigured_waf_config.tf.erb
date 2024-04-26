@@ -1,6 +1,4 @@
 resource "google_compute_region_security_policy" "default" {
-  provider    = google-beta
-
   region      = "asia-southeast1"
   name        = "<%= ctx[:vars]['sec_policy_name'] %>"
   description = "basic region security policy"
@@ -8,8 +6,6 @@ resource "google_compute_region_security_policy" "default" {
 }
 
 resource "google_compute_region_security_policy_rule" "<%= ctx[:primary_resource_id] %>" {
-  provider = google-beta
-
   region          = "asia-southeast1"
   security_policy = google_compute_region_security_policy.default.name
   description     = "new rule"
@@ -21,25 +17,25 @@ resource "google_compute_region_security_policy_rule" "<%= ctx[:primary_resource
     }
   }
   preconfigured_waf_config {
-    exclusions {
-      request_uris_to_exclude {
-        op = "STARTS_WITH"
-        val = "/admin"
+    exclusion {
+      request_uri {
+        operator = "STARTS_WITH"
+        value = "/admin"
       }
       target_rule_set = "rce-stable"
     }
-    exclusions {
-      request_query_params_to_exclude {
-        op = "CONTAINS"
-        val = "password"
+    exclusion {
+      request_query_param {
+        operator = "CONTAINS"
+        value = "password"
       }
-      request_query_params_to_exclude {
-        op = "STARTS_WITH"
-        val = "freeform"
+      request_query_param {
+        operator = "STARTS_WITH"
+        value = "freeform"
       }
-      request_query_params_to_exclude {
-        op = "EQUALS"
-        val = "description"
+      request_query_param {
+        operator = "EQUALS"
+        value = "description"
       }
       target_rule_set = "xss-stable"
       target_rule_ids = [
