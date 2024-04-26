@@ -8,7 +8,6 @@
 package tests
 
 import builds.UseTeamCityGoTest
-import jetbrains.buildServer.configs.kotlin.Project
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Test

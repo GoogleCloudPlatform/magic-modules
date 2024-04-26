@@ -7,11 +7,9 @@
 
 package tests
 
+import jetbrains.buildServer.configs.kotlin.triggers.ScheduleTrigger
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import jetbrains.buildServer.configs.kotlin.Project
-import jetbrains.buildServer.configs.kotlin.triggers.ScheduleTrigger
-import org.junit.Assert
 import projects.googleCloudRootProject
 
 class NightlyTestProjectsTests {

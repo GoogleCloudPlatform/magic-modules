@@ -10,12 +10,11 @@ package tests
 import ProjectSweeperName
 import ServiceSweeperName
 import jetbrains.buildServer.configs.kotlin.BuildType
+import jetbrains.buildServer.configs.kotlin.Project
+import jetbrains.buildServer.configs.kotlin.triggers.ScheduleTrigger
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import jetbrains.buildServer.configs.kotlin.Project
-import jetbrains.buildServer.configs.kotlin.triggers.ScheduleTrigger
-import org.junit.Assert
 import projects.googleCloudRootProject
 
 class SweeperTests {

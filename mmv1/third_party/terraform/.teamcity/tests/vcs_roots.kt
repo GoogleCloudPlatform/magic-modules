@@ -7,7 +7,6 @@
 
 package tests
 
-import jetbrains.buildServer.configs.kotlin.Project
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import projects.googleCloudRootProject
