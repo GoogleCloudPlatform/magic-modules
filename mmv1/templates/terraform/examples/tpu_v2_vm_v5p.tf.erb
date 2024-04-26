@@ -1,17 +1,21 @@
-data "google_tpu_v2_runtime_versions" "available" {
-  provider = google-beta
-}
-
 resource "google_tpu_v2_vm" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
 
   name = "<%= ctx[:vars]["vm_name"] %>"
-  zone = "us-east1-d"
+  zone = "us-east5-a"
 
   runtime_version = "tpu-vm-tf-2.16.1-pjrt"
 
   accelerator_config {
-    type     = "<%= ctx[:vars]["type"] %>"
-    topology = "<%= ctx[:vars]["topology"] %>"
+    type     = "V5P"
+    topology = "2x2x1"
+  }
+
+  network_config {
+    enable_external_ips = true
+  }
+
+  scheduling_config {
+    preemptible = true
   }
 }
