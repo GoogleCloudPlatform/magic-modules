@@ -1,0 +1,29 @@
+resource "google_dataproc_gdc_application_environment" "app_env" {
+  application_environment_id = "<%= ctx[:vars]['application_environment_id'] %>"
+  serviceinstance = "do-not-delete-dataproc-gdc-instance"
+  location        = "us-west2"
+  namespace = "default"
+}
+
+resource "google_dataproc_gdc_spark_application" "<%= ctx[:primary_resource_id] %>" {
+  spark_application_id = "<%= ctx[:vars]['spark_application_id'] %>"
+  serviceinstance = "do-not-delete-dataproc-gdc-instance"
+  location        = "us-west2"
+  namespace = "default"
+  labels = {
+    "test-label": "label-value"
+  }
+  annotations = {
+    "an_annotation": "annotation_value"
+  }
+  properties = {
+    "spark.executor.instances": "2"
+  }
+  application_environment = google_dataproc_gdc_application_environment.app_env.name
+  version = "1.2"
+  spark_application_config {
+    main_class = "org.apache.spark.examples.SparkPi"
+    jar_file_uris = ["file:///usr/lib/spark/examples/jars/spark-examples.jar"]
+    args = ["10"]
+  }
+}
