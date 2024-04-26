@@ -72,8 +72,6 @@ examples:
     primary_resource_id: 'tpu'
     vars:
       vm_name: 'test-tpu'
-      type: 'V5P'
-      topology: '2x2x1'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'zone'
