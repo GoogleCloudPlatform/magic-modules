@@ -41,6 +41,7 @@ func ResourceConverters() map[string][]cai.ResourceConverter {
 		"google_compute_forwarding_rule":                  {compute.ResourceConverterComputeForwardingRule()},
 		"google_compute_global_address":                   {compute.ResourceConverterComputeGlobalAddress()},
 		"google_compute_global_forwarding_rule":           {compute.ResourceConverterComputeGlobalForwardingRule()},
+		"google_compute_health_check":           {compute.ResourceConverterComputeHealthCheck()},
 		"google_compute_instance":                         {compute.ResourceConverterComputeInstance()},
 		"google_compute_network":                          {compute.ResourceConverterComputeNetwork()},
 		"google_compute_route":                  		   {compute.ResourceConverterComputeRoute()},
