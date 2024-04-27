@@ -103,7 +103,7 @@ resource "google_network_security_tls_inspection_policy" "<%= ctx[:primary_resou
   exclude_public_ca_set = false
 
   min_tls_version     = "TLS_1_0"
-  trust_config        = google_certificate_manager_trust_config.default.id
+  trust_config        = "projects/${data.google_project.project.number}/locations/${google_certificate_manager_trust_config.default.location}/trustConfigs/${google_certificate_manager_trust_config.default.name}"
   tls_feature_profile = "PROFILE_CUSTOM"
   custom_tls_features = [
     "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA",
