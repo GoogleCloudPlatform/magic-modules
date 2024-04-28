@@ -12,7 +12,7 @@ func TestAccVmwareengineExternalAccessRule_vmwareEngineExternalAccessRuleUpdate(
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"region":          "southamerica-west1", // using region with low node utilization.
+		"region":          "asia-south1", // using region with low node utilization.
 		"random_suffix":   acctest.RandString(t, 10),
 		"org_id":          envvar.GetTestOrgFromEnv(t),
 		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
@@ -52,13 +52,37 @@ func TestAccVmwareengineExternalAccessRule_vmwareEngineExternalAccessRuleUpdate(
 
 func testVmwareEngineExternalAccessRuleCreateConfig(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_project" "project" {
+  project_id      = "tf-test%{random_suffix}"
+  name            = "tf-test%{random_suffix}"
+  org_id          = "%{org_id}"
+  billing_account = "%{billing_account}"
+}
+
+resource "google_project_service" "vmwareengine" {
+  project = google_project.project.project_id
+  service = "vmwareengine.googleapis.com"
+}
+
+resource "time_sleep" "sleep" {
+  create_duration = "1m"
+  depends_on = [
+    google_project_service.vmwareengine,
+  ]
+}
+
 resource "google_vmwareengine_network" "external-access-rule-nw" {
+  project = google_project.project.project_id
   name        = "tf-test-sample-external-access-rule-nw-%{random_suffix}"
   location    = "global"
   type        = "STANDARD"
+  depends_on = [
+    time_sleep.sleep # Sleep allows permissions in the new project to propagate
+  ]
 }
 
 resource "google_vmwareengine_private_cloud" "external-access-rule-pc" {
+  project = google_project.project.project_id
   location    = "%{region}-a"
   name        = "tf-test-sample-external-access-rule-pc-%{random_suffix}"
   type        = "TIME_LIMITED"
@@ -77,6 +101,7 @@ resource "google_vmwareengine_private_cloud" "external-access-rule-pc" {
 }
 
 resource "google_vmwareengine_network_policy" "external-access-rule-np" {
+  project = google_project.project.project_id
   location = "%{region}"
   name = "tf-test-sample-external-access-rule-np-%{random_suffix}"
   edge_services_cidr = "192.168.0.0/26"
