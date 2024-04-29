@@ -53,7 +53,7 @@ fun testContextParameters(): AllContextParameters {
         "region",
         "zone",
         "infraProject",
-        "vcrBucketName"
+        "vcrBucketName",
         "credentialsGCS")
 }
 
