@@ -132,7 +132,7 @@ type Resource struct {
 	//
 	// [Optional] (Api::Resource::IamPolicy) Configuration of a resource's
 	// resource-specific IAM Policy.
-	IamPolicy resource.IamPolicy `yaml:"iam_policy"`
+	IamPolicy *resource.IamPolicy `yaml:"iam_policy"`
 
 	// [Optional] If set to true, don't generate the resource itself; only
 	// generate the IAM policy.
