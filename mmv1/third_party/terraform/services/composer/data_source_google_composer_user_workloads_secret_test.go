@@ -78,12 +78,12 @@ func checkSecretDataSourceMatchesResource() resource.TestCheckFunc {
 func testAccDataSourceComposerUserWorkloadsSecret_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_composer_environment" "test" {
-	name   = "%{env_name}"
-	config {
-		software_config {
-			image_version = "composer-3-airflow-2"
-		}
-	}
+  name   = "%{env_name}"
+  config {
+    software_config {
+      image_version = "composer-3-airflow-2"
+    }
+  }
 }
 resource "google_composer_user_workloads_secret" "test" {
   environment = google_composer_environment.test.name
@@ -94,8 +94,8 @@ resource "google_composer_user_workloads_secret" "test" {
   }
 }
 data "google_composer_user_workloads_secret" "test" {
-	name        = google_composer_user_workloads_secret.test.name
-	environment = google_composer_environment.test.name
+  name        = google_composer_user_workloads_secret.test.name
+  environment = google_composer_environment.test.name
 }
 `, context)
 }
