@@ -208,6 +208,7 @@ properties:
     exactly_one_of:
       - network
       - network_config.0.network
+      - psc_config.0.psc_enabled
     default_from_api: true
     deprecation_message: >-
       `network` is deprecated and will be removed in a future major release. Instead, use `network_config` to define the network configuration.
@@ -227,6 +228,7 @@ properties:
         exactly_one_of:
           - network
           - network_config.0.network
+          - psc_config.0.psc_enabled
         description: |
           The resource link for the VPC network in which cluster resources are created and from which they are accessible via Private IP. The network must belong to the same project as the cluster.
           It is specified in the form: "projects/{projectNumber}/global/networks/{network_id}".
@@ -243,9 +245,12 @@ properties:
     properties:
       - !ruby/object:Api::Type::Boolean
         name: 'pscEnabled'
+        exactly_one_of:
+          - network
+          - network_config.0.network
+          - psc_config.0.psc_enabled
         description: |
           Create an instance that allows connections from Private Service Connect endpoints to the instance.
-        required: true
         immutable: true
         min_version: beta
     min_version: beta
