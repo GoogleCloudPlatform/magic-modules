@@ -298,7 +298,6 @@ properties:
         default_from_api: true
         description: |
           List of consumer projects that are allowed to create PSC endpoints to service-attachments to this instance.
-        default_from_api: true
       - !ruby/object:Api::Type::String
         name: 'pscDnsName'
         output: true
