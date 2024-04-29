@@ -35,6 +35,7 @@ import (
 // N:1 = [ResourceConverter{Convert: convertAbc, merge: mergeAbc}] (len=1)
 func ResourceConverters() map[string][]cai.ResourceConverter {
 	return map[string][]cai.ResourceConverter{
+	        "google_artifact_registry_repository":             {artifactregistry.ResourceConverterArtifactRegistryRepository()},
 		"google_compute_address":                          {compute.ResourceConverterComputeAddress()},
 		"google_compute_firewall":                         {compute.ResourceConverterComputeFirewall()},
 		"google_compute_disk":                             {compute.ResourceConverterComputeDisk()},
@@ -93,7 +94,7 @@ func ResourceConverters() map[string][]cai.ResourceConverter {
 		"google_cloud_run_service":                        {cloudrun.ResourceConverterCloudRunService()},
 		"google_cloud_run_domain_mapping":                 {cloudrun.ResourceConverterCloudRunDomainMapping()},
 		"google_cloud_run_v2_job":                         {cloudrunv2.ResourceConverterCloudRunV2Job()},
-	    "google_cloudfunctions_function":                  {resourceConverterCloudFunctionsCloudFunction()},
+	        "google_cloudfunctions_function":                  {resourceConverterCloudFunctionsCloudFunction()},
 		"google_monitoring_notification_channel":          {monitoring.ResourceConverterMonitoringNotificationChannel()},
 		"google_monitoring_alert_policy":                  {monitoring.ResourceConverterMonitoringAlertPolicy()},
         <% products.each do |product| -%>
