@@ -738,7 +738,7 @@ resource "google_alloydb_instance" "default" {
     cpu_count = 2
   }
   psc_instance_config {
-	allowed_consumer_projects = ["vmiglani-playground-psc"]
+	allowed_consumer_projects = ["722705436247"]
   }
 }
 resource "google_alloydb_cluster" "default" {
@@ -758,7 +758,6 @@ data "google_project" "project" {}
 func testAccAlloydbInstance_updatePscInstanceConfigAllowlist(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_alloydb_instance" "default" {
-  provider = google-beta
   cluster       = google_alloydb_cluster.default.name
   instance_id   = "tf-test-alloydb-instance%{random_suffix}"
   instance_type = "PRIMARY"
@@ -766,7 +765,7 @@ resource "google_alloydb_instance" "default" {
     cpu_count = 2
   }
   psc_instance_config {
-	allowed_consumer_projects = ["vmiglani-playground-psc", "alloydb-psc-cep"]
+	allowed_consumer_projects = ["722705436247", "1044355742748"]
   }
 }
 resource "google_alloydb_cluster" "default" {
