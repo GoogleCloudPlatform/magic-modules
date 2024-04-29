@@ -125,6 +125,25 @@ examples:
     primary_resource_id: "connection"
     vars:
       connection_id: "my-connection"
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'bigquery_connection_kms'
+    pull_external: true
+    primary_resource_id:
+      'connection'
+    # Random provider
+    skip_vcr: true
+    vars:
+      database_instance_name: 'my-database-instance'
+      username: 'user'
+      deletion_protection: 'true'
+      kms_key_ring: 'bq-connection'
+      kms_key_name: 'bq-key'
+    test_vars_overrides:
+      deletion_protection: 'false'
+    oics_vars_overrides:
+      deletion_protection: 'false'
+    ignore_read_extra:
+      - 'cloud_sql.0.credential'  # password removed
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -164,6 +183,12 @@ properties:
     output: true
     description: |
       True if the connection has credential assigned.
+  - !ruby/object:Api::Type::String
+    name: 'kmsKeyName'
+    description: |
+      Optional. The Cloud KMS key that is used for encryption.
+
+      Example: projects/[kms_project_id]/locations/[region]/keyRings/[key_region]/cryptoKeys/[key]
   - !ruby/object:Api::Type::NestedObject
     name: 'cloudSql'
     description: Connection properties specific to the Cloud SQL.
