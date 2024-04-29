@@ -2,9 +2,13 @@ package composer_test
 
 import (
 	"fmt"
+	"log"
+	"strings"
 	"testing"
+	"errors"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -23,12 +27,52 @@ func TestAccDataSourceComposerUserWorkloadsSecret_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceComposerUserWorkloadsSecret_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					acctest.CheckDataSourceStateMatchesResourceState("data.google_composer_user_workloads_secret.test",
-						"google_composer_user_workloads_secret.test"),
+					checkSecretDataSourceMatchesResource(),
 				),
 			},
 		},
 	})
+}
+
+func checkSecretDataSourceMatchesResource() resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		ds, ok := s.RootModule().Resources["data.google_composer_user_workloads_secret.test"]
+		if !ok {
+			return fmt.Errorf("can't find %s in state", "data.google_composer_user_workloads_secret.test")
+		}
+		rs, ok := s.RootModule().Resources["google_composer_user_workloads_secret.test"]
+		if !ok {
+			return fmt.Errorf("can't find %s in state", "google_composer_user_workloads_secret.test")
+		}
+
+		dsAttr := ds.Primary.Attributes
+		rsAttr := rs.Primary.Attributes
+		errMsg := ""
+
+		for k := range rsAttr {
+			if k == "%" {
+				continue
+			}
+			// ignore diff if it's due to secrets being masked.
+			if strings.HasPrefix(k, "data.") && k != "data.%" {
+				if dsAttr[k] == "**********" {
+					continue
+				}
+			}
+			if dsAttr[k] != rsAttr[k] {
+				errMsg += fmt.Sprintf("%s is %s; want %s\n", k, dsAttr[k], rsAttr[k])
+			}
+		}
+
+		log.Printf("[DEBUG] dsAttr: %s", dsAttr)
+		log.Printf("[DEBUG] rsAttr: %s", rsAttr)
+
+		if errMsg != "" {
+			return errors.New(errMsg)
+		}
+
+		return nil
+	}
 }
 
 func testAccDataSourceComposerUserWorkloadsSecret_basic(context map[string]interface{}) string {
