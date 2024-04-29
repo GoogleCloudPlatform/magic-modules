@@ -63,6 +63,8 @@ val zone            = DslContext.getParameter("zone", "")             // GOOGLE_
 val infraProject             = DslContext.getParameter("infraProject", "") // GOOGLE_INFRA_PROJECT
 val vcrBucketName            = DslContext.getParameter("vcrBucketName", "") // VCR_BUCKET_NAME
 
+// Used for copying nightly + upstream MM debug logs to GCS bucket
+val credentialsGCS = DslContext.getParameter("credentialsGCS", "") // GOOGLE_CREDENTIALS_GCS
 
 var allContextParams = AllContextParameters(
     credentialsGa,
