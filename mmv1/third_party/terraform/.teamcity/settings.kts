@@ -99,7 +99,8 @@ var allContextParams = AllContextParameters(
     region,
     zone,
     infraProject,
-    vcrBucketName
+    vcrBucketName,
+    credentialsGCS
 )
 
 // This is the entry point of the code in .teamcity/
