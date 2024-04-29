@@ -161,10 +161,6 @@ func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, g
 	}
 
 	sourceByte := contents.Bytes()
-	// Replace import path based on version (beta/alpha)
-	if td.TerraformResourceDirectory != "google" {
-		sourceByte = bytes.Replace(sourceByte, []byte("github.com/hashicorp/terraform-provider-google/google"), []byte(td.TerraformProviderModule+"/"+td.TerraformResourceDirectory), -1)
-	}
 
 	// if goFormat {
 	// 	sourceByte, err = format.Source(sourceByte)
