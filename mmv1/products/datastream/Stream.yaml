@@ -11,26 +11,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
-!ruby/object:Api::Resource
-name: "Stream"
-base_url: "projects/{{project}}/locations/{{location}}/streams"
-create_url: "projects/{{project}}/locations/{{location}}/streams?streamId={{stream_id}}"
-self_link: "projects/{{project}}/locations/{{location}}/streams/{{stream_id}}"
+--- !ruby/object:Api::Resource
+name: 'Stream'
+base_url: 'projects/{{project}}/locations/{{location}}/streams'
+create_url: 'projects/{{project}}/locations/{{location}}/streams?streamId={{stream_id}}'
+self_link: 'projects/{{project}}/locations/{{location}}/streams/{{stream_id}}'
 update_verb: :PATCH
 update_mask: true
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    "Official Documentation": "https://cloud.google.com/datastream/docs/create-a-stream"
-  api: "https://cloud.google.com/datastream/docs/reference/rest/v1/projects.locations.streams"
+    'Official Documentation': 'https://cloud.google.com/datastream/docs/create-a-stream'
+  api: 'https://cloud.google.com/datastream/docs/reference/rest/v1/projects.locations.streams'
 description: |
   A resource representing streaming data from a source to a destination.
 id_format: projects/{{project}}/locations/{{location}}/streams/{{stream_id}}
 import_format:
-  ["projects/{{project}}/locations/{{location}}/streams/{{stream_id}}"]
+  ['projects/{{project}}/locations/{{location}}/streams/{{stream_id}}']
 virtual_fields:
   - !ruby/object:Api::Type::Enum
-    name: "desired_state"
+    name: 'desired_state'
     description: |
       Desired state of the Stream. Set this field to `RUNNING` to start the stream, and `PAUSED` to pause the stream.
     values:
@@ -39,115 +38,118 @@ virtual_fields:
       - :PAUSED
     default_value: :NOT_STARTED
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: "templates/terraform/constants/datastream_stream.go.erb"
-  post_create: "templates/terraform/post_create/datastream_stream.go.erb"
-  post_import: "templates/terraform/post_import/datastream_stream.go.erb"
-  pre_update: "templates/terraform/pre_update/datastream_stream.go.erb"
-  post_update: "templates/terraform/post_update/datastream_stream.go.erb"
-  encoder: "templates/terraform/encoders/datastream_stream.go.erb"
-custom_diff: ["resourceDatastreamStreamCustomDiff"]
+  constants: 'templates/terraform/constants/datastream_stream.go.erb'
+  post_create: 'templates/terraform/post_create/datastream_stream.go.erb'
+  post_import: 'templates/terraform/post_import/datastream_stream.go.erb'
+  pre_update: 'templates/terraform/pre_update/datastream_stream.go.erb'
+  post_update: 'templates/terraform/post_update/datastream_stream.go.erb'
+  encoder: 'templates/terraform/encoders/datastream_stream.go.erb'
+custom_diff: [
+  'resourceDatastreamStreamCustomDiff',
+]
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "datastream_stream_basic"
+    name: 'datastream_stream_basic'
     pull_external: true
-    primary_resource_id: "default"
+    primary_resource_id: 'default'
     skip_docs:
       true
       # Random provider
     skip_vcr: true
     vars:
-      stream_id: "my-stream"
-      private_connection_id: "my-connection"
-      network_name: "my-network"
-      source_connection_profile_id: "source-profile"
-      database_instance_name: "my-instance"
-      deletion_protection: "true"
-      bucket_name: "my-bucket"
-      destination_connection_profile_id: "destination-profile"
+      stream_id: 'my-stream'
+      private_connection_id: 'my-connection'
+      network_name: 'my-network'
+      source_connection_profile_id: 'source-profile'
+      database_instance_name: 'my-instance'
+      deletion_protection: 'true'
+      bucket_name: 'my-bucket'
+      destination_connection_profile_id: 'destination-profile'
     test_vars_overrides:
-      deletion_protection: "false"
+      deletion_protection: 'false'
     oics_vars_overrides:
-      deletion_protection: "false"
+      deletion_protection: 'false'
   - !ruby/object:Provider::Terraform::Examples
-    name: "datastream_stream_full"
+    name: 'datastream_stream_full'
     pull_external: true
     primary_resource_id:
-      "default"
+      'default'
       # Random provider
     skip_vcr: true
     vars:
-      stream_id: "my-stream"
-      private_connection_id: "my-connection"
-      network_name: "my-network"
-      source_connection_profile_id: "source-profile"
-      database_instance_name: "my-instance"
-      deletion_protection: "true"
-      bucket_name: "my-bucket"
-      destination_connection_profile_id: "destination-profile"
-      stream_cmek: "kms-name"
+      stream_id: 'my-stream'
+      private_connection_id: 'my-connection'
+      network_name: 'my-network'
+      source_connection_profile_id: 'source-profile'
+      database_instance_name: 'my-instance'
+      deletion_protection: 'true'
+      bucket_name: 'my-bucket'
+      destination_connection_profile_id: 'destination-profile'
+      stream_cmek: 'kms-name'
     test_vars_overrides:
-      deletion_protection: "false"
+      deletion_protection: 'false'
       stream_cmek: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     oics_vars_overrides:
-      deletion_protection: "false"
+      deletion_protection: 'false'
   - !ruby/object:Provider::Terraform::Examples
-    name: "datastream_stream_postgresql"
-    primary_resource_id: "default"
+    name: 'datastream_stream_postgresql'
+    primary_resource_id: 'default'
     skip_test: true
     vars:
-      stream_id: "my-stream"
-      source_connection_profile_id: "source-profile"
-      destination_connection_profile_id: "destination-profile"
+      stream_id: 'my-stream'
+      source_connection_profile_id: 'source-profile'
+      destination_connection_profile_id: 'destination-profile'
   - !ruby/object:Provider::Terraform::Examples
-    name: "datastream_stream_oracle"
-    primary_resource_id: "default"
+    name: 'datastream_stream_oracle'
+    primary_resource_id: 'default'
     skip_test: true
     vars:
-      stream_id: "my-stream"
-      source_connection_profile_id: "source-profile"
-      destination_connection_profile_id: "destination-profile"
+      stream_id: 'my-stream'
+      source_connection_profile_id: 'source-profile'
+      destination_connection_profile_id: 'destination-profile'
   - !ruby/object:Provider::Terraform::Examples
-    name: "datastream_stream_sql_server"
-    primary_resource_id: "default"
+    name: 'datastream_stream_sql_server'
+    primary_resource_id: 'default'
     skip_test: true
     vars:
-      stream_id: "my-stream"
-      source_connection_profile_id: "source-profile"
-      destination_connection_profile_id: "destination-profile"
+      stream_id: 'my-stream'
+      source_connection_profile_id: 'source-profile'
+      destination_connection_profile_id: 'destination-profile'
   - !ruby/object:Provider::Terraform::Examples
-    name: "datastream_stream_postgresql_bigquery_dataset_id"
-    primary_resource_id: "default"
+    name: 'datastream_stream_postgresql_bigquery_dataset_id'
+    primary_resource_id: 'default'
     vars:
-      dataset_id: "postgres"
-      stream_id: "postgres-bigquery"
-      dest_connection_profile_id: "dest-profile"
-      instance_name: "instance-name"
-      sql_user_name: "my-user"
-      source_connection_profile_id: "source-profile"
+      dataset_id: 'postgres'
+      stream_id: 'postgres-bigquery'
+      dest_connection_profile_id: 'dest-profile'
+      instance_name: 'instance-name'
+      sql_user_name: 'my-user'
+      source_connection_profile_id: 'source-profile'
     pull_external: true
     # Random provider
     skip_vcr: true
   - !ruby/object:Provider::Terraform::Examples
-    name: "datastream_stream_bigquery"
+    name: 'datastream_stream_bigquery'
     pull_external: true
     primary_resource_id:
-      "default"
+      'default'
       # Random provider
     skip_vcr: true
     vars:
-      stream_id: "my-stream"
-      private_connection_id: "my-connection"
-      network_name: "my-network"
-      source_connection_profile_id: "source-profile"
-      database_instance_name: "my-instance"
-      deletion_protection: "true"
-      destination_connection_profile_id: "destination-profile"
-      bigquery_destination_table_kms_key_name: "bigquery-kms-name"
+      stream_id: 'my-stream'
+      private_connection_id: 'my-connection'
+      network_name: 'my-network'
+      source_connection_profile_id: 'source-profile'
+      database_instance_name: 'my-instance'
+      deletion_protection: 'true'
+      destination_connection_profile_id: 'destination-profile'
+      bigquery_destination_table_kms_key_name: 'bigquery-kms-name'
     test_vars_overrides:
-      deletion_protection: "false"
-      bigquery_destination_table_kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      deletion_protection: 'false'
+      bigquery_destination_table_kms_key_name:
+        'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     oics_vars_overrides:
-      deletion_protection: "false"
+      deletion_protection: 'false'
 parameters:
   - !ruby/object:Api::Type::String
     name: streamId
@@ -157,7 +159,7 @@ parameters:
     immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::String
-    name: "location"
+    name: 'location'
     description: |
       The name of the location this stream is located in.
     required: true
@@ -165,31 +167,31 @@ parameters:
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
-    name: "name"
+    name: 'name'
     output: true
     description: The stream's name.
   - !ruby/object:Api::Type::KeyValueLabels
-    name: "labels"
+    name: 'labels'
     description: Labels.
   - !ruby/object:Api::Type::String
-    name: "displayName"
+    name: 'displayName'
     required: true
     description: Display name.
   - !ruby/object:Api::Type::NestedObject
-    name: "sourceConfig"
+    name: 'sourceConfig'
     required: true
     description: |
       Source connection profile configuration.
     properties:
       - !ruby/object:Api::Type::String
-        name: "sourceConnectionProfile"
+        name: 'sourceConnectionProfile'
         immutable: true
         required: true
         description: |
           Source connection profile resource. Format: projects/{project}/locations/{location}/connectionProfiles/{name}
-        diff_suppress_func: "tpgresource.ProjectNumberDiffSuppress"
+        diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
       - !ruby/object:Api::Type::NestedObject
-        name: "mysqlSourceConfig"
+        name: 'mysqlSourceConfig'
         allow_empty_object: true
         send_empty_value: true
         exactly_one_of:
@@ -201,12 +203,12 @@ properties:
           MySQL data source configuration.
         properties:
           - !ruby/object:Api::Type::NestedObject
-            name: "includeObjects"
+            name: 'includeObjects'
             description: |
               MySQL objects to retrieve from the source.
             properties:
               - !ruby/object:Api::Type::Array
-                name: "mysqlDatabases"
+                name: 'mysqlDatabases'
                 required: true
                 min_size: 1
                 description: |
@@ -216,12 +218,12 @@ properties:
                     MySQL database.
                   properties:
                     - !ruby/object:Api::Type::String
-                      name: "database"
+                      name: 'database'
                       required: true
                       description: |
                         Database name.
                     - !ruby/object:Api::Type::Array
-                      name: "mysqlTables"
+                      name: 'mysqlTables'
                       min_size: 1
                       description: |
                         Tables in the database.
@@ -230,12 +232,12 @@ properties:
                           MySQL table.
                         properties:
                           - !ruby/object:Api::Type::String
-                            name: "table"
+                            name: 'table'
                             required: true
                             description: |
                               Table name.
                           - !ruby/object:Api::Type::Array
-                            name: "mysqlColumns"
+                            name: 'mysqlColumns'
                             min_size: 1
                             description: |
                               MySQL columns in the schema. When unspecified as part of include/exclude objects, includes/excludes everything.
@@ -244,42 +246,42 @@ properties:
                                 MySQL Column.
                               properties:
                                 - !ruby/object:Api::Type::String
-                                  name: "column"
+                                  name: 'column'
                                   description: |
                                     Column name.
                                 - !ruby/object:Api::Type::String
-                                  name: "dataType"
+                                  name: 'dataType'
                                   description: |
                                     The MySQL data type. Full data types list can be found here:
                                     https://dev.mysql.com/doc/refman/8.0/en/data-types.html
                                 - !ruby/object:Api::Type::Integer
-                                  name: "length"
+                                  name: 'length'
                                   output: true
                                   description: |
                                     Column length.
                                 - !ruby/object:Api::Type::String
-                                  name: "collation"
+                                  name: 'collation'
                                   description: |
                                     Column collation.
                                 - !ruby/object:Api::Type::Boolean
-                                  name: "primaryKey"
+                                  name: 'primaryKey'
                                   description: |
                                     Whether or not the column represents a primary key.
                                 - !ruby/object:Api::Type::Boolean
-                                  name: "nullable"
+                                  name: 'nullable'
                                   description: |
                                     Whether or not the column can accept a null value.
                                 - !ruby/object:Api::Type::Integer
-                                  name: "ordinalPosition"
+                                  name: 'ordinalPosition'
                                   description: |
                                     The ordinal position of the column in the table.
           - !ruby/object:Api::Type::NestedObject
-            name: "excludeObjects"
+            name: 'excludeObjects'
             description: |
               MySQL objects to exclude from the stream.
             properties:
               - !ruby/object:Api::Type::Array
-                name: "mysqlDatabases"
+                name: 'mysqlDatabases'
                 required: true
                 min_size: 1
                 description: |
@@ -289,12 +291,12 @@ properties:
                     MySQL database.
                   properties:
                     - !ruby/object:Api::Type::String
-                      name: "database"
+                      name: 'database'
                       required: true
                       description: |
                         Database name.
                     - !ruby/object:Api::Type::Array
-                      name: "mysqlTables"
+                      name: 'mysqlTables'
                       min_size: 1
                       description: |
                         Tables in the database.
@@ -303,12 +305,12 @@ properties:
                           MySQL table.
                         properties:
                           - !ruby/object:Api::Type::String
-                            name: "table"
+                            name: 'table'
                             required: true
                             description: |
                               Table name.
                           - !ruby/object:Api::Type::Array
-                            name: "mysqlColumns"
+                            name: 'mysqlColumns'
                             min_size: 1
                             description: |
                               MySQL columns in the schema. When unspecified as part of include/exclude objects, includes/excludes everything.
@@ -317,55 +319,55 @@ properties:
                                 MySQL Column.
                               properties:
                                 - !ruby/object:Api::Type::String
-                                  name: "column"
+                                  name: 'column'
                                   description: |
                                     Column name.
                                 - !ruby/object:Api::Type::String
-                                  name: "dataType"
+                                  name: 'dataType'
                                   description: |
                                     The MySQL data type. Full data types list can be found here:
                                     https://dev.mysql.com/doc/refman/8.0/en/data-types.html
                                 - !ruby/object:Api::Type::Integer
-                                  name: "length"
+                                  name: 'length'
                                   output: true
                                   description: |
                                     Column length.
                                 - !ruby/object:Api::Type::String
-                                  name: "collation"
+                                  name: 'collation'
                                   description: |
                                     Column collation.
                                 - !ruby/object:Api::Type::Boolean
-                                  name: "primaryKey"
+                                  name: 'primaryKey'
                                   description: |
                                     Whether or not the column represents a primary key.
                                 - !ruby/object:Api::Type::Boolean
-                                  name: "nullable"
+                                  name: 'nullable'
                                   description: |
                                     Whether or not the column can accept a null value.
                                 - !ruby/object:Api::Type::Integer
-                                  name: "ordinalPosition"
+                                  name: 'ordinalPosition'
                                   description: |
                                     The ordinal position of the column in the table.
           - !ruby/object:Api::Type::Integer
-            name: "maxConcurrentCdcTasks"
+            name: 'maxConcurrentCdcTasks'
             send_empty_value: true
             description: |
               Maximum number of concurrent CDC tasks. The number should be non negative.
               If not set (or set to 0), the system's default value will be used.
             default_from_api: true
             validation: !ruby/object:Provider::Terraform::Validation
-              function: "validation.IntAtLeast(0)"
+              function: 'validation.IntAtLeast(0)'
           - !ruby/object:Api::Type::Integer
-            name: "maxConcurrentBackfillTasks"
+            name: 'maxConcurrentBackfillTasks'
             send_empty_value: true
             description: |
               Maximum number of concurrent backfill tasks. The number should be non negative.
               If not set (or set to 0), the system's default value will be used.
             default_from_api: true
             validation: !ruby/object:Provider::Terraform::Validation
-              function: "validation.IntAtLeast(0)"
+              function: 'validation.IntAtLeast(0)'
       - !ruby/object:Api::Type::NestedObject
-        name: "oracleSourceConfig"
+        name: 'oracleSourceConfig'
         allow_empty_object: true
         send_empty_value: true
         exactly_one_of:
@@ -377,12 +379,12 @@ properties:
           MySQL data source configuration.
         properties:
           - !ruby/object:Api::Type::NestedObject
-            name: "includeObjects"
+            name: 'includeObjects'
             description: |
               Oracle objects to retrieve from the source.
             properties:
               - !ruby/object:Api::Type::Array
-                name: "oracleSchemas"
+                name: 'oracleSchemas'
                 required: true
                 min_size: 1
                 description: |
@@ -392,12 +394,12 @@ properties:
                     MySQL database.
                   properties:
                     - !ruby/object:Api::Type::String
-                      name: "schema"
+                      name: 'schema'
                       required: true
                       description: |
                         Schema name.
                     - !ruby/object:Api::Type::Array
-                      name: "oracleTables"
+                      name: 'oracleTables'
                       min_size: 1
                       description: |
                         Tables in the database.
@@ -406,12 +408,12 @@ properties:
                           Oracle table.
                         properties:
                           - !ruby/object:Api::Type::String
-                            name: "table"
+                            name: 'table'
                             required: true
                             description: |
                               Table name.
                           - !ruby/object:Api::Type::Array
-                            name: "oracleColumns"
+                            name: 'oracleColumns'
                             min_size: 1
                             description: |
                               Oracle columns in the schema. When unspecified as part of include/exclude objects, includes/excludes everything.
@@ -420,56 +422,56 @@ properties:
                                 Oracle Column.
                               properties:
                                 - !ruby/object:Api::Type::String
-                                  name: "column"
+                                  name: 'column'
                                   description: |
                                     Column name.
                                 - !ruby/object:Api::Type::String
-                                  name: "dataType"
+                                  name: 'dataType'
                                   description: |
                                     The Oracle data type. Full data types list can be found here:
                                     https://docs.oracle.com/en/database/oracle/oracle-database/21/sqlrf/Data-Types.html
                                 - !ruby/object:Api::Type::Integer
-                                  name: "length"
+                                  name: 'length'
                                   output: true
                                   description: |
                                     Column length.
                                 - !ruby/object:Api::Type::Integer
-                                  name: "precision"
+                                  name: 'precision'
                                   output: true
                                   description: |
                                     Column precision.
                                 - !ruby/object:Api::Type::Integer
-                                  name: "scale"
+                                  name: 'scale'
                                   output: true
                                   description: |
                                     Column scale.
                                 - !ruby/object:Api::Type::String
-                                  name: "encoding"
+                                  name: 'encoding'
                                   output: true
                                   description: |
                                     Column encoding.
                                 - !ruby/object:Api::Type::Boolean
-                                  name: "primaryKey"
+                                  name: 'primaryKey'
                                   output: true
                                   description: |
                                     Whether or not the column represents a primary key.
                                 - !ruby/object:Api::Type::Boolean
-                                  name: "nullable"
+                                  name: 'nullable'
                                   output: true
                                   description: |
                                     Whether or not the column can accept a null value.
                                 - !ruby/object:Api::Type::Integer
-                                  name: "ordinalPosition"
+                                  name: 'ordinalPosition'
                                   output: true
                                   description: |
                                     The ordinal position of the column in the table.
           - !ruby/object:Api::Type::NestedObject
-            name: "excludeObjects"
+            name: 'excludeObjects'
             description: |
               Oracle objects to exclude from the stream.
             properties:
               - !ruby/object:Api::Type::Array
-                name: "oracleSchemas"
+                name: 'oracleSchemas'
                 required: true
                 min_size: 1
                 description: |
@@ -479,12 +481,12 @@ properties:
                     MySQL database.
                   properties:
                     - !ruby/object:Api::Type::String
-                      name: "schema"
+                      name: 'schema'
                       required: true
                       description: |
                         Schema name.
                     - !ruby/object:Api::Type::Array
-                      name: "oracleTables"
+                      name: 'oracleTables'
                       min_size: 1
                       description: |
                         Tables in the database.
@@ -493,12 +495,12 @@ properties:
                           Oracle table.
                         properties:
                           - !ruby/object:Api::Type::String
-                            name: "table"
+                            name: 'table'
                             required: true
                             description: |
                               Table name.
                           - !ruby/object:Api::Type::Array
-                            name: "oracleColumns"
+                            name: 'oracleColumns'
                             min_size: 1
                             description: |
                               Oracle columns in the schema. When unspecified as part of include/exclude objects, includes/excludes everything.
@@ -507,83 +509,83 @@ properties:
                                 Oracle Column.
                               properties:
                                 - !ruby/object:Api::Type::String
-                                  name: "column"
+                                  name: 'column'
                                   description: |
                                     Column name.
                                 - !ruby/object:Api::Type::String
-                                  name: "dataType"
+                                  name: 'dataType'
                                   description: |
                                     The Oracle data type. Full data types list can be found here:
                                     https://docs.oracle.com/en/database/oracle/oracle-database/21/sqlrf/Data-Types.html
                                 - !ruby/object:Api::Type::Integer
-                                  name: "length"
+                                  name: 'length'
                                   output: true
                                   description: |
                                     Column length.
                                 - !ruby/object:Api::Type::Integer
-                                  name: "precision"
+                                  name: 'precision'
                                   output: true
                                   description: |
                                     Column precision.
                                 - !ruby/object:Api::Type::Integer
-                                  name: "scale"
+                                  name: 'scale'
                                   output: true
                                   description: |
                                     Column scale.
                                 - !ruby/object:Api::Type::String
-                                  name: "encoding"
+                                  name: 'encoding'
                                   output: true
                                   description: |
                                     Column encoding.
                                 - !ruby/object:Api::Type::Boolean
-                                  name: "primaryKey"
+                                  name: 'primaryKey'
                                   output: true
                                   description: |
                                     Whether or not the column represents a primary key.
                                 - !ruby/object:Api::Type::Boolean
-                                  name: "nullable"
+                                  name: 'nullable'
                                   output: true
                                   description: |
                                     Whether or not the column can accept a null value.
                                 - !ruby/object:Api::Type::Integer
-                                  name: "ordinalPosition"
+                                  name: 'ordinalPosition'
                                   output: true
                                   description: |
                                     The ordinal position of the column in the table.
           - !ruby/object:Api::Type::Integer
-            name: "maxConcurrentCdcTasks"
+            name: 'maxConcurrentCdcTasks'
             send_empty_value: true
             description: |
               Maximum number of concurrent CDC tasks. The number should be non negative.
               If not set (or set to 0), the system's default value will be used.
             default_from_api: true
             validation: !ruby/object:Provider::Terraform::Validation
-              function: "validation.IntAtLeast(0)"
+              function: 'validation.IntAtLeast(0)'
           - !ruby/object:Api::Type::Integer
-            name: "maxConcurrentBackfillTasks"
+            name: 'maxConcurrentBackfillTasks'
             send_empty_value: true
             description: |
               Maximum number of concurrent backfill tasks. The number should be non negative.
               If not set (or set to 0), the system's default value will be used.
             default_from_api: true
             validation: !ruby/object:Provider::Terraform::Validation
-              function: "validation.IntAtLeast(0)"
+              function: 'validation.IntAtLeast(0)'
           - !ruby/object:Api::Type::NestedObject
-            name: "dropLargeObjects"
+            name: 'dropLargeObjects'
             allow_empty_object: true
             send_empty_value: true
             description: |
               Configuration to drop large object values.
             properties: []
           - !ruby/object:Api::Type::NestedObject
-            name: "streamLargeObjects"
+            name: 'streamLargeObjects'
             allow_empty_object: true
             send_empty_value: true
             description: |
               Configuration to drop large object values.
             properties: []
       - !ruby/object:Api::Type::NestedObject
-        name: "postgresqlSourceConfig"
+        name: 'postgresqlSourceConfig'
         allow_empty_object: true
         send_empty_value: true
         exactly_one_of:
@@ -595,12 +597,12 @@ properties:
           PostgreSQL data source configuration.
         properties:
           - !ruby/object:Api::Type::NestedObject
-            name: "includeObjects"
+            name: 'includeObjects'
             description: |
               PostgreSQL objects to retrieve from the source.
             properties:
               - !ruby/object:Api::Type::Array
-                name: "postgresqlSchemas"
+                name: 'postgresqlSchemas'
                 required: true
                 min_size: 1
                 description: |
@@ -610,12 +612,12 @@ properties:
                     PostgreSQL schema.
                   properties:
                     - !ruby/object:Api::Type::String
-                      name: "schema"
+                      name: 'schema'
                       required: true
                       description: |
                         Database name.
                     - !ruby/object:Api::Type::Array
-                      name: "postgresqlTables"
+                      name: 'postgresqlTables'
                       min_size: 1
                       description: |
                         Tables in the schema.
@@ -624,12 +626,12 @@ properties:
                           PostgreSQL table.
                         properties:
                           - !ruby/object:Api::Type::String
-                            name: "table"
+                            name: 'table'
                             required: true
                             description: |
                               Table name.
                           - !ruby/object:Api::Type::Array
-                            name: "postgresqlColumns"
+                            name: 'postgresqlColumns'
                             min_size: 1
                             description: |
                               PostgreSQL columns in the schema. When unspecified as part of include/exclude objects, includes/excludes everything.
@@ -638,48 +640,48 @@ properties:
                                 PostgreSQL Column.
                               properties:
                                 - !ruby/object:Api::Type::String
-                                  name: "column"
+                                  name: 'column'
                                   description: |
                                     Column name.
                                 - !ruby/object:Api::Type::String
-                                  name: "dataType"
+                                  name: 'dataType'
                                   description: |
                                     The PostgreSQL data type. Full data types list can be found here:
                                     https://www.postgresql.org/docs/current/datatype.html
                                 - !ruby/object:Api::Type::Integer
-                                  name: "length"
+                                  name: 'length'
                                   output: true
                                   description: |
                                     Column length.
                                 - !ruby/object:Api::Type::Integer
-                                  name: "precision"
+                                  name: 'precision'
                                   output: true
                                   description: |
                                     Column precision.
                                 - !ruby/object:Api::Type::Integer
-                                  name: "scale"
+                                  name: 'scale'
                                   output: true
                                   description: |
                                     Column scale.
                                 - !ruby/object:Api::Type::Boolean
-                                  name: "primaryKey"
+                                  name: 'primaryKey'
                                   description: |
                                     Whether or not the column represents a primary key.
                                 - !ruby/object:Api::Type::Boolean
-                                  name: "nullable"
+                                  name: 'nullable'
                                   description: |
                                     Whether or not the column can accept a null value.
                                 - !ruby/object:Api::Type::Integer
-                                  name: "ordinalPosition"
+                                  name: 'ordinalPosition'
                                   description: |
                                     The ordinal position of the column in the table.
           - !ruby/object:Api::Type::NestedObject
-            name: "excludeObjects"
+            name: 'excludeObjects'
             description: |
               PostgreSQL objects to exclude from the stream.
             properties:
               - !ruby/object:Api::Type::Array
-                name: "postgresqlSchemas"
+                name: 'postgresqlSchemas'
                 required: true
                 min_size: 1
                 description: |
@@ -689,12 +691,12 @@ properties:
                     PostgreSQL schema.
                   properties:
                     - !ruby/object:Api::Type::String
-                      name: "schema"
+                      name: 'schema'
                       required: true
                       description: |
                         Database name.
                     - !ruby/object:Api::Type::Array
-                      name: "postgresqlTables"
+                      name: 'postgresqlTables'
                       min_size: 1
                       description: |
                         Tables in the schema.
@@ -703,12 +705,12 @@ properties:
                           PostgreSQL table.
                         properties:
                           - !ruby/object:Api::Type::String
-                            name: "table"
+                            name: 'table'
                             required: true
                             description: |
                               Table name.
                           - !ruby/object:Api::Type::Array
-                            name: "postgresqlColumns"
+                            name: 'postgresqlColumns'
                             min_size: 1
                             description: |
                               PostgreSQL columns in the schema. When unspecified as part of include/exclude objects, includes/excludes everything.
@@ -717,64 +719,64 @@ properties:
                                 PostgreSQL Column.
                               properties:
                                 - !ruby/object:Api::Type::String
-                                  name: "column"
+                                  name: 'column'
                                   description: |
                                     Column name.
                                 - !ruby/object:Api::Type::String
-                                  name: "dataType"
+                                  name: 'dataType'
                                   description: |
                                     The PostgreSQL data type. Full data types list can be found here:
                                     https://www.postgresql.org/docs/current/datatype.html
                                 - !ruby/object:Api::Type::Integer
-                                  name: "length"
+                                  name: 'length'
                                   output: true
                                   description: |
                                     Column length.
                                 - !ruby/object:Api::Type::Integer
-                                  name: "precision"
+                                  name: 'precision'
                                   output: true
                                   description: |
                                     Column precision.
                                 - !ruby/object:Api::Type::Integer
-                                  name: "scale"
+                                  name: 'scale'
                                   output: true
                                   description: |
                                     Column scale.
                                 - !ruby/object:Api::Type::Boolean
-                                  name: "primaryKey"
+                                  name: 'primaryKey'
                                   description: |
                                     Whether or not the column represents a primary key.
                                 - !ruby/object:Api::Type::Boolean
-                                  name: "nullable"
+                                  name: 'nullable'
                                   description: |
                                     Whether or not the column can accept a null value.
                                 - !ruby/object:Api::Type::Integer
-                                  name: "ordinalPosition"
+                                  name: 'ordinalPosition'
                                   description: |
                                     The ordinal position of the column in the table.
           - !ruby/object:Api::Type::String
-            name: "replicationSlot"
+            name: 'replicationSlot'
             required: true
             description: |
               The name of the logical replication slot that's configured with
               the pgoutput plugin.
           - !ruby/object:Api::Type::String
-            name: "publication"
+            name: 'publication'
             required: true
             description: |
               The name of the publication that includes the set of all tables
               that are defined in the stream's include_objects.
           - !ruby/object:Api::Type::Integer
-            name: "maxConcurrentBackfillTasks"
+            name: 'maxConcurrentBackfillTasks'
             send_empty_value: true
             description: |
               Maximum number of concurrent backfill tasks. The number should be non
               negative. If not set (or set to 0), the system's default value will be used.
             default_from_api: true
             validation: !ruby/object:Provider::Terraform::Validation
-              function: "validation.IntAtLeast(0)"
+              function: 'validation.IntAtLeast(0)'
       - !ruby/object:Api::Type::NestedObject
-        name: "sqlServerSourceConfig"
+        name: 'sqlServerSourceConfig'
         min_version: beta
         allow_empty_object: true
         send_empty_value: true
@@ -784,15 +786,15 @@ properties:
           - source_config.0.postgresql_source_config
           - source_config.0.sql_server_source_config
         description: |
-          SQl Server data source configuration.
+          SQL Server data source configuration.
         properties:
           - !ruby/object:Api::Type::NestedObject
-            name: "includeObjects"
+            name: 'includeObjects'
             description: |
               SQL Server objects to retrieve from the source.
             properties:
               - !ruby/object:Api::Type::Array
-                name: "schemas"
+                name: 'schemas'
                 required: true
                 min_size: 1
                 description: |
@@ -802,12 +804,12 @@ properties:
                     SQL Server database.
                   properties:
                     - !ruby/object:Api::Type::String
-                      name: "schema"
+                      name: 'schema'
                       required: true
                       description: |
                         Schema name.
                     - !ruby/object:Api::Type::Array
-                      name: "tables"
+                      name: 'tables'
                       min_size: 1
                       description: |
                         Tables in the database.
@@ -816,12 +818,12 @@ properties:
                           SQL Server table.
                         properties:
                           - !ruby/object:Api::Type::String
-                            name: "table"
+                            name: 'table'
                             required: true
                             description: |
                               Table name.
                           - !ruby/object:Api::Type::Array
-                            name: "columns"
+                            name: 'columns'
                             min_size: 1
                             description: |
                               SQL Server columns in the schema. When unspecified as part of include/exclude objects, includes/excludes everything.
@@ -830,56 +832,56 @@ properties:
                                 SQL Server Column.
                               properties:
                                 - !ruby/object:Api::Type::String
-                                  name: "column"
+                                  name: 'column'
                                   description: |
                                     Column name.
                                 - !ruby/object:Api::Type::String
-                                  name: "dataType"
+                                  name: 'dataType'
                                   description: |
                                     The SQL Server data type. Full data types list can be found here:
                                     https://learn.microsoft.com/en-us/sql/t-sql/data-types/data-types-transact-sql?view=sql-server-ver16
                                 - !ruby/object:Api::Type::Integer
-                                  name: "length"
+                                  name: 'length'
                                   output: true
                                   description: |
                                     Column length.
                                 - !ruby/object:Api::Type::Integer
-                                  name: "precision"
+                                  name: 'precision'
                                   output: true
                                   description: |
                                     Column precision.
                                 - !ruby/object:Api::Type::Integer
-                                  name: "scale"
+                                  name: 'scale'
                                   output: true
                                   description: |
                                     Column scale.
                                 - !ruby/object:Api::Type::String
-                                  name: "encoding"
+                                  name: 'encoding'
                                   output: true
                                   description: |
                                     Column encoding.
                                 - !ruby/object:Api::Type::Boolean
-                                  name: "primaryKey"
+                                  name: 'primaryKey'
                                   output: true
                                   description: |
                                     Whether or not the column represents a primary key.
                                 - !ruby/object:Api::Type::Boolean
-                                  name: "nullable"
+                                  name: 'nullable'
                                   output: true
                                   description: |
                                     Whether or not the column can accept a null value.
                                 - !ruby/object:Api::Type::Integer
-                                  name: "ordinalPosition"
+                                  name: 'ordinalPosition'
                                   output: true
                                   description: |
                                     The ordinal position of the column in the table.
           - !ruby/object:Api::Type::NestedObject
-            name: "excludeObjects"
+            name: 'excludeObjects'
             description: |
               SQL Server objects to exclude from the stream.
             properties:
               - !ruby/object:Api::Type::Array
-                name: "schemas"
+                name: 'schemas'
                 required: true
                 min_size: 1
                 description: |
@@ -889,12 +891,12 @@ properties:
                     SQL Server database.
                   properties:
                     - !ruby/object:Api::Type::String
-                      name: "schema"
+                      name: 'schema'
                       required: true
                       description: |
                         Schema name.
                     - !ruby/object:Api::Type::Array
-                      name: "tables"
+                      name: 'tables'
                       min_size: 1
                       description: |
                         Tables in the database.
@@ -903,12 +905,12 @@ properties:
                           SQL Server table.
                         properties:
                           - !ruby/object:Api::Type::String
-                            name: "table"
+                            name: 'table'
                             required: true
                             description: |
                               Table name.
                           - !ruby/object:Api::Type::Array
-                            name: "columns"
+                            name: 'columns'
                             min_size: 1
                             description: |
                               SQL Server columns in the schema. When unspecified as part of include/exclude objects, includes/excludes everything.
@@ -917,82 +919,82 @@ properties:
                                 SQL Server Column.
                               properties:
                                 - !ruby/object:Api::Type::String
-                                  name: "column"
+                                  name: 'column'
                                   description: |
                                     Column name.
                                 - !ruby/object:Api::Type::String
-                                  name: "dataType"
+                                  name: 'dataType'
                                   description: |
                                     The SQL Server data type. Full data types list can be found here:
                                     https://learn.microsoft.com/en-us/sql/t-sql/data-types/data-types-transact-sql?view=sql-server-ver16
                                 - !ruby/object:Api::Type::Integer
-                                  name: "length"
+                                  name: 'length'
                                   output: true
                                   description: |
                                     Column length.
                                 - !ruby/object:Api::Type::Integer
-                                  name: "precision"
+                                  name: 'precision'
                                   output: true
                                   description: |
                                     Column precision.
                                 - !ruby/object:Api::Type::Integer
-                                  name: "scale"
+                                  name: 'scale'
                                   output: true
                                   description: |
                                     Column scale.
                                 - !ruby/object:Api::Type::String
-                                  name: "encoding"
+                                  name: 'encoding'
                                   output: true
                                   description: |
                                     Column encoding.
                                 - !ruby/object:Api::Type::Boolean
-                                  name: "primaryKey"
+                                  name: 'primaryKey'
                                   output: true
                                   description: |
                                     Whether or not the column represents a primary key.
                                 - !ruby/object:Api::Type::Boolean
-                                  name: "nullable"
+                                  name: 'nullable'
                                   output: true
                                   description: |
                                     Whether or not the column can accept a null value.
                                 - !ruby/object:Api::Type::Integer
-                                  name: "ordinalPosition"
+                                  name: 'ordinalPosition'
                                   output: true
                                   description: |
                                     The ordinal position of the column in the table.
           - !ruby/object:Api::Type::Integer
-            name: "maxConcurrentCdcTasks"
+            name: 'maxConcurrentCdcTasks'
             send_empty_value: true
             description: |
               Maximum number of concurrent CDC tasks. The number should be non negative.
               If not set (or set to 0), the system's default value will be used.
             default_from_api: true
             validation: !ruby/object:Provider::Terraform::Validation
-              function: "validation.IntAtLeast(0)"
+              function: 'validation.IntAtLeast(0)'
           - !ruby/object:Api::Type::Integer
-            name: "maxConcurrentBackfillTasks"
+            name: 'maxConcurrentBackfillTasks'
             send_empty_value: true
             description: |
               Maximum number of concurrent backfill tasks. The number should be non negative.
               If not set (or set to 0), the system's default value will be used.
             default_from_api: true
             validation: !ruby/object:Provider::Terraform::Validation
-              function: "validation.IntAtLeast(0)"
+              function: 'validation.IntAtLeast(0)'
   - !ruby/object:Api::Type::NestedObject
-    name: "destinationConfig"
+    name: 'destinationConfig'
     required: true
     description: |
       Destination connection profile configuration.
     properties:
       - !ruby/object:Api::Type::String
-        name: "destinationConnectionProfile"
+        name: 'destinationConnectionProfile'
         immutable: true
         required: true
         description: |
           Destination connection profile resource. Format: projects/{project}/locations/{location}/connectionProfiles/{name}
-        diff_suppress_func: "tpgresource.ProjectNumberDiffSuppress"
+        diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
       - !ruby/object:Api::Type::NestedObject
-        name: "gcsDestinationConfig"
+        name: 'gcsDestinationConfig'
         exactly_one_of:
           - destination_config.0.gcs_destination_config
           - destination_config.0.bigquery_destination_config
@@ -1000,22 +1002,22 @@ properties:
           A configuration for how data should be loaded to Cloud Storage.
         properties:
           - !ruby/object:Api::Type::String
-            name: "path"
+            name: 'path'
             description: |
               Path inside the Cloud Storage bucket to write data to.
           - !ruby/object:Api::Type::Integer
-            name: "fileRotationMb"
+            name: 'fileRotationMb'
             description: |
               The maximum file size to be saved in the bucket.
             default_from_api: true
           - !ruby/object:Api::Type::String
-            name: "fileRotationInterval"
+            name: 'fileRotationInterval'
             description: |
               The maximum duration for which new events are added before a file is closed and a new file is created.
               A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s". Defaults to 900s.
             default_from_api: true
           - !ruby/object:Api::Type::NestedObject
-            name: "avroFileFormat"
+            name: 'avroFileFormat'
             exactly_one_of:
               - destination_config.0.gcs_destination_config.0.avro_file_format
               - destination_config.0.gcs_destination_config.0.json_file_format
@@ -1025,7 +1027,7 @@ properties:
               AVRO file format configuration.
             properties: []
           - !ruby/object:Api::Type::NestedObject
-            name: "jsonFileFormat"
+            name: 'jsonFileFormat'
             exactly_one_of:
               - destination_config.0.gcs_destination_config.0.avro_file_format
               - destination_config.0.gcs_destination_config.0.json_file_format
@@ -1033,21 +1035,21 @@ properties:
               JSON file format configuration.
             properties:
               - !ruby/object:Api::Type::Enum
-                name: "schemaFileFormat"
+                name: 'schemaFileFormat'
                 description: |
                   The schema file format along JSON data files.
                 values:
                   - NO_SCHEMA_FILE
                   - AVRO_SCHEMA_FILE
               - !ruby/object:Api::Type::Enum
-                name: "compression"
+                name: 'compression'
                 description: |
                   Compression of the loaded JSON file.
                 values:
                   - NO_COMPRESSION
                   - GZIP
       - !ruby/object:Api::Type::NestedObject
-        name: "bigqueryDestinationConfig"
+        name: 'bigqueryDestinationConfig'
         exactly_one_of:
           - destination_config.0.gcs_destination_config
           - destination_config.0.bigquery_destination_config
@@ -1055,14 +1057,14 @@ properties:
           A configuration for how data should be loaded to Cloud Storage.
         properties:
           - !ruby/object:Api::Type::String
-            name: "dataFreshness"
+            name: 'dataFreshness'
             description: |
               The guaranteed data freshness (in seconds) when querying tables created by the stream.
               Editing this field will only affect new tables created in the future, but existing tables
               will not be impacted. Lower values mean that queries will return fresher data, but may result in higher cost.
               A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s". Defaults to 900s.
           - !ruby/object:Api::Type::NestedObject
-            name: "singleTargetDataset"
+            name: 'singleTargetDataset'
             exactly_one_of:
               - destination_config.0.bigquery_destination_config.0.single_target_dataset
               - destination_config.0.bigquery_destination_config.0.source_hierarchy_datasets
@@ -1070,15 +1072,15 @@ properties:
               A single target dataset to which all data will be streamed.
             properties:
               - !ruby/object:Api::Type::String
-                name: "datasetId"
+                name: 'datasetId'
                 required: true
                 description: |
                   Dataset ID in the format projects/{project}/datasets/{dataset_id} or
                   {project}:{dataset_id}
-                custom_expand: "templates/terraform/custom_expand/datastream_stream_dataset_id.go.erb"
+                custom_expand: 'templates/terraform/custom_expand/datastream_stream_dataset_id.go.erb'
                 diff_suppress_func: resourceDatastreamStreamDatabaseIdDiffSuppress
           - !ruby/object:Api::Type::NestedObject
-            name: "sourceHierarchyDatasets"
+            name: 'sourceHierarchyDatasets'
             exactly_one_of:
               - destination_config.0.bigquery_destination_config.0.single_target_dataset
               - destination_config.0.bigquery_destination_config.0.source_hierarchy_datasets
@@ -1086,24 +1088,24 @@ properties:
               Destination datasets are created so that hierarchy of the destination data objects matches the source hierarchy.
             properties:
               - !ruby/object:Api::Type::NestedObject
-                name: "datasetTemplate"
+                name: 'datasetTemplate'
                 required: true
                 description: |
                   Dataset template used for dynamic dataset creation.
                 properties:
                   - !ruby/object:Api::Type::String
-                    name: "location"
+                    name: 'location'
                     required: true
                     description: |
                       The geographic location where the dataset should reside.
                       See https://cloud.google.com/bigquery/docs/locations for supported locations.
                   - !ruby/object:Api::Type::String
-                    name: "datasetIdPrefix"
+                    name: 'datasetIdPrefix'
                     description: |
                       If supplied, every created dataset will have its name prefixed by the provided value.
                       The prefix and name will be separated by an underscore. i.e. _.
                   - !ruby/object:Api::Type::String
-                    name: "kmsKeyName"
+                    name: 'kmsKeyName'
                     immutable: true
                     description: |
                       Describes the Cloud KMS encryption key that will be used to protect destination BigQuery
@@ -1111,11 +1113,11 @@ properties:
                       encryption key. i.e. projects/{project}/locations/{location}/keyRings/{key_ring}/cryptoKeys/{cryptoKey}.
                       See https://cloud.google.com/bigquery/docs/customer-managed-encryption for more information.
   - !ruby/object:Api::Type::String
-    name: "state"
+    name: 'state'
     description: The state of the stream.
     output: true
   - !ruby/object:Api::Type::NestedObject
-    name: "backfillAll"
+    name: 'backfillAll'
     exactly_one_of:
       - backfill_all
       - backfill_none
@@ -1125,12 +1127,12 @@ properties:
       Backfill strategy to automatically backfill the Stream's objects. Specific objects can be excluded.
     properties:
       - !ruby/object:Api::Type::NestedObject
-        name: "mysqlExcludedObjects"
+        name: 'mysqlExcludedObjects'
         description: |
           MySQL data source objects to avoid backfilling.
         properties:
           - !ruby/object:Api::Type::Array
-            name: "mysqlDatabases"
+            name: 'mysqlDatabases'
             required: true
             min_size: 1
             description: |
@@ -1140,12 +1142,12 @@ properties:
                 MySQL database.
               properties:
                 - !ruby/object:Api::Type::String
-                  name: "database"
+                  name: 'database'
                   required: true
                   description: |
                     Database name.
                 - !ruby/object:Api::Type::Array
-                  name: "mysqlTables"
+                  name: 'mysqlTables'
                   min_size: 1
                   description: |
                     Tables in the database.
@@ -1154,12 +1156,12 @@ properties:
                       MySQL table.
                     properties:
                       - !ruby/object:Api::Type::String
-                        name: "table"
+                        name: 'table'
                         required: true
                         description: |
                           Table name.
                       - !ruby/object:Api::Type::Array
-                        name: "mysqlColumns"
+                        name: 'mysqlColumns'
                         min_size: 1
                         description: |
                           MySQL columns in the schema. When unspecified as part of include/exclude objects, includes/excludes everything.
@@ -1168,42 +1170,42 @@ properties:
                             MySQL Column.
                           properties:
                             - !ruby/object:Api::Type::String
-                              name: "column"
+                              name: 'column'
                               description: |
                                 Column name.
                             - !ruby/object:Api::Type::String
-                              name: "dataType"
+                              name: 'dataType'
                               description: |
                                 The MySQL data type. Full data types list can be found here:
                                 https://dev.mysql.com/doc/refman/8.0/en/data-types.html
                             - !ruby/object:Api::Type::Integer
-                              name: "length"
+                              name: 'length'
                               output: true
                               description: |
                                 Column length.
                             - !ruby/object:Api::Type::String
-                              name: "collation"
+                              name: 'collation'
                               description: |
                                 Column collation.
                             - !ruby/object:Api::Type::Boolean
-                              name: "primaryKey"
+                              name: 'primaryKey'
                               description: |
                                 Whether or not the column represents a primary key.
                             - !ruby/object:Api::Type::Boolean
-                              name: "nullable"
+                              name: 'nullable'
                               description: |
                                 Whether or not the column can accept a null value.
                             - !ruby/object:Api::Type::Integer
-                              name: "ordinalPosition"
+                              name: 'ordinalPosition'
                               description: |
                                 The ordinal position of the column in the table.
       - !ruby/object:Api::Type::NestedObject
-        name: "postgresqlExcludedObjects"
+        name: 'postgresqlExcludedObjects'
         description: |
           PostgreSQL data source objects to avoid backfilling.
         properties:
           - !ruby/object:Api::Type::Array
-            name: "postgresqlSchemas"
+            name: 'postgresqlSchemas'
             required: true
             min_size: 1
             description: |
@@ -1213,12 +1215,12 @@ properties:
                 PostgreSQL schema.
               properties:
                 - !ruby/object:Api::Type::String
-                  name: "schema"
+                  name: 'schema'
                   required: true
                   description: |
                     Database name.
                 - !ruby/object:Api::Type::Array
-                  name: "postgresqlTables"
+                  name: 'postgresqlTables'
                   min_size: 1
                   description: |
                     Tables in the schema.
@@ -1227,12 +1229,12 @@ properties:
                       PostgreSQL table.
                     properties:
                       - !ruby/object:Api::Type::String
-                        name: "table"
+                        name: 'table'
                         required: true
                         description: |
                           Table name.
                       - !ruby/object:Api::Type::Array
-                        name: "postgresqlColumns"
+                        name: 'postgresqlColumns'
                         min_size: 1
                         description: |
                           PostgreSQL columns in the schema. When unspecified as part of include/exclude objects, includes/excludes everything.
@@ -1241,48 +1243,48 @@ properties:
                             PostgreSQL Column.
                           properties:
                             - !ruby/object:Api::Type::String
-                              name: "column"
+                              name: 'column'
                               description: |
                                 Column name.
                             - !ruby/object:Api::Type::String
-                              name: "dataType"
+                              name: 'dataType'
                               description: |
                                 The PostgreSQL data type. Full data types list can be found here:
                                 https://www.postgresql.org/docs/current/datatype.html
                             - !ruby/object:Api::Type::Integer
-                              name: "length"
+                              name: 'length'
                               output: true
                               description: |
                                 Column length.
                             - !ruby/object:Api::Type::Integer
-                              name: "precision"
+                              name: 'precision'
                               output: true
                               description: |
                                 Column precision.
                             - !ruby/object:Api::Type::Integer
-                              name: "scale"
+                              name: 'scale'
                               output: true
                               description: |
                                 Column scale.
                             - !ruby/object:Api::Type::Boolean
-                              name: "primaryKey"
+                              name: 'primaryKey'
                               description: |
                                 Whether or not the column represents a primary key.
                             - !ruby/object:Api::Type::Boolean
-                              name: "nullable"
+                              name: 'nullable'
                               description: |
                                 Whether or not the column can accept a null value.
                             - !ruby/object:Api::Type::Integer
-                              name: "ordinalPosition"
+                              name: 'ordinalPosition'
                               description: |
                                 The ordinal position of the column in the table.
       - !ruby/object:Api::Type::NestedObject
-        name: "oracleExcludedObjects"
+        name: 'oracleExcludedObjects'
         description: |
           PostgreSQL data source objects to avoid backfilling.
         properties:
           - !ruby/object:Api::Type::Array
-            name: "oracleSchemas"
+            name: 'oracleSchemas'
             required: true
             min_size: 1
             description: |
@@ -1292,12 +1294,12 @@ properties:
                 MySQL database.
               properties:
                 - !ruby/object:Api::Type::String
-                  name: "schema"
+                  name: 'schema'
                   required: true
                   description: |
                     Schema name.
                 - !ruby/object:Api::Type::Array
-                  name: "oracleTables"
+                  name: 'oracleTables'
                   min_size: 1
                   description: |
                     Tables in the database.
@@ -1306,12 +1308,12 @@ properties:
                       Oracle table.
                     properties:
                       - !ruby/object:Api::Type::String
-                        name: "table"
+                        name: 'table'
                         required: true
                         description: |
                           Table name.
                       - !ruby/object:Api::Type::Array
-                        name: "oracleColumns"
+                        name: 'oracleColumns'
                         min_size: 1
                         description: |
                           Oracle columns in the schema. When unspecified as part of include/exclude objects, includes/excludes everything.
@@ -1320,58 +1322,57 @@ properties:
                             Oracle Column.
                           properties:
                             - !ruby/object:Api::Type::String
-                              name: "column"
+                              name: 'column'
                               description: |
                                 Column name.
                             - !ruby/object:Api::Type::String
-                              name: "dataType"
+                              name: 'dataType'
                               description: |
                                 The Oracle data type. Full data types list can be found here:
                                 https://docs.oracle.com/en/database/oracle/oracle-database/21/sqlrf/Data-Types.html
                             - !ruby/object:Api::Type::Integer
-                              name: "length"
+                              name: 'length'
                               output: true
                               description: |
                                 Column length.
                             - !ruby/object:Api::Type::Integer
-                              name: "precision"
+                              name: 'precision'
                               output: true
                               description: |
                                 Column precision.
                             - !ruby/object:Api::Type::Integer
-                              name: "scale"
+                              name: 'scale'
                               output: true
                               description: |
                                 Column scale.
                             - !ruby/object:Api::Type::String
-                              name: "encoding"
+                              name: 'encoding'
                               output: true
                               description: |
                                 Column encoding.
                             - !ruby/object:Api::Type::Boolean
-                              name: "primaryKey"
+                              name: 'primaryKey'
                               output: true
                               description: |
                                 Whether or not the column represents a primary key.
                             - !ruby/object:Api::Type::Boolean
-                              name: "nullable"
+                              name: 'nullable'
                               output: true
                               description: |
                                 Whether or not the column can accept a null value.
                             - !ruby/object:Api::Type::Integer
-                              name: "ordinalPosition"
+                              name: 'ordinalPosition'
                               output: true
                               description: |
                                 The ordinal position of the column in the table.
       - !ruby/object:Api::Type::NestedObject
-        name: "sqlServerExcludedObjects"
+        name: 'sqlServerExcludedObjects'
         min_version: beta
-        required: false
         description: |
           SQL Server data source objects to avoid backfilling.
         properties:
           - !ruby/object:Api::Type::Array
-            name: "schemas"
+            name: 'schemas'
             required: true
             min_size: 1
             description: |
@@ -1381,12 +1382,12 @@ properties:
                 SQL Server database.
               properties:
                 - !ruby/object:Api::Type::String
-                  name: "schema"
+                  name: 'schema'
                   required: true
                   description: |
                     Schema name.
                 - !ruby/object:Api::Type::Array
-                  name: "tables"
+                  name: 'tables'
                   min_size: 1
                   description: |
                     Tables in the database.
@@ -1395,12 +1396,12 @@ properties:
                       SQL Server table.
                     properties:
                       - !ruby/object:Api::Type::String
-                        name: "table"
+                        name: 'table'
                         required: true
                         description: |
                           Table name.
                       - !ruby/object:Api::Type::Array
-                        name: "columns"
+                        name: 'columns'
                         min_size: 1
                         description: |
                           SQL Server columns in the schema. When unspecified as part of include/exclude objects, includes/excludes everything.
@@ -1409,51 +1410,51 @@ properties:
                             SQL Server Column.
                           properties:
                             - !ruby/object:Api::Type::String
-                              name: "column"
+                              name: 'column'
                               description: |
                                 Column name.
                             - !ruby/object:Api::Type::String
-                              name: "dataType"
+                              name: 'dataType'
                               description: |
                                 The SQL Server data type. Full data types list can be found here:
                                 https://learn.microsoft.com/en-us/sql/t-sql/data-types/data-types-transact-sql?view=sql-server-ver16
                             - !ruby/object:Api::Type::Integer
-                              name: "length"
+                              name: 'length'
                               output: true
                               description: |
                                 Column length.
                             - !ruby/object:Api::Type::Integer
-                              name: "precision"
+                              name: 'precision'
                               output: true
                               description: |
                                 Column precision.
                             - !ruby/object:Api::Type::Integer
-                              name: "scale"
+                              name: 'scale'
                               output: true
                               description: |
                                 Column scale.
                             - !ruby/object:Api::Type::String
-                              name: "encoding"
+                              name: 'encoding'
                               output: true
                               description: |
                                 Column encoding.
                             - !ruby/object:Api::Type::Boolean
-                              name: "primaryKey"
+                              name: 'primaryKey'
                               output: true
                               description: |
                                 Whether or not the column represents a primary key.
                             - !ruby/object:Api::Type::Boolean
-                              name: "nullable"
+                              name: 'nullable'
                               output: true
                               description: |
                                 Whether or not the column can accept a null value.
                             - !ruby/object:Api::Type::Integer
-                              name: "ordinalPosition"
+                              name: 'ordinalPosition'
                               output: true
                               description: |
                                 The ordinal position of the column in the table.
   - !ruby/object:Api::Type::NestedObject
-    name: "backfillNone"
+    name: 'backfillNone'
     exactly_one_of:
       - backfill_all
       - backfill_none
@@ -1463,7 +1464,7 @@ properties:
       Backfill strategy to disable automatic backfill for the Stream's objects.
     properties: []
   - !ruby/object:Api::Type::String
-    name: "customerManagedEncryptionKey"
+    name: 'customerManagedEncryptionKey'
     immutable: true
     description: |
       A reference to a KMS encryption key. If provided, it will be used to encrypt the data. If left blank, data
