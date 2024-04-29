@@ -53,14 +53,26 @@ resource "google_project" "my_project" {
   billing_account = "%{billing_account}"
 }
 
+resource "google_project_service" "project" {
+  for_each = toset([
+    "compute.googleapis.com",
+    "appengineflex.googleapis.com"
+  ])
+
+  project = google_project.my_project.project_id
+  service = each.key
+
+  disable_dependent_services = false
+}
+
 resource "google_compute_network" "network" {
-  project                 = google_project.my_project.project_id
+  project                 = google_project_service.project.project
   name                    = "custom"
   auto_create_subnetworks = "false"
 }
 
 resource "google_compute_subnetwork" "subnetwork" {
-  project                  = google_project.my_project.project_id
+  project                  = google_project_service.project.project
   name                     = "custom"
   region                   = "us-central1"
   network                  = google_compute_network.network.id
@@ -71,13 +83,6 @@ resource "google_compute_subnetwork" "subnetwork" {
 resource "google_app_engine_application" "app" {
   project     = google_project.my_project.project_id
   location_id = "us-central"
-}
-
-resource "google_project_service" "project" {
-  project = google_project.my_project.project_id
-  service = "appengineflex.googleapis.com"
-
-  disable_dependent_services = false
 }
 
 resource "google_project_iam_member" "gae_api" {
@@ -182,14 +187,26 @@ resource "google_project" "my_project" {
   billing_account = "%{billing_account}"
 }
 
+resource "google_project_service" "project" {
+  for_each = toset([
+    "compute.googleapis.com",
+    "appengineflex.googleapis.com"
+  ])
+
+  project = google_project.my_project.project_id
+  service = each.key
+
+  disable_dependent_services = false
+}
+
 resource "google_compute_network" "network" {
-  project                 = google_project.my_project.project_id
+  project                 = google_project_service.project.project
   name                    = "custom"
   auto_create_subnetworks = "false"
 }
 
 resource "google_compute_subnetwork" "subnetwork" {
-  project                  = google_project.my_project.project_id
+  project                  = google_project_service.project.project
   name                     = "custom"
   region                   = "us-central1"
   network                  = google_compute_network.network.id
@@ -200,13 +217,6 @@ resource "google_compute_subnetwork" "subnetwork" {
 resource "google_app_engine_application" "app" {
   project     = google_project.my_project.project_id
   location_id = "us-central"
-}
-
-resource "google_project_service" "project" {
-  project = google_project.my_project.project_id
-  service = "appengineflex.googleapis.com"
-
-  disable_dependent_services = false
 }
 
 resource "google_project_iam_member" "gae_api" {
