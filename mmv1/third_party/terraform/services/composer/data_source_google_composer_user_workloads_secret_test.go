@@ -1,11 +1,11 @@
 package composer_test
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"strings"
 	"testing"
-	"errors"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
