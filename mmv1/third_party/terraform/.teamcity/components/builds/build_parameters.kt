@@ -28,6 +28,9 @@ class AllContextParameters(
     val credentialsBeta: String,
     val credentialsVcr: String,
 
+    // GOOGLE_CREDENTIALS_GCS
+    val credentialsGCS: String,
+
     // GOOGLE_SERVICE_ACCOUNT
     val serviceAccountGa: String,
     val serviceAccountBeta: String,
@@ -96,6 +99,9 @@ class AccTestConfiguration(
     // VCR specific
     val infraProject: String,
     val vcrBucketName: String,
+
+    // GCS specific (for nightly + upstream MM logs)
+    val credentialsGCS: String,
     )
 
 fun getGaAcceptanceTestConfig(allConfig: AllContextParameters): AccTestConfiguration {
@@ -116,7 +122,8 @@ fun getGaAcceptanceTestConfig(allConfig: AllContextParameters): AccTestConfigura
         allConfig.serviceAccountGa,
         allConfig.zone,
         allConfig.infraProject,
-        allConfig.vcrBucketName
+        allConfig.vcrBucketName,
+        allConfig.credentialsGCS
     )
 }
 
@@ -138,7 +145,8 @@ fun getBetaAcceptanceTestConfig(allConfig: AllContextParameters): AccTestConfigu
         allConfig.serviceAccountBeta,
         allConfig.zone,
         allConfig.infraProject,
-        allConfig.vcrBucketName
+        allConfig.vcrBucketName,
+        allConfig.credentialsGCS
     )
 }
 
@@ -160,7 +168,8 @@ fun getVcrAcceptanceTestConfig(allConfig: AllContextParameters): AccTestConfigur
         allConfig.serviceAccountVcr,
         allConfig.zone,
         allConfig.infraProject,
-        allConfig.vcrBucketName
+        allConfig.vcrBucketName,
+        allConfig.credentialsGCS
     )
 }
 
@@ -245,6 +254,8 @@ fun ParametrizedWithType.terraformLoggingParameters(providerName: String) {
     // Set where logs are sent
     text("PROVIDER_NAME", providerName)
     text("env.TF_LOG_PATH_MASK", "%system.teamcity.build.checkoutDir%/debug-%PROVIDER_NAME%-%env.BUILD_NUMBER%-%teamcity.build.counter%-%s.txt") // .txt extension used to make artifacts open in browser, instead of download
+
+    hiddenPasswordVariable("env.GOOGLE_CREDENTIALS_GCS", config.credentialsGCS, "The Google credentials for copy debug logs to the GCS bucket")
 }
 
 fun ParametrizedWithType.readOnlySettings() {

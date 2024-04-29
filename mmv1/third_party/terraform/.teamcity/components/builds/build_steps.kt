@@ -141,16 +141,19 @@ fun BuildSteps.saveArtifactsToGCS() {
             echo "Post-test step - storge artifacts(debug logs) to GCS"
 
             # Authenticate gcloud CLI
-            echo "${'$'}{GOOGLE_CREDENTIALS}" > google-account.json
+            echo "${'$'}{GOOGLE_CREDENTIALS_GCS}" > google-account.json
             chmod 600 google-account.json
             gcloud auth activate-service-account --key-file=google-account.json
+
+            # Get current date
+            current_date=$(date+"%Y-%m-%d")
 
             # Detect Trigger Method 
             TRIGGERED_BY_USERNAME=%teamcity.build.triggeredBy.username%
             BRANCH_NAME=%teamcity.build.branch%
             if [[ "${'$'}TRIGGERED_BY_USERNAME" = "n/a" ]] ; then
                 echo "Build was triggered as part of automated testing. We know this because the `triggeredBy.username` value was `n/a`, value: ${'$'}{TRIGGERED_BY_USERNAME}"
-                FOLDER="nightly/%teamcity.project.id%"
+                FOLDER="nightly/%teamcity.project.id%/${'$'}current_date"
             else
                 echo "Build was triggered manually. We know this because `triggeredBy.username` has a non- `n/a` value: ${'$'}{TRIGGERED_BY_USERNAME}"
                 FOLDER="manual/%teamcity.project.id%/${'$'}BRANCH_NAME"
