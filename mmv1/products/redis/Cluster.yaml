@@ -110,6 +110,19 @@ properties:
     default_value: :TRANSIT_ENCRYPTION_MODE_DISABLED
     immutable: true
     required: false
+  - !ruby/object:Api::Type::Enum
+    name: nodeType
+    description: |
+      The nodeType for the Redis cluster.
+      If not provided, REDIS_HIGHMEM_MEDIUM will be used as default
+    values:
+      - :REDIS_SHARED_CORE_NANO
+      - :REDIS_HIGHMEM_MEDIUM
+      - :REDIS_HIGHMEM_XLARGE
+      - :REDIS_STANDARD_SMALL
+    default_from_api: true
+    immutable: true
+    required: false
   - !ruby/object:Api::Type::Array
     name: 'pscConfigs'
     description: |
@@ -208,8 +221,19 @@ properties:
     description: |
       Output only. Redis memory size in GB for the entire cluster.
     output: true
+  - !ruby/object:Api::Type::Double
+    name: preciseSizeGb
+    description: |
+      Output only. Redis memory precise size in GB for the entire cluster.
+    output: true
   - !ruby/object:Api::Type::Integer
     name: shardCount
     description: |
       Required. Number of shards for the Redis cluster.
     required: true
+  - !ruby/object:Api::Type::KeyValuePairs
+    name: 'redisConfigs'
+    description: |
+      Configure Redis Cluster behavior using a subset of native Redis configuration parameters.
+      Please check Memorystore documentation for the list of supported parameters:
+      https://cloud.google.com/memorystore/docs/cluster/supported-instance-configurations

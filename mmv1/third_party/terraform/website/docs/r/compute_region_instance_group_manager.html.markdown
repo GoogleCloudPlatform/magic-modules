@@ -173,6 +173,8 @@ group. You can specify one or more values. For more information, see the [offici
 
 * `stateful_external_ip` - (Optional) External network IPs assigned to the instances that will be preserved on instance delete, update, etc. This map is keyed with the network interface name. Structure is [documented below](#nested_stateful_external_ip).
 
+* `params` - (Optional [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Input only additional params for instance group manager creation. Structure is [documented below](#nested_params). For more information, see [API](https://cloud.google.com/compute/docs/reference/rest/beta/instanceGroupManagers/insert).
+
 - - -
 
 <a name="nested_update_policy"></a>The `update_policy` block supports:
@@ -317,12 +319,26 @@ one of which has a `target_size.percent` of `60` will create 2 instances of that
 
 * `delete_rule` - (Optional), A value that prescribes what should happen to the external ip when the VM instance is deleted. The available options are `NEVER` and `ON_PERMANENT_INSTANCE_DELETION`. `NEVER` - detach the ip when the VM is deleted, but do not delete the ip. `ON_PERMANENT_INSTANCE_DELETION` will delete the external ip when the VM is permanently deleted from the instance group.
 
+<a name="nested_params"></a>The `params` block supports:
+
+```hcl
+params{
+  resource_manager_tags = {
+    "tagKeys/123": "tagValues/123"
+  }
+}
+```
+
+* `resource_manager_tags` - (Optional) Resource manager tags to bind to the managed instance group. The tags are key-value pairs. Keys must be in the format tagKeys/123 and values in the format tagValues/456. For more information, see [Manage tags for resources](https://cloud.google.com/compute/docs/tag-resources)
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are
 exported:
 
 * `id` - an identifier for the resource with format `projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{name}}`
+
+* `creation_timestamp` - Creation timestamp in RFC3339 text format.
 
 * `fingerprint` - The fingerprint of the instance group manager.
 
@@ -334,19 +350,27 @@ The `status` block holds:
 
 * `is_stable` - A bit indicating whether the managed instance group is in a stable state. A stable state means that: none of the instances in the managed instance group is currently undergoing any type of change (for example, creation, restart, or deletion); no future changes are scheduled for instances in the managed instance group; and the managed instance group itself is not being modified.
 
+* `all_instances_config` - Status of all-instances configuration on the group.
+
+* `stateful` - Stateful status of the given Instance Group Manager.
+
 * `version_target` - A status of consistency of Instances' versions with their target version specified by version field on Instance Group Manager.
 
 The `version_target` block holds:
 
 * `version_target` - A bit indicating whether version target has been reached in this managed instance group, i.e. all instances are in their target version. Instances' target version are specified by version field on Instance Group Manager.
 
-* `stateful` - Stateful status of the given Instance Group Manager.
+The `all_instances_config` block holds:
+
+* `effective` -  A bit indicating whether this configuration has been applied to all managed instances in the group.
+
+* `current_revision` - Current all-instances configuration revision. This value is in RFC3339 text format.
 
 The `stateful` block holds:
 
 * `has_stateful_config` - A bit indicating whether the managed instance group has stateful configuration, that is, if you have configured any items in a stateful policy or in per-instance configs. The group might report that it has no stateful config even when there is still some preserved state on a managed instance, for example, if you have deleted all PICs but not yet applied those deletions.
 
-* `per_instance_configs` - Status of per-instance configs on the instance.
+* `per_instance_configs` - Status of per-instance configs on the instances.
 
 The `per_instance_configs` block holds:
 

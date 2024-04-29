@@ -68,14 +68,12 @@ resource "google_eventarc_trigger" "<%= ctx[:vars]['trigger_pubsub_tf'] %>" {
 }
 
 # Give default Compute service account eventarc.eventReceiver role
-resource "google_project_iam_binding" "project" {
+resource "google_project_iam_member" "project" {
   provider = google-beta
   project = data.google_project.project.id
   role    = "roles/eventarc.eventReceiver"
 
-  members = [
-    "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
-  ]
+  member = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
 }
     
 # Create an AuditLog for Cloud Storage trigger
