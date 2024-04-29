@@ -332,7 +332,7 @@ func TestComputeBreakingChanges(t *testing.T) {
 			schemaDiff := diff.ComputeSchemaDiff(tc.oldResourceMap, tc.newResourceMap)
 			violations := ComputeBreakingChanges(schemaDiff)
 			for _, v := range violations {
-				if strings.Contains(v, "{{") || strings.Contains(v, "}}") {
+				if strings.Contains(v.Message, "{{") || strings.Contains(v.Message, "}}") {
 					t.Errorf("Test `%s` failed: found unreplaced characters in string - %s", tc.name, v)
 				}
 			}

@@ -6,6 +6,8 @@ import (
 	"testing"
 
 	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
+	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/rules"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -92,7 +94,7 @@ func TestBreakingChangesCmd(t *testing.T) {
 			out := make([]byte, buf.Len())
 			buf.Read(out)
 
-			var got []string
+			var got []rules.BreakingChange
 			if err = json.Unmarshal(out, &got); err != nil {
 				t.Fatalf("Failed to unmarshall output: %s", err)
 			}

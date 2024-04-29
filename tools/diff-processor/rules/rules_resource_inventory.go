@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/constants"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -59,11 +60,17 @@ func (rm ResourceInventoryRule) Identifier() string {
 
 // Message - a message to to inform the user
 // of a breakage.
-func (rm ResourceInventoryRule) Message(resource string) string {
+func (rm ResourceInventoryRule) Message(resource string) *BreakingChange {
 	msg := rm.message
-	resource = fmt.Sprintf("`%s`", resource)
-	msg = strings.ReplaceAll(msg, "{{resource}}", resource)
-	return msg + documentationReference(rm.identifier)
+	msg = strings.ReplaceAll(msg, "{{resource}}", fmt.Sprintf("`%s`", resource))
+	return &BreakingChange{
+		RuleTemplate:           rm.message,
+		Resource:               resource,
+		Message:                msg,
+		DocumentationReference: constants.GetFileUrl(rm.identifier),
+		RuleDefinition:         rm.definition,
+		RuleName:               rm.name,
+	}
 }
 
 // Undetectable - informs if there are functions in place
