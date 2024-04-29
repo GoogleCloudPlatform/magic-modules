@@ -234,6 +234,8 @@ properties:
   - !ruby/object:Api::Type::Boolean
     name: deletionProtectionEnabled
     description: |
-      Optional. Indicates if the cluster is deletion protected or not. Default value is true.
+      Optional. Indicates if the cluster is deletion protected or not. 
+      If the value if set to true, any delete cluster operation will fail. 
+      Default value is true. 
     required: false
     default_value: true
