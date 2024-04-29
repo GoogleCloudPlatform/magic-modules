@@ -192,7 +192,7 @@ func TestAccRedisCluster_createUpdateDeletionProtection(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// create cluster with deletion protection set to false
-        Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, deletionProtectionEnabled: false})
+        		Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, deletionProtectionEnabled: false}),
 			},
 			{
 				ResourceName:            "google_redis_cluster.test",
@@ -202,7 +202,7 @@ func TestAccRedisCluster_createUpdateDeletionProtection(t *testing.T) {
 			},
 			{
 				// update deletion protection to true
-        Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, deletionProtectionEnabled: true})
+        		Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, deletionProtectionEnabled: true}),
 			},
 			{
 				ResourceName:            "google_redis_cluster.test",
@@ -212,7 +212,7 @@ func TestAccRedisCluster_createUpdateDeletionProtection(t *testing.T) {
 			},
 			{
 				// update deletion protection to false and delete the cluster
-        Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, deletionProtectionEnabled: false})
+        		Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, deletionProtectionEnabled: false}),
 			},
 
 		},
