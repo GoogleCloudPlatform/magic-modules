@@ -160,7 +160,7 @@ fun BuildSteps.saveArtifactsToGCS() {
             fi
 
             # Copy logs to GCS
-            gsutil -m cp %teamcity.build.checkoutDir%/debug* gs://teamcity-nightly-logs/${'$'}{FOLDER}/%env.BUILD_NUMBER%/
+            gsutil -m cp %teamcity.build.checkoutDir%/debug* gs://teamcity-logs/${'$'}{FOLDER}/%env.BUILD_NUMBER%/
 
             # Cleanup
             rm google-account.json
