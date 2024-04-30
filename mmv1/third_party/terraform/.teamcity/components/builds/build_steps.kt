@@ -146,7 +146,7 @@ fun BuildSteps.saveArtifactsToGCS() {
             gcloud auth activate-service-account --key-file=google-account.json
 
             # Get current date
-            current_date=$(date+"%Y-%m-%d")
+            current_date=$(date +"%%Y-%%m-%%d")
 
             # Detect Trigger Method 
             TRIGGERED_BY_USERNAME=%teamcity.build.triggeredBy.username%
