@@ -53,26 +53,28 @@ resource "google_project" "my_project" {
   billing_account = "%{billing_account}"
 }
 
-resource "google_project_service" "project" {
-  for_each = toset([
-    "compute.googleapis.com",
-    "appengineflex.googleapis.com"
-  ])
-
+resource "google_project_service" "compute" {
   project = google_project.my_project.project_id
-  service = each.key
+  service = "compute.googleapis.com"
+
+  disable_dependent_services = false
+}
+
+resource "google_project_service" "appengineflex" {
+  project = google_project.my_project.project_id
+  service = "appengineflex.googleapis.com"
 
   disable_dependent_services = false
 }
 
 resource "google_compute_network" "network" {
-  project                 = google_project_service.project.project
+  project                 = google_project_service.compute.project
   name                    = "custom"
   auto_create_subnetworks = "false"
 }
 
 resource "google_compute_subnetwork" "subnetwork" {
-  project                  = google_project_service.project.project
+  project                  = google_project_service.compute.project
   name                     = "custom"
   region                   = "us-central1"
   network                  = google_compute_network.network.id
@@ -86,7 +88,7 @@ resource "google_app_engine_application" "app" {
 }
 
 resource "google_project_iam_member" "gae_api" {
-  project = google_project_service.project.project
+  project = google_project_service.appengineflex.project
   role    = "roles/compute.networkUser"
   member  = "serviceAccount:service-${google_project.my_project.number}@gae-api-prod.google.com.iam.gserviceaccount.com"
 }
@@ -187,26 +189,28 @@ resource "google_project" "my_project" {
   billing_account = "%{billing_account}"
 }
 
-resource "google_project_service" "project" {
-  for_each = toset([
-    "compute.googleapis.com",
-    "appengineflex.googleapis.com"
-  ])
-
+resource "google_project_service" "compute" {
   project = google_project.my_project.project_id
-  service = each.key
+  service = "compute.googleapis.com"
+
+  disable_dependent_services = false
+}
+
+resource "google_project_service" "appengineflex" {
+  project = google_project.my_project.project_id
+  service = "appengineflex.googleapis.com"
 
   disable_dependent_services = false
 }
 
 resource "google_compute_network" "network" {
-  project                 = google_project_service.project.project
+  project                 = google_project_service.compute.project
   name                    = "custom"
   auto_create_subnetworks = "false"
 }
 
 resource "google_compute_subnetwork" "subnetwork" {
-  project                  = google_project_service.project.project
+  project                  = google_project_service.compute.project
   name                     = "custom"
   region                   = "us-central1"
   network                  = google_compute_network.network.id
@@ -220,7 +224,7 @@ resource "google_app_engine_application" "app" {
 }
 
 resource "google_project_iam_member" "gae_api" {
-  project = google_project_service.project.project
+  project = google_project_service.appengineflex.project
   role    = "roles/compute.networkUser"
   member  = "serviceAccount:service-${google_project.my_project.number}@gae-api-prod.google.com.iam.gserviceaccount.com"
 }
