@@ -2179,7 +2179,7 @@ resource "google_container_cluster" "cluster" {
     advanced_machine_features {
       threads_per_core = 1
       enable_nested_virtualization = "%t"
-	  }
+    }
   }
 }
 
@@ -2194,7 +2194,7 @@ resource "google_container_node_pool" "np" {
     advanced_machine_features {
       threads_per_core = 1
       enable_nested_virtualization = "%t"
-	  }
+    }
   }
 }
 `, cluster, networkName, subnetworkName, enableNV, np, enableNV)
