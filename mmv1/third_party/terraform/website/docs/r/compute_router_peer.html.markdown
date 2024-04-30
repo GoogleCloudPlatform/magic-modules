@@ -335,8 +335,8 @@ The following arguments are supported:
 * `project` - (Optional) The ID of the project in which the resource belongs.
     If it is not provided, the provider project is used.
 
-* `md5_authentication_key` - (Optional) Present if MD5 authentication is enabled for the peering.
-   The field must comply with RFC1035. Structure is [documented below](#nested_md5_authentication_key).
+* `md5_authentication_key` - (Optional) Configuration for MD5 authentication on the BGP session.
+  Structure is [documented below](#nested_md5_authentication_key).
 
 <a name="nested_advertised_ip_ranges"></a>The `advertised_ip_ranges` block supports:
 
@@ -386,12 +386,11 @@ The following arguments are supported:
 
 * `name` -
   (Required)
-  Name used to identify the key. Must be unique within a router. Must be
-  referenced by exactly one bgpPeer. Must comply with RFC1035.
+  Name used to identify the key. Must be unique within a router. Must comply with RFC1035.
 
 * `key` -
   (Required, Input Only)
-  Value of the key. Maximum length is 80 characters. Can only contain printable ASCII characters
+  The MD5 authentication key for this BGP peer. Maximum length is 80 characters. Can only contain printable ASCII characters
 
 ## Attributes Reference
 
