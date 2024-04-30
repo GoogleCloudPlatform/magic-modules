@@ -253,7 +253,7 @@ fun ParametrizedWithType.terraformLoggingParameters(config: AccTestConfiguration
 
     // Set where logs are sent
     text("PROVIDER_NAME", providerName)
-    text("env.TF_LOG_PATH_MASK", "%system.teamcity.build.checkoutDir%/debug-%PROVIDER_NAME%-%env.BUILD_NUMBER%-%teamcity.build.counter%-%s.txt") // .txt extension used to make artifacts open in browser, instead of download
+    text("env.TF_LOG_PATH_MASK", "%system.teamcity.build.checkoutDir%/debug-%PROVIDER_NAME%-%env.BUILD_NUMBER%-%build.counter%-%s.txt") // .txt extension used to make artifacts open in browser, instead of download
 
     hiddenPasswordVariable("env.GOOGLE_CREDENTIALS_GCS", config.credentialsGCS, "The Google credentials for copying debug logs to the GCS bucket")
 }
