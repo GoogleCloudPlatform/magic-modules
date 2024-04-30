@@ -1,3 +1,7 @@
+data "google_project" "project" {
+  provider = google-beta
+}
+
 resource "google_privateca_ca_pool" "default" {
   provider = google-beta
   name      = "<%= ctx[:vars]['privateca_ca_pool_name'] %>"
