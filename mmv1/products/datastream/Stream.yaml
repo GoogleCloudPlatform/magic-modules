@@ -109,12 +109,18 @@ examples:
       destination_connection_profile_id: 'destination-profile'
   - !ruby/object:Provider::Terraform::Examples
     name: 'datastream_stream_sql_server'
+    min_version: beta
     primary_resource_id: 'default'
     skip_test: true
     vars:
-      stream_id: 'my-stream'
-      source_connection_profile_id: 'source-profile'
+      database_name: 'db'
+      database_password: 'password'
+      database_user: 'user'
       destination_connection_profile_id: 'destination-profile'
+      source_connection_profile_id: 'source-profile'
+      sql_server_name: 'sql-server'
+      sql_server_root_password: 'root-password'
+      stream_id: 'stream'
   - !ruby/object:Provider::Terraform::Examples
     name: 'datastream_stream_postgresql_bigquery_dataset_id'
     primary_resource_id: 'default'
