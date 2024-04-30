@@ -34,14 +34,12 @@ resource "google_sql_database_instance" "instance" {
 }
 
 resource "google_sql_database" "db" {
-  provider   = google-beta
   name       = "{{index $.Vars "database_name"}}"
   instance   = google_sql_database_instance.instance.name
   depends_on = [google_sql_user.user]
 }
 
 resource "google_sql_user" "user" {
-  provider = google-beta
   name     = "{{index $.Vars "database_user"}}"
   instance = google_sql_database_instance.instance.name
   password = "{{index $.Vars "database_password"}}"

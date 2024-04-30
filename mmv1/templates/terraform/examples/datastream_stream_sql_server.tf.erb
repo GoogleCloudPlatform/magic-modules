@@ -34,14 +34,12 @@ resource "google_sql_database_instance" "instance" {
 }
 
 resource "google_sql_database" "db" {
-  provider   = google-beta
   name       = "<%= ctx[:vars]['database_name'] %>"
   instance   = google_sql_database_instance.instance.name
   depends_on = [google_sql_user.user]
 }
 
 resource "google_sql_user" "user" {
-  provider = google-beta
   name     = "<%= ctx[:vars]['database_user'] %>"
   instance = google_sql_database_instance.instance.name
   password = "<%= ctx[:vars]['database_password'] %>"
