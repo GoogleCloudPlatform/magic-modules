@@ -1,4 +1,6 @@
 resource "google_compute_region_security_policy" "default" {
+  provider    = google-beta
+
   region      = "asia-southeast1"
   name        = "<%= ctx[:vars]['sec_policy_name'] %>"
   description = "basic region security policy"
@@ -6,6 +8,8 @@ resource "google_compute_region_security_policy" "default" {
 }
 
 resource "google_compute_region_security_policy_rule" "<%= ctx[:primary_resource_id] %>" {
+  provider    = google-beta
+
   region          = "asia-southeast1"
   security_policy = google_compute_region_security_policy.default.name
   description     = "new rule"
