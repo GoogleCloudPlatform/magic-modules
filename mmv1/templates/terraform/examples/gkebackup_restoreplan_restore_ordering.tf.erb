@@ -39,7 +39,7 @@ resource "google_gke_backup_restore_plan" "restore_orderings" {
       all_group_kinds = true
     }
     cluster_resource_conflict_policy = "USE_EXISTING_VERSION"
-    restore_ordering {
+    restore_order {
         group_kind_dependencies {
             satisfying {
                 resource_group = "stable.example.com"
