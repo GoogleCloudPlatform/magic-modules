@@ -51,6 +51,12 @@ examples:
       fw_allow_iap_hc_name: 'l7-ilb-fw-allow-iap-hc'
       fw_allow_ilb_to_backends_name: 'l7-ilb-fw-allow-ilb-to-backends'
       vm_test_name: 'l7-ilb-test-vm'
+      lb_route_extension_name: 'l7-ilb-route-ext'
+      callouts_instance_name: 'l7-ilb-callouts-ins'
+      callouts_instance_group: 'l7-ilb-callouts-ins-group'
+      callouts_hc_name: 'l7-ilb-callouts-hc'
+      callouts_backend_name: 'l7-ilb-callouts-backend'
+      callouts_url_map_name: 'l7-ilb-callouts-url-map'
     min_version: beta
     ignore_read_extra:
       - 'port_range'
@@ -162,18 +168,14 @@ properties:
                   List of the HTTP headers to forward to the extension (from the client or backend).
                   If omitted, all headers are sent. Each element is a string indicating the header name.
                 item_type: Api::Type::String
-              - !ruby/object:Api::Type::Enum
+              - !ruby/object:Api::Type::Array
                 name: 'supportedEvents'
+                min_size: 1
                 description: |
                   A set of events during request or response processing for which this extension is called.
                   This field is required for the LbTrafficExtension resource. It's not relevant for the LbRouteExtension
-                  resource.
-                values:
-                  - :EVENT_TYPE_UNSPECIFIED
-                  - :REQUEST_HEADERS
-                  - :REQUEST_BODY
-                  - :RESPONSE_HEADERS
-                  - :RESPONSE_BODY
+                  resource. Possible values:`EVENT_TYPE_UNSPECIFIED`, `REQUEST_HEADERS`, `REQUEST_BODY`, `RESPONSE_HEADERS`,
+                  `RESPONSE_BODY`, `RESPONSE_BODY` and `RESPONSE_BODY`.
   - !ruby/object:Api::Type::Enum
     name: 'loadBalancingScheme'
     description: |

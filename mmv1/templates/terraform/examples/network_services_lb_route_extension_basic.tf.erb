@@ -1,3 +1,7 @@
+data "google_project" "project" {
+  provider = google-beta
+}
+
 # Internal HTTP load balancer with a managed instance group backend
 
 # [START cloudloadbalancing_int_http_gce]
@@ -191,26 +195,141 @@ resource "google_compute_instance" "vm-test" {
 # [END cloudloadbalancing_int_http_gce]
 
 # [START lb_route_extension]
-
 resource "google_network_services_lb_route_extension" "<%= ctx[:primary_resource_id] %>" {
-    location   = "us-west1"
-    name       = "lb-route-extension"
-    provider      = google-beta
-    forwarding_rules = ["https://www.googleapis.com/compute/v1/projects/myproj/regions/us-west1/forwardingRules/l7-ilb-forwarding-rule"]
-    load_balancing_scheme = "INTERNAL_MANAGED"
-    extension_chains {
-        name = "chain1"
-        match_condition {
-            cel_expression = "request.path.startsWith('/extensions')"
-        }
-        extensions {
-            name = "ext11"
-            authority = "ext11.com"
-            service = "https://www.googleapis.com/compute/v1/projects/myproj/regions/us-west1/backendServices/l7-ilb-test-vm"
-            timeout = "0.1s"
-        }
-    }
+  provider              = google-beta
+  name                  = "<%= ctx[:vars]['lb_route_extension_name'] %>"
+  location              = "us-west1"
+  provider              = google-beta
+  load_balancing_scheme = "INTERNAL_MANAGED"
 
+  forwarding_rules = [
+    "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.number}/regions/${google_compute_forwarding_rule.default.region}/forwardingRules/${google_compute_forwarding_rule.default.name}"
+  ]
+
+  extension_chains {
+    name = "chain1"
+    match_condition {
+        cel_expression = "request.path.startsWith('/extensions')"
+    }
+    extensions {
+        name = "ext11"
+        authority = "ext11.com"
+        service = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.number}/regions/${google_compute_region_backend_service.callouts_backend.region}/backendServices/${google_compute_region_backend_service.callouts_backend.name}"
+        timeout = "0.100s"
+        fail_open = false
+    }
+  }
 }
 
+# Route Extension Backend Instance
+resource "google_compute_instance" "callouts_instance" {
+  provider = google-beta
+
+  name = "<%= ctx[:vars]['callouts_instance_name'] %>"
+  zone = "us-west1-a"
+
+  machine_type = "e2-small"
+  labels = {
+    "container-vm" = "cos-stable-109-17800-147-54"
+  }
+  tags         = ["allow-ssh","load-balanced-backend"]
+
+  network_interface {
+    network    = google_compute_network.ilb_network.id
+    subnetwork = google_compute_subnetwork.ilb_subnet.id
+    access_config {
+        # add external ip to fetch packages
+    }
+  }
+  boot_disk {
+    auto_delete  = true
+    initialize_params {
+      type = "pd-standard"
+      size = 10
+      image = "https://www.googleapis.com/compute/v1/projects/cos-cloud/global/images/cos-stable-109-17800-147-54"
+    }
+  }
+
+  # Initialize an Envoy's Ext Proc gRPC API based on a docker container
+  metadata = {
+    startup-script = <<-EOF1
+      #! /bin/bash
+      apt-get update
+      apt-get install apache2 -y
+      a2ensite default-ssl
+      a2enmod ssl
+      echo "Page served from second backend service" | tee /var/www/html/index.html
+      systemctl restart apache2'
+    EOF1
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+// callouts instance group
+resource "google_compute_instance_group" "callouts_instance_group" {
+  provider    = google-beta
+  name        = "<%= ctx[:vars]['callouts_instance_group'] %>"
+  description = "Terraform test instance group"
+
+  instances = [
+    google_compute_instance.callouts_instance.id,
+  ]
+
+  named_port {
+    name = "http"
+    port = "80"
+  }
+
+  named_port {
+    name = "grpc"
+    port = "443"
+  }
+
+  zone = "us-west1-a"
+}
+
+# callout health check
+resource "google_compute_region_health_check" "callouts_health_check" {
+  provider = google-beta
+  name     = "<%= ctx[:vars]['callouts_hc_name'] %>"
+  region   = "us-west1"
+  http_health_check {
+    port = 80
+  }
+}
+
+# callout backend service
+resource "google_compute_region_backend_service" "callouts_backend" {
+  provider              = google-beta
+  name                  = "<%= ctx[:vars]['callouts_backend_name'] %>"
+  region                = "us-west1"
+  protocol              = "HTTP2"
+  load_balancing_scheme = "INTERNAL_MANAGED"
+  timeout_sec           = 10
+
+  port_name             = "grpc"
+  health_checks         = [google_compute_region_health_check.callouts_health_check.id]
+
+  backend {
+    group           = google_compute_instance_group.callouts_instance_group.id
+    balancing_mode  = "UTILIZATION"
+    capacity_scaler = 1.0
+  }
+}
+
+# callout URL map
+resource "google_compute_region_url_map" "callouts_url_map" {
+  name            = "<%= ctx[:vars]['regional_callouts_url_map_name'] %>"
+  provider        = google-beta
+  region          = "us-west1"
+  default_service = google_compute_region_backend_service.callouts_backend.id
+
+  host_rule {
+    hosts        = ["service-extensions.com"]
+    path_matcher = "allpaths"
+  }
+}
 # [END lb_route_extension]
