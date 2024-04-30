@@ -24,8 +24,8 @@ import (
 )
 
 func TestTrustedContributors(t *testing.T) {
-	for _, member := range trustedContributors {
-		if slices.Contains(reviewerRotation, member) {
+	for member, _ := range trustedContributors {
+		if IsCoreReviewer(member) {
 			t.Fatalf(`%v should not be on reviewerRotation list`, member)
 		}
 	}
@@ -33,7 +33,7 @@ func TestTrustedContributors(t *testing.T) {
 
 func TestOnVacationReviewers(t *testing.T) {
 	for _, member := range onVacationReviewers {
-		if !slices.Contains(reviewerRotation, member.id) {
+		if !IsCoreReviewer(member.id) {
 			t.Fatalf(`%v is not on reviewerRotation list`, member)
 		}
 	}
