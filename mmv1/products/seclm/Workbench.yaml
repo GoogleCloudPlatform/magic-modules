@@ -25,6 +25,7 @@ autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'sec_lm_workbench_basic'
+    primary_resource_id: "example"
     vars:
       workbench_name: 'my-workbench-name'
 properties:
