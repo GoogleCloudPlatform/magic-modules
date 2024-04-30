@@ -576,7 +576,7 @@ properties:
               exactly_one_of:
                 - restoreConfig.0.volumeType
               values:
-                  - :GCE_PERSISTENT_DISK
+                - :GCE_PERSISTENT_DISK
       - !ruby/object:Api::Type::NestedObject
         name: restoreOrder
         description: |
