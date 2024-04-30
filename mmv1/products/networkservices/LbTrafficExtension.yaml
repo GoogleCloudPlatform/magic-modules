@@ -51,6 +51,11 @@ examples:
       fw_allow_iap_hc_name: 'l7-ilb-fw-allow-iap-hc'
       fw_allow_ilb_to_backends_name: 'l7-ilb-fw-allow-ilb-to-backends'
       vm_test_name: 'l7-ilb-test-vm'
+      lb_traffic_extension_name: 'l7-ilb-traffic-ext'
+      callouts_instance_name: 'l7-ilb-callouts-ins'
+      callouts_instance_group: 'l7-ilb-callouts-ins-group'
+      callouts_hc_name: 'l7-ilb-callouts-hc'
+      callouts_backend_name: 'l7-ilb-callouts-backend'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'

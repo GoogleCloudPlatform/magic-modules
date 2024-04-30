@@ -1,6 +1,8 @@
-# Internal HTTP load balancer with a managed instance group backend
+data "google_project" "project" {
+  provider = google-beta
+}
 
-# [START cloudloadbalancing_int_http_gce]
+# Internal HTTP load balancer with a managed instance group backend
 # VPC network
 resource "google_compute_network" "ilb_network" {
   name                    = "<%= ctx[:vars]['ilb_network_name'] %>"
@@ -191,27 +193,119 @@ resource "google_compute_instance" "vm-test" {
 # [END cloudloadbalancing_int_http_gce]
 
 # [START lb_traffic_extension]
-
 resource "google_network_services_lb_traffic_extension" "<%= ctx[:primary_resource_id] %>" {
-    location   = "us-west1"
-    name       = "<%= ctx[:vars]['lb_traffic_extension_name'] %>"
-    provider      = google-beta
-    forwarding_rules = ["https://www.googleapis.com/compute/v1/projects/myproj/regions/us-west1/forwardingRules/l7-ilb-forwarding-rule"]
-    load_balancing_scheme = "INTERNAL_MANAGED"
-    extension_chains {
-        name = "chain1"
-        match_condition {
-            cel_expression = "request.host == 'example.com'"
-        }
-        extensions {
-            name = "ext11"
-            authority = "ext11.com"
-            service = "https://www.googleapis.com/compute/v1/projects/myproj/regions/us-west1/backendServices/l7-ilb-test-vm"
-            timeout = "0.1s"
-            supported_events = "REQUEST_HEADERS"
-        }
-    }
+  provider = google-beta
+  name       = "<%= ctx[:vars]['lb_traffic_extension_name'] %>"
+  location   = "us-west1"
+  load_balancing_scheme = "INTERNAL_MANAGED"
+  forwarding_rules = [
+    "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.number}/regions/${google_compute_forwarding_rule.default.region}/forwardingRules/${google_compute_forwarding_rule.default.name}"
+  ]
 
+  extension_chains {
+      name = "chain1"
+      match_condition {
+          cel_expression = "request.host == 'example.com'"
+      }
+      extensions {
+          name = "ext11"
+          authority = "ext11.com"
+          service = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.number}/regions/${google_compute_region_backend_service.callouts_backend.region}/backendServices/${google_compute_region_backend_service.callouts_backend.name}"
+          timeout = "0.100s"
+          supported_events = ["REQUEST_HEADERS"]
+          fail_open = false
+      }
+  }
 }
 
+# Traffic Extension Backend Instance
+resource "google_compute_instance" "callouts_instance" {
+  provider = google-beta
+
+  name = "<%= ctx[:vars]['callouts_instance_name'] %>"
+  zone = "us-west1-a"
+
+  machine_type = "e2-small"
+  labels = {
+    "container-vm" = "cos-stable-109-17800-147-54"
+  }
+  tags         = ["allow-ssh","load-balanced-backend"]
+
+  network_interface {
+    network    = google_compute_network.ilb_network.id
+    subnetwork = google_compute_subnetwork.ilb_subnet.id
+    access_config {
+        # add external ip to fetch packages
+    }
+  }
+  boot_disk {
+    auto_delete  = true
+    initialize_params {
+      type = "pd-standard"
+      size = 10
+      image = "https://www.googleapis.com/compute/v1/projects/cos-cloud/global/images/cos-stable-109-17800-147-54"
+    }
+  }
+
+  # Initialize an Envoy's Ext Proc gRPC API based on a docker container
+  metadata = {
+    gce-container-declaration = "# DISCLAIMER:\n# This container declaration format is not a public API and may change without\n# notice. Please use gcloud command-line tool or Google Cloud Console to run\n# Containers on Google Compute Engine.\n\nspec:\n  containers:\n  - image: us-docker.pkg.dev/service-extensions/ext-proc/service-callout-basic-example-python:latest\n    name: callouts-vm\n    securityContext:\n      privileged: false\n    stdin: false\n    tty: false\n    volumeMounts: []\n  restartPolicy: Always\n  volumes: []\n"
+    google-logging-enabled = "true"
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+// callouts instance group
+resource "google_compute_instance_group" "callouts_instance_group" {
+  provider    = google-beta
+  name        = "<%= ctx[:vars]['callouts_instance_group'] %>"
+  description = "Terraform test instance group"
+
+  instances = [
+    google_compute_instance.callouts_instance.id,
+  ]
+
+  named_port {
+    name = "http"
+    port = "80"
+  }
+
+  named_port {
+    name = "grpc"
+    port = "443"
+  }
+
+  zone = "us-west1-a"
+}
+
+# callout health check
+resource "google_compute_region_health_check" "callouts_health_check" {
+  provider = google-beta
+  name     = "<%= ctx[:vars]['callouts_hc_name'] %>"
+  region   = "us-west1"
+  http_health_check {
+    port = 80
+  }
+}
+
+# callout backend service
+resource "google_compute_region_backend_service" "callouts_backend" {
+  provider              = google-beta
+  name                  = "<%= ctx[:vars]['callouts_backend_name'] %>"
+  region                = "us-west1"
+  protocol              = "HTTP2"
+  load_balancing_scheme = "INTERNAL_MANAGED"
+  timeout_sec           = 10
+
+  port_name             = "grpc"
+  health_checks         = [google_compute_region_health_check.callouts_health_check.id]
+
+  backend {
+    group           = google_compute_instance_group.callouts_instance_group.id
+    balancing_mode  = "UTILIZATION"
+    capacity_scaler = 1.0
+  }
+}
 # [END lb_traffic_extension]
