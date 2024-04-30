@@ -42,6 +42,12 @@ examples:
     vars:
       instance_name: 'test-instance'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'filestore_instance_protocol'
+    primary_resource_id: 'instance'
+    min_version: beta
+    vars:
+      instance_name: 'test-instance'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'filestore_instance_enterprise'
     primary_resource_id: 'instance'
     # https://github.com/GoogleCloudPlatform/magic-modules/pull/5875#discussion_r844285335
@@ -49,7 +55,6 @@ examples:
     vars:
       instance_name: 'test-instance'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/filestore.erb
   pre_create: templates/terraform/pre_create/filestore_instance.go.erb
 parameters:
   - !ruby/object:Api::Type::String
@@ -82,7 +87,6 @@ properties:
       The resource name of the instance.
     required: true
     url_param_only: true
-    pattern: projects/{{project}}/locations/{{location}}/instances/{{name}}
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   - !ruby/object:Api::Type::String
     name: 'description'
@@ -99,6 +103,20 @@ properties:
       Possible values include: STANDARD, PREMIUM, BASIC_HDD, BASIC_SSD, HIGH_SCALE_SSD, ZONAL, REGIONAL and ENTERPRISE
     required: true
     immutable: true
+  - !ruby/object:Api::Type::Enum
+    name: 'protocol'
+    description: |
+      Either NFSv3, for using NFS version 3 as file sharing protocol,
+      or NFSv4.1, for using NFS version 4.1 as file sharing protocol.
+      NFSv4.1 can be used with HIGH_SCALE_SSD, ZONAL, REGIONAL and ENTERPRISE.
+      The default is NFSv3.
+    default_value: :NFS_V3
+    min_version: 'beta'
+    immutable: true
+    values:
+      - :NFS_V3
+      - :NFS_V4_1
+    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
   - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |

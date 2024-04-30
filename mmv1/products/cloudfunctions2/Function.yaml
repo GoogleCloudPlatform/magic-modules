@@ -157,6 +157,28 @@ examples:
       - 'build_config.0.source.0.storage_source.0.object'
       - 'build_config.0.source.0.storage_source.0.bucket'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudfunctions2_basic_builder'
+    primary_resource_id: 'function'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-function-v2%s\",
+      context[\"random_suffix\"\
+      ])"
+    vars:
+      function: 'function-v2'
+      bucket_name: 'gcf-source'
+      zip_path: 'function-source.zip'
+      service_account: 'gcf-sa'
+    test_env_vars:
+      project: :PROJECT_NAME
+    test_vars_overrides:
+      zip_path: '"./test-fixtures/function-source.zip"'
+      location:
+        '"us-central1"'
+        # ignore these fields during import step
+    ignore_read_extra:
+      - 'build_config.0.source.0.storage_source.0.object'
+      - 'build_config.0.source.0.storage_source.0.bucket'
+    pull_external: true
+  - !ruby/object:Provider::Terraform::Examples
     name: 'cloudfunctions2_secret_env'
     primary_resource_id: 'function'
     vars:
@@ -278,7 +300,6 @@ properties:
     description: |
       A user-defined name of the function. Function names must
       be unique globally and match pattern `projects/*/locations/*/functions/*`.
-    pattern: projects/{{project}}/locations/{{location}}/functions/{{name}}
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
     custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
   - !ruby/object:Api::Type::String
@@ -422,6 +443,10 @@ properties:
         name: 'dockerRepository'
         description: |
           User managed repository created in Artifact Registry optionally with a customer managed encryption key.
+        default_from_api: true
+      - !ruby/object:Api::Type::String
+        name: 'serviceAccount'
+        description: 'The fully-qualified name of the service account to be used for building the container.'
         default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: 'serviceConfig'

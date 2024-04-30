@@ -1,0 +1,6 @@
+resource "google_scc_mute_config" "{{$.PrimaryResourceId}}" {
+  mute_config_id = "{{index $.Vars "mute_config_id"}}"
+  parent         = "organizations/{{index $.TestEnvVars "org_id"}}"
+  filter         = "category: \"OS_VULNERABILITY\""
+  description    = "My Mute Config"
+}
