@@ -140,6 +140,51 @@ properties:
       - :PUBLIC_WEBSITE
     immutable: true
     required: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'documentProcessingConfig'
+    description: |
+      Configuration for Document understanding and enrichment.
+    required: false
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          The full resource name of the Document Processing Config. Format:
+          `projects/{project}/locations/{location}/collections/{collection_id}/dataStores/{data_store_id}/documentProcessingConfig`.
+        output: true
+
+      - !ruby/object:Api::Type::NestedObject
+          name: 'defaultParsingConfig'
+          description: |
+            Configurations for default Document parser. If not specified, we will
+            configure it as default DigitalParsingConfig, and the default parsing
+            config will be applied to all file types for Document parsing.
+          required: false
+          properties:
+            - !ruby/object:Api::Type::NestedObject
+              name: 'digitalParsingConfig'
+              allow_empty_object: true
+              send_empty_value: true
+              exactly_one_of:
+                - default_parsing_config.0.digital_parsing_config
+                - default_parsing_config.0.ocr_parsing_config
+              description: |
+                Configurations applied to digital parser.
+              properties: []
+            - !ruby/object:Api::Type::NestedObject
+              name: 'ocrParsingConfig'
+              exactly_one_of:
+                - default_parsing_config.0.digital_parsing_config
+                - default_parsing_config.0.ocr_parsing_config
+              description: |
+                Configurations applied to OCR parser. Currently it only applies to PDFs.
+              required: false
+              properties:
+                - !ruby/object:Api::Type::Boolean
+                  name: 'useNativeText'
+                  required: false
+                  description: |
+                    If true, will use native text instead of OCR text on pages containing native text.
   - !ruby/object:Api::Type::Time
     name: "createTime"
     description: |
