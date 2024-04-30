@@ -535,6 +535,7 @@ properties:
     name: 'enableControlPlaneV2'
     description: Enable control plane V2. Default to false.
     immutable: true
+    default_value: true
   - !ruby/object:Api::Type::Boolean
     name: 'disableBundledIngress'
     description: Disable bundled ingress.
