@@ -600,7 +600,7 @@ func schemaNodeConfig() *schema.Schema {
 						Schema: map[string]*schema.Schema{
 							"threads_per_core": {
 								Type:        schema.TypeInt,
-                                                                Optional:    true,
+                                                                Required:    true,
                                                                 ForceNew:    true,
 								Description: `The number of threads per physical core. To disable simultaneous multithreading (SMT) set this to 1. If unset, the maximum number of threads supported per core by the underlying processor is assumed.`,
 							},
