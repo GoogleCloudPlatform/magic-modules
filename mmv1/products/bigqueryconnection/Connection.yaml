@@ -129,9 +129,7 @@ examples:
     name: 'bigquery_connection_kms'
     pull_external: true
     primary_resource_id:
-      'connection'
-    # Random provider
-    skip_vcr: true
+      'bq-connection-cmek'
     vars:
       database_instance_name: 'my-database-instance'
       username: 'user'
