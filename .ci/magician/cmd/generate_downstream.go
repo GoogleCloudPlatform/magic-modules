@@ -135,13 +135,8 @@ func execGenerateDownstream(baseBranch, command, repo, version, ref string, gh G
 		os.Exit(1)
 	}
 
-	commitErr := createCommit(scratchRepo, commitMessage, rnr)
-	if commitErr != nil {
-		fmt.Println("Error creating commit: ", commitErr)
-	}
-
 	var pullRequest *github.PullRequest
-	if commitErr == nil && command == "downstream" {
+	if command == "downstream" {
 		pullRequest, err = getPullRequest(baseBranch, ref, gh)
 		if err != nil {
 			fmt.Println("Error getting pull request: ", err)
@@ -155,13 +150,18 @@ func execGenerateDownstream(baseBranch, command, repo, version, ref string, gh G
 		}
 	}
 
+	scratchCommitSha, commitErr := createCommit(scratchRepo, commitMessage, rnr)
+	if commitErr != nil {
+		fmt.Println("Error creating commit: ", commitErr)
+	}
+
 	if _, err := rnr.Run("git", []string{"push", ctlr.URL(scratchRepo), scratchRepo.Branch, "-f"}, nil); err != nil {
 		fmt.Println("Error pushing commit: ", err)
 		os.Exit(1)
 	}
 
 	if commitErr == nil && command == "downstream" {
-		if err := mergePullRequest(downstreamRepo, scratchRepo, pullRequest, rnr, gh); err != nil {
+		if err := mergePullRequest(downstreamRepo, scratchRepo, scratchCommitSha, pullRequest, rnr, gh); err != nil {
 			fmt.Println("Error merging pull request: ", err)
 			os.Exit(1)
 		}
@@ -299,26 +299,35 @@ func getPullRequest(baseBranch, ref string, gh GithubClient) (*github.PullReques
 	return nil, fmt.Errorf("no pr found with merge commit sha %s and base branch %s", ref, baseBranch)
 }
 
-func createCommit(scratchRepo *source.Repo, commitMessage string, rnr ExecRunner) error {
+func createCommit(scratchRepo *source.Repo, commitMessage string, rnr ExecRunner) (string, error) {
 	if err := rnr.PushDir(scratchRepo.Path); err != nil {
-		return err
+		return "", err
 	}
 	if err := setGitConfig(rnr); err != nil {
-		return err
+		return "", err
 	}
 
 	if _, err := rnr.Run("git", []string{"add", "."}, nil); err != nil {
-		return err
+		return "", err
 	}
 	if _, err := rnr.Run("git", []string{"checkout", "-b", scratchRepo.Branch}, nil); err != nil {
-		return err
+		return "", err
 	}
 
 	if _, err := rnr.Run("git", []string{"commit", "--signoff", "-m", commitMessage}, nil); err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	commitSha, err := rnr.Run("git", []string{"rev-parse", "HEAD"}, nil)
+	if err != nil {
+		fmt.Println("Error retrieving commit sha: ", err)
+		os.Exit(1)
+	}
+
+	commitSha = strings.TrimSpace(commitSha)
+	fmt.Printf("Commit sha on the branch is: `%s`\n", commitSha)
+
+	return commitSha, err
 }
 
 func addChangelogEntry(pullRequest *github.PullRequest, rnr ExecRunner) error {
@@ -326,16 +335,10 @@ func addChangelogEntry(pullRequest *github.PullRequest, rnr ExecRunner) error {
 	if err := rnr.WriteFile(filepath.Join(".changelog", fmt.Sprintf("%d.txt", pullRequest.Number)), strings.Join(changelogExp.FindAllString(pullRequest.Body, -1), "\n")); err != nil {
 		return err
 	}
-	if _, err := rnr.Run("git", []string{"add", "."}, nil); err != nil {
-		return err
-	}
-	if _, err := rnr.Run("git", []string{"commit", "--signoff", "--amend", "--no-edit"}, nil); err != nil {
-		return err
-	}
 	return nil
 }
 
-func mergePullRequest(downstreamRepo, scratchRepo *source.Repo, pullRequest *github.PullRequest, rnr ExecRunner, gh GithubClient) error {
+func mergePullRequest(downstreamRepo, scratchRepo *source.Repo, scratchRepoSha string, pullRequest *github.PullRequest, rnr ExecRunner, gh GithubClient) error {
 	fmt.Printf(`Base: %s:%s
 Head: %s:%s
 `, downstreamRepo.Owner, downstreamRepo.Branch, scratchRepo.Owner, scratchRepo.Branch)
@@ -366,7 +369,7 @@ Head: %s:%s
 	// Wait a few seconds, then merge the PR.
 	time.Sleep(5 * time.Second)
 	fmt.Println("Merging PR ", newPRURL)
-	if err := gh.MergePullRequest(downstreamRepo.Owner, downstreamRepo.Name, newPRNumber); err != nil {
+	if err := gh.MergePullRequest(downstreamRepo.Owner, downstreamRepo.Name, newPRNumber, scratchRepoSha); err != nil {
 		return err
 	}
 	return nil

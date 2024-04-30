@@ -479,3 +479,12 @@ properties:
           when a threshold is exceeded. Default recipients are
           those with Billing Account Administrators and Billing
           Account Users IAM roles for the target account.
+  - !ruby/object:Api::Type::Enum
+    name: ownershipScope
+    description: |
+      The ownership scope of the budget. The ownership scope and users'
+      IAM permissions determine who has full access to the budget's data.
+    values:
+      - :OWNERSHIP_SCOPE_UNSPECIFIED
+      - :ALL_USERS
+      - :BILLING_ACCOUNT

@@ -1,0 +1,15 @@
+resource "google_cloudbuild_trigger" "{{$.PrimaryResourceId}}" {
+  name        = "{{index $.Vars "cloudbuild_trigger_name"}}"
+  location    = "us-central1"
+
+  github {
+    owner = "hashicorp"
+    name  = "terraform-provider-google"
+    push {
+      branch = "^main$"
+    }
+    enterprise_config_resource_name = "projects/123456789/locations/us-central1/githubEnterpriseConfigs/configID"
+  }
+
+  filename = "cloudbuild.yaml"
+}

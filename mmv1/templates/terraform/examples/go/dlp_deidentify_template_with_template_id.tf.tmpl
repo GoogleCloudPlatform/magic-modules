@@ -1,0 +1,25 @@
+resource "google_data_loss_prevention_deidentify_template" "{{$.PrimaryResourceId}}" {
+  parent = "projects/{{index $.TestEnvVars "project"}}"
+  template_id = "{{index $.Vars "name"}}"
+
+  deidentify_config {
+    info_type_transformations {
+      transformations {
+        info_types {
+          name = "PHONE_NUMBER"
+        }
+        info_types {
+          name = "AGE"
+        }
+
+        primitive_transformation {
+          replace_config {
+            new_value {
+              integer_value = 9
+            }
+          }
+        }
+      }
+    }
+  }
+}

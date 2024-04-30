@@ -1,0 +1,31 @@
+resource "google_data_loss_prevention_deidentify_template" "{{$.PrimaryResourceId}}" {
+  parent = "projects/{{index $.TestEnvVars "project"}}"
+  description = "Description"
+  display_name = "Displayname"
+  
+  deidentify_config {
+    image_transformations {
+      transforms {
+        redaction_color {
+          red = 0.5
+          blue = 1
+          green = 0.2
+        }
+        selected_info_types {
+          info_types {
+            name = "COLOR_INFO"
+            version = "latest"
+          }
+        }
+      }
+
+      transforms {
+        all_info_types {}
+      }
+
+      transforms {
+        all_text {}
+      }
+    }
+  }
+}

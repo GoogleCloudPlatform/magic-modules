@@ -66,6 +66,14 @@ examples:
       ca_pool_id: 'my-pool'
     test_env_vars:
       project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'privateca_certificate_custom_ski'
+    primary_resource_id: 'default'
+    vars:
+      certificate_name: 'my-certificate'
+      ca_pool_id: 'my-pool'
+    test_env_vars:
+      project: :PROJECT_NAME
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_create: templates/terraform/pre_create/privateca_certificate.go.erb
 parameters:
@@ -1049,6 +1057,19 @@ properties:
                   - config.0.subject_config.0.subject_alt_name.0.email_addresses
                   - config.0.subject_config.0.subject_alt_name.0.ip_addresses
                 immutable: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'subjectKeyId'
+        description:
+          When specified this provides a custom SKI to be used in the certificate.
+          This should only be used to maintain a SKI of an existing CA originally
+          created outside CA service, which was not generated using method (1)
+          described in RFC 5280 section 4.2.1.2..
+        immutable: true
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'keyId'
+            description: The value of the KeyId in lowercase hexidecimal.
+            immutable: true
       - !ruby/object:Api::Type::NestedObject
         name: 'publicKey'
         required: true

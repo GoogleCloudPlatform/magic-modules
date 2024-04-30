@@ -1,0 +1,23 @@
+resource "google_container_cluster" "primary" {
+  name               = "{{index $.Vars "cluster_name"}}"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  workload_identity_config {
+    workload_pool = "{{index $.TestEnvVars "project"}}.svc.id.goog"
+  }
+  deletion_protection  = "{{index $.Vars "deletion_protection"}}"
+  network       = "{{index $.Vars "network_name"}}"
+  subnetwork    = "{{index $.Vars "subnetwork_name"}}"
+}
+
+resource "google_gke_hub_membership" "membership" {
+  membership_id = "{{index $.Vars "name"}}"
+  endpoint {
+    gke_cluster {
+      resource_link = google_container_cluster.primary.id
+    }
+  }
+  authority {
+    issuer = "https://container.googleapis.com/v1/${google_container_cluster.primary.id}"
+  }
+}

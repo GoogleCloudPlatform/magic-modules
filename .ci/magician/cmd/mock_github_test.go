@@ -63,8 +63,8 @@ func (m *mockGithub) GetTeamMembers(organization, team string) ([]github.User, e
 	return m.teamMembers[team], nil
 }
 
-func (m *mockGithub) RequestPullRequestReviewer(prNumber string, reviewer string) error {
-	m.calledMethods["RequestPullRequestReviewer"] = append(m.calledMethods["RequestPullRequestReviewer"], []any{prNumber, reviewer})
+func (m *mockGithub) RequestPullRequestReviewers(prNumber string, reviewers []string) error {
+	m.calledMethods["RequestPullRequestReviewers"] = append(m.calledMethods["RequestPullRequestReviewers"], []any{prNumber, reviewers})
 	return nil
 }
 
@@ -93,7 +93,7 @@ func (m *mockGithub) CreateWorkflowDispatchEvent(workflowFileName string, inputs
 	return nil
 }
 
-func (m *mockGithub) MergePullRequest(owner, repo, prNumber string) error {
-	m.calledMethods["MergePullRequest"] = append(m.calledMethods["MergePullRequest"], []any{owner, repo, prNumber})
+func (m *mockGithub) MergePullRequest(owner, repo, prNumber, commitSha string) error {
+	m.calledMethods["MergePullRequest"] = append(m.calledMethods["MergePullRequest"], []any{owner, repo, prNumber, commitSha})
 	return nil
 }

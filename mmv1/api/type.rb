@@ -545,6 +545,7 @@ module Api
     # Represents an array, and stores its items' type
     class Array < Composite
       attr_reader :item_type
+      attr_reader :item_validation # Adds a ValidateFunc to the item schema
       attr_reader :min_size
       attr_reader :max_size
 
@@ -564,6 +565,7 @@ module Api
 
         check :min_size, type: ::Integer
         check :max_size, type: ::Integer
+        check :item_validation, type: Provider::Terraform::Validation
       end
 
       def exclude_if_not_in_version!(version)
@@ -861,20 +863,6 @@ module Api
 
       def nested_properties
         @value_type.nested_properties.reject(&:exclude)
-      end
-    end
-
-    # Support for schema ValidateFunc functionality.
-    class Validation < Object
-      # Ensures the value matches this regex
-      attr_reader :regex
-      attr_reader :function
-
-      def validate
-        super
-
-        check :regex, type: String
-        check :function, type: String
       end
     end
 

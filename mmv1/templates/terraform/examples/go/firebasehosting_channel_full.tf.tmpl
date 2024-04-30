@@ -1,0 +1,16 @@
+resource "google_firebase_hosting_site" "default" {
+  provider = google-beta
+  project  = "{{index $.TestEnvVars "project_id"}}"
+  site_id = "{{index $.Vars "site_id"}}"
+}
+
+resource "google_firebase_hosting_channel" "full" {
+  provider = google-beta
+  site_id = google_firebase_hosting_site.default.site_id
+  channel_id = "{{index $.Vars "channel_id"}}"
+  ttl = "86400s"
+  retained_release_count = 20
+  labels = {
+    "some-key": "some-value"
+  }
+}

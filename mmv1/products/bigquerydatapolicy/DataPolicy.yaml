@@ -48,6 +48,15 @@ examples:
     vars:
       data_policy_id: 'data_policy'
       taxonomy: 'taxonomy'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'bigquery_datapolicy_data_policy_routine'
+    primary_resource_id: 'data_policy'
+    primary_resource_name:
+      'fmt.Sprintf("tf_test_data_policy%s", context["random_suffix"])'
+    vars:
+      data_policy_id: 'data_policy'
+      taxonomy: 'taxonomy'
+      dataset_id: 'dataset_id'
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -88,7 +97,9 @@ properties:
     properties:
       - !ruby/object:Api::Type::Enum
         name: 'predefinedExpression'
-        required: true
+        exactly_one_of:
+          - data_masking_policy.0.predefined_expression
+          - data_masking_policy.0.routine
         description: |-
           The available masking rules. Learn more here: https://cloud.google.com/bigquery/docs/column-data-masking-intro#masking_options.
         values:
@@ -99,3 +110,11 @@ properties:
           - :FIRST_FOUR_CHARACTERS
           - :EMAIL_MASK
           - :DATE_YEAR_MASK
+      - !ruby/object:Api::Type::String
+        exactly_one_of:
+          - data_masking_policy.0.predefined_expression
+          - data_masking_policy.0.routine
+        name: routine
+        diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+        description: |-
+          The name of the BigQuery routine that contains the custom masking routine, in the format of projects/{projectNumber}/datasets/{dataset_id}/routines/{routine_id}.

@@ -14,7 +14,7 @@
 package resource
 
 import (
-	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
+	"gopkg.in/yaml.v3"
 )
 
 // Information about the IAM policy for this resource
@@ -22,145 +22,122 @@ import (
 // and accessed via their parent resource
 // See: https://cloud.google.com/iam/docs/overview
 type IamPolicy struct {
-	google.YamlValidator
+	// google.YamlValidator
 
 	// boolean of if this binding should be generated
-
-	// attr_reader
 	Exclude bool
 
 	// boolean of if this binding should be generated
-
-	// attr_reader
-	ExcludeTgc bool
+	ExcludeTgc bool `yaml:"exclude_tgc"`
 
 	// Boolean of if tests for IAM resources should exclude import test steps
 	// Used to handle situations where typical generated IAM tests cannot import
 	// due to the parent resource having an API-generated id
-
-	// attr_reader
-	SkipImportTest bool
+	SkipImportTest bool `yaml:"skip_import_test"`
 
 	// Character that separates resource identifier from method call in URL
 	// For example, PubSub subscription uses {resource}:getIamPolicy
 	// While Compute subnetwork uses {resource}/getIamPolicy
-
-	// attr_reader
-	MethodNameSeparator string
+	MethodNameSeparator string `yaml:"method_name_separator"`
 
 	// The terraform type of the parent resource if it is not the same as the
 	// IAM resource. The IAP product needs these as its IAM policies refer
 	// to compute resources
-
-	// attr_reader
-	ParentResourceType string
+	ParentResourceType string `yaml:"parent_resource_type"`
 
 	// Some resources allow retrieving the IAM policy with GET requests,
 	// others expect POST requests
-
-	// attr_reader
-	FetchIamPolicyVerb string
+	FetchIamPolicyVerb string `yaml:"fetch_iam_policy_verb"`
 
 	// Last part of URL for fetching IAM policy.
-
-	// attr_reader
-	FetchIamPolicyMethod string
+	FetchIamPolicyMethod string `yaml:"fetch_iam_policy_method"`
 
 	// Some resources allow setting the IAM policy with POST requests,
 	// others expect PUT requests
-
-	// attr_reader
-	SetIamPolicyVerb string
+	SetIamPolicyVerb string `yaml:"set_iam_policy_verb"`
 
 	// Last part of URL for setting IAM policy.
-
-	// attr_reader
-	SetIamPolicyMethod string
+	SetIamPolicyMethod string `yaml:"set_iam_policy_method"`
 
 	// Whether the policy JSON is contained inside of a 'policy' object.
-
-	// attr_reader
-	WrappedPolicyObj bool
+	WrappedPolicyObj bool `yaml:"wrapped_policy_obj"`
 
 	// Certain resources allow different sets of roles to be set with IAM policies
 	// This is a role that is acceptable for the given IAM policy resource for use in tests
-
-	// attr_reader
-	AllowedIamRole string
+	AllowedIamRole string `yaml:"allowed_iam_role"`
 
 	// This is a role that grants create/read/delete for the parent resource for use in tests.
 	// If set, the test runner will receive a binding to this role in _policy tests in order to
 	// avoid getting locked out of the resource.
-
-	// attr_reader
-	AdminIamRole string
+	AdminIamRole string `yaml:"admin_iam_role"`
 
 	// Certain resources need an attribute other than "id" from their parent resource
 	// Especially when a parent is not the same type as the IAM resource
-
-	// attr_reader
-	ParentResourceAttribute string
+	ParentResourceAttribute string `yaml:"parent_resource_attribute"`
 
 	// If the IAM resource test needs a new project to be created, this is the name of the project
-
-	// attr_reader
-	TestProjectName string
+	TestProjectName string `yaml:"test_project_name"`
 
 	// Resource name may need a custom diff suppress function. Default is to use
 	// CompareSelfLinkOrResourceName
-
-	// attr_reader
-	CustomDiffSuppress *string
+	CustomDiffSuppress *string `yaml:"custom_diff_suppress"`
 
 	// Some resources (IAP) use fields named differently from the parent resource.
 	// We need to use the parent's attributes to create an IAM policy, but they may not be
 	// named as the IAM IAM resource expects.
 	// This allows us to specify a file (relative to MM root) containing a partial terraform
 	// config with the test/example attributes of the IAM resource.
-
-	// attr_reader
-	ExampleConfigBody string
+	ExampleConfigBody string `yaml:"example_config_body"`
 
 	// How the API supports IAM conditions
-
-	// attr_reader
-	IamConditionsRequestType string
+	IamConditionsRequestType string `yaml:"iam_conditions_request_type"`
 
 	// Allows us to override the base_url of the resource. This is required for Cloud Run as the
 	// IAM resources use an entirely different base URL from the actual resource
-
-	// attr_reader
-	BaseUrl string
+	BaseUrl string `yaml:"base_url"`
 
 	// Allows us to override the import format of the resource. Useful for Cloud Run where we need
 	// variables that are outside of the base_url qualifiers.
-
-	// attr_reader
-	ImportFormat []string
+	ImportFormat []string `yaml:"import_format"`
 
 	// Allows us to override the self_link of the resource. This is required for Artifact Registry
 	// to prevent breaking changes
-
-	// attr_reader
-	SelfLink string
+	SelfLink string `yaml:"self_link"`
 
 	// [Optional] Version number in the request payload.
 	// if set, it overrides the default IamPolicyVersion
-
-	// attr_reader
-	IamPolicyVersion string
+	IamPolicyVersion string `yaml:"iam_policy_version"`
 
 	// [Optional] Min version to make IAM resources available at
 	// If unset, defaults to 'ga'
-
-	// attr_reader
-	MinVersion string
+	MinVersion string `yaml:"min_version"`
 
 	// [Optional] Check to see if zone value should be replaced with GOOGLE_ZONE in iam tests
 	// Defaults to true
+	SubstituteZoneValue bool `yaml:"substitute_zone_value"`
+}
 
-	// attr_reader
-	SubstituteZoneValue bool
+func (p *IamPolicy) UnmarshalYAML(n *yaml.Node) error {
+	p.MethodNameSeparator = "/"
+	p.FetchIamPolicyVerb = "GET"
+	p.FetchIamPolicyMethod = "getIamPolicy"
+	p.SetIamPolicyVerb = "POST"
+	p.SetIamPolicyMethod = "setIamPolicy"
+	p.WrappedPolicyObj = true
+	p.AllowedIamRole = "roles/viewer"
+	p.ParentResourceAttribute = "id"
+	p.ExampleConfigBody = "templates/terraform/iam/iam_attributes.tf.erb"
+	p.SubstituteZoneValue = true
+
+	type iamPolicyAlias IamPolicy
+	aliasObj := (*iamPolicyAlias)(p)
+
+	err := n.Decode(&aliasObj)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // func (p *IamPolicy) validate() {

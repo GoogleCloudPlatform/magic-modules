@@ -1,0 +1,8 @@
+resource "google_firebase_database_instance" "full" {
+  provider = google-beta
+  project  = "{{index $.TestEnvVars "project_id"}}"
+  region   = "europe-west1"
+  instance_id = "{{index $.Vars "instance_id"}}"
+  type     = "USER_DATABASE"
+  desired_state   = "DISABLED"
+}

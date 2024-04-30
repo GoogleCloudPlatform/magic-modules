@@ -23,7 +23,7 @@ description: |
 id_format: 'projects/{{project_number}}/locations/{{location}}'
 autogen_async: true
 async: !ruby/object:Api::OpAsync
-  actions: ['create'] 
+  actions: ['create']
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
     base_url: '{{op_id}}'
@@ -48,9 +48,10 @@ skip_sweeper: true
 exclude_import: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
+    # docs only, testing is done in a DocumentSchema update test
+    skip_test: true
     name: "document_ai_warehouse_location"
     primary_resource_id: "example"
-    skip_import_test: true
 timeouts: !ruby/object:Api::Timeouts
   insert_minutes: 30
   update_minutes: 30

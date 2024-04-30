@@ -350,6 +350,8 @@ properties:
     default_from_api: true
   - !ruby/object:Api::Type::NestedObject
     name: 'automaticScaling'
+    # This flattener is entirely handwritten and must be updated with **any** new field or subfield
+    custom_flatten: 'templates/terraform/custom_flatten/appengine_standardappversion_automatic_scaling_handlenil.go.erb'
     description: |
       Automatic scaling is based on request rate, response latencies, and other application metrics.
     conflicts:

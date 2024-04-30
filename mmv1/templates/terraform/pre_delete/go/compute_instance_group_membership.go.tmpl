@@ -1,0 +1,12 @@
+toDelete := make(map[string]interface{})
+
+// Instance
+instanceProp := flattenNestedComputeInstanceGroupMembershipInstance(d.Get("instance"), d, config)
+
+if instanceProp != "" {
+  toDelete["instance"] = instanceProp
+}
+
+obj = map[string]interface{}{
+	"instances": []map[string]interface{}{toDelete},
+}

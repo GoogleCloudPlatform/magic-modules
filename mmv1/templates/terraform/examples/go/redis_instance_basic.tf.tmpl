@@ -1,0 +1,8 @@
+resource "google_redis_instance" "{{$.PrimaryResourceId}}" {
+  name           = "{{index $.Vars "instance_name"}}"
+  memory_size_gb = 1
+
+  lifecycle {
+    prevent_destroy = {{index $.Vars "prevent_destroy"}}
+  }
+}

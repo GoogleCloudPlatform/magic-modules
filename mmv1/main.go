@@ -9,11 +9,11 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"time"
 
 	"golang.org/x/exp/slices"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
-	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/provider"
 )
 
@@ -69,6 +69,7 @@ func main() {
 		log.Fatalf("No product.yaml file found.")
 	}
 
+	startTime := time.Now()
 	log.Printf("Generating MM output to '%s'", *outputPath)
 	log.Printf("Using %s version", *version)
 
@@ -81,8 +82,7 @@ func main() {
 		return false
 	})
 
-	yamlValidator := google.YamlValidator{}
-
+	var productsForVersion []map[string]interface{}
 	for _, productName := range allProductFiles {
 		productYamlPath := path.Join(productName, "go_product.yaml")
 
@@ -97,12 +97,8 @@ func main() {
 		if _, err := os.Stat(productYamlPath); err == nil {
 			var resources []*api.Resource = make([]*api.Resource, 0)
 
-			productYaml, err := os.ReadFile(productYamlPath)
-			if err != nil {
-				log.Fatalf("Cannot open the file: %v", productYaml)
-			}
 			productApi := &api.Product{}
-			yamlValidator.Parse(productYaml, productApi)
+			api.Compile(productYamlPath, productApi)
 
 			if !productApi.ExistsAtVersionOrLower(*version) {
 				log.Printf("%s does not have a '%s' version, skipping", productName, *version)
@@ -123,21 +119,17 @@ func main() {
 					continue
 				}
 
-				resourceYaml, err := os.ReadFile(resourceYamlPath)
-				if err != nil {
-					log.Fatalf("Cannot open the file: %v", resourceYamlPath)
-				}
 				resource := &api.Resource{}
-				yamlValidator.Parse(resourceYaml, resource)
+				api.Compile(resourceYamlPath, resource)
 
+				resource.TargetVersionName = *version
 				resource.Properties = resource.AddLabelsRelatedFields(resource.PropertiesWithExcluded(), nil)
-
+				resource.SetDefault(productApi)
 				resource.Validate()
 				resources = append(resources, resource)
 			}
 
 			// TODO Q2: override resources
-			// log.Printf("resources before sorting %#v", resources)
 
 			// Sort resources by name
 			sort.Slice(resources, func(i, j int) bool {
@@ -148,7 +140,7 @@ func main() {
 			productApi.Validate()
 
 			// TODO Q2: set other providers via flag
-			providerToGenerate := provider.NewTerraform(productApi, *version)
+			providerToGenerate := provider.NewTerraform(productApi, *version, startTime)
 
 			if !slices.Contains(productsToGenerate, productName) {
 				log.Printf("%s not specified, skipping generation", productName)
@@ -157,8 +149,33 @@ func main() {
 
 			log.Printf("%s: Generating files", productName)
 			providerToGenerate.Generate(*outputPath, productName, generateCode, generateDocs)
+
+			// we need to preserve a single provider instance to use outside of this loop.
+			productsForVersion = append(productsForVersion, map[string]interface{}{
+				"Definitions": productApi,
+				"Provider":    providerToGenerate,
+			})
 		}
 
 		// TODO Q2: copy common files
+	}
+
+	slices.SortFunc(productsForVersion, func(p1, p2 map[string]interface{}) int {
+		return strings.Compare(strings.ToLower(p1["Definitions"].(*api.Product).Name), strings.ToLower(p2["Definitions"].(*api.Product).Name))
+	})
+
+	// In order to only copy/compile files once per provider this must be called outside
+	// of the products loop. This will get called with the provider from the final iteration
+	// of the loop
+	finalProduct := productsForVersion[len(productsForVersion)-1]
+	provider := finalProduct["Provider"].(*provider.Terraform)
+
+	provider.CopyCommonFiles(*outputPath, generateCode, generateDocs)
+
+	log.Printf("Compiling common files for terraform")
+	if generateCode {
+		provider.CompileCommonFiles(*outputPath, productsForVersion, "")
+
+		// TODO Q2: product overrides
 	}
 }

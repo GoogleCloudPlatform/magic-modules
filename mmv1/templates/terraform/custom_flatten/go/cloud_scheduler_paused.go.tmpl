@@ -1,0 +1,10 @@
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+    state := d.Get("state");
+    if state == "PAUSED" {
+        return true
+    }
+    if state == "ENABLED" {
+        return false
+    }
+    return false // Job has an error state that's not paused or enabled
+}

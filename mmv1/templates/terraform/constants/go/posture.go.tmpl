@@ -1,0 +1,10 @@
+// Compute revision_id for changes in posture fields.
+func revisionIdCustomizeDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+    if d.HasChanges("description", "state", "policy_sets") {
+        err := d.SetNewComputed("revision_id")
+        if err != nil {
+            return fmt.Errorf("Error re-setting revision_id: %s", err)
+        }
+    }
+    return nil
+}

@@ -18,5 +18,5 @@ metadata["name"] = name
 
 // The only acceptable version/kind right now
 obj["apiVersion"] = "domains.cloudrun.com/v1"
-obj["kind"] = "<%= "#{object.name}" -%>"
+obj["kind"] = "<%= object.name -%>"
 return obj, nil

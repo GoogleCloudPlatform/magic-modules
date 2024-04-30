@@ -1,4 +1,4 @@
-resource "google_document_ai_warehouse_document_schema" "example_text" {
+resource "google_document_ai_warehouse_document_schema" "<%= ctx[:primary_resource_id] %>" {
   project_number     = data.google_project.project.number
   display_name       = "test-property-text"
   location           = "us"

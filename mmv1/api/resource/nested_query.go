@@ -13,24 +13,15 @@
 
 package resource
 
-import (
-	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-)
-
-// require 'api/object'
-// require 'google/string_utils'
-
 // Metadata for resources that are nested within a parent resource, as
 // a list of resources or single object within the parent.
 // e.g. Fine-grained resources
 type NestedQuery struct {
-	google.YamlValidator
+	// google.YamlValidator
 
 	// A list of keys to traverse in order.
 	// i.e. backendBucket --> cdnPolicy.signedUrlKeyNames
 	// should be ["cdnPolicy", "signedUrlKeyNames"]
-
-	// attr_reader :
 	Keys []string
 
 	// If true, we expect the the nested list to be
@@ -38,9 +29,7 @@ type NestedQuery struct {
 	// than a list of nested resource objects
 	// i.e. backendBucket.cdnPolicy.signedUrlKeyNames is a list of key names
 	// rather than a list of the actual key objects
-
-	// attr_reader :
-	IsListOfIds bool
+	IsListOfIds bool `yaml:"is_list_of_ids"`
 
 	// If true, the resource is created/updated/deleted by patching
 	// the parent resource and appropriate encoders/update_encoders/pre_delete
@@ -51,9 +40,7 @@ type NestedQuery struct {
 	// {
 	//  keys[-1] : list_of_objects
 	// }
-
-	// attr_reader :
-	ModifyByPatch bool
+	ModifyByPatch bool `yaml:"modify_by_patch"`
 }
 
 // def validate

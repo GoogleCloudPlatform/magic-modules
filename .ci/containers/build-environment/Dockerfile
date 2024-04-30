@@ -36,10 +36,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends git openssh-cli
 RUN git config --global user.name "Modular Magician"
 RUN git config --global user.email "magic-modules@google.com"
 
-# Set up Github SSH cloning.
-RUN ssh-keyscan github.com >> /known_hosts
-RUN echo "UserKnownHostsFile /known_hosts" >> /etc/ssh/ssh_config
-
 RUN go install golang.org/x/tools/cmd/goimports@d088b475e3360caabc032aaee1dc66351d4e729a
 RUN go install github.com/github/hub@v2.11.2+incompatible
 

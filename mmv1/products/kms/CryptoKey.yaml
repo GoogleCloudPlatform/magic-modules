@@ -156,3 +156,10 @@ properties:
     description: |
       Whether this key may contain imported versions only.
     default_from_api: true
+  - !ruby/object:Api::Type::String
+    name: 'cryptoKeyBackend'
+    immutable: true
+    description: |
+      The resource name of the backend environment associated with all CryptoKeyVersions within this CryptoKey.
+      The resource name is in the format "projects/*/locations/*/ekmConnections/*" and only applies to "EXTERNAL_VPC" keys.
+    default_from_api: true
