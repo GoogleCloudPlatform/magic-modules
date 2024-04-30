@@ -2176,10 +2176,10 @@ resource "google_container_cluster" "cluster" {
 
   node_config {
     machine_type = "c2-standard-4"
-	advanced_machine_features {
-    threads_per_core = 1
-    enable_nested_virtualization = "%t"
-	}
+    advanced_machine_features {
+      threads_per_core = 1
+      enable_nested_virtualization = "%t"
+	  }
   }
 }
 
@@ -2191,10 +2191,10 @@ resource "google_container_node_pool" "np" {
 
   node_config {
     machine_type = "c2-standard-4"
-	advanced_machine_features {
-    threads_per_core = 1
-    enable_nested_virtualization = "%t"
-	}
+    advanced_machine_features {
+      threads_per_core = 1
+      enable_nested_virtualization = "%t"
+	  }
   }
 }
 `, cluster, networkName, subnetworkName, enableNV, np, enableNV)
