@@ -1,0 +1,19 @@
+{
+  "name": "{{target}}",
+  "location": "{{region}}",
+  "project": "{{project}}",
+
+  "description": "custom target description",
+  "annotations": {
+    "my_first_annotation": "example-annotation-1",
+    "my_second_annotation": "example-annotation-2"
+  },
+  "labels": {
+    "my_first_label": "example-label-1",
+    "my_second_label": "example-label-2"
+  },
+  "requireApproval": false,
+  "customTarget": {
+    "customTargetType": "projects/{{project}}/locations/{{region}}/customTargetTypes/ctt"
+  }
+}
