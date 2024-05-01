@@ -72,6 +72,21 @@ examples:
     oics_vars_overrides:
       deletion_protection: 'false'
     skip_test: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'datastream_connection_profile_sql_server'
+    min_version: beta
+    primary_resource_id: 'default'
+    skip_test: true
+    vars:
+      database_name: 'db'
+      database_password: 'password'
+      database_user: 'user'
+      deletion_protection: 'true'
+      source_connection_profile_id: 'source-profile'
+      sql_server_name: 'sql-server'
+      sql_server_root_password: 'root-password'
+    test_vars_overrides:
+      deletion_protection: 'false'
 parameters:
   - !ruby/object:Api::Type::String
     name: connectionProfileId
