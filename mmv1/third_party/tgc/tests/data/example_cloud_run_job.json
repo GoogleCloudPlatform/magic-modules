@@ -1,6 +1,6 @@
 [
    {
-      "name":"//run.googleapis.com/projects/tf-deployer-2/locations/us-central1/jobs/cloudrun-job",
+      "name":"//run.googleapis.com/projects/{{.Provider.project}}/locations/us-central1/jobs/cloudrun-job",
       "asset_type":"run.googleapis.com/Job",
       "resource":{
          "version":"v2",
@@ -21,11 +21,6 @@
          }
       },
       "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
-      "ancestors":[
-         "projects/{{.Provider.project}}",
-         "folders/{{.FolderID}}",
-         "folders/{{.FolderID}}",
-         "organizations/{{.OrgID}}"
-      ]
+     "ancestors": ["organizations/{{.OrgID}}"]
    }
 ]
