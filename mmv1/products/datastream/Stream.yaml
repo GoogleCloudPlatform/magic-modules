@@ -116,11 +116,14 @@ examples:
       database_name: 'db'
       database_password: 'password'
       database_user: 'user'
+      deletion_protection: 'true'
       destination_connection_profile_id: 'destination-profile'
       source_connection_profile_id: 'source-profile'
       sql_server_name: 'sql-server'
       sql_server_root_password: 'root-password'
       stream_id: 'stream'
+    test_vars_overrides:
+      deletion_protection: 'false'
   - !ruby/object:Provider::Terraform::Examples
     name: 'datastream_stream_postgresql_bigquery_dataset_id'
     primary_resource_id: 'default'
