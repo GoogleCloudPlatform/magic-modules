@@ -18,8 +18,7 @@ description: |
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Access regional Google APIs through endpoints': 'https://cloud.google.com/vpc/docs/access-regional-google-apis-endpoints'
-  api: 'https://cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1beta/projects.locations.regionalEndpoints'
-min_version: beta
+  api: 'https://cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1/projects.locations.regionalEndpoints'
 base_url: 'projects/{{project}}/locations/{{location}}/regionalEndpoints'
 self_link: 'projects/{{project}}/locations/{{location}}/regionalEndpoints/{{name}}'
 immutable: true
