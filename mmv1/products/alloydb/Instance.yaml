@@ -295,9 +295,9 @@ properties:
       - !ruby/object:Api::Type::Array
         name: allowedConsumerProjects
         item_type: Api::Type::String
-        default_from_api: true
         description: |
           List of consumer projects that are allowed to create PSC endpoints to service-attachments to this instance.
+        diff_suppress_func: tpgresource.ProjectNumberDiffSuppressWithoutPrefix
       - !ruby/object:Api::Type::String
         name: 'pscDnsName'
         output: true
