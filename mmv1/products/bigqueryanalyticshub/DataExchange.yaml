@@ -49,6 +49,26 @@ examples:
     vars:
       data_exchange_id: 'my_data_exchange'
       description: 'example data exchange'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'bigquery_analyticshub_data_exchange_sharing'
+    primary_resource_id: 'data_exchange'
+    primary_resource_name: "fmt.Sprintf(\"tf_test_my_data_exchange%s\",
+      context[\"\
+      random_suffix\"])"
+    region_override: 'US'
+    vars:
+      data_exchange_id: 'my_data_exchange'
+      description: 'example data exchange'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'bigquery_analyticshub_data_exchange_sharing_dcr'
+    primary_resource_id: 'data_exchange'
+    primary_resource_name: "fmt.Sprintf(\"tf_test_my_data_exchange%s\",
+      context[\"\
+      random_suffix\"])"
+    region_override: 'US'
+    vars:
+      data_exchange_id: 'my_data_exchange'
+      description: 'example data exchange'
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -96,3 +116,31 @@ properties:
     name: icon
     description: |-
       Base64 encoded image representing the data exchange.
+  - !ruby/object:Api::Type::NestedObject
+    name: sharingEnvironmentConfig
+    description: Configurable data sharing environment option for a data exchange.
+    allow_empty_object: true
+    send_empty_value: true
+    default_from_api: true
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: defaultExchangeConfig
+        description: Default Analytics Hub data exchange, used for secured data sharing.
+        immutable: true
+        allow_empty_object: true
+        send_empty_value: true
+        default_from_api: true
+        exactly_one_of: 
+          - sharing_environment_config.0.default_exchange_config
+          - sharing_environment_config.0.dcr_exchange_config  
+        properties: []
+      - !ruby/object:Api::Type::NestedObject
+        name: dcrExchangeConfig  
+        description: Data Clean Room (DCR), used for privacy-safe and secured data sharing.
+        immutable: true
+        allow_empty_object: true
+        send_empty_value: true
+        exactly_one_of: 
+          - sharing_environment_config.0.default_exchange_config
+          - sharing_environment_config.0.dcr_exchange_config
+        properties: []
