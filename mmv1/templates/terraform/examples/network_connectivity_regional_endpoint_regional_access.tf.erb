@@ -1,0 +1,28 @@
+resource "google_compute_network" "my_network" {
+  name                    = "<%= ctx[:vars]['rep_network'] %>"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "my_subnetwork" {
+  name          = "<%= ctx[:vars]['rep_subnetwork'] %>"
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "us-central1"
+  network       = google_compute_network.my_network.id
+}
+
+resource "google_compute_address" "my_address" {
+  name       = "<%= ctx[:vars]['rep_address'] %>"
+  region     = "us-central1"
+  subnetwork = google_compute_subnetwork.my_subnetwork.id
+  purpose    = "GCE_ENDPOINT"
+  ip-version = "IPV4"
+}
+
+resource "google_network_connectivity_regional_endpoint" "<%= ctx[:primary_resource_id] %>" {
+  name              = "<%= ctx[:vars]['rep_name'] %>"
+  target_google_api = "<%= ctx[:vars]['rep_target_gogole_api'] %>"
+  access_type       = "REGIONAL"
+  address           = google_compute_address.my_address.id
+  network           = google_compute_network.my_network.id
+  subnetwork        = google_compute_subnetwork.my_subnetwork.id
+}
