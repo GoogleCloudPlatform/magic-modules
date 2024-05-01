@@ -572,11 +572,6 @@ service/sourcerepo:
 service/spanner:
   resources:
   - google_spanner_.*
-service/sqladmin:
-  resources:
-  - google_sql_database
-  - google_sql_databases
-  - google_sql_user
 service/sqladmin-cp:
   resources:
   - google_sql_database_instance
@@ -587,6 +582,11 @@ service/sqladmin-dp:
   resources:
   - google_sql_backup_run
   - google_sql_database_instance_latest_recovery_time
+service/sqladmin-infra:
+  resources:
+  - google_sql_user
+  - google_sql_database
+  - google_sql_databases
 service/sqladmin-security:
   resources:
   - google_sql_ca_certs
