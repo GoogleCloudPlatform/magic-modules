@@ -14,6 +14,7 @@ resource "google_compute_address" "my_address" {
   name       = "<%= ctx[:vars]['rep_address'] %>"
   region     = "us-central1"
   subnetwork = google_compute_subnetwork.my_subnetwork.id
+  address_type = "INTERNAL"
   purpose    = "GCE_ENDPOINT"
   ip_version = "IPV4"
 }
