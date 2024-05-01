@@ -667,3 +667,340 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
     return nil
 {{  end -}}
 }
+
+{{if $.Updatable -}}
+func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{}) error {
+{{if and ($.GetAsync.IsA "OpAsync") ($.GetAsync.IncludeProject) ($.GetAsync.Allow "update") -}}
+    var project string
+{{- end}}
+    config := meta.(*transport_tpg.Config)
+{{if $.CustomCode.CustomUpdate -}}
+//TODO custom update
+{{  else  -}}
+    userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+    if err != nil {
+        return err
+    }
+
+    billingProject := ""
+
+{{if $.HasProject -}}
+    project, err := tpgresource.GetProject(d, config)
+    if err != nil {
+        return fmt.Errorf("Error fetching project for {{ $.Name -}}: %s", err)
+    }
+{{if $.LegacyLongFormProject -}}
+    billingProject = strings.TrimPrefix(project, "projects/")
+{{      else -}}
+    billingProject = project
+{{- end}}
+{{- end}}
+
+
+{{if not $.Immutable -}}
+    obj := make(map[string]interface{})
+{{- range $prop := $.UpdateBodyProperties }}
+    {{/* flattened $s won't have something stored in state so instead nil is passed to the next expander. */}}
+    {{ $prop.ApiName -}}Prop, err := expand{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}({{ if $prop.FlattenObject }}nil{{else}}d.Get("{{underscore $prop.Name}}"){{ end }}, d, config)
+    if err != nil {
+        return err
+{{if $prop.SendEmptyValue -}}
+    } else if v, ok := d.GetOkExists("{{ underscore $prop.Name -}}"); ok || !reflect.DeepEqual(v, {{ $prop.ApiName -}}Prop) {
+{{        else if $prop.FlattenObject -}}
+    } else if !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.ApiName -}}Prop)) {
+{{        else -}}
+    } else if v, ok := d.GetOkExists("{{ underscore $prop.Name -}}"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, {{ $prop.ApiName -}}Prop)) {
+{{- end}}
+        obj["{{ $prop.ApiName -}}"] = {{ $prop.ApiName -}}Prop
+    }
+{{- end}}
+
+{{/*     We need to decide what encoder to use here - if there's an update encoder, use that! -*/}}
+{{if $.CustomCode.UpdateEncoder -}}
+    obj, err = resource{{ $.ResourceName -}}UpdateEncoder(d, meta, obj)
+    if err != nil {
+        return err
+    }
+{{      else if $.CustomCode.Encoder -}}
+    obj, err = resource{{ $.ResourceName -}}Encoder(d, meta, obj)
+    if err != nil {
+        return err
+    }
+{{- end}}
+
+{{if $.Mutex -}}
+    lockName, err := tpgresource.ReplaceVars(d, config, "{{ $.Mutex -}}")
+    if err != nil {
+        return err
+    }
+    transport_tpg.MutexStore.Lock(lockName)
+    defer transport_tpg.MutexStore.Unlock(lockName)
+{{- end}}
+
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{ $.UpdateUrl }}")
+    if err != nil {
+        return err
+    }
+
+    log.Printf("[DEBUG] Updating {{ $.Name -}} %q: %#v", d.Id(), obj)
+	headers := make(http.Header)
+{{ if $.UpdateMask -}}
+//TODO updatemask
+{{end}}
+{{ if $.CustomCode.PreUpdate -}}
+//TODO Preupdate
+{{end}}
+{{if $.NestedQuery -}}
+{{if $.NestedQuery.ModifyByPatch -}}
+{{/*#       Keep this after mutex - patch request data relies on current resource state */}}
+    obj, err = resource{{ $.ResourceName -}}PatchUpdateEncoder(d, meta, obj)
+    if err != nil {
+        return err
+    }
+{{- end}}
+{{- end}}
+{{if $.SupportsIndirectUserProjectOverride -}}
+    if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
+        billingProject = parts[1]
+    }
+{{- end}}
+
+    // err == nil indicates that the billing_project value was found
+    if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+      billingProject = bp
+    }
+
+{{if $.UpdateMask -}}
+// if updateMask is empty we are not updating anything so skip the post
+if len(updateMask) > 0 {
+{{- end}}
+    res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+        Config: config,
+        Method: "{{ $.UpdateVerb -}}",
+        Project: billingProject,
+        RawURL: url,
+        UserAgent: userAgent,
+        Body: obj,
+        Timeout: d.Timeout(schema.TimeoutUpdate),
+{{if $.ErrorRetryPredicates -}}
+        ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
+{{- end}}
+{{if $.ErrorAbortPredicates -}}
+        ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
+{{- end}}
+		Headers:   headers,
+    })
+
+    if err != nil {
+        return fmt.Errorf("Error updating {{ $.Name -}} %q: %s", d.Id(), err)
+    } else {
+        log.Printf("[DEBUG] Finished updating {{ $.Name -}} %q: %#v", d.Id(), res)
+    }
+
+{{if $.GetAsync.Allow "update" -}}
+{{if $.GetAsync.IsA "OpAsync" -}}
+    err = {{ $.ClientNamePascal -}}OperationWaitTime(
+        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}} "Updating {{ $.Name -}}", userAgent,
+        d.Timeout(schema.TimeoutUpdate))
+
+    if err != nil {
+        return err
+    }
+{{        else if $.GetAsync.IsA "PollAsync" -}}
+    err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName -}}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncExistence -}}, "Updating {{ $.Name -}}", d.Timeout(schema.TimeoutUpdate), {{ $.GetAsync.TargetOccurrences -}})
+    if err != nil {
+{{if $.GetAsync.SuppressError -}}
+        log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name -}} %q finished updating: %q", d.Id(), err)
+{{          else -}}
+        return err
+{{- end}}
+    }
+{{- end}}
+{{- end}}
+{{if $.UpdateMask -}}
+  }
+{{- end}}
+{{    end -}}
+{{if eq 0 1 -}} 
+{{/* TODO THIS BLOCK NEEDS FUNCTIONS TO WORK -- LINE 982 
+
+* field_specific_update_methods
+* properties_by_custom_update
+* group_by / key[:]
+
+*/}}
+//TODO field_specific_update_methods($.root_properties)
+    d.Partial(true)
+
+{{/*      properties_by_custom_update($.root_properties)
+          .sort_by {|k, _| k.nil? ? "" : k[:update_id].to_s}
+          .each do |key, props|
+-*/}}
+    if {{/* props.map { |prop| "d.HasChange(\"#{underscore $prop.Name }\")" }.join ' || ' -*/}} {
+        obj := make(map[string]interface{})
+
+{{/*- TODO 878      if key[:fingerprint_name] -*/}}
+        getUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}" -}}")
+        if err != nil {
+            return err
+        }
+{{if $.SupportsIndirectUserProjectOverride -}}
+        if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
+            billingProject = parts[1]
+        }
+{{- end}}
+
+        // err == nil indicates that the billing_project value was found
+        if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+        billingProject = bp
+        }
+
+        getRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+            Config: config,
+            Method: "{{ upper $.ReadVerb -}}",
+            Project: billingProject,
+            RawURL: getUrl,
+            UserAgent: userAgent,
+{{if $.ErrorRetryPredicates -}}
+        	ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
+{{- end}}
+{{if $.ErrorAbortPredicates -}}
+        	ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
+{{- end}}
+        })
+        if err != nil {
+            return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("{{ $.ResourceName -}} %q", d.Id()))
+        }
+
+        obj["{{/* key[:fingerprint_name] */}}"] = getRes["{{/* key[:fingerprint_name] */}}"]
+
+{{/*      end  -*/}}
+{{/*- TODO range $prop := $.CustomUpdatePropertiesByKey $.AllUserProperties key */}}
+{{ range $prop := $.AllProperties }}      
+        {{ $prop.ApiName -}}Prop, err := expand{{ if $.NestedQuery -}}Nested{{ end }}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}({{ if $prop.FlattenObject }}nil{{else}}d.Get("{{underscore $prop.Name}}"){{ end }}, d, config)
+        if err != nil {
+            return err
+{{/*         There is some nuance in when we choose to send a value to an update function.
+            This is unfortunate, but it's because of the way that GCP works, so there's
+            no easy way out.  Some APIs require you to send `enable_foo: false`, while
+            others will crash if you send `attribute: ''`.  We require this nuance to
+            be annotated in ResourceName.yaml, since it is not discoverable automatically.
+
+            The behavior here, which we believe to be correct, is to send a value if
+            * It is non-empty OR
+            * It is marked send_empty_value in ResourceName.yaml.
+            AND
+            * It has been set by the user OR
+            * It has been modified by the expander in any way
+
+            This subsumes both `ForceSendFields` and `NullFields` in the go API client -
+            `NullFields` is a special case of `send_empty_value` where the empty value
+            in question is go's literal nil.
+-*/}}
+{{if $prop.SendEmptyValue -}}
+        } else if v, ok := d.GetOkExists("{{ underscore $prop.Name -}}"); ok || !reflect.DeepEqual(v, {{ $prop.ApiName -}}Prop) {
+{{          else if $prop.FlattenObject -}}
+        } else if !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.ApiName -}}Prop)) {
+{{          else -}}
+        } else if v, ok := d.GetOkExists("{{ underscore $prop.Name -}}"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, {{ $prop.ApiName -}}Prop)) {
+{{- end}}
+            obj["{{ $prop.ApiName -}}"] = {{ $prop.ApiName -}}Prop
+        }
+{{/*       end  # props.each -*/}}
+
+{{/*     We need to decide what encoder to use here - if there's an update encoder, use that! -*/}}
+{{if $.CustomCode.update_encoder -}}
+    obj, err = resource{{ $.ResourceName -}}UpdateEncoder(d, meta, obj)
+    if err != nil {
+        return err
+    }
+{{- end}}
+
+{{if $.Mutex -}}
+        lockName, err := tpgresource.ReplaceVars(d, config, "{{ $.Mutex -}}")
+        if err != nil {
+            return err
+        }
+        transport_tpg.MutexStore.Lock(lockName)
+        defer transport_tpg.MutexStore.Unlock(lockName)
+{{- end}}
+
+        url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{ $.UpdateUrl }}")-}}")
+        if err != nil {
+            return err
+        }
+
+
+{{ if $.CustomCode.PreUpdate -}}
+//TODO Preupdate
+{{ end}}
+{{if $.SupportsIndirectUserProjectOverride -}}
+        if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
+            billingProject = parts[1]
+        }
+{{- end}}
+
+        // err == nil indicates that the billing_project value was found
+        if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+        billingProject = bp
+        }
+
+        res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+            Config: config,
+            Method: "{{/* key[:update_verb] -*/}}",
+            Project: billingProject,
+            RawURL: url,
+            UserAgent: userAgent,
+            Body: obj,
+            Timeout: d.Timeout(schema.TimeoutUpdate),
+{{if $.ErrorRetryPredicates -}}
+        	ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
+{{- end}}
+{{if $.ErrorAbortPredicates -}}
+        	ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
+{{- end}}
+			Headers:   headers,
+        })
+        if err != nil {
+            return fmt.Errorf("Error updating {{ $.Name -}} %q: %s", d.Id(), err)
+        } else {
+        log.Printf("[DEBUG] Finished updating {{ $.Name -}} %q: %#v", d.Id(), res)
+    }
+
+{{if $.GetAsync.Allow "update" -}}
+{{if $.GetAsync.IsA "OpAsync" -}}
+	    err = {{ $.ClientNamePascal -}}OperationWaitTime(
+	        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}} "Updating {{ $.Name -}}", userAgent,
+	        d.Timeout(schema.TimeoutUpdate))
+
+	    if err != nil {
+	        return err
+	    }
+{{        else if $.GetAsync.IsA "PollAsync" -}}
+	    err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName -}}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncExistence -}}, "Updating {{ $.Name -}}", d.Timeout(schema.TimeoutUpdate), {{ $.GetAsync.TargetOccurrences -}})
+	    if err != nil {
+{{if $.GetAsync.SuppressError -}}
+	        log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name -}} %q finished updating: %q", d.Id(), err)
+{{          else -}}
+	        return err
+{{- end}}
+        }
+{{- end}}
+{{- end}}
+    } 
+{{/* TODO THIS BLOCK NEEDS FUNCTIONS TO WORK -- LINE 824 */}}
+{{- end}}
+
+  d.Partial(false)
+{{- end}}
+
+{{ if $.CustomCode.PostUpdate -}} //TODO POST UPDATE {{end}}
+    return resource{{ $.ResourceName -}}Read(d, meta)
+{{  end -}}
+}
+{{ else if $.RootLabels -}}
+func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{}) error {
+    // Only the root field "labels" and "terraform_labels" are mutable
+    return resource{{ $.ResourceName -}}Read(d, meta)
+}
+{{- end}}
