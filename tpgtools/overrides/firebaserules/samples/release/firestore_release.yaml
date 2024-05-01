@@ -21,3 +21,5 @@ resource: ./firestore_release.tf.tmpl
 variables:
 - name: project
   type: project
+- name: database
+  type: resource_name
