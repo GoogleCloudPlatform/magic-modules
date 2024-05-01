@@ -46,15 +46,25 @@ async: !ruby/object:Api::OpAsync
 
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: 'regional_endpoints_regional_access_with_address_input'
+    name: 'regional_endpoints_regional_access'
     primary_resource_id: 'default'
     vars:
-      name: 'my-rep'
-      target_gogole_api: 'spanner.me-central2.p.rep.googleapis.com'
-      access_type: 'REGIONAL'
-      address: 'projects/my-project/regions/my-region/addresses/my-address'
-      network: 'projects/my-project/global/networks/my-network'
-      subnetwork: 'projects/my-project/regions/my-region/subnetworks/my-subnetwork'
+      rep_name: 'my-rep'
+      rep_target_google_api: 'spanner.me-central2.p.rep.googleapis.com'
+      rep_access_type: 'REGIONAL'
+      rep_address: 'my-address'
+      rep_network: 'my-network'
+      rep_subnetwork: 'my-subnetwork'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'regional_endpoints_global_access'
+    primary_resource_id: 'default'
+    vars:
+      rep_name: 'my-rep'
+      rep_target_google_api: 'spanner.me-central2.p.rep.googleapis.com'
+      rep_access_type: 'GLOBAL'
+      rep_address: 'my-address'
+      rep_network: 'my-network'
+      rep_subnetwork: 'my-subnetwork'
 
 parameters:
   - !ruby/object:Api::Type::String
