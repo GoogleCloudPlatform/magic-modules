@@ -293,6 +293,19 @@ func ProjectNumberDiffSuppress(_, old, new string, _ *schema.ResourceData) bool 
 	return a2 == b2
 }
 
+// Suppress diffs when the value read from api
+// has the project number instead of the project name.
+// This function suppresses the difference when the project ID is not prefixed with the string "projects".
+func ProjectNumberDiffSuppressWithoutPrefix(_, old, new string, _ *schema.ResourceData) bool {
+	var a2, b2 string
+	reN := regexp.MustCompile("\\d+")
+	re := regexp.MustCompile("[^/]+")
+	replacement := []byte("equal")
+	a2 = string(reN.ReplaceAll([]byte(old), replacement))
+	b2 = string(re.ReplaceAll([]byte(new), replacement))
+	return a2 == b2
+}
+
 func IsNewResource(diff TerraformResourceDiff) bool {
 	name := diff.Get("name")
 	return name.(string) == ""
