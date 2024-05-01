@@ -224,7 +224,7 @@ properties:
         - !ruby/object:Api::Type::Enum
           name: 'issueType'
           description: |
-            Form this outage is expected to take. Note that the versions of this enum prefixed with 
+            Form this outage is expected to take. Note that the versions of this enum prefixed with
             "IT_" have been deprecated in favor of the unprefixed values. Can take one of the
             following values:
               - OUTAGE: The Interconnect may be completely out of service for some or all of the
@@ -321,7 +321,7 @@ properties:
           properties:
             - !ruby/object:Api::Type::String
               name: 'name'
-              required: True
+              required: true
               description: |
                 A name for this pre-shared key. The name must be 1-63 characters long, and
                  comply with RFC1035. Specifically, the name must be 1-63 characters long and match
@@ -362,7 +362,7 @@ properties:
       interconnects.list of features requested for this Interconnect connection. Options: MACSEC (
       If specified then the connection is created on MACsec capable hardware ports. If not
       specified, the default value is false, which allocates non-MACsec capable ports first if
-      available). 
+      available).
     item_type: !ruby/object:Api::Type::Enum
       name: 'requestedFeatures'
       description: |
@@ -383,3 +383,4 @@ properties:
         interconnects.list of features available for this Interconnect connection,
       values:
         - :MACSEC
+
