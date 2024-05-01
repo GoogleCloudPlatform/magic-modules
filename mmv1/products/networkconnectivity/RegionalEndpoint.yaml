@@ -46,7 +46,7 @@ async: !ruby/object:Api::OpAsync
 
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: 'network_connectivity_regional_endpoints_regional_access'
+    name: 'network_connectivity_regional_endpoint_regional_access'
     primary_resource_id: 'default'
     vars:
       rep_name: 'my-rep'
@@ -56,7 +56,7 @@ examples:
       rep_network: 'my-network'
       rep_subnetwork: 'my-subnetwork'
   - !ruby/object:Provider::Terraform::Examples
-    name: 'network_connectivity_regional_endpoints_global_access'
+name: 'network_connectivity_regional_endpoint_global_access'
     primary_resource_id: 'default'
     vars:
       rep_name: 'my-rep'
