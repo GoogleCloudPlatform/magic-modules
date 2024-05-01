@@ -177,7 +177,7 @@ properties:
               description: |
                 User-specified description for the IP range.
               send_empty_value: true
-        custom_flatten: 'templates/terraform/custom_flatten/compute_router_property.go.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/compute_router_range.go.erb'
       - !ruby/object:Api::Type::Integer
         name: keepaliveInterval
         description: |

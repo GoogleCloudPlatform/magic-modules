@@ -30,7 +30,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
 		})
 	}
 	configData := []map[string]interface{}{}
-	for _, item := range d.Get("properties.0.property").([]interface{}) {
+	for _, item := range d.Get("advertisedIpRanges.0.range").([]interface{}) {
 		configData = append(configData, item.(map[string]interface{}))
 	}
 	sorted, err := tpgresource.SortMapsByConfigOrder(configData, apiData, "range")
