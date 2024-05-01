@@ -46,8 +46,8 @@ examples:
     name: 'network_connectivity_regional_endpoint_regional_access'
     primary_resource_id: 'default'
     vars:
+      rep_name: 'my-rep'
       rep_target_google_api: 'spanner.me-central2.p.rep.googleapis.com'
-      rep_access_type: 'REGIONAL'
       rep_address: 'my-address'
       rep_network: 'my-network'
       rep_subnetwork: 'my-subnetwork'
@@ -55,8 +55,8 @@ examples:
     name: 'network_connectivity_regional_endpoint_global_access'
     primary_resource_id: 'default'
     vars:
+      rep_name: 'my-rep'
       rep_target_google_api: 'spanner.me-central2.p.rep.googleapis.com'
-      rep_access_type: 'GLOBAL'
       rep_address: 'my-address'
       rep_network: 'my-network'
       rep_subnetwork: 'my-subnetwork'
@@ -64,11 +64,10 @@ examples:
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
-    output: true
     immutable: true
     url_param_only: true
     description: |
-      The name of a RegionalEndpoint. Format: `projects/{project}/locations/{location}/regionalEndpoints/{regional_endpoint}`.
+      The name of the RegionalEndpoint.
   - !ruby/object:Api::Type::String
     name: 'location'
     required: true
