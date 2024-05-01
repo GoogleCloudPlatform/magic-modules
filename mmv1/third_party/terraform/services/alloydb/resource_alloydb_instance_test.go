@@ -738,7 +738,7 @@ resource "google_alloydb_instance" "default" {
     cpu_count = 2
   }
   psc_instance_config {
-	allowed_consumer_projects = ["722705436247"]
+	allowed_consumer_projects = ["vmiglani-playground-psc"]
   }
 }
 resource "google_alloydb_cluster" "default" {
@@ -765,7 +765,7 @@ resource "google_alloydb_instance" "default" {
     cpu_count = 2
   }
   psc_instance_config {
-	allowed_consumer_projects = ["722705436247", "1044355742748"]
+	allowed_consumer_projects = ["vmiglani-playground-psc", "alloydb-psc-cep"]
   }
 }
 resource "google_alloydb_cluster" "default" {
