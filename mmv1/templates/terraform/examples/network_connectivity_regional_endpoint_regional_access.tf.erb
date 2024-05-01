@@ -27,5 +27,4 @@ resource "google_network_connectivity_regional_endpoint" "<%= ctx[:primary_resou
   subnetwork        = google_compute_subnetwork.my_subnetwork.id
   description       = "My RegionalEndpoint targeting Google API spanner.me-central2.p.rep.googleapis.com"
   labels            = {env = "default"}
-  project           = "my-project"
 }

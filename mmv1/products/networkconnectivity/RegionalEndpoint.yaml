@@ -22,9 +22,6 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 base_url: 'projects/{{project}}/locations/{{location}}/regionalEndpoints'
 self_link: 'projects/{{project}}/locations/{{location}}/regionalEndpoints/{{name}}'
 immutable: true
-timeouts: !ruby/object:Api::Timeouts
-  insert_minutes: 20
-  delete_minutes: 20
 create_url: 'projects/{{project}}/locations/{{location}}/regionalEndpoints?regional_endpoint_id={{name}}'
 delete_url: 'projects/{{project}}/locations/{{location}}/regionalEndpoints/{{name}}'
 autogen_async: true
@@ -49,7 +46,6 @@ examples:
     name: 'network_connectivity_regional_endpoint_regional_access'
     primary_resource_id: 'default'
     vars:
-      rep_name: 'my-rep'
       rep_target_google_api: 'spanner.me-central2.p.rep.googleapis.com'
       rep_access_type: 'REGIONAL'
       rep_address: 'my-address'
@@ -59,7 +55,6 @@ examples:
     name: 'network_connectivity_regional_endpoint_global_access'
     primary_resource_id: 'default'
     vars:
-      rep_name: 'my-rep'
       rep_target_google_api: 'spanner.me-central2.p.rep.googleapis.com'
       rep_access_type: 'GLOBAL'
       rep_address: 'my-address'
@@ -74,6 +69,13 @@ parameters:
     url_param_only: true
     description: |
       The name of a RegionalEndpoint. Format: `projects/{project}/locations/{location}/regionalEndpoints/{regional_endpoint}`.
+  - !ruby/object:Api::Type::String
+    name: 'location'
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The location of the RegionalEndpoint.
 
 properties:
   - !ruby/object:Api::Type::Time
@@ -113,7 +115,6 @@ properties:
     description: |
       The access type of this regional endpoint. This field is reflected in the PSC Forwarding Rule configuration to enable global access.
     values:
-      - :ACCESS_TYPE_UNSPECIFIED
       - :GLOBAL
       - :REGIONAL
   - !ruby/object:Api::Type::String
