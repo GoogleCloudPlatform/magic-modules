@@ -53,12 +53,16 @@ examples:
     vars:
       router_name: 'my-router'
       network_name: 'my-network'
+    ignore_read_extra:
+      - advertisedIpRanges
   - !ruby/object:Provider::Terraform::Examples
     name: 'compute_router_encrypted_interconnect'
     primary_resource_id: 'encrypted-interconnect-router'
     vars:
       router_name: 'test-router'
       network_name: 'test-network'
+    ignore_read_extra:
+      - advertisedIpRanges
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/router.go.erb
 custom_diff: [
@@ -173,6 +177,7 @@ properties:
               description: |
                 User-specified description for the IP range.
               send_empty_value: true
+        custom_flatten: 'templates/terraform/custom_flatten/compute_router_property.go.erb'
       - !ruby/object:Api::Type::Integer
         name: keepaliveInterval
         description: |
