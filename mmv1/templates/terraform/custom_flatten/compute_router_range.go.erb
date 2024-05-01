@@ -12,7 +12,7 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
-func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+func flatten<%= prefix -%><%= titlelize_range(range) -%>(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil {
 		return v
 	}
@@ -35,7 +35,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
 	}
 	sorted, err := tpgresource.SortMapsByConfigOrder(configData, apiData, "range")
 	if err != nil {
-		log.Printf("[ERROR] Could not support API response for properties.0.property: %s", err)
+		log.Printf("[ERROR] Could not support API response for advertisedIpRanges.0.range: %s", err)
 		return apiData
 	}
 	return sorted
