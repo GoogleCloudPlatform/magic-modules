@@ -15,7 +15,7 @@ resource "google_compute_address" "my_address" {
   region     = "us-central1"
   subnetwork = google_compute_subnetwork.my_subnetwork.id
   purpose    = "GCE_ENDPOINT"
-  ip-version = "IPV4"
+  ip_version = "IPV4"
 }
 
 resource "google_network_connectivity_regional_endpoint" "<%= ctx[:primary_resource_id] %>" {
