@@ -738,12 +738,12 @@ properties:
           - !ruby/object:Api::Type::String
             name: "key"
             description: |
-              Key for the connection
+              Key for the Registration Destination Config
           - !ruby/object:Api::Type::Array
             name: "destination"
             api_name: "destinations"
             description: |
-              destinations for the connection
+              destinations for eventing configuration
             item_type: !ruby/object:Api::Type::NestedObject
               properties:
                 - !ruby/object:Api::Type::Integer
@@ -758,6 +758,47 @@ properties:
                   name: "host"
                   description: |
                     Host
+      - !ruby/object:Api::Type::NestedObject
+        name: "proxyDestinationConfig"
+        description: |
+          Proxy for Eventing auto-registration.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: "key"
+            description: |
+              Key for the Registration Destination Config
+          - !ruby/object:Api::Type::Array
+            name: "destination"
+            api_name: "destinations"
+            description: |
+              destinations for eventing configuration
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::Integer
+                  name: "port"
+                  description: |
+                    port number
+                - !ruby/object:Api::Type::String
+                  name: "serviceAttachment"
+                  description: |
+                    Service Attachment
+                - !ruby/object:Api::Type::String
+                  name: "host"
+                  description: |
+                    Host
+      - !ruby/object:Api::Type::NestedObject
+        name: "deadLetterConfig"
+        description: |
+          Dead letter config for eventing
+        properties:
+          - !ruby/object:Api::Type::String
+            name: "topic"
+            description: |
+             Topic to push events which couldn't be processed.
+          - !ruby/object:Api::Type::String
+            name: "projectId"
+            description: |
+              Project which has the topic given.
       - !ruby/object:Api::Type::NestedObject
         name: "authConfig"
         description: |
