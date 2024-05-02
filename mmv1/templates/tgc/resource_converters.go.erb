@@ -37,6 +37,7 @@ func ResourceConverters() map[string][]cai.ResourceConverter {
 	return map[string][]cai.ResourceConverter{
 		"google_artifact_registry_repository":             {artifactregistry.ResourceConverterArtifactRegistryRepository()},
 		"google_compute_address":                          {compute.ResourceConverterComputeAddress()},
+		"google_compute_autoscaler":					   {compute.ResourceConverterComputeAutoscaler()},
 		"google_compute_firewall":                         {compute.ResourceConverterComputeFirewall()},
 		"google_compute_disk":                             {compute.ResourceConverterComputeDisk()},
 		"google_compute_forwarding_rule":                  {compute.ResourceConverterComputeForwardingRule()},
