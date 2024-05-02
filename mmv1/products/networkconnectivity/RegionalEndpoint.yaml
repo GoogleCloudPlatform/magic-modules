@@ -100,10 +100,12 @@ properties:
     name: 'network'
     description: |
       The name of the VPC network for this private regional endpoint. Format: `projects/{project}/global/networks/{network}`
+    default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'subnetwork'
     description: |
       The name of the subnetwork from which the IP address will be allocated. Format: `projects/{project}/regions/{region}/subnetworks/{subnetwork}`
+    default_from_api: true
   - !ruby/object:Api::Type::Enum
     name: accessType
     required: true
