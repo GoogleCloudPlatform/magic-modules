@@ -95,7 +95,7 @@ The following arguments are supported:
 * `column_family` - (Optional) A group of columns within a table which share a common configuration. This can be specified multiple times. Structure is documented below.
 
 * `deletion_protection` - (Optional) A field to make the table protected against data loss i.e. when set to PROTECTED, deleting the table, the column families in the table, and the instance containing the table would be prohibited.
-If not provided, deletion protection will be set to UNPROTECTED.
+If not provided, currently deletion protection will be set to UNPROTECTED as it is the API default value. Note this field configs the deletion protection provided by the API in the backend, and should not be confused with Terraform-side deletion protection.
 
 * `subset_view` - (Optional) An AuthorizedView permitting access to an explicit subset of a Table. Structure is documented below.
 
