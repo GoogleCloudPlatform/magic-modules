@@ -47,7 +47,6 @@ examples:
     primary_resource_id: 'default'
     vars:
       rep_name: 'my-rep'
-      rep_address: 'my-address'
       rep_network: 'my-network'
       rep_subnetwork: 'my-subnetwork'
   - !ruby/object:Provider::Terraform::Examples
@@ -55,7 +54,6 @@ examples:
     primary_resource_id: 'default'
     vars:
       rep_name: 'my-rep'
-      rep_address: 'my-address'
       rep_network: 'my-network'
       rep_subnetwork: 'my-subnetwork'
 

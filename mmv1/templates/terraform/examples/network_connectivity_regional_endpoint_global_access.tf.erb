@@ -5,18 +5,9 @@ resource "google_compute_network" "my_network" {
 
 resource "google_compute_subnetwork" "my_subnetwork" {
   name          = "<%= ctx[:vars]['rep_subnetwork'] %>"
-  ip_cidr_range = "10.0.0.0/16"
+  ip_cidr_range = "192.168.0.0/24"
   region        = "us-central1"
   network       = google_compute_network.my_network.id
-}
-
-resource "google_compute_address" "my_address" {
-  name       = "<%= ctx[:vars]['rep_address'] %>"
-  region     = "us-central1"
-  subnetwork = google_compute_subnetwork.my_subnetwork.id
-  address_type = "INTERNAL"
-  purpose    = "GCE_ENDPOINT"
-  ip_version = "IPV4"
 }
 
 resource "google_network_connectivity_regional_endpoint" "<%= ctx[:primary_resource_id] %>" {
@@ -24,7 +15,7 @@ resource "google_network_connectivity_regional_endpoint" "<%= ctx[:primary_resou
   location          = "us-central1"
   target_google_api = "boqcodelabjaimin-pa.us-central1.p.rep.googleapis.com"
   access_type       = "GLOBAL"
-  address           = google_compute_address.my_address.id
+  address           = "192.168.0.4"
   network           = google_compute_network.my_network.id
   subnetwork        = google_compute_subnetwork.my_subnetwork.id
 }
