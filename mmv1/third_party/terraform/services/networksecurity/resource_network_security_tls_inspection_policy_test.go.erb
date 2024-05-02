@@ -1,5 +1,6 @@
 <% autogen_exception -%>
 package networksecurity_test
+<% unless version == 'ga' -%>
 
 import (
 	"fmt"
@@ -205,3 +206,5 @@ resource "google_network_security_tls_inspection_policy" "foobar" {
 }
 `, caPoolName, certificateAuthorityName, tlsInspectionPolicyName)
 }
+
+<% end -%>
