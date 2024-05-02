@@ -45,6 +45,7 @@ func ResourceConverters() map[string][]cai.ResourceConverter {
 		"google_compute_instance":                         {compute.ResourceConverterComputeInstance()},
 		"google_compute_network":                          {compute.ResourceConverterComputeNetwork()},
 		"google_compute_route":                  		   {compute.ResourceConverterComputeRoute()},
+		"google_compute_router":						   {compute.ResourceConverterComputeRouter()},
 		"google_compute_security_policy":                  {resourceConverterComputeSecurityPolicy()},
 		"google_compute_snapshot":                         {compute.ResourceConverterComputeSnapshot()},
 		"google_compute_subnetwork":                       {compute.ResourceConverterComputeSubnetwork()},
