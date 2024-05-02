@@ -25,7 +25,7 @@ description: |
   the attached firewall endpoint.
 references:
   !ruby/object:Api::Resource::ReferenceLinks
-  api: 'https://cloud.google.com/firewall/docs/reference/network-security/rest/v1beta1/projects.locations.firewallEndpointAssociations#FirewallEndpointAssociation'
+  api: 'https://cloud.google.com/firewall/docs/reference/network-security/rest/v1/projects.locations.firewallEndpointAssociations#FirewallEndpointAssociation'
   guides:
     'Firewall endpoint overview': 'https://cloud.google.com/firewall/docs/about-firewall-endpoints'
     'Create and associate firewall endpoints': 'https://cloud.google.com/firewall/docs/configure-firewall-endpoints'

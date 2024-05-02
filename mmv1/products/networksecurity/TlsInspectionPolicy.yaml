@@ -22,7 +22,7 @@ description:
   'The TlsInspectionPolicy resource contains references to CA pools in
   Certificate Authority Service and associated metadata.'
 references: !ruby/object:Api::Resource::ReferenceLinks
-  api: 'https://cloud.google.com/secure-web-proxy/docs/reference/network-security/rest/v1beta1/projects.locations.tlsInspectionPolicies'
+  api: 'https://cloud.google.com/secure-web-proxy/docs/reference/network-security/rest/v1/projects.locations.tlsInspectionPolicies'
   guides:
     'Use TlsInspectionPolicy': 'https://cloud.google.com/secure-web-proxy/docs/tls-inspection-overview'
 async: !ruby/object:Api::OpAsync
