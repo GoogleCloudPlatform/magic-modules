@@ -62,16 +62,17 @@ func wrapMultipleParams(params ...interface{}) (map[string]interface{}, error) {
 }
 
 var TemplateFunctions = template.FuncMap{
-	"title":      google.SpaceSeparatedTitle,
-	"replace":    strings.Replace,
-	"camelize":   google.Camelize,
-	"underscore": google.Underscore,
-	"plural":     google.Plural,
-	"contains":   strings.Contains,
-	"join":       strings.Join,
-	"lower":      strings.ToLower,
-	"upper":      strings.ToUpper,
-	"dict":       wrapMultipleParams,
+	"title":        google.SpaceSeparatedTitle,
+	"replace":      strings.Replace,
+	"camelize":     google.Camelize,
+	"underscore":   google.Underscore,
+	"plural":       google.Plural,
+	"contains":     strings.Contains,
+	"join":         strings.Join,
+	"lower":        strings.ToLower,
+	"upper":        strings.ToUpper,
+	"dict":         wrapMultipleParams,
+	"format2regex": google.Format2Regex,
 }
 
 var GA_VERSION = "ga"
