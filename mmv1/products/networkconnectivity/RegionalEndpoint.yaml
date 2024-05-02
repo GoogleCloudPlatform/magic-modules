@@ -60,6 +60,7 @@ examples:
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
+    required: true
     immutable: true
     url_param_only: true
     description: |
