@@ -893,7 +893,12 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
 	}
 
   if d.HasChange("instance_flexibility_policy") {
-		updatedManager.InstanceFlexibilityPolicy = expandInstanceFlexibilityPolicy(d.Get("instance_flexibility_policy").([]any))
+    instanceFlexibilityPolicy := d.Get("instance_flexibility_policy")
+    if instanceFlexibilityPolicy == nil || len(instanceFlexibilityPolicy.([]any)) == 0 {
+      updatedManager.NullFields = append(updatedManager.NullFields, "InstanceFlexibilityPolicy")
+    } else {
+      updatedManager.InstanceFlexibilityPolicy = expandInstanceFlexibilityPolicy(instanceFlexibilityPolicy.([]any))
+    }
 		change = true
 	}
 
