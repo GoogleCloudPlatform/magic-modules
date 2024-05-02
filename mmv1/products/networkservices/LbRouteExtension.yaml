@@ -56,7 +56,6 @@ examples:
       callouts_instance_group: 'l7-ilb-callouts-ins-group'
       callouts_hc_name: 'l7-ilb-callouts-hc'
       callouts_backend_name: 'l7-ilb-callouts-backend'
-      callouts_url_map_name: 'l7-ilb-callouts-url-map'
     min_version: beta
     ignore_read_extra:
       - 'port_range'

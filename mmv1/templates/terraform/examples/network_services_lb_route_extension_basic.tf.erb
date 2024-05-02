@@ -57,10 +57,20 @@ resource "google_compute_region_target_http_proxy" "default" {
 
 # URL map
 resource "google_compute_region_url_map" "default" {
-  name            = "<%= ctx[:vars]['regional_url_map_name'] %>"
+  name            = "tf-test-l7-ilb-regional-url-map%{random_suffix}"
   provider        = google-beta
   region          = "us-west1"
   default_service = google_compute_region_backend_service.default.id
+
+  host_rule {
+    hosts        = ["service-extensions.com"]
+    path_matcher = "callouts"
+  }
+
+  path_matcher {
+    name            = "callouts"
+    default_service = google_compute_region_backend_service.callouts_backend.id
+  }
 }
 
 # backend service
@@ -199,7 +209,6 @@ resource "google_network_services_lb_route_extension" "<%= ctx[:primary_resource
   provider              = google-beta
   name                  = "<%= ctx[:vars]['lb_route_extension_name'] %>"
   location              = "us-west1"
-  provider              = google-beta
   load_balancing_scheme = "INTERNAL_MANAGED"
 
   forwarding_rules = [
@@ -317,19 +326,6 @@ resource "google_compute_region_backend_service" "callouts_backend" {
     group           = google_compute_instance_group.callouts_instance_group.id
     balancing_mode  = "UTILIZATION"
     capacity_scaler = 1.0
-  }
-}
-
-# callout URL map
-resource "google_compute_region_url_map" "callouts_url_map" {
-  name            = "<%= ctx[:vars]['regional_callouts_url_map_name'] %>"
-  provider        = google-beta
-  region          = "us-west1"
-  default_service = google_compute_region_backend_service.callouts_backend.id
-
-  host_rule {
-    hosts        = ["service-extensions.com"]
-    path_matcher = "allpaths"
   }
 }
 # [END lb_route_extension]
