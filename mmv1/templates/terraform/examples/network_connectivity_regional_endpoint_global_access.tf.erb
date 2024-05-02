@@ -22,7 +22,7 @@ resource "google_compute_address" "my_address" {
 resource "google_network_connectivity_regional_endpoint" "<%= ctx[:primary_resource_id] %>" {
   name              = "<%= ctx[:vars]['rep_name'] %>"
   location          = "us-central1"
-  target_google_api = "<%= ctx[:vars]['rep_target_gogole_api'] %>"
+  target_google_api = "spanner.me-central2.p.rep.googleapis.com"
   access_type       = "GLOBAL"
   address           = google_compute_address.my_address.id
   network           = google_compute_network.my_network.id

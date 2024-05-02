@@ -47,7 +47,6 @@ examples:
     primary_resource_id: 'default'
     vars:
       rep_name: 'my-rep'
-      rep_target_google_api: 'spanner.me-central2.p.rep.googleapis.com'
       rep_address: 'my-address'
       rep_network: 'my-network'
       rep_subnetwork: 'my-subnetwork'
@@ -56,7 +55,6 @@ examples:
     primary_resource_id: 'default'
     vars:
       rep_name: 'my-rep'
-      rep_target_google_api: 'spanner.me-central2.p.rep.googleapis.com'
       rep_address: 'my-address'
       rep_network: 'my-network'
       rep_subnetwork: 'my-subnetwork'
