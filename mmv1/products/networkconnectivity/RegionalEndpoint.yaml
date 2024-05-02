@@ -121,3 +121,4 @@ properties:
     name: 'address'
     description: |
       The IP Address of the Regional Endpoint. When no address is provided, an IP from the subnetwork is allocated. Use one of the following formats: * IPv4 address as in `10.0.0.1` * Address resource URI as in `projects/{project}/regions/{region}/addresses/{address_name}`
+    default_from_api: true
