@@ -172,12 +172,12 @@ properties:
                 The IP range to advertise. The value must be a
                 CIDR-formatted string.
               send_empty_value: true
+              custom_flatten: 'templates/terraform/custom_flatten/compute_router_range.go.erb'
             - !ruby/object:Api::Type::String
               name: description
               description: |
                 User-specified description for the IP range.
               send_empty_value: true
-        custom_flatten: 'templates/terraform/custom_flatten/compute_router_range.go.erb'
       - !ruby/object:Api::Type::Integer
         name: keepaliveInterval
         description: |
