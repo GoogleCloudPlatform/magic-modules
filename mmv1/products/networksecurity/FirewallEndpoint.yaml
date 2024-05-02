@@ -16,7 +16,6 @@ name: 'FirewallEndpoint'
 base_url: '{{parent}}/locations/{{location}}/firewallEndpoints'
 create_url: '{{parent}}/locations/{{location}}/firewallEndpoints?firewallEndpointId={{name}}'
 self_link: '{{parent}}/locations/{{location}}/firewallEndpoints/{{name}}'
-min_version: beta
 update_verb: :PATCH
 update_mask: true
 description: |

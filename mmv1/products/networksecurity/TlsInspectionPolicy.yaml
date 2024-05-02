@@ -16,7 +16,6 @@ name: 'TlsInspectionPolicy'
 base_url: 'projects/{{project}}/locations/{{location}}/tlsInspectionPolicies'
 create_url: 'projects/{{project}}/locations/{{location}}/tlsInspectionPolicies?tlsInspectionPolicyId={{name}}'
 self_link: 'projects/{{project}}/locations/{{location}}/tlsInspectionPolicies/{{name}}'
-min_version: beta
 update_verb: :PATCH
 update_mask: true
 description:
@@ -51,7 +50,6 @@ import_format:
   ['projects/{{project}}/locations/{{location}}/tlsInspectionPolicies/{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
     name: 'network_security_tls_inspection_policy_basic'
     primary_resource_id: 'default'
     vars:

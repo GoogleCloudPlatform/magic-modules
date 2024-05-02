@@ -16,7 +16,6 @@ name: 'SecurityProfileGroup'
 base_url: '{{parent}}/locations/{{location}}securityProfileGroups'
 create_url: '{{parent}}/locations/{{location}}/securityProfileGroups?securityProfileGroupId={{name}}'
 self_link: '{{parent}}/locations/{{location}}/securityProfileGroups/{{name}}'
-min_version: beta
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -36,7 +35,6 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'network_security_security_profile_group_basic'
     primary_resource_id: 'default'
-    min_version: beta
     test_env_vars:
       org_id: :ORG_ID
     vars:
