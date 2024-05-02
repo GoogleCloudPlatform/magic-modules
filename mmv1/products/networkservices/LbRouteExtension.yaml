@@ -176,6 +176,7 @@ properties:
                   This field is required for the LbTrafficExtension resource. It's not relevant for the LbRouteExtension
                   resource. Possible values:`EVENT_TYPE_UNSPECIFIED`, `REQUEST_HEADERS`, `REQUEST_BODY`, `RESPONSE_HEADERS`,
                   `RESPONSE_BODY`, `RESPONSE_BODY` and `RESPONSE_BODY`.
+                item_type: Api::Type::String
   - !ruby/object:Api::Type::Enum
     name: 'loadBalancingScheme'
     description: |
