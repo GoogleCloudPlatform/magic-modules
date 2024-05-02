@@ -76,6 +76,8 @@ resource "google_privateca_ca_pool_iam_member" "tls_inspection_permission" {
 }
 
 resource "google_network_security_tls_inspection_policy" "<%= ctx[:primary_resource_id] %>" {
+  provider = google-beta
+
   name     = "<%= ctx[:vars]['resource_name'] %>"
   location = "us-central1"
   ca_pool  = google_privateca_ca_pool.default.id
