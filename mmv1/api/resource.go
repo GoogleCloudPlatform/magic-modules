@@ -132,7 +132,7 @@ type Resource struct {
 	//
 	// [Optional] (Api::Resource::IamPolicy) Configuration of a resource's
 	// resource-specific IAM Policy.
-	IamPolicy resource.IamPolicy `yaml:"iam_policy"`
+	IamPolicy *resource.IamPolicy `yaml:"iam_policy"`
 
 	// [Optional] If set to true, don't generate the resource itself; only
 	// generate the IAM policy.
@@ -964,13 +964,18 @@ func (r Resource) GetIdFormat() string {
 // ====================
 // Template Methods
 // ====================
+// Functions used to create slices of resource properties that could not otherwise be called from within generating templates.
 
-// Prints a dot notation path to where the field is nested within the parent
-// object when called on a property. eg: parent.meta.label.foo
-// Redefined on Resource to terminate the calls up the parent chain.
-
-// checks a resource for if it has properties that have FlattenObject=true on fields where IgnoreRead=false
-// used to decide whether or not to import "google.golang.org/api/googleapi"
-func (r Resource) FlattenedProperties() []*Type {
-	return google.Select(google.Reject(r.GettableProperties(), func(p *Type) bool { return p.IgnoreRead }), func(p *Type) bool { return p.FlattenObject })
+func (r Resource) ReadProperties() []*Type {
+	return google.Reject(r.GettableProperties(), func(p *Type) bool {
+		return p.IgnoreRead
+	})
 }
+
+func (r Resource) FlattenedProperties() []*Type {
+	return google.Select(r.ReadProperties(), func(p *Type) bool { 
+		return p.FlattenObject 
+	})
+}
+
+
