@@ -16,6 +16,8 @@ package provider
 import (
 	"bytes"
 	"errors"
+	"fmt"
+	"go/format"
 	"log"
 	"os"
 	"path/filepath"
@@ -99,11 +101,13 @@ func NewTemplateData(outputFolder string, version product.Version) *TemplateData
 func (td *TemplateData) GenerateResourceFile(filePath string, resource api.Resource) {
 	templatePath := "templates/terraform/resource.go.tmpl"
 	templates := []string{
+		templatePath,
 		"templates/terraform/schema_property.go.tmpl",
 		"templates/terraform/schema_subresource.go.tmpl",
-		templatePath,
 		"templates/terraform/expand_resource_ref.tmpl",
 		"templates/terraform/custom_flatten/go/bigquery_table_ref.go.tmpl",
+		"templates/terraform/flatten_property_method.go.tmpl",
+		"templates/terraform/expand_property_method.go.tmpl",
 	}
 	td.GenerateFile(filePath, templatePath, resource, true, templates...)
 }
@@ -111,9 +115,9 @@ func (td *TemplateData) GenerateResourceFile(filePath string, resource api.Resou
 func (td *TemplateData) GenerateDocumentationFile(filePath string, resource api.Resource) {
 	templatePath := "templates/terraform/resource.html.markdown.tmpl"
 	templates := []string{
+		templatePath,
 		"templates/terraform/property_documentation.html.markdown.tmpl",
 		"templates/terraform/nested_property_documentation.html.markdown.tmpl",
-		templatePath,
 	}
 	td.GenerateFile(filePath, templatePath, resource, false, templates...)
 }
@@ -163,12 +167,12 @@ func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, g
 
 	sourceByte := contents.Bytes()
 
-	// if goFormat {
-	// 	sourceByte, err = format.Source(sourceByte)
-	// 	if err != nil {
-	// 		glog.Error(fmt.Errorf("error formatting %s", filePath))
-	// 	}
-	// }
+	if goFormat {
+		sourceByte, err = format.Source(sourceByte)
+		if err != nil {
+			glog.Error(fmt.Errorf("error formatting %s", filePath))
+		}
+	}
 
 	err = os.WriteFile(filePath, sourceByte, 0644)
 	if err != nil {
