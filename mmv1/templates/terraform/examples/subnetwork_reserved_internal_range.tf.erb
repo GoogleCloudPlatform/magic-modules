@@ -1,9 +1,9 @@
-resource "google_compute_subnetwork" "subnetwork_with_reserved_internal_range" {
+resource "google_compute_subnetwork" "<%= ctx[:primary_resource_id] %>" {
   provider                = google-beta
   name                    = "<%= ctx[:vars]['subnetwork_name'] %>"
   region                  = "us-central1"
   network                 = google_compute_network.default.id
-  reserved_internal_range = google_network_connectivity_internal_range.reserved.id
+  reserved_internal_range = "networkconnectivity.googleapis.com/${google_network_connectivity_internal_range.reserved.id}"
 }
 
 resource "google_compute_network" "default" {
