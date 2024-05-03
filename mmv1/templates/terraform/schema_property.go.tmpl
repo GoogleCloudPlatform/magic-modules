@@ -138,7 +138,7 @@ Possible values: ["{{ join .EnumValues "\",\"" }}"]
 			"{{ .KeyName -}}": {
 				Type:     schema.TypeString,
 				Required: true,
-				{{ if .DiffSuppressFunc -}}
+				{{ if .KeyDiffSuppressFunc -}}
 					DiffSuppressFunc: {{ .KeyDiffSuppressFunc }},
 				{{ end -}}
 				{{ if .Immutable -}}
