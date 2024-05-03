@@ -1,4 +1,4 @@
-{{/* the license inside this block applies to this file
+{{/* The license inside this block applies to this file
   Copyright 2024 Google LLC. All Rights Reserved.
 
   Licensed under the Apache License, Version 2.0 (the "License");
@@ -414,7 +414,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{  end -}}
 }
 
-{{if ($.GetAsync.IsA "OpAsync")}}
+{{if ($.GetAsync.IsA "PollAsync")}}
 func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interface{}) transport_tpg.PollReadFunc {
     return func() (map[string]interface{}, error) {
 {{if $.GetAsync.CustomPollRead -}}
@@ -513,7 +513,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
         return err
     }
 
-    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}/{{$.SelfLinkUri}}{{$.ReadQueryParams}}")
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}{{$.ReadQueryParams}}")
     if err != nil {
         return err
     }
@@ -1170,5 +1170,17 @@ func resource{{ $.ResourceName }}Import(d *schema.ResourceData, meta interface{}
     {{- end }}
 }
 {{- end }}
-{{/* TODO Flatteners */}}
-{{/* TODO Expanders */}}
+{{- range $prop := $.GettableProperties }}
+    {{- if not $prop.IgnoreRead }}
+        {{- template "flattenPropertyMethod" $prop -}}
+    {{- end }}
+{{- end }}
+{{- range $prop := $.SettableProperties }}
+    {{- template "expandPropertyMethod" $prop -}}
+{{- end }}
+{{/* TODO custom encoder */}}
+{{/* TODO custom update encoder */}}
+{{/* TODO nested query */}}
+{{/* TODO custom decoder */}}
+{{/* TODO custom post create failure */}}
+{{/* TODO state upgraders */}}
