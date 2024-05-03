@@ -27,4 +27,4 @@ jobs:
           cd .ci/magician
           go build .
       - name: Request reviewer
-        run: .ci/magician/magician scheduled-pr-reminders ${{ github.event.pull_request.number }}
+        run: .ci/magician/magician scheduled-pr-reminders ${{ github.event.pull_request.number }} --dry-run
