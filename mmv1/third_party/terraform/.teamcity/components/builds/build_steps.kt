@@ -146,18 +146,20 @@ fun BuildSteps.saveArtifactsToGCS() {
             gcloud auth activate-service-account --key-file=google-account.json
 
             # Get current date for nightly tests
-            current_date=$(date +"%%Y-%%m-%%d") 
+            CURRENT_DATE=$(date +"%%Y-%%m-%%d") 
             // "%%" is used to escape "%" see details at https://www.jetbrains.com/help/teamcity/9.0/defining-and-using-build-parameters-in-build-configuration.html#using-build-parameters-in-build-configuration-settings
+
+            echo "Print out CURRENT_DATE: ${'$'}{CURRENT_DATE}"
 
             # Detect Trigger Method 
             TRIGGERED_BY_USERNAME=%teamcity.build.triggeredBy.username%
             BRANCH_NAME=%teamcity.build.branch%
             if [[ "${'$'}TRIGGERED_BY_USERNAME" = "n/a" ]] ; then
                 echo "Build was triggered as part of automated testing. We know this because the `triggeredBy.username` value was `n/a`, value: ${'$'}{TRIGGERED_BY_USERNAME}"
-                FOLDER="nightly/%teamcity.project.id%/${'$'}current_date"
+                FOLDER="nightly/%teamcity.project.id%/${'$'}{CURRENT_DATE}"
             else
                 echo "Build was triggered manually. We know this because `triggeredBy.username` has a non- `n/a` value: ${'$'}{TRIGGERED_BY_USERNAME}"
-                FOLDER="manual/%teamcity.project.id%/${'$'}BRANCH_NAME/${'$'}current_date"
+                FOLDER="manual/%teamcity.project.id%/${'$'}{BRANCH_NAME}/${'$'}{CURRENT_DATE}"
             fi
 
             # Copy logs to GCS
