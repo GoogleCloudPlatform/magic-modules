@@ -135,10 +135,10 @@ examples:
     oics_vars_overrides:
       deletion_protection: 'false'
   - !ruby/object:Provider::Terraform::Examples
-    name: 'gkebackup_restoreplan_gitops_restore_mode'
-    primary_resource_id: 'gitops_restore_mode'
+    name: 'gkebackup_restoreplan_gitops_mode'
+    primary_resource_id: 'gitops_mode'
     vars:
-      name: 'gitops-restore-mode'
+      name: 'gitops-mode'
       network_name: 'default'
       subnetwork_name: 'default'
     test_env_vars:
@@ -151,10 +151,10 @@ examples:
     oics_vars_overrides:
       deletion_protection: 'false'
   - !ruby/object:Provider::Terraform::Examples
-    name: 'gkebackup_restoreplan_restore_ordering'
-    primary_resource_id: 'restore_ordering'
+    name: 'gkebackup_restoreplan_restore_order'
+    primary_resource_id: 'restore_order'
     vars:
-      name: 'restore-ordering'
+      name: 'restore-order'
       network_name: 'default'
       subnetwork_name: 'default'
     test_env_vars:
@@ -167,10 +167,10 @@ examples:
     oics_vars_overrides:
       deletion_protection: 'false'
   - !ruby/object:Provider::Terraform::Examples
-    name: 'gkebackup_restoreplan_volume_restore_policy_bindings'
-    primary_resource_id: 'volume_restore_policy_bindings'
+    name: 'gkebackup_restoreplan_volume_res'
+    primary_resource_id: 'volume_res'
     vars:
-      name: 'volume-restore-policy-bindings'
+      name: 'volume-res'
       network_name: 'default'
       subnetwork_name: 'default'
     test_env_vars:

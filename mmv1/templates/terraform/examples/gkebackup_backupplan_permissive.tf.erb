@@ -15,7 +15,7 @@ resource "google_container_cluster" "primary" {
   subnetwork    = "<%= ctx[:vars]['subnetwork_name'] %>"
 }
 
-resource "google_gke_backup_backup_plan" "permissive" {
+resource "google_gke_backup_backup_plan" "<%= ctx[:primary_resource_id] %>" {
   name = "<%= ctx[:vars]['name'] %>"
   cluster = google_container_cluster.primary.id
   location = "us-central1"

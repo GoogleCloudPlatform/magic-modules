@@ -26,7 +26,7 @@ resource "google_gke_backup_backup_plan" "basic" {
   }
 }
 
-resource "google_gke_backup_restore_plan" "restore_orderings" {
+resource "google_gke_backup_restore_plan" "<%= ctx[:primary_resource_id] %>" {
   name = "<%= ctx[:vars]['name'] %>"
   location = "us-central1"
   backup_plan = google_gke_backup_backup_plan.basic.id
@@ -34,32 +34,14 @@ resource "google_gke_backup_restore_plan" "restore_orderings" {
   restore_config {
     all_namespaces = true
     namespaced_resource_restore_mode = "FAIL_ON_CONFLICT"
-    volume_data_restore_policy = "RESTORE_VOLUME_DATA_FROM_BACKUP"
+    volume_data_restore_policy = "NO_VOLUME_DATA_RESTORATION"
     cluster_resource_restore_scope {
       all_group_kinds = true
     }
     cluster_resource_conflict_policy = "USE_EXISTING_VERSION"
-    restore_order {
-        group_kind_dependencies {
-            satisfying {
-                resource_group = "stable.example.com"
-                resource_kind = "kindA"
-            }
-            requiring {
-                resource_group = "stable.example.com"
-                resource_kind = "kindB"
-            }
-        }
-        group_kind_dependencies {
-            satisfying {
-                resource_group = "stable.example.com"
-                resource_kind = "kindB"
-            }
-            requiring {
-                resource_group = "stable.example.com"
-                resource_kind = "kindC"
-            }
-        }
+    volume_data_restore_policy_bindings {
+        policy = "RESTORE_VOLUME_DATA_FROM_BACKUP"
+        volume_type = "GCE_PERSISTENT_DISK"
     }
   }
 }
