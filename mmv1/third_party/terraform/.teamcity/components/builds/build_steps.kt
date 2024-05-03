@@ -155,10 +155,10 @@ fun BuildSteps.saveArtifactsToGCS() {
             TRIGGERED_BY_USERNAME=%teamcity.build.triggeredBy.username%
             BRANCH_NAME=%teamcity.build.branch%
             if [[ "${'$'}TRIGGERED_BY_USERNAME" = "n/a" ]] ; then
-                echo "Build was triggered as part of automated testing. We know this because the `triggeredBy.username` value was `n/a`, value: ${'$'}{TRIGGERED_BY_USERNAME}"
+                echo "Build was triggered as part of automated testing. We know this because the \`triggeredBy.username\` value was \`n/a\`, value: ${'$'}{TRIGGERED_BY_USERNAME}"
                 FOLDER="nightly/%teamcity.project.id%/${'$'}{CURRENT_DATE}"
             else
-                echo "Build was triggered manually. We know this because `triggeredBy.username` has a non- `n/a` value: ${'$'}{TRIGGERED_BY_USERNAME}"
+                echo "Build was triggered manually. We know this because \`triggeredBy.username\` has a non- \`n/a\` value: ${'$'}{TRIGGERED_BY_USERNAME}"
                 FOLDER="manual/%teamcity.project.id%/${'$'}{BRANCH_NAME}/${'$'}{CURRENT_DATE}"
             fi
 
