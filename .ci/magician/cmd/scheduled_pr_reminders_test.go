@@ -23,7 +23,7 @@ func TestNotificationState(t *testing.T) {
 		// expectState: waitingForReviewerAssignment
 		"no review requests, and no reviews": {
 			pullRequest: &github.PullRequest{
-				User: &github.User{Login: github.String("author")},
+				User:      &github.User{Login: github.String("author")},
 				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 			},
 			expectState: waitingForReviewerAssignment,
@@ -31,7 +31,7 @@ func TestNotificationState(t *testing.T) {
 		},
 		"request for non-core reviewer, and no reviews": {
 			pullRequest: &github.PullRequest{
-				User: &github.User{Login: github.String("author")},
+				User:      &github.User{Login: github.String("author")},
 				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 				RequestedReviewers: []*github.User{
 					&github.User{Login: github.String("reviewer")},
@@ -39,8 +39,8 @@ func TestNotificationState(t *testing.T) {
 			},
 			issueEvents: []*github.IssueEvent{
 				&github.IssueEvent{
-					Event: github.String("review_requested"),
-					CreatedAt: &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
+					Event:             github.String("review_requested"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
 					RequestedReviewer: &github.User{Login: github.String("reviewer")},
 				},
 			},
@@ -49,7 +49,7 @@ func TestNotificationState(t *testing.T) {
 		},
 		"request for team reviewer, and no reviews": {
 			pullRequest: &github.PullRequest{
-				User: &github.User{Login: github.String("author")},
+				User:      &github.User{Login: github.String("author")},
 				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 				RequestedTeams: []*github.Team{
 					&github.Team{Name: github.String("terraform-team")},
@@ -57,8 +57,8 @@ func TestNotificationState(t *testing.T) {
 			},
 			issueEvents: []*github.IssueEvent{
 				&github.IssueEvent{
-					Event: github.String("review_requested"),
-					CreatedAt: &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
+					Event:         github.String("review_requested"),
+					CreatedAt:     &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
 					RequestedTeam: &github.Team{Name: github.String("terraform-team")},
 				},
 			},
@@ -69,13 +69,13 @@ func TestNotificationState(t *testing.T) {
 		// expectState: waitingForReview
 		"no reviews": {
 			pullRequest: &github.PullRequest{
-				User: &github.User{Login: github.String("author")},
+				User:      &github.User{Login: github.String("author")},
 				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 			},
 			issueEvents: []*github.IssueEvent{
 				&github.IssueEvent{
-					Event: github.String("review_requested"),
-					CreatedAt: &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
+					Event:             github.String("review_requested"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
 					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
 				},
 			},
@@ -84,45 +84,45 @@ func TestNotificationState(t *testing.T) {
 		},
 		"no reviews since latest review request": {
 			pullRequest: &github.PullRequest{
-				User: &github.User{Login: github.String("author")},
+				User:      &github.User{Login: github.String("author")},
 				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 			},
 			issueEvents: []*github.IssueEvent{
 				&github.IssueEvent{
-					Event: github.String("review_requested"),
-					CreatedAt: &github.Timestamp{time.Date(2024, 2, 1, 0, 0, 0, 0, time.UTC)},
+					Event:             github.String("review_requested"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 2, 1, 0, 0, 0, 0, time.UTC)},
 					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
 				},
 				&github.IssueEvent{
-					Event: github.String("review_requested"),
-					CreatedAt: &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
+					Event:             github.String("review_requested"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
 					RequestedReviewer: &github.User{Login: github.String(secondCoreReviewer)},
 				},
 				&github.IssueEvent{
-					Event: github.String("review_requested"),
-					CreatedAt: &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
+					Event:             github.String("review_requested"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
 					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
 				},
 			},
 			reviews: []*github.PullRequestReview{
 				&github.PullRequestReview{
-					User: &github.User{Login: github.String(firstCoreReviewer)},
-					State: github.String("APPROVED"),
+					User:        &github.User{Login: github.String(firstCoreReviewer)},
+					State:       github.String("APPROVED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
 				},
 				&github.PullRequestReview{
-					User: &github.User{Login: github.String(firstCoreReviewer)},
-					State: github.String("CHANGES_REQUESTED"),
+					User:        &github.User{Login: github.String(firstCoreReviewer)},
+					State:       github.String("CHANGES_REQUESTED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 4, 0, 0, 0, 0, time.UTC)},
 				},
 				&github.PullRequestReview{
-					User: &github.User{Login: github.String(firstCoreReviewer)},
-					State: github.String("COMMENTED"),
+					User:        &github.User{Login: github.String(firstCoreReviewer)},
+					State:       github.String("COMMENTED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 5, 0, 0, 0, 0, time.UTC)},
 				},
 				&github.PullRequestReview{
-					User: &github.User{Login: github.String(firstCoreReviewer)},
-					State: github.String("DISMISSED"),
+					User:        &github.User{Login: github.String(firstCoreReviewer)},
+					State:       github.String("DISMISSED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 6, 0, 0, 0, 0, time.UTC)},
 				},
 			},
@@ -131,20 +131,20 @@ func TestNotificationState(t *testing.T) {
 		},
 		"ignore reviews from deleted accounts": {
 			pullRequest: &github.PullRequest{
-				User: &github.User{Login: github.String("author")},
+				User:      &github.User{Login: github.String("author")},
 				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 			},
 			issueEvents: []*github.IssueEvent{
 				&github.IssueEvent{
-					Event: github.String("review_requested"),
-					CreatedAt: &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
+					Event:             github.String("review_requested"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
 					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
 				},
 			},
 			reviews: []*github.PullRequestReview{
 				&github.PullRequestReview{
-					User: nil,
-					State: github.String("APPROVED"),
+					User:        nil,
+					State:       github.String("APPROVED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 1, 0, 0, 0, 0, time.UTC)},
 				},
 			},
@@ -155,35 +155,35 @@ func TestNotificationState(t *testing.T) {
 		// waitingForContributor
 		"change request": {
 			pullRequest: &github.PullRequest{
-				User: &github.User{Login: github.String("author")},
+				User:      &github.User{Login: github.String("author")},
 				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 			},
 			issueEvents: []*github.IssueEvent{
 				&github.IssueEvent{
-					Event: github.String("review_requested"),
-					CreatedAt: &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
+					Event:             github.String("review_requested"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
 					RequestedReviewer: &github.User{Login: github.String(secondCoreReviewer)},
 				},
 				&github.IssueEvent{
-					Event: github.String("review_requested"),
-					CreatedAt: &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
+					Event:             github.String("review_requested"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
 					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
 				},
 			},
 			reviews: []*github.PullRequestReview{
 				&github.PullRequestReview{
-					User: &github.User{Login: github.String(secondCoreReviewer)},
-					State: github.String("APPROVED"),
+					User:        &github.User{Login: github.String(secondCoreReviewer)},
+					State:       github.String("APPROVED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 1, 0, 0, 0, 0, time.UTC)},
 				},
 				&github.PullRequestReview{
-					User: &github.User{Login: github.String(secondCoreReviewer)},
-					State: github.String("CHANGES_REQUESTED"),
+					User:        &github.User{Login: github.String(secondCoreReviewer)},
+					State:       github.String("CHANGES_REQUESTED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 2, 0, 0, 0, 0, time.UTC)},
 				},
 				&github.PullRequestReview{
-					User: &github.User{Login: github.String(secondCoreReviewer)},
-					State: github.String("COMMENTED"),
+					User:        &github.User{Login: github.String(secondCoreReviewer)},
+					State:       github.String("COMMENTED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 3, 0, 0, 0, 0, time.UTC)},
 				},
 			},
@@ -192,30 +192,30 @@ func TestNotificationState(t *testing.T) {
 		},
 		"comment review but no approval": {
 			pullRequest: &github.PullRequest{
-				User: &github.User{Login: github.String("author")},
+				User:      &github.User{Login: github.String("author")},
 				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 			},
 			issueEvents: []*github.IssueEvent{
 				&github.IssueEvent{
-					Event: github.String("review_requested"),
-					CreatedAt: &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
+					Event:             github.String("review_requested"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
 					RequestedReviewer: &github.User{Login: github.String(secondCoreReviewer)},
 				},
 				&github.IssueEvent{
-					Event: github.String("review_requested"),
-					CreatedAt: &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
+					Event:             github.String("review_requested"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
 					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
 				},
 			},
 			reviews: []*github.PullRequestReview{
 				&github.PullRequestReview{
-					User: &github.User{Login: github.String(secondCoreReviewer)},
-					State: github.String("APPROVED"),
+					User:        &github.User{Login: github.String(secondCoreReviewer)},
+					State:       github.String("APPROVED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 1, 0, 0, 0, 0, time.UTC)},
 				},
 				&github.PullRequestReview{
-					User: &github.User{Login: github.String(secondCoreReviewer)},
-					State: github.String("COMMENTED"),
+					User:        &github.User{Login: github.String(secondCoreReviewer)},
+					State:       github.String("COMMENTED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 2, 0, 0, 0, 0, time.UTC)},
 				},
 			},
@@ -224,30 +224,30 @@ func TestNotificationState(t *testing.T) {
 		},
 		"approved review with a change request review": {
 			pullRequest: &github.PullRequest{
-				User: &github.User{Login: github.String("author")},
+				User:      &github.User{Login: github.String("author")},
 				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 			},
 			issueEvents: []*github.IssueEvent{
 				&github.IssueEvent{
-					Event: github.String("review_requested"),
-					CreatedAt: &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
+					Event:             github.String("review_requested"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
 					RequestedReviewer: &github.User{Login: github.String(secondCoreReviewer)},
 				},
 				&github.IssueEvent{
-					Event: github.String("review_requested"),
-					CreatedAt: &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
+					Event:             github.String("review_requested"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
 					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
 				},
 			},
 			reviews: []*github.PullRequestReview{
 				&github.PullRequestReview{
-					User: &github.User{Login: github.String(firstCoreReviewer)},
-					State: github.String("APPROVED"),
+					User:        &github.User{Login: github.String(firstCoreReviewer)},
+					State:       github.String("APPROVED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 1, 0, 0, 0, 0, time.UTC)},
 				},
 				&github.PullRequestReview{
-					User: &github.User{Login: github.String(secondCoreReviewer)},
-					State: github.String("CHANGES_REQUESTED"),
+					User:        &github.User{Login: github.String(secondCoreReviewer)},
+					State:       github.String("CHANGES_REQUESTED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 2, 0, 0, 0, 0, time.UTC)},
 				},
 			},
@@ -258,35 +258,35 @@ func TestNotificationState(t *testing.T) {
 		// expectState: waitingForMerge
 		"approved review on its own": {
 			pullRequest: &github.PullRequest{
-				User: &github.User{Login: github.String("author")},
+				User:      &github.User{Login: github.String("author")},
 				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 			},
 			issueEvents: []*github.IssueEvent{
 				&github.IssueEvent{
-					Event: github.String("review_requested"),
-					CreatedAt: &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
+					Event:             github.String("review_requested"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
 					RequestedReviewer: &github.User{Login: github.String(secondCoreReviewer)},
 				},
 				&github.IssueEvent{
-					Event: github.String("review_requested"),
-					CreatedAt: &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
+					Event:             github.String("review_requested"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
 					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
 				},
 			},
 			reviews: []*github.PullRequestReview{
 				&github.PullRequestReview{
-					User: &github.User{Login: github.String(secondCoreReviewer)},
-					State: github.String("APPROVED"),
+					User:        &github.User{Login: github.String(secondCoreReviewer)},
+					State:       github.String("APPROVED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 3, 0, 0, 0, 0, time.UTC)},
 				},
 				&github.PullRequestReview{
-					User: &github.User{Login: github.String(secondCoreReviewer)},
-					State: github.String("COMMENTED"),
+					User:        &github.User{Login: github.String(secondCoreReviewer)},
+					State:       github.String("COMMENTED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 2, 0, 0, 0, 0, time.UTC)},
 				},
 				&github.PullRequestReview{
-					User: &github.User{Login: github.String(secondCoreReviewer)},
-					State: github.String("CHANGES_REQUESTED"),
+					User:        &github.User{Login: github.String(secondCoreReviewer)},
+					State:       github.String("CHANGES_REQUESTED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 1, 0, 0, 0, 0, time.UTC)},
 				},
 			},
@@ -295,30 +295,30 @@ func TestNotificationState(t *testing.T) {
 		},
 		"approved review with a comment review": {
 			pullRequest: &github.PullRequest{
-				User: &github.User{Login: github.String("author")},
+				User:      &github.User{Login: github.String("author")},
 				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 			},
 			issueEvents: []*github.IssueEvent{
 				&github.IssueEvent{
-					Event: github.String("review_requested"),
-					CreatedAt: &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
+					Event:             github.String("review_requested"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
 					RequestedReviewer: &github.User{Login: github.String(secondCoreReviewer)},
 				},
 				&github.IssueEvent{
-					Event: github.String("review_requested"),
-					CreatedAt: &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
+					Event:             github.String("review_requested"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
 					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
 				},
 			},
 			reviews: []*github.PullRequestReview{
 				&github.PullRequestReview{
-					User: &github.User{Login: github.String(firstCoreReviewer)},
-					State: github.String("APPROVED"),
+					User:        &github.User{Login: github.String(firstCoreReviewer)},
+					State:       github.String("APPROVED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 1, 0, 0, 0, 0, time.UTC)},
 				},
 				&github.PullRequestReview{
-					User: &github.User{Login: github.String(secondCoreReviewer)},
-					State: github.String("COMMENTED"),
+					User:        &github.User{Login: github.String(secondCoreReviewer)},
+					State:       github.String("COMMENTED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 2, 0, 0, 0, 0, time.UTC)},
 				},
 			},
@@ -327,35 +327,35 @@ func TestNotificationState(t *testing.T) {
 		},
 		"approved review followed by dismissed review": {
 			pullRequest: &github.PullRequest{
-				User: &github.User{Login: github.String("author")},
+				User:      &github.User{Login: github.String("author")},
 				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 			},
 			issueEvents: []*github.IssueEvent{
 				&github.IssueEvent{
-					Event: github.String("review_requested"),
-					CreatedAt: &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
+					Event:             github.String("review_requested"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
 					RequestedReviewer: &github.User{Login: github.String(secondCoreReviewer)},
 				},
 				&github.IssueEvent{
-					Event: github.String("review_requested"),
-					CreatedAt: &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
+					Event:             github.String("review_requested"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
 					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
 				},
 			},
 			reviews: []*github.PullRequestReview{
 				&github.PullRequestReview{
-					User: &github.User{Login: github.String(firstCoreReviewer)},
-					State: github.String("APPROVED"),
+					User:        &github.User{Login: github.String(firstCoreReviewer)},
+					State:       github.String("APPROVED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 1, 0, 0, 0, 0, time.UTC)},
 				},
 				&github.PullRequestReview{
-					User: &github.User{Login: github.String(firstCoreReviewer)},
-					State: github.String("DISMISSED"),
+					User:        &github.User{Login: github.String(firstCoreReviewer)},
+					State:       github.String("DISMISSED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 2, 0, 0, 0, 0, time.UTC)},
 				},
 				&github.PullRequestReview{
-					User: &github.User{Login: github.String(secondCoreReviewer)},
-					State: github.String("COMMENTED"),
+					User:        &github.User{Login: github.String(secondCoreReviewer)},
+					State:       github.String("COMMENTED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 3, 0, 0, 0, 0, time.UTC)},
 				},
 			},
@@ -384,57 +384,57 @@ func TestDaysDiff(t *testing.T) {
 		panic(err)
 	}
 	cases := map[string]struct {
-		from, to time.Time
+		from, to   time.Time
 		expectDays int
 	}{
 		"same time": {
-			from: time.Date(2024, 5, 6, 0, 0, 0, 0, pdtLoc),
-			to: time.Date(2024, 5, 6, 0, 0, 0, 0, pdtLoc),
+			from:       time.Date(2024, 5, 6, 0, 0, 0, 0, pdtLoc),
+			to:         time.Date(2024, 5, 6, 0, 0, 0, 0, pdtLoc),
 			expectDays: 0,
 		},
 		"same day": {
-			from: time.Date(2024, 5, 6, 0, 0, 0, 0, pdtLoc),
-			to: time.Date(2024, 5, 6, 1, 0, 0, 0, pdtLoc),
+			from:       time.Date(2024, 5, 6, 0, 0, 0, 0, pdtLoc),
+			to:         time.Date(2024, 5, 6, 1, 0, 0, 0, pdtLoc),
 			expectDays: 0,
 		},
 		"next day, earlier": {
-			from: time.Date(2024, 5, 6, 5, 0, 0, 0, pdtLoc),
-			to: time.Date(2024, 5, 7, 0, 0, 0, 0, pdtLoc),
+			from:       time.Date(2024, 5, 6, 5, 0, 0, 0, pdtLoc),
+			to:         time.Date(2024, 5, 7, 0, 0, 0, 0, pdtLoc),
 			expectDays: 1,
 		},
 		"next day, later": {
-			from: time.Date(2024, 5, 6, 5, 0, 0, 0, pdtLoc),
-			to: time.Date(2024, 5, 7, 6, 0, 0, 0, pdtLoc),
+			from:       time.Date(2024, 5, 6, 5, 0, 0, 0, pdtLoc),
+			to:         time.Date(2024, 5, 7, 6, 0, 0, 0, pdtLoc),
 			expectDays: 1,
 		},
 		"next week, earlier": {
-			from: time.Date(2024, 5, 6, 5, 0, 0, 0, pdtLoc),
-			to: time.Date(2024, 5, 13, 3, 0, 0, 0, pdtLoc),
+			from:       time.Date(2024, 5, 6, 5, 0, 0, 0, pdtLoc),
+			to:         time.Date(2024, 5, 13, 3, 0, 0, 0, pdtLoc),
 			expectDays: 7,
 		},
 		"next month": {
-			from: time.Date(2024, 5, 6, 23, 0, 0, 0, pdtLoc),
-			to: time.Date(2024, 6, 6, 1, 0, 0, 0, pdtLoc),
+			from:       time.Date(2024, 5, 6, 23, 0, 0, 0, pdtLoc),
+			to:         time.Date(2024, 6, 6, 1, 0, 0, 0, pdtLoc),
 			expectDays: 31,
 		},
 		"previous day, earlier": {
-			from: time.Date(2024, 5, 6, 5, 0, 0, 0, pdtLoc),
-			to: time.Date(2024, 5, 5, 0, 0, 0, 0, pdtLoc),
+			from:       time.Date(2024, 5, 6, 5, 0, 0, 0, pdtLoc),
+			to:         time.Date(2024, 5, 5, 0, 0, 0, 0, pdtLoc),
 			expectDays: 1,
 		},
 		"previous day, later": {
-			from: time.Date(2024, 5, 6, 5, 0, 0, 0, pdtLoc),
-			to: time.Date(2024, 5, 5, 0, 0, 0, 0, pdtLoc),
+			from:       time.Date(2024, 5, 6, 5, 0, 0, 0, pdtLoc),
+			to:         time.Date(2024, 5, 5, 0, 0, 0, 0, pdtLoc),
 			expectDays: 1,
 		},
 		"earlier than minFrom": {
-			from: time.Date(2022, 1, 1, 0, 0, 0, 0, pdtLoc),
-			to: time.Date(2024, 4, 19, 11, 1, 0, 0, pdtLoc),
+			from:       time.Date(2022, 1, 1, 0, 0, 0, 0, pdtLoc),
+			to:         time.Date(2024, 4, 19, 11, 1, 0, 0, pdtLoc),
 			expectDays: 4,
 		},
 		"UTC times": {
-			from: time.Date(2024, 5, 6, 0, 0, 0, 0, time.UTC),
-			to: time.Date(2024, 5, 6, 23, 0, 0, 0, time.UTC),
+			from:       time.Date(2024, 5, 6, 0, 0, 0, 0, time.UTC),
+			to:         time.Date(2024, 5, 6, 23, 0, 0, 0, time.UTC),
 			expectDays: 1,
 		},
 	}
@@ -457,163 +457,163 @@ func TestShouldNotify(t *testing.T) {
 		// waitingForMerge
 		"waitingForMerge first day": {
 			pullRequest: &github.PullRequest{},
-			state: waitingForMerge,
-			sinceDays: 0,
-			want: false,
+			state:       waitingForMerge,
+			sinceDays:   0,
+			want:        false,
 		},
 		"waitingForMerge too early": {
 			pullRequest: &github.PullRequest{},
-			state: waitingForMerge,
-			sinceDays: 4,
-			want: false,
+			state:       waitingForMerge,
+			sinceDays:   4,
+			want:        false,
 		},
 		"waitingForMerge first week": {
 			pullRequest: &github.PullRequest{},
-			state: waitingForMerge,
-			sinceDays: 7,
-			want: true,
+			state:       waitingForMerge,
+			sinceDays:   7,
+			want:        true,
 		},
 		"waitingForMerge not on a week": {
 			pullRequest: &github.PullRequest{},
-			state: waitingForMerge,
-			sinceDays: 8,
-			want: false,
+			state:       waitingForMerge,
+			sinceDays:   8,
+			want:        false,
 		},
 		"waitingForMerge after many weeks": {
 			pullRequest: &github.PullRequest{},
-			state: waitingForMerge,
-			sinceDays: 7 * 57,
-			want: true,
+			state:       waitingForMerge,
+			sinceDays:   7 * 57,
+			want:        true,
 		},
 		"waitingForMerge skip with label": {
 			pullRequest: &github.PullRequest{
 				Labels: []*github.Label{{Name: github.String("disable-review-reminders")}},
 			},
-			state: waitingForMerge,
+			state:     waitingForMerge,
 			sinceDays: 7,
-			want: false,
+			want:      false,
 		},
 		"waitingForMerge ignore disable-automatic-closure": {
 			pullRequest: &github.PullRequest{
 				Labels: []*github.Label{{Name: github.String("disable-automatic-closure")}},
 			},
-			state: waitingForMerge,
+			state:     waitingForMerge,
 			sinceDays: 14,
-			want: true,
+			want:      true,
 		},
 
 		// waitingForReview
 		"waitingForReview first day": {
 			pullRequest: &github.PullRequest{},
-			state: waitingForReview,
-			sinceDays: 0,
-			want: false,
+			state:       waitingForReview,
+			sinceDays:   0,
+			want:        false,
 		},
 		"waitingForReview too early": {
 			pullRequest: &github.PullRequest{},
-			state: waitingForReview,
-			sinceDays: 1,
-			want: false,
+			state:       waitingForReview,
+			sinceDays:   1,
+			want:        false,
 		},
 		"waitingForReview two days": {
 			pullRequest: &github.PullRequest{},
-			state: waitingForReview,
-			sinceDays: 2,
-			want: true,
+			state:       waitingForReview,
+			sinceDays:   2,
+			want:        true,
 		},
 		"waitingForReview first week": {
 			pullRequest: &github.PullRequest{},
-			state: waitingForReview,
-			sinceDays: 7,
-			want: true,
+			state:       waitingForReview,
+			sinceDays:   7,
+			want:        true,
 		},
 		"waitingForReview not on a week": {
 			pullRequest: &github.PullRequest{},
-			state: waitingForReview,
-			sinceDays: 8,
-			want: false,
+			state:       waitingForReview,
+			sinceDays:   8,
+			want:        false,
 		},
 		"waitingForReview after many weeks": {
 			pullRequest: &github.PullRequest{},
-			state: waitingForReview,
-			sinceDays: 7 * 57,
-			want: true,
+			state:       waitingForReview,
+			sinceDays:   7 * 57,
+			want:        true,
 		},
 		"waitingForReview skip with label": {
 			pullRequest: &github.PullRequest{
 				Labels: []*github.Label{{Name: github.String("disable-review-reminders")}},
 			},
-			state: waitingForReview,
+			state:     waitingForReview,
 			sinceDays: 7,
-			want: false,
+			want:      false,
 		},
 		"waitingForReview ignore disable-automatic-closure": {
 			pullRequest: &github.PullRequest{
 				Labels: []*github.Label{{Name: github.String("disable-automatic-closure")}},
 			},
-			state: waitingForReview,
+			state:     waitingForReview,
 			sinceDays: 14,
-			want: true,
+			want:      true,
 		},
 
 		// waitingForContributor
 		"waitingForContributor first day": {
 			pullRequest: &github.PullRequest{},
-			state: waitingForContributor,
-			sinceDays: 0,
-			want: false,
+			state:       waitingForContributor,
+			sinceDays:   0,
+			want:        false,
 		},
 		"waitingForContributor too early": {
 			pullRequest: &github.PullRequest{},
-			state: waitingForContributor,
-			sinceDays: 5,
-			want: false,
+			state:       waitingForContributor,
+			sinceDays:   5,
+			want:        false,
 		},
 		"waitingForContributor two weeks": {
 			pullRequest: &github.PullRequest{},
-			state: waitingForContributor,
-			sinceDays: 14,
-			want: true,
+			state:       waitingForContributor,
+			sinceDays:   14,
+			want:        true,
 		},
 		"waitingForContributor four weeks": {
 			pullRequest: &github.PullRequest{},
-			state: waitingForContributor,
-			sinceDays: 28,
-			want: true,
+			state:       waitingForContributor,
+			sinceDays:   28,
+			want:        true,
 		},
 		"waitingForContributor 40 days": {
 			pullRequest: &github.PullRequest{},
-			state: waitingForContributor,
-			sinceDays: 40,
-			want: true,
+			state:       waitingForContributor,
+			sinceDays:   40,
+			want:        true,
 		},
 		"waitingForContributor six weeks": {
 			pullRequest: &github.PullRequest{},
-			state: waitingForContributor,
-			sinceDays: 42,
-			want: true,
+			state:       waitingForContributor,
+			sinceDays:   42,
+			want:        true,
 		},
 		"waitingForContributor other sinceDays": {
 			pullRequest: &github.PullRequest{},
-			state: waitingForContributor,
-			sinceDays: 10,
-			want: false,
+			state:       waitingForContributor,
+			sinceDays:   10,
+			want:        false,
 		},
 		"waitingForContributor skip with label": {
 			pullRequest: &github.PullRequest{
 				Labels: []*github.Label{{Name: github.String("disable-automatic-closure")}},
 			},
-			state: waitingForContributor,
+			state:     waitingForContributor,
 			sinceDays: 14,
-			want: false,
+			want:      false,
 		},
 		"waitingForContributor ignore disable-review-reminders": {
 			pullRequest: &github.PullRequest{
 				Labels: []*github.Label{{Name: github.String("disable-review-reminders")}},
 			},
-			state: waitingForContributor,
+			state:     waitingForContributor,
 			sinceDays: 14,
-			want: true,
+			want:      true,
 		},
 	}
 
@@ -627,9 +627,9 @@ func TestShouldNotify(t *testing.T) {
 
 func TestFormatReminderComment(t *testing.T) {
 	cases := map[string]struct {
-		state       pullRequestReviewState
-		data reminderCommentData
-		expectedStrings        []string
+		state              pullRequestReviewState
+		data               reminderCommentData
+		expectedStrings    []string
 		notExpectedStrings []string
 	}{
 		// waitingForMerge
@@ -637,7 +637,7 @@ func TestFormatReminderComment(t *testing.T) {
 			state: waitingForMerge,
 			data: reminderCommentData{
 				PullRequest: &github.PullRequest{},
-				SinceDays: 7,
+				SinceDays:   7,
 			},
 			expectedStrings: []string{
 				"waiting for merge for 7 days",
@@ -648,7 +648,7 @@ func TestFormatReminderComment(t *testing.T) {
 			state: waitingForMerge,
 			data: reminderCommentData{
 				PullRequest: &github.PullRequest{},
-				SinceDays: 14,
+				SinceDays:   14,
 			},
 			expectedStrings: []string{
 				"waiting for merge for 14 days",
@@ -661,7 +661,7 @@ func TestFormatReminderComment(t *testing.T) {
 			state: waitingForReview,
 			data: reminderCommentData{
 				PullRequest: &github.PullRequest{},
-				SinceDays: 2,
+				SinceDays:   2,
 			},
 			expectedStrings: []string{
 				"waiting for review for 2 days",
@@ -675,7 +675,7 @@ func TestFormatReminderComment(t *testing.T) {
 			state: waitingForReview,
 			data: reminderCommentData{
 				PullRequest: &github.PullRequest{},
-				SinceDays: 7,
+				SinceDays:   7,
 			},
 			expectedStrings: []string{
 				"@terraform-team",
@@ -687,7 +687,7 @@ func TestFormatReminderComment(t *testing.T) {
 			state: waitingForReview,
 			data: reminderCommentData{
 				PullRequest: &github.PullRequest{},
-				SinceDays: 14,
+				SinceDays:   14,
 			},
 			expectedStrings: []string{
 				"@terraform-team",
@@ -798,61 +798,61 @@ func TestShouldClose(t *testing.T) {
 		// waitingForContributor
 		"waitingForContributor first day": {
 			pullRequest: &github.PullRequest{},
-			state: waitingForContributor,
-			sinceDays: 0,
-			want: false,
+			state:       waitingForContributor,
+			sinceDays:   0,
+			want:        false,
 		},
 		"waitingForContributor two weeks": {
 			pullRequest: &github.PullRequest{},
-			state: waitingForContributor,
-			sinceDays: 14,
-			want: false,
+			state:       waitingForContributor,
+			sinceDays:   14,
+			want:        false,
 		},
 		"waitingForContributor four weeks": {
 			pullRequest: &github.PullRequest{},
-			state: waitingForContributor,
-			sinceDays: 28,
-			want: false,
+			state:       waitingForContributor,
+			sinceDays:   28,
+			want:        false,
 		},
 		"waitingForContributor six weeks": {
 			pullRequest: &github.PullRequest{},
-			state: waitingForContributor,
-			sinceDays: 42,
-			want: true,
+			state:       waitingForContributor,
+			sinceDays:   42,
+			want:        true,
 		},
 		"waitingForContributor seven weeks": {
 			pullRequest: &github.PullRequest{},
-			state: waitingForContributor,
-			sinceDays: 49,
-			want: true,
+			state:       waitingForContributor,
+			sinceDays:   49,
+			want:        true,
 		},
 		"waitingForMerge six weeks": {
 			pullRequest: &github.PullRequest{},
-			state: waitingForMerge,
-			sinceDays: 42,
-			want: false,
+			state:       waitingForMerge,
+			sinceDays:   42,
+			want:        false,
 		},
 		"waitingForReview six weeks": {
 			pullRequest: &github.PullRequest{},
-			state: waitingForReview,
-			sinceDays: 42,
-			want: false,
+			state:       waitingForReview,
+			sinceDays:   42,
+			want:        false,
 		},
 		"waitingForContributor skip with label": {
 			pullRequest: &github.PullRequest{
 				Labels: []*github.Label{{Name: github.String("disable-automatic-closure")}},
 			},
-			state: waitingForContributor,
+			state:     waitingForContributor,
 			sinceDays: 42,
-			want: false,
+			want:      false,
 		},
 		"waitingForContributor ignore disable-review-reminders": {
 			pullRequest: &github.PullRequest{
 				Labels: []*github.Label{{Name: github.String("disable-review-reminders")}},
 			},
-			state: waitingForContributor,
+			state:     waitingForContributor,
 			sinceDays: 42,
-			want: true,
+			want:      true,
 		},
 	}
 

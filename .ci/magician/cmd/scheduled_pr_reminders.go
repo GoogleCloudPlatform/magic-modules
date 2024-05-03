@@ -36,7 +36,7 @@ import (
 
 var (
 	// used for flags
-	dryRun   bool
+	dryRun bool
 
 	//go:embed SCHEDULED_PR_WAITING_FOR_CONTRIBUTOR.md.tmpl
 	waitingForContributorTemplate string
@@ -49,9 +49,9 @@ var (
 )
 
 type reminderCommentData struct {
-		PullRequest *github.PullRequest
-		State pullRequestReviewState
-		SinceDays int
+	PullRequest *github.PullRequest
+	State       pullRequestReviewState
+	SinceDays   int
 }
 
 // scheduledPrReminders sends automated PR notifications and closes stale PRs
@@ -100,7 +100,7 @@ func execScheduledPrReminders(gh *github.Client) error {
 		if *pr.Draft {
 			fmt.Printf(
 				"%d/%d: PR %d: Skipping draft pr\n",
-				index + 1,
+				index+1,
 				len(allPulls),
 				*pr.Number,
 			)
@@ -149,7 +149,7 @@ func execScheduledPrReminders(gh *github.Client) error {
 		if err != nil {
 			fmt.Printf(
 				"%d/%d: PR %d: error computing notification state: %s\n",
-				index + 1,
+				index+1,
 				len(allPulls),
 				*pr.Number,
 				err,
@@ -158,7 +158,7 @@ func execScheduledPrReminders(gh *github.Client) error {
 		}
 		fmt.Printf(
 			"%d/%d: PR %d: %s since %v\n",
-			index + 1,
+			index+1,
 			len(allPulls),
 			*pr.Number,
 			state,
@@ -168,12 +168,12 @@ func execScheduledPrReminders(gh *github.Client) error {
 		if shouldNotify(pr, state, sinceDays) {
 			comment, err := formatReminderComment(state, reminderCommentData{
 				PullRequest: pr,
-				SinceDays: sinceDays,
+				SinceDays:   sinceDays,
 			})
 			if err != nil {
 				fmt.Printf(
 					"%d/%d: PR %d: error rendering comment: %s\n",
-					index + 1,
+					index+1,
 					len(allPulls),
 					*pr.Number,
 					err,
@@ -183,7 +183,7 @@ func execScheduledPrReminders(gh *github.Client) error {
 			if dryRun {
 				fmt.Printf("DRY RUN: Would post comment: %s\n", comment)
 			} else {
-				
+
 			}
 		}
 
@@ -191,7 +191,7 @@ func execScheduledPrReminders(gh *github.Client) error {
 			if dryRun {
 				fmt.Printf("DRY RUN: Would close PR %d\n", *pr.Number)
 			} else {
-				
+
 			}
 		}
 	}
@@ -227,6 +227,7 @@ func (s pullRequestReviewState) String() string {
 // The basic algorithm is:
 // - find the most recent request for review from a core contributor
 //   - if there are none, the state is waitingForReviewerAssignment
+//
 // - check for any reviews from core reviewers since that review request.
 //   - if there are none, the state is waitingForReview and the time is the
 //     review request time
@@ -236,6 +237,7 @@ func (s pullRequestReviewState) String() string {
 //     earliest approval
 //   - otherwise there are reviews and all are comment reviews; the state is
 //     waitingForContributor and the time is the earliest review time
+//
 // We don't specially handle cases where the contributor has "acted" because it would be
 // significant additional effort, and this case is already handled by re-requesting review
 // automatically based on contributor actions.
@@ -359,7 +361,7 @@ func shouldNotify(pr *github.PullRequest, state pullRequestReviewState, sinceDay
 		if _, ok := labels["disable-review-reminders"]; ok {
 			return false
 		}
-		return sinceDays > 0 && sinceDays % 7 == 0
+		return sinceDays > 0 && sinceDays%7 == 0
 	case waitingForContributor:
 		if _, ok := labels["disable-automatic-closure"]; ok {
 			return false
@@ -369,7 +371,7 @@ func shouldNotify(pr *github.PullRequest, state pullRequestReviewState, sinceDay
 		if _, ok := labels["disable-review-reminders"]; ok {
 			return false
 		}
-		return sinceDays == 2 || (sinceDays > 0 && sinceDays % 7 == 0)
+		return sinceDays == 2 || (sinceDays > 0 && sinceDays%7 == 0)
 	}
 	return false
 }

@@ -27,19 +27,19 @@ import (
 var (
 	// This is for the random-assignee rotation.
 	reviewerRotation = map[string]struct{}{
-		"slevenick": struct{}{},
-		"c2thorn": struct{}{},
+		"slevenick":   struct{}{},
+		"c2thorn":     struct{}{},
 		"rileykarson": struct{}{},
-		"melinath": struct{}{},
+		"melinath":    struct{}{},
 		"ScottSuarez": struct{}{},
-		"shuyama1": struct{}{},
+		"shuyama1":    struct{}{},
 		"SarahFrench": struct{}{},
-		"roaks3": struct{}{},
-		"zli82016": struct{}{},
-		"trodge": struct{}{},
-		"hao-nan-li": struct{}{},
-		"NickElliot": struct{}{},
-		"BBBmau": struct{}{},
+		"roaks3":      struct{}{},
+		"zli82016":    struct{}{},
+		"trodge":      struct{}{},
+		"hao-nan-li":  struct{}{},
+		"NickElliot":  struct{}{},
+		"BBBmau":      struct{}{},
 	}
 
 	// This is for new team members who are onboarding
