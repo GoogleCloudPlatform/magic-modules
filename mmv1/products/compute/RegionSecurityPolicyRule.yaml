@@ -298,6 +298,15 @@ properties:
     name: 'rateLimitOptions'
     description: |
       Must be specified if the action is "rate_based_ban" or "throttle". Cannot be specified for any other actions.
+    update_mask_fields:
+      - 'rateLimitOptions.rateLimitThreshold'
+      - 'rateLimitOptions.conformAction'
+      - 'rateLimitOptions.exceedAction'
+      - 'rateLimitOptions.enforceOnKey'
+      - 'rateLimitOptions.enforceOnKeyName'
+      - 'rateLimitOptions.enforceOnKeyConfigs'
+      - 'rateLimitOptions.banThreshold'
+      - 'rateLimitOptions.banDurationSec'
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'rateLimitThreshold'
@@ -320,7 +329,7 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'exceedAction'
         description: |
-          Action to take for requests that are above the configured rate limit threshold, to either deny with a specified HTTP response code, or redirect to a different endpoint.
+          Action to take for requests that are above the configured rate limit threshold, to deny with a specified HTTP response code.
           Valid options are deny(STATUS), where valid values for STATUS are 403, 404, 429, and 502.
       - !ruby/object:Api::Type::Enum
         name: 'enforceOnKey'
@@ -334,6 +343,8 @@ properties:
           * HTTP_PATH: The URL path of the HTTP request. The key value is truncated to the first 128 bytes.
           * SNI: Server name indication in the TLS session of the HTTPS request. The key value is truncated to the first 128 bytes. The key type defaults to ALL on a HTTP session.
           * REGION_CODE: The country/region from which the request originates.
+          * TLS_JA3_FINGERPRINT: JA3 TLS/SSL fingerprint if the client connects using HTTPS, HTTP/2 or HTTP/3. If not available, the key type defaults to ALL.
+          * USER_IP: The IP address of the originating client, which is resolved based on "userIpRequestHeaders" configured with the security policy. If there is no "userIpRequestHeaders" configuration or an IP address cannot be resolved from it, the key type defaults to IP.
         values:
           - :ALL
           - :IP
@@ -343,6 +354,8 @@ properties:
           - :HTTP_PATH
           - :SNI
           - :REGION_CODE
+          - :TLS_JA3_FINGERPRINT
+          - :USER_IP
       - !ruby/object:Api::Type::String
         name: 'enforceOnKeyName'
         description: |
@@ -369,14 +382,19 @@ properties:
                 * HTTP_PATH: The URL path of the HTTP request. The key value is truncated to the first 128 bytes.
                 * SNI: Server name indication in the TLS session of the HTTPS request. The key value is truncated to the first 128 bytes. The key type defaults to ALL on a HTTP session.
                 * REGION_CODE: The country/region from which the request originates.
+                * TLS_JA3_FINGERPRINT: JA3 TLS/SSL fingerprint if the client connects using HTTPS, HTTP/2 or HTTP/3. If not available, the key type defaults to ALL.
+                * USER_IP: The IP address of the originating client, which is resolved based on "userIpRequestHeaders" configured with the security policy. If there is no "userIpRequestHeaders" configuration or an IP address cannot be resolved from it, the key type defaults to IP.
               values:
                 - :ALL
                 - :IP
                 - :HTTP_HEADER
                 - :XFF_IP
                 - :HTTP_COOKIE
+                - :HTTP_PATH
                 - :SNI
                 - :REGION_CODE
+                - :TLS_JA3_FINGERPRINT
+                - :USER_IP
             - !ruby/object:Api::Type::String
               name: 'enforceOnKeyName'
               description: |
