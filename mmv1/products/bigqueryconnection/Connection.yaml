@@ -134,10 +134,14 @@ examples:
       database_instance_name: 'my-database-instance'
       username: 'user'
       deletion_protection: 'true'
-      kms_key_ring: 'bq-connection'
       kms_key_name: 'bq-key'
     test_vars_overrides:
       deletion_protection: 'false'
+      kms_key_name: 'acctest.BootstrapKMSKey(t).CryptoKey.Name'
+      policyChanged:
+        "acctest.BootstrapPSARole(t, \"bq-\", \"bigquery-encryption\",
+        \"roles/cloudkms.cryptoKeyEncrypterDecrypter\"\
+        )"
     oics_vars_overrides:
       deletion_protection: 'false'
     ignore_read_extra:
