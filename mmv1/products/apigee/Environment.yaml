@@ -56,7 +56,7 @@ examples:
     name: 'apigee_environment_basic'
     vars:
       environment_name: 'my-environment'
-    skip_test:
+    exclude_test:
       true
       # This is a more verbose version of the above that creates all
       # the resources needed for the acceptance test.
