@@ -14,7 +14,7 @@
   limitations under the License. */ -}}
 {{- define "expandPropertyMethod" }}
   {{- if $.CustomExpand }}
-    {{/* TODO custom flatten */}}
+    {{- $.CustomExpandTemplate -}}
   {{- else }}{{/* if $.CustomExpand */}}
     {{- if $.IsA "Map" }}
 func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
@@ -50,7 +50,7 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
   }
   return m, nil
 }
-    {{ else if $.IsA "KeyValuePairs" }}{{/* if $.IsA "Map" */}}
+    {{ else if or ($.IsA "KeyValuePairs") ($.IsA "KeyValueEffectiveLabels") }}{{/* if $.IsA "Map" */}}
 func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]string, error) {
   if v == nil {
     return map[string]string{}, nil
@@ -122,7 +122,7 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
         return nil, err
             {{- if $prop.SendEmptyValue }}
       } else {
-        transformed["{{$prop.ApiName}}] = transformed{{$prop.TitlelizeProperty}}
+        transformed["{{$prop.ApiName}}"] = transformed{{$prop.TitlelizeProperty}}
             {{- else }}
       } else if val := reflect.ValueOf(transformed{{$prop.TitlelizeProperty}}); val.IsValid() && !tpgresource.IsEmptyValue(val) {
         transformed["{{$prop.ApiName}}"] = transformed{{$prop.TitlelizeProperty}}
