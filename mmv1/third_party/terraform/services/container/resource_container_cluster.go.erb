@@ -1167,8 +1167,7 @@ func ResourceContainerCluster() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"mode": {
 							Type:             schema.TypeString,
-							Optional:         true,
-							Computed:         true,
+                                                        Required:         true,
 							ValidateFunc:     validation.StringInSlice([]string{"DISABLED", "ENABLED"}, false),
 							Description:      `Defines the enablement mode for Compliance Posture.`,
 							DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("MODE_UNSPECIFIED"),
