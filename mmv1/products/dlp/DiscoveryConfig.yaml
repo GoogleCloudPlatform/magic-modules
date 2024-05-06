@@ -362,7 +362,7 @@ properties:
                                 description: Regex to test the database name against. If empty, all databases match.
                               - !ruby/object:Api::Type::String
                                 name: databaseResourceNameRegex
-                                description: Regex to test the database resource's name against. An example of a database resource name is a table's name. Other database resource names like view names could be included in the future. If empty, all database resources match.' 
+                                description: Regex to test the database resource's name against. An example of a database resource name is a table's name. Other database resource names like view names could be included in the future. If empty, all database resources match.'
                 - !ruby/object:Api::Type::NestedObject
                   name: others
                   description: 'Catch-all. This should always be the last target in the list because anything above it will apply first. Should only appear once in a configuration. If none is specified, a default one will be added automatically.'
@@ -427,9 +427,9 @@ properties:
                   name: 'refresh_frequency'
                   description: Data changes (non-schema changes) in Cloud SQL tables can't trigger reprofiling. If you set this field, profiles are refreshed at this frequency regardless of whether the underlying tables have changes. Defaults to never.
                   values:
-                        - :UPDATE_FREQUENCY_NEVER
-                        - :UPDATE_FREQUENCY_DAILY
-                        - :UPDATE_FREQUENCY_MONTHLY
+                    - :UPDATE_FREQUENCY_NEVER
+                    - :UPDATE_FREQUENCY_DAILY
+                    - :UPDATE_FREQUENCY_MONTHLY
             - !ruby/object:Api::Type::NestedObject
               name: disabled
               description: 'Disable profiling for database resources that match this filter.'
