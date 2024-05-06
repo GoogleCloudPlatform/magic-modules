@@ -1,12 +1,15 @@
-<%# Template for code adding update mask query parameter to update URL.
-
-   UpdateMask documentation is not not obvious about which fields are supported or
-   how deeply nesting is supported.  For instance, if we change the field foo.bar.baz,
-   it seems that *sometimes*, 'foo' is a valid value.  Other times, it needs to be
-   'foo.bar', and other times 'foo.bar.baz'. If the defaults don't work for you,
-   you can customize the exact list of fields that are passed for a property
-   using `update_mask_fields`.
--%>
+{{- /*
+  The license inside this block applies to this file
+  Copyright 2024 Google Inc.
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/}}
 {{- define "UpdateMask" }}
 updateMask := []string{}
 {{- range $field, $masks := $.GetPropertyUpdateMasksGroups }}
