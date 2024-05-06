@@ -979,3 +979,18 @@ func (r Resource) FlattenedProperties() []*Type {
 }
 
 
+func (r Resource) GetPropertyUpdateMasksGroups() map[string][]string {
+	maskGroups := map[string][]string{}
+	for _, prop := range r.AllUserProperties() {
+		if (prop.FlattenObject) {
+			prop.GetNestedPropertyUpdateMasksGroups(maskGroups, prop.ApiName)
+		}else if (len(prop.UpdateMaskFields) > 0){
+			maskGroups[google.Underscore(prop.Name)] = prop.UpdateMaskFields
+		}else{
+			maskGroups[google.Underscore(prop.Name)] = []string{prop.ApiName}
+		}
+	}
+	return maskGroups
+}
+
+
