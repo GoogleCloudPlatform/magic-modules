@@ -342,7 +342,7 @@ properties:
                       description: 'A collection of regular expressions to match a database resource against.'
                       properties:
                         - !ruby/object:Api::Type::Array
-                          name: patterns
+                          name: 'patterns'
                           description: 'A group of regular expression patterns to match against one or more database resources. Maximum of 100 entries. The sum of all regular expression's length can't exceed 10 KiB.'
                           item_type: !ruby/object:Api::Type::NestedObject
                             properties:
