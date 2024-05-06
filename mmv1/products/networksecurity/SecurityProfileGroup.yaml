@@ -16,14 +16,13 @@ name: 'SecurityProfileGroup'
 base_url: '{{parent}}/locations/{{location}}securityProfileGroups'
 create_url: '{{parent}}/locations/{{location}}/securityProfileGroups?securityProfileGroupId={{name}}'
 self_link: '{{parent}}/locations/{{location}}/securityProfileGroups/{{name}}'
-min_version: beta
 update_verb: :PATCH
 update_mask: true
 description: |
   A security profile group defines a container for security profiles.
 references:
   !ruby/object:Api::Resource::ReferenceLinks
-  api: 'https://cloud.google.com/firewall/docs/reference/network-security/rest/v1beta1/organizations.locations.securityProfileGroups'
+  api: 'https://cloud.google.com/firewall/docs/reference/network-security/rest/v1/organizations.locations.securityProfileGroups'
   guides:
     'Security profile groups overview': 'https://cloud.google.com/firewall/docs/about-security-profile-groups'
     'Create and manage security profile groups': 'https://cloud.google.com/firewall/docs/configure-security-profile-groups'
@@ -36,7 +35,6 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'network_security_security_profile_group_basic'
     primary_resource_id: 'default'
-    min_version: beta
     test_env_vars:
       org_id: :ORG_ID
     vars:
