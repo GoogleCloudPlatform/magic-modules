@@ -1,16 +1,14 @@
-data "google_project" "project" {
-  provider = google-beta
-}
-
 resource "google_privateca_ca_pool" "default" {
   provider = google-beta
-  name      = "<%= ctx[:vars]['privateca_ca_pool_name'] %>"
-  location  = "us-central1"
+  name     = "<%= ctx[:vars]['privateca_ca_pool_name'] %>"
+  location = "us-central1"
   tier     = "DEVOPS"
+
   publishing_options {
     publish_ca_cert = false
     publish_crl = false
   }
+
   issuance_policy {
     maximum_lifetime = "1209600s"
     baseline_values {
@@ -27,22 +25,24 @@ resource "google_privateca_ca_pool" "default" {
   }
 }
 
-
 resource "google_privateca_certificate_authority" "default" {
   provider = google-beta
-  pool = google_privateca_ca_pool.default.name
+  pool     = google_privateca_ca_pool.default.name
+
   certificate_authority_id = "<%= ctx[:vars]['privateca_certificate_authority_id'] %>"
-  location = "us-central1"
-  lifetime = "86400s"
-  type = "SELF_SIGNED"
-  deletion_protection = false
-  skip_grace_period = true
+  location                 = "us-central1"
+  lifetime                 = "86400s"
+  type                     = "SELF_SIGNED"
+  deletion_protection      = false
+  skip_grace_period        = true
+
   ignore_active_certificates_on_deletion = true
+
   config {
     subject_config {
       subject {
         organization = "Test LLC"
-        common_name = "my-ca"
+        common_name  = "my-ca"
       }
     }
     x509_config {
@@ -52,7 +52,7 @@ resource "google_privateca_certificate_authority" "default" {
       key_usage {
         base_key_usage {
           cert_sign = true
-          crl_sign = true
+          crl_sign  = true
         }
         extended_key_usage {
           server_auth = false
@@ -60,6 +60,7 @@ resource "google_privateca_certificate_authority" "default" {
       }
     }
   }
+
   key_spec {
     algorithm = "RSA_PKCS1_4096_SHA256"
   }
@@ -67,16 +68,14 @@ resource "google_privateca_certificate_authority" "default" {
 
 resource "google_project_service_identity" "ns_sa" {
   provider = google-beta
-
-  service = "networksecurity.googleapis.com"
+  service  = "networksecurity.googleapis.com"
 }
 
 resource "google_privateca_ca_pool_iam_member" "tls_inspection_permission" {
   provider = google-beta
-
-  ca_pool = google_privateca_ca_pool.default.id
-  role = "roles/privateca.certificateManager"
-  member = "serviceAccount:${google_project_service_identity.ns_sa.email}"
+  ca_pool  = google_privateca_ca_pool.default.id
+  role     = "roles/privateca.certificateManager"
+  member   = "serviceAccount:${google_project_service_identity.ns_sa.email}"
 }
 
 resource "google_certificate_manager_trust_config" "default" {
@@ -93,10 +92,6 @@ resource "google_certificate_manager_trust_config" "default" {
       pem_certificate = file("test-fixtures/ca_cert.pem")
     }
   }
-
-  labels = {
-    foo = "bar"
-  }
 }
 
 resource "google_network_security_tls_inspection_policy" "<%= ctx[:primary_resource_id] %>" {
@@ -104,11 +99,12 @@ resource "google_network_security_tls_inspection_policy" "<%= ctx[:primary_resou
   name     = "<%= ctx[:vars]['resource_name'] %>"
   location = "us-central1"
   ca_pool  = google_privateca_ca_pool.default.id
-  exclude_public_ca_set = false
 
-  min_tls_version     = "TLS_1_0"
-  trust_config        = "projects/${data.google_project.project.number}/locations/${google_certificate_manager_trust_config.default.location}/trustConfigs/${google_certificate_manager_trust_config.default.name}"
-  tls_feature_profile = "PROFILE_CUSTOM"
+  exclude_public_ca_set = false
+  min_tls_version       = "TLS_1_0"
+  trust_config          = google_certificate_manager_trust_config.default.id
+  tls_feature_profile   = "PROFILE_CUSTOM"
+
   custom_tls_features = [
     "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA",
     "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
