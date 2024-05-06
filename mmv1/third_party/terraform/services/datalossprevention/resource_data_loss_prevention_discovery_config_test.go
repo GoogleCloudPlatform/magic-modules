@@ -662,6 +662,13 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
             filter {
                 others {}
             }
+			cadence {
+                schema_modified_cadence {
+                    types = ["NEW_COLUMNS"]
+                    frequency = "UPDATE_FREQUENCY_MONTHLY"
+                }
+                refresh_frequency = "UPDATE_FREQUENCY_MONTHLY"
+            }
         }
 
     }
@@ -714,12 +721,17 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
                 }
                 refresh_frequency = "UPDATE_FREQUENCY_MONTHLY"
             }
-        }  - :UPDATE_FREQUENCY_NEVER
-		- :UPDATE_FREQUENCY_DAILY
-		- :UPDATE_FREQUENCY_MONTHLY
+        }
         cloud_sql_target {
             filter {
                 others {}
+            }
+			cadence {
+                schema_modified_cadence {
+                    types = ["NEW_COLUMNS", "REMOVED_COLUMNS"]
+                    frequency = "UPDATE_FREQUENCY_DAILY"
+                }
+                refresh_frequency = "UPDATE_FREQUENCY_MONTHLY"
             }
         }
 

@@ -52,6 +52,13 @@ resource "google_data_loss_prevention_discovery_config" "<%= ctx[:primary_resour
             filter {
                 others {}
             }
+            cadence {
+                schema_modified_cadence {
+                    types = ["NEW_COLUMNS"]
+                    frequency = "UPDATE_FREQUENCY_MONTHLY"
+                }
+                refresh_frequency = "UPDATE_FREQUENCY_MONTHLY"
+            }
         }
 
     }
