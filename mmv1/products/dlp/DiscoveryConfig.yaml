@@ -343,7 +343,7 @@ properties:
                       properties:
                         - !ruby/object:Api::Type::Array
                           name: 'patterns'
-                          description: 'A group of regular expression patterns to match against one or more database resources. Maximum of 100 entries. The sum of all regular expression's length can't exceed 10 KiB.'
+                          description: A group of regular expression patterns to match against one or more database resources. Maximum of 100 entries. The sum of all regular expressions' length can't exceed 10 KiB.
                           item_type: !ruby/object:Api::Type::NestedObject
                             properties:
                               - !ruby/object:Api::Type::String
@@ -371,10 +371,10 @@ properties:
                   properties:
                     - !ruby/object:Api::Type::String
                       name: projectId
-                      description: 'If within a project-level config, then this must match the config's project id.'
+                      description: If within a project-level config, then this must match the config's project id.
                     - !ruby/object:Api::Type::String
                       name: instance
-                      description: 'The instance where this resource is located. For example: Cloud SQL's instance id.'
+                      description: The instance where this resource is located. For example - Cloud SQL's instance id.
                     - !ruby/object:Api::Type::String
                       name: database
                       description: 'Name of a database within the instance.'
@@ -387,27 +387,27 @@ properties:
               properties:
                 - !ruby/object:Api::Type::Array
                   name: databaseEngines
-                  description: 'Database engines that should be profiled. Optional. Defaults to ALL_SUPPORTED_DATABASE_ENGINES if unspecified.'
-                    item_type: !ruby/object:Api::Type::Enum
-                      name: 'undefined'
-                      description: |
-                        This field only has a name and description because of MM
-                        limitations. It should not appear in downstreams.
-                      values:
-                        - :ALL_SUPPORTED_DATABASE_ENGINES
-                        - :MYSQL
-                        - :POSTGRES
+                  description: Database engines that should be profiled. Optional. Defaults to ALL_SUPPORTED_DATABASE_ENGINES if unspecified.
+                  item_type: !ruby/object:Api::Type::Enum
+                    name: 'undefined'
+                    description: |
+                      This field only has a name and description because of MM
+                      limitations. It should not appear in downstreams.
+                    values:
+                      - :ALL_SUPPORTED_DATABASE_ENGINES
+                      - :MYSQL
+                      - :POSTGRES
                 - !ruby/object:Api::Type::Array
                   name: types
                   description: 'Data profiles will only be generated for the database resource types specified in this field. If not specified, defaults to [DATABASE_RESOURCE_TYPE_ALL_SUPPORTED_TYPES].'
-                    item_type: !ruby/object:Api::Type::Enum
-                      name: 'undefined'
-                      description: |
-                        This field only has a name and description because of MM
-                        limitations. It should not appear in downstreams.
-                      values:
-                        - :DATABASE_RESOURCE_TYPE_ALL_SUPPORTED_TYPES
-                        - :DATABASE_RESOURCE_TYPE_TABLE
+                  item_type: !ruby/object:Api::Type::Enum
+                    name: 'undefined'
+                    description: |
+                      This field only has a name and description because of MM
+                      limitations. It should not appear in downstreams.
+                    values:
+                      - :DATABASE_RESOURCE_TYPE_ALL_SUPPORTED_TYPES
+                      - :DATABASE_RESOURCE_TYPE_TABLE
             - !ruby/object:Api::Type::NestedObject
               name: cadence
               description: How often and when to update profiles. New tables that match both the filter and conditions are scanned as quickly as possible depending on system capacity.
@@ -436,7 +436,7 @@ properties:
                         - :UPDATE_FREQUENCY_MONTHLY
                 - !ruby/object:Api::Type::Enum
                   name: 'refresh_frequency'
-                  description: 'Data changes (non-schema changes) in Cloud SQL tables can't trigger reprofiling. If you set this field, profiles are refreshed at this frequency regardless of whether the underlying tables have changes. Defaults to never.'
+                  description: Data changes (non-schema changes) in Cloud SQL tables can't trigger reprofiling. If you set this field, profiles are refreshed at this frequency regardless of whether the underlying tables have changes. Defaults to never.
                   values:
                         - :UPDATE_FREQUENCY_NEVER
                         - :UPDATE_FREQUENCY_DAILY
