@@ -53,9 +53,9 @@ import (
     "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
 
-    "{{/* ##TODO: importpath() method/attribute ## -*/}}/tpgresource"
-    transport_tpg "{{/* ##TODO: importpath() method/attribute ## -*/}}/transport"
-    "{{/* ##TODO: importpath() method/attribute ## -*/}}/verify"
+    "{{ $.ImportPath }}/tpgresource"
+    transport_tpg "{{ $.ImportPath }}/transport"
+    "{{ $.ImportPath }}/verify"
 
 {{ if $.FlattenedProperties }}
     "google.golang.org/api/googleapi"
@@ -108,7 +108,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 {{- end }}
 {{if or (and (or $.HasProject $.HasRegion $.HasZone) (not $.SkipDefaultCdiff)) $.CustomDiff }}
         CustomizeDiff: customdiff.All(
-{{- if $.CustomDiff -}}
+{{ if $.CustomDiff -}}
 {{-          range $cdiff := $.CustomDiff -}}
         {{ $cdiff }},
 {{- end}}
@@ -130,8 +130,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 {{- end}}
 
         Schema: map[string]*schema.Schema{
-//TODO order props?
-			{{- range $prop := $.AllUserProperties }}
+			{{- range $prop := orderProperties $.AllUserProperties }}
 {{template "SchemaFields" $prop -}}
 			{{- end }}
 {{- if $.VirtualFields -}}
@@ -143,14 +142,14 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
                 ForceNew: true,
 {{-     end}}
 {{      if $field.DefaultValue -}}
-                Default:  {{ $field.Default_Value -}},
+                Default:  {{ $field.GoLiteral $field.Default_Value -}},
 {{-     end}}
                 Description: `{{ $field.Description -}}`,
             },
 {{-   end}}
 {{- end}}
- //TODO Q2 function to compile custom code lines ($.CustomCode.extra_schema_entry)
-{{- if $.HasProject }}
+{{/* TODO Q2 function to compile custom code lines ($.CustomCode.extra_schema_entry) */}}
+{{- if $.HasProject -}}
             "project": {
                 Type:     schema.TypeString,
                 Optional: true,
@@ -176,11 +175,11 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 {{- end}}
 
 func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{}) error {
-{{if and ($.GetAsync.IsA "OpAsync") ($.GetAsync.IncludeProject) ($.GetAsync.Allow "Create") -}}
+{{- if and ($.GetAsync.IsA "OpAsync") ($.GetAsync.IncludeProject) ($.GetAsync.Allow "Create") -}}
     var project string
 {{- end}}
     config := meta.(*transport_tpg.Config)
-{{if $.CustomCode.CustomCreate -}}
+{{ if $.CustomCode.CustomCreate -}}
  //TODO Q2 function to compile custom code lines
 {{  else  -}}
     userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
@@ -194,11 +193,11 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     {{ $prop.ApiName -}}Prop, err := expand{{ if $.NestedQuery -}}Nested{{ end }}{{ $.ResourceName -}}{{ camelize $prop.Name "upper" -}}({{ if $prop.FlattenObject }}nil{{ else }}d.Get("{{ underscore $prop.Name }}{{ end }}"), d, config)
     if err != nil {
         return err
-{{if $prop.SendEmptyValue -}}
+{{- if $prop.SendEmptyValue -}}
     } else if v, ok := d.GetOkExists("{{ underscore $prop.Name -}}"); ok || !reflect.DeepEqual(v, {{ $prop.ApiName -}}Prop) {
-{{      else if $prop.FlattenObject -}}
+{{-      else if $prop.FlattenObject -}}
     } else if !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.ApiName -}}Prop)) {
-{{      else -}}
+{{-      else -}}
     } else if v, ok := d.GetOkExists("{{ underscore $prop.Name -}}"); !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.ApiName -}}Prop)) && (ok || !reflect.DeepEqual(v, {{ $prop.ApiName -}}Prop)) {
 {{- end}}
         obj["{{ $prop.ApiName -}}"] = {{ $prop.ApiName -}}Prop
@@ -227,8 +226,8 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     }
 
     log.Printf("[DEBUG] Creating new {{ $.Name -}}: %#v", obj)
-{{if $.NestedQuery -}}
-{{if $.NestedQuery.ModifyByPatch }}
+{{- if $.NestedQuery -}}
+{{- if $.NestedQuery.ModifyByPatch }}
 {{/*# Keep this after mutex - patch request data relies on current resource state */}}
     obj, err = resource{{ $.ResourceName -}}PatchCreateEncoder(d, meta, obj)
     if err != nil {
@@ -267,7 +266,8 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
       billingProject = bp
     }
 
-//TODO Q2 COMPILE PRECREATE
+    {{/*TODO Q2 COMPILE PRECREATE */}}
+    headers := make(http.Header)
     res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
         Config: config,
         Method: "{{ upper $.CreateVerb -}}",
@@ -276,6 +276,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
         UserAgent: userAgent,
         Body: obj,
         Timeout: d.Timeout(schema.TimeoutCreate),
+        Headers: headers,
 {{if $.ErrorRetryPredicates -}}
         ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
 {{- end}}
@@ -284,7 +285,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{- end}}
     })
     if err != nil {
-{{if and ($.CustomCode.PostCreateFailure) ($.GetAsync) -}}
+{{- if and ($.CustomCode.PostCreateFailure) ($.GetAsync) -}}
         resource{{ $.ResourceName -}}PostCreateFailure(d, meta)
 {{- end}}
         return fmt.Errorf("Error creating {{ $.Name -}}: %s", err)
@@ -292,8 +293,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{/* # Set resource properties from create API response (unless it returns an Operation) */}}
 {{if not ($.GetAsync.IsA "OpAsync") }}
 {{- range $prop := $.GettableProperties }}
-//todo does identities contain property
-{{		if and (true) ($prop.Output)}}
+{{  if and ($.IsInIdentity $prop) $prop.Output }}
     if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {
         return fmt.Errorf(`Error setting computed identity field "{{ underscore $prop.Name }}": %s`, err)
     }
@@ -324,8 +324,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{-          if not $.TaintResourceOnFailedCreate -}}
         // The resource didn't actually create
         d.SetId("")
-
-{{- end}}
+{{ end}}
         return fmt.Errorf("Error waiting to create {{ $.Name -}}: %s", err)
     }
 
@@ -352,13 +351,12 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
         }
     }
 {{- end}}
+{{- end}}
 {{- range $prop := $.GettableProperties }}
-//todo does identities contain property
-{{		if and (true) ($prop.Output)}}
+{{  if $.IsInIdentity $prop }}
     if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{ end }}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(opRes["{{ $prop.ApiName -}}"], d, config)); err != nil {
         return err
     }
-{{- end}}
 {{- end}}
 {{- end}}
 
@@ -388,16 +386,15 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{        end  -}}
 {{      end -}}
 {{    end -}}
-
-//TODO POST CREATE
+{{/* TODO POST CREATE */}}
 
 {{if $.GetAsync.Allow "Create" -}}
 {{if $.GetAsync.IsA "PollAsync" -}}
     err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName -}}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncExistence -}}, "Creating {{ $.Name -}}", d.Timeout(schema.TimeoutCreate), {{ $.GetAsync.TargetOccurrences -}})
     if err != nil {
 {{if $.GetAsync.SuppressError -}}
-        log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name -}} %q finished updating: %q", d.Id(), err)
-{{        else -}}
+        log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name }} %q finished updating: %q", d.Id(), err)
+{{-        else -}}
 {{if $.CustomCode.PostCreateFailure -}}
         resource{{ $.ResourceName -}}PostCreateFailure(d, meta)
 {{- end}}
@@ -408,7 +405,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{- end}}
 {{- end}}
 
-    log.Printf("[DEBUG] Finished creating {{ $.Name -}} %q: %#v", d.Id(), res)
+    log.Printf("[DEBUG] Finished creating {{ $.Name }} %q: %#v", d.Id(), res)
 
     return resource{{ $.ResourceName -}}Read(d, meta)
 {{  end -}}
@@ -423,7 +420,7 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
         config := meta.(*transport_tpg.Config)
 
 
-        url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}/{{$.SelfLinkUri}}")
+        url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}")
 
         if err != nil {
             return nil, err
@@ -485,8 +482,8 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
             return nil, tpgresource.Fake404("nested", "{{ $.ResourceName }}")
         }
 
-{{- end}}
-{{if $.CustomCode.Decoder -}}
+{{- end -}}
+{{- if $.CustomCode.Decoder -}}
         res, err = resource{{ $.ResourceName -}}Decoder(d, meta, res)
         if err != nil {
             return nil, err
@@ -494,14 +491,12 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
         if res == nil {
             return nil, tpgresource.Fake404("decoded", "{{ $.ResourceName }}")
         }
-
-{{- end}}
+{{- end -}}
         return res, nil
 {{    end  -}}
     }
 }
-{{  end -}}
-
+{{  end }}
 func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{}) error {
 {{if $.SkipRead -}}
   // This resource could not be read from the API.
@@ -544,15 +539,16 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
     }
 
     headers := make(http.Header)
-    {{ if $.CustomCode.PreRead -}}
+    {{- if $.CustomCode.PreRead -}}
     //todo preread
-    {{ end }}
+    {{- end }}
     res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
         Config: config,
         Method: "{{ upper $.ReadVerb -}}",
         Project: billingProject,
         RawURL: url,
         UserAgent: userAgent,
+        Headers: headers,
 {{if $.ErrorRetryPredicates -}}
         ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
 {{- end}}
@@ -562,9 +558,9 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
     })
     if err != nil {
 {{if $.ReadErrorTransform -}}
-        return transport_tpg.HandleNotFoundError({{ $.ReadErrorTransform }}(err), d, fmt.Sprintf("{{ $.ResourceName -}} %q", d.Id()))
+        return transport_tpg.HandleNotFoundError({{ $.ReadErrorTransform }}(err), d, fmt.Sprintf("{{ $.ResourceName }} %q", d.Id()))
 {{  else -}}
-        return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("{{ $.ResourceName -}} %q", d.Id()))
+        return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("{{ $.ResourceName }} %q", d.Id()))
 {{- end}}
     }
 
@@ -670,7 +666,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
 
 {{if $.Updatable -}}
 func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{}) error {
-{{if and ($.GetAsync.IsA "OpAsync") ($.GetAsync.IncludeProject) ($.GetAsync.Allow "update") -}}
+{{- if and ($.GetAsync.IsA "OpAsync") ($.GetAsync.IncludeProject) ($.GetAsync.Allow "update") -}}
     var project string
 {{- end}}
     config := meta.(*transport_tpg.Config)
@@ -701,14 +697,14 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
     obj := make(map[string]interface{})
 {{- range $prop := $.UpdateBodyProperties }}
     {{/* flattened $s won't have something stored in state so instead nil is passed to the next expander. */}}
-    {{ $prop.ApiName -}}Prop, err := expand{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}({{ if $prop.FlattenObject }}nil{{else}}d.Get("{{underscore $prop.Name}}"){{ end }}, d, config)
+    {{- $prop.ApiName -}}Prop, err := expand{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}({{ if $prop.FlattenObject }}nil{{else}}d.Get("{{underscore $prop.Name}}"){{ end }}, d, config)
     if err != nil {
         return err
-{{if $prop.SendEmptyValue -}}
+{{- if $prop.SendEmptyValue -}}
     } else if v, ok := d.GetOkExists("{{ underscore $prop.Name -}}"); ok || !reflect.DeepEqual(v, {{ $prop.ApiName -}}Prop) {
-{{        else if $prop.FlattenObject -}}
+{{-        else if $prop.FlattenObject -}}
     } else if !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.ApiName -}}Prop)) {
-{{        else -}}
+{{-        else -}}
     } else if v, ok := d.GetOkExists("{{ underscore $prop.Name -}}"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, {{ $prop.ApiName -}}Prop)) {
 {{- end}}
         obj["{{ $prop.ApiName -}}"] = {{ $prop.ApiName -}}Prop
@@ -737,12 +733,12 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
     defer transport_tpg.MutexStore.Unlock(lockName)
 {{- end}}
 
-    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{ $.UpdateUrl }}")
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{ $.UpdateUri }}")
     if err != nil {
         return err
     }
 
-    log.Printf("[DEBUG] Updating {{ $.Name -}} %q: %#v", d.Id(), obj)
+    log.Printf("[DEBUG] Updating {{ $.Name }} %q: %#v", d.Id(), obj)
 	headers := make(http.Header)
 {{ if $.UpdateMask -}}
 //TODO updatemask
@@ -782,19 +778,19 @@ if len(updateMask) > 0 {
         UserAgent: userAgent,
         Body: obj,
         Timeout: d.Timeout(schema.TimeoutUpdate),
-{{if $.ErrorRetryPredicates -}}
+{{- if $.ErrorRetryPredicates -}}
         ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
 {{- end}}
-{{if $.ErrorAbortPredicates -}}
+{{- if $.ErrorAbortPredicates -}}
         ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
 {{- end}}
 		Headers:   headers,
     })
 
     if err != nil {
-        return fmt.Errorf("Error updating {{ $.Name -}} %q: %s", d.Id(), err)
+        return fmt.Errorf("Error updating {{ $.Name }} %q: %s", d.Id(), err)
     } else {
-        log.Printf("[DEBUG] Finished updating {{ $.Name -}} %q: %#v", d.Id(), res)
+        log.Printf("[DEBUG] Finished updating {{ $.Name }} %q: %#v", d.Id(), res)
     }
 
 {{if $.GetAsync.Allow "update" -}}
@@ -1169,7 +1165,7 @@ func resource{{ $.ResourceName }}Import(d *schema.ResourceData, meta interface{}
     return []*schema.ResourceData{d}, nil
     {{- end }}
 }
-{{- end }}
+{{ end }}
 {{- range $prop := $.GettableProperties }}
     {{- if not $prop.IgnoreRead }}
         {{- template "flattenPropertyMethod" $prop -}}
