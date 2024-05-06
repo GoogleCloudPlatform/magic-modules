@@ -48,6 +48,7 @@ var (
 	// This is for reviewers who are "on vacation": will not receive new review assignments but will still receive re-requests for assigned PRs.
 	// User can specify the time zone like this, and following the example below:
 	pdtLoc, _           = time.LoadLocation("America/Los_Angeles")
+	bstLoc, _           = time.LoadLocation("Europe/London")
 	onVacationReviewers = []onVacationReviewer{
 		// Example: taking vacation from 2024-03-28 to 2024-04-02 in pdt time zone.
 		// both ends are inclusive:
@@ -56,16 +57,26 @@ var (
 		// 	startDate: newDate(2024, 3, 28, pdtLoc),
 		// 	endDate:   newDate(2024, 4, 2, pdtLoc),
 		// },
-    {
-      id: "trodge",
-      startDate: newDate(2024, 4, 5, pdtLoc),
-      endDate: newDate(2024, 4, 10, pdtLoc),
-    },
-	{
-	  id: "hao-nan-li",
-	  startDate: newDate(2024, 4, 15, pdtLoc),
-	  endDate: newDate(2024, 6, 14, pdtLoc),
-	},
+		{
+			id:        "hao-nan-li",
+			startDate: newDate(2024, 4, 11, pdtLoc),
+			endDate:   newDate(2024, 6, 14, pdtLoc),
+		},
+		{
+			id:        "SarahFrench",
+			startDate: newDate(2024, 4, 20, bstLoc),
+			endDate:   newDate(2024, 4, 23, bstLoc),
+		},
+		{
+			id:        "slevenick",
+			startDate: newDate(2024, 4, 20, pdtLoc),
+			endDate:   newDate(2024, 4, 27, pdtLoc),
+		},
+		{
+			id:        "ScottSuarez",
+			startDate: newDate(2024, 4, 30, pdtLoc),
+			endDate:   newDate(2024, 7, 31, pdtLoc),
+		},
 	}
 )
 

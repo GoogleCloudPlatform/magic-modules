@@ -9,7 +9,7 @@ description: |-
 Manages a set of DNS records within Google Cloud DNS. For more information see [the official documentation](https://cloud.google.com/dns/records/) and
 [API](https://cloud.google.com/dns/api/v1/resourceRecordSets).
 
-~> **Note:** The provider treats this resource as an authoritative record set. This means existing records (including the default records) for the given type will be overwritten when you create this resource in Terraform. In addition, the Google Cloud DNS API requires NS records to be present at all times, so Terraform will not actually remove NS records during destroy but will report that it did.
+~> **Note:** The provider treats this resource as an authoritative record set. This means existing records (including the default records) for the given type will be overwritten when you create this resource in Terraform. In addition, the Google Cloud DNS API requires NS and SOA records to be present at all times, so Terraform will not actually remove NS or SOA records on the root of the zone during destroy but will report that it did.
 
 ## Example Usage
 
@@ -177,7 +177,7 @@ resource "google_dns_record_set" "geo" {
 }
 ```
 
-#### Primary-Backup
+#### Failover
 
 ```hcl
 resource "google_dns_record_set" "a" {
@@ -276,7 +276,7 @@ The following arguments are supported:
 
 * `enable_geo_fencing` - (Optional) Specifies whether to enable fencing for geo queries.
 
-* `primary_backup` - (Optional) The configuration for a primary-backup policy with global to regional failover. Queries are responded to with the global primary targets, but if none of the primary targets are healthy, then we fallback to a regional failover policy.
+* `primary_backup` - (Optional) The configuration for a failover policy with global to regional failover. Queries are responded to with the global primary targets, but if none of the primary targets are healthy, then we fallback to a regional failover policy.
     Structure is [documented below](#nested_primary_backup).
 
 <a name="nested_wrr"></a>The `wrr` block supports:

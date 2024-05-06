@@ -1,0 +1,3 @@
+if err := waitForPrivateConnectionReady(d, config, d.Timeout(schema.TimeoutCreate) - time.Minute); err != nil {
+  return fmt.Errorf("Error waiting for PrivateConnection %q to be CREATED. %q", d.Get("name").(string), err)
+}
