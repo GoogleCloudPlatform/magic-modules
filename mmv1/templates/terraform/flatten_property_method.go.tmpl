@@ -14,7 +14,7 @@
   limitations under the License. */ -}}
 {{- define "flattenPropertyMethod" }}
 {{- if $.CustomFlatten }}
-{{/* TODO custom flatten */}}
+    {{- $.CustomTemplate $.CustomFlatten -}}
 {{- else }}
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
   {{- if $.IsA "NestedObject" }}

@@ -299,6 +299,8 @@ type Resource struct {
 
 	// The compiler to generate the downstream files, for example "terraformgoogleconversion-codegen".
 	Compiler string
+
+	ImportPath string
 }
 
 func (r *Resource) UnmarshalYAML(n *yaml.Node) error {
@@ -738,6 +740,15 @@ func (r Resource) CreateUri() string {
 	return r.SelfLinkUri()
 }
 
+// def update_uri
+func (r Resource) UpdateUri() string {
+	if r.UpdateUrl != "" {
+		return r.UpdateUrl
+	}
+
+	return r.SelfLinkUri()
+}
+
 // def delete_uri
 func (r Resource) DeleteUri() string {
 	if r.DeleteUrl != "" {
@@ -973,9 +984,37 @@ func (r Resource) ReadProperties() []*Type {
 }
 
 func (r Resource) FlattenedProperties() []*Type {
-	return google.Select(r.ReadProperties(), func(p *Type) bool { 
-		return p.FlattenObject 
+	return google.Select(r.ReadProperties(), func(p *Type) bool {
+		return p.FlattenObject
 	})
 }
 
+func (r Resource) IsInIdentity(t Type) bool {
+	for _, i := range r.GetIdentity() {
+		if i.Name == t.Name {
+			return true
+		}
+	}
+	return false
+}
 
+func OrderProperties(props []*Type) []*Type {
+	req := google.Select(props, func(p *Type) bool {
+		return p.Required
+	})
+	slices.SortFunc(req, CompareByName)
+	rest := google.Reject(props, func(p *Type) bool {
+		return p.Output || p.Required
+	})
+	slices.SortFunc(rest, CompareByName)
+	output := google.Select(props, func(p *Type) bool {
+		return p.Output
+	})
+	slices.SortFunc(output, CompareByName)
+	returnProps := google.Concat(req, rest)
+	return google.Concat(returnProps, output)
+}
+
+func CompareByName(a, b *Type) int {
+	return strings.Compare(a.Name, b.Name)
+}
