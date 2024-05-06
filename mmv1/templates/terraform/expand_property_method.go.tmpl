@@ -14,7 +14,7 @@
   limitations under the License. */ -}}
 {{- define "expandPropertyMethod" }}
   {{- if $.CustomExpand }}
-    {{- $.CustomExpandTemplate -}}
+    {{- $.CustomTemplate $.CustomExpand -}}
   {{- else }}{{/* if $.CustomExpand */}}
     {{- if $.IsA "Map" }}
 func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {

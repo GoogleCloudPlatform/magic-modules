@@ -1283,12 +1283,8 @@ func (t Type) NamespaceProperty() string {
 //
 // end
 
-func (t Type) CustomExpandTemplate() string {
-	return resource.ExecuteTemplate(&t, t.CustomExpand)
-}
-
-func (t Type) CustomFlattenTemplate() string {
-	return resource.ExecuteTemplate(&t, t.CustomFlatten)
+func (t Type) CustomTemplate(templatePath string) string {
+	return resource.ExecuteTemplate(&t, templatePath)
 }
 
 func (t *Type) GetIdFormat() string {
