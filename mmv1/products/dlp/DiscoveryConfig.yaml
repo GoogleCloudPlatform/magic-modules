@@ -64,18 +64,8 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
-    name: 'dlp_discovery_config_secrets'
-    primary_resource_id: 'secrets'
-    test_env_vars:
-      project: :PROJECT_NAME
-  - !ruby/object:Provider::Terraform::Examples
     name: 'dlp_discovery_config_cloud_sql'
     primary_resource_id: 'cloud_sql'
-    test_env_vars:
-      project: :PROJECT_NAME
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'dlp_discovery_config_cloud_sql_resource_ref'
-    primary_resource_id: 'cloud_sql_resource_ref'
     test_env_vars:
       project: :PROJECT_NAME
 custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -372,7 +362,7 @@ properties:
                                 description: Regex to test the database name against. If empty, all databases match.
                               - !ruby/object:Api::Type::String
                                 name: databaseResourceNameRegex
-                                description: Regex to test the database resource's name against. An example of a database resource name is a table's name. Other database resource names like view names could be included in the future. If empty, all database resources match.' 
+                                description: Regex to test the database resource's name against. An example of a database resource name is a table's name. Other database resource names like view names could be included in the future. If empty, all database resources match.'
                 - !ruby/object:Api::Type::NestedObject
                   name: others
                   description: 'Catch-all. This should always be the last target in the list because anything above it will apply first. Should only appear once in a configuration. If none is specified, a default one will be added automatically.'
@@ -380,22 +370,6 @@ properties:
                     []  # Meant to be an empty object with no properties. The fields below are necessary to include the "others" filter in the payload
                   send_empty_value: true
                   allow_empty_object: true
-                - !ruby/object:Api::Type::NestedObject
-                  name: databaseResourceReference  
-                  description: 'The database resource to scan. Targets including this can only include one target (the target with this database resource reference).'
-                  properties:
-                    - !ruby/object:Api::Type::String
-                      name: projectId
-                      description: If within a project-level config, then this must match the config's project id.
-                    - !ruby/object:Api::Type::String
-                      name: instance
-                      description: The instance where this resource is located. For example - Cloud SQL's instance id.
-                    - !ruby/object:Api::Type::String
-                      name: database
-                      description: 'Name of a database within the instance.'
-                    - !ruby/object:Api::Type::String
-                      name: databaseResource
-                      description: 'Name of a database resource. For example, a table within the database.'
             - !ruby/object:Api::Type::NestedObject
               name: conditions
               description: 'In addition to matching the filter, these conditions must be true before a profile is generated.'
@@ -453,9 +427,9 @@ properties:
                   name: 'refresh_frequency'
                   description: Data changes (non-schema changes) in Cloud SQL tables can't trigger reprofiling. If you set this field, profiles are refreshed at this frequency regardless of whether the underlying tables have changes. Defaults to never.
                   values:
-                        - :UPDATE_FREQUENCY_NEVER
-                        - :UPDATE_FREQUENCY_DAILY
-                        - :UPDATE_FREQUENCY_MONTHLY
+                    - :UPDATE_FREQUENCY_NEVER
+                    - :UPDATE_FREQUENCY_DAILY
+                    - :UPDATE_FREQUENCY_MONTHLY
             - !ruby/object:Api::Type::NestedObject
               name: disabled
               description: 'Disable profiling for database resources that match this filter.'
@@ -464,13 +438,6 @@ properties:
                 # The fields below are necessary to include the "disabled" filter in the payload
               send_empty_value: true
               allow_empty_object: true
-        - !ruby/object:Api::Type::NestedObject
-          name: secretsTarget
-          description: 'Discovery target that looks for credentials and secrets stored in Cloud resource metadata and reports them as vulnerabilities to Security Command Center. Only one target of this type is allowed.'
-          properties:
-            []  # Meant to be an empty object with no properties. The fields below are necessary to include the "secretsTarget" target in the payload
-          send_empty_value: true
-          allow_empty_object: true
   - !ruby/object:Api::Type::Array
     name: 'errors'
     description: Output only. A stream of errors encountered when the config was activated. Repeated errors may result in the config automatically being paused. Output only field. Will return the last 100 errors. Whenever the config is modified this list will be cleared.
