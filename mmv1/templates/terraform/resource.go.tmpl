@@ -1,4 +1,4 @@
-{{/* the license inside this block applies to this file
+{{/* The license inside this block applies to this file
   Copyright 2024 Google LLC. All Rights Reserved.
 
   Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,7 +11,7 @@
   distributed under the License is distributed on an "AS IS" BASIS,
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
-  limitations under the License. */}}
+  limitations under the License. */ -}}
 // Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
 
@@ -227,7 +227,8 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     }
 
     log.Printf("[DEBUG] Creating new {{ $.Name -}}: %#v", obj)
-{{if $.NestedQuery.ModifyByPatch -}}
+{{if $.NestedQuery -}}
+{{if $.NestedQuery.ModifyByPatch }}
 {{/*# Keep this after mutex - patch request data relies on current resource state */}}
     obj, err = resource{{ $.ResourceName -}}PatchCreateEncoder(d, meta, obj)
     if err != nil {
@@ -238,6 +239,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     if err != nil {
         return err
     }
+{{- end}}
 {{- end}}
 {{- end}}
     billingProject := ""
@@ -337,6 +339,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     }
 {{- end}}
 
+{{if $.NestedQuery -}}
 {{if $.NestedQuery.Keys -}}
     if _, ok := opRes["{{ index $.NestedQuery.Keys 0 -}}"]; ok {
         opRes, err = flattenNested{{ $.ResourceName -}}(d, meta, opRes)
@@ -355,6 +358,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{ end }}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(opRes["{{ $prop.ApiName -}}"], d, config)); err != nil {
         return err
     }
+{{- end}}
 {{- end}}
 {{- end}}
 
@@ -409,3 +413,774 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     return resource{{ $.ResourceName -}}Read(d, meta)
 {{  end -}}
 }
+
+{{if ($.GetAsync.IsA "PollAsync")}}
+func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interface{}) transport_tpg.PollReadFunc {
+    return func() (map[string]interface{}, error) {
+{{if $.GetAsync.CustomPollRead -}}
+//TODO custom poll read
+{{    else -}}
+        config := meta.(*transport_tpg.Config)
+
+
+        url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}/{{$.SelfLinkUri}}")
+
+        if err != nil {
+            return nil, err
+        }
+
+        billingProject := ""
+
+{{if $.HasProject -}}
+        project, err := tpgresource.GetProject(d, config)
+        if err != nil {
+            return nil, fmt.Errorf("Error fetching project for {{ $.Name -}}: %s", err)
+        }
+{{if $.LegacyLongFormProject -}}
+        billingProject = strings.TrimPrefix(project, "projects/")
+{{        else -}}
+        billingProject = project
+{{- end}}
+{{- end}}
+
+{{if $.SupportsIndirectUserProjectOverride -}}
+        if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
+            billingProject = parts[1]
+        }
+{{- end}}
+
+        // err == nil indicates that the billing_project value was found
+        if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+        billingProject = bp
+        }
+
+        userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+        if err != nil {
+            return nil, err
+        }
+
+        res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+            Config: config,
+            Method: "{{ upper $.ReadVerb -}}",
+            Project: billingProject,
+            RawURL: url,
+            UserAgent: userAgent,
+{{if $.ErrorRetryPredicates -}}
+            ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
+{{- end}}
+{{if $.ErrorAbortPredicates -}}
+            ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
+{{- end}}
+        })
+        if err != nil {
+            return res, err
+        }
+{{if $.NestedQuery -}}
+        res, err = flattenNested{{ $.ResourceName -}}(d, meta, res)
+        if err != nil {
+            return nil, err
+        }
+
+        if res == nil {
+            return nil, tpgresource.Fake404("nested", "{{ $.ResourceName }}")
+        }
+
+{{- end}}
+{{if $.CustomCode.Decoder -}}
+        res, err = resource{{ $.ResourceName -}}Decoder(d, meta, res)
+        if err != nil {
+            return nil, err
+        }
+        if res == nil {
+            return nil, tpgresource.Fake404("decoded", "{{ $.ResourceName }}")
+        }
+
+{{- end}}
+        return res, nil
+{{    end  -}}
+    }
+}
+{{  end -}}
+
+func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{}) error {
+{{if $.SkipRead -}}
+  // This resource could not be read from the API.
+  return nil
+{{  else  -}}
+    config := meta.(*transport_tpg.Config)
+    userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+    if err != nil {
+        return err
+    }
+
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}{{$.ReadQueryParams}}")
+    if err != nil {
+        return err
+    }
+
+    billingProject := ""
+
+{{if $.HasProject -}}
+    project, err := tpgresource.GetProject(d, config)
+    if err != nil {
+        return fmt.Errorf("Error fetching project for {{ $.Name -}}: %s", err)
+    }
+{{if $.LegacyLongFormProject -}}
+    billingProject = strings.TrimPrefix(project, "projects/")
+{{    else -}}
+    billingProject = project
+{{- end}}
+{{- end}}
+
+{{if $.SupportsIndirectUserProjectOverride -}}
+    if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
+        billingProject = parts[1]
+    }
+{{- end}}
+
+    // err == nil indicates that the billing_project value was found
+    if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+      billingProject = bp
+    }
+
+    headers := make(http.Header)
+    {{ if $.CustomCode.PreRead -}}
+    //todo preread
+    {{ end }}
+    res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+        Config: config,
+        Method: "{{ upper $.ReadVerb -}}",
+        Project: billingProject,
+        RawURL: url,
+        UserAgent: userAgent,
+{{if $.ErrorRetryPredicates -}}
+        ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
+{{- end}}
+{{if $.ErrorAbortPredicates -}}
+        ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
+{{- end}}
+    })
+    if err != nil {
+{{if $.ReadErrorTransform -}}
+        return transport_tpg.HandleNotFoundError({{ $.ReadErrorTransform }}(err), d, fmt.Sprintf("{{ $.ResourceName -}} %q", d.Id()))
+{{  else -}}
+        return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("{{ $.ResourceName -}} %q", d.Id()))
+{{- end}}
+    }
+
+{{if $.NestedQuery -}}
+    res, err = flattenNested{{ $.ResourceName -}}(d, meta, res)
+    if err != nil {
+        return err
+    }
+
+    if res == nil {
+        // Object isn't there any more - remove it from the state.
+        log.Printf("[DEBUG] Removing {{ $.ResourceName -}} because it couldn't be matched.")
+        d.SetId("")
+        return nil
+    }
+
+{{- end}}
+
+{{if $.CustomCode.Decoder -}}
+    res, err = resource{{ $.ResourceName -}}Decoder(d, meta, res)
+    if err != nil {
+        return err
+    }
+
+    if res == nil {
+        // Decoding the $ has resulted in it being gone. It may be marked deleted
+        log.Printf("[DEBUG] Removing {{ $.ResourceName -}} because it no longer exists.")
+        d.SetId("")
+        return nil
+    }
+
+{{- end}}
+{{- if $.VirtualFields -}}
+  // Explicitly set virtual fields to default values if unset
+{{- range $prop := $.VirtualFields }}
+{{      if $prop.DefaultValue -}}
+    if _, ok := d.GetOkExists("{{ $prop.Name -}}"); !ok {
+        if err := d.Set("{{ $prop.Name -}}", {{ $prop.DefaultValue -}}); err != nil {
+            return fmt.Errorf("Error setting {{ $prop.Name -}}: %s", err)
+        }
+    }
+{{- end}}
+{{- end}}
+{{- end}}
+{{if $.HasProject -}}
+    if err := d.Set("project", project); err != nil {
+        return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
+    }
+{{- end}}
+
+{{if $.HasRegion -}}
+    region, err := tpgresource.GetRegion(d, config)
+    if err != nil {
+        return err
+    }
+    if err := d.Set("region", region); err != nil {
+        return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
+    }
+{{- end}}
+
+{{if $.HasZone -}}
+    zone, err := tpgresource.GetZone(d, config)
+    if err != nil {
+        return err
+    }
+    if err := d.Set("zone", zone); err != nil {
+        return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
+    }
+{{- end}}
+
+{{- range $prop := $.ReadProperties }}
+{{if $prop.FlattenObject -}}
+// Terraform must set the top level schema field, but since this $ contains collapsed properties
+// it's difficult to know what the top level should be. Instead we just loop over the map returned from flatten.
+    if flattenedProp := flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config); flattenedProp != nil {
+        if gerr, ok := flattenedProp.(*googleapi.Error); ok {
+            return fmt.Errorf("Error reading {{ $.Name -}}: %s", gerr)
+        }
+        casted := flattenedProp.([]interface{})[0]
+        if casted != nil {
+            for k, v := range casted.(map[string]interface{}) {
+                if err := d.Set(k, v); err != nil {
+                    return fmt.Errorf("Error setting %s: %s", k, err)
+                }
+            }
+        }
+    }
+{{    else -}}
+    if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper" -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {
+        return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
+    }
+{{- end}}
+{{- end}}
+{{if $.HasSelfLink -}}
+    if err := d.Set("self_link", tpgresource.ConvertSelfLinkToV1(res["selfLink"].(string))); err != nil {
+        return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
+    }
+{{- end}}
+
+    return nil
+{{  end -}}
+}
+
+{{if $.Updatable -}}
+func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{}) error {
+{{if and ($.GetAsync.IsA "OpAsync") ($.GetAsync.IncludeProject) ($.GetAsync.Allow "update") -}}
+    var project string
+{{- end}}
+    config := meta.(*transport_tpg.Config)
+{{if $.CustomCode.CustomUpdate -}}
+//TODO custom update
+{{  else  -}}
+    userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+    if err != nil {
+        return err
+    }
+
+    billingProject := ""
+
+{{if $.HasProject -}}
+    project, err := tpgresource.GetProject(d, config)
+    if err != nil {
+        return fmt.Errorf("Error fetching project for {{ $.Name -}}: %s", err)
+    }
+{{if $.LegacyLongFormProject -}}
+    billingProject = strings.TrimPrefix(project, "projects/")
+{{      else -}}
+    billingProject = project
+{{- end}}
+{{- end}}
+
+
+{{if not $.Immutable -}}
+    obj := make(map[string]interface{})
+{{- range $prop := $.UpdateBodyProperties }}
+    {{/* flattened $s won't have something stored in state so instead nil is passed to the next expander. */}}
+    {{ $prop.ApiName -}}Prop, err := expand{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}({{ if $prop.FlattenObject }}nil{{else}}d.Get("{{underscore $prop.Name}}"){{ end }}, d, config)
+    if err != nil {
+        return err
+{{if $prop.SendEmptyValue -}}
+    } else if v, ok := d.GetOkExists("{{ underscore $prop.Name -}}"); ok || !reflect.DeepEqual(v, {{ $prop.ApiName -}}Prop) {
+{{        else if $prop.FlattenObject -}}
+    } else if !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.ApiName -}}Prop)) {
+{{        else -}}
+    } else if v, ok := d.GetOkExists("{{ underscore $prop.Name -}}"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, {{ $prop.ApiName -}}Prop)) {
+{{- end}}
+        obj["{{ $prop.ApiName -}}"] = {{ $prop.ApiName -}}Prop
+    }
+{{- end}}
+
+{{/*     We need to decide what encoder to use here - if there's an update encoder, use that! -*/}}
+{{if $.CustomCode.UpdateEncoder -}}
+    obj, err = resource{{ $.ResourceName -}}UpdateEncoder(d, meta, obj)
+    if err != nil {
+        return err
+    }
+{{      else if $.CustomCode.Encoder -}}
+    obj, err = resource{{ $.ResourceName -}}Encoder(d, meta, obj)
+    if err != nil {
+        return err
+    }
+{{- end}}
+
+{{if $.Mutex -}}
+    lockName, err := tpgresource.ReplaceVars(d, config, "{{ $.Mutex -}}")
+    if err != nil {
+        return err
+    }
+    transport_tpg.MutexStore.Lock(lockName)
+    defer transport_tpg.MutexStore.Unlock(lockName)
+{{- end}}
+
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{ $.UpdateUrl }}")
+    if err != nil {
+        return err
+    }
+
+    log.Printf("[DEBUG] Updating {{ $.Name -}} %q: %#v", d.Id(), obj)
+	headers := make(http.Header)
+{{ if $.UpdateMask -}}
+//TODO updatemask
+{{end}}
+{{ if $.CustomCode.PreUpdate -}}
+//TODO Preupdate
+{{end}}
+{{if $.NestedQuery -}}
+{{if $.NestedQuery.ModifyByPatch -}}
+{{/*#       Keep this after mutex - patch request data relies on current resource state */}}
+    obj, err = resource{{ $.ResourceName -}}PatchUpdateEncoder(d, meta, obj)
+    if err != nil {
+        return err
+    }
+{{- end}}
+{{- end}}
+{{if $.SupportsIndirectUserProjectOverride -}}
+    if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
+        billingProject = parts[1]
+    }
+{{- end}}
+
+    // err == nil indicates that the billing_project value was found
+    if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+      billingProject = bp
+    }
+
+{{if $.UpdateMask -}}
+// if updateMask is empty we are not updating anything so skip the post
+if len(updateMask) > 0 {
+{{- end}}
+    res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+        Config: config,
+        Method: "{{ $.UpdateVerb -}}",
+        Project: billingProject,
+        RawURL: url,
+        UserAgent: userAgent,
+        Body: obj,
+        Timeout: d.Timeout(schema.TimeoutUpdate),
+{{if $.ErrorRetryPredicates -}}
+        ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
+{{- end}}
+{{if $.ErrorAbortPredicates -}}
+        ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
+{{- end}}
+		Headers:   headers,
+    })
+
+    if err != nil {
+        return fmt.Errorf("Error updating {{ $.Name -}} %q: %s", d.Id(), err)
+    } else {
+        log.Printf("[DEBUG] Finished updating {{ $.Name -}} %q: %#v", d.Id(), res)
+    }
+
+{{if $.GetAsync.Allow "update" -}}
+{{if $.GetAsync.IsA "OpAsync" -}}
+    err = {{ $.ClientNamePascal -}}OperationWaitTime(
+        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}} "Updating {{ $.Name -}}", userAgent,
+        d.Timeout(schema.TimeoutUpdate))
+
+    if err != nil {
+        return err
+    }
+{{        else if $.GetAsync.IsA "PollAsync" -}}
+    err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName -}}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncExistence -}}, "Updating {{ $.Name -}}", d.Timeout(schema.TimeoutUpdate), {{ $.GetAsync.TargetOccurrences -}})
+    if err != nil {
+{{if $.GetAsync.SuppressError -}}
+        log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name -}} %q finished updating: %q", d.Id(), err)
+{{          else -}}
+        return err
+{{- end}}
+    }
+{{- end}}
+{{- end}}
+{{if $.UpdateMask -}}
+  }
+{{- end}}
+{{    end -}}
+{{if eq 0 1 -}} 
+{{/* TODO THIS BLOCK NEEDS FUNCTIONS TO WORK -- LINE 982 
+
+* field_specific_update_methods
+* properties_by_custom_update
+* group_by / key[:]
+
+*/}}
+//TODO field_specific_update_methods($.root_properties)
+    d.Partial(true)
+
+{{/*      properties_by_custom_update($.root_properties)
+          .sort_by {|k, _| k.nil? ? "" : k[:update_id].to_s}
+          .each do |key, props|
+-*/}}
+    if {{/* props.map { |prop| "d.HasChange(\"#{underscore $prop.Name }\")" }.join ' || ' -*/}} {
+        obj := make(map[string]interface{})
+
+{{/*- TODO 878      if key[:fingerprint_name] -*/}}
+        getUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}" -}}")
+        if err != nil {
+            return err
+        }
+{{if $.SupportsIndirectUserProjectOverride -}}
+        if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
+            billingProject = parts[1]
+        }
+{{- end}}
+
+        // err == nil indicates that the billing_project value was found
+        if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+        billingProject = bp
+        }
+
+        getRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+            Config: config,
+            Method: "{{ upper $.ReadVerb -}}",
+            Project: billingProject,
+            RawURL: getUrl,
+            UserAgent: userAgent,
+{{if $.ErrorRetryPredicates -}}
+        	ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
+{{- end}}
+{{if $.ErrorAbortPredicates -}}
+        	ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
+{{- end}}
+        })
+        if err != nil {
+            return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("{{ $.ResourceName -}} %q", d.Id()))
+        }
+
+        obj["{{/* key[:fingerprint_name] */}}"] = getRes["{{/* key[:fingerprint_name] */}}"]
+
+{{/*      end  -*/}}
+{{/*- TODO range $prop := $.CustomUpdatePropertiesByKey $.AllUserProperties key */}}
+{{ range $prop := $.AllProperties }}      
+        {{ $prop.ApiName -}}Prop, err := expand{{ if $.NestedQuery -}}Nested{{ end }}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}({{ if $prop.FlattenObject }}nil{{else}}d.Get("{{underscore $prop.Name}}"){{ end }}, d, config)
+        if err != nil {
+            return err
+{{/*         There is some nuance in when we choose to send a value to an update function.
+            This is unfortunate, but it's because of the way that GCP works, so there's
+            no easy way out.  Some APIs require you to send `enable_foo: false`, while
+            others will crash if you send `attribute: ''`.  We require this nuance to
+            be annotated in ResourceName.yaml, since it is not discoverable automatically.
+
+            The behavior here, which we believe to be correct, is to send a value if
+            * It is non-empty OR
+            * It is marked send_empty_value in ResourceName.yaml.
+            AND
+            * It has been set by the user OR
+            * It has been modified by the expander in any way
+
+            This subsumes both `ForceSendFields` and `NullFields` in the go API client -
+            `NullFields` is a special case of `send_empty_value` where the empty value
+            in question is go's literal nil.
+-*/}}
+{{if $prop.SendEmptyValue -}}
+        } else if v, ok := d.GetOkExists("{{ underscore $prop.Name -}}"); ok || !reflect.DeepEqual(v, {{ $prop.ApiName -}}Prop) {
+{{          else if $prop.FlattenObject -}}
+        } else if !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.ApiName -}}Prop)) {
+{{          else -}}
+        } else if v, ok := d.GetOkExists("{{ underscore $prop.Name -}}"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, {{ $prop.ApiName -}}Prop)) {
+{{- end}}
+            obj["{{ $prop.ApiName -}}"] = {{ $prop.ApiName -}}Prop
+        }
+{{/*       end  # props.each -*/}}
+
+{{/*     We need to decide what encoder to use here - if there's an update encoder, use that! -*/}}
+{{if $.CustomCode.update_encoder -}}
+    obj, err = resource{{ $.ResourceName -}}UpdateEncoder(d, meta, obj)
+    if err != nil {
+        return err
+    }
+{{- end}}
+
+{{if $.Mutex -}}
+        lockName, err := tpgresource.ReplaceVars(d, config, "{{ $.Mutex -}}")
+        if err != nil {
+            return err
+        }
+        transport_tpg.MutexStore.Lock(lockName)
+        defer transport_tpg.MutexStore.Unlock(lockName)
+{{- end}}
+
+        url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{ $.UpdateUrl }}")-}}")
+        if err != nil {
+            return err
+        }
+
+
+{{ if $.CustomCode.PreUpdate -}}
+//TODO Preupdate
+{{ end}}
+{{if $.SupportsIndirectUserProjectOverride -}}
+        if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
+            billingProject = parts[1]
+        }
+{{- end}}
+
+        // err == nil indicates that the billing_project value was found
+        if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+        billingProject = bp
+        }
+
+        res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+            Config: config,
+            Method: "{{/* key[:update_verb] -*/}}",
+            Project: billingProject,
+            RawURL: url,
+            UserAgent: userAgent,
+            Body: obj,
+            Timeout: d.Timeout(schema.TimeoutUpdate),
+{{if $.ErrorRetryPredicates -}}
+        	ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
+{{- end}}
+{{if $.ErrorAbortPredicates -}}
+        	ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
+{{- end}}
+			Headers:   headers,
+        })
+        if err != nil {
+            return fmt.Errorf("Error updating {{ $.Name -}} %q: %s", d.Id(), err)
+        } else {
+        log.Printf("[DEBUG] Finished updating {{ $.Name -}} %q: %#v", d.Id(), res)
+    }
+
+{{if $.GetAsync.Allow "update" -}}
+{{if $.GetAsync.IsA "OpAsync" -}}
+	    err = {{ $.ClientNamePascal -}}OperationWaitTime(
+	        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}} "Updating {{ $.Name -}}", userAgent,
+	        d.Timeout(schema.TimeoutUpdate))
+
+	    if err != nil {
+	        return err
+	    }
+{{        else if $.GetAsync.IsA "PollAsync" -}}
+	    err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName -}}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncExistence -}}, "Updating {{ $.Name -}}", d.Timeout(schema.TimeoutUpdate), {{ $.GetAsync.TargetOccurrences -}})
+	    if err != nil {
+{{if $.GetAsync.SuppressError -}}
+	        log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name -}} %q finished updating: %q", d.Id(), err)
+{{          else -}}
+	        return err
+{{- end}}
+        }
+{{- end}}
+{{- end}}
+    } 
+{{/* TODO THIS BLOCK NEEDS FUNCTIONS TO WORK -- LINE 824 */}}
+{{- end}}
+
+  d.Partial(false)
+{{- end}}
+
+{{ if $.CustomCode.PostUpdate -}} //TODO POST UPDATE {{end}}
+    return resource{{ $.ResourceName -}}Read(d, meta)
+{{  end -}}
+}
+{{ else if $.RootLabels -}}
+func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{}) error {
+    // Only the root field "labels" and "terraform_labels" are mutable
+    return resource{{ $.ResourceName -}}Read(d, meta)
+}
+{{- end}}
+func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}) error {
+{{- if and (and ($.GetAsync.IsA "OpAsync") $.GetAsync.IncludeProject) ($.GetAsync.Allow "delete")}}
+    var project string
+{{- end }}
+{{- if $.SkipDelete }}
+    log.Printf("[WARNING] {{ $.ProductMetadata.Name }}{{" "}}{{ $.Name }} resources" +
+    " cannot be deleted from Google Cloud. The resource %s will be removed from Terraform" +
+    " state, but will still be present on Google Cloud.", d.Id())
+    d.SetId("")
+
+    return nil
+{{- else }}
+    config := meta.(*transport_tpg.Config)
+    userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+    if err != nil {
+        return err
+    }
+
+{{- if $.CustomCode.CustomDelete }} 
+{{/* TODO CustomDelete */}}
+{{- else }}
+
+    billingProject := ""
+    {{ if $.HasProject }}
+    project, err := tpgresource.GetProject(d, config)
+    if err != nil {
+        return fmt.Errorf("Error fetching project for {{ $.Name }}: %s", err)
+    }
+        {{- if $.LegacyLongFormProject }}
+    billingProject = strings.TrimPrefix(project, "projects/")
+        {{- else }}
+    billingProject = project
+        {{- end }}
+    {{- end }}
+    {{- if $.Mutex }}
+    lockName, err := tpgresource.ReplaceVars(d, config, "{{ $.Mutex }}")
+    if err != nil {
+        return err
+    }
+    transport_tpg.MutexStore.Lock(lockName)
+    defer transport_tpg.MutexStore.Unlock(lockName)
+    {{- end }}
+
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.DeleteUri}}")
+    if err != nil {
+        return err
+    }
+    {{/*If the deletion of the object requires sending a request body, the custom code will set 'obj' */}}
+    var obj map[string]interface{}
+    {{- if and $.NestedQuery $.NestedQuery.ModifyByPatch }}
+        {{/*Keep this after mutex - patch request data relies on current resource state*/}}
+    obj, err = resource{{ $.ResourceName }}PatchDeleteEncoder(d, meta, obj)
+    if err != nil {
+        return transport_tpg.HandleNotFoundError(err, d, "{{ $.ResourceName }}")
+    }
+        {{- if $.UpdateMask }}
+    url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": "{{- join $.NestedQuery.Keys "," -}}"})
+    if err != nil {
+        return err
+    }
+        {{- end }}
+    {{- end }}
+    {{- if $.SupportsIndirectUserProjectOverride }}
+    if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
+        billingProject = parts[1]
+    }
+    {{- end }}
+
+    // err == nil indicates that the billing_project value was found
+    if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+      billingProject = bp
+    }
+
+    headers := make(http.Header)
+    {{- if $.CustomCode.PreDelete }} 
+    {{/* TODO PreDelete */}}
+    {{- end }}
+
+    log.Printf("[DEBUG] Deleting {{ $.Name }} %q", d.Id())
+    res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+        Config: config,
+        Method: "{{ camelize $.DeleteVerb "upper" -}}",
+        Project: billingProject,
+        RawURL: url,
+        UserAgent: userAgent,
+        Body: obj,
+        Timeout: d.Timeout(schema.TimeoutDelete),
+        Headers: headers,
+        {{- if $.ErrorRetryPredicates }}
+        ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{- join $.ErrorRetryPredicates "," -}}{{"}"}},
+        {{- end }}
+        {{- if $.ErrorAbortPredicates }}
+        ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{- join $.ErrorAbortPredicates "," -}}{{"}"}},
+        {{- end }}
+    })
+    if err != nil {
+        return transport_tpg.HandleNotFoundError(err, d, "{{ $.Name }}")
+    }
+    {{ if $.GetAsync.Allow "Delete" -}}
+        {{ if $.GetAsync.IsA "PollAsync" -}}
+    err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName }}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncExistence }}, "Deleting {{ $.Name }}}", d.Timeout(schema.TimeoutCreate), {{ $.Async.TargetOccurrences }})
+    if err != nil {
+            {{- if $.Async.SuppressError }}
+        log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name }} %q finished updating: %q", d.Id(), err)
+            {{- else }}
+        return fmt.Errorf("Error waiting to delete {{ $.Name }}: %s", err)
+            {{- end }}
+    }
+        {{- else }}
+    err = {{ $.ClientNamePascal }}OperationWaitTime(
+        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}} "Deleting {{ $.Name -}}", userAgent,
+        d.Timeout(schema.TimeoutDelete))
+
+    if err != nil {
+        return err
+    }
+    {{- end }}
+{{- end }}
+{{- if $.CustomCode.PostDelete }}
+{{/* TODO PostDelete */}}
+{{- end }}
+
+    log.Printf("[DEBUG] Finished deleting {{ $.Name }} %q: %#v", d.Id(), res)
+    return nil
+{{- end }}{{/* custom code */}}
+{{- end }}{{/* pre delete */}}
+}
+
+{{ if not $.ExcludeImport -}}
+func resource{{ $.ResourceName }}Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+    {{- if $.CustomCode.CustomImport }}
+    {{/* TODO CustomImport */}}
+    {{- else }}
+    config := meta.(*transport_tpg.Config)
+    if err := tpgresource.ParseImportId([]string{
+        {{- range $id := $.ImportIdFormatsFromResource }}
+        "^{{ format2regex $id }}$",
+        {{- end }}
+    }, d, config); err != nil {
+      return nil, err
+    }
+
+    // Replace import id for the resource id
+    id, err := tpgresource.ReplaceVars{{ if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{ $.IdFormat }}")
+    if err != nil {
+        return nil, fmt.Errorf("Error constructing id: %s", err)
+    }
+    d.SetId(id)
+        {{- if $.VirtualFields -}}
+    // Explicitly set virtual fields to default values on import
+            {{- range $vf := $.VirtualFields }}
+                {{- if $vf.DefaultValue }}
+    if err := d.Set("{{ $.vf.Name }}", {{ $.vf.DefaultValue }}); err != nil {
+        return nil, fmt.Errorf("Error setting {{ $.vf.Name }}: %s", err)
+    }
+                {{- end }}
+            {{- end }}
+        {{- end }}
+        {{- if $.CustomCode.PostImport }}
+        {{/* TODO PostImport */}}
+        {{- end }}
+
+    return []*schema.ResourceData{d}, nil
+    {{- end }}
+}
+{{- end }}
+{{- range $prop := $.GettableProperties }}
+    {{- if not $prop.IgnoreRead }}
+        {{- template "flattenPropertyMethod" $prop -}}
+    {{- end }}
+{{- end }}
+{{- range $prop := $.SettableProperties }}
+    {{- template "expandPropertyMethod" $prop -}}
+{{- end }}
+{{/* TODO custom encoder */}}
+{{/* TODO custom update encoder */}}
+{{/* TODO nested query */}}
+{{/* TODO custom decoder */}}
+{{/* TODO custom post create failure */}}
+{{/* TODO state upgraders */}}
