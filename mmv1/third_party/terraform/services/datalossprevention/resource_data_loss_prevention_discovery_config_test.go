@@ -15,6 +15,7 @@ func TestAccDataLossPreventionDiscoveryConfig_Update(t *testing.T) {
 		"actions":    testAccDataLossPreventionDiscoveryConfig_ActionsUpdate,
 		"conditions": testAccDataLossPreventionDiscoveryConfig_ConditionsCadenceUpdate,
 		"filter":     testAccDataLossPreventionDiscoveryConfig_FilterUpdate,
+		"cloud_sql":  testAccDataLossPreventionDiscoveryConfig_CloudSqlUpdate,
 	}
 	for name, tc := range testCases {
 		// shadow the tc variable into scope so that when
