@@ -438,13 +438,6 @@ properties:
                 # The fields below are necessary to include the "disabled" filter in the payload
               send_empty_value: true
               allow_empty_object: true
-        - !ruby/object:Api::Type::NestedObject
-          name: secretsTarget
-          description: 'Discovery target that looks for credentials and secrets stored in Cloud resource metadata and reports them as vulnerabilities to Security Command Center. Only one target of this type is allowed.'
-          properties:
-            []  # Meant to be an empty object with no properties. The fields below are necessary to include the "secretsTarget" target in the payload
-          send_empty_value: true
-          allow_empty_object: true
   - !ruby/object:Api::Type::Array
     name: 'errors'
     description: Output only. A stream of errors encountered when the config was activated. Repeated errors may result in the config automatically being paused. Output only field. Will return the last 100 errors. Whenever the config is modified this list will be cleared.
