@@ -213,7 +213,7 @@ func testAccDataLossPreventionDiscoveryConfig_FilterUpdate(t *testing.T) {
 	})
 }
 
-func testAccDataLossPreventionDiscoveryConfig_FilterUpdate(t *testing.T) {
+func testAccDataLossPreventionDiscoveryConfig_CloudSqlUpdate(t *testing.T) {
 
 	context := map[string]interface{}{
 		"project":       envvar.GetTestProjectFromEnv(),
@@ -713,9 +713,9 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
                 }
                 refresh_frequency = "UPDATE_FREQUENCY_MONTHLY"
             }
-        }
-    }
-    targets {
+        }  - :UPDATE_FREQUENCY_NEVER
+		- :UPDATE_FREQUENCY_DAILY
+		- :UPDATE_FREQUENCY_MONTHLY
         cloud_sql_target {
             filter {
                 others {}
