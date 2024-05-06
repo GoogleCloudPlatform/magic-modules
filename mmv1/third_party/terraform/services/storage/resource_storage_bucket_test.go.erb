@@ -323,6 +323,12 @@ func TestAccStorageBucket_lifecycleRulesMultiple(t *testing.T) {
 			},
 			{
 				Config: testAccStorageBucket_lifecycleRulesMultiple_update(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket.bucket", "lifecycle_rule.2.condition.0.custom_time_before", "2019-01-12"),
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket.bucket", "lifecycle_rule.3.condition.0.noncurrent_time_before", "2019-01-12"),
+				),
 			},
 			{
 				ResourceName:            "google_storage_bucket.bucket",
@@ -1957,6 +1963,14 @@ resource "google_storage_bucket" "bucket" {
   }
   lifecycle_rule {
     action {
+      type = "Delete"
+    }
+    condition {
+      noncurrent_time_before = "2019-01-01"
+    }
+  }
+  lifecycle_rule {
+    action {
       type          = "SetStorageClass"
       storage_class = "NEARLINE"
     }
@@ -2043,7 +2057,15 @@ resource "google_storage_bucket" "bucket" {
       type = "Delete"
     }
     condition {
-      custom_time_before = "2019-01-01"
+      custom_time_before = "2019-01-12"
+    }
+  }
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+    condition {
+      noncurrent_time_before = "2019-01-12"
     }
   }
   lifecycle_rule {
