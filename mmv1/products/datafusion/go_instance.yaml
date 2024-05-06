@@ -272,7 +272,7 @@ able to access the public internet."
         immutable: true
   - name: 'accelerators'
     type: Array
-    description: | 
+    description: |
       List of accelerators enabled for this CDF instance.
         If accelerators are enabled it is possible a permadiff will be created with the Options field.
         Users will need to either manually update their state file to include these diffed options, or include the field in a [lifecycle ignore changes block](https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle#ignore_changes).
