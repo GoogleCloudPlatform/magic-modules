@@ -179,7 +179,7 @@ func (e *Examples) UnmarshalYAML(n *yaml.Node) error {
 
 // Executes example templates for documentation and tests
 func (e *Examples) SetHCLText() {
-	e.DocumentationHCLText = ExecuteHCL(e)
+	e.DocumentationHCLText = ExecuteTemplate(e, e.ConfigPath)
 
 	copy := e
 	// Override vars to inject test values into configs - will have
@@ -207,11 +207,10 @@ func (e *Examples) SetHCLText() {
 		copy.Vars[key] = fmt.Sprintf("%%{%s}", key)
 	}
 
-	e.TestHCLText = ExecuteHCL(copy)
+	e.TestHCLText = ExecuteTemplate(copy, copy.ConfigPath)
 }
 
-func ExecuteHCL(e *Examples) string {
-	templatePath := e.ConfigPath
+func ExecuteTemplate(e any, templatePath string) string {
 	templates := []string{
 		templatePath,
 	}
@@ -366,7 +365,7 @@ func (e *Examples) OiCSLink() string {
 }
 
 func (e *Examples) TestSlug(productName, resourceName string) string {
-	ret := fmt.Sprintf("%s%s_%sExample", productName, resourceName, google.Camelize(e.Name, "upper"))
+	ret := fmt.Sprintf("%s%s_%sExample", productName, resourceName, google.Camelize(e.Name, "lower"))
 	return ret
 }
 

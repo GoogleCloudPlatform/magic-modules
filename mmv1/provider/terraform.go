@@ -69,6 +69,7 @@ func NewTerraform(product *api.Product, versionName string, startTime time.Time)
 	t.Product.SetPropertiesBasedOnVersion(&t.Version)
 	for _, r := range t.Product.Objects {
 		r.SetCompiler(t.providerName())
+		r.ImportPath = t.ImportPathFromVersion(versionName)
 	}
 
 	return &t
@@ -205,7 +206,7 @@ func (t *Terraform) GenerateOperation(outputFolder string) {
 }
 
 func (t *Terraform) FolderName() string {
-	if t.Version.Name == "ga" {
+	if t.TargetVersionName == "ga" {
 		return "google"
 	}
 	return "google-beta"
@@ -440,7 +441,9 @@ func (t Terraform) CompileFileList(outputFolder string, files map[string]string,
 			source,
 		}
 
-		fileTemplate.GenerateFile(targetFile, source, t, true, templates...)
+		formatFile := filepath.Ext(targetFile) == ".go"
+
+		fileTemplate.GenerateFile(targetFile, source, t, formatFile, templates...)
 		t.replaceImportPath(outputFolder, target)
 		t.addHashicorpCopyRightHeader(outputFolder, target)
 	}
@@ -540,8 +543,9 @@ func (t Terraform) replaceImportPath(outputFolder, target string) {
 
 	data := string(sourceByte)
 
-	betaImportPath := fmt.Sprintf("%s/%s", TERRAFORM_PROVIDER_BETA, RESOURCE_DIRECTORY_BETA)
-	gaImportPath := fmt.Sprintf("%s/%s", TERRAFORM_PROVIDER_GA, RESOURCE_DIRECTORY_GA)
+	gaImportPath := t.ImportPathFromVersion("ga")
+	betaImportPath := t.ImportPathFromVersion("beta")
+
 	if strings.Contains(data, betaImportPath) {
 		log.Fatalf("Importing a package from module %s is not allowed in file %s. Please import a package from module %s.", betaImportPath, filepath.Base(target), gaImportPath)
 	}
@@ -566,15 +570,35 @@ func (t Terraform) replaceImportPath(outputFolder, target string) {
 	sourceByte = bytes.Replace(sourceByte, []byte(TERRAFORM_PROVIDER_GA+"/version"), []byte(tpg+"/version"), -1)
 	sourceByte = bytes.Replace(sourceByte, []byte("module "+TERRAFORM_PROVIDER_GA), []byte("module "+tpg), -1)
 
-	sourceByte, err = format.Source(sourceByte)
-	if err != nil {
-		log.Fatalf("error formatting %s", targetFile)
+	if filepath.Ext(targetFile) == (".go") {
+		formatByte, err := format.Source(sourceByte)
+		if err != nil {
+			log.Printf("error formatting %s: %s", targetFile, err)
+		} else {
+			sourceByte = formatByte
+		}
 	}
 
 	err = os.WriteFile(targetFile, sourceByte, 0644)
 	if err != nil {
 		log.Fatalf("Cannot write file %s to replace import path: %s", target, err)
 	}
+}
+
+func (t Terraform) ImportPathFromVersion(v string) string {
+	var tpg, dir string
+	switch v {
+	case "ga":
+		tpg = TERRAFORM_PROVIDER_GA
+		dir = RESOURCE_DIRECTORY_GA
+	case "beta":
+		tpg = TERRAFORM_PROVIDER_BETA
+		dir = RESOURCE_DIRECTORY_BETA
+	default:
+		tpg = TERRAFORM_PROVIDER_PRIVATE
+		dir = RESOURCE_DIRECTORY_PRIVATE
+	}
+	return fmt.Sprintf("%s/%s", tpg, dir)
 }
 
 // # Gets the list of services dependent on the version ga, beta, and private
@@ -692,14 +716,6 @@ func (t Terraform) replaceImportPath(outputFolder, target string) {
 // def update_url(resource, url_part)
 //
 //	[resource.__product.base_url, update_uri(resource, url_part)].flatten.join
-//
-// end
-//
-// def update_uri(resource, url_part)
-//
-//	return resource.self_link_uri if url_part.nil?
-//
-//	url_part
 //
 // end
 //
