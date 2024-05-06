@@ -864,11 +864,6 @@ properties:
                                   output: true
                                   description: |
                                     Column scale.
-                                - !ruby/object:Api::Type::String
-                                  name: 'encoding'
-                                  output: true
-                                  description: |
-                                    Column encoding.
                                 - !ruby/object:Api::Type::Boolean
                                   name: 'primaryKey'
                                   output: true
