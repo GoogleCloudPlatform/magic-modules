@@ -96,8 +96,7 @@ examples:
       org_id: :ORG_ID
       billing_account: :BILLING_ACCT
     skip_docs: true
-    min_version:
-      beta
+    min_version: beta
       # Resource creation race
     skip_vcr: true
 timeouts: !ruby/object:Api::Timeouts
