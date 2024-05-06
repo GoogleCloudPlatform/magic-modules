@@ -132,7 +132,7 @@ type Resource struct {
 	//
 	// [Optional] (Api::Resource::IamPolicy) Configuration of a resource's
 	// resource-specific IAM Policy.
-	IamPolicy resource.IamPolicy `yaml:"iam_policy"`
+	IamPolicy *resource.IamPolicy `yaml:"iam_policy"`
 
 	// [Optional] If set to true, don't generate the resource itself; only
 	// generate the IAM policy.
@@ -299,6 +299,8 @@ type Resource struct {
 
 	// The compiler to generate the downstream files, for example "terraformgoogleconversion-codegen".
 	Compiler string
+
+	ImportPath string
 }
 
 func (r *Resource) UnmarshalYAML(n *yaml.Node) error {
@@ -738,6 +740,15 @@ func (r Resource) CreateUri() string {
 	return r.SelfLinkUri()
 }
 
+// def update_uri
+func (r Resource) UpdateUri() string {
+	if r.UpdateUrl != "" {
+		return r.UpdateUrl
+	}
+
+	return r.SelfLinkUri()
+}
+
 // def delete_uri
 func (r Resource) DeleteUri() string {
 	if r.DeleteUrl != "" {
@@ -964,13 +975,46 @@ func (r Resource) GetIdFormat() string {
 // ====================
 // Template Methods
 // ====================
+// Functions used to create slices of resource properties that could not otherwise be called from within generating templates.
 
-// Prints a dot notation path to where the field is nested within the parent
-// object when called on a property. eg: parent.meta.label.foo
-// Redefined on Resource to terminate the calls up the parent chain.
+func (r Resource) ReadProperties() []*Type {
+	return google.Reject(r.GettableProperties(), func(p *Type) bool {
+		return p.IgnoreRead
+	})
+}
 
-// checks a resource for if it has properties that have FlattenObject=true on fields where IgnoreRead=false
-// used to decide whether or not to import "google.golang.org/api/googleapi"
 func (r Resource) FlattenedProperties() []*Type {
-	return google.Select(google.Reject(r.GettableProperties(), func(p *Type) bool { return p.IgnoreRead }), func(p *Type) bool { return p.FlattenObject })
+	return google.Select(r.ReadProperties(), func(p *Type) bool {
+		return p.FlattenObject
+	})
+}
+
+func (r Resource) IsInIdentity(t Type) bool {
+	for _, i := range r.GetIdentity() {
+		if i.Name == t.Name {
+			return true
+		}
+	}
+	return false
+}
+
+func OrderProperties(props []*Type) []*Type {
+	req := google.Select(props, func(p *Type) bool {
+		return p.Required
+	})
+	slices.SortFunc(req, CompareByName)
+	rest := google.Reject(props, func(p *Type) bool {
+		return p.Output || p.Required
+	})
+	slices.SortFunc(rest, CompareByName)
+	output := google.Select(props, func(p *Type) bool {
+		return p.Output
+	})
+	slices.SortFunc(output, CompareByName)
+	returnProps := google.Concat(req, rest)
+	return google.Concat(returnProps, output)
+}
+
+func CompareByName(a, b *Type) int {
+	return strings.Compare(a.Name, b.Name)
 }
