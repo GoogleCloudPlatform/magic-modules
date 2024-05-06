@@ -1217,3 +1217,29 @@ func (t Type) PropertyNsPrefix() []string {
 		"Property",
 	}
 }
+
+// "Namespace" - prefix with product and resource - a property with
+// information from the "object" variable
+
+func (t Type) NamespaceProperty() string {
+	name := google.Camelize(t.Name, "lower")
+	p := t
+	for p.Parent() != nil {
+		p = *p.Parent()
+		name = fmt.Sprintf("%s%s", google.Camelize(p.Name, "lower"), name)
+	}
+
+	return fmt.Sprintf("%s%s%s", google.Camelize(t.ApiName, "lower"), t.ResourceMetadata.Name, name)
+}
+
+// def namespace_property_from_object(property, object)
+//
+//	name = property.name.camelize
+//	until property.parent.nil?
+//	  property = property.parent
+//	  name = property.name.camelize + name
+//	end
+//
+//	"#{property.__resource.__product.api_name.camelize(:lower)}#{object.name}#{name}"
+//
+// end

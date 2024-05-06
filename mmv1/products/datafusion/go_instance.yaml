@@ -107,8 +107,8 @@ properties:
     description: "The ID of the instance or a fully qualified identifier for the instance."
     required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/go/shortname_to_url.go.tmpl'
   - name: 'description'
     type: String
     description: "An optional description of the instance."

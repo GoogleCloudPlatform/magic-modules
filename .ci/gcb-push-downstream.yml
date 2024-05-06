@@ -206,7 +206,6 @@ steps:
         - "GOOGLE_SERVICE_ACCOUNT"
         - "SA_KEY"
         - "GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION"
-        - "GOOGLE_TPU_V2_VM_RUNTIME_VERSION"
       env:
         - "COMMIT_SHA=$COMMIT_SHA"
         - "GOOGLE_REGION=us-central1"
@@ -253,5 +252,3 @@ availableSecrets:
       env: SA_KEY
     - versionName: projects/673497134629/secrets/ci-test-public-advertised-prefix-description/versions/latest
       env: GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION
-    - versionName: projects/673497134629/secrets/ci-test-tpu-v2-vm-runtime-version/versions/latest
-      env: GOOGLE_TPU_V2_VM_RUNTIME_VERSION
