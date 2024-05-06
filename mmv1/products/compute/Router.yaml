@@ -163,6 +163,7 @@ properties:
           ranges will be advertised in addition to any specified groups.
           Leave this field blank to advertise no custom IP ranges.
         send_empty_value: true
+        custom_flatten: 'templates/terraform/custom_flatten/compute_router_range.go.erb'
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::String
@@ -172,7 +173,6 @@ properties:
                 The IP range to advertise. The value must be a
                 CIDR-formatted string.
               send_empty_value: true
-              custom_flatten: 'templates/terraform/custom_flatten/compute_router_range.go.erb'
             - !ruby/object:Api::Type::String
               name: description
               description: |
