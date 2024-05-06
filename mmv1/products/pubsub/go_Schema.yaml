@@ -41,7 +41,7 @@ iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'schema'
 custom_code:
-  update_encoder: 'templates/terraform/update_encoder/pubsub_schema.erb'
+  update_encoder: 'templates/terraform/update_encoder/go/pubsub_schema.tmpl'
 examples:
   - name: 'pubsub_schema_basic'
     primary_resource_id: 'example'
@@ -62,8 +62,8 @@ parameters:
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-    custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.erb'
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/go/resource_from_self_link.go.tmpl'
 properties:
   - name: 'type'
     type: Enum

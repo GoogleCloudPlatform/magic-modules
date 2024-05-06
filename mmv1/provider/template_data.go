@@ -20,6 +20,7 @@ import (
 	"go/format"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -64,17 +65,18 @@ func wrapMultipleParams(params ...interface{}) (map[string]interface{}, error) {
 }
 
 var TemplateFunctions = template.FuncMap{
-	"title":        google.SpaceSeparatedTitle,
-	"replace":      strings.Replace,
-	"camelize":     google.Camelize,
-	"underscore":   google.Underscore,
-	"plural":       google.Plural,
-	"contains":     strings.Contains,
-	"join":         strings.Join,
-	"lower":        strings.ToLower,
-	"upper":        strings.ToUpper,
-	"dict":         wrapMultipleParams,
-	"format2regex": google.Format2Regex,
+	"title":           google.SpaceSeparatedTitle,
+	"replace":         strings.Replace,
+	"camelize":        google.Camelize,
+	"underscore":      google.Underscore,
+	"plural":          google.Plural,
+	"contains":        strings.Contains,
+	"join":            strings.Join,
+	"lower":           strings.ToLower,
+	"upper":           strings.ToUpper,
+	"dict":            wrapMultipleParams,
+	"format2regex":    google.Format2Regex,
+	"orderProperties": api.OrderProperties,
 }
 
 var GA_VERSION = "ga"
@@ -168,15 +170,24 @@ func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, g
 	sourceByte := contents.Bytes()
 
 	if goFormat {
-		sourceByte, err = format.Source(sourceByte)
+		formattedByte, err := format.Source(sourceByte)
 		if err != nil {
-			glog.Error(fmt.Errorf("error formatting %s", filePath))
+			glog.Error(fmt.Errorf("error formatting %s: %s", filePath, err))
+		} else {
+			sourceByte = formattedByte
 		}
 	}
 
 	err = os.WriteFile(filePath, sourceByte, 0644)
 	if err != nil {
 		glog.Exit(err)
+	}
+
+	if goFormat {
+		cmd := exec.Command("goimports", "-w", filePath)
+		if err := cmd.Run(); err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
