@@ -81,7 +81,7 @@ properties:
     immutable: true
     validation: !ruby/object:Provider::Terraform::Validation
       regex: '^[a-z]([-a-z0-9]*[a-z0-9])?$'
-  - !ruby/object:Api::Type::String
+  - !ruby/object:Api::Type::ResourceRef
     name: 'location'
     description: |
       URL of the InterconnectLocation object that represents where this connection is to be provisioned.
