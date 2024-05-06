@@ -1183,6 +1183,7 @@ func expandStatefulIps(statefulIP []interface{}) map[string]compute.StatefulPoli
 	return statefulIpsMap
 }
 
+<% unless version == "ga" -%>
 func expandInstanceFlexibilityPolicy(instanceFlexibilityPolicyData []any) *compute.InstanceGroupManagerInstanceFlexibilityPolicy {
 	instanceFlexibilityPolicy := &compute.InstanceGroupManagerInstanceFlexibilityPolicy{}
 	if instanceFlexibilityPolicyData == nil {
@@ -1207,6 +1208,7 @@ func expandInstanceSelections(instanceSelections []any) map[string]compute.Insta
 	}
 	return instanceSelectionsMap
 }
+<% end -%>
 
 func expandVersions(configured []interface{}) []*compute.InstanceGroupManagerVersion {
 	versions := make([]*compute.InstanceGroupManagerVersion, 0, len(configured))
@@ -1388,6 +1390,7 @@ func flattenStatefulPolicyStatefulIps(d *schema.ResourceData, ipfieldName string
 	return sorted
 }
 
+<% unless version == "ga" -%>
 func flattenInstanceFlexibilityPolicy(instanceFlexibilityPolicy *compute.InstanceGroupManagerInstanceFlexibilityPolicy) []map[string]any {
 	results := []map[string]any{}
 	if instanceFlexibilityPolicy != nil {
@@ -1409,6 +1412,7 @@ func flattenInstanceSelections(instanceSelections map[string]compute.InstanceGro
 	}
 	return results
 }
+<% end -%>
 
 func flattenUpdatePolicy(updatePolicy *compute.InstanceGroupManagerUpdatePolicy) []map[string]interface{} {
 	results := []map[string]interface{}{}

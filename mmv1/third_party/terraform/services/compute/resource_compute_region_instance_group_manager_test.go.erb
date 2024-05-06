@@ -376,7 +376,7 @@ func TestAccRegionInstanceGroupManager_stateful(t *testing.T) {
 		},
 	})
 }
-
+<% unless version == "ga" -%>
 func TestAccRegionInstanceGroupManager_instanceFlexibilityPolicy(t *testing.T) {
 	t.Parallel()
 
@@ -419,6 +419,7 @@ func TestAccRegionInstanceGroupManager_instanceFlexibilityPolicy(t *testing.T) {
 		},
 	})
 }
+<% end -%>
 
 func TestAccRegionInstanceGroupManager_APISideListRecordering(t *testing.T) {
 	t.Parallel()
@@ -1536,22 +1537,6 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
     interface_name = "nic1"
     delete_rule = "NEVER"
   }
-  instance_flexibility_policy {
-    instance_selections {
-      name = "instance_selection_name_1"
-      rank = 2
-      machine_types{
-        "n1-standard-16"
-      }
-    }
-    instance_selections {
-      name = "instance_selection_name_1"
-      rank = 1
-      machine_types{
-        "n1-standard-1", "n4-standard-2"
-      }
-    }
-  }
 }
 `, network, template, igm)
 }
@@ -1773,7 +1758,7 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
 }
 `, context)
 }
-
+<% unless version == "ga" -%>
 func testAccRegionInstanceGroupManager_instanceFlexibilityPolicy(network, template, igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -1927,7 +1912,7 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
 
   base_instance_name        = "tf-test-igm-basic"
   region                    = "us-central1"
-  target_size               = 0
+  target_size               = 2
   distribution_policy_target_shape = "ANY_SINGLE_ZONE"
   update_policy {
     instance_redistribution_type = "NONE"
@@ -1939,6 +1924,7 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
 }
 `, network, template, igm)
 }
+<% end -%>
 
 <% unless version == "ga" -%>
 func testAccRegionInstanceGroupManager_resourceManagerTags(template_name, tag_name, igm_name, project_id string) string {

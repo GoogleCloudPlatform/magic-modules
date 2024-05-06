@@ -239,7 +239,7 @@ instance_flexibility_policy {
 }
 ```
 
-* `instance_selections` - (Optional), Named instance selections configuring properties that the group will use when creating new VMs. One can specify multiple instance selection to allows managed instance group to create VMs from multiple types of machines, based on preference and availability. Structure is [documented below](#nested_instance_selections).
+* `instance_selections` - (Optional), Named instance selections configuring properties that the group will use when creating new VMs. One can specify multiple instance selection to allow managed instance group to create VMs from multiple types of machines, based on preference and availability. Structure is [documented below](#nested_instance_selections).
 - - -
 <a name="nested_instance_selections"></a>The `instance_selections` block supports:
 

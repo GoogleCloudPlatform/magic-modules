@@ -95,6 +95,7 @@ func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
 				},
 			},
 
+      <% unless version == "ga" -%>
       "instance_flexibility_policy": {
         Type:        schema.TypeList,
         Optional:    true,
@@ -134,6 +135,7 @@ func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
           },
         },
       },
+      <% end -%>
 
 			"name": {
 				Type:        schema.TypeString,
@@ -623,7 +625,9 @@ func resourceComputeRegionInstanceGroupManagerCreate(d *schema.ResourceData, met
 		TargetPools:                 tpgresource.ConvertStringSet(d.Get("target_pools").(*schema.Set)),
 		AutoHealingPolicies:         expandAutoHealingPolicies(d.Get("auto_healing_policies").([]interface{})),
 		Versions:                    expandVersions(d.Get("version").([]interface{})),
+		<% unless version == "ga" -%>
 		InstanceFlexibilityPolicy:   expandInstanceFlexibilityPolicy(d.Get("instance_flexibility_policy").([]any)),
+		<% end -%>
 		UpdatePolicy:                expandRegionUpdatePolicy(d.Get("update_policy").([]interface{})),
 		InstanceLifecyclePolicy:     expandInstanceLifecyclePolicy(d.Get("instance_lifecycle_policy").([]interface{})),
 		AllInstancesConfig:          expandAllInstancesConfig(nil, d.Get("all_instances_config").([]interface{})),
@@ -816,9 +820,12 @@ func resourceComputeRegionInstanceGroupManagerRead(d *schema.ResourceData, meta 
 	if err := d.Set("version", flattenVersions(manager.Versions)); err != nil {
 		return err
 	}
+	<% unless version == "ga" -%>
 	if err := d.Set("instance_flexibility_policy", flattenInstanceFlexibilityPolicy(manager.InstanceFlexibilityPolicy)); err != nil {
     return err
   }
+ <% end -%>
+
 	if err := d.Set("update_policy", flattenRegionUpdatePolicy(manager.UpdatePolicy)); err != nil {
 		return fmt.Errorf("Error setting update_policy in state: %s", err.Error())
 	}
@@ -892,6 +899,8 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
 		change = true
 	}
 
+  <% unless version == "ga" -%>
+  var targetSizePatchUpdate bool
   if d.HasChange("instance_flexibility_policy") {
     instanceFlexibilityPolicy := d.Get("instance_flexibility_policy")
     if instanceFlexibilityPolicy == nil || len(instanceFlexibilityPolicy.([]any)) == 0 {
@@ -900,7 +909,14 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
       updatedManager.InstanceFlexibilityPolicy = expandInstanceFlexibilityPolicy(instanceFlexibilityPolicy.([]any))
     }
 		change = true
+
+		// target size update should be done by patch instead of using resize
+		if d.HasChange("target_size") {
+      updatedManager.TargetSize = int64(d.Get("target_size").(int))
+      targetSizePatchUpdate = true
+    }
 	}
+	<% end -%>
 
 	if d.HasChange("distribution_policy_target_shape") {
 		updatedManager.DistributionPolicy = expandDistributionPolicy(d)
@@ -972,7 +988,7 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
 	}
 
 	// target size should use resize
-	if d.HasChange("target_size") {
+	if d.HasChange("target_size") <% unless version == "ga" -%>&& targetSizePatchUpdate == false <% end -%> {
 		d.Partial(true)
 		targetSize := int64(d.Get("target_size").(int))
 		op, err := config.NewComputeClient(userAgent).RegionInstanceGroupManagers.Resize(
