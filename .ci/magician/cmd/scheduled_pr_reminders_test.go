@@ -153,7 +153,7 @@ func TestNotificationState(t *testing.T) {
 		},
 
 		// waitingForContributor
-		"change request": {
+		"change request followed by comment review from same reviewer": {
 			pullRequest: &github.PullRequest{
 				User:      &github.User{Login: github.String("author")},
 				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
@@ -190,38 +190,6 @@ func TestNotificationState(t *testing.T) {
 			expectState: waitingForContributor,
 			expectSince: time.Date(2024, 2, 2, 0, 0, 0, 0, time.UTC),
 		},
-		"comment review but no approval": {
-			pullRequest: &github.PullRequest{
-				User:      &github.User{Login: github.String("author")},
-				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
-			},
-			issueEvents: []*github.IssueEvent{
-				&github.IssueEvent{
-					Event:             github.String("review_requested"),
-					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
-					RequestedReviewer: &github.User{Login: github.String(secondCoreReviewer)},
-				},
-				&github.IssueEvent{
-					Event:             github.String("review_requested"),
-					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
-					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
-				},
-			},
-			reviews: []*github.PullRequestReview{
-				&github.PullRequestReview{
-					User:        &github.User{Login: github.String(secondCoreReviewer)},
-					State:       github.String("APPROVED"),
-					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 1, 0, 0, 0, 0, time.UTC)},
-				},
-				&github.PullRequestReview{
-					User:        &github.User{Login: github.String(secondCoreReviewer)},
-					State:       github.String("COMMENTED"),
-					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 2, 0, 0, 0, 0, time.UTC)},
-				},
-			},
-			expectState: waitingForContributor,
-			expectSince: time.Date(2024, 2, 2, 0, 0, 0, 0, time.UTC),
-		},
 		"approved review with a change request review": {
 			pullRequest: &github.PullRequest{
 				User:      &github.User{Login: github.String("author")},
@@ -242,6 +210,38 @@ func TestNotificationState(t *testing.T) {
 			reviews: []*github.PullRequestReview{
 				&github.PullRequestReview{
 					User:        &github.User{Login: github.String(firstCoreReviewer)},
+					State:       github.String("APPROVED"),
+					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 1, 0, 0, 0, 0, time.UTC)},
+				},
+				&github.PullRequestReview{
+					User:        &github.User{Login: github.String(secondCoreReviewer)},
+					State:       github.String("CHANGES_REQUESTED"),
+					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 2, 0, 0, 0, 0, time.UTC)},
+				},
+			},
+			expectState: waitingForContributor,
+			expectSince: time.Date(2024, 2, 2, 0, 0, 0, 0, time.UTC),
+		},
+		"approved review followed by change request review from same user": {
+			pullRequest: &github.PullRequest{
+				User:      &github.User{Login: github.String("author")},
+				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
+			},
+			issueEvents: []*github.IssueEvent{
+				&github.IssueEvent{
+					Event:             github.String("review_requested"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
+					RequestedReviewer: &github.User{Login: github.String(secondCoreReviewer)},
+				},
+				&github.IssueEvent{
+					Event:             github.String("review_requested"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
+					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+				},
+			},
+			reviews: []*github.PullRequestReview{
+				&github.PullRequestReview{
+					User:        &github.User{Login: github.String(secondCoreReviewer)},
 					State:       github.String("APPROVED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 1, 0, 0, 0, 0, time.UTC)},
 				},
@@ -325,7 +325,39 @@ func TestNotificationState(t *testing.T) {
 			expectState: waitingForMerge,
 			expectSince: time.Date(2024, 2, 1, 0, 0, 0, 0, time.UTC),
 		},
-		"approved review followed by dismissed review": {
+		"approved review followed by comment review from same user": {
+			pullRequest: &github.PullRequest{
+				User:      &github.User{Login: github.String("author")},
+				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
+			},
+			issueEvents: []*github.IssueEvent{
+				&github.IssueEvent{
+					Event:             github.String("review_requested"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
+					RequestedReviewer: &github.User{Login: github.String(secondCoreReviewer)},
+				},
+				&github.IssueEvent{
+					Event:             github.String("review_requested"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
+					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+				},
+			},
+			reviews: []*github.PullRequestReview{
+				&github.PullRequestReview{
+					User:        &github.User{Login: github.String(secondCoreReviewer)},
+					State:       github.String("APPROVED"),
+					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 1, 0, 0, 0, 0, time.UTC)},
+				},
+				&github.PullRequestReview{
+					User:        &github.User{Login: github.String(secondCoreReviewer)},
+					State:       github.String("COMMENTED"),
+					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 2, 0, 0, 0, 0, time.UTC)},
+				},
+			},
+			expectState: waitingForMerge,
+			expectSince: time.Date(2024, 2, 1, 0, 0, 0, 0, time.UTC),
+		},
+		"approved review followed by dismissed review from same user": {
 			pullRequest: &github.PullRequest{
 				User:      &github.User{Login: github.String("author")},
 				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
