@@ -63,6 +63,21 @@ examples:
     primary_resource_id: 'filter_regexes_and_conditions'
     test_env_vars:
       project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dlp_discovery_config_secrets'
+    primary_resource_id: 'secrets'
+    test_env_vars:
+      project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dlp_discovery_config_cloud_sql'
+    primary_resource_id: 'cloud_sql'
+    test_env_vars:
+      project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dlp_discovery_config_cloud_sql_resource_ref'
+    primary_resource_id: 'cloud_sql_resource_ref'
+    test_env_vars:
+      project: :PROJECT_NAME
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/wrap_object.go.erb
   decoder: templates/terraform/decoders/unwrap_resource.go.erb
