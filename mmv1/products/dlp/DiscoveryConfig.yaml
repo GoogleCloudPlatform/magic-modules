@@ -398,7 +398,7 @@ properties:
                       - :DATABASE_RESOURCE_TYPE_ALL_SUPPORTED_TYPES
                       - :DATABASE_RESOURCE_TYPE_TABLE
             - !ruby/object:Api::Type::NestedObject
-              name: cadence
+              name: generationCadence
               description: How often and when to update profiles. New tables that match both the filter and conditions are scanned as quickly as possible depending on system capacity.
               properties:
                 - !ruby/object:Api::Type::NestedObject

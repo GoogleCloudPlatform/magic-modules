@@ -662,7 +662,7 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
             filter {
                 others {}
             }
-			cadence {
+			generation_cadence {
                 schema_modified_cadence {
                     types = ["NEW_COLUMNS"]
                     frequency = "UPDATE_FREQUENCY_MONTHLY"
@@ -714,7 +714,7 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
                 database_engines = ["ALL_SUPPORTED_DATABASE_ENGINES", "MYSQL", "POSTGRES"]
                 types = ["DATABASE_RESOURCE_TYPE_ALL_SUPPORTED_TYPES", "DATABASE_RESOURCE_TYPE_TABLE"]
             }
-            cadence {
+            generation_cadence {
                 schema_modified_cadence {
                     types = ["NEW_COLUMNS", "REMOVED_COLUMNS"]
                     frequency = "UPDATE_FREQUENCY_DAILY"
@@ -726,7 +726,7 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
             filter {
                 others {}
             }
-			cadence {
+			generation_cadence {
                 schema_modified_cadence {
                     types = ["NEW_COLUMNS", "REMOVED_COLUMNS"]
                     frequency = "UPDATE_FREQUENCY_DAILY"
