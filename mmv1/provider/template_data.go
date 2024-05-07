@@ -15,10 +15,12 @@ package provider
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"go/format"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -45,14 +47,36 @@ type TemplateData struct {
 	//     attr_accessor :env
 }
 
+// Build a map(map[string]interface{}) from a list of paramerter
+// The format of passed in parmeters are key1, value1, key2, value2 ...
+func wrapMultipleParams(params ...interface{}) (map[string]interface{}, error) {
+	if len(params)%2 != 0 {
+		return nil, errors.New("invalid number of arguments")
+	}
+	m := make(map[string]interface{}, len(params)/2)
+	for i := 0; i < len(params); i += 2 {
+		key, ok := params[i].(string)
+		if !ok {
+			return nil, errors.New("keys must be strings")
+		}
+		m[key] = params[i+1]
+	}
+	return m, nil
+}
+
 var TemplateFunctions = template.FuncMap{
-	"title":      google.SpaceSeparatedTitle,
-	"replace":    strings.Replace,
-	"camelize":   google.Camelize,
-	"underscore": google.Underscore,
-	"plural":     google.Plural,
-	"contains":   strings.Contains,
-	"join":       strings.Join,
+	"title":           google.SpaceSeparatedTitle,
+	"replace":         strings.Replace,
+	"camelize":        google.Camelize,
+	"underscore":      google.Underscore,
+	"plural":          google.Plural,
+	"contains":        strings.Contains,
+	"join":            strings.Join,
+	"lower":           strings.ToLower,
+	"upper":           strings.ToUpper,
+	"dict":            wrapMultipleParams,
+	"format2regex":    google.Format2Regex,
+	"orderProperties": api.OrderProperties,
 }
 
 var GA_VERSION = "ga"
@@ -80,6 +104,12 @@ func (td *TemplateData) GenerateResourceFile(filePath string, resource api.Resou
 	templatePath := "templates/terraform/resource.go.tmpl"
 	templates := []string{
 		templatePath,
+		"templates/terraform/schema_property.go.tmpl",
+		"templates/terraform/schema_subresource.go.tmpl",
+		"templates/terraform/expand_resource_ref.tmpl",
+		"templates/terraform/custom_flatten/go/bigquery_table_ref.go.tmpl",
+		"templates/terraform/flatten_property_method.go.tmpl",
+		"templates/terraform/expand_property_method.go.tmpl",
 	}
 	td.GenerateFile(filePath, templatePath, resource, true, templates...)
 }
@@ -87,9 +117,9 @@ func (td *TemplateData) GenerateResourceFile(filePath string, resource api.Resou
 func (td *TemplateData) GenerateDocumentationFile(filePath string, resource api.Resource) {
 	templatePath := "templates/terraform/resource.html.markdown.tmpl"
 	templates := []string{
+		templatePath,
 		"templates/terraform/property_documentation.html.markdown.tmpl",
 		"templates/terraform/nested_property_documentation.html.markdown.tmpl",
-		templatePath,
 	}
 	td.GenerateFile(filePath, templatePath, resource, false, templates...)
 }
@@ -138,21 +168,26 @@ func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, g
 	}
 
 	sourceByte := contents.Bytes()
-	// Replace import path based on version (beta/alpha)
-	if td.TerraformResourceDirectory != "google" {
-		sourceByte = bytes.Replace(sourceByte, []byte("github.com/hashicorp/terraform-provider-google/google"), []byte(td.TerraformProviderModule+"/"+td.TerraformResourceDirectory), -1)
-	}
 
 	if goFormat {
-		sourceByte, err = format.Source(sourceByte)
+		formattedByte, err := format.Source(sourceByte)
 		if err != nil {
-			glog.Error(fmt.Errorf("error formatting %s", filePath))
+			glog.Error(fmt.Errorf("error formatting %s: %s", filePath, err))
+		} else {
+			sourceByte = formattedByte
 		}
 	}
 
 	err = os.WriteFile(filePath, sourceByte, 0644)
 	if err != nil {
 		glog.Exit(err)
+	}
+
+	if goFormat {
+		cmd := exec.Command("goimports", "-w", filePath)
+		if err := cmd.Run(); err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 

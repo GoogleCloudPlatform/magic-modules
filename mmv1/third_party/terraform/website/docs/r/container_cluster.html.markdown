@@ -821,6 +821,8 @@ ephemeral_storage_local_ssd_config {
 
 * `logging_variant` (Optional) Parameter for specifying the type of logging agent used in a node pool. This will override any [cluster-wide default value](#nested_node_pool_defaults). Valid values include DEFAULT and MAX_THROUGHPUT. See [Increasing logging agent throughput](https://cloud.google.com/stackdriver/docs/solutions/gke/managing-logs#throughput) for more information.
 
+* `secondary_boot_disks` - (Optional) Parameters for secondary boot disks to preload container images and data on new nodes. Structure is [documented below](#nested_secondary_boot_disks). `gcfs_config` must be `enabled=true` for this feature to work. `min_master_version` must also be set to use GKE 1.28.3-gke.106700 or later versions.
+
 * `gcfs_config` - (Optional) Parameters for the Google Container Filesystem (GCFS).
     If unspecified, GCFS will not be enabled on the node pool. When enabling this feature you must specify `image_type = "COS_CONTAINERD"` and `node_version` from GKE versions 1.19 or later to use it.
     For GKE versions 1.19, 1.20, and 1.21, the recommended minimum `node_version` would be 1.19.15-gke.1300, 1.20.11-gke.1300, and 1.21.5-gke.1300 respectively.
@@ -967,6 +969,8 @@ sole_tenant_config {
 
 * `threads_per_core` - (Required) The number of threads per physical core. To disable simultaneous multithreading (SMT) set this to 1. If unset, the maximum number of threads supported per core by the underlying processor is assumed.
 
+* `enable_nested_virtualization`- (Optional) Defines whether the instance should have nested virtualization enabled. Defaults to false.
+
 * `network_performance_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Network bandwidth tier configuration.
 
 <a name="network_performance_config"></a>The `network_performance_config` block supports:
@@ -989,6 +993,12 @@ sole_tenant_config {
 
 * `local_ssd_count` (Required) - Number of raw-block local NVMe SSD disks to be attached to the node. Each local SSD is 375 GB in size. If zero, it means no raw-block local NVMe SSD disks to be attached to the node.
 -> Note: Local NVMe SSD storage available in GKE versions v1.25.3-gke.1800 and later.
+
+<a name="nested_secondary_boot_disks"></a>The `secondary_boot_disks` block supports:
+
+* `disk_image` (Required) - Path to disk image to create the secondary boot disk from. After using the [gke-disk-image-builder](https://github.com/GoogleCloudPlatform/ai-on-gke/tree/main/tools/gke-disk-image-builder), this argument should be `global/images/DISK_IMAGE_NAME`.
+* `mode` (Optional) - Mode for how the secondary boot disk is used. An example mode is `CONTAINER_IMAGE_CACHE`.
+
 
 <a name="nested_gcfs_config"></a>The `gcfs_config` block supports:
 
@@ -1024,6 +1034,7 @@ sole_tenant_config {
 * `gpu_sharing_strategy` (Required) - The type of GPU sharing strategy to enable on the GPU node.
     Accepted values are:
     * `"TIME_SHARING"`: Allow multiple containers to have [time-shared](https://cloud.google.com/kubernetes-engine/docs/concepts/timesharing-gpus) access to a single GPU device.
+    * `"MPS"`: Enable co-operative multi-process CUDA workloads to run concurrently on a single GPU device with [MPS](https://cloud.google.com/kubernetes-engine/docs/how-to/nvidia-mps-gpus)
 
 * `max_shared_clients_per_gpu` (Required) - The maximum number of containers that can share a GPU.
 

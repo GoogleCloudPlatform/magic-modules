@@ -35,6 +35,7 @@ import (
 // N:1 = [ResourceConverter{Convert: convertAbc, merge: mergeAbc}] (len=1)
 func ResourceConverters() map[string][]cai.ResourceConverter {
 	return map[string][]cai.ResourceConverter{
+		"google_artifact_registry_repository":             {artifactregistry.ResourceConverterArtifactRegistryRepository()},
 		"google_compute_address":                          {compute.ResourceConverterComputeAddress()},
 		"google_compute_firewall":                         {compute.ResourceConverterComputeFirewall()},
 		"google_compute_disk":                             {compute.ResourceConverterComputeDisk()},
@@ -43,6 +44,7 @@ func ResourceConverters() map[string][]cai.ResourceConverter {
 		"google_compute_global_forwarding_rule":           {compute.ResourceConverterComputeGlobalForwardingRule()},
 		"google_compute_instance":                         {compute.ResourceConverterComputeInstance()},
 		"google_compute_network":                          {compute.ResourceConverterComputeNetwork()},
+		"google_compute_route":                  		   {compute.ResourceConverterComputeRoute()},
 		"google_compute_security_policy":                  {resourceConverterComputeSecurityPolicy()},
 		"google_compute_snapshot":                         {compute.ResourceConverterComputeSnapshot()},
 		"google_compute_subnetwork":                       {compute.ResourceConverterComputeSubnetwork()},

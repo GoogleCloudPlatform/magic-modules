@@ -124,7 +124,7 @@ type Resource struct {
 	// often used to extract an object from a parent object or a collection.
 	// Note that if both nested_query and custom_code.decoder are provided,
 	// the decoder will be included within the code handling the nested query.
-	NestedQuery resource.NestedQuery `yaml:"nested_query"`
+	NestedQuery *resource.NestedQuery `yaml:"nested_query"`
 
 	// ====================
 	// IAM Configuration
@@ -132,7 +132,7 @@ type Resource struct {
 	//
 	// [Optional] (Api::Resource::IamPolicy) Configuration of a resource's
 	// resource-specific IAM Policy.
-	IamPolicy resource.IamPolicy `yaml:"iam_policy"`
+	IamPolicy *resource.IamPolicy `yaml:"iam_policy"`
 
 	// [Optional] If set to true, don't generate the resource itself; only
 	// generate the IAM policy.
@@ -299,6 +299,8 @@ type Resource struct {
 
 	// The compiler to generate the downstream files, for example "terraformgoogleconversion-codegen".
 	Compiler string
+
+	ImportPath string
 }
 
 func (r *Resource) UnmarshalYAML(n *yaml.Node) error {
@@ -421,7 +423,7 @@ func (r Resource) SensitivePropsToString() string {
 // they will need to be set in every Update.
 
 // def settable_properties
-func (r Resource) settableProperties() []*Type {
+func (r Resource) SettableProperties() []*Type {
 	props := make([]*Type, 0)
 
 	props = google.Reject(r.AllUserProperties(), func(v *Type) bool {
@@ -738,6 +740,15 @@ func (r Resource) CreateUri() string {
 	return r.SelfLinkUri()
 }
 
+// def update_uri
+func (r Resource) UpdateUri() string {
+	if r.UpdateUrl != "" {
+		return r.UpdateUrl
+	}
+
+	return r.SelfLinkUri()
+}
+
 // def delete_uri
 func (r Resource) DeleteUri() string {
 	if r.DeleteUrl != "" {
@@ -764,7 +775,7 @@ func propertiesWithoutCustomUpdate(properties []*Type) []*Type {
 
 // def update_body_properties
 func (r Resource) UpdateBodyProperties() []*Type {
-	updateProp := propertiesWithoutCustomUpdate(r.settableProperties())
+	updateProp := propertiesWithoutCustomUpdate(r.SettableProperties())
 	if r.UpdateVerb == "PATCH" {
 		updateProp = google.Reject(updateProp, func(p *Type) bool {
 			return p.Immutable
@@ -827,6 +838,17 @@ func (r Resource) HasRegion() bool {
 // def zone?
 func (r Resource) HasZone() bool {
 	return strings.Contains(r.BaseUrl, "{{zone}}") || strings.Contains(r.CreateUrl, "{{zone}}")
+}
+
+// resource functions needed for template that previously existed in terraform.go but due to how files are being inherited here it was easier to put in here
+// taken wholesale from tpgtools
+func (r Resource) Updatable() bool {
+	for _, p := range r.AllProperties() {
+		if !p.Immutable && !(p.Required && p.DefaultFromApi) {
+			return true
+		}
+	}
+	return false
 }
 
 // ====================
@@ -948,4 +970,51 @@ func (r Resource) GetIdFormat() string {
 		idFormat = r.SelfLinkUri()
 	}
 	return idFormat
+}
+
+// ====================
+// Template Methods
+// ====================
+// Functions used to create slices of resource properties that could not otherwise be called from within generating templates.
+
+func (r Resource) ReadProperties() []*Type {
+	return google.Reject(r.GettableProperties(), func(p *Type) bool {
+		return p.IgnoreRead
+	})
+}
+
+func (r Resource) FlattenedProperties() []*Type {
+	return google.Select(r.ReadProperties(), func(p *Type) bool {
+		return p.FlattenObject
+	})
+}
+
+func (r Resource) IsInIdentity(t Type) bool {
+	for _, i := range r.GetIdentity() {
+		if i.Name == t.Name {
+			return true
+		}
+	}
+	return false
+}
+
+func OrderProperties(props []*Type) []*Type {
+	req := google.Select(props, func(p *Type) bool {
+		return p.Required
+	})
+	slices.SortFunc(req, CompareByName)
+	rest := google.Reject(props, func(p *Type) bool {
+		return p.Output || p.Required
+	})
+	slices.SortFunc(rest, CompareByName)
+	output := google.Select(props, func(p *Type) bool {
+		return p.Output
+	})
+	slices.SortFunc(output, CompareByName)
+	returnProps := google.Concat(req, rest)
+	return google.Concat(returnProps, output)
+}
+
+func CompareByName(a, b *Type) int {
+	return strings.Compare(a.Name, b.Name)
 }

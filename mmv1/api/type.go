@@ -275,6 +275,10 @@ type Type struct {
 	ResourceMetadata *Resource
 
 	ParentMetadata *Type // is nil for top-level properties
+
+	// The prefix used as part of the property expand/flatten function name
+	// flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}
+	Prefix string
 }
 
 const MAX_NAME = 20
@@ -407,14 +411,46 @@ func (t Type) TerraformLineage() string {
 	return fmt.Sprintf("%s.0.%s", t.ParentMetadata.TerraformLineage(), google.Underscore(t.Name))
 }
 
-func (t Type) EnumValuesToString() string {
+func (t Type) EnumValuesToString(quoteSeperator string) string {
 	var values []string
 
 	for _, val := range t.EnumValues {
-		values = append(values, fmt.Sprintf("`%s`", val))
+		values = append(values, fmt.Sprintf("%s%s%s", quoteSeperator, val, quoteSeperator))
 	}
 
 	return strings.Join(values, ", ")
+}
+
+// def titlelize_property(property)
+func (t Type) TitlelizeProperty() string {
+	return google.Camelize(t.Name, "upper")
+}
+
+// If the Prefix field is already set, returns the value.
+// Otherwise, set the Prefix field and returns the value.
+func (t *Type) GetPrefix() string {
+	if t.Prefix == "" {
+		if t.ParentMetadata == nil {
+			nestedPrefix := ""
+			if t.ResourceMetadata.NestedQuery != nil {
+				nestedPrefix = "Nested"
+			}
+
+			t.Prefix = fmt.Sprintf("%s%s", nestedPrefix, t.ResourceMetadata.ResourceName())
+		} else {
+			t.Prefix = fmt.Sprintf("%s%s", t.ParentMetadata.GetPrefix(), t.ParentMetadata.TitlelizeProperty())
+		}
+	}
+	return t.Prefix
+}
+
+func (t Type) ResourceType() string {
+	r := t.ResourceRef()
+	if r == nil {
+		return ""
+	}
+	path := strings.Split(r.BaseUrl, "/")
+	return path[len(path)-1]
 }
 
 // func (t *Type) to_json(opts) {
@@ -782,6 +818,45 @@ func (t Type) ItemTypeClass() string {
 	}
 
 	return t.ItemType.Type
+}
+
+func (t Type) TFType(s string) string {
+	switch s {
+	case "Boolean":
+		return "schema.TypeBool"
+	case "Double":
+		return "schema.TypeFloat"
+	case "Integer":
+		return "schema.TypeInt"
+	case "String":
+		return "schema.TypeString"
+	case "Time":
+		return "schema.TypeString"
+	case "Enum":
+		return "schema.TypeString"
+	case "ResourceRef":
+		return "schema.TypeString"
+	case "NestedObject":
+		return "schema.TypeList"
+	case "Array":
+		return "schema.TypeList"
+	case "KeyValuePairs":
+		return "schema.TypeMap"
+	case "KeyValueLabels":
+		return "schema.TypeMap"
+	case "KeyValueTerraformLabels":
+		return "schema.TypeMap"
+	case "KeyValueEffectiveLabels":
+		return "schema.TypeMap"
+	case "KeyValueAnnotations":
+		return "schema.TypeMap"
+	case "Map":
+		return "schema.TypeSet"
+	case "Fingerprint":
+		return "schema.TypeString"
+	}
+
+	return "schema.TypeString"
 }
 
 // // Represents an enum, and store is valid values
@@ -1179,5 +1254,63 @@ func (t Type) PropertyNsPrefix() []string {
 		"Google",
 		google.Camelize(t.ResourceMetadata.ProductMetadata.Name, "upper"),
 		"Property",
+	}
+}
+
+// "Namespace" - prefix with product and resource - a property with
+// information from the "object" variable
+
+func (t Type) NamespaceProperty() string {
+	name := google.Camelize(t.Name, "lower")
+	p := t
+	for p.Parent() != nil {
+		p = *p.Parent()
+		name = fmt.Sprintf("%s%s", google.Camelize(p.Name, "lower"), name)
+	}
+
+	return fmt.Sprintf("%s%s%s", google.Camelize(t.ApiName, "lower"), t.ResourceMetadata.Name, name)
+}
+
+// def namespace_property_from_object(property, object)
+//
+//	name = property.name.camelize
+//	until property.parent.nil?
+//	  property = property.parent
+//	  name = property.name.camelize + name
+//	end
+//
+//	"#{property.__resource.__product.api_name.camelize(:lower)}#{object.name}#{name}"
+//
+// end
+
+func (t Type) CustomTemplate(templatePath string) string {
+	return resource.ExecuteTemplate(&t, templatePath)
+}
+
+func (t *Type) GetIdFormat() string {
+	return t.ResourceMetadata.GetIdFormat()
+}
+
+func (t *Type) GoLiteral(value interface{}) string {
+	switch v := value.(type) {
+	case int:
+		return fmt.Sprintf("\"%d\"", v)
+	case float64:
+		return fmt.Sprintf("\"%f\"", v)
+	case bool:
+		return fmt.Sprintf("\"%v\"", v)
+	case string:
+		if !strings.HasPrefix(v, "\"") {
+			return fmt.Sprintf("\"%s\"", v)
+		}
+		return v
+	case []string:
+		for i, val := range v {
+			v[i] = fmt.Sprintf("\"%v\"", val)
+		}
+		return fmt.Sprintf("[]string{%s}", strings.Join(v, ","))
+
+	default:
+		panic(fmt.Errorf("unknown go literal type %+v", value))
 	}
 }
