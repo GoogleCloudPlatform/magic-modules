@@ -708,12 +708,24 @@ The following arguments are supported:
   The configuration setting for Task Logs. Structure is
   [documented below](#nested_task_logs_retention_config_c2).
 
+* `airflow_metadata_retntion_config` - 
+  (Optional)
+  The configuration setting for Airflow Metadata Database Retention mechanism. Structure is [documented below](#nested_airflow_metadata_retention_config).
+
 <a name="nested_task_logs_retention_config_c2"></a>The `task_logs_retention_config` block supports:
 * `storage_mode` - 
   (Optional)
   The mode of storage for Airflow workers task logs. Values for storage mode are 
   `CLOUD_LOGGING_ONLY` to only store logs in cloud logging and 
   `CLOUD_LOGGING_AND_CLOUD_STORAGE` to store logs in cloud logging and cloud storage.
+
+<a name="nested_airflow_metadata_retention_config"></a>The `airflow_metadata_retntion_config` block supports:
+* `retention_mode` - 
+  (Optional)
+  Values for retention mode are 
+  `RETENTION_MODE_ENABLED` to enable Airflow Metadata Database Retention mechanism 
+  `RETENTION_MODE_DISABLED` to disable Airflow Metadata Database Retention mechanism.
+
 
 
 <a name="nested_storage_config_c2"></a>The `storage_config` block supports:
