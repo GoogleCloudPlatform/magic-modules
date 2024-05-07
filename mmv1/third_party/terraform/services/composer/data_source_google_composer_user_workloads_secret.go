@@ -25,18 +25,6 @@ func DataSourceGoogleComposerUserWorkloadsSecret() *schema.Resource {
 
 func dataSourceGoogleComposerUserWorkloadsSecretRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	/*
-		project, err := tpgresource.GetProject(d, config)
-		if err != nil {
-			return err
-		}
-		region, err := tpgresource.GetRegion(d, config)
-		if err != nil {
-			return err
-		}
-		envName := d.Get("environment").(string)
-		secretName := d.Get("name").(string)
-	*/
 
 	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{region}}/environments/{{environment}}/userWorkloadsSecrets/{{name}}")
 	if err != nil {

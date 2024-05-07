@@ -3,7 +3,6 @@ package composer_test
 import (
 	"errors"
 	"fmt"
-	"log"
 	"strings"
 	"testing"
 
@@ -63,9 +62,6 @@ func checkSecretDataSourceMatchesResource() resource.TestCheckFunc {
 				errMsg += fmt.Sprintf("%s is %s; want %s\n", k, dsAttr[k], rsAttr[k])
 			}
 		}
-
-		log.Printf("[DEBUG] dsAttr: %s", dsAttr)
-		log.Printf("[DEBUG] rsAttr: %s", rsAttr)
 
 		if errMsg != "" {
 			return errors.New(errMsg)
