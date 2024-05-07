@@ -822,9 +822,9 @@ func resourceComputeRegionInstanceGroupManagerRead(d *schema.ResourceData, meta 
 	}
 	<% unless version == "ga" -%>
 	if err := d.Set("instance_flexibility_policy", flattenInstanceFlexibilityPolicy(manager.InstanceFlexibilityPolicy)); err != nil {
-    return err
-  }
- <% end -%>
+		return err
+	}
+	<% end -%>
 
 	if err := d.Set("update_policy", flattenRegionUpdatePolicy(manager.UpdatePolicy)); err != nil {
 		return fmt.Errorf("Error setting update_policy in state: %s", err.Error())
@@ -908,16 +908,16 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
     } else {
       updatedManager.InstanceFlexibilityPolicy = expandInstanceFlexibilityPolicy(instanceFlexibilityPolicy.([]any))
     }
-		change = true
+    change = true
 
-		// target size update should be done by patch instead of using resize
-		if d.HasChange("target_size") {
+    // target size update should be done by patch instead of using resize
+    if d.HasChange("target_size") {
       updatedManager.TargetSize = int64(d.Get("target_size").(int))
       updatedManager.ForceSendFields = append(updatedManager.ForceSendFields, "TargetSize")
       targetSizePatchUpdate = true
     }
-	}
-	<% end -%>
+  }
+  <% end -%>
 
 	if d.HasChange("distribution_policy_target_shape") {
 		updatedManager.DistributionPolicy = expandDistributionPolicy(d)

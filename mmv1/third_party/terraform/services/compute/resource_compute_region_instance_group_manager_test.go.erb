@@ -385,20 +385,20 @@ func TestAccRegionInstanceGroupManager_instanceFlexibilityPolicy(t *testing.T) {
 	network := fmt.Sprintf("tf-test-igm-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckRegionInstanceGroupManagerDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccRegionInstanceGroupManager_instanceFlexibilityPolicy(template, network, igm),
-			},
-			{
-				ResourceName:            "google_compute_region_instance_group_manager.igm-basic",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"status"},
-			},
-			{
+    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+    CheckDestroy:             testAccCheckRegionInstanceGroupManagerDestroyProducer(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccRegionInstanceGroupManager_instanceFlexibilityPolicy(template, network, igm),
+      },
+      {
+        ResourceName:            "google_compute_region_instance_group_manager.igm-basic",
+        ImportState:             true,
+        ImportStateVerify:       true,
+        ImportStateVerifyIgnore: []string{"status"},
+      },
+      {
         Config: testAccRegionInstanceGroupManager_instanceFlexibilityPolicyUpdate(template, network, igm),
       },
       {
@@ -416,8 +416,8 @@ func TestAccRegionInstanceGroupManager_instanceFlexibilityPolicy(t *testing.T) {
         ImportStateVerify:       true,
         ImportStateVerifyIgnore: []string{"status"},
       },
-		},
-	})
+    },
+  })
 }
 <% end -%>
 
@@ -1867,8 +1867,8 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
   }
   instance_flexibility_policy {
     instance_selections {
-      name = "instance_selection_name_1"
-      rank = 2
+      name = "instance_selection_name"
+      rank = 1
       machine_types = ["n1-standard-16"]
     }
   }
