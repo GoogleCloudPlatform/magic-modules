@@ -743,20 +743,6 @@ func (t Terraform) replaceImportPath(outputFolder, target string) {
 //
 // end
 //
-// # "Namespace" - prefix with product and resource - a property with
-// # information from the "object" variable
-// def namespace_property_from_object(property, object)
-//
-//	name = property.name.camelize
-//	until property.parent.nil?
-//	  property = property.parent
-//	  name = property.name.camelize + name
-//	end
-//
-//	"#{property.__resource.__product.api_name.camelize(:lower)}#{object.name}#{name}"
-//
-// end
-//
 // # Converts between the Magic Modules type of an object and its type in the
 // # TF schema
 // def tf_types
@@ -861,26 +847,6 @@ func (t Terraform) replaceImportPath(outputFolder, target string) {
 //	else
 //	  path_tkns.compact.join('.0.')
 //	end
-//
-// end
-//
-// # Transforms a format string with field markers to a regex string with
-// # capture groups.
-// #
-// # For instance,
-// #   projects/{{project}}/global/networks/{{name}}
-// # is transformed to
-// #   projects/(?P<project>[^/]+)/global/networks/(?P<name>[^/]+)
-// #
-// # Values marked with % are URL-encoded, and will match any number of /'s.
-// #
-// # Note: ?P indicates a Python-compatible named capture group. Named groups
-// # aren't common in JS-based regex flavours, but are in Perl-based ones
-// def format2regex(format)
-//
-//	format
-//	  .gsub(/\{\{%([[:word:]]+)\}\}/, '(?P<\1>.+)')
-//	  .gsub(/\{\{([[:word:]]+)\}\}/, '(?P<\1>[^/]+)')
 //
 // end
 //

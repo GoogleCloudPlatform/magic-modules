@@ -94,7 +94,7 @@ Possible values: ["{{ join .EnumValues "\",\"" }}"]
   {{ end -}}
   {{ if eq .ItemType.Type "NestedObject" -}}
     {{ if .IsSet -}}
-      Elem: //TODO NameSpacePropertyFromObject Schema(),
+      Elem: {{ .NamespaceProperty }}Schema(),
     {{ else -}}
       Elem: &schema.Resource{
         Schema: map[string]*schema.Schema{
@@ -138,7 +138,7 @@ Possible values: ["{{ join .EnumValues "\",\"" }}"]
 			"{{ .KeyName -}}": {
 				Type:     schema.TypeString,
 				Required: true,
-				{{ if .DiffSuppressFunc -}}
+				{{ if .KeyDiffSuppressFunc -}}
 					DiffSuppressFunc: {{ .KeyDiffSuppressFunc }},
 				{{ end -}}
 				{{ if .Immutable -}}
