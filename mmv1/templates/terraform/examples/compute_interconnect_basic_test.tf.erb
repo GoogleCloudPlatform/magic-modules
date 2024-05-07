@@ -10,6 +10,14 @@ resource "google_compute_interconnect" "<%= ctx[:primary_resource_id] %>" {
   admin_enabled        = true
   description          = ""
   macsec_enabled       = true
-  noc_contact_emeail   = ""
-  remote_location      = "" 
+  noc_contact_email   = ""
+  remote_location      = ""
+  requested_features   = ["macsec"]
+  macsec = {
+    preSharedKeys = {
+      name = ""
+      start_time = ""
+      fail_open = false
+    }
+  }
 }
