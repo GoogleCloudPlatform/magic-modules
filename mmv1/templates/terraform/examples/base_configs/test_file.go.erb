@@ -81,7 +81,13 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 		<% else -%>
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		<% end -%>
-		<% if example.pull_external -%>
+		<% if !example.external_providers.nil? && !example.external_providers.empty? -%>
+		ExternalProviders: map[string]resource.ExternalProvider{
+		<% example.external_providers.each do |provider| -%>
+			"<%= provider %>": {},
+		<% end -%>
+		},
+		<% elsif example.pull_external -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"random": {},
 			"time": {},
