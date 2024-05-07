@@ -2686,9 +2686,11 @@ func resourceBigQueryTableImport(d *schema.ResourceData, meta interface{}) ([]*s
 	if err := d.Set("deletion_protection", true); err != nil {
 		return nil, fmt.Errorf("Error setting deletion_protection: %s", err)
 	}
+	<% unless version == 'ga' -%>
 	if err := d.Set("allow_resource_tags_on_deletion", false); err != nil {
 		return nil, fmt.Errorf("Error setting allow_resource_tags_on_deletion: %s", err)
 	}
+	<% end -%>
 
 	// Replace import id for the resource id
 	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}")
