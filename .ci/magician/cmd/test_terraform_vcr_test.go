@@ -147,6 +147,18 @@ func TestNotRunTests(t *testing.T) {
 			},
 			wantNotRun: []string{"TestAccThree"},
 		},
+		"multiline diffs": {
+			gaDiff: `diff --git a/google/services/alloydb/resource_alloydb_backup_generated_test.go b/google/services/alloydb/resource_alloydb_backup_generated_test.go
++func TestAccAlloydbBackup_alloydbBackupFullTestNewExample(t *testing.T) {
++func TestAccCloudRunService_cloudRunServiceMulticontainerExample(t *testing.T) {`,
+			betaDiff: `diff --git a/google-beta/services/alloydb/resource_alloydb_backup_generated_test.go b/google-beta/services/alloydb/resource_alloydb_backup_generated_test.go
++func TestAccAlloydbBackup_alloydbBackupFullTestNewExample(t *testing.T) {`,
+			result: &vcr.Result{
+				PassedTests: []string{},
+				FailedTests: []string{},
+			},
+			wantNotRun: []string{"TestAccAlloydbBackup_alloydbBackupFullTestNewExample", "TestAccCloudRunService_cloudRunServiceMulticontainerExample"},
+		},
 	}
 	for tn, tc := range cases {
 		tc := tc
