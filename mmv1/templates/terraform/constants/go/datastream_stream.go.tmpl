@@ -1,4 +1,4 @@
-{{/* 
+{{- /*
 	The license inside this block applies to this file
 	Copyright 2024 Google Inc.
 	Licensed under the Apache License, Version 2.0 (the "License");
@@ -9,7 +9,7 @@
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	See the License for the specific language governing permissions and
 	limitations under the License.
-*/ -}}
+*/}}
 func resourceDatastreamStreamCustomDiffFunc(diff tpgresource.TerraformResourceDiff) error {
 	if diff.HasChange("desired_state") {
 		old, new := diff.GetChange("desired_state")
@@ -41,7 +41,7 @@ func resourceDatastreamStreamCustomDiff(_ context.Context, diff *schema.Resource
 	return resourceDatastreamStreamCustomDiffFunc(diff)
 }
 
-{{ if ne $.Compiler "terraformgoogleconversion-codegen" }}
+{{- if ne $.Compiler "terraformgoogleconversion-codegen" }}
 // waitForDatastreamStreamReady waits for an agent pool to reach a stable state to indicate that it's ready.
 func waitForDatastreamStreamReady(d *schema.ResourceData, config *transport_tpg.Config, timeout time.Duration) error {
 	return resource.Retry(timeout, func() *resource.RetryError {
@@ -76,4 +76,4 @@ func resourceDatastreamStreamDatabaseIdDiffSuppress(_, old, new string, _ *schem
 	return old == new
 }
 
-{{ end -}}
+{{- end }}

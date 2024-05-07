@@ -66,7 +66,6 @@ type Examples struct {
 	// test_env_vars is a Hash from template variable names to one of the
 	// following symbols:
 	//  - :PROJECT_NAME
-	//  - :FIRESTORE_PROJECT_NAME
 	//  - :CREDENTIALS
 	//  - :REGION
 	//  - :ORG_ID
@@ -179,7 +178,7 @@ func (e *Examples) UnmarshalYAML(n *yaml.Node) error {
 
 // Executes example templates for documentation and tests
 func (e *Examples) SetHCLText() {
-	e.DocumentationHCLText = ExecuteHCL(e)
+	e.DocumentationHCLText = ExecuteTemplate(e, e.ConfigPath)
 
 	copy := e
 	// Override vars to inject test values into configs - will have
@@ -207,11 +206,10 @@ func (e *Examples) SetHCLText() {
 		copy.Vars[key] = fmt.Sprintf("%%{%s}", key)
 	}
 
-	e.TestHCLText = ExecuteHCL(copy)
+	e.TestHCLText = ExecuteTemplate(copy, copy.ConfigPath)
 }
 
-func ExecuteHCL(e *Examples) string {
-	templatePath := e.ConfigPath
+func ExecuteTemplate(e any, templatePath string) string {
 	templates := []string{
 		templatePath,
 	}
@@ -239,7 +237,6 @@ func ExecuteHCL(e *Examples) string {
 // func (e *Examples) config_documentation(pwd) {
 // docs_defaults = {
 //   PROJECT_NAME: 'my-project-name',
-//   FIRESTORE_PROJECT_NAME: 'my-project-name',
 //   CREDENTIALS: 'my/credentials/filename.json',
 //   REGION: 'us-west1',
 //   ORG_ID: '123456789',
@@ -366,7 +363,7 @@ func (e *Examples) OiCSLink() string {
 }
 
 func (e *Examples) TestSlug(productName, resourceName string) string {
-	ret := fmt.Sprintf("%s%s_%sExample", productName, resourceName, google.Camelize(e.Name, "upper"))
+	ret := fmt.Sprintf("%s%s_%sExample", productName, resourceName, google.Camelize(e.Name, "lower"))
 	return ret
 }
 
