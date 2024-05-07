@@ -69,6 +69,29 @@ resource "google_storage_bucket" "auto-expire" {
 }
 ```
 
+## Example Usage - Life cycle settings for storage bucket objects with `no_age` enabled
+When creating a life cycle condition that does not also include an `age` field, it's important to include the `no_age` flag so your new bucket does not unintentionally create an extreanous condition that may interact incorrectly with your other options.
+
+```hcl
+resource "google_storage_bucket" "no-age-enabled" {
+  provider = google-beta
+  name          = "somename-test"
+  location      = "US"
+  force_destroy = true
+
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+    condition {
+      days_since_noncurrent_time = 3
+      no_age = true
+    }
+  }
+}
+```
+
+
 ## Example Usage - Enabling public access prevention
 
 ```hcl
