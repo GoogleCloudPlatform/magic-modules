@@ -88,6 +88,22 @@ examples:
     # https://github.com/hashicorp/terraform-provider-google/issues/16231
     skip_vcr: true
     skip_docs: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'alloydb_backup_full_test_new'
+    primary_resource_id: 'default'
+    vars:
+      alloydb_backup_id: 'alloydb-backup'
+      alloydb_cluster_name: 'alloydb-cluster'
+      alloydb_instance_name: 'alloydb-instance'
+      network_name: 'alloydb-network'
+    test_vars_overrides:
+      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1")'
+    ignore_read_extra:
+      - 'reconciling'
+      - 'update_time'
+    # https://github.com/hashicorp/terraform-provider-google/issues/16231
+    skip_vcr: true
+    skip_docs: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/alloydb_backup.erb
 parameters:
