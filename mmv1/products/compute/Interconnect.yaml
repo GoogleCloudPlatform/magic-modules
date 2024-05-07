@@ -85,6 +85,7 @@ properties:
     name: 'location'
     description: |
       URL of the InterconnectLocation object that represents where this connection is to be provisioned.
+    resource: 'InterconnectLocations'
     required: true
     immutable: true
   - !ruby/object:Api::Type::Enum
