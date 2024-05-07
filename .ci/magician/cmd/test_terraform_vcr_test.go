@@ -69,15 +69,14 @@ func TestModifiedPackagesFromDiffs(t *testing.T) {
 	}
 }
 
-
 func TestNotRunTests(t *testing.T) {
 	cases := map[string]struct {
-		gaDiff, betaDiff     string
-		result *vcr.Result
-		wantNotRun []string
+		gaDiff, betaDiff string
+		result           *vcr.Result
+		wantNotRun       []string
 	}{
 		"no diff": {
-			gaDiff: "",
+			gaDiff:   "",
 			betaDiff: "",
 			result: &vcr.Result{
 				PassedTests: []string{"TestAccOne"},
@@ -86,7 +85,7 @@ func TestNotRunTests(t *testing.T) {
 			wantNotRun: []string{},
 		},
 		"no added tests": {
-			gaDiff: "+// some change",
+			gaDiff:   "+// some change",
 			betaDiff: "+// some change",
 			result: &vcr.Result{
 				PassedTests: []string{"TestAccOne"},
@@ -95,7 +94,7 @@ func TestNotRunTests(t *testing.T) {
 			wantNotRun: []string{},
 		},
 		"tests added and run": {
-			gaDiff: "+func TestAccOne(t *testing.T) {",
+			gaDiff:   "+func TestAccOne(t *testing.T) {",
 			betaDiff: "+func TestAccTwo(t *testing.T) {",
 			result: &vcr.Result{
 				PassedTests: []string{"TestAccOne"},
@@ -104,7 +103,7 @@ func TestNotRunTests(t *testing.T) {
 			wantNotRun: []string{},
 		},
 		"tests removed and run": {
-			gaDiff: "-func TestAccOne(t *testing.T) {",
+			gaDiff:   "-func TestAccOne(t *testing.T) {",
 			betaDiff: "-func TestAccTwo(t *testing.T) {",
 			result: &vcr.Result{
 				PassedTests: []string{"TestAccOne"},
@@ -113,7 +112,7 @@ func TestNotRunTests(t *testing.T) {
 			wantNotRun: []string{},
 		},
 		"tests added and not run": {
-			gaDiff: "+func TestAccThree(t *testing.T) {",
+			gaDiff:   "+func TestAccThree(t *testing.T) {",
 			betaDiff: "+func TestAccFour(t *testing.T) {",
 			result: &vcr.Result{
 				PassedTests: []string{"TestAccOne"},
@@ -122,7 +121,7 @@ func TestNotRunTests(t *testing.T) {
 			wantNotRun: []string{"TestAccThree", "TestAccFour"},
 		},
 		"tests removed and not run": {
-			gaDiff: "-func TestAccThree(t *testing.T) {",
+			gaDiff:   "-func TestAccThree(t *testing.T) {",
 			betaDiff: "-func TestAccFour(t *testing.T) {",
 			result: &vcr.Result{
 				PassedTests: []string{"TestAccOne"},
@@ -131,7 +130,7 @@ func TestNotRunTests(t *testing.T) {
 			wantNotRun: []string{},
 		},
 		"tests added but commented out": {
-			gaDiff: "+//func TestAccThree(t *testing.T) {",
+			gaDiff:   "+//func TestAccThree(t *testing.T) {",
 			betaDiff: "+//func TestAccFour(t *testing.T) {",
 			result: &vcr.Result{
 				PassedTests: []string{"TestAccOne"},
@@ -140,7 +139,7 @@ func TestNotRunTests(t *testing.T) {
 			wantNotRun: []string{},
 		},
 		"tests added and not run are deduped": {
-			gaDiff: "+func TestAccThree(t *testing.T) {",
+			gaDiff:   "+func TestAccThree(t *testing.T) {",
 			betaDiff: "+func TestAccThree(t *testing.T) {",
 			result: &vcr.Result{
 				PassedTests: []string{"TestAccOne"},
@@ -151,7 +150,7 @@ func TestNotRunTests(t *testing.T) {
 	}
 	for tn, tc := range cases {
 		tc := tc
-		t.Run(tn, func (t *testing.T) {
+		t.Run(tn, func(t *testing.T) {
 			notRun := notRunTests(tc.gaDiff, tc.betaDiff, tc.result)
 			assert.Equal(t, tc.wantNotRun, notRun)
 		})

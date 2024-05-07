@@ -332,7 +332,7 @@ Please fix these to complete your PR. If you believe these test failures to be i
 
 var addedTestsRegexp = regexp.MustCompile(`^\+func (Test\w+)\(t \*testing.T\) {`)
 
-func notRunTests(gaDiff, betaDiff string, result *vcr.Result) ([]string) {
+func notRunTests(gaDiff, betaDiff string, result *vcr.Result) []string {
 	fmt.Println("Checking for new acceptance tests that were not run")
 	addedTests := append(
 		addedTestsRegexp.FindAllStringSubmatch(gaDiff, -1),
