@@ -1,0 +1,20 @@
+resource "google_dataproc_batch" "<%= ctx[:primary_resource_id] %>" {
+
+    batch_id      = "tf-test-batch%{random_suffix}"
+    location      = "us-central1"
+
+    runtime_config {
+      properties    = { "spark.dynamicAllocation.enabled": "false", "spark.executor.instances": "2" }
+    }
+
+    environment_config {
+      execution_config {
+        network_uri = "default"
+      }
+    }
+
+    pyspark_batch {
+      main_python_file_uri = "gs://dataproc-examples/pyspark/hello-world/hello-world.py"
+    }
+}
+

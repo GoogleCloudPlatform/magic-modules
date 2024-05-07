@@ -1,0 +1,22 @@
+resource "google_dataproc_batch" "<%= ctx[:primary_resource_id] %>" {
+
+    batch_id      = "tf-test-batch%{random_suffix}"
+    location      = "us-central1"
+
+    runtime_config {
+      properties    = { "spark.dynamicAllocation.enabled": "false", "spark.executor.instances": "2" }
+    }
+
+    environment_config {
+      execution_config {
+        network_uri = "default"
+      }
+    }
+
+    spark_batch {
+      main_class = "org.apache.spark.examples.SparkPi"
+      args = ["10"]
+      jar_file_uris = ["file:///usr/lib/spark/examples/jars/spark-examples.jar"]
+    }
+}
+
