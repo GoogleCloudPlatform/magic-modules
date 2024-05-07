@@ -761,6 +761,27 @@ func ResourceComposerEnvironment() *schema.Resource {
 											},
 										},
 									},
+									"airflow_metadata_retention_config": {
+										Type:			schema.TypeList,
+										Description: 	`Optional. The configuration setting for Database Retention.`,
+										Required: 		true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"retention_mode": {
+													Type: 			schema.TypeString,
+													Optional:		true,
+													ValidateFunc: 	validation.StringInSlice([]string{"RETENTION_MODE_ENABLED", "RETENTION_MODE_DISABLED"}, false),
+													Description: 	`Wheter Database Retention mechanism is enabled for this environment.`,
+												},
+												"retention_days": {
+													Type: 			schema.TypeInt,
+													Optional:		true,
+													ValidateFunc:	validation.IntBetween(30, 730),
+													Description: 	`For enabled Database Retention mechanism how many days of Airflow metadata database are kept uncleared.`,
+												},
+											},
+										},
+									},
 								},
 							},
 						},
