@@ -51,6 +51,7 @@ func ResourceConverters() map[string][]cai.ResourceConverter {
 		"google_compute_ssl_policy":                       {compute.ResourceConverterComputeSslPolicy()},
 		"google_compute_target_https_proxy":               {compute.ResourceConverterComputeTargetHttpsProxy()},
 		"google_compute_target_ssl_proxy":                 {compute.ResourceConverterComputeTargetSslProxy()},
+		"google_dataproc_autoscaling_policy":			   {dataproc.ResourceConverterDataprocAutoscalingPolicy()},
 		"google_dns_managed_zone":                         {dns.ResourceConverterDNSManagedZone()},
 		"google_dns_policy":                               {dns.ResourceConverterDNSPolicy()},
 		"google_storage_bucket":                           {resourceConverterStorageBucket()},
