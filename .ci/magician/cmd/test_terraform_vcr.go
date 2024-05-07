@@ -2,16 +2,19 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+	"regexp"
+	"strings"
+
+	"github.com/spf13/cobra"
+	"golang.org/x/exp/maps"
+
 	"magician/exec"
 	"magician/github"
 	"magician/provider"
 	"magician/source"
 	"magician/vcr"
-	"os"
-	"path/filepath"
-	"strings"
-
-	"github.com/spf13/cobra"
 )
 
 var ttvEnvironmentVariables = [...]string{
@@ -91,32 +94,71 @@ var testTerraformVCRCmd = &cobra.Command{
 func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, baseBranch string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller, vt *vcr.Tester) {
 	newBranch := "auto-pr-" + prNumber
 	oldBranch := newBranch + "-old"
-	repo := &source.Repo{
+
+	tpgRepo := &source.Repo{
+		Name:   "terraform-provider-google",
+		Owner:  "modular-magician",
+		Branch: newBranch,
+	}
+	tpgbRepo := &source.Repo{
 		Name:   "terraform-provider-google-beta",
 		Owner:  "modular-magician",
 		Branch: newBranch,
 	}
-	ctlr.SetPath(repo)
-	if err := ctlr.Clone(repo); err != nil {
-		fmt.Println("Error cloning repo: ", err)
+	// Initialize repos
+	for _, repo := range []*source.Repo{tpgRepo, tpgbRepo} {
+		ctlr.SetPath(repo)
+		if err := ctlr.Clone(repo); err != nil {
+			fmt.Println("Error cloning repo: ", err)
+			os.Exit(1)
+		}
+		if err := ctlr.Fetch(repo, oldBranch); err != nil {
+			fmt.Println("Failed to fetch old branch: ", err)
+			os.Exit(1)
+		}
+		changedFiles, err := ctlr.DiffNameOnly(repo, oldBranch, newBranch)
+		if err != nil {
+			fmt.Println("Failed to compute name-only diff: ", err)
+			os.Exit(1)
+		}
+		repo.ChangedFiles = changedFiles
+		repo.UnifiedZeroDiff, err = ctlr.DiffUnifiedZero(repo, oldBranch, newBranch)
+		if err != nil {
+			fmt.Println("Failed to compute unified=0 diff: ", err)
+			os.Exit(1)
+		}
+	}
+
+	vt.SetRepoPath(provider.Beta, tpgbRepo.Path)
+
+	if err := rnr.PushDir(tpgbRepo.Path); err != nil {
+		fmt.Println("Error changing to tpgbRepo dir: ", err)
 		os.Exit(1)
 	}
 
-	vt.SetRepoPath(provider.Beta, repo.Path)
-
-	if err := rnr.PushDir(repo.Path); err != nil {
-		fmt.Println("Error changing to repo dir: ", err)
-		os.Exit(1)
-	}
-
-	services, runFullVCR, err := modifiedPackages(newBranch, oldBranch, rnr)
-	if err != nil {
-		fmt.Println("Error getting modified packages: ", err)
-		os.Exit(1)
-	}
-
+	services, runFullVCR := modifiedPackages(tpgbRepo.ChangedFiles)
 	if len(services) == 0 && !runFullVCR {
 		fmt.Println("Skipping tests: No go files or test fixtures changed")
+		// Duplicating non-exercised test logic here since it complicates things too much
+		// to try to reuse the run that happens otherwise.
+		replayingResult := &vcr.Result{}
+		notRun := notRunTests(tpgRepo.UnifiedZeroDiff, tpgbRepo.UnifiedZeroDiff, replayingResult)
+
+		if len(notRun) > 0 {
+			comment := `#### Non-exercised tests
+
+Tests were added in this PR that did not run in VCR:
+
+`
+			for _, t := range notRun {
+				comment += `
+- ` + t
+			}
+			if err := gh.PostComment(prNumber, comment); err != nil {
+				fmt.Println("Error posting comment: ", err)
+				os.Exit(1)
+			}
+		}
 		os.Exit(0)
 	}
 	fmt.Println("Running tests: Go files or test fixtures changed")
@@ -161,6 +203,21 @@ Affected tests: ` + fmt.Sprintf("`%d`", len(replayingResult.FailedTests)) + `
 <details><summary>Click here to see the affected service packages</summary><blockquote>` + affectedServicesComment + `</blockquote></details>
 
 `
+
+	notRun := notRunTests(tpgRepo.UnifiedZeroDiff, tpgbRepo.UnifiedZeroDiff, replayingResult)
+	if len(notRun) > 0 {
+		comment += `
+#### Non-exercised tests
+
+Tests were added in this PR that did not run in VCR:
+
+`
+		for _, t := range notRun {
+			comment += `
+- ` + t
+		}
+	}
+
 	if len(replayingResult.FailedTests) > 0 {
 		comment += fmt.Sprintf(`#### Action taken
 <details> <summary>Found %d affected test(s) by replaying old test recordings. Starting RECORDING based on the most recent commit. Click here to see the affected tests</summary><blockquote>%s </blockquote></details>
@@ -253,11 +310,6 @@ Please fix these to complete your PR. If you believe these test failures to be i
 		}
 
 		comment += fmt.Sprintf("View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-%s/artifacts/%s/build-log/recording_test.log) or the [debug log](https://console.cloud.google.com/storage/browser/ci-vcr-logs/beta/refs/heads/auto-pr-%s/artifacts/%s/recording) for each test", prNumber, buildID, prNumber, buildID)
-
-		if err := gh.PostComment(prNumber, comment); err != nil {
-			fmt.Println("Error posting comment: ", err)
-			os.Exit(1)
-		}
 	} else {
 		if replayingErr != nil {
 			// Check for any uncaught errors in REPLAYING mode.
@@ -266,11 +318,10 @@ Please fix these to complete your PR. If you believe these test failures to be i
 			comment += "$\\textcolor{green}{\\textsf{All tests passed!}}$\n"
 		}
 		comment += fmt.Sprintf("View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-%s/artifacts/%s/build-log/replaying_test.log)", prNumber, buildID)
-
-		if err := gh.PostComment(prNumber, comment); err != nil {
-			fmt.Println("Error posting comment: ", err)
-			os.Exit(1)
-		}
+	}
+	if err := gh.PostComment(prNumber, comment); err != nil {
+		fmt.Println("Error posting comment: ", err)
+		os.Exit(1)
 	}
 
 	if err := gh.PostBuildStatus(prNumber, "VCR-test", testState, buildStatusTargetURL, mmCommitSha); err != nil {
@@ -279,22 +330,41 @@ Please fix these to complete your PR. If you believe these test failures to be i
 	}
 }
 
-func modifiedPackages(newBranch, oldBranch string, rnr ExecRunner) (map[string]struct{}, bool, error) {
-	fmt.Println("Checking for modified go files or test fixtures")
+var addedTestsRegexp = regexp.MustCompile(`^\+func (Test\w+)\(t \*testing.T\) {`)
 
-	if _, err := rnr.Run("git", []string{"fetch", "origin", fmt.Sprintf("%s:%s", oldBranch, oldBranch), "--depth", "1"}, nil); err != nil {
+func notRunTests(gaDiff, betaDiff string, result *vcr.Result) ([]string) {
+	fmt.Println("Checking for new acceptance tests that were not run")
+	addedTests := append(
+		addedTestsRegexp.FindAllStringSubmatch(gaDiff, -1),
+		addedTestsRegexp.FindAllStringSubmatch(betaDiff, -1)...,
+	)
 
+	if len(addedTests) == 0 {
+		return []string{}
 	}
-	diffs, err := rnr.Run("git", []string{"diff", newBranch, oldBranch, "--name-only"}, nil)
-	if err != nil {
-		return nil, false, err
+
+	// Consider tests "run" only if they passed or failed.
+	runTests := map[string]struct{}{}
+	for _, t := range result.PassedTests {
+		runTests[t] = struct{}{}
 	}
-	return modifiedPackagesFromDiffs(strings.Split(diffs, "\n"))
+	for _, t := range result.FailedTests {
+		runTests[t] = struct{}{}
+	}
+
+	notRun := map[string]struct{}{}
+	for _, t := range addedTests {
+		if _, ok := runTests[t[1]]; !ok {
+			notRun[t[1]] = struct{}{}
+		}
+	}
+
+	return maps.Keys(notRun)
 }
 
-func modifiedPackagesFromDiffs(diffs []string) (map[string]struct{}, bool, error) {
+func modifiedPackages(changedFiles []string) (map[string]struct{}, bool) {
 	var goFiles []string
-	for _, line := range diffs {
+	for _, line := range changedFiles {
 		if strings.HasSuffix(line, ".go") || strings.Contains(line, "test-fixtures") || strings.HasSuffix(line, "go.mod") || strings.HasSuffix(line, "go.sum") {
 			goFiles = append(goFiles, line)
 		}
@@ -313,7 +383,7 @@ func modifiedPackagesFromDiffs(diffs []string) (map[string]struct{}, bool, error
 			break
 		}
 	}
-	return services, runFullVCR, nil
+	return services, runFullVCR
 }
 
 func runReplaying(runFullVCR bool, services map[string]struct{}, vt *vcr.Tester) (*vcr.Result, string, []string, error) {

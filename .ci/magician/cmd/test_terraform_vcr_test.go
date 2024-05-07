@@ -3,6 +3,10 @@ package cmd
 import (
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"magician/vcr"
 )
 
 func TestModifiedPackagesFromDiffs(t *testing.T) {
@@ -57,10 +61,99 @@ func TestModifiedPackagesFromDiffs(t *testing.T) {
 			all:      false,
 		},
 	} {
-		if packages, all, _ := modifiedPackagesFromDiffs(tc.diffs); !reflect.DeepEqual(packages, tc.packages) {
+		if packages, all := modifiedPackages(tc.diffs); !reflect.DeepEqual(packages, tc.packages) {
 			t.Errorf("Unexpected packages found for test %s: %v, expected %v", tc.name, packages, tc.packages)
 		} else if all != tc.all {
 			t.Errorf("Unexpected value for all packages for test %s: %v, expected %v", tc.name, all, tc.all)
 		}
+	}
+}
+
+
+func TestNotRunTests(t *testing.T) {
+	cases := map[string]struct {
+		gaDiff, betaDiff     string
+		result *vcr.Result
+		wantNotRun []string
+	}{
+		"no diff": {
+			gaDiff: "",
+			betaDiff: "",
+			result: &vcr.Result{
+				PassedTests: []string{"TestAccOne"},
+				FailedTests: []string{"TestAccTwo"},
+			},
+			wantNotRun: []string{},
+		},
+		"no added tests": {
+			gaDiff: "+// some change",
+			betaDiff: "+// some change",
+			result: &vcr.Result{
+				PassedTests: []string{"TestAccOne"},
+				FailedTests: []string{"TestAccTwo"},
+			},
+			wantNotRun: []string{},
+		},
+		"tests added and run": {
+			gaDiff: "+func TestAccOne(t *testing.T) {",
+			betaDiff: "+func TestAccTwo(t *testing.T) {",
+			result: &vcr.Result{
+				PassedTests: []string{"TestAccOne"},
+				FailedTests: []string{"TestAccTwo"},
+			},
+			wantNotRun: []string{},
+		},
+		"tests removed and run": {
+			gaDiff: "-func TestAccOne(t *testing.T) {",
+			betaDiff: "-func TestAccTwo(t *testing.T) {",
+			result: &vcr.Result{
+				PassedTests: []string{"TestAccOne"},
+				FailedTests: []string{"TestAccTwo"},
+			},
+			wantNotRun: []string{},
+		},
+		"tests added and not run": {
+			gaDiff: "+func TestAccThree(t *testing.T) {",
+			betaDiff: "+func TestAccFour(t *testing.T) {",
+			result: &vcr.Result{
+				PassedTests: []string{"TestAccOne"},
+				FailedTests: []string{"TestAccTwo"},
+			},
+			wantNotRun: []string{"TestAccThree", "TestAccFour"},
+		},
+		"tests removed and not run": {
+			gaDiff: "-func TestAccThree(t *testing.T) {",
+			betaDiff: "-func TestAccFour(t *testing.T) {",
+			result: &vcr.Result{
+				PassedTests: []string{"TestAccOne"},
+				FailedTests: []string{"TestAccTwo"},
+			},
+			wantNotRun: []string{},
+		},
+		"tests added but commented out": {
+			gaDiff: "+//func TestAccThree(t *testing.T) {",
+			betaDiff: "+//func TestAccFour(t *testing.T) {",
+			result: &vcr.Result{
+				PassedTests: []string{"TestAccOne"},
+				FailedTests: []string{"TestAccTwo"},
+			},
+			wantNotRun: []string{},
+		},
+		"tests added and not run are deduped": {
+			gaDiff: "+func TestAccThree(t *testing.T) {",
+			betaDiff: "+func TestAccThree(t *testing.T) {",
+			result: &vcr.Result{
+				PassedTests: []string{"TestAccOne"},
+				FailedTests: []string{"TestAccTwo"},
+			},
+			wantNotRun: []string{"TestAccThree"},
+		},
+	}
+	for tn, tc := range cases {
+		tc := tc
+		t.Run(tn, func (t *testing.T) {
+			notRun := notRunTests(tc.gaDiff, tc.betaDiff, tc.result)
+			assert.Equal(t, tc.wantNotRun, notRun)
+		})
 	}
 }
