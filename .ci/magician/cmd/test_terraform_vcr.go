@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	"golang.org/x/exp/maps"
 
 	"magician/exec"
 	"magician/github"
@@ -140,26 +139,6 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 	services, runFullVCR := modifiedPackages(tpgbRepo.ChangedFiles)
 	if len(services) == 0 && !runFullVCR {
 		fmt.Println("Skipping tests: No go files or test fixtures changed")
-		// Duplicating non-exercised test logic here since it complicates things too much
-		// to try to reuse the run that happens otherwise.
-		replayingResult := &vcr.Result{}
-		notRun := notRunTests(tpgRepo.UnifiedZeroDiff, tpgbRepo.UnifiedZeroDiff, replayingResult)
-
-		if len(notRun) > 0 {
-			comment := `#### Non-exercised tests
-
-Tests were added in this PR that did not run in VCR:
-
-`
-			for _, t := range notRun {
-				comment += `
-- ` + t
-			}
-			if err := gh.PostComment(prNumber, comment); err != nil {
-				fmt.Println("Error posting comment: ", err)
-				os.Exit(1)
-			}
-		}
 		os.Exit(0)
 	}
 	fmt.Println("Running tests: Go files or test fixtures changed")
@@ -205,22 +184,35 @@ Affected tests: ` + fmt.Sprintf("`%d`", len(replayingResult.FailedTests)) + `
 
 `
 
-	notRun := notRunTests(tpgRepo.UnifiedZeroDiff, tpgbRepo.UnifiedZeroDiff, replayingResult)
-	if len(notRun) > 0 {
+	notRunBeta, notRunGa := notRunTests(tpgRepo.UnifiedZeroDiff, tpgbRepo.UnifiedZeroDiff, replayingResult)
+	if len(notRunBeta) > 0 || len(notRunGa) > 0 {
 		comment += `
-#### Non-exercised tests
+#### Non-exercised tests`
 
-Tests were added in this PR that did not run in VCR:
-
-`
-		for _, t := range notRun {
+		if len(notRunBeta) > 0 {
 			comment += `
+Tests were added that are skipped in VCR:
+`
+			for _, t := range notRunBeta {
+				comment += `
 - ` + t
+			}
+		}
+
+		if len(notRunGa) > 0 {
+			comment += `
+Tests were added that are GA-only additions and require manual runs:
+`
+			for _, t := range notRunGa {
+				comment += `
+- ` + t
+			}
 		}
 	}
 
 	if len(replayingResult.FailedTests) > 0 {
-		comment += fmt.Sprintf(`#### Action taken
+		comment += fmt.Sprintf(`
+#### Action taken
 <details> <summary>Found %d affected test(s) by replaying old test recordings. Starting RECORDING based on the most recent commit. Click here to see the affected tests</summary><blockquote>%s </blockquote></details>
 
 [Get to know how VCR tests work](https://googlecloudplatform.github.io/magic-modules/docs/getting-started/contributing/#general-contributing-steps)`, len(replayingResult.FailedTests), failedTestsPattern)
@@ -333,15 +325,13 @@ Please fix these to complete your PR. If you believe these test failures to be i
 
 var addedTestsRegexp = regexp.MustCompile(`(?m)^\+func (Test\w+)\(t \*testing.T\) {`)
 
-func notRunTests(gaDiff, betaDiff string, result *vcr.Result) []string {
+func notRunTests(gaDiff, betaDiff string, result *vcr.Result) ([]string, []string) {
 	fmt.Println("Checking for new acceptance tests that were not run")
-	addedTests := append(
-		addedTestsRegexp.FindAllStringSubmatch(gaDiff, -1),
-		addedTestsRegexp.FindAllStringSubmatch(betaDiff, -1)...,
-	)
+	addedGaTests := addedTestsRegexp.FindAllStringSubmatch(gaDiff, -1)
+	addedBetaTests := addedTestsRegexp.FindAllStringSubmatch(betaDiff, -1)
 
-	if len(addedTests) == 0 {
-		return []string{}
+	if len(addedGaTests) == 0 && len(addedBetaTests) == 0 {
+		return []string{}, []string{}
 	}
 
 	// Consider tests "run" only if they passed or failed.
@@ -353,16 +343,27 @@ func notRunTests(gaDiff, betaDiff string, result *vcr.Result) []string {
 		runTests[t] = struct{}{}
 	}
 
-	notRun := map[string]struct{}{}
-	for _, t := range addedTests {
+	notRunBeta := []string{}
+	for _, t := range addedBetaTests {
 		if _, ok := runTests[t[1]]; !ok {
-			notRun[t[1]] = struct{}{}
+			notRunBeta = append(notRunBeta, t[1])
+		}
+	}
+	// Always count GA-only tests because we never run GA tests
+	notRunGa := []string{}
+	addedBetaTestsMap := map[string]struct{}{}
+	for _, t := range addedBetaTests {
+		addedBetaTestsMap[t[1]] = struct{}{}
+	}
+	for _, t := range addedGaTests {
+		if _, ok := addedBetaTestsMap[t[1]]; !ok {
+			notRunGa = append(notRunGa, t[1])
 		}
 	}
 
-	notRunSlice := maps.Keys(notRun)
-	sort.Strings(notRunSlice)
-	return notRunSlice
+	sort.Strings(notRunBeta)
+	sort.Strings(notRunGa)
+	return notRunBeta, notRunGa
 }
 
 func modifiedPackages(changedFiles []string) (map[string]struct{}, bool) {

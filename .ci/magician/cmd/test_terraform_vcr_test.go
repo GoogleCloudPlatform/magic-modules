@@ -73,7 +73,8 @@ func TestNotRunTests(t *testing.T) {
 	cases := map[string]struct {
 		gaDiff, betaDiff string
 		result           *vcr.Result
-		wantNotRun       []string
+		wantNotRunBeta   []string
+		wantNotRunGa     []string
 	}{
 		"no diff": {
 			gaDiff:   "",
@@ -82,7 +83,8 @@ func TestNotRunTests(t *testing.T) {
 				PassedTests: []string{"TestAccOne"},
 				FailedTests: []string{"TestAccTwo"},
 			},
-			wantNotRun: []string{},
+			wantNotRunBeta: []string{},
+			wantNotRunGa:   []string{},
 		},
 		"no added tests": {
 			gaDiff:   "+// some change",
@@ -91,16 +93,40 @@ func TestNotRunTests(t *testing.T) {
 				PassedTests: []string{"TestAccOne"},
 				FailedTests: []string{"TestAccTwo"},
 			},
-			wantNotRun: []string{},
+			wantNotRunBeta: []string{},
+			wantNotRunGa:   []string{},
 		},
-		"tests added and run": {
-			gaDiff:   "+func TestAccOne(t *testing.T) {",
+		"test added and passed": {
+			gaDiff:   "+func TestAccTwo(t *testing.T) {",
 			betaDiff: "+func TestAccTwo(t *testing.T) {",
 			result: &vcr.Result{
-				PassedTests: []string{"TestAccOne"},
+				PassedTests: []string{"TestAccTwo"},
+				FailedTests: []string{},
+			},
+			wantNotRunBeta: []string{},
+			wantNotRunGa:   []string{},
+		},
+		"multiple tests added and passed": {
+			gaDiff: `+func TestAccTwo(t *testing.T) {
++func TestAccThree(t *testing.T) {`,
+			betaDiff: `+func TestAccTwo(t *testing.T) {
++func TestAccThree(t *testing.T) {`,
+			result: &vcr.Result{
+				PassedTests: []string{"TestAccTwo", "TestAccThree"},
+				FailedTests: []string{},
+			},
+			wantNotRunBeta: []string{},
+			wantNotRunGa:   []string{},
+		},
+		"test added and failed": {
+			gaDiff:   "+func TestAccTwo(t *testing.T) {",
+			betaDiff: "+func TestAccTwo(t *testing.T) {",
+			result: &vcr.Result{
+				PassedTests: []string{},
 				FailedTests: []string{"TestAccTwo"},
 			},
-			wantNotRun: []string{},
+			wantNotRunBeta: []string{},
+			wantNotRunGa:   []string{},
 		},
 		"tests removed and run": {
 			gaDiff:   "-func TestAccOne(t *testing.T) {",
@@ -109,16 +135,30 @@ func TestNotRunTests(t *testing.T) {
 				PassedTests: []string{"TestAccOne"},
 				FailedTests: []string{"TestAccTwo"},
 			},
-			wantNotRun: []string{},
+			wantNotRunBeta: []string{},
+			wantNotRunGa:   []string{},
 		},
-		"tests added and not run": {
+		"test added and not run": {
 			gaDiff:   "+func TestAccThree(t *testing.T) {",
 			betaDiff: "+func TestAccFour(t *testing.T) {",
 			result: &vcr.Result{
 				PassedTests: []string{"TestAccOne"},
 				FailedTests: []string{"TestAccTwo"},
 			},
-			wantNotRun: []string{"TestAccFour", "TestAccThree"},
+			wantNotRunBeta: []string{"TestAccFour"},
+			wantNotRunGa:   []string{"TestAccThree"},
+		},
+		"multiple tests added and not run": {
+			gaDiff: `+func TestAccTwo(t *testing.T) {
++func TestAccThree(t *testing.T) {`,
+			betaDiff: `+func TestAccTwo(t *testing.T) {
++func TestAccThree(t *testing.T) {`,
+			result: &vcr.Result{
+				PassedTests: []string{"TestAccOne"},
+				FailedTests: []string{"TestAccFour"},
+			},
+			wantNotRunBeta: []string{"TestAccThree", "TestAccTwo"},
+			wantNotRunGa:   []string{},
 		},
 		"tests removed and not run": {
 			gaDiff:   "-func TestAccThree(t *testing.T) {",
@@ -127,7 +167,8 @@ func TestNotRunTests(t *testing.T) {
 				PassedTests: []string{"TestAccOne"},
 				FailedTests: []string{"TestAccTwo"},
 			},
-			wantNotRun: []string{},
+			wantNotRunBeta: []string{},
+			wantNotRunGa:   []string{},
 		},
 		"tests added but commented out": {
 			gaDiff:   "+//func TestAccThree(t *testing.T) {",
@@ -136,16 +177,8 @@ func TestNotRunTests(t *testing.T) {
 				PassedTests: []string{"TestAccOne"},
 				FailedTests: []string{"TestAccTwo"},
 			},
-			wantNotRun: []string{},
-		},
-		"tests added and not run are deduped": {
-			gaDiff:   "+func TestAccThree(t *testing.T) {",
-			betaDiff: "+func TestAccThree(t *testing.T) {",
-			result: &vcr.Result{
-				PassedTests: []string{"TestAccOne"},
-				FailedTests: []string{"TestAccTwo"},
-			},
-			wantNotRun: []string{"TestAccThree"},
+			wantNotRunBeta: []string{},
+			wantNotRunGa:   []string{},
 		},
 		"multiline diffs": {
 			gaDiff: `diff --git a/google/services/alloydb/resource_alloydb_backup_generated_test.go b/google/services/alloydb/resource_alloydb_backup_generated_test.go
@@ -157,14 +190,26 @@ func TestNotRunTests(t *testing.T) {
 				PassedTests: []string{},
 				FailedTests: []string{},
 			},
-			wantNotRun: []string{"TestAccAlloydbBackup_alloydbBackupFullTestNewExample", "TestAccCloudRunService_cloudRunServiceMulticontainerExample"},
+			wantNotRunBeta: []string{"TestAccAlloydbBackup_alloydbBackupFullTestNewExample"},
+			wantNotRunGa:   []string{"TestAccCloudRunService_cloudRunServiceMulticontainerExample"},
+		},
+		"always count GA-only added tests": {
+			gaDiff:   "+func TestAccOne(t *testing.T) {",
+			betaDiff: "",
+			result: &vcr.Result{
+				PassedTests: []string{"TestAccOne"},
+				FailedTests: []string{"TestAccTwo"},
+			},
+			wantNotRunBeta: []string{},
+			wantNotRunGa:   []string{"TestAccOne"},
 		},
 	}
 	for tn, tc := range cases {
 		tc := tc
 		t.Run(tn, func(t *testing.T) {
-			notRun := notRunTests(tc.gaDiff, tc.betaDiff, tc.result)
-			assert.Equal(t, tc.wantNotRun, notRun)
+			notRunBeta, notRunGa := notRunTests(tc.gaDiff, tc.betaDiff, tc.result)
+			assert.Equal(t, tc.wantNotRunBeta, notRunBeta)
+			assert.Equal(t, tc.wantNotRunGa, notRunGa)
 		})
 	}
 }
