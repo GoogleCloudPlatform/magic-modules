@@ -91,7 +91,6 @@ resource "google_storage_bucket" "no-age-enabled" {
 }
 ```
 
-
 ## Example Usage - Enabling public access prevention
 
 ```hcl
