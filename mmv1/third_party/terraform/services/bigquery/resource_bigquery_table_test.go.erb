@@ -4001,7 +4001,7 @@ resource "google_bigquery_table" "test" {
   provider = google-beta
 
   deletion_protection = false
-	allow_resource_tags_on_deletion = true
+  allow_resource_tags_on_deletion = true
   dataset_id = "${google_bigquery_dataset.test.dataset_id}"
   table_id   = "%{table_id}"
   resource_tags = {
@@ -4051,7 +4051,7 @@ resource "google_bigquery_table" "test" {
   provider = google-beta
 
   deletion_protection = false
-	allow_resource_tags_on_deletion = true
+  allow_resource_tags_on_deletion = true
   dataset_id = "${google_bigquery_dataset.test.dataset_id}"
   table_id   = "%{table_id}"
   resource_tags = {
@@ -4102,7 +4102,7 @@ resource "google_bigquery_table" "test" {
   provider = google-beta
 
   deletion_protection = false
-	allow_resource_tags_on_deletion = true
+  allow_resource_tags_on_deletion = true
   dataset_id = "${google_bigquery_dataset.test.dataset_id}"
   table_id   = "%{table_id}"
   resource_tags = {}
