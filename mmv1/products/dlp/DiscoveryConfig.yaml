@@ -424,7 +424,7 @@ properties:
                         - :UPDATE_FREQUENCY_DAILY
                         - :UPDATE_FREQUENCY_MONTHLY
                 - !ruby/object:Api::Type::Enum
-                  name: 'refresh_frequency'
+                  name: 'refreshFrequency'
                   description: Data changes (non-schema changes) in Cloud SQL tables can't trigger reprofiling. If you set this field, profiles are refreshed at this frequency regardless of whether the underlying tables have changes. Defaults to never.
                   values:
                     - :UPDATE_FREQUENCY_NEVER

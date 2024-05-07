@@ -362,7 +362,7 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
 	actions {
         export_data {
             profile_table {
-                project_id = "project"
+                project_id = "%{project}"
                 dataset_id = "dataset"
                 table_id = "table"
             }
@@ -654,6 +654,10 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
                     }
                 }
             }
+			conditions {
+                database_engines = ["MYSQL", "POSTGRES"]
+                types = ["DATABASE_RESOURCE_TYPE_ALL_SUPPORTED_TYPES"]
+            }
             disabled {}
         }
     }
@@ -711,8 +715,8 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
                 }
             }
             conditions {
-                database_engines = ["ALL_SUPPORTED_DATABASE_ENGINES", "MYSQL", "POSTGRES"]
-                types = ["DATABASE_RESOURCE_TYPE_ALL_SUPPORTED_TYPES", "DATABASE_RESOURCE_TYPE_TABLE"]
+                database_engines = ["ALL_SUPPORTED_DATABASE_ENGINES"]
+                types = ["DATABASE_RESOURCE_TYPE_TABLE"]
             }
             generation_cadence {
                 schema_modified_cadence {
@@ -722,6 +726,8 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
                 refresh_frequency = "UPDATE_FREQUENCY_MONTHLY"
             }
         }
+	}
+	targets {
         cloud_sql_target {
             filter {
                 others {}
@@ -731,10 +737,9 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
                     types = ["NEW_COLUMNS", "REMOVED_COLUMNS"]
                     frequency = "UPDATE_FREQUENCY_DAILY"
                 }
-                refresh_frequency = "UPDATE_FREQUENCY_MONTHLY"
+                refresh_frequency = "UPDATE_FREQUENCY_DAILY"
             }
         }
-
     }
     inspect_templates = ["projects/%{project}/inspectTemplates/${google_data_loss_prevention_inspect_template.basic.name}"]
 }
