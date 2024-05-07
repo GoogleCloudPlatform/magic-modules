@@ -86,6 +86,7 @@ properties:
       At least one forwarding rule is required. There can be only one LBTrafficExtension resource per forwarding rule.
     required: true
     item_type: Api::Type::String
+    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
   - !ruby/object:Api::Type::Array
     name: extensionChains
     description: |
@@ -142,12 +143,14 @@ properties:
                 description: |
                   The reference to the service that runs the extension. Must be a reference to a backend service
                 required: true
+                diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
               - !ruby/object:Api::Type::String
                 name: 'timeout'
                 description: |
                   Specifies the timeout for each individual message on the stream. The timeout must be between 10-1000 milliseconds.
                   A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
                 required: true
+                diff_suppress_func: 'tpgresource.DurationDiffSuppress'
               - !ruby/object:Api::Type::Boolean
                 name: 'failOpen'
                 description: |
