@@ -899,8 +899,8 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
 		change = true
 	}
 
-  <% unless version == "ga" -%>
   var targetSizePatchUpdate bool
+  <% unless version == "ga" -%>
   if d.HasChange("instance_flexibility_policy") {
     instanceFlexibilityPolicy := d.Get("instance_flexibility_policy")
     if instanceFlexibilityPolicy == nil || len(instanceFlexibilityPolicy.([]any)) == 0 {
@@ -913,6 +913,7 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
 		// target size update should be done by patch instead of using resize
 		if d.HasChange("target_size") {
       updatedManager.TargetSize = int64(d.Get("target_size").(int))
+      updatedManager.ForceSendFields = append(updatedManager.ForceSendFields, "TargetSize")
       targetSizePatchUpdate = true
     }
 	}
@@ -988,7 +989,7 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
 	}
 
 	// target size should use resize
-	if d.HasChange("target_size") <% unless version == "ga" -%>&& targetSizePatchUpdate == false <% end -%> {
+	if d.HasChange("target_size") <% unless version == "ga" -%>&&  targetSizePatchUpdate == false<% end -%> {
 		d.Partial(true)
 		targetSize := int64(d.Get("target_size").(int))
 		op, err := config.NewComputeClient(userAgent).RegionInstanceGroupManagers.Resize(

@@ -1795,7 +1795,7 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
 
   base_instance_name        = "tf-test-igm-basic"
   region                    = "us-central1"
-  target_size               = 0
+  target_size               = 2
   distribution_policy_target_shape = "ANY_SINGLE_ZONE"
   update_policy {
     instance_redistribution_type = "NONE"
@@ -1912,7 +1912,7 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
 
   base_instance_name        = "tf-test-igm-basic"
   region                    = "us-central1"
-  target_size               = 2
+  target_size               = 0
   distribution_policy_target_shape = "ANY_SINGLE_ZONE"
   update_policy {
     instance_redistribution_type = "NONE"
