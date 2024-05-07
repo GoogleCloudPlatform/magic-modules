@@ -196,14 +196,17 @@ properties:
       properties:
         - !ruby/object:Api::Type::String
           name: 'name'
+          output: true
           description: |
             Unique identifier for this outage notification.
         - !ruby/object:Api::Type::String
           name: 'description'
+          output: true
           description: |
             A description about the purpose of the outage.
         - !ruby/object:Api::Type::Enum
           name: 'source'
+          output: true
           description: |
             The party that generated this notification. Note that the value of NSRC_GOOGLE has been
             deprecated in favor of GOOGLE. Can take the following value:
@@ -212,6 +215,7 @@ properties:
             - :GOOGLE
         - !ruby/object:Api::Type::Enum
           name: 'state'
+          output: true
           description: |
             State of this notification. Note that the versions of this enum prefixed with "NS_" have
             been deprecated in favor of the unprefixed values. Can take one of the following values:
@@ -226,6 +230,7 @@ properties:
             - :COMPLETED
         - !ruby/object:Api::Type::Enum
           name: 'issueType'
+          output: true
           description: |
             Form this outage is expected to take. Note that the versions of this enum prefixed with
             "IT_" have been deprecated in favor of the unprefixed values. Can take one of the
@@ -239,16 +244,19 @@ properties:
             - :PARTIAL_OUTAGE
         - !ruby/object:Api::Type::Array
           name: 'affectedCircuits'
+          output: true
           item_type: Api::Type::String
           description: |
             If issueType is IT_PARTIAL_OUTAGE, a list of the Google-side circuit IDs that will be
             affected.
         - !ruby/object:Api::Type::String
           name: 'startTime'
+          output: true
           description: |
             Scheduled start time for the outage (milliseconds since Unix epoch).
         - !ruby/object:Api::Type::String
           name: 'endTime'
+          output: true
           description: |
             Scheduled end time for the outage (milliseconds since Unix epoch).
   - !ruby/object:Api::Type::Array
@@ -259,19 +267,23 @@ properties:
       properties:
         - !ruby/object:Api::Type::String
           name: 'googleCircuitId'
+          output: true
           description: |
             Google-assigned unique ID for this circuit. Assigned at circuit turn-up.
         - !ruby/object:Api::Type::String
           name: 'googleDemarcId'
+          output: true
           description: |
             Google-side demarc ID for this circuit. Assigned at circuit turn-up and provided by
             Google to the customer in the LOA.
         - !ruby/object:Api::Type::String
           name: 'customerDemarcId'
+          output: true
           description: |
             Customer-side demarc ID for this circuit.
   - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
+    output: true
     description: |
       Labels for this resource. These can only be added or modified by the setLabels
       method. Each label key/value pair must comply with RFC1035. Label values may be empty.
