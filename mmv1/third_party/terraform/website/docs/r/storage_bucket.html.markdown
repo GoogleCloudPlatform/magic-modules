@@ -75,7 +75,7 @@ When creating a life cycle condition that does not also include an `age` field, 
 ```hcl
 resource "google_storage_bucket" "no-age-enabled" {
   provider = google-beta
-  name          = "somename-test"
+  name          = "no-age-enabled-bucket"
   location      = "US"
   force_destroy = true
 
