@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -359,7 +360,9 @@ func notRunTests(gaDiff, betaDiff string, result *vcr.Result) []string {
 		}
 	}
 
-	return maps.Keys(notRun)
+	notRunSlice := maps.Keys(notRun)
+	sort.Strings(notRunSlice)
+	return notRunSlice
 }
 
 func modifiedPackages(changedFiles []string) (map[string]struct{}, bool) {

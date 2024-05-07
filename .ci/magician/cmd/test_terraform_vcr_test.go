@@ -118,7 +118,7 @@ func TestNotRunTests(t *testing.T) {
 				PassedTests: []string{"TestAccOne"},
 				FailedTests: []string{"TestAccTwo"},
 			},
-			wantNotRun: []string{"TestAccThree", "TestAccFour"},
+			wantNotRun: []string{"TestAccFour", "TestAccThree"},
 		},
 		"tests removed and not run": {
 			gaDiff:   "-func TestAccThree(t *testing.T) {",
