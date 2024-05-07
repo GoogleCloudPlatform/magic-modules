@@ -145,7 +145,7 @@ func resourceComposerUserWorkloadsConfigMapRead(d *schema.ResourceData, meta int
 		return fmt.Errorf("Error setting UserWorkloadsConfigMap Name: %s", err)
 	}
 	if err := d.Set("data", res.Data); err != nil {
-		return fmt.Errorf("Error setting UserWorkloadsSecret Data: %s", err)
+		return fmt.Errorf("Error setting UserWorkloadsConfigMap Data: %s", err)
 	}
 	return nil
 }
