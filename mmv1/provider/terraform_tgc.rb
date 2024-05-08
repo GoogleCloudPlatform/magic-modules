@@ -305,7 +305,10 @@ module Provider
                        ['converters/google/convert.go',
                         'third_party/tgc/convert.go'],
                        ['converters/google/convert_test.go',
-                        'third_party/tgc/convert_test.go']
+                        'third_party/tgc/convert_test.go'],
+                       ['converters/google/resources/service_account_key.go',
+                        'third_party/tgc/service_account_key.go']
+                        
                      ])
     end
 
