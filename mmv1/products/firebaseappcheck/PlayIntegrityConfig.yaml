@@ -39,7 +39,7 @@ examples:
     name: "firebase_app_check_play_integrity_config_minimal"
     min_version: 'beta'
     # Need the time_sleep resource
-    pull_external: true
+    external_providers: ["random", "time"]
     primary_resource_id: "default"
     vars:
       package_name: "package.name.playintegrity"
@@ -49,7 +49,7 @@ examples:
     name: "firebase_app_check_play_integrity_config_full"
     min_version: 'beta'
     # Need the time_sleep resource
-    pull_external: true
+    external_providers: ["random", "time"]
     primary_resource_id: "default"
     vars:
       package_name: "package.name.playintegrity"
