@@ -1698,45 +1698,6 @@ resource "google_compute_router_nat" "foobar" {
 `, routerName, routerName, routerName, routerName)
 }
 
-<% unless version == "ga" -%>
-func testAccComputeRouterNatPrivateType(routerName string) string {
-	return fmt.Sprintf(`
-resource "google_compute_network" "foobar" {
-  name                    = "%s-net"
-  auto_create_subnetworks = false
-}
-
-resource "google_compute_subnetwork" "foobar" {
-  name          = "%s-subnet"
-  network       = google_compute_network.foobar.self_link
-  ip_cidr_range = "10.0.0.0/16"
-  region        = "us-central1"
-  purpose          = "PRIVATE_NAT"
-}
-
-resource "google_compute_router" "foobar" {
-  name    = "%s"
-  region  = google_compute_subnetwork.foobar.region
-  network = google_compute_network.foobar.self_link
-}
-
-resource "google_compute_router_nat" "foobar" {
-  name                               = "%s"
-  router                             = google_compute_router.foobar.name
-  region                             = google_compute_router.foobar.region
-  source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
-  type = "PRIVATE"
-  enable_dynamic_port_allocation = false
-  enable_endpoint_independent_mapping = false
-  min_ports_per_vm = 32
-  subnetwork {
-    name                    = google_compute_subnetwork.foobar.id
-    source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
-  }
-}
-`, routerName, routerName, routerName, routerName)
-}
-
 func testAccComputeRouterNatBaseResourcesWithPrivateNatSubnetworks(routerName, hubName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "foobar" {
@@ -1803,6 +1764,45 @@ resource "google_compute_router" "foobar" {
   ]
 }
 `, routerName, routerName, routerName, routerName, routerName, hubName, routerName, routerName)
+}
+
+<% unless version == "ga" -%>
+func testAccComputeRouterNatPrivateType(routerName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "foobar" {
+  name                    = "%s-net"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "foobar" {
+  name          = "%s-subnet"
+  network       = google_compute_network.foobar.self_link
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "us-central1"
+  purpose          = "PRIVATE_NAT"
+}
+
+resource "google_compute_router" "foobar" {
+  name    = "%s"
+  region  = google_compute_subnetwork.foobar.region
+  network = google_compute_network.foobar.self_link
+}
+
+resource "google_compute_router_nat" "foobar" {
+  name                               = "%s"
+  router                             = google_compute_router.foobar.name
+  region                             = google_compute_router.foobar.region
+  source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
+  type = "PRIVATE"
+  enable_dynamic_port_allocation = false
+  enable_endpoint_independent_mapping = false
+  min_ports_per_vm = 32
+  subnetwork {
+    name                    = google_compute_subnetwork.foobar.id
+    source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
+  }
+}
+`, routerName, routerName, routerName, routerName)
 }
 
 func testAccComputeRouterNatRulesBasic_privateNatOmitRules(routerName, hubName string) string {
