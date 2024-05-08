@@ -61,8 +61,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dns_managed_zone_basic'
     primary_resource_id: 'example-zone'
-    pull_external:
-      true
+    external_providers: ["random", "time"]
       # Randomness from random provider
     skip_vcr: true
   - !ruby/object:Provider::Terraform::Examples
