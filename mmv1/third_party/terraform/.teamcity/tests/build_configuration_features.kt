@@ -62,4 +62,31 @@ class BuildConfigurationFeatureTests {
             }
         }
     }
+
+    @Test
+    fun nonVCRBuildShouldHaveSaveArtifactsToGCS() {
+        val project = googleCloudRootProject(testContextParameters())
+        // Find Google (GA) project
+        var gaProject: Project? =  project.subProjects.find { p->  p.name == gaProjectName}
+        if (gaProject == null) {
+            fail("Could not find the Google (GA) project")
+        }
+        // Find Google Beta project
+        var betaProject: Project? =  project.subProjects.find { p->  p.name == betaProjectName}
+        if (betaProject == null) {
+            fail("Could not find the Google (GA) project")
+        }
+
+        (gaProject!!.subProjects + betaProject!!.subProjects).forEach{p ->
+            var exists: ArrayList<Boolean> = arrayListOf()
+            p.buildTypes.forEach{bt ->
+                bt.steps.items.forEach { s ->
+                    exists.add(s.name == "Tasks after running nightly tests: push artifacts(debug logs) to GCS")
+                }
+            }
+            if (exists.contains(false)){
+                fail("Project ${p.name} does not contain a build step that pushes artifacts to GCS")
+            }
+        }
+    }
 }
