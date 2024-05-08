@@ -257,7 +257,7 @@ properties:
             name: 'timeoutSeconds'
             immutable: true
             default_value: 1
-            description:  Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. Must be greater or equal to periodSeconds.
+            description: Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. Must be greater or equal to periodSeconds.
           - !ruby/object:Api::Type::NestedObject
             name: 'exec'
             description: Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. Must be greater or equal to periodSeconds.
