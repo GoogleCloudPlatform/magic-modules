@@ -76,6 +76,14 @@ data "google_iam_policy" "admin" {
 
 ## google\_organization\_iam\_binding
 
+
+!> **Warning:** Note that this resource will remove the role 
+   from any accounts not explicitly declared in the configuration. 
+   Always ensure that all required accounts are included to avoid unintended access removal. 
+   Alternatively, consider using the `google__organization_iam_member` resource, 
+   which allows for non-exclusive role assignments, 
+   adding specified members to a role without affecting others.
+
 ~> **Note:** If `role` is set to `roles/owner` and you don't specify a user or service account you have access to in `members`, you can lock yourself out of your organization.
 
 ```hcl
