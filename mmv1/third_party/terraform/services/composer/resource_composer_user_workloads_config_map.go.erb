@@ -75,7 +75,6 @@ func ResourceComposerUserWorkloadsConfigMap() *schema.Resource {
 				Type:        schema.TypeMap,
 				Optional:    true,
 				ForceNew:    false,
-				Sensitive:   true,
 				Description: `The "data" field of Kubernetes ConfigMap, organized in key-value pairs.`,
 			},
     },
