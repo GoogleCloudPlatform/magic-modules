@@ -173,7 +173,7 @@ The following arguments are supported:
 
 * `age` - (Optional) Minimum age of an object in days to satisfy this condition. If not supplied alongside another condition and without setting `no_age` to `true`, a default `age` of 0 will be set. 
 
-* `no_age` - (Optional) While set `true`, `age` value will be omitted. **Note** Required to set `true` when `age` is unset in the config file.  If ommitted alongside other numeric conditions set to `0` this can lead to a state where your bucket will automatically execute your configured Lifecycle Rule immediately.
+* `no_age` - (Optional) While set `true`, `age` value will be omitted from requests. This prevents a default age of `0` from being applied, and if you do not have an `age` value set, setting this to `true` is strongly recommended. When unset and other conditions are set to zero values, this can result in a rule that applies your action to all files in the bucket.
 
 * `created_before` - (Optional) A date in the RFC 3339 format YYYY-MM-DD. This condition is satisfied when an object is created before midnight of the specified date in UTC.
 
