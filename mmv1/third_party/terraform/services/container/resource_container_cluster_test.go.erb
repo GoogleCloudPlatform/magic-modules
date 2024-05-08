@@ -1524,6 +1524,31 @@ func TestAccContainerCluster_withLoggingVariantUpdates(t *testing.T) {
 	})
 }
 
+func TestAccContainerCluster_withAdvancedMachineFeaturesInNodePool(t *testing.T) {
+	t.Parallel()
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	nodePoolName := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(t, 10))
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withAdvancedMachineFeaturesInNodePool(clusterName, nodePoolName, networkName, subnetworkName, true),
+			},
+			{
+				ResourceName:            "google_container_cluster.with_advanced_machine_features_in_node_pool",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
 <% unless version == 'ga' -%>
 func TestAccContainerCluster_withNodePoolDefaults(t *testing.T) {
 	t.Parallel()
@@ -3789,7 +3814,7 @@ func TestAccContainerCluster_errorCleanDanglingCluster(t *testing.T) {
 
 	initConfig := testAccContainerCluster_withInitialCIDR(containerNetName, clusterName)
 	overlapConfig := testAccContainerCluster_withCIDROverlap(initConfig, clusterNameError)
-	overlapConfigWithTimeout := testAccContainerCluster_withCIDROverlapWithTimeout(initConfig, clusterNameErrorWithTimeout, "40s")
+	overlapConfigWithTimeout := testAccContainerCluster_withCIDROverlapWithTimeout(initConfig, clusterNameErrorWithTimeout, "1s")
 
 	checkTaintApplied := func(st *terraform.State) error {
 		// Return an error if there is no tainted (i.e. marked for deletion) cluster.
@@ -3835,7 +3860,7 @@ func TestAccContainerCluster_errorCleanDanglingCluster(t *testing.T) {
 				Check: checkTaintApplied,
 			},
 			{
-				// Next attempt to create the overlapping cluster with a 40s timeout. This will fail with a different error.
+				// Next attempt to create the overlapping cluster with a 1s timeout. This will fail with a different error.
 				Config:		   overlapConfigWithTimeout,
 				ExpectError: regexp.MustCompile("timeout while waiting for state to become 'DONE'"),
 			},
@@ -6219,6 +6244,30 @@ resource "google_container_cluster" "with_logging_variant_node_pool_default" {
   subnetwork    = "%s"
 }
 `, clusterName, loggingVariant, networkName, subnetworkName)
+}
+
+func testAccContainerCluster_withAdvancedMachineFeaturesInNodePool(clusterName, nodePoolName, networkName, subnetworkName string, nvEnabled bool) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_advanced_machine_features_in_node_pool" {
+  name               = "%s"
+  location           = "us-central1-f"
+
+  node_pool {
+    name               = "%s"
+    initial_node_count = 1
+    node_config {
+      machine_type = "c2-standard-4"
+      advanced_machine_features {
+        threads_per_core = 1
+        enable_nested_virtualization = "%t"
+	    }
+    }
+  }
+  deletion_protection = false
+  network    = "%s"
+  subnetwork    = "%s"
+}
+`, clusterName, nodePoolName, nvEnabled, networkName, subnetworkName)
 }
 
 <% unless version == 'ga' -%>

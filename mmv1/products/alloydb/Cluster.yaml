@@ -497,6 +497,56 @@ properties:
         description: |
           Name of the primary cluster must be in the format
           'projects/{project}/locations/{location}/clusters/{cluster_id}'
+  - !ruby/object:Api::Type::NestedObject
+    name: 'maintenanceUpdatePolicy'
+    description: |
+      MaintenanceUpdatePolicy defines the policy for system updates.
+    properties:
+      - !ruby/object:Api::Type::Array
+        name: 'maintenanceWindows'
+        description: |
+          Preferred windows to perform maintenance. Currently limited to 1.
+        item_type: !ruby/object:Api::Type::NestedObject
+          name: 'maintenanceWindow'
+          description: |
+            specifies a preferred day and time for maintenance.
+          properties:
+            - !ruby/object:Api::Type::Enum
+              name: 'day'
+              required: true
+              description: |
+                Preferred day of the week for maintenance, e.g. MONDAY, TUESDAY, etc.
+              values:
+                - :MONDAY
+                - :TUESDAY
+                - :WEDNESDAY
+                - :THURSDAY
+                - :FRIDAY
+                - :SATURDAY
+                - :SUNDAY
+            - !ruby/object:Api::Type::NestedObject
+              name: 'startTime'
+              required: true
+              description: |
+                Preferred time to start the maintenance operation on the specified day. Maintenance will start within 1 hour of this time.
+              properties:
+                - !ruby/object:Api::Type::Integer
+                  name: hours
+                  required: true
+                  description: |
+                    Hours of day in 24 hour format. Should be from 0 to 23.
+                - !ruby/object:Api::Type::Integer
+                  name: minutes
+                  description: |
+                    Minutes of hour of day. Currently, only the value 0 is supported.
+                - !ruby/object:Api::Type::Integer
+                  name: seconds
+                  description: |
+                    Seconds of minutes of the time. Currently, only the value 0 is supported.
+                - !ruby/object:Api::Type::Integer
+                  name: nanos
+                  description: |
+                    Fractions of seconds in nanoseconds. Currently, only the value 0 is supported.
 virtual_fields:
   - !ruby/object:Api::Type::Enum
     name: 'deletion_policy'
