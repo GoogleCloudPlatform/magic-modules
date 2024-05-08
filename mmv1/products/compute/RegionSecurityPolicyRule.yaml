@@ -232,4 +232,3 @@ properties:
             name: "intervalSec"
             description: |
               Interval over which the threshold is computed.
-
