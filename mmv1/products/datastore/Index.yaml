@@ -42,6 +42,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'datastore_index'
     primary_resource_id: 'default'
+    test_env_vars:
+      project_id: :PROJECT_NAME
     vars:
       property_name_1: 'property_a'
       property_name_2: 'property_b'

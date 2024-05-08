@@ -1,0 +1,30 @@
+resource "google_vmwareengine_network" "{{$.PrimaryResourceId}}" {
+  project     = google_project_service.acceptance.project
+  name        = "{{index $.TestEnvVars "location"}}-default" #Legacy network IDs are in the format: {region-id}-default
+  location    = "{{index $.TestEnvVars "location"}}"
+  type        = "LEGACY"
+  description = "VMwareEngine legacy network sample"
+}
+
+resource "google_project_service" "acceptance" {
+  project  = google_project.acceptance.project_id
+  service  = "vmwareengine.googleapis.com"
+
+  # Needed for CI tests for permissions to propagate, should not be needed for actual usage
+  depends_on = [time_sleep.wait_60_seconds]
+}
+
+# there can be only 1 Legacy network per region for a given project,
+# so creating new project for isolation in CI.
+resource "google_project" "acceptance" {
+  name            = "{{index $.Vars "proj_id"}}"
+  project_id      = "{{index $.Vars "proj_id"}}"
+  org_id          = "{{index $.TestEnvVars "org_id"}}"
+  billing_account = "{{index $.TestEnvVars "billing_account"}}"
+}
+
+resource "time_sleep" "wait_60_seconds" {
+  depends_on = [google_project.acceptance]
+
+  create_duration = "60s"
+}

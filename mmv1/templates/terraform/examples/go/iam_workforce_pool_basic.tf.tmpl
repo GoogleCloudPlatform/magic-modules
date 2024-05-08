@@ -1,0 +1,5 @@
+resource "google_iam_workforce_pool" "{{$.PrimaryResourceId}}" {
+  workforce_pool_id = "{{index $.Vars "workforce_pool_id"}}"
+  parent            = "organizations/{{index $.TestEnvVars "org_id"}}"
+  location          = "global"
+}

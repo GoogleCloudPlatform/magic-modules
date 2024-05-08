@@ -1,0 +1,5 @@
+resource "google_monitoring_group" "{{$.PrimaryResourceId}}" {
+  display_name = "tf-test {{index $.Vars "display_name"}}"
+
+  filter = "resource.metadata.region=\"europe-west2\""
+}

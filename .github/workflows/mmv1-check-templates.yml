@@ -1,0 +1,30 @@
+name: mmv1-check-templates
+
+permissions: read-all
+
+on:
+  pull_request:
+    paths:
+      - 'mmv1/**/*.erb'
+
+jobs:
+  version-guard-check:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
+        with:
+          path: repo
+          fetch-depth: 0
+      - name: Merge base branch
+        id: pull_request
+        run: |
+          cd repo
+          git config user.name "modular-magician"
+          git config user.email "magic-modules@google.com"
+          git fetch origin ${{ github.base_ref }} # Fetch the base branch
+          git merge --no-ff origin/${{ github.base_ref }} # Merge with the base branch
+      - name: Check for invalid version guards
+        run: |
+          cd repo/tools/template-check
+          git diff --name-only --diff-filter=d origin/${{ github.base_ref }} ../../*.erb | sed 's=^=../../=g' | go run main.go

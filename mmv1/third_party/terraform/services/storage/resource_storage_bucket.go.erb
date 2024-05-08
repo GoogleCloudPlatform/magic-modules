@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
@@ -15,6 +16,7 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
 
 	"github.com/gammazero/workerpool"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
@@ -61,6 +63,7 @@ func ResourceStorageBucket() *schema.Resource {
 				Required:    true,
 				ForceNew:    true,
 				Description: `The name of the bucket.`,
+				ValidateFunc: verify.ValidateGCSName,
 			},
 
 			"encryption": {
@@ -94,6 +97,7 @@ func ResourceStorageBucket() *schema.Resource {
 
 			"labels": {
 				Type:        schema.TypeMap,
+				ValidateFunc: labelKeyValidator,
 				Optional:    true,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Description: `A set of key/value label pairs to assign to the bucket.`,
@@ -518,6 +522,22 @@ func ResourceStorageBucket() *schema.Resource {
 const resourceDataplexGoogleLabelPrefix = "goog-dataplex"
 const resourceDataplexGoogleProvidedLabelPrefix = "labels." + resourceDataplexGoogleLabelPrefix
 
+var labelKeyRegex = regexp.MustCompile(`^[a-z0-9_-]{1,63}$`)
+
+func labelKeyValidator(val interface{}, key string) (warns []string, errs []error) {
+	if val == nil {
+		return
+	}
+
+	m := val.(map[string]interface{})
+	for k := range m {
+		if !labelKeyRegex.MatchString(k) {
+			errs = append(errs, fmt.Errorf("%q is an invalid label key. See https://cloud.google.com/storage/docs/tags-and-labels#bucket-labels", k))
+		}
+	}
+	return
+}
+
 func resourceDataplexLabelDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	if strings.HasPrefix(k, resourceDataplexGoogleProvidedLabelPrefix) && new == "" {
 		return true
@@ -560,9 +580,6 @@ func resourceStorageBucketCreate(d *schema.ResourceData, meta interface{}) error
 
 	// Get the bucket and location
 	bucket := d.Get("name").(string)
-	if err := tpgresource.CheckGCSName(bucket); err != nil {
-		return err
-	}
 	location := d.Get("location").(string)
 
 	// Create a bucket, setting the labels, location and name.

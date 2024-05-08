@@ -309,6 +309,17 @@ properties:
           - :TRANSLATIONS_ONLY
           - :ALL
   - !ruby/object:Api::Type::Array
+    name: 'endpointTypes'
+    immutable: true
+    min_size: 1
+    description: |
+      Specifies the endpoint Types supported by the NAT Gateway.
+      Supported values include:
+            `ENDPOINT_TYPE_VM`, `ENDPOINT_TYPE_SWG`,
+            `ENDPOINT_TYPE_MANAGED_PROXY_LB`.
+    default_from_api: true
+    item_type: Api::Type::String
+  - !ruby/object:Api::Type::Array
     name: rules
     description: 'A list of rules associated with this NAT.'
     send_empty_value: true

@@ -1,0 +1,5 @@
+resource "google_firebase_hosting_site" "default" {
+  provider = google-beta
+  project  = "{{index $.TestEnvVars "project_id"}}"
+  site_id = "{{index $.Vars "site_id"}}"
+}

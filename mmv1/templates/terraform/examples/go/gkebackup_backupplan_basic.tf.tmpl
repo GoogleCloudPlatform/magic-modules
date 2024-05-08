@@ -1,0 +1,27 @@
+resource "google_container_cluster" "primary" {
+  name               = "{{index $.Vars "cluster_name"}}"
+  location           = "us-central1"
+  initial_node_count = 1
+  workload_identity_config {
+    workload_pool = "{{index $.TestEnvVars "project"}}.svc.id.goog"
+  }
+  addons_config {
+    gke_backup_agent_config {
+      enabled = true
+    }
+  }
+  deletion_protection  = "{{index $.Vars "deletion_protection"}}"
+  network       = "{{index $.Vars "network_name"}}"
+  subnetwork    = "{{index $.Vars "subnetwork_name"}}"
+}
+
+resource "google_gke_backup_backup_plan" "basic" {
+  name = "{{index $.Vars "name"}}"
+  cluster = google_container_cluster.primary.id
+  location = "us-central1"
+  backup_config {
+    include_volume_data = true
+    include_secrets = true
+    all_namespaces = true
+  }
+}

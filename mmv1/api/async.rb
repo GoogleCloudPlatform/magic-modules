@@ -39,23 +39,9 @@ module Api
       # Contains information about an long-running operation, to make
       # requests for the state of an operation.
       attr_reader :timeouts
-      attr_reader :result
 
       def validate
-        check :result, type: Result
         check :timeouts, type: Api::Timeouts
-      end
-    end
-
-    # Base result class
-    class Result < Google::YamlValidator
-      # Contains information about the result of an Operation
-
-      attr_reader :resource_inside_response
-
-      def validate
-        super
-        check :resource_inside_response, type: :boolean, default: false
       end
     end
   end
@@ -127,8 +113,9 @@ module Api
     end
 
     # Represents the results of an Operation request
-    class Result < Async::Result
+    class Result < Google::YamlValidator
       attr_reader :path
+      attr_reader :resource_inside_response
 
       def initialize(path = nil, resource_inside_response = nil)
         super()
@@ -140,6 +127,7 @@ module Api
         super
 
         check :path, type: String
+        check :resource_inside_response, type: :boolean, default: false
       end
     end
 

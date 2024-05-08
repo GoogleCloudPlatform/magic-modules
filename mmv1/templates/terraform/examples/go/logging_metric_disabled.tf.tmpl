@@ -1,0 +1,9 @@
+resource "google_logging_metric" "{{$.PrimaryResourceId}}" {
+  name   = "{{index $.Vars "logging_metric_name"}}"
+  filter = "resource.type=gae_app AND severity>=ERROR"
+  metric_descriptor {
+    metric_kind = "DELTA"
+    value_type  = "INT64"
+  }
+  disabled = true
+}

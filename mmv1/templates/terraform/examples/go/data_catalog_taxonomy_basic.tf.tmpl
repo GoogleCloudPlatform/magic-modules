@@ -1,0 +1,5 @@
+resource "google_data_catalog_taxonomy" "{{$.PrimaryResourceId}}" {
+  display_name =  "{{index $.Vars "display_name"}}"
+  description = "A collection of policy tags"
+  activated_policy_types = ["FINE_GRAINED_ACCESS_CONTROL"]
+}

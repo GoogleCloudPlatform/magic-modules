@@ -42,12 +42,16 @@ examples:
     primary_resource_id: "pubsubconnection"
     vars:
       connection_name: "test-pubsub"
+    ignore_read_extra:
+      - 'status.0.description'
   - !ruby/object:Provider::Terraform::Examples
     name: "integration_connectors_connection_advanced"
     primary_resource_id: "zendeskconnection"
     vars:
       connection_name: "test-zendesk"
       secret_id: "test-secret"
+    ignore_read_extra:
+      - 'status.0.description'
   - !ruby/object:Provider::Terraform::Examples
     name: "integration_connectors_connection_sa"
     primary_resource_id: "zendeskconnection"
@@ -55,6 +59,8 @@ examples:
       connection_name: "test-zendesk"
       secret_id: "test-secret"
     skip_docs: true
+    ignore_read_extra:
+      - 'status.0.description'
   - !ruby/object:Provider::Terraform::Examples
     name: "integration_connectors_connection_oauth"
     primary_resource_id: "boxconnection"
@@ -62,6 +68,8 @@ examples:
       connection_name: "test-box"
       secret_id: "test-secret"
     skip_docs: true
+    ignore_read_extra:
+      - 'status.0.description'
   - !ruby/object:Provider::Terraform::Examples
     name: "integration_connectors_connection_oauth_ssh"
     primary_resource_id: "boxconnection"
@@ -69,6 +77,8 @@ examples:
       connection_name: "test-box"
       secret_id: "test-secret"
     skip_docs: true
+    ignore_read_extra:
+      - 'status.0.description'
   - !ruby/object:Provider::Terraform::Examples
     name: "integration_connectors_connection_oauth_cc"
     primary_resource_id: "boxconnection"
@@ -76,6 +86,8 @@ examples:
       connection_name: "test-box"
       secret_id: "test-secret"
     skip_docs: true
+    ignore_read_extra:
+      - 'status.0.description'
   - !ruby/object:Provider::Terraform::Examples
     name: "integration_connectors_connection_oauth_jwt"
     primary_resource_id: "boxconnection"
@@ -83,6 +95,8 @@ examples:
       connection_name: "test-box"
       secret_id: "test-secret"
     skip_docs: true
+    ignore_read_extra:
+      - 'status.0.description'
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: "name"

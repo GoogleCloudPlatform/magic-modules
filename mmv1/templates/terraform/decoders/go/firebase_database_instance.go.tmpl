@@ -1,0 +1,6 @@
+if v := res["state"]; v == "DELETED" {
+	return nil, nil
+} 
+res["desired_state"] = res["state"]
+
+return res, nil

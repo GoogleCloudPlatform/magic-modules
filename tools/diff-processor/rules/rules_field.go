@@ -178,8 +178,11 @@ func fieldRule_GrowingMin_func(old, new *schema.Schema, mc MessageContext) strin
 		return ""
 	}
 	message := mc.message
-	if old.MinItems < new.MinItems {
+	if old.MinItems < new.MinItems || old.MinItems == 0 && new.MinItems > 0 {
 		oldMin := fmt.Sprint(old.MinItems)
+		if old.MinItems == 0 {
+			oldMin = "unset"
+		}
 		newMin := fmt.Sprint(new.MinItems)
 		message = strings.ReplaceAll(message, "{{oldMin}}", oldMin)
 		message = strings.ReplaceAll(message, "{{newMin}}", newMin)
@@ -202,9 +205,12 @@ func fieldRule_ShrinkingMax_func(old, new *schema.Schema, mc MessageContext) str
 		return ""
 	}
 	message := mc.message
-	if old.MaxItems > new.MaxItems {
-		oldMax := fmt.Sprint(old.MinItems)
-		newMax := fmt.Sprint(new.MinItems)
+	if old.MaxItems > new.MaxItems || old.MaxItems == 0 && new.MaxItems > 0 {
+		oldMax := fmt.Sprint(old.MaxItems)
+		if old.MaxItems == 0 {
+			oldMax = "unset"
+		}
+		newMax := fmt.Sprint(new.MaxItems)
 		message = strings.ReplaceAll(message, "{{oldMax}}", oldMax)
 		message = strings.ReplaceAll(message, "{{newMax}}", newMax)
 		return populateMessageContext(message, mc)

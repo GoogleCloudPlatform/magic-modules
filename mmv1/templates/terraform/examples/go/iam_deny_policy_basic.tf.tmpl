@@ -1,0 +1,41 @@
+resource "google_project" "project" {
+  project_id      = "{{index $.Vars "project_name"}}"
+  name            = "{{index $.Vars "project_name"}}"
+  org_id          = "{{index $.TestEnvVars "org_id"}}"
+  billing_account = "{{index $.TestEnvVars "billing_account"}}"
+}
+
+resource "google_iam_deny_policy" "{{$.PrimaryResourceId}}" {
+  parent   = urlencode("cloudresourcemanager.googleapis.com/projects/${google_project.project.project_id}")
+  name     = "{{index $.Vars "policy_name"}}"
+  display_name = "A deny rule"
+  rules {
+    description = "First rule"
+    deny_rule {
+      denied_principals = ["principalSet://goog/public:all"]
+      denial_condition {
+        title = "Some expr"
+        expression = "!resource.matchTag('12345678/env', 'test')"
+      }
+      denied_permissions = ["cloudresourcemanager.googleapis.com/projects.update"]
+    }
+  }
+  rules {
+    description = "Second rule"
+    deny_rule {
+      denied_principals = ["principalSet://goog/public:all"]
+      denial_condition {
+        title = "Some expr"
+        expression = "!resource.matchTag('12345678/env', 'test')"
+      }
+      denied_permissions = ["cloudresourcemanager.googleapis.com/projects.update"]
+      exception_principals = ["principal://iam.googleapis.com/projects/-/serviceAccounts/${google_service_account.test-account.email}"]
+    }
+  }
+}
+
+resource "google_service_account" "test-account" {
+  account_id   = "{{index $.Vars "account_id"}}"
+  display_name = "Test Service Account"
+  project      = google_project.project.project_id
+}

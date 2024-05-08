@@ -56,7 +56,7 @@ examples:
     primary_resource_id: 'access-policy'
     test_env_vars:
       org_id: :ORG_ID
-      project: '"acm-tf-test-" + acctest.RandString(t, 10)'
+      project: :PROJECT_NAME
 # Skipping the sweeper due to the non-standard base_url
 skip_sweeper: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode

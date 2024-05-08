@@ -435,7 +435,7 @@ var fieldRule_GrowingMinTestCases = []fieldTestCase{
 			MinItems: 1,
 		},
 		newField: &schema.Schema{
-			MaxItems: 1,
+			MinItems: 1,
 		},
 		expectedViolation: false,
 	},
@@ -469,7 +469,7 @@ var fieldRule_GrowingMinTestCases = []fieldTestCase{
 		name:     "field added",
 		oldField: nil,
 		newField: &schema.Schema{
-			MaxItems: 1,
+			MinItems: 1,
 		},
 		expectedViolation: false,
 	},
@@ -480,6 +480,14 @@ var fieldRule_GrowingMinTestCases = []fieldTestCase{
 		},
 		newField:          nil,
 		expectedViolation: false,
+	},
+	{
+		name:     "min unset to defined",
+		oldField: &schema.Schema{},
+		newField: &schema.Schema{
+			MinItems: 2,
+		},
+		expectedViolation: true,
 	},
 }
 
@@ -493,7 +501,7 @@ var fieldRule_ShrinkingMaxTestCases = []fieldTestCase{
 	{
 		name: "control:max - static",
 		oldField: &schema.Schema{
-			MinItems: 2,
+			MaxItems: 2,
 		},
 		newField: &schema.Schema{
 			MaxItems: 2,
@@ -537,10 +545,18 @@ var fieldRule_ShrinkingMaxTestCases = []fieldTestCase{
 	{
 		name: "field removed",
 		oldField: &schema.Schema{
-			MinItems: 2,
+			MaxItems: 2,
 		},
 		newField:          nil,
 		expectedViolation: false,
+	},
+	{
+		name:     "max unset to defined",
+		oldField: &schema.Schema{},
+		newField: &schema.Schema{
+			MaxItems: 2,
+		},
+		expectedViolation: true,
 	},
 }
 

@@ -100,14 +100,6 @@ func TestExecMembershipChecker_AmbiguousUserFlow(t *testing.T) {
 		t.Fatalf("Wrong calls for %s, got %v, expected %v", method, calls, expected)
 	}
 
-	method = "GetAwaitingApprovalBuildLink"
-	expected = [][]any{{"pr1", "sha1"}}
-	if calls, ok := cb.calledMethods[method]; !ok {
-		t.Fatal("Awaiting approval build link wasn't gotten from pull request")
-	} else if !reflect.DeepEqual(calls, expected) {
-		t.Fatalf("Wrong calls for %s, got %v, expected %v", method, calls, expected)
-	}
-
 	if _, ok := gh.calledMethods["ApproveCommunityChecker"]; ok {
 		t.Fatal("Incorrectly approved community checker for ambiguous user")
 	}

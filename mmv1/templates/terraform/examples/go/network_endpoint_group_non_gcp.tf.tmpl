@@ -1,0 +1,17 @@
+resource "google_compute_network_endpoint_group" "{{$.PrimaryResourceId}}" {
+  name                  = "{{index $.Vars "neg_name"}}"
+  network               = google_compute_network.default.id
+  default_port          = "90"
+  zone                  = "us-central1-a"
+  network_endpoint_type = "NON_GCP_PRIVATE_IP_PORT"
+}
+
+resource "google_compute_network_endpoint" "default-endpoint" {
+  network_endpoint_group = google_compute_network_endpoint_group.{{$.PrimaryResourceId}}.name
+  port = google_compute_network_endpoint_group.{{$.PrimaryResourceId}}.default_port
+  ip_address = "127.0.0.1"
+}
+
+resource "google_compute_network" "default" {
+  name = "{{index $.Vars "network_name"}}"
+}

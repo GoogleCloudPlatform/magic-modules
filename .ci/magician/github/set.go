@@ -117,10 +117,11 @@ func (gh *Client) CreateWorkflowDispatchEvent(workflowFileName string, inputs ma
 	return nil
 }
 
-func (gh *Client) MergePullRequest(owner, repo, prNumber string) error {
+func (gh *Client) MergePullRequest(owner, repo, prNumber, commitSha string) error {
 	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/pulls/%s/merge", owner, repo, prNumber)
 	err := utils.RequestCall(url, "PUT", gh.token, nil, map[string]any{
 		"merge_method": "squash",
+		"sha":          commitSha,
 	})
 
 	if err != nil {

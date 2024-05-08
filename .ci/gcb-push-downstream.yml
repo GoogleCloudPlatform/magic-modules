@@ -181,7 +181,7 @@ steps:
       entrypoint: '/workspace/.ci/scripts/go-plus/vcr-cassette-merger/vcr_merge.sh'
       secretEnv: ["GITHUB_TOKEN_CLASSIC", "GOOGLE_PROJECT"]
       id: vcr-merge
-      waitFor: ["tpg-push"]
+      waitFor: ["tpg-push", "tpgb-push", "tgc-push", "tf-oics-push"]
       env:
         - BASE_BRANCH=$BRANCH_NAME
       args:

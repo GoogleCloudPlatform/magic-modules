@@ -1,0 +1,9 @@
+resource "google_network_services_mesh" "{{$.PrimaryResourceId}}" {
+  provider    = google-beta
+  name        = "{{index $.Vars "resource_name"}}"
+  labels      = {
+    foo = "bar"
+  }
+  description = "my description"
+  interception_port = 443
+}

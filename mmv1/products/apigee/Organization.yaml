@@ -52,8 +52,8 @@ examples:
     name: 'apigee_organization_cloud_basic'
     skip_test:
       true
-      # This is a more verbose version of the above that creates all
-      # the resources needed for the acceptance test.
+  # This is a more verbose version of the above that creates all
+  # the resources needed for the acceptance test.
   - !ruby/object:Provider::Terraform::Examples
     name: 'apigee_organization_cloud_basic_test'
     primary_resource_id: 'org'
@@ -64,14 +64,14 @@ examples:
       - properties
     skip_docs:
       true
-      # Resource creation race
+    # Resource creation race
     skip_vcr: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'apigee_organization_cloud_basic_disable_vpc_peering'
     skip_test:
       true
-      # This is a more verbose version of the above that creates all
-      # the resources needed for the acceptance test.
+  # This is a more verbose version of the above that creates all
+  # the resources needed for the acceptance test.
   - !ruby/object:Provider::Terraform::Examples
     name: 'apigee_organization_cloud_basic_disable_vpc_peering_test'
     primary_resource_id: 'org'
@@ -82,39 +82,52 @@ examples:
       - properties
     skip_docs:
       true
-      # Resource creation race
+    # Resource creation race
     skip_vcr: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'apigee_organization_cloud_full'
     skip_test:
       true
-      # This is a more verbose version of the above that creates all
-      # the resources needed for the acceptance test. While all Apigee
-      # resources in this test are in the GA API, we depend on a service
-      # identity resource which is only available in the beta provider.
+  # This is a more verbose version of the above that creates all
+  # the resources needed for the acceptance test. While all Apigee
+  # resources in this test are in the GA API, we depend on a service
+  # identity resource which is only available in the beta provider.
   - !ruby/object:Provider::Terraform::Examples
     name: 'apigee_organization_cloud_full_test'
     primary_resource_id: 'org'
     test_env_vars:
       org_id: :ORG_ID
       billing_account: :BILLING_ACCT
+    ignore_read_extra:
+      - properties
     skip_docs: true
     min_version:
       beta
-      # Resource creation race
+    # Resource creation race
     skip_vcr: true
-    ignore_read_extra:
-      - properties
   - !ruby/object:Provider::Terraform::Examples
     name: 'apigee_organization_cloud_full_disable_vpc_peering'
     skip_test:
       true
-      # This is a more verbose version of the above that creates all
-      # the resources needed for the acceptance test. While all Apigee
-      # resources in this test are in the GA API, we depend on a service
-      # identity resource which is only available in the beta provider.
+  # This is a more verbose version of the above that creates all
+  # the resources needed for the acceptance test. While all Apigee
+  # resources in this test are in the GA API, we depend on a service
+  # identity resource which is only available in the beta provider.
   - !ruby/object:Provider::Terraform::Examples
     name: 'apigee_organization_cloud_full_disable_vpc_peering_test'
+    primary_resource_id: 'org'
+    test_env_vars:
+      org_id: :ORG_ID
+      billing_account: :BILLING_ACCT
+    ignore_read_extra:
+      - properties
+    skip_docs: true
+    min_version:
+      beta
+    # Resource creation race
+    skip_vcr: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'apigee_organization_retention_test'
     primary_resource_id: 'org'
     test_env_vars:
       org_id: :ORG_ID
@@ -122,10 +135,10 @@ examples:
     skip_docs: true
     min_version:
       beta
-      # Resource creation race
+    # Resource creation race
     skip_vcr: true
   - !ruby/object:Provider::Terraform::Examples
-    name: 'apigee_organization_retention_test'
+    name: 'apigee_organization_drz_test'
     primary_resource_id: 'org'
     test_env_vars:
       org_id: :ORG_ID
@@ -177,6 +190,24 @@ properties:
     name: 'analyticsRegion'
     description: |
       Primary GCP region for analytics data storage. For valid values, see [Create an Apigee organization](https://cloud.google.com/apigee/docs/api-platform/get-started/create-org).
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: 'apiConsumerDataLocation'
+    description: |
+      This field is needed only for customers using non-default data residency regions.
+      Apigee stores some control plane data only in single region.
+      This field determines which single region Apigee should use.
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: 'apiConsumerDataEncryptionKeyName'
+    description: |
+      Cloud KMS key name used for encrypting API consumer data.
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: 'controlPlaneEncryptionKeyName'
+    description: |
+      Cloud KMS key name used for encrypting control plane data that is stored in a multi region.
+      Only used for the data residency region "US" or "EU".
     immutable: true
   - !ruby/object:Api::Type::String
     name: 'authorizedNetwork'
@@ -235,6 +266,7 @@ properties:
       - !ruby/object:Api::Type::Array
         name: 'property'
         description: List of all properties in the object.
+        custom_flatten: 'templates/terraform/custom_flatten/apigee_organization_property.go.erb'
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::String

@@ -1,0 +1,24 @@
+resource "google_secret_manager_secret" "secret-basic" {
+  secret_id = "{{index $.Vars "secret_name"}}"
+
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "secret-version-basic" {
+  secret = google_secret_manager_secret.secret-basic.id
+
+  secret_data = "secret-data"
+}
+
+resource "google_network_services_edge_cache_origin" "{{$.PrimaryResourceId}}" {
+  name           = "{{index $.Vars "resource_name"}}"
+  origin_address = "gs://media-edge-default"
+  description    = "The default bucket for V4 authentication"
+  aws_v4_authentication {
+    access_key_id             = "ACCESSKEYID"
+    secret_access_key_version = google_secret_manager_secret_version.secret-version-basic.id
+    origin_region             = "auto"
+  }
+}

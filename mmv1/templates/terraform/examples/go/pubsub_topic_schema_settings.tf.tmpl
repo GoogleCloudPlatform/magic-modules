@@ -1,0 +1,15 @@
+resource "google_pubsub_schema" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "schema_name"}}"
+  type = "AVRO"
+  definition = "{\n  \"type\" : \"record\",\n  \"name\" : \"Avro\",\n  \"fields\" : [\n    {\n      \"name\" : \"StringField\",\n      \"type\" : \"string\"\n    },\n    {\n      \"name\" : \"IntField\",\n      \"type\" : \"int\"\n    }\n  ]\n}\n"
+}
+
+resource "google_pubsub_topic" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "topic_name"}}"
+
+  depends_on = [google_pubsub_schema.{{$.PrimaryResourceId}}]
+  schema_settings {
+    schema = "projects/{{index $.TestEnvVars "project_name"}}/schemas/{{index $.Vars "schema_name"}}"
+    encoding = "JSON"
+  }
+}

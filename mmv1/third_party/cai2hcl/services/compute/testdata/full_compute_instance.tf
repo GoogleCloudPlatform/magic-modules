@@ -83,6 +83,16 @@ resource "google_compute_instance" "test1" {
     subnetwork  = "projects/test-subnetwork_project/regions/us-central1/subnetworks/test-subnetwork"
   }
 
+  network_interface {
+    ipv6_access_config {
+      external_ipv6               = "0000:00000:00000:00000:00000:00000:00000:1"
+      external_ipv6_prefix_length = "96"
+      network_tier                = "PREMIUM"
+    }
+
+    queue_count = 0
+  }
+
   scheduling {
     automatic_restart   = true
     on_host_maintenance = "test-on_host_maintenance"

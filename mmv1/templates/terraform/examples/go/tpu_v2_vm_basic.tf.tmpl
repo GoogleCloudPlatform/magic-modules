@@ -1,0 +1,12 @@
+data "google_tpu_v2_runtime_versions" "available" {
+  provider = google-beta
+}
+
+resource "google_tpu_v2_vm" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+
+  name = "{{index $.Vars "vm_name"}}"
+  zone = "us-central1-c"
+
+  runtime_version = "tpu-vm-tf-2.13.0"
+}

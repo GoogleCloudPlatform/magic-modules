@@ -1,0 +1,47 @@
+resource "google_cloud_identity_group" "group" {
+  display_name = "{{index $.Vars "group_id"}}"
+
+  parent = "customers/{{index $.TestEnvVars "cust_id"}}"
+
+  group_key {
+    id = "{{index $.Vars "group_id"}}@{{index $.TestEnvVars "org_domain"}}"
+  }
+
+  labels = {
+    "cloudidentity.googleapis.com/groups.discussion_forum" = ""
+  }
+}
+
+resource "google_access_context_manager_access_level" "{{index $.Vars "access_level_id"}}" {
+  parent = "accessPolicies/${google_access_context_manager_access_policy.access-policy.name}"
+  name   = "accessPolicies/${google_access_context_manager_access_policy.access-policy.name}/accessLevels/{{index $.Vars "access_level_name"}}"
+  title  = "{{index $.Vars "access_level_name"}}"
+  basic {
+    conditions {
+      device_policy {
+        require_screen_lock = true
+        os_constraints {
+          os_type = "DESKTOP_CHROME_OS"
+        }
+      }
+      regions = [
+  "US",
+      ]
+    }
+  }
+}
+
+resource "google_access_context_manager_access_policy" "access-policy" {
+  parent = "organizations/{{index $.TestEnvVars "org_id"}}"
+  title  = "my policy"
+}
+
+
+
+resource "google_access_context_manager_gcp_user_access_binding" "{{$.PrimaryResourceId}}" {
+  organization_id = "{{index $.TestEnvVars "org_id"}}"
+  group_key       = trimprefix(google_cloud_identity_group.group.id, "groups/")
+  access_levels   = [
+    google_access_context_manager_access_level.{{index $.Vars "access_level_id"}}.name,
+  ]
+}

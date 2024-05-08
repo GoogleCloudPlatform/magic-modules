@@ -286,7 +286,11 @@ func testAccCheckComputeNetworkEndpointsWithAllEndpointsDestroyed(t *testing.T, 
 func testAccComputeNetworkEndpointsListEndpoints(t *testing.T, negId string) ([]interface{}, error) {
 	config := acctest.GoogleProviderConfig(t)
 
-	url := fmt.Sprintf("https://www.googleapis.com/compute/<% if version == 'ga' %>v1<% else %>beta<% end %>/%s/listNetworkEndpoints", negId)
+	<% if version == 'ga' -%>
+	url := fmt.Sprintf("https://www.googleapis.com/compute/v1/%s/listNetworkEndpoints", negId)
+	<% else -%>
+	url := fmt.Sprintf("https://www.googleapis.com/compute/beta/%s/listNetworkEndpoints", negId)
+	<% end -%>
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "POST",

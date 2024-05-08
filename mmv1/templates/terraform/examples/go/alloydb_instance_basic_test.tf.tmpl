@@ -1,0 +1,25 @@
+resource "google_alloydb_instance" "{{$.PrimaryResourceId}}" {
+  cluster       = google_alloydb_cluster.{{$.PrimaryResourceId}}.name
+  instance_id   = "{{index $.Vars "alloydb_instance_name"}}"
+  instance_type = "PRIMARY"
+
+  machine_config {
+    cpu_count = 2
+  }
+}
+
+resource "google_alloydb_cluster" "{{$.PrimaryResourceId}}" {
+  cluster_id = "{{index $.Vars "alloydb_cluster_name"}}"
+  location   = "us-central1"
+  network    = data.google_compute_network.default.id
+
+  initial_user {
+    password = "{{index $.Vars "alloydb_cluster_name"}}"
+  }
+}
+
+data "google_project" "project" {}
+
+data "google_compute_network" "default" {
+  name = "{{index $.Vars "network_name"}}"
+}

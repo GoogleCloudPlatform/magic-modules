@@ -67,7 +67,7 @@ examples:
       - "client.0.api_key"
       - "client.0.firebase_subdomain"
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_create: 'templates/terraform/custom_create/identity_platform_config.go'
+  custom_create: 'templates/terraform/custom_create/identity_platform_config.go.erb'
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'

@@ -333,6 +333,7 @@ func flattenIpv6AccessConfigs(ipv6AccessConfigs []*compute.AccessConfig) []map[s
 		}
 		flattened[i]["public_ptr_domain_name"] = ac.PublicPtrDomainName
 		flattened[i]["external_ipv6"] = ac.ExternalIpv6
+		flattened[i]["external_ipv6_prefix_length"] = ac.ExternalIpv6PrefixLength
 	}
 	return flattened
 }

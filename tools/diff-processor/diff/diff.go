@@ -9,9 +9,7 @@ import (
 	"golang.org/x/exp/maps"
 )
 
-// SchemaDiff is a nested map with field names as keys and Field objects
-// as bottom-level values.
-// Fields are assumed not to be covered until detected in a test.
+// SchemaDiff is a nested map with resource names as top-level keys.
 type SchemaDiff map[string]ResourceDiff
 
 type ResourceDiff struct {
