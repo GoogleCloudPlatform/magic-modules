@@ -9,8 +9,8 @@ resource "google_compute_interconnect" "<%= ctx[:primary_resource_id] %>" {
   requested_link_count = 1
   admin_enabled        = true
   description          = ""
-  macsec_enabled       = true
+  macsec_enabled       = false
   noc_contact_email   = ""
   remote_location      = ""
-  requested_features   = ["macsec"]
+  requested_features   = []
 }
