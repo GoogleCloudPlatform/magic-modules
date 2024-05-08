@@ -624,19 +624,19 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
 func testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigStartCloudSql(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_data_loss_prevention_inspect_template" "basic" {
-	parent = "projects/%{project}"
-	description = "Description"
-	display_name = "Display"
-	inspect_config {
-		info_types {
-			name = "EMAIL_ADDRESS"
-		}
-	}
+    parent = "projects/%{project}"
+    description = "Description"
+    display_name = "Display"
+    inspect_config {
+        info_types {
+            name = "EMAIL_ADDRESS"
+        }
+    }
 }
 resource "google_data_loss_prevention_discovery_config" "basic" {
-	parent = "projects/%{project}/locations/%{location}"
-	location = "%{location}"
-	status = "RUNNING"
+    parent = "projects/%{project}/locations/%{location}"
+    location = "%{location}"
+    status = "RUNNING"
     targets {
         cloud_sql_target {
             filter {
@@ -651,7 +651,7 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
                     }
                 }
             }
-			conditions {
+            conditions {
                 database_engines = ["MYSQL", "POSTGRES"]
                 types = ["DATABASE_RESOURCE_TYPE_ALL_SUPPORTED_TYPES"]
             }
@@ -663,7 +663,7 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
             filter {
                 others {}
             }
-			generation_cadence {
+            generation_cadence {
                 schema_modified_cadence {
                     types = ["NEW_COLUMNS"]
                     frequency = "UPDATE_FREQUENCY_MONTHLY"
@@ -680,20 +680,20 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
 func testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigUpdateCloudSql(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_data_loss_prevention_inspect_template" "basic" {
-	parent = "projects/%{project}"
-	description = "Description"
-	display_name = "Display"
-	inspect_config {
-		info_types {
-			name = "EMAIL_ADDRESS"
-		}
-	}
+    parent = "projects/%{project}"
+    description = "Description"
+    display_name = "Display"
+    inspect_config {
+        info_types {
+            name = "EMAIL_ADDRESS"  
+        }
+    }
 }
 resource "google_data_loss_prevention_discovery_config" "basic" {
-	parent = "projects/%{project}/locations/%{location}"
-	location = "%{location}"
-	status = "RUNNING"
-	targets {
+    parent = "projects/%{project}/locations/%{location}"
+    location = "%{location}"
+    status = "RUNNING"
+    targets {
         cloud_sql_target {
             filter {
                 collection {
@@ -719,13 +719,13 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
                 refresh_frequency = "UPDATE_FREQUENCY_MONTHLY"
             }
         }
-	}
-	targets {
+    }
+    targets {
         cloud_sql_target {
             filter {
                 others {}
             }
-			generation_cadence {
+            generation_cadence {
                 schema_modified_cadence {
                     types = ["NEW_COLUMNS", "REMOVED_COLUMNS"]
                     frequency = "UPDATE_FREQUENCY_DAILY"

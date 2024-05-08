@@ -337,6 +337,7 @@ properties:
             - !ruby/object:Api::Type::NestedObject
               name: filter
               description: 'Required. The tables the discovery cadence applies to. The first target with a matching filter will be the one to apply to a table.'
+              required: true
               properties:
                 - !ruby/object:Api::Type::NestedObject
                   name: collection
