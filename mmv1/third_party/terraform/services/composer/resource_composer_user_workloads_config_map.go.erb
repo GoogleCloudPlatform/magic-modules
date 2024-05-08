@@ -236,7 +236,7 @@ func resourceComposerUserWorkloadsConfigMapImport(d *schema.ResourceData, meta i
 	return []*schema.ResourceData{d}, nil
 }
 
-func resourceComposerUserWorkloadsConfigMapName(d *schema.ResourceData, config *transport_tpg.Config) (*UserWorkloadsConfiMapName, error) {
+func resourceComposerUserWorkloadsConfigMapName(d *schema.ResourceData, config *transport_tpg.Config) (*UserWorkloadsConfigMapName, error) {
 	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return nil, err
@@ -247,7 +247,7 @@ func resourceComposerUserWorkloadsConfigMapName(d *schema.ResourceData, config *
 		return nil, err
 	}
 
-	return &UserWorkloadsConfiMapName{
+	return &UserWorkloadsConfigMapName{
 		Project:     project,
 		Region:      region,
 		Environment: d.Get("environment").(string),
@@ -255,17 +255,17 @@ func resourceComposerUserWorkloadsConfigMapName(d *schema.ResourceData, config *
 	}, nil
 }
 
-type UserWorkloadsConfiMapName struct {
+type UserWorkloadsConfigMapName struct {
 	Project     string
 	Region      string
 	Environment string
 	ConfigMap   string
 }
 
-func (n *UserWorkloadsConfiMapName) ResourceName() string {
+func (n *UserWorkloadsConfigMapName) ResourceName() string {
 	return fmt.Sprintf("projects/%s/locations/%s/environments/%s/userWorkloadsConfigMaps/%s", n.Project, n.Region, n.Environment, n.ConfigMap)
 }
 
-func (n *UserWorkloadsConfiMapName) ParentName() string {
+func (n *UserWorkloadsConfigMapName) ParentName() string {
 	return fmt.Sprintf("projects/%s/locations/%s/environments/%s", n.Project, n.Region, n.Environment)
 }
