@@ -88,7 +88,13 @@ func TestAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *testing.T
 	{{- else }}
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 	{{- end }}
-	{{- if $e.PullExternal }}
+	{{- if $e.ExternalProviders }}
+		ExternalProviders: map[string]resource.ExternalProvider{
+		{{- range $provider := $e.ExternalProviders }}
+			"{{$provider}}": {},
+		{{- end }}
+		},
+	{{- else if $e.PullExternal }}
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"random": {},
 			"time": {},

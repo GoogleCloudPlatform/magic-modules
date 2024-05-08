@@ -37,7 +37,7 @@ examples:
       connection_profile_id: 'my-profile'
   - !ruby/object:Provider::Terraform::Examples
     name: 'datastream_connection_profile_postgresql_private_connection'
-    pull_external: true
+    external_providers: ["random", "time"]
     primary_resource_id: 'default'
     # Random provider
     skip_vcr: true

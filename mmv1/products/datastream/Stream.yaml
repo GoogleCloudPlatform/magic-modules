@@ -50,7 +50,7 @@ custom_diff: [
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'datastream_stream_basic'
-    pull_external: true
+    external_providers: ["random", "time"]
     primary_resource_id: 'default'
     skip_docs:
       true
@@ -71,7 +71,7 @@ examples:
       deletion_protection: 'false'
   - !ruby/object:Provider::Terraform::Examples
     name: 'datastream_stream_full'
-    pull_external: true
+    external_providers: ["random", "time"]
     primary_resource_id:
       'default'
       # Random provider
@@ -117,12 +117,12 @@ examples:
       instance_name: 'instance-name'
       sql_user_name: 'my-user'
       source_connection_profile_id: 'source-profile'
-    pull_external: true
+    external_providers: ["random", "time"]
     # Random provider
     skip_vcr: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'datastream_stream_bigquery'
-    pull_external: true
+    external_providers: ["random", "time"]
     primary_resource_id:
       'default'
       # Random provider
