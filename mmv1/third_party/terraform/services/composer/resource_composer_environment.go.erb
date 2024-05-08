@@ -742,7 +742,7 @@ func ResourceComposerEnvironment() *schema.Resource {
 							Type:         schema.TypeList,
 							Optional:     true,
 							Computed:     true,
-							AtLeastOneOf: composerDataRetentionKeys,
+							AtLeastOneOf: composerConfigKeys,
 							MaxItems:     1,
 							Description:  `The configuration setting for Airflow data retention mechanism. This field is supported for Cloud Composer environments in versions composer-2.0.32-airflow-2.1.4. or newer`,
 							Elem: &schema.Resource{
@@ -751,6 +751,7 @@ func ResourceComposerEnvironment() *schema.Resource {
 										Type:         schema.TypeList,
 										Description: `Optional. The configuration setting for Task Logs.`,
 										Optional:     true,
+										AtLeastOneOf: composerDataRetentionKeys,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"storage_mode": {
@@ -766,6 +767,7 @@ func ResourceComposerEnvironment() *schema.Resource {
 										Type:			schema.TypeList,
 										Description: 	`Optional. The configuration setting for Airflow Metadata Database Retention.`,
 										Optional: 		true,
+										AtLeastOneOf: composerDataRetentionKeys,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"retention_mode": {

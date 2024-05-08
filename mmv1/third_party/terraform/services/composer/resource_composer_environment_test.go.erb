@@ -3551,10 +3551,10 @@ resource "google_composer_environment" "test" {
           storage_mode = "CLOUD_LOGGING_ONLY"
         }
 		// This will work only in projects with experiment enabled.
-		// airflow_metadata_retention_config {
-		// 	retention_mode = "RETENTION_MODE_ENABLED"
-		// 	retention_days = 100
-		// }
+		airflow_metadata_retention_config {
+			retention_mode = "RETENTION_MODE_ENABLED"
+			retention_days = 100
+		}
       }
       private_environment_config {
         enable_private_endpoint                 = true
