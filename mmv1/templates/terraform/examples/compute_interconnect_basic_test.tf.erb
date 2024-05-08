@@ -8,9 +8,8 @@ resource "google_compute_interconnect" "<%= ctx[:primary_resource_id] %>" {
   location             = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.name}/global/interconnectLocations/z2z-us-east4-zone1-lciadl-a" # Special location only available for Google testing.
   requested_link_count = 1
   admin_enabled        = true
-  description          = ""
+  description          = "example description"
   macsec_enabled       = false
-  noc_contact_email   = ""
-  remote_location      = ""
+  noc_contact_email    = "user@example.com"
   requested_features   = []
 }
