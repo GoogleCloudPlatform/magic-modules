@@ -180,17 +180,18 @@ Passed tests: ` + fmt.Sprintf("`%d`", len(replayingResult.PassedTests)) + `
 Skipped tests: ` + fmt.Sprintf("`%d`", len(replayingResult.SkippedTests)) + `
 Affected tests: ` + fmt.Sprintf("`%d`", len(replayingResult.FailedTests)) + `
 
-<details><summary>Click here to see the affected service packages</summary><blockquote>` + affectedServicesComment + `</blockquote></details>
-
-`
+<details><summary>Click here to see the affected service packages</summary><blockquote>` + affectedServicesComment + `</blockquote></details>`
 
 	notRunBeta, notRunGa := notRunTests(tpgRepo.UnifiedZeroDiff, tpgbRepo.UnifiedZeroDiff, replayingResult)
 	if len(notRunBeta) > 0 || len(notRunGa) > 0 {
 		comment += `
+
+
 #### Non-exercised tests`
 
 		if len(notRunBeta) > 0 {
 			comment += `
+
 Tests were added that are skipped in VCR:
 `
 			for _, t := range notRunBeta {
@@ -201,6 +202,7 @@ Tests were added that are skipped in VCR:
 
 		if len(notRunGa) > 0 {
 			comment += `
+
 Tests were added that are GA-only additions and require manual runs:
 `
 			for _, t := range notRunGa {
@@ -212,6 +214,8 @@ Tests were added that are GA-only additions and require manual runs:
 
 	if len(replayingResult.FailedTests) > 0 {
 		comment += fmt.Sprintf(`
+
+
 #### Action taken
 <details> <summary>Found %d affected test(s) by replaying old test recordings. Starting RECORDING based on the most recent commit. Click here to see the affected tests</summary><blockquote>%s </blockquote></details>
 
