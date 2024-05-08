@@ -1,6 +1,8 @@
 <% autogen_exception -%>
 package composer_test
 
+<% unless version == 'ga' -%>
+
 import (
 	"fmt"
 	"testing"
@@ -172,3 +174,5 @@ func testAccComposerUserWorkloadsConfigMapDestroyed(t *testing.T) func(s *terraf
 		return nil
 	}
 }
+
+<% end -%>
