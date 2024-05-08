@@ -1,6 +1,5 @@
 <% autogen_exception -%>
 package networksecurity_test
-<% unless version == 'ga' -%>
 
 import (
 	"fmt"
@@ -89,5 +88,3 @@ resource "google_network_security_security_profile" "foobar" {
 }
 `, randomSuffix, orgId)
 }
-
-<% end -%>
