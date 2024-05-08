@@ -190,7 +190,6 @@ properties:
       - !ruby/object:Api::Type::String
         name: identifierRange
         default_from_api: true
-        min_version: beta
         description: |
           Explicitly specifies a range of valid BGP Identifiers for this Router.
           It is provided as a link-local IPv4 range (from 169.254.0.0/16), of
