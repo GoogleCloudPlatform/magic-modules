@@ -150,6 +150,38 @@ func TestAccComputeSecurityPolicyRule_withPreconfiguredWafConfig(t *testing.T) {
 	})
 }
 
+func TestAccComputeSecurityPolicyRule_withRateLimitOptions(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeSecurityPolicyRuleDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeSecurityPolicyRule_withRateLimitOptionsCreate(context),
+			},
+      {
+        ResourceName:      "google_compute_security_policy_rule.policy_rule",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+      {
+        Config: testAccComputeSecurityPolicyRule_withRateLimitOptionsUpdate(context),
+      },
+      {
+        ResourceName:      "google_compute_security_policy_rule.policy_rule",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+    },
+  })
+}
+
 func TestAccComputeSecurityPolicyRule_withRateLimit_withEnforceOnKeyConfigs(t *testing.T) {
 	t.Parallel()
 
@@ -566,6 +598,82 @@ resource "google_compute_security_policy_rule" "policy_rule" {
   }
   preview = false
 }
+`, context)
+}
+
+func testAccComputeSecurityPolicyRule_withRateLimitOptionsCreate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+  resource "google_compute_security_policy" "default" {
+    name        = "tf-test%{random_suffix}"
+    description = "basic global security policy"
+  }
+
+  resource "google_compute_security_policy_rule" "policy_rule" {
+    security_policy = google_compute_security_policy.default.name
+    description     = "rule create with rate limit"
+    priority        = 101
+    action          = "rate_based_ban"
+    rate_limit_options {
+      rate_limit_threshold {
+        count = 500
+        interval_sec = 10
+      }
+      conform_action = "allow"
+      exceed_action = "deny(404)"
+      enforce_on_key = "ALL"
+      ban_threshold {
+        count = 750
+        interval_sec = 180
+      }
+      ban_duration_sec = 180
+    }
+    match {
+      config {
+        src_ip_ranges = [
+          "*"
+        ]
+      }
+      versioned_expr = "SRC_IPS_V1"
+    }
+  }
+`, context)
+}
+
+func testAccComputeSecurityPolicyRule_withRateLimitOptionsUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+  resource "google_compute_security_policy" "default" {
+    name        = "tf-test%{random_suffix}"
+    description = "basic global security policy"
+  }
+
+  resource "google_compute_security_policy_rule" "policy_rule" {
+    security_policy = google_compute_security_policy.default.name
+    description     = "rule update with rate limit update"
+    priority        = 101
+    action          = "rate_based_ban"
+    rate_limit_options {
+      rate_limit_threshold {
+        count = 1000
+        interval_sec = 30
+      }
+      conform_action = "allow"
+      exceed_action = "deny(404)"
+      enforce_on_key = "ALL"
+      ban_threshold {
+        count = 2000
+        interval_sec = 180
+      }
+      ban_duration_sec = 300
+    }
+    match {
+      config {
+        src_ip_ranges = [
+          "*"
+        ]
+      }
+      versioned_expr = "SRC_IPS_V1"
+    }
+  }
 `, context)
 }
 
