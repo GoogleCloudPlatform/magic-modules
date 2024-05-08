@@ -133,7 +133,7 @@ examples:
       database_instance_name: 'my-database-instance'
       username: 'user'
       deletion_protection: 'true'
-      kms_key_name: 'bq-key'
+      kms_key_name: 'projects/project/locations/us-central1/keyRings/us-central1/cryptoKeys/bq-key'
     test_vars_overrides:
       deletion_protection: 'false'
       kms_key_name: 'acctest.BootstrapKMSKey(t).CryptoKey.Name'
