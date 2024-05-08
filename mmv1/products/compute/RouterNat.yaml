@@ -107,7 +107,6 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: 'templates/terraform/constants/router_nat.go.erb'
   pre_create: 'templates/terraform/constants/router_nat_validate_action_active_range.go.erb'
   pre_update: 'templates/terraform/constants/router_nat_validate_action_active_range.go.erb'
-  # encoder: 'templates/terraform/encoders/router_nat.go.erb'
 custom_diff: [
   'resourceComputeRouterNatDrainNatIpsCustomDiff',
 ]
