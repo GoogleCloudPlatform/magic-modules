@@ -556,6 +556,19 @@ module Api
       fields
     end
 
+    # Return ignore_read fields that should be added to ImportStateVerifyIgnore
+    def ignore_read_fields(props)
+      fields = []
+      props.each do |p|
+        if p.ignore_read && !p.url_param_only && !p.is_a?(Api::Type::ResourceRef)
+          fields << p.terraform_lineage
+        elsif (p.is_a? Api::Type::NestedObject) && !p.all_properties.nil?
+          fields.concat(ignore_read_fields(p.all_properties))
+        end
+      end
+      fields
+    end
+
     def get_labels_field_note(title)
       "**Note**: This field is non-authoritative, and will only manage the #{title} present " \
 "in your configuration.

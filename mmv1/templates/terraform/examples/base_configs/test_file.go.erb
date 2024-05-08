@@ -43,10 +43,11 @@ object.examples
     test_slug = "#{resource_name}_#{example.name.camelize(:lower)}Example"
 
     ignore_read = object.all_user_properties
-      .select{|p| p.url_param_only || p.ignore_read || p.is_a?(Api::Type::ResourceRef)}
+      .select{|p| p.url_param_only || p.is_a?(Api::Type::ResourceRef)}
       .map { |p| p.name.underscore }
       .concat(example.ignore_read_extra)
       .concat(object.ignore_read_labels_fields(object.properties_with_excluded))
+      .concat(object.ignore_read_fields(object.all_user_properties))
 
     # Use explicit version for the example if given.
     # Otherwise, use object version.
