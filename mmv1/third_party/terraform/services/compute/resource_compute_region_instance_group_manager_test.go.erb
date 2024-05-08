@@ -378,13 +378,13 @@ func TestAccRegionInstanceGroupManager_stateful(t *testing.T) {
 }
 <% unless version == "ga" -%>
 func TestAccRegionInstanceGroupManager_instanceFlexibilityPolicy(t *testing.T) {
-	t.Parallel()
+  t.Parallel()
 
-	template := fmt.Sprintf("tf-test-rigm-%s", acctest.RandString(t, 10))
-	igm := fmt.Sprintf("tf-test-rigm-%s", acctest.RandString(t, 10))
-	network := fmt.Sprintf("tf-test-igm-%s", acctest.RandString(t, 10))
+  template := fmt.Sprintf("tf-test-rigm-%s", acctest.RandString(t, 10))
+  igm := fmt.Sprintf("tf-test-rigm-%s", acctest.RandString(t, 10))
+  network := fmt.Sprintf("tf-test-igm-%s", acctest.RandString(t, 10))
 
-	acctest.VcrTest(t, resource.TestCase{
+  acctest.VcrTest(t, resource.TestCase{
     PreCheck:                 func() { acctest.AccTestPreCheck(t) },
     ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
     CheckDestroy:             testAccCheckRegionInstanceGroupManagerDestroyProducer(t),
