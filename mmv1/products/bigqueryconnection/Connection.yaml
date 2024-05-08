@@ -127,7 +127,6 @@ examples:
       connection_id: "my-connection"
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_connection_kms'
-    pull_external: true
     primary_resource_id:
       'bq-connection-cmek'
     vars:
