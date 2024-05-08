@@ -220,21 +220,6 @@ func resourceComposerUserWorkloadsConfigMapImport(d *schema.ResourceData, meta i
 	}
 	d.SetId(id)
 
-	// retrieve "data" in advance, because Read function won't do it.
-	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
-	if err != nil {
-		return nil, err
-	}
-
-	res, err := config.NewComposerClient(userAgent).Projects.Locations.Environments.UserWorkloadsConfigMaps.Get(id).Do()
-	if err != nil {
-		return nil, err
-	}
-
-	if err := d.Set("data", res.Data); err != nil {
-		return nil, fmt.Errorf("Error setting UserWorkloadsConfigMap Data: %s", err)
-	}
-
 	return []*schema.ResourceData{d}, nil
 }
 

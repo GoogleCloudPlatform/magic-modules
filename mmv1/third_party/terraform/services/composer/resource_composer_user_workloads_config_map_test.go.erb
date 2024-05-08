@@ -32,7 +32,7 @@ func TestAccComposerUserWorkloadsConfigMap_basic(t *testing.T) {
 			{
 				Config:    testAccComposerUserWorkloadsConfigMap_basic(envName, configMapName, envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv()),
 				Check:     resource.ComposeTestCheckFunc(
-						resource.TestCheckResourceAttrSet("google_composer_user_workloads_config_map.test", "data.api_host"),
+						resource.TestCheckResourceAttr("google_composer_user_workloads_config_map.test", "data.api_host", "apihost:443"),
 				),
 			},
 			{
@@ -59,7 +59,7 @@ func TestAccComposerUserWorkloadsConfigMap_update(t *testing.T) {
 			{
 				Config:    testAccComposerUserWorkloadsConfigMap_update(envName, configMapName),
 				Check:     resource.ComposeTestCheckFunc(
-						resource.TestCheckResourceAttrSet("google_composer_user_workloads_config_map.test", "data.db_host"),
+						resource.TestCheckResourceAttr("google_composer_user_workloads_config_map.test", "data.db_host", "dbhost:5432"),
 						resource.TestCheckNoResourceAttr("google_composer_user_workloads_config_map.test", "data.api_host"),
 				),
 			},
