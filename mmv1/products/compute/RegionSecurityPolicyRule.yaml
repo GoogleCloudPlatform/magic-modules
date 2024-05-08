@@ -214,21 +214,22 @@ properties:
           BGP Autonomous System Number associated with the source IP address.
         item_type: Api::Type::Integer
   - !ruby/object:Api::Type::NestedObject
-    name: 'rateLimitOptions'
+    name: "rateLimitOptions"
     description: |
       Must be specified if the action is "rate_based_ban" or "throttle".
       Cannot be specified for any other actions.
     properties:
-     - !ruby/object:Api::Type::NestedObject
-      name: 'rateLimitThreshold'
-      description: |
-        Threshold at which to begin ratelimiting.
-      properties:
-       - !ruby/object:Api::Type::Integer
-        name: 'count'
+      - !ruby/object:Api::Type::NestedObject
+        name: "rateLimitThreshold"
         description: |
-          Number of HTTP(S) requests for calculating the threshold.
-       - !ruby/object:Api::Type::Integer
-        name: 'intervalSec'
-        description: |
-          Interval over which the threshold is computed.
+          Threshold at which to begin ratelimiting.
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: "count"
+            description: |
+              Number of HTTP(S) requests for calculating the threshold.
+          - !ruby/object:Api::Type::Integer
+            name: "intervalSec"
+            description: |
+              Interval over which the threshold is computed.
+
