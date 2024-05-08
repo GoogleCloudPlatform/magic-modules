@@ -178,14 +178,15 @@ steps:
             fi
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
-      entrypoint: '/workspace/.ci/scripts/go-plus/vcr-cassette-merger/vcr_merge.sh'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       secretEnv: ["GITHUB_TOKEN_CLASSIC", "GOOGLE_PROJECT"]
       id: vcr-merge
       waitFor: ["tpg-push", "tpgb-push", "tgc-push", "tf-oics-push"]
       env:
         - BASE_BRANCH=$BRANCH_NAME
       args:
-          - $COMMIT_SHA
+        - "vcr-merge"
+        - $COMMIT_SHA
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
       id: magician-check-vcr-cassettes
