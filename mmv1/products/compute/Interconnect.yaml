@@ -283,12 +283,9 @@ properties:
             Customer-side demarc ID for this circuit.
   - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
-    output: true
     description: |
       Labels for this resource. These can only be added or modified by the setLabels
       method. Each label key/value pair must comply with RFC1035. Label values may be empty.
-    update_verb: :POST
-    update_url: 'projects/{{project}}/global/interconnects/{{name}}/setLabels'
   - !ruby/object:Api::Type::Fingerprint
     name: 'labelFingerprint'
     description: |
@@ -297,8 +294,6 @@ properties:
       Compute Engine and changes after every request to modify or update labels.
       You must always provide an up-to-date fingerprint hash in order to update or change labels,
       otherwise the request will fail with error 412 conditionNotMet.
-    update_verb: :POST
-    update_url: 'projects/{{project}}/global/interconnects/{{name}}/setLabels'
   - !ruby/object:Api::Type::Enum
     name: 'state'
     description: |
