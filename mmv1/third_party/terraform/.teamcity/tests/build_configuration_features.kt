@@ -80,12 +80,14 @@ class BuildConfigurationFeatureTests {
         var betaMMUpstreamProject = getSubProject(project, betaProjectName, mmUpstreamProjectName)
 
         (gaNightlyTestProject.buildTypes + gaMMUpstreamProject.buildTypes + betaNightlyTestProject.buildTypes + betaMMUpstreamProject.buildTypes).forEach{bt ->
-            bt.steps.items.forEach { s ->
-                exists.add(s.name == "Tasks after running nightly tests: push artifacts(debug logs) to GCS")
+            var found: Boolean = false
+            for (item in bt.steps.items) {
+                if (item.name == "Tasks after running nightly tests: push artifacts(debug logs) to GCS") {
+                    found = true
+                    break
+                }
             }
-            if (exists.contains(false)){
-                fail("${bt.name} does not contain a build step that pushes artifacts to GCS")
-            }
+            assertTrue("Build configuration `${bt.name}` contains a build step that pushes artifacts to GCS", found)
         }
     }
 }
