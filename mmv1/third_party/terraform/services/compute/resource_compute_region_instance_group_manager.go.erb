@@ -625,14 +625,14 @@ func resourceComputeRegionInstanceGroupManagerCreate(d *schema.ResourceData, met
 		TargetPools:                 tpgresource.ConvertStringSet(d.Get("target_pools").(*schema.Set)),
 		AutoHealingPolicies:         expandAutoHealingPolicies(d.Get("auto_healing_policies").([]interface{})),
 		Versions:                    expandVersions(d.Get("version").([]interface{})),
-		<% unless version == "ga" -%>
-		InstanceFlexibilityPolicy:   expandInstanceFlexibilityPolicy(d.Get("instance_flexibility_policy").([]any)),
-		<% end -%>
 		UpdatePolicy:                expandRegionUpdatePolicy(d.Get("update_policy").([]interface{})),
 		InstanceLifecyclePolicy:     expandInstanceLifecyclePolicy(d.Get("instance_lifecycle_policy").([]interface{})),
 		AllInstancesConfig:          expandAllInstancesConfig(nil, d.Get("all_instances_config").([]interface{})),
 		DistributionPolicy:          expandDistributionPolicy(d),
 		StatefulPolicy:              expandStatefulPolicy(d),
+		<% unless version == "ga" -%>
+			InstanceFlexibilityPolicy:   expandInstanceFlexibilityPolicy(d),
+		<% end -%>
 		<% unless version == "ga" -%>
 		Params:                      expandInstanceGroupManagerParams(d),
 		<% end -%>
@@ -899,14 +899,14 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
 		change = true
 	}
 
-  var targetSizePatchUpdate bool
   <% unless version == "ga" -%>
+  var targetSizePatchUpdate bool
   if d.HasChange("instance_flexibility_policy") {
     instanceFlexibilityPolicy := d.Get("instance_flexibility_policy")
     if instanceFlexibilityPolicy == nil || len(instanceFlexibilityPolicy.([]any)) == 0 {
       updatedManager.NullFields = append(updatedManager.NullFields, "InstanceFlexibilityPolicy")
     } else {
-      updatedManager.InstanceFlexibilityPolicy = expandInstanceFlexibilityPolicy(instanceFlexibilityPolicy.([]any))
+      updatedManager.InstanceFlexibilityPolicy = expandInstanceFlexibilityPolicy(d)
     }
     change = true
 
