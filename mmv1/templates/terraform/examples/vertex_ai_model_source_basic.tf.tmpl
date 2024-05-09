@@ -1,0 +1,7 @@
+resource "google_vertex_ai_models" "{{$.PrimaryResourceId}}" {
+  model_id = "{{index $.Vars "model_id"}}"
+  project = "{{index $.TestEnvVars "project_name"}}"
+  source_model = "projects/{{index $.TestEnvVars "project_name"}}>/locations/us-central1/models/4469245519628878651"
+
+  region       = "us-central1"
+}
