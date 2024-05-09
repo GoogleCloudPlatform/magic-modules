@@ -63,6 +63,11 @@ examples:
     primary_resource_id: 'filter_regexes_and_conditions'
     test_env_vars:
       project: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dlp_discovery_config_cloud_sql'
+    primary_resource_id: 'cloud_sql'
+    test_env_vars:
+      project: :PROJECT_NAME
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/wrap_object.go.erb
   decoder: templates/terraform/decoders/unwrap_resource.go.erb
@@ -320,6 +325,115 @@ properties:
             - !ruby/object:Api::Type::NestedObject
               name: disabled
               description: 'Tables that match this filter will not have profiles created.'
+              properties:
+                []  # Meant to be an empty object with no properties - see here : https://cloud.google.com/sensitive-data-protection/docs/reference/rest/v2/organizations.locations.discoveryConfigs#disabled
+                # The fields below are necessary to include the "disabled" filter in the payload
+              send_empty_value: true
+              allow_empty_object: true
+        - !ruby/object:Api::Type::NestedObject
+          name: cloudSqlTarget
+          description: 'Cloud SQL target for Discovery. The first target to match a table will be the one applied.'
+          properties:
+            - !ruby/object:Api::Type::NestedObject
+              name: filter
+              description: 'Required. The tables the discovery cadence applies to. The first target with a matching filter will be the one to apply to a table.'
+              required: true
+              properties:
+                - !ruby/object:Api::Type::NestedObject
+                  name: collection
+                  description: 'A specific set of database resources for this filter to apply to.'
+                  properties:
+                    - !ruby/object:Api::Type::NestedObject
+                      name: includeRegexes
+                      description: 'A collection of regular expressions to match a database resource against.'
+                      properties:
+                        - !ruby/object:Api::Type::Array
+                          name: 'patterns'
+                          description: A group of regular expression patterns to match against one or more database resources. Maximum of 100 entries. The sum of all regular expressions' length can't exceed 10 KiB.
+                          item_type: !ruby/object:Api::Type::NestedObject
+                            properties:
+                              - !ruby/object:Api::Type::String
+                                name: projectIdRegex
+                                description: For organizations, if unset, will match all projects. Has no effect for data profile configurations created within a project.
+                              - !ruby/object:Api::Type::String
+                                name: instanceRegex
+                                description: Regex to test the instance name against. If empty, all instances match.
+                              - !ruby/object:Api::Type::String
+                                name: databaseRegex
+                                description: Regex to test the database name against. If empty, all databases match.
+                              - !ruby/object:Api::Type::String
+                                name: databaseResourceNameRegex
+                                description: Regex to test the database resource's name against. An example of a database resource name is a table's name. Other database resource names like view names could be included in the future. If empty, all database resources match.'
+                - !ruby/object:Api::Type::NestedObject
+                  name: others
+                  description: 'Catch-all. This should always be the last target in the list because anything above it will apply first. Should only appear once in a configuration. If none is specified, a default one will be added automatically.'
+                  properties:
+                    []  # Meant to be an empty object with no properties. The fields below are necessary to include the "others" filter in the payload
+                  send_empty_value: true
+                  allow_empty_object: true
+            - !ruby/object:Api::Type::NestedObject
+              name: conditions
+              description: 'In addition to matching the filter, these conditions must be true before a profile is generated.'
+              properties:
+                - !ruby/object:Api::Type::Array
+                  name: databaseEngines
+                  description: Database engines that should be profiled. Optional. Defaults to ALL_SUPPORTED_DATABASE_ENGINES if unspecified.
+                  item_type: !ruby/object:Api::Type::Enum
+                    name: 'undefined'
+                    description: |
+                      This field only has a name and description because of MM
+                      limitations. It should not appear in downstreams.
+                    values:
+                      - :ALL_SUPPORTED_DATABASE_ENGINES
+                      - :MYSQL
+                      - :POSTGRES
+                - !ruby/object:Api::Type::Array
+                  name: types
+                  description: 'Data profiles will only be generated for the database resource types specified in this field. If not specified, defaults to [DATABASE_RESOURCE_TYPE_ALL_SUPPORTED_TYPES].'
+                  item_type: !ruby/object:Api::Type::Enum
+                    name: 'undefined'
+                    description: |
+                      This field only has a name and description because of MM
+                      limitations. It should not appear in downstreams.
+                    values:
+                      - :DATABASE_RESOURCE_TYPE_ALL_SUPPORTED_TYPES
+                      - :DATABASE_RESOURCE_TYPE_TABLE
+            - !ruby/object:Api::Type::NestedObject
+              name: generationCadence
+              description: How often and when to update profiles. New tables that match both the filter and conditions are scanned as quickly as possible depending on system capacity.
+              properties:
+                - !ruby/object:Api::Type::NestedObject
+                  name: schemaModifiedCadence
+                  description: Governs when to update data profiles when a schema is modified
+                  properties:
+                    - !ruby/object:Api::Type::Array
+                      name: 'types'
+                      description: The types of schema modifications to consider. Defaults to NEW_COLUMNS.
+                      item_type: !ruby/object:Api::Type::Enum
+                        name: 'undefined'
+                        description: |
+                          This field only has a name and description because of MM
+                          limitations. It should not appear in downstreams.
+                        values:
+                          - :NEW_COLUMNS
+                          - :REMOVED_COLUMNS
+                    - !ruby/object:Api::Type::Enum
+                      name: 'frequency'
+                      description: Frequency to regenerate data profiles when the schema is modified. Defaults to monthly.
+                      values:
+                        - :UPDATE_FREQUENCY_NEVER
+                        - :UPDATE_FREQUENCY_DAILY
+                        - :UPDATE_FREQUENCY_MONTHLY
+                - !ruby/object:Api::Type::Enum
+                  name: 'refreshFrequency'
+                  description: Data changes (non-schema changes) in Cloud SQL tables can't trigger reprofiling. If you set this field, profiles are refreshed at this frequency regardless of whether the underlying tables have changes. Defaults to never.
+                  values:
+                    - :UPDATE_FREQUENCY_NEVER
+                    - :UPDATE_FREQUENCY_DAILY
+                    - :UPDATE_FREQUENCY_MONTHLY
+            - !ruby/object:Api::Type::NestedObject
+              name: disabled
+              description: 'Disable profiling for database resources that match this filter.'
               properties:
                 []  # Meant to be an empty object with no properties - see here : https://cloud.google.com/sensitive-data-protection/docs/reference/rest/v2/organizations.locations.discoveryConfigs#disabled
                 # The fields below are necessary to include the "disabled" filter in the payload
