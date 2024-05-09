@@ -289,7 +289,6 @@ func TestComputeBreakingChanges(t *testing.T) {
 					},
 				},
 			},
-			wantViolationCount: 1,
 			wantViolations: []*BreakingChange{
 				{
 					Resource:               "google-x",
@@ -340,7 +339,6 @@ func TestComputeBreakingChanges(t *testing.T) {
 					},
 				},
 			},
-			wantViolationCount: 1,
 			wantViolations: []*BreakingChange{
 				{
 					Resource:               "google-x",
@@ -391,7 +389,6 @@ func TestComputeBreakingChanges(t *testing.T) {
 					},
 				},
 			},
-			wantViolationCount: 1,
 			wantViolations: []*BreakingChange{
 				{
 					Resource:               "google-x",
@@ -428,7 +425,6 @@ func TestComputeBreakingChanges(t *testing.T) {
 					},
 				},
 			},
-			wantViolationCount: 1,
 			wantViolations: []*BreakingChange{
 				{
 					Resource:               "google-x",
