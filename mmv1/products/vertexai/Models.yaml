@@ -52,11 +52,13 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_create: templates/terraform/pre_create/vertex_ai_models.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: 'vertex_ai_model_basic'
+    name: 'vertex_ai_model_source_basic'
     skip_import_test: true
     primary_resource_id: 'model'
     vars:
       name: 'test-model'
+    test_env_vars:
+      project_name: :PROJECT_NAME
 parameters:
   - !ruby/object:Api::Type::String
     name: region
