@@ -130,7 +130,7 @@ steps:
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       secretEnv: ["GITHUB_TOKEN_CLASSIC"]
       id: tgc-push
-      waitFor: ["tpg-sync", "tpgb-sync", "tgc-sync", "tf-oics-sync", "tpgb-push"]
+      waitFor: ["tpgb-push"]
       env:
         - BASE_BRANCH=$BRANCH_NAME
       args:
