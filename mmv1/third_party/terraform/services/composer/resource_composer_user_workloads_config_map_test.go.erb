@@ -27,7 +27,7 @@ func TestAccComposerUserWorkloadsConfigMap_basic(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:		                func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories:   acctest.ProtoV5ProviderFactories(t),
-		// CheckDestroy:               testAccComposerUserWorkloadsConfigMapDestroy(t),
+		CheckDestroy:               testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config:    testAccComposerUserWorkloadsConfigMap_basic(envName, configMapName, envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv()),
@@ -52,6 +52,7 @@ func TestAccComposerUserWorkloadsConfigMap_update(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:		                func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories:   acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:               testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config:    testAccComposerUserWorkloadsConfigMap_basic(envName, configMapName, envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv()),
@@ -76,6 +77,7 @@ func TestAccComposerUserWorkloadsConfigMap_delete(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:		                func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories:   acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:               testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config:    testAccComposerUserWorkloadsConfigMap_basic(envName, configMapName, envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv()),
