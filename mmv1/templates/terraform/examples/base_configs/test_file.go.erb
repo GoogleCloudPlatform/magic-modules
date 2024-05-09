@@ -47,6 +47,7 @@ object.examples
       .map { |p| p.name.underscore }
       .concat(example.ignore_read_extra)
       .concat(object.ignore_read_labels_fields(object.properties_with_excluded))
+      .sort()
 
     # Use explicit version for the example if given.
     # Otherwise, use object version.
