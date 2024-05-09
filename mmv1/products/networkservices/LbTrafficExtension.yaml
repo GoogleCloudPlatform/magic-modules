@@ -21,7 +21,6 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/service-extensions/docs/reference/rest/v1beta1/projects.locations.lbTrafficExtensions'
 base_url: 'projects/{{project}}/locations/{{location}}/lbTrafficExtensions'
 self_link: 'projects/{{project}}/locations/{{location}}/lbTrafficExtensions/{{name}}'
-min_version: beta
 timeouts: !ruby/object:Api::Timeouts
   insert_minutes: 20
   update_minutes: 20
