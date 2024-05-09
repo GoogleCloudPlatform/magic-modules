@@ -302,6 +302,7 @@ func ResourceComputeInstance() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: `The machine type to create.`,
+				DiffSuppressFunc: tpgresource.CompareResourceNames,
 			},
 
 			"name": {
