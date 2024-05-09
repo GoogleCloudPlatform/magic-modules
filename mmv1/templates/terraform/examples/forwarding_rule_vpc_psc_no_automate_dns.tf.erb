@@ -4,7 +4,7 @@ resource "google_compute_forwarding_rule" "<%= ctx[:primary_resource_id] %>" {
   load_balancing_scheme   = ""
   target                  = google_compute_service_attachment.producer_service_attachment.id
   network                 = google_compute_network.consumer_net.name
-  ip_address              = google_compute_address.consumer_address.address
+  ip_address              = google_compute_address.consumer_address.id
   allow_psc_global_access = true
   no_automate_dns_zone    = true
 }
