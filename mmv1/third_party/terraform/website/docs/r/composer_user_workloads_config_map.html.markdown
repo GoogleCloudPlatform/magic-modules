@@ -75,7 +75,7 @@ ConfigMap can be imported using any of these accepted formats:
 
 * `projects/{{project}}/locations/{{region}}/environments/{{environment}}/userWorkloadsConfigMaps/{{name}}`
 * `{{project}}/{{region}}/{{environment}}/{{name}}`
-* `{{name}}`
+* `{{environment}}/{{name}}`
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import User Workloads ConfigMap using one of the formats above. For example:
 
@@ -91,5 +91,5 @@ When using the [`terraform import` command](https://developer.hashicorp.com/terr
 ```
 $ terraform import google_composer_user_workloads_config_map.example projects/{{project}}/locations/{{region}}/environments/{{environment}}/userWorkloadsConfigMaps/{{name}}
 $ terraform import google_composer_user_workloads_config_map.example {{project}}/{{region}}/{{environment}}/{{name}}
-$ terraform import google_composer_user_workloads_config_map.example {{name}}
+$ terraform import google_composer_user_workloads_config_map.example {{environment}}/{{name}}
 ```
