@@ -48,8 +48,10 @@ func ComputeBreakingChanges(schemaDiff diff.SchemaDiff) []*BreakingChange {
 					fieldDiff.Old,
 					fieldDiff.New,
 					MessageContext{
-						Resource: resource,
-						Field:    field,
+						Resource:   resource,
+						Field:      field,
+						definition: rule.definition,
+						name:       rule.name,
 					},
 				)
 				if breakageMessage != nil {
