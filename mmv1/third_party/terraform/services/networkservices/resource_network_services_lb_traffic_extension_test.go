@@ -4,11 +4,10 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-func TestAccNetworkServicesLbTrafficExtension_networkServicesLbTrafficExtensionBasicExample(t *testing.T) {
+func TestAccNetworkServicesLbTrafficExtension_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -17,7 +16,7 @@ func TestAccNetworkServicesLbTrafficExtension_networkServicesLbTrafficExtensionB
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckNetworkServicesLbTrafficExtensionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -48,14 +47,12 @@ func testAccNetworkServicesLbTrafficExtension_basic(context map[string]interface
 # VPC network
 resource "google_compute_network" "ilb_network" {
   name                    = "tf-test-l7-ilb-network%{random_suffix}"
-  provider                = google-beta
   auto_create_subnetworks = false
 }
 
 # proxy-only subnet
 resource "google_compute_subnetwork" "proxy_subnet" {
   name          = "tf-test-l7-ilb-proxy-subnet%{random_suffix}"
-  provider      = google-beta
   ip_cidr_range = "10.0.0.0/24"
   region        = "us-west1"
   purpose       = "REGIONAL_MANAGED_PROXY"
@@ -66,7 +63,6 @@ resource "google_compute_subnetwork" "proxy_subnet" {
 # backend subnet
 resource "google_compute_subnetwork" "ilb_subnet" {
   name          = "tf-test-l7-ilb-subnet%{random_suffix}"
-  provider      = google-beta
   ip_cidr_range = "10.0.1.0/24"
   region        = "us-west1"
   network       = google_compute_network.ilb_network.id
@@ -75,7 +71,6 @@ resource "google_compute_subnetwork" "ilb_subnet" {
 # forwarding rule
 resource "google_compute_forwarding_rule" "default" {
   name                  = "tf-test-l7-ilb-forwarding-rule%{random_suffix}"
-  provider              = google-beta
   region                = "us-west1"
   depends_on            = [google_compute_subnetwork.proxy_subnet]
   ip_protocol           = "TCP"
@@ -90,7 +85,6 @@ resource "google_compute_forwarding_rule" "default" {
 # HTTP target proxy
 resource "google_compute_region_target_http_proxy" "default" {
   name     = "tf-test-l7-ilb-target-http-proxy%{random_suffix}"
-  provider = google-beta
   region   = "us-west1"
   url_map  = google_compute_region_url_map.default.id
 }
@@ -98,7 +92,6 @@ resource "google_compute_region_target_http_proxy" "default" {
 # URL map
 resource "google_compute_region_url_map" "default" {
   name            = "tf-test-l7-ilb-regional-url-map%{random_suffix}"
-  provider        = google-beta
   region          = "us-west1"
   default_service = google_compute_region_backend_service.default.id
 }
@@ -106,7 +99,6 @@ resource "google_compute_region_url_map" "default" {
 # backend service
 resource "google_compute_region_backend_service" "default" {
   name                  = "tf-test-l7-ilb-backend-subnet%{random_suffix}"
-  provider              = google-beta
   region                = "us-west1"
   protocol              = "HTTP"
   load_balancing_scheme = "INTERNAL_MANAGED"
@@ -122,7 +114,6 @@ resource "google_compute_region_backend_service" "default" {
 # instance template
 resource "google_compute_instance_template" "instance_template" {
   name         = "tf-test-l7-ilb-mig-template%{random_suffix}"
-  provider     = google-beta
   machine_type = "e2-small"
   tags         = ["http-server"]
 
@@ -172,7 +163,6 @@ resource "google_compute_instance_template" "instance_template" {
 # health check
 resource "google_compute_region_health_check" "default" {
   name     = "tf-test-l7-ilb-hc%{random_suffix}"
-  provider = google-beta
   region   = "us-west1"
 
   http_health_check {
@@ -183,7 +173,6 @@ resource "google_compute_region_health_check" "default" {
 # MIG
 resource "google_compute_region_instance_group_manager" "mig" {
   name     = "tf-test-l7-ilb-mig1%{random_suffix}"
-  provider = google-beta
   region   = "us-west1"
 
   base_instance_name = "vm"
@@ -198,7 +187,6 @@ resource "google_compute_region_instance_group_manager" "mig" {
 # allow all access from IAP and health check ranges
 resource "google_compute_firewall" "fw-iap" {
   name          = "tf-test-l7-ilb-fw-allow-iap-hc%{random_suffix}"
-  provider      = google-beta
   direction     = "INGRESS"
   network       = google_compute_network.ilb_network.id
   source_ranges = ["130.211.0.0/22", "35.191.0.0/16", "35.235.240.0/20"]
@@ -211,7 +199,6 @@ resource "google_compute_firewall" "fw-iap" {
 # allow http from proxy subnet to backends
 resource "google_compute_firewall" "fw-ilb-to-backends" {
   name          = "tf-test-l7-ilb-fw-allow-ilb-to-backends%{random_suffix}"
-  provider      = google-beta
   direction     = "INGRESS"
   network       = google_compute_network.ilb_network.id
   source_ranges = ["10.0.0.0/24"]
@@ -223,51 +210,31 @@ resource "google_compute_firewall" "fw-ilb-to-backends" {
   }
 }
 
-# test instance
-resource "google_compute_instance" "vm-test" {
-  name         = "tf-test-l7-ilb-test-vm%{random_suffix}"
-  provider     = google-beta
-  zone         = "us-west1-b"
-  machine_type = "e2-small"
-
-  network_interface {
-    network    = google_compute_network.ilb_network.id
-    subnetwork = google_compute_subnetwork.ilb_subnet.id
-  }
-
-  boot_disk {
-    initialize_params {
-      image = "debian-cloud/debian-11"
-    }
-  }
-}
-
 resource "google_network_services_lb_traffic_extension" "default" {
-  provider = google-beta
-  name     = "tf-test-l7-ilb-traffic-ext%{random_suffix}"
+  name        = "tf-test-l7-ilb-traffic-ext%{random_suffix}"
   description = "my traffic extension"
-  location = "us-west1"
+  location    = "us-west1"
 
   load_balancing_scheme = "INTERNAL_MANAGED"
   forwarding_rules      = [google_compute_forwarding_rule.default.self_link]
 
   extension_chains {
-      name = "chain1"
+    name = "chain1"
 
-      match_condition {
-          cel_expression = "request.host == 'example.com'"
-      }
+    match_condition {
+      cel_expression = "request.host == 'example.com'"
+    }
 
-      extensions {
-          name      = "ext11"
-          authority = "ext11.com"
-          service   = google_compute_region_backend_service.callouts_backend.self_link
-          timeout   = "0.1s"
-          fail_open = false
+    extensions {
+      name      = "ext11"
+      authority = "ext11.com"
+      service   = google_compute_region_backend_service.callouts_backend.self_link
+      timeout   = "0.1s"
+      fail_open = false
 
-          supported_events = ["REQUEST_HEADERS"]
-          forward_headers = ["custom-header"]
-      }
+      supported_events = ["REQUEST_HEADERS"]
+      forward_headers  = ["custom-header"]
+    }
   }
 
   labels = {
@@ -277,29 +244,31 @@ resource "google_network_services_lb_traffic_extension" "default" {
 
 # Traffic Extension Backend Instance
 resource "google_compute_instance" "callouts_instance" {
-  provider = google-beta
-
-  name = "tf-test-l7-ilb-callouts-ins%{random_suffix}"
-  zone = "us-west1-a"
-
+  name         = "tf-test-l7-ilb-callouts-ins%{random_suffix}"
+  zone         = "us-west1-a"
   machine_type = "e2-small"
+
   labels = {
     "container-vm" = "cos-stable-109-17800-147-54"
   }
-  tags         = ["allow-ssh","load-balanced-backend"]
+
+  tags = ["allow-ssh","load-balanced-backend"]
 
   network_interface {
     network    = google_compute_network.ilb_network.id
     subnetwork = google_compute_subnetwork.ilb_subnet.id
+
     access_config {
         # add external ip to fetch packages
     }
   }
+
   boot_disk {
     auto_delete  = true
+
     initialize_params {
-      type = "pd-standard"
-      size = 10
+      type  = "pd-standard"
+      size  = 10
       image = "https://www.googleapis.com/compute/v1/projects/cos-cloud/global/images/cos-stable-109-17800-147-54"
     }
   }
@@ -309,14 +278,16 @@ resource "google_compute_instance" "callouts_instance" {
     gce-container-declaration = "# DISCLAIMER:\n# This container declaration format is not a public API and may change without\n# notice. Please use gcloud command-line tool or Google Cloud Console to run\n# Containers on Google Compute Engine.\n\nspec:\n  containers:\n  - image: us-docker.pkg.dev/service-extensions/ext-proc/service-callout-basic-example-python:latest\n    name: callouts-vm\n    securityContext:\n      privileged: false\n    stdin: false\n    tty: false\n    volumeMounts: []\n  restartPolicy: Always\n  volumes: []\n"
     google-logging-enabled = "true"
   }
+
   lifecycle {
     create_before_destroy = true
   }
+
+  deletion_protection = false
 }
 
 // callouts instance group
 resource "google_compute_instance_group" "callouts_instance_group" {
-  provider    = google-beta
   name        = "tf-test-l7-ilb-callouts-ins-group%{random_suffix}"
   description = "Terraform test instance group"
 
@@ -339,7 +310,6 @@ resource "google_compute_instance_group" "callouts_instance_group" {
 
 # callout health check
 resource "google_compute_region_health_check" "callouts_health_check" {
-  provider = google-beta
   name     = "tf-test-l7-ilb-callouts-hc%{random_suffix}"
   region   = "us-west1"
   http_health_check {
@@ -349,7 +319,6 @@ resource "google_compute_region_health_check" "callouts_health_check" {
 
 # callout backend service
 resource "google_compute_region_backend_service" "callouts_backend" {
-  provider              = google-beta
   name                  = "tf-test-l7-ilb-callouts-backend%{random_suffix}"
   region                = "us-west1"
   protocol              = "HTTP2"
@@ -373,14 +342,12 @@ func testAccNetworkServicesLbTrafficExtension_update(context map[string]interfac
 # VPC network
 resource "google_compute_network" "ilb_network" {
   name                    = "tf-test-l7-ilb-network%{random_suffix}"
-  provider                = google-beta
   auto_create_subnetworks = false
 }
 
 # proxy-only subnet
 resource "google_compute_subnetwork" "proxy_subnet" {
   name          = "tf-test-l7-ilb-proxy-subnet%{random_suffix}"
-  provider      = google-beta
   ip_cidr_range = "10.0.0.0/24"
   region        = "us-west1"
   purpose       = "REGIONAL_MANAGED_PROXY"
@@ -391,7 +358,6 @@ resource "google_compute_subnetwork" "proxy_subnet" {
 # backend subnet
 resource "google_compute_subnetwork" "ilb_subnet" {
   name          = "tf-test-l7-ilb-subnet%{random_suffix}"
-  provider      = google-beta
   ip_cidr_range = "10.0.1.0/24"
   region        = "us-west1"
   network       = google_compute_network.ilb_network.id
@@ -400,7 +366,6 @@ resource "google_compute_subnetwork" "ilb_subnet" {
 # forwarding rule
 resource "google_compute_forwarding_rule" "default" {
   name                  = "tf-test-l7-ilb-forwarding-rule%{random_suffix}"
-  provider              = google-beta
   region                = "us-west1"
   depends_on            = [google_compute_subnetwork.proxy_subnet]
   ip_protocol           = "TCP"
@@ -415,7 +380,6 @@ resource "google_compute_forwarding_rule" "default" {
 # HTTP target proxy
 resource "google_compute_region_target_http_proxy" "default" {
   name     = "tf-test-l7-ilb-target-http-proxy%{random_suffix}"
-  provider = google-beta
   region   = "us-west1"
   url_map  = google_compute_region_url_map.default.id
 }
@@ -423,7 +387,6 @@ resource "google_compute_region_target_http_proxy" "default" {
 # URL map
 resource "google_compute_region_url_map" "default" {
   name            = "tf-test-l7-ilb-regional-url-map%{random_suffix}"
-  provider        = google-beta
   region          = "us-west1"
   default_service = google_compute_region_backend_service.default.id
 }
@@ -431,7 +394,6 @@ resource "google_compute_region_url_map" "default" {
 # backend service
 resource "google_compute_region_backend_service" "default" {
   name                  = "tf-test-l7-ilb-backend-subnet%{random_suffix}"
-  provider              = google-beta
   region                = "us-west1"
   protocol              = "HTTP"
   load_balancing_scheme = "INTERNAL_MANAGED"
@@ -447,7 +409,6 @@ resource "google_compute_region_backend_service" "default" {
 # instance template
 resource "google_compute_instance_template" "instance_template" {
   name         = "tf-test-l7-ilb-mig-template%{random_suffix}"
-  provider     = google-beta
   machine_type = "e2-small"
   tags         = ["http-server"]
 
@@ -497,7 +458,6 @@ resource "google_compute_instance_template" "instance_template" {
 # health check
 resource "google_compute_region_health_check" "default" {
   name     = "tf-test-l7-ilb-hc%{random_suffix}"
-  provider = google-beta
   region   = "us-west1"
 
   http_health_check {
@@ -508,7 +468,6 @@ resource "google_compute_region_health_check" "default" {
 # MIG
 resource "google_compute_region_instance_group_manager" "mig" {
   name     = "tf-test-l7-ilb-mig1%{random_suffix}"
-  provider = google-beta
   region   = "us-west1"
 
   base_instance_name = "vm"
@@ -523,7 +482,6 @@ resource "google_compute_region_instance_group_manager" "mig" {
 # allow all access from IAP and health check ranges
 resource "google_compute_firewall" "fw-iap" {
   name          = "tf-test-l7-ilb-fw-allow-iap-hc%{random_suffix}"
-  provider      = google-beta
   direction     = "INGRESS"
   network       = google_compute_network.ilb_network.id
   source_ranges = ["130.211.0.0/22", "35.191.0.0/16", "35.235.240.0/20"]
@@ -536,7 +494,6 @@ resource "google_compute_firewall" "fw-iap" {
 # allow http from proxy subnet to backends
 resource "google_compute_firewall" "fw-ilb-to-backends" {
   name          = "tf-test-l7-ilb-fw-allow-ilb-to-backends%{random_suffix}"
-  provider      = google-beta
   direction     = "INGRESS"
   network       = google_compute_network.ilb_network.id
   source_ranges = ["10.0.0.0/24"]
@@ -548,51 +505,50 @@ resource "google_compute_firewall" "fw-ilb-to-backends" {
   }
 }
 
-# test instance
-resource "google_compute_instance" "vm-test" {
-  name         = "tf-test-l7-ilb-test-vm%{random_suffix}"
-  provider     = google-beta
-  zone         = "us-west1-b"
-  machine_type = "e2-small"
-
-  network_interface {
-    network    = google_compute_network.ilb_network.id
-    subnetwork = google_compute_subnetwork.ilb_subnet.id
-  }
-
-  boot_disk {
-    initialize_params {
-      image = "debian-cloud/debian-11"
-    }
-  }
-}
-
 resource "google_network_services_lb_traffic_extension" "default" {
-  provider = google-beta
-  name     = "tf-test-l7-ilb-traffic-ext%{random_suffix}"
+  name        = "tf-test-l7-ilb-traffic-ext%{random_suffix}"
   description = "my traffic extension"
-  location = "us-west1"
+  location    = "us-west1"
 
   load_balancing_scheme = "INTERNAL_MANAGED"
   forwarding_rules      = [google_compute_forwarding_rule.default.self_link]
 
   extension_chains {
-      name = "chain1"
+    name = "chain1"
 
-      match_condition {
-          cel_expression = "request.host == 'example.com'"
-      }
+    match_condition {
+      cel_expression = "request.host == 'example.com'"
+    }
 
-      extensions {
-          name      = "ext11"
-          authority = "ext11.com"
-          service   = google_compute_region_backend_service.callouts_backend.self_link
-          timeout   = "0.1s"
-          fail_open = false
+    extensions {
+      name      = "ext12"
+      authority = "ext12.com"
+      service   = google_compute_region_backend_service.callouts_backend_2.self_link
+      timeout   = "0.1s"
+      fail_open = false
 
-          supported_events = ["REQUEST_HEADERS"]
-          forward_headers = ["custom-header"]
-      }
+      supported_events = ["REQUEST_HEADERS"]
+      forward_headers = ["custom-header"]
+    }
+  }
+
+  extension_chains {
+    name = "chain2"
+
+    match_condition {
+        cel_expression = "request.host == 'example.com'"
+    }
+
+    extensions {
+      name      = "ext11"
+      authority = "ext11.com"
+      service   = google_compute_region_backend_service.callouts_backend.self_link
+      timeout   = "0.1s"
+      fail_open = false
+
+      supported_events = ["REQUEST_HEADERS"]
+      forward_headers  = ["custom-header"]
+    }
   }
 
   labels = {
@@ -600,31 +556,33 @@ resource "google_network_services_lb_traffic_extension" "default" {
   }
 }
 
-# Traffic Extension Backend Instance
+# traffic extension backend instance
 resource "google_compute_instance" "callouts_instance" {
-  provider = google-beta
-
-  name = "tf-test-l7-ilb-callouts-ins%{random_suffix}"
-  zone = "us-west1-a"
-
+  name         = "tf-test-l7-ilb-callouts-ins%{random_suffix}"
+  zone         = "us-west1-a"
   machine_type = "e2-small"
+
   labels = {
     "container-vm" = "cos-stable-109-17800-147-54"
   }
-  tags         = ["allow-ssh","load-balanced-backend"]
+
+  tags = ["allow-ssh","load-balanced-backend"]
 
   network_interface {
     network    = google_compute_network.ilb_network.id
     subnetwork = google_compute_subnetwork.ilb_subnet.id
+
     access_config {
         # add external ip to fetch packages
     }
   }
+
   boot_disk {
     auto_delete  = true
+
     initialize_params {
-      type = "pd-standard"
-      size = 10
+      type  = "pd-standard"
+      size  = 10
       image = "https://www.googleapis.com/compute/v1/projects/cos-cloud/global/images/cos-stable-109-17800-147-54"
     }
   }
@@ -634,14 +592,16 @@ resource "google_compute_instance" "callouts_instance" {
     gce-container-declaration = "# DISCLAIMER:\n# This container declaration format is not a public API and may change without\n# notice. Please use gcloud command-line tool or Google Cloud Console to run\n# Containers on Google Compute Engine.\n\nspec:\n  containers:\n  - image: us-docker.pkg.dev/service-extensions/ext-proc/service-callout-basic-example-python:latest\n    name: callouts-vm\n    securityContext:\n      privileged: false\n    stdin: false\n    tty: false\n    volumeMounts: []\n  restartPolicy: Always\n  volumes: []\n"
     google-logging-enabled = "true"
   }
+
   lifecycle {
     create_before_destroy = true
   }
+
+  deletion_protection = false
 }
 
 // callouts instance group
 resource "google_compute_instance_group" "callouts_instance_group" {
-  provider    = google-beta
   name        = "tf-test-l7-ilb-callouts-ins-group%{random_suffix}"
   description = "Terraform test instance group"
 
@@ -664,7 +624,6 @@ resource "google_compute_instance_group" "callouts_instance_group" {
 
 # callout health check
 resource "google_compute_region_health_check" "callouts_health_check" {
-  provider = google-beta
   name     = "tf-test-l7-ilb-callouts-hc%{random_suffix}"
   region   = "us-west1"
   http_health_check {
@@ -674,7 +633,6 @@ resource "google_compute_region_health_check" "callouts_health_check" {
 
 # callout backend service
 resource "google_compute_region_backend_service" "callouts_backend" {
-  provider              = google-beta
   name                  = "tf-test-l7-ilb-callouts-backend%{random_suffix}"
   region                = "us-west1"
   protocol              = "HTTP2"
@@ -685,6 +643,98 @@ resource "google_compute_region_backend_service" "callouts_backend" {
 
   backend {
     group           = google_compute_instance_group.callouts_instance_group.id
+    balancing_mode  = "UTILIZATION"
+    capacity_scaler = 1.0
+  }
+}
+
+# traffic extension backend instance 2
+resource "google_compute_instance" "callouts_instance_2" {
+  name         = "tf-test-l7-ilb-callouts-ins-2%{random_suffix}"
+  zone         = "us-west1-a"
+  machine_type = "e2-small"
+
+  labels = {
+    "container-vm" = "cos-stable-109-17800-147-54"
+  }
+
+  tags = ["allow-ssh","load-balanced-backend"]
+
+  network_interface {
+    network    = google_compute_network.ilb_network.id
+    subnetwork = google_compute_subnetwork.ilb_subnet.id
+
+    access_config {
+        # add external ip to fetch packages
+    }
+  }
+
+  boot_disk {
+    auto_delete  = true
+
+    initialize_params {
+      type  = "pd-standard"
+      size  = 10
+      image = "https://www.googleapis.com/compute/v1/projects/cos-cloud/global/images/cos-stable-109-17800-147-54"
+    }
+  }
+
+  # Initialize an Envoy's Ext Proc gRPC API based on a docker container
+  metadata = {
+    gce-container-declaration = "# DISCLAIMER:\n# This container declaration format is not a public API and may change without\n# notice. Please use gcloud command-line tool or Google Cloud Console to run\n# Containers on Google Compute Engine.\n\nspec:\n  containers:\n  - image: us-docker.pkg.dev/service-extensions/ext-proc/service-callout-basic-example-python:latest\n    name: callouts-vm\n    securityContext:\n      privileged: false\n    stdin: false\n    tty: false\n    volumeMounts: []\n  restartPolicy: Always\n  volumes: []\n"
+    google-logging-enabled = "true"
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  deletion_protection = false
+}
+
+// callouts instance group 2
+resource "google_compute_instance_group" "callouts_instance_group_2" {
+  name        = "tf-test-l7-ilb-callouts-ins-group-2%{random_suffix}"
+  description = "Terraform test instance group"
+
+  instances = [
+    google_compute_instance.callouts_instance_2.id,
+  ]
+
+  named_port {
+    name = "http"
+    port = "80"
+  }
+
+  named_port {
+    name = "grpc"
+    port = "443"
+  }
+
+  zone = "us-west1-a"
+}
+
+# callout health check 2
+resource "google_compute_region_health_check" "callouts_health_check_2" {
+  name     = "tf-test-l7-ilb-callouts-hc-2%{random_suffix}"
+  region   = "us-west1"
+  http_health_check {
+    port = 80
+  }
+}
+
+# callout backend service
+resource "google_compute_region_backend_service" "callouts_backend_2" {
+  name                  = "tf-test-l7-ilb-callouts-backend-2%{random_suffix}"
+  region                = "us-west1"
+  protocol              = "HTTP2"
+  load_balancing_scheme = "INTERNAL_MANAGED"
+  timeout_sec           = 10
+  port_name             = "grpc"
+  health_checks         = [google_compute_region_health_check.callouts_health_check_2.id]
+
+  backend {
+    group           = google_compute_instance_group.callouts_instance_group_2.id
     balancing_mode  = "UTILIZATION"
     capacity_scaler = 1.0
   }
