@@ -83,7 +83,7 @@ func mergeCassettes(basePath, baseBranch, prPath string, runner source.Runner) {
 		runner,
 	)
 
-	// rmCassettes(fmt.Sprintf("%s/%s/", basePath, prPath), runner)
+	rmCassettes(fmt.Sprintf("%s/%s/", basePath, prPath), runner)
 }
 
 func listCassettes(path string, runner source.Runner) error {
