@@ -4691,8 +4691,11 @@ func TestAccContainerCluster_withWorkloadALTSConfigAutopilot(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
-				Check: resource.TestCheckResourceAttr(
-					"google_container_cluster.with_workload_alts_config", "workload_alts_config.enable_alts", "true"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_container_cluster.with_workload_alts_config", "workload_identity_config.workload_pool", fmt.Sprintf("%s.svc.id.goog", pid)),
+					resource.TestCheckResourceAttr(
+						"google_container_cluster.with_workload_alts_config", "workload_alts_config.enable_alts", "true")),
 			},
 		},
 	})
