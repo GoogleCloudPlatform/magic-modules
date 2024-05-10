@@ -1,7 +1,6 @@
 <% autogen_exception -%>
 package cloudasset
 
-<% unless version == 'ga' -%>
 import (
 	"fmt"
 	"net/url"
@@ -55,6 +54,7 @@ func DataSourceGoogleCloudAssetResourcesSearchAll() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						<% unless version == 'ga' -%>
 						"additional_attributes": {
 							Type:     schema.TypeList,
 							Computed: true,
@@ -62,6 +62,7 @@ func DataSourceGoogleCloudAssetResourcesSearchAll() *schema.Resource {
 								Type: schema.TypeString,
 							},
 						},
+						<% end -%>
 						"location": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -99,7 +100,12 @@ func datasourceGoogleCloudAssetResourcesSearchAllRead(d *schema.ResourceData, me
 	query := d.Get("query").(string)
 	assetTypes := d.Get("asset_types").([]interface{})
 
+	<% if version == 'ga' -%>
+	url := fmt.Sprintf("https://cloudasset.googleapis.com/v1/%s:searchAllResources", scope)
+	<% else -%>
 	url := fmt.Sprintf("https://cloudasset.googleapis.com/v1p1beta1/%s/resources:searchAll", scope)
+	<% end -%>
+
 	params["query"] = query
 
 	url, err = addArrayQueryParam(url, "asset_types", assetTypes)
@@ -167,7 +173,12 @@ func flattenDatasourceGoogleCloudAssetResourcesList(v interface{}) []map[string]
 	for _, raw := range ls {
 		p := raw.(map[string]interface{})
 
+		<% if version == 'ga' -%>
+		var mName, mAssetType, mProject, mDisplayName, mDescription, mLocation, mLabels, mNetworkTags interface{}
+		<% else -%>
 		var mName, mAssetType, mProject, mDisplayName, mDescription, mAdditionalAttributes, mLocation, mLabels, mNetworkTags interface{}
+		<% end -%>
+
 		if pName, ok := p["name"]; ok {
 			mName = pName
 		}
@@ -183,9 +194,11 @@ func flattenDatasourceGoogleCloudAssetResourcesList(v interface{}) []map[string]
 		if pDescription, ok := p["description"]; ok {
 			mDescription = pDescription
 		}
+		<% unless version == 'ga' -%>
 		if pAdditionalAttributes, ok := p["additionalAttributes"]; ok {
 			mAdditionalAttributes = pAdditionalAttributes
 		}
+		<% end -%>
 		if pLocation, ok := p["location"]; ok {
 			mLocation = pLocation
 		}
@@ -195,13 +208,16 @@ func flattenDatasourceGoogleCloudAssetResourcesList(v interface{}) []map[string]
 		if pNetworkTags, ok := p["networkTags"]; ok {
 			mNetworkTags = pNetworkTags
 		}
+
 		results = append(results, map[string]interface{}{
 			"name":                  mName,
 			"asset_type":            mAssetType,
 			"project":               mProject,
 			"display_name":          mDisplayName,
 			"description":           mDescription,
+			<% unless version == 'ga' -%>
 			"additional_attributes": mAdditionalAttributes,
+			<% end -%>
 			"location":              mLocation,
 			"labels":                mLabels,
 			"network_tags":          mNetworkTags,
@@ -223,5 +239,3 @@ func addArrayQueryParam(rawurl string, param string, values []interface{}) (stri
 	u.RawQuery = q.Encode()
 	return u.String(), nil
 }
-
-<% end -%>
