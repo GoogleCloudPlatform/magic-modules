@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const breakingChangesDesc = `Check for breaking changes between the new / old Terraform provider versions.`
+const breakingChangesDesc = `Check for breaking changes between the new / old Terraform provider versions. Add this line to trigger unit tests`
 
 type breakingChangesOptions struct {
 	rootOptions       *rootOptions

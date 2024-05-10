@@ -42,7 +42,7 @@ var checkCassettesCmd = &cobra.Command{
 	The following environment variables are expected:
 ` + listCCEnvironmentVariables() + `
 
-	It prints a list of tests that failed in replaying mode along with all test output.`,
+	It prints a list of tests that failed in replaying mode along with all test output. Add this line to trigger unit tests`,
 	Run: func(cmd *cobra.Command, args []string) {
 		env := make(map[string]string, len(ccEnvironmentVariables))
 		for _, ev := range ccEnvironmentVariables {
