@@ -902,12 +902,7 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
   <% unless version == "ga" -%>
   var targetSizePatchUpdate bool
   if d.HasChange("instance_flexibility_policy") {
-    instanceFlexibilityPolicy := d.Get("instance_flexibility_policy")
-    if instanceFlexibilityPolicy == nil || len(instanceFlexibilityPolicy.([]any)) == 0 {
-      updatedManager.NullFields = append(updatedManager.NullFields, "InstanceFlexibilityPolicy")
-    } else {
-      updatedManager.InstanceFlexibilityPolicy = expandInstanceFlexibilityPolicy(d)
-    }
+    updatedManager.InstanceFlexibilityPolicy = expandInstanceFlexibilityPolicy(d)
     change = true
 
     // target size update should be done by patch instead of using resize

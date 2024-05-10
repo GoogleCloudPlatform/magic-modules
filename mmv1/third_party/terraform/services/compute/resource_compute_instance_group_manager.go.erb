@@ -1186,7 +1186,6 @@ func expandStatefulIps(statefulIP []interface{}) map[string]compute.StatefulPoli
 <% unless version == "ga" -%>
 func expandInstanceFlexibilityPolicy(d *schema.ResourceData) *compute.InstanceGroupManagerInstanceFlexibilityPolicy {
 	instanceFlexibilityPolicy := &compute.InstanceGroupManagerInstanceFlexibilityPolicy{}
-	isRemovingAnInstanceSelection := false
 	if  d.HasChange("instance_flexibility_policy") {
 		oldFlexibilityPolicy, newFlexibilityPolicy := d.GetChange("instance_flexibility_policy")
 		for _, ifp := range newFlexibilityPolicy.([]any) {
@@ -1203,12 +1202,6 @@ func expandInstanceFlexibilityPolicy(d *schema.ResourceData) *compute.InstanceGr
 				}
 			}
 			instanceFlexibilityPolicy.ForceSendFields = append(instanceFlexibilityPolicy.ForceSendFields, "InstanceSelections")
-		}
-	}
-	if isRemovingAnInstanceSelection == false {
-		for _, ifp := range d.Get("instance_flexibility_policy").([]any) {
-			ifpData := ifp.(map[string]any)
-			instanceFlexibilityPolicy.InstanceSelections = expandInstanceSelections(ifpData["instance_selections"].(*schema.Set).List())
 		}
 	}
 	return instanceFlexibilityPolicy
