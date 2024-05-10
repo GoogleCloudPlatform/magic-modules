@@ -13,8 +13,8 @@ provider "google" {
 
 resource "google_compute_ssl_certificate" "webserver_cert" {
   name         = "prod-webserver-cert"
-  private_key = file("/etc/apache2/ssl/apache.key")
-  certificate = file("/etc/apache2/ssl/apache.crt")
+  private_key  = base64encode("-----BEGIN RSA PRIVATE KEY...")
+  certificate  = base64encode("-----BEGIN CERTIFICATE...")
   lifecycle {
     create_before_destroy = true
   }
