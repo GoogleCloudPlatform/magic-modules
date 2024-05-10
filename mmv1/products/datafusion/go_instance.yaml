@@ -59,6 +59,7 @@ examples:
       prober_test_run: ''
     test_vars_overrides:
       'prober_test_run': '`options = { prober_test_run = "true" }`'
+    external_providers: ["random", "time"]
   - name: 'data_fusion_instance_full'
     primary_resource_id: 'extended_instance'
     primary_resource_name: 'extended_instance'
@@ -143,7 +144,8 @@ pipelines at low cost."
   - name: 'labels'
     type: KeyValueLabels
     description: "The resource labels for instance to use to annotate any related underlying resources,
-such as Compute Engine VMs."
+such as Compute Engine VMs.
+"
     immutable: false
   - name: 'options'
     type: KeyValuePairs
