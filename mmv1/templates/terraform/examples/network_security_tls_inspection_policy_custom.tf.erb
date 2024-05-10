@@ -71,7 +71,7 @@ resource "google_project_service_identity" "ns_sa" {
   service  = "networksecurity.googleapis.com"
 }
 
-resource "google_privateca_ca_pool_iam_member" "tls_inspection_permission" {
+resource "google_privateca_ca_pool_iam_member" "default" {
   provider = google-beta
   ca_pool  = google_privateca_ca_pool.default.id
   role     = "roles/privateca.certificateManager"
@@ -126,7 +126,7 @@ resource "google_network_security_tls_inspection_policy" "<%= ctx[:primary_resou
   depends_on = [
     google_privateca_ca_pool.default,
     google_privateca_certificate_authority.default,
-    google_privateca_ca_pool_iam_member.tls_inspection_permission,
+    google_privateca_ca_pool_iam_member.default,
     google_certificate_manager_trust_config.default
   ]
 }
