@@ -20,7 +20,7 @@ module Provider
   class Terraform
     # Support for schema ValidateFunc functionality.
     class Sweeper < Google::YamlValidator
-      # The field checked by seeper to determine 
+      # The field checked by seeper to determine
       # eligibility for deletion for generated resources
       attr_reader :tf_test_field
 
