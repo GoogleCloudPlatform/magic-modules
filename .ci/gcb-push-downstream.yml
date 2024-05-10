@@ -30,41 +30,45 @@ steps:
       waitFor: ["checkout"]
 
     # TPG
-    - name: 'gcr.io/graphite-docker-images/bash-plus'
-      entrypoint: '/workspace/.ci/scripts/bash-plus/downstream-waiter/wait_for_commit.sh'
+    - name: 'gcr.io/graphite-docker-images/go-plus'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: tpg-sync
       waitFor: ["checkout"]
       args:
+          - 'wait-for-commit'
           - 'tpg-sync'
           - $BRANCH_NAME
           - $COMMIT_SHA
 
     # TPGB
-    - name: 'gcr.io/graphite-docker-images/bash-plus'
-      entrypoint: '/workspace/.ci/scripts/bash-plus/downstream-waiter/wait_for_commit.sh'
+    - name: 'gcr.io/graphite-docker-images/go-plus'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: tpgb-sync
       waitFor: ["checkout"]
       args:
+          - 'wait-for-commit'
           - 'tpgb-sync'
           - $BRANCH_NAME
           - $COMMIT_SHA
 
     # TGC
-    - name: 'gcr.io/graphite-docker-images/bash-plus'
-      entrypoint: '/workspace/.ci/scripts/bash-plus/downstream-waiter/wait_for_commit.sh'
+    - name: 'gcr.io/graphite-docker-images/go-plus'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: tgc-sync
       waitFor: ["checkout"]
       args:
+          - 'wait-for-commit'
           - 'tgc-sync'
           - $BRANCH_NAME
           - $COMMIT_SHA
 
     # TF-OICS
-    - name: 'gcr.io/graphite-docker-images/bash-plus'
-      entrypoint: '/workspace/.ci/scripts/bash-plus/downstream-waiter/wait_for_commit.sh'
+    - name: 'gcr.io/graphite-docker-images/go-plus'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: tf-oics-sync
       waitFor: ["checkout"]
       args:
+          - 'wait-for-commit'
           - 'tf-oics-sync'
           - $BRANCH_NAME
           - $COMMIT_SHA
