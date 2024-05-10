@@ -50,6 +50,7 @@ func ResourceConverters() map[string][]cai.ResourceConverter {
 		"google_compute_snapshot":                         {compute.ResourceConverterComputeSnapshot()},
 		"google_compute_subnetwork":                       {compute.ResourceConverterComputeSubnetwork()},
 		"google_compute_ssl_policy":                       {compute.ResourceConverterComputeSslPolicy()},
+		"google_compute_ssl_certificate": 				   {compute.ResourceConverterComputeSslCertificate()},
 		"google_compute_target_http_proxy": 			   {compute.ResourceConverterComputeTargetHttpProxy()},
 		"google_compute_target_https_proxy":               {compute.ResourceConverterComputeTargetHttpsProxy()},
 		"google_compute_target_ssl_proxy":                 {compute.ResourceConverterComputeTargetSslProxy()},
