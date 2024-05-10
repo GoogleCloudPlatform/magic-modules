@@ -25,7 +25,7 @@ autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "apphub_workload_basic"
-    pull_external: true
+    external_providers: ["random", "time"]
     primary_resource_id: "example"
     vars:
       application_id: "example-application-1"
@@ -39,7 +39,7 @@ examples:
       billing_account: :BILLING_ACCT
   - !ruby/object:Provider::Terraform::Examples
     name: "apphub_workload_full"
-    pull_external: true
+    external_providers: ["random", "time"]
     primary_resource_id: "example"
     vars:
       application_id: "example-application-1"

@@ -498,6 +498,9 @@ examples:
 <%      unless !example.pull_external -%>
     pull_external: <%= example.pull_external %>
 <%      end -%>
+<%      unless example.external_providers.nil? -%>
+    external_providers: <%= example.external_providers %>
+<%      end -%>
 <%      unless example.skip_test.nil? -%>
     skip_test: <%= example.skip_test %>
 <%      end -%>

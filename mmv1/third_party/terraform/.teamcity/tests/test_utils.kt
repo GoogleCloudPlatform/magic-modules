@@ -36,9 +36,6 @@ fun testContextParameters(): AllContextParameters {
         "identityUserGa",
         "identityUserBeta",
         "identityUserVcr",
-        "firestoreProjectGa",
-        "firestoreProjectBeta",
-        "firestoreProjectVcr",
         "masterBillingAccountGa",
         "masterBillingAccountBeta",
         "masterBillingAccountVcr",
@@ -53,7 +50,8 @@ fun testContextParameters(): AllContextParameters {
         "region",
         "zone",
         "infraProject",
-        "vcrBucketName")
+        "vcrBucketName",
+        "credentialsGCS")
 }
 
 fun getSubProject(rootProject: Project, parentProjectName: String, subProjectName: String): Project {
