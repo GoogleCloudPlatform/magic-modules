@@ -48,8 +48,8 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/instances/{{name}}'
     - '{{name}}'
 custom_code:
-  constants: 'templates/terraform/constants/data_fusion_instance_option.go.erb'
-  pre_update: 'templates/terraform/pre_update/datafusion_instance_update.go.erb'
+  constants: 'templates/terraform/constants/go/data_fusion_instance_option.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/go/datafusion_instance_update.go.tmpl'
 examples:
   - name: 'data_fusion_instance_basic'
     primary_resource_id: 'basic_instance'
@@ -272,10 +272,10 @@ able to access the public internet."
         immutable: true
   - name: 'accelerators'
     type: Array
-    description: "List of accelerators enabled for this CDF instance.
-
-If accelerators are enabled it is possible a permadiff will be created with the Options field.
-Users will need to either manually update their state file to include these diffed options, or include the field in a [lifecycle ignore changes block](https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle#ignore_changes)."
+    description: |
+      List of accelerators enabled for this CDF instance.
+        If accelerators are enabled it is possible a permadiff will be created with the Options field.
+        Users will need to either manually update their state file to include these diffed options, or include the field in a [lifecycle ignore changes block](https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle#ignore_changes).
     item_type:
       properties:
         - name: 'acceleratorType'
