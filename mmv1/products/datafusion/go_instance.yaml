@@ -144,7 +144,8 @@ pipelines at low cost."
   - name: 'labels'
     type: KeyValueLabels
     description: "The resource labels for instance to use to annotate any related underlying resources,
-such as Compute Engine VMs."
+such as Compute Engine VMs.
+"
     immutable: false
   - name: 'options'
     type: KeyValuePairs
