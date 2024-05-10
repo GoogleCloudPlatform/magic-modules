@@ -77,6 +77,7 @@ var TemplateFunctions = template.FuncMap{
 	"dict":            wrapMultipleParams,
 	"format2regex":    google.Format2Regex,
 	"orderProperties": api.OrderProperties,
+	"hasPrefix":       strings.HasPrefix,
 }
 
 var GA_VERSION = "ga"
