@@ -1287,10 +1287,9 @@ linux_node_config {
 
 * `private_registry_access_config` (Optional) - Configuration for private container registries. There are two fields in this config:
 
-  <!-- TODO(mmiranda96): update with correct docs link -->
   * `enabled` (Required) - Enables private registry config. If set to false, all other fields in this object must not be set.
 
-  * `certificate_authority_domain_config` (Optional) - List of configuration objects for CA and domains. Each object identifies a certificate and its assigned domains. See [docs](#TODO) for more detail. Example: 
+  * `certificate_authority_domain_config` (Optional) - List of configuration objects for CA and domains. Each object identifies a certificate and its assigned domains. See [how to configure for private container registries](https://cloud.google.com/kubernetes-engine/docs/how-to/access-private-registries-private-certificates) for more detail. Example: 
   ```hcl
   certificate_authority_domain_config {
     fqdns = [
