@@ -1783,7 +1783,6 @@ func ResourceContainerCluster() *schema.Resource {
 				// workload_identity_config today.
 				Computed: true,
 				Description: `Configuration for the use of Kubernetes Service Accounts in GCP IAM policies.`,
-				ConflictsWith: []string{"enable_autopilot"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"workload_pool": {
