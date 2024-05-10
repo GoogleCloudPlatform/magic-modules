@@ -10070,62 +10070,62 @@ resource "google_container_cluster" "without_confidential_boot_disk" {
 
 <% unless version == 'ga' -%>
 func testAccContainerCluster_withWorkloadALTSConfig(projectID, name, networkName, subnetworkName string, enable bool) string {
-	return fmt.Sprintf(`
-	data "google_project" "project" {
-		provider = google-beta
-		project_id = "%s"
-	}
-	resource "google_compute_network" "network" {
-		provider                 = google-beta
-		name                     = "%s"
-		auto_create_subnetworks  = false
-		enable_ula_internal_ipv6 = true
-	}
-	resource "google_compute_subnetwork" "subnet" {
-		provider         = google-beta
-		name             = "%s"
-		network          = google_compute_network.network.id
-		ip_cidr_range    = "9.12.22.0/24"
-		region           = "us-central1"
-	}
-	resource "google_container_cluster" "with_workload_alts_config" {
-		provider = google-beta
-		name               = "%s"
-		location           = "us-central1-a"
-		initial_node_count = 1
-		network         = google_compute_network.network.name
-		subnetwork      = google_compute_subnetwork.subnet.name
-		workload_alts_config {
-			enable_alts = %v
-		}
-		workload_identity_config {
-			workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
-		}
-		deletion_protection = false
-	}
+  return fmt.Sprintf(`
+  data "google_project" "project" {
+    provider = google-beta
+    project_id = "%s"
+  }
+  resource "google_compute_network" "network" {
+    provider                 = google-beta
+    name                     = "%s"
+    auto_create_subnetworks  = false
+    enable_ula_internal_ipv6 = true
+  }
+  resource "google_compute_subnetwork" "subnet" {
+    provider         = google-beta
+    name             = "%s"
+    network          = google_compute_network.network.id
+    ip_cidr_range    = "9.12.22.0/24"
+    region           = "us-central1"
+  }
+  resource "google_container_cluster" "with_workload_alts_config" {
+    provider = google-beta
+    name               = "%s"
+    location           = "us-central1-a"
+    initial_node_count = 1
+    network         = google_compute_network.network.name
+    subnetwork      = google_compute_subnetwork.subnet.name
+    workload_alts_config {
+      enable_alts = %v
+    }
+    workload_identity_config {
+      workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
+    }
+    deletion_protection = false
+  }
 `, projectID, networkName, subnetworkName, name, enable)
 }
 
 func testAccContainerCluster_withWorkloadALTSConfigAutopilot(projectID, name string, enable bool) string {
-	return fmt.Sprintf(`
-	data "google_project" "project" {
-		provider = google-beta
-		project_id = "%s"
-	}
-	resource "google_container_cluster" "with_workload_alts_config" {
-		provider = google-beta
-		name               = "%s"
-		location           = "us-central1"
-		initial_node_count = 1
-		workload_alts_config {
-			enable_alts = %v
-		}
-		workload_identity_config {
-			workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
-		}
-		enable_autopilot = true
-		deletion_protection = false
-	}
+  return fmt.Sprintf(`
+  data "google_project" "project" {
+    provider = google-beta
+    project_id = "%s"
+  }
+  resource "google_container_cluster" "with_workload_alts_config" {
+    provider = google-beta
+    name               = "%s"
+    location           = "us-central1"
+    initial_node_count = 1
+    workload_alts_config {
+      enable_alts = %v
+    }
+    workload_identity_config {
+      workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
+    }
+    enable_autopilot = true
+    deletion_protection = false
+  }
 `, projectID, name, enable)
 }
 
