@@ -40,7 +40,7 @@ examples:
     name: "firebase_app_check_debug_token_basic"
     min_version: 'beta'
     # Need the time_sleep resource
-    pull_external: true
+    external_providers: ["random", "time"]
     primary_resource_id: "default"
     vars:
       display_name: "Debug Token"
