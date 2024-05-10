@@ -1,0 +1,26 @@
+[
+   {
+      "name":"//run.googleapis.com/projects/{{.Provider.project}}/locations/us-central1/jobs/cloudrun-job",
+      "asset_type":"run.googleapis.com/Job",
+      "resource":{
+         "version":"v2",
+         "discovery_document_uri":"https://www.googleapis.com/discovery/v1/apis/run/v2/rest",
+         "discovery_name":"Job",
+         "parent":"//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+         "data":{
+            "template":{
+               "template":{
+                  "containers":[
+                     {
+                        "image":"us-docker.pkg.dev/cloudrun/container/hello"
+                     }
+                  ],
+                  "maxRetries":3
+               }
+            }
+         }
+      },
+      "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+     "ancestors": ["organizations/{{.OrgID}}"]
+   }
+]
