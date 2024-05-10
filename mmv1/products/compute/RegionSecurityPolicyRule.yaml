@@ -13,7 +13,6 @@
 
 --- !ruby/object:Api::Resource
 name: 'RegionSecurityPolicyRule'
-min_version: beta
 base_url: 'projects/{{project}}/regions/{{region}}/securityPolicies/{{security_policy}}'
 self_link: 'projects/{{project}}/regions/{{region}}/securityPolicies/{{security_policy}}/getRule?priority={{priority}}'
 create_url: 'projects/{{project}}/regions/{{region}}/securityPolicies/{{security_policy}}/addRule?priority={{priority}}'
