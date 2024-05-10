@@ -24,6 +24,10 @@ resource "google_compute_subnetwork" "ilb_subnet" {
   ip_cidr_range = "10.0.1.0/24"
   region        = "us-west1"
   network       = google_compute_network.ilb_network.id
+
+  depends_on = [
+    google_compute_subnetwork.proxy_subnet
+  ]
 }
 
 # forwarding rule
@@ -31,7 +35,6 @@ resource "google_compute_forwarding_rule" "default" {
   name                  = "<%= ctx[:vars]['forwarding_rule_name'] %>"
   provider              = google-beta
   region                = "us-west1"
-  depends_on            = [google_compute_subnetwork.proxy_subnet]
   ip_protocol           = "TCP"
   load_balancing_scheme = "INTERNAL_MANAGED"
   port_range            = "80"
@@ -39,6 +42,10 @@ resource "google_compute_forwarding_rule" "default" {
   network               = google_compute_network.ilb_network.id
   subnetwork            = google_compute_subnetwork.ilb_subnet.id
   network_tier          = "PREMIUM"
+
+  depends_on = [
+  	google_compute_subnetwork.proxy_subnet
+  ]
 }
 
 # HTTP target proxy
@@ -150,7 +157,7 @@ resource "google_compute_region_instance_group_manager" "mig" {
 }
 
 # allow all access from IAP and health check ranges
-resource "google_compute_firewall" "fw-iap" {
+resource "google_compute_firewall" "fw_iap" {
   name          = "<%= ctx[:vars]['fw_allow_iap_hc_name'] %>"
   provider      = google-beta
   direction     = "INGRESS"
@@ -163,7 +170,7 @@ resource "google_compute_firewall" "fw-iap" {
 }
 
 # allow http from proxy subnet to backends
-resource "google_compute_firewall" "fw-ilb-to-backends" {
+resource "google_compute_firewall" "fw_ilb_to_backends" {
   name          = "<%= ctx[:vars]['fw_allow_ilb_to_backends_name'] %>"
   provider      = google-beta
   direction     = "INGRESS"
@@ -175,25 +182,10 @@ resource "google_compute_firewall" "fw-ilb-to-backends" {
     protocol = "tcp"
     ports    = ["80", "443", "8080"]
   }
-}
 
-# test instance
-resource "google_compute_instance" "vm-test" {
-  name         = "<%= ctx[:vars]['vm_test_name'] %>"
-  provider     = google-beta
-  zone         = "us-west1-b"
-  machine_type = "e2-small"
-
-  network_interface {
-    network    = google_compute_network.ilb_network.id
-    subnetwork = google_compute_subnetwork.ilb_subnet.id
-  }
-
-  boot_disk {
-    initialize_params {
-      image = "debian-cloud/debian-11"
-    }
-  }
+  depends_on = [
+	  google_compute_firewall.fw_iap
+  ]
 }
 # [END cloudloadbalancing_int_http_gce]
 
@@ -231,31 +223,54 @@ resource "google_network_services_lb_traffic_extension" "<%= ctx[:primary_resour
   }
 }
 
+# test instance
+resource "google_compute_instance" "vm_test" {
+  name         = "<%= ctx[:vars]['vm_test_name'] %>"
+  provider     = google-beta
+  zone         = "us-west1-b"
+  machine_type = "e2-small"
+
+  network_interface {
+    network    = google_compute_network.ilb_network.id
+    subnetwork = google_compute_subnetwork.ilb_subnet.id
+  }
+
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-11"
+    }
+  }
+}
+
 # Traffic Extension Backend Instance
 resource "google_compute_instance" "callouts_instance" {
-  provider = google-beta
-
-  name = "<%= ctx[:vars]['callouts_instance_name'] %>"
-  zone = "us-west1-a"
-
+  provider     = google-beta
+  name         = "<%= ctx[:vars]['callouts_instance_name'] %>"
+  zone         = "us-west1-a"
   machine_type = "e2-small"
+
   labels = {
     "container-vm" = "cos-stable-109-17800-147-54"
   }
+
   tags         = ["allow-ssh","load-balanced-backend"]
 
   network_interface {
     network    = google_compute_network.ilb_network.id
     subnetwork = google_compute_subnetwork.ilb_subnet.id
+
     access_config {
-        # add external ip to fetch packages
+      # add external ip to fetch packages
     }
+
   }
+
   boot_disk {
     auto_delete  = true
+
     initialize_params {
-      type = "pd-standard"
-      size = 10
+      type  = "pd-standard"
+      size  = 10
       image = "https://www.googleapis.com/compute/v1/projects/cos-cloud/global/images/cos-stable-109-17800-147-54"
     }
   }
@@ -265,9 +280,16 @@ resource "google_compute_instance" "callouts_instance" {
     gce-container-declaration = "# DISCLAIMER:\n# This container declaration format is not a public API and may change without\n# notice. Please use gcloud command-line tool or Google Cloud Console to run\n# Containers on Google Compute Engine.\n\nspec:\n  containers:\n  - image: us-docker.pkg.dev/service-extensions/ext-proc/service-callout-basic-example-python:latest\n    name: callouts-vm\n    securityContext:\n      privileged: false\n    stdin: false\n    tty: false\n    volumeMounts: []\n  restartPolicy: Always\n  volumes: []\n"
     google-logging-enabled = "true"
   }
+
   lifecycle {
     create_before_destroy = true
   }
+
+  deletion_protection = false
+
+  depends_on = [
+	  google_compute_instance.vm_test
+  ]
 }
 
 // callouts instance group
@@ -275,6 +297,7 @@ resource "google_compute_instance_group" "callouts_instance_group" {
   provider    = google-beta
   name        = "<%= ctx[:vars]['callouts_instance_group'] %>"
   description = "Terraform test instance group"
+  zone        = "us-west1-a"
 
   instances = [
     google_compute_instance.callouts_instance.id,
@@ -289,8 +312,6 @@ resource "google_compute_instance_group" "callouts_instance_group" {
     name = "grpc"
     port = "443"
   }
-
-  zone = "us-west1-a"
 }
 
 # callout health check
@@ -298,9 +319,14 @@ resource "google_compute_region_health_check" "callouts_health_check" {
   provider = google-beta
   name     = "<%= ctx[:vars]['callouts_hc_name'] %>"
   region   = "us-west1"
+
   http_health_check {
     port = 80
   }
+
+  depends_on = [
+	google_compute_region_health_check.default
+  ]
 }
 
 # callout backend service
@@ -319,5 +345,9 @@ resource "google_compute_region_backend_service" "callouts_backend" {
     balancing_mode  = "UTILIZATION"
     capacity_scaler = 1.0
   }
+
+  depends_on = [
+	  google_compute_region_backend_service.default
+  ]
 }
 # [END lb_traffic_extension]

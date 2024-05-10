@@ -36,6 +36,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'network_services_lb_traffic_extension_basic'
     primary_resource_id: 'default'
+    min_version: beta
     vars:
       ilb_network_name: 'l7-ilb-network'
       proxy_subnet_name: 'l7-ilb-proxy-subnet'

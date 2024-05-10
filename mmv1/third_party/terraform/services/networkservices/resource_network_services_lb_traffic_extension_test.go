@@ -66,13 +66,16 @@ resource "google_compute_subnetwork" "ilb_subnet" {
   ip_cidr_range = "10.0.1.0/24"
   region        = "us-west1"
   network       = google_compute_network.ilb_network.id
+
+  depends_on = [
+    google_compute_subnetwork.proxy_subnet
+  ]
 }
 
 # forwarding rule
 resource "google_compute_forwarding_rule" "default" {
   name                  = "tf-test-l7-ilb-forwarding-rule%{random_suffix}"
   region                = "us-west1"
-  depends_on            = [google_compute_subnetwork.proxy_subnet]
   ip_protocol           = "TCP"
   load_balancing_scheme = "INTERNAL_MANAGED"
   port_range            = "80"
@@ -80,6 +83,10 @@ resource "google_compute_forwarding_rule" "default" {
   network               = google_compute_network.ilb_network.id
   subnetwork            = google_compute_subnetwork.ilb_subnet.id
   network_tier          = "PREMIUM"
+
+  depends_on = [
+	google_compute_subnetwork.proxy_subnet
+  ]
 }
 
 # HTTP target proxy
@@ -185,7 +192,7 @@ resource "google_compute_region_instance_group_manager" "mig" {
 }
 
 # allow all access from IAP and health check ranges
-resource "google_compute_firewall" "fw-iap" {
+resource "google_compute_firewall" "fw_iap" {
   name          = "tf-test-l7-ilb-fw-allow-iap-hc%{random_suffix}"
   direction     = "INGRESS"
   network       = google_compute_network.ilb_network.id
@@ -197,7 +204,7 @@ resource "google_compute_firewall" "fw-iap" {
 }
 
 # allow http from proxy subnet to backends
-resource "google_compute_firewall" "fw-ilb-to-backends" {
+resource "google_compute_firewall" "fw_ilb_to_backends" {
   name          = "tf-test-l7-ilb-fw-allow-ilb-to-backends%{random_suffix}"
   direction     = "INGRESS"
   network       = google_compute_network.ilb_network.id
@@ -208,6 +215,10 @@ resource "google_compute_firewall" "fw-ilb-to-backends" {
     protocol = "tcp"
     ports    = ["80", "443", "8080"]
   }
+
+  depends_on = [
+	google_compute_firewall.fw_iap
+  ]
 }
 
 resource "google_network_services_lb_traffic_extension" "default" {
@@ -259,7 +270,7 @@ resource "google_compute_instance" "callouts_instance" {
     subnetwork = google_compute_subnetwork.ilb_subnet.id
 
     access_config {
-        # add external ip to fetch packages
+      # add external ip to fetch packages
     }
   }
 
@@ -290,6 +301,7 @@ resource "google_compute_instance" "callouts_instance" {
 resource "google_compute_instance_group" "callouts_instance_group" {
   name        = "tf-test-l7-ilb-callouts-ins-group%{random_suffix}"
   description = "Terraform test instance group"
+  zone        = "us-west1-a"
 
   instances = [
     google_compute_instance.callouts_instance.id,
@@ -304,17 +316,20 @@ resource "google_compute_instance_group" "callouts_instance_group" {
     name = "grpc"
     port = "443"
   }
-
-  zone = "us-west1-a"
 }
 
 # callout health check
 resource "google_compute_region_health_check" "callouts_health_check" {
   name     = "tf-test-l7-ilb-callouts-hc%{random_suffix}"
   region   = "us-west1"
+
   http_health_check {
     port = 80
   }
+
+  depends_on = [
+	google_compute_region_health_check.default
+  ]
 }
 
 # callout backend service
@@ -332,6 +347,10 @@ resource "google_compute_region_backend_service" "callouts_backend" {
     balancing_mode  = "UTILIZATION"
     capacity_scaler = 1.0
   }
+
+  depends_on = [
+	google_compute_region_backend_service.default
+  ]
 }
 `, context)
 }
@@ -361,13 +380,16 @@ resource "google_compute_subnetwork" "ilb_subnet" {
   ip_cidr_range = "10.0.1.0/24"
   region        = "us-west1"
   network       = google_compute_network.ilb_network.id
+
+  depends_on = [
+    google_compute_subnetwork.proxy_subnet
+  ]
 }
 
 # forwarding rule
 resource "google_compute_forwarding_rule" "default" {
   name                  = "tf-test-l7-ilb-forwarding-rule%{random_suffix}"
   region                = "us-west1"
-  depends_on            = [google_compute_subnetwork.proxy_subnet]
   ip_protocol           = "TCP"
   load_balancing_scheme = "INTERNAL_MANAGED"
   port_range            = "80"
@@ -375,6 +397,10 @@ resource "google_compute_forwarding_rule" "default" {
   network               = google_compute_network.ilb_network.id
   subnetwork            = google_compute_subnetwork.ilb_subnet.id
   network_tier          = "PREMIUM"
+
+  depends_on = [
+	google_compute_subnetwork.proxy_subnet
+  ]
 }
 
 # HTTP target proxy
@@ -480,7 +506,7 @@ resource "google_compute_region_instance_group_manager" "mig" {
 }
 
 # allow all access from IAP and health check ranges
-resource "google_compute_firewall" "fw-iap" {
+resource "google_compute_firewall" "fw_iap" {
   name          = "tf-test-l7-ilb-fw-allow-iap-hc%{random_suffix}"
   direction     = "INGRESS"
   network       = google_compute_network.ilb_network.id
@@ -492,7 +518,7 @@ resource "google_compute_firewall" "fw-iap" {
 }
 
 # allow http from proxy subnet to backends
-resource "google_compute_firewall" "fw-ilb-to-backends" {
+resource "google_compute_firewall" "fw_ilb_to_backends" {
   name          = "tf-test-l7-ilb-fw-allow-ilb-to-backends%{random_suffix}"
   direction     = "INGRESS"
   network       = google_compute_network.ilb_network.id
@@ -503,6 +529,10 @@ resource "google_compute_firewall" "fw-ilb-to-backends" {
     protocol = "tcp"
     ports    = ["80", "443", "8080"]
   }
+
+  depends_on = [
+	google_compute_firewall.fw_iap
+  ]
 }
 
 resource "google_network_services_lb_traffic_extension" "default" {
@@ -604,6 +634,7 @@ resource "google_compute_instance" "callouts_instance" {
 resource "google_compute_instance_group" "callouts_instance_group" {
   name        = "tf-test-l7-ilb-callouts-ins-group%{random_suffix}"
   description = "Terraform test instance group"
+  zone        = "us-west1-a"
 
   instances = [
     google_compute_instance.callouts_instance.id,
@@ -618,17 +649,20 @@ resource "google_compute_instance_group" "callouts_instance_group" {
     name = "grpc"
     port = "443"
   }
-
-  zone = "us-west1-a"
 }
 
 # callout health check
 resource "google_compute_region_health_check" "callouts_health_check" {
   name     = "tf-test-l7-ilb-callouts-hc%{random_suffix}"
   region   = "us-west1"
+
   http_health_check {
     port = 80
   }
+
+  depends_on = [
+	google_compute_region_health_check.default
+  ]
 }
 
 # callout backend service
@@ -646,6 +680,10 @@ resource "google_compute_region_backend_service" "callouts_backend" {
     balancing_mode  = "UTILIZATION"
     capacity_scaler = 1.0
   }
+
+  depends_on = [
+	google_compute_region_backend_service.default
+  ]
 }
 
 # traffic extension backend instance 2
@@ -690,12 +728,17 @@ resource "google_compute_instance" "callouts_instance_2" {
   }
 
   deletion_protection = false
+
+  depends_on = [
+	google_compute_instance.callouts_instance
+  ]
 }
 
 // callouts instance group 2
 resource "google_compute_instance_group" "callouts_instance_group_2" {
   name        = "tf-test-l7-ilb-callouts-ins-group-2%{random_suffix}"
   description = "Terraform test instance group"
+  zone        = "us-west1-a"
 
   instances = [
     google_compute_instance.callouts_instance_2.id,
@@ -711,16 +754,23 @@ resource "google_compute_instance_group" "callouts_instance_group_2" {
     port = "443"
   }
 
-  zone = "us-west1-a"
+  depends_on = [
+	google_compute_instance_group.callouts_instance_group
+  ]
 }
 
 # callout health check 2
 resource "google_compute_region_health_check" "callouts_health_check_2" {
   name     = "tf-test-l7-ilb-callouts-hc-2%{random_suffix}"
   region   = "us-west1"
+
   http_health_check {
     port = 80
   }
+
+  depends_on = [
+	google_compute_region_health_check.callouts_health_check
+  ]
 }
 
 # callout backend service
@@ -738,6 +788,10 @@ resource "google_compute_region_backend_service" "callouts_backend_2" {
     balancing_mode  = "UTILIZATION"
     capacity_scaler = 1.0
   }
+
+  depends_on = [
+	google_compute_region_backend_service.callouts_backend
+  ]
 }
 `, context)
 }
