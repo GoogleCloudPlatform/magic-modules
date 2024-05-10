@@ -631,7 +631,7 @@ func resourceComputeRegionInstanceGroupManagerCreate(d *schema.ResourceData, met
 		DistributionPolicy:          expandDistributionPolicy(d),
 		StatefulPolicy:              expandStatefulPolicy(d),
 		<% unless version == "ga" -%>
-			InstanceFlexibilityPolicy:   expandInstanceFlexibilityPolicy(d),
+		InstanceFlexibilityPolicy:   expandInstanceFlexibilityPolicy(d),
 		<% end -%>
 		<% unless version == "ga" -%>
 		Params:                      expandInstanceGroupManagerParams(d),

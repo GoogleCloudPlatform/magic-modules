@@ -1188,28 +1188,28 @@ func expandInstanceFlexibilityPolicy(d *schema.ResourceData) *compute.InstanceGr
 	instanceFlexibilityPolicy := &compute.InstanceGroupManagerInstanceFlexibilityPolicy{}
 	isRemovingAnInstanceSelection := false
 	if  d.HasChange("instance_flexibility_policy") {
-	  oldFlexibilityPolicy, newFlexibilityPolicy := d.GetChange("instance_flexibility_policy")
-	  for _, ifp := range newFlexibilityPolicy.([]any) {
-      ifpData := ifp.(map[string]any)
-      instanceFlexibilityPolicy.InstanceSelections = expandInstanceSelections(ifpData["instance_selections"].(*schema.Set).List())
-    }
-    for _, ifp := range oldFlexibilityPolicy.([]any) {
-      ifpData := ifp.(map[string]any)
-      for _, instSl := range ifpData["instance_selections"].(*schema.Set).List() {
-      		  instSlData := instSl.(map[string] any)
-      			name := instSlData["name"].(string)
-      			if _, exist := instanceFlexibilityPolicy.InstanceSelections[name]; !exist {
-      				instanceFlexibilityPolicy.NullFields = append(instanceFlexibilityPolicy.NullFields, "InstanceSelections." + name)
-      			}
-      		}
-      		instanceFlexibilityPolicy.ForceSendFields = append(instanceFlexibilityPolicy.ForceSendFields, "InstanceSelections")
-    }
+		oldFlexibilityPolicy, newFlexibilityPolicy := d.GetChange("instance_flexibility_policy")
+		for _, ifp := range newFlexibilityPolicy.([]any) {
+			ifpData := ifp.(map[string]any)
+			instanceFlexibilityPolicy.InstanceSelections = expandInstanceSelections(ifpData["instance_selections"].(*schema.Set).List())
+		}
+		for _, ifp := range oldFlexibilityPolicy.([]any) {
+			ifpData := ifp.(map[string]any)
+			for _, instSl := range ifpData["instance_selections"].(*schema.Set).List() {
+				instSlData := instSl.(map[string] any)
+				name := instSlData["name"].(string)
+				if _, exist := instanceFlexibilityPolicy.InstanceSelections[name]; !exist {
+					instanceFlexibilityPolicy.NullFields = append(instanceFlexibilityPolicy.NullFields, "InstanceSelections." + name)
+				}
+			}
+			instanceFlexibilityPolicy.ForceSendFields = append(instanceFlexibilityPolicy.ForceSendFields, "InstanceSelections")
+		}
 	}
 	if isRemovingAnInstanceSelection == false {
-	  for _, ifp := range d.Get("instance_flexibility_policy").([]any) {
-      ifpData := ifp.(map[string]any)
-      instanceFlexibilityPolicy.InstanceSelections = expandInstanceSelections(ifpData["instance_selections"].(*schema.Set).List())
-    }
+		for _, ifp := range d.Get("instance_flexibility_policy").([]any) {
+			ifpData := ifp.(map[string]any)
+			instanceFlexibilityPolicy.InstanceSelections = expandInstanceSelections(ifpData["instance_selections"].(*schema.Set).List())
+		}
 	}
 	return instanceFlexibilityPolicy
 }
