@@ -93,7 +93,7 @@ virtual_fields:
     name: 'delete_swg_autogen_router_on_destroy'
     default_value: false
     description: |
-      When deleting a gateway of type 'SECURE_WEB_GATEWAY', this boolean option will also delete auto generated router by the gateway creation.
+      UPDATEDWhen deleting a gateway of type 'SECURE_WEB_GATEWAY', this boolean option will also delete auto generated router by the gateway creation.
       If there is no other gateway of type 'SECURE_WEB_GATEWAY' remaining for that region and network it will be deleted.
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_delete: 'templates/terraform/post_delete/network_services_gateway.go.erb'
