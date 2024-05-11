@@ -35,14 +35,19 @@ skip_delete: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'kms_key_handle_basic'
+    # Need the time_sleep resource
+    external_providers: ["random", "time"]
     primary_resource_id:
       'example-keyhandle'
     min_version: beta
     vars:
       key_project_name:
-        'example-key-project'
+        'key-proj'
       resource_project_name:
-        'example-resource-project'
+        'resources'
+    test_env_vars:
+      org_id: :ORG_ID
+      billing_account: :BILLING_ACCT
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   decoder: templates/terraform/decoders/kms.go.erb
 autogen_async: true

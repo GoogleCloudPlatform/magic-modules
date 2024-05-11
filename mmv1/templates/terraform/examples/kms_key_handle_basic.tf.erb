@@ -37,7 +37,6 @@ resource "google_project_service" "kms_api_service" {
 
 # Wait delay after enabling APIs
 resource "time_sleep" "wait_enable_service_api" {
-  provider         = google-beta
   depends_on       = [google_project_service.kms_api_service]
   create_duration  = "30s"
 }
@@ -46,8 +45,14 @@ resource "time_sleep" "wait_enable_service_api" {
 resource "google_project_service_identity" "kms_service_agent" {
   provider   = google-beta
   service    = "cloudkms.googleapis.com"
-  project    = google_project.key_project.project_id
+  project    = google_project.key_project.number
   depends_on = [time_sleep.wait_enable_service_api]
+}
+
+# Wait delay after creating service agent.
+resource "time_sleep" "wait_service_agent" {
+  depends_on       = [google_project_service_identity.kms_service_agent]
+  create_duration  = "10s"
 }
 
 #Grant the KMS Service Agent the Cloud KMS Admin role
@@ -55,27 +60,25 @@ resource "google_project_iam_member" "autokey_project_admin" {
   provider   = google-beta
   project    = google_project.key_project.project_id
   role       = "roles/cloudkms.admin"
-  member     = "serviceAccount:service-${google_project.key_project.project_id}@gcp-sa-cloudkms.iam.gserviceaccount.com"
-  depends_on = [google_project_service_identity.kms_service_agent]
+  member     = "serviceAccount:service-${google_project.key_project.number}@gcp-sa-cloudkms.iam.gserviceaccount.com"
+  depends_on = [time_sleep.wait_service_agent]
 }
 
 # Wait delay after granting IAM permissions
 resource "time_sleep" "wait_srv_acc_permissions" {
-  provider        = google-beta
   create_duration = "10s"
   depends_on      = [google_project_iam_member.autokey_project_admin]
 }
 
 resource "google_kms_autokey_config" "autokey_config" {
   provider    = google-beta
-  folder      = google_folder.autokms_folder[count.index].folder_id
+  folder      = google_folder.autokms_folder.folder_id
   key_project = "projects/${google_project.key_project.project_id}"
   depends_on  = [time_sleep.wait_srv_acc_permissions]
 }
 
 # Wait delay for autokey config to take effect
 resource "time_sleep" "wait_autokey_config" {
-  provider        = google-beta
   create_duration = "10s"
   depends_on      = [google_kms_autokey_config.autokey_config]
 }
