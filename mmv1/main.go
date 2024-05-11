@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"time"
 
 	"golang.org/x/exp/slices"
 
@@ -68,6 +69,7 @@ func main() {
 		log.Fatalf("No product.yaml file found.")
 	}
 
+	startTime := time.Now()
 	log.Printf("Generating MM output to '%s'", *outputPath)
 	log.Printf("Using %s version", *version)
 
@@ -80,6 +82,7 @@ func main() {
 		return false
 	})
 
+	var productsForVersion []map[string]interface{}
 	for _, productName := range allProductFiles {
 		productYamlPath := path.Join(productName, "go_product.yaml")
 
@@ -137,7 +140,7 @@ func main() {
 			productApi.Validate()
 
 			// TODO Q2: set other providers via flag
-			providerToGenerate := provider.NewTerraform(productApi, *version)
+			providerToGenerate := provider.NewTerraform(productApi, *version, startTime)
 
 			if !slices.Contains(productsToGenerate, productName) {
 				log.Printf("%s not specified, skipping generation", productName)
@@ -146,8 +149,33 @@ func main() {
 
 			log.Printf("%s: Generating files", productName)
 			providerToGenerate.Generate(*outputPath, productName, generateCode, generateDocs)
+
+			// we need to preserve a single provider instance to use outside of this loop.
+			productsForVersion = append(productsForVersion, map[string]interface{}{
+				"Definitions": productApi,
+				"Provider":    providerToGenerate,
+			})
 		}
 
 		// TODO Q2: copy common files
+	}
+
+	slices.SortFunc(productsForVersion, func(p1, p2 map[string]interface{}) int {
+		return strings.Compare(strings.ToLower(p1["Definitions"].(*api.Product).Name), strings.ToLower(p2["Definitions"].(*api.Product).Name))
+	})
+
+	// In order to only copy/compile files once per provider this must be called outside
+	// of the products loop. This will get called with the provider from the final iteration
+	// of the loop
+	finalProduct := productsForVersion[len(productsForVersion)-1]
+	provider := finalProduct["Provider"].(*provider.Terraform)
+
+	provider.CopyCommonFiles(*outputPath, generateCode, generateDocs)
+
+	log.Printf("Compiling common files for terraform")
+	if generateCode {
+		provider.CompileCommonFiles(*outputPath, productsForVersion, "")
+
+		// TODO Q2: product overrides
 	}
 }

@@ -41,9 +41,9 @@ async:
   suppress_error: true
   target_occurrences: 1
 custom_code:
-  constants: 'templates/terraform/constants/subscription.go.erb'
-  encoder: 'templates/terraform/encoders/no_send_name.go.erb'
-  update_encoder: 'templates/terraform/update_encoder/pubsub_subscription.erb'
+  constants: 'templates/terraform/constants/go/subscription.go.tmpl'
+  encoder: 'templates/terraform/encoders/go/no_send_name.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/go/pubsub_subscription.tmpl'
 examples:
   - name: 'pubsub_subscription_push'
     primary_resource_id: 'example'
@@ -100,8 +100,8 @@ properties:
     description: "Name of the subscription."
     required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/go/shortname_to_url.go.tmpl'
   - name: 'topic'
     type: ResourceRef
     description: "A reference to a Topic resource, of the form projects/{project}/topics/{{name}}
@@ -110,16 +110,13 @@ the topic is in the same project as the subscription."
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    custom_expand: 'templates/terraform/custom_expand/computed_subscription_topic.erb'
+    custom_expand: 'templates/terraform/custom_expand/go/computed_subscription_topic.tmpl'
     resource: 'Topic'
     imports: 'name'
   - name: 'labels'
     type: KeyValueLabels
     description: "A set of key/value label pairs to assign to this Subscription.
-
-
-**Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
-Please refer to the field `effective_labels` for all of the labels present on the resource."
+"
     immutable: false
   - name: 'bigqueryConfig'
     type: NestedObject
@@ -264,7 +261,7 @@ pull and ack messages using API methods."
         type: NestedObject
         description: "When set, the payload to the push endpoint is not wrapped.Sets the
     `data` field as the HTTP body for delivery."
-        custom_flatten: 'templates/terraform/custom_flatten/pubsub_no_wrapper_write_metadata_flatten.go.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/go/pubsub_no_wrapper_write_metadata_flatten.go.tmpl'
         properties:
           - name: 'writeMetadata'
             type: Boolean
