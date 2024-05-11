@@ -1528,7 +1528,7 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 				return err
 			}
 		}
-		if d.HasChange("config.0.data_retention_config.0.task_logs_retention_config.0.storage_mode") {
+		if d.HasChange("config.0.data_retention_configuration.0.task_logs_retention_config.0.storage_mode") {
 			patchObj := &composer.Environment{
 				Config: &composer.EnvironmentConfig{
 					DataRetentionConfig: &composer.DataRetentionConfig{
@@ -1544,7 +1544,7 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 				return err
 			}
 		}
-		if d.HasChange("config.0.data_retention_config.0.airflow_metadata_retention_config.0.retention_mode") {
+		if d.HasChange("config.0.data_retention_configuration.0.airflow_metadata_retention_config.0.retention_mode") {
 			patchObj := &composer.Environment{
 				Config: &composer.EnvironmentConfig{
 					DataRetentionConfig: &composer.DataRetentionConfig {
@@ -1560,7 +1560,7 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 				return err
 			}
 		}
-		if d.HasChange("config.0.data_retention_config.0.airflow_metadata_retention_config.0.retention_days") {
+		if d.HasChange("config.0.data_retention_configuration.0.airflow_metadata_retention_config.0.retention_days") {
 			patchObj := &composer.Environment{
 				Config: &composer.EnvironmentConfig{
 					DataRetentionConfig: &composer.DataRetentionConfig {
