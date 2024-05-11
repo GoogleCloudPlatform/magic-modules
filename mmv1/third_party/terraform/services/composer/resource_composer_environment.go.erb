@@ -742,6 +742,7 @@ func ResourceComposerEnvironment() *schema.Resource {
 							Type:         schema.TypeList,
 							Optional:     true,
 							Computed:     true,
+							ForceNew:     false,
 							AtLeastOneOf: composerConfigKeys,
 							MaxItems:     1,
 							Description:  `The configuration setting for Airflow data retention mechanism. This field is supported for Cloud Composer environments in versions composer-2.0.32-airflow-2.1.4. or newer`,
@@ -751,12 +752,14 @@ func ResourceComposerEnvironment() *schema.Resource {
 										Type:         schema.TypeList,
 										Description: `Optional. The configuration setting for Task Logs.`,
 										Optional:     true,
+										ForceNew:     false,
 										AtLeastOneOf: composerDataRetentionKeys,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"storage_mode": {
 													Type:         schema.TypeString,
 													Optional:     true,
+													ForceNew:     false,
 													ValidateFunc: validation.StringInSlice([]string{"CLOUD_LOGGING_ONLY", "CLOUD_LOGGING_AND_CLOUD_STORAGE"}, false),
 													Description:  `Whether logs in cloud logging only is enabled or not. This field is supported for Cloud Composer environments in versions composer-2.0.32-airflow-2.1.4 and newer.`,
 												},
@@ -767,18 +770,21 @@ func ResourceComposerEnvironment() *schema.Resource {
 										Type:			schema.TypeList,
 										Description: 	`Optional. The configuration setting for Airflow Metadata Database Retention.`,
 										Optional: 		true,
+										ForceNew:     false,
 										AtLeastOneOf: composerDataRetentionKeys,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"retention_mode": {
 													Type: 			schema.TypeString,
 													Optional:		true,
+													ForceNew:     false,
 													ValidateFunc: 	validation.StringInSlice([]string{"RETENTION_MODE_ENABLED", "RETENTION_MODE_DISABLED"}, false),
 													Description: 	`Wheter Database Retention mechanism is enabled for this environment.`,
 												},
 												"retention_days": {
 													Type: 			schema.TypeInt,
 													Optional:		true,
+													ForceNew:     false,
 													ValidateFunc:	validation.IntBetween(30, 730),
 													Description: 	`For enabled Database Retention mechanism how many days of Airflow metadata database are kept uncleared.`,
 												},
