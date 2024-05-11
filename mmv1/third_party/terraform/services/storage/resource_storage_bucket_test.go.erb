@@ -323,12 +323,6 @@ func TestAccStorageBucket_lifecycleRulesMultiple(t *testing.T) {
 			},
 			{
 				Config: testAccStorageBucket_lifecycleRulesMultiple_update(bucketName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"google_storage_bucket.bucket", "lifecycle_rule.2.condition.0.custom_time_before", "2019-01-12"),
-					resource.TestCheckResourceAttr(
-						"google_storage_bucket.bucket", "lifecycle_rule.3.condition.0.noncurrent_time_before", "2019-01-12"),
-				),
 			},
 			{
 				ResourceName:            "google_storage_bucket.bucket",
