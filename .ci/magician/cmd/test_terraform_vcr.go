@@ -180,7 +180,9 @@ Passed tests: ` + fmt.Sprintf("`%d`", len(replayingResult.PassedTests)) + `
 Skipped tests: ` + fmt.Sprintf("`%d`", len(replayingResult.SkippedTests)) + `
 Affected tests: ` + fmt.Sprintf("`%d`", len(replayingResult.FailedTests)) + `
 
-<details><summary>Click here to see the affected service packages</summary><blockquote>` + affectedServicesComment + `</blockquote></details>`
+<details><summary>Click here to see the affected service packages</summary><blockquote>` + affectedServicesComment + `</blockquote></details>
+
+`
 
 	notRunBeta, notRunGa := notRunTests(tpgRepo.UnifiedZeroDiff, tpgbRepo.UnifiedZeroDiff, replayingResult)
 	if len(notRunBeta) > 0 || len(notRunGa) > 0 {
