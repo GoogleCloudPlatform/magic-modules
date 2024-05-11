@@ -43,6 +43,9 @@ examples:
         'example-key-project'
       resource_project_name:
         'example-resource-project'
+    test_env_vars:
+      org_id: :ORG_ID
+      billing_account: :BILLING_ACCT
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   decoder: templates/terraform/decoders/kms.go.erb
 autogen_async: true
