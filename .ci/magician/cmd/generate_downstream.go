@@ -337,7 +337,7 @@ func createCommit(scratchRepo *source.Repo, commitMessage string, rnr ExecRunner
 	variablePath := fmt.Sprintf("/workspace/upstreamCommitSHA_%d.txt", scratchRepo.Version)
 	fmt.Println("variablePath: ", variablePath)
 
-	err := rnr.WriteFile(variablePath, commentSha)
+	err = rnr.WriteFile(variablePath, commitSha)
 	if err != nil {
 		fmt.Println("Error:", err)
 	}
