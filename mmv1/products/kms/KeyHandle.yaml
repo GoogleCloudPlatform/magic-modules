@@ -40,9 +40,9 @@ examples:
     min_version: beta
     vars:
       key_project_name:
-        'example-key-project'
+        'key-proj'
       resource_project_name:
-        'example-resource-project'
+        'resources'
     test_env_vars:
       org_id: :ORG_ID
       billing_account: :BILLING_ACCT
