@@ -35,6 +35,8 @@ skip_delete: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'kms_key_handle_basic'
+    # Need the time_sleep resource
+    external_providers: ["random", "time"]
     primary_resource_id:
       'example-keyhandle'
     min_version: beta
