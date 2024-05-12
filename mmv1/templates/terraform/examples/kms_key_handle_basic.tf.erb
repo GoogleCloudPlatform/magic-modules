@@ -45,8 +45,14 @@ resource "time_sleep" "wait_enable_service_api" {
 resource "google_project_service_identity" "kms_service_agent" {
   provider   = google-beta
   service    = "cloudkms.googleapis.com"
-  project    = google_project.key_project.project_id
+  project    = google_project.key_project.number
   depends_on = [time_sleep.wait_enable_service_api]
+}
+
+# Wait delay after creating service agent.
+resource "time_sleep" "wait_service_agent" {
+  depends_on       = [google_project_service_identity.kms_service_agent]
+  create_duration  = "10s"
 }
 
 #Grant the KMS Service Agent the Cloud KMS Admin role
@@ -54,8 +60,8 @@ resource "google_project_iam_member" "autokey_project_admin" {
   provider   = google-beta
   project    = google_project.key_project.project_id
   role       = "roles/cloudkms.admin"
-  member     = "serviceAccount:service-${google_project.key_project.project_id}@gcp-sa-cloudkms.iam.gserviceaccount.com"
-  depends_on = [google_project_service_identity.kms_service_agent]
+  member     = "serviceAccount:service-${google_project.key_project.number}@gcp-sa-cloudkms.iam.gserviceaccount.com"
+  depends_on = [time_sleep.wait_service_agent]
 }
 
 # Wait delay after granting IAM permissions
