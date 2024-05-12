@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"fmt"
+	"io/ioutil"
 	"magician/github"
 	"os"
 
@@ -47,6 +48,15 @@ var testTGCCmd = &cobra.Command{
 }
 
 func execTestTGC(commit, pr string, gh ttGithub) error {
+	content, err := ioutil.ReadFile("/workspace/test.txt")
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+
+	commitShaUpstream := string(content)
+
+	fmt.Println("commitShaUpstream: ", commitShaUpstream)
+
 	if err := gh.CreateWorkflowDispatchEvent("test-tgc.yml", map[string]any{
 		"owner":  "modular-magician",
 		"repo":   "terraform-google-conversion",
