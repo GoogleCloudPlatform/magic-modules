@@ -6,6 +6,7 @@ on:
   pull_request:
     paths:
       - 'tools/**'
+      - '.github/workflows/unit-tests-tools.yml'
 
 jobs:
   test:
@@ -21,4 +22,50 @@ jobs:
       - name: Run unit tests in tools/
         run: |
           cd tools
+          go test -v ./...
+
+      - name: Build diff-processor with TPG
+        run: |
+          cd tools/diff-processor
+          make clone OWNER_REPO=hashicorp/terraform-provider-google DEPTH=1
+          make build OLD_REF=main NEW_REF=main
+
+      - name: Test diff-processor with TPG
+        run: |
+          cd tools/diff-processor
+          go test -v ./...
+        env:
+          SERVICES_DIR: tools/diff-processor/new/google/services
+
+      - name: Build diff-processor with TPGB
+        run: |
+          cd tools/diff-processor
+          make clone OWNER_REPO=hashicorp/terraform-provider-google-beta DEPTH=1
+          make build OLD_REF=main NEW_REF=main
+
+      - name: Test diff-processor with TPGB
+        run: |
+          cd tools/diff-processor
+          go test -v ./...
+        env:
+          SERVICES_DIR: tools/diff-processor/new/google/services
+
+      - name: Build go-changelog
+        run: |
+          cd tools/go-changelog/cmd/changelog-pr-body-check
+          go build
+
+      - name: Test go-changelog
+        run: |
+          cd tools/go-changelog
+          go test -v ./...
+
+      - name: Build issue-labeler
+        run: |
+          cd tools/issue-labeler
+          go build
+
+      - name: Test issue-labeler
+        run: |
+          cd tools/issue-labeler
           go test -v ./...
