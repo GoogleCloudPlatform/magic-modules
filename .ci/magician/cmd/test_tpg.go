@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"magician/github"
 	"os"
-
 	"github.com/spf13/cobra"
 )
 
@@ -56,16 +55,29 @@ func execTestTPG(version, commit, pr string, gh ttGithub) error {
 	var repo string
 	if version == "ga" {
 		repo = "terraform-provider-google"
+		content, err := os.ReadFile("/workspace/upstreamCommitSHA_ga.txt")
+		if err != nil {
+			fmt.Println("Error:", err)
+		}
 	} else if version == "beta" {
 		repo = "terraform-provider-google-beta"
+		content, err := os.ReadFile("/workspace/upstreamCommitSHA_beta.txt")
+		if err != nil {
+			fmt.Println("Error:", err)
+		}
 	} else {
 		return fmt.Errorf("invalid version specified")
 	}
 
+	commitShaUpstream := string(content)
+
+	fmt.Println("commitShaUpstream: ", commitShaUpstream)
+	fmt.Println("pr: ", pr)
+
 	if err := gh.CreateWorkflowDispatchEvent("test-tpg.yml", map[string]any{
 		"owner":  "modular-magician",
 		"repo":   repo,
-		"branch": "auto-pr-" + pr,
+		"branch": commitShaUpstream,
 		"sha":    commit,
 	}); err != nil {
 		return fmt.Errorf("error creating workflow dispatch event: %w", err)

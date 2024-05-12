@@ -20,7 +20,6 @@ import (
 	"io/ioutil"
 	"magician/github"
 	"os"
-
 	"github.com/spf13/cobra"
 )
 
@@ -49,18 +48,17 @@ var testTGCCmd = &cobra.Command{
 
 func execTestTGC(commit, pr string, gh ttGithub) error {
 	content, err := ioutil.ReadFile("/workspace/test.txt")
-	if err != nil {
 		fmt.Println("Error:", err)
 	}
-
 	commitShaUpstream := string(content)
 
 	fmt.Println("commitShaUpstream: ", commitShaUpstream)
+	fmt.Println("pr: ", pr)
 
 	if err := gh.CreateWorkflowDispatchEvent("test-tgc.yml", map[string]any{
 		"owner":  "modular-magician",
 		"repo":   "terraform-google-conversion",
-		"branch": "auto-pr-" + pr,
+		"branch": commitShaUpstream,
 		"sha":    commit,
 	}); err != nil {
 		return fmt.Errorf("error creating workflow dispatch event: %w", err)

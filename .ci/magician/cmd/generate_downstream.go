@@ -334,7 +334,7 @@ func createCommit(scratchRepo *source.Repo, commitMessage string, rnr ExecRunner
 	commitSha = strings.TrimSpace(commitSha)
 	fmt.Printf("Commit sha on the branch is: `%s`\n", commitSha)
 
-	variablePath := fmt.Sprintf("/workspace/upstreamCommitSHA_%d.txt", scratchRepo.Version)
+	variablePath := fmt.Sprintf("/workspace/upstreamCommitSHA_%s.txt", scratchRepo.Version.String())
 	fmt.Println("variablePath: ", variablePath)
 
 	err = rnr.WriteFile(variablePath, commitSha)
