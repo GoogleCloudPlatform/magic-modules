@@ -53,15 +53,17 @@ var testTPGCmd = &cobra.Command{
 
 func execTestTPG(version, commit, pr string, gh ttGithub) error {
 	var repo string
+	var content []byte
+	var err error
 	if version == "ga" {
 		repo = "terraform-provider-google"
-		content, err := os.ReadFile("/workspace/upstreamCommitSHA_ga.txt")
+		content, err = os.ReadFile("/workspace/upstreamCommitSHA_ga.txt")
 		if err != nil {
 			fmt.Println("Error:", err)
 		}
 	} else if version == "beta" {
 		repo = "terraform-provider-google-beta"
-		content, err := os.ReadFile("/workspace/upstreamCommitSHA_beta.txt")
+		content, err = os.ReadFile("/workspace/upstreamCommitSHA_beta.txt")
 		if err != nil {
 			fmt.Println("Error:", err)
 		}
