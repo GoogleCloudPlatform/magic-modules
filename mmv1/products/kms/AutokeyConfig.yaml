@@ -41,6 +41,8 @@ import_format: ['folders/{{folder}}/autokeyConfig']
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'kms_autokey_config_all'
+    # Need the time_sleep resource
+    external_providers: ["random", "time"]
     primary_resource_id:
       'example-autokeyconfig'
     vars:

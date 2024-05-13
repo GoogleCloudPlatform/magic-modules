@@ -1,9 +1,16 @@
-resource "google_kms_autokey_config" "<%= ctx[:primary_resource_id] %>" {
-  folder       = google_folder.my_folder.folder_id
-  key_project  = "projects/<%= ctx[:test_env_vars]['project_id'] %>"
-}
-
 resource "google_folder" "my_folder" {
   display_name = "<%= ctx[:vars]['folder_name'] %>"
   parent       = "organizations/<%= ctx[:test_env_vars]['org_id'] %>"
+}
+
+# Wait delay after creating folder.
+resource "time_sleep" "wait_folder_creation" {
+  depends_on       = [google_folder.my_folder]
+  create_duration  = "20s"
+}
+
+resource "google_kms_autokey_config" "<%= ctx[:primary_resource_id] %>" {
+  folder       = google_folder.my_folder.folder_id
+  key_project  = "projects/<%= ctx[:test_env_vars]['project_id'] %>"
+  depends_on   = [time_sleep.wait_folder_creation]
 }
