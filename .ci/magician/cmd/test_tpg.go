@@ -57,13 +57,13 @@ func execTestTPG(version, commit, pr string, gh ttGithub) error {
 	var err error
 	if version == "ga" {
 		repo = "terraform-provider-google"
-		content, err = os.ReadFile("/workspace/upstreamCommitSHA_ga.txt")
+		content, err = os.ReadFile("/workspace/upstreamCommitSHA-terraform-provider-google.txt")
 		if err != nil {
 			fmt.Println("Error:", err)
 		}
 	} else if version == "beta" {
 		repo = "terraform-provider-google-beta"
-		content, err = os.ReadFile("/workspace/upstreamCommitSHA_beta.txt")
+		content, err = os.ReadFile("/workspace/upstreamCommitSHA-terraform-provider-google-beta.txt")
 		if err != nil {
 			fmt.Println("Error:", err)
 		}
@@ -71,15 +71,18 @@ func execTestTPG(version, commit, pr string, gh ttGithub) error {
 		return fmt.Errorf("invalid version specified")
 	}
 
-	commitShaUpstream := string(content)
+	commitShaOrBranchUpstream := string(content)
 
-	fmt.Println("commitShaUpstream: ", commitShaUpstream)
-	fmt.Println("pr: ", pr)
+	if commitShaOrBranchUpstream == ""{
+		commitShaOrBranchUpstream = "auto-pr-" + pr
+	}
+
+	fmt.Println("commitShaOrBranchUpstream: ", commitShaOrBranchUpstream)
 
 	if err := gh.CreateWorkflowDispatchEvent("test-tpg.yml", map[string]any{
 		"owner":  "modular-magician",
 		"repo":   repo,
-		"branch": commitShaUpstream,
+		"branch": commitShaOrBranchUpstream,
 		"sha":    commit,
 	}); err != nil {
 		return fmt.Errorf("error creating workflow dispatch event: %w", err)
