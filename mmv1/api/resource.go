@@ -586,8 +586,8 @@ func buildEffectiveLabelsField(name string, labels *Type) *Type {
 
 // def build_terraform_labels_field(name, parent, labels)
 func buildTerraformLabelsField(name string, parent *Type, labels *Type) *Type {
-	description := fmt.Sprintf("The combination of %s configured directly on the resource "+
-		"and default %s configured on the provider.", name, name)
+	description := fmt.Sprintf("The combination of %s configured directly on the resource\n"+
+		" and default %s configured on the provider.", name, name)
 
 	immutable := false
 	if parent != nil {
