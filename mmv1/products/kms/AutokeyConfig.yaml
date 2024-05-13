@@ -45,11 +45,13 @@ examples:
     external_providers: ["random", "time"]
     primary_resource_id:
       'example-autokeyconfig'
+    min_version: beta
     vars:
-      folder_name: "folder-name"
+      key_project_name:
+        'key-proj'
     test_env_vars:
       org_id: :ORG_ID
-      project_id: :PROJECT_NAME
+      billing_account: :BILLING_ACCT
 parameters:
   - !ruby/object:Api::Type::String
     name: 'folder'
