@@ -956,6 +956,8 @@ func (r Resource) IgnoreReadPropertiesToString(e resource.Examples) string {
 		props = append(props, fmt.Sprintf("\"%s\"", google.Underscore(tp)))
 	}
 
+	slices.Sort(props)
+
 	return fmt.Sprintf("[]string{%s}", strings.Join(props, ", "))
 }
 

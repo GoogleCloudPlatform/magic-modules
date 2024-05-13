@@ -780,13 +780,13 @@ if len(updateMask) > 0 {
         UserAgent: userAgent,
         Body: obj,
         Timeout: d.Timeout(schema.TimeoutUpdate),
-{{- if $.ErrorRetryPredicates -}}
+		Headers:   headers,
+{{ if $.ErrorRetryPredicates -}}
         ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
 {{- end}}
 {{- if $.ErrorAbortPredicates -}}
         ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
 {{- end}}
-		Headers:   headers,
     })
 
     if err != nil {
