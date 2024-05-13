@@ -52,19 +52,19 @@ class BuildConfigurationFeatureTests {
 
     @Test
     fun nonVCRBuildShouldHaveSaveArtifactsToGCS() {
-        val project = googleCloudRootProject(testContextParameters())
+        val root = googleCloudRootProject(testContextParameters())
 
         // Find GA nightly test project
-        var gaNightlyTestProject = getSubProject(project, gaProjectName, nightlyTestsProjectName)
+        var gaNightlyTestProject = getNestedProjectFromRoot(root, gaProjectName, nightlyTestsProjectName)
 
         // Find GA MM Upstream project
-        var gaMMUpstreamProject = getSubProject(project, gaProjectName, mmUpstreamProjectName)
+        var gaMMUpstreamProject = getNestedProjectFromRoot(root, gaProjectName, mmUpstreamProjectName)
 
         // Find Beta nightly test project
-        var betaNightlyTestProject = getSubProject(project, betaProjectName, nightlyTestsProjectName)
+        var betaNightlyTestProject = getNestedProjectFromRoot(root, betaProjectName, nightlyTestsProjectName)
 
         // Find Beta MM Upstream project
-        var betaMMUpstreamProject = getSubProject(project, betaProjectName, mmUpstreamProjectName)
+        var betaMMUpstreamProject = getNestedProjectFromRoot(root, betaProjectName, mmUpstreamProjectName)
 
         (gaNightlyTestProject.buildTypes + gaMMUpstreamProject.buildTypes + betaNightlyTestProject.buildTypes + betaMMUpstreamProject.buildTypes).forEach{bt ->
             var found: Boolean = false
