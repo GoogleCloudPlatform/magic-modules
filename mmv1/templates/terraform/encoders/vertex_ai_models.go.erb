@@ -1,0 +1,8 @@
+if v, ok := d.GetOk("display_name"); ok {
+    modelobj := make(map[string]interface{})
+	modelobj["displayName"] = v
+    delete(obj, "displayName")
+    obj["model"] = modelobj
+}
+
+return obj, nil
