@@ -104,7 +104,7 @@ func (gh *Client) RemoveLabel(prNumber, label string) error {
 func (gh *Client) CreateWorkflowDispatchEvent(workflowFileName string, inputs map[string]any) error {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/actions/workflows/%s/dispatches", workflowFileName)
 	err := utils.RequestCall(url, "POST", gh.token, nil, map[string]any{
-		"ref":    "main",
+		"ref":    "test-pr-10671",
 		"inputs": inputs,
 	})
 
