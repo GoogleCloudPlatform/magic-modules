@@ -461,7 +461,7 @@ func TestDaysDiff(t *testing.T) {
 		},
 		"earlier than minFrom": {
 			from:       time.Date(2022, 1, 1, 0, 0, 0, 0, pdtLoc),
-			to:         time.Date(2024, 4, 19, 11, 1, 0, 0, pdtLoc),
+			to:         time.Date(2024, 5, 5, 11, 1, 0, 0, pdtLoc),
 			expectDays: 4,
 		},
 		"UTC times": {
