@@ -14,9 +14,15 @@
 package resource
 
 import (
+	"bytes"
 	"fmt"
 	"net/url"
+	"path/filepath"
+	"strings"
+	"text/template"
 
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
+	"github.com/golang/glog"
 	"gopkg.in/yaml.v3"
 )
 
@@ -151,6 +157,9 @@ type Examples struct {
 	// testcase. Think before adding as there is latency and adds an external dependency to
 	// your test so avoid if you can.
 	PullExternal bool `yaml:"pull_external"`
+
+	DocumentationHCLText string
+	TestHCLText          string
 }
 
 func (e *Examples) UnmarshalYAML(n *yaml.Node) error {
@@ -162,9 +171,69 @@ func (e *Examples) UnmarshalYAML(n *yaml.Node) error {
 		return err
 	}
 
-	e.ConfigPath = fmt.Sprintf("templates/terraform/examples/%s.tf.erb", e.Name)
+	e.ConfigPath = fmt.Sprintf("templates/terraform/examples/go/%s.tf.tmpl", e.Name)
+	e.SetHCLText()
 
 	return nil
+}
+
+// Executes example templates for documentation and tests
+func (e *Examples) SetHCLText() {
+	e.DocumentationHCLText = ExecuteHCL(e)
+
+	copy := e
+	// Override vars to inject test values into configs - will have
+	//   - "a-example-var-value%{random_suffix}""
+	//   - "%{my_var}" for overrides that have custom Golang values
+	for key, value := range copy.Vars {
+		var newVal string
+		if strings.Contains(value, "-") {
+			newVal = fmt.Sprintf("tf-test-%s", value)
+		} else if strings.Contains(value, "_") {
+			newVal = fmt.Sprintf("tf_test_%s", value)
+		} else {
+			// Some vars like descriptions shouldn't have prefix
+			newVal = value
+		}
+		// Random suffix is 10 characters and standard name length <= 64
+		if len(newVal) > 54 {
+			newVal = newVal[:54]
+		}
+		copy.Vars[key] = fmt.Sprintf("%s%%{random_suffix}", newVal)
+	}
+
+	// Apply overrides from YAML
+	for key := range copy.TestVarsOverrides {
+		copy.Vars[key] = fmt.Sprintf("%%{%s}", key)
+	}
+
+	e.TestHCLText = ExecuteHCL(copy)
+}
+
+func ExecuteHCL(e *Examples) string {
+	templatePath := e.ConfigPath
+	templates := []string{
+		templatePath,
+	}
+	templateFileName := filepath.Base(templatePath)
+
+	tmpl, err := template.New(templateFileName).ParseFiles(templates...)
+	if err != nil {
+		glog.Exit(err)
+	}
+
+	contents := bytes.Buffer{}
+	if err = tmpl.ExecuteTemplate(&contents, templateFileName, e); err != nil {
+		glog.Exit(err)
+	}
+
+	rs := contents.String()
+
+	if !strings.HasSuffix(rs, "\n") {
+		rs = fmt.Sprintf("%s\n", rs)
+	}
+
+	return rs
 }
 
 // func (e *Examples) config_documentation(pwd) {
@@ -294,6 +363,18 @@ func (e *Examples) OiCSLink() string {
 		RawQuery: v.Encode(),
 	}
 	return u.String()
+}
+
+func (e *Examples) TestSlug(productName, resourceName string) string {
+	ret := fmt.Sprintf("%s%s_%sExample", productName, resourceName, google.Camelize(e.Name, "upper"))
+	return ret
+}
+
+func (e *Examples) ResourceType(terraformName string) string {
+	if e.PrimaryResourceType != "" {
+		return e.PrimaryResourceType
+	}
+	return terraformName
 }
 
 // rubocop:disable Layout/LineLength
