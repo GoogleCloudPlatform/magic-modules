@@ -49,6 +49,9 @@ func TestAccDefaultUniverseDomainDisk(t *testing.T) {
 }
 
 func TestAccDefaultUniverseDomain_doesNotMatchExplicit(t *testing.T) {
+	// Need a way to mock credentials or only run in an environment with TPC creds
+	t.Skip()
+
 	universeDomainFake := "fakedomain.test"
 
 	acctest.VcrTest(t, resource.TestCase{
