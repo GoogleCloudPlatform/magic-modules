@@ -1134,6 +1134,44 @@ func flattenRegionUpdatePolicy(updatePolicy *compute.InstanceGroupManagerUpdateP
 	return results
 }
 
+<% unless version == "ga" -%>
+func expandInstanceFlexibilityPolicy(d *schema.ResourceData) *compute.InstanceGroupManagerInstanceFlexibilityPolicy {
+	instanceFlexibilityPolicy := &compute.InstanceGroupManagerInstanceFlexibilityPolicy{}
+	if  d.HasChange("instance_flexibility_policy") {
+		oldFlexibilityPolicy, newFlexibilityPolicy := d.GetChange("instance_flexibility_policy")
+		for _, ifp := range newFlexibilityPolicy.([]any) {
+			ifpData := ifp.(map[string]any)
+			instanceFlexibilityPolicy.InstanceSelections = expandInstanceSelections(ifpData["instance_selections"].(*schema.Set).List())
+		}
+		for _, ifp := range oldFlexibilityPolicy.([]any) {
+			ifpData := ifp.(map[string]any)
+			for _, instSl := range ifpData["instance_selections"].(*schema.Set).List() {
+				instSlData := instSl.(map[string] any)
+				name := instSlData["name"].(string)
+				if _, exist := instanceFlexibilityPolicy.InstanceSelections[name]; !exist {
+					instanceFlexibilityPolicy.NullFields = append(instanceFlexibilityPolicy.NullFields, "InstanceSelections." + name)
+				}
+			}
+			instanceFlexibilityPolicy.ForceSendFields = append(instanceFlexibilityPolicy.ForceSendFields, "InstanceSelections")
+		}
+	}
+	return instanceFlexibilityPolicy
+}
+
+func expandInstanceSelections(instanceSelections []any) map[string]compute.InstanceGroupManagerInstanceFlexibilityPolicyInstanceSelection {
+	instanceSelectionsMap := make(map[string]compute.InstanceGroupManagerInstanceFlexibilityPolicyInstanceSelection)
+	for _, instSl := range instanceSelections {
+		instSlData := instSl.(map[string]any)
+		instanceSelection := compute.InstanceGroupManagerInstanceFlexibilityPolicyInstanceSelection{
+			Rank:         int64(instSlData["rank"].(int)),
+			MachineTypes: tpgresource.ConvertStringSet(instSlData["machine_types"].(*schema.Set)),
+		}
+		instanceSelectionsMap[instSlData["name"].(string)] = instanceSelection
+	}
+	return instanceSelectionsMap
+}
+<% end -%>
+
 func expandDistributionPolicy(d *schema.ResourceData) *compute.DistributionPolicy {
 	dpz := d.Get("distribution_policy_zones").(*schema.Set)
 	dpts := d.Get("distribution_policy_target_shape").(string)
@@ -1153,6 +1191,30 @@ func expandDistributionPolicy(d *schema.ResourceData) *compute.DistributionPolic
 
 	return &compute.DistributionPolicy{Zones: distributionPolicyZoneConfigs, TargetShape: dpts}
 }
+
+<% unless version == "ga" -%>
+func flattenInstanceFlexibilityPolicy(instanceFlexibilityPolicy *compute.InstanceGroupManagerInstanceFlexibilityPolicy) []map[string]any {
+	results := []map[string]any{}
+	if instanceFlexibilityPolicy != nil {
+		ifp := map[string]any{}
+		ifp["instance_selections"] = flattenInstanceSelections(instanceFlexibilityPolicy.InstanceSelections)
+		results = append(results, ifp)
+	}
+	return results
+}
+
+func flattenInstanceSelections(instanceSelections map[string]compute.InstanceGroupManagerInstanceFlexibilityPolicyInstanceSelection) []map[string]any {
+	results := make([]map[string]any, 0, len(instanceSelections))
+	for instanceSelectionName, instanceSelection := range instanceSelections {
+		instanceSelectionMap := make(map[string]any)
+		instanceSelectionMap["name"] = instanceSelectionName
+		instanceSelectionMap["rank"] = instanceSelection.Rank
+		instanceSelectionMap["machine_types"] = instanceSelection.MachineTypes
+		results = append(results, instanceSelectionMap)
+	}
+	return results
+}
+<% end -%>
 
 func flattenDistributionPolicy(distributionPolicy *compute.DistributionPolicy) []string {
 	zones := make([]string, 0)
