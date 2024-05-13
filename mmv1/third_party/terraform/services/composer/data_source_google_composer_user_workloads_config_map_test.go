@@ -15,7 +15,7 @@ func TestAccDataSourceComposerUserWorkloadsConfigMap_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"env_name":    fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t)),
+		"env_name":        fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t)),
 		"config_map_name": fmt.Sprintf("%s-%d", testComposerUserWorkloadsConfigMapPrefix, acctest.RandInt(t)),
 	}
 
