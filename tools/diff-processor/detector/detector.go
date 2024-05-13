@@ -47,6 +47,10 @@ func getChangedFieldsFromSchemaDiff(schemaDiff diff.SchemaDiff) map[string]Resou
 	for resource, resourceDiff := range schemaDiff {
 		resourceChanges := make(ResourceChanges)
 		for field, fieldDiff := range resourceDiff.Fields {
+			if field == "project" {
+				// Skip the project field.
+				continue
+			}
 			if fieldDiff.New == nil {
 				// Skip deleted fields.
 				continue
