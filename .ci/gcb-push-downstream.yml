@@ -30,10 +30,10 @@ steps:
       waitFor: ["checkout"]
 
     # TPG
-    - name: 'gcr.io/graphite-docker-images/bash-plus'
+    - name: 'gcr.io/graphite-docker-images/go-plus'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: tpg-sync
-      waitFor: ["checkout"]
+      waitFor: ["build-magician-binary", "checkout"]
       args:
           - wait-for-commit
           - 'tpg-sync'
@@ -41,10 +41,10 @@ steps:
           - $COMMIT_SHA
 
     # TPGB
-    - name: 'gcr.io/graphite-docker-images/bash-plus'
+    - name: 'gcr.io/graphite-docker-images/go-plus'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: tpgb-sync
-      waitFor: ["checkout"]
+      waitFor: ["build-magician-binary", "checkout"]
       args:
           - wait-for-commit
           - 'tpgb-sync'
@@ -52,10 +52,10 @@ steps:
           - $COMMIT_SHA
 
     # TGC
-    - name: 'gcr.io/graphite-docker-images/bash-plus'
+    - name: 'gcr.io/graphite-docker-images/go-plus'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: tgc-sync
-      waitFor: ["checkout"]
+      waitFor: ["build-magician-binary", "checkout"]
       args:
           - wait-for-commit
           - 'tgc-sync'
@@ -63,10 +63,10 @@ steps:
           - $COMMIT_SHA
 
     # TF-OICS
-    - name: 'gcr.io/graphite-docker-images/bash-plus'
+    - name: 'gcr.io/graphite-docker-images/go-plus'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: tf-oics-sync
-      waitFor: ["checkout"]
+      waitFor: ["build-magician-binary", "checkout"]
       args:
           - wait-for-commit
           - 'tf-oics-sync'
