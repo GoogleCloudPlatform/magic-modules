@@ -20,6 +20,7 @@ import (
 	"go/format"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -64,17 +65,19 @@ func wrapMultipleParams(params ...interface{}) (map[string]interface{}, error) {
 }
 
 var TemplateFunctions = template.FuncMap{
-	"title":        google.SpaceSeparatedTitle,
-	"replace":      strings.Replace,
-	"camelize":     google.Camelize,
-	"underscore":   google.Underscore,
-	"plural":       google.Plural,
-	"contains":     strings.Contains,
-	"join":         strings.Join,
-	"lower":        strings.ToLower,
-	"upper":        strings.ToUpper,
-	"dict":         wrapMultipleParams,
-	"format2regex": google.Format2Regex,
+	"title":           google.SpaceSeparatedTitle,
+	"replace":         strings.Replace,
+	"camelize":        google.Camelize,
+	"underscore":      google.Underscore,
+	"plural":          google.Plural,
+	"contains":        strings.Contains,
+	"join":            strings.Join,
+	"lower":           strings.ToLower,
+	"upper":           strings.ToUpper,
+	"dict":            wrapMultipleParams,
+	"format2regex":    google.Format2Regex,
+	"orderProperties": api.OrderProperties,
+	"hasPrefix":       strings.HasPrefix,
 }
 
 var GA_VERSION = "ga"
@@ -129,22 +132,21 @@ func (td *TemplateData) GenerateTestFile(filePath string, resource api.Resource)
 		templatePath,
 	}
 	tmplInput := TestInput{
-		Res:                    resource,
-		ImportPath:             td.ImportPath(),
-		PROJECT_NAME:           "my-project-name",
-		FIRESTORE_PROJECT_NAME: "my-project-name",
-		CREDENTIALS:            "my/credentials/filename.json",
-		REGION:                 "us-west1",
-		ORG_ID:                 "123456789",
-		ORG_DOMAIN:             "example.com",
-		ORG_TARGET:             "123456789",
-		PROJECT_NUMBER:         "1111111111111",
-		BILLING_ACCT:           "000000-0000000-0000000-000000",
-		MASTER_BILLING_ACCT:    "000000-0000000-0000000-000000",
-		SERVICE_ACCT:           "my@service-account.com",
-		CUST_ID:                "A01b123xz",
-		IDENTITY_USER:          "cloud_identity_user",
-		PAP_DESCRIPTION:        "description",
+		Res:                 resource,
+		ImportPath:          td.ImportPath(),
+		PROJECT_NAME:        "my-project-name",
+		CREDENTIALS:         "my/credentials/filename.json",
+		REGION:              "us-west1",
+		ORG_ID:              "123456789",
+		ORG_DOMAIN:          "example.com",
+		ORG_TARGET:          "123456789",
+		PROJECT_NUMBER:      "1111111111111",
+		BILLING_ACCT:        "000000-0000000-0000000-000000",
+		MASTER_BILLING_ACCT: "000000-0000000-0000000-000000",
+		SERVICE_ACCT:        "my@service-account.com",
+		CUST_ID:             "A01b123xz",
+		IDENTITY_USER:       "cloud_identity_user",
+		PAP_DESCRIPTION:     "description",
 	}
 
 	td.GenerateFile(filePath, templatePath, tmplInput, true, templates...)
@@ -168,15 +170,24 @@ func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, g
 	sourceByte := contents.Bytes()
 
 	if goFormat {
-		sourceByte, err = format.Source(sourceByte)
+		formattedByte, err := format.Source(sourceByte)
 		if err != nil {
-			glog.Error(fmt.Errorf("error formatting %s", filePath))
+			glog.Error(fmt.Errorf("error formatting %s: %s", filePath, err))
+		} else {
+			sourceByte = formattedByte
 		}
 	}
 
 	err = os.WriteFile(filePath, sourceByte, 0644)
 	if err != nil {
 		glog.Exit(err)
+	}
+
+	if goFormat {
+		cmd := exec.Command("goimports", "-w", filePath)
+		if err := cmd.Run(); err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
@@ -272,20 +283,19 @@ func (td *TemplateData) ImportPath() string {
 }
 
 type TestInput struct {
-	Res                    api.Resource
-	ImportPath             string
-	PROJECT_NAME           string
-	FIRESTORE_PROJECT_NAME string
-	CREDENTIALS            string
-	REGION                 string
-	ORG_ID                 string
-	ORG_DOMAIN             string
-	ORG_TARGET             string
-	PROJECT_NUMBER         string
-	BILLING_ACCT           string
-	MASTER_BILLING_ACCT    string
-	SERVICE_ACCT           string
-	CUST_ID                string
-	IDENTITY_USER          string
-	PAP_DESCRIPTION        string
+	Res                 api.Resource
+	ImportPath          string
+	PROJECT_NAME        string
+	CREDENTIALS         string
+	REGION              string
+	ORG_ID              string
+	ORG_DOMAIN          string
+	ORG_TARGET          string
+	PROJECT_NUMBER      string
+	BILLING_ACCT        string
+	MASTER_BILLING_ACCT string
+	SERVICE_ACCT        string
+	CUST_ID             string
+	IDENTITY_USER       string
+	PAP_DESCRIPTION     string
 }

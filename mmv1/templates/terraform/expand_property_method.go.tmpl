@@ -14,7 +14,7 @@
   limitations under the License. */ -}}
 {{- define "expandPropertyMethod" }}
   {{- if $.CustomExpand }}
-    {{/* TODO custom flatten */}}
+    {{- $.CustomTemplate $.CustomExpand -}}
   {{- else }}{{/* if $.CustomExpand */}}
     {{- if $.IsA "Map" }}
 func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
@@ -50,7 +50,7 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
   }
   return m, nil
 }
-    {{ else if $.IsA "KeyValuePairs" }}{{/* if $.IsA "Map" */}}
+    {{ else if hasPrefix $.Type "KeyValue" }}{{/* KeyValueLabels, KeyValueTerraformLabels, KeyValueEffectiveLabels, KeyValueAnnotations are types similar to KeyValuePairs*/}}
 func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]string, error) {
   if v == nil {
     return map[string]string{}, nil
@@ -65,7 +65,7 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
 func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
   transformed := make(map[string]interface{})
       {{- range $prop := $.NestedProperties }}
-        {{- if not (and ($prop.IsA "KeyValuePairs") $prop.IgnoreWrite) }}
+        {{- if not (and (hasPrefix $.prop.Type "KeyValue") $prop.IgnoreWrite) }}
   transformed{{$prop.TitlelizeProperty}}, err := expand{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}({{ if $prop.FlattenObject }}nil{{ else }}d.Get("{{ underscore $prop.Name }}"), d, config)
   if err != nil {
     return nil, err
@@ -116,13 +116,13 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
         {{- end }}{{/* if $.IsA "Array */}}
     transformed := make(map[string]interface{})
         {{ range $prop := $.NestedProperties }}
-          {{- if not (and ($prop.IsA "KeyValuePairs") $prop.IgnoreWrite) }}
+          {{- if not (and (hasPrefix $prop.Type "KeyValue") $prop.IgnoreWrite) }}
       transformed{{$prop.TitlelizeProperty}}, err := expand{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}(original["{{ underscore $prop.Name }}"], d, config)
       if err != nil {
         return nil, err
             {{- if $prop.SendEmptyValue }}
       } else {
-        transformed["{{$prop.ApiName}}] = transformed{{$prop.TitlelizeProperty}}
+        transformed["{{$prop.ApiName}}"] = transformed{{$prop.TitlelizeProperty}}
             {{- else }}
       } else if val := reflect.ValueOf(transformed{{$prop.TitlelizeProperty}}); val.IsValid() && !tpgresource.IsEmptyValue(val) {
         transformed["{{$prop.ApiName}}"] = transformed{{$prop.TitlelizeProperty}}
@@ -157,7 +157,7 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
     {{- end }}{{/* if $.IsA "Map" */}}
     {{ if $.NestedProperties }}
       {{- range $prop := $.NestedProperties }}
-        {{- if not (and ($prop.IsA "KeyValuePairs") $prop.IgnoreWrite) }}
+        {{- if not (and (hasPrefix $prop.Type "KeyValue") $prop.IgnoreWrite) }}
           {{- template "expandPropertyMethod" $prop -}}
         {{- end }}
       {{- end }}
