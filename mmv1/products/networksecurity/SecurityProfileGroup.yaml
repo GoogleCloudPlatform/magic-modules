@@ -68,6 +68,7 @@ properties:
     name: 'selfLink'
     description: |
       Server-defined URL of this resource.
+    output: true
   - !ruby/object:Api::Type::Time
     name: 'createTime'
     description: Time the security profile group was created in UTC.
