@@ -288,7 +288,7 @@ resource "google_app_engine_flexible_app_version" "foo" {
     instances = 2
   }
 
-  noop_on_destroy = true
+  delete_service_on_destroy = true
 }
 
 resource "google_storage_bucket" "bucket" {
