@@ -21,7 +21,7 @@ resource "google_composer_environment" "example" {
 }
 resource "google_composer_user_workloads_config_map" "example" {
     environment = google_composer_environment.example.name
-    name = "example-config_map"
+    name = "example-config-map"
     data = {
         db_host: "dbhost:5432",
         api_host: "apihost:443",
