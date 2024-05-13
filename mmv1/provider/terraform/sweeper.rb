@@ -22,12 +22,12 @@ module Provider
     class Sweeper < Google::YamlValidator
       # The field checked by sweeper to determine
       # eligibility for deletion for generated resources
-      attr_reader :tf_test_field
+      attr_reader :sweepable_identifier_field
 
       def validate
         super
 
-        check :tf_test_field, type: String
+        check :sweepable_identifier_field, type: String
       end
     end
   end

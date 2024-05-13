@@ -24,7 +24,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': https://cloud.google.com/data-catalog/docs
   api: https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.taxonomies
 sweeper: !ruby/object:Provider::Terraform::Sweeper
-  tf_test_field: 'displayName'
+  sweepable_identifier_field: 'displayName'
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   skip_import_test: true
   method_name_separator: ':'
