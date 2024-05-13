@@ -14,7 +14,7 @@
 --- !ruby/object:Api::Resource
 name: 'ConnectionProfile'
 base_url: 'projects/{{project}}/locations/{{location}}/connectionProfiles'
-create_url: 'projects/{{project}}/locations/{{location}}/connectionProfiles?connectionProfileId={{connection_profile_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/connectionProfiles?connectionProfileId={{connection_profile_id}}&force={{force}}'
 self_link: 'projects/{{project}}/locations/{{location}}/connectionProfiles/{{connection_profile_id}}'
 update_verb: :PATCH
 update_mask: true
@@ -93,6 +93,14 @@ parameters:
     description: |-
       The connection profile identifier.
     required: true
+    immutable: true
+    url_param_only: true
+  - !ruby/object:Api::Type::Boolean
+    name: force
+    description: |-
+      Create the connection profile without validating it.
+    required: false
+    default_value: false
     immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::String

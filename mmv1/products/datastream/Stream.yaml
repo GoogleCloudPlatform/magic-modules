@@ -14,7 +14,7 @@
 --- !ruby/object:Api::Resource
 name: 'Stream'
 base_url: 'projects/{{project}}/locations/{{location}}/streams'
-create_url: 'projects/{{project}}/locations/{{location}}/streams?streamId={{stream_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/streams?streamId={{stream_id}}&force={{force}}'
 self_link: 'projects/{{project}}/locations/{{location}}/streams/{{stream_id}}'
 update_verb: :PATCH
 update_mask: true
@@ -165,6 +165,14 @@ parameters:
     description: |-
       The stream identifier.
     required: true
+    immutable: true
+    url_param_only: true
+  - !ruby/object:Api::Type::Boolean
+    name: force
+    description: |-
+      Create the stream without validating it.
+    required: false
+    default_value: false
     immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::String
