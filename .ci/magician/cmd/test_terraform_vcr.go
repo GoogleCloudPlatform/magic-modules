@@ -308,9 +308,13 @@ Please fix these to complete your PR. If you believe these test failures to be i
 
 		comment += fmt.Sprintf("View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-%s/artifacts/%s/build-log/recording_test.log) or the [debug log](https://console.cloud.google.com/storage/browser/ci-vcr-logs/beta/refs/heads/auto-pr-%s/artifacts/%s/recording) for each test", prNumber, buildID, prNumber, buildID)
 	} else {
+		// Add newlines so that the color formatting will work properly.
+		comment += `
+
+`
 		if replayingErr != nil {
 			// Check for any uncaught errors in REPLAYING mode.
-			comment += "$\\textcolor{red}{\\textsf{Errors occurred during RECORDING mode. Please fix them to complete your PR.}}$\n"
+			comment += "$\\textcolor{red}{\\textsf{Errors occurred during REPLAYING mode. Please fix them to complete your PR.}}$\n"
 		} else {
 			comment += "$\\textcolor{green}{\\textsf{All tests passed!}}$\n"
 		}
