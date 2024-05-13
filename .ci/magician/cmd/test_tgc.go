@@ -17,9 +17,9 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
 	"magician/github"
 	"os"
+
 	"github.com/spf13/cobra"
 )
 
@@ -47,19 +47,36 @@ var testTGCCmd = &cobra.Command{
 }
 
 func execTestTGC(commit, pr string, gh ttGithub) error {
-	content, err := ioutil.ReadFile("/workspace/test.txt")
+	contentTPGB, err := os.ReadFile("/workspace/upstreamCommitSHA-terraform-provider-google-beta.txt")
+	if err != nil {
 		fmt.Println("Error:", err)
 	}
-	commitShaUpstream := string(content)
 
-	fmt.Println("commitShaUpstream: ", commitShaUpstream)
-	fmt.Println("pr: ", pr)
+	contentTGC, err := os.ReadFile("/workspace/upstreamCommitSHA-terraform-google-conversion.txt")
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+
+	commitShaOrBranchUpstreamTPGB := string(contentTPGB)
+	commitShaOrBranchUpstreamTGC := string(contentTGC)
+
+	if commitShaOrBranchUpstreamTPGB == "" {
+		commitShaOrBranchUpstreamTPGB = "auto-pr-" + pr
+	}
+
+	if commitShaOrBranchUpstreamTGC == "" {
+		commitShaOrBranchUpstreamTGC = "auto-pr-" + pr
+	}
+
+	fmt.Println("commitShaOrBranchUpstreamTPGB: ", commitShaOrBranchUpstreamTPGB)
+	fmt.Println("commitShaOrBranchUpstreamTGC: ", commitShaOrBranchUpstreamTGC)
 
 	if err := gh.CreateWorkflowDispatchEvent("test-tgc.yml", map[string]any{
-		"owner":  "modular-magician",
-		"repo":   "terraform-google-conversion",
-		"branch": commitShaUpstream,
-		"sha":    commit,
+		"owner":      "modular-magician",
+		"repo":       "terraform-google-conversion",
+		"tpgbbranch": commitShaOrBranchUpstreamTPGB,
+		"tgcbranch":  commitShaOrBranchUpstreamTGC,
+		"sha":        commit,
 	}); err != nil {
 		return fmt.Errorf("error creating workflow dispatch event: %w", err)
 	}
