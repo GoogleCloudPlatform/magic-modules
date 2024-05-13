@@ -57,13 +57,13 @@ func execTestTPG(version, commit, pr string, gh ttGithub) error {
 	var err error
 	if version == "ga" {
 		repo = "terraform-provider-google"
-		content, err = os.ReadFile("/workspace/upstreamCommitSHA-terraform-provider-google.txt")
+		content, err = os.ReadFile("/workspace/upstreamCommitSHA_terraform-provider-google.txt")
 		if err != nil {
 			fmt.Println("Error:", err)
 		}
 	} else if version == "beta" {
 		repo = "terraform-provider-google-beta"
-		content, err = os.ReadFile("/workspace/upstreamCommitSHA-terraform-provider-google-beta.txt")
+		content, err = os.ReadFile("/workspace/upstreamCommitSHA_terraform-provider-google-beta.txt")
 		if err != nil {
 			fmt.Println("Error:", err)
 		}
