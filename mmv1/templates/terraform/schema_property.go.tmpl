@@ -129,7 +129,7 @@ Default value: {{.DefaultValue -}}
     // Default schema.HashSchema is used.
     {{ end -}}
   {{ end -}}
-{{ else if eq .Type "KeyValuePairs" -}}
+{{ else if hasPrefix .Type "KeyValue" -}}{{- /* KeyValueLabels, KeyValueTerraformLabels, KeyValueEffectiveLabels, KeyValueAnnotations are types similar to KeyValuePairs*/ -}}
   Elem: &schema.Schema{Type: schema.TypeString},
 {{ else if eq .Type "Map" -}}
 	Elem: &schema.Resource{
