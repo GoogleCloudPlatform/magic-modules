@@ -99,11 +99,6 @@ properties:
 
       ~> **Note:** The API will reject the request if this value is set to true when creating the resource,
       otherwise on an update the association can be disabled.
-  - !ruby/object:Api::Type::String
-    name: 'selfLink'
-    description: |
-      Server-defined URL of this resource.
-    output: true
   - !ruby/object:Api::Type::Time
     name: 'createTime'
     description: Time the firewall endpoint was created in UTC.
