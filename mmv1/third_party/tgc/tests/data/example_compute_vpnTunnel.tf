@@ -28,6 +28,8 @@ resource "google_compute_vpn_tunnel" "tunnel1" {
   labels = {
     foo = "bar"
   }
+  
+  region="us-central1"
 }
 
 resource "google_compute_vpn_gateway" "target_gateway" {
@@ -37,10 +39,12 @@ resource "google_compute_vpn_gateway" "target_gateway" {
 
 resource "google_compute_network" "network1" {
   name = "network-1"
+  
 }
 
 resource "google_compute_address" "vpn_static_ip" {
   name = "vpn-static-ip"
+  region="us-central1"
 }
 
 resource "google_compute_forwarding_rule" "fr_esp" {
@@ -48,6 +52,7 @@ resource "google_compute_forwarding_rule" "fr_esp" {
   ip_protocol = "ESP"
   ip_address  = google_compute_address.vpn_static_ip.address
   target      = google_compute_vpn_gateway.target_gateway.id
+  region="us-central1"
 }
 
 resource "google_compute_forwarding_rule" "fr_udp500" {
@@ -56,6 +61,7 @@ resource "google_compute_forwarding_rule" "fr_udp500" {
   port_range  = "500"
   ip_address  = google_compute_address.vpn_static_ip.address
   target      = google_compute_vpn_gateway.target_gateway.id
+  region="us-central1"
 }
 
 resource "google_compute_forwarding_rule" "fr_udp4500" {
@@ -64,6 +70,7 @@ resource "google_compute_forwarding_rule" "fr_udp4500" {
   port_range  = "4500"
   ip_address  = google_compute_address.vpn_static_ip.address
   target      = google_compute_vpn_gateway.target_gateway.id
+  region="us-central1"
 }
 
 resource "google_compute_route" "route1" {
