@@ -604,7 +604,15 @@ func (c *Config) getTokenSource(clientScopes []string, initialCredentialsOnly bo
 	creds, err := c.GetCredentials(clientScopes, initialCredentialsOnly)
 	if err != nil {
 		return nil, fmt.Errorf("%s", err)
+	}	
+
+	ud, err := creds.GetUniverseDomain()
+	if err != nil {
+		log.Printf("[WARN] Error retrieving universe domain: %s", err)
+	} else if ud != "googleapis.com" { // Only overwrite if the universe domain is different from the default
+		c.UniverseDomain = ud
 	}
+
 	return creds.TokenSource, nil
 }
 
