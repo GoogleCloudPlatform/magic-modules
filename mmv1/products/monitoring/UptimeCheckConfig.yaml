@@ -463,6 +463,7 @@ properties:
         immutable: true
         required: true
         default_from_api: true
+        diff_suppress_func: resourceMonitoringUptimeCheckConfigMonitoredResourceLabelsDiffSuppress
         description:
           Values for all of the labels listed in the associated monitored
           resource descriptor. For example, Compute Engine VM instances use the
