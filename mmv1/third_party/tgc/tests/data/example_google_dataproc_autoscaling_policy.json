@@ -1,0 +1,32 @@
+[
+    {
+        "name": "//dataproc.googleapis.com/projects/{{.Provider.project}}/locations/us-central1/autoscalingPolicies/dataproc-policy1",
+        "asset_type": "dataproc.googleapis.com/AutoscalingPolicy",
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+        "resource": {
+            "version": "v1beta2",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/dataproc/v1beta2/rest",
+            "discovery_name": "AutoscalingPolicy",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "basicAlgorithm": {
+                    "cooldownPeriod": "120s",
+                    "yarnConfig": {
+                        "gracefulDecommissionTimeout": "30s",
+                        "scaleDownFactor": 0.5,
+                        "scaleUpFactor": 0.5
+                    }
+                },
+                "id": "dataproc-policy1",
+                "workerConfig": {
+                    "maxInstances": 3,
+                    "minInstances": 2,
+                    "weight": 1
+                }
+            }
+        },
+        "ancestors": [
+            "organizations/{{.OrgID}}"
+        ]
+    }
+]

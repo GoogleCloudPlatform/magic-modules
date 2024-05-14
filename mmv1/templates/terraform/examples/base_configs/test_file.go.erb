@@ -48,6 +48,7 @@ object.examples
       .concat(example.ignore_read_extra)
       .concat(object.ignore_read_labels_fields(object.properties_with_excluded))
       .concat(object.ignore_read_fields(object.all_user_properties))
+      .sort()
 
     # Use explicit version for the example if given.
     # Otherwise, use object version.
