@@ -47,6 +47,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	<% unless version == 'ga' -%>
 	"google_cloud_asset_resources_search_all":          cloudasset.DataSourceGoogleCloudAssetResourcesSearchAll(),
 	<% end -%>
+	"google_cloud_asset_search_all_resources":          cloudasset.DataSourceGoogleCloudAssetSearchAllResources(),
 	"google_cloud_identity_groups":                     cloudidentity.DataSourceGoogleCloudIdentityGroups(),
 	"google_cloud_identity_group_memberships":          cloudidentity.DataSourceGoogleCloudIdentityGroupMemberships(),
 	"google_cloud_identity_group_lookup":               cloudidentity.DataSourceGoogleCloudIdentityGroupLookup(),
