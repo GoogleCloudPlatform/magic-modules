@@ -15,7 +15,7 @@ if err != nil {
   return nil
 }
 
-if v := res["key_project"]; v != "" {
+if v := res["key_project"]; v != nil {
 	return fmt.Errorf("AutokeyConfig still exists at %s", url)
 }
 
