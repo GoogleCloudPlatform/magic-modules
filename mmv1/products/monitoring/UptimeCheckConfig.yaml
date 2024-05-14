@@ -462,6 +462,7 @@ properties:
         name: 'labels'
         immutable: true
         required: true
+        default_from_api: true
         description:
           Values for all of the labels listed in the associated monitored
           resource descriptor. For example, Compute Engine VM instances use the
