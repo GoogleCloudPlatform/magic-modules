@@ -243,8 +243,7 @@ func (a *Async) UnmarshalYAML(n *yaml.Node) error {
 		return err
 	}
 
-	if a.Type == "PollAsync" {
-		a.CheckResponseFuncAbsence = "transport_tpg.PollCheckForAbsence"
+	if a.Type == "PollAsync" && a.TargetOccurrences == 0 {
 		a.TargetOccurrences = 1
 	}
 
