@@ -53,7 +53,8 @@ For more information about types of resources and the generation process overall
 1. Remove `min_version: beta` from any examples in a `ResourceName.yaml` which only test fields and resources that are present in the `google` provider.
 2. Remove version guards from any handwritten code related to fields and resources that are present in the `google` provider.
 3. Remove `provider = google-beta` from any test configurations (from MMv1 `examples` or handwritten) which have been promoted.
-4. Ensure that there is at least one test that will run for the `google` provider that covers any promoted fields and resources.
+4. Replace `ProtoV5ProviderBetaFactories` with `ProtoV5ProviderFactories` in all promoted handwritten tests.
+5. Ensure that there is at least one test that will run for the `google` provider that covers any promoted fields and resources.
 
 ## Promote documentation
 
