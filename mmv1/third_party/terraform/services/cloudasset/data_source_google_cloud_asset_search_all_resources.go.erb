@@ -158,7 +158,7 @@ func datasourceGoogleCloudAssetSearchAllResourcesRead(d *schema.ResourceData, me
 			return fmt.Errorf("Error searching resources: %s", err)
 		}
 
-		pageResults := flattenDatasourceGoogleCloudAssetResourcesList(res["results"])
+		pageResults := flattenDatasourceGoogleCloudAssetSearchAllResources(res["results"])
 		results = append(results, pageResults...)
 
 		pToken, ok := res["nextPageToken"]
@@ -186,7 +186,7 @@ func datasourceGoogleCloudAssetSearchAllResourcesRead(d *schema.ResourceData, me
 	return nil
 }
 
-func flattenDatasourceGoogleCloudAssetResourcesList(v interface{}) []map[string]interface{} {
+func flattenDatasourceGoogleCloudAssetSearchAllResources(v interface{}) []map[string]interface{} {
 	if v == nil {
 		return make([]map[string]interface{}, 0)
 	}
