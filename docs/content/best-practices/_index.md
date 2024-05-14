@@ -193,7 +193,7 @@ if err := tpgresource.SetDataSourceAnnotations(d); err != nil {
 
 ## Update `go.mod`
 
-Currently, you will need to update the [`go.mod`](https://github.com/hashicorp/terraform-provider-google/blob/main/go.mod) and [`go.sum`](https://github.com/hashicorp/terraform-provider-google/blob/main/go.sum) files in the dowsntream repository [terraform-provider-google](https://github.com/hashicorp/terraform-provider-google) and synchronize them with the corresponding files [`go.mod.erb`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/go.mod.erb) and [go.sum](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/go.sum) in the [magic-modules](https://github.com/GoogleCloudPlatform/magic-modules) repository
+The Magic Modules repository does not contain a complete Go module, preventing the use of automated tooling like `go get` from that repository. To add or update provider dependencies, use standard Go tooling to update an individual provider and copy the results to the upstream files in Magic Modules. The providers share the same go.mod and go.sum contents so either can be used to generate the changes.
 
 Below are the steps you can follow to make the change:
 
