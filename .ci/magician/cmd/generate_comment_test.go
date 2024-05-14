@@ -204,7 +204,7 @@ func TestFormatDiffComment(t *testing.T) {
 				"## Breaking Change(s) Detected",
 				"major release",
 				"`override-breaking-change`",
-				"- Breaking change 1- [reference](doc1)\n- Breaking change 2- [reference](doc2)\n",
+				"- Breaking change 1 - [reference](doc1)\n- Breaking change 2 - [reference](doc2)\n",
 			},
 			notExpectedStrings: []string{
 				"generated some diffs",
