@@ -146,6 +146,7 @@ resource "google_datastream_connection_profile" "source_connection_profile" {
     display_name          = "Source connection profile"
     location              = "us-central1"
     connection_profile_id = "tf-test-source-profile%{random_suffix}"
+    force                 = true
 
     mysql_profile {
         hostname = google_sql_database_instance.instance.public_ip_address
@@ -194,6 +195,7 @@ resource "google_datastream_stream" "default" {
     location = "us-central1"
     display_name = "my stream update"
     desired_state = "%{desired_state}"
+    force = true
 
     labels = {
     	key = "updated"
