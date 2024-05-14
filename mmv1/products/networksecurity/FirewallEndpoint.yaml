@@ -87,11 +87,6 @@ properties:
     name: 'labels'
     description: |
       A map of key/value label pairs to assign to the resource.
-  - !ruby/object:Api::Type::String
-    name: 'selfLink'
-    description: |
-      Server-defined URL of this resource.
-    output: true
   - !ruby/object:Api::Type::Time
     name: 'createTime'
     description: Time the firewall endpoint was created in UTC.
