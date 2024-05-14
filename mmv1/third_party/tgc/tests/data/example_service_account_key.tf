@@ -11,7 +11,6 @@ provider "google" {
   {{if .Provider.credentials }}credentials = "{{.Provider.credentials}}"{{end}}
 }
 
-
 resource "google_service_account" "myaccount" {
   account_id   = "myaccount"
   display_name = "My Service Account"
