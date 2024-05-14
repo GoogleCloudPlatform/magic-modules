@@ -111,6 +111,7 @@ resource "google_compute_region_backend_service" "default" {
   load_balancing_scheme = "INTERNAL_MANAGED"
   timeout_sec           = 10
   health_checks         = [google_compute_region_health_check.default.id]
+
   backend {
     group           = google_compute_region_instance_group_manager.mig.instance_group
     balancing_mode  = "UTILIZATION"
@@ -127,6 +128,7 @@ resource "google_compute_instance_template" "instance_template" {
   network_interface {
     network    = google_compute_network.ilb_network.id
     subnetwork = google_compute_subnetwork.ilb_subnet.id
+
     access_config {
       # add external ip to fetch packages
     }
@@ -425,6 +427,7 @@ resource "google_compute_region_backend_service" "default" {
   load_balancing_scheme = "INTERNAL_MANAGED"
   timeout_sec           = 10
   health_checks         = [google_compute_region_health_check.default.id]
+
   backend {
     group           = google_compute_region_instance_group_manager.mig.instance_group
     balancing_mode  = "UTILIZATION"
@@ -441,6 +444,7 @@ resource "google_compute_instance_template" "instance_template" {
   network_interface {
     network    = google_compute_network.ilb_network.id
     subnetwork = google_compute_subnetwork.ilb_subnet.id
+
     access_config {
       # add external ip to fetch packages
     }
