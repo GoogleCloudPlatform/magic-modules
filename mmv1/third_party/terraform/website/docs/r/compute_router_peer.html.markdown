@@ -5,7 +5,7 @@ description: |-
   establish BGP peering.
 ---
 
-# google\_compute\_router\_peer
+# google_compute_router_peer
 
 BGP information that must be configured into the routing stack to
 establish BGP peering. This information must specify the peer ASN
@@ -302,7 +302,7 @@ The following arguments are supported:
   Enable IPv6 traffic over BGP Peer. If not specified, it is disabled by default.
 
 * `enable_ipv4` -
-  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+  (Optional)
   Enable IPv4 traffic over BGP Peer. It is enabled by default if the peerIpAddress is version 4.
 
 * `ipv6_nexthop_address` -
@@ -313,7 +313,7 @@ The following arguments are supported:
   assigns unused addresses from the 2600:2d00:0:2::/64 or 2600:2d00:0:3::/64 range for you.
 
 * `ipv4_nexthop_address` -
-  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+  (Optional)
   IPv4 address of the interface inside Google Cloud Platform.
 
 * `peer_ipv6_nexthop_address` -
@@ -324,7 +324,7 @@ The following arguments are supported:
   assigns unused addresses from the 2600:2d00:0:2::/64 or 2600:2d00:0:3::/64 range for you.
 
 * `peer_ipv4_nexthop_address` -
-  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+  (Optional)
   IPv4 address of the BGP interface outside Google Cloud Platform.
 
 * `region` -

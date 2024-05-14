@@ -46,7 +46,7 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_connection_cloud_resource'
-    pull_external: true
+    external_providers: ["random", "time"]
     region_override: 'US'
     primary_resource_id: 'connection'
     primary_resource_name: "fmt.Sprintf(\"tf-test-my-connection%s\",
@@ -56,7 +56,7 @@ examples:
       connection_id: 'my-connection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_connection_basic'
-    pull_external: true
+    external_providers: ["random", "time"]
     primary_resource_id:
       'connection'
       # Random provider
@@ -73,7 +73,7 @@ examples:
       - 'cloud_sql.0.credential'  # password removed
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_connection_full'
-    pull_external: true
+    external_providers: ["random", "time"]
     primary_resource_id:
       'connection'
       # Random provider
@@ -91,14 +91,14 @@ examples:
       - 'cloud_sql.0.credential'  # password removed
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_connection_aws'
-    pull_external: true
+    external_providers: ["random", "time"]
     primary_resource_id: 'connection'
     vars:
       connection_id: 'my-connection'
       iam_role_id: 'arn:aws:iam::999999999999:role/omnirole'
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_connection_azure'
-    pull_external: true
+    external_providers: ["random", "time"]
     primary_resource_id: 'connection'
     vars:
       connection_id: 'my-connection'
@@ -106,7 +106,7 @@ examples:
       federated_application_client_id: 'b43eeeee-eeee-eeee-eeee-a480155501ce'
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_connection_cloudspanner'
-    pull_external: true
+    external_providers: ["random", "time"]
     primary_resource_id: 'connection'
     vars:
       connection_id: 'my-connection'
@@ -114,7 +114,7 @@ examples:
       database_role: 'database_role'
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_connection_cloudspanner_databoost'
-    pull_external: true
+    external_providers: ["random", "time"]
     primary_resource_id: 'connection'
     vars:
       connection_id: 'my-connection'
@@ -125,6 +125,26 @@ examples:
     primary_resource_id: "connection"
     vars:
       connection_id: "my-connection"
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'bigquery_connection_kms'
+    primary_resource_id:
+      'bq-connection-cmek'
+    vars:
+      database_instance_name: 'my-database-instance'
+      username: 'user'
+      deletion_protection: 'true'
+      kms_key_name: 'projects/project/locations/us-central1/keyRings/us-central1/cryptoKeys/bq-key'
+    test_vars_overrides:
+      deletion_protection: 'false'
+      kms_key_name: 'acctest.BootstrapKMSKey(t).CryptoKey.Name'
+      policyChanged:
+        "acctest.BootstrapPSARole(t, \"bq-\", \"bigquery-encryption\",
+        \"roles/cloudkms.cryptoKeyEncrypterDecrypter\"\
+        )"
+    oics_vars_overrides:
+      deletion_protection: 'false'
+    ignore_read_extra:
+      - 'cloud_sql.0.credential'  # password removed
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -164,6 +184,12 @@ properties:
     output: true
     description: |
       True if the connection has credential assigned.
+  - !ruby/object:Api::Type::String
+    name: 'kmsKeyName'
+    description: |
+      Optional. The Cloud KMS key that is used for encryption.
+
+      Example: projects/[kms_project_id]/locations/[region]/keyRings/[key_region]/cryptoKeys/[key]
   - !ruby/object:Api::Type::NestedObject
     name: 'cloudSql'
     description: Connection properties specific to the Cloud SQL.

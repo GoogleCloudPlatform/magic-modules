@@ -397,6 +397,9 @@ service/ids:
 service/integrationconnectors:
   resources:
   - google_integration_connectors_.*
+service/integrations:
+  resources:
+  - google_integrations_.*
 service/logging:
   resources:
   - google_logging_.*
@@ -565,6 +568,7 @@ service/serviceusage:
   - google_project_service
 service/serviceusage-quota:
   resources:
+  - google_cloud_quotas_.*
   - google_service_usage_consumer_quota_override
 service/sourcerepo:
   resources:
