@@ -1,6 +1,7 @@
 <% autogen_exception -%>
 package cloudasset_test
 
+<% unless version == 'ga' -%>
 import (
 	"fmt"
 	"regexp"
@@ -47,3 +48,5 @@ data google_cloud_asset_resources_search_all resources {
 }
 `, project)
 }
+
+<% end -%>

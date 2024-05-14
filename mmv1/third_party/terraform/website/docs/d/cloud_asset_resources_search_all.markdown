@@ -7,13 +7,17 @@ description: |-
 # google_cloud_asset_resources_search_all
 
 Retrieve all the resources within a given accessible CRM scope (project/folder/organization). See the
-[REST API](https://cloud.google.com/asset-inventory/docs/reference/rest/v1/TopLevel/searchAllResources)
+[REST API](https://cloud.google.com/asset-inventory/docs/reference/rest/v1p1beta1/resources/searchAll)
 for more details.
+
+~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
+See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
 
 ## Example Usage - searching for all projects in an org
 
 ```hcl
 data google_cloud_asset_resources_search_all projects {
+  provider = google-beta
   scope = "organizations/0123456789"
   asset_types = [
     "cloudresourcemanager.googleapis.com/Project"
@@ -25,6 +29,7 @@ data google_cloud_asset_resources_search_all projects {
 
 ```hcl
 data google_cloud_asset_resources_search_all cloud_build_projects {
+  provider = google-beta
   scope = "organizations/0123456789"
   asset_types = [
     "serviceusage.googleapis.com/Service"
@@ -37,6 +42,7 @@ data google_cloud_asset_resources_search_all cloud_build_projects {
 
 ```hcl
 data google_cloud_asset_resources_search_all project_service_accounts {
+  provider = google-beta
   scope = "projects/my-project-id"
   asset_types = [
     "iam.googleapis.com/ServiceAccount"
@@ -66,7 +72,7 @@ The following attributes are exported:
 * `project` - The project that this resource belongs to, in the form of `projects/{project_number}`.
 * `display_name` - The display name of this resource.
 * `description` - One or more paragraphs of text description of this resource. Maximum length could be up to 1M bytes.
-* `additional_attributes` - (Beta only) Additional searchable attributes of this resource. Informational only. The exact set of attributes is subject to change. For example: project id, DNS name etc.
+* `additional_attributes` - Additional searchable attributes of this resource. Informational only. The exact set of attributes is subject to change. For example: project id, DNS name etc.
 * `location` - Location can be `global`, regional like `us-east1`, or zonal like `us-west1-b`.
 * `labels` - Labels associated with this resource.
 * `network_tags` - Network tags associated with this resource.
