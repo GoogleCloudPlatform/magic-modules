@@ -1,10 +1,12 @@
+resource "google_storage_bucket" "bucket" {
+  name     = "<%= ctx[:vars]['bucket_name'] %>"
+  location = "US"
+  uniform_bucket_level_access = true
+  force_destroy = true
+}
+
 resource "google_storage_managed_folder" "managed_folder" {
   bucket = google_storage_bucket.bucket.name
   name   = "managed-folder-name"
 }
 
-resource "google_storage_bucket" "bucket" {
-  name     = "<%= ctx[:vars]['bucket_name'] %>"
-  location = "me-central2"
-  uniform_bucket_level_access = true
-}

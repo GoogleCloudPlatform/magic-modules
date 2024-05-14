@@ -33,7 +33,17 @@ examples:
 id_format: '{{bucket}}/{{managedFolder}}'
 import_format: ['{{bucket}}/{{managedFolder}}']
 mutex: 'storage/buckets/{{bucket}}'
+immutable: true
 skip_sweeper: true
+iam_policy: !ruby/object:Api::Resource::IamPolicy
+  parent_resource_attribute: 'managedFolders'
+  method_name_separator: ':'
+  base_url: 'b/{{bucket}}/managedFolders/{{managedFolder}}'
+  set_iam_policy_method: 'iam'
+  set_iam_policy_verb: :PUT
+  fetch_iam_policy_method: 'iam'
+  fetch_iam_policy_verb: :POST
+  wrapped_policy_obj: false
 properties:
   - !ruby/object:Api::Type::ResourceRef
     name: 'bucket'
@@ -41,6 +51,7 @@ properties:
     imports: 'name'
     description: 'The name of the bucket.'
     required: true
+    url_param_only: true
     ignore_read: true
   - !ruby/object:Api::Type::String
     name: 'name'
