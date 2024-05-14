@@ -4,7 +4,7 @@
 {{- template "nestedPropertyDocumentation" $np -}}
     {{- end}}
   {{- else if $.NestedProperties }}
-<a name="nested_{{ underscore $.Name }}"></a>The `{{ underscore $.Name }}` block {{ if $.Output }} contains{{ else }} supports{{ end }}:
+<a name="nested_{{ underscore $.Name }}"></a>The `{{ underscore $.Name }}` block {{ if $.Output }}contains{{ else }}supports{{ end }}:
 {{ if $.IsA "Map" }}
   * `{{ underscore $.KeyName }}` - (Required) The identifier for this object. Format specified above.
     {{- end}}

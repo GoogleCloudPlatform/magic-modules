@@ -110,8 +110,8 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 {{- end }}
 {{if or (and (or $.HasProject $.HasRegion $.HasZone) (not $.SkipDefaultCdiff)) $.CustomDiff }}
         CustomizeDiff: customdiff.All(
-{{- if $.CustomDiff }}
-{{          range $cdiff := $.CustomDiff -}}
+{{- if $.CustomDiff -}}
+{{-          range $cdiff := $.CustomDiff }}
         {{ $cdiff }},
 {{- end}}
 {{- end}}
