@@ -96,7 +96,7 @@ resource "google_project_iam_member" "gae_api" {
 resource "google_app_engine_flexible_app_version" "foo" {
   project    = google_project_iam_member.gae_api.project
   version_id = "v1"
-  service    = "default"
+  service    = "custom"
   runtime    = "python"
 
   runtime_api_version = "1"
@@ -232,7 +232,7 @@ resource "google_project_iam_member" "gae_api" {
 resource "google_app_engine_flexible_app_version" "foo" {
   project    = google_project_iam_member.gae_api.project
   version_id = "v1"
-  service    = "default"
+  service    = "custom"
   runtime    = "python"
 
   runtime_api_version = "1"
