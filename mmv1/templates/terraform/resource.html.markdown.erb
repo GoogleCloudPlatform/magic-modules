@@ -53,7 +53,7 @@ description: |-
 <%= indent(object.description.first_sentence, 2) %>
 ---
 
-# <%= terraform_name.gsub("_", "\\_") %>
+# <%= terraform_name %>
 <% if object.deprecation_message -%>
 ~> **Warning:** <%= object.deprecation_message %>
 <% end -%>
