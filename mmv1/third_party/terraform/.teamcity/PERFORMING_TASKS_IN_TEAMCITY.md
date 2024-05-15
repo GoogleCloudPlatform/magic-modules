@@ -67,7 +67,7 @@ To do this you should:
 * Navigate to [`Google > Nightly Tests`](https://hashicorp.teamcity.com/project/TerraformProviders_GoogleCloud_GOOGLE_NIGHTLYTESTS?mode=builds#all-projects) or [`Google Beta > Nightly Tests`](https://hashicorp.teamcity.com/project/TerraformProviders_GoogleCloud_GOOGLE_BETA_NIGHTLYTESTS#all-projects) depending on which provider you want to test
 * Click on the build configuration for the service you want to test, e.g. [`Accessapproval - Acceptance Tests`](https://hashicorp.teamcity.com/buildConfiguration/TerraformProviders_GoogleCloud_GOOGLE_NIGHTLYTESTS_GOOGLE_PACKAGE_ACCESSAPPROVAL?branch=%3Cdefault%3E&buildTypeTab=overview&mode=builds)
 * On the page for the service's build configuation, look in the top right of the page for two buttons, one with the text "Run" and the other containing "...". Click on the righthand-side "..." button to launch the Custom Build modal.
-* Launching a [Cusom Build](https://www.jetbrains.com/help/teamcity/running-custom-build.html):
+* Launching a [Custom Build](https://www.jetbrains.com/help/teamcity/running-custom-build.html):
   * Select which branch to test
      * By default the `Nightly Tests` projects will use `main`.
      * To change to a different branch, open the `Changes` tab, and select the branch from the `Build branch` dropdown. For more info [see the documentation on build branches](https://www.jetbrains.com/help/teamcity/running-custom-build.html#Build+Branch).
