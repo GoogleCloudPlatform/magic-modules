@@ -12,8 +12,8 @@ provider "google" {
 }
 
 resource "google_bigquery_dataset" "postgres" {
-  dataset_id    = "postgresst"
-  friendly_name = "postgresst"
+  dataset_id    = "stpostgres"
+  friendly_name = "stpostgres"
   description   = "Database of postgres"
   location      = "us-central1"
 }
@@ -21,7 +21,7 @@ resource "google_bigquery_dataset" "postgres" {
 resource "google_datastream_stream" "default" {
   display_name  = "postgres to bigQuery"
   location      = "us-central1"
-  stream_id     = "postgres-stream-bigquery"
+  stream_id     = "postgres-bigquery"
 
    source_config {
     source_connection_profile = google_datastream_connection_profile.source_connection_profile.id
@@ -46,12 +46,12 @@ resource "google_datastream_stream" "default" {
 resource "google_datastream_connection_profile" "destination_connection_profile2" {
     display_name          = "Connection profile"
     location              = "us-central1"
-    connection_profile_id = "des-stream-profile"
+    connection_profile_id = "dest-st-profile"
     bigquery_profile {}
 }
 
 resource "google_sql_database_instance" "instance" {
-    name             = "instance-name-st"
+    name             = "instance-stream-name"
     database_version = "MYSQL_8_0"
     region           = "us-central1"
     settings {
@@ -108,7 +108,7 @@ resource "google_sql_user" "user" {
 resource "google_datastream_connection_profile" "source_connection_profile" {
     display_name          = "Source connection profile"
     location              = "us-central1"
-    connection_profile_id = "stream-source-profile"
+    connection_profile_id = "source-profile-st"
 
     mysql_profile {
         hostname = google_sql_database_instance.instance.public_ip_address

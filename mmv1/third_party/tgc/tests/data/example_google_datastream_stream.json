@@ -1,6 +1,6 @@
 [
     {
-        "name": "//bigquery.googleapis.com/projects/tf-deployer-2/datasets/postgresst",
+        "name": "//bigquery.googleapis.com/projects/tf-deployer-2/datasets/stpostgres",
         "asset_type": "bigquery.googleapis.com/Dataset",
         "resource": {
             "version": "v2",
@@ -9,10 +9,10 @@
             "parent": "//cloudresourcemanager.googleapis.com/projects/tf-deployer-2",
             "data": {
                 "datasetReference": {
-                    "datasetId": "postgresst"
+                    "datasetId": "stpostgres"
                 },
                 "description": "Database of postgres",
-                "friendlyName": "postgresst",
+                "friendlyName": "stpostgres",
                 "location": "us-central1"
             }
         },
@@ -20,7 +20,7 @@
         "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"
     },
     {
-        "name": "//cloudsql.googleapis.com/projects/tf-deployer-2/instances/instance-name-st",
+        "name": "//cloudsql.googleapis.com/projects/tf-deployer-2/instances/instance-stream-name",
         "asset_type": "sqladmin.googleapis.com/Instance",
         "resource": {
             "version": "v1beta4",
@@ -29,7 +29,7 @@
             "parent": "//cloudresourcemanager.googleapis.com/projects/tf-deployer-2",
             "data": {
                 "databaseVersion": "MYSQL_8_0",
-                "name": "instance-name-st",
+                "name": "instance-stream-name",
                 "project": "tf-deployer-2",
                 "region": "us-central1",
                 "settings": {
@@ -71,7 +71,7 @@
         "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"
     },
     {
-        "name": "//datastream.googleapis.com/projects/tf-deployer-2/locations/us-central1/connectionProfiles/des-stream-profile",
+        "name": "//datastream.googleapis.com/projects/tf-deployer-2/locations/us-central1/connectionProfiles/dest-st-profile",
         "asset_type": "datastream.googleapis.com/ConnectionProfile",
         "resource": {
             "version": "v1",
@@ -87,7 +87,7 @@
         "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"
     },
     {
-        "name": "//datastream.googleapis.com/projects/tf-deployer-2/locations/us-central1/connectionProfiles/stream-source-profile",
+        "name": "//datastream.googleapis.com/projects/tf-deployer-2/locations/us-central1/connectionProfiles/source-profile-st",
         "asset_type": "datastream.googleapis.com/ConnectionProfile",
         "resource": {
             "version": "v1",
@@ -107,7 +107,7 @@
         "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"
     },
     {
-        "name": "//datastream.googleapis.com/projects/tf-deployer-2/locations/us-central1/streams/postgres-stream-bigquery",
+        "name": "//datastream.googleapis.com/projects/tf-deployer-2/locations/us-central1/streams/postgres-bigquery",
         "asset_type": "datastream.googleapis.com/Stream",
         "resource": {
             "version": "v1",
@@ -138,7 +138,7 @@
         "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"
     },
     {
-        "name": "//sqladmin.googleapis.com/projects/tf-deployer-2/instances/instance-name-st/databases/db",
+        "name": "//sqladmin.googleapis.com/projects/tf-deployer-2/instances/instance-stream-name/databases/db",
         "asset_type": "sqladmin.googleapis.com/Database",
         "resource": {
             "version": "v1beta4",
@@ -146,7 +146,7 @@
             "discovery_name": "Database",
             "parent": "//cloudresourcemanager.googleapis.com/projects/tf-deployer-2",
             "data": {
-                "instance": "instance-name-st",
+                "instance": "instance-stream-name",
                 "name": "db"
             }
         },
