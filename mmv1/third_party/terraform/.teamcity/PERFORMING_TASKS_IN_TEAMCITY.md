@@ -42,8 +42,9 @@ Google Cloud/
 A CRON trigger causes all acceptance tests for the GA and Beta providers to run overnight, Mon-Sun. These tests use the `main` branches of hashicorp/terraform-provider-google(-beta) repos. The tests interact fully with Google APIs and are used to identify any breaking changes introduced by either a recent PR or a change in the API itself.
 
 You can find the builds for nightly tests at:
-* Google > Nightly Tests
-* Google Beta > Nightly Tests
+
+* [Google > Nightly Tests](https://hashicorp.teamcity.com/project/TerraformProviders_GoogleCloud_GOOGLE_NIGHTLYTESTS?mode=builds#all-projects)
+* [Google Beta > Nightly Tests](https://hashicorp.teamcity.com/project/TerraformProviders_GoogleCloud_GOOGLE_BETA_NIGHTLYTESTS#all-projects)
 
 These projects contain a build configuration per service package.
 
@@ -86,8 +87,8 @@ To do this you should:
 When reviewing a PR you may need to run acceptance tests using the code shown in the Diff Report, present in branches in the modular-magician/terraform-provider-google(-beta) repositories.
 
 To do this you should navigate to either of these projects and run a custom build:
-* `Google > Upstream MM Testing`
-* `Google Beta > Upstream MM Testing`
+* [`Google > Upstream MM Testing`](https://hashicorp.teamcity.com/project/TerraformProviders_GoogleCloud_GOOGLE_MMUPSTREAMTESTS#all-projects)
+* [`Google Beta > Upstream MM Testing`](https://hashicorp.teamcity.com/project/TerraformProviders_GoogleCloud_GOOGLE_BETA_MMUPSTREAMTESTS#all-projects)
 
 Builds in these projects will test the code present in the Modular Magician's forks and will run tests against the VCR testing project in GCP.
 
@@ -97,7 +98,8 @@ See the section above about how to customise and run a Custom Build.
 ### Triggering VCR tests to record new cassettes
 
 Sometimes VCR cassettes need to be re-recorded by manual intervention, for example if a VCR test is failing across all PRs due to a bad cassette that isn't being replaced. Our VCR tests on PRs only use the Beta provider, so the only place to record VCR cassettes in TeamCity is:
-* `Google Beta > VCR  Recording`.
+
+* [`Google Beta > VCR  Recording`](https://hashicorp.teamcity.com/project/TerraformProviders_GoogleCloud_GOOGLE_BETA_VCRRECORDING#all-projects)
 
 There are two build configurations in this project: one for using hashicorp/terraform-provider-google-beta to run the tests, and the other for using modular-magician/terraform-provider-google-beta. Make sure to use the correct one for your use case.
 
@@ -118,11 +120,11 @@ In REPLAYING mode the build will download VCR cassettes from a GCS Bucket and ru
 
 ### Sweeping the Nightly Test Projects
 
-The Service Sweeper builds in `Google > Nightly Tests` and `Google Beta > Nightly Tests` run every night via CRON. They are designed to not run until there are no builds testing any services in the GA or Beta nightly test GCP projects. No acceptance testing builds will start until the sweeper stops.
+The Service Sweeper builds in [`Google > Nightly Tests`](https://hashicorp.teamcity.com/project/TerraformProviders_GoogleCloud_GOOGLE_NIGHTLYTESTS?mode=builds#all-projects) and [`Google Beta > Nightly Tests`](https://hashicorp.teamcity.com/project/TerraformProviders_GoogleCloud_GOOGLE_BETA_NIGHTLYTESTS#all-projects) run every night via CRON. They are designed to not run until there are no builds testing any services in the GA or Beta nightly test GCP projects. No acceptance testing builds will start until the sweeper stops.
 
 ### Sweeping the VCR Project
 
-The Service Sweeper builds in `Google > Upstream MM Testing` and `Google Beta > Upstream MM Testing` run every night via CRON. They are redundant as both sweep the VCR project, but I've left them both in. They are designed to not run until there are no builds testing any services in the VCR test GCP project. No acceptance testing builds will start until the sweeper stops.
+The Service Sweeper builds in [`Google > Upstream MM Testing`](https://hashicorp.teamcity.com/project/TerraformProviders_GoogleCloud_GOOGLE_MMUPSTREAMTESTS#all-projects) and [`Google Beta > Upstream MM Testing`](https://hashicorp.teamcity.com/project/TerraformProviders_GoogleCloud_GOOGLE_BETA_MMUPSTREAMTESTS#all-projects) run every night via CRON. They are redundant as both sweep the VCR project, but I've left them both in. They are designed to not run until there are no builds testing any services in the VCR test GCP project. No acceptance testing builds will start until the sweeper stops.
 
 ### Sweeping `google_project` Resources
 
