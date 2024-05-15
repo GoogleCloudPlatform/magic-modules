@@ -183,7 +183,18 @@ func execScheduledPrReminders(gh *github.Client) error {
 			if dryRun {
 				fmt.Printf("DRY RUN: Would post comment: %s\n", comment)
 			} else {
-
+				_, _, err := gh.Issues.CreateComment(
+					ctx,
+					"GoogleCloudPlatform",
+					"magic-modules",
+					*pr.Number,
+					&github.IssueComment{
+						Body: github.String(comment),
+					},
+				)
+				if err != nil {
+					return fmt.Errorf("Error posting comment to PR %d: %w", *pr.Number, err)
+				}
 			}
 		}
 
@@ -191,7 +202,18 @@ func execScheduledPrReminders(gh *github.Client) error {
 			if dryRun {
 				fmt.Printf("DRY RUN: Would close PR %d\n", *pr.Number)
 			} else {
-
+				_, _, err := gh.Issues.Edit(
+					ctx,
+					"GoogleCloudPlatform",
+					"magic-modules",
+					*pr.Number,
+					&github.IssueRequest{
+						State: github.String("closed"),
+					},
+				)
+				if err != nil {
+					return fmt.Errorf("Error closing PR %d: %w", *pr.Number, err)
+				}
 			}
 		}
 	}
@@ -337,7 +359,7 @@ func daysDiff(from, to time.Time) int {
 	if err != nil {
 		panic(err)
 	}
-	minFrom := time.Date(2024, 4, 15, 0, 0, 0, 0, pdtLoc)
+	minFrom := time.Date(2024, 5, 1, 0, 0, 0, 0, pdtLoc)
 	if from.Before(minFrom) {
 		from = minFrom
 	}
