@@ -1,7 +1,7 @@
 ---
 subcategory: "Cloud Composer"
 description: |-
-  Kubernetes ConfigMap in Composer Environment workloads.
+  User workloads ConfigMap used by Airflow tasks that run with Kubernetes Executor or KubernetesPodOperator.
 ---
 
 # google\_composer\_user\_workloads\_config\_map
