@@ -246,6 +246,7 @@ properties:
           - 'V2'
           - 'V3'
           - 'V4'
+          - 'V5P'
       - !ruby/object:Api::Type::String
         name: 'topology'
         immutable: true
