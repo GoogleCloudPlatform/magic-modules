@@ -307,7 +307,9 @@ module Provider
                        ['converters/google/convert_test.go',
                         'third_party/tgc/convert_test.go'],
                        ['converters/google/resources/job.go',
-                        'third_party/tgc/job.go']
+                        'third_party/tgc/job.go'],
+                       ['converters/google/resources/service_account_key.go',
+                        'third_party/tgc/service_account_key.go']
                      ])
     end
 

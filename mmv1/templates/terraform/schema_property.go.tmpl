@@ -105,16 +105,16 @@ Default value: {{.DefaultValue -}}
     {{ end -}}
   {{ else if eq .ItemType.Type "String" -}}
       Elem: &schema.Schema{
-        Type: {{ .ItemTypeClass -}},
+        Type: schema.Type{{ .ItemTypeClass -}},
       },
   {{ else if eq .ItemType.Type "Enum" -}}
       Elem: &schema.Schema{
-        Type: {{ .ItemTypeClass -}},
+        Type: schema.Type{{ .ItemTypeClass -}},
         ValidateFunc: verify.ValidateEnum([]string{ {{- .ItemType.EnumValuesToString "\"" -}} }),
       },
   {{ else -}}
       Elem: &schema.Schema{
-        Type: {{ .ItemTypeClass -}},
+        Type: schema.Type{{ .ItemTypeClass -}},
     {{ if eq .ItemType.Type "ResourceRef" -}}
         DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
     {{ end -}}
