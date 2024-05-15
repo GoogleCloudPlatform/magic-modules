@@ -17,3 +17,12 @@ resource "google_compute_security_policy_rule" "<%= ctx[:primary_resource_id] %>
   action          = "allow"
   preview         = true
 }
+
+resource "google_compute_security_policy_rule" "primary" {
+  rate_limit_options {
+    rate_limit_threshold {
+      count        = 5
+      interval_sec = 30
+    }
+  }
+}
