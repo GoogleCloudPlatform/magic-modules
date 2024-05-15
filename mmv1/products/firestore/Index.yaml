@@ -63,7 +63,7 @@ examples:
       database_id: "database-id"
     test_env_vars:
       project_id: :PROJECT_NAME
-    pull_external: true
+    external_providers: ["random", "time"]
   - !ruby/object:Provider::Terraform::Examples
     name: 'firestore_index_datastore_mode'
     primary_resource_id:
