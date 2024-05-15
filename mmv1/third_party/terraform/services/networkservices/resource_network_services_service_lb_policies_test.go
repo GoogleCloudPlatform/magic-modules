@@ -58,6 +58,14 @@ resource "google_network_services_service_lb_policies" "foobar" {
   location                 = "global"
   description              = "my description"
   load_balancing_algorithm = "SPRAY_TO_REGION"
+
+  auto_capacity_drain {
+    enable = true
+  }
+
+  failover_config {
+    failover_health_threshold = 70
+  }
   
   labels = {
     foo = "bar"

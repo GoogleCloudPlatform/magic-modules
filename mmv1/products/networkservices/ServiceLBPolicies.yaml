@@ -96,16 +96,22 @@ properties:
       - :SPRAY_TO_WORLD
       - :WATERFALL_BY_REGION
       - :WATERFALL_BY_ZONE
-  - !ruby/object:Api::Type::Boolean
+  - !ruby/object:Api::Type::NestedObject
     name: 'autoCapacityDrain'
     description: |
-      If specified, an unhealthy MIG/NEG will be removed from Global load balancing and traffic routing for the service.
-      A MIG/NEG is considered to be unhealthy if less than 25% of the instance/endpoints in the MIG/NEG are healthy.
-      autoCapacityDrain will never drain more than 50% of the configured MIGs/NEGs of a Backend Service.
-  - !ruby/object:Api::Type::Integer
-    name: 'failoverHealthThreshold'
+      Option to specify if an unhealthy MIG/NEG should be considered for global load balancing and traffic routing.
+    properties:
+      - !ruby/object:Api::Type::Boolean
+        name: 'enable'
+        description:
+          Optional. If set to 'True', an unhealthy MIG/NEG will be set as drained. - An MIG/NEG is considered unhealthy if less than 25% of the instances/endpoints in the MIG/NEG are healthy. - This option will never result in draining more than 50% of the configured IGs/NEGs for the Backend Service.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'failoverConfig'
     description: |
-      The percentage threshold that a load balancer will begin to send traffic to failover backends.
-      If the percentage of endpoints in a MIG/NEG is smaller than this value, traffic would be sent to failover backends if possible.
-      This field should be set to a value between 1 and 99.
-      The default value is 50 for Global external HTTP(S) load balancer (classic) and Proxyless service mesh, and 70 for others.
+      Option to specify health based failover behavior. This is not related to Network load balancer FailoverPolicy.
+    properties:
+      - !ruby/object:Api::Type::Integer
+        name: 'failoverHealthThreshold'
+        required: true
+        description:
+          Optional. The percentage threshold that a load balancer will begin to send traffic to failover backends. If the percentage of endpoints in a MIG/NEG is smaller than this value, traffic would be sent to failover backends if possible. This field should be set to a value between 1 and 99. The default value is 50 for Global external HTTP(S) load balancer (classic) and Proxyless service mesh, and 70 for others.
