@@ -206,6 +206,7 @@ properties:
       and can consist of any UTF-8 characters.
   - !ruby/object:Api::Type::Array
     name: 'versionAliases'
+    default_from_api: true
     description:
       user provided version aliases so that a model version can be referenced via alias.
     item_type: Api::Type::String
