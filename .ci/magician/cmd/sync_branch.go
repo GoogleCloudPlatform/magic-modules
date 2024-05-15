@@ -48,8 +48,7 @@ var syncBranchCmd = &cobra.Command{
 
 		rnr, err := exec.NewRunner()
 		if err != nil {
-			fmt.Println("Error creating Runner: ", err)
-			os.Exit(1)
+			return fmt.Errorf("error creating Runner: %s", err)
 		}
 		return execSyncBranchCmd(syncBranchPrefix, baseBranch, sha, githubToken, rnr)
 	},
@@ -58,7 +57,6 @@ var syncBranchCmd = &cobra.Command{
 func execSyncBranchCmd(syncBranchPrefix, baseBranch, sha, githubToken string, runner source.Runner) error {
 	syncBranch := getSyncBranch(syncBranchPrefix, baseBranch)
 	fmt.Println("SYNC_BRANCH: ", syncBranch)
-
 
 	_, err := runner.Run("git", []string{"push", fmt.Sprintf("https://modular-magician:%s@github.com/GoogleCloudPlatform/magic-modules", githubToken), fmt.Sprintf("%s:%s", sha, syncBranch)}, nil)
 	return err
