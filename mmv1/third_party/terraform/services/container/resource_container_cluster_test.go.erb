@@ -10534,21 +10534,11 @@ func TestAccContainerCluster_privateRegistry(t *testing.T) {
 						"node_pool_defaults.0.node_config_defaults.0.containerd_config.0.private_registry_access_config.0.certificate_authority_domain_config.0.fqdns.0",
 						"my.custom.domain",
 					),
-					resource.TestCheckResourceAttr(
-						"google_container_cluster.primary",
-						"node_pool_defaults.0.node_config_defaults.0.containerd_config.0.private_registry_access_config.0.certificate_authority_domain_config.0.gcp_secret_manager_certificate_config.0.secret_uri",
-						"projects/0000000000/secrets/my-cert/versions/1",
-					),
 					// Second CA config
 					resource.TestCheckResourceAttr(
 						"google_container_cluster.primary",
 						"node_pool_defaults.0.node_config_defaults.0.containerd_config.0.private_registry_access_config.0.certificate_authority_domain_config.1.fqdns.0",
 						"10.1.2.32",
-					),
-					resource.TestCheckResourceAttr(
-						"google_container_cluster.primary",
-						"node_pool_defaults.0.node_config_defaults.0.containerd_config.0.private_registry_access_config.0.certificate_authority_domain_config.1.gcp_secret_manager_certificate_config.0.secret_uri",
-						"projects/0000000000/secrets/my-other-cert/versions/latest",
 					),
 				),
 			},
@@ -10588,6 +10578,32 @@ func TestAccContainerCluster_privateRegistry(t *testing.T) {
 
 func testAccContainerCluster_privateRegistryEnabled(name, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
+data "google_project" "test_project" { 
+	}
+
+resource "google_secret_manager_secret" "secret-basic" { 
+	secret_id     = "test-secret" 
+	replication { 
+		user_managed { 
+		replicas { 
+			location = "us-central1" 
+		} 
+		} 
+	} 
+}
+
+resource "google_secret_manager_secret_version" "secret-version-basic" { 
+	secret = google_secret_manager_secret.secret-basic.id 
+	secret_data = "dummypassword" 
+  } 
+   
+resource "google_secret_manager_secret_iam_member" "secret_iam" { 
+	secret_id  = google_secret_manager_secret.secret-basic.id 
+	role       = "roles/secretmanager.admin" 
+	member     = "serviceAccount:${data.google_project.test_project.number}-compute@developer.gserviceaccount.com" 
+	depends_on = [google_secret_manager_secret_version.secret-version-basic] 
+  }
+
 resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
@@ -10604,20 +10620,20 @@ resource "google_container_cluster" "primary" {
           certificate_authority_domain_config {
             fqdns = [ "my.custom.domain" ]
             gcp_secret_manager_certificate_config {
-              secret_uri = "projects/0000000000/secrets/my-cert/versions/1"
+              secret_uri = google_secret_manager_secret_version.secret-version-basic.name
             }
           }
 		  certificate_authority_domain_config {
             fqdns = [ "10.1.2.32" ]
             gcp_secret_manager_certificate_config {
-              secret_uri = "projects/0000000000/secrets/my-other-cert/versions/latest"
+              secret_uri = google_secret_manager_secret_version.secret-version-basic.name
             }
           }
         }
       }
     }
   }
-}
+} 
 `, name, networkName, subnetworkName)
 }
 
@@ -10646,6 +10662,30 @@ resource "google_container_cluster" "primary" {
 
 func testAccContainerCluster_withNodePoolPrivateRegistry(name, nodePoolName, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
+data "google_project" "test_project" { 
+	}
+
+resource "google_secret_manager_secret" "secret-basic" { 
+	secret_id     = "test-secret"
+	replication { 
+		user_managed { 
+		replicas { 
+			location = "us-central1" 
+		} 
+		} 
+	} 
+}
+resource "google_secret_manager_secret_version" "secret-version-basic" { 
+	secret = google_secret_manager_secret.secret-basic.id 
+	secret_data = "dummypassword" 
+  } 
+   
+resource "google_secret_manager_secret_iam_member" "secret_iam" { 
+	secret_id  = google_secret_manager_secret.secret-basic.id 
+	role       = "roles/secretmanager.admin" 
+	member     = "serviceAccount:${data.google_project.test_project.number}-compute@developer.gserviceaccount.com" 
+	depends_on = [google_secret_manager_secret_version.secret-version-basic] 
+  }
 resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
@@ -10665,7 +10705,7 @@ resource "google_container_cluster" "primary" {
 			certificate_authority_domain_config {
 			  fqdns = [ "my.custom.domain", "10.0.0.127:8888" ]
 			  gcp_secret_manager_certificate_config {
-				secret_uri = "projects/0000000000/secrets/my-cert/versions/1"
+				secret_uri = google_secret_manager_secret_version.secret-version-basic.name
 			}
 		}
     }
