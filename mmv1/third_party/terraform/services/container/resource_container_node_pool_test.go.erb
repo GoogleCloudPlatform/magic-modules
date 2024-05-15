@@ -4740,6 +4740,7 @@ func TestAccContainerNodePool_privateRegistry(t *testing.T) {
 
 	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	nodepool := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(t, 10))
+	secretID := fmt.Sprintf("tf-test-secret-%s", acctest.RandString(t, 10))
 	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
 	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
 
@@ -4749,7 +4750,7 @@ func TestAccContainerNodePool_privateRegistry(t *testing.T) {
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccContainerNodePool_privateRegistryEnabled(cluster, nodepool, networkName, subnetworkName),
+				Config: testAccContainerNodePool_privateRegistryEnabled(secretID, cluster, nodepool, networkName, subnetworkName),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"google_container_node_pool.np",
@@ -4779,13 +4780,13 @@ func TestAccContainerNodePool_privateRegistry(t *testing.T) {
 	})
 }
 
-func testAccContainerNodePool_privateRegistryEnabled(cluster, nodepool, network, subnetwork string) string {
+func testAccContainerNodePool_privateRegistryEnabled(secretID, cluster, nodepool, network, subnetwork string) string {
 	return fmt.Sprintf(`
 data "google_project" "test_project" { 
 	}
 
 resource "google_secret_manager_secret" "secret-basic" { 
-	secret_id     = "test-secret" 
+	secret_id     = "%s" 
 	replication { 
 		user_managed { 
 		replicas { 
@@ -4847,5 +4848,5 @@ resource "google_container_node_pool" "np" {
     }
   }
 }
-`, cluster, network, subnetwork, nodepool)
+`, secretID, cluster, network, subnetwork, nodepool)
 }
