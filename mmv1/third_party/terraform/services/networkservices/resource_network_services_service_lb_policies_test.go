@@ -17,7 +17,7 @@ func TestAccNetworkServicesLBPolicies_update(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckNetworkServicesServiceLBPoliciesDestroyProducer(t),
+		CheckDestroy:             testAccCheckNetworkServicesServiceLbPoliciesDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkServicesLBPolicies_basic(gatewayName),
@@ -54,10 +54,10 @@ resource "google_network_services_service_lb_policies" "foobar" {
 func testAccNetworkServicesLBPolicies_update(gatewayName string) string {
 	return fmt.Sprintf(`
 resource "google_network_services_service_lb_policies" "foobar" {
-  name                   = "%s"
-  location               = "global"
-  description            = "my description"
-  loadBalancingAlgorithm = "SPRAY_TO_REGION"
+  name                     = "%s"
+  location                 = "global"
+  description              = "my description"
+  load_balancing_algorithm = "SPRAY_TO_REGION"
   
   labels = {
     foo = "bar"
