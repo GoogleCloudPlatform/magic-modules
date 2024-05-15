@@ -156,5 +156,7 @@ func ResourceConverters() map[string][]cai.ResourceConverter {
 		"google_vpc_access_connector": {vpcaccess.ResourceConverterVPCAccessConnector()},
 		"google_logging_metric": {logging.ResourceConverterLoggingMetric()},
 		"google_service_account": {resourceConverterServiceAccount()},
+		"google_service_account_key": {resourceConverterServiceAccountKey()},
+		
 	}
 }
