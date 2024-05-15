@@ -1,4 +1,4 @@
-resource "google_network_services_gateway" "<%= ctx[:primary_resource_id] %>" {
+resource "google_network_services_service_lb_policies" "<%= ctx[:primary_resource_id] %>" {
   name        = "<%= ctx[:vars]['resource_name'] %>"
   location    = "global"
   description = "my description"

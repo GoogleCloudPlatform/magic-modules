@@ -1,4 +1,4 @@
-resource "google_network_services_gateway" "{{$.PrimaryResourceId}}" {
+resource "google_network_services_service_lb_policies" "{{$.PrimaryResourceId}}" {
   name        = "{{index $.Vars "resource_name"}}"
   location    = "global"
   description = "my description"
