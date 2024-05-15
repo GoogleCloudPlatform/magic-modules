@@ -1,8 +1,36 @@
-if v, ok := d.GetOk("display_name"); ok {
-    modelobj := make(map[string]interface{})
-	modelobj["displayName"] = v
-    delete(obj, "displayName")
-    obj["model"] = modelobj
+	if v, ok := d.GetOk("display_name"); ok {
+		modelobj := make(map[string]interface{})
+		modelobj["displayName"] = v
+		if val, ok := d.GetOk("artifact_uri"); ok {
+			modelobj["artifactUri"] = val
+		}
+		if val, ok := d.GetOk("description"); ok {
+			modelobj["description"] = val
+		}
+		if val, ok := d.GetOk("labels"); ok {
+			modelobj["labels"] = val
+		}
+		if val, ok := d.GetOk("metadata_schema_uri"); ok {
+			modelobj["metadataSchemaUri"] = val
+		}
+		val := d.Get("version_aliases")
+		var aliases = make([]string, len(val.([]interface{}))+1)
+		aliases[0] = "default"
+		for i, a := range aliases {
+			if i < 1 {
+				continue
+			}
+			aliases[i] = fmt.Sprint(a)
+		}
+		modelobj["versionAliases"] = aliases
+		
+		delete(obj, "displayName")
+		delete(obj, "artifactUri")
+		delete(obj, "description")
+		delete(obj, "labels")
+		delete(obj, "metadataSchemaUri")
+		delete(obj, "versionAliases")
+		obj["model"] = modelobj
 }
 
 return obj, nil

@@ -1,0 +1,11 @@
+resource "google_vertex_ai_models" "<%= ctx[:primary_resource_id] %>" {
+  display_name = "<%= ctx[:vars]['display_name'] %>"
+  description  = "container spec upload model"
+  
+  // required for container_spec custom model
+  artifact_uri = "gs://cloud-ml-tables-data/bank-marketing.csv"
+  model_id = "container_spec_upload_test"
+  metadata_schema_uri = "gs://cloud-ml-tables-data/bank-marketing.yaml" # need to find valid values
+
+  region       = "us-central1"
+}

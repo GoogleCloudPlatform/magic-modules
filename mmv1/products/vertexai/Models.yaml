@@ -58,6 +58,12 @@ examples:
     primary_resource_id: 'model'
     vars:
       name: 'test-model'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'vertex_ai_model_upload_basic'
+    skip_import_test: true
+    primary_resource_id: 'upload_model'
+    vars:
+      display_name: 'test-model-upload'
 parameters:
   - !ruby/object:Api::Type::String
     name: region
@@ -66,63 +72,56 @@ parameters:
     immutable: true
     default_from_api: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    description:
-      The name of the Model. This value may be up to 60 characters, and
-      valid characters are [a-z0-9_]. The first character cannot be a number.
-    output: true
-    # url_param_only: true
-    custom_flatten: templates/terraform/custom_flatten/vertex_ai_name_from_model.go.erb
-  - !ruby/object:Api::Type::String
-    name: 'description'
-    description: Description of the Model.
-    immutable: true
-  - !ruby/object:Api::Type::String
-    name: 'versionId'
-    description: The version ID of the Model.
-    immutable: true
-    output: true
-  - !ruby/object:Api::Type::String
-    name: 'versionCreateTime'
+  ## output only properties ##
+  - !ruby/object:Api::Type::Array
+    name: 'supportedDeploymentResourcesTypes'
     output: true
     description: |
-      The timestamp of when this version was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-  - !ruby/object:Api::Type::String
-    name: 'versionUpdateTime'
+        When this Model is deployed, its prediction resources are described by the prediction_resources field of the Endpoint.deployed_models object.     item_type: !ruby/object:Api::Type::Enum
+    item_type: !ruby/object:Api::Type::Enum
+      name: deploymentResourcesType
+      immutable: true
+      description: |
+        The content of this Model that may be exported.
+      values:
+        - :DEDICATED_RESOURCES
+        - :AUTOMATIC_RESOURCES
+        - :SHARED_RESOURCES
+  - !ruby/object:Api::Type::Array
+    name: 'supportedInputStorageFormats'
     output: true
     description: |
-      The timestamp of when this version was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-  - !ruby/object:Api::Type::String
-    name: 'versionDescription'
+        The formats this Model supports in BatchPredictionJob.input_config. If PredictSchemata.instance_schema_uri exists, the instances should be given as per that schema.
+    item_type: Api::Type::String
+  - !ruby/object:Api::Type::Array
+    name: 'supportedOutputStorageFormats'
     output: true
     description: |
-      The description of this version
+        The formats this Model supports in BatchPredictionJob.input_config. If PredictSchemata.instance_schema_uri exists, the instances should be given as per that schema.
+    item_type: Api::Type::String
   - !ruby/object:Api::Type::String
-    name: 'metadataSchemaUri'
-    immutable: true
-    description: |
-      Points to a YAML file stored on Google Cloud Storage describing additional information about the Model, that is specific to it.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'predictSchemata'
-    description: |
-      The schemata that describe formats of the Model's predictions and explanations as given and returned via PredictionService.Predict and PredictionService.Explain.
-    properties:
-      - !ruby/object:Api::Type::String
-        name: instanceSchemaUri
-        immutable: true
-        description: |
-          Points to a YAML file stored on Google Cloud Storage describing the format of a single instance, which are used in PredictRequest.instances, ExplainRequest.instances and BatchPredictionJob.input_config.
-      - !ruby/object:Api::Type::String
-        name: parametersSchemaUri
-        immutable: true
-        description: |
-          Points to a YAML file stored on Google Cloud Storage describing the parameters of prediction and explanation via PredictRequest.parameters, ExplainRequest.parameters and BatchPredictionJob.model_parameters.
-      - !ruby/object:Api::Type::String
-        name: predictionSchemaUri
-        immutable: true
-        description: |
-          Points to a YAML file stored on Google Cloud Storage describing the format of a single prediction produced by this Model, which are returned via PredictResponse.predictions, ExplainResponse.explanations, and BatchPredictionJob.output_config.
+    name: 'metadataArtifact'
+    description: The resource name of the Artifact that was created in MetadataStore when creating the Model.
+    output: true
+  - !ruby/object:Api::Type::Array
+    name: 'deployedModels'
+    output: true
+    description: The pointers to DeployedModels created from this Model. Note that Model could have been deployed to Endpoints in different Locations.
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'endpoint'
+          immutable: true
+          description: A resource name of an Endpoint.
+        - !ruby/object:Api::Type::String
+          name: 'deployedModelId'
+          immutable: true
+          description:  An ID of a DeployedModel in the above Endpoint.
+  - !ruby/object:Api::Type::String
+    name: 'etag'
+    description: Used to perform consistent read-modify-write updates.
+    output: true
+    ignore_read: true
   - !ruby/object:Api::Type::Array
     name: 'supportedExportFormats'
     output: true
@@ -149,9 +148,115 @@ properties:
     description: |
       The resource name of the TrainingPipeline that uploaded this Model, if any.
   - !ruby/object:Api::Type::String
+    name: 'versionId'
+    description: The version ID of the Model.
+    immutable: true
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'versionCreateTime'
+    output: true
+    description: |
+      The timestamp of when this version was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+  - !ruby/object:Api::Type::String
+    name: 'versionUpdateTime'
+    output: true
+    description: |
+      The timestamp of when this version was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+  - !ruby/object:Api::Type::String
+    name: 'versionDescription'
+    output: true
+    description: |
+      The description of this version
+  - !ruby/object:Api::Type::String
+    name: 'createTime'
+    output: true
+    description: |
+      The timestamp of when the Model was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+  - !ruby/object:Api::Type::String
+    name: 'updateTime'
+    output: true
+    description: |
+      The timestamp of when the MetadataStore was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description:
+      The name of the Model. This value may be up to 60 characters, and
+      valid characters are [a-z0-9_]. The first character cannot be a number.
+    output: true
+    # url_param_only: true
+    custom_flatten: templates/terraform/custom_flatten/vertex_ai_name_from_model.go.erb
+  ## root properties ##
+  - !ruby/object:Api::Type::String
     name: 'pipelineJob'
+    output: true
     description: |
       This field is populated if the model is produced by a pipeline job.
+  - !ruby/object:Api::Type::String
+    name: 'artifactUri'
+    immutable: true
+    description: |
+      The path to the directory containing the Model artifact and any of its supporting files.
+  - !ruby/object:Api::Type::String
+    name: 'displayName'
+    at_least_one_of: 
+      - model
+      - displayName
+    description:
+      The display name of the Model. The name can be up to 128 characters long
+      and can consist of any UTF-8 characters.
+  - !ruby/object:Api::Type::Array
+    name: 'versionAliases'
+    description:
+      user provided version aliases so that a model version can be referenced via alias.
+    item_type: Api::Type::String
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: 'labels'
+    description: The labels with user-defined metadata to organize your Models.
+  - !ruby/object:Api::Type::String
+    name: 'sourceModel'
+    at_least_one_of: 
+      - model
+      - displayName
+    description: |
+      The resource name of the Model to copy. That Model must be in the same Project
+  - !ruby/object:Api::Type::String
+    name: 'modelId'
+    ignore_read: true
+    description: |
+      Copy sourceModel into a new Model with this ID. The ID will become the final component of the model resource name.
+  - !ruby/object:Api::Type::String
+    name: 'parentModel'
+    description: |
+      Specify this field to copy sourceModel into this existing Model as a new version.
+  - !ruby/object:Api::Type::String
+    name: 'description'
+    description: Description of the Model.
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: 'metadataSchemaUri'
+    immutable: true
+    description: |
+      Points to a YAML file stored on Google Cloud Storage describing additional information about the Model, that is specific to it.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'predictSchemata'
+    description: |
+      The schemata that describe formats of the Model's predictions and explanations as given and returned via PredictionService.Predict and PredictionService.Explain.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: instanceSchemaUri
+        immutable: true
+        description: |
+          Points to a YAML file stored on Google Cloud Storage describing the format of a single instance, which are used in PredictRequest.instances, ExplainRequest.instances and BatchPredictionJob.input_config.
+      - !ruby/object:Api::Type::String
+        name: parametersSchemaUri
+        immutable: true
+        description: |
+          Points to a YAML file stored on Google Cloud Storage describing the parameters of prediction and explanation via PredictRequest.parameters, ExplainRequest.parameters and BatchPredictionJob.model_parameters.
+      - !ruby/object:Api::Type::String
+        name: predictionSchemaUri
+        immutable: true
+        description: |
+          Points to a YAML file stored on Google Cloud Storage describing the format of a single prediction produced by this Model, which are returned via PredictResponse.predictions, ExplainResponse.explanations, and BatchPredictionJob.output_config.
   - !ruby/object:Api::Type::NestedObject
     name: 'containerSpec'
     description: |
@@ -266,42 +371,6 @@ properties:
               - !ruby/object:Api::Type::String
                 name: 'command'
                 description: Command is the command line to execute inside the container, the working directory for the command is root ('/') in the container's filesystem.
-  - !ruby/object:Api::Type::String
-    name: 'artifactUri'
-    immutable: true
-    description: |
-      The path to the directory containing the Model artifact and any of its supporting files.
-  - !ruby/object:Api::Type::String
-    name: 'createTime'
-    output: true
-    description: |
-      The timestamp of when the Model was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-  - !ruby/object:Api::Type::String
-    name: 'updateTime'
-    output: true
-    description: |
-      The timestamp of when the MetadataStore was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-  - !ruby/object:Api::Type::String
-    name: 'displayName'
-    at_least_one_of: 
-      - model
-      - displayName
-    description:
-      The display name of the Model. The name can be up to 128 characters long
-      and can consist of any UTF-8 characters.
-  - !ruby/object:Api::Type::String
-    name: 'etag'
-    description: Used to perform consistent read-modify-write updates.
-    output: true
-    ignore_read: true
-  - !ruby/object:Api::Type::Array
-    name: 'versionAliases'
-    description:
-      user provided version aliases so that a model version can be referenced via alias.
-    item_type: Api::Type::String
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
-    description: The labels with user-defined metadata to organize your Models.
   - !ruby/object:Api::Type::NestedObject
     name: 'encryptionSpec'
     immutable: true
@@ -417,65 +486,6 @@ properties:
                 description: |-
                   Configuration options for using brute force search, which simply implements the
                   standard linear search in the database for each query.
-  - !ruby/object:Api::Type::String
-    name: 'sourceModel'
-    at_least_one_of: 
-      - model
-      - displayName
-    description: |
-      The resource name of the Model to copy. That Model must be in the same Project
-  # - !ruby/object:Api::Type::String
-  #   name: 'modelID'
-  #   description: |
-  #     Copy sourceModel into a new Model with this ID. The ID will become the final component of the model resource name.
-  # - !ruby/object:Api::Type::String
-  #   name: 'parentModel'
-  #   description: |
-  #     Specify this field to copy sourceModel into this existing Model as a new version.
-  # - !ruby/object:Api::Type::Array
-  #   name: 'supportedDeploymentResourcesTypes'
-  #   output: true
-  #   description: |
-  #       When this Model is deployed, its prediction resources are described by the prediction_resources field of the Endpoint.deployed_models object.     item_type: !ruby/object:Api::Type::Enum
-  #   item_type: !ruby/object:Api::Type::Enum
-  #     name: deploymentResourcesType
-  #     immutable: true
-  #     description: |
-  #       The content of this Model that may be exported.
-  #     values:
-  #       - :DEDICATED_RESOURCES
-  #       - :AUTOMATIC_RESOURCES
-  #       - :SHARED_RESOURCES
-  # - !ruby/object:Api::Type::Array
-  #   name: 'supportedInputStorageFormats'
-  #   output: true
-  #   description: |
-  #       The formats this Model supports in BatchPredictionJob.input_config. If PredictSchemata.instance_schema_uri exists, the instances should be given as per that schema.
-  #   item_type: Api::Type::String
-  # - !ruby/object:Api::Type::Array
-  #   name: 'supportedOutputStorageFormats'
-  #   output: true
-  #   description: |
-  #       The formats this Model supports in BatchPredictionJob.input_config. If PredictSchemata.instance_schema_uri exists, the instances should be given as per that schema.
-  #   item_type: Api::Type::String
-  # - !ruby/object:Api::Type::String
-  #   name: 'metadataArtifact'
-  #   description: The resource name of the Artifact that was created in MetadataStore when creating the Model.
-  #   output: true
-  # - !ruby/object:Api::Type::Array
-  #   name: 'deployedModels'
-  #   output: true
-  #   description: The pointers to DeployedModels created from this Model. Note that Model could have been deployed to Endpoints in different Locations.
-  #   item_type: !ruby/object:Api::Type::NestedObject
-  #     properties:
-  #       - !ruby/object:Api::Type::String
-  #         name: 'endpoint'
-  #         immutable: true
-  #         description: A resource name of an Endpoint.
-  #       - !ruby/object:Api::Type::String
-  #         name: 'deployedModelId'
-  #         immutable: true
-  #         description:  An ID of a DeployedModel in the above Endpoint.
   # - !ruby/object:Api::Type::NestedObject
   #   name: 'explanationSpec'
   #   description: The pointers to DeployedModels created from this Model. Note that Model could have been deployed to Endpoints in different Locations.

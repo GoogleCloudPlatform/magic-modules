@@ -1,6 +1,10 @@
 resource "google_vertex_ai_models" "<%= ctx[:primary_resource_id] %>" {
   display_name = "<%= ctx[:vars]['display_name'] %>"
-  description  = "sample description"
+  description  = "basic upload model"
+
+  // version_aliases = ["projects/vertex-ai-models-test/locations/us-central1/models/8741822227772604416@v1"]
+  model_id = "id_upload_test"
+
   labels       = {
     "key1" : "value1",
     "key2" : "value2"
