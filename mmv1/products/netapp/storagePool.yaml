@@ -74,6 +74,7 @@ properties:
       - :PREMIUM
       - :EXTREME
       - :STANDARD
+      - :FLEX
     required: true
     immutable: true
   - !ruby/object:Api::Type::String
