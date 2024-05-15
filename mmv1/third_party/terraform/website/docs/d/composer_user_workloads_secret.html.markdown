@@ -1,12 +1,12 @@
 ---
 subcategory: "Cloud Composer"
 description: |-
-  Kubernetes secret in Composer Environment workloads.
+  User workloads Secret used by Airflow tasks that run with Kubernetes Executor or KubernetesPodOperator.
 ---
 
 # google\_composer\_user\_workloads\_secret
 
-Provides access to Kubernetes secret configuration for a given project, region and Composer Environment.
+Provides access to Kubernetes Secret configuration for a given project, region and Composer Environment.
 
 ## Example Usage
 
@@ -45,7 +45,7 @@ The following arguments are supported:
 
 * `name` - (Required) Name of the Secret.
 
-* `environment` - (Required) Environment where the secret is stored.
+* `environment` - (Required) Environment where the Secret is stored.
 
 * `project` - (Optional) The ID of the project in which the resource belongs.
     If it is not provided, the provider project is used.
