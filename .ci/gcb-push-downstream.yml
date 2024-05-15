@@ -30,41 +30,45 @@ steps:
       waitFor: ["checkout"]
 
     # TPG
-    - name: 'gcr.io/graphite-docker-images/bash-plus'
-      entrypoint: '/workspace/.ci/scripts/bash-plus/downstream-waiter/wait_for_commit.sh'
+    - name: 'gcr.io/graphite-docker-images/go-plus'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: tpg-sync
-      waitFor: ["checkout"]
+      waitFor: ["build-magician-binary"]
       args:
+          - wait-for-commit
           - 'tpg-sync'
           - $BRANCH_NAME
           - $COMMIT_SHA
 
     # TPGB
-    - name: 'gcr.io/graphite-docker-images/bash-plus'
-      entrypoint: '/workspace/.ci/scripts/bash-plus/downstream-waiter/wait_for_commit.sh'
+    - name: 'gcr.io/graphite-docker-images/go-plus'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: tpgb-sync
-      waitFor: ["checkout"]
+      waitFor: ["build-magician-binary"]
       args:
+          - wait-for-commit
           - 'tpgb-sync'
           - $BRANCH_NAME
           - $COMMIT_SHA
 
     # TGC
-    - name: 'gcr.io/graphite-docker-images/bash-plus'
-      entrypoint: '/workspace/.ci/scripts/bash-plus/downstream-waiter/wait_for_commit.sh'
+    - name: 'gcr.io/graphite-docker-images/go-plus'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: tgc-sync
-      waitFor: ["checkout"]
+      waitFor: ["build-magician-binary"]
       args:
+          - wait-for-commit
           - 'tgc-sync'
           - $BRANCH_NAME
           - $COMMIT_SHA
 
     # TF-OICS
-    - name: 'gcr.io/graphite-docker-images/bash-plus'
-      entrypoint: '/workspace/.ci/scripts/bash-plus/downstream-waiter/wait_for_commit.sh'
+    - name: 'gcr.io/graphite-docker-images/go-plus'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: tf-oics-sync
-      waitFor: ["checkout"]
+      waitFor: ["build-magician-binary"]
       args:
+          - wait-for-commit
           - 'tf-oics-sync'
           - $BRANCH_NAME
           - $COMMIT_SHA
@@ -74,7 +78,7 @@ steps:
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       secretEnv: ["GITHUB_TOKEN_CLASSIC"]
       id: tpg-push
-      waitFor: ["tpg-sync", "tpgb-sync", "tgc-sync", "tf-oics-sync", "build-magician-binary"]
+      waitFor: ["tpg-sync", "tpgb-sync", "tgc-sync", "tf-oics-sync"]
       env:
         - BASE_BRANCH=$BRANCH_NAME
       args:
@@ -102,7 +106,7 @@ steps:
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       secretEnv: ["GITHUB_TOKEN_CLASSIC"]
       id: tpgb-push
-      waitFor: ["tpg-sync", "tpgb-sync", "tgc-sync", "tf-oics-sync", "build-magician-binary"]
+      waitFor: ["tpg-sync", "tpgb-sync", "tgc-sync", "tf-oics-sync"]
       env:
         - BASE_BRANCH=$BRANCH_NAME
       args:
@@ -158,7 +162,7 @@ steps:
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       secretEnv: ["GITHUB_TOKEN_CLASSIC"]
       id: tf-oics-push
-      waitFor: ["tpg-sync", "tpgb-sync", "tgc-sync", "tf-oics-sync", "build-magician-binary"]
+      waitFor: ["tpg-sync", "tpgb-sync", "tgc-sync", "tf-oics-sync"]
       env:
         - BASE_BRANCH=$BRANCH_NAME
       args:
