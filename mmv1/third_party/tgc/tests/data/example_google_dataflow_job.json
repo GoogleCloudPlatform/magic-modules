@@ -1,0 +1,19 @@
+[
+    {
+        "name": "//dataflow.googleapis.com/v1b3/projects/{{.Provider.project}}/locations/placeholder-2EsS2bm9/jobs",
+        "asset_type": "dataflow.googleapis.com/Job",
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+        "resource": {
+            "version": "v1b3",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/dataflow/v1b3/rest",
+            "discovery_name": "Job",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "name": "my-word-count-job"
+            }
+        },
+        "ancestors": [
+            "organizations/{{.OrgID}}"
+        ]
+    }
+]
