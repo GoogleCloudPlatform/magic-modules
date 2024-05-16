@@ -7,6 +7,5 @@ resource "google_storage_bucket" "bucket" {
 
 resource "google_storage_managed_folder" "managed_folder" {
   bucket = google_storage_bucket.bucket.name
-  name   = "managed-folder-name"
+  name   = "<%= ctx[:vars]['managed_folder_name'] %>"
 }
-

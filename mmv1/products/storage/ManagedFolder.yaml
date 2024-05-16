@@ -15,10 +15,10 @@
 name: 'ManagedFolder'
 kind: 'storage#ManagedFolder'
 base_url: b/{{bucket}}/managedFolders
-self_link: b/{{bucket}}/managedFolders/{{managedFolder}}
+self_link: b/{{bucket}}/managedFolders/{{name}}
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Official Documentation': 'https://cloud.google.com/storage/docs/json_api/v1/managedFolder/insert'
+    'Official Documentation': 'https://cloud.google.com/storage/docs/managed-folders'
   api: 'https://cloud.google.com/storage/docs/json_api/v1/managedFolder'
 description: |
   The ManagedFolder resource represents a managed folder in Cloud Storage.
@@ -27,24 +27,23 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'google_storage_managed_folder'
     primary_resource_id: 'managed_folder'
+    primary_resource_name: 'fmt.Sprintf("tf-test-managed-folder-name%s", context["random_suffix"])'
     vars:
       bucket_name: 'static-content-bucket-03'
-      name: "managed-folder-name"
-id_format: '{{bucket}}/{{managedFolder}}'
-import_format: ['{{bucket}}/{{managedFolder}}']
-mutex: 'storage/buckets/{{bucket}}'
+      managed_folder_name: "managed-folder-name"
 immutable: true
 skip_sweeper: true
 iam_policy: !ruby/object:Api::Resource::IamPolicy
-  parent_resource_attribute: 'managedFolders'
-  method_name_separator: ':'
-  base_url: 'b/{{bucket}}/managedFolders/{{managedFolder}}'
+  parent_resource_attribute: 'managed_folder'
+  method_name_separator: '/'
   set_iam_policy_method: 'iam'
   set_iam_policy_verb: :PUT
   fetch_iam_policy_method: 'iam'
   fetch_iam_policy_verb: :POST
-  wrapped_policy_obj: false
-properties:
+  import_format: [
+    'b/{{bucket}}/managedFolders/{{managed_folder}}'
+  ]
+parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'bucket'
     resource: 'Bucket'
@@ -52,7 +51,7 @@ properties:
     description: 'The name of the bucket.'
     required: true
     url_param_only: true
-    ignore_read: true
+properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     description: 'The name of the managed folder, expressed as a path. For example, example-dir or example-dir/example-dir1.'
