@@ -1,4 +1,4 @@
-name: unit-tests-tools
+name: unit-test-tools
 
 permissions: read-all
 
@@ -6,10 +6,10 @@ on:
   pull_request:
     paths:
       - 'tools/**'
-      - '.github/workflows/unit-tests-tools.yml'
+      - '.github/workflows/unit-test-tools.yml'
 
 jobs:
-  test:
+  unit-test-diff-processor:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
@@ -45,6 +45,16 @@ jobs:
         env:
           SERVICES_DIR: tools/diff-processor/new/google/services
 
+  unit-test-go-changelog:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
+
+      - name: Set up Go
+        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
+        with:
+          go-version: '^1.21.0'
+
       - name: Build go-changelog
         run: |
           cd tools/go-changelog/cmd/changelog-pr-body-check
@@ -54,6 +64,16 @@ jobs:
         run: |
           cd tools/go-changelog
           go test -v ./...
+ 
+ unit-test-issue-labeler:
+  runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
+
+      - name: Set up Go
+        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
+        with:
+          go-version: '^1.21.0'
 
       - name: Build issue-labeler
         run: |
@@ -63,4 +83,24 @@ jobs:
       - name: Test issue-labeler
         run: |
           cd tools/issue-labeler
+          go test -v ./...
+
+ unit-test-template-check:
+  runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
+
+      - name: Set up Go
+        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
+        with:
+          go-version: '^1.21.0'
+
+      - name: Build template-check
+        run: |
+          cd tools/template-check
+          go build
+
+      - name: Test template-check
+        run: |
+          cd tools/template-check
           go test -v ./...
