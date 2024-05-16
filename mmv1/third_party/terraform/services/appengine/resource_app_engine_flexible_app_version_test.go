@@ -93,6 +93,35 @@ resource "google_project_iam_member" "gae_api" {
   member  = "serviceAccount:service-${google_project.my_project.number}@gae-api-prod.google.com.iam.gserviceaccount.com"
 }
 
+resource "google_app_engine_standard_app_version" "foo" {
+  project    = google_project_iam_member.gae_api.project
+  version_id = "v1"
+  service    = "default"
+  runtime    = "python38"
+
+  entrypoint {
+    shell = "gunicorn -b :$PORT main:app"
+  }
+
+  deployment {
+    files {
+      name = "main.py"
+      source_url = "https://storage.googleapis.com/${google_storage_bucket.bucket.name}/${google_storage_bucket_object.main.name}"
+    }
+
+    files {
+      name = "requirements.txt"
+      source_url = "https://storage.googleapis.com/${google_storage_bucket.bucket.name}/${google_storage_bucket_object.requirements.name}"
+    }
+  }
+
+  env_variables = {
+    port = "8000"
+  }
+
+  noop_on_destroy = true
+}
+
 resource "google_app_engine_flexible_app_version" "foo" {
   project    = google_project_iam_member.gae_api.project
   version_id = "v1"
@@ -153,6 +182,8 @@ resource "google_app_engine_flexible_app_version" "foo" {
   }
 
   noop_on_destroy = true
+
+  depends_on = [google_app_engine_standard_app_version.foo]
 }
 
 resource "google_storage_bucket" "bucket" {
@@ -229,6 +260,35 @@ resource "google_project_iam_member" "gae_api" {
   member  = "serviceAccount:service-${google_project.my_project.number}@gae-api-prod.google.com.iam.gserviceaccount.com"
 }
 
+resource "google_app_engine_standard_app_version" "foo" {
+  project    = google_project_iam_member.gae_api.project
+  version_id = "v1"
+  service    = "default"
+  runtime    = "python38"
+
+  entrypoint {
+    shell = "gunicorn -b :$PORT main:app"
+  }
+
+  deployment {
+    files {
+      name = "main.py"
+      source_url = "https://storage.googleapis.com/${google_storage_bucket.bucket.name}/${google_storage_bucket_object.main.name}"
+    }
+
+    files {
+      name = "requirements.txt"
+      source_url = "https://storage.googleapis.com/${google_storage_bucket.bucket.name}/${google_storage_bucket_object.requirements.name}"
+    }
+  }
+
+  env_variables = {
+    port = "8000"
+  }
+
+  noop_on_destroy = true
+}
+
 resource "google_app_engine_flexible_app_version" "foo" {
   project    = google_project_iam_member.gae_api.project
   version_id = "v1"
@@ -289,6 +349,8 @@ resource "google_app_engine_flexible_app_version" "foo" {
   }
 
   delete_service_on_destroy = true
+  
+  depends_on = [google_app_engine_standard_app_version.foo]
 }
 
 resource "google_storage_bucket" "bucket" {
