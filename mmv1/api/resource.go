@@ -932,10 +932,24 @@ func ImportIdFormats(importFormat, identity []string, baseUrl string) []string {
 	// `{{project}}/{{%name}}` as there is no way to differentiate between
 	// project-name/resource-name and resource-name/with-slash
 	if !strings.Contains(idFormats[0], "%") {
-		idFormats = append(idFormats, shortIdFormat, shortIdDefaultProjectFormat, shortIdDefaultFormat)
+		idFormats = append(idFormats, shortIdFormat, shortIdDefaultProjectFormat)
+		if shortIdDefaultProjectFormat != shortIdDefaultFormat {
+			idFormats = append(idFormats, shortIdDefaultFormat)
+		}
 	}
 
-	// TODO Q2:  id_formats.uniq.reject(&:empty?).sort_by { |i| [i.count('/'), i.count('{{')] }.reverse
+	idFormats = google.Reject(slices.Compact(idFormats), func(i string) bool {
+		return i == ""
+	})
+	slices.SortFunc(idFormats, func(a, b string) int {
+		i := strings.Count(a, "/")
+		j := strings.Count(b, "/")
+		if i == j {
+			return strings.Count(a, "{{") - strings.Count(b, "{{")
+		}
+		return i - j
+	})
+	slices.Reverse(idFormats)
 	return idFormats
 }
 
@@ -952,6 +966,8 @@ func (r Resource) IgnoreReadPropertiesToString(e resource.Examples) string {
 	for _, tp := range r.IgnoreReadLabelsFields(r.PropertiesWithExcluded()) {
 		props = append(props, fmt.Sprintf("\"%s\"", google.Underscore(tp)))
 	}
+
+	slices.Sort(props)
 
 	return fmt.Sprintf("[]string{%s}", strings.Join(props, ", "))
 }
@@ -998,6 +1014,84 @@ func (r Resource) IsInIdentity(t Type) bool {
 	return false
 }
 
+func (r Resource) IamParentResourceName() string {
+	var parentResourceName string
+
+	if r.IamPolicy != nil {
+		parentResourceName = r.IamPolicy.ParentResourceAttribute
+	}
+
+	if parentResourceName == "" {
+		parentResourceName = google.Underscore(r.Name)
+	}
+
+	return parentResourceName
+}
+
+func (r Resource) IamResourceUri() string {
+	var resourceUri string
+	if r.IamPolicy != nil {
+		resourceUri = r.IamPolicy.BaseUrl
+	}
+	if resourceUri == "" {
+		resourceUri = r.SelfLinkUri()
+	}
+	return resourceUri
+}
+
+func (r Resource) IamImportUrl() string {
+	r.IamResourceUri()
+	return regexp.MustCompile(`\{\{%?(\w+)\}\}`).ReplaceAllString(r.IamResourceUri(), "%s")
+}
+
+func (r Resource) IamResourceParams() []string {
+	resourceUri := strings.ReplaceAll(r.IamResourceUri(), "{{name}}", fmt.Sprintf("{{%s}}}", r.IamParentResourceName()))
+
+	return r.ExtractIdentifiers(resourceUri)
+}
+
+func (r Resource) IsInIamResourceParams(param string) bool {
+	return slices.Contains(r.IamResourceParams(), param)
+}
+
+func (r Resource) IamStringQualifiers() string {
+	var transformed []string
+	for _, param := range r.IamResourceParams() {
+		transformed = append(transformed, fmt.Sprintf("u.%s", google.Camelize(param, "lower")))
+	}
+	return strings.Join(transformed[:], ", ")
+}
+
+// def extract_identifiers(url)
+func (r Resource) ExtractIdentifiers(url string) []string {
+	matches := regexp.MustCompile(`\{\{%?(\w+)\}\}`).FindAllStringSubmatch(url, -1)
+	var result []string
+	for _, match := range matches {
+		result = append(result, match[1])
+	}
+	return result
+}
+
+func (r Resource) ImportIdFormatsFromIam() string {
+	var importFormat, transformed []string
+
+	if r.IamPolicy != nil {
+		importFormat = r.IamPolicy.ImportFormat
+	}
+	if len(importFormat) == 0 {
+		importFormat = r.ImportFormat
+	}
+
+	importIdFormats := ImportIdFormats(importFormat, r.Identity, r.BaseUrl)
+	for _, s := range importIdFormats {
+		s = google.Format2Regex(s)
+		s = strings.ReplaceAll(s, "<name>", fmt.Sprintf("<%s>", r.IamParentResourceName()))
+		transformed = append(transformed, s)
+	}
+
+	return strings.Join(transformed[:], "\", \"")
+}
+
 func OrderProperties(props []*Type) []*Type {
 	req := google.Select(props, func(p *Type) bool {
 		return p.Required
@@ -1017,4 +1111,8 @@ func OrderProperties(props []*Type) []*Type {
 
 func CompareByName(a, b *Type) int {
 	return strings.Compare(a.Name, b.Name)
+}
+
+func (r Resource) CustomTemplate(templatePath string) string {
+	return resource.ExecuteTemplate(&r, templatePath)
 }
