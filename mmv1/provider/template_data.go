@@ -64,6 +64,12 @@ func wrapMultipleParams(params ...interface{}) (map[string]interface{}, error) {
 	return m, nil
 }
 
+// subtract returns the difference between a and b
+// and used in Go templates
+func subtract(a, b int) int {
+	return a - b
+}
+
 var TemplateFunctions = template.FuncMap{
 	"title":           google.SpaceSeparatedTitle,
 	"replace":         strings.Replace,
@@ -77,6 +83,8 @@ var TemplateFunctions = template.FuncMap{
 	"dict":            wrapMultipleParams,
 	"format2regex":    google.Format2Regex,
 	"orderProperties": api.OrderProperties,
+	"hasPrefix":       strings.HasPrefix,
+	"sub":             subtract,
 }
 
 var GA_VERSION = "ga"
@@ -149,6 +157,17 @@ func (td *TemplateData) GenerateTestFile(filePath string, resource api.Resource)
 	}
 
 	td.GenerateFile(filePath, templatePath, tmplInput, true, templates...)
+}
+
+func (td *TemplateData) GenerateIamPolicyFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/iam_policy.go.tmpl"
+	templates := []string{
+		templatePath,
+	}
+	td.GenerateFile(filePath, templatePath, resource, true, templates...)
+}
+
+func (td *TemplateData) GenerateIamPolicyTestFile(filePath string, resource api.Resource) {
 }
 
 func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, goFormat bool, templates ...string) {
