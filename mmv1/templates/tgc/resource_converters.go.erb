@@ -60,6 +60,7 @@ func ResourceConverters() map[string][]cai.ResourceConverter {
 		"google_dns_managed_zone":                         {dns.ResourceConverterDNSManagedZone()},
 		"google_dns_policy":                               {dns.ResourceConverterDNSPolicy()},
 		"google_kms_key_ring_import_job":                  {kms.ResourceConverterKMSKeyRingImportJob()},
+		"google_gke_hub_feature":                          {gkehub2.ResourceConverterGKEHub2Feature()},
 		"google_storage_bucket":                           {resourceConverterStorageBucket()},
 		"google_sql_database_instance":                    {resourceConverterSQLDatabaseInstance()},
 		"google_sql_database":                             {sql.ResourceConverterSQLDatabase()},
