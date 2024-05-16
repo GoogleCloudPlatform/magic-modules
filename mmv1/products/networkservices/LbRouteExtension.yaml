@@ -19,7 +19,6 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Configure a route extension': 'https://cloud.google.com/service-extensions/docs/configure-callout#configure_a_route_extension'
   api: 'https://cloud.google.com/service-extensions/docs/reference/rest/v1beta1/projects.locations.lbRouteExtensions'
-min_version: beta
 base_url: 'projects/{{project}}/locations/{{location}}/lbRouteExtensions'
 self_link: 'projects/{{project}}/locations/{{location}}/lbRouteExtensions/{{name}}'
 timeouts: !ruby/object:Api::Timeouts
@@ -36,7 +35,7 @@ async: !ruby/object:Api::OpAsync
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'network_services_lb_route_extension_basic'
-    primary_resource_id: 'google_network_services_lb_route_extension'
+    primary_resource_id: 'default'
     vars:
       ilb_network_name: 'l7-ilb-network'
       proxy_subnet_name: 'l7-ilb-proxy-subnet'
@@ -56,7 +55,6 @@ examples:
       callouts_instance_group: 'l7-ilb-callouts-ins-group'
       callouts_hc_name: 'l7-ilb-callouts-hc'
       callouts_backend_name: 'l7-ilb-callouts-backend'
-    min_version: beta
     ignore_read_extra:
       - 'port_range'
       - 'target'
@@ -81,7 +79,7 @@ properties:
     description: |
       A human-readable description of the resource.
   - !ruby/object:Api::Type::KeyValueLabels
-    name: labels
+    name: 'labels'
     description: 'Set of labels associated with the LbRouteExtension resource.'
   - !ruby/object:Api::Type::Array
     name: forwardingRules
@@ -90,6 +88,7 @@ properties:
       At least one forwarding rule is required. There can be only one LbRouteExtension resource per forwarding rule.
     required: true
     item_type: Api::Type::String
+    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
   - !ruby/object:Api::Type::Array
     name: extensionChains
     description: |
@@ -146,12 +145,14 @@ properties:
                 description: |
                   The reference to the service that runs the extension. Must be a reference to a backend service
                 required: true
+                diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
               - !ruby/object:Api::Type::String
                 name: 'timeout'
                 description: |
                   Specifies the timeout for each individual message on the stream. The timeout must be between 10-1000 milliseconds.
                   A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
                 required: true
+                diff_suppress_func: 'tpgresource.DurationDiffSuppress'
               - !ruby/object:Api::Type::Boolean
                 name: 'failOpen'
                 description: |
@@ -172,7 +173,7 @@ properties:
                 min_size: 1
                 description: |
                   A set of events during request or response processing for which this extension is called.
-                  This field is required for the LbTrafficExtension resource. It's not relevant for the LbRouteExtension
+                  This field is required for the LbTrafficExtension resource. Not allowed for the LbRouteExtension
                   resource. Possible values:`EVENT_TYPE_UNSPECIFIED`, `REQUEST_HEADERS`, `REQUEST_BODY`, `RESPONSE_HEADERS`,
                   `RESPONSE_BODY`, `RESPONSE_BODY` and `RESPONSE_BODY`.
                 item_type: Api::Type::String
