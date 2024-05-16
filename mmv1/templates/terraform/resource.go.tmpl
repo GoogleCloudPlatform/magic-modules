@@ -62,7 +62,9 @@ import (
 {{- end}}
 )
 
-{{if $.CustomCode.Constants}} //TODO Q2 function to compile constants custom code lines {{- end}}
+{{if $.CustomCode.Constants -}} 
+    {{- $.CustomTemplate $.CustomCode.Constants -}}
+{{- end}}
 
 func Resource{{ $.ResourceName -}}() *schema.Resource {
     return &schema.Resource{
@@ -108,8 +110,8 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 {{- end }}
 {{if or (and (or $.HasProject $.HasRegion $.HasZone) (not $.SkipDefaultCdiff)) $.CustomDiff }}
         CustomizeDiff: customdiff.All(
-{{ if $.CustomDiff -}}
-{{-          range $cdiff := $.CustomDiff -}}
+{{- if $.CustomDiff -}}
+{{-          range $cdiff := $.CustomDiff }}
         {{ $cdiff }},
 {{- end}}
 {{- end}}
@@ -740,11 +742,11 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
 
     log.Printf("[DEBUG] Updating {{ $.Name }} %q: %#v", d.Id(), obj)
 	headers := make(http.Header)
-{{ if $.UpdateMask -}}
+{{- if $.UpdateMask -}}
 //TODO updatemask
-{{end}}
-{{ if $.CustomCode.PreUpdate -}}
-//TODO Preupdate
+{{- end -}}
+{{- if $.CustomCode.PreUpdate -}}
+    {{- $.CustomTemplate $.CustomCode.PreUpdate -}}
 {{end}}
 {{if $.NestedQuery -}}
 {{if $.NestedQuery.ModifyByPatch -}}
@@ -778,13 +780,13 @@ if len(updateMask) > 0 {
         UserAgent: userAgent,
         Body: obj,
         Timeout: d.Timeout(schema.TimeoutUpdate),
-{{- if $.ErrorRetryPredicates -}}
+		Headers:   headers,
+{{ if $.ErrorRetryPredicates -}}
         ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
 {{- end}}
 {{- if $.ErrorAbortPredicates -}}
         ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
 {{- end}}
-		Headers:   headers,
     })
 
     if err != nil {
@@ -1099,8 +1101,8 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
         return transport_tpg.HandleNotFoundError(err, d, "{{ $.Name }}")
     }
     {{ if $.GetAsync.Allow "Delete" -}}
-        {{ if $.GetAsync.IsA "PollAsync" -}}
-    err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName }}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncExistence }}, "Deleting {{ $.Name }}}", d.Timeout(schema.TimeoutCreate), {{ $.Async.TargetOccurrences }})
+        {{ if $.GetAsync.IsA "PollAsync" }}
+    err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName }}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncAbsence }}, "Deleting {{ $.Name }}", d.Timeout(schema.TimeoutCreate), {{ $.Async.TargetOccurrences }})
     if err != nil {
             {{- if $.Async.SuppressError }}
         log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name }} %q finished updating: %q", d.Id(), err)
@@ -1159,7 +1161,7 @@ func resource{{ $.ResourceName }}Import(d *schema.ResourceData, meta interface{}
             {{- end }}
         {{- end }}
         {{- if $.CustomCode.PostImport }}
-        {{/* TODO PostImport */}}
+            {{- $.CustomTemplate $.CustomCode.PostImport -}}
         {{- end }}
 
     return []*schema.ResourceData{d}, nil
@@ -1174,9 +1176,25 @@ func resource{{ $.ResourceName }}Import(d *schema.ResourceData, meta interface{}
 {{- range $prop := $.SettableProperties }}
     {{- template "expandPropertyMethod" $prop -}}
 {{- end }}
-{{/* TODO custom encoder */}}
-{{/* TODO custom update encoder */}}
+{{- if $.CustomCode.Encoder }}
+func resource{{ $.ResourceName -}}Encoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+    {{- $.CustomTemplate $.CustomCode.Encoder -}}
+}
+{{- end }}
+{{- if $.CustomCode.UpdateEncoder }}
+func resource{{ $.ResourceName -}}UpdateEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+    {{- $.CustomTemplate $.CustomCode.UpdateEncoder -}}
+}
+{{- end }}
+{{- if $.CustomCode.Decoder }}
+func resource{{ $.ResourceName -}}Decoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+    {{- $.CustomTemplate $.CustomCode.Decoder -}}
+}
+{{- end }}
+{{- if $.CustomCode.PostCreateFailure }}
+func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+    {{- $.CustomTemplate $.CustomCode.PostCreateFailure -}}
+}
+{{- end }}
 {{/* TODO nested query */}}
-{{/* TODO custom decoder */}}
-{{/* TODO custom post create failure */}}
 {{/* TODO state upgraders */}}
