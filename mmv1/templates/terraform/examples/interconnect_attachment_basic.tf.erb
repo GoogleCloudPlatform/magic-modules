@@ -4,7 +4,6 @@ resource "google_compute_interconnect_attachment" "<%= ctx[:primary_resource_id]
   type                     = "PARTNER"
   router                   = google_compute_router.foobar.id
   mtu                      = 1500
-  subnet_length            = 29
 }
 
 resource "google_compute_router" "foobar" {
