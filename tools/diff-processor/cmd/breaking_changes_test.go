@@ -2,10 +2,13 @@ package cmd
 
 import (
 	"bytes"
-	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"strings"
+	"encoding/json"
 	"testing"
+
+	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
+	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/rules"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func TestBreakingChangesCmd(t *testing.T) {
@@ -91,15 +94,13 @@ func TestBreakingChangesCmd(t *testing.T) {
 			out := make([]byte, buf.Len())
 			buf.Read(out)
 
-			lines := strings.Split(string(out), "\n")
-			nonemptyLines := []string{}
-			for _, line := range lines {
-				if line != "" {
-					nonemptyLines = append(nonemptyLines, line)
-				}
+			var got []rules.BreakingChange
+			if err = json.Unmarshal(out, &got); err != nil {
+				t.Fatalf("Failed to unmarshall output: %s", err)
 			}
-			if len(nonemptyLines) != tc.expectedViolations {
-				t.Errorf("Unexpected number of violations. Want %d, got %d. Output: %s", tc.expectedViolations, len(nonemptyLines), out)
+
+			if len(got) != tc.expectedViolations {
+				t.Errorf("Unexpected number of violations. Want %d, got %d. Output: %s", tc.expectedViolations, len(got), out)
 			}
 		})
 	}
