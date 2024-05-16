@@ -1033,7 +1033,7 @@ func TestAccComputeRegionInstanceTemplate_spot_maxRunDuration(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 	var expectedMaxRunDuration = compute.Duration{}
-	// Define in testAccComputeRegionInstanceTemplate_spot
+	// Define in testAccComputeRegionInstanceTemplate_spot_maxRunDuration
 	expectedMaxRunDuration.Nanos = 123
 	expectedMaxRunDuration.Seconds = 60
 
