@@ -692,7 +692,7 @@ func schedulingHasChangeRequiringReboot(d *schema.ResourceData) bool {
 	oScheduling := o.([]interface{})[0].(map[string]interface{})
 	newScheduling := n.([]interface{})[0].(map[string]interface{})
 
-	return hasNodeAffinitiesChanged(oScheduling, newScheduling)
+	return hasNodeAffinitiesChanged(oScheduling, newScheduling) || hasMaxRunDurationChanged(oScheduling, newScheduling)
 }
 
 // Terraform doesn't correctly calculate changes on schema.Set, so we do it manually
@@ -733,6 +733,20 @@ func schedulingHasChangeWithoutReboot(d *schema.ResourceData) bool {
 
 	if oScheduling["instance_termination_action"] != newScheduling["instance_termination_action"] {
 			return true
+	}
+
+	return false
+}
+
+func hasMaxRunDurationChanged(oScheduling, newScheduling map[string]interface{}) bool {
+	oldMrd := oScheduling["max_run_duration"].(map[string]interface{})
+	newMrd := newScheduling["max_run_duration"].(map[string]interface{})
+
+	if oldMrd["seconds"] != newMrd["seconds"] {
+		return true
+	}
+	if oldMrd["nanos"] != newMrd["nanos"] {
+		return true
 	}
 
 	return false

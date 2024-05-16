@@ -38,6 +38,7 @@ var (
 <% unless version == 'ga' -%>
 		"scheduling.0.max_run_duration",
 		"scheduling.0.maintenance_interval",
+		"scheduling.0.on_instance_stop_action",
 <% end -%>
 		"scheduling.0.local_ssd_recovery_timeout",
 	}
@@ -728,6 +729,24 @@ Must be from 0 to 315,576,000,000 inclusive.`,
 resolution. Durations less than one second are represented
 with a 0 seconds field and a positive nanos field. Must
 be from 0 to 999,999,999 inclusive.`,
+									},
+								},
+							},
+						},
+						"on_instance_stop_action": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							ForceNew:    true,
+							Description: `Defines the behaviour for instances with the instance_termination_action.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"discard_local_ssd": {
+										Type:     schema.TypeBool,
+										Optional:    true,
+										Description: `If true, the contents of any attached Local SSD disks will be discarded.`,
+										Default:      false,
+										ForceNew:    true,
 									},
 								},
 							},
