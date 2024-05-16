@@ -27,10 +27,11 @@ description: |
   *will not delete the resource from the project.*
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'Auto-provisioning a CryptoKey for CMEK': 'TODO - docs link'
-  api: 'TODO - api docs link'
+    'Cloud KMS with Autokey': 'https://cloud.google.com/kms/docs/kms-with-autokey'
+  api: 'https://cloud.google.com/kms/docs/reference/rest/v1/projects.locations.keyHandles'
 id_format: 'projects/{{project}}/locations/{{location}}/keyHandles/{{name}}'
 import_format: ['projects/{{project}}/locations/{{location}}/keyHandles/{{name}}']
+min_version: beta
 skip_delete: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
