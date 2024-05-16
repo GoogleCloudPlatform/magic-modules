@@ -1,12 +1,12 @@
 [
     {
-        "name": "//bigquery.googleapis.com/projects/tf-deployer-2/datasets/stpostgres",
+        "name": "//bigquery.googleapis.com/projects/{{.Provider.project}}/datasets/stpostgres",
         "asset_type": "bigquery.googleapis.com/Dataset",
         "resource": {
             "version": "v2",
             "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/bigquery/v2/rest",
             "discovery_name": "Dataset",
-            "parent": "//cloudresourcemanager.googleapis.com/projects/tf-deployer-2",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
             "data": {
                 "datasetReference": {
                     "datasetId": "stpostgres"
@@ -20,17 +20,17 @@
         "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"
     },
     {
-        "name": "//cloudsql.googleapis.com/projects/tf-deployer-2/instances/instance-stream-name",
+        "name": "//cloudsql.googleapis.com/projects/{{.Provider.project}}/instances/instance-stream-name",
         "asset_type": "sqladmin.googleapis.com/Instance",
         "resource": {
             "version": "v1beta4",
             "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/sqladmin/v1beta4/rest",
             "discovery_name": "DatabaseInstance",
-            "parent": "//cloudresourcemanager.googleapis.com/projects/tf-deployer-2",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
             "data": {
                 "databaseVersion": "MYSQL_8_0",
                 "name": "instance-stream-name",
-                "project": "tf-deployer-2",
+                "project": "{{.Provider.project}}",
                 "region": "us-central1",
                 "settings": {
                     "activationPolicy": "ALWAYS",
@@ -71,13 +71,13 @@
         "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"
     },
     {
-        "name": "//datastream.googleapis.com/projects/tf-deployer-2/locations/us-central1/connectionProfiles/dest-st-profile",
+        "name": "//datastream.googleapis.com/projects/{{.Provider.project}}/locations/us-central1/connectionProfiles/dest-st-profile",
         "asset_type": "datastream.googleapis.com/ConnectionProfile",
         "resource": {
             "version": "v1",
             "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/datastream/v1/rest",
             "discovery_name": "ConnectionProfile",
-            "parent": "//cloudresourcemanager.googleapis.com/projects/tf-deployer-2",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
             "data": {
                 "bigqueryProfile": {},
                 "displayName": "Connection profile"
@@ -87,13 +87,13 @@
         "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"
     },
     {
-        "name": "//datastream.googleapis.com/projects/tf-deployer-2/locations/us-central1/connectionProfiles/source-profile-st",
+        "name": "//datastream.googleapis.com/projects/{{.Provider.project}}/locations/us-central1/connectionProfiles/source-profile-st",
         "asset_type": "datastream.googleapis.com/ConnectionProfile",
         "resource": {
             "version": "v1",
             "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/datastream/v1/rest",
             "discovery_name": "ConnectionProfile",
-            "parent": "//cloudresourcemanager.googleapis.com/projects/tf-deployer-2",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
             "data": {
                 "bigqueryProfile": null,
                 "displayName": "Source connection profile",
@@ -107,13 +107,13 @@
         "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"
     },
     {
-        "name": "//datastream.googleapis.com/projects/tf-deployer-2/locations/us-central1/streams/postgres-bigquery",
+        "name": "//datastream.googleapis.com/projects/{{.Provider.project}}/locations/us-central1/streams/postgres-bigquery",
         "asset_type": "datastream.googleapis.com/Stream",
         "resource": {
             "version": "v1",
             "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/datastream/v1/rest",
             "discovery_name": "Stream",
-            "parent": "//cloudresourcemanager.googleapis.com/projects/tf-deployer-2",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
             "data": {
                 "backfillAll": {},
                 "backfillNone": null,
@@ -138,13 +138,13 @@
         "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"
     },
     {
-        "name": "//sqladmin.googleapis.com/projects/tf-deployer-2/instances/instance-stream-name/databases/db",
+        "name": "//sqladmin.googleapis.com/projects/{{.Provider.project}}/instances/instance-stream-name/databases/db",
         "asset_type": "sqladmin.googleapis.com/Database",
         "resource": {
             "version": "v1beta4",
             "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/sqladmin/v1beta4/rest",
             "discovery_name": "Database",
-            "parent": "//cloudresourcemanager.googleapis.com/projects/tf-deployer-2",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
             "data": {
                 "instance": "instance-stream-name",
                 "name": "db"
