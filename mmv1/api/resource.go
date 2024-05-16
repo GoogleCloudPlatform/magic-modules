@@ -586,8 +586,8 @@ func buildEffectiveLabelsField(name string, labels *Type) *Type {
 
 // def build_terraform_labels_field(name, parent, labels)
 func buildTerraformLabelsField(name string, parent *Type, labels *Type) *Type {
-	description := fmt.Sprintf("The combination of %s configured directly on the resource "+
-		"and default %s configured on the provider.", name, name)
+	description := fmt.Sprintf("The combination of %s configured directly on the resource\n"+
+		" and default %s configured on the provider.", name, name)
 
 	immutable := false
 	if parent != nil {
@@ -932,7 +932,10 @@ func ImportIdFormats(importFormat, identity []string, baseUrl string) []string {
 	// `{{project}}/{{%name}}` as there is no way to differentiate between
 	// project-name/resource-name and resource-name/with-slash
 	if !strings.Contains(idFormats[0], "%") {
-		idFormats = append(idFormats, shortIdFormat, shortIdDefaultProjectFormat, shortIdDefaultFormat)
+		idFormats = append(idFormats, shortIdFormat, shortIdDefaultProjectFormat)
+		if shortIdDefaultProjectFormat != shortIdDefaultFormat {
+			idFormats = append(idFormats, shortIdDefaultFormat)
+		}
 	}
 
 	// TODO Q2:  id_formats.uniq.reject(&:empty?).sort_by { |i| [i.count('/'), i.count('{{')] }.reverse
@@ -952,6 +955,8 @@ func (r Resource) IgnoreReadPropertiesToString(e resource.Examples) string {
 	for _, tp := range r.IgnoreReadLabelsFields(r.PropertiesWithExcluded()) {
 		props = append(props, fmt.Sprintf("\"%s\"", google.Underscore(tp)))
 	}
+
+	slices.Sort(props)
 
 	return fmt.Sprintf("[]string{%s}", strings.Join(props, ", "))
 }
@@ -1017,4 +1022,8 @@ func OrderProperties(props []*Type) []*Type {
 
 func CompareByName(a, b *Type) int {
 	return strings.Compare(a.Name, b.Name)
+}
+
+func (r Resource) CustomTemplate(templatePath string) string {
+	return resource.ExecuteTemplate(&r, templatePath)
 }

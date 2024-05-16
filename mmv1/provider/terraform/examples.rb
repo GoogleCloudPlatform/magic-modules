@@ -275,7 +275,7 @@ module Provider
           open_in_editor: 'main.tf',
           cloudshell_print: './motd',
           cloudshell_tutorial: './tutorial.md'
-        }
+        }.sort
         URI::HTTPS.build(
           host: 'console.cloud.google.com',
           path: '/cloudshell/open',

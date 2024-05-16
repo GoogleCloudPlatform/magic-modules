@@ -37,6 +37,7 @@ async:
   check_response_func_absence: 'transport_tpg.PollCheckForAbsence'
   suppress_error: false
   target_occurrences: 10
+  actions: ['delete']
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'schema'
