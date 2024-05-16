@@ -18,7 +18,7 @@ Your PR generated some diffs in downstreams - here they are.
 The following breaking change(s) were detected within your pull request.
 
 {{- range .BreakingChanges}}
-- {{.}}{{end}}
+- {{.Message}} - [reference]({{.DocumentationReference}}){{end}}
 
 If you believe this detection to be incorrect please raise the concern with your reviewer.
 If you intend to make this change you will need to wait for a [major release](https://www.terraform.io/plugin/sdkv2/best-practices/versioning#example-major-number-increments) window.

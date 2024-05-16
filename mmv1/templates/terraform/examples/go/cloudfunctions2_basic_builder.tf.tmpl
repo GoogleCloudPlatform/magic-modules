@@ -73,7 +73,3 @@ resource "google_cloudfunctions2_function" "{{$.PrimaryResourceId}}" {
 
   depends_on = [time_sleep.wait_60s]
 }
-
-output "function_uri" { 
-  value = google_cloudfunctions2_function.function.service_config[0].uri
-}

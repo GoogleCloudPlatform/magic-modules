@@ -188,9 +188,15 @@ func TestFormatDiffComment(t *testing.T) {
 		},
 		"breaking changes are displayed": {
 			data: diffCommentData{
-				BreakingChanges: []string{
-					"Breaking change 1",
-					"Breaking change 2",
+				BreakingChanges: []BreakingChange{
+					{
+						Message:                "Breaking change 1",
+						DocumentationReference: "doc1",
+					},
+					{
+						Message:                "Breaking change 2",
+						DocumentationReference: "doc2",
+					},
 				},
 			},
 			expectedStrings: []string{
@@ -198,7 +204,7 @@ func TestFormatDiffComment(t *testing.T) {
 				"## Breaking Change(s) Detected",
 				"major release",
 				"`override-breaking-change`",
-				"- Breaking change 1\n- Breaking change 2\n",
+				"- Breaking change 1 - [reference](doc1)\n- Breaking change 2 - [reference](doc2)\n",
 			},
 			notExpectedStrings: []string{
 				"generated some diffs",
