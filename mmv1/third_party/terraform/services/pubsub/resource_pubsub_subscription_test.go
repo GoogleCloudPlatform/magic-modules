@@ -206,6 +206,40 @@ func TestAccPubsubSubscriptionBigQuery_update(t *testing.T) {
 	})
 }
 
+func TestAccPubsubSubscriptionCloudStorage_update(t *testing.T) {
+	t.Parallel()
+
+	bucket := fmt.Sprintf("tf-test-bucket-%s", acctest.RandString(t, 10))
+	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
+	subscriptionShort := fmt.Sprintf("tf-test-sub-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPubsubSubscriptionCloudStorage_basic(bucket, topic, subscriptionShort, ""),
+			},
+			{
+				ResourceName:      "google_pubsub_subscription.foo",
+				ImportStateId:     subscriptionShort,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccPubsubSubscriptionCloudStorage_basic(bucket, topic, subscriptionShort, "YYYY-MM-DD/hh_mm_ssZ"),
+			},
+			{
+				ResourceName:      "google_pubsub_subscription.foo",
+				ImportStateId:     subscriptionShort,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 // Context: hashicorp/terraform-provider-google#4993
 // This test makes a call to GET an subscription before it is actually created.
 // The PubSub API negative-caches responses so this tests we are
@@ -457,6 +491,37 @@ resource "google_pubsub_subscription" "foo" {
   ]
 }
 `, dataset, table, topic, subscription, useTableSchema)
+}
+
+func testAccPubsubSubscriptionCloudStorage_basic(bucket, topic, subscription, filenameDatetimeFormat string) string {
+	filenameDatetimeString := ""
+	if filenameDatetimeFormat != "" {
+		filenameDatetimeString = fmt.Sprintf(`filename_datetime_format = "%s"`, filenameDatetimeFormat)
+	}
+	return fmt.Sprintf(`
+data "google_project" "project" { }
+resource "google_project_iam_member" "admin" {
+  project = data.google_project.project.project_id
+  role   = "roles/storage.admin"
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+}
+resource "google_storage_bucket" "test" {
+  name = "%s"
+  location = "US"
+}
+resource "google_pubsub_topic" "foo" {
+  name = "%s"
+}
+resource "google_pubsub_subscription" "foo" {
+  name   = "%s"
+  topic  = google_pubsub_topic.foo.id
+
+  cloud_storage_config {
+    bucket = "${google_storage_bucket.test.name}"
+    %s
+  }
+}
+`, bucket, topic, subscription, filenameDatetimeString)
 }
 
 func testAccPubsubSubscription_topicOnly(topic string) string {
