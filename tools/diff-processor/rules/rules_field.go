@@ -14,7 +14,7 @@ type FieldRule struct {
 	definition  string
 	message     string
 	identifier  string
-	isRuleBreak func(old, new *schema.Schema, mc MessageContext) string
+	isRuleBreak func(old, new *schema.Schema, mc MessageContext) *BreakingChange
 }
 
 // FieldRules is a list of FieldRule
@@ -45,10 +45,10 @@ var fieldRule_ChangingType = FieldRule{
 	isRuleBreak: fieldRule_ChangingType_func,
 }
 
-func fieldRule_ChangingType_func(old, new *schema.Schema, mc MessageContext) string {
+func fieldRule_ChangingType_func(old, new *schema.Schema, mc MessageContext) *BreakingChange {
 	// Type change doesn't matter for added / removed fields
 	if old == nil || new == nil {
-		return ""
+		return nil
 	}
 	message := mc.message
 	if old.Type != new.Type {
@@ -69,7 +69,7 @@ func fieldRule_ChangingType_func(old, new *schema.Schema, mc MessageContext) str
 		return populateMessageContext(message, mc)
 	}
 
-	return ""
+	return nil
 }
 
 var fieldRule_BecomingRequired = FieldRule{
@@ -80,17 +80,17 @@ var fieldRule_BecomingRequired = FieldRule{
 	isRuleBreak: fieldRule_BecomingRequired_func,
 }
 
-func fieldRule_BecomingRequired_func(old, new *schema.Schema, mc MessageContext) string {
+func fieldRule_BecomingRequired_func(old, new *schema.Schema, mc MessageContext) *BreakingChange {
 	// Ignore for added / removed fields
 	if old == nil || new == nil {
-		return ""
+		return nil
 	}
 	message := mc.message
 	if !old.Required && new.Required {
 		return populateMessageContext(message, mc)
 	}
 
-	return ""
+	return nil
 }
 
 var fieldRule_BecomingComputedOnly = FieldRule{
@@ -101,22 +101,22 @@ var fieldRule_BecomingComputedOnly = FieldRule{
 	isRuleBreak: fieldRule_BecomingComputedOnly_func,
 }
 
-func fieldRule_BecomingComputedOnly_func(old, new *schema.Schema, mc MessageContext) string {
+func fieldRule_BecomingComputedOnly_func(old, new *schema.Schema, mc MessageContext) *BreakingChange {
 	// ignore for added / removed fields
 	if old == nil || new == nil {
-		return ""
+		return nil
 	}
 	message := mc.message
 	// if the field is computed only already
 	// this rule doesn't apply
 	if old.Computed && !old.Optional {
-		return ""
+		return nil
 	}
 
 	if new.Computed && !new.Optional {
 		return populateMessageContext(message, mc)
 	}
-	return ""
+	return nil
 }
 
 var fieldRule_OptionalComputedToOptional = FieldRule{
@@ -127,16 +127,16 @@ var fieldRule_OptionalComputedToOptional = FieldRule{
 	isRuleBreak: fieldRule_OptionalComputedToOptional_func,
 }
 
-func fieldRule_OptionalComputedToOptional_func(old, new *schema.Schema, mc MessageContext) string {
+func fieldRule_OptionalComputedToOptional_func(old, new *schema.Schema, mc MessageContext) *BreakingChange {
 	// ignore for added / removed fields
 	if old == nil || new == nil {
-		return ""
+		return nil
 	}
 	message := mc.message
 	if (old.Computed && old.Optional) && (new.Optional && !new.Computed) {
 		return populateMessageContext(message, mc)
 	}
-	return ""
+	return nil
 }
 
 var fieldRule_DefaultModification = FieldRule{
@@ -147,10 +147,10 @@ var fieldRule_DefaultModification = FieldRule{
 	isRuleBreak: fieldRule_DefaultModification_func,
 }
 
-func fieldRule_DefaultModification_func(old, new *schema.Schema, mc MessageContext) string {
+func fieldRule_DefaultModification_func(old, new *schema.Schema, mc MessageContext) *BreakingChange {
 	// ignore for added / removed fields
 	if old == nil || new == nil {
-		return ""
+		return nil
 	}
 	message := mc.message
 	if old.Default != new.Default {
@@ -161,7 +161,7 @@ func fieldRule_DefaultModification_func(old, new *schema.Schema, mc MessageConte
 		return populateMessageContext(message, mc)
 	}
 
-	return ""
+	return nil
 }
 
 var fieldRule_GrowingMin = FieldRule{
@@ -172,10 +172,10 @@ var fieldRule_GrowingMin = FieldRule{
 	isRuleBreak: fieldRule_GrowingMin_func,
 }
 
-func fieldRule_GrowingMin_func(old, new *schema.Schema, mc MessageContext) string {
+func fieldRule_GrowingMin_func(old, new *schema.Schema, mc MessageContext) *BreakingChange {
 	// ignore for added / removed fields
 	if old == nil || new == nil {
-		return ""
+		return nil
 	}
 	message := mc.message
 	if old.MinItems < new.MinItems || old.MinItems == 0 && new.MinItems > 0 {
@@ -188,7 +188,7 @@ func fieldRule_GrowingMin_func(old, new *schema.Schema, mc MessageContext) strin
 		message = strings.ReplaceAll(message, "{{newMin}}", newMin)
 		return populateMessageContext(message, mc)
 	}
-	return ""
+	return nil
 }
 
 var fieldRule_ShrinkingMax = FieldRule{
@@ -199,10 +199,10 @@ var fieldRule_ShrinkingMax = FieldRule{
 	isRuleBreak: fieldRule_ShrinkingMax_func,
 }
 
-func fieldRule_ShrinkingMax_func(old, new *schema.Schema, mc MessageContext) string {
+func fieldRule_ShrinkingMax_func(old, new *schema.Schema, mc MessageContext) *BreakingChange {
 	// ignore for added / removed fields
 	if old == nil || new == nil {
-		return ""
+		return nil
 	}
 	message := mc.message
 	if old.MaxItems > new.MaxItems || old.MaxItems == 0 && new.MaxItems > 0 {
@@ -215,7 +215,7 @@ func fieldRule_ShrinkingMax_func(old, new *schema.Schema, mc MessageContext) str
 		message = strings.ReplaceAll(message, "{{newMax}}", newMax)
 		return populateMessageContext(message, mc)
 	}
-	return ""
+	return nil
 }
 
 var fieldRule_RemovingDiffSuppress = FieldRule{
@@ -226,15 +226,15 @@ var fieldRule_RemovingDiffSuppress = FieldRule{
 	isRuleBreak: fieldRule_RemovingDiffSuppress_func,
 }
 
-func fieldRule_RemovingDiffSuppress_func(old, new *schema.Schema, mc MessageContext) string {
+func fieldRule_RemovingDiffSuppress_func(old, new *schema.Schema, mc MessageContext) *BreakingChange {
 	// ignore for added / removed fields
 	if old == nil || new == nil {
-		return ""
+		return nil
 	}
 	if old.DiffSuppressFunc != nil && new.DiffSuppressFunc == nil {
 		return populateMessageContext(mc.message, mc)
 	}
-	return ""
+	return nil
 }
 
 func fieldRulesToRuleArray(frs []FieldRule) []Rule {
@@ -260,22 +260,11 @@ func (fr FieldRule) Identifier() string {
 	return fr.identifier
 }
 
-// Message - a message to to inform the user
-// of a breakage.
-func (fr FieldRule) messages(resource, field string) string {
-	msg := fr.message
-	resource = fmt.Sprintf("`%s`", resource)
-	field = fmt.Sprintf("`%s`", field)
-	msg = strings.ReplaceAll(msg, "{{resource}}", resource)
-	msg = strings.ReplaceAll(msg, "{{field}}", field)
-	return msg + documentationReference(fr.identifier)
-}
-
 // IsRuleBreak - compares the fields and returns
 // a string defining the rule breakage if detected
-func (fr FieldRule) IsRuleBreak(old, new *schema.Schema, mc MessageContext) string {
+func (fr FieldRule) IsRuleBreak(old, new *schema.Schema, mc MessageContext) *BreakingChange {
 	if fr.isRuleBreak == nil {
-		return ""
+		return nil
 	}
 	mc.identifier = fr.identifier
 	mc.message = fr.message
