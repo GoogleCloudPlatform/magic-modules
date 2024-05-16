@@ -65,8 +65,8 @@ jobs:
           cd tools/go-changelog
           go test -v ./...
 
- unit-test-issue-labeler:
-  runs-on: ubuntu-22.04
+  unit-test-issue-labeler:
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
 
@@ -85,8 +85,8 @@ jobs:
           cd tools/issue-labeler
           go test -v ./...
 
- unit-test-template-check:
-  runs-on: ubuntu-22.04
+  unit-test-template-check:
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
 
