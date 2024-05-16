@@ -64,7 +64,7 @@ jobs:
         run: |
           cd tools/go-changelog
           go test -v ./...
- 
+
  unit-test-issue-labeler:
   runs-on: ubuntu-22.04
     steps:
