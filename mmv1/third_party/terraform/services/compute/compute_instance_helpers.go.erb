@@ -738,13 +738,14 @@ func schedulingHasChangeWithoutReboot(d *schema.ResourceData) bool {
 	return false
 }
 
-func hasMaxRunDurationChanged(oScheduling, newScheduling map[string]interface{}) bool {
+func hasMaxRunDurationChanged(oScheduling, nScheduling map[string]interface{}) bool {
 	oMrd := oScheduling["max_run_duration"].([]interface{})
 	nMrd := nScheduling["max_run_duration"].([]interface{})
-	if (len(oMrd) || oMrd[0] == nil) &&  (len(nMrd) || nMrd[0] == nil) {
+	
+	if (len(oMrd) == 0 || oMrd[0] == nil) &&  (len(nMrd) == 0 || nMrd[0] == nil) {
 		return false
 	}
-	if (len(oMrd) || oMrd[0] == nil) ||  (len(nMrd) || nMrd[0] == nil) {
+	if (len(oMrd) == 0 || oMrd[0] == nil) ||  (len(nMrd) == 0 || nMrd[0] == nil) {
 		return true
 	}
 
