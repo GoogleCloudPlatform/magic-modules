@@ -136,7 +136,6 @@ properties:
                 name: 'authority'
                 description: |
                   The :authority header in the gRPC request sent from Envoy to the extension service.
-                required: true
               - !ruby/object:Api::Type::String
                 name: 'service'
                 description: |
@@ -148,7 +147,6 @@ properties:
                 description: |
                   Specifies the timeout for each individual message on the stream. The timeout must be between 10-1000 milliseconds.
                   A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
-                required: true
                 diff_suppress_func: 'tpgresource.DurationDiffSuppress'
               - !ruby/object:Api::Type::Boolean
                 name: 'failOpen'
