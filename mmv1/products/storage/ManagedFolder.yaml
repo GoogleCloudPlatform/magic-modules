@@ -56,3 +56,13 @@ properties:
     name: 'name'
     description: 'The name of the managed folder, expressed as a path. For example, example-dir or example-dir/example-dir1.'
     required: true
+  - !ruby/object:Api::Type::Time
+    name: 'createTime'
+    description: |
+      Time the ManagedFolder was created in UTC.
+    output: true
+  - !ruby/object:Api::Type::Time
+    name: 'updateTime'
+    description: |
+      Time the ManagedFolder was updated in UTC.
+    output: true
