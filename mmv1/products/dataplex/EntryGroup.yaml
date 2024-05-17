@@ -114,7 +114,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataplex_entry_group_basic'
     primary_resource_id: 'test_entry_group_basic'
-    primary_resource_name: "fmt.Sprintf(\"tf_test_my_group%s\",
+    primary_resource_name: "fmt.Sprintf(\"tf-test-entry-group%s\",
       context[\"random_suffix\"\
       ])"
     test_env_vars:
@@ -124,7 +124,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataplex_entry_group_full'
     primary_resource_id: 'test_entry_group_full'
-    primary_resource_name: "fmt.Sprintf(\"tf_test_my_group%s\",
+    primary_resource_name: "fmt.Sprintf(\"tf-test-entry-group%s\",
       context[\"random_suffix\"\
       ])"
     test_env_vars:
