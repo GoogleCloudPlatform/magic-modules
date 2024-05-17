@@ -101,13 +101,6 @@ properties:
     name: 'labels'
     description: |
       User-defined labels for the EntryGroup.
-  - !ruby/object:Api::Type::String
-    name: 'etag'
-    description: |
-      This checksum is computed by the server based on the value of other fields,
-      and may be sent on update and delete requests to ensure the client has
-      an up-to-date value before proceeding.
-    ignore_read: true
   - !ruby/object:Api::Type::Enum
     name: 'transferStatus'
     output: true
