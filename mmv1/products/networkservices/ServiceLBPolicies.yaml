@@ -48,6 +48,11 @@ examples:
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-lb-policy'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'network_services_service_lb_policies_advanced'
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-lb-policy'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'

@@ -12,7 +12,7 @@ import (
 func TestAccNetworkServicesLBPolicies_update(t *testing.T) {
 	t.Parallel()
 
-	gatewayName := fmt.Sprintf("tf-test-gateway-%s", acctest.RandString(t, 10))
+	policyName := fmt.Sprintf("tf-test-lb-policy-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -20,7 +20,7 @@ func TestAccNetworkServicesLBPolicies_update(t *testing.T) {
 		CheckDestroy:             testAccCheckNetworkServicesServiceLbPoliciesDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkServicesLBPolicies_basic(gatewayName),
+				Config: testAccNetworkServicesLBPolicies_basic(policyName),
 			},
 			{
 				ResourceName:            "google_network_services_service_lb_policies.foobar",
@@ -29,7 +29,7 @@ func TestAccNetworkServicesLBPolicies_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			{
-				Config: testAccNetworkServicesLBPolicies_update(gatewayName),
+				Config: testAccNetworkServicesLBPolicies_update(policyName),
 			},
 			{
 				ResourceName:            "google_network_services_service_lb_policies.foobar",
@@ -41,17 +41,17 @@ func TestAccNetworkServicesLBPolicies_update(t *testing.T) {
 	})
 }
 
-func testAccNetworkServicesLBPolicies_basic(gatewayName string) string {
+func testAccNetworkServicesLBPolicies_basic(policyName string) string {
 	return fmt.Sprintf(`
 resource "google_network_services_service_lb_policies" "foobar" {
   name        = "%s"
   location    = "global"
   description = "my description"
 }
-`, gatewayName)
+`, policyName)
 }
 
-func testAccNetworkServicesLBPolicies_update(gatewayName string) string {
+func testAccNetworkServicesLBPolicies_update(policyName string) string {
 	return fmt.Sprintf(`
 resource "google_network_services_service_lb_policies" "foobar" {
   name                     = "%s"
@@ -71,5 +71,5 @@ resource "google_network_services_service_lb_policies" "foobar" {
     foo = "bar"
   }
 }
-`, gatewayName)
+`, policyName)
 }
