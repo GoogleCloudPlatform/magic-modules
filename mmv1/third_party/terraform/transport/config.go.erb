@@ -1238,6 +1238,7 @@ func (c *Config) GetCredentials(clientScopes []string, initialCredentialsOnly bo
 		var content map[string]any
 		if err := json.Unmarshal([]byte(creds.JSON), &content); err != nil {
 			log.Printf("[WARN] error unmarshaling credentials, skipping Universe Domain detection")
+			c.UniverseDomain = ""
 		} else if content["universe_domain"] != nil {
 			c.UniverseDomain = content["universe_domain"].(string)
 		} else {
