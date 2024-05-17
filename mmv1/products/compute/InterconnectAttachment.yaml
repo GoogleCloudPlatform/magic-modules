@@ -47,6 +47,15 @@ examples:
       router_name: 'router-1'
       network_name: 'network-1'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'interconnect_attachment_dedicated'
+    skip_docs: true
+    primary_resource_id: 'on_prem'
+    vars:
+      interconnect_name: 'interconenct-1'
+      interconnect_attachment_name: 'on-prem-attachment'
+      router_name: 'router-1'
+      network_name: 'network-1'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'compute_interconnect_attachment_ipsec_encryption'
     primary_resource_id: 'ipsec-encrypted-interconnect-attachment'
     vars:
@@ -328,3 +337,4 @@ properties:
       gives Google Cloud Support more debugging visibility.
     immutable: true
     default_from_api: true
+    ignore_read: true
