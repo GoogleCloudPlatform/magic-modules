@@ -1136,7 +1136,7 @@ type StaticTokenSource struct {
 // If initialCredentialsOnly is true, don't follow the impersonation settings and return the initial set of creds
 // instead.
 func (c *Config) GetCredentials(clientScopes []string, initialCredentialsOnly bool) (googleoauth.Credentials, error) {
-	// UniverseDomain defaults to the previously set provider-configured value for access tokens
+	// UniverseDomain is assumed to be the previously set provider-configured value for access tokens
 	if c.AccessToken != "" {
 		contents, _, err := verify.PathOrContents(c.AccessToken)
 		if err != nil {

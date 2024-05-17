@@ -278,7 +278,7 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 		})
 	}
 	
-	// Default the universe domain to the configured value if set
+	// Set the universe domain to the configured value, if any
 	if v, ok := d.GetOk("universe_domain"); ok {
 		config.UniverseDomain = v.(string)
 	}
@@ -383,7 +383,7 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 
 	// Verify that universe domains match between credentials and configuration
 	if v, ok := d.GetOk("universe_domain"); ok {
-		if config.UniverseDomain == "" && v.(string) != "googleapis.com" {
+		if config.UniverseDomain == "" && v.(string) != "googleapis.com" { // v can't be "", as it wouldn't pass `ok` above
 			return nil, diag.FromErr(fmt.Errorf("Universe domain mismatch: '%s' supplied directly to Terraform with no matching universe domain in credentials. Credentials with no 'universe_domain' set are assumed to be in the default universe.", v))
 		} else if v.(string) != config.UniverseDomain && !(config.UniverseDomain == "" && v.(string) == "googleapis.com") {
 			return nil, diag.FromErr(fmt.Errorf("Universe domain mismatch: '%s' does not match the universe domain '%s' supplied directly to Terraform. The 'universe_domain' provider configuration must match the universe domain supplied by credentials.", config.UniverseDomain, v))
