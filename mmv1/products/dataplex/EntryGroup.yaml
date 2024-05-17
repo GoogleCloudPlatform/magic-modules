@@ -45,6 +45,7 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 autogen_async: true
 iam_policy: !ruby/object:Api::Resource::IamPolicy
+  skip_import_test: true
   method_name_separator: ':'
   fetch_iam_policy_verb: :GET
   parent_resource_attribute: 'entry_group_id'
