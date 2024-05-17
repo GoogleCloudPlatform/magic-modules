@@ -336,3 +336,4 @@ properties:
       requesting 29 returns an error. Where both 29 and 30 are allowed, 29 is preferred, because it
       gives Google Cloud Support more debugging visibility.
     immutable: true
+    default_from_api: true
