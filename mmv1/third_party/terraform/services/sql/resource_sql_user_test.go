@@ -136,7 +136,6 @@ func TestAccSqlUser_postgres(t *testing.T) {
 }
 
 func TestAccSqlUser_postgresIAM(t *testing.T) {
-	t.Skipf("Skipping test %s due to https://github.com/hashicorp/terraform-provider-google/issues/16704", t.Name())
 	t.Parallel()
 
 	instance := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
@@ -428,9 +427,17 @@ resource "time_sleep" "wait_30_seconds" {
   create_duration = "30s"
 }
 
+data "google_project" "project" {}
+
+resource "google_project_iam_member" "iam_user" {
+	project = data.google_project.project.project_id
+	role    = "roles/cloudsql.instanceUser"
+	member = "user:admin@hashicorptest.com"
+}
+
 resource "google_sql_user" "user" {
-  depends_on = [time_sleep.wait_30_seconds]
-  name     = "admin"
+  depends_on = [time_sleep.wait_30_seconds, google_project_iam_member.iam_user]
+  name     = "admin@hashicorptest.com"
   instance = google_sql_database_instance.instance.name
   type     = "CLOUD_IAM_USER"
 }
