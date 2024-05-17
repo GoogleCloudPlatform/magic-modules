@@ -9,7 +9,7 @@ on:
       - '.github/workflows/unit-test-tools.yml'
 
 jobs:
-  unit-test-diff-processor:
+  diff-processor:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
@@ -45,7 +45,7 @@ jobs:
         env:
           SERVICES_DIR: tools/diff-processor/new/google/services
 
-  unit-test-go-changelog:
+  go-changelog:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
@@ -65,7 +65,7 @@ jobs:
           cd tools/go-changelog
           go test -v ./...
 
-  unit-test-issue-labeler:
+  issue-labeler:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
@@ -85,7 +85,7 @@ jobs:
           cd tools/issue-labeler
           go test -v ./...
 
-  unit-test-template-check:
+  template-check:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
