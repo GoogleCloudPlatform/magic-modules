@@ -53,7 +53,6 @@ parameters:
     name: 'region'
     resource: 'Region'
     imports: 'name'
-    required: false
     default_from_api: true
     immutable: true
     description: |
