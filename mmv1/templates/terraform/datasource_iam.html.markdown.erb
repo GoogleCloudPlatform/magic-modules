@@ -65,7 +65,6 @@ Retrieves the current IAM policy data for <%= object.name.downcase -%>
 See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
 <% end -%>
 
-<% markdown_escaped_name = resource_ns_iam.gsub("_", "\\_") %>
 <% params = extract_identifiers(object.iam_policy.self_link || object.self_link_url) -%>
 <%
 url_properties = object.all_user_properties.select do
