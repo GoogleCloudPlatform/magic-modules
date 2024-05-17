@@ -3632,6 +3632,25 @@ resource "google_sql_database_instance" "instance" {
 }
 `
 
+var testGoogleSqlDatabaseInstance_maintenance_week5 = `
+resource "google_sql_database_instance" "instance" {
+  name                = "tf-test-%d"
+  region              = "us-central1"
+  database_version    = "MYSQL_5_7"
+  deletion_protection = false
+
+  settings {
+    tier = "db-f1-micro"
+
+    maintenance_window {
+      day          = 7
+      hour         = 3
+      update_track = "week5"
+    }
+  }
+}
+`
+
 var testGoogleSqlDatabaseInstance_authNets_step1 = `
 resource "google_sql_database_instance" "instance" {
   name                = "tf-test-%d"
