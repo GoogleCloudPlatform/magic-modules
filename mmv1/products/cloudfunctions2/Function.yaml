@@ -177,7 +177,7 @@ examples:
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
       - 'build_config.0.source.0.storage_source.0.bucket'
-    pull_external: true
+    external_providers: ["random", "time"]
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudfunctions2_secret_env'
     primary_resource_id: 'function'

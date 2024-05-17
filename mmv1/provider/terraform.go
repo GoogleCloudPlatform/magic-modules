@@ -30,6 +30,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 )
 
@@ -69,6 +70,7 @@ func NewTerraform(product *api.Product, versionName string, startTime time.Time)
 	t.Product.SetPropertiesBasedOnVersion(&t.Version)
 	for _, r := range t.Product.Objects {
 		r.SetCompiler(t.providerName())
+		r.ImportPath = t.ImportPathFromVersion(versionName)
 	}
 
 	return &t
@@ -125,17 +127,12 @@ func (t *Terraform) GenerateObject(object api.Resource, outputFolder, productPat
 		}
 	}
 
-	// TODO Q2
-	//	# if iam_policy is not defined or excluded, don't generate it
-	//	return if object.iam_policy.nil? || object.iam_policy.exclude
-	//
-	//	FileUtils.mkpath output_folder
-	//	Dir.chdir output_folder
-	//	Google::LOGGER.debug "Generating #{object.name} IAM policy"
-	//	generate_iam_policy(pwd, data.clone, generate_code, generate_docs)
-	//	Dir.chdir pwd
-	//
-	// end
+	// if iam_policy is not defined or excluded, don't generate it
+	if object.IamPolicy == nil || object.IamPolicy.Exclude {
+		return
+	}
+
+	t.GenerateIamPolicy(object, *templateData, outputFolder, generateCode, generateDocs)
 }
 
 func (t *Terraform) GenerateResource(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
@@ -204,8 +201,35 @@ func (t *Terraform) GenerateOperation(outputFolder string) {
 	//    end
 }
 
+// Generate the IAM policy for this object. This is used to query and test
+// IAM policies separately from the resource itself
+// def generate_iam_policy(pwd, data, generate_code, generate_docs)
+func (t *Terraform) GenerateIamPolicy(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
+	if generateCode && object.IamPolicy != nil && (object.IamPolicy.MinVersion == "" || object.IamPolicy.MinVersion >= t.TargetVersionName) {
+		productName := t.Product.ApiName
+		targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
+		if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+			log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+		}
+		targetFilePath := path.Join(targetFolder, fmt.Sprintf("iam_%s.go", t.FullResourceName(object)))
+		templateData.GenerateIamPolicyFile(targetFilePath, object)
+
+		// Only generate test if testable examples exist.
+		examples := google.Reject(object.Examples, func(e resource.Examples) bool {
+			return e.SkipTest
+		})
+		if len(examples) != 0 {
+			targetFilePath := path.Join(targetFolder, fmt.Sprintf("iam_%s_generated_test.go", t.FullResourceName(object)))
+			templateData.GenerateIamPolicyTestFile(targetFilePath, object)
+		}
+	}
+	// if generateDocs {
+	// generate_iam_documentation(pwd, data)
+	// }
+}
+
 func (t *Terraform) FolderName() string {
-	if t.Version.Name == "ga" {
+	if t.TargetVersionName == "ga" {
 		return "google"
 	}
 	return "google-beta"
@@ -440,7 +464,9 @@ func (t Terraform) CompileFileList(outputFolder string, files map[string]string,
 			source,
 		}
 
-		fileTemplate.GenerateFile(targetFile, source, t, true, templates...)
+		formatFile := filepath.Ext(targetFile) == ".go"
+
+		fileTemplate.GenerateFile(targetFile, source, t, formatFile, templates...)
 		t.replaceImportPath(outputFolder, target)
 		t.addHashicorpCopyRightHeader(outputFolder, target)
 	}
@@ -540,8 +566,9 @@ func (t Terraform) replaceImportPath(outputFolder, target string) {
 
 	data := string(sourceByte)
 
-	betaImportPath := fmt.Sprintf("%s/%s", TERRAFORM_PROVIDER_BETA, RESOURCE_DIRECTORY_BETA)
-	gaImportPath := fmt.Sprintf("%s/%s", TERRAFORM_PROVIDER_GA, RESOURCE_DIRECTORY_GA)
+	gaImportPath := t.ImportPathFromVersion("ga")
+	betaImportPath := t.ImportPathFromVersion("beta")
+
 	if strings.Contains(data, betaImportPath) {
 		log.Fatalf("Importing a package from module %s is not allowed in file %s. Please import a package from module %s.", betaImportPath, filepath.Base(target), gaImportPath)
 	}
@@ -566,15 +593,35 @@ func (t Terraform) replaceImportPath(outputFolder, target string) {
 	sourceByte = bytes.Replace(sourceByte, []byte(TERRAFORM_PROVIDER_GA+"/version"), []byte(tpg+"/version"), -1)
 	sourceByte = bytes.Replace(sourceByte, []byte("module "+TERRAFORM_PROVIDER_GA), []byte("module "+tpg), -1)
 
-	sourceByte, err = format.Source(sourceByte)
-	if err != nil {
-		log.Fatalf("error formatting %s", targetFile)
+	if filepath.Ext(targetFile) == (".go") {
+		formatByte, err := format.Source(sourceByte)
+		if err != nil {
+			log.Printf("error formatting %s: %s", targetFile, err)
+		} else {
+			sourceByte = formatByte
+		}
 	}
 
 	err = os.WriteFile(targetFile, sourceByte, 0644)
 	if err != nil {
 		log.Fatalf("Cannot write file %s to replace import path: %s", target, err)
 	}
+}
+
+func (t Terraform) ImportPathFromVersion(v string) string {
+	var tpg, dir string
+	switch v {
+	case "ga":
+		tpg = TERRAFORM_PROVIDER_GA
+		dir = RESOURCE_DIRECTORY_GA
+	case "beta":
+		tpg = TERRAFORM_PROVIDER_BETA
+		dir = RESOURCE_DIRECTORY_BETA
+	default:
+		tpg = TERRAFORM_PROVIDER_PRIVATE
+		dir = RESOURCE_DIRECTORY_PRIVATE
+	}
+	return fmt.Sprintf("%s/%s", tpg, dir)
 }
 
 // # Gets the list of services dependent on the version ga, beta, and private
@@ -692,14 +739,6 @@ func (t Terraform) replaceImportPath(outputFolder, target string) {
 // def update_url(resource, url_part)
 //
 //	[resource.__product.base_url, update_uri(resource, url_part)].flatten.join
-//
-// end
-//
-// def update_uri(resource, url_part)
-//
-//	return resource.self_link_uri if url_part.nil?
-//
-//	url_part
 //
 // end
 //
@@ -960,107 +999,115 @@ func languageFromFilename(filename string) string {
 	}
 }
 
-//    # Finds the folder name for a given version of the terraform provider
-//    def folder_name(version)
-//      version == 'ga' ? 'google' : "google-#{version}"
-//    end
+// # Finds the folder name for a given version of the terraform provider
+// def folder_name(version)
 //
+//	version == 'ga' ? 'google' : "google-#{version}"
 //
-//    def generate_documentation(pwd, data)
-//      target_folder = data.output_folder
-//      target_folder = File.join(target_folder, 'website', 'docs', 'r')
-//      FileUtils.mkpath target_folder
-//      filepath = File.join(target_folder, "#{full_resource_name(data)}.html.markdown")
-//      data.generate(pwd, 'templates/terraform/resource.html.markdown.erb', filepath, self)
-//    end
+// end
 //
-//    def generate_resource_tests(pwd, data)
-//      return if data.object.examples
-//                    .reject(&:skip_test)
-//                    .reject do |e|
-//                  @api.version_obj_or_closest(data.version) \
-//                < @api.version_obj_or_closest(e.min_version)
-//                end
-//                    .empty?
+// def generate_documentation(pwd, data)
 //
-//      product_name = @api.api_name
-//      target_folder = File.join(folder_name(data.version), 'services', product_name)
-//      FileUtils.mkpath folder_name(data.version)
-//      data.generate(
-//        pwd,
-//        'templates/terraform/examples/base_configs/test_file.go.erb',
-//        "#{target_folder}/resource_#{full_resource_name(data)}_generated_test.go",
-//        self
-//      )
-//    end
+//	target_folder = data.output_folder
+//	target_folder = File.join(target_folder, 'website', 'docs', 'r')
+//	FileUtils.mkpath target_folder
+//	filepath = File.join(target_folder, "#{full_resource_name(data)}.html.markdown")
+//	data.generate(pwd, 'templates/terraform/resource.html.markdown.erb', filepath, self)
 //
-//    def generate_resource_sweepers(pwd, data)
-//      return if data.object.skip_sweeper ||
-//                data.object.custom_code.custom_delete ||
-//                data.object.custom_code.pre_delete ||
-//                data.object.custom_code.post_delete ||
-//                data.object.skip_delete
+// end
 //
-//      product_name = @api.api_name
-//      target_folder = File.join(folder_name(data.version), 'services', product_name)
-//      file_name =
-//        "#{target_folder}/resource_#{full_resource_name(data)}_sweeper.go"
-//      FileUtils.mkpath folder_name(data.version)
-//      data.generate(pwd,
-//                    'templates/terraform/sweeper_file.go.erb',
-//                    file_name,
-//                    self)
-//    end
+// def generate_resource_tests(pwd, data)
 //
-//    # Generate the IAM policy for this object. This is used to query and test
-//    # IAM policies separately from the resource itself
-//    def generate_iam_policy(pwd, data, generate_code, generate_docs)
-//      if generate_code \
-//        && (!data.object.iam_policy.min_version \
-//        || data.object.iam_policy.min_version >= data.version)
-//        product_name = @api.api_name
-//        target_folder = File.join(folder_name(data.version), 'services', product_name)
-//        FileUtils.mkpath target_folder
-//        data.generate(pwd,
-//                      'templates/terraform/iam_policy.go.erb',
-//                      "#{target_folder}/iam_#{full_resource_name(data)}.go",
-//                      self)
+//	return if data.object.examples
+//	              .reject(&:skip_test)
+//	              .reject do |e|
+//	            @api.version_obj_or_closest(data.version) \
+//	          < @api.version_obj_or_closest(e.min_version)
+//	          end
+//	              .empty?
 //
-//        # Only generate test if testable examples exist.
-//        unless data.object.examples.reject(&:skip_test).empty?
-//          data.generate(
-//            pwd,
-//            'templates/terraform/examples/base_configs/iam_test_file.go.erb',
-//            "#{target_folder}/iam_#{full_resource_name(data)}_generated_test.go",
-//            self
-//          )
-//        end
-//      end
+//	product_name = @api.api_name
+//	target_folder = File.join(folder_name(data.version), 'services', product_name)
+//	FileUtils.mkpath folder_name(data.version)
+//	data.generate(
+//	  pwd,
+//	  'templates/terraform/examples/base_configs/test_file.go.erb',
+//	  "#{target_folder}/resource_#{full_resource_name(data)}_generated_test.go",
+//	  self
+//	)
 //
-//      return unless generate_docs
+// end
 //
-//      generate_iam_documentation(pwd, data)
-//    end
+// def generate_resource_sweepers(pwd, data)
 //
-//    def generate_iam_documentation(pwd, data)
-//      target_folder = data.output_folder
-//      resource_doc_folder = File.join(target_folder, 'website', 'docs', 'r')
-//      datasource_doc_folder = File.join(target_folder, 'website', 'docs', 'd')
-//      FileUtils.mkpath resource_doc_folder
-//      filepath =
-//        File.join(resource_doc_folder, "#{full_resource_name(data)}_iam.html.markdown")
+//	return if data.object.skip_sweeper ||
+//	          data.object.custom_code.custom_delete ||
+//	          data.object.custom_code.pre_delete ||
+//	          data.object.custom_code.post_delete ||
+//	          data.object.skip_delete
 //
-//      data.generate(pwd, 'templates/terraform/resource_iam.html.markdown.erb', filepath, self)
-//      FileUtils.mkpath datasource_doc_folder
-//      filepath =
-//        File.join(datasource_doc_folder, "#{full_resource_name(data)}_iam_policy.html.markdown")
+//	product_name = @api.api_name
+//	target_folder = File.join(folder_name(data.version), 'services', product_name)
+//	file_name =
+//	  "#{target_folder}/resource_#{full_resource_name(data)}_sweeper.go"
+//	FileUtils.mkpath folder_name(data.version)
+//	data.generate(pwd,
+//	              'templates/terraform/sweeper_file.go.erb',
+//	              file_name,
+//	              self)
 //
-//      data.generate(pwd, 'templates/terraform/datasource_iam.html.markdown.erb', filepath, self)
-//    end
+// end
 //
-//    def extract_identifiers(url)
-//      url.scan(/\{\{%?(\w+)\}\}/).flatten
-//    end
+// # Generate the IAM policy for this object. This is used to query and test
+// # IAM policies separately from the resource itself
+// def generate_iam_policy(pwd, data, generate_code, generate_docs)
+//
+//	if generate_code \
+//	  && (!data.object.iam_policy.min_version \
+//	  || data.object.iam_policy.min_version >= data.version)
+//	  product_name = @api.api_name
+//	  target_folder = File.join(folder_name(data.version), 'services', product_name)
+//	  FileUtils.mkpath target_folder
+//	  data.generate(pwd,
+//	                'templates/terraform/iam_policy.go.erb',
+//	                "#{target_folder}/iam_#{full_resource_name(data)}.go",
+//	                self)
+//
+//	  # Only generate test if testable examples exist.
+//	  unless data.object.examples.reject(&:skip_test).empty?
+//	    data.generate(
+//	      pwd,
+//	      'templates/terraform/examples/base_configs/iam_test_file.go.erb',
+//	      "#{target_folder}/iam_#{full_resource_name(data)}_generated_test.go",
+//	      self
+//	    )
+//	  end
+//	end
+//
+//	return unless generate_docs
+//
+//	generate_iam_documentation(pwd, data)
+//
+// end
+//
+// def generate_iam_documentation(pwd, data)
+//
+//	target_folder = data.output_folder
+//	resource_doc_folder = File.join(target_folder, 'website', 'docs', 'r')
+//	datasource_doc_folder = File.join(target_folder, 'website', 'docs', 'd')
+//	FileUtils.mkpath resource_doc_folder
+//	filepath =
+//	  File.join(resource_doc_folder, "#{full_resource_name(data)}_iam.html.markdown")
+//
+//	data.generate(pwd, 'templates/terraform/resource_iam.html.markdown.erb', filepath, self)
+//	FileUtils.mkpath datasource_doc_folder
+//	filepath =
+//	  File.join(datasource_doc_folder, "#{full_resource_name(data)}_iam_policy.html.markdown")
+//
+//	data.generate(pwd, 'templates/terraform/datasource_iam.html.markdown.erb', filepath, self)
+//
+// end
+//
 //
 //    # Returns the id format of an object, or self_link_uri if none is explicitly defined
 //    # We prefer the long name of a resource as the id so that users can reference

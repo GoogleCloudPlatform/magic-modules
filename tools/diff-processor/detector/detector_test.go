@@ -38,6 +38,9 @@ func TestGetChangedFieldsFromSchemaDiff(t *testing.T) {
 						"field_seven": {
 							New: &schema.Schema{Computed: true},
 						},
+						"project": {
+							New: &schema.Schema{},
+						},
 					},
 				},
 			},

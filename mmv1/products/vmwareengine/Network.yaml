@@ -49,7 +49,7 @@ examples:
     primary_resource_id: "vmw-engine-network"
   - !ruby/object:Provider::Terraform::Examples
     name: "vmware_engine_network_legacy"
-    pull_external: true
+    external_providers: ["random", "time"]
     primary_resource_id: "vmw-engine-network"
     skip_test: true   # update tests will take care of create and update. Legacy network needs to be created on an isolated project.
     vars:

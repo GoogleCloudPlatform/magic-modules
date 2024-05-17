@@ -76,7 +76,13 @@ func TestAcc<%= resource_name -%>IamBindingGenerated(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 <% else -%>
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		<% if example.pull_external -%>
+		<% if !example.external_providers.nil? && !example.external_providers.empty? -%>
+		ExternalProviders: map[string]resource.ExternalProvider{
+		<% example.external_providers.each do |provider| -%>
+			"<%= provider %>": {},
+		<% end -%>
+		},
+		<% elsif example.pull_external -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"random": {},
 			"time": {},
@@ -123,7 +129,13 @@ func TestAcc<%= resource_name -%>IamMemberGenerated(t *testing.T) {
 <% else -%>
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 <% end -%>
-		<% if example.pull_external -%>
+		<% if !example.external_providers.nil? && !example.external_providers.empty? -%>
+		ExternalProviders: map[string]resource.ExternalProvider{
+		<% example.external_providers.each do |provider| -%>
+			"<%= provider %>": {},
+		<% end -%>
+		},
+		<% elsif example.pull_external -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"random": {},
 			"time": {},
@@ -165,7 +177,13 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated(t *testing.T) {
 <% else -%>
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 <% end -%>
-		<% if example.pull_external -%>
+		<% if !example.external_providers.nil? && !example.external_providers.empty? -%>
+		ExternalProviders: map[string]resource.ExternalProvider{
+		<% example.external_providers.each do |provider| -%>
+			"<%= provider %>": {},
+		<% end -%>
+		},
+		<% elsif example.pull_external -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"random": {},
 			"time": {},
@@ -212,7 +230,13 @@ func TestAcc<%= resource_name -%>IamBindingGenerated_withCondition(t *testing.T)
 <% else -%>
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 <% end -%>
-		<% if example.pull_external -%>
+		<% if !example.external_providers.nil? && !example.external_providers.empty? -%>
+		ExternalProviders: map[string]resource.ExternalProvider{
+		<% example.external_providers.each do |provider| -%>
+			"<%= provider %>": {},
+		<% end -%>
+		},
+		<% elsif example.pull_external -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"random": {},
 			"time": {},
@@ -248,7 +272,13 @@ func TestAcc<%= resource_name -%>IamBindingGenerated_withAndWithoutCondition(t *
 <% else -%>
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 <% end -%>
-		<% if example.pull_external -%>
+		<% if !example.external_providers.nil? && !example.external_providers.empty? -%>
+		ExternalProviders: map[string]resource.ExternalProvider{
+		<% example.external_providers.each do |provider| -%>
+			"<%= provider %>": {},
+		<% end -%>
+		},
+		<% elsif example.pull_external -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"random": {},
 			"time": {},
@@ -294,7 +324,13 @@ func TestAcc<%= resource_name -%>IamMemberGenerated_withCondition(t *testing.T) 
 <% else -%>
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 <% end -%>
-		<% if example.pull_external -%>
+		<% if !example.external_providers.nil? && !example.external_providers.empty? -%>
+		ExternalProviders: map[string]resource.ExternalProvider{
+		<% example.external_providers.each do |provider| -%>
+			"<%= provider %>": {},
+		<% end -%>
+		},
+		<% elsif example.pull_external -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"random": {},
 			"time": {},
@@ -330,7 +366,13 @@ func TestAcc<%= resource_name -%>IamMemberGenerated_withAndWithoutCondition(t *t
 <% else -%>
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 <% end -%>
-		<% if example.pull_external -%>
+		<% if !example.external_providers.nil? && !example.external_providers.empty? -%>
+		ExternalProviders: map[string]resource.ExternalProvider{
+		<% example.external_providers.each do |provider| -%>
+			"<%= provider %>": {},
+		<% end -%>
+		},
+		<% elsif example.pull_external -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"random": {},
 			"time": {},
@@ -392,7 +434,13 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated_withCondition(t *testing.T) 
 <% else -%>
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 <% end -%>
-		<% if example.pull_external -%>
+		<% if !example.external_providers.nil? && !example.external_providers.empty? -%>
+		ExternalProviders: map[string]resource.ExternalProvider{
+		<% example.external_providers.each do |provider| -%>
+			"<%= provider %>": {},
+		<% end -%>
+		},
+		<% elsif example.pull_external -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"random": {},
 			"time": {},

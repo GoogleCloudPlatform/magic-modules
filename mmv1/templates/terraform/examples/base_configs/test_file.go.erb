@@ -33,11 +33,10 @@ tf_resource = object.name.underscore
 terraform_name = object.legacy_name || "google_#{tf_product}_#{tf_resource}"
 -%>
 <%
-# @api.version_obj_or_closest(version) is slightly wrong; we want the _object_ version or the generation version.
-# Ultimately this will not matter though, since the API default should always be less than the object default.
+# Check if the example has a version specified and that version is lower than the compiler's version
 object.examples
   .reject(&:skip_test)
-  .reject { |e| @api.version_obj_or_closest(version) < @api.version_obj_or_closest(e.min_version) }
+  .reject { |e| !e.min_version.nil? && Api::Product::Version::ORDER.index(@target_version_name) < Api::Product::Version::ORDER.index(e.min_version) }
   .each do |example|
 
 	# {Compute}{Address}_{addressBasic}
@@ -48,6 +47,7 @@ object.examples
       .map { |p| p.name.underscore }
       .concat(example.ignore_read_extra)
       .concat(object.ignore_read_labels_fields(object.properties_with_excluded))
+      .sort()
 
     # Use explicit version for the example if given.
     # Otherwise, use object version.
@@ -81,7 +81,13 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 		<% else -%>
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		<% end -%>
-		<% if example.pull_external -%>
+		<% if !example.external_providers.nil? && !example.external_providers.empty? -%>
+		ExternalProviders: map[string]resource.ExternalProvider{
+		<% example.external_providers.each do |provider| -%>
+			"<%= provider %>": {},
+		<% end -%>
+		},
+		<% elsif example.pull_external -%>
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"random": {},
 			"time": {},
