@@ -46,7 +46,6 @@ async: !ruby/object:Api::OpAsync
 autogen_async: true
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ':'
-  exclude: false
   fetch_iam_policy_verb: :GET
   parent_resource_attribute: 'entry_group_id'
   import_format:
