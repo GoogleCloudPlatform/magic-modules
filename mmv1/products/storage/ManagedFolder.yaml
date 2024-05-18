@@ -1,0 +1,68 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'ManagedFolder'
+kind: 'storage#ManagedFolder'
+base_url: b/{{bucket}}/managedFolders
+self_link: b/{{bucket}}/managedFolders/{{name}}
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/storage/docs/managed-folders'
+  api: 'https://cloud.google.com/storage/docs/json_api/v1/managedFolder'
+description: |
+  The ManagedFolder resource represents a managed folder in Cloud Storage.
+  You can apply IAM policies on a managed folder to control access to the resources within the managed folder.
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'google_storage_managed_folder'
+    primary_resource_id: 'managed_folder'
+    primary_resource_name: 'fmt.Sprintf("tf-test-managed-folder-name%s", context["random_suffix"])'
+    vars:
+      bucket_name: 'static-content-bucket-03'
+      managed_folder_name: "managed-folder-name"
+immutable: true
+skip_sweeper: true
+iam_policy: !ruby/object:Api::Resource::IamPolicy
+  parent_resource_attribute: 'managed_folder'
+  method_name_separator: '/'
+  set_iam_policy_method: 'iam'
+  set_iam_policy_verb: :PUT
+  fetch_iam_policy_method: 'iam'
+  fetch_iam_policy_verb: :POST
+  import_format: [
+    'b/{{bucket}}/managedFolders/{{managed_folder}}'
+  ]
+parameters:
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'bucket'
+    resource: 'Bucket'
+    imports: 'name'
+    description: 'The name of the bucket.'
+    required: true
+    url_param_only: true
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description: 'The name of the managed folder, expressed as a path. For example, example-dir or example-dir/example-dir1.'
+    required: true
+  - !ruby/object:Api::Type::Time
+    name: 'createTime'
+    description: |
+      Time the ManagedFolder was created in UTC.
+    output: true
+  - !ruby/object:Api::Type::Time
+    name: 'updateTime'
+    description: |
+      Time the ManagedFolder was updated in UTC.
+    output: true

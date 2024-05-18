@@ -938,7 +938,18 @@ func ImportIdFormats(importFormat, identity []string, baseUrl string) []string {
 		}
 	}
 
-	// TODO Q2:  id_formats.uniq.reject(&:empty?).sort_by { |i| [i.count('/'), i.count('{{')] }.reverse
+	idFormats = google.Reject(slices.Compact(idFormats), func(i string) bool {
+		return i == ""
+	})
+	slices.SortFunc(idFormats, func(a, b string) int {
+		i := strings.Count(a, "/")
+		j := strings.Count(b, "/")
+		if i == j {
+			return strings.Count(a, "{{") - strings.Count(b, "{{")
+		}
+		return i - j
+	})
+	slices.Reverse(idFormats)
 	return idFormats
 }
 
@@ -1003,6 +1014,84 @@ func (r Resource) IsInIdentity(t Type) bool {
 	return false
 }
 
+func (r Resource) IamParentResourceName() string {
+	var parentResourceName string
+
+	if r.IamPolicy != nil {
+		parentResourceName = r.IamPolicy.ParentResourceAttribute
+	}
+
+	if parentResourceName == "" {
+		parentResourceName = google.Underscore(r.Name)
+	}
+
+	return parentResourceName
+}
+
+func (r Resource) IamResourceUri() string {
+	var resourceUri string
+	if r.IamPolicy != nil {
+		resourceUri = r.IamPolicy.BaseUrl
+	}
+	if resourceUri == "" {
+		resourceUri = r.SelfLinkUri()
+	}
+	return resourceUri
+}
+
+func (r Resource) IamImportUrl() string {
+	r.IamResourceUri()
+	return regexp.MustCompile(`\{\{%?(\w+)\}\}`).ReplaceAllString(r.IamResourceUri(), "%s")
+}
+
+func (r Resource) IamResourceParams() []string {
+	resourceUri := strings.ReplaceAll(r.IamResourceUri(), "{{name}}", fmt.Sprintf("{{%s}}}", r.IamParentResourceName()))
+
+	return r.ExtractIdentifiers(resourceUri)
+}
+
+func (r Resource) IsInIamResourceParams(param string) bool {
+	return slices.Contains(r.IamResourceParams(), param)
+}
+
+func (r Resource) IamStringQualifiers() string {
+	var transformed []string
+	for _, param := range r.IamResourceParams() {
+		transformed = append(transformed, fmt.Sprintf("u.%s", google.Camelize(param, "lower")))
+	}
+	return strings.Join(transformed[:], ", ")
+}
+
+// def extract_identifiers(url)
+func (r Resource) ExtractIdentifiers(url string) []string {
+	matches := regexp.MustCompile(`\{\{%?(\w+)\}\}`).FindAllStringSubmatch(url, -1)
+	var result []string
+	for _, match := range matches {
+		result = append(result, match[1])
+	}
+	return result
+}
+
+func (r Resource) ImportIdFormatsFromIam() string {
+	var importFormat, transformed []string
+
+	if r.IamPolicy != nil {
+		importFormat = r.IamPolicy.ImportFormat
+	}
+	if len(importFormat) == 0 {
+		importFormat = r.ImportFormat
+	}
+
+	importIdFormats := ImportIdFormats(importFormat, r.Identity, r.BaseUrl)
+	for _, s := range importIdFormats {
+		s = google.Format2Regex(s)
+		s = strings.ReplaceAll(s, "<name>", fmt.Sprintf("<%s>", r.IamParentResourceName()))
+		transformed = append(transformed, s)
+	}
+
+	return strings.Join(transformed[:], "\", \"")
+}
+
 func OrderProperties(props []*Type) []*Type {
 	req := google.Select(props, func(p *Type) bool {
 		return p.Required
@@ -1022,6 +1111,20 @@ func OrderProperties(props []*Type) []*Type {
 
 func CompareByName(a, b *Type) int {
 	return strings.Compare(a.Name, b.Name)
+}
+
+func (r Resource) GetPropertyUpdateMasksGroups() map[string][]string {
+	maskGroups := map[string][]string{}
+	for _, prop := range r.AllUserProperties() {
+		if (prop.FlattenObject) {
+			prop.GetNestedPropertyUpdateMasksGroups(maskGroups, prop.ApiName)
+		}else if (len(prop.UpdateMaskFields) > 0){
+			maskGroups[google.Underscore(prop.Name)] = prop.UpdateMaskFields
+		}else{
+			maskGroups[google.Underscore(prop.Name)] = []string{prop.ApiName}
+		}
+	}
+	return maskGroups
 }
 
 func (r Resource) CustomTemplate(templatePath string) string {
