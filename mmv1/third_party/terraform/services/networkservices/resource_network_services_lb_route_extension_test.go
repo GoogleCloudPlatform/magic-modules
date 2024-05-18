@@ -420,6 +420,24 @@ resource "google_compute_forwarding_rule" "default" {
   ]
 }
 
+# Additional forwarding rule
+resource "google_compute_forwarding_rule" "additional_forwarding_rule" {
+  name                  = "tf-test-l7-ilb-additional-forwarding-rule%{random_suffix}"
+  region                = "us-west1"
+  ip_protocol           = "TCP"
+  load_balancing_scheme = "INTERNAL_MANAGED"
+  port_range            = "80"
+  target                = google_compute_region_target_http_proxy.default.id
+  network               = google_compute_network.ilb_network.id
+  subnetwork            = google_compute_subnetwork.ilb_subnet.id
+  network_tier          = "PREMIUM"
+
+  depends_on = [
+    google_compute_subnetwork.proxy_subnet,
+	google_compute_forwarding_rule.default
+  ]
+}
+
 # HTTP target proxy
 resource "google_compute_region_target_http_proxy" "default" {
   name     = "tf-test-l7-ilb-target-http-proxy%{random_suffix}"
@@ -579,7 +597,10 @@ resource "google_network_services_lb_route_extension" "default" {
   description           = "my route extension"
   location              = "us-west1"
   load_balancing_scheme = "INTERNAL_MANAGED"
-  forwarding_rules      = [google_compute_forwarding_rule.default.self_link]
+  forwarding_rules      = [
+    google_compute_forwarding_rule.default.self_link,
+    google_compute_forwarding_rule.additional_forwarding_rule.self_link
+  ]
 
   extension_chains {
     name = "chain1"
@@ -618,7 +639,7 @@ resource "google_network_services_lb_route_extension" "default" {
   }
 
   labels = {
-    foo = "bar"
+    bar = "foo"
   }
 }
 

@@ -168,10 +168,12 @@ properties:
                 item_type: Api::Type::String
   - !ruby/object:Api::Type::Enum
     name: 'loadBalancingScheme'
+    required: true
+    immutable: true
     description: |
       All backend services and forwarding rules referenced by this extension must share the same load balancing scheme.
-        For more information, refer to Choosing a load balancer.
+      For more information, refer to [Choosing a load balancer](https://cloud.google.com/load-balancing/docs/backend-service) and
+      [Supported application load balancers](https://cloud.google.com/service-extensions/docs/callouts-overview#supported-lbs).
     values:
-      - :LOAD_BALANCING_SCHEME_UNSPECIFIED
       - :INTERNAL_MANAGED
       - :EXTERNAL_MANAGED
