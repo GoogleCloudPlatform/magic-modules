@@ -27,9 +27,9 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'google_storage_managed_folder'
     primary_resource_id: 'managed_folder'
-    primary_resource_name: 'fmt.Sprintf("tf-test-managed-folder-name%s", context["random_suffix"])'
+    primary_resource_name: 'fmt.Sprintf("tf-test-bucket-name%s", context["random_suffix"]), fmt.Sprintf("tf-test-managed-folder-name%s", context["random_suffix"])'
     vars:
-      bucket_name: 'static-content-bucket-03'
+      bucket_name: 'bucket-name'
       managed_folder_name: "managed-folder-name"
 immutable: true
 skip_sweeper: true
@@ -65,4 +65,9 @@ properties:
     name: 'updateTime'
     description: |
       Time the ManagedFolder was updated in UTC.
+    output: true
+  - !ruby/object:Api::Type::Integer
+    name: 'metageneration'
+    description: |
+      The metadata generation of the managed folder.
     output: true
