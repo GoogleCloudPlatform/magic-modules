@@ -692,6 +692,24 @@ be from 0 to 999,999,999 inclusive.`,
 								},
 							},
 						},
+						"on_instance_stop_action": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							ForceNew:    true,
+							Description: `Defines the behaviour for instances with the instance_termination_action.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"discard_local_ssd": {
+										Type:     schema.TypeBool,
+										Optional:    true,
+										Description: `If true, the contents of any attached Local SSD disks will be discarded.`,
+										Default:      false,
+										ForceNew:    true,
+									},
+								},
+							},
+						},
 						"maintenance_interval" : {
 							Type:        schema.TypeString,
 							Optional:    true,
