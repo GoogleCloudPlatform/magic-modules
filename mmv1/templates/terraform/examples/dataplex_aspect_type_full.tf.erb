@@ -6,7 +6,7 @@ resource "google_dataplex_aspect_type" "<%= ctx[:primary_resource_id] %>" {
   labels = { "tag": "test-tf" }
   display_name = "terraform aspect type"
   description = "aspect type created by Terraform"
-  schema = <<EOF
+  metadata_template = <<EOF
 {
   "name": "tf-test-template",
   "type": "record",
