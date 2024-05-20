@@ -67,11 +67,9 @@ A data source can be used to retrieve policy data in advent you do not need crea
 ~> **Note:** `{{ $.IamTerraformName }}_policy` **cannot** be used in conjunction with `{{ $.IamTerraformName }}_binding` and `{{ $.IamTerraformName }}_member` or they will fight over what your policy should be.
 
 ~> **Note:** `{{ $.IamTerraformName }}_binding` resources **can be** used in conjunction with `{{ $.IamTerraformName }}_member` resources **only if** they do not grant privilege to the same role.
-
 {{ if $.IamPolicy.IamConditionsRequestType }}
 ~> **Note:**  This resource supports IAM Conditions but they have some known limitations which can be found [here](https://cloud.google.com/iam/docs/conditions-overview#limitations). Please review this article if you are having issues with IAM Conditions.
 {{- end }}
-
 {{ if or (eq $.MinVersionObj.Name "beta") (eq $.IamPolicy.MinVersion "beta") }}
 ~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
 See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
@@ -93,14 +91,13 @@ data "google_iam_policy" "admin" {
 }
 
 resource "{{ $.IamTerraformName }}_policy" "policy" {
-{{ if eq $.MinVersionObj.Name "beta" }}
+{{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{- end }}
-{{/* object.iam_policy.example_config_body)) */}}
+{{- $.CustomTemplate $.IamPolicy.ExampleConfigBody false }}
   policy_data = data.google_iam_policy.admin.policy_data
 }
 ```
-
 {{ if $.IamPolicy.IamConditionsRequestType }}
 With IAM Conditions:
 
@@ -124,10 +121,10 @@ data "google_iam_policy" "admin" {
 }
 
 resource "{{ $.IamTerraformName }}_policy" "policy" {
-{{ if eq $.MinVersionObj.Name "beta" }}
+{{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{- end }}
-{{/* object.iam_policy.example_config_body)) */}}
+{{- $.CustomTemplate $.IamPolicy.ExampleConfigBody false }}
   policy_data = data.google_iam_policy.admin.policy_data
 }
 ```
@@ -136,26 +133,25 @@ resource "{{ $.IamTerraformName }}_policy" "policy" {
 
 ```hcl
 resource "{{ $.IamTerraformName }}_binding" "binding" {
-{{ if eq $.MinVersionObj.Name "beta" }}
+{{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
-{{- end }}
-{{/* object.iam_policy.example_config_body)) */}}
+{{- end -}}
+{{- $.CustomTemplate $.IamPolicy.ExampleConfigBody false }}
   role = "{{if $.IamPolicy.AdminIamRole}}{{$.IamPolicy.AdminIamRole }}{{else}}{{$.IamPolicy.AllowedIamRole}}{{end}}"
   members = [
     "user:jane@example.com",
   ]
 }
 ```
-
 {{ if $.IamPolicy.IamConditionsRequestType }}
 With IAM Conditions:
 
 ```hcl
 resource "{{ $.IamTerraformName }}_binding" "binding" {
-{{ if eq $.MinVersionObj.Name "beta" }}
+{{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{- end }}
-{{/* object.iam_policy.example_config_body)) */}}
+{{- $.CustomTemplate $.IamPolicy.ExampleConfigBody false }}
   role = "{{if $.IamPolicy.AdminIamRole}}{{$.IamPolicy.AdminIamRole }}{{else}}{{$.IamPolicy.AllowedIamRole}}{{end}}"
   members = [
     "user:jane@example.com",
@@ -173,24 +169,23 @@ resource "{{ $.IamTerraformName }}_binding" "binding" {
 
 ```hcl
 resource "{{ $.IamTerraformName }}_member" "member" {
-{{ if eq $.MinVersionObj.Name "beta" }}
+{{- if eq $.MinVersionObj.Name "beta" -}}
   provider = google-beta
-{{- end }}
-{{/* object.iam_policy.example_config_body)) */}}
+{{- end -}}
+{{- $.CustomTemplate $.IamPolicy.ExampleConfigBody false }}
   role = "{{if $.IamPolicy.AdminIamRole}}{{$.IamPolicy.AdminIamRole }}{{else}}{{$.IamPolicy.AllowedIamRole}}{{end}}"
   member = "user:jane@example.com"
 }
 ```
-
 {{ if $.IamPolicy.IamConditionsRequestType -}}
 With IAM Conditions:
 
 ```hcl
 resource "{{ $.IamTerraformName }}_member" "member" {
-{{ if eq $.MinVersionObj.Name "beta" }}
+{{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
-{{- end }}
-{{/* object.iam_policy.example_config_body)) */}}
+{{- end -}}
+{{- $.CustomTemplate $.IamPolicy.ExampleConfigBody false }}
   role = "{{if $.IamPolicy.AdminIamRole}}{{$.IamPolicy.AdminIamRole}}{{else}}{{$.IamPolicy.AllowedIamRole}}{{end}}"
   member = "user:jane@example.com"
 
@@ -208,9 +203,9 @@ resource "{{ $.IamTerraformName }}_member" "member" {
 The following arguments are supported:
 
 {{ range $param := $.IamSelfLinkProperties }}
-{{-   if eq $param.Name "name" }}
+{{-   if eq $param.Name "name" -}}
 * `{{if $.IamPolicy.ParentResourceAttribute}}{{$.IamPolicy.ParentResourceAttribute}}{{else}}{{underscore $.Name}}{{end}}` - (Required) Used to find the parent resource to bind the IAM policy to
-{{   else if or (eq (underscore $param.Name) "region") (eq (underscore $param.Name) "zone") }}
+{{-   else if or (eq (underscore $param.Name) "region") (eq (underscore $param.Name) "zone") }}
 * `{{ underscore $param.Name }}` - (Optional) {{ $param.Description }} Used to find the parent resource to bind the IAM policy to. If not specified,
   the value will be parsed from the identifier of the parent resource. If no {{ underscore $param.Name }} is provided in the parent identifier and no
   {{ underscore $param.Name }} is specified, it is taken from the provider configuration.
@@ -218,19 +213,19 @@ The following arguments are supported:
 * `{{ underscore $param.Name }}` - (Required) {{ $param.Description }} Used to find the parent resource to bind the IAM policy to
 {{-  end }}
 {{- end }}
-{{ if $.IamPolicy.BaseUrl }}
-{{   if contains $.IamPolicy.BaseUrl "{{project}}" }}
-{{/* The following new line allow for project to be bullet-formatted properly. */}}
+{{- if $.IamPolicy.BaseUrl }}
+{{-   if contains $.IamPolicy.BaseUrl "{{project}}" }}
+{{- /* The following new line allow for project to be bullet-formatted properly. */}}
 
 * `project` - (Optional) The ID of the project in which the resource belongs.
     If it is not provided, the project will be parsed from the identifier of the parent resource. If no project is provided in the parent identifier and no project is specified, the provider project is used.
 {{-   end }}
-{{ else if contains $.BaseUrl "{{project}}" }}
-{{/* The following new line allow for project to be bullet-formatted properly. */}}
+{{- else if contains $.BaseUrl "{{project}}" }}
+{{- /* The following new line allow for project to be bullet-formatted properly. */}}
 
 * `project` - (Optional) The ID of the project in which the resource belongs.
     If it is not provided, the project will be parsed from the identifier of the parent resource. If no project is provided in the parent identifier and no project is specified, the provider project is used.
-{{ end }}
+{{- end }}
 
 * `member/members` - (Required) Identities that will be granted the privilege in `role`.
   Each entry can have one of the following values:
@@ -251,7 +246,7 @@ The following arguments are supported:
 * `policy_data` - (Required only by `{{ $.IamTerraformName }}_policy`) The policy data generated by
   a `google_iam_policy` data source.
 
-{{ if $.IamPolicy.IamConditionsRequestType }}
+{{ if $.IamPolicy.IamConditionsRequestType -}}
 * `condition` - (Optional) An [IAM Condition](https://cloud.google.com/iam/docs/conditions-overview) for a given binding.
   Structure is documented below.
 
@@ -268,7 +263,7 @@ The `condition` block supports:
 ~> **Warning:** Terraform considers the `role` and condition contents (`title`+`description`+`expression`) as the
   identifier for the binding. This means that if any part of the condition is changed out-of-band, Terraform will
   consider it to be an entirely different resource and will treat it as such.
-{{- end }}
+{{- end -}}
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are
@@ -279,7 +274,6 @@ exported:
 ## Import
 
 For all import syntaxes, the "resource in question" can take any of the following forms:
-
 {{ range $idFormat := $.ImportIdFormatsFromIam }}
 * {{ $idFormat }}
 {{- end }}
@@ -306,7 +300,7 @@ $ terraform import {{ $.IamTerraformName }}_policy.editor {{ $.FirstIamImportIdF
 -> **Custom Roles**: If you're importing a IAM resource with a custom role, make sure to use the
  full name of the custom role, e.g. `[projects/my-project|organizations/my-org]/roles/my-custom-role`.
 
-{{- if contains $.BaseUrl "{{project}}" }}
+{{ if contains $.BaseUrl "{{project}}" -}}
 ## User Project Overrides
 
 This resource supports [User Project Overrides](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#user_project_override).
