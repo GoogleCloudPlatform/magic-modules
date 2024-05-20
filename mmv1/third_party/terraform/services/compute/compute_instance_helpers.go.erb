@@ -738,6 +738,7 @@ func schedulingHasChangeWithoutReboot(d *schema.ResourceData) bool {
 	return false
 }
 
+<% unless version == 'ga' -%>
 func hasMaxRunDurationChanged(oScheduling, nScheduling map[string]interface{}) bool {
 	oMrd := oScheduling["max_run_duration"].([]interface{})
 	nMrd := nScheduling["max_run_duration"].([]interface{})
@@ -761,7 +762,7 @@ func hasMaxRunDurationChanged(oScheduling, nScheduling map[string]interface{}) b
 
 	return false
 }
-
+<% end -%>
 func hasNodeAffinitiesChanged(oScheduling, newScheduling map[string]interface{}) bool {
 	oldNAs := oScheduling["node_affinities"].(*schema.Set).List()
 	newNAs := newScheduling["node_affinities"].(*schema.Set).List()
