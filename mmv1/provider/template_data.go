@@ -168,6 +168,14 @@ func (td *TemplateData) GenerateIamPolicyFile(filePath string, resource api.Reso
 	td.GenerateFile(filePath, templatePath, resource, true, templates...)
 }
 
+func (td *TemplateData) GenerateIamResourceDocumentationFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/resource_iam.html.markdown.tmpl"
+	templates := []string{
+		templatePath,
+	}
+	td.GenerateFile(filePath, templatePath, resource, false, templates...)
+}
+
 func (td *TemplateData) GenerateIamPolicyTestFile(filePath string, resource api.Resource) {
 }
 

@@ -223,9 +223,26 @@ func (t *Terraform) GenerateIamPolicy(object api.Resource, templateData Template
 			templateData.GenerateIamPolicyTestFile(targetFilePath, object)
 		}
 	}
-	// if generateDocs {
-	// generate_iam_documentation(pwd, data)
-	// }
+	if generateDocs {
+		t.GenerateIamDocumentation(object, templateData, outputFolder, generateCode, generateDocs)
+	}
+}
+
+// def generate_iam_documentation(pwd, data)
+func (t *Terraform) GenerateIamDocumentation(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
+	resourceDocFolder := path.Join(outputFolder, "website", "docs", "r")
+	if err := os.MkdirAll(resourceDocFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", resourceDocFolder, err))
+	}
+	targetFilePath := path.Join(resourceDocFolder, fmt.Sprintf("%s_iam.html.markdown", t.FullResourceName(object)))
+	templateData.GenerateIamResourceDocumentationFile(targetFilePath, object)
+
+	datasourceDocFolder := path.Join(outputFolder, "website", "docs", "d")
+	if err := os.MkdirAll(datasourceDocFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", datasourceDocFolder, err))
+	}
+	// targetFilePath = path.Join(datasourceDocFolder, fmt.Sprintf("%s_iam.html.markdown", t.FullResourceName(object)))
+	// templateData.GenerateIamDatasourceDocumentationFile(targetFilePath, object)
 }
 
 func (t *Terraform) FolderName() string {
@@ -1016,28 +1033,6 @@ func languageFromFilename(filename string) string {
 //
 // end
 //
-// def generate_resource_tests(pwd, data)
-//
-//	return if data.object.examples
-//	              .reject(&:skip_test)
-//	              .reject do |e|
-//	            @api.version_obj_or_closest(data.version) \
-//	          < @api.version_obj_or_closest(e.min_version)
-//	          end
-//	              .empty?
-//
-//	product_name = @api.api_name
-//	target_folder = File.join(folder_name(data.version), 'services', product_name)
-//	FileUtils.mkpath folder_name(data.version)
-//	data.generate(
-//	  pwd,
-//	  'templates/terraform/examples/base_configs/test_file.go.erb',
-//	  "#{target_folder}/resource_#{full_resource_name(data)}_generated_test.go",
-//	  self
-//	)
-//
-// end
-//
 // def generate_resource_sweepers(pwd, data)
 //
 //	return if data.object.skip_sweeper ||
@@ -1057,57 +1052,6 @@ func languageFromFilename(filename string) string {
 //	              self)
 //
 // end
-//
-// # Generate the IAM policy for this object. This is used to query and test
-// # IAM policies separately from the resource itself
-// def generate_iam_policy(pwd, data, generate_code, generate_docs)
-//
-//	if generate_code \
-//	  && (!data.object.iam_policy.min_version \
-//	  || data.object.iam_policy.min_version >= data.version)
-//	  product_name = @api.api_name
-//	  target_folder = File.join(folder_name(data.version), 'services', product_name)
-//	  FileUtils.mkpath target_folder
-//	  data.generate(pwd,
-//	                'templates/terraform/iam_policy.go.erb',
-//	                "#{target_folder}/iam_#{full_resource_name(data)}.go",
-//	                self)
-//
-//	  # Only generate test if testable examples exist.
-//	  unless data.object.examples.reject(&:skip_test).empty?
-//	    data.generate(
-//	      pwd,
-//	      'templates/terraform/examples/base_configs/iam_test_file.go.erb',
-//	      "#{target_folder}/iam_#{full_resource_name(data)}_generated_test.go",
-//	      self
-//	    )
-//	  end
-//	end
-//
-//	return unless generate_docs
-//
-//	generate_iam_documentation(pwd, data)
-//
-// end
-//
-// def generate_iam_documentation(pwd, data)
-//
-//	target_folder = data.output_folder
-//	resource_doc_folder = File.join(target_folder, 'website', 'docs', 'r')
-//	datasource_doc_folder = File.join(target_folder, 'website', 'docs', 'd')
-//	FileUtils.mkpath resource_doc_folder
-//	filepath =
-//	  File.join(resource_doc_folder, "#{full_resource_name(data)}_iam.html.markdown")
-//
-//	data.generate(pwd, 'templates/terraform/resource_iam.html.markdown.erb', filepath, self)
-//	FileUtils.mkpath datasource_doc_folder
-//	filepath =
-//	  File.join(datasource_doc_folder, "#{full_resource_name(data)}_iam_policy.html.markdown")
-//
-//	data.generate(pwd, 'templates/terraform/datasource_iam.html.markdown.erb', filepath, self)
-//
-// end
-//
 //
 //    # Returns the id format of an object, or self_link_uri if none is explicitly defined
 //    # We prefer the long name of a resource as the id so that users can reference
