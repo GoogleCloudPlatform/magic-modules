@@ -2383,7 +2383,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "%s"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
     ip_configuration {
       ipv4_enabled = true
       require_ssl = %t
@@ -2401,7 +2401,7 @@ resource "google_sql_database_instance" "mysql_pvp_instance_name" {
   database_version = "MYSQL_8_0"
   root_password = "abcABC123!"
   settings {
-    tier              = "db-f1-micro"
+    tier              = "db-g1-small"
     password_validation_policy {
       min_length  = 6
       complexity  =  "COMPLEXITY_DEFAULT"
@@ -2421,7 +2421,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
   }
 }
 `
@@ -2433,7 +2433,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
   }
 }
 `
@@ -2445,7 +2445,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_8_0"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
   }
 }
 `
@@ -2962,7 +2962,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_8_0"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
 	backup_configuration {
 		enabled = true
 		binary_log_enabled = true
@@ -2989,7 +2989,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_8_0"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
     ip_configuration {
 		psc_config {
 			psc_enabled = true
@@ -3022,7 +3022,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_8_0"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
     ip_configuration {
 		psc_config {
 			psc_enabled = true
@@ -3055,7 +3055,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_8_0"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
     ip_configuration {
 		psc_config {
 			psc_enabled = true
@@ -3089,7 +3089,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_8_0"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
     ip_configuration {
 		psc_config {
 			psc_enabled = true
@@ -3160,7 +3160,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
     ip_configuration {
       ipv4_enabled       = "false"
       private_network    = data.google_compute_network.servicenet.self_link
@@ -3183,7 +3183,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
     ip_configuration {
       ipv4_enabled       = "false"
       private_network    = data.google_compute_network.servicenet.self_link
@@ -3206,7 +3206,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
     ip_configuration {
       ipv4_enabled       = "false"
       private_network    = data.google_compute_network.servicenet.self_link
@@ -3224,7 +3224,7 @@ resource "google_sql_database_instance" "replica1" {
   database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
     ip_configuration {
       ipv4_enabled       = "false"
       private_network    = data.google_compute_network.servicenet.self_link
@@ -3258,7 +3258,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
     ip_configuration {
       ipv4_enabled       = "false"
       private_network    = data.google_compute_network.servicenet.self_link
@@ -3298,7 +3298,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
     ip_configuration {
       ipv4_enabled       = "false"
       private_network    = data.google_compute_network.servicenet.self_link
@@ -3323,7 +3323,7 @@ resource "google_sql_database_instance" "clone1" {
   }
 
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
     backup_configuration {
       enabled = false
     }
@@ -3339,7 +3339,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
-    tier                   = "db-f1-micro"
+    tier                   = "db-g1-small"
     location_preference {
       zone = "us-central1-f"
     }
@@ -3370,7 +3370,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
-    tier                   = "db-f1-micro"
+    tier                   = "db-g1-small"
     availability_type      = "REGIONAL"
     location_preference {
       zone           = "us-central1-f"
@@ -3405,7 +3405,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_5_7"
   deletion_protection = %s
   settings {
-    tier                   = "db-f1-micro"
+    tier                   = "db-g1-small"
     location_preference {
       zone = "us-central1-f"
 	}
@@ -3437,7 +3437,7 @@ resource "google_sql_database_instance" "instance" {
   deletion_protection = false
   maintenance_version = "MYSQL_5_7_37.R20210508.01_03"
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
   }
 }
 `
@@ -3450,7 +3450,7 @@ resource "google_sql_database_instance" "instance" {
   deletion_protection         = false
   settings {
 	deletion_protection_enabled = %s
-    tier                        = "db-f1-micro"
+    tier                        = "db-g1-small"
   }
 }
 `
@@ -3466,7 +3466,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
     ip_configuration {
       ipv4_enabled    = "false"
       private_network = google_compute_network.servicenet.self_link
@@ -3553,7 +3553,7 @@ resource "google_sql_database_instance" "instance_master" {
   deletion_protection = false
 
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
 
     backup_configuration {
       enabled            = true
@@ -3571,7 +3571,7 @@ resource "google_sql_database_instance" "instance_slave" {
   master_instance_name = google_sql_database_instance.instance_master.name
 
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
   }
 }
 `
@@ -3584,7 +3584,7 @@ resource "google_sql_database_instance" "instance" {
   deletion_protection = false
 
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
 
     availability_type = "REGIONAL"
 
@@ -3604,7 +3604,7 @@ resource "google_sql_database_instance" "instance" {
   deletion_protection = false
 
   settings {
-    tier                  = "db-f1-micro"
+    tier                  = "db-g1-small"
     disk_autoresize       = true
     disk_autoresize_limit = 50
     disk_size             = 15
@@ -3621,7 +3621,7 @@ resource "google_sql_database_instance" "instance" {
   deletion_protection = false
 
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
 
     maintenance_window {
       day          = 7
@@ -3639,7 +3639,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
-    tier                   = "db-f1-micro"
+    tier                   = "db-g1-small"
 
     ip_configuration {
       authorized_networks {
@@ -3659,7 +3659,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
-    tier                   = "db-f1-micro"
+    tier                   = "db-g1-small"
 
     ip_configuration {
       ipv4_enabled = "true"
@@ -3675,7 +3675,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
-    tier                   = "db-f1-micro"
+    tier                   = "db-g1-small"
   }
 }
 
@@ -3699,7 +3699,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
     user_labels = {
       track    = "production"
       location = "western-division"
@@ -3714,7 +3714,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
     user_labels = {
       track = "production"
     }
@@ -3730,7 +3730,7 @@ resource "google_sql_database_instance" "instance" {
   deletion_protection = false
 
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
 
     insights_config {
       query_insights_enabled  = true
@@ -3923,7 +3923,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_8_0"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
     backup_configuration {
       enabled                        = true
       start_time                     = "00:00"
@@ -3946,7 +3946,7 @@ resource "google_sql_database_instance" "instance" {
   region           = "us-central1"
 
   settings {
-	tier = "db-f1-micro"
+	tier = "db-g1-small"
 	backup_configuration {
 		enabled            = "false"
 	}
@@ -3965,7 +3965,7 @@ resource "google_sql_database_instance" "instance" {
   region           = "us-central1"
 
   settings {
-	tier = "db-f1-micro"
+	tier = "db-g1-small"
 	backup_configuration {
 		enabled            = "false"
 	}
@@ -4026,7 +4026,7 @@ resource "google_sql_database_instance" "instance" {
   region           = "us-central1"
 
   settings {
-	tier = "db-f1-micro"
+	tier = "db-g1-small"
 	backup_configuration {
 		enabled            = false
 	}
@@ -4159,7 +4159,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
 
     database_flags {
       name  = "character_set_server"
@@ -4181,7 +4181,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "MYSQL_5_7"
   deletion_protection = false
   settings {
-    tier = "db-f1-micro"
+    tier = "db-g1-small"
 
     database_flags {
       name  = "auto_increment_increment"
@@ -4207,7 +4207,7 @@ resource "google_sql_database_instance" "master" {
     disk_autoresize   = true
     disk_size         = 10
     disk_type         = "PD_SSD"
-    tier              = "db-f1-micro"
+    tier              = "db-g1-small"
 
     activation_policy = "ALWAYS"
     pricing_plan      = "PER_USE"
@@ -4238,7 +4238,7 @@ resource "google_sql_database_instance" "replica" {
     failover_target = false
   }
   settings {
-    tier              = "db-f1-micro"
+    tier              = "db-g1-small"
     availability_type = "ZONAL"
     pricing_plan      = "PER_USE"
     disk_autoresize   = true
@@ -4278,7 +4278,7 @@ resource "google_sql_database_instance" "master" {
     disk_autoresize   = true
     disk_size         = 10
     disk_type         = "PD_SSD"
-    tier              = "db-f1-micro"
+    tier              = "db-g1-small"
 
     activation_policy = "ALWAYS"
     pricing_plan      = "PER_USE"
@@ -4309,7 +4309,7 @@ resource "google_sql_database_instance" "replica" {
     failover_target = false
   }
   settings {
-    tier              = "db-f1-micro"
+    tier              = "db-g1-small"
     availability_type = "ZONAL"
     pricing_plan      = "PER_USE"
     disk_autoresize   = true
@@ -4359,7 +4359,7 @@ resource "google_sql_database_instance" "instance" {
   database_version    = "%s"
   deletion_protection = %t
   settings {
-    tier              = "db-f1-micro"
+    tier              = "db-g1-small"
     activation_policy = "%s"
   }
 }
