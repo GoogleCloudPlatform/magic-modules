@@ -563,8 +563,8 @@ var fieldRule_ShrinkingMaxTestCases = []fieldTestCase{
 func (tc *fieldTestCase) check(rule FieldRule, t *testing.T) {
 	breakage := rule.isRuleBreak(tc.oldField, tc.newField, MessageContext{})
 
-	violation := breakage != ""
-	if strings.Contains(breakage, "{{") {
+	violation := breakage != nil
+	if breakage != nil && strings.Contains(breakage.Message, "{{") {
 		t.Errorf("Test `%s` failed: replacements for `{{<val>}}` not successful ", tc.name)
 	}
 	if tc.expectedViolation != violation {
@@ -587,7 +587,7 @@ func TestBreakingMessage(t *testing.T) {
 		},
 	)
 
-	if !strings.Contains(breakageMessage, "Field `b` transitioned from optional+computed to optional `a`") {
+	if !strings.Contains(breakageMessage.Message, "Field `b` transitioned from optional+computed to optional `a`") {
 		t.Errorf("Test `%s` failed: replacements for `{{<val>}}` not successful ", "TestBreakingMessage")
 	}
 
