@@ -8078,6 +8078,7 @@ resource "google_compute_instance" "foobar" {
 `, instance)
 }
 
+<% unless version == 'ga' -%>
 func testAccComputeInstance_standardVM_maxRunDuration(instance string, instanceTerminationAction string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -8104,12 +8105,10 @@ resource "google_compute_instance" "foobar" {
     provisioning_model = "STANDARD"
     automatic_restart = false
     instance_termination_action = "%s"
-<% unless version == 'ga' -%>
     max_run_duration {
         nanos = 123
         seconds = 60
     }
-<% end -%>
   }
 }
 `, instance, instanceTerminationAction)
@@ -8141,12 +8140,10 @@ resource "google_compute_instance" "foobar" {
     provisioning_model = "STANDARD"
     automatic_restart = false
     instance_termination_action = "%s"
-<% unless version == 'ga' -%>
     max_run_duration {
         nanos = 456
         seconds = 60
     }
-<% end -%>
   }
 }
 `, instance, instanceTerminationAction)
@@ -8181,7 +8178,6 @@ resource "google_compute_instance" "foobar" {
     provisioning_model = "STANDARD"
     automatic_restart = false
     instance_termination_action = "%s"
-<% unless version == 'ga' -%>
     max_run_duration {
         nanos = 123
         seconds = 180
@@ -8189,11 +8185,11 @@ resource "google_compute_instance" "foobar" {
 	on_instance_stop_action {
 		discard_local_ssd = true
 	}
-<% end -%>
   }
 }
 `, instance, instanceTerminationAction)
 }
+<% end -%>
 
 
 func testAccComputeInstance_spotVM_maxRunDuration(instance string, instanceTerminationAction string) string {

@@ -3350,6 +3350,7 @@ resource "google_compute_region_instance_template" "foobar" {
 `, suffix)
 }
 
+<% unless version == 'ga' -%>
 func testAccComputeRegionInstanceTemplate_maxRunDuration_onInstanceStopAction(suffix string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -3378,7 +3379,6 @@ resource "google_compute_region_instance_template" "foobar" {
     automatic_restart = false
     provisioning_model = "STANDARD"
     instance_termination_action = "STOP"
-	<% unless version == 'ga' -%>
     max_run_duration {
 	nanos = 123
 	seconds = 60
@@ -3386,7 +3386,6 @@ resource "google_compute_region_instance_template" "foobar" {
 	on_instance_stop_action {
 		discard_local_ssd = true
 	}
-<% end -%>
 
   }
 
@@ -3400,6 +3399,7 @@ resource "google_compute_region_instance_template" "foobar" {
 }
 `, suffix)
 }
+<% end -%>
 
 func testAccComputeRegionInstanceTemplate_localSsdRecoveryTimeout(suffix string) string {
 	return fmt.Sprintf(`
