@@ -28,6 +28,18 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'https://cloud.google.com/compute/docs/reference/rest/v1/projects/setCloudArmorTier'
 id_format: 'projects/{{project}}'
 import_format: ['projects/{{project}}']
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'compute_project_cloud_armor_tier_basic'
+    primary_resource_id: 'cloud_armor_tier_config'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'compute_project_cloud_armor_tier_project_set'
+    primary_resource_id: 'cloud_armor_tier_config'
+    vars:
+      project_id: 'your_project_id'
+    test_env_vars:
+      org_id: :ORG_ID
+      billing_account: :BILLING_ACCT
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'

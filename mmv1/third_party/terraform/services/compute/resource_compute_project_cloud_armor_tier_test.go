@@ -20,7 +20,7 @@ func TestAccComputeProjectCloudArmorTier_basic(t *testing.T) {
 				Config: testAccComputeProject_cloudArmorTier_standard(),
 			},
 			{
-				ResourceName:      "google_compute_project_cloud_armor_tier.cloud_armor_tier",
+				ResourceName:      "google_compute_project_cloud_armor_tier.cloud_armor_tier_config",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -39,7 +39,7 @@ func TestAccComputeProjectCloudArmorTier_modify(t *testing.T) {
 				Config: testAccComputeProject_cloudArmorTier_standard(),
 			},
 			{
-				ResourceName:      "google_compute_project_cloud_armor_tier.cloud_armor_tier",
+				ResourceName:      "google_compute_project_cloud_armor_tier.cloud_armor_tier_config",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -47,7 +47,7 @@ func TestAccComputeProjectCloudArmorTier_modify(t *testing.T) {
 				Config: testAccComputeProject_cloudArmorTier_enterprise_paygo(),
 			},
 			{
-				ResourceName:      "google_compute_project_cloud_armor_tier.cloud_armor_tier",
+				ResourceName:      "google_compute_project_cloud_armor_tier.cloud_armor_tier_config",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -55,7 +55,7 @@ func TestAccComputeProjectCloudArmorTier_modify(t *testing.T) {
 				Config: testAccComputeProject_cloudArmorTier_standard(),
 			},
 			{
-				ResourceName:      "google_compute_project_cloud_armor_tier.cloud_armor_tier",
+				ResourceName:      "google_compute_project_cloud_armor_tier.cloud_armor_tier_config",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -80,7 +80,7 @@ func TestAccComputeProjectCloudArmorTier_withProjectSet(t *testing.T) {
 				Config: testAccComputeProject_cloudArmorTier_withProjectSet_standard(context),
 			},
 			{
-				ResourceName:      "google_compute_project_cloud_armor_tier.cloud_armor_tier",
+				ResourceName:      "google_compute_project_cloud_armor_tier.cloud_armor_tier_config",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -88,7 +88,7 @@ func TestAccComputeProjectCloudArmorTier_withProjectSet(t *testing.T) {
 				Config: testAccComputeProject_cloudArmorTier_withProjectSet_enterprise_paygo(context),
 			},
 			{
-				ResourceName:      "google_compute_project_cloud_armor_tier.cloud_armor_tier",
+				ResourceName:      "google_compute_project_cloud_armor_tier.cloud_armor_tier_config",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -96,7 +96,7 @@ func TestAccComputeProjectCloudArmorTier_withProjectSet(t *testing.T) {
 				Config: testAccComputeProject_cloudArmorTier_withProjectSet_standard(context),
 			},
 			{
-				ResourceName:      "google_compute_project_cloud_armor_tier.cloud_armor_tier",
+				ResourceName:      "google_compute_project_cloud_armor_tier.cloud_armor_tier_config",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -106,14 +106,14 @@ func TestAccComputeProjectCloudArmorTier_withProjectSet(t *testing.T) {
 
 func testAccComputeProject_cloudArmorTier_enterprise_paygo() string {
 	return fmt.Sprintln(`
-resource "google_compute_project_cloud_armor_tier" "cloud_armor_tier" {
+resource "google_compute_project_cloud_armor_tier" "cloud_armor_tier_config" {
   cloud_armor_tier = "CA_ENTERPRISE_PAYGO"
 }`)
 }
 
 func testAccComputeProject_cloudArmorTier_standard() string {
 	return fmt.Sprintln(`
-resource "google_compute_project_cloud_armor_tier" "cloud_armor_tier" {
+resource "google_compute_project_cloud_armor_tier" "cloud_armor_tier_config" {
 	cloud_armor_tier = "CA_STANDARD"
 }`)
 }
@@ -132,7 +132,7 @@ resource "google_project_service" "compute" {
   service = "compute.googleapis.com"
 }
 
-resource "google_compute_project_cloud_armor_tier" "cloud_armor_tier" {
+resource "google_compute_project_cloud_armor_tier" "cloud_armor_tier_config" {
   project      = google_project.project.project_id
   cloud_armor_tier = "CA_ENTERPRISE_PAYGO"
   depends_on   = [google_project_service.compute]
@@ -154,7 +154,7 @@ resource "google_project_service" "compute" {
   service = "compute.googleapis.com"
 }
 
-resource "google_compute_project_cloud_armor_tier" "cloud_armor_tier" {
+resource "google_compute_project_cloud_armor_tier" "cloud_armor_tier_config" {
   project      = google_project.project.project_id
   cloud_armor_tier = "CA_STANDARD"
   depends_on   = [google_project_service.compute]
