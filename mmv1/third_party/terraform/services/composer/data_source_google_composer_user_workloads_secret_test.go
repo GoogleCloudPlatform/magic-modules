@@ -1,5 +1,6 @@
 package composer_test
 
+<% unless version == 'ga' -%>
 import (
 	"errors"
 	"fmt"
