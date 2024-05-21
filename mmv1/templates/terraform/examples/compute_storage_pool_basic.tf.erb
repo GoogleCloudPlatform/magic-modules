@@ -1,0 +1,7 @@
+resource "google_compute_storage_pool" "default" {
+  name  = "<%= ctx[:vars]['storage_pool_name'] %>"
+  zone  = "us-central1-a"
+  storage_pool_type = "hyperdisk-throughput"
+  pool_provisioned_capacity_gb = 10240
+  pool_provisioned_throughput = 100
+}

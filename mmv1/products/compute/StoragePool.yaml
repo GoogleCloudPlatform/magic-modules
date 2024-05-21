@@ -1,0 +1,242 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'StoragePool'
+kind: 'compute#storagePool'
+immutable: true
+base_url: projects/{{project}}/zones/{{zone}}/storagePools
+collection_url_key: 'items'
+has_self_link: true
+description: |
+  Storage pools improve performance for volumes of the CVS service type. A storage pool
+  acts as a container for up to 50 volumes; all volumes in the pool share the capacity
+  and performance of that pool.
+
+  Each volume of the CVS-Performance service type exists individually. The performance
+  of a volume of the CVS-Performance service type is determined by its size and its
+  service level, which can impose a performance limitation for very small volumes.
+  To improve performance for small volume performance, the CVS service type manages
+  volumes with storage pools.
+
+  A storage pool aggregates capacity and performance. Volumes are created within the
+  storage pool and can use the capacity and performance of that pool. All volumes in
+  the same storage pool share the performance capability of the pool. A volume can use
+  the full performance capacity of its pool. If volumes need performance isolation from
+  each other, they must be created in different pools.
+
+  Storage pools support two levels of availability: zonal and zone-redundant.
+  Redundancy is set when you create a storage pool and can either be zonal (high
+  availability within a single zone) or zone-redundant (high availability across two
+  zones). For zone-redundant volumes, all volumes are run in a primary zone and fail
+  over to the secondary zone in the case of zone failure or because of a user-initiated
+  cross-zone move. Primary and secondary zones are chosen at the time of pool creation.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Create a storage pool': 'https://cloud.google.com/compute/docs/disks/create-storage-pools'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/storagePools'
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    kind: 'compute#operation'
+    path: 'name'
+    base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'targetLink'
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'status'
+    complete: 'DONE'
+    allowed:
+      - 'PENDING'
+      - 'RUNNING'
+      - 'DONE'
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error/errors'
+    message: 'message'
+examples:
+  # The creation tests are covered in the update test and fromStoragePoolTypeUrl test.
+  # Skip these since generated creation tests and IAM tests will exceed the storage pool
+  # hourly creation limit.
+  - !ruby/object:Provider::Terraform::Examples
+    skip_test: true
+    name: 'compute_storage_pool_basic'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-test-storage-pool%s\",
+      context[\"random_suffix\"\
+      ])"
+    vars:
+      storage_pool_name: 'test-storage-pool'
+  - !ruby/object:Provider::Terraform::Examples
+    skip_test: true
+    name: 'compute_storage_pool_hyperdisk_balanced'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-test-storage-pool-hyperdisk-balanced%s\",
+      context[\"random_suffix\"\
+      ])"
+    vars:
+      storage_pool_name: 'test-storage-pool-hyperdisk-balanced'
+iam_policy: !ruby/object:Api::Resource::IamPolicy
+  method_name_separator: '/'
+  fetch_iam_policy_verb: :GET
+  parent_resource_attribute: 'name'
+  import_format:
+    ['projects/{{project}}/zones/{{zone}}/storagePools/{{name}}', '{{name}}']
+  base_url: projects/{{project}}/zones/{{zone}}/storagePools/{{name}}
+parameters:
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'zone'
+    resource: 'Zone'
+    imports: 'name'
+    description: |
+      A reference to the zone where the storage pool resides.
+    required: false
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'StoragePoolId'
+    description: |
+      The unique identifier for the resource. This identifier is defined by the server.
+    output: true
+    api_name: id
+  - !ruby/object:Api::Type::Time
+    name: 'creationTimestamp'
+    description: 'Creation timestamp in RFC3339 text format.'
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description: |
+      Name of the resource. Provided by the client when the resource is
+      created. The name must be 1-63 characters long, and comply with
+      RFC1035. Specifically, the name must be 1-63 characters long and match
+      the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the
+      first character must be a lowercase letter, and all following
+      characters must be a dash, lowercase letter, or digit, except the last
+      character, which cannot be a dash.
+    immutable: true
+    required: true
+  - !ruby/object:Api::Type::String
+    name: 'description'
+    description: |
+      An optional description of this resource. Provide this property when
+      you create the resource.
+  - !ruby/object:Api::Type::Integer
+    name: 'poolProvisionedCapacityGb'
+    description: |
+      Size, in GiB, of the storage pool. Choose between 10,240 and 1,048,576 GiB.
+    required: true
+    update_verb: :PATCH
+    update_url: 'projects/{{project}}/zones/{{zone}}/storagePools/{{name}}?updateMask=poolProvisionedCapacityGb'
+  - !ruby/object:Api::Type::Integer
+    name: 'poolProvisionedIops'
+    description: |
+      Provisioned IOPS of the storage pool. Only relevant if the storage pool type is
+      hyperdisk-balanced. Provision between 0 and 40,000, must be a multiple of 10,000.
+    default_from_api: true
+    update_verb: :PATCH
+    update_url: 'projects/{{project}}/zones/{{zone}}/storagePools/{{name}}?updateMask=poolProvisionedIops'
+  - !ruby/object:Api::Type::Integer
+    name: 'poolProvisionedThroughput'
+    description: |
+      Provisioned throughput of the storage pool. For hyperdisk-balanced storage pool type,
+      provision between 0 and 10,240, must be a multiple of 1,024 MB/s. For hyperdisk-throughput
+      storage pool type, provision between 100 and 180, must be a multiple of 10 MB/s.
+    required: true
+    update_verb: :PATCH
+    update_url: 'projects/{{project}}/zones/{{zone}}/storagePools/{{name}}?updateMask=poolProvisionedThroughput'
+  - !ruby/object:Api::Type::Time
+    name: 'lastResizeTimestamp'
+    description: 'Timestamp of the last successful resize in RFC3339 text format.'
+    output: true
+  - !ruby/object:Api::Type::Integer
+    name: 'diskCount'
+    description: |
+      Number of disks used.
+    output: true
+  - !ruby/object:Api::Type::Integer
+    name: 'poolUsedCapacityBytes'
+    description: |
+      Space used by data stored in disks within the storage pool (in bytes).
+      This will reflect the total number of bytes written to the disks in the pool,
+      in contrast to the capacity of those disks.
+    output: true
+  - !ruby/object:Api::Type::Integer
+    name: 'poolUserWrittenBytes'
+    description: |
+      Amount of data written into the pool, before it is compacted.
+    output: true
+  - !ruby/object:Api::Type::Integer
+    name: 'totalProvisionedDiskCapacityGb'
+    description: |
+      Sum of all the capacity provisioned in disks in this storage pool.
+      A disk's provisioned capacity is the same as its total capacity.
+    output: true
+  - !ruby/object:Api::Type::Integer
+    name: 'maxTotalProvisionedDiskCapacityGb'
+    description: |
+      Maximum allowed aggregate disk size in gigabytes.
+    output: true
+  - !ruby/object:Api::Type::Integer
+    name: 'poolUsedIops'
+    description: |
+      Sum of all the disks' provisioned IOPS, minus some amount that is allowed
+      per disk that is not counted towards pool's IOPS capacity.
+    output: true
+  - !ruby/object:Api::Type::Integer
+    name: 'totalProvisionedDiskIops'
+    description: |
+      Sum of all the disks' provisioned IOPS.
+    output: true
+  - !ruby/object:Api::Type::Integer
+    name: 'poolUsedThroughput'
+    description: |
+      Sum of all the disks' provisioned throughput in MB/s.
+    output: true
+  - !ruby/object:Api::Type::Integer
+    name: 'totalProvisionedDiskThroughput'
+    description: |
+      Sum of all the disks' provisioned throughput in MB/s, minus
+      some amount that is allowed per disk that is not counted
+      toward pool's throughput capacity.
+    output: true
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'storagePoolType'
+    resource: 'StoragePoolType'
+    imports: 'selfLink'
+    description: |
+      URL of the storage pool type resource describing which storage pool type to use to
+      create the storage pool. Provide this when creating the storage pool.
+    diff_suppress_func: 'tpgresource.CompareResourceNames'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
+    required: true
+  - !ruby/object:Api::Type::Enum
+    name: 'capacityProvisioningType'
+    description: |
+      Provisioning type of the byte capacity of the pool.
+    immutable: true
+    default_from_api: true
+    values:
+      - :ADVANCED
+      - :STANDARD
+  - !ruby/object:Api::Type::Enum
+    name: 'performanceProvisioningType'
+    description: |
+      Provisioning type of the performance-related parameters of the pool,
+      such as throughput and IOPS.
+    immutable: true
+    default_from_api: true
+    values:
+      - :ADVANCED
+      - :STANDARD
