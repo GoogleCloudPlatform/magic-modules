@@ -1,4 +1,4 @@
-resource "google_discovery_engine_data_store" "basic" {
+resource "google_discovery_engine_data_store" "document_processing_config" {
   location                    = "global"
   data_store_id               = "<%= ctx[:vars]['data_store_id'] %>"
   display_name                = "tf-test-structured-datastore"
@@ -6,4 +6,16 @@ resource "google_discovery_engine_data_store" "basic" {
   content_config              = "NO_CONTENT"
   solution_types              = ["SOLUTION_TYPE_SEARCH"]
   create_advanced_site_search = false
+  document_processing_config {
+    default_parsing_config  {
+      digital_parsing_config {}
+    }
+    parsingConfigOverrides {
+      pdf = {
+        ocrParsingConfig {
+          useNativeText = true
+        }
+      }
+    }
+  }        
 }
