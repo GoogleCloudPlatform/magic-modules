@@ -559,6 +559,30 @@ func TestAccSqlDatabaseInstance_maintenance(t *testing.T) {
 	})
 }
 
+func TestAccSqlDatabaseInstance_maintenance_update_track_week5(t *testing.T) {
+	t.Parallel()
+
+	masterID := acctest.RandInt(t)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: fmt.Sprintf(
+					testGoogleSqlDatabaseInstance_maintenance_week5, masterID),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
 func TestAccSqlDatabaseInstance_settings_upgrade(t *testing.T) {
 	t.Parallel()
 
