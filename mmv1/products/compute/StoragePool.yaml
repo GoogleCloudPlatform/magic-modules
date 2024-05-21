@@ -65,8 +65,8 @@ async: !ruby/object:Api::OpAsync
     message: 'message'
 examples:
   # The creation tests are covered in the update test and fromStoragePoolTypeUrl test.
-  # Skip these since generated creation tests and IAM tests will exceed the storage pool
-  # hourly creation limit.
+  # Skip these since generated creation tests will cause the total number of creation of
+  # all storage-pool-related tests exceeds the storage pool hourly creation limit.
   - !ruby/object:Provider::Terraform::Examples
     skip_test: true
     name: 'compute_storage_pool_basic'

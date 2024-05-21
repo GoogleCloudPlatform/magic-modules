@@ -75,8 +75,10 @@ func testAccComputeStoragePool_basic(context map[string]interface{}) string {
 resource "google_compute_storage_pool" "foobar" {
   name  = "%{storage_pool_name}"
   zone  = "us-central1-a"
+  description = "testing storage pool basic"
   storage_pool_type = "%{storage_pool_type}"
   capacity_provisioning_type = "ADVANCED"
+  performance_provisioning_type = "STANDARD"
   pool_provisioned_capacity_gb = 10240
   pool_provisioned_throughput = 140
 }
@@ -88,8 +90,10 @@ func testAccComputeStoragePool_update(context map[string]interface{}) string {
 resource "google_compute_storage_pool" "foobar" {
   name  = "%{storage_pool_name}"
   zone  = "us-central1-a"
+  description = "testing storage pool update"
   storage_pool_type = "%{storage_pool_type}"
   capacity_provisioning_type = "ADVANCED"
+  performance_provisioning_type = "STANDARD"
   pool_provisioned_capacity_gb = 11264
   pool_provisioned_throughput = 120
 }
