@@ -1,5 +1,6 @@
 package composer
 
+<% unless version == 'ga' -%>
 import (
 	"fmt"
 
