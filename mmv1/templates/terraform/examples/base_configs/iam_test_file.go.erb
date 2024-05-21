@@ -82,11 +82,6 @@ func TestAcc<%= resource_name -%>IamBindingGenerated(t *testing.T) {
 			"<%= provider %>": {},
 		<% end -%>
 		},
-		<% elsif example.pull_external -%>
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"random": {},
-			"time": {},
-		},
 		<% end -%>
 <% end -%>
 		Steps: []resource.TestStep{
@@ -135,11 +130,6 @@ func TestAcc<%= resource_name -%>IamMemberGenerated(t *testing.T) {
 			"<%= provider %>": {},
 		<% end -%>
 		},
-		<% elsif example.pull_external -%>
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"random": {},
-			"time": {},
-		},
 		<% end -%>
 		Steps: []resource.TestStep{
 			{
@@ -182,11 +172,6 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated(t *testing.T) {
 		<% example.external_providers.each do |provider| -%>
 			"<%= provider %>": {},
 		<% end -%>
-		},
-		<% elsif example.pull_external -%>
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"random": {},
-			"time": {},
 		},
 		<% end -%>
 		Steps: []resource.TestStep{
@@ -236,11 +221,6 @@ func TestAcc<%= resource_name -%>IamBindingGenerated_withCondition(t *testing.T)
 			"<%= provider %>": {},
 		<% end -%>
 		},
-		<% elsif example.pull_external -%>
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"random": {},
-			"time": {},
-		},
 		<% end -%>
 		Steps: []resource.TestStep{
 			{
@@ -277,11 +257,6 @@ func TestAcc<%= resource_name -%>IamBindingGenerated_withAndWithoutCondition(t *
 		<% example.external_providers.each do |provider| -%>
 			"<%= provider %>": {},
 		<% end -%>
-		},
-		<% elsif example.pull_external -%>
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"random": {},
-			"time": {},
 		},
 		<% end -%>
 		Steps: []resource.TestStep{
@@ -330,11 +305,6 @@ func TestAcc<%= resource_name -%>IamMemberGenerated_withCondition(t *testing.T) 
 			"<%= provider %>": {},
 		<% end -%>
 		},
-		<% elsif example.pull_external -%>
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"random": {},
-			"time": {},
-		},
 		<% end -%>
 		Steps: []resource.TestStep{
 			{
@@ -371,11 +341,6 @@ func TestAcc<%= resource_name -%>IamMemberGenerated_withAndWithoutCondition(t *t
 		<% example.external_providers.each do |provider| -%>
 			"<%= provider %>": {},
 		<% end -%>
-		},
-		<% elsif example.pull_external -%>
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"random": {},
-			"time": {},
 		},
 		<% end -%>
 		Steps: []resource.TestStep{
@@ -439,11 +404,6 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated_withCondition(t *testing.T) 
 		<% example.external_providers.each do |provider| -%>
 			"<%= provider %>": {},
 		<% end -%>
-		},
-		<% elsif example.pull_external -%>
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"random": {},
-			"time": {},
 		},
 		<% end -%>
 		Steps: []resource.TestStep{
