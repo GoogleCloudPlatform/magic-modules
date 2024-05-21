@@ -139,6 +139,7 @@ func TestAccSqlUser_postgresIAM(t *testing.T) {
 	t.Parallel()
 
 	instance := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	const iamUser = "admin@hashicorptest.com"
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -148,14 +149,14 @@ func TestAccSqlUser_postgresIAM(t *testing.T) {
 		CheckDestroy: testAccSqlUserDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleSqlUser_postgresIAM(instance),
+				Config: testGoogleSqlUser_postgresIAM(instance, iamUser),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user"),
 				),
 			},
 			{
 				ResourceName:            "google_sql_user.user",
-				ImportStateId:           fmt.Sprintf("%s/%s/admin", envvar.GetTestProjectFromEnv(), instance),
+				ImportStateId:           fmt.Sprintf("%s/%s/%s", envvar.GetTestProjectFromEnv(), instance, iamUser),
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"password"},
@@ -403,7 +404,7 @@ resource "google_sql_user" "user" {
 `, instance, password)
 }
 
-func testGoogleSqlUser_postgresIAM(instance string) string {
+func testGoogleSqlUser_postgresIAM(instance, iamUser string) string {
 	return fmt.Sprintf(`
 resource "google_sql_database_instance" "instance" {
   name             = "%s"
@@ -427,21 +428,13 @@ resource "time_sleep" "wait_30_seconds" {
   create_duration = "30s"
 }
 
-data "google_project" "project" {}
-
-resource "google_project_iam_member" "iam_user" {
-	project = data.google_project.project.project_id
-	role    = "roles/cloudsql.instanceUser"
-	member = "user:admin@hashicorptest.com"
-}
-
 resource "google_sql_user" "user" {
-  depends_on = [time_sleep.wait_30_seconds, google_project_iam_member.iam_user]
-  name     = "admin@hashicorptest.com"
+  depends_on = [time_sleep.wait_30_seconds]
+  name     = "%s"
   instance = google_sql_database_instance.instance.name
   type     = "CLOUD_IAM_USER"
 }
-`, instance)
+`, instance, iamUser)
 }
 
 func testGoogleSqlUser_postgresAbandon(instance, name string) string {
