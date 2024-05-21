@@ -80,10 +80,11 @@ func execTestTPG(version, commit, pr string, gh ttGithub) error {
 	fmt.Println("commitShaOrBranchUpstream: ", commitShaOrBranchUpstream)
 
 	if err := gh.CreateWorkflowDispatchEvent("test-tpg.yml", map[string]any{
-		"owner":  "modular-magician",
-		"repo":   repo,
-		"branch": commitShaOrBranchUpstream,
-		"sha":    commit,
+		"owner":     "modular-magician",
+		"repo":      repo,
+		"branch":    commitShaOrBranchUpstream,
+		"pr-number": pr,
+		"sha":       commit,
 	}); err != nil {
 		return fmt.Errorf("error creating workflow dispatch event: %w", err)
 	}
