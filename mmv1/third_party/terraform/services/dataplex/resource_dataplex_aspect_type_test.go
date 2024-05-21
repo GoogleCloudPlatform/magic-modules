@@ -13,8 +13,9 @@ func TestAccDataplexAspectType_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_name":  envvar.GetTestProjectFromEnv(),
-		"random_suffix": acctest.RandString(t, 10),
+		"project_name":   envvar.GetTestProjectFromEnv(),
+		"random_suffix":  acctest.RandString(t, 10),
+		"aspect_type_id": "tf-test-aspect-type%{random_suffix}",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -47,7 +48,7 @@ func TestAccDataplexAspectType_update(t *testing.T) {
 func testAccDataplexAspectType_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_dataplex_aspect_type" "test_aspect_type_full" {
-  aspect_type_id = "tf-test-aspect-type-full%{random_suffix}"
+  aspect_type_id = "%{aspect_type_id}"
   project = "%{project_name}"
   location = "us-central1"
 
@@ -87,7 +88,7 @@ EOF
 func testAccDataplexAspectType_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_dataplex_aspect_type" "test_aspect_type_basic" {
-  aspect_type_id = "tf-test-aspect-type-basic%{random_suffix}"
+  aspect_type_id = "%{aspect_type_id}"
   project = "%{project_name}"
   location = "us-central1"
 
