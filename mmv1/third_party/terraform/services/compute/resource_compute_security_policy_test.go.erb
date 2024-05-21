@@ -1734,9 +1734,9 @@ resource "google_compute_security_policy" "policy" {
 	name = "%s"
 
 	rule {
-		action   = "allow"
-		priority = "2147483647"
-    description = "default rule"
+		action      = "allow"
+		priority    = "2147483647"
+		description = "default rule"
 		match {
 			versioned_expr = "SRC_IPS_V1"
 			config {
@@ -1746,25 +1746,25 @@ resource "google_compute_security_policy" "policy" {
 	}
 
 	rule {
-		action   = "deny(403)"
-		priority = "2000"
-    description = "reCAPTCHA rule"
+		action      = "deny(403)"
+		priority    = "2000"
+		description = "reCAPTCHA rule"
 		match {
 			expr {
 				expression = "request.path.endsWith('RegisterWithEmail') && token.recaptcha_action.score >= 0.8 && (token.recaptcha_action.valid)"
 			}
-      expr_options {
-        recaptcha_options {
-          action_token_site_keys = [
-            "placeholder-recaptcha-action-site-key-01",
-            "placeholder-recaptcha-action-site-key-02"
-          ]
-          session_token_site_keys = [
-            "placeholder-recaptcha-session-site-key-1",
-            "placeholder-recaptcha-session-site-key-2"
-          ]
-        }
-      }
+			expr_options {
+				recaptcha_options {
+					action_token_site_keys = [
+						"placeholder-recaptcha-action-site-key-01",
+						"placeholder-recaptcha-action-site-key-02"
+					]
+					session_token_site_keys = [
+						"placeholder-recaptcha-session-site-key-1",
+						"placeholder-recaptcha-session-site-key-2"
+					]
+				}
+			}
 		}
 	}
 }

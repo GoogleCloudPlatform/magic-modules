@@ -156,41 +156,41 @@ func ResourceComputeSecurityPolicy() *schema.Resource {
 										Description: `User defined CEVAL expression. A CEVAL expression is used to specify match criteria such as origin.ip, source.region_code and contents in the request header.`,
 									},
 
-                  "expr_options": {
+									"expr_options": {
 										Type:     schema.TypeList,
 										Optional: true,
 										MaxItems: 1,
-                    Description: `The configuration options available when specifying a user defined CEVAL expression (i.e., 'expr').`,
+										Description: `The configuration options available when specifying a user defined CEVAL expression (i.e., 'expr').`,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
-                        "recaptcha_options": {
-                          Type:     schema.TypeList,
-                          Optional: true,
-                          MaxItems: 1,
-                          Description: `reCAPTCHA configuration options to be applied for the rule. If the rule does not evaluate reCAPTCHA tokens, this field has no effect.`,
-                          Elem: &schema.Resource{
-                            Schema: map[string]*schema.Schema{
-                              "action_token_site_keys": {
-                                Type:     schema.TypeList,
-                                Optional: true,
-                                Description: `A list of site keys to be used during the validation of reCAPTCHA action-tokens. The provided site keys need to be created from reCAPTCHA API under the same project where the security policy is created`,
-                                MinItems: 1,
-                                Elem: &schema.Schema{
-                                  Type: schema.TypeString,
-                                },
-                              },
-                              "session_token_site_keys": {
-                                Type:     schema.TypeList,
-                                Optional: true,
-                                Description: `A list of site keys to be used during the validation of reCAPTCHA session-tokens. The provided site keys need to be created from reCAPTCHA API under the same project where the security policy is created.`,
-                                MinItems: 1,
-                                Elem: &schema.Schema{
-                                  Type: schema.TypeString,
-                                },
-                              },
-                            },
-                          },
-                        },
+												"recaptcha_options": {
+													Type:     schema.TypeList,
+													Optional: true,
+													MaxItems: 1,
+													Description: `reCAPTCHA configuration options to be applied for the rule. If the rule does not evaluate reCAPTCHA tokens, this field has no effect.`,
+													Elem: &schema.Resource{
+														Schema: map[string]*schema.Schema{
+															"action_token_site_keys": {
+																Type:     schema.TypeList,
+																Optional: true,
+																Description: `A list of site keys to be used during the validation of reCAPTCHA action-tokens. The provided site keys need to be created from reCAPTCHA API under the same project where the security policy is created`,
+																MinItems: 1,
+																Elem: &schema.Schema{
+																	Type: schema.TypeString,
+																},
+															},
+															"session_token_site_keys": {
+																Type:     schema.TypeList,
+																Optional: true,
+																Description: `A list of site keys to be used during the validation of reCAPTCHA session-tokens. The provided site keys need to be created from reCAPTCHA API under the same project where the security policy is created.`,
+																MinItems: 1,
+																Elem: &schema.Schema{
+																	Type: schema.TypeString,
+																},
+															},
+														},
+													},
+												},
 											},
 										},
 									},
