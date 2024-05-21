@@ -181,7 +181,9 @@ module OpenAPIGenerate
       end.last
       raise 'did not find ID param' unless id_param
 
-      [properties, parameters, id_param.name]
+      lro = path.post.instance_variable_get(:@raw_schema)['x-google-lro']
+
+      [properties, parameters, id_param.name, lro]
     end
 
     def build_properties(properties, required)
@@ -213,7 +215,7 @@ module OpenAPIGenerate
     end
 
     def build_resource(spec_path, resource_path, resource_name)
-      properties, parameters, query_param = parse_openapi(spec_path, resource_path, resource_name)
+      properties, parameters, query_param, lro = parse_openapi(spec_path, resource_path, resource_name)
 
       resource = Api::Resource.new
       base_url = base_url(resource_path)
@@ -235,17 +237,19 @@ module OpenAPIGenerate
         resource.immutable = true
       end
 
-      resource.autogen_async = true
       resource.properties = properties
       resource.parameters = parameters
 
-      # Default operation handling
-      op = Api::OpAsync::Operation.new('name', '{{op_id}}', 1000, nil)
-      result = Api::OpAsync::Result.new('response', true)
-      status = Api::OpAsync::Status.new('done', true, [true, false])
-      error = Api::OpAsync::Error.new('error', 'message')
-      async = Api::OpAsync.new(op, result, status, error)
-      resource.async = async
+      if lro
+        resource.autogen_async = true
+        # Default operation handling
+        op = Api::OpAsync::Operation.new('name', '{{op_id}}', 1000, nil)
+        result = Api::OpAsync::Result.new('response', true)
+        status = Api::OpAsync::Status.new('done', true, [true, false])
+        error = Api::OpAsync::Error.new('error', 'message')
+        async = Api::OpAsync.new(op, result, status, error)
+        resource.async = async
+      end
       resource
     end
 
