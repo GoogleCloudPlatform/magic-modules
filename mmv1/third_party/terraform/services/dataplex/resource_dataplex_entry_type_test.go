@@ -32,7 +32,7 @@ func TestAccDataplexEntryType_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"entry_type_id", "labels", "location", "terraform_labels"},
 			},
 			{
-				Config: TestAccDataplexEntryType_update(context),
+				Config: testAccDataplexEntryType_update(context),
 			},
 			{
 				ResourceName:            "google_dataplex_entry_type.test_entry_type",
