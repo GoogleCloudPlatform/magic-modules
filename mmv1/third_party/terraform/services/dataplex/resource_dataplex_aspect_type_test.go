@@ -51,9 +51,6 @@ resource "google_dataplex_aspect_type" "test_aspect_type_full" {
   project = "%{project_name}"
   location = "us-central1"
 
-  labels = { "tag": "test-tf" }
-  display_name = "terraform aspect type"
-  description = "aspect type created by Terraform"
   metadata_template = <<EOF
 {
 	"name": "tf-test-template",
@@ -91,6 +88,9 @@ resource "google_dataplex_aspect_type" "test_aspect_type_basic" {
   project = "%{project_name}"
   location = "us-central1"
 
+  labels = { "tag": "test-tf" }
+  display_name = "terraform aspect type"
+  description = "aspect type created by Terraform"
   metadata_template = <<EOF
 {
   "name": "tf-test-template",
