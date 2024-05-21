@@ -1,7 +1,15 @@
 resource "google_dataplex_aspect_type" "<%= ctx[:primary_resource_id] %>" {
-  name         = "tf-test-aspect-type%{random_suffix}"
+  aspect_type_id         = "tf-test-aspect-type%{random_suffix}"
   location     = "us-central1"
-  project = "<%= ctx[:test_env_vars]['project_name'] %>"
+  project      = "<%= ctx[:test_env_vars]['project_name'] %>"
+
+  metadata_template = <<EOF
+{
+  "name": "CloudSQLDatabase",
+  "type": "record",
+  "recordFields": []
+}
+EOF
 }
 
 resource "google_dataplex_entry_type" "<%= ctx[:primary_resource_id] %>" {
@@ -15,5 +23,9 @@ resource "google_dataplex_entry_type" "<%= ctx[:primary_resource_id] %>" {
 
   type_aliases = ["TABLE", "DATABASE"]
   platform = "GCS"
-  system = "MariaDB"
+  system = "CloudSQL"
+  
+  required_aspects {
+    type = google_dataplex_aspect_type.<%= ctx[:primary_resource_id] %>.name
+  }
 }
