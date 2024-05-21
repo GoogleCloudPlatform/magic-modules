@@ -4,8 +4,18 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
 )
 
-func ComputeBreakingChanges(schemaDiff diff.SchemaDiff) []string {
-	messages := []string{}
+type BreakingChange struct {
+	Resource               string
+	Field                  string
+	Message                string
+	DocumentationReference string
+	RuleTemplate           string
+	RuleDefinition         string
+	RuleName               string
+}
+
+func ComputeBreakingChanges(schemaDiff diff.SchemaDiff) []*BreakingChange {
+	var messages []*BreakingChange
 	for resource, resourceDiff := range schemaDiff {
 		for _, rule := range ResourceInventoryRules {
 			if rule.isRuleBreak(resourceDiff.ResourceConfig.Old, resourceDiff.ResourceConfig.New) {
@@ -38,11 +48,13 @@ func ComputeBreakingChanges(schemaDiff diff.SchemaDiff) []string {
 					fieldDiff.Old,
 					fieldDiff.New,
 					MessageContext{
-						Resource: resource,
-						Field:    field,
+						Resource:   resource,
+						Field:      field,
+						definition: rule.definition,
+						name:       rule.name,
 					},
 				)
-				if breakageMessage != "" {
+				if breakageMessage != nil {
 					messages = append(messages, breakageMessage)
 				}
 			}
