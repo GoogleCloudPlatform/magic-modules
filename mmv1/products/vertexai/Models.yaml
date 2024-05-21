@@ -122,7 +122,7 @@ properties:
         - !ruby/object:Api::Type::String
           name: 'deployedModelId'
           immutable: true
-          description:  An ID of a DeployedModel in the above Endpoint.
+          description: An ID of a DeployedModel in the above Endpoint.
   - !ruby/object:Api::Type::String
     name: 'etag'
     description: Used to perform consistent read-modify-write updates.
@@ -204,7 +204,7 @@ properties:
       The path to the directory containing the Model artifact and any of its supporting files.
   - !ruby/object:Api::Type::String
     name: 'displayName'
-    at_least_one_of: 
+    at_least_one_of:
       - model
       - displayName
     description:
@@ -221,7 +221,7 @@ properties:
     description: The labels with user-defined metadata to organize your Models.
   - !ruby/object:Api::Type::String
     name: 'sourceModel'
-    at_least_one_of: 
+    at_least_one_of:
       - model
       - displayName
     description: |
@@ -287,7 +287,7 @@ properties:
       - !ruby/object:Api::Type::Array
         name: 'env'
         immutable: true
-        description: List of environment variables to set in the container. 
+        description: List of environment variables to set in the container.
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::String
@@ -329,11 +329,11 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'deploymentTimeout'
         immutable: true
-        description:  Deployment timeout. Limit for deployment timeout is 2 hours.
+        description: Deployment timeout. Limit for deployment timeout is 2 hours.
       - !ruby/object:Api::Type::String
         name: 'sharedMemorySizeMb'
         immutable: true
-        description:  The amount of the VM memory to reserve as the shared memory for the model in megabytes.
+        description: The amount of the VM memory to reserve as the shared memory for the model in megabytes.
       - !ruby/object:Api::Type::NestedObject
         name: 'startupProbe'
         immutable: true
@@ -343,15 +343,15 @@ properties:
             name: 'periodSeconds'
             immutable: true
             default_value: 10
-            description:  How often (in seconds) to perform the probe. Default to 10 seconds. Minimum value is 1. Must be less than timeoutSeconds.
+            description: How often (in seconds) to perform the probe. Default to 10 seconds. Minimum value is 1. Must be less than timeoutSeconds.
           - !ruby/object:Api::Type::Integer
             name: 'timeoutSeconds'
             immutable: true
             default_value: 1
-            description:  Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. Must be greater or equal to periodSeconds.
+            description: Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. Must be greater or equal to periodSeconds.
           - !ruby/object:Api::Type::NestedObject
             name: 'exec'
-            description:  Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. Must be greater or equal to periodSeconds.
+            description: Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. Must be greater or equal to periodSeconds.
             properties:
               - !ruby/object:Api::Type::Array
                 name: 'command'
@@ -366,15 +366,15 @@ properties:
             name: 'periodSeconds'
             immutable: true
             default_value: 10
-            description:  How often (in seconds) to perform the probe. Default to 10 seconds. Minimum value is 1. Must be less than timeoutSeconds.
+            description: How often (in seconds) to perform the probe. Default to 10 seconds. Minimum value is 1. Must be less than timeoutSeconds.
           - !ruby/object:Api::Type::Integer
             name: 'timeoutSeconds'
             immutable: true
             default_value: 1
-            description:  Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. Must be greater or equal to periodSeconds.
+            description: Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. Must be greater or equal to periodSeconds.
           - !ruby/object:Api::Type::NestedObject
             name: 'exec'
-            description:  Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. Must be greater or equal to periodSeconds.
+            description: Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. Must be greater or equal to periodSeconds.
             properties:
               - !ruby/object:Api::Type::Array
                 name: 'command'
@@ -508,7 +508,7 @@ properties:
   #           properties:
   #             - !ruby/object:Api::Type::Integer
   #               name: 'topK'
-  #               description: If populated, returns attributions for top K indices of outputs (defaults to 1). 
+  #               description: If populated, returns attributions for top K indices of outputs (defaults to 1).
   #               default_value: 1
   #               immutable: true
   #             - !ruby/object:Api::Type::Array
@@ -528,7 +528,7 @@ properties:
   #                     required: true
   #             - !ruby/object:Api::Type::NestedObject
   #               name: 'integratedGradientsAttribution'
-  #               description: An attribution method that computes Aumann-Shapley values taking advantage of the model's fully differentiable structure. 
+  #               description: An attribution method that computes Aumann-Shapley values taking advantage of the model's fully differentiable structure.
   #               item_type: !ruby/object:Api::Type::NestedObject
   #                 properties:
   #                   - !ruby/object:Api::Type::Integer
@@ -546,7 +546,7 @@ properties:
   #                           default_value: 3
   #                         - !ruby/object:Api::Type::Double
   #                           name: 'noiseSigma'
-  #                           description: This is a single float value and will be used to add noise to all the features. 
+  #                           description: This is a single float value and will be used to add noise to all the features.
   #                           default_value: 0.1
   #                         - !ruby/object:Api::Type::NestedObject
   #                           name: 'featureNoiseSigma'
@@ -594,7 +594,7 @@ properties:
   #                           default_value: 3
   #                         - !ruby/object:Api::Type::Double
   #                           name: 'noiseSigma'
-  #                           description: This is a single float value and will be used to add noise to all the features. 
+  #                           description: This is a single float value and will be used to add noise to all the features.
   #                           default_value: 0.1
   #                         - !ruby/object:Api::Type::NestedObject
   #                           name: 'featureNoiseSigma'
@@ -866,7 +866,7 @@ properties:
   #                       Source URL
   #             - !ruby/object:Api::Type::String
   #               name: 'featureAttributionsSchemaUri'
-  #               description: Points to a YAML file stored on Google Cloud Storage describing the format of the feature attributions. 
+  #               description: Points to a YAML file stored on Google Cloud Storage describing the format of the feature attributions.
   #               output: true
   #             - !ruby/object:Api::Type::String
   #               name: 'latentSpaceSource'
