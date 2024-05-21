@@ -97,11 +97,11 @@ resource "google_dataplex_aspect_type" "test_aspect_type" {
   "type": "record",
   "recordFields": [
     {
-      "name": "type",
+      "name": "updatedType",
       "type": "enum",
       "annotations": {
         "displayName": "Type",
-        "description": "Specifies the type of view represented by the entry."
+        "description": "Specifies the type of view represented by the entry. This is updated."
       },
       "index": 1,
       "constraints": {
