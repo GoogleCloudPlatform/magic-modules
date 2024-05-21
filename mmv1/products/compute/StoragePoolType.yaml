@@ -132,5 +132,3 @@ properties:
       imports: 'selfLink'
       description: 'A reference to a supported disk type of this storage pool'
     custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
-
-  
