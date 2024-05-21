@@ -68,7 +68,7 @@ resource "google_compute_instance_template" "foobar" {
 }
 
 resource "google_compute_target_pool" "foobar" {
-  name = "my-target-pool-2"
+  name = "instance-target-pool"
   region = "us-central1"
 }
 
