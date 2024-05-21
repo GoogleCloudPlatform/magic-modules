@@ -72,11 +72,12 @@ func execTestTGC(commit, pr string, gh ttGithub) error {
 	fmt.Println("commitShaOrBranchUpstreamTGC: ", commitShaOrBranchUpstreamTGC)
 
 	if err := gh.CreateWorkflowDispatchEvent("test-tgc.yml", map[string]any{
-		"owner":      "modular-magician",
-		"repo":       "terraform-google-conversion",
-		"tpgbbranch": commitShaOrBranchUpstreamTPGB,
-		"tgcbranch":  commitShaOrBranchUpstreamTGC,
-		"sha":        commit,
+		"owner":       "modular-magician",
+		"repo":        "terraform-google-conversion",
+		"tpgb-branch": commitShaOrBranchUpstreamTPGB,
+		"tgc-branch":  commitShaOrBranchUpstreamTGC,
+		"pr-number":   pr,
+		"sha":         commit,
 	}); err != nil {
 		return fmt.Errorf("error creating workflow dispatch event: %w", err)
 	}
