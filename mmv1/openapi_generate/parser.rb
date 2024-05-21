@@ -215,7 +215,9 @@ module OpenAPIGenerate
     end
 
     def build_resource(spec_path, resource_path, resource_name)
-      properties, parameters, query_param, lro = parse_openapi(spec_path, resource_path, resource_name)
+      properties, parameters, query_param, lro = parse_openapi(
+        spec_path, resource_path, resource_name
+      )
 
       resource = Api::Resource.new
       base_url = base_url(resource_path)
