@@ -63,3 +63,4 @@ func dataSourceGoogleComposerUserWorkloadsSecretRead(d *schema.ResourceData, met
 
 	return nil
 }
+<% end -%>
