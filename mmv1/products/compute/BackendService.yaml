@@ -61,8 +61,6 @@ examples:
     primary_resource_id: 'default'
     vars:
       backend_service_name: 'tf-test-backend-service-external'
-    ignore_read_extra:
-      - 'iap.0.oauth2_client_secret'
   - !ruby/object:Provider::Terraform::Examples
     name: 'backend_service_cache_simple'
     primary_resource_id: 'default'
@@ -760,7 +758,6 @@ properties:
         send_empty_value: true
         ignore_read: true
         sensitive: true
-        custom_flatten: templates/terraform/custom_flatten/compute_backend_service_iap_oauth2_client_secret.go.erb
       - !ruby/object:Api::Type::String
         name: 'oauth2ClientSecretSha256'
         output: true
