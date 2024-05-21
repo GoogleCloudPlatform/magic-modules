@@ -116,11 +116,11 @@ properties:
     description: |
       AspectInfo for the entry type.
     item_type: !ruby/object:Api::Type::NestedObject
-    properties:
-      - !ruby/object:Api::Type::String
-        name: 'type'
-        description: |
-          Required aspect type for the entry type.
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'type'
+          description: |
+            Required aspect type for the entry type.
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataplex_entry_type_basic'
