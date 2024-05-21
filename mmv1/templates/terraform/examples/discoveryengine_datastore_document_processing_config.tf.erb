@@ -10,11 +10,10 @@ resource "google_discovery_engine_data_store" "document_processing_config" {
     default_parsing_config  {
       digital_parsing_config {}
     }
-    parsingConfigOverrides {
-      pdf = {
-        ocrParsingConfig {
-          useNativeText = true
-        }
+    parsing_config_overrides {
+      file_type = "pdf"
+      ocr_parsing_config {
+        use_native_text = true
       }
     }
   }        

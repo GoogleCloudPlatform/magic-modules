@@ -55,7 +55,6 @@ async: !ruby/object:Api::OpAsync
     path: "error"
     message: "message"
 
-# Custom titles for examples?
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "discoveryengine_datastore_basic"
@@ -150,75 +149,62 @@ properties:
     required: true
   - !ruby/object:Api::Type::NestedObject
     name: 'documentProcessingConfig'
-    immutable: true   # Not documented in REST Reference, but the field is immutable (evidence: PATCH request returns
-                      # Field \"updateMask\" contains an immutable path \"document_processing_config\".)
+    immutable: true
     description: |
-      Configuration for Document understanding and enrichment. Only one among 
+      Configuration for Document understanding and enrichment.
     required: false
     properties:
-      # explain
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
           The full resource name of the Document Processing Config. Format:
           `projects/{project}/locations/{location}/collections/{collection_id}/dataStores/{data_store_id}/documentProcessingConfig`.
-        
-        # not marked as "output only" in the docs. However, this seems to have no effect.
-        # i.e. referencing an existing "documentProcessingConfig.name" when creating a datastore
-        # will produce a datastore with different (default) documentProcessingConfig params,
-        # while the original conf in the existing datastore is left unchanged
-        # output: true
+        output: true
         required: false
 
       - !ruby/object:Api::Type::NestedObject
-          name: 'defaultParsingConfig'
-          description: |
-            Configurations for default Document parser. If not specified, we will
-            configure it as default DigitalParsingConfig, and the default parsing
-            config will be applied to all file types for Document parsing.
-          required: false
-          properties:
-            - !ruby/object:Api::Type::NestedObject
-              name: 'digitalParsingConfig'
-              allow_empty_object: true
-              send_empty_value: true
-              exactly_one_of:
-                - default_parsing_config.0.digital_parsing_config
-                - default_parsing_config.0.ocr_parsing_config
-              description: |
-                Configurations applied to digital parser.
-              required: false
-              properties: []
-            - !ruby/object:Api::Type::NestedObject
-              name: 'ocrParsingConfig'
-              exactly_one_of:
-                - default_parsing_config.0.digital_parsing_config
-                - default_parsing_config.0.ocr_parsing_config
-              description: |
-                Configurations applied to OCR parser. Currently it only applies to PDFs.
-              required: false
-              properties:
-                - !ruby/object:Api::Type::Boolean
-                  name: 'useNativeText'
-                  required: false
-                  description: |
-                    If true, will use native text instead of OCR text on pages containing native text.
+        name: 'defaultParsingConfig'
+        description: |
+          Configurations for default Document parser. If not specified, we will
+          configure it as default DigitalParsingConfig, and the default parsing
+          config will be applied to all file types for Document parsing.
+        required: false
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'digitalParsingConfig'
+            allow_empty_object: true
+            send_empty_value: true
+            exactly_one_of:
+              - default_parsing_config.0.digital_parsing_config
+              - default_parsing_config.0.ocr_parsing_config
+            description: |
+              Configurations applied to digital parser.
+            required: false
+            properties: []
+          - !ruby/object:Api::Type::NestedObject
+            name: 'ocrParsingConfig'
+            exactly_one_of:
+              - default_parsing_config.0.digital_parsing_config
+              - default_parsing_config.0.ocr_parsing_config
+            description: |
+              Configurations applied to OCR parser. Currently it only applies to PDFs.
+            required: false
+            properties:
+              - !ruby/object:Api::Type::Boolean
+                name: 'useNativeText'
+                required: false
+                description: |
+                  If true, will use native text instead of OCR text on pages containing native text.
 
       - !ruby/object:Api::Type::Map
         name: 'parsingConfigOverrides'
         description: |
-          Map from file type to override the default parsing configuration based on the file type.
-        key_name: KEY_NAME
+          Map from file type to override the default parsing configuration based on the file type. Supported keys:
+            * `pdf`: Override parsing config for PDF files, either digital parsing, ocr parsing or layout parsing is supported.
+            * `html`: Override parsing config for HTML files, only digital parsing and or layout parsing are supported.
+            * `docx`: Override parsing config for DOCX files, only digital parsing and or layout parsing are supported.
+        key_name: file_type
 
-        # The description mentions some constraints that cannot be modeled in a map. Should this be converted to a NestedObject
-        # The description mentions Layout parsing, which is only available in alpha
-        key_description: |
-          Supported keys:
-            * pdf: Override parsing config for PDF files, either digital parsing, ocr parsing or layout parsing is supported.
-            * html: Override parsing config for HTML files, only digital parsing and or layout parsing are supported.
-            * docx: Override parsing config for DOCX files, only digital parsing and or layout parsing are supported.
-
-        # This is a duplication of "defaultParsingConfig". I couldn't find a way to reuse existing models
         value_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::NestedObject
