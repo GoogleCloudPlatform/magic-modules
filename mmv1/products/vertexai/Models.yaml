@@ -63,7 +63,13 @@ examples:
     skip_import_test: true
     primary_resource_id: 'upload_model'
     vars:
-      display_name: 'test-model-upload'
+      display_name: 'test-model-upload-basic'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'vertex_ai_model_upload_container_spec'
+    skip_import_test: true
+    primary_resource_id: 'upload_model'
+    vars:
+      display_name: 'test-model-upload-container-spec'
 parameters:
   - !ruby/object:Api::Type::String
     name: region
