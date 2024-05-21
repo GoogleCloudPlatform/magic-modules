@@ -53,28 +53,28 @@ resource "google_dataplex_aspect_type" "test_aspect_type" {
 
   metadata_template = <<EOF
 {
-	"name": "tf-test-template",
-	"type": "record",
-	"recordFields": [
-		{
-			"name": "type",
-			"type": "enum",
-			"annotations": {
-				"displayName": "Type",
-				"description": "Specifies the type of view represented by the entry."
-			},
-			"index": 1,
-			"constraints": {
-				"required": true
-			},
-			"enumValues": [
-				{
-					"name": "VIEW",
-					"index": 1
-				}
-			]
-		}
-	]
+  "name": "tf-test-template",
+  "type": "record",
+  "recordFields": [
+    {
+      "name": "type",
+      "type": "enum",
+      "annotations": {
+        "displayName": "Type",
+        "description": "Specifies the type of view represented by the entry."
+      },
+      "index": 1,
+      "constraints": {
+        "required": true
+      },
+      "enumValues": [
+        {
+          "name": "VIEW",
+          "index": 1
+        }
+      ]
+    }
+  ]
 }
 EOF
 }
