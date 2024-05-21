@@ -16,8 +16,6 @@ name: 'EntryGroup'
 base_url: 'projects/{{project}}/locations/{{location}}/entryGroups/{{entry_group_id}}'
 self_link: 'projects/{{project}}/locations/{{location}}/entryGroups/{{entry_group_id}}'
 create_url: 'projects/{{project}}/locations/{{location}}/entryGroups?entryGroupId={{entry_group_id}}'
-update_url: 'projects/{{project}}/locations/{{location}}/entryGroups/{{entry_group_id}}'
-delete_url: 'projects/{{project}}/locations/{{location}}/entryGroups/{{entry_group_id}}'
 update_verb: :PATCH
 update_mask: true
 description: |
