@@ -26,7 +26,7 @@ func TestAccDataplexAspectType_update(t *testing.T) {
 				Config: testAccDataplexAspectType_full(context),
 			},
 			{
-				ResourceName:            "google_dataplex_aspect_type.test_aspect_type_full",
+				ResourceName:            "google_dataplex_aspect_type.test_aspect_type",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"aspect_type_id", "labels", "location", "terraform_labels"},
@@ -35,7 +35,7 @@ func TestAccDataplexAspectType_update(t *testing.T) {
 				Config: testAccDataplexAspectType_update(context),
 			},
 			{
-				ResourceName:            "google_dataplex_aspect_type.test_aspect_type_basic",
+				ResourceName:            "google_dataplex_aspect_type.test_aspect_type",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"aspect_type_id", "labels", "location", "terraform_labels"},
@@ -46,7 +46,7 @@ func TestAccDataplexAspectType_update(t *testing.T) {
 
 func testAccDataplexAspectType_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_dataplex_aspect_type" "test_aspect_type_full" {
+resource "google_dataplex_aspect_type" "test_aspect_type" {
   aspect_type_id = "tf-test-aspect-type%{random_suffix}"
   project = "%{project_name}"
   location = "us-central1"
@@ -83,7 +83,7 @@ EOF
 
 func testAccDataplexAspectType_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_dataplex_aspect_type" "test_aspect_type_basic" {
+resource "google_dataplex_aspect_type" "test_aspect_type" {
   aspect_type_id = "tf-test-aspect-type%{random_suffix}"
   project = "%{project_name}"
   location = "us-central1"
