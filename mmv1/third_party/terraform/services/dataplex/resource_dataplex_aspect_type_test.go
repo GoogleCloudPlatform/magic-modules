@@ -87,6 +87,7 @@ EOF
 func testAccDataplexAspectType_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_dataplex_aspect_type" "test_aspect_type_basic" {
+  aspect_type_id = "tf-test-aspect-type-basic%{random_suffix}"
   project = "%{project_name}"
   location = "us-central1"
 
