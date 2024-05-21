@@ -1,0 +1,136 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'StoragePoolType'
+kind: 'compute#storagePoolType'
+base_url: projects/{{project}}/zones/{{zone}}/storagePoolTypes
+collection_url_key: 'items'
+description: |
+  Represents a StoragePoolType resource. A StoragePoolType resource represents the type
+  of storage pool to use, such as hyperdisk-balanced or hyperdisk-throughput. To reference
+  a storage pool type, use the storage pool type's full or partial URL.
+# Make StoragePoolType virtual so no tests gets triggered for create.
+readonly: true
+has_self_link: true
+exclude: true
+parameters:
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'zone'
+    resource: 'Zone'
+    imports: 'name'
+    description: 'A reference to the zone where the storage pool type resides.'
+    required: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
+properties:
+  - !ruby/object:Api::Type::Integer
+    name: 'id'
+    description: |
+      The unique identifier for the resource. This identifier is defined by the server.
+    output: true
+  - !ruby/object:Api::Type::Time
+    name: 'creationTimestamp'
+    description: 'Creation timestamp in RFC3339 text format.'
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description: 'Name of the resource.'
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'description'
+    description: 'An optional description of this resource.'
+    output: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'deprecated'
+    description: 'The deprecation status associated with this disk type.'
+    output: true
+    properties:
+      - !ruby/object:Api::Type::Time
+        name: 'deleted'
+        description: |
+          An optional RFC3339 timestamp on or after which the state of this
+          resource is intended to change to DELETED. This is only informational
+          and the status will not change unless the client explicitly changes it.
+        output: true
+      - !ruby/object:Api::Type::Time
+        name: 'deprecated'
+        description: |
+          An optional RFC3339 timestamp on or after which the state of this
+          resource is intended to change to DEPRECATED. This is only informational
+          and the status will not change unless the client explicitly changes it.
+        output: true
+      - !ruby/object:Api::Type::Time
+        name: 'obsolete'
+        description: |
+          An optional RFC3339 timestamp on or after which the state of this
+          resource is intended to change to OBSOLETE. This is only informational
+          and the status will not change unless the client explicitly changes it.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'replacement'
+        description: |
+          The URL of the suggested replacement for a deprecated resource. The
+          suggested replacement resource must be the same kind of resource as
+          the deprecated resource.
+        output: true
+      - !ruby/object:Api::Type::Enum
+        name: 'state'
+        description: |
+          The deprecation state of this resource. This can be ACTIVE, DEPRECATED,
+          OBSOLETE, or DELETED. Operations which communicate the end of life date
+          for an image, can use ACTIVE. Operations which create a new resource using
+          a DEPRECATED resource will return successfully, but with a warning indicating
+          the deprecated resource and recommending its replacement. Operations which
+          use OBSOLETE or DELETED resources will be rejected and result in an error.
+        values:
+          - :ACTIVE
+          - :DEPRECATED
+          - :OBSOLETE
+          - :DELETED
+        output: true
+  - !ruby/object:Api::Type::Integer
+    name: 'minPoolProvisionedCapacityGb'
+    description: 'Minimum storage pool size in GB.'
+    output: true
+  - !ruby/object:Api::Type::Integer
+    name: 'maxPoolProvisionedCapacityGb'
+    description: 'Maximum storage pool size in GB.'
+    output: true
+  - !ruby/object:Api::Type::Integer
+    name: 'minPoolProvisionedIops'
+    description: 'Minimum provisioned IOPS.'
+    output: true
+  - !ruby/object:Api::Type::Integer
+    name: 'maxPoolProvisionedIops'
+    description: 'Maximum provisioned IOPS.'
+    output: true
+  - !ruby/object:Api::Type::Integer
+    name: 'minPoolProvisionedThroughput'
+    description: 'Minimum provisioned throughput.'
+    output: true
+  - !ruby/object:Api::Type::Integer
+    name: 'maxPoolProvisionedThroughput'
+    description: 'Maximum provisioned throughput.'
+    output: true
+  - !ruby/object:Api::Type::Array
+    name: 'supportedDiskTypes'
+    description: 'The list of disk types supported in this storage pool type.'
+    output: true
+    item_type: !ruby/object:Api::Type::ResourceRef
+      name: 'supportedDiskType'
+      resource: 'DiskType'
+      imports: 'selfLink'
+      description: 'A reference to a supported disk type of this storage pool'
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
+
+  
