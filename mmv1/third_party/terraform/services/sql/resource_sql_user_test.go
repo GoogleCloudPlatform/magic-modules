@@ -422,14 +422,14 @@ resource "google_sql_database_instance" "instance" {
 }
 
 # TODO: Remove with resolution of https://github.com/hashicorp/terraform-provider-google/issues/14233
-resource "time_sleep" "wait_30_seconds" {
+resource "time_sleep" "wait_60_seconds" {
   depends_on = [google_sql_database_instance.instance]
 
-  create_duration = "30s"
+  create_duration = "60s"
 }
 
 resource "google_sql_user" "user" {
-  depends_on = [time_sleep.wait_30_seconds]
+  depends_on = [time_sleep.wait_60_seconds]
   name     = "%s"
   instance = google_sql_database_instance.instance.name
   type     = "CLOUD_IAM_USER"
