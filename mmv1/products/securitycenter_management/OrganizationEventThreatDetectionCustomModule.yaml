@@ -15,7 +15,7 @@
 name: 'OrganizationEventThreatDetectionCustomModule'
 description: |
   Represents an instance of an Event Threat Detection custom module, including
-  its full module name, display name, enablement state, andlast updated time.
+  its full module name, display name, enablement state, and last updated time.
   You can create a custom module at the organization level only.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
@@ -50,10 +50,12 @@ parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
     immutable: true
-    required: true-
+    required: false
     url_param_only: true
+    default: 'global'
     description: |
-      location ID of the parent organization.
+      Location ID of the parent organization. If not provided, 'global' will be used as the default location.
+
 
 properties:
   - !ruby/object:Api::Type::String
