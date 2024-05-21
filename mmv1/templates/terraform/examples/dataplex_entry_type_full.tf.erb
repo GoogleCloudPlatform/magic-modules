@@ -1,3 +1,9 @@
+resource "google_dataplex_aspect_type" "<%= ctx[:primary_resource_id] %>" {
+  name         = "tf-test-aspect-type%{random_suffix}"
+  location     = "us-central1"
+  project = "<%= ctx[:test_env_vars]['project_name'] %>"
+}
+
 resource "google_dataplex_entry_type" "<%= ctx[:primary_resource_id] %>" {
   entry_type_id = "<%= ctx[:vars]['entry_type_name'] %>"
   project = "<%= ctx[:test_env_vars]['project_name'] %>"
@@ -6,4 +12,8 @@ resource "google_dataplex_entry_type" "<%= ctx[:primary_resource_id] %>" {
   labels = { "tag": "test-tf" }
   display_name = "terraform entry type"
   description = "entry type created by Terraform"
+
+  type_aliases = ["TABLE", "DATABASE"]
+  platform = "GCS"
+  system = "MariaDB"
 }
