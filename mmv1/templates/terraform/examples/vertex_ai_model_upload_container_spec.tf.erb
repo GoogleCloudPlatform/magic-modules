@@ -8,11 +8,28 @@ resource "google_vertex_ai_models" "<%= ctx[:primary_resource_id] %>" {
       name  = "env_one"
       value = "value_one"
     }
+    grpc_ports {
+      container_port = 8080
+    }
+    health_probe {
+      exec {
+        command = ["pwd"]
+      }
+      period_seconds  = 30
+      timeout_seconds = 1
+    }
     health_route = "/health"
     ports {
       container_port = 8080
     }
     predict_route = "/predict"
+    startup_probe {
+      exec {
+        command = ["pwd"]
+      }
+      period_seconds  = 30
+      timeout_seconds = 1
+    }
   }
   region       = "us-central1"
   artifact_uri = "gs://cloud-samples-data/vertex-ai/google-cloud-aiplatform-ci-artifacts/models/iris_xgboost/"

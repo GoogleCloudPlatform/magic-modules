@@ -353,9 +353,10 @@ properties:
             name: 'exec'
             description:  Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. Must be greater or equal to periodSeconds.
             properties:
-              - !ruby/object:Api::Type::String
+              - !ruby/object:Api::Type::Array
                 name: 'command'
                 description: Command is the command line to execute inside the container, the working directory for the command is root ('/') in the container's filesystem.
+                item_type: Api::Type::String
       - !ruby/object:Api::Type::NestedObject
         name: 'healthProbe'
         immutable: true
@@ -375,9 +376,10 @@ properties:
             name: 'exec'
             description:  Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. Must be greater or equal to periodSeconds.
             properties:
-              - !ruby/object:Api::Type::String
+              - !ruby/object:Api::Type::Array
                 name: 'command'
                 description: Command is the command line to execute inside the container, the working directory for the command is root ('/') in the container's filesystem.
+                item_type: Api::Type::String
   - !ruby/object:Api::Type::NestedObject
     name: 'encryptionSpec'
     immutable: true
