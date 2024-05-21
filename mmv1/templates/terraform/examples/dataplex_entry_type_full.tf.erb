@@ -5,9 +5,28 @@ resource "google_dataplex_aspect_type" "<%= ctx[:primary_resource_id] %>" {
 
   metadata_template = <<EOF
 {
-  "name": "CloudSQLDatabase",
+  "name": "tf-test-template",
   "type": "record",
-  "recordFields": []
+  "recordFields": [
+    {
+      "name": "type",
+      "type": "enum",
+      "annotations": {
+        "displayName": "Type",
+        "description": "Specifies the type of view represented by the entry."
+      },
+      "index": 1,
+      "constraints": {
+        "required": true
+      },
+      "enumValues": [
+        {
+          "name": "VIEW",
+          "index": 1
+        }
+      ]
+    }
+  ]
 }
 EOF
 }
