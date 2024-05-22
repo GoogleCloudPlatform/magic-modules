@@ -28,6 +28,7 @@ var FieldRules = []FieldRule{
 	fieldRule_GrowingMin,
 	fieldRule_ShrinkingMax,
 	fieldRule_RemovingDiffSuppress,
+	fieldRule_AddingSubfieldToConfigModeAttr,
 	fieldRule_ChangingFieldDataFormat,
 }
 
@@ -233,6 +234,38 @@ func fieldRule_RemovingDiffSuppress_func(old, new *schema.Schema, mc MessageCont
 	}
 	if old.DiffSuppressFunc != nil && new.DiffSuppressFunc == nil {
 		return populateMessageContext(mc.message, mc)
+	}
+	return nil
+}
+
+var fieldRule_AddingSubfieldToConfigModeAttr = FieldRule{
+	name:        "Adding a subfield to a SchemaConfigModeAttr field",
+	definition:  "Subfields cannot be added to fields with SchemaConfigModeAttr because they will be treated as required even if optional.",
+	message:     "Field {{field}} gained a subfield {{subfield}} when it has SchemaConfigModeAttr",
+	identifier:  "field-adding-subfield-to-config-mode-attr",
+	isRuleBreak: fieldRule_AddingSubfieldToConfigModeAttr_func,
+}
+
+func fieldRule_AddingSubfieldToConfigModeAttr_func(old, new *schema.Schema, mc MessageContext) *BreakingChange {
+	if old == nil || new == nil {
+		return nil
+	}
+	if new.ConfigMode == schema.SchemaConfigModeAttr {
+		newObj, ok := new.Elem.(*schema.Resource)
+		if !ok {
+			return nil
+		}
+		oldObj, ok := old.Elem.(*schema.Resource)
+		if !ok {
+			return nil
+		}
+		message := mc.message
+		for fieldName := range newObj.Schema {
+			if _, ok := oldObj.Schema[fieldName]; !ok {
+				message = strings.ReplaceAll(message, "{{subfield}}", fieldName)
+				return populateMessageContext(message, mc)
+			}
+		}
 	}
 	return nil
 }
