@@ -43,8 +43,8 @@ iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'topic'
 custom_code:
-  encoder: 'templates/terraform/encoders/no_send_name.go.erb'
-  update_encoder: 'templates/terraform/update_encoder/pubsub_topic.erb'
+  encoder: 'templates/terraform/encoders/go/no_send_name.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/go/pubsub_topic.tmpl'
 error_retry_predicates:
 
   - 'transport_tpg.PubsubTopicProjectNotReady'
@@ -83,8 +83,8 @@ properties:
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-    custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.erb'
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/go/resource_from_self_link.go.tmpl'
   - name: 'kmsKeyName'
     type: String
     description: "The resource name of the Cloud KMS CryptoKey to be used to protect access
@@ -95,10 +95,7 @@ The expected format is `projects/*/locations/*/keyRings/*/cryptoKeys/*`"
   - name: 'labels'
     type: KeyValueLabels
     description: "A set of key/value label pairs to assign to this Topic.
-
-
-**Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
-Please refer to the field `effective_labels` for all of the labels present on the resource."
+"
     immutable: false
   - name: 'messageStoragePolicy'
     type: NestedObject
