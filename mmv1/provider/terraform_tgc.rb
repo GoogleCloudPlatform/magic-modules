@@ -309,7 +309,9 @@ module Provider
                        ['converters/google/resources/job.go',
                         'third_party/tgc/job.go'],
                        ['converters/google/resources/service_account_key.go',
-                        'third_party/tgc/service_account_key.go']
+                        'third_party/tgc/service_account_key.go'],
+                       ['converters/google/resources/compute_target_pool.go',
+                        'third_party/tgc/compute_target_pool.go']
                      ])
     end
 
