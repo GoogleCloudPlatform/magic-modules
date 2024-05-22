@@ -1,0 +1,8 @@
+// Delay deletion of the Private Cloud if delationDelayHours value is set
+if deletionParameters := d.Get("deletion_parameters").([]interface{}); len(deletionParameters) > 0 {
+    delayHours := d.Get("deletion_parameters.0.delay_hours")
+    log.Printf("[DEBUG] Triggering delete of the Private Cloud with a delay of %v hours.\n", delayHours)
+    url = url + "?delay_hours=" + fmt.Sprintf("%v", delayHours) 
+} else {
+    log.Printf("[DEBUG] No deletion delay provided, triggering DELETE API without setting delay hours.\n")
+}
