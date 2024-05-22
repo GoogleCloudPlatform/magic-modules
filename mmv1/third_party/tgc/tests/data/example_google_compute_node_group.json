@@ -29,8 +29,16 @@
             "discovery_name": "NodeGroup",
             "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
             "data": {
+                "autoscalingPolicy": {
+                    "maxNodes": 10,
+                    "minNodes": 1,
+                    "mode": "ONLY_SCALE_OUT"
+                },
                 "description": "example google_compute_node_group for Terraform Google Provider",
-                "maintenancePolicy": "DEFAULT",
+                "maintenancePolicy": "RESTART_IN_PLACE",
+                "maintenanceWindow": {
+                    "startTime": "08:00"
+                },
                 "name": "soletenant-group",
                 "zone": "projects/{{.Provider.project}}/global/zones/us-central1-f"
             }
