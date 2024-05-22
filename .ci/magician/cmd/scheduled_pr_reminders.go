@@ -164,7 +164,7 @@ func execScheduledPrReminders(gh *github.Client) error {
 			state,
 			since,
 		)
-		sinceDays := daysDiff(since, time.Now())
+		sinceDays := businessDaysDiff(since, time.Now())
 		if shouldNotify(pr, state, sinceDays) {
 			comment, err := formatReminderComment(state, reminderCommentData{
 				PullRequest: pr,
@@ -353,8 +353,10 @@ func notificationState(pr *github.PullRequest, issueEvents []*github.IssueEvent,
 }
 
 // Calculates the number of PDT days between from and to (by calendar date, not # of hours).
-func daysDiff(from, to time.Time) int {
-	// Set minimum time here
+func businessDaysDiff(from, to time.Time) int {
+	if to.Before(from) {
+		from, to = to, from
+	}
 	pdtLoc, err := time.LoadLocation("America/Los_Angeles")
 	if err != nil {
 		panic(err)
@@ -364,11 +366,40 @@ func daysDiff(from, to time.Time) int {
 		from = minFrom
 	}
 	from = from.In(pdtLoc)
-	to = to.In(pdtLoc) //.Truncate(24 * time.Hour)
-	// Timezone-aware truncation to day
+	to = to.In(pdtLoc)
+	// Timezone-aware truncation to day start
 	from = time.Date(from.Year(), from.Month(), from.Day(), 0, 0, 0, 0, from.Location())
 	to = time.Date(to.Year(), to.Month(), to.Day(), 0, 0, 0, 0, to.Location())
-	return int(math.Floor(from.Sub(to).Abs().Hours() / 24))
+
+	// Calculate offset from previous Monday & truncate dates
+	fromOffset := int(from.Weekday()) - 1
+	if fromOffset == -1 {
+		fromOffset = 6
+	}
+	toOffset := int(to.Weekday()) - 1
+	if toOffset == -1 {
+		toOffset = 6
+	}
+
+	// Calculate # of business days for full weeks
+	from = from.AddDate(0, 0, -fromOffset)
+	to = to.AddDate(0, 0, -toOffset)
+	daysDiff := int(math.Floor(to.Sub(from).Hours()/24/7)) * 5
+
+	// Adjust days based on weekdays from the offsets. For "from", count weekends as
+	// 5 days (that is, they "become" the following Monday). For "to", count weekends
+	// as 4 days (that is, they "become" the previous Friday).
+	fromOffset = int(math.Min(float64(fromOffset), 5))
+	toOffset = int(math.Min(float64(toOffset), 4))
+	daysDiff += toOffset - fromOffset
+
+	// Special case: daysDiff may be < 0 if from & to are a saturday and sunday
+	// from the same weekend. Count this as 0.
+	if daysDiff < 0 {
+		daysDiff = 0
+	}
+
+	return daysDiff
 }
 
 func shouldNotify(pr *github.PullRequest, state pullRequestReviewState, sinceDays int) bool {
@@ -381,17 +412,17 @@ func shouldNotify(pr *github.PullRequest, state pullRequestReviewState, sinceDay
 		if _, ok := labels["disable-review-reminders"]; ok {
 			return false
 		}
-		return sinceDays > 0 && sinceDays%7 == 0
+		return sinceDays > 0 && sinceDays%5 == 0
 	case waitingForContributor:
 		if _, ok := labels["disable-automatic-closure"]; ok {
 			return false
 		}
-		return slices.Contains([]int{14, 28, 40, 42}, sinceDays)
+		return slices.Contains([]int{10, 20, 28, 30}, sinceDays)
 	case waitingForReview:
 		if _, ok := labels["disable-review-reminders"]; ok {
 			return false
 		}
-		return sinceDays == 2 || (sinceDays > 0 && sinceDays%7 == 0)
+		return sinceDays == 2 || (sinceDays > 0 && sinceDays%5 == 0)
 	}
 	return false
 }
@@ -409,8 +440,8 @@ func formatReminderComment(state pullRequestReviewState, data reminderCommentDat
 		return "", fmt.Errorf("state does not have corresponding template: %s", state.String())
 	}
 	tmpl, err := template.New("").Funcs(template.FuncMap{
-		"minus": func(a, b int) int {
-			return a - b
+		"weekdaysToWeeks": func(a int) int {
+			return a / 5
 		},
 	}).Parse(embeddedTemplate)
 	if err != nil {
@@ -430,7 +461,7 @@ func shouldClose(pr *github.PullRequest, state pullRequestReviewState, sinceDays
 			return false
 		}
 	}
-	return state == waitingForContributor && sinceDays >= 42
+	return state == waitingForContributor && sinceDays >= 30
 }
 
 func init() {

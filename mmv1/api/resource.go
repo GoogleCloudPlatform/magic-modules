@@ -1072,8 +1072,8 @@ func (r Resource) ExtractIdentifiers(url string) []string {
 	return result
 }
 
-func (r Resource) ImportIdFormatsFromIam() string {
-	var importFormat, transformed []string
+func (r Resource) RawImportIdFormatsFromIam() []string {
+	var importFormat []string
 
 	if r.IamPolicy != nil {
 		importFormat = r.IamPolicy.ImportFormat
@@ -1082,7 +1082,13 @@ func (r Resource) ImportIdFormatsFromIam() string {
 		importFormat = r.ImportFormat
 	}
 
-	importIdFormats := ImportIdFormats(importFormat, r.Identity, r.BaseUrl)
+	return ImportIdFormats(importFormat, r.Identity, r.BaseUrl)
+}
+
+func (r Resource) ImportIdRegexesFromIam() string {
+	var transformed []string
+
+	importIdFormats := r.RawImportIdFormatsFromIam()
 	for _, s := range importIdFormats {
 		s = google.Format2Regex(s)
 		s = strings.ReplaceAll(s, "<name>", fmt.Sprintf("<%s>", r.IamParentResourceName()))
@@ -1090,6 +1096,47 @@ func (r Resource) ImportIdFormatsFromIam() string {
 	}
 
 	return strings.Join(transformed[:], "\", \"")
+}
+
+func (r Resource) ImportIdFormatsFromIam() []string {
+	importIdFormats := r.RawImportIdFormatsFromIam()
+	var transformed []string
+	for _, s := range importIdFormats {
+		transformed = append(transformed, strings.ReplaceAll(s, "%", ""))
+	}
+	return transformed
+}
+
+func (r Resource) FirstIamImportIdFormat() string {
+	importIdFormats := r.ImportIdFormatsFromIam()
+	if len(importIdFormats) == 0 {
+		return ""
+	}
+	first := importIdFormats[0]
+	first = strings.ReplaceAll(first, "{{name}}", fmt.Sprintf("{{%s}}", google.Underscore(r.Name)))
+	return first
+}
+
+func (r Resource) IamTerraformName() string {
+	return fmt.Sprintf("%s_iam", r.TerraformName())
+}
+
+func (r Resource) IamSelfLinkProperties() []*Type {
+	var selfLink string
+	if r.IamPolicy != nil {
+		selfLink = r.IamPolicy.SelfLink
+	}
+	if selfLink == "" {
+		selfLink = r.SelfLinkUrl()
+	}
+
+	params := r.ExtractIdentifiers(selfLink)
+
+	urlProperties := google.Select(r.AllUserProperties(), func(p *Type) bool {
+		return slices.Contains(params, p.Name)
+	})
+
+	return urlProperties
 }
 
 func OrderProperties(props []*Type) []*Type {
