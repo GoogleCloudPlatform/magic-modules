@@ -74,7 +74,13 @@ func GetComputeInstanceGroupApiObject(d tpgresource.TerraformResourceData, confi
 	if err != nil {
 		return nil, err
 	} else if v, ok := d.GetOkExists("zone"); !tpgresource.IsEmptyValue(reflect.ValueOf(zoneProp)) && (ok || !reflect.DeepEqual(v, zoneProp)) {
-		obj["zone"] = zoneProp
+		url, err := tpgresource.ReplaceVars(d, config, "https://www.googleapis.com/compute/v1/projects/{{project}}/zones/")
+		if err != nil {
+			return nil, err
+		}
+		url = url + zoneProp.(string)
+
+		obj["zone"] =  url
 	}
 	selfLinkProp, err := expandComputeInstanceGroupSelfLink(d.Get("self_link"), d, config)
 	if err != nil {

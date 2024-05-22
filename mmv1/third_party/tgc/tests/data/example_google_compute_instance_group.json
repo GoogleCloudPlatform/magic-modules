@@ -1,6 +1,6 @@
 [
     {
-        "name": "//compute.googleapis.com/projects/{{.Provider.project}}/zones/us-central1-a/instanceGroups/placeholder-mh48EYYn",
+        "name": "//compute.googleapis.com/projects/{{.Provider.project}}/zones/us-central1-a/instanceGroups/placeholder-VM3roEyE",
         "asset_type": "compute.googleapis.com/InstanceGroup",
         "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
         "resource": {
@@ -11,10 +11,11 @@
             "data": {
                 "description": "Terraform test instance group",
                 "name": "terraform-test",
-                "zone": "us-central1-a"
+                "zone": "https://www.googleapis.com/compute/v1/projects/{{.Provider.project}}/zones/us-central1-a"
             }
         },
-        "ancestors": ["organizations/{{.OrgID}}"]
-
+        "ancestors": [
+            "organizations/{{.OrgID}}"
+        ]
     }
 ]
