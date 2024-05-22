@@ -18,7 +18,7 @@ func resourceDataflowJob() cai.ResourceConverter {
 }
 
 func GetDataflowJobCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]cai.Asset, error) {
-	name, err := cai.AssetName(d, config, "//dataflow.googleapis.com/v1b3/projects/{{project}}/locations/{{location}}/jobs")
+	name, err := cai.AssetName(d, config, "//dataflow.googleapis.com/projects/{{project}}/locations/{{location}}/jobs")
 	if err != nil {
 		return []cai.Asset{}, err
 	}
@@ -27,8 +27,8 @@ func GetDataflowJobCaiObject(d tpgresource.TerraformResourceData, config *transp
 			Name: name,
 			Type: DataflowJobAssetType,
 			Resource: &cai.AssetResource{
-				Version:              "v1b3",
-				DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/dataflow/v1b3/rest",
+				Version:              "v1beta3",
+				DiscoveryDocumentURI: "https://dataflow.googleapis.com/$discovery/rest?version=v1b3",
 				DiscoveryName:        "Job",
 				Data:                 obj,
 			},
