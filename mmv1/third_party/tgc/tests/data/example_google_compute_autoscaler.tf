@@ -67,11 +67,6 @@ resource "google_compute_instance_template" "foobar" {
   }
 }
 
-resource "google_compute_target_pool" "foobar" {
-  name = "my-target-pool-2"
-  region = "us-central1"
-}
-
 resource "google_compute_instance_group_manager" "foobar" {
   name = "my-igm"
   zone = "us-east1-c"
@@ -81,6 +76,5 @@ resource "google_compute_instance_group_manager" "foobar" {
     name               = "primary"
   }
 
-  target_pools       = [google_compute_target_pool.foobar.id]
   base_instance_name = "foobar"
 }
