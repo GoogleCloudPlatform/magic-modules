@@ -18,7 +18,7 @@ func resourceGkehubMembership() cai.ResourceConverter {
 }
 
 func GetGkehubMembershipCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]cai.Asset, error) {
-	name, err := cai.AssetName(d, config, "//gkehub.googleapis.com/projects/{{project}}/locations/{{location}}/memberships/my-membership")
+	name, err := cai.AssetName(d, config, "//gkehub.googleapis.com/projects/{{project}}/locations/{{location}}/memberships/basic")
 	if err != nil {
 		return []cai.Asset{}, err
 	}
@@ -28,7 +28,7 @@ func GetGkehubMembershipCaiObject(d tpgresource.TerraformResourceData, config *t
 			Type: GkehubMembershipAssetType,
 			Resource: &cai.AssetResource{
 				Version:              "v1",
-				DiscoveryDocumentURI: "https://gkehub.googleapis.com/$discovery/rest?version=v1",
+				DiscoveryDocumentURI: "https://gkehub.googleapis.com/$discovery/rest",
 				DiscoveryName:        "Membership",
 				Data:                 obj,
 			},

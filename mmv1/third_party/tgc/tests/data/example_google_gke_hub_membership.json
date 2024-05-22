@@ -1,14 +1,39 @@
 [
     {
-        "name": "//gkehub.googleapis.com/projects/{{.Provider.project}}/locations/us-central1-a/memberships/my-membership",
+        "name": "//container.googleapis.com/projects/{{.Provider.project}}/locations/us-central1-a/clusters/basic-cluster",
+        "asset_type": "container.googleapis.com/Cluster",
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+        "resource": {
+            "version": "v1",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/container/v1/rest",
+            "discovery_name": "Cluster",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "initialNodeCount": 1,
+                "location": "us-central1-a",
+                "name": "basic-cluster",
+                "network": "projects/{{.Provider.project}}/global/networks/default",
+                "subnetwork": "projects/{{.Provider.project}}/global/networks/default"
+            }
+        },
+        "ancestors": [
+            "organizations/{{.OrgID}}"
+        ]
+    },
+    {
+        "name": "//gkehub.googleapis.com/projects/{{.Provider.project}}/locations/us-west1/memberships/basic",
         "asset_type": "gkehub.googleapis.com/Membership",
         "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
         "resource": {
             "version": "v1",
-            "discovery_document_uri": "https://gkehub.googleapis.com/$discovery/rest?version=v1",
+            "discovery_document_uri": "https://gkehub.googleapis.com/$discovery/rest",
             "discovery_name": "Membership",
             "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
-            "data": {}
+            "data": {
+                "labels": {
+                    "env": "test"
+                }
+            }
         },
         "ancestors": [
             "organizations/{{.OrgID}}"
