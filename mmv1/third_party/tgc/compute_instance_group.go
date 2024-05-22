@@ -10,7 +10,7 @@ import (
 
 const ComputeInstanceGroupAssetType string = "compute.googleapis.com/InstanceGroup"
 
-func resourceComputeInstanceGroup() cai.ResourceConverter {
+func resourceConverterComputeInstanceGroup() cai.ResourceConverter {
 	return cai.ResourceConverter{
 		AssetType: ComputeInstanceGroupAssetType,
 		Convert:   GetComputeInstanceGroupCaiObject,
