@@ -136,7 +136,7 @@ virtual_fields:
     name: 'deletion_protection'
     default_value: true
     description: |
-      Whether Terraform will be prevented from destroying the CertificateAuthority. 
+      Whether Terraform will be prevented from destroying the CertificateAuthority.
       When a`terraform destroy` or `terraform apply` would delete the CertificateAuthority,
       the command will fail if this field is not set to false in Terraform state.
   - !ruby/object:Api::Type::Enum
