@@ -312,6 +312,7 @@ module "project-services" {
     "securesourcemanager.googleapis.com",
     "securetoken.googleapis.com",
     "securitycenter.googleapis.com",
+    "securitycentermanagement.googleapis.com",
     "securityposture.googleapis.com",
     "serviceconsumermanagement.googleapis.com",
     "servicecontrol.googleapis.com",
