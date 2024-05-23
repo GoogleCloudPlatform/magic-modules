@@ -152,13 +152,9 @@ type Examples struct {
 	// Or a config with two fine grained resources that have a race condition during create
 	SkipVcr bool `yaml:"skip_vcr"`
 
-	// (DEPRECATED) Use ExternalProviders instead
-	// Set for false by default. Set to true if you need to pull external provider for your
-	// testcase. Think before adding as there is latency and adds an external dependency to
+	// Specify which external providers are needed for the testcase.
+	// Think before adding as there is latency and adds an external dependency to
 	// your test so avoid if you can.
-	PullExternal bool `yaml:"pull_external"`
-
-	// Specify which external providers are needed
 	ExternalProviders []string `yaml:"external_providers"`
 
 	DocumentationHCLText string
@@ -416,8 +412,10 @@ func (e *Examples) ResourceType(terraformName string) string {
 // check :skip_docs, type: TrueClass
 // check :config_path, type: String, default: "templates/terraform/examples///{name}.tf.erb"
 // check :skip_vcr, type: TrueClass
-// check :pull_external, type: :boolean, default: false
 // }
+
+// TODO
+// validate_external_providers
 
 // func (e *Examples) merge(other) {
 // result = self.class.new
