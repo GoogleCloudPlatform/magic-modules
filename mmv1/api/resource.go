@@ -1121,7 +1121,7 @@ func (r Resource) IamTerraformName() string {
 	return fmt.Sprintf("%s_iam", r.TerraformName())
 }
 
-func (r Resource) IamSelfLinkProperties() []*Type {
+func (r Resource) IamSelfLinkIdentifiers() []string {
 	var selfLink string
 	if r.IamPolicy != nil {
 		selfLink = r.IamPolicy.SelfLink
@@ -1130,13 +1130,59 @@ func (r Resource) IamSelfLinkProperties() []*Type {
 		selfLink = r.SelfLinkUrl()
 	}
 
-	params := r.ExtractIdentifiers(selfLink)
+	return r.ExtractIdentifiers(selfLink)
+}
+
+func (r Resource) IamSelfLinkProperties() []*Type {
+	params := r.IamSelfLinkIdentifiers()
 
 	urlProperties := google.Select(r.AllUserProperties(), func(p *Type) bool {
 		return slices.Contains(params, p.Name)
 	})
 
 	return urlProperties
+}
+
+func (r Resource) IamAttributes() []string {
+	var attributes []string
+	ids := r.IamSelfLinkIdentifiers()
+	for i, p := range ids {
+		var attribute string
+		if i == len(ids)-1 {
+			attribute = r.IamPolicy.ParentResourceAttribute
+			if attribute == "" {
+				attribute = p
+			}
+		} else {
+			attribute = p
+		}
+		attributes = append(attributes, attribute)
+	}
+	return attributes
+}
+
+func (r Resource) ExamplePrimaryResourceId() string {
+	examples := google.Reject(r.Examples, func(e resource.Examples) bool {
+		return e.SkipTest
+	})
+	examples = google.Reject(examples, func(e resource.Examples) bool {
+		return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(e.MinVersion)) < 0)
+	})
+
+	if len(examples) == 0 {
+		examples = google.Reject(r.Examples, func(e resource.Examples) bool {
+			return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(e.MinVersion)) < 0)
+		})
+	}
+	return examples[0].PrimaryResourceId
+}
+
+func (r Resource) IamParentSourceType() string {
+	t := r.IamPolicy.ParentResourceType
+	if t == "" {
+		t = r.TerraformName()
+	}
+	return t
 }
 
 func OrderProperties(props []*Type) []*Type {
@@ -1163,17 +1209,17 @@ func CompareByName(a, b *Type) int {
 func (r Resource) GetPropertyUpdateMasksGroups() map[string][]string {
 	maskGroups := map[string][]string{}
 	for _, prop := range r.AllUserProperties() {
-		if (prop.FlattenObject) {
+		if prop.FlattenObject {
 			prop.GetNestedPropertyUpdateMasksGroups(maskGroups, prop.ApiName)
-		}else if (len(prop.UpdateMaskFields) > 0){
+		} else if len(prop.UpdateMaskFields) > 0 {
 			maskGroups[google.Underscore(prop.Name)] = prop.UpdateMaskFields
-		}else{
+		} else {
 			maskGroups[google.Underscore(prop.Name)] = []string{prop.ApiName}
 		}
 	}
 	return maskGroups
 }
 
-func (r Resource) CustomTemplate(templatePath string) string {
-	return resource.ExecuteTemplate(&r, templatePath)
+func (r Resource) CustomTemplate(templatePath string, appendNewline bool) string {
+	return resource.ExecuteTemplate(&r, templatePath, appendNewline)
 }
