@@ -1182,18 +1182,19 @@ func resource{{ $.ResourceName -}}Encoder(d *schema.ResourceData, meta interface
 }
 {{- end }}
 {{- if $.CustomCode.UpdateEncoder }}
+
 func resource{{ $.ResourceName -}}UpdateEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
     {{- $.CustomTemplate $.CustomCode.UpdateEncoder -}}
 }
 {{- end }}
 {{- if $.CustomCode.Decoder }}
 func resource{{ $.ResourceName -}}Decoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
-    {{- $.CustomTemplate $.CustomCode.Decoder -}}
+    {{ $.CustomTemplate $.CustomCode.Decoder -}}
 }
 {{- end }}
 {{- if $.CustomCode.PostCreateFailure }}
 func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
-    {{- $.CustomTemplate $.CustomCode.PostCreateFailure -}}
+    {{ $.CustomTemplate $.CustomCode.PostCreateFailure -}}
 }
 {{- end }}
 {{/* TODO nested query */}}
