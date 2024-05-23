@@ -118,47 +118,50 @@ func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}
 		AccountId:      aid,
 		ServiceAccount: sa,
 	}
+	d.SetId(fmt.Sprintf("projects/%s/serviceAccounts/%s@%s.iam.gserviceaccount.com", project, aid, project))
 
 	sa, err = config.NewIamClient(userAgent).Projects.ServiceAccounts.Create("projects/"+project, r).Do()
 	if err != nil {
 		gerr, ok := err.(*googleapi.Error)
 		alreadyExists := ok && gerr.Code == 409 && d.Get("create_ignore_already_exists").(bool)
 		if alreadyExists {
-			sa = &iam.ServiceAccount{
-				Name: fmt.Sprintf("projects/%s/serviceAccounts/%s@%s.iam.gserviceaccount.com", project, aid, project),
-			}
+			return resourceGoogleServiceAccountRead(d, meta)
 		} else {
 			return fmt.Errorf("Error creating service account: %s", err)
 		}
 	}
 
-	d.SetId(sa.Name)
+	email := sa.Name[strings.LastIndex(sa.Name, "/")+1:]
 
-	err = transport_tpg.Retry(transport_tpg.RetryOptions{
-		RetryFunc: func() (operr error) {
-			_, saerr := config.NewIamClient(userAgent).Projects.ServiceAccounts.Get(d.Id()).Do()
-			return saerr
-		},
-		Timeout: d.Timeout(schema.TimeoutCreate),
-		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{
-			transport_tpg.IsNotFoundRetryableError("service account creation"),
-			transport_tpg.IsForbiddenIamServiceAccountRetryableError("service account creation"),
-		},
-	})
-
-	if err != nil {
-		return fmt.Errorf("Error reading service account after creation: %s", err)
+	if err := d.Set("email", email); err != nil {
+		return fmt.Errorf("Error setting email: %s", err)
+	}
+	if err := d.Set("unique_id", sa.UniqueId); err != nil {
+		return fmt.Errorf("Error setting unique_id: %s", err)
+	}
+	if err := d.Set("account_id", aid); err != nil {
+		return fmt.Errorf("Error setting account_id: %s", err)
+	}
+	if err := d.Set("name", sa.Name); err != nil {
+		return fmt.Errorf("Error setting name: %s", err)
+	}
+	if err := d.Set("display_name", displayName); err != nil {
+		return fmt.Errorf("Error setting display_name: %s", err)
+	}
+	if err := d.Set("description", description); err != nil {
+		return fmt.Errorf("Error setting description: %s", err)
+	}
+	if err := d.Set("member", "serviceAccount:"+email); err != nil {
+		return fmt.Errorf("Error setting member: %s", err)
 	}
 
-	// We poll until the resource is found due to eventual consistency issue
-	// on part of the api https://cloud.google.com/iam/docs/overview#consistency
-	err = transport_tpg.PollingWaitTime(resourceServiceAccountPollRead(d, meta), transport_tpg.PollCheckForExistence, "Creating Service Account", d.Timeout(schema.TimeoutCreate), 1)
-
-	if err != nil {
-		return err
+	if d.Get("disabled") == nil {
+		if err := d.Set("disabled", false); err != nil {
+			return fmt.Errorf("Error setting disabled: %s", err)
+		}
 	}
 
-	return resourceGoogleServiceAccountRead(d, meta)
+	return nil
 }
 
 func resourceServiceAccountPollRead(d *schema.ResourceData, meta interface{}) transport_tpg.PollReadFunc {
