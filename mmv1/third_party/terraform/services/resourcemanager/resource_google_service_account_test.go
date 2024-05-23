@@ -2,12 +2,15 @@ package resourcemanager_test
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"google.golang.org/api/iam/v1"
 )
 
 // Test that a service account resource can be created, updated, and destroyed
@@ -97,28 +100,16 @@ func TestAccServiceAccount_createIgnoreAlreadyExists(t *testing.T) {
 	desc := "test description"
 	project := envvar.GetTestProjectFromEnv()
 	expectedEmail := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", accountId, project)
+
+	// Create a service account before prior to applying the terraform config
+	config := acctest.GoogleProviderConfig(t)
+	testAccCreateServiceAccount(project, accountId, desc, displayName, config)
+
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
-			// The first step creates a basic service account
-			{
-				Config: testAccServiceAccountBasic(accountId, displayName, desc),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"google_service_account.acceptance", "project", project),
-					resource.TestCheckResourceAttr(
-						"google_service_account.acceptance", "member", "serviceAccount:"+expectedEmail),
-				),
-				Destroy: false,
-			},
-			{
-				ResourceName:      "google_service_account.acceptance",
-				ImportStateId:     fmt.Sprintf("projects/%s/serviceAccounts/%s", project, expectedEmail),
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			// The second step creates a new resource that duplicates with the existing service account.
+			// Create a new resource that duplicates with the existing service account.
 			{
 				Config: testAccServiceAccountCreateIgnoreAlreadyExists(accountId, displayName, desc, true),
 				Check: resource.ComposeTestCheckFunc(
@@ -211,6 +202,7 @@ func TestAccServiceAccount_Disabled(t *testing.T) {
 						"google_service_account.acceptance", "project", project),
 					testAccStoreServiceAccountUniqueId(&uniqueId),
 				),
+				RefreshState: false, // Eventual consistency makes an immediate refresh flaky
 			},
 			{
 				ResourceName:      "google_service_account.acceptance",
@@ -240,6 +232,25 @@ func testAccStoreServiceAccountUniqueId(uniqueId *string) resource.TestCheckFunc
 		*uniqueId = s.RootModule().Resources["google_service_account.acceptance"].Primary.Attributes["unique_id"]
 		return nil
 	}
+}
+
+func testAccCreateServiceAccount(project, name, desc, displayName string, config *transport_tpg.Config) error {
+	userAgent := strings.Join([]string{config.UserAgent, "Terraform Test"}, " ")
+	sa := &iam.ServiceAccount{
+		DisplayName: displayName,
+		Description: desc,
+	}
+
+	r := &iam.CreateServiceAccountRequest{
+		AccountId:      name,
+		ServiceAccount: sa,
+	}
+
+	_, err := config.NewIamClient(userAgent).Projects.ServiceAccounts.Create("projects/"+project, r).Do()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func testAccServiceAccountBasic(account, name, desc string) string {

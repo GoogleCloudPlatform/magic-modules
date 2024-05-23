@@ -139,47 +139,14 @@ func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}
 	if err := d.Set("unique_id", sa.UniqueId); err != nil {
 		return fmt.Errorf("Error setting unique_id: %s", err)
 	}
-	if err := d.Set("account_id", aid); err != nil {
-		return fmt.Errorf("Error setting account_id: %s", err)
-	}
 	if err := d.Set("name", sa.Name); err != nil {
 		return fmt.Errorf("Error setting name: %s", err)
-	}
-	if err := d.Set("display_name", displayName); err != nil {
-		return fmt.Errorf("Error setting display_name: %s", err)
-	}
-	if err := d.Set("description", description); err != nil {
-		return fmt.Errorf("Error setting description: %s", err)
 	}
 	if err := d.Set("member", "serviceAccount:"+email); err != nil {
 		return fmt.Errorf("Error setting member: %s", err)
 	}
 
-	if d.Get("disabled") == nil {
-		if err := d.Set("disabled", false); err != nil {
-			return fmt.Errorf("Error setting disabled: %s", err)
-		}
-	}
-
 	return nil
-}
-
-func resourceServiceAccountPollRead(d *schema.ResourceData, meta interface{}) transport_tpg.PollReadFunc {
-	return func() (map[string]interface{}, error) {
-		config := meta.(*transport_tpg.Config)
-		userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
-		if err != nil {
-			return nil, err
-		}
-
-		// Confirm the service account exists
-		_, err = config.NewIamClient(userAgent).Projects.ServiceAccounts.Get(d.Id()).Do()
-
-		if err != nil {
-			return nil, err
-		}
-		return nil, nil
-	}
 }
 
 func resourceGoogleServiceAccountRead(d *schema.ResourceData, meta interface{}) error {
