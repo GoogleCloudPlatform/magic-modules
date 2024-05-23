@@ -309,9 +309,7 @@ module Provider
                        ['converters/google/resources/service_account_key.go',
                         'third_party/tgc/service_account_key.go'],
                        ['converters/google/resources/compute_target_pool.go',
-                        'third_party/tgc/compute_target_pool.go'],
-                       ['converters/google/resources/gkehub_membership.go',
-                        'third_party/tgc/gkehub_membership.go']
+                        'third_party/tgc/compute_target_pool.go']
                      ])
     end
 

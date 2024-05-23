@@ -25,8 +25,8 @@
         "asset_type": "gkehub.googleapis.com/Membership",
         "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
         "resource": {
-            "version": "v1",
-            "discovery_document_uri": "https://gkehub.googleapis.com/$discovery/rest",
+            "version": "v1beta1",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/gkehub/v1beta1/rest",
             "discovery_name": "Membership",
             "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
             "data": {
