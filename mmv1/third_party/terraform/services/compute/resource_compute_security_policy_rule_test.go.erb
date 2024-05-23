@@ -333,7 +333,7 @@ func TestAccComputeSecurityPolicyRule_modifyExprOptions(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeSecurityPolicyRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
-      {
+			{
 				Config: testAccComputeSecurityPolicyRule_withRuleExpr(context),
 			},
 			{
@@ -349,7 +349,7 @@ func TestAccComputeSecurityPolicyRule_modifyExprOptions(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-      {
+			{
 				Config: testAccComputeSecurityPolicyRule_modifyExprOptions(context),
 			},
 			{

@@ -165,7 +165,7 @@ func ResourceComputeSecurityPolicy() *schema.Resource {
 											Schema: map[string]*schema.Schema{
 												"recaptcha_options": {
 													Type:     schema.TypeList,
-													Optional: true,
+													Required: true,
 													MaxItems: 1,
 													Description: `reCAPTCHA configuration options to be applied for the rule. If the rule does not evaluate reCAPTCHA tokens, this field has no effect.`,
 													Elem: &schema.Resource{
@@ -1063,7 +1063,7 @@ func expandSecurityPolicyMatch(configured []interface{}) *compute.SecurityPolicy
 		VersionedExpr: data["versioned_expr"].(string),
 		Config:        expandSecurityPolicyMatchConfig(data["config"].([]interface{})),
 		Expr:          expandSecurityPolicyMatchExpr(data["expr"].([]interface{})),
-    ExprOptions:   expandSecurityPolicyMatchExprOptions(data["expr_options"].([]interface{})),
+		ExprOptions:   expandSecurityPolicyMatchExprOptions(data["expr_options"].([]interface{})),
 	}
 }
 
@@ -1104,28 +1104,28 @@ func expandSecurityPolicyMatchExprOptions(exprOptions []interface{}) *compute.Se
 	}
 }
 
-func expandSecurityPolicyMatchExprOptionsRecaptchaOptions(RecaptchaOptions []interface{}) *compute.SecurityPolicyRuleMatcherExprOptionsRecaptchaOptions {
-	if len(RecaptchaOptions) == 0 || RecaptchaOptions[0] == nil {
+func expandSecurityPolicyMatchExprOptionsRecaptchaOptions(recaptchaOptions []interface{}) *compute.SecurityPolicyRuleMatcherExprOptionsRecaptchaOptions {
+	if len(recaptchaOptions) == 0 || recaptchaOptions[0] == nil {
 		return nil
 	}
 
-	data := RecaptchaOptions[0].(map[string]interface{})
+	data := recaptchaOptions[0].(map[string]interface{})
 
   actionTokenKeysInterface := data["action_token_site_keys"].([]interface{})
-	actionTokenKeysString := make([]string, len(actionTokenKeysInterface))
+	actionTokenKeys := make([]string, len(actionTokenKeysInterface))
 	for i, v := range actionTokenKeysInterface {
-		actionTokenKeysString[i] = v.(string)
+		actionTokenKeys[i] = v.(string)
 	}
 
 	sessionTokenKeysInterface := data["session_token_site_keys"].([]interface{})
-	sessionTokenKeysString := make([]string, len(sessionTokenKeysInterface))
+	sessionTokenKeys := make([]string, len(sessionTokenKeysInterface))
 	for i, v := range sessionTokenKeysInterface {
-		sessionTokenKeysString[i] = v.(string)
+		sessionTokenKeys[i] = v.(string)
 	}
 
 	return &compute.SecurityPolicyRuleMatcherExprOptionsRecaptchaOptions{
-		ActionTokenSiteKeys:  actionTokenKeysString,
-		SessionTokenSiteKeys: sessionTokenKeysString,
+		ActionTokenSiteKeys:  actionTokenKeys,
+		SessionTokenSiteKeys: sessionTokenKeys,
 	}
 }
 
@@ -1208,7 +1208,7 @@ func flattenMatch(match *compute.SecurityPolicyRuleMatcher) []map[string]interfa
 		"versioned_expr": match.VersionedExpr,
 		"config":         flattenMatchConfig(match.Config),
 		"expr":           flattenMatchExpr(match),
-    "expr_options":   flattenMatchExprOptions(match.ExprOptions),
+		"expr_options":   flattenMatchExprOptions(match.ExprOptions),
 	}
 
 	return []map[string]interface{}{data}

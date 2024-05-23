@@ -590,7 +590,7 @@ func TestAccComputeSecurityPolicy_modifyExprOptions(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeSecurityPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
-      {
+			{
 				Config: testAccComputeSecurityPolicy_withRule(spName),
 			},
 			{
@@ -606,7 +606,7 @@ func TestAccComputeSecurityPolicy_modifyExprOptions(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-      {
+			{
 				Config: testAccComputeSecurityPolicy_modifyExprOptions(spName),
 			},
 			{
@@ -1839,7 +1839,7 @@ resource "google_compute_security_policy" "policy" {
 					action_token_site_keys = [
 						"placeholder-recaptcha-action-site-key-09",
 						"placeholder-recaptcha-action-site-key-08",
-            "placeholder-recaptcha-action-site-key-07"
+						"placeholder-recaptcha-action-site-key-07"
 					]
 					session_token_site_keys = [
 						"placeholder-recaptcha-session-site-key-1"

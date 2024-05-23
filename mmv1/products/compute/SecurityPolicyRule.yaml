@@ -130,6 +130,7 @@ properties:
         properties:
           - !ruby/object:Api::Type::NestedObject
             name: 'recaptchaOptions'
+            required: true
             description: |
               reCAPTCHA configuration options to be applied for the rule. If the rule does not evaluate reCAPTCHA tokens, this field has no effect.
             properties:
