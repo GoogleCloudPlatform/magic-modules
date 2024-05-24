@@ -118,6 +118,7 @@ func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}
 		AccountId:      aid,
 		ServiceAccount: sa,
 	}
+
 	d.SetId(fmt.Sprintf("projects/%s/serviceAccounts/%s@%s.iam.gserviceaccount.com", project, aid, project))
 
 	sa, err = config.NewIamClient(userAgent).Projects.ServiceAccounts.Create("projects/"+project, r).Do()
@@ -125,20 +126,36 @@ func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}
 		gerr, ok := err.(*googleapi.Error)
 		alreadyExists := ok && gerr.Code == 409 && d.Get("create_ignore_already_exists").(bool)
 		if alreadyExists {
-			return resourceGoogleServiceAccountRead(d, meta)
+			err = transport_tpg.Retry(transport_tpg.RetryOptions{
+				RetryFunc: func() (operr error) {
+					sa, saerr := config.NewIamClient(userAgent).Projects.ServiceAccounts.Get(d.Id()).Do()
+
+					if saerr != nil {
+						return saerr
+					}
+					return populateResourceData(d, sa)
+				},
+				Timeout: d.Timeout(schema.TimeoutCreate),
+				ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{
+					transport_tpg.IsNotFoundRetryableError("service account creation"),
+				},
+			})
+
+			return nil
 		} else {
 			return fmt.Errorf("Error creating service account: %s", err)
 		}
 	}
 
 	// We poll until the resource is found due to eventual consistency issue
-	// on part of the api https://cloud.google.com/iam/docs/overview#consistency
-	err = transport_tpg.PollingWaitTime(
+	// on part of the api https://cloud.google.com/iam/docs/overview#consistency.
+	// Wait for at least 3 successful responses in a row to ensure result is consistent.
+	transport_tpg.PollingWaitTime(
 		resourceServiceAccountPollRead(d, meta),
 		transport_tpg.PollCheckForExistence,
 		"Creating Service Account",
 		d.Timeout(schema.TimeoutCreate),
-		5, // Number of consecutive occurences.
+		3, // Number of consecutive occurences.
 	)
 
 	email := sa.Name[strings.LastIndex(sa.Name, "/")+1:]
@@ -159,6 +176,8 @@ func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}
 	return nil
 }
 
+// PollReadFunc for checking Service Account existence.
+// If resourceData is not nil, it will be updated with the response.
 func resourceServiceAccountPollRead(d *schema.ResourceData, meta interface{}) transport_tpg.PollReadFunc {
 	return func() (map[string]interface{}, error) {
 		config := meta.(*transport_tpg.Config)
@@ -190,6 +209,10 @@ func resourceGoogleServiceAccountRead(d *schema.ResourceData, meta interface{}) 
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Service Account %q", d.Id()))
 	}
 
+	return populateResourceData(d, sa)
+}
+
+func populateResourceData(d *schema.ResourceData, sa *iam.ServiceAccount) error {
 	if err := d.Set("email", sa.Email); err != nil {
 		return fmt.Errorf("Error setting email: %s", err)
 	}
