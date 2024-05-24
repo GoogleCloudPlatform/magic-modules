@@ -825,7 +825,6 @@ resource "google_cloudbuildv2_connection" "primary" {
 `, context)
 }
 
-
 func testAccCloudbuildv2Connection_BbcConnection(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_cloudbuildv2_connection" "primary" {
