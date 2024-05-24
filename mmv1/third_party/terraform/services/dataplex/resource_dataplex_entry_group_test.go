@@ -26,7 +26,7 @@ func TestAccDataplexEntryGroup_update(t *testing.T) {
 				Config: testAccDataplexEntryGroup_full(context),
 			},
 			{
-				ResourceName:            "google_dataplex_entry_group.test_entry_group_full",
+				ResourceName:            "google_dataplex_entry_group.test_entry_group",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location", "entry_group_id", "labels", "terraform_labels"},
@@ -35,7 +35,7 @@ func TestAccDataplexEntryGroup_update(t *testing.T) {
 				Config: testAccDataplexEntryGroup_update(context),
 			},
 			{
-				ResourceName:            "google_dataplex_entry_group.test_entry_group_basic",
+				ResourceName:            "google_dataplex_entry_group.test_entry_group",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location", "entry_group_id", "labels", "terraform_labels"},
@@ -46,24 +46,24 @@ func TestAccDataplexEntryGroup_update(t *testing.T) {
 
 func testAccDataplexEntryGroup_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_dataplex_entry_group" "test_entry_group_full" {
-  entry_group_id = "tf-test-entry-group-full%{random_suffix}"
+resource "google_dataplex_entry_group" "test_entry_group" {
+  entry_group_id = "tf-test-entry-group%{random_suffix}"
   project = "%{project_name}"
   location = "us-central1"
-
-  labels = { "tag": "test-tf" }
-  display_name = "terraform entry group"
-  description = "entry group created by Terraform"
 }
 `, context)
 }
 
 func testAccDataplexEntryGroup_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_dataplex_entry_group" "test_entry_group_basic" {
-  entry_group_id = "tf-test-entry-group-basic%{random_suffix}"
+resource "google_dataplex_entry_group" "test_entry_group" {
+  entry_group_id = "tf-test-entry-group%{random_suffix}"
   project = "%{project_name}"
   location = "us-central1"
+	
+  labels = { "tag": "test-tf" }
+  display_name = "terraform entry group"
+  description = "entry group created by Terraform"
 }
 `, context)
 }
