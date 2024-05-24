@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
-	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func DataSourceGoogleComputeSecurityPolicy() *schema.Resource {
@@ -14,7 +14,7 @@ func DataSourceGoogleComputeSecurityPolicy() *schema.Resource {
 	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceComputeSecurityPolicy().Schema)
 
 	// Set 'Optional' schema elements
-	tpgresource.AddRequiredFieldsToSchema(dsSchema, "name")
+	tpgresource.AddOptionalFieldsToSchema(dsSchema, "name")
 	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project")
 	tpgresource.AddOptionalFieldsToSchema(dsSchema, "self_link")
 
