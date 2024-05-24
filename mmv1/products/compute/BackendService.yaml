@@ -1311,3 +1311,8 @@ properties:
           The default value is 1.0.
         default_value: 1.0
         diff_suppress_func: 'suppressWhenDisabled'
+  - !ruby/object:Api::Type::String
+    name: 'serviceLbPolicy'
+    description: |
+      URL to networkservices.ServiceLbPolicy resource.
+      Can only be set if load balancing scheme is EXTERNAL, EXTERNAL_MANAGED, INTERNAL_MANAGED or INTERNAL_SELF_MANAGED and the scope is global.
