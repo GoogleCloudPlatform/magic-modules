@@ -6,7 +6,7 @@ id_format: projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}
 name: Cluster
-description: Description
+description: An Apache Kafka cluster deployed in a location. Fix this?
 min_version: beta
 update_verb: :PATCH
 update_mask: true
@@ -21,7 +21,17 @@ examples:
     primary_resource_id: "example"
     min_version: beta
     vars:
-      cluster_id: "my-cluster"
+      cluster_id: 'my-cluster'
+      key_name: 'example-key'
+      keyring_name: 'example-keyring'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'managedkafka_cluster_cmek'
+    primary_resource_id: 'example'
+    min_version: beta
+    vars:
+      cluster_id: 'my-cluster'
+      key_name: 'example-key'
+      key_ring_name: 'example-key-ring'
 properties:
   - !ruby/object:Api::Type::NestedObject
     properties:

@@ -1,4 +1,6 @@
+<% autogen_exception -%>
 package managedkafka_test
+<% unless version == 'ga' -%>
 
 import (
 	"testing"
@@ -104,3 +106,4 @@ data "google_project" "project" {
 }
 `, context)
 }
+<% end -%>
