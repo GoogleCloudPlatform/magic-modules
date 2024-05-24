@@ -1,0 +1,15 @@
+resource "google_storage_bucket" "bucket" {
+  name                        = "<%= ctx[:vars]['bucket_name'] %>"
+  location                    = "EU"
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_managed_folder" "parent" {
+  bucket = google_storage_bucket.bucket.name
+  name   = "parent/"
+}
+
+resource "google_storage_managed_folder" "<%= ctx[:primary_resource_id] %>" {
+  bucket = google_storage_bucket.bucket.name
+  name   = "${google_storage_managed_folder.parent.name}nested/"
+}

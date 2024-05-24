@@ -1,0 +1,14 @@
+func <%= object.resource_name -%>DiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+	// Standard IAM policies use the expanded base URL for the
+	// resource's last parameter. Managed folders have a unique
+	// endpoint format
+	// ('b/{{bucket}}/managedFolders/{{%managed_folder}}'), so we
+	// adjust extraction to correctly identify the folder name.
+
+	oldParts := strings.SplitN(old, "/managedFolders/", 2)
+	if len(oldParts) == 2 {
+		oldFolderName := oldParts[1] + "/"
+		return oldFolderName == new
+	}
+	return false
+}
