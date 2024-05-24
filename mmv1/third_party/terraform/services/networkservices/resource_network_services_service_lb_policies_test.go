@@ -73,3 +73,46 @@ resource "google_network_services_service_lb_policies" "foobar" {
 }
 `, policyName)
 }
+
+func TestAccNetworkServicesLBPolicies_linkBackend(t *testing.T) {
+	t.Parallel()
+
+	randomString := acctest.RandString(t, 10)
+	policyName := fmt.Sprintf("tf-test-lb-policy-%s", randomString)
+	backendName := fmt.Sprintf("tf-test-backend-service-%s", randomString)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckNetworkServicesServiceLbPoliciesDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkServicesLBPolicies_linkBackend(policyName, backendName),
+			},
+			{
+				ResourceName:            "google_network_services_service_lb_policies.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccNetworkServicesLBPolicies_linkBackend(policyName string, backendName string) string {
+	return fmt.Sprintf(`
+resource "google_network_services_service_lb_policies" "default" {
+  name        = "%s"
+  location    = "global"
+  description = "my description"
+}
+
+resource "google_compute_backend_service" "default" {
+	name                  = "%s"
+	description           = "my description"
+	load_balancing_scheme = "INTERNAL_SELF_MANAGED"
+	protocol              = "HTTP"
+	service_lb_policy     = "//networkservices.googleapis.com/${google_network_services_service_lb_policies.default.id}"
+}
+`, policyName, backendName)
+}

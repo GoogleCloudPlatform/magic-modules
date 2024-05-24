@@ -67,11 +67,6 @@ parameters:
     description: |
       The location of the service lb policy.
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'selfLink'
-    description: |
-      Server-defined URL of this resource.
-    output: true
   - !ruby/object:Api::Type::Time
     name: 'createTime'
     description: |
@@ -94,7 +89,6 @@ properties:
     description: |
       The type of load balancing algorithm to be used. The default behavior is WATERFALL_BY_REGION.
     values:
-      - :LOAD_BALANCING_ALGORITHM_UNSPECIFIED
       - :SPRAY_TO_REGION
       - :SPRAY_TO_WORLD
       - :WATERFALL_BY_REGION
