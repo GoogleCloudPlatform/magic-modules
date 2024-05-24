@@ -1,6 +1,6 @@
 resource "google_scc_management_organization_event_threat_detection_custom_module" "<%= ctx[:primary_resource_id] %>" {
   organization = "<%= ctx[:test_env_vars]['org_id'] %>"
-  location = "<%= ctx[:vars]['location'] %>"
+  location = "global"
   display_name = "<%= ctx[:vars]['display_name'] %>"
   enablement_state = "ENABLED"
   type = "<%= ctx[:vars]['type'] %>"

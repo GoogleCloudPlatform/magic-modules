@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: 'ManagementOrganizationEventThreatDetectionCustomModule'
+name: 'OrganizationEventThreatDetectionCustomModule'
 description: |
   Represents an instance of an Event Threat Detection custom module, including
   its full module name, display name, enablement state, and last updated time.
