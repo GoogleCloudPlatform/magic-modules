@@ -27,7 +27,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/security-command-center/docs/reference/rest/v2/organizations.locations.muteConfigs'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: 'scc_organization_mute_config'
+    name: 'scc_v2_organization_mute_config'
     primary_resource_id: 'default'
     vars:
       organization_mute_config_id: 'my-config'
