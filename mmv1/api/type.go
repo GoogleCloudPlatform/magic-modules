@@ -1296,18 +1296,18 @@ func (t Type) NamespaceProperty() string {
 
 func (t Type) GetNestedPropertyUpdateMasksGroups(maskGroups map[string][]string, maskPrefix string) {
 	for _, prop := range t.AllProperties() {
-		if (prop.FlattenObject) {
+		if prop.FlattenObject {
 			prop.GetNestedPropertyUpdateMasksGroups(maskGroups, prop.ApiName)
-		}else if (len(prop.UpdateMaskFields) > 0){
+		} else if len(prop.UpdateMaskFields) > 0 {
 			maskGroups[google.Underscore(prop.Name)] = prop.UpdateMaskFields
-		}else{
+		} else {
 			maskGroups[google.Underscore(prop.Name)] = []string{maskPrefix + prop.ApiName}
 		}
 	}
 }
 
-func (t Type) CustomTemplate(templatePath string) string {
-	return resource.ExecuteTemplate(&t, templatePath)
+func (t Type) CustomTemplate(templatePath string, appendNewline bool) string {
+	return resource.ExecuteTemplate(&t, templatePath, appendNewline)
 }
 
 func (t *Type) GetIdFormat() string {
