@@ -1,6 +1,6 @@
 <% autogen_exception -%>
-<% unless version == 'ga' -%>
 package managedkafka_test
+<% unless version == 'ga' -%>
 
 import (
 	"testing"
@@ -106,4 +106,6 @@ data "google_project" "project" {
 }
 `, context)
 }
+<% else %>
+// Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
 <% end -%>
