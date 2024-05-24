@@ -225,7 +225,7 @@ func TestValidateProjectNumber(t *testing.T) {
 	x := []StringValidationTestCase{
 		// No errors
 		{TestName: "basic with numbers only", Value: "12345"},
-		
+
 		// With errors
 		{TestName: "empty", Value: "", ExpectError: true},
 		{TestName: "with alphabets", Value: "testproject", ExpectError: true},
