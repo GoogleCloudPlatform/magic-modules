@@ -299,7 +299,7 @@ properties:
           List of consumer projects that are allowed to create PSC endpoints to service-attachments to this instance.
           These should be specified as project numbers only.
         item_validation: !ruby/object:Provider::Terraform::Validation
-          function: 'verify.ValidateProjectNumber()'
+          regex: '^\d+$'
       - !ruby/object:Api::Type::String
         name: 'pscDnsName'
         output: true
