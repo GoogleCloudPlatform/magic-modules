@@ -38,6 +38,7 @@ func ResourceConverters() map[string][]cai.ResourceConverter {
 		"google_artifact_registry_repository":             {artifactregistry.ResourceConverterArtifactRegistryRepository()},
 		"google_alloydb_cluster":                          {alloydb.ResourceConverterAlloydbCluster()},
 		"google_alloydb_instance":                         {alloydb.ResourceConverterAlloydbInstance()},
+		"google_apikeys_key":                              {resourceConverterApikeysKey()},
 		"google_compute_address":                          {compute.ResourceConverterComputeAddress()},
 		"google_compute_autoscaler":                       {compute.ResourceConverterComputeAutoscaler()},
 		"google_compute_firewall":                         {compute.ResourceConverterComputeFirewall()},
