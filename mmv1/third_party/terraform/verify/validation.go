@@ -65,6 +65,7 @@ var (
 
 	ProjectNameInDNSFormRegex = "[-a-z0-9\\.]{1,63}"
 	ProjectNameRegex          = "^[A-Za-z0-9-'\"\\s!]{4,30}$"
+	ProjectNumberRegex        = "^\\d+$"
 
 	// Valid range for Cloud Router ASN values as per RFC6996
 	// https://tools.ietf.org/html/rfc6996
@@ -243,6 +244,18 @@ func ValidateProjectID() schema.SchemaValidateFunc {
 		if !regexp.MustCompile("^" + ProjectRegex + "$").MatchString(value) {
 			errors = append(errors, fmt.Errorf(
 				"%q project_id must be 6 to 30 with lowercase letters, digits, hyphens and start with a letter. Trailing hyphens are prohibited.", value))
+		}
+		return
+	}
+}
+
+func ValidateProjectNumber() schema.SchemaValidateFunc {
+	return func(v interface{}, k string) (ws []string, errors []error) {
+		value := v.(string)
+
+		if !regexp.MustCompile(ProjectNumberRegex).MatchString(value) {
+			errors = append(errors, fmt.Errorf(
+				"%q project number must be digits only.", value))
 		}
 		return
 	}
