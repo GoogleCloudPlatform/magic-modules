@@ -3,7 +3,18 @@ resource "google_vertex_ai_models" "<%= ctx[:primary_resource_id] %>" {
   description  = "basic upload model"
 
   // version_aliases = ["projects/vertex-ai-models-test/locations/us-central1/models/8741822227772604416@v1"]
-  model_id = "id_upload_test"
+  // model_id = "id_upload_test"
+
+  // deployed_models {
+  //   deployed_model_id = "test"
+  //   endpoint = "test"
+  // }
+  encryption_spec {
+    kms_key_name = "test"
+  }
+  // supported_export_formats {
+  //   exportable_content = "test"
+  // }
 
   labels       = {
     "key1" : "value1",
