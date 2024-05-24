@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: 'OrganizationEventThreatDetectionCustomModule'
+name: 'ManagementOrganizationEventThreatDetectionCustomModule'
 description: |
   Represents an instance of an Event Threat Detection custom module, including
   its full module name, display name, enablement state, and last updated time.
@@ -28,7 +28,7 @@ update_verb: :PATCH
 update_mask: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "scc_organization_event_threat_detection_custom_module"
+    name: "scc_management_organization_event_threat_detection_custom_module"
     primary_resource_id: "example"
     # Has a handwritten update test
     skip_test: true
@@ -52,7 +52,7 @@ parameters:
     immutable: true
     required: false
     url_param_only: true
-    default: 'global'
+    default_value: 'global'
     description: |
       Location ID of the parent organization. If not provided, 'global' will be used as the default location.
 
@@ -67,7 +67,7 @@ properties:
       Its format is "organizations/{organization}/locations/{location}/eventThreatDetectionCustomModules/{eventThreatDetectionCustomModule}".
   - !ruby/object:Api::Type::String
     name: 'config'
-    required: true
+    required: false
     custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
     custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
     state_func:
@@ -80,7 +80,7 @@ properties:
       function: 'validation.StringIsJSON'
   - !ruby/object:Api::Type::Enum
     name: 'enablementState'
-    required: true
+    required: false
     description: |
       The state of enablement for the module at the given level of the hierarchy.
     values:
@@ -89,7 +89,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'type'
     immutable: true
-    required: true
+    required: false
     description: |
       Immutable. Type for the module. e.g. CONFIGURABLE_BAD_IP.
   - !ruby/object:Api::Type::String

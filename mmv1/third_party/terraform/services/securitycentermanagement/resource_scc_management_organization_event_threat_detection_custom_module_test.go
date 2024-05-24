@@ -14,7 +14,7 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func TestAccSecurityCenterOrganizationEventThreatDetectionCustomModule(t *testing.T) {
+func TestAccSecurityCenterManagementOrganizationEventThreatDetectionCustomModule(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -26,22 +26,22 @@ func TestAccSecurityCenterOrganizationEventThreatDetectionCustomModule(t *testin
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccSecurityCenterOrganizationEventThreatDetectionCustomModuleDestroyProducer(t),
+		CheckDestroy:             testAccSecurityCenterManagementOrganizationEventThreatDetectionCustomModuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSecurityCenterOrganizationEventThreatDetectionCustomModule__sccOrganizationCustomModuleExample(context),
+				Config: testAccSecurityCenterManagementOrganizationEventThreatDetectionCustomModule__sccOrganizationCustomModuleExample(context),
 			},
 			{
-				ResourceName:            "google_scc_organization_event_threat_detection_custom_module.example",
+				ResourceName:            "google_scc_management_organization_event_threat_detection_custom_module.example",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"organization", "location"},
 			},
 			{
-				Config: testAccSecurityCenterOrganizationEventThreatDetectionCustomModule_sccOrganizationCustomModuleUpdate(context),
+				Config: testAccSecurityCenterManagementOrganizationEventThreatDetectionCustomModule_sccOrganizationCustomModuleUpdate(context),
 			},
 			{
-				ResourceName:            "google_scc_organization_event_threat_detection_custom_module.example",
+				ResourceName:            "google_scc_management_organization_event_threat_detection_custom_module.example",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"organization", "location"},
@@ -50,14 +50,11 @@ func TestAccSecurityCenterOrganizationEventThreatDetectionCustomModule(t *testin
 	})
 }
 
-func testAccSecurityCenterOrganizationEventThreatDetectionCustomModule__sccOrganizationCustomModuleExample(context map[string]interface{}) string {
+func testAccSecurityCenterManagementOrganizationEventThreatDetectionCustomModule__sccOrganizationCustomModuleExample(context map[string]interface{}) string {
 	location := context["location"].(string)
-	if location == "" {
-		location = "global"
-	}
 	context["location"] = location
 	return acctest.Nprintf(`
-resource "google_scc_organization_event_threat_detection_custom_module" "example" {
+resource "google_scc_management_organization_event_threat_detection_custom_module" "example" {
 	organization = "%{org_id}"
 	location = "%{location}"
 	display_name = "tf_test_custom_module%{random_suffix}"
@@ -78,14 +75,11 @@ resource "google_scc_organization_event_threat_detection_custom_module" "example
 `, context)
 }
 
-func testAccSecurityCenterOrganizationEventThreatDetectionCustomModule_sccOrganizationCustomModuleUpdate(context map[string]interface{}) string {
+func testAccSecurityCenterManagementOrganizationEventThreatDetectionCustomModule_sccOrganizationCustomModuleUpdate(context map[string]interface{}) string {
 	location := context["location"].(string)
-	if location == "" {
-		location = "global"
-	}
 	context["location"] = location
 	return acctest.Nprintf(`
-resource "google_scc_organization_event_threat_detection_custom_module" "example" {
+resource "google_scc_management_organization_event_threat_detection_custom_module" "example" {
 	organization = "%{org_id}"
 	location = "%{location}"
 	display_name = "tf_test_custom_module%{random_suffix}_updated"
@@ -105,10 +99,10 @@ resource "google_scc_organization_event_threat_detection_custom_module" "example
 `, context)
 }
 
-func testAccSecurityCenterOrganizationEventThreatDetectionCustomModuleDestroyProducer(t *testing.T) func(s *terraform.State) error {
+func testAccSecurityCenterManagementOrganizationEventThreatDetectionCustomModuleDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		for name, rs := range s.RootModule().Resources {
-			if rs.Type != "google_scc_organization_event_threat_detection_custom_module" {
+			if rs.Type != "google_scc_management_organization_event_threat_detection_custom_module" {
 				continue
 			}
 			if strings.HasPrefix(name, "data.") {
@@ -118,9 +112,6 @@ func testAccSecurityCenterOrganizationEventThreatDetectionCustomModuleDestroyPro
 			config := acctest.GoogleProviderConfig(t)
 
 			location := rs.Primary.Attributes["location"]
-			if location == "" {
-				location = "global"
-			}
 
 			url, err := tpgresource.ReplaceVarsForTest(config, rs, fmt.Sprintf("{{SecurityCenterBasePath}}organizations/{{organization}}/locations/%s/eventThreatDetectionCustomModules/{{name}}", location))
 
@@ -142,7 +133,7 @@ func testAccSecurityCenterOrganizationEventThreatDetectionCustomModuleDestroyPro
 				UserAgent: config.UserAgent,
 			})
 			if err == nil {
-				return fmt.Errorf("OrganizationEventThreatDetectionCustomModule still exists at %s", url)
+				return fmt.Errorf("ManagementOrganizationEventThreatDetectionCustomModule still exists at %s", url)
 			}
 		}
 
