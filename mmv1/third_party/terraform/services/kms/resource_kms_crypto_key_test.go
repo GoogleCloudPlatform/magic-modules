@@ -320,7 +320,7 @@ func TestAccKmsCryptoKey_destroyDuration(t *testing.T) {
 func TestAccKmsCryptoKey_keyAccessJustificationsPolicy(t *testing.T) {
 	t.Parallel()
 
-	projectId := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	projectId := envvar.GetTestProjectFromEnv()
 	projectOrg := envvar.GetTestOrgFromEnv(t)
 	location := envvar.GetTestRegionFromEnv()
 	projectBillingAccount := envvar.GetTestBillingAccountFromEnv(t)
@@ -334,7 +334,7 @@ func TestAccKmsCryptoKey_keyAccessJustificationsPolicy(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleKmsCryptoKey_keyAccessJustificationsPolicy(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, allowedAccessReason),
+				Config: testGoogleKmsCryptoKey_keyAccessJustificationsPolicy(projectId, keyRingName, cryptoKeyName, allowedAccessReason),
 			},
 			{
 				ResourceName:            "google_kms_crypto_key.crypto_key",
@@ -343,7 +343,7 @@ func TestAccKmsCryptoKey_keyAccessJustificationsPolicy(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			{
-				Config: testGoogleKmsCryptoKey_keyAccessJustificationsPolicy(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, updatedAllowedAccessReason),
+				Config: testGoogleKmsCryptoKey_keyAccessJustificationsPolicy(projectId, keyRingName, cryptoKeyName, updatedAllowedAccessReason),
 			},
 			{
 				ResourceName:            "google_kms_crypto_key.crypto_key",
@@ -836,22 +836,14 @@ resource "google_kms_crypto_key" "crypto_key" {
 `, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName)
 }
 
-func testGoogleKmsCryptoKey_keyAccessJustificationsPolicy(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, allowed_access_reason string) string {
+func testGoogleKmsCryptoKey_keyAccessJustificationsPolicy(projectId, keyRingName, cryptoKeyName, allowed_access_reason string) string {
 	return fmt.Sprintf(`
-resource "google_project" "acceptance" {
-  name            = "%s"
-  project_id      = "%s"
-  org_id          = "%s"
-  billing_account = "%s"
-}
-
-resource "google_project_service" "acceptance" {
-  project = google_project.acceptance.project_id
-  service = "cloudkms.googleapis.com"
+data "google_project" "project" {
+  project_id = "%s"
 }
 
 resource "google_kms_key_ring" "key_ring" {
-  project  = google_project_service.acceptance.project
+  project  = data.google_project.project.project_id
   name     = "%s"
   location = "us-central1"
 }
@@ -866,7 +858,7 @@ resource "google_kms_crypto_key" "crypto_key" {
     allowed_access_reasons = ["%s"]
   }
 }
-`, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, allowed_access_reason)
+`, projectId, keyRingName, cryptoKeyName, allowed_access_reason)
 }
 
 func testGoogleKmsCryptoKey_importOnly(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName string) string {
