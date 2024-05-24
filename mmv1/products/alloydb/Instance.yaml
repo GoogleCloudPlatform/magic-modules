@@ -290,7 +290,7 @@ properties:
         output: true
         description: |
           The service attachment created when Private Service Connect (PSC) is enabled for the instance.
-          The name of the resource will be in the format of 
+          The name of the resource will be in the format of
           `projects/<alloydb-tenant-project-number>/regions/<region-name>/serviceAttachments/<service-attachment-name>`
       - !ruby/object:Api::Type::Array
         name: allowedConsumerProjects
