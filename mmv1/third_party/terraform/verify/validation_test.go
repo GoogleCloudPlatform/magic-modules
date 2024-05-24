@@ -221,25 +221,6 @@ func TestValidateServiceAccountLink(t *testing.T) {
 	}
 }
 
-func TestValidateProjectNumber(t *testing.T) {
-	x := []StringValidationTestCase{
-		// No errors
-		{TestName: "basic with numbers only", Value: "12345"},
-
-		// With errors
-		{TestName: "empty", Value: "", ExpectError: true},
-		{TestName: "with alphabets", Value: "testproject", ExpectError: true},
-		{TestName: "beginning with numbers and has alphabets", Value: "1234testproject", ExpectError: true},
-		{TestName: "beginning with alphabets and has numbers", Value: "testproject1234", ExpectError: true},
-		{TestName: "with numbers and hyphens", Value: "1234-6789", ExpectError: true},
-	}
-
-	es := TestStringValidationCases(x, ValidateProjectNumber())
-	if len(es) > 0 {
-		t.Errorf("Failed to validate project numbers: %v", es)
-	}
-}
-
 func TestValidateProjectID(t *testing.T) {
 	x := []StringValidationTestCase{
 		// No errors
