@@ -131,6 +131,16 @@ func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}
 		}
 	}
 
+	// We poll until the resource is found due to eventual consistency issue
+	// on part of the api https://cloud.google.com/iam/docs/overview#consistency
+	err = transport_tpg.PollingWaitTime(
+		resourceServiceAccountPollRead(d, meta),
+		transport_tpg.PollCheckForExistence,
+		"Creating Service Account",
+		d.Timeout(schema.TimeoutCreate),
+		5, // Number of consecutive occurences.
+	)
+
 	email := sa.Name[strings.LastIndex(sa.Name, "/")+1:]
 
 	if err := d.Set("email", email); err != nil {
@@ -147,6 +157,24 @@ func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}
 	}
 
 	return nil
+}
+
+func resourceServiceAccountPollRead(d *schema.ResourceData, meta interface{}) transport_tpg.PollReadFunc {
+	return func() (map[string]interface{}, error) {
+		config := meta.(*transport_tpg.Config)
+		userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+		if err != nil {
+			return nil, err
+		}
+
+		// Confirm the service account exists
+		_, err = config.NewIamClient(userAgent).Projects.ServiceAccounts.Get(d.Id()).Do()
+
+		if err != nil {
+			return nil, err
+		}
+		return nil, nil
+	}
 }
 
 func resourceGoogleServiceAccountRead(d *schema.ResourceData, meta interface{}) error {

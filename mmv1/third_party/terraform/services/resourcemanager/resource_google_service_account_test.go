@@ -101,12 +101,14 @@ func TestAccServiceAccount_createIgnoreAlreadyExists(t *testing.T) {
 	project := envvar.GetTestProjectFromEnv()
 	expectedEmail := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", accountId, project)
 
-	// Create a service account before prior to applying the terraform config
-	config := acctest.GoogleProviderConfig(t)
-	testAccCreateServiceAccount(project, accountId, desc, displayName, config)
-
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		PreCheck: func() {
+			acctest.AccTestPreCheck(t)
+
+			// Create a service account before prior to applying the terraform config
+			config := acctest.GoogleProviderConfig(t)
+			testAccCreateServiceAccount(project, accountId, desc, displayName, config)
+		},
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			// Create a new resource that duplicates with the existing service account.
@@ -202,7 +204,6 @@ func TestAccServiceAccount_Disabled(t *testing.T) {
 						"google_service_account.acceptance", "project", project),
 					testAccStoreServiceAccountUniqueId(&uniqueId),
 				),
-				RefreshState: false, // Eventual consistency makes an immediate refresh flaky
 			},
 			{
 				ResourceName:      "google_service_account.acceptance",
