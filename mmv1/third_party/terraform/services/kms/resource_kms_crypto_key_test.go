@@ -321,9 +321,7 @@ func TestAccKmsCryptoKey_keyAccessJustificationsPolicy(t *testing.T) {
 	t.Parallel()
 
 	projectId := envvar.GetTestProjectFromEnv()
-	projectOrg := envvar.GetTestOrgFromEnv(t)
 	location := envvar.GetTestRegionFromEnv()
-	projectBillingAccount := envvar.GetTestBillingAccountFromEnv(t)
 	keyRingName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	cryptoKeyName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	allowedAccessReason := "CUSTOMER_INITIATED_SUPPORT"
@@ -353,7 +351,7 @@ func TestAccKmsCryptoKey_keyAccessJustificationsPolicy(t *testing.T) {
 			},
 			// Use a separate TestStep rather than a CheckDestroy because we need the project to still exist.
 			{
-				Config: testGoogleKmsCryptoKey_removed(projectId, projectOrg, projectBillingAccount, keyRingName),
+				Config: testGoogleKmsCryptoKey_removedProjectOverride(projectId, keyRingName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleKmsCryptoKeyWasRemovedFromState("google_kms_crypto_key.crypto_key"),
 					testAccCheckGoogleKmsCryptoKeyVersionsDestroyed(t, projectId, location, keyRingName, cryptoKeyName),
@@ -805,6 +803,16 @@ resource "google_kms_key_ring" "key_ring" {
 `, projectId, projectId, projectOrg, projectBillingAccount, keyRingName)
 }
 
+func testGoogleKmsCryptoKey_removedProjectOverride(projectId, keyRingName string) string {
+	return fmt.Sprintf(`
+resource "google_kms_key_ring" "key_ring" {
+  project  = "%s"
+  name     = "%s"
+  location = "us-central1"
+}
+`, projectId, keyRingName)
+}
+
 func testGoogleKmsCryptoKey_destroyDuration(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
@@ -838,6 +846,11 @@ resource "google_kms_crypto_key" "crypto_key" {
 
 func testGoogleKmsCryptoKey_keyAccessJustificationsPolicy(projectId, keyRingName, cryptoKeyName, allowed_access_reason string) string {
 	return fmt.Sprintf(`
+provider "google" {
+  user_project_override = true
+  project = "%s"
+}
+
 data "google_project" "project" {
   project_id = "%s"
 }
@@ -858,7 +871,7 @@ resource "google_kms_crypto_key" "crypto_key" {
     allowed_access_reasons = ["%s"]
   }
 }
-`, projectId, keyRingName, cryptoKeyName, allowed_access_reason)
+`, projectId, projectId, keyRingName, cryptoKeyName, allowed_access_reason)
 }
 
 func testGoogleKmsCryptoKey_importOnly(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName string) string {
