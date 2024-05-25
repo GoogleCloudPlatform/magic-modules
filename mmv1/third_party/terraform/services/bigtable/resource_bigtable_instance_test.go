@@ -485,7 +485,7 @@ func TestAccBigtableInstance_forceDestroyBackups(t *testing.T) {
 			},
 			{
 				// Try to delete the instance after force_destroy = true was set before
-				Config: testAccBigtableInstance_forceDestroy_deleteInstance(), // Empty config; trying to delete the instance with force_destroy = true previously
+				Config: testAccBigtableInstance_forceDestroy_deleteInstance(),
 			},
 		},
 	})
