@@ -465,7 +465,18 @@ func TestAccBigtableInstance_forceDestroyBackups(t *testing.T) {
 				Config: testAccBigtableInstance_forceDestroy(context, false),
 			},
 			{
-				Config:      testAccBigtableInstance_forceDestroy_deleteInstance(), // Empty config; trying to delete the instance with force_destroy = false previously
+				ResourceName:            "google_bigtable_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type", "labels", "terraform_labels"}, // we don't read instance type back
+				Check: resource.ComposeTestCheckFunc(
+					// Make sure field is set, and is set to false after import
+					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "force_destroy", "false"),
+				),
+			},
+			{
+				// Try to delete the instance after force_destroy = false was set before
+				Config:      testAccBigtableInstance_forceDestroy_deleteInstance(),
 				ExpectError: regexp.MustCompile("until all user backups have been deleted"),
 			},
 			{
@@ -473,6 +484,7 @@ func TestAccBigtableInstance_forceDestroyBackups(t *testing.T) {
 				Config: testAccBigtableInstance_forceDestroy(context, true),
 			},
 			{
+				// Try to delete the instance after force_destroy = true was set before
 				Config: testAccBigtableInstance_forceDestroy_deleteInstance(), // Empty config; trying to delete the instance with force_destroy = true previously
 			},
 		},
