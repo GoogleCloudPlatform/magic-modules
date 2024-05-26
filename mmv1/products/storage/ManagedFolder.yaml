@@ -15,7 +15,7 @@
 name: 'ManagedFolder'
 kind: 'storage#ManagedFolder'
 base_url: b/{{bucket}}/managedFolders
-self_link: b/{{bucket}}/managedFolders/{{name}}
+self_link: b/{{bucket}}/managedFolders/{{%name}}
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/storage/docs/managed-folders'
@@ -27,10 +27,10 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'google_storage_managed_folder'
     primary_resource_id: 'managed_folder'
-    primary_resource_name: 'fmt.Sprintf("tf-test-bucket-name%s", context["random_suffix"]), fmt.Sprintf("tf-test-managed-folder-name%s", context["random_suffix"])'
+    primary_resource_name: 'fmt.Sprintf("tf-test-bucket-name%s", context["random_suffix"]), fmt.Sprintf("tf-test-managed/folder/name%s", context["random_suffix"])'
     vars:
       bucket_name: 'bucket-name'
-      managed_folder_name: "managed-folder-name"
+      managed_folder_name: "managed/folder/name"
 immutable: true
 skip_sweeper: true
 iam_policy: !ruby/object:Api::Resource::IamPolicy
@@ -56,6 +56,8 @@ properties:
     name: 'name'
     description: 'The name of the managed folder, expressed as a path. For example, example-dir or example-dir/example-dir1.'
     required: true
+    validation: !ruby/object:Provider::Terraform::Validation
+      regex: '/$'
   - !ruby/object:Api::Type::Time
     name: 'createTime'
     description: |
