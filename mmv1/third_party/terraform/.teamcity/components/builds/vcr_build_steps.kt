@@ -140,7 +140,7 @@ fun BuildSteps.runVcrTestRecordingSetup() {
 fun BuildSteps.runVcrTestRecordingSaveCassettes() {
     step(ScriptBuildStep {
         name = "Tasks after running VCR tests: if in RECORDING mode, push new cassettes to GCS"
-        executionMode = "RUN_ON_FAILURE"
+        executionMode = BuildStep.ExecutionMode.RUN_ON_FAILURE
         scriptContent = """
             #!/bin/bash
             echo "VCR Testing: Post-test steps"
