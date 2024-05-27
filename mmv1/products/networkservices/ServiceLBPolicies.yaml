@@ -53,6 +53,7 @@ examples:
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-lb-policy'
+      backend_name: 'my-lb-backend'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
