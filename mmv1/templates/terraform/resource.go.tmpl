@@ -63,7 +63,7 @@ import (
 )
 
 {{if $.CustomCode.Constants -}} 
-    {{- $.CustomTemplate $.CustomCode.Constants -}}
+    {{- $.CustomTemplate $.CustomCode.Constants true -}}
 {{- end}}
 
 func Resource{{ $.ResourceName -}}() *schema.Resource {
@@ -746,7 +746,7 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
 {{template "UpdateMask" $ -}}
 {{end}}
 {{- if $.CustomCode.PreUpdate -}}
-    {{- $.CustomTemplate $.CustomCode.PreUpdate -}}
+    {{- $.CustomTemplate $.CustomCode.PreUpdate true -}}
 {{end}}
 {{if $.NestedQuery -}}
 {{if $.NestedQuery.ModifyByPatch -}}
@@ -1161,7 +1161,7 @@ func resource{{ $.ResourceName }}Import(d *schema.ResourceData, meta interface{}
             {{- end }}
         {{- end }}
         {{- if $.CustomCode.PostImport }}
-            {{- $.CustomTemplate $.CustomCode.PostImport -}}
+            {{- $.CustomTemplate $.CustomCode.PostImport true -}}
         {{- end }}
 
     return []*schema.ResourceData{d}, nil
@@ -1178,22 +1178,23 @@ func resource{{ $.ResourceName }}Import(d *schema.ResourceData, meta interface{}
 {{- end }}
 {{- if $.CustomCode.Encoder }}
 func resource{{ $.ResourceName -}}Encoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
-    {{- $.CustomTemplate $.CustomCode.Encoder -}}
+    {{- $.CustomTemplate $.CustomCode.Encoder true -}}
 }
 {{- end }}
 {{- if $.CustomCode.UpdateEncoder }}
+
 func resource{{ $.ResourceName -}}UpdateEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
-    {{- $.CustomTemplate $.CustomCode.UpdateEncoder -}}
+    {{- $.CustomTemplate $.CustomCode.UpdateEncoder true -}}
 }
 {{- end }}
 {{- if $.CustomCode.Decoder }}
 func resource{{ $.ResourceName -}}Decoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
-    {{- $.CustomTemplate $.CustomCode.Decoder -}}
+    {{ $.CustomTemplate $.CustomCode.Decoder true -}}
 }
 {{- end }}
 {{- if $.CustomCode.PostCreateFailure }}
 func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
-    {{- $.CustomTemplate $.CustomCode.PostCreateFailure -}}
+    {{ $.CustomTemplate $.CustomCode.PostCreateFailure true -}}
 }
 {{- end }}
 {{/* TODO nested query */}}
