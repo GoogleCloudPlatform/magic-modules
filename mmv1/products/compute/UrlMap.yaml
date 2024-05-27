@@ -337,8 +337,8 @@ properties:
               api_name: errorResponseRules
               description: |
                 Specifies rules for returning error responses.
-                In a given policy, if you specify rules for both a range of error codes as well as rules for specific error codes then rules with specific error codes have a higher priority. 
-                For example, assume that you configure a rule for 401 (Un-authorized) code, and another for all 4 series error codes (4XX). 
+                In a given policy, if you specify rules for both a range of error codes as well as rules for specific error codes then rules with specific error codes have a higher priority.
+                For example, assume that you configure a rule for 401 (Un-authorized) code, and another for all 4 series error codes (4XX).
                 If the backend service returns a 401, then the rule for 401 will be applied. However if the backend service returns a 403, the rule for 4xx takes effect.
               item_type: !ruby/object:Api::Type::NestedObject
                 properties:
@@ -363,7 +363,7 @@ properties:
                   - !ruby/object:Api::Type::Integer
                     name: 'overrideResponseCode'
                     description: |
-                      The HTTP status code returned with the response containing the custom error content. 
+                      The HTTP status code returned with the response containing the custom error content.
                       If overrideResponseCode is not supplied, the same response code returned by the original backend bucket or backend service is returned to the client.
             - !ruby/object:Api::Type::ResourceRef
               name: 'errorService'
@@ -482,7 +482,7 @@ properties:
                 min_version: beta
                 description: |
                   customErrorResponsePolicy specifies how the Load Balancer returns error responses when BackendServiceor BackendBucket responds with an error.
-                  If a policy for an error code is not configured for the PathRule, a policy for the error code configured in pathMatcher.defaultCustomErrorResponsePolicy is applied. If one is not specified in pathMatcher.defaultCustomErrorResponsePolicy, the policy configured in UrlMap.defaultCustomErrorResponsePolicy takes effect.      
+                  If a policy for an error code is not configured for the PathRule, a policy for the error code configured in pathMatcher.defaultCustomErrorResponsePolicy is applied. If one is not specified in pathMatcher.defaultCustomErrorResponsePolicy, the policy configured in UrlMap.defaultCustomErrorResponsePolicy takes effect.    
                   For example, consider a UrlMap with the following configuration:
                     
                   UrlMap.defaultCustomErrorResponsePolicy are configured with policies for 5xx and 4xx errors
@@ -496,8 +496,8 @@ properties:
                     api_name: errorResponseRules
                     description: |
                       Specifies rules for returning error responses.
-                      In a given policy, if you specify rules for both a range of error codes as well as rules for specific error codes then rules with specific error codes have a higher priority. 
-                      For example, assume that you configure a rule for 401 (Un-authorized) code, and another for all 4 series error codes (4XX). 
+                      In a given policy, if you specify rules for both a range of error codes as well as rules for specific error codes then rules with specific error codes have a higher priority.
+                      For example, assume that you configure a rule for 401 (Un-authorized) code, and another for all 4 series error codes (4XX).
                       If the backend service returns a 401, then the rule for 401 will be applied. However if the backend service returns a 403, the rule for 4xx takes effect.
                     item_type: !ruby/object:Api::Type::NestedObject
                       properties:
@@ -522,7 +522,7 @@ properties:
                         - !ruby/object:Api::Type::Integer
                           name: 'overrideResponseCode'
                           description: |
-                            The HTTP status code returned with the response containing the custom error content. 
+                            The HTTP status code returned with the response containing the custom error content.
                             If overrideResponseCode is not supplied, the same response code returned by the original backend bucket or backend service is returned to the client.
                   - !ruby/object:Api::Type::ResourceRef
                     name: "errorService"
