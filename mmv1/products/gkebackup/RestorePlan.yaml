@@ -602,7 +602,7 @@ properties:
                     - !ruby/object:Api::Type::String
                       name: resourceGroup
                       description: |
-                        API Group string of a Kubernetes resource, e.g.
+                        API Group of a Kubernetes resource, e.g.
                         "apiextensions.k8s.io", "storage.k8s.io", etc.
                         Use empty string for core group.
                     - !ruby/object:Api::Type::String
@@ -614,13 +614,13 @@ properties:
                   name: requiring
                   required: true
                   description: |
-                    The requiring group kind requires that the other
+                    The requiring group kind requires that the satisfying
                     group kind be restored first.
                   properties:
                     - !ruby/object:Api::Type::String
                       name: resourceGroup
                       description: |
-                        API Group string of a Kubernetes resource, e.g.
+                        API Group of a Kubernetes resource, e.g.
                         "apiextensions.k8s.io", "storage.k8s.io", etc.
                         Use empty string for core group.
                     - !ruby/object:Api::Type::String
