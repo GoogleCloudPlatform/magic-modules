@@ -74,11 +74,6 @@ examples:
     primary_resource_id: "default"
     vars:
       edgecontainer_cluster_name: "cluster-with-maintenance"
-  - !ruby/object:Provider::Terraform::Examples
-    name: "edgecontainer_cluster_with_maintenance_exclusion_windows"
-    primary_resource_id: "default"
-    vars:
-      edgecontainer_cluster_name: "cluster-with-maintenance-exclusions"
   # Skip the local control plane cluster test as we only have limited machine resources.
   # Instead the local control plane cluster test will be tested in the node pool test.
   - !ruby/object:Provider::Terraform::Examples
