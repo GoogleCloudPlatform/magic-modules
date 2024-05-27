@@ -916,18 +916,19 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
 		updatedManager.StandbyPolicy = expandStandbyPolicy(d)
 		change = true
 	}
+
 	if d.HasChange("target_suspended_size") {
 		updatedManager.TargetSuspendedSize = int64(d.Get("target_suspended_size").(int))
 		updatedManager.ForceSendFields = append(updatedManager.ForceSendFields, "TargetSuspendedSize")
 		change = true
 	}
+
 	if d.HasChange("target_stopped_size") {
 		updatedManager.TargetStoppedSize = int64(d.Get("target_stopped_size").(int))
 		updatedManager.ForceSendFields = append(updatedManager.ForceSendFields, "TargetStoppedSize")
 		change = true
 	}
 	<% end -%>
-
 
 	if d.HasChange("update_policy") {
 		updatedManager.UpdatePolicy = expandRegionUpdatePolicy(d.Get("update_policy").([]interface{}))
