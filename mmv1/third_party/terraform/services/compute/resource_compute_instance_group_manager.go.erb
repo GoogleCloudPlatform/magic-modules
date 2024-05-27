@@ -218,6 +218,7 @@ func ResourceComputeInstanceGroupManager() *schema.Resource {
 
 			<% unless version == "ga" -%>
 			"standby_policy": {
+				Computed:    true,
 				Type:        schema.TypeList,
 				Optional:    true,
 				MaxItems:    1,

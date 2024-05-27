@@ -284,6 +284,7 @@ func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
 			<% unless version == "ga" -%>
 			"standby_policy": {
 				Type:        schema.TypeList,
+				Computed:    true,
 				Optional:    true,
 				MaxItems:    1,
 				Description: `Standby policy for stopped and suspended instances.`,
