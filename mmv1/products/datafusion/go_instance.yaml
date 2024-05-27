@@ -48,8 +48,8 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/instances/{{name}}'
     - '{{name}}'
 custom_code:
-  constants: 'templates/terraform/constants/data_fusion_instance_option.go.erb'
-  pre_update: 'templates/terraform/pre_update/datafusion_instance_update.go.erb'
+  constants: 'templates/terraform/constants/go/data_fusion_instance_option.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/go/datafusion_instance_update.go.tmpl'
 examples:
   - name: 'data_fusion_instance_basic'
     primary_resource_id: 'basic_instance'
@@ -107,24 +107,25 @@ properties:
     description: "The ID of the instance or a fully qualified identifier for the instance."
     required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/go/shortname_to_url.go.tmpl'
   - name: 'description'
     type: String
     description: "An optional description of the instance."
     immutable: true
   - name: 'type'
     type: Enum
-    description: "Represents the type of Data Fusion instance. Each type is configured with
-the default settings for processing and memory.
-- BASIC: Basic Data Fusion instance. In Basic type, the user will be able to create data pipelines
-using point and click UI. However, there are certain limitations, such as fewer number
-of concurrent pipelines, no support for streaming pipelines, etc.
-- ENTERPRISE: Enterprise Data Fusion instance. In Enterprise type, the user will have more features
-available, such as support for streaming pipelines, higher number of concurrent pipelines, etc.
-- DEVELOPER: Developer Data Fusion instance. In Developer type, the user will have all features available but
-with restrictive capabilities. This is to help enterprises design and develop their data ingestion and integration
-pipelines at low cost."
+    description: |
+      Represents the type of Data Fusion instance. Each type is configured with
+      the default settings for processing and memory.
+      - BASIC: Basic Data Fusion instance. In Basic type, the user will be able to create data pipelines
+      using point and click UI. However, there are certain limitations, such as fewer number
+      of concurrent pipelines, no support for streaming pipelines, etc.
+      - ENTERPRISE: Enterprise Data Fusion instance. In Enterprise type, the user will have more features
+      available, such as support for streaming pipelines, higher number of concurrent pipelines, etc.
+      - DEVELOPER: Developer Data Fusion instance. In Developer type, the user will have all features available but
+      with restrictive capabilities. This is to help enterprises design and develop their data ingestion and integration
+      pipelines at low cost.
     required: true
     immutable: true
     enum_values:
@@ -142,8 +143,9 @@ pipelines at low cost."
     description: "Option to enable granular role-based access control."
   - name: 'labels'
     type: KeyValueLabels
-    description: "The resource labels for instance to use to annotate any related underlying resources,
-such as Compute Engine VMs."
+    description: |
+      The resource labels for instance to use to annotate any related underlying resources,
+      such as Compute Engine VMs.
     immutable: false
   - name: 'options'
     type: KeyValuePairs
@@ -153,21 +155,24 @@ such as Compute Engine VMs."
     diff_suppress_func: 'instanceOptionsDiffSuppress'
   - name: 'createTime'
     type: String
-    description: "The time the instance was created in RFC3339 UTC 'Zulu' format, accurate to nanoseconds."
+    description: |
+      The time the instance was created in RFC3339 UTC "Zulu" format, accurate to nanoseconds.
     output: true
   - name: 'updateTime'
     type: String
-    description: "The time the instance was last updated in RFC3339 UTC 'Zulu' format, accurate to nanoseconds."
+    description: |
+      The time the instance was last updated in RFC3339 UTC "Zulu" format, accurate to nanoseconds.
     output: true
   - name: 'state'
     type: Enum
-    description: "The current state of this Data Fusion instance.
-- CREATING: Instance is being created
-- RUNNING: Instance is running and ready for requests
-- FAILED: Instance creation failed
-- DELETING: Instance is being deleted
-- UPGRADING: Instance is being upgraded
-- RESTARTING: Instance is being restarted"
+    description: |
+      The current state of this Data Fusion instance.
+      - CREATING: Instance is being created
+      - RUNNING: Instance is running and ready for requests
+      - FAILED: Instance creation failed
+      - DELETING: Instance is being deleted
+      - UPGRADING: Instance is being upgraded
+      - RESTARTING: Instance is being restarted
     output: true
     enum_values:
       - 'CREATING'
@@ -196,9 +201,10 @@ such as Compute Engine VMs."
     deprecation_message: '`service_account` is deprecated and will be removed in a future major release. Instead, use `tenant_project_id` to extract the tenant project ID.'
   - name: 'privateInstance'
     type: Boolean
-    description: "Specifies whether the Data Fusion instance should be private. If set to
-true, all Data Fusion nodes will have private IP addresses and will not be
-able to access the public internet."
+    description: |
+      Specifies whether the Data Fusion instance should be private. If set to
+      true, all Data Fusion nodes will have private IP addresses and will not be
+      able to access the public internet.
     immutable: true
   - name: 'dataprocServiceAccount'
     type: String
@@ -219,15 +225,17 @@ able to access the public internet."
     properties:
       - name: 'ipAllocation'
         type: String
-        description: "The IP range in CIDR notation to use for the managed Data Fusion instance
-    nodes. This range must not overlap with any other ranges used in the Data Fusion instance network."
+        description: |
+          The IP range in CIDR notation to use for the managed Data Fusion instance
+          nodes. This range must not overlap with any other ranges used in the Data Fusion instance network.
         required: true
         immutable: true
       - name: 'network'
         type: String
-        description: "Name of the network in the project with which the tenant project
-    will be peered for executing pipelines. In case of shared VPC where the network resides in another host
-    project the network should specified in the form of projects/{host-project-id}/global/networks/{network}"
+        description: |
+          Name of the network in the project with which the tenant project
+          will be peered for executing pipelines. In case of shared VPC where the network resides in another host
+          project the network should specified in the form of projects/{host-project-id}/global/networks/{network}
         required: true
         immutable: true
   - name: 'zone'
@@ -272,10 +280,11 @@ able to access the public internet."
         immutable: true
   - name: 'accelerators'
     type: Array
-    description: "List of accelerators enabled for this CDF instance.
+    description: |
+      List of accelerators enabled for this CDF instance.
 
-If accelerators are enabled it is possible a permadiff will be created with the Options field.
-Users will need to either manually update their state file to include these diffed options, or include the field in a [lifecycle ignore changes block](https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle#ignore_changes)."
+      If accelerators are enabled it is possible a permadiff will be created with the Options field.
+      Users will need to either manually update their state file to include these diffed options, or include the field in a [lifecycle ignore changes block](https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle#ignore_changes).
     item_type:
       properties:
         - name: 'acceleratorType'
@@ -288,7 +297,8 @@ Users will need to either manually update their state file to include these diff
             - 'CCAI_INSIGHTS'
         - name: 'state'
           type: Enum
-          description: "The type of an accelator for a CDF instance."
+          description: |
+            The type of an accelator for a CDF instance.
           required: true
           enum_values:
             - 'ENABLED'

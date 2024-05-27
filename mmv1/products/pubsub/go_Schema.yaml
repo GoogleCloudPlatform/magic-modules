@@ -37,11 +37,12 @@ async:
   check_response_func_absence: 'transport_tpg.PollCheckForAbsence'
   suppress_error: false
   target_occurrences: 10
+  actions: ['delete']
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'schema'
 custom_code:
-  update_encoder: 'templates/terraform/update_encoder/pubsub_schema.erb'
+  update_encoder: 'templates/terraform/update_encoder/go/pubsub_schema.tmpl'
 examples:
   - name: 'pubsub_schema_basic'
     primary_resource_id: 'example'
@@ -62,8 +63,8 @@ parameters:
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-    custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.erb'
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/go/resource_from_self_link.go.tmpl'
 properties:
   - name: 'type'
     type: Enum
@@ -73,13 +74,13 @@ properties:
       - 'TYPE_UNSPECIFIED'
       - 'PROTOCOL_BUFFER'
       - 'AVRO'
-      - ''
   - name: 'definition'
     type: String
-    description: "The definition of the schema.
-This should contain a string representing the full definition of the schema
-that is a valid schema definition of the type specified in type. Changes
-to the definition commit new [schema revisions](https://cloud.google.com/pubsub/docs/commit-schema-revision).
-A schema can only have up to 20 revisions, so updates that fail with an
-error indicating that the limit has been reached require manually
-[deleting old revisions](https://cloud.google.com/pubsub/docs/delete-schema-revision)."
+    description: |
+      The definition of the schema.
+      This should contain a string representing the full definition of the schema
+      that is a valid schema definition of the type specified in type. Changes
+      to the definition commit new [schema revisions](https://cloud.google.com/pubsub/docs/commit-schema-revision).
+      A schema can only have up to 20 revisions, so updates that fail with an
+      error indicating that the limit has been reached require manually
+      [deleting old revisions](https://cloud.google.com/pubsub/docs/delete-schema-revision).

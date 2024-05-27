@@ -148,6 +148,7 @@ func clusterSchemaNodePoolDefaults() *schema.Schema {
 					MaxItems:    1,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
+							"containerd_config": schemaContainerdConfig(),
 <% unless version == 'ga' -%>
 							"gcfs_config": schemaGcfsConfig(false),
 <% end -%>
@@ -1188,9 +1189,9 @@ func ResourceContainerCluster() *schema.Resource {
 							Optional:    true,
 							Computed:    true,
 <% if version == "ga" -%>
-							Description: `GKE components exposing metrics. Valid values include SYSTEM_COMPONENTS, APISERVER, SCHEDULER, CONTROLLER_MANAGER, STORAGE, HPA, POD, DAEMONSET, DEPLOYMENT and STATEFULSET.`,
+							Description: `GKE components exposing metrics. Valid values include SYSTEM_COMPONENTS, APISERVER, SCHEDULER, CONTROLLER_MANAGER, STORAGE, HPA, POD, DAEMONSET, DEPLOYMENT, STATEFULSET, KUBELET and CADVISOR.`,
 <% else -%>
-							Description: `GKE components exposing metrics. Valid values include SYSTEM_COMPONENTS, APISERVER, SCHEDULER, CONTROLLER_MANAGER, STORAGE, HPA, POD, DAEMONSET, DEPLOYMENT, STATEFULSET and WORKLOADS.`,
+							Description: `GKE components exposing metrics. Valid values include SYSTEM_COMPONENTS, APISERVER, SCHEDULER, CONTROLLER_MANAGER, STORAGE, HPA, POD, DAEMONSET, DEPLOYMENT, STATEFULSET, WORKLOADS, KUBELET and CADVISOR.`,
 <% end -%>
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
@@ -1783,7 +1784,6 @@ func ResourceContainerCluster() *schema.Resource {
 				// workload_identity_config today.
 				Computed: true,
 				Description: `Configuration for the use of Kubernetes Service Accounts in GCP IAM policies.`,
-				ConflictsWith: []string{"enable_autopilot"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"workload_pool": {
@@ -2046,6 +2046,13 @@ func ResourceContainerCluster() *schema.Resource {
 				Description: `Configuration for Cloud DNS for Kubernetes Engine.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						<% unless version == 'ga' -%>
+						"additive_vpc_scope_dns_domain": {
+							Type:         schema.TypeString,
+							Description:  `Enable additive VPC scope DNS in a GKE cluster.`,
+							Optional:     true,
+						},
+						<% end -%>
 						"cluster_dns": {
 							Type:         schema.TypeString,
 							Default:      "PROVIDER_UNSPECIFIED",
@@ -4189,6 +4196,21 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s Security Posture Config has been updated to %#v", d.Id(), req.Update.DesiredSecurityPostureConfig)
 	}
 
+	if d.HasChange("node_pool_defaults") && d.HasChange("node_pool_defaults.0.node_config_defaults.0.containerd_config") {
+		if v, ok := d.GetOk("node_pool_defaults.0.node_config_defaults.0.containerd_config"); ok {
+			req := &container.UpdateClusterRequest{
+				Update: &container.ClusterUpdate{
+					DesiredContainerdConfig: expandContainerdConfig(v),
+				},
+			}
+			updateF := updateFunc(req, "updating GKE cluster containerd config")
+			if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+				return err
+			}
+			log.Printf("[INFO] GKE cluster %s containerd config has been updated to %#v", d.Id(), req.Update.DesiredContainerdConfig)
+		}
+	}
+
 	if d.HasChange("node_pool_auto_config.0.network_tags.0.tags") {
 		tags := d.Get("node_pool_auto_config.0.network_tags.0.tags").([]interface{})
 
@@ -5313,9 +5335,12 @@ func expandDnsConfig(configured interface{}) *container.DNSConfig {
 
 	config := l[0].(map[string]interface{})
 	return &container.DNSConfig{
-		ClusterDns:       config["cluster_dns"].(string),
-		ClusterDnsScope:  config["cluster_dns_scope"].(string),
-		ClusterDnsDomain: config["cluster_dns_domain"].(string),
+<% unless version == 'ga' -%>
+		AdditiveVpcScopeDnsDomain: 	config["additive_vpc_scope_dns_domain"].(string),
+<% end -%>
+		ClusterDns:       			config["cluster_dns"].(string),
+		ClusterDnsScope:  			config["cluster_dns_scope"].(string),
+		ClusterDnsDomain: 			config["cluster_dns_domain"].(string),
 	}
 }
 
@@ -6187,9 +6212,12 @@ func flattenDnsConfig(c *container.DNSConfig) []map[string]interface{} {
 	}
 	return []map[string]interface{}{
 		{
-			"cluster_dns":        c.ClusterDns,
-			"cluster_dns_scope":  c.ClusterDnsScope,
-			"cluster_dns_domain": c.ClusterDnsDomain,
+<% unless version == 'ga' -%>
+			"additive_vpc_scope_dns_domain": 	c.AdditiveVpcScopeDnsDomain,
+<% end -%>
+			"cluster_dns":        				c.ClusterDns,
+			"cluster_dns_scope":  				c.ClusterDnsScope,
+			"cluster_dns_domain": 				c.ClusterDnsDomain,
 		},
 	}
 }

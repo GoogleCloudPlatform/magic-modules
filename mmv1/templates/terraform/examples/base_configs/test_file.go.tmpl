@@ -65,8 +65,6 @@ func TestAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *testing.T
 		"{{$varKey}}": envvar.GetTestProjectFromEnv(),
 		{{- else if eq $varVal $.PROJECT_NUMBER }}
 		"{{$varKey}}": envvar.GetTestProjectNumberFromEnv(),
-		{{- else if eq $varVal $.FIRESTORE_PROJECT_NAME }}
-		"{{$varKey}}": envvar.GetTestFirestoreProjectFromEnv(t),
 		{{- else if eq $varVal $.CUST_ID }}
 		"{{$varKey}}": envvar.GetTestCustIdFromEnv(t),
 		{{- else if eq $varVal $.IDENTITY_USER }}
@@ -90,10 +88,11 @@ func TestAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *testing.T
 	{{- else }}
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 	{{- end }}
-	{{- if $e.PullExternal }}
+	{{- if $e.ExternalProviders }}
 		ExternalProviders: map[string]resource.ExternalProvider{
-			"random": {},
-			"time": {},
+		{{- range $provider := $e.ExternalProviders }}
+			"{{$provider}}": {},
+		{{- end }}
 		},
 	{{- end }}
 	{{- if not $.Res.SkipDelete }}

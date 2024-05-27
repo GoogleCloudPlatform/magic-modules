@@ -132,7 +132,7 @@ type Resource struct {
 	//
 	// [Optional] (Api::Resource::IamPolicy) Configuration of a resource's
 	// resource-specific IAM Policy.
-	IamPolicy resource.IamPolicy `yaml:"iam_policy"`
+	IamPolicy *resource.IamPolicy `yaml:"iam_policy"`
 
 	// [Optional] If set to true, don't generate the resource itself; only
 	// generate the IAM policy.
@@ -299,6 +299,8 @@ type Resource struct {
 
 	// The compiler to generate the downstream files, for example "terraformgoogleconversion-codegen".
 	Compiler string
+
+	ImportPath string
 }
 
 func (r *Resource) UnmarshalYAML(n *yaml.Node) error {
@@ -584,8 +586,8 @@ func buildEffectiveLabelsField(name string, labels *Type) *Type {
 
 // def build_terraform_labels_field(name, parent, labels)
 func buildTerraformLabelsField(name string, parent *Type, labels *Type) *Type {
-	description := fmt.Sprintf("The combination of %s configured directly on the resource "+
-		"and default %s configured on the provider.", name, name)
+	description := fmt.Sprintf("The combination of %s configured directly on the resource\n"+
+		" and default %s configured on the provider.", name, name)
 
 	immutable := false
 	if parent != nil {
@@ -733,6 +735,15 @@ func (r Resource) CreateUri() string {
 
 	if r.CreateVerb == "" || r.CreateVerb == "POST" {
 		return r.collectionUri()
+	}
+
+	return r.SelfLinkUri()
+}
+
+// def update_uri
+func (r Resource) UpdateUri() string {
+	if r.UpdateUrl != "" {
+		return r.UpdateUrl
 	}
 
 	return r.SelfLinkUri()
@@ -921,10 +932,24 @@ func ImportIdFormats(importFormat, identity []string, baseUrl string) []string {
 	// `{{project}}/{{%name}}` as there is no way to differentiate between
 	// project-name/resource-name and resource-name/with-slash
 	if !strings.Contains(idFormats[0], "%") {
-		idFormats = append(idFormats, shortIdFormat, shortIdDefaultProjectFormat, shortIdDefaultFormat)
+		idFormats = append(idFormats, shortIdFormat, shortIdDefaultProjectFormat)
+		if shortIdDefaultProjectFormat != shortIdDefaultFormat {
+			idFormats = append(idFormats, shortIdDefaultFormat)
+		}
 	}
 
-	// TODO Q2:  id_formats.uniq.reject(&:empty?).sort_by { |i| [i.count('/'), i.count('{{')] }.reverse
+	idFormats = google.Reject(slices.Compact(idFormats), func(i string) bool {
+		return i == ""
+	})
+	slices.SortFunc(idFormats, func(a, b string) int {
+		i := strings.Count(a, "/")
+		j := strings.Count(b, "/")
+		if i == j {
+			return strings.Count(a, "{{") - strings.Count(b, "{{")
+		}
+		return i - j
+	})
+	slices.Reverse(idFormats)
 	return idFormats
 }
 
@@ -941,6 +966,8 @@ func (r Resource) IgnoreReadPropertiesToString(e resource.Examples) string {
 	for _, tp := range r.IgnoreReadLabelsFields(r.PropertiesWithExcluded()) {
 		props = append(props, fmt.Sprintf("\"%s\"", google.Underscore(tp)))
 	}
+
+	slices.Sort(props)
 
 	return fmt.Sprintf("[]string{%s}", strings.Join(props, ", "))
 }
@@ -964,13 +991,235 @@ func (r Resource) GetIdFormat() string {
 // ====================
 // Template Methods
 // ====================
+// Functions used to create slices of resource properties that could not otherwise be called from within generating templates.
 
-// Prints a dot notation path to where the field is nested within the parent
-// object when called on a property. eg: parent.meta.label.foo
-// Redefined on Resource to terminate the calls up the parent chain.
+func (r Resource) ReadProperties() []*Type {
+	return google.Reject(r.GettableProperties(), func(p *Type) bool {
+		return p.IgnoreRead
+	})
+}
 
-// checks a resource for if it has properties that have FlattenObject=true on fields where IgnoreRead=false
-// used to decide whether or not to import "google.golang.org/api/googleapi"
 func (r Resource) FlattenedProperties() []*Type {
-	return google.Select(google.Reject(r.GettableProperties(), func(p *Type) bool { return p.IgnoreRead }), func(p *Type) bool { return p.FlattenObject })
+	return google.Select(r.ReadProperties(), func(p *Type) bool {
+		return p.FlattenObject
+	})
+}
+
+func (r Resource) IsInIdentity(t Type) bool {
+	for _, i := range r.GetIdentity() {
+		if i.Name == t.Name {
+			return true
+		}
+	}
+	return false
+}
+
+func (r Resource) IamParentResourceName() string {
+	var parentResourceName string
+
+	if r.IamPolicy != nil {
+		parentResourceName = r.IamPolicy.ParentResourceAttribute
+	}
+
+	if parentResourceName == "" {
+		parentResourceName = google.Underscore(r.Name)
+	}
+
+	return parentResourceName
+}
+
+func (r Resource) IamResourceUri() string {
+	var resourceUri string
+	if r.IamPolicy != nil {
+		resourceUri = r.IamPolicy.BaseUrl
+	}
+	if resourceUri == "" {
+		resourceUri = r.SelfLinkUri()
+	}
+	return resourceUri
+}
+
+func (r Resource) IamImportUrl() string {
+	r.IamResourceUri()
+	return regexp.MustCompile(`\{\{%?(\w+)\}\}`).ReplaceAllString(r.IamResourceUri(), "%s")
+}
+
+func (r Resource) IamResourceParams() []string {
+	resourceUri := strings.ReplaceAll(r.IamResourceUri(), "{{name}}", fmt.Sprintf("{{%s}}}", r.IamParentResourceName()))
+
+	return r.ExtractIdentifiers(resourceUri)
+}
+
+func (r Resource) IsInIamResourceParams(param string) bool {
+	return slices.Contains(r.IamResourceParams(), param)
+}
+
+func (r Resource) IamStringQualifiers() string {
+	var transformed []string
+	for _, param := range r.IamResourceParams() {
+		transformed = append(transformed, fmt.Sprintf("u.%s", google.Camelize(param, "lower")))
+	}
+	return strings.Join(transformed[:], ", ")
+}
+
+// def extract_identifiers(url)
+func (r Resource) ExtractIdentifiers(url string) []string {
+	matches := regexp.MustCompile(`\{\{%?(\w+)\}\}`).FindAllStringSubmatch(url, -1)
+	var result []string
+	for _, match := range matches {
+		result = append(result, match[1])
+	}
+	return result
+}
+
+func (r Resource) RawImportIdFormatsFromIam() []string {
+	var importFormat []string
+
+	if r.IamPolicy != nil {
+		importFormat = r.IamPolicy.ImportFormat
+	}
+	if len(importFormat) == 0 {
+		importFormat = r.ImportFormat
+	}
+
+	return ImportIdFormats(importFormat, r.Identity, r.BaseUrl)
+}
+
+func (r Resource) ImportIdRegexesFromIam() string {
+	var transformed []string
+
+	importIdFormats := r.RawImportIdFormatsFromIam()
+	for _, s := range importIdFormats {
+		s = google.Format2Regex(s)
+		s = strings.ReplaceAll(s, "<name>", fmt.Sprintf("<%s>", r.IamParentResourceName()))
+		transformed = append(transformed, s)
+	}
+
+	return strings.Join(transformed[:], "\", \"")
+}
+
+func (r Resource) ImportIdFormatsFromIam() []string {
+	importIdFormats := r.RawImportIdFormatsFromIam()
+	var transformed []string
+	for _, s := range importIdFormats {
+		transformed = append(transformed, strings.ReplaceAll(s, "%", ""))
+	}
+	return transformed
+}
+
+func (r Resource) FirstIamImportIdFormat() string {
+	importIdFormats := r.ImportIdFormatsFromIam()
+	if len(importIdFormats) == 0 {
+		return ""
+	}
+	first := importIdFormats[0]
+	first = strings.ReplaceAll(first, "{{name}}", fmt.Sprintf("{{%s}}", google.Underscore(r.Name)))
+	return first
+}
+
+func (r Resource) IamTerraformName() string {
+	return fmt.Sprintf("%s_iam", r.TerraformName())
+}
+
+func (r Resource) IamSelfLinkIdentifiers() []string {
+	var selfLink string
+	if r.IamPolicy != nil {
+		selfLink = r.IamPolicy.SelfLink
+	}
+	if selfLink == "" {
+		selfLink = r.SelfLinkUrl()
+	}
+
+	return r.ExtractIdentifiers(selfLink)
+}
+
+func (r Resource) IamSelfLinkProperties() []*Type {
+	params := r.IamSelfLinkIdentifiers()
+
+	urlProperties := google.Select(r.AllUserProperties(), func(p *Type) bool {
+		return slices.Contains(params, p.Name)
+	})
+
+	return urlProperties
+}
+
+func (r Resource) IamAttributes() []string {
+	var attributes []string
+	ids := r.IamSelfLinkIdentifiers()
+	for i, p := range ids {
+		var attribute string
+		if i == len(ids)-1 {
+			attribute = r.IamPolicy.ParentResourceAttribute
+			if attribute == "" {
+				attribute = p
+			}
+		} else {
+			attribute = p
+		}
+		attributes = append(attributes, attribute)
+	}
+	return attributes
+}
+
+func (r Resource) ExamplePrimaryResourceId() string {
+	examples := google.Reject(r.Examples, func(e resource.Examples) bool {
+		return e.SkipTest
+	})
+	examples = google.Reject(examples, func(e resource.Examples) bool {
+		return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(e.MinVersion)) < 0)
+	})
+
+	if len(examples) == 0 {
+		examples = google.Reject(r.Examples, func(e resource.Examples) bool {
+			return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(e.MinVersion)) < 0)
+		})
+	}
+	return examples[0].PrimaryResourceId
+}
+
+func (r Resource) IamParentSourceType() string {
+	t := r.IamPolicy.ParentResourceType
+	if t == "" {
+		t = r.TerraformName()
+	}
+	return t
+}
+
+func OrderProperties(props []*Type) []*Type {
+	req := google.Select(props, func(p *Type) bool {
+		return p.Required
+	})
+	slices.SortFunc(req, CompareByName)
+	rest := google.Reject(props, func(p *Type) bool {
+		return p.Output || p.Required
+	})
+	slices.SortFunc(rest, CompareByName)
+	output := google.Select(props, func(p *Type) bool {
+		return p.Output
+	})
+	slices.SortFunc(output, CompareByName)
+	returnProps := google.Concat(req, rest)
+	return google.Concat(returnProps, output)
+}
+
+func CompareByName(a, b *Type) int {
+	return strings.Compare(a.Name, b.Name)
+}
+
+func (r Resource) GetPropertyUpdateMasksGroups() map[string][]string {
+	maskGroups := map[string][]string{}
+	for _, prop := range r.AllUserProperties() {
+		if prop.FlattenObject {
+			prop.GetNestedPropertyUpdateMasksGroups(maskGroups, prop.ApiName)
+		} else if len(prop.UpdateMaskFields) > 0 {
+			maskGroups[google.Underscore(prop.Name)] = prop.UpdateMaskFields
+		} else {
+			maskGroups[google.Underscore(prop.Name)] = []string{prop.ApiName}
+		}
+	}
+	return maskGroups
+}
+
+func (r Resource) CustomTemplate(templatePath string, appendNewline bool) string {
+	return resource.ExecuteTemplate(&r, templatePath, appendNewline)
 }

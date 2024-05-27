@@ -39,7 +39,7 @@ examples:
     name: "firebase_app_check_app_attest_config_minimal"
     min_version: 'beta'
     # Need the time_sleep resource
-    pull_external: true
+    external_providers: ["random", "time"]
     primary_resource_id: "default"
     vars:
       team_id: "9987654321"
@@ -53,7 +53,7 @@ examples:
     name: "firebase_app_check_app_attest_config_full"
     min_version: 'beta'
     # Need the time_sleep resource
-    pull_external: true
+    external_providers: ["random", "time"]
     primary_resource_id: "default"
     vars:
       team_id: "9987654321"

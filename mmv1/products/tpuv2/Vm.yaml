@@ -59,7 +59,7 @@ examples:
     name: 'tpu_v2_vm_full'
     min_version: 'beta'
     primary_resource_id: 'tpu'
-    pull_external: true
+    external_providers: ["random", "time"]
     vars:
       vm_name: 'test-tpu'
       network_name: 'tpu-net'
@@ -246,6 +246,7 @@ properties:
           - 'V2'
           - 'V3'
           - 'V4'
+          - 'V5P'
       - !ruby/object:Api::Type::String
         name: 'topology'
         immutable: true

@@ -59,6 +59,18 @@ examples:
       region_backend_service_name: 'backend-service'
       region_health_check_name: 'http-health-check'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'region_target_https_proxy_mtls'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      target_https_proxy_name: 'test-mtls-proxy'
+      ssl_certificate_name: 'my-certificate'
+      url_map_name: 'url-map'
+      backend_service_name: 'backend-service'
+      http_health_check_name: 'http-health-check'
+      server_tls_policy_name: 'my-tls-policy'
+      trust_config_name: 'my-trust-config'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'region_target_https_proxy_certificate_manager_certificate'
     primary_resource_id: 'default'
     vars:
@@ -179,3 +191,17 @@ properties:
     update_verb: :POST
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
     update_url: 'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setUrlMap'
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'serverTlsPolicy'
+    resource: 'SslPolicy'
+    imports: 'selfLink'
+    description: |
+      A URL referring to a networksecurity.ServerTlsPolicy
+      resource that describes how the proxy should authenticate inbound
+      traffic. serverTlsPolicy only applies to a global TargetHttpsProxy
+      attached to globalForwardingRules with the loadBalancingScheme
+      set to INTERNAL_SELF_MANAGED or EXTERNAL or EXTERNAL_MANAGED.
+      For details which ServerTlsPolicy resources are accepted with
+      INTERNAL_SELF_MANAGED and which with EXTERNAL, EXTERNAL_MANAGED
+      loadBalancingScheme consult ServerTlsPolicy documentation.
+      If left blank, communications are not encrypted.

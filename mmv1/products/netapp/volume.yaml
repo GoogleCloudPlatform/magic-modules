@@ -109,15 +109,10 @@ properties:
     description: |
       VPC network name with format: `projects/{{project}}/global/networks/{{network}}`. Inherited from storage pool.
     output: true
-  - !ruby/object:Api::Type::Enum
+  - !ruby/object:Api::Type::String
     name: 'serviceLevel'
     description: |
-      Service level of the volume. Inherited from storage pool.
-    values:
-      - :SERVICE_LEVEL_UNSPECIFIED
-      - :PREMIUM
-      - :EXTREME
-      - :STANDARD
+      Service level of the volume. Inherited from storage pool. Supported values are : PREMIUM, EXTERME, STANDARD, FLEX.
     output: true
   - !ruby/object:Api::Type::String
     name: 'capacityGib'

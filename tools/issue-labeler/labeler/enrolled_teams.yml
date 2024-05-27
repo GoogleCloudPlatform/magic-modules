@@ -43,6 +43,9 @@ service/apikeys:
 service/appengine:
   resources:
   - google_app_engine_.*
+service/apphub:
+  resources:
+  - google_apphub_.*
 service/artifactregistry:
   team: artifact-registry
   resources:
@@ -106,6 +109,7 @@ service/cloudkms:
   - google_kms_.*
 service/cloudresourcemanager-crm:
   resources:
+  - google_active_folder
   - google_folder
   - google_folder_iam_.*
   - google_folders
@@ -393,6 +397,9 @@ service/ids:
 service/integrationconnectors:
   resources:
   - google_integration_connectors_.*
+service/integrations:
+  resources:
+  - google_integrations_.*
 service/logging:
   resources:
   - google_logging_.*
@@ -561,6 +568,7 @@ service/serviceusage:
   - google_project_service
 service/serviceusage-quota:
   resources:
+  - google_cloud_quotas_.*
   - google_service_usage_consumer_quota_override
 service/sourcerepo:
   resources:
@@ -568,19 +576,21 @@ service/sourcerepo:
 service/spanner:
   resources:
   - google_spanner_.*
-service/sqladmin:
+service/sqladmin-cp:
   resources:
-  - google_sql_database
   - google_sql_database_instance
   - google_sql_database_instances
-  - google_sql_databases
   - google_sql_source_representation_instance
   - google_sql_tiers
-  - google_sql_user
 service/sqladmin-dp:
   resources:
   - google_sql_backup_run
   - google_sql_database_instance_latest_recovery_time
+service/sqladmin-infra:
+  resources:
+  - google_sql_user
+  - google_sql_database
+  - google_sql_databases
 service/sqladmin-security:
   resources:
   - google_sql_ca_certs

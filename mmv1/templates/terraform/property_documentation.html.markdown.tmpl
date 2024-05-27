@@ -26,12 +26,12 @@
     {{- if not (or $.ItemType.DefaultValue (eq $.ItemType.DefaultValue "")) }}
     Default value is [`{{ $.ItemType.DefaultValue }}`].
     {{- end }}
-    Each value may be one of: {{ $.ItemType.EnumValuesToString }}.
+    Each value may be one of: {{ $.ItemType.EnumValuesToString "`" false }}.
   {{- else if and ($.IsA "Enum") (and (not $.Output) (not (and $.ItemType $.ItemType.SkipDocsValues)))}}
     {{- if not (or $.DefaultValue (eq $.DefaultValue "")) }}
     Default value is [`{{ $.DefaultValue }}`].
     {{- end }}
-    Possible values are: {{ $.EnumValuesToString }}.
+    Possible values are: {{ $.EnumValuesToString "`" false }}.
   {{- end }}
   {{- if $.Sensitive }}
     **Note**: This property is sensitive and will not be displayed in the plan.
