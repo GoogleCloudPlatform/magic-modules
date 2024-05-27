@@ -652,10 +652,10 @@ func resourceComputeInstanceGroupManagerCreate(d *schema.ResourceData, meta inte
 		AutoHealingPolicies:         expandAutoHealingPolicies(d.Get("auto_healing_policies").([]interface{})),
 		Versions:                    expandVersions(d.Get("version").([]interface{})),
 		<% unless version == "ga" -%>
-    StandbyPolicy:               expandStandbyPolicy(d),
-    TargetSuspendedSize:         int64(d.Get("target_suspended_size").(int)),
-    TargetStoppedSize:           int64(d.Get("target_stopped_size").(int)),
-    <% end -%>
+		StandbyPolicy:               expandStandbyPolicy(d),
+		TargetSuspendedSize:         int64(d.Get("target_suspended_size").(int)),
+		TargetStoppedSize:           int64(d.Get("target_stopped_size").(int)),
+		<% end -%>
 		UpdatePolicy:                expandUpdatePolicy(d.Get("update_policy").([]interface{})),
 		InstanceLifecyclePolicy:     expandInstanceLifecyclePolicy(d.Get("instance_lifecycle_policy").([]interface{})),
 		AllInstancesConfig:          expandAllInstancesConfig(nil, d.Get("all_instances_config").([]interface{})),
@@ -880,16 +880,16 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 		return err
 	}
 	<% unless version == "ga" -%>
-  if err = d.Set("standby_policy", flattenStandbyPolicy(manager.StandbyPolicy)); err != nil {
-    return fmt.Errorf("Error setting standby_policy in state: %s", err.Error())
-  }
-  if err := d.Set("target_suspended_size", manager.TargetSuspendedSize); err != nil {
-    return fmt.Errorf("Error setting target_suspended_size: %s", err)
-  }
-  if err := d.Set("target_stopped_size", manager.TargetStoppedSize); err != nil {
-    return fmt.Errorf("Error setting target_stopped_size: %s", err)
-  }
-  <% end -%>
+	if err = d.Set("standby_policy", flattenStandbyPolicy(manager.StandbyPolicy)); err != nil {
+		return fmt.Errorf("Error setting standby_policy in state: %s", err.Error())
+	}
+	if err := d.Set("target_suspended_size", manager.TargetSuspendedSize); err != nil {
+		return fmt.Errorf("Error setting target_suspended_size: %s", err)
+	}
+	if err := d.Set("target_stopped_size", manager.TargetStoppedSize); err != nil {
+		return fmt.Errorf("Error setting target_stopped_size: %s", err)
+	}
+	<% end -%>
 	if err = d.Set("update_policy", flattenUpdatePolicy(manager.UpdatePolicy)); err != nil {
 		return fmt.Errorf("Error setting update_policy in state: %s", err.Error())
 	}
