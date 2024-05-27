@@ -651,11 +651,6 @@ func resourceComputeInstanceGroupManagerCreate(d *schema.ResourceData, meta inte
 		TargetPools:                 tpgresource.ConvertStringSet(d.Get("target_pools").(*schema.Set)),
 		AutoHealingPolicies:         expandAutoHealingPolicies(d.Get("auto_healing_policies").([]interface{})),
 		Versions:                    expandVersions(d.Get("version").([]interface{})),
-		<% unless version == "ga" -%>
-		StandbyPolicy:               expandStandbyPolicy(d),
-		TargetSuspendedSize:         int64(d.Get("target_suspended_size").(int)),
-		TargetStoppedSize:           int64(d.Get("target_stopped_size").(int)),
-		<% end -%>
 		UpdatePolicy:                expandUpdatePolicy(d.Get("update_policy").([]interface{})),
 		InstanceLifecyclePolicy:     expandInstanceLifecyclePolicy(d.Get("instance_lifecycle_policy").([]interface{})),
 		AllInstancesConfig:          expandAllInstancesConfig(nil, d.Get("all_instances_config").([]interface{})),
@@ -879,17 +874,6 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 	if err := d.Set("version", flattenVersions(manager.Versions)); err != nil {
 		return err
 	}
-	<% unless version == "ga" -%>
-	if err = d.Set("standby_policy", flattenStandbyPolicy(manager.StandbyPolicy)); err != nil {
-		return fmt.Errorf("Error setting standby_policy in state: %s", err.Error())
-	}
-	if err := d.Set("target_suspended_size", manager.TargetSuspendedSize); err != nil {
-		return fmt.Errorf("Error setting target_suspended_size: %s", err)
-	}
-	if err := d.Set("target_stopped_size", manager.TargetStoppedSize); err != nil {
-		return fmt.Errorf("Error setting target_stopped_size: %s", err)
-	}
-	<% end -%>
 	if err = d.Set("update_policy", flattenUpdatePolicy(manager.UpdatePolicy)); err != nil {
 		return fmt.Errorf("Error setting update_policy in state: %s", err.Error())
 	}
@@ -960,23 +944,6 @@ func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta inte
 		updatedManager.Versions = expandVersions(d.Get("version").([]interface{}))
 		change = true
 	}
-
-	<% unless version == "ga" -%>
-	if d.HasChange("standby_policy") {
-		updatedManager.StandbyPolicy = expandStandbyPolicy(d)
-		change = true
-	}
-	if d.HasChange("target_suspended_size") {
-		updatedManager.TargetSuspendedSize = int64(d.Get("target_suspended_size").(int))
-		updatedManager.ForceSendFields = append(updatedManager.ForceSendFields, "TargetSuspendedSize")
-		change = true
-	}
-	if d.HasChange("target_stopped_size") {
-		updatedManager.TargetStoppedSize = int64(d.Get("target_stopped_size").(int))
-		updatedManager.ForceSendFields = append(updatedManager.ForceSendFields, "TargetStoppedSize")
-		change = true
-	}
-	<% end -%>
 
 	if d.HasChange("update_policy") {
 		updatedManager.UpdatePolicy = expandUpdatePolicy(d.Get("update_policy").([]interface{}))
@@ -1302,19 +1269,6 @@ func expandInstanceLifecyclePolicy(configured []interface{}) *compute.InstanceGr
 	return instanceLifecyclePolicy
 }
 
-<% unless version == "ga" -%>
-func expandStandbyPolicy(d *schema.ResourceData) *compute.InstanceGroupManagerStandbyPolicy {
-	standbyPolicy := &compute.InstanceGroupManagerStandbyPolicy{}
-	for _, sp := range d.Get("standby_policy").([]any) {
-		spData := sp.(map[string]any)
-		standbyPolicy.InitialDelaySec = int64(spData["initial_delay_sec"].(int))
-		standbyPolicy.ForceSendFields = []string{"InitialDelaySec"}
-		standbyPolicy.Mode = spData["mode"].(string)
-	}
-	return standbyPolicy
-}
-<% end -%>
-
 func expandUpdatePolicy(configured []interface{}) *compute.InstanceGroupManagerUpdatePolicy {
 	updatePolicy := &compute.InstanceGroupManagerUpdatePolicy{}
 
@@ -1450,19 +1404,6 @@ func flattenStatefulPolicyStatefulIps(d *schema.ResourceData, ipfieldName string
 	}
 	return sorted
 }
-
-<% unless version == "ga" -%>
-func flattenStandbyPolicy(standbyPolicy *compute.InstanceGroupManagerStandbyPolicy) []map[string]any{
-	results := []map[string]any{}
-	if standbyPolicy != nil {
-		sp := map[string]any{}
-		sp["initial_delay_sec"] = standbyPolicy.InitialDelaySec
-		sp["mode"]              = standbyPolicy.Mode
-		results = append(results, sp)
-	}
-	return results
-}
-<% end -%>
 
 func flattenUpdatePolicy(updatePolicy *compute.InstanceGroupManagerUpdatePolicy) []map[string]interface{} {
 	results := []map[string]interface{}{}
