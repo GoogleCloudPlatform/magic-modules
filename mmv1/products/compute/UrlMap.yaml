@@ -2094,7 +2094,7 @@ properties:
             - !ruby/object:Api::Type::Integer
               name: 'overrideResponseCode'
               description: |
-                The HTTP status code returned with the response containing the custom error content. 
+                The HTTP status code returned with the response containing the custom error content.
                 If overrideResponseCode is not supplied, the same response code returned by the original backend bucket or backend service is returned to the client.
       - !ruby/object:Api::Type::ResourceRef
         name: "errorService"
