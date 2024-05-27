@@ -410,7 +410,7 @@ func TestNotificationState(t *testing.T) {
 	}
 }
 
-func TestDaysDiff(t *testing.T) {
+func TestBusinessDaysDiff(t *testing.T) {
 	pdtLoc, err := time.LoadLocation("America/Los_Angeles")
 	if err != nil {
 		panic(err)
@@ -442,38 +442,118 @@ func TestDaysDiff(t *testing.T) {
 		"next week, earlier": {
 			from:       time.Date(2024, 5, 6, 5, 0, 0, 0, pdtLoc),
 			to:         time.Date(2024, 5, 13, 3, 0, 0, 0, pdtLoc),
-			expectDays: 7,
+			expectDays: 5,
 		},
 		"next month": {
 			from:       time.Date(2024, 5, 6, 23, 0, 0, 0, pdtLoc),
 			to:         time.Date(2024, 6, 6, 1, 0, 0, 0, pdtLoc),
-			expectDays: 31,
+			expectDays: 23,
 		},
 		"previous day, earlier": {
-			from:       time.Date(2024, 5, 6, 5, 0, 0, 0, pdtLoc),
-			to:         time.Date(2024, 5, 5, 0, 0, 0, 0, pdtLoc),
+			from:       time.Date(2024, 5, 7, 5, 0, 0, 0, pdtLoc),
+			to:         time.Date(2024, 5, 6, 0, 0, 0, 0, pdtLoc),
 			expectDays: 1,
 		},
 		"previous day, later": {
-			from:       time.Date(2024, 5, 6, 5, 0, 0, 0, pdtLoc),
-			to:         time.Date(2024, 5, 5, 0, 0, 0, 0, pdtLoc),
+			from:       time.Date(2024, 5, 7, 5, 0, 0, 0, pdtLoc),
+			to:         time.Date(2024, 5, 6, 10, 0, 0, 0, pdtLoc),
 			expectDays: 1,
 		},
 		"earlier than minFrom": {
 			from:       time.Date(2022, 1, 1, 0, 0, 0, 0, pdtLoc),
-			to:         time.Date(2024, 5, 5, 11, 1, 0, 0, pdtLoc),
-			expectDays: 4,
+			to:         time.Date(2024, 5, 3, 11, 1, 0, 0, pdtLoc),
+			expectDays: 2,
 		},
 		"UTC times": {
-			from:       time.Date(2024, 5, 6, 0, 0, 0, 0, time.UTC),
-			to:         time.Date(2024, 5, 6, 23, 0, 0, 0, time.UTC),
+			from:       time.Date(2024, 5, 7, 0, 0, 0, 0, time.UTC),
+			to:         time.Date(2024, 5, 7, 23, 0, 0, 0, time.UTC),
 			expectDays: 1,
+		},
+		"saturday to sunday": {
+			from:       time.Date(2024, 5, 4, 0, 0, 0, 0, pdtLoc),
+			to:         time.Date(2024, 5, 5, 0, 0, 0, 0, pdtLoc),
+			expectDays: 0,
+		},
+		"saturday to monday": {
+			from:       time.Date(2024, 5, 4, 0, 0, 0, 0, pdtLoc),
+			to:         time.Date(2024, 5, 6, 0, 0, 0, 0, pdtLoc),
+			expectDays: 0,
+		},
+		"sunday to monday": {
+			from:       time.Date(2024, 5, 5, 0, 0, 0, 0, pdtLoc),
+			to:         time.Date(2024, 5, 6, 0, 0, 0, 0, pdtLoc),
+			expectDays: 0,
+		},
+		"friday to monday": {
+			from:       time.Date(2024, 5, 3, 0, 0, 0, 0, pdtLoc),
+			to:         time.Date(2024, 5, 6, 0, 0, 0, 0, pdtLoc),
+			expectDays: 1,
+		},
+		"monday to friday": {
+			from:       time.Date(2024, 5, 6, 0, 0, 0, 0, pdtLoc),
+			to:         time.Date(2024, 5, 10, 0, 0, 0, 0, pdtLoc),
+			expectDays: 4,
+		},
+		"monday to saturday": {
+			from:       time.Date(2024, 5, 6, 0, 0, 0, 0, pdtLoc),
+			to:         time.Date(2024, 5, 11, 0, 0, 0, 0, pdtLoc),
+			expectDays: 4,
+		},
+		"monday to sunday": {
+			from:       time.Date(2024, 5, 6, 0, 0, 0, 0, pdtLoc),
+			to:         time.Date(2024, 5, 12, 0, 0, 0, 0, pdtLoc),
+			expectDays: 4,
+		},
+		"monday to friday plus 1 week": {
+			from:       time.Date(2024, 5, 6, 0, 0, 0, 0, pdtLoc),
+			to:         time.Date(2024, 5, 17, 0, 0, 0, 0, pdtLoc),
+			expectDays: 9,
+		},
+		"monday to saturday plus 1 week": {
+			from:       time.Date(2024, 5, 6, 0, 0, 0, 0, pdtLoc),
+			to:         time.Date(2024, 5, 18, 0, 0, 0, 0, pdtLoc),
+			expectDays: 9,
+		},
+		"monday to sunday plus 1 week": {
+			from:       time.Date(2024, 5, 6, 0, 0, 0, 0, pdtLoc),
+			to:         time.Date(2024, 5, 19, 0, 0, 0, 0, pdtLoc),
+			expectDays: 9,
+		},
+		"monday plus 1 week": {
+			from:       time.Date(2024, 5, 6, 0, 0, 0, 0, pdtLoc),
+			to:         time.Date(2024, 5, 13, 0, 0, 0, 0, pdtLoc),
+			expectDays: 5,
+		},
+		"monday plus 2 weeks": {
+			from:       time.Date(2024, 5, 6, 0, 0, 0, 0, pdtLoc),
+			to:         time.Date(2024, 5, 20, 0, 0, 0, 0, pdtLoc),
+			expectDays: 10,
+		},
+		"sunday plus 1 week": {
+			from:       time.Date(2024, 5, 5, 0, 0, 0, 0, pdtLoc),
+			to:         time.Date(2024, 5, 12, 0, 0, 0, 0, pdtLoc),
+			expectDays: 4,
+		},
+		"sunday plus 2 weeks": {
+			from:       time.Date(2024, 5, 5, 0, 0, 0, 0, pdtLoc),
+			to:         time.Date(2024, 5, 19, 0, 0, 0, 0, pdtLoc),
+			expectDays: 9,
+		},
+		"saturday plus 1 weeks": {
+			from:       time.Date(2024, 5, 4, 0, 0, 0, 0, pdtLoc),
+			to:         time.Date(2024, 5, 11, 0, 0, 0, 0, pdtLoc),
+			expectDays: 4,
+		},
+		"saturday plus 2 weeks": {
+			from:       time.Date(2024, 5, 4, 0, 0, 0, 0, pdtLoc),
+			to:         time.Date(2024, 5, 18, 0, 0, 0, 0, pdtLoc),
+			expectDays: 9,
 		},
 	}
 
 	for tn, tc := range cases {
 		t.Run(tn, func(t *testing.T) {
-			days := daysDiff(tc.from, tc.to)
+			days := businessDaysDiff(tc.from, tc.to)
 			assert.Equal(t, tc.expectDays, days)
 		})
 	}
@@ -502,19 +582,19 @@ func TestShouldNotify(t *testing.T) {
 		"waitingForMerge first week": {
 			pullRequest: &github.PullRequest{},
 			state:       waitingForMerge,
-			sinceDays:   7,
+			sinceDays:   5,
 			want:        true,
 		},
 		"waitingForMerge not on a week": {
 			pullRequest: &github.PullRequest{},
 			state:       waitingForMerge,
-			sinceDays:   8,
+			sinceDays:   6,
 			want:        false,
 		},
 		"waitingForMerge after many weeks": {
 			pullRequest: &github.PullRequest{},
 			state:       waitingForMerge,
-			sinceDays:   7 * 57,
+			sinceDays:   5 * 57,
 			want:        true,
 		},
 		"waitingForMerge skip with label": {
@@ -522,7 +602,7 @@ func TestShouldNotify(t *testing.T) {
 				Labels: []*github.Label{{Name: github.String("disable-review-reminders")}},
 			},
 			state:     waitingForMerge,
-			sinceDays: 7,
+			sinceDays: 5,
 			want:      false,
 		},
 		"waitingForMerge ignore disable-automatic-closure": {
@@ -530,7 +610,7 @@ func TestShouldNotify(t *testing.T) {
 				Labels: []*github.Label{{Name: github.String("disable-automatic-closure")}},
 			},
 			state:     waitingForMerge,
-			sinceDays: 14,
+			sinceDays: 10,
 			want:      true,
 		},
 
@@ -556,19 +636,19 @@ func TestShouldNotify(t *testing.T) {
 		"waitingForReview first week": {
 			pullRequest: &github.PullRequest{},
 			state:       waitingForReview,
-			sinceDays:   7,
+			sinceDays:   5,
 			want:        true,
 		},
 		"waitingForReview not on a week": {
 			pullRequest: &github.PullRequest{},
 			state:       waitingForReview,
-			sinceDays:   8,
+			sinceDays:   6,
 			want:        false,
 		},
 		"waitingForReview after many weeks": {
 			pullRequest: &github.PullRequest{},
 			state:       waitingForReview,
-			sinceDays:   7 * 57,
+			sinceDays:   5 * 57,
 			want:        true,
 		},
 		"waitingForReview skip with label": {
@@ -576,7 +656,7 @@ func TestShouldNotify(t *testing.T) {
 				Labels: []*github.Label{{Name: github.String("disable-review-reminders")}},
 			},
 			state:     waitingForReview,
-			sinceDays: 7,
+			sinceDays: 5,
 			want:      false,
 		},
 		"waitingForReview ignore disable-automatic-closure": {
@@ -584,7 +664,7 @@ func TestShouldNotify(t *testing.T) {
 				Labels: []*github.Label{{Name: github.String("disable-automatic-closure")}},
 			},
 			state:     waitingForReview,
-			sinceDays: 14,
+			sinceDays: 10,
 			want:      true,
 		},
 
@@ -598,37 +678,37 @@ func TestShouldNotify(t *testing.T) {
 		"waitingForContributor too early": {
 			pullRequest: &github.PullRequest{},
 			state:       waitingForContributor,
-			sinceDays:   5,
+			sinceDays:   4,
 			want:        false,
 		},
 		"waitingForContributor two weeks": {
 			pullRequest: &github.PullRequest{},
 			state:       waitingForContributor,
-			sinceDays:   14,
+			sinceDays:   10,
 			want:        true,
 		},
 		"waitingForContributor four weeks": {
 			pullRequest: &github.PullRequest{},
 			state:       waitingForContributor,
-			sinceDays:   28,
+			sinceDays:   20,
 			want:        true,
 		},
-		"waitingForContributor 40 days": {
+		"waitingForContributor 28 weekdays": {
 			pullRequest: &github.PullRequest{},
 			state:       waitingForContributor,
-			sinceDays:   40,
+			sinceDays:   28,
 			want:        true,
 		},
 		"waitingForContributor six weeks": {
 			pullRequest: &github.PullRequest{},
 			state:       waitingForContributor,
-			sinceDays:   42,
+			sinceDays:   30,
 			want:        true,
 		},
 		"waitingForContributor other sinceDays": {
 			pullRequest: &github.PullRequest{},
 			state:       waitingForContributor,
-			sinceDays:   10,
+			sinceDays:   9,
 			want:        false,
 		},
 		"waitingForContributor skip with label": {
@@ -636,7 +716,7 @@ func TestShouldNotify(t *testing.T) {
 				Labels: []*github.Label{{Name: github.String("disable-automatic-closure")}},
 			},
 			state:     waitingForContributor,
-			sinceDays: 14,
+			sinceDays: 10,
 			want:      false,
 		},
 		"waitingForContributor ignore disable-review-reminders": {
@@ -644,7 +724,7 @@ func TestShouldNotify(t *testing.T) {
 				Labels: []*github.Label{{Name: github.String("disable-review-reminders")}},
 			},
 			state:     waitingForContributor,
-			sinceDays: 14,
+			sinceDays: 10,
 			want:      true,
 		},
 	}
@@ -669,10 +749,10 @@ func TestFormatReminderComment(t *testing.T) {
 			state: waitingForMerge,
 			data: reminderCommentData{
 				PullRequest: &github.PullRequest{},
-				SinceDays:   7,
+				SinceDays:   5,
 			},
 			expectedStrings: []string{
-				"waiting for merge for 7 days",
+				"waiting for merge for 1 week",
 				"disable-review-reminders",
 			},
 		},
@@ -680,10 +760,21 @@ func TestFormatReminderComment(t *testing.T) {
 			state: waitingForMerge,
 			data: reminderCommentData{
 				PullRequest: &github.PullRequest{},
-				SinceDays:   14,
+				SinceDays:   5 * 2,
 			},
 			expectedStrings: []string{
-				"waiting for merge for 14 days",
+				"waiting for merge for 2 weeks",
+				"disable-review-reminders",
+			},
+		},
+		"waitingForMerge many weeks": {
+			state: waitingForMerge,
+			data: reminderCommentData{
+				PullRequest: &github.PullRequest{},
+				SinceDays:   5 * 57,
+			},
+			expectedStrings: []string{
+				"waiting for merge for 57 weeks",
 				"disable-review-reminders",
 			},
 		},
@@ -696,7 +787,7 @@ func TestFormatReminderComment(t *testing.T) {
 				SinceDays:   2,
 			},
 			expectedStrings: []string{
-				"waiting for review for 2 days",
+				"waiting for review for 2 weekdays",
 				"disable-review-reminders",
 			},
 			notExpectedStrings: []string{
@@ -707,11 +798,11 @@ func TestFormatReminderComment(t *testing.T) {
 			state: waitingForReview,
 			data: reminderCommentData{
 				PullRequest: &github.PullRequest{},
-				SinceDays:   7,
+				SinceDays:   5,
 			},
 			expectedStrings: []string{
 				"@GoogleCloudPlatform/terraform-team",
-				"waiting for review for 7 days",
+				"waiting for review for 1 week",
 				"disable-review-reminders",
 			},
 		},
@@ -719,11 +810,11 @@ func TestFormatReminderComment(t *testing.T) {
 			state: waitingForReview,
 			data: reminderCommentData{
 				PullRequest: &github.PullRequest{},
-				SinceDays:   14,
+				SinceDays:   10,
 			},
 			expectedStrings: []string{
 				"@GoogleCloudPlatform/terraform-team",
-				"waiting for review for 14 days",
+				"waiting for review for 2 weeks",
 				"disable-review-reminders",
 			},
 		},
@@ -735,7 +826,7 @@ func TestFormatReminderComment(t *testing.T) {
 				PullRequest: &github.PullRequest{
 					User: &github.User{Login: github.String("pr-author")},
 				},
-				SinceDays: 14,
+				SinceDays: 10,
 			},
 			expectedStrings: []string{
 				"@pr-author",
@@ -749,7 +840,7 @@ func TestFormatReminderComment(t *testing.T) {
 				PullRequest: &github.PullRequest{
 					User: &github.User{Login: github.String("pr-author")},
 				},
-				SinceDays: 28,
+				SinceDays: 20,
 			},
 			expectedStrings: []string{
 				"@pr-author",
@@ -757,17 +848,17 @@ func TestFormatReminderComment(t *testing.T) {
 				"disable-automatic-closure",
 			},
 		},
-		"waitingForContributor 40 days": {
+		"waitingForContributor 28 days": {
 			state: waitingForContributor,
 			data: reminderCommentData{
 				PullRequest: &github.PullRequest{
 					User: &github.User{Login: github.String("pr-author")},
 				},
-				SinceDays: 40,
+				SinceDays: 28,
 			},
 			expectedStrings: []string{
 				"@pr-author",
-				"If no action is taken, this PR will be closed in 2 days",
+				"If no action is taken, this PR will be closed in 2 weekdays",
 				"disable-automatic-closure",
 			},
 		},
@@ -777,7 +868,7 @@ func TestFormatReminderComment(t *testing.T) {
 				PullRequest: &github.PullRequest{
 					User: &github.User{Login: github.String("pr-author")},
 				},
-				SinceDays: 42,
+				SinceDays: 30,
 			},
 			expectedStrings: []string{"@pr-author", "PR is being closed due to inactivity"},
 			notExpectedStrings: []string{
@@ -791,7 +882,7 @@ func TestFormatReminderComment(t *testing.T) {
 				PullRequest: &github.PullRequest{
 					User: &github.User{Login: github.String("pr-author")},
 				},
-				SinceDays: 49,
+				SinceDays: 35,
 			},
 			expectedStrings: []string{"@pr-author", "PR is being closed due to inactivity"},
 			notExpectedStrings: []string{
@@ -837,37 +928,37 @@ func TestShouldClose(t *testing.T) {
 		"waitingForContributor two weeks": {
 			pullRequest: &github.PullRequest{},
 			state:       waitingForContributor,
-			sinceDays:   14,
+			sinceDays:   10,
 			want:        false,
 		},
 		"waitingForContributor four weeks": {
 			pullRequest: &github.PullRequest{},
 			state:       waitingForContributor,
-			sinceDays:   28,
+			sinceDays:   20,
 			want:        false,
 		},
 		"waitingForContributor six weeks": {
 			pullRequest: &github.PullRequest{},
 			state:       waitingForContributor,
-			sinceDays:   42,
+			sinceDays:   30,
 			want:        true,
 		},
 		"waitingForContributor seven weeks": {
 			pullRequest: &github.PullRequest{},
 			state:       waitingForContributor,
-			sinceDays:   49,
+			sinceDays:   35,
 			want:        true,
 		},
 		"waitingForMerge six weeks": {
 			pullRequest: &github.PullRequest{},
 			state:       waitingForMerge,
-			sinceDays:   42,
+			sinceDays:   30,
 			want:        false,
 		},
 		"waitingForReview six weeks": {
 			pullRequest: &github.PullRequest{},
 			state:       waitingForReview,
-			sinceDays:   42,
+			sinceDays:   30,
 			want:        false,
 		},
 		"waitingForContributor skip with label": {
@@ -875,7 +966,7 @@ func TestShouldClose(t *testing.T) {
 				Labels: []*github.Label{{Name: github.String("disable-automatic-closure")}},
 			},
 			state:     waitingForContributor,
-			sinceDays: 42,
+			sinceDays: 30,
 			want:      false,
 		},
 		"waitingForContributor ignore disable-review-reminders": {
@@ -883,7 +974,7 @@ func TestShouldClose(t *testing.T) {
 				Labels: []*github.Label{{Name: github.String("disable-review-reminders")}},
 			},
 			state:     waitingForContributor,
-			sinceDays: 42,
+			sinceDays: 30,
 			want:      true,
 		},
 	}
