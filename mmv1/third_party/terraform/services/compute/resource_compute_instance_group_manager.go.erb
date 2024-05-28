@@ -226,16 +226,16 @@ func ResourceComputeInstanceGroupManager() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"initial_delay_sec": {
+							Computed:         true,
 							Type:             schema.TypeInt,
-							Default:          0,
 							Optional:         true,
 							ValidateFunc:     validation.IntBetween(0, 3600),
 							Description:      `Specifies the number of seconds that the MIG should wait to suspend or stop a VM after that VM was created. The initial delay gives the initialization script the time to prepare your VM for a quick scale out. The value of initial delay must be between 0 and 3600 seconds. The default value is 0.`,
 						},
 
 						"mode": {
+							Computed:     true,
 							Type:         schema.TypeString,
-							Default:      "MANUAL",
 							Optional:     true,
 							ValidateFunc: validation.StringInSlice([]string{"MANUAL", "SCALE_OUT_POOL"}, true),
 							Description:  `Defines how a MIG resumes or starts VMs from a standby pool when the group scales out. The default mode is "MANUAL".`,
