@@ -124,21 +124,18 @@ func GetCloudFunctionsCloudFunctionApiObject(d tpgresource.TerraformResourceData
 	} else if v, ok := d.GetOkExists("region"); !tpgresource.IsEmptyValue(reflect.ValueOf(locationProp)) && (ok || !reflect.DeepEqual(v, locationProp)) {
 		obj["location"] = locationProp
 	}
-
 	trigger_httpProp, err := expandCloudFunctionsCloudFunctionTriggerHttp(d.Get("trigger_http"), d, config)
 	if err != nil {
 		return nil, err
 	} else if v, ok := d.GetOkExists("trigger_http"); !tpgresource.IsEmptyValue(reflect.ValueOf(trigger_httpProp)) && (ok || !reflect.DeepEqual(v, trigger_httpProp)) {
 		obj["trigger_http"] = trigger_httpProp
 	}
-
 	vpcConnectorProp, err := expandCloudFunctionsCloudFunctionvpcConnector(d.Get("vpc_connector"), d, config)
 	if err != nil {
 		return nil, err
 	} else if v, ok := d.GetOkExists("vpc_connector"); !tpgresource.IsEmptyValue(reflect.ValueOf(vpcConnectorProp)) && (ok || !reflect.DeepEqual(v, vpcConnectorProp)) {
 		obj["vpcConnector"] = vpcConnectorProp
 	}
-
 	vpcConnectorEgressSettingsProp, err := expandCloudFunctionsCloudFunctionvpcConnectorEgressSettings(d.Get("vpc_connector_egress_settings"), d, config)
 	if err != nil {
 		return nil, err
