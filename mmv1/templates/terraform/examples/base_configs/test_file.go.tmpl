@@ -94,11 +94,6 @@ func TestAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *testing.T
 			"{{$provider}}": {},
 		{{- end }}
 		},
-	{{- else if $e.PullExternal }}
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"random": {},
-			"time": {},
-		},
 	{{- end }}
 	{{- if not $.Res.SkipDelete }}
 		CheckDestroy: testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t),

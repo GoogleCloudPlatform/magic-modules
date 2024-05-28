@@ -126,7 +126,7 @@ func (p *IamPolicy) UnmarshalYAML(n *yaml.Node) error {
 	p.WrappedPolicyObj = true
 	p.AllowedIamRole = "roles/viewer"
 	p.ParentResourceAttribute = "id"
-	p.ExampleConfigBody = "templates/terraform/iam/iam_attributes.tf.erb"
+	p.ExampleConfigBody = "templates/terraform/iam/go/iam_attributes.go.tmpl"
 	p.SubstituteZoneValue = true
 
 	type iamPolicyAlias IamPolicy
