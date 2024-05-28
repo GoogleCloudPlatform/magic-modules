@@ -57,7 +57,4 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-The following attributes are exported:
-
-* `id` - An identifier for the resource in format `projects/{{project}}/locations/{{region}}/environments/{{environment}}/userWorkloadsSecrets/{{name}}`
-
+See [google_composer_user_workloads_secret](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/composer_user_workloads_secret) resource for details of the available attributes.
