@@ -31,10 +31,10 @@ resource "google_storage_bucket" "image-store" {
   name     = "new-bucket-test-tf"
   location = "EU"
 
+  public_access_prevention = "enforced"
+
   website {
     main_page_suffix = "index.html"
     not_found_page   = "404.html"
   }
-
-  public_access_prevention = "enforced"
 }
