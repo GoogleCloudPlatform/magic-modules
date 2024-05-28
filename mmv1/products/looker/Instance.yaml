@@ -339,7 +339,7 @@ properties:
     immutable: true
     url_param_only: true
     validation: !ruby/object:Provider::Terraform::Validation
-      regex: '^[a-z][a-z0-9-]{0,39}[a-z0-9]$'
+      regex: '^[a-z][a-z0-9-]{0,61}[a-z0-9]$'
   # Oauth Object
   - !ruby/object:Api::Type::NestedObject
     name: oauthConfig
