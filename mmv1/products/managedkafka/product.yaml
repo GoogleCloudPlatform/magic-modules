@@ -1,7 +1,7 @@
 --- !ruby/object:Api::Product
 versions:
   - !ruby/object:Api::Product::Version
-    base_url: https://staging-managedkafka.sandbox.googleapis.com/v1/
+    base_url: https://managedkafka.googleapis.com/v1/
     name: beta
 name: ManagedKafka
 display_name: Managed Kafka
