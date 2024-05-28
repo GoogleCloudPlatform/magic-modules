@@ -56,12 +56,11 @@ parameters:
       "organizations/[organization_id]"
   - !ruby/object:Api::Type::String
     name: location
-    required: false
+    required: true
     immutable: true
     url_param_only: true
-    default: global
     description: |
-      location Id is provided by organization. If not provided, Use global as default.
+      location Id is provided by organization.
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
