@@ -241,8 +241,8 @@ func (t *Terraform) GenerateIamDocumentation(object api.Resource, templateData T
 	if err := os.MkdirAll(datasourceDocFolder, os.ModePerm); err != nil {
 		log.Println(fmt.Errorf("error creating parent directory %v: %v", datasourceDocFolder, err))
 	}
-	// targetFilePath = path.Join(datasourceDocFolder, fmt.Sprintf("%s_iam.html.markdown", t.FullResourceName(object)))
-	// templateData.GenerateIamDatasourceDocumentationFile(targetFilePath, object)
+	targetFilePath = path.Join(datasourceDocFolder, fmt.Sprintf("%s_iam.html.markdown", t.FullResourceName(object)))
+	templateData.GenerateIamDatasourceDocumentationFile(targetFilePath, object)
 }
 
 func (t *Terraform) FolderName() string {

@@ -152,13 +152,9 @@ type Examples struct {
 	// Or a config with two fine grained resources that have a race condition during create
 	SkipVcr bool `yaml:"skip_vcr"`
 
-	// (DEPRECATED) Use ExternalProviders instead
-	// Set for false by default. Set to true if you need to pull external provider for your
-	// testcase. Think before adding as there is latency and adds an external dependency to
+	// Specify which external providers are needed for the testcase.
+	// Think before adding as there is latency and adds an external dependency to
 	// your test so avoid if you can.
-	PullExternal bool `yaml:"pull_external"`
-
-	// Specify which external providers are needed
 	ExternalProviders []string `yaml:"external_providers"`
 
 	DocumentationHCLText string
@@ -183,7 +179,7 @@ func (e *Examples) UnmarshalYAML(n *yaml.Node) error {
 
 // Executes example templates for documentation and tests
 func (e *Examples) SetHCLText() {
-	e.DocumentationHCLText = ExecuteTemplate(e, e.ConfigPath)
+	e.DocumentationHCLText = ExecuteTemplate(e, e.ConfigPath, true)
 
 	copy := e
 	// Override vars to inject test values into configs - will have
@@ -211,10 +207,10 @@ func (e *Examples) SetHCLText() {
 		copy.Vars[key] = fmt.Sprintf("%%{%s}", key)
 	}
 
-	e.TestHCLText = ExecuteTemplate(copy, copy.ConfigPath)
+	e.TestHCLText = ExecuteTemplate(copy, copy.ConfigPath, true)
 }
 
-func ExecuteTemplate(e any, templatePath string) string {
+func ExecuteTemplate(e any, templatePath string, appendNewline bool) string {
 	templates := []string{
 		templatePath,
 	}
@@ -232,7 +228,7 @@ func ExecuteTemplate(e any, templatePath string) string {
 
 	rs := contents.String()
 
-	if !strings.HasSuffix(rs, "\n") {
+	if !strings.HasSuffix(rs, "\n") && appendNewline {
 		rs = fmt.Sprintf("%s\n", rs)
 	}
 
@@ -416,8 +412,10 @@ func (e *Examples) ResourceType(terraformName string) string {
 // check :skip_docs, type: TrueClass
 // check :config_path, type: String, default: "templates/terraform/examples///{name}.tf.erb"
 // check :skip_vcr, type: TrueClass
-// check :pull_external, type: :boolean, default: false
 // }
+
+// TODO
+// validate_external_providers
 
 // func (e *Examples) merge(other) {
 // result = self.class.new

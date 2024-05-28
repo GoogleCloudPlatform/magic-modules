@@ -266,6 +266,11 @@ properties:
         name: 'minInstanceCount'
         description: |
           Minimum number of instances for the service, to be divided among all revisions receiving traffic.
+  - !ruby/object:Api::Type::Boolean
+    name: 'defaultUriDisabled'
+    min_version: beta
+    description: |-
+      Disables public resolution of the default URI of this service.
   - !ruby/object:Api::Type::NestedObject
     name: 'template'
     required: true
