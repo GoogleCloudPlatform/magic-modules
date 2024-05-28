@@ -48,11 +48,12 @@ parameters:
       Unique identifier provided by the client within the parent scope.
   - !ruby/object:Api::Type::String
     name: location
-    required: true
+    required: false
     immutable: true
     url_param_only: true
+    default: global
     description: |
-      location provided by the client within the parent scope.
+      location Id is provided by organization. If not provided, Use global as default.
   - !ruby/object:Api::Type::String
     name: parent
     required: true
