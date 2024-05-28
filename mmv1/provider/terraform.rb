@@ -23,6 +23,7 @@ require 'provider/terraform/custom_code'
 require 'provider/terraform/docs'
 require 'provider/terraform/examples'
 require 'provider/terraform/sub_template'
+require 'provider/terraform/sweeper'
 require 'google/golang_utils'
 
 module Provider

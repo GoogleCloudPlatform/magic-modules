@@ -64,6 +64,12 @@ func wrapMultipleParams(params ...interface{}) (map[string]interface{}, error) {
 	return m, nil
 }
 
+// subtract returns the difference between a and b
+// and used in Go templates
+func subtract(a, b int) int {
+	return a - b
+}
+
 var TemplateFunctions = template.FuncMap{
 	"title":           google.SpaceSeparatedTitle,
 	"replace":         strings.Replace,
@@ -77,6 +83,8 @@ var TemplateFunctions = template.FuncMap{
 	"dict":            wrapMultipleParams,
 	"format2regex":    google.Format2Regex,
 	"orderProperties": api.OrderProperties,
+	"hasPrefix":       strings.HasPrefix,
+	"sub":             subtract,
 }
 
 var GA_VERSION = "ga"
@@ -110,6 +118,7 @@ func (td *TemplateData) GenerateResourceFile(filePath string, resource api.Resou
 		"templates/terraform/custom_flatten/go/bigquery_table_ref.go.tmpl",
 		"templates/terraform/flatten_property_method.go.tmpl",
 		"templates/terraform/expand_property_method.go.tmpl",
+		"templates/terraform/update_mask.go.tmpl",
 	}
 	td.GenerateFile(filePath, templatePath, resource, true, templates...)
 }
@@ -131,25 +140,51 @@ func (td *TemplateData) GenerateTestFile(filePath string, resource api.Resource)
 		templatePath,
 	}
 	tmplInput := TestInput{
-		Res:                    resource,
-		ImportPath:             td.ImportPath(),
-		PROJECT_NAME:           "my-project-name",
-		FIRESTORE_PROJECT_NAME: "my-project-name",
-		CREDENTIALS:            "my/credentials/filename.json",
-		REGION:                 "us-west1",
-		ORG_ID:                 "123456789",
-		ORG_DOMAIN:             "example.com",
-		ORG_TARGET:             "123456789",
-		PROJECT_NUMBER:         "1111111111111",
-		BILLING_ACCT:           "000000-0000000-0000000-000000",
-		MASTER_BILLING_ACCT:    "000000-0000000-0000000-000000",
-		SERVICE_ACCT:           "my@service-account.com",
-		CUST_ID:                "A01b123xz",
-		IDENTITY_USER:          "cloud_identity_user",
-		PAP_DESCRIPTION:        "description",
+		Res:                 resource,
+		ImportPath:          td.ImportPath(),
+		PROJECT_NAME:        "my-project-name",
+		CREDENTIALS:         "my/credentials/filename.json",
+		REGION:              "us-west1",
+		ORG_ID:              "123456789",
+		ORG_DOMAIN:          "example.com",
+		ORG_TARGET:          "123456789",
+		PROJECT_NUMBER:      "1111111111111",
+		BILLING_ACCT:        "000000-0000000-0000000-000000",
+		MASTER_BILLING_ACCT: "000000-0000000-0000000-000000",
+		SERVICE_ACCT:        "my@service-account.com",
+		CUST_ID:             "A01b123xz",
+		IDENTITY_USER:       "cloud_identity_user",
+		PAP_DESCRIPTION:     "description",
 	}
 
 	td.GenerateFile(filePath, templatePath, tmplInput, true, templates...)
+}
+
+func (td *TemplateData) GenerateIamPolicyFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/iam_policy.go.tmpl"
+	templates := []string{
+		templatePath,
+	}
+	td.GenerateFile(filePath, templatePath, resource, true, templates...)
+}
+
+func (td *TemplateData) GenerateIamResourceDocumentationFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/resource_iam.html.markdown.tmpl"
+	templates := []string{
+		templatePath,
+	}
+	td.GenerateFile(filePath, templatePath, resource, false, templates...)
+}
+
+func (td *TemplateData) GenerateIamDatasourceDocumentationFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/datasource_iam.html.markdown.tmpl"
+	templates := []string{
+		templatePath,
+	}
+	td.GenerateFile(filePath, templatePath, resource, false, templates...)
+}
+
+func (td *TemplateData) GenerateIamPolicyTestFile(filePath string, resource api.Resource) {
 }
 
 func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, goFormat bool, templates ...string) {
@@ -283,20 +318,19 @@ func (td *TemplateData) ImportPath() string {
 }
 
 type TestInput struct {
-	Res                    api.Resource
-	ImportPath             string
-	PROJECT_NAME           string
-	FIRESTORE_PROJECT_NAME string
-	CREDENTIALS            string
-	REGION                 string
-	ORG_ID                 string
-	ORG_DOMAIN             string
-	ORG_TARGET             string
-	PROJECT_NUMBER         string
-	BILLING_ACCT           string
-	MASTER_BILLING_ACCT    string
-	SERVICE_ACCT           string
-	CUST_ID                string
-	IDENTITY_USER          string
-	PAP_DESCRIPTION        string
+	Res                 api.Resource
+	ImportPath          string
+	PROJECT_NAME        string
+	CREDENTIALS         string
+	REGION              string
+	ORG_ID              string
+	ORG_DOMAIN          string
+	ORG_TARGET          string
+	PROJECT_NUMBER      string
+	BILLING_ACCT        string
+	MASTER_BILLING_ACCT string
+	SERVICE_ACCT        string
+	CUST_ID             string
+	IDENTITY_USER       string
+	PAP_DESCRIPTION     string
 }

@@ -4,7 +4,7 @@ description: |-
   Creates a Security Policy resource for Google Compute Engine.
 ---
 
-# google\_compute\_security\_policy
+# google_compute_security_policy
 
 A Security Policy defines an IP blacklist or whitelist that protects load balanced Google Cloud services by denying or permitting traffic from specified IP ranges. For more information
 see the [official documentation](https://cloud.google.com/armor/docs/configure-security-policies)
@@ -196,6 +196,7 @@ The following arguments are supported:
 * `json_parsing` - Whether or not to JSON parse the payload body. Defaults to `DISABLED`.
   * `DISABLED` - Don't parse JSON payloads in POST bodies.
   * `STANDARD` - Parse JSON payloads in POST bodies.
+  * `STANDARD_WITH_GRAPHQL` - Parse JSON and GraphQL payloads in POST bodies.
 
 * `json_custom_config` - Custom configuration to apply the JSON parsing. Only applicable when
     `json_parsing` is set to `STANDARD`. Structure is [documented below](#nested_json_custom_config).

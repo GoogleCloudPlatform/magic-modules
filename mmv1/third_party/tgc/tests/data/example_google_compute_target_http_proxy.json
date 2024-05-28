@@ -1,0 +1,19 @@
+[
+    {
+        "name": "//compute.googleapis.com/projects/{{.Provider.project}}/global/targetHttpProxies/test-proxy",
+        "asset_type": "compute.googleapis.com/TargetHttpProxy",
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+        "resource": {
+            "version": "beta",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
+            "discovery_name": "TargetHttpProxy",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "name": "test-proxy"
+            }
+        },
+        "ancestors": [
+            "organizations/{{.OrgID}}"
+        ]
+    }
+]

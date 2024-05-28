@@ -4,7 +4,7 @@ description: |-
   Creates a new SQL database instance in Google Cloud SQL.
 ---
 
-# google\_sql\_database\_instance
+# google_sql_database_instance
 
 Creates a new Google SQL Database Instance. For more information, see the [official documentation](https://cloud.google.com/sql/),
 or the [JSON API](https://cloud.google.com/sql/docs/admin-api/v1beta4/instances).
@@ -419,8 +419,7 @@ when an Instance can automatically restart to apply updates. The maintenance win
 
 * `hour` - (Optional) Hour of day (`0-23`), ignored if `day` not set
 
-* `update_track` - (Optional) Receive updates earlier (`canary`) or later
-(`stable`)
+* `update_track` - (Optional) Receive updates after one week (`canary`) or after two weeks (`stable`) or after five weeks (`week5`) of notification.
 
 The optional `settings.insights_config` subblock for instances declares Query Insights([MySQL](https://cloud.google.com/sql/docs/mysql/using-query-insights), [PostgreSQL](https://cloud.google.com/sql/docs/postgres/using-query-insights)) configuration. It contains:
 

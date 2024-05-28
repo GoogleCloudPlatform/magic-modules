@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/constants"
 	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
 )
 
@@ -76,13 +77,19 @@ func (rs ResourceSchemaRule) Identifier() string {
 
 // Message - a message to to inform the user
 // of a breakage.
-func (rs ResourceSchemaRule) Message(resource, field string) string {
+func (rs ResourceSchemaRule) Message(resource, field string) *BreakingChange {
 	msg := rs.message
-	resource = fmt.Sprintf("`%s`", resource)
-	field = fmt.Sprintf("`%s`", field)
-	msg = strings.ReplaceAll(msg, "{{resource}}", resource)
-	msg = strings.ReplaceAll(msg, "{{field}}", field)
-	return msg + documentationReference(rs.identifier)
+	msg = strings.ReplaceAll(msg, "{{resource}}", fmt.Sprintf("`%s`", resource))
+	msg = strings.ReplaceAll(msg, "{{field}}", fmt.Sprintf("`%s`", field))
+	return &BreakingChange{
+		Resource:               resource,
+		Field:                  field,
+		Message:                msg,
+		DocumentationReference: constants.GetFileUrl(rs.identifier),
+		RuleTemplate:           rs.message,
+		RuleDefinition:         rs.definition,
+		RuleName:               rs.name,
+	}
 }
 
 // IsRuleBreak - compares the field entries and returns

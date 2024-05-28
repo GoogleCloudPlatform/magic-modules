@@ -188,6 +188,9 @@ module Api
       # If true, skip sweeper generation for this resource
       attr_reader :skip_sweeper
 
+      # Override sweeper settings
+      attr_reader :sweeper
+
       attr_reader :timeouts
 
       # An array of function names that determine whether an error is retryable.
@@ -317,6 +320,7 @@ module Api
 
       check :custom_code, type: Provider::Terraform::CustomCode,
                           default: Provider::Terraform::CustomCode.new
+      check :sweeper, type: Provider::Terraform::Sweeper, default: Provider::Terraform::Sweeper.new
       check :docs, type: Provider::Terraform::Docs, default: Provider::Terraform::Docs.new
       check :import_format, type: Array, item_type: String, default: []
       check :autogen_async, type: :boolean, default: false
@@ -551,6 +555,19 @@ module Api
           fields << p.terraform_lineage
         elsif (p.is_a? Api::Type::NestedObject) && !p.all_properties.nil?
           fields.concat(ignore_read_labels_fields(p.all_properties))
+        end
+      end
+      fields
+    end
+
+    # Return ignore_read fields that should be added to ImportStateVerifyIgnore
+    def ignore_read_fields(props)
+      fields = []
+      props.each do |p|
+        if p.ignore_read && !p.url_param_only && !p.is_a?(Api::Type::ResourceRef)
+          fields << p.terraform_lineage
+        elsif (p.is_a? Api::Type::NestedObject) && !p.all_properties.nil?
+          fields.concat(ignore_read_fields(p.all_properties))
         end
       end
       fields

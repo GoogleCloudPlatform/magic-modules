@@ -4,7 +4,7 @@ description: |-
   Manages an Instance Group within GCE.
 ---
 
-# google\_compute\_instance\_group\_manager
+# google_compute_instance_group_manager
 
 The Google Compute Engine Instance Group Manager API creates and manages pools
 of homogeneous Compute Engine virtual machine instances from a common instance
@@ -184,7 +184,7 @@ update_policy {
 }
 ```
 
-* `minimal_action` - (Required) - Minimal action to be taken on an instance. You can specify either `REFRESH` to update without stopping instances, `RESTART` to restart existing instances or `REPLACE` to delete and create new instances from the target template. If you specify a `REFRESH`, the Updater will attempt to perform that action only. However, if the Updater determines that the minimal action you specify is not enough to perform the update, it might perform a more disruptive action.
+* `minimal_action` - (Required) - Minimal action to be taken on an instance. You can specify either `NONE` to forbid any actions, `REFRESH` to update without stopping instances, `RESTART` to restart existing instances or `REPLACE` to delete and create new instances from the target template. If you specify a `REFRESH`, the Updater will attempt to perform that action only. However, if the Updater determines that the minimal action you specify is not enough to perform the update, it might perform a more disruptive action.
 
 * `most_disruptive_allowed_action` - (Optional) - Most disruptive action that is allowed to be taken on an instance. You can specify either NONE to forbid any actions, REFRESH to allow actions that do not need instance restart, RESTART to allow actions that can be applied without instance replacing or REPLACE to allow all possible actions. If the Updater determines that the minimal update action needed is more disruptive than most disruptive allowed action you specify it will not perform the update at all.
 
