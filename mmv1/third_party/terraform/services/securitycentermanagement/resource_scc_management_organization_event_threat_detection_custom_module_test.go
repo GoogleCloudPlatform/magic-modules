@@ -50,7 +50,7 @@ func TestAccSecurityCenterManagementOrganizationEventThreatDetectionCustomModule
 	})
 }
 
-func testAccSecurityCenterManagementOrganizationEventThreatDetectionCustomModule__sccOrganizationCustomModuleExample(context map[string]interface{}) string {	
+func testAccSecurityCenterManagementOrganizationEventThreatDetectionCustomModule__sccOrganizationCustomModuleExample(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_scc_management_organization_event_threat_detection_custom_module" "example" {
 	organization = "%{org_id}"
@@ -73,7 +73,7 @@ resource "google_scc_management_organization_event_threat_detection_custom_modul
 `, context)
 }
 
-func testAccSecurityCenterManagementOrganizationEventThreatDetectionCustomModule_sccOrganizationCustomModuleUpdate(context map[string]interface{}) string {	
+func testAccSecurityCenterManagementOrganizationEventThreatDetectionCustomModule_sccOrganizationCustomModuleUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_scc_management_organization_event_threat_detection_custom_module" "example" {
 	organization = "%{org_id}"
