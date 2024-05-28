@@ -281,7 +281,6 @@ properties:
               - :ALLOW_UNENCRYPTED_AND_ENCRYPTED
   - !ruby/object:Api::Type::NestedObject
     name: 'pscInstanceConfig'
-    default_from_api: true
     description: |
       Configuration for Private Service Connect (PSC) for the instance.
     properties:
