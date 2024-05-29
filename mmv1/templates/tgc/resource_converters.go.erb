@@ -66,6 +66,7 @@ func ResourceConverters() map[string][]cai.ResourceConverter {
 		"google_compute_target_pool":				   	   {resourceConverterComputeTargetPool()},
 		"google_dataflow_job":                             {resourceDataflowJob()},
 		"google_dataproc_autoscaling_policy":	           {dataproc.ResourceConverterDataprocAutoscalingPolicy()},
+		"google_dataproc_cluster":	           			   {resourceConverterDataprocCluster()},
 		"google_dns_managed_zone":                         {dns.ResourceConverterDNSManagedZone()},
 		"google_dns_policy":                               {dns.ResourceConverterDNSPolicy()},
 		"google_kms_key_ring_import_job":                  {kms.ResourceConverterKMSKeyRingImportJob()},
