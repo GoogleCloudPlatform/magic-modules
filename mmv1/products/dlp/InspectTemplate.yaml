@@ -144,7 +144,6 @@ properties:
               properties:
                 - !ruby/object:Api::Type::NestedObject
                   name: 'infoType'
-                  required: true
                   description: |
                     Type of information the findings limit applies to. Only one limit per infoType should be provided. If InfoTypeLimit does
                     not have an infoType, the DLP API applies the limit against all infoTypes that are found but not
