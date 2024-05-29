@@ -516,9 +516,6 @@ func verifyBigtableAutomatedBackupsDisabled(t *testing.T) resource.TestCheckFunc
 		if err != nil {
 			return fmt.Errorf("Error retrieving table. Could not find %s in %s.", rs.Primary.Attributes["name"], rs.Primary.Attributes["instance_name"])
 		}
-		fmt.Print("Checking ABC")
-		fmt.print(table.AutomatedBackupConfig)
-		print("---")
 		if table.AutomatedBackupConfig != nil {
 			return fmt.Errorf("Automated Backups are expected to be disabled but they are not: %v", table)
 		}

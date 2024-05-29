@@ -185,11 +185,11 @@ func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error
 		if !frequencyExists {
 			return fmt.Errorf("Automated backup policy frequency must be specified")
 		}
-		abpRetentionPeriod, err := time.ParseDuration(abpRetentionPeriodField.(string))
+		abpRetentionPeriod, err := ParseDuration(abpRetentionPeriodField.(string))
 		if err != nil {
 			return fmt.Errorf("Error parsing automated backup policy retention period: %s", err)
 		}
-		abpFrequency, err := time.ParseDuration(abpFrequencyField.(string))
+		abpFrequency, err := ParseDuration(abpFrequencyField.(string))
 		if err != nil {
 			return fmt.Errorf("Error parsing automated backup policy frequency: %s", err)
 		}
@@ -406,7 +406,7 @@ func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error
 		abp := bigtable.TableAutomatedBackupPolicy{}
 		if d.HasChange("automated_backup_policy.retention_period") {
 			retentionPeriod := d.Get("automated_backup_policy.retention_period")
-			abpRetentionPeriod, err := time.ParseDuration(retentionPeriod.(string))
+			abpRetentionPeriod, err := ParseDuration(retentionPeriod.(string))
 			if err != nil {
 				return fmt.Errorf("Error parsing automated backup policy retention period: %s", err)
 			}
@@ -414,7 +414,7 @@ func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error
 		}
 		if d.HasChange("automated_backup_policy.frequency") {
 			frequency := d.Get("automated_backup_policy.frequency")
-			abpFrequency, err := time.ParseDuration(frequency.(string))
+			abpFrequency, err := ParseDuration(frequency.(string))
 			if err != nil {
 				return fmt.Errorf("Error parsing automated backup policy frequency: %s", err)
 			}
