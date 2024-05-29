@@ -48,7 +48,7 @@ properties:
                     in the subnet. The subnet must be located in the same region as the
                     cluster. The project may differ. A minimum of 1 subnet is required.
                     A maximum of 10 subnets can be specified. The name of the subnet must be
-                    in the format projects/PROJECT_ID/regions/REGION/subnetworks/SUBNET."
+                    in the format `projects/PROJECT_ID/regions/REGION/subnetworks/SUBNET`."
                   required: true
                   diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
             description: "Virtual Private Cloud (VPC) networks that must be granted
@@ -62,7 +62,7 @@ properties:
         name: kmsKey
         description: "The Cloud KMS Key name to use for encryption.
           The key must be located in the same region as the cluster and cannot be changed.
-          Must be in the format projects/PROJECT_ID/locations/LOCATION/keyRings/KEY_RING/cryptoKeys/KEY."
+          Must be in the format `projects/PROJECT_ID/locations/LOCATION/keyRings/KEY_RING/cryptoKeys/KEY`."
         immutable: true
         diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
     name: gcpConfig
@@ -70,7 +70,7 @@ properties:
     required: true
   - !ruby/object:Api::Type::String
     name: name
-    description: "The name of the cluster. Structured like: projects/PROJECT_ID/locations/LOCATION/clusters/CLUSTER_ID."
+    description: "The name of the cluster. Structured like: `projects/PROJECT_ID/locations/LOCATION/clusters/CLUSTER_ID`."
     output: true
   - !ruby/object:Api::Type::String
     name: createTime
@@ -83,9 +83,9 @@ properties:
   - !ruby/object:Api::Type::KeyValueLabels
     name: labels
     description: "List of label KEY=VALUE pairs to add. Keys must start with a lowercase
-        character and contain only hyphens (-), underscores (_), lowercase
+        character and contain only hyphens (-), underscores (\_), lowercase
         characters, and numbers. Values must contain only hyphens (-),
-        underscores (_), lowercase characters, and numbers."
+        underscores (\_), lowercase characters, and numbers."
   - !ruby/object:Api::Type::NestedObject
     properties:
       - !ruby/object:Api::Type::String
