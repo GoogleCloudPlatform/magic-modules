@@ -55,6 +55,11 @@ type BreakingChange struct {
 	DocumentationReference string
 }
 
+type MissingTestInfo struct {
+	SuggestedTest string
+	Tests         []string
+}
+
 type Errors struct {
 	Title  string
 	Errors []string
@@ -64,7 +69,7 @@ type diffCommentData struct {
 	PrNumber        int
 	Diffs           []Diff
 	BreakingChanges []BreakingChange
-	MissingTests    string
+	MissingTests    map[string]*MissingTestInfo
 	Errors          []Errors
 }
 
@@ -465,17 +470,21 @@ func changedSchemaResources(diffProcessorPath string, rnr ExecRunner) ([]string,
 // Run the missing test detector and return the results.
 // Returns an empty string unless there are missing tests.
 // Error will be nil unless an error occurs during setup.
-func detectMissingTests(diffProcessorPath, tpgbLocalPath string, rnr ExecRunner) (string, error) {
+func detectMissingTests(diffProcessorPath, tpgbLocalPath string, rnr ExecRunner) (map[string]*MissingTestInfo, error) {
 	if err := rnr.PushDir(diffProcessorPath); err != nil {
-		return "", err
+		return nil, err
 	}
 
 	output, err := rnr.Run("bin/diff-processor", []string{"detect-missing-tests", fmt.Sprintf("%s/google-beta/services", tpgbLocalPath)}, nil)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return output, rnr.PopDir()
+	var missingTests map[string]*MissingTestInfo
+	if err = json.Unmarshal([]byte(output), &missingTests); err != nil {
+		return nil, err
+	}
+	return missingTests, rnr.PopDir()
 }
 
 func formatDiffComment(data diffCommentData) (string, error) {
