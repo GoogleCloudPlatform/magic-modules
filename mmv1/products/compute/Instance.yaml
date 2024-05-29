@@ -674,3 +674,12 @@ properties:
           An array of tags. Each tag must be 1-63 characters long, and
           comply with RFC1035.
         item_type: Api::Type::String
+  - !ruby/object:Api::Type::NestedObject
+    name: 'advancedMachineFeatures'
+    description: |
+      Controls for advanced machine-related behavior features.
+    properties:
+      - !ruby/object:Api::Type::Boolean
+        name: 'enableNestedVirtualization'
+        description: |
+          Whether to enable nested virtualization or not (default is false).
