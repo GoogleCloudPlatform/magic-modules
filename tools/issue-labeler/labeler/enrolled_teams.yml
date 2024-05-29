@@ -553,9 +553,6 @@ service/securesourcemanager:
 service/securitycenter:
   resources:
   - google_scc_.*
-service/securitycentermanagement:
-  resources:
-  - google_scc_management_.*
 service/securityposture:
   resources:
   - google_securityposture_.*
