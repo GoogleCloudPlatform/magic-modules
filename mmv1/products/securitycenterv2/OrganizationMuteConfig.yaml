@@ -101,4 +101,3 @@ properties:
       field is set by the server and will be ignored if provided on
       config creation or update.
     output: true
-  
