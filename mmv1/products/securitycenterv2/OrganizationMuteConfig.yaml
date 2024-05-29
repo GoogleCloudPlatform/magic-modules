@@ -59,7 +59,7 @@ parameters:
     required: false
     immutable: true
     url_param_only: true
-    default: global
+    default_value: global
     description: |
       location Id is provided by organization. If not provided, Use global as default.
 properties:
