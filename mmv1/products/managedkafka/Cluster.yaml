@@ -6,7 +6,7 @@ id_format: projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}
 name: Cluster
-description: An Apache Kafka cluster deployed in a location. Fix this?
+description: An Apache Kafka for BigQuery cluster.
 min_version: beta
 update_verb: :PATCH
 update_mask: true
@@ -44,11 +44,11 @@ properties:
                 - !ruby/object:Api::Type::String
                   name: subnet
                   description: "Name of the VPC subnet from which the cluster is accessible. Both broker and
-        bootstrap server IP addresses and DNS entries are automatically created
-        in the subnet. The subnet must be located in the same region as the
-        cluster. The project may differ. A minimum of 1 subnet is required.
-        A maximum of 10 subnets can be specified.
-        The name of the subnet must be in the format projects/PROJECT_ID/regions/REGION/subnetworks/SUBNET."
+                    bootstrap server IP addresses and DNS entries are automatically created
+                    in the subnet. The subnet must be located in the same region as the
+                    cluster. The project may differ. A minimum of 1 subnet is required.
+                    A maximum of 10 subnets can be specified. The name of the subnet must be
+                    in the format projects/PROJECT_ID/regions/REGION/subnetworks/SUBNET."
                   required: true
                   diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
             description: "Virtual Private Cloud (VPC) networks that must be granted
@@ -70,7 +70,7 @@ properties:
     required: true
   - !ruby/object:Api::Type::String
     name: name
-    description: "Identifier. The name of the cluster. Structured like: projects/PROJECT_ID/locations/LOCATION/clusters/CLUSTER_ID"
+    description: "The name of the cluster. Structured like: projects/PROJECT_ID/locations/LOCATION/clusters/CLUSTER_ID."
     output: true
   - !ruby/object:Api::Type::String
     name: createTime
@@ -83,9 +83,9 @@ properties:
   - !ruby/object:Api::Type::KeyValueLabels
     name: labels
     description: "List of label KEY=VALUE pairs to add. Keys must start with a lowercase
-        character and contain only hyphens (-), underscores (), lowercase
+        character and contain only hyphens (-), underscores (_), lowercase
         characters, and numbers. Values must contain only hyphens (-),
-        underscores (), lowercase characters, and numbers."
+        underscores (_), lowercase characters, and numbers."
   - !ruby/object:Api::Type::NestedObject
     properties:
       - !ruby/object:Api::Type::String
@@ -95,7 +95,7 @@ properties:
       - !ruby/object:Api::Type::String
         name: memoryBytes
         description: "The memory to provision for the cluster in bytes. The value must be
-        between 1 GiB and 8 GiB per vCPU. Ex. 1024Mi, 4Gi."
+          between 1 GiB and 8 GiB per vCPU. Ex. 1024Mi, 4Gi."
         required: true
     name: capacityConfig
     description: "A capacity configuration of a Kafka cluster."
@@ -105,19 +105,19 @@ properties:
       - !ruby/object:Api::Type::String
         name: mode
         description: "The rebalance behavior for the cluster. When not specified,
-          defaults to `NO_REBALANCE`. Possible values: `MODE_UNSPECIFIED`, `NO_REBALANCE`, `AUTO_REBALANCE_ON_SCALE_UP`"
+          defaults to `NO_REBALANCE`. Possible values: `MODE_UNSPECIFIED`, `NO_REBALANCE`, `AUTO_REBALANCE_ON_SCALE_UP`."
     name: rebalanceConfig
     description: "Defines rebalancing behavior of a Kafka cluster."
   - !ruby/object:Api::Type::String
     name: state
-    description: "The current state of the cluster. Possible values: `STATE_UNSPECIFIED`, `CREATING`, `ACTIVE`, `DELETING`"
+    description: "The current state of the cluster. Possible values: `STATE_UNSPECIFIED`, `CREATING`, `ACTIVE`, `DELETING`."
     output: true
 parameters:
   - !ruby/object:Api::Type::String
     name: location
     description: "ID of the location of the Apache Kafka for BigQuery resource. See
-          https://cloud.google.com/managed-kafka/docs/locations for a list of
-          supported locations."
+      https://cloud.google.com/managed-kafka/docs/locations for a list of
+      supported locations."
     url_param_only: true
     required: true
     immutable: true
