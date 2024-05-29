@@ -12,12 +12,26 @@ resource "google_access_context_manager_service_perimeter" "storage-perimeter" {
 
 resource "google_access_context_manager_service_perimeter_ingress_policy" "ingress_policy" {
   perimeter = "${google_access_context_manager_service_perimeter.storage-perimeter.name}"
+
   ingress_from {
     identity_type = "any_identity"
     sources {
       access_level = "*"
     }
   }
+  # Allow ingress from another project
+  ingress_from {
+    sources {
+      resource = "projects/87654321"
+    }
+  }
+  # Allow ingress from a specific VPC in another project
+  ingress_from {
+    sources {
+      resource = "//compute.googleapis.com/projects/87654321/global/networks/network-in-another-project"
+    }
+  }
+
   ingress_to {
     resources = ["*"]
     operations {

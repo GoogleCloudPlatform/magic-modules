@@ -17,6 +17,13 @@ resource "google_access_context_manager_service_perimeter" "test-access" {
       }
 
       ingress_policies {
+          # Allow ingress from a specific VPC in another project
+          ingress_from {
+              sources {
+                  resource = "//compute.googleapis.com/projects/87654321/global/networks/network-in-another-project"
+              }
+          }
+
           ingress_from {
               sources {
                   access_level = google_access_context_manager_access_level.test-access.name
