@@ -464,7 +464,6 @@ properties:
           This flag specifies whether Backups will not fail when
           Backup for GKE detects Kubernetes configuration that is
           non-standard or requires additional setup to restore.
-        default_from_api: false
   - !ruby/object:Api::Type::Integer
     name: protectedPodCount
     output: true
