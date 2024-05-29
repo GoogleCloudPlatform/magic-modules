@@ -14,6 +14,7 @@
 --- !ruby/object:Api::Resource
 name: 'ServiceLbPolicies'
 base_url: 'projects/{{project}}/locations/{{location}}/serviceLbPolicies'
+min_version: beta
 create_url: 'projects/{{project}}/locations/{{location}}/serviceLbPolicies?serviceLbPolicyId={{name}}'
 self_link: 'projects/{{project}}/locations/{{location}}/serviceLbPolicies/{{name}}'
 update_verb: :PATCH

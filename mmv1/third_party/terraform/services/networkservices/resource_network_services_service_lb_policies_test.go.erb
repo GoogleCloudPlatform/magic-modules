@@ -1,4 +1,6 @@
+<% autogen_exception -%>
 package networkservices_test
+<% unless version == 'ga' -%>
 
 import (
 	"fmt"
@@ -73,3 +75,5 @@ resource "google_network_services_service_lb_policies" "foobar" {
 }
 `, policyName)
 }
+
+<% end -%>
