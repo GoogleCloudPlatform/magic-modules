@@ -185,6 +185,11 @@ func (td *TemplateData) GenerateIamDatasourceDocumentationFile(filePath string, 
 }
 
 func (td *TemplateData) GenerateIamPolicyTestFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/examples/base_configs/iam_test_file.go.tmpl"
+	templates := []string{
+		templatePath,
+	}
+	td.GenerateFile(filePath, templatePath, resource, false, templates...)
 }
 
 func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, goFormat bool, templates ...string) {
