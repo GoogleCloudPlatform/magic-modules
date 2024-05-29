@@ -57,6 +57,14 @@ examples:
       display_name: 'tcp-uptime-check'
       group_display_name: 'uptime-check-group'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'uptime_check_config_cloud_run'
+    primary_resource_id: 'cloud_run'
+    vars:
+      cloud_run_primary_id: 'default'
+      display_name: 'cloud-run-uptime-check'
+    test_env_vars:
+      project_id: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
     name: 'uptime_check_config_synthetic_monitor'
     primary_resource_id: 'synthetic_monitor'
     vars:
@@ -432,12 +440,12 @@ properties:
     name: monitoredResource
     immutable: true
     description: |
-      The [monitored resource]
-      (https://cloud.google.com/monitoring/api/resources) associated with the
+      The [monitored resource](https://cloud.google.com/monitoring/api/resources) associated with the
       configuration. The following monitored resource types are supported for
       uptime checks:
       * `aws_ec2_instance`
       * `aws_elb_load_balancer`
+      * `cloud_run_revision`
       * `gae_app
       * `gce_instance`
       * `k8s_service`
