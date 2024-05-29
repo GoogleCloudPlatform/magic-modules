@@ -204,7 +204,7 @@ The following arguments are supported:
 
 {{ range $param := $.IamSelfLinkProperties }}
 {{-   if eq $param.Name "name" -}}
-* `{{if $.IamPolicy.ParentResourceAttribute}}{{$.IamPolicy.ParentResourceAttribute}}{{else}}{{underscore $.Name}}{{end}}` - (Required) Used to find the parent resource to bind the IAM policy to
+* `{{ $.IamParentResourceName }}` - (Required) Used to find the parent resource to bind the IAM policy to
 {{-   else if or (eq (underscore $param.Name) "region") (eq (underscore $param.Name) "zone") }}
 * `{{ underscore $param.Name }}` - (Optional) {{ $param.Description }} Used to find the parent resource to bind the IAM policy to. If not specified,
   the value will be parsed from the identifier of the parent resource. If no {{ underscore $param.Name }} is provided in the parent identifier and no
