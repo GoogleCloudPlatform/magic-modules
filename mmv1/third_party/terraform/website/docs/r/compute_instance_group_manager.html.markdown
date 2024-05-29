@@ -89,6 +89,31 @@ resource "google_compute_instance_group_manager" "appserver" {
 }
 ```
 
+## Example Usage with standby policy (`google-beta` provider)
+```hcl
+resource "google_compute_instance_group_manager" "igm-sr" {
+  provider = google-beta
+  name = "tf-sr-igm"
+
+  base_instance_name        = "tf-sr-igm-instance"
+  zone                      = "us-central1-a"
+
+  target_size               = 5
+
+  version {
+    instance_template = google_compute_instance_template.sr-igm.self_link
+    name              = "primary"
+  }
+
+  standby_policy {
+    initial_delay_sec           = 30
+    mode                        = "MANUAL"
+  }
+  target_suspended_size         = 2
+  target_stopped_size           = 1
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -158,7 +183,7 @@ group. You can specify only one value. Structure is [documented below](#nested_a
   allInstancesConfig on the group, you must update the group's instances to
   apply the configuration.
 
-* `standby_policy` - (Optional [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The standby policy for stopped and suspended instances. Structure is [documented below](#nested_standby_policy). For more information, see the [official documentation](https://cloud.google.com/compute/docs/instance-groups/suspended-and-stopped-vms-in-mig) and [API](https://cloud.google.com/compute/docs/reference/rest/beta/regionInstanceGroupManagers/patch)
+* `standby_policy` - (Optional [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The standby policy for stopped and suspended instances. Structure is documented below. For more information, see the [official documentation](https://cloud.google.com/compute/docs/instance-groups/suspended-and-stopped-vms-in-mig) and [API](https://cloud.google.com/compute/docs/reference/rest/beta/regionInstanceGroupManagers/patch)
 
 * `target_suspended_size` - (Optional [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The target number of suspended instances for this managed instance group.
 
@@ -176,14 +201,7 @@ group. You can specify only one value. Structure is [documented below](#nested_a
 
 - - -
 
-<a name="nested_standby_policy"></a>The `standby_policy` block supports:
-
-```hcl
-standby_policy {
-  initial_delay_sec = 20
-  mode = "MANUAL"
-}
-```
+The `standby_policy` block supports:
 
 * `initial_delay_sec` - (Optional) - Specifies the number of seconds that the MIG should wait to suspend or stop a VM after that VM was created. The initial delay gives the initialization script the time to prepare your VM for a quick scale out. The value of initial delay must be between 0 and 3600 seconds. The default value is 0.
 * `mode` - (Optional) - Defines how a MIG resumes or starts VMs from a standby pool when the group scales out. Valid options are: `MANUAL`, `SCALE_OUT_POOL`. If `MANUAL`(default), you have full control over which VMs are stopped and suspended in the MIG. If `SCALE_OUT_POOL`, the MIG uses the VMs from the standby pools to accelerate the scale out by resuming or starting them and then automatically replenishes the standby pool with new VMs to maintain the target sizes.
