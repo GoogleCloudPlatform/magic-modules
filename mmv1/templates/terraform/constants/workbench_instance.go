@@ -123,9 +123,9 @@ func WorkbenchInstanceTagsDiffSuppress(_, _, _ string, d *schema.ResourceData) b
 <% unless compiler == "terraformgoogleconversion-codegen" -%>
 // waitForWorkbenchInstanceActive waits for an workbench instance to become "ACTIVE"
 func waitForWorkbenchInstanceActive(d *schema.ResourceData, config *transport_tpg.Config, timeout time.Duration) error {
-	return resource.Retry(timeout, func() *resource.RetryError {
+	return retry.Retry(timeout, func() *retry.RetryError {
 		if err := resourceWorkbenchInstanceRead(d, config); err != nil {
-			return resource.NonRetryableError(err)
+			return retry.NonRetryableError(err)
 		}
 
 		name := d.Get("name").(string)
@@ -134,7 +134,7 @@ func waitForWorkbenchInstanceActive(d *schema.ResourceData, config *transport_tp
 			log.Printf("[DEBUG] Workbench Instance %q has state %q.", name, state)
 			return nil
 		} else {
-			return resource.RetryableError(fmt.Errorf("Workbench Instance %q has state %q. Waiting for ACTIVE state", name, state))
+			return retry.RetryableError(fmt.Errorf("Workbench Instance %q has state %q. Waiting for ACTIVE state", name, state))
 		}
 
 	})
