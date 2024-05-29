@@ -69,7 +69,7 @@ data "{{ $.IamTerraformName }}_policy" "policy" {
 {{ if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{- end }}
-{{- $.CustomTemplate $.IamPolicy.ExampleConfigBody}}
+{{- $.CustomTemplate $.IamPolicy.ExampleConfigBody false }}
 }
 ```
 
