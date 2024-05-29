@@ -513,3 +513,14 @@ properties:
       resource: 'License'
       imports: 'selfLink'
     custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
+  - !ruby/object:Api::Type::String
+    name: 'storagePool'
+    required: false
+    immutable: true
+    description: |
+      The URL of the storage pool in which the new disk is created.
+      For example:
+      * https://www.googleapis.com/compute/v1/projects/{project}/zones/{zone}/storagePools/{storagePool}
+      * /projects/{project}/zones/{zone}/storagePools/{storagePool}
+    diff_suppress_func: 'tpgresource.CompareResourceNames'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'

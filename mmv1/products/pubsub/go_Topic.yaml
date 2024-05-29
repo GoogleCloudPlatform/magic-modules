@@ -51,12 +51,11 @@ error_retry_predicates:
 examples:
   - name: 'pubsub_topic_basic'
     primary_resource_id: 'example'
-    primary_resource_name: 'example'
+    primary_resource_name: 'fmt.Sprintf("tf-test-example-topic%s", context["random_suffix"])'
     vars:
       topic_name: 'example-topic'
   - name: 'pubsub_topic_cmek'
     primary_resource_id: 'example'
-    primary_resource_name: 'example'
     vars:
       topic_name: 'example-topic'
       key_name: 'example-key'
@@ -64,12 +63,10 @@ examples:
     skip_test: true
   - name: 'pubsub_topic_geo_restricted'
     primary_resource_id: 'example'
-    primary_resource_name: 'example'
     vars:
       topic_name: 'example-topic'
   - name: 'pubsub_topic_schema_settings'
     primary_resource_id: 'example'
-    primary_resource_name: 'example'
     vars:
       topic_name: 'example-topic'
       schema_name: 'example'

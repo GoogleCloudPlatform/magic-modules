@@ -313,7 +313,9 @@ module Provider
                        ['converters/google/resources/service_account_key.go',
                         'third_party/tgc/service_account_key.go'],
                        ['converters/google/resources/compute_target_pool.go',
-                        'third_party/tgc/compute_target_pool.go']
+                        'third_party/tgc/compute_target_pool.go'],
+                       ['converters/google/resources/dataproc_cluster.go',
+                        'third_party/tgc/dataproc_cluster.go']
                      ])
     end
 
