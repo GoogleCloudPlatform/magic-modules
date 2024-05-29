@@ -14,6 +14,7 @@ resource "google_managed_kafka_cluster" "<%= ctx[:primary_resource_id] %>" {
     kms_key = google_kms_crypto_key.key.id
   }
 
+  depends_on = [google_kms_crypto_key_iam_binding.crypto_key_binding]
   provider = google-beta
 }
 
