@@ -237,3 +237,7 @@ properties:
       Configure Redis Cluster behavior using a subset of native Redis configuration parameters.
       Please check Memorystore documentation for the list of supported parameters:
       https://cloud.google.com/memorystore/docs/cluster/supported-instance-configurations
+  - !ruby/object:Api::Type::KeyValuePairs
+    name: 'testMissingTests'
+    description: |
+      abcdefg
