@@ -12,9 +12,9 @@ func TestAccDataSourceComputeSecurityPolicy_basic(t *testing.T) {
 	t.Parallel()
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeSecurityPolicyDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeSecurityPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceComputeSecurityPolicy_basic(acctest.RandString(t, 10)),
