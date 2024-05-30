@@ -1,0 +1,115 @@
+resource "google_vertex_ai_models" "<%= ctx[:primary_resource_id] %>" {
+  display_name = "<%= ctx[:vars]['display_name'] %>"
+  artifact_uri = "gs://cloud-samples-data/vertex-ai/google-cloud-aiplatform-ci-artifacts/models/iris_xgboost/"
+  description  = "sample description"
+
+  explanation_spec {
+    metadata {
+      inputs {
+        dense_shape_tensor_name = "test"
+        encoded_baselines       = "test"
+        encoded_tensor_name     = "test"
+        encoding                = "test"
+        feature_value_domain {
+          max_value       = "test"
+          min_value       = "test"
+          original_mean   = "test"
+          original_stddev = "test"
+        }
+        group_name            = "test"
+        index_feature_mapping = "test"
+        indices_tensor_name   = "test"
+        input_tensor_name     = "test"
+        modality              = "test"
+        name                  = "test"
+        sha1_sum              = "test"
+        visualization {
+          clip_percent_lowerbound = "test"
+          clip_percent_upperbound = "test"
+          color_map               = "test"
+          overlay_type            = "test"
+          polarity                = "test"
+          type                    = "test"
+        }
+      }
+      latent_space_source = "test"
+      outputs {
+        display_name_mapping_key   = "test"
+        index_display_name_mapping = "test"
+        name                       = "test"
+        output_tensor_name         = "test"
+      }
+    }
+    parameters {
+      examples {
+        example_gcs_source {
+          data_format = "test"
+          gcs_source {
+            uris = "test"
+          }
+        }
+        nearest_neighbor_search_config {
+          config {
+            algorithm_config {
+              tree_ah_config {
+                leaf_node_embedding_count    = "test"
+                leaf_nodes_to_search_percent = "test"
+              }
+            }
+            approximate_neighbors_count = "test"
+            dimensions                  = "test"
+            distance_measure_type       = "test"
+            feature_norm_type           = "test"
+            shard_size                  = "test"
+          }
+          contents_delta_uri    = "test"
+          is_complete_overwrite = "test"
+        }
+        neighbor_count = "test"
+        presets {
+          modality = "test"
+          query    = "test"
+        }
+      }
+      integrated_gradients_attribution {
+        blur_baseline_config {
+          max_blur_sigma = "test"
+        }
+        smooth_grad_config {
+          feature_noise_sigma {
+            noise_sigma {
+              name  = "test"
+              sigma = "test"
+            }
+          }
+          noise_sigma        = "test"
+          noisy_sample_count = "test"
+        }
+        step_count = "test"
+      }
+      output_indices = "test"
+      sampled_shapley_attribution {
+        path_count = "test"
+      }
+      top_k = "test"
+      xrai_attribution {
+        blur_baseline_config {
+          max_blur_sigma = "test"
+        }
+        smooth_grad_config {
+          feature_noise_sigma {
+            noise_sigma {
+              name  = "test"
+              sigma = "test"
+            }
+          }
+          noise_sigma        = "test"
+          noisy_sample_count = "test"
+        }
+        step_count = "test"
+      }
+    }
+  }
+
+  region       = "us-central1"
+}

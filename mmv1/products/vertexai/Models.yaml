@@ -505,9 +505,6 @@ properties:
     name: 'model'
     resource: 'Models'
     imports: 'displayName'
-    at_least_one_of:
-      - sourceModel
-      - model
     description: |
       The Model to create.
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
