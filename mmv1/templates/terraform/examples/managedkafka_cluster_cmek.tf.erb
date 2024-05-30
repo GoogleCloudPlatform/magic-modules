@@ -15,6 +15,7 @@ resource "google_managed_kafka_cluster" "<%= ctx[:primary_resource_id] %>" {
   }
 
   depends_on = [time_sleep.wait_240_seconds]
+
   provider = google-beta
 }
 
