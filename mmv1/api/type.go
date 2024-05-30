@@ -21,6 +21,7 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
+	"golang.org/x/exp/slices"
 )
 
 // Represents a property type
@@ -411,11 +412,15 @@ func (t Type) TerraformLineage() string {
 	return fmt.Sprintf("%s.0.%s", t.ParentMetadata.TerraformLineage(), google.Underscore(t.Name))
 }
 
-func (t Type) EnumValuesToString() string {
+func (t Type) EnumValuesToString(quoteSeperator string, addEmpty bool) string {
 	var values []string
 
 	for _, val := range t.EnumValues {
-		values = append(values, fmt.Sprintf("`%s`", val))
+		values = append(values, fmt.Sprintf("%s%s%s", quoteSeperator, val, quoteSeperator))
+	}
+
+	if addEmpty && !slices.Contains(values, "\"\"") && !t.Required {
+		values = append(values, "\"\"")
 	}
 
 	return strings.Join(values, ", ")
@@ -687,6 +692,10 @@ func (t Type) Deprecated() bool {
 	return t.DeprecationMessage != ""
 }
 
+func (t *Type) GetDescription() string {
+	return strings.TrimRight(t.Description, "\n")
+}
+
 // // private
 
 // // A constant value to be provided as field
@@ -818,6 +827,45 @@ func (t Type) ItemTypeClass() string {
 	}
 
 	return t.ItemType.Type
+}
+
+func (t Type) TFType(s string) string {
+	switch s {
+	case "Boolean":
+		return "schema.TypeBool"
+	case "Double":
+		return "schema.TypeFloat"
+	case "Integer":
+		return "schema.TypeInt"
+	case "String":
+		return "schema.TypeString"
+	case "Time":
+		return "schema.TypeString"
+	case "Enum":
+		return "schema.TypeString"
+	case "ResourceRef":
+		return "schema.TypeString"
+	case "NestedObject":
+		return "schema.TypeList"
+	case "Array":
+		return "schema.TypeList"
+	case "KeyValuePairs":
+		return "schema.TypeMap"
+	case "KeyValueLabels":
+		return "schema.TypeMap"
+	case "KeyValueTerraformLabels":
+		return "schema.TypeMap"
+	case "KeyValueEffectiveLabels":
+		return "schema.TypeMap"
+	case "KeyValueAnnotations":
+		return "schema.TypeMap"
+	case "Map":
+		return "schema.TypeSet"
+	case "Fingerprint":
+		return "schema.TypeString"
+	}
+
+	return "schema.TypeString"
 }
 
 // // Represents an enum, and store is valid values
@@ -1215,5 +1263,77 @@ func (t Type) PropertyNsPrefix() []string {
 		"Google",
 		google.Camelize(t.ResourceMetadata.ProductMetadata.Name, "upper"),
 		"Property",
+	}
+}
+
+// "Namespace" - prefix with product and resource - a property with
+// information from the "object" variable
+
+func (t Type) NamespaceProperty() string {
+	name := google.Camelize(t.Name, "lower")
+	p := t
+	for p.Parent() != nil {
+		p = *p.Parent()
+		name = fmt.Sprintf("%s%s", google.Camelize(p.Name, "lower"), name)
+	}
+
+	return fmt.Sprintf("%s%s%s", google.Camelize(t.ApiName, "lower"), t.ResourceMetadata.Name, name)
+}
+
+// def namespace_property_from_object(property, object)
+//
+//	name = property.name.camelize
+//	until property.parent.nil?
+//	  property = property.parent
+//	  name = property.name.camelize + name
+//	end
+//
+//	"#{property.__resource.__product.api_name.camelize(:lower)}#{object.name}#{name}"
+//
+// end
+
+// new utility function for recursive calls to GetPropertyUpdateMasksGroups
+
+func (t Type) GetNestedPropertyUpdateMasksGroups(maskGroups map[string][]string, maskPrefix string) {
+	for _, prop := range t.AllProperties() {
+		if prop.FlattenObject {
+			prop.GetNestedPropertyUpdateMasksGroups(maskGroups, prop.ApiName)
+		} else if len(prop.UpdateMaskFields) > 0 {
+			maskGroups[google.Underscore(prop.Name)] = prop.UpdateMaskFields
+		} else {
+			maskGroups[google.Underscore(prop.Name)] = []string{maskPrefix + prop.ApiName}
+		}
+	}
+}
+
+func (t Type) CustomTemplate(templatePath string, appendNewline bool) string {
+	return resource.ExecuteTemplate(&t, templatePath, appendNewline)
+}
+
+func (t *Type) GetIdFormat() string {
+	return t.ResourceMetadata.GetIdFormat()
+}
+
+func (t *Type) GoLiteral(value interface{}) string {
+	switch v := value.(type) {
+	case int:
+		return fmt.Sprintf("\"%d\"", v)
+	case float64:
+		return fmt.Sprintf("\"%f\"", v)
+	case bool:
+		return fmt.Sprintf("\"%v\"", v)
+	case string:
+		if !strings.HasPrefix(v, "\"") {
+			return fmt.Sprintf("\"%s\"", v)
+		}
+		return v
+	case []string:
+		for i, val := range v {
+			v[i] = fmt.Sprintf("\"%v\"", val)
+		}
+		return fmt.Sprintf("[]string{%s}", strings.Join(v, ","))
+
+	default:
+		panic(fmt.Errorf("unknown go literal type %+v", value))
 	}
 }

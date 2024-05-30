@@ -1,6 +1,6 @@
 ---
-majorVersion: "5.0.0"
-upgradeGuide: "version_5_upgrade.html.markdown"
+majorVersion: "6.0.0"
+upgradeGuide: "version_6_upgrade.html.markdown"
 title: "Make a breaking change"
 summary: "Guidance on making a breaking changes"
 weight: 20
@@ -177,7 +177,7 @@ Entries should focus on the changes that users need to make when upgrading
 to `{{% param "majorVersion" %}}`, rather than how to write configurations
 after upgrading.
 
-See [Terraform provider for Google Cloud 4.0.0 Upgrade Guide](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/version_4_upgrade)
+See [Terraform provider for Google Cloud 5.0.0 Upgrade Guide](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/version_5_upgrade)
 and other upgrade guides for examples.
 
 The upgrade guide and the actual breaking change will be merged only after both are completed.

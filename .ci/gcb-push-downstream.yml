@@ -30,20 +30,55 @@ steps:
       waitFor: ["checkout"]
 
     # TPG
-    - name: 'gcr.io/graphite-docker-images/bash-plus'
-      entrypoint: '/workspace/.ci/scripts/bash-plus/downstream-waiter/wait_for_commit.sh'
+    - name: 'gcr.io/graphite-docker-images/go-plus'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: tpg-sync
-      waitFor: ["checkout"]
+      waitFor: ["build-magician-binary"]
       args:
+          - wait-for-commit
           - 'tpg-sync'
           - $BRANCH_NAME
           - $COMMIT_SHA
 
+    # TPGB
+    - name: 'gcr.io/graphite-docker-images/go-plus'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
+      id: tpgb-sync
+      waitFor: ["build-magician-binary"]
+      args:
+          - wait-for-commit
+          - 'tpgb-sync'
+          - $BRANCH_NAME
+          - $COMMIT_SHA
+
+    # TGC
+    - name: 'gcr.io/graphite-docker-images/go-plus'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
+      id: tgc-sync
+      waitFor: ["build-magician-binary"]
+      args:
+          - wait-for-commit
+          - 'tgc-sync'
+          - $BRANCH_NAME
+          - $COMMIT_SHA
+
+    # TF-OICS
+    - name: 'gcr.io/graphite-docker-images/go-plus'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
+      id: tf-oics-sync
+      waitFor: ["build-magician-binary"]
+      args:
+          - wait-for-commit
+          - 'tf-oics-sync'
+          - $BRANCH_NAME
+          - $COMMIT_SHA
+
+    # TPG
     - name: 'gcr.io/graphite-docker-images/build-environment'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       secretEnv: ["GITHUB_TOKEN_CLASSIC"]
       id: tpg-push
-      waitFor: ["tpg-sync", "build-magician-binary"]
+      waitFor: ["tpg-sync", "tpgb-sync", "tgc-sync", "tf-oics-sync"]
       env:
         - BASE_BRANCH=$BRANCH_NAME
       args:
@@ -67,20 +102,11 @@ steps:
             fi
 
     # TPGB
-    - name: 'gcr.io/graphite-docker-images/bash-plus'
-      entrypoint: '/workspace/.ci/scripts/bash-plus/downstream-waiter/wait_for_commit.sh'
-      id: tpgb-sync
-      waitFor: ["checkout"]
-      args:
-          - 'tpgb-sync'
-          - $BRANCH_NAME
-          - $COMMIT_SHA
-
     - name: 'gcr.io/graphite-docker-images/build-environment'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       secretEnv: ["GITHUB_TOKEN_CLASSIC"]
       id: tpgb-push
-      waitFor: ["tpgb-sync", "build-magician-binary"]
+      waitFor: ["tpg-sync", "tpgb-sync", "tgc-sync", "tf-oics-sync"]
       env:
         - BASE_BRANCH=$BRANCH_NAME
       args:
@@ -104,20 +130,11 @@ steps:
             fi
 
     # TGC
-    - name: 'gcr.io/graphite-docker-images/bash-plus'
-      entrypoint: '/workspace/.ci/scripts/bash-plus/downstream-waiter/wait_for_commit.sh'
-      id: tgc-sync
-      waitFor: ["checkout"]
-      args:
-          - 'tgc-sync'
-          - $BRANCH_NAME
-          - $COMMIT_SHA
-
     - name: 'gcr.io/graphite-docker-images/build-environment'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       secretEnv: ["GITHUB_TOKEN_CLASSIC"]
       id: tgc-push
-      waitFor: ["tgc-sync", "tpgb-push"]
+      waitFor: ["tpgb-push"]
       env:
         - BASE_BRANCH=$BRANCH_NAME
       args:
@@ -141,20 +158,11 @@ steps:
             fi
 
     # TF-OICS
-    - name: 'gcr.io/graphite-docker-images/bash-plus'
-      entrypoint: '/workspace/.ci/scripts/bash-plus/downstream-waiter/wait_for_commit.sh'
-      id: tf-oics-sync
-      waitFor: ["checkout"]
-      args:
-          - 'tf-oics-sync'
-          - $BRANCH_NAME
-          - $COMMIT_SHA
-
     - name: 'gcr.io/graphite-docker-images/build-environment'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       secretEnv: ["GITHUB_TOKEN_CLASSIC"]
       id: tf-oics-push
-      waitFor: ["tf-oics-sync", "build-magician-binary"]
+      waitFor: ["tpg-sync", "tpgb-sync", "tgc-sync", "tf-oics-sync"]
       env:
         - BASE_BRANCH=$BRANCH_NAME
       args:
@@ -178,14 +186,15 @@ steps:
             fi
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
-      entrypoint: '/workspace/.ci/scripts/go-plus/vcr-cassette-merger/vcr_merge.sh'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       secretEnv: ["GITHUB_TOKEN_CLASSIC", "GOOGLE_PROJECT"]
       id: vcr-merge
       waitFor: ["tpg-push", "tpgb-push", "tgc-push", "tf-oics-push"]
       env:
         - BASE_BRANCH=$BRANCH_NAME
       args:
-          - $COMMIT_SHA
+        - "vcr-merge"
+        - $COMMIT_SHA
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
       id: magician-check-vcr-cassettes
@@ -206,7 +215,6 @@ steps:
         - "GOOGLE_SERVICE_ACCOUNT"
         - "SA_KEY"
         - "GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION"
-        - "GOOGLE_TPU_V2_VM_RUNTIME_VERSION"
       env:
         - "COMMIT_SHA=$COMMIT_SHA"
         - "GOOGLE_REGION=us-central1"
@@ -253,5 +261,3 @@ availableSecrets:
       env: SA_KEY
     - versionName: projects/673497134629/secrets/ci-test-public-advertised-prefix-description/versions/latest
       env: GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION
-    - versionName: projects/673497134629/secrets/ci-test-tpu-v2-vm-runtime-version/versions/latest
-      env: GOOGLE_TPU_V2_VM_RUNTIME_VERSION

@@ -3,7 +3,13 @@
   - name: '<%= property.name -%>'
     type: <%= property.class.to_s.gsub("Api::Type::", "") %>
 <%  unless property.description.nil? -%>
-    description: "<%= property.description.strip.gsub('"', '\'') -%>"
+<%    des = property.description.strip.gsub('"', '\'') -%>
+<%    if property.is_a?(Api::Type::KeyValueLabels) || property.is_a?(Api::Type::KeyValueAnnotations) -%>
+<%      index = des.index("\n\n**Note**: This field is non-authoritative") -%>
+    description: "<%= des[0, index] -%>"
+<%    else -%>
+    description: "<%= des -%>"
+<%    end -%>
 <%  end -%>
 <%  unless !property.unordered_list -%>
     unordered_list: <%= property.unordered_list %>

@@ -459,8 +459,8 @@ examples:
 <%      unless example.primary_resource_id.nil? -%>
     primary_resource_id: '<%= example.primary_resource_id %>'
 <%      end -%>
-<%      unless example.primary_resource_id.nil? -%>
-    primary_resource_name: '<%= example.primary_resource_id %>'
+<%      unless example.primary_resource_name.nil? -%>
+    primary_resource_name: '<%= example.primary_resource_name %>'
 <%      end -%>
 <%      unless example.min_version.nil? -%>
     min_version: '<%= example.min_version %>'
@@ -495,8 +495,8 @@ examples:
       '<%= irextra %>'
 <%        end -%>
 <%      end -%>
-<%      unless !example.pull_external -%>
-    pull_external: <%= example.pull_external %>
+<%      unless example.external_providers.nil? -%>
+    external_providers: <%= example.external_providers %>
 <%      end -%>
 <%      unless example.skip_test.nil? -%>
     skip_test: <%= example.skip_test %>
