@@ -90,7 +90,7 @@ class SweeperTests {
         allSweepers.forEach{ sweeper ->
             // Check PACKAGE_PATH is in google-beta
             val value = sweeper.params.findRawParam("PACKAGE_PATH")!!.value
-            assertEquals("./google-beta/sweeper", value)
+            assertEquals("./google/sweeper", value)
 
             // SKIP_PROJECT_SWEEPER should have a value so project sweepers will be skipped
             // See https://github.com/GoogleCloudPlatform/magic-modules/blob/501429790939717ca6dce76dbf4b1b82aef4e9d9/mmv1/third_party/terraform/services/resourcemanager/resource_google_project_sweeper.go#L18-L26
