@@ -297,7 +297,7 @@ func TestAccBigtableTable_automated_backups_enable(t *testing.T) {
 			},
 			// Changing automated backup retention period value
 			{
-				Config: testAccBigtableTable_automated_backups(instanceName, tableName, "24h0m0s", "24h0m0s", family),
+				Config: testAccBigtableTable_automated_backups(instanceName, tableName, "72h0m0s", "", family),
 			},
 			{
 				ResourceName:      "google_bigtable_table.table",
@@ -306,7 +306,7 @@ func TestAccBigtableTable_automated_backups_enable(t *testing.T) {
 			},
 			// Changing automated backup frequency value
 			{
-				Config: testAccBigtableTable_automated_backups(instanceName, tableName, "24h0m0s", "6h0m0s", family),
+				Config: testAccBigtableTable_automated_backups(instanceName, tableName, "", "24h0m0s", family),
 			},
 			{
 				ResourceName:      "google_bigtable_table.table",
@@ -643,7 +643,15 @@ resource "google_bigtable_table" "table" {
 }
 
 func testAccBigtableTable_automated_backups(instanceName, tableName, automatedBackupsRetentionPeriod, automatedBackupsFrequency, family string) string {
-	return fmt.Sprintf(`
+	var retentionPeriod string
+	if automatedBackupsRetentionPeriod != "" {
+		retentionPeriod = fmt.Sprintf(`retention_period = "%s"`, automatedBackupsRetentionPeriod)
+	}
+	var frequency string
+	if automatedBackupsFrequency != "" {
+		frequency = fmt.Sprintf(`frequency = "%s"`, automatedBackupsFrequency)
+	}
+	config := fmt.Sprintf(`
 resource "google_bigtable_instance" "instance" {
   name = "%s"
   cluster {
@@ -656,15 +664,16 @@ resource "google_bigtable_instance" "instance" {
 resource "google_bigtable_table" "table" {
   name          = "%s"
   instance_name = google_bigtable_instance.instance.name
-  automated_backup_policy = {
-	retention_period = "%s"
-	frequency = "%s"
+  automated_backup_policy {
+	%s
+	%s
   }
   column_family {
     family = "%s"
   }
 }
-`, instanceName, instanceName, tableName, automatedBackupsRetentionPeriod, automatedBackupsFrequency, family)
+`, instanceName, instanceName, tableName, retentionPeriod, frequency, family)
+	return config
 }
 
 func testAccBigtableTable_disable_automated_backups(instanceName, tableName, family string) string {
