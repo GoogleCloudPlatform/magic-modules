@@ -37,7 +37,7 @@ func TestAccSecurityCenterManagementOrganizationSecurityHealthAnalyticsCustomMod
 				ResourceName:            "google_scc_management_organization_security_health_analytics_custom_module.example",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"organization"},
+				ImportStateVerifyIgnore: []string{"organization", "location"},
 			},
 			{
 				Config: testAccSecurityCenterManagementOrganizationSecurityHealthAnalyticsCustomModule_sccOrganizationCustomModuleFullExample(context),
@@ -46,7 +46,7 @@ func TestAccSecurityCenterManagementOrganizationSecurityHealthAnalyticsCustomMod
 				ResourceName:            "google_scc_management_organization_security_health_analytics_custom_module.example",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"organization"},
+				ImportStateVerifyIgnore: []string{"organization", "location"},
 			},
 			{
 				Config: testAccSecurityCenterManagementOrganizationSecurityHealthAnalyticsCustomModule_sccOrganizationCustomModuleUpdate(context),
@@ -55,7 +55,7 @@ func TestAccSecurityCenterManagementOrganizationSecurityHealthAnalyticsCustomMod
 				ResourceName:            "google_scc_management_organization_security_health_analytics_custom_module.example",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"organization"},
+				ImportStateVerifyIgnore: []string{"organization", "location"},
 			},
 		},
 	})
@@ -173,7 +173,11 @@ func testAccCheckSecurityCenterManagementOrganizationSecurityHealthAnalyticsCust
 
 			config := acctest.GoogleProviderConfig(t)
 
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{SecurityCenterBasePath}}organizations/{{organization}}/securityHealthAnalyticsSettings/customModules/{{name}}")
+			location := rs.Primary.Attributes["location"]
+
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, fmt.Sprintf(
+				"{{SecurityCenterBasePath}}organizations/{{organization}}/locations/%s/securityHealthAnalyticsCustomModules/{{name}}", location))
+			
 			if err != nil {
 				return err
 			}
