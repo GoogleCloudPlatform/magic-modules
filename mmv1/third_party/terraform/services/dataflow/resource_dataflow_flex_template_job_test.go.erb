@@ -1348,7 +1348,7 @@ resource "google_dataflow_flex_template_job" "flex_job_kms" {
   labels = {
    "my_labels" = "value"
   }
-  kms_key_name		= data.google_kms_crypto_key.crypto_key.id
+  kms_key_name		= "%s"
 
 }
 `, topicName, bucket, crypto_key, job)
