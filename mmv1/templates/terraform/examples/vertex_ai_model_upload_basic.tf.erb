@@ -1,11 +1,20 @@
+resource "google_vertex_ai_models" "platform_model" {
+  display_name = "platform"
+  artifact_uri = "gs://cloud-samples-data/vertex-ai/google-cloud-aiplatform-ci-artifacts/models/iris_xgboost/"
+  description  = "platform model"
+
+  region       = "us-central1"
+}
+
 resource "google_vertex_ai_models" "<%= ctx[:primary_resource_id] %>" {
   display_name = "<%= ctx[:vars]['display_name'] %>"
   description  = "basic upload model"
 
   metadata_schema_uri   = "gs://google-cloud-aiplatform/schema/dataset/metadata/image_1.0.0.yaml"
 
-  // version_aliases = ["projects/vertex-ai-models-test/locations/us-central1/models/8741822227772604416@v1"]
-  // model_id = "id_upload_test"
+  version_aliases = ["v2beta1"]
+  model_id = "id_upload_test"
+  parent_model = google_vertex_ai_models.platform_model.display_name
 
   encryption_spec {
     kms_key_name = "test"
@@ -34,4 +43,5 @@ resource "google_vertex_ai_models" "<%= ctx[:primary_resource_id] %>" {
     "key2" : "value2"
   }
   region       = "us-central1"
+  depends_on = [google_vertex_ai_models.platform_model]
 }

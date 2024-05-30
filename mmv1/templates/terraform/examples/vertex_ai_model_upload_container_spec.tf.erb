@@ -4,6 +4,8 @@ resource "google_vertex_ai_models" "<%= ctx[:primary_resource_id] %>" {
     image_uri = "us-docker.pkg.dev/vertex-ai/prediction/xgboost-cpu.1-5:latest"
     args      = ["sample", "args"]
     command   = ["sample", "command"]
+    deployment_timeout = "2s"
+    shared_memory_size_mb = 10
     env {
       name  = "env_one"
       value = "value_one"
