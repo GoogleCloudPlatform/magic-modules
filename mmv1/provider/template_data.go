@@ -71,20 +71,21 @@ func subtract(a, b int) int {
 }
 
 var TemplateFunctions = template.FuncMap{
-	"title":           google.SpaceSeparatedTitle,
-	"replace":         strings.Replace,
-	"camelize":        google.Camelize,
-	"underscore":      google.Underscore,
-	"plural":          google.Plural,
-	"contains":        strings.Contains,
-	"join":            strings.Join,
-	"lower":           strings.ToLower,
-	"upper":           strings.ToUpper,
-	"dict":            wrapMultipleParams,
-	"format2regex":    google.Format2Regex,
-	"orderProperties": api.OrderProperties,
-	"hasPrefix":       strings.HasPrefix,
-	"sub":             subtract,
+	"title":                google.SpaceSeparatedTitle,
+	"replace":              strings.Replace,
+	"camelize":             google.Camelize,
+	"underscore":           google.Underscore,
+	"plural":               google.Plural,
+	"contains":             strings.Contains,
+	"join":                 strings.Join,
+	"lower":                strings.ToLower,
+	"upper":                strings.ToUpper,
+	"dict":                 wrapMultipleParams,
+	"format2regex":         google.Format2Regex,
+	"orderProperties":      api.OrderProperties,
+	"hasPrefix":            strings.HasPrefix,
+	"sub":                  subtract,
+	"formatDocDescription": api.FormatDocDescription,
 }
 
 var GA_VERSION = "ga"
