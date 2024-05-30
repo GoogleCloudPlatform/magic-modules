@@ -3,13 +3,13 @@ resource "google_vertex_ai_models" "<%= ctx[:primary_resource_id] %>" {
   description  = "basic upload model"
 
   encryption_spec {
-    kms_key_name = "test"
+    kms_key_name = "<%= ctx[:vars]['kms_key_name'] %>"
   }
 
   predict_schemata {
-    instance_schema_uri   = "test" # value needed
-    parameters_schema_uri = "test" # value needed
-    prediction_schema_uri = "test" # value needed
+    instance_schema_uri   = "gs://cloud-samples-data/vertex-ai/google-cloud-aiplatform-ci-artifacts/models/iris_xgboost/" # value needed
+    parameters_schema_uri = "gs://cloud-samples-data/vertex-ai/google-cloud-aiplatform-ci-artifacts/models/iris_xgboost/" # value needed
+    prediction_schema_uri = "gs://cloud-samples-data/vertex-ai/google-cloud-aiplatform-ci-artifacts/models/iris_xgboost/" # value needed
   }
 
   metadata {

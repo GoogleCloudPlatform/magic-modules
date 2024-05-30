@@ -58,6 +58,7 @@ examples:
     primary_resource_id: 'model'
     vars:
       name: 'test-model'
+      kms_key_name: 'kms-name'
   - !ruby/object:Provider::Terraform::Examples
     name: 'vertex_ai_model_upload_basic'
     skip_import_test: true
@@ -71,11 +72,18 @@ examples:
     vars:
       display_name: 'test-model-upload-container-spec'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'vertex_ai_model_upload_explanation_spec'
+    skip_import_test: true
+    primary_resource_id: 'upload_model'
+    vars:
+      display_name: 'test-model-upload-explanation-spec'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'vertex_ai_model_upload_predict_schemata'
     skip_import_test: true
     primary_resource_id: 'upload_model'
     vars:
       display_name: 'test-model-upload-predict-schemata'
+      kms_key_name: 'kms-name'
 parameters:
   - !ruby/object:Api::Type::String
     name: region

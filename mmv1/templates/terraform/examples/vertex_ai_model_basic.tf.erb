@@ -6,12 +6,9 @@ resource "google_vertex_ai_models" "<%= ctx[:primary_resource_id] %>" {
     "key1" : "value1",
     "key2" : "value2"
   }
-  
+
   encryption_spec {
-    kms_key_name = "test"
-  }
-  supported_export_formats {
-    exportable_content = "test"
+    kms_key_name = "<%= ctx[:vars]['kms_key_name'] %>"
   }
   region       = "us-central1"
 }
