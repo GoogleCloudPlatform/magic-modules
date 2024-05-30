@@ -75,7 +75,7 @@ class BuildConfigurationFeatureTests {
                 }
             }
             // service sweeper does not contain push artifacts to GCS step
-            if (bt.name != "Service Sweeper") {
+            if (!bt.name.startsWith("Service Sweeper")) {
                 assertTrue("Build configuration `${bt.name}` contains a build step that pushes artifacts to GCS", found)
             }
         }
