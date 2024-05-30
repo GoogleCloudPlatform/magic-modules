@@ -1293,6 +1293,18 @@ func (r Resource) GetPropertyUpdateMasksGroups() map[string][]string {
 	return maskGroups
 }
 
+// Formats whitespace in the style of the old Ruby generator's descriptions in documentation
+func FormatDocDescription(desc string) string {
+	returnString := strings.ReplaceAll(desc, "\n\n", "\n")
+
+	returnString = strings.ReplaceAll(returnString, "\n", "\n  ")
+
+	// fix removing for ruby -> go transition diffs
+	returnString = strings.ReplaceAll(returnString, "\n  \n  **Note**: This field is non-authoritative,", "\n\n  **Note**: This field is non-authoritative,")
+
+	return strings.TrimSuffix(returnString, "\n  ")
+}
+
 func (r Resource) CustomTemplate(templatePath string, appendNewline bool) string {
 	return resource.ExecuteTemplate(&r, templatePath, appendNewline)
 }
