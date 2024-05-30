@@ -31,8 +31,8 @@ class SweeperTests {
         // See https://github.com/GoogleCloudPlatform/magic-modules/blob/501429790939717ca6dce76dbf4b1b82aef4e9d9/mmv1/third_party/terraform/services/resourcemanager/resource_google_project_sweeper.go#L18-L26
 
         projectSweeperProject.buildTypes.forEach{bt ->
-            val value = bt.params.findRawParam("env.SKIP_PROJECT_SWEEPER")!!.value
-            assertTrue("env.SKIP_PROJECT_SWEEPER should be set to an empty value, so project sweepers are NOT skipped in the ${projectSweeperProject.name} project. Value = `${value}` ", value == "")
+            val skipProjectSweeper = bt.params.findRawParam("env.SKIP_PROJECT_SWEEPER")!!.value
+            assertTrue("env.SKIP_PROJECT_SWEEPER should be set to an empty value, so project sweepers are NOT skipped in the ${projectSweeperProject.name} project. Value = `${skipProjectSweeper}` ", skipProjectSweeper == "")
         }
     }
 
@@ -52,8 +52,8 @@ class SweeperTests {
 
         // SKIP_PROJECT_SWEEPER should have a value so project sweepers will be skipped
         // See https://github.com/GoogleCloudPlatform/magic-modules/blob/501429790939717ca6dce76dbf4b1b82aef4e9d9/mmv1/third_party/terraform/services/resourcemanager/resource_google_project_sweeper.go#L18-L26
-        value = sweeper.params.findRawParam("env.SKIP_PROJECT_SWEEPER")!!.value
-        assertTrue("env.SKIP_PROJECT_SWEEPER should be set to a non-empty string so project sweepers are skipped in the ${project.name} project (${sweeper.name}). Value = `${value}` ", value != "")
+        val skipProjectSweeper = sweeper.params.findRawParam("env.SKIP_PROJECT_SWEEPER")!!.value
+        assertTrue("env.SKIP_PROJECT_SWEEPER should be set to a non-empty string so project sweepers are skipped in the ${project.name} project (${sweeper.name}). Value = `${skipProjectSweeper}` ", skipProjectSweeper != "")
     }
 
     @Test
@@ -72,8 +72,8 @@ class SweeperTests {
 
         // SKIP_PROJECT_SWEEPER should have a value so project sweepers will be skipped
         // See https://github.com/GoogleCloudPlatform/magic-modules/blob/501429790939717ca6dce76dbf4b1b82aef4e9d9/mmv1/third_party/terraform/services/resourcemanager/resource_google_project_sweeper.go#L18-L26
-        value = sweeper.params.findRawParam("env.SKIP_PROJECT_SWEEPER")!!.value
-        assertTrue("env.SKIP_PROJECT_SWEEPER should be set to a non-empty string so project sweepers are skipped in the ${project.name} project (${sweeper.name}). Value = `${value}` ", value != "")
+        val skipProjectSweeper = sweeper.params.findRawParam("env.SKIP_PROJECT_SWEEPER")!!.value
+        assertTrue("env.SKIP_PROJECT_SWEEPER should be set to a non-empty string so project sweepers are skipped in the ${project.name} project (${sweeper.name}). Value = `${skipProjectSweeper}` ", skipProjectSweeper != "")
     }
 
     @Test
@@ -94,8 +94,8 @@ class SweeperTests {
 
             // SKIP_PROJECT_SWEEPER should have a value so project sweepers will be skipped
             // See https://github.com/GoogleCloudPlatform/magic-modules/blob/501429790939717ca6dce76dbf4b1b82aef4e9d9/mmv1/third_party/terraform/services/resourcemanager/resource_google_project_sweeper.go#L18-L26
-            value = sweeper.params.findRawParam("env.SKIP_PROJECT_SWEEPER")!!.value
-            assertTrue("env.SKIP_PROJECT_SWEEPER should be set to a non-empty string so project sweepers are skipped in the ${project.name} project (${sweeper.name}). Value = `${value}` ", value != "")
+            val skipProjectSweeper = sweeper.params.findRawParam("env.SKIP_PROJECT_SWEEPER")!!.value
+            assertTrue("env.SKIP_PROJECT_SWEEPER should be set to a non-empty string so project sweepers are skipped in the ${project.name} project (${sweeper.name}). Value = `${skipProjectSweeper}` ", skipProjectSweeper != "")
         }
     }
 
@@ -117,8 +117,8 @@ class SweeperTests {
 
             // SKIP_PROJECT_SWEEPER should have a value so project sweepers will be skipped
             // See https://github.com/GoogleCloudPlatform/magic-modules/blob/501429790939717ca6dce76dbf4b1b82aef4e9d9/mmv1/third_party/terraform/services/resourcemanager/resource_google_project_sweeper.go#L18-L26
-            value = sweeper.params.findRawParam("env.SKIP_PROJECT_SWEEPER")!!.value
-            assertTrue("env.SKIP_PROJECT_SWEEPER should be set to a non-empty string so project sweepers are skipped in the ${project.name} project (${sweeper.name}). Value = `${value}` ", value != "")
+            val skipProjectSweeper = sweeper.params.findRawParam("env.SKIP_PROJECT_SWEEPER")!!.value
+            assertTrue("env.SKIP_PROJECT_SWEEPER should be set to a non-empty string so project sweepers are skipped in the ${project.name} project (${sweeper.name}). Value = `${skipProjectSweeper}` ", skipProjectSweeper != "")
         }
     }
 
