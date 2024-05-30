@@ -28,6 +28,7 @@ examples:
     name: 'managedkafka_cluster_cmek'
     primary_resource_id: 'example'
     min_version: beta
+    external_providers: ["time"]
     vars:
       cluster_id: 'my-cluster'
       key_name: 'example-key'
