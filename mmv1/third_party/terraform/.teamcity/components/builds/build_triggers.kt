@@ -14,7 +14,6 @@ import DefaultStartHour
 import jetbrains.buildServer.configs.kotlin.BuildType
 import jetbrains.buildServer.configs.kotlin.Triggers
 import jetbrains.buildServer.configs.kotlin.triggers.schedule
-import jetbrains.buildServer.configs.kotlin.vcs.GitVcsRoot
 
 class NightlyTriggerConfiguration(
     val branch: String = DefaultBranchName,
