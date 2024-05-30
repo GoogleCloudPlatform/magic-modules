@@ -2,23 +2,14 @@ resource "google_vertex_ai_models" "<%= ctx[:primary_resource_id] %>" {
   display_name = "<%= ctx[:vars]['display_name'] %>"
   description  = "basic upload model"
 
-  metadata_schema_uri   = "gs://google-cloud-aiplatform/schema/dataset/metadata/image_1.0.0.yaml"
-
-  // version_aliases = ["projects/vertex-ai-models-test/locations/us-central1/models/8741822227772604416@v1"]
-  // model_id = "id_upload_test"
-
-  // output only
-  // deployed_models {
-  //   deployed_model_id = "test"
-  //   endpoint = "test"
-  // }
-  // supported_export_formats {
-  //   exportable_content = "test"
-  // }
-
-
   encryption_spec {
     kms_key_name = "test"
+  }
+
+  predict_schemata {
+    instance_schema_uri   = "test" # value needed
+    parameters_schema_uri = "test" # value needed
+    prediction_schema_uri = "test" # value needed
   }
 
   metadata {
