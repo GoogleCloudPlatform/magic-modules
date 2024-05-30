@@ -131,6 +131,12 @@ properties:
     required: false
     item_type: Api::Type::String
   - !ruby/object:Api::Type::Array
+    name: 'administrators'
+    description: |
+      Domain user accounts to be added to the local Administrators group of the SMB service. Comma-separated list of domain users or groups. The Domain Admin group is automatically added when the service joins your domain as a hidden group.
+    required: false
+    item_type: Api::Type::String
+  - !ruby/object:Api::Type::Array
     name: 'securityOperators'
     description: |
       Domain accounts that require elevated privileges such as `SeSecurityPrivilege` to manage security logs. Comma-separated list.
