@@ -44,9 +44,11 @@ fun mmUpstream(parentProject: String, providerName: String, vcsRoot: GitVcsRoot,
         ProviderNameBeta -> sweepersList = SweepersListBeta
         else -> throw Exception("Provider name not supplied when generating a nightly test subproject")
     }
-    val serviceSweeperConfig = BuildConfigurationForServiceSweeper(providerName, ServiceSweeperName, sweepersList, projectId, vcsRoot, sharedResources, config)
-    val trigger  = NightlyTriggerConfiguration(startHour=12, vcsRoot=cronSweeperVcsRoot)
-    serviceSweeperConfig.addTrigger(trigger) // Only the sweeper is on a schedule in this project
+    val serviceSweeperManualConfig = BuildConfigurationForServiceSweeper(providerName, "$ServiceSweeperName - Manual", sweepersList, projectId, vcsRoot, sharedResources, config)
+
+    val serviceSweeperCronConfig = BuildConfigurationForServiceSweeper(providerName, "$ServiceSweeperName - Cron", sweepersList, projectId, cronSweeperVcsRoot, sharedResources, config)
+    val trigger  = NightlyTriggerConfiguration(startHour=12)
+    serviceSweeperCronConfig.addTrigger(trigger) // Only the sweeper is on a schedule in this project
 
     return Project {
         id(projectId)
@@ -57,7 +59,8 @@ fun mmUpstream(parentProject: String, providerName: String, vcsRoot: GitVcsRoot,
         packageBuildConfigs.forEach { buildConfiguration: BuildType ->
             buildType(buildConfiguration)
         }
-        buildType(serviceSweeperConfig)
+        buildType(serviceSweeperManualConfig)
+        buildType(serviceSweeperCronConfig)
 
         params{
             configureGoogleSpecificTestParameters(config)
