@@ -70,6 +70,12 @@ examples:
     primary_resource_id: 'upload_model'
     vars:
       display_name: 'test-model-upload-container-spec'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'vertex_ai_model_upload_predict_schemata'
+    skip_import_test: true
+    primary_resource_id: 'upload_model'
+    vars:
+      display_name: 'test-model-upload-predict-schemata'
 parameters:
   - !ruby/object:Api::Type::String
     name: region
