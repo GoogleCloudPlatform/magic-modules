@@ -26,7 +26,7 @@ resource "google_managed_kafka_cluster" "<%= ctx[:primary_resource_id] %>" {
 
 resource "google_project_service" "managedkafka" {
   project = data.google_project.project.project_id
-  service = "staging-managedkafka.sandbox.googleapis.com"
+  service = "managedkafka.googleapis.com"
   disable_on_destroy = false
 
   provider = google-beta
