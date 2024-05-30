@@ -1293,6 +1293,7 @@ func (r Resource) GetPropertyUpdateMasksGroups() map[string][]string {
 	return maskGroups
 }
 
+// Formats whitespace in the style of the old Ruby generator's descriptions in documentation
 func FormatDocDescription(desc string) string {
 	returnString := strings.ReplaceAll(desc, "\n\n", "\n")
 
