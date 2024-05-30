@@ -5,16 +5,37 @@ resource "google_vertex_ai_models" "<%= ctx[:primary_resource_id] %>" {
   // version_aliases = ["projects/vertex-ai-models-test/locations/us-central1/models/8741822227772604416@v1"]
   // model_id = "id_upload_test"
 
+  // output only
   // deployed_models {
   //   deployed_model_id = "test"
   //   endpoint = "test"
   // }
-  encryption_spec {
-    kms_key_name = "test"
-  }
   // supported_export_formats {
   //   exportable_content = "test"
   // }
+
+
+  encryption_spec {
+    kms_key_name = "test"
+  }
+
+  metadata {
+    config {
+      algorithm_config {
+        tree_ah_config {
+          leaf_node_embedding_count    = 1
+          leaf_nodes_to_search_percent = 1
+        }
+      }
+      approximate_neighbors_count = 1
+      dimensions                  = 1
+      distance_measure_type       = 1
+      feature_norm_type           = "normal"
+      shard_size                  = 1
+    }
+    contents_delta_uri    = "test"
+    is_complete_overwrite = false
+  }
 
   labels       = {
     "key1" : "value1",
