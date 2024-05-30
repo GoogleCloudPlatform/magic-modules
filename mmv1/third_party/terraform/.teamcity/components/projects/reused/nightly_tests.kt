@@ -38,7 +38,7 @@ fun nightlyTests(parentProject:String, providerName: String, vcsRoot: GitVcsRoot
     // Create build configs to run acceptance tests for each package defined in packages.kt and services.kt files
     val allPackages = getAllPackageInProviderVersion(providerName)
     val packageBuildConfigs = BuildConfigurationsForPackages(allPackages, providerName, projectId, vcsRoot, sharedResources, config)
-    val accTestTrigger  = NightlyTriggerConfiguration()
+    val accTestTrigger  = NightlyTriggerConfiguration(vcsRoot=vcsRoot)
     packageBuildConfigs.forEach { buildConfiguration ->
         buildConfiguration.addTrigger(accTestTrigger)
     }
@@ -51,7 +51,7 @@ fun nightlyTests(parentProject:String, providerName: String, vcsRoot: GitVcsRoot
         else -> throw Exception("Provider name not supplied when generating a nightly test subproject")
     }
     val serviceSweeperConfig = BuildConfigurationForServiceSweeper(providerName, ServiceSweeperName, sweepersList, projectId, vcsRoot, sharedResources, config)
-    val sweeperTrigger  = NightlyTriggerConfiguration(startHour=11)  // Override hour
+    val sweeperTrigger  = NightlyTriggerConfiguration(startHour=11, vcsRoot=vcsRoot)  // Override hour
     serviceSweeperConfig.addTrigger(sweeperTrigger)
 
     return Project {

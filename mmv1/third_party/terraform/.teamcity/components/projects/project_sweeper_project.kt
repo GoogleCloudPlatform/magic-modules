@@ -32,7 +32,7 @@ fun projectSweeperSubProject(allConfig: AllContextParameters): Project {
     // Create build config for sweeping project resources
     // Uses the HashiCorpVCSRootGa VCS Root so that the latest sweepers in hashicorp/terraform-provider-google are used
     val serviceSweeperConfig = BuildConfigurationForProjectSweeper("N/A", ProjectSweeperName, SweepersListGa, projectId, HashiCorpVCSRootGa, sharedResources, gaConfig)
-    val trigger  = NightlyTriggerConfiguration(startHour=12)
+    val trigger  = NightlyTriggerConfiguration(startHour=12, vcsRoot=HashiCorpVCSRootGa)
     serviceSweeperConfig.addTrigger(trigger)
 
     return Project{

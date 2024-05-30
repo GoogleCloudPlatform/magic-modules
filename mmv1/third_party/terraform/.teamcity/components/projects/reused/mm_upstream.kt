@@ -24,7 +24,7 @@ import jetbrains.buildServer.configs.kotlin.Project
 import jetbrains.buildServer.configs.kotlin.vcs.GitVcsRoot
 import replaceCharsId
 
-fun mmUpstream(parentProject: String, providerName: String, vcsRoot: GitVcsRoot, config: AccTestConfiguration): Project {
+fun mmUpstream(parentProject: String, providerName: String, vcsRoot: GitVcsRoot, cronSweeperVcsRoot: GitVcsRoot, config: AccTestConfiguration): Project {
 
     // Create unique ID for the dynamically-created project
     var projectId = "${parentProject}_${MMUpstreamProjectId}"
@@ -45,7 +45,7 @@ fun mmUpstream(parentProject: String, providerName: String, vcsRoot: GitVcsRoot,
         else -> throw Exception("Provider name not supplied when generating a nightly test subproject")
     }
     val serviceSweeperConfig = BuildConfigurationForServiceSweeper(providerName, ServiceSweeperName, sweepersList, projectId, vcsRoot, sharedResources, config)
-    val trigger  = NightlyTriggerConfiguration(startHour=12)
+    val trigger  = NightlyTriggerConfiguration(startHour=12, vcrRoot=cronSweeperVcsRoot)
     serviceSweeperConfig.addTrigger(trigger) // Only the sweeper is on a schedule in this project
 
     return Project {
