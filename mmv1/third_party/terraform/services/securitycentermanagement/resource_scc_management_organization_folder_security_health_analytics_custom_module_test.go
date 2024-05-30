@@ -225,7 +225,7 @@ func testAccCheckSecurityCenterManagementOrganizationFolderSecurityHealthAnalyti
 				UserAgent: config.UserAgent,
 			})
 			if err == nil {
-				return fmt.Errorf("SecurityCenterFolderCustomModule still exists at %s", url)
+				return fmt.Errorf("SecurityCenterManagementOrganizationFolderSecurityHealthAnalyticsCustomModule still exists at %s", url)
 			}
 		}
 
