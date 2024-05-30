@@ -22,9 +22,9 @@ references:
     'Managing Subscriptions': 'https://cloud.google.com/pubsub/docs/admin#managing_subscriptions'
   api: 'https://cloud.google.com/pubsub/docs/reference/rest/v1/projects.subscriptions'
 docs:
-  note: 'You can retrieve the email of the Google Managed Pub/Sub Service Account used for forwarding
-by using the `google_project_service_identity` resource.
-'
+  note: |
+    You can retrieve the email of the Google Managed Pub/Sub Service Account used for forwarding
+    by using the `google_project_service_identity` resource.
 base_url: 'projects/{{project}}/subscriptions'
 create_verb: 'PUT'
 update_url: 'projects/{{project}}/subscriptions/{{name}}'

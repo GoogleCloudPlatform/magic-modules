@@ -21,9 +21,9 @@ references:
     'Managing Topics': 'https://cloud.google.com/pubsub/docs/admin#managing_topics'
   api: 'https://cloud.google.com/pubsub/docs/reference/rest/v1/projects.topics'
 docs:
-  note: 'You can retrieve the email of the Google Managed Pub/Sub Service Account used for forwarding
-by using the `google_project_service_identity` resource.
-'
+  note: |
+    You can retrieve the email of the Google Managed Pub/Sub Service Account used for forwarding
+    by using the `google_project_service_identity` resource.
 base_url: 'projects/{{project}}/topics'
 create_verb: 'PUT'
 update_url: 'projects/{{project}}/topics/{{name}}'
