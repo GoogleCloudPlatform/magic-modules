@@ -238,12 +238,6 @@ properties:
     description: |-
       A unique string used as a suffix creating a new execution upon job create or update. The Job will become ready when the execution is successfully started.
       The sum of job name and token length must be fewer than 63 characters.
-    min_version: beta
-  - !ruby/object:Api::Type::String
-    name: start_execution_token
-    description: |-
-      A unique string used as a suffix creating a new execution upon job create or update. The Job will become ready when the execution is successfully started.
-      The sum of job name and token length must be fewer than 63 characters.
     exactly_one_of:
       - start_execution_token
       - run_execution_token
