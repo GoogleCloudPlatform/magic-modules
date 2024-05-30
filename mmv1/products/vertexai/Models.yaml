@@ -556,7 +556,7 @@ properties:
     name: 'metadataArtifact'
     description: The resource name of the Artifact that was created in MetadataStore when creating the Model.
     output: true
-  - !ruby/object:Api::Type::Array-
+  - !ruby/object:Api::Type::Array
     name: 'deployedModels'
     output: true
     description: The pointers to DeployedModels created from this Model. Note that Model could have been deployed to Endpoints in different Locations.
