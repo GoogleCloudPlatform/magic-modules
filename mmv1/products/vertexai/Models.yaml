@@ -898,9 +898,9 @@ properties:
                           description: |
                             The maximum permissible value for this feature.
                         - !ruby/object:Api::Type::Double
-                           name: 'originalMean'
-                           description: |
-                             If this input feature has been normalized to a mean value of 0, the originalMean specifies the mean value of the domain prior to normalization.
+                          name: 'originalMean'
+                          description: |
+                            If this input feature has been normalized to a mean value of 0, the originalMean specifies the mean value of the domain prior to normalization.
                         - !ruby/object:Api::Type::Double
                           name: 'originalStddev'
                           description: |
