@@ -35,7 +35,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
-  type: "PollAsync"
+  type: 'PollAsync'
   check_response_func_existence: 'transport_tpg.PollCheckForExistence'
   suppress_error: true
   actions: ['create']
