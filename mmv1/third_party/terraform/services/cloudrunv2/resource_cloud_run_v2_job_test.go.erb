@@ -487,6 +487,24 @@ func TestAccCloudRunV2Job_cloudrunv2JobWithRunJobTokenUpdate(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location", "launch_stage"},
 			},
+      {
+				Config: testAccCloudRunV2Job_cloudrunv2JobWithRunExecutionToken(context1),
+			},
+			{
+				ResourceName:            "google_cloud_run_v2_job.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "launch_stage"},
+			},
+			{
+				Config: testAccCloudRunV2Job_cloudrunv2JobWithRunExecutionToken(context2),
+			},
+			{
+				ResourceName:            "google_cloud_run_v2_job.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "launch_stage"},
+			},
 		},
 	})
 }
@@ -496,8 +514,24 @@ func testAccCloudRunV2Job_cloudrunv2JobWithStartExecutionToken(context map[strin
   resource "google_cloud_run_v2_job" "default" {
     name     = "%{job_name}"
     location = "us-central1"
-    launch_stage = "BETA"
     start_execution_token = "%{token}"
+    template {
+      template {
+        containers {
+          image = "us-docker.pkg.dev/cloudrun/container/job"
+        }
+      }
+    }
+  }
+`, context)
+}
+
+func testAccCloudRunV2Job_cloudrunv2JobWithRunExecutionToken(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+  resource "google_cloud_run_v2_job" "default" {
+    name     = "%{job_name}"
+    location = "us-central1"
+    run_execution_token = "%{token}"
     template {
       template {
         containers {
