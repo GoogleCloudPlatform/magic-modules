@@ -10,7 +10,8 @@ package projects.reused
 import MMUpstreamProjectId
 import ProviderNameBeta
 import ProviderNameGa
-import ServiceSweeperName
+import ServiceSweeperCronName
+import ServiceSweeperManualName
 import SharedResourceNameVcr
 import builds.*
 import generated.PackagesListBeta
@@ -44,9 +45,9 @@ fun mmUpstream(parentProject: String, providerName: String, vcsRoot: GitVcsRoot,
         ProviderNameBeta -> sweepersList = SweepersListBeta
         else -> throw Exception("Provider name not supplied when generating a nightly test subproject")
     }
-    val serviceSweeperManualConfig = BuildConfigurationForServiceSweeper(providerName, "$ServiceSweeperName - Manual", sweepersList, projectId, vcsRoot, sharedResources, config)
+    val serviceSweeperManualConfig = BuildConfigurationForServiceSweeper(providerName, ServiceSweeperManualName, sweepersList, projectId, vcsRoot, sharedResources, config)
 
-    val serviceSweeperCronConfig = BuildConfigurationForServiceSweeper(providerName, "$ServiceSweeperName - Cron", sweepersList, projectId, cronSweeperVcsRoot, sharedResources, config)
+    val serviceSweeperCronConfig = BuildConfigurationForServiceSweeper(providerName, ServiceSweeperCronName, sweepersList, projectId, cronSweeperVcsRoot, sharedResources, config)
     val trigger  = NightlyTriggerConfiguration(startHour=12)
     serviceSweeperCronConfig.addTrigger(trigger) // Only the sweeper is on a schedule in this project
 
