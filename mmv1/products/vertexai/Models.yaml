@@ -497,7 +497,7 @@ properties:
                   standard linear search in the database for each query.
   - !ruby/object:Api::Type::String
     name: 'sourceModel'
-    at_least_one_of: 
+    at_least_one_of:
       - model
       - sourceModel
     description: |
@@ -506,7 +506,7 @@ properties:
     name: 'model'
     resource: 'Models'
     imports: 'displayName'
-    at_least_one_of: 
+    at_least_one_of:
       - sourceModel
       - model
     description: |
@@ -563,21 +563,21 @@ properties:
         - !ruby/object:Api::Type::String
           name: 'deployedModelId'
           immutable: true
-          description:  An ID of a DeployedModel in the above Endpoint.
+          description: An ID of a DeployedModel in the above Endpoint.
   - !ruby/object:Api::Type::NestedObject
     name: 'explanationSpec'
     description: The pointers to DeployedModels created from this Model. Note that Model could have been deployed to Endpoints in different Locations.
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::NestedObject
-          name: 'parameters' #ExplanationParameters
+          name: 'parameters'
           required: true
           description: Parameters that configure explaining of the Model's predictions.
           item_type: !ruby/object:Api::Type::NestedObject
             properties:
               - !ruby/object:Api::Type::Integer
                 name: 'topK'
-                description: If populated, returns attributions for top K indices of outputs (defaults to 1). 
+                description: If populated, returns attributions for top K indices of outputs (defaults to 1).
                 default_value: 1
                 immutable: true
               - !ruby/object:Api::Type::Array
@@ -597,7 +597,7 @@ properties:
                       required: true
               - !ruby/object:Api::Type::NestedObject
                 name: 'integratedGradientsAttribution'
-                description: An attribution method that computes Aumann-Shapley values taking advantage of the model's fully differentiable structure. 
+                description: An attribution method that computes Aumann-Shapley values taking advantage of the model's fully differentiable structure.
                 item_type: !ruby/object:Api::Type::NestedObject
                   properties:
                     - !ruby/object:Api::Type::Integer
@@ -615,7 +615,7 @@ properties:
                             default_value: 3
                           - !ruby/object:Api::Type::Double
                             name: 'noiseSigma'
-                            description: This is a single float value and will be used to add noise to all the features. 
+                            description: This is a single float value and will be used to add noise to all the features.
                             default_value: 0.1
                           - !ruby/object:Api::Type::NestedObject
                             name: 'featureNoiseSigma'
@@ -663,7 +663,7 @@ properties:
                             default_value: 3
                           - !ruby/object:Api::Type::Double
                             name: 'noiseSigma'
-                            description: This is a single float value and will be used to add noise to all the features. 
+                            description: This is a single float value and will be used to add noise to all the features.
                             default_value: 0.1
                           - !ruby/object:Api::Type::NestedObject
                             name: 'featureNoiseSigma'
@@ -849,7 +849,7 @@ properties:
                       default_value: 1
                       immutable: true
         - !ruby/object:Api::Type::NestedObject
-          name: 'metadata' #ExplanationMetadata
+          name: 'metadata'
           description: metadata describing the Model's input and output for explanation.
           item_type: !ruby/object:Api::Type::NestedObject
             properties:
@@ -890,21 +890,21 @@ properties:
                         The domain details of the input feature value. Like min/max, original mean or standard deviation if normalized.
                       properties:
                         - !ruby/object:Api::Type::Double
-                           name: 'minValue'
-                           description: |
-                             The minimum permissible value for this feature.
+                          name: 'minValue'
+                          description: |
+                            The minimum permissible value for this feature.
                         - !ruby/object:Api::Type::Double
-                           name: 'maxValue'
-                           description: |
-                             The maximum permissible value for this feature.
+                          name: 'maxValue'
+                          description: |
+                            The maximum permissible value for this feature.
                         - !ruby/object:Api::Type::Double
                            name: 'originalMean'
                            description: |
                              If this input feature has been normalized to a mean value of 0, the originalMean specifies the mean value of the domain prior to normalization.
                         - !ruby/object:Api::Type::Double
-                           name: 'originalStddev'
-                           description: |
-                             If this input feature has been normalized to a standard deviation of 1.0, the originalStddev specifies the standard deviation of the domain prior to normalization.
+                          name: 'originalStddev'
+                          description: |
+                            If this input feature has been normalized to a standard deviation of 1.0, the originalStddev specifies the standard deviation of the domain prior to normalization.
                     - !ruby/object:Api::Type::String
                       name: 'indicesTensorName'
                       description: |
@@ -1006,7 +1006,7 @@ properties:
                         Source URL
               - !ruby/object:Api::Type::String
                 name: 'featureAttributionsSchemaUri'
-                description: Points to a YAML file stored on Google Cloud Storage describing the format of the feature attributions. 
+                description: Points to a YAML file stored on Google Cloud Storage describing the format of the feature attributions.
                 output: true
               - !ruby/object:Api::Type::String
                 name: 'latentSpaceSource'
