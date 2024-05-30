@@ -119,7 +119,8 @@ The following arguments are supported:
 
 * `type` - (Optional) The user type. It determines the method to authenticate the
     user during login. The default is the database's built-in user type. Flags
-    include "BUILT_IN", "CLOUD_IAM_USER", "CLOUD_IAM_GROUP" or "CLOUD_IAM_SERVICE_ACCOUNT".
+    include "BUILT_IN", "CLOUD_IAM_USER", "CLOUD_IAM_SERVICE_ACCOUNT", or
+    "CLOUD_IAM_GROUP" ("CLOUD_IAM_GROUP" is not supported for Postgres instances).
 
 * `deletion_policy` - (Optional) The deletion policy for the user.
     Setting `ABANDON` allows the resource to be abandoned rather than deleted. This is useful
