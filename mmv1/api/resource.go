@@ -1014,6 +1014,9 @@ func (r Resource) IsInIdentity(t Type) bool {
 	return false
 }
 
+// ====================
+// Iam Methods
+// ====================
 func (r Resource) IamParentResourceName() string {
 	var parentResourceName string
 
@@ -1028,6 +1031,7 @@ func (r Resource) IamParentResourceName() string {
 	return parentResourceName
 }
 
+// For example: "projects/{{project}}/schemas/{{name}}"
 func (r Resource) IamResourceUri() string {
 	var resourceUri string
 	if r.IamPolicy != nil {
@@ -1039,13 +1043,15 @@ func (r Resource) IamResourceUri() string {
 	return resourceUri
 }
 
-func (r Resource) IamImportUrl() string {
-	r.IamResourceUri()
+// For example: "projects/%s/schemas/%s"
+func (r Resource) IamResourceUriFormat() string {
 	return regexp.MustCompile(`\{\{%?(\w+)\}\}`).ReplaceAllString(r.IamResourceUri(), "%s")
 }
 
+// For example: the uri "projects/{{project}}/schemas/{{name}}"
+// The paramerters are "project", "schema".
 func (r Resource) IamResourceParams() []string {
-	resourceUri := strings.ReplaceAll(r.IamResourceUri(), "{{name}}", fmt.Sprintf("{{%s}}}", r.IamParentResourceName()))
+	resourceUri := strings.ReplaceAll(r.IamResourceUri(), "{{name}}", fmt.Sprintf("{{%s}}", r.IamParentResourceName()))
 
 	return r.ExtractIdentifiers(resourceUri)
 }
@@ -1054,7 +1060,9 @@ func (r Resource) IsInIamResourceParams(param string) bool {
 	return slices.Contains(r.IamResourceParams(), param)
 }
 
-func (r Resource) IamStringQualifiers() string {
+// For example: for the uri "projects/{{project}}/schemas/{{name}}",
+// the string qualifiers are "u.project, u.schema"
+func (r Resource) IamResourceUriStringQualifiers() string {
 	var transformed []string
 	for _, param := range r.IamResourceParams() {
 		transformed = append(transformed, fmt.Sprintf("u.%s", google.Camelize(param, "lower")))
@@ -1062,6 +1070,8 @@ func (r Resource) IamStringQualifiers() string {
 	return strings.Join(transformed[:], ", ")
 }
 
+// For example, for the url "projects/{{project}}/schemas/{{schema}}",
+// the identifiers are "project", "schema".
 // def extract_identifiers(url)
 func (r Resource) ExtractIdentifiers(url string) []string {
 	matches := regexp.MustCompile(`\{\{%?(\w+)\}\}`).FindAllStringSubmatch(url, -1)
@@ -1072,6 +1082,7 @@ func (r Resource) ExtractIdentifiers(url string) []string {
 	return result
 }
 
+// For example, "projects/{{project}}/schemas/{{name}}", "{{project}}/{{name}}", "{{name}}"
 func (r Resource) RawImportIdFormatsFromIam() []string {
 	var importFormat []string
 
@@ -1085,6 +1096,7 @@ func (r Resource) RawImportIdFormatsFromIam() []string {
 	return ImportIdFormats(importFormat, r.Identity, r.BaseUrl)
 }
 
+// For example, projects/(?P<project>[^/]+)/schemas/(?P<schema>[^/]+)", "(?P<project>[^/]+)/(?P<schema>[^/]+)", "(?P<schema>[^/]+)
 func (r Resource) ImportIdRegexesFromIam() string {
 	var transformed []string
 
@@ -1098,6 +1110,7 @@ func (r Resource) ImportIdRegexesFromIam() string {
 	return strings.Join(transformed[:], "\", \"")
 }
 
+// For example, "projects/{{project}}/schemas/{{name}}", "{{project}}/{{name}}", "{{name}}"
 func (r Resource) ImportIdFormatsFromIam() []string {
 	importIdFormats := r.RawImportIdFormatsFromIam()
 	var transformed []string
@@ -1107,6 +1120,7 @@ func (r Resource) ImportIdFormatsFromIam() []string {
 	return transformed
 }
 
+// For example, projects/{{project}}/schemas/{{schema}}
 func (r Resource) FirstIamImportIdFormat() string {
 	importIdFormats := r.ImportIdFormatsFromIam()
 	if len(importIdFormats) == 0 {
@@ -1121,7 +1135,7 @@ func (r Resource) IamTerraformName() string {
 	return fmt.Sprintf("%s_iam", r.TerraformName())
 }
 
-func (r Resource) IamSelfLinkProperties() []*Type {
+func (r Resource) IamSelfLinkIdentifiers() []string {
 	var selfLink string
 	if r.IamPolicy != nil {
 		selfLink = r.IamPolicy.SelfLink
@@ -1130,13 +1144,118 @@ func (r Resource) IamSelfLinkProperties() []*Type {
 		selfLink = r.SelfLinkUrl()
 	}
 
-	params := r.ExtractIdentifiers(selfLink)
+	return r.ExtractIdentifiers(selfLink)
+}
+
+// Returns the resource properties that are idenfifires in the selflink url
+func (r Resource) IamSelfLinkProperties() []*Type {
+	params := r.IamSelfLinkIdentifiers()
 
 	urlProperties := google.Select(r.AllUserProperties(), func(p *Type) bool {
 		return slices.Contains(params, p.Name)
 	})
 
 	return urlProperties
+}
+
+// Returns the attributes from the selflink url
+func (r Resource) IamAttributes() []string {
+	var attributes []string
+	ids := r.IamSelfLinkIdentifiers()
+	for i, p := range ids {
+		var attribute string
+		if i == len(ids)-1 {
+			attribute = r.IamPolicy.ParentResourceAttribute
+			if attribute == "" {
+				attribute = p
+			}
+		} else {
+			attribute = p
+		}
+		attributes = append(attributes, attribute)
+	}
+	return attributes
+}
+
+// Since most resources define a "basic" config as their first example,
+// we can reuse that config to create a resource to test IAM resources with.
+func (r Resource) FirstTestExample() resource.Examples {
+	examples := google.Reject(r.Examples, func(e resource.Examples) bool {
+		return e.SkipTest
+	})
+	examples = google.Reject(examples, func(e resource.Examples) bool {
+		return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(e.MinVersion)) < 0)
+	})
+
+	return examples[0]
+}
+
+func (r Resource) ExamplePrimaryResourceId() string {
+	examples := google.Reject(r.Examples, func(e resource.Examples) bool {
+		return e.SkipTest
+	})
+	examples = google.Reject(examples, func(e resource.Examples) bool {
+		return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(e.MinVersion)) < 0)
+	})
+
+	if len(examples) == 0 {
+		examples = google.Reject(r.Examples, func(e resource.Examples) bool {
+			return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(e.MinVersion)) < 0)
+		})
+	}
+	return examples[0].PrimaryResourceId
+}
+
+func (r Resource) IamParentSourceType() string {
+	t := r.IamPolicy.ParentResourceType
+	if t == "" {
+		t = r.TerraformName()
+	}
+	return t
+}
+
+func (r Resource) IamImportQualifiersForTest() string {
+	var importFormat string
+	if len(r.IamPolicy.ImportFormat) > 0 {
+		importFormat = r.IamPolicy.ImportFormat[0]
+	} else {
+		importFormat = r.IamPolicy.SelfLink
+		if importFormat == "" {
+			importFormat = r.SelfLinkUrl()
+		}
+	}
+
+	params := r.ExtractIdentifiers(importFormat)
+	var importQualifiers []string
+	for i, param := range params {
+		if param == "project" {
+			if i != len(params)-1 {
+				// If the last parameter is project then we want to create a new project to use for the test, so don't default from the environment
+				importQualifiers = append(importQualifiers, "envvar.GetTestProjectFromEnv()")
+			} else {
+				importQualifiers = append(importQualifiers, `context["project_id"]`)
+			}
+		} else if param == "zone" && r.IamPolicy.SubstituteZoneValue {
+			importQualifiers = append(importQualifiers, "envvar.GetTestZoneFromEnv()")
+		} else if param == "region" || param == "location" {
+			example := r.FirstTestExample()
+			if example.RegionOverride == "" {
+				importQualifiers = append(importQualifiers, "envvar.GetTestRegionFromEnv()")
+			} else {
+				importQualifiers = append(importQualifiers, example.RegionOverride)
+			}
+		} else if param == "universe_domain" {
+			importQualifiers = append(importQualifiers, "envvar.GetTestUniverseDomainFromEnv()")
+		} else {
+			break
+		}
+	}
+
+	if len(importQualifiers) == 0 {
+		return ""
+	}
+
+	return strings.Join(importQualifiers, ", ")
 }
 
 func OrderProperties(props []*Type) []*Type {
@@ -1163,17 +1282,17 @@ func CompareByName(a, b *Type) int {
 func (r Resource) GetPropertyUpdateMasksGroups() map[string][]string {
 	maskGroups := map[string][]string{}
 	for _, prop := range r.AllUserProperties() {
-		if (prop.FlattenObject) {
+		if prop.FlattenObject {
 			prop.GetNestedPropertyUpdateMasksGroups(maskGroups, prop.ApiName)
-		}else if (len(prop.UpdateMaskFields) > 0){
+		} else if len(prop.UpdateMaskFields) > 0 {
 			maskGroups[google.Underscore(prop.Name)] = prop.UpdateMaskFields
-		}else{
+		} else {
 			maskGroups[google.Underscore(prop.Name)] = []string{prop.ApiName}
 		}
 	}
 	return maskGroups
 }
 
-func (r Resource) CustomTemplate(templatePath string) string {
-	return resource.ExecuteTemplate(&r, templatePath)
+func (r Resource) CustomTemplate(templatePath string, appendNewline bool) string {
+	return resource.ExecuteTemplate(&r, templatePath, appendNewline)
 }

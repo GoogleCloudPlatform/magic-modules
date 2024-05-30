@@ -179,7 +179,7 @@ func (e *Examples) UnmarshalYAML(n *yaml.Node) error {
 
 // Executes example templates for documentation and tests
 func (e *Examples) SetHCLText() {
-	e.DocumentationHCLText = ExecuteTemplate(e, e.ConfigPath)
+	e.DocumentationHCLText = ExecuteTemplate(e, e.ConfigPath, true)
 
 	copy := e
 	// Override vars to inject test values into configs - will have
@@ -207,10 +207,10 @@ func (e *Examples) SetHCLText() {
 		copy.Vars[key] = fmt.Sprintf("%%{%s}", key)
 	}
 
-	e.TestHCLText = ExecuteTemplate(copy, copy.ConfigPath)
+	e.TestHCLText = ExecuteTemplate(copy, copy.ConfigPath, true)
 }
 
-func ExecuteTemplate(e any, templatePath string) string {
+func ExecuteTemplate(e any, templatePath string, appendNewline bool) string {
 	templates := []string{
 		templatePath,
 	}
@@ -228,7 +228,7 @@ func ExecuteTemplate(e any, templatePath string) string {
 
 	rs := contents.String()
 
-	if !strings.HasSuffix(rs, "\n") {
+	if !strings.HasSuffix(rs, "\n") && appendNewline {
 		rs = fmt.Sprintf("%s\n", rs)
 	}
 
