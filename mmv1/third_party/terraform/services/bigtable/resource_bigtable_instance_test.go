@@ -444,13 +444,16 @@ func TestAccBigtableInstance_forceDestroyBackups(t *testing.T) {
 	t.Parallel()
 
 	randomString := acctest.RandString(t, 10)
+	region := envvar.GetTestRegionFromEnv()
 	context := map[string]interface{}{
-		"instance_name": fmt.Sprintf("tf-test-instance-%s", randomString),
-		"cluster_name":  fmt.Sprintf("tf-test-cluster-%s", randomString),
-		"table_name":    fmt.Sprintf("tf-test-table-%s", randomString),
-		"force_destroy": true, // Overridden in test steps
+		"instance_name":  fmt.Sprintf("tf-test-instance-%s", randomString),
+		"cluster_name_1": fmt.Sprintf("tf-test-cluster-%s-1", randomString),
+		"cluster_name_2": fmt.Sprintf("tf-test-cluster-%s-2", randomString),
+		"cluster_zone_1": fmt.Sprintf("%s-a", region),
+		"cluster_zone_2": fmt.Sprintf("%s-b", region),
+		"table_name":     fmt.Sprintf("tf-test-table-%s", randomString),
+		"force_destroy":  true, // Overridden in test steps
 	}
-
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -807,9 +810,16 @@ provider "google" {
 resource "google_bigtable_instance" "instance" {
   name = "%{instance_name}"
   cluster {
-    cluster_id   = "%{cluster_name}"
+    cluster_id   = "%{cluster_name_1}"
     num_nodes    = 1
     storage_type = "HDD"
+    zone         = "%{cluster_zone_1}"
+  }
+  cluster {
+    cluster_id   = "%{cluster_name_2}"
+    num_nodes    = 1
+    storage_type = "HDD"
+    zone         = "%{cluster_zone_2}"
   }
   force_destroy = %{force_destroy}
   deletion_protection = false
@@ -831,12 +841,13 @@ data "google_client_config" "current" {
 locals {
   project = google_bigtable_instance.instance.project
   instance = google_bigtable_instance.instance.name
-  cluster = google_bigtable_instance.instance.cluster[0].cluster_id
+  cluster_1 = google_bigtable_instance.instance.cluster[0].cluster_id
+  cluster_2 = google_bigtable_instance.instance.cluster[1].cluster_id
   backup = "backup-1"
 }
 
-data "http" "make_backup" {
-  url    = "https://bigtableadmin.googleapis.com/v2/projects/${local.project}/instances/${local.instance}/clusters/${local.cluster}/backups?backupId=${local.backup}"
+data "http" "make_backup_1" {
+  url    = "https://bigtableadmin.googleapis.com/v2/projects/${local.project}/instances/${local.instance}/clusters/${local.cluster_1}/backups?backupId=${local.backup}"
   method = "POST"
 
   request_headers = {
@@ -856,9 +867,37 @@ EOT
   ]
 }
 
-check "health_check" {
+data "http" "make_backup_2" {
+  url    = "https://bigtableadmin.googleapis.com/v2/projects/${local.project}/instances/${local.instance}/clusters/${local.cluster_2}/backups?backupId=${local.backup}"
+  method = "POST"
+
+  request_headers = {
+    Content-Type  = "application/json"
+    Authorization = "Bearer ${data.google_client_config.current.access_token}"
+  }
+
+  request_body = <<EOT
+{
+  "sourceTable" : "${google_bigtable_table.table.id}",
+  "expireTime" : "${time_offset.week-in-future.rfc3339}"
+}
+EOT
+
+  depends_on = [
+    google_bigtable_table.table // Needs to exist for backup to be made
+  ]
+}
+
+check "health_check_1" {
   assert {
-    condition     = data.http.make_backup.status_code == 200
+    condition     = data.http.make_backups_1.status_code == 200
+    error_message = "HTTP request to create a backup returned a non-200 status code"
+  }
+}
+
+check "health_check_2" {
+  assert {
+    condition     = data.http.make_backup_2.status_code == 200
     error_message = "HTTP request to create a backup returned a non-200 status code"
   }
 }
@@ -868,8 +907,12 @@ resource "time_offset" "week-in-future" {
   offset_days = 7
 }
 
-resource "time_sleep" "wait-30sec" {
-  depends_on = [data.http.make_backup]
+resource "time_sleep" "wait_30sec_1" {
+  depends_on = [data.http.make_backup_1]
+  create_duration = "30s"
+}
+resource "time_sleep" "wait_30sec_2" {
+  depends_on = [data.http.make_backup_2]
   create_duration = "30s"
 }
 `, context)
