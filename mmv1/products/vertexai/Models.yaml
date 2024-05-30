@@ -577,7 +577,7 @@ properties:
                         description: The number of gradient samples to use for approximation.
                         item_type: !ruby/object:Api::Type::NestedObject
                           properties:
-                            - !ruby/object:Api::Type::Integer
+                            - !ruby/object:Api::Type::String
                               name: 'name'
                               description: The name of the input feature for which noise sigma is provided.
                             - !ruby/object:Api::Type::Double
@@ -621,7 +621,7 @@ properties:
                         description: The number of gradient samples to use for approximation.
                         item_type: !ruby/object:Api::Type::NestedObject
                           properties:
-                            - !ruby/object:Api::Type::Integer
+                            - !ruby/object:Api::Type::String
                               name: 'name'
                               description: The name of the input feature for which noise sigma is provided.
                             - !ruby/object:Api::Type::Double

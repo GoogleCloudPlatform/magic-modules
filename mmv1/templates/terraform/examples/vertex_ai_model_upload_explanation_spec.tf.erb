@@ -7,25 +7,25 @@ resource "google_vertex_ai_models" "<%= ctx[:primary_resource_id] %>" {
     metadata {
       inputs {
         dense_shape_tensor_name = "test"
-        encoded_baselines       = "test"
+        encoded_baselines       = [1]
         encoded_tensor_name     = "test"
         encoding                = "test"
         feature_value_domain {
-          max_value       = "test"
-          min_value       = "test"
-          original_mean   = "test"
-          original_stddev = "test"
+          max_value       = 1
+          min_value       = 1
+          original_mean   = 1
+          original_stddev = 1
         }
         group_name            = "test"
-        index_feature_mapping = "test"
+        index_feature_mapping = ["test"]
         indices_tensor_name   = "test"
         input_tensor_name     = "test"
         modality              = "test"
         name                  = "test"
         sha1_sum              = "test"
         visualization {
-          clip_percent_lowerbound = "test"
-          clip_percent_upperbound = "test"
+          clip_percent_lowerbound = 1
+          clip_percent_upperbound = 1
           color_map               = "test"
           overlay_type            = "test"
           polarity                = "test"
@@ -35,7 +35,7 @@ resource "google_vertex_ai_models" "<%= ctx[:primary_resource_id] %>" {
       latent_space_source = "test"
       outputs {
         display_name_mapping_key   = "test"
-        index_display_name_mapping = "test"
+        index_display_name_mapping = 1
         name                       = "test"
         output_tensor_name         = "test"
       }
@@ -45,27 +45,27 @@ resource "google_vertex_ai_models" "<%= ctx[:primary_resource_id] %>" {
         example_gcs_source {
           data_format = "test"
           gcs_source {
-            uris = "test"
+            uris = ["test"]
           }
         }
         nearest_neighbor_search_config {
           config {
             algorithm_config {
               tree_ah_config {
-                leaf_node_embedding_count    = "test"
-                leaf_nodes_to_search_percent = "test"
+                leaf_node_embedding_count    = 1
+                leaf_nodes_to_search_percent = 1
               }
             }
-            approximate_neighbors_count = "test"
-            dimensions                  = "test"
+            approximate_neighbors_count = 1
+            dimensions                  = 1
             distance_measure_type       = "test"
             feature_norm_type           = "test"
             shard_size                  = "test"
           }
           contents_delta_uri    = "test"
-          is_complete_overwrite = "test"
+          is_complete_overwrite = 1
         }
-        neighbor_count = "test"
+        neighbor_count = 1
         presets {
           modality = "test"
           query    = "test"
@@ -73,40 +73,40 @@ resource "google_vertex_ai_models" "<%= ctx[:primary_resource_id] %>" {
       }
       integrated_gradients_attribution {
         blur_baseline_config {
-          max_blur_sigma = "test"
+          max_blur_sigma = 1
         }
         smooth_grad_config {
           feature_noise_sigma {
             noise_sigma {
               name  = "test"
-              sigma = "test"
+              sigma = 1
             }
           }
-          noise_sigma        = "test"
-          noisy_sample_count = "test"
+          noise_sigma        = 1
+          noisy_sample_count = 1
         }
-        step_count = "test"
+        step_count = 1
       }
-      output_indices = "test"
+      output_indices = [1]
       sampled_shapley_attribution {
-        path_count = "test"
+        path_count = 1
       }
-      top_k = "test"
+      top_k = 1
       xrai_attribution {
         blur_baseline_config {
-          max_blur_sigma = "test"
+          max_blur_sigma = 1
         }
         smooth_grad_config {
           feature_noise_sigma {
             noise_sigma {
               name  = "test"
-              sigma = "test"
+              sigma = 1
             }
           }
-          noise_sigma        = "test"
-          noisy_sample_count = "test"
+          noise_sigma        = 1
+          noisy_sample_count = 1
         }
-        step_count = "test"
+        step_count = 1
       }
     }
   }
