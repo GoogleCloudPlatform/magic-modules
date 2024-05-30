@@ -45,7 +45,7 @@ fun mmUpstream(parentProject: String, providerName: String, vcsRoot: GitVcsRoot,
         else -> throw Exception("Provider name not supplied when generating a nightly test subproject")
     }
     val serviceSweeperConfig = BuildConfigurationForServiceSweeper(providerName, ServiceSweeperName, sweepersList, projectId, vcsRoot, sharedResources, config)
-    val trigger  = NightlyTriggerConfiguration(startHour=12, vcrRoot=cronSweeperVcsRoot)
+    val trigger  = NightlyTriggerConfiguration(startHour=12, vcsRoot=cronSweeperVcsRoot)
     serviceSweeperConfig.addTrigger(trigger) // Only the sweeper is on a schedule in this project
 
     return Project {
