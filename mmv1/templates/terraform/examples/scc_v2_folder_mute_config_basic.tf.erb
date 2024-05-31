@@ -2,7 +2,7 @@ resource "google_pubsub_topic" "scc_v2_folder_mute_config" {
   name = "<%= ctx[:vars]['topic_name'] %>"
 }
 
-resource "google_scc_folder_mute_config" "<%= ctx[:primary_resource_id] %>" {
+resource "google_scc_v2_folder_mute_config" "<%= ctx[:primary_resource_id] %>" {
   mute_config_id = "<%= ctx[:vars]['mute_config_id'] %>"
   folder         = "<%= ctx[:test_env_vars]['folder_id'] %>"
   description    = "My custom Cloud Security Command Center Mute Configuration"
