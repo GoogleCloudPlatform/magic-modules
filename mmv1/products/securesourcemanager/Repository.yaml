@@ -28,7 +28,7 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
     base_url: '{{op_id}}'
-    wait_ms: 100
+    wait_ms: 1000
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 1
       update_minutes: 1
@@ -48,7 +48,7 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   parent_resource_attribute: 'repository_id'
   method_name_separator: ':'
   allowed_iam_role: 'roles/securesourcemanager.repoAdmin'
-  import_format: ['projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}']
+  import_format: ['projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}', '{{repository_id}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'secure_source_manager_repository_basic'
@@ -57,6 +57,7 @@ examples:
       context[\"random_suffix\"\
       ])"
     vars:
+      repository_id: 'my-repository'
       instance_id: 'my-instance'
 parameters:
   - !ruby/object:Api::Type::String
