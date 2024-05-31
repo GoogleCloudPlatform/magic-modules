@@ -8,7 +8,7 @@ if v, ok := d.GetOk("model_id"); ok {
 }
 newObj["modelId"] = name
 newObj["model"] = obj
-if v, ok := d.GetOk("model_id"); ok {
+if _, ok := d.GetOk("parent_model"); ok {
     delete(newObj,"parentModel")
 }
 return newObj, nil
