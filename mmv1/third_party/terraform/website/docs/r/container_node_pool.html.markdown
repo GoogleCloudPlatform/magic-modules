@@ -224,9 +224,9 @@ cluster.
 * `additional_pod_network_configs` - (Optional, Beta) We specify the additional pod networks for this node pool using this list. Each pod network corresponds to an additional alias IP range for the node.
     Structure is [documented below](#nested_additional_pod_network_configs)
 
-* `pod_cidr_overprovision_config` - (Optional) Configuration for node-pool level pod cidr overprovision. If not set, the cluster level setting will be inherited. Structure is documented below.
+* `pod_cidr_overprovision_config` - (Optional) Configuration for node-pool level pod cidr overprovision. If not set, the cluster level setting will be inherited. Structure is [documented below](#pod_cidr_overprovision_config).
 
-* `network_performance_config` - (Optional) Network bandwidth tier configuration. Structure is documented below.
+* `network_performance_config` - (Optional) Network bandwidth tier configuration. Structure is [documented below](#network_performance_config).
 
 <a name="nested_additional_node_network_configs"></a>The `additional_node_network_configs` block supports:
 
