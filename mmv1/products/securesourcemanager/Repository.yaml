@@ -108,8 +108,8 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'etag'
     description: |
-      This checksum is computed by the server based on the value of other fields, 
-      and may be sent on update and delete requests to ensure the client has an 
+      This checksum is computed by the server based on the value of other fields,
+      and may be sent on update and delete requests to ensure the client has an
       up-to-date value before proceeding.
   - !ruby/object:Api::Type::NestedObject
     name: 'uris'
@@ -124,7 +124,7 @@ properties:
         output: true
       - !ruby/object:Api::Type::String
         name: 'gitHttps'
-        description: 
+        description:
           git_https is the git HTTPS URI for git operations.
         output: true
       - !ruby/object:Api::Type::String
