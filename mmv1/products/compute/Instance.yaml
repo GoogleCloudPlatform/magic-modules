@@ -173,8 +173,8 @@ properties:
               name: 'labels'
               is_set: true
               description: |
-                Labels to apply to this disk. These can be later modified by 
-                the disks.setLabels method. This field is only applicable for 
+                Labels to apply to this disk. These can be later modified by
+                the disks.setLabels method. This field is only applicable for
                 persistent disks.
             - !ruby/object:Api::Type::Integer
               name: 'provisionedIops'
@@ -201,7 +201,7 @@ properties:
               description: |
                 Whether this disk is using confidential compute mode.
                 Note: Only supported on hyperdisk skus, disk_encryption_key
-                is required when setting to true.  
+                is required when setting to true.
         - !ruby/object:Api::Type::Enum
           name: 'interface'
           description: |
@@ -272,7 +272,7 @@ properties:
           api_name: 'acceleratorType'
           description: |
             Full or partial URL of the accelerator type resource to expose
-            to this instance.  
+            to this instance.
   - !ruby/object:Api::Type::String
     name: 'hostname'
     description: |
@@ -549,7 +549,7 @@ properties:
           description: |
             The list of scopes to be made available for this service
             account.
-          item_type: Api::Type::String 
+          item_type: Api::Type::String
           is_set: true
   - !ruby/object:Api::Type::NestedObject
     name: 'shieldedInstanceConfig'
@@ -645,4 +645,4 @@ properties:
       - !ruby/object:Api::Type::Boolean
         name: 'enableNestedVirtualization'
         description: |
-          Whether to enable nested virtualization or not (default is false).
+          Whether to enable nested virtualization or not (default is false)
