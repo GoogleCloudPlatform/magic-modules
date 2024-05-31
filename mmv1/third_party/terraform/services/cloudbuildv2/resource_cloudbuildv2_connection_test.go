@@ -810,9 +810,9 @@ resource "google_cloudbuildv2_connection" "primary" {
     webhook_secret_secret_version = "projects/407304063574/secrets/bbdc-webhook-secret/versions/latest"
     host_uri                      = "https://private-bitbucket.proctor-test.com"
 
-	service_directory_config {
-	  service = "projects/407304063574/locations/us-west1/namespaces/private-conn/services/private-bitbucket"
-	}
+  service_directory_config {
+    service = "projects/407304063574/locations/us-west1/namespaces/private-conn/services/private-bitbucket"
+  }
 
 	ssl_ca = "-----BEGIN CERTIFICATE-----\nMIIDjDCCAnSgAwIBAgIUBh5+3oeT1vmUSS5rSNaFfy6igSAwDQYJKoZIhvcNAQEL\nBQAwVzELMAkGA1UEBhMCVVMxGzAZBgNVBAoMEkdvb2dsZSBDbG91ZCBCdWlsZDEr\nMCkGA1UEAwwicHJpdmF0ZS1iaXRidWNrZXQucHJvY3Rvci10ZXN0LmNvbTAeFw0y\nMzEyMTIyMzI5NTlaFw0yNDEyMTEyMzI5NTlaMFcxCzAJBgNVBAYTAlVTMRswGQYD\nVQQKDBJHb29nbGUgQ2xvdWQgQnVpbGQxKzApBgNVBAMMInByaXZhdGUtYml0YnVj\na2V0LnByb2N0b3ItdGVzdC5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEK\nAoIBAQCNfMx4ImGD4imZR64RbmRtpUNmypDokx2/S9kgobmyNvBWeSgRVhOGHGbU\nUgyvENcEg803K8unwF2jF6sdGrocRnIdPpr2tUoViOM2Ss6ds+TD8a2kqBA6+hmQ\nOMJiEIirpGT3Mw1pYTpuLisfIeeuuYssoS5k18kFLZ+Mk6MUSAHCgC8EowUZLGBZ\nagh9OhrjpMSXyidv+2d7FKTh/k3BWffVkDXehjvWjcr47hSvQwqW5m773ewCq0uD\nwxUgO6MAAAxLJz15cjhfvk4ishgSqcp49IZrx+xsNCLbHjPVyGkrL2OhgFaGsQS/\nq6GkXYfJ1sJYrf5Xm1EXbZlQZzJPAgMBAAGjUDBOMC0GA1UdEQQmMCSCInByaXZh\ndGUtYml0YnVja2V0LnByb2N0b3ItdGVzdC5jb20wHQYDVR0OBBYEFISmuuTpHKMB\n+m1h62gEqg1ovC86MA0GCSqGSIb3DQEBCwUAA4IBAQAwIwR6pIum9EZyLtC438Q1\nEgH3SKqbdyMFCkFSBvr4WfFU6ja1pn5ZxzJWt5TRFlI9GMy7BupQrxJGebOiFuUC\noNJpc4QDt9a0/GKh48DGF7uKo9XK33p0v1ahq3ewNT/CUnHewQNX7aXXP1/rL+br\nZPA20XWURUTviMik7DdhaXKQv76K9coI3H74heeBUp+OHKgUkqA3D1QIGNRGOKos\n4z6MyBWVpMUIeJQGtIQBd9CY1hBN231iG1+hdOlOMwgyNVK2GS738r+HbngFo9v4\nh2I1HMUHVcHiPQLqwZ2/OTmTmF1aWCUbhnAvoisu20rHVcGnVIOqMrHYFzdGr3ZQ\n-----END CERTIFICATE-----\n"  
   }
@@ -832,7 +832,7 @@ resource "google_cloudbuildv2_connection" "primary" {
   name     = "tf-test-connection%{random_suffix}"
 
   bitbucket_cloud_config {
-	workspace                   = "proctor-test"
+  workspace = "proctor-test"
     authorizer_credential {
       user_token_secret_version = "projects/407304063574/secrets/bbc-api-token/versions/latest"
     }
