@@ -16,7 +16,6 @@ name: 'Instance'
 kind: 'compute#instance'
 base_url: projects/{{project}}/zones/{{zone}}/instances
 collection_url_key: 'items'
-immutable: true
 has_self_link: true
 description: |
   An instance is a virtual machine (VM) hosted on Google's infrastructure.
@@ -42,7 +41,7 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   allowed_iam_role: 'roles/compute.osLogin'
   parent_resource_attribute: 'instance_name'
   iam_conditions_request_type: :QUERY_PARAM
-exclude_resource: true
+exclude_resource: false
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'instance_basic'
@@ -83,7 +82,8 @@ properties:
     update_verb: :POST
     update_url: /projects/{{project}}/zones/{{zone}}/instances/{resourceId}/setDeletionProtection
   - !ruby/object:Api::Type::Array
-    name: 'disks'
+    name: 'bootDisk'
+    api_name: 'disks'
     description: |
       An array of disks that are associated with the instances that are
       created from this template.
@@ -113,31 +113,16 @@ properties:
             operating system running within the instance. This name can
             be used to reference the device for mounting, resizing, and
             so on, from within the instance.
-        - !ruby/object:Api::Type::NestedObject
-          name: 'diskEncryptionKey'
+        - !ruby/object:Api::Type::String
+          name: 'diskEncryptionKeyRaw'
           description: |
-            Encrypts or decrypts a disk using a customer-supplied
-            encryption key.
-          properties:
-            - !ruby/object:Api::Type::String
-              name: 'rawKey'
-              description: |
-                Specifies a 256-bit customer-supplied encryption key,
-                encoded in RFC 4648 base64 to either encrypt or decrypt
-                this resource.
-            - !ruby/object:Api::Type::String
-              name: 'rsaEncryptedKey'
-              description: |
-                Specifies an RFC 4648 base64 encoded, RSA-wrapped
-                2048-bit customer-supplied encryption key to either
-                encrypt or decrypt this resource.
-            - !ruby/object:Api::Type::String
-              name: 'sha256'
-              description: |
-                The RFC 4648 base64 encoded SHA-256 hash of the
-                customer-supplied encryption key that protects this
-                resource.
-              output: true
+            Specifies a 256-bit customer-supplied encryption key,
+            encoded in RFC 4648 base64 to either encrypt or decrypt
+            this resource.
+        - !ruby/object:Api::Type::String
+          name: 'kmsKeySelfLink'
+          description: |
+            The name of the encryption key that is stored in Google Cloud KMS.
         - !ruby/object:Api::Type::Integer
           name: 'index'
           description: |
@@ -161,11 +146,13 @@ properties:
                 Specifies the disk name. If not specified, the default
                 is to use the name of the instance.
             - !ruby/object:Api::Type::Integer
-              name: 'diskSizeGb'
+              name: 'size'
+              api_name: 'diskSizeGb'
               description: Specifies the size of the disk in base-2 GB.
             # diskStorageType - deprecated
             - !ruby/object:Api::Type::ResourceRef
-              name: 'diskType'
+              name: 'type'
+              api_name: 'diskType'
               description: |
                 Reference to a disk type.
                 Specifies the disk type to use to create the instance.
@@ -174,13 +161,21 @@ properties:
               imports: 'selfLink'
               custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
             - !ruby/object:Api::Type::String
-              name: 'sourceImage'
+              name: 'image'
+              api_name: 'sourceImage'
               description: |
                 The source image to create this disk. When creating a
                 new instance, one of initializeParams.sourceImage or
                 disks.source is required.  To create a disk with one of
                 the public operating system images, specify the image
                 by its family name.
+            - !ruby/object:Api::Type::KeyValuePairs
+              name: 'labels'
+              is_set: true
+              description: |
+                Labels to apply to this disk. These can be later modified by 
+                the disks.setLabels method. This field is only applicable for 
+                persistent disks.
             - !ruby/object:Api::Type::Integer
               name: 'provisionedIops'
               description: |
@@ -206,32 +201,7 @@ properties:
               description: |
                 Whether this disk is using confidential compute mode.
                 Note: Only supported on hyperdisk skus, disk_encryption_key
-                is required when setting to true.
-            - !ruby/object:Api::Type::NestedObject
-              name: 'sourceImageEncryptionKey'
-              description: |
-                The customer-supplied encryption key of the source
-                image. Required if the source image is protected by a
-                customer-supplied encryption key.
-
-                Instance templates do not store customer-supplied
-                encryption keys, so you cannot create disks for
-                instances in a managed instance group if the source
-                images are encrypted with your own keys.
-              properties:
-                - !ruby/object:Api::Type::String
-                  name: 'rawKey'
-                  description: |
-                    Specifies a 256-bit customer-supplied encryption
-                    key, encoded in RFC 4648 base64 to either encrypt
-                    or decrypt this resource.
-                - !ruby/object:Api::Type::String
-                  name: 'sha256'
-                  description: |
-                    The RFC 4648 base64 encoded SHA-256 hash of the
-                    customer-supplied encryption key that protects this
-                    resource.
-                  output: true
+                is required when setting to true.  
         - !ruby/object:Api::Type::Enum
           name: 'interface'
           description: |
@@ -282,24 +252,27 @@ properties:
           item_type: Api::Type::String
           output: true
   - !ruby/object:Api::Type::Array
-    name: 'guestAccelerators'
+    name: 'guestAccelerator'
+    api_name: 'guestAccelerators'
     description: |
       List of the type and count of accelerator cards attached to the
       instance
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::Integer
-          name: 'acceleratorCount'
+          name: 'count'
+          api_name: 'acceleratorCount'
           description: |
             The number of the guest accelerator cards exposed to this
             instance.
         # TODO(alexstephen): Change to ResourceRef once AcceleratorType is
         # created.
         - !ruby/object:Api::Type::String
-          name: 'acceleratorType'
+          name: 'type'
+          api_name: 'acceleratorType'
           description: |
             Full or partial URL of the accelerator type resource to expose
-            to this instance.
+            to this instance.  
   - !ruby/object:Api::Type::String
     name: 'hostname'
     description: |
@@ -379,7 +352,8 @@ properties:
       lowercase letter, or digit, except the last character, which cannot
       be a dash.
   - !ruby/object:Api::Type::Array
-    name: 'networkInterfaces'
+    name: 'networkInterface'
+    api_name: 'networkInterfaces'
     description: |
       An array of configurations for this interface. This specifies
       how this interface is configured to interact with other
@@ -388,7 +362,8 @@ properties:
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::Array
-          name: 'accessConfigs'
+          name: 'accessConfig'
+          api_name: 'accessConfigs'
           description: |
             An array of configurations for this interface. Currently, only
             one access config, ONE_TO_ONE_NAT, is supported. If there are no
@@ -452,7 +427,8 @@ properties:
                   - :PREMIUM
                   - :STANDARD
         - !ruby/object:Api::Type::Array
-          name: 'aliasIpRanges'
+          name: 'aliasIpRange'
+          api_name: 'aliasIpRanges'
           description: |
             An array of alias IP ranges for this network interface. Can
             only be specified for network interfaces on subnet-mode
@@ -557,7 +533,8 @@ properties:
           during instance creation, it cannot be set or changed after the
           instance has been created.
   - !ruby/object:Api::Type::Array
-    name: 'serviceAccounts'
+    name: 'serviceAccount'
+    api_name: 'serviceAccounts'
     description: |
       A list of service accounts, with their specified scopes, authorized
       for this instance. Only one service account per VM instance is
@@ -572,7 +549,8 @@ properties:
           description: |
             The list of scopes to be made available for this service
             account.
-          item_type: Api::Type::String
+          item_type: Api::Type::String 
+          is_set: true
   - !ruby/object:Api::Type::NestedObject
     name: 'shieldedInstanceConfig'
     description:
@@ -649,7 +627,7 @@ properties:
     name: 'statusMessage'
     description: An optional, human-readable explanation of the status.
     output: true
-  - !ruby/object:Api::Type::NestedObject
+  - !ruby/object:Api::Type::Array
     name: 'tags'
     description: |
       A list of tags to apply to this instance. Tags are used to identify
@@ -657,23 +635,8 @@ properties:
       the client during instance creation. The tags can be later modified
       by the setTags method. Each tag within the list must comply with
       RFC1035.
-    properties:
-      # TODO(alexstephen) Investigate bytes type
-      - !ruby/object:Api::Type::String
-        name: 'fingerprint'
-        description: |
-          Specifies a fingerprint for this request, which is essentially a
-          hash of the metadata's contents and used for optimistic locking.
-          The fingerprint is initially generated by Compute Engine and
-          changes after every request to modify or update metadata. You
-          must always provide an up-to-date fingerprint hash in order to
-          update or change metadata.
-      - !ruby/object:Api::Type::Array
-        name: 'items'
-        description: |
-          An array of tags. Each tag must be 1-63 characters long, and
-          comply with RFC1035.
-        item_type: Api::Type::String
+    item_type: Api::Type::String
+    is_set: true
   - !ruby/object:Api::Type::NestedObject
     name: 'advancedMachineFeatures'
     description: |

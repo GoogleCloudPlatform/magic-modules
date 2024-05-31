@@ -27,9 +27,8 @@ provider "google" {
   {{if .Provider.credentials }}credentials = "{{.Provider.credentials}}"{{end}}
 }
 
-resource "google_compute_instance" "my-test-instance" {
-  project      = "{{.Provider.project}}"
-  name         = "my-instance"
+resource "google_compute_instance" "new-instance-test" {
+  name         = "new-instance-test"
   machine_type = "n1-standard-1"
   zone         = "us-central1-a"
 
@@ -37,7 +36,7 @@ resource "google_compute_instance" "my-test-instance" {
 
   boot_disk {
     initialize_params {
-      image = "projects/debian-cloud/global/images/debian-8-jessie-v20170523"
+      image = "debian-cloud/debian-11"
     }
   }
 
@@ -58,5 +57,9 @@ resource "google_compute_instance" "my-test-instance" {
 
   service_account {
     scopes = ["cloud-platform"]
+  }
+
+  advanced_machine_features {
+    enable_nested_virtualization = true
   }
 }
