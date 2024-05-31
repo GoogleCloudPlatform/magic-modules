@@ -63,7 +63,7 @@ resource "google_vertex_ai_models" "<%= ctx[:primary_resource_id] %>" {
             shard_size                  = "test"
           }
           contents_delta_uri    = "test"
-          is_complete_overwrite = 1
+          is_complete_overwrite = false
         }
         neighbor_count = 1
         presets {
