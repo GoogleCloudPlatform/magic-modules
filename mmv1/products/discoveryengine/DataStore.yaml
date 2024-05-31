@@ -70,6 +70,14 @@ examples:
       'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
     vars:
       data_store_id: "data-store-id"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "discoveryengine_datastore_document_processing_config_ocr"
+    skip_docs: true
+    primary_resource_id: 'document_processing_config_ocr'
+    primary_resource_name:
+      'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
+    vars:
+      data_store_id: "data-store-id"
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -161,12 +169,11 @@ properties:
           `projects/{project}/locations/{location}/collections/{collection_id}/dataStores/{data_store_id}/documentProcessingConfig`.
         output: true
         required: false
-
       - !ruby/object:Api::Type::NestedObject
         name: 'defaultParsingConfig'
         description: |
-          Configurations for default Document parser. If not specified, we will
-          configure it as default DigitalParsingConfig, and the default parsing
+          Configurations for default Document parser. If not specified, this resource
+          will be configured to use a default DigitalParsingConfig, and the default parsing
           config will be applied to all file types for Document parsing.
         required: false
         properties:
