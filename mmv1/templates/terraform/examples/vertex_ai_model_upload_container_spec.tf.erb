@@ -1,6 +1,5 @@
 resource "google_vertex_ai_models" "platform_model" {
   display_name = "platform"
-  artifact_uri = "gs://cloud-samples-data/vertex-ai/google-cloud-aiplatform-ci-artifacts/models/iris_xgboost/"
   description  = "platform model"
 
   region       = "us-central1"

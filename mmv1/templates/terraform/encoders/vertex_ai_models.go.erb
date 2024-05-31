@@ -1,5 +1,11 @@
 newObj := make(map[string]interface{})
-name := d.Get("name").(string)
+name := ""
+if v, ok := d.GetOk("model_id"); ok {
+	name = v.(string)
+    delete(obj,"modelId")
+} else {
+	name = d.Get("name").(string)
+}
 newObj["modelId"] = name
 newObj["model"] = obj
 return newObj, nil

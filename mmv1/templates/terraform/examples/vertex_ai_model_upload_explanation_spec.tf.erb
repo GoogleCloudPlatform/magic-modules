@@ -9,7 +9,7 @@ resource "google_vertex_ai_models" "<%= ctx[:primary_resource_id] %>" {
         dense_shape_tensor_name = "test"
         encoded_baselines       = [1]
         encoded_tensor_name     = "test"
-        encoding                = "test"
+        encoding                = "BAG_OF_FEATURES"
         feature_value_domain {
           max_value       = 1
           min_value       = 1
@@ -26,10 +26,10 @@ resource "google_vertex_ai_models" "<%= ctx[:primary_resource_id] %>" {
         visualization {
           clip_percent_lowerbound = 1
           clip_percent_upperbound = 1
-          color_map               = "test"
-          overlay_type            = "test"
-          polarity                = "test"
-          type                    = "test"
+          color_map               = "PINK_GREEN"
+          overlay_type            = "GRAY_SCALE"
+          polarity                = "POSITIVE"
+          type                    = "PIXELS"
         }
       }
       latent_space_source = "test"
@@ -43,7 +43,7 @@ resource "google_vertex_ai_models" "<%= ctx[:primary_resource_id] %>" {
     parameters {
       examples {
         example_gcs_source {
-          data_format = "test"
+          data_format = "JSONL"
           gcs_source {
             uris = ["test"]
           }
@@ -67,8 +67,8 @@ resource "google_vertex_ai_models" "<%= ctx[:primary_resource_id] %>" {
         }
         neighbor_count = 1
         presets {
-          modality = "test"
-          query    = "test"
+          modality = "JSONL"
+          query    = "FAST"
         }
       }
       integrated_gradients_attribution {
