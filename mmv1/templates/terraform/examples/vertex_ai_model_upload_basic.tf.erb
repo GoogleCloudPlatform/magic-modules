@@ -7,10 +7,6 @@ resource "google_vertex_ai_models" "<%= ctx[:primary_resource_id] %>" {
   version_aliases = ["v2beta1"]
   model_id = "id_upload_test"
 
-  encryption_spec {
-    kms_key_name = "test"
-  }
-
   metadata {
     config {
       algorithm_config {
