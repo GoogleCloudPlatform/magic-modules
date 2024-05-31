@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/client"
-	scc "google.golang.org/api/securitycenter/v1"
+	scc "google.golang.org/api/securitycenter/v2"
 )
 
 func TestAccSecurityCenterOrganizationNotificationConfig_basic(t *testing.T) {
@@ -44,7 +44,7 @@ func TestAccSecurityCenterOrganizationNotificationConfig_basic(t *testing.T) {
 
 func testAccSecurityCenterOrganizationNotificationConfig_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_pubsub_topic" "scc_organization_notification" {
+resource "google_pubsub_topic" "scc_v2_organization_notification_config" {
   name = "tf-test-topic-%{random_suffix}"
 }
 
