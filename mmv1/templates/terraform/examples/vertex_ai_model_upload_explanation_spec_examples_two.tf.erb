@@ -1,5 +1,5 @@
-resource "google_vertex_ai_models" "<%= ctx[:primary_resource_id] %>" {
-  display_name = "<%= ctx[:vars]['display_name'] %>"
+resource "google_vertex_ai_models" "<%= ctx[:primary_resource_id] %>" { // examples_2
+  display_name = "<%= ctx[:vars]['examples_two_display_name'] %>"
   artifact_uri = "gs://cloud-samples-data/vertex-ai/google-cloud-aiplatform-ci-artifacts/models/iris_xgboost/"
   description  = "sample description"
 
@@ -9,7 +9,7 @@ resource "google_vertex_ai_models" "<%= ctx[:primary_resource_id] %>" {
         dense_shape_tensor_name = "test"
         encoded_baselines       = [1]
         encoded_tensor_name     = "test"
-        encoding                = "BAG_OF_FEATURES"
+        encoding                = "IDENTITY"
         feature_value_domain {
           max_value       = 1
           min_value       = 1
@@ -20,14 +20,13 @@ resource "google_vertex_ai_models" "<%= ctx[:primary_resource_id] %>" {
         index_feature_mapping = ["test"]
         indices_tensor_name   = "test"
         input_tensor_name     = "test"
-        modality              = "test"
+        modality              = "numeric"
         name                  = "test"
-        sha1_sum              = "test"
         visualization {
           clip_percent_lowerbound = 1
           clip_percent_upperbound = 1
           color_map               = "PINK_GREEN"
-          overlay_type            = "GRAY_SCALE"
+          overlay_type            = "GRAYSCALE"
           polarity                = "POSITIVE"
           type                    = "PIXELS"
         }
@@ -35,7 +34,6 @@ resource "google_vertex_ai_models" "<%= ctx[:primary_resource_id] %>" {
       latent_space_source = "test"
       outputs {
         display_name_mapping_key   = "test"
-        index_display_name_mapping = 1
         name                       = "test"
         output_tensor_name         = "test"
       }
@@ -66,47 +64,6 @@ resource "google_vertex_ai_models" "<%= ctx[:primary_resource_id] %>" {
           is_complete_overwrite = false
         }
         neighbor_count = 1
-        presets {
-          modality = "IMAGE"
-          query    = "FAST"
-        }
-      }
-      integrated_gradients_attribution {
-        blur_baseline_config {
-          max_blur_sigma = 1
-        }
-        smooth_grad_config {
-          feature_noise_sigma {
-            noise_sigma {
-              name  = "test"
-              sigma = 1
-            }
-          }
-          noise_sigma        = 1
-          noisy_sample_count = 1
-        }
-        step_count = 1
-      }
-      output_indices = [1]
-      sampled_shapley_attribution {
-        path_count = 1
-      }
-      top_k = 1
-      xrai_attribution {
-        blur_baseline_config {
-          max_blur_sigma = 1
-        }
-        smooth_grad_config {
-          feature_noise_sigma {
-            noise_sigma {
-              name  = "test"
-              sigma = 1
-            }
-          }
-          noise_sigma        = 1
-          noisy_sample_count = 1
-        }
-        step_count = 1
       }
     }
   }

@@ -75,11 +75,35 @@ examples:
     vars:
       display_name: 'test-model-upload-container-spec'
   - !ruby/object:Provider::Terraform::Examples
-    name: 'vertex_ai_model_upload_explanation_spec'
+    name: 'vertex_ai_model_upload_explanation_spec_examples_one'
     skip_import_test: true
-    primary_resource_id: 'upload_model'
+    primary_resource_id: 'examplesOneModel'
     vars:
-      display_name: 'test-model-upload-explanation-spec'
+      examples_one_display_name: 'test-model-upload-explanation-spec-example-one'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'vertex_ai_model_upload_explanation_spec_examples_two'
+    skip_import_test: true
+    primary_resource_id: 'examplesTwoModel'
+    vars:
+      examples_two_display_name: 'test-model-upload-explanation-spec-example-two'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'vertex_ai_model_upload_explanation_spec_integrated_gradients'
+    skip_import_test: true
+    primary_resource_id: 'integratedGradientsModel'
+    vars:
+      integrated_gradients_display_name: 'test-model-upload-explanation-spec-integrated-gradients'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'vertex_ai_model_upload_explanation_spec_xrai_attribution'
+    skip_import_test: true
+    primary_resource_id: 'xraiAttributionModel'
+    vars:
+      xrai_attribution_display_name: 'test-model-upload-explanation-spec-xrai-attribution'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'vertex_ai_model_upload_explanation_spec_sampled_shapely'
+    skip_import_test: true
+    primary_resource_id: 'sampledShapelyModel'
+    vars:
+      sampled_shapely_display_name: 'test-model-upload-explanation-spec-sampled-shapely'
   - !ruby/object:Provider::Terraform::Examples
     name: 'vertex_ai_model_upload_predict_schemata'
     skip_import_test: true
@@ -568,9 +592,15 @@ properties:
                     default_value: 3
                   - !ruby/object:Api::Type::Double
                     name: 'noiseSigma'
+                    at_least_one_of:
+                      - explanationSpec.parameters.integratedGradientsAttribution.smoothGradConfig.noiseSigma
+                      - explanationSpec.parameters.integratedGradientsAttribution.smoothGradConfig.featureNoiseSigma
                     description: This is a single float value and will be used to add noise to all the features.
                   - !ruby/object:Api::Type::NestedObject
                     name: 'featureNoiseSigma'
+                    at_least_one_of:
+                      - explanationSpec.parameters.integratedGradientsAttribution.smoothGradConfig.noiseSigma
+                      - explanationSpec.parameters.integratedGradientsAttribution.smoothGradConfig.featureNoiseSigma
                     description: The number of gradient samples to use for approximation.
                     properties:
                       - !ruby/object:Api::Type::Array
@@ -801,10 +831,6 @@ properties:
             value_type: !ruby/object:Api::Type::NestedObject
               properties:
                 - !ruby/object:Api::Type::String
-                  name: 'sha1Sum'
-                  description: |
-                    SHA1 checksum of the file
-                - !ruby/object:Api::Type::String
                   name: 'inputTensorName'
                   description: |
                     name of the input tensor for this feature. Required and is only applicable to Vertex AI-provided images for Tensorflow.
@@ -816,6 +842,7 @@ properties:
                     - IDENTITY
                     - BAG_OF_FEATURES
                     - BAG_OF_FEATURES_SPARSE
+                    - IDENTITY_SPARSE
                     - INDICATOR
                     - COMBINED_EMBEDDING
                     - CONCAT_EMBEDDING
@@ -918,7 +945,7 @@ properties:
                       values:
                         - :NONE
                         - :ORIGINAL
-                        - :GRAY_SCALE
+                        - :GRAYSCALE
                         - :MASK_BLACK
                 - !ruby/object:Api::Type::String
                   name: 'groupName'
@@ -937,11 +964,11 @@ properties:
                   required: true
                   description: |
                     name of the output tensor.
-                - !ruby/object:Api::Type::Integer
+                - !ruby/object:Api::Type::Array
                   name: 'indexDisplayNameMapping'
-                  required: true
                   description: |
                     Static mapping between the index and display name.
+                  item_type: Api::Type::String
                 - !ruby/object:Api::Type::String
                   name: 'displayNameMappingKey'
                   description: |
