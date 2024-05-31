@@ -13,9 +13,9 @@
 
 --- !ruby/object:Api::Resource
 name: 'OrganizationMuteConfig'
-base_url: '{{parent}}/organizationmuteConfigs'
+base_url: '{{parent}}/muteConfigs'
 self_link: '{{name}}'
-create_url: '{{parent}}/organizationmuteConfigs?organizationmuteConfigId={{organization_mute_Configs_id}}'
+create_url: '{{parent}}/muteConfigs?organizationmuteConfigId={{name}}'
 update_verb: :PATCH
 update_mask: true
 description: |

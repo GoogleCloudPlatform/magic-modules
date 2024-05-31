@@ -13,9 +13,9 @@
 
 --- !ruby/object:Api::Resource
 name: 'FolderMuteConfig'
-base_url: '{{parent}}/foldermuteConfigs'
+base_url: '{{parent}}/muteConfigs'
 self_link: '{{name}}'
-create_url: '{{parent}}/foldermuteConfigs?foldermuteConfigId={{folder_mute_config_id}}'
+create_url: '{{parent}}/muteConfigs?muteConfigId={{name}}'
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -60,9 +60,9 @@ parameters:
     immutable: true
     url_param_only: true
     description: |
-      Resource name of the new mute configs's parent. Its format is
-      "organizations/[organization_id]", "folders/[folder_id]", or
-      "projects/[project_id]".
+      Required. Resource name of the new mute configs's parent. 
+      Its format is "organizations/[organization_id]/locations/[locationId]",
+      "folders/[folder_id]/locations/[locationId]", or "projects/[projectId]/locations/[locationId]".
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
