@@ -238,8 +238,7 @@ properties:
     description: |-
       A unique string used as a suffix creating a new execution upon job create or update. The Job will become ready when the execution is successfully started.
       The sum of job name and token length must be fewer than 63 characters.
-    exactly_one_of:
-      - start_execution_token
+    conflicts:
       - run_execution_token
     min_version: beta
   - !ruby/object:Api::Type::String
@@ -247,9 +246,8 @@ properties:
     description: |-
       A unique string used as a suffix creating a new execution upon job create or update. The Job will become ready when the execution is successfully completed.
       The sum of job name and token length must be fewer than 63 characters.
-    exactly_one_of:
+    conflicts:
       - start_execution_token
-      - run_execution_token
     min_version: beta
   - !ruby/object:Api::Type::NestedObject
     name: 'template'
