@@ -12,6 +12,6 @@ resource "google_project_service" "compute" {
 
 resource "google_compute_project_cloud_armor_tier" "<%= ctx[:primary_resource_id] %>" {
   project          = google_project.project.project_id  
-  cloud_armor_tier = "CA_ENTERPRISE_PAYGO"
+  cloud_armor_tier = "CA_STANDARD"
   depends_on       = [google_project_service.compute]
 }

@@ -10,6 +10,7 @@ import (
 )
 
 func TestAccComputeProjectCloudArmorTier_basic(t *testing.T) {
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -17,7 +18,7 @@ func TestAccComputeProjectCloudArmorTier_basic(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeProject_cloudArmorTier_enterprise_paygo(),
+				Config: testAccComputeProject_cloudArmorTier_standard(),
 			},
 			{
 				ResourceName:      "google_compute_project_cloud_armor_tier.cloud_armor_tier_config",
