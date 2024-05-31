@@ -9303,7 +9303,8 @@ resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
   initial_node_count = 1
-  secret_manager_csi_config {
+
+  secret_manager_config {
     enabled = false
   }
   deletion_protection = false
