@@ -8,6 +8,8 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 )
 
+// force tests
+
 func ResourceConverterSpannerDatabaseIamPolicy() cai.ResourceConverter {
 	return cai.ResourceConverter{
 		AssetType:         "spanner.googleapis.com/Database",
