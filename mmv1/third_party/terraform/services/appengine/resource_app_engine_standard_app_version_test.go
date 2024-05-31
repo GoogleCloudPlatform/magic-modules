@@ -259,12 +259,6 @@ resource "google_storage_bucket_object" "main" {
   name   = "main.py"
   bucket = google_storage_bucket.bucket.name
   source = "./test-fixtures/hello-world-flask/main.py"
-}
-
-resource "google_storage_bucket_iam_member" "build" {
-  bucket = google_storage_bucket.bucket.name
-  role = "roles/storage.objectViewer"
-  member = "serviceAccount:${google_project.my_project.number}@cloudbuild.gserviceaccount.com"
 }`, context)
 }
 
