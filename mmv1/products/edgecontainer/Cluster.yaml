@@ -257,7 +257,7 @@ properties:
                   this window recurs. They go on for the span of time between the start and
                   end time.
       - !ruby/object:Api::Type::Array
-        name: "maintenance_exclusions"
+        name: "maintenanceExclusions"
         required: false
         description: |
           Exclusions to automatic maintenance. Non-emergency maintenance should not occur
