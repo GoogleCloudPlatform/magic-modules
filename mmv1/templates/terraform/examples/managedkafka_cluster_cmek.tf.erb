@@ -32,9 +32,10 @@ resource "google_service_account" "gmk_service_account" {
   provider = google-beta
 }
 
-resource "google_service_identity" "kafka_service_identity" {
+resource "google_project_service_identity" "kafka_service_identity" {
   project  = data.google_project.project.project_id
   service  = "managedkafka.googleapis.com"
+
   depends_on = [google_service_account.gmk_service_account]
 
   provider = google-beta
