@@ -58,9 +58,10 @@ examples:
     primary_resource_id: 'model'
     vars:
       display_name: 'test-model'
-      kms_key_name: 'kms-name'
+      kms_key_name: 'projects/keys-project/locations/us-central1/keyRings/key-ring/cryptoKeys/crypto-key'
     test_vars_overrides:
-      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      kms_key_name: 'acctest.BootstrapKMSKeyWithPurposeInLocation(t, "ASYMMETRIC_SIGN",
+        "us-central1").CryptoKey.Name'
   - !ruby/object:Provider::Terraform::Examples
     name: 'vertex_ai_model_upload_basic'
     skip_import_test: true
@@ -85,9 +86,10 @@ examples:
     primary_resource_id: 'upload_model'
     vars:
       display_name: 'test-model-upload-predict-schemata'
-      kms_key_name: 'kms-name'
+      kms_key_name: 'projects/keys-project/locations/us-central1/keyRings/key-ring/cryptoKeys/crypto-key'
     test_vars_overrides:
-      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      kms_key_name: 'acctest.BootstrapKMSKeyWithPurposeInLocation(t, "ASYMMETRIC_SIGN",
+        "us-central1").CryptoKey.Name'
 parameters:
   - !ruby/object:Api::Type::String
     name: region

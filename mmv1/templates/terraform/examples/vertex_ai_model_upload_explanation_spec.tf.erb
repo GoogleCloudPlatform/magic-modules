@@ -67,7 +67,7 @@ resource "google_vertex_ai_models" "<%= ctx[:primary_resource_id] %>" {
         }
         neighbor_count = 1
         presets {
-          modality = "JSONL"
+          modality = "IMAGE"
           query    = "FAST"
         }
       }
