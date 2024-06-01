@@ -19,3 +19,15 @@ resource "google_monitoring_uptime_check_config" "<%= ctx[:primary_resource_id] 
     }
   }
 }
+
+resource "google_cloud_run_v2_service" "<%= ctx[:cloud_run_primary_id] %>" {
+  name     = "<%= ctx[:vars]['cloud_run_service_name'] %>"
+  location = "us-central1"
+  ingress = "INGRESS_TRAFFIC_ALL"
+  
+  template {
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+    }
+  }
+}

@@ -61,6 +61,7 @@ examples:
     primary_resource_id: 'cloud_run'
     vars:
       cloud_run_primary_id: 'default'
+      cloud_run_service_name: 'cloudrun-service'
       display_name: 'cloud-run-uptime-check'
     test_env_vars:
       project_id: :PROJECT_NAME
