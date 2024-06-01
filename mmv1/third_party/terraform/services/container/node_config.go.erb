@@ -898,7 +898,7 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 	if v, ok := nodeConfig["secondary_boot_disks"]; ok && len(v.([]interface{})) > 0 {
 		conf := v.([]interface{})[0].(map[string]interface{})
 		modeValue, modeOK := conf["mode"]
-		diskImage, diskImageOK := conf["disk_image"]
+		diskImage := conf["disk_image"]
     	if modeOK && modeValue.(string) == "CONTAINER_IMAGE_CACHE" {
 			nc.SecondaryBootDisks = append(nc.SecondaryBootDisks, &container.SecondaryBootDisk{
 				DiskImage: diskImage.(string),
