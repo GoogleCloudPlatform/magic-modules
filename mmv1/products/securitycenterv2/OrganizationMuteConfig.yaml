@@ -15,7 +15,7 @@
 name: 'OrganizationMuteConfig'
 base_url: '{{parent}}/muteConfigs'
 self_link: '{{name}}'
-create_url: '{{parent}}/muteConfigs?organizationmuteConfigId={{name}}'
+create_url: '{{parent}}/muteConfigs?muteConfigId={{name}}'
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -40,7 +40,7 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/scc_mute_config.go.erb
 parameters:
   - !ruby/object:Api::Type::String
-    name: organizationmuteConfigId
+    name: muteConfigId
     required: true
     immutable: true
     url_param_only: true
