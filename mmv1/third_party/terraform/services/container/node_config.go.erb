@@ -900,7 +900,7 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 		diskImage, diskImageOK := conf["disk_image"].(string)
     	mode, modeOK := conf["mode"].(string)
 
-    	if diskImageOK && modeOK {
+    	if diskImageOK && modeOK && mode == "CONTAINER_IMAGE_CACHE" {
 			nc.SecondaryBootDisks = append(nc.SecondaryBootDisks, &container.SecondaryBootDisk{
 				DiskImage: diskImage,
 				Mode:      mode,
