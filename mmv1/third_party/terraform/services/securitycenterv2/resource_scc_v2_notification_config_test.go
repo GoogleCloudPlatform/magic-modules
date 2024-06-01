@@ -1,6 +1,7 @@
 package securitycenter_test
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -8,7 +9,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/client"
-	scc "google.golang.org/api/securitycenter/v2"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"google.golang.org/api/googleapi"
+	"google.golang.org/api/securitycenter/v1"
 )
 
 func TestAccSecurityCenterOrganizationNotificationConfig_basic(t *testing.T) {
@@ -16,27 +19,24 @@ func TestAccSecurityCenterOrganizationNotificationConfig_basic(t *testing.T) {
 
 	context := map[string]interface{}{
 		"org_id":        envvar.GetTestOrgFromEnv(t),
-		"topic_name":    acctest.RandomString(10),
-		"config_id":     acctest.RandomString(10),
-		"random_suffix": acctest.RandomString(10),
+		"topic_name":    acctest.RandString(t, 10),
+		"config_id":     acctest.RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckSecurityCenterOrganizationNotificationConfigDestroyProducer(t),
+		CheckDestroy:             testAccCheckSecurityCenterOrganizationNotificationConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSecurityCenterOrganizationNotificationConfig_basic(context),
 			},
 			{
-				ResourceName: "google_scc_organization_notification_config.default",
-				ImportState: true,
-				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{
-					"parent",
-					"config_id",
-				},
+				ResourceName:            "google_scc_organization_notification_config.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parent", "config_id"},
 			},
 		},
 	})
@@ -53,7 +53,7 @@ resource "google_scc_organization_notification_config" "default" {
   organization = "%{org_id}"
   location     = "global"
   description  = "A test organization notification config"
-  pubsub_topic = google_pubsub_topic.scc_organization_notification.id
+  pubsub_topic = google_pubsub_topic.scc_v2_organization_notification_config.id
 
   streaming_config {
     filter = "severity = \"HIGH\""
@@ -65,7 +65,7 @@ resource "google_scc_organization_notification_config" "default" {
 func testAccCheckSecurityCenterOrganizationNotificationConfigDestroyProducer(t *testing.T) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := acctest.Provider.Meta().(*client.Config)
-		sccService, err := scc.New(config.HTTPClient)
+		sccService, err := securitycenter.NewService(context.Background(), config.GoogleClientOptions...)
 		if err != nil {
 			return fmt.Errorf("Error creating Security Command Center client: %s", err)
 		}
@@ -102,3 +102,6 @@ func isGoogleAPINotFoundError(err error) bool {
 	}
 	return apiErr.Code == 404
 }
+
+
+
