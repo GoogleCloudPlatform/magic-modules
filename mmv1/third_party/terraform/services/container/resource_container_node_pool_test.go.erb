@@ -1700,7 +1700,7 @@ resource "google_container_node_pool" "np" {
   }
 }
 
-resource "google_container_node_pool" "np" {
+resource "google_container_node_pool" "np-no-mode" {
   name               = "%s-no-mode"
   location           = "us-central1-a"
   cluster            = google_container_cluster.cluster.name
