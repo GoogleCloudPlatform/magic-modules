@@ -192,7 +192,7 @@ func testAccCheckGoogleHealthcareDicomStoreUpdate(t *testing.T, pubsubTopic stri
 				return fmt.Errorf("dicomStore 'NotificationConfig' not updated ('%s' != '%s'): %s", topicName, pubsubTopic, gcpResourceUri)
 			}
 
-			sendForBulkImport := path.Base(response.NotificationConfig.SendForBulkImport
+			sendForBulkImport := path.Base(response.NotificationConfig.SendForBulkImport)
 			if sendForBulkImport != true {
 				return fmt.Errorf("dicomStore 'NotificationConfig.SendForBulkImport' not updated: %s", gcpResourceUri)
 			}
