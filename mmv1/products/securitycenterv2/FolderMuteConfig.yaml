@@ -94,7 +94,7 @@ properties:
     description: |
       Output only. The most recent time at which the mute config was
       updated. This field is set by the server and will be ignored if
-      provided on config creation or update. 
+      provided on config creation or update.
     output: true
   - !ruby/object:Api::Type::String
     name: 'mostRecentEditor'
