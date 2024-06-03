@@ -1,4 +1,4 @@
-package securitycenter_test
+package securitycentermanagement_test
 
 import (
 	"fmt"
@@ -206,7 +206,7 @@ func testAccCheckSecurityCenterManagementOrganizationFolderSecurityHealthAnalyti
 
 			url, err := tpgresource.ReplaceVarsForTest(config, rs, fmt.Sprintf(
 				"{{SecurityCenterBasePath}}folders/{{folder}}/locations/%s/securityHealthAnalyticsCustomModules/{{name}}", location))
-			
+
 			if err != nil {
 				return err
 			}
