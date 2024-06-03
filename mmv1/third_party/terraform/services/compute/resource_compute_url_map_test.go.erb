@@ -362,6 +362,7 @@ func TestAccComputeUrlMap_defaultUrlRedirect(t *testing.T) {
 	})
 }
 
+<% unless version == 'ga' -%>
 func TestAccComputeUrlMap_urlMapCustomErrorResponsePolicyUpdate(t *testing.T) {
 	t.Parallel()
 
@@ -395,6 +396,7 @@ func TestAccComputeUrlMap_urlMapCustomErrorResponsePolicyUpdate(t *testing.T) {
 		},
 	})
 }
+<% end -%>
 
 func testAccComputeUrlMap_basic1(bsName, hcName, umName string) string {
 	return fmt.Sprintf(`
@@ -1720,6 +1722,7 @@ resource "google_compute_url_map" "foobar" {
 `, randomSuffix)
 }
 
+<% unless version == 'ga' -%>
 func testAccComputeUrlMap_urlMapCustomErrorResponsePolicy(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_url_map" "urlmap" {
@@ -1810,7 +1813,9 @@ resource "google_storage_bucket" "error" {
 }
 `, context)
 }
+<% end -%>
 
+<% unless version == 'ga' -%>
 func testAccComputeUrlMap_urlMapCustomErrorResponsePolicyUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_url_map" "urlmap" {
@@ -1905,3 +1910,4 @@ resource "google_storage_bucket" "error" {
 }
 `, context)
 }
+<% end -%>
