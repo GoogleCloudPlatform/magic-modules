@@ -160,6 +160,10 @@ properties:
               description: |
                 Identifiers of features under the feature group.
               item_type: Api::Type::String
+      - !ruby/object:Api::Type::String
+        name: 'projectNumber'
+        description: |
+          The project number of the parent project of the feature Groups.
   - !ruby/object:Api::Type::NestedObject
     name: 'vectorSearchConfig'
     description: |

@@ -103,5 +103,5 @@ properties:
             description: 'BigQuery URI to a table, up to 2000 characters long. For example: `bq://projectId.bqDatasetId.bqTableId.`'
       - !ruby/object:Api::Type::Array
         name: entityIdColumns
-        description: Columns to construct entityId / row keys. Currently only supports 1 entity_id_column. If not provided defaults to entityId.
+        description: Columns to construct entityId / row keys. If not provided defaults to entityId.
         item_type: Api::Type::String
