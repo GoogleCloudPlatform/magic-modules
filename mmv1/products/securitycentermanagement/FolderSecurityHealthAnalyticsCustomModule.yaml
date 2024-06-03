@@ -84,7 +84,7 @@ properties:
       The id {securityHealthAnalyticsCustomModule} is server-generated and is not user settable. It will be a numeric id containing 1-20 digits.
   - !ruby/object:Api::Type::String
     name: 'displayName'
-    immutable: true    
+    immutable: true
     # API error for invalid display names is just "INVALID_ARGUMENT" with no details
     validation: !ruby/object:Provider::Terraform::Validation
       function: 'verify.ValidateRegexp(`^[a-z][\w_]{0,127}$`)'
