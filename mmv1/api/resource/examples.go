@@ -179,13 +179,33 @@ func (e *Examples) UnmarshalYAML(n *yaml.Node) error {
 
 // Executes example templates for documentation and tests
 func (e *Examples) SetHCLText() {
-	e.DocumentationHCLText = ExecuteTemplate(e, e.ConfigPath, true)
+	docCopy := e
+	testCopy := e
+	docs_defaults := map[string]string{
+		"PROJECT_NAME":        "my-project-name",
+		"CREDENTIALS":         "my/credentials/filename.json",
+		"REGION":              "us-west1",
+		"ORG_ID":              "123456789",
+		"ORG_DOMAIN":          "example.com",
+		"ORG_TARGET":          "123456789",
+		"BILLING_ACCT":        "000000-0000000-0000000-000000",
+		"MASTER_BILLING_ACCT": "000000-0000000-0000000-000000",
+		"SERVICE_ACCT":        "my@service-account.com",
+		"CUST_ID":             "A01b123xz",
+		"IDENTITY_USER":       "cloud_identity_user",
+		"PAP_DESCRIPTION":     "description",
+	}
 
-	copy := e
+	// Apply doc defaults to test_env_vars from YAML
+	for key := range docCopy.TestEnvVars {
+		docCopy.TestEnvVars[key] = docs_defaults[docCopy.TestEnvVars[key]]
+	}
+	e.DocumentationHCLText = ExecuteTemplate(docCopy, docCopy.ConfigPath, true)
+
 	// Override vars to inject test values into configs - will have
 	//   - "a-example-var-value%{random_suffix}""
 	//   - "%{my_var}" for overrides that have custom Golang values
-	for key, value := range copy.Vars {
+	for key, value := range testCopy.Vars {
 		var newVal string
 		if strings.Contains(value, "-") {
 			newVal = fmt.Sprintf("tf-test-%s", value)
@@ -199,15 +219,15 @@ func (e *Examples) SetHCLText() {
 		if len(newVal) > 54 {
 			newVal = newVal[:54]
 		}
-		copy.Vars[key] = fmt.Sprintf("%s%%{random_suffix}", newVal)
+		testCopy.Vars[key] = fmt.Sprintf("%s%%{random_suffix}", newVal)
 	}
 
 	// Apply overrides from YAML
-	for key := range copy.TestVarsOverrides {
-		copy.Vars[key] = fmt.Sprintf("%%{%s}", key)
+	for key := range testCopy.TestVarsOverrides {
+		testCopy.Vars[key] = fmt.Sprintf("%%{%s}", key)
 	}
 
-	e.TestHCLText = ExecuteTemplate(copy, copy.ConfigPath, true)
+	e.TestHCLText = ExecuteTemplate(testCopy, testCopy.ConfigPath, true)
 }
 
 func ExecuteTemplate(e any, templatePath string, appendNewline bool) string {
@@ -234,114 +254,6 @@ func ExecuteTemplate(e any, templatePath string, appendNewline bool) string {
 
 	return rs
 }
-
-// func (e *Examples) config_documentation(pwd) {
-// docs_defaults = {
-//   PROJECT_NAME: 'my-project-name',
-//   CREDENTIALS: 'my/credentials/filename.json',
-//   REGION: 'us-west1',
-//   ORG_ID: '123456789',
-//   ORG_DOMAIN: 'example.com',
-//   ORG_TARGET: '123456789',
-//   BILLING_ACCT: '000000-0000000-0000000-000000',
-//   MASTER_BILLING_ACCT: '000000-0000000-0000000-000000',
-//   SERVICE_ACCT: 'my@service-account.com',
-//   CUST_ID: 'A01b123xz',
-//   IDENTITY_USER: 'cloud_identity_user',
-//   PAP_DESCRIPTION: 'description'
-// }
-// @vars ||= {}
-// @test_env_vars ||= {}
-// body = lines(compile_file(
-//                {
-//                  vars:,
-//                  test_env_vars: test_env_vars.to_h { |k, v| [k, docs_defaults[v]] },
-//                  primary_resource_id:
-//                },
-//                "//{pwd}///{config_path}"
-//              ))
-
-// // Remove region tags
-// body = body.gsub(/// \[[a-zA-Z_ ]+\]\n/, '')
-// body = body.gsub(/\n// \[[a-zA-Z_ ]+\]/, '')
-// lines(compile_file(
-//         { content: body },
-//         "//{pwd}/templates/terraform/examples/base_configs/documentation.tf.erb"
-//       ))
-// }
-
-// func (e *Examples) config_test(pwd) {
-// body = config_test_body(pwd)
-// lines(compile_file(
-//         {
-//           content: body
-//         },
-//         "//{pwd}/templates/terraform/examples/base_configs/test_body.go.erb"
-//       ))
-// }
-
-// rubocop:disable Style/FormatStringToken
-// func (e *Examples) config_test_body(pwd) {
-// @vars ||= {}
-// @test_env_vars ||= {}
-// @test_vars_overrides ||= {}
-
-// // Construct map for vars to inject into config - will have
-// //   - "a-example-var-value%{random_suffix}""
-// //   - "%{my_var}" for overrides that have custom Golang values
-// rand_vars = vars.map do |k, v|
-//   // Some resources only allow underscores.
-//   testv = if v.include?('-')
-//             "tf-test-//{v}"
-//           elsif v.include?('_')
-//             "tf_test_//{v}"
-//           else
-//             // Some vars like descriptions shouldn't have prefix
-//             v
-//           end
-//   // Random suffix is 10 characters and standard name length <= 64
-//   testv = "//{testv[0...54]}%{random_suffix}"
-//   [k, testv]
-// end
-
-// rand_vars = rand_vars.to_h
-// overrides = test_vars_overrides.to_h { |k, _| [k, "%{//{k}}"] }
-// body = lines(compile_file(
-//                {
-//                  vars: rand_vars.merge(overrides),
-//                  test_env_vars: test_env_vars.to_h { |k, _| [k, "%{//{k}}"] },
-//                  primary_resource_id:,
-//                  primary_resource_type:
-//                },
-//                "//{pwd}///{config_path}"
-//              ))
-
-// // Remove region tags
-// body = body.gsub(/// \[[a-zA-Z_ ]+\]\n/, '')
-// body = body.gsub(/\n// \[[a-zA-Z_ ]+\]/, '')
-// substitute_test_paths body
-// }
-
-// func (e *Examples) config_oics(pwd) {
-// @vars ||= []
-// @oics_vars_overrides ||= {}
-
-// rand_vars = vars.to_h { |k, str| [k, "//{str}-${local.name_suffix}"] }
-
-// // Examples with test_env_vars are skipped elsewhere
-// body = lines(compile_file(
-//                {
-//                  vars: rand_vars.merge(oics_vars_overrides),
-//                  primary_resource_id:
-//                },
-//                "//{pwd}///{config_path}"
-//              ))
-
-// // Remove region tags
-// body = body.gsub(/// \[[a-zA-Z_ ]+\]\n/, '')
-// body = body.gsub(/\n// \[[a-zA-Z_ ]+\]/, '')
-// substitute_example_paths body
-// }
 
 func (e *Examples) OiCSLink() string {
 	v := url.Values{}
