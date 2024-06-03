@@ -177,7 +177,7 @@ func testAccCheckSecurityCenterManagementOrganizationSecurityHealthAnalyticsCust
 
 			url, err := tpgresource.ReplaceVarsForTest(config, rs, fmt.Sprintf(
 				"{{SecurityCenterBasePath}}organizations/{{organization}}/locations/%s/securityHealthAnalyticsCustomModules/{{name}}", location))
-			
+
 			if err != nil {
 				return err
 			}
