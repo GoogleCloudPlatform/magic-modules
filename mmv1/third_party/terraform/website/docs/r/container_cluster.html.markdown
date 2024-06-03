@@ -292,6 +292,10 @@ region are guaranteed to support the same version.
     [PodSecurityPolicy](https://cloud.google.com/kubernetes-engine/docs/how-to/pod-security-policies) feature.
     Structure is [documented below](#nested_pod_security_policy_config).
 
+* `secret_manager_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for the
+    [SecretManagerConfig](https://cloud.google.com/secret-manager/docs/secret-manager-managed-csi-component) feature.
+    Structure is [documented below](#nested_secret_manager_config).
+
 * `authenticator_groups_config` - (Optional) Configuration for the
     [Google Groups for GKE](https://cloud.google.com/kubernetes-engine/docs/how-to/role-based-access-control#groups-setup-gsuite) feature.
     Structure is [documented below](#nested_authenticator_groups_config).
@@ -973,12 +977,6 @@ sole_tenant_config {
 
 * `enable_nested_virtualization`- (Optional) Defines whether the instance should have nested virtualization enabled. Defaults to false.
 
-* `network_performance_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Network bandwidth tier configuration.
-
-<a name="network_performance_config"></a>The `network_performance_config` block supports:
-
-* `total_egress_bandwidth_tier` (Required) - Specifies the total network bandwidth tier for the NodePool.
-
 <a name="nested_ephemeral_storage_config"></a>The `ephemeral_storage_config` block supports:
 
 * `local_ssd_count` (Required) - Number of local SSDs to use to back ephemeral storage. Uses NVMe interfaces. Each local SSD is 375 GB in size. If zero, it means to disable using local SSDs as ephemeral storage.
@@ -1111,6 +1109,10 @@ notification_config {
 
 * `enabled` (Required) - Enable the PodSecurityPolicy controller for this cluster.
     If enabled, pods must be valid under a PodSecurityPolicy to be created.
+
+<a name="nested_secret_manager_config"></a>The `secret_manager_config` block supports:
+
+* `enabled` (Required) - Enable the Secret Manager add-on for this cluster.
 
 <a name="nested_private_cluster_config"></a>The `private_cluster_config` block supports:
 
