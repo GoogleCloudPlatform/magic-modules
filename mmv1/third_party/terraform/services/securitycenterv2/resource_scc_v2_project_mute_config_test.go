@@ -1,4 +1,4 @@
-package securitycenter_test
+package securitycenterv2_test
 
 import (
 	"context"
