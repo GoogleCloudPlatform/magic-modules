@@ -3,10 +3,11 @@
  * SPDX-License-Identifier: MPL-2.0
  */
 
-// This file is controlled by MMv1, any changes made here will be overwritten
+// This file is maintained in the GoogleCloudPlatform/magic-modules repository and copied into the downstream provider repositories. Any changes to this file in the downstream will be overwritten.
 
 package builds
 
+import jetbrains.buildServer.configs.kotlin.BuildStep
 import jetbrains.buildServer.configs.kotlin.BuildSteps
 import jetbrains.buildServer.configs.kotlin.buildSteps.ScriptBuildStep
 
@@ -140,6 +141,7 @@ fun BuildSteps.runVcrTestRecordingSetup() {
 fun BuildSteps.runVcrTestRecordingSaveCassettes() {
     step(ScriptBuildStep {
         name = "Tasks after running VCR tests: if in RECORDING mode, push new cassettes to GCS"
+        executionMode = BuildStep.ExecutionMode.RUN_ON_FAILURE
         scriptContent = """
             #!/bin/bash
             echo "VCR Testing: Post-test steps"

@@ -13,9 +13,13 @@
 
 package product
 
+import (
+	"golang.org/x/exp/slices"
+)
+
 // require 'api/object'
 
-var ORDER = [...]string{"ga", "beta", "alpha", "private"}
+var ORDER = []string{"ga", "beta", "alpha", "private"}
 
 // A version of the API for a given product / API group
 // In GCP, different product versions are generally ordered where alpha is
@@ -50,3 +54,7 @@ type Version struct {
 // def <=>(other)
 //   ORDER.index(name) <=> ORDER.index(other.name) if other.is_a?(Version)
 // end
+
+func (v *Version) CompareTo(other *Version) int {
+	return slices.Index(ORDER, v.Name) - slices.Index(ORDER, other.Name)
+}

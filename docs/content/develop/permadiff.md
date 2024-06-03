@@ -226,9 +226,7 @@ In tests, add the field to `ImportStateVerifyIgnore` on any relevant import step
 
 ## API returns a list in a different order than was sent {#list-order}
 
-For an Array of nested objects, convert it to a Set – this is a [breaking change]({{< ref "/develop/breaking-changes/breaking-changes" >}}) and can only happen in a major release.
-
-For an Array of simple values (such as strings or ints), rewrite the value in the flattener to match the order in the user's configuration. This will also simplify diffs if new values are added or removed.
+For an Array of unique string values (or nested objects with unique string identifiers), use the `SortStringsByConfigOrder` or `SortMapsByConfigOrder` helper functions to sort the API response to match the order in the user's configuration. This will also simplify diffs if new values are added or removed. Imported resources will not have access to a configuration, so the field will be sorted alphabetically. This means that tests for the resource need to ignore the field's import behavior via `ignore_read_extra` (for MMv1 examples) or [`ImportStateVerifyIgnore`](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/import#importstateverifyignore-1) (for handwritten tests).
 
 {{< tabs "diff_suppress_list" >}}
 
@@ -239,10 +237,13 @@ Add a [custom flattener]({{< ref "/develop/custom-code#custom_flatten" >}}) for 
 func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
     configValue := d.Get("path.0.to.0.parent_field.0.nested_field").([]string)
 
-    ret := []string{}
-    // Add values from v to ret to match order in configValue and put any new strings at the end
+    sorted, err := tpgresource.SortStringsByConfigOrder(configValue, v.([]string))
+    if err != nil {
+        log.Printf("[ERROR] Could not sort API response value: %s", err)
+        return v
+    }
 
-    return ret
+    return sorted.(interface{})
 }
 ```
 {{< /tab >}}
@@ -253,11 +254,16 @@ Define resource-specific functions in your service package, for example at the t
 func flattenResourceNameFieldName(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
     configValue := d.Get("path.0.to.0.parent_field.0.nested_field").([]string)
 
-    ret := []string{}
-    // Add values from v to ret to match order in configValue and put any new strings at the end
+    sorted, err := tpgresource.SortStringsByConfigOrder(configValue, v.([]string))
+    if err != nil {
+        log.Printf("[ERROR] Could not sort API response value: %s", err)
+        return v
+    }
 
-    return ret
+    return sorted.(interface{})
 }
 ```
 {{< /tab >}}
 {{< /tabs >}}
+
+For other Array fields, convert the field to a Set – this is a [breaking change]({{< ref "/develop/breaking-changes/breaking-changes" >}}) and can only happen in a major release.

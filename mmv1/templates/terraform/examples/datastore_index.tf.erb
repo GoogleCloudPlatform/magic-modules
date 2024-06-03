@@ -1,3 +1,16 @@
+resource "google_firestore_database" "database" {
+  project     = "<%= ctx[:test_env_vars]['project_id'] %>"
+  # google_datastore_index resources only support the (default) database.
+  # However, google_firestore_index can express any Datastore Mode index
+  # and should be preferred in all cases.
+  name        = "(default)"
+  location_id = "nam5"
+  type        = "DATASTORE_MODE"
+
+  delete_protection_state = "DELETE_PROTECTION_DISABLED"
+  deletion_policy         = "DELETE"
+}
+
 resource "google_datastore_index" "<%= ctx[:primary_resource_id] %>" {
   kind = "foo"
   properties {
@@ -8,4 +21,6 @@ resource "google_datastore_index" "<%= ctx[:primary_resource_id] %>" {
     name = "<%= ctx[:vars]['property_name_2'] %>"
     direction = "ASCENDING"
   }
+  
+  depends_on = [google_firestore_database.database]
 }

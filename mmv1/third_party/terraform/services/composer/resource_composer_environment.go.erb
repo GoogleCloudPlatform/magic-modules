@@ -3,6 +3,7 @@ package composer
 
 import (
 	"fmt"
+	"net"
 	"log"
 	"regexp"
 	"strings"
@@ -169,11 +170,13 @@ func ResourceComposerEnvironment() *schema.Resource {
 			tpgresource.DefaultProviderProject,
 			tpgresource.DefaultProviderRegion,
 			tpgresource.SetLabelsDiff,
+			customdiff.Sequence(
+				customdiff.ValidateChange("config.0.software_config.0.image_version", imageVersionChangeValidationFunc),
+				versionValidationCustomizeDiffFunc,
+			),
 <% unless version == "ga" -%>
 			customdiff.ForceNewIf("config.0.node_config.0.network", forceNewCustomDiff("config.0.node_config.0.network")),
 			customdiff.ForceNewIf("config.0.node_config.0.subnetwork", forceNewCustomDiff("config.0.node_config.0.subnetwork")),
-			customdiff.ValidateChange("config.0.software_config.0.image_version", imageVersionChangeValidationFunc),
-			versionValidationCustomizeDiffFunc,
 <% end -%>
 		),
 
@@ -390,6 +393,7 @@ func ResourceComposerEnvironment() *schema.Resource {
 										Computed:         true,
 										Optional:         true,
 										ForceNew:         true,
+										ValidateFunc:     validateComposerInternalIpv4CidrBlock,
 										Description:      `IPv4 cidr range that will be used by Composer internal components.`,
 									},
 <% end -%>
@@ -474,9 +478,6 @@ func ResourceComposerEnvironment() *schema.Resource {
 										Type:             schema.TypeString,
 										Computed:         true,
 										Optional:         true,
-<% if version == "ga" -%>
-										ForceNew:         true,
-<% end -%>
 										AtLeastOneOf:     composerSoftwareConfigKeys,
 										ValidateFunc:     verify.ValidateRegexp(composerEnvironmentVersionRegexp),
 										DiffSuppressFunc: composerImageVersionDiffSuppress,
@@ -969,6 +970,14 @@ func ResourceComposerEnvironment() *schema.Resource {
 													ValidateFunc: validation.FloatAtLeast(0),
 													Description:  `Storage (GB) request and limit for DAG processor.`,
 												},
+												"count": {
+													Type:         schema.TypeInt,
+													Optional:     true,
+													ForceNew:     false,
+													Computed:     true,
+													ValidateFunc: validation.IntBetween(0, 3),
+													Description:  `Number of DAG processors.`,
+												},
 											},
 										},
 									},
@@ -1279,7 +1288,6 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 		}
 <% end -%>
 
-<% unless version == "ga" -%>
 		if d.HasChange("config.0.software_config.0.image_version") {
 			patchObj := &composer.Environment{
 				Config: &composer.EnvironmentConfig{
@@ -1294,7 +1302,6 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 				return err
 			}
 		}
-<% end -%>
 
 		if d.HasChange("config.0.software_config.0.scheduler_count") {
 			patchObj := &composer.Environment{
@@ -1887,6 +1894,7 @@ func flattenComposerEnvironmentConfigWorkloadsConfig(workloadsConfig *composer.W
 		transformedDagProcessor["cpu"] = wlCfgDagProcessor.Cpu
 		transformedDagProcessor["memory_gb"] = wlCfgDagProcessor.MemoryGb
 		transformedDagProcessor["storage_gb"] = wlCfgDagProcessor.StorageGb
+		transformedDagProcessor["count"] = wlCfgDagProcessor.Count
 	}
 <% end -%>
 
@@ -2398,6 +2406,7 @@ func expandComposerEnvironmentConfigWorkloadsConfig(v interface{}, d *schema.Res
 			transformedDagProcessor.Cpu = originalDagProcessorRaw["cpu"].(float64)
 			transformedDagProcessor.MemoryGb = originalDagProcessorRaw["memory_gb"].(float64)
 			transformedDagProcessor.StorageGb = originalDagProcessorRaw["storage_gb"].(float64)
+			transformedDagProcessor.Count = int64(originalDagProcessorRaw["count"].(int))
 			transformed.DagProcessor = transformedDagProcessor
 		}
 	}
@@ -3096,4 +3105,18 @@ func versionValidationCustomizeDiffFunc(ctx context.Context, d *schema.ResourceD
 		}
 	}
 	return nil
+}
+
+func validateComposerInternalIpv4CidrBlock(v any, k string) (warns []string, errs []error) {
+	cidr_range := v.(string)
+	_, ip_net, err := net.ParseCIDR(cidr_range)
+	if err != nil {
+		errs = append(errs, fmt.Errorf("Invalid CIDR range: %s", err))
+		return
+	}
+	ones, _ := ip_net.Mask.Size()
+	if ones != 20 {
+		errs = append(errs, fmt.Errorf("Composer Internal IPv4 CIDR range must have size /20"))
+	}
+	return
 }

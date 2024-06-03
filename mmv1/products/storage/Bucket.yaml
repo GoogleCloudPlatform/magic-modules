@@ -392,6 +392,8 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     description: 'The name of the bucket'
+    validation: !ruby/object:Provider::Terraform::Validation
+      function: 'verify.ValidateGCSName'
   - !ruby/object:Api::Type::NestedObject
     name: 'owner'
     description: |

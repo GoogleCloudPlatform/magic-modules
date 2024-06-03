@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MPL-2.0
  */
 
-// This file is controlled by MMv1, any changes made here will be overwritten
+// This file is maintained in the GoogleCloudPlatform/magic-modules repository and copied into the downstream provider repositories. Any changes to this file in the downstream will be overwritten.
 
 package builds
 
@@ -46,11 +46,6 @@ class AllContextParameters(
     val identityUserBeta: String,
     val identityUserVcr: String,
 
-    // GOOGLE_FIRESTORE_PROJECT
-    val firestoreProjectGa: String,
-    val firestoreProjectBeta: String,
-    val firestoreProjectVcr: String,
-
     // GOOGLE_MASTER_BILLING_ACCOUNT
     val masterBillingAccountGa: String,
     val masterBillingAccountBeta: String,
@@ -73,6 +68,9 @@ class AllContextParameters(
     // VCR specific
     val infraProject: String,     // GOOGLE_INFRA_PROJECT
     val vcrBucketName: String,    // VCR_BUCKET_NAME
+
+    // GCS specific (for nightly + upstream MM logs)
+    val credentialsGCS: String,   // GOOGLE_CREDENTIALS_GCS
     )
 
 // AccTestConfiguration is used to easily pass values set via Context Parameters into build configurations.
@@ -81,7 +79,6 @@ class AccTestConfiguration(
     val billingAccount2: String,
     val credentials: String,
     val custId: String,
-    val firestoreProject: String,
     val identityUser: String,
     val masterBillingAccount: String,
     val org: String,
@@ -96,6 +93,9 @@ class AccTestConfiguration(
     // VCR specific
     val infraProject: String,
     val vcrBucketName: String,
+
+    // GCS specific (for nightly + upstream MM logs)
+    val credentialsGCS: String,
     )
 
 fun getGaAcceptanceTestConfig(allConfig: AllContextParameters): AccTestConfiguration {
@@ -104,7 +104,6 @@ fun getGaAcceptanceTestConfig(allConfig: AllContextParameters): AccTestConfigura
         allConfig.billingAccount2,
         allConfig.credentialsGa,
         allConfig.custId,
-        allConfig.firestoreProjectGa,
         allConfig.identityUserGa,
         allConfig.masterBillingAccountGa,
         allConfig.org,
@@ -116,7 +115,8 @@ fun getGaAcceptanceTestConfig(allConfig: AllContextParameters): AccTestConfigura
         allConfig.serviceAccountGa,
         allConfig.zone,
         allConfig.infraProject,
-        allConfig.vcrBucketName
+        allConfig.vcrBucketName,
+        allConfig.credentialsGCS
     )
 }
 
@@ -126,7 +126,6 @@ fun getBetaAcceptanceTestConfig(allConfig: AllContextParameters): AccTestConfigu
         allConfig.billingAccount2,
         allConfig.credentialsBeta,
         allConfig.custId,
-        allConfig.firestoreProjectBeta,
         allConfig.identityUserBeta,
         allConfig.masterBillingAccountBeta,
         allConfig.org,
@@ -138,7 +137,8 @@ fun getBetaAcceptanceTestConfig(allConfig: AllContextParameters): AccTestConfigu
         allConfig.serviceAccountBeta,
         allConfig.zone,
         allConfig.infraProject,
-        allConfig.vcrBucketName
+        allConfig.vcrBucketName,
+        allConfig.credentialsGCS
     )
 }
 
@@ -148,7 +148,6 @@ fun getVcrAcceptanceTestConfig(allConfig: AllContextParameters): AccTestConfigur
         allConfig.billingAccount2,
         allConfig.credentialsVcr,
         allConfig.custId,
-        allConfig.firestoreProjectVcr,
         allConfig.identityUserVcr,
         allConfig.masterBillingAccountVcr,
         allConfig.org,
@@ -160,7 +159,8 @@ fun getVcrAcceptanceTestConfig(allConfig: AllContextParameters): AccTestConfigur
         allConfig.serviceAccountVcr,
         allConfig.zone,
         allConfig.infraProject,
-        allConfig.vcrBucketName
+        allConfig.vcrBucketName,
+        allConfig.credentialsGCS
     )
 }
 
@@ -179,7 +179,6 @@ fun ParametrizedWithType.configureGoogleSpecificTestParameters(config: AccTestCo
     hiddenVariable("env.GOOGLE_REGION", config.region, "The google region to use")
     hiddenVariable("env.GOOGLE_SERVICE_ACCOUNT", config.serviceAccount, "The service account")
     hiddenVariable("env.GOOGLE_ZONE", config.zone, "The google zone to use")
-    hiddenVariable("env.GOOGLE_FIRESTORE_PROJECT", config.firestoreProject, "The project to use for firestore")
     hiddenVariable("env.GOOGLE_IDENTITY_USER", config.identityUser, "The user for the identity platform")
     hiddenPasswordVariable("env.GOOGLE_CREDENTIALS", config.credentials, "The Google credentials for this test runner")
 }
@@ -236,7 +235,7 @@ fun ParametrizedWithType.vcrEnvironmentVariables(config: AccTestConfiguration, p
 
 // ParametrizedWithType.terraformLoggingParameters sets environment variables and build parameters that
 // affect which logs are shown and allows them to be saved
-fun ParametrizedWithType.terraformLoggingParameters(providerName: String) {
+fun ParametrizedWithType.terraformLoggingParameters(config: AccTestConfiguration, providerName: String) {
     // Set logging levels to match old projects
     text("env.TF_LOG", "DEBUG")
     text("env.TF_LOG_CORE", "WARN")
@@ -244,7 +243,9 @@ fun ParametrizedWithType.terraformLoggingParameters(providerName: String) {
 
     // Set where logs are sent
     text("PROVIDER_NAME", providerName)
-    text("env.TF_LOG_PATH_MASK", "%system.teamcity.build.checkoutDir%/debug-%PROVIDER_NAME%-%env.BUILD_NUMBER%-%s.txt") // .txt extension used to make artifacts open in browser, instead of download
+    text("env.TF_LOG_PATH_MASK", "%system.teamcity.build.checkoutDir%/debug-%PROVIDER_NAME%-%env.BUILD_NUMBER%-%teamcity.build.id%-%s.txt") // .txt extension used to make artifacts open in browser, instead of download
+
+    hiddenPasswordVariable("env.GOOGLE_CREDENTIALS_GCS", config.credentialsGCS, "The Google credentials for copying debug logs to the GCS bucket")
 }
 
 fun ParametrizedWithType.readOnlySettings() {
@@ -252,10 +253,18 @@ fun ParametrizedWithType.readOnlySettings() {
 }
 
 // ParametrizedWithType.terraformCoreBinaryTesting sets environment variables that control what Terraform version is downloaded
-// and ensures the testing framework uses that downloaded version
-fun ParametrizedWithType.terraformCoreBinaryTesting() {
-    text("env.TERRAFORM_CORE_VERSION", DefaultTerraformCoreVersion, "The version of Terraform Core which should be used for testing")
+// and ensures the testing framework uses that downloaded version. The default Terraform core version is used if no argument is supplied.
+fun ParametrizedWithType.terraformCoreBinaryTesting(tfVersion: String = DefaultTerraformCoreVersion) {
+    text("env.TERRAFORM_CORE_VERSION", tfVersion, "The version of Terraform Core which should be used for testing")
     hiddenVariable("env.TF_ACC_TERRAFORM_PATH", "%system.teamcity.build.checkoutDir%/tools/terraform", "The path where the Terraform Binary is located. Used by the testing framework.")
+}
+
+// BuildType.overrideTerraformCoreVersion is used to override the value of TERRAFORM_CORE_VERSION in special cases where we're testing new features
+// that rely on a specific version of Terraform we might not want to be used for all our tests in TeamCity.
+fun BuildType.overrideTerraformCoreVersion(tfVersion: String){
+    params {
+        terraformCoreBinaryTesting(tfVersion)
+    }
 }
 
 fun ParametrizedWithType.terraformShouldPanicForSchemaErrors() {

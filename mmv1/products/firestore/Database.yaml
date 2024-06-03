@@ -79,6 +79,23 @@ examples:
       - etag
       - deletion_policy
   - !ruby/object:Provider::Terraform::Examples
+    name: 'firestore_cmek_database'
+    min_version: beta
+    primary_resource_id: 'database'
+    vars:
+      database_id: "cmek-database-id"
+      delete_protection_state: "DELETE_PROTECTION_ENABLED"
+      kms_key_ring_name: "kms-key-ring"
+      kms_key_name: "kms-key"
+    test_env_vars:
+      project_id: :PROJECT_NAME
+    test_vars_overrides:
+      delete_protection_state: '"DELETE_PROTECTION_DISABLED"'
+    ignore_read_extra:
+      - project
+      - etag
+      - deletion_policy
+  - !ruby/object:Provider::Terraform::Examples
     name: 'firestore_default_database_in_datastore_mode'
     primary_resource_id: 'datastore_mode_database'
     test_env_vars:
@@ -94,6 +111,23 @@ examples:
     vars:
       database_id: "database-id"
       delete_protection_state: "DELETE_PROTECTION_ENABLED"
+    test_env_vars:
+      project_id: :PROJECT_NAME
+    test_vars_overrides:
+      delete_protection_state: '"DELETE_PROTECTION_DISABLED"'
+    ignore_read_extra:
+      - project
+      - etag
+      - deletion_policy
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'firestore_cmek_database_in_datastore_mode'
+    min_version: beta
+    primary_resource_id: 'database'
+    vars:
+      database_id: "cmek-database-id"
+      delete_protection_state: "DELETE_PROTECTION_ENABLED"
+      kms_key_ring_name: "kms-key-ring"
+      kms_key_name: "kms-key"
     test_env_vars:
       project_id: :PROJECT_NAME
     test_vars_overrides:
@@ -234,3 +268,41 @@ properties:
       This value is continuously updated, and becomes stale the moment it is queried. If you are using this value to recover data, make sure to account for the time from the moment when the value is queried to the moment when you initiate the recovery.
       A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
     output: true
+  - !ruby/object:Api::Type::NestedObject
+    name: cmekConfig
+    min_version: beta
+    immutable: true
+    description: |
+       The CMEK (Customer Managed Encryption Key) configuration for a Firestore
+       database. If not present, the database is secured by the default Google
+       encryption key.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: kmsKeyName
+        required: true
+        immutable: true
+        description: |
+          The resource ID of a Cloud KMS key. If set, the database created will
+          be a Customer-managed Encryption Key (CMEK) database encrypted with
+          this key. This feature is allowlist only in initial launch.
+
+          Only keys in the same location as this database are allowed to be used
+          for encryption. For Firestore's nam5 multi-region, this corresponds to Cloud KMS
+          multi-region us. For Firestore's eur3 multi-region, this corresponds to
+          Cloud KMS multi-region europe. See https://cloud.google.com/kms/docs/locations.
+
+          This value should be the KMS key resource ID in the format of
+          `projects/{project_id}/locations/{kms_location}/keyRings/{key_ring}/cryptoKeys/{crypto_key}`.
+          How to retrive this resource ID is listed at
+          https://cloud.google.com/kms/docs/getting-resource-ids#getting_the_id_for_a_key_and_version.
+      - !ruby/object:Api::Type::Array
+        name: activeKeyVersion
+        output: true
+        description: |
+           Currently in-use KMS key versions (https://cloud.google.com/kms/docs/resource-hierarchy#key_versions).
+           During key rotation (https://cloud.google.com/kms/docs/key-rotation), there can be
+           multiple in-use key versions.
+
+           The expected format is
+           `projects/{project_id}/locations/{kms_location}/keyRings/{key_ring}/cryptoKeys/{crypto_key}/cryptoKeyVersions/{key_version}`.
+        item_type: Api::Type::String

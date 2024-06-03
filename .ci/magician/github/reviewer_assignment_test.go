@@ -17,7 +17,6 @@ package github
 
 import (
 	"fmt"
-	utils "magician/utility"
 	"strings"
 	"testing"
 
@@ -25,6 +24,8 @@ import (
 )
 
 func TestChooseCoreReviewers(t *testing.T) {
+	firstCoreReviewer := AvailableReviewers()[0]
+	secondCoreReviewer := AvailableReviewers()[1]
 	cases := map[string]struct {
 		RequestedReviewers                               []User
 		PreviousReviewers                                []User
@@ -34,11 +35,11 @@ func TestChooseCoreReviewers(t *testing.T) {
 		"no previous review requests assigns new reviewer from team": {
 			RequestedReviewers:      []User{},
 			PreviousReviewers:       []User{},
-			ExpectReviewersFromList: utils.Removes(reviewerRotation, onVacationReviewers),
+			ExpectReviewersFromList: AvailableReviewers(),
 			ExpectPrimaryReviewer:   true,
 		},
 		"requested reviewer from team means that primary reviewer was already selected": {
-			RequestedReviewers:    []User{User{Login: reviewerRotation[0]}},
+			RequestedReviewers:    []User{User{Login: firstCoreReviewer}},
 			PreviousReviewers:     []User{},
 			ExpectPrimaryReviewer: false,
 		},
@@ -49,26 +50,26 @@ func TestChooseCoreReviewers(t *testing.T) {
 		},
 		"previously involved team member reviewers should have review requested and mean that primary reviewer was already selected": {
 			RequestedReviewers:      []User{},
-			PreviousReviewers:       []User{User{Login: reviewerRotation[0]}},
-			ExpectSpecificReviewers: []string{reviewerRotation[0]},
+			PreviousReviewers:       []User{User{Login: firstCoreReviewer}},
+			ExpectSpecificReviewers: []string{firstCoreReviewer},
 			ExpectPrimaryReviewer:   false,
 		},
 		"previously involved reviewers that are not team members are ignored": {
 			RequestedReviewers:      []User{},
 			PreviousReviewers:       []User{User{Login: "foobar"}},
-			ExpectReviewersFromList: utils.Removes(reviewerRotation, onVacationReviewers),
+			ExpectReviewersFromList: AvailableReviewers(),
 			ExpectPrimaryReviewer:   true,
 		},
 		"only previously involved team member reviewers will have review requested": {
 			RequestedReviewers:      []User{},
-			PreviousReviewers:       []User{User{Login: reviewerRotation[0]}, User{Login: "foobar"}, User{Login: reviewerRotation[1]}},
-			ExpectSpecificReviewers: []string{reviewerRotation[0], reviewerRotation[1]},
+			PreviousReviewers:       []User{User{Login: firstCoreReviewer}, User{Login: "foobar"}, User{Login: secondCoreReviewer}},
+			ExpectSpecificReviewers: []string{firstCoreReviewer, secondCoreReviewer},
 			ExpectPrimaryReviewer:   false,
 		},
 		"primary reviewer will not have review requested even if other team members previously reviewed": {
-			RequestedReviewers:      []User{User{Login: reviewerRotation[1]}},
-			PreviousReviewers:       []User{User{Login: reviewerRotation[0]}},
-			ExpectSpecificReviewers: []string{reviewerRotation[0]},
+			RequestedReviewers:      []User{User{Login: secondCoreReviewer}},
+			PreviousReviewers:       []User{User{Login: firstCoreReviewer}},
+			ExpectSpecificReviewers: []string{firstCoreReviewer},
 			ExpectPrimaryReviewer:   false,
 		},
 	}

@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: MPL-2.0
  */
 
-// This file is controlled by MMv1, any changes made here will be overwritten
+// This file is maintained in the GoogleCloudPlatform/magic-modules repository and copied into the downstream provider repositories. Any changes to this file in the downstream will be overwritten.
 
 import projects.googleCloudRootProject
 import builds.AllContextParameters
 import jetbrains.buildServer.configs.kotlin.*
 
-version = "2023.11"
+version = "2024.03"
 
 // The code below pulls context parameters from the TeamCity project.
 // Context parameters aren't stored in VCS, and are managed manually.
@@ -37,10 +37,6 @@ val projectNumberVcr  = DslContext.getParameter("projectNumberVcr", "")
 val identityUserGa   = DslContext.getParameter("identityUserGa", "")
 val identityUserBeta = DslContext.getParameter("identityUserBeta", "")
 val identityUserVcr  = DslContext.getParameter("identityUserVcr", "")
-// GOOGLE_FIRESTORE_PROJECT
-val firestoreProjectGa   = DslContext.getParameter("firestoreProjectGa", "")
-val firestoreProjectBeta = DslContext.getParameter("firestoreProjectBeta", "")
-val firestoreProjectVcr  = DslContext.getParameter("firestoreProjectVcr", "")
 // GOOGLE_MASTER_BILLING_ACCOUNT
 val masterBillingAccountGa   = DslContext.getParameter("masterBillingAccountGa", "")
 val masterBillingAccountBeta = DslContext.getParameter("masterBillingAccountBeta", "")
@@ -63,6 +59,8 @@ val zone            = DslContext.getParameter("zone", "")             // GOOGLE_
 val infraProject             = DslContext.getParameter("infraProject", "") // GOOGLE_INFRA_PROJECT
 val vcrBucketName            = DslContext.getParameter("vcrBucketName", "") // VCR_BUCKET_NAME
 
+// Used for copying nightly + upstream MM debug logs to GCS bucket
+val credentialsGCS = DslContext.getParameter("credentialsGCS", "") // GOOGLE_CREDENTIALS_GCS
 
 var allContextParams = AllContextParameters(
     credentialsGa,
@@ -80,9 +78,6 @@ var allContextParams = AllContextParameters(
     identityUserGa,
     identityUserBeta,
     identityUserVcr,
-    firestoreProjectGa,
-    firestoreProjectBeta,
-    firestoreProjectVcr,
     masterBillingAccountGa,
     masterBillingAccountBeta,
     masterBillingAccountVcr,
@@ -97,7 +92,8 @@ var allContextParams = AllContextParameters(
     region,
     zone,
     infraProject,
-    vcrBucketName
+    vcrBucketName,
+    credentialsGCS
 )
 
 // This is the entry point of the code in .teamcity/

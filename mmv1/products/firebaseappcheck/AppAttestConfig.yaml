@@ -37,8 +37,9 @@ import_format:
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "firebase_app_check_app_attest_config_minimal"
+    min_version: 'beta'
     # Need the time_sleep resource
-    pull_external: true
+    external_providers: ["random", "time"]
     primary_resource_id: "default"
     vars:
       team_id: "9987654321"
@@ -50,8 +51,9 @@ examples:
       project_id: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
     name: "firebase_app_check_app_attest_config_full"
+    min_version: 'beta'
     # Need the time_sleep resource
-    pull_external: true
+    external_providers: ["random", "time"]
     primary_resource_id: "default"
     vars:
       team_id: "9987654321"
@@ -78,7 +80,6 @@ properties:
     description: |
       The relative resource name of the App Attest configuration object
     output: true
-    pattern: projects/{{project}}/apps/{{app_id}}/appAttestConfig
   - !ruby/object:Api::Type::String
     name: tokenTtl
     description: |

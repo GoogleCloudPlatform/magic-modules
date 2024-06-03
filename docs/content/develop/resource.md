@@ -402,6 +402,8 @@ This section covers how to add IAM resources in Terraform if they are supported 
 
 {{< tabs "IAM" >}}
 {{< tab "MMv1" >}}
+IAM support for MMv1-generated resources is configured within the `ResourceName.yaml` file, and will create the `google_product_resource_iam_policy`, `google_product_resource_iam_binding`, `google_product_resource_iam_member` resource, website, and test files for that resource target when an `iam_policy` block is present.
+
 1. Add the following top-level block to `ResourceName.yaml` directly above `parameters`.
 
 ```yaml

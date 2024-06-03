@@ -1,0 +1,5 @@
+if err := d.Set("version_id", tpgresource.GetResourceNameFromSelfLink(res["name"].(string))); err != nil {
+    return nil, err
+}
+
+return res, nil

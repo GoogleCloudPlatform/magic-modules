@@ -1,0 +1,20 @@
+func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+		if v == "" {
+				return v, nil
+		}
+		val, err := tpgresource.ParseZonalFieldValue("instances", v.(string), "project", "next_hop_instance_zone", d, config, true)
+		if err != nil {
+				return nil, err
+		}
+
+		userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
+		if err != nil {
+			return nil, err
+		}
+
+		nextInstance, err := config.NewComputeClient(userAgent).Instances.Get(val.Project, val.Zone, val.Name).Do()
+		if err != nil {
+				return nil, err
+		}
+		return nextInstance.SelfLink, nil
+}

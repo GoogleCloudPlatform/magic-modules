@@ -23,6 +23,7 @@ require 'provider/terraform/custom_code'
 require 'provider/terraform/docs'
 require 'provider/terraform/examples'
 require 'provider/terraform/sub_template'
+require 'provider/terraform/sweeper'
 require 'google/golang_utils'
 
 module Provider
@@ -463,14 +464,6 @@ module Provider
           update_id: p.update_id,
           fingerprint_name: p.fingerprint_name
         }
-      end
-    end
-
-    # Filter the properties to keep only the ones don't have custom update
-    # method and group them by update url & verb.
-    def properties_without_custom_update(properties)
-      properties.select do |p|
-        p.update_url.nil? || p.update_verb.nil? || p.update_verb == :NOOP
       end
     end
 
