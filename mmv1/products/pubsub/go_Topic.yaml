@@ -124,7 +124,7 @@ properties:
           allowed regions. An empty list means that no regions are allowed,
           and is not a valid configuration.
         required: true
-        item_type: 
+        item_type:
           type: String
   - name: 'schemaSettings'
     type: NestedObject
