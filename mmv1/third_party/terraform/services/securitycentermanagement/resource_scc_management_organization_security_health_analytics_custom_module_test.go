@@ -1,4 +1,4 @@
-package securitycenter_test
+package securitycentermanagement_test
 
 import (
 	"fmt"
