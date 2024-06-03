@@ -43,53 +43,6 @@ func testAccAccessContextManagerServicePerimeterIngressPolicy_basicTest(t *testi
 	})
 }
 
-func testAccCheckAccessContextManagerServicePerimeterIngressPolicyDestroyProducer(t *testing.T) func(s *terraform.State) error {
-	return func(s *terraform.State) error {
-		for _, rs := range s.RootModule().Resources {
-			if rs.Type != "google_access_context_manager_service_perimeter_ingress_policy" {
-				continue
-			}
-
-			config := acctest.GoogleProviderConfig(t)
-
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{AccessContextManagerBasePath}}{{perimeter}}")
-			if err != nil {
-				return err
-			}
-
-			res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-				Config:    config,
-				Method:    "GET",
-				RawURL:    url,
-				UserAgent: config.UserAgent,
-			})
-			if err != nil {
-				return err
-			}
-
-			v, ok := res["status"]
-			if !ok || v == nil {
-				return nil
-			}
-
-			res = v.(map[string]interface{})
-			v, ok = res["perimeter"]
-			if !ok || v == nil {
-				return nil
-			}
-
-			resources := v.([]interface{})
-			if len(resources) == 0 {
-				return nil
-			}
-
-			return fmt.Errorf("expected 0 resources in perimeter, found %d: %v", len(resources), resources)
-		}
-
-		return nil
-	}
-}
-
 func testAccAccessContextManagerServicePerimeterIngressPolicy_basic(org, policyTitle, perimeterTitleName string) string {
 	return fmt.Sprintf(`
 %s
