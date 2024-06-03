@@ -222,6 +222,9 @@ type Resource struct {
 	// If true, skip sweeper generation for this resource
 	SkipSweeper bool `yaml:"skip_sweeper"`
 
+	// Override sweeper settings
+	Sweeper resource.Sweeper
+
 	Timeouts *Timeouts
 
 	// An array of function names that determine whether an error is retryable.
@@ -1307,4 +1310,27 @@ func FormatDocDescription(desc string) string {
 
 func (r Resource) CustomTemplate(templatePath string, appendNewline bool) string {
 	return resource.ExecuteTemplate(&r, templatePath, appendNewline)
+}
+
+// Returns the key of the list of resources in the List API response
+// Used to get the list of resources to sweep
+func (r Resource) ResourceListKey() string {
+	var k string
+	if r.NestedQuery != nil && len(r.NestedQuery.Keys) > 0 {
+		k = r.NestedQuery.Keys[0]
+	}
+
+	if k == "" {
+		k = r.CollectionUrlKey
+	}
+
+	return k
+}
+
+func (r Resource) ListUrlTemplate() string {
+	return strings.Replace(r.CollectionUrl(), "zones/{{zone}}", "aggregated", 1)
+}
+
+func (r Resource) DeleteUrlTemplate() string {
+	return fmt.Sprintf("%s%s", r.ProductMetadata.BaseUrl, r.DeleteUri())
 }

@@ -195,6 +195,14 @@ func (td *TemplateData) GenerateIamPolicyTestFile(filePath string, resource api.
 	td.GenerateFile(filePath, templatePath, resource, true, templates...)
 }
 
+func (td *TemplateData) GenerateSweeperFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/sweeper_file.go.tmpl"
+	templates := []string{
+		templatePath,
+	}
+	td.GenerateFile(filePath, templatePath, resource, false, templates...)
+}
+
 func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, goFormat bool, templates ...string) {
 	log.Printf("Generating %s", filePath)
 
