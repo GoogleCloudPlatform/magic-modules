@@ -42,6 +42,24 @@ examples:
     vars:
       display_name: full_custom_module
 
+parameters:
+  - !ruby/object:Api::Type::String
+    name: 'project'
+    immutable: true
+    required: true
+    url_param_only: true
+    description: |
+      Numerical ID of the parent folder.
+      
+  - !ruby/object:Api::Type::String
+    name: 'location'
+    immutable: true
+    required: false
+    url_param_only: true
+    default_value: 'global'
+    description: |
+      Location ID of the parent organization. If not provided, 'global' will be used as the default location.
+
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
