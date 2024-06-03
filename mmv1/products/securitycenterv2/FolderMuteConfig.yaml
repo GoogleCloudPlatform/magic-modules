@@ -60,9 +60,8 @@ parameters:
     immutable: true
     url_param_only: true
     description: |
-      Required. Resource name of the new mute configs's parent. 
-      Its format is "organizations/[organization_id]/locations/[locationId]",
-      "folders/[folder_id]/locations/[locationId]", or "projects/[projectId]/locations/[locationId]".
+      Resource name of the new organization mute configs's parent. Its format is
+      "folder/[folder_id]"
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -95,7 +94,7 @@ properties:
     description: |
       Output only. The most recent time at which the mute config was
       updated. This field is set by the server and will be ignored if
-      provided on config creation or update.
+      provided on config creation or update. 
     output: true
   - !ruby/object:Api::Type::String
     name: 'mostRecentEditor'

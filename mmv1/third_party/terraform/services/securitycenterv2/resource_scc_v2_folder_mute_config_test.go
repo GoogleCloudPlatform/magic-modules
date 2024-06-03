@@ -44,7 +44,7 @@ func TestAccSecurityCenterv2FolderMuteConfig_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"google_scc_v2_folder_mute_config.default", "filter", "severity = \"LOW\""),
 					resource.TestCheckResourceAttr(
-						"google_scc_v2_folder_mute_config.default", "foldermute_config_id", fmt.Sprintf("tf-test-my-config%s", contextBasic["random_suffix"])),
+						"google_scc_v2_folder_mute_config.default", "folder_mute_config_id", fmt.Sprintf("tf-test-my-config%s", contextBasic["random_suffix"])),
 					resource.TestCheckResourceAttr(
 						"google_scc_v2_folder_mute_config.default", "location", contextBasic["location"].(string)),
 					resource.TestCheckResourceAttr(
@@ -55,7 +55,7 @@ func TestAccSecurityCenterv2FolderMuteConfig_basic(t *testing.T) {
 				ResourceName:            "google_scc_v2_folder_mute_config.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"parent", "foldermute_config_id"},
+				ImportStateVerifyIgnore: []string{"parent", "folder_mute_config_id"},
 			},
 			{
 				Config: testAccSecurityCenterv2FolderMuteConfig_highSeverity(contextHighSeverity),
@@ -65,7 +65,7 @@ func TestAccSecurityCenterv2FolderMuteConfig_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"google_scc_v2_folder_mute_config.default", "filter", "severity = \"HIGH\""),
 					resource.TestCheckResourceAttr(
-						"google_scc_v2_folder_mute_config.default", "foldermute_config_id", fmt.Sprintf("tf-test-my-config%s", contextHighSeverity["random_suffix"])),
+						"google_scc_v2_folder_mute_config.default", "folder_mute_config_id", fmt.Sprintf("tf-test-my-config%s", contextHighSeverity["random_suffix"])),
 					resource.TestCheckResourceAttr(
 						"google_scc_v2_folder_mute_config.default", "location", contextHighSeverity["location"].(string)),
 					resource.TestCheckResourceAttr(
@@ -76,7 +76,7 @@ func TestAccSecurityCenterv2FolderMuteConfig_basic(t *testing.T) {
 				ResourceName:            "google_scc_v2_folder_mute_config.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"parent", "foldermute_config_id"},
+				ImportStateVerifyIgnore: []string{"parent", "folder_mute_config_id"},
 			},
 		},
 	})
@@ -87,7 +87,7 @@ func testAccSecurityCenterv2FolderMuteConfig_basic(context map[string]interface{
 resource "google_scc_v2_folder_mute_config" "default" {
   description          = "A test folder mute config"
   filter               = "severity = \"LOW\""
-  foldermute_config_id = "tf-test-my-config%{random_suffix}"
+  folder_mute_config_id = "tf-test-my-config%{random_suffix}"
   location             = "%{location}"
   parent               = "folders/%{folder_id}"
 }
@@ -99,7 +99,7 @@ func testAccSecurityCenterv2FolderMuteConfig_highSeverity(context map[string]int
 resource "google_scc_v2_folder_mute_config" "default" {
   description          = "A test folder mute config with high severity"
   filter               = "severity = \"HIGH\""
-  foldermute_config_id = "tf-test-my-config%{random_suffix}"
+  folder_mute_config_id = "tf-test-my-config%{random_suffix}"
   location             = "%{location}"
   parent               = "folders/%{folder_id}"
 }
