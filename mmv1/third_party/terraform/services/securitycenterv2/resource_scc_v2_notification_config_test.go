@@ -31,12 +31,26 @@ func TestAccSecurityCenterOrganizationNotificationConfig_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSecurityCenterOrganizationNotificationConfig_basic(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_scc_v2_organization_notification_config.default", "description", "A test organization notification config"),
+					resource.TestCheckResourceAttr("google_scc_v2_organization_notification_config.default", "streaming_config.0.filter", "severity = \"HIGH\""),
+				),
 			},
 			{
-				ResourceName:            "google_scc_organization_notification_config.default",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"parent", "config_id"},
+				ResourceName:      "google_scc_v2_organization_notification_config.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"parent",
+					"config_id",
+				},
+			},
+			{
+				Config: testAccSecurityCenterOrganizationNotificationConfig_update(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_scc_v2_organization_notification_config.default", "description", "An updated test organization notification config"),
+					resource.TestCheckResourceAttr("google_scc_v2_organization_notification_config.default", "streaming_config.0.filter", "severity = \"CRITICAL\""),
+				),
 			},
 		},
 	})
@@ -48,7 +62,7 @@ resource "google_pubsub_topic" "scc_v2_organization_notification_config" {
   name = "tf-test-topic-%{random_suffix}"
 }
 
-resource "google_scc_organization_notification_config" "default" {
+resource "google_scc_v2_organization_notification_config" "default" {
   config_id    = "tf-test-config-%{random_suffix}"
   organization = "%{org_id}"
   location     = "global"
@@ -57,6 +71,26 @@ resource "google_scc_organization_notification_config" "default" {
 
   streaming_config {
     filter = "severity = \"HIGH\""
+  }
+}
+`, context)
+}
+
+func testAccSecurityCenterOrganizationNotificationConfig_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_pubsub_topic" "scc_v2_organization_notification_config" {
+  name = "tf-test-topic-%{random_suffix}"
+}
+
+resource "google_scc_v2_organization_notification_config" "default" {
+  config_id    = "tf-test-config-%{random_suffix}"
+  organization = "%{org_id}"
+  location     = "global"
+  description  = "An updated test organization notification config"
+  pubsub_topic = google_pubsub_topic.scc_v2_organization_notification_config.id
+
+  streaming_config {
+    filter = "severity = \"CRITICAL\""
   }
 }
 `, context)
@@ -102,6 +136,3 @@ func isGoogleAPINotFoundError(err error) bool {
 	}
 	return apiErr.Code == 404
 }
-
-
-
