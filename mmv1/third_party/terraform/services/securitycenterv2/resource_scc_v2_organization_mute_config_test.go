@@ -8,8 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/config"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/securitycenter/v1"
 )
@@ -109,7 +109,7 @@ func testAccCheckSecurityCenterv2OrganizationMuteConfigDestroyProducer(t *testin
 		config := acctest.Provider.Meta().(*config.Config)
 
 		for _, rs := range s.RootModule().Resources {
-			if (rs.Type != "google_scc_v2_organization_mute_config") {
+			if rs.Type != "google_scc_v2_organization_mute_config" {
 				continue
 			}
 
@@ -140,5 +140,3 @@ func isGoogleAPINotFoundError(err error) bool {
 	apiErr, ok := err.(*googleapi.Error)
 	return ok && apiErr.Code == 404
 }
-
-
