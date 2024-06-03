@@ -80,10 +80,15 @@ resource "google_netapp_volume_snapshot" "default" {
 
 resource "google_netapp_backup" "test_backup" {
   name = "tf-test-test-backup%{random_suffix}"
+  description = "This is a test backup"
   source_volume = google_netapp_volume.default.id
   location = google_netapp_backup_vault.default.location
   vault_name = google_netapp_backup_vault.default.name
   source_snapshot = google_netapp_volume_snapshot.default.id
+  labels = {
+	key= "test"
+	value= "backup"
+  }
 }
 `, context)
 }
