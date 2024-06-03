@@ -137,7 +137,7 @@ func (td *TemplateData) GenerateDocumentationFile(filePath string, resource api.
 func (td *TemplateData) GenerateTestFile(filePath string, resource api.Resource) {
 	templatePath := "templates/terraform/examples/base_configs/test_file.go.tmpl"
 	templates := []string{
-		// "templates/terraform//env_var_context.go.tmpl",
+		"templates/terraform/env_var_context.go.tmpl",
 		templatePath,
 	}
 	tmplInput := TestInput{
@@ -189,8 +189,10 @@ func (td *TemplateData) GenerateIamPolicyTestFile(filePath string, resource api.
 	templatePath := "templates/terraform/examples/base_configs/iam_test_file.go.tmpl"
 	templates := []string{
 		templatePath,
+		"templates/terraform/env_var_context.go.tmpl",
+		"templates/terraform/iam/go/iam_context.go.tmpl",
 	}
-	td.GenerateFile(filePath, templatePath, resource, false, templates...)
+	td.GenerateFile(filePath, templatePath, resource, true, templates...)
 }
 
 func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, goFormat bool, templates ...string) {
