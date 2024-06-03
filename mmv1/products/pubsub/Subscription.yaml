@@ -11,6 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Warning: This is a deprecated file, please edit the go_ version in the same
+# directory
+
 --- !ruby/object:Api::Resource
 name: 'Subscription'
 description: |

@@ -68,6 +68,7 @@ mmv1:
 			bundle exec compiler.rb -e terraform -o $(OUTPUT_PATH) -v beta --no-code $(mmv1_compile); \
 		else \
 			bundle exec compiler.rb -e terraform -o $(OUTPUT_PATH) -v $(VERSION) $(mmv1_compile); \
+		go run . --version $(VERSION) --output $(OUTPUT_PATH); \
 		fi
 
 tpgtools:
