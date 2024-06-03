@@ -32,7 +32,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/security-command-center/docs/reference/rest/v2/organizations.locations.notificationConfigs'
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: 'scc_organization_notification_config_basic'
+    name: 'scc_v2_organization_notification_config_basic'
     primary_resource_id: 'custom_organization_notification_config'
     vars:
       topic_name: 'my-topic'
