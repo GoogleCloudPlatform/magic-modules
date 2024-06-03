@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: SecurityCenter
+name: SecurityCenterV2
 display_name: Security Command Center (SCC)
 legacy_name: scc_v2
 versions:
