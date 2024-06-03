@@ -22,9 +22,9 @@ references:
     'Managing Subscriptions': 'https://cloud.google.com/pubsub/docs/admin#managing_subscriptions'
   api: 'https://cloud.google.com/pubsub/docs/reference/rest/v1/projects.subscriptions'
 docs:
-  note: 'You can retrieve the email of the Google Managed Pub/Sub Service Account used for forwarding
-by using the `google_project_service_identity` resource.
-'
+  note: |
+    You can retrieve the email of the Google Managed Pub/Sub Service Account used for forwarding
+    by using the `google_project_service_identity` resource.
 base_url: 'projects/{{project}}/subscriptions'
 create_verb: 'PUT'
 update_url: 'projects/{{project}}/subscriptions/{{name}}'
@@ -35,7 +35,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
-  type: "PollAsync"
+  type: 'PollAsync'
   check_response_func_existence: 'transport_tpg.PollCheckForExistence'
   suppress_error: true
   actions: ['create']
@@ -46,25 +46,21 @@ custom_code:
 examples:
   - name: 'pubsub_subscription_push'
     primary_resource_id: 'example'
-    primary_resource_name: 'example'
     vars:
       topic_name: 'example-topic'
       subscription_name: 'example-subscription'
   - name: 'pubsub_subscription_pull'
     primary_resource_id: 'example'
-    primary_resource_name: 'example'
     vars:
       topic_name: 'example-topic'
       subscription_name: 'example-subscription'
   - name: 'pubsub_subscription_dead_letter'
     primary_resource_id: 'example'
-    primary_resource_name: 'example'
     vars:
       topic_name: 'example-topic'
       subscription_name: 'example-subscription'
   - name: 'pubsub_subscription_push_bq'
     primary_resource_id: 'example'
-    primary_resource_name: 'example'
     vars:
       topic_name: 'example-topic'
       subscription_name: 'example-subscription'
@@ -72,7 +68,6 @@ examples:
       table_id: 'example_table'
   - name: 'pubsub_subscription_push_bq_table_schema'
     primary_resource_id: 'example'
-    primary_resource_name: 'example'
     vars:
       topic_name: 'example-topic'
       subscription_name: 'example-subscription'
@@ -80,14 +75,12 @@ examples:
       table_id: 'example_table'
   - name: 'pubsub_subscription_push_cloudstorage'
     primary_resource_id: 'example'
-    primary_resource_name: 'example'
     vars:
       topic_name: 'example-topic'
       subscription_name: 'example-subscription'
       bucket_name: 'example-bucket'
   - name: 'pubsub_subscription_push_cloudstorage_avro'
     primary_resource_id: 'example'
-    primary_resource_name: 'example'
     vars:
       topic_name: 'example-topic'
       subscription_name: 'example-subscription'
