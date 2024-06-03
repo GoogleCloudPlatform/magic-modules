@@ -133,15 +133,17 @@ properties:
         description: |
           When true, use the topic's schema as the columns to write to in BigQuery, if it exists.
           Only one of use_topic_schema and use_table_schema can be set.
-        conflicts:
-          - use_table_schema
+        # Not present in Ruby version
+        # conflicts:
+        #   - use_table_schema
       - name: 'useTableSchema'
         type: Boolean
         description: |
           When true, use the BigQuery table's schema as the columns to write to in BigQuery. Messages
           must be published in JSON format. Only one of use_topic_schema and use_table_schema can be set.
-        conflicts:
-          - use_topic_schema
+        # Not present in Ruby version
+        # conflicts:
+        #   - use_topic_schema
       - name: 'writeMetadata'
         type: Boolean
         description: |

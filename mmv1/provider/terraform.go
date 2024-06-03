@@ -90,22 +90,7 @@ func (t *Terraform) Generate(outputFolder, productPath string, generateCode, gen
 
 func (t *Terraform) GenerateObjects(outputFolder string, generateCode, generateDocs bool) {
 	for _, object := range t.Product.Objects {
-		// 		TODO Q2: Exclude objects
-		//        if !types.empty? && !types.include?(object.name)
-		//          Google::LOGGER.info "Excluding #{object.name} per user request"
-		//        elsif types.empty? && object.exclude
-		//          Google::LOGGER.info "Excluding #{object.name} per API catalog"
-		//        elsif types.empty? && object.not_in_version?(@version)
-		//          Google::LOGGER.info "Excluding #{object.name} per API version"
-		//        else
-		//          Google::LOGGER.info "Generating #{object.name}"
-		//          # exclude_if_not_in_version must be called in order to filter out
-		//          # beta properties that are nested within GA resources
-		//          object.exclude_if_not_in_version!(@version)
-		//
-		//          # Make object immutable.
-		//          object.freeze
-		//          object.all_user_properties.each(&:freeze)
+		object.ExcludeIfNotInVersion(&t.Version)
 
 		t.GenerateObject(*object, outputFolder, t.TargetVersionName, generateCode, generateDocs)
 	}
