@@ -30,7 +30,7 @@ timeouts:
   delete_minutes: 50
 autogen_async: true
 async:
-  type: "OpAsync"
+  type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
     path: 'name'
@@ -53,7 +53,7 @@ custom_code:
 examples:
   - name: 'data_fusion_instance_basic'
     primary_resource_id: 'basic_instance'
-    primary_resource_name: 'basic_instance'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
     vars:
       instance_name: 'my-instance'
       prober_test_run: ''
@@ -61,7 +61,6 @@ examples:
       'prober_test_run': '`options = { prober_test_run = "true" }`'
   - name: 'data_fusion_instance_full'
     primary_resource_id: 'extended_instance'
-    primary_resource_name: 'extended_instance'
     vars:
       instance_name: 'my-instance'
       ip_alloc: 'datafusion-ip-alloc'
@@ -71,12 +70,10 @@ examples:
       'prober_test_run': '`options = { prober_test_run = "true" }`'
   - name: 'data_fusion_instance_cmek'
     primary_resource_id: 'cmek'
-    primary_resource_name: 'cmek'
     vars:
       instance_name: 'my-instance'
   - name: 'data_fusion_instance_enterprise'
     primary_resource_id: 'enterprise_instance'
-    primary_resource_name: 'enterprise_instance'
     vars:
       instance_name: 'my-instance'
       prober_test_run: ''
@@ -84,12 +81,10 @@ examples:
       'prober_test_run': '`options = { prober_test_run = "true" }`'
   - name: 'data_fusion_instance_event'
     primary_resource_id: 'event'
-    primary_resource_name: 'event'
     vars:
       instance_name: 'my-instance'
   - name: 'data_fusion_instance_zone'
     primary_resource_id: 'zone'
-    primary_resource_name: 'zone'
     vars:
       instance_name: 'my-instance'
 parameters:

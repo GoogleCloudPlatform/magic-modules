@@ -316,7 +316,9 @@ module Provider
                         'third_party/tgc/compute_target_pool.go'],
                        ['converters/google/resources/apikeys_key.go',
                         'third_party/tgc/apikeys_key.go']
-
+                       ['converters/google/resources/dataproc_cluster.go',
+                        'third_party/tgc/dataproc_cluster.go']
+        
                      ])
     end
 

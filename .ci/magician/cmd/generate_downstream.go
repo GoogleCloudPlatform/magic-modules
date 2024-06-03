@@ -153,6 +153,9 @@ func execGenerateDownstream(baseBranch, command, repo, version, ref string, gh G
 	scratchCommitSha, commitErr := createCommit(scratchRepo, commitMessage, rnr)
 	if commitErr != nil {
 		fmt.Println("Error creating commit: ", commitErr)
+		if !strings.Contains(commitErr.Error(), "nothing to commit") {
+			os.Exit(1)
+		}
 	}
 
 	if _, err := rnr.Run("git", []string{"push", ctlr.URL(scratchRepo), scratchRepo.Branch, "-f"}, nil); err != nil {
