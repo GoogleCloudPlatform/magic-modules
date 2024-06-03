@@ -11,8 +11,6 @@ import (
 )
 
 func TestAccNetappbackup_netappBackupFull(t *testing.T) {
-	t.Parallel()
-
 	context := map[string]interface{}{
 		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-1", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
 		"random_suffix": acctest.RandString(t, 10),
