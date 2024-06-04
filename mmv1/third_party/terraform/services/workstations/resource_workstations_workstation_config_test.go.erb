@@ -541,8 +541,11 @@ func testAccWorkstationsWorkstationConfig_boost(context map[string]interface{}) 
           }
         }
         boost_configs {
-          id           = "boost-1"
-          machine_type = "e2-standard-2"
+          id                           = "boost-2"
+          machine_type                 = "n1-standard-2"
+          pool_size                    = 2
+          boot_disk_size_gb            = 30
+          enable_nested_virtualization = true
         }
       }
     }

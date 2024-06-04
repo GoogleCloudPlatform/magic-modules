@@ -354,6 +354,17 @@ Google Cloud KMS.`,
 				Description: `Metadata key/value pairs to make available from within instances created from this template.`,
 			},
 
+			<% unless version == 'ga' -%>
+			"partner_metadata": {
+				Type:                  schema.TypeMap,
+				Optional:              true,
+				DiffSuppressFunc:      ComparePartnerMetadataDiff,
+				DiffSuppressOnRefresh: true,
+				Elem:                  &schema.Schema{Type: schema.TypeString},
+				Description:           `Partner Metadata Map made available within the instance.`,
+			},
+			<% end -%>
+
 			"metadata_startup_script": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -688,6 +699,24 @@ Must be from 0 to 315,576,000,000 inclusive.`,
 resolution. Durations less than one second are represented
 with a 0 seconds field and a positive nanos field. Must
 be from 0 to 999,999,999 inclusive.`,
+									},
+								},
+							},
+						},
+						"on_instance_stop_action": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							ForceNew:    true,
+							Description: `Defines the behaviour for instances with the instance_termination_action.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"discard_local_ssd": {
+										Type:     schema.TypeBool,
+										Optional:    true,
+										Description: `If true, the contents of any attached Local SSD disks will be discarded.`,
+										Default:      false,
+										ForceNew:    true,
 									},
 								},
 							},
@@ -1046,6 +1075,13 @@ func resourceComputeRegionInstanceTemplateCreate(d *schema.ResourceData, meta in
 		return err
 	}
 
+	<% unless version == 'ga' -%>
+	PartnerMetadata, err := resourceInstancePartnerMetadata(d)
+	if err != nil {
+		return err
+	}
+	<% end -%>
+
 	networks, err := expandNetworkInterfaces(d, config)
 	if err != nil {
 		return err
@@ -1073,6 +1109,9 @@ func resourceComputeRegionInstanceTemplateCreate(d *schema.ResourceData, meta in
 		MinCpuPlatform:             d.Get("min_cpu_platform").(string),
 		Disks:                      disks,
 		Metadata:                   metadata,
+		<% unless version == 'ga' -%>
+		PartnerMetadata:            PartnerMetadata,
+		<% end -%>
 		NetworkInterfaces:          networks,
 		NetworkPerformanceConfig:   networkPerformanceConfig,
 		Scheduling:                 scheduling,
@@ -1164,6 +1203,13 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 		return err
 	}
 
+	<% unless version == 'ga' -%>
+	url, err = transport_tpg.AddQueryParams(url, map[string]string{"view": "FULL"})
+	if err != nil {
+		return err
+	}
+	<% end -%>
+
 	instanceTemplate, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config: config,
 		Method: "GET",
@@ -1212,6 +1258,18 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 			return fmt.Errorf("Error setting metadata: %s", err)
 		}
 	}
+
+	<% unless version == 'ga' -%>
+	if instanceProperties.PartnerMetadata != nil {
+		partnerMetadata, err := flattenPartnerMetadata(instanceProperties.PartnerMetadata)
+		if err != nil {
+			return fmt.Errorf("Error parsing partner metadata: %s", err)
+		}
+		if err = d.Set("partner_metadata", partnerMetadata); err != nil {
+			return fmt.Errorf("Error setting partner metadata: %s", err)
+		}
+	}
+	<% end -%>
 
 	// Set the tags fingerprint if there is one.
 	if instanceProperties.Tags != nil {

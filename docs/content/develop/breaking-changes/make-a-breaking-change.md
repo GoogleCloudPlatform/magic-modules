@@ -1,6 +1,6 @@
 ---
-majorVersion: "5.0.0"
-upgradeGuide: "version_5_upgrade.html.markdown"
+majorVersion: "6.0.0"
+upgradeGuide: "version_6_upgrade.html.markdown"
 title: "Make a breaking change"
 summary: "Guidance on making a breaking changes"
 weight: 20
@@ -63,7 +63,7 @@ The general process for contributing a breaking change to the
 1. Make the `main` branch forwards-compatible with the major release
 2. Add deprecations and warnings to the `main` branch of `magic-modules`
 3. Add upgrade guide entries to the `main` branch of `magic-modules`
-4. Make the breaking change on `FEATURE-BRANCH-major-release-{{% param "majorVersion" %}}`
+4. Make the breaking change on ~~`FEATURE-BRANCH-major-release-{{% param "majorVersion" %}}`~~ `main` temporarily
 
 These are covered in more detail in the following sections. The upgrade guide
 and the actual breaking change will be merged only after both are completed.
@@ -177,43 +177,18 @@ Entries should focus on the changes that users need to make when upgrading
 to `{{% param "majorVersion" %}}`, rather than how to write configurations
 after upgrading.
 
-See [Terraform provider for Google Cloud 4.0.0 Upgrade Guide](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/version_4_upgrade)
+See [Terraform provider for Google Cloud 5.0.0 Upgrade Guide](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/version_5_upgrade)
 and other upgrade guides for examples.
 
 The upgrade guide and the actual breaking change will be merged only after both are completed.
 
 ### Make the breaking change on `FEATURE-BRANCH-major-release-{{% param "majorVersion" %}}`
 
-When working on your breaking change, make sure that your base branch
-is `FEATURE-BRANCH-major-release-{{% param "majorVersion" %}}`. This
-means that you will follow the standard
-[contribution process]({{< ref "/get-started/contribution-process" >}})
-with the following changes:
-
-1. Before you start, check out and sync your local `magic-modules` and provider
-   repositories with the upstream major release branches.
-   ```bash
-   cd ~/magic-modules
-   git checkout FEATURE-BRANCH-major-release-{{% param "majorVersion" %}}
-   git pull --ff-only origin FEATURE-BRANCH-major-release-{{% param "majorVersion" %}}
-   cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
-   git checkout FEATURE-BRANCH-major-release-{{% param "majorVersion" %}}
-   git pull --ff-only origin FEATURE-BRANCH-major-release-{{% param "majorVersion" %}}
-   cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
-   git checkout FEATURE-BRANCH-major-release-{{% param "majorVersion" %}}
-   git pull --ff-only origin FEATURE-BRANCH-major-release-{{% param "majorVersion" %}}
-   ```
-1. Make sure that any deprecation notices and warnings that you added in previous sections
-   are present on the major release branch. Changes to the `main` branch will be
-   merged into the major release branch every Monday.
-1. Make the breaking change.
-1. Remove any deprecation notices and warnings (including in documentation) not already removed by the breaking change.
-1. When you create your pull request,
-   [change the base branch](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/changing-the-base-branch-of-a-pull-request)
-   to `FEATURE-BRANCH-major-release-{{% param "majorVersion" %}}`
-1. To resolve merge conflicts with `git rebase` or `git merge`, use `FEATURE-BRANCH-major-release-{{% param "majorVersion" %}}` instead of `main`.
-
-The upgrade guide and the actual breaking change will be merged only after both are completed.
+> [!CAUTION]
+> `FEATURE-BRANCH-major-release-{{% param "majorVersion" %}}` is not yet ready. If you want to make your
+> breaking change ahead of time (possibly for early review), please submit a PR on `main` with the title prefix "6.0.0 - ". 
+> Ensure that a Github Issue is created as per all PR's, and our team will manually switch your PR over to
+> `FEATURE-BRANCH-major-release-{{% param "majorVersion" %}} when it is ready.
 
 ## What's next?
 

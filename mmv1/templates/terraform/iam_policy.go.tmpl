@@ -68,7 +68,7 @@ var {{ $.ResourceName }}IamSchema = map[string]*schema.Schema{
 }
 
 {{- if and $.IamPolicy $.IamPolicy.CustomDiffSuppress }}
-  {{- $.CustomTemplate $.IamPolicy.CustomDiffSuppress }}
+  {{- $.CustomTemplate $.IamPolicy.CustomDiffSuppress true }}
 {{- end }}
 
 type {{ $.ResourceName }}IamUpdater struct {
@@ -101,7 +101,7 @@ func {{ $.ResourceName }}IamUpdaterProducer(d tpgresource.TerraformResourceData,
 {{- end }}{{- /* range $param := $.IamResourceParams */}}
 
 	// We may have gotten either a long or short name, so attempt to parse long name if possible
-	m, err := tpgresource.GetImportIdQualifiers([]string{"{{ $.ImportIdFormatsFromIam }}"}, d, config, d.Get("{{ $.IamParentResourceName }}").(string))
+	m, err := tpgresource.GetImportIdQualifiers([]string{"{{ $.ImportIdRegexesFromIam }}"}, d, config, d.Get("{{ $.IamParentResourceName }}").(string))
 	if err != nil {
 		return nil, err
 	}
@@ -154,7 +154,7 @@ func {{ $.ResourceName }}IdParseFunc(d *schema.ResourceData, config *transport_t
 {{-   end }}
 {{- end }}{{/* range $param := $.IamResourceParams */}}
 
-	m, err := tpgresource.GetImportIdQualifiers([]string{"{{ $.ImportIdFormatsFromIam }}"}, d, config, d.Id())
+	m, err := tpgresource.GetImportIdQualifiers([]string{"{{ $.ImportIdRegexesFromIam }}"}, d, config, d.Id())
 	if err != nil {
 		return err
 	}
@@ -309,7 +309,7 @@ func (u *{{ $.ResourceName }}IamUpdater) SetResourceIamPolicy(policy *cloudresou
 }
 
 func (u *{{ $.ResourceName }}IamUpdater) qualify{{ $.Name }}Url(methodIdentifier string) (string, error) {
-	urlTemplate := fmt.Sprintf("{{"{{"}}{{ $.ProductMetadata.Name }}BasePath{{"}}"}}%s{{ $.IamPolicy.MethodNameSeparator }}%s", fmt.Sprintf("{{ $.IamImportUrl }}", {{ $.IamStringQualifiers }}), methodIdentifier)
+	urlTemplate := fmt.Sprintf("{{"{{"}}{{ $.ProductMetadata.Name }}BasePath{{"}}"}}%s{{ $.IamPolicy.MethodNameSeparator }}%s", fmt.Sprintf("{{ $.IamResourceUriFormat }}", {{ $.IamResourceUriStringQualifiers }}), methodIdentifier)
   url, err := tpgresource.ReplaceVars(u.d, u.Config, urlTemplate)
   if err != nil {
       return "", err
@@ -318,7 +318,7 @@ func (u *{{ $.ResourceName }}IamUpdater) qualify{{ $.Name }}Url(methodIdentifier
 }
 
 func (u *{{ $.ResourceName }}IamUpdater) GetResourceId() string {
-	return fmt.Sprintf("{{ $.IamImportUrl }}", {{ $.IamStringQualifiers }})
+	return fmt.Sprintf("{{ $.IamResourceUriFormat }}", {{ $.IamResourceUriStringQualifiers }})
 }
 
 func (u *{{ $.ResourceName }}IamUpdater) GetMutexKey() string {
