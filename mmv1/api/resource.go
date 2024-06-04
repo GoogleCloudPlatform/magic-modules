@@ -1286,8 +1286,6 @@ func (r Resource) GetPropertyUpdateMasksGroupKeys(properties []*Type) []string {
 		if prop.FlattenObject {
 			k := r.GetPropertyUpdateMasksGroupKeys(prop.Properties)
 			keys = append(keys, k...)
-		} else if len(prop.UpdateMaskFields) > 0 {
-			keys = append(keys, google.Underscore(prop.Name))
 		} else {
 			keys = append(keys, google.Underscore(prop.Name))
 		}
