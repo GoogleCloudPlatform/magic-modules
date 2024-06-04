@@ -83,7 +83,7 @@ func GetApikeysKeyApiObject(d tpgresource.TerraformResourceData, config *transpo
 		obj["deleteTime"] = deleteTimeProp
 	}
 
-	restrictionsProp, err := expandApikeysKeyDRestrictions(d.Get("restrictions"), d, config)
+	restrictionsProp, err := expandApikeysKeyRestrictions(d.Get("restrictions"), d, config)
 	if err != nil {
 		return nil, err
 	} else if v, ok := d.GetOkExists("restrictions"); !tpgresource.IsEmptyValue(reflect.ValueOf(restrictionsProp)) && (ok || !reflect.DeepEqual(v, restrictionsProp)) {
@@ -124,9 +124,123 @@ func expandApikeysKeyDeleteTime(v interface{}, d tpgresource.TerraformResourceDa
 	return v, nil
 }
 
-func expandApikeysKeyDRestrictions(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandApikeysKeyRestrictions(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	
+	l := v.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil, nil
+	}
+	raw := l[0]
+	original := raw.(map[string]interface{})
+	transformed := make(map[string]interface{})
+
+	transformedAndroidKeyRestrictions, err := expandApikeysKeyAndroidKeyRestriction(original["android_key_restrictions"], d, config)
+	if err != nil {
+		return nil, err
+	} else if val := reflect.ValueOf(transformedAndroidKeyRestrictions); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+		transformed["android_key_restrictions"] = transformedAndroidKeyRestrictions
+	}
+
+	transformedApiTargets, err := expandApikeysKeyApiTargets(original["api_targets"], d, config)
+	if err != nil {
+		return nil, err
+	} else if val := reflect.ValueOf(transformedApiTargets); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+		transformed["api_targets"] = transformedApiTargets
+	}
+
+	return transformed, nil
+}
+func expandApikeysKeyAndroidKeyRestriction(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	l := v.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil, nil
+	}
+	raw := l[0]
+	original := raw.(map[string]interface{})
+	transformed := make(map[string]interface{})
+
+	transformedAllowedServices, err := expandApikeysKeyAllowedApplications(original["allowed_applications"], d, config)
+	if err != nil {
+		return nil, err
+	} else if val := reflect.ValueOf(transformedAllowedServices); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+		transformed["allowed_applications"] = transformedAllowedServices
+	}
+
+	return transformed, nil
+}
+
+func expandApikeysKeyAllowedApplications(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	l := v.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil, nil
+	}
+	raw := l[0]
+	original := raw.(map[string]interface{})
+	transformed := make(map[string]interface{})
+
+	transformedPackageName, err := expandApikeysKeyPackageName(original["package_name"], d, config)
+	if err != nil {
+		return nil, err
+	} else if val := reflect.ValueOf(transformedPackageName); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+		transformed["package_name"] = transformedPackageName
+	}
+
+	transformedSha1Fingerprint, err := expandApikeysKeySha1Fingerprint(original["sha1_fingerprint"], d, config)
+	if err != nil {
+		return nil, err
+	} else if val := reflect.ValueOf(transformedSha1Fingerprint); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+		transformed["sha1_fingerprint"] = transformedSha1Fingerprint
+	}
+
+	return transformed, nil
+}
+
+func expandApikeysKeyPackageName(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
+
+func expandApikeysKeySha1Fingerprint(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	return v, nil
+}
+
+
+func expandApikeysKeyApiTargets(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	l := v.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil, nil
+	}
+	raw := l[0]
+	original := raw.(map[string]interface{})
+	transformed := make(map[string]interface{})
+
+	transformedService, err := expandApikeysKeyService(original["service"], d, config)
+	if err != nil {
+		return nil, err
+	} else if val := reflect.ValueOf(transformedService); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+		transformed["service"] = transformedService
+	}
+
+	transformedMethods, err := expandApikeysKeyMethods(original["methods"], d, config)
+	if err != nil {
+		return nil, err
+	} else if val := reflect.ValueOf(transformedMethods); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+		transformed["methods"] = transformedMethods
+	}
+
+	return transformed, nil
+}
+
+func expandApikeysKeyService(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	return v, nil
+}
+
+func expandApikeysKeyMethods(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	if v == nil {
+		return nil
+	}
+	return tpgresource.ConvertAndMapStringArr(v.([]interface{}), tpgresource.ConvertSelfLinkToV1), error
+}
+
 
 func expandApikeysKeyDEtag(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil

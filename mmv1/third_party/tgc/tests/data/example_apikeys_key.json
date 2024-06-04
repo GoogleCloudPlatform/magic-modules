@@ -27,16 +27,7 @@
                         ],
                         "service":"translate.googleapis.com"
                      }
-                  ],
-                  "browser_key_restrictions":[
-                     
-                  ],
-                  "ios_key_restrictions":[
-                     
-                  ],
-                  "server_key_restrictions":[
-                     
-                  ]
+                  ]                 
                }
             ]
          }
