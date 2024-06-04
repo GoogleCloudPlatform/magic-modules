@@ -11,7 +11,7 @@ resource "google_app_engine_application" "app" {
   location_id = "us-central"
 }
 
-resource "google_project_service" "appengine_service" {
+resource "google_project_service" "appengine" {
   project = google_project.my_project.project_id
   service = "appengineflex.googleapis.com"
 
@@ -21,13 +21,6 @@ resource "google_project_service" "appengine_service" {
 resource "google_project_service" "compute" {
   project = google_project.my_project.project_id
   service = "compute.googleapis.com"
-}
-
-resource "google_project_service" "service" {
-  project = google_project.my_project.project_id
-  service = "appengineflex.googleapis.com"
-
-  disable_dependent_services = false
 }
 
 data "google_app_engine_default_service_account" "default" {
@@ -52,6 +45,7 @@ resource "google_project_iam_member" "storage_viewer" {
 }
 
 resource "google_compute_region_network_endpoint_group" "test-neg" {
+  project = google_project_service.compute.project
   name                  = "test-neg"
   network_endpoint_type = "SERVERLESS"
   region                = "us-central1"
@@ -63,7 +57,7 @@ resource "google_compute_region_network_endpoint_group" "test-neg" {
 
 resource "google_app_engine_flexible_app_version" "<%= ctx[:vars]['app_version_name'] %>" {
   version_id = "v1"
-  project    = google_project_iam_member.gae_api.project
+  project = google_project_service.appengine.project
   service    = "default"
   runtime    = "nodejs"
 
@@ -112,13 +106,14 @@ resource "google_app_engine_flexible_app_version" "<%= ctx[:vars]['app_version_n
 }
 
 resource "google_storage_bucket" "bucket" {
-  project  = google_project.my_project.project_id
+  project  = google_project_service.compute.project
   name     = "<%= ctx[:vars]['bucket_name'] %>"
   location = "US"
   uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_object" "object" {
+  project  = google_project_service.compute.project
   name   = "hello-world.zip"
   bucket = google_storage_bucket.bucket.name
   source = "./test-fixtures/hello-world.zip"
