@@ -15,6 +15,15 @@
 name: ReservationAssignment
 base_url: projects/{{project}}/locations/{{location}}/reservations/{{reservation}}/assignments
 create_url: projects/{{project}}/locations/{{location}}/reservations/{{reservation}}/assignments
+self_link: projects/{{project}}/locations/{{location}}/reservations/{{reservation}}/assignments
+nested_query: !ruby/object:Api::Resource::NestedQuery
+  keys:
+    - assignments
+id_format: 'projects/{{project}}/locations/{{location}}/reservations/{{reservation}}/assignments/{{name}}'
+import_format:
+  [
+    'projects/{{project}}/locations/{{location}}/reservations/{{reservation}}/assignments/{{name}}',
+  ]
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Work with reservation assignments': 'https://cloud.google.com/bigquery/docs/reservations-assignments'
