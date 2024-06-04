@@ -900,7 +900,7 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 		if confOK {
 			modeValue, modeOK := conf["mode"]
 			diskImage := conf["disk_image"].(string)
-			if modeOK && modeValue.(string) == "CONTAINER_IMAGE_CACHE" {
+			if modeOK {
 				nc.SecondaryBootDisks = append(nc.SecondaryBootDisks, &container.SecondaryBootDisk{
 					DiskImage: diskImage,
 					Mode:      modeValue.(string),
@@ -1541,9 +1541,7 @@ func flattenSecondaryBootDisks(c []*container.SecondaryBootDisk) []map[string]in
 		for _, disk := range c {
 			secondaryBootDisk := map[string]interface{}{
 				"disk_image": disk.DiskImage,
-			}
-			if disk.Mode == "CONTAINER_IMAGE_CACHE" {
-				secondaryBootDisk["mode"] = disk.Mode
+				"mode": disk.Mode,
 			}
 			result = append(result, secondaryBootDisk)
 		}

@@ -1665,6 +1665,11 @@ func TestAccContainerNodePool_secondaryBootDisks(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 			},
+			resource.TestStep{
+				ResourceName:            "google_container_node_pool.np-no-mode",
+				ImportState:             true,
+				ImportStateVerify:       true,
+			},
 		},
 	})
 }
