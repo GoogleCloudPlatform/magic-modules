@@ -234,7 +234,7 @@ properties:
         description: |
           If True, indicates to use the default project's binary authorization policy. If False, binary authorization will be disabled.
   - !ruby/object:Api::Type::String
-    name: start_execution_token
+    name: 'startExecutionToken'
     description: |-
       A unique string used as a suffix creating a new execution upon job create or update. The Job will become ready when the execution is successfully started.
       The sum of job name and token length must be fewer than 63 characters.
@@ -242,7 +242,7 @@ properties:
       - run_execution_token
     min_version: beta
   - !ruby/object:Api::Type::String
-    name: run_execution_token
+    name: 'runExecutionToken'
     description: |-
       A unique string used as a suffix creating a new execution upon job create or update. The Job will become ready when the execution is successfully completed.
       The sum of job name and token length must be fewer than 63 characters.
