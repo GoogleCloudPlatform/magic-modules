@@ -65,6 +65,7 @@ resource "google_project_service" "appengineflex" {
   service = "appengineflex.googleapis.com"
 
   disable_dependent_services = false
+  depends_on = [google_project_service.compute]
 }
 
 resource "google_compute_network" "network" {
@@ -237,6 +238,7 @@ resource "google_project_service" "appengineflex" {
   service = "appengineflex.googleapis.com"
 
   disable_dependent_services = false
+  depends_on = [google_project_service.compute]
 }
 
 resource "google_compute_network" "network" {
