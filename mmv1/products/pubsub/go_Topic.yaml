@@ -21,9 +21,9 @@ references:
     'Managing Topics': 'https://cloud.google.com/pubsub/docs/admin#managing_topics'
   api: 'https://cloud.google.com/pubsub/docs/reference/rest/v1/projects.topics'
 docs:
-  note: 'You can retrieve the email of the Google Managed Pub/Sub Service Account used for forwarding
-by using the `google_project_service_identity` resource.
-'
+  note: |
+    You can retrieve the email of the Google Managed Pub/Sub Service Account used for forwarding
+    by using the `google_project_service_identity` resource.
 base_url: 'projects/{{project}}/topics'
 create_verb: 'PUT'
 update_url: 'projects/{{project}}/topics/{{name}}'
@@ -34,7 +34,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
-  type: "PollAsync"
+  type: 'PollAsync'
   check_response_func_existence: 'transport_tpg.PollCheckForExistence'
   check_response_func_absence: 'transport_tpg.PollCheckForAbsence'
   suppress_error: true
@@ -51,12 +51,11 @@ error_retry_predicates:
 examples:
   - name: 'pubsub_topic_basic'
     primary_resource_id: 'example'
-    primary_resource_name: 'example'
+    primary_resource_name: 'fmt.Sprintf("tf-test-example-topic%s", context["random_suffix"])'
     vars:
       topic_name: 'example-topic'
   - name: 'pubsub_topic_cmek'
     primary_resource_id: 'example'
-    primary_resource_name: 'example'
     vars:
       topic_name: 'example-topic'
       key_name: 'example-key'
@@ -64,12 +63,10 @@ examples:
     skip_test: true
   - name: 'pubsub_topic_geo_restricted'
     primary_resource_id: 'example'
-    primary_resource_name: 'example'
     vars:
       topic_name: 'example-topic'
   - name: 'pubsub_topic_schema_settings'
     primary_resource_id: 'example'
-    primary_resource_name: 'example'
     vars:
       topic_name: 'example-topic'
       schema_name: 'example'

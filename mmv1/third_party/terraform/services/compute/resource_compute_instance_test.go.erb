@@ -2,7 +2,13 @@
 package compute_test
 
 import (
+	<% unless version == 'ga' -%>
+	"encoding/json"
+	<% end -%>
 	"fmt"
+	<% unless version == 'ga' -%>
+	"google.golang.org/api/googleapi"
+	<% end -%>
 	"reflect"
 	"regexp"
 	"sort"
@@ -1596,7 +1602,7 @@ func TestAccComputeInstance_guestAccelerator(t *testing.T) {
 				Config: testAccComputeInstance_guestAccelerator(instanceName, 1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
-					testAccCheckComputeInstanceHasGuestAccelerator(&instance, "nvidia-tesla-k80", 1),
+					testAccCheckComputeInstanceHasGuestAccelerator(&instance, "nvidia-tesla-t4", 1),
 				),
 			},
 			computeInstanceImportStep("us-east1-d", instanceName, []string{"metadata.baz", "metadata.foo"}),
@@ -2834,6 +2840,108 @@ func TestAccComputeInstance_localSsdRecoveryTimeout_update(t *testing.T) {
 	})
 }
 
+<% unless version == 'ga' -%>
+func TestAccComputeInstance_partnerMetadata(t *testing.T) {
+	t.Parallel()
+
+	var instance compute.Instance
+	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	var namespace = "test.compute.googleapis.com"
+	expectedPartnerMetadata := make(map[string]compute.StructuredEntries)
+	expectedPartnerMetadata[namespace] = compute.StructuredEntries{
+		Entries: googleapi.RawMessage(`{"key1": "value1", "key2": 2,"key3": {"key31":"value31"}}`),
+	}
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_partnerMetadata(instanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstancePartnerMetadata(&instance, expectedPartnerMetadata),
+				),
+			},
+			computeInstanceImportStep("us-central1-a", instanceName, []string{fmt.Sprintf("partner_metadata.%s", namespace)}),
+		},
+	})
+}
+
+func TestAccComputeInstance_partnerMetadata_update(t *testing.T) {
+	t.Parallel()
+
+	var instance compute.Instance
+	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	var namespace = "test.compute.googleapis.com"
+	expectedPartnerMetadata := make(map[string]compute.StructuredEntries)
+	expectedPartnerMetadata[namespace] = compute.StructuredEntries{
+		Entries: googleapi.RawMessage(`{"key1": "value1", "key2": 2,"key3": {"key31":"value31"}}`),
+	}
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_partnerMetadata_empty(instanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+				),
+			},
+
+			{
+				Config: testAccComputeInstance_partnerMetadata(instanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstancePartnerMetadata(&instance, expectedPartnerMetadata),
+				),
+			},
+			computeInstanceImportStep("us-central1-a", instanceName, []string{fmt.Sprintf("partner_metadata.%s", namespace)}),
+		},
+	})
+}
+
+func TestAccComputeInstance_partnerMetadata_deletePartnerMetadata(t *testing.T) {
+	t.Parallel()
+
+	var instance compute.Instance
+	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	var namespace = "test.compute.googleapis.com"
+	expectedPartnerMetadata := make(map[string]compute.StructuredEntries)
+	expectedPartnerMetadata[namespace] = compute.StructuredEntries{
+		Entries: googleapi.RawMessage(`{"key1": "value1", "key2": 2,"key3": {"key31":"value31"}}`),
+	}
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_partnerMetadata(instanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstancePartnerMetadata(&instance, expectedPartnerMetadata),
+				),
+			},
+
+			{
+				Config: testAccComputeInstance_partnerMetadata_empty(instanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+				),
+			},
+			computeInstanceImportStep("us-central1-a", instanceName, []string{fmt.Sprintf("partner_metadata.%s", namespace)}),
+		},
+	})
+}
+<% end -%>
+
 func TestAccComputeInstance_metadataStartupScript_update(t *testing.T) {
 	t.Parallel()
 
@@ -3497,9 +3605,13 @@ func testAccCheckComputeInstanceExistsInProject(t *testing.T, n, p string, insta
 		}
 
 		config := acctest.GoogleProviderConfig(t)
-
+		<% if version == "ga" -%>
 		found, err := config.NewComputeClient(config.UserAgent).Instances.Get(
 			p, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"]).Do()
+		<% else -%>
+		found, err := config.NewComputeClient(config.UserAgent).Instances.Get(
+			p, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"]).View("FULL").Do()
+		<% end -%>
 		if err != nil {
 			return err
 		}
@@ -3654,6 +3766,36 @@ func testAccCheckComputeInstanceLocalSsdRecoveryTimeout(instance *compute.Instan
 		return nil
 	}
 }
+
+<% unless version == 'ga' -%>
+func testAccCheckComputeInstancePartnerMetadata(instance *compute.Instance, expectedPartnerMetadata map[string]compute.StructuredEntries) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		if instance == nil {
+			return fmt.Errorf("instance is nil")
+		}
+		if instance.PartnerMetadata == nil {
+			return fmt.Errorf("no partner metadata")
+		}
+		expectedPartnerMetadataMap := make(map[string]interface{})
+		acutalPartnerMetadataMap := make(map[string]interface{})
+		for key, value := range instance.PartnerMetadata {
+			var jsonMap map[string]interface{}
+			json.Unmarshal(value.Entries, jsonMap)
+			acutalPartnerMetadataMap[key] = jsonMap
+		}
+		for key, value := range expectedPartnerMetadata {
+			var jsonMap map[string]interface{}
+			json.Unmarshal(value.Entries, jsonMap)
+			expectedPartnerMetadataMap[key] = jsonMap
+		}
+		if !reflect.DeepEqual(acutalPartnerMetadataMap, expectedPartnerMetadataMap) {
+			return fmt.Errorf("got the wrong instance partne metadata action: have: %+v; want: %+v", acutalPartnerMetadataMap, expectedPartnerMetadataMap)
+		}
+		return nil
+
+	}
+}
+<% end -%>
 
 func testAccCheckComputeInstanceTerminationAction(instance *compute.Instance, instanceTerminationActionWant string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -6697,7 +6839,7 @@ resource "google_compute_instance" "foobar" {
 
   guest_accelerator {
     count = %d
-    type  = "nvidia-tesla-k80"
+    type  = "nvidia-tesla-t4"
   }
 }
 `, instance, count)
@@ -8262,6 +8404,68 @@ resource "google_compute_instance" "foobar" {
 }
 `, instance)
 }
+
+<% unless version == 'ga' -%>
+func testAccComputeInstance_partnerMetadata_empty(instance string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family    = "ubuntu-2004-lts"
+  project   = "ubuntu-os-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%s"
+  machine_type = "e2-medium"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+}`, instance)
+}
+
+func testAccComputeInstance_partnerMetadata(instance string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family    = "ubuntu-2004-lts"
+  project   = "ubuntu-os-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%s"
+  machine_type = "e2-medium"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  partner_metadata = {
+  	"test.compute.googleapis.com" = jsonencode({ 
+  		entries = {
+  			key1 = "value1"
+  			key2 = 2
+  			key3 = {
+  				key31 = "value31"
+  			}
+  		}
+  	})
+  }
+}`, instance)
+}
+<% end -%>
 
 func testAccComputeInstance_metadataStartupScript(instance, machineType, metadata string) string {
 	return fmt.Sprintf(`
