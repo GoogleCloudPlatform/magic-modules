@@ -315,7 +315,9 @@ module Provider
                        ['converters/google/resources/compute_target_pool.go',
                         'third_party/tgc/compute_target_pool.go'],
                        ['converters/google/resources/dataproc_cluster.go',
-                        'third_party/tgc/dataproc_cluster.go']
+                        'third_party/tgc/dataproc_cluster.go'],
+                       ['converters/google/resources/resource_logging_project_bucket_config.go',
+                        'third_party/terraform/services/logging/resource_logging_project_bucket_config.go']
                      ])
     end
 
