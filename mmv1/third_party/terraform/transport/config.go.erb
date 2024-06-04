@@ -250,11 +250,6 @@ var DefaultBasePaths = map[string]string{
 <% end -%>
 	CloudBillingBasePathKey : "https://cloudbilling.googleapis.com/v1/",
 <% if version == "ga" -%>
-	ComposerBasePathKey : "https://composer.googleapis.com/v1/",
-<% else -%>
-	ComposerBasePathKey : "https://composer.googleapis.com/v1beta1/",
-<% end -%>
-<% if version == "ga" -%>
 	ContainerBasePathKey : "https://container.googleapis.com/v1/",
 <% else -%>
 	ContainerBasePathKey : "https://container.googleapis.com/v1beta1/",
