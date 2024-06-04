@@ -171,6 +171,20 @@ func expandComputeEnvironmentConfig(v interface{}, d tpgresource.TerraformResour
 		transformed["maintenanceWindow"] = transformedMaintenanceWindow
 	}
 
+	transformedWorkloadsConfig, err := expandComputeEnvironmentConfigWorkloadsConfig(original["workloads_config"], d, config)
+	if err != nil {
+		return nil, err
+	} else if val := reflect.ValueOf(transformedWorkloadsConfig); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+		transformed["workloadsConfig"] = transformedWorkloadsConfig
+	}
+
+	transformedDataRetentionConfig, err := expandComputeEnvironmentConfigDataRetentionConfig(original["data_retention_config"], d, config)
+	if err != nil {
+		return nil, err
+	} else if val := reflect.ValueOf(transformedDataRetentionConfig); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+		transformed["dataRetentionConfig"] = transformedDataRetentionConfig
+	}
+
 	transformedMasterAuthorizedNetworksConfig, err := expandComputeEnvironmentConfigMasterAuthorizedNetworksConfig(original["master_authorized_networks_config"], d, config)
 	if err != nil {
 		return nil, err
@@ -349,6 +363,14 @@ func expandComputeEnvironmentConfigEncryptionConfig(v interface{}, d tpgresource
 }
 
 func expandComputeEnvironmentConfigMaintenanceWindow(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	return v, nil
+}
+
+func expandComputeEnvironmentConfigWorkloadsConfig(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	return v, nil
+}
+
+func expandComputeEnvironmentConfigDataRetentionConfig(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
