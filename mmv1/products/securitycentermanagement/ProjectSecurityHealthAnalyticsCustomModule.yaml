@@ -42,15 +42,7 @@ examples:
     vars:
       display_name: full_custom_module
 
-parameters:
-  - !ruby/object:Api::Type::String
-    name: 'project'
-    immutable: true
-    required: true
-    url_param_only: true
-    description: |
-      Numerical ID of the parent folder.
-      
+parameters:      
   - !ruby/object:Api::Type::String
     name: 'location'
     immutable: true
