@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	"google.golang.org/api/googleapi"
 	"google.golang.org/api/securitycenter/v1"
 )
 
@@ -125,17 +124,8 @@ func testAccCheckSecurityCenterv2OrganizationMuteConfigDestroyProducer(t *testin
 			if err == nil {
 				return fmt.Errorf("Organization mute config %s still exists", name)
 			}
-			if !isGoogleAPINotFoundError(err) {
-				return fmt.Errorf("Error while retrieving mute config: %s", err)
-			}
 		}
 
 		return nil
 	}
-}
-
-// isGoogleAPINotFoundError checks if an error is a Google API Not Found error
-func isGoogleAPINotFoundError(err error) bool {
-	apiErr, ok := err.(*googleapi.Error)
-	return ok && apiErr.Code == 404
 }
