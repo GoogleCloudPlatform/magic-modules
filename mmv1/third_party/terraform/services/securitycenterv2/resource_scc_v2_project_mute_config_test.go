@@ -9,8 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/securitycenter/v1"
 )
@@ -107,7 +105,7 @@ resource "google_scc_v2_project_mute_config" "default" {
 
 func testAccCheckSecurityCenterv2ProjectMuteConfigDestroyProducer(t *testing.T) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := acctest.Provider.Meta().(*transport_tpg.Config)
+		config := acctest.Provider.Meta().(*acctest.Config)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_scc_v2_project_mute_config" {
