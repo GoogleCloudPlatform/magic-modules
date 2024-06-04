@@ -317,7 +317,7 @@ module Provider
                        ['converters/google/resources/dataproc_cluster.go',
                         'third_party/tgc/dataproc_cluster.go'],
                        ['converters/google/resources/composer_environment.go',
-                         'third_party/tgc/composer_environment.go']
+                        'third_party/tgc/composer_environment.go']
                      ])
     end
 
