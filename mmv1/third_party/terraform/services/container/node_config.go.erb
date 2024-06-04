@@ -896,17 +896,23 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 	}
 
 	if v, ok := nodeConfig["secondary_boot_disks"]; ok && len(v.([]interface{})) > 0 {
-		conf := v.([]interface{})[0].(map[string]interface{})
-		modeValue, modeOK := conf["mode"]
-		diskImage := conf["disk_image"]
-    	if modeOK && modeValue.(string) == "CONTAINER_IMAGE_CACHE" {
-			nc.SecondaryBootDisks = append(nc.SecondaryBootDisks, &container.SecondaryBootDisk{
-				DiskImage: diskImage.(string),
-				Mode:      modeValue.(string),
-			})
+		conf, confOK := v.([]interface{})[0].(map[string]interface{})
+		if confOK {
+			modeValue, modeOK := conf["mode"]
+			diskImage := conf["disk_image"].(string)
+			if modeOK && modeValue.(string) == "CONTAINER_IMAGE_CACHE" {
+				nc.SecondaryBootDisks = append(nc.SecondaryBootDisks, &container.SecondaryBootDisk{
+					DiskImage: diskImage,
+					Mode:      modeValue.(string),
+				})
+			} else {
+				nc.SecondaryBootDisks = append(nc.SecondaryBootDisks, &container.SecondaryBootDisk{
+					DiskImage: diskImage,
+				})
+			}
 		} else {
 			nc.SecondaryBootDisks = append(nc.SecondaryBootDisks, &container.SecondaryBootDisk{
-				DiskImage: diskImage.(string),
+				DiskImage: "",
 			})
 		}
 	}
@@ -1535,7 +1541,9 @@ func flattenSecondaryBootDisks(c []*container.SecondaryBootDisk) []map[string]in
 		for _, disk := range c {
 			secondaryBootDisk := map[string]interface{}{
 				"disk_image": disk.DiskImage,
-				"mode": disk.Mode,
+			}
+			if disk.Mode == "CONTAINER_IMAGE_CACHE" {
+				secondaryBootDisk["mode"] = disk.Mode
 			}
 			result = append(result, secondaryBootDisk)
 		}
