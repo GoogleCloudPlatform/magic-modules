@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-  "github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -398,7 +398,7 @@ resource "google_compute_forwarding_rule" "default-https" {
   ip_protocol           = "TCP"
   port_range            = "443"
   allow_global_access   = "true"
-	depends_on            = [google_compute_subnetwork.ilb_subnet2]
+  depends_on            = [google_compute_subnetwork.ilb_subnet2]
 }
 
 resource "google_compute_region_backend_service" "default" {
@@ -520,7 +520,7 @@ resource "google_compute_forwarding_rule" "default-https" {
   ip_protocol           = "TCP"
   port_range            = "443"
   allow_global_access   = "true"
-	depends_on            = [google_compute_subnetwork.ilb_subnet2]
+  depends_on            = [google_compute_subnetwork.ilb_subnet2]
 }
 
 resource "google_compute_region_backend_service" "default" {
