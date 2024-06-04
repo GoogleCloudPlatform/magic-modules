@@ -14,6 +14,7 @@ package api
 
 import (
 	"fmt"
+	"maps"
 	"regexp"
 	"strings"
 
@@ -1282,15 +1283,28 @@ func CompareByName(a, b *Type) int {
 	return strings.Compare(a.Name, b.Name)
 }
 
-func (r Resource) GetPropertyUpdateMasksGroups() map[string][]string {
-	maskGroups := map[string][]string{}
-	for _, prop := range r.AllUserProperties() {
+func (r Resource) GetPropertyUpdateMasksGroupKeys(properties []*Type) []string {
+	keys := []string{}
+	for _, prop := range properties {
 		if prop.FlattenObject {
-			prop.GetNestedPropertyUpdateMasksGroups(maskGroups, prop.ApiName)
+			k := r.GetPropertyUpdateMasksGroupKeys(prop.Properties)
+			keys = append(keys, k...)
+		} else {
+			keys = append(keys, google.Underscore(prop.Name))
+		}
+	}
+	return keys
+}
+
+func (r Resource) GetPropertyUpdateMasksGroups(properties []*Type, maskPrefix string) map[string][]string {
+	maskGroups := map[string][]string{}
+	for _, prop := range properties {
+		if prop.FlattenObject {
+			maps.Copy(maskGroups, r.GetPropertyUpdateMasksGroups(prop.Properties, prop.ApiName))
 		} else if len(prop.UpdateMaskFields) > 0 {
 			maskGroups[google.Underscore(prop.Name)] = prop.UpdateMaskFields
 		} else {
-			maskGroups[google.Underscore(prop.Name)] = []string{prop.ApiName}
+			maskGroups[google.Underscore(prop.Name)] = []string{maskPrefix + prop.ApiName}
 		}
 	}
 	return maskGroups
