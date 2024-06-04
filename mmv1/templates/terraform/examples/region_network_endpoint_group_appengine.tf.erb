@@ -19,7 +19,7 @@ resource "google_project_service" "appengine_service" {
 }
 
 resource "google_project_service" "compute" {
-  project = google_project.project.project_id
+  project = google_project.my_project.project_id
   service = "compute.googleapis.com"
 }
 
