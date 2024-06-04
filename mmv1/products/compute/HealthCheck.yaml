@@ -170,6 +170,22 @@ properties:
       The default value is 5 seconds.  It is invalid for timeoutSec to have
       greater value than checkIntervalSec.
     default_value: 5
+  - !ruby/object:Api::Type::Array
+    name: 'sourceRegions'
+    item_type: Api::Type::String
+    min_size: 3
+    max_size: 3
+    description: |
+      Define the list of Google Cloud regions from which health checks are
+      performed. This option is supported only for global health checks that
+      will be referenced by DNS routing policies. If specified, the
+      --check-interval field should be at least 30 seconds. The
+      --proxy-header and --request fields (for TCP health checks) are not
+      supported with this option.
+
+      If --source-regions is specified for a health check, then that health
+      check cannot be used by a backend service or by a managed instance
+      group (for autohealing).
   - !ruby/object:Api::Type::Integer
     name: 'unhealthyThreshold'
     description: |
