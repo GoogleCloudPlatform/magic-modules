@@ -239,9 +239,9 @@ resource "google_compute_region_network_endpoint" "region_network_endpoint_portm
   region_network_endpoint_group = google_compute_region_network_endpoint_group.default.name
   region = "us-central1"
   instance   = google_compute_instance.default.self_link
-  port       = "80"
+  port       = 80
   ip_address = google_compute_instance.default.network_interface[0].network_ip
-  client_destination_port = "8080"
+  client_destination_port = 8080
   provider           = google-beta
 }
 `, context) + testAccComputeRegionNetworkEndpoint_regionNetworkEndpointPortmapNoEndpointExample(context)

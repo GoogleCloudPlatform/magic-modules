@@ -31,7 +31,6 @@ identity:
   - ipAddress
   - fqdn
   - port
-  - clientDestinationPort
 nested_query: !ruby/object:Api::Resource::NestedQuery
   keys:
     - items
@@ -58,7 +57,7 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
-id_format: '{{project}}/{{region}}/{{region_network_endpoint_group}}/{{ip_address}}/{{fqdn}}/{{port}}/{{client_destination_port}}'
+id_format: '{{project}}/{{region}}/{{region_network_endpoint_group}}/{{ip_address}}/{{fqdn}}/{{port}}'
 mutex: networkEndpoint/{{project}}/{{region}}/{{region_network_endpoint_group}}
 exclude_tgc: true
 examples:

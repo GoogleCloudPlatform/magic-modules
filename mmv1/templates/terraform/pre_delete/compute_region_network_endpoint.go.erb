@@ -42,7 +42,7 @@ clientDestinationPortProp, err := expandNestedComputeRegionNetworkEndpointClient
 if err != nil {
 	return err
 }
-if clientDestinationPortProp != "" {
+if clientDestinationPortProp != "" && d.Get("client_destination_port").(int) > 0 {
   toDelete["clientDestinationPort"] = clientDestinationPortProp
 }
 <% end -%>
