@@ -235,10 +235,7 @@ func expandApikeysKeyService(v interface{}, d tpgresource.TerraformResourceData,
 }
 
 func expandApikeysKeyMethods(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-	if v == nil {
-		return nil
-	}
-	return tpgresource.ConvertAndMapStringArr(v.([]interface{}), tpgresource.ConvertSelfLinkToV1), error
+	return convertInterfaceToStringArray(v.([]interface{})), nil
 }
 
 
