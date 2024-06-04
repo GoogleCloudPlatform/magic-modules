@@ -286,7 +286,7 @@ understand how the resource maps to the underlying API.
 ```
 
 ### `url_param_only`
-If true, the field is not sent in the resource body, and the provider will
+If true, the field is not sent in the resource body, and the provider does
 not read the field value from the API response. If unset or false, the field
 is sent in the resource body, and the provider reads the field value from the
 API response.
