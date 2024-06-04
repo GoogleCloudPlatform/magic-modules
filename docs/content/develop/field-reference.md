@@ -285,6 +285,16 @@ understand how the resource maps to the underlying API.
   api_name: 'otherFieldName'
 ```
 
+### `url_param_only`
+If true, the field is not sent in the resource body, and the provider does
+not read the field value from the API response. If unset or false, the field
+is sent in the resource body, and the provider reads the field value from the
+API response.
+
+```yaml
+url_param_only: true
+```
+
 ## `Enum` properties
 
 ### `values`
