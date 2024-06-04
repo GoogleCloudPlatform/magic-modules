@@ -10,6 +10,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/client"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/securitycenter/v1"
 )
@@ -98,7 +100,7 @@ resource "google_scc_v2_organization_notification_config" "default" {
 
 func testAccCheckSecurityCenterOrganizationNotificationConfigDestroyProducer(t *testing.T) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := acctest.Provider.Meta().(*client.Config)
+		config := acctest.Provider.Meta().(*transport_tpg.Config)
 		sccService, err := securitycenter.NewService(context.Background(), config.GoogleClientOptions...)
 		if err != nil {
 			return fmt.Errorf("Error creating Security Command Center client: %s", err)
