@@ -175,6 +175,7 @@ properties:
     item_type: Api::Type::String
     min_size: 3
     max_size: 3
+    min_version: beta
     description: |
       Define the list of Google Cloud regions from which health checks are
       performed. This option is supported only for global health checks that
