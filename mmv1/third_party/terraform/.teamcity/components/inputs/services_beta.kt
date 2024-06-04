@@ -616,6 +616,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Securitycenter",
         "path" to "./google-beta/services/securitycenter"
     ),
+    "securitycentermanagement" to mapOf(
+        "name" to "securitycentermanagement",
+        "displayName" to "Securitycentermanagement",
+        "path" to "./google-beta/services/securitycentermanagement"
+    ),
     "securitycenterv2" to mapOf(
         "name" to "securitycenterv2",
         "displayName" to "securitycenterv2",
