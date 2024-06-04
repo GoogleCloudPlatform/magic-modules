@@ -299,6 +299,8 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 			fmt.Println("Error formatting record replay comment: ", err)
 			os.Exit(1)
 		}
+		fmt.Println("ichen")
+		fmt.Println(recordReplayComment)
 		if err := gh.PostComment(prNumber, recordReplayComment); err != nil {
 			fmt.Println("Error posting comment: ", err)
 			os.Exit(1)
