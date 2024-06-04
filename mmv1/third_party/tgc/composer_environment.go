@@ -70,6 +70,13 @@ func GetComposerEnvironmentApiObject(d tpgresource.TerraformResourceData, config
 		obj["config"] = configProp
 	}
 
+	storageConfigProp, err := expandComputeEnvironmentStorageConfig(d.Get("storage_config"), d, config)
+	if err != nil {
+		return nil, err
+	} else if v, ok := d.GetOkExists("storage_config"); !tpgresource.IsEmptyValue(reflect.ValueOf(storageConfigProp)) && (ok || !reflect.DeepEqual(v, storageConfigProp)) {
+		obj["storageConfig"] = storageConfigProp
+	}
+
 	return obj, nil
 }
 
@@ -89,6 +96,10 @@ func expandComputeEnvironmentLabels(v interface{}, d tpgresource.TerraformResour
 }
 
 func expandComputeEnvironmentRegion(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	return v, nil
+}
+
+func expandComputeEnvironmentStorageConfig(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
@@ -190,6 +201,13 @@ func expandComputeEnvironmentConfig(v interface{}, d tpgresource.TerraformResour
 		return nil, err
 	} else if val := reflect.ValueOf(transformedMasterAuthorizedNetworksConfig); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["masterAuthorizedNetworksConfig"] = transformedMasterAuthorizedNetworksConfig
+	}
+
+	transformedResilienceMode, err := expandComputeEnvironmentConfigResilienceMode(original["resilience_mode"], d, config)
+	if err != nil {
+		return nil, err
+	} else if val := reflect.ValueOf(transformedResilienceMode); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+		transformed["resilienceMode"] = transformedResilienceMode
 	}
 
 	return transformed, nil
@@ -406,5 +424,9 @@ func expandComputeEnvironmentConfigNodeConfigEnabled(v interface{}, d tpgresourc
 
 func expandComputeEnvironmentConfigNodeConfigCidrBlocks(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	v = v.(*schema.Set).List()
+	return v, nil
+}
+
+func expandComputeEnvironmentConfigResilienceMode(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
