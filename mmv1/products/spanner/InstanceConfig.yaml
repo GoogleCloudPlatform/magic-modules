@@ -46,6 +46,7 @@ examples:
       instance_config_name: '"custom-tf-test-nam11-config"'
 # Sweeper skipped as this resource has customized deletion.
 skip_sweeper: true
+exclude_tgc: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/spanner_instance_config.go.erb
   update_encoder: templates/terraform/update_encoder/spanner_instance_config_update.go.erb
