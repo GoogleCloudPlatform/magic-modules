@@ -834,6 +834,10 @@ func (r Resource) HasProject() bool {
 	return strings.Contains(r.BaseUrl, "{{project}}") || strings.Contains(r.CreateUrl, "{{project}}")
 }
 
+func (r Resource) IncludeProjectForOperation() bool {
+	return strings.Contains(r.BaseUrl, "{{project}}") || (r.GetAsync().IsA("OpAsync") && r.GetAsync().IncludeProject)
+}
+
 // def region?
 func (r Resource) HasRegion() bool {
 	return strings.Contains(r.BaseUrl, "{{region}}") || strings.Contains(r.CreateUrl, "{{region}}")
