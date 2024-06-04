@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,8 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----!ruby/object:Api::Resource
-name: 'Organization_Source'
+--- !ruby/object:Api::Resource
+name: 'organization_Source'
 base_url: organizations/{{organization}}/sources
 self_link: '{{name}}'
 update_verb: :PATCH
@@ -25,11 +25,11 @@ description: |
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/security-command-center/docs'
-  api: 'https://cloud.google.com/security-command-center/docs/reference/rest/v2/organizations.sources'
-iam_policy: !ruby/object:Api::Resource::IamPolicy
+  api: ‘https://cloud.google.com/security-command-center/docs/reference/rest/v2/organizations.sources’
+organization_iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ':'
-  fetch_organization_source_iam_policy_verb: :POST
-  parent_resource_attribute: 'source'
+  fetch_organization_iam_policy_verb: :POST
+  parent_resource_attribute: 'organization_source'
   base_url: organizations/{{organization}}/sources/{{source}}
   import_format:
     ['organizations/{{organization}}/sources/{{source}}', '{{source}}']
@@ -71,14 +71,6 @@ properties:
     validation: !ruby/object:Provider::Terraform::Validation
       function: 'validation.StringLenBetween(0, 1024)'
   - !ruby/object:Api::Type::String
-    name: canonoicalName
-    description: |
-      The canonical name of the finding source. It's either "organizations/{organization_id}/sources/{source_id}",
-      "folders/{folder_id}/sources/{source_id}", or "projects/{project_number}/sources/{source_id}", depending on 
-      the closest CRM ancestor of the resource associated with the finding.
-    validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validation.StringLenBetween(0, 1024)'
-  - !ruby/object:Api::Type::String
     name: displayName
     required: true
     description: |
@@ -89,3 +81,15 @@ properties:
       and underscores, and can be no longer than 32 characters.
     validation: !ruby/object:Provider::Terraform::Validation
       regex: '[\p{L}\p{N}]({\p{L}\p{N}_- ]{0,30}[\p{L}\p{N}])?'
+  - !ruby/object:Api::Type::String
+    name: canonicalName
+    required: true
+    description: |
+     The canonical name of the finding source. It's either "organizations/{organization_id}/sources/{source_id}",
+     "folders/{folder_id}/sources/{source_id}", or "projects/{project_number}/sources/{source_id}", 
+     depending on the closest CRM ancestor of the resource associated with the finding.
+
+
+
+
+
