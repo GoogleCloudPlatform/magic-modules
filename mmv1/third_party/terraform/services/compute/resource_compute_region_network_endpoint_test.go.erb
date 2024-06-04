@@ -144,6 +144,8 @@ resource "google_compute_region_network_endpoint" "add2" {
 `, context) + testAccComputeRegionNetworkEndpoint_noRegionNetworkEndpoints(context)
 }
 
+<% unless version == 'ga' -%>
+
 func TestAccComputeRegionNetworkEndpoint_regionNetworkEndpointPortmapExample(t *testing.T) {
 	t.Parallel()
 
@@ -260,6 +262,7 @@ resource "google_compute_network" "default" {
 }
 `, context)
 }
+<% end -%>
 
 // testAccCheckComputeRegionNetworkEndpointDestroyed makes sure the endpoint with
 // given Terraform resource name and previous information (obtained from Exists)
