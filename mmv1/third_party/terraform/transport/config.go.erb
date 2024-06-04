@@ -210,7 +210,6 @@ type Config struct {
 	<% end -%>
 
 	CloudBillingBasePath string
-	ComposerBasePath string
 	ContainerBasePath string
 	DataflowBasePath string
 	IamCredentialsBasePath string
@@ -233,7 +232,6 @@ type Config struct {
 const <%= product[:definitions].name -%>BasePathKey = "<%= product[:definitions].name -%>"
 <% end -%>
 const CloudBillingBasePathKey = "CloudBilling"
-const ComposerBasePathKey = "Composer"
 const ContainerBasePathKey = "Container"
 const DataflowBasePathKey = "Dataflow"
 const IAMBasePathKey = "IAM"
