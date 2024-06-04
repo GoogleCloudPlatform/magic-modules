@@ -312,6 +312,11 @@ resource "google_app_engine_flexible_app_version" "foo" {
     shell = "gunicorn -b :$PORT main:app"
   }
 
+  flexible_runtime_settings {
+    operating_system = "ubuntu22"
+    runtime_version = "3.11"
+  }
+
   deployment {
     files {
       name = "main.py"
