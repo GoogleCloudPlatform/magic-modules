@@ -16,11 +16,14 @@ resource "google_project_service" "appengine" {
   service = "appengineflex.googleapis.com"
 
   disable_dependent_services = false
+  disable_on_destroy = false
 }
 
 resource "google_project_service" "compute" {
   project = google_project.my_project.project_id
   service = "compute.googleapis.com"
+
+    disable_on_destroy = false
 }
 
 data "google_app_engine_default_service_account" "default" {
@@ -101,6 +104,8 @@ resource "google_app_engine_flexible_app_version" "<%= ctx[:vars]['app_version_n
       target_utilization = 0.5
     }
   }
+
+  noop_on_destroy = true
 }
 
 resource "google_storage_bucket" "bucket" {
