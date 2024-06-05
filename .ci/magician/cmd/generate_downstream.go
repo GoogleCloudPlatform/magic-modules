@@ -336,7 +336,7 @@ func createCommit(scratchRepo *source.Repo, commitMessage string, rnr ExecRunner
 
 func addChangelogEntry(pullRequest *github.PullRequest, rnr ExecRunner) error {
 	rnr.Mkdir(".changelog")
-	fmt.Println("Changelog Dir Path: ", rnr.GetCWD()
+	fmt.Println("Changelog Dir Path: ", rnr.GetCWD())
 	if err := rnr.WriteFile(filepath.Join(".changelog", fmt.Sprintf("%d.txt", pullRequest.Number)), strings.Join(changelogExp.FindAllString(pullRequest.Body, -1), "\n")); err != nil {
 		return err
 	}
