@@ -112,6 +112,15 @@ update_verb: :PUT
 # the field values from the resource at runtime.
 # mutex: RESOURCE_NAME/{{name}}
 
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "composer_user_workloads_config_map_basic"
+    primary_resource_id: "config_map"
+    vars:
+      environment_name: "test_environment_basic"
+      config_map_name: "test_config_map_basic"
+      region: "us-central1"
+
 parameters:
   - !ruby/object:Api::Type::String
     name: 'region'
