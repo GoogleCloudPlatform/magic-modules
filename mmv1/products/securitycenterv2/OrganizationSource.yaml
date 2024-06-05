@@ -26,7 +26,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/security-command-center/docs'
   api: ‘https://cloud.google.com/security-command-center/docs/reference/rest/v2/organizations.sources’
-organization_iam_policy: !ruby/object:Api::Resource::IamPolicy
+iam_policy: !ruby/object:Api::Resource::IamPolicy
   method_name_separator: ':'
   fetch_organization_iam_policy_verb: :POST
   parent_resource_attribute: 'organization_source'
