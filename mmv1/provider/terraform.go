@@ -90,29 +90,13 @@ func (t *Terraform) Generate(outputFolder, productPath string, generateCode, gen
 
 func (t *Terraform) GenerateObjects(outputFolder string, generateCode, generateDocs bool) {
 	for _, object := range t.Product.Objects {
-		// 		TODO Q2: Exclude objects
-		//        if !types.empty? && !types.include?(object.name)
-		//          Google::LOGGER.info "Excluding #{object.name} per user request"
-		//        elsif types.empty? && object.exclude
-		//          Google::LOGGER.info "Excluding #{object.name} per API catalog"
-		//        elsif types.empty? && object.not_in_version?(@version)
-		//          Google::LOGGER.info "Excluding #{object.name} per API version"
-		//        else
-		//          Google::LOGGER.info "Generating #{object.name}"
-		//          # exclude_if_not_in_version must be called in order to filter out
-		//          # beta properties that are nested within GA resources
-		//          object.exclude_if_not_in_version!(@version)
-		//
-		//          # Make object immutable.
-		//          object.freeze
-		//          object.all_user_properties.each(&:freeze)
+		object.ExcludeIfNotInVersion(&t.Version)
 
 		t.GenerateObject(*object, outputFolder, t.TargetVersionName, generateCode, generateDocs)
 	}
 }
 
 func (t *Terraform) GenerateObject(object api.Resource, outputFolder, productPath string, generateCode, generateDocs bool) {
-
 	templateData := NewTemplateData(outputFolder, t.Version)
 
 	if !object.ExcludeResource {
@@ -193,25 +177,21 @@ func (t *Terraform) GenerateResourceSweeper(object api.Resource, templateData Te
 }
 
 func (t *Terraform) GenerateOperation(outputFolder string) {
+	asyncObjects := google.Select(t.Product.Objects, func(o *api.Resource) bool {
+		return o.AutogenAsync
+	})
 
-	// TODO Q2
-	//    def generate_operation(pwd, output_folder, _types)
-	//      return if @api.objects.select(&:autogen_async).empty?
-	//
-	//      product_name = @api.api_name
-	//      product_name_underscore = @api.name.underscore
-	//      data = build_object_data(pwd, @api.objects.first, output_folder, @target_version_name)
-	//
-	//      data.object = @api.objects.select(&:autogen_async).first
-	//
-	//      data.async = data.object.async
-	//      target_folder = File.join(folder_name(data.version), 'services', product_name)
-	//      FileUtils.mkpath target_folder
-	//      data.generate(pwd,
-	//                    'templates/terraform/operation.go.erb',
-	//                    "#{target_folder}/#{product_name_underscore}_operation.go",
-	//                    self)
-	//    end
+	if len(asyncObjects) == 0 {
+		return
+	}
+
+	targetFolder := path.Join(outputFolder, t.FolderName(), "services", t.Product.ApiName)
+	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+	}
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_operation.go", google.Underscore(t.Product.Name)))
+	templateData := NewTemplateData(outputFolder, t.Version)
+	templateData.GenerateOperationFile(targetFilePath, *asyncObjects[0])
 }
 
 // Generate the IAM policy for this object. This is used to query and test
