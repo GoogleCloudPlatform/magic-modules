@@ -1,7 +1,6 @@
 package securitycenterv2_test
 
 import (
-	"context"
 	"fmt"
 	"testing"
 
@@ -98,4 +97,27 @@ resource "google_scc_v2_project_mute_config" "default" {
   parent               = "projects/%{project_id}"
 }
 `, context)
+}
+func testAccCheckSecurityCenterv2ProjectMuteConfigDestroyProducer(t *testing.T) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := acctest.Provider.Meta().(*acctest.Config)
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "google_scc_v2_project_mute_config" {
+				continue
+			}
+			// Initialize Security Command Center Service
+			sc, err := securitycenter.NewService(context.Background(), config.GoogleClientOptions...)
+			if err != nil {
+				return fmt.Errorf("Error creating Security Command Center client: %s", err)
+			}
+			// Get the project mute config by name
+			name := rs.Primary.ID
+			_, err = sc.Projects.MuteConfigs.Get(name).Do()
+			if err == nil {
+				return fmt.Errorf("Project mute config %s still exists", name)
+			}
+		}
+
+		return nil
+	}
 }

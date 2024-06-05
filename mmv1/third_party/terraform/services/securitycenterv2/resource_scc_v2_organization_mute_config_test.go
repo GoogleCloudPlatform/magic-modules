@@ -1,7 +1,6 @@
 package securitycenterv2_test
 
 import (
-	"context"
 	"fmt"
 	"testing"
 
@@ -10,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestAccSecurityCenterv2OrganizationMuteConfig_basic(t *testing.T) {
+func TestAccSecurityCenterV2OrganizationMuteConfig_basic(t *testing.T) {
 	t.Parallel()
 
 	contextBasic := map[string]interface{}{
@@ -28,10 +27,10 @@ func TestAccSecurityCenterv2OrganizationMuteConfig_basic(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckSecurityCenterv2OrganizationMuteConfigDestroyProducer(t),
+		CheckDestroy:             testAccCheckSecurityCenterV2OrganizationMuteConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSecurityCenterv2OrganizationMuteConfig_basic(contextBasic),
+				Config: testAccSecurityCenterV2OrganizationMuteConfig_basic(contextBasic),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"google_scc_v2_organization_mute_config.default", "description", "A test organization mute config"),
@@ -52,7 +51,7 @@ func TestAccSecurityCenterv2OrganizationMuteConfig_basic(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"parent", "organization_mute_config_id"},
 			},
 			{
-				Config: testAccSecurityCenterv2OrganizationMuteConfig_highSeverity(contextHighSeverity),
+				Config: testAccSecurityCenterV2OrganizationMuteConfig_highSeverity(contextHighSeverity),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"google_scc_v2_organization_mute_config.default", "description", "A test organization mute config with high severity"),
@@ -76,7 +75,7 @@ func TestAccSecurityCenterv2OrganizationMuteConfig_basic(t *testing.T) {
 	})
 }
 
-func testAccSecurityCenterv2OrganizationMuteConfig_basic(context map[string]interface{}) string {
+func testAccSecurityCenterV2OrganizationMuteConfig_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_scc_v2_organization_mute_config" "default" {
   description          = "A test organization mute config"
@@ -88,7 +87,7 @@ resource "google_scc_v2_organization_mute_config" "default" {
 `, context)
 }
 
-func testAccSecurityCenterv2OrganizationMuteConfig_highSeverity(context map[string]interface{}) string {
+func testAccSecurityCenterV2OrganizationMuteConfig_highSeverity(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_scc_v2_organization_mute_config" "default" {
   description          = "A test organization mute config with high severity"
@@ -98,4 +97,27 @@ resource "google_scc_v2_organization_mute_config" "default" {
   parent               = "organizations/%{org_id}"
 }
 `, context)
+}
+func testAccCheckSecurityCenterV2OrganizationMuteConfigDestroyProducer(t *testing.T) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := acctest.Provider.Meta().(*acctest.Config)
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "google_scc_v2_organization_mute_config" {
+				continue
+			}
+			// Initialize Security Command Center Service
+			sc, err := securitycenter.NewService(context.Background(), config.GoogleClientOptions...)
+			if err != nil {
+				return fmt.Errorf("Error creating Security Command Center client: %s", err)
+			}
+			// Get the organization mute config by name
+			name := rs.Primary.ID
+			_, err = sc.Organizations.MuteConfigs.Get(name).Do()
+			if err == nil {
+				return fmt.Errorf("Organization mute config %s still exists", name)
+			}
+		}
+
+		return nil
+	}
 }

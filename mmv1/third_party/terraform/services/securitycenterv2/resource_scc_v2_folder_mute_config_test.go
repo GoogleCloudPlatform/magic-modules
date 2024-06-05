@@ -1,7 +1,6 @@
 package securitycenterv2_test
 
 import (
-	"context"
 	"fmt"
 	"testing"
 
@@ -10,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestAccSecurityCenterv2FolderMuteConfig_basic(t *testing.T) {
+func TestAccSecurityCenterV2FolderMuteConfig_basic(t *testing.T) {
 	t.Parallel()
 
 	contextBasic := map[string]interface{}{
@@ -30,7 +29,7 @@ func TestAccSecurityCenterv2FolderMuteConfig_basic(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckSecurityCenterv2FolderMuteConfigDestroyProducer(t),
+		CheckDestroy:             testAccCheckSecurityCenterV2FolderMuteConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSecurityCenterv2FolderMuteConfig_basic(contextBasic),
@@ -54,7 +53,7 @@ func TestAccSecurityCenterv2FolderMuteConfig_basic(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"parent", "folder_mute_config_id"},
 			},
 			{
-				Config: testAccSecurityCenterv2FolderMuteConfig_highSeverity(contextHighSeverity),
+				Config: testAccSecurityCenterV2FolderMuteConfig_highSeverity(contextHighSeverity),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"google_scc_v2_folder_mute_config.default", "description", "A test folder mute config with high severity"),
@@ -78,7 +77,7 @@ func TestAccSecurityCenterv2FolderMuteConfig_basic(t *testing.T) {
 	})
 }
 
-func testAccSecurityCenterv2FolderMuteConfig_basic(context map[string]interface{}) string {
+func testAccSecurityCenterV2FolderMuteConfig_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_scc_v2_folder_mute_config" "default" {
   description          = "A test folder mute config"
@@ -90,7 +89,7 @@ resource "google_scc_v2_folder_mute_config" "default" {
 `, context)
 }
 
-func testAccSecurityCenterv2FolderMuteConfig_highSeverity(context map[string]interface{}) string {
+func testAccSecurityCenterV2FolderMuteConfig_highSeverity(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_scc_v2_folder_mute_config" "default" {
   description          = "A test folder mute config with high severity"
@@ -100,4 +99,27 @@ resource "google_scc_v2_folder_mute_config" "default" {
   parent               = "folders/%{folder_id}"
 }
 `, context)
+}
+func testAccCheckSecurityCenterV2FolderMuteConfigDestroyProducer(t *testing.T) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := acctest.Provider.Meta().(*acctest.Config)
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "google_scc_v2_folder_mute_config" {
+				continue
+			}
+			// Initialize Security Command Center Service
+			sc, err := securitycenter.NewService(context.Background(), config.GoogleClientOptions...)
+			if err != nil {
+				return fmt.Errorf("Error creating Security Command Center client: %s", err)
+			}
+			// Get the folder mute config by name
+			name := rs.Primary.ID
+			_, err = sc.Folders.MuteConfigs.Get(name).Do()
+			if err == nil {
+				return fmt.Errorf("Folder mute config %s still exists", name)
+			}
+		}
+
+		return nil
+	}
 }
