@@ -21,7 +21,7 @@ func TestAccSecurityCenterManagementOrganizationFolderSecurityHealthAnalyticsCus
 
 	context := map[string]interface{}{
 		"org_id":        envvar.GetTestOrgFromEnv(t),
-		"location":      "us-central1",
+		"location":      "global",
 		"sleep":         true,
 		"random_suffix": acctest.RandString(t, 10),
 	}
