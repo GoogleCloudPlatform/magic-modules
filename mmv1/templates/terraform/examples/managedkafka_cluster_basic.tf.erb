@@ -19,16 +19,6 @@ resource "google_managed_kafka_cluster" "<%= ctx[:primary_resource_id] %>" {
     key = "value"
   }
 
-  depends_on = [google_project_service.managedkafka]
-
-  provider = google-beta
-}
-
-resource "google_project_service" "managedkafka" {
-  project = data.google_project.project.project_id
-  service = "managedkafka.googleapis.com"
-  disable_on_destroy = false
-
   provider = google-beta
 }
 
