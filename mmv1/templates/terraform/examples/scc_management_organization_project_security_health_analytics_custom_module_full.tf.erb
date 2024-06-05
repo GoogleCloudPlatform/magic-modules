@@ -1,4 +1,4 @@
-resource "google_scc_management_organization_project_security_health_analytics_custom_module" "<%= ctx[:primary_resource_id] %>" {
+resource "google_scc_management_project_security_health_analytics_custom_module" "<%= ctx[:primary_resource_id] %>" {
   location = "global"
   display_name = "<%= ctx[:vars]['display_name'] %>"
   enablement_state = "ENABLED"
