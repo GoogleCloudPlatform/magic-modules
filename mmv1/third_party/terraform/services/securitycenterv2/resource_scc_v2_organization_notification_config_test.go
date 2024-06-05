@@ -13,7 +13,6 @@ func TestAccSecurityCenterV2OrganizationNotificationConfig_basic(t *testing.T) {
 
     context := map[string]interface{}{
         "org_id":        envvar.GetTestOrgFromEnv(t),
-        "config_id":     acctest.RandString(t, 10),
         "random_suffix": acctest.RandString(t, 10),
     }
 
@@ -22,19 +21,18 @@ func TestAccSecurityCenterV2OrganizationNotificationConfig_basic(t *testing.T) {
         ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
         Steps: []resource.TestStep{
             {
-                Config: testAccSecurityCenterOrganizationNotificationConfig_basic(context),
+                Config: testAccSecurityCenterV2OrganizationNotificationConfig_basic(context),
             },
             {
                 ResourceName:      "google_scc_v2_organization_notification_config.default",
                 ImportState:       true,
                 ImportStateVerify: true,
                 ImportStateVerifyIgnore: []string{
-                    "parent",
                     "config_id",
                 },
             },
             {
-                Config: testAccSecurityCenterOrganizationNotificationConfig_update(context),
+                Config: testAccSecurityCenterV2OrganizationNotificationConfig_update(context),
             },
         },
     })
@@ -43,7 +41,7 @@ func TestAccSecurityCenterV2OrganizationNotificationConfig_basic(t *testing.T) {
 func testAccSecurityCenterV2OrganizationNotificationConfig_basic(context map[string]interface{}) string {
     return acctest.Nprintf(`
 resource "google_pubsub_topic" "scc_v2_organization_notification_config" {
-  name = "tf-test-topic-%s"
+  name = "tf-test-topic-%{random_suffix}"
 }
 
 resource "google_scc_v2_organization_notification_config" "default" {
