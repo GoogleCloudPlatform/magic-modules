@@ -126,12 +126,14 @@ parameters:
     required: false
     immutable: true
     default_from_api: true
+    url_param_only: true
     description: |
       The location or Compute Engine region for the environment.
   - !ruby/object:Api::Type::String
     name: 'environment'
     required: true
     immutable: true
+    url_param_only: true
     validation: !ruby/object:Provider::Terraform::Validation
       function: 'verify.ValidateGCEName'
     description: |
