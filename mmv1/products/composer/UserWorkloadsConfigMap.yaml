@@ -41,11 +41,11 @@ min_version: beta
 # URL for the resource's standard List method. https://google.aip.dev/132
 # Terraform field names enclosed in double curly braces are replaced with
 # the field values from the resource at runtime.
-base_url: 'projects/{{project}}/locations/{{location}}/environments/{{environment}}/UserWorkloadsConfigMaps'
+base_url: 'projects/{{project}}/locations/{{region}}/environments/{{environment}}/UserWorkloadsConfigMaps'
 # URL for the resource's standard Get method. https://google.aip.dev/131
 # Terraform field names enclosed in double curly braces are replaced with
 # the field values from the resource at runtime.
-self_link: 'projects/{{project}}/locations/{{location}}/environments/{{environment}}/UserWorkloadsConfigMaps/{{name}}'
+self_link: 'projects/{{project}}/locations/{{region}}/environments/{{environment}}/UserWorkloadsConfigMaps/{{name}}'
 
 # If true, the resource and all its fields are considered immutable - that is,
 # only creatable, not updatable. Individual fields can override this if they
@@ -62,7 +62,7 @@ timeouts: !ruby/object:Api::Timeouts
 # https://google.aip.dev/133
 # Terraform field names enclosed in double curly braces are replaced with
 # the field values from the resource at runtime.
-create_url: 'projects/{{project}}/locations/{{location}}/environments/{{environment}}/UserWorkloadsConfigMaps'
+create_url: 'projects/{{project}}/locations/{{region}}/environments/{{environment}}/UserWorkloadsConfigMaps'
 # Overrides the HTTP verb used to create a new resource.
 # Allowed values: :POST, :PUT, :PATCH. Default: :POST
 # create_verb: :POST
