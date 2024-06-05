@@ -30,7 +30,7 @@ update_verb: 'PATCH'
 update_mask: true
 delete_url: 'projects/{{project}}/locations/global/domains/{{domain_name}}'
 import_format:
-    - '{{name}}'
+  - '{{name}}'
 timeouts:
   insert_minutes: 60
   update_minutes: 60
