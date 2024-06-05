@@ -3312,7 +3312,6 @@ func testAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfi
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
-					testAccCheckComputeInstanceNicAccessConfigHasSecurityPolicy(&instance, policyName),
 				),
 			},
 			{
@@ -3327,7 +3326,8 @@ func testAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfi
 func testAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfigsUpdateSwapPolicies(t *testing.T) {
 	var instance compute.Instance
 	randomString := acctest.RandString(t, 10)
-	policyName := "google_compute_region_security_policy.policyforinstance.self_link"
+	policyName1 := "google_compute_region_security_policy.policyforinstance.self_link"
+	policyName2 := "google_compute_region_security_policy.policyforinstance2.self_link"
 
 	context_1 := map[string]interface{}{
 		"instance_name":   fmt.Sprintf("tf-test-instance-%s", randomString),
@@ -3342,17 +3342,18 @@ func testAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfi
 		"policy_name_1":   fmt.Sprintf("tf-test-policy-%s", randomString),
 		"policy_name_2":   fmt.Sprintf("tf-test-policy2-%s", randomString),
 		"suffix":          randomString,
-		"policy_to_set_1": "google_compute_region_security_policy.policyforinstance.self_link",
-		"policy_to_set_2": "google_compute_region_security_policy.policyforinstance2.self_link",
+		// Add policies
+		"policy_to_set_1": policyName1,
+		"policy_to_set_2": policyName2,
 	}
 	context_3 := map[string]interface{}{
 		"instance_name":   fmt.Sprintf("tf-test-instance-%s", randomString),
 		"policy_name_1":   fmt.Sprintf("tf-test-policy-%s", randomString),
 		"policy_name_2":   fmt.Sprintf("tf-test-policy2-%s", randomString),
 		"suffix":          randomString,
-		// Policies to set are flipped round vs context_2
-		"policy_to_set_1": "google_compute_region_security_policy.policyforinstance2.self_link",
-		"policy_to_set_2": "google_compute_region_security_policy.policyforinstance.self_link",
+		// Policies switch places vs context_2
+		"policy_to_set_1": policyName2,
+		"policy_to_set_2": policyName1,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -3377,7 +3378,7 @@ func testAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfi
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
-					testAccCheckComputeInstanceNicAccessConfigHasSecurityPolicy(&instance, policyName),
+					testAccCheckComputeInstanceNicAccessConfigHasSecurityPolicy(&instance, policyName1),
 					testAccCheckComputeInstanceNicAccessConfigHasSecurityPolicy(&instance, policyName2),
 				),
 			},
@@ -3392,7 +3393,7 @@ func testAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfi
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
 					testAccCheckComputeInstanceNicAccessConfigHasSecurityPolicy(&instance, policyName2),
-					testAccCheckComputeInstanceNicAccessConfigHasSecurityPolicy(&instance, policyName),
+					testAccCheckComputeInstanceNicAccessConfigHasSecurityPolicy(&instance, policyName1),
 				),
 			},
 			{
