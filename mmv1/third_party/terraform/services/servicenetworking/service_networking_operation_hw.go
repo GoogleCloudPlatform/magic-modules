@@ -8,14 +8,14 @@ import (
 	"google.golang.org/api/servicenetworking/v1"
 )
 
-type ServiceNetworkingOperationWaiter struct {
+type ServiceNetworkingOperationWaiterHW struct {
 	Service             *servicenetworking.APIService
 	Project             string
 	UserProjectOverride bool
 	tpgresource.CommonOperationWaiter
 }
 
-func (w *ServiceNetworkingOperationWaiter) QueryOp() (interface{}, error) {
+func (w *ServiceNetworkingOperationWaiterHW) QueryOp() (interface{}, error) {
 	opGetCall := w.Service.Operations.Get(w.Op.Name)
 	if w.UserProjectOverride {
 		opGetCall.Header().Add("X-Goog-User-Project", w.Project)
@@ -23,8 +23,8 @@ func (w *ServiceNetworkingOperationWaiter) QueryOp() (interface{}, error) {
 	return opGetCall.Do()
 }
 
-func ServiceNetworkingOperationWaitTime(config *transport_tpg.Config, op *servicenetworking.Operation, activity, userAgent, project string, timeout time.Duration) error {
-	w := &ServiceNetworkingOperationWaiter{
+func ServiceNetworkingOperationWaitTimeHW(config *transport_tpg.Config, op *servicenetworking.Operation, activity, userAgent, project string, timeout time.Duration) error {
+	w := &ServiceNetworkingOperationWaiterHW{
 		Service:             config.NewServiceNetworkingClient(userAgent),
 		Project:             project,
 		UserProjectOverride: config.UserProjectOverride,
