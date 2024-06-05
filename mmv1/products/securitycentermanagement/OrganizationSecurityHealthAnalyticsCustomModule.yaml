@@ -23,9 +23,9 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Overview of custom modules for Security Health Analytics': 'https://cloud.google.com/security-command-center/docs/custom-modules-sha-overview'
   api: 'https://cloud.google.com/security-command-center/docs/reference/security-center-management/rest/v1/organizations.locations.securityHealthAnalyticsCustomModules'
-base_url: 'organizations/{{organization}}/locations/{location}/securityHealthAnalyticsCustomModules'
-self_link: 'organizations/{{organization}}/locations/{location}/securityHealthAnalyticsCustomModules/{{name}}'
-mutex: 'organizations/{{organization}}/locations/{location}/securityHealthAnalyticsCustomModules'
+base_url: 'organizations/{{organization}}/locations/{{location}}/securityHealthAnalyticsCustomModules'
+self_link: 'organizations/{{organization}}/locations/{{location}}/securityHealthAnalyticsCustomModules/{{name}}'
+mutex: 'organizations/{{organization}}/locations/{{location}}/securityHealthAnalyticsCustomModules'
 update_verb: :PATCH
 update_mask: true
 examples:
