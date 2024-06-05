@@ -157,16 +157,9 @@ func testAccComposerUserWorkloadsConfigMapDestroyed(t *testing.T) func(s *terraf
 			if len(idTokens) != 8 {
 				return fmt.Errorf("Invalid ID %q, expected format projects/{project}/regions/{region}/environments/{environment}/userWorkloadsConfigMaps/{name}", rs.Primary.ID)
 			}
-			configMapName := &composer.UserWorkloadsConfigMapName{
-				Project:		 idTokens[1],
-				Region:			 idTokens[3],
-				Environment: idTokens[5],
-				ConfigMap:   idTokens[7],
-			}
-
-			_, err := config.NewComposerClient(config.UserAgent).Projects.Locations.Environments.UserWorkloadsConfigMaps.Get(configMapName.ResourceName()).Do()
+			_, err := config.NewComposerClient(config.UserAgent).Projects.Locations.Environments.UserWorkloadsConfigMaps.Get(rs.Primary.ID).Do()
 			if err == nil {
-				return fmt.Errorf("config map %s still exists", configMapName.ResourceName())
+				return fmt.Errorf("config map %s still exists", rs.Primary.ID)
 			}
 		}
 
