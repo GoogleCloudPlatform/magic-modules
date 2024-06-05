@@ -669,9 +669,9 @@ resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
   network    = data.google_compute_network.default.id
-	initial_user {
-		password = "tf-test-alloydb-cluster%{random_suffix}"
-	}
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
+  }
 }
 
 data "google_project" "project" {}
@@ -704,9 +704,9 @@ resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
   network    = data.google_compute_network.default.id
-	initial_user {
-		password = "tf-test-alloydb-cluster%{random_suffix}"
-	}
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
+  }
 }
 
 data "google_project" "project" {}
