@@ -6,10 +6,8 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	"google.golang.org/api/securitycenter/v1"
 )
 
 func TestAccSecurityCenterv2OrganizationMuteConfig_basic(t *testing.T) {
@@ -100,32 +98,4 @@ resource "google_scc_v2_organization_mute_config" "default" {
   parent               = "organizations/%{org_id}"
 }
 `, context)
-}
-
-func testAccCheckSecurityCenterv2OrganizationMuteConfigDestroyProducer(t *testing.T) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		config := acctest.Provider.Meta().(*acctest.Config)
-
-		for _, rs := range s.RootModule().Resources {
-			if rs.Type != "google_scc_v2_organization_mute_config" {
-				continue
-			}
-
-			// Initialize Security Command Center Service
-			sc, err := securitycenter.NewService(context.Background(), config.GoogleClientOptions...)
-			if err != nil {
-				return fmt.Errorf("Error creating Security Command Center client: %s", err)
-			}
-
-			// Get the organization mute config by name
-			name := rs.Primary.ID
-
-			_, err = sc.Organizations.MuteConfigs.Get(name).Do()
-			if err == nil {
-				return fmt.Errorf("Organization mute config %s still exists", name)
-			}
-		}
-
-		return nil
-	}
 }

@@ -6,10 +6,8 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	"google.golang.org/api/securitycenter/v1"
 )
 
 func TestAccSecurityCenterv2FolderMuteConfig_basic(t *testing.T) {
@@ -102,32 +100,4 @@ resource "google_scc_v2_folder_mute_config" "default" {
   parent               = "folders/%{folder_id}"
 }
 `, context)
-}
-
-func testAccCheckSecurityCenterv2FolderMuteConfigDestroyProducer(t *testing.T) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		config := acctest.Provider.Meta().(*acctest.Config)
-
-		for _, rs := range s.RootModule().Resources {
-			if rs.Type != "google_scc_v2_folder_mute_config" {
-				continue
-			}
-
-			// Initialize Security Command Center Service
-			sc, err := securitycenter.NewService(context.Background(), config.GoogleClientOptions...)
-			if err != nil {
-				return fmt.Errorf("Error creating Security Command Center client: %s", err)
-			}
-
-			// Get the folder mute config by name
-			name := rs.Primary.ID
-
-			_, err = sc.Folders.MuteConfigs.Get(name).Do()
-			if err == nil {
-				return fmt.Errorf("Folder mute config %s still exists", name)
-			}
-		}
-
-		return nil
-	}
 }
