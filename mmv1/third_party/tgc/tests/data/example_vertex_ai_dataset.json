@@ -1,6 +1,6 @@
 [
   {
-    "name": "//aiplatform.googleapis.com/placeholder-KT1s0sEk",
+    "name": "//aiplatform.googleapis.com/placeholder-VSDAy5Fn",
     "asset_type": "aiplatform.googleapis.com/Dataset",
     "resource": {
       "version": "v1beta1",
@@ -17,6 +17,5 @@
     },
     "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
     "ancestors": ["organizations/{{.OrgID}}"]
-
   }
 ]
