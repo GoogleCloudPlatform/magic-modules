@@ -79,7 +79,7 @@ func testAccSecurityCenterV2ProjectMuteConfig_basic(context map[string]interface
 resource "google_scc_v2_project_mute_config" "default" {
   description          = "A test project mute config"
   filter               = "severity = \"LOW\""
-  project_mute_config_id = "tf-test-my-config%{random_suffix}"
+  mute_config_id = "tf-test-my-config%{random_suffix}"
   location             = "%{location}"
   parent               = "projects/%{project_id}"
 }
@@ -91,7 +91,7 @@ func testAccSecurityCenterV2ProjectMuteConfig_highSeverity(context map[string]in
 resource "google_scc_v2_project_mute_config" "default" {
   description          = "A test project mute config with high severity"
   filter               = "severity = \"HIGH\""
-  project_mute_config_id = "tf-test-my-config%{random_suffix}"
+  mute_config_id = "tf-test-my-config%{random_suffix}"
   location             = "%{location}"
   parent               = "projects/%{project_id}"
 }

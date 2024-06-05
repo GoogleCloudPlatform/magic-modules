@@ -79,7 +79,7 @@ func testAccSecurityCenterV2OrganizationMuteConfig_basic(context map[string]inte
 resource "google_scc_v2_organization_mute_config" "default" {
   description          = "A test organization mute config"
   filter               = "severity = \"LOW\""
-  organization_mute_config_id = "tf-test-my-config%{random_suffix}"
+  mute_config_id = "tf-test-my-config%{random_suffix}"
   location             = "%{location}"
   parent               = "organizations/%{org_id}"
 }
@@ -91,7 +91,7 @@ func testAccSecurityCenterV2OrganizationMuteConfig_highSeverity(context map[stri
 resource "google_scc_v2_organization_mute_config" "default" {
   description          = "A test organization mute config with high severity"
   filter               = "severity = \"HIGH\""
-  organization_mute_config_id = "tf-test-my-config%{random_suffix}"
+  mute_config_id = "tf-test-my-config%{random_suffix}"
   location             = "%{location}"
   parent               = "organizations/%{org_id}"
 }

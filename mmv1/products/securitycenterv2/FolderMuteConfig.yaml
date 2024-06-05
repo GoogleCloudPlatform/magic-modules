@@ -30,7 +30,7 @@ examples:
     name: 'scc_v2_folder_mute_config_basic'
     primary_resource_id: 'default'
     vars:
-      folder_mute_config_id: 'my-config'
+      mute_config_id: 'my-config'
     test_env_vars:
       org_id: :ORG_ID
 # Skipping sweeper since this is a child resource

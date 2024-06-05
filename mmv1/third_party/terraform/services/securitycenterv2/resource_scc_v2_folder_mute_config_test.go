@@ -81,7 +81,7 @@ func testAccSecurityCenterV2FolderMuteConfig_basic(context map[string]interface{
 resource "google_scc_v2_folder_mute_config" "default" {
   description          = "A test folder mute config"
   filter               = "severity = \"LOW\""
-  folder_mute_config_id = "tf-test-my-config%{random_suffix}"
+  mute_config_id = "tf-test-my-config%{random_suffix}"
   location             = "%{location}"
   parent               = "folders/%{folder_id}"
 }
@@ -93,7 +93,7 @@ func testAccSecurityCenterV2FolderMuteConfig_highSeverity(context map[string]int
 resource "google_scc_v2_folder_mute_config" "default" {
   description          = "A test folder mute config with high severity"
   filter               = "severity = \"HIGH\""
-  folder_mute_config_id = "tf-test-my-config%{random_suffix}"
+  mute_config_id = "tf-test-my-config%{random_suffix}"
   location             = "%{location}"
   parent               = "folders/%{folder_id}"
 }
