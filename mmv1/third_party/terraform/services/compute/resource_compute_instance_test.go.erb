@@ -8902,8 +8902,8 @@ resource "google_compute_instance" "foobar" {
 `, context)
 }
 
-func testAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfigsUpdateTwoPoliciesRemoveAccessConfig(suffix, policy, policy2, instance, policyToSetOne, policyToSetTwo string) string {
-	return fmt.Sprintf(`
+func testAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfigsUpdateTwoPoliciesRemoveAccessConfig(context map[string]interface{}) string {
+	return acctest.Nprintf(`
 data "google_compute_image" "my_image" {
   family  = "debian-11"
   project = "debian-cloud"
@@ -8912,7 +8912,7 @@ data "google_compute_image" "my_image" {
 # First activate advanced network DDoS protection for the desired region
 resource "google_compute_region_security_policy" "policyddosprotection" {
   region      = "europe-west1"
-  name        = "tf-test-policyddosprotection-%s"
+  name        = "tf-test-policyddosprotection-%{suffix}"
   description = "region security policy for instance"
   type        = "CLOUD_ARMOR_NETWORK"
   ddos_protection_config {
@@ -8922,19 +8922,19 @@ resource "google_compute_region_security_policy" "policyddosprotection" {
 
 resource "google_compute_network_edge_security_service" "edge_sec_service" {
   region          = "europe-west1"
-  name            = "tf-test-edgesecservice-%s"
+  name            = "tf-test-edgesecservice-%{suffix}"
   description     = "My basic resource using security policy"
   security_policy = google_compute_region_security_policy.policyddosprotection.self_link
 }
 
 resource "google_compute_network" "net" {
-  name                    = "tf-test-network-%s"
+  name                    = "tf-test-network-%{suffix}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "subnet" {
   region                     = "europe-west1"
-  name                       = "tf-test-subnet-%s"
+  name                       = "tf-test-subnet-%{suffix}"
   ip_cidr_range              = "192.168.0.0/16"
   purpose                    = "PRIVATE"
   stack_type                 = "IPV4_ONLY"
@@ -8943,7 +8943,7 @@ resource "google_compute_subnetwork" "subnet" {
 
 resource "google_compute_subnetwork" "subnet-ipv6" {
   region                     = "europe-west1"
-  name                       = "tf-test-subnet-ip6-%s"
+  name                       = "tf-test-subnet-ip6-%{suffix}"
   ip_cidr_range              = "10.0.0.0/22"
   purpose                    = "PRIVATE"
   stack_type                 = "IPV4_IPV6"
@@ -8953,12 +8953,12 @@ resource "google_compute_subnetwork" "subnet-ipv6" {
 
 resource "google_compute_address" "normal-address" {
   region   = "europe-west1"
-  name     = "tf-test-addr-normal-%s"
+  name     = "tf-test-addr-normal-%{suffix}"
 }
 
 resource "google_compute_address" "ipv6-address" {
   region             = "europe-west1"
-  name               = "tf-test-addr-ipv6-%s"
+  name               = "tf-test-addr-ipv6-%{suffix}"
   address_type       = "EXTERNAL"
   ip_version         = "IPV6"
   network_tier       = "PREMIUM"
@@ -8967,13 +8967,13 @@ resource "google_compute_address" "ipv6-address" {
 }
 
 resource "google_compute_network" "net2" {
-  name                    = "tf-test-network2-%s"
+  name                    = "tf-test-network2-%{suffix}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "subnet2" {
   region                     = "europe-west1"
-  name                       = "tf-test-subnet2-%s"
+  name                       = "tf-test-subnet2-%{suffix}"
   ip_cidr_range              = "192.170.0.0/20"
   purpose                    = "PRIVATE"
   stack_type                 = "IPV4_ONLY"
@@ -8982,7 +8982,7 @@ resource "google_compute_subnetwork" "subnet2" {
   
 resource "google_compute_subnetwork" "subnet-ipv62" {
   region                     = "europe-west1"
-  name                       = "tf-test-subnet-ip62-%s"
+  name                       = "tf-test-subnet-ip62-%{suffix}"
   ip_cidr_range              = "10.10.0.0/20"
   purpose                    = "PRIVATE"
   stack_type                 = "IPV4_IPV6"
@@ -8992,12 +8992,12 @@ resource "google_compute_subnetwork" "subnet-ipv62" {
 
 resource "google_compute_address" "normal-address2" {
   region   = "europe-west1"
-  name     = "tf-test-addr-normal2-%s"
+  name     = "tf-test-addr-normal2-%{suffix}"
 }
   
 resource "google_compute_address" "ipv6-address2" {
   region             = "europe-west1"
-  name               = "tf-test-addr-ipv62-%s"
+  name               = "tf-test-addr-ipv62-%{suffix}"
   address_type       = "EXTERNAL"
   ip_version         = "IPV6"
   network_tier       = "PREMIUM"
@@ -9043,8 +9043,8 @@ resource "google_compute_instance" "foobar" {
       name                        = "external-ipv6-access-config"
       network_tier                = "PREMIUM"
     }
-	# access config removed
-	security_policy = %s
+    # access config removed
+    security_policy = %{policy_to_set_2}
   }
 
   network_interface {
@@ -9057,15 +9057,15 @@ resource "google_compute_instance" "foobar" {
       name                        = "external-ipv6-access-config"
       network_tier                = "PREMIUM"
     }
-	# access config removed
-	security_policy = %s
+    # access config removed
+    security_policy = %{policy_to_set_2}
   }
 
   metadata = {
     foo = "bar"
   }
 }
-`, suffix, suffix, suffix, suffix, suffix, suffix, suffix, suffix, suffix, suffix, suffix, suffix, policy, policy2, instance, policyToSetOne, policyToSetTwo)
+`, context)
 }
 
 func testAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndAccessConfigsWithEmptyAndNullSecurityPolicies(suffix, instance string) string {
