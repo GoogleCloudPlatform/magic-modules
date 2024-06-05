@@ -258,6 +258,37 @@ func TestAccComputeSecurityPolicy_withAdaptiveProtection(t *testing.T) {
 	})
 }
 
+func TestAccComputeSecurityPolicy_withoutAdaptiveProtection(t *testing.T) {
+	t.Parallel()
+
+	spName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeSecurityPolicyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// Can create with layer 7 protection disabled
+				Config: testAccComputeSecurityPolicy_withAdaptiveProtection_disabled(spName),
+			},
+			{
+				ResourceName:      "google_compute_security_policy.policy",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				// Can update to layer 7 protection enabled
+				Config: testAccComputeSecurityPolicy_withAdaptiveProtection_enabled(spName),
+			},
+			{
+				// Can update to layer 7 protection disabled again
+				Config: testAccComputeSecurityPolicy_withAdaptiveProtection_disabled(spName),
+			},
+		},
+	})
+}
+
 <% unless version == 'ga' -%>
 func TestAccComputeSecurityPolicy_withAdaptiveProtectionAutoDeployConfig(t *testing.T) {
 	t.Parallel()
