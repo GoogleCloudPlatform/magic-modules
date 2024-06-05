@@ -9,9 +9,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
-	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
-	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccComposerUserWorkloadsConfigMap_composerUserWorkloadsConfigMapBasicExample_update(t *testing.T) {
@@ -87,7 +87,6 @@ func TestAccComposerUserWorkloadsConfigMap_composerUserWorkloadsConfigMapBasicEx
 func testAccComposerUserWorkloadsConfigMap_composerUserWorkloadsConfigMapBasicExample_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_composer_environment" "environment" {
-  provider = google-beta
   name   = "tf-test-test-environment%{random_suffix}"
   region = "us-central1"
   config {
@@ -98,7 +97,6 @@ resource "google_composer_environment" "environment" {
 }
 
 resource "google_composer_user_workloads_config_map" "config_map" {
-  provider = google-beta
   name = "tf-test-test-config-map%{random_suffix}"
   region = "us-central1"
   environment = google_composer_environment.environment.name
@@ -112,7 +110,6 @@ resource "google_composer_user_workloads_config_map" "config_map" {
 func testAccComposerUserWorkloadsConfigMap_composerUserWorkloadsConfigMapBasicExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_composer_environment" "environment" {
-  provider = google-beta
   name   = "tf-test-test-environment%{random_suffix}"
   region = "us-central1"
   config {
@@ -123,7 +120,6 @@ resource "google_composer_environment" "environment" {
 }
 
 resource "google_composer_user_workloads_config_map" "config_map" {
-  provider = google-beta
   name = "tf-test-test-config-map%{random_suffix}"
   region = "us-central1"
   environment = google_composer_environment.environment.name
@@ -137,7 +133,6 @@ resource "google_composer_user_workloads_config_map" "config_map" {
 func testAccComposerUserWorkloadsConfigMap_composerUserWorkloadsConfigMapBasicExample_delete(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_composer_environment" "environment" {
-  provider = google-beta
   name   = "tf-test-test-environment%{random_suffix}"
   region = "us-central1"
   config {
