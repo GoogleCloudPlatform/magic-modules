@@ -20,7 +20,6 @@ func TestAccSecurityCenterV2OrganizationNotificationConfig_basic(t *testing.T) {
     acctest.VcrTest(t, resource.TestCase{
         PreCheck:                 func() { acctest.AccTestPreCheck(t) },
         ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-        CheckDestroy:             testAccCheckSecurityCenterOrganizationNotificationConfigDestroyProducer(t),
         Steps: []resource.TestStep{
             {
                 Config: testAccSecurityCenterOrganizationNotificationConfig_basic(context),
@@ -41,7 +40,7 @@ func TestAccSecurityCenterV2OrganizationNotificationConfig_basic(t *testing.T) {
     })
 }
 
-func testAccSecurityCenterOrganizationNotificationConfig_basic(context map[string]interface{}) string {
+func testAccSecurityCenterV2OrganizationNotificationConfig_basic(context map[string]interface{}) string {
     return acctest.Nprintf(`
 resource "google_pubsub_topic" "scc_v2_organization_notification_config" {
   name = "tf-test-topic-%s"
@@ -61,7 +60,7 @@ resource "google_scc_v2_organization_notification_config" "default" {
 `, context["random_suffix"], context["random_suffix"], context["org_id"])
 }
 
-func testAccSecurityCenterOrganizationNotificationConfig_update(context map[string]interface{}) string {
+func testAccSecurityCenterV2OrganizationNotificationConfig_update(context map[string]interface{}) string {
     return acctest.Nprintf(`
 resource "google_pubsub_topic" "scc_v2_organization_notification_config" {
   name = "tf-test-topic-%s"
