@@ -62,8 +62,6 @@ examples:
     vars:
       cloud_run_service_name: 'cloudrun-service'
       display_name: 'cloud-run-uptime-check'
-    test_env_vars:
-      project_id: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
     name: 'uptime_check_config_synthetic_monitor'
     primary_resource_id: 'synthetic_monitor'
