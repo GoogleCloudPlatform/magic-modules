@@ -119,7 +119,6 @@ examples:
     vars:
       environment_name: "test-environment"
       config_map_name: "test-config-map"
-      region: "us-central1"
 
 parameters:
   - !ruby/object:Api::Type::String
