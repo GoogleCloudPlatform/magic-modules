@@ -117,8 +117,8 @@ examples:
     name: "composer_user_workloads_config_map_basic"
     primary_resource_id: "config_map"
     vars:
-      environment_name: "test_environment_basic"
-      config_map_name: "test_config_map_basic"
+      environment_name: "test-environment"
+      config_map_name: "test-config-map"
       region: "us-central1"
 
 parameters:
