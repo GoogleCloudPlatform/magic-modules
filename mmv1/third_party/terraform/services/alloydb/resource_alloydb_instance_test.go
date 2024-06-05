@@ -655,9 +655,9 @@ resource "google_alloydb_instance" "default" {
   cluster       = google_alloydb_cluster.default.name
   instance_id   = "tf-test-alloydb-instance%{random_suffix}"
   instance_type = "PRIMARY"
-	database_flags = {
-		"password.enforce_complexity" = "on"
-	}
+  database_flags = {
+    "password.enforce_complexity" = "on"
+  }
 
   network_config {
     enable_public_ip = %{enable_public_ip}
@@ -688,9 +688,9 @@ resource "google_alloydb_instance" "default" {
   cluster       = google_alloydb_cluster.default.name
   instance_id   = "tf-test-alloydb-instance%{random_suffix}"
   instance_type = "PRIMARY"
-	database_flags = {
-		"password.enforce_complexity" = "on"
-	}
+  database_flags = {
+    "password.enforce_complexity" = "on"
+  }
 
   network_config {
     enable_public_ip = %{enable_public_ip}
