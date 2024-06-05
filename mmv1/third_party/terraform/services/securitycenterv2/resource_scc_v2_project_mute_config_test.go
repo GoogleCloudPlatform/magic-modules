@@ -7,9 +7,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func TestAccSecurityCenterv2ProjectMuteConfig_basic(t *testing.T) {
+func TestAccSecurityCenterV2ProjectMuteConfig_basic(t *testing.T) {
 	t.Parallel()
 
 	contextBasic := map[string]interface{}{
@@ -27,10 +29,10 @@ func TestAccSecurityCenterv2ProjectMuteConfig_basic(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckSecurityCenterv2ProjectMuteConfigDestroyProducer(t),
+		CheckDestroy:             testAccCheckSecurityCenterV2ProjectMuteConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSecurityCenterv2ProjectMuteConfig_basic(contextBasic),
+				Config: testAccSecurityCenterV2ProjectMuteConfig_basic(contextBasic),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"google_scc_v2_project_mute_config.default", "description", "A test project mute config"),
@@ -51,7 +53,7 @@ func TestAccSecurityCenterv2ProjectMuteConfig_basic(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"parent", "project_mute_config_id"},
 			},
 			{
-				Config: testAccSecurityCenterv2ProjectMuteConfig_highSeverity(contextHighSeverity),
+				Config: testAccSecurityCenterV2ProjectMuteConfig_highSeverity(contextHighSeverity),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"google_scc_v2_project_mute_config.default", "description", "A test project mute config with high severity"),
@@ -75,7 +77,7 @@ func TestAccSecurityCenterv2ProjectMuteConfig_basic(t *testing.T) {
 	})
 }
 
-func testAccSecurityCenterv2ProjectMuteConfig_basic(context map[string]interface{}) string {
+func testAccSecurityCenterV2ProjectMuteConfig_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_scc_v2_project_mute_config" "default" {
   description          = "A test project mute config"
@@ -87,7 +89,7 @@ resource "google_scc_v2_project_mute_config" "default" {
 `, context)
 }
 
-func testAccSecurityCenterv2ProjectMuteConfig_highSeverity(context map[string]interface{}) string {
+func testAccSecurityCenterV2ProjectMuteConfig_highSeverity(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_scc_v2_project_mute_config" "default" {
   description          = "A test project mute config with high severity"
@@ -98,9 +100,9 @@ resource "google_scc_v2_project_mute_config" "default" {
 }
 `, context)
 }
-func testAccCheckSecurityCenterv2ProjectMuteConfigDestroyProducer(t *testing.T) resource.TestCheckFunc {
+func testAccCheckSecurityCenterVS2ProjectMuteConfigDestroyProducer(t *testing.T) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := acctest.Provider.Meta().(*acctest.Config)
+		config := acctest.Provider.Meta().(*transport_tpg.Config)
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_scc_v2_project_mute_config" {
 				continue
