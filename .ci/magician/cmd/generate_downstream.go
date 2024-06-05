@@ -291,7 +291,7 @@ func runMake(downstreamRepo *source.Repo, command string, rnr ExecRunner) error 
 }
 
 func getPullRequest(baseBranch, ref string, gh GithubClient) (*github.PullRequest, error) {
-	prs, err := gh.GetPullRequests("closed", baseBranch, "updated", "desc")
+	prs, err := gh.GetPullRequests("open", baseBranch, "updated", "desc")
 	if err != nil {
 		return nil, err
 	}
