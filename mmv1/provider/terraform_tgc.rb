@@ -318,6 +318,8 @@ module Provider
                         'third_party/tgc/dataproc_cluster.go'],
                        ['converters/google/resources/composer_environment.go',
                         'third_party/tgc/composer_environment.go']
+                       ['converters/google/resources/commitment.go',
+                        'third_party/tgc/commitment.go']
                      ])
     end
 

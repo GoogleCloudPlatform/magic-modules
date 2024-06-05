@@ -97,7 +97,7 @@ The following arguments are supported:
 	{{- end }}
 {{- end }}
 
-{{- range $p := $.AllNestedProperties $.RootProperties }}
+{{- range $p := $.AllUserProperties }}
 	{{- if $p.Required }}
 {{- template "nestedPropertyDocumentation" $p}}
 	{{- end}}
@@ -120,7 +120,7 @@ The following arguments are supported:
 {{ if $.Docs.OptionalProperties }}
 {{ $.Docs.OptionalProperties }}
 {{- end }}
-{{- range $p := $.AllNestedProperties $.RootProperties }}
+{{- range $p := $.AllUserProperties }}
 	{{- if and (not $p.Required) (not $p.Output) }}
 {{- template "nestedPropertyDocumentation" $p -}}
 {{ end}}
@@ -138,7 +138,7 @@ In addition to the arguments listed above, the following computed attributes are
 {{- if $.HasSelfLink }}
 * `self_link` - The URI of the created resource.
 {{- end }}
-{{ range $p := $.AllNestedProperties $.RootProperties }}
+{{ range $p := $.AllUserProperties }}
 	{{- if $p.Output }}
 {{- template "nestedPropertyDocumentation" $p -}}
 	{{- end }}
