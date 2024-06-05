@@ -6,9 +6,6 @@ import (
 	"encoding/json"
 	<% end -%>
 	"fmt"
-	<% unless version == 'ga' -%>
-	"google.golang.org/api/googleapi"
-	<% end -%>
 	"reflect"
 	"regexp"
 	"sort"
@@ -16,6 +13,10 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	<% unless version == 'ga' -%>
+	"google.golang.org/api/googleapi"
+	<% end -%>
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
