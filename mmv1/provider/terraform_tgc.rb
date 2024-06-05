@@ -315,7 +315,9 @@ module Provider
                        ['converters/google/resources/compute_target_pool.go',
                         'third_party/tgc/compute_target_pool.go'],
                        ['converters/google/resources/dataproc_cluster.go',
-                        'third_party/tgc/dataproc_cluster.go']
+                        'third_party/tgc/dataproc_cluster.go'],
+                       ['converters/google/resources/commitment.go',
+                        'third_party/tgc/commitment.go']
                      ])
     end
 

@@ -56,7 +56,6 @@ description: |-
 
 # `{{ $.IamTerraformName }}_policy`
 Retrieves the current IAM policy data for {{ lower $.Name }}
-
 {{ if or (eq $.MinVersionObj.Name "beta") (eq $.IamPolicy.MinVersion "beta") }}
 ~> **Warning:** This datasource is in beta, and should be used with the terraform-provider-google-beta provider.
 See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
@@ -66,7 +65,7 @@ See [Provider Versions](https://terraform.io/docs/providers/google/guides/provid
 
 ```hcl
 data "{{ $.IamTerraformName }}_policy" "policy" {
-{{ if eq $.MinVersionObj.Name "beta" }}
+{{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{- end }}
 {{- $.CustomTemplate $.IamPolicy.ExampleConfigBody false }}
