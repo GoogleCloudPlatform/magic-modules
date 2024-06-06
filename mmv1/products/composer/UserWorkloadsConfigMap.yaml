@@ -142,6 +142,7 @@ parameters:
     name: 'name'
     required: true
     immutable: true
+    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
     validation: !ruby/object:Provider::Terraform::Validation
       function: 'verify.ValidateGCEName'
     description: |
