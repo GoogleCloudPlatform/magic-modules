@@ -190,6 +190,7 @@ properties:
     conflicts:
       - optimized
     min_version: beta
+    default_from_api: true
     deprecation_message: >-
               `embedding_management` is deprecated. This field is no longer needed anymore and embedding management is automatically enabled when specifying Optimized storage type
     properties:
