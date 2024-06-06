@@ -135,8 +135,10 @@ func execGenerateDownstream(baseBranch, command, repo, version, ref string, gh G
 		os.Exit(1)
 	}
 
+	fmt.Println("Changelog Dir Path: ", rnr.GetCWD())
+
 	var pullRequest *github.PullRequest
-	// if command == "downstream" {
+	if command == "downstream" {
 		pullRequest, err = getPullRequest(baseBranch, ref, gh)
 		if err != nil {
 			fmt.Println("Error getting pull request: ", err)
@@ -148,8 +150,7 @@ func execGenerateDownstream(baseBranch, command, repo, version, ref string, gh G
 				os.Exit(1)
 			}
 		}
-	// }
-
+	}
 
 	scratchCommitSha, commitErr := createCommit(scratchRepo, commitMessage, rnr)
 	if commitErr != nil {
@@ -291,7 +292,7 @@ func runMake(downstreamRepo *source.Repo, command string, rnr ExecRunner) error 
 }
 
 func getPullRequest(baseBranch, ref string, gh GithubClient) (*github.PullRequest, error) {
-	prs, err := gh.GetPullRequests("open", baseBranch, "updated", "desc")
+	prs, err := gh.GetPullRequests("closed", baseBranch, "updated", "desc")
 	if err != nil {
 		return nil, err
 	}
@@ -336,7 +337,6 @@ func createCommit(scratchRepo *source.Repo, commitMessage string, rnr ExecRunner
 
 func addChangelogEntry(pullRequest *github.PullRequest, rnr ExecRunner) error {
 	rnr.Mkdir(".changelog")
-	fmt.Println("Changelog Dir Path: ", rnr.GetCWD())
 	if err := rnr.WriteFile(filepath.Join(".changelog", fmt.Sprintf("%d.txt", pullRequest.Number)), strings.Join(changelogExp.FindAllString(pullRequest.Body, -1), "\n")); err != nil {
 		return err
 	}
