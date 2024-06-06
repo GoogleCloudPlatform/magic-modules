@@ -33,20 +33,28 @@ func TestAccSecurityCenterV2OrganizationNotificationConfig_basic(t *testing.T) {
 			},
 			{
 				Config: testAccSecurityCenterV2OrganizationNotificationConfig_update(context),
+				{
+					ResourceName:      "google_scc_v2_organization_notification_config.default",
+					ImportState:       true,
+					ImportStateVerify: true,
+					ImportStateVerifyIgnore: []string{
+						"config_id",
+					},
+				},
 			},
 		},
 	})
 }
 
 func testAccSecurityCenterV2OrganizationNotificationConfig_basic(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+    return acctest.Nprintf(`
 resource "google_pubsub_topic" "scc_v2_organization_notification_config" {
   name = "tf-test-topic-%{random_suffix}"
 }
 
 resource "google_scc_v2_organization_notification_config" "default" {
-  config_id    = "tf-test-config-%s"
-  organization = "%s"
+  config_id    = "tf-test-config-%{random_suffix}"
+  organization = "%{org_id}"
   location     = "global"
   description  = "A test organization notification config"
   pubsub_topic = google_pubsub_topic.scc_v2_organization_notification_config.id
@@ -55,18 +63,18 @@ resource "google_scc_v2_organization_notification_config" "default" {
     filter = "severity = \"HIGH\""
   }
 }
-`, context["random_suffix"], context["random_suffix"], context["org_id"])
+`, context)
 }
 
 func testAccSecurityCenterV2OrganizationNotificationConfig_update(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+    return acctest.Nprintf(`
 resource "google_pubsub_topic" "scc_v2_organization_notification_config" {
-  name = "tf-test-topic-%s"
+  name = "tf-test-topic-%{random_suffix}"
 }
 
 resource "google_scc_v2_organization_notification_config" "default" {
-  config_id    = "tf-test-config-%s"
-  organization = "%s"
+  config_id    = "tf-test-config-%{random_suffix}"
+  organization = "%{org_id}"
   location     = "global"
   description  = "An updated test organization notification config"
   pubsub_topic = google_pubsub_topic.scc_v2_organization_notification_config.id
@@ -75,5 +83,5 @@ resource "google_scc_v2_organization_notification_config" "default" {
     filter = "severity = \"CRITICAL\""
   }
 }
-`, context["random_suffix"], context["random_suffix"], context["org_id"])
+`, context)
 }
