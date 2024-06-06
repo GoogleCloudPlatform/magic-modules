@@ -135,6 +135,11 @@ func execGenerateDownstream(baseBranch, command, repo, version, ref string, gh G
 		os.Exit(1)
 	}
 
+	if err := rnr.PushDir(scratchRepo.Path); err != nil {
+		fmt.Println("Error changing directory: ", err)
+		os.Exit(1)
+	}
+
 	fmt.Println("Changelog Dir Path: ", rnr.GetCWD())
 
 	var pullRequest *github.PullRequest
