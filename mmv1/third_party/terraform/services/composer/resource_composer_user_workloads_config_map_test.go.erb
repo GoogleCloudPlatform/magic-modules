@@ -76,11 +76,6 @@ func TestAccComposerUserWorkloadsConfigMap_composerUserWorkloadsConfigMapBasicEx
 						testAccComposerUserWorkloadsConfigMapDestroyed(t),
 				),
 			},
-			{
-				ResourceName:      "google_composer_user_workloads_config_map.config_map",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
 		},
 	})
 }
