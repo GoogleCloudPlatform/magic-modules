@@ -3184,26 +3184,28 @@ func testAccComputeInstance_nic_securityPolicyCreateWithEmptyAndNullSecurityPoli
 
 func testAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfigsUpdateOnlyOnePolicy(t *testing.T) {
 	var instance compute.Instance
-	policyName1 := "google_compute_region_security_policy.policyforinstance.self_link"
-	policyName2 := "google_compute_region_security_policy.policyforinstance2.self_link"
+	policyName1 := fmt.Sprintf("tf-test-policy-%s", randomString)
+	policyName2 := fmt.Sprintf("tf-test-policy2-%s", randomString)
+	policyRef1 := "google_compute_region_security_policy.policyforinstance.self_link"
+	policyRef2 := "google_compute_region_security_policy.policyforinstance2.self_link"
 
 	randomString := acctest.RandString(t, 10)
 	context_1 := map[string]interface{}{
-		"instance_name":   fmt.Sprintf("tf-test-instance-%s", randomString),
-		"policy_name_1":   fmt.Sprintf("tf-test-policy-%s", randomString),
-		"policy_name_2":   fmt.Sprintf("tf-test-policy2-%s", randomString),
-		"suffix":          randomString,
-		"policy_to_set_1": policyName1,
-		"policy_to_set_2": policyName1,
+		"instance_name":    fmt.Sprintf("tf-test-instance-%s", randomString),
+		"policy_name_1":    policyName1,
+		"policy_name_2":    policyName2,
+		"suffix":           randomString,
+		"nic_1_policy_ref": policyRef1,
+		"nic_2_policy_ref": policyRef1,
 	}
 
 	context_2 := map[string]interface{}{
-		"instance_name":   fmt.Sprintf("tf-test-instance-%s", randomString),
-		"policy_name_1":   fmt.Sprintf("tf-test-policy-%s", randomString),
-		"policy_name_2":   fmt.Sprintf("tf-test-policy2-%s", randomString),
-		"suffix":          randomString,
-		"policy_to_set_1": policyName1,
-		"policy_to_set_2": policyName2,
+		"instance_name":    fmt.Sprintf("tf-test-instance-%s", randomString),
+		"policy_name_1":    policyName1,
+		"policy_name_2":    policyName2,
+		"suffix":           randomString,
+		"nic_1_policy_ref": policyRef1,
+		"nic_2_policy_ref": policyRef2,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -3279,14 +3281,13 @@ func testAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigsUpdateSe
 func testAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfigsUpdateRemoveAccessConfig(t *testing.T) {
 	var instance compute.Instance
 	randomString := acctest.RandString(t, 10)
-	policyName := "google_compute_region_security_policy.policyforinstance.self_link"
+	policyReference := "google_compute_region_security_policy.policyforinstance.self_link"
 	context := map[string]interface{}{
 		"instance_name":   fmt.Sprintf("tf-test-instance-%s", randomString),
-		"policy_name_1":   fmt.Sprintf("tf-test-policy-%s", randomString),
-		"policy_name_2":   fmt.Sprintf("tf-test-policy2-%s", randomString),
+		"policy_name":   fmt.Sprintf("tf-test-policy-%s", randomString),
 		"suffix":          randomString,
-		"policy_to_set_1": policyName,
-		"policy_to_set_2": policyName,
+		"nic_1_policy_ref": policyReference,
+		"nic_2_policy_ref": policyReference,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -3326,34 +3327,36 @@ func testAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfi
 func testAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfigsUpdateSwapPolicies(t *testing.T) {
 	var instance compute.Instance
 	randomString := acctest.RandString(t, 10)
-	policyName1 := "google_compute_region_security_policy.policyforinstance.self_link"
-	policyName2 := "google_compute_region_security_policy.policyforinstance2.self_link"
+	policyName1 := fmt.Sprintf("tf-test-policy-%s", randomString)
+	policyName2 := fmt.Sprintf("tf-test-policy2-%s", randomString)
+	policyRef1 := "google_compute_region_security_policy.policyforinstance.self_link"
+	policyRef2 := "google_compute_region_security_policy.policyforinstance2.self_link"
 
 	context_1 := map[string]interface{}{
 		"instance_name":   fmt.Sprintf("tf-test-instance-%s", randomString),
-		"policy_name_1":   fmt.Sprintf("tf-test-policy-%s", randomString),
-		"policy_name_2":   fmt.Sprintf("tf-test-policy2-%s", randomString),
+		"policy_name_1":   policyName1,
+		"policy_name_2":   policyName2,
 		"suffix":          randomString,
-		"policy_to_set_1": "\"\"",
-		"policy_to_set_2": "\"\"",
+		"nic_1_policy_ref": "\"\"",
+		"nic_2_policy_ref": "\"\"",
 	}
 	context_2 := map[string]interface{}{
 		"instance_name":   fmt.Sprintf("tf-test-instance-%s", randomString),
-		"policy_name_1":   fmt.Sprintf("tf-test-policy-%s", randomString),
-		"policy_name_2":   fmt.Sprintf("tf-test-policy2-%s", randomString),
+		"policy_name_1":   policyName1,
+		"policy_name_2":   policyName2,
 		"suffix":          randomString,
 		// Add policies
-		"policy_to_set_1": policyName1,
-		"policy_to_set_2": policyName2,
+		"nic_1_policy_ref": policyRef1,
+		"nic_2_policy_ref": policyRef2,
 	}
 	context_3 := map[string]interface{}{
 		"instance_name":   fmt.Sprintf("tf-test-instance-%s", randomString),
-		"policy_name_1":   fmt.Sprintf("tf-test-policy-%s", randomString),
-		"policy_name_2":   fmt.Sprintf("tf-test-policy2-%s", randomString),
+		"policy_name_1":   policyName1,
+		"policy_name_2":   policyName2,
 		"suffix":          randomString,
 		// Policies switch places vs context_2
-		"policy_to_set_1": policyName2,
-		"policy_to_set_2": policyName1,
+		"nic_1_policy_ref": policyRef2,
+		"nic_2_policy_ref": policyRef1,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -8788,7 +8791,7 @@ data "google_compute_image" "my_image" {
 # First activate advanced network DDoS protection for the desired region
 resource "google_compute_region_security_policy" "policyddosprotection" {
   region      = "europe-west1"
-  name        = "tf-test-policyddosprotection-%{suffix}"
+  name        = "%{policy_name_1}"
   description = "region security policy for instance"
   type        = "CLOUD_ARMOR_NETWORK"
   ddos_protection_config {
@@ -8923,7 +8926,7 @@ resource "google_compute_instance" "foobar" {
 	  network_tier = "PREMIUM"
       nat_ip = google_compute_address.normal-address.address
     }
-	security_policy = %{policy_to_set_1}
+	security_policy = %{nic_1_policy_ref}
   }
 
   network_interface {
@@ -8940,7 +8943,7 @@ resource "google_compute_instance" "foobar" {
 	  network_tier = "PREMIUM"
       nat_ip = google_compute_address.normal-address2.address
     }
-	security_policy = %{policy_to_set_2}
+	security_policy = %{nic_2_policy_ref}
   }
 
   metadata = {
@@ -8960,7 +8963,7 @@ data "google_compute_image" "my_image" {
 # First activate advanced network DDoS protection for the desired region
 resource "google_compute_region_security_policy" "policyddosprotection" {
   region      = "europe-west1"
-  name        = "tf-test-policyddosprotection-%{suffix}"
+  name        = "%{policy_name_1}"
   description = "region security policy for instance"
   type        = "CLOUD_ARMOR_NETWORK"
   ddos_protection_config {
@@ -9092,7 +9095,7 @@ resource "google_compute_instance" "foobar" {
       network_tier                = "PREMIUM"
     }
     # access config removed
-    security_policy = %{policy_to_set_2}
+    security_policy = %{nic_1_policy_ref}
   }
 
   network_interface {
@@ -9106,7 +9109,7 @@ resource "google_compute_instance" "foobar" {
       network_tier                = "PREMIUM"
     }
     # access config removed
-    security_policy = %{policy_to_set_2}
+    security_policy = %{nic_2_policy_ref}
   }
 
   metadata = {
