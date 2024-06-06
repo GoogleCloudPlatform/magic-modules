@@ -87,8 +87,8 @@ func ResourceStorageBucketObject() *schema.Resource {
 			},
 
 			"content": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
 				ExactlyOneOf: []string{"source"},
 				Sensitive:    true,
 				Computed:     true,
