@@ -8981,23 +8981,7 @@ data "google_compute_image" "my_image" {
   project = "debian-cloud"
 }
 
-# First activate advanced network DDoS protection for the desired region
-resource "google_compute_region_security_policy" "policyddosprotection" {
-  region      = "europe-west1"
-  name        = "tf-test-policyddosprotection-%{suffix}"
-  description = "region security policy for instance"
-  type        = "CLOUD_ARMOR_NETWORK"
-  ddos_protection_config {
-    ddos_protection = "ADVANCED_PREVIEW"
-  }
-}
-
-resource "google_compute_network_edge_security_service" "edge_sec_service" {
-  region          = "europe-west1"
-  name            = "tf-test-edgesecservice-%{suffix}"
-  description     = "My basic resource using security policy"
-  security_policy = google_compute_region_security_policy.policyddosprotection.self_link
-}
+# Remove DDoS protection for the desired region
 
 resource "google_compute_network" "net" {
   name                    = "tf-test-network-%{suffix}"
@@ -9153,23 +9137,7 @@ data "google_compute_image" "my_image" {
   project = "debian-cloud"
 }
 
-# First activate advanced network DDoS protection for the desired region
-resource "google_compute_region_security_policy" "policyddosprotection" {
-  region      = "europe-west1"
-  name        = "%{policy_name_1}"
-  description = "region security policy for instance"
-  type        = "CLOUD_ARMOR_NETWORK"
-  ddos_protection_config {
-    ddos_protection = "ADVANCED_PREVIEW"
-  }
-}
-
-resource "google_compute_network_edge_security_service" "edge_sec_service" {
-  region          = "europe-west1"
-  name            = "tf-test-edgesecservice-%{suffix}"
-  description     = "My basic resource using security policy"
-  security_policy = google_compute_region_security_policy.policyddosprotection.self_link
-}
+# Remove DDoS protection for the desired region
 
 resource "google_compute_network" "net" {
   name                    = "tf-test-network-%{suffix}"
