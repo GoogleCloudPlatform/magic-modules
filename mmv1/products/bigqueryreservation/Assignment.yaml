@@ -13,9 +13,10 @@
 
 --- !ruby/object:Api::Resource
 name: ReservationAssignment
-base_url: projects/{{project}}/locations/{{location}}/reservations/{{reservation}}/assignments
-create_url: projects/{{project}}/locations/{{location}}/reservations/{{reservation}}/assignments
-self_link: projects/{{project}}/locations/{{location}}/reservations/{{reservation}}/assignments
+base_url: 'projects/{{project}}/locations/{{location}}/reservations/{{reservation}}/assignments'
+create_url: 'projects/{{project}}/locations/{{location}}/reservations/{{reservation}}/assignments'
+self_link: 'projects/{{project}}/locations/{{location}}/reservations/{{reservation}}/assignments'
+delete_url: 'projects/{{project}}/locations/{{location}}/reservations/{{reservation}}/assignments/{{name}}'
 nested_query: !ruby/object:Api::Resource::NestedQuery
   keys:
     - assignments
@@ -32,13 +33,14 @@ legacy_long_form_project: true
 description: ""
 immutable: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-  encoder: templates/terraform/encoders/bigquery_reservation_assignment.go.erb
+  pre_create: templates/terraform/pre_create/bigquery_reservation_assignment.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: location
     description: The location for the resource
     url_param_only: true
     immutable: true
+    default_from_api: true 
   - !ruby/object:Api::Type::ResourceRef
     name: reservation
     resource: reservation
@@ -61,17 +63,7 @@ properties:
     name: jobType
     description: Types of job, which could be specified when using the reservation.
     required: true
-    # values:
-    #   - :JOB_TYPE_UNSPECIFIED
-    #   - :PIPELINE
-    #   - :QUERY
-    # default_value: "PIPELINE"
   - !ruby/object:Api::Type::String
     name: state
     description: Assignment will remain in PENDING state if no active capacity commitment is present. It will become ACTIVE when some capacity commitment becomes active.
     output: true
-    # values:
-    #   - :STATE_UNSPECIFIED
-    #   - :PENDING
-    #   - :ACTIVE
-    # default_value: "PENDING"
