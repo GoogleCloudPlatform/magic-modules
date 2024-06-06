@@ -3184,12 +3184,12 @@ func testAccComputeInstance_nic_securityPolicyCreateWithEmptyAndNullSecurityPoli
 
 func testAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfigsUpdateOnlyOnePolicy(t *testing.T) {
 	var instance compute.Instance
+	randomString := acctest.RandString(t, 10)
 	policyName1 := fmt.Sprintf("tf-test-policy-%s", randomString)
 	policyName2 := fmt.Sprintf("tf-test-policy2-%s", randomString)
 	policyRef1 := "google_compute_region_security_policy.policyforinstance.self_link"
 	policyRef2 := "google_compute_region_security_policy.policyforinstance2.self_link"
 
-	randomString := acctest.RandString(t, 10)
 	context_1 := map[string]interface{}{
 		"instance_name":    fmt.Sprintf("tf-test-instance-%s", randomString),
 		"policy_name_1":    policyName1,
