@@ -81,37 +81,25 @@ parameters:
     immutable: true
     url_param_only: true
 properties:
-  - !ruby/object:Api::Type::Enum
+  - !ruby/object:Api::Type::String
     name: 'state'
     description: |
-      The state of the Backup Vault.
-    values:
-      - :STATE_UNSPECIFIED
-      - :CREATING
-      - :UPLOADING
-      - :READY
-      - :DELETING
-      - :ERROR
-      - :UPDATING
+      The state of the Backup Vault. Possible Values : [STATE_UNSPECIFIED, CREATING, UPLOADING, READY, DELETING, ERROR, UPDATING]
     output: true
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
-      An optional description of this resource.
+      A description of the backup with 2048 characters or less. Requests with longer descriptions will be rejected.
     required: false
   - !ruby/object:Api::Type::String
     name: 'volumeUsageBytes'
     description: |
       Size of the file system when the backup was created. When creating a new volume from the backup, the volume capacity will have to be at least as big.
     output: true
-  - !ruby/object:Api::Type::Enum
+  - !ruby/object:Api::Type::String
     name: 'backupType'
     description: |
-      Type of backup, manually created or created by a backup policy.
-    values:
-      - :TYPE_UNSPECIFIED
-      - :MANUAL
-      - :SCHEDULED
+      Type of backup, manually created or created by a backup policy. Possible Values : [TYPE_UNSPECIFIED, MANUAL, SCHEDULED]
     output: true
   - !ruby/object:Api::Type::String
     name: 'sourceVolume'
