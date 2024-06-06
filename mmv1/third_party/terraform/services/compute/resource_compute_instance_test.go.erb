@@ -3281,13 +3281,14 @@ func testAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigsUpdateSe
 func testAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfigsUpdateRemoveAccessConfig(t *testing.T) {
 	var instance compute.Instance
 	randomString := acctest.RandString(t, 10)
-	policyReference := "google_compute_region_security_policy.policyforinstance.self_link"
+	policyRef := "google_compute_region_security_policy.policyforinstance.self_link"
+	policyName := fmt.Sprintf("tf-test-policy-%s", randomString)
 	context := map[string]interface{}{
-		"instance_name":   fmt.Sprintf("tf-test-instance-%s", randomString),
-		"policy_name":   fmt.Sprintf("tf-test-policy-%s", randomString),
-		"suffix":          randomString,
-		"nic_1_policy_ref": policyReference,
-		"nic_2_policy_ref": policyReference,
+		"instance_name":    fmt.Sprintf("tf-test-instance-%s", randomString),
+		"policy_name":      policyName,
+		"suffix":           randomString,
+		"nic_1_policy_ref": policyRef,
+		"nic_2_policy_ref": policyRef,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
