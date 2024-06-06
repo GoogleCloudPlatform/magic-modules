@@ -58,7 +58,9 @@ examples:
 parameters:
   - name: 'name'
     type: String
-    description: "The ID to use for the schema, which will become the final component of the schema's resource name."
+    description:
+      The ID to use for the schema, which will become the final component of the
+      schema's resource name.
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
@@ -67,7 +69,7 @@ parameters:
 properties:
   - name: 'type'
     type: Enum
-    description: "The type of the schema definition"
+    description: The type of the schema definition
     default_value: TYPE_UNSPECIFIED
     enum_values:
       - 'TYPE_UNSPECIFIED'
