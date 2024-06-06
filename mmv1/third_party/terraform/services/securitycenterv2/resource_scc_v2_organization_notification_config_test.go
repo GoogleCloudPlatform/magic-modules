@@ -47,7 +47,7 @@ func TestAccSecurityCenterV2OrganizationNotificationConfig_basic(t *testing.T) {
 }
 
 func testAccSecurityCenterV2OrganizationNotificationConfig_basic(context map[string]interface{}) string {
-    return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_pubsub_topic" "scc_v2_organization_notification_config" {
   name = "tf-test-topic-%{random_suffix}"
 }
@@ -67,7 +67,7 @@ resource "google_scc_v2_organization_notification_config" "default" {
 }
 
 func testAccSecurityCenterV2OrganizationNotificationConfig_update(context map[string]interface{}) string {
-    return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_pubsub_topic" "scc_v2_organization_notification_config" {
   name = "tf-test-topic-%{random_suffix}"
 }
