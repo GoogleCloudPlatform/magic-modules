@@ -765,7 +765,7 @@ resource "google_alloydb_instance" "default" {
     cpu_count = 2
   }
   psc_instance_config {
-	allowed_consumer_projects = ["${data.google_project.project.number}", "1044355742748"]
+	allowed_consumer_projects = ["${data.google_project.project.number}", "alloydb-psc-cep"]
   }
 }
 resource "google_alloydb_cluster" "default" {
