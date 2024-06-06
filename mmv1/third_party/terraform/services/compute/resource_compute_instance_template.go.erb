@@ -382,6 +382,16 @@ Google Cloud KMS.`,
 				ForceNew:    true,
 				Description: `An alternative to using the startup-script metadata key, mostly to match the compute_instance resource. This replaces the startup-script metadata key on the created instance and thus the two mechanisms are not allowed to be used simultaneously.`,
 			},
+			<% unless version == 'ga' -%>
+			"partner_metadata": {
+				Type:                  schema.TypeMap,
+				Optional:              true,
+				DiffSuppressFunc:      ComparePartnerMetadataDiff,
+				DiffSuppressOnRefresh: true,
+				Elem:                  &schema.Schema{Type: schema.TypeString},
+				Description:           `Partner Metadata Map made available within the instance.`,
+			},
+			<% end -%>
 
 			"metadata_fingerprint": {
 				Type:        schema.TypeString,
@@ -1368,6 +1378,12 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 	if err != nil {
 		return err
 	}
+	<% unless version == 'ga' -%>
+	PartnerMetadata, err := resourceInstancePartnerMetadata(d)
+	if err != nil {
+		return err
+	}
+	<% end -%>
 
 	networks, err := expandNetworkInterfaces(d, config)
 	if err != nil {
@@ -1396,6 +1412,9 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 		MinCpuPlatform:             d.Get("min_cpu_platform").(string),
 		Disks:                      disks,
 		Metadata:                   metadata,
+		<% unless version == 'ga' -%>
+		PartnerMetadata:            PartnerMetadata,
+		<% end -%>
 		NetworkInterfaces:          networks,
 		NetworkPerformanceConfig:   networkPerformanceConfig,
 		Scheduling:                 scheduling,
@@ -1707,7 +1726,11 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 	}
 
 	splits := strings.Split(idStr, "/")
+	<% if version == "ga" -%>
 	instanceTemplate, err := config.NewComputeClient(userAgent).InstanceTemplates.Get(project, splits[len(splits)-1]).Do()
+	<% else -%>
+	instanceTemplate, err := config.NewComputeClient(userAgent).InstanceTemplates.Get(project, splits[len(splits)-1]).View("FULL").Do()
+	<% end -%>
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Instance Template %q", d.Get("name").(string)))
 	}
@@ -1733,6 +1756,18 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 			return fmt.Errorf("Error setting metadata: %s", err)
 		}
 	}
+
+	<% unless version == 'ga' -%>
+	if instanceTemplate.Properties.PartnerMetadata != nil {
+		partnerMetadata, err := flattenPartnerMetadata(instanceTemplate.Properties.PartnerMetadata)
+		if err != nil {
+			return fmt.Errorf("Error parsing partner metadata: %s", err)
+		}
+		if err = d.Set("partner_metadata", partnerMetadata); err != nil {
+			return fmt.Errorf("Error setting partner metadata: %s", err)
+		}
+	}
+	<% end -%>
 
 	// Set the tags fingerprint if there is one.
 	if instanceTemplate.Properties.Tags != nil {

@@ -14,6 +14,7 @@ package api
 
 import (
 	"fmt"
+	"maps"
 	"regexp"
 	"strings"
 
@@ -221,6 +222,9 @@ type Resource struct {
 
 	// If true, skip sweeper generation for this resource
 	SkipSweeper bool `yaml:"skip_sweeper"`
+
+	// Override sweeper settings
+	Sweeper resource.Sweeper
 
 	Timeouts *Timeouts
 
@@ -830,6 +834,10 @@ func (r Resource) HasProject() bool {
 	return strings.Contains(r.BaseUrl, "{{project}}") || strings.Contains(r.CreateUrl, "{{project}}")
 }
 
+func (r Resource) IncludeProjectForOperation() bool {
+	return strings.Contains(r.BaseUrl, "{{project}}") || (r.GetAsync().IsA("OpAsync") && r.GetAsync().IncludeProject)
+}
+
 // def region?
 func (r Resource) HasRegion() bool {
 	return strings.Contains(r.BaseUrl, "{{region}}") || strings.Contains(r.CreateUrl, "{{region}}")
@@ -1279,15 +1287,28 @@ func CompareByName(a, b *Type) int {
 	return strings.Compare(a.Name, b.Name)
 }
 
-func (r Resource) GetPropertyUpdateMasksGroups() map[string][]string {
-	maskGroups := map[string][]string{}
-	for _, prop := range r.AllUserProperties() {
+func (r Resource) GetPropertyUpdateMasksGroupKeys(properties []*Type) []string {
+	keys := []string{}
+	for _, prop := range properties {
 		if prop.FlattenObject {
-			prop.GetNestedPropertyUpdateMasksGroups(maskGroups, prop.ApiName)
+			k := r.GetPropertyUpdateMasksGroupKeys(prop.Properties)
+			keys = append(keys, k...)
+		} else {
+			keys = append(keys, google.Underscore(prop.Name))
+		}
+	}
+	return keys
+}
+
+func (r Resource) GetPropertyUpdateMasksGroups(properties []*Type, maskPrefix string) map[string][]string {
+	maskGroups := map[string][]string{}
+	for _, prop := range properties {
+		if prop.FlattenObject {
+			maps.Copy(maskGroups, r.GetPropertyUpdateMasksGroups(prop.Properties, prop.ApiName))
 		} else if len(prop.UpdateMaskFields) > 0 {
 			maskGroups[google.Underscore(prop.Name)] = prop.UpdateMaskFields
 		} else {
-			maskGroups[google.Underscore(prop.Name)] = []string{prop.ApiName}
+			maskGroups[google.Underscore(prop.Name)] = []string{maskPrefix + prop.ApiName}
 		}
 	}
 	return maskGroups
@@ -1307,4 +1328,27 @@ func FormatDocDescription(desc string) string {
 
 func (r Resource) CustomTemplate(templatePath string, appendNewline bool) string {
 	return resource.ExecuteTemplate(&r, templatePath, appendNewline)
+}
+
+// Returns the key of the list of resources in the List API response
+// Used to get the list of resources to sweep
+func (r Resource) ResourceListKey() string {
+	var k string
+	if r.NestedQuery != nil && len(r.NestedQuery.Keys) > 0 {
+		k = r.NestedQuery.Keys[0]
+	}
+
+	if k == "" {
+		k = r.CollectionUrlKey
+	}
+
+	return k
+}
+
+func (r Resource) ListUrlTemplate() string {
+	return strings.Replace(r.CollectionUrl(), "zones/{{zone}}", "aggregated", 1)
+}
+
+func (r Resource) DeleteUrlTemplate() string {
+	return fmt.Sprintf("%s%s", r.ProductMetadata.BaseUrl, r.DeleteUri())
 }
