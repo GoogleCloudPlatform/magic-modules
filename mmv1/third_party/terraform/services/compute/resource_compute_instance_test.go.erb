@@ -3282,11 +3282,16 @@ func testAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfi
 	var instance compute.Instance
 	randomString := acctest.RandString(t, 10)
 	policyRef := "google_compute_region_security_policy.policyforinstance.self_link"
-	policyName := fmt.Sprintf("tf-test-policy-%s", randomString)
+	policyName1 := fmt.Sprintf("tf-test-policy-%s", randomString)
+	policyName2 := fmt.Sprintf("tf-test-policy2-%s", acctest.RandString(t, 10))
+
 	context := map[string]interface{}{
 		"instance_name":    fmt.Sprintf("tf-test-instance-%s", randomString),
-		"policy_name":      policyName,
+		"policy_name_1":    policyName1,
+		"policy_name_2":    policyName2,
 		"suffix":           randomString,
+
+		// This test intentionally has >1 policies provisioned but only uses one to define network interfaces
 		"nic_1_policy_ref": policyRef,
 		"nic_2_policy_ref": policyRef,
 	}
@@ -3301,7 +3306,7 @@ func testAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfi
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
-					testAccCheckComputeInstanceNicAccessConfigHasSecurityPolicy(&instance, policyName),
+					testAccCheckComputeInstanceNicAccessConfigHasSecurityPolicy(&instance, policyName1),
 				),
 			},
 			{
