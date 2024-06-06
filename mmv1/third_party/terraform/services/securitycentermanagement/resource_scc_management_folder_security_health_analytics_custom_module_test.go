@@ -16,7 +16,7 @@ import (
 
 // Custom Module tests cannot be run in parallel without running into 409 Conflict reponses.
 // Run them as individual steps of an update test instead.
-func TestAccSecurityCenterManagementOrganizationFolderSecurityHealthAnalyticsCustomModule(t *testing.T) {
+func TestAccSecurityCenterManagementFolderSecurityHealthAnalyticsCustomModule(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -33,31 +33,31 @@ func TestAccSecurityCenterManagementOrganizationFolderSecurityHealthAnalyticsCus
 			"random": {},
 			"time":   {},
 		},
-		CheckDestroy: testAccCheckSecurityCenterManagementOrganizationFolderSecurityHealthAnalyticsCustomModuleDestroyProducer(t),
+		CheckDestroy: testAccCheckSecurityCenterManagementFolderSecurityHealthAnalyticsCustomModuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSecurityCenterManagementOrganizationFolderSecurityHealthAnalyticsCustomModule_sccFolderCustomModuleBasicExample(context),
+				Config: testAccSecurityCenterManagementFolderSecurityHealthAnalyticsCustomModule_sccFolderCustomModuleBasicExample(context),
 			},
 			{
-				ResourceName:            "google_scc_management_organization_folder_security_health_analytics_custom_module.example",
+				ResourceName:            "google_scc_management_folder_security_health_analytics_custom_module.example",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"folder", "location"},
 			},
 			{
-				Config: testAccSecurityCenterManagementOrganizationFolderSecurityHealthAnalyticsCustomModule_sccFolderCustomModuleFullExample(context),
+				Config: testAccSecurityCenterManagementFolderSecurityHealthAnalyticsCustomModule_sccFolderCustomModuleFullExample(context),
 			},
 			{
-				ResourceName:            "google_scc_management_organization_folder_security_health_analytics_custom_module.example",
+				ResourceName:            "google_scc_management_folder_security_health_analytics_custom_module.example",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"folder", "location"},
 			},
 			{
-				Config: testAccSecurityCenterManagementOrganizationFolderSecurityHealthAnalyticsCustomModule_sccFolderCustomModuleUpdate(context),
+				Config: testAccSecurityCenterManagementFolderSecurityHealthAnalyticsCustomModule_sccFolderCustomModuleUpdate(context),
 			},
 			{
-				ResourceName:            "google_scc_management_organization_folder_security_health_analytics_custom_module.example",
+				ResourceName:            "google_scc_management_folder_security_health_analytics_custom_module.example",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"folder", "location"},
@@ -66,7 +66,7 @@ func TestAccSecurityCenterManagementOrganizationFolderSecurityHealthAnalyticsCus
 	})
 }
 
-func testAccSecurityCenterManagementOrganizationFolderSecurityHealthAnalyticsCustomModule_sccFolderCustomModuleBasicExample(context map[string]interface{}) string {
+func testAccSecurityCenterManagementFolderSecurityHealthAnalyticsCustomModule_sccFolderCustomModuleBasicExample(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_folder" "folder" {
   parent       = "organizations/%{org_id}"
@@ -79,7 +79,7 @@ resource "time_sleep" "wait_1_minute" {
 	create_duration = "2m"
 }
 
-resource "google_scc_management_organization_folder_security_health_analytics_custom_module" "example" {
+resource "google_scc_management_folder_security_health_analytics_custom_module" "example" {
 	folder = google_folder.folder.folder_id
 	location = "%{location}"
 	display_name = "tf_test_basic_custom_module%{random_suffix}"
@@ -104,14 +104,14 @@ resource "google_scc_management_organization_folder_security_health_analytics_cu
 `, context)
 }
 
-func testAccSecurityCenterManagementOrganizationFolderSecurityHealthAnalyticsCustomModule_sccFolderCustomModuleFullExample(context map[string]interface{}) string {
+func testAccSecurityCenterManagementFolderSecurityHealthAnalyticsCustomModule_sccFolderCustomModuleFullExample(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_folder" "folder" {
   parent       = "organizations/%{org_id}"
   display_name = "tf-test-folder-name%{random_suffix}"
 }
 
-resource "google_scc_management_organization_folder_security_health_analytics_custom_module" "example" {
+resource "google_scc_management_folder_security_health_analytics_custom_module" "example" {
 	folder = google_folder.folder.folder_id
 	location = "%{location}"
 	display_name = "tf_test_full_custom_module%{random_suffix}"
@@ -147,14 +147,14 @@ resource "google_scc_management_organization_folder_security_health_analytics_cu
 `, context)
 }
 
-func testAccSecurityCenterManagementOrganizationFolderSecurityHealthAnalyticsCustomModule_sccFolderCustomModuleUpdate(context map[string]interface{}) string {
+func testAccSecurityCenterManagementFolderSecurityHealthAnalyticsCustomModule_sccFolderCustomModuleUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_folder" "folder" {
   parent       = "organizations/%{org_id}"
   display_name = "tf-test-folder-name%{random_suffix}"
 }
 
-resource "google_scc_management_organization_folder_security_health_analytics_custom_module" "example" {
+resource "google_scc_management_folder_security_health_analytics_custom_module" "example" {
 	folder = google_folder.folder.folder_id
 	location = "%{location}"
 	display_name = "tf_test_full_custom_module%{random_suffix}"
@@ -190,10 +190,10 @@ resource "google_scc_management_organization_folder_security_health_analytics_cu
 `, context)
 }
 
-func testAccCheckSecurityCenterManagementOrganizationFolderSecurityHealthAnalyticsCustomModuleDestroyProducer(t *testing.T) func(s *terraform.State) error {
+func testAccCheckSecurityCenterManagementFolderSecurityHealthAnalyticsCustomModuleDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		for name, rs := range s.RootModule().Resources {
-			if rs.Type != "google_scc_folder_custom_module" {
+			if rs.Type != "google_scc_management_folder_security_health_analytics_custom_module" {
 				continue
 			}
 			if strings.HasPrefix(name, "data.") {
@@ -225,7 +225,7 @@ func testAccCheckSecurityCenterManagementOrganizationFolderSecurityHealthAnalyti
 				UserAgent: config.UserAgent,
 			})
 			if err == nil {
-				return fmt.Errorf("SecurityCenterManagementOrganizationFolderSecurityHealthAnalyticsCustomModule still exists at %s", url)
+				return fmt.Errorf("SecurityCenterManagementFolderSecurityHealthAnalyticsCustomModule still exists at %s", url)
 			}
 		}
 

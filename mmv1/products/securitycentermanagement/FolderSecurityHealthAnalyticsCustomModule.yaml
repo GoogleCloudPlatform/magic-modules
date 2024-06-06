@@ -30,7 +30,7 @@ update_verb: :PATCH
 update_mask: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "scc_management_organization_folder_security_health_analytics_custom_module_basic"
+    name: "scc_management_folder_security_health_analytics_custom_module_basic"
     primary_resource_id: "example"
     external_providers: ["random", "time"]
     skip_test: true
@@ -43,7 +43,7 @@ examples:
     test_vars_overrides:
       sleep: "true"
   - !ruby/object:Provider::Terraform::Examples
-    name: "scc_management_organization_folder_security_health_analytics_custom_module_full"
+    name: "scc_management_folder_security_health_analytics_custom_module_full"
     primary_resource_id: "example"
     external_providers: ["random", "time"]
     skip_test: true
