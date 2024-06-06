@@ -85,6 +85,10 @@ resource "google_scc_v2_folder_mute_config" "default" {
   location             = "%{location}"
   parent               = "folders/%{folder_id}"
 }
+resource "google_folder" "default" {
+	display_name = "A test folder mute config"
+	parent       = "folders/%{folder_id}"
+  }
 `, context)
 }
 
@@ -97,5 +101,9 @@ resource "google_scc_v2_folder_mute_config" "default" {
   location             = "%{location}"
   parent               = "folders/%{folder_id}"
 }
+resource "google_folder" "default" {
+	display_name = "A test folder mute config"
+	parent       = "folders/%{folder_id}"
+  }
 `, context)
 }
