@@ -738,156 +738,259 @@ func TestShouldNotify(t *testing.T) {
 }
 
 func TestFormatReminderComment(t *testing.T) {
+	firstCoreReviewer := membership.AvailableReviewers()[0]
+	secondCoreReviewer := membership.AvailableReviewers()[1]
 	cases := map[string]struct {
+		pullRequest        *github.PullRequest
 		state              pullRequestReviewState
-		data               reminderCommentData
+		sinceDays          int
 		expectedStrings    []string
 		notExpectedStrings []string
 	}{
 		// waitingForMerge
 		"waitingForMerge one week": {
-			state: waitingForMerge,
-			data: reminderCommentData{
-				PullRequest: &github.PullRequest{},
-				SinceDays:   5,
+			pullRequest: &github.PullRequest{
+				User: &github.User{Login: github.String("pr-author")},
+				RequestedReviewers: []*github.User{
+					&github.User{Login: github.String(firstCoreReviewer)},
+					&github.User{Login: github.String(secondCoreReviewer)},
+					&github.User{Login: github.String("other-reviewer")},
+				},
 			},
+			state: waitingForMerge,
+			sinceDays: 5,
 			expectedStrings: []string{
 				"waiting for merge for 1 week",
 				"disable-review-reminders",
+				"@" + firstCoreReviewer,
+				"@" + secondCoreReviewer,
+			},
+			notExpectedStrings: []string{
+				"@pr-author",
+				"@other-reviewer",
 			},
 		},
 		"waitingForMerge two weeks": {
-			state: waitingForMerge,
-			data: reminderCommentData{
-				PullRequest: &github.PullRequest{},
-				SinceDays:   5 * 2,
+			pullRequest: &github.PullRequest{
+				User: &github.User{Login: github.String("pr-author")},
+				RequestedReviewers: []*github.User{
+					&github.User{Login: github.String(firstCoreReviewer)},
+					&github.User{Login: github.String(secondCoreReviewer)},
+					&github.User{Login: github.String("other-reviewer")},
+				},
 			},
+			state:     waitingForMerge,
+			sinceDays: 5 * 2,
 			expectedStrings: []string{
 				"waiting for merge for 2 weeks",
 				"disable-review-reminders",
+				"@" + firstCoreReviewer,
+				"@" + secondCoreReviewer,
+			},
+			notExpectedStrings: []string{
+				"@pr-author",
+				"@other-reviewer",
 			},
 		},
 		"waitingForMerge many weeks": {
-			state: waitingForMerge,
-			data: reminderCommentData{
-				PullRequest: &github.PullRequest{},
-				SinceDays:   5 * 57,
+			pullRequest: &github.PullRequest{
+				User: &github.User{Login: github.String("pr-author")},
+				RequestedReviewers: []*github.User{
+					&github.User{Login: github.String(firstCoreReviewer)},
+					&github.User{Login: github.String(secondCoreReviewer)},
+					&github.User{Login: github.String("other-reviewer")},
+				},
 			},
+			state:     waitingForMerge,
+			sinceDays: 5 * 57,
 			expectedStrings: []string{
 				"waiting for merge for 57 weeks",
 				"disable-review-reminders",
+				"@" + firstCoreReviewer,
+				"@" + secondCoreReviewer,
+			},
+			notExpectedStrings: []string{
+				"@pr-author",
+				"@other-reviewer",
 			},
 		},
 
 		// waitingForReview
-		"waitingForReview two days": {
-			state: waitingForReview,
-			data: reminderCommentData{
-				PullRequest: &github.PullRequest{},
-				SinceDays:   3,
+		"waitingForReview three days": {
+			pullRequest: &github.PullRequest{
+				User: &github.User{Login: github.String("pr-author")},
+				RequestedReviewers: []*github.User{
+					&github.User{Login: github.String(firstCoreReviewer)},
+					&github.User{Login: github.String(secondCoreReviewer)},
+					&github.User{Login: github.String("other-reviewer")},
+				},
 			},
+			state:     waitingForReview,
+			sinceDays: 3,
 			expectedStrings: []string{
 				"waiting for review for 3 weekdays",
 				"disable-review-reminders",
+				"@" + firstCoreReviewer,
+				"@" + secondCoreReviewer,
 			},
 			notExpectedStrings: []string{
 				"@GoogleCloudPlatform/terraform-team",
+				"@pr-author",
+				"@other-reviewer",
 			},
 		},
 		"waitingForReview one week": {
-			state: waitingForReview,
-			data: reminderCommentData{
-				PullRequest: &github.PullRequest{},
-				SinceDays:   5,
+			pullRequest: &github.PullRequest{
+				User: &github.User{Login: github.String("pr-author")},
+				RequestedReviewers: []*github.User{
+					&github.User{Login: github.String(firstCoreReviewer)},
+					&github.User{Login: github.String(secondCoreReviewer)},
+					&github.User{Login: github.String("other-reviewer")},
+				},
 			},
+			state:     waitingForReview,
+			sinceDays: 5,
 			expectedStrings: []string{
 				"@GoogleCloudPlatform/terraform-team",
 				"waiting for review for 1 week",
 				"disable-review-reminders",
+				"@" + firstCoreReviewer,
+				"@" + secondCoreReviewer,
+			},
+			notExpectedStrings: []string{
+				"@pr-author",
+				"@other-reviewer",
 			},
 		},
 		"waitingForReview two weeks": {
-			state: waitingForReview,
-			data: reminderCommentData{
-				PullRequest: &github.PullRequest{},
-				SinceDays:   10,
+			pullRequest: &github.PullRequest{
+				User: &github.User{Login: github.String("pr-author")},
+				RequestedReviewers: []*github.User{
+					&github.User{Login: github.String(firstCoreReviewer)},
+					&github.User{Login: github.String(secondCoreReviewer)},
+					&github.User{Login: github.String("other-reviewer")},
+				},
 			},
+			state:     waitingForReview,
+			sinceDays: 10,
 			expectedStrings: []string{
 				"@GoogleCloudPlatform/terraform-team",
 				"waiting for review for 2 weeks",
 				"disable-review-reminders",
+				"@" + firstCoreReviewer,
+				"@" + secondCoreReviewer,
+			},
+			notExpectedStrings: []string{
+				"@pr-author",
+				"@other-reviewer",
 			},
 		},
 
 		// waitingForContributor
 		"waitingForContributor two weeks": {
-			state: waitingForContributor,
-			data: reminderCommentData{
-				PullRequest: &github.PullRequest{
-					User: &github.User{Login: github.String("pr-author")},
+			pullRequest: &github.PullRequest{
+				User: &github.User{Login: github.String("pr-author")},
+				RequestedReviewers: []*github.User{
+					&github.User{Login: github.String(firstCoreReviewer)},
+					&github.User{Login: github.String(secondCoreReviewer)},
+					&github.User{Login: github.String("other-reviewer")},
 				},
-				SinceDays: 10,
 			},
+			state:     waitingForContributor,
+			sinceDays: 10,
 			expectedStrings: []string{
 				"@pr-author",
 				"If no action is taken, this PR will be closed in 28 days",
 				"disable-automatic-closure",
 			},
+			notExpectedStrings: []string{
+				"@" + firstCoreReviewer,
+				"@" + secondCoreReviewer,
+				"@other-reviewer",
+			},
 		},
 		"waitingForContributor four weeks": {
-			state: waitingForContributor,
-			data: reminderCommentData{
-				PullRequest: &github.PullRequest{
-					User: &github.User{Login: github.String("pr-author")},
+			pullRequest: &github.PullRequest{
+				User: &github.User{Login: github.String("pr-author")},
+				RequestedReviewers: []*github.User{
+					&github.User{Login: github.String(firstCoreReviewer)},
+					&github.User{Login: github.String(secondCoreReviewer)},
+					&github.User{Login: github.String("other-reviewer")},
 				},
-				SinceDays: 20,
 			},
+			state:     waitingForContributor,
+			sinceDays: 20,
 			expectedStrings: []string{
 				"@pr-author",
 				"If no action is taken, this PR will be closed in 14 days",
 				"disable-automatic-closure",
 			},
+			notExpectedStrings: []string{
+				"@" + firstCoreReviewer,
+				"@" + secondCoreReviewer,
+				"@other-reviewer",
+			},
 		},
 		"waitingForContributor 28 days": {
-			state: waitingForContributor,
-			data: reminderCommentData{
-				PullRequest: &github.PullRequest{
-					User: &github.User{Login: github.String("pr-author")},
+			pullRequest: &github.PullRequest{
+				User: &github.User{Login: github.String("pr-author")},
+				RequestedReviewers: []*github.User{
+					&github.User{Login: github.String(firstCoreReviewer)},
+					&github.User{Login: github.String(secondCoreReviewer)},
+					&github.User{Login: github.String("other-reviewer")},
 				},
-				SinceDays: 28,
 			},
+			state:     waitingForContributor,
+			sinceDays: 28,
 			expectedStrings: []string{
 				"@pr-author",
 				"If no action is taken, this PR will be closed in 2 weekdays",
 				"disable-automatic-closure",
 			},
+			notExpectedStrings: []string{
+				"@" + firstCoreReviewer,
+				"@" + secondCoreReviewer,
+				"@other-reviewer",
+			},
 		},
 		"waitingForContributor six weeks": {
-			state: waitingForContributor,
-			data: reminderCommentData{
-				PullRequest: &github.PullRequest{
-					User: &github.User{Login: github.String("pr-author")},
+			pullRequest: &github.PullRequest{
+				User: &github.User{Login: github.String("pr-author")},
+				RequestedReviewers: []*github.User{
+					&github.User{Login: github.String(firstCoreReviewer)},
+					&github.User{Login: github.String(secondCoreReviewer)},
+					&github.User{Login: github.String("other-reviewer")},
 				},
-				SinceDays: 30,
 			},
+			state:           waitingForContributor,
+			sinceDays:       30,
 			expectedStrings: []string{"@pr-author", "PR is being closed due to inactivity"},
 			notExpectedStrings: []string{
 				"If no action is taken, this PR will be closed",
 				"disable-automatic-closure",
+				"@" + firstCoreReviewer,
+				"@" + secondCoreReviewer,
+				"@other-reviewer",
 			},
 		},
 		"waitingForContributor seven weeks": {
-			state: waitingForContributor,
-			data: reminderCommentData{
-				PullRequest: &github.PullRequest{
-					User: &github.User{Login: github.String("pr-author")},
+			pullRequest: &github.PullRequest{
+				User: &github.User{Login: github.String("pr-author")},
+				RequestedReviewers: []*github.User{
+					&github.User{Login: github.String(firstCoreReviewer)},
+					&github.User{Login: github.String(secondCoreReviewer)},
+					&github.User{Login: github.String("other-reviewer")},
 				},
-				SinceDays: 35,
 			},
+			state:           waitingForContributor,
+			sinceDays:       35,
 			expectedStrings: []string{"@pr-author", "PR is being closed due to inactivity"},
 			notExpectedStrings: []string{
 				"If no action is taken, this PR will be closed",
 				"disable-automatic-closure",
+				"@" + firstCoreReviewer,
+				"@" + secondCoreReviewer,
+				"@other-reviewer",
 			},
 		},
 	}
@@ -897,7 +1000,7 @@ func TestFormatReminderComment(t *testing.T) {
 		t.Run(tn, func(t *testing.T) {
 			t.Parallel()
 
-			comment, err := formatReminderComment(tc.state, tc.data)
+			comment, err := formatReminderComment(tc.pullRequest, tc.state, tc.sinceDays)
 			assert.Nil(t, err)
 
 			for _, s := range tc.expectedStrings {

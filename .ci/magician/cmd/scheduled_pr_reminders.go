@@ -49,9 +49,9 @@ var (
 )
 
 type reminderCommentData struct {
-	PullRequest *github.PullRequest
-	State       pullRequestReviewState
-	SinceDays   int
+	User          string
+	SinceDays     int
+	CoreReviewers []string
 }
 
 // scheduledPrReminders sends automated PR notifications and closes stale PRs
@@ -165,10 +165,7 @@ func execScheduledPrReminders(gh *github.Client) error {
 		)
 		sinceDays := businessDaysDiff(since, time.Now())
 		if shouldNotify(pr, state, sinceDays) {
-			comment, err := formatReminderComment(state, reminderCommentData{
-				PullRequest: pr,
-				SinceDays:   sinceDays,
-			})
+			comment, err := formatReminderComment(pr, state, sinceDays)
 			if err != nil {
 				fmt.Printf(
 					"%d/%d: PR %d: error rendering comment: %s\n",
@@ -426,7 +423,7 @@ func shouldNotify(pr *github.PullRequest, state pullRequestReviewState, sinceDay
 	return false
 }
 
-func formatReminderComment(state pullRequestReviewState, data reminderCommentData) (string, error) {
+func formatReminderComment(pullRequest *github.PullRequest, state pullRequestReviewState, sinceDays int) (string, error) {
 	embeddedTemplate := ""
 	switch state {
 	case waitingForMerge:
@@ -446,6 +443,20 @@ func formatReminderComment(state pullRequestReviewState, data reminderCommentDat
 	if err != nil {
 		panic(fmt.Sprintf("Unable to parse template for %s: %s", state.String(), err))
 	}
+
+	coreReviewers := []string{}
+	for _, reviewer := range pullRequest.RequestedReviewers {
+		if membership.IsCoreReviewer(*reviewer.Login) {
+			coreReviewers = append(coreReviewers, *reviewer.Login)
+		}
+	}
+
+	data := reminderCommentData{
+		User:          *pullRequest.User.Login,
+		SinceDays:     sinceDays,
+		CoreReviewers: coreReviewers,
+	}
+
 	sb := new(strings.Builder)
 	err = tmpl.Execute(sb, data)
 	if err != nil {
