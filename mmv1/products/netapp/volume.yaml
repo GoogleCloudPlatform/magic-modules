@@ -452,6 +452,29 @@ properties:
             description: |-
               Set the day or days of the month to make a snapshot (1-31). Accepts a comma separated number of days. Defaults to '1'.
             default_value: '1'
+  - !ruby/object:Api::Type::NestedObject
+    name: 'backupConfig'
+    description: |-
+      Backup configuration for the volume.
+    update_mask_fields:
+      - 'backup_config.backup_policies'
+      - 'backup_config.backup_vault'
+      - 'backup_config.scheduled_backup_enabled'
+    properties:
+      - !ruby/object:Api::Type::Array
+        name: 'backupPolicies'
+        description: |-
+          Specify a single backup policy ID for scheduled backups. Format: `projects/{{projectId}}/locations/{{location}}/backupPolicies/{{backupPolicyName}}`
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::String
+        name: 'backupVault'
+        description: |-
+          ID of the backup vault to use. A backup vault is reqired to create manual or scheduled backups.
+          Format: `projects/{{projectId}}/locations/{{location}}/backupVaults/{{backupVaultName}}`
+      - !ruby/object:Api::Type::Boolean
+        name: 'scheduledBackupEnabled'
+        description: |-
+          When set to true, scheduled backup is enabled on the volume. Omit if no backup_policy is specified.
 virtual_fields:
   - !ruby/object:Api::Type::Enum
     name: 'deletion_policy'
