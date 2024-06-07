@@ -87,6 +87,7 @@ resource "google_scc_v2_organization_mute_config" "organization_mute_test1" {
   mute_config_id       = "tf-test-my-config%{random_suffix}"
   location             = "%{location}"
   parent               = "${google_organization.test1.id}"
+  type                 =  "static"
 }
 `, context)
 }
@@ -104,6 +105,7 @@ resource "google_scc_v2_organization_mute_config" "organization_mute_test2" {
   mute_config_id       = "tf-test-my-config%{random_suffix}"
   location             = "%{location}"
   parent               = "${google_organization.test2.id}"
+  type                 =  "static"
 }
 `, context)
 }

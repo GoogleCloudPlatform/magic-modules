@@ -8,4 +8,5 @@ resource "google_scc_v2_folder_mute_config" "<%= ctx[:primary_resource_id] %>" {
 	parent         = google_folder.default.id  # Using the ID of the google_folder resource
 	description    = "My custom Cloud Security Command Center Mute Configuration"
 	filter         = "severity = \"HIGH\""
+	type                 =  "static"
 }

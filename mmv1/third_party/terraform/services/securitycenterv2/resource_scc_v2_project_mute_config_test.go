@@ -91,6 +91,7 @@ resource "google_scc_v2_project_mute_config" "project_mute_test1" {
   mute_config_id       = "tf-test-my-config%{random_suffix}"
   location             = "%{location}"
   parent               = "projects/${google_project.google_project1.project_id}"
+  type                 =  "static"
 }
 `, context)
 }
@@ -109,6 +110,7 @@ resource "google_scc_v2_project_mute_config" "project_mute_test2" {
   mute_config_id       = "tf-test-my-config%{random_suffix}"
   location             = "%{location}"
   parent               = "projects/${google_project.google_project2.project_id}"
+  type                 =  "static"
 }
 `, context)
 }
