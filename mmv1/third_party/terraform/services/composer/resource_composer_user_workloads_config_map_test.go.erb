@@ -37,8 +37,8 @@ func TestAccComposerUserWorkloadsConfigMap_composerUserWorkloadsConfigMapBasicEx
 			{
 				Config: testAccComposerUserWorkloadsConfigMap_composerUserWorkloadsConfigMapBasicExample_update(context),
 				Check:  resource.ComposeTestCheckFunc(
-						resource.TestCheckResourceAttr("google_composer_user_workloads_config_map.test", "data.db_host", "dbhost:5432"),
-						resource.TestCheckNoResourceAttr("google_composer_user_workloads_config_map.test", "data.api_host"),
+						resource.TestCheckResourceAttr("google_composer_user_workloads_config_map.config_map", "data.db_host", "dbhost:5432"),
+						resource.TestCheckNoResourceAttr("google_composer_user_workloads_config_map.config_map", "data.api_host"),
 				),
 			},
 			{
