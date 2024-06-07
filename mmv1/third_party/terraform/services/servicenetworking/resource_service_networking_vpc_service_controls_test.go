@@ -11,15 +11,13 @@ import (
 
 func TestAccServiceNetworkingVPCServiceControls_update(t *testing.T) {
 	t.Parallel()
-
-	network := fmt.Sprintf("tf-test-example-network%s", acctest.RandString(t, 10))
-
+	suffix := acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccServiceNetworkingVPCServiceControls_full(network, "true"),
+				Config: testAccServiceNetworkingVPCServiceControls_full(suffix, "true"),
 			},
 			{
 				ResourceName:            "google_service_networking_vpc_service_controls.default",
@@ -28,7 +26,7 @@ func TestAccServiceNetworkingVPCServiceControls_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"network", "project", "service"},
 			},
 			{
-				Config: testAccServiceNetworkingVPCServiceControls_full(network, "false"),
+				Config: testAccServiceNetworkingVPCServiceControls_full(suffix, "false"),
 			},
 			{
 				ResourceName:            "google_service_networking_vpc_service_controls.default",
@@ -40,16 +38,16 @@ func TestAccServiceNetworkingVPCServiceControls_update(t *testing.T) {
 	})
 }
 
-func testAccServiceNetworkingVPCServiceControls_full(network, enabled string) string {
+func testAccServiceNetworkingVPCServiceControls_full(suffix, enabled string) string {
 	return fmt.Sprintf(`
 # Create a VPC
 resource "google_compute_network" "default" {
-  name = "%s"
+  name = "tf-test-example-network%s"
 }
 
 # Create an IP address
 resource "google_compute_global_address" "default" {
-  name          = "psa-range"
+  name          = "tf-test-psa-range%s"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
   prefix_length = 16
@@ -70,5 +68,5 @@ resource "google_service_networking_vpc_service_controls" "default" {
   enabled    = %s
   depends_on = [google_service_networking_connection.default]
 }
-`, network, enabled)
+`, suffix, suffix, enabled)
 }

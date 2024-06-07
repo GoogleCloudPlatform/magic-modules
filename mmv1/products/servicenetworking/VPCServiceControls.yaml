@@ -61,6 +61,7 @@ examples:
     primary_resource_id: "default"
     vars:
       network_name: "example-network"
+      psa_range_name: "psa-range"
 autogen_async: true
 async: !ruby/object:Api::OpAsync
   actions: [] # we just need the boilerplate async code, we'll call the methods manually
