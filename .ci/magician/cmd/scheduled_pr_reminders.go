@@ -63,8 +63,7 @@ var scheduledPrReminders = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		githubToken, ok := os.LookupEnv("GITHUB_TOKEN")
 		if !ok {
-			fmt.Println("Did not provide GITHUB_TOKEN environment variable")
-			os.Exit(1)
+			return fmt.Errorf("did not provide GITHUB_TOKEN environment variable")
 		}
 		gh := github.NewClient(nil).WithAuthToken(githubToken)
 		return execScheduledPrReminders(gh)
