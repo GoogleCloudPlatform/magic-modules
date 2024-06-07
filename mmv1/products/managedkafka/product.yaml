@@ -1,3 +1,4 @@
+
 --- !ruby/object:Api::Product
 versions:
   - !ruby/object:Api::Product::Version
