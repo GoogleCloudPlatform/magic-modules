@@ -1,20 +1,12 @@
-terraform {
-  required_providers {
-    google = {
-      source = "hashicorp/google-beta"
-      version = "~> {{.Provider.version}}"
-    }
-  }
-}
-
 provider "google" {
-  {{if .Provider.credentials }}credentials = "{{.Provider.credentials}}"{{end}}
+  project     = "tf-deployer-2"
+  region      = "us-central1"
 }
 
 resource "google_apikeys_key" "primary" {
   name         = "key"
   display_name = "sample-key"
-  project      = "{{.Provider.project}}"
+  project      = "tf-deployer-2"
 
   restrictions {
     android_key_restrictions {
@@ -30,5 +22,3 @@ resource "google_apikeys_key" "primary" {
     }
   }
 }
-
-
