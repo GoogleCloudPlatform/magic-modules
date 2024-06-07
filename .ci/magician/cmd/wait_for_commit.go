@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"magician/exec"
 	"magician/source"
-	"os"
 	"strings"
 	"time"
 
@@ -33,8 +32,7 @@ var waitForCommitCmd = &cobra.Command{
 
 		rnr, err := exec.NewRunner()
 		if err != nil {
-			fmt.Println("Error creating Runner: ", err)
-			os.Exit(1)
+			return fmt.Errorf("error creating Runner: %w", err)
 		}
 
 		return execWaitForCommit(syncBranchPrefix, baseBranch, sha, rnr)

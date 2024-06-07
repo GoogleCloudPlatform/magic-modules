@@ -142,7 +142,7 @@ func execGenerateDownstream(baseBranch, command, repo, version, ref string, gh G
 	if commitErr != nil {
 		fmt.Println("Error creating commit: ", commitErr)
 		if !strings.Contains(commitErr.Error(), "nothing to commit") {
-			os.Exit(1)
+			return fmt.Errorf("error creating commit: %w", commitErr)
 		}
 	}
 
