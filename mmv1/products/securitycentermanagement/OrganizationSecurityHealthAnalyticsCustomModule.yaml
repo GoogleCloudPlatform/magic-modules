@@ -78,7 +78,6 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'displayName'
     immutable: true
-    required: false
     # API error for invalid display names is just "INVALID_ARGUMENT" with no details
     validation: !ruby/object:Provider::Terraform::Validation
       function: 'verify.ValidateRegexp(`^[a-z][\w_]{0,127}$`)'
@@ -90,7 +89,6 @@ properties:
       characters or underscores only.
   - !ruby/object:Api::Type::Enum
     name: 'enablementState'
-    required: false
     description: |
       The enablement state of the custom module.
     values:
@@ -118,7 +116,6 @@ properties:
       specifies the organization or folder from which the custom module is inherited.
   - !ruby/object:Api::Type::NestedObject
     name: 'customConfig'
-    required: false
     description: |
       The user specified custom configuration for the module.
     properties:
