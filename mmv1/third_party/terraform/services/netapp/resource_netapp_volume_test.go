@@ -704,7 +704,7 @@ resource "google_netapp_storage_pool" "default" {
 }
 
 resource "google_netapp_volume" "test_volume" {
-    location = "us-west2"
+    location = "us-east1"
     name = "tf-test-test-volume%{random_suffix}"
     capacity_gib = "100"
     share_name = "tf-test-test-volume%{random_suffix}"
