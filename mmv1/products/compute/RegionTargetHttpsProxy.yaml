@@ -140,7 +140,7 @@ properties:
     name: 'certificateManagerCertificates'
     description: |
       URLs to certificate manager certificate resources that are used to authenticate connections between users and the load balancer.
-      sslCertificates and certificateManagerCertificates can not be defined together.
+      sslCertificates and certificateManagerCertificates can't be defined together.
       Accepted format is `//certificatemanager.googleapis.com/projects/{project}/locations/{location}/certificates/{resourceName}` or just the self_link `projects/{project}/locations/{location}/certificates/{resourceName}`
     update_verb: :POST
     update_url: 'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setSslCertificates'
