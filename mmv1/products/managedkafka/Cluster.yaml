@@ -1,4 +1,3 @@
-
 --- !ruby/object:Api::Resource
 base_url: projects/{{project}}/locations/{{location}}/clusters
 create_url: projects/{{project}}/locations/{{location}}/clusters?clusterId={{cluster_id}}
