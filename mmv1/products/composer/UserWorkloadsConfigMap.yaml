@@ -12,22 +12,19 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-# API resource name
 name: 'UserWorkloadsConfigMap'
-# Resource description for the provider documentation.
 description: |
-  User workloads Secret used by Airflow tasks that run with Kubernetes Executor or KubernetesPodOperator. 
+  User workloads ConfigMap used by Airflow tasks that run with Kubernetes Executor or KubernetesPodOperator.
   Intended for Composer 3 Environments.
 references: !ruby/object:Api::Resource::ReferenceLinks
-  guides:
-   # Link to quickstart in the API's Guides section. For example:
-   # 'Create and connect to a database': 'https://cloud.google.com/alloydb/docs/quickstart/create-and-connect'
-    'QUICKSTART_TITLE': 'QUICKSTART_URL'
-  # Link to the REST API reference for the resource. For example,
-  # https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.backups
-  api: 'API_REFERENCE_URL'
-# Marks the resource as beta-only. Ensure a beta version block is present in
-# provider.yaml.
+  # TODO: add quickstart guide
+  # guides:
+  #  Link to quickstart in the API's Guides section. For example:
+  #  'Create and connect to a database': 'https://cloud.google.com/alloydb/docs/quickstart/create-and-connect'
+  #  'QUICKSTART_TITLE': 'QUICKSTART_URL'
+  # TODO: add v1 reference later
+  api: https://cloud.google.com/composer/docs/reference/rest/v1beta1/projects.locations.environments.userWorkloadsConfigMaps
+
 min_version: beta
 
 # Inserts styled markdown into the header of the resource's page in the
@@ -87,30 +84,6 @@ create_url: projects/{{project}}/locations/{{region}}/environments/{{environment
 # Allowed values: :POST, :PUT, :PATCH, :DELETE. Default: :DELETE
 # delete_verb: :DELETE
 
-# If true, code for handling long-running operations is generated along with
-# the resource. If false, that code is not generated.
-# autogen_async: true
-# Sets parameters for handling operations returned by the API.
-#async: !ruby/object:Api::OpAsync
-  # Overrides which API calls return operations. Default: ['create',
-  # 'update', 'delete']
-  # actions: ['create', 'update', 'delete']
-#  operation: !ruby/object:Api::OpAsync::Operation
-#    base_url: '{{op_id}}'
-
-  # If true, the provider sets the resource's Terraform ID after the resource is created,
-  # taking into account values that are set by the API at create time. This is only possible
-  # when the completed operation's JSON includes the created resource in the "response" field.
-  # If false (or unset), the provider sets the resource's Terraform ID before the resource is
-  # created, based only on the resource configuration.
-  # result: !ruby/object:Api::OpAsync::Result
-  #   resource_inside_response: true
-
-# All resources (of all kinds) that share a mutex value block rather than
-# executing concurrent API requests.
-# Terraform field names enclosed in double curly braces are replaced with
-# the field values from the resource at runtime.
-# mutex: RESOURCE_NAME/{{name}}
 
 examples:
   - !ruby/object:Provider::Terraform::Examples
@@ -137,7 +110,7 @@ parameters:
     validation: !ruby/object:Provider::Terraform::Validation
       function: 'verify.ValidateGCEName'
     description: |
-      Name of the environment.
+      Environment where the Kubernetes ConfigMap will be stored and used.
   - !ruby/object:Api::Type::String
     name: 'name'
     required: true
@@ -147,13 +120,14 @@ parameters:
     validation: !ruby/object:Provider::Terraform::Validation
       function: 'verify.ValidateGCEName'
     description: |
-      Name of the secret.
+      Name of the Kubernetes ConfigMap.
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'data'
     required: false
     immutable: false
     description: |
-      A map of the secret data. 
+      The "data" field of Kubernetes ConfigMap, organized in key-value pairs.
+      For details see: https://kubernetes.io/docs/concepts/configuration/configmap/
 
 properties:
   # Fields go here
