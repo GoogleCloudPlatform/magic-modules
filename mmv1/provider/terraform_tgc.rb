@@ -322,7 +322,6 @@ module Provider
                         'third_party/tgc/commitment.go'],
                        ['converters/google/resources/firebase_project.go',
                         'third_party/tgc/firebase_project.go']
-
                       ])
     end
 
