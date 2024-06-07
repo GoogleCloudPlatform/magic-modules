@@ -101,11 +101,11 @@ properties:
       field is set by the server and will be ignored if provided on
       config creation or update.
     output: true
-- !ruby/object:Api::Type::Enum
+  - !ruby/object:Api::Type::Enum
     name: 'type'
     required: true
     description: |
-      Required. The type of the mute config, 
+      Required. The type of the mute config,
       which determines what type of mute state the config affects. Immutable after creation.
     values:
       - :MUTE_CONFIG_TYPE_UNSPECIFIED
