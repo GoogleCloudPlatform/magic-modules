@@ -421,7 +421,7 @@ func shouldNotify(pr *github.PullRequest, state pullRequestReviewState, sinceDay
 		if _, ok := labels["disable-review-reminders"]; ok {
 			return false
 		}
-		return sinceDays == 2 || (sinceDays > 0 && sinceDays%5 == 0)
+		return sinceDays == 3 || (sinceDays > 0 && sinceDays%5 == 0)
 	}
 	return false
 }

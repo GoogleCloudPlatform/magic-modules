@@ -627,10 +627,10 @@ func TestShouldNotify(t *testing.T) {
 			sinceDays:   1,
 			want:        false,
 		},
-		"waitingForReview two days": {
+		"waitingForReview three days": {
 			pullRequest: &github.PullRequest{},
 			state:       waitingForReview,
-			sinceDays:   2,
+			sinceDays:   3,
 			want:        true,
 		},
 		"waitingForReview first week": {
@@ -784,10 +784,10 @@ func TestFormatReminderComment(t *testing.T) {
 			state: waitingForReview,
 			data: reminderCommentData{
 				PullRequest: &github.PullRequest{},
-				SinceDays:   2,
+				SinceDays:   3,
 			},
 			expectedStrings: []string{
-				"waiting for review for 2 weekdays",
+				"waiting for review for 3 weekdays",
 				"disable-review-reminders",
 			},
 			notExpectedStrings: []string{
