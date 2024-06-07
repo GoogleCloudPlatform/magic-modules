@@ -13,13 +13,17 @@ func TestAccSecurityCenterV2ProjectMuteConfig_basic(t *testing.T) {
 	t.Parallel()
 
 	contextBasic := map[string]interface{}{
-		"project_id":    envvar.GetTestProjectFromEnv(),
+		"org_id":        envvar.GetTestOrgFromEnv(),
+		"folder_name":   acctest.RandString(t, 10),
+		"project_id":    acctest.RandString(t, 10),
 		"random_suffix": acctest.RandString(t, 10),
 		"location":      "global",
 	}
 
 	contextHighSeverity := map[string]interface{}{
-		"project_id":    envvar.GetTestProjectFromEnv(),
+		"org_id":        envvar.GetTestOrgFromEnv(),
+		"folder_name":   acctest.RandString(t, 10),
+		"project_id":    acctest.RandString(t, 10),
 		"random_suffix": acctest.RandString(t, 10),
 		"location":      "us_central",
 	}
@@ -32,19 +36,19 @@ func TestAccSecurityCenterV2ProjectMuteConfig_basic(t *testing.T) {
 				Config: testAccSecurityCenterV2ProjectMuteConfig_basic(contextBasic),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"google_scc_v2_project_mute_config.default", "description", "A test project mute config"),
+						"google_scc_v2_project_mute_config.project_mute_test1", "description", "A test project mute config"),
 					resource.TestCheckResourceAttr(
-						"google_scc_v2_project_mute_config.default", "filter", "severity = \"LOW\""),
+						"google_scc_v2_project_mute_config.project_mute_test1", "filter", "severity = \"LOW\""),
 					resource.TestCheckResourceAttr(
-						"google_scc_v2_project_mute_config.default", "project_mute_config_id", fmt.Sprintf("tf-test-my-config%s", contextBasic["random_suffix"])),
+						"google_scc_v2_project_mute_config.project_mute_test1", "project_mute_config_id", fmt.Sprintf("tf-test-my-config%s", contextBasic["random_suffix"])),
 					resource.TestCheckResourceAttr(
-						"google_scc_v2_project_mute_config.default", "location", contextBasic["location"].(string)),
+						"google_scc_v2_project_mute_config.project_mute_test1", "location", contextBasic["location"].(string)),
 					resource.TestCheckResourceAttr(
-						"google_scc_v2_project_mute_config.default", "parent", fmt.Sprintf("projects/%s", contextBasic["project_id"])),
+						"google_scc_v2_project_mute_config.project_mute_test1", "parent", fmt.Sprintf("projects/%s", contextBasic["project_id"])),
 				),
 			},
 			{
-				ResourceName:            "google_scc_v2_project_mute_config.default",
+				ResourceName:            "google_scc_v2_project_mute_config.project_mute_test1",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"parent", "project_mute_config_id"},
@@ -53,19 +57,19 @@ func TestAccSecurityCenterV2ProjectMuteConfig_basic(t *testing.T) {
 				Config: testAccSecurityCenterV2ProjectMuteConfig_highSeverity(contextHighSeverity),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"google_scc_v2_project_mute_config.default", "description", "A test project mute config with high severity"),
+						"google_scc_v2_project_mute_config.project_mute_test2", "description", "A test project mute config with high severity"),
 					resource.TestCheckResourceAttr(
-						"google_scc_v2_project_mute_config.default", "filter", "severity = \"HIGH\""),
+						"google_scc_v2_project_mute_config.project_mute_test2", "filter", "severity = \"HIGH\""),
 					resource.TestCheckResourceAttr(
-						"google_scc_v2_project_mute_config.default", "project_mute_config_id", fmt.Sprintf("tf-test-my-config%s", contextHighSeverity["random_suffix"])),
+						"google_scc_v2_project_mute_config.project_mute_test2", "project_mute_config_id", fmt.Sprintf("tf-test-my-config%s", contextHighSeverity["random_suffix"])),
 					resource.TestCheckResourceAttr(
-						"google_scc_v2_project_mute_config.default", "location", contextHighSeverity["location"].(string)),
+						"google_scc_v2_project_mute_config.project_mute_test2", "location", contextHighSeverity["location"].(string)),
 					resource.TestCheckResourceAttr(
-						"google_scc_v2_project_mute_config.default", "parent", fmt.Sprintf("projects/%s", contextHighSeverity["project_id"])),
+						"google_scc_v2_project_mute_config.project_mute_test2", "parent", fmt.Sprintf("projects/%s", contextHighSeverity["project_id"])),
 				),
 			},
 			{
-				ResourceName:            "google_scc_v2_project_mute_config.default",
+				ResourceName:            "google_scc_v2_project_mute_config.project_mute_test2",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"parent", "project_mute_config_id"},
@@ -76,24 +80,35 @@ func TestAccSecurityCenterV2ProjectMuteConfig_basic(t *testing.T) {
 
 func testAccSecurityCenterV2ProjectMuteConfig_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_scc_v2_project_mute_config" "default" {
+resource "google_project" "google_project1" {
+  name       = "Test project"
+  project_id = "%{project_id}"
+ }
+
+resource "google_scc_v2_project_mute_config" "project_mute_test1" {
   description          = "A test project mute config"
   filter               = "severity = \"LOW\""
-  mute_config_id = "tf-test-my-config%{random_suffix}"
+  mute_config_id       = "tf-test-my-config%{random_suffix}"
   location             = "%{location}"
-  parent               = "projects/%{project_id}"
+  parent               = "projects/${google_project.google_project1.project_id}"
 }
 `, context)
 }
 
 func testAccSecurityCenterV2ProjectMuteConfig_highSeverity(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_scc_v2_project_mute_config" "default" {
+
+resource "google_project" "google_project2" {
+  name       = "Test project"
+  project_id = "%{project_id}"
+ }
+
+resource "google_scc_v2_project_mute_config" "project_mute_test2" {
   description          = "A test project mute config with high severity"
   filter               = "severity = \"HIGH\""
-  mute_config_id = "tf-test-my-config%{random_suffix}"
+  mute_config_id       = "tf-test-my-config%{random_suffix}"
   location             = "%{location}"
-  parent               = "projects/%{project_id}"
+  parent               = "projects/${google_project.google_project2.project_id}"
 }
 `, context)
 }

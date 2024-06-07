@@ -14,14 +14,14 @@ func TestAccSecurityCenterV2FolderMuteConfig_basic(t *testing.T) {
 
 	contextBasic := map[string]interface{}{
 		"org_id":        envvar.GetTestOrgFromEnv(t),
-		"folder_id":     acctest.RandString(t, 10),
+		"folder_name":   fmt.Sprintf("test1-%s", acctest.RandString(t, 10)),
 		"random_suffix": acctest.RandString(t, 10),
 		"location":      "global",
 	}
 
 	contextHighSeverity := map[string]interface{}{
 		"org_id":        envvar.GetTestOrgFromEnv(t),
-		"folder_id":     acctest.RandString(t, 10),
+		"folder_name":   fmt.Sprintf("test2-%s", acctest.RandString(t, 10)),
 		"random_suffix": acctest.RandString(t, 10),
 		"location":      "us_central",
 	}
@@ -34,19 +34,19 @@ func TestAccSecurityCenterV2FolderMuteConfig_basic(t *testing.T) {
 				Config: testAccSecurityCenterV2FolderMuteConfig_basic(contextBasic),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"google_scc_v2_folder_mute_config.default", "description", "A test folder mute config"),
+						"google_scc_v2_folder_mute_config.folder_mute_test1", "description", "A test folder mute config"),
 					resource.TestCheckResourceAttr(
-						"google_scc_v2_folder_mute_config.default", "filter", "severity = \"LOW\""),
+						"google_scc_v2_folder_mute_config.folder_mute_test1", "filter", "severity = \"LOW\""),
 					resource.TestCheckResourceAttr(
-						"google_scc_v2_folder_mute_config.default", "folder_mute_config_id", fmt.Sprintf("tf-test-my-config%s", contextBasic["random_suffix"])),
+						"google_scc_v2_folder_mute_config.folder_mute_test1", "folder_mute_config_id", fmt.Sprintf("tf-test-my-config%s", contextBasic["random_suffix"])),
 					resource.TestCheckResourceAttr(
-						"google_scc_v2_folder_mute_config.default", "location", contextBasic["location"].(string)),
+						"google_scc_v2_folder_mute_config.folder_mute_test1", "location", contextBasic["location"].(string)),
 					resource.TestCheckResourceAttr(
-						"google_scc_v2_folder_mute_config.default", "parent", fmt.Sprintf("folders/%s", contextBasic["folder_id"])),
+						"google_scc_v2_folder_mute_config.folder_mute_test1", "parent", fmt.Sprintf("folders/%s", contextBasic["folder_name"])),
 				),
 			},
 			{
-				ResourceName:            "google_scc_v2_folder_mute_config.default",
+				ResourceName:            "google_scc_v2_folder_mute_config.folder_mute_test1",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"parent", "folder_mute_config_id"},
@@ -55,19 +55,19 @@ func TestAccSecurityCenterV2FolderMuteConfig_basic(t *testing.T) {
 				Config: testAccSecurityCenterV2FolderMuteConfig_highSeverity(contextHighSeverity),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"google_scc_v2_folder_mute_config.default", "description", "A test folder mute config with high severity"),
+						"google_scc_v2_folder_mute_config.folder_mute_test2", "description", "A test folder mute config with high severity"),
 					resource.TestCheckResourceAttr(
-						"google_scc_v2_folder_mute_config.default", "filter", "severity = \"HIGH\""),
+						"google_scc_v2_folder_mute_config.folder_mute_test2", "filter", "severity = \"HIGH\""),
 					resource.TestCheckResourceAttr(
-						"google_scc_v2_folder_mute_config.default", "folder_mute_config_id", fmt.Sprintf("tf-test-my-config%s", contextHighSeverity["random_suffix"])),
+						"google_scc_v2_folder_mute_config.folder_mute_test2", "folder_mute_config_id", fmt.Sprintf("tf-test-my-config%s", contextHighSeverity["random_suffix"])),
 					resource.TestCheckResourceAttr(
-						"google_scc_v2_folder_mute_config.default", "location", contextHighSeverity["location"].(string)),
+						"google_scc_v2_folder_mute_config.folder_mute_test2", "location", contextHighSeverity["location"].(string)),
 					resource.TestCheckResourceAttr(
-						"google_scc_v2_folder_mute_config.default", "parent", fmt.Sprintf("folders/%s", contextHighSeverity["folder_id"])),
+						"google_scc_v2_folder_mute_config.folder_mute_test2", "parent", fmt.Sprintf("folders/%s", contextHighSeverity["folder_name"])),
 				),
 			},
 			{
-				ResourceName:            "google_scc_v2_folder_mute_config.default",
+				ResourceName:            "google_scc_v2_folder_mute_config.folder_mute_test2",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"parent", "folder_mute_config_id"},
@@ -78,32 +78,34 @@ func TestAccSecurityCenterV2FolderMuteConfig_basic(t *testing.T) {
 
 func testAccSecurityCenterV2FolderMuteConfig_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_scc_v2_folder_mute_config" "default" {
+resource "google_folder" "test1" {
+  display_name = "%{folder_name}"
+  parent       = "organizations/%{org_id}"
+}
+
+resource "google_scc_v2_folder_mute_config" "folder_mute_test1" {
   description          = "A test folder mute config"
   filter               = "severity = \"LOW\""
-  mute_config_id = "tf-test-my-config%{random_suffix}"
+  mute_config_id       = "tf-test-my-config%{random_suffix}"
   location             = "%{location}"
-  parent               = "folders/%{folder_id}"
+  parent               = "${google_folder.test1.id}"
 }
-resource "google_folder" "default" {
-	display_name = "A test folder mute config"
-	parent       = "folders/%{folder_id}"
-  }
 `, context)
 }
 
 func testAccSecurityCenterV2FolderMuteConfig_highSeverity(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_scc_v2_folder_mute_config" "default" {
+resource "google_folder" "test2" {
+  display_name = "%{folder_name}"
+  parent       = "organizations/%{org_id}"
+}
+
+resource "google_scc_v2_folder_mute_config" "folder_mute_test2" {
   description          = "A test folder mute config with high severity"
   filter               = "severity = \"HIGH\""
-  mute_config_id = "tf-test-my-config%{random_suffix}"
+  mute_config_id       = "tf-test-my-config%{random_suffix}"
   location             = "%{location}"
-  parent               = "folders/%{folder_id}"
+  parent               = "${google_folder.test2.id}"
 }
-resource "google_folder" "default" {
-	display_name = "A test folder mute config"
-	parent       = "folders/%{folder_id}"
-  }
 `, context)
 }

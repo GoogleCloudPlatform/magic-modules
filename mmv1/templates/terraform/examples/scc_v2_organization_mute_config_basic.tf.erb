@@ -1,6 +1,10 @@
+resource "google_organization" "default" {
+	display_name = "My Test Organization"
+}
+
 resource "google_scc_v2_organization_mute_config" "<%= ctx[:primary_resource_id] %>" {
-  mute_config_id = "<%= ctx[:vars]['mute_config_id'] %>"
-  parent  = "<%= ctx[:test_env_vars]['org_id'] %>"
-  description    = "My custom Cloud Security Command Center Organization Mute Configuration"
-  filter         = "severity = \"HIGH\""
+	mute_config_id = "<%= ctx[:vars]['mute_config_id'] %>"
+	parent         = google_organization.default.id
+	description    = "My custom Cloud Security Command Center Organization Mute Configuration"
+	filter         = "severity = \"HIGH\""
 }
