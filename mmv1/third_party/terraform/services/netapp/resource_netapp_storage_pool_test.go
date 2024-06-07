@@ -36,6 +36,15 @@ func TestAccNetappstoragePool_storagePoolCreateExample_update(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels"},
 			},
+			{
+				Config: testAccNetappstoragePool_storagePoolCreateExample_flexRegional(context),
+			},
+			{
+				ResourceName:            "google_netapp_storage_pool.test_pool",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels"},
+			},
 		},
 	})
 }
@@ -120,6 +129,49 @@ resource "google_netapp_storage_pool" "test_pool" {
   }
   ldap_enabled          = false
 
+}
+`, context)
+}
+
+func testAccNetappstoragePool_storagePoolCreateExample_flexRegional(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+
+resource "google_compute_network" "peering_network" {
+  name = "tf-test-network%{random_suffix}"
+}
+
+# Create an IP address
+resource "google_compute_global_address" "private_ip_alloc" {
+  name          = "tf-test-address%{random_suffix}"
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  prefix_length = 16
+  network       = google_compute_network.peering_network.id
+}
+
+# Create a private connection
+resource "google_service_networking_connection" "default" {
+  network                 = google_compute_network.peering_network.id
+  service                 = "netapp.servicenetworking.goog"
+  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
+}
+
+resource "google_netapp_storage_pool" "test_pool" {
+  name = "tf-test-pool%{random_suffix}"
+  location = "us-east1"
+  service_level = "FLEX"
+  capacity_gib = "2048"
+  network = google_compute_network.peering_network.id
+  active_directory      = ""
+  description           = "this is a test description"
+  kms_config            = ""
+  labels                = {
+    key= "test"
+    value= "pool"
+  }
+  ldap_enabled          = false
+  zone = "us-east1-c"
+  replica_zone = "us-east1-b"
 }
 `, context)
 }

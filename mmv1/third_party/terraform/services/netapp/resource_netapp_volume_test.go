@@ -104,6 +104,16 @@ func TestAccNetappVolume_netappVolumeBasicExample_update(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
 			},
+
+			{
+				Config: testAccNetappVolume_volumeBasicExample_createFlexRegionalVolume(context),
+			},
+			{
+				ResourceName:            "google_netapp_volume.test_volume",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
+			},
 		},
 	})
 }
@@ -658,4 +668,31 @@ func testAccNetappVolume_volumeBasicExample_cleanupScheduledBackup(t *testing.T,
 		}
 		return nil
 	}
+}
+
+func testAccNetappVolume_volumeBasicExample_createFlexRegionalVolume(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_netapp_storage_pool" "default" {
+    name = "tf-test-test-pool%{random_suffix}"
+    location = "us-east1"
+    service_level = "FLEX"
+    capacity_gib = "2048"
+    network = data.google_compute_network.default.id
+    zone = "us-east1-c"
+    replica_zone = "us-east1-b"
+}
+
+resource "google_netapp_volume" "test_volume" {
+    location = "us-west2"
+    name = "tf-test-test-volume%{random_suffix}"
+    capacity_gib = "100"
+    share_name = "tf-test-test-volume%{random_suffix}"
+    storage_pool = google_netapp_storage_pool.default.name
+    protocols = ["NFSV3"]
+}
+
+data "google_compute_network" "default" {
+    name = "%{network_name}"
+}
+`, context)
 }
