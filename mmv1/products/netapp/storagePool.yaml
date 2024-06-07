@@ -137,7 +137,9 @@ properties:
     name: 'zone'
     description: |
       Specifies the active zone for regional storagePool.
+    min_version: beta
   - !ruby/object:Api::Type::String
     name: 'replicaZone'
     description: |
       Specifies the replica zone for regional storagePool.
+    min_version: beta

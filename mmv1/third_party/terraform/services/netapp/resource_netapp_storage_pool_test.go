@@ -36,6 +36,13 @@ func TestAccNetappstoragePool_storagePoolCreateExample_update(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels"},
 			},
+		},
+	})
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
 			{
 				Config: testAccNetappstoragePool_storagePoolCreateExample_flexRegional(context),
 			},
