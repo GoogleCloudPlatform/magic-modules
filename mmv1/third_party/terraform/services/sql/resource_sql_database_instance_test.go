@@ -1564,6 +1564,32 @@ func TestAccSQLDatabaseInstance_DenyMaintenancePeriod(t *testing.T) {
 	})
 }
 
+func TestAccSQLDatabaseInstance_DefaultEdition(t *testing.T) {
+	t.Parallel()
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
+	databaseVersion := "POSTGRES_16"
+	enterprisePlusTier := "db-perf-optimized-N-2"
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlDatabaseInstance_DefaultEdition(databaseName, databaseVersion, enterprisePlusTier),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.edition", "ENTERPRISE_PLUS"),
+				),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
 func TestAccSqlDatabaseInstance_Edition(t *testing.T) {
 	t.Parallel()
 	enterprisePlusName := "tf-test-enterprise-plus" + acctest.RandString(t, 10)
@@ -1579,7 +1605,7 @@ func TestAccSqlDatabaseInstance_Edition(t *testing.T) {
 			{
 				Config: testGoogleSqlDatabaseInstance_EditionConfig_noEdition(noEditionName, enterpriseTier),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.edition", "ENTERPRISE"),
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.edition", ""),
 				),
 			},
 			{
@@ -1723,7 +1749,7 @@ func TestAccSqlDatabaseInstance_Postgres_Edition_Upgrade(t *testing.T) {
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleSqlDatabaseInstance_EditionConfig_noEdition(editionUpgrade, enterpriseTier),
+				Config: testGoogleSqlDatabaseInstance_EditionConfig(editionUpgrade, enterpriseTier, "ENTERPRISE"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.edition", "ENTERPRISE"),
 				),
@@ -1773,7 +1799,7 @@ func TestAccSqlDatabaseInstance_Edition_Downgrade(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testGoogleSqlDatabaseInstance_EditionConfig_noEdition(editionDowngrade, enterpriseTier),
+				Config: testGoogleSqlDatabaseInstance_EditionConfig(editionDowngrade, enterpriseTier, "ENTERPRISE"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.edition", "ENTERPRISE"),
 				),
@@ -2549,6 +2575,20 @@ resource "google_sql_database_instance" "instance" {
 }`, databaseName, endDate, startDate, time)
 }
 
+func testGoogleSqlDatabaseInstance_DefaultEdition(databaseName, databaseVersion, tier string) string {
+	return fmt.Sprintf(`
+
+resource "google_sql_database_instance" "instance" {
+  name             = "%s"
+  region           = "us-east1"
+  database_version    = "%s"
+  deletion_protection = false
+  settings {
+    tier = "%s"
+  }
+}`, databaseName, databaseVersion, tier)
+}
+
 func testGoogleSqlDatabaseInstance_EditionConfig_noEdition(databaseName, tier string) string {
 	return fmt.Sprintf(`
 
@@ -2559,9 +2599,6 @@ resource "google_sql_database_instance" "instance" {
   deletion_protection = false
   settings {
     tier = "%s"
-     backup_configuration {
-      transaction_log_retention_days = 7
-     }    
   }
 }`, databaseName, tier)
 }
@@ -2577,6 +2614,9 @@ resource "google_sql_database_instance" "instance" {
   settings {
     tier = "%s"
     edition = "%s"
+    backup_configuration {
+	  transaction_log_retention_days = 7
+    }
   }
 }`, databaseName, tier, edition)
 }
