@@ -13,7 +13,7 @@ func TestAccSecurityCenterV2ProjectMuteConfig_basic(t *testing.T) {
 	t.Parallel()
 
 	contextBasic := map[string]interface{}{
-		"org_id":        envvar.GetTestOrgFromEnv(),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
 		"folder_name":   acctest.RandString(t, 10),
 		"project_id":    acctest.RandString(t, 10),
 		"random_suffix": acctest.RandString(t, 10),
@@ -21,7 +21,7 @@ func TestAccSecurityCenterV2ProjectMuteConfig_basic(t *testing.T) {
 	}
 
 	contextHighSeverity := map[string]interface{}{
-		"org_id":        envvar.GetTestOrgFromEnv(),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
 		"folder_name":   acctest.RandString(t, 10),
 		"project_id":    acctest.RandString(t, 10),
 		"random_suffix": acctest.RandString(t, 10),
