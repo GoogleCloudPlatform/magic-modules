@@ -168,6 +168,7 @@ autogen_async: <%= object.autogen_async %>
 <%  unless object.async.nil? -%>
 async:
 <%    if object.async.is_a? Provider::Terraform::PollAsync -%>
+  type: 'PollAsync'
 <%      unless object.async.check_response_func_existence.nil? -%>
   check_response_func_existence: '<%= object.async.check_response_func_existence %>'
 <%      end -%>
@@ -185,6 +186,7 @@ async:
 <%      end -%>
 <%    end -%>
 <%    if object.async.is_a? Api::OpAsync -%>
+  type: 'OpAsync'
 <% #async.operation %>
 <%    unless object.async.operation.nil? -%>
   operation:
