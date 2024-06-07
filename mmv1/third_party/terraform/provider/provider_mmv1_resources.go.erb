@@ -58,6 +58,9 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_cloud_run_v2_job":                          cloudrunv2.DataSourceGoogleCloudRunV2Job(),
 	"google_cloud_run_v2_service":                      cloudrunv2.DataSourceGoogleCloudRunV2Service(),
 	"google_composer_environment":                      composer.DataSourceGoogleComposerEnvironment(),
+	<% unless version == 'ga' -%>
+	"google_composer_user_workloads_secret":            composer.DataSourceGoogleComposerUserWorkloadsSecret(),
+	<% end -%>
 	"google_composer_image_versions":                   composer.DataSourceGoogleComposerImageVersions(),
 	"google_compute_address":                           compute.DataSourceGoogleComputeAddress(),
 	"google_compute_addresses":                         compute.DataSourceGoogleComputeAddresses(),
@@ -95,6 +98,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_compute_router":                            compute.DataSourceGoogleComputeRouter(),
 	"google_compute_router_nat":                        compute.DataSourceGoogleComputeRouterNat(),
 	"google_compute_router_status":                     compute.DataSourceGoogleComputeRouterStatus(),
+	"google_compute_security_policy":                   compute.DataSourceGoogleComputeSecurityPolicy(),
 	"google_compute_snapshot":                          compute.DataSourceGoogleComputeSnapshot(),
 	"google_compute_ssl_certificate":                   compute.DataSourceGoogleComputeSslCertificate(),
 	"google_compute_ssl_policy":                        compute.DataSourceGoogleComputeSslPolicy(),

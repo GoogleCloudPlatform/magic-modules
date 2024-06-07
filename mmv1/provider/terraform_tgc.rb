@@ -317,7 +317,11 @@ module Provider
                        ['converters/google/resources/apikeys_key.go',
                         'third_party/tgc/apikeys_key.go'],
                        ['converters/google/resources/dataproc_cluster.go',
-                        'third_party/tgc/dataproc_cluster.go']
+                        'third_party/tgc/dataproc_cluster.go'],
+                       ['converters/google/resources/commitment.go',
+                        'third_party/tgc/commitment.go'],
+                       ['converters/google/resources/firebase_project.go',
+                        'third_party/tgc/firebase_project.go']
                      ])
     end
 

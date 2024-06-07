@@ -73,6 +73,7 @@ func subtract(a, b int) int {
 var TemplateFunctions = template.FuncMap{
 	"title":                google.SpaceSeparatedTitle,
 	"replace":              strings.Replace,
+	"replaceAll":           strings.ReplaceAll,
 	"camelize":             google.Camelize,
 	"underscore":           google.Underscore,
 	"plural":               google.Plural,
@@ -120,6 +121,14 @@ func (td *TemplateData) GenerateResourceFile(filePath string, resource api.Resou
 		"templates/terraform/flatten_property_method.go.tmpl",
 		"templates/terraform/expand_property_method.go.tmpl",
 		"templates/terraform/update_mask.go.tmpl",
+	}
+	td.GenerateFile(filePath, templatePath, resource, true, templates...)
+}
+
+func (td *TemplateData) GenerateOperationFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/operation.go.tmpl"
+	templates := []string{
+		templatePath,
 	}
 	td.GenerateFile(filePath, templatePath, resource, true, templates...)
 }
@@ -193,6 +202,14 @@ func (td *TemplateData) GenerateIamPolicyTestFile(filePath string, resource api.
 		"templates/terraform/iam/go/iam_context.go.tmpl",
 	}
 	td.GenerateFile(filePath, templatePath, resource, true, templates...)
+}
+
+func (td *TemplateData) GenerateSweeperFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/sweeper_file.go.tmpl"
+	templates := []string{
+		templatePath,
+	}
+	td.GenerateFile(filePath, templatePath, resource, false, templates...)
 }
 
 func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, goFormat bool, templates ...string) {

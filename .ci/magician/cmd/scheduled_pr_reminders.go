@@ -49,9 +49,9 @@ var (
 )
 
 type reminderCommentData struct {
-	PullRequest *github.PullRequest
-	State       pullRequestReviewState
-	SinceDays   int
+	User          string
+	SinceDays     int
+	CoreReviewers []string
 }
 
 // scheduledPrReminders sends automated PR notifications and closes stale PRs
@@ -63,8 +63,7 @@ var scheduledPrReminders = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		githubToken, ok := os.LookupEnv("GITHUB_TOKEN")
 		if !ok {
-			fmt.Println("Did not provide GITHUB_TOKEN environment variable")
-			os.Exit(1)
+			return fmt.Errorf("did not provide GITHUB_TOKEN environment variable")
 		}
 		gh := github.NewClient(nil).WithAuthToken(githubToken)
 		return execScheduledPrReminders(gh)
@@ -166,10 +165,7 @@ func execScheduledPrReminders(gh *github.Client) error {
 		)
 		sinceDays := businessDaysDiff(since, time.Now())
 		if shouldNotify(pr, state, sinceDays) {
-			comment, err := formatReminderComment(state, reminderCommentData{
-				PullRequest: pr,
-				SinceDays:   sinceDays,
-			})
+			comment, err := formatReminderComment(pr, state, sinceDays)
 			if err != nil {
 				fmt.Printf(
 					"%d/%d: PR %d: error rendering comment: %s\n",
@@ -422,12 +418,12 @@ func shouldNotify(pr *github.PullRequest, state pullRequestReviewState, sinceDay
 		if _, ok := labels["disable-review-reminders"]; ok {
 			return false
 		}
-		return sinceDays == 2 || (sinceDays > 0 && sinceDays%5 == 0)
+		return sinceDays == 3 || (sinceDays > 0 && sinceDays%5 == 0)
 	}
 	return false
 }
 
-func formatReminderComment(state pullRequestReviewState, data reminderCommentData) (string, error) {
+func formatReminderComment(pullRequest *github.PullRequest, state pullRequestReviewState, sinceDays int) (string, error) {
 	embeddedTemplate := ""
 	switch state {
 	case waitingForMerge:
@@ -447,6 +443,20 @@ func formatReminderComment(state pullRequestReviewState, data reminderCommentDat
 	if err != nil {
 		panic(fmt.Sprintf("Unable to parse template for %s: %s", state.String(), err))
 	}
+
+	coreReviewers := []string{}
+	for _, reviewer := range pullRequest.RequestedReviewers {
+		if membership.IsCoreReviewer(*reviewer.Login) {
+			coreReviewers = append(coreReviewers, *reviewer.Login)
+		}
+	}
+
+	data := reminderCommentData{
+		User:          *pullRequest.User.Login,
+		SinceDays:     sinceDays,
+		CoreReviewers: coreReviewers,
+	}
+
 	sb := new(strings.Builder)
 	err = tmpl.Execute(sb, data)
 	if err != nil {

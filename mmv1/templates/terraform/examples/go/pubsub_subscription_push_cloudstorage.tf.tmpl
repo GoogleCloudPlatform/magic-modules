@@ -17,11 +17,12 @@ resource "google_pubsub_subscription" "{{$.PrimaryResourceId}}" {
 
     filename_prefix = "pre-"
     filename_suffix = "-%{random_suffix}"
-  
+    filename_datetime_format = "YYYY-MM-DD/hh_mm_ssZ"
+
     max_bytes = 1000
     max_duration = "300s"
   }
-  depends_on = [ 
+  depends_on = [
     google_storage_bucket.{{$.PrimaryResourceId}},
     google_storage_bucket_iam_member.admin,
   ]
