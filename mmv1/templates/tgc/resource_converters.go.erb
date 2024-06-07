@@ -49,6 +49,7 @@ func ResourceConverters() map[string][]cai.ResourceConverter {
 		"google_compute_health_check":                     {compute.ResourceConverterComputeHealthCheck()},
 		"google_compute_instance":                         {compute.ResourceConverterComputeInstance()},
 		"google_compute_instance_group":                   {resourceConverterComputeInstanceGroup()},
+		"google_logging_project_bucket_config":            {ResourceLoggingProjectBucketConfig()},
                 "google_compute_network":                          {compute.ResourceConverterComputeNetwork()},
 		"google_compute_node_template":                    {compute.ResourceConverterComputeNodeTemplate()},		
                 "google_compute_route":                            {compute.ResourceConverterComputeRoute()},
