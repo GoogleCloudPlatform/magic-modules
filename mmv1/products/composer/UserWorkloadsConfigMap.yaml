@@ -17,23 +17,10 @@ description: |
   User workloads ConfigMap used by Airflow tasks that run with Kubernetes Executor or KubernetesPodOperator.
   Intended for Composer 3 Environments.
 references: !ruby/object:Api::Resource::ReferenceLinks
-  # TODO: add quickstart guide
-  # guides:
-  #  Link to quickstart in the API's Guides section. For example:
-  #  'Create and connect to a database': 'https://cloud.google.com/alloydb/docs/quickstart/create-and-connect'
-  #  'QUICKSTART_TITLE': 'QUICKSTART_URL'
-  # TODO: add v1 reference later
+  # TODO: add v1 reference when this is moved to ga
   api: https://cloud.google.com/composer/docs/reference/rest/v1beta1/projects.locations.environments.userWorkloadsConfigMaps
 
 min_version: beta
-
-# Inserts styled markdown into the header of the resource's page in the
-# provider documentation.
-# docs: !ruby/object:Provider::Terraform::Docs
-#   warning: |
-#     MULTILINE_WARNING_MARKDOWN
-#   note: |
-#     MULTILINE_NOTE_MARKDOWN
 
 base_url: projects/{{project}}/locations/{{region}}/environments/{{environment}}/userWorkloadsConfigMaps
 self_link: projects/{{project}}/locations/{{region}}/environments/{{environment}}/userWorkloadsConfigMaps/{{name}}
