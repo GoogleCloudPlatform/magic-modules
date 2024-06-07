@@ -112,7 +112,7 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
 ```
 
 
-Use `custom_code.decoder` to inject code that modifies the data that will be sent in the API request. This is useful if the API expects the data to be in a significantly different structure than Terraform does - for example, if the API returns the entire object nested under a key, or uses a different name for a field in the response than in the request. The decoder will run _before_ any [`custom_flatten`]({{< ref "#custom_flatten" >}}) code.
+Use `custom_code.decoder` to inject code that modifies the data recieved from an API response. This is useful if the API returns data in a significantly different structure than what Terraform expects - for example, if the API returns the entire object nested under a key, or uses a different name for a field in the response than in the request. The decoder will run _before_ any [`custom_flatten`]({{< ref "#custom_flatten" >}}) code.
 
 The decoder code will be wrapped in a function like:
 
