@@ -3,7 +3,7 @@
     "name": "//aiplatform.googleapis.com/placeholder-VSDAy5Fn",
     "asset_type": "aiplatform.googleapis.com/Dataset",
     "resource": {
-      "version": "v1",
+      "version": "v1beta1",
       "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/aiplatform/v1beta1/rest",
       "discovery_name": "Dataset",
       "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
