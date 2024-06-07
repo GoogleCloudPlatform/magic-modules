@@ -41,13 +41,12 @@ var generateDownstreamCmd = &cobra.Command{
 
 	The following environment variables should be set:
 ` + listGDEnvironmentVariables(),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		env := make(map[string]string, len(gdEnvironmentVariables))
 		for _, ev := range gdEnvironmentVariables {
 			val, ok := os.LookupEnv(ev)
 			if !ok {
-				fmt.Printf("Did not provide %s environment variable\n", ev)
-				os.Exit(1)
+				return fmt.Errorf("did not provide %s environment variable", ev)
 			}
 			env[ev] = val
 		}
@@ -65,28 +64,24 @@ var generateDownstreamCmd = &cobra.Command{
 		gh := github.NewClient(githubToken)
 		rnr, err := exec.NewRunner()
 		if err != nil {
-			fmt.Println("Error creating a runner: ", err)
-			os.Exit(1)
+			return fmt.Errorf("error creating a runner: %w", err)
 		}
 		ctlr := source.NewController(env["GOPATH"], "modular-magician", githubToken, rnr)
 		oldToken := os.Getenv("GITHUB_TOKEN")
 		if err := os.Setenv("GITHUB_TOKEN", githubToken); err != nil {
-			fmt.Println("Error setting GITHUB_TOKEN environment variable: ", err)
-			os.Exit(1)
+			return fmt.Errorf("error setting GITHUB_TOKEN environment variable: %w", err)
 		}
 		defer func() {
 			if err := os.Setenv("GITHUB_TOKEN", oldToken); err != nil {
 				fmt.Println("Error setting GITHUB_TOKEN environment variable: ", err)
-				os.Exit(1)
 			}
 		}()
 
 		if len(args) != 4 {
-			fmt.Printf("Wrong number of arguments %d, expected 4\n", len(args))
-			os.Exit(1)
+			return fmt.Errorf("wrong number of arguments %d, expected 4", len(args))
 		}
 
-		execGenerateDownstream(env["BASE_BRANCH"], args[0], args[1], args[2], args[3], gh, rnr, ctlr)
+		return execGenerateDownstream(env["BASE_BRANCH"], args[0], args[1], args[2], args[3], gh, rnr, ctlr)
 	},
 }
 
@@ -98,7 +93,7 @@ func listGDEnvironmentVariables() string {
 	return result
 }
 
-func execGenerateDownstream(baseBranch, command, repo, version, ref string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller) {
+func execGenerateDownstream(baseBranch, command, repo, version, ref string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller) error {
 	if baseBranch == "" {
 		baseBranch = "main"
 	}
@@ -106,8 +101,7 @@ func execGenerateDownstream(baseBranch, command, repo, version, ref string, gh G
 	mmLocalPath := filepath.Join(rnr.GetCWD(), "..", "..")
 	mmCopyPath := filepath.Join(mmLocalPath, "..", fmt.Sprintf("mm-%s-%s-%s", repo, version, command))
 	if _, err := rnr.Run("cp", []string{"-rp", mmLocalPath, mmCopyPath}, nil); err != nil {
-		fmt.Println("Error copying magic modules: ", err)
-		os.Exit(1)
+		return fmt.Errorf("error copying magic modules: %w", err)
 	}
 	mmRepo := &source.Repo{
 		Name: "magic-modules",
@@ -116,36 +110,30 @@ func execGenerateDownstream(baseBranch, command, repo, version, ref string, gh G
 
 	downstreamRepo, scratchRepo, commitMessage, err := cloneRepo(mmRepo, baseBranch, repo, version, command, ref, rnr, ctlr)
 	if err != nil {
-		fmt.Println("Error cloning repo: ", err)
-		os.Exit(1)
+		return fmt.Errorf("error cloning repo: %w", err)
 	}
 
 	if err := rnr.PushDir(mmCopyPath); err != nil {
-		fmt.Println("Error changing directory to copied magic modules: ", err)
-		os.Exit(1)
+		return fmt.Errorf("error changing directory to copied magic modules: %w", err)
 	}
 
 	if err := setGitConfig(rnr); err != nil {
-		fmt.Println("Error setting config: ", err)
-		os.Exit(1)
+		return fmt.Errorf("error setting config: %w", err)
 	}
 
 	if err := runMake(downstreamRepo, command, rnr); err != nil {
-		fmt.Println("Error running make: ", err)
-		os.Exit(1)
+		return fmt.Errorf("error running make: %w", err)
 	}
 
 	var pullRequest *github.PullRequest
 	if command == "downstream" {
 		pullRequest, err = getPullRequest(baseBranch, ref, gh)
 		if err != nil {
-			fmt.Println("Error getting pull request: ", err)
-			os.Exit(1)
+			return fmt.Errorf("error getting pull request: %w", err)
 		}
 		if repo == "terraform" {
 			if err := addChangelogEntry(pullRequest, rnr); err != nil {
-				fmt.Println("Error adding changelog entry: ", err)
-				os.Exit(1)
+				return fmt.Errorf("error adding changelog entry: %w", err)
 			}
 		}
 	}
@@ -159,16 +147,15 @@ func execGenerateDownstream(baseBranch, command, repo, version, ref string, gh G
 	}
 
 	if _, err := rnr.Run("git", []string{"push", ctlr.URL(scratchRepo), scratchRepo.Branch, "-f"}, nil); err != nil {
-		fmt.Println("Error pushing commit: ", err)
-		os.Exit(1)
+		return fmt.Errorf("error pushing commit: %w", err)
 	}
 
 	if commitErr == nil && command == "downstream" {
 		if err := mergePullRequest(downstreamRepo, scratchRepo, scratchCommitSha, pullRequest, rnr, gh); err != nil {
-			fmt.Println("Error merging pull request: ", err)
-			os.Exit(1)
+			return fmt.Errorf("error merging pull request: %w", err)
 		}
 	}
+	return nil
 }
 
 func cloneRepo(mmRepo *source.Repo, baseBranch, repo, version, command, ref string, rnr ExecRunner, ctlr *source.Controller) (*source.Repo, *source.Repo, string, error) {
@@ -323,8 +310,7 @@ func createCommit(scratchRepo *source.Repo, commitMessage string, rnr ExecRunner
 
 	commitSha, err := rnr.Run("git", []string{"rev-parse", "HEAD"}, nil)
 	if err != nil {
-		fmt.Println("Error retrieving commit sha: ", err)
-		os.Exit(1)
+		return "", fmt.Errorf("error retrieving commit sha: %w", err)
 	}
 
 	commitSha = strings.TrimSpace(commitSha)
