@@ -123,6 +123,7 @@ func ResourceConverters() map[string][]cai.ResourceConverter {
 		"google_cloudfunctions_function":                  {resourceConverterCloudFunctionsCloudFunction()},
 		"google_monitoring_notification_channel":          {monitoring.ResourceConverterMonitoringNotificationChannel()},
 		"google_monitoring_alert_policy":                  {monitoring.ResourceConverterMonitoringAlertPolicy()},
+		"google_vertex_ai_dataset":                        {vertexai.ResourceConverterVertexAIDataset()},		
         <% products.each do |product| -%>
             <% (product[:definitions].objects || []).each do |object| -%>
                 <% if object.min_version.name == "ga" -%>
