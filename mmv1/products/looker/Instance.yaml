@@ -30,6 +30,7 @@ timeouts: !ruby/object:Api::Timeouts
   delete_minutes: 90
 autogen_async: true
 error_abort_predicates: ['transport_tpg.Is429QuotaError']
+skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'looker_instance_basic'
