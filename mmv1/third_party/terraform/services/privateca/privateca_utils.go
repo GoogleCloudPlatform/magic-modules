@@ -337,9 +337,13 @@ func flattenPrivatecaCertificateConfigX509ConfigAiaOcspServers(v interface{}, d 
 }
 
 func flattenPrivatecaCertificateConfigX509ConfigCaOptions(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return nil
+	}
+
 	// Special case here as the CaPool API returns an empty object rather than nil unlike the Certificate
 	// and CertificateAuthority APIs.
-	if v == nil || len(v.(map[string]interface{})) == 0 {
+	if len(v.(map[string]interface{})) == 0 {
 		v = make(map[string]interface{})
 	}
 	original := v.(map[string]interface{})
