@@ -6,8 +6,8 @@ resource "google_vertex_ai_models" "<%= ctx[:primary_resource_id] %>" {
     "key2" : "value2"
   }
 
-  encryption_spec {
-    kms_key_name = "<%= ctx[:vars]['kms_key_name'] %>"
-  }
+  // encryption_spec {
+  //   kms_key_name = "<%= ctx[:vars]['kms_key_name'] %>"
+  // }
   region       = "us-central1"
 }

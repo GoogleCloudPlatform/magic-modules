@@ -1,20 +1,11 @@
-resource "google_vertex_ai_models" "platform_model" {
-  display_name = "platform"
-  description  = "platform model"
-
-  region       = "us-central1"
-}
-
 resource "google_vertex_ai_models" "<%= ctx[:primary_resource_id] %>" {
   display_name = "<%= ctx[:vars]['display_name'] %>"
-  parent_model = google_vertex_ai_models.platform_model.display_name
   region       = "us-central1"
   artifact_uri = "gs://cloud-samples-data/vertex-ai/google-cloud-aiplatform-ci-artifacts/models/iris_xgboost/"
   description  = "A sample model"
   labels = {
     label-one = "value-one"
   }
-  depends_on = [google_vertex_ai_models.platform_model]
 
   container_spec {
     image_uri = "us-docker.pkg.dev/vertex-ai/prediction/xgboost-cpu.1-5:latest"
