@@ -57,3 +57,6 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `id` - An identifier for the resource in format `projects/{{project}}/locations/{{region}}/environments/{{environment}}/userWorkloadsConfigMaps/{{name}}`
+
+* `data` - The "data" field of Kubernetes ConfigMap, organized in key-value pairs.
+      For details see: https://kubernetes.io/docs/concepts/configuration/configmap/
