@@ -64,20 +64,29 @@ func wrapMultipleParams(params ...interface{}) (map[string]interface{}, error) {
 	return m, nil
 }
 
+// subtract returns the difference between a and b
+// and used in Go templates
+func subtract(a, b int) int {
+	return a - b
+}
+
 var TemplateFunctions = template.FuncMap{
-	"title":           google.SpaceSeparatedTitle,
-	"replace":         strings.Replace,
-	"camelize":        google.Camelize,
-	"underscore":      google.Underscore,
-	"plural":          google.Plural,
-	"contains":        strings.Contains,
-	"join":            strings.Join,
-	"lower":           strings.ToLower,
-	"upper":           strings.ToUpper,
-	"dict":            wrapMultipleParams,
-	"format2regex":    google.Format2Regex,
-	"orderProperties": api.OrderProperties,
-	"hasPrefix":       strings.HasPrefix,
+	"title":                google.SpaceSeparatedTitle,
+	"replace":              strings.Replace,
+	"replaceAll":           strings.ReplaceAll,
+	"camelize":             google.Camelize,
+	"underscore":           google.Underscore,
+	"plural":               google.Plural,
+	"contains":             strings.Contains,
+	"join":                 strings.Join,
+	"lower":                strings.ToLower,
+	"upper":                strings.ToUpper,
+	"dict":                 wrapMultipleParams,
+	"format2regex":         google.Format2Regex,
+	"orderProperties":      api.OrderProperties,
+	"hasPrefix":            strings.HasPrefix,
+	"sub":                  subtract,
+	"formatDocDescription": api.FormatDocDescription,
 }
 
 var GA_VERSION = "ga"
@@ -111,6 +120,15 @@ func (td *TemplateData) GenerateResourceFile(filePath string, resource api.Resou
 		"templates/terraform/custom_flatten/go/bigquery_table_ref.go.tmpl",
 		"templates/terraform/flatten_property_method.go.tmpl",
 		"templates/terraform/expand_property_method.go.tmpl",
+		"templates/terraform/update_mask.go.tmpl",
+	}
+	td.GenerateFile(filePath, templatePath, resource, true, templates...)
+}
+
+func (td *TemplateData) GenerateOperationFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/operation.go.tmpl"
+	templates := []string{
+		templatePath,
 	}
 	td.GenerateFile(filePath, templatePath, resource, true, templates...)
 }
@@ -128,7 +146,7 @@ func (td *TemplateData) GenerateDocumentationFile(filePath string, resource api.
 func (td *TemplateData) GenerateTestFile(filePath string, resource api.Resource) {
 	templatePath := "templates/terraform/examples/base_configs/test_file.go.tmpl"
 	templates := []string{
-		// "templates/terraform//env_var_context.go.tmpl",
+		"templates/terraform/env_var_context.go.tmpl",
 		templatePath,
 	}
 	tmplInput := TestInput{
@@ -150,6 +168,48 @@ func (td *TemplateData) GenerateTestFile(filePath string, resource api.Resource)
 	}
 
 	td.GenerateFile(filePath, templatePath, tmplInput, true, templates...)
+}
+
+func (td *TemplateData) GenerateIamPolicyFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/iam_policy.go.tmpl"
+	templates := []string{
+		templatePath,
+	}
+	td.GenerateFile(filePath, templatePath, resource, true, templates...)
+}
+
+func (td *TemplateData) GenerateIamResourceDocumentationFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/resource_iam.html.markdown.tmpl"
+	templates := []string{
+		templatePath,
+	}
+	td.GenerateFile(filePath, templatePath, resource, false, templates...)
+}
+
+func (td *TemplateData) GenerateIamDatasourceDocumentationFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/datasource_iam.html.markdown.tmpl"
+	templates := []string{
+		templatePath,
+	}
+	td.GenerateFile(filePath, templatePath, resource, false, templates...)
+}
+
+func (td *TemplateData) GenerateIamPolicyTestFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/examples/base_configs/iam_test_file.go.tmpl"
+	templates := []string{
+		templatePath,
+		"templates/terraform/env_var_context.go.tmpl",
+		"templates/terraform/iam/go/iam_context.go.tmpl",
+	}
+	td.GenerateFile(filePath, templatePath, resource, true, templates...)
+}
+
+func (td *TemplateData) GenerateSweeperFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/sweeper_file.go.tmpl"
+	templates := []string{
+		templatePath,
+	}
+	td.GenerateFile(filePath, templatePath, resource, false, templates...)
 }
 
 func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, goFormat bool, templates ...string) {

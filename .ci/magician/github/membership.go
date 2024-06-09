@@ -74,8 +74,13 @@ var (
 		},
 		{
 			id:        "SarahFrench",
-			startDate: newDate(2024, 5, 10, bstLoc),
-			endDate:   newDate(2024, 5, 12, bstLoc),
+			startDate: newDate(2024, 5, 17, bstLoc),
+			endDate:   newDate(2024, 5, 19, bstLoc),
+		},
+		{
+			id:        "shuyama1",
+			startDate: newDate(2024, 5, 22, pdtLoc),
+			endDate:   newDate(2024, 5, 28, pdtLoc),
 		},
 	}
 )

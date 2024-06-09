@@ -4,7 +4,7 @@ description: |-
   An environment for running orchestration tasks.
 ---
 
-# google\_composer\_environment
+# google_composer_environment
 
 An environment for running orchestration tasks.
 
@@ -1399,6 +1399,10 @@ The `dag_processor` block supports:
 * `storage_gb`
   (Optional)
   Storage (GB) request and limit for DAG processor.
+
+* `count` -
+  (Required)
+  The number of Airflow DAG processors.
 
 ## Attributes Reference
 

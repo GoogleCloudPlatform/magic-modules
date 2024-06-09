@@ -4,10 +4,11 @@ permissions: read-all
 
 on:
   schedule:
-    - cron: '37 9 * * *'
+    - cron: '37 9 * * 1-5'
 
 jobs:
   send-pr-reminders:
+    if: github.repository == 'GoogleCloudPlatform/magic-modules'
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
@@ -27,4 +28,4 @@ jobs:
           cd .ci/magician
           go build .
       - name: Request reviewer
-        run: .ci/magician/magician scheduled-pr-reminders ${{ github.event.pull_request.number }} --dry-run
+        run: .ci/magician/magician scheduled-pr-reminders ${{ github.event.pull_request.number }}

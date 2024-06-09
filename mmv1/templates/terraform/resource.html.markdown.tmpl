@@ -27,7 +27,7 @@
 # ----------------------------------------------------------------------------
 subcategory: "{{$.ProductMetadata.DisplayName}}"
 description: |-
-  {{$.Description -}}
+  {{ formatDocDescription $.Description }}
 ---
 
 # {{$.TerraformName}}
@@ -54,16 +54,15 @@ To get more information about {{$.Name}}, see:
     * [{{$title}}]({{$link}})
 		{{- end }}
 	{{- end }}
-{{- end }}
+{{ end }}
 {{- if $.Docs.Warning}}
 
 ~> **Warning:** {{$.Docs.Warning}}
 {{- end }}
 {{- if $.Docs.Note}}
-
-~> **Note:** {{$.Docs.Note}}
+~> **Note:** {{$.Docs.Note }}
 {{- end }}
-{{ if $.SensitiveProps }}
+{{- if $.SensitiveProps }}
 ~> **Warning:** All arguments including the following potentially sensitive
 values will be stored in the raw state as plain text: {{ $.SensitivePropsToString }}.
 [Read more about sensitive data in state](https://www.terraform.io/language/state/sensitive-data).
@@ -98,7 +97,7 @@ The following arguments are supported:
 	{{- end }}
 {{- end }}
 
-{{- range $p := $.AllNestedProperties $.RootProperties }}
+{{- range $p := $.AllUserProperties }}
 	{{- if $p.Required }}
 {{- template "nestedPropertyDocumentation" $p}}
 	{{- end}}
@@ -121,7 +120,7 @@ The following arguments are supported:
 {{ if $.Docs.OptionalProperties }}
 {{ $.Docs.OptionalProperties }}
 {{- end }}
-{{- range $p := $.AllNestedProperties $.RootProperties }}
+{{- range $p := $.AllUserProperties }}
 	{{- if and (not $p.Required) (not $p.Output) }}
 {{- template "nestedPropertyDocumentation" $p -}}
 {{ end}}
@@ -139,7 +138,7 @@ In addition to the arguments listed above, the following computed attributes are
 {{- if $.HasSelfLink }}
 * `self_link` - The URI of the created resource.
 {{- end }}
-{{ range $p := $.AllNestedProperties $.RootProperties }}
+{{ range $p := $.AllUserProperties }}
 	{{- if $p.Output }}
 {{- template "nestedPropertyDocumentation" $p -}}
 	{{- end }}
@@ -188,4 +187,4 @@ $ terraform import {{$.TerraformName}}.default {{$idFormat}}
 ## User Project Overrides
 
 This resource supports [User Project Overrides](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#user_project_override).
-{{- end }}
+{{ end }}

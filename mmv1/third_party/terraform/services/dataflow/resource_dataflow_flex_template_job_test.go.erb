@@ -299,8 +299,9 @@ func TestAccDataflowFlexTemplateJob_withKmsKey(t *testing.T) {
 
 	randStr := acctest.RandString(t, 10)
 	job := "tf-test-dataflow-job-" + randStr
-	key_ring := "tf-test-dataflow-kms-ring-" + randStr
-	crypto_key := "tf-test-dataflow-kms-key-" + randStr
+	kms := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
+	keyRing := kms.KeyRing.Name
+	cryptoKey := kms.CryptoKey.Name
 	bucket := "tf-test-dataflow-bucket-" + randStr
 	topic := "tf-test-topic" + randStr
 
@@ -318,7 +319,7 @@ func TestAccDataflowFlexTemplateJob_withKmsKey(t *testing.T) {
 		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataflowFlexTemplateJob_kms(job, key_ring, crypto_key, bucket, topic),
+				Config: testAccDataflowFlexTemplateJob_kms(job, keyRing, cryptoKey, bucket, topic),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataflowFlexJobExists(t, "google_dataflow_flex_template_job.flex_job_kms", false),
 				),
@@ -1331,17 +1332,6 @@ resource "google_storage_bucket_object" "schema" {
 EOF
 }
 
-resource "google_kms_key_ring" "keyring" {
-  name     = "%s"
-  location = "global"
-}
-
-resource "google_kms_crypto_key" "crypto_key" {
-  name            = "%s"
-  key_ring        = google_kms_key_ring.keyring.id
-  rotation_period = "100000s"
-}
-
 data "google_storage_bucket_object" "flex_template" {
   name   = "latest/flex/Streaming_Data_Generator"
   bucket = "dataflow-templates"
@@ -1358,10 +1348,10 @@ resource "google_dataflow_flex_template_job" "flex_job_kms" {
   labels = {
    "my_labels" = "value"
   }
-  kms_key_name		= google_kms_crypto_key.crypto_key.id
+  kms_key_name		= "%s"
 
 }
-`, topicName, bucket, key_ring, crypto_key, job)
+`, topicName, bucket, crypto_key, job)
 }
 
 func testAccDataflowFlexTemplateJob_additionalExperiments(job, bucket, topicName string, experiments []string) string {

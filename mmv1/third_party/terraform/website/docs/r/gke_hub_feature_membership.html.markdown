@@ -4,7 +4,7 @@ description: |-
   Contains information about a GKEHub Feature Memberships.
 ---
 
-# google\_gkehub\_feature\_membership
+# google_gkehub_feature_membership
 
 Contains information about a GKEHub Feature Memberships. Feature Memberships configure GKEHub Features that apply to specific memberships rather than the project as a whole. The google_gke_hub is the Fleet API.
 
@@ -598,8 +598,7 @@ The following arguments are supported:
   (Optional)
   Configures the installation of the Template Library. Structure is [documented below](#nested_template_library).
 
-<a name="nested_bundles"></a>The `template_library` block supports:
-The `bundles` block supports:
+<a name="nested_bundles"></a>The `bundles` block supports:
     
 * `bundle_name` -
   (Required)

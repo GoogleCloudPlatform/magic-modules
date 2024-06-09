@@ -4,7 +4,7 @@ description: |-
   User workloads Secret used by Airflow tasks that run with Kubernetes Executor or KubernetesPodOperator.
 ---
 
-# google\_composer\_user\_workloads\_secret
+# google_composer_user_workloads_secret
 
 ~> **Warning:** These resources are in beta, and should be used with the terraform-provider-google-beta provider.
 See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
@@ -83,7 +83,7 @@ Secret can be imported using any of these accepted formats:
 
 * `projects/{{project}}/locations/{{region}}/environments/{{environment}}/userWorkloadsSecrets/{{name}}`
 * `{{project}}/{{region}}/{{environment}}/{{name}}`
-* `{{name}}`
+* `{{environment}}/{{name}}`
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import User Workloads Secret using one of the formats above. For example:
 
@@ -99,5 +99,5 @@ When using the [`terraform import` command](https://developer.hashicorp.com/terr
 ```
 $ terraform import google_composer_user_workloads_secret.example projects/{{project}}/locations/{{region}}/environments/{{environment}}/userWorkloadsSecrets/{{name}}
 $ terraform import google_composer_user_workloads_secret.example {{project}}/{{region}}/{{environment}}/{{name}}
-$ terraform import google_composer_user_workloads_secret.example {{name}}
+$ terraform import google_composer_user_workloads_secret.example {{environment}}/{{name}}
 ```
