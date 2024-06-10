@@ -475,17 +475,13 @@ func TestResourceStorageBucketObjectUpdate_ContentChange(t *testing.T) {
 	}
 	newDataMd5 := base64.StdEncoding.EncodeToString(h2.Sum(nil))
 	// Update the object content and verify
-	testFile := getNewTmpTestFile(t, "tf-test")
-	if err := ioutil.WriteFile(testFile.Name(), content, 0644); err != nil {
-		t.Errorf("error writing file: %v", err)
-	}
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageObjectDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleStorageBucketsObjectCustomContent(bucketName, initialContent),
+				Config: testGoogleStorageBucketsObjectCustomContent(bucketName, string(initialContent)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleStorageObject(t, bucketName, objectName, dataMd5),
 					resource.TestCheckResourceAttr(
@@ -496,7 +492,7 @@ func TestResourceStorageBucketObjectUpdate_ContentChange(t *testing.T) {
 				),
 			},
 			{
-				Config: testGoogleStorageBucketsObjectCustomContent(bucketName, updatedContent),
+				Config: testGoogleStorageBucketsObjectCustomContent(bucketName, string(updatedContent)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleStorageObject(t, bucketName, objectName, newDataMd5),
 					resource.TestCheckResourceAttr(
