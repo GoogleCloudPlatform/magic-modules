@@ -70,7 +70,7 @@ resource "google_managed_kafka_topic" "example" {
   partition_count = 2
   replication_factor = 3
   configs = {
-  "cleanup.policy" = "compact"
+    "cleanup.policy" = "compact"
   }
 
   provider = google-beta
@@ -109,7 +109,7 @@ resource "google_managed_kafka_topic" "example" {
   partition_count = 3
   replication_factor = 3
   configs = {
-  "cleanup.policy" = "compact"
+    "cleanup.policy" = "compact"
   }
 
   provider = google-beta
