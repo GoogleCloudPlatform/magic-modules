@@ -118,11 +118,15 @@ properties:
     validation: !ruby/object:Provider::Terraform::Validation
       function: 'validation.IntBetween(200, 1000)'
     default_from_api: true
+    conflicts:
+      - min_instances
   - !ruby/object:Api::Type::Integer
     name: minInstances
     description: |
       Minimum value of instances in autoscaling group underlying the connector. Value must be between 2 and 9, inclusive. Must be
       lower than the value specified by max_instances.
+    conflicts:
+      - min_throughput
     default_from_api: true
   - !ruby/object:Api::Type::Integer
     name: maxInstances
