@@ -132,7 +132,7 @@ func execGenerateDownstream(baseBranch, command, repo, version, ref string, gh G
 		// 	return fmt.Errorf("error getting pull request: %w", err)
 		// }
 		if repo == "terraform" {
-			pullRequest, _ = getCurrentPullRequest(ref)
+			pullRequest, _ = getCurrentPullRequest(ref, gh)
 			if err := addChangelogEntry(pullRequest, rnr); err != nil {
 				return fmt.Errorf("error adding changelog entry: %w", err)
 			}
