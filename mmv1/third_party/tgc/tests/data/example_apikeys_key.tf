@@ -1,7 +1,16 @@
-provider "google" {
-  project     = "tf-deployer-2"
-  region      = "us-central1"
+terraform {
+  required_providers {
+    google = {
+      source = "hashicorp/google-beta"
+      version = "~> {{.Provider.version}}"
+    }
+  }
 }
+
+provider "google" {
+  {{if .Provider.credentials }}credentials = "{{.Provider.credentials}}"{{end}}
+}
+
 
 resource "google_apikeys_key" "primary" {
   name         = "key"
