@@ -71,6 +71,14 @@ resource "google_workbench_instance" "instance" {
       enable_integrity_monitoring = false
     }
 
+	boot_disk {
+		disk_size_gb  = 310
+	  }
+  
+	  data_disks {
+		disk_size_gb  = 330
+	  }
+
     metadata = {
       terraform = "true"
     }
