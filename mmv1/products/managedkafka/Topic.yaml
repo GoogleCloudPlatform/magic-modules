@@ -19,7 +19,7 @@ id_format: projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/topi
 import_format:
   - projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/topics/{{topic_id}}
 name: Topic
-description: An Apache Kafka for BigQuery topic.
+description: An Apache Kafka for BigQuery topic. Apache Kafka is a trademark owned by the Apache Software Foundation.
 min_version: beta
 update_verb: :PATCH
 update_mask: true
