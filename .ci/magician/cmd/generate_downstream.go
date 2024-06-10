@@ -327,10 +327,7 @@ func addChangelogEntry(downstreamRepo *source.Repo, pullRequest *github.PullRequ
 	if err := rnr.WriteFile(filepath.Join(".changelog", fmt.Sprintf("%d.txt", pullRequest.Number)), strings.Join(changelogExp.FindAllString(pullRequest.Body, -1), "\n")); err != nil {
 		return err
 	}
-	if err := rnr.PopDir(); err != nil {
-		return err
-	}
-	return nil
+	return rnr.PopDir()
 }
 
 func mergePullRequest(downstreamRepo, scratchRepo *source.Repo, scratchRepoSha string, pullRequest *github.PullRequest, rnr ExecRunner, gh GithubClient) error {
