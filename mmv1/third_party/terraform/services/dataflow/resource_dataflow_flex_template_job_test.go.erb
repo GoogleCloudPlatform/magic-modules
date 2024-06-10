@@ -300,7 +300,6 @@ func TestAccDataflowFlexTemplateJob_withKmsKey(t *testing.T) {
 	randStr := acctest.RandString(t, 10)
 	job := "tf-test-dataflow-job-" + randStr
 	kms := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
-	keyRing := kms.KeyRing.Name
 	cryptoKey := kms.CryptoKey.Name
 	bucket := "tf-test-dataflow-bucket-" + randStr
 	topic := "tf-test-topic" + randStr
@@ -319,7 +318,7 @@ func TestAccDataflowFlexTemplateJob_withKmsKey(t *testing.T) {
 		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataflowFlexTemplateJob_kms(job, keyRing, cryptoKey, bucket, topic),
+				Config: testAccDataflowFlexTemplateJob_kms(job, cryptoKey, bucket, topic),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataflowFlexJobExists(t, "google_dataflow_flex_template_job.flex_job_kms", false),
 				),
@@ -1299,7 +1298,7 @@ resource "google_dataflow_flex_template_job" "flex_job_ipconfig" {
 `, topicName, network, subnetwork, bucket, job)
 }
 
-func testAccDataflowFlexTemplateJob_kms(job, key_ring, crypto_key, bucket, topicName string) string {
+func testAccDataflowFlexTemplateJob_kms(job, crypto_key, bucket, topicName string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {}
 
