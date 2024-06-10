@@ -1,6 +1,7 @@
 package vpcaccess_test
 
 import (
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -31,7 +32,7 @@ func TestAccVPCAccessConnector_vpcAccessConnectorThroughput(t *testing.T) {
 	})
 }
 
-func TestAccVPCAccessConnector_vpcAccessConnectorThroughput_combiningThroughputAndInstancesFields_permadiff(t *testing.T) {
+func TestAccVPCAccessConnector_vpcAccessConnectorThroughput_combiningThroughputAndInstancesFields_conflict(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -45,10 +46,11 @@ func TestAccVPCAccessConnector_vpcAccessConnectorThroughput_combiningThroughputA
 		Steps: []resource.TestStep{
 			{
 				Config: testAccVPCAccessConnector_vpcAccessConnectorThroughput_bothThroughputAndInstances(context),
-				// When both min_instance/max_instance and min_throughput/max_throughput fields are sent to the API
+				// When all 4 of min_instance/max_instance and min_throughput/max_throughput fields are sent to the API
 				// the API ignores the throughput field values. Instead the API returns values for min and max throughput
 				// based on the value of min and max instances. The mismatch with the config causes a permadiff.
-				ExpectNonEmptyPlan: true,
+				// Due to this we make the fields conflict with each other.
+				ExpectError: regexp.MustCompile("conflicts with"),
 			},
 		},
 	})
