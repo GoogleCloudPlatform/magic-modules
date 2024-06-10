@@ -88,4 +88,5 @@ resource "google_apigee_environment_keyvaluemaps" "<%= ctx[:primary_resource_id]
   env_id    = google_apigee_environment.apigee_environment.id
   name      = "tf-test-env-kvms%{random_suffix}"
   encrypted = true
+  depends_on = [google_apigee_instance_attachment.apigee_instance_attachment]
 }
