@@ -138,7 +138,7 @@ module Provider
 
       # If the example should be skipped during VCR testing.
       # This is the case when something about the resource or config causes VCR to fail for example
-      # a resource with a unique identifier generated within the resource via resource.UniqueId()
+      # a resource with a unique identifier generated within the resource via id.UniqueId()
       # Or a config with two fine grained resources that have a race condition during create
       attr_reader :skip_vcr
 

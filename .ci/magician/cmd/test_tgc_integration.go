@@ -34,7 +34,6 @@ var testTGCIntegrationCmd = &cobra.Command{
 		rnr, err := exec.NewRunner()
 		if err != nil {
 			return fmt.Errorf("error creating runner: %w", err)
-			os.Exit(1)
 		}
 
 		ctlr := source.NewController(goPath, "modular-magician", githubToken, rnr)

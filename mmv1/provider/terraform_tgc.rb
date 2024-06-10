@@ -318,6 +318,8 @@ module Provider
                         'third_party/tgc/dataproc_cluster.go'],
                        ['converters/google/resources/commitment.go',
                         'third_party/tgc/commitment.go'],
+                       ['converters/google/resources/firebase_project.go',
+                        'third_party/tgc/firebase_project.go'],
                        ['converters/google/resources/appengine_version.go',
                         'third_party/tgc/appengine_version.go']
                      ])
