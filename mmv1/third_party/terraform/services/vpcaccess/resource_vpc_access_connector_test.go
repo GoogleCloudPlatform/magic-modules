@@ -87,15 +87,15 @@ func TestAccVPCAccessConnector_vpcAccessConnectorThroughput_usingThroughputOrIns
 				Check: resource.ComposeTestCheckFunc(
 					// These fields are set by the config in this test step
 					resource.TestCheckResourceAttr(
-						"google_vpc_access_connector.connector", "min_instances", "4"),
+						"google_vpc_access_connector.connector", "min_instances", "5"),
 					resource.TestCheckResourceAttr(
-						"google_vpc_access_connector.connector", "max_instances", "6"),
+						"google_vpc_access_connector.connector", "max_instances", "7"),
 					// These fields aren't set in the config; the API sets and returns values
 					// based on the instance limit values provided
 					resource.TestCheckResourceAttr(
-						"google_vpc_access_connector.connector", "min_throughput", "400"),
+						"google_vpc_access_connector.connector", "min_throughput", "500"),
 					resource.TestCheckResourceAttr(
-						"google_vpc_access_connector.connector", "max_throughput", "600"),
+						"google_vpc_access_connector.connector", "max_throughput", "700"),
 				),
 			},
 		},
