@@ -280,11 +280,21 @@ func notificationState(pr *github.PullRequest, issueEvents []*github.IssueEvent,
 	})
 
 	var latestReviewRequest *github.IssueEvent
+	removedRequests := map[string]struct{}{}
 	for _, event := range issueEvents {
+		if *event.Event == "review_request_removed" && event.RequestedReviewer != nil {
+			removedRequests[*event.RequestedReviewer.Login] = struct{}{}
+			continue
+		}
 		if *event.Event != "review_requested" {
 			continue
 		}
+		// Ignore review requests for users who no longer exist.
 		if event.RequestedReviewer == nil {
+			continue
+		}
+		// Ignore review requests that were later removed.
+		if _, ok := removedRequests[*event.RequestedReviewer.Login]; ok {
 			continue
 		}
 		if membership.IsCoreReviewer(*event.RequestedReviewer.Login) {
