@@ -56,6 +56,7 @@ parameters:
       function: 'verify.ValidateGCEName'
     description: |
       Environment where the Kubernetes ConfigMap will be stored and used.
+properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     required: true
