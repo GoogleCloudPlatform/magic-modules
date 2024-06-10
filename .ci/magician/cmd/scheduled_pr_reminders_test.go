@@ -65,6 +65,29 @@ func TestNotificationState(t *testing.T) {
 			expectState: waitingForReviewerAssignment,
 			expectSince: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
 		},
+		"request for team reviewer which was later removed, and no reviews": {
+			pullRequest: &github.PullRequest{
+				User:      &github.User{Login: github.String("author")},
+				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
+				RequestedTeams: []*github.Team{
+					&github.Team{Name: github.String("terraform-team")},
+				},
+			},
+			issueEvents: []*github.IssueEvent{
+				&github.IssueEvent{
+					Event:             github.String("review_requested"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
+					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+				},
+				&github.IssueEvent{
+					Event:             github.String("review_request_removed"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
+					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+				},
+			},
+			expectState: waitingForReviewerAssignment,
+			expectSince: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
+		},
 
 		// expectState: waitingForReview
 		"no reviews": {
@@ -81,6 +104,31 @@ func TestNotificationState(t *testing.T) {
 			},
 			expectState: waitingForReview,
 			expectSince: time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC),
+		},
+		"review requested, removed, and rerequested, with no reviews": {
+			pullRequest: &github.PullRequest{
+				User:      &github.User{Login: github.String("author")},
+				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
+			},
+			issueEvents: []*github.IssueEvent{
+				&github.IssueEvent{
+					Event:             github.String("review_requested"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
+					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+				},
+				&github.IssueEvent{
+					Event:             github.String("review_request_removed"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
+					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+				},
+				&github.IssueEvent{
+					Event:             github.String("review_requested"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 4, 0, 0, 0, 0, time.UTC)},
+					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+				},
+			},
+			expectState: waitingForReview,
+			expectSince: time.Date(2024, 1, 4, 0, 0, 0, 0, time.UTC),
 		},
 		"no reviews since latest review request": {
 			pullRequest: &github.PullRequest{
