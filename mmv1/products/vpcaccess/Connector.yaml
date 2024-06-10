@@ -117,6 +117,7 @@ properties:
       min_instances are provided, min_instances takes precedence over min_throughput. The use of min_throughput is discouraged in favor of min_instances.
     validation: !ruby/object:Provider::Terraform::Validation
       function: 'validation.IntBetween(200, 1000)'
+    default_from_api: true
   - !ruby/object:Api::Type::Integer
     name: minInstances
     description: |
@@ -138,6 +139,7 @@ properties:
       max_throughput is discouraged in favor of max_instances.
     validation: !ruby/object:Provider::Terraform::Validation
       function: 'validation.IntBetween(200, 1000)'
+    default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'selfLink'
     description: |
