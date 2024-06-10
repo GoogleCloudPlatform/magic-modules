@@ -52,7 +52,7 @@ func execTestTGC(commit, pr string, gh ttGithub) error {
 		fmt.Println("Error:", err)
 	}
 
-	contentTGC, err := os.ReadFile("/workspace/upstreamCommitSHA_terraform-google-conversion.txt")
+	contentTGC, err := os.ReadFile("/workspace/commitSHA_modular-magician_terraform-google-conversion.txt")
 	if err != nil {
 		fmt.Println("Error:", err)
 	}
