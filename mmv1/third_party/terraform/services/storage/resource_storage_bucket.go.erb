@@ -496,6 +496,9 @@ func ResourceStorageBucket() *schema.Resource {
 							MinItems: 2,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
+								StateFunc: func(s interface{}) string {
+									return strings.ToUpper(s.(string))
+								},
 							},
 							Description: `The list of individual regions that comprise a dual-region bucket. See the docs for a list of acceptable regions. Note: If any of the data_locations changes, it will recreate the bucket.`,
 						},
@@ -1171,7 +1174,9 @@ func expandBucketDataLocations(configured interface{}) []string {
 
 	req := make([]string, 0, len(l))
 	for _, raw := range l {
-		req = append(req, raw.(string))
+		if raw.(string) == strings.ToUpper(raw.(string)) {
+			req = append(req, raw.(string))
+		}
 	}
 	return req
 }
