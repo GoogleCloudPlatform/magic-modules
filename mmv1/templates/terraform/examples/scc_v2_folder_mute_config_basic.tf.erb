@@ -3,10 +3,16 @@ resource "google_folder" "default" {
 	parent       = "folders/${var.org_id}"
 }
 
+resource "google_folder_iam_member" "scc_folder_mute_config" {
+  folder = google_folder.default.id
+  role   = "roles/securitycenter.admin"
+  member = "serviceAccount:<%= ctx[:vars]['service_account_email'] %>"
+}
+
 resource "google_scc_v2_folder_mute_config" "<%= ctx[:primary_resource_id] %>" {
 	mute_config_id = "<%= ctx[:vars]['mute_config_id'] %>"
 	parent         = google_folder.default.id  # Using the ID of the google_folder resource
 	description    = "My custom Cloud Security Command Center Mute Configuration"
 	filter         = "severity = \"HIGH\""
-	type                 =  "STATIC"
+	type           =  "STATIC"
 }

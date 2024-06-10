@@ -76,17 +76,12 @@ func TestAccSecurityCenterV2OrganizationMuteConfig_basic(t *testing.T) {
 
 func testAccSecurityCenterV2OrganizationMuteConfig_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_organization" "test1" {
-  display_name = "Test Organization 1"
-  parent       = "organizations/%{org_id}"
-}
-
 resource "google_scc_v2_organization_mute_config" "organization_mute_test1" {
   description          = "A test organization mute config"
   filter               = "severity = \"LOW\""
   mute_config_id       = "tf-test-my-config%{random_suffix}"
   location             = "%{location}"
-  parent               = "${google_organization.test1.id}"
+  parent               = "organizations/%{org_id}"
   type                 =  "STATIC"
 }
 `, context)
@@ -94,17 +89,12 @@ resource "google_scc_v2_organization_mute_config" "organization_mute_test1" {
 
 func testAccSecurityCenterV2OrganizationMuteConfig_highSeverity(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_organization" "test2" {
-  display_name = "Test Organization 2"
-  parent       = "organizations/%{org_id}"
-}
-
 resource "google_scc_v2_organization_mute_config" "organization_mute_test2" {
   description          = "A test organization mute config with high severity"
   filter               = "severity = \"HIGH\""
   mute_config_id       = "tf-test-my-config%{random_suffix}"
   location             = "%{location}"
-  parent               = "${google_organization.test2.id}"
+  parent               = "organizations/%{org_id}"
   type                 =  "STATIC"
 }
 `, context)

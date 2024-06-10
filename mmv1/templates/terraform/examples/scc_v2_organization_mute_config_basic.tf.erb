@@ -7,5 +7,5 @@ resource "google_scc_v2_organization_mute_config" "<%= ctx[:primary_resource_id]
 	parent         = google_organization.default.id
 	description    = "My custom Cloud Security Command Center Organization Mute Configuration"
 	filter         = "severity = \"HIGH\""
-	type                 =  "STATIC"
+	type           =  "STATIC"
 }
