@@ -126,17 +126,18 @@ func execGenerateDownstream(baseBranch, command, repo, version, ref string, gh G
 	}
 
 	var pullRequest *github.PullRequest
-	if command == "downstream" {
-		pullRequest, err = getPullRequest(baseBranch, ref, gh)
-		if err != nil {
-			return fmt.Errorf("error getting pull request: %w", err)
-		}
+	// if command == "downstream" {
+		// pullRequest, err = getPullRequest(baseBranch, ref, gh)
+		// if err != nil {
+		// 	return fmt.Errorf("error getting pull request: %w", err)
+		// }
 		if repo == "terraform" {
-			if err := addChangelogEntry(pullRequest, rnr); err != nil {
+			pullRequest, _ = getCurrentPullRequest(ref, gh)
+			if err := addChangelogEntry(scratchRepo, pullRequest, rnr); err != nil {
 				return fmt.Errorf("error adding changelog entry: %w", err)
 			}
 		}
-	}
+	// }
 
 	scratchCommitSha, commitErr := createCommit(scratchRepo, commitMessage, rnr)
 	if commitErr != nil {
@@ -289,6 +290,14 @@ func getPullRequest(baseBranch, ref string, gh GithubClient) (*github.PullReques
 	return nil, fmt.Errorf("no pr found with merge commit sha %s and base branch %s", ref, baseBranch)
 }
 
+func getCurrentPullRequest(ref string, gh GithubClient) (*github.PullRequest, error) {
+	pr, err := gh.GetPullRequest(ref)
+	if err != nil {
+		return nil, err
+	}
+	return &pr, nil
+}
+
 func createCommit(scratchRepo *source.Repo, commitMessage string, rnr ExecRunner) (string, error) {
 	if err := rnr.PushDir(scratchRepo.Path); err != nil {
 		return "", err
@@ -319,9 +328,15 @@ func createCommit(scratchRepo *source.Repo, commitMessage string, rnr ExecRunner
 	return commitSha, err
 }
 
-func addChangelogEntry(pullRequest *github.PullRequest, rnr ExecRunner) error {
+func addChangelogEntry(downstreamRepo *source.Repo, pullRequest *github.PullRequest, rnr ExecRunner) error {
+	if err := rnr.PushDir(downstreamRepo.Path); err != nil {
+		return err
+	}
 	rnr.Mkdir(".changelog")
 	if err := rnr.WriteFile(filepath.Join(".changelog", fmt.Sprintf("%d.txt", pullRequest.Number)), strings.Join(changelogExp.FindAllString(pullRequest.Body, -1), "\n")); err != nil {
+		return err
+	}
+	if err := rnr.PopDir(); err != nil {
 		return err
 	}
 	return nil
