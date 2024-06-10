@@ -236,7 +236,7 @@ func ExecuteTemplate(e any, templatePath string, appendNewline bool) string {
 	}
 	templateFileName := filepath.Base(templatePath)
 
-	tmpl, err := template.New(templateFileName).ParseFiles(templates...)
+	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).ParseFiles(templates...)
 	if err != nil {
 		glog.Exit(err)
 	}
