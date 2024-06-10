@@ -15,13 +15,14 @@ on:
 
 jobs:
   request-review:
-    if: github.event.pull_request && github.event.pull_request.draft == false && (github.event.sender.login == github.event.issue.user.login || github.event.action != 'created')
+    # if: github.event.pull_request && github.event.pull_request.draft == false && (github.event.comment.user.login == github.event.issue.user.login || github.event.action != 'created')
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
+      - run: echo "${{ toJSON(github.event) }}"
       - name: Checkout Repository
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
       - name: Set up Go
