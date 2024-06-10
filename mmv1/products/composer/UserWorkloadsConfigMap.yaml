@@ -69,7 +69,6 @@ parameters:
       Name of the Kubernetes ConfigMap.
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'data'
-    required: false
     immutable: false
     description: |
       The "data" field of Kubernetes ConfigMap, organized in key-value pairs.
