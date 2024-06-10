@@ -132,7 +132,7 @@ func execGenerateDownstream(baseBranch, command, repo, version, ref string, gh G
 		// 	return fmt.Errorf("error getting pull request: %w", err)
 		// }
 		if repo == "terraform" {
-			pullRequest, _ = gh.GetPullRequest(ref)
+			pullRequest, _ = getCurrentPullRequest(ref)
 			if err := addChangelogEntry(pullRequest, rnr); err != nil {
 				return fmt.Errorf("error adding changelog entry: %w", err)
 			}
@@ -288,6 +288,14 @@ func getPullRequest(baseBranch, ref string, gh GithubClient) (*github.PullReques
 		}
 	}
 	return nil, fmt.Errorf("no pr found with merge commit sha %s and base branch %s", ref, baseBranch)
+}
+
+func getCurrentPullRequest(ref string, gh GithubClient) (*github.PullRequest, error) {
+	pr, err := gh.GetPullRequest(ref)
+	if err != nil {
+		return nil, err
+	}
+	return &pr, nil
 }
 
 func createCommit(scratchRepo *source.Repo, commitMessage string, rnr ExecRunner) (string, error) {
