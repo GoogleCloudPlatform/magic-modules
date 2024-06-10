@@ -61,7 +61,7 @@ func TestGetChangedFieldsFromSchemaDiff(t *testing.T) {
 }
 
 func TestGetMissingTestsForChanges(t *testing.T) {
-	allTests, errs := reader.ReadAllTests("../../test-reader/testdata")
+	allTests, errs := reader.ReadAllTests("../../test-reader/reader/testdata")
 	if len(errs) > 0 {
 		t.Errorf("errors reading tests before testing detect missing tests: %v", errs)
 	}
