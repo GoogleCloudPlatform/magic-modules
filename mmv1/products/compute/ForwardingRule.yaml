@@ -662,4 +662,3 @@ properties:
       - :IPV6
     immutable: true
     default_from_api: true
-
