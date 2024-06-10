@@ -34,14 +34,14 @@ func TestAccSecurityCenterV2OrganizationNotificationConfig_basic(t *testing.T) {
 			{
 				Config: testAccSecurityCenterV2OrganizationNotificationConfig_update(context),
 			},
-				{
-					ResourceName:      "google_scc_v2_organization_notification_config.default",
-					ImportState:       true,
-					ImportStateVerify: true,
-					ImportStateVerifyIgnore: []string{
-						"config_id",
-					},
+			{
+				ResourceName:      "google_scc_v2_organization_notification_config.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"config_id",
 				},
+			},
 		},
 	})
 }
