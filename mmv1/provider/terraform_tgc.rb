@@ -34,7 +34,8 @@ module Provider
         output_folder,
         types,
         generate_code,
-        generate_docs
+        generate_docs,
+        _product_path
       )
     end
 

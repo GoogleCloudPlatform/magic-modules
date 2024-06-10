@@ -50,7 +50,7 @@ module Provider
 
     def generate(output_folder, types, _product_path, _dump_yaml, generate_code, generate_docs)
       @base_url = @version.base_url
-      generate_objects(output_folder, types, generate_code, generate_docs)
+      generate_objects(output_folder, types, generate_code, generate_docs, _product_path)
       compile_product_files(output_folder)
     end
 
