@@ -126,17 +126,18 @@ func execGenerateDownstream(baseBranch, command, repo, version, ref string, gh G
 	}
 
 	var pullRequest *github.PullRequest
-	if command == "downstream" {
-		pullRequest, err = getPullRequest(baseBranch, ref, gh)
-		if err != nil {
-			return fmt.Errorf("error getting pull request: %w", err)
-		}
+	// if command == "downstream" {
+		// pullRequest, err = getPullRequest(baseBranch, ref, gh)
+		// if err != nil {
+		// 	return fmt.Errorf("error getting pull request: %w", err)
+		// }
 		if repo == "terraform" {
+			pullRequest, _ = gh.GetPullRequest(ref)
 			if err := addChangelogEntry(pullRequest, rnr); err != nil {
 				return fmt.Errorf("error adding changelog entry: %w", err)
 			}
 		}
-	}
+	// }
 
 	scratchCommitSha, commitErr := createCommit(scratchRepo, commitMessage, rnr)
 	if commitErr != nil {
