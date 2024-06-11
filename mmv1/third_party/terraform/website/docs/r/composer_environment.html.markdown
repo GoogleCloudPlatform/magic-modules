@@ -690,7 +690,25 @@ The following arguments are supported:
   master authorized networks will disallow all external traffic to access
   Kubernetes master through HTTPS except traffic from the given CIDR blocks,
   Google Compute Engine Public IPs and Google Prod IPs. Structure is
-  [documented below](#nested_master_authorized_networks_config_c1).
+  [documented below](#nested_master_authorized_networks_config_c2).
+
+<a name="nested_master_authorized_networks_config_c2"></a>The `master_authorized_networks_config` block supports:
+* `enabled` -
+  (Required)
+  Whether or not master authorized networks is enabled.
+
+* `cidr_blocks` -
+  `cidr_blocks `define up to 50 external networks that could access Kubernetes master through HTTPS. Structure is [documented below](#nested_cidr_blocks_c2).
+
+<a name="nested_cidr_blocks_c2"></a>The `cidr_blocks` supports:
+
+* `display_name` -
+  (Optional)
+  `display_name` is a field for users to identify CIDR blocks.
+
+* `cidr_block` -
+  (Required)
+  `cidr_block` must be specified in CIDR notation.
 
 * `data_retention_config` -
   (Optional, Cloud Composer 2.0.23 or newer only)
