@@ -132,7 +132,7 @@ func execGenerateDownstream(baseBranch, command, repo, version, ref string, gh G
 			return fmt.Errorf("error getting pull request: %w", err)
 		}
 		if repo == "terraform" {
-			if err := addChangelogEntry(pullRequest, rnr); err != nil {
+			if err := addChangelogEntry(scratchRepo, pullRequest, rnr); err != nil {
 				return fmt.Errorf("error adding changelog entry: %w", err)
 			}
 		}
@@ -319,12 +319,15 @@ func createCommit(scratchRepo *source.Repo, commitMessage string, rnr ExecRunner
 	return commitSha, err
 }
 
-func addChangelogEntry(pullRequest *github.PullRequest, rnr ExecRunner) error {
+func addChangelogEntry(downstreamRepo *source.Repo, pullRequest *github.PullRequest, rnr ExecRunner) error {
+	if err := rnr.PushDir(downstreamRepo.Path); err != nil {
+		return err
+	}
 	rnr.Mkdir(".changelog")
 	if err := rnr.WriteFile(filepath.Join(".changelog", fmt.Sprintf("%d.txt", pullRequest.Number)), strings.Join(changelogExp.FindAllString(pullRequest.Body, -1), "\n")); err != nil {
 		return err
 	}
-	return nil
+	return rnr.PopDir()
 }
 
 func mergePullRequest(downstreamRepo, scratchRepo *source.Repo, scratchRepoSha string, pullRequest *github.PullRequest, rnr ExecRunner, gh GithubClient) error {
