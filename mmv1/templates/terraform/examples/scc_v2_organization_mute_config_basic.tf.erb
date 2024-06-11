@@ -1,5 +1,5 @@
 resource "google_organization" "default" {
-	display_name = "My Test Organization"
+	domain = "<%= ctx[:vars]['organization_domain'] %>"
 }
 
 resource "google_scc_v2_organization_mute_config" "<%= ctx[:primary_resource_id] %>" {
