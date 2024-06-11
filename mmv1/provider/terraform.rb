@@ -89,7 +89,8 @@ module Provider
     end
 
     # Main entry point for generation.
-    def generate(output_folder, types, product_path, dump_yaml, generate_code, generate_docs, go_yaml)
+    def generate(output_folder, types, product_path, dump_yaml, generate_code, generate_docs, \
+                 go_yaml)
       generate_objects(output_folder, types, generate_code, generate_docs, product_path, go_yaml)
 
       FileUtils.mkpath output_folder
@@ -358,7 +359,8 @@ module Provider
       services
     end
 
-    def generate_objects(output_folder, types, generate_code, generate_docs, product_path, go_yaml)
+    def generate_objects(output_folder, types, generate_code, generate_docs, product_path, \
+                         go_yaml)
       (@api.objects || []).each do |object|
         if !types.empty? && !types.include?(object.name)
           Google::LOGGER.info "Excluding #{object.name} per user request"
@@ -378,9 +380,7 @@ module Provider
 
           generate_object object, output_folder, @target_version_name, generate_code, generate_docs
         end
-        if go_yaml
-          generate_object_modified object, product_path, @target_version_name
-        end
+        generate_object_modified object, product_path, @target_version_name if go_yaml
       end
     end
 
