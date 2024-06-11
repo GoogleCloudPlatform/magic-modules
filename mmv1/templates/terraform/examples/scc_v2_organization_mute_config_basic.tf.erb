@@ -1,11 +1,6 @@
-data "google_organization" "default" {
-	domain = "<%= ctx[:vars]['organization_domain'] %>"
-}
-
 resource "google_scc_v2_organization_mute_config" "<%= ctx[:primary_resource_id] %>" {
-	mute_config_id = "<%= ctx[:vars]['mute_config_id'] %>"
-	parent         = data.google_organization.default.id
-	description    = "My custom Cloud Security Command Center Organization Mute Configuration"
-	filter         = "severity = \"HIGH\""
-	type           =  "STATIC"
+  mute_config_id = "<%= ctx[:vars]['mute_config_id'] %>"
+  parent         = "organizations/<%= ctx[:test_env_vars]['org_id'] %>"
+  description    = "My custom Cloud Security Command Center Organization Mute Configuration"
+  filter         = "severity = \"HIGH\""
 }
