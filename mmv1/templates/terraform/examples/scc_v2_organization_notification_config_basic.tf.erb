@@ -7,7 +7,7 @@ resource "google_scc_v2_organization_notification_config" "<%= ctx[:primary_reso
   organization = "<%= ctx[:test_env_vars]['org_id'] %>"
   location     = "global"
   description  = "My custom Cloud Security Command Center Finding Organization Notification Configuration"
-  pubsub_topic = google_pubsub_topic.scc_organization_notification.id
+  pubsub_topic = google_pubsub_topic.scc_v2_organization_notification_config.id
 
   streaming_config {
     filter = "category = \"OPEN_FIREWALL\" AND state = \"ACTIVE\""
