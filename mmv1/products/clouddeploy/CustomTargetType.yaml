@@ -48,20 +48,34 @@ import_format:
   [
     'projects/{{project}}/locations/{{location}}/customTargetTypes/{{name}}'
   ]
+iam_policy: !ruby/object:Api::Resource::IamPolicy
+  parent_resource_attribute: 'name'
+  method_name_separator: ':'
+  base_url: 'projects/{{project}}/locations/{{location}}/customTargetTypes/{{name}}'
+  import_format: ['projects/{{project}}/locations/{{location}}/customTargetTypes/{{name}}', '{{name}}']
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "clouddeploy_custom_target_type_basic"
     primary_resource_id: "custom-target-type"
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-custom-target-type%s", context["random_suffix"])'
     vars:
       custom_target_type_name: "my-custom-target-type"
   - !ruby/object:Provider::Terraform::Examples
     name: "clouddeploy_custom_target_type_git_skaffold_modules"
     primary_resource_id: "custom-target-type"
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-custom-target-type%s", context["random_suffix"])'
     vars:
       custom_target_type_name: "my-custom-target-type"
   - !ruby/object:Provider::Terraform::Examples
     name: "clouddeploy_custom_target_type_gcs_skaffold_modules"
     primary_resource_id: "custom-target-type"
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-custom-target-type%s", context["random_suffix"])'
+    vars:
+      custom_target_type_name: "my-custom-target-type"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "clouddeploy_custom_target_type_gcb_repo_skaffold_modules"
+    primary_resource_id: "custom-target-type"
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-custom-target-type%s", context["random_suffix"])'
     vars:
       custom_target_type_name: "my-custom-target-type"
 parameters:
@@ -133,6 +147,7 @@ properties:
               exactly_one_of:
                 - git
                 - googleCloudStorage
+                - googleCloudBuildRepo
               properties:
                 - !ruby/object:Api::Type::String
                   name: "repo"
@@ -150,6 +165,7 @@ properties:
               exactly_one_of:
                 - git
                 - googleCloudStorage
+                - googleCloudBuildRepo
               properties:
                 - !ruby/object:Api::Type::String
                   name: "source"
@@ -158,3 +174,21 @@ properties:
                 - !ruby/object:Api::Type::String
                   name: "path"
                   description: "Relative path from the source to the Skaffold file."
+            - !ruby/object:Api::Type::NestedObject
+              name: "googleCloudBuildRepo"
+              description: "Cloud Build 2nd gen repository containing the Skaffold Config modules."
+              exactly_one_of:
+                - git
+                - googleCloudStorage
+                - googleCloudBuildRepo
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: "repository"
+                  description: "Cloud Build 2nd gen repository in the format of 'projects/<project>/locations/<location>/connections/<connection>/repositories/<repository>'."
+                  required: true
+                - !ruby/object:Api::Type::String
+                  name: "path"
+                  description: "Relative path from the repository root to the Skaffold file."
+                - !ruby/object:Api::Type::String
+                  name: "ref"
+                  description: "Branch or tag to use when cloning the repository."

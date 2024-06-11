@@ -53,7 +53,7 @@ parameters:
     url_param_only: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: 'volume_basic'
+    name: 'netapp_volume_basic'
     primary_resource_id: 'test_volume'
     vars:
       volume_name: 'test-volume'
@@ -64,6 +64,30 @@ examples:
     test_vars_overrides:
       network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-1", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
 properties:
+  - !ruby/object:Api::Type::Enum
+    name: 'state'
+    description: |
+      State of the volume.
+    values:
+      - STATE_UNSPECIFIED
+      - READY
+      - CREATING
+      - DELETING
+      - UPDATING
+      - RESTORING
+      - DISABLED
+      - ERROR
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'stateDetails'
+    description: |
+      State details of the volume.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'createTime'
+    description: |
+      Create time of the volume. A timestamp in RFC3339 UTC "Zulu" format. Examples: "2023-06-22T09:13:01.617Z".
+    output: true
   - !ruby/object:Api::Type::String
     name: 'shareName'
     description: |
@@ -85,15 +109,10 @@ properties:
     description: |
       VPC network name with format: `projects/{{project}}/global/networks/{{network}}`. Inherited from storage pool.
     output: true
-  - !ruby/object:Api::Type::Enum
+  - !ruby/object:Api::Type::String
     name: 'serviceLevel'
     description: |
-      Service level of the volume. Inherited from storage pool.
-    values:
-      - :SERVICE_LEVEL_UNSPECIFIED
-      - :PREMIUM
-      - :EXTREME
-      - :STANDARD
+      Service level of the volume. Inherited from storage pool. Supported values are : PREMIUM, EXTERME, STANDARD, FLEX.
     output: true
   - !ruby/object:Api::Type::String
     name: 'capacityGib'
@@ -205,11 +224,11 @@ properties:
     name: 'description'
     description: |
       An optional description of this resource.
-  # Use of snapReserve is depricated. We don't expose it intentially.
+  # Use of snapReserve is deprecated. Here as a comment to express intention.
   # - !ruby/object:Api::Type::Integer
   #   name: 'snapReserve'
   #   description: |
-  #     Snap_reserve specifies percentage of volume storage reserved for snapshot storage. Default is 0 percent. Use is deprecated.
+  #     `snap_reserve` specifies percentage of volume storage reserved for snapshot storage. Default is 0 percent. Use is deprecated.
   - !ruby/object:Api::Type::Boolean
     name: 'snapshotDirectory'
     description: |
@@ -245,6 +264,34 @@ properties:
     description: |
       Reports the resource name of the Active Directory policy being used. Inherited from storage pool.
     output: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'restoreParameters'
+    description: |-
+      Used to create this volume from a snapshot (= cloning) or an backup.
+    immutable: true
+    # This parameter is only used at CREATE. READs will omit it.
+    ignore_read: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'sourceSnapshot'
+        description: |-
+          Full name of the snapshot to use for creating this volume.
+          `source_snapshot` and `source_backup` cannot be used simultaneously.
+          Format: `projects/{{project}}/locations/{{location}}/volumes/{{volume}}/snapshots/{{snapshot}}`.
+        exactly_one_of:
+          - restore_parameters.0.source_backup
+          - restore_parameters.0.source_snapshot
+        immutable: true
+      - !ruby/object:Api::Type::String
+        name: 'sourceBackup'
+        description: |-
+          Full name of the snapshot to use for creating this volume.
+          `source_snapshot` and `source_backup` cannot be used simultaneously.
+          Format: `projects/{{project}}/locations/{{location}}/backupVaults/{{backupVaultId}}/backups/{{backup}}`.
+        exactly_one_of:
+          - restore_parameters.0.source_backup
+          - restore_parameters.0.source_snapshot
+        immutable: true
   - !ruby/object:Api::Type::String
     name: 'kmsConfig'
     description: |
@@ -405,17 +452,29 @@ properties:
             description: |-
               Set the day or days of the month to make a snapshot (1-31). Accepts a comma separated number of days. Defaults to '1'.
             default_value: '1'
-# This is disabled until we have support for backup resource and can test it.
-# - !ruby/object:Api::Type::NestedObject
-#   name: restoreParameters
-#   description: Specifies the source information to create a volume from.
-#   immutable: true
-#   properties:
-#     - !ruby/object:Api::Type::String
-#       name: 'sourceSnapshot'
-#       description: |-
-#         Full name of the snapshot resource. Format: `projects/{{project}}/locations/{{location}}/volumes/{{volume}}/snapshots/{{snapshot}}`.
-#       required: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'backupConfig'
+    description: |-
+      Backup configuration for the volume.
+    update_mask_fields:
+      - 'backup_config.backup_policies'
+      - 'backup_config.backup_vault'
+      - 'backup_config.scheduled_backup_enabled'
+    properties:
+      - !ruby/object:Api::Type::Array
+        name: 'backupPolicies'
+        description: |-
+          Specify a single backup policy ID for scheduled backups. Format: `projects/{{projectId}}/locations/{{location}}/backupPolicies/{{backupPolicyName}}`
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::String
+        name: 'backupVault'
+        description: |-
+          ID of the backup vault to use. A backup vault is reqired to create manual or scheduled backups.
+          Format: `projects/{{projectId}}/locations/{{location}}/backupVaults/{{backupVaultName}}`
+      - !ruby/object:Api::Type::Boolean
+        name: 'scheduledBackupEnabled'
+        description: |-
+          When set to true, scheduled backup is enabled on the volume. Omit if no backup_policy is specified.
 virtual_fields:
   - !ruby/object:Api::Type::Enum
     name: 'deletion_policy'

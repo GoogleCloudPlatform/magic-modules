@@ -82,6 +82,15 @@ func TestExecRequestServiceReviewersMembershipChecker(t *testing.T) {
 			teamMembers:             map[string][]string{"google-x": []string{"googler_team_member"}},
 			expectSpecificReviewers: []string{},
 		},
+		"authors will not be requested on their own PRs even if they left comments on it previously": {
+			pullRequest: github.PullRequest{
+				User:   github.User{Login: "googler_team_member"},
+				Labels: []github.Label{{Name: "service/google-x"}},
+			},
+			teamMembers:             map[string][]string{"google-x": []string{"googler_team_member"}},
+			previousReviewers:       []string{"googler_team_member"},
+			expectSpecificReviewers: []string{},
+		},
 		"other team members be requested even if the author is excluded": {
 			pullRequest: github.PullRequest{
 				User:   github.User{Login: "googler_team_member"},
@@ -135,8 +144,8 @@ func TestExecRequestServiceReviewersMembershipChecker(t *testing.T) {
 			execRequestServiceReviewers("1", gh, enrolledTeamsYaml)
 
 			actualReviewers := []string{}
-			for _, args := range gh.calledMethods["RequestPullRequestReviewer"] {
-				actualReviewers = append(actualReviewers, args[1].(string))
+			for _, args := range gh.calledMethods["RequestPullRequestReviewers"] {
+				actualReviewers = append(actualReviewers, args[1].([]string)...)
 			}
 
 			if tc.expectSpecificReviewers != nil {

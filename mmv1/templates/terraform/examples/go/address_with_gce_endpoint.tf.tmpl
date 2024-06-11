@@ -1,0 +1,5 @@
+resource "google_compute_address" "{{$.PrimaryResourceId}}" {
+  name         = "{{index $.Vars "address_name"}}"
+  address_type = "INTERNAL"
+  purpose      = "GCE_ENDPOINT"
+}

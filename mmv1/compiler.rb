@@ -36,6 +36,7 @@ require 'provider/terraform_tgc_cai2hcl'
 products_to_generate = nil
 all_products = false
 yaml_dump = false
+go_yaml = false
 generate_code = true
 generate_docs = true
 output_path = nil
@@ -93,6 +94,9 @@ OptionParser.new do |opt|
   end
   opt.on('--openapi-generate', 'Generate MMv1 YAML from openapi directory (Experimental)') do
     openapi_generate = true
+  end
+  opt.on('--go-yaml', 'Generate MMv1 Go YAML from Ruby YAML') do
+    go_yaml = true
   end
 end.parse!
 # rubocop:enable Metrics/BlockLength
@@ -177,7 +181,8 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
     resources = []
     Dir["#{product_name}/*"].each do |file_path|
       next if File.basename(file_path) == 'product.yaml' \
-       || File.extname(file_path) != '.yaml'
+       || File.extname(file_path) != '.yaml' \
+       || File.basename(file_path).include?('go_')
 
       if override_dir
         # Skip if resource will be merged in the override loop
@@ -191,13 +196,17 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
       )
       resource.validate
       resources.push(resource)
+    rescue StandardError => e
+      Google::LOGGER.error "Failed to compile #{file_path}: #{e}"
+      raise e
     end
 
     if override_dir
       ovr_prod_dir = File.join(override_dir, product_name)
       Dir["#{ovr_prod_dir}/*"].each do |override_path|
         next if File.basename(override_path) == 'product.yaml' \
-        || File.extname(override_path) != '.yaml'
+        || File.extname(override_path) != '.yaml' \
+        || File.basename(override_path).include?('go_')
 
         file_path = File.join(product_name, File.basename(override_path))
         res_yaml = if File.exist?(file_path)
@@ -219,6 +228,9 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
         )
         resource.validate
         resources.push(resource)
+      rescue StandardError => e
+        Google::LOGGER.error "Failed to compile using override #{override_path}: #{e}"
+        raise e
       end
     end
     resources = resources.sort_by(&:name)
@@ -262,7 +274,8 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
     product_name,
     yaml_dump,
     generate_code,
-    generate_docs
+    generate_docs,
+    go_yaml
   )
 
   # we need to preserve a single provider instance to use outside of this loop.

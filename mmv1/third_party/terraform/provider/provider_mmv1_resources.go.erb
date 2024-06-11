@@ -8,7 +8,9 @@ import (
 	  "github.com/hashicorp/terraform-provider-google/google/services/<%= service -%>"
 	<% end -%>
 
+	<% if version == 'ga' -%>
 	"github.com/hashicorp/terraform-provider-google/google/services/composer"
+	<% end -%>
 	"github.com/hashicorp/terraform-provider-google/google/services/container"
 	"github.com/hashicorp/terraform-provider-google/google/services/containeraws"
 	"github.com/hashicorp/terraform-provider-google/google/services/containerazure"
@@ -27,7 +29,10 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_alloydb_locations":                         alloydb.DataSourceAlloydbLocations(),
 	"google_alloydb_supported_database_flags":          alloydb.DataSourceAlloydbSupportedDatabaseFlags(),
 	"google_artifact_registry_repository":              artifactregistry.DataSourceArtifactRegistryRepository(),
+	"google_apphub_discovered_workload":		    apphub.DataSourceApphubDiscoveredWorkload(),
 	"google_app_engine_default_service_account":        appengine.DataSourceGoogleAppEngineDefaultServiceAccount(),
+	"google_apphub_application":						apphub.DataSourceGoogleApphubApplication(),
+	"google_apphub_discovered_service":		    apphub.DataSourceApphubDiscoveredService(),
 	<% unless version == 'ga' -%>
 	"google_backup_dr_management_server":				backupdr.DataSourceGoogleCloudBackupDRService(),
 	<% end -%>
@@ -44,14 +49,20 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	<% unless version == 'ga' -%>
 	"google_cloud_asset_resources_search_all":          cloudasset.DataSourceGoogleCloudAssetResourcesSearchAll(),
 	<% end -%>
+	"google_cloud_asset_search_all_resources":          cloudasset.DataSourceGoogleCloudAssetSearchAllResources(),
 	"google_cloud_identity_groups":                     cloudidentity.DataSourceGoogleCloudIdentityGroups(),
 	"google_cloud_identity_group_memberships":          cloudidentity.DataSourceGoogleCloudIdentityGroupMemberships(),
 	"google_cloud_identity_group_lookup":               cloudidentity.DataSourceGoogleCloudIdentityGroupLookup(),
+	"google_cloud_quotas_quota_info":                   cloudquotas.DataSourceGoogleCloudQuotasQuotaInfo(),
+	"google_cloud_quotas_quota_infos":                  cloudquotas.DataSourceGoogleCloudQuotasQuotaInfos(),
 	"google_cloud_run_locations":                       cloudrun.DataSourceGoogleCloudRunLocations(),
 	"google_cloud_run_service":                         cloudrun.DataSourceGoogleCloudRunService(),
 	"google_cloud_run_v2_job":                          cloudrunv2.DataSourceGoogleCloudRunV2Job(),
 	"google_cloud_run_v2_service":                      cloudrunv2.DataSourceGoogleCloudRunV2Service(),
 	"google_composer_environment":                      composer.DataSourceGoogleComposerEnvironment(),
+	<% unless version == 'ga' -%>
+	"google_composer_user_workloads_secret":            composer.DataSourceGoogleComposerUserWorkloadsSecret(),
+	<% end -%>
 	"google_composer_image_versions":                   composer.DataSourceGoogleComposerImageVersions(),
 	"google_compute_address":                           compute.DataSourceGoogleComputeAddress(),
 	"google_compute_addresses":                         compute.DataSourceGoogleComputeAddresses(),
@@ -60,6 +71,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_compute_default_service_account":           compute.DataSourceGoogleComputeDefaultServiceAccount(),
 	"google_compute_disk":                              compute.DataSourceGoogleComputeDisk(),
 	"google_compute_forwarding_rule":                   compute.DataSourceGoogleComputeForwardingRule(),
+	"google_compute_forwarding_rules":                  compute.DataSourceGoogleComputeForwardingRules(),
 	"google_compute_global_address":                    compute.DataSourceGoogleComputeGlobalAddress(),
 	"google_compute_global_forwarding_rule":            compute.DataSourceGoogleComputeGlobalForwardingRule(),
 	"google_compute_ha_vpn_gateway":                    compute.DataSourceGoogleComputeHaVpnGateway(),
@@ -88,10 +100,12 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_compute_router":                            compute.DataSourceGoogleComputeRouter(),
 	"google_compute_router_nat":                        compute.DataSourceGoogleComputeRouterNat(),
 	"google_compute_router_status":                     compute.DataSourceGoogleComputeRouterStatus(),
+	"google_compute_security_policy":                   compute.DataSourceGoogleComputeSecurityPolicy(),
 	"google_compute_snapshot":                          compute.DataSourceGoogleComputeSnapshot(),
 	"google_compute_ssl_certificate":                   compute.DataSourceGoogleComputeSslCertificate(),
 	"google_compute_ssl_policy":                        compute.DataSourceGoogleComputeSslPolicy(),
 	"google_compute_subnetwork":                        compute.DataSourceGoogleComputeSubnetwork(),
+	"google_compute_subnetworks":                       compute.DataSourceGoogleComputeSubnetworks(),
 	"google_compute_vpn_gateway":                       compute.DataSourceGoogleComputeVpnGateway(),
 	"google_compute_zones":                             compute.DataSourceGoogleComputeZones(),
 	"google_container_azure_versions":                  containerazure.DataSourceGoogleContainerAzureVersions(),
@@ -104,6 +118,10 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_container_registry_repository":             containeranalysis.DataSourceGoogleContainerRepo(),
 	"google_dataproc_metastore_service":                dataprocmetastore.DataSourceDataprocMetastoreService(),
 	"google_datastream_static_ips":                     datastream.DataSourceGoogleDatastreamStaticIps(),
+	"google_dns_keys":                                  dns.DataSourceDNSKeys(),
+	"google_dns_managed_zone":                          dns.DataSourceDnsManagedZone(),
+	"google_dns_managed_zones":                         dns.DataSourceDnsManagedZones(),
+	"google_dns_record_set":                            dns.DataSourceDnsRecordSet(),
 	"google_filestore_instance":                        filestore.DataSourceGoogleFilestoreInstance(),
 	"google_iam_policy":                                resourcemanager.DataSourceGoogleIamPolicy(),
 	"google_iam_role":                                  resourcemanager.DataSourceGoogleIamRole(),
@@ -173,13 +191,17 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_sql_database_instances":                    sql.DataSourceSqlDatabaseInstances(),
 	"google_service_networking_peered_dns_domain":      servicenetworking.DataSourceGoogleServiceNetworkingPeeredDNSDomain(),
 	"google_storage_bucket":                            storage.DataSourceGoogleStorageBucket(),
+	"google_storage_buckets":                           storage.DataSourceGoogleStorageBuckets(),
 	"google_storage_bucket_object":                     storage.DataSourceGoogleStorageBucketObject(),
+	"google_storage_bucket_objects":                    storage.DataSourceGoogleStorageBucketObjects(),
 	"google_storage_bucket_object_content":             storage.DataSourceGoogleStorageBucketObjectContent(),
 	"google_storage_object_signed_url":                 storage.DataSourceGoogleSignedUrl(),
 	"google_storage_project_service_account":           storage.DataSourceGoogleStorageProjectServiceAccount(),
 	"google_storage_transfer_project_service_account":  storagetransfer.DataSourceGoogleStorageTransferProjectServiceAccount(),
 	"google_tags_tag_key":                              tags.DataSourceGoogleTagsTagKey(),
+	"google_tags_tag_keys":                             tags.DataSourceGoogleTagsTagKeys(),
 	"google_tags_tag_value":                            tags.DataSourceGoogleTagsTagValue(),
+	"google_tags_tag_values":							tags.DataSourceGoogleTagsTagValues(),
 	"google_tpu_tensorflow_versions":                   tpu.DataSourceTpuTensorflowVersions(),
 	<% unless version == 'ga' -%>
 	"google_tpu_v2_runtime_versions":                   tpuv2.DataSourceTpuV2RuntimeVersions(),
@@ -275,9 +297,13 @@ var handwrittenResources = map[string]*schema.Resource{
 	"google_bigtable_gc_policy":                    bigtable.ResourceBigtableGCPolicy(),
 	"google_bigtable_instance":                     bigtable.ResourceBigtableInstance(),
 	"google_bigtable_table":                        bigtable.ResourceBigtableTable(),
+	"google_bigtable_authorized_view":              bigtable.ResourceBigtableAuthorizedView(),
 	"google_billing_subaccount":                    resourcemanager.ResourceBillingSubaccount(),
 	"google_cloudfunctions_function":               cloudfunctions.ResourceCloudFunctionsFunction(),
 	"google_composer_environment":                  composer.ResourceComposerEnvironment(),
+	<% unless version == 'ga' -%>
+	"google_composer_user_workloads_secret":        composer.ResourceComposerUserWorkloadsSecret(),
+	<% end -%>
 	"google_compute_attached_disk":                 compute.ResourceComputeAttachedDisk(),
 	"google_compute_instance":                      compute.ResourceComputeInstance(),
 	"google_compute_disk_async_replication":        compute.ResourceComputeDiskAsyncReplication(),
@@ -340,6 +366,7 @@ var handwrittenResources = map[string]*schema.Resource{
 	"google_project_default_service_accounts":      resourcemanager.ResourceGoogleProjectDefaultServiceAccounts(),
 	"google_project_service":                       resourcemanager.ResourceGoogleProjectService(),
 	"google_project_iam_custom_role":               resourcemanager.ResourceGoogleProjectIamCustomRole(),
+	"google_project_iam_member_remove":             resourcemanager.ResourceGoogleProjectIamMemberRemove(),
 	"google_project_organization_policy":           resourcemanager.ResourceGoogleProjectOrganizationPolicy(),
 	"google_project_usage_export_bucket":           compute.ResourceProjectUsageBucket(),
 	<% unless version == 'ga' -%>

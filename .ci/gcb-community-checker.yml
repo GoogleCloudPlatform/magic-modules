@@ -61,7 +61,7 @@ steps:
   - name: 'gcr.io/graphite-docker-images/go-plus'
     entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
     id: community-checker
-    secretEnv: ["GITHUB_TOKEN", "GENERATE_DIFFS_TRIGGER"]
+    secretEnv: ["GITHUB_TOKEN_MAGIC_MODULES", "GENERATE_DIFFS_TRIGGER"]
     timeout: 8000s
     args:
         - "community-checker"
@@ -72,9 +72,10 @@ steps:
         - $_HEAD_BRANCH
         - $_BASE_BRANCH
 
+logsBucket: 'gs://cloudbuild-community-checker-logs'
 availableSecrets:
   secretManager:
-    - versionName: projects/673497134629/secrets/github-magician-token/versions/latest
-      env: GITHUB_TOKEN
+    - versionName: projects/673497134629/secrets/github-magician-token-generate-diffs-magic-modules/versions/latest
+      env: GITHUB_TOKEN_MAGIC_MODULES
     - versionName: projects/673497134629/secrets/ci-trigger-generate-diffs/versions/latest
       env: GENERATE_DIFFS_TRIGGER

@@ -39,6 +39,7 @@ examples:
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_delete: templates/terraform/custom_delete/kms_crypto_key_version.erb
   custom_import: templates/terraform/custom_import/kms_crypto_key_version.go.erb
+  pre_update: templates/terraform/pre_update/kms_crypto_key_version.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: 'cryptoKey'
@@ -104,15 +105,18 @@ properties:
         description: |
           The certificate chains needed to validate the attestation
         properties:
-          - !ruby/object:Api::Type::String
+          - !ruby/object:Api::Type::Array
+            item_type: Api::Type::String
             name: 'caviumCerts'
             description: |
               Cavium certificate chain corresponding to the attestation.
-          - !ruby/object:Api::Type::String
+          - !ruby/object:Api::Type::Array
+            item_type: Api::Type::String
             name: 'googleCardCerts'
             description: |
               Google card certificate chain corresponding to the attestation.
-          - !ruby/object:Api::Type::String
+          - !ruby/object:Api::Type::Array
+            item_type: Api::Type::String
             name: 'googlePartitionCerts'
             description: |
               Google partition certificate chain corresponding to the attestation.
@@ -120,6 +124,9 @@ properties:
         name: 'externalProtectionLevelOptions'
         description: |
           ExternalProtectionLevelOptions stores a group of additional fields for configuring a CryptoKeyVersion that are specific to the EXTERNAL protection level and EXTERNAL_VPC protection levels.
+        deprecation_message: >-
+          `externalProtectionLevelOptions` is being un-nested from the `attestation` field.
+          Please use the top level `externalProtectionLevelOptions` field instead.
         properties:
           - !ruby/object:Api::Type::String
             name: 'externalKeyUri'
@@ -129,3 +136,16 @@ properties:
             name: 'ekmConnectionKeyPath'
             description: |
               The path to the external key material on the EKM when using EkmConnection e.g., "v0/my/key". Set this field instead of externalKeyUri when using an EkmConnection.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'externalProtectionLevelOptions'
+    description: |
+      ExternalProtectionLevelOptions stores a group of additional fields for configuring a CryptoKeyVersion that are specific to the EXTERNAL protection level and EXTERNAL_VPC protection levels.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'externalKeyUri'
+        description: |
+          The URI for an external resource that this CryptoKeyVersion represents.
+      - !ruby/object:Api::Type::String
+        name: 'ekmConnectionKeyPath'
+        description: |
+          The path to the external key material on the EKM when using EkmConnection e.g., "v0/my/key". Set this field instead of externalKeyUri when using an EkmConnection.

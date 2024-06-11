@@ -98,6 +98,14 @@ func ComputeIssueUpdates(issues []Issue, regexpLabels []RegexpLabel) []IssueUpda
 			continue
 		}
 
+		// Decision was made to no longer add new service labels to linked tickets, because it is
+		// more difficult to know which teams have received those tickets and which haven't.
+		// Forwarding a ticket to a different service team should involve removing the old service
+		// label and `linked` label.
+		if linked {
+			continue
+		}
+
 		var issueUpdate IssueUpdate
 		for label := range desired {
 			issueUpdate.OldLabels = append(issueUpdate.OldLabels, label)

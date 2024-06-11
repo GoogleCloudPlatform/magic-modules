@@ -23,6 +23,7 @@ require 'provider/terraform/custom_code'
 require 'provider/terraform/docs'
 require 'provider/terraform/examples'
 require 'provider/terraform/sub_template'
+require 'provider/terraform/sweeper'
 require 'google/golang_utils'
 
 module Provider
@@ -88,8 +89,9 @@ module Provider
     end
 
     # Main entry point for generation.
-    def generate(output_folder, types, product_path, dump_yaml, generate_code, generate_docs)
-      generate_objects(output_folder, types, generate_code, generate_docs)
+    def generate(output_folder, types, product_path, dump_yaml, generate_code, generate_docs, \
+                 go_yaml)
+      generate_objects(output_folder, types, generate_code, generate_docs, product_path, go_yaml)
 
       FileUtils.mkpath output_folder
       pwd = Dir.pwd
@@ -357,7 +359,8 @@ module Provider
       services
     end
 
-    def generate_objects(output_folder, types, generate_code, generate_docs)
+    def generate_objects(output_folder, types, generate_code, generate_docs, product_path, \
+                         go_yaml)
       (@api.objects || []).each do |object|
         if !types.empty? && !types.include?(object.name)
           Google::LOGGER.info "Excluding #{object.name} per user request"
@@ -377,6 +380,7 @@ module Provider
 
           generate_object object, output_folder, @target_version_name, generate_code, generate_docs
         end
+        generate_object_modified object, product_path, @target_version_name if go_yaml
       end
     end
 
@@ -395,7 +399,6 @@ module Provider
         end
         Dir.chdir pwd
       end
-
       # if iam_policy is not defined or excluded, don't generate it
       return if object.iam_policy.nil? || object.iam_policy.exclude
 
@@ -404,6 +407,28 @@ module Provider
       Google::LOGGER.debug "Generating #{object.name} IAM policy"
       generate_iam_policy(pwd, data.clone, generate_code, generate_docs)
       Dir.chdir pwd
+    end
+
+    def generate_object_modified(object, output_folder, version_name)
+      pwd = Dir.pwd
+      data = build_object_data(pwd, object, output_folder, version_name)
+      Dir.chdir output_folder
+      Google::LOGGER.info "Generating #{object.name} rewrite yaml"
+      generate_newyaml(pwd, data.clone)
+      Dir.chdir pwd
+    end
+
+    def generate_newyaml(pwd, data)
+      data.generate(pwd,
+                    '/templates/terraform/yaml_conversion.erb',
+                    "go_#{data.object.name}.yaml",
+                    self)
+      unless File.exist?('go_product.yaml') && File.mtime('go_product.yaml') > data.env[:start_time]
+        data.generate(pwd,
+                      '/templates/terraform/product_yaml_conversion.erb',
+                      'go_product.yaml',
+                      self)
+      end
     end
 
     def build_env
@@ -435,14 +460,6 @@ module Provider
           update_id: p.update_id,
           fingerprint_name: p.fingerprint_name
         }
-      end
-    end
-
-    # Filter the properties to keep only the ones don't have custom update
-    # method and group them by update url & verb.
-    def properties_without_custom_update(properties)
-      properties.select do |p|
-        p.update_url.nil? || p.update_verb.nil? || p.update_verb == :NOOP
       end
     end
 

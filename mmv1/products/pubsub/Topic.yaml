@@ -72,6 +72,11 @@ examples:
       schema_name: 'example'
     test_env_vars:
       project_name: :PROJECT_NAME
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'pubsub_topic_ingestion_kinesis'
+    primary_resource_id: 'example'
+    vars:
+      topic_name: 'example-topic'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/no_send_name.go.erb
   update_encoder: templates/terraform/update_encoder/pubsub_topic.erb
@@ -81,7 +86,6 @@ properties:
     required: true
     description: 'Name of the topic.'
     immutable: true
-    pattern: 'projects/{{project}}/topics/{{name}}'
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
@@ -149,3 +153,40 @@ properties:
       set, message retention is controlled by settings on individual subscriptions.
       The rotation period has the format of a decimal number, followed by the
       letter `s` (seconds). Cannot be more than 31 days or less than 10 minutes.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'ingestionDataSourceSettings'
+    description: |
+      Settings for ingestion from a data source into this topic.
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: 'awsKinesis'
+        description: |
+          Settings for ingestion from Amazon Kinesis Data Streams.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'streamArn'
+            description: |
+              The Kinesis stream ARN to ingest data from.
+            required: true
+          - !ruby/object:Api::Type::String
+            name: 'consumerArn'
+            description: |
+              The Kinesis consumer ARN to used for ingestion in
+              Enhanced Fan-Out mode. The consumer must be already
+              created and ready to be used.
+            required: true
+          - !ruby/object:Api::Type::String
+            name: 'awsRoleArn'
+            description: |
+              AWS role ARN to be used for Federated Identity authentication with
+              Kinesis. Check the Pub/Sub docs for how to set up this role and the
+              required permissions that need to be attached to it.
+            required: true
+          - !ruby/object:Api::Type::String
+            name: 'gcpServiceAccount'
+            description: |
+              The GCP service account to be used for Federated Identity authentication
+              with Kinesis (via a `AssumeRoleWithWebIdentity` call for the provided
+              role). The `awsRoleArn` must be set up with `accounts.google.com:sub`
+              equals to this service account number.
+            required: true

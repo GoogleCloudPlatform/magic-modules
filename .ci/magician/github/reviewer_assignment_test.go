@@ -17,7 +17,6 @@ package github
 
 import (
 	"fmt"
-	utils "magician/utility"
 	"strings"
 	"testing"
 
@@ -25,6 +24,8 @@ import (
 )
 
 func TestChooseCoreReviewers(t *testing.T) {
+	firstCoreReviewer := AvailableReviewers()[0]
+	secondCoreReviewer := AvailableReviewers()[1]
 	cases := map[string]struct {
 		RequestedReviewers                               []User
 		PreviousReviewers                                []User
@@ -34,11 +35,11 @@ func TestChooseCoreReviewers(t *testing.T) {
 		"no previous review requests assigns new reviewer from team": {
 			RequestedReviewers:      []User{},
 			PreviousReviewers:       []User{},
-			ExpectReviewersFromList: utils.Removes(reviewerRotation, onVacationReviewers),
+			ExpectReviewersFromList: AvailableReviewers(),
 			ExpectPrimaryReviewer:   true,
 		},
 		"requested reviewer from team means that primary reviewer was already selected": {
-			RequestedReviewers:    []User{User{Login: reviewerRotation[0]}},
+			RequestedReviewers:    []User{User{Login: firstCoreReviewer}},
 			PreviousReviewers:     []User{},
 			ExpectPrimaryReviewer: false,
 		},
@@ -49,26 +50,26 @@ func TestChooseCoreReviewers(t *testing.T) {
 		},
 		"previously involved team member reviewers should have review requested and mean that primary reviewer was already selected": {
 			RequestedReviewers:      []User{},
-			PreviousReviewers:       []User{User{Login: reviewerRotation[0]}},
-			ExpectSpecificReviewers: []string{reviewerRotation[0]},
+			PreviousReviewers:       []User{User{Login: firstCoreReviewer}},
+			ExpectSpecificReviewers: []string{firstCoreReviewer},
 			ExpectPrimaryReviewer:   false,
 		},
 		"previously involved reviewers that are not team members are ignored": {
 			RequestedReviewers:      []User{},
 			PreviousReviewers:       []User{User{Login: "foobar"}},
-			ExpectReviewersFromList: utils.Removes(reviewerRotation, onVacationReviewers),
+			ExpectReviewersFromList: AvailableReviewers(),
 			ExpectPrimaryReviewer:   true,
 		},
 		"only previously involved team member reviewers will have review requested": {
 			RequestedReviewers:      []User{},
-			PreviousReviewers:       []User{User{Login: reviewerRotation[0]}, User{Login: "foobar"}, User{Login: reviewerRotation[1]}},
-			ExpectSpecificReviewers: []string{reviewerRotation[0], reviewerRotation[1]},
+			PreviousReviewers:       []User{User{Login: firstCoreReviewer}, User{Login: "foobar"}, User{Login: secondCoreReviewer}},
+			ExpectSpecificReviewers: []string{firstCoreReviewer, secondCoreReviewer},
 			ExpectPrimaryReviewer:   false,
 		},
 		"primary reviewer will not have review requested even if other team members previously reviewed": {
-			RequestedReviewers:      []User{User{Login: reviewerRotation[1]}},
-			PreviousReviewers:       []User{User{Login: reviewerRotation[0]}},
-			ExpectSpecificReviewers: []string{reviewerRotation[0]},
+			RequestedReviewers:      []User{User{Login: secondCoreReviewer}},
+			PreviousReviewers:       []User{User{Login: firstCoreReviewer}},
+			ExpectSpecificReviewers: []string{firstCoreReviewer},
 			ExpectPrimaryReviewer:   false,
 		},
 	}
@@ -127,27 +128,12 @@ func TestFormatReviewerComment(t *testing.T) {
 		tc := tc
 		t.Run(tn, func(t *testing.T) {
 			t.Parallel()
-			comment := FormatReviewerComment(tc.Reviewer, tc.AuthorUserType, tc.Trusted)
+			comment := FormatReviewerComment(tc.Reviewer)
 			t.Log(comment)
 			if !strings.Contains(comment, fmt.Sprintf("@%s", tc.Reviewer)) {
 				t.Errorf("wanted comment to contain @%s; does not.", tc.Reviewer)
 			}
-			if !strings.Contains(comment, tc.AuthorUserType.String()) {
-				t.Errorf("wanted comment to contain user type (%s); does not.", tc.AuthorUserType.String())
-			}
-			if strings.Contains(comment, fmt.Sprintf("~%s~", tc.AuthorUserType.String())) {
-				t.Errorf("wanted user type (%s) in comment to not be crossed out, but it is", tc.AuthorUserType.String())
-			}
-			for _, ut := range []UserType{CommunityUserType, GooglerUserType, CoreContributorUserType} {
-				if ut != tc.AuthorUserType && !strings.Contains(comment, fmt.Sprintf("~%s~", ut.String())) {
-					t.Errorf("wanted other user type (%s) in comment to be crossed out, but it is not", ut)
-				}
-			}
-
-			if tc.Trusted && !strings.Contains(comment, "Tests will run automatically") {
-				t.Errorf("wanted comment to say tests will run automatically; does not")
-			}
-			if !tc.Trusted && !strings.Contains(comment, "Tests will require approval") {
+			if !strings.Contains(comment, "Tests will require approval") {
 				t.Errorf("wanted comment to say tests will require approval; does not")
 			}
 		})
