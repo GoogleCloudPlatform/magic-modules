@@ -270,10 +270,6 @@ The following arguments are supported:
   (Optional)
   The configuration used for the Kubernetes Engine cluster.  Structure is [documented below](#nested_node_config_c1).
 
-* `recovery_config` -
-  (Optional, Cloud Composer 2 only)
-  The configuration settings for recovery. Structure is [documented below](#nested_recovery_config_c1).
-
 * `software_config` -
   (Optional)
   The configuration settings for software inside the environment.  Structure is [documented below](#nested_software_config_c1).
@@ -652,6 +648,10 @@ The following arguments are supported:
   (Optional)
   The configuration used for the Kubernetes Engine cluster. Structure is [documented below](#nested_node_config_c2).
 
+* `recovery_config` -
+  (Optional, Cloud Composer 2 only)
+  The configuration settings for recovery. Structure is [documented below](#nested_recovery_config_c2).
+
 * `software_config` -
   (Optional)
   The configuration settings for software (Airflow) inside the environment. Structure is
@@ -930,7 +930,7 @@ The following arguments are supported:
   The only allowed values for 'FREQ' field are 'FREQ=DAILY' and 'FREQ=WEEKLY;BYDAY=...'.
   Example values: 'FREQ=WEEKLY;BYDAY=TU,WE', 'FREQ=DAILY'.
 
-<a name="nested_recovery_config_c1"></a>The `recovery_config` block supports:
+<a name="nested_recovery_config_c2"></a>The `recovery_config` block supports:
 
 * `scheduled_snapshots_config` -
   (Optional)
