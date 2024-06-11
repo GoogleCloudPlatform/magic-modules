@@ -393,6 +393,12 @@ module Api
       nested
     end
 
+    def convert_go_file(file)
+      dir, base = File.split(file)
+      base.slice! '.erb'
+      "#{dir}/go/#{base}.tmpl"
+    end
+
     # All settable properties in the resource.
     # Fingerprints aren't *really" settable properties, but they behave like one.
     # At Create, they have no value but they can just be read in anyways, and after a Read
@@ -555,6 +561,19 @@ module Api
           fields << p.terraform_lineage
         elsif (p.is_a? Api::Type::NestedObject) && !p.all_properties.nil?
           fields.concat(ignore_read_labels_fields(p.all_properties))
+        end
+      end
+      fields
+    end
+
+    # Return ignore_read fields that should be added to ImportStateVerifyIgnore
+    def ignore_read_fields(props)
+      fields = []
+      props.each do |p|
+        if p.ignore_read && !p.url_param_only && !p.is_a?(Api::Type::ResourceRef)
+          fields << p.terraform_lineage
+        elsif (p.is_a? Api::Type::NestedObject) && !p.all_properties.nil?
+          fields.concat(ignore_read_fields(p.all_properties))
         end
       end
       fields

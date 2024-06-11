@@ -88,18 +88,15 @@ steps:
           - 'ga'
           - $COMMIT_SHA
 
-    - name: 'gcr.io/cloud-builders/git'
+    - name: 'gcr.io/graphite-docker-images/go-plus'
       waitFor: ["tpg-push"]
       secretEnv: ["GITHUB_TOKEN_CLASSIC"]
-      entrypoint: 'bash'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       args:
-          - -c
-          - |
-            if [ "$BRANCH_NAME" == "main" ]; then
-              git push https://modular-magician:$$GITHUB_TOKEN_CLASSIC@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tpg-sync
-            else
-              git push https://modular-magician:$$GITHUB_TOKEN_CLASSIC@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tpg-sync-$BRANCH_NAME
-            fi
+          - 'sync-branch'
+          - 'tpg-sync'
+          - $BRANCH_NAME
+          - $COMMIT_SHA
 
     # TPGB
     - name: 'gcr.io/graphite-docker-images/build-environment'
@@ -116,18 +113,15 @@ steps:
           - 'beta'
           - $COMMIT_SHA
 
-    - name: 'gcr.io/cloud-builders/git'
+    - name: 'gcr.io/graphite-docker-images/go-plus'
       waitFor: ["tpgb-push"]
       secretEnv: ["GITHUB_TOKEN_CLASSIC"]
-      entrypoint: 'bash'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       args:
-          - -c
-          - |
-            if [ "$BRANCH_NAME" == "main" ]; then
-              git push https://modular-magician:$$GITHUB_TOKEN_CLASSIC@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tpgb-sync
-            else
-              git push https://modular-magician:$$GITHUB_TOKEN_CLASSIC@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tpgb-sync-$BRANCH_NAME
-            fi
+          - 'sync-branch'
+          - 'tpgb-sync'
+          - $BRANCH_NAME
+          - $COMMIT_SHA
 
     # TGC
     - name: 'gcr.io/graphite-docker-images/build-environment'
@@ -144,18 +138,15 @@ steps:
           - 'beta'
           - $COMMIT_SHA
 
-    - name: 'gcr.io/cloud-builders/git'
+    - name: 'gcr.io/graphite-docker-images/go-plus'
       waitFor: ["tgc-push"]
       secretEnv: ["GITHUB_TOKEN_CLASSIC"]
-      entrypoint: 'bash'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       args:
-          - -c
-          - |
-            if [ "$BRANCH_NAME" == "main" ]; then
-              git push https://modular-magician:$$GITHUB_TOKEN_CLASSIC@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tgc-sync
-            else
-              git push https://modular-magician:$$GITHUB_TOKEN_CLASSIC@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tgc-sync-$BRANCH_NAME
-            fi
+          - 'sync-branch'
+          - 'tgc-sync'
+          - $BRANCH_NAME
+          - $COMMIT_SHA
 
     # TF-OICS
     - name: 'gcr.io/graphite-docker-images/build-environment'
@@ -172,18 +163,15 @@ steps:
           - 'beta'
           - $COMMIT_SHA
 
-    - name: 'gcr.io/cloud-builders/git'
+    - name: 'gcr.io/graphite-docker-images/go-plus'
       waitFor: ["tf-oics-push"]
       secretEnv: ["GITHUB_TOKEN_CLASSIC"]
-      entrypoint: 'bash'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       args:
-          - -c
-          - |
-            if [ "$BRANCH_NAME" == "main" ]; then
-              git push https://modular-magician:$$GITHUB_TOKEN_CLASSIC@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tf-oics-sync
-            else
-              git push https://modular-magician:$$GITHUB_TOKEN_CLASSIC@github.com/GoogleCloudPlatform/magic-modules $COMMIT_SHA:tf-oics-sync-$BRANCH_NAME
-            fi
+          - 'sync-branch'
+          - 'tf-oics-sync'
+          - $BRANCH_NAME
+          - $COMMIT_SHA
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
