@@ -1,10 +1,10 @@
-resource "google_organization" "default" {
+data "google_organization" "default" {
 	domain = "<%= ctx[:vars]['organization_domain'] %>"
 }
 
 resource "google_scc_v2_organization_mute_config" "<%= ctx[:primary_resource_id] %>" {
 	mute_config_id = "<%= ctx[:vars]['mute_config_id'] %>"
-	parent         = google_organization.default.id
+	parent         = data.google_organization.default.id
 	description    = "My custom Cloud Security Command Center Organization Mute Configuration"
 	filter         = "severity = \"HIGH\""
 	type           =  "STATIC"
