@@ -124,7 +124,16 @@ parameters:
       The instance group manager this instance config is part of.
     required: true
     url_param_only: true
-    immutable: true  
+    immutable: true
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'resizeRequest'
+    resource: 'resizeRequest'
+    imports: 'name'
+    description: |
+      The resizeRequest to get
+    required: true
+    url_param_only: true
+    immutable: true
 
 properties:
   - !ruby/object:Api::Type::Time
