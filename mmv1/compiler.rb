@@ -36,6 +36,7 @@ require 'provider/terraform_tgc_cai2hcl'
 products_to_generate = nil
 all_products = false
 yaml_dump = false
+go_yaml = false
 generate_code = true
 generate_docs = true
 output_path = nil
@@ -93,6 +94,9 @@ OptionParser.new do |opt|
   end
   opt.on('--openapi-generate', 'Generate MMv1 YAML from openapi directory (Experimental)') do
     openapi_generate = true
+  end
+  opt.on('--go-yaml', 'Generate MMv1 Go YAML from Ruby YAML') do
+    go_yaml = true
   end
 end.parse!
 # rubocop:enable Metrics/BlockLength
@@ -270,7 +274,8 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
     product_name,
     yaml_dump,
     generate_code,
-    generate_docs
+    generate_docs,
+    go_yaml
   )
 
   # we need to preserve a single provider instance to use outside of this loop.
