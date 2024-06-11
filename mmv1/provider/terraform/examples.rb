@@ -138,17 +138,13 @@ module Provider
 
       # If the example should be skipped during VCR testing.
       # This is the case when something about the resource or config causes VCR to fail for example
-      # a resource with a unique identifier generated within the resource via resource.UniqueId()
+      # a resource with a unique identifier generated within the resource via id.UniqueId()
       # Or a config with two fine grained resources that have a race condition during create
       attr_reader :skip_vcr
 
-      # (DEPRECATED) Use external_providers instead
-      # Set for false by default. Set to true if you need to pull external provider for your
-      # testcase. Think before adding as there is latency and adds an external dependency to
+      # Specify which external providers are needed for your testcase.
+      # Think before adding as there is latency and adds an external dependency to
       # your test so avoid if you can.
-      attr_reader :pull_external
-
-      # Specify which external providers are needed
       attr_reader :external_providers
 
       # Official providers supported by HashiCorp
@@ -319,7 +315,6 @@ module Provider
         check :skip_docs, type: TrueClass
         check :config_path, type: String, default: "templates/terraform/examples/#{name}.tf.erb"
         check :skip_vcr, type: TrueClass
-        check :pull_external, type: :boolean, default: false
 
         validate_external_providers
       end

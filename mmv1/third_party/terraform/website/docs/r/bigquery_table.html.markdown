@@ -161,11 +161,18 @@ The following arguments are supported:
 * `materialized_view` - (Optional) If specified, configures this table as a materialized view.
     Structure is [documented below](#nested_materialized_view).
 
-* `deletion_protection` - (Optional) Whether or not to allow Terraform to destroy the instance. Unless this field is set to false
-in Terraform state, a `terraform destroy` or `terraform apply` that would delete the instance will fail.
+* `deletion_protection` - (Optional) Whether Terraform will be prevented from destroying the table.
+    When the field is set to true or unset in Terraform state, a `terraform apply`
+    or `terraform destroy` that would delete the table will fail.
+    When the field is set to false, deleting the table is allowed..
 
 * `table_constraints` - (Optional) Defines the primary key and foreign keys. 
     Structure is [documented below](#nested_table_constraints).
+
+* `table_replication_info` - (Optional) Replication info of a table created
+    using "AS REPLICA" DDL like:
+    `CREATE MATERIALIZED VIEW mv1 AS REPLICA OF src_mv`.
+    Structure is [documented below](#nested_table_replication_info).
 
 * `resource_tags` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
     This field is in beta. The tags attached to this table. Tag keys are
@@ -175,8 +182,8 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
     expected to be the short name, for example "Production".
 
 * `allow_resource_tags_on_deletion` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
-    This field is in beta. Whether or not to allow table deletion when there are
-    still resource tags attached. The default value is false.
+    This field is in beta. If set to true, it allows table deletion when there
+    are still resource tags attached. The default value is false.
 
 <a name="nested_external_data_configuration"></a>The `external_data_configuration` block supports:
 
@@ -470,6 +477,17 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
 
 * `referenced_column`: (Required) The column in the primary key that are
     referenced by the referencingColumn
+
+<a name="nested_table_replication_info"></a>The `table_replication_info` block supports:
+
+* `source_project_id` (Required) - The ID of the source project.
+
+* `source_dataset_id` (Required) - The ID of the source dataset.
+
+* `source_table_id` (Required) - The ID of the source materialized view.
+
+* `replication_interval_ms` (Optional) - The interval at which the source
+    materialized view is polled for updates. The default is 300000.
 
 ## Attributes Reference
 
