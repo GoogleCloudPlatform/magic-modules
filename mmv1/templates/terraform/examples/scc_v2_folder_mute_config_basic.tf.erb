@@ -15,4 +15,5 @@ resource "google_scc_v2_folder_mute_config" "<%= ctx[:primary_resource_id] %>" {
 	description    = "My custom Cloud Security Command Center Mute Configuration"
 	filter         = "severity = \"HIGH\""
 	type           =  "STATIC"
+	depends_on     = [google_folder_iam_member.scc_folder_mute_config]
 }

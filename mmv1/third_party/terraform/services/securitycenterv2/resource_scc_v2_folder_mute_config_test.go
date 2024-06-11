@@ -87,7 +87,7 @@ resource "google_scc_v2_folder_mute_config" "folder_mute_test1" {
   description          = "A test folder mute config"
   filter               = "severity = \"LOW\""
   mute_config_id       = "tf-test-my-config%{random_suffix}"
-  location             = "%{location}"
+  location             = "global"
   parent               = "${google_folder.test1.id}"
   type                 =  "STATIC"
 }
@@ -105,7 +105,7 @@ resource "google_scc_v2_folder_mute_config" "folder_mute_test2" {
   description          = "A test folder mute config with high severity"
   filter               = "severity = \"HIGH\""
   mute_config_id       = "tf-test-my-config%{random_suffix}"
-  location             = "%{location}"
+  location             = "global"
   parent               = "${google_folder.test2.id}"
   type                 =  "STATIC"
 }

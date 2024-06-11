@@ -15,16 +15,16 @@ func TestAccSecurityCenterV2ProjectMuteConfig_basic(t *testing.T) {
 	contextBasic := map[string]interface{}{
 		"org_id":        envvar.GetTestOrgFromEnv(t),
 		"folder_name":   acctest.RandString(t, 10),
-		"project_id":    acctest.RandString(t, 10),
-		"random_suffix": acctest.RandString(t, 10),
+		"project_id":    fmt.Sprintf("tf-test-project-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNumLower)),
+		"random_suffix": acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNumLower),
 		"location":      "global",
 	}
 
 	contextHighSeverity := map[string]interface{}{
 		"org_id":        envvar.GetTestOrgFromEnv(t),
 		"folder_name":   acctest.RandString(t, 10),
-		"project_id":    acctest.RandString(t, 10),
-		"random_suffix": acctest.RandString(t, 10),
+		"project_id":    fmt.Sprintf("tf-test-project-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNumLower)),
+        "random_suffix": acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNumLower),
 		"location":      "us_central",
 	}
 
@@ -40,7 +40,7 @@ func TestAccSecurityCenterV2ProjectMuteConfig_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"google_scc_v2_project_mute_config.project_mute_test1", "filter", "severity = \"LOW\""),
 					resource.TestCheckResourceAttr(
-						"google_scc_v2_project_mute_config.project_mute_test1", "project_mute_config_id", fmt.Sprintf("tf-test-my-config%s", contextBasic["random_suffix"])),
+						"google_scc_v2_project_mute_config.project_mute_test1", "mute_config_id", fmt.Sprintf("tf-test-my-config-%s", contextBasic["random_suffix"])),
 					resource.TestCheckResourceAttr(
 						"google_scc_v2_project_mute_config.project_mute_test1", "location", contextBasic["location"].(string)),
 					resource.TestCheckResourceAttr(
@@ -61,7 +61,7 @@ func TestAccSecurityCenterV2ProjectMuteConfig_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"google_scc_v2_project_mute_config.project_mute_test2", "filter", "severity = \"HIGH\""),
 					resource.TestCheckResourceAttr(
-						"google_scc_v2_project_mute_config.project_mute_test2", "project_mute_config_id", fmt.Sprintf("tf-test-my-config%s", contextHighSeverity["random_suffix"])),
+						"google_scc_v2_project_mute_config.project_mute_test2", "project_mute_config_id", fmt.Sprintf("tf-test-my-config-%s", contextHighSeverity["random_suffix"])),
 					resource.TestCheckResourceAttr(
 						"google_scc_v2_project_mute_config.project_mute_test2", "location", contextHighSeverity["location"].(string)),
 					resource.TestCheckResourceAttr(
@@ -88,8 +88,8 @@ resource "google_project" "google_project1" {
 resource "google_scc_v2_project_mute_config" "project_mute_test1" {
   description          = "A test project mute config"
   filter               = "severity = \"LOW\""
-  mute_config_id       = "tf-test-my-config%{random_suffix}"
-  location             = "%{location}"
+  mute_config_id       = "tf-test-my-config-%{random_suffix}"
+  location             = "global"
   parent               = "projects/${google_project.google_project1.project_id}"
   type                 =  "STATIC"
 }
@@ -107,8 +107,8 @@ resource "google_project" "google_project2" {
 resource "google_scc_v2_project_mute_config" "project_mute_test2" {
   description          = "A test project mute config with high severity"
   filter               = "severity = \"HIGH\""
-  mute_config_id       = "tf-test-my-config%{random_suffix}"
-  location             = "%{location}"
+  mute_config_id       = "tf-test-my-config-%{random_suffix}"
+  location             = "global"
   parent               = "projects/${google_project.google_project2.project_id}"
   type                 =  "STATIC"
 }

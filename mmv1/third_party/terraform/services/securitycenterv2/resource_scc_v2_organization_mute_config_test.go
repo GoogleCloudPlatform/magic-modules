@@ -36,7 +36,7 @@ func TestAccSecurityCenterV2OrganizationMuteConfig_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"google_scc_v2_organization_mute_config.organization_mute_test1", "filter", "severity = \"LOW\""),
 					resource.TestCheckResourceAttr(
-						"google_scc_v2_organization_mute_config.organization_mute_test1", "mute_config_id", fmt.Sprintf("tf-test-my-config%s", contextBasic["random_suffix"])),
+						"google_scc_v2_organization_mute_config.organization_mute_test1", "mute_config_id", fmt.Sprintf("tf-test-my-config-%s", contextBasic["random_suffix"])),
 					resource.TestCheckResourceAttr(
 						"google_scc_v2_organization_mute_config.organization_mute_test1", "location", contextBasic["location"].(string)),
 					resource.TestCheckResourceAttr(
@@ -57,7 +57,7 @@ func TestAccSecurityCenterV2OrganizationMuteConfig_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"google_scc_v2_organization_mute_config.organization_mute_test2", "filter", "severity = \"HIGH\""),
 					resource.TestCheckResourceAttr(
-						"google_scc_v2_organization_mute_config.organization_mute_test2", "mute_config_id", fmt.Sprintf("tf-test-my-config%s", contextHighSeverity["random_suffix"])),
+						"google_scc_v2_organization_mute_config.organization_mute_test2", "mute_config_id", fmt.Sprintf("tf-test-my-config-%s", contextHighSeverity["random_suffix"])),
 					resource.TestCheckResourceAttr(
 						"google_scc_v2_organization_mute_config.organization_mute_test2", "location", contextHighSeverity["location"].(string)),
 					resource.TestCheckResourceAttr(
@@ -79,8 +79,8 @@ func testAccSecurityCenterV2OrganizationMuteConfig_basic(context map[string]inte
 resource "google_scc_v2_organization_mute_config" "organization_mute_test1" {
   description          = "A test organization mute config"
   filter               = "severity = \"LOW\""
-  mute_config_id       = "tf-test-my-config%{random_suffix}"
-  location             = "%{location}"
+  mute_config_id       = "tf-test-my-config-%{random_suffix}"
+  location             = "global"
   parent               = "organizations/%{org_id}"
   type                 =  "STATIC"
 }
@@ -92,8 +92,8 @@ func testAccSecurityCenterV2OrganizationMuteConfig_highSeverity(context map[stri
 resource "google_scc_v2_organization_mute_config" "organization_mute_test2" {
   description          = "A test organization mute config with high severity"
   filter               = "severity = \"HIGH\""
-  mute_config_id       = "tf-test-my-config%{random_suffix}"
-  location             = "%{location}"
+  mute_config_id       = "tf-test-my-config-%{random_suffix}"
+  location             = "global"
   parent               = "organizations/%{org_id}"
   type                 =  "STATIC"
 }
