@@ -33,6 +33,9 @@ func TestAccVPCAccessConnector_vpcAccessConnectorThroughput(t *testing.T) {
 }
 
 func TestAccVPCAccessConnector_vpcAccessConnectorThroughput_combiningThroughputAndInstancesFields_conflict(t *testing.T) {
+	// Need to skip this test as the expected failure happens before the provider interacts with APIs
+	// In VCR mode this test fails due to lack of cassettes
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
