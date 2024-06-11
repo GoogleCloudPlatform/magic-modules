@@ -22,7 +22,9 @@ module Provider
       false
     end
 
-    def generate(output_folder, types, _product_path, _dump_yaml, generate_code, generate_docs) end
+    # rubocop:disable Layout/LineLength
+    def generate(output_folder, types, _product_path, _dump_yaml, generate_code, generate_docs, _go_yaml) end
+    # rubocop:enable Layout/LineLength
 
     def generate_resource(pwd, data, _generate_code, _generate_docs) end
 
