@@ -15,7 +15,7 @@ func TestAccSecurityCenterV2ProjectMuteConfig_basic(t *testing.T) {
 	contextBasic := map[string]interface{}{
 		"org_id":        envvar.GetTestOrgFromEnv(t),
 		"folder_name":   acctest.RandString(t, 10),
-		"project_id":    fmt.Sprintf("tf-test-project-%s",  acctest.RandString(t, 10)),
+		"project_id":    fmt.Sprintf("tf-test-project-%s", acctest.RandString(t, 10)),
 		"random_suffix": acctest.RandString(t, 10),
 		"location":      "global",
 	}
@@ -23,8 +23,8 @@ func TestAccSecurityCenterV2ProjectMuteConfig_basic(t *testing.T) {
 	contextHighSeverity := map[string]interface{}{
 		"org_id":        envvar.GetTestOrgFromEnv(t),
 		"folder_name":   acctest.RandString(t, 10),
-		"project_id":    fmt.Sprintf("tf-test-project-%s",  acctest.RandString(t, 10)),
-        "random_suffix": acctest.RandString(t, 10),
+		"project_id":    fmt.Sprintf("tf-test-project-%s", acctest.RandString(t, 10)),
+		"random_suffix": acctest.RandString(t, 10),
 		"location":      "us_central",
 	}
 
