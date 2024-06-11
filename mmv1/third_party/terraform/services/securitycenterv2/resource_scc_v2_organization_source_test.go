@@ -25,28 +25,28 @@ func TestAccSCCOrganizationSource_complete(t *testing.T) {
 			{
 				Config: testAccSCCOrganizationSourceCompleteExample(orgId, suffix, "My description", canonicalName),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("google_scc_organization_source.custom_source", "display_name", fmt.Sprintf("TFSrc %s", suffix)),
-					resource.TestCheckResourceAttr("google_scc_organization_source.custom_source", "organization", orgId),
-					resource.TestCheckResourceAttr("google_scc_organization_source.custom_source", "description", "My description"),
-					resource.TestCheckResourceAttr("google_scc_organization_source.custom_source", "canonical_name", canonicalName),
+					resource.TestCheckResourceAttr("google_scc_v2_organization_source.custom_source", "display_name", fmt.Sprintf("TFSrc %s", suffix)),
+					resource.TestCheckResourceAttr("google_scc_v2_organization_source.custom_source", "organization", orgId),
+					resource.TestCheckResourceAttr("google_scc_v2_organization_source.custom_source", "description", "My description"),
+					resource.TestCheckResourceAttr("google_scc_v2_organization_source.custom_source", "canonical_name", canonicalName),
 				),
 			},
 			{
-				ResourceName:      "google_scc_organization_source.custom_source",
+				ResourceName:      "google_scc_v2_organization_source.custom_source",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
 				Config: testAccSCCOrganizationSourceCompleteExample(orgId, suffix, "", canonicalName),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("google_scc_organization_source.custom_source", "display_name", fmt.Sprintf("TFSrc %s", suffix)),
-					resource.TestCheckResourceAttr("google_scc_organization_source.custom_source", "organization", orgId),
-					resource.TestCheckResourceAttr("google_scc_organization_source.custom_source", "description", ""),
-					resource.TestCheckResourceAttr("google_scc_organization_source.custom_source", "canonical_name", canonicalName),
+					resource.TestCheckResourceAttr("google_scc_v2_organization_source.custom_source", "display_name", fmt.Sprintf("TFSrc %s", suffix)),
+					resource.TestCheckResourceAttr("google_scc_v2_organization_source.custom_source", "organization", orgId),
+					resource.TestCheckResourceAttr("google_scc_v2_organization_source.custom_source", "description", ""),
+					resource.TestCheckResourceAttr("google_scc_v2_organization_source.custom_source", "canonical_name", canonicalName),
 				),
 			},
 			{
-				ResourceName:      "google_scc_organization_source.custom_source",
+				ResourceName:      "google_scc_v2_organization_source.custom_source",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -56,7 +56,7 @@ func TestAccSCCOrganizationSource_complete(t *testing.T) {
 
 func testAccSCCOrganizationSourceCompleteExample(orgId, suffix, description, canonicalName string) string {
 	return fmt.Sprintf(`
-resource "google_scc_organization_source" "custom_source" {
+resource "google_scc_v2_organization_source" "custom_source" {
   display_name  = "TFSrc %s"
   organization  = "%s"
   description   = "%s"
