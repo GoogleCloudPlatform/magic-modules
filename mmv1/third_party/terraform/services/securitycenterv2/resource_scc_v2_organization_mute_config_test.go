@@ -21,7 +21,7 @@ func TestAccSecurityCenterV2OrganizationMuteConfig_basic(t *testing.T) {
 	contextHighSeverity := map[string]interface{}{
 		"org_id":        envvar.GetTestOrgFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
-		"location":      "us_central",
+		"location":      "global",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -80,7 +80,7 @@ resource "google_scc_v2_organization_mute_config" "organization_mute_test1" {
   description          = "A test organization mute config"
   filter               = "severity = \"LOW\""
   mute_config_id       = "tf-test-my-config-%{random_suffix}"
-  location             = "global"
+  location             = "%{location}"
   parent               = "organizations/%{org_id}"
   type                 =  "STATIC"
 }
@@ -93,7 +93,7 @@ resource "google_scc_v2_organization_mute_config" "organization_mute_test2" {
   description          = "A test organization mute config with high severity"
   filter               = "severity = \"HIGH\""
   mute_config_id       = "tf-test-my-config-%{random_suffix}"
-  location             = "global"
+  location             = "%{location}"
   parent               = "organizations/%{org_id}"
   type                 =  "STATIC"
 }

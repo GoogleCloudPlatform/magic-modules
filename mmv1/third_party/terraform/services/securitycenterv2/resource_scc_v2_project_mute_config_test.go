@@ -18,6 +18,7 @@ func TestAccSecurityCenterV2ProjectMuteConfig_basic(t *testing.T) {
 		"project_id":    fmt.Sprintf("tf-test-project-%s", acctest.RandString(t, 10)),
 		"random_suffix": acctest.RandString(t, 10),
 		"location":      "global",
+		"parent_org":    envvar.GetEnv("TEST_ORG_ID", "{org_id}"),
 	}
 
 	contextHighSeverity := map[string]interface{}{
@@ -25,7 +26,8 @@ func TestAccSecurityCenterV2ProjectMuteConfig_basic(t *testing.T) {
 		"folder_name":   acctest.RandString(t, 10),
 		"project_id":    fmt.Sprintf("tf-test-project-%s", acctest.RandString(t, 10)),
 		"random_suffix": acctest.RandString(t, 10),
-		"location":      "us_central",
+		"location":      "global",
+		"parent_org":    envvar.GetEnv("TEST_ORG_ID", "{org_id}"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -61,7 +63,7 @@ func TestAccSecurityCenterV2ProjectMuteConfig_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"google_scc_v2_project_mute_config.project_mute_test2", "filter", "severity = \"HIGH\""),
 					resource.TestCheckResourceAttr(
-						"google_scc_v2_project_mute_config.project_mute_test2", "project_mute_config_id", fmt.Sprintf("tf-test-my-config-%s", contextHighSeverity["random_suffix"])),
+						"google_scc_v2_project_mute_config.project_mute_test2", "mute_config_id", fmt.Sprintf("tf-test-my-config-%s", contextHighSeverity["random_suffix"])),
 					resource.TestCheckResourceAttr(
 						"google_scc_v2_project_mute_config.project_mute_test2", "location", contextHighSeverity["location"].(string)),
 					resource.TestCheckResourceAttr(
@@ -83,13 +85,14 @@ func testAccSecurityCenterV2ProjectMuteConfig_basic(context map[string]interface
 resource "google_project" "google_project1" {
   name       = "Test project"
   project_id = "%{project_id}"
+  org_id     = "%{parent_org}"
  }
 
 resource "google_scc_v2_project_mute_config" "project_mute_test1" {
   description          = "A test project mute config"
   filter               = "severity = \"LOW\""
   mute_config_id       = "tf-test-my-config-%{random_suffix}"
-  location             = "global"
+  location             = "%{location}"
   parent               = "projects/${google_project.google_project1.project_id}"
   type                 =  "STATIC"
 }
@@ -102,13 +105,14 @@ func testAccSecurityCenterV2ProjectMuteConfig_highSeverity(context map[string]in
 resource "google_project" "google_project2" {
   name       = "Test project"
   project_id = "%{project_id}"
+  org_id     = "%{parent_org}"
  }
 
 resource "google_scc_v2_project_mute_config" "project_mute_test2" {
   description          = "A test project mute config with high severity"
   filter               = "severity = \"HIGH\""
   mute_config_id       = "tf-test-my-config-%{random_suffix}"
-  location             = "global"
+  location             = "%{location}"
   parent               = "projects/${google_project.google_project2.project_id}"
   type                 =  "STATIC"
 }

@@ -17,13 +17,15 @@ func TestAccSecurityCenterV2FolderMuteConfig_basic(t *testing.T) {
 		"folder_name":   fmt.Sprintf("test1-%s", acctest.RandString(t, 10)),
 		"random_suffix": acctest.RandString(t, 10),
 		"location":      "global",
+		"service_account":envvar.GetTestServiceAccountFromEnv(t),
 	}
 
 	contextHighSeverity := map[string]interface{}{
 		"org_id":        envvar.GetTestOrgFromEnv(t),
 		"folder_name":   fmt.Sprintf("test2-%s", acctest.RandString(t, 10)),
 		"random_suffix": acctest.RandString(t, 10),
-		"location":      "us_central",
+		"location":      "global",
+		"service_account":envvar.GetTestServiceAccountFromEnv(t),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -83,11 +85,19 @@ resource "google_folder" "test1" {
   parent       = "organizations/%{org_id}"
 }
 
+resource "google_project_iam_binding" "folder_test1_binding" {
+	project = "billingProject"
+	role    = "roles/securitycenter.admin"
+	members = [
+	  "serviceAccount: %{service_account}",
+	]
+}
+
 resource "google_scc_v2_folder_mute_config" "folder_mute_test1" {
   description          = "A test folder mute config"
   filter               = "severity = \"LOW\""
   mute_config_id       = "tf-test-my-config%{random_suffix}"
-  location             = "global"
+  location             = "%{location}"
   parent               = "${google_folder.test1.id}"
   type                 =  "STATIC"
 }
@@ -101,11 +111,19 @@ resource "google_folder" "test2" {
   parent       = "organizations/%{org_id}"
 }
 
+resource "google_project_iam_binding" "folder_test2_binding" {
+	project = "YOUR_PROJECT_ID"
+	role    = "roles/securitycenter.admin"
+	members = [
+	  "serviceAccount:YOUR_SERVICE_ACCOUNT",
+	]
+}
+
 resource "google_scc_v2_folder_mute_config" "folder_mute_test2" {
   description          = "A test folder mute config with high severity"
   filter               = "severity = \"HIGH\""
   mute_config_id       = "tf-test-my-config%{random_suffix}"
-  location             = "global"
+  location             = "%{location}"
   parent               = "${google_folder.test2.id}"
   type                 =  "STATIC"
 }
