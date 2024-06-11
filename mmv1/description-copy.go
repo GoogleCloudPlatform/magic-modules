@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 )
 
@@ -134,43 +135,6 @@ func CopyText(identifier string) {
 func terminateText(line string) bool {
 	terminalStrings := []string{
 		"!ruby/",
-		"immutable:",
-		"name:",
-		"default_from_api:",
-		"diff_suppress_func:",
-		"properties:",
-		"send_empty_value:",
-		"custom_flatten:",
-		"required:",
-		"conflicts:",
-		"output:",
-		"values:",
-		"custom_expand:",
-		"imports:",
-		"base_url:",
-		"default_value:",
-		"item_type:",
-		"ignore_read:",
-		"resource:",
-		"update_verb:",
-		"update_url:",
-		"min_version:",
-		"max_size:",
-		"at_least_one_of:",
-		"flatten_object:",
-		"is_set:",
-		"set_hash_func:",
-		"sensitive:",
-		"readonly:",
-		"has_self_link:",
-		"exclude:",
-		"parameters:",
-		"exactly_one_of:",
-		"min_size:",
-		"url_param_only:",
-		"create_url:",
-		"delete_verb:",
-		"delete_url:",
 	}
 
 	for _, t := range terminalStrings {
@@ -179,5 +143,5 @@ func terminateText(line string) bool {
 		}
 	}
 
-	return false
+	return regexp.MustCompile(`^\s*[a-z_]+:[\s$]*`).MatchString(line)
 }
