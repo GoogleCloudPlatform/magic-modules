@@ -24,7 +24,7 @@ module Provider
     end
 
     def generate(output_folder, types, product_path, _dump_yaml, generate_code, generate_docs, \
-                 _go_yaml)
+                 go_yaml)
       # Temporary shim to generate the missing resources directory. Can be removed
       # once the folder exists downstream.
       resources_folder = File.join(output_folder, 'converters/google/resources')
@@ -36,7 +36,8 @@ module Provider
         types,
         generate_code,
         generate_docs,
-        product_path
+        product_path,
+        go_yaml
       )
     end
 
