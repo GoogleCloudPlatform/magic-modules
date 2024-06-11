@@ -15,6 +15,7 @@
 name: 'VPCServiceControls'
 base_url: ''
 skip_delete: true
+exclude_tgc: true # excluding tgc because of helpers in custom_code.constants
 id_format: 'services/{{service}}/projects/{{project}}/networks/{{network}}'
 import_format:
   - 'services/{{service}}/projects/{{project}}/networks/{{network}}'
