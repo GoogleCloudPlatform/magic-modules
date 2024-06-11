@@ -127,4 +127,51 @@ parameters:
     immutable: true  
 
 properties:
-  # Fields go here
+  - !ruby/object:Api::Type::Time
+    name: 'creationTimestamp'
+    description: 'Creation timestamp in RFC3339 text format.'
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description: |
+      Name of the resize-request.
+    required: true
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: 'description'
+    description: |
+      An optional description of this resize-request.
+  - !ruby/object:Api::Type::Integer
+    name: 'count'
+    description: |
+      TBD.
+    required: true
+  - !ruby/object:Api::Type::Integer
+    name: 'resizeBy'
+    description: |
+      The maximum number of instances to scale to.
+    required: true
+  - !ruby/object:Api::Type::NestedObject
+      name: 'requestedRunDuration'
+      description: |
+        How long the instances should be provisioned for.
+      required: true
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'seconds'
+          description: |
+            Seconds
+        - !ruby/object:Api::Type::Integer
+          name: 'nanos'
+          api_name: minNumReplicas
+          description: |
+            nanos
+  - !ruby/object:Api::Type::Enum
+    name: 'state'
+    api_name: 'utilizationTargetType'
+    description: |
+      State of the resize request
+    values:
+      - :GAUGE
+      - :DELTA_PER_SECOND
+      - :DELTA_PER_MINUTE
