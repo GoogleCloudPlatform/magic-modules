@@ -272,29 +272,6 @@ func TestAccStorageBucket_dualLocation_lowercase(t *testing.T) {
 	})
 }
 
-func TestAccStorageBucket_dualLocation_lowercase(t *testing.T) {
-	t.Parallel()
-
-	bucketName := acctest.TestBucketName(t)
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccStorageBucketDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccStorageBucket_dualLocation_lowercase(bucketName),
-			},
-			{
-				ResourceName:            "google_storage_bucket.bucket",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
-			},
-		},
-	})
-}
-
 func TestAccStorageBucket_dualLocation_versionChange(t *testing.T) {
 	// Test is not parallel because ENVs are set.
 	// Need to skip VCR as this test downloads providers from the Terraform Registry
