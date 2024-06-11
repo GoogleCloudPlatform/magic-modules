@@ -1,4 +1,4 @@
-package appengine
+package google
 
 import (
 	"reflect"
@@ -58,7 +58,7 @@ func GetAppEngineApplicationApiObject(d tpgresource.TerraformResourceData, confi
 	authDomainProp, err := expandAppEngineApplicationAuthDomain(d.Get("authDomain"), d, config)
 	if err != nil {
 		return nil, err
-	} else if v, ok := d.GetOkExists("authDomain"); !tpgresource.IsEmptyValue(reflect.ValueOf(keyStringProp)) && (ok || !reflect.DeepEqual(v, authDomainProp)) {
+	} else if v, ok := d.GetOkExists("authDomain"); !tpgresource.IsEmptyValue(reflect.ValueOf(authDomainProp)) && (ok || !reflect.DeepEqual(v, authDomainProp)) {
 		obj["authDomain"] = authDomainProp
 	}
 
@@ -66,7 +66,7 @@ func GetAppEngineApplicationApiObject(d tpgresource.TerraformResourceData, confi
 	if err != nil {
 		return nil, err
 	} else if v, ok := d.GetOkExists("locationId"); !tpgresource.IsEmptyValue(reflect.ValueOf(locationIdProp)) && (ok || !reflect.DeepEqual(v, locationIdProp)) {
-		obj["locationId"] = createTimeProp
+		obj["locationId"] = locationIdProp
 	}
 
 	codeBucketProp, err := expandAppEngineApplicationCodeBucket(d.Get("codeBucket"), d, config)
@@ -195,6 +195,18 @@ func expandAppEngineApplicationUrlDispatchRule(v interface{}, d tpgresource.Terr
 	return transformed, nil
 }
 
+func expandAppEngineApplicationDomain(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	return v, nil
+}
+
+func expandAppEngineApplicationPath(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	return v, nil
+}
+
+func expandAppEngineApplicationService(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	return v, nil
+}
+
 func expandAppEngineApplicationAuthDomain(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
@@ -224,7 +236,7 @@ func expandAppEngineApplicationServingStatus(v interface{}, d tpgresource.Terraf
 	if err != nil {
 		return nil, err
 	} else if val := reflect.ValueOf(transformedEnabled); val.IsValid() && !tpgresource.IsEmptyValue(val) {
-		transformed["enabled"] = transformedDomain
+		transformed["enabled"] = transformedEnabled
 	}
 
 	transformedOauth2ClientId, err := expandAppEngineServingStatusOauth2ClientId(original["oauth2ClientId"], d, config)

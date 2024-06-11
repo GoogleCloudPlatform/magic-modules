@@ -320,8 +320,8 @@ module Provider
                         'third_party/tgc/commitment.go'],
                        ['converters/google/resources/firebase_project.go',
                         'third_party/tgc/firebase_project.go'],
-                       ['converters/google/resources/app_engine_application.go',
-                        'third_party/tgc/app_engine_application.go']
+                       ['converters/google/resources/appengine_application.go',
+                        'third_party/tgc/appengine_application.go']
                      ])
     end
 
