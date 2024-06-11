@@ -53,7 +53,7 @@ resource "google_pubsub_topic" "scc_v2_organization_notification_config" {
 }
 
 resource "google_scc_v2_organization_notification_config" "default" {
-  config_id    = "tf-test-config-%{random_suffix}"
+  config_id    = "organizations/%{org_id}/sources/source-%{random_suffix}/notificationConfigs/tf-test-config-%{random_suffix}"
   organization = "%{org_id}"
   location     = "global"
   description  = "A test organization notification config"
@@ -73,7 +73,7 @@ resource "google_pubsub_topic" "scc_v2_organization_notification_config" {
 }
 
 resource "google_scc_v2_organization_notification_config" "default" {
-  config_id    = "tf-test-config-%{random_suffix}"
+  config_id    = "organizations/%{org_id}/sources/source-%{random_suffix}/notificationConfigs/tf-test-config-%{random_suffix}"
   organization = "%{org_id}"
   location     = "global"
   description  = "An updated test organization notification config"
