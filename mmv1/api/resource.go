@@ -1401,18 +1401,15 @@ func (r Resource) PropertiesByCustomUpdate() map[UpdateGroup][]*Type {
 }
 
 func (r Resource) FieldSpecificUpdateMethods() bool {
-	fmt.Println("\n")
-	fmt.Println(len(r.PropertiesByCustomUpdate()))
-	fmt.Println("\n")
 	return (len(r.PropertiesByCustomUpdate()) > 0)
 }
 
 func (r Resource) CustomUpdatePropertiesByKey(updateUrl string, updateId string, fingerprintName string, updateVerb string) []*Type {
 	groupedProperties := r.PropertiesByCustomUpdate()
 	groupedProperty := UpdateGroup{ UpdateUrl: updateUrl,
-			UpdateVerb: updateId,
-			UpdateId: fingerprintName,
-			FingerprintName: updateVerb}
+			UpdateVerb: updateVerb,
+			UpdateId: updateId,
+			FingerprintName: fingerprintName}
 	return groupedProperties[groupedProperty]
 }
 
