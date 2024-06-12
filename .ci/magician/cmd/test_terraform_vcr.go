@@ -217,8 +217,7 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 	}
 	testsAnalyticsComment, err := formatTestsAnalytics(analyticsData)
 	if err != nil {
-		fmt.Println("Error formatting test_analytics comment: ", err)
-		os.Exit(1)
+		return fmt.Errorf("error formatting test_analytics comment: %w", err)
 	}
 
 	notRunBeta, notRunGa := notRunTests(tpgRepo.UnifiedZeroDiff, tpgbRepo.UnifiedZeroDiff, replayingResult)
@@ -229,8 +228,7 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 	}
 	nonExercisedTestsComment, err := formatNonExercisedTests(nonExercisedTestsData)
 	if err != nil {
-		fmt.Println("Error formatting non exercised tests comment: ", err)
-		os.Exit(1)
+		return fmt.Errorf("error formatting non exercised tests comment: %w", err)
 	}
 
 	if len(replayingResult.FailedTests) > 0 {
@@ -239,8 +237,7 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		}
 		withReplayFailedTestsComment, err := formatWithReplayFailedTests(withReplayFailedTestsData)
 		if err != nil {
-			fmt.Println("Error formatting action taken comment: ", err)
-			os.Exit(1)
+			return fmt.Errorf("error formatting action taken comment: %w", err)
 		}
 
 		comment := strings.Join([]string{testsAnalyticsComment, nonExercisedTestsComment, withReplayFailedTestsComment}, "\n")
@@ -296,12 +293,10 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		}
 		recordReplayComment, err := formatRecordReplay(recordReplayData)
 		if err != nil {
-			fmt.Println("Error formatting record replay comment: ", err)
-			os.Exit(1)
+			return fmt.Errorf("error formatting record replay comment: %w", err)
 		}
 		if err := gh.PostComment(prNumber, recordReplayComment); err != nil {
-			fmt.Println("Error posting comment: ", err)
-			os.Exit(1)
+			return fmt.Errorf("error posting comment: %w", err)
 		}
 
 	} else { //  len(replayingResult.FailedTests) == 0
@@ -312,14 +307,12 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		}
 		withoutReplayFailedTestsComment, err := formatWithoutReplayFailedTests(withoutReplayFailedTestsData)
 		if err != nil {
-			fmt.Println("Error formatting action taken comment: ", err)
-			os.Exit(1)
+			return fmt.Errorf("error formatting action taken comment: %w", err)
 		}
 
 		comment := strings.Join([]string{testsAnalyticsComment, nonExercisedTestsComment, withoutReplayFailedTestsComment}, "\n")
 		if err := gh.PostComment(prNumber, comment); err != nil {
-			fmt.Println("Error posting comment: ", err)
-			os.Exit(1)
+			return fmt.Errorf("error posting comment: %w", err)
 		}
 	}
 
