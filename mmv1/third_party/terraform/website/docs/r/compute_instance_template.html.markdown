@@ -375,6 +375,8 @@ The following arguments are supported:
 
 * `advanced_machine_features` (Optional) - Configure Nested Virtualisation and Simultaneous Hyper Threading on this VM. Structure is [documented below](#nested_advanced_machine_features)
 
+* `partner_metadata` - (optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) key/value pair represents partner metadata assigned to instance template where key represent a defined namespace and value is a json string represent the entries associted with the namespace.
+
 <a name="nested_disk"></a>The `disk` block supports:
 
 * `auto_delete` - (Optional) Whether or not the disk should be auto-deleted.
@@ -434,7 +436,7 @@ The following arguments are supported:
 ~> **Note:** Either `source`, `source_image`, or `source_snapshot` is **required** in a disk block unless the disk type is `local-ssd`. Check the API [docs](https://cloud.google.com/compute/docs/reference/rest/v1/instanceTemplates/insert) for details.
 
 * `disk_type` - (Optional) The GCE disk type. Such as `"pd-ssd"`, `"local-ssd"`,
-    `"pd-balanced"` or `"pd-standard"`.
+    `"pd-balanced"` or `"pd-standard"`, `"hyperdisk-balanced"`, `"hyperdisk-throughput"` or `"hyperdisk-extreme"`.
 
 * `disk_size_gb` - (Optional) The size of the image in gigabytes. If not
     specified, it will inherit the size of its base image. For SCRATCH disks,
