@@ -40,7 +40,7 @@
 {{ if .DeprecationMessage -}}
   Deprecated: "{{ .DeprecationMessage }}",
 {{ end -}}
-{{ if .Immutable -}}
+{{ if .IsForceNew -}}
   ForceNew: true,
 {{ end -}}
 {{ if .Validation -}}
@@ -140,7 +140,7 @@ Possible values: [{{- .EnumValuesToString "\"" false -}}]
 				{{ if .KeyDiffSuppressFunc -}}
 					DiffSuppressFunc: {{ .KeyDiffSuppressFunc }},
 				{{ end -}}
-				{{ if .Immutable -}}
+				{{ if .IsForceNew -}}
 				ForceNew: true,
 				{{ end -}}
 			},

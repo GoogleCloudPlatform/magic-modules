@@ -1,32 +1,32 @@
 {{- define "EnvVarContext" }}
 	{{- range $varKey, $varVal := $.TestEnvVars }}
-		{{- if eq $varVal $.ORGID }}
+		{{- if eq $varVal (index $.TestEnvVars "ORG_ID") }}
 		"{{$varKey}}": envvar.GetTestOrgFromEnv(t),
-		{{- else if eq $varVal $.ORG_DOMAIN }}
+		{{- else if eq $varVal (index $.TestEnvVars "ORG_DOMAIN") }}
 		"{{$varKey}}": envvar.GetTestOrgDomainFromEnv(t),
-		{{- else if eq $varVal $.CREDENTIALS }}
+		{{- else if eq $varVal (index $.TestEnvVars "CREDENTIALS") }}
 		"{{$varKey}}": envvar.GetTestCredsFromEnv(t),
-		{{- else if eq $varVal $.REGION }}
+		{{- else if eq $varVal (index $.TestEnvVars "REGION") }}
 		"{{$varKey}}": envvar.GetTestRegionFromEnv(),
-		{{- else if eq $varVal $.ORG_TARGET }}
+		{{- else if eq $varVal (index $.TestEnvVars "ORG_TARGET") }}
 		"{{$varKey}}": envvar.GetTestOrgTargetFromEnv(t),
-		{{- else if eq $varVal $.BILLING_ACCT }}
+		{{- else if eq $varVal (index $.TestEnvVars "BILLING_ACCT") }}
 		"{{$varKey}}": envvar.GetTestBillingAccountFromEnv(t),
-		{{- else if eq $varVal $.MASTER_BILLING_ACCT }}
+		{{- else if eq $varVal (index $.TestEnvVars "MASTER_BILLING_ACCT") }}
 		"{{$varKey}}": envvar.GetTestMasterBillingAccountFromEnv(t),
-		{{- else if eq $varVal $.SERVICE_ACCT }}
+		{{- else if eq $varVal (index $.TestEnvVars "SERVICE_ACCT") }}
 		"{{$varKey}}": envvar.GetTestServiceAccountFromEnv(t),
-		{{- else if eq $varVal $.PROJECT_NAME }}
+		{{- else if eq $varVal (index $.TestEnvVars "PROJECT_NAME") }}
 		"{{$varKey}}": envvar.GetTestProjectFromEnv(),
-		{{- else if eq $varVal $.PROJECT_NUMBER }}
+		{{- else if eq $varVal (index $.TestEnvVars "PROJECT_NUMBER") }}
 		"{{$varKey}}": envvar.GetTestProjectNumberFromEnv(),
-		{{- else if eq $varVal $.CUST_ID }}
+		{{- else if eq $varVal (index $.TestEnvVars "CUST_ID") }}
 		"{{$varKey}}": envvar.GetTestCustIdFromEnv(t),
-		{{- else if eq $varVal $.IDENTITY_USER }}
+		{{- else if eq $varVal (index $.TestEnvVars "IDENTITY_USER") }}
 		"{{$varKey}}": envvar.GetTestIdentityUserFromEnv(t),
-		{{- else if eq $varVal $.PAP_DESCRIPTION }}
+		{{- else if eq $varVal (index $.TestEnvVars "PAP_DESCRIPTION") }}
 		"{{$varKey}}": envvar.GetTestPublicAdvertisedPrefixDescriptionFromEnv(t),
-		{{- else if eq $varVal $.ZONE }}
+		{{- else if eq $varVal (index $.TestEnvVars "ZONE") }}
 		"{{$varKey}}": envvar.GetTestZoneFromEnv(),
 		{{- end }}
 	{{- end }}

@@ -138,15 +138,15 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 {{- if $.VirtualFields -}}
 {{-   range $field := $.VirtualFields }}
             "{{ $field.Name -}}": {
-                Type: schema.{{ $field.ItemType -}},
+                Type: schema.{{ $field.Type -}},
                 Optional: true,
 {{      if $field.Immutable -}}
                 ForceNew: true,
 {{-     end}}
 {{      if $field.DefaultValue -}}
-                Default:  {{ $field.GoLiteral $field.Default_Value -}},
+                Default:  {{ $field.GoLiteral $field.DefaultValue -}},
 {{-     end}}
-                Description: `{{ $field.Description -}}`,
+                Description: `{{ replace $field.GetDescription "`" "'" -1 -}}`,
             },
 {{-   end}}
 {{- end}}
@@ -198,7 +198,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     obj := make(map[string]interface{})
 
 {{- range $prop := $.SettableProperties }}
-    {{ $prop.ApiName -}}Prop, err := expand{{ if $.NestedQuery -}}Nested{{ end }}{{ $.ResourceName -}}{{ camelize $prop.Name "upper" -}}({{ if $prop.FlattenObject }}nil{{ else }}d.Get("{{ underscore $prop.Name }}{{ end }}"), d, config)
+    {{ $prop.ApiName -}}Prop, err := expand{{ if $.NestedQuery -}}Nested{{ end }}{{ $.ResourceName -}}{{ camelize $prop.Name "upper" -}}({{ if $prop.FlattenObject }}nil{{ else }}d.Get("{{ underscore $prop.Name }}"){{ end }}, d, config)
     if err != nil {
         return err
 {{- if $prop.SendEmptyValue -}}
@@ -361,7 +361,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{- end}}
 {{- end}}
 {{- range $prop := $.GettableProperties }}
-{{  if $.IsInIdentity $prop }}
+{{-  if $.IsInIdentity $prop }}
     if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{ end }}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(opRes["{{ $prop.ApiName -}}"], d, config)); err != nil {
         return err
     }
@@ -384,7 +384,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{if $.CustomCode.PostCreateFailure -}}
         resource{{ $.ResourceName -}}PostCreateFailure(d, meta)
 {{- end}}
-{{          if not $.TaintResourceOnFailedCreate -}}
+{{-          if not $.TaintResourceOnFailedCreate -}}
         // The resource didn't actually create
         d.SetId("")
 {{- end}}
@@ -599,8 +599,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
         d.SetId("")
         return nil
     }
-
-{{- end}}
+{{ end}}
 {{- if $.VirtualFields -}}
   // Explicitly set virtual fields to default values if unset
 {{- range $prop := $.VirtualFields }}
@@ -748,11 +747,11 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
 
     log.Printf("[DEBUG] Updating {{ $.Name }} %q: %#v", d.Id(), obj)
 	headers := make(http.Header)
-{{-             if $.UpdateMask -}}
-{{template "UpdateMask" $ -}}
+{{-              if $.UpdateMask }}
+{{ template "UpdateMask" $ -}}
 {{              end}}
-{{-             if $.CustomCode.PreUpdate -}}
-    {{- $.CustomTemplate $.CustomCode.PreUpdate true -}}
+{{             if $.CustomCode.PreUpdate -}}
+    {{ $.CustomTemplate $.CustomCode.PreUpdate true -}}
 {{              end}}
 {{              if $.NestedQuery -}}
 {{                  if $.NestedQuery.ModifyByPatch -}}
@@ -831,7 +830,7 @@ if len(updateMask) > 0 {
 if d.HasChange("{{ join ($.PropertyNamesToStrings $props) "\") || d.HasChange(\""}}") {
         obj := make(map[string]interface{})
 {{		            if $index.FingerprintName }}
-        getUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}" -}}")
+        getUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}")
         if err != nil {
             return err
         }
@@ -983,7 +982,7 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings $props) "\") || d.HasChange(\"
 
 {{          if $.CustomCode.PostUpdate -}} //TODO POST UPDATE {{end}}
     return resource{{ $.ResourceName -}}Read(d, meta)
-{{      end -}}{{/*if CustomUpdate*/}}
+{{-      end }}{{/*if CustomUpdate*/}}
 }
 {{  else if $.RootLabels -}}{{/*if not immutable*/}}
 func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{}) error {
@@ -1143,8 +1142,8 @@ func resource{{ $.ResourceName }}Import(d *schema.ResourceData, meta interface{}
     // Explicitly set virtual fields to default values on import
             {{- range $vf := $.VirtualFields }}
                 {{- if $vf.DefaultValue }}
-    if err := d.Set("{{ $.vf.Name }}", {{ $.vf.DefaultValue }}); err != nil {
-        return nil, fmt.Errorf("Error setting {{ $.vf.Name }}: %s", err)
+    if err := d.Set("{{ $vf.Name }}", {{ $vf.DefaultValue }}); err != nil {
+        return nil, fmt.Errorf("Error setting {{ $vf.Name }}: %s", err)
     }
                 {{- end }}
             {{- end }}
