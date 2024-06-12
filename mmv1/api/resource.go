@@ -449,6 +449,12 @@ func (r Resource) IsSettableProperty(t *Type) bool {
 	return slices.Contains(r.SettableProperties(), t)
 }
 
+func (r Resource) UnorderedListProperties() []*Type {
+	return google.Select(r.SettableProperties(), func(t *Type) bool {
+		return t.UnorderedList
+	})
+}
+
 // Properties that will be returned in the API body
 
 // def gettable_properties
