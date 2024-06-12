@@ -19,7 +19,7 @@ func TestAccSecurityCenterV2ProjectMuteConfig_basic(t *testing.T) {
 		"project_id":    fmt.Sprintf("tf-test-project-%s", acctest.RandString(t, 10)),
 		"random_suffix": acctest.RandString(t, 10),
 		"location":      "global",
-		"parent_org":     os.Getenv("TEST_ORG_ID"),
+		"parent_org":    os.Getenv("TEST_ORG_ID"),
 	}
 
 	contextHighSeverity := map[string]interface{}{
@@ -28,7 +28,7 @@ func TestAccSecurityCenterV2ProjectMuteConfig_basic(t *testing.T) {
 		"project_id":    fmt.Sprintf("tf-test-project-%s", acctest.RandString(t, 10)),
 		"random_suffix": acctest.RandString(t, 10),
 		"location":      "global",
-		"parent_org":     os.Getenv("TEST_ORG_ID"),
+		"parent_org":    os.Getenv("TEST_ORG_ID"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
