@@ -1,3 +1,14 @@
+package securitycenterv2_test
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+)
+
 func TestAccSCCV2OrganizationSourceIAMPolicy(t *testing.T) {
 	t.Parallel()
 
