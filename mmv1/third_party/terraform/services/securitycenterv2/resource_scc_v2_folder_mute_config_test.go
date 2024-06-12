@@ -85,8 +85,8 @@ resource "google_folder" "test1" {
   parent       = "organizations/%{org_id}"
 }
 
-resource "google_project_iam_binding" "folder_test1_binding" {
-	project = "billingProject"
+resource "google_folder_iam_binding" "folder_test1_binding" {
+	folder = google_folder.test1.id
 	role    = "roles/securitycenter.admin"
 	members = [
 	  "serviceAccount: %{service_account}",
@@ -111,8 +111,8 @@ resource "google_folder" "test2" {
   parent       = "organizations/%{org_id}"
 }
 
-resource "google_project_iam_binding" "folder_test2_binding" {
-	project = "billingProject"
+resource "google_folder_iam_binding" "folder_test2_binding" {
+	folder = google_folder.test2.id
 	role    = "roles/securitycenter.admin"
 	members = [
 	  "serviceAccount: %{service_account}",

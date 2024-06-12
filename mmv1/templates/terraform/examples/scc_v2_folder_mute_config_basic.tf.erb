@@ -1,6 +1,6 @@
 resource "google_folder" "default" {
 	display_name = "A test folder mute config"
-	parent       = "folders/${var.org_id}"
+	parent       = "organizations/${var.org_id}"
 }
 
 resource "google_folder_iam_member" "scc_folder_mute_config" {

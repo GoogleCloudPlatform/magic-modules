@@ -68,7 +68,7 @@ properties:
     output: true
     description: |
       Name of the Organization mute config. Its format is
-      organizations/{organization}/OrgmuteConfigs/{configId},
+      organizations/{organization}/muteConfigs/{muteConfigId},
   - !ruby/object:Api::Type::String
     name: 'description'
     description: A description of the Organization mute config.
