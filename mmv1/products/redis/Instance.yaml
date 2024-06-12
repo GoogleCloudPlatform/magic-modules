@@ -402,6 +402,8 @@ properties:
   - !ruby/object:Api::Type::String
     name: maintenanceVersion
     description: The self service update maintenance version.
+    required: false
+    default_from_api: true
   - !ruby/object:Api::Type::Integer
     name: memorySizeGb
     description: Redis memory size in GiB.
