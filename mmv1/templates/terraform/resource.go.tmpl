@@ -150,7 +150,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
             },
 {{-   end}}
 {{- end}}
-{{/* TODO Q2 function to compile custom code lines ($.CustomCode.extra_schema_entry) */}}
+{{- $.CustomTemplate $.CustomCode.ExtraSchemaEntry true -}}
 {{- if $.HasProject -}}
             "project": {
                 Type:     schema.TypeString,
@@ -188,7 +188,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{- end}}
     config := meta.(*transport_tpg.Config)
 {{ if $.CustomCode.CustomCreate -}}
- //TODO Q2 function to compile custom code lines
+{{- $.CustomTemplate $.CustomCode.CustomCreate true -}}
 {{  else  -}}
     userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
     if err != nil {
@@ -274,7 +274,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
       billingProject = bp
     }
 
-    {{/*TODO Q2 COMPILE PRECREATE */}}
+    {{- $.CustomTemplate $.CustomCode.PreCreate true -}}
     headers := make(http.Header)
     res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
         Config: config,
@@ -394,7 +394,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{        end  -}}
 {{      end -}}
 {{    end -}}
-{{/* TODO POST CREATE */}}
+{{- $.CustomTemplate $.CustomCode.PostCreate true -}}
 
 {{if $.GetAsync.Allow "Create" -}}
 {{if $.GetAsync.IsA "PollAsync" -}}
@@ -423,7 +423,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interface{}) transport_tpg.PollReadFunc {
     return func() (map[string]interface{}, error) {
 {{if $.GetAsync.CustomPollRead -}}
-//TODO custom poll read
+{{- $.CustomTemplate $.GetAsync.CustomPollRead true -}}
 {{    else -}}
         config := meta.(*transport_tpg.Config)
 
@@ -548,7 +548,8 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
 
     headers := make(http.Header)
     {{- if $.CustomCode.PreRead -}}
-    //todo preread
+
+    {{- $.CustomTemplate $.CustomCode.PreCreate true -}}
     {{- end }}
     res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
         Config: config,
@@ -678,7 +679,7 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
 {{-     end}}
     config := meta.(*transport_tpg.Config)
 {{      if $.CustomCode.CustomUpdate -}}
-//TODO custom update
+{{- $.CustomTemplate $.CustomCode.PreCreate true -}}
 {{      else  -}}
     userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
     if err != nil {
@@ -920,7 +921,7 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings $props) "\") || d.HasChange(\"
 
         headers := make(http.Header)
 {{                  if $.CustomCode.PreUpdate -}}
-//TODO Preupdate
+{{- $.CustomTemplate $.CustomCode.PreUpdate true -}}
 {{                  end}}
 {{                  if $.SupportsIndirectUserProjectOverride -}}
         if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
@@ -980,7 +981,7 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings $props) "\") || d.HasChange(\"
   d.Partial(false)
 {{-         end  }}{{/*if FieldSpecificUpdateMethods*/}}
 
-{{          if $.CustomCode.PostUpdate -}} //TODO POST UPDATE {{end}}
+{{          if $.CustomCode.PostUpdate -}} {{- $.CustomTemplate $.CustomCode.PostUpdate true -}} {{end}}
     return resource{{ $.ResourceName -}}Read(d, meta)
 {{-      end }}{{/*if CustomUpdate*/}}
 }
@@ -1009,7 +1010,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     }
 
 {{- if $.CustomCode.CustomDelete }} 
-{{/* TODO CustomDelete */}}
+{{- $.CustomTemplate $.CustomCode.CustomDelete true -}}
 {{- else }}
 
     billingProject := ""
@@ -1065,7 +1066,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
 
     headers := make(http.Header)
     {{- if $.CustomCode.PreDelete }} 
-    {{/* TODO PreDelete */}}
+    {{- $.CustomTemplate $.CustomCode.PreDelete true -}}
     {{- end }}
 
     log.Printf("[DEBUG] Deleting {{ $.Name }} %q", d.Id())
@@ -1109,7 +1110,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     {{- end }}
 {{- end }}
 {{- if $.CustomCode.PostDelete }}
-{{/* TODO PostDelete */}}
+{{- $.CustomTemplate $.CustomCode.PostDelete true -}}
 {{- end }}
 
     log.Printf("[DEBUG] Finished deleting {{ $.Name }} %q: %#v", d.Id(), res)
@@ -1121,7 +1122,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
 {{ if not $.ExcludeImport -}}
 func resource{{ $.ResourceName }}Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
     {{- if $.CustomCode.CustomImport }}
-    {{/* TODO CustomImport */}}
+{{- $.CustomTemplate $.CustomCode.CustomImport true -}}
     {{- else }}
     config := meta.(*transport_tpg.Config)
     if err := tpgresource.ParseImportId([]string{
