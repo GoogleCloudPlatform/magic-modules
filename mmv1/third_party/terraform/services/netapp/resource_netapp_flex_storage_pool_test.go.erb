@@ -61,7 +61,7 @@ resource "google_compute_global_address" "private_ip_alloc" {
 }
 
 # Create a private connection
-resource "google_service_networking_connection" "default" {
+resource "google_service_networking_connection" "flex_default" {
   provider = google-beta
   network                 = google_compute_network.peering_network.id
   service                 = "netapp.servicenetworking.goog"
@@ -85,7 +85,7 @@ resource "google_netapp_storage_pool" "test_pool" {
   ldap_enabled          = false
   zone = "us-east1-c"
   replica_zone = "us-east1-b"
-  depends_on = [google_service_networking_connection.default]
+  depends_on = [google_service_networking_connection.flex_default]
 }
 `, context)
 }
@@ -109,7 +109,7 @@ resource "google_compute_global_address" "private_ip_alloc" {
 }
 
 # Create a private connection
-resource "google_service_networking_connection" "default" {
+resource "google_service_networking_connection" "flex_default" {
   provider = google-beta
   network                 = google_compute_network.peering_network.id
   service                 = "netapp.servicenetworking.goog"
@@ -133,7 +133,7 @@ resource "google_netapp_storage_pool" "test_pool" {
   ldap_enabled          = false
   zone = "us-east1-c"
   replica_zone = "us-east1-b"
-  depends_on = [google_service_networking_connection.default]
+  depends_on = [google_service_networking_connection.flex_default]
 }
 `, context)
 }
