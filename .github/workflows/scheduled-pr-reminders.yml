@@ -1,0 +1,31 @@
+name: scheduled-pr-reminders
+
+permissions: read-all
+
+on:
+  schedule:
+    - cron: '37 9 * * 1-5'
+
+jobs:
+  send-pr-reminders:
+    if: github.repository == 'GoogleCloudPlatform/magic-modules'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
+      - name: Set up Go
+        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
+        with:
+          go-version: '^1.21'
+          # Disable caching for now due to issues with large provider dependency caches
+          cache: false
+      - name: Build magician
+        run: |
+          cd .ci/magician
+          go build .
+      - name: Request reviewer
+        run: .ci/magician/magician scheduled-pr-reminders ${{ github.event.pull_request.number }}

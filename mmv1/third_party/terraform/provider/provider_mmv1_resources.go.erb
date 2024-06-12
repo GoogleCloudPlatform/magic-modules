@@ -8,7 +8,9 @@ import (
 	  "github.com/hashicorp/terraform-provider-google/google/services/<%= service -%>"
 	<% end -%>
 
+	<% if version == 'ga' -%>
 	"github.com/hashicorp/terraform-provider-google/google/services/composer"
+	<% end -%>
 	"github.com/hashicorp/terraform-provider-google/google/services/container"
 	"github.com/hashicorp/terraform-provider-google/google/services/containeraws"
 	"github.com/hashicorp/terraform-provider-google/google/services/containerazure"
@@ -47,6 +49,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	<% unless version == 'ga' -%>
 	"google_cloud_asset_resources_search_all":          cloudasset.DataSourceGoogleCloudAssetResourcesSearchAll(),
 	<% end -%>
+	"google_cloud_asset_search_all_resources":          cloudasset.DataSourceGoogleCloudAssetSearchAllResources(),
 	"google_cloud_identity_groups":                     cloudidentity.DataSourceGoogleCloudIdentityGroups(),
 	"google_cloud_identity_group_memberships":          cloudidentity.DataSourceGoogleCloudIdentityGroupMemberships(),
 	"google_cloud_identity_group_lookup":               cloudidentity.DataSourceGoogleCloudIdentityGroupLookup(),
@@ -57,6 +60,10 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_cloud_run_v2_job":                          cloudrunv2.DataSourceGoogleCloudRunV2Job(),
 	"google_cloud_run_v2_service":                      cloudrunv2.DataSourceGoogleCloudRunV2Service(),
 	"google_composer_environment":                      composer.DataSourceGoogleComposerEnvironment(),
+	<% unless version == 'ga' -%>
+	"google_composer_user_workloads_config_map":        composer.DataSourceGoogleComposerUserWorkloadsConfigMap(),
+	"google_composer_user_workloads_secret":            composer.DataSourceGoogleComposerUserWorkloadsSecret(),
+	<% end -%>
 	"google_composer_image_versions":                   composer.DataSourceGoogleComposerImageVersions(),
 	"google_compute_address":                           compute.DataSourceGoogleComputeAddress(),
 	"google_compute_addresses":                         compute.DataSourceGoogleComputeAddresses(),
@@ -94,10 +101,12 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_compute_router":                            compute.DataSourceGoogleComputeRouter(),
 	"google_compute_router_nat":                        compute.DataSourceGoogleComputeRouterNat(),
 	"google_compute_router_status":                     compute.DataSourceGoogleComputeRouterStatus(),
+	"google_compute_security_policy":                   compute.DataSourceGoogleComputeSecurityPolicy(),
 	"google_compute_snapshot":                          compute.DataSourceGoogleComputeSnapshot(),
 	"google_compute_ssl_certificate":                   compute.DataSourceGoogleComputeSslCertificate(),
 	"google_compute_ssl_policy":                        compute.DataSourceGoogleComputeSslPolicy(),
 	"google_compute_subnetwork":                        compute.DataSourceGoogleComputeSubnetwork(),
+	"google_compute_subnetworks":                       compute.DataSourceGoogleComputeSubnetworks(),
 	"google_compute_vpn_gateway":                       compute.DataSourceGoogleComputeVpnGateway(),
 	"google_compute_zones":                             compute.DataSourceGoogleComputeZones(),
 	"google_container_azure_versions":                  containerazure.DataSourceGoogleContainerAzureVersions(),

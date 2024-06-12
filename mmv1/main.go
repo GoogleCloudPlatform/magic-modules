@@ -27,8 +27,18 @@ var version = flag.String("version", "", "optional version name. If specified, t
 
 var product = flag.String("product", "", "optional product name. If specified, the resources under the specific product will be generated. Otherwise, resources under all products will be generated.")
 
+// Example usage: --yaml
+var yamlMode = flag.Bool("yaml", false, "strictly copy text over from ruby yaml to go yaml")
+
 func main() {
 	flag.Parse()
+
+	if *yamlMode {
+		CopyText("description:")
+		CopyText("note:")
+		return
+	}
+
 	var generateCode = true
 	var generateDocs = true
 

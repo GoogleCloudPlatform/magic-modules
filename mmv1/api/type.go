@@ -21,6 +21,7 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
+	"golang.org/x/exp/slices"
 )
 
 // Represents a property type
@@ -411,11 +412,15 @@ func (t Type) TerraformLineage() string {
 	return fmt.Sprintf("%s.0.%s", t.ParentMetadata.TerraformLineage(), google.Underscore(t.Name))
 }
 
-func (t Type) EnumValuesToString(quoteSeperator string) string {
+func (t Type) EnumValuesToString(quoteSeperator string, addEmpty bool) string {
 	var values []string
 
 	for _, val := range t.EnumValues {
 		values = append(values, fmt.Sprintf("%s%s%s", quoteSeperator, val, quoteSeperator))
+	}
+
+	if addEmpty && !slices.Contains(values, "\"\"") && !t.Required {
+		values = append(values, "\"\"")
 	}
 
 	return strings.Join(values, ", ")
@@ -685,6 +690,10 @@ func (t Type) Removed() bool {
 // def deprecated?
 func (t Type) Deprecated() bool {
 	return t.DeprecationMessage != ""
+}
+
+func (t *Type) GetDescription() string {
+	return strings.TrimRight(t.Description, "\n")
 }
 
 // // private
@@ -1283,8 +1292,8 @@ func (t Type) NamespaceProperty() string {
 //
 // end
 
-func (t Type) CustomTemplate(templatePath string) string {
-	return resource.ExecuteTemplate(&t, templatePath)
+func (t Type) CustomTemplate(templatePath string, appendNewline bool) string {
+	return resource.ExecuteTemplate(&t, templatePath, appendNewline)
 }
 
 func (t *Type) GetIdFormat() string {

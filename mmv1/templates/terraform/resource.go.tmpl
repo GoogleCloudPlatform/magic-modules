@@ -62,7 +62,9 @@ import (
 {{- end}}
 )
 
-{{if $.CustomCode.Constants}} //TODO Q2 function to compile constants custom code lines {{- end}}
+{{if $.CustomCode.Constants -}} 
+    {{- $.CustomTemplate $.CustomCode.Constants true -}}
+{{- end}}
 
 func Resource{{ $.ResourceName -}}() *schema.Resource {
     return &schema.Resource{
@@ -108,8 +110,8 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 {{- end }}
 {{if or (and (or $.HasProject $.HasRegion $.HasZone) (not $.SkipDefaultCdiff)) $.CustomDiff }}
         CustomizeDiff: customdiff.All(
-{{ if $.CustomDiff -}}
-{{-          range $cdiff := $.CustomDiff -}}
+{{- if $.CustomDiff -}}
+{{-          range $cdiff := $.CustomDiff }}
         {{ $cdiff }},
 {{- end}}
 {{- end}}
@@ -130,7 +132,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 {{- end}}
 
         Schema: map[string]*schema.Schema{
-			{{- range $prop := orderProperties $.AllUserProperties }}
+			{{- range $prop := $.OrderProperties $.AllUserProperties }}
 {{template "SchemaFields" $prop -}}
 			{{- end }}
 {{- if $.VirtualFields -}}
@@ -169,7 +171,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 }
 
 {{- range $prop := $.AllUserProperties }}
-{{if and (eq $prop.Type "Array") ($prop.IsSet) (eq $prop.ItemType "NestedObject")}}
+{{if and (eq $prop.Type "Array") ($prop.IsSet) (eq $prop.ItemType.Type "NestedObject")}}
 {{template "SchemaSubResource" $prop}}
 {{end}}
 {{- end}}
@@ -280,7 +282,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{if $.ErrorRetryPredicates -}}
         ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
 {{- end}}
-{{if $.ErrorAbortPredicates -}}
+{{- if $.ErrorAbortPredicates -}}
         ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{ join $.ErrorAbortPredicates "," -}}{{"}"}},
 {{- end}}
     })
@@ -334,7 +336,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
         return fmt.Errorf("Error decoding response from operation: %s", err)
     }
     if opRes == nil {
-        return fmt.Errorf("Error decoding response from operation, could not find $")
+        return fmt.Errorf("Error decoding response from operation, could not find object")
     }
 {{- end}}
 
@@ -343,11 +345,11 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     if _, ok := opRes["{{ index $.NestedQuery.Keys 0 -}}"]; ok {
         opRes, err = flattenNested{{ $.ResourceName -}}(d, meta, opRes)
         if err != nil {
-            return fmt.Errorf("Error getting nested $ from operation response: %s", err)
+            return fmt.Errorf("Error getting nested object from operation response: %s", err)
         }
         if opRes == nil {
             // Object isn't there any more - remove it from the state.
-            return fmt.Errorf("Error decoding response from operation, could not find nested $")
+            return fmt.Errorf("Error decoding response from operation, could not find nested object")
         }
     }
 {{- end}}
@@ -369,7 +371,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 
 {{        else -}}
     err = {{ $.ClientNamePascal -}}OperationWaitTime(
-    config, res, {{if or $.Project $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}} "Creating {{ $.Name -}}", userAgent,
+    config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}} "Creating {{ $.Name -}}", userAgent,
         d.Timeout(schema.TimeoutCreate))
 
     if err != nil {
@@ -465,8 +467,8 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
 {{if $.ErrorRetryPredicates -}}
             ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
 {{- end}}
-{{if $.ErrorAbortPredicates -}}
-            ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
+{{- if $.ErrorAbortPredicates -}}
+            ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorAbortPredicates "," -}}{{"}"}},
 {{- end}}
         })
         if err != nil {
@@ -552,8 +554,8 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
 {{if $.ErrorRetryPredicates -}}
         ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
 {{- end}}
-{{if $.ErrorAbortPredicates -}}
-        ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
+{{- if $.ErrorAbortPredicates -}}
+        ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorAbortPredicates "," -}}{{"}"}},
 {{- end}}
     })
     if err != nil {
@@ -572,7 +574,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
 
     if res == nil {
         // Object isn't there any more - remove it from the state.
-        log.Printf("[DEBUG] Removing {{ $.ResourceName -}} because it couldn't be matched.")
+        log.Printf("[DEBUG] Removing {{ $.ResourceName }} because it couldn't be matched.")
         d.SetId("")
         return nil
     }
@@ -586,8 +588,8 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
     }
 
     if res == nil {
-        // Decoding the $ has resulted in it being gone. It may be marked deleted
-        log.Printf("[DEBUG] Removing {{ $.ResourceName -}} because it no longer exists.")
+        // Decoding the object has resulted in it being gone. It may be marked deleted
+        log.Printf("[DEBUG] Removing {{ $.ResourceName }} because it no longer exists.")
         d.SetId("")
         return nil
     }
@@ -740,11 +742,11 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
 
     log.Printf("[DEBUG] Updating {{ $.Name }} %q: %#v", d.Id(), obj)
 	headers := make(http.Header)
-{{ if $.UpdateMask -}}
-//TODO updatemask
+{{- if $.UpdateMask -}}
+{{template "UpdateMask" $ -}}
 {{end}}
-{{ if $.CustomCode.PreUpdate -}}
-//TODO Preupdate
+{{- if $.CustomCode.PreUpdate -}}
+    {{- $.CustomTemplate $.CustomCode.PreUpdate true -}}
 {{end}}
 {{if $.NestedQuery -}}
 {{if $.NestedQuery.ModifyByPatch -}}
@@ -778,13 +780,13 @@ if len(updateMask) > 0 {
         UserAgent: userAgent,
         Body: obj,
         Timeout: d.Timeout(schema.TimeoutUpdate),
-{{- if $.ErrorRetryPredicates -}}
+		Headers:   headers,
+{{ if $.ErrorRetryPredicates -}}
         ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
 {{- end}}
 {{- if $.ErrorAbortPredicates -}}
-        ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
+        ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorAbortPredicates "," -}}{{"}"}},
 {{- end}}
-		Headers:   headers,
     })
 
     if err != nil {
@@ -860,8 +862,8 @@ if len(updateMask) > 0 {
 {{if $.ErrorRetryPredicates -}}
         	ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
 {{- end}}
-{{if $.ErrorAbortPredicates -}}
-        	ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
+{{- if $.ErrorAbortPredicates -}}
+        	ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorAbortPredicates "," -}}{{"}"}},
 {{- end}}
         })
         if err != nil {
@@ -952,8 +954,8 @@ if len(updateMask) > 0 {
 {{if $.ErrorRetryPredicates -}}
         	ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
 {{- end}}
-{{if $.ErrorAbortPredicates -}}
-        	ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
+{{- if $.ErrorAbortPredicates -}}
+        	ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorAbortPredicates "," -}}{{"}"}},
 {{- end}}
 			Headers:   headers,
         })
@@ -1099,8 +1101,8 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
         return transport_tpg.HandleNotFoundError(err, d, "{{ $.Name }}")
     }
     {{ if $.GetAsync.Allow "Delete" -}}
-        {{ if $.GetAsync.IsA "PollAsync" -}}
-    err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName }}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncExistence }}, "Deleting {{ $.Name }}}", d.Timeout(schema.TimeoutCreate), {{ $.Async.TargetOccurrences }})
+        {{ if $.GetAsync.IsA "PollAsync" }}
+    err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName }}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncAbsence }}, "Deleting {{ $.Name }}", d.Timeout(schema.TimeoutCreate), {{ $.Async.TargetOccurrences }})
     if err != nil {
             {{- if $.Async.SuppressError }}
         log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name }} %q finished updating: %q", d.Id(), err)
@@ -1159,7 +1161,7 @@ func resource{{ $.ResourceName }}Import(d *schema.ResourceData, meta interface{}
             {{- end }}
         {{- end }}
         {{- if $.CustomCode.PostImport }}
-        {{/* TODO PostImport */}}
+            {{- $.CustomTemplate $.CustomCode.PostImport true -}}
         {{- end }}
 
     return []*schema.ResourceData{d}, nil
@@ -1174,9 +1176,28 @@ func resource{{ $.ResourceName }}Import(d *schema.ResourceData, meta interface{}
 {{- range $prop := $.SettableProperties }}
     {{- template "expandPropertyMethod" $prop -}}
 {{- end }}
-{{/* TODO custom encoder */}}
-{{/* TODO custom update encoder */}}
-{{/* TODO nested query */}}
-{{/* TODO custom decoder */}}
-{{/* TODO custom post create failure */}}
+{{- if $.CustomCode.Encoder }}
+func resource{{ $.ResourceName -}}Encoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+    {{- $.CustomTemplate $.CustomCode.Encoder true -}}
+}
+{{- end }}
+{{- if $.CustomCode.UpdateEncoder }}
+
+func resource{{ $.ResourceName -}}UpdateEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+    {{- $.CustomTemplate $.CustomCode.UpdateEncoder true -}}
+}
+{{- end }}
+{{- if $.NestedQuery }}
+    {{ template "NestedQuery" $ }}
+{{- end }}
+{{- if $.CustomCode.Decoder }}
+func resource{{ $.ResourceName -}}Decoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
+    {{- $.CustomTemplate $.CustomCode.Decoder true -}}
+}
+{{- end }}
+{{- if $.CustomCode.PostCreateFailure }}
+func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+    {{- $.CustomTemplate $.CustomCode.PostCreateFailure true -}}
+}
+{{- end }}
 {{/* TODO state upgraders */}}
