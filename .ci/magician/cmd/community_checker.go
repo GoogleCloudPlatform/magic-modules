@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"magician/cloudbuild"
 	"magician/github"
-	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -42,7 +41,7 @@ var communityApprovalCmd = &cobra.Command{
 	1. Trigger cloud presubmits with specific substitutions for the PR.
 	2. Remove the 'awaiting-approval' label from the PR.
 	`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		prNumber := args[0]
 		fmt.Println("PR Number: ", prNumber)
 
@@ -63,16 +62,15 @@ var communityApprovalCmd = &cobra.Command{
 
 		githubToken, ok := lookupGithubTokenOrFallback("GITHUB_TOKEN_MAGIC_MODULES")
 		if !ok {
-			fmt.Println("Did not provide GITHUB_TOKEN_MAGIC_MODULES or GITHUB_TOKEN environment variables")
-			os.Exit(1)
+			return fmt.Errorf("did not provide GITHUB_TOKEN_MAGIC_MODULES or GITHUB_TOKEN environment variables")
 		}
 		gh := github.NewClient(githubToken)
 		cb := cloudbuild.NewClient()
-		execCommunityChecker(prNumber, commitSha, branchName, headRepoUrl, headBranch, baseBranch, gh, cb)
+		return execCommunityChecker(prNumber, commitSha, branchName, headRepoUrl, headBranch, baseBranch, gh, cb)
 	},
 }
 
-func execCommunityChecker(prNumber, commitSha, branchName, headRepoUrl, headBranch, baseBranch string, gh GithubClient, cb CloudbuildClient) {
+func execCommunityChecker(prNumber, commitSha, branchName, headRepoUrl, headBranch, baseBranch string, gh GithubClient, cb CloudbuildClient) error {
 	substitutions := map[string]string{
 		"BRANCH_NAME":    branchName,
 		"_PR_NUMBER":     prNumber,
@@ -85,13 +83,13 @@ func execCommunityChecker(prNumber, commitSha, branchName, headRepoUrl, headBran
 	// (explicitly or via membership-checker)
 	err := cb.TriggerMMPresubmitRuns(commitSha, substitutions)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return err
 	}
 
 	// in community-checker job:
 	// remove awaiting-approval label from external contributor PRs
 	gh.RemoveLabel(prNumber, "awaiting-approval")
+	return nil
 }
 
 func init() {

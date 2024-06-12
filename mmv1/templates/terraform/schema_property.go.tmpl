@@ -14,7 +14,7 @@
 */}}
 {{- define "SchemaFields"}}
 {{- if .FlattenObject -}}
-	{{- range $prop := orderProperties .Properties -}}
+	{{- range $prop := .ResourceMetadata.OrderProperties .Properties -}}
 		{{- template "SchemaFields" $prop -}}
 	{{- end -}}
 {{- else -}}
@@ -79,7 +79,7 @@ Possible values: [{{- .EnumValuesToString "\"" false -}}]
   {{ end -}}
   Elem: &schema.Resource{
     Schema: map[string]*schema.Schema{
-      {{- range $prop := orderProperties $.Properties }}
+      {{- range $prop := .ResourceMetadata.OrderProperties $.Properties }}
       {{template "SchemaFields" $prop}}
       {{- end }}
     },
@@ -97,7 +97,7 @@ Possible values: [{{- .EnumValuesToString "\"" false -}}]
     {{ else -}}
       Elem: &schema.Resource{
         Schema: map[string]*schema.Schema{
-            {{- range $prop := orderProperties $.ItemType.Properties }}
+            {{- range $prop := .ResourceMetadata.OrderProperties $.ItemType.Properties }}
             {{template "SchemaFields" $prop}}
             {{- end }}
         },
@@ -123,7 +123,7 @@ Possible values: [{{- .EnumValuesToString "\"" false -}}]
   {{ if .IsSet -}}
     {{ if .SetHashFunc -}}
     Set: {{ .SetHashFunc -}},
-    {{ else if or (eq .ItemType "String") (eq .ItemType.Type "Enum") -}}
+    {{ else if or (eq .ItemType.Type "String") (eq .ItemType.Type "Enum") -}}
     Set: schema.HashString,
     {{ else -}}
     // Default schema.HashSchema is used.
@@ -144,7 +144,7 @@ Possible values: [{{- .EnumValuesToString "\"" false -}}]
 				ForceNew: true,
 				{{ end -}}
 			},
-      {{- range $prop := orderProperties $.ValueType.Properties }}
+      {{- range $prop := .ResourceMetadata.OrderProperties $.ValueType.Properties }}
         {{template "SchemaFields" $prop}}
       {{- end }}
 		},

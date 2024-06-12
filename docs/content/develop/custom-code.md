@@ -1,6 +1,6 @@
 ---
 title: "Add custom resource code"
-weight: 32
+weight: 39
 ---
 
 # Add custom resource code
@@ -32,9 +32,12 @@ Use `custom_code.constants` to inject top-level code in a resource file. This is
 
 - Constants
 - Regexes compiled at build time
-- Functions, such as diff suppress functions
+- Functions, such as [diff suppress functions]({{<ref "/develop/field-reference#diff_suppress_func" >}}),
+  [validation functions]({{<ref "/develop/field-reference#validation" >}}),
+  CustomizeDiff functions, and so on.
 - Methods
 
+Any custom functions added should have thorough [unit tests]({{< ref "/develop/test/test#add-unit-tests" >}}).
 
 ## Modify the API request or response
 
