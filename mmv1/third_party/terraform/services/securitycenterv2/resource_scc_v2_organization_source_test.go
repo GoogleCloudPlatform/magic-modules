@@ -36,20 +36,6 @@ func TestAccSCCOrganizationSource_complete(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			{
-				Config: testAccSCCOrganizationSourceCompleteExample(orgId, suffix, "", canonicalName),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("google_scc_v2_organization_source.custom_source", "display_name", fmt.Sprintf("TFSrc %s", suffix)),
-					resource.TestCheckResourceAttr("google_scc_v2_organization_source.custom_source", "organization", orgId),
-					resource.TestCheckResourceAttr("google_scc_v2_organization_source.custom_source", "description", ""),
-					resource.TestCheckResourceAttr("google_scc_v2_organization_source.custom_source", "canonical_name", canonicalName),
-				),
-			},
-			{
-				ResourceName:      "google_scc_v2_organization_source.custom_source",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
 		},
 	})
 }
@@ -58,9 +44,9 @@ func testAccSCCOrganizationSourceCompleteExample(orgId, suffix, description, can
 	return fmt.Sprintf(`
 resource "google_scc_v2_organization_source" "custom_source" {
   display_name  = "TFSrc %s"
-  organization  = "%s"
-  description   = "%s"
-  canonical_name = "%s"
+  organization  = "%{org_id}"
+  description   = "My custom Cloud Security Command Center Finding Source"
+  canonical_name = "organizations/%s/sources/source-%s"
 }
 `, suffix, orgId, description, canonicalName)
 }

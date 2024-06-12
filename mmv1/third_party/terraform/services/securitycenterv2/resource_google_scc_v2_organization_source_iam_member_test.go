@@ -14,7 +14,6 @@ func TestAccSCCV2OrganizationSourceIAMMember(t *testing.T) {
 
 	orgId := envvar.GetTestOrgFromEnv(t)
 	suffix := acctest.RandString(t, 10)
-	canonicalName := fmt.Sprintf("organizations/%s/sources/source-%s", orgId, suffix)
 	role := "roles/editor"
 	member := "user:test@example.com"
 	conditionTitle := "Title"
