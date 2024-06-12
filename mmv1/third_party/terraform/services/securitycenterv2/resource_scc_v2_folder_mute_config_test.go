@@ -112,10 +112,10 @@ resource "google_folder" "test2" {
 }
 
 resource "google_project_iam_binding" "folder_test2_binding" {
-	project = "YOUR_PROJECT_ID"
+	project = "billingProject"
 	role    = "roles/securitycenter.admin"
 	members = [
-	  "serviceAccount:YOUR_SERVICE_ACCOUNT",
+	  "serviceAccount: %{service_account}",
 	]
 }
 
