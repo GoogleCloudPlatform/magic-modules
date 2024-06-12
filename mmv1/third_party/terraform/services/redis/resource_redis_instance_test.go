@@ -289,7 +289,6 @@ func TestAccRedisInstance_selfServiceUpdate(t *testing.T) {
 	})
 }
 
-
 func TestAccRedisInstance_downgradeRedisVersion(t *testing.T) {
 	t.Parallel()
 
