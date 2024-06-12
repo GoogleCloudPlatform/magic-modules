@@ -69,6 +69,13 @@ examples:
     test_env_vars:
       billing_acct: :MASTER_BILLING_ACCT
   - !ruby/object:Provider::Terraform::Examples
+    name: 'billing_budget_notify_project_recipient'
+    primary_resource_id: 'budget'
+    vars:
+      budget_name: 'Example Billing Budget'
+    test_env_vars:
+      billing_acct: :MASTER_BILLING_ACCT
+  - !ruby/object:Provider::Terraform::Examples
     name: 'billing_budget_customperiod'
     primary_resource_id: 'budget'
     vars:
