@@ -43,6 +43,8 @@ resource "google_looker_instance" "{{$.PrimaryResourceId}}" {
     client_id = "{{index $.Vars "client_id"}}"
     client_secret = "{{index $.Vars "client_secret"}}"
   }
+
+  depends_on = [google_kms_crypto_key_iam_member.crypto_key]
 }
 
 data "google_compute_global_address" "looker_range" {

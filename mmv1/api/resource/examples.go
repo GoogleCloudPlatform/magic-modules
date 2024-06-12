@@ -233,6 +233,7 @@ func (e *Examples) SetHCLText() {
 func ExecuteTemplate(e any, templatePath string, appendNewline bool) string {
 	templates := []string{
 		templatePath,
+		"templates/terraform/expand_resource_ref.tmpl",
 	}
 	templateFileName := filepath.Base(templatePath)
 

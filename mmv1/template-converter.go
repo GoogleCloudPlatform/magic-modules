@@ -30,7 +30,8 @@ func find(root, ext string) []string {
 }
 
 func convertTemplates() {
-	folders := []string{"examples", "constants", "custom_check_destroy", "custom_create", "custom_delete", "custom_import", "custom_update", "decoders", "encoders", "extra_schema_entry", "post_create", "post_create_failure", "post_delete", "post_import", "post_update", "pre_create", "pre_delete", "pre_read", "pre_update", "state_migrations", "update_encoder", "custom_expand", "custom_flatten", "iam", "iam/example_config_body"}
+	// exculding iam
+	folders := []string{"examples", "constants", "custom_check_destroy", "custom_create", "custom_delete", "custom_import", "custom_update", "decoders", "encoders", "extra_schema_entry", "post_create", "post_create_failure", "post_delete", "post_import", "post_update", "pre_create", "pre_delete", "pre_read", "pre_update", "state_migrations", "update_encoder", "custom_expand", "custom_flatten", "iam/example_config_body"}
 	counts := 0
 	for _, folder := range folders {
 		counts += convertTemplate(folder)

@@ -10,4 +10,7 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */}}
-{{- template "bigqueryTableRegexp" dict "PropPath" "load.0.destination_table.0.table_id" "GetPrefix" $.GetPrefix "TitlelizeProperty" $.TitlelizeProperty}}
+<%= lines(compile_template(pwd + '/templates/terraform/custom_flatten/bigquery_table_ref.go.tmpl',
+                           prefix: prefix,
+                           property: property,
+                           prop_path: 'load.0.destination_table.0.table_id')) -%>
