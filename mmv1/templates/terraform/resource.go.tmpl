@@ -176,6 +176,12 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 {{end}}
 {{- end}}
 
+{{- range $prop := $.UnorderedListProperties }}
+func resource{{ $.ResourceName }}{{ camelize $prop.Name "upper" }}SetStyleDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+{{template "UnorderedListCustomizeDiff" $prop}}
+}
+{{- end}}
+
 func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{}) error {
 {{- if and ($.GetAsync.IsA "OpAsync") ($.GetAsync.IncludeProject) ($.GetAsync.Allow "Create") -}}
     var project string
