@@ -15,32 +15,22 @@
 name: 'Batch'
 base_url: 'projects/{{project}}/locations/{{location}}/batches'
 self_link: 'projects/{{project}}/locations/{{location}}/batches/{{batch_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/batches/{{batch_id}}?batch_id={{batch_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/batches?batchId={{batch_id}}'
 delete_url: 'projects/{{project}}/locations/{{location}}/batches/{{batch_id}}'
 collection_url_key: 'batches'
 description: |
   Dataproc Serverless Batches lets you run Spark workloads without requiring you to
   provision and manage your own Dataproc cluster.
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  method_name_separator: ':'
-  parent_resource_attribute: 'batch_id'
-  fetch_iam_policy_verb: :POST
-  import_format:
-    [
-      'projects/{{project}}/locations/{{location}}/batches/{{batch_id}}',
-      '{{batch_id}}',
-    ]
 async: !ruby/object:Api::OpAsync
+  actions:
+    - create
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
     base_url: '{{op_id}}'
     wait_ms: 1000
-    timeouts: !ruby/object:Api::Timeouts
-      insert_minutes: 5
-      update_minutes: 5
-      delete_minutes: 5
   result: !ruby/object:Api::OpAsync::Result
     path: 'response'
+    resource_inside_response: true
   status: !ruby/object:Api::OpAsync::Status
     path: 'done'
     complete: true
@@ -50,7 +40,7 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
-autogen_async: true
+autogen_async: false
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Dataproc Serverless Batches Intro': 'https://cloud.google.com/dataproc-serverless/docs/overview'
@@ -87,7 +77,7 @@ parameters:
     description: |
       The location in which the batch will be created in.
   - !ruby/object:Api::Type::String
-    name: 'batchId'
+    name: 'batch_id'
     url_param_only: true
     immutable: true
     description: |
