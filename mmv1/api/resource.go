@@ -1381,61 +1381,45 @@ type UpdateGroup struct {
 }
 
 // def properties_without_custom_update(properties)
-func propertiesWithCustomUpdate(properties []*Type) []*Type {
+func (r Resource) propertiesWithCustomUpdate(properties []*Type) []*Type {
 	return google.Reject(properties, func(p *Type) bool {
 		return p.UpdateUrl == "" || p.UpdateVerb == "" || p.UpdateVerb == "NOOP"
 	})
 }
 
-func (r Resource) PropertiesByCustomUpdate() map[UpdateGroup][]Type {
-	customUpdateProps = r.propertiesWithCustomUpdate(r.RootProperties())
-	groupedCustomUpdateProps := map[UpdateGroup][]Type{}
+func (r Resource) PropertiesByCustomUpdate() map[UpdateGroup][]*Type {
+	customUpdateProps := r.propertiesWithCustomUpdate(r.RootProperties())
+	groupedCustomUpdateProps := map[UpdateGroup][]*Type{}
 	for _, prop := range customUpdateProps {
-		groupedProperty := UpdateGroup{
-			UpdateUrl = prop.UpdateUrl
-			UpdateVerb = prop.UpdateVerb
-			UpdateId = prop.UpdateId
-			FingerprintName = prop.FingerprintName
-		}
+		groupedProperty := UpdateGroup{ UpdateUrl: prop.UpdateUrl,
+			UpdateVerb: prop.UpdateVerb,
+			UpdateId: prop.UpdateId,
+			FingerprintName: prop.FingerprintName}
 		groupedCustomUpdateProps[groupedProperty] = append(groupedCustomUpdateProps[groupedProperty], prop)
 	}
 	return groupedCustomUpdateProps
 }
 
-func (r Resource) PropertiesByCustomUpdateStrings() map[UpdateGroup][]String {
-	customUpdateProps = r.propertiesWithCustomUpdate(r.RootProperties())
-	groupedCustomUpdateProps := map[UpdateGroup][]string{}
-	for _, prop := range customUpdateProps {
-		groupedProperty := UpdateGroup{
-			UpdateUrl = prop.UpdateUrl
-			UpdateVerb = prop.UpdateVerb
-			UpdateId = prop.UpdateId
-			FingerprintName = prop.FingerprintName
-		}
-		groupedCustomUpdateProps[groupedProperty] = append(groupedCustomUpdateProps[groupedProperty], prop.Name)
-	}
-	return groupedCustomUpdateProps
-}
-
 func (r Resource) FieldSpecificUpdateMethods() bool {
-	return (len(r.PropertiesByCustomUpdate) > 0)
+	fmt.Println("\n")
+	fmt.Println(len(r.PropertiesByCustomUpdate()))
+	fmt.Println("\n")
+	return (len(r.PropertiesByCustomUpdate()) > 0)
 }
 
 func (r Resource) CustomUpdatePropertiesByKey(updateUrl string, updateId string, fingerprintName string, updateVerb string) []*Type {
-	groupedProperties = r.PropertiesByCustomUpdate()
-	groupedProperty := UpdateGroup{
-			UpdateUrl = updateUrl
-			UpdateVerb = updateId
-			UpdateId = fingerprintName
-			FingerprintName = updateVerb
-		}
+	groupedProperties := r.PropertiesByCustomUpdate()
+	groupedProperty := UpdateGroup{ UpdateUrl: updateUrl,
+			UpdateVerb: updateId,
+			UpdateId: fingerprintName,
+			FingerprintName: updateVerb}
 	return groupedProperties[groupedProperty]
 }
 
-func (r Resource) PropertyNamesToStrings (properties []*Type) {
+func (r Resource) PropertyNamesToStrings (properties []*Type) []string{
 	var propertyNames []string
 	for _, prop := range properties {
-		append(propertyNames, strings.Underscore(prop.Name))
+		propertyNames = append(propertyNames, google.Underscore(prop.Name))
 	}
 	return propertyNames
 }
