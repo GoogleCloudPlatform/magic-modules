@@ -2,6 +2,7 @@ package securitycenterv2_test
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -18,7 +19,7 @@ func TestAccSecurityCenterV2ProjectMuteConfig_basic(t *testing.T) {
 		"project_id":    fmt.Sprintf("tf-test-project-%s", acctest.RandString(t, 10)),
 		"random_suffix": acctest.RandString(t, 10),
 		"location":      "global",
-		"parent_org":    envvar.GetEnv("TEST_ORG_ID", "{org_id}"),
+		"parent_org":     os.Getenv("TEST_ORG_ID"),
 	}
 
 	contextHighSeverity := map[string]interface{}{
@@ -27,7 +28,7 @@ func TestAccSecurityCenterV2ProjectMuteConfig_basic(t *testing.T) {
 		"project_id":    fmt.Sprintf("tf-test-project-%s", acctest.RandString(t, 10)),
 		"random_suffix": acctest.RandString(t, 10),
 		"location":      "global",
-		"parent_org":    envvar.GetEnv("TEST_ORG_ID", "{org_id}"),
+		"parent_org":     os.Getenv("TEST_ORG_ID"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -86,7 +87,7 @@ resource "google_project" "google_project1" {
   name       = "Test project"
   project_id = "%{project_id}"
   org_id     = "%{parent_org}"
- }
+}
 
 resource "google_scc_v2_project_mute_config" "project_mute_test1" {
   description          = "A test project mute config"
@@ -106,7 +107,7 @@ resource "google_project" "google_project2" {
   name       = "Test project"
   project_id = "%{project_id}"
   org_id     = "%{parent_org}"
- }
+}
 
 resource "google_scc_v2_project_mute_config" "project_mute_test2" {
   description          = "A test project mute config with high severity"

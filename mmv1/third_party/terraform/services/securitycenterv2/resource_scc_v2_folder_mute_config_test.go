@@ -13,19 +13,19 @@ func TestAccSecurityCenterV2FolderMuteConfig_basic(t *testing.T) {
 	t.Parallel()
 
 	contextBasic := map[string]interface{}{
-		"org_id":        envvar.GetTestOrgFromEnv(t),
-		"folder_name":   fmt.Sprintf("test1-%s", acctest.RandString(t, 10)),
-		"random_suffix": acctest.RandString(t, 10),
-		"location":      "global",
-		"service_account":envvar.GetTestServiceAccountFromEnv(t),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"folder_name":     fmt.Sprintf("test1-%s", acctest.RandString(t, 10)),
+		"random_suffix":   acctest.RandString(t, 10),
+		"location":        "global",
+		"service_account": envvar.GetTestServiceAccountFromEnv(t),
 	}
 
 	contextHighSeverity := map[string]interface{}{
-		"org_id":        envvar.GetTestOrgFromEnv(t),
-		"folder_name":   fmt.Sprintf("test2-%s", acctest.RandString(t, 10)),
-		"random_suffix": acctest.RandString(t, 10),
-		"location":      "global",
-		"service_account":envvar.GetTestServiceAccountFromEnv(t),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"folder_name":     fmt.Sprintf("test2-%s", acctest.RandString(t, 10)),
+		"random_suffix":   acctest.RandString(t, 10),
+		"location":        "global",
+		"service_account": envvar.GetTestServiceAccountFromEnv(t),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
