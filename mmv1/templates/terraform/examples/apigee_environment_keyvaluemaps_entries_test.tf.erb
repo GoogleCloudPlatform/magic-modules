@@ -88,6 +88,12 @@ resource "google_apigee_environment_keyvaluemaps" "apigee_environment_keyvaluema
   env_id    = google_apigee_environment.apigee_environment.id
   name      = "tf-test-env-kvms%{random_suffix}"
   encrypted = true
+  depends_on = [
+    google_apigee_organization.apigee_org,
+    google_apigee_environment.apigee_environment,
+    google_apigee_instance.apigee_instance,
+    google_apigee_instance_attachment.apigee_instance_attachment
+  ]
 }
 
 resource "google_apigee_environment_keyvaluemaps_entries" "<%= ctx[:primary_resource_id] %>" {
@@ -95,4 +101,11 @@ resource "google_apigee_environment_keyvaluemaps_entries" "<%= ctx[:primary_reso
   env_keyvaluemap_id = google_apigee_environment_keyvaluemaps.apigee_environment_keyvaluemaps.id
   name           = "testName"
   value          = "testValue"
+  depends_on = [
+    google_apigee_organization.apigee_org,
+    google_apigee_environment.apigee_environment,
+    google_apigee_instance.apigee_instance,
+    google_apigee_instance_attachment.apigee_instance_attachment,
+    google_apigee_environment_keyvaluemaps.apigee_environment_keyvaluemaps
+  ]
 }
