@@ -138,7 +138,7 @@ mutex: <%= object.mutex %>
 <%  unless object.import_format.empty? -%>
 import_format:
 <%    object.import_format.each do |iformat| -%>
-    - '<%= iformat %>'
+  - '<%= iformat %>'
 <%    end -%>
 <%  end -%>
 <%  unless !object.exclude_import -%>
@@ -248,12 +248,18 @@ async:
 <%  unless object.collection_url_key == object.name.plural.camelize(:lower) -%>
 collection_url_key: '<%= object.collection_url_key %>'
 <%  end -%>
+<%  unless object.instance_variable_get("@identity").nil? -%>
+identity:
+<%  object.instance_variable_get("@identity").each do |id| -%>
+  - <%= id %>
+<%    end -%>
+<%  end -%>
 <%  unless object.nested_query.nil? -%>
 nested_query:
 <%    unless object.nested_query.keys.nil? -%>
   keys:
 <%       object.nested_query.keys.each do |key| -%>
-    - '<%= key -%>'
+    - <%= key %>
 <%      end -%>
 <%    end -%>
 <%    unless object.nested_query.is_list_of_ids.nil? -%>
@@ -378,6 +384,9 @@ custom_code:
 <%    end -%>
 <%    unless object.custom_code.pre_delete.nil? -%>
   pre_delete: '<%= object.convert_go_file( object.custom_code.pre_delete )%>'
+<%    end -%>
+<%    unless object.custom_code.custom_delete.nil? -%>
+  custom_delete: '<%= object.convert_go_file( object.custom_code.custom_delete ) %>'
 <%    end -%>
 <%    unless object.custom_code.custom_import.nil? -%>
   custom_import: '<%= object.convert_go_file( object.custom_code.custom_import )%>'
