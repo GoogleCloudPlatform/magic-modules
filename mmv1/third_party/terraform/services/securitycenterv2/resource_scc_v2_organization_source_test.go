@@ -44,7 +44,7 @@ func testAccSCCOrganizationSourceCompleteExample(orgId, suffix, description, can
 	return fmt.Sprintf(`
 resource "google_scc_v2_organization_source" "custom_source" {
   display_name  = "TFSrc %s"
-  organization  = "%{org_id}"
+  organization  = "%s"
   description   = "My custom Cloud Security Command Center Finding Source"
   canonical_name = "organizations/%s/sources/source-%s"
 }
