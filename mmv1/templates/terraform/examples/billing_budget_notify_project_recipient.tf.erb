@@ -21,6 +21,7 @@ resource "google_billing_budget" "<%= ctx[:primary_resource_id] %>" {
   }
 
   all_updates_rule {
-    enable_project_level_recipients = true
+    monitoring_notification_channels = []
+    enable_project_level_recipients  = true
   }
 }
