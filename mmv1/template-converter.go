@@ -51,7 +51,11 @@ func convertTemplate(folder string) int {
 	log.Printf("%d template files in folder %s", len(templates), folder)
 
 	for _, file := range templates {
-		data, err := os.ReadFile(path.Join(rubyDir, file))
+		filePath := path.Join(rubyDir, file)
+		if checkExceptionList(filePath) {
+			continue
+		}
+		data, err := os.ReadFile(filePath)
 		if err != nil {
 			log.Fatalf("Cannot open the file: %v", file)
 		}
@@ -342,4 +346,22 @@ func convertTemplate(folder string) int {
 	}
 
 	return len(templates)
+}
+
+func checkExceptionList(filePath string) bool {
+	exceptionPaths := []string{
+		"custom_flatten/bigquery_table_ref_load_destinationtable.go",
+		"custom_flatten/bigquery_table_ref.go",
+		"custom_flatten/bigquery_table_ref_copy_destinationtable.go",
+		"custom_flatten/bigquery_table_ref_extract_sourcetable.go",
+		"custom_flatten/bigquery_table_ref_query_destinationtable.go",
+	}
+
+	for _, t := range exceptionPaths {
+		if strings.Contains(filePath, t) {
+			return true
+		}
+	}
+
+	return false
 }
