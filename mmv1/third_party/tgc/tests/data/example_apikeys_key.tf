@@ -15,7 +15,7 @@ provider "google" {
 resource "google_apikeys_key" "primary" {
   name         = "key"
   display_name = "sample-key"
-  project      = "tf-deployer-2"
+  project      = "{{.Provider.project}}"
 
   restrictions {
     android_key_restrictions {
