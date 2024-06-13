@@ -220,6 +220,12 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
 custom_diff: [
   'forwardingRuleCustomizeDiff',
 ]
+virtual_fields:
+  - !ruby/object:Api::Type::Boolean
+    name: recreate_closed_psc
+    description:
+      This is used in PSC consumer ForwardingRule to make terraform recreate the ForwardingRule when the status is closed
+    default_value: false
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
@@ -656,9 +662,3 @@ properties:
       - :IPV6
     immutable: true
     default_from_api: true
-virtual_fields:
-  - !ruby/object:Api::Type::Boolean
-    name: recreate_closed_psc
-    description:
-      This is used in PSC consumer ForwardingRule to make terraform recreate the ForwardingRule when the status is closed
-    default_value: false

@@ -1,5 +1,4 @@
 resource "google_dataproc_metastore_federation" "{{$.PrimaryResourceId}}" {
-  provider      = google-beta
   location      = "us-central1"
   federation_id = "{{index $.Vars "metastore_federation_name"}}"
   version       = "3.1.2"
@@ -12,7 +11,6 @@ resource "google_dataproc_metastore_federation" "{{$.PrimaryResourceId}}" {
 }
 
 resource "google_dataproc_metastore_service" "{{$.PrimaryResourceId}}" {
-  provider   = google-beta
   service_id = "{{index $.Vars "metastore_federation_name"}}"
   location   = "us-central1"
   tier       = "DEVELOPER"

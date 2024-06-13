@@ -445,6 +445,16 @@ func (r Resource) SettableProperties() []*Type {
 	return props
 }
 
+func (r Resource) IsSettableProperty(t *Type) bool {
+	return slices.Contains(r.SettableProperties(), t)
+}
+
+func (r Resource) UnorderedListProperties() []*Type {
+	return google.Select(r.SettableProperties(), func(t *Type) bool {
+		return t.UnorderedList
+	})
+}
+
 // Properties that will be returned in the API body
 
 // def gettable_properties
@@ -505,7 +515,6 @@ func (r Resource) GetIdentity() []*Type {
 	return google.Select(props, func(p *Type) bool {
 		return p.Name == "name"
 	})
-
 }
 
 // def add_labels_related_fields(props, parent)
@@ -1266,7 +1275,7 @@ func (r Resource) IamImportQualifiersForTest() string {
 	return strings.Join(importQualifiers, ", ")
 }
 
-func OrderProperties(props []*Type) []*Type {
+func (r Resource) OrderProperties(props []*Type) []*Type {
 	req := google.Select(props, func(p *Type) bool {
 		return p.Required
 	})
@@ -1315,7 +1324,7 @@ func (r Resource) GetPropertyUpdateMasksGroups(properties []*Type, maskPrefix st
 }
 
 // Formats whitespace in the style of the old Ruby generator's descriptions in documentation
-func FormatDocDescription(desc string) string {
+func (r Resource) FormatDocDescription(desc string) string {
 	returnString := strings.ReplaceAll(desc, "\n\n", "\n")
 
 	returnString = strings.ReplaceAll(returnString, "\n", "\n  ")
@@ -1351,4 +1360,69 @@ func (r Resource) ListUrlTemplate() string {
 
 func (r Resource) DeleteUrlTemplate() string {
 	return fmt.Sprintf("%s%s", r.ProductMetadata.BaseUrl, r.DeleteUri())
+}
+
+func (r Resource) LastNestedQueryKey() string {
+	if r.NestedQuery == nil {
+		return ""
+	}
+	len := len(r.NestedQuery.Keys)
+	return r.NestedQuery.Keys[len-1]
+}
+
+func (r Resource) FirstIdentityProp() *Type {
+	idProps := r.GetIdentity()
+	if len(idProps) == 0 {
+		return nil
+	}
+
+	return idProps[0]
+}
+
+type UpdateGroup struct {
+	UpdateUrl string
+	UpdateVerb string
+	UpdateId string
+	FingerprintName string
+}
+
+// def properties_without_custom_update(properties)
+func (r Resource) propertiesWithCustomUpdate(properties []*Type) []*Type {
+	return google.Reject(properties, func(p *Type) bool {
+		return p.UpdateUrl == "" || p.UpdateVerb == "" || p.UpdateVerb == "NOOP"
+	})
+}
+
+func (r Resource) PropertiesByCustomUpdate() map[UpdateGroup][]*Type {
+	customUpdateProps := r.propertiesWithCustomUpdate(r.RootProperties())
+	groupedCustomUpdateProps := map[UpdateGroup][]*Type{}
+	for _, prop := range customUpdateProps {
+		groupedProperty := UpdateGroup{ UpdateUrl: prop.UpdateUrl,
+			UpdateVerb: prop.UpdateVerb,
+			UpdateId: prop.UpdateId,
+			FingerprintName: prop.FingerprintName}
+		groupedCustomUpdateProps[groupedProperty] = append(groupedCustomUpdateProps[groupedProperty], prop)
+	}
+	return groupedCustomUpdateProps
+}
+
+func (r Resource) FieldSpecificUpdateMethods() bool {
+	return (len(r.PropertiesByCustomUpdate()) > 0)
+}
+
+func (r Resource) CustomUpdatePropertiesByKey(updateUrl string, updateId string, fingerprintName string, updateVerb string) []*Type {
+	groupedProperties := r.PropertiesByCustomUpdate()
+	groupedProperty := UpdateGroup{ UpdateUrl: updateUrl,
+			UpdateVerb: updateVerb,
+			UpdateId: updateId,
+			FingerprintName: fingerprintName}
+	return groupedProperties[groupedProperty]
+}
+
+func (r Resource) PropertyNamesToStrings (properties []*Type) []string{
+	var propertyNames []string
+	for _, prop := range properties {
+		propertyNames = append(propertyNames, google.Underscore(prop.Name))
+	}
+	return propertyNames
 }
