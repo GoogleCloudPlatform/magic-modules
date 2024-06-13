@@ -19,7 +19,7 @@ id_format: projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}
 name: Cluster
-description: An Apache Kafka for BigQuery cluster.
+description: An Apache Kafka for BigQuery cluster. Apache Kafka is a trademark owned by the Apache Software Foundation.
 min_version: beta
 update_verb: :PATCH
 update_mask: true

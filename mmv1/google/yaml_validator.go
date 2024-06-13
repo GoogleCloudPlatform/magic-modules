@@ -22,12 +22,12 @@ import (
 // A helper class to validate contents coming from YAML files.
 type YamlValidator struct{}
 
-func (v *YamlValidator) Parse(content []byte, obj interface{}) {
+func (v *YamlValidator) Parse(content []byte, obj interface{}, yamlPath string) {
 	// TODO(nelsonjr): Allow specifying which symbols to restrict it further.
 	// But it requires inspecting all configuration files for symbol sources,
 	// such as Enum values. Leaving it as a nice-to-have for the future.
 	if err := yaml.Unmarshal(content, obj); err != nil {
-		log.Fatalf("Cannot unmarshal data: %v", err)
+		log.Fatalf("Cannot unmarshal data from file %s: %v", yamlPath, err)
 	}
 }
 

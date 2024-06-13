@@ -225,7 +225,7 @@ An update test is a test that creates the target resource and then makes updates
 ## Add unit tests
 
 A unit test verifies functionality that is not related to interactions with the API, such as
-[diff suppress functions]({{<ref "/develop/field-reference#diff_suppress_func" >}})),
+[diff suppress functions]({{<ref "/develop/field-reference#diff_suppress_func" >}}),
 [validation functions]({{<ref "/develop/field-reference#validation" >}}),
 CustomizeDiff functions, and so on.
 
