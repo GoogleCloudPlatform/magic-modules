@@ -1,7 +1,7 @@
 ---
 title: "Add a datasource"
 summary: "Datasources are like terraform resources except they don't *create* anything."
-weight: 60
+weight: 40
 aliases:
   - /docs/how-to/add-handwritten-datasource
   - /how-to/add-handwritten-datasource

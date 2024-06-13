@@ -88,6 +88,13 @@ examples:
       dns_auth_name2: 'dns-auth2'
       dns_auth_subdomain2: 'subdomain2'
       cert_name: 'dns-cert'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'certificate_manager_google_managed_regional_certificate_dns_auth'
+    primary_resource_id: 'default'
+    vars:
+      dns_auth_name: 'dns-auth'
+      dns_auth_subdomain: 'subdomain'
+      cert_name: 'dns-cert'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/cert_manager.erb
 parameters:

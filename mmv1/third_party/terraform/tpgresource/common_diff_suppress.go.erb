@@ -250,7 +250,7 @@ func CompareIpAddressOrSelfLinkOrResourceName(_, old, new string, _ *schema.Reso
 	return CompareSelfLinkOrResourceName("", old, new, nil)
 }
 
-<% if version != "ga" -%>
+<% unless version == "ga" -%>
 // Suppress all diffs, used for Disk.Interface which is a nonfunctional field
 func AlwaysDiffSuppress(_, _, _ string, _ *schema.ResourceData) bool {
 	return true
@@ -291,10 +291,6 @@ func ProjectNumberDiffSuppress(_, old, new string, _ *schema.ResourceData) bool 
 	a2 = string(reN.ReplaceAll([]byte(old), replacement))
 	b2 = string(re.ReplaceAll([]byte(new), replacement))
 	return a2 == b2
-}
-
-func CompareCaseInsensitive(k, old, new string, d *schema.ResourceData) bool {
-	return strings.ToLower(old) == strings.ToLower(new)
 }
 
 func IsNewResource(diff TerraformResourceDiff) bool {

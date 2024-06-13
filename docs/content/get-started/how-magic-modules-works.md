@@ -8,7 +8,7 @@ aliases:
 
 # How Magic Modules works
 
-Magic Modules can be thought of as a source of truth for how to map a GCP API resource representation to a Terraform resource (or datasource) representation. Magic Modules uses that mapping (and additional handwritten code where necessary) to generate "downstream" repositories - in particular, the Terraform providers for Google Platform: [`google`](https://github.com/hashicorp/terraform-provider-google) (or TPG) and [`google-beta`](https://github.com/hashicorp/terraform-provider-google-beta) (or TPGB).
+Magic Modules can be thought of as a source of truth for how to map a GCP API resource representation to a Terraform resource (or datasource) representation. Magic Modules uses that mapping (and additional handwritten code where necessary) to generate "downstream" repositories - in particular, the Terraform providers for Google Cloud: [`google`](https://github.com/hashicorp/terraform-provider-google) (or TPG) and [`google-beta`](https://github.com/hashicorp/terraform-provider-google-beta) (or TPGB).
 
 Generation of the downstream repositories happens for every new commit in a PR (to a temporary branch owned by the [`modular-magician`](https://github.com/modular-magician/) robot user) and on every merge into the main branch (to the main branch of downstreams). Generation for PR commits allows contributors to manually examine the changes, as well as allowing automatic running of unit tests, acceptance tests, and automated checks such as breaking change detection.
 

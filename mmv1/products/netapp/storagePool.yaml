@@ -22,10 +22,12 @@ description: |
  * LDAP use for NFS volumes, if applicable
  * Customer-managed encryption key (CMEK) policy
 
- The capacity of the pool can be split up and assigned to volumes within the pool. Storage pools are a billable component of NetApp Volumes. Billing is based on the location, service level, and capacity allocated to a pool independent of consumption at the volume level.
+ The capacity of the pool can be split up and assigned to volumes within the pool. Storage pools are a billable
+ component of NetApp Volumes. Billing is based on the location, service level, and capacity allocated to a pool
+ independent of consumption at the volume level.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'QUICKSTART_TITLE': 'https://cloud.google.com/netapp/volumes/docs/get-started/quickstarts/create-storage-pool'
+    'Quickstart documentation': 'https://cloud.google.com/netapp/volumes/docs/get-started/quickstarts/create-storage-pool'
   api: 'https://cloud.google.com/netapp/volumes/docs/reference/rest/v1/projects.locations.storagePools'
 base_url: projects/{{project}}/locations/{{location}}/storagePools
 self_link: projects/{{project}}/locations/{{location}}/storagePools/{{name}}
@@ -47,7 +49,7 @@ parameters:
     immutable: true
     url_param_only: true
     description: |
-      Name of the location. Usually a region name, expect for some STANDARD service level pools which require a zone name.
+      Name of the location. Usually a region name, expect for some FLEX service level pools which require a zone name.
   - !ruby/object:Api::Type::String
     name: 'name'
     description:
@@ -64,7 +66,6 @@ examples:
       network_name: 'test-network'
       global_name: 'test-address'
 properties:
-  # Fields go here
   - !ruby/object:Api::Type::Enum
     name: 'serviceLevel'
     description: |
@@ -73,6 +74,7 @@ properties:
       - :PREMIUM
       - :EXTREME
       - :STANDARD
+      - :FLEX
     required: true
     immutable: true
   - !ruby/object:Api::Type::String

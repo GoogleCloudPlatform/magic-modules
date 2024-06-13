@@ -32,7 +32,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "scc_folder_custom_module_basic"
     primary_resource_id: "example"
-    pull_external: true
+    external_providers: ["random", "time"]
     skip_test: true
     vars:
       folder_display_name: "folder-name"
@@ -45,7 +45,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "scc_folder_custom_module_full"
     primary_resource_id: "example"
-    pull_external: true
+    external_providers: ["random", "time"]
     skip_test: true
     vars:
       folder_display_name: "folder-name"

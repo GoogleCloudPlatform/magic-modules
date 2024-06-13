@@ -81,7 +81,7 @@ state. See
 for more information.
 
 Sensitive fields are often not returned by the API (because they are sensitive).
-In this case, the field will also need to use [`ignore_read` or a `custom_flatten` function]({{< ref "/develop/field-reference#ignore_read" >}}).
+In this case, the field will also need to use [`ignore_read` or a `custom_flatten` function]({{< ref "/develop/permadiff#ignore_read" >}}).
 
 Example:
 
@@ -99,8 +99,7 @@ Nested fields currently
 [do not support `ignore_read`](https://github.com/hashicorp/terraform-provider-google/issues/12410)
 but can replicate the behavior by implementing a
 [`custom_flatten`]({{< ref "/develop/custom-code#custom_flatten" >}})
-that always ignores the value returned by the API.
-](https://github.com/GoogleCloudPlatform/magic-modules/blob/5923d4cb878396a04bed9beaf22a8478e8b1e6a5/mmv1/templates/terraform/custom_flatten/source_representation_instance_configuration_password.go.erb).
+that always ignores the value returned by the API. [Example](https://github.com/GoogleCloudPlatform/magic-modules/blob/5923d4cb878396a04bed9beaf22a8478e8b1e6a5/mmv1/templates/terraform/custom_flatten/source_representation_instance_configuration_password.go.erb).
 Any fields using a custom flatten also need to be added to `ignore_read_extra`
 for any examples where the field is set.
 
@@ -166,27 +165,134 @@ send_empty_value: true
 ### `conflicts`
 Specifies a list of fields (excluding the current field) that cannot be
 specified at the same time as the current field. Must be set separately on
-all listed fields.
+all listed fields. Not supported within
+[lists of nested objects](https://github.com/hashicorp/terraform-plugin-sdk/issues/470#issue-630928923).
 
 Example:
 
 ```yaml
-conflicts:
-  - field_one
-  - nested_object.0.nested_field
+- !ruby/object:Api::Type::String
+  name: 'fieldOne'
+  conflicts:
+    - field_two
+    - nested_object.0.nested_field
 ```
 
 ### `exactly_one_of`
-Specifies a list of fields (including the current field) that cannot be
-specified at the same time (but at least one of which must be set). Must be
-set separately on all listed fields.
+Specifies a list of fields (including the current field) of which exactly one
+must be set. Must be set separately on all listed fields. Not supported within
+[lists of nested objects](https://github.com/hashicorp/terraform-plugin-sdk/issues/470#issue-630928923).
 
 Example:
 
 ```yaml
-exactly_one_of:
-  - field_one
-  - nested_object.0.nested_field
+- !ruby/object:Api::Type::String
+  name: 'fieldOne'
+  exactly_one_of:
+    - field_one
+    - field_two
+    - nested_object.0.nested_field
+```
+
+### `at_least_one_of`
+Specifies a list of fields (including the current field) that cannot be
+specified at the same time (but at least one of which must be set). Must be
+set separately on all listed fields. Not supported within
+[lists of nested objects](https://github.com/hashicorp/terraform-plugin-sdk/issues/470#issue-630928923).
+
+Example:
+
+```yaml
+- !ruby/object:Api::Type::String
+  name: 'fieldOne'
+  at_least_one_of:
+    - field_one
+    - field_two
+    - nested_object.0.nested_field
+```
+
+### `diff_suppress_func`
+Specifies the name of a [diff suppress function](https://developer.hashicorp.com/terraform/plugin/sdkv2/schemas/schema-behaviors#diffsuppressfunc)
+to use for this field. In many cases, a [custom flattener](https://googlecloudplatform.github.io/magic-modules/develop/custom-code/#custom_flatten)
+is preferred because it will allow the user to see a clearer diff when the field actually is being changed. See
+[Fix a permadiff]({{< ref "/develop/permadiff.md" >}}) for more information and best practices.
+
+The function specified can be a
+[provider-specific function](https://github.com/hashicorp/terraform-provider-google-beta/blob/main/google-beta/tpgresource/common_diff_suppress.go)
+(for example, `tgpresource.CaseDiffSuppress`) or a function defined in resource-specific
+[custom code]({{<ref "/develop/custom-code#add-reusable-variables-and-functions" >}}).
+
+Example:
+
+```yaml
+- !ruby/object:Api::Type::String
+  name: 'fieldOne'
+  diff_suppress_func: 'tpgresource.CaseDiffSuppress'
+```
+
+### `validation`
+Controls the value set for the field's [`ValidateFunc`](https://developer.hashicorp.com/terraform/plugin/sdkv2/schemas/schema-behaviors#validatefunc).
+
+For Enum fields, this will override the default validation (that the provided value is one of the enum [`values`](#values)).
+If you need additional validation on top of an enum, ensure that the supplied validation func also verifies the enum
+values are correct.
+
+This property has two mutually exclusive child properties:
+
+- `function`: The name of a
+  [validation function](https://developer.hashicorp.com/terraform/plugin/sdkv2/schemas/schema-behaviors#validatefunc)
+  to use for validation. The function can be a
+  [Terraform-provided function](https://pkg.go.dev/github.com/hashicorp/terraform-plugin-sdk/helper/validation)
+  (for example, `validation.IntAtLeast(0)`), a
+  [provider-specific function](https://github.com/hashicorp/terraform-provider-google-beta/blob/main/google-beta/verify/validation.go)
+  (for example, `verify.ValidateBase64String`), or a function defined in
+  resource-specific
+  [custom code]({{<ref "/develop/custom-code#add-reusable-variables-and-functions" >}}).
+- `regex`: A regex string to check values against. This can only be used on simple
+  String fields. It is equivalent to
+  [`function: verify.ValidateRegexp(REGEX_STRING)`](https://github.com/hashicorp/terraform-provider-google-beta/blob/0ef51142a4dd1c1a4fc308c1eb09dce307ebe5f5/google-beta/verify/validation.go#L425).
+
+`validation` is not supported for Array fields (including sets); however, individual
+elements in the array can be validated using [`item_validation`]({{<ref "/develop/field-reference#item_validation" >}}).
+
+Example: Provider-specific function
+
+```yaml
+- !ruby/object:Api::Type::String
+  name: 'fieldOne'
+  validation: !ruby/object:Provider::Terraform::Validation
+    function: 'verify.ValidateBase64String'
+```
+
+Example: Regex
+
+```yaml
+- !ruby/object:Api::Type::String
+  name: 'fieldOne'
+  validation: !ruby/object:Provider::Terraform::Validation
+    regex: '^[a-zA-Z][a-zA-Z0-9_]*$'
+```
+
+### `api_name`
+Specifies a name to use for communication with the API that is different than
+the name of the field in Terraform. In general, setting an `api_name` is not
+recommended, because it makes it more difficult for users and maintainers to
+understand how the resource maps to the underlying API.
+
+```yaml
+- !ruby/object:Api::Type::String
+  name: 'fieldOne'
+  api_name: 'otherFieldName'
+```
+
+### `url_param_only`
+If true, the field is not sent in the resource body, and the provider does
+not read the field value from the API response. If unset or false, the field
+is sent in the resource body, and the provider reads the field value from the
+API response.
+
+```yaml
+url_param_only: true
 ```
 
 ## `Enum` properties
@@ -197,6 +303,9 @@ colon). If the allowed values change frequently, use a String field instead
 to allow better forwards-compatibility, and link to API documentation
 stating the current allowed values in the String field's description. Do not
 include UNSPECIFIED values in this list.
+
+Enums will validate that the provided field is in the allowed list unless a
+custom [`validation`]({{<ref "/develop/field-reference#validation" >}}) is provided.
 
 Example:
 
@@ -240,6 +349,49 @@ item_type: !ruby/object:Api::Type::NestedObject
       description: |
         MULTI_LINE_FIELD_DESCRIPTION
 ```
+
+### `item_validation`
+Array only. Controls the [`ValidateFunc`](https://developer.hashicorp.com/terraform/plugin/sdkv2/schemas/schema-behaviors#validatefunc)
+used to validate individual items in the array. Behaves like [`validation`]({{<ref "/develop/field-reference#validation" >}}).
+
+For arrays of enums, this will override the default validation (that the provided value is one of the enum [`values`](#values)).
+If you need additional validation on top of an enum, ensure that the supplied validation func also verifies the enum
+values are correct.
+
+Example: Provider-specific function
+
+```yaml
+- !ruby/object:Api::Type::Array
+  name: 'fieldOne'
+  item_type: Api::Type::String
+  item_validation: !ruby/object:Provider::Terraform::Validation
+    function: 'verify.ValidateBase64String'
+```
+
+Example: Regex
+
+```yaml
+- !ruby/object:Api::Type::Array
+  name: 'fieldOne'
+  item_type: Api::Type::String
+  item_validation: !ruby/object:Provider::Terraform::Validation
+    regex: '^[a-zA-Z][a-zA-Z0-9_]*$'
+```
+
+Example: Enum
+
+```yaml
+- !ruby/object:Api::Type::Array
+  name: 'fieldOne'
+  item_type: !ruby/object:Api::Type::Enum
+    name: 'required but unused'
+    description: 'required but unused'
+    values:
+      - :VALUE_ONE
+      - :VALUE_TWO
+  item_validation: 'customFunction'
+```
+
 
 ## `NestedObject` properties
 

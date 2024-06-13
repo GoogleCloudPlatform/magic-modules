@@ -62,7 +62,6 @@ properties:
       A reference to a Topic resource.
     required: true
     immutable: true
-    pattern: 'projects/{{project}}/locations/{{zone}}/topics/{{name}}'
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     custom_expand: templates/terraform/custom_expand/computed_lite_subscription_topic.erb
   - !ruby/object:Api::Type::NestedObject

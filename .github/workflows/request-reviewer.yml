@@ -1,0 +1,39 @@
+name: request-reviewer
+
+permissions: read-all
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - ready_for_review
+      - reopened
+      - synchronize
+  issue_comment:
+    types:
+      - created
+
+jobs:
+  request-review:
+    if: (github.event.action == 'created' && github.event.issue.draft == false && github.event.comment.user.login == github.event.issue.user.login) || (github.event.action != 'created' && github.event.pull_request.draft == false)
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
+      - name: Set up Go
+        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
+        with:
+          go-version: '^1.21'
+          # Disable caching for now due to issues with large provider dependency caches
+          cache: false
+      - name: Build magician
+        run: |
+          cd .ci/magician
+          go build .
+      - name: Request reviewer
+        run: .ci/magician/magician request-reviewer ${{ github.event.pull_request.number || github.event.issue.number }}
+

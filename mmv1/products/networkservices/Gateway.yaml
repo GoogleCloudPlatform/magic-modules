@@ -97,6 +97,7 @@ virtual_fields:
       If there is no other gateway of type 'SECURE_WEB_GATEWAY' remaining for that region and network it will be deleted.
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_delete: 'templates/terraform/post_delete/network_services_gateway.go.erb'
+  pre_update: 'templates/terraform/pre_update/network_services_gateway.erb'
   constants: 'templates/terraform/constants/network_services_gateway.go.erb'
 parameters:
   - !ruby/object:Api::Type::String
@@ -170,6 +171,7 @@ properties:
   - !ruby/object:Api::Type::Array
     name: 'addresses'
     immutable: true
+    default_from_api: true
     description: |
       Zero or one IPv4-address on which the Gateway will receive the traffic. When no address is provided,
       an IP from the subnetwork is allocated This field only applies to gateways of type 'SECURE_WEB_GATEWAY'.
@@ -191,14 +193,12 @@ properties:
       Currently, this field is specific to gateways of type 'SECURE_WEB_GATEWAY'.
   - !ruby/object:Api::Type::String
     name: 'gatewaySecurityPolicy'
-    immutable: true
     description: |
       A fully-qualified GatewaySecurityPolicy URL reference. Defines how a server should apply security policy to inbound (VM to Proxy) initiated connections.
       For example: `projects/*/locations/*/gatewaySecurityPolicies/swg-policy`.
       This policy is specific to gateways of type 'SECURE_WEB_GATEWAY'.
   - !ruby/object:Api::Type::Array
     name: 'certificateUrls'
-    immutable: true
     description: |
       A fully-qualified Certificates URL reference. The proxy presents a Certificate (selected based on SNI) when establishing a TLS connection.
       This feature only applies to gateways of type 'SECURE_WEB_GATEWAY'.

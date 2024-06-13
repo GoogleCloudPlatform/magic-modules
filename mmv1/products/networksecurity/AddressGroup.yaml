@@ -71,11 +71,6 @@ examples:
       resource_name: "my-address-groups"
     test_env_vars:
       project: :PROJECT_NAME
-custom_code:
-  !ruby/object:Provider::Terraform::CustomCode  # Calling custom operation that are different from other network security resources.
-  pre_create: templates/terraform/pre_create/network_security_address_group_operation.go.erb
-  pre_update: templates/terraform/pre_update/network_security_address_group_operation.go.erb
-  pre_delete: templates/terraform/pre_delete/network_security_address_group_operation.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: parent

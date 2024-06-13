@@ -79,16 +79,14 @@ examples:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
   - !ruby/object:Provider::Terraform::Examples
-    name: 'bigquery_dataset_external_reference_aws'
+    name: 'bigquery_dataset_external_reference_aws_test'
     primary_resource_id: 'dataset'
-    min_version: beta
     skip_docs: true
     vars:
       dataset_id: 'example_dataset'
   - !ruby/object:Provider::Terraform::Examples
-    name: 'bigquery_dataset_external_reference_aws_docs'
+    name: 'bigquery_dataset_external_reference_aws'
     primary_resource_id: 'dataset'
-    min_version: beta
     skip_test: true
     vars:
       dataset_id: 'example_dataset'
@@ -309,7 +307,6 @@ properties:
     name: 'externalDatasetReference'
     description: |
      Information about the external metadata storage where the dataset is defined.
-    min_version: beta
     immutable: true
     properties:
       - !ruby/object:Api::Type::String

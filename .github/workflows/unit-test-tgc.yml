@@ -9,13 +9,13 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Download built artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
         with:
           name: artifact-terraform-google-conversion
           path: artifacts-tgc
 
       - name: Download built artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
         with:
           name: artifact-terraform-provider-google-beta
           path: artifacts-tpgb
@@ -28,19 +28,9 @@ jobs:
           rm artifacts-tpgb/output.zip
 
       - name: Set up Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
         with:
-          go-version: '^1.20'
-
-      - name: Cache Go modules and build cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-test-terraform-google-conversion-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-test-terraform-google-conversion-${{ hashFiles('**/go.sum') }}
-            ${{ runner.os }}-test-terraform-google-conversion-
+          go-version: '^1.21'
 
       - name: Build Terraform Google Conversion
         run: |

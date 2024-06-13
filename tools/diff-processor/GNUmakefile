@@ -56,3 +56,5 @@ endif
 	go mod tidy
 	mkdir -p bin/
 	go build -o ./bin/ .
+
+.PHONY: clone clean build

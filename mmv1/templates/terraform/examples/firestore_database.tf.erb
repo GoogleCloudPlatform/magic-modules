@@ -1,6 +1,6 @@
 resource "google_firestore_database" "<%= ctx[:primary_resource_id] %>" {
   project                           = "<%= ctx[:test_env_vars]['project_id'] %>"
-  name                              = "<%= ctx[:vars]['name']%>"
+  name                              = "<%= ctx[:vars]['database_id']%>"
   location_id                       = "nam5"
   type                              = "FIRESTORE_NATIVE"
   concurrency_mode                  = "OPTIMISTIC"

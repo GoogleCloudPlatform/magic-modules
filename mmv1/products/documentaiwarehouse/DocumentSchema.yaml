@@ -27,50 +27,10 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/document_ai_warehouse_document_schema.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
+    # docs only, testing is done in an update test
+    skip_test: true
     name: "document_ai_warehouse_document_schema_text"
     primary_resource_id: "example_text"
-    vars:
-      document_schema_name: "schema-name-text"
-  - !ruby/object:Provider::Terraform::Examples
-    name: "document_ai_warehouse_document_schema_integer"
-    primary_resource_id: "example_integer"
-    vars:
-      document_schema_name: "schema-name-integer"
-  - !ruby/object:Provider::Terraform::Examples
-    name: "document_ai_warehouse_document_schema_float"
-    primary_resource_id: "example_float"
-    vars:
-      document_schema_name: "schema-name-float"
-  - !ruby/object:Provider::Terraform::Examples
-    name: "document_ai_warehouse_document_schema_property"
-    primary_resource_id: "example_property"
-    vars:
-      document_schema_name: "schema-name-property"
-  - !ruby/object:Provider::Terraform::Examples
-    name: "document_ai_warehouse_document_schema_property_enum"
-    primary_resource_id: "example_property_enum"
-    vars:
-      document_schema_name: "schema-name-property-enum"
-  - !ruby/object:Provider::Terraform::Examples
-    name: "document_ai_warehouse_document_schema_enum"
-    primary_resource_id: "example_enum"
-    vars:
-      document_schema_name: "schema-name-enum"
-  - !ruby/object:Provider::Terraform::Examples
-    name: "document_ai_warehouse_document_schema_map"
-    primary_resource_id: "example_map"
-    vars:
-      document_schema_name: "schema-name-map"
-  - !ruby/object:Provider::Terraform::Examples
-    name: "document_ai_warehouse_document_schema_datetime"
-    primary_resource_id: "example_datetime"
-    vars:
-      document_schema_name: "schema-name-datetime"
-  - !ruby/object:Provider::Terraform::Examples
-    name: "document_ai_warehouse_document_schema_timestamp"
-    primary_resource_id: "example_timestamp"
-    vars:
-      document_schema_name: "schema-name-timestamp"
 parameters:
   - !ruby/object:Api::Type::String
     name: 'project_number'
@@ -343,4 +303,3 @@ properties:
           send_empty_value: true
           allow_empty_object: true
           properties: []
-            

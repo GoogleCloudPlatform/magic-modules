@@ -16,6 +16,7 @@ func TestAccLoggingBucketConfigFolder_basic(t *testing.T) {
 		"random_suffix": acctest.RandString(t, 10),
 		"folder_name":   "tf-test-" + acctest.RandString(t, 10),
 		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"bucket_id":     "_Default",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -52,6 +53,7 @@ func TestAccLoggingBucketConfigProject_basic(t *testing.T) {
 		"project_name":    "tf-test-" + acctest.RandString(t, 10),
 		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
 		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"bucket_id":       "tf-test-bucket-" + acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -97,12 +99,25 @@ func TestAccLoggingBucketConfigProject_analyticsEnabled(t *testing.T) {
 		"project_name":    "tf-test-" + acctest.RandString(t, 10),
 		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
 		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"bucket_id":       "tf-test-bucket-" + acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
+			{
+				Config: testAccLoggingBucketConfigProject_basic(context, 30),
+			},
+			{
+				ResourceName:            "google_logging_project_bucket_config.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"project"},
+			},
 			{
 				Config: testAccLoggingBucketConfigProject_analyticsEnabled(context, true),
 			},
@@ -132,9 +147,9 @@ func TestAccLoggingBucketConfigProject_cmekSettings(t *testing.T) {
 		"project_name":    "tf-test-" + acctest.RandString(t, 10),
 		"org_id":          envvar.GetTestOrgFromEnv(t),
 		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+		"bucket_id":       "tf-test-bucket-" + acctest.RandString(t, 10),
 	}
 
-	bucketId := fmt.Sprintf("tf-test-bucket-%s", acctest.RandString(t, 10))
 	keyRingName := fmt.Sprintf("tf-test-key-ring-%s", acctest.RandString(t, 10))
 	cryptoKeyName := fmt.Sprintf("tf-test-crypto-key-%s", acctest.RandString(t, 10))
 	cryptoKeyNameUpdate := fmt.Sprintf("tf-test-crypto-key-%s", acctest.RandString(t, 10))
@@ -144,7 +159,7 @@ func TestAccLoggingBucketConfigProject_cmekSettings(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLoggingBucketConfigProject_cmekSettings(context, bucketId, keyRingName, cryptoKeyName, cryptoKeyNameUpdate),
+				Config: testAccLoggingBucketConfigProject_cmekSettings(context, keyRingName, cryptoKeyName, cryptoKeyNameUpdate),
 			},
 			{
 				ResourceName:            "google_logging_project_bucket_config.basic",
@@ -153,7 +168,7 @@ func TestAccLoggingBucketConfigProject_cmekSettings(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"project"},
 			},
 			{
-				Config: testAccLoggingBucketConfigProject_cmekSettingsUpdate(context, bucketId, keyRingName, cryptoKeyName, cryptoKeyNameUpdate),
+				Config: testAccLoggingBucketConfigProject_cmekSettingsUpdate(context, keyRingName, cryptoKeyName, cryptoKeyNameUpdate),
 			},
 			{
 				ResourceName:            "google_logging_project_bucket_config.basic",
@@ -172,6 +187,7 @@ func TestAccLoggingBucketConfigBillingAccount_basic(t *testing.T) {
 		"random_suffix":        acctest.RandString(t, 10),
 		"billing_account_name": "billingAccounts/" + envvar.GetTestMasterBillingAccountFromEnv(t),
 		"org_id":               envvar.GetTestOrgFromEnv(t),
+		"bucket_id":            "_Default",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -206,6 +222,7 @@ func TestAccLoggingBucketConfigOrganization_basic(t *testing.T) {
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"bucket_id":     "_Default",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -265,7 +282,7 @@ resource "google_logging_project_bucket_config" "basic" {
 	location  = "global"
 	retention_days = %d
 	description = "retention test %d days"
-	bucket_id = "test-bucket"
+	bucket_id = "%{bucket_id}"
 }
 `, context), retention, retention)
 }
@@ -279,11 +296,22 @@ resource "google_project" "default" {
 	billing_account = "%{billing_account}"
 }
 
+// time_sleep would allow for permissions to be granted before creating log bucket
+resource "time_sleep" "wait_1_minute" {
+	create_duration = "1m"
+  
+	depends_on = [
+	  google_project.default,
+	]
+  }
+
 resource "google_logging_project_bucket_config" "basic" {
 	project    = google_project.default.name
 	location  = "global"
 	enable_analytics = %t
-	bucket_id = "test-bucket"
+	bucket_id = "%{bucket_id}"
+
+	depends_on = [time_sleep.wait_1_minute]
 }
 `, context), analytics)
 }
@@ -363,7 +391,7 @@ resource "google_kms_crypto_key_iam_member" "crypto_key_member2" {
 `, context), keyRingName, cryptoKeyName, cryptoKeyNameUpdate)
 }
 
-func testAccLoggingBucketConfigProject_cmekSettings(context map[string]interface{}, bucketId, keyRingName, cryptoKeyName, cryptoKeyNameUpdate string) string {
+func testAccLoggingBucketConfigProject_cmekSettings(context map[string]interface{}, keyRingName, cryptoKeyName, cryptoKeyNameUpdate string) string {
 	return fmt.Sprintf(`
 %s
 
@@ -380,10 +408,10 @@ resource "google_logging_project_bucket_config" "basic" {
 
 	depends_on   = [google_kms_crypto_key_iam_member.crypto_key_member1]
 }
-`, testAccLoggingBucketConfigProject_preCmekSettings(context, keyRingName, cryptoKeyName, cryptoKeyNameUpdate), bucketId)
+`, testAccLoggingBucketConfigProject_preCmekSettings(context, keyRingName, cryptoKeyName, cryptoKeyNameUpdate), context["bucket_id"])
 }
 
-func testAccLoggingBucketConfigProject_cmekSettingsUpdate(context map[string]interface{}, bucketId, keyRingName, cryptoKeyName, cryptoKeyNameUpdate string) string {
+func testAccLoggingBucketConfigProject_cmekSettingsUpdate(context map[string]interface{}, keyRingName, cryptoKeyName, cryptoKeyNameUpdate string) string {
 	return fmt.Sprintf(`
 %s
 
@@ -400,7 +428,7 @@ resource "google_logging_project_bucket_config" "basic" {
 
 	depends_on   = [google_kms_crypto_key_iam_member.crypto_key_member2]
 }
-`, testAccLoggingBucketConfigProject_preCmekSettings(context, keyRingName, cryptoKeyName, cryptoKeyNameUpdate), bucketId)
+`, testAccLoggingBucketConfigProject_preCmekSettings(context, keyRingName, cryptoKeyName, cryptoKeyNameUpdate), context["bucket_id"])
 }
 
 func TestAccLoggingBucketConfig_CreateBuckets_withCustomId(t *testing.T) {
@@ -494,6 +522,7 @@ func TestAccLoggingBucketConfigOrganization_indexConfigs(t *testing.T) {
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"bucket_id":     "_Default",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

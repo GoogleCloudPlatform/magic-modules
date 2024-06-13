@@ -134,7 +134,11 @@ func testSweep<%= sweeper_name -%>(region string) error {
 		name := tpgresource.GetResourceNameFromSelfLink(obj["name"].(string))
 		<% end -%>
 		// Skip resources that shouldn't be sweeped
+		<% if object.sweeper.sweepable_identifier_field.nil? -%>
 		if !sweeper.IsSweepableTestResource(name) {
+		<% else -%>
+		if !sweeper.IsSweepableTestResource(obj["<%= object.sweeper.sweepable_identifier_field -%>"].(string)) {
+		<% end -%>
 			nonPrefixCount++
 			continue
 		}

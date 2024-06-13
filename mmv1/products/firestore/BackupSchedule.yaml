@@ -40,16 +40,24 @@ docs: !ruby/object:Provider::Terraform::Docs
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'firestore_backup_schedule_daily'
-    primary_resource_id:
-      'daily-backup'
+    primary_resource_id: 'daily-backup'
+    vars:
+      database_id: 'database-id'
+      delete_protection_state: "DELETE_PROTECTION_ENABLED"
     test_env_vars:
-      project_id: :FIRESTORE_PROJECT_NAME
+      project_id: :PROJECT_NAME
+    test_vars_overrides:
+      delete_protection_state: '"DELETE_PROTECTION_DISABLED"'
   - !ruby/object:Provider::Terraform::Examples
     name: 'firestore_backup_schedule_weekly'
-    primary_resource_id:
-      'weekly-backup'
+    primary_resource_id: 'weekly-backup'
+    vars:
+      database_id: 'database-id'
+      delete_protection_state: "DELETE_PROTECTION_ENABLED"
     test_env_vars:
-      project_id: :FIRESTORE_PROJECT_NAME
+      project_id: :PROJECT_NAME
+    test_vars_overrides:
+      delete_protection_state: '"DELETE_PROTECTION_DISABLED"'
 parameters:
   - !ruby/object:Api::Type::String
     name: database
@@ -64,7 +72,7 @@ properties:
     output: true
     description: |
       The unique backup schedule identifier across all locations and databases for the given project. Format:
-      `projects/{{project}}/databases/{{database}}/backupSchedules/{{backupSchedule}}
+      `projects/{{project}}/databases/{{database}}/backupSchedules/{{backupSchedule}}`
     immutable: true
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::String
@@ -74,11 +82,11 @@ properties:
       At what relative time in the future, compared to its creation time, the backup should be deleted, e.g. keep backups for 7 days.
       A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
 
-      For a daily backup recurrence, set this to a value up to 7 days. If you set a weekly backup recurrence, set this to a value up to 14 weeks.
+      You can set this to a value up to 14 weeks.
   - !ruby/object:Api::Type::NestedObject
     name: dailyRecurrence
     description: |
-      For a schedule that runs daily at a specified time.
+      For a schedule that runs daily.
     exactly_one_of:
       - daily_recurrence
       - weekly_recurrence
@@ -89,7 +97,7 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: weeklyRecurrence
     description: |
-      For a schedule that runs weekly on a specific day and time.
+      For a schedule that runs weekly on a specific day.
     immutable: true
     exactly_one_of:
       - weekly_recurrence
