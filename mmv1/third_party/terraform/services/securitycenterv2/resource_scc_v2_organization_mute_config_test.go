@@ -40,14 +40,14 @@ func TestAccSecurityCenterV2OrganizationMuteConfig_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"google_scc_v2_organization_mute_config.organization_mute_test1", "location", contextBasic["location"].(string)),
 					resource.TestCheckResourceAttr(
-						"google_scc_v2_organization_mute_config.organization_mute_test1", "parent", fmt.Sprintf("organizations/%s", contextBasic["org_id"])),
+						"google_scc_v2_organization_mute_config.organization_mute_test1", "organization", fmt.Sprintf("organizations/%s", contextBasic["org_id"])),
 				),
 			},
 			{
 				ResourceName:            "google_scc_v2_organization_mute_config.organization_mute_test1",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"parent", "mute_config_id"},
+				ImportStateVerifyIgnore: []string{"organization", "location"},
 			},
 			{
 				Config: testAccSecurityCenterV2OrganizationMuteConfig_highSeverity(contextHighSeverity),
@@ -61,14 +61,14 @@ func TestAccSecurityCenterV2OrganizationMuteConfig_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"google_scc_v2_organization_mute_config.organization_mute_test2", "location", contextHighSeverity["location"].(string)),
 					resource.TestCheckResourceAttr(
-						"google_scc_v2_organization_mute_config.organization_mute_test2", "parent", fmt.Sprintf("organizations/%s", contextHighSeverity["org_id"])),
+						"google_scc_v2_organization_mute_config.organization_mute_test2", "organization", fmt.Sprintf("organizations/%s", contextHighSeverity["org_id"])),
 				),
 			},
 			{
 				ResourceName:            "google_scc_v2_organization_mute_config.organization_mute_test2",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"parent", "mute_config_id"},
+				ImportStateVerifyIgnore: []string{"organization", "location"},
 			},
 		},
 	})
@@ -81,7 +81,7 @@ resource "google_scc_v2_organization_mute_config" "organization_mute_test1" {
   filter               = "severity = \"LOW\""
   mute_config_id       = "tf-test-my-config-%{random_suffix}"
   location             = "%{location}"
-  parent               = "organizations/%{org_id}"
+  organization         = "organizations/%{org_id}"
   type                 =  "STATIC"
 }
 `, context)
@@ -94,7 +94,7 @@ resource "google_scc_v2_organization_mute_config" "organization_mute_test2" {
   filter               = "severity = \"HIGH\""
   mute_config_id       = "tf-test-my-config-%{random_suffix}"
   location             = "%{location}"
-  parent               = "organizations/%{org_id}"
+  organization         = "organizations/%{org_id}"
   type                 =  "STATIC"
 }
 `, context)

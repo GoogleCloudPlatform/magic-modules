@@ -1,18 +1,18 @@
-resource "google_project" "default" {
+resource "google_project" "project" {
   name       = "My Test Project"
   project_id = "<%= ctx[:vars]['project_id'] %>"
   parent     = "<%= ctx[:vars]['org_id'] %>"
 }
 
 resource "google_project_iam_member" "scc_project_mute_config" {
-  project = google_project.default.project_id
+  project = google_project.project.project_id
   role    = "roles/securitycenter.admin"
   member  = "serviceAccount:<%= ctx[:vars]['service_account_email'] %>"
 }
 
 resource "google_scc_v2_project_mute_config" "<%= ctx[:primary_resource_id] %>" {
   mute_config_id = "<%= ctx[:vars]['mute_config_id'] %>"
-  parent         = google_project.default.project_id
+  project         = google_project.project.project_id
   description    = "My custom Cloud Security Command Center Project Mute Configuration"
   filter         = "severity = \"HIGH\""
   type           =  "STATIC"

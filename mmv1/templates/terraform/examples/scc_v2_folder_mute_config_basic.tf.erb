@@ -1,4 +1,4 @@
-resource "google_folder" "default" {
+resource "google_folder" "folder" {
 	display_name = "A test folder mute config"
 	parent       = "organizations/${var.org_id}"
 }
@@ -11,7 +11,7 @@ resource "google_folder_iam_member" "scc_folder_mute_config" {
 
 resource "google_scc_v2_folder_mute_config" "<%= ctx[:primary_resource_id] %>" {
 	mute_config_id = "<%= ctx[:vars]['mute_config_id'] %>"
-	parent         = google_folder.default.id  # Using the ID of the google_folder resource
+	folder         = google_folder.folder.folder_id
 	description    = "My custom Cloud Security Command Center Mute Configuration"
 	filter         = "severity = \"HIGH\""
 	type           =  "STATIC"
