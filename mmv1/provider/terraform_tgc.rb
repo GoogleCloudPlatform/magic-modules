@@ -319,6 +319,8 @@ module Provider
                         'third_party/tgc/compute_target_pool.go'],
                        ['converters/google/resources/dataproc_cluster.go',
                         'third_party/tgc/dataproc_cluster.go'],
+                       ['converters/google/resources/composer_environment.go',
+                        'third_party/tgc/composer_environment.go'],
                        ['converters/google/resources/commitment.go',
                         'third_party/tgc/commitment.go'],
                        ['converters/google/resources/firebase_project.go',
