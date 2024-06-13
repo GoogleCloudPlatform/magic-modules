@@ -289,7 +289,6 @@ func TestAccStorageBucket_dualLocation_versionChange(t *testing.T) {
 		CheckDestroy: testAccStorageBucketDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				// Context: this was an addidental breaking change introduced with muxing
 				Config: testAccStorageBucket_dualLocation(bucketName),
 				ExternalProviders: map[string]resource.ExternalProvider{
 					"google": {
