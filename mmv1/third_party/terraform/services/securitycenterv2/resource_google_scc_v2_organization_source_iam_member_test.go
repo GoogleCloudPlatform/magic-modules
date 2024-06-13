@@ -29,6 +29,7 @@ func TestAccSCCV2OrganizationSourceIAMMember(t *testing.T) {
 			{
 				Config: testAccSCCV2OrganizationSourceIAMMember(orgId, suffix, role, member, conditionTitle, conditionDescription, conditionExpression),
 				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_scc_v2_organization_source_iam_member.custom_member", "organization", orgId),
 					resource.TestCheckResourceAttr("google_scc_v2_organization_source_iam_member.custom_member", "role", role),
 					resource.TestCheckResourceAttr("google_scc_v2_organization_source_iam_member.custom_member", "member", member),
 					resource.TestCheckResourceAttr("google_scc_v2_organization_source_iam_member.custom_member", "condition.title", conditionTitle),
@@ -54,6 +55,7 @@ resource "google_scc_v2_organization_source" "custom_source" {
 }
 
 resource "google_scc_v2_organization_source_iam_member" "custom_member" {
+  organization  = "%s"
   source        = google_scc_v2_organization_source.custom_source.canonical_name
   role          = "%s"
   member        = "%s"
@@ -63,5 +65,5 @@ resource "google_scc_v2_organization_source_iam_member" "custom_member" {
     expression  = "%s"
   }
 }
-`, suffix, orgId, orgId, suffix, role, member, title, description, expression)
+`, suffix, orgId, orgId, suffix, orgId, role, member, title, description, expression)
 }
