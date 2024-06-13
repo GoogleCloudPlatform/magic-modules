@@ -61,6 +61,14 @@ examples:
     vars:
       name: 'example_feature_view_feature_registry'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'vertex_ai_featureonlinestore_featureview_cross_project'
+    primary_resource_id: 'cross_project_featureview'
+    test_env_vars:
+      org_id: :ORG_ID
+      billing_account: :BILLING_ACCT
+    vars:
+      name: 'example_cross_project_featureview'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'vertex_ai_featureonlinestore_featureview_with_vector_search'
     primary_resource_id: 'featureview_vector_search'
     vars:
