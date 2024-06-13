@@ -1,3 +1,4 @@
+NOT CONVERTED - RUN YAML MODE
 # Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,8 +24,7 @@ kind: '<%= object.kind %>'
 <%  unless object.legacy_name.nil? -%>
 legacy_name: '<%= object.legacy_name %>'
 <%  end -%>
-description: |
-  <%= object.description.gsub(/\n/, "\n  ") %>
+description:
 <%  unless object.min_version.nil? -%>
 <%  unless object.min_version.name == 'ga' -%>
 min_version: '<%= object.min_version.name %>'
@@ -63,7 +63,7 @@ docs:
   warning: '<%= object.docs.warning %>'
 <%    end -%>
 <%    unless object.docs.note.nil? -%>
-  note: '<%= object.docs.note %>'
+  note:
 <%    end -%>
 <%    unless object.docs.required_properties.nil? -%>
   required_properties: '<%= object.docs.required_properties %>'
@@ -138,7 +138,7 @@ mutex: <%= object.mutex %>
 <%  unless object.import_format.empty? -%>
 import_format:
 <%    object.import_format.each do |iformat| -%>
-    - '<%= iformat %>'
+  - '<%= iformat %>'
 <%    end -%>
 <%  end -%>
 <%  unless !object.exclude_import -%>
@@ -184,6 +184,7 @@ async:
 <%      unless object.async.target_occurrences.nil? -%>
   target_occurrences: <%= object.async.target_occurrences %>
 <%      end -%>
+  actions: ['<%= object.async.actions.join('\',\'') %>']
 <%    end -%>
 <%    if object.async.is_a? Api::OpAsync -%>
   type: 'OpAsync'
@@ -247,12 +248,18 @@ async:
 <%  unless object.collection_url_key == object.name.plural.camelize(:lower) -%>
 collection_url_key: '<%= object.collection_url_key %>'
 <%  end -%>
+<%  unless object.instance_variable_get("@identity").nil? -%>
+identity:
+<%  object.instance_variable_get("@identity").each do |id| -%>
+  - <%= id %>
+<%    end -%>
+<%  end -%>
 <%  unless object.nested_query.nil? -%>
 nested_query:
 <%    unless object.nested_query.keys.nil? -%>
   keys:
-<%       object.nested_query.keys.each do |key| %>
-    - <%= key -%>
+<%       object.nested_query.keys.each do |key| -%>
+    - <%= key %>
 <%      end -%>
 <%    end -%>
 <%    unless object.nested_query.is_list_of_ids.nil? -%>
@@ -340,52 +347,55 @@ iam_policy:
 <%  unless object.custom_code.nil? -%>
 custom_code:
 <%    unless object.custom_code.extra_schema_entry.nil? -%>
-  extra_schema_entry: '<%= object.custom_code.extra_schema_entry %>'
+  extra_schema_entry: '<%= object.convert_go_file( object.custom_code.extra_schema_entry) %>'
 <%    end -%>
 <%    unless object.custom_code.constants.nil? -%>
-  constants: '<%= object.custom_code.constants %>'
+  constants: '<%= object.convert_go_file( object.custom_code.constants) %>'
 <%    end -%>
 <%    unless object.custom_code.encoder.nil? -%>
-  encoder: '<%= object.custom_code.encoder %>'
+  encoder: '<%= object.convert_go_file( object.custom_code.encoder )%>'
 <%    end -%>
 <%    unless object.custom_code.update_encoder.nil? -%>
-  update_encoder: '<%= object.custom_code.update_encoder %>'
+  update_encoder: '<%= object.convert_go_file( object.custom_code.update_encoder )%>'
 <%    end -%>
 <%    unless object.custom_code.decoder.nil? -%>
-  decoder: '<%= object.custom_code.decoder %>'
+  decoder: '<%= object.convert_go_file( object.custom_code.decoder )%>'
 <%    end -%>
 <%    unless object.custom_code.pre_create.nil? -%>
-  pre_create: '<%= object.custom_code.pre_create %>'
+  pre_create: '<%= object.convert_go_file( object.custom_code.pre_create )%>'
 <%    end -%>
 <%    unless object.custom_code.post_create.nil? -%>
-  post_create: '<%= object.custom_code.post_create %>'
+  post_create: '<%= object.convert_go_file( object.custom_code.post_create )%>'
 <%    end -%>
 <%    unless object.custom_code.custom_create.nil? -%>
-  custom_create: '<%= object.custom_code.custom_create %>'
+  custom_create: '<%= object.convert_go_file( object.custom_code.custom_create )%>'
 <%    end -%>
 <%    unless object.custom_code.pre_read.nil? -%>
-  pre_read: '<%= object.custom_code.pre_read %>'
+  pre_read: '<%= object.convert_go_file( object.custom_code.pre_read )%>'
 <%    end -%>
 <%    unless object.custom_code.pre_update.nil? -%>
-  pre_update: '<%= object.custom_code.pre_update %>'
+  pre_update: '<%= object.convert_go_file( object.custom_code.pre_update )%>'
 <%    end -%>
 <%    unless object.custom_code.post_update.nil? -%>
-  post_update: '<%= object.custom_code.post_update %>'
+  post_update: '<%= object.convert_go_file( object.custom_code.post_update )%>'
 <%    end -%>
 <%    unless object.custom_code.custom_update.nil? -%>
-  custom_update: '<%= object.custom_code.custom_update %>'
+  custom_update: '<%= object.convert_go_file( object.custom_code.custom_update )%>'
 <%    end -%>
 <%    unless object.custom_code.pre_delete.nil? -%>
-  pre_delete: '<%= object.custom_code.pre_delete %>'
+  pre_delete: '<%= object.convert_go_file( object.custom_code.pre_delete )%>'
+<%    end -%>
+<%    unless object.custom_code.custom_delete.nil? -%>
+  custom_delete: '<%= object.convert_go_file( object.custom_code.custom_delete ) %>'
 <%    end -%>
 <%    unless object.custom_code.custom_import.nil? -%>
-  custom_import: '<%= object.custom_code.custom_import %>'
+  custom_import: '<%= object.convert_go_file( object.custom_code.custom_import )%>'
 <%    end -%>
 <%    unless object.custom_code.post_import.nil? -%>
-  post_import: '<%= object.custom_code.post_import %>'
+  post_import: '<%= object.convert_go_file( object.custom_code.post_import )%>'
 <%    end -%>
 <%    unless object.custom_code.test_check_destroy.nil? -%>
-  test_check_destroy: '<%= object.custom_code.test_check_destroy %>'
+  test_check_destroy: '<%= object.convert_go_file( object.custom_code.test_check_destroy )%>'
 <%    end -%>
 <%  end -%>
 <%  unless object.custom_diff.empty? || (object.custom_diff.size == 1 && object.custom_diff.include?("tpgresource.SetLabelsDiff")) -%>
@@ -494,7 +504,7 @@ examples:
 <%      unless example.ignore_read_extra.empty? -%>
     ignore_read_extra:
 <%        example.ignore_read_extra.each do |irextra| -%>
-      '<%= irextra %>'
+      - '<%= irextra %>'
 <%        end -%>
 <%      end -%>
 <%      unless example.external_providers.nil? -%>
@@ -521,7 +531,7 @@ examples:
 virtual_fields:
 <%    object.virtual_fields.each do |vfield| -%>
   - name: '<%= vfield.name %>'
-    description: '<%= vfield.description %>'
+    description:
 <%      unless vfield.type.nil? -%>
     type: <%= tf_type(vfield.type) %>
 <%      end -%>

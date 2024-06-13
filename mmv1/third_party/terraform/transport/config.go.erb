@@ -194,7 +194,7 @@ type Config struct {
 	DefaultLabels                             map[string]string
 	AddTerraformAttributionLabel              bool
 	TerraformAttributionLabelAdditionStrategy string
-	// PollInterval is passed to resource.StateChangeConf in common_operation.go
+	// PollInterval is passed to retry.StateChangeConf in common_operation.go
 	// It controls the interval at which we poll for successful operations
 	PollInterval time.Duration
 
@@ -210,7 +210,6 @@ type Config struct {
 	<% end -%>
 
 	CloudBillingBasePath string
-	ComposerBasePath string
 	ContainerBasePath string
 	DataflowBasePath string
 	IamCredentialsBasePath string
@@ -233,7 +232,6 @@ type Config struct {
 const <%= product[:definitions].name -%>BasePathKey = "<%= product[:definitions].name -%>"
 <% end -%>
 const CloudBillingBasePathKey = "CloudBilling"
-const ComposerBasePathKey = "Composer"
 const ContainerBasePathKey = "Container"
 const DataflowBasePathKey = "Dataflow"
 const IAMBasePathKey = "IAM"
@@ -251,11 +249,6 @@ var DefaultBasePaths = map[string]string{
 	<%= product[:definitions].name -%>BasePathKey : "<%= product[:definitions].base_url -%>",
 <% end -%>
 	CloudBillingBasePathKey : "https://cloudbilling.googleapis.com/v1/",
-<% if version == "ga" -%>
-	ComposerBasePathKey : "https://composer.googleapis.com/v1/",
-<% else -%>
-	ComposerBasePathKey : "https://composer.googleapis.com/v1beta1/",
-<% end -%>
 <% if version == "ga" -%>
 	ContainerBasePathKey : "https://container.googleapis.com/v1/",
 <% else -%>

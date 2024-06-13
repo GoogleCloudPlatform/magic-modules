@@ -23,7 +23,8 @@ module Provider
       false
     end
 
-    def generate(output_folder, types, _product_path, _dump_yaml, generate_code, generate_docs)
+    def generate(output_folder, types, product_path, _dump_yaml, generate_code, generate_docs, \
+                 go_yaml)
       # Temporary shim to generate the missing resources directory. Can be removed
       # once the folder exists downstream.
       resources_folder = File.join(output_folder, 'converters/google/resources')
@@ -34,7 +35,9 @@ module Provider
         output_folder,
         types,
         generate_code,
-        generate_docs
+        generate_docs,
+        product_path,
+        go_yaml
       )
     end
 
@@ -317,7 +320,9 @@ module Provider
                        ['converters/google/resources/dataproc_cluster.go',
                         'third_party/tgc/dataproc_cluster.go'],
                        ['converters/google/resources/commitment.go',
-                        'third_party/tgc/commitment.go']
+                        'third_party/tgc/commitment.go'],
+                       ['converters/google/resources/firebase_project.go',
+                        'third_party/tgc/firebase_project.go']
                      ])
     end
 

@@ -21,7 +21,7 @@
   (Deprecated)
     {{- end}}
   {{- end }}
-  {{ formatDocDescription $.Description -}}
+  {{ $.ResourceMetadata.FormatDocDescription $.Description -}}
   {{- if and (and ($.IsA "Array") ($.ItemType.IsA "Enum")) (and (not $.Output) (not $.ItemType.SkipDocsValues))}}
     {{- if $.ItemType.DefaultValue }}
   Default value is `{{ $.ItemType.DefaultValue }}`.
