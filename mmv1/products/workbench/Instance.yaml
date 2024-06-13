@@ -367,7 +367,6 @@ properties:
               name: network
               description: 'Optional. The name of the VPC that this VM instance is in.'
               immutable: true
-              custom_expand: templates/terraform/custom_expand/network_full_url.erb
               diff_suppress_func: tpgresource.CompareSelfLinkRelativePaths
               default_from_api: true
             - !ruby/object:Api::Type::String

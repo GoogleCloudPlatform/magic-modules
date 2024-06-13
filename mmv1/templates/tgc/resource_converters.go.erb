@@ -36,8 +36,10 @@ import (
 func ResourceConverters() map[string][]cai.ResourceConverter {
 	return map[string][]cai.ResourceConverter{
 		"google_artifact_registry_repository":             {artifactregistry.ResourceConverterArtifactRegistryRepository()},
+		"google_app_engine_application":                   {resourceConverterAppEngineApplication()},
 		"google_alloydb_cluster":                          {alloydb.ResourceConverterAlloydbCluster()},
 		"google_alloydb_instance":                         {alloydb.ResourceConverterAlloydbInstance()},
+		"google_apikeys_key":                              {resourceConverterApikeysKey()},
 		"google_compute_address":                          {compute.ResourceConverterComputeAddress()},
 		"google_compute_autoscaler":                       {compute.ResourceConverterComputeAutoscaler()},
 		"google_compute_firewall":                         {compute.ResourceConverterComputeFirewall()},
@@ -65,6 +67,7 @@ func ResourceConverters() map[string][]cai.ResourceConverter {
 		"google_compute_target_https_proxy":               {compute.ResourceConverterComputeTargetHttpsProxy()},
 		"google_compute_target_ssl_proxy":                 {compute.ResourceConverterComputeTargetSslProxy()},
 		"google_compute_target_pool":				   	   {resourceConverterComputeTargetPool()},
+		"google_composer_environment":				   	   {resourceConverterComposerEnvironment()},
 		"google_compute_region_commitment":                {resourceConverterCommitment()},
 		"google_dataflow_job":                             {resourceDataflowJob()},
 		"google_dataproc_autoscaling_policy":	           {dataproc.ResourceConverterDataprocAutoscalingPolicy()},
