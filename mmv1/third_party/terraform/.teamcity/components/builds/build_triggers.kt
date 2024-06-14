@@ -14,10 +14,6 @@ import DefaultStartHour
 import jetbrains.buildServer.configs.kotlin.BuildType
 import jetbrains.buildServer.configs.kotlin.Triggers
 import jetbrains.buildServer.configs.kotlin.triggers.schedule
-import java.time.LocalDate
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.util.*
 
 class NightlyTriggerConfiguration(
     val branch: String = DefaultBranchName,
