@@ -13,9 +13,9 @@
 
 --- !ruby/object:Api::Resource
 name: 'OrganizationMuteConfig'
-base_url: '{{parent}}/muteConfigs'
+base_url: '{{organization}}/muteConfigs'
 self_link: '{{name}}'
-create_url: '{{parent}}/muteConfigs?muteConfigId={{name}}'
+create_url: '{{organization}}/muteConfigs?muteConfigId={{name}}'
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -47,7 +47,7 @@ parameters:
     description: |
       Unique identifier provided by the client within the parent scope.
   - !ruby/object:Api::Type::String
-    name: parent
+    name: organization
     required: true
     immutable: true
     url_param_only: true

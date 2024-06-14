@@ -13,9 +13,9 @@
 
 --- !ruby/object:Api::Resource
 name: 'FolderMuteConfig'
-base_url: '{{parent}}/muteConfigs'
+base_url: '{{folder}}/muteConfigs'
 self_link: '{{name}}'
-create_url: '{{parent}}/muteConfigs?muteConfigId={{name}}'
+create_url: '{{folder}}/muteConfigs?muteConfigId={{name}}'
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -55,7 +55,7 @@ parameters:
     description: |
       location Id is provided by organization. If not provided, Use global as default.
   - !ruby/object:Api::Type::String
-    name: parent
+    name: folder
     required: true
     immutable: true
     url_param_only: true
