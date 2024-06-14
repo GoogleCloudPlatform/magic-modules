@@ -922,6 +922,13 @@ func BootstrapSubnet(t *testing.T, subnetName string, networkName string) string
         return BootstrapCustomSubnet(t, subnetName, networkName, make(map[string]interface{}))
 }
 
+func BootstrapSubnetWithFirewallForDataprocBatches(t *testing.T, testId string, subnetName string) string {
+	networkName := BootstrapSharedTestNetwork(t, testId)
+	subnetworkName := BootstrapSubnetForDataprocBatches(t, subnetName, networkName)
+	BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-batches", networkName)
+	return subnetworkName
+}
+
 func BootstrapCustomSubnet(t *testing.T, subnetName string, networkName string, subnetOptions map[string]interface{}) string {
 	projectID := envvar.GetTestProjectFromEnv()
 	region := envvar.GetTestRegionFromEnv()

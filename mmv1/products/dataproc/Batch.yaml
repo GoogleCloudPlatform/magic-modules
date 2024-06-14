@@ -61,7 +61,7 @@ examples:
       subnetwork_name: 'default'
       prevent_destroy: 'true'
     test_vars_overrides:
-      subnetwork_name: 'acctest.BootstrapSubnetForDataprocBatches(t, "dataproc-spark-test-network", acctest.BootstrapSharedTestNetwork(t, "dataproc-spark-test-network"))'
+      subnetwork_name: 'acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-spark-test-network", "dataproc-spark-test-subnetwork")'
       prevent_destroy: 'false'
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataproc_batch_sparksql'
@@ -74,7 +74,7 @@ examples:
       subnetwork_name: 'default'
       prevent_destroy: 'true'
     test_vars_overrides:
-      subnetwork_name: 'acctest.BootstrapSubnetForDataprocBatches(t, "dataproc-sparksql-test-network", acctest.BootstrapSharedTestNetwork(t, "dataproc-sparksql-test-network"))'
+      subnetwork_name: 'acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-sparksql-test-network", "dataproc-sparksql-test-subnetwork")'
       prevent_destroy: 'false'
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataproc_batch_pyspark'
@@ -87,7 +87,7 @@ examples:
       subnetwork_name: 'default'
       prevent_destroy: 'true'
     test_vars_overrides:
-      subnetwork_name: 'acctest.BootstrapSubnetForDataprocBatches(t, "dataproc-pyspark-test-network", acctest.BootstrapSharedTestNetwork(t, "dataproc-pyspark-test-network"))'
+      subnetwork_name: 'acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-pyspark-test-network", "dataproc-pyspark-test-subnetwork")'
       prevent_destroy: 'false'
 parameters:
   - !ruby/object:Api::Type::String
