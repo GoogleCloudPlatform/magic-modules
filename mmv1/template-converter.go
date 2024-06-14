@@ -254,7 +254,7 @@ func convertTemplate(folder string) int {
 		if err != nil {
 			log.Fatalf("Cannot compile the regular expression: %v", err)
 		}
-		data = r.ReplaceAll(data, []byte(`{{$.DefaultValue}}`))
+		data = r.ReplaceAll(data, []byte(`{{$.GoLiteral $.DefaultValue}}`))
 
 		// Replace <%= build_expand_resource_ref('v.(string)', property, pwd) %>
 		r, err = regexp.Compile(`<%= build_expand_resource_ref\('v\.\(string\)', property, pwd\) %>`)
@@ -355,6 +355,7 @@ func checkExceptionList(filePath string) bool {
 		"custom_flatten/bigquery_table_ref_copy_destinationtable.go",
 		"custom_flatten/bigquery_table_ref_extract_sourcetable.go",
 		"custom_flatten/bigquery_table_ref_query_destinationtable.go",
+		"unordered_list_customize_diff",
 	}
 
 	for _, t := range exceptionPaths {
