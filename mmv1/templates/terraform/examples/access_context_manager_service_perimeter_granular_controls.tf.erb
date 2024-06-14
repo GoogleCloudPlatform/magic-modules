@@ -1,11 +1,11 @@
-resource "google_access_context_manager_access_policy" "access-policy" {
+resource "google_access_context_manager_access_policy" "access_policy" {
   parent = "organizations/123456789"
   title  = "Policy with Granular Controls Group Support"
 }
 
-resource "google_access_context_manager_service_perimeter" "test-access" {
-  parent         = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}"
-  name           = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/servicePerimeters/%s"
+resource "google_access_context_manager_service_perimeter" "test_access" {
+  parent         = "accessPolicies/${google_access_context_manager_access_policy.access_policy.name}"
+  name           = "accessPolicies/${google_access_context_manager_access_policy.access_policy.name}/servicePerimeters/%s"
   title          = "%s"
   perimeter_type = "PERIMETER_TYPE_REGULAR"
   status {
@@ -28,8 +28,6 @@ resource "google_access_context_manager_service_perimeter" "test-access" {
               sources {
                   access_level = google_access_context_manager_access_level.test-access.name
               }
-              identities = ["group:database-admins@google.com"]
-              identities = ["principal://iam.googleapis.com/locations/global/workforcePools/1234/subject/janedoe"]
               identities = ["principalSet://iam.googleapis.com/locations/global/workforcePools/1234/*"]
           }
 

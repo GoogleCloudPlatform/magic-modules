@@ -14,10 +14,11 @@ resource "google_access_context_manager_service_perimeters" "<%= ctx[:primary_re
     title  = "<%= ctx[:vars]['service_perimeter_name2'] %>"
     status {
       restricted_services = ["bigtable.googleapis.com"]
-      		vpcAccessibleServices = {
-			enableRestriction = true
-			allowedServices = ["bigquery.googleapis.com"]
-		}
+
+			vpc_accessible_services {
+				enableRestriction = true
+				allowedServices = ["bigquery.googleapis.com"]
+			}
     }
   }
 }
