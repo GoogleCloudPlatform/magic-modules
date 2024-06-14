@@ -48,6 +48,6 @@ resource "google_compute_network_attachment" "default" {
     connection_preference = "ACCEPT_AUTOMATIC"
 
     subnetworks = [
-        google_compute_subnetwork.network.self_link
+        google_compute_subnetwork.default.self_link
     ]
 }
