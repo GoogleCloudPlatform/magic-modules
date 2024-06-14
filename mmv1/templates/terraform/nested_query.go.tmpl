@@ -56,7 +56,7 @@ func resource{{ $.ResourceName }}FindNestedObjectInList(d *schema.ResourceData, 
     {{- if $.NestedQuery.IsListOfIds }}
     // List response only contains the ID - construct a response object.
     item := map[string]interface{}{
-      "{{ $.FirstIdentity.ApiName }}": itemRaw,
+      "{{ $.FirstIdentityProp.ApiName }}": itemRaw,
     }
     {{- else }}
     item := itemRaw.(map[string]interface{})

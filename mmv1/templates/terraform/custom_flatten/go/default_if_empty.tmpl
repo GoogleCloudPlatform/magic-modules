@@ -12,7 +12,7 @@
 */}}
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil || tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
-		return {{$.DefaultValue}}
+		return {{$.GoLiteral $.DefaultValue}}
 	}
 {{- if $.IsA "Integer" }}
 	// Handles the string fixed64 format

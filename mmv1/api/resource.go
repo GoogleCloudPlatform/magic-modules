@@ -321,8 +321,12 @@ func (r *Resource) UnmarshalYAML(n *yaml.Node) error {
 		return err
 	}
 
-	r.ApiName = r.Name
-	r.CollectionUrlKey = google.Camelize(google.Plural(r.Name), "lower")
+	if r.ApiName == "" {
+		r.ApiName = r.Name
+	}
+	if r.CollectionUrlKey == "" {
+		r.CollectionUrlKey = google.Camelize(google.Plural(r.Name), "lower")
+	}
 
 	return nil
 }
@@ -849,12 +853,26 @@ func (r Resource) IncludeProjectForOperation() bool {
 
 // def region?
 func (r Resource) HasRegion() bool {
-	return strings.Contains(r.BaseUrl, "{{region}}") || strings.Contains(r.CreateUrl, "{{region}}")
+	found := false
+	for _, p := range r.Parameters {
+		if p.Name == "region" && p.IgnoreRead {
+			found = true
+			break
+		}
+	}
+	return found && strings.Contains(r.BaseUrl, "{{region}}")
 }
 
 // def zone?
 func (r Resource) HasZone() bool {
-	return strings.Contains(r.BaseUrl, "{{zone}}") || strings.Contains(r.CreateUrl, "{{zone}}")
+	found := false
+	for _, p := range r.Parameters {
+		if p.Name == "zone" && p.IgnoreRead {
+			found = true
+			break
+		}
+	}
+	return found && strings.Contains(r.BaseUrl, "{{zone}}")
 }
 
 // resource functions needed for template that previously existed in terraform.go but due to how files are being inherited here it was easier to put in here
@@ -1124,7 +1142,7 @@ func (r Resource) ImportIdRegexesFromIam() string {
 		transformed = append(transformed, s)
 	}
 
-	return strings.Join(transformed[:], "\", \"")
+	return strings.Join(slices.Compact(transformed[:]), "\", \"")
 }
 
 // For example, "projects/{{project}}/schemas/{{name}}", "{{project}}/{{name}}", "{{name}}"
@@ -1380,9 +1398,9 @@ func (r Resource) FirstIdentityProp() *Type {
 }
 
 type UpdateGroup struct {
-	UpdateUrl string
-	UpdateVerb string
-	UpdateId string
+	UpdateUrl       string
+	UpdateVerb      string
+	UpdateId        string
 	FingerprintName string
 }
 
@@ -1397,9 +1415,9 @@ func (r Resource) PropertiesByCustomUpdate() map[UpdateGroup][]*Type {
 	customUpdateProps := r.propertiesWithCustomUpdate(r.RootProperties())
 	groupedCustomUpdateProps := map[UpdateGroup][]*Type{}
 	for _, prop := range customUpdateProps {
-		groupedProperty := UpdateGroup{ UpdateUrl: prop.UpdateUrl,
-			UpdateVerb: prop.UpdateVerb,
-			UpdateId: prop.UpdateId,
+		groupedProperty := UpdateGroup{UpdateUrl: prop.UpdateUrl,
+			UpdateVerb:      prop.UpdateVerb,
+			UpdateId:        prop.UpdateId,
 			FingerprintName: prop.FingerprintName}
 		groupedCustomUpdateProps[groupedProperty] = append(groupedCustomUpdateProps[groupedProperty], prop)
 	}
@@ -1412,17 +1430,21 @@ func (r Resource) FieldSpecificUpdateMethods() bool {
 
 func (r Resource) CustomUpdatePropertiesByKey(updateUrl string, updateId string, fingerprintName string, updateVerb string) []*Type {
 	groupedProperties := r.PropertiesByCustomUpdate()
-	groupedProperty := UpdateGroup{ UpdateUrl: updateUrl,
-			UpdateVerb: updateVerb,
-			UpdateId: updateId,
-			FingerprintName: fingerprintName}
+	groupedProperty := UpdateGroup{UpdateUrl: updateUrl,
+		UpdateVerb:      updateVerb,
+		UpdateId:        updateId,
+		FingerprintName: fingerprintName}
 	return groupedProperties[groupedProperty]
 }
 
-func (r Resource) PropertyNamesToStrings (properties []*Type) []string{
+func (r Resource) PropertyNamesToStrings(properties []*Type) []string {
 	var propertyNames []string
 	for _, prop := range properties {
 		propertyNames = append(propertyNames, google.Underscore(prop.Name))
 	}
 	return propertyNames
+}
+
+func (r Resource) IsExcluded() bool {
+	return r.Exclude || r.ExcludeResource
 }

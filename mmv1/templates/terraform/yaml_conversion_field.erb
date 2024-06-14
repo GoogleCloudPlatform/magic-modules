@@ -173,7 +173,7 @@
 <%          end -%>
 <%        end -%>
 <%      elsif property.item_type.is_a?(Api::Type::ResourceRef) -%>
-    item_type: 
+    item_type:
       name: '<%= property.item_type.name -%>'
       type: ResourceRef
 <%        unless property.item_type.description.nil? || property.item_type.description == "A nested object resource"  -%>
@@ -186,7 +186,7 @@
       imports: '<%= property.item_type.imports.to_s -%>'
 <%    end -%>
 <%      else -%>
-    item_type: 
+    item_type:
 <%      if property.item_type.is_a?(Api::Type::Enum) -%>
       type: Enum
 <%          unless property.item_type.description.nil?  || property.item_type.description == "A nested object resource" -%>

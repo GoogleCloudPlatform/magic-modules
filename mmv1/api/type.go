@@ -1323,3 +1323,16 @@ func (t *Type) GoLiteral(value interface{}) string {
 		panic(fmt.Errorf("unknown go literal type %+v", value))
 	}
 }
+
+// def force_new?(property, resource)
+func (t *Type) IsForceNew() bool {
+	parent := t.Parent()
+	return (((!t.Output || t.IsA("KeyValueEffectiveLabels")) &&
+		(t.Immutable ||
+			(t.ResourceMetadata.Immutable && t.UpdateUrl == "" && !t.Immutable &&
+				(parent == nil ||
+					(parent.IsForceNew() &&
+						!(parent.FlattenObject && t.IsA("KeyValueLabels"))))))) ||
+		(t.IsA("KeyValueTerraformLabels") &&
+			t.ResourceMetadata.Updatable() && !t.ResourceMetadata.RootLabels()))
+}
