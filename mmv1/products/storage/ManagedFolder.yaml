@@ -95,7 +95,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: updateTime
     description: |
-      Output only. The timestamp at which this managed folder was most recently updated.
+      The timestamp at which this managed folder was most recently updated.
     output: true
   - !ruby/object:Api::Type::String
     name: metageneration
