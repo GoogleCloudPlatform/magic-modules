@@ -93,7 +93,7 @@ func ResourceSqlUser() *schema.Resource {
 				Optional:  true,
 				Sensitive: true,
 				Description: `The password for the user. Can be updated. For Postgres instances this is a Required field, unless type is set to
-                either CLOUD_IAM_USER or CLOUD_IAM_SERVICE_ACCOUNT.`,
+				either CLOUD_IAM_USER or CLOUD_IAM_SERVICE_ACCOUNT.`,
 			},
 
 			"type": {
@@ -102,7 +102,7 @@ func ResourceSqlUser() *schema.Resource {
 				ForceNew:         true,
 				DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("BUILT_IN"),
 				Description: `The user type. It determines the method to authenticate the user during login.
-                The default is the database's built-in user type.`,
+				The default is the database's built-in user type.`,
 			},
 			"sql_server_user_details": {
 				Type:     schema.TypeList,
