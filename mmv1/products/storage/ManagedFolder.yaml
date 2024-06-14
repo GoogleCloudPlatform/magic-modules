@@ -90,7 +90,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: createTime
     description: |
-      Output only. The timestamp at which this managed folder was created.
+      The timestamp at which this managed folder was created.
     output: true
   - !ruby/object:Api::Type::String
     name: updateTime
@@ -100,5 +100,5 @@ properties:
   - !ruby/object:Api::Type::String
     name: metageneration
     description: |
-      Output only. The metadata generation of the managed folder.
+      The metadata generation of the managed folder.
     output: true
