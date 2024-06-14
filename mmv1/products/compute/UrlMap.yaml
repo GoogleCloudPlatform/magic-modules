@@ -486,7 +486,7 @@ properties:
                   customErrorResponsePolicy is supported only for global external Application Load Balancers.
                 properties:
                   - !ruby/object:Api::Type::Array
-                    name: 'error_response_rule'
+                    name: 'errorResponseRule'
                     api_name: errorResponseRules
                     description: |
                       Specifies rules for returning error responses.
