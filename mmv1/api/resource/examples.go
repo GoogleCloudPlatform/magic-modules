@@ -179,8 +179,8 @@ func (e *Examples) UnmarshalYAML(n *yaml.Node) error {
 
 // Executes example templates for documentation and tests
 func (e *Examples) SetHCLText() {
-	docCopy := e
-	testCopy := e
+	docVars := make(map[string]string)
+	testVars := e.TestEnvVars
 	docs_defaults := map[string]string{
 		"PROJECT_NAME":        "my-project-name",
 		"CREDENTIALS":         "my/credentials/filename.json",
@@ -197,15 +197,17 @@ func (e *Examples) SetHCLText() {
 	}
 
 	// Apply doc defaults to test_env_vars from YAML
-	for key := range docCopy.TestEnvVars {
-		docCopy.TestEnvVars[key] = docs_defaults[docCopy.TestEnvVars[key]]
+	for key := range e.TestEnvVars {
+		docVars[key] = docs_defaults[e.TestEnvVars[key]]
 	}
-	e.DocumentationHCLText = ExecuteTemplate(docCopy, docCopy.ConfigPath, true)
+	e.TestEnvVars = docVars
+	e.DocumentationHCLText = ExecuteTemplate(e, e.ConfigPath, true)
 
+	e.TestEnvVars = testVars
 	// Override vars to inject test values into configs - will have
 	//   - "a-example-var-value%{random_suffix}""
 	//   - "%{my_var}" for overrides that have custom Golang values
-	for key, value := range testCopy.Vars {
+	for key, value := range e.Vars {
 		var newVal string
 		if strings.Contains(value, "-") {
 			newVal = fmt.Sprintf("tf-test-%s", value)
@@ -219,15 +221,15 @@ func (e *Examples) SetHCLText() {
 		if len(newVal) > 54 {
 			newVal = newVal[:54]
 		}
-		testCopy.Vars[key] = fmt.Sprintf("%s%%{random_suffix}", newVal)
+		e.Vars[key] = fmt.Sprintf("%s%%{random_suffix}", newVal)
 	}
 
 	// Apply overrides from YAML
-	for key := range testCopy.TestVarsOverrides {
-		testCopy.Vars[key] = fmt.Sprintf("%%{%s}", key)
+	for key := range e.TestVarsOverrides {
+		e.Vars[key] = fmt.Sprintf("%%{%s}", key)
 	}
 
-	e.TestHCLText = ExecuteTemplate(testCopy, testCopy.ConfigPath, true)
+	e.TestHCLText = ExecuteTemplate(e, e.ConfigPath, true)
 }
 
 func ExecuteTemplate(e any, templatePath string, appendNewline bool) string {
