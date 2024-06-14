@@ -99,7 +99,7 @@ resource "google_scc_v2_project_mute_config" "project_mute_test1" {
   filter               = "severity = \"LOW\""
   mute_config_id       = "tf-test-my-config-%{random_suffix}"
   location             = "%{location}"
-  project              = "projects/${google_project.project.project_id}"
+  project              = "${google_project.project.project_id}"
   type                 =  "STATIC"
 }
 `, context)
@@ -124,7 +124,7 @@ resource "google_scc_v2_project_mute_config" "project_mute_test2" {
   filter               = "severity = \"HIGH\""
   mute_config_id       = "tf-test-my-config-%{random_suffix}"
   location             = "%{location}"
-  project              = "projects/${google_project.project.project_id}"
+  project              = "${google_project.project.project_id}"
   type                 =  "STATIC"
 }
 `, context)

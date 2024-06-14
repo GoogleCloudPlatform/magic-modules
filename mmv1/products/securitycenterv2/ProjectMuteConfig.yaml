@@ -55,7 +55,7 @@ parameters:
     description: |
       location Id is provided by organization. If not provided, Use global as default.
   - !ruby/object:Api::Type::String
-    name: project
+    name: project_parent
     required: true
     immutable: true
     url_param_only: true
