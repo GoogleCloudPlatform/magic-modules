@@ -42,7 +42,6 @@ examples:
       org_id: :ORG_ID
       billing_account: :BILLING_ACCT
     skip_docs: true
-    skip_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'apigee_environment_keyvaluemaps_entries_beta_test'
     primary_resource_id: 'apigee_environment_keyvaluemaps_entries'
@@ -50,7 +49,6 @@ examples:
       org_id: :ORG_ID
       billing_account: :BILLING_ACCT
     skip_docs: true
-    skip_test: true
     min_version: beta
 timeouts: !ruby/object:Api::Timeouts
   insert_minutes: 1

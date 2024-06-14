@@ -48,7 +48,6 @@ examples:
       org_id: :ORG_ID
       billing_account: :BILLING_ACCT
     skip_docs: true
-    skip_test: true
     min_version: beta
 immutable: true
 timeouts: !ruby/object:Api::Timeouts
