@@ -1,6 +1,5 @@
 resource "google_data_fusion_instance" "<%= ctx[:primary_resource_id] %>" {
-  name             = "my-instance"
-  # name             = "<%= ctx[:vars]["instance_name"] %>"
+  name             = "<%= ctx[:vars]["instance_name"] %>"
   region           = "us-central1"
   type             = "BASIC"
   private_instance = true
@@ -8,7 +7,7 @@ resource "google_data_fusion_instance" "<%= ctx[:primary_resource_id] %>" {
   network_config {
     connection_type = "PRIVATE_SERVICE_CONNECT_INTERFACES"
     private_service_connect_config {
-      network_attachment      = google_compute_network_attachment.default.id
+      network_attachment      = google_compute_network_attachment.psc.id
       unreachable_cidr_block = "192.168.0.0/25"
     }
   }
@@ -16,38 +15,25 @@ resource "google_data_fusion_instance" "<%= ctx[:primary_resource_id] %>" {
   <%= ctx[:vars]['prober_test_run'] %>
 }
 
-resource "google_compute_network" "network" {
-  name = "<%= ctx[:vars]["network_name"] %>"
+resource "google_compute_network" "psc" {
+  name                    = "<%= ctx[:vars]["network_name"] %>"
+  auto_create_subnetworks = false
 }
 
-# resource "google_compute_global_address" "private_ip_address" {
-#   name          = "private-ip-address"
-#   purpose       = "VPC_PEERING"
-#   address_type  = "INTERNAL"
-#   prefix_length = 16
-#   network       = google_compute_network.network.id
-# }
+resource "google_compute_subnetwork" "psc" {
+  name   = "<%= ctx[:vars]["subnet_name"] %>"
+  region = "us-central1"
 
-# resource "google_service_networking_connection" "default" {
-#   network                 = google_compute_network.network.id
-#   service                 = "servicenetworking.googleapis.com"
-#   reserved_peering_ranges = [google_compute_global_address.private_ip_address.name]
-# }
-
-resource "google_compute_subnetwork" "default" {
-    name = "basic-subnetwork"
-    region = "us-central1"
-
-    network = google_compute_network.network.id
-    ip_cidr_range = "10.0.0.0/16"
+  network       = google_compute_network.psc.id
+  ip_cidr_range = "10.0.0.0/16"
 }
 
-resource "google_compute_network_attachment" "default" {
-    name = "basic-network-attachment"
-    region = "us-central1"
-    connection_preference = "ACCEPT_AUTOMATIC"
+resource "google_compute_network_attachment" "psc" {
+  name                  = "<%= ctx[:vars]["attachment_name"] %>"
+  region                = "us-central1"
+  connection_preference = "ACCEPT_AUTOMATIC"
 
-    subnetworks = [
-        google_compute_subnetwork.default.self_link
-    ]
+  subnetworks = [
+    google_compute_subnetwork.psc.self_link
+  ]
 }

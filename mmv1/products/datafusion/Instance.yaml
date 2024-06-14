@@ -63,8 +63,10 @@ examples:
     name: 'data_fusion_instance_psc'
     primary_resource_id: 'psc_instance'
     vars:
-      instance_name: 'my-instance'
+      instance_name: 'psc-instance'
       network_name: 'datafusion-psc-network'
+      subnet_name: 'datafusion-psc-subnet'
+      attachment_name: 'datafusion-psc-attachment'
       prober_test_run: ''
     test_vars_overrides:
       # Mark for testing to avoid service networking connection usage that is not cleaned up
@@ -271,21 +273,30 @@ properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'privateServiceConnectConfig'
         description: |
-          Optional. Configuration for Private Service Connect. This is required only when using connection type PRIVATE_SERVICE_CONNECT_INTERFACES.
-        immutable: true
+          Optional. Configuration for Private Service Connect.
+          This is required only when using connection type PRIVATE_SERVICE_CONNECT_INTERFACES.
+        required: false
         properties:
           - !ruby/object:Api::Type::String
             name: 'networkAttachment'
             description: |
-              sxxxx
+              Required. The reference to the network attachment used to establish private connectivity.
+              It will be of the form projects/{project-id}/regions/{region}/networkAttachments/{network-attachment-id}.
             required: false
-            immutable: true
           - !ruby/object:Api::Type::String
             name: 'unreachableCidrBlock'
             description: |
-              xxx
+              Optional. Input only. The CIDR block to which the CDF instance can't route traffic to in the consumer project VPC.
+              The size of this block should be at least /25. This range should not overlap with the primary address range of any subnetwork used by the network attachment.
+              This range can be used for other purposes in the consumer VPC as long as there is no requirement for CDF to reach destinations using these addresses.
+              If this value is not provided, the server chooses a non RFC 1918 address range. The format of this field is governed by RFC 4632.
             required: false
-            immutable: true
+          - !ruby/object:Api::Type::String
+            name: 'effectiveUnreachableCidrBlock'
+            description: |
+              Output only. The CIDR block to which the CDF instance can't route traffic to in the consumer project VPC.
+              The size of this block is /25. The format of this field is governed by RFC 4632.
+            output: true
   - !ruby/object:Api::Type::String
     name: 'zone'
     description: |
