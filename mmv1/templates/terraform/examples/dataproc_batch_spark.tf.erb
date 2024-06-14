@@ -9,7 +9,7 @@ resource "google_dataproc_batch" "<%= ctx[:primary_resource_id] %>" {
 
     environment_config {
       execution_config {
-        network_uri = "default"
+        subnetwork_uri = "<%= ctx[:vars]['subnetwork_name'] %>"
       }
     }
 

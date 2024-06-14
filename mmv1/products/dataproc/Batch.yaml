@@ -18,19 +18,21 @@ self_link: 'projects/{{project}}/locations/{{location}}/batches/{{batch_id}}'
 create_url: 'projects/{{project}}/locations/{{location}}/batches?batchId={{batch_id}}'
 delete_url: 'projects/{{project}}/locations/{{location}}/batches/{{batch_id}}'
 collection_url_key: 'batches'
+immutable: true
 description: |
   Dataproc Serverless Batches lets you run Spark workloads without requiring you to
   provision and manage your own Dataproc cluster.
 async: !ruby/object:Api::OpAsync
-  actions:
-    - create
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
     base_url: '{{op_id}}'
     wait_ms: 1000
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 10
+      update_minutes: 5
+      delete_minutes: 5
   result: !ruby/object:Api::OpAsync::Result
     path: 'response'
-    resource_inside_response: true
   status: !ruby/object:Api::OpAsync::Status
     path: 'done'
     complete: true
@@ -55,6 +57,12 @@ examples:
       'fmt.Sprintf("tf-test-spark-batch%s", context["random_suffix"])'
     test_env_vars:
       project_name: :PROJECT_NAME
+    vars:
+      subnetwork_name: 'default'
+      prevent_destroy: 'true'
+    test_vars_overrides:
+      subnetwork_name: 'acctest.BootstrapSubnetForDataprocBatches(t, "dataproc-spark-test-network", acctest.BootstrapSharedTestNetwork(t, "dataproc-spark-test-network"))'
+      prevent_destroy: 'false'
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataproc_batch_sparksql'
     primary_resource_id: 'example_batch_sparsql'
@@ -62,6 +70,12 @@ examples:
       'fmt.Sprintf("tf-test-spark-batch%s", context["random_suffix"])'
     test_env_vars:
       project_name: :PROJECT_NAME
+    vars:
+      subnetwork_name: 'default'
+      prevent_destroy: 'true'
+    test_vars_overrides:
+      subnetwork_name: 'acctest.BootstrapSubnetForDataprocBatches(t, "dataproc-sparksql-test-network", acctest.BootstrapSharedTestNetwork(t, "dataproc-sparksql-test-network"))'
+      prevent_destroy: 'false'
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataproc_batch_pyspark'
     primary_resource_id: 'example_batch_pyspark'
@@ -69,6 +83,12 @@ examples:
       'fmt.Sprintf("tf-test-spark-batch%s", context["random_suffix"])'
     test_env_vars:
       project_name: :PROJECT_NAME
+    vars:
+      subnetwork_name: 'default'
+      prevent_destroy: 'true'
+    test_vars_overrides:
+      subnetwork_name: 'acctest.BootstrapSubnetForDataprocBatches(t, "dataproc-pyspark-test-network", acctest.BootstrapSharedTestNetwork(t, "dataproc-pyspark-test-network"))'
+      prevent_destroy: 'false'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -77,7 +97,7 @@ parameters:
     description: |
       The location in which the batch will be created in.
   - !ruby/object:Api::Type::String
-    name: 'batch_id'
+    name: 'batchId'
     url_param_only: true
     immutable: true
     description: |
@@ -206,6 +226,7 @@ properties:
         name: 'version'
         description: |
           Version of the batch runtime.
+        default_from_api: true
       - !ruby/object:Api::Type::String
         name: 'containerImage'
         description: |
@@ -214,6 +235,7 @@ properties:
         name: 'properties'
         description: |
           A mapping of property names to values, which are used to configure workload execution.
+        default_from_api: true
       - !ruby/object:Api::Type::NestedObject
         name: 'repositoryConfig'
         description: |
@@ -242,6 +264,7 @@ properties:
             name: 'serviceAccount'
             description: |
               Service account that used to execute workload.
+            default_from_api: true
           - !ruby/object:Api::Type::Array
             name: 'networkTags'
             description: |
@@ -276,6 +299,8 @@ properties:
         name: 'peripheralsConfig'
         description: |
           Peripherals configuration that workload has access to.
+        default_from_api: true
+          #custom_flatten: 'templates/terraform/custom_flatten/json_to_string_map.go.erb'
         properties:
           - !ruby/object:Api::Type::String
             name: 'metastoreService'

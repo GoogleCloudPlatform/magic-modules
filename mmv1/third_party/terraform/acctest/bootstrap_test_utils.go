@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"maps"
 	"os"
 	"strings"
 	"testing"
@@ -910,7 +911,18 @@ func BootstrapSharedCaPoolInLocation(t *testing.T, location string) string {
 	return poolName
 }
 
+func BootstrapSubnetForDataprocBatches(t *testing.T, subnetName string, networkName string) string {
+	subnetOptions := map[string]interface{}{
+		"privateIpGoogleAccess": true,
+	}
+        return BootstrapCustomSubnet(t, subnetName, networkName, subnetOptions)
+}
+
 func BootstrapSubnet(t *testing.T, subnetName string, networkName string) string {
+        return BootstrapCustomSubnet(t, subnetName, networkName, make(map[string]interface{}))
+}
+
+func BootstrapCustomSubnet(t *testing.T, subnetName string, networkName string, subnetOptions map[string]interface{}) string {
 	projectID := envvar.GetTestProjectFromEnv()
 	region := envvar.GetTestRegionFromEnv()
 
@@ -932,12 +944,18 @@ func BootstrapSubnet(t *testing.T, subnetName string, networkName string) string
 		networkUrl := fmt.Sprintf("%sprojects/%s/global/networks/%s", config.ComputeBasePath, projectID, networkName)
 		url := fmt.Sprintf("%sprojects/%s/regions/%s/subnetworks", config.ComputeBasePath, projectID, region)
 
-		subnetObj := map[string]interface{}{
+		defaultSubnetObj := map[string]interface{}{
 			"name":        subnetName,
 			"region ":     region,
 			"network":     networkUrl,
 			"ipCidrRange": "10.77.0.0/20",
 		}
+
+		subnetObj := defaultSubnetObj
+
+		if len(subnetOptions) != 0 {
+		        maps.Copy(defaultSubnetObj, subnetOptions)
+                }
 
 		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
