@@ -91,7 +91,7 @@ properties:
       The full names of the Google Compute Engine networks the domain instance is connected to. The domain is only available on networks listed in authorizedNetworks.
       If CIDR subnets overlap between networks, domain creation will fail.
     is_set: true
-    item_type: 
+    item_type:
       type: String
   - name: 'reservedIpRange'
     type: String
@@ -106,7 +106,7 @@ properties:
       Locations where domain needs to be provisioned. [regions][compute/docs/regions-zones/]
       e.g. us-west1 or us-east4 Service supports up to 4 locations at once. Each location will use a /26 block.
     required: true
-    item_type: 
+    item_type:
       type: String
   - name: 'admin'
     type: String

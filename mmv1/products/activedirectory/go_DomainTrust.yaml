@@ -110,7 +110,7 @@ properties:
       The target DNS server IP addresses which can resolve the remote domain involved in the trust.
     is_set: true
     required: true
-    item_type: 
+    item_type:
       type: String
   - name: 'trustHandshakeSecret'
     type: String
