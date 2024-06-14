@@ -41,10 +41,10 @@ class NightlyTestProjectsTests {
 
             // Check that nightly test is being ran on a nightly-test-* branch
             var isNightlyTestBranch: Boolean = false
-            if (schedulingTrigger.branchFilter == "+:UTC-nightly-test-*"){
+            if (schedulingTrigger.branchFilter == "+:refs/heads/UTC-*\n-:refs/heads/UTC-nightly-*"){
                 isNightlyTestBranch = true
             }
-            assertTrue("Build configuration `${bt.name}` is using the nightly-test branch;", isNightlyTestBranch)
+            assertTrue("Build configuration `${bt.name}` is using the nightly-test branch filter;", isNightlyTestBranch)
         }
     }
 }
