@@ -29,10 +29,9 @@ class NightlyTriggerConfiguration(
 
 fun Triggers.runNightly(config: NightlyTriggerConfiguration) {
 
-    val nightlyTestDate = LocalDate.parse(LocalDate.now(ZoneId.of("UTC")).toString(), DateTimeFormatter.ofPattern("y-MM-d", Locale.US)).toString()
     schedule{
         enabled = config.nightlyTestsEnabled
-        branchFilter = "+:UTC-nightly-test-$nightlyTestDate" 
+        branchFilter = "+:UTC-*,-:UTC-nightly-*" 
         triggerBuild = always() // Run build even if no new commits/pending changes
         withPendingChangesOnly = false
         enforceCleanCheckout = true
