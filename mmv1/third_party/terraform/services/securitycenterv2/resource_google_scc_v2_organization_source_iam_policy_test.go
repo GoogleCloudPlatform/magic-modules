@@ -51,7 +51,7 @@ resource "google_scc_v2_organization_source" "custom_source" {
 resource "google_scc_v2_organization_source_iam_policy" "custom_policy" {
   organization  = "%s"
   source        = google_scc_v2_organization_source.custom_source.canonical_name
-  policy_data   = '%s'
+  policy_data   = "%s"
 }
 `, suffix, orgId, orgId, suffix, orgId, policyData)
 }
