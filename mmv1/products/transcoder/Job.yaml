@@ -375,18 +375,241 @@ properties:
               name: "key"
               description: |
                 A unique key for this atom. Must be specified when using advanced mapping.
-            - !ruby/object:Api::Type::Array
-              name: "inputs"
-              item_type: Api::Type::String
+            - !ruby/object:Api::Type::NestedObject
+              name: "videoStream"
               description: |
-                List of Input.key values identifying files that should be used in this atom. The listed inputs must have the same timeline.
-            - !ruby/object:Api::Type::Time
-              name: "startTimeOffset"
-              description: |
-                Start time in seconds for the atom, relative to the input file timeline. The default is 0s.
-                A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
-            - !ruby/object:Api::Type::Time
-              name: "endTimeOffset"
-              description: |
-                End time in seconds for the atom, relative to the input file timeline. When endTimeOffset is not specified, the inputs are used until the end of the atom.
-                A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
+                Encoding of a video stream.
+              properties:
+                - !ruby/object:Api::Type::NestedObject
+                  name: "videoStream"
+                  description: |
+                    Encoding of a video stream.
+                  properties:
+                    - !ruby/object:Api::Type::NestedObject
+                      name: "h264"
+                      description: |
+                        H264 codec settings
+                      properties:
+                        - !ruby/object:Api::Type::Integer
+                          name: "widthPixels"
+                          description: |
+                            The width of the video in pixels. Must be an even integer. When not specified, the width is adjusted to match the specified height and input aspect ratio. If both are omitted, the input width is used.
+                            For portrait videos that contain horizontal ASR and rotation metadata, provide the width, in pixels, per the horizontal ASR. The API calculates the height per the horizontal ASR. The API detects any rotation metadata and swaps the requested height and width for the output.
+                        - !ruby/object:Api::Type::Integer
+                          name: "heightPixels"
+                          description: |
+                            The height of the video in pixels. Must be an even integer. When not specified, the height is adjusted to match the specified width and input aspect ratio. If both are omitted, the input height is used.
+                            For portrait videos that contain horizontal ASR and rotation metadata, provide the height, in pixels, per the horizontal ASR. The API calculates the width per the horizontal ASR. The API detects any rotation metadata and swaps the requested height and width for the output.
+                        - !ruby/object:Api::Type::Integer
+                          name: "frameRate"
+                          description: The target video frame rate in frames per second (FPS).
+                          required: true
+                        - !ruby/object:Api::Type::Enum
+                          name: "frameRateConversionStrategy"
+                          description: |
+                            Frame rate conversion strategy for desired frame rate.
+                          values:
+                            - :FRAME_RATE_CONVERSION_STRATEGY_UNSPECIFIED
+                            - :DOWNSAMPLE
+                            - :DROP_DUPLICATE
+                        - !ruby/object:Api::Type::Integer
+                          name: "bitrateBps"
+                          description: The video bitrate in bits per second.
+                        - !ruby/object:Api::Type::String
+                          name: "pixelFormat"
+                          description: Pixel format to use.
+                        - !ruby/object:Api::Type::String
+                          name: "rateControlMode"
+                          description: Specify the mode.
+                        - !ruby/object:Api::Type::Integer
+                          name: "crfLevel"
+                          description: Target CRF level.
+                        - !ruby/object:Api::Type::Boolean
+                          name: "allowOpenGop"
+                          description: Specifies whether an open Group of Pictures (GOP) structure should be allowed or not.
+                        - !ruby/object:Api::Type::Boolean
+                          name: "enableTwoPass"
+                          description: Use two-pass encoding strategy to achieve better video quality.
+                        - !ruby/object:Api::Type::Integer
+                          name: "vbvSizeBits"
+                          description: Size of the Video Buffering Verifier (VBV) buffer in bits.
+                        - !ruby/object:Api::Type::Integer
+                          name: "vbvFullnessBits"
+                          description: Initial fullness of the Video Buffering Verifier (VBV) buffer in bits.
+                        - !ruby/object:Api::Type::String
+                          name: "entropyCoder"
+                          description: The entropy coder to use.
+                        - !ruby/object:Api::Type::Boolean
+                          name: "bPyramid"
+                          description: Allow B-pyramid for reference frame selection.
+                        - !ruby/object:Api::Type::Integer
+                          name: "bFrameCount"
+                          description: The number of consecutive B-frames.
+                        - !ruby/object:Api::Type::Integer
+                          name: "aqStrength"
+                          description: Specify the intensity of the adaptive quantizer (AQ).
+                        - !ruby/object:Api::Type::String
+                          name: "profile"
+                          description: Enforces the specified codec profile.
+                        - !ruby/object:Api::Type::String
+                          name: "tune"
+                          description: Enforces the specified codec tune.
+                        - !ruby/object:Api::Type::String
+                          name: "preset"
+                          description: Enforces the specified codec preset.
+                        - !ruby/object:Api::Type::Integer
+                          name: "gopFrameCount"
+                          description: Select the GOP size based on the specified frame count.
+                        - !ruby/object:Api::Type::Time
+                          name: "gopDuration"
+                          description: Select the GOP size based on the specified duration.
+                        - !ruby/object:Api::Type::NestedObject
+                          name: "sdr"
+                          description: |
+                            SDR color format setting for H264.
+                        - !ruby/object:Api::Type::NestedObject
+                          name: "hlg"
+                          description: |
+                            HLG color format setting for H264.
+                    - !ruby/object:Api::Type::NestedObject
+                      name: "h265"
+                      description: |
+                        H265 codec settings
+                      properties:
+                        - !ruby/object:Api::Type::Integer
+                          name: "widthPixels"
+                          description: |
+                            The width of the video in pixels.
+                        - !ruby/object:Api::Type::Integer
+                          name: "heightPixels"
+                          description: |
+                            The height of the video in pixels.
+                        - !ruby/object:Api::Type::Integer
+                          name: "frameRate"
+                          description: The target video frame rate in frames per second (FPS).
+                          required: true
+                        - !ruby/object:Api::Type::Enum
+                          name: "frameRateConversionStrategy"
+                          description: |
+                            Frame rate conversion strategy for desired frame rate.
+                          values:
+                            - :FRAME_RATE_CONVERSION_STRATEGY_UNSPECIFIED
+                            - :DOWNSAMPLE
+                            - :DROP_DUPLICATE
+                        - !ruby/object:Api::Type::Integer
+                          name: "bitrateBps"
+                          description: The video bitrate in bits per second.
+                        - !ruby/object:Api::Type::String
+                          name: "pixelFormat"
+                          description: Pixel format to use.
+                        - !ruby/object:Api::Type::String
+                          name: "rateControlMode"
+                          description: Specify the mode.
+                        - !ruby/object:Api::Type::Integer
+                          name: "crfLevel"
+                          description: Target CRF level.
+                        - !ruby/object:Api::Type::Boolean
+                          name: "allowOpenGop"
+                          description: Specifies whether an open Group of Pictures (GOP) structure should be allowed or not.
+                        - !ruby/object:Api::Type::Boolean
+                          name: "enableTwoPass"
+                          description: Use two-pass encoding strategy to achieve better video quality.
+                        - !ruby/object:Api::Type::Integer
+                          name: "vbvSizeBits"
+                          description: Size of the Video Buffering Verifier (VBV) buffer in bits.
+                        - !ruby/object:Api::Type::Integer
+                          name: "vbvFullnessBits"
+                          description: Initial fullness of the Video Buffering Verifier (VBV) buffer in bits.
+                        - !ruby/object:Api::Type::String
+                          name: "entropyCoder"
+                          description: The entropy coder to use.
+                        - !ruby/object:Api::Type::Boolean
+                          name: "bPyramid"
+                          description: Allow B-pyramid for reference frame selection.
+                        - !ruby/object:Api::Type::Integer
+                          name: "bFrameCount"
+                          description: The number of consecutive B-frames.
+                        - !ruby/object:Api::Type::Integer
+                          name: "aqStrength"
+                          description: Specify the intensity of the adaptive quantizer (AQ).
+                        - !ruby/object:Api::Type::String
+                          name: "profile"
+                          description: Enforces the specified codec profile.
+                        - !ruby/object:Api::Type::String
+                          name: "tune"
+                          description: Enforces the specified codec tune.
+                        - !ruby/object:Api::Type::String
+                          name: "preset"
+                          description: Enforces the specified codec preset.
+                        - !ruby/object:Api::Type::Integer
+                          name: "gopFrameCount"
+                          description: Select the GOP size based on the specified frame count.
+                        - !ruby/object:Api::Type::Time
+                          name: "gopDuration"
+                          description: Select the GOP size based on the specified duration.
+                        - !ruby/object:Api::Type::NestedObject
+                          name: "sdr"
+                          description: |
+                            SDR color format setting for H265.
+                        - !ruby/object:Api::Type::NestedObject
+                          name: "hlg"
+                          description: |
+                            HLG color format setting for H265.
+                        - !ruby/object:Api::Type::NestedObject
+                          name: "hdr10"
+                          description: |
+                            HDR10 color format setting for H265.
+                    - !ruby/object:Api::Type::NestedObject
+                      name: "vp9"
+                      description: |
+                        VP9 codec settings
+                      properties:
+                        - !ruby/object:Api::Type::Integer
+                          name: "widthPixels"
+                          description: |
+                            The width of the video in pixels.
+                        - !ruby/object:Api::Type::Integer
+                          name: "heightPixels"
+                          description: |
+                            The height of the video in pixels.
+                        - !ruby/object:Api::Type::Integer
+                          name: "frameRate"
+                          description: The target video frame rate in frames per second (FPS).
+                          required: true
+                        - !ruby/object:Api::Type::Enum
+                          name: "frameRateConversionStrategy"
+                          description: |
+                            Frame rate conversion strategy for desired frame rate.
+                          values:
+                            - :FRAME_RATE_CONVERSION_STRATEGY_UNSPECIFIED
+                            - :DOWNSAMPLE
+                            - :DROP_DUPLICATE
+                        - !ruby/object:Api::Type::Integer
+                          name: "bitrateBps"
+                          description: The video bitrate in bits per second.
+                        - !ruby/object:Api::Type::String
+                          name: "pixelFormat"
+                          description: Pixel format to use.
+                        - !ruby/object:Api::Type::String
+                          name: "rateControlMode"
+                          description: Specify the mode.
+                        - !ruby/object:Api::Type::Integer
+                          name: "crfLevel"
+                          description: Target CRF level.
+                        - !ruby/object:Api::Type::String
+                          name: "profile"
+                          description: Enforces the specified codec profile.
+                        - !ruby/object:Api::Type::Integer
+                          name: "gopFrameCount"
+                          description: Select the GOP size based on the specified frame count.
+                        - !ruby/object:Api::Type::Time
+                          name: "gopDuration"
+                          description: Select the GOP size based on the specified duration.
+                        - !ruby/object:Api::Type::NestedObject
+                          name: "sdr"
+                          description: |
+                            SDR color format setting for H265.
+                        - !ruby/object:Api::Type::NestedObject
+                          name: "hlg"
+                          description: |
+                            HLG color format setting for H265.
