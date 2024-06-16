@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
-	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/reader"
+	"github.com/GoogleCloudPlatform/magic-modules/tools/test-reader/reader"
 	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/zclconf/go-cty/cty"
