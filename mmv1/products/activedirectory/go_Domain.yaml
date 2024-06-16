@@ -15,8 +15,7 @@
 ---
 name: 'Domain'
 kind: 'activedirectory#domain'
-description: |
-  Creates a Microsoft AD domain
+description: Creates a Microsoft AD domain
 references:
   guides:
     'Managed Microsoft Active Directory Quickstart': 'https://cloud.google.com/managed-microsoft-ad/docs/quickstarts'
@@ -53,7 +52,7 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  custom_import: 'templates/terraform/custom_import/self_link_as_name.erb'
+  custom_import: 'templates/terraform/custom_import/go/self_link_as_name.tmpl'
 error_abort_predicates:
 
   - 'transport_tpg.Is429QuotaError'
@@ -67,8 +66,9 @@ examples:
 parameters:
   - name: 'domainName'
     type: String
-    description: "The fully qualified domain name. e.g. mydomain.myorganization.com, with the restrictions,
-https://cloud.google.com/managed-microsoft-ad/reference/rest/v1/projects.locations.global.domains."
+    description: |
+      The fully qualified domain name. e.g. mydomain.myorganization.com, with the restrictions
+      of https://cloud.google.com/managed-microsoft-ad/reference/rest/v1/projects.locations.global.domains.
     url_param_only: true
     required: true
     immutable: true
@@ -77,40 +77,47 @@ https://cloud.google.com/managed-microsoft-ad/reference/rest/v1/projects.locatio
 properties:
   - name: 'name'
     type: String
-    description: "The unique name of the domain using the format: `projects/{project}/locations/global/domains/{domainName}`."
+    description:
+      'The unique name of the domain using the format:
+      `projects/{project}/locations/global/domains/{domainName}`.'
     output: true
   - name: 'labels'
     type: KeyValueLabels
-    description: "Resource labels that can contain user-provided metadata"
+    description: 'Resource labels that can contain user-provided metadata'
     immutable: false
   - name: 'authorizedNetworks'
     type: Array
-    description: "The full names of the Google Compute Engine networks the domain instance is connected to. The domain is only available on networks listed in authorizedNetworks.
-If CIDR subnets overlap between networks, domain creation will fail."
+    description: |
+      The full names of the Google Compute Engine networks the domain instance is connected to. The domain is only available on networks listed in authorizedNetworks.
+      If CIDR subnets overlap between networks, domain creation will fail.
     is_set: true
     item_type:
       type: String
   - name: 'reservedIpRange'
     type: String
-    description: "The CIDR range of internal addresses that are reserved for this domain. Reserved networks must be /24 or larger.
-Ranges must be unique and non-overlapping with existing subnets in authorizedNetworks"
+    description: |
+      The CIDR range of internal addresses that are reserved for this domain. Reserved networks must be /24 or larger.
+      Ranges must be unique and non-overlapping with existing subnets in authorizedNetworks
     required: true
     immutable: true
   - name: 'locations'
     type: Array
-    description: "Locations where domain needs to be provisioned. [regions][compute/docs/regions-zones/]
-e.g. us-west1 or us-east4 Service supports up to 4 locations at once. Each location will use a /26 block."
+    description: |
+      Locations where domain needs to be provisioned. [regions][compute/docs/regions-zones/]
+      e.g. us-west1 or us-east4 Service supports up to 4 locations at once. Each location will use a /26 block.
     required: true
     item_type:
       type: String
   - name: 'admin'
     type: String
-    description: "The name of delegated administrator account used to perform Active Directory operations.
-If not specified, setupadmin will be used."
+    description: |
+      The name of delegated administrator account used to perform Active Directory operations.
+      If not specified, setupadmin will be used.
     immutable: true
     default_value: setupadmin
   - name: 'fqdn'
     type: String
-    description: "The fully-qualified domain name of the exposed domain used by clients to connect to the service.
-Similar to what would be chosen for an Active Directory set up on an internal network."
+    description: |
+      The fully-qualified domain name of the exposed domain used by clients to connect to the service.
+      Similar to what would be chosen for an Active Directory set up on an internal network.
     output: true

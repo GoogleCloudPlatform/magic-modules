@@ -15,7 +15,7 @@
 {{- define "flattenPropertyMethod" }}
 {{- if $.CustomFlatten }}
     {{- $.CustomTemplate $.CustomFlatten true -}}
-{{- else }}
+{{ else }}
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
   {{- if $.IsA "NestedObject" }}
   if v == nil {
@@ -122,7 +122,7 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 	}
 
 	return v // let terraform core handle it otherwise
-  {{- else if and ($.IsA "Integer") ($.ItemType.IsA "ResourceRef")}}
+  {{- else if and ($.IsA "Array") ($.ItemType.IsA "ResourceRef")}}
   if v == nil {
     return v
   }
@@ -147,7 +147,7 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 }
   {{- if $.NestedProperties }}
     {{- range $prop := $.NestedProperties }}
-      {{- template "flattenPropertyMethod" $prop -}}
+      {{ template "flattenPropertyMethod" $prop -}}
     {{- end }}
   {{- end }}
 {{- end }}

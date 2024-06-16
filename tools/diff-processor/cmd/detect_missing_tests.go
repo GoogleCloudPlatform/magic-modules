@@ -11,7 +11,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/detector"
 	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
-	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/reader"
+	"github.com/GoogleCloudPlatform/magic-modules/tools/test-reader/reader"
 	"github.com/golang/glog"
 	"github.com/spf13/cobra"
 )

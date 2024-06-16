@@ -99,7 +99,7 @@ func (t *Terraform) GenerateObjects(outputFolder string, generateCode, generateD
 func (t *Terraform) GenerateObject(object api.Resource, outputFolder, productPath string, generateCode, generateDocs bool) {
 	templateData := NewTemplateData(outputFolder, t.Version)
 
-	if !object.ExcludeResource {
+	if !object.IsExcluded() {
 		log.Printf("Generating %s resource", object.Name)
 		t.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
 
@@ -826,26 +826,6 @@ func (t Terraform) ImportPathFromVersion(v string) string {
 //
 // end
 //
-// def force_new?(property, resource)
-//
-//	(
-//	  (!property.output || property.is_a?(Api::Type::KeyValueEffectiveLabels)) &&
-//	  (property.immutable ||
-//	    (resource.immutable && property.update_url.nil? && property.immutable.nil? &&
-//	      (property.parent.nil? ||
-//	        (force_new?(property.parent, resource) &&
-//	         !(property.parent.flatten_object && property.is_a?(Api::Type::KeyValueLabels))
-//	        )
-//	      )
-//	    )
-//	  )
-//	) ||
-//	  (property.is_a?(Api::Type::KeyValueTerraformLabels) &&
-//	    !updatable?(resource, resource.all_user_properties) && !resource.root_labels?
-//	  )
-//
-// end
-//
 // # Returns tuples of (fieldName, list of update masks) for
 // #  top-level updatable fields. Schema path refers to a given Terraform
 // # field name (e.g. d.GetChange('fieldName)')
@@ -931,7 +911,7 @@ func (t *Terraform) generateResourcesForVersion(products []map[string]interface{
 
 			var resourceName string
 
-			if !object.ExcludeResource {
+			if !object.IsExcluded() {
 				t.ResourceCount++
 				resourceName = fmt.Sprintf("%s.Resource%s", service, object.ResourceName())
 			}

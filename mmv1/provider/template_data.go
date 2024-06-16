@@ -171,7 +171,7 @@ func (td *TemplateData) GenerateSweeperFile(filePath string, resource api.Resour
 }
 
 func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, goFormat bool, templates ...string) {
-	log.Printf("Generating %s", filePath)
+	// log.Printf("Generating %s", filePath)
 
 	templateFileName := filepath.Base(templatePath)
 

@@ -533,7 +533,7 @@ virtual_fields:
   - name: '<%= vfield.name %>'
     description:
 <%      unless vfield.type.nil? -%>
-    type: <%= tf_type(vfield.type) %>
+    type: <%= vfield.type.to_s.gsub("Api::Type::", "") %>
 <%      end -%>
 <%      unless vfield.default_value.nil? -%>
     default_value: <%= go_literal(vfield.default_value) %>
