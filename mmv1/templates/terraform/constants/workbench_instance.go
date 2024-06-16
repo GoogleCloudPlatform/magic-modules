@@ -185,3 +185,48 @@ func waitForWorkbenchOperation(config *transport_tpg.Config, d *schema.ResourceD
 	return nil
 }
 <% end -%>
+
+func resizeWorkbenchInstanceDisk(config *transport_tpg.Config, d *schema.ResourceData, project string, userAgent string, isBoot bool) (error) {
+	diskObj := make(map[string]interface{})
+	var sizeString string
+	var diskKey string
+	if isBoot{
+		sizeString = "gce_setup.0.boot_disk.0.disk_size_gb"
+		diskKey = "bootDisk"
+	} else{
+		sizeString = "gce_setup.0.data_disks.0.disk_size_gb"
+		diskKey = "dataDisk"
+	}
+	disk := make(map[string]interface{})
+	disk["diskSizeGb"] = d.Get(sizeString)
+	diskObj[diskKey] = disk
+	
+  
+	resizeUrl, err := tpgresource.ReplaceVars(d, config, "{{WorkbenchBasePath}}projects/{{project}}/locations/{{location}}/instances/{{name}}:resizeDisk")
+	if err != nil {
+		return err
+	}
+  
+	dRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	  Config: config,
+	  Method: "POST",
+	  RawURL: resizeUrl,
+	  UserAgent: userAgent,
+	  Body: diskObj,
+	  Timeout: d.Timeout(schema.TimeoutUpdate),
+	})
+  
+	if err != nil {
+	  return fmt.Errorf("Error resizing disk: %s", err)
+	}
+	
+	err = WorkbenchOperationWaitTime(
+	  config, dRes, project, "Resizing disk", userAgent,
+	  d.Timeout(schema.TimeoutUpdate))
+  
+	if err != nil {
+	  return err
+	}
+	
+	return nil
+}
