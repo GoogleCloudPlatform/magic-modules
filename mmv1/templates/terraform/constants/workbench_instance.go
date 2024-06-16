@@ -220,9 +220,7 @@ func resizeWorkbenchInstanceDisk(config *transport_tpg.Config, d *schema.Resourc
 	  return fmt.Errorf("Error resizing disk: %s", err)
 	}
 	
-	err = WorkbenchOperationWaitTime(
-	  config, dRes, project, "Resizing disk", userAgent,
-	  d.Timeout(schema.TimeoutUpdate))
+	err = waitForWorkbenchOperation(config, d, project, billingProject, userAgent, dRes)
   
 	if err != nil {
 	  return err
