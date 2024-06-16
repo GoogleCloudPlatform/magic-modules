@@ -387,6 +387,7 @@ properties:
             - !ruby/object:Api::Type::Array
               name: accessConfigs
               immutable: true
+              default_from_api: true
               description: |
                 Optional. An array of configurations for this interface. Currently, only one access
                 config, ONE_TO_ONE_NAT, is supported. If no accessConfigs specified, the
@@ -396,7 +397,6 @@ properties:
                 properties:
                   - !ruby/object:Api::Type::String
                     name: externalIp
-                    default_from_api: true
                     immutable: true
                     required: true
                     description: |
