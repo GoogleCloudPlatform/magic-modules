@@ -11,7 +11,7 @@
     description:
 <%    end -%>
 <%  end -%>
-<%  unless property.api_name == property.name -%>
+<%  unless property.api_name == property.name || property.api_name.nil? -%>
     api_name: <%= property.api_name %>
 <%  end -%>
 <%  unless !property.unordered_list -%>

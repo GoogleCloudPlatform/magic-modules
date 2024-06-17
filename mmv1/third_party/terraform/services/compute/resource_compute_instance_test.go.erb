@@ -906,17 +906,17 @@ func TestAccComputeInstance_with375GbScratchDisk(t *testing.T) {
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
 					testAccCheckComputeInstanceScratchDisk(&instance, []map[string]string{
-						map[string]string{
+						{
 							"interface": "NVME",
 						},
-						map[string]string{
+						{
 							"interface": "SCSI",
 						},
-						map[string]string{
+						{
 							"interface": "NVME",
 							"deviceName": "nvme-local-ssd",
 						},
-						map[string]string{
+						{
 							"interface": "SCSI",
 							"deviceName": "scsi-local-ssd",
 						},
@@ -948,22 +948,22 @@ func TestAccComputeInstance_with18TbScratchDisk(t *testing.T) {
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
 					testAccCheckComputeInstanceScratchDisk(&instance, []map[string]string{
-						map[string]string{
+						{
 							"interface": "NVME",
 						},
-						map[string]string{
+						{
 							"interface": "NVME",
 						},
-						map[string]string{
+						{
 							"interface": "NVME",
 						},
-						map[string]string{
+						{
 							"interface": "NVME",
 						},
-						map[string]string{
+						{
 							"interface": "NVME",
 						},
-						map[string]string{
+						{
 							"interface": "NVME",
 						},
 					}),
