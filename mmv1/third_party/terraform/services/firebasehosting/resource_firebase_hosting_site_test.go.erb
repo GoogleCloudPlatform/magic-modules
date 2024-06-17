@@ -61,19 +61,10 @@ func TestAccFirebaseHostingSite_firebasehostingSiteUpsert(t *testing.T) {
 		CheckDestroy:             testAccCheckFirebaseHostingSiteDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFirebaseHostingSite_firebasehostingSiteCreate(context),
+				Config: testAccFirebaseHostingSite_firebasehostingSiteUpsert(context),
 			},
 			{
-				ResourceName:            "google_firebase_hosting_site.create",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"site_id"},
-			},
-			{
-				Config: testAccFirebaseHostingSite_firebasehostingSiteCreateAgain(context),
-			},
-			{
-				ResourceName:            "google_firebase_hosting_site.create_again",
+				ResourceName:            "google_firebase_hosting_site.create2",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"site_id"},
@@ -117,30 +108,20 @@ resource "google_firebase_hosting_site" "update" {
 `, context)
 }
 
-func testAccFirebaseHostingSite_firebasehostingSiteCreate(context map[string]interface{}) string {
+func testAccFirebaseHostingSite_firebasehostingSiteUpsert(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_firebase_hosting_site" "create" {
   provider = google-beta
   project  = "%{project_id}"
   site_id = "%{site_id}%{random_suffix}"
 }
-`, context)
-}
 
-
-func testAccFirebaseHostingSite_firebasehostingSiteCreateAgain(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_firebase_web_app" "app" {
-  provider = google-beta
-  project  = "%{project_id}"
-  display_name = "tf-test Test web app for Firebase Hosting"
-}
-
-resource "google_firebase_hosting_site" "create_again" {
+resource "google_firebase_hosting_site" "create2" {
   provider = google-beta
   project  = "%{project_id}"
   site_id = "%{site_id}%{random_suffix}"
-  app_id = google_firebase_web_app.app.app_id
+
+  depends_on = [google_firebase_hosting_site.create]
 }
 `, context)
 }
