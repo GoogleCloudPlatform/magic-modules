@@ -323,3 +323,21 @@ resource "google_project_service" "test" {
 }
 `, pid, pid, org, service)
 }
+
+func testAccProjectService_checkUsage(service string, pid, org string) string {
+	return fmt.Sprintf(`
+resource "google_project" "acceptance" {
+  project_id = "%s"
+  name       = "%s"
+  org_id     = "%s"
+}
+
+resource "google_project_service" "test" {
+  project = google_project.acceptance.project_id
+  service = "%s"
+
+  disable_dependent_services = true
+  check_if_service_has_usage_on_destroy = true
+}
+`, pid, pid, org, service)
+}
