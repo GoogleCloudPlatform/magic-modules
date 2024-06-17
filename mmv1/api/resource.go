@@ -1030,19 +1030,6 @@ func (r Resource) IgnoreReadPropertiesToString(e resource.Examples) string {
 	return ""
 }
 
-// def ignore_read_fields(props)
-// fields = []
-// props.each do |p|
-//
-//	  if p.ignore_read && !p.url_param_only && !p.is_a?(Api::Type::ResourceRef)
-//		fields << p.terraform_lineage
-//	  elsif (p.is_a? Api::Type::NestedObject) && !p.all_properties.nil?
-//		fields.concat(ignore_read_fields(p.all_properties))
-//	  end
-//
-// end
-// fields
-// end
 func ignoreReadFields(props []*Type) []string {
 	var fields []string
 	for _, tp := range props {
