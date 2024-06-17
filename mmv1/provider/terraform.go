@@ -52,7 +52,7 @@ type Terraform struct {
 
 	Version product.Version
 
-	Product api.Product
+	Product *api.Product
 
 	StartTime time.Time
 }
@@ -61,7 +61,7 @@ func NewTerraform(product *api.Product, versionName string, startTime time.Time)
 	t := Terraform{
 		ResourceCount:     0,
 		IAMResourceCount:  0,
-		Product:           *product,
+		Product:           product,
 		TargetVersionName: versionName,
 		Version:           *product.VersionObjOrClosest(versionName),
 		StartTime:         startTime,
@@ -90,40 +90,23 @@ func (t *Terraform) Generate(outputFolder, productPath string, generateCode, gen
 
 func (t *Terraform) GenerateObjects(outputFolder string, generateCode, generateDocs bool) {
 	for _, object := range t.Product.Objects {
-		// 		TODO Q2: Exclude objects
-		//        if !types.empty? && !types.include?(object.name)
-		//          Google::LOGGER.info "Excluding #{object.name} per user request"
-		//        elsif types.empty? && object.exclude
-		//          Google::LOGGER.info "Excluding #{object.name} per API catalog"
-		//        elsif types.empty? && object.not_in_version?(@version)
-		//          Google::LOGGER.info "Excluding #{object.name} per API version"
-		//        else
-		//          Google::LOGGER.info "Generating #{object.name}"
-		//          # exclude_if_not_in_version must be called in order to filter out
-		//          # beta properties that are nested within GA resources
-		//          object.exclude_if_not_in_version!(@version)
-		//
-		//          # Make object immutable.
-		//          object.freeze
-		//          object.all_user_properties.each(&:freeze)
+		object.ExcludeIfNotInVersion(&t.Version)
 
 		t.GenerateObject(*object, outputFolder, t.TargetVersionName, generateCode, generateDocs)
 	}
 }
 
 func (t *Terraform) GenerateObject(object api.Resource, outputFolder, productPath string, generateCode, generateDocs bool) {
-
 	templateData := NewTemplateData(outputFolder, t.Version)
 
-	if !object.ExcludeResource {
+	if !object.IsExcluded() {
 		log.Printf("Generating %s resource", object.Name)
 		t.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
 
 		if generateCode {
 			log.Printf("Generating %s tests", object.Name)
 			t.GenerateResourceTests(object, *templateData, outputFolder)
-			// TODO Q2
-			//	    generate_resource_sweepers(pwd, data.clone)
+			t.GenerateResourceSweeper(object, *templateData, outputFolder)
 		}
 	}
 
@@ -179,26 +162,36 @@ func (t *Terraform) GenerateResourceTests(object api.Resource, templateData Temp
 	templateData.GenerateTestFile(targetFilePath, object)
 }
 
-func (t *Terraform) GenerateOperation(outputFolder string) {
+func (t *Terraform) GenerateResourceSweeper(object api.Resource, templateData TemplateData, outputFolder string) {
+	if object.SkipSweeper || object.CustomCode.CustomDelete != "" || object.CustomCode.PreDelete != "" || object.CustomCode.PostDelete != "" || object.SkipDelete {
+		return
+	}
 
-	// TODO Q2
-	//    def generate_operation(pwd, output_folder, _types)
-	//      return if @api.objects.select(&:autogen_async).empty?
-	//
-	//      product_name = @api.api_name
-	//      product_name_underscore = @api.name.underscore
-	//      data = build_object_data(pwd, @api.objects.first, output_folder, @target_version_name)
-	//
-	//      data.object = @api.objects.select(&:autogen_async).first
-	//
-	//      data.async = data.object.async
-	//      target_folder = File.join(folder_name(data.version), 'services', product_name)
-	//      FileUtils.mkpath target_folder
-	//      data.generate(pwd,
-	//                    'templates/terraform/operation.go.erb',
-	//                    "#{target_folder}/#{product_name_underscore}_operation.go",
-	//                    self)
-	//    end
+	productName := t.Product.ApiName
+	targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
+	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+	}
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s_sweeper.go", t.FullResourceName(object)))
+	templateData.GenerateSweeperFile(targetFilePath, object)
+}
+
+func (t *Terraform) GenerateOperation(outputFolder string) {
+	asyncObjects := google.Select(t.Product.Objects, func(o *api.Resource) bool {
+		return o.AutogenAsync
+	})
+
+	if len(asyncObjects) == 0 {
+		return
+	}
+
+	targetFolder := path.Join(outputFolder, t.FolderName(), "services", t.Product.ApiName)
+	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+	}
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_operation.go", google.Underscore(t.Product.Name)))
+	templateData := NewTemplateData(outputFolder, t.Version)
+	templateData.GenerateOperationFile(targetFilePath, *asyncObjects[0])
 }
 
 // Generate the IAM policy for this object. This is used to query and test
@@ -241,10 +234,11 @@ func (t *Terraform) GenerateIamDocumentation(object api.Resource, templateData T
 	if err := os.MkdirAll(datasourceDocFolder, os.ModePerm); err != nil {
 		log.Println(fmt.Errorf("error creating parent directory %v: %v", datasourceDocFolder, err))
 	}
-	targetFilePath = path.Join(datasourceDocFolder, fmt.Sprintf("%s_iam.html.markdown", t.FullResourceName(object)))
+	targetFilePath = path.Join(datasourceDocFolder, fmt.Sprintf("%s_iam_policy.html.markdown", t.FullResourceName(object)))
 	templateData.GenerateIamDatasourceDocumentationFile(targetFilePath, object)
 }
 
+// Finds the folder name for a given version of the terraform provider
 func (t *Terraform) FolderName() string {
 	if t.TargetVersionName == "ga" {
 		return "google"
@@ -832,26 +826,6 @@ func (t Terraform) ImportPathFromVersion(v string) string {
 //
 // end
 //
-// def force_new?(property, resource)
-//
-//	(
-//	  (!property.output || property.is_a?(Api::Type::KeyValueEffectiveLabels)) &&
-//	  (property.immutable ||
-//	    (resource.immutable && property.update_url.nil? && property.immutable.nil? &&
-//	      (property.parent.nil? ||
-//	        (force_new?(property.parent, resource) &&
-//	         !(property.parent.flatten_object && property.is_a?(Api::Type::KeyValueLabels))
-//	        )
-//	      )
-//	    )
-//	  )
-//	) ||
-//	  (property.is_a?(Api::Type::KeyValueTerraformLabels) &&
-//	    !updatable?(resource, resource.all_user_properties) && !resource.root_labels?
-//	  )
-//
-// end
-//
 // # Returns tuples of (fieldName, list of update masks) for
 // #  top-level updatable fields. Schema path refers to a given Terraform
 // # field name (e.g. d.GetChange('fieldName)')
@@ -937,7 +911,7 @@ func (t *Terraform) generateResourcesForVersion(products []map[string]interface{
 
 			var resourceName string
 
-			if !object.ExcludeResource {
+			if !object.IsExcluded() {
 				t.ResourceCount++
 				resourceName = fmt.Sprintf("%s.Resource%s", service, object.ResourceName())
 			}
@@ -1016,42 +990,6 @@ func languageFromFilename(filename string) string {
 	}
 }
 
-// # Finds the folder name for a given version of the terraform provider
-// def folder_name(version)
-//
-//	version == 'ga' ? 'google' : "google-#{version}"
-//
-// end
-//
-// def generate_documentation(pwd, data)
-//
-//	target_folder = data.output_folder
-//	target_folder = File.join(target_folder, 'website', 'docs', 'r')
-//	FileUtils.mkpath target_folder
-//	filepath = File.join(target_folder, "#{full_resource_name(data)}.html.markdown")
-//	data.generate(pwd, 'templates/terraform/resource.html.markdown.erb', filepath, self)
-//
-// end
-//
-// def generate_resource_sweepers(pwd, data)
-//
-//	return if data.object.skip_sweeper ||
-//	          data.object.custom_code.custom_delete ||
-//	          data.object.custom_code.pre_delete ||
-//	          data.object.custom_code.post_delete ||
-//	          data.object.skip_delete
-//
-//	product_name = @api.api_name
-//	target_folder = File.join(folder_name(data.version), 'services', product_name)
-//	file_name =
-//	  "#{target_folder}/resource_#{full_resource_name(data)}_sweeper.go"
-//	FileUtils.mkpath folder_name(data.version)
-//	data.generate(pwd,
-//	              'templates/terraform/sweeper_file.go.erb',
-//	              file_name,
-//	              self)
-//
-// end
 //
 //    # Returns the id format of an object, or self_link_uri if none is explicitly defined
 //    # We prefer the long name of a resource as the id so that users can reference

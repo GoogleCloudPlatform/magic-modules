@@ -14,6 +14,7 @@ package api
 
 import (
 	"fmt"
+	"maps"
 	"regexp"
 	"strings"
 
@@ -222,6 +223,9 @@ type Resource struct {
 	// If true, skip sweeper generation for this resource
 	SkipSweeper bool `yaml:"skip_sweeper"`
 
+	// Override sweeper settings
+	Sweeper resource.Sweeper
+
 	Timeouts *Timeouts
 
 	// An array of function names that determine whether an error is retryable.
@@ -317,8 +321,12 @@ func (r *Resource) UnmarshalYAML(n *yaml.Node) error {
 		return err
 	}
 
-	r.ApiName = r.Name
-	r.CollectionUrlKey = google.Camelize(google.Plural(r.Name), "lower")
+	if r.ApiName == "" {
+		r.ApiName = r.Name
+	}
+	if r.CollectionUrlKey == "" {
+		r.CollectionUrlKey = google.Camelize(google.Plural(r.Name), "lower")
+	}
 
 	return nil
 }
@@ -441,6 +449,16 @@ func (r Resource) SettableProperties() []*Type {
 	return props
 }
 
+func (r Resource) IsSettableProperty(t *Type) bool {
+	return slices.Contains(r.SettableProperties(), t)
+}
+
+func (r Resource) UnorderedListProperties() []*Type {
+	return google.Select(r.SettableProperties(), func(t *Type) bool {
+		return t.UnorderedList
+	})
+}
+
 // Properties that will be returned in the API body
 
 // def gettable_properties
@@ -501,7 +519,6 @@ func (r Resource) GetIdentity() []*Type {
 	return google.Select(props, func(p *Type) bool {
 		return p.Name == "name"
 	})
-
 }
 
 // def add_labels_related_fields(props, parent)
@@ -830,14 +847,32 @@ func (r Resource) HasProject() bool {
 	return strings.Contains(r.BaseUrl, "{{project}}") || strings.Contains(r.CreateUrl, "{{project}}")
 }
 
+func (r Resource) IncludeProjectForOperation() bool {
+	return strings.Contains(r.BaseUrl, "{{project}}") || (r.GetAsync().IsA("OpAsync") && r.GetAsync().IncludeProject)
+}
+
 // def region?
 func (r Resource) HasRegion() bool {
-	return strings.Contains(r.BaseUrl, "{{region}}") || strings.Contains(r.CreateUrl, "{{region}}")
+	found := false
+	for _, p := range r.Parameters {
+		if p.Name == "region" && p.IgnoreRead {
+			found = true
+			break
+		}
+	}
+	return found && strings.Contains(r.BaseUrl, "{{region}}")
 }
 
 // def zone?
 func (r Resource) HasZone() bool {
-	return strings.Contains(r.BaseUrl, "{{zone}}") || strings.Contains(r.CreateUrl, "{{zone}}")
+	found := false
+	for _, p := range r.Parameters {
+		if p.Name == "zone" && p.IgnoreRead {
+			found = true
+			break
+		}
+	}
+	return found && strings.Contains(r.BaseUrl, "{{zone}}")
 }
 
 // resource functions needed for template that previously existed in terraform.go but due to how files are being inherited here it was easier to put in here
@@ -1107,7 +1142,7 @@ func (r Resource) ImportIdRegexesFromIam() string {
 		transformed = append(transformed, s)
 	}
 
-	return strings.Join(transformed[:], "\", \"")
+	return strings.Join(slices.Compact(transformed[:]), "\", \"")
 }
 
 // For example, "projects/{{project}}/schemas/{{name}}", "{{project}}/{{name}}", "{{name}}"
@@ -1258,7 +1293,7 @@ func (r Resource) IamImportQualifiersForTest() string {
 	return strings.Join(importQualifiers, ", ")
 }
 
-func OrderProperties(props []*Type) []*Type {
+func (r Resource) OrderProperties(props []*Type) []*Type {
 	req := google.Select(props, func(p *Type) bool {
 		return p.Required
 	})
@@ -1279,20 +1314,137 @@ func CompareByName(a, b *Type) int {
 	return strings.Compare(a.Name, b.Name)
 }
 
-func (r Resource) GetPropertyUpdateMasksGroups() map[string][]string {
-	maskGroups := map[string][]string{}
-	for _, prop := range r.AllUserProperties() {
+func (r Resource) GetPropertyUpdateMasksGroupKeys(properties []*Type) []string {
+	keys := []string{}
+	for _, prop := range properties {
 		if prop.FlattenObject {
-			prop.GetNestedPropertyUpdateMasksGroups(maskGroups, prop.ApiName)
+			k := r.GetPropertyUpdateMasksGroupKeys(prop.Properties)
+			keys = append(keys, k...)
+		} else {
+			keys = append(keys, google.Underscore(prop.Name))
+		}
+	}
+	return keys
+}
+
+func (r Resource) GetPropertyUpdateMasksGroups(properties []*Type, maskPrefix string) map[string][]string {
+	maskGroups := map[string][]string{}
+	for _, prop := range properties {
+		if prop.FlattenObject {
+			maps.Copy(maskGroups, r.GetPropertyUpdateMasksGroups(prop.Properties, prop.ApiName))
 		} else if len(prop.UpdateMaskFields) > 0 {
 			maskGroups[google.Underscore(prop.Name)] = prop.UpdateMaskFields
 		} else {
-			maskGroups[google.Underscore(prop.Name)] = []string{prop.ApiName}
+			maskGroups[google.Underscore(prop.Name)] = []string{maskPrefix + prop.ApiName}
 		}
 	}
 	return maskGroups
 }
 
+// Formats whitespace in the style of the old Ruby generator's descriptions in documentation
+func (r Resource) FormatDocDescription(desc string) string {
+	returnString := strings.ReplaceAll(desc, "\n\n", "\n")
+
+	returnString = strings.ReplaceAll(returnString, "\n", "\n  ")
+
+	// fix removing for ruby -> go transition diffs
+	returnString = strings.ReplaceAll(returnString, "\n  \n  **Note**: This field is non-authoritative,", "\n\n  **Note**: This field is non-authoritative,")
+
+	return strings.TrimSuffix(returnString, "\n  ")
+}
+
 func (r Resource) CustomTemplate(templatePath string, appendNewline bool) string {
 	return resource.ExecuteTemplate(&r, templatePath, appendNewline)
+}
+
+// Returns the key of the list of resources in the List API response
+// Used to get the list of resources to sweep
+func (r Resource) ResourceListKey() string {
+	var k string
+	if r.NestedQuery != nil && len(r.NestedQuery.Keys) > 0 {
+		k = r.NestedQuery.Keys[0]
+	}
+
+	if k == "" {
+		k = r.CollectionUrlKey
+	}
+
+	return k
+}
+
+func (r Resource) ListUrlTemplate() string {
+	return strings.Replace(r.CollectionUrl(), "zones/{{zone}}", "aggregated", 1)
+}
+
+func (r Resource) DeleteUrlTemplate() string {
+	return fmt.Sprintf("%s%s", r.ProductMetadata.BaseUrl, r.DeleteUri())
+}
+
+func (r Resource) LastNestedQueryKey() string {
+	if r.NestedQuery == nil {
+		return ""
+	}
+	len := len(r.NestedQuery.Keys)
+	return r.NestedQuery.Keys[len-1]
+}
+
+func (r Resource) FirstIdentityProp() *Type {
+	idProps := r.GetIdentity()
+	if len(idProps) == 0 {
+		return nil
+	}
+
+	return idProps[0]
+}
+
+type UpdateGroup struct {
+	UpdateUrl       string
+	UpdateVerb      string
+	UpdateId        string
+	FingerprintName string
+}
+
+// def properties_without_custom_update(properties)
+func (r Resource) propertiesWithCustomUpdate(properties []*Type) []*Type {
+	return google.Reject(properties, func(p *Type) bool {
+		return p.UpdateUrl == "" || p.UpdateVerb == "" || p.UpdateVerb == "NOOP"
+	})
+}
+
+func (r Resource) PropertiesByCustomUpdate() map[UpdateGroup][]*Type {
+	customUpdateProps := r.propertiesWithCustomUpdate(r.RootProperties())
+	groupedCustomUpdateProps := map[UpdateGroup][]*Type{}
+	for _, prop := range customUpdateProps {
+		groupedProperty := UpdateGroup{UpdateUrl: prop.UpdateUrl,
+			UpdateVerb:      prop.UpdateVerb,
+			UpdateId:        prop.UpdateId,
+			FingerprintName: prop.FingerprintName}
+		groupedCustomUpdateProps[groupedProperty] = append(groupedCustomUpdateProps[groupedProperty], prop)
+	}
+	return groupedCustomUpdateProps
+}
+
+func (r Resource) FieldSpecificUpdateMethods() bool {
+	return (len(r.PropertiesByCustomUpdate()) > 0)
+}
+
+func (r Resource) CustomUpdatePropertiesByKey(updateUrl string, updateId string, fingerprintName string, updateVerb string) []*Type {
+	groupedProperties := r.PropertiesByCustomUpdate()
+	groupedProperty := UpdateGroup{UpdateUrl: updateUrl,
+		UpdateVerb:      updateVerb,
+		UpdateId:        updateId,
+		FingerprintName: fingerprintName}
+	return groupedProperties[groupedProperty]
+}
+
+func (r Resource) PropertyNamesToStrings(properties []*Type) []string {
+	var propertyNames []string
+	for _, prop := range properties {
+		propertyNames = append(propertyNames, google.Underscore(prop.Name))
+	}
+	return propertyNames
+}
+
+func (r Resource) IsExcluded() bool {
+	return r.Exclude || r.ExcludeResource
 }

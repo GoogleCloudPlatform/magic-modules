@@ -1292,20 +1292,6 @@ func (t Type) NamespaceProperty() string {
 //
 // end
 
-// new utility function for recursive calls to GetPropertyUpdateMasksGroups
-
-func (t Type) GetNestedPropertyUpdateMasksGroups(maskGroups map[string][]string, maskPrefix string) {
-	for _, prop := range t.AllProperties() {
-		if prop.FlattenObject {
-			prop.GetNestedPropertyUpdateMasksGroups(maskGroups, prop.ApiName)
-		} else if len(prop.UpdateMaskFields) > 0 {
-			maskGroups[google.Underscore(prop.Name)] = prop.UpdateMaskFields
-		} else {
-			maskGroups[google.Underscore(prop.Name)] = []string{maskPrefix + prop.ApiName}
-		}
-	}
-}
-
 func (t Type) CustomTemplate(templatePath string, appendNewline bool) string {
 	return resource.ExecuteTemplate(&t, templatePath, appendNewline)
 }
@@ -1336,4 +1322,17 @@ func (t *Type) GoLiteral(value interface{}) string {
 	default:
 		panic(fmt.Errorf("unknown go literal type %+v", value))
 	}
+}
+
+// def force_new?(property, resource)
+func (t *Type) IsForceNew() bool {
+	parent := t.Parent()
+	return (((!t.Output || t.IsA("KeyValueEffectiveLabels")) &&
+		(t.Immutable ||
+			(t.ResourceMetadata.Immutable && t.UpdateUrl == "" && !t.Immutable &&
+				(parent == nil ||
+					(parent.IsForceNew() &&
+						!(parent.FlattenObject && t.IsA("KeyValueLabels"))))))) ||
+		(t.IsA("KeyValueTerraformLabels") &&
+			t.ResourceMetadata.Updatable() && !t.ResourceMetadata.RootLabels()))
 }
