@@ -288,7 +288,7 @@ func disableServiceUsageProjectService(service, project string, d *schema.Resour
 			name := fmt.Sprintf("projects/%s/services/%s", project, service)
 			checkIfServiceHasUsage := "SKIP"
 			if checkUsage {
-				checkIfServiceHasUsage := "CHECK"
+				checkIfServiceHasUsage = "CHECK"
 			}
 			servicesDisableCall := config.NewServiceUsageClient(userAgent).Services.Disable(name, &serviceusage.DisableServiceRequest{
 				DisableDependentServices: disableDependentServices,
