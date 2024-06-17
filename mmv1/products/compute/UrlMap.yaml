@@ -280,6 +280,43 @@ properties:
       `[a-z]([-a-z0-9]*[a-z0-9])?` which means the first character must be a lowercase
       letter, and all following characters must be a dash, lowercase letter, or digit,
       except the last character, which cannot be a dash.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'defaultCustomErrorResponsePolicy'
+    description: Specifies the custom error response policies that must be
+      applied when the backend service or backend bucket responds with an error.
+      Can be defined for the urlMap, pathMatcher or routeRule/pathRule. The most
+      specific customErrorPolicy that matches the error response applies.
+    properties:
+      - !ruby/object::Api::Type::Array
+        name: 'errorResponseRules'
+        description: Specifies the rules to match the error response. Rules defined
+          for specific HTTP error status codes have higher precedence over rules defined
+          for HTTP status code classes.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object::Api::Type::Array
+              name: 'matchResponseCodes'
+              item_type: !ruby/object:Api::Type::String
+              description: |
+                HTTP error status code, or class of error status codes to match against.
+                Example status codes are '501', '403', and example status code classes are
+                '4xx' and '5xx'.
+            - !ruby/object:Api::Type::String
+              name: 'path'
+              description: |
+                Path to redirect to for the backend service or backend bucket to get
+                the custom error response.
+            - !ruby/object::Api::Type::Integer
+              name: 'overrideResponseCode'
+              description: |
+                Optional HTTP status code returned with the response containing the custom
+                error content. If not specified, the original HTTP status code will be
+                returned with the custom error content.
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'errorService'
+        resource: 'BackendService'
+        description: |
+          The backend service or backend bucket to fetch the custom error content from.
   - !ruby/object:Api::Type::Array
     name: "path_matcher"
     api_name: 'pathMatchers'
@@ -375,6 +412,43 @@ properties:
           required: true
           description: |
             The name to which this PathMatcher is referred by the HostRule.
+        - !ruby/object:Api::Type::NestedObject
+          name: 'defaultCustomErrorResponsePolicy'
+          description: Specifies the custom error response policies that must be
+            applied when the backend service or backend bucket responds with an error.
+            Can be defined for the urlMap, pathMatcher or routeRule/pathRule. The most
+            specific customErrorPolicy that matches the error response applies.
+          properties:
+            - !ruby/object::Api::Type::Array
+              name: 'errorResponseRules'
+              description: Specifies the rules to match the error response. Rules defined
+                for specific HTTP error status codes have higher precedence over rules
+                defined for HTTP status code classes.
+              item_type: !ruby/object:Api::Type::NestedObject
+                properties:
+                  - !ruby/object::Api::Type::Array
+                    name: 'matchResponseCodes'
+                    item_type: !ruby/object:Api::Type::String
+                    description: |
+                      HTTP error status code, or class of error status codes to match
+                      against.  Example status codes are '501', '403', and example status
+                      code classes are '4xx' and '5xx'.
+                  - !ruby/object:Api::Type::String
+                    name: 'path'
+                    description: |
+                      Path to redirect to for the backend service or backend bucket to get
+                      the custom error response.
+                  - !ruby/object::Api::Type::Integer
+                    name: 'overrideResponseCode'
+                    description: |
+                      Optional HTTP status code returned with the response containing the
+                      custom error content. If not specified, the original HTTP status code
+                      will be returned with the custom error content.
+            - !ruby/object:Api::Type::ResourceRef
+              name: 'errorService'
+              resource: 'BackendService'
+              description: |
+                The backend service or backend bucket to fetch the custom error content from.
         - !ruby/object:Api::Type::Array
           name: 'path_rule'
           api_name: pathRules
@@ -730,6 +804,44 @@ properties:
                             been directed to a backendService, subsequent requests will be sent to the same
                             backendService as determined by the BackendService's session affinity policy.
                             The value must be between 0 and 1000
+              - !ruby/object:Api::Type::NestedObject
+                name: 'customErrorResponsePolicy'
+                description: Specifies the custom error response policies that must be
+                  applied when the backend service or backend bucket responds with an error.
+                  Can be defined for the urlMap, pathMatcher or routeRule/pathRule. The most
+                  specific customErrorPolicy that matches the error response applies.
+                properties:
+                  - !ruby/object::Api::Type::Array
+                    name: 'errorResponseRules'
+                    description: Specifies the rules to match the error response. Rules defined
+                      for specific HTTP error status codes have higher precedence over rules
+                      defined for HTTP status code classes.
+                    item_type: !ruby/object:Api::Type::NestedObject
+                      properties:
+                        - !ruby/object::Api::Type::Array
+                          name: 'matchResponseCodes'
+                          item_type: !ruby/object:Api::Type::String
+                          description: |
+                            HTTP error status code, or class of error status codes to match
+                            against.  Example status codes are '501', '403', and example status
+                            code classes are '4xx' and '5xx'.
+                        - !ruby/object:Api::Type::String
+                          name: 'path'
+                          description: |
+                            Path to redirect to for the backend service or backend bucket to get
+                            the custom error response.
+                        - !ruby/object::Api::Type::Integer
+                          name: 'overrideResponseCode'
+                          description: |
+                            Optional HTTP status code returned with the response containing the
+                            custom error content. If not specified, the original HTTP status code
+                            will be returned with the custom error content.
+                  - !ruby/object:Api::Type::ResourceRef
+                    name: 'errorService'
+                    resource: 'BackendService'
+                    description: |
+                      The backend service or backend bucket to fetch the custom error content
+                      from.
               - !ruby/object:Api::Type::NestedObject
                 name: 'urlRedirect'
                 description: |
@@ -1459,6 +1571,44 @@ properties:
                             been directed to a backendService, subsequent requests will be sent to the same
                             backendService as determined by the BackendService's session affinity policy.
                             The value must be between 0 and 1000
+              - !ruby/object:Api::Type::NestedObject
+                name: 'customErrorResponsePolicy'
+                description: Specifies the custom error response policies that must be
+                  applied when the backend service or backend bucket responds with an error.
+                  Can be defined for the urlMap, pathMatcher or routeRule/pathRule. The most
+                  specific customErrorPolicy that matches the error response applies.
+                properties:
+                  - !ruby/object::Api::Type::Array
+                    name: 'errorResponseRules'
+                    description: Specifies the rules to match the error response. Rules defined
+                      for specific HTTP error status codes have higher precedence over rules
+                      defined for HTTP status code classes.
+                    item_type: !ruby/object:Api::Type::NestedObject
+                      properties:
+                        - !ruby/object::Api::Type::Array
+                          name: 'matchResponseCodes'
+                          item_type: !ruby/object:Api::Type::String
+                          description: |
+                            HTTP error status code, or class of error status codes to match
+                            against.  Example status codes are '501', '403', and example status
+                            code classes are '4xx' and '5xx'.
+                        - !ruby/object:Api::Type::String
+                          name: 'path'
+                          description: |
+                            Path to redirect to for the backend service or backend bucket to get
+                            the custom error response.
+                        - !ruby/object::Api::Type::Integer
+                          name: 'overrideResponseCode'
+                          description: |
+                            Optional HTTP status code returned with the response containing the
+                            custom error content. If not specified, the original HTTP status code
+                            will be returned with the custom error content.
+                  - !ruby/object:Api::Type::ResourceRef
+                    name: 'errorService'
+                    resource: 'BackendService'
+                    description: |
+                      The backend service or backend bucket to fetch the custom error content
+                      from.
               - !ruby/object:Api::Type::NestedObject
                 name: 'urlRedirect'
                 description: |
