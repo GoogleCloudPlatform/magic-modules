@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,9 +13,9 @@
 
 --- !ruby/object:Api::Resource
 name: 'OrganizationMuteConfig'
-base_url: '{{parent}}/organizationmuteConfigs'
+base_url: '{{parent}}/locations/{location}/organizationmuteConfigs'
 self_link: '{{name}}'
-create_url: '{{parent}}/organizationmuteConfigs?organizationmuteConfigId={{organization_mute_Configs_id}}'
+create_url: '{{parent}}/locations/{location}/organizationmuteConfigs?organizationmuteConfigId={{organization_mute_Configs_id}}'
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -56,11 +56,12 @@ parameters:
       "organizations/[organization_id]"
   - !ruby/object:Api::Type::String
     name: location
-    required: true
+    required: false
     immutable: true
     url_param_only: true
+    default_value: global
     description: |
-      location provided by the client within the parent scope.
+      location Id is provided by organization. If not provided, Use global as default.
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -100,4 +101,13 @@ properties:
       field is set by the server and will be ignored if provided on
       config creation or update.
     output: true
+  - !ruby/object:Api::Type::Enum
+    name: 'type'
+    required: true
+    description: |
+      Required. The type of the mute config,
+      which determines what type of mute state the config affects. Immutable after creation.
+    values:
+      - :MUTE_CONFIG_TYPE_UNSPECIFIED
+      - :STATIC
   
