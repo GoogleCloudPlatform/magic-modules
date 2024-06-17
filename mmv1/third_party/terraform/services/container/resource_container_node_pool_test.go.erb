@@ -25,10 +25,10 @@ func TestAccContainerNodePool_basic(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccContainerNodePool_basic(cluster, np, networkName, subnetworkName),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_container_node_pool.np",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -180,10 +180,10 @@ func TestAccContainerNodePool_namePrefix(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccContainerNodePool_namePrefix(cluster, "tf-np-", networkName, subnetworkName),
 			},
-			resource.TestStep{
+			{
 				ResourceName:            "google_container_node_pool.np",
 				ImportState:             true,
 				ImportStateVerify:       true,
@@ -207,10 +207,10 @@ func TestAccContainerNodePool_noName(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccContainerNodePool_noName(cluster, networkName, subnetworkName),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_container_node_pool.np",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -273,10 +273,10 @@ func TestAccContainerNodePool_withNodeConfig(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccContainerNodePool_withNodeConfig(cluster, nodePool, networkName, subnetworkName),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_container_node_pool.np_with_node_config",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -284,10 +284,10 @@ func TestAccContainerNodePool_withNodeConfig(t *testing.T) {
 				// but will still cause an import diff
 				ImportStateVerifyIgnore: []string{"autoscaling.#", "node_config.0.taint"},
 			},
-			resource.TestStep{
+			{
 				Config: testAccContainerNodePool_withNodeConfigUpdate(cluster, nodePool, networkName, subnetworkName),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_container_node_pool.np_with_node_config",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -312,18 +312,18 @@ func TestAccContainerNodePool_withTaintsUpdate(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccContainerNodePool_basic(cluster, nodePool, networkName, subnetworkName),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_container_node_pool.np",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			resource.TestStep{
+			{
 				Config: testAccContainerNodePool_withTaintsUpdate(cluster, nodePool, networkName, subnetworkName),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_container_node_pool.np",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -926,10 +926,10 @@ func TestAccContainerNodePool_withGPU(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccContainerNodePool_withGPU(cluster, np, networkName, subnetworkName),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_container_node_pool.np_with_gpu",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -957,7 +957,7 @@ func TestAccContainerNodePool_withManagement(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccContainerNodePool_withManagement(cluster, nodePool, "", networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
@@ -968,12 +968,12 @@ func TestAccContainerNodePool_withManagement(t *testing.T) {
 						"google_container_node_pool.np_with_management", "management.0.auto_upgrade", "true"),
 				),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_container_node_pool.np_with_management",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			resource.TestStep{
+			{
 				Config: testAccContainerNodePool_withManagement(cluster, nodePool, management, networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
@@ -984,7 +984,7 @@ func TestAccContainerNodePool_withManagement(t *testing.T) {
 						"google_container_node_pool.np_with_management", "management.0.auto_upgrade", "false"),
 				),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_container_node_pool.np_with_management",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -1006,10 +1006,10 @@ func TestAccContainerNodePool_withNodeConfigScopeAlias(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccContainerNodePool_withNodeConfigScopeAlias(cluster, np, networkName, subnetworkName),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_container_node_pool.np_with_node_config_scope_alias",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -1032,38 +1032,38 @@ func TestAccContainerNodePool_regionalAutoscaling(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccContainerNodePool_regionalAutoscaling(cluster, np, networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_node_pool.np", "autoscaling.0.min_node_count", "1"),
 					resource.TestCheckResourceAttr("google_container_node_pool.np", "autoscaling.0.max_node_count", "3"),
 				),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_container_node_pool.np",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			resource.TestStep{
+			{
 				Config: testAccContainerNodePool_updateAutoscaling(cluster, np, networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_node_pool.np", "autoscaling.0.min_node_count", "0"),
 					resource.TestCheckResourceAttr("google_container_node_pool.np", "autoscaling.0.max_node_count", "5"),
 				),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_container_node_pool.np",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			resource.TestStep{
+			{
 				Config: testAccContainerNodePool_basic(cluster, np, networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckNoResourceAttr("google_container_node_pool.np", "autoscaling.0.min_node_count"),
 					resource.TestCheckNoResourceAttr("google_container_node_pool.np", "autoscaling.0.max_node_count"),
 				),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_container_node_pool.np",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -1089,7 +1089,7 @@ func TestAccContainerNodePool_totalSize(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccContainerNodePool_totalSize(cluster, np, networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_node_pool.np", "autoscaling.0.total_min_node_count", "4"),
@@ -1097,12 +1097,12 @@ func TestAccContainerNodePool_totalSize(t *testing.T) {
 					resource.TestCheckResourceAttr("google_container_node_pool.np", "autoscaling.0.location_policy", "BALANCED"),
 				),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_container_node_pool.np",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			resource.TestStep{
+			{
 				Config: testAccContainerNodePool_updateTotalSize(cluster, np, networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_node_pool.np", "autoscaling.0.total_min_node_count", "2"),
@@ -1110,19 +1110,19 @@ func TestAccContainerNodePool_totalSize(t *testing.T) {
 					resource.TestCheckResourceAttr("google_container_node_pool.np", "autoscaling.0.location_policy", "ANY"),
 				),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_container_node_pool.np",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			resource.TestStep{
+			{
 				Config: testAccContainerNodePool_basicTotalSize(cluster, np, networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckNoResourceAttr("google_container_node_pool.np", "autoscaling.0.min_node_count"),
 					resource.TestCheckNoResourceAttr("google_container_node_pool.np", "autoscaling.0.max_node_count"),
 				),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_container_node_pool.np",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -1147,38 +1147,38 @@ func TestAccContainerNodePool_autoscaling(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccContainerNodePool_autoscaling(cluster, np, networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_node_pool.np", "autoscaling.0.min_node_count", "1"),
 					resource.TestCheckResourceAttr("google_container_node_pool.np", "autoscaling.0.max_node_count", "3"),
 				),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_container_node_pool.np",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			resource.TestStep{
+			{
 				Config: testAccContainerNodePool_updateAutoscaling(cluster, np, networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_node_pool.np", "autoscaling.0.min_node_count", "0"),
 					resource.TestCheckResourceAttr("google_container_node_pool.np", "autoscaling.0.max_node_count", "5"),
 				),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_container_node_pool.np",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			resource.TestStep{
+			{
 				Config: testAccContainerNodePool_basic(cluster, np, networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckNoResourceAttr("google_container_node_pool.np", "autoscaling.0.min_node_count"),
 					resource.TestCheckNoResourceAttr("google_container_node_pool.np", "autoscaling.0.max_node_count"),
 				),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_container_node_pool.np",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -1283,10 +1283,10 @@ func TestAccContainerNodePool_regionalClusters(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccContainerNodePool_regionalClusters(cluster, np, networkName, subnetworkName),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_container_node_pool.np",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -1388,10 +1388,10 @@ func TestAccContainerNodePool_shieldedInstanceConfig(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccContainerNodePool_shieldedInstanceConfig(cluster, np, networkName, subnetworkName),
 			},
-			resource.TestStep{
+			{
 				ResourceName:            "google_container_node_pool.np",
 				ImportState:             true,
 				ImportStateVerify:       true,
@@ -1486,10 +1486,10 @@ func TestAccContainerNodePool_ephemeralStorageConfig(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccContainerNodePool_ephemeralStorageConfig(cluster, np, networkName, subnetworkName),
 			},
-			resource.TestStep{
+			{
 				ResourceName:            "google_container_node_pool.np",
 				ImportState:             true,
 				ImportStateVerify:       true,
@@ -1657,15 +1657,15 @@ func TestAccContainerNodePool_secondaryBootDisks(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccContainerNodePool_secondaryBootDisks(cluster, np, networkName, subnetworkName),
 			},
-			resource.TestStep{
+			{
 				ResourceName:            "google_container_node_pool.np",
 				ImportState:             true,
 				ImportStateVerify:       true,
 			},
-			resource.TestStep{
+			{
 				ResourceName:            "google_container_node_pool.np-no-mode",
 				ImportState:             true,
 				ImportStateVerify:       true,
@@ -1738,10 +1738,10 @@ func TestAccContainerNodePool_gcfsConfig(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccContainerNodePool_gcfsConfig(cluster, np, networkName, subnetworkName),
 			},
-			resource.TestStep{
+			{
 				ResourceName:            "google_container_node_pool.np",
 				ImportState:             true,
 				ImportStateVerify:       true,
@@ -4772,7 +4772,7 @@ func TestAccContainerNodePool_privateRegistry(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccContainerNodePool_privateRegistryEnabled(secretID, cluster, nodepool, networkName, subnetworkName),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(
