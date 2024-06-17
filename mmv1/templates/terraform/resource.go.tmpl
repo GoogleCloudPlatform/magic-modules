@@ -89,8 +89,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 {{- end}}
             Delete: schema.DefaultTimeout({{ $.Timeouts.DeleteMinutes -}} * time.Minute),
         },
-
-{{- if $.SchemaVersion }}
+{{ if $.SchemaVersion }}
         SchemaVersion: {{ $.SchemaVersion -}},
 {{- end}}
 {{- if $.MigrateState }}
@@ -108,7 +107,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 {{-       end }}
         },
 {{- end }}
-{{if or (and (or $.HasProject $.HasRegion $.HasZone) (not $.SkipDefaultCdiff)) $.CustomDiff }}
+{{- if or (and (or $.HasProject $.HasRegion $.HasZone) (not $.SkipDefaultCdiff)) $.CustomDiff }}
         CustomizeDiff: customdiff.All(
 {{- if $.CustomDiff -}}
 {{-          range $cdiff := $.CustomDiff }}
@@ -188,7 +187,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{- end}}
     config := meta.(*transport_tpg.Config)
 {{ if $.CustomCode.CustomCreate -}}
- //TODO Q2 function to compile custom code lines
+    {{ $.CustomTemplate $.CustomCode.CustomCreate false -}}
 {{  else  -}}
     userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
     if err != nil {
@@ -394,7 +393,9 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{        end  -}}
 {{      end -}}
 {{    end -}}
-{{/* TODO POST CREATE */}}
+{{if $.CustomCode.PostCreate -}} 
+    {{- $.CustomTemplate $.CustomCode.PostCreate false -}}
+{{- end}}
 
 {{if $.GetAsync.Allow "Create" -}}
 {{if $.GetAsync.IsA "PollAsync" -}}
@@ -548,7 +549,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
 
     headers := make(http.Header)
     {{- if $.CustomCode.PreRead -}}
-    //todo preread
+        {{ $.CustomTemplate $.CustomCode.PreRead false -}}
     {{- end }}
     res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
         Config: config,
@@ -612,7 +613,9 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
 {{- end}}
 {{- end}}
 {{- end}}
-{{if $.HasProject -}}
+{{ if $.HasProject }}
+
+
     if err := d.Set("project", project); err != nil {
         return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
     }
@@ -637,10 +640,9 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
         return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
     }
 {{- end}}
-
-{{- range $prop := $.ReadProperties }}
+{{ range $prop := $.ReadProperties }}
 {{if $prop.FlattenObject -}}
-// Terraform must set the top level schema field, but since this $ contains collapsed properties
+// Terraform must set the top level schema field, but since this object contains collapsed properties
 // it's difficult to know what the top level should be. Instead we just loop over the map returned from flatten.
     if flattenedProp := flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config); flattenedProp != nil {
         if gerr, ok := flattenedProp.(*googleapi.Error); ok {
@@ -655,7 +657,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
             }
         }
     }
-{{    else -}}
+{{-    else -}}
     if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper" -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {
         return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
     }
@@ -678,7 +680,7 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
 {{-     end}}
     config := meta.(*transport_tpg.Config)
 {{      if $.CustomCode.CustomUpdate -}}
-//TODO custom update
+    {{ $.CustomTemplate $.CustomCode.CustomUpdate false -}}
 {{      else  -}}
     userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
     if err != nil {
@@ -820,13 +822,13 @@ if len(updateMask) > 0 {
     }
 {{-                 end}}
 {{-             end}}
-{{              if $.UpdateMask -}}
+{{-              if $.UpdateMask -}}
   }
 {{-             end}}
 {{-         end}}{{/*if not immutable*/}}
 {{          if $.FieldSpecificUpdateMethods }}
     d.Partial(true)
-{{-             range $index, $props := $.PropertiesByCustomUpdate }}
+{{             range $index, $props := $.PropertiesByCustomUpdate }}
 if d.HasChange("{{ join ($.PropertyNamesToStrings $props) "\") || d.HasChange(\""}}") {
         obj := make(map[string]interface{})
 {{		            if $index.FingerprintName }}
@@ -886,7 +888,7 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings $props) "\") || d.HasChange(\"
             `NullFields` is a special case of `send_empty_value` where the empty value
             in question is go's literal nil.
 -*/}}
-{{                      if $propsByKey.SendEmptyValue -}}
+{{-                      if $propsByKey.SendEmptyValue -}}
         } else if v, ok := d.GetOkExists("{{ underscore $propsByKey.Name -}}"); ok || !reflect.DeepEqual(v, {{ $propsByKey.ApiName -}}Prop) {
 {{                      else if $propsByKey.FlattenObject -}}
         } else if !tpgresource.IsEmptyValue(reflect.ValueOf({{ $propsByKey.ApiName -}}Prop)) {
@@ -895,7 +897,7 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings $props) "\") || d.HasChange(\"
 {{-                     end}}
             obj["{{ $propsByKey.ApiName -}}"] = {{ $propsByKey.ApiName -}}Prop
         }
-{{                  end -}}{{/*range propsByKey*/}}
+{{-                  end -}}{{/*range propsByKey*/}}
 {{/*     We need to decide what encoder to use here - if there's an update encoder, use that! -*/}}
 {{                  if $.CustomCode.UpdateEncoder -}}
     obj, err = resource{{ $.ResourceName -}}UpdateEncoder(d, meta, obj)
@@ -920,7 +922,7 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings $props) "\") || d.HasChange(\"
 
         headers := make(http.Header)
 {{                  if $.CustomCode.PreUpdate -}}
-//TODO Preupdate
+    {{ $.CustomTemplate $.CustomCode.PreUpdate false -}}
 {{                  end}}
 {{                  if $.SupportsIndirectUserProjectOverride -}}
         if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
@@ -941,7 +943,7 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings $props) "\") || d.HasChange(\"
             UserAgent: userAgent,
             Body: obj,
             Timeout: d.Timeout(schema.TimeoutUpdate),
-{{                  if $.ErrorRetryPredicates -}}
+{{-                  if $.ErrorRetryPredicates -}}
         	ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
 {{-                 end}}
 {{-                 if $.ErrorAbortPredicates -}}
@@ -950,9 +952,9 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings $props) "\") || d.HasChange(\"
 			Headers:   headers,
         })
         if err != nil {
-            return fmt.Errorf("Error updating {{ $.Name -}} %q: %s", d.Id(), err)
+            return fmt.Errorf("Error updating {{ $.Name }} %q: %s", d.Id(), err)
         } else {
-        log.Printf("[DEBUG] Finished updating {{ $.Name -}} %q: %#v", d.Id(), res)
+        log.Printf("[DEBUG] Finished updating {{ $.Name }} %q: %#v", d.Id(), res)
     }
 
 {{                  if $.GetAsync.Allow "update" -}}
@@ -960,27 +962,28 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings $props) "\") || d.HasChange(\"
 	    err = {{ $.ClientNamePascal -}}OperationWaitTime(
 	        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}} "Updating {{ $.Name -}}", userAgent,
 	        d.Timeout(schema.TimeoutUpdate))
-
 	    if err != nil {
 	        return err
 	    }
-{{                      else if $.GetAsync.IsA "PollAsync" -}}
+{{-                      else if $.GetAsync.IsA "PollAsync" -}}
 	    err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName -}}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncExistence -}}, "Updating {{ $.Name -}}", d.Timeout(schema.TimeoutUpdate), {{ $.GetAsync.TargetOccurrences -}})
 	    if err != nil {
-{{                          if $.GetAsync.SuppressError -}}
+{{-                          if $.GetAsync.SuppressError -}}
 	        log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name -}} %q finished updating: %q", d.Id(), err)
-{{                          else -}}
+{{-                          else -}}
 	        return err
 {{-                         end}}
         }
 {{-                     end}}
 {{-                 end}}
     } 
-{{-             end  }}{{/*range PropertiesByCustomUpdate*/}}
+{{             end  }}{{/*range PropertiesByCustomUpdate*/}}
   d.Partial(false)
 {{-         end  }}{{/*if FieldSpecificUpdateMethods*/}}
 
-{{          if $.CustomCode.PostUpdate -}} //TODO POST UPDATE {{end}}
+{{          if $.CustomCode.PostUpdate -}}
+    {{ $.CustomTemplate $.CustomCode.PostUpdate false -}}
+ {{end}}
     return resource{{ $.ResourceName -}}Read(d, meta)
 {{-      end }}{{/*if CustomUpdate*/}}
 }
@@ -1007,9 +1010,8 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     if err != nil {
         return err
     }
-
-{{- if $.CustomCode.CustomDelete }} 
-{{/* TODO CustomDelete */}}
+{{ if $.CustomCode.CustomDelete }} 
+{{ $.CustomTemplate $.CustomCode.CustomDelete false -}}
 {{- else }}
 
     billingProject := ""
@@ -1025,6 +1027,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
         {{- end }}
     {{- end }}
     {{- if $.Mutex }}
+
     lockName, err := tpgresource.ReplaceVars(d, config, "{{ $.Mutex }}")
     if err != nil {
         return err
@@ -1065,7 +1068,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
 
     headers := make(http.Header)
     {{- if $.CustomCode.PreDelete }} 
-    {{/* TODO PreDelete */}}
+        {{ $.CustomTemplate $.CustomCode.PreDelete false -}}
     {{- end }}
 
     log.Printf("[DEBUG] Deleting {{ $.Name }} %q", d.Id())
@@ -1109,7 +1112,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     {{- end }}
 {{- end }}
 {{- if $.CustomCode.PostDelete }}
-{{/* TODO PostDelete */}}
+    {{ $.CustomTemplate $.CustomCode.PostDelete false -}}
 {{- end }}
 
     log.Printf("[DEBUG] Finished deleting {{ $.Name }} %q: %#v", d.Id(), res)
@@ -1121,7 +1124,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
 {{ if not $.ExcludeImport -}}
 func resource{{ $.ResourceName }}Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
     {{- if $.CustomCode.CustomImport }}
-    {{/* TODO CustomImport */}}
+        {{ $.CustomTemplate $.CustomCode.CustomImport false -}}
     {{- else }}
     config := meta.(*transport_tpg.Config)
     if err := tpgresource.ParseImportId([]string{
@@ -1149,7 +1152,7 @@ func resource{{ $.ResourceName }}Import(d *schema.ResourceData, meta interface{}
             {{- end }}
         {{- end }}
         {{- if $.CustomCode.PostImport }}
-            {{- $.CustomTemplate $.CustomCode.PostImport true -}}
+            {{- $.CustomTemplate $.CustomCode.PostImport false -}}
         {{- end }}
 
     return []*schema.ResourceData{d}, nil
@@ -1158,7 +1161,7 @@ func resource{{ $.ResourceName }}Import(d *schema.ResourceData, meta interface{}
 {{ end }}
 {{- range $prop := $.GettableProperties }}
     {{- if not $prop.IgnoreRead }}
-        {{- template "flattenPropertyMethod" $prop -}}
+        {{ template "flattenPropertyMethod" $prop -}}
     {{- end }}
 {{- end }}
 {{- range $prop := $.SettableProperties }}
@@ -1166,13 +1169,13 @@ func resource{{ $.ResourceName }}Import(d *schema.ResourceData, meta interface{}
 {{- end }}
 {{- if $.CustomCode.Encoder }}
 func resource{{ $.ResourceName -}}Encoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
-    {{- $.CustomTemplate $.CustomCode.Encoder true -}}
+{{ $.CustomTemplate $.CustomCode.Encoder false -}}
 }
-{{- end }}
+{{ end -}}
 {{- if $.CustomCode.UpdateEncoder }}
 
 func resource{{ $.ResourceName -}}UpdateEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
-    {{- $.CustomTemplate $.CustomCode.UpdateEncoder true -}}
+    {{ $.CustomTemplate $.CustomCode.UpdateEncoder false -}}
 }
 {{- end }}
 {{- if $.NestedQuery }}
@@ -1180,12 +1183,12 @@ func resource{{ $.ResourceName -}}UpdateEncoder(d *schema.ResourceData, meta int
 {{- end }}
 {{- if $.CustomCode.Decoder }}
 func resource{{ $.ResourceName -}}Decoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
-    {{- $.CustomTemplate $.CustomCode.Decoder true -}}
+    {{ $.CustomTemplate $.CustomCode.Decoder false -}}
 }
 {{- end }}
 {{- if $.CustomCode.PostCreateFailure }}
 func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
-    {{- $.CustomTemplate $.CustomCode.PostCreateFailure true -}}
+    {{- $.CustomTemplate $.CustomCode.PostCreateFailure false -}}
 }
 {{- end }}
 {{/* TODO state upgraders */}}
