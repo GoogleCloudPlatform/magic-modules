@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"magician/exec"
 	"magician/source"
-	"os"
 	"strings"
 	"time"
 
@@ -33,8 +32,7 @@ var waitForCommitCmd = &cobra.Command{
 
 		rnr, err := exec.NewRunner()
 		if err != nil {
-			fmt.Println("Error creating Runner: ", err)
-			os.Exit(1)
+			return fmt.Errorf("error creating Runner: %w", err)
 		}
 
 		return execWaitForCommit(syncBranchPrefix, baseBranch, sha, rnr)
@@ -46,13 +44,10 @@ var waitFunc = func() {
 }
 
 func execWaitForCommit(syncBranchPrefix, baseBranch, sha string, runner source.Runner) error {
-	syncBranch := syncBranchPrefix + "-" + baseBranch
-	if baseBranch == "main" {
-		syncBranch = syncBranchPrefix
-	}
+	syncBranch := getSyncBranch(syncBranchPrefix, baseBranch)
 	fmt.Println("SYNC_BRANCH: ", syncBranch)
 
-	if _, err := runner.Run("git", []string{"merge-base", "--is-ancestor", sha, "origin/" + syncBranch}, nil); err == nil {
+	if syncBranchHasCommit(sha, syncBranch, runner) {
 		return fmt.Errorf("found %s in history of %s - dying to avoid double-generating that commit", sha, syncBranch)
 	}
 
@@ -95,6 +90,20 @@ func execWaitForCommit(syncBranchPrefix, baseBranch, sha string, runner source.R
 		}
 		waitFunc()
 	}
+}
+
+func getSyncBranch(syncBranchPrefix, baseBranch string) string {
+	if baseBranch == "main" {
+		return syncBranchPrefix
+	}
+	return fmt.Sprintf("%s-%s", syncBranchPrefix, baseBranch)
+}
+
+func syncBranchHasCommit(sha, syncBranch string, runner source.Runner) bool {
+	if _, err := runner.Run("git", []string{"merge-base", "--is-ancestor", sha, "origin/" + syncBranch}, nil); err == nil {
+		return true
+	}
+	return false
 }
 
 func gitRevParse(target string, runner source.Runner) (string, error) {

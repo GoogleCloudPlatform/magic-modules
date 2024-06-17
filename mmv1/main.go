@@ -27,19 +27,37 @@ var version = flag.String("version", "", "optional version name. If specified, t
 
 var product = flag.String("product", "", "optional product name. If specified, the resources under the specific product will be generated. Otherwise, resources under all products will be generated.")
 
+// Example usage: --yaml
+var yamlMode = flag.Bool("yaml", false, "copy text over from ruby yaml to go yaml")
+
+// Example usage: --template
+var templateMode = flag.Bool("template", false, "copy templates over from .erb to go .tmpl")
+
 func main() {
+
 	flag.Parse()
-	var generateCode = true
-	var generateDocs = true
+
+	if *yamlMode {
+		CopyText("description:")
+		CopyText("note:")
+	}
+
+	if *templateMode {
+		convertTemplates()
+	}
 
 	if outputPath == nil || *outputPath == "" {
-		log.Fatalf("No output path specified")
+		log.Printf("No output path specified, exiting")
+		return
 	}
 
 	if version == nil || *version == "" {
-		log.Fatalf("No version specified")
+		log.Printf("No version specified, assuming ga")
+		*version = "ga"
 	}
 
+	var generateCode = true
+	var generateDocs = true
 	var productsToGenerate []string
 	var allProducts = false
 	if product == nil || *product == "" {

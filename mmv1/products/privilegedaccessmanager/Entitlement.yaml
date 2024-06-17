@@ -258,7 +258,7 @@ parameters:
     required: true
     url_param_only: true
     description: |
-      Format: project/{project_id} or organization/{organization_number} or folder/{folder_number}
+      Format: projects/{project-id|project-number} or organizations/{organization-number} or folders/{folder-number}
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_update: templates/terraform/pre_update/privileged_access_manager_entitlement.go.erb
   constants: templates/terraform/constants/privileged_access_manager_entitlement.go.erb

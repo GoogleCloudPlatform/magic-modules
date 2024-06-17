@@ -8,11 +8,11 @@
 {{ if $.IsA "Map" }}
   * `{{ underscore $.KeyName }}` - (Required) The identifier for this object. Format specified above.
     {{- end}}
-  {{- end}}
-  {{- range $np := $.NestedProperties }}
-{{- template "propertyDocumentation" $np -}}
-  {{- end}}
-  {{- range $np := $.NestedProperties }}
+    {{- range $np := $.NestedProperties }}
+{{- template "propertyDocumentation" $np }}
+    {{- end }}
+    {{- range $np := $.NestedProperties }}
 {{- template "nestedPropertyDocumentation" $np -}}
+    {{- end}}
   {{- end}}
 {{- end}}
