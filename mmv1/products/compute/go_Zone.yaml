@@ -33,12 +33,10 @@ properties:
   - name: 'creationTimestamp'
     type: Time
     description: 'Creation timestamp in RFC3339 text format.'
-    api_name: 
     output: true
   - name: 'deprecated'
     type: NestedObject
     description: 'The deprecation status associated with this machine type.'
-    api_name: 
     output: true
     properties:
       - name: 'deleted'
@@ -48,7 +46,6 @@ properties:
           resource is intended to change to DELETED. This is only
           informational and the status will not change unless the client
           explicitly changes it.
-        api_name: 
         output: true
       - name: 'deprecated'
         type: Time
@@ -57,7 +54,6 @@ properties:
           resource is intended to change to DEPRECATED. This is only
           informational and the status will not change unless the client
           explicitly changes it.
-        api_name: 
         output: true
       - name: 'obsolete'
         type: Time
@@ -66,7 +62,6 @@ properties:
           resource is intended to change to OBSOLETE. This is only
           informational and the status will not change unless the client
           explicitly changes it.
-        api_name: 
         output: true
       - name: 'replacement'
         type: String
@@ -74,7 +69,6 @@ properties:
           The URL of the suggested replacement for a deprecated resource.
           The suggested replacement resource must be the same kind of
           resource as the deprecated resource.
-        api_name: 
         output: true
       - name: 'state'
         type: Enum
@@ -85,7 +79,6 @@ properties:
           warning indicating the deprecated resource and recommending its
           replacement. Operations which use OBSOLETE or DELETED resources
           will be rejected and result in an error.
-        api_name: 
         output: true
         enum_values:
           - 'DEPRECATED'
@@ -94,21 +87,17 @@ properties:
   - name: 'description'
     type: String
     description: 'An optional textual description of the resource.'
-    api_name: 
     output: true
   - name: 'id'
     type: Integer
     description: 'The unique identifier for the resource.'
-    api_name: 
     output: true
   - name: 'name'
     type: String
     description: 'Name of the resource.'
-    api_name: 
   - name: 'region'
     type: ResourceRef
     description: 'The region where the zone is located.'
-    api_name: 
     output: true
     custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
     resource: 'Region'
@@ -116,7 +105,6 @@ properties:
   - name: 'status'
     type: Enum
     description: 'The status of the zone.'
-    api_name: 
     output: true
     enum_values:
       - 'UP'
@@ -124,7 +112,6 @@ properties:
   - name: 'availableCpuPlatforms'
     type: Array
     description: 'The available CPU platforms in this zone'
-    api_name: 
     output: true
     item_type:
       type: String

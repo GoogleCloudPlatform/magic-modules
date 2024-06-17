@@ -34,7 +34,6 @@ parameters:
   - name: 'region'
     type: ResourceRef
     description: 'A reference to the region where the disk type resides.'
-    api_name: 
     required: true
     custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
     resource: 'Region'
@@ -43,17 +42,14 @@ properties:
   - name: 'creationTimestamp'
     type: Time
     description: 'Creation timestamp in RFC3339 text format.'
-    api_name: 
     output: true
   - name: 'defaultDiskSizeGb'
     type: Integer
     description: 'Server-defined default disk size in GB.'
-    api_name: 
     output: true
   - name: 'deprecated'
     type: NestedObject
     description: 'The deprecation status associated with this disk type.'
-    api_name: 
     output: true
     properties:
       - name: 'deleted'
@@ -61,21 +57,18 @@ properties:
         description: |
           An optional RFC3339 timestamp on or after which the deprecation state
           of this resource will be changed to DELETED.
-        api_name: 
         output: true
       - name: 'deprecated'
         type: Time
         description: |
           An optional RFC3339 timestamp on or after which the deprecation state
           of this resource will be changed to DEPRECATED.
-        api_name: 
         output: true
       - name: 'obsolete'
         type: Time
         description: |
           An optional RFC3339 timestamp on or after which the deprecation state
           of this resource will be changed to OBSOLETE.
-        api_name: 
         output: true
       - name: 'replacement'
         type: String
@@ -83,7 +76,6 @@ properties:
           The URL of the suggested replacement for a deprecated resource. The
           suggested replacement resource must be the same kind of resource as
           the deprecated resource.
-        api_name: 
         output: true
       - name: 'state'
         type: Enum
@@ -94,7 +86,6 @@ properties:
           indicating the deprecated resource and recommending its replacement.
           Operations which use OBSOLETE or DELETED resources will be rejected
           and result in an error.
-        api_name: 
         output: true
         enum_values:
           - 'DEPRECATED'
@@ -103,21 +94,17 @@ properties:
   - name: 'description'
     type: String
     description: 'An optional description of this resource.'
-    api_name: 
     output: true
   - name: 'id'
     type: Integer
     description: 'The unique identifier for the resource.'
-    api_name: 
     output: true
   - name: 'name'
     type: String
     description: 'Name of the resource.'
-    api_name: 
   - name: 'validDiskSize'
     type: String
     description: |
       An optional textual description of the valid disk size, such as
       "10GB-10TB".
-    api_name: 
     output: true

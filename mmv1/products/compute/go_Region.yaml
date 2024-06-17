@@ -36,12 +36,10 @@ properties:
   - name: 'creationTimestamp'
     type: Time
     description: 'Creation timestamp in RFC3339 text format.'
-    api_name: 
     output: true
   - name: 'deprecated'
     type: NestedObject
     description: 'The deprecation state of this resource.'
-    api_name: 
     output: true
     properties:
       - name: 'deleted'
@@ -49,20 +47,17 @@ properties:
         description: |
           An optional RFC3339 timestamp on or after which the deprecation state
           of this resource will be changed to DELETED.
-        api_name: 
       - name: 'deprecated'
         type: Time
         description: |
           An optional RFC3339 timestamp on or after which the deprecation state
           of this resource will be changed to DEPRECATED.
-        api_name: 
         output: true
       - name: 'obsolete'
         type: Time
         description: |
           An optional RFC3339 timestamp on or after which the deprecation state
           of this resource will be changed to OBSOLETE.
-        api_name: 
         output: true
       - name: 'replacement'
         type: String
@@ -70,7 +65,6 @@ properties:
           The URL of the suggested replacement for a deprecated resource. The
           suggested replacement resource must be the same kind of resource as
           the deprecated resource.
-        api_name: 
         output: true
       - name: 'state'
         type: Enum
@@ -81,7 +75,6 @@ properties:
           indicating the deprecated resource and recommending its replacement.
           Operations which use OBSOLETE or DELETED resources will be rejected
           and result in an error.
-        api_name: 
         output: true
         enum_values:
           - 'DEPRECATED'
@@ -90,21 +83,17 @@ properties:
   - name: 'description'
     type: String
     description: 'An optional description of this resource.'
-    api_name: 
     output: true
   - name: 'id'
     type: Integer
     description: 'The unique identifier for the resource.'
-    api_name: 
     output: true
   - name: 'name'
     type: String
     description: 'Name of the resource.'
-    api_name: 
   - name: 'quotas'
     type: Array
     description: 'Quotas assigned to this region.'
-    api_name: 
     output: true
     item_type:
       type: NestedObject
@@ -112,30 +101,25 @@ properties:
         - name: 'metric'
           type: String
           description: 'Name of the quota metric.'
-          api_name: 
           output: true
         - name: 'limit'
           type: Double
           description: 'Quota limit for this metric.'
-          api_name: 
           output: true
         - name: 'usage'
           type: Double
           description: 'Current usage of this metric.'
-          api_name: 
           output: true
         - name: 'owner'
           type: String
           description:
             'Owning resource. This is the resource on which this quota is
             applied.'
-          api_name: 
           output: true
   - name: 'status'
     type: Enum
     description: |
       Status of the region, either UP or DOWN.
-    api_name: 
     output: true
     enum_values:
       - 'UP'
@@ -143,7 +127,6 @@ properties:
   - name: 'zones'
     type: Array
     description: 'List of zones within the region'
-    api_name: 
     output: true
     item_type:
       type: String

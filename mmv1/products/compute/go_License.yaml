@@ -38,12 +38,10 @@ properties:
     description: |
       Name of the resource. The name is 1-63 characters long
       and complies with RFC1035.
-    api_name: 
     output: true
   - name: 'chargesUseFee'
     type: Boolean
     description: |
       If true, the customer will be charged license fee for
       running software that contains this license on an instance.
-    api_name: 
     output: true

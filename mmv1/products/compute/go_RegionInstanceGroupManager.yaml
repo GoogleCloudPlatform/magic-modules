@@ -51,7 +51,6 @@ parameters:
   - name: 'region'
     type: ResourceRef
     description: 'The region the managed instance group resides.'
-    api_name: 
     required: true
     custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
     resource: 'Region'
@@ -64,21 +63,18 @@ properties:
       must be 1-58 characters long. Instances are named by appending a
       hyphen and a random four-character string to the base instance name.
       The base instance name must comply with RFC1035.
-    api_name: 
     required: true
   - name: 'creationTimestamp'
     type: Time
     description: |
       The creation timestamp for this managed instance group in RFC3339
       text format.
-    api_name: 
     output: true
   - name: 'currentActions'
     type: NestedObject
     description: |
       The list of instance actions and the number of instances in this
       managed instance group that are scheduled for each of those actions.
-    api_name: 
     output: true
     properties:
       - name: 'abandoning'
@@ -87,7 +83,6 @@ properties:
           The total number of instances in the managed instance group that
           are scheduled to be abandoned. Abandoning an instance removes it
           from the managed instance group without deleting it.
-        api_name: 
         output: true
       - name: 'creating'
         type: Integer
@@ -100,7 +95,6 @@ properties:
           If you have disabled creation retries, this field will not be
           populated; instead, the creatingWithoutRetries field will be
           populated.
-        api_name: 
         output: true
       - name: 'creatingWithoutRetries'
         type: Integer
@@ -109,21 +103,18 @@ properties:
           attempt to create. The group attempts to create each instance only
           once. If the group fails to create any of these instances, it
           decreases the group's targetSize value accordingly.
-        api_name: 
         output: true
       - name: 'deleting'
         type: Integer
         description: |
           The number of instances in the managed instance group that are
           scheduled to be deleted or are currently being deleted.
-        api_name: 
         output: true
       - name: 'none'
         type: Integer
         description: |
           The number of instances in the managed instance group that are
           running and have no scheduled actions.
-        api_name: 
         output: true
       - name: 'recreating'
         type: Integer
@@ -133,7 +124,6 @@ properties:
           Recreating an instance deletes the existing root persistent disk
           and creates a new disk from the image that is defined in the
           instance template.
-        api_name: 
         output: true
       - name: 'refreshing'
         type: Integer
@@ -142,31 +132,26 @@ properties:
           being reconfigured with properties that do not require a restart
           or a recreate action. For example, setting or removing target
           pools for the instance.
-        api_name: 
         output: true
       - name: 'restarting'
         type: Integer
         description: |
           The number of instances in the managed instance group that are
           scheduled to be restarted or are currently being restarted.
-        api_name: 
         output: true
   - name: 'description'
     type: String
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
-    api_name: 
     immutable: true
   - name: 'id'
     type: Integer
     description: 'A unique identifier for this resource'
-    api_name: 
     output: true
   - name: 'instanceGroup'
     type: ResourceRef
     description: 'The instance group being managed'
-    api_name: 
     output: true
     custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
     resource: 'InstanceGroup'
@@ -177,7 +162,6 @@ properties:
       The instance template that is specified for this managed instance
       group. The group uses this template to create all new instances in the
       managed instance group.
-    api_name: 
     required: true
     custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
     resource: 'InstanceTemplate'
@@ -187,14 +171,12 @@ properties:
     description: |
       The name of the managed instance group. The name must be 1-63
       characters long, and comply with RFC1035.
-    api_name: 
     required: true
   - name: 'namedPorts'
     type: Array
     description:
       Named ports configured for the Instance Groups complementary to this
       Instance Group Manager.
-    api_name: 
     item_type:
       type: NestedObject
       properties:
@@ -203,19 +185,16 @@ properties:
           description: |
             The name for this named port. The name must be 1-63 characters
             long, and comply with RFC1035.
-          api_name: 
         - name: 'port'
           type: Integer
           description:
             The port number, which can be a value between 1 and 65535.
-          api_name: 
   - name: 'targetPools'
     type: Array
     description: |
       TargetPool resources to which instances in the instanceGroup field are
       added. The target pools automatically apply to all of the instances in
       the managed instance group.
-    api_name: 
     custom_expand: 'templates/terraform/custom_expand/go/array_resourceref_with_validation.go.tmpl'
     item_type:
       name: 'targetPool'
@@ -229,12 +208,10 @@ properties:
       The target number of running instances for this managed instance
       group. Deleting or abandoning instances reduces this number. Resizing
       the group changes this number.
-    api_name: 
   - name: 'autoHealingPolicies'
     type: Array
     description: |
       The autohealing policy for this managed instance group
-    api_name: 
     item_type:
       type: NestedObject
       properties:
@@ -242,10 +219,8 @@ properties:
           type: String
           description: |
             The URL for the health check that signals autohealing.
-          api_name: 
         - name: 'initialDelaySec'
           type: Integer
           description: |
             The number of seconds that the managed instance group waits
             before it applies autohealing policies to new instances or recently recreated instances
-          api_name: 
