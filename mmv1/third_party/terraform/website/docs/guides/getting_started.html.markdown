@@ -101,7 +101,7 @@ the Cloud Console will be the one defined in the `name` field.
 
 When linking resources in a Terraform config though, you'll primarily want to
 use a different field, the `id` of a resource. Every Terraform resource has an
-`id`. In the Google provider they look like:
+`id`. In the Google provider they generally look like:
 
 ```
 projects/{{your project}}/{{location type}}/{{location}}/{{resource type}}/{{name}}
