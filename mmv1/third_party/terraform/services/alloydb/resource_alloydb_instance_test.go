@@ -146,6 +146,58 @@ data "google_compute_network" "default" {
 `, context)
 }
 
+func TestAccAlloydbInstance_observabilityConfig(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-observabilityconfig"),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAlloydbInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAlloydbInstance_observabilityConfig(context),
+			},
+		},
+	})
+}
+
+func testAccAlloydbInstance_observabilityConfig(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_instance" "default" {
+  cluster       = google_alloydb_cluster.default.name
+  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
+  instance_type = "PRIMARY"
+  observability_config {
+	enabled = true
+	preserve_comments = true
+	track_wait_events = true
+	track_wait_event_types = true
+	record_application_tags = true
+	track_active_queries = true
+	query_plans_per_minute = 50
+	max_query_string_length = 1024
+  }
+}
+
+resource "google_alloydb_cluster" "default" {
+  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
+  location   = "us-central1"
+  network    = data.google_compute_network.default.id
+}
+
+data "google_project" "project" {}
+
+data "google_compute_network" "default" {
+  name = "%{network_name}"
+}
+`, context)
+}
+
 // This test passes if we are able to create a primary instance with maximum number of fields
 /* func TestAccAlloydbInstance_createInstanceWithMaximumFields(t *testing.T) {
 	t.Parallel()
