@@ -129,7 +129,7 @@ properties:
     sensitive: true
     ignore_read: true
     custom_flatten: 'templates/terraform/custom_flatten/sha256.erb'
-    diff_suppress_func: 'tpgresource.Sha256DiffSuppress'    
+    diff_suppress_func: 'tpgresource.Sha256DiffSuppress'
   - !ruby/object:Api::Type::String
     name: 'region'
     description: '[Output Only] URL of the region where the regional SSL Certificate resides. This field is not applicable to global SSL Certificate.'
