@@ -127,7 +127,7 @@ func ResourceGoogleProjectService() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
-			}
+			},
 		},
 		UseJSONNumber: true,
 	}
