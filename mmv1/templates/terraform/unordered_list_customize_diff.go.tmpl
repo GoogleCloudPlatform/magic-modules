@@ -28,8 +28,8 @@ for i := 0; i < count; i++ {
     }
 }
 
-oldSet := schema.NewSet(schema.HashResource(Resource{{ $.ResourceName }}().Schema[{{ underscore $.Name }}].Elem.(*schema.Resource)), old)
-newSet := schema.NewSet(schema.HashResource(Resource{{ $.ResourceName }}().Schema[{{ underscore $.Name }}].Elem.(*schema.Resource)), new)
+oldSet := schema.NewSet(schema.HashResource(Resource{{ $.ResourceMetadata.ResourceName }}().Schema[{{ underscore $.Name }}].Elem.(*schema.Resource)), old)
+newSet := schema.NewSet(schema.HashResource(Resource{{ $.ResourceMetadata.ResourceName }}().Schema[{{ underscore $.Name }}].Elem.(*schema.Resource)), new)
 
 if oldSet.Equal(newSet) {
     if err := diff.Clear({{ underscore $.Name }}); err != nil {
