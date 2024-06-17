@@ -138,13 +138,13 @@ properties:
       This field is not applicable to global SSL Certificate.
     output: true
   - !ruby/object:Api::Type::NestedObject
-      name: 'selfManaged'
-      description: |
-        Configuration and status of a self-managed SSL certificate.
-      properties:
-        - !ruby/object:Api::Type::String
-         name: 'certificate'
-         description: |
-            A local certificate file. The certificate must be in PEM format.
-            The certificate chain must be no greater than 5 certs long.
-            The chain must include at least one intermediate cert.
+    name: 'selfManaged'
+    description: |
+      Configuration and status of a self-managed SSL certificate.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'certificate'
+        description: |
+          A local certificate file. The certificate must be in PEM format.
+          The certificate chain must be no greater than 5 certs long.
+          The chain must include at least one intermediate cert.
