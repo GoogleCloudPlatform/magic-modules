@@ -59,8 +59,8 @@ destroyed. If `false` or unset, an error will be returned if any enabled
 services depend on this service when attempting to destroy it.
 
 * `check_if_service_has_usage_on_destroy` - (Optional) If `true`, the usage of
-the service to be disabled will be checked and an error will be thrown if the
-service has usage. Defaults to `false`.
+the service to be disabled will be checked and an error will be returned if the
+service to be disabled has usage in last 30 days. Defaults to `false`.
 
 ## Attributes Reference
 
