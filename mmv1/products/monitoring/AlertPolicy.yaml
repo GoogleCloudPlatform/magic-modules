@@ -1025,9 +1025,9 @@ properties:
           - !ruby/object:Api::Type::String
             name: display_name
             description: |
-            A short display name for the link. The display name must not be empty or exceed 63 characters. Example: "playbook".
+              A short display name for the link. The display name must not be empty or exceed 63 characters. Example: "playbook".
           - !ruby/object:Api::Type::String
-          name: url
-          description: |
-          The url of a webpage. A url can be templatized by using variables in the path or the query parameters. The total length of a URL should not exceed 2083 characters before and after variable expansion. Example: "https://my_domain.com/playbook?name=${resource.name}".
+            name: url
+            description: |
+              The url of a webpage. A url can be templatized by using variables in the path or the query parameters. The total length of a URL should not exceed 2083 characters before and after variable expansion. Example: "https://my_domain.com/playbook?name=${resource.name}".
 
