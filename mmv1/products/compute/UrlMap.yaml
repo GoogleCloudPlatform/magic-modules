@@ -285,7 +285,8 @@ properties:
     description: Specifies the custom error response policies that must be
       applied when the backend service or backend bucket responds with an error.
       Can be defined for the urlMap, pathMatcher or routeRule/pathRule. The most
-      specific customErrorPolicy that matches the error response applies.
+      specific customErrorResponsePolicy that matches the error response applies.
+    min_version: beta
     properties:
       - !ruby/object:Api::Type::Array
         name: 'errorResponseRules'
@@ -422,7 +423,8 @@ properties:
           description: Specifies the custom error response policies that must be
             applied when the backend service or backend bucket responds with an error.
             Can be defined for the urlMap, pathMatcher or routeRule/pathRule. The most
-            specific customErrorPolicy that matches the error response applies.
+            specific customErrorResponsePolicy that matches the error response applies.
+          min_version: beta
           properties:
             - !ruby/object:Api::Type::Array
               name: 'errorResponseRules'
@@ -816,10 +818,11 @@ properties:
                             The value must be between 0 and 1000
               - !ruby/object:Api::Type::NestedObject
                 name: 'customErrorResponsePolicy'
+                min_version: beta
                 description: Specifies the custom error response policies that must be
                   applied when the backend service or backend bucket responds with an error.
                   Can be defined for the urlMap, pathMatcher or routeRule/pathRule. The most
-                  specific customErrorPolicy that matches the error response applies.
+                  specific customErrorResponsePolicy that matches the error response applies.
                 properties:
                   - !ruby/object:Api::Type::Array
                     name: 'errorResponseRules'
@@ -1588,10 +1591,11 @@ properties:
                             The value must be between 0 and 1000
               - !ruby/object:Api::Type::NestedObject
                 name: 'customErrorResponsePolicy'
+                min_version: beta
                 description: Specifies the custom error response policies that must be
                   applied when the backend service or backend bucket responds with an error.
                   Can be defined for the urlMap, pathMatcher or routeRule/pathRule. The most
-                  specific customErrorPolicy that matches the error response applies.
+                  specific customErrorResponsePolicy that matches the error response applies.
                 properties:
                   - !ruby/object:Api::Type::Array
                     name: 'errorResponseRules'
