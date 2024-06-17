@@ -126,6 +126,16 @@ func WorkbenchInstanceTagsDiffSuppress(_, _, _ string, d *schema.ResourceData) b
 	return false
 }
 
+func WorkbenchInstanceAcceleratorDiffSuppress(_, _, _ string, d *schema.ResourceData) bool {
+	old, new := d.GetChange("gce_setup.0.accelerator_configs")
+	oldInterface := old.([]interface{})
+	newInterface := new.([]interface{})
+	if len(oldInterface) == 0 && len(newInterface) == 1 && newInterface[0] == nil{
+		return true
+	}
+	return false
+  }
+
 <% unless compiler == "terraformgoogleconversion-codegen" -%>
 // waitForWorkbenchInstanceActive waits for an workbench instance to become "ACTIVE"
 func waitForWorkbenchInstanceActive(d *schema.ResourceData, config *transport_tpg.Config, timeout time.Duration) error {
