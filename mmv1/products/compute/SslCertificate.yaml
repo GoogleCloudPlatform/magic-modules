@@ -134,6 +134,3 @@ properties:
     name: 'region'
     description: '[Output Only] URL of the region where the regional SSL Certificate resides. This field is not applicable to global SSL Certificate.'
     output: true
-   
-    
-
