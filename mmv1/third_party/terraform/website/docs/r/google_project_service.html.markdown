@@ -58,6 +58,10 @@ and which depend on this service should also be disabled when this service is
 destroyed. If `false` or unset, an error will be returned if any enabled
 services depend on this service when attempting to destroy it.
 
+* `check_if_service_has_usage_on_destroy` - (Optional) If `true`, the usage of
+the service to be disabled will be checked and an error will be thrown if the
+service has usage. Defaults to `false`.
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are
