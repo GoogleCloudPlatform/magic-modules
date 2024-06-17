@@ -110,4 +110,3 @@ properties:
     values:
       - :MUTE_CONFIG_TYPE_UNSPECIFIED
       - :STATIC
-  
