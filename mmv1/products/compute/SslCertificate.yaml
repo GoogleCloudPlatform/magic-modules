@@ -132,9 +132,9 @@ properties:
     diff_suppress_func: 'tpgresource.Sha256DiffSuppress'
   - !ruby/object:Api::Type::String
     name: 'region'
-    description: | 
-      [Output Only] URL of the region 
-      where the regional SSL Certificate resides. 
+    description: |
+      [Output Only] URL of the region
+      where the regional SSL Certificate resides.
       This field is not applicable to global SSL Certificate.
     output: true
   - !ruby/object:Api::Type::NestedObject
