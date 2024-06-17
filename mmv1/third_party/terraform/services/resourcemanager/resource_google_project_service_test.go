@@ -104,7 +104,7 @@ func TestAccProjectService_disableDependentServices(t *testing.T) {
 				ResourceName:            "google_project_service.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"disable_on_destroy"},
+				ImportStateVerifyIgnore: []string{"disable_on_destroy", "check_if_service_has_usage_on_destroy"},
 			},
 			{
 				Config:             testAccProjectService_dependencyRemoved(services, pid, org, billingId),
@@ -164,7 +164,7 @@ func TestAccProjectService_renamedService(t *testing.T) {
 				ResourceName:            "google_project_service.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"disable_on_destroy", "disable_dependent_services"},
+				ImportStateVerifyIgnore: []string{"disable_on_destroy", "disable_dependent_services", "check_if_service_has_usage_on_destroy"},
 			},
 		},
 	})
