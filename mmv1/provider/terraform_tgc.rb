@@ -331,7 +331,7 @@ module Provider
                         'third_party/tgc/apikeys_key.go'],
                        ['converters/google/resources/logging_folder_bucket_config.go',
                         'third_party/tgc/logging_folder_bucket_config.go'],
-                        ['converters/google/resources/logging_organization_bucket_config.go',
+                       ['converters/google/resources/logging_organization_bucket_config.go',
                         'third_party/tgc/logging_organization_bucket_config.go']
                      ])
     end
