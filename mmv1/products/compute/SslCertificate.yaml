@@ -132,5 +132,19 @@ properties:
     diff_suppress_func: 'tpgresource.Sha256DiffSuppress'
   - !ruby/object:Api::Type::String
     name: 'region'
-    description: '[Output Only] URL of the region where the regional SSL Certificate resides. This field is not applicable to global SSL Certificate.'
+    description: | 
+      [Output Only] URL of the region 
+      where the regional SSL Certificate resides. 
+      This field is not applicable to global SSL Certificate.
     output: true
+  - !ruby/object:Api::Type::NestedObject
+      name: 'selfManaged'
+      description: |
+        Configuration and status of a self-managed SSL certificate.
+      properties:
+        - !ruby/object:Api::Type::String
+         name: 'certificate'
+         description: |
+            A local certificate file. The certificate must be in PEM format.
+            The certificate chain must be no greater than 5 certs long.
+            The chain must include at least one intermediate cert.
