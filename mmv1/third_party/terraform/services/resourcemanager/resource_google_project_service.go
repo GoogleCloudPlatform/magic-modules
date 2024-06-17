@@ -123,6 +123,11 @@ func ResourceGoogleProjectService() *schema.Resource {
 				Optional: true,
 				Default:  true,
 			},
+			"check_if_service_has_usage_on_destroy": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			}
 		},
 		UseJSONNumber: true,
 	}
@@ -256,7 +261,8 @@ func resourceGoogleProjectServiceDelete(d *schema.ResourceData, meta interface{}
 
 	service := d.Get("service").(string)
 	disableDependencies := d.Get("disable_dependent_services").(bool)
-	if err = disableServiceUsageProjectService(service, project, d, config, disableDependencies); err != nil {
+	checkUsage := d.Get("check_if_service_has_usage_on_destroy").(bool)
+	if err = disableServiceUsageProjectService(service, project, d, config, disableDependencies,checkUsage); err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Project Service %s", d.Id()))
 	}
 
@@ -271,7 +277,7 @@ func resourceGoogleProjectServiceUpdate(d *schema.ResourceData, meta interface{}
 }
 
 // Disables a project service.
-func disableServiceUsageProjectService(service, project string, d *schema.ResourceData, config *transport_tpg.Config, disableDependentServices bool) error {
+func disableServiceUsageProjectService(service, project string, d *schema.ResourceData, config *transport_tpg.Config, disableDependentServices bool, checkUsage bool) error {
 	err := transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() error {
 			billingProject := project
@@ -280,8 +286,13 @@ func disableServiceUsageProjectService(service, project string, d *schema.Resour
 				return err
 			}
 			name := fmt.Sprintf("projects/%s/services/%s", project, service)
+			checkIfServiceHasUsage := "SKIP"
+			if checkUsage {
+				checkIfServiceHasUsage := "CHECK"
+			}
 			servicesDisableCall := config.NewServiceUsageClient(userAgent).Services.Disable(name, &serviceusage.DisableServiceRequest{
 				DisableDependentServices: disableDependentServices,
+				CheckIfServiceHasUsage: checkIfServiceHasUsage,
 			})
 			if config.UserProjectOverride {
 				// err == nil indicates that the billing_project value was found
