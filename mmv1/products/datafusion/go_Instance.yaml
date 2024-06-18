@@ -305,6 +305,7 @@ properties:
       If accelerators are enabled it is possible a permadiff will be created with the Options field.
       Users will need to either manually update their state file to include these diffed options, or include the field in a [lifecycle ignore changes block](https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle#ignore_changes).
     item_type:
+      type: NestedObject
       properties:
         - name: 'acceleratorType'
           type: Enum
@@ -323,4 +324,3 @@ properties:
           enum_values:
             - 'ENABLED'
             - 'DISABLED'
-      type: NestedObject

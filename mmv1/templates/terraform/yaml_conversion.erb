@@ -398,9 +398,14 @@ custom_code:
   test_check_destroy: '<%= object.convert_go_file( object.custom_code.test_check_destroy )%>'
 <%    end -%>
 <%  end -%>
-<%  unless object.custom_diff.empty? || (object.custom_diff.size == 1 && object.custom_diff.include?("tpgresource.SetLabelsDiff")) -%>
+<% 
+custom_diff = object.custom_diff.reject {
+  |cdiff| cdiff == "tpgresource.SetLabelsDiff" || cdiff == "tpgresource.SetMetadataLabelsDiff" || cdiff == "tpgresource.SetAnnotationsDiff" || cdiff == "tpgresource.SetMetadataAnnotationsDiff"
+}
+-%>
+<%  unless custom_diff.empty? -%>
 custom_diff:
-<%    object.custom_diff.each do |cdiff| -%>
+<%    custom_diff.each do |cdiff| -%>
   - '<%= cdiff %>'
 <%    end -%>
 <%  end -%>

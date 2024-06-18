@@ -70,7 +70,6 @@ custom_code:
 custom_diff:
   - 'customdiff.ForceNewIfChange("size", IsDiskShrinkage)'
   - 'hyperDiskIopsUpdateDiffSupress'
-  - 'tpgresource.SetLabelsDiff'
 examples:
   - name: 'region_disk_basic'
     primary_resource_id: 'regiondisk'
