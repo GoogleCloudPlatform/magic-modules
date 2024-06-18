@@ -105,7 +105,7 @@ resource "google_app_engine_flexible_app_version" "<%= ctx[:vars]['app_version_n
     }
   }
 
-  delete_service_on_destroy = true
+  delete_service_on_destroy = false
 }
 
 resource "google_storage_bucket" "bucket" {
