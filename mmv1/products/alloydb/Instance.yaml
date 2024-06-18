@@ -239,6 +239,7 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: 'observabilityConfig'
     description: 'Configuration for enhanced query insights.'
+    min_version: beta
     properties:
       - !ruby/object:Api::Type::Boolean
         name: 'enabled'
