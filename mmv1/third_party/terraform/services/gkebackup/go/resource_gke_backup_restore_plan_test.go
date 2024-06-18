@@ -1,15 +1,12 @@
-
-
 package gkebackup_test
 
 import (
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
-
 
 func TestAccGKEBackupRestorePlan_update(t *testing.T) {
 	t.Parallel()
@@ -35,7 +32,7 @@ func TestAccGKEBackupRestorePlan_update(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "location", "terraform_labels"},
 			},
-      {
+			{
 				Config: testAccGKEBackupRestorePlan_update(context),
 			},
 			{

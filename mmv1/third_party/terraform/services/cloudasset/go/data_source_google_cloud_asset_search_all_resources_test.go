@@ -5,9 +5,9 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccDataSourceGoogleCloudAssetSearchAllResources_basic(t *testing.T) {
@@ -46,4 +46,3 @@ data google_cloud_asset_search_all_resources resources {
 }
 `, project)
 }
-

@@ -2,11 +2,11 @@ package firestore_test
 
 import (
 	"fmt"
-	"testing"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestAccFirestoreDatabase_updateConcurrencyMode(t *testing.T) {
@@ -26,18 +26,18 @@ func TestAccFirestoreDatabase_updateConcurrencyMode(t *testing.T) {
 				Config: testAccFirestoreDatabase_concurrencyMode(projectId, randomSuffix, "OPTIMISTIC"),
 			},
 			{
-				ResourceName:      "google_firestore_database.database",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_firestore_database.database",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"etag", "project"},
 			},
 			{
 				Config: testAccFirestoreDatabase_concurrencyMode(projectId, randomSuffix, "PESSIMISTIC"),
 			},
 			{
-				ResourceName:      "google_firestore_database.database",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_firestore_database.database",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"etag", "project"},
 			},
 		},
@@ -61,18 +61,18 @@ func TestAccFirestoreDatabase_updatePitrEnablement(t *testing.T) {
 				Config: testAccFirestoreDatabase_pitrEnablement(projectId, randomSuffix, "POINT_IN_TIME_RECOVERY_ENABLED"),
 			},
 			{
-				ResourceName:      "google_firestore_database.database",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_firestore_database.database",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"etag", "project"},
 			},
 			{
 				Config: testAccFirestoreDatabase_pitrEnablement(projectId, randomSuffix, "POINT_IN_TIME_RECOVERY_DISABLED"),
 			},
 			{
-				ResourceName:      "google_firestore_database.database",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_firestore_database.database",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"etag", "project"},
 			},
 		},
@@ -96,18 +96,18 @@ func TestAccFirestoreDatabase_updateDeleteProtectionState(t *testing.T) {
 				Config: testAccFirestoreDatabase_deleteProtectionState(projectId, randomSuffix, "DELETE_PROTECTION_ENABLED"),
 			},
 			{
-				ResourceName:      "google_firestore_database.database",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_firestore_database.database",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"etag", "project"},
 			},
 			{
 				Config: testAccFirestoreDatabase_deleteProtectionState(projectId, randomSuffix, "DELETE_PROTECTION_DISABLED"),
 			},
 			{
-				ResourceName:      "google_firestore_database.database",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_firestore_database.database",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"etag", "project"},
 			},
 		},
