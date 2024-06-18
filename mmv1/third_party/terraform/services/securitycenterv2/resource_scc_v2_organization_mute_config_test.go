@@ -1,9 +1,11 @@
 package securitycenterv2_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
@@ -84,4 +86,29 @@ resource "google_scc_organization_mute_config" "default" {
   type           = "STATIC"
 }
 `, context)
+}
+
+func testAccCheckSecurityCenterOrganizationMuteConfigDestroyProducer(t *testing.T) resource.TestCheckFunc {
+
+	return func(s *terraform.State) error {
+		config := acctest.ProviderConfig(t)
+		client := config.SecurityCenterClientV2
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "google_scc_organization_mute_config" {
+				continue
+			}
+
+			_, err := client.Organizations.MuteConfigs.Get(rs.Primary.ID).Do()
+			if err == nil {
+				return fmt.Errorf("Organization Mute Config %s still exists", rs.Primary.ID)
+			}
+
+			if !googleErrCodeEquals(err, 404) {
+				return fmt.Errorf("error fetching Organization Mute Config: %s", err)
+			}
+		}
+
+		return nil
+	}
+
 }
