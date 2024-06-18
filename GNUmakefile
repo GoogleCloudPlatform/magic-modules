@@ -138,3 +138,4 @@ refresh-go:
 	cd mmv1;\
 		bundle exec compiler.rb -e terraform -o $(OUTPUT_PATH) -v $(VERSION) $(mmv1_compile) --go-yaml; \
 		go run . --yaml --template
+		go run . --yaml --handwritten

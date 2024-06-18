@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/golang/glog"
+	"golang.org/x/exp/slices"
 )
 
 func find(root, ext string) []string {
@@ -73,7 +74,8 @@ func convertTemplate(folder string) int {
 }
 
 func convertAllHandwrittenFiles() int {
-	folders := []string{}
+	// Add third_party/terraform to convert files in this folder
+	folders := []string{"third_party/terraform"}
 
 	// Get all of the service folders
 	servicesRoot := "third_party/terraform/services"
@@ -86,11 +88,26 @@ func convertAllHandwrittenFiles() int {
 		folders = append(folders, rubyDir)
 	}
 
+	// Get all of the utility folders
+	utilsExceptionFolders := []string{".teamcity", "website", "META.d", "go", "services", "test-fixtures", "versionq"}
+	utilsRoot := "third_party/terraform"
+	utilsFolders, err := ioutil.ReadDir(utilsRoot)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, utilsFolder := range utilsFolders {
+		if !utilsFolder.IsDir() || slices.Contains(utilsExceptionFolders, utilsFolder.Name()) {
+			continue
+		}
+		rubyDir := fmt.Sprintf("%s/%s", "third_party/terraform", utilsFolder.Name())
+		folders = append(folders, rubyDir)
+	}
+
 	counts := 0
 	for _, folder := range folders {
 		counts += convertHandwrittenFiles(folder)
 	}
-	log.Printf("%d service handwritten files in total", counts)
+	log.Printf("%d handwritten files in total", counts)
 
 	return counts
 }
@@ -107,7 +124,9 @@ func convertHandwrittenFiles(folder string) int {
 
 	for _, file := range files {
 		filePath := path.Join(folder, file)
-
+		if checkExceptionList(filePath) {
+			continue
+		}
 		data, err := os.ReadFile(filePath)
 		if err != nil {
 			log.Fatalf("Cannot open the file: %v", file)
@@ -193,6 +212,13 @@ func replace(data []byte) []byte {
 	}
 	data = r.ReplaceAll(data, []byte(`{{- if eq $.TargetVersionName "ga" }}`))
 
+	// Replace <%= "-" + version unless version == 'ga'  -%>
+	r, err = regexp.Compile(`<%= "-" \+ version unless version == 'ga'[\s-]*%>`)
+	if err != nil {
+		log.Fatalf("Cannot compile the regular expression: %v", err)
+	}
+	data = r.ReplaceAll(data, []byte(`{{- if ne $.TargetVersionName "ga" -}}-{{$.TargetVersionName}}{{- end }}`))
+
 	// Replace \n\n<% unless version.nil? || version == ['|"]ga['|"] -%>
 	r, err = regexp.Compile(`\n\n(\s*)<% unless version\.nil\? \|\| version == ['|"]ga['|"] -%>`)
 	if err != nil {
@@ -206,6 +232,167 @@ func replace(data []byte) []byte {
 		log.Fatalf("Cannot compile the regular expression: %v", err)
 	}
 	data = r.ReplaceAll(data, []byte(`{{- if or (ne $.TargetVersionName "") (eq $.TargetVersionName "ga") }}`))
+
+	// Replace <% if version.nil? || version == ['|"]ga['|"] -%>
+	r, err = regexp.Compile(`<% if version\.nil\? \|\| version == ['|"]ga['|"] -%>`)
+	if err != nil {
+		log.Fatalf("Cannot compile the regular expression: %v", err)
+	}
+	data = r.ReplaceAll(data, []byte(`{{- if or (eq $.TargetVersionName "") (eq $.TargetVersionName "ga") }}`))
+
+	// Replace <% Api::Product::Version::ORDER[1..Api::Product::Version::ORDER.index(version)].each do |aliased_version| -%>
+	r, err = regexp.Compile(`<% Api::Product::Version::ORDER\[1\.\.Api::Product::Version::ORDER\.index\(version\)\]\.each do \|aliased_version\| -%>`)
+	if err != nil {
+		log.Fatalf("Cannot compile the regular expression: %v", err)
+	}
+	data = r.ReplaceAll(data, []byte(`{{ range $$aliasedVersion := $.SupportedProviderVersions -}}`))
+
+	// Replace <%= provider_name -?%>
+	r, err = regexp.Compile(`<%= provider_name -?%>`)
+	if err != nil {
+		log.Fatalf("Cannot compile the regular expression: %v", err)
+	}
+	data = r.ReplaceAll(data, []byte(`{{ $.ProviderFromVersion }}`))
+
+	// Replace <% products.each do |product| -%>
+	r, err = regexp.Compile(`<% products\.each do \|product\| -%>`)
+	if err != nil {
+		log.Fatalf("Cannot compile the regular expression: %v", err)
+	}
+	data = r.ReplaceAll(data, []byte(`{{- range $$product := $.Products }}`))
+
+	// Replace <% products.map.each do |product| -%>
+	r, err = regexp.Compile(`<% products\.map\.each do \|product\| -%>`)
+	if err != nil {
+		log.Fatalf("Cannot compile the regular expression: %v", err)
+	}
+	data = r.ReplaceAll(data, []byte(`{{- range $$product := $.Products }}`))
+
+	// Replace <% resources_for_version.each do |object| -%>
+	r, err = regexp.Compile(`<% resources_for_version\.each do \|object\| -%>`)
+	if err != nil {
+		log.Fatalf("Cannot compile the regular expression: %v", err)
+	}
+	data = r.ReplaceAll(data, []byte(`{{- range $$object := $.ResourcesForVersion }}`))
+
+	// Replace <% 	unless object[:resource_name].nil? -%>
+	r, err = regexp.Compile(`<% 	unless object\[\:resource_name\]\.nil\? -%>`)
+	if err != nil {
+		log.Fatalf("Cannot compile the regular expression: %v", err)
+	}
+	data = r.ReplaceAll(data, []byte(`{{- if $$object.ResourceName }}`))
+
+	// Replace <% unless object[:iam_class_name].nil? -%>
+	r, err = regexp.Compile(`<% unless object\[\:iam_class_name\]\.nil\? -%>`)
+	if err != nil {
+		log.Fatalf("Cannot compile the regular expression: %v", err)
+	}
+	data = r.ReplaceAll(data, []byte(`{{- if $$object.IamClassName }}`))
+
+	// Replace <%= object[:terraform_name] -%>
+	r, err = regexp.Compile(`<%= object\[\:terraform_name\] -%>`)
+	if err != nil {
+		log.Fatalf("Cannot compile the regular expression: %v", err)
+	}
+	data = r.ReplaceAll(data, []byte(`{{ $$object.TerraformName }}`))
+
+	// Replace <%= object[:resource_name] -%>
+	r, err = regexp.Compile(`<%= object\[\:resource_name\] -%>`)
+	if err != nil {
+		log.Fatalf("Cannot compile the regular expression: %v", err)
+	}
+	data = r.ReplaceAll(data, []byte(`{{ $$object.ResourceName }}`))
+
+	// Replace <%= object[:iam_class_name] -%>
+	r, err = regexp.Compile(`<%= object\[\:iam_class_name\] -%>`)
+	if err != nil {
+		log.Fatalf("Cannot compile the regular expression: %v", err)
+	}
+	data = r.ReplaceAll(data, []byte(`{{ $$object.IamClassName }}`))
+
+	// Replace <%= product[:definitions].name -%>
+	r, err = regexp.Compile(`<%= product\[\:definitions\]\.name -%>`)
+	if err != nil {
+		log.Fatalf("Cannot compile the regular expression: %v", err)
+	}
+	data = r.ReplaceAll(data, []byte(`{{ $$product.Name }}`))
+
+	// Replace <%= product[:definitions].name.underscore -%>
+	r, err = regexp.Compile(`<%= product\[\:definitions\]\.name\.underscore -%>`)
+	if err != nil {
+		log.Fatalf("Cannot compile the regular expression: %v", err)
+	}
+	data = r.ReplaceAll(data, []byte(`{{ underscore $$product.Name }}`))
+
+	// Replace <%= product[:definitions].name.underscore.upcase -%>
+	r, err = regexp.Compile(`<%= product\[\:definitions\]\.name\.underscore\.upcase -%>`)
+	if err != nil {
+		log.Fatalf("Cannot compile the regular expression: %v", err)
+	}
+	data = r.ReplaceAll(data, []byte(`{{ upper (underscore $$product.Name) }}`))
+
+	// Replace <%= product[:definitions].name.base_url -%>
+	r, err = regexp.Compile(`<%= product\[\:definitions\]\.base_url -%>`)
+	if err != nil {
+		log.Fatalf("Cannot compile the regular expression: %v", err)
+	}
+	data = r.ReplaceAll(data, []byte(`{{ $$product.BaseUrl }}`))
+
+	// Replace <%= product[:definitions].name.underscore.downcase -%>
+	r, err = regexp.Compile(`<%= product\[\:definitions\]\.name\.underscore\.downcase -%>`)
+	if err != nil {
+		log.Fatalf("Cannot compile the regular expression: %v", err)
+	}
+	data = r.ReplaceAll(data, []byte(`{{ lower (underscore $$product.Name) }}`))
+
+	// Replace <%= product[:definitions].name.downcase -%>
+	r, err = regexp.Compile(`<%= product\[\:definitions\]\.name\.downcase -%>`)
+	if err != nil {
+		log.Fatalf("Cannot compile the regular expression: %v", err)
+	}
+	data = r.ReplaceAll(data, []byte(`{{ lower $$product.Name }}`))
+
+	// Replace <% get_mmv1_services_in_version(products, version).each do |service|  -%>
+	r, err = regexp.Compile(`<% get_mmv1_services_in_version\(products, version\)\.each do \|service\|  -%>`)
+	if err != nil {
+		log.Fatalf("Cannot compile the regular expression: %v", err)
+	}
+	data = r.ReplaceAll(data, []byte(`{{- range $$service := $.GetMmv1ServicesInVersion $.Products }}`))
+
+	// Replace <%= resource_count %>
+	r, err = regexp.Compile(`<%= resource_count %>`)
+	if err != nil {
+		log.Fatalf("Cannot compile the regular expression: %v", err)
+	}
+	data = r.ReplaceAll(data, []byte(`{{ $.ResourceCount }}`))
+
+	// Replace <%= iam_resource_count %>
+	r, err = regexp.Compile(`<%= iam_resource_count %>`)
+	if err != nil {
+		log.Fatalf("Cannot compile the regular expression: %v", err)
+	}
+	data = r.ReplaceAll(data, []byte(`{{ $.IAMResourceCount }}`))
+
+	// Replace <%= resource_count + iam_resource_count %>
+	r, err = regexp.Compile(`<%= resource_count \+ iam_resource_count %>`)
+	if err != nil {
+		log.Fatalf("Cannot compile the regular expression: %v", err)
+	}
+	data = r.ReplaceAll(data, []byte(`{{ plus $.ResourceCount $.IAMResourceCount }}`))
+
+	// Replace <%= service -%>
+	r, err = regexp.Compile(`<%= service -%>`)
+	if err != nil {
+		log.Fatalf("Cannot compile the regular expression: %v", err)
+	}
+	data = r.ReplaceAll(data, []byte(`{{ $$service }}`))
+
+	// Replace <%= aliased_version -%>
+	r, err = regexp.Compile(`<%= aliased_version -%>`)
+	if err != nil {
+		log.Fatalf("Cannot compile the regular expression: %v", err)
+	}
+	data = r.ReplaceAll(data, []byte(`{{ $$aliasedVersion }}`))
 
 	// Replace <%= dcl_version(version) -%>
 	r, err = regexp.Compile(`<%= dcl_version\(version\) -%>`)
@@ -478,12 +665,12 @@ func replace(data []byte) []byte {
 	}
 	data = r.ReplaceAll(data, []byte(``))
 
-	// Replace <%= "-" + version unless version == 'ga'  -%>
-	r, err = regexp.Compile(`<%= "-" \+ version unless version == 'ga'[\s-]*%>`)
+	// Replace <% provider_name = version.nil? || version == 'ga' ? 'google' : 'google-' + version -%>
+	r, err = regexp.Compile(`<% provider_name = version.nil\? \|\| version == 'ga' \? 'google' : 'google-' \+ version -%>\n`)
 	if err != nil {
 		log.Fatalf("Cannot compile the regular expression: %v", err)
 	}
-	data = r.ReplaceAll(data, []byte(`{{- if ne $.TargetVersionName "ga" -}}-{{$.TargetVersionName}}{{- end }}`))
+	data = r.ReplaceAll(data, []byte(``))
 
 	// Replace .erb
 	r, err = regexp.Compile(`\.erb`)
@@ -504,6 +691,16 @@ func checkExceptionList(filePath string) bool {
 		"custom_flatten/bigquery_table_ref_query_destinationtable.go",
 		"unordered_list_customize_diff",
 		"default_if_empty",
+
+		// TODO: remove the following files from the exception list after all of the services are migrated to Go
+		// It will generate diffs when partial services are migrated.
+		"provider/provider_mmv1_resources.go.erb",
+		"provider/provider.go.erb",
+		"fwmodels/provider_model.go.erb",
+		"fwprovider/framework_provider.go.erb",
+		"fwtransport/framework_config.go.erb",
+		"sweeper/gcp_sweeper_test.go.erb",
+		"transport/config.go.erb",
 	}
 
 	for _, t := range exceptionPaths {
