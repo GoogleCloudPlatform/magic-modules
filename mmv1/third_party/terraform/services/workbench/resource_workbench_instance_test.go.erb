@@ -552,6 +552,9 @@ func TestAccWorkbenchInstance_updateBothDisks(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccWorkbenchInstance_basic(context),
+				Check: resource.ComposeTestCheckFunc(
+                    	resource.TestCheckResourceAttr(
+                        		"google_workbench_instance.instance", "state", "ACTIVE"),
 			},
 			{
 				ResourceName:            "google_workbench_instance.instance",
@@ -561,6 +564,9 @@ func TestAccWorkbenchInstance_updateBothDisks(t *testing.T) {
 			},
       		{
 				Config: testAccWorkbenchInstance_updateBothDisks(context),
+				Check: resource.ComposeTestCheckFunc(
+                    	resource.TestCheckResourceAttr(
+                        		"google_workbench_instance.instance", "state", "ACTIVE"),
 			},
 			{
 				ResourceName:            "google_workbench_instance.instance",
