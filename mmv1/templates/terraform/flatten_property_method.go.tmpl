@@ -14,10 +14,12 @@
   limitations under the License. */ -}}
 {{- define "flattenPropertyMethod" }}
 {{- if $.CustomFlatten }}
-    {{- $.CustomTemplate $.CustomFlatten true -}}
-{{ else }}
+    {{- $.CustomTemplate $.CustomFlatten false -}}
+{{- else -}}
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-  {{- if $.IsA "NestedObject" }}
+  {{- if $.IgnoreRead }}
+  return d.Get("{{ $.TerraformLineage }}")
+  {{- else if $.IsA "NestedObject" }}
   if v == nil {
     return nil
   }
@@ -143,9 +145,9 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
     {{- end }}
   {{- else }}
   return v
-  {{- end }}
+{{- end }}
 }
-  {{- if $.NestedProperties }}
+{{- if $.NestedProperties }}
     {{- range $prop := $.NestedProperties }}
       {{ template "flattenPropertyMethod" $prop -}}
     {{- end }}

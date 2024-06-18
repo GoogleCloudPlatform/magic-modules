@@ -558,6 +558,15 @@ func (r *Resource) addLabelsFields(props []*Type, parent *Type, labels *Type) []
 	return props
 }
 
+func (r *Resource) HasLabelsField() bool {
+	for _, p := range r.Properties {
+		if p.Name == "labels" {
+			return true
+		}
+	}
+	return false
+}
+
 // def add_annotations_fields(props, parent, annotations)
 func (r *Resource) addAnnotationsFields(props []*Type, parent *Type, annotations *Type) []*Type {
 
@@ -878,6 +887,9 @@ func (r Resource) HasZone() bool {
 // resource functions needed for template that previously existed in terraform.go but due to how files are being inherited here it was easier to put in here
 // taken wholesale from tpgtools
 func (r Resource) Updatable() bool {
+	if r.Immutable && !r.RootLabels() {
+		return false
+	}
 	for _, p := range r.AllProperties() {
 		if !p.Immutable && !(p.Required && p.DefaultFromApi) {
 			return true
@@ -907,6 +919,11 @@ func (r Resource) TerraformName() string {
 }
 
 func (r Resource) ImportIdFormatsFromResource() []string {
+
+	var ids []string
+	for _, id := range r.GetIdentity() {
+		ids = append(ids, google.Underscore(id.Name))
+	}
 	return ImportIdFormats(r.ImportFormat, r.Identity, r.BaseUrl)
 }
 
@@ -942,7 +959,7 @@ func ImportIdFormats(importFormat, identity []string, baseUrl string) []string {
 				transformedIdentity = append(transformedIdentity, fmt.Sprintf("{{%s}}", id))
 			}
 			identityPath := strings.Join(transformedIdentity, "/")
-			idFormats = []string{fmt.Sprintf("%s/{{name}}", identityPath)}
+			idFormats = []string{fmt.Sprintf("%s/%s", underscoredBaseUrl, identityPath)}
 		}
 	} else {
 		idFormats = importFormat
@@ -991,7 +1008,7 @@ func ImportIdFormats(importFormat, identity []string, baseUrl string) []string {
 func (r Resource) IgnoreReadPropertiesToString(e resource.Examples) string {
 	var props []string
 	for _, tp := range r.AllUserProperties() {
-		if tp.UrlParamOnly || tp.IgnoreRead || tp.IsA("ResourceRef") {
+		if tp.UrlParamOnly || tp.IsA("ResourceRef") {
 			props = append(props, fmt.Sprintf("\"%s\"", google.Underscore(tp.Name)))
 		}
 	}
@@ -1001,10 +1018,28 @@ func (r Resource) IgnoreReadPropertiesToString(e resource.Examples) string {
 	for _, tp := range r.IgnoreReadLabelsFields(r.PropertiesWithExcluded()) {
 		props = append(props, fmt.Sprintf("\"%s\"", google.Underscore(tp)))
 	}
+	for _, tp := range ignoreReadFields(r.AllUserProperties()) {
+		props = append(props, fmt.Sprintf("\"%s\"", tp))
+	}
 
 	slices.Sort(props)
 
-	return fmt.Sprintf("[]string{%s}", strings.Join(props, ", "))
+	if len(props) > 0 {
+		return fmt.Sprintf("[]string{%s}", strings.Join(props, ", "))
+	}
+	return ""
+}
+
+func ignoreReadFields(props []*Type) []string {
+	var fields []string
+	for _, tp := range props {
+		if tp.IgnoreRead && !tp.UrlParamOnly && !tp.IsA("ResourceRef") {
+			fields = append(fields, tp.TerraformLineage())
+		} else if tp.IsA("NestedObject") && tp.AllProperties() != nil {
+			fields = append(fields, ignoreReadFields(tp.AllProperties())...)
+		}
+	}
+	return fields
 }
 
 func (r *Resource) SetCompiler(t string) {
@@ -1342,19 +1377,26 @@ func (r Resource) GetPropertyUpdateMasksGroups(properties []*Type, maskPrefix st
 }
 
 // Formats whitespace in the style of the old Ruby generator's descriptions in documentation
-func (r Resource) FormatDocDescription(desc string) string {
-	returnString := strings.ReplaceAll(desc, "\n\n", "\n")
+func (r Resource) FormatDocDescription(desc string, indent bool) string {
+	returnString := desc
+	if indent {
+		returnString = strings.ReplaceAll(returnString, "\n\n", "\n")
+		returnString = strings.ReplaceAll(returnString, "\n", "\n  ")
 
-	returnString = strings.ReplaceAll(returnString, "\n", "\n  ")
+		// fix removing for ruby -> go transition diffs
+		returnString = strings.ReplaceAll(returnString, "\n  \n  **Note**: This field is non-authoritative,", "\n\n  **Note**: This field is non-authoritative,")
 
-	// fix removing for ruby -> go transition diffs
-	returnString = strings.ReplaceAll(returnString, "\n  \n  **Note**: This field is non-authoritative,", "\n\n  **Note**: This field is non-authoritative,")
-
-	return strings.TrimSuffix(returnString, "\n  ")
+		return strings.TrimSuffix(returnString, "\n  ")
+	}
+	return strings.TrimSuffix(returnString, "\n")
 }
 
 func (r Resource) CustomTemplate(templatePath string, appendNewline bool) string {
-	return resource.ExecuteTemplate(&r, templatePath, appendNewline)
+	output := resource.ExecuteTemplate(&r, templatePath, appendNewline)
+	if !appendNewline {
+		output = strings.TrimSuffix(output, "\n")
+	}
+	return output
 }
 
 // Returns the key of the list of resources in the List API response
@@ -1407,7 +1449,8 @@ type UpdateGroup struct {
 // def properties_without_custom_update(properties)
 func (r Resource) propertiesWithCustomUpdate(properties []*Type) []*Type {
 	return google.Reject(properties, func(p *Type) bool {
-		return p.UpdateUrl == "" || p.UpdateVerb == "" || p.UpdateVerb == "NOOP"
+		return p.UpdateUrl == "" || p.UpdateVerb == "" || p.UpdateVerb == "NOOP" ||
+			p.IsA("KeyValueTerraformLabels") || p.IsA("KeyValueLabels")
 	})
 }
 
@@ -1447,4 +1490,20 @@ func (r Resource) PropertyNamesToStrings(properties []*Type) []string {
 
 func (r Resource) IsExcluded() bool {
 	return r.Exclude || r.ExcludeResource
+}
+
+func (r Resource) TestExamples() []resource.Examples {
+	return google.Reject(google.Reject(r.Examples, func(e resource.Examples) bool {
+		return e.SkipTest
+	}), func(e resource.Examples) bool {
+		return e.MinVersion != "" && slices.Index(product.ORDER, r.TargetVersionName) < slices.Index(product.ORDER, e.MinVersion)
+	})
+}
+
+func (r Resource) VersionedProvider(exampleVersion string) bool {
+	vp := r.MinVersion
+	if exampleVersion != "" {
+		vp = exampleVersion
+	}
+	return vp != "" && vp != "ga"
 }

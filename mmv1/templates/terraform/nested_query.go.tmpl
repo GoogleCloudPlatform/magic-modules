@@ -10,9 +10,8 @@ func flattenNested{{ $.ResourceName }}(d *schema.ResourceData, meta interface{},
     return nil, nil
   }
   res = v.(map[string]interface{})
-
 {{-   end }}
-{{- end }}
+{{ end }}
   v, ok = res["{{ $.LastNestedQueryKey }}"]
   if !ok || v == nil {
     return nil,nil
