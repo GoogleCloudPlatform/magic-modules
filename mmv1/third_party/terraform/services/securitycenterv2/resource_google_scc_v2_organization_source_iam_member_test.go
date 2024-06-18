@@ -62,7 +62,7 @@ resource "google_scc_v2_organization_source_iam_member" "custom_member" {
   condition {
     title       = "%s"
     description = "%s"
-    expression  = "%s"
+    expression  = "request.time < timestamp(\"2023-12-31T00:00:00Z\")"
   }
 }
 `, suffix, orgId, orgId, suffix, orgId, role, member, title, description, expression)
