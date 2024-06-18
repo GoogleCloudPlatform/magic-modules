@@ -479,14 +479,12 @@ properties:
     name: 'zone'
     description: |
       Specifies the active zone for regional volume.
-    immutable: true
     output: true
     min_version: beta
   - !ruby/object:Api::Type::String
     name: 'replicaZone'
     description: |
       Specifies the replica zone for regional volume.
-    immutable: true
     output: true
     min_version: beta
 virtual_fields:

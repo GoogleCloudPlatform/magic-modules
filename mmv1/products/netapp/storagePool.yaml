@@ -137,11 +137,11 @@ properties:
     name: 'zone'
     description: |
       Specifies the active zone for regional storagePool.
-    immutable: true
     min_version: beta
   - !ruby/object:Api::Type::String
     name: 'replicaZone'
     description: |
       Specifies the replica zone for regional storagePool.
-    immutable: true
     min_version: beta
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_update: templates/terraform/pre_update/netapp_storagepool.go.erb
