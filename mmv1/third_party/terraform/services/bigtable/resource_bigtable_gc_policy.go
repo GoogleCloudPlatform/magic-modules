@@ -226,7 +226,6 @@ func ResourceBigtableGCPolicy() *schema.Resource {
 				the risks listed at https://cloud.google.com/bigtable/docs/garbage-collection#increasing`,
 				Default: false,
 			},
-
 		},
 		UseJSONNumber: true,
 	}
@@ -266,7 +265,7 @@ func resourceBigtableGCPolicyUpsert(d *schema.ResourceData, meta interface{}) er
 	columnFamily := d.Get("column_family").(string)
 	ignoreWarnings := d.Get("ignore_warnings").(bool)
 	updateOpts := []bigtable.GCPolicyOption{}
-	if (ignoreWarnings) {
+	if ignoreWarnings {
 		updateOpts = append(updateOpts, bigtable.IgnoreWarnings())
 	}
 
