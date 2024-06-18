@@ -801,3 +801,22 @@ properties:
             name: "uri"
             description: |
               URI for the output file(s). For example, gs://my-bucket/outputs/.
+      - !ruby/object:Api::Type::Array
+        name: "adBreaks"
+        description: |
+          Ad break.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::Time
+              name: "startTimeOffset"
+              description: |
+                Start time in seconds for the ad break, relative to the output file timeline
+      - !ruby/object:Api::Type::NestedObject
+        name: "pubsubDestination"
+        description: |
+          Pub/Sub destination.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: "topic"
+            description: |
+              The name of the Pub/Sub topic to publish job completion notification to. For example: projects/{project}/topics/{topic}.
