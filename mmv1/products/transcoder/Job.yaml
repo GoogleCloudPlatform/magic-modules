@@ -705,4 +705,99 @@ properties:
                         name: "displayName"
                         description: |
                           The name for this particular text stream that will be added to the HLS/DASH manifest.
-                          
+      - !ruby/object:Api::Type::Array
+        name: "muxStreams"
+        description: |
+          Multiplexing settings for output stream.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: "key"
+              description: |
+               A unique key for this multiplexed stream.
+            - !ruby/object:Api::Type::String
+              name: "fileName"
+              description: |
+               The name of the generated file.
+            - !ruby/object:Api::Type::String
+              name: "container"
+              description: |
+               The container format.
+            - !ruby/object:Api::Type::Array
+              name: "elementaryStreams"
+              item_type: Api::Type::String
+              description: |
+                List of ElementaryStream.key values multiplexed in this stream.
+            - !ruby/object:Api::Type::NestedObject
+              name: "segmentSettings"
+              description: |
+                Segment settings for ts, fmp4 and vtt.
+              properties:
+                - !ruby/object:Api::Type::Time
+                  name: "segmentDuration"
+                  description: |
+                    Duration of the segments in seconds
+                - !ruby/object:Api::Type::Boolean
+                  name: "individualSegments"
+                  description: |
+                    Whether to create an individual segment file or not.
+            - !ruby/object:Api::Type::String
+              name: "encryptionId"
+              description: |
+               Identifier of the encryption configuration to use.
+            - !ruby/object:Api::Type::NestedObject
+              name: "fmp4"
+              description: |
+                fmp4 container configuration.
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: "codecTag"
+                  description: |
+                    Specify the codec tag string that will be used in the media bitstream.
+      - !ruby/object:Api::Type::Array
+        name: "manifests"
+        description: |
+          Manifest configuration.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: "fileName"
+              description: |
+               The name of the generated file.
+            - !ruby/object:Api::Type::Enum
+              name: "type"
+              output: true
+              description: |
+                Type of the manifest.
+              values:
+                - :MANIFEST_TYPE_UNSPECIFIED
+                - :HLS
+                - :DASH
+            - !ruby/object:Api::Type::Array
+              name: "muxStreams"
+              item_type: Api::Type::String
+              description: |
+                List of user supplied MuxStream.key values that should appear in this manifest.
+            - !ruby/object:Api::Type::NestedObject
+              name: "dash"
+              description: |
+                DASH manifest configuration.
+              properties:
+                - !ruby/object:Api::Type::Enum
+                    name: "segmentReferenceScheme"
+                    output: true
+                    description: |
+                      The segment reference scheme for a DASH manifest.
+                    values:
+                      - :SEGMENT_REFERENCE_SCHEME_UNSPECIFIED
+                      - :SEGMENT_LIST
+                      - :SEGMENT_TEMPLATE_NUMBER
+      - !ruby/object:Api::Type::NestedObject
+        name: "output"
+        description: |
+          Location of output file(s) in a Cloud Storage bucket.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: "uri"
+            description: |
+              URI for the output file(s). For example, gs://my-bucket/outputs/.
