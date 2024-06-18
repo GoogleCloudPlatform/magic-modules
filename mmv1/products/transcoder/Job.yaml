@@ -613,3 +613,96 @@ properties:
                           name: "hlg"
                           description: |
                             HLG color format setting for H265.
+                - !ruby/object:Api::Type::NestedObject
+                  name: "audioStream"
+                  description: |
+                    Encoding of an audio stream.
+                  properties:
+                    - !ruby/object:Api::Type::String
+                        name: "codec"
+                        description: The codec for this audio stream.
+                    - !ruby/object:Api::Type::Integer
+                        name: "bitrateBps"
+                        description: Audio bitrate in bits per second.
+                    - !ruby/object:Api::Type::Integer
+                        name: "channelCount"
+                        description: Number of audio channels.
+                    - !ruby/object:Api::Type::Array
+                        name: "channelLayout"
+                        item_type: Api::Type::String
+                        description: |
+                          A list of channel names specifying layout of the audio channels. This only affects the metadata embedded in the container headers, if supported by the specified format.
+                    - !ruby/object:Api::Type::NestedObject
+                        name: "mapping"
+                        description: |
+                          The mapping for the JobConfig.edit_list atoms with audio EditAtom.inputs.
+                        properties:
+                          - !ruby/object:Api::Type::String
+                            name: "atomKey"
+                            description: |
+                              The EditAtom.key that references the atom with audio inputs in the JobConfig.edit_list.
+                          - !ruby/object:Api::Type::String
+                            name: "inputKey"
+                            description: |
+                              The Input.key that identifies the input file.
+                          - !ruby/object:Api::Type::Integer
+                            name: "inputTrack"
+                            description: |
+                              The zero-based index of the track in the input file.
+                          - !ruby/object:Api::Type::Integer
+                            name: "inputChannel"
+                            description: |
+                              The zero-based index of the channel in the input audio stream.
+                          - !ruby/object:Api::Type::Integer
+                            name: "outputChannel"
+                            description: |
+                              The zero-based index of the channel in the output audio stream.
+                          - !ruby/object:Api::Type::Integer
+                            name: "gainDb"
+                            description: |
+                              Audio volume control in dB. Negative values decrease volume, positive values increase.
+                    - !ruby/object:Api::Type::Integer
+                        name: "sampleRateHertz"
+                        description: |
+                          The audio sample rate in Hertz.
+                    - !ruby/object:Api::Type::String
+                        name: "languageCode"
+                        description: |
+                          The BCP-47 language code, such as en-US or sr-Latn. For more information, see https://www.unicode.org/reports/tr35/#Unicode_locale_identifier.
+                    - !ruby/object:Api::Type::String
+                        name: "languageCode"
+                        description: |
+                          The name for this particular audio stream that will be added to the HLS/DASH manifest.
+                - !ruby/object:Api::Type::NestedObject
+                  name: "textStream"
+                  description: |
+                    Encoding of a text stream.
+                  properties:
+                    - !ruby/object:Api::Type::String
+                        name: "codec"
+                        description: The codec for this text stream.
+                    - !ruby/object:Api::Type::String
+                        name: "languageCode"
+                        description: The BCP-47 language code, such as en-US or sr-Latn. For more information, see https://www.unicode.org/reports/tr35/#Unicode_locale_identifier.
+                    - !ruby/object:Api::Type::NestedObject
+                        name: "mapping"
+                        description: |
+                          The mapping for the JobConfig.edit_list atoms with text EditAtom.inputs.
+                        properties:
+                          - !ruby/object:Api::Type::String
+                            name: "atomKey"
+                            description: |
+                              The EditAtom.key that references atom with text inputs in the JobConfig.edit_list.
+                          - !ruby/object:Api::Type::String
+                            name: "inputKey"
+                            description: |
+                              The Input.key that identifies the input file.
+                          - !ruby/object:Api::Type::Integer
+                            name: "inputTrack"
+                            description: |
+                              The zero-based index of the track in the input file.
+                    - !ruby/object:Api::Type::String
+                        name: "displayName"
+                        description: |
+                          The name for this particular text stream that will be added to the HLS/DASH manifest.
+                          
