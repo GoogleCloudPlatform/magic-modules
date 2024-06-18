@@ -194,7 +194,6 @@ func waitForWorkbenchOperation(config *transport_tpg.Config, d *schema.ResourceD
 	}
 	return nil
 }
-<% end -%>
 
 func resizeWorkbenchInstanceDisk(config *transport_tpg.Config, d *schema.ResourceData, project string, userAgent string, isBoot bool) (error) {
 	diskObj := make(map[string]interface{})
@@ -229,7 +228,7 @@ func resizeWorkbenchInstanceDisk(config *transport_tpg.Config, d *schema.Resourc
 	if err != nil {
 	  return fmt.Errorf("Error resizing disk: %s", err)
 	}
-	<% unless compiler == "terraformgoogleconversion-codegen" -%>
+
 	var opRes map[string]interface{}
 	err = WorkbenchOperationWaitTimeWithResponse(
 	  config, dRes, &opRes, project, "Resizing disk", userAgent,
@@ -237,6 +236,7 @@ func resizeWorkbenchInstanceDisk(config *transport_tpg.Config, d *schema.Resourc
 	if err != nil {
 	  return fmt.Errorf("Error resizing disk: %s", err)
 	}
-	<% end -%>
+
 	return nil
 }
+<% end -%>
