@@ -305,7 +305,7 @@ func convertTemplate(folder string) int {
 		}
 		data = r.ReplaceAll(data, []byte(`{{- end }}`))
 
-		copyRight := `{{- /*
+		copyRight := `{{/*
 	The license inside this block applies to this file
 	Copyright 2024 Google Inc.
 	Licensed under the Apache License, Version 2.0 (the "License");
@@ -316,7 +316,7 @@ func convertTemplate(folder string) int {
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	See the License for the specific language governing permissions and
 	limitations under the License.
-*/}}`
+*/ -}}`
 		// Replace copyright
 		r, err = regexp.Compile(`(?s)<%[-\s#]*[tT]he license inside this.*?limitations under the License..*?%>`)
 		if err != nil {
@@ -356,6 +356,7 @@ func checkExceptionList(filePath string) bool {
 		"custom_flatten/bigquery_table_ref_extract_sourcetable.go",
 		"custom_flatten/bigquery_table_ref_query_destinationtable.go",
 		"unordered_list_customize_diff",
+		"default_if_empty",
 	}
 
 	for _, t := range exceptionPaths {
