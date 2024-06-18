@@ -15,7 +15,14 @@ func TestAccSCCV2OrganizationSourceIAMPolicy(t *testing.T) {
 	orgId := envvar.GetTestOrgFromEnv(t)
 	suffix := acctest.RandString(t, 10)
 	canonicalName := fmt.Sprintf("organizations/%s/sources/source-%s", orgId, suffix)
-	policyData := `{"bindings":[{"role":"roles/editor","members":["user:test@example.com"]}]}`
+	policyData := `{
+  "bindings": [
+    {
+      "role": "roles/editor",
+      "members": ["user:test@example.com"]
+    }
+  ]
+}`
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -51,7 +58,9 @@ resource "google_scc_v2_organization_source" "custom_source" {
 resource "google_scc_v2_organization_source_iam_policy" "custom_policy" {
   organization  = "%s"
   source        = google_scc_v2_organization_source.custom_source.canonical_name
-  policy_data   = "%s"
+  policy_data   = <<-EOF
+%s
+EOF
 }
 `, suffix, orgId, orgId, suffix, orgId, policyData)
 }
