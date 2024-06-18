@@ -42,6 +42,7 @@ func testSweepVmwareengineNetwork(region string) error {
 	//   * the 'region' passed to the sweeper
 	locations := []string{"global", "us-central1", "southamerica-west1", "me-west1", region}
 	for _, location := range locations {
+		log.Printf("[INFO][SWEEPER_LOG] Beginning the process of sweeping location '%s'.", location)
 
 		// Setup variables to replace in list template
 		d := &tpgresource.ResourceDataMock{
