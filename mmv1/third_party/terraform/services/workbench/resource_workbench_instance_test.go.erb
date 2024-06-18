@@ -555,6 +555,7 @@ func TestAccWorkbenchInstance_updateBothDisks(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
                     	resource.TestCheckResourceAttr(
                         		"google_workbench_instance.instance", "state", "ACTIVE"),
+				),
 			},
 			{
 				ResourceName:            "google_workbench_instance.instance",
@@ -567,6 +568,7 @@ func TestAccWorkbenchInstance_updateBothDisks(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
                     	resource.TestCheckResourceAttr(
                         		"google_workbench_instance.instance", "state", "ACTIVE"),
+				),
 			},
 			{
 				ResourceName:            "google_workbench_instance.instance",
