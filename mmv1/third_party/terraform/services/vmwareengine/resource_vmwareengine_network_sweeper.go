@@ -73,7 +73,7 @@ func testSweepVmwareengineNetwork(region string) error {
 			return nil
 		}
 
-		resourceList, ok := res["networks"]
+		resourceList, ok := res["vmwareEngineNetworks"]
 		if !ok {
 			log.Printf("[INFO][SWEEPER_LOG] Nothing found in response.")
 			return nil
