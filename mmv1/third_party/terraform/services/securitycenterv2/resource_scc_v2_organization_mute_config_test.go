@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"google.golang.org/api/googleapi"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
@@ -91,7 +92,7 @@ resource "google_scc_organization_mute_config" "default" {
 func testAccCheckSecurityCenterOrganizationMuteConfigDestroyProducer(t *testing.T) resource.TestCheckFunc {
 
 	return func(s *terraform.State) error {
-		config := acctest.ProviderConfig(t)
+		config := acctest.Provider.Meta().(*Config)
 		client := config.SecurityCenterClientV2
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_scc_organization_mute_config" {
@@ -103,12 +104,16 @@ func testAccCheckSecurityCenterOrganizationMuteConfigDestroyProducer(t *testing.
 				return fmt.Errorf("Organization Mute Config %s still exists", rs.Primary.ID)
 			}
 
-			if !googleErrCodeEquals(err, 404) {
+			if !isGoogleAPIErrorWithCode(err, 404) {
 				return fmt.Errorf("error fetching Organization Mute Config: %s", err)
 			}
 		}
 
 		return nil
 	}
+}
 
+func isGoogleAPIErrorWithCode(err error, code int) bool {
+	apiErr, ok := err.(*googleapi.Error)
+	return ok && apiErr.Code == code
 }
