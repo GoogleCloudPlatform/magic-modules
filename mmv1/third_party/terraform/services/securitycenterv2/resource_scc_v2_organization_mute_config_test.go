@@ -7,8 +7,9 @@ import (
 	"google.golang.org/api/googleapi"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/envvar"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/provider"
 )
 
 func TestAccSecurityCenterOrganizationMuteConfig_createUpdateDelete(t *testing.T) {
@@ -47,6 +48,11 @@ func TestAccSecurityCenterOrganizationMuteConfig_createUpdateDelete(t *testing.T
 				Config: testAccSecurityCenterOrganizationMuteConfig_delete(context),
 			},
 		},
+		Providers: map[string]func() (*schema.Provider, error){
+
+			"google-beta": provider.Provider,
+
+		},
 	})
 }
 
@@ -82,7 +88,7 @@ resource "google_scc_organization_mute_config" "default" {
   mute_config_id = "tf-test-my-config-%{random_suffix}"
   parent         = "organizations/%{org_id}"
   filter         = "category: \"OS_VULNERABILITY\""
-  location       = "%{location}" 
+  location       = "%{location}"
   description    = "My Mute Config"
   type           = "STATIC"
 }
