@@ -990,22 +990,22 @@ func languageFromFilename(filename string) string {
 	}
 }
 
-//
-//    # Returns the id format of an object, or self_link_uri if none is explicitly defined
-//    # We prefer the long name of a resource as the id so that users can reference
-//    # resources in a standard way, and most APIs accept short name, long name or self_link
-//    def id_format(object)
-//      object.id_format || object.self_link_uri
-//    end
-//
-//
-//    # Returns the extension for DCL packages for the given version. This is needed
-//    # as the DCL uses "alpha" for preview resources, while we use "private"
-//    def dcl_version(version)
-//      return '' if version == 'ga'
-//      return '/beta' if version == 'beta'
-//      return '/alpha' if version == 'private'
-//    end
-//  end
-//end
-//
+//	  # Returns the id format of an object, or self_link_uri if none is explicitly defined
+//	  # We prefer the long name of a resource as the id so that users can reference
+//	  # resources in a standard way, and most APIs accept short name, long name or self_link
+//	  def id_format(object)
+//	    object.id_format || object.self_link_uri
+//	  end
+
+// Returns the extension for DCL packages for the given version. This is needed
+// as the DCL uses "alpha" for preview resources, while we use "private"
+func (t Terraform) DCLVersion() string {
+	switch t.TargetVersionName {
+	case "beta":
+		return "/beta"
+	case "private":
+		return "/alpha"
+	default:
+		return ""
+	}
+}

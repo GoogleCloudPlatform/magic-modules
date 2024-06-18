@@ -1509,7 +1509,7 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	if err := d.Set("metadata_fingerprint", instance.Metadata.Fingerprint); err != nil {
 		return fmt.Errorf("Error setting metadata_fingerprint: %s", err)
 	}
-	
+
 	<% unless version == 'ga' -%>
 	if instance.PartnerMetadata != nil {
 		partnerMetadata, err := flattenPartnerMetadata(instance.PartnerMetadata)
