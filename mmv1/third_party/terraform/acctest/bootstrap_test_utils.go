@@ -925,7 +925,7 @@ func BootstrapSubnet(t *testing.T, subnetName string, networkName string) string
 func BootstrapSubnetWithFirewallForDataprocBatches(t *testing.T, testId string, subnetName string) string {
 	networkName := BootstrapSharedTestNetwork(t, testId)
 	subnetworkName := BootstrapSubnetForDataprocBatches(t, subnetName, networkName)
-	BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-batches", networkName)
+	BootstrapFirewallForDataprocSharedNetwork(t, subnetName, networkName)
 	return subnetworkName
 }
 
