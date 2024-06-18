@@ -15,8 +15,8 @@
 {{- define "SchemaFields"}}
 {{- if .FlattenObject -}}
 	{{- range $prop := .ResourceMetadata.OrderProperties .Properties -}}
-		{{- template "SchemaFields" $prop -}}
-	{{- end -}}
+    {{ template "SchemaFields" $prop }}
+	{{ end -}}
 {{- else -}}
 "{{underscore .Name -}}": {
 {{ if .IsSet -}}
@@ -156,19 +156,19 @@ Possible values: [{{- .EnumValuesToString "\"" false -}}]
 {{ if .Sensitive -}}
     Sensitive: true,
 {{ end -}}
-{{ if .DefaultValue -}}
+{{ if not (eq .DefaultValue nil ) -}}
     Default: {{ .GoLiteral .DefaultValue -}},
 {{ end -}}
-{{ if .Conflicting -}}
+{{ if or .Conflicting .Conflicts -}}
     ConflictsWith: {{ .GoLiteral .Conflicting  -}},
 {{ end -}}
-{{ if .AtLeastOneOfList -}}
+{{ if or .AtLeastOneOfList .AtLeastOneOf -}}
     AtLeastOneOf: {{ .GoLiteral .AtLeastOneOfList  -}},
 {{ end -}}
-{{ if .ExactlyOneOfList -}}
+{{ if or .ExactlyOneOfList .ExactlyOneOf -}}
     ExactlyOneOf: {{ .GoLiteral .ExactlyOneOfList  -}},
 {{ end -}}
-{{ if .RequiredWithList -}}
+{{ if or .RequiredWithList .RequiredWith -}}
     RequiredWith: {{ .GoLiteral .RequiredWithList  -}},
 {{ end -}}
 },

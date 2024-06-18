@@ -17,7 +17,7 @@
 func {{ .NamespaceProperty }}Schema() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
-            {{- range $prop := $.ItemType.Properties }}
+            {{- range $prop := $.ResourceMetadata.OrderProperties $.ItemType.Properties }}
             {{template "SchemaFields" $prop}}
             {{- end }}
 		},
