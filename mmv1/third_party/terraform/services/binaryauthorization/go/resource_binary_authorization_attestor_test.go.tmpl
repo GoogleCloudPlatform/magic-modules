@@ -2,10 +2,10 @@ package binaryauthorization_test
 
 import (
 	"fmt"
-	"testing"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/services/binaryauthorization"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"testing"
 )
 
 func TestSignatureAlgorithmDiffSuppress(t *testing.T) {
@@ -14,33 +14,33 @@ func TestSignatureAlgorithmDiffSuppress(t *testing.T) {
 		ExpectDiffSuppress bool
 	}{
 		"ECDSA_P256 equivalent": {
-			Old:                  "ECDSA_P256_SHA256",
-			New:                  "EC_SIGN_P256_SHA256",
+			Old:                "ECDSA_P256_SHA256",
+			New:                "EC_SIGN_P256_SHA256",
 			ExpectDiffSuppress: true,
 		},
 		"ECDSA_P384 equivalent": {
-			Old:                  "ECDSA_P384_SHA384",
-			New:                  "EC_SIGN_P384_SHA384",
+			Old:                "ECDSA_P384_SHA384",
+			New:                "EC_SIGN_P384_SHA384",
 			ExpectDiffSuppress: true,
 		},
 		"ECDSA_P521 equivalent": {
-			Old:                  "ECDSA_P521_SHA512",
-			New:                  "EC_SIGN_P521_SHA512",
+			Old:                "ECDSA_P521_SHA512",
+			New:                "EC_SIGN_P521_SHA512",
 			ExpectDiffSuppress: true,
 		},
 		"not equivalent 1": {
-			Old:                  "ECDSA_P256",
-			New:                  "EC_SIGN_P384_SHA384",
+			Old:                "ECDSA_P256",
+			New:                "EC_SIGN_P384_SHA384",
 			ExpectDiffSuppress: false,
 		},
 		"not equivalent 2": {
-			Old:                  "ECDSA_P384_SHA384",
-			New:                  "EC_SIGN_P521_SHA512",
+			Old:                "ECDSA_P384_SHA384",
+			New:                "EC_SIGN_P521_SHA512",
 			ExpectDiffSuppress: false,
 		},
 		"not equivalent 3": {
-			Old:                  "ECDSA_P521_SHA512",
-			New:                  "EC_SIGN_P256_SHA256",
+			Old:                "ECDSA_P521_SHA512",
+			New:                "EC_SIGN_P256_SHA256",
 			ExpectDiffSuppress: false,
 		},
 	}
