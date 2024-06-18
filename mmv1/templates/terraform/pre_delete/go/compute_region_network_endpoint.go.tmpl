@@ -27,7 +27,7 @@ if fqdnProp != "" {
   toDelete["fqdn"] = fqdnProp
 }
 
-{{- if ne $.TargetVersionName "ga" }}
+{{ if ne $.TargetVersionName `ga` -}}
 // Instance
 instanceProp, err := expandNestedComputeRegionNetworkEndpointInstance(d.Get("instance"), d, config)
 if err != nil {
