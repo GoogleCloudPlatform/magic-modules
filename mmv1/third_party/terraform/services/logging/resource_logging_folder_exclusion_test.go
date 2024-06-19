@@ -67,7 +67,7 @@ func TestUnitLoggingFolder_OptionalPrefixSuppress(t *testing.T) {
 	}
 
 	for tn, tc := range cases {
-		if optionalPrefixSuppress(tc.Prefix)("folder", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+		if logging.OptionalPrefixSuppress(tc.Prefix)("folder", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
 			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
 		}
 	}
