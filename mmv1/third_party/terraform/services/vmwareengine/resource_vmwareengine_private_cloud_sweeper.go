@@ -42,6 +42,7 @@ func testSweepVmwareenginePrivateCloud(region string) error {
 	//   * regions used for this resource type's acc tests in the past
 	//   * the 'region' passed to the sweeper
 	locations := []string{region, "southamerica-west1-a", "me-west1-a"}
+	log.Printf("[INFO][SWEEPER_LOG] Sweeping will include these locations: %v.", locations)
 	for _, location := range locations {
 		log.Printf("[INFO][SWEEPER_LOG] Beginning the process of sweeping location '%s'.", location)
 
