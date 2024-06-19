@@ -17,6 +17,7 @@ kind: 'storage#managedFolder'
 base_url: 'b/{{bucket}}/managedFolders'
 self_link: 'b/{{bucket}}/managedFolders/{{%name}}'
 id_format: '{{bucket}}/{{name}}'
+delete_url: 'b/{{bucket}}/managedFolders/{{%name}}?allowNonEmpty={{force_destroy}}'
 has_self_link: true
 immutable: true
 skip_sweeper: true # Skipping sweeper since this is a child resource.
@@ -42,8 +43,8 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   parent_resource_attribute: 'managed_folder'
   base_url: 'b/{{bucket}}/managedFolders/{{%managed_folder}}'
   import_format:
-    - '{{bucket}}/managedFolders/{{%managed_folder}}'
-    - '{{bucket}}/{{%managed_folder}}'
+    - 'b/{{bucket}}/managedFolders/{{%managed_folder}}'
+    - '{{%managed_folder}}'
   iam_conditions_request_type: :QUERY_PARAM
   method_name_separator: '/'
   fetch_iam_policy_method: 'iam'
@@ -51,7 +52,7 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   set_iam_policy_method: 'iam'
   set_iam_policy_verb: :PUT
   wrapped_policy_obj: false
-  custom_diff_suppress: 'templates/terraform/iam/storage_managed_folder_diff_suppress.go.erb'
+  # custom_diff_suppress: 'templates/terraform/iam/storage_managed_folder_diff_suppress.go.erb'
   example_config_body: 'templates/terraform/iam/example_config_body/storage_managed_folder.tf.erb'
 import_format:
   - '{{bucket}}/managedFolders/{{%name}}'
@@ -64,11 +65,11 @@ examples:
     vars:
       bucket_name: 'my-bucket'
       managed_folder_name: 'managed/folder/name/'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'storage_managed_folder_nested'
-    primary_resource_id: 'folder'
-    vars:
-      bucket_name: 'my-bucket'
+  # - !ruby/object:Provider::Terraform::Examples
+  #   name: 'storage_managed_folder_nested'
+  #   primary_resource_id: 'folder'
+  #   vars:
+  #     bucket_name: 'my-bucket'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'bucket'
@@ -87,6 +88,15 @@ parameters:
     # output.
     validation: !ruby/object:Provider::Terraform::Validation
       regex: '/$'
+virtual_fields:
+  - !ruby/object:Api::Type::Boolean
+    name: 'force_destroy'
+    immutable: true
+    default_value: false
+    description: |
+      Allows the deletion of a managed folder even if it's not empty.
+      If a non-empty managed folder is deleted, a simulated folder
+      with the same name is retained.
 properties:
   - !ruby/object:Api::Type::String
     name: createTime

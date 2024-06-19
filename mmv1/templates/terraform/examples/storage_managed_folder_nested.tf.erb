@@ -5,12 +5,7 @@ resource "google_storage_bucket" "bucket" {
   force_destroy               = true
 }
 
-resource "google_storage_managed_folder" "parent" {
-  bucket = google_storage_bucket.bucket.name
-  name   = "parent/"
-}
-
 resource "google_storage_managed_folder" "<%= ctx[:primary_resource_id] %>" {
   bucket = google_storage_bucket.bucket.name
-  name   = "${google_storage_managed_folder.parent.name}nested/"
+  name   = "parent/nested/"
 }
