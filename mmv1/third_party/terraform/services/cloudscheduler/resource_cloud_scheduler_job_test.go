@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/services/cloudscheduler"
 )
 
 func TestAccCloudSchedulerJob_schedulerPausedExample(t *testing.T) {
@@ -70,7 +71,7 @@ func TestUnitCloudSchedulerJob_LastSlashDiffSuppress(t *testing.T) {
 	}
 
 	for tn, tc := range cases {
-		if lastSlashDiffSuppress("uri", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+		if cloudscheduler.LastSlashDiffSuppress("uri", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
 			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
 		}
 	}
