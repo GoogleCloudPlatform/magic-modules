@@ -40,7 +40,7 @@ func testSweepVmwareengineNetwork(region string) error {
 	//   * global location
 	//   * regions used for this resource type's acc tests in the past
 	//   * the 'region' passed to the sweeper
-	locations := []string{"global", "us-central1", "southamerica-west1", "me-west1", region}
+	locations := []string{region, "global", "southamerica-west1", "me-west1"}
 	for _, location := range locations {
 		log.Printf("[INFO][SWEEPER_LOG] Beginning the process of sweeping location '%s'.", location)
 
