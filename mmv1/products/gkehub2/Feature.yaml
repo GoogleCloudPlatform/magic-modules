@@ -258,6 +258,7 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: fleetDefaultMemberConfig
     description: Optional. Fleet Default Membership Configuration.
+    send_empty_value: true
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: mesh
