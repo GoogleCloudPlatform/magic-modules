@@ -100,16 +100,18 @@ func testSweepVmwareenginePrivateCloud(region string) error {
 				continue
 			}
 
-			// We force delete the Private Cloud and ensure there's no delay in deletion
-			force := true
-			delayHours := 0
-			deleteTemplate := fmt.Sprintf("https://vmwareengine.googleapis.com/v1/projects/{{project}}/locations/{{location}}/privateClouds/{{name}}?force=%t&delayHours=%d", force, delayHours)
+			deleteTemplate := "https://vmwareengine.googleapis.com/v1/projects/{{project}}/locations/{{location}}/privateClouds/{{name}}"
 			deleteUrl, err := tpgresource.ReplaceVars(d, config, deleteTemplate)
 			if err != nil {
 				log.Printf("[INFO][SWEEPER_LOG] error preparing delete url: %s", err)
 				return nil
 			}
 			deleteUrl = deleteUrl + name
+
+			// We force delete the Private Cloud and ensure there's no delay in deletion
+			force := true
+			delayHours := 0
+			deleteUrl = deleteUrl + fmt.Sprintf("?force=%t&delayHours=%d", force, delayHours)
 
 			// Don't wait on operations as we may have a lot to delete
 			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
