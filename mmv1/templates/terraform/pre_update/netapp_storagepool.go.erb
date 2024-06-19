@@ -29,7 +29,7 @@ if d.Get("service_level").(string) == "FLEX" {
 
 				err = NetappOperationWaitTime(
 					config, reso, project, "Switching active pool zone", userAgent,
-					d.Timeout(schema.TimeoutDelete))
+					d.Timeout(schema.TimeoutUpdate))
 				if err != nil {
 					return err
 				}

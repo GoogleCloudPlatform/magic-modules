@@ -4,6 +4,7 @@ package netapp_test
 
 import (
 	"testing"
+  "time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
@@ -163,6 +164,8 @@ data "google_compute_network" "default" {
 }
 
 func testAccNetappstoragePool_FlexRegionalStoragePoolCreateExample_switchBackZone(context map[string]interface{}) string {
+  // wait 5 minutes before executing the switchback due to api zone switch issues
+  time.Sleep(5 * time.Minute)
 	return acctest.Nprintf(`
 resource "google_netapp_storage_pool" "test_pool" {
   provider = google-beta
