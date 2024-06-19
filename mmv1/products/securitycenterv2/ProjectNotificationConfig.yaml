@@ -13,9 +13,9 @@
 
 --- !ruby/object:Api::Resource
 name: 'ProjectNotificationConfig'
-base_url: projects/{{project}}/locations/{location}/notificationConfigs
+base_url: projects/{{projectId}}/locations/{location}/notificationConfigs
 self_link: '{{name}}'
-create_url: projects/{{project}}/locations/{location}/notificationConfigs?configId={{config_id}}
+create_url: projects/{{projectId}}/locations/{location}/notificationConfigs?configId={{config_id}}
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -44,7 +44,7 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/set_computed_name.erb
 parameters:
   - !ruby/object:Api::Type::String
-    name: project
+    name: projectId
     required: true
     immutable: true
     url_param_only: true
@@ -72,7 +72,7 @@ properties:
     output: true
     description: |
       The resource name of this notification config, in the format
-      `projects/{{project}}/locations/{location}/notificationConfigs/{{config_id}}`.
+      `projects/{{projectId}}/locations/{location}/notificationConfigs/{{config_id}}`.
   - !ruby/object:Api::Type::String
     name: description
     description: |
