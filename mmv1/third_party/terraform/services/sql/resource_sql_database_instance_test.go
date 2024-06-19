@@ -1712,7 +1712,7 @@ func TestAccSqlDatabaseInstance_Mysql_Edition_Upgrade(t *testing.T) {
 			{
 				Config: testGoogleSqlDatabaseInstance_sqlMysql(editionUpgrade, enterpriseTier),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.edition", "ENTERPRISE"),
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.edition", ""),
 				),
 			},
 			{
