@@ -6,5 +6,5 @@ resource "google_storage_bucket" "bucket" {
 
 resource "google_storage_managed_folder" "<%= ctx[:primary_resource_id] %>" {
   bucket = google_storage_bucket.bucket.name
-  name   = "managed-folder-1/"
+  name   = "<%= ctx[:vars]['managed_folder_name'] %>"
 }

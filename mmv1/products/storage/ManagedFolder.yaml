@@ -43,7 +43,7 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   base_url: 'b/{{bucket}}/managedFolders/{{%managed_folder}}'
   import_format:
     - '{{bucket}}/managedFolders/{{%managed_folder}}'
-    - '{{managed_folder}}'
+    - '{{bucket}}/{{%managed_folder}}'
   iam_conditions_request_type: :QUERY_PARAM
   method_name_separator: '/'
   fetch_iam_policy_method: 'iam'
@@ -51,7 +51,6 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
   set_iam_policy_method: 'iam'
   set_iam_policy_verb: :PUT
   wrapped_policy_obj: false
-  skip_import_test: true
   custom_diff_suppress: 'templates/terraform/iam/storage_managed_folder_diff_suppress.go.erb'
   example_config_body: 'templates/terraform/iam/example_config_body/storage_managed_folder.tf.erb'
 import_format:
@@ -61,8 +60,10 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'storage_managed_folder_basic'
     primary_resource_id: 'folder'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-bucket%s", context["random_suffix"]), fmt.Sprintf("tf-test-managed/folder/name%s", context["random_suffix"])'
     vars:
       bucket_name: 'my-bucket'
+      managed_folder_name: 'managed/folder/name/'
   - !ruby/object:Provider::Terraform::Examples
     name: 'storage_managed_folder_nested'
     primary_resource_id: 'folder'
