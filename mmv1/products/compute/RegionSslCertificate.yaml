@@ -78,6 +78,7 @@ examples:
     ignore_read_extra:
       - 'name_prefix'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/go/compute_certificate.go.tmpl
   extra_schema_entry: templates/terraform/extra_schema_entry/ssl_certificate.erb
 parameters:
   - !ruby/object:Api::Type::ResourceRef

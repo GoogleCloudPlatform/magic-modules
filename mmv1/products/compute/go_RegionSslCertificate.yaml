@@ -132,5 +132,5 @@ properties:
     immutable: true
     ignore_read: true
     sensitive: true
-    diff_suppress_func: 'tpgresource.Sha256DiffSuppress'
+    diff_suppress_func: 'sha256DiffSuppress'
     custom_flatten: 'templates/terraform/custom_flatten/go/sha256.tmpl'
