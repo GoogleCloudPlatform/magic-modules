@@ -8,6 +8,10 @@ import (
 	"google.golang.org/api/logging/v2"
 )
 
+func OptionalSurroundingSpacesSuppress(k, old, new string, d *schema.ResourceData) bool {
+	return strings.TrimSpace(old) == strings.TrimSpace(new)
+}
+
 func resourceLoggingSinkSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"name": {
@@ -26,7 +30,7 @@ func resourceLoggingSinkSchema() map[string]*schema.Schema {
 		"filter": {
 			Type:             schema.TypeString,
 			Optional:         true,
-			DiffSuppressFunc: optionalSurroundingSpacesSuppress,
+			DiffSuppressFunc: OptionalSurroundingSpacesSuppress,
 			Description:      `The filter to apply when exporting logs. Only log entries that match the filter are exported.`,
 		},
 
