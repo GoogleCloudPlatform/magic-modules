@@ -13,9 +13,9 @@
 
 --- !ruby/object:Api::Resource
 name: 'projectMuteConfig'
-base_url: '{{project}}/muteConfigs'
+base_url: '{{project}}/locations/{{location}}/muteConfigs'
 self_link: '{{name}}'
-create_url: '{{project}}/muteConfigs?muteConfigId={{name}}'
+create_url: '{{project}}/locations/{{location}}/muteConfigs?muteConfigId={{name}}'
 update_verb: :PATCH
 update_mask: true
 description: |
