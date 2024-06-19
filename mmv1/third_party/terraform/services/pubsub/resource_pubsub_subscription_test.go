@@ -392,7 +392,7 @@ func TestUnitPubsubSubscription_IgnoreMissingKeyInMap(t *testing.T) {
 	}
 
 	for tn, tc := range cases {
-		if ignoreMissingKeyInMap(tc.Key)("push_config.0.attributes."+tc.Key, tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+		if pubsub.IgnoreMissingKeyInMap(tc.Key)("push_config.0.attributes."+tc.Key, tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
 			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
 		}
 	}

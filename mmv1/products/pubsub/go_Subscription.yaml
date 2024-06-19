@@ -278,7 +278,7 @@ properties:
 
           - v1beta1: uses the push format defined in the v1beta1 Pub/Sub API.
           - v1 or v1beta2: uses the push format defined in the v1 Pub/Sub API.
-        diff_suppress_func: 'tpgresource.IgnoreMissingKeyInMap("x-goog-version")'
+        diff_suppress_func: 'IgnoreMissingKeyInMap("x-goog-version")'
       - name: 'noWrapper'
         type: NestedObject
         description: |
