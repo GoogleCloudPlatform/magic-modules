@@ -432,7 +432,7 @@ properties:
       cannot have overlapping `portRange`s.
 
       @pattern: \d+(?:-\d+)?
-    diff_suppress_func: 'portRangeDiffSuppress'
+    diff_suppress_func: PortRangeDiffSuppress
     default_from_api: true
   - !ruby/object:Api::Type::Array
     name: 'ports'

@@ -415,7 +415,7 @@ properties:
 
       @pattern: \d+(?:-\d+)?
     default_from_api: true
-    diff_suppress_func: 'tpgresource.PortRangeDiffSuppress'
+    diff_suppress_func: PortRangeDiffSuppress
   - name: 'ports'
     type: Array
     description: |
