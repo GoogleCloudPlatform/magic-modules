@@ -297,7 +297,7 @@ func TestUnitComputeGlobalForwardingRule_InternalIpDiffSuppress(t *testing.T) {
 	}
 
 	for tn, tc := range cases {
-		if internalIpDiffSuppress("ipv4/v6_compare", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+		if compute.InternalIpDiffSuppress("ipv4/v6_compare", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
 			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
 		}
 	}
