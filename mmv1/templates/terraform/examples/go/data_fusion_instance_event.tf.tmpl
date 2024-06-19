@@ -1,0 +1,14 @@
+resource "google_data_fusion_instance" "{{$.PrimaryResourceId}}" {
+  name    = "{{index $.Vars "instance_name"}}"
+  region  = "us-central1"
+  type    = "BASIC"
+
+  event_publish_config {
+    enabled = true
+    topic   = google_pubsub_topic.{{$.PrimaryResourceId}}.id
+  }
+}
+
+resource "google_pubsub_topic" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "instance_name"}}"
+}

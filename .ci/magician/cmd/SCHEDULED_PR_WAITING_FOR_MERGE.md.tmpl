@@ -1,0 +1,1 @@
+{{range .CoreReviewers}}@{{ . }} {{end}}This PR is approved and has been waiting for merge for {{if eq .SinceDays 5}}1 week{{else}}{{weekdaysToWeeks .SinceDays}} weeks{{end}}. Is it ready to merge? Use the label `disable-review-reminders` to disable these notifications.

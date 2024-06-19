@@ -1,0 +1,22 @@
+func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return nil
+	}
+
+	original := v.(map[string]interface{})
+	transformed := make(map[string]interface{})
+
+	if original["disabledUserSignup"] == nil {
+		transformed["disabled_user_signup"] = false
+	} else {
+		transformed["disabled_user_signup"] = original["disabledUserSignup"]
+	}
+
+	if original["disabledUserDeletion"] == nil {
+		transformed["disabled_user_deletion"] = false
+	} else {
+		transformed["disabled_user_deletion"] = original["disabledUserDeletion"]
+	}
+
+	return []interface{}{transformed}
+}

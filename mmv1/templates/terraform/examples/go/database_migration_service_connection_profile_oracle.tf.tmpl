@@ -1,0 +1,16 @@
+resource "google_database_migration_service_connection_profile" "{{$.PrimaryResourceId}}" {
+  location = "us-central1"
+  connection_profile_id = "{{index $.Vars "profile"}}"
+  display_name = "{{index $.Vars "profile"}}_display"
+  labels = { 
+    foo = "bar" 
+  }
+  oracle {
+    host = "host"
+    port = 1521
+    username = "username"
+    password = "password"
+    database_service = "dbprovider"
+    static_service_ip_connectivity {}
+  }
+}

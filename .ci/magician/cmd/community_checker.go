@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"magician/cloudbuild"
 	"magician/github"
-	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -39,13 +38,10 @@ var communityApprovalCmd = &cobra.Command{
 	6. Base Branch
 
 	The command performs the following steps:
-	1. Retrieve and print the provided pull request details.
-	2. Get the author of the pull request and determine their user type.
-	3. If the author is not a trusted user (neither a Core Contributor nor a Googler):
-			a. Trigger cloud builds with specific substitutions for the PR.
-	4. For all pull requests, the 'awaiting-approval' label is removed.
+	1. Trigger cloud presubmits with specific substitutions for the PR.
+	2. Remove the 'awaiting-approval' label from the PR.
 	`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		prNumber := args[0]
 		fmt.Println("PR Number: ", prNumber)
 
@@ -64,13 +60,17 @@ var communityApprovalCmd = &cobra.Command{
 		baseBranch := args[5]
 		fmt.Println("Base Branch: ", baseBranch)
 
-		gh := github.NewClient()
+		githubToken, ok := lookupGithubTokenOrFallback("GITHUB_TOKEN_MAGIC_MODULES")
+		if !ok {
+			return fmt.Errorf("did not provide GITHUB_TOKEN_MAGIC_MODULES or GITHUB_TOKEN environment variables")
+		}
+		gh := github.NewClient(githubToken)
 		cb := cloudbuild.NewClient()
-		execCommunityChecker(prNumber, commitSha, branchName, headRepoUrl, headBranch, baseBranch, gh, cb)
+		return execCommunityChecker(prNumber, commitSha, branchName, headRepoUrl, headBranch, baseBranch, gh, cb)
 	},
 }
 
-func execCommunityChecker(prNumber, commitSha, branchName, headRepoUrl, headBranch, baseBranch string, gh GithubClient, cb CloudbuildClient) {
+func execCommunityChecker(prNumber, commitSha, branchName, headRepoUrl, headBranch, baseBranch string, gh GithubClient, cb CloudbuildClient) error {
 	substitutions := map[string]string{
 		"BRANCH_NAME":    branchName,
 		"_PR_NUMBER":     prNumber,
@@ -79,28 +79,17 @@ func execCommunityChecker(prNumber, commitSha, branchName, headRepoUrl, headBran
 		"_BASE_BRANCH":   baseBranch,
 	}
 
-	pullRequest, err := gh.GetPullRequest(prNumber)
+	// trigger presubmit builds - community-checker requires approval
+	// (explicitly or via membership-checker)
+	err := cb.TriggerMMPresubmitRuns(commitSha, substitutions)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	author := pullRequest.User.Login
-	authorUserType := gh.GetUserType(author)
-	trusted := authorUserType == github.CoreContributorUserType || authorUserType == github.GooglerUserType
-
-	// only triggers build for untrusted users (because trusted users will be handled by membership-checker)
-	if !trusted {
-		err = cb.TriggerMMPresubmitRuns(commitSha, substitutions)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		return err
 	}
 
 	// in community-checker job:
 	// remove awaiting-approval label from external contributor PRs
 	gh.RemoveLabel(prNumber, "awaiting-approval")
+	return nil
 }
 
 func init() {

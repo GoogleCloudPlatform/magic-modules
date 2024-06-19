@@ -4,7 +4,7 @@ description: |-
   Provides a list of available Google Compute machine types
 ---
 
-# google\_compute\_machine\_types
+# google_compute_machine_types
 
 Provides access to available Google Compute machine types in a zone for a given project.
 See more about [machine type availability](https://cloud.google.com/compute/docs/regions-zones#available) in the upstream docs.
@@ -20,7 +20,7 @@ Configure a Google Kubernetes Engine (GKE) cluster with node auto-provisioning, 
 
 ```hcl
 data "google_compute_machine_types" "example" {
-  filter = "name = 'n1-standard-1'"
+  filter = "name = \"n1-standard-1\""
   zone   = "us-central1-a"
 }
 

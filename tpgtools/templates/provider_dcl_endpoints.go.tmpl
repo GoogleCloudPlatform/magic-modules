@@ -92,11 +92,15 @@ func ConfigureDCLCustomEndpointAttributesFramework(frameworkSchema *framework_sc
 }
 
 func ProviderDCLConfigure(d *schema.ResourceData, config *Config) interface{} {
-{{- range $index, $pkg := . }}
-{{- if $pkg.ShouldWriteProductBasePath }}
-	config.{{$pkg.BasePathIdentifier.ToTitle}}BasePath = d.Get({{$pkg.BasePathIdentifier.ToTitle}}EndpointEntryKey).(string)
-{{- end}}
-{{- end}}
-	config.CloudBuildWorkerPoolBasePath = d.Get(CloudBuildWorkerPoolEndpointEntryKey).(string)
+	// networkConnectivity uses mmv1 basePath, assuredworkloads has a location variable in the basepath, can't be defined here.
+	config.ApikeysBasePath = "https://apikeys.googleapis.com/v2/"
+	config.AssuredWorkloadsBasePath = d.Get(AssuredWorkloadsEndpointEntryKey).(string)
+	config.CloudBuildWorkerPoolBasePath = "https://cloudbuild.googleapis.com/v1/"
+	config.CloudResourceManagerBasePath = "https://cloudresourcemanager.googleapis.com/"
+	config.EventarcBasePath = "https://eventarc.googleapis.com/v1/"
+	config.FirebaserulesBasePath = "https://firebaserules.googleapis.com/v1/"
+	config.GKEHubFeatureBasePath = "https://gkehub.googleapis.com/v1beta1/"
+	config.RecaptchaEnterpriseBasePath = "https://recaptchaenterprise.googleapis.com/v1/"
+
 	return config
 }

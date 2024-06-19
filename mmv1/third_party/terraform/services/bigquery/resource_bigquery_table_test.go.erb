@@ -46,6 +46,39 @@ func TestAccBigQueryTable_Basic(t *testing.T) {
 	})
 }
 
+func TestAccBigQueryTable_DropColumns(t *testing.T) {
+	t.Parallel()
+
+	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	tableID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryTableTimePartitioningDropColumns(datasetID, tableID),
+			},
+			{
+				ResourceName:            "google_bigquery_table.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccBigQueryTableTimePartitioningDropColumnsUpdate(datasetID, tableID),
+			},
+			{
+				ResourceName:            "google_bigquery_table.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
 func TestAccBigQueryTable_Kms(t *testing.T) {
 	t.Parallel()
 	resourceName := "google_bigquery_table.test"
@@ -1085,6 +1118,37 @@ func TestAccBigQueryDataTable_bigtable(t *testing.T) {
 	})
 }
 
+func TestAccBigQueryDataTable_bigtable_options(t *testing.T) {
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 8),
+		"project":       envvar.GetTestProjectFromEnv(),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryTableFromBigtableOptions(context),
+			},
+			{
+				ResourceName:            "google_bigquery_table.table",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccBigQueryTableFromBigtable(context),
+			},
+		},
+	})
+}
+
 func TestAccBigQueryDataTable_sheet(t *testing.T) {
 	t.Parallel()
 
@@ -1432,7 +1496,6 @@ func TestAccBigQueryTable_invalidSchemas(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccBigQueryTable_TableReplicationInfo_ConflictsWithView(t *testing.T) {
 	t.Parallel()
 
@@ -1441,7 +1504,7 @@ func TestAccBigQueryTable_TableReplicationInfo_ConflictsWithView(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -1467,11 +1530,11 @@ func TestAccBigQueryTable_TableReplicationInfo_WithoutReplicationInterval(t *tes
 	replicationIntervalExpr := ""
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-		ExternalProviders:        map[string]resource.ExternalProvider{
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},
-		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
+		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigQueryTableWithReplicationInfo(projectID, sourceDatasetID, sourceTableID, sourceMVID, replicaDatasetID, replicaMVID, sourceMVJobID, dropMVJobID, replicationIntervalExpr),
@@ -1502,11 +1565,11 @@ func TestAccBigQueryTable_TableReplicationInfo_WithReplicationInterval(t *testin
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-		ExternalProviders:        map[string]resource.ExternalProvider{
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},
-		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
+		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigQueryTableWithReplicationInfo(projectID, sourceDatasetID, sourceTableID, sourceMVID, replicaDatasetID, replicaMVID, sourceMVJobID, dropMVJobID, replicationIntervalExpr),
@@ -1516,6 +1579,57 @@ func TestAccBigQueryTable_TableReplicationInfo_WithReplicationInterval(t *testin
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+<% unless version == 'ga' -%>
+func TestAccBigQueryTable_ResourceTags(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project_id": envvar.GetTestProjectFromEnv(),
+		"dataset_id": fmt.Sprintf("tf_test_dataset_%s", acctest.RandString(t, 10)),
+		"table_id"  : fmt.Sprintf("tf_test_table_%s", acctest.RandString(t, 10)),
+		"tag_key_name1": fmt.Sprintf("tf_test_tag_key1_%s", acctest.RandString(t, 10)),
+		"tag_value_name1": fmt.Sprintf("tf_test_tag_value1_%s", acctest.RandString(t, 10)),
+		"tag_key_name2": fmt.Sprintf("tf_test_tag_key2_%s", acctest.RandString(t, 10)),
+		"tag_value_name2": fmt.Sprintf("tf_test_tag_value2_%s", acctest.RandString(t, 10)),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryTableWithResourceTags(context),
+			},
+			{
+				ResourceName:            "google_bigquery_table.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "allow_resource_tags_on_deletion"},
+			},
+			{
+				Config: testAccBigQueryTableWithResourceTagsUpdate(context),
+			},
+			{
+				ResourceName:            "google_bigquery_table.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "allow_resource_tags_on_deletion"},
+			},
+			// testAccBigQueryTableWithResourceTagsDestroy must be called at the end of this test to clear the resource tag bindings of the table before deletion.
+			{
+				Config: testAccBigQueryTableWithResourceTagsDestroy(context),
+			},
+			{
+				ResourceName:            "google_bigquery_table.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "allow_resource_tags_on_deletion"},
 			},
 		},
 	})
@@ -1760,6 +1874,62 @@ EOH
 
 }
 `, datasetID, tableID, partitioningType)
+}
+
+func testAccBigQueryTableTimePartitioningDropColumns(datasetID, tableID string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "test" {
+  dataset_id = "%s"
+}
+
+resource "google_bigquery_table" "test" {
+  deletion_protection = false
+  table_id   = "%s"
+  dataset_id = google_bigquery_dataset.test.dataset_id
+
+  schema     = <<EOH
+[
+  {
+    "name": "ts",
+    "type": "TIMESTAMP"
+  },
+  {
+    "name": "some_string",
+    "type": "STRING"
+  },
+  {
+    "name": "some_int",
+    "type": "INTEGER"
+  }
+]
+EOH
+
+}
+`, datasetID, tableID)
+}
+
+func testAccBigQueryTableTimePartitioningDropColumnsUpdate(datasetID, tableID string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "test" {
+  dataset_id = "%s"
+}
+
+resource "google_bigquery_table" "test" {
+  deletion_protection = false
+  table_id   = "%s"
+  dataset_id = google_bigquery_dataset.test.dataset_id
+
+  schema     = <<EOH
+[
+  {
+    "name": "ts",
+    "type": "TIMESTAMP"
+  }
+]
+EOH
+
+}
+`, datasetID, tableID)
 }
 
 func testAccBigQueryTableKms(cryptoKeyName, datasetID, tableID string) string {
@@ -2956,6 +3126,8 @@ resource "google_bigquery_table" "test" {
       encoding = "%s"
     }
 
+	json_extension = "GEOJSON"
+
     hive_partitioning_options {
       mode = "CUSTOM"
       source_uri_prefix = "gs://${google_storage_bucket.test.name}/{key1:STRING}"
@@ -3100,7 +3272,7 @@ resource "google_bigquery_table" "test" {
 }
 
 func testAccBigQueryTableFromBigtable(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_bigtable_instance" "instance" {
   name = "tf-test-bigtable-inst-%{random_suffix}"
   cluster {
@@ -3138,6 +3310,77 @@ resource "google_bigquery_dataset" "dataset" {
   friendly_name               = "test"
   description                 = "This is a test description"
   location                    = "EU"
+  default_table_expiration_ms = 3600000
+  labels = {
+    env = "default"
+  }
+}
+`, context)
+}
+
+func testAccBigQueryTableFromBigtableOptions(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_bigtable_instance" "instance" {
+  name = "tf-test-bigtable-inst-%{random_suffix}"
+  cluster {
+    cluster_id = "tf-test-bigtable-%{random_suffix}"
+    zone       = "us-central1-b"
+  }
+  instance_type = "DEVELOPMENT"
+  deletion_protection = false
+}
+resource "google_bigtable_table" "table" {
+  name          = "%{random_suffix}"
+  instance_name = google_bigtable_instance.instance.name
+  column_family {
+    family = "cf-%{random_suffix}-first"
+  }
+  column_family {
+    family = "cf-%{random_suffix}-second"
+  }
+}
+resource "google_bigquery_table" "table" {
+  deletion_protection = false
+  dataset_id = google_bigquery_dataset.dataset.dataset_id
+  table_id   = "tf_test_bigtable_%{random_suffix}"
+  external_data_configuration {
+    autodetect            = true
+    source_format         = "BIGTABLE"
+    ignore_unknown_values = true
+    source_uris = [
+    "https://googleapis.com/bigtable/${google_bigtable_table.table.id}",
+    ]
+	bigtable_options {
+      column_family {
+        family_id        = "cf-%{random_suffix}-first"
+		column {
+			field_name       = "cf-%{random_suffix}-first"
+			type             = "STRING"
+			encoding         = "TEXT"
+			only_read_latest = true
+		  }
+		type             = "STRING"
+		encoding         = "TEXT"
+		only_read_latest = true
+	  }
+      column_family {
+        family_id        = "cf-%{random_suffix}-second"
+		type             = "STRING"
+		encoding         = "TEXT"
+		only_read_latest = false
+	  }
+      ignore_unspecified_column_families = true
+      read_rowkey_as_string              = true
+      output_column_families_as_json     = true
+	}
+  }
+}
+resource "google_bigquery_dataset" "dataset" {
+  dataset_id                  = "tf_test_ds_%{random_suffix}"
+  friendly_name               = "test"
+  description                 = "This is a test description"
+  location                    = "EU"
+  delete_contents_on_destroy  = true
   default_table_expiration_ms = 3600000
   labels = {
     env = "default"
@@ -3717,18 +3960,13 @@ resource "google_bigquery_table" "test" {
 `, datasetID, tableID, schema)
 }
 
-<% unless version == 'ga' -%>
 func testAccBigQueryTableWithReplicationInfoAndView(datasetID, tableID string) string {
 	return fmt.Sprintf(`
 resource "google_bigquery_dataset" "test" {
-  provider = google-beta
-
   dataset_id = "%s"
 }
 
 resource "google_bigquery_table" "test" {
-  provider = google-beta
-
   deletion_protection = false
   table_id   = "%s"
   dataset_id = google_bigquery_dataset.test.dataset_id
@@ -3748,15 +3986,11 @@ resource "google_bigquery_table" "test" {
 func testAccBigQueryTableWithReplicationInfo(projectID, sourceDatasetID, sourceTableID, sourceMVID, replicaDatasetID, replicaMVID, sourceMVJobID, dropMVJobID, replicationIntervalExpr string) string {
 	return fmt.Sprintf(`
 resource "google_bigquery_dataset" "source" {
-  provider = google-beta
-
   dataset_id = "%s"
   location = "aws-us-east-1"
 }
 
 resource "google_bigquery_table" "source_table" {
-  provider = google-beta
-
   deletion_protection = false
   table_id   = "%s"
   dataset_id = google_bigquery_dataset.source.dataset_id
@@ -3773,8 +4007,6 @@ resource "google_bigquery_table" "source_table" {
 }
 
 resource "google_bigquery_job" "source_mv_job" {
-  provider = google-beta
-
   job_id = "%s"
 
   location = "aws-us-east-1"
@@ -3794,8 +4026,6 @@ resource "time_sleep" "wait_10_seconds" {
 }
 
 resource "google_bigquery_dataset_access" "access" {
-  provider = google-beta
-
   dataset_id    = google_bigquery_dataset.source.dataset_id
   view {
     project_id = "%s"
@@ -3807,15 +4037,11 @@ resource "google_bigquery_dataset_access" "access" {
 }
 
 resource "google_bigquery_dataset" "replica" {
-  provider = google-beta
-
   dataset_id = "%s"
   location = "us"
 }
 
 resource "google_bigquery_table" "replica_mv" {
-  provider = google-beta
-
   deletion_protection = false
   dataset_id = google_bigquery_dataset.replica.dataset_id
   table_id   = "%s"
@@ -3830,8 +4056,6 @@ resource "google_bigquery_table" "replica_mv" {
 }
 
 resource "google_bigquery_job" "drop_source_mv_job" {
-  provider = google-beta
-
   job_id = "%s"
 
   location = "aws-us-east-1"
@@ -3852,8 +4076,143 @@ resource "time_sleep" "wait_10_seconds_last" {
 `, sourceDatasetID, sourceTableID, sourceMVJobID, sourceDatasetID, sourceMVID, sourceDatasetID, sourceTableID, projectID, sourceMVID, replicaDatasetID, replicaMVID, projectID, sourceMVID, replicationIntervalExpr, dropMVJobID, sourceDatasetID, sourceMVID)
 }
 
-<% end -%>
+<% unless version == 'ga' -%>
+func testAccBigQueryTableWithResourceTags(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_tags_tag_key" "key1" {
+  provider = google-beta
 
+  parent = "projects/%{project_id}"
+  short_name = "%{tag_key_name1}"
+}
+
+resource "google_tags_tag_value" "value1" {
+  provider = google-beta
+
+  parent = "tagKeys/${google_tags_tag_key.key1.name}"
+  short_name = "%{tag_value_name1}"
+}
+
+resource "google_bigquery_dataset" "test" {
+  provider = google-beta
+
+  dataset_id = "%{dataset_id}"
+}
+
+resource "google_bigquery_table" "test" {
+  provider = google-beta
+
+  deletion_protection = false
+  allow_resource_tags_on_deletion = true
+  dataset_id = "${google_bigquery_dataset.test.dataset_id}"
+  table_id   = "%{table_id}"
+  resource_tags = {
+    "%{project_id}/${google_tags_tag_key.key1.short_name}" = "${google_tags_tag_value.value1.short_name}"
+  }
+}
+`, context)
+}
+
+func testAccBigQueryTableWithResourceTagsUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_tags_tag_key" "key1" {
+  provider = google-beta
+
+  parent = "projects/%{project_id}"
+  short_name = "%{tag_key_name1}"
+}
+
+resource "google_tags_tag_value" "value1" {
+  provider = google-beta
+
+  parent = "tagKeys/${google_tags_tag_key.key1.name}"
+  short_name = "%{tag_value_name1}"
+}
+
+resource "google_tags_tag_key" "key2" {
+  provider = google-beta
+
+  parent = "projects/%{project_id}"
+  short_name = "%{tag_key_name2}"
+}
+
+resource "google_tags_tag_value" "value2" {
+  provider = google-beta
+
+  parent = "tagKeys/${google_tags_tag_key.key2.name}"
+  short_name = "%{tag_value_name2}"
+}
+
+resource "google_bigquery_dataset" "test" {
+  provider = google-beta
+
+  dataset_id = "%{dataset_id}"
+}
+
+resource "google_bigquery_table" "test" {
+  provider = google-beta
+
+  deletion_protection = false
+  allow_resource_tags_on_deletion = true
+  dataset_id = "${google_bigquery_dataset.test.dataset_id}"
+  table_id   = "%{table_id}"
+  resource_tags = {
+    "%{project_id}/${google_tags_tag_key.key1.short_name}" = "${google_tags_tag_value.value1.short_name}"
+    "%{project_id}/${google_tags_tag_key.key2.short_name}" = "${google_tags_tag_value.value2.short_name}"
+  }
+}
+`, context)
+}
+
+func testAccBigQueryTableWithResourceTagsDestroy(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_tags_tag_key" "key1" {
+  provider = google-beta
+
+  parent = "projects/%{project_id}"
+  short_name = "%{tag_key_name1}"
+}
+
+resource "google_tags_tag_value" "value1" {
+  provider = google-beta
+
+  parent = "tagKeys/${google_tags_tag_key.key1.name}"
+  short_name = "%{tag_value_name1}"
+}
+
+resource "google_tags_tag_key" "key2" {
+  provider = google-beta
+
+  parent = "projects/%{project_id}"
+  short_name = "%{tag_key_name2}"
+}
+
+resource "google_tags_tag_value" "value2" {
+  provider = google-beta
+
+  parent = "tagKeys/${google_tags_tag_key.key2.name}"
+  short_name = "%{tag_value_name2}"
+}
+
+resource "google_bigquery_dataset" "test" {
+  provider = google-beta
+
+  dataset_id = "%{dataset_id}"
+}
+
+resource "google_bigquery_table" "test" {
+  provider = google-beta
+
+  deletion_protection = false
+  allow_resource_tags_on_deletion = true
+  dataset_id = "${google_bigquery_dataset.test.dataset_id}"
+  table_id   = "%{table_id}"
+  resource_tags = {}
+}
+`, context)
+}
+
+<% end -%>
 var TEST_CSV = `lifelock,LifeLock,,web,Tempe,AZ,1-May-07,6850000,USD,b
 lifelock,LifeLock,,web,Tempe,AZ,1-Oct-06,6000000,USD,a
 lifelock,LifeLock,,web,Tempe,AZ,1-Jan-08,25000000,USD,c

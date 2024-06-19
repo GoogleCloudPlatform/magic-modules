@@ -24,12 +24,15 @@ module Provider
 
     # We don't want *any* static generation, so we override generate to only
     # generate objects.
-    def generate(output_folder, types, _product_path, _dump_yaml, generate_code, generate_docs)
+    def generate(output_folder, types, product_path, _dump_yaml, generate_code, generate_docs, \
+                 go_yaml)
       generate_objects(
         output_folder,
         types,
         generate_code,
-        generate_docs
+        generate_docs,
+        product_path,
+        go_yaml
       )
     end
 

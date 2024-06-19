@@ -14,7 +14,7 @@ import (
 
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mitchellh/hashstructure"
@@ -62,6 +62,7 @@ var (
 <% unless version == 'ga' -%>
 		"scheduling.0.max_run_duration",
 		"scheduling.0.maintenance_interval",
+		"scheduling.0.on_instance_stop_action",
 <% end -%>
 		"scheduling.0.local_ssd_recovery_timeout",
 	}
@@ -251,8 +252,7 @@ func ResourceComputeInstance() *schema.Resource {
 										AtLeastOneOf: initializeParamsKeys,
 										Computed:     true,
 										ForceNew:     true,
-										ValidateFunc: validation.IntBetween(10000, 120000),
-										Description:  `Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second that the disk can handle. Values must be between 10,000 and 120,000.`,
+										Description:  `Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second that the disk can handle.`,
 									},
 
 									"provisioned_throughput": {
@@ -261,8 +261,7 @@ func ResourceComputeInstance() *schema.Resource {
 										AtLeastOneOf: initializeParamsKeys,
 										Computed:     true,
 										ForceNew:     true,
-										ValidateFunc: validation.IntBetween(1, 7124),
-										Description:  `Indicates how much throughput to provision for the disk. This sets the number of throughput mb per second that the disk can handle. Values must be between 1 and 7,124.`,
+										Description:  `Indicates how much throughput to provision for the disk. This sets the number of throughput mb per second that the disk can handle.`,
 									},
 
 									"enable_confidential_compute": {
@@ -304,6 +303,7 @@ func ResourceComputeInstance() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: `The machine type to create.`,
+				DiffSuppressFunc: tpgresource.CompareResourceNames,
 			},
 
 			"name": {
@@ -336,7 +336,7 @@ func ResourceComputeInstance() *schema.Resource {
 							Description:      `The name or self_link of the subnetwork attached to this interface.`,
 						},
 
-						<% if version == "beta" -%>
+						<% unless version == 'ga' -%>
 						"network_attachment": {
 							Type:             schema.TypeString,
 							Optional:         true,
@@ -446,7 +446,7 @@ func ResourceComputeInstance() *schema.Resource {
 
 						"ipv6_access_config": {
 							Type:        schema.TypeList,
-							Optional:    true,
+                                                        Optional:    true,
 							Description: `An array of IPv6 access configurations for this interface. Currently, only one IPv6 access config, DIRECT_IPV6, is supported. If there is no ipv6AccessConfig specified, then this instance will have no external IPv6 Internet access.`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -653,7 +653,7 @@ func ResourceComputeInstance() *schema.Resource {
 				},
 			},
 
-	        	"params": {
+	        "params": {
 				Type:        schema.TypeList,
 				MaxItems:    1,
 				Optional:    true,
@@ -675,7 +675,7 @@ func ResourceComputeInstance() *schema.Resource {
 				Optional:    true,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Description: `A set of key/value label pairs assigned to the instance.
-				
+
 				**Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
 				Please refer to the field 'effective_labels' for all of the labels present on the resource.`,
 			},
@@ -700,6 +700,17 @@ func ResourceComputeInstance() *schema.Resource {
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Description: `Metadata key/value pairs made available within the instance.`,
 			},
+
+			<% unless version == 'ga' -%>
+			"partner_metadata": {
+				Type:                  schema.TypeMap,
+				Optional:              true,
+				DiffSuppressFunc:      ComparePartnerMetadataDiff,
+				DiffSuppressOnRefresh: true,
+				Elem:                  &schema.Schema{Type: schema.TypeString},
+				Description:           `Partner Metadata Map made available within the instance.`,
+			},
+			<% end -%>
 
 			"metadata_startup_script": {
 				Type:        schema.TypeString,
@@ -815,6 +826,24 @@ Must be from 0 to 315,576,000,000 inclusive.`,
 resolution. Durations less than one second are represented
 with a 0 seconds field and a positive nanos field. Must
 be from 0 to 999,999,999 inclusive.`,
+									},
+								},
+							},
+						},
+						"on_instance_stop_action": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							ForceNew:    true,
+							Description: `Defines the behaviour for instances with the instance_termination_action.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"discard_local_ssd": {
+										Type:     schema.TypeBool,
+										Optional:    true,
+										Description: `If true, the contents of any attached Local SSD disks will be discarded.`,
+										Default:      false,
+										ForceNew:    true,
 									},
 								},
 							},
@@ -996,11 +1025,29 @@ be from 0 to 999,999,999 inclusive.`,
 				Description: `The Confidential VM config being used by the instance.  on_host_maintenance has to be set to TERMINATE or this will fail to create.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						<% if version == "ga" -%>
 						"enable_confidential_compute": {
 							Type:        schema.TypeBool,
 							Required:    true,
 							Description: `Defines whether the instance should have confidential compute enabled.`,
 						},
+						<% else -%>
+						"enable_confidential_compute": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: `Defines whether the instance should have confidential compute enabled. Field will be deprecated in a future release`,
+							AtLeastOneOf: []string{"confidential_instance_config.0.enable_confidential_compute", "confidential_instance_config.0.confidential_instance_type"},
+						},
+						"confidential_instance_type": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: `
+								Specifies which confidential computing technology to use.
+								This could be one of the following values: SEV, SEV_SNP.
+								If SEV_SNP, min_cpu_platform = "AMD Milan" is currently required.`,
+							AtLeastOneOf: []string{"confidential_instance_config.0.enable_confidential_compute", "confidential_instance_config.0.confidential_instance_type"},
+						},
+						<% end -%>
 					},
 				},
 			},
@@ -1162,7 +1209,11 @@ func getInstance(config *transport_tpg.Config, d *schema.ResourceData) (*compute
 	if err != nil {
 		return nil, err
 	}
+	<% if version == "ga" -%>
 	instance, err := config.NewComputeClient(userAgent).Instances.Get(project, zone, d.Get("name").(string)).Do()
+	<% else -%>
+	instance, err := config.NewComputeClient(userAgent).Instances.Get(project, zone, d.Get("name").(string)).View("FULL").Do()
+	<% end -%>
 	if err != nil {
 		return nil, transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Instance %s", d.Get("name").(string)))
 	}
@@ -1247,6 +1298,13 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 		return nil, fmt.Errorf("Error creating metadata: %s", err)
 	}
 
+	<% unless version == 'ga' -%>
+	PartnerMetadata, err := resourceInstancePartnerMetadata(d)
+	if err != nil {
+		return nil, fmt.Errorf("Error creating partner metadata: %s", err)
+	}
+	<% end -%>
+
 	networkInterfaces, err := expandNetworkInterfaces(d, config)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating network interfaces: %s", err)
@@ -1272,6 +1330,9 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 		Disks:                      disks,
 		MachineType:                machineTypeUrl,
 		Metadata:                   metadata,
+		<% unless version == 'ga' -%>
+		PartnerMetadata:            PartnerMetadata,
+		<% end -%>
 		Name:                       d.Get("name").(string),
 		NetworkInterfaces:          networkInterfaces,
 		NetworkPerformanceConfig:   networkPerformanceConfig,
@@ -1328,7 +1389,7 @@ func waitUntilInstanceHasDesiredStatus(config *transport_tpg.Config, d *schema.R
 			}
 			return instance.Id, instance.Status, nil
 		}
-		stateChangeConf := resource.StateChangeConf{
+		stateChangeConf := retry.StateChangeConf{
 			Delay:      5 * time.Second,
 			Pending:    getAllStatusBut(desiredStatus),
 			Refresh:    stateRefreshFunc,
@@ -1406,7 +1467,7 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 		return fmt.Errorf("Error creating instance while setting the security policies: %s", err)
 	}
 	<% end -%>
-	
+
 	err = waitUntilInstanceHasDesiredStatus(config, d)
 	if err != nil {
 		return fmt.Errorf("Error waiting for status: %s", err)
@@ -1448,6 +1509,19 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	if err := d.Set("metadata_fingerprint", instance.Metadata.Fingerprint); err != nil {
 		return fmt.Errorf("Error setting metadata_fingerprint: %s", err)
 	}
+
+	<% unless version == 'ga' -%>
+	if instance.PartnerMetadata != nil {
+		partnerMetadata, err := flattenPartnerMetadata(instance.PartnerMetadata)
+		if err != nil {
+			return fmt.Errorf("Error parsing partner metadata: %s", err)
+		}
+		if err = d.Set("partner_metadata", partnerMetadata); err != nil {
+			return fmt.Errorf("Error setting partner metadata: %s", err)
+		}
+	}
+	<% end -%>
+
 	if err := d.Set("can_ip_forward", instance.CanIpForward); err != nil {
 		return fmt.Errorf("Error setting can_ip_forward: %s", err)
 	}
@@ -1616,16 +1690,6 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	if err := d.Set("scratch_disk", scratchDisks); err != nil {
 		return fmt.Errorf("Error setting scratch_disk: %s", err)
 	}
-<% unless version == 'ga' -%>
-	// Add extra check on Scheduling to prevent STOP instance setting MaxRunDuration.
-	// When Instance being stopped, GCE will wipe out the MaxRunDuration field.
-	// And Terraform has no visiblity on this field after then. Given the infrastructure
-	// constraint, MaxRunDuration will only be supported with instance has
-	// DELETE InstanceTerminationAction
-	if instance.Scheduling.MaxRunDuration != nil && instance.Scheduling.InstanceTerminationAction == "STOP" {
-		return fmt.Errorf("Can not set MaxRunDuration on instance with STOP InstanceTerminationAction, it is not supported by terraform.")
-	}
-<% end -%>
 	if err := d.Set("scheduling", flattenScheduling(instance.Scheduling)); err != nil {
 		return fmt.Errorf("Error setting scheduling: %s", err)
 	}
@@ -1789,6 +1853,37 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		}
 	}
 
+<% unless version == 'ga' -%>
+	if d.HasChange("partner_metadata") {
+		err = transport_tpg.Retry(transport_tpg.RetryOptions{
+			RetryFunc: func() error {
+				instance, err := config.NewComputeClient(userAgent).Instances.Get(project, zone, instance.Name).View("FULL").Do()
+				if err != nil {
+					return fmt.Errorf("Error retrieving partner_metadata: %s", err)
+				}
+				instance.Fingerprint = instance.Fingerprint
+				instance.PartnerMetadata = resourceInstancePatchPartnerMetadata(d, instance.PartnerMetadata)
+				instance.NullFields = []string{"partnerMetadata"}
+
+				op, err := config.NewComputeClient(userAgent).Instances.Update(project, zone, instance.Name, instance).Do()
+				if err != nil {
+					return fmt.Errorf("Error updating partner_metadata: %s", err)
+				}
+
+				opErr := ComputeOperationWaitTime(config, op, project, "partner metadata to update", userAgent, d.Timeout(schema.TimeoutUpdate))
+				if opErr != nil {
+					return opErr
+				}
+				return nil
+			},
+		})
+
+		if err != nil {
+			return err
+		}
+	}
+
+<% end -%>
 	if d.HasChange("tags") {
 		tags := resourceInstanceTags(d)
 		tagsV1 := &compute.Tags{}
@@ -1920,7 +2015,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		return fmt.Errorf("Instance had unexpected number of network interfaces: %d", len(instance.NetworkInterfaces))
 	}
 
-	<% unless version == 'ga' -%>	
+	<% unless version == 'ga' -%>
 	updateSecurityPolicy := false
 	for i := 0; i < len(instance.NetworkInterfaces); i++ {
 		prefix := fmt.Sprintf("network_interface.%d", i)
@@ -2038,6 +2133,23 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 
 			networkInterfacePatchObj := &compute.NetworkInterface{
 				AliasIpRanges: networkInterface.AliasIpRanges,
+				Fingerprint:   instNetworkInterface.Fingerprint,
+			}
+			updateCall := config.NewComputeClient(userAgent).Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, networkInterfacePatchObj).Do
+			op, err := updateCall()
+			if err != nil {
+				return errwrap.Wrapf("Error updating network interface: {{err}}", err)
+			}
+			opErr := ComputeOperationWaitTime(config, op, project, "network interface to update", userAgent, d.Timeout(schema.TimeoutUpdate))
+			if opErr != nil {
+				return opErr
+			}
+		}
+
+		if !updateDuringStop && d.HasChange(prefix+".stack_type") {
+
+			networkInterfacePatchObj := &compute.NetworkInterface{
+				StackType: d.Get(prefix+".stack_type").(string),
 				Fingerprint:   instNetworkInterface.Fingerprint,
 			}
 			updateCall := config.NewComputeClient(userAgent).Instances.UpdateNetworkInterface(project, zone, instance.Name, networkName, networkInterfacePatchObj).Do
@@ -2305,7 +2417,11 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		desiredStatus := d.Get("desired_status").(string)
 
 		if statusBeforeUpdate == "RUNNING" && desiredStatus != "TERMINATED" && !d.Get("allow_stopping_for_update").(bool) {
+<% unless version == 'ga' -%>
+			return fmt.Errorf("Changing the machine_type, min_cpu_platform, service_account, enable_display, shielded_instance_config, scheduling.node_affinities, scheduling.max_run_duration " +
+<% else -%>
 			return fmt.Errorf("Changing the machine_type, min_cpu_platform, service_account, enable_display, shielded_instance_config, scheduling.node_affinities " +
+<% end -%>
 				"or network_interface.[#d].(network/subnetwork/subnetwork_project) or advanced_machine_features on a started instance requires stopping it. " +
 				"To acknowledge this, please set allow_stopping_for_update = true in your config. " +
 				"You can also stop it by setting desired_status = \"TERMINATED\", but the instance will not be restarted after the update.")

@@ -51,10 +51,6 @@ module Api
     # failures on operation_get. see github.com/hashicorp/terraform-provider-google/issues/9489
     attr_reader :operation_retry
 
-    # The APIs required to be enabled for this product.
-    # Usually just the product's API
-    attr_reader :apis_required
-
     attr_reader :async
 
     attr_reader :legacy_name

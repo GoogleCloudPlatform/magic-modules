@@ -4,7 +4,7 @@ description: |-
   Creates a Security Policy resource for Google Compute Engine.
 ---
 
-# google\_compute\_security\_policy
+# google_compute_security_policy
 
 A Security Policy defines an IP blacklist or whitelist that protects load balanced Google Cloud services by denying or permitting traffic from specified IP ranges. For more information
 see the [official documentation](https://cloud.google.com/armor/docs/configure-security-policies)
@@ -196,6 +196,7 @@ The following arguments are supported:
 * `json_parsing` - Whether or not to JSON parse the payload body. Defaults to `DISABLED`.
   * `DISABLED` - Don't parse JSON payloads in POST bodies.
   * `STANDARD` - Parse JSON payloads in POST bodies.
+  * `STANDARD_WITH_GRAPHQL` - Parse JSON and GraphQL payloads in POST bodies.
 
 * `json_custom_config` - Custom configuration to apply the JSON parsing. Only applicable when
     `json_parsing` is set to `STANDARD`. Structure is [documented below](#nested_json_custom_config).
@@ -204,7 +205,7 @@ The following arguments are supported:
   * `NORMAL` - Normal log level.
   * `VERBOSE` - Verbose log level.
 
-* `user_ip_request_headers` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) An optional list of case-insensitive request header names to use for resolving the callers client IP address.
+* `user_ip_request_headers` - (Optional) An optional list of case-insensitive request header names to use for resolving the callers client IP address.
 
 <a name="nested_json_custom_config"></a>The `json_custom_config` block supports:
 
@@ -280,9 +281,9 @@ The following arguments are supported:
 
 * `request_cookie` - (Optional) Request cookie whose value will be excluded from inspection during preconfigured WAF evaluation. Structure is [documented below](#nested_field_params).
 
-* `request_uri` - (Optional) Request query parameter whose value will be excluded from inspection during preconfigured WAF evaluation. Note that the parameter can be in the query string or in the POST body. Structure is [documented below](#nested_field_params).
+* `request_uri` - (Optional) Request URI from the request line to be excluded from inspection during preconfigured WAF evaluation. When specifying this field, the query or fragment part should be excluded. Structure is [documented below](#nested_field_params).
 
-* `request_query_param` - (Optional) Request URI from the request line to be excluded from inspection during preconfigured WAF evaluation. When specifying this field, the query or fragment part should be excluded. Structure is [documented below](#nested_field_params).
+* `request_query_param` - (Optional) Request query parameter whose value will be excluded from inspection during preconfigured WAF evaluation. Note that the parameter can be in the query string or in the POST body. Structure is [documented below](#nested_field_params).
 
 * `target_rule_set` - (Required) Target WAF rule set to apply the preconfigured WAF exclusion.
 

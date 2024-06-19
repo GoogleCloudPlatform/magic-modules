@@ -89,8 +89,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'managed_ssl_certificate_recreation'
     primary_resource_id: 'cert'
-    pull_external:
-      true
+    external_providers: ["random", "time"]
       # Random provider
     skip_vcr: true
 properties:

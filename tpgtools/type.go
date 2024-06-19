@@ -67,14 +67,13 @@ func (t Type) String() string {
 		}
 		return "unknown number type"
 	case "object":
-		// assume if this is set, it's a string -> string map for now.
-		// https://swagger.io/docs/specification/data-models/dictionaries/
-		// describes the behaviour of AdditionalProperties for type: object
 		if t.typ.AdditionalProperties != nil {
 			if v := t.typ.AdditionalProperties.Type; v == "string" {
 				return SchemaTypeMap
 			} else {
-				return fmt.Sprintf("unknown AdditionalProperties: %q", v)
+				// Complex maps are handled as sets with an extra value for the
+				// name of the object
+				return SchemaTypeSet
 			}
 		}
 		return SchemaTypeList

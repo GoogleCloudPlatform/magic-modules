@@ -1,0 +1,144 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'EntryType'
+base_url: 'projects/{{project}}/locations/{{location}}/entryTypes/{{entry_type_id}}'
+self_link: 'projects/{{project}}/locations/{{location}}/entryTypes/{{entry_type_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/entryTypes?entryTypeId={{entry_type_id}}'
+update_verb: :PATCH
+update_mask: true
+description: |
+ An Entry Type is a template for creating Entries.
+import_format: ['projects/{{project}}/locations/{{location}}/entryTypes/{{entry_type_id}}']
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 5
+      update_minutes: 5
+      delete_minutes: 5
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'
+autogen_async: true
+iam_policy: !ruby/object:Api::Resource::IamPolicy
+  skip_import_test: true
+  method_name_separator: ':'
+  fetch_iam_policy_verb: :GET
+  parent_resource_attribute: 'entry_type_id'
+  import_format:
+    [
+      'projects/{{project}}/locations/{{location}}/entryTypes/{{entry_type_id}}',
+      '{{entry_type_id}}',
+    ]
+parameters:
+  - !ruby/object:Api::Type::String
+    name: 'location'
+    url_param_only: true
+    immutable: true
+    description: |
+      The location where entry type will be created in.
+  - !ruby/object:Api::Type::String
+    name: 'entryTypeId'
+    url_param_only: true
+    immutable: true
+    description: |
+      The entry type id of the entry type.
+properties:
+  - !ruby/object:Api::Type::String
+    name: name
+    description: |
+      The relative resource name of the EntryType, of the form: projects/{project_number}/locations/{location_id}/entryTypes/{entry_type_id}
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'uid'
+    output: true
+    description: |
+      System generated globally unique ID for the EntryType. This ID will be different if the EntryType is deleted and re-created with the same name.
+  - !ruby/object:Api::Type::Time
+    name: 'createTime'
+    output: true
+    description: |
+      The time when the EntryType was created.
+  - !ruby/object:Api::Type::Time
+    name: 'updateTime'
+    output: true
+    description: |
+      The time when the EntryType was last updated.
+  - !ruby/object:Api::Type::String
+    name: 'description'
+    description: |
+      Description of the EntryType.
+  - !ruby/object:Api::Type::String
+    name: 'displayName'
+    description: |
+      User friendly display name.
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: 'labels'
+    description: |
+      User-defined labels for the EntryType.
+  - !ruby/object:Api::Type::Array
+    name: 'typeAliases'
+    description: |
+      Indicates the class this Entry Type belongs to, for example, TABLE, DATABASE, MODEL.
+    item_type: Api::Type::String
+  - !ruby/object:Api::Type::String
+    name: 'platform'
+    description: |
+      The platform that Entries of this type belongs to.
+  - !ruby/object:Api::Type::String
+    name: 'system'
+    description: |
+      The system that Entries of this type belongs to.
+  - !ruby/object:Api::Type::Array
+    name: 'requiredAspects'
+    description: |
+      AspectInfo for the entry type.
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::String
+          name: 'type'
+          description: |
+            Required aspect type for the entry type.
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dataplex_entry_type_basic'
+    primary_resource_id: 'test_entry_type_basic'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-entry-type%s\",
+      context[\"random_suffix\"\
+      ])"
+    test_env_vars:
+      project_name: :PROJECT_NAME
+    vars:
+      entry_type_name: entry-type-basic
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dataplex_entry_type_full'
+    primary_resource_id: 'test_entry_type_full'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-entry-type%s\",
+      context[\"random_suffix\"\
+      ])"
+    test_env_vars:
+      project_name: :PROJECT_NAME
+    vars:
+      entry_type_name: entry-type-full

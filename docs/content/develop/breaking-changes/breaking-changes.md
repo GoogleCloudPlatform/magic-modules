@@ -79,9 +79,15 @@ For more information, see
     and modifying examples and modules may achieve the intended effect with a smaller blast radius.
 * <a name="field-changing-data-format"></a> Modifying how field data is stored in state
   * For example, changing the case of a value returned by the API in a flattener or decorder
-* Removing diff suppression from a field.
+* <a name="field-removing-diff-suppress"></a> Removing diff suppression from a field.
   * For MMv1 resources, removing `diff_suppress_func` from a field.
   * For handwritten resources, removing `DiffSuppressFunc` from a field.
+* <a name="field-adding-subfield-to-config-mode-attr"></a> Adding a subfield to
+  a SchemaConfigModeAttr field.
+  * For MMv1 resources, adding a subfield to a field that has
+    SchemaConfigModeAttr.
+  * For handwritten resources, adding a subfield to a field that has
+    SchemaConfigModeAttr.
 * Removing update support from a field.
 
 ### Making validation more strict

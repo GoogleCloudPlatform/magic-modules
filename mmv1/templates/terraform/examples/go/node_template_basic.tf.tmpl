@@ -1,0 +1,5 @@
+resource "google_compute_node_template" "{{$.PrimaryResourceId}}" {
+  name      = "{{index $.Vars "template_name"}}"
+  region    = "us-central1"
+  node_type = "n1-node-96-624"
+}

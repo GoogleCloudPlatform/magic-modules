@@ -1,0 +1,15 @@
+resource "google_iam_workforce_pool" "{{$.PrimaryResourceId}}" {
+  workforce_pool_id   = "{{index $.Vars "workforce_pool_id"}}"
+  parent              = "organizations/{{index $.TestEnvVars "org_id"}}"
+  location            = "global"
+  display_name        = "Display name"
+  description         = "A sample workforce pool."
+  disabled            = false
+  session_duration    = "7200s"
+  access_restrictions {
+    allowed_services {
+      domain = "backstory.chronicle.security"
+    }
+    disable_programmatic_signin = false
+  }
+}

@@ -1,0 +1,9 @@
+resource "google_pubsub_topic" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "topic_name"}}"
+
+  labels = {
+    foo = "bar"
+  }
+
+  message_retention_duration = "86600s"
+}
