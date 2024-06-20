@@ -282,7 +282,7 @@ func replace(data []byte) []byte {
 	if err != nil {
 		log.Fatalf("Cannot compile the regular expression: %v", err)
 	}
-	data = r.ReplaceAll(data, []byte(`{{- if eq $.Name "Disk" }}`))
+	data = r.ReplaceAll(data, []byte(`{{ if eq $.Name "Disk" -}}`))
 
 	// Replace <% elsif object.name == 'RegionDisk' -%>
 	r, err = regexp.Compile(`<% elsif object.name == 'RegionDisk' -%>`)
