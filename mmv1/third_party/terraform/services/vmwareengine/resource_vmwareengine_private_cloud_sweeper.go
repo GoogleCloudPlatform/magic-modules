@@ -39,7 +39,7 @@ func testSweepVmwareenginePrivateCloud(region string) error {
 
 	// List of location values includes:
 	//   * global location
-	//   * regions used for this resource type's acc tests in the past
+	//   * zones used for this resource type's acc tests in the past
 	//   * the 'region' passed to the sweeper
 	locations := []string{region, "southamerica-west1-a", "me-west1-a"}
 	log.Printf("[INFO][SWEEPER_LOG] Sweeping will include these locations: %v.", locations)
