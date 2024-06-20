@@ -92,12 +92,19 @@ func CopyText(identifier string) {
 			for scanner.Scan() {
 				line := scanner.Text()
 				if firstLine {
-					if line != "NOT CONVERTED - RUN YAML MODE" {
-						// log.Printf("skipping %s", goPath)
-						break
-					} else {
+					if line == "NOT CONVERTED - RUN YAML MODE" {
+						firstLine = false
+						w.WriteString(fmt.Sprintf("%s\n", "NOT CONVERTED #2 - RUN YAML MODE"))
+						continue
+					} else if line == "NOT CONVERTED #2 - RUN YAML MODE" {
+						firstLine = false
+						w.WriteString(fmt.Sprintf("%s\n", "NOT CONVERTED #3 - RUN YAML MODE"))
+						continue
+					} else if line == "NOT CONVERTED #3 - RUN YAML MODE" {
 						firstLine = false
 						continue
+					} else {
+						break
 					}
 				}
 				if strings.Contains(line, identifier) {
