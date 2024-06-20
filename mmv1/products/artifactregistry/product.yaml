@@ -23,10 +23,6 @@ versions:
   - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://artifactregistry.googleapis.com/v1/
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Artifact Registry API
-    url: https://console.cloud.google.com/apis/library/artifactregistry.googleapis.com/
 async: !ruby/object:Api::OpAsync
   actions: ['create', 'delete']
   operation: !ruby/object:Api::OpAsync::Operation

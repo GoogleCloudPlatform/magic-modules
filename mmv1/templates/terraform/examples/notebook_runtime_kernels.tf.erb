@@ -22,4 +22,7 @@ resource "google_notebooks_runtime" "<%= ctx[:primary_resource_id] %>" {
       }
     }
   }
+  labels = {
+    k = "val"
+  }
 }

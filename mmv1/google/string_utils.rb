@@ -38,12 +38,6 @@ module Google
       ss.gsub(/\b(?<!\w['’`()])[a-z]/, &:capitalize)
     end
 
-    # rubocop:disable Style/SafeNavigation # support Ruby < 2.3.0
-    def self.symbolize(key)
-      key.to_sym unless key.nil?
-    end
-    # rubocop:enable Style/SafeNavigation
-
     # Returns all the characters up until the period (.) or returns text
     # unchanged if there is no period.
     def self.first_sentence(text)
@@ -73,6 +67,24 @@ module Google
       return "#{source.gsub(/y$/, '')}ies" if source.end_with?('y')
 
       "#{source}s"
+    end
+
+    # Slimmed down version of ActiveSupport::Inflector code
+    def self.camelize(term, uppercase_first_letter)
+      acronyms_camelize_regex = /^(?:(?=a)b(?=\b|[A-Z_])|\w)/
+
+      string = term.to_s
+      string = if uppercase_first_letter
+                 string.sub(/^[a-z\d]*/) { |match| match.capitalize! || match }
+               else
+                 string.sub(acronyms_camelize_regex) { |match| match.downcase! || match }
+               end
+      # handle snake case
+      string.gsub!(/(?:_)([a-z\d]*)/i) do
+        word = ::Regexp.last_match(1)
+        word.capitalize! || word
+      end
+      string
     end
   end
 end

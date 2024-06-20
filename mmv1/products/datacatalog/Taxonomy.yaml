@@ -23,6 +23,8 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': https://cloud.google.com/data-catalog/docs
   api: https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.taxonomies
+sweeper: !ruby/object:Provider::Terraform::Sweeper
+  sweepable_identifier_field: 'displayName'
 iam_policy: !ruby/object:Api::Resource::IamPolicy
   skip_import_test: true
   method_name_separator: ':'
@@ -66,6 +68,7 @@ properties:
     name: 'displayName'
     description: |
       User defined name of this taxonomy.
+      The taxonomy display name must be unique within an organization.
       It must: contain only unicode letters, numbers, underscores, dashes
       and spaces; not start or end with spaces; and be at most 200 bytes
       long when encoded in UTF-8.

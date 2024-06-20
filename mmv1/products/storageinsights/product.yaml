@@ -20,10 +20,3 @@ versions:
     base_url: https://storageinsights.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/devstorage.full_control
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Google Cloud Storage
-    url: https://console.cloud.google.com/apis/library/storage-component.googleapis.com/
-  - !ruby/object:Api::Product::ApiReference
-    name: Google Cloud Storage Insights
-    url: https://console.cloud.google.com/apis/library/storageinsights.googleapis.com/

@@ -78,7 +78,6 @@ properties:
     description: |
       The fully-qualified resource name of the Extension Instance.
     output: true
-    pattern: projects/{{project}}/instances/{{instance_id}}
   - !ruby/object:Api::Type::Time
     name: createTime
     description: The time at which the Extension Instance was created.
@@ -104,7 +103,6 @@ properties:
         name: name
         description: The unique identifier for this configuration.
         output: true
-        pattern: projects/{{project}}/instances/{{instance_id}}/configs/{{config_id}}
       - !ruby/object:Api::Type::Time
         name: createTime
         description: The time at which the Extension Instance Config was created.
@@ -119,7 +117,8 @@ properties:
         description: |
           Params whose values are only available at deployment time.
           Unlike other params, these will not be set as environment variables on
-          functions.
+          functions. See a full list of system parameters at
+          https://firebase.google.com/docs/extensions/publishers/parameters#system_parameters
         default_from_api: true
       - !ruby/object:Api::Type::String
         name: extensionRef
@@ -142,7 +141,6 @@ properties:
         name: eventarcChannel
         description: |
           Fully qualified Eventarc resource name that consumers should use for event triggers.
-        pattern: projects/{{project}}/locations/{{location}}/channels/{{channel_id}}
         default_from_api: true
       - !ruby/object:Api::Type::String
         name: populatedPostinstallContent
@@ -210,7 +208,6 @@ properties:
     description: |
       The name of the last operation that acted on this Extension
       Instance
-    pattern: projects/{{project}}/operations/{{operation_id}}
   - !ruby/object:Api::Type::String
     name: lastOperationType
     output: true
@@ -255,4 +252,3 @@ properties:
               The error message. This is set by the extension developer to give
               more detail on why the extension is unusable and must be re-installed
               or reconfigured.
-

@@ -20,7 +20,3 @@ versions:
     base_url: https://firebaseextensions.googleapis.com/v1beta/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Firebase Extensions API
-    url: https://console.cloud.google.com/apis/library/firebaseextensions.googleapis.com/

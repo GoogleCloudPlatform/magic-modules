@@ -1,0 +1,4 @@
+resource "google_workbench_instance" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "instance_name"}}"
+  location = "us-west1-a"
+}

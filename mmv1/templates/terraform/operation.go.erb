@@ -9,7 +9,7 @@
 
 <%= lines(autogen_notice(:go, pwd)) -%>
 
-package <%= product_ns.downcase -%>
+package <%= object.__product.name .downcase -%>
 
 import (
   "encoding/json"

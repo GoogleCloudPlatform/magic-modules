@@ -22,11 +22,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/caiasset"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/ancestrymanager"
-	resources "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/tfdata"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/tfplan"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/caiasset"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/ancestrymanager"
+	resources "github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/converters/google/resources"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/tfdata"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/tfplan"
 	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 
@@ -172,7 +172,6 @@ func (c *Converter) addDelete(rc *tfjson.ResourceChange) error {
 		}
 
 		for _, converted := range convertedItems {
-
 			key := converted.Type + converted.Name
 			var existingConverterAsset *resources.Asset
 			if existing, exists := c.assets[key]; exists {
@@ -190,14 +189,14 @@ func (c *Converter) addDelete(rc *tfjson.ResourceChange) error {
 				} else {
 					existingConverterAsset = &asset
 				}
-				if existingConverterAsset != nil {
-					converted = converter.MergeDelete(*existingConverterAsset, converted)
-					augmented, err := c.augmentAsset(rd, c.cfg, converted)
-					if err != nil {
-						return err
-					}
-					c.assets[key] = augmented
+			}
+			if existingConverterAsset != nil {
+				converted = converter.MergeDelete(*existingConverterAsset, converted)
+				augmented, err := c.augmentAsset(rd, c.cfg, converted)
+				if err != nil {
+					return err
 				}
+				c.assets[key] = augmented
 			}
 		}
 	}

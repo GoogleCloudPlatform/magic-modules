@@ -46,7 +46,6 @@ description: |-
 autogen_async: false
 id_format: '{{name}}'
 exclude_import: true
-skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'vertex_ai_dataset'

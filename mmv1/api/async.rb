@@ -16,7 +16,7 @@ require 'api/timeout'
 
 module Api
   # Base class from which other Async classes can inherit.
-  class Async < Api::Object
+  class Async < Google::YamlValidator
     # Describes an operation
     attr_reader :operation
 
@@ -35,27 +35,13 @@ module Api
     end
 
     # Base async operation type
-    class Operation < Api::Object
+    class Operation < Google::YamlValidator
       # Contains information about an long-running operation, to make
       # requests for the state of an operation.
       attr_reader :timeouts
-      attr_reader :result
 
       def validate
-        check :result, type: Result
         check :timeouts, type: Api::Timeouts
-      end
-    end
-
-    # Base result class
-    class Result < Api::Object
-      # Contains information about the result of an Operation
-
-      attr_reader :resource_inside_response
-
-      def validate
-        super
-        check :resource_inside_response, type: :boolean, default: false
       end
     end
   end
@@ -127,8 +113,9 @@ module Api
     end
 
     # Represents the results of an Operation request
-    class Result < Async::Result
+    class Result < Google::YamlValidator
       attr_reader :path
+      attr_reader :resource_inside_response
 
       def initialize(path = nil, resource_inside_response = nil)
         super()
@@ -140,12 +127,13 @@ module Api
         super
 
         check :path, type: String
+        check :resource_inside_response, type: :boolean, default: false
       end
     end
 
     # Provides information to parse the result response to check operation
     # status
-    class Status < Api::Object
+    class Status < Google::YamlValidator
       attr_reader :path
       attr_reader :complete
       attr_reader :allowed
@@ -165,7 +153,7 @@ module Api
     end
 
     # Provides information on how to retrieve errors of the executed operations
-    class Error < Api::Object
+    class Error < Google::YamlValidator
       attr_reader :path
       attr_reader :message
 

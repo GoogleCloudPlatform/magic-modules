@@ -1,0 +1,136 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+<%
+#names
+-%>
+name: '<%= object.__product.name %>'
+<%  unless object.__product.legacy_name.nil? -%>
+legacy_name: '<%= object.__product.legacy_name %>'
+<%  end -%>
+<%  unless object.__product.display_name.nil? -%>
+display_name: '<%= object.__product.display_name %>'
+<%  end -%>
+<%  unless object.__product.client_name.nil? -%>
+client_name: '<%= object.__product.client_name %>'
+<%  end -%>
+<%
+#versions
+-%>
+<%  unless object.__product.versions.empty? -%>
+versions:
+<%    object.__product.versions.each do |version| -%>
+  - name: '<%= version.name %>'
+<%       unless version.base_url.nil? -%>
+    base_url: '<%= version.base_url %>'
+<%      end -%>
+<%      unless version.cai_base_url.nil? -%>
+    cai_base_url: '<%= version.cai_base_url %>'
+<%      end -%>
+<%    end -%>
+<%  end -%>
+<%
+#scopes
+-%>
+<%  unless object.__product.scopes.nil? -%>
+scopes:
+<%    object.__product.scopes.each do |scope| -%>
+  - '<%= scope -%>'
+<%    end -%>
+<%  end -%>
+<%
+#async
+-%>
+<%  unless object.__product.async.nil? -%>
+async:
+  type: "OpAsync"
+<%    if object.__product.async.is_a? Provider::Terraform::PollAsync -%>
+<%      unless object.__product.async.check_response_func_existence.nil? -%>
+    check_response_func_existence: '<%= object.__product.async.check_response_func_existence %>'
+<%      end -%>
+<%      unless object.__product.async.check_response_func_absence.nil? -%>
+    check_response_func_absence: '<%= object.__product.async.check_response_func_absence %>'
+<%      end -%>
+<%      unless object.__product.async.custom_poll_read.nil? -%>
+    custom_poll_read: '<%= object.__product.async.custom_poll_read %>'
+<%      end -%>
+<%      unless object.__product.async.suppress_error.nil? -%>
+    suppress_error: <%= object.__product.async.suppress_error %>
+<%      end -%>
+<%      unless object.__product.async.target_occurrences.nil? -%>
+    target_occurrences: <%= object.__product.async.target_occurrences %>
+<%      end -%>
+<%    end -%>
+<%    if object.__product.async.is_a? Api::OpAsync -%>
+<% #async.operation -%>
+<%    unless object.__product.async.operation.nil? -%>
+  operation:
+<%      unless object.__product.async.operation.base_url.nil? -%>
+    base_url: '<%= object.__product.async.operation.base_url %>'
+<%      end -%>
+<%      unless object.__product.async.operation.full_url.nil? -%>
+    full_url: '<%= object.__product.async.operation.full_url %>'
+<%      end -%>
+<%      unless object.__product.async.operation.kind.nil? -%>
+    kind: '<%= object.__product.async.operation.kind %>'
+<%      end -%>
+<%      unless object.__product.async.operation.path.nil? -%>
+    path: '<%= object.__product.async.operation.path %>'
+<%      end -%>
+<%      unless object.__product.async.operation.wait_ms.nil? -%>
+    wait_ms: <%= object.__product.async.operation.wait_ms %>
+<%      end -%>
+<% #async.operation.timeouts -%>
+<%      unless object.__product.async.operation.timeouts.nil? -%>
+    timeouts:
+<%        unless object.__product.async.operation.timeouts.insert_minutes.nil? -%>
+      insert_minutes: <%= object.__product.async.operation.timeouts.insert_minutes %>
+<%        end -%>
+<%        unless object.__product.async.operation.timeouts.update_minutes.nil? -%>
+      update_minutes: <%= object.__product.async.operation.timeouts.update_minutes %>
+<%        end -%>
+<%        unless object.__product.async.operation.timeouts.delete_minutes.nil? -%>
+      delete_minutes: <%= object.__product.async.operation.timeouts.delete_minutes %>
+<%        end -%>
+<%      end -%>
+<%    end -%>
+<% #async.result -%>
+<%    unless object.__product.async.result.nil? -%>
+  result:
+<%      unless object.__product.async.result.path.nil? -%>
+    path: '<%= object.__product.async.result.path %>'
+<%      end -%>
+<%      unless object.__product.async.result.resource_inside_response.nil? -%>
+    resource_inside_response: <%= object.__product.async.result.resource_inside_response %>
+<%      end -%>
+<%    end -%>
+<% #async.error -%>
+<%    unless object.__product.async.error.nil? -%>
+  error:
+<%      unless object.__product.async.error.path.nil? -%>
+    path: '<%= object.__product.async.error.path %>'
+<%      end -%>
+<%      unless object.__product.async.error.message.nil? -%>
+    message: '<%= object.__product.async.error.message %>'
+<%      end -%>
+<%    end -%>
+<%    end -%>
+<%  end -%>
+<%
+#misc
+-%>
+<%   unless object.__product.operation_retry.nil? -%>
+operation_retry: '<%= object.__product.operation_retry %>'
+<%  end -%>

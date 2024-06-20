@@ -1,28 +1,6 @@
-resource "google_project" "project" {
-	project_id = "tf-test%{random_suffix}"
-	name       = "tf-test%{random_suffix}"
-	org_id     = "<%= ctx[:test_env_vars]['org_id'] %>"
-}
-
-resource "time_sleep" "wait_60_seconds" {
-  depends_on = [google_project.project]
-  create_duration = "60s"
-}
-
-resource "google_project_service" "firestore" {
-  project = google_project.project.project_id
-  service = "firestore.googleapis.com"
-  # Needed for CI tests for permissions to propagate, should not be needed for actual usage
-  depends_on = [time_sleep.wait_60_seconds]
-}
-
 resource "google_firestore_database" "<%= ctx[:primary_resource_id] %>" {
-    project = google_project.project.project_id
-
-    name = "(default)"
-
-    location_id = "nam5"
-    type        = "DATASTORE_MODE"
-
-    depends_on = [google_project_service.firestore]
+  project     = "<%= ctx[:test_env_vars]['project_id'] %>"
+  name        = "(default)"
+  location_id = "nam5"
+  type        = "DATASTORE_MODE"
 }

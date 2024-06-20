@@ -1,5 +1,4 @@
 resource "google_vmwareengine_network" "<%= ctx[:primary_resource_id] %>" {
-  provider    = google-beta
   project     = google_project_service.acceptance.project
   name        = "<%= ctx[:test_env_vars]['location'] %>-default" #Legacy network IDs are in the format: {region-id}-default
   location    = "<%= ctx[:test_env_vars]['location'] %>"
@@ -9,7 +8,6 @@ resource "google_vmwareengine_network" "<%= ctx[:primary_resource_id] %>" {
 
 resource "google_project_service" "acceptance" {
   project  = google_project.acceptance.project_id
-  provider = google-beta
   service  = "vmwareengine.googleapis.com"
 
   # Needed for CI tests for permissions to propagate, should not be needed for actual usage
@@ -20,7 +18,6 @@ resource "google_project_service" "acceptance" {
 # so creating new project for isolation in CI.
 resource "google_project" "acceptance" {
   name            = "<%= ctx[:vars]['proj_id'] %>"
-  provider        = google-beta
   project_id      = "<%= ctx[:vars]['proj_id'] %>"
   org_id          = "<%= ctx[:test_env_vars]['org_id'] %>"
   billing_account = "<%= ctx[:test_env_vars]['billing_account'] %>"

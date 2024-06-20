@@ -4,7 +4,7 @@ description: |-
   Creates a new Transfer Job in Google Cloud Storage Transfer.
 ---
 
-# google\_storage\_transfer\_job
+# google_storage_transfer_job
 
 Creates a new Transfer Job in Google Cloud Storage Transfer.
 
@@ -111,6 +111,8 @@ resource "google_storage_transfer_job" "s3-bucket-nightly-backup" {
 ## Argument Reference
 
 The following arguments are supported:
+
+* `name` - (Optional) The name of the Transfer Job. This name must start with "transferJobs/" prefix and end with a letter or a number, and should be no more than 128 characters ( `transferJobs/^(?!OPI)[A-Za-z0-9-._~]*[A-Za-z0-9]$` ). For transfers involving PosixFilesystem, this name must start with transferJobs/OPI specifically ( `transferJobs/OPI^[A-Za-z0-9-._~]*[A-Za-z0-9]$` ). For all other transfer types, this name must not start with transferJobs/OPI. Default the provider will assign a random unique name with `transferJobs/{{name}}` format, where `name` is a numeric value.
 
 * `description` - (Required) Unique description to identify the Transfer Job.
 
@@ -245,7 +247,9 @@ The `aws_access_key` block supports:
 
 * `path` - (Required) Root path to transfer objects. Must be an empty string or full path name that ends with a '/'. This field is treated as an object prefix. As such, it should generally not begin with a '/'.
 
-* `azure_credentials` - (Required) Credentials used to authenticate API requests to Azure block.
+* `credentials_secret` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Full Resource name of a secret in Secret Manager containing [SAS Credentials in JSON form](https://cloud.google.com/storage-transfer/docs/reference/rest/v1/TransferSpec#azureblobstoragedata:~:text=begin%20with%20a%20%27/%27.-,credentialsSecret,-string). Service Agent for Storage Transfer must have permissions to access secret. If credentials_secret is specified, do not specify azure_credentials.`,
+
+* `azure_credentials` - (Required in GA, Optional in [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Credentials used to authenticate API requests to Azure block.
 
 The `azure_credentials` block supports:
 

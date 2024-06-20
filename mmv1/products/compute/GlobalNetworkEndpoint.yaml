@@ -93,6 +93,8 @@ properties:
       Port number of the external endpoint.
     required: true
     custom_flatten: templates/terraform/custom_flatten/float64_to_int.go.erb
+    validation: !ruby/object:Provider::Terraform::Validation
+      function: 'validation.IntAtLeast(1)'
   - !ruby/object:Api::Type::String
     name: 'ipAddress'
     description: |

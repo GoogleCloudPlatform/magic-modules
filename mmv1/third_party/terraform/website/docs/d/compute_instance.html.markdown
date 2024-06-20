@@ -4,7 +4,7 @@ description: |-
   Get a VM instance within GCE.
 ---
 
-# google\_compute\_instance
+# google_compute_instance
 
 Get information about a VM instance resource within GCE. For more information see
 [the official documentation](https://cloud.google.com/compute/docs/instances)
@@ -158,6 +158,8 @@ The following arguments are supported:
     instance can be accessed via the Internet. Structure [documented below](#nested_access_config).
 
 * `alias_ip_range` - An array of alias IP ranges for this network interface. Structure [documented below](#nested_alias_ip_range).
+
+* `network_attachment` - [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) The URL of the network attachment to this interface.	
 
 <a name="nested_access_config"></a>The `access_config` block supports:
 

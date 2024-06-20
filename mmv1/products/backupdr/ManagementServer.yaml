@@ -39,6 +39,7 @@ examples:
       managementserver_name: 'ms-console'
     test_env_vars:
       project: :PROJECT_NAME
+    skip_test: true
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -74,7 +75,6 @@ properties:
           description: |
             Network with format `projects/{{project_id}}/global/networks/{{network_id}}`
           required: true
-          pattern: projects/{{project}}/global/networks/{{network}}
         - !ruby/object:Api::Type::Enum
           name: 'peeringMode'
           description: |

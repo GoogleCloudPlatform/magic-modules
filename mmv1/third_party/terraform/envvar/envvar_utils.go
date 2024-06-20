@@ -19,6 +19,18 @@ var CredsEnvVars = []string{
 	"GOOGLE_USE_DEFAULT_CREDENTIALS",
 }
 
+// CredsEnvVarsExcludingAdcs returns the contents of CredsEnvVars excluding GOOGLE_APPLICATION_CREDENTIALS
+func CredsEnvVarsExcludingAdcs() []string {
+	envs := CredsEnvVars
+	var filtered []string
+	for _, e := range envs {
+		if e != "GOOGLE_APPLICATION_CREDENTIALS" {
+			filtered = append(filtered, e)
+		}
+	}
+	return filtered
+}
+
 var ProjectNumberEnvVars = []string{
 	"GOOGLE_PROJECT_NUMBER",
 }
@@ -27,10 +39,6 @@ var ProjectEnvVars = []string{
 	"GOOGLE_PROJECT",
 	"GCLOUD_PROJECT",
 	"CLOUDSDK_CORE_PROJECT",
-}
-
-var FirestoreProjectEnvVars = []string{
-	"GOOGLE_FIRESTORE_PROJECT",
 }
 
 var RegionEnvVars = []string{
@@ -74,6 +82,10 @@ var OrgTargetEnvVars = []string{
 	"GOOGLE_ORG_2",
 }
 
+var UniverseDomainEnvVars = []string{
+	"GOOGLE_UNIVERSE_DOMAIN",
+}
+
 // This is the billing account that will be charged for the infrastructure used during testing. For
 // that reason, it is also the billing account used for creating new projects.
 var BillingAccountEnvVars = []string{
@@ -111,6 +123,12 @@ func GetTestCredsFromEnv() string {
 	return transport_tpg.MultiEnvSearch(CredsEnvVars)
 }
 
+// Returns googleapis.com if there's no universe set.
+func GetTestUniverseDomainFromEnv(t *testing.T) string {
+	SkipIfEnvNotSet(t, IdentityUserEnvVars...)
+	return transport_tpg.MultiEnvSearch(UniverseDomainEnvVars)
+}
+
 // AccTestPreCheck ensures at least one of the region env variables is set.
 func GetTestRegionFromEnv() string {
 	return transport_tpg.MultiEnvSearch(RegionEnvVars)
@@ -128,13 +146,6 @@ func GetTestCustIdFromEnv(t *testing.T) string {
 func GetTestIdentityUserFromEnv(t *testing.T) string {
 	SkipIfEnvNotSet(t, IdentityUserEnvVars...)
 	return transport_tpg.MultiEnvSearch(IdentityUserEnvVars)
-}
-
-// Firestore can't be enabled at the same time as Datastore, so we need a new
-// project to manage it until we can enable Firestore programmatically.
-func GetTestFirestoreProjectFromEnv(t *testing.T) string {
-	SkipIfEnvNotSet(t, FirestoreProjectEnvVars...)
-	return transport_tpg.MultiEnvSearch(FirestoreProjectEnvVars)
 }
 
 // Returns the raw organization id like 1234567890, skipping the test if one is

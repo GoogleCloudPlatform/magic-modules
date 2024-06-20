@@ -63,6 +63,12 @@ examples:
     primary_resource_id: "default"
     vars:
       workstation_cluster_name: "workstation-cluster-private"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "workstation_cluster_custom_domain"
+    min_version: beta
+    primary_resource_id: "default"
+    vars:
+      workstation_cluster_name: "workstation-cluster-custom-domain"
 parameters:
   - !ruby/object:Api::Type::String
     name: "workstationClusterId"
@@ -90,7 +96,7 @@ properties:
     description: |
       The system-generated UID of the resource.
   - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+    name: "labels"
     description:
       "Client-specified labels that are applied to the resource and that are
       also propagated to the underlying Compute Engine resources."
@@ -109,6 +115,12 @@ properties:
       Name of the Compute Engine subnetwork in which instances associated with this cluster will be created.
       Must be part of the subnetwork specified for this cluster.
   - !ruby/object:Api::Type::String
+    name: "controlPlaneIp"
+    description: |
+      The private IP address of the control plane for this workstation cluster.
+      Workstation VMs need access to this IP address to work with the service, so make sure that your firewall rules allow egress from the workstation VMs to this address.
+    output: true
+  - !ruby/object:Api::Type::String
     name: "displayName"
     description: |
       Human-readable name for this resource.
@@ -119,7 +131,7 @@ properties:
       Details can be found in the conditions field.
     output: true
   - !ruby/object:Api::Type::KeyValueAnnotations
-    name: 'annotations'
+    name: "annotations"
     description: "Client-specified annotations. This is distinct from labels."
   - !ruby/object:Api::Type::Fingerprint
     name: "etag"
@@ -163,6 +175,19 @@ properties:
         description: |
           Additional project IDs that are allowed to attach to the workstation cluster's service attachment.
           By default, the workstation cluster's project and the VPC host project (if different) are allowed.
+  - !ruby/object:Api::Type::NestedObject
+    name: "domainConfig"
+    min_version: beta
+    description: |
+      Configuration options for a custom domain.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: "domain"
+        immutable: true
+        required: true
+        description: |
+          Domain used by Workstations for HTTP ingress.
+
   - !ruby/object:Api::Type::Array
     name: "conditions"
     description: |-

@@ -33,6 +33,12 @@ resource "google_organization_iam_member" "sa_access_boundary_admin" {
   member = google_service_account.sa.member
 }
 
+resource "google_organization_iam_member" "sa_apphub_admin" {
+  org_id = data.google_organization.org.org_id
+  role   = "roles/apphub.admin"
+  member = google_service_account.sa.member
+}
+
 resource "google_organization_iam_member" "sa_assuredworkloads_admin" {
   org_id = data.google_organization.org.org_id
   role   = "roles/assuredworkloads.admin"
@@ -60,6 +66,18 @@ resource "google_organization_iam_member" "sa_cloudkms_admin" {
 resource "google_organization_iam_member" "sa_compute_xpn_admin" {
   org_id = data.google_organization.org.org_id
   role   = "roles/compute.xpnAdmin"
+  member = google_service_account.sa.member
+}
+
+resource "google_organization_iam_member" "sa_contentwarehouse_admin" {
+  org_id = data.google_organization.org.org_id
+  role   = "roles/contentwarehouse.admin"
+  member = google_service_account.sa.member
+}
+
+resource "google_organization_iam_member" "sa_contentwarehouse_document_admin" {
+  org_id = data.google_organization.org.org_id
+  role   = "roles/contentwarehouse.documentAdmin"
   member = google_service_account.sa.member
 }
 
@@ -168,6 +186,7 @@ module "project-services" {
     "apikeys.googleapis.com",
     "appengine.googleapis.com",
     "appengineflex.googleapis.com",
+    "apphub.googleapis.com",
     "artifactregistry.googleapis.com",
     "assuredworkloads.googleapis.com",
     "autoscaling.googleapis.com",
@@ -184,23 +203,24 @@ module "project-services" {
     "bigtableadmin.googleapis.com",
     "billingbudgets.googleapis.com",
     "binaryauthorization.googleapis.com",
+    "blockchainnodeengine.googleapis.com",
     "certificatemanager.googleapis.com",
     "cloudapis.googleapis.com",
     "cloudasset.googleapis.com",
     "cloudbilling.googleapis.com",
     "cloudbuild.googleapis.com",
-    "clouddebugger.googleapis.com",
     "clouddeploy.googleapis.com",
     "cloudfunctions.googleapis.com",
     "cloudidentity.googleapis.com",
-    "cloudiot.googleapis.com",
     "cloudkms.googleapis.com",
+    "cloudquotas.googleapis.com",
     "cloudresourcemanager.googleapis.com",
     "cloudscheduler.googleapis.com",
     "cloudtasks.googleapis.com",
     "cloudtrace.googleapis.com",
     "composer.googleapis.com",
     "compute.googleapis.com",
+    "connectors.googleapis.com",
     "container.googleapis.com",
     "containeranalysis.googleapis.com",
     "containerfilesystem.googleapis.com",
@@ -220,6 +240,7 @@ module "project-services" {
     "datastream.googleapis.com",
     "deploymentmanager.googleapis.com",
     "dialogflow.googleapis.com",
+    "discoveryengine.googleapis.com",
     "dlp.googleapis.com",
     "dns.googleapis.com",
     "documentai.googleapis.com",
@@ -259,10 +280,12 @@ module "project-services" {
     "managedidentities.googleapis.com",
     "memcache.googleapis.com",
     "metastore.googleapis.com",
+    "migrationcenter.googleapis.com",
     "ml.googleapis.com",
     "mobilecrashreporting.googleapis.com",
     "monitoring.googleapis.com",
     "multiclustermetering.googleapis.com",
+    "netapp.googleapis.com",
     "networkconnectivity.googleapis.com",
     "networkmanagement.googleapis.com",
     "networksecurity.googleapis.com",
@@ -271,7 +294,9 @@ module "project-services" {
     "orgpolicy.googleapis.com",
     "osconfig.googleapis.com",
     "oslogin.googleapis.com",
+    "parallelstore.googleapis.com",
     "privateca.googleapis.com",
+    "privilegedaccessmanager.googleapis.com",
     "pubsub.googleapis.com",
     "pubsublite.googleapis.com",
     "publicca.googleapis.com",
@@ -284,8 +309,11 @@ module "project-services" {
     "run.googleapis.com",
     "runtimeconfig.googleapis.com",
     "secretmanager.googleapis.com",
+    "securesourcemanager.googleapis.com",
     "securetoken.googleapis.com",
     "securitycenter.googleapis.com",
+    "securitycentermanagement.googleapis.com",
+    "securityposture.googleapis.com",
     "serviceconsumermanagement.googleapis.com",
     "servicecontrol.googleapis.com",
     "servicedirectory.googleapis.com",

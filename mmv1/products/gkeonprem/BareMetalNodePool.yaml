@@ -13,7 +13,6 @@
 
 --- !ruby/object:Api::Resource
 name: 'BareMetalNodePool'
-min_version: beta
 base_url: 'projects/{{project}}/locations/{{location}}/bareMetalClusters/{{bare_metal_cluster}}/bareMetalNodePools'
 create_url: 'projects/{{project}}/locations/{{location}}/bareMetalClusters/{{bare_metal_cluster}}/bareMetalNodePools?bare_metal_node_pool_id={{name}}'
 update_url: 'projects/{{project}}/locations/{{location}}/bareMetalClusters/{{bare_metal_cluster}}/bareMetalNodePools/{{name}}'
@@ -32,7 +31,6 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'gkeonprem_bare_metal_node_pool_basic'
     primary_resource_id: 'nodepool-basic'
-    min_version: beta
     vars:
       name: 'my-nodepool'
       cluster: 'my-cluster'
@@ -41,7 +39,6 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'gkeonprem_bare_metal_node_pool_full'
     primary_resource_id: 'nodepool-full'
-    min_version: beta
     vars:
       name: 'my-nodepool'
       cluster: 'my-cluster'

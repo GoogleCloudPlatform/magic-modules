@@ -1,11 +1,6 @@
-resource "google_sourcerepo_repository" "git_repository" {
-  provider = google-beta
-  name = "<%= ctx[:vars]['git_repository_name'] %>"
-}
-
 resource "google_secret_manager_secret" "secret" {
   provider = google-beta
-  secret_id = "secret"
+  secret_id = "<%= ctx[:vars]['secret_name'] %>"
 
   replication {
     auto {}
@@ -22,9 +17,15 @@ resource "google_secret_manager_secret_version" "secret_version" {
 resource "google_dataform_repository" "<%= ctx[:primary_resource_id] %>" {
   provider = google-beta
   name = "<%= ctx[:vars]['dataform_repository_name'] %>"
+  display_name = "<%= ctx[:vars]['dataform_repository_name'] %>"
+  npmrc_environment_variables_secret_version = google_secret_manager_secret_version.secret_version.id
+
+  labels = {
+    label_foo1 = "label-bar1"
+  }
 
   git_remote_settings {
-      url = google_sourcerepo_repository.git_repository.url
+      url = "https://github.com/OWNER/REPOSITORY.git"
       default_branch = "main"
       authentication_token_secret_version = google_secret_manager_secret_version.secret_version.id
   }

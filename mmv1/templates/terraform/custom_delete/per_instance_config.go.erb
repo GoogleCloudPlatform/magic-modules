@@ -10,14 +10,31 @@
 	transport_tpg.MutexStore.Lock(lockName)
 	defer transport_tpg.MutexStore.Unlock(lockName)
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}/deletePerInstanceConfigs")
+	var url string
+	if d.Get("remove_instance_on_destroy").(bool) {
+		url, err = tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}/deleteInstances")
+	} else {
+		url, err = tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}/deletePerInstanceConfigs")
+	}
 	if err != nil {
 		return err
 	}
 
 	var obj map[string]interface{}
-	obj = map[string]interface{}{
-		"names": [1]string{d.Get("name").(string)},
+	if d.Get("remove_instance_on_destroy").(bool) {
+		// Instance name in deleteInstances request must include zone
+		instanceName, err := tpgresource.ReplaceVars(d, config, "zones/{{zone}}/instances/{{name}}")
+		if err != nil {
+			return err
+		}
+
+		obj = map[string]interface{}{
+			"instances": [1]string{instanceName},
+		}
+	} else {
+		obj = map[string]interface{}{
+			"names": [1]string{d.Get("name").(string)},
+		}
 	}
 	log.Printf("[DEBUG] Deleting PerInstanceConfig %q", d.Id())
 
@@ -42,8 +59,14 @@
 		return err
 	}
 
-	// Potentially delete the state managed by this config
-	if d.Get("remove_instance_state_on_destroy").(bool) {
+	if d.Get("remove_instance_on_destroy").(bool) {
+		err = transport_tpg.PollingWaitTime(resourceComputePerInstanceConfigInstancePollRead(d, meta, d.Get("name").(string)), PollCheckInstanceConfigInstanceDeleted, "Deleting PerInstanceConfig", d.Timeout(schema.TimeoutDelete), 1)
+		if err != nil {
+			return fmt.Errorf("Error waiting for instance delete on PerInstanceConfig %q: %s", d.Id(), err)
+		}
+	} else if d.Get("remove_instance_state_on_destroy").(bool) {
+		// Potentially delete the state managed by this config
+
 		// Instance name in applyUpdatesToInstances request must include zone
 		instanceName, err := tpgresource.ReplaceVars(d, config, "zones/{{zone}}/instances/{{name}}")
 		if err != nil {
@@ -85,7 +108,7 @@
 		err = transport_tpg.PollingWaitTime(resourceComputePerInstanceConfigPollRead(d, meta), PollCheckInstanceConfigDeleted, "Deleting PerInstanceConfig", d.Timeout(schema.TimeoutDelete), 1)
 		if err != nil {
 			return fmt.Errorf("Error waiting for delete on PerInstanceConfig %q: %s", d.Id(), err)
-		}		
+		}
 	}
 
 	log.Printf("[DEBUG] Finished deleting PerInstanceConfig %q: %#v", d.Id(), res)

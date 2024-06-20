@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/googleapi"
@@ -364,7 +364,15 @@ func resourceDataflowFlexJobSetupEnv(d *schema.ResourceData, config *transport_t
 	var enableStreamingEngine bool
 	if p, ok := d.GetOk("parameters.enableStreamingEngine"); ok {
 		delete(updatedParameters, "enableStreamingEngine")
-		enableStreamingEngine = p.(bool)
+		e := strings.ToLower(p.(string))
+		switch e {
+		case "true":
+			enableStreamingEngine = true
+		case "false":
+			enableStreamingEngine = false
+		default:
+			return dataflow.FlexTemplateRuntimeEnvironment{}, nil, fmt.Errorf("error when handling parameters.enableStreamingEngine value: expected value to be true or false but got value `%s`", e)
+		}
 	} else {
 		if v, ok := d.GetOk("enable_streaming_engine"); ok {
 			enableStreamingEngine = v.(bool)
@@ -496,23 +504,23 @@ func resourceDataflowFlexTemplateJobRead(d *schema.ResourceData, meta interface{
 }
 
 func waitForDataflowJobState(d *schema.ResourceData, config *transport_tpg.Config, jobID, userAgent string, timeout time.Duration, targetState string) error {
-	return resource.Retry(timeout, func() *resource.RetryError {
+	return retry.Retry(timeout, func() *retry.RetryError {
 		project, err := tpgresource.GetProject(d, config)
 		if err != nil {
-			return resource.NonRetryableError(err)
+			return retry.NonRetryableError(err)
 		}
 
 		region, err := tpgresource.GetRegion(d, config)
 		if err != nil {
-			return resource.NonRetryableError(err)
+			return retry.NonRetryableError(err)
 		}
 
 		job, err := resourceDataflowJobGetJob(config, project, region, userAgent, jobID)
 		if err != nil {
 			if transport_tpg.IsRetryableError(err, nil, nil) {
-				return resource.RetryableError(err)
+				return retry.RetryableError(err)
 			}
-			return resource.NonRetryableError(err)
+			return retry.NonRetryableError(err)
 		}
 
 		state := job.CurrentState
@@ -522,13 +530,13 @@ func waitForDataflowJobState(d *schema.ResourceData, config *transport_tpg.Confi
 		}
 		_, terminating := DataflowTerminatingStatesMap[state]
 		if terminating && targetState == "JOB_STATE_RUNNING" {
-			return resource.NonRetryableError(fmt.Errorf("the job with ID %q is terminating with state %q and cannot reach expected state %q", jobID, state, targetState))
+			return retry.NonRetryableError(fmt.Errorf("the job with ID %q is terminating with state %q and cannot reach expected state %q", jobID, state, targetState))
 		}
 		if _, terminated := DataflowTerminalStatesMap[state]; terminated {
-			return resource.NonRetryableError(fmt.Errorf("the job with ID %q has terminated with state %q instead of expected state %q", jobID, state, targetState))
+			return retry.NonRetryableError(fmt.Errorf("the job with ID %q has terminated with state %q instead of expected state %q", jobID, state, targetState))
 		} else {
 			log.Printf("[DEBUG] the job with ID %q has state %q.", jobID, state)
-			return resource.RetryableError(fmt.Errorf("the job with ID %q has state %q, waiting for %q", jobID, state, targetState))
+			return retry.RetryableError(fmt.Errorf("the job with ID %q has state %q, waiting for %q", jobID, state, targetState))
 		}
 	})
 }
@@ -540,66 +548,67 @@ func resourceDataflowFlexTemplateJobUpdate(d *schema.ResourceData, meta interfac
 		return nil
 	}
 
-	config := meta.(*transport_tpg.Config)
-	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
-	if err != nil {
-		return err
+	if jobHasUpdate(d, ResourceDataflowFlexTemplateJob().Schema) {
+		config := meta.(*transport_tpg.Config)
+		userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+		if err != nil {
+			return err
+		}
+
+		project, err := tpgresource.GetProject(d, config)
+		if err != nil {
+			return err
+		}
+
+		region, err := tpgresource.GetRegion(d, config)
+		if err != nil {
+			return err
+		}
+
+		tnamemapping := tpgresource.ExpandStringMap(d, "transform_name_mapping")
+
+		env, updatedParameters, err := resourceDataflowFlexJobSetupEnv(d, config)
+		if err != nil {
+			return err
+		}
+
+		// wait until current job is running or terminated
+		err = waitForDataflowJobState(d, config, d.Id(), userAgent, d.Timeout(schema.TimeoutUpdate), "JOB_STATE_RUNNING")
+		if err != nil {
+			return fmt.Errorf("Error waiting for job with job ID %q to be running: %s", d.Id(), err)
+		}
+
+		request := dataflow.LaunchFlexTemplateRequest{
+			LaunchParameter: &dataflow.LaunchFlexTemplateParameter{
+
+				ContainerSpecGcsPath:  d.Get("container_spec_gcs_path").(string),
+				JobName:               d.Get("name").(string),
+				Parameters:            updatedParameters,
+				TransformNameMappings: tnamemapping,
+				Environment:           &env,
+				Update:                true,
+			},
+		}
+
+		response, err := config.NewDataflowClient(userAgent).Projects.Locations.FlexTemplates.Launch(project, region, &request).Do()
+		if err != nil {
+			return err
+		}
+
+		// don't set id until new job is successfully running
+		job := response.Job
+		err = waitForDataflowJobState(d, config, job.Id, userAgent, d.Timeout(schema.TimeoutUpdate), "JOB_STATE_RUNNING")
+		if err != nil {
+			// the default behavior is to overwrite the resource's state with the state of the "new" job, even though we are returning an error here. this call to Partial prevents this behavior
+			d.Partial(true)
+			return fmt.Errorf("Error waiting for Job with job ID %q to be updated: %s", job.Id, err)
+		}
+
+		d.SetId(job.Id)
+		if err := d.Set("job_id", job.Id); err != nil {
+			return fmt.Errorf("Error setting job_id: %s", err)
+		}
 	}
-
-	project, err := tpgresource.GetProject(d, config)
-	if err != nil {
-		return err
-	}
-
-	region, err := tpgresource.GetRegion(d, config)
-	if err != nil {
-		return err
-	}
-
-	tnamemapping := tpgresource.ExpandStringMap(d, "transform_name_mapping")
-
-	env, updatedParameters, err := resourceDataflowFlexJobSetupEnv(d, config)
-	if err != nil {
-		return err
-	}
-
-	// wait until current job is running or terminated
-	err = waitForDataflowJobState(d, config, d.Id(), userAgent, d.Timeout(schema.TimeoutUpdate), "JOB_STATE_RUNNING")
-	if err != nil {
-		return fmt.Errorf("Error waiting for job with job ID %q to be running: %s", d.Id(), err)
-	}
-
-	request := dataflow.LaunchFlexTemplateRequest{
-		LaunchParameter: &dataflow.LaunchFlexTemplateParameter{
-
-			ContainerSpecGcsPath:  d.Get("container_spec_gcs_path").(string),
-			JobName:               d.Get("name").(string),
-			Parameters:            updatedParameters,
-			TransformNameMappings: tnamemapping,
-			Environment:           &env,
-			Update:                true,
-		},
-	}
-
-	response, err := config.NewDataflowClient(userAgent).Projects.Locations.FlexTemplates.Launch(project, region, &request).Do()
-	if err != nil {
-		return err
-	}
-
-	// don't set id until new job is successfully running
-	job := response.Job
-	err = waitForDataflowJobState(d, config, job.Id, userAgent, d.Timeout(schema.TimeoutUpdate), "JOB_STATE_RUNNING")
-	if err != nil {
-		// the default behavior is to overwrite the resource's state with the state of the "new" job, even though we are returning an error here. this call to Partial prevents this behavior
-		d.Partial(true)
-		return fmt.Errorf("Error waiting for Job with job ID %q to be updated: %s", job.Id, err)
-	}
-
-	d.SetId(job.Id)
-	if err := d.Set("job_id", job.Id); err != nil {
-		return fmt.Errorf("Error setting job_id: %s", err)
-	}
-
 	return resourceDataflowFlexTemplateJobRead(d, meta)
 }
 
@@ -628,7 +637,7 @@ func resourceDataflowFlexTemplateJobDelete(d *schema.ResourceData, meta interfac
 	}
 
 	// Retry updating the state while the job is not ready to be canceled/drained.
-	err = resource.Retry(time.Minute*time.Duration(15), func() *resource.RetryError {
+	err = retry.Retry(time.Minute*time.Duration(15), func() *retry.RetryError {
 		// To terminate a dataflow job, we update the job with a requested
 		// terminal state.
 		job := &dataflow.Job{
@@ -640,14 +649,14 @@ func resourceDataflowFlexTemplateJobDelete(d *schema.ResourceData, meta interfac
 			gerr, isGoogleErr := updateErr.(*googleapi.Error)
 			if !isGoogleErr {
 				// If we have an error and it's not a google-specific error, we should go ahead and return.
-				return resource.NonRetryableError(updateErr)
+				return retry.NonRetryableError(updateErr)
 			}
 
 			if strings.Contains(gerr.Message, "not yet ready for canceling") {
 				// Retry cancelling job if it's not ready.
 				// Sleep to avoid hitting update quota with repeated attempts.
 				time.Sleep(5 * time.Second)
-				return resource.RetryableError(updateErr)
+				return retry.RetryableError(updateErr)
 			}
 
 			if strings.Contains(gerr.Message, "Job has terminated") {
@@ -789,7 +798,7 @@ func resourceDataflowFlexJobTypeCustomizeDiff(_ context.Context, d *schema.Resou
 				continue
 			}
 
-			if field != "labels" && field != "terraform_labels" && d.HasChange(field) {
+			if field != "terraform_labels" && d.HasChange(field) {
 				if err := d.ForceNew(field); err != nil {
 					return err
 				}

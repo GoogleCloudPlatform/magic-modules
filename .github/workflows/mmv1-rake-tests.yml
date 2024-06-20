@@ -1,0 +1,39 @@
+name: mmv1-rake-tests
+
+permissions: read-all
+
+on:
+  pull_request:
+    paths:
+      - 'mmv1/**/*.rb'
+
+jobs:
+  rake-tests:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
+        with:
+          path: repo
+          fetch-depth: 2
+      - name: Merge base branch
+        id: pull_request
+        run: |
+          cd repo
+          git config user.name "modular-magician"
+          git config user.email "magic-modules@google.com"
+          git fetch origin ${{ github.base_ref }} # Fetch the base branch
+          git merge --no-ff origin/${{ github.base_ref }} # Merge with the base branch
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@036ef458ddccddb148a2b9fb67e95a22fdbf728b # v1.160.0
+        with:
+          ruby-version: '3.1'
+      - name: Install dependencies
+        run: |
+          cd repo/mmv1
+          bundle install
+      - name: Run rake tests
+        run: |
+          cd repo/mmv1
+          bundle exec rake test
+

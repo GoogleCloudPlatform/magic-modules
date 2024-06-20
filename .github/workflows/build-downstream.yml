@@ -1,0 +1,114 @@
+name: build
+permissions: read-all
+
+on:
+  workflow_call:
+    inputs:
+      repo:
+        description: 'Repository to build'
+        required: true
+        type: string
+
+concurrency:
+  group: ${{ inputs.repo  }}-${{ github.event_name == 'pull_request' && format('pr-{0}-', github.event.pull_request.number) || format('commit-{0}', github.sha) }}
+  cancel-in-progress: true
+
+jobs:
+  generate-repository:
+    runs-on: ubuntu-22.04
+    env:
+      BASE_BRANCH: ${{ github.event.pull_request.base.ref || github.ref_name }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
+        with:
+          fetch-depth: 0
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@036ef458ddccddb148a2b9fb67e95a22fdbf728b # v1.160.0
+        with:
+          ruby-version: '3.1'
+
+      - name: Cache Bundler gems
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
+        with:
+          path: mmv1/vendor/bundle
+          key: ${{ runner.os }}-gems-${{ hashFiles('mmv1/**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-gems-
+
+      - name: Install Ruby dependencies
+        run: |
+          bundle config path mmv1/vendor/bundle
+          bundle install
+        working-directory: mmv1
+
+      - name: Set up Go
+        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
+        with:
+          go-version: '^1.21'
+
+      # Cache Go modules
+      - name: Cache Go modules
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - run: go install golang.org/x/tools/cmd/goimports@7656c4c657688cae30795365d2a5f30d6f18be7f # v0.19.0
+
+      - name: Build ${{ inputs.repo  }}
+        run: |
+          set -e
+          set -x
+          # Set GOPATH to a directory the runner user has access to
+          export GOPATH=~/go
+
+          function clone_repo() {
+            export OUTPUT_PATH=$GOPATH/src/github.com/$UPSTREAM_OWNER/$GH_REPO
+            GITHUB_PATH=https://x-access-token:$GITHUB_TOKEN@github.com/$UPSTREAM_OWNER/$GH_REPO
+            mkdir -p "$(dirname $OUTPUT_PATH)"
+            git clone $GITHUB_PATH $OUTPUT_PATH --branch $BASE_BRANCH
+          }
+
+          GH_REPO="${{ inputs.repo  }}"
+          if [ "$GH_REPO" == "docs-examples" ] && [ "$BASE_BRANCH" == "main" ]; then
+              BASE_BRANCH="master"
+          fi
+
+          GITHUB_PATH=https://x-access-token:$GITHUB_TOKEN@github.com/$UPSTREAM_OWNER/$GH_REPO
+
+          if [[ "$GH_REPO" == terraform-provider-google* ]]; then
+            UPSTREAM_OWNER=hashicorp
+            clone_repo
+          if [ "$GH_REPO" == "terraform-provider-google" ]; then
+              export VERSION=ga
+            else
+              export VERSION=beta
+            fi
+            make clean-provider
+            make provider
+          elif [ "$GH_REPO" == "terraform-google-conversion" ]; then
+            UPSTREAM_OWNER=GoogleCloudPlatform
+            clone_repo
+            make clean-tgc
+            make tgc
+          elif [ "$GH_REPO" == "docs-examples" ]; then
+            UPSTREAM_OWNER=terraform-google-modules
+            clone_repo
+            make tf-oics
+          else
+            echo "case not supported"
+            exit 1
+          fi
+
+          (current_dir=$(pwd) && cd $OUTPUT_PATH && zip -r "$current_dir/output.zip" .)
+
+      - name: Upload built artifacts
+        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3.1.3
+        with:
+          name: artifact-${{ inputs.repo  }}
+          path: output.zip

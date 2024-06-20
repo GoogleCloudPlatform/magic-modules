@@ -171,6 +171,162 @@ func TestAccPubsubSubscription_pushNoWrapperEmpty(t *testing.T) {
 	})
 }
 
+func TestAccPubsubSubscriptionBigQuery_update(t *testing.T) {
+	t.Parallel()
+
+	dataset := fmt.Sprintf("tftestdataset%s", acctest.RandString(t, 10))
+	table := fmt.Sprintf("tf-test-table-%s", acctest.RandString(t, 10))
+	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
+	subscriptionShort := fmt.Sprintf("tf-test-sub-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPubsubSubscriptionBigQuery_basic(dataset, table, topic, subscriptionShort, false, ""),
+			},
+			{
+				ResourceName:      "google_pubsub_subscription.foo",
+				ImportStateId:     subscriptionShort,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccPubsubSubscriptionBigQuery_basic(dataset, table, topic, subscriptionShort, true, ""),
+			},
+			{
+				ResourceName:      "google_pubsub_subscription.foo",
+				ImportStateId:     subscriptionShort,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccPubsubSubscriptionBigQuery_serviceAccount(t *testing.T) {
+	t.Parallel()
+
+	dataset := fmt.Sprintf("tftestdataset%s", acctest.RandString(t, 10))
+	table := fmt.Sprintf("tf-test-table-%s", acctest.RandString(t, 10))
+	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
+	subscriptionShort := fmt.Sprintf("tf-test-sub-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPubsubSubscriptionBigQuery_basic(dataset, table, topic, subscriptionShort, false, "bq-test-sa"),
+			},
+			{
+				ResourceName:      "google_pubsub_subscription.foo",
+				ImportStateId:     subscriptionShort,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccPubsubSubscriptionBigQuery_basic(dataset, table, topic, subscriptionShort, true, ""),
+			},
+			{
+				ResourceName:      "google_pubsub_subscription.foo",
+				ImportStateId:     subscriptionShort,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccPubsubSubscriptionBigQuery_basic(dataset, table, topic, subscriptionShort, true, "bq-test-sa2"),
+			},
+			{
+				ResourceName:      "google_pubsub_subscription.foo",
+				ImportStateId:     subscriptionShort,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccPubsubSubscriptionCloudStorage_update(t *testing.T) {
+	t.Parallel()
+
+	bucket := fmt.Sprintf("tf-test-bucket-%s", acctest.RandString(t, 10))
+	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
+	subscriptionShort := fmt.Sprintf("tf-test-sub-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPubsubSubscriptionCloudStorage_basic(bucket, topic, subscriptionShort, "", "", "", 0, "", ""),
+			},
+			{
+				ResourceName:      "google_pubsub_subscription.foo",
+				ImportStateId:     subscriptionShort,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccPubsubSubscriptionCloudStorage_basic(bucket, topic, subscriptionShort, "pre-", "-suffix", "YYYY-MM-DD/hh_mm_ssZ", 1000, "300s", ""),
+			},
+			{
+				ResourceName:      "google_pubsub_subscription.foo",
+				ImportStateId:     subscriptionShort,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccPubsubSubscriptionCloudStorage_serviceAccount(t *testing.T) {
+	t.Parallel()
+
+	bucket := fmt.Sprintf("tf-test-bucket-%s", acctest.RandString(t, 10))
+	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
+	subscriptionShort := fmt.Sprintf("tf-test-sub-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPubsubSubscriptionCloudStorage_basic(bucket, topic, subscriptionShort, "", "", "", 0, "", "gcs-test-sa"),
+			},
+			{
+				ResourceName:      "google_pubsub_subscription.foo",
+				ImportStateId:     subscriptionShort,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccPubsubSubscriptionCloudStorage_basic(bucket, topic, subscriptionShort, "pre-", "-suffix", "YYYY-MM-DD/hh_mm_ssZ", 1000, "300s", ""),
+			},
+			{
+				ResourceName:      "google_pubsub_subscription.foo",
+				ImportStateId:     subscriptionShort,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccPubsubSubscriptionCloudStorage_basic(bucket, topic, subscriptionShort, "", "", "", 0, "", "gcs-test-sa2"),
+			},
+			{
+				ResourceName:      "google_pubsub_subscription.foo",
+				ImportStateId:     subscriptionShort,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 // Context: hashicorp/terraform-provider-google#4993
 // This test makes a call to GET an subscription before it is actually created.
 // The PubSub API negative-caches responses so this tests we are
@@ -364,6 +520,179 @@ resource "google_pubsub_subscription" "foo" {
   enable_exactly_once_delivery = %t
 }
 `, topic, subscription, label, deadline, exactlyOnceDelivery)
+}
+
+func testAccPubsubSubscriptionBigQuery_basic(dataset, table, topic, subscription string, useTableSchema bool, serviceAccountId string) string {
+	serivceAccountEmailField := ""
+	serivceAccountResource := ""
+	if serviceAccountId != "" {
+		serivceAccountResource = fmt.Sprintf(`
+resource "google_service_account" "bq_write_service_account" {
+  account_id   = "%s"
+  display_name = "BQ Write Service Account"
+}
+
+resource "google_project_iam_member" "viewer" {
+	project = data.google_project.project.project_id
+	role   = "roles/bigquery.metadataViewer"
+	member = "serviceAccount:${google_service_account.bq_write_service_account.email}"
+}
+
+resource "google_project_iam_member" "editor" {
+	project = data.google_project.project.project_id
+	role   = "roles/bigquery.dataEditor"
+	member = "serviceAccount:${google_service_account.bq_write_service_account.email}"
+}`, serviceAccountId)
+		serivceAccountEmailField = "service_account_email = google_service_account.bq_write_service_account.email"
+	} else {
+		serivceAccountResource = fmt.Sprintf(`
+resource "google_project_iam_member" "viewer" {
+	project = data.google_project.project.project_id
+	role   = "roles/bigquery.metadataViewer"
+	member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "editor" {
+	project = data.google_project.project.project_id
+	role   = "roles/bigquery.dataEditor"
+	member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+}
+	`)
+	}
+
+	return fmt.Sprintf(`
+data "google_project" "project" { }
+
+%s
+
+resource "google_bigquery_dataset" "test" {
+	dataset_id = "%s"
+}
+
+resource "google_bigquery_table" "test" {
+  deletion_protection = false
+  table_id   = "%s"
+  dataset_id = google_bigquery_dataset.test.dataset_id
+
+  schema = <<EOF
+[
+  {
+    "name": "data",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "The data"
+  }
+]
+EOF
+}
+
+resource "google_pubsub_topic" "foo" {
+  name = "%s"
+}
+
+resource "google_pubsub_subscription" "foo" {
+  name   = "%s"
+  topic  = google_pubsub_topic.foo.id
+
+  bigquery_config {
+    table = "${google_bigquery_table.test.project}.${google_bigquery_table.test.dataset_id}.${google_bigquery_table.test.table_id}"
+    use_table_schema = %t
+		%s
+  }
+
+  depends_on = [
+    google_project_iam_member.viewer,
+    google_project_iam_member.editor
+  ]
+}
+	`, serivceAccountResource, dataset, table, topic, subscription, useTableSchema, serivceAccountEmailField)
+}
+
+func testAccPubsubSubscriptionCloudStorage_basic(bucket, topic, subscription, filenamePrefix, filenameSuffix, filenameDatetimeFormat string, maxBytes int, maxDuration string, serviceAccountId string) string {
+	filenamePrefixString := ""
+	if filenamePrefix != "" {
+		filenamePrefixString = fmt.Sprintf(`filename_prefix = "%s"`, filenamePrefix)
+	}
+	filenameSuffixString := ""
+	if filenameSuffix != "" {
+		filenameSuffixString = fmt.Sprintf(`filename_suffix = "%s"`, filenameSuffix)
+	}
+	filenameDatetimeString := ""
+	if filenameDatetimeFormat != "" {
+		filenameDatetimeString = fmt.Sprintf(`filename_datetime_format = "%s"`, filenameDatetimeFormat)
+	}
+	maxBytesString := ""
+	if maxBytes != 0 {
+		maxBytesString = fmt.Sprintf(`max_bytes = %d`, maxBytes)
+	}
+	maxDurationString := ""
+	if maxDuration != "" {
+		maxDurationString = fmt.Sprintf(`max_duration = "%s"`, maxDuration)
+	}
+
+	serivceAccountEmailField := ""
+	serivceAccountResource := ""
+	if serviceAccountId != "" {
+		serivceAccountResource = fmt.Sprintf(`
+resource "google_service_account" "storage_write_service_account" {
+  account_id   = "%s"
+  display_name = "Write Service Account"
+}
+
+resource "google_storage_bucket_iam_member" "admin" {
+  bucket = google_storage_bucket.test.name
+  role   = "roles/storage.admin"
+	member = "serviceAccount:${google_service_account.storage_write_service_account.email}"
+}
+
+resource "google_project_iam_member" "editor" {
+	project = data.google_project.project.project_id
+	role   = "roles/bigquery.dataEditor"
+	member = "serviceAccount:${google_service_account.storage_write_service_account.email}"
+}`, serviceAccountId)
+		serivceAccountEmailField = "service_account_email = google_service_account.storage_write_service_account.email"
+	} else {
+		serivceAccountResource = fmt.Sprintf(`
+resource "google_storage_bucket_iam_member" "admin" {
+  bucket = google_storage_bucket.test.name
+  role   = "roles/storage.admin"
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+}`)
+	}
+	return fmt.Sprintf(`
+data "google_project" "project" { }
+
+resource "google_storage_bucket" "test" {
+  name = "%s"
+  location = "US"
+}
+
+%s
+
+resource "google_pubsub_topic" "foo" {
+  name = "%s"
+}
+
+resource "google_pubsub_subscription" "foo" {
+  name   = "%s"
+  topic  = google_pubsub_topic.foo.id
+
+  cloud_storage_config {
+    bucket = "${google_storage_bucket.test.name}"
+    %s
+    %s
+    %s
+    %s
+    %s
+		%s
+  }
+
+  depends_on = [
+    google_storage_bucket.test,
+    google_storage_bucket_iam_member.admin,
+  ]
+}
+`, bucket, serivceAccountResource, topic, subscription, filenamePrefixString, filenameSuffixString, filenameDatetimeString, maxBytesString, maxDurationString, serivceAccountEmailField)
 }
 
 func testAccPubsubSubscription_topicOnly(topic string) string {

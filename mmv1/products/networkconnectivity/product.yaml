@@ -20,7 +20,3 @@ versions:
   - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://networkconnectivity.googleapis.com/v1/
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Network Connectivity API
-    url: https://console.cloud.google.com/apis/library/networkconnectivity.googleapis.com/

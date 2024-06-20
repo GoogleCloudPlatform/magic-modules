@@ -4,7 +4,7 @@ description: |-
   Manages a GKE NodePool resource.
 ---
 
-# google\_container\_node\_pool
+# google_container_node_pool
 
 -> See the [Using GKE with Terraform](/docs/providers/google/guides/using_gke_with_terraform.html)
 guide for more information about using GKE with Terraform.
@@ -172,6 +172,9 @@ cluster.
 * `placement_policy` - (Optional) Specifies a custom placement policy for the
   nodes.
 
+* `queued_provisioning` - (Optional) Specifies node pool-level settings of queued provisioning.
+    Structure is [documented below](#nested_queued_provisioning).
+
 <a name="nested_autoscaling"></a>The `autoscaling` block supports (either total or per zone limits are required):
 
 * `min_node_count` - (Optional) Minimum number of nodes per zone in the NodePool.
@@ -221,6 +224,9 @@ cluster.
 * `additional_pod_network_configs` - (Optional, Beta) We specify the additional pod networks for this node pool using this list. Each pod network corresponds to an additional alias IP range for the node.
     Structure is [documented below](#nested_additional_pod_network_configs)
 
+* `pod_cidr_overprovision_config` - (Optional) Configuration for node-pool level pod cidr overprovision. If not set, the cluster level setting will be inherited. Structure is [documented below](#pod_cidr_overprovision_config).
+
+* `network_performance_config` - (Optional) Network bandwidth tier configuration. Structure is [documented below](#network_performance_config).
 
 <a name="nested_additional_node_network_configs"></a>The `additional_node_network_configs` block supports:
 
@@ -235,6 +241,14 @@ cluster.
 * `secondary_pod_range` - The name of the secondary range on the subnet which provides IP address for this pod range.
 
 * `max_pods_per_node` - The maximum number of pods per node which use this pod network.
+
+<a name="network_performance_config"></a>The `network_performance_config` block supports:
+
+* `total_egress_bandwidth_tier` (Required) - Specifies the total network bandwidth tier for the NodePool.
+
+<a name="pod_cidr_overprovision_config"></a>The `pod_cidr_overprovision_config` block supports:
+
+* `disabled` (Required) - Whether pod cidr overprovision is disabled.
 
 <a name="nested_upgrade_settings"></a>The `upgrade_settings` block supports:
 
@@ -274,6 +288,10 @@ cluster.
   If not found, InvalidArgument error is returned.
 
 * `tpu_topology` - (Optional) The [TPU placement topology](https://cloud.google.com/tpu/docs/types-topologies#tpu_topologies) for pod slice node pool.
+
+<a name="nested_queued_provisioning"></a> The `queued_provisioning` block supports:
+
+* `enabled` (Required) - Makes nodes obtainable through the [ProvisioningRequest API](https://cloud.google.com/kubernetes-engine/docs/how-to/provisioningrequest) exclusively.
 
 ## Attributes Reference
 

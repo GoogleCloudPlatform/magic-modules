@@ -1,3 +1,18 @@
+/*
+* Copyright 2023 Google LLC. All Rights Reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+ */
 package cloudbuild
 
 import (
@@ -5,10 +20,10 @@ import (
 	"fmt"
 	"os"
 
-	"google.golang.org/api/cloudbuild/v1"
+	cloudbuildv1 "google.golang.org/api/cloudbuild/v1"
 )
 
-func (cb cloudBuild) ApproveCommunityChecker(prNumber, commitSha string) error {
+func (cb *Client) ApproveCommunityChecker(prNumber, commitSha string) error {
 	buildId, err := getPendingBuildId(PROJECT_ID, commitSha)
 	if err != nil {
 		return err
@@ -26,21 +41,6 @@ func (cb cloudBuild) ApproveCommunityChecker(prNumber, commitSha string) error {
 	return nil
 }
 
-func (cb cloudBuild) GetAwaitingApprovalBuildLink(prNumber, commitSha string) (string, error) {
-	buildId, err := getPendingBuildId(PROJECT_ID, commitSha)
-	if err != nil {
-		return "", err
-	}
-
-	if buildId == "" {
-		return "", fmt.Errorf("failed to find pending build for PR %s", prNumber)
-	}
-
-	targetUrl := fmt.Sprintf("https://console.cloud.google.com/cloud-build/builds;region=global/%s?project=%s", buildId, PROJECT_ID)
-
-	return targetUrl, nil
-}
-
 func getPendingBuildId(projectId, commitSha string) (string, error) {
 	COMMUNITY_CHECKER_TRIGGER, ok := os.LookupEnv("COMMUNITY_CHECKER_TRIGGER")
 	if !ok {
@@ -49,7 +49,7 @@ func getPendingBuildId(projectId, commitSha string) (string, error) {
 
 	ctx := context.Background()
 
-	c, err := cloudbuild.NewService(ctx)
+	c, err := cloudbuildv1.NewService(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -76,15 +76,15 @@ func getPendingBuildId(projectId, commitSha string) (string, error) {
 func approveBuild(projectId, buildId string) error {
 	ctx := context.Background()
 
-	c, err := cloudbuild.NewService(ctx)
+	c, err := cloudbuildv1.NewService(ctx)
 	if err != nil {
 		return err
 	}
 
 	name := fmt.Sprintf("projects/%s/builds/%s", projectId, buildId)
 
-	approveBuildRequest := &cloudbuild.ApproveBuildRequest{
-		ApprovalResult: &cloudbuild.ApprovalResult{
+	approveBuildRequest := &cloudbuildv1.ApproveBuildRequest{
+		ApprovalResult: &cloudbuildv1.ApprovalResult{
 			Decision: "APPROVED",
 		},
 	}

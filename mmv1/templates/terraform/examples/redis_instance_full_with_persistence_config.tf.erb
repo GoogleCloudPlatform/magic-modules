@@ -9,4 +9,8 @@ resource "google_redis_instance" "<%= ctx[:primary_resource_id] %>" {
     persistence_mode = "RDB"
     rdb_snapshot_period = "TWELVE_HOURS"
   }
+
+  lifecycle {
+    prevent_destroy = <%= ctx[:vars]['prevent_destroy'] %>
+  }
 }

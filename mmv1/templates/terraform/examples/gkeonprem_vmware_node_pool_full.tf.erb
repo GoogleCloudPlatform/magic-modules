@@ -1,5 +1,4 @@
 resource "google_gkeonprem_vmware_cluster" "default-full" {
-  provider = google-beta
   name = "<%= ctx[:vars]['cluster'] %>"
   location = "us-west1"
   admin_cluster_membership = "projects/870316890899/locations/global/memberships/gkeonprem-terraform-test"
@@ -38,7 +37,6 @@ resource "google_gkeonprem_vmware_cluster" "default-full" {
 }
 
 resource "google_gkeonprem_vmware_node_pool" "<%= ctx[:primary_resource_id] %>" {
-  provider = google-beta
   name = "<%= ctx[:vars]['name'] %>"
   location = "us-west1"
   vmware_cluster = google_gkeonprem_vmware_cluster.default-full.name
@@ -60,6 +58,18 @@ resource "google_gkeonprem_vmware_node_pool" "<%= ctx[:primary_resource_id] %>" 
         effect = "NO_SCHEDULE"
     }
     labels = {}
+    vsphere_config {
+      datastore = "test-datastore"
+      tags {
+        category = "test-category-1"
+        tag = "tag-1"
+      }
+      tags {
+        category = "test-category-2"
+        tag = "tag-2"
+      }
+      host_groups = ["host1", "host2"]
+    }
     enable_load_balancer = true
   }
   node_pool_autoscaling {

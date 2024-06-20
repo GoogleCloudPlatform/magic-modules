@@ -36,8 +36,8 @@
     directly inserted from YAML.
 -%>
 <%
-  tf_product = (object.__product.legacy_name || product_ns).underscore
-  product_ns_display = (object.__product.legacy_name || product_ns).camelize
+  tf_product = (object.__product.legacy_name || object.__product.name ).underscore
+  product_ns_display = (object.__product.legacy_name || object.__product.name ).camelize
   tf_subcategory = (object.__product.display_name)
   resource_ns = object.legacy_name || "google_#{tf_product}_#{object.name.underscore}"
   resource_ns_iam = "#{resource_ns}_iam"
@@ -80,14 +80,13 @@ A data source can be used to retrieve policy data in advent you do not need crea
 See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
 <% end -%>
 
-<% markdown_escaped_name = resource_ns_iam.gsub("_", "\\_") %>
 <% params = extract_identifiers(object.iam_policy.self_link || object.self_link_url) -%>
 <%
 url_properties = object.all_user_properties.select do
   |param| params.include?(param.name)
 end
 -%>
-## <%= markdown_escaped_name -%>\_policy
+## <%= resource_ns_iam -%>_policy
 
 ```hcl
 data "google_iam_policy" "admin" {
@@ -142,7 +141,7 @@ resource "<%= resource_ns_iam -%>_policy" "policy" {
 }
 ```
 <% end -%>
-## <%= markdown_escaped_name -%>\_binding
+## <%= resource_ns_iam -%>_binding
 
 ```hcl
 resource "<%= resource_ns_iam -%>_binding" "binding" {
@@ -179,7 +178,7 @@ resource "<%= resource_ns_iam -%>_binding" "binding" {
 }
 ```
 <% end -%>
-## <%= markdown_escaped_name -%>\_member
+## <%= resource_ns_iam -%>_member
 
 ```hcl
 resource "<%= resource_ns_iam -%>_member" "member" {
@@ -220,7 +219,7 @@ The following arguments are supported:
 <% url_properties.each do |param| -%>
 <% if param.name == "name" -%>
 * `<%= object.iam_policy.parent_resource_attribute || object.name.underscore -%>` - (Required) Used to find the parent resource to bind the IAM policy to
-<% elsif ["region", "zone"].include?(param.name.underscore) -%>
+<% elsif ["location", "region", "zone"].include?(param.name.underscore) -%>
 * `<%= param.name.underscore -%>` - (Optional) <%= param.description -%> Used to find the parent resource to bind the IAM policy to. If not specified,
   the value will be parsed from the identifier of the parent resource. If no <%= param.name.underscore -%> is provided in the parent identifier and no
   <%= param.name.underscore -%> is specified, it is taken from the provider configuration.
@@ -228,7 +227,7 @@ The following arguments are supported:
 * `<%= param.name.underscore -%>` - (Required) <%= param.description -%> Used to find the parent resource to bind the IAM policy to
 <% end -%>
 <% end -%>
-<% if object.iam_policy.base_url.present? -%>
+<% if !object.iam_policy.base_url.nil? -%>
 <% if object.iam_policy.base_url.include?("{{project}}") -%>
 <%# The following new line allow for project to be bullet-formatted properly. -%>
 

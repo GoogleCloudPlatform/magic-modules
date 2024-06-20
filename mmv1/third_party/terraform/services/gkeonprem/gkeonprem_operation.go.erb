@@ -1,6 +1,6 @@
 <% autogen_exception -%>
 package gkeonprem
-<% unless version == 'ga' -%>
+
 import (
 	"encoding/json"
 	"fmt"
@@ -144,4 +144,3 @@ func GkeonpremOperationWaitTime(config *transport_tpg.Config, op map[string]inte
 	}
 	return tpgresource.OperationWait(w, activity, timeout, config.PollInterval)
 }
-<% end -%>
