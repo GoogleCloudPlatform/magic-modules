@@ -37,10 +37,9 @@ func testSweepVmwareengineCluster(region string) error {
 	billingId := envvar.GetTestBillingAccountFromEnv(t)
 
 	// List of location values includes:
-	//   * global location
-	//   * regions used for this resource type's acc tests in the past
+	//   * zones used for this resource type's acc tests in the past
 	//   * the 'region' passed to the sweeper
-	locations := []string{region, "global", "southamerica-west1", "me-west1"}
+	locations := []string{region, "us-central1-a", "southamerica-west1-a", "me-west1-a"}
 	log.Printf("[INFO][SWEEPER_LOG] Sweeping will include these locations: %v.", locations)
 	for _, location := range locations {
 		log.Printf("[INFO][SWEEPER_LOG] Beginning the process of sweeping location '%s'.", location)
@@ -51,7 +50,7 @@ func testSweepVmwareengineCluster(region string) error {
 				"project":         config.Project,
 				"region":          location,
 				"location":        location,
-				"zone":            "-",
+				"zone":            location,
 				"billing_account": billingId,
 			},
 		}
