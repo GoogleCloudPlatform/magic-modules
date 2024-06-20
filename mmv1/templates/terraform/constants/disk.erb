@@ -17,9 +17,9 @@ func hyperDiskIopsUpdateDiffSupress(_ context.Context, d *schema.ResourceDiff, m
 }
 <% end -%>
 
-<% if object.min_version.name == 'beta' -%>
+<% unless version == "ga" -%>
 // Suppress all diffs, used for Disk.Interface which is a nonfunctional field
-func alwaysDiffSuppress(_, _, _ string, _ *schema.ResourceData) bool {
+func AlwaysDiffSuppress(_, _, _ string, _ *schema.ResourceData) bool {
 	return true
 }
 <% end -%>
