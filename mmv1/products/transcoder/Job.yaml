@@ -619,92 +619,92 @@ properties:
                     Encoding of an audio stream.
                   properties:
                     - !ruby/object:Api::Type::String
-                        name: "codec"
-                        description: The codec for this audio stream.
+                      name: "codec"
+                      description: The codec for this audio stream.
                     - !ruby/object:Api::Type::Integer
-                        name: "bitrateBps"
-                        description: Audio bitrate in bits per second.
+                      name: "bitrateBps"
+                      description: Audio bitrate in bits per second.
                     - !ruby/object:Api::Type::Integer
-                        name: "channelCount"
-                        description: Number of audio channels.
+                      name: "channelCount"
+                      description: Number of audio channels.
                     - !ruby/object:Api::Type::Array
-                        name: "channelLayout"
-                        item_type: Api::Type::String
-                        description: |
-                          A list of channel names specifying layout of the audio channels. This only affects the metadata embedded in the container headers, if supported by the specified format.
+                      name: "channelLayout"
+                      item_type: Api::Type::String
+                      description: |
+                        A list of channel names specifying layout of the audio channels. This only affects the metadata embedded in the container headers, if supported by the specified format.
                     - !ruby/object:Api::Type::NestedObject
-                        name: "mapping"
-                        description: |
-                          The mapping for the JobConfig.edit_list atoms with audio EditAtom.inputs.
-                        properties:
-                          - !ruby/object:Api::Type::String
-                            name: "atomKey"
-                            description: |
-                              The EditAtom.key that references the atom with audio inputs in the JobConfig.edit_list.
-                          - !ruby/object:Api::Type::String
-                            name: "inputKey"
-                            description: |
-                              The Input.key that identifies the input file.
-                          - !ruby/object:Api::Type::Integer
-                            name: "inputTrack"
-                            description: |
-                              The zero-based index of the track in the input file.
-                          - !ruby/object:Api::Type::Integer
-                            name: "inputChannel"
-                            description: |
-                              The zero-based index of the channel in the input audio stream.
-                          - !ruby/object:Api::Type::Integer
-                            name: "outputChannel"
-                            description: |
-                              The zero-based index of the channel in the output audio stream.
-                          - !ruby/object:Api::Type::Integer
-                            name: "gainDb"
-                            description: |
-                              Audio volume control in dB. Negative values decrease volume, positive values increase.
+                      name: "mapping"
+                      description: |
+                        The mapping for the JobConfig.edit_list atoms with audio EditAtom.inputs.
+                      properties:
+                        - !ruby/object:Api::Type::String
+                          name: "atomKey"
+                          description: |
+                            The EditAtom.key that references the atom with audio inputs in the JobConfig.edit_list.
+                        - !ruby/object:Api::Type::String
+                          name: "inputKey"
+                          description: |
+                            The Input.key that identifies the input file.
+                        - !ruby/object:Api::Type::Integer
+                          name: "inputTrack"
+                          description: |
+                            The zero-based index of the track in the input file.
+                        - !ruby/object:Api::Type::Integer
+                          name: "inputChannel"
+                          description: |
+                            The zero-based index of the channel in the input audio stream.
+                        - !ruby/object:Api::Type::Integer
+                          name: "outputChannel"
+                          description: |
+                            The zero-based index of the channel in the output audio stream.
+                        - !ruby/object:Api::Type::Integer
+                          name: "gainDb"
+                          description: |
+                            Audio volume control in dB. Negative values decrease volume, positive values increase.
                     - !ruby/object:Api::Type::Integer
-                        name: "sampleRateHertz"
-                        description: |
-                          The audio sample rate in Hertz.
+                      name: "sampleRateHertz"
+                      description: |
+                        The audio sample rate in Hertz.
                     - !ruby/object:Api::Type::String
-                        name: "languageCode"
-                        description: |
-                          The BCP-47 language code, such as en-US or sr-Latn. For more information, see https://www.unicode.org/reports/tr35/#Unicode_locale_identifier.
+                      name: "languageCode"
+                      description: |
+                        The BCP-47 language code, such as en-US or sr-Latn. For more information, see https://www.unicode.org/reports/tr35/#Unicode_locale_identifier.
                     - !ruby/object:Api::Type::String
-                        name: "languageCode"
-                        description: |
-                          The name for this particular audio stream that will be added to the HLS/DASH manifest.
+                      name: "languageCode"
+                      description: |
+                        The name for this particular audio stream that will be added to the HLS/DASH manifest.
                 - !ruby/object:Api::Type::NestedObject
                   name: "textStream"
                   description: |
                     Encoding of a text stream.
                   properties:
                     - !ruby/object:Api::Type::String
-                        name: "codec"
-                        description: The codec for this text stream.
+                      name: "codec"
+                      description: The codec for this text stream.
                     - !ruby/object:Api::Type::String
-                        name: "languageCode"
-                        description: The BCP-47 language code, such as en-US or sr-Latn. For more information, see https://www.unicode.org/reports/tr35/#Unicode_locale_identifier.
+                      name: "languageCode"
+                      description: The BCP-47 language code, such as en-US or sr-Latn. For more information, see https://www.unicode.org/reports/tr35/#Unicode_locale_identifier.
                     - !ruby/object:Api::Type::NestedObject
-                        name: "mapping"
-                        description: |
-                          The mapping for the JobConfig.edit_list atoms with text EditAtom.inputs.
-                        properties:
-                          - !ruby/object:Api::Type::String
-                            name: "atomKey"
-                            description: |
-                              The EditAtom.key that references atom with text inputs in the JobConfig.edit_list.
-                          - !ruby/object:Api::Type::String
-                            name: "inputKey"
-                            description: |
-                              The Input.key that identifies the input file.
-                          - !ruby/object:Api::Type::Integer
-                            name: "inputTrack"
-                            description: |
-                              The zero-based index of the track in the input file.
+                      name: "mapping"
+                      description: |
+                        The mapping for the JobConfig.edit_list atoms with text EditAtom.inputs.
+                      properties:
+                        - !ruby/object:Api::Type::String
+                          name: "atomKey"
+                          description: |
+                            The EditAtom.key that references atom with text inputs in the JobConfig.edit_list.
+                        - !ruby/object:Api::Type::String
+                          name: "inputKey"
+                          description: |
+                            The Input.key that identifies the input file.
+                        - !ruby/object:Api::Type::Integer
+                          name: "inputTrack"
+                          description: |
+                            The zero-based index of the track in the input file.
                     - !ruby/object:Api::Type::String
-                        name: "displayName"
-                        description: |
-                          The name for this particular text stream that will be added to the HLS/DASH manifest.
+                      name: "displayName"
+                      description: |
+                        The name for this particular text stream that will be added to the HLS/DASH manifest.
       - !ruby/object:Api::Type::Array
         name: "muxStreams"
         description: |
@@ -714,15 +714,15 @@ properties:
             - !ruby/object:Api::Type::String
               name: "key"
               description: |
-               A unique key for this multiplexed stream.
+                A unique key for this multiplexed stream.
             - !ruby/object:Api::Type::String
               name: "fileName"
               description: |
-               The name of the generated file.
+                The name of the generated file.
             - !ruby/object:Api::Type::String
               name: "container"
               description: |
-               The container format.
+                The container format.
             - !ruby/object:Api::Type::Array
               name: "elementaryStreams"
               item_type: Api::Type::String
@@ -744,7 +744,7 @@ properties:
             - !ruby/object:Api::Type::String
               name: "encryptionId"
               description: |
-               Identifier of the encryption configuration to use.
+                Identifier of the encryption configuration to use.
             - !ruby/object:Api::Type::NestedObject
               name: "fmp4"
               description: |
@@ -763,7 +763,7 @@ properties:
             - !ruby/object:Api::Type::String
               name: "fileName"
               description: |
-               The name of the generated file.
+                The name of the generated file.
             - !ruby/object:Api::Type::Enum
               name: "type"
               output: true
@@ -784,14 +784,14 @@ properties:
                 DASH manifest configuration.
               properties:
                 - !ruby/object:Api::Type::Enum
-                    name: "segmentReferenceScheme"
-                    output: true
-                    description: |
-                      The segment reference scheme for a DASH manifest.
-                    values:
-                      - :SEGMENT_REFERENCE_SCHEME_UNSPECIFIED
-                      - :SEGMENT_LIST
-                      - :SEGMENT_TEMPLATE_NUMBER
+                  name: "segmentReferenceScheme"
+                  output: true
+                  description: |
+                    The segment reference scheme for a DASH manifest.
+                  values:
+                    - :SEGMENT_REFERENCE_SCHEME_UNSPECIFIED
+                    - :SEGMENT_LIST
+                    - :SEGMENT_TEMPLATE_NUMBER
       - !ruby/object:Api::Type::NestedObject
         name: "output"
         description: |
@@ -820,3 +820,219 @@ properties:
             name: "topic"
             description: |
               The name of the Pub/Sub topic to publish job completion notification to. For example: projects/{project}/topics/{topic}.
+      - !ruby/object:Api::Type::Array
+        name: "spriteSheets"
+        description: |
+          List of output sprite sheets. Spritesheets require at least one VideoStream in the Jobconfig.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: "format"
+              description: |
+                Format type.
+            - !ruby/object:Api::Type::String
+              name: "filePrefix"
+              description: |
+                File name prefix for the generated sprite sheets.
+            - !ruby/object:Api::Type::Integer
+              name: "spriteWidthPixels"
+              description: |
+                The width of sprite in pixels.
+            - !ruby/object:Api::Type::Integer
+              name: "spriteHeightPixels"
+              description: |
+                The height of sprite in pixels.
+            - !ruby/object:Api::Type::Integer
+              name: "columnCount"
+              description: |
+                The maximum number of sprites per row in a sprite sheet.
+            - !ruby/object:Api::Type::Integer
+              name: "rowCount"
+              description: |
+                The maximum number of rows per sprite sheet.
+            - !ruby/object:Api::Type::Time
+              name: "startTimeOffset"
+              description: |
+                Start time in seconds, relative to the output file timeline.
+            - !ruby/object:Api::Type::Time
+              name: "endTimeOffset"
+              description: |
+                End time in seconds, relative to the output file timeline.
+            - !ruby/object:Api::Type::Integer
+              name: "quality"
+              description: |
+                The quality of the generated sprite sheet.
+            - !ruby/object:Api::Type::Integer
+              name: "totalCount"
+              description: |
+                Total number of sprites.
+            - !ruby/object:Api::Type::Time
+              name: "interval"
+              description: |
+                Starting from 0s, create sprites at regular intervals. Specify the interval value in seconds.
+      - !ruby/object:Api::Type::Array
+        name: "overlays"
+        description: |
+          List of overlays on the output video, in descending Z-order.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::NestedObject
+              name: "image"
+              description: |
+                Image overlay.
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: "uri"
+                  description: |
+                    URI of the image in Cloud Storage. For example, gs://bucket/inputs/image.png.
+                - !ruby/object:Api::Type::NestedObject
+                  name: "resolution"
+                  description: |
+                    2D normalized coordinates.
+                  properties:
+                    - !ruby/object:Api::Type::Integer
+                      name: "x"
+                      description: |
+                        Normalized x coordinate.
+                    - !ruby/object:Api::Type::Integer
+                      name: "y"
+                      description: |
+                        Normalized y coordinate.
+                - !ruby/object:Api::Type::Integer
+                  name: "alpha"
+                  description: |
+                    Target image opacity.
+            - !ruby/object:Api::Type::Array
+              name: "animations"
+              description: |
+                List of animations. The list should be chronological, without any time overlap.
+              item_type: !ruby/object:Api::Type::NestedObject
+                properties:
+                  - !ruby/object:Api::Type::NestedObject
+                    name: "animationStatic"
+                    description: |
+                      Display static overlay object.
+                    properties:
+                      - !ruby/object:Api::Type::NestedObject
+                        name: "xy"
+                        description: |
+                          Normalized coordinates based on output video resolution.
+                        properties:
+                          - !ruby/object:Api::Type::Integer
+                            name: "x"
+                            description: |
+                              Normalized x coordinate.
+                          - !ruby/object:Api::Type::Integer
+                            name: "y"
+                            description: |
+                              Normalized y coordinate.
+                      - !ruby/object:Api::Type::Time
+                        name: "startTimeOffset"
+                        description: |
+                          The time to start displaying the overlay object, in seconds
+                  - !ruby/object:Api::Type::NestedObject
+                    name: "animationFade"
+                    description: |
+                      Display overlay object with fade animation.
+                    properties:
+                      - !ruby/object:Api::Type::NestedObject
+                        name: "xy"
+                        description: |
+                          Normalized coordinates based on output video resolution.
+                        properties:
+                          - !ruby/object:Api::Type::Enum
+                            name: "fadeType"
+                            description: |
+                              Type of fade animation.
+                            values:
+                              - :FADE_TYPE_UNSPECIFIED
+                              - :FADE_IN
+                              - :FADE_OUT
+                          - !ruby/object:Api::Type::Integer
+                            name: "x"
+                            description: |
+                              Normalized x coordinate.
+                          - !ruby/object:Api::Type::Integer
+                            name: "y"
+                            description: |
+                              Normalized y coordinate.
+                      - !ruby/object:Api::Type::Time
+                        name: "startTimeOffset"
+                        description: |
+                          The time to start the fade animation, in seconds.
+                      - !ruby/object:Api::Type::Time
+                        name: "endTimeOffset"
+                        description: |
+                          The time to end the fade animation, in seconds.
+                  - !ruby/object:Api::Type::NestedObject
+                    name: "animationEnd"
+                    description: |
+                      End previous animation.
+                    properties:
+                      - !ruby/object:Api::Type::Time
+                        name: "startTimeOffset"
+                        description: |
+                          The time to end overlay object, in seconds.
+
+      - !ruby/object:Api::Type::Array
+        name: "encryptions"
+        description: |
+          List of encryption configurations for the content.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: "id"
+              description: |
+                Identifier for this set of encryption options.
+            - !ruby/object:Api::Type::NestedObject
+              name: "drmSystems"
+              description: |
+                Defines configuration for DRM systems in use.
+              properties:
+                - !ruby/object:Api::Type::NestedObject
+                  name: "widevine"
+                  description: |
+                    Widevine configuration.
+                - !ruby/object:Api::Type::NestedObject
+                  name: "widevine"
+                  description: |
+                    Fairplay configuration.
+                - !ruby/object:Api::Type::NestedObject
+                  name: "playready"
+                  description: |
+                    Playready configuration.
+                - !ruby/object:Api::Type::NestedObject
+                  name: "clearkey"
+                  description: |
+                    Clearkey configuration.
+            - !ruby/object:Api::Type::NestedObject
+              name: "aes128"
+              description: |
+                Configuration for AES-128 encryption.
+            - !ruby/object:Api::Type::NestedObject
+              name: "sampleAes"
+              description: |
+                Configuration for SAMPLE-AES encryption.
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: "scheme"
+                  description: |
+                    Specify the encryption scheme.
+            - !ruby/object:Api::Type::NestedObject
+              name: "mpegCenc"
+              description: |
+                Configuration for MPEG Common Encryption (MPEG-CENC).
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: "scheme"
+                  description: |
+                    Specify the encryption scheme.
+            - !ruby/object:Api::Type::NestedObject
+              name: "secretManagerKeySource"
+              description: |
+                Configuration for secrets stored in Google Secret Manager.
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: "secretVersion"
+                  description: |
+                    The name of the Secret Version containing the encryption key in the following format: projects/{project}/secrets/{secret_id}/versions/{version_number}.
