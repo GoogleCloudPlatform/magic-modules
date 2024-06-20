@@ -38,7 +38,6 @@ func testSweepVmwareenginePrivateCloud(region string) error {
 	billingId := envvar.GetTestBillingAccountFromEnv(t)
 
 	// List of location values includes:
-	//   * global location
 	//   * zones used for this resource type's acc tests in the past
 	//   * the 'region' passed to the sweeper
 	locations := []string{region, "southamerica-west1-a", "me-west1-a"}
