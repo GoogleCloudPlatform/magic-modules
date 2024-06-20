@@ -8,7 +8,7 @@
         return err
     }
 
-    {{- /*  The generate DELETE method isn't including the {trust: } object in the response body thus custom_delete is needed */}}
+    {{/*  The generate DELETE method isn't including the {trust: } object in the response body thus custom_delete is needed */ -}}
 
     obj := make(map[string]interface{})
     targetDomainNameProp, err := expandNestedActiveDirectoryDomainTrustTargetDomainName(d.Get("target_domain_name"), d, config)
