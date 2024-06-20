@@ -47,6 +47,11 @@ will not be able to find or manage many of these underlying resources automatica
 resource "google_composer_environment" "test" {
   name   = "example-composer-env"
   region = "us-central1"
+  config {
+    software_config {
+      image_version = "composer-1-airflow-2"
+    }
+  }
 }
 ```
 
