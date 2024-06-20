@@ -20,26 +20,26 @@ func TestAccDNSResponsePolicy_update(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckDNSResponsePolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccDnsResponsePolicy_privateUpdate(responsePolicySuffix, "network-1"),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_dns_response_policy.example-response-policy",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			resource.TestStep{
+			{
 				Config: testAccDnsResponsePolicy_privateUpdate(responsePolicySuffix, "network-2"),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_dns_response_policy.example-response-policy",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			resource.TestStep{
+			{
 				Config: testAccDnsResponsePolicy_removeNetworks(responsePolicySuffix),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_dns_response_policy.example-response-policy",
 				ImportState:       true,
 				ImportStateVerify: true,

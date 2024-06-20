@@ -99,7 +99,7 @@ func (t *Terraform) GenerateObjects(outputFolder string, generateCode, generateD
 func (t *Terraform) GenerateObject(object api.Resource, outputFolder, productPath string, generateCode, generateDocs bool) {
 	templateData := NewTemplateData(outputFolder, t.Version)
 
-	if !object.ExcludeResource {
+	if !object.IsExcluded() {
 		log.Printf("Generating %s resource", object.Name)
 		t.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
 
@@ -332,7 +332,7 @@ func (t Terraform) getCopyFilesInFolder(folderPath, targetDir string) map[string
 	m := make(map[string]string, 0)
 	filepath.WalkDir(folderPath, func(path string, di fs.DirEntry, err error) error {
 		if !di.IsDir() && !strings.HasSuffix(di.Name(), ".tmpl") && !strings.HasSuffix(di.Name(), ".erb") {
-			fname := strings.TrimPrefix(path, "third_party/terraform/")
+			fname := strings.TrimPrefix(strings.Replace(path, "/go/", "/", 1), "third_party/terraform/")
 			target := fname
 			if targetDir != "." {
 				target = fmt.Sprintf("%s/%s", targetDir, fname)
@@ -438,7 +438,7 @@ func (t Terraform) getCompileFilesInFolder(folderPath, targetDir string) map[str
 	m := make(map[string]string, 0)
 	filepath.WalkDir(folderPath, func(path string, di fs.DirEntry, err error) error {
 		if !di.IsDir() && strings.HasSuffix(di.Name(), ".tmpl") {
-			fname := strings.TrimPrefix(path, "third_party/terraform/")
+			fname := strings.TrimPrefix(strings.Replace(path, "/go/", "/", 1), "third_party/terraform/")
 			fname = strings.TrimSuffix(fname, ".tmpl")
 			target := fname
 			if targetDir != "" {
@@ -826,26 +826,6 @@ func (t Terraform) ImportPathFromVersion(v string) string {
 //
 // end
 //
-// def force_new?(property, resource)
-//
-//	(
-//	  (!property.output || property.is_a?(Api::Type::KeyValueEffectiveLabels)) &&
-//	  (property.immutable ||
-//	    (resource.immutable && property.update_url.nil? && property.immutable.nil? &&
-//	      (property.parent.nil? ||
-//	        (force_new?(property.parent, resource) &&
-//	         !(property.parent.flatten_object && property.is_a?(Api::Type::KeyValueLabels))
-//	        )
-//	      )
-//	    )
-//	  )
-//	) ||
-//	  (property.is_a?(Api::Type::KeyValueTerraformLabels) &&
-//	    !updatable?(resource, resource.all_user_properties) && !resource.root_labels?
-//	  )
-//
-// end
-//
 // # Returns tuples of (fieldName, list of update masks) for
 // #  top-level updatable fields. Schema path refers to a given Terraform
 // # field name (e.g. d.GetChange('fieldName)')
@@ -931,7 +911,7 @@ func (t *Terraform) generateResourcesForVersion(products []map[string]interface{
 
 			var resourceName string
 
-			if !object.ExcludeResource {
+			if !object.IsExcluded() {
 				t.ResourceCount++
 				resourceName = fmt.Sprintf("%s.Resource%s", service, object.ResourceName())
 			}
@@ -1010,22 +990,22 @@ func languageFromFilename(filename string) string {
 	}
 }
 
-//
-//    # Returns the id format of an object, or self_link_uri if none is explicitly defined
-//    # We prefer the long name of a resource as the id so that users can reference
-//    # resources in a standard way, and most APIs accept short name, long name or self_link
-//    def id_format(object)
-//      object.id_format || object.self_link_uri
-//    end
-//
-//
-//    # Returns the extension for DCL packages for the given version. This is needed
-//    # as the DCL uses "alpha" for preview resources, while we use "private"
-//    def dcl_version(version)
-//      return '' if version == 'ga'
-//      return '/beta' if version == 'beta'
-//      return '/alpha' if version == 'private'
-//    end
-//  end
-//end
-//
+//	  # Returns the id format of an object, or self_link_uri if none is explicitly defined
+//	  # We prefer the long name of a resource as the id so that users can reference
+//	  # resources in a standard way, and most APIs accept short name, long name or self_link
+//	  def id_format(object)
+//	    object.id_format || object.self_link_uri
+//	  end
+
+// Returns the extension for DCL packages for the given version. This is needed
+// as the DCL uses "alpha" for preview resources, while we use "private"
+func (t Terraform) DCLVersion() string {
+	switch t.TargetVersionName {
+	case "beta":
+		return "/beta"
+	case "private":
+		return "/alpha"
+	default:
+		return ""
+	}
+}

@@ -50,7 +50,7 @@ examples:
     vars:
       prefixes_name: 'my-prefix'
     test_env_vars:
-      description: :PAP_DESCRIPTION
+      desc: :PAP_DESCRIPTION
 properties:
   - !ruby/object:Api::Type::String
     name: 'description'

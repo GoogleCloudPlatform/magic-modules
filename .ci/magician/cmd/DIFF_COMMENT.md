@@ -24,7 +24,22 @@ If you believe this detection to be incorrect please raise the concern with your
 If you intend to make this change you will need to wait for a [major release](https://www.terraform.io/plugin/sdkv2/best-practices/versioning#example-major-number-increments) window.
 An `override-breaking-change` label can be added to allow merging.
 {{end}}
-{{.MissingTests}}
+
+{{if gt (len .MissingTests) 0}}
+## Missing test report
+Your PR includes resource fields which are not covered by any test.
+{{ range $resourceName, $missingTestInfo := .MissingTests }}
+Resource: `{{ $resourceName }}` ({{ len $missingTestInfo.Tests }} total tests)
+Please add an acceptance test which includes these fields. The test should include the following:
+
+```hcl
+{{ $missingTestInfo.SuggestedTest }}
+
+```
+
+{{- end }}
+{{end}}
+
 {{- $errorsLength := len .Errors}}
 {{- if gt $errorsLength 0}}
 ## Errors

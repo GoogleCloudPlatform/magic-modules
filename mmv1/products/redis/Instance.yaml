@@ -399,6 +399,11 @@ properties:
           can not go beyond, including reschedule.
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
           resolution and up to nine fractional digits.
+  - !ruby/object:Api::Type::String
+    name: maintenanceVersion
+    description: The self service update maintenance version.
+    required: false
+    default_from_api: true
   - !ruby/object:Api::Type::Integer
     name: memorySizeGb
     description: Redis memory size in GiB.

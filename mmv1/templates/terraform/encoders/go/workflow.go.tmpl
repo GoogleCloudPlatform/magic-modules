@@ -2,9 +2,9 @@ var ResName string
 if v, ok := d.GetOk("name"); ok {
 	ResName = v.(string)
 } else if v, ok := d.GetOk("name_prefix"); ok {
-	ResName = resource.PrefixedUniqueId(v.(string))
+	ResName = id.PrefixedUniqueId(v.(string))
 } else {
-	ResName = resource.UniqueId()
+	ResName = id.UniqueId()
 }
 
 if err := d.Set("name", ResName); err != nil {

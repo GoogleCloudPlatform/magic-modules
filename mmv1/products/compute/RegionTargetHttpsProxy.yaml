@@ -140,8 +140,7 @@ properties:
     name: 'certificateManagerCertificates'
     description: |
       URLs to certificate manager certificate resources that are used to authenticate connections between users and the load balancer.
-      Currently, you may specify up to 15 certificates. Certificate manager certificates do not apply when the load balancing scheme is set to INTERNAL_SELF_MANAGED.
-      sslCertificates and certificateManagerCertificates fields can not be defined together.
+      sslCertificates and certificateManagerCertificates can't be defined together.
       Accepted format is `//certificatemanager.googleapis.com/projects/{project}/locations/{location}/certificates/{resourceName}` or just the self_link `projects/{project}/locations/{location}/certificates/{resourceName}`
     update_verb: :POST
     update_url: 'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setSslCertificates'
@@ -174,11 +173,11 @@ properties:
       A reference to the Region SslPolicy resource that will be associated with
       the TargetHttpsProxy resource. If not set, the TargetHttpsProxy
       resource will not have any SSL policy configured.
-  # 2022 May 28 - setSslPolicy method not yet listed
-  # https://cloud.google.com/compute/docs/reference/rest/beta/regionTargetHttpsProxies
-  #  update_verb: :POST
-  #  update_url:
-  #    'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setSslPolicy'
+    update_id: 'sslPolicy'
+    fingerprint_name: 'fingerprint'
+    update_verb: :PATCH
+    update_url:
+      'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}'
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::ResourceRef
     name: 'urlMap'

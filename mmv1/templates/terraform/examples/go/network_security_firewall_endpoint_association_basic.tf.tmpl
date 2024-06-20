@@ -1,5 +1,4 @@
 resource "google_network_security_firewall_endpoint" "{{$.PrimaryResourceId}}" {
-  provider    = google-beta
   name        = "{{index $.Vars "resource_name_prefix"}}"
   parent      = "organizations/{{index $.TestEnvVars "org_id"}}"
   location    = "us-central1-a"
@@ -10,7 +9,6 @@ resource "google_network_security_firewall_endpoint" "{{$.PrimaryResourceId}}" {
 }
 
 resource "google_network_security_firewall_endpoint_association" "{{$.PrimaryResourceId}}_association" {
-  provider    = google-beta
   name        = "{{index $.Vars "resource_name_prefix"}}-association"
   parent      = "projects/{{index $.TestEnvVars "project"}}"
   location    = "us-central1-a"

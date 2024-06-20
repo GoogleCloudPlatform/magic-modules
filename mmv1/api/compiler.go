@@ -27,5 +27,5 @@ func Compile(yamlPath string, obj interface{}) {
 	}
 
 	yamlValidator := google.YamlValidator{}
-	yamlValidator.Parse(objYaml, obj)
+	yamlValidator.Parse(objYaml, obj, yamlPath)
 }

@@ -364,7 +364,6 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	config.RuntimeConfigBasePath = d.Get(transport_tpg.RuntimeConfigCustomEndpointEntryKey).(string)
 	<% end -%>
 	config.IAMBasePath = d.Get(transport_tpg.IAMCustomEndpointEntryKey).(string)
-	config.ServiceNetworkingBasePath = d.Get(transport_tpg.ServiceNetworkingCustomEndpointEntryKey).(string)
 	config.ServiceUsageBasePath = d.Get(transport_tpg.ServiceUsageCustomEndpointEntryKey).(string)
 	config.BigtableAdminBasePath = d.Get(transport_tpg.BigtableAdminCustomEndpointEntryKey).(string)
 	config.TagsLocationBasePath = d.Get(transport_tpg.TagsLocationCustomEndpointEntryKey).(string)

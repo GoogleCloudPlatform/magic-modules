@@ -145,7 +145,6 @@ properties:
     exactly_one_of:
       - bigtable
       - optimized
-    min_version: beta
     properties:
       []  # Meant to be an empty object with no properties - see here : https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.featureOnlineStores#Optimized
       # The fields below are necessary to include the "Optimized" transformation in the payload
@@ -187,10 +186,13 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: embeddingManagement
     description: |
-      The settings for embedding management in FeatureOnlineStore. Embedding management can only be used with BigTable.
+      The settings for embedding management in FeatureOnlineStore. Embedding management can only be set for BigTable. It is enabled by default for optimized storagetype.
     conflicts:
       - optimized
     min_version: beta
+    default_from_api: true
+    deprecation_message: >-
+              `embedding_management` is deprecated. This field is no longer needed anymore and embedding management is automatically enabled when specifying Optimized storage type
     properties:
       - !ruby/object:Api::Type::Boolean
         name: enabled

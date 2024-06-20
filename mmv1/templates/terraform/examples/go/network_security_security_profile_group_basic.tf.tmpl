@@ -1,5 +1,4 @@
 resource "google_network_security_security_profile_group" "{{$.PrimaryResourceId}}" {
-  provider                  = google-beta
   name                      = "{{index $.Vars "security_profile_group_name"}}"
   parent                    = "organizations/{{index $.TestEnvVars "org_id"}}"
   description               = "my description"
@@ -11,7 +10,6 @@ resource "google_network_security_security_profile_group" "{{$.PrimaryResourceId
 }
 
 resource "google_network_security_security_profile" "security_profile" {
-    provider    = google-beta
     name        = "{{index $.Vars "security_profile_name"}}"
     type        = "THREAT_PREVENTION"
     parent      = "organizations/{{index $.TestEnvVars "org_id"}}"

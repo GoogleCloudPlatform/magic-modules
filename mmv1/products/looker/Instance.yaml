@@ -30,6 +30,7 @@ timeouts: !ruby/object:Api::Timeouts
   delete_minutes: 90
 autogen_async: true
 error_abort_predicates: ['transport_tpg.Is429QuotaError']
+skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'looker_instance_basic'
@@ -69,9 +70,9 @@ examples:
       client_id: 'my-client-id'
       client_secret: 'my-client-secret'
     test_vars_overrides:
-      address_name: 'acctest.BootstrapSharedTestGlobalAddress(t, "looker-vpc-network-2")'
+      address_name: 'acctest.BootstrapSharedTestGlobalAddress(t, "looker-vpc-network-3", acctest.AddressWithPrefixLength(8))'
       kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
-      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "looker-vpc-network-2")'
+      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "looker-vpc-network-3", acctest.ServiceNetworkWithPrefixLength(8))'
     skip_docs: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'looker_instance_custom_domain'

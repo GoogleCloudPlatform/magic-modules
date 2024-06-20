@@ -1,6 +1,5 @@
 resource "google_integrations_client" "client" {
   location = "us-south1"
-  provision_gmek = true
 }
 
 resource "google_service_account" "service_account" {
