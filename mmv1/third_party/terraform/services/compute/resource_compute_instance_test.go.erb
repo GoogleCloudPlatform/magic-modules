@@ -2642,7 +2642,6 @@ func TestAccComputeInstance_spotVM_update(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccComputeInstance_maxRunDuration_update(t *testing.T) {
 	t.Parallel()
 
@@ -2830,7 +2829,6 @@ func TestAccComputeInstance_spotVM_maxRunDuration_update(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccComputeInstance_localSsdRecoveryTimeout(t *testing.T) {
 	t.Parallel()
@@ -3786,7 +3784,6 @@ func testAccCheckComputeResourcePolicy(instance *compute.Instance, scheduleName 
 	}
 }
 
-<% unless version == 'ga' -%>
 func testAccCheckComputeInstanceMaxRunDuration(instance *compute.Instance, instanceMaxRunDurationWant compute.Duration) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if instance == nil {
@@ -3803,7 +3800,6 @@ func testAccCheckComputeInstanceMaxRunDuration(instance *compute.Instance, insta
 		return nil
 	}
 }
-<% end -%>
 
 func testAccCheckComputeInstanceLocalSsdRecoveryTimeout(instance *compute.Instance, instanceLocalSsdRecoveryTiemoutWant compute.Duration) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -8363,7 +8359,6 @@ resource "google_compute_instance" "foobar" {
 `, instance)
 }
 
-<% unless version == 'ga' -%>
 func testAccComputeInstance_standardVM_maxRunDuration(instance string, instanceTerminationAction string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -8474,7 +8469,6 @@ resource "google_compute_instance" "foobar" {
 }
 `, instance, instanceTerminationAction)
 }
-<% end -%>
 
 
 func testAccComputeInstance_spotVM_maxRunDuration(instance string, instanceTerminationAction string) string {
@@ -8504,12 +8498,10 @@ resource "google_compute_instance" "foobar" {
     automatic_restart = false
     preemptible = true
     instance_termination_action = "%s"
-<% unless version == 'ga' -%>
     max_run_duration {
         nanos = 123
         seconds = 60
     }
-<% end -%>
   }
 }
 `, instance, instanceTerminationAction)
