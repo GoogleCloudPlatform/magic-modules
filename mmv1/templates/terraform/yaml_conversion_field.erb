@@ -130,7 +130,7 @@
     state_func: '<%= property.state_func %>'
 <%  end -%>
 <%  unless property.set_hash_func.nil? -%>
-    set_hash_func: '<%= property.set_hash_func %>'
+    set_hash_func:
 <%  end -%>
 <%  unless property.custom_flatten.nil? -%>
     custom_flatten: '<%= object.convert_go_file( property.custom_flatten )%>'

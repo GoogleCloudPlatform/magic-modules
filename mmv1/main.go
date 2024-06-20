@@ -43,6 +43,7 @@ func main() {
 	if *yamlMode {
 		CopyText("description:")
 		CopyText("note:")
+		CopyText("set_hash_func:")
 	}
 
 	if *templateMode {
