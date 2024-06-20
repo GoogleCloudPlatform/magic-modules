@@ -55,8 +55,6 @@ examples:
     primary_resource_id: 'default'
     vars:
       trust_config_name: 'trust-config'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  pre_update: templates/terraform/pre_update/certificate_manager_trust_config.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -92,7 +90,6 @@ properties:
   - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: 'Set of label tags associated with the trust config.'
-    immutable: true
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
