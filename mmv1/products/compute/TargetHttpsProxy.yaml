@@ -141,7 +141,7 @@ properties:
       - :STRICT
       - :PERMISSIVE
       - :DISABLED
-    default_value: :DISABLED
+    default_from_api: true
   - !ruby/object:Api::Type::Array
     name: 'certificateManagerCertificates'
     description: |
