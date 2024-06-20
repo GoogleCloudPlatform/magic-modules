@@ -14,16 +14,16 @@
 ---
 !ruby/object:Api::Resource
 name: "Job"
-self_link: "projects/{{project}}/locations/{{location}}/jobs/{{job_id}}"
-base_url: "projects/{{project}}/locations/{{location}}/jobs"
-create_url: "projects/{{project}}/locations/{{location}}/jobs?jobId={{job_id}}"
+self_link: "projects/{{project}}/locations/{{location}}/jobTemplates/{{job_template_id}}"
+base_url: "projects/{{project}}/locations/{{location}}/jobTemplates"
+create_url: "projects/{{project}}/locations/{{location}}/jobTemplates?jobTemplateId={{job_template_id}}"
 update_verb: :PATCH
 update_mask: true
-description: "Transcoding Job Resource"
+description: "Transcoding Job Template Resource"
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     "Transcoder": "https://cloud.google.com/transcoder/docs/"
-  api: "https://cloud.google.com/transcoder/docs/reference/rest/v1/projects.locations.jobs"
+  api: "https://cloud.google.com/transcoder/docs/reference/rest/v1/projects.locations.jobTemplates"
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: "name"
@@ -44,128 +44,46 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: "error"
     message: "message"
-import_format: ["projects/{{project}}/locations/{{location}}/jobs/{{job_id}}"]
+import_format:
+  [
+    "projects/{{project}}/locations/{{location}}/jobTemplates/{{job_template_id}}",
+  ]
 autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "job_basic"
+    name: "job_template_basic"
     primary_resource_id: "default"
     primary_resource_name: 'fmt.Sprintf("tf-test-job%s", context["random_suffix"])'
     vars:
-      job_name: "job"
+      job_template_name: "job-template"
 parameters:
   - !ruby/object:Api::Type::String
-    name: "jobId"
+    name: "jobTemplateId"
     required: true
     immutable: true
     url_param_only: true
     description: |
-      ID to use for the Transcoding job.
+      ID to use for the Transcoding job template.
   - !ruby/object:Api::Type::String
     name: "location"
     immutable: true
     required: true
     url_param_only: true
     description: |
-      The location of the transcoding job resource.
+      The location of the transcoding job template resource.
 properties:
   - !ruby/object:Api::Type::String
     name: "name"
     description: |
-      The resource name of the job.
-  - !ruby/object:Api::Type::String
-    name: "inputUri"
-    description: |
-      URI of the media. For example, gs://bucket/inputs/file.mp4.
-  - !ruby/object:Api::Type::String
-    name: "outputUri"
-    description: |
-      URI for the output file(s). For example, gs://my-bucket/outputs/.
-  - !ruby/object:Api::Type::Time
-    name: "createTime"
-    description: |
-      The time the job was created.
-    output: true
-  - !ruby/object:Api::Type::Time
-    name: "startTime"
-    description: |
-      The time the transcoding started.
-    output: true
-  - !ruby/object:Api::Type::Time
-    name: "endTime"
-    description: |
-      The time the transcoding finished.
-    output: true
-  - !ruby/object:Api::Type::Enum
-    name: "state"
-    description: |
-      The current state of the job.
-    output: true
-    values:
-      - :PROCESSING_STATE_UNSPECIFIED
-      - :PENDING
-      - :RUNNING
-      - :SUCCEEDED
-      - :FAILED
-  - !ruby/object:Api::Type::Integer
-    name: "ttlAfterCompletionDays"
-    description: |
-      Job time to live value in days, which will be effective after job completion.
-      Job should be deleted automatically after the given TTL.
-      Enter a value between 1 and 90. The default is 30.
+      The resource name of the job template. Format: projects/{project_number}/locations/{location}/jobTemplates/{jobTemplate}
   - !ruby/object:Api::Type::KeyValueLabels
     name: "labels"
     description: |
-      The labels associated with this job. You can use these to organize and group your jobs.
-  - !ruby/object:Api::Type::NestedObject
-    name: "error"
-    description: |
-      An error object that describes the reason for the failure.
-    output: true
-    properties:
-      - !ruby/object:Api::Type::Integer
-        name: "code"
-        description: |
-          The status code.
-      - !ruby/object:Api::Type::String
-        name: "message"
-        description: |
-          A developer-facing error message.
-      - !ruby/object:Api::Type::Array
-        name: "details"
-        description: |
-          A list of messages that carry the error details.
-  - !ruby/object:Api::Type::Enum
-    name: "mode"
-    description: |
-      The processing mode of the job.
-    values:
-      - :PROCESSING_MODE_UNSPECIFIED
-      - :PROCESSING_MODE_INTERACTIVE
-      - :PROCESSING_MODE_BATCH
-  - !ruby/object:Api::Type::Integer
-    name: "batchModePriority"
-    description: |
-      The processing priority of a batch job. This field can only be set for batch mode jobs.
-      The default value is 0. This value cannot be negative. Higher values correspond to higher priorities for the job.
-  - !ruby/object:Api::Type::Enum
-    name: "optimization"
-    description: |
-      The optimization strategy of the job.
-    optional: true
-    values:
-      - :OPTIMIZATION_STRATEGY_UNSPECIFIED
-      - :AUTODETECT
-      - :DISABLED
-  - !ruby/object:Api::Type::String
-    name: "templateId"
-    description: |
-      Specify the templateId to use for populating Job.config.
-      The default is preset/web-hd, which is the only supported preset.
+      The labels associated with this job template. You can use these to organize and group your job templates.
   - !ruby/object:Api::Type::NestedObject
     name: "config"
     description: |
-      The configuration for this job.
+      The configuration for this template.
     properties:
       - !ruby/object:Api::Type::Array
         name: "inputs"
