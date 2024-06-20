@@ -46,6 +46,7 @@ fun googleSubProjectBeta(allConfig: AllContextParameters): Project {
 
         params {
             readOnlySettings()
+            activeBranchSettings()
         }
     }
 }
