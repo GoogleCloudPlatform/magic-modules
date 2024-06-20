@@ -50,7 +50,6 @@ custom_code:
   post_create: 'templates/terraform/post_create/go/labels.tmpl'
 custom_diff:
   - 'forwardingRuleCustomizeDiff'
-  - 'tpgresource.SetLabelsDiff'
 legacy_long_form_project: true
 examples:
   - name: 'internal_http_lb_with_mig_backend'
