@@ -73,13 +73,10 @@ examples:
     vars:
       workstation_cluster_name: 'workstation-cluster'
       workstation_config_name: 'workstation-config'
-      key_short_name: 'keyname'
-      value_short_name: 'valuename'
-      org_id: '123456789'
-    test_vars_overrides:
-      key_short_name: '"tf-test-key-" + acctest.RandString(t, 10)'
-      value_short_name: '"tf-test-value-" + acctest.RandString(t, 10)'
-      org_id: 'envvar.GetTestOrgFromEnv(t)'
+      tag_key1: 'tag_key1'
+      tag_value1: 'tag_value1'
+      tag_key2: 'tag_key2'
+      tag_value2: 'tag_value2'
   - !ruby/object:Provider::Terraform::Examples
     name: 'workstation_config_container'
     min_version: beta
@@ -276,6 +273,8 @@ properties:
               Whether instances have no public IP address.
           - !ruby/object:Api::Type::Boolean
             name: 'disableSsh'
+            default_value: true
+            send_empty_value: true
             description: |
               Whether to disable SSH access to the VM.
           - !ruby/object:Api::Type::Boolean
