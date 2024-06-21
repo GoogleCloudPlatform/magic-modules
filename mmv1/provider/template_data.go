@@ -21,6 +21,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"text/template"
 
@@ -171,7 +172,7 @@ func (td *TemplateData) GenerateSweeperFile(filePath string, resource api.Resour
 }
 
 func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, goFormat bool, templates ...string) {
-	log.Printf("Generating %s", filePath)
+	// log.Printf("Generating %s", filePath)
 
 	templateFileName := filepath.Base(templatePath)
 
@@ -201,7 +202,7 @@ func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, g
 		glog.Exit(err)
 	}
 
-	if goFormat {
+	if goFormat && !strings.Contains(templatePath, "third_party/terraform") {
 		cmd := exec.Command("goimports", "-w", filePath)
 		if err := cmd.Run(); err != nil {
 			log.Fatal(err)

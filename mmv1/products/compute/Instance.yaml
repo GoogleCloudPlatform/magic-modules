@@ -526,7 +526,6 @@ properties:
         - !ruby/object:Api::Type::ResourceRef
           name: 'networkAttachment'
           resource: 'networkAttachment'
-          min_version: beta
           imports: 'selfLink'
           description: |
             The URL of the network attachment that this interface should connect to in the following format:

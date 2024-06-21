@@ -398,7 +398,7 @@ func resourceContainerClusterResourceV1() *schema.Resource {
 										ForceNew:    true,
 										Description: `The Customer Managed Encryption Key used to encrypt the boot disk attached to each node in the node pool.`,
 									},
-									"shielded_instance_config": &schema.Schema{
+									"shielded_instance_config": {
 										Type:        schema.TypeList,
 										Optional:    true,
 										Description: `Shielded Instance options.`,

@@ -33,6 +33,9 @@ var yamlMode = flag.Bool("yaml", false, "copy text over from ruby yaml to go yam
 // Example usage: --template
 var templateMode = flag.Bool("template", false, "copy templates over from .erb to go .tmpl")
 
+// Example usage: --handwritten
+var handwrittenMode = flag.Bool("handwritten", false, "copy handwritten files over from .erb to go .tmpl")
+
 func main() {
 
 	flag.Parse()
@@ -40,10 +43,15 @@ func main() {
 	if *yamlMode {
 		CopyText("description:")
 		CopyText("note:")
+		CopyText("set_hash_func:")
 	}
 
 	if *templateMode {
 		convertTemplates()
+	}
+
+	if *handwrittenMode {
+		convertAllHandwrittenFiles()
 	}
 
 	if outputPath == nil || *outputPath == "" {
