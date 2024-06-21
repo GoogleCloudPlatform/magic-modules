@@ -197,6 +197,32 @@ func testAccCheckProjectService(t *testing.T, services []string, pid string, exp
 	}
 }
 
+func TestAccProjectService_checkUsageOfServices(t *testing.T) {
+	// Multiple fine-grained resources
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	org := envvar.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	services := "bigquerystorage.googleapis.com"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccProjectService_checkUsage(services, pid, org),
+			},
+			{
+				ResourceName:            "google_project_service.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"disable_on_destroy", "disable_dependent_services"},
+			},
+		},
+	})
+}
+
 func testAccProjectService_basic(services []string, pid, org string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
@@ -336,8 +362,7 @@ resource "google_project_service" "test" {
   project = google_project.acceptance.project_id
   service = "%s"
 
-  disable_dependent_services = true
-  check_if_service_has_usage_on_destroy = true
+  check_if_service_has_usage_on_destroy = false
 }
 `, pid, pid, org, service)
 }
