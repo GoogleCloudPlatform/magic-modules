@@ -826,6 +826,28 @@ func TestAccComputeBackendService_trafficDirectorUpdateFull(t *testing.T) {
 }
 <% end -%>
 
+func TestAccComputeBackendService_withPrivateOriginAuth(t *testing.T) {
+	t.Parallel()
+
+	randomSuffix := acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeBackendServiceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeBackendService_withPrivateOriginAuth(randomSuffix),
+			},
+			{
+				ResourceName:      "google_compute_backend_service.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 <% unless version == 'ga' -%>
 func TestAccComputeBackendService_regionNegBackend(t *testing.T) {
 	t.Parallel()
@@ -2010,3 +2032,37 @@ resource "google_cloud_run_service" "cloudrun_neg" {
 `, suffix, suffix, suffix)
 }
 <% end -%>
+
+func testAccComputeBackendService_withPrivateOriginAuth(randomSuffix string) string {
+	return fmt.Sprintf(`
+resource "google_compute_backend_service" "foobar" {
+  name          = "tf-test-backend-service-%s"
+  security_settings {
+    aws_v4_authentication {
+      access_key_id = "AKIAIOSFODNN7EXAMPLE"
+      access_key = "c4afb1cc5771d871763a393e44b703571b55cc28424d1a5e86da6ed3c154a4b9"
+      access_key_version = "prod-access-key-v1.2"
+      origin_region = "us-east-2"
+    }
+  }
+  backend {
+    group = google_compute_global_network_endpoint_group.group.self_link
+  }
+  iap {
+    oauth2_client_id     = "abc"
+    oauth2_client_secret = "xyz"
+  }
+}
+
+resource "google_compute_global_network_endpoint" "networkendpoint" {
+  global_network_endpoint_group = google_compute_global_network_endpoint_group.group.name
+  ip_address  = "8.8.8.8"
+  port        = 443
+}
+
+resource "google_compute_global_network_endpoint_group" "group" {
+  name         = "tf-test-neg-%s"
+  network_endpoint_type = "INTERNET_IP_PORT"
+}
+`, randomSuffix, randomSuffix)
+}
