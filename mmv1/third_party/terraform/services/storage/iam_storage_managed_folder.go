@@ -80,7 +80,10 @@ func StorageManagedFolderIdParseFunc(d *schema.ResourceData, config *transport_t
 		d:             d,
 		Config:        config,
 	}
-	if err := d.Set("managed_folder", u.GetResourceId()); err != nil {
+	if err := d.Set("bucket", u.bucket); err != nil {
+		return fmt.Errorf("Error setting bucket: %s", err)
+	}
+	if err := d.Set("managed_folder", u.managedFolder); err != nil {
 		return fmt.Errorf("Error setting managed_folder: %s", err)
 	}
 	d.SetId(u.GetResourceId())

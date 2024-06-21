@@ -1,7 +1,0 @@
-func managedFolderNameDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
-	return managedFolderNameDiffSuppressLogic(old, new)
-}
-
-func managedFolderNameDiffSuppressLogic(old, new string) bool {
-	return strings.TrimSuffix(old, "/") == strings.TrimSuffix(new, "/")
-}

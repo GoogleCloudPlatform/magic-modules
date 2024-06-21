@@ -38,8 +38,6 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     'Official Documentation': 'https://cloud.google.com/storage/docs/managed-folders'
   api: 'https://cloud.google.com/storage/docs/json_api/v1/managedFolder'
 # iam_policy: handwritten in mmv1/third_party/terraform/services/storage/iam_storage_managed_folder.go
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/storage_managed_folder.go.erb
 import_format:
   - '{{bucket}}/managedFolders/{{%name}}'
   - '{{bucket}}/{{%name}}'
@@ -47,10 +45,8 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'storage_managed_folder_basic'
     primary_resource_id: 'folder'
-    # primary_resource_name: 'fmt.Sprintf("tf-test-my-bucket%s", context["random_suffix"]), fmt.Sprintf("tf-test-managed/folder/name%s", context["random_suffix"])'
     vars:
       bucket_name: 'my-bucket'
-      managed_folder_name: 'managed/folder/name'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'bucket'
@@ -61,12 +57,14 @@ parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
-      The name of the managed folder expressed as a path. For example, `example_dir/example_dir2/`.
+      The name of the managed folder expressed as a path. Must include
+      trailing '/'. For example, `example_dir/example_dir2/`.
     required: true
     # The API returns values with trailing slashes, even if not
-    # provided. We use a custom diff suppress to compare the old and
-    # new values ignoring any trailing slashes
-    diff_suppress_func: managedFolderNameDiffSuppress
+    # provided. Enforcing trailing slashes prevents diffs and ensures
+    # consistent output.
+    validation: !ruby/object:Provider::Terraform::Validation
+      regex: '/$'
 virtual_fields:
   - !ruby/object:Api::Type::Boolean
     name: 'force_destroy'

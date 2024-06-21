@@ -35,7 +35,7 @@ func TestAccStorageManagedFolderIamBindingGenerated(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_storage_managed_folder_iam_binding.foo",
-				ImportStateId:     fmt.Sprintf("b/%s/managedFolders/%s roles/storage.objectViewer", fmt.Sprintf("tf-test-my-bucket%s", context["random_suffix"]), fmt.Sprintf("tf-test-managed/folder/name%s", context["random_suffix"])),
+				ImportStateId:     fmt.Sprintf("b/%s/managedFolders/managed/folder/name/ roles/storage.objectViewer", fmt.Sprintf("tf-test-my-bucket%s", context["random_suffix"])),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -45,7 +45,7 @@ func TestAccStorageManagedFolderIamBindingGenerated(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_storage_managed_folder_iam_binding.foo",
-				ImportStateId:     fmt.Sprintf("b/%s/managedFolders/%s roles/storage.objectViewer", fmt.Sprintf("tf-test-my-bucket%s", context["random_suffix"]), fmt.Sprintf("tf-test-managed/folder/name%s", context["random_suffix"])),
+				ImportStateId:     fmt.Sprintf("b/%s/managedFolders/managed/folder/name/ roles/storage.objectViewer", fmt.Sprintf("tf-test-my-bucket%s", context["random_suffix"])),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -77,7 +77,7 @@ func TestAccStorageManagedFolderIamMemberGenerated(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_storage_managed_folder_iam_member.foo",
-				ImportStateId:     fmt.Sprintf("b/%s/managedFolders/%s roles/storage.objectViewer user:admin@hashicorptest.com", fmt.Sprintf("tf-test-my-bucket%s", context["random_suffix"]), fmt.Sprintf("tf-test-managed/folder/name%s", context["random_suffix"])),
+				ImportStateId:     fmt.Sprintf("b/%s/managedFolders/managed/folder/name/ roles/storage.objectViewer user:admin@hashicorptest.com", fmt.Sprintf("tf-test-my-bucket%s", context["random_suffix"])),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -112,7 +112,7 @@ func TestAccStorageManagedFolderIamPolicyGenerated(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_storage_managed_folder_iam_policy.foo",
-				ImportStateId:     fmt.Sprintf("b/%s/managedFolders/%s", fmt.Sprintf("tf-test-my-bucket%s", context["random_suffix"]), fmt.Sprintf("tf-test-managed/folder/name%s", context["random_suffix"])),
+				ImportStateId:     fmt.Sprintf("b/%s/managedFolders/managed/folder/name/", fmt.Sprintf("tf-test-my-bucket%s", context["random_suffix"])),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -121,7 +121,7 @@ func TestAccStorageManagedFolderIamPolicyGenerated(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_storage_managed_folder_iam_policy.foo",
-				ImportStateId:     fmt.Sprintf("b/%s/managedFolders/%s", fmt.Sprintf("tf-test-my-bucket%s", context["random_suffix"]), fmt.Sprintf("tf-test-managed/folder/name%s", context["random_suffix"])),
+				ImportStateId:     fmt.Sprintf("b/%s/managedFolders/managed/folder/name/", fmt.Sprintf("tf-test-my-bucket%s", context["random_suffix"])),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -152,7 +152,7 @@ func TestAccStorageManagedFolderIamBindingGenerated_withCondition(t *testing.T) 
 			},
 			{
 				ResourceName:      "google_storage_managed_folder_iam_binding.foo",
-				ImportStateId:     fmt.Sprintf("b/%s/managedFolders/%s roles/storage.objectViewer %s", fmt.Sprintf("tf-test-my-bucket%s", context["random_suffix"]), fmt.Sprintf("tf-test-managed/folder/name%s", context["random_suffix"]), context["condition_title"]),
+				ImportStateId:     fmt.Sprintf("b/%s/managedFolders/managed/folder/name/ roles/storage.objectViewer %s", fmt.Sprintf("tf-test-my-bucket%s", context["random_suffix"]), context["condition_title"]),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -185,19 +185,19 @@ func TestAccStorageManagedFolderIamBindingGenerated_withAndWithoutCondition(t *t
 			},
 			{
 				ResourceName:      "google_storage_managed_folder_iam_binding.foo",
-				ImportStateId:     fmt.Sprintf("b/%s/managedFolders/%s roles/storage.objectViewer", fmt.Sprintf("tf-test-my-bucket%s", context["random_suffix"]), fmt.Sprintf("tf-test-managed/folder/name%s", context["random_suffix"])),
+				ImportStateId:     fmt.Sprintf("b/%s/managedFolders/managed/folder/name/ roles/storage.objectViewer", fmt.Sprintf("tf-test-my-bucket%s", context["random_suffix"])),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
 				ResourceName:      "google_storage_managed_folder_iam_binding.foo2",
-				ImportStateId:     fmt.Sprintf("b/%s/managedFolders/%s roles/storage.objectViewer %s", fmt.Sprintf("tf-test-my-bucket%s", context["random_suffix"]), fmt.Sprintf("tf-test-managed/folder/name%s", context["random_suffix"]), context["condition_title"]),
+				ImportStateId:     fmt.Sprintf("b/%s/managedFolders/managed/folder/name/ roles/storage.objectViewer %s", fmt.Sprintf("tf-test-my-bucket%s", context["random_suffix"]), context["condition_title"]),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
 				ResourceName:      "google_storage_managed_folder_iam_binding.foo3",
-				ImportStateId:     fmt.Sprintf("b/%s/managedFolders/%s roles/storage.objectViewer %s", fmt.Sprintf("tf-test-my-bucket%s", context["random_suffix"]), fmt.Sprintf("tf-test-managed/folder/name%s", context["random_suffix"]), context["condition_title_no_desc"]),
+				ImportStateId:     fmt.Sprintf("b/%s/managedFolders/managed/folder/name/ roles/storage.objectViewer %s", fmt.Sprintf("tf-test-my-bucket%s", context["random_suffix"]), context["condition_title_no_desc"]),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -228,7 +228,7 @@ func TestAccStorageManagedFolderIamMemberGenerated_withCondition(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_storage_managed_folder_iam_member.foo",
-				ImportStateId:     fmt.Sprintf("b/%s/managedFolders/%s roles/storage.objectViewer user:admin@hashicorptest.com %s", fmt.Sprintf("tf-test-my-bucket%s", context["random_suffix"]), fmt.Sprintf("tf-test-managed/folder/name%s", context["random_suffix"]), context["condition_title"]),
+				ImportStateId:     fmt.Sprintf("b/%s/managedFolders/managed/folder/name/ roles/storage.objectViewer user:admin@hashicorptest.com %s", fmt.Sprintf("tf-test-my-bucket%s", context["random_suffix"]), context["condition_title"]),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -261,19 +261,19 @@ func TestAccStorageManagedFolderIamMemberGenerated_withAndWithoutCondition(t *te
 			},
 			{
 				ResourceName:      "google_storage_managed_folder_iam_member.foo",
-				ImportStateId:     fmt.Sprintf("b/%s/managedFolders/%s roles/storage.objectViewer user:admin@hashicorptest.com", fmt.Sprintf("tf-test-my-bucket%s", context["random_suffix"]), fmt.Sprintf("tf-test-managed/folder/name%s", context["random_suffix"])),
+				ImportStateId:     fmt.Sprintf("b/%s/managedFolders/managed/folder/name/ roles/storage.objectViewer user:admin@hashicorptest.com", fmt.Sprintf("tf-test-my-bucket%s", context["random_suffix"])),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
 				ResourceName:      "google_storage_managed_folder_iam_member.foo2",
-				ImportStateId:     fmt.Sprintf("b/%s/managedFolders/%s roles/storage.objectViewer user:admin@hashicorptest.com %s", fmt.Sprintf("tf-test-my-bucket%s", context["random_suffix"]), fmt.Sprintf("tf-test-managed/folder/name%s", context["random_suffix"]), context["condition_title"]),
+				ImportStateId:     fmt.Sprintf("b/%s/managedFolders/managed/folder/name/ roles/storage.objectViewer user:admin@hashicorptest.com %s", fmt.Sprintf("tf-test-my-bucket%s", context["random_suffix"]), context["condition_title"]),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
 				ResourceName:      "google_storage_managed_folder_iam_member.foo3",
-				ImportStateId:     fmt.Sprintf("b/%s/managedFolders/%s roles/storage.objectViewer user:admin@hashicorptest.com %s", fmt.Sprintf("tf-test-my-bucket%s", context["random_suffix"]), fmt.Sprintf("tf-test-managed/folder/name%s", context["random_suffix"]), context["condition_title_no_desc"]),
+				ImportStateId:     fmt.Sprintf("b/%s/managedFolders/managed/folder/name/ roles/storage.objectViewer user:admin@hashicorptest.com %s", fmt.Sprintf("tf-test-my-bucket%s", context["random_suffix"]), context["condition_title_no_desc"]),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -317,7 +317,7 @@ func TestAccStorageManagedFolderIamPolicyGenerated_withCondition(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_storage_managed_folder_iam_policy.foo",
-				ImportStateId:     fmt.Sprintf("b/%s/managedFolders/%s", fmt.Sprintf("tf-test-my-bucket%s", context["random_suffix"]), fmt.Sprintf("tf-test-managed/folder/name%s", context["random_suffix"])),
+				ImportStateId:     fmt.Sprintf("b/%s/managedFolders/managed/folder/name/", fmt.Sprintf("tf-test-my-bucket%s", context["random_suffix"])),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -335,7 +335,7 @@ resource "google_storage_bucket" "bucket" {
 
 resource "google_storage_managed_folder" "folder" {
   bucket = google_storage_bucket.bucket.name
-  name   = "managed/folder/name%{random_suffix}"
+  name   = "managed/folder/name/"
 }
 
 resource "google_storage_managed_folder_iam_member" "foo" {
@@ -357,7 +357,7 @@ resource "google_storage_bucket" "bucket" {
 
 resource "google_storage_managed_folder" "folder" {
   bucket = google_storage_bucket.bucket.name
-  name   = "managed/folder/name%{random_suffix}"
+  name   = "managed/folder/name/"
 }
 
 data "google_iam_policy" "foo" {
@@ -397,7 +397,7 @@ resource "google_storage_bucket" "bucket" {
 
 resource "google_storage_managed_folder" "folder" {
   bucket = google_storage_bucket.bucket.name
-  name   = "managed/folder/name%{random_suffix}"
+  name   = "managed/folder/name/"
 }
 
 data "google_iam_policy" "foo" {
@@ -421,7 +421,7 @@ resource "google_storage_bucket" "bucket" {
 
 resource "google_storage_managed_folder" "folder" {
   bucket = google_storage_bucket.bucket.name
-  name   = "managed/folder/name%{random_suffix}"
+  name   = "managed/folder/name/"
 }
 
 resource "google_storage_managed_folder_iam_binding" "foo" {
@@ -443,7 +443,7 @@ resource "google_storage_bucket" "bucket" {
 
 resource "google_storage_managed_folder" "folder" {
   bucket = google_storage_bucket.bucket.name
-  name   = "managed/folder/name%{random_suffix}"
+  name   = "managed/folder/name/"
 }
 
 resource "google_storage_managed_folder_iam_binding" "foo" {
@@ -465,7 +465,7 @@ resource "google_storage_bucket" "bucket" {
 
 resource "google_storage_managed_folder" "folder" {
   bucket = google_storage_bucket.bucket.name
-  name   = "managed/folder/name%{random_suffix}"
+  name   = "managed/folder/name/"
 }
 
 resource "google_storage_managed_folder_iam_binding" "foo" {
@@ -492,7 +492,7 @@ resource "google_storage_bucket" "bucket" {
 
 resource "google_storage_managed_folder" "folder" {
   bucket = google_storage_bucket.bucket.name
-  name   = "managed/folder/name%{random_suffix}"
+  name   = "managed/folder/name/"
 }
 
 resource "google_storage_managed_folder_iam_binding" "foo" {
@@ -539,7 +539,7 @@ resource "google_storage_bucket" "bucket" {
 
 resource "google_storage_managed_folder" "folder" {
   bucket = google_storage_bucket.bucket.name
-  name   = "managed/folder/name%{random_suffix}"
+  name   = "managed/folder/name/"
 }
 
 resource "google_storage_managed_folder_iam_member" "foo" {
@@ -566,7 +566,7 @@ resource "google_storage_bucket" "bucket" {
 
 resource "google_storage_managed_folder" "folder" {
   bucket = google_storage_bucket.bucket.name
-  name   = "managed/folder/name%{random_suffix}"
+  name   = "managed/folder/name/"
 }
 
 resource "google_storage_managed_folder_iam_member" "foo" {
@@ -613,7 +613,7 @@ resource "google_storage_bucket" "bucket" {
 
 resource "google_storage_managed_folder" "folder" {
   bucket = google_storage_bucket.bucket.name
-  name   = "managed/folder/name%{random_suffix}"
+  name   = "managed/folder/name/"
 }
 
 data "google_iam_policy" "foo" {
