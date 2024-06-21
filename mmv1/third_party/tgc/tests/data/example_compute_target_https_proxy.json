@@ -15,7 +15,6 @@
           "projects/{{.Provider.project}}/global/sslCertificates/ssl-certificate-id"
         ],
         "sslPolicy": "projects/{{.Provider.project}}/global/sslPolicies/ssl-policy-id",
-	"tlsEarlyData": "DISABLED",
         "urlMap": "projects/{{.Provider.project}}/global/urlMaps/url-map-id"
       }
     }
