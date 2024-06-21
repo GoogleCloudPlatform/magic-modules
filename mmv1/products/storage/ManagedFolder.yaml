@@ -65,11 +65,6 @@ examples:
     vars:
       bucket_name: 'my-bucket'
       managed_folder_name: 'managed/folder/name/'
-  # - !ruby/object:Provider::Terraform::Examples
-  #   name: 'storage_managed_folder_nested'
-  #   primary_resource_id: 'folder'
-  #   vars:
-  #     bucket_name: 'my-bucket'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'bucket'
