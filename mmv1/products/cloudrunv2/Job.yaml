@@ -114,6 +114,13 @@ examples:
       ])"
     vars:
       cloud_run_job_name: 'cloudrun-job'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'cloudrunv2_job_run_job'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-cloudrun-job%s\", context[\"random_suffix\"\
+      ])"
+    vars:
+      cloud_run_job_name: 'cloudrun-job'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -226,6 +233,22 @@ properties:
         name: 'useDefault'
         description: |
           If True, indicates to use the default project's binary authorization policy. If False, binary authorization will be disabled.
+  - !ruby/object:Api::Type::String
+    name: 'startExecutionToken'
+    description: |-
+      A unique string used as a suffix creating a new execution upon job create or update. The Job will become ready when the execution is successfully started.
+      The sum of job name and token length must be fewer than 63 characters.
+    conflicts:
+      - run_execution_token
+    min_version: beta
+  - !ruby/object:Api::Type::String
+    name: 'runExecutionToken'
+    description: |-
+      A unique string used as a suffix creating a new execution upon job create or update. The Job will become ready when the execution is successfully completed.
+      The sum of job name and token length must be fewer than 63 characters.
+    conflicts:
+      - start_execution_token
+    min_version: beta
   - !ruby/object:Api::Type::NestedObject
     name: 'template'
     required: true

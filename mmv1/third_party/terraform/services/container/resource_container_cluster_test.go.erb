@@ -2059,7 +2059,7 @@ func TestAccContainerCluster_withNodePoolAutoscaling(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy: testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccContainerCluster_withNodePoolAutoscaling(clusterName, npName, networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.with_node_pool", "node_pool.0.autoscaling.0.min_node_count", "1"),
@@ -2072,7 +2072,7 @@ func TestAccContainerCluster_withNodePoolAutoscaling(t *testing.T) {
 				ImportStateVerify:	 true,
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
-			resource.TestStep{
+			{
 				Config: testAccContainerCluster_withNodePoolUpdateAutoscaling(clusterName, npName, networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.with_node_pool", "node_pool.0.autoscaling.0.min_node_count", "1"),
@@ -2085,7 +2085,7 @@ func TestAccContainerCluster_withNodePoolAutoscaling(t *testing.T) {
 				ImportStateVerify:	 true,
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
-			resource.TestStep{
+			{
 				Config: testAccContainerCluster_withNodePoolBasic(clusterName, npName, networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckNoResourceAttr("google_container_cluster.with_node_pool", "node_pool.0.autoscaling.0.min_node_count"),
@@ -2115,7 +2115,7 @@ func TestAccContainerCluster_withNodePoolCIA(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy: testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccContainerRegionalCluster_withNodePoolCIA(clusterName, npName, networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.with_node_pool", "node_pool.0.autoscaling.0.min_node_count", "0"),
@@ -2131,7 +2131,7 @@ func TestAccContainerCluster_withNodePoolCIA(t *testing.T) {
 				ImportStateVerify:	 true,
 				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
 			},
-			resource.TestStep{
+			{
 				Config: testAccContainerRegionalClusterUpdate_withNodePoolCIA(clusterName, npName, networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.with_node_pool", "node_pool.0.autoscaling.0.min_node_count", "0"),
@@ -2147,7 +2147,7 @@ func TestAccContainerCluster_withNodePoolCIA(t *testing.T) {
 				ImportStateVerify:	 true,
 				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
 			},
-			resource.TestStep{
+			{
 				Config: testAccContainerRegionalCluster_withNodePoolBasic(clusterName, npName, networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckNoResourceAttr("google_container_cluster.with_node_pool", "node_pool.0.autoscaling.0.min_node_count"),
@@ -3222,6 +3222,59 @@ func TestAccContainerCluster_withIdentityServiceConfig(t *testing.T) {
 		},
 	})
 }
+
+<% unless version == 'ga' -%>
+func TestAccContainerCluster_withSecretManagerConfig(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_basic(clusterName, networkName, subnetworkName),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_withSecretManagerConfigEnabled(clusterName, networkName, subnetworkName),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_withSecretManagerConfigUpdated(clusterName, networkName, subnetworkName),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_basic(clusterName, networkName, subnetworkName),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+<% end -%>
 
 func TestAccContainerCluster_withLoggingConfig(t *testing.T) {
 	t.Parallel()
@@ -4565,6 +4618,15 @@ func TestAccContainerCluster_withSecurityPostureConfig(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
+				Config: testAccContainerCluster_SetSecurityPostureToEnterprise(clusterName, networkName, subnetworkName),
+			},
+			{
+				ResourceName:            "google_container_cluster.with_security_posture_config",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
 			 	Config: testAccContainerCluster_SetWorkloadVulnerabilityToStandard(clusterName, networkName, subnetworkName),
 			},
 			{
@@ -4755,6 +4817,22 @@ resource "google_container_cluster" "with_security_posture_config" {
   initial_node_count = 1
   security_posture_config {
 	mode = "BASIC"
+  }
+  deletion_protection = false
+  network    = "%s"
+  subnetwork    = "%s"
+}
+`, resource_name, networkName, subnetworkName)
+}
+
+func testAccContainerCluster_SetSecurityPostureToEnterprise(resource_name, networkName, subnetworkName string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_security_posture_config" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  security_posture_config {
+	mode = "ENTERPRISE"
   }
   deletion_protection = false
   network    = "%s"
@@ -9227,6 +9305,41 @@ resource "google_container_cluster" "primary" {
 `, name, networkName, subnetworkName)
 }
 
+<% unless version == 'ga' -%>
+func testAccContainerCluster_withSecretManagerConfigEnabled(name, networkName, subnetworkName string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  secret_manager_config {
+    enabled = true
+  }
+  deletion_protection = false
+  network    = "%s"
+  subnetwork    = "%s"
+}
+`, name, networkName, subnetworkName)
+}
+
+func testAccContainerCluster_withSecretManagerConfigUpdated(name, networkName, subnetworkName string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+
+  secret_manager_config {
+    enabled = false
+  }
+  deletion_protection = false
+  network    = "%s"
+  subnetwork    = "%s"
+}
+`, name, networkName, subnetworkName)
+}
+<% end -%>
+
 func testAccContainerCluster_withLoggingConfigEnabled(name, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
@@ -10655,7 +10768,7 @@ func TestAccContainerCluster_privateRegistry(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccContainerCluster_privateRegistryEnabled(secretID, clusterName, networkName, subnetworkName),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(
@@ -10703,7 +10816,7 @@ func TestAccContainerCluster_privateRegistry(t *testing.T) {
 					),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccContainerCluster_withNodePoolPrivateRegistry(secretID, clusterName, nodePoolName, networkName, subnetworkName),
 			},
 			{
@@ -10712,7 +10825,7 @@ func TestAccContainerCluster_privateRegistry(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
-			resource.TestStep{
+			{
 				Config: testAccContainerCluster_withNodeConfigPrivateRegistry(secretID, clusterName, networkName, subnetworkName),
 			},
 			{

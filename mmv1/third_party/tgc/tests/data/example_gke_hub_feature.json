@@ -9,6 +9,7 @@
             "discovery_name": "Feature",
             "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
             "data": {
+                "fleetDefaultMemberConfig": null,
                 "labels": {
                     "foo": "bar"
                 }
