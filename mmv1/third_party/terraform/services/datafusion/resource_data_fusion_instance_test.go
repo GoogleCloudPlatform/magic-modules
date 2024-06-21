@@ -208,7 +208,7 @@ resource "google_data_fusion_instance" "basic_instance" {
 `, context)
 }
 
-func TestAccDataFusionInstanceNetwork_dataFusionNetworkUpdate(t *testing.T) {
+func TestAccDataFusionInstanceNetwork_dataFusionNetworkReCreate(t *testing.T) {
 	t.Parallel()
 
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
@@ -227,7 +227,7 @@ func TestAccDataFusionInstanceNetwork_dataFusionNetworkUpdate(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			{
-				Config: testAccDataFusionInstanceNetwork_updateNetwork(instanceName),
+				Config: testAccDataFusionInstanceNetwork_psc(instanceName),
 			},
 			{
 				ResourceName:            "google_data_fusion_instance.foobar",
@@ -239,7 +239,7 @@ func TestAccDataFusionInstanceNetwork_dataFusionNetworkUpdate(t *testing.T) {
 	})
 }
 
-func testAccDataFusionInstanceNetwork_updateNetwork(instanceName string) string {
+func testAccDataFusionInstanceNetwork_psc(instanceName string) string {
 	return fmt.Sprintf(`
 resource "google_data_fusion_instance" "foobar" {
   name   = "%s"
