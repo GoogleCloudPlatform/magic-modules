@@ -332,7 +332,11 @@ module Provider
                        ['converters/google/resources/logging_folder_bucket_config.go',
                         'third_party/tgc/logging_folder_bucket_config.go'],
                        ['converters/google/resources/logging_organization_bucket_config.go',
-                        'third_party/tgc/logging_organization_bucket_config.go']
+                        'third_party/tgc/logging_organization_bucket_config.go'],
+                       ['converters/google/resources/logging_project_bucket_config.go',
+                        'third_party/tgc/logging_project_bucket_config.go'],
+                       ['converters/google/resources/logging_billing_account_bucket_config.go',
+                        'third_party/tgc/logging_billing_account_bucket_config.go']
                      ])
     end
 
