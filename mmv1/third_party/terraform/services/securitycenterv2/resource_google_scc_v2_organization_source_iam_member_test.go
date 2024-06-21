@@ -46,7 +46,7 @@ func TestAccSCCV2OrganizationSourceIAMMember(t *testing.T) {
 	})
 }
 
-func testAccSCCV2OrganizationSourceIAMMember(orgId, suffix, role, member, title, description, expression string) string {
+func testAccSCCV2OrganizationSourceIAMMember(suffix, orgId, role, orgId, role, member, title, description string) string {
 	return fmt.Sprintf(`
 resource "google_scc_v2_organization_source" "custom_source" {
   display_name  = "TFSrc %s"
@@ -62,8 +62,7 @@ resource "google_scc_v2_organization_source_iam_member" "custom_member" {
   condition {
     title       = "%s"
     description = "%s"
-    expression  = "request.time < timestamp(\"2023-12-31T00:00:00Z\")"
   }
 }
-`, suffix, orgId, role, member, title, description, expression)
+`, suffix, orgId, role, orgId, role, member, title, description)
 }
