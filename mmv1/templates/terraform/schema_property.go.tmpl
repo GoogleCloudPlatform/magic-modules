@@ -66,7 +66,7 @@
   {{- if .ItemType.DefaultValue -}}
 Default value: {{ .ItemType.DefaultValue -}}
   {{- end -}}
-Possible values: [{{- .EnumValuesToString "\"" false -}}]
+{{- " "}}Possible values: [{{- .ItemType.EnumValuesToString "\"" false -}}]
   {{- else if and (eq .Type "Enum") (not .Output) -}}
     {{- if .DefaultValue -}}
       {{- " "}}Default value: "{{ .DefaultValue -}}"
@@ -109,14 +109,20 @@ Possible values: [{{- .EnumValuesToString "\"" false -}}]
       },
   {{ else if eq .ItemType.Type "Enum" -}}
       Elem: &schema.Schema{
-        Type: schema.Type{{ .ItemTypeClass -}},
-        ValidateFunc: verify.ValidateEnum([]string{ {{- .ItemType.EnumValuesToString "\"" true -}} }),
+        Type: schema.TypeString,
+        {{- if not .Output }}
+        ValidateFunc: verify.ValidateEnum([]string{ {{- .ItemType.EnumValuesToString "\"" false -}} }),
+        {{- end }}
       },
   {{ else -}}
       Elem: &schema.Schema{
-        Type: schema.Type{{ .ItemTypeClass -}},
     {{ if eq .ItemType.Type "ResourceRef" -}}
+        Type: schema.TypeString,
+        {{- if not .Output }}
         DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
+        {{- end }}
+    {{ else -}}
+        Type: schema.Type{{ .ItemTypeClass -}},
     {{ end -}}
       },
   {{ end -}}
