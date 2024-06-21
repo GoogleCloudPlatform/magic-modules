@@ -252,6 +252,10 @@ fun ParametrizedWithType.readOnlySettings() {
     hiddenVariable("teamcity.ui.settings.readOnly", "true", "Requires build configurations be edited via Kotlin")
 }
 
+
+// ParametrizedWithType.activeBranchSettings sets the max length of age for keeping an active branch
+// after a recent build is made. (By default, the activeBuildBranch age is 24 hours while activeVcsBranch age is 7 days.)
+// https://www.jetbrains.com/help/teamcity/2024.03/working-with-feature-branches.html#Active+Branches
 fun ParametrizedWithType.activeBranchSettings() {
     hiddenVariable("teamcity.activeVcsBranch.age.days", "10")
     hiddenVariable("teamcity.activeBuildBranch.age.days", "10")
