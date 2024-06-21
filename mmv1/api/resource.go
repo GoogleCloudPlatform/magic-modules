@@ -984,15 +984,9 @@ func ImportIdFormats(importFormat, identity []string, baseUrl string) []string {
 	// `{{project}}/{{%name}}` as there is no way to differentiate between
 	// project-name/resource-name and resource-name/with-slash
 	if !strings.Contains(idFormats[0], "%") {
-		idFormats = append(idFormats, shortIdFormat, shortIdDefaultProjectFormat)
-		if shortIdDefaultProjectFormat != shortIdDefaultFormat {
-			idFormats = append(idFormats, shortIdDefaultFormat)
-		}
+		idFormats = append(idFormats, shortIdFormat, shortIdDefaultProjectFormat, shortIdDefaultFormat)
 	}
 
-	idFormats = google.Reject(slices.Compact(idFormats), func(i string) bool {
-		return i == ""
-	})
 	slices.SortFunc(idFormats, func(a, b string) int {
 		i := strings.Count(a, "/")
 		j := strings.Count(b, "/")
@@ -1002,7 +996,25 @@ func ImportIdFormats(importFormat, identity []string, baseUrl string) []string {
 		return i - j
 	})
 	slices.Reverse(idFormats)
-	return idFormats
+
+	// Remove duplicates from idFormats
+	uniq := make([]string, len(idFormats))
+	uniq[0] = idFormats[0]
+	i := 1
+	j := 1
+	for j < len(idFormats) {
+		format := idFormats[j]
+		if format != uniq[i-1] {
+			uniq[i] = format
+			i++
+		}
+		j++
+	}
+
+	uniq = google.Reject(slices.Compact(uniq), func(i string) bool {
+		return i == ""
+	})
+	return uniq
 }
 
 func (r Resource) IgnoreReadPropertiesToString(e resource.Examples) string {
