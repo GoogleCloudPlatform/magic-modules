@@ -207,3 +207,85 @@ resource "google_data_fusion_instance" "basic_instance" {
 }
 `, context)
 }
+
+func TestAccDataFusionInstanceNetwork_dataFusionNetworkUpdate(t *testing.T) {
+	t.Parallel()
+
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataFusionInstance_basic(instanceName),
+			},
+			{
+				ResourceName:            "google_data_fusion_instance.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				Config: testAccDataFusionInstanceNetwork_updateNetwork(instanceName),
+			},
+			{
+				ResourceName:            "google_data_fusion_instance.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccDataFusionInstanceNetwork_updateNetwork(instanceName string) string {
+	return fmt.Sprintf(`
+resource "google_data_fusion_instance" "foobar" {
+  name   = "%s"
+  region = "us-central1"
+  type   = "BASIC"
+  # See supported versions here https://cloud.google.com/data-fusion/docs/support/version-support-policy
+  version = "6.9.1"
+  # Mark for testing to avoid service networking connection usage that is not cleaned up
+  options = {
+	prober_test_run = "true"
+  }
+  accelerators {
+    accelerator_type = "CDC"
+    state = "DISABLED"
+  }
+  network_config {
+    connection_type = "PRIVATE_SERVICE_CONNECT_INTERFACES"
+    private_service_connect_config {
+      network_attachment     = google_compute_network_attachment.psc.id
+      unreachable_cidr_block = "192.168.0.0/25"
+    }
+  }
+}
+
+resource "google_compute_network" "psc" {
+	name                    = "psc"
+	auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "psc" {
+	name   = "psc"
+	region = "us-central1"
+
+	network       = google_compute_network.psc.id
+	ip_cidr_range = "10.0.0.0/16"
+}
+
+resource "google_compute_network_attachment" "psc" {
+	name                  = "psc"
+	region                = "us-central1"
+	connection_preference = "ACCEPT_AUTOMATIC"
+
+	subnetworks = [
+		google_compute_subnetwork.psc.self_link
+	]
+}
+
+`, instanceName)
+}

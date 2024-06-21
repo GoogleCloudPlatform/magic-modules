@@ -288,7 +288,7 @@ properties:
               This range can be used for other purposes in the consumer VPC as long as there is no requirement for CDF to reach destinations using these addresses.
               If this value is not provided, the server chooses a non RFC 1918 address range. The format of this field is governed by RFC 4632.
             required: false
-            output: false
+            ignore_read: true
           - !ruby/object:Api::Type::String
             name: 'effectiveUnreachableCidrBlock'
             description: |
