@@ -27,7 +27,7 @@ if d.HasChange("gce_setup.0.metadata") {
 if d.HasChange("effective_labels") {
     newUpdateMask = append(newUpdateMask, "labels")
 }
-
+updateMask = newUpdateMask
 // Overwrite the previously set mask.
 url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(newUpdateMask, ",")})
 if err != nil {
@@ -54,4 +54,11 @@ if stopInstance{
 
 } else {
   log.Printf("[DEBUG] Workbench Instance %q need not be stopped for the update.", name)
+}
+
+if d.HasChange("gce_setup.0.boot_disk.0.disk_size_gb") {
+  resizeWorkbenchInstanceDisk(config, d, project, userAgent, true)
+}
+if d.HasChange("gce_setup.0.data_disks.0.disk_size_gb") {
+  resizeWorkbenchInstanceDisk(config, d, project, userAgent, false)
 }

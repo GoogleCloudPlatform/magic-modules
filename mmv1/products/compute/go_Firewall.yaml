@@ -161,6 +161,7 @@ properties:
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
+    send_empty_value: true
   - name: 'destinationRanges'
     type: Array
     description: |
