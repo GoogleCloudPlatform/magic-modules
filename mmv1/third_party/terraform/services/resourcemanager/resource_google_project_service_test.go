@@ -91,7 +91,7 @@ func TestAccProjectService_disableDependentServices(t *testing.T) {
 				ResourceName:            "google_project_service.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"disable_on_destroy"},
+				ImportStateVerifyIgnore: []string{"disable_on_destroy", "check_if_service_has_usage_on_destroy"},
 			},
 			{
 				Config:      testAccProjectService_dependencyRemoved(services, pid, org, billingId),
@@ -211,7 +211,7 @@ func TestAccProjectService_checkUsageOfServices(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProjectService_checkUsage(services, pid, org),
+				Config: testAccProjectService_checkUsage(services, pid, org, "false"),
 			},
 			{
 				ResourceName:            "google_project_service.test",
@@ -350,7 +350,7 @@ resource "google_project_service" "test" {
 `, pid, pid, org, service)
 }
 
-func testAccProjectService_checkUsage(service string, pid, org string) string {
+func testAccProjectService_checkUsage(service string, pid, org string, checkIfServiceHasUsage string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
   project_id = "%s"
@@ -362,7 +362,7 @@ resource "google_project_service" "test" {
   project = google_project.acceptance.project_id
   service = "%s"
 
-  check_if_service_has_usage_on_destroy = false
+  check_if_service_has_usage_on_destroy = checkIfServiceHasUsage
 }
 `, pid, pid, org, service)
 }
