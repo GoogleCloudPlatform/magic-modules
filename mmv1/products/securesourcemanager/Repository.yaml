@@ -59,6 +59,15 @@ examples:
     vars:
       repository_id: 'my-repository'
       instance_id: 'my-instance'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'secure_source_manager_repository_initial_config'
+    primary_resource_id: 'default'
+    primary_resource_name: "fmt.Sprintf(\"tf-test-my-repo%s\",
+      context[\"random_suffix\"\
+      ])"
+    vars:
+      repository_id: 'my-repository'
+      instance_id: 'my-instance'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
