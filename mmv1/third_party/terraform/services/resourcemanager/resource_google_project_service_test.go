@@ -219,6 +219,15 @@ func TestAccProjectService_checkUsageOfServices(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"disable_on_destroy", "disable_dependent_services"},
 			},
+			{
+				Config: testAccProjectService_checkUsage(services, pid, org, "true"),
+			},
+			{
+				ResourceName:            "google_project_service.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"disable_on_destroy", "disable_dependent_services"},
+			},
 		},
 	})
 }
