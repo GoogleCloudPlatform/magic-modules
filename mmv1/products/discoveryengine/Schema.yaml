@@ -47,55 +47,55 @@ async: !ruby/object:Api::OpAsync
     path: "done"
     complete: true
     allowed:
-    - true
-    - false
+      - true
+      - false
   error: !ruby/object:Api::OpAsync::Error
     path: "error"
     message: "message"
 
 examples:
-- !ruby/object:Provider::Terraform::Examples
-  name: "discoveryengine_schema_basic"
-  primary_resource_id: 'basic'
-  primary_resource_name:
-    'fmt.Sprintf("tf_test_schema%s", context["random_suffix"])'
-  vars:
-    data_store_id: "data-store-id"
-    schema_id: "schema-id"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "discoveryengine_schema_basic"
+    primary_resource_id: 'basic'
+    primary_resource_name:
+      'fmt.Sprintf("tf_test_schema%s", context["random_suffix"])'
+    vars:
+      data_store_id: "data-store-id"
+      schema_id: "schema-id"
 parameters:
-- !ruby/object:Api::Type::String
-  name: 'location'
-  required: true
-  immutable: true
-  url_param_only: true
-  description: |
-    The geographic location where the data store should reside. The value can
-    only be one of "global", "us" and "eu".
-- !ruby/object:Api::Type::String
-  name: 'dataStoreId'
-  required: true
-  immutable: true
-  url_param_only: true
-  description: |
-    The unique id of the data store.
-- !ruby/object:Api::Type::String
-  name: 'schemaId'
-  required: true
-  immutable: true
-  url_param_only: true
-  description: |
-    The unique id of the schema.
+  - !ruby/object:Api::Type::String
+    name: 'location'
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The geographic location where the data store should reside. The value can
+      only be one of "global", "us" and "eu".
+  - !ruby/object:Api::Type::String
+    name: 'dataStoreId'
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The unique id of the data store.
+  - !ruby/object:Api::Type::String
+    name: 'schemaId'
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The unique id of the schema.
 
 properties:
-- !ruby/object:Api::Type::String
-  name: 'name'
-  description: |
-    The unique full resource name of the schema. Values are of the format
-    `projects/{project}/locations/{location}/collections/{collection_id}/dataStores/{data_store_id}/schemas/{schema_id}`.
-    This field must be a UTF-8 encoded string with a length limit of 1024
-    characters.
-  output: true
-- !ruby/object:Api::Type::String
-  name: 'jsonSchema'
-  description: |
-    The JSON representation of the schema.
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description: |
+      The unique full resource name of the schema. Values are of the format
+      `projects/{project}/locations/{location}/collections/{collection_id}/dataStores/{data_store_id}/schemas/{schema_id}`.
+      This field must be a UTF-8 encoded string with a length limit of 1024
+      characters.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: 'jsonSchema'
+    description: |
+      The JSON representation of the schema.
