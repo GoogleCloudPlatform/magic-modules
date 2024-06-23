@@ -22,7 +22,7 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 
 base_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/schemas'
 self_link: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/schemas/{{schema_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores?schemaId={{schema_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/schemas?schemaId={{schema_id}}'
 update_verb: :PATCH
 update_mask: true
 delete_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/schemas/{{schema_id}}'
@@ -58,7 +58,7 @@ examples:
   name: "discoveryengine_schema_basic"
   primary_resource_id: 'basic'
   primary_resource_name:
-    'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
+    'fmt.Sprintf("tf_test_schema%s", context["random_suffix"])'
   vars:
     data_store_id: "data-store-id"
     schema_id: "schema-id"
