@@ -45,6 +45,33 @@ examples:
       network: 'connectivity-vpc'
       source_addr: 'src-addr'
       dest_addr: 'dest-addr'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'network_management_connectivity_test_cloudrun_v2'
+    primary_resource_id: 'cloudrun-v2-test'
+    vars:
+      primary_resource_name: 'cloudrun-v2-test'
+      network: 'connectivity-vpc'
+      source_cloudrun: 'src-cloudrun-v2'
+      dest_cloudrun: 'dest-cloudrun-v2'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'network_management_connectivity_test_cloudfunctions2'
+    primary_resource_id: 'cloudfunctions2-test'
+    vars:
+      primary_resource_name: 'cloudfunctions2-test'
+      source_cloudfunction: 'src-cloudfunctions2'
+      dest_cloudfunction: 'dest-cloudfunctions2'
+      bucket_name: 'gcf-source'
+      zip_path: 'function-source.zip'
+    test_env_vars:
+      project: :PROJECT_NAME
+    test_vars_overrides:
+      zip_path: '"../cloudfunctions2/test-fixtures/function-source.zip"'
+      location:
+        '"us-central1"'
+        # ignore these fields during import step
+    ignore_read_extra:
+      - 'build_config.0.source.0.storage_source.0.object'
+      - 'build_config.0.source.0.storage_source.0.bucket'
 properties:
   - !ruby/object:Api::Type::String
     name: name
@@ -93,6 +120,8 @@ properties:
       - 'source.network'
       - 'source.networkType'
       - 'source.projectId'
+      - 'source.forwardingRule'
+      - 'source.cloudsql'
     properties:
       - !ruby/object:Api::Type::String
         name: ipAddress
@@ -133,6 +162,48 @@ properties:
              that you provide is from the service project. In this case,
              the network that the IP address resides in is defined in the
              host project.
+      - !ruby/object:Api::Type::String
+        name: forwardingRule
+        description: |-
+          ID of the Forwarding Rule in one of the following formats:
+          1. projects/{project}/global/forwardingRules/{id}
+          2. projects/{project}/regions/{region}/forwardingRules/{id}
+      - !ruby/object:Api::Type::String
+        name: gkeMasterCluster
+        description: |-
+          A cluster URI for Google Kubernetes Engine master.
+      - !ruby/object:Api::Type::String
+        name: cloudSqlInstance
+        description: |-
+          A Cloud SQL instance URI.
+      - !ruby/object:Api::Type::NestedObject
+        name: cloudFunction
+        description: |
+          Reference to a cloud function
+        properties:
+          - !ruby/object:Api::Type::String
+            name: uri
+            description: |-
+              A Cloud Function URI.
+      - !ruby/object:Api::Type::NestedObject
+        name: appEngineVersion
+        description: |
+          Reference to an App engine service version.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: uri
+            description: |-
+              A App Engine service URI.
+      - !ruby/object:Api::Type::NestedObject
+        name: cloudRunRevision
+        description: |
+          Reference to a Cloud Run revision.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: uri
+            description: |-
+              A Cloud Run revision URI.
+              The format is: projects/{project}/locations/{location}/revisions/{revision}
   - !ruby/object:Api::Type::NestedObject
     name: 'destination'
     required: true
@@ -192,6 +263,48 @@ properties:
           that you provide is from the service project. In this case, the
           network that the IP address resides in is defined in the host
           project.
+      - !ruby/object:Api::Type::String
+        name: forwardingRule
+        description: |-
+          ID of the Forwarding Rule in one of the following formats:
+          1. projects/{project}/global/forwardingRules/{id}
+          2. projects/{project}/regions/{region}/forwardingRules/{id}
+      - !ruby/object:Api::Type::String
+        name: gkeMasterCluster
+        description: |-
+          A cluster URI for Google Kubernetes Engine master.
+      - !ruby/object:Api::Type::String
+        name: cloudSqlInstance
+        description: |-
+          A Cloud SQL instance URI.
+      - !ruby/object:Api::Type::NestedObject
+        name: cloudFunction
+        description: |
+          Reference to a cloud function
+        properties:
+          - !ruby/object:Api::Type::String
+            name: uri
+            description: |-
+              A Cloud Function URI.
+      - !ruby/object:Api::Type::NestedObject
+        name: appEngineVersion
+        description: |
+          Reference to an App engine service version.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: uri
+            description: |-
+              A App Engine service URI.
+      - !ruby/object:Api::Type::NestedObject
+        name: cloudRunRevision
+        description: |
+          Reference to a Cloud Run revision.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: uri
+            description: |-
+              A Cloud Run revision URI.
+              The format is: projects/{project}/locations/{location}/revisions/{revision}
   - !ruby/object:Api::Type::String
     name: protocol
     description: |-
