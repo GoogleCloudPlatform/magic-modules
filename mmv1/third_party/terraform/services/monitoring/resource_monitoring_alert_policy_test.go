@@ -408,10 +408,6 @@ resource "google_monitoring_alert_policy" "log" {
     content   = "test content"
     mime_type = "text/markdown"
     subject = "test subject"
-	links {
-        display_name = "link display name"
-        url = "http://mydomain.com"
-	}    
   }
 }
 `, alertName, conditionName)
