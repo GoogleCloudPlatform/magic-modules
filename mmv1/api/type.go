@@ -293,12 +293,12 @@ func (t *Type) SetDefault(r *Resource) {
 	switch {
 	case t.IsA("Array"):
 		t.ItemType.ParentName = t.Name
-		t.ItemType.ParentMetadata = t.ParentMetadata
+		t.ItemType.ParentMetadata = t
 		t.ItemType.SetDefault(r)
 	case t.IsA("Map"):
 		t.KeyExpander = "tpgresource.ExpandString"
 		t.ValueType.ParentName = t.Name
-		t.ValueType.ParentMetadata = t.ParentMetadata
+		t.ValueType.ParentMetadata = t
 		t.ValueType.SetDefault(r)
 	case t.IsA("NestedObject"):
 		if t.Name == "" {
@@ -443,7 +443,11 @@ func (t *Type) GetPrefix() string {
 
 			t.Prefix = fmt.Sprintf("%s%s", nestedPrefix, t.ResourceMetadata.ResourceName())
 		} else {
-			t.Prefix = fmt.Sprintf("%s%s", t.ParentMetadata.GetPrefix(), t.ParentMetadata.TitlelizeProperty())
+			if t.ParentMetadata != nil && (t.ParentMetadata.IsA("Array") || t.ParentMetadata.IsA("Map")) {
+				t.Prefix = t.ParentMetadata.GetPrefix()
+			} else {
+				t.Prefix = fmt.Sprintf("%s%s", t.ParentMetadata.GetPrefix(), t.ParentMetadata.TitlelizeProperty())
+			}
 		}
 	}
 	return t.Prefix
