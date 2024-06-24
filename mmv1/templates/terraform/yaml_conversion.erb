@@ -60,19 +60,19 @@ references:
 <%  unless object.docs.nil? -%>
 docs:
 <%    unless object.docs.warning.nil? -%>
-  warning: '<%= object.docs.warning %>'
+  warning:
 <%    end -%>
 <%    unless object.docs.note.nil? -%>
   note:
 <%    end -%>
 <%    unless object.docs.required_properties.nil? -%>
-  required_properties: '<%= object.docs.required_properties %>'
+  required_properties:
 <%    end -%>
 <%    unless object.docs.optional_properties.nil? -%>
-  optional_properties: '<%= object.docs.optional_properties %>'
+  optional_properties:
 <%    end -%>
 <%    unless object.docs.attributes.nil? -%>
-  attributes: '<%= object.docs.attributes %>'
+  attributes:
 <%    end -%>
 <%  end -%>
 <%
@@ -367,6 +367,9 @@ custom_code:
 <%    unless object.custom_code.post_create.nil? -%>
   post_create: '<%= object.convert_go_file( object.custom_code.post_create )%>'
 <%    end -%>
+<%    unless object.custom_code.post_delete.nil? -%>
+  post_delete: '<%= object.convert_go_file( object.custom_code.post_delete )%>'
+<%    end -%>
 <%    unless object.custom_code.custom_create.nil? -%>
   custom_create: '<%= object.convert_go_file( object.custom_code.custom_create )%>'
 <%    end -%>
@@ -398,9 +401,14 @@ custom_code:
   test_check_destroy: '<%= object.convert_go_file( object.custom_code.test_check_destroy )%>'
 <%    end -%>
 <%  end -%>
-<%  unless object.custom_diff.empty? || (object.custom_diff.size == 1 && object.custom_diff.include?("tpgresource.SetLabelsDiff")) -%>
+<% 
+custom_diff = object.custom_diff.reject {
+  |cdiff| cdiff == "tpgresource.SetLabelsDiff" || cdiff == "tpgresource.SetMetadataLabelsDiff" || cdiff == "tpgresource.SetAnnotationsDiff" || cdiff == "tpgresource.SetMetadataAnnotationsDiff"
+}
+-%>
+<%  unless custom_diff.empty? -%>
 custom_diff:
-<%    object.custom_diff.each do |cdiff| -%>
+<%    custom_diff.each do |cdiff| -%>
   - '<%= cdiff %>'
 <%    end -%>
 <%  end -%>

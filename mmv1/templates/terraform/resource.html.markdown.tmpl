@@ -27,7 +27,7 @@
 # ----------------------------------------------------------------------------
 subcategory: "{{$.ProductMetadata.DisplayName}}"
 description: |-
-  {{ $.FormatDocDescription $.Description }}
+  {{ $.FormatDocDescription (firstSentence $.Description) true }}
 ---
 
 # {{$.TerraformName}}
@@ -35,9 +35,8 @@ description: |-
 ~> **Warning:** {{$.DeprecationMessage}}
 {{- end }}
 
-{{$.Description}}
-
-{{- if eq $.MinVersion "beta"}}
+{{ $.FormatDocDescription $.Description false }}
+{{ if eq $.MinVersion "beta"}}
 ~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
 See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
 {{- end }}
@@ -66,7 +65,7 @@ To get more information about {{$.Name}}, see:
 ~> **Warning:** All arguments including the following potentially sensitive
 values will be stored in the raw state as plain text: {{ $.SensitivePropsToString }}.
 [Read more about sensitive data in state](https://www.terraform.io/language/state/sensitive-data).
-{{- end }}
+{{ end }}
 {{- if $.Examples }}
 	{{- range $e := $.Examples }}
 		{{- if not $e.SkipDocs }}
