@@ -62,6 +62,7 @@ examples:
       name: 'example_feature_view_feature_registry'
   - !ruby/object:Provider::Terraform::Examples
     name: 'vertex_ai_featureonlinestore_featureview_cross_project'
+    external_providers: ["time"]
     primary_resource_id: 'cross_project_featureview'
     test_env_vars:
       org_id: :ORG_ID

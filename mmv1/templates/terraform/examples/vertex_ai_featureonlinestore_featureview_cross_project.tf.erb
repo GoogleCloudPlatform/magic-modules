@@ -1,6 +1,4 @@
-#TODO: remove this before merging
-data "google_project_iam_policy" "policy" {
-  project  = google_project.project.project_id
+data "google_project" "test_project" {
 }
 
 resource "google_project" "project" {
@@ -10,14 +8,10 @@ resource "google_project" "project" {
   billing_account = "<%= ctx[:test_env_vars]['billing_account'] %>"
 }
 
-resource "google_project_service" "bigquery" {
-  service = "bigquery.googleapis.com"
-  project = google_project.project.project_id
-  timeouts {
-    create = "30m"
-    update = "40m"
-  }
-  disable_on_destroy = false
+resource "time_sleep" "wait_60_seconds" {
+  depends_on = [google_project.project]
+
+  create_duration = "60s"
 }
 
 resource "google_project_service" "vertexai" {
@@ -28,10 +22,13 @@ resource "google_project_service" "vertexai" {
     update = "40m"
   }
   disable_on_destroy = false
+  # Needed for CI tests for permissions to propagate, should not be needed for actual usage
+  depends_on = [time_sleep.wait_60_seconds]
 }
 
 resource "google_vertex_ai_feature_online_store" "featureonlinestore" {
   name     = "<%= ctx[:vars]['name'] %>"
+  project  = google_project.project.project_id
   labels = {
     foo = "bar"
   }
@@ -43,20 +40,18 @@ resource "google_vertex_ai_feature_online_store" "featureonlinestore" {
       cpu_utilization_target = 80
     }
   }
+  depends_on = [google_project_service.vertexai]
 }
 
 resource "google_bigquery_dataset" "sample_dataset" {
-  project                     = google_project.project.project_id
   dataset_id                  = "<%= ctx[:vars]['name'] %>"
   friendly_name               = "test"
   description                 = "This is a test description"
   location                    = "US"
-  depends_on = [google_project_service.bigquery]
 }
 
 resource "google_bigquery_table" "sample_table" {
   deletion_protection = false
-  project = google_project.project.project_id
   dataset_id = google_bigquery_dataset.sample_dataset.dataset_id
   table_id   = "<%= ctx[:vars]['name'] %>"
 
@@ -79,12 +74,10 @@ resource "google_bigquery_table" "sample_table" {
     }
 ]
 EOF
-depends_on = [google_project_service.bigquery]
 }
 
 resource "google_vertex_ai_feature_group" "sample_feature_group" {
   name = "<%= ctx[:vars]['name'] %>"
-  project = google_project.project.project_id
   description = "A sample feature group"
   region = "us-central1"
   labels = {
@@ -97,26 +90,24 @@ resource "google_vertex_ai_feature_group" "sample_feature_group" {
     }
     entity_id_columns = ["feature_id"]
   }
-  depends_on = [google_project_service.vertexai, google_project_service.bigquery]
 }
 
 
 
 resource "google_vertex_ai_feature_group_feature" "sample_feature" {
   name = "<%= ctx[:vars]['name'] %>"
-  project = google_project.project.project_id
   region = "us-central1"
   feature_group = google_vertex_ai_feature_group.sample_feature_group.name
   description = "A sample feature"
   labels = {
       label-one = "value-one"
   }
-  depends_on = [google_project_service.vertexai, google_project_service.bigquery]
 }
 
 
 resource "google_vertex_ai_feature_online_store_featureview" "<%= ctx[:primary_resource_id] %>" {
   name                 = "<%= ctx[:vars]['name'] %>"
+  project              = google_project.project.project_id
   region               = "us-central1"
   feature_online_store = google_vertex_ai_feature_online_store.featureonlinestore.name
   sync_config {
@@ -128,9 +119,9 @@ resource "google_vertex_ai_feature_online_store_featureview" "<%= ctx[:primary_r
         feature_group_id = google_vertex_ai_feature_group.sample_feature_group.name
         feature_ids      = [google_vertex_ai_feature_group_feature.sample_feature.name]
 }
-   project_number = google_project.project.number
+   project_number = data.google_project.test_project.number
 
   }
-  depends_on = [google_project_service.vertexai, google_project_service.bigquery]
+  depends_on = [google_project_service.vertexai]
 }
 
