@@ -41,9 +41,7 @@ func main() {
 	flag.Parse()
 
 	if *yamlMode {
-		CopyText("description:")
-		CopyText("note:")
-		CopyText("set_hash_func:")
+		CopyAllDescriptions()
 	}
 
 	if *templateMode {

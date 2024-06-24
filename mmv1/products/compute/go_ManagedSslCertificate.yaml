@@ -27,19 +27,19 @@ references:
     'Official Documentation': 'https://cloud.google.com/load-balancing/docs/ssl-certificates'
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/sslCertificates'
 docs:
-  warning: 'This resource should be used with extreme caution!  Provisioning an SSL
-certificate is complex.  Ensure that you understand the lifecycle of a
-certificate before attempting complex tasks like cert rotation automatically.
-This resource will "return" as soon as the certificate object is created,
-but post-creation the certificate object will go through a "provisioning"
-process.  The provisioning process can complete only when the domain name
-for which the certificate is created points to a target pool which, itself,
-points at the certificate.  Depending on your DNS provider, this may take
-some time, and migrating from self-managed certificates to Google-managed
-certificates may entail some downtime while the certificate provisions.
+  warning: |
+    This resource should be used with extreme caution!  Provisioning an SSL
+    certificate is complex.  Ensure that you understand the lifecycle of a
+    certificate before attempting complex tasks like cert rotation automatically.
+    This resource will "return" as soon as the certificate object is created,
+    but post-creation the certificate object will go through a "provisioning"
+    process.  The provisioning process can complete only when the domain name
+    for which the certificate is created points to a target pool which, itself,
+    points at the certificate.  Depending on your DNS provider, this may take
+    some time, and migrating from self-managed certificates to Google-managed
+    certificates may entail some downtime while the certificate provisions.
 
-In conclusion: Be extremely cautious.
-'
+    In conclusion: Be extremely cautious.
 base_url: 'projects/{{project}}/global/sslCertificates'
 has_self_link: true
 immutable: true
@@ -106,7 +106,6 @@ properties:
       first character must be a lowercase letter, and all following
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
-
 
       These are in the same namespace as the managed SSL certificates.
   - name: 'managed'

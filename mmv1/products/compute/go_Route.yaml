@@ -44,11 +44,11 @@ references:
     'Using Routes': 'https://cloud.google.com/vpc/docs/using-routes'
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/routes'
 docs:
-  optional_properties: '* `next_hop_instance_zone` - (Optional when `next_hop_instance` is
-  specified)  The zone of the instance specified in
-  `next_hop_instance`.  Omit if `next_hop_instance` is specified as
-  a URL.
-'
+  optional_properties: |
+    * `next_hop_instance_zone` - (Optional when `next_hop_instance` is
+      specified)  The zone of the instance specified in
+      `next_hop_instance`.  Omit if `next_hop_instance` is specified as
+      a URL.
 base_url: 'projects/{{project}}/global/routes'
 has_self_link: true
 immutable: true
