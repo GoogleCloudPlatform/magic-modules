@@ -960,7 +960,7 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
         log.Printf("[DEBUG] Finished updating {{ $.Name }} %q: %#v", d.Id(), res)
     }
 
-{{                  if $.GetAsync.Allow "update" -}}
+{{                  if and ($.GetAsync) ($.GetAsync.Allow "update") -}}
 {{                      if $.GetAsync.IsA "OpAsync" -}}
 	    err = {{ $.ClientNamePascal -}}OperationWaitTime(
 	        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}} "Updating {{ $.Name -}}", userAgent,
