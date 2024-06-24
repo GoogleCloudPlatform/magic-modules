@@ -427,7 +427,6 @@ resource "google_compute_health_check" "src_region" {
   source_regions      = ["us-central1", "us-east1", "asia-south1"]
   http_health_check {
     port          = "80"
-	proxy_header  = ""
   }
 }
 `, hckName)
@@ -443,7 +442,6 @@ resource "google_compute_health_check" "src_region" {
   source_regions      = ["us-west1", "europe-north1", "asia-south1"]
   http_health_check {
     port          = "80"
-	proxy_header  = ""
   }
 }
 `, hckName)
