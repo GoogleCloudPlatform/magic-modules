@@ -830,10 +830,11 @@ if len(updateMask) > 0 {
 {{-         end}}{{/*if not immutable*/}}
 {{          if $.FieldSpecificUpdateMethods }}
     d.Partial(true)
-{{             range $index, $props := $.PropertiesByCustomUpdate }}
-if d.HasChange("{{ join ($.PropertyNamesToStrings $props) "\") || d.HasChange(\""}}") {
+{{             $CustomUpdateProps := $.PropertiesByCustomUpdate }}
+{{             range $group := $.PropertiesByCustomUpdateGroups }}
+if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $group)) "\") || d.HasChange(\""}}") {
         obj := make(map[string]interface{})
-{{		            if $index.FingerprintName }}
+{{		            if $group.FingerprintName }}
         getUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}")
         if err != nil {
             return err
@@ -866,10 +867,10 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings $props) "\") || d.HasChange(\"
             return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("{{ $.ResourceName -}} %q", d.Id()))
         }
 
-        obj["{{ $index.FingerprintName }}"] = getRes["{{ $index.FingerprintName }}"]
+        obj["{{ $group.FingerprintName }}"] = getRes["{{ $group.FingerprintName }}"]
 
 {{                  end  }}{{/*if FingerprintName*/}}
-{{                  range $propsByKey := $.CustomUpdatePropertiesByKey $index.UpdateUrl $index.UpdateId $index.FingerprintName $index.UpdateVerb }}
+{{                  range $propsByKey := $.CustomUpdatePropertiesByKey $group.UpdateUrl $group.UpdateId $group.FingerprintName $group.UpdateVerb }}
         {{ $propsByKey.ApiName -}}Prop, err := expand{{ if $.NestedQuery -}}Nested{{ end }}{{ $.ResourceName -}}{{ camelize $propsByKey.Name "upper"  -}}({{ if $propsByKey.FlattenObject }}nil{{else}}d.Get("{{underscore $propsByKey.Name}}"){{ end }}, d, config)
         if err != nil {
             return err
@@ -916,7 +917,7 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings $props) "\") || d.HasChange(\"
         transport_tpg.MutexStore.Lock(lockName)
         defer transport_tpg.MutexStore.Unlock(lockName)
 {{-                 end}}
-        url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{ $index.UpdateUrl }}")
+        url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{ $group.UpdateUrl }}")
         if err != nil {
             return err
         }
@@ -939,7 +940,7 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings $props) "\") || d.HasChange(\"
 
         res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
             Config: config,
-            Method: "{{ $index.UpdateVerb }}",
+            Method: "{{ $group.UpdateVerb }}",
             Project: billingProject,
             RawURL: url,
             UserAgent: userAgent,
