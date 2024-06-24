@@ -70,7 +70,7 @@ func TestAccSqlDatabaseInstance_networkArchitecture(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: fmt.Sprintf(
-					testGoogleSqlDatabaseInstance_old_netowrk_architecture, databaseName)
+					testGoogleSqlDatabaseInstance_old_netowrk_architecture, databaseName),
 				Check: resource.ComposeTestCheckFunc(
 					checkInstanceTypeIsPresent("google_sql_database_instance.instance"),
 				),
@@ -83,7 +83,7 @@ func TestAccSqlDatabaseInstance_networkArchitecture(t *testing.T) {
 			},
 			{
 				Config: fmt.Sprintf(
-					testGoogleSqlDatabaseInstance_new_netowrk_architecture, databaseName)
+					testGoogleSqlDatabaseInstance_new_netowrk_architecture, databaseName),
 				Check: resource.ComposeTestCheckFunc(
 					checkInstanceTypeIsPresent("google_sql_database_instance.instance"),
 				),
