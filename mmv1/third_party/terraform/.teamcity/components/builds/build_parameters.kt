@@ -257,8 +257,8 @@ fun ParametrizedWithType.readOnlySettings() {
 // after a recent build is made. (By default, the activeBuildBranch age is 24 hours while activeVcsBranch age is 7 days.)
 // https://www.jetbrains.com/help/teamcity/2024.03/working-with-feature-branches.html#Active+Branches
 fun ParametrizedWithType.activeBranchSettings() {
-    hiddenVariable("teamcity.activeVcsBranch.age.days", "10")
-    hiddenVariable("teamcity.activeBuildBranch.age.hours", "240") // after 10 days, builds from previous nightly tests will be removed from teamcity UI
+    hiddenVariable("teamcity.activeVcsBranch.age.days", "10", "allows branches to be present in teamcity UI before 10 days have passed since last commit on branch")
+    hiddenVariable("teamcity.activeBuildBranch.age.hours", "240", "allows builds to be present in teamcity UI before 10 days have passed since last build")
 }
 
 // ParametrizedWithType.terraformCoreBinaryTesting sets environment variables that control what Terraform version is downloaded
