@@ -893,9 +893,9 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 -*/}}
 {{-                      if $propsByKey.SendEmptyValue -}}
         } else if v, ok := d.GetOkExists("{{ underscore $propsByKey.Name -}}"); ok || !reflect.DeepEqual(v, {{ $propsByKey.ApiName -}}Prop) {
-{{                      else if $propsByKey.FlattenObject -}}
+{{-                      else if $propsByKey.FlattenObject -}}
         } else if !tpgresource.IsEmptyValue(reflect.ValueOf({{ $propsByKey.ApiName -}}Prop)) {
-{{                      else -}}
+{{-                      else -}}
         } else if v, ok := d.GetOkExists("{{ underscore $propsByKey.Name -}}"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, {{ $propsByKey.ApiName -}}Prop)) {
 {{-                     end}}
             obj["{{ $propsByKey.ApiName -}}"] = {{ $propsByKey.ApiName -}}Prop
@@ -960,7 +960,7 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
         log.Printf("[DEBUG] Finished updating {{ $.Name }} %q: %#v", d.Id(), res)
     }
 
-{{                  if $.GetAsync.Allow "update" -}}
+{{                  if and ($.GetAsync) ($.GetAsync.Allow "update") -}}
 {{                      if $.GetAsync.IsA "OpAsync" -}}
 	    err = {{ $.ClientNamePascal -}}OperationWaitTime(
 	        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}} "Updating {{ $.Name -}}", userAgent,
