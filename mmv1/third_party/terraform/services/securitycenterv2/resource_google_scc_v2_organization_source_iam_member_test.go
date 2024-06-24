@@ -30,6 +30,7 @@ func TestAccSCCV2OrganizationSourceIAMMember(t *testing.T) {
 				Config: testAccSCCV2OrganizationSourceIAMMember(orgId, suffix, role, member, conditionTitle, conditionDescription, conditionExpression),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_scc_v2_organization_source_iam_member.custom_member", "organization", orgId),
+					resource.TestCheckResourceAttr("google_scc_v2_organization_source_iam_member.custom_member", "suffix", suffix),
 					resource.TestCheckResourceAttr("google_scc_v2_organization_source_iam_member.custom_member", "role", role),
 					resource.TestCheckResourceAttr("google_scc_v2_organization_source_iam_member.custom_member", "member", member),
 					resource.TestCheckResourceAttr("google_scc_v2_organization_source_iam_member.custom_member", "condition.title", conditionTitle),
@@ -46,14 +47,13 @@ func TestAccSCCV2OrganizationSourceIAMMember(t *testing.T) {
 	})
 }
 
-func testAccSCCV2OrganizationSourceIAMMember(suffix, orgId, role, orgId, role, member, title, description string) string {
+func testAccSCCV2OrganizationSourceIAMMember(suffix, orgId, canonicalName, role, member, title, description string) string {
 	return fmt.Sprintf(`
 resource "google_scc_v2_organization_source" "custom_source" {
   display_name  = "TFSrc %s"
   organization  = "%s"
   canonical_name = "organizations/%s/sources/source-%s"
 }
-
 resource "google_scc_v2_organization_source_iam_member" "custom_member" {
   organization  = "%s"
   source        = google_scc_v2_organization_source.custom_source.canonical_name
@@ -64,5 +64,5 @@ resource "google_scc_v2_organization_source_iam_member" "custom_member" {
     description = "%s"
   }
 }
-`, suffix, orgId, role, orgId, role, member, title, description)
+`, suffix, orgId, canonicalName, suffix, orgId, role, member, title, description)
 }
