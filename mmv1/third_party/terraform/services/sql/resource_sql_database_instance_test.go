@@ -61,13 +61,16 @@ func TestAccSqlDatabaseInstance_basicInferredName(t *testing.T) {
 func TestAccSqlDatabaseInstance_networkArchitecture(t *testing.T) {
 	t.Parallel()
 
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
+
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleSqlDatabaseInstance_old_netowrk_architecture,
+				Config: fmt.Sprintf(
+					testGoogleSqlDatabaseInstance_old_netowrk_architecture, databaseName)
 				Check: resource.ComposeTestCheckFunc(
 					checkInstanceTypeIsPresent("google_sql_database_instance.instance"),
 				),
@@ -77,6 +80,13 @@ func TestAccSqlDatabaseInstance_networkArchitecture(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: fmt.Sprintf(
+					testGoogleSqlDatabaseInstance_new_netowrk_architecture, databaseName)
+				Check: resource.ComposeTestCheckFunc(
+					checkInstanceTypeIsPresent("google_sql_database_instance.instance"),
+				),
 			},
 		},
 	})
