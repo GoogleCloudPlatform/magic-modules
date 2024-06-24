@@ -132,6 +132,7 @@ properties:
         type: Enum
         description: |
           Type of sharing for this shared-reservation
+        immutable: true
         default_from_api: true
         enum_values:
           - 'LOCAL'

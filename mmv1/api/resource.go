@@ -17,6 +17,7 @@ import (
 	"maps"
 	"regexp"
 	"strings"
+	"sort"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
@@ -887,11 +888,11 @@ func (r Resource) HasZone() bool {
 // resource functions needed for template that previously existed in terraform.go but due to how files are being inherited here it was easier to put in here
 // taken wholesale from tpgtools
 func (r Resource) Updatable() bool {
-	if r.Immutable && !r.RootLabels() {
-		return false
+	if !r.Immutable {
+		return true
 	}
 	for _, p := range r.AllProperties() {
-		if !p.Immutable && !(p.Required && p.DefaultFromApi) {
+		if p.UpdateUrl != "" {
 			return true
 		}
 	}
@@ -1465,6 +1466,24 @@ func (r Resource) PropertiesByCustomUpdate() map[UpdateGroup][]*Type {
 		groupedCustomUpdateProps[groupedProperty] = append(groupedCustomUpdateProps[groupedProperty], prop)
 	}
 	return groupedCustomUpdateProps
+}
+
+func (r Resource) PropertiesByCustomUpdateGroups() []UpdateGroup {
+	customUpdateProps := r.propertiesWithCustomUpdate(r.RootProperties())
+	var updateGroups []UpdateGroup
+	for _, prop := range customUpdateProps {
+		groupedProperty := UpdateGroup{UpdateUrl: prop.UpdateUrl,
+			UpdateVerb:      prop.UpdateVerb,
+			UpdateId:        prop.UpdateId,
+			FingerprintName: prop.FingerprintName}
+
+		if slices.Contains(updateGroups, groupedProperty){
+			continue
+		}
+		updateGroups = append(updateGroups, groupedProperty)
+	}
+	sort.Slice(updateGroups, func(i, j int) bool { return updateGroups[i].UpdateId < updateGroups[i].UpdateId })
+	return updateGroups
 }
 
 func (r Resource) FieldSpecificUpdateMethods() bool {

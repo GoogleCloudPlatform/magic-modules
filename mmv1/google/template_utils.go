@@ -43,6 +43,12 @@ func subtract(a, b int) int {
 	return a - b
 }
 
+// plus returns the sum of a and b
+// and used in Go templates
+func plus(a, b int) int {
+	return a + b
+}
+
 var TemplateFunctions = template.FuncMap{
 	"title":         SpaceSeparatedTitle,
 	"replace":       strings.Replace,
@@ -58,5 +64,6 @@ var TemplateFunctions = template.FuncMap{
 	"format2regex":  Format2Regex,
 	"hasPrefix":     strings.HasPrefix,
 	"sub":           subtract,
+	"plus":          plus,
 	"firstSentence": FirstSentence,
 }
