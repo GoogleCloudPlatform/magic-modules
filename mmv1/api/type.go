@@ -138,9 +138,9 @@ type Type struct {
 	// ====================
 	// Array Fields
 	// ====================
-	ItemType *Type `yaml:"item_type"`
-	MinSize  int   `yaml:"min_size"`
-	MaxSize  int   `yaml:"max_size"`
+	ItemType *Type  `yaml:"item_type"`
+	MinSize  string `yaml:"min_size"`
+	MaxSize  string `yaml:"max_size"`
 	// __name
 	ParentName string
 

@@ -887,11 +887,11 @@ func (r Resource) HasZone() bool {
 // resource functions needed for template that previously existed in terraform.go but due to how files are being inherited here it was easier to put in here
 // taken wholesale from tpgtools
 func (r Resource) Updatable() bool {
-	if r.Immutable && !r.RootLabels() {
-		return false
+	if !r.Immutable {
+		return true
 	}
 	for _, p := range r.AllProperties() {
-		if !p.Immutable && !(p.Required && p.DefaultFromApi) {
+		if p.UpdateUrl != "" {
 			return true
 		}
 	}

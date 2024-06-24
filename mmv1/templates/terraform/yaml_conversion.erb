@@ -367,6 +367,9 @@ custom_code:
 <%    unless object.custom_code.post_create.nil? -%>
   post_create: '<%= object.convert_go_file( object.custom_code.post_create )%>'
 <%    end -%>
+<%    unless object.custom_code.post_delete.nil? -%>
+  post_delete: '<%= object.convert_go_file( object.custom_code.post_delete )%>'
+<%    end -%>
 <%    unless object.custom_code.custom_create.nil? -%>
   custom_create: '<%= object.convert_go_file( object.custom_code.custom_create )%>'
 <%    end -%>

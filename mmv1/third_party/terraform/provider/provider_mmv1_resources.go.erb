@@ -227,15 +227,11 @@ var handwrittenDatasources = map[string]*schema.Resource{
 
 var generatedIAMDatasources = map[string]*schema.Resource{
 	// ####### START generated IAM datasources ###########
-	<%
-	resources_for_version.each do |object|
-		unless object[:iam_class_name].nil?
-	-%>
+	<% resources_for_version.each do |object| -%>
+	<% unless object[:iam_class_name].nil? -%>
 	"<%= object[:terraform_name] -%>_iam_policy":               tpgiamresource.DataSourceIamPolicy(<%= object[:iam_class_name] -%>IamSchema, <%= object[:iam_class_name] -%>IamUpdaterProducer),
-	<%
-		end
-	end
-	-%>
+	<% end -%>
+	<% end -%>
 	// ####### END generated IAM datasources ###########
 }
 
@@ -272,18 +268,12 @@ var generatedResources = map[string]*schema.Resource{
 	<% 	unless object[:resource_name].nil? -%>
 		"<%= object[:terraform_name] -%>": <%= object[:resource_name] -%>(),
 	<%  end -%>
-	<%
-	    unless object[:iam_class_name].nil?
-	-%>
+	<% unless object[:iam_class_name].nil? -%>
 		"<%= object[:terraform_name] -%>_iam_binding":              tpgiamresource.ResourceIamBinding(<%= object[:iam_class_name] -%>IamSchema, <%= object[:iam_class_name] -%>IamUpdaterProducer, <%= object[:iam_class_name] -%>IdParseFunc),
 		"<%= object[:terraform_name] -%>_iam_member":               tpgiamresource.ResourceIamMember(<%= object[:iam_class_name] -%>IamSchema, <%= object[:iam_class_name] -%>IamUpdaterProducer, <%= object[:iam_class_name] -%>IdParseFunc),
 		"<%= object[:terraform_name] -%>_iam_policy":               tpgiamresource.ResourceIamPolicy(<%= object[:iam_class_name] -%>IamSchema, <%= object[:iam_class_name] -%>IamUpdaterProducer, <%= object[:iam_class_name] -%>IdParseFunc),
-	<%
-	    end # unless object[:iam_class_name].nil?
-	-%>
-	<%
-	end     # resources_for_version.each do
-	-%>
+	<% end -%>
+	<% end -%>
 }
 
 var handwrittenResources = map[string]*schema.Resource{

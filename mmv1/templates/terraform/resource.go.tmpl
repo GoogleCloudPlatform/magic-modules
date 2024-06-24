@@ -70,7 +70,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
     return &schema.Resource{
         Create: resource{{ $.ResourceName -}}Create,
         Read: resource{{ $.ResourceName -}}Read,
-{{- if $.Updatable -}}                                           {{/* ##TODO Q2 || $.root_labels? -}} */}}
+{{- if or $.Updatable $.RootLabels }}
         Update: resource{{ $.ResourceName -}}Update,
 {{- end}}
         Delete: resource{{ $.ResourceName -}}Delete,
@@ -84,7 +84,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 
         Timeouts: &schema.ResourceTimeout {
             Create: schema.DefaultTimeout({{ $.Timeouts.InsertMinutes -}} * time.Minute),
-{{- if $.Updatable -}}                                           {{/* ##TODO Q2 || $.root_labels? -}} */}}
+{{- if or $.Updatable $.RootLabels }}
             Update: schema.DefaultTimeout({{ $.Timeouts.UpdateMinutes -}} * time.Minute),
 {{- end}}
             Delete: schema.DefaultTimeout({{ $.Timeouts.DeleteMinutes -}} * time.Minute),
@@ -137,12 +137,12 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 {{- if $.VirtualFields -}}
 {{-   range $field := $.VirtualFields }}
             "{{ $field.Name -}}": {
-                Type: schema.{{ $field.Type -}},
+                Type: {{ $field.TFType $field.Type -}},
                 Optional: true,
-{{      if $field.Immutable -}}
+{{-      if $field.Immutable }}
                 ForceNew: true,
 {{-     end}}
-{{      if $field.DefaultValue -}}
+{{-      if not (eq $field.DefaultValue nil) }}
                 Default:  {{ $field.GoLiteral $field.DefaultValue -}},
 {{-     end}}
                 Description: `{{ replace $field.GetDescription "`" "'" -1 -}}`,
@@ -182,7 +182,7 @@ func resource{{ $.ResourceName }}{{ camelize $prop.Name "upper" }}SetStyleDiff(_
 {{- end}}
 
 func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{}) error {
-{{- if and ($.GetAsync.IsA "OpAsync") ($.GetAsync.IncludeProject) ($.GetAsync.Allow "Create") -}}
+{{- if and ($.GetAsync) (and ($.GetAsync.IsA "OpAsync") ($.GetAsync.IncludeProject) ($.GetAsync.Allow "Create")) -}}
     var project string
 {{- end}}
     config := meta.(*transport_tpg.Config)
@@ -273,8 +273,10 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
       billingProject = bp
     }
 
-    {{/*TODO Q2 COMPILE PRECREATE */}}
     headers := make(http.Header)
+{{- if $.CustomCode.PreCreate }} 
+    {{ $.CustomTemplate $.CustomCode.PreCreate false -}}
+{{- end}}
     res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
         Config: config,
         Method: "{{ upper $.CreateVerb -}}",
@@ -298,7 +300,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
         return fmt.Errorf("Error creating {{ $.Name -}}: %s", err)
     }
 {{/* # Set resource properties from create API response (unless it returns an Operation) */}}
-{{if not ($.GetAsync.IsA "OpAsync") }}
+{{if and ($.GetAsync) (not ($.GetAsync.IsA "OpAsync")) }}
 {{- range $prop := $.GettableProperties }}
 {{  if and ($.IsInIdentity $prop) $prop.Output }}
     if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {
@@ -315,7 +317,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     }
     d.SetId(id)
 
-{{if ($.GetAsync.Allow "Create") -}}
+{{if and $.GetAsync ($.GetAsync.Allow "Create") -}}
 {{if ($.GetAsync.IsA "OpAsync") -}}
 {{if and $.GetAsync.Result.ResourceInsideResponse $.GetIdentity -}}
     // Use the resource in the operation response to populate
@@ -397,7 +399,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     {{- $.CustomTemplate $.CustomCode.PostCreate false -}}
 {{- end}}
 
-{{if $.GetAsync.Allow "Create" -}}
+{{if and ($.GetAsync) ($.GetAsync.Allow "Create") -}}
 {{if $.GetAsync.IsA "PollAsync" -}}
     err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName -}}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncExistence -}}, "Creating {{ $.Name -}}", d.Timeout(schema.TimeoutCreate), {{ $.GetAsync.TargetOccurrences -}})
     if err != nil {
@@ -420,7 +422,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{  end -}}
 }
 
-{{if ($.GetAsync.IsA "PollAsync")}}
+{{if and ($.GetAsync) ($.GetAsync.IsA "PollAsync")}}
 func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interface{}) transport_tpg.PollReadFunc {
     return func() (map[string]interface{}, error) {
 {{if $.GetAsync.CustomPollRead -}}
@@ -604,7 +606,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
 {{- if $.VirtualFields -}}
   // Explicitly set virtual fields to default values if unset
 {{- range $prop := $.VirtualFields }}
-{{      if $prop.DefaultValue -}}
+{{      if not (eq $prop.DefaultValue nil) -}}
     if _, ok := d.GetOkExists("{{ $prop.Name -}}"); !ok {
         if err := d.Set("{{ $prop.Name -}}", {{ $prop.DefaultValue -}}); err != nil {
             return fmt.Errorf("Error setting {{ $prop.Name -}}: %s", err)
@@ -675,7 +677,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
 
 {{if $.Updatable -}}
 func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{}) error {
-{{-     if and ($.GetAsync.IsA "OpAsync") ($.GetAsync.IncludeProject) ($.GetAsync.Allow "update") -}}
+{{-     if and ($.GetAsync) (and ($.GetAsync.IsA "OpAsync") ($.GetAsync.IncludeProject) ($.GetAsync.Allow "update")) -}}
     var project string
 {{-     end}}
     config := meta.(*transport_tpg.Config)
@@ -802,7 +804,7 @@ if len(updateMask) > 0 {
         log.Printf("[DEBUG] Finished updating {{ $.Name }} %q: %#v", d.Id(), res)
     }
 
-{{              if $.GetAsync.Allow "update" -}}
+{{              if and ($.GetAsync) ($.GetAsync.Allow "update") -}}
 {{                  if $.GetAsync.IsA "OpAsync" -}}
     err = {{ $.ClientNamePascal -}}OperationWaitTime(
         config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}} "Updating {{ $.Name -}}", userAgent,
@@ -992,9 +994,10 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
     // Only the root field "labels" and "terraform_labels" are mutable
     return resource{{ $.ResourceName -}}Read(d, meta)
 }
-{{- end}}
+
+{{ end}}
 func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}) error {
-{{- if and (and ($.GetAsync.IsA "OpAsync") $.GetAsync.IncludeProject) ($.GetAsync.Allow "delete")}}
+{{- if and ($.GetAsync) (and (and ($.GetAsync.IsA "OpAsync") $.GetAsync.IncludeProject) ($.GetAsync.Allow "delete")) }}
     var project string
 {{- end }}
 {{- if $.SkipDelete }}
@@ -1046,7 +1049,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
         {{/*Keep this after mutex - patch request data relies on current resource state*/}}
     obj, err = resource{{ $.ResourceName }}PatchDeleteEncoder(d, meta, obj)
     if err != nil {
-        return transport_tpg.HandleNotFoundError(err, d, "{{ $.ResourceName }}")
+        return transport_tpg.HandleNotFoundError(err, d, "{{ $.Name }}")
     }
         {{- if $.UpdateMask }}
     url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": "{{- join $.NestedQuery.Keys "," -}}"})
@@ -1091,7 +1094,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     if err != nil {
         return transport_tpg.HandleNotFoundError(err, d, "{{ $.Name }}")
     }
-    {{ if $.GetAsync.Allow "Delete" -}}
+    {{ if and $.GetAsync ($.GetAsync.Allow "Delete") -}}
         {{ if $.GetAsync.IsA "PollAsync" }}
     err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName }}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncAbsence }}, "Deleting {{ $.Name }}", d.Timeout(schema.TimeoutCreate), {{ $.Async.TargetOccurrences }})
     if err != nil {
@@ -1141,10 +1144,11 @@ func resource{{ $.ResourceName }}Import(d *schema.ResourceData, meta interface{}
         return nil, fmt.Errorf("Error constructing id: %s", err)
     }
     d.SetId(id)
-        {{- if $.VirtualFields -}}
+        {{ if $.VirtualFields }}
+
     // Explicitly set virtual fields to default values on import
             {{- range $vf := $.VirtualFields }}
-                {{- if $vf.DefaultValue }}
+                {{- if not (eq $vf.DefaultValue nil) }}
     if err := d.Set("{{ $vf.Name }}", {{ $vf.DefaultValue }}); err != nil {
         return nil, fmt.Errorf("Error setting {{ $vf.Name }}: %s", err)
     }
