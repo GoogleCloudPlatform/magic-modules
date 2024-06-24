@@ -1476,6 +1476,10 @@ func (r Resource) PropertiesByCustomUpdateGroups() []UpdateGroup {
 			UpdateVerb:      prop.UpdateVerb,
 			UpdateId:        prop.UpdateId,
 			FingerprintName: prop.FingerprintName}
+
+		if slices.Contains(updateGroups, groupedProperty){
+			continue
+		}
 		updateGroups = append(updateGroups, groupedProperty)
 	}
 	sort.Slice(updateGroups, func(i, j int) bool { return updateGroups[i].UpdateId < updateGroups[i].UpdateId })
