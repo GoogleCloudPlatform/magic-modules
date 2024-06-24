@@ -1,0 +1,129 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: IndexEndpointDeployedIndex
+base_url: projects/{{project}}/locations/{{region}}/indexEndpoints/
+create_url: projects/{{project}}/locations/{{region}}/indexEndpoints/{{IndexEndpoint}}:deployIndex
+update_url: projects/{{project}}/locations/{{region}}/indexEndpoints/{{IndexEndpoint}}:mutateDeployedIndex
+self_link: projects/{{project}}/locations/{{region}}/indexEndpoints/{{name}}
+update_mask: true
+references: !ruby/object:Api::Resource::ReferenceLinks
+  api: https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.indexEndpoints#DeployedIndex
+async: !ruby/object:Api::OpAsync
+  actions:
+    - create
+    - delete
+  operation: !ruby/object:Api::OpAsync::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'response'
+    resource_inside_response: true
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'done'
+    complete: True
+    allowed:
+      - True
+      - False
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error'
+    message: 'message'
+description: |-
+  An endpoint indexes are deployed into. An index endpoint can have multiple deployed indexes.
+autogen_async: false
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "vertex_ai_index_endpoint_deployed_index"
+    primary_resource_id: "index_endpoint"
+    vars:
+      address_name: "address-name"
+      network_name: "network-name"
+    skip_test: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: "vertex_ai_index_endpoint_deployed_index_test"
+    primary_resource_id: "index_endpoint"
+    vars:
+      network_name: "network-name"
+    test_vars_overrides:
+      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
+    skip_docs: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: "vertex_ai_index_endpoint_deployed_index_with_psc"
+    primary_resource_id: "index_endpoint"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "vertex_ai_index_endpoint_with_false_psc"
+    primary_resource_id: "index_endpoint"
+    # It's not distinguishable if the psc is false or not set, so we need to skip the test.
+    skip_import_test: true
+    skip_docs: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: "vertex_ai_index_endpoint_deployed_index_with_public_endpoint"
+    primary_resource_id: "index_endpoint"
+    test_vars_overrides:
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "vertex-ai-index-endpoint")'
+parameters:
+  - !ruby/object:Api::Type::String
+    name: region
+    description: The region of the index endpoint. eg us-central1
+    url_param_only: true
+    immutable: true
+properties:
+  # Intentionally deployedIndexes[] is not included because it's an output-only field and another terraform resource will manage a deployed index.
+  - !ruby/object:Api::Type::String
+    name: 'index'
+    description: The name of the Index this is the deployment of.
+    required: true
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+  - !ruby/object:Api::Type::String
+    name: 'displayName'
+    description: The display name of the Index. The name can be up to 128 characters long and can consist of any UTF-8 characters.
+  - !ruby/object:Api::Type::String
+    name: 'createTime'
+    output: true
+    description: The timestamp of when the Index was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+  - !ruby/object:Api::Type::NestedObject
+    name: privateEndpoints
+    output: true
+    description: Provides paths for users to send requests directly to the deployed index services running on Cloud via private services access
+    properties: // TODO
+  - !ruby/object:Api::Type::String
+    name: 'indexSyncTime'
+    output: true
+    description: If this timestamp's value is at least the Index.update_time of the original Index, it means that this DeployedIndex and the original Index are in sync. If this timestamp is older, then to see which updates this DeployedIndex already contains (and which it does not), one must list the operations that are running on the original Index.
+  - !ruby/object:Api::Type::NestedObject
+    name: automaticResources
+    description: A description of resources that the DeployedIndex uses, which to large degree are decided by Vertex AI, and optionally allows only a modest additional configuration.
+    properties: // TODO
+  - !ruby/object:Api::Type::NestedObject
+    name: dedicatedResources
+    description: A description of resources that are dedicated to the DeployedIndex, and that need a higher degree of manual configuration.
+    properties: // TODO
+  - !ruby/object:Api::Type::Boolean
+    name: enableAccessLogging
+    description: If true, private endpoint's access logs are sent to Cloud Logging.
+  - !ruby/object:Api::Type::NestedObject
+    name: deploymentIndexAuthConfig
+    description: If set, the authentication is enabled for the private endpoint.
+    properties: // TODO
+  - !ruby/object:Api::Type::Array
+    name: publicEndpointDomainName
+    output: true
+    description: A list of reserved ip ranges under the VPC network that can be used for this DeployedIndex.
+    item_type: Api::Type::String
+  - !ruby/object:Api::Type::String
+    name: deploymentGroup
+    output: true
+    description:  | 
+      The deployment group can be no longer than 64 characters (eg: 'test', 'prod'). If not set, we will use the 'default' deployment group. Note: we only support up to 5 deployment groups(not including 'default').
