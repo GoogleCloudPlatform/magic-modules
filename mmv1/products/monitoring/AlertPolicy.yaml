@@ -1024,7 +1024,7 @@ properties:
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::String
-              name: display_name
+              name: displayName
               description: |
                 A short display name for the link. The display name must not be empty or exceed 63 characters. Example: "playbook".
             - !ruby/object:Api::Type::String
