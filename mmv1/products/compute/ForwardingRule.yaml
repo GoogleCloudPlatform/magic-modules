@@ -220,6 +220,12 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
 custom_diff: [
   'forwardingRuleCustomizeDiff',
 ]
+virtual_fields:
+  - !ruby/object:Api::Type::Boolean
+    name: recreate_closed_psc
+    description:
+      This is used in PSC consumer ForwardingRule to make terraform recreate the ForwardingRule when the status is closed
+    default_value: false
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
@@ -280,7 +286,6 @@ properties:
       * When the `target` is a Private Service Connect Google APIs
       bundle, you must specify an `IPAddress`.
 
-
       Otherwise, you can optionally specify an IP address that references an
       existing static (reserved) IP address resource. When omitted, Google Cloud
       assigns an ephemeral IP address.
@@ -297,7 +302,6 @@ properties:
         * `regions/region/addresses/address-name`
         * `global/addresses/address-name`
         * `address-name`
-
 
       The forwarding rule's `target` or `backendService`,
       and in most cases, also the `loadBalancingScheme`, determine the
@@ -488,7 +492,6 @@ properties:
         *  `vpc-sc` - [ APIs that support VPC Service Controls](https://cloud.google.com/vpc-service-controls/docs/supported-products).
         *  `all-apis` - [All supported Google APIs](https://cloud.google.com/vpc/docs/private-service-connect#supported-apis).
 
-
       For Private Service Connect forwarding rules that forward traffic to managed services, the target must be a service attachment.
     update_verb: :POST
     update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setTarget'
@@ -656,9 +659,3 @@ properties:
       - :IPV6
     immutable: true
     default_from_api: true
-virtual_fields:
-  - !ruby/object:Api::Type::Boolean
-    name: recreate_closed_psc
-    description:
-      This is used in PSC consumer ForwardingRule to make terraform recreate the ForwardingRule when the status is closed
-    default_value: false

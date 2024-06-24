@@ -114,7 +114,7 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'privateca_certificate_authority_custom_ski'
     primary_resource_id: 'default'
-      # Multiple IAM bindings on the same key cause non-determinism
+    # Multiple IAM bindings on the same key cause non-determinism
     skip_vcr: true
     vars:
       kms_key_name: 'projects/keys-project/locations/us-central1/keyRings/key-ring/cryptoKeys/crypto-key'
@@ -136,8 +136,10 @@ virtual_fields:
     name: 'deletion_protection'
     default_value: true
     description: |
-      Whether or not to allow Terraform to destroy the CertificateAuthority. Unless this field is set to false
-      in Terraform state, a `terraform destroy` or `terraform apply` that would delete the instance will fail.
+      Whether Terraform will be prevented from destroying the CertificateAuthority.
+      When the field is set to true or unset in Terraform state, a `terraform apply`
+      or `terraform destroy` that would delete the CertificateAuthority will fail.
+      When the field is set to false, deleting the CertificateAuthority is allowed.
   - !ruby/object:Api::Type::Enum
     name: 'desired_state'
     description: |

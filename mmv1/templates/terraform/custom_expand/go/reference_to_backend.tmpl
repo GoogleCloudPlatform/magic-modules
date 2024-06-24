@@ -1,4 +1,4 @@
-{{- /*
+{{/*
 	The license inside this block applies to this file
 	Copyright 2024 Google Inc.
 	Licensed under the Apache License, Version 2.0 (the "License");
@@ -9,8 +9,8 @@
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	See the License for the specific language governing permissions and
 	limitations under the License.
-*/}}
-{{- /* This provides the best long-form self link possible given the input.
+*/ -}}
+{{/* This provides the best long-form self link possible given the input.
    If the input is a full URL including scheme, we return it unmodified
         https://compute.googleapis.com/v1/projects/foo/regions/bar/backendBuckets/baz -> (the same)
    If the input is a partial self-link, we return it with the compute base path in front.
@@ -21,7 +21,7 @@
    If the input is just project/region/name, region/name, or just name, we treat it like a backendService.
         baz -> https://compute.googleapis.com/v1/projects/provider-project/regions/provider-region/backendServices/baz
         bar/baz -> https://compute.googleapis.com/v1/projects/provider-project/regions/bar/backendServices/baz
-        foo/bar/baz -> https://compute.googleapis.com/v1/projects/foo/regions/bar/backendServices/baz */}}
+        foo/bar/baz -> https://compute.googleapis.com/v1/projects/foo/regions/bar/backendServices/baz */ -}}
 func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
   // This method returns a full self link from whatever the input is.
   if v == nil || v.(string) == "" {
