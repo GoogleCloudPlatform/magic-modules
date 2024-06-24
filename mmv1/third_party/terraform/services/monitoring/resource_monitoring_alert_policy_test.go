@@ -365,7 +365,7 @@ resource "google_monitoring_alert_policy" "mql" {
     mime_type = "text/markdown"
     subject = "test subject"
 	links {
-		displayname = "link display name"
+		displayName = "link display name"
 		url = "http://mydomain.com"
 	}
 	links {
