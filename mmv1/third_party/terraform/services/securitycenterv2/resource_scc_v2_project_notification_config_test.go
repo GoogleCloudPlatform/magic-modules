@@ -29,7 +29,7 @@ func TestAccSecurityCenterV2ProjectNotificationConfig_updateStreamingConfigFilte
 				ResourceName:            "google_scc_v2_project_notification_config.custom_notification_config",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"project", "config_id"},
+				ImportStateVerifyIgnore: []string{"projectId", "config_id"},
 			},
 			{
 				Config: testAccSecurityCenterV2ProjectNotificationConfig_updateStreamingConfigFilter(context),
@@ -38,7 +38,7 @@ func TestAccSecurityCenterV2ProjectNotificationConfig_updateStreamingConfigFilte
 				ResourceName:            "google_scc_v2_project_notification_config.custom_notification_config",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"project", "config_id"},
+				ImportStateVerifyIgnore: []string{"projectId", "config_id"},
 			},
 		},
 	})
@@ -52,7 +52,7 @@ resource "google_pubsub_topic" "scc_v2_project_notification" {
 
 resource "google_scc_v2_project_notification_config" "custom_notification_config" {
   config_id    = "tf-test-my-config%{random_suffix}"
-  project      = "%{project_id}"
+  projectId      = "%{project_id}"
   description  = "My custom Cloud Security Command Center Finding Notification Configuration"
   pubsub_topic =  google_pubsub_topic.scc_v2_project_notification.id
   location     = "global"
