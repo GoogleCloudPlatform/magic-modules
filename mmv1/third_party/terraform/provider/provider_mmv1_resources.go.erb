@@ -8,12 +8,13 @@ import (
 	  "github.com/hashicorp/terraform-provider-google/google/services/<%= service -%>"
 	<% end -%>
 
+	<% if version == 'ga' -%>
 	"github.com/hashicorp/terraform-provider-google/google/services/composer"
+	<% end -%>
 	"github.com/hashicorp/terraform-provider-google/google/services/container"
 	"github.com/hashicorp/terraform-provider-google/google/services/containeraws"
 	"github.com/hashicorp/terraform-provider-google/google/services/containerazure"
 	"github.com/hashicorp/terraform-provider-google/google/services/dataflow"
-	"github.com/hashicorp/terraform-provider-google/google/services/servicenetworking"
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
 )
 
@@ -26,6 +27,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_active_folder":                             resourcemanager.DataSourceGoogleActiveFolder(),
 	"google_alloydb_locations":                         alloydb.DataSourceAlloydbLocations(),
 	"google_alloydb_supported_database_flags":          alloydb.DataSourceAlloydbSupportedDatabaseFlags(),
+	"google_artifact_registry_docker_image":            artifactregistry.DataSourceArtifactRegistryDockerImage(),
 	"google_artifact_registry_repository":              artifactregistry.DataSourceArtifactRegistryRepository(),
 	"google_apphub_discovered_workload":		    apphub.DataSourceApphubDiscoveredWorkload(),
 	"google_app_engine_default_service_account":        appengine.DataSourceGoogleAppEngineDefaultServiceAccount(),
@@ -58,6 +60,10 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_cloud_run_v2_job":                          cloudrunv2.DataSourceGoogleCloudRunV2Job(),
 	"google_cloud_run_v2_service":                      cloudrunv2.DataSourceGoogleCloudRunV2Service(),
 	"google_composer_environment":                      composer.DataSourceGoogleComposerEnvironment(),
+	<% unless version == 'ga' -%>
+	"google_composer_user_workloads_config_map":        composer.DataSourceGoogleComposerUserWorkloadsConfigMap(),
+	"google_composer_user_workloads_secret":            composer.DataSourceGoogleComposerUserWorkloadsSecret(),
+	<% end -%>
 	"google_composer_image_versions":                   composer.DataSourceGoogleComposerImageVersions(),
 	"google_compute_address":                           compute.DataSourceGoogleComputeAddress(),
 	"google_compute_addresses":                         compute.DataSourceGoogleComputeAddresses(),
@@ -95,6 +101,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_compute_router":                            compute.DataSourceGoogleComputeRouter(),
 	"google_compute_router_nat":                        compute.DataSourceGoogleComputeRouterNat(),
 	"google_compute_router_status":                     compute.DataSourceGoogleComputeRouterStatus(),
+	"google_compute_security_policy":                   compute.DataSourceGoogleComputeSecurityPolicy(),
 	"google_compute_snapshot":                          compute.DataSourceGoogleComputeSnapshot(),
 	"google_compute_ssl_certificate":                   compute.DataSourceGoogleComputeSslCertificate(),
 	"google_compute_ssl_policy":                        compute.DataSourceGoogleComputeSslPolicy(),
@@ -220,15 +227,11 @@ var handwrittenDatasources = map[string]*schema.Resource{
 
 var generatedIAMDatasources = map[string]*schema.Resource{
 	// ####### START generated IAM datasources ###########
-	<%
-	resources_for_version.each do |object|
-		unless object[:iam_class_name].nil?
-	-%>
+	<% resources_for_version.each do |object| -%>
+	<% unless object[:iam_class_name].nil? -%>
 	"<%= object[:terraform_name] -%>_iam_policy":               tpgiamresource.DataSourceIamPolicy(<%= object[:iam_class_name] -%>IamSchema, <%= object[:iam_class_name] -%>IamUpdaterProducer),
-	<%
-		end
-	end
-	-%>
+	<% end -%>
+	<% end -%>
 	// ####### END generated IAM datasources ###########
 }
 
@@ -265,18 +268,12 @@ var generatedResources = map[string]*schema.Resource{
 	<% 	unless object[:resource_name].nil? -%>
 		"<%= object[:terraform_name] -%>": <%= object[:resource_name] -%>(),
 	<%  end -%>
-	<%
-	    unless object[:iam_class_name].nil?
-	-%>
+	<% unless object[:iam_class_name].nil? -%>
 		"<%= object[:terraform_name] -%>_iam_binding":              tpgiamresource.ResourceIamBinding(<%= object[:iam_class_name] -%>IamSchema, <%= object[:iam_class_name] -%>IamUpdaterProducer, <%= object[:iam_class_name] -%>IdParseFunc),
 		"<%= object[:terraform_name] -%>_iam_member":               tpgiamresource.ResourceIamMember(<%= object[:iam_class_name] -%>IamSchema, <%= object[:iam_class_name] -%>IamUpdaterProducer, <%= object[:iam_class_name] -%>IdParseFunc),
 		"<%= object[:terraform_name] -%>_iam_policy":               tpgiamresource.ResourceIamPolicy(<%= object[:iam_class_name] -%>IamSchema, <%= object[:iam_class_name] -%>IamUpdaterProducer, <%= object[:iam_class_name] -%>IdParseFunc),
-	<%
-	    end # unless object[:iam_class_name].nil?
-	-%>
-	<%
-	end     # resources_for_version.each do
-	-%>
+	<% end -%>
+	<% end -%>
 }
 
 var handwrittenResources = map[string]*schema.Resource{
