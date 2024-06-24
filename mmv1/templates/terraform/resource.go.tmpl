@@ -893,9 +893,9 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 -*/}}
 {{-                      if $propsByKey.SendEmptyValue -}}
         } else if v, ok := d.GetOkExists("{{ underscore $propsByKey.Name -}}"); ok || !reflect.DeepEqual(v, {{ $propsByKey.ApiName -}}Prop) {
-{{                      else if $propsByKey.FlattenObject -}}
+{{-                      else if $propsByKey.FlattenObject -}}
         } else if !tpgresource.IsEmptyValue(reflect.ValueOf({{ $propsByKey.ApiName -}}Prop)) {
-{{                      else -}}
+{{-                      else -}}
         } else if v, ok := d.GetOkExists("{{ underscore $propsByKey.Name -}}"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, {{ $propsByKey.ApiName -}}Prop)) {
 {{-                     end}}
             obj["{{ $propsByKey.ApiName -}}"] = {{ $propsByKey.ApiName -}}Prop
