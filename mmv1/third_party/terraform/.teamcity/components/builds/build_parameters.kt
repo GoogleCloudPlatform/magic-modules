@@ -258,7 +258,7 @@ fun ParametrizedWithType.readOnlySettings() {
 // https://www.jetbrains.com/help/teamcity/2024.03/working-with-feature-branches.html#Active+Branches
 fun ParametrizedWithType.activeBranchSettings() {
     hiddenVariable("teamcity.activeVcsBranch.age.days", "10")
-    hiddenVariable("teamcity.activeBuildBranch.age.days", "10")
+    hiddenVariable("teamcity.activeBuildBranch.age.hours", "240") // after 10 days, builds from previous nightly tests will be removed from teamcity UI
 }
 
 // ParametrizedWithType.terraformCoreBinaryTesting sets environment variables that control what Terraform version is downloaded
