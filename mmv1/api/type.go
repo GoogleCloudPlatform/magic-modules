@@ -1326,13 +1326,19 @@ func (t *Type) GoLiteral(value interface{}) string {
 
 // def force_new?(property, resource)
 func (t *Type) IsForceNew() bool {
+	if t.IsA("KeyValueLabels") && t.ResourceMetadata.RootLabels() {
+		return false
+	}
+
+	if t.IsA("KeyValueTerraformLabels") && !t.ResourceMetadata.Updatable() && !t.ResourceMetadata.RootLabels() {
+		return true
+	}
+
 	parent := t.Parent()
-	return (((!t.Output || t.IsA("KeyValueEffectiveLabels")) &&
+	return (!t.Output || t.IsA("KeyValueEffectiveLabels")) &&
 		(t.Immutable ||
-			(t.ResourceMetadata.Immutable && t.UpdateUrl == "" && !t.Immutable &&
+			(t.ResourceMetadata.Immutable && t.UpdateUrl == "" &&
 				(parent == nil ||
 					(parent.IsForceNew() &&
-						!(parent.FlattenObject && t.IsA("KeyValueLabels"))))))) ||
-		(t.IsA("KeyValueTerraformLabels") &&
-			t.ResourceMetadata.Updatable() && !t.ResourceMetadata.RootLabels()))
+						!(parent.FlattenObject && t.IsA("KeyValueLabels"))))))
 }
