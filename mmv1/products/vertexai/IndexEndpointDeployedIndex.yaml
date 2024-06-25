@@ -43,36 +43,36 @@ async: !ruby/object:Api::OpAsync
 description: |-
   An endpoint indexes are deployed into. An index endpoint can have multiple deployed indexes.
 autogen_async: false
-examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: "vertex_ai_index_endpoint_deployed_index"
-    primary_resource_id: "index_endpoint"
-    vars:
-      address_name: "address-name"
-      network_name: "network-name"
-    skip_test: true
-  - !ruby/object:Provider::Terraform::Examples
-    name: "vertex_ai_index_endpoint_deployed_index_test"
-    primary_resource_id: "index_endpoint"
-    vars:
-      network_name: "network-name"
-    test_vars_overrides:
-      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
-    skip_docs: true
-  - !ruby/object:Provider::Terraform::Examples
-    name: "vertex_ai_index_endpoint_deployed_index_with_psc"
-    primary_resource_id: "index_endpoint"
-  - !ruby/object:Provider::Terraform::Examples
-    name: "vertex_ai_index_endpoint_with_false_psc"
-    primary_resource_id: "index_endpoint"
-    # It's not distinguishable if the psc is false or not set, so we need to skip the test.
-    skip_import_test: true
-    skip_docs: true
-  - !ruby/object:Provider::Terraform::Examples
-    name: "vertex_ai_index_endpoint_deployed_index_with_public_endpoint"
-    primary_resource_id: "index_endpoint"
-    test_vars_overrides:
-      network_name: 'acctest.BootstrapSharedTestNetwork(t, "vertex-ai-index-endpoint")'
+# examples:
+#   - !ruby/object:Provider::Terraform::Examples
+#     name: "vertex_ai_index_endpoint_deployed_index"
+#     primary_resource_id: "index_endpoint"
+#     vars:
+#       address_name: "address-name"
+#       network_name: "network-name"
+#     skip_test: true
+#   - !ruby/object:Provider::Terraform::Examples
+#     name: "vertex_ai_index_endpoint_deployed_index_test"
+#     primary_resource_id: "index_endpoint"
+#     vars:
+#       network_name: "network-name"
+#     test_vars_overrides:
+#       network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
+#     skip_docs: true
+#   - !ruby/object:Provider::Terraform::Examples
+#     name: "vertex_ai_index_endpoint_deployed_index_with_psc"
+#     primary_resource_id: "index_endpoint"
+#   - !ruby/object:Provider::Terraform::Examples
+#     name: "vertex_ai_index_endpoint_with_false_psc"
+#     primary_resource_id: "index_endpoint"
+#     # It's not distinguishable if the psc is false or not set, so we need to skip the test.
+#     skip_import_test: true
+#     skip_docs: true
+#   - !ruby/object:Provider::Terraform::Examples
+#     name: "vertex_ai_index_endpoint_deployed_index_with_public_endpoint"
+#     primary_resource_id: "index_endpoint"
+#     test_vars_overrides:
+#       network_name: 'acctest.BootstrapSharedTestNetwork(t, "vertex-ai-index-endpoint")'
 parameters:
   - !ruby/object:Api::Type::String
     name: region
@@ -97,7 +97,37 @@ properties:
     name: privateEndpoints
     output: true
     description: Provides paths for users to send requests directly to the deployed index services running on Cloud via private services access
-    properties: // TODO
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'matchGrpcAddress'
+        description: The ip address used to send match gRPC requests.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'serviceAttachment'
+        description: The name of the service attachment resource. Populated if private service connect is enabled.
+        output: true
+      - !ruby/object:Api::Type::Array
+        name: 'pscAutomatedEndpoints'
+        description: |
+          PscAutomatedEndpoints is populated if private service connect is enabled if PscAutomatedConfig is set.
+        output: true
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: projectId
+              output: true
+              description: |
+                Corresponding projectId in pscAutomationConfigs
+            - !ruby/object:Api::Type::String
+              name: network
+              output: true
+              description: |
+                Corresponding network in pscAutomationConfigs.
+            - !ruby/object:Api::Type::String
+              name: 'matchAddress'
+              output: true
+              description: |
+                ip Address created by the automated forwarding rule.
   - !ruby/object:Api::Type::String
     name: 'indexSyncTime'
     output: true
@@ -105,21 +135,104 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: automaticResources
     description: A description of resources that the DeployedIndex uses, which to large degree are decided by Vertex AI, and optionally allows only a modest additional configuration.
-    properties: // TODO
+    properties:
+      - !ruby/object:Api::Type::Integer
+        name: 'minReplicaCount'
+        description: The minimum number of replicas this DeployedModel will be always deployed on.
+        immutable: true
+      - !ruby/object:Api::Type::Integer
+        name: 'maxReplicaCount'
+        description: The maximum number of replicas this DeployedModel may be deployed on when the traffic against it increases.
+        immutable: true
   - !ruby/object:Api::Type::NestedObject
     name: dedicatedResources
     description: A description of resources that are dedicated to the DeployedIndex, and that need a higher degree of manual configuration.
-    properties: // TODO
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: 'machineSpec'
+        description: The minimum number of replicas this DeployedModel will be always deployed on.
+        immutable: true
+        required: true
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'machineType'
+            description: The type of the machine.
+            immutable: true
+          - !ruby/object:Api::Type::Enum
+            name: 'acceleratorType'
+            description: The name of the service attachment resource. Populated if private service connect is enabled.
+            immutable: true
+            values:
+             - NVIDIA_TESLA_K80
+             - NVIDIA_TESLA_P100
+             - NVIDIA_TESLA_V100
+             - NVIDIA_TESLA_P4
+             - NVIDIA_TESLA_T4
+             - NVIDIA_TESLA_A100
+             - NVIDIA_A100_80GB
+             - NVIDIA_L4
+             - NVIDIA_H100_80GB
+             - TPU_V2
+             - TPU_V3
+             - TPU_V4_POD
+             - TPU_V5_LITEPOD
+          - !ruby/object:Api::Type::Integer
+            name: 'acceleratorCount'
+            description: The number of accelerators to attach to the machine.
+          - !ruby/object:Api::Type::String
+            name: 'tpuTopology'
+            immutable: true
+            description: |
+              The topology of the TPUs. Corresponds to the TPU topologies available from GKE. (Example: tpuTopology: "2x2x1").
+      - !ruby/object:Api::Type::Integer
+        name: 'minReplicaCount'
+        description: The minimum number of machine replicas this DeployedModel will be always deployed on. This value must be greater than or equal to 1.
+        immutable: true
+        required: true
+      - !ruby/object:Api::Type::Integer
+        name: 'maxReplicaCount'
+        description: The maximum number of replicas this DeployedModel may be deployed on when the traffic against it increases.
+        immutable: true
+      - !ruby/object:Api::Type::Array
+        name: 'autoscalingMetricSpecs'
+        description: The metric specifications that overrides a resource utilization metric (CPU utilization, accelerator's duty cycle, and so on) target value (default to 60 if not set). At most one entry is allowed per metric.
+        immutable: true
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: metricName
+              required: true
+              description: |
+                The resource metric name.
+            - !ruby/object:Api::Type::String
+              name: target
+              default_value: "60"
+              description: |
+                The target resource utilization in percentage (1% - 100%) for the given metric; once the real usage deviates from the target by a certain percentage, the machine replicas change. The default value is 60 (representing 60%) if not provided.
   - !ruby/object:Api::Type::Boolean
     name: enableAccessLogging
     description: If true, private endpoint's access logs are sent to Cloud Logging.
   - !ruby/object:Api::Type::NestedObject
     name: deploymentIndexAuthConfig
     description: If set, the authentication is enabled for the private endpoint.
-    properties: // TODO
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: authProvider
+        description: Defines the authentication provider that the DeployedIndex uses.
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: audiences
+            output: true
+            description: The list of JWT audiences. that are allowed to access. A JWT containing any of these audiences will be accepted.
+            item_type: Api::Type::String
+          - !ruby/object:Api::Type::Array
+            name: allowedIssuers
+            output: true
+            description: |
+              A list of allowed JWT issuers. Each entry must be a valid Google service account, in the following format: service-account-name@project-id.iam.gserviceaccount.com
+            item_type: Api::Type::String
   - !ruby/object:Api::Type::Array
-    name: publicEndpointDomainName
-    output: true
+    name: reservedIpRanges
     description: A list of reserved ip ranges under the VPC network that can be used for this DeployedIndex.
     item_type: Api::Type::String
   - !ruby/object:Api::Type::String
