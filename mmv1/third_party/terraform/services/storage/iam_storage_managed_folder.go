@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
 )
 
 var StorageManagedFolderIamSchema = map[string]*schema.Schema{
@@ -24,6 +25,7 @@ var StorageManagedFolderIamSchema = map[string]*schema.Schema{
 		Required:         true,
 		ForceNew:         true,
 		DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
+		ValidateFunc:     verify.ValidateRegexp(`/$`),
 	},
 }
 
