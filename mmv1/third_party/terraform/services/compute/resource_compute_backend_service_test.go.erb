@@ -848,6 +848,36 @@ func TestAccComputeBackendService_withPrivateOriginAuth(t *testing.T) {
 	})
 }
 
+func TestAccComputeBackendService_withOauth2ClientAuth(t *testing.T) {
+	t.Parallel()
+
+	randomSuffix := acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeBackendServiceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeBackendService_withOauth2ClientAuth(randomSuffix, "xyz"),
+			},
+			{
+				ResourceName:      "google_compute_backend_service.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeBackendService_withOauth2ClientAuth(randomSuffix, "987"),
+			},
+			{
+				ResourceName:      "google_compute_backend_service.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 <% unless version == 'ga' -%>
 func TestAccComputeBackendService_regionNegBackend(t *testing.T) {
 	t.Parallel()
@@ -2048,10 +2078,6 @@ resource "google_compute_backend_service" "foobar" {
   backend {
     group = google_compute_global_network_endpoint_group.group.self_link
   }
-  iap {
-    oauth2_client_id     = "abc"
-    oauth2_client_secret = "xyz"
-  }
 }
 
 resource "google_compute_global_network_endpoint" "networkendpoint" {
@@ -2065,4 +2091,19 @@ resource "google_compute_global_network_endpoint_group" "group" {
   network_endpoint_type = "INTERNET_IP_PORT"
 }
 `, randomSuffix, randomSuffix)
+}
+
+
+func testAccComputeBackendService_withOauth2ClientAuth(randomSuffix, clientSecret string) string {
+	return fmt.Sprintf(`
+resource "google_compute_backend_service" "foobar" {
+  name                  = "tf-test-backend-service-%s"
+  protocol              = "HTTP"
+  load_balancing_scheme = "EXTERNAL"
+  iap {
+    oauth2_client_id     = "abc"
+    oauth2_client_secret = "%s"
+  }
+}
+`, randomSuffix, clientSecret)
 }
