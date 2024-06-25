@@ -75,8 +75,6 @@ examples:
       workstation_config_name: 'workstation-config'
       tag_key1: 'tag_key1'
       tag_value1: 'tag_value1'
-      tag_key2: 'tag_key2'
-      tag_value2: 'tag_value2'
   - !ruby/object:Provider::Terraform::Examples
     name: 'workstation_config_container'
     min_version: beta
