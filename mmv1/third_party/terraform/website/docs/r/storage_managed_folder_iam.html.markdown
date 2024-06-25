@@ -178,7 +178,7 @@ exported:
 For all import syntaxes, the "resource in question" can take any of the following forms:
 
 * b/{{bucket}}/managedFolders/{{managed_folder}}
-* bucket/{{managed_folder}}
+* {{bucket}}/{{managed_folder}}
 
 Any variables not passed in the import command will be taken from the provider configuration.
 
