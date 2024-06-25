@@ -18,7 +18,7 @@ func TestAccSCCV2OrganizationSourceIAMMember(t *testing.T) {
 	member := "user:test@example.com"
 	conditionTitle := "Title"
 	conditionDescription := "Description"
-	conditionExpression := `request.time < timestamp("2023-12-31T00:00:00Z")`
+	conditionExpression := `request.time < timestamp(\"2023-12-31T00:00:00Z\")`
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck: func() {
