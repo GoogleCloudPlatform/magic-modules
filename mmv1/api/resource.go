@@ -1391,6 +1391,9 @@ func (r Resource) GetPropertyUpdateMasksGroups(properties []*Type, maskPrefix st
 
 // Formats whitespace in the style of the old Ruby generator's descriptions in documentation
 func (r Resource) FormatDocDescription(desc string, indent bool) string {
+	if desc == "" {
+		return ""
+	}
 	returnString := desc
 	if indent {
 		returnString = strings.ReplaceAll(returnString, "\n\n", "\n")
@@ -1399,7 +1402,7 @@ func (r Resource) FormatDocDescription(desc string, indent bool) string {
 		// fix removing for ruby -> go transition diffs
 		returnString = strings.ReplaceAll(returnString, "\n  \n  **Note**: This field is non-authoritative,", "\n\n  **Note**: This field is non-authoritative,")
 
-		return strings.TrimSuffix(returnString, "\n  ")
+		return fmt.Sprintf("\n  %s", strings.TrimSuffix(returnString, "\n  "))
 	}
 	return strings.TrimSuffix(returnString, "\n")
 }
