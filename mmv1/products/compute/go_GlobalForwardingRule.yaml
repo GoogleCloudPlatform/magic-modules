@@ -255,7 +255,7 @@ properties:
       When reading an `IPAddress`, the API always returns the IP
       address number.
     default_from_api: true
-    diff_suppress_func: 'tpgresource.InternalIpDiffSuppress'
+    diff_suppress_func: InternalIpDiffSuppress
   - name: 'IPProtocol'
     type: Enum
     description: |
@@ -433,7 +433,7 @@ properties:
       cannot have overlapping `portRange`s.
 
       @pattern: \d+(?:-\d+)?
-    diff_suppress_func: 'tpgresource.PortRangeDiffSuppress'
+    diff_suppress_func: PortRangeDiffSuppress
   - name: 'subnetwork'
     type: ResourceRef
     description: |

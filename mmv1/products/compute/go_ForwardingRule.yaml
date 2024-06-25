@@ -299,7 +299,7 @@ properties:
       When reading an `IPAddress`, the API always returns the IP
       address number.
     default_from_api: true
-    diff_suppress_func: 'tpgresource.InternalIpDiffSuppress'
+    diff_suppress_func: InternalIpDiffSuppress
   - name: 'IPProtocol'
     type: Enum
     description: |
@@ -412,7 +412,7 @@ properties:
 
       @pattern: \d+(?:-\d+)?
     default_from_api: true
-    diff_suppress_func: 'tpgresource.PortRangeDiffSuppress'
+    diff_suppress_func: PortRangeDiffSuppress
   - name: 'ports'
     type: Array
     description: |

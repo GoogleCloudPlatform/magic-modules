@@ -264,7 +264,7 @@ properties:
       When reading an `IPAddress`, the API always returns the IP
       address number.
     default_from_api: true
-    diff_suppress_func: 'tpgresource.InternalIpDiffSuppress'
+    diff_suppress_func: InternalIpDiffSuppress
   - !ruby/object:Api::Type::Enum
     name: 'IPProtocol'
     description: |
@@ -441,7 +441,7 @@ properties:
       cannot have overlapping `portRange`s.
 
       @pattern: \d+(?:-\d+)?
-    diff_suppress_func: 'tpgresource.PortRangeDiffSuppress'
+    diff_suppress_func: PortRangeDiffSuppress
     # This is a multi-resource resource reference (TargetHttp(s)Proxy,
     # TargetSslProxy, TargetTcpProxy, TargetVpnGateway, TargetPool,
     # TargetInstance)
