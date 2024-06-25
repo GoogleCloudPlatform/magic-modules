@@ -56,7 +56,8 @@ async:
     path: 'error/errors'
     message: 'message'
 collection_url_key: 'items'
-custom_code:
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/compute_network_endpoint_group.go.erb
 examples:
   - name: 'network_endpoint_group'
     primary_resource_id: 'neg'
@@ -137,7 +138,7 @@ properties:
     type: ResourceRef
     description: |
       Optional subnetwork to which all network endpoints in the NEG belong.
-    diff_suppress_func: 'tpgresource.CompareOptionalSubnet'
+    diff_suppress_func: 'compareOptionalSubnet'
     custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
     resource: 'Subnetwork'
     imports: 'selfLink'

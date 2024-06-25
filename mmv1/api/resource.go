@@ -985,15 +985,9 @@ func ImportIdFormats(importFormat, identity []string, baseUrl string) []string {
 	// `{{project}}/{{%name}}` as there is no way to differentiate between
 	// project-name/resource-name and resource-name/with-slash
 	if !strings.Contains(idFormats[0], "%") {
-		idFormats = append(idFormats, shortIdFormat, shortIdDefaultProjectFormat)
-		if shortIdDefaultProjectFormat != shortIdDefaultFormat {
-			idFormats = append(idFormats, shortIdDefaultFormat)
-		}
+		idFormats = append(idFormats, shortIdFormat, shortIdDefaultProjectFormat, shortIdDefaultFormat)
 	}
 
-	idFormats = google.Reject(slices.Compact(idFormats), func(i string) bool {
-		return i == ""
-	})
 	slices.SortFunc(idFormats, func(a, b string) int {
 		i := strings.Count(a, "/")
 		j := strings.Count(b, "/")
@@ -1003,7 +997,25 @@ func ImportIdFormats(importFormat, identity []string, baseUrl string) []string {
 		return i - j
 	})
 	slices.Reverse(idFormats)
-	return idFormats
+
+	// Remove duplicates from idFormats
+	uniq := make([]string, len(idFormats))
+	uniq[0] = idFormats[0]
+	i := 1
+	j := 1
+	for j < len(idFormats) {
+		format := idFormats[j]
+		if format != uniq[i-1] {
+			uniq[i] = format
+			i++
+		}
+		j++
+	}
+
+	uniq = google.Reject(slices.Compact(uniq), func(i string) bool {
+		return i == ""
+	})
+	return uniq
 }
 
 func (r Resource) IgnoreReadPropertiesToString(e resource.Examples) string {
@@ -1379,6 +1391,9 @@ func (r Resource) GetPropertyUpdateMasksGroups(properties []*Type, maskPrefix st
 
 // Formats whitespace in the style of the old Ruby generator's descriptions in documentation
 func (r Resource) FormatDocDescription(desc string, indent bool) string {
+	if desc == "" {
+		return ""
+	}
 	returnString := desc
 	if indent {
 		returnString = strings.ReplaceAll(returnString, "\n\n", "\n")
@@ -1387,7 +1402,7 @@ func (r Resource) FormatDocDescription(desc string, indent bool) string {
 		// fix removing for ruby -> go transition diffs
 		returnString = strings.ReplaceAll(returnString, "\n  \n  **Note**: This field is non-authoritative,", "\n\n  **Note**: This field is non-authoritative,")
 
-		return strings.TrimSuffix(returnString, "\n  ")
+		return fmt.Sprintf("\n  %s", strings.TrimSuffix(returnString, "\n  "))
 	}
 	return strings.TrimSuffix(returnString, "\n")
 }
