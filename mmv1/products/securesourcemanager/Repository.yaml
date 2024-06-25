@@ -79,16 +79,10 @@ parameters:
   - !ruby/object:Api::Type::String
     name: 'repository_id'
     description: |
-      The name for the Repository.
+      The ID for the Repository.
     required: true
     immutable: true
     url_param_only: true
-  - !ruby/object:Api::Type::String
-    name: 'instance'
-    description: |
-      The name of the instance in which the repository is hosted.
-    required: true
-    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
@@ -100,6 +94,12 @@ properties:
     name: 'description'
     description: |
       Description of the repository, which cannot exceed 500 characters.
+  - !ruby/object:Api::Type::String
+    name: 'instance'
+    description: |
+      The name of the instance in which the repository is hosted.
+    required: true
+    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
   - !ruby/object:Api::Type::String
     name: 'uid'
     description: |
