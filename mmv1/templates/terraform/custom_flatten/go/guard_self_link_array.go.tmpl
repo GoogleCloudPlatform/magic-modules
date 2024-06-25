@@ -10,7 +10,7 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */ -}}
-{{- /* This should be used for multi-resource ref fields that can't be made to real resource refs yet */}}
+{{/* This should be used for multi-resource ref fields that can't be made to real resource refs yet */}}
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil {
 		return v

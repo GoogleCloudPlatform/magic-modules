@@ -37,6 +37,7 @@ timeouts:
   delete_minutes: 20
 custom_code:
   post_create: 'templates/terraform/post_create/go/org_security_policy_association.go.tmpl'
+  post_delete: 'templates/terraform/post_create/go/org_security_policy_association.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/go/skip_delete_during_test.go.tmpl'
 read_error_transform: 'transformSecurityPolicyAssociationReadError'
 examples:

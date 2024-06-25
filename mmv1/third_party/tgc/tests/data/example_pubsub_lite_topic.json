@@ -1,6 +1,6 @@
 [
   {
-    "name": "//pubsublite.googleapis.com/projects/{{.Provider.project}}/locations/us-central1a/topics/example-topic",
+    "name": "//pubsublite.googleapis.com/projects/{{.Provider.project}}/locations/us-central1-a/topics/example-topic",
     "asset_type": "pubsublite.googleapis.com/Topic",
     "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
     "resource": {
@@ -17,7 +17,7 @@
           "count": 1
         },
         "reservationConfig": {
-          "throughputReservation": "projects/{{.Provider.project}}/locations/us-central/reservations/example-reservation"
+          "throughputReservation": "projects/{{.Provider.project}}/locations/us-central1/reservations/example-reservation"
         },
         "retentionConfig": {
           "perPartitionBytes": "32212254720"
