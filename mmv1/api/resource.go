@@ -17,6 +17,7 @@ import (
 	"maps"
 	"regexp"
 	"strings"
+	"sort"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
@@ -1465,6 +1466,24 @@ func (r Resource) PropertiesByCustomUpdate() map[UpdateGroup][]*Type {
 		groupedCustomUpdateProps[groupedProperty] = append(groupedCustomUpdateProps[groupedProperty], prop)
 	}
 	return groupedCustomUpdateProps
+}
+
+func (r Resource) PropertiesByCustomUpdateGroups() []UpdateGroup {
+	customUpdateProps := r.propertiesWithCustomUpdate(r.RootProperties())
+	var updateGroups []UpdateGroup
+	for _, prop := range customUpdateProps {
+		groupedProperty := UpdateGroup{UpdateUrl: prop.UpdateUrl,
+			UpdateVerb:      prop.UpdateVerb,
+			UpdateId:        prop.UpdateId,
+			FingerprintName: prop.FingerprintName}
+
+		if slices.Contains(updateGroups, groupedProperty){
+			continue
+		}
+		updateGroups = append(updateGroups, groupedProperty)
+	}
+	sort.Slice(updateGroups, func(i, j int) bool { return updateGroups[i].UpdateId < updateGroups[i].UpdateId })
+	return updateGroups
 }
 
 func (r Resource) FieldSpecificUpdateMethods() bool {

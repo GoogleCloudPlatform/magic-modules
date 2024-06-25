@@ -75,6 +75,14 @@ examples:
       subscription_name: 'example-subscription'
       dataset_id: 'example_dataset'
       table_id: 'example_table'
+  - name: 'pubsub_subscription_push_bq_service_account'
+    primary_resource_id: 'example'
+    vars:
+      topic_name: 'example-topic'
+      subscription_name: 'example-subscription'
+      dataset_id: 'example_dataset'
+      table_id: 'example_table'
+      service_account_id: 'example-bqw'
   - name: 'pubsub_subscription_push_cloudstorage'
     primary_resource_id: 'example'
     vars:
@@ -87,6 +95,13 @@ examples:
       topic_name: 'example-topic'
       subscription_name: 'example-subscription'
       bucket_name: 'example-bucket'
+  - name: 'pubsub_subscription_push_cloudstorage_service_account'
+    primary_resource_id: 'example'
+    vars:
+      topic_name: 'example-topic'
+      subscription_name: 'example-subscription'
+      bucket_name: 'example-bucket'
+      service_account_id: 'example-stw'
 parameters:
 properties:
   - name: 'name'
@@ -133,17 +148,15 @@ properties:
         description: |
           When true, use the topic's schema as the columns to write to in BigQuery, if it exists.
           Only one of use_topic_schema and use_table_schema can be set.
-        # Not present in Ruby version
-        # conflicts:
-        #   - use_table_schema
+        conflicts:
+          - use_table_schema
       - name: 'useTableSchema'
         type: Boolean
         description: |
           When true, use the BigQuery table's schema as the columns to write to in BigQuery. Messages
           must be published in JSON format. Only one of use_topic_schema and use_table_schema can be set.
-        # Not present in Ruby version
-        # conflicts:
-        #   - use_topic_schema
+        conflicts:
+          - use_topic_schema
       - name: 'writeMetadata'
         type: Boolean
         description: |
@@ -155,6 +168,12 @@ properties:
           When true and use_topic_schema or use_table_schema is true, any fields that are a part of the topic schema or message schema that
           are not part of the BigQuery table schema are dropped when writing to BigQuery. Otherwise, the schemas must be kept in sync
           and any messages with extra fields are not written and remain in the subscription's backlog.
+      - name: 'serviceAccountEmail'
+        type: String
+        description: |
+          The service account to use to write to BigQuery. If not specified, the Pub/Sub
+          [service agent](https://cloud.google.com/iam/docs/service-agents),
+          service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com, is used.
   - name: 'cloudStorageConfig'
     type: NestedObject
     description: |
@@ -212,6 +231,12 @@ properties:
             type: Boolean
             description: |
               When true, write the subscription name, messageId, publishTime, attributes, and orderingKey as additional fields in the output.
+      - name: 'serviceAccountEmail'
+        type: String
+        description: |
+          The service account to use to write to Cloud Storage. If not specified, the Pub/Sub
+          [service agent](https://cloud.google.com/iam/docs/service-agents),
+          service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com, is used.
   - name: 'pushConfig'
     type: NestedObject
     description: |
