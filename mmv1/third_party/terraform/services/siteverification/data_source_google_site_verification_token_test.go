@@ -43,7 +43,6 @@ func testAccSiteVerificationToken_siteverificationTokenSite(context map[string]i
 data "google_service_account_access_token" "impersonated" {
   target_service_account = "%{account}"
   scopes = [
-    "https://www.googleapis.com/auth/siteverification",
     "https://www.googleapis.com/auth/siteverification.verify_only",
     "https://www.googleapis.com/auth/cloud-platform",
     "https://www.googleapis.com/auth/userinfo.email",
@@ -102,7 +101,6 @@ func testAccSiteVerificationToken_siteverificationTokenDomain(context map[string
 data "google_service_account_access_token" "impersonated" {
   target_service_account = "%{account}"
   scopes = [
-    "https://www.googleapis.com/auth/siteverification",
     "https://www.googleapis.com/auth/siteverification.verify_only",
     "https://www.googleapis.com/auth/cloud-platform",
     "https://www.googleapis.com/auth/userinfo.email",
