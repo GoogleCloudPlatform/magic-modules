@@ -17,7 +17,7 @@ kind: 'storage#managedFolder'
 base_url: 'b/{{bucket}}/managedFolders'
 self_link: 'b/{{bucket}}/managedFolders/{{%name}}'
 id_format: '{{bucket}}/{{name}}'
-delete_url: 'b/{{bucket}}/managedFolders/{{%name}}?allowNonEmpty={{force_destroy}}'
+delete_url: 'b/{{bucket}}/managedFolders/{{%name}}'
 has_self_link: true
 immutable: true
 skip_sweeper: true # Skipping sweeper since this is a child resource.
@@ -47,8 +47,6 @@ examples:
     primary_resource_id: 'folder'
     vars:
       bucket_name: 'my-bucket'
-    ignore_read_extra:
-      - 'force_destroy'
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'bucket'
@@ -67,15 +65,6 @@ parameters:
     # consistent output.
     validation: !ruby/object:Provider::Terraform::Validation
       regex: '/$'
-virtual_fields:
-  - !ruby/object:Api::Type::Boolean
-    name: 'force_destroy'
-    immutable: true
-    default_value: false
-    description: |
-      Allows the deletion of a managed folder even if it's not empty.
-      If a non-empty managed folder is deleted, a simulated folder
-      with the same name is retained.
 properties:
   - !ruby/object:Api::Type::String
     name: createTime
