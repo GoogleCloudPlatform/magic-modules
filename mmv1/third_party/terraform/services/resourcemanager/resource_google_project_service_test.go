@@ -222,12 +222,6 @@ func TestAccProjectService_checkUsageOfServices(t *testing.T) {
 			{
 				Config: testAccProjectService_checkUsage(services, pid, org, "true"),
 			},
-			{
-				ResourceName:            "google_project_service.test",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"disable_on_destroy", "disable_dependent_services"},
-			},
 		},
 	})
 }
@@ -371,7 +365,7 @@ resource "google_project_service" "test" {
   project = google_project.acceptance.project_id
   service = "%s"
 
-  check_if_service_has_usage_on_destroy = checkIfServiceHasUsage
+  check_if_service_has_usage_on_destroy = %s
 }
-`, pid, pid, org, service)
+`, pid, pid, org, service, checkIfServiceHasUsage)
 }

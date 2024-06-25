@@ -123,11 +123,13 @@ func ResourceGoogleProjectService() *schema.Resource {
 				Optional: true,
 				Default:  true,
 			},
+<% unless version == 'ga' -%>
 			"check_if_service_has_usage_on_destroy": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
 			},
+<% end -%>
 		},
 		UseJSONNumber: true,
 	}
