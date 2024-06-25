@@ -919,6 +919,13 @@ is set to true. Defaults to ZONAL.`,
 				Computed:    true,
 				Description: `The link to service attachment of PSC instance.`,
 			},
+			"sql_network_architecture": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Optional: 	true,
+				ValidateFunc: validation.StringInSlice([]string{"NEW_NETWORK_ARCHITECTURE", "OLD_NETWORK_ARCHITECTURE"}, false),
+				Description: `The SQL network architecture for the instance. The valid values are:- 'SQL_NETWORK_ARCHITECTURE_UNSPECIFIED', 'NEW_NETWORK_ARCHITECTURE'and 'OLD_NETWORK_ARCHITECTURE'.`,
+			},
 			"dns_name": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -1683,6 +1690,9 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 	}
 	if err := d.Set("psc_service_attachment_link", instance.PscServiceAttachmentLink); err != nil {
 		return fmt.Errorf("Error setting psc_service_attachment_link: %s", err)
+	}
+	if err := d.Set("sql_network_architecture", instance.SqlNetworkArchitecture); err != nil {
+		return fmt.Errorf("Error setting sql_network_architecture: %s", err)
 	}
 	if err := d.Set("dns_name", instance.DnsName); err != nil {
 		return fmt.Errorf("Error setting dns_name: %s", err)

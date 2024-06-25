@@ -2547,7 +2547,7 @@ resource "google_sql_database_instance" "instance" {
 	settings {
 		tier = "db-g1-small"
 	}
-	sql_network_architecture = "OlD_NETWORK_ARCHITECTURE"
+	sql_network_architecture = "OLD_NETWORK_ARCHITECTURE"
 }
 `
 
