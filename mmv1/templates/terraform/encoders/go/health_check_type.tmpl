@@ -10,7 +10,6 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */ -}}
-
 if _, ok := d.GetOk("http_health_check"); ok {
 	hc := d.Get("http_health_check").([]interface{})[0]
 	ps := hc.(map[string]interface{})["port_specification"]
