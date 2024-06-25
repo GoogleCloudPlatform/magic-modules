@@ -21,7 +21,7 @@ description: |
   balancing. Global forwarding rules can only be used for HTTP load
   balancing.
 
-  For more information, see
+  For more information, see https://cloud.google.com/compute/docs/load-balancing/http/
 docs:
 base_url: 'projects/{{project}}/global/forwardingRules'
 has_self_link: true
