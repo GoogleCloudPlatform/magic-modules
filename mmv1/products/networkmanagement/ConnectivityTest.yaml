@@ -54,6 +54,37 @@ examples:
       source_cloudrun: 'src-cloudrun-v2'
       dest_cloudrun: 'dest-cloudrun-v2'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'network_management_connectivity_test_cloudsql'
+    primary_resource_id: 'cloudsql-test'
+    vars:
+      primary_resource_name: 'cloudsql-test'
+      network: 'connectivity-vpc'
+      source_cloudrun: 'src-cloudsql'
+      dest_cloudrun: 'dest-cloudsql'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      deletion_protection: 'false'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'network_management_connectivity_test_forwarding_rule'
+    primary_resource_id: 'forwarding-rule-test'
+    vars:
+      primary_resource_name: 'forwarding-rule-test'
+      source_forwarding_rule: 'src-forwarding-rule'
+      dest_forwarding_rule: 'src-forwarding-rule'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      deletion_protection: 'false'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'network_management_connectivity_test_gke_master'
+    primary_resource_id: 'gke-master-test'
+    vars:
+      primary_resource_name: 'gke-master-test'
+      source_gke: 'src-gke'
+      dest_gke: 'dst-gke'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      deletion_protection: 'false'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'network_management_connectivity_test_cloudfunctions2'
     primary_resource_id: 'cloudfunctions2-test'
     vars:
@@ -186,15 +217,6 @@ properties:
             description: |-
               A Cloud Function URI.
       - !ruby/object:Api::Type::NestedObject
-        name: appEngineVersion
-        description: |
-          Reference to an App engine service version.
-        properties:
-          - !ruby/object:Api::Type::String
-            name: uri
-            description: |-
-              A App Engine service URI.
-      - !ruby/object:Api::Type::NestedObject
         name: cloudRunRevision
         description: |
           Reference to a Cloud Run revision.
@@ -286,15 +308,6 @@ properties:
             name: uri
             description: |-
               A Cloud Function URI.
-      - !ruby/object:Api::Type::NestedObject
-        name: appEngineVersion
-        description: |
-          Reference to an App engine service version.
-        properties:
-          - !ruby/object:Api::Type::String
-            name: uri
-            description: |-
-              A App Engine service URI.
       - !ruby/object:Api::Type::NestedObject
         name: cloudRunRevision
         description: |

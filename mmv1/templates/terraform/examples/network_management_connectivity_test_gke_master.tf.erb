@@ -1,0 +1,35 @@
+# [START networkmanagement_test_gke_master]
+resource "google_network_management_connectivity_test" "<%= ctx[:primary_resource_id] %>" {
+  name = "<%= ctx[:vars]['primary_resource_name'] %>"
+  source {
+    forwarding_rule = google_compute_forwarding_rule.source.id
+  }
+
+  destination {
+    forwarding_rule = google_compute_forwarding_rule.dest.id
+  }
+
+  protocol = "TCP"
+  labels = {
+    env = "test"
+  }
+}
+
+resource "google_container_cluster" "source" {
+  name     = "<%= ctx[:vars]['source_gke'] %>"
+  location = "us-central1-a"
+
+  deletion_protection      = "<%= ctx[:vars]['deletion_protection'] %>"
+  remove_default_node_pool = true
+  initial_node_count       = 1
+}
+
+resource "google_container_cluster" "dest" {
+  name     = "<%= ctx[:vars]['dest_gke'] %>"
+  location = "us-central1-a"
+
+  deletion_protection      = "<%= ctx[:vars]['deletion_protection'] %>"
+  remove_default_node_pool = true
+  initial_node_count       = 1
+}
+# [END networkmanagement_test_gke_master]

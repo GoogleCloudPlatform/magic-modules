@@ -1,0 +1,53 @@
+# [START networkmanagement_test_cloudsql]
+resource "google_network_management_connectivity_test" "<%= ctx[:primary_resource_id] %>" {
+  name = "<%= ctx[:vars]['primary_resource_name'] %>"
+  source {
+    cloud_sql_instance = google_sql_database_instance.source.self_link
+  }
+
+  destination {
+    cloud_sql_instance = google_sql_database_instance.dest.self_link
+  }
+
+  protocol = "TCP"
+  labels = {
+    env = "test"
+  }
+}
+
+resource "google_compute_network" "vpc" {
+  name = "<%= ctx[:vars]['network'] %>"
+}
+
+resource "google_sql_database_instance" "source" {
+  name                = "<%= ctx[:vars]['source_cloudsql'] %>"
+  database_version    = "POSTGRES_15"
+  region              = "us-central1"
+  deletion_protection = "<%= ctx[:vars]['deletion_protection'] %>"
+
+  settings {
+    tier = "db-f1-micro"
+    ip_configuration {
+      ipv4_enabled                                  = false
+      private_network                               = google_compute_network.vpc.id
+      enable_private_path_for_google_cloud_services = true
+    }
+  }
+}
+
+resource "google_sql_database_instance" "dest" {
+  name                = "<%= ctx[:vars]['dest_cloudsql'] %>"
+  database_version    = "POSTGRES_15"
+  region              = "us-central1"
+  deletion_protection = "<%= ctx[:vars]['deletion_protection'] %>"
+
+  settings {
+    tier = "db-f1-micro"
+    ip_configuration {
+      ipv4_enabled                                  = false
+      private_network                               = google_compute_network.vpc.id
+      enable_private_path_for_google_cloud_services = true
+    }
+  }
+}
+# [END networkmanagement_test_cloudsql]
