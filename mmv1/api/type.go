@@ -566,7 +566,7 @@ func (t Type) AtLeastOneOfList() []string {
 // Returns list of properties that needs exactly one of their fields set.
 // func (t *Type) exactly_one_of_list() {
 func (t Type) ExactlyOneOfList() []string {
-	if t.ResourceMetadata == nil || t.Parent() != nil {
+	if t.ResourceMetadata == nil {
 		return []string{}
 	}
 
@@ -1345,4 +1345,63 @@ func (t *Type) IsForceNew() bool {
 				(parent == nil ||
 					(parent.IsForceNew() &&
 						!(parent.FlattenObject && t.IsA("KeyValueLabels"))))))
+}
+
+// Returns an updated path for a given Terraform field path (e.g.
+// 'a_field', 'parent_field.0.child_name'). Returns nil if the property
+// is not included in the resource's properties and removes keys that have
+// been flattened
+// FYI: Fields that have been renamed should use the new name, however, flattened
+// fields still need to be included, ie:
+// flattenedField > newParent > renameMe should be passed to this function as
+// flattened_field.0.new_parent.0.im_renamed
+// TODO(emilymye): Change format of input for
+// exactly_one_of/at_least_one_of/etc to use camelcase, MM properities and
+// convert to snake in this method
+// def get_property_schema_path(schema_path, resource)
+func (t *Type) GetPropertySchemaPath(schemaPath string) string {
+	nestedProps := t.ResourceMetadata.UserProperites()
+
+	var pathTkns []string
+	for _, pname := range strings.Split(schemaPath, ".0.") {
+		camelPname := google.Camelize(pname, "lower")
+		index := slices.IndexFunc(nestedProps, func(p *Type) bool {
+			return p.Name == camelPname
+		})
+
+		// if we couldn't find it, see if it was renamed at the top level
+		if index == -1 {
+			index = slices.IndexFunc(nestedProps, func(p *Type) bool {
+				return p.Name == schemaPath
+			})
+		}
+
+		if index == -1 {
+			continue
+		}
+
+		prop := nestedProps[index]
+
+		nestedProps = prop.NestedProperties()
+		if !prop.FlattenObject {
+			pathTkns = append(pathTkns, google.Underscore(pname))
+		}
+	}
+
+	if len(pathTkns) == 0 || pathTkns[len(pathTkns)-1] == "" {
+		return ""
+	}
+
+	return strings.Join(pathTkns[:], ".0.")
+}
+
+func (t Type) GetPropertySchemaPathList(propertyList []string) []string {
+	var list []string
+	for _, path := range propertyList {
+		path = t.GetPropertySchemaPath(path)
+		if path != "" {
+			list = append(list, path)
+		}
+	}
+	return list
 }
