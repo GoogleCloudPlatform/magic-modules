@@ -13,7 +13,6 @@
 
 --- !ruby/object:Api::Resource
 name: 'Repository'
-kind: 'securesourcemanager#repository'
 base_url: 'projects/{{project}}/locations/{{location}}/repositories?repository_id={{repository_id}}'
 self_link: 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}'
 immutable: true
@@ -70,14 +69,12 @@ parameters:
     description: |
       The location for the Repository.
     required: true
-    immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::String
     name: 'repository_id'
     description: |
       The ID for the Repository.
     required: true
-    immutable: true
     url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
@@ -85,7 +82,6 @@ properties:
     description: |
       The resource name for the Repository.
     output: true
-    immutable: true
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
