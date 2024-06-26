@@ -15,7 +15,6 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/services/containeraws"
 	"github.com/hashicorp/terraform-provider-google/google/services/containerazure"
 	"github.com/hashicorp/terraform-provider-google/google/services/dataflow"
-	"github.com/hashicorp/terraform-provider-google/google/services/servicenetworking"
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
 )
 
@@ -28,6 +27,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_active_folder":                             resourcemanager.DataSourceGoogleActiveFolder(),
 	"google_alloydb_locations":                         alloydb.DataSourceAlloydbLocations(),
 	"google_alloydb_supported_database_flags":          alloydb.DataSourceAlloydbSupportedDatabaseFlags(),
+	"google_artifact_registry_docker_image":            artifactregistry.DataSourceArtifactRegistryDockerImage(),
 	"google_artifact_registry_repository":              artifactregistry.DataSourceArtifactRegistryRepository(),
 	"google_apphub_discovered_workload":		    apphub.DataSourceApphubDiscoveredWorkload(),
 	"google_app_engine_default_service_account":        appengine.DataSourceGoogleAppEngineDefaultServiceAccount(),
@@ -227,15 +227,11 @@ var handwrittenDatasources = map[string]*schema.Resource{
 
 var generatedIAMDatasources = map[string]*schema.Resource{
 	// ####### START generated IAM datasources ###########
-	<%
-	resources_for_version.each do |object|
-		unless object[:iam_class_name].nil?
-	-%>
+	<% resources_for_version.each do |object| -%>
+	<% unless object[:iam_class_name].nil? -%>
 	"<%= object[:terraform_name] -%>_iam_policy":               tpgiamresource.DataSourceIamPolicy(<%= object[:iam_class_name] -%>IamSchema, <%= object[:iam_class_name] -%>IamUpdaterProducer),
-	<%
-		end
-	end
-	-%>
+	<% end -%>
+	<% end -%>
 	// ####### END generated IAM datasources ###########
 }
 
@@ -256,6 +252,7 @@ var handwrittenIAMDatasources = map[string]*schema.Resource{
 	"google_kms_crypto_key_iam_policy":             tpgiamresource.DataSourceIamPolicy(kms.IamKmsCryptoKeySchema, kms.NewKmsCryptoKeyIamUpdater),
 	"google_spanner_instance_iam_policy":           tpgiamresource.DataSourceIamPolicy(spanner.IamSpannerInstanceSchema, spanner.NewSpannerInstanceIamUpdater),
 	"google_spanner_database_iam_policy":           tpgiamresource.DataSourceIamPolicy(spanner.IamSpannerDatabaseSchema, spanner.NewSpannerDatabaseIamUpdater),
+	"google_storage_managed_folder_iam_policy":     tpgiamresource.DataSourceIamPolicy(storage.StorageManagedFolderIamSchema, storage.StorageManagedFolderIamUpdaterProducer),
 	"google_organization_iam_policy":               tpgiamresource.DataSourceIamPolicy(resourcemanager.IamOrganizationSchema, resourcemanager.NewOrganizationIamUpdater),
 	"google_project_iam_policy":                    tpgiamresource.DataSourceIamPolicy(resourcemanager.IamProjectSchema, resourcemanager.NewProjectIamUpdater),
 	"google_pubsub_subscription_iam_policy":        tpgiamresource.DataSourceIamPolicy(pubsub.IamPubsubSubscriptionSchema, pubsub.NewPubsubSubscriptionIamUpdater),
@@ -272,18 +269,12 @@ var generatedResources = map[string]*schema.Resource{
 	<% 	unless object[:resource_name].nil? -%>
 		"<%= object[:terraform_name] -%>": <%= object[:resource_name] -%>(),
 	<%  end -%>
-	<%
-	    unless object[:iam_class_name].nil?
-	-%>
+	<% unless object[:iam_class_name].nil? -%>
 		"<%= object[:terraform_name] -%>_iam_binding":              tpgiamresource.ResourceIamBinding(<%= object[:iam_class_name] -%>IamSchema, <%= object[:iam_class_name] -%>IamUpdaterProducer, <%= object[:iam_class_name] -%>IdParseFunc),
 		"<%= object[:terraform_name] -%>_iam_member":               tpgiamresource.ResourceIamMember(<%= object[:iam_class_name] -%>IamSchema, <%= object[:iam_class_name] -%>IamUpdaterProducer, <%= object[:iam_class_name] -%>IdParseFunc),
 		"<%= object[:terraform_name] -%>_iam_policy":               tpgiamresource.ResourceIamPolicy(<%= object[:iam_class_name] -%>IamSchema, <%= object[:iam_class_name] -%>IamUpdaterProducer, <%= object[:iam_class_name] -%>IdParseFunc),
-	<%
-	    end # unless object[:iam_class_name].nil?
-	-%>
-	<%
-	end     # resources_for_version.each do
-	-%>
+	<% end -%>
+	<% end -%>
 }
 
 var handwrittenResources = map[string]*schema.Resource{
@@ -436,6 +427,9 @@ var handwrittenIAMResources = map[string]*schema.Resource{
 	"google_spanner_database_iam_binding":          tpgiamresource.ResourceIamBinding(spanner.IamSpannerDatabaseSchema, spanner.NewSpannerDatabaseIamUpdater, spanner.SpannerDatabaseIdParseFunc),
 	"google_spanner_database_iam_member":           tpgiamresource.ResourceIamMember(spanner.IamSpannerDatabaseSchema, spanner.NewSpannerDatabaseIamUpdater, spanner.SpannerDatabaseIdParseFunc),
 	"google_spanner_database_iam_policy":           tpgiamresource.ResourceIamPolicy(spanner.IamSpannerDatabaseSchema, spanner.NewSpannerDatabaseIamUpdater, spanner.SpannerDatabaseIdParseFunc),
+	"google_storage_managed_folder_iam_binding":    tpgiamresource.ResourceIamBinding(storage.StorageManagedFolderIamSchema, storage.StorageManagedFolderIamUpdaterProducer, storage.StorageManagedFolderIdParseFunc),
+	"google_storage_managed_folder_iam_member":     tpgiamresource.ResourceIamMember(storage.StorageManagedFolderIamSchema, storage.StorageManagedFolderIamUpdaterProducer, storage.StorageManagedFolderIdParseFunc),
+	"google_storage_managed_folder_iam_policy":     tpgiamresource.ResourceIamPolicy(storage.StorageManagedFolderIamSchema, storage.StorageManagedFolderIamUpdaterProducer, storage.StorageManagedFolderIdParseFunc),
 	"google_organization_iam_binding":              tpgiamresource.ResourceIamBinding(resourcemanager.IamOrganizationSchema, resourcemanager.NewOrganizationIamUpdater, resourcemanager.OrgIdParseFunc),
 	"google_organization_iam_member":               tpgiamresource.ResourceIamMember(resourcemanager.IamOrganizationSchema, resourcemanager.NewOrganizationIamUpdater, resourcemanager.OrgIdParseFunc),
 	"google_organization_iam_policy":               tpgiamresource.ResourceIamPolicy(resourcemanager.IamOrganizationSchema, resourcemanager.NewOrganizationIamUpdater, resourcemanager.OrgIdParseFunc),

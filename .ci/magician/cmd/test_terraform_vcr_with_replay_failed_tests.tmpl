@@ -1,0 +1,12 @@
+#### Action taken
+<details>
+<summary>Found {{len .ReplayingResult.FailedTests}} affected test(s) by replaying old test recordings. Starting RECORDING based on the most recent commit. Click here to see the affected tests
+</summary>
+<blockquote>
+<ul>
+{{range .ReplayingResult.FailedTests}}{{. | printf "<li>%s</li>\n"}}{{end}}
+</ul>
+</blockquote>
+</details>
+
+[Get to know how VCR tests work](https://googlecloudplatform.github.io/magic-modules/docs/getting-started/contributing/#general-contributing-steps)

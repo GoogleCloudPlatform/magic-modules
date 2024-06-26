@@ -906,17 +906,17 @@ func TestAccComputeInstance_with375GbScratchDisk(t *testing.T) {
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
 					testAccCheckComputeInstanceScratchDisk(&instance, []map[string]string{
-						map[string]string{
+						{
 							"interface": "NVME",
 						},
-						map[string]string{
+						{
 							"interface": "SCSI",
 						},
-						map[string]string{
+						{
 							"interface": "NVME",
 							"deviceName": "nvme-local-ssd",
 						},
-						map[string]string{
+						{
 							"interface": "SCSI",
 							"deviceName": "scsi-local-ssd",
 						},
@@ -948,22 +948,22 @@ func TestAccComputeInstance_with18TbScratchDisk(t *testing.T) {
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
 					testAccCheckComputeInstanceScratchDisk(&instance, []map[string]string{
-						map[string]string{
+						{
 							"interface": "NVME",
 						},
-						map[string]string{
+						{
 							"interface": "NVME",
 						},
-						map[string]string{
+						{
 							"interface": "NVME",
 						},
-						map[string]string{
+						{
 							"interface": "NVME",
 						},
-						map[string]string{
+						{
 							"interface": "NVME",
 						},
-						map[string]string{
+						{
 							"interface": "NVME",
 						},
 					}),
@@ -1110,6 +1110,54 @@ func TestAccComputeInstance_serviceAccount(t *testing.T) {
 	})
 }
 
+func TestAccComputeInstance_noServiceAccount(t *testing.T) {
+	t.Parallel()
+
+	var instance compute.Instance
+	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_noServiceAccount(instanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceNoServiceAccount(&instance),
+				),
+			},
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
+		},
+	})
+}
+
+func TestAccComputeInstance_serviceAccountEmail_0scopes(t *testing.T) {
+	t.Parallel()
+
+	var instance compute.Instance
+	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_serviceAccountEmail_0scopes(instanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceMatchServiceAccount(&instance, "\\d+-compute@developer.gserviceaccount.com"),
+				),
+			},
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
+		},
+	})
+}
+
 func TestAccComputeInstance_serviceAccount_updated(t *testing.T) {
 	t.Parallel()
 
@@ -1126,6 +1174,7 @@ func TestAccComputeInstance_serviceAccount_updated(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceNoServiceAccount(&instance),
 					testAccCheckComputeInstanceScopes(&instance, 0),
 				),
 			},
@@ -1135,6 +1184,7 @@ func TestAccComputeInstance_serviceAccount_updated(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceNoServiceAccount(&instance),
 					testAccCheckComputeInstanceScopes(&instance, 0),
 				),
 			},
@@ -1144,6 +1194,7 @@ func TestAccComputeInstance_serviceAccount_updated(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceMatchServiceAccount(&instance, "\\d+-compute@developer.gserviceaccount.com"),
 					testAccCheckComputeInstanceScopes(&instance, 0),
 				),
 			},
@@ -1153,6 +1204,7 @@ func TestAccComputeInstance_serviceAccount_updated(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceMatchServiceAccount(&instance, "\\d+-compute@developer.gserviceaccount.com"),
 					testAccCheckComputeInstanceScopes(&instance, 3),
 				),
 			},
@@ -1177,6 +1229,7 @@ func TestAccComputeInstance_serviceAccount_updated0to1to0scopes(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceNoServiceAccount(&instance),
 					testAccCheckComputeInstanceScopes(&instance, 0),
 				),
 			},
@@ -1186,6 +1239,7 @@ func TestAccComputeInstance_serviceAccount_updated0to1to0scopes(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceMatchServiceAccount(&instance, "\\d+-compute@developer.gserviceaccount.com"),
 					testAccCheckComputeInstanceScopes(&instance, 1),
 				),
 			},
@@ -1195,6 +1249,7 @@ func TestAccComputeInstance_serviceAccount_updated0to1to0scopes(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceNoServiceAccount(&instance),
 					testAccCheckComputeInstanceScopes(&instance, 0),
 				),
 			},
@@ -1835,9 +1890,7 @@ func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 	t.Parallel()
 
 	var instance compute.Instance
-	<% unless version == "ga" -%>
 	var instance2 compute.Instance
-	<% end -%>
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1850,13 +1903,10 @@ func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
 					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance, true, "SEV"),
-					<% unless version == "ga" -%>
 					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar2", &instance2),
 					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance2, true, ""),
-					<% end -%>
 				),
 			},
-			<% unless version == "ga" -%>
 			{
 				Config: testAccComputeInstanceConfidentialInstanceConfigNoEnable(instanceName, "AMD Milan", "SEV_SNP"),
 				Check: resource.ComposeTestCheckFunc(
@@ -1866,7 +1916,6 @@ func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance2, false, "SEV_SNP"),
 				),
 			},
-			<% end -%>
 		},
 	})
 }
@@ -4084,6 +4133,30 @@ func testAccCheckComputeInstanceServiceAccount(instance *compute.Instance, scope
 	}
 }
 
+func testAccCheckComputeInstanceNoServiceAccount(instance *compute.Instance) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		if count := len(instance.ServiceAccounts); count != 0 {
+			return fmt.Errorf("Wrong number of ServiceAccounts: expected 0, got %d", count)
+		}
+		return nil
+	}
+}
+
+func testAccCheckComputeInstanceMatchServiceAccount(instance *compute.Instance, serviceAcctRegexp string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		if count := len(instance.ServiceAccounts); count != 1 {
+			return fmt.Errorf("Wrong number of ServiceAccounts: expected 1, got %d", count)
+		}
+
+		email := instance.ServiceAccounts[0].Email
+		if !regexp.MustCompile(serviceAcctRegexp).MatchString(email) {
+			return fmt.Errorf("ServiceAccount email didn't match:\"%s\", got \"%s\"", serviceAcctRegexp, email)
+		}
+
+		return nil
+	}
+}
+
 func testAccCheckComputeInstanceScopes(instance *compute.Instance, scopeCount int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 
@@ -4232,7 +4305,7 @@ func testAccCheckComputeInstanceHasAliasIpRange(instance *compute.Instance, subn
 	return func(s *terraform.State) error {
 		for _, networkInterface := range instance.NetworkInterfaces {
 			for _, aliasIpRange := range networkInterface.AliasIpRanges {
-				if aliasIpRange.SubnetworkRangeName == subnetworkRangeName && (aliasIpRange.IpCidrRange == iPCidrRange || tpgresource.IpCidrRangeDiffSuppress("ip_cidr_range", aliasIpRange.IpCidrRange, iPCidrRange, nil)) {
+				if aliasIpRange.SubnetworkRangeName == subnetworkRangeName && (aliasIpRange.IpCidrRange == iPCidrRange || tpgcompute.IpCidrRangeDiffSuppress("ip_cidr_range", aliasIpRange.IpCidrRange, iPCidrRange, nil)) {
 					return nil
 				}
 			}
@@ -4317,11 +4390,9 @@ func testAccCheckComputeInstanceHasConfidentialInstanceConfig(instance *compute.
 		if instance.ConfidentialInstanceConfig.EnableConfidentialCompute != EnableConfidentialCompute {
 			return fmt.Errorf("Wrong ConfidentialInstanceConfig EnableConfidentialCompute: expected %t, got, %t", EnableConfidentialCompute, instance.ConfidentialInstanceConfig.EnableConfidentialCompute)
 		}
-		<% unless version == "ga" -%>
 		if instance.ConfidentialInstanceConfig.ConfidentialInstanceType != ConfidentialInstanceType {
 			return fmt.Errorf("Wrong ConfidentialInstanceConfig ConfidentialInstanceType: expected %s, got, %s", ConfidentialInstanceType, instance.ConfidentialInstanceConfig.ConfidentialInstanceType)
 		}
-		<% end -%>
 
 		return nil
 	}
@@ -6116,6 +6187,70 @@ resource "google_compute_instance" "foobar" {
 `, instance)
 }
 
+func testAccComputeInstance_noServiceAccount(instance string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%s"
+  machine_type = "e2-medium"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  service_account {
+	  scopes = []
+  }
+}
+`, instance)
+}
+
+func testAccComputeInstance_serviceAccountEmail_0scopes(instance string) string {
+	return fmt.Sprintf(`
+data "google_project" "project" {}
+
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%s"
+  machine_type = "e2-medium"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  service_account {
+    email = data.google_compute_default_service_account.default.email
+    scopes = []
+  }
+}
+
+data "google_compute_default_service_account" "default" {
+}
+`, instance)
+}
+
 func testAccComputeInstance_serviceAccount_update0(instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -7539,9 +7674,7 @@ resource "google_compute_instance" "foobar" {
 
   confidential_instance_config {
     enable_confidential_compute       = true
-<% unless version == "ga" -%>
     confidential_instance_type        = %q
-<% end -%>
   }
 
   scheduling {
@@ -7550,7 +7683,6 @@ resource "google_compute_instance" "foobar" {
 
 }
 
-<% unless version == "ga" -%>
 resource "google_compute_instance" "foobar2" {
   name         = "%s2"
   machine_type = "n2d-standard-2"
@@ -7575,15 +7707,9 @@ resource "google_compute_instance" "foobar2" {
   }
 
 }
-<% end -%>
-<% if version == "ga" -%>
-`, instance)
-<% else -%>
 `, instance, confidentialInstanceType, instance)
-<% end -%>
 }
 
-<% unless version == "ga" -%>
 func testAccComputeInstanceConfidentialInstanceConfigNoEnable(instance string, minCpuPlatform, confidentialInstanceType string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image2" {
@@ -7646,7 +7772,6 @@ resource "google_compute_instance" "foobar4" {
 }
 `, instance, minCpuPlatform, confidentialInstanceType, instance, minCpuPlatform, confidentialInstanceType)
 }
-<% end -%>
 
 func testAccComputeInstance_attributionLabelCreate(instance, add, strategy string) string {
 	return fmt.Sprintf(`
