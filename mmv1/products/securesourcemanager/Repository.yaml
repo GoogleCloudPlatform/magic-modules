@@ -107,12 +107,6 @@ properties:
     description: |
       Time the repository was updated in UTC.
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'etag'
-    description: |
-      This checksum is computed by the server based on the value of other fields,
-      and may be sent on update and delete requests to ensure the client has an
-      up-to-date value before proceeding.
   - !ruby/object:Api::Type::NestedObject
     name: 'uris'
     description: |
