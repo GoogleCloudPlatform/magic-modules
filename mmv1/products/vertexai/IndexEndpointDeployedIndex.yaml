@@ -14,9 +14,9 @@
 --- !ruby/object:Api::Resource
 name: IndexEndpointDeployedIndex
 base_url: projects/{{project}}/locations/{{region}}/indexEndpoints/
-create_url: projects/{{project}}/locations/{{region}}/indexEndpoints/{{IndexEndpoint}}:deployIndex
-update_url: projects/{{project}}/locations/{{region}}/indexEndpoints/{{IndexEndpoint}}:mutateDeployedIndex
-self_link: projects/{{project}}/locations/{{region}}/indexEndpoints/{{name}}
+create_url: projects/{{project}}/locations/{{region}}/indexEndpoints/{{index}}:deployIndex
+update_url: projects/{{project}}/locations/{{region}}/indexEndpoints/{{index}}:mutateDeployedIndex
+self_link: projects/{{project}}/locations/{{region}}/indexEndpoints/{{index}}
 update_mask: true
 references: !ruby/object:Api::Resource::ReferenceLinks
   api: https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.indexEndpoints#DeployedIndex
