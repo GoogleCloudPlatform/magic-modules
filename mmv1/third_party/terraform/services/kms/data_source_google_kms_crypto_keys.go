@@ -16,6 +16,13 @@ func DataSourceGoogleKmsCryptoKeys() *schema.Resource {
 	tpgresource.AddOptionalFieldsToSchema(dsSchema, "name")
 	tpgresource.AddOptionalFieldsToSchema(dsSchema, "key_ring")
 
+	// We need to explicitly add the id field to the schema used for individual keys
+	// Currently the id field in the google_kms_crypto_key resource is implied/added by the SDK
+	dsSchema["id"] = &schema.Schema{
+		Type:     schema.TypeString,
+		Computed: true,
+	}
+
 	return &schema.Resource{
 		Read: dataSourceGoogleKmsCryptoKeysRead,
 		Schema: map[string]*schema.Schema{
