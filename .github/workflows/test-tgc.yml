@@ -17,10 +17,10 @@ on:
         required: false
         default: 'terraform-google-conversion'
       tpgb-branch:
-        description: 'The branch or sha of the tgc execute against'
+        description: 'The branch or sha of the tpgb execute against'
         required: true
       tgc-branch:
-        description: 'The branch or sha of the tpgb execute against'
+        description: 'The branch or sha of the tgc execute against'
         required: true
       pr-number:
         description: 'The pull request number in magic-modules repository'
