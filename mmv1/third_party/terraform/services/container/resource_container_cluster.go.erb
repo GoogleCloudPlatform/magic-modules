@@ -1980,7 +1980,6 @@ func ResourceContainerCluster() *schema.Resource {
 			   Description: `Whether L4ILB Subsetting is enabled for this cluster.`,
 			   Default: false,
 			},
-<% unless version == 'ga' -%>
 			"enable_multi_networking": {
 			   Type: schema.TypeBool,
 			   Optional: true,
@@ -1988,6 +1987,7 @@ func ResourceContainerCluster() *schema.Resource {
 			   Description: `Whether multi-networking is enabled for this cluster.`,
 			   Default: false,
 			},
+<% unless version == 'ga' -%>
 			"enable_fqdn_network_policy": {
 			   Type: schema.TypeBool,
 			   Optional: true,
@@ -2316,8 +2316,8 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			EnableL4ilbSubsetting:                d.Get("enable_l4_ilb_subsetting").(bool),
 			DnsConfig:                            expandDnsConfig(d.Get("dns_config")),
 			GatewayApiConfig:                     expandGatewayApiConfig(d.Get("gateway_api_config")),
-<% unless version == "ga" -%>
 			EnableMultiNetworking:                d.Get("enable_multi_networking").(bool),
+<% unless version == "ga" -%>
 			EnableFqdnNetworkPolicy:              d.Get("enable_fqdn_network_policy").(bool),
 <% end -%>
 	    },
@@ -2856,10 +2856,10 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("enable_intranode_visibility", cluster.NetworkConfig.EnableIntraNodeVisibility); err != nil {
 		return fmt.Errorf("Error setting enable_intranode_visibility: %s", err)
 	}
-<% unless version == 'ga' -%>
 	if err := d.Set("enable_multi_networking", cluster.NetworkConfig.EnableMultiNetworking); err != nil {
 		return fmt.Errorf("Error setting enable_multi_networking: %s", err)
 	}
+<% unless version == 'ga' -%>
 	if err := d.Set("enable_fqdn_network_policy", cluster.NetworkConfig.EnableFqdnNetworkPolicy); err != nil {
 		return fmt.Errorf("Error setting enable_fqdn_network_policy: %s", err)
 	}
