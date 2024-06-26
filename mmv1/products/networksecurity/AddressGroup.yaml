@@ -72,6 +72,7 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
+    min_version: "beta"
     name: "network_security_address_groups_cloud_armor"
     primary_resource_id: "default"
     vars:
@@ -141,6 +142,7 @@ properties:
     description: |
       Capacity of the Address Group.
   - !ruby/object:Api::Type::Array
+    min_version: "beta"
     name: "purpose"
     description: |
       List of supported purposes of the Address Group.
