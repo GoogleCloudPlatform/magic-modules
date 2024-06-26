@@ -263,7 +263,6 @@ func resourceGoogleProjectServiceDelete(d *schema.ResourceData, meta interface{}
 	project = tpgresource.GetResourceNameFromSelfLink(project)
 
 	service := d.Get("service").(string)
-
 	disableDependencies := d.Get("disable_dependent_services").(bool)
 	<% unless version == 'ga' -%>
 	checkUsage := d.Get("check_if_service_has_usage_on_destroy").(bool)
