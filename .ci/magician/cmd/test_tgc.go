@@ -47,7 +47,7 @@ var testTGCCmd = &cobra.Command{
 }
 
 func execTestTGC(commit, pr string, gh ttGithub) error {
-	contentTPGB, err := os.ReadFile("/workspace/upstreamCommitSHA-terraform-provider-google-beta.txt")
+	contentTPGB, err := os.ReadFile("/workspace/commitSHA_modular-magician_terraform-provider-google-beta.txt")
 	if err != nil {
 		fmt.Println("Error:", err)
 	}
@@ -61,10 +61,12 @@ func execTestTGC(commit, pr string, gh ttGithub) error {
 	commitShaOrBranchUpstreamTGC := string(contentTGC)
 
 	if commitShaOrBranchUpstreamTPGB == "" {
+		// fall back to branch if commit SHA can't be found
 		commitShaOrBranchUpstreamTPGB = "auto-pr-" + pr
 	}
 
 	if commitShaOrBranchUpstreamTGC == "" {
+		// fall back to branch if commit SHA can't be found
 		commitShaOrBranchUpstreamTGC = "auto-pr-" + pr
 	}
 
