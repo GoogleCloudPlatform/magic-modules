@@ -218,7 +218,7 @@ func resource{{ $.ResourceName }}PatchDeleteEncoder(d *schema.ResourceData, meta
 
 // ListForPatch handles making API request to get parent resource and
 // extracting list of objects.
-{{/* This function is similar to flattenNested...() but
+{{- /* This function is similar to flattenNested...() but
   # 1) does an API request to read the parent resource from API (flatten
        takes in list from top-level Read() method, whereas this method
        is called in Create/Update/Delete)
