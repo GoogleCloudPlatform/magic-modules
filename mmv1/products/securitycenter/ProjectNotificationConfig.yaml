@@ -13,9 +13,9 @@
 
 --- !ruby/object:Api::Resource
 name: 'ProjectNotificationConfig'
-base_url: projects/{{projectId}}/notificationConfigs
+base_url: projects/{{project}}/notificationConfigs
 self_link: '{{name}}'
-create_url: projects/{{projectId}}/notificationConfigs?configId={{config_id}}
+create_url: projects/{{project}}/notificationConfigs?configId={{config_id}}
 update_verb: :PATCH
 update_mask: true
 description: |
@@ -44,12 +44,12 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: templates/terraform/post_create/set_computed_name.erb
 parameters:
   - !ruby/object:Api::Type::String
-    name: projectId
+    name: project
     required: true
     immutable: true
     url_param_only: true
     description: |
-      The projectId whose Cloud Security Command Center the Notification
+      The project whose Cloud Security Command Center the Notification
       Config lives in.
   - !ruby/object:Api::Type::String
     name: configId
