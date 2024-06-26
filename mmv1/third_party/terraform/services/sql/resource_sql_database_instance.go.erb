@@ -922,7 +922,6 @@ is set to true. Defaults to ZONAL.`,
 			},
 			"sql_network_architecture": {
 				Type:        schema.TypeString,
-				Computed:    true,
 				Optional: 	true,
 				ValidateFunc: validation.StringInSlice([]string{"NEW_NETWORK_ARCHITECTURE", "OLD_NETWORK_ARCHITECTURE"}, false),
 				Description: `The SQL network architecture for the instance. The valid values are:- 'NEW_NETWORK_ARCHITECTURE'and 'OLD_NETWORK_ARCHITECTURE'.`,
@@ -1262,6 +1261,10 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		if err != nil {
 			return err
 		}
+	}
+
+	if _, ok := d.GetOk("sql_network_architecture"); ok {
+		instance.SqlNetworkArchitecture = d.Get("sql_network_architecture").(string)
 	}
 
 	return nil
@@ -1980,6 +1983,10 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 				return err
 			}
 		}
+	}
+
+	if _, ok := d.GetOk("sql_network_architecture"); ok {
+		instance.SqlNetworkArchitecture = d.Get("sql_network_architecture").(string)
 	}
 
 	return resourceSqlDatabaseInstanceRead(d, meta)
