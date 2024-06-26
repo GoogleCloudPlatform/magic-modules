@@ -33,10 +33,10 @@ type Docs struct {
 	Note string
 
 	// attr_reader :
-	RequiredProperties string
+	RequiredProperties string `yaml:"required_properties"`
 
 	// attr_reader :
-	OptionalProperties string
+	OptionalProperties string `yaml:"optional_properties"`
 
 	// attr_reader :
 	Attributes string

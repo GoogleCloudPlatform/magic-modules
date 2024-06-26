@@ -27,7 +27,7 @@
   Default value is `{{ $.ItemType.DefaultValue }}`.
     {{- end }}
   Each value may be one of: {{ $.ItemType.EnumValuesToString "`" false }}.
-  {{- else if and ($.IsA "Enum") (and (not $.Output) (not (and $.ItemType $.ItemType.SkipDocsValues)))}}
+  {{- else if and ($.IsA "Enum") (and (not $.Output) (not $.SkipDocsValues))}}
     {{- if $.DefaultValue }}
   Default value is `{{ $.DefaultValue }}`.
     {{- end }}

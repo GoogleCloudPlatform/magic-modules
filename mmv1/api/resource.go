@@ -16,8 +16,8 @@ import (
 	"fmt"
 	"maps"
 	"regexp"
-	"strings"
 	"sort"
+	"strings"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
@@ -948,10 +948,7 @@ func ImportIdFormats(importFormat, identity []string, baseUrl string) []string {
 	var idFormats []string
 	if len(importFormat) == 0 {
 		underscoredBaseUrl := baseUrl
-		// TODO Q2: underscore base url needed?
-		// underscored_base_url = base_url.gsub(
-		//     /{{[[:word:]]+}}/, &:underscore
-		//   )
+
 		if len(identity) == 0 {
 			idFormats = []string{fmt.Sprintf("%s/{{name}}", underscoredBaseUrl)}
 		} else {
@@ -960,7 +957,7 @@ func ImportIdFormats(importFormat, identity []string, baseUrl string) []string {
 				transformedIdentity = append(transformedIdentity, fmt.Sprintf("{{%s}}", id))
 			}
 			identityPath := strings.Join(transformedIdentity, "/")
-			idFormats = []string{fmt.Sprintf("%s/%s", underscoredBaseUrl, identityPath)}
+			idFormats = []string{fmt.Sprintf("%s/%s", underscoredBaseUrl, google.Underscore(identityPath))}
 		}
 	} else {
 		idFormats = importFormat
@@ -1026,7 +1023,7 @@ func (r Resource) IgnoreReadPropertiesToString(e resource.Examples) string {
 		}
 	}
 	for _, tp := range e.IgnoreReadExtra {
-		props = append(props, fmt.Sprintf("\"%s\"", google.Underscore(tp)))
+		props = append(props, fmt.Sprintf("\"%s\"", tp))
 	}
 	for _, tp := range r.IgnoreReadLabelsFields(r.PropertiesWithExcluded()) {
 		props = append(props, fmt.Sprintf("\"%s\"", google.Underscore(tp)))
@@ -1492,7 +1489,7 @@ func (r Resource) PropertiesByCustomUpdateGroups() []UpdateGroup {
 			UpdateId:        prop.UpdateId,
 			FingerprintName: prop.FingerprintName}
 
-		if slices.Contains(updateGroups, groupedProperty){
+		if slices.Contains(updateGroups, groupedProperty) {
 			continue
 		}
 		updateGroups = append(updateGroups, groupedProperty)
