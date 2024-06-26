@@ -72,8 +72,8 @@ async:
     message: 'message'
 collection_url_key: 'items'
 custom_code:
-  constants: templates/terraform/constants/compute_route.go.erb
   extra_schema_entry: 'templates/terraform/extra_schema_entry/go/route.tmpl'
+  constants: 'templates/terraform/constants/go/compute_route.go.tmpl'
   decoder: 'templates/terraform/decoders/go/route.tmpl'
 error_retry_predicates:
 

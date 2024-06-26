@@ -126,7 +126,7 @@ properties:
         type: Enum
         description: |
           User-specified flag to indicate which mode to use for advertisement.
-        default_value: DEFAULT
+        default_value: "DEFAULT"
         enum_values:
           - 'DEFAULT'
           - 'CUSTOM'
