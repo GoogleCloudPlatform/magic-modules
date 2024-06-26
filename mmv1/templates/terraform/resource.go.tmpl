@@ -240,7 +240,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     if err != nil {
         return err
     }
-{{if $.UpdateMask -}}
+{{- if $.UpdateMask -}}
     url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": "{{ join $.NestedQuery.Keys "." -}}"})
     if err != nil {
         return err
@@ -568,9 +568,9 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
 {{- end}}
     })
     if err != nil {
-{{if $.ReadErrorTransform -}}
+{{- if $.ReadErrorTransform -}}
         return transport_tpg.HandleNotFoundError({{ $.ReadErrorTransform }}(err), d, fmt.Sprintf("{{ $.ResourceName }} %q", d.Id()))
-{{  else -}}
+{{-  else }}
         return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("{{ $.ResourceName }} %q", d.Id()))
 {{- end}}
     }
@@ -603,7 +603,8 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
         return nil
     }
 {{ end}}
-{{- if $.VirtualFields -}}
+{{- if $.VirtualFields }}
+
   // Explicitly set virtual fields to default values if unset
 {{- range $prop := $.VirtualFields }}
 {{      if not (eq $prop.DefaultValue nil) -}}
@@ -615,9 +616,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
 {{- end}}
 {{- end}}
 {{- end}}
-{{ if $.HasProject }}
-
-
+{{- if $.HasProject }}
     if err := d.Set("project", project); err != nil {
         return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
     }
@@ -754,7 +753,7 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
 {{-              if $.UpdateMask }}
 {{ template "UpdateMask" $ -}}
 {{              end}}
-{{             if $.CustomCode.PreUpdate -}}
+{{-             if $.CustomCode.PreUpdate -}}{{""}}
     {{ $.CustomTemplate $.CustomCode.PreUpdate true -}}
 {{              end}}
 {{              if $.NestedQuery -}}
@@ -828,7 +827,7 @@ if len(updateMask) > 0 {
   }
 {{-             end}}
 {{-         end}}{{/*if not immutable*/}}
-{{          if $.FieldSpecificUpdateMethods }}
+{{-          if $.FieldSpecificUpdateMethods }}
     d.Partial(true)
 {{             $CustomUpdateProps := $.PropertiesByCustomUpdate }}
 {{             range $group := $.PropertiesByCustomUpdateGroups }}
@@ -864,7 +863,7 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 {{-                     end}}
         })
         if err != nil {
-            return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("{{ $.ResourceName -}} %q", d.Id()))
+            return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("{{ $.ResourceName }} %q", d.Id()))
         }
 
         obj["{{ $group.FingerprintName }}"] = getRes["{{ $group.FingerprintName }}"]
@@ -980,7 +979,8 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 {{-                     end}}
 {{-                 end}}
     } 
-{{             end  }}{{/*range PropertiesByCustomUpdate*/}}
+{{-             end  }}{{/*range PropertiesByCustomUpdate*/}}
+{{ "" }}
   d.Partial(false)
 {{-         end  }}{{/*if FieldSpecificUpdateMethods*/}}
 
@@ -1187,6 +1187,9 @@ func resource{{ $.ResourceName -}}UpdateEncoder(d *schema.ResourceData, meta int
     {{ template "NestedQuery" $ }}
 {{- end }}
 {{- if $.CustomCode.Decoder }}
+{{- if and $.CustomCode.UpdateEncoder (not $.NestedQuery ) }}
+{{ "" }}
+{{- end }}
 func resource{{ $.ResourceName -}}Decoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
     {{ $.CustomTemplate $.CustomCode.Decoder false -}}
 }
