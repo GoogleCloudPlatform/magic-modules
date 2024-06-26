@@ -183,7 +183,7 @@ properties:
       only be set for global health check. If this list is non-empty, then
       there are restrictions on what other health check fields are supported
       and what other resources can use this health check:
-      
+
       * SSL, HTTP2, and GRPC protocols are not supported.
 
       * The TCP request field is not supported.
