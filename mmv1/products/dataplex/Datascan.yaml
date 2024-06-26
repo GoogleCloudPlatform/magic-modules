@@ -431,7 +431,7 @@ properties:
             - !ruby/object:Api::Type::NestedObject
               name: 'sqlAssertion'
               description: |
-                Aggregate rule which evaluates the number of rows returned for the provided statement.
+                Table rule which evaluates whether any row matches invalid state.
               properties:
                 - !ruby/object:Api::Type::String
                   name: 'sqlStatement'

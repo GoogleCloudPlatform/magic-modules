@@ -342,6 +342,8 @@ properties:
         type: String
         description: |
           Export filter used to define which VPC flow logs should be logged, as as CEL expression. See
+          https://cloud.google.com/vpc/docs/flow-logs#filtering for details on how to format this field.
+          The default value is 'true', which evaluates to include everything.
         at_least_one_of:
           - 'log_config.0.aggregation_interval'
           - 'log_config.0.flow_sampling'
