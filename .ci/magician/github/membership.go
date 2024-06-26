@@ -83,7 +83,7 @@ var (
 			endDate:   newDate(2024, 5, 28, pdtLoc),
 		},
 		{
-			id:        "melinath"
+			id:        "melinath",
 			startDate: newDate(2024, 6, 26, pdtLoc),
 			endDate:   newDate(2024, 7, 22, pdtLoc),
 		},
