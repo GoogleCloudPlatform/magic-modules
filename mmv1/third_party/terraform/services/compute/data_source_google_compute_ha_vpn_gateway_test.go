@@ -30,6 +30,8 @@ func testAccDataSourceComputeHaVpnGatewayConfig(gwName string) string {
 resource "google_compute_ha_vpn_gateway" "ha_gateway" {
   name     = "%s"
   network  = google_compute_network.network1.id
+  stack_type = "IPV4_ONLY"
+  gateway_ip_version = "IPV4"
 }
 
 resource "google_compute_network" "network1" {
@@ -39,26 +41,6 @@ resource "google_compute_network" "network1" {
 
 data "google_compute_ha_vpn_gateway" "ha_gateway" {
   name = google_compute_ha_vpn_gateway.ha_gateway.name
-}
-`, gwName, gwName)
-}
-
-func testAccDataSourceComputeHaVpnGatewayConfigStack(gwName string) string {
-	return fmt.Sprintf(`
-resource "google_compute_ha_vpn_gateway" "ha_gateway" {
-  name     = "%s"
-  network  = google_compute_network.network1.id
-}
-
-resource "google_compute_network" "network1" {
-  name                    = "%s"
-  auto_create_subnetworks = false
-}
-
-data "google_compute_ha_vpn_gateway" "ha_gateway" {
-  name = google_compute_ha_vpn_gateway.ha_gateway.name
-  stack_type = IPV4_ONLY
-  gateway_ip_version = IPV4
 }
 `, gwName, gwName)
 }
