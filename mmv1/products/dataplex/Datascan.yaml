@@ -437,7 +437,7 @@ properties:
                   name: 'sqlStatement'
                   required: true
                   description: |
-                    The SQL Statement.
+                    The SQL statement.
   - !ruby/object:Api::Type::NestedObject
     name: 'dataProfileSpec'
     allow_empty_object: true
