@@ -1080,11 +1080,12 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	databaseVersion := d.Get("database_version").(string)
 
 	instance := &sqladmin.DatabaseInstance{
-		Name:                 name,
-		Region:               region,
-		DatabaseVersion:      databaseVersion,
-		MasterInstanceName:   d.Get("master_instance_name").(string),
-		ReplicaConfiguration: expandReplicaConfiguration(d.Get("replica_configuration").([]interface{})),
+		Name:                 	name,
+		Region:               	region,
+		DatabaseVersion:      	databaseVersion,
+		MasterInstanceName: 	d.Get("master_instance_name").(string),
+		ReplicaConfiguration:	expandReplicaConfiguration(d.Get("replica_configuration").([]interface{})),
+		SqlNetworkArchitecture: d.Get("sql_network_architecture").(string),
 	}
 
 	cloneContext, cloneSource := expandCloneContext(d.Get("clone").([]interface{}))
@@ -1197,6 +1198,8 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		}
 	}
 
+
+
 	// patch any fields that need to be sent postcreation
 	if patchData != nil {
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
@@ -1261,10 +1264,6 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		if err != nil {
 			return err
 		}
-	}
-
-	if _, ok := d.GetOk("sql_network_architecture"); ok {
-		instance.SqlNetworkArchitecture = d.Get("sql_network_architecture").(string)
 	}
 
 	return nil
