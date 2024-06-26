@@ -263,9 +263,17 @@ func resourceGoogleProjectServiceDelete(d *schema.ResourceData, meta interface{}
 	project = tpgresource.GetResourceNameFromSelfLink(project)
 
 	service := d.Get("service").(string)
+
 	disableDependencies := d.Get("disable_dependent_services").(bool)
+	<% unless version == 'ga' -%>
 	checkUsage := d.Get("check_if_service_has_usage_on_destroy").(bool)
-	if err = disableServiceUsageProjectService(service, project, d, config, disableDependencies,checkUsage); err != nil {
+	<% end -%>
+	<% if version == "ga" -%>
+	  err = disableServiceUsageProjectService(service, project, d, config, disableDependencies)
+	<% else -%>
+    err = disableServiceUsageProjectService(service, project, d, config, disableDependencies,checkUsage)
+  <% end -%>
+	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Project Service %s", d.Id()))
 	}
 
@@ -280,7 +288,11 @@ func resourceGoogleProjectServiceUpdate(d *schema.ResourceData, meta interface{}
 }
 
 // Disables a project service.
+<% if version == "ga" -%>
+func disableServiceUsageProjectService(service, project string, d *schema.ResourceData, config *transport_tpg.Config, disableDependentServices bool) error {
+<% else -%>
 func disableServiceUsageProjectService(service, project string, d *schema.ResourceData, config *transport_tpg.Config, disableDependentServices bool, checkUsage bool) error {
+<% end -%>
 	err := transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() error {
 			billingProject := project
@@ -289,13 +301,17 @@ func disableServiceUsageProjectService(service, project string, d *schema.Resour
 				return err
 			}
 			name := fmt.Sprintf("projects/%s/services/%s", project, service)
+		  <% unless version == 'ga' -%>
 			checkIfServiceHasUsage := "SKIP"
 			if checkUsage {
 				checkIfServiceHasUsage = "CHECK"
 			}
+		  <% end -%>
 			servicesDisableCall := config.NewServiceUsageClient(userAgent).Services.Disable(name, &serviceusage.DisableServiceRequest{
 				DisableDependentServices: disableDependentServices,
+				<% unless version == 'ga' -%>
 				CheckIfServiceHasUsage: checkIfServiceHasUsage,
+				<% end -%>
 			})
 			if config.UserProjectOverride {
 				// err == nil indicates that the billing_project value was found
