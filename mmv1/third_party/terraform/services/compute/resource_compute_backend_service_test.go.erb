@@ -843,36 +843,16 @@ func TestAccComputeBackendService_withPrivateOriginAuth(t *testing.T) {
 				ResourceName:      "google_compute_backend_service.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
+        ImportStateVerifyIgnore: []string{"security_settings.0.aws_v4_authentication.0.access_key"},
 			},
-		},
-	})
-}
-
-func TestAccComputeBackendService_withOauth2ClientAuth(t *testing.T) {
-	t.Parallel()
-
-	randomSuffix := acctest.RandString(t, 10)
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckComputeBackendServiceDestroyProducer(t),
-		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeBackendService_withOauth2ClientAuth(randomSuffix, "xyz"),
+				Config: testAccComputeBackendService_withPrivateOriginAuthUpdate(randomSuffix),
 			},
 			{
 				ResourceName:      "google_compute_backend_service.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
-			},
-			{
-				Config: testAccComputeBackendService_withOauth2ClientAuth(randomSuffix, "987"),
-			},
-			{
-				ResourceName:      "google_compute_backend_service.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
+        ImportStateVerifyIgnore: []string{"security_settings.0.aws_v4_authentication.0.access_key"},
 			},
 		},
 	})
@@ -2093,17 +2073,32 @@ resource "google_compute_global_network_endpoint_group" "group" {
 `, randomSuffix, randomSuffix)
 }
 
-
-func testAccComputeBackendService_withOauth2ClientAuth(randomSuffix, clientSecret string) string {
+func testAccComputeBackendService_withPrivateOriginAuthUpdate(randomSuffix string) string {
 	return fmt.Sprintf(`
 resource "google_compute_backend_service" "foobar" {
-  name                  = "tf-test-backend-service-%s"
-  protocol              = "HTTP"
-  load_balancing_scheme = "EXTERNAL"
-  iap {
-    oauth2_client_id     = "abc"
-    oauth2_client_secret = "%s"
+  name          = "tf-test-backend-service-%s"
+  security_settings {
+    aws_v4_authentication {
+      access_key_id = "AKIAIOSFODNN7EXAMPLE"
+      access_key = "EXAMPLEc5771d871763a393e44b703571b55cc28424d1a5e86da6ed3cELPMAXE"
+      access_key_version = "prod-access-key-v1.2"
+      origin_region = "us-east-2"
+    }
+  }
+  backend {
+    group = google_compute_global_network_endpoint_group.group.self_link
   }
 }
-`, randomSuffix, clientSecret)
+
+resource "google_compute_global_network_endpoint" "networkendpoint" {
+  global_network_endpoint_group = google_compute_global_network_endpoint_group.group.name
+  ip_address  = "8.8.8.8"
+  port        = 443
+}
+
+resource "google_compute_global_network_endpoint_group" "group" {
+  name         = "tf-test-neg-%s"
+  network_endpoint_type = "INTERNET_IP_PORT"
+}
+`, randomSuffix, randomSuffix)
 }
