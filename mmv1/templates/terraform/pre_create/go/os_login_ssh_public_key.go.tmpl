@@ -1,4 +1,4 @@
-{{- /*
+{{/*
 	The license inside this block applies to this file
 	Copyright 2024 Google Inc.
 	Licensed under the Apache License, Version 2.0 (the "License");
@@ -9,7 +9,7 @@
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	See the License for the specific language governing permissions and
 	limitations under the License.
-*/}}
+*/ -}}
 // Don't use `GetProject()` because we only want to set the project in the URL
 // if the user set it explicitly on the resource.
 if p, ok := d.GetOk("project"); ok {

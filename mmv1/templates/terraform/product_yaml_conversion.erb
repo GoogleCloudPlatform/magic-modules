@@ -55,6 +55,7 @@ scopes:
 -%>
 <%  unless object.__product.async.nil? -%>
 async:
+  type: "OpAsync"
 <%    if object.__product.async.is_a? Provider::Terraform::PollAsync -%>
 <%      unless object.__product.async.check_response_func_existence.nil? -%>
     check_response_func_existence: '<%= object.__product.async.check_response_func_existence %>'

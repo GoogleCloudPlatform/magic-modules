@@ -1,0 +1,50 @@
+[
+    {
+        "name": "//compute.googleapis.com/projects/{{.Provider.project}}/regions/us-central1/nodeTemplates/soletenant-tmpl",
+        "asset_type": "compute.googleapis.com/NodeTemplate",
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+        "resource": {
+            "version": "beta",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
+            "discovery_name": "NodeTemplate",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "cpuOvercommitType": "NONE",
+                "name": "soletenant-tmpl",
+                "nodeType": "n1-node-96-624",
+                "region": "projects/{{.Provider.project}}/global/regions/us-central1"
+            }
+        },
+        "ancestors": [
+            "organizations/{{.OrgID}}"
+        ]
+    },
+    {
+        "name": "//compute.googleapis.com/projects/{{.Provider.project}}/zones/us-central1-f/nodeGroups/soletenant-group",
+        "asset_type": "compute.googleapis.com/NodeGroup",
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+        "resource": {
+            "version": "beta",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
+            "discovery_name": "NodeGroup",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "autoscalingPolicy": {
+                    "maxNodes": 10,
+                    "minNodes": 1,
+                    "mode": "ONLY_SCALE_OUT"
+                },
+                "description": "example google_compute_node_group for Terraform Google Provider",
+                "maintenancePolicy": "RESTART_IN_PLACE",
+                "maintenanceWindow": {
+                    "startTime": "08:00"
+                },
+                "name": "soletenant-group",
+                "zone": "projects/{{.Provider.project}}/global/zones/us-central1-f"
+            }
+        },
+        "ancestors": [
+            "organizations/{{.OrgID}}"
+        ]
+    }
+]

@@ -1,5 +1,5 @@
 resource "google_sql_database_instance" "instance" {
-    provider            = google-beta
+	provider            = google-beta
     name                = "{{index $.Vars "sql_server_name"}}"
     database_version    = "SQLSERVER_2019_STANDARD"
     region              = "us-central1"
@@ -35,7 +35,7 @@ resource "google_sql_database_instance" "instance" {
 }
 
 resource "google_sql_database" "db" {
-    provider   = google-beta
+	provider   = google-beta
     name       = "{{index $.Vars "database_name"}}"
     instance   = google_sql_database_instance.instance.name
 }

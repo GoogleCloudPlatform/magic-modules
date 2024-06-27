@@ -428,6 +428,16 @@ properties:
                   required: true
                   description: |
                     The SQL expression.
+            - !ruby/object:Api::Type::NestedObject
+              name: 'sqlAssertion'
+              description: |
+                Table rule which evaluates whether any row matches invalid state.
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'sqlStatement'
+                  required: true
+                  description: |
+                    The SQL statement.
   - !ruby/object:Api::Type::NestedObject
     name: 'dataProfileSpec'
     allow_empty_object: true

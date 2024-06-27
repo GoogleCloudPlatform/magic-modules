@@ -1,0 +1,68 @@
+[
+    {
+        "name": "//compute.googleapis.com/projects/{{.Provider.project}}/regions/us-central1/clusters/my-new-cluster",
+        "asset_type": "dataproc.googleapis.com/Cluster",
+        "resource": {
+            "version": "v1",
+            "discovery_document_uri": "https://dataproc.googleapis.com/$discovery/rest?version=v1",
+            "discovery_name": "Cluster",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "clusterName": "my-new-cluster",
+                "config": {
+                    "autoscalingConfig": [],
+                    "auxiliaryNodeGroups": null,
+                    "dataprocMetricConfig": null,
+                    "encryptionConfig": [],
+                    "endpointConfig": [],
+                    "gceClusterConfig": {
+                        "tags": [
+                            "bar",
+                            "foo"
+                        ]
+                    },
+                    "initializationActions": [
+                        {
+                            "script": "gs://dataproc-initialization-actions/stackdriver/stackdriver.sh",
+                            "timeout_sec": 500
+                        }
+                    ],
+                    "lifecycleConfig": [],
+                    "masterConfig": {
+                        "diskConfig": {
+                            "bootDiskSizeGb": 30,
+                            "bootDiskType": "pd-ssd"
+                        },
+                        "numInstances": 1
+                    },
+                    "metastoreConfig": [],
+                    "secondaryWorkerConfig": {
+                        "preemptibility": "PREEMPTIBLE"
+                    },
+                    "securityConfig": [],
+                    "softwareConfig": {
+                        "imageVersion": "2.0.35-debian10",
+                        "properties": {
+                            "dataproc:dataproc.allow.zero.workers": "true"
+                        }
+                    },
+                    "workerConfig": {
+                        "diskConfig": {
+                            "bootDiskSizeGb": 30,
+                            "bootDiskType": "pd-standard",
+                            "numLocalSsds": 1
+                        },
+                        "minCpuPlatform": "Intel Skylake",
+                        "numInstances": 2
+                    }
+                },
+                "labels": {
+                    "foo": "bar"
+                },
+                "projectId": "{{.Provider.project}}"
+            }
+        },
+        "ancestors": ["organizations/{{.OrgID}}"],
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"
+    }
+]

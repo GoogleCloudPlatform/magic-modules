@@ -303,5 +303,6 @@ func expandIamConfiguration(d tpgresource.TerraformResourceData) *storage.Bucket
 			Enabled:         d.Get("uniform_bucket_level_access").(bool),
 			ForceSendFields: []string{"Enabled"},
 		},
+		PublicAccessPrevention: d.Get("public_access_prevention").(string),
 	}
 }

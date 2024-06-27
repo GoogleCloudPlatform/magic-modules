@@ -1,0 +1,5 @@
+resource "google_dataplex_entry_type" "{{$.PrimaryResourceId}}" {
+  entry_type_id = "{{index $.Vars "entry_type_name"}}"
+  project = "{{index $.TestEnvVars "project_name"}}"
+  location = "us-central1"
+}

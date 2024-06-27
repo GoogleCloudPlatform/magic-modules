@@ -170,6 +170,7 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		ForceSendFields:        []string{"CanIpForward", "DeletionProtection"},
 		ShieldedInstanceConfig: expandShieldedVmConfigs(d),
 		DisplayDevice:          expandDisplayDevice(d),
+		AdvancedMachineFeatures: expandAdvancedMachineFeatures(d),
 	}, nil
 }
 

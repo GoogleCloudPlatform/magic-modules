@@ -1,0 +1,20 @@
+resource "google_composer_environment" "environment" {
+  provider = google-beta
+  name   = "{{index $.Vars "environment_name"}}"
+  region = "us-central1"
+  config {
+    software_config {
+      image_version = "composer-3-airflow-2"
+    }
+  }
+}
+
+resource "google_composer_user_workloads_config_map" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  name = "{{index $.Vars "config_map_name"}}"
+  region = "us-central1"
+  environment = google_composer_environment.environment.name
+  data = {
+    api_host: "apihost:443",
+  }
+}

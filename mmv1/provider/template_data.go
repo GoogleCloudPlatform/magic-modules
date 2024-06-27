@@ -15,7 +15,6 @@ package provider
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"go/format"
 	"log"
@@ -45,46 +44,6 @@ type TemplateData struct {
 	//     # Information about the local environment
 	//     # (which formatters are enabled, start-time)
 	//     attr_accessor :env
-}
-
-// Build a map(map[string]interface{}) from a list of paramerter
-// The format of passed in parmeters are key1, value1, key2, value2 ...
-func wrapMultipleParams(params ...interface{}) (map[string]interface{}, error) {
-	if len(params)%2 != 0 {
-		return nil, errors.New("invalid number of arguments")
-	}
-	m := make(map[string]interface{}, len(params)/2)
-	for i := 0; i < len(params); i += 2 {
-		key, ok := params[i].(string)
-		if !ok {
-			return nil, errors.New("keys must be strings")
-		}
-		m[key] = params[i+1]
-	}
-	return m, nil
-}
-
-// subtract returns the difference between a and b
-// and used in Go templates
-func subtract(a, b int) int {
-	return a - b
-}
-
-var TemplateFunctions = template.FuncMap{
-	"title":           google.SpaceSeparatedTitle,
-	"replace":         strings.Replace,
-	"camelize":        google.Camelize,
-	"underscore":      google.Underscore,
-	"plural":          google.Plural,
-	"contains":        strings.Contains,
-	"join":            strings.Join,
-	"lower":           strings.ToLower,
-	"upper":           strings.ToUpper,
-	"dict":            wrapMultipleParams,
-	"format2regex":    google.Format2Regex,
-	"orderProperties": api.OrderProperties,
-	"hasPrefix":       strings.HasPrefix,
-	"sub":             subtract,
 }
 
 var GA_VERSION = "ga"
@@ -119,6 +78,16 @@ func (td *TemplateData) GenerateResourceFile(filePath string, resource api.Resou
 		"templates/terraform/flatten_property_method.go.tmpl",
 		"templates/terraform/expand_property_method.go.tmpl",
 		"templates/terraform/update_mask.go.tmpl",
+		"templates/terraform/nested_query.go.tmpl",
+		"templates/terraform/unordered_list_customize_diff.go.tmpl",
+	}
+	td.GenerateFile(filePath, templatePath, resource, true, templates...)
+}
+
+func (td *TemplateData) GenerateOperationFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/operation.go.tmpl"
+	templates := []string{
+		templatePath,
 	}
 	td.GenerateFile(filePath, templatePath, resource, true, templates...)
 }
@@ -136,7 +105,7 @@ func (td *TemplateData) GenerateDocumentationFile(filePath string, resource api.
 func (td *TemplateData) GenerateTestFile(filePath string, resource api.Resource) {
 	templatePath := "templates/terraform/examples/base_configs/test_file.go.tmpl"
 	templates := []string{
-		// "templates/terraform//env_var_context.go.tmpl",
+		"templates/terraform/env_var_context.go.tmpl",
 		templatePath,
 	}
 	tmplInput := TestInput{
@@ -185,14 +154,29 @@ func (td *TemplateData) GenerateIamDatasourceDocumentationFile(filePath string, 
 }
 
 func (td *TemplateData) GenerateIamPolicyTestFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/examples/base_configs/iam_test_file.go.tmpl"
+	templates := []string{
+		templatePath,
+		"templates/terraform/env_var_context.go.tmpl",
+		"templates/terraform/iam/go/iam_context.go.tmpl",
+	}
+	td.GenerateFile(filePath, templatePath, resource, true, templates...)
+}
+
+func (td *TemplateData) GenerateSweeperFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/sweeper_file.go.tmpl"
+	templates := []string{
+		templatePath,
+	}
+	td.GenerateFile(filePath, templatePath, resource, false, templates...)
 }
 
 func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, goFormat bool, templates ...string) {
-	log.Printf("Generating %s", filePath)
+	// log.Printf("Generating %s", filePath)
 
 	templateFileName := filepath.Base(templatePath)
 
-	tmpl, err := template.New(templateFileName).Funcs(TemplateFunctions).ParseFiles(templates...)
+	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).ParseFiles(templates...)
 	if err != nil {
 		glog.Exit(err)
 	}
@@ -218,7 +202,7 @@ func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, g
 		glog.Exit(err)
 	}
 
-	if goFormat {
+	if goFormat && !strings.Contains(templatePath, "third_party/terraform") {
 		cmd := exec.Command("goimports", "-w", filePath)
 		if err := cmd.Run(); err != nil {
 			log.Fatal(err)

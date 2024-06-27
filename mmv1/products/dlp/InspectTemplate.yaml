@@ -55,6 +55,11 @@ examples:
     test_env_vars:
       project: :PROJECT_NAME
     skip_docs: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dlp_inspect_template_max_infotype_per_finding_default'
+    primary_resource_id: 'max_infotype_per_finding_default'
+    test_env_vars:
+      project: :PROJECT_NAME
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   decoder: templates/terraform/decoders/dlp_template_id.go.erb
   encoder: templates/terraform/encoders/wrap_object_with_template_id.go.erb
@@ -144,7 +149,6 @@ properties:
               properties:
                 - !ruby/object:Api::Type::NestedObject
                   name: 'infoType'
-                  required: true
                   description: |
                     Type of information the findings limit applies to. Only one limit per infoType should be provided. If InfoTypeLimit does
                     not have an infoType, the DLP API applies the limit against all infoTypes that are found but not

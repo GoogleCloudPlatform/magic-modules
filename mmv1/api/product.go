@@ -69,8 +69,6 @@ type Product struct {
 }
 
 func (p *Product) UnmarshalYAML(n *yaml.Node) error {
-	p.Async = NewAsync()
-
 	type productAlias Product
 	aliasObj := (*productAlias)(p)
 

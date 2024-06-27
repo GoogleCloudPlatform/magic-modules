@@ -10,7 +10,7 @@ resource "google_healthcare_fhir_store" "default" {
   enable_history_import          = false
   default_search_handling_strict = false
 
-  notification_config {
+  notification_configs {
     pubsub_topic = google_pubsub_topic.topic.id
   }
 

@@ -52,7 +52,7 @@ type Terraform struct {
 
 	Version product.Version
 
-	Product api.Product
+	Product *api.Product
 
 	StartTime time.Time
 }
@@ -61,7 +61,7 @@ func NewTerraform(product *api.Product, versionName string, startTime time.Time)
 	t := Terraform{
 		ResourceCount:     0,
 		IAMResourceCount:  0,
-		Product:           *product,
+		Product:           product,
 		TargetVersionName: versionName,
 		Version:           *product.VersionObjOrClosest(versionName),
 		StartTime:         startTime,
@@ -90,40 +90,23 @@ func (t *Terraform) Generate(outputFolder, productPath string, generateCode, gen
 
 func (t *Terraform) GenerateObjects(outputFolder string, generateCode, generateDocs bool) {
 	for _, object := range t.Product.Objects {
-		// 		TODO Q2: Exclude objects
-		//        if !types.empty? && !types.include?(object.name)
-		//          Google::LOGGER.info "Excluding #{object.name} per user request"
-		//        elsif types.empty? && object.exclude
-		//          Google::LOGGER.info "Excluding #{object.name} per API catalog"
-		//        elsif types.empty? && object.not_in_version?(@version)
-		//          Google::LOGGER.info "Excluding #{object.name} per API version"
-		//        else
-		//          Google::LOGGER.info "Generating #{object.name}"
-		//          # exclude_if_not_in_version must be called in order to filter out
-		//          # beta properties that are nested within GA resources
-		//          object.exclude_if_not_in_version!(@version)
-		//
-		//          # Make object immutable.
-		//          object.freeze
-		//          object.all_user_properties.each(&:freeze)
+		object.ExcludeIfNotInVersion(&t.Version)
 
 		t.GenerateObject(*object, outputFolder, t.TargetVersionName, generateCode, generateDocs)
 	}
 }
 
 func (t *Terraform) GenerateObject(object api.Resource, outputFolder, productPath string, generateCode, generateDocs bool) {
-
 	templateData := NewTemplateData(outputFolder, t.Version)
 
-	if !object.ExcludeResource {
+	if !object.IsExcluded() {
 		log.Printf("Generating %s resource", object.Name)
 		t.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
 
 		if generateCode {
 			log.Printf("Generating %s tests", object.Name)
 			t.GenerateResourceTests(object, *templateData, outputFolder)
-			// TODO Q2
-			//	    generate_resource_sweepers(pwd, data.clone)
+			t.GenerateResourceSweeper(object, *templateData, outputFolder)
 		}
 	}
 
@@ -179,26 +162,36 @@ func (t *Terraform) GenerateResourceTests(object api.Resource, templateData Temp
 	templateData.GenerateTestFile(targetFilePath, object)
 }
 
-func (t *Terraform) GenerateOperation(outputFolder string) {
+func (t *Terraform) GenerateResourceSweeper(object api.Resource, templateData TemplateData, outputFolder string) {
+	if object.SkipSweeper || object.CustomCode.CustomDelete != "" || object.CustomCode.PreDelete != "" || object.CustomCode.PostDelete != "" || object.SkipDelete {
+		return
+	}
 
-	// TODO Q2
-	//    def generate_operation(pwd, output_folder, _types)
-	//      return if @api.objects.select(&:autogen_async).empty?
-	//
-	//      product_name = @api.api_name
-	//      product_name_underscore = @api.name.underscore
-	//      data = build_object_data(pwd, @api.objects.first, output_folder, @target_version_name)
-	//
-	//      data.object = @api.objects.select(&:autogen_async).first
-	//
-	//      data.async = data.object.async
-	//      target_folder = File.join(folder_name(data.version), 'services', product_name)
-	//      FileUtils.mkpath target_folder
-	//      data.generate(pwd,
-	//                    'templates/terraform/operation.go.erb',
-	//                    "#{target_folder}/#{product_name_underscore}_operation.go",
-	//                    self)
-	//    end
+	productName := t.Product.ApiName
+	targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
+	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+	}
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s_sweeper.go", t.FullResourceName(object)))
+	templateData.GenerateSweeperFile(targetFilePath, object)
+}
+
+func (t *Terraform) GenerateOperation(outputFolder string) {
+	asyncObjects := google.Select(t.Product.Objects, func(o *api.Resource) bool {
+		return o.AutogenAsync
+	})
+
+	if len(asyncObjects) == 0 {
+		return
+	}
+
+	targetFolder := path.Join(outputFolder, t.FolderName(), "services", t.Product.ApiName)
+	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+	}
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_operation.go", google.Underscore(t.Product.Name)))
+	templateData := NewTemplateData(outputFolder, t.Version)
+	templateData.GenerateOperationFile(targetFilePath, *asyncObjects[0])
 }
 
 // Generate the IAM policy for this object. This is used to query and test
@@ -241,10 +234,11 @@ func (t *Terraform) GenerateIamDocumentation(object api.Resource, templateData T
 	if err := os.MkdirAll(datasourceDocFolder, os.ModePerm); err != nil {
 		log.Println(fmt.Errorf("error creating parent directory %v: %v", datasourceDocFolder, err))
 	}
-	targetFilePath = path.Join(datasourceDocFolder, fmt.Sprintf("%s_iam.html.markdown", t.FullResourceName(object)))
+	targetFilePath = path.Join(datasourceDocFolder, fmt.Sprintf("%s_iam_policy.html.markdown", t.FullResourceName(object)))
 	templateData.GenerateIamDatasourceDocumentationFile(targetFilePath, object)
 }
 
+// Finds the folder name for a given version of the terraform provider
 func (t *Terraform) FolderName() string {
 	if t.TargetVersionName == "ga" {
 		return "google"
@@ -282,8 +276,8 @@ func (t Terraform) CopyCommonFiles(outputFolder string, generateCode, generateDo
 	t.CopyFileList(outputFolder, files)
 }
 
-// To compile a new folder, add the folder to foldersCopiedToRootDir or foldersCopiedToGoogleDir.
-// To compile a file, add the file to singleFiles
+// To copy a new folder, add the folder to foldersCopiedToRootDir or foldersCopiedToGoogleDir.
+// To copy a file, add the file to singleFiles
 func (t Terraform) getCommonCopyFiles(versionName string, generateCode, generateDocs bool) map[string]string {
 	// key is the target file and value is the source file
 	commonCopyFiles := make(map[string]string, 0)
@@ -325,9 +319,9 @@ func (t Terraform) getCommonCopyFiles(versionName string, generateCode, generate
 	// Case 3: When copy a single file, save the target as key and source as value to the map singleFiles
 	singleFiles := map[string]string{
 		"go.sum":                           "third_party/terraform/go.sum",
-		"go.mod":                           "third_party/terraform/go.mod",
+		"go.mod":                           "third_party/terraform/go/go.mod",
 		".go-version":                      "third_party/terraform/.go-version",
-		"terraform-registry-manifest.json": "third_party/terraform/terraform-registry-manifest.json",
+		"terraform-registry-manifest.json": "third_party/terraform/go/terraform-registry-manifest.json",
 	}
 	maps.Copy(commonCopyFiles, singleFiles)
 
@@ -338,7 +332,7 @@ func (t Terraform) getCopyFilesInFolder(folderPath, targetDir string) map[string
 	m := make(map[string]string, 0)
 	filepath.WalkDir(folderPath, func(path string, di fs.DirEntry, err error) error {
 		if !di.IsDir() && !strings.HasSuffix(di.Name(), ".tmpl") && !strings.HasSuffix(di.Name(), ".erb") {
-			fname := strings.TrimPrefix(path, "third_party/terraform/")
+			fname := strings.TrimPrefix(strings.Replace(path, "/go/", "/", 1), "third_party/terraform/")
 			target := fname
 			if targetDir != "." {
 				target = fmt.Sprintf("%s/%s", targetDir, fname)
@@ -395,11 +389,11 @@ func (t Terraform) CopyFileList(outputFolder string, files map[string]string) {
 //	  common_compile_file,
 //	  override_path = nil
 //	)
-func (t Terraform) CompileCommonFiles(outputFolder string, products []map[string]interface{}, overridePath string) {
+func (t Terraform) CompileCommonFiles(outputFolder string, products []*api.Product, overridePath string) {
 	t.generateResourcesForVersion(products)
 	files := t.getCommonCompileFiles(t.TargetVersionName)
 	templateData := NewTemplateData(outputFolder, t.Version)
-	t.CompileFileList(outputFolder, files, *templateData)
+	t.CompileFileList(outputFolder, files, *templateData, products)
 }
 
 // To compile a new folder, add the folder to foldersCompiledToRootDir or foldersCompiledToGoogleDir.
@@ -430,10 +424,10 @@ func (t Terraform) getCommonCompileFiles(versionName string) map[string]string {
 
 	// Case 3: When compile a single file, save the target as key and source as value to the map singleFiles
 	singleFiles := map[string]string{
-		"main.go":                       "third_party/terraform/main.go.tmpl",
-		".goreleaser.yml":               "third_party/terraform/.goreleaser.yml.tmpl",
-		".release/release-metadata.hcl": "third_party/terraform/release-metadata.hcl.tmpl",
-		".copywrite.hcl":                "third_party/terraform/.copywrite.hcl.tmpl",
+		"main.go":                       "third_party/terraform/go/main.go.tmpl",
+		".goreleaser.yml":               "third_party/terraform/go/.goreleaser.yml.tmpl",
+		".release/release-metadata.hcl": "third_party/terraform/go/release-metadata.hcl.tmpl",
+		".copywrite.hcl":                "third_party/terraform/go/.copywrite.hcl.tmpl",
 	}
 	maps.Copy(commonCompileFiles, singleFiles)
 
@@ -444,10 +438,10 @@ func (t Terraform) getCompileFilesInFolder(folderPath, targetDir string) map[str
 	m := make(map[string]string, 0)
 	filepath.WalkDir(folderPath, func(path string, di fs.DirEntry, err error) error {
 		if !di.IsDir() && strings.HasSuffix(di.Name(), ".tmpl") {
-			fname := strings.TrimPrefix(path, "third_party/terraform/")
+			fname := strings.TrimPrefix(strings.Replace(path, "/go/", "/", 1), "third_party/terraform/")
 			fname = strings.TrimSuffix(fname, ".tmpl")
 			target := fname
-			if targetDir != "" {
+			if targetDir != "." {
 				target = fmt.Sprintf("%s/%s", targetDir, fname)
 			}
 			m[target] = path
@@ -459,16 +453,15 @@ func (t Terraform) getCompileFilesInFolder(folderPath, targetDir string) map[str
 }
 
 // def compile_file_list(output_folder, files, file_template, pwd = Dir.pwd)
-func (t Terraform) CompileFileList(outputFolder string, files map[string]string, fileTemplate TemplateData) {
+func (t Terraform) CompileFileList(outputFolder string, files map[string]string, fileTemplate TemplateData, products []*api.Product) {
+	providerWithProducts := ProviderWithProducts{
+		Terraform: t,
+		Products:  products,
+	}
+
 	if err := os.MkdirAll(outputFolder, os.ModePerm); err != nil {
 		log.Println(fmt.Errorf("error creating output directory %v: %v", outputFolder, err))
 	}
-
-	// TODO: is this needed?
-	// err := os.Chdir(outputFolder)
-	// if err != nil {
-	// 	log.Fatalf("Could not move into the directory %s", outputFolder)
-	// }
 
 	for target, source := range files {
 		targetFile := filepath.Join(outputFolder, target)
@@ -483,12 +476,10 @@ func (t Terraform) CompileFileList(outputFolder string, files map[string]string,
 
 		formatFile := filepath.Ext(targetFile) == ".go"
 
-		fileTemplate.GenerateFile(targetFile, source, t, formatFile, templates...)
+		fileTemplate.GenerateFile(targetFile, source, providerWithProducts, formatFile, templates...)
 		t.replaceImportPath(outputFolder, target)
 		t.addHashicorpCopyRightHeader(outputFolder, target)
 	}
-	// TODO: is this needed?
-	//	Dir.chdir pwd
 }
 
 // def add_hashicorp_copyright_header(output_folder, target)
@@ -641,34 +632,48 @@ func (t Terraform) ImportPathFromVersion(v string) string {
 	return fmt.Sprintf("%s/%s", tpg, dir)
 }
 
-// # Gets the list of services dependent on the version ga, beta, and private
-// # If there are some resources of a servcie is in GA,
-// # then this service is in GA. Otherwise, the service is in BETA
+func (t Terraform) ProviderFromVersion() string {
+	var dir string
+	switch t.TargetVersionName {
+	case "ga":
+		dir = RESOURCE_DIRECTORY_GA
+	case "beta":
+		dir = RESOURCE_DIRECTORY_BETA
+	default:
+		dir = RESOURCE_DIRECTORY_PRIVATE
+	}
+	return dir
+}
+
+// Gets the list of services dependent on the version ga, beta, and private
+// If there are some resources of a servcie is in GA,
+// then this service is in GA. Otherwise, the service is in BETA
 // def get_mmv1_services_in_version(products, version)
-//
-//	services = []
-//	products.map do |product|
-//	  product_definition = product[:definitions]
-//	  if version == 'ga'
-//	    some_resource_in_ga = false
-//	    product_definition.objects.each do |object|
-//	      break if some_resource_in_ga
-//
-//	      if !object.exclude &&
-//	         !object.not_in_version?(product_definition.version_obj_or_closest(version))
-//	        some_resource_in_ga = true
-//	      end
-//	    end
-//
-//	    services << product[:definitions].name.downcase if some_resource_in_ga
-//	  else
-//	    services << product[:definitions].name.downcase
-//	  end
-//	end
-//	services
-//
-// end
-//
+func (t Terraform) GetMmv1ServicesInVersion(products []*api.Product) []string {
+	var services []string
+	for _, product := range products {
+		if t.TargetVersionName == "ga" {
+			someResourceInGA := false
+			for _, object := range product.Objects {
+				if someResourceInGA {
+					break
+				}
+
+				if !object.Exclude && !object.NotInVersion(product.VersionObjOrClosest(t.TargetVersionName)) {
+					someResourceInGA = true
+				}
+			}
+
+			if someResourceInGA {
+				services = append(services, strings.ToLower(product.Name))
+			}
+		} else {
+			services = append(services, strings.ToLower(product.Name))
+		}
+	}
+	return services
+}
+
 // def generate_newyaml(pwd, data)
 //
 //	# @api.api_name is the service folder name
@@ -832,26 +837,6 @@ func (t Terraform) ImportPathFromVersion(v string) string {
 //
 // end
 //
-// def force_new?(property, resource)
-//
-//	(
-//	  (!property.output || property.is_a?(Api::Type::KeyValueEffectiveLabels)) &&
-//	  (property.immutable ||
-//	    (resource.immutable && property.update_url.nil? && property.immutable.nil? &&
-//	      (property.parent.nil? ||
-//	        (force_new?(property.parent, resource) &&
-//	         !(property.parent.flatten_object && property.is_a?(Api::Type::KeyValueLabels))
-//	        )
-//	      )
-//	    )
-//	  )
-//	) ||
-//	  (property.is_a?(Api::Type::KeyValueTerraformLabels) &&
-//	    !updatable?(resource, resource.all_user_properties) && !resource.root_labels?
-//	  )
-//
-// end
-//
 // # Returns tuples of (fieldName, list of update masks) for
 // #  top-level updatable fields. Schema path refers to a given Terraform
 // # field name (e.g. d.GetChange('fieldName)')
@@ -870,39 +855,6 @@ func (t Terraform) ImportPathFromVersion(v string) string {
 //	  end
 //	end
 //	mask_groups
-//
-// end
-//
-// # Returns an updated path for a given Terraform field path (e.g.
-// # 'a_field', 'parent_field.0.child_name'). Returns nil if the property
-// # is not included in the resource's properties and removes keys that have
-// # been flattened
-// # FYI: Fields that have been renamed should use the new name, however, flattened
-// # fields still need to be included, ie:
-// # flattenedField > newParent > renameMe should be passed to this function as
-// # flattened_field.0.new_parent.0.im_renamed
-// # TODO(emilymye): Change format of input for
-// # exactly_one_of/at_least_one_of/etc to use camelcase, MM properities and
-// # convert to snake in this method
-// def get_property_schema_path(schema_path, resource)
-//
-//	nested_props = resource.properties
-//	prop = nil
-//	path_tkns = schema_path.split('.0.').map do |pname|
-//	  camel_pname = pname.camelize(:lower)
-//	  prop = nested_props.find { |p| p.name == camel_pname }
-//	  # if we couldn't find it, see if it was renamed at the top level
-//	  prop = nested_props.find { |p| p.name == schema_path } if prop.nil?
-//	  return nil if prop.nil?
-//
-//	  nested_props = prop.nested_properties || []
-//	  prop.flatten_object ? nil : pname.underscore
-//	end
-//	if path_tkns.empty? || path_tkns[-1].nil?
-//	  nil
-//	else
-//	  path_tkns.compact.join('.0.')
-//	end
 //
 // end
 //
@@ -925,10 +877,8 @@ func (t Terraform) ImportPathFromVersion(v string) string {
 // # The variable resources_for_version is used to generate resources in file
 // # mmv1/third_party/terraform/provider/provider_mmv1_resources.go.erb
 // def generate_resources_for_version(products, version)
-func (t *Terraform) generateResourcesForVersion(products []map[string]interface{}) {
-	// products.each do |product|
-	for _, product := range products {
-		productDefinition := product["Definitions"].(*api.Product)
+func (t *Terraform) generateResourcesForVersion(products []*api.Product) {
+	for _, productDefinition := range products {
 		service := strings.ToLower(productDefinition.Name)
 		for _, object := range productDefinition.Objects {
 			if object.Exclude || object.NotInVersion(productDefinition.VersionObjOrClosest(t.TargetVersionName)) {
@@ -937,7 +887,7 @@ func (t *Terraform) generateResourcesForVersion(products []map[string]interface{
 
 			var resourceName string
 
-			if !object.ExcludeResource {
+			if !object.IsExcluded() {
 				t.ResourceCount++
 				resourceName = fmt.Sprintf("%s.Resource%s", service, object.ResourceName())
 			}
@@ -1016,58 +966,42 @@ func languageFromFilename(filename string) string {
 	}
 }
 
-// # Finds the folder name for a given version of the terraform provider
-// def folder_name(version)
-//
-//	version == 'ga' ? 'google' : "google-#{version}"
-//
-// end
-//
-// def generate_documentation(pwd, data)
-//
-//	target_folder = data.output_folder
-//	target_folder = File.join(target_folder, 'website', 'docs', 'r')
-//	FileUtils.mkpath target_folder
-//	filepath = File.join(target_folder, "#{full_resource_name(data)}.html.markdown")
-//	data.generate(pwd, 'templates/terraform/resource.html.markdown.erb', filepath, self)
-//
-// end
-//
-// def generate_resource_sweepers(pwd, data)
-//
-//	return if data.object.skip_sweeper ||
-//	          data.object.custom_code.custom_delete ||
-//	          data.object.custom_code.pre_delete ||
-//	          data.object.custom_code.post_delete ||
-//	          data.object.skip_delete
-//
-//	product_name = @api.api_name
-//	target_folder = File.join(folder_name(data.version), 'services', product_name)
-//	file_name =
-//	  "#{target_folder}/resource_#{full_resource_name(data)}_sweeper.go"
-//	FileUtils.mkpath folder_name(data.version)
-//	data.generate(pwd,
-//	              'templates/terraform/sweeper_file.go.erb',
-//	              file_name,
-//	              self)
-//
-// end
-//
-//    # Returns the id format of an object, or self_link_uri if none is explicitly defined
-//    # We prefer the long name of a resource as the id so that users can reference
-//    # resources in a standard way, and most APIs accept short name, long name or self_link
-//    def id_format(object)
-//      object.id_format || object.self_link_uri
-//    end
-//
-//
-//    # Returns the extension for DCL packages for the given version. This is needed
-//    # as the DCL uses "alpha" for preview resources, while we use "private"
-//    def dcl_version(version)
-//      return '' if version == 'ga'
-//      return '/beta' if version == 'beta'
-//      return '/alpha' if version == 'private'
-//    end
-//  end
-//end
-//
+//	  # Returns the id format of an object, or self_link_uri if none is explicitly defined
+//	  # We prefer the long name of a resource as the id so that users can reference
+//	  # resources in a standard way, and most APIs accept short name, long name or self_link
+//	  def id_format(object)
+//	    object.id_format || object.self_link_uri
+//	  end
+
+// Returns the extension for DCL packages for the given version. This is needed
+// as the DCL uses "alpha" for preview resources, while we use "private"
+func (t Terraform) DCLVersion() string {
+	switch t.TargetVersionName {
+	case "beta":
+		return "/beta"
+	case "private":
+		return "/alpha"
+	default:
+		return ""
+	}
+}
+
+// Gets the provider versions supported by a version
+func (t Terraform) SupportedProviderVersions() []string {
+	var supported []string
+	for i, v := range product.ORDER {
+		if i == 0 {
+			continue
+		}
+		supported = append(supported, v)
+		if v == t.TargetVersionName {
+			break
+		}
+	}
+	return supported
+}
+
+type ProviderWithProducts struct {
+	Terraform
+	Products []*api.Product
+}

@@ -57,6 +57,7 @@ properties:
     name: 'servicePerimeters'
     description: |
       The desired Service Perimeters that should replace all existing Service Perimeters in the Access Policy.
+    custom_flatten: 'templates/terraform/custom_flatten/accesscontextmanager_serviceperimeters_custom_flatten.go.erb'
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::String
@@ -220,10 +221,9 @@ properties:
                         is_set: true
                         item_type: Api::Type::String
                         description: |
-                          'A list of identities that are allowed access through this `IngressPolicy`.
-                          To specify an identity or identity group, use the IAM v1 format
-                          specified [here](https://cloud.google.com/iam/docs/principal-identifiers.md#v1).
-                          The following prefixes are supprted: user, group, serviceAccount, principal, and principalSet.'
+                          A list of identities that are allowed access through this ingress policy.
+                          Should be in the format of email address. The email address should represent
+                          individual user or service account only.
                       - !ruby/object:Api::Type::Array
                         name: 'sources'
                         description: |
@@ -330,10 +330,9 @@ properties:
                       - !ruby/object:Api::Type::Array
                         name: 'identities'
                         description: |
-                          'A list of identities that are allowed access through this `EgressPolicy`.
-                          To specify an identity or identity group, use the IAM v1 format
-                          specified [here](https://cloud.google.com/iam/docs/principal-identifiers.md#v1).
-                          The following prefixes are supprted: user, group, serviceAccount, principal, and principalSet.'
+                          A list of identities that are allowed access through this `EgressPolicy`.
+                          Should be in the format of email address. The email address should
+                          represent individual user or service account only.
                         is_set: true
                         item_type: Api::Type::String
                       - !ruby/object:Api::Type::Array
@@ -516,10 +515,9 @@ properties:
                         is_set: true
                         item_type: Api::Type::String
                         description: |
-                          'A list of identities that are allowed access through this `IngressPolicy`.
-                          To specify an identity or identity group, use the IAM v1 format
-                          specified [here](https://cloud.google.com/iam/docs/principal-identifiers.md#v1).
-                          The following prefixes are supprted: user, group, serviceAccount, principal, and principalSet.'
+                          A list of identities that are allowed access through this ingress policy.
+                          Should be in the format of email address. The email address should represent
+                          individual user or service account only.
                       - !ruby/object:Api::Type::Array
                         name: 'sources'
                         description: |
@@ -626,10 +624,9 @@ properties:
                       - !ruby/object:Api::Type::Array
                         name: 'identities'
                         description: |
-                          'A list of identities that are allowed access through this `EgressPolicy`.
-                          To specify an identity or identity group, use the IAM v1 format
-                          specified [here](https://cloud.google.com/iam/docs/principal-identifiers.md#v1).
-                          The following prefixes are supprted: user, group, serviceAccount, principal, and principalSet.'
+                          A list of identities that are allowed access through this `EgressPolicy`.
+                          Should be in the format of email address. The email address should
+                          represent individual user or service account only.
                         item_type: Api::Type::String
                         is_set: true
                       - !ruby/object:Api::Type::Array

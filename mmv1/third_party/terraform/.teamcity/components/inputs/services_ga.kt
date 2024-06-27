@@ -481,6 +481,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Looker",
         "path" to "./google/services/looker"
     ),
+    "managedkafka" to mapOf(
+        "name" to "managedkafka",
+        "displayName" to "Managedkafka",
+        "path" to "./google/services/managedkafka"
+    ),
     "memcache" to mapOf(
         "name" to "memcache",
         "displayName" to "Memcache",
@@ -610,6 +615,11 @@ var ServicesListGa = mapOf(
         "name" to "securitycenter",
         "displayName" to "Securitycenter",
         "path" to "./google/services/securitycenter"
+    ),
+    "securitycentermanagement" to mapOf(
+        "name" to "securitycentermanagement",
+        "displayName" to "Securitycentermanagement",
+        "path" to "./google/services/securitycentermanagement"
     ),
     "securityposture" to mapOf(
         "name" to "securityposture",

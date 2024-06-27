@@ -15,5 +15,42 @@
         "ancestors": [
             "organizations/{{.OrgID}}"
         ]
+    },
+    {
+        "name": "//compute.googleapis.com/projects/{{.Provider.project}}/global/urlMaps/url-map",
+        "asset_type": "compute.googleapis.com/UrlMap",
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+        "resource": {
+            "version": "beta",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
+            "discovery_name": "UrlMap",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "hostRules": [
+                    {
+                        "hosts": [
+                            "mysite.com"
+                        ],
+                        "pathMatcher": "allpaths"
+                    }
+                ],
+                "name": "url-map",
+                "pathMatchers": [
+                    {
+                        "name": "allpaths",
+                        "pathRules": [
+                            {
+                                "paths": [
+                                    "/*"
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        "ancestors": [
+            "organizations/{{.OrgID}}"
+        ]
     }
 ]

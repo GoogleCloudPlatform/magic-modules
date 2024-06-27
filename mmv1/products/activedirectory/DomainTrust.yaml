@@ -78,8 +78,8 @@ parameters:
     url_param_only: true
     immutable: true
     description: |
-      The fully qualified domain name. e.g. mydomain.myorganization.com, with the restrictions,
-      https://cloud.google.com/managed-microsoft-ad/reference/rest/v1/projects.locations.global.domains.
+      The fully qualified domain name. e.g. mydomain.myorganization.com, with the restrictions
+      of https://cloud.google.com/managed-microsoft-ad/reference/rest/v1/projects.locations.global.domains.
 properties:
   - !ruby/object:Api::Type::String
     name: 'targetDomainName'

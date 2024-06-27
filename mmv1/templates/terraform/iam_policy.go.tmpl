@@ -309,7 +309,7 @@ func (u *{{ $.ResourceName }}IamUpdater) SetResourceIamPolicy(policy *cloudresou
 }
 
 func (u *{{ $.ResourceName }}IamUpdater) qualify{{ $.Name }}Url(methodIdentifier string) (string, error) {
-	urlTemplate := fmt.Sprintf("{{"{{"}}{{ $.ProductMetadata.Name }}BasePath{{"}}"}}%s{{ $.IamPolicy.MethodNameSeparator }}%s", fmt.Sprintf("{{ $.IamImportUrl }}", {{ $.IamStringQualifiers }}), methodIdentifier)
+	urlTemplate := fmt.Sprintf("{{"{{"}}{{ $.ProductMetadata.Name }}BasePath{{"}}"}}%s{{ $.IamPolicy.MethodNameSeparator }}%s", fmt.Sprintf("{{ $.IamResourceUriFormat }}", {{ $.IamResourceUriStringQualifiers }}), methodIdentifier)
   url, err := tpgresource.ReplaceVars(u.d, u.Config, urlTemplate)
   if err != nil {
       return "", err
@@ -318,7 +318,7 @@ func (u *{{ $.ResourceName }}IamUpdater) qualify{{ $.Name }}Url(methodIdentifier
 }
 
 func (u *{{ $.ResourceName }}IamUpdater) GetResourceId() string {
-	return fmt.Sprintf("{{ $.IamImportUrl }}", {{ $.IamStringQualifiers }})
+	return fmt.Sprintf("{{ $.IamResourceUriFormat }}", {{ $.IamResourceUriStringQualifiers }})
 }
 
 func (u *{{ $.ResourceName }}IamUpdater) GetMutexKey() string {

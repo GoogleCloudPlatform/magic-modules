@@ -183,14 +183,12 @@ func GetContainerClusterApiObject(d tpgresource.TerraformResourceData, config *t
 	} else if v, ok := d.GetOkExists("private_cluster_config"); !tpgresource.IsEmptyValue(reflect.ValueOf(privateClusterConfigProp)) && (ok || !reflect.DeepEqual(v, privateClusterConfigProp)) {
 		obj["privateClusterConfig"] = privateClusterConfigProp
 	}
-
 	workloadIdentityConfigProp, err := expandContainerClusterWorkloadIdentityConfig(d.Get("workload_identity_config"), d, config)
 	if err != nil {
 		return nil, err
 	} else if v, ok := d.GetOkExists("workload_identity_config"); !tpgresource.IsEmptyValue(reflect.ValueOf(workloadIdentityConfigProp)) && (ok || !reflect.DeepEqual(v, workloadIdentityConfigProp)) {
 		obj["workloadIdentityConfig"] = workloadIdentityConfigProp
 	}
-
 	clusterIpv4CidrProp, err := expandContainerClusterClusterIpv4Cidr(d.Get("cluster_ipv4_cidr"), d, config)
 	if err != nil {
 		return nil, err
@@ -292,6 +290,18 @@ func GetContainerClusterApiObject(d tpgresource.TerraformResourceData, config *t
 		return nil, err
 	} else if v, ok := d.GetOkExists("kubectl_context"); !tpgresource.IsEmptyValue(reflect.ValueOf(kubectlContextProp)) && (ok || !reflect.DeepEqual(v, kubectlContextProp)) {
 		obj["kubectlContext"] = kubectlContextProp
+	}
+	databaseEncryptionProp, err := expandContainerClusterDatabaseEncryption(d.Get("database_encryption"), d, config)
+	if err != nil {
+		return nil, err
+	} else if v, ok := d.GetOkExists("database_encryption"); !tpgresource.IsEmptyValue(reflect.ValueOf(databaseEncryptionProp)) && (ok || !reflect.DeepEqual(v, databaseEncryptionProp)) {
+		obj["databaseEncryption"] = databaseEncryptionProp
+	}
+	releaseChannelProp, err := expandContainerClusterReleaseChannel(d.Get("release_channel"), d, config)
+	if err != nil {
+		return nil, err
+	} else if v, ok := d.GetOkExists("release_channel"); !tpgresource.IsEmptyValue(reflect.ValueOf(releaseChannelProp)) && (ok || !reflect.DeepEqual(v, releaseChannelProp)) {
+		obj["releaseChannel"] = releaseChannelProp
 	}
 
 	return obj, nil
@@ -1166,6 +1176,14 @@ func expandContainerClusterKubectlPath(v interface{}, d tpgresource.TerraformRes
 }
 
 func expandContainerClusterKubectlContext(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	return v, nil
+}
+
+func expandContainerClusterDatabaseEncryption(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	return v, nil
+}
+
+func expandContainerClusterReleaseChannel(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 

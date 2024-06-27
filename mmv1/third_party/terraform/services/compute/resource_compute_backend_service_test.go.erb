@@ -21,19 +21,19 @@ func TestAccComputeBackendService_basic(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeBackendService_basic(serviceName, checkName),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_backend_service.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeBackendService_basicModified(
 					serviceName, checkName, extraCheckName),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_backend_service.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -54,20 +54,20 @@ func TestAccComputeBackendService_withBackend(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeBackendService_withBackend(
 					serviceName, igName, itName, checkName, 10),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_backend_service.lipsum",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeBackendService_withBackend(
 					serviceName, igName, itName, checkName, 20),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_backend_service.lipsum",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -86,26 +86,26 @@ func TestAccComputeBackendService_withBackendAndMaxUtilization(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeBackendService_withBackend(
 					serviceName, igName, itName, checkName, 10),
 			},
-			resource.TestStep{
+			{
 				ResourceName:            "google_compute_backend_service.lipsum",
 				ImportState:             true,
 				ImportStateVerify:       true,
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeBackendService_withBackendAndMaxUtilization(
 					serviceName, igName, itName, checkName, 10),
 				PlanOnly: true,
 				ExpectNonEmptyPlan: true,
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeBackendService_withBackendAndMaxUtilization(
 					serviceName, igName, itName, checkName, 10),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_backend_service.lipsum",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -124,21 +124,21 @@ func TestAccComputeBackendService_withBackendAndIAP(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeBackendService_withBackendAndIAP(
 					serviceName, igName, itName, checkName, 10),
 			},
-			resource.TestStep{
+			{
 				ResourceName:            "google_compute_backend_service.lipsum",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"iap.0.oauth2_client_secret"},
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeBackendService_withBackend(
 					serviceName, igName, itName, checkName, 10),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_backend_service.lipsum",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -158,20 +158,20 @@ func TestAccComputeBackendService_updatePreservesOptionalParameters(t *testing.T
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeBackendService_withSessionAffinity(
 					serviceName, checkName, "initial-description", "GENERATED_COOKIE"),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_backend_service.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeBackendService_withSessionAffinity(
 					serviceName, checkName, "updated-description", "GENERATED_COOKIE"),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_backend_service.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -191,10 +191,10 @@ func TestAccComputeBackendService_withConnectionDraining(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeBackendService_withConnectionDraining(serviceName, checkName, 10),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_backend_service.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -214,18 +214,18 @@ func TestAccComputeBackendService_withConnectionDrainingAndUpdate(t *testing.T) 
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeBackendService_withConnectionDraining(serviceName, checkName, 10),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_backend_service.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeBackendService_basic(serviceName, checkName),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_backend_service.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -245,10 +245,10 @@ func TestAccComputeBackendService_withHttpsHealthCheck(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeBackendService_withHttpsHealthCheck(serviceName, checkName),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_backend_service.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -356,11 +356,11 @@ func TestAccComputeBackendService_withCDNEnabled(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeBackendService_withCDNEnabled(
 					serviceName, checkName),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_backend_service.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -380,20 +380,20 @@ func TestAccComputeBackendService_withSessionAffinity(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeBackendService_withSessionAffinity(
 					serviceName, checkName, "description", "CLIENT_IP"),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_backend_service.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeBackendService_withSessionAffinity(
 					serviceName, checkName, "description", "GENERATED_COOKIE"),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_backend_service.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -413,11 +413,11 @@ func TestAccComputeBackendService_withAffinityCookieTtlSec(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeBackendService_withAffinityCookieTtlSec(
 					serviceName, checkName, "description", "GENERATED_COOKIE", 300),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_backend_service.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -439,20 +439,20 @@ func TestAccComputeBackendService_withMaxConnections(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeBackendService_withMaxConnections(
 					serviceName, igName, itName, checkName, 10),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_backend_service.lipsum",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeBackendService_withMaxConnections(
 					serviceName, igName, itName, checkName, 20),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_backend_service.lipsum",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -474,20 +474,20 @@ func TestAccComputeBackendService_withMaxConnectionsPerInstance(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeBackendService_withMaxConnectionsPerInstance(
 					serviceName, igName, itName, checkName, 10),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_backend_service.lipsum",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeBackendService_withMaxConnectionsPerInstance(
 					serviceName, igName, itName, checkName, 20),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_backend_service.lipsum",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -581,18 +581,18 @@ func TestAccComputeBackendService_withCustomHeaders(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeBackendService_withCustomHeaders(serviceName, checkName),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_backend_service.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeBackendService_basic(serviceName, checkName),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_backend_service.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,

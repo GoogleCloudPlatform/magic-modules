@@ -24,6 +24,8 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://firebase.google.com/docs/hosting'
   api: 'https://firebase.google.com/docs/reference/hosting/rest/v1beta1/projects.sites'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_create: templates/terraform/pre_create/firebasehosting_site.go.erb
 import_format:
   ['projects/{{project}}/sites/{{site_id}}', 'sites/{{site_id}}', '{{site_id}}']
 examples:
