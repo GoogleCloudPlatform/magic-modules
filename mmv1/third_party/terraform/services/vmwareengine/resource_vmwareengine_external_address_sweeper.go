@@ -88,7 +88,7 @@ func testSweepVmwareengineExternalAddress(region string) error {
 				continue
 			}
 
-			resourceList, ok := res["externalAccessRules"]
+			resourceList, ok := res["externalAddresses"]
 			if !ok {
 				log.Printf("[INFO][SWEEPER_LOG] Nothing found in response.")
 				continue
