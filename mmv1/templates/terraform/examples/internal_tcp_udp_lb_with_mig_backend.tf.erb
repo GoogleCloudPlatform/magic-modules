@@ -128,7 +128,7 @@ resource "google_compute_firewall" "fw_hc" {
   target_tags = ["allow-health-check"]
 }
 
-# allow communication within the subnet
+# allow communication within the subnet 
 resource "google_compute_firewall" "fw_ilb_to_backends" {
   name          = "<%= ctx[:vars]['fw_allow_ilb_to_backends_name'] %>"
   provider      = google-beta

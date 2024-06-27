@@ -9,7 +9,6 @@ resource "google_compute_instance" "<%= ctx[:primary_resource_id] %>" {
       image = "debian-cloud/debian-11"
     }
   }
-
   scheduling {
       preemptible = true
       automatic_restart = false
