@@ -5,6 +5,7 @@ package kms
 import (
 	"fmt"
 	"log"
+	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -70,16 +71,54 @@ func dataSourceGoogleKmsKeyRingsRead(d *schema.ResourceData, meta interface{}) e
 	d.SetId(id)
 
 	log.Printf("[DEBUG] Searching for keyrings")
-	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	res, err := dataSourceGoogleKmsKeyRingsList(d, meta)
 	if err != nil {
 		return err
+	}
+
+	// Check for keyRings field, as empty response lacks keyRings
+	// If found, set data in the data source's `keyRing` field
+	if keyRings, ok := res["keyRings"].([]interface{}); ok {
+		log.Printf("[DEBUG] Found %d key rings", len(keyRings))
+		value, err := flattenKMSKeyRingsList(d, config, keyRings)
+		if err != nil {
+			return fmt.Errorf("error flattening key rings list: %s", err)
+		}
+		if err := d.Set("key_rings", value); err != nil {
+			return fmt.Errorf("error setting key rings: %s", err)
+		}
+	} else {
+		log.Printf("[DEBUG] Found 0 key rings")
+	}
+
+	return nil
+}
+
+func dataSourceGoogleKmsKeyRingsList(d *schema.ResourceData, meta interface{}) (map[string]interface{}, error) {
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return nil, err
+	}
+
+	url, err := tpgresource.ReplaceVars(d, config, "{{KMSBasePath}}projects/{{project}}/locations/{{location}}/keyRings")
+	if err != nil {
+		return nil, err
+	}
+
+	if filter, ok := d.GetOk("filter"); ok {
+		log.Printf("[DEBUG] Search for key rings using filter ?filter=%s", filter.(string))
+		url, err = transport_tpg.AddQueryParams(url, map[string]string{"filter": filter.(string)})
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	billingProject := ""
 
 	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
-		return fmt.Errorf("Error fetching project for keyRings: %s", err)
+		return nil, fmt.Errorf("Error fetching project for keyRings: %s", err)
 	}
 	billingProject = project
 
@@ -88,68 +127,32 @@ func dataSourceGoogleKmsKeyRingsRead(d *schema.ResourceData, meta interface{}) e
 		billingProject = bp
 	}
 
-	var keyRings []interface{}
-
-	params := make(map[string]string)
-	if filter, ok := d.GetOk("filter"); ok {
-		log.Printf("[DEBUG] Search for key rings using filter ?filter=%s", filter.(string))
-		params["filter"] = filter.(string)
-		if err != nil {
-			return err
-		}
-	}
-
-	url, err := tpgresource.ReplaceVars(d, config, "{{KMSBasePath}}projects/{{project}}/locations/{{location}}/keyRings")
+	headers := make(http.Header)
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   billingProject,
+		RawURL:    url,
+		UserAgent: userAgent,
+		Headers:   headers,
+	})
 	if err != nil {
-		return err
+		return nil, transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("KMSKeyRing %q", d.Id()))
 	}
 
-	for {
-		url, err = transport_tpg.AddQueryParams(url, params)
-		if err != nil {
-			return err
-		}
-
-		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-			Config:    config,
-			Method:    "GET",
-			Project:   billingProject,
-			RawURL:    url,
-			UserAgent: userAgent,
-		})
-		if err != nil {
-			return fmt.Errorf("Error retrieving buckets: %s", err)
-		}
-
-		if res["keyRings"] == nil {
-			break
-		}
-		pageKeyRings, err := flattenKMSKeyRingsList(config, res["keyRings"])
-		if err != nil {
-			return fmt.Errorf("error flattening key rings list: %s", err)
-		}
-		keyRings = append(keyRings, pageKeyRings...)
-
-		pToken, ok := res["nextPageToken"]
-		if ok && pToken != nil && pToken.(string) != "" {
-			params["pageToken"] = pToken.(string)
-		} else {
-			break
-		}
+	if res == nil {
+		// Decoding the object has resulted in it being gone. It may be marked deleted
+		log.Printf("[DEBUG] Removing KMSKeyRing because it no longer exists.")
+		d.SetId("")
+		return nil, nil
 	}
-
-	log.Printf("[DEBUG] Found %d key rings", len(keyRings))
-	if err := d.Set("key_rings", keyRings); err != nil {
-		return fmt.Errorf("error setting key rings: %s", err)
-	}
-
-	return nil
+	return res, nil
 }
 
 // flattenKMSKeyRingsList flattens a list of key rings
-func flattenKMSKeyRingsList(config *transport_tpg.Config, keyRingsList interface{}) ([]interface{}, error) {
+func flattenKMSKeyRingsList(d *schema.ResourceData, config *transport_tpg.Config, keyRingsList []interface{}) ([]interface{}, error) {
 	var keyRings []interface{}
-	for _, k := range keyRingsList.([]interface{}) {
+	for _, k := range keyRingsList {
 		keyRing := k.(map[string]interface{})
 
 		parsedId, err := parseKmsKeyRingId(keyRing["name"].(string), config)
