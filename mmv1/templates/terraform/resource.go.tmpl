@@ -109,6 +109,11 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 {{- end }}
 {{- if or (and (or $.HasProject $.HasRegion $.HasZone) (not $.SkipDefaultCdiff)) $.CustomDiff }}
         CustomizeDiff: customdiff.All(
+{{-   if $.UnorderedListProperties }}
+{{-     range $prop := $.UnorderedListProperties }}
+        resource{{ $.ResourceName }}{{ camelize $prop.Name "upper" }}SetStyleDiff,
+{{-     end}}
+{{-   end}}
 {{- if $.CustomDiff -}}
 {{-          range $cdiff := $.CustomDiff }}
         {{ $cdiff }},
