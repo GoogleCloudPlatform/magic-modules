@@ -668,8 +668,6 @@ func getLabelsFieldNote(title string) string {
 		title, title, title)
 }
 
-// get 
-
 func (r Resource) StateMigrationFile() string {
 	return fmt.Sprintf("templates/terraform/state_migrations/go/%s_%s.go.tmpl", google.Underscore(r.ProductMetadata.Name), google.Underscore(r.Name))
 }
