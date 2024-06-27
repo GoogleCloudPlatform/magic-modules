@@ -97,7 +97,8 @@ func (vt *Tester) FetchCassettes(version provider.Version, baseBranch, prNumber 
 	}
 	cassettePath = filepath.Join(vt.baseDir, "cassettes", version.String())
 	vt.rnr.Mkdir(cassettePath)
-	if baseBranch != "FEATURE-BRANCH-major-release-5.0.0" {
+	if baseBranch != "FEATURE-BRANCH-major-release-6.0.0" {
+		// pull main cassettes (major release uses branch specific casssettes as primary ones)
 		bucketPath := fmt.Sprintf("gs://ci-vcr-cassettes/%sfixtures/*", version.BucketPath())
 		if err := vt.fetchBucketPath(bucketPath, cassettePath); err != nil {
 			fmt.Println("Error fetching cassettes: ", err)

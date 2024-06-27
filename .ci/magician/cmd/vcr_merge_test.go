@@ -24,10 +24,10 @@ func TestExecVCRMerge(t *testing.T) {
 			calledMethods: []string{
 				"gsutil ls gs://ci-vcr-cassettes/refs/heads/auto-pr-123/fixtures/",
 				"gsutil -m cp gs://ci-vcr-cassettes/refs/heads/auto-pr-123/fixtures/* gs://ci-vcr-cassettes/fixtures/",
-				// "gsutil -m rm -r gs://ci-vcr-cassettes/refs/heads/auto-pr-123/",
+				"gsutil -m rm -r gs://ci-vcr-cassettes/refs/heads/auto-pr-123/",
 				"gsutil ls gs://ci-vcr-cassettes/beta/refs/heads/auto-pr-123/fixtures/",
 				"gsutil -m cp gs://ci-vcr-cassettes/beta/refs/heads/auto-pr-123/fixtures/* gs://ci-vcr-cassettes/beta/fixtures/",
-				// "gsutil -m rm -r gs://ci-vcr-cassettes/beta/refs/heads/auto-pr-123/",
+				"gsutil -m rm -r gs://ci-vcr-cassettes/beta/refs/heads/auto-pr-123/",
 			},
 		},
 		{
@@ -37,10 +37,10 @@ func TestExecVCRMerge(t *testing.T) {
 			calledMethods: []string{
 				"gsutil ls gs://ci-vcr-cassettes/refs/heads/auto-pr-123/fixtures/",
 				"gsutil -m cp gs://ci-vcr-cassettes/refs/heads/auto-pr-123/fixtures/* gs://ci-vcr-cassettes/refs/branches/test-branch/fixtures/",
-				// "gsutil -m rm -r gs://ci-vcr-cassettes/refs/heads/auto-pr-123/",
+				"gsutil -m rm -r gs://ci-vcr-cassettes/refs/heads/auto-pr-123/",
 				"gsutil ls gs://ci-vcr-cassettes/beta/refs/heads/auto-pr-123/fixtures/",
 				"gsutil -m cp gs://ci-vcr-cassettes/beta/refs/heads/auto-pr-123/fixtures/* gs://ci-vcr-cassettes/beta/refs/branches/test-branch/fixtures/",
-				// "gsutil -m rm -r gs://ci-vcr-cassettes/beta/refs/heads/auto-pr-123/",
+				"gsutil -m rm -r gs://ci-vcr-cassettes/beta/refs/heads/auto-pr-123/",
 			},
 		},
 		{

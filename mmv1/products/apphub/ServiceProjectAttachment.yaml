@@ -29,7 +29,7 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "service_project_attachment_basic"
-    pull_external: true
+    external_providers: ["random", "time"]
     primary_resource_id: "example"
     config_path: "templates/terraform/examples/apphub_service_project_attachment_basic.tf.erb"
     vars:
@@ -39,7 +39,7 @@ examples:
       host_project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
     name: "service_project_attachment_full"
-    pull_external: true
+    external_providers: ["random", "time"]
     primary_resource_id: "example2"
     config_path: "templates/terraform/examples/apphub_service_project_attachment_full.tf.erb"
     vars:

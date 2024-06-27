@@ -4,7 +4,7 @@ description: |-
   Creates a Google Kubernetes Engine (GKE) cluster.
 ---
 
-# google\_container\_cluster
+# google_container_cluster
 
 Manages a Google Kubernetes Engine (GKE) cluster.
 
@@ -291,6 +291,10 @@ region are guaranteed to support the same version.
 * `pod_security_policy_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for the
     [PodSecurityPolicy](https://cloud.google.com/kubernetes-engine/docs/how-to/pod-security-policies) feature.
     Structure is [documented below](#nested_pod_security_policy_config).
+
+* `secret_manager_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for the
+    [SecretManagerConfig](https://cloud.google.com/secret-manager/docs/secret-manager-managed-csi-component) feature.
+    Structure is [documented below](#nested_secret_manager_config).
 
 * `authenticator_groups_config` - (Optional) Configuration for the
     [Google Groups for GKE](https://cloud.google.com/kubernetes-engine/docs/how-to/role-based-access-control#groups-setup-gsuite) feature.
@@ -610,7 +614,7 @@ This block also contains several computed attributes, documented below.
 
 <a name="nested_monitoring_config"></a>The `monitoring_config` block supports:
 
-*  `enable_components` - (Optional) The GKE components exposing metrics. Supported values include: `SYSTEM_COMPONENTS`, `APISERVER`, `SCHEDULER`, `CONTROLLER_MANAGER`, `STORAGE`, `HPA`, `POD`, `DAEMONSET`, `DEPLOYMENT`, `STATEFULSET` and `DCGM`. In beta provider, `WORKLOADS` is supported on top of those 10 values. (`WORKLOADS` is deprecated and removed in GKE 1.24.)
+*  `enable_components` - (Optional) The GKE components exposing metrics. Supported values include: `SYSTEM_COMPONENTS`, `APISERVER`, `SCHEDULER`, `CONTROLLER_MANAGER`, `STORAGE`, `HPA`, `POD`, `DAEMONSET`, `DEPLOYMENT`, `STATEFULSET`, `KUBELET`, `CADVISOR` and `DCGM`. In beta provider, `WORKLOADS` is supported on top of those 12 values. (`WORKLOADS` is deprecated and removed in GKE 1.24.) `KUBELET` and `CADVISOR` are only supported in GKE 1.29.3-gke.1093000 and above.
 
 *  `managed_prometheus` - (Optional) Configuration for Managed Service for Prometheus. Structure is [documented below](#nested_managed_prometheus).
 
@@ -940,6 +944,8 @@ kubelet_config {
 
 * `linux_node_config` - (Optional) Parameters that can be configured on Linux nodes. Structure is [documented below](#nested_linux_node_config).
 
+* `containerd_config` - (Optional) Parameters to customize containerd runtime. Structure is [documented below](#nested_containerd_config).
+
 * `node_group` - (Optional) Setting this field will assign instances of this pool to run on the specified node group. This is useful for running workloads on [sole tenant nodes](https://cloud.google.com/compute/docs/nodes/sole-tenant-nodes).
 
 * `sole_tenant_config` (Optional)  Allows specifying multiple [node affinities](https://cloud.google.com/compute/docs/nodes/sole-tenant-nodes#node_affinity_and_anti-affinity) useful for running workloads on [sole tenant nodes](https://cloud.google.com/kubernetes-engine/docs/how-to/sole-tenancy). `node_affinity` structure is [documented below](#nested_node_affinity).
@@ -970,12 +976,6 @@ sole_tenant_config {
 * `threads_per_core` - (Required) The number of threads per physical core. To disable simultaneous multithreading (SMT) set this to 1. If unset, the maximum number of threads supported per core by the underlying processor is assumed.
 
 * `enable_nested_virtualization`- (Optional) Defines whether the instance should have nested virtualization enabled. Defaults to false.
-
-* `network_performance_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Network bandwidth tier configuration.
-
-<a name="network_performance_config"></a>The `network_performance_config` block supports:
-
-* `total_egress_bandwidth_tier` (Required) - Specifies the total network bandwidth tier for the NodePool.
 
 <a name="nested_ephemeral_storage_config"></a>The `ephemeral_storage_config` block supports:
 
@@ -1109,6 +1109,10 @@ notification_config {
 
 * `enabled` (Required) - Enable the PodSecurityPolicy controller for this cluster.
     If enabled, pods must be valid under a PodSecurityPolicy to be created.
+
+<a name="nested_secret_manager_config"></a>The `secret_manager_config` block supports:
+
+* `enabled` (Required) - Enable the Secret Manager add-on for this cluster.
 
 <a name="nested_private_cluster_config"></a>The `private_cluster_config` block supports:
 
@@ -1281,11 +1285,33 @@ linux_node_config {
     * `CGROUP_MODE_V1`: CGROUP_MODE_V1 specifies to use cgroupv1 for the cgroup configuration on the node image.
     * `CGROUP_MODE_V2`: CGROUP_MODE_V2 specifies to use cgroupv2 for the cgroup configuration on the node image.
 
+<a name="nested_containerd_config"></a>The `containerd_config` block supports:
+
+* `private_registry_access_config` (Optional) - Configuration for private container registries. There are two fields in this config:
+
+  * `enabled` (Required) - Enables private registry config. If set to false, all other fields in this object must not be set.
+
+  * `certificate_authority_domain_config` (Optional) - List of configuration objects for CA and domains. Each object identifies a certificate and its assigned domains. See [how to configure for private container registries](https://cloud.google.com/kubernetes-engine/docs/how-to/access-private-registries-private-certificates) for more detail. Example: 
+  ```hcl
+  certificate_authority_domain_config {
+    fqdns = [
+      "my.custom.domain",
+      "10.4.5.6",
+      "127.0.0.1:8888",
+    ]
+    gcp_secret_manager_certificate_config {
+      secret_uri = "projects/99999/secrets/my-ca-cert/versions/1"
+    }
+  }
+  ```
+
 <a name="nested_vertical_pod_autoscaling"></a>The `vertical_pod_autoscaling` block supports:
 
 * `enabled` (Required) - Enables vertical pod autoscaling
 
 <a name="nested_dns_config"></a>The `dns_config` block supports:
+
+* `additive_vpc_scope_dns_domain` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) This will enable Cloud DNS additive VPC scope. Must provide a domain name that is unique within the VPC. For this to work `cluster_dns = "CLOUD_DNS"` and `cluster_dns_scope = "CLUSTER_SCOPE"` must both be set as well.
 
 * `cluster_dns` - (Optional) Which in-cluster DNS provider should be used. `PROVIDER_UNSPECIFIED` (default) or `PLATFORM_DEFAULT` or `CLOUD_DNS`.
 
@@ -1309,7 +1335,9 @@ linux_node_config {
 
 <a name="nested_security_posture_config"></a>The `security_posture_config` block supports:
 
-* `mode` - (Optional) Sets the mode of the Kubernetes security posture API's off-cluster features. Available options include `DISABLED` and `BASIC`.
+**Note:** `ENTERPRISE` and `VULNERABILITY_ENTERPRISE` are only available for [GKE Enterprise](http://cloud/kubernetes-engine/enterprise/docs/concepts/overview) projects.  
+
+* `mode` - (Optional) Sets the mode of the Kubernetes security posture API's off-cluster features. Available options include `DISABLED`, `BASIC`, and `ENTERPRISE`.
 
 
 * `vulnerability_mode` - (Optional) Sets the mode of the Kubernetes security posture API's workload vulnerability scanning. Available options include `VULNERABILITY_DISABLED`, `VULNERABILITY_BASIC` and `VULNERABILITY_ENTERPRISE`.

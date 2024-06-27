@@ -560,11 +560,86 @@ var fieldRule_ShrinkingMaxTestCases = []fieldTestCase{
 	},
 }
 
+func TestFieldRule_AddingSubfieldToConfigModeAttr(t *testing.T) {
+	for _, tc := range fieldRule_AddingSubfieldToConfigModeAttrTestCases {
+		tc.check(fieldRule_AddingSubfieldToConfigModeAttr, t)
+	}
+}
+
+var fieldRule_AddingSubfieldToConfigModeAttrTestCases = []fieldTestCase{
+	{
+		name: "no new subfields",
+		oldField: &schema.Schema{
+			ConfigMode:  schema.SchemaConfigModeAttr,
+			Description: "beep",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"field_one": {},
+				},
+			},
+		},
+		newField: &schema.Schema{
+			ConfigMode:  schema.SchemaConfigModeAttr,
+			Description: "beep",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"field_one": {},
+				},
+			},
+		},
+		expectedViolation: false,
+	},
+	{
+		name: "adding a subfield with no SchemaConfigModeAttr",
+		oldField: &schema.Schema{
+			Description: "beep",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"field_one": {},
+				},
+			},
+		},
+		newField: &schema.Schema{
+			Description: "beep",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"field_one": {},
+					"field_two": {},
+				},
+			},
+		},
+		expectedViolation: false,
+	},
+	{
+		name: "adding a field with SchemaConfigModeAttr",
+		oldField: &schema.Schema{
+			ConfigMode:  schema.SchemaConfigModeAttr,
+			Description: "beep",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"field_one": {},
+				},
+			},
+		},
+		newField: &schema.Schema{
+			ConfigMode:  schema.SchemaConfigModeAttr,
+			Description: "beep",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"field_one": {},
+					"field_two": {},
+				},
+			},
+		},
+		expectedViolation: true,
+	},
+}
+
 func (tc *fieldTestCase) check(rule FieldRule, t *testing.T) {
 	breakage := rule.isRuleBreak(tc.oldField, tc.newField, MessageContext{})
 
-	violation := breakage != ""
-	if strings.Contains(breakage, "{{") {
+	violation := breakage != nil
+	if breakage != nil && strings.Contains(breakage.Message, "{{") {
 		t.Errorf("Test `%s` failed: replacements for `{{<val>}}` not successful ", tc.name)
 	}
 	if tc.expectedViolation != violation {
@@ -587,7 +662,7 @@ func TestBreakingMessage(t *testing.T) {
 		},
 	)
 
-	if !strings.Contains(breakageMessage, "Field `b` transitioned from optional+computed to optional `a`") {
+	if !strings.Contains(breakageMessage.Message, "Field `b` transitioned from optional+computed to optional `a`") {
 		t.Errorf("Test `%s` failed: replacements for `{{<val>}}` not successful ", "TestBreakingMessage")
 	}
 

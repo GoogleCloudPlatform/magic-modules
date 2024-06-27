@@ -438,7 +438,7 @@ properties:
       uptime checks:
       * `aws_ec2_instance`
       * `aws_elb_load_balancer`
-      * `gae_app
+      * `gae_app`
       * `gce_instance`
       * `k8s_service`
       * `servicedirectory_service`
@@ -462,6 +462,7 @@ properties:
         name: 'labels'
         immutable: true
         required: true
+        diff_suppress_func: resourceMonitoringUptimeCheckConfigMonitoredResourceLabelsDiffSuppress
         description:
           Values for all of the labels listed in the associated monitored
           resource descriptor. For example, Compute Engine VM instances use the
