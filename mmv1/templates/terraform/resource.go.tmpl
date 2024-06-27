@@ -98,10 +98,10 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 {{- if $.StateUpgraders }}
 
         StateUpgraders: []schema.StateUpgrader{
-{{-       range $v := $.SchemaVersions }}
+{{-       range $v := $.StateUpgradersCount }}
           {
-            Type:    resource{{$.PathType}}ResourceV{{$v}}().CoreConfigSchema().ImpliedType(),
-            Upgrade: Resource{{$.PathType}}UpgradeV{{$v}},
+            Type:    resource{{$.ResourceName}}ResourceV{{$v}}().CoreConfigSchema().ImpliedType(),
+            Upgrade: Resource{{$.ResourceName}}UpgradeV{{$v}},
             Version: {{$v}},
           },
 {{-       end }}
@@ -1204,4 +1204,6 @@ func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta
     {{- $.CustomTemplate $.CustomCode.PostCreateFailure false -}}
 }
 {{- end }}
-{{/* TODO state upgraders */}}
+{{- if and $.SchemaVersion $.StateUpgraders }}
+    {{ $.CustomTemplate $.StateMigrationFile false -}}
+{{- end }}
