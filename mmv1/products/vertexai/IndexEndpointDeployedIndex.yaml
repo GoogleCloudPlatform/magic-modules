@@ -13,10 +13,11 @@
 
 --- !ruby/object:Api::Resource
 name: IndexEndpointDeployedIndex
-base_url: projects/{{project}}/locations/{{region}}/indexEndpoints/
+base_url: 'projects/{{project}}/locations/{{region}}/indexEndpoints/{{index}}'
 create_url: projects/{{project}}/locations/{{region}}/indexEndpoints/{{index}}:deployIndex
-update_url: projects/{{project}}/locations/{{region}}/indexEndpoints/{{index}}:mutateDeployedIndex
-self_link: projects/{{project}}/locations/{{region}}/indexEndpoints/{{index}}
+update_url: 'projects/{{project}}/locations/{{region}}/indexEndpoints/{{index}}:mutateDeployedIndex'
+delete_url: 'projects/{{project}}/locations/{{region}}/indexEndpoints/{{index}}:undeployIndex'
+self_link: 'projects/{{project}}/locations/{{region}}/indexEndpoints/{{index}}'
 update_mask: true
 references: !ruby/object:Api::Resource::ReferenceLinks
   api: https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.indexEndpoints#DeployedIndex
@@ -73,6 +74,10 @@ autogen_async: false
 #     primary_resource_id: "index_endpoint"
 #     test_vars_overrides:
 #       network_name: 'acctest.BootstrapSharedTestNetwork(t, "vertex-ai-index-endpoint")'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  encoder: templates/terraform/encoders/vertex_ai_index_endpoint_deployed_index.go.erb
+  decoder: templates/terraform/decoders/vertex_ai_index_endpoint_deployed_index.go.erb
+  pre_delete: templates/terraform/pre_delete/vertex_ai_index_endpoint_deployed_index.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: region
@@ -80,12 +85,16 @@ parameters:
     url_param_only: true
     immutable: true
 properties:
-  # Intentionally deployedIndexes[] is not included because it's an output-only field and another terraform resource will manage a deployed index.
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    api_name: 'id'
+    description: The name of the deployed index.
+    required: true
   - !ruby/object:Api::Type::String
     name: 'index'
     description: The name of the Index this is the deployment of.
     required: true
-    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+    custom_expand: templates/terraform/custom_expand/vertex_ai_endpoint_deployed_index.go.erb
   - !ruby/object:Api::Type::String
     name: 'displayName'
     description: The display name of the Index. The name can be up to 128 characters long and can consist of any UTF-8 characters.

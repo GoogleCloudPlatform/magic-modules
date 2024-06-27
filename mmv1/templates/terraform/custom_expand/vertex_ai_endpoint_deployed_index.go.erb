@@ -1,0 +1,7 @@
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+    indexEndpoint, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{region}}/indexes/{{index}}")
+    	if err != nil {
+    		return nil, err
+    	}
+    return indexEndpoint, nil
+}

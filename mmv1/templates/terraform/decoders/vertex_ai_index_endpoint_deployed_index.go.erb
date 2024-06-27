@@ -1,0 +1,18 @@
+// res["name"] = res["id"]
+// delete("id",res)
+v, ok := res["deployedIndexes"]
+if !ok || v == nil {
+	return res, nil
+}
+dpIndex := make(map[string]interface{})
+for _, v := range v.([]interface{}) {
+	dpI := v.(map[string]interface{})
+	if dpI["id"] == d.Get("name") {
+		dpIndex = dpI
+		break
+	}
+}
+if dpIndex == nil {
+	return nil, fmt.Errorf("Error: Deployment Index not Found")
+}
+return dpIndex, nil
