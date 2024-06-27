@@ -16,7 +16,7 @@ updateMask := []string{}
 {{- range $key := $.GetPropertyUpdateMasksGroupKeys $.UpdateBodyProperties }}
 
 if d.HasChange("{{ $key }}") {
-  updateMask = append(updateMask, "{{ join (index $maskGroups $key) "\",\""}}")
+  updateMask = append(updateMask, "{{ join (index $maskGroups $key) "\",\n\""}}")
 }
 {{- end }}
 // updateMask is a URL parameter but not present in the schema, so ReplaceVars
