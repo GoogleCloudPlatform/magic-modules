@@ -227,9 +227,9 @@ update_policy {
 
 * `type` - (Required) - The type of update process. You can specify either `PROACTIVE` so that the instance group manager proactively executes actions in order to bring instances to their target versions or `OPPORTUNISTIC` so that no action is proactively executed but the update will be performed as part of other actions (for example, resizes or recreateInstances calls).
 
-* `max_surge_fixed` - (Optional), Specifies a fixed number of VM instances. This must be a positive integer.
+* `max_surge_fixed` - (Optional), Specifies a fixed number of VM instances. This must be a positive integer. Conflicts with max_surge_percent. If neither is set, defaults to 1.
 
-* `max_surge_percent` - (Optional), Specifies a percentage of instances between 0 to 100%, inclusive. For example, specify 80 for 80%.
+* `max_surge_percent` - (Optional), Specifies a percentage of instances between 0 to 100%, inclusive. For example, specify 80 for 80%. Conflicts with max_surge_fixed.
 
 * `max_unavailable_fixed` - (Optional), Specifies a fixed number of VM instances. This must be a positive integer.
 
