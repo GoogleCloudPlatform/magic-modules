@@ -1,4 +1,3 @@
-# [START storage_create_lifecycle_setting_tf]
 resource "google_storage_bucket" "{{$.PrimaryResourceId}}" {
   provider      = google-beta
   name          = "{{index $.Vars "example_bucket"}}"
@@ -14,4 +13,3 @@ resource "google_storage_bucket" "{{$.PrimaryResourceId}}" {
     }
   }
 }
-# [END storage_create_lifecycle_setting_tf]

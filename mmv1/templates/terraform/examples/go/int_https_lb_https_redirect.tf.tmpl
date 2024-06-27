@@ -1,6 +1,5 @@
 # Internal HTTPS load balancer with HTTP-to-HTTPS redirect
 
-# [START cloudloadbalancing_int_https_with_redirect]
 
 # VPC network
 resource "google_compute_network" "default" {
@@ -88,7 +87,7 @@ resource "google_compute_region_ssl_certificate" "default" {
   name_prefix = "my-certificate-"
   private_key = tls_private_key.default.private_key_pem
   certificate = tls_self_signed_cert.default.cert_pem
-  region      = "europe-west1" 
+  region      = "europe-west1"
   lifecycle {
     create_before_destroy = true
   }
@@ -283,4 +282,3 @@ resource "google_compute_region_url_map" "{{$.PrimaryResourceId}}" {
     }
   }
 }
-# [END cloudloadbalancing_int_https_with_redirect]
