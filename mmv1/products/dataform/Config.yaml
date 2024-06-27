@@ -1,0 +1,50 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: Config
+base_url: projects/{{project}}/locations/{{region}}/config
+create_url: projects/{{project}}/locations/{{region}}/config
+update_verb: :PATCH
+min_version: beta
+description: |-
+  A singleton resource represents a Dataform configuration for project location.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  api: 'https://cloud.google.com/dataform/reference/rest/v1beta1/projects.locations.config'
+id_format: projects/{{project}}/locations/{{region}}/config
+import_format:
+  ['projects/{{project}}/locations/{{region}}/config']
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'dataform_config'
+    primary_resource_id: dataform_config
+    min_version: beta
+    vars:
+      region: 'us-central1'
+parameters:
+  - !ruby/object:Api::Type::String
+    name: 'region'
+    description: 'A reference to the region'
+    immutable: true
+    url_param_only: true
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description: The config's name.
+    immutable: true
+    required: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+  - !ruby/object:Api::Type::String
+    name: 'defaultKmsKeyName'
+    description:
+      Optional. The customer managed KMS key that will be used as default for encryption of user data.
