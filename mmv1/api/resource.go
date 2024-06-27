@@ -593,9 +593,6 @@ func buildEffectiveLabelsField(name string, labels *Type) *Type {
 		"including the %s configured through Terraform, other clients and services.", name, name)
 
 	t := "KeyValueEffectiveLabels"
-	if name == "annotations" {
-		t = "KeyValueEffectiveAnnotations"
-	}
 
 	n := fmt.Sprintf("effective%s", strings.Title(name))
 
