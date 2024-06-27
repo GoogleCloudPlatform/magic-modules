@@ -34,9 +34,9 @@ async: !ruby/object:Api::OpAsync
     path: 'status'
     complete: 'DONE'
     allowed:
-    - 'PENDING'
-    - 'RUNNING'
-    - 'DONE'
+      - 'PENDING'
+      - 'RUNNING'
+      - 'DONE'
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
@@ -44,48 +44,48 @@ async: !ruby/object:Api::OpAsync
 description: The NetworkConnectivity Hub resource
 parameters: []
 properties:
-- !ruby/object:Api::Type::String
-  name: name
-  description: 'Immutable. The name of the hub. Hub names must be unique. They use the following form: `projects/{project_number}/locations/global/hubs/{hub_id}`'
-  default_from_api: true
-  diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-  required: true
-  immutable: true
-- !ruby/object:Api::Type::String
-  name: createTime
-  description: Output only. The time the hub was created.
-  output: true
-- !ruby/object:Api::Type::String
-  name: updateTime
-  description: Output only. The time the hub was last updated.
-  output: true
-- !ruby/object:Api::Type::KeyValueLabels
-  name: labels
-  description: Optional labels in key:value format. For more information about labels, see [Requirements for labels](https://cloud.google.com/resource-manager/docs/creating-managing-labels#requirements).
-- !ruby/object:Api::Type::String
-  name: description
-  description: An optional description of the hub.
-- !ruby/object:Api::Type::String
-  name: uniqueId
-  description: Output only. The Google-generated UUID for the hub. This value is unique across all hub resources. If a hub is deleted and another with the same name is created, the new hub is assigned a different unique_id.
-  output: true
-- !ruby/object:Api::Type::String
-  name: state
-  description: Output only. The current lifecycle state of this hub.
-  output: true
-  exactly_one_of:
-  - STATE_UNSPECIFIED
-  - CREATING
-  - ACTIVE
-  - DELETING
-  default_value: null
-- !ruby/object:Api::Type::Array
-  name: routingVpcs
-  description: The VPC network associated with this hub's spokes. All of the VPN tunnels, VLAN attachments, and router appliance instances referenced by this hub's spokes must belong to this VPC network. This field is read-only. Network Connectivity Center automatically populates it based on the set of spokes attached to the hub.
-  output: true
-  item_type: !ruby/object:Api::Type::NestedObject
+  - !ruby/object:Api::Type::String
+    name: name
+    description: 'Immutable. The name of the hub. Hub names must be unique. They use the following form: `projects/{project_number}/locations/global/hubs/{hub_id}`'
+    default_from_api: true
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+    required: true
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: createTime
+    description: Output only. The time the hub was created.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: updateTime
+    description: Output only. The time the hub was last updated.
+    output: true
+  - !ruby/object:Api::Type::KeyValueLabels
+    name: labels
+    description: Optional labels in key:value format. For more information about labels, see [Requirements for labels](https://cloud.google.com/resource-manager/docs/creating-managing-labels#requirements).
+  - !ruby/object:Api::Type::String
+    name: description
+    description: An optional description of the hub.
+  - !ruby/object:Api::Type::String
+    name: uniqueId
+    description: Output only. The Google-generated UUID for the hub. This value is unique across all hub resources. If a hub is deleted and another with the same name is created, the new hub is assigned a different unique_id.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: state
+    description: Output only. The current lifecycle state of this hub.
+    output: true
+    exactly_one_of:
+      - STATE_UNSPECIFIED
+      - CREATING
+      - ACTIVE
+      - DELETING
+    default_value: null
+  - !ruby/object:Api::Type::Array
+    name: routingVpcs
+    description: The VPC network associated with this hub's spokes. All of the VPN tunnels, VLAN attachments, and router appliance instances referenced by this hub's spokes must belong to this VPC network. This field is read-only. Network Connectivity Center automatically populates it based on the set of spokes attached to the hub.
+    output: true
+    item_type: !ruby/object:Api::Type::NestedObject
     name: HubRoutingVpcs
     properties:
-    - !ruby/object:Api::Type::String
-      name: uri
-      description: The URI of the VPC network.
+      - !ruby/object:Api::Type::String
+        name: uri
+        description: The URI of the VPC network.
