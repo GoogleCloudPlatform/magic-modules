@@ -50,6 +50,7 @@ async:
 collection_url_key: 'items'
 custom_code:
   extra_schema_entry: 'templates/terraform/extra_schema_entry/go/ssl_certificate.tmpl'
+  constants: 'templates/terraform/constants/go/compute_certificate.go.tmpl'
 examples:
   - name: 'region_ssl_certificate_basic'
     primary_resource_id: 'default'

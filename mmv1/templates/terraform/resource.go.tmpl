@@ -149,8 +149,10 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
             },
 {{-   end}}
 {{- end}}
-{{/* TODO Q2 function to compile custom code lines ($.CustomCode.extra_schema_entry) */}}
-{{- if $.HasProject -}}
+{{- if $.CustomCode.ExtraSchemaEntry }} 
+    {{ $.CustomTemplate $.CustomCode.ExtraSchemaEntry false -}}
+{{- end}}
+{{ if $.HasProject -}}
             "project": {
                 Type:     schema.TypeString,
                 Optional: true,
@@ -609,7 +611,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
 {{- range $prop := $.VirtualFields }}
 {{      if not (eq $prop.DefaultValue nil) -}}
     if _, ok := d.GetOkExists("{{ $prop.Name -}}"); !ok {
-        if err := d.Set("{{ $prop.Name -}}", {{ $prop.DefaultValue -}}); err != nil {
+        if err := d.Set("{{ $prop.Name -}}", {{ $prop.GoLiteral $prop.DefaultValue -}}); err != nil {
             return fmt.Errorf("Error setting {{ $prop.Name -}}: %s", err)
         }
     }
@@ -829,7 +831,7 @@ if len(updateMask) > 0 {
 {{-         end}}{{/*if not immutable*/}}
 {{-          if $.FieldSpecificUpdateMethods }}
     d.Partial(true)
-{{             $CustomUpdateProps := $.PropertiesByCustomUpdate }}
+{{             $CustomUpdateProps := $.PropertiesByCustomUpdate $.RootProperties }}
 {{             range $group := $.PropertiesByCustomUpdateGroups }}
 if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $group)) "\") || d.HasChange(\""}}") {
         obj := make(map[string]interface{})
@@ -869,7 +871,7 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
         obj["{{ $group.FingerprintName }}"] = getRes["{{ $group.FingerprintName }}"]
 
 {{                  end  }}{{/*if FingerprintName*/}}
-{{                  range $propsByKey := $.CustomUpdatePropertiesByKey $group.UpdateUrl $group.UpdateId $group.FingerprintName $group.UpdateVerb }}
+{{                  range $propsByKey := $.CustomUpdatePropertiesByKey $.AllUserProperties $group.UpdateUrl $group.UpdateId $group.FingerprintName $group.UpdateVerb }}
         {{ $propsByKey.ApiName -}}Prop, err := expand{{ if $.NestedQuery -}}Nested{{ end }}{{ $.ResourceName -}}{{ camelize $propsByKey.Name "upper"  -}}({{ if $propsByKey.FlattenObject }}nil{{else}}d.Get("{{underscore $propsByKey.Name}}"){{ end }}, d, config)
         if err != nil {
             return err
@@ -1150,7 +1152,7 @@ func resource{{ $.ResourceName }}Import(d *schema.ResourceData, meta interface{}
     // Explicitly set virtual fields to default values on import
             {{- range $vf := $.VirtualFields }}
                 {{- if not (eq $vf.DefaultValue nil) }}
-    if err := d.Set("{{ $vf.Name }}", {{ $vf.DefaultValue }}); err != nil {
+    if err := d.Set("{{ $vf.Name }}", {{ $vf.GoLiteral $vf.DefaultValue }}); err != nil {
         return nil, fmt.Errorf("Error setting {{ $vf.Name }}: %s", err)
     }
                 {{- end }}

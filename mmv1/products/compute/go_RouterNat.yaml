@@ -448,7 +448,7 @@ properties:
       If `PRIVATE` NAT used for private IP translation.
     min_version: 'beta'
     immutable: true
-    default_value: PUBLIC
+    default_value: "PUBLIC"
     enum_values:
       - 'PUBLIC'
       - 'PRIVATE'

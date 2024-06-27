@@ -107,7 +107,7 @@ properties:
     description: |
       The request path of the HTTP health check request.
       The default value is /.
-    default_value: /
+    default_value: "/"
   - name: 'timeoutSec'
     type: Integer
     description: |

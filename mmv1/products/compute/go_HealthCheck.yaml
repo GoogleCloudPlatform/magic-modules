@@ -213,7 +213,7 @@ properties:
           - 'http_health_check.0.port_name'
           - 'http_health_check.0.proxy_header'
           - 'http_health_check.0.port_specification'
-        default_value: /
+        default_value: "/"
       - name: 'response'
         type: String
         description: |
@@ -267,7 +267,7 @@ properties:
           - 'http_health_check.0.port_name'
           - 'http_health_check.0.proxy_header'
           - 'http_health_check.0.port_specification'
-        default_value: NONE
+        default_value: "NONE"
         enum_values:
           - 'NONE'
           - 'PROXY_V1'
@@ -338,7 +338,7 @@ properties:
           - 'https_health_check.0.port_name'
           - 'https_health_check.0.proxy_header'
           - 'https_health_check.0.port_specification'
-        default_value: /
+        default_value: "/"
       - name: 'response'
         type: String
         description: |
@@ -392,7 +392,7 @@ properties:
           - 'https_health_check.0.port_name'
           - 'https_health_check.0.proxy_header'
           - 'https_health_check.0.port_specification'
-        default_value: NONE
+        default_value: "NONE"
         enum_values:
           - 'NONE'
           - 'PROXY_V1'
@@ -499,7 +499,7 @@ properties:
           - 'tcp_health_check.0.port_name'
           - 'tcp_health_check.0.proxy_header'
           - 'tcp_health_check.0.port_specification'
-        default_value: NONE
+        default_value: "NONE"
         enum_values:
           - 'NONE'
           - 'PROXY_V1'
@@ -605,7 +605,7 @@ properties:
           - 'ssl_health_check.0.port_name'
           - 'ssl_health_check.0.proxy_header'
           - 'ssl_health_check.0.port_specification'
-        default_value: NONE
+        default_value: "NONE"
         enum_values:
           - 'NONE'
           - 'PROXY_V1'
@@ -675,7 +675,7 @@ properties:
           - 'http2_health_check.0.port_name'
           - 'http2_health_check.0.proxy_header'
           - 'http2_health_check.0.port_specification'
-        default_value: /
+        default_value: "/"
       - name: 'response'
         type: String
         description: |
@@ -729,7 +729,7 @@ properties:
           - 'http2_health_check.0.port_name'
           - 'http2_health_check.0.proxy_header'
           - 'http2_health_check.0.port_specification'
-        default_value: NONE
+        default_value: "NONE"
         enum_values:
           - 'NONE'
           - 'PROXY_V1'
