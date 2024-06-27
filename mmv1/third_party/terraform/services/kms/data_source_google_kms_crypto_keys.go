@@ -65,6 +65,9 @@ func dataSourceGoogleKmsCryptoKeysRead(d *schema.ResourceData, meta interface{})
 	}
 
 	id := fmt.Sprintf("%s/cryptoKeys", keyRingId.KeyRingId())
+	if filter, ok := d.GetOk("filter"); ok {
+		id += "/filter=" + filter.(string)
+	}
 	d.SetId(id)
 
 	log.Printf("[DEBUG] Searching for keys in key ring %s", keyRingId.KeyRingId())
