@@ -11,11 +11,6 @@ provider "google" {
   {{if .Provider.credentials }}credentials = "{{.Provider.credentials}}"{{end}}
 }
 
-resource "google_app_engine_application" "my_app_v1" {
-  project  = "{{.Provider.project}}"
-  location_id = "us-central"
-}
-
 resource "google_app_engine_standard_app_version" "my_app_v1" {
   version_id = "v1"
   service    = "default"
