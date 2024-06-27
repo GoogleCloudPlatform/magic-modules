@@ -68,6 +68,7 @@ func execWaitForCommit(syncBranchPrefix, baseBranch, sha string, runner source.R
 		}
 		fmt.Println("sync branch is at: ", syncHead)
 		fmt.Println("current commit is: ", sha)
+
 		if _, err := runner.Run("git", []string{"fetch", "origin", syncBranch}, nil); err != nil {
 			return err
 		}
