@@ -71,14 +71,12 @@ func dataSourceGoogleKmsCryptoKeysRead(d *schema.ResourceData, meta interface{})
 	d.SetId(id)
 
 	log.Printf("[DEBUG] Searching for keys in key ring %s", keyRingId.KeyRingId())
-	res, err := dataSourceKMSCryptoKeysList(d, meta, keyRingId.KeyRingId())
+	keys, err := dataSourceKMSCryptoKeysList(d, meta, keyRingId.KeyRingId())
 	if err != nil {
 		return err
 	}
 
-	// Check for cryptoKeys field, as empty response lacks keys
-	// If found, set data in the data source's `keys` field
-	if keys, ok := res["cryptoKeys"].([]interface{}); ok {
+	if len(keys) > 0 {
 		log.Printf("[DEBUG] Found %d keys in key ring %s", len(keys), keyRingId.KeyRingId())
 		value, err := flattenKMSKeysList(d, config, keys, keyRingId.KeyRingId())
 		if err != nil {
@@ -94,7 +92,10 @@ func dataSourceGoogleKmsCryptoKeysRead(d *schema.ResourceData, meta interface{})
 	return nil
 }
 
-func dataSourceKMSCryptoKeysList(d *schema.ResourceData, meta interface{}, keyRingId string) (map[string]interface{}, error) {
+// dataSourceKMSCryptoKeysList calls the list endpoint for Crypto Key resources and collects all keys in a slice.
+// This function handles pagination by collecting the resources returned by multiple calls to the list endpoint.
+// This function also handles server-side filtering by setting the filter query parameter on each API call.
+func dataSourceKMSCryptoKeysList(d *schema.ResourceData, meta interface{}, keyRingId string) ([]interface{}, error) {
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -104,14 +105,6 @@ func dataSourceKMSCryptoKeysList(d *schema.ResourceData, meta interface{}, keyRi
 	url, err := tpgresource.ReplaceVars(d, config, "{{KMSBasePath}}{{key_ring}}/cryptoKeys")
 	if err != nil {
 		return nil, err
-	}
-
-	if filter, ok := d.GetOk("filter"); ok {
-		log.Printf("[DEBUG] Search for keys in key ring %s is using filter ?filter=%s", keyRingId, filter.(string))
-		url, err = transport_tpg.AddQueryParams(url, map[string]string{"filter": filter.(string)})
-		if err != nil {
-			return nil, err
-		}
 	}
 
 	billingProject := ""
@@ -125,26 +118,56 @@ func dataSourceKMSCryptoKeysList(d *schema.ResourceData, meta interface{}, keyRi
 		billingProject = bp
 	}
 
-	headers := make(http.Header)
-	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:    config,
-		Method:    "GET",
-		Project:   billingProject,
-		RawURL:    url,
-		UserAgent: userAgent,
-		Headers:   headers,
-	})
-	if err != nil {
-		return nil, transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("KMSCryptoKeys %q", d.Id()))
+	// Always include the filter param, and optionally include the pageToken parameter for subsequent requests
+	var params = make(map[string]string, 0)
+	if filter, ok := d.GetOk("filter"); ok {
+		log.Printf("[DEBUG] Search for keys in key ring %s is using filter ?filter=%s", keyRingId, filter.(string))
+		params["filter"] = filter.(string)
 	}
 
-	if res == nil {
-		// Decoding the object has resulted in it being gone. It may be marked deleted
-		log.Printf("[DEBUG] Removing KMSCryptoKey because it no longer exists.")
-		d.SetId("")
-		return nil, nil
+	cryptoKeys := make([]interface{}, 0)
+	for {
+		// Depending on previous iterations, params might contain a pageToken param
+		url, err = transport_tpg.AddQueryParams(url, params)
+		if err != nil {
+			return nil, err
+		}
+
+		headers := make(http.Header)
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   billingProject,
+			RawURL:    url,
+			UserAgent: userAgent,
+			Headers:   headers,
+		})
+		if err != nil {
+			return nil, transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("KMSCryptoKeys %q", d.Id()))
+		}
+
+		if res == nil {
+			// Decoding the object has resulted in it being gone. It may be marked deleted
+			log.Printf("[DEBUG] Removing KMSCryptoKey because it no longer exists.")
+			d.SetId("")
+			return nil, nil
+		}
+
+		// Store info from this page
+		if v, ok := res["cryptoKeys"].([]interface{}); ok {
+			cryptoKeys = append(cryptoKeys, v...)
+		}
+
+		// Handle pagination for next loop, or break loop
+		v, ok := res["nextPageToken"]
+		if ok {
+			params["pageToken"] = v.(string)
+		}
+		if !ok {
+			break
+		}
 	}
-	return res, nil
+	return cryptoKeys, nil
 }
 
 // flattenKMSKeysList flattens a list of crypto keys from a given crypto key ring
@@ -152,7 +175,6 @@ func flattenKMSKeysList(d *schema.ResourceData, config *transport_tpg.Config, ke
 	var keys []interface{}
 	for _, k := range keysList {
 		key := k.(map[string]interface{})
-
 		parsedId, err := ParseKmsCryptoKeyId(key["name"].(string), config)
 		if err != nil {
 			return nil, err
