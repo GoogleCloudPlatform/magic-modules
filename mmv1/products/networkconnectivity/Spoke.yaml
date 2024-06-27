@@ -125,25 +125,25 @@ properties:
         required: true
         immutable: true
         item_type: !ruby/object:Api::Type::NestedObject
-        name: instance
-        description: The list of router appliance instances
-        properties:
-          - !ruby/object:Api::Type::String
-            name: virtualMachine
-            description: The URI of the virtual machine resource
-            min_version: ga
-            immutable: true
-          - !ruby/object:Api::Type::String
-            name: ipAddress
-            description: The IP address on the VM to use for peering.
-            min_version: ga
-            immutable: true
-    - !ruby/object:Api::Type::Boolean
-      name: siteToSiteDataTransfer
-      description: A value that controls whether site-to-site data transfer is enabled for these resources. Note that data transfer is available only in supported locations.
-      min_version: ga
-      required: true
-      immutable: true
+          name: instance
+          description: The list of router appliance instances
+          properties:
+            - !ruby/object:Api::Type::String
+              name: virtualMachine
+              description: The URI of the virtual machine resource
+              min_version: ga
+              immutable: true
+            - !ruby/object:Api::Type::String
+              name: ipAddress
+              description: The IP address on the VM to use for peering.
+              min_version: ga
+              immutable: true
+   - !ruby/object:Api::Type::Boolean
+     name: siteToSiteDataTransfer
+     description: A value that controls whether site-to-site data transfer is enabled for these resources. Note that data transfer is available only in supported locations.
+     min_version: ga
+     required: true
+     immutable: true
   - !ruby/object:Api::Type::NestedObject
     name: linkedVpcNetwork
     description: VPC network that is associated with the spoke.
