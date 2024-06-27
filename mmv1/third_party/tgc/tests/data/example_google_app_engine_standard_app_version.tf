@@ -24,5 +24,5 @@ resource "google_app_engine_standard_app_version" "my_app_v1" {
     zip {
       source_url = "https://storage.googleapis.com/bucket-app-engine/world.zip"
     }
-  }
+  } 
 }
