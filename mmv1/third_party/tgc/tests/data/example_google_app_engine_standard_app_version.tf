@@ -12,7 +12,6 @@ provider "google" {
 }
 
 resource "google_app_engine_application" "my_app_v1" {
-  project  = "{{.Provider.project}}"
   location_id = "us-central"
 }
 
