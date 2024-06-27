@@ -172,9 +172,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 }
 
 {{- range $prop := $.AllUserProperties }}
-{{if and (eq $prop.Type "Array") ($prop.IsSet) (eq $prop.ItemType.Type "NestedObject")}}
 {{template "SchemaSubResource" $prop}}
-{{end}}
 {{- end}}
 
 {{- range $prop := $.UnorderedListProperties }}
