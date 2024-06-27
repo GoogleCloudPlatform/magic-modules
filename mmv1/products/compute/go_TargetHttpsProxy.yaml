@@ -120,7 +120,7 @@ properties:
     update_url: 'projects/{{project}}/global/targetHttpsProxies/{{name}}/setQuicOverride'
     update_verb: 'POST'
     custom_flatten: 'templates/terraform/custom_flatten/go/default_if_empty.tmpl'
-    default_value: NONE
+    default_value: "NONE"
     enum_values:
       - 'NONE'
       - 'ENABLE'

@@ -65,8 +65,8 @@ async:
     path: 'error/errors'
     message: 'message'
 collection_url_key: 'items'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/compute_managed_ssl_certificate.go.erb
+custom_code:
+  constants: 'templates/terraform/constants/go/compute_managed_ssl_certificate.go.tmpl'
 examples:
   - name: 'managed_ssl_certificate_basic'
     primary_resource_id: 'default'
@@ -130,7 +130,7 @@ properties:
     description: |
       Enum field whose value is always `MANAGED` - used to signal to the API
       which type this is.
-    default_value: MANAGED
+    default_value: "MANAGED"
     enum_values:
       - 'MANAGED'
   - name: 'subjectAlternativeNames'

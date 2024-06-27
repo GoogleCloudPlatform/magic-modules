@@ -300,7 +300,7 @@ properties:
       attachment must be created with this option.
     immutable: true
     custom_flatten: 'templates/terraform/custom_flatten/go/default_if_empty.tmpl'
-    default_value: NONE
+    default_value: "NONE"
     enum_values:
       - 'NONE'
       - 'IPSEC'

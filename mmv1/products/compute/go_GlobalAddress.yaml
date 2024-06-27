@@ -130,7 +130,7 @@ properties:
       * EXTERNAL indicates public/external single IP address.
       * INTERNAL indicates internal IP ranges belonging to some network.
     diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("EXTERNAL")'
-    default_value: EXTERNAL
+    default_value: "EXTERNAL"
     enum_values:
       - 'EXTERNAL'
       - 'INTERNAL'
