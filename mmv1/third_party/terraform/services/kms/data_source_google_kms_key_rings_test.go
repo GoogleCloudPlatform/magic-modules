@@ -14,15 +14,18 @@ func TestAccDataSourceGoogleKmsKeyRings_basic(t *testing.T) {
 	kms := acctest.BootstrapKMSKey(t)
 	idPath := strings.Split(kms.KeyRing.Name, "/")
 	location := idPath[3]
+	randomString := acctest.RandString(t, 10)
+	filterNameFindSharedKeys := "name:tftest-shared-"
+	filterNameFindsNoKeys := fmt.Sprintf("name:%s", randomString)
+
 	keyRingsID := fmt.Sprintf("projects/%s/locations/%s/keyRings", idPath[1], location)
+	findSharedKeysId := fmt.Sprintf("%s/filter=%s", keyRingsID, filterNameFindSharedKeys)
+	findsNoKeysId := fmt.Sprintf("%s/filter=%s", keyRingsID, filterNameFindsNoKeys)
+
 	context := map[string]interface{}{
 		"filter":   "", // Can be overridden using 2nd argument to config funcs
 		"location": location,
 	}
-
-	randomString := acctest.RandString(t, 10)
-	filterNameFindSharedKeyRings := "filter = \"name:tftest-shared-\""
-	filterNameFindsNoKeyRings := fmt.Sprintf("filter = \"name:%s\"", randomString)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -36,18 +39,18 @@ func TestAccDataSourceGoogleKmsKeyRings_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceGoogleKmsKeyRings_basic(context, filterNameFindSharedKeyRings),
+				Config: testAccDataSourceGoogleKmsKeyRings_basic(context, fmt.Sprintf("filter = \"%s\"", filterNameFindSharedKeys)),
 				Check: resource.ComposeTestCheckFunc(
 					// This filter should retrieve the bootstrapped KMS key rings used by the test
-					resource.TestCheckResourceAttr("data.google_kms_key_rings.all_key_rings", "id", keyRingsID),
+					resource.TestCheckResourceAttr("data.google_kms_key_rings.all_key_rings", "id", findSharedKeysId),
 					resource.TestMatchResourceAttr("data.google_kms_key_rings.all_key_rings", "key_rings.#", regexp.MustCompile("[1-9]+[0-9]*")),
 				),
 			},
 			{
-				Config: testAccDataSourceGoogleKmsKeyRings_basic(context, filterNameFindsNoKeyRings),
+				Config: testAccDataSourceGoogleKmsKeyRings_basic(context, fmt.Sprintf("filter = \"%s\"", filterNameFindsNoKeys)),
 				Check: resource.ComposeTestCheckFunc(
 					// This filter should retrieve no keys
-					resource.TestCheckResourceAttr("data.google_kms_key_rings.all_key_rings", "id", keyRingsID),
+					resource.TestCheckResourceAttr("data.google_kms_key_rings.all_key_rings", "id", findsNoKeysId),
 					resource.TestCheckResourceAttr("data.google_kms_key_rings.all_key_rings", "key_rings.#", "0"),
 				),
 			},

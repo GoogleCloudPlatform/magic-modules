@@ -66,6 +66,10 @@ func dataSourceGoogleKmsKeyRingsRead(d *schema.ResourceData, meta interface{}) e
 	if err != nil {
 		return err
 	}
+
+	if filter, ok := d.GetOk("filter"); ok {
+		id += "/filter=" + filter.(string)
+	}
 	d.SetId(id)
 
 	log.Printf("[DEBUG] Searching for keyrings")
@@ -124,6 +128,8 @@ func dataSourceGoogleKmsKeyRingsList(d *schema.ResourceData, meta interface{}) (
 	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
+
+	d.Set("project", billingProject)
 
 	headers := make(http.Header)
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
