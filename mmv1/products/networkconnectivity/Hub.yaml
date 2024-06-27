@@ -84,8 +84,8 @@ properties:
     description: The VPC network associated with this hub's spokes. All of the VPN tunnels, VLAN attachments, and router appliance instances referenced by this hub's spokes must belong to this VPC network. This field is read-only. Network Connectivity Center automatically populates it based on the set of spokes attached to the hub.
     output: true
     item_type: !ruby/object:Api::Type::NestedObject
-               name: HubRoutingVpcs
-               properties:
-                 - !ruby/object:Api::Type::String
-                   name: uri
-                   description: The URI of the VPC network.
+      name: HubRoutingVpcs
+      properties:
+        - !ruby/object:Api::Type::String
+          name: uri
+          description: The URI of the VPC network.
