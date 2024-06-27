@@ -58,7 +58,7 @@ if d.Get("service_level").(string) == "FLEX" {
 					return err
 				}
 			} else {
-				return fmt.Errorf("Incorrect zone change for pool: %s. Supported Zones are : %s, %s", d.Id(), oldZone, oldReplicaZone)
+				return fmt.Errorf("Incorrect zone change for pool: %s. Supported zone, replica_zone are : %s, %s", d.Id(), oldZone, oldReplicaZone)
 			}
 		}
 	}
