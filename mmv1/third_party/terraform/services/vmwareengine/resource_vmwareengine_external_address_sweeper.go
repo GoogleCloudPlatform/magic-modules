@@ -65,7 +65,7 @@ func testSweepVmwareengineExternalAddress(region string) error {
 		}
 		for _, parent := range parentNames {
 
-			// `parent` will be string of form projects/my-project/locations/us-central1/networkPolicies/my-network-policy
+			// `parent` will be string of form projects/my-project/locations/us-central1-a/privateClouds/my-cloud
 			// Change on each loop, so new value used in tpgresource.ReplaceVars
 			d.Set("parent", parent)
 
