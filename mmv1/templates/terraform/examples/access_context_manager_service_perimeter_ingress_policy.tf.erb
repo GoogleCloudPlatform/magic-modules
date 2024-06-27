@@ -15,7 +15,7 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "ingre
   perimeter = "${google_access_context_manager_service_perimeter.storage-perimeter.name}"
 
   ingress_from {
-    identity_type = "any_identity"
+    identity_type = "ANY_IDENTITY"
     sources {
       access_level = "*"
     }

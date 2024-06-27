@@ -16,8 +16,8 @@ resource "google_access_context_manager_service_perimeters" "<%= ctx[:primary_re
       restricted_services = ["bigtable.googleapis.com"]
 
 			vpc_accessible_services {
-				enableRestriction = true
-				allowedServices = ["bigquery.googleapis.com"]
+				enable_restriction = true
+				allowed_services = ["bigquery.googleapis.com"]
 			}
     }
   }
