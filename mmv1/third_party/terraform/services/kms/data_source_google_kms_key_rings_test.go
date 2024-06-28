@@ -67,8 +67,11 @@ data "google_kms_key_rings" "all_key_rings" {
   %{filter}
 }
 
-output "count" {
-  value = length(data.google_kms_key_rings.all_key_rings.key_rings)
+data "google_project" "project" {
+}
+
+output "project_number" {
+  value = data.google_project.project.number
 }
 `, context)
 }
