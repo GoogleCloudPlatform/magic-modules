@@ -1,9 +1,8 @@
 resource "google_network_connectivity_hub" "primary" {
-  name        = "tf-test-hub%{random_suffix}"
-  description = "A sample hub"
-  project     = "%{project_name}"
-
-  labels = {
+ name        = "<%= ctx[:vars]['resource_name'] %>"
+ description = "A sample hub"
+ project     = "us-central1"
+ labels = {
     label-one = "value-one"
   }
 }
