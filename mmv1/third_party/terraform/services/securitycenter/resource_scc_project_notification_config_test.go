@@ -12,7 +12,7 @@ func TestAccSecurityCenterProjectNotificationConfig_updateStreamingConfigFilter(
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":    envvar.GetTestProjectFromEnv(),
+		"project":       envvar.GetTestProjectFromEnv(),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
