@@ -1,6 +1,6 @@
 resource "google_tags_tag_key" "tag_key1" {
   provider = "google-beta"
-  parent = "organizations/<%= ctx[:test_env_vars]['org_id'] %>"
+  parent = "organizations/<%= ctx[:vars]['org_id'] %>"
   short_name = "<%= ctx[:vars]['tag_key1'] %>"
 }
 
