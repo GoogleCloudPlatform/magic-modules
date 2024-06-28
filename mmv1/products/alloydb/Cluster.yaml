@@ -18,7 +18,7 @@ docs: !ruby/object:Provider::Terraform::Docs
     Users can promote a secondary cluster to a primary cluster with the help of `cluster_type`.
     To promote, users have to set the `cluster_type` property as `PRIMARY` and remove the `secondary_config` field from cluster configuration.
     [See Example](https://github.com/hashicorp/terraform-provider-google/pull/16413).
-  note: |
+
     Switchover is supported in terraform by refreshing the state of the terraform configurations.
     The switchover operation still needs to be called outside of terraform.
     After the switchover operation is completed successfully:
