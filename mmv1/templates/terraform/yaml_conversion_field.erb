@@ -11,7 +11,7 @@
     description:
 <%    end -%>
 <%  end -%>
-<%  unless property.api_name == property.name -%>
+<%  unless property.api_name == property.name || property.api_name.nil? -%>
     api_name: <%= property.api_name %>
 <%  end -%>
 <%  unless !property.unordered_list -%>
@@ -130,7 +130,7 @@
     state_func: '<%= property.state_func %>'
 <%  end -%>
 <%  unless property.set_hash_func.nil? -%>
-    set_hash_func: '<%= property.set_hash_func %>'
+    set_hash_func:
 <%  end -%>
 <%  unless property.custom_flatten.nil? -%>
     custom_flatten: '<%= object.convert_go_file( property.custom_flatten )%>'
@@ -151,7 +151,7 @@
 <%  end -%>
 <%  end -%>
 <%  unless property.default_value.nil? -%>
-    default_value: <%= property.default_value %>
+    default_value: <%= go_literal(property.default_value) %>
 <%  end -%>
 <%  unless property.deprecation_message.nil? -%>
     deprecation_message: '<%= property.deprecation_message %>'
@@ -173,7 +173,7 @@
 <%          end -%>
 <%        end -%>
 <%      elsif property.item_type.is_a?(Api::Type::ResourceRef) -%>
-    item_type: 
+    item_type:
       name: '<%= property.item_type.name -%>'
       type: ResourceRef
 <%        unless property.item_type.description.nil? || property.item_type.description == "A nested object resource"  -%>
@@ -186,7 +186,7 @@
       imports: '<%= property.item_type.imports.to_s -%>'
 <%    end -%>
 <%      else -%>
-    item_type: 
+    item_type:
 <%      if property.item_type.is_a?(Api::Type::Enum) -%>
       type: Enum
 <%          unless property.item_type.description.nil?  || property.item_type.description == "A nested object resource" -%>
