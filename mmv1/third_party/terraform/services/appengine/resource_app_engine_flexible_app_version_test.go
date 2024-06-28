@@ -94,6 +94,12 @@ resource "google_project_iam_member" "gae_api" {
   member  = "serviceAccount:service-${google_project.my_project.number}@gae-api-prod.google.com.iam.gserviceaccount.com"
 }
 
+resource "google_project_iam_member" "storage_viewer" {
+  project     = google_project.my_project.project_id
+  role    = "roles/storage.objectViewer"
+  member  = "serviceAccount:service-${google_project.my_project.number}@gae-api-prod.google.com.iam.gserviceaccount.com"
+}
+
 resource "google_app_engine_standard_app_version" "foo" {
   project    = google_project_iam_member.gae_api.project
   version_id = "v1"
@@ -259,6 +265,12 @@ resource "google_compute_subnetwork" "subnetwork" {
 resource "google_app_engine_application" "app" {
   project     = google_project.my_project.project_id
   location_id = "us-central"
+}
+
+resource "google_project_iam_member" "storage_viewer" {
+  project     = google_project.my_project.project_id
+  role    = "roles/storage.objectViewer"
+  member  = "serviceAccount:service-${google_project.my_project.number}@gae-api-prod.google.com.iam.gserviceaccount.com"
 }
 
 resource "google_project_iam_member" "gae_api" {
