@@ -312,5 +312,5 @@ import {
 When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), Storage Transfer Jobs can be imported using one of the formats above. For example:
 
 ```
-$ terraform import google_storage_transfer_job.default {{project_id}}/123456789
+$ terraform import google_storage_transfer_job.default {{project_id}}/{{name}}
 ```
