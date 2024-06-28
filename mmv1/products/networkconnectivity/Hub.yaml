@@ -40,7 +40,12 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
-
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'network_connectivity_hub_basic'
+    primary_resource_id: 'default'
+    vars:
+      resource_name: "basic"
 description: The NetworkConnectivity Hub resource
 parameters: []
 properties:
