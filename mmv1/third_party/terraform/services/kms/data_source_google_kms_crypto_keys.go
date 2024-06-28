@@ -141,6 +141,8 @@ func dataSourceKMSCryptoKeysList(d *schema.ResourceData, meta interface{}, keyRi
 			RawURL:    url,
 			UserAgent: userAgent,
 			Headers:   headers,
+			// ErrorRetryPredicates used to allow retrying if rate limits are hit when requesting multiple pages in a row
+			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsRetryable429QuotaError},
 		})
 		if err != nil {
 			return nil, transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("KMSCryptoKeys %q", d.Id()))

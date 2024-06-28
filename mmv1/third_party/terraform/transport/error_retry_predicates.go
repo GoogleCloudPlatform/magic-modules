@@ -453,6 +453,16 @@ func Is429QuotaError(err error) (bool, string) {
 	return false, ""
 }
 
+// Do retry if operation returns a 429
+func IsRetryable429QuotaError(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 429 {
+			return true, "429s are retryable for this resource"
+		}
+	}
+	return false, ""
+}
+
 // Retry if App Engine operation returns a 409 with a specific message for
 // concurrent operations, or a 404 indicating p4sa has not yet propagated.
 func IsAppEngineRetryableError(err error) (bool, string) {
