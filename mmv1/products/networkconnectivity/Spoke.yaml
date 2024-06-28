@@ -40,6 +40,23 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
+examples: 
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'network_connectivity_spoke_linked_vpc_network_basic'
+    primary_resource_id: 'primary'
+    vars:
+      network_name: "basic_network"
+      hub_name: "basic_hub1"
+      spoke_name: "basic_spoke"
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'network_connectivity_spoke_router_appliance_basic'
+    primary_resource_id: 'primary'
+    vars:
+      network_name: "basic_network"
+      subnetwork_name: "basic_subnetwork"
+      instance_name: "basic_instance"
+      hub_name: "basic_hub1"
+      spoke_name: "basic_spoke"
 description: "The NetworkConnectivity Spoke resource"
 parameters:
   - !ruby/object:Api::Type::String
