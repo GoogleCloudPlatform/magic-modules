@@ -1,0 +1,9 @@
+resource "google_network_connectivity_hub" "primary" {
+  name        = "tf-test-hub%{random_suffix}"
+  description = "A sample hub"
+  project     = "%{project_name}"
+
+  labels = {
+    label-one = "value-one"
+  }
+}
