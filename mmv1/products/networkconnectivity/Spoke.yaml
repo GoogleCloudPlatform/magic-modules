@@ -40,7 +40,7 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error/errors'
     message: 'message'
-examples: 
+examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'network_connectivity_spoke_linked_vpc_network_basic'
     primary_resource_id: 'primary'
