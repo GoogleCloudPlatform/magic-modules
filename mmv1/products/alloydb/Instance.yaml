@@ -240,6 +240,7 @@ properties:
     name: 'observabilityConfig'
     description: 'Configuration for enhanced query insights.'
     default_from_api: true
+    min_version: beta
     properties:
       - !ruby/object:Api::Type::Boolean
         name: 'enabled'
