@@ -75,6 +75,13 @@ examples:
       workstation_config_name: 'workstation-config'
       tag_key1: 'tag_key1'
       tag_value1: 'tag_value1'
+      project_id: 'my-new-project'
+      project_name: 'my-new-project'
+      org_id: '123456789'
+    test_vars_overrides:
+      project_id: 'fmt.Sprintf("tf-test-workstation-proj-%s", context["random_suffix"])'
+      project_name: 'fmt.Sprintf("tf-test-workstation-proj-%s", context["random_suffix"])'
+      org_id: 'envvar.GetTestOrgFromEnv(t)'
   - !ruby/object:Provider::Terraform::Examples
     name: 'workstation_config_container'
     min_version: beta
