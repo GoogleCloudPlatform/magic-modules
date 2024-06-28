@@ -119,7 +119,7 @@ func dataSourceGoogleKmsKeyRingsRead(d *schema.ResourceData, meta interface{}) e
 			Project:              billingProject,
 			RawURL:               url,
 			UserAgent:            userAgent,
-			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsRetryable429QuotaError},
+			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.Is429RetryableQuotaError},
 		})
 		if err != nil {
 			return fmt.Errorf("Error retrieving buckets: %s", err)
