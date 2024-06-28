@@ -43,7 +43,7 @@ async: !ruby/object:Api::OpAsync
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'network_connectivity_hub_basic'
-    primary_resource_id: 'default'
+    primary_resource_id: 'primary'
     vars:
       resource_name: "basic"
 description: The NetworkConnectivity Hub resource
