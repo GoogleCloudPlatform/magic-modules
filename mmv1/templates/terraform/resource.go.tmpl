@@ -245,7 +245,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     if err != nil {
         return err
     }
-{{- if $.UpdateMask -}}
+{{- if $.UpdateMask }}
     url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": "{{ join $.NestedQuery.Keys "." -}}"})
     if err != nil {
         return err
@@ -488,7 +488,10 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
         if err != nil {
             return res, err
         }
-{{if $.NestedQuery -}}
+{{- if or $.NestedQuery $.CustomCode.Decoder }}
+{{""}}
+{{- end }}
+{{- if $.NestedQuery }}
         res, err = flattenNested{{ $.ResourceName -}}(d, meta, res)
         if err != nil {
             return nil, err
@@ -507,7 +510,7 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
         if res == nil {
             return nil, tpgresource.Fake404("decoded", "{{ $.ResourceName }}")
         }
-{{- end -}}
+{{- end }}
         return res, nil
 {{    end  -}}
     }
@@ -817,7 +820,10 @@ if len(updateMask) > 0 {
     if err != nil {
         return err
     }
-{{                  else if $.GetAsync.IsA "PollAsync" -}}
+{{-             if not $.FieldSpecificUpdateMethods }}
+{{""}}
+{{-             end}}
+{{-                  else if $.GetAsync.IsA "PollAsync" -}}
     err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName -}}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncExistence -}}, "Updating {{ $.Name -}}", d.Timeout(schema.TimeoutUpdate), {{ $.GetAsync.TargetOccurrences -}})
     if err != nil {
 {{                      if $.GetAsync.SuppressError -}}
@@ -1058,7 +1064,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
         return transport_tpg.HandleNotFoundError(err, d, "{{ $.Name }}")
     }
         {{- if $.UpdateMask }}
-    url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": "{{- join $.NestedQuery.Keys "," -}}"})
+    url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": "{{- join $.NestedQuery.Keys "." -}}"})
     if err != nil {
         return err
     }

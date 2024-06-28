@@ -1495,7 +1495,14 @@ func (r Resource) PropertiesByCustomUpdateGroups() []UpdateGroup {
 		}
 		updateGroups = append(updateGroups, groupedProperty)
 	}
-	sort.Slice(updateGroups, func(i, j int) bool { return updateGroups[i].UpdateId < updateGroups[i].UpdateId })
+	sort.Slice(updateGroups, func(i, j int) bool {
+		a := updateGroups[i]
+		b := updateGroups[j]
+		if a.UpdateVerb != b.UpdateVerb {
+			return a.UpdateVerb > b.UpdateVerb
+		}
+		return a.UpdateId < b.UpdateId
+	})
 	return updateGroups
 }
 
