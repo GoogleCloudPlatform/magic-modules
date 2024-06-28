@@ -1,3 +1,4 @@
+# [START vpc_firewall_create]
 resource "google_compute_firewall" "{{$.PrimaryResourceId}}" {
   project     = "{{index $.TestEnvVars "project"}}"
   name        = "{{index $.Vars "firewall_name"}}"
@@ -12,3 +13,4 @@ resource "google_compute_firewall" "{{$.PrimaryResourceId}}" {
   source_tags = ["foo"]
   target_tags = ["web"]
 }
+# [END vpc_firewall_create]

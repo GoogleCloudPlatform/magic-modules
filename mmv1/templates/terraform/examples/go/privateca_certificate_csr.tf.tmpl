@@ -1,3 +1,4 @@
+# [START privateca_create_certificate_csr]
 resource "google_privateca_ca_pool" "default" {
   location = "us-central1"
   name = "{{index $.Vars "ca_pool_id"}}"
@@ -54,3 +55,4 @@ resource "google_privateca_certificate" "{{$.PrimaryResourceId}}" {
   lifetime = "860s"
   pem_csr = file("test-fixtures/rsa_csr.pem")
 }
+# [END privateca_create_certificate_csr]

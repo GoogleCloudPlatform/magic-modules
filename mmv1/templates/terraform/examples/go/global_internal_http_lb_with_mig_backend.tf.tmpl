@@ -1,5 +1,6 @@
 # Global Internal HTTP load balancer with a managed instance group backend
 
+# [START cloudloadbalancing_int_http_gce]
 # VPC network
 resource "google_compute_network" "gilb_network" {
   name                    = "{{index $.Vars "gilb_network_name"}}"
@@ -181,3 +182,4 @@ resource "google_compute_instance" "vm-test" {
     }
   }
 }
+# [END cloudloadbalancing_int_http_gce]

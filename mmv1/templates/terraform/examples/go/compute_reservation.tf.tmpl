@@ -1,3 +1,4 @@
+# [START compute_reservation_create_local_reservation]
 
 resource "google_compute_reservation" "{{$.PrimaryResourceId}}" {
   name = "{{index $.Vars "gce_reservation_local"}}"
@@ -16,3 +17,4 @@ resource "google_compute_reservation" "{{$.PrimaryResourceId}}" {
   }
 }
 
+# [END compute_reservation_create_local_reservation]
