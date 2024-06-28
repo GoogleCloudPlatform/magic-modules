@@ -6,6 +6,7 @@ resource "google_project_service_identity" "gcp_sa_cloud_sql" {
   service  = "sqladmin.googleapis.com"
 }
 
+# [START cloud_sql_instance_iam_conditions]
 data "google_iam_policy" "sql_iam_policy" {
   binding {
     role = "roles/cloudsql.client"
@@ -24,6 +25,7 @@ resource "google_project_iam_policy" "project" {
   project     = data.google_project.project.id
   policy_data = data.google_iam_policy.sql_iam_policy.policy_data
 }
+# [END cloud_sql_instance_iam_conditions]
 
 resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
   name             = "{{index $.Vars "mysql_instance_iam_condition"}}"
