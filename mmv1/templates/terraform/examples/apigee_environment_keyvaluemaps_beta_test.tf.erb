@@ -19,6 +19,7 @@ resource "google_project" "project" {
   
    project = google_project.project.project_id 
    service = "compute.googleapis.com" 
+   depends_on = [google_project_service.apigeeconnect]
  } 
   
  resource "google_project_service" "servicenetworking" { 
@@ -26,6 +27,7 @@ resource "google_project" "project" {
   
    project = google_project.project.project_id 
    service = "servicenetworking.googleapis.com" 
+   depends_on = [google_project_service.compute]
  } 
   
  resource "google_project_service" "kms" { 
@@ -33,6 +35,7 @@ resource "google_project" "project" {
   
    project = google_project.project.project_id 
    service = "cloudkms.googleapis.com" 
+   depends_on = [google_project_service.servicenetworking]
  } 
 
  resource "google_project_service" "apigeeconnect" {
