@@ -1,10 +1,3 @@
-resource "google_project" "project" {
-  provider = "google-beta"
-  project_id = "<%= ctx[:vars]['project_id'] %>"
-  name       = "<%= ctx[:vars]['project_id'] %>"
-  org_id     = "<%= ctx[:vars]['org_id'] %>"
-}
-  
 resource "google_tags_tag_key" "tag_key1" {
   provider = "google-beta"
   parent = "organizations/<%= ctx[:test_env_vars]['org_id'] %>"

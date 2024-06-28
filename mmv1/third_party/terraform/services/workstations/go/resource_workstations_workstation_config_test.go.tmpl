@@ -752,13 +752,6 @@ func TestAccWorkstationsWorkstationConfig_update(t *testing.T) {
 
 func testAccWorkstationsWorkstationConfig_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_project" "project" {
-  provider = "google-beta"
-  project_id = "%{project_id}"
-  name       = "%{project_id}"
-  org_id     = "%{org_id}"
-}
-  
 resource "google_tags_tag_key" "tag_key1" {
   provider = "google-beta"
   parent = "organizations/%{org_id}"

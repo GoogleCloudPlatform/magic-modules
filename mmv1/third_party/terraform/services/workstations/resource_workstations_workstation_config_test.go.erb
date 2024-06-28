@@ -3,10 +3,8 @@ package workstations_test
 <% unless version == "ga" -%>
 
 import (
-  "fmt"
 	"testing"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -710,11 +708,8 @@ func testAccWorkstationsWorkstationConfig_readinessChecks(context map[string]int
 func TestAccWorkstationsWorkstationConfig_update(t *testing.T) {
 	t.Parallel()
 
-	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": randString,
-		"project_id":    fmt.Sprintf("tf-test-proj-%s", randString),
-		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -755,13 +750,6 @@ func TestAccWorkstationsWorkstationConfig_update(t *testing.T) {
 
 func testAccWorkstationsWorkstationConfig_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_project" "project" {
-  provider = "google-beta"
-  project_id = "%{project_id}"
-  name       = "%{project_id}"
-  org_id     = "%{org_id}"
-}
-  
 resource "google_tags_tag_key" "tag_key1" {
   provider = "google-beta"
   parent = "organizations/%{org_id}"
