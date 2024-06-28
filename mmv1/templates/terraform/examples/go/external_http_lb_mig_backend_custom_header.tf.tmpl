@@ -1,6 +1,7 @@
 # External HTTP load balancer with a CDN-enabled managed instance group backend
 # and custom request and response headers
 
+# [START cloudloadbalancing_ext_http_gce_custom_header]
 # VPC
 resource "google_compute_network" "default" {
   name                    = "{{index $.Vars "xlb_network_name"}}"
@@ -153,3 +154,4 @@ resource "google_compute_firewall" "default" {
   }
   target_tags = ["allow-health-check"]
 }
+# [END cloudloadbalancing_ext_http_gce_custom_header]

@@ -1,3 +1,4 @@
+# [START cloud_sql_mysql_instance_backup_location]
 resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
   name             = "{{index $.Vars "mysql_instance_backup_location"}}"
   region           = "asia-northeast1"
@@ -11,3 +12,4 @@ resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
   }
   deletion_protection =  "{{index $.Vars "deletion_protection"}}"
 }
+# [END cloud_sql_mysql_instance_backup_location]

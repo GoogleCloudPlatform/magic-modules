@@ -1,4 +1,4 @@
-{{- define "UnorderedListCustomizeDiff" }}
+{{- define "UnorderedListCustomizeDiff" -}}
 keys := diff.GetChangedKeysPrefix("{{ underscore $.Name }}")
 if len(keys) == 0 {
     return nil

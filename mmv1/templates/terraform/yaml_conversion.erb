@@ -130,7 +130,7 @@ skip_delete: <%= object.skip_delete %>
 immutable: <%= object.immutable %>
 <%  end -%>
 <%  unless object.mutex.nil? -%>
-mutex: <%= object.mutex %>
+mutex: '<%= object.mutex %>'
 <%  end -%>
 <%
 #import

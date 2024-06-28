@@ -1,3 +1,4 @@
+# [START cloud_sql_postgres_instance_authorized_network]
 resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
   name             = "{{index $.Vars "postgres_instance_with_authorized_network"}}"
   region           = "us-central1"
@@ -14,3 +15,4 @@ resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
   }
   deletion_protection =  "{{index $.Vars "deletion_protection"}}"
 }
+# [END cloud_sql_postgres_instance_authorized_network]

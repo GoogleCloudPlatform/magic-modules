@@ -1,3 +1,4 @@
+# [START cloud_sql_mysql_instance_labels]
 resource "google_sql_database_instance" "mysql_instance_labels" {
   name             = "{{index $.Vars "mysql_instance_labels"}}"
   region           = "us-central1"
@@ -11,7 +12,9 @@ resource "google_sql_database_instance" "mysql_instance_labels" {
   }
   deletion_protection = "false"
 }
+# [END cloud_sql_mysql_instance_labels]
 
+# [START cloud_sql_postgres_instance_labels]
 resource "google_sql_database_instance" "postgres_instance_labels" {
   name             = "{{index $.Vars "postgres_instance_labels"}}"
   region           = "us-central1"
@@ -25,7 +28,9 @@ resource "google_sql_database_instance" "postgres_instance_labels" {
   }
   deletion_protection = "false"
 }
+# [END cloud_sql_postgres_instance_labels]
 
+# [START cloud_sql_sqlserver_instance_labels]
 resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
   name             = "{{index $.Vars "sqlserver_instance_labels"}}"
   region           = "us-central1"
@@ -40,3 +45,4 @@ resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
   }
   deletion_protection = "false"
 }
+# [END cloud_sql_sqlserver_instance_labels]
