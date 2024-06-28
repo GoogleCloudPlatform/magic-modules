@@ -66,5 +66,9 @@ data "google_kms_key_rings" "all_key_rings" {
   location = "%{location}"
   %{filter}
 }
+
+output "count" {
+  value = length(data.google_kms_key_rings.all_key_rings.key_rings)
+}
 `, context)
 }
