@@ -76,7 +76,6 @@ examples:
       tag_key1: 'tag_key1'
       tag_value1: 'tag_value1'
       project_id: 'my-new-project'
-      project_name: 'my-new-project'
       org_id: '123456789'
     test_vars_overrides:
       project_id: 'fmt.Sprintf("tf-test-workstation-proj-%s", acctest.RandString(t, 10))'
