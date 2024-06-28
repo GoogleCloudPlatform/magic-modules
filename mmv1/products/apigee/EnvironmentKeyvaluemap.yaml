@@ -54,6 +54,10 @@ timeouts: !ruby/object:Api::Timeouts
   insert_minutes: 1
   delete_minutes: 1
 autogen_async: true
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  custom_import: templates/terraform/custom_import/apigee_environment_keyvaluemaps.go.erb
+  custom_create: 'templates/terraform/custom_create/apigee_environment_keyvaluemaps.go'
+  decoder: templates/terraform/decoders/apigee_environment_keyvaluemaps.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: 'envId'
@@ -63,10 +67,6 @@ parameters:
     required: true
     immutable: true
     url_param_only: true
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_import: templates/terraform/custom_import/apigee_environment_keyvaluemaps.go.erb
-  custom_create: 'templates/terraform/custom_create/apigee_environment_keyvaluemaps.go'
-  decoder: templates/terraform/decoders/apigee_environment_keyvaluemaps.go.erb
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'

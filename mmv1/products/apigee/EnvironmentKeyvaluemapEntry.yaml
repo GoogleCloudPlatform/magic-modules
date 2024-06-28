@@ -55,6 +55,8 @@ timeouts: !ruby/object:Api::Timeouts
   delete_minutes: 1
 immutable: true
 autogen_async: true
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  custom_import: templates/terraform/custom_import/apigee_environment_keyvaluemaps_entries.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: 'env_keyvaluemap_id'
@@ -64,8 +66,6 @@ parameters:
     required: true
     immutable: true
     url_param_only: true
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_import: templates/terraform/custom_import/apigee_environment_keyvaluemaps_entries.go.erb
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
