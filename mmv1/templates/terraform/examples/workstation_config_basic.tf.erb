@@ -1,13 +1,13 @@
 resource "google_tags_tag_key" "tag_key1" {
-  provider = "google-beta"
-  parent = "organizations/<%= ctx[:vars]['org_id'] %>"
-  short_name = "<%= ctx[:vars]['tag_key1'] %>"
+  provider   = google-beta
+  parent     = "organizations/<%= ctx[:vars]['org_id'] %>"
+  short_name = "<%= ctx[:vars]['key_short_name'] %>"
 }
 
 resource "google_tags_tag_value" "tag_value1" {
-  provider = "google-beta"
-  parent = "tagKeys/${google_tags_tag_key.tag_key1.name}"
-  short_name = "<%= ctx[:vars]['tag_value1'] %>"
+  provider   = google-beta
+  parent     = "tagKeys/${google_tags_tag_key.tag_key1.name}"
+  short_name = "<%= ctx[:vars]['value_short_name'] %>"
 }
 
 resource "google_compute_network" "default" {
