@@ -1,13 +1,15 @@
-// res["name"] = res["id"]
-// delete("id",res)
+res["indexEndpoint"] = d.Get("index_endpoint")
 v, ok := res["deployedIndexes"]
-if !ok || v == nil {
+if !ok || v == nil { // CREATE
+    res["name"] = res["deployedIndexId"]
+    delete(res, "deployedIndexId")
 	return res, nil
 }
 dpIndex := make(map[string]interface{})
 for _, v := range v.([]interface{}) {
 	dpI := v.(map[string]interface{})
-	if dpI["id"] == d.Get("name") {
+	if dpI["id"] == d.Get("name").(string) {
+        dpI["indexEndpoint"] = d.Get("index_endpoint")
 		dpIndex = dpI
 		break
 	}

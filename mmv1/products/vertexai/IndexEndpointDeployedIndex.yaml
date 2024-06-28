@@ -18,6 +18,7 @@ create_url: projects/{{project}}/locations/{{region}}/indexEndpoints/{{index_end
 update_url: 'projects/{{project}}/locations/{{region}}/indexEndpoints/{{index_endpoint}}:mutateDeployedIndex'
 delete_url: 'projects/{{project}}/locations/{{region}}/indexEndpoints/{{index_endpoint}}:undeployIndex'
 self_link: 'projects/{{project}}/locations/{{region}}/indexEndpoints/{{index_endpoint}}'
+import_format: ['projects/{{project}}/locations/{{region}}/indexEndpoints/{{index_endpoint}}/deployedIndex/{{deployed_index_id}}']
 update_mask: true
 references: !ruby/object:Api::Resource::ReferenceLinks
   api: https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.indexEndpoints#DeployedIndex
@@ -77,23 +78,31 @@ autogen_async: false
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/vertex_ai_index_endpoint_deployed_index.go.erb
   decoder: templates/terraform/decoders/vertex_ai_index_endpoint_deployed_index.go.erb
-  pre_delete: templates/terraform/pre_delete/vertex_ai_index_endpoint_deployed_index.go.erb
+  # pre_delete: templates/terraform/pre_delete/vertex_ai_index_endpoint_deployed_index.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: region
     description: The region of the index endpoint. eg us-central1
     url_param_only: true
     immutable: true
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'indexEndpoint'
+    description: |
+      Identifies the index endpoint. Must be in the format
+      'projects/{{project}}/locations/{{region}}/indexEndpoints/{{indexEndpoint}}'
+    required: true
+    immutable: true
+    resource: 'IndexEndpoint'
+    imports: 'name'
+    url_param_only: true
 properties:
   - !ruby/object:Api::Type::String
-    name: 'indexEndpoint'
-    description: The name of the IndexEndpoint where the Index will be deployed to.
-    immutable: true
-    required: true
-    custom_expand: templates/terraform/custom_expand/vertex_ai_endpoint_deployed_index.go.erb
-  - !ruby/object:Api::Type::String
     name: 'name'
-    api_name: 'id'
+    output: true
+    description: |
+      The name of the DeployedIndex resource.
+  - !ruby/object:Api::Type::String
+    name: 'deployedIndexId'
     description: The user specified ID of the DeployedIndex. The ID can be up to 128 characters long and must start with a letter and only contain letters, numbers, and underscores. The ID must be unique within the project it is created in.
     required: true
   - !ruby/object:Api::Type::String

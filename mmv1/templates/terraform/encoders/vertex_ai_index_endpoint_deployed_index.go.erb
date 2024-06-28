@@ -1,6 +1,6 @@
-data := make(map[string]interface{})
+req := make(map[string]interface{})
 obj["id"] = d.Get("name")
 delete(obj, "name")
 delete(obj, "indexEndpoint")
-data["deployedIndex"] = obj
-return data, nil
+req["deployedIndex"] = obj
+return req, nil
