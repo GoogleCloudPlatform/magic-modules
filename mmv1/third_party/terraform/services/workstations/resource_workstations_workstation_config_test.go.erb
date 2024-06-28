@@ -709,9 +709,13 @@ func testAccWorkstationsWorkstationConfig_readinessChecks(context map[string]int
 func TestAccWorkstationsWorkstationConfig_update(t *testing.T) {
 	t.Parallel()
 
+	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"random_suffix":    randString,
+		"project_id":       fmt.Sprintf("tf-test-proj-%s", randString),
+		"key_short_name":   fmt.Sprintf("tf-test-key-%s", randString),
+		"value_short_name": fmt.Sprintf("tf-test-value-%s", randString),
+		"org_id":           envvar.GetTestOrgFromEnv(t),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

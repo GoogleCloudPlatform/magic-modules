@@ -710,9 +710,11 @@ func TestAccWorkstationsWorkstationConfig_update(t *testing.T) {
 
 	randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": randString,
-		"project_id":    fmt.Sprintf("tf-test-proj-%s", randString),
-		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"random_suffix":    randString,
+		"project_id":       fmt.Sprintf("tf-test-proj-%s", randString),
+		"key_short_name":   fmt.Sprintf("tf-test-key-%s", randString),
+		"value_short_name": fmt.Sprintf("tf-test-value-%s", randString),
+		"org_id":           envvar.GetTestOrgFromEnv(t),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -762,7 +764,7 @@ resource "google_tags_tag_key" "tag_key1" {
 resource "google_tags_tag_value" "tag_value1" {
   provider = google-beta
   parent = "tagKeys/${google_tags_tag_key.tag_key1.name}"
-  short_name = "%{key_short_name}"
+  short_name = "%{value_short_name}"
 }
 resource "google_compute_network" "default" {
   provider                = google-beta
