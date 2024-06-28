@@ -593,9 +593,6 @@ func buildEffectiveLabelsField(name string, labels *Type) *Type {
 		"including the %s configured through Terraform, other clients and services.", name, name)
 
 	t := "KeyValueEffectiveLabels"
-	if name == "annotations" {
-		t = "KeyValueEffectiveAnnotations"
-	}
 
 	n := fmt.Sprintf("effective%s", strings.Title(name))
 
@@ -1467,8 +1464,8 @@ func (r Resource) propertiesWithCustomUpdate(properties []*Type) []*Type {
 	})
 }
 
-func (r Resource) PropertiesByCustomUpdate() map[UpdateGroup][]*Type {
-	customUpdateProps := r.propertiesWithCustomUpdate(r.RootProperties())
+func (r Resource) PropertiesByCustomUpdate(properties []*Type) map[UpdateGroup][]*Type {
+	customUpdateProps := r.propertiesWithCustomUpdate(properties)
 	groupedCustomUpdateProps := map[UpdateGroup][]*Type{}
 	for _, prop := range customUpdateProps {
 		groupedProperty := UpdateGroup{UpdateUrl: prop.UpdateUrl,
@@ -1499,11 +1496,11 @@ func (r Resource) PropertiesByCustomUpdateGroups() []UpdateGroup {
 }
 
 func (r Resource) FieldSpecificUpdateMethods() bool {
-	return (len(r.PropertiesByCustomUpdate()) > 0)
+	return (len(r.PropertiesByCustomUpdate(r.RootProperties())) > 0)
 }
 
-func (r Resource) CustomUpdatePropertiesByKey(updateUrl string, updateId string, fingerprintName string, updateVerb string) []*Type {
-	groupedProperties := r.PropertiesByCustomUpdate()
+func (r Resource) CustomUpdatePropertiesByKey(properties []*Type, updateUrl string, updateId string, fingerprintName string, updateVerb string) []*Type {
+	groupedProperties := r.PropertiesByCustomUpdate(properties)
 	groupedProperty := UpdateGroup{UpdateUrl: updateUrl,
 		UpdateVerb:      updateVerb,
 		UpdateId:        updateId,
