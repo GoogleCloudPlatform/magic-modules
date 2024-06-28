@@ -12,7 +12,7 @@ func TestAccSecurityCenterProjectNotificationConfig_updateStreamingConfigFilter(
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_id":    envvar.GetTestProjectFromEnv(),
+		"project":    envvar.GetTestProjectFromEnv(),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -28,7 +28,7 @@ func TestAccSecurityCenterProjectNotificationConfig_updateStreamingConfigFilter(
 				ResourceName:            "google_scc_project_notification_config.custom_notification_config",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"project_id", "config_id"},
+				ImportStateVerifyIgnore: []string{"project", "config_id"},
 			},
 			{
 				Config: testAccSecurityCenterProjectNotificationConfig_updateStreamingConfigFilter(context),
@@ -37,7 +37,7 @@ func TestAccSecurityCenterProjectNotificationConfig_updateStreamingConfigFilter(
 				ResourceName:            "google_scc_project_notification_config.custom_notification_config",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"project_id", "config_id"},
+				ImportStateVerifyIgnore: []string{"project", "config_id"},
 			},
 		},
 	})
@@ -51,7 +51,7 @@ resource "google_pubsub_topic" "scc_project_notification" {
 
 resource "google_scc_project_notification_config" "custom_notification_config" {
   config_id    = "tf-test-my-config%{random_suffix}"
-  project_id   = "%{project_id}"
+  project      = "%{project}"
   description  = "My custom Cloud Security Command Center Finding Notification Configuration"
   pubsub_topic =  google_pubsub_topic.scc_project_notification.id
 
