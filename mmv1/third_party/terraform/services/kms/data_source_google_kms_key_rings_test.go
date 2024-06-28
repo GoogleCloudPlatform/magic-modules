@@ -66,10 +66,5 @@ data "google_kms_key_rings" "all_key_rings" {
   location = "%{location}"
   %{filter}
 }
-data "google_project" "project" {
-}
-output "project_number" {
-  value = data.google_project.project.number
-}
 `, context)
 }
