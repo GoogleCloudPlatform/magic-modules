@@ -1,0 +1,7 @@
+resource "google_vertex_ai_models" "<%= ctx[:primary_resource_id] %>" {
+  display_name = "<%= ctx[:vars]['display_name'] %>"
+  project = "<%= ctx[:test_env_vars]['project_name'] %>"
+  source_model = "projects/<%= ctx[:test_env_vars]['project_name'] %>/locations/us-central1/models/4469245519628878651"
+
+  region       = "us-central1"
+}
