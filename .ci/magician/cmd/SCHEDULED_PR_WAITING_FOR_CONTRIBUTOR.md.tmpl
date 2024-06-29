@@ -1,5 +1,5 @@
 {{ if lt .SinceDays 30 -}}
-@{{.PullRequest.User.Login}}, this PR is waiting for action from you. Please address any comments or change requests, or [re-request review](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/requesting-a-pull-request-review) from a core reviewer if no action is required.
+@{{.User}}, this PR is waiting for action from you. Please address any comments or change requests, or [re-request review](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/requesting-a-pull-request-review) from a core reviewer if no action is required.
 
 ![Image showing the re-request review button](https://docs.github.com/assets/cb-28785/mw-1440/images/help/pull_requests/request-re-review.webp)
 
@@ -10,5 +10,5 @@ If no action is taken, this PR will be closed in
 
 This notification can be disabled with the `disable-automatic-closure` label.
 {{ else -}}
-@{{.PullRequest.User.Login}}, this PR is being closed due to inactivity.
+@{{.User}}, this PR is being closed due to inactivity.
 {{ end -}}
