@@ -931,32 +931,6 @@ properties:
                 Identifier for this set of encryption options.
               required: true
             - !ruby/object:Api::Type::NestedObject
-              name: "drmSystems"
-              description: |
-                Defines configuration for DRM systems in use.
-              required: true
-              properties:
-                - !ruby/object:Api::Type::NestedObject
-                  name: "widevine"
-                  description: |
-                    Widevine configuration.
-                - !ruby/object:Api::Type::NestedObject
-                  name: "widevine"
-                  description: |
-                    Fairplay configuration.
-                - !ruby/object:Api::Type::NestedObject
-                  name: "playready"
-                  description: |
-                    Playready configuration.
-                - !ruby/object:Api::Type::NestedObject
-                  name: "clearkey"
-                  description: |
-                    Clearkey configuration.
-            - !ruby/object:Api::Type::NestedObject
-              name: "aes128"
-              description: |
-                Configuration for AES-128 encryption.
-            - !ruby/object:Api::Type::NestedObject
               name: "sampleAes"
               description: |
                 Configuration for SAMPLE-AES encryption.
