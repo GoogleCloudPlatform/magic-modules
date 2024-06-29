@@ -326,7 +326,6 @@ properties:
                           name: "frameRateConversionStrategy"
                           description: |
                             Frame rate conversion strategy for desired frame rate.
-                          optional: true
                           values:
                             - :FRAME_RATE_CONVERSION_STRATEGY_UNSPECIFIED
                             - :DOWNSAMPLE
@@ -410,7 +409,6 @@ properties:
                           required: true
                         - !ruby/object:Api::Type::Enum
                           name: "frameRateConversionStrategy"
-                          optional: true
                           description: |
                             Frame rate conversion strategy for desired frame rate.
                           values:
@@ -498,7 +496,6 @@ properties:
                           name: "frameRateConversionStrategy"
                           description: |
                             Frame rate conversion strategy for desired frame rate.
-                          optional: true
                           values:
                             - :FRAME_RATE_CONVERSION_STRATEGY_UNSPECIFIED
                             - :DOWNSAMPLE
@@ -672,13 +669,11 @@ properties:
               name: "fmp4"
               description: |
                 fmp4 container configuration.
-              optional: true
               properties:
                 - !ruby/object:Api::Type::String
                   name: "codecTag"
                   description: |
                     Specify the codec tag string that will be used in the media bitstream.
-                  optional: true
                   default_from_api: true
       - !ruby/object:Api::Type::Array
         name: "manifests"
