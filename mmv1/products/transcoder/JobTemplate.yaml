@@ -52,7 +52,7 @@ import_format:
 autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "job_template_basic"
+    name: "transcoder_job_template_basic"
     primary_resource_id: "default"
     primary_resource_name: 'fmt.Sprintf("tf-test-job%s", context["random_suffix"])'
     vars:

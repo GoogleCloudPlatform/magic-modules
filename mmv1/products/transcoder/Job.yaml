@@ -49,7 +49,7 @@ import_format: ["projects/{{project}}/locations/{{location}}/jobs/{{job_id}}"]
 autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "job_basic"
+    name: "transcoder_job_basic"
     primary_resource_id: "default"
     primary_resource_name: 'fmt.Sprintf("tf-test-job%s", context["random_suffix"])'
     vars:

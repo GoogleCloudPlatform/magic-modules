@@ -1,0 +1,23 @@
+resource "google_transcoder_job" "<%= ctx[:primary_resource_id] %>" {
+  provider = google-beta
+  name     = "<%= ctx[:vars]['job_name'] %>"
+  template_id = google_transcoder_job_template.default.name
+  location = "us-central1"
+
+  labels = {
+    "label" = "key"
+  }
+}
+
+resource "google_transcoder_job_template" "default" {
+  provider    = google-beta
+  name        = "example"
+  location = "us-central1"
+
+  config {
+  }
+
+  labels = {
+    "label" = "key"
+  }
+}
