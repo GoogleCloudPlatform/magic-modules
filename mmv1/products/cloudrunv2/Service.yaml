@@ -279,6 +279,7 @@ properties:
     properties:
       - !ruby/object:Api::Type::String
         name: 'revision'
+        default_from_api: true
         description: |-
           The unique name for the revision. If this field is omitted, it will be automatically generated based on the Service name.
       - !ruby/object:Api::Type::KeyValuePairs
