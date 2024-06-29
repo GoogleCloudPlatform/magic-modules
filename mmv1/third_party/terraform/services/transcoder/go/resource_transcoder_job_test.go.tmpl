@@ -1,0 +1,36 @@
+package transcoder_test
+
+{{ if ne $.TargetVersionName `ga` -}}
+import (
+	"testing"
+	"strconv"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+)
+
+func testAccTranscoderJobTemplate_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_transcoder_job" "default" {
+  name                    = "tf-test-job-template%{random_suffix}"
+  template_id         = google_transcoder_job_template.default.id
+
+  labels = {
+	  foo = "bar"
+  }
+}
+
+resource "google_transcoder_job_template" "default" {
+  job_template_id         = "tf-test-job-template%{random_suffix}"
+  name                    = "tf-test-job-template%{random_suffix}"
+  config {
+  }
+
+  labels = {
+	  foo = "bar"
+  }
+}
+`, context)
+}
+<% end -%>
