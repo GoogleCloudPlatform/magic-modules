@@ -17,7 +17,7 @@ name: Transcoder
 display_name: Transcoder
 versions:
   - !ruby/object:Api::Product::Version
-    name: beta
+    name: ga
     base_url: https://transcoder.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
