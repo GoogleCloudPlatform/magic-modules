@@ -391,16 +391,6 @@ properties:
                         - !ruby/object:Api::Type::Time
                           name: "gopDuration"
                           description: Select the GOP size based on the specified duration.
-                        - !ruby/object:Api::Type::NestedObject
-                          name: "sdr"
-                          description: |
-                            SDR color format setting for H264.
-                          optional: true
-                        - !ruby/object:Api::Type::NestedObject
-                          name: "hlg"
-                          description: |
-                            HLG color format setting for H264.
-                          optional: true
                     - !ruby/object:Api::Type::NestedObject
                       name: "h265"
                       description: |
@@ -487,21 +477,6 @@ properties:
                         - !ruby/object:Api::Type::Time
                           name: "gopDuration"
                           description: Select the GOP size based on the specified duration.
-                        - !ruby/object:Api::Type::NestedObject
-                          name: "sdr"
-                          description: |
-                            SDR color format setting for H265.
-                          optional: true
-                        - !ruby/object:Api::Type::NestedObject
-                          name: "hlg"
-                          description: |
-                            HLG color format setting for H265.
-                          optional: true
-                        - !ruby/object:Api::Type::NestedObject
-                          name: "hdr10"
-                          description: |
-                            HDR10 color format setting for H265.
-                          optional: true
                     - !ruby/object:Api::Type::NestedObject
                       name: "vp9"
                       description: |
@@ -546,16 +521,6 @@ properties:
                         - !ruby/object:Api::Type::Time
                           name: "gopDuration"
                           description: Select the GOP size based on the specified duration.
-                        - !ruby/object:Api::Type::NestedObject
-                          name: "sdr"
-                          description: |
-                            SDR color format setting for H265.
-                          optional: true
-                        - !ruby/object:Api::Type::NestedObject
-                          name: "hlg"
-                          description: |
-                            HLG color format setting for H265.
-                          optional: true
                 - !ruby/object:Api::Type::NestedObject
                   name: "audioStream"
                   description: |
