@@ -388,7 +388,7 @@ is set to true. Defaults to ZONAL.`,
 							Type:             schema.TypeBool,
 							Optional:         true,
 							Default:          true,
-							Description:      `Enables auto-resizing of the storage size. Defaults to true.`,
+							Description:      `Enables auto-resizing of the storage size. Defaults to true. Note that future terraform apply calls will attempt to delete the instance in order to resize the disk to the value specified in disk_size.`,
 						},
 						"disk_autoresize_limit": {
 							Type:             schema.TypeInt,
@@ -406,7 +406,7 @@ is set to true. Defaults to ZONAL.`,
 							Optional: true,
 							// Default is likely 10gb, but it is undocumented and may change.
 							Computed:    true,
-							Description: `The size of data disk, in GB. Size of a running instance cannot be reduced but can be increased. The minimum value is 10GB.`,
+							Description: `The size of data disk, in GB. Size of a running instance cannot be reduced but can be increased. The minimum value is 10GB. Note that future terraform apply calls will attempt to delete the instance in order to expand the instance if disk_autoresize is true.`,
 						},
 						"disk_type": {
 							Type:     schema.TypeString,

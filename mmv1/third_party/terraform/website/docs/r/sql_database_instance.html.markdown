@@ -292,11 +292,11 @@ The `settings` block supports:
 
 * `enable_google_ml_integration` - (Optional) Enables [Cloud SQL instances to connect to Vertex AI](https://cloud.google.com/sql/docs/postgres/integrate-cloud-sql-with-vertex-ai) and pass requests for real-time predictions and insights. Defaults to `false`.
 
-* `disk_autoresize` - (Optional) Enables auto-resizing of the storage size. Defaults to `true`.
+* `disk_autoresize` - (Optional) Enables auto-resizing of the storage size. Defaults to `true`. Note that future terraform apply calls will attempt to delete the instance in order to resize the disk to the value specified in disk_size.
 
 * `disk_autoresize_limit` - (Optional) The maximum size to which storage capacity can be automatically increased. The default value is 0, which specifies that there is no limit.
 
-* `disk_size` - (Optional) The size of data disk, in GB. Size of a running instance cannot be reduced but can be increased. The minimum value is 10GB.
+* `disk_size` - (Optional) The size of data disk, in GB. Size of a running instance cannot be reduced but can be increased. The minimum value is 10GB. Note that future terraform apply calls will attempt to delete the instance in order to expand the instance if disk_autoresize is true.
 
 * `disk_type` - (Optional) The type of data disk: PD_SSD or PD_HDD. Defaults to `PD_SSD`.
 
