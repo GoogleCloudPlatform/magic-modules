@@ -1,3 +1,21 @@
+resource "google_project" "project" {
+  project_id = "{{index $.Vars "project_id"}}"
+  name       = "{{index $.Vars "project_id"}}"
+  org_id     = "{{index $.TestEnvVars "org_id"}}"
+}
+  
+resource "google_tags_tag_key" "tag_key1" {
+  provider = "google-beta"
+  parent = "organizations/{{index $.TestEnvVars "org_id"}}"
+  short_name = "{{index $.Vars "tag_key1"}}"
+}
+
+resource "google_tags_tag_value" "tag_value1" {
+  provider = "google-beta"
+  parent = "tagKeys/${google_tags_tag_key.tag_key1.name}"
+  short_name = "{{index $.Vars "tag_value1"}}"
+}
+
 resource "google_compute_network" "default" {
   provider                = google-beta
   name                    = "{{index $.Vars "workstation_cluster_name"}}"
@@ -52,6 +70,9 @@ resource "google_workstations_workstation_config" "{{$.PrimaryResourceId}}" {
       boot_disk_size_gb           = 35
       disable_public_ip_addresses = true
       disable_ssh                 = false
+      vm_tags = {
+        "tagKeys/${google_tags_tag_key.tag_key1.short_name}" = "tagValues/${google_tags_tag_value.tag_value1.short_name}"
+      }
     }
   }
 }

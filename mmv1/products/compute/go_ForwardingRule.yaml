@@ -273,7 +273,6 @@ properties:
       * When the `target` is a Private Service Connect Google APIs
       bundle, you must specify an `IPAddress`.
 
-
       Otherwise, you can optionally specify an IP address that references an
       existing static (reserved) IP address resource. When omitted, Google Cloud
       assigns an ephemeral IP address.
@@ -291,7 +290,6 @@ properties:
         * `global/addresses/address-name`
         * `address-name`
 
-
       The forwarding rule's `target` or `backendService`,
       and in most cases, also the `loadBalancingScheme`, determine the
       type of IP address that you can use. For detailed information, see
@@ -301,7 +299,7 @@ properties:
       When reading an `IPAddress`, the API always returns the IP
       address number.
     default_from_api: true
-    diff_suppress_func: 'tpgresource.InternalIpDiffSuppress'
+    diff_suppress_func: 'InternalIpDiffSuppress'
   - name: 'IPProtocol'
     type: Enum
     description: |
@@ -346,7 +344,7 @@ properties:
 
       For more information about forwarding rules, refer to
       [Forwarding rule concepts](https://cloud.google.com/load-balancing/docs/forwarding-rule-concepts).
-    default_value: EXTERNAL
+    default_value: "EXTERNAL"
     enum_values:
       - 'EXTERNAL'
       - 'EXTERNAL_MANAGED'
@@ -414,7 +412,7 @@ properties:
 
       @pattern: \d+(?:-\d+)?
     default_from_api: true
-    diff_suppress_func: 'tpgresource.PortRangeDiffSuppress'
+    diff_suppress_func: 'PortRangeDiffSuppress'
   - name: 'ports'
     type: Array
     description: |
@@ -476,12 +474,20 @@ properties:
         *  `vpc-sc` - [ APIs that support VPC Service Controls](https://cloud.google.com/vpc-service-controls/docs/supported-products).
         *  `all-apis` - [All supported Google APIs](https://cloud.google.com/vpc/docs/private-service-connect#supported-apis).
 
-
       For Private Service Connect forwarding rules that forward traffic to managed services, the target must be a service attachment.
     update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setTarget'
     update_verb: 'POST'
     diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
     custom_expand: 'templates/terraform/custom_expand/go/self_link_from_name.tmpl'
+  - name: 'labelFingerprint'
+    type: Fingerprint
+    description: |
+      The fingerprint used for optimistic locking of this resource.  Used
+      internally during updates.
+    output: true
+    update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setLabels'
+    update_verb: 'POST'
+    key_expander: ''
   - name: 'allowGlobalAccess'
     type: Boolean
     description: |
@@ -504,15 +510,6 @@ properties:
     immutable: false
     update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setLabels'
     update_verb: 'POST'
-  - name: 'labelFingerprint'
-    type: Fingerprint
-    description: |
-      The fingerprint used for optimistic locking of this resource.  Used
-      internally during updates.
-    output: true
-    update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setLabels'
-    update_verb: 'POST'
-    key_expander: ''
   - name: 'allPorts'
     type: Boolean
     description: |

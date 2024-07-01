@@ -1,4 +1,3 @@
-# [START dns_policy_basic]
 resource "google_dns_policy" "<%= ctx[:primary_resource_id] %>" {
   name                      = "<%= ctx[:vars]['policy_name'] %>"
   enable_inbound_forwarding = true
@@ -32,4 +31,3 @@ resource "google_compute_network" "network-2" {
   name                    = "<%= ctx[:vars]['network_2_name'] %>"
   auto_create_subnetworks = false
 }
-# [END dns_policy_basic]
