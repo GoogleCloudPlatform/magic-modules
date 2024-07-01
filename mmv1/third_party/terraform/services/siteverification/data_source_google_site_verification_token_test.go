@@ -13,7 +13,7 @@ func TestAccSiteVerificationToken_siteverificationTokenSite(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"site": "https://www.example.com",
+		"site": "https://example.com",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
