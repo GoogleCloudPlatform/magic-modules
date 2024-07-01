@@ -31,27 +31,24 @@ func TestAccSCCOrganizationSource_complete(t *testing.T) {
 					resource.TestCheckResourceAttr("google_scc_v2_organization_source.custom_source", "canonical_name", canonicalName),
 				),
 			},
-			Config: testAccSCCOrganizationSourceCompleteExample(orgId, suffix, "My updated description", canonicalName),
+			{
+				Config: testAccSCCOrganizationSourceCompleteExample(orgId, suffix, "My updated description", canonicalName),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_scc_v2_organization_source.custom_source", "description", "My updated description"),
 				),
 			},
-
 			{
 				Config: testAccSCCOrganizationSourceCompleteExample(orgId, suffix, "My updated description", canonicalName+"-updated"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_scc_v2_organization_source.custom_source", "canonical_name", canonicalName+"-updated"),
 				),
 			},
-
 			{
 				Config: testAccSCCOrganizationSourceCompleteExample(orgId, suffix+"-updated", "My updated description", canonicalName+"-updated"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_scc_v2_organization_source.custom_source", "display_name", fmt.Sprintf("TFSrc %s-updated", suffix)),
 				),
 			},
-
-			{
 			{
 				ResourceName:      "google_scc_v2_organization_source.custom_source",
 				ImportState:       true,
