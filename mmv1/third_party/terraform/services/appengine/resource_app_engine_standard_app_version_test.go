@@ -65,8 +65,7 @@ resource "google_project" "my_project" {
   billing_account = "%{billing_account}"
 }
 
-
-resource "google_project_service" "project" {
+resource "google_project_service" "gae" {
   project = google_project.my_project.project_id
   service = "appengine.googleapis.com"
 
@@ -75,10 +74,21 @@ resource "google_app_engine_application" "app" {
   project     = google_project_service.gae.project
   location_id = "us-central"
 }
+
+resource "google_service_account" "custom_service_account" {
+  project      = google_project_service.gae.project
+  account_id   = "tf-test-app-eng-%{random_suffix}"
+  display_name = "Service account for GAE acc test"
+}
+
+resource "google_project_iam_member" "storage_viewer" {
+  project = google_project.my_project.project_id
+  role    = "roles/storage.objectViewer"
+  member  = "serviceAccount:${google_service_account.custom_service_account.email}"
 }
 
 resource "google_app_engine_standard_app_version" "foo" {
-  project    = google_project_service.project.project
+  project    = google_project_service.gae.project
   version_id = "v1"
   service    = "default"
   runtime    = "python38"
@@ -124,12 +134,6 @@ resource "google_app_engine_standard_app_version" "foo" {
   noop_on_destroy = true
 }
 
-resource "google_project_iam_member" "storage_viewer" {
-  project  = google_project.my_project.project_id
-  role    = "roles/storage.objectViewer"
-  member  = "serviceAccount:service-${google_project.my_project.number}@gae-api-prod.google.com.iam.gserviceaccount.com"
-}
-
 resource "google_storage_bucket" "bucket" {
   project  = google_project.my_project.project_id
   name     = "tf-test-%{random_suffix}-standard-ae-bucket"
@@ -159,7 +163,7 @@ resource "google_project" "my_project" {
 }
 
 
-resource "google_project_service" "project" {
+resource "google_project_service" "gae" {
   project = google_project.my_project.project_id
   service = "appengine.googleapis.com"
 
@@ -182,6 +186,19 @@ resource "google_project_service" "vpcaccess_api" {
   depends_on = [time_sleep.wait_60_seconds]
 }
 
+resource "google_service_account" "custom_service_account" {
+  project      = google_project_service.gae.project
+  account_id   = "tf-test-app-eng-%{random_suffix}"
+  display_name = "Service account for GAE acc test"
+}
+
+resource "google_project_iam_member" "storage_viewer" {
+  project = google_project.my_project.project_id
+  role    = "roles/storage.objectViewer"
+  member  = "serviceAccount:${google_service_account.custom_service_account.email}"
+}
+
+
 resource "google_vpc_access_connector" "bar" {
   depends_on = [
     google_project_service.vpcaccess_api
@@ -194,12 +211,12 @@ resource "google_vpc_access_connector" "bar" {
 }
 
 resource "google_app_engine_application" "app" {
-  project     = google_project_service.project.project
+  project     = google_project_service.gae.project
   location_id = "us-central"
 }
 
 resource "google_app_engine_standard_app_version" "foo" {
-  project    = google_project_service.project.project
+  project    = google_project_service.gae.project
   version_id = "v1"
   service    = "default"
   runtime    = "python38"
@@ -250,12 +267,6 @@ resource "google_app_engine_standard_app_version" "foo" {
   noop_on_destroy = true
 }
 
-resource "google_project_iam_member" "storage_viewer" {
-  project  = google_project.my_project.project_id
-  role    = "roles/storage.objectViewer"
-  member  = "serviceAccount:service-${google_project.my_project.number}@gae-api-prod.google.com.iam.gserviceaccount.com"
-}
-
 resource "google_storage_bucket" "bucket" {
   project  = google_project.my_project.project_id
   name     = "tf-test-%{random_suffix}-standard-ae-bucket"
@@ -284,20 +295,32 @@ resource "google_project" "my_project" {
   billing_account = "%{billing_account}"
 }
 
-resource "google_app_engine_application" "app" {
-  project     = google_project.my_project.project_id
-  location_id = "us-central"
-}
-
-resource "google_project_service" "project" {
+resource "google_project_service" "gae" {
   project = google_project.my_project.project_id
   service = "appengine.googleapis.com"
 
   disable_dependent_services = false
 }
 
+resource "google_app_engine_application" "app" {
+  project     = google_project_service.gae.project
+  location_id = "us-central"
+}
+
+resource "google_service_account" "custom_service_account" {
+  project      = google_project_service.gae.project
+  account_id   = "tf-test-app-eng-%{random_suffix}"
+  display_name = "Service account for GAE acc test"
+}
+
+resource "google_project_iam_member" "storage_viewer" {
+  project = google_project.my_project.project_id
+  role    = "roles/storage.objectViewer"
+  member  = "serviceAccount:${google_service_account.custom_service_account.email}"
+}
+
 resource "google_app_engine_standard_app_version" "foo" {
-  project    = google_project_service.project.project
+  project    = google_project_service.gae.project
   version_id = "v1"
   service    = "default"
   runtime    = "python38"
@@ -331,12 +354,6 @@ resource "google_app_engine_standard_app_version" "foo" {
   }
 
   noop_on_destroy = true
-}
-
-resource "google_project_iam_member" "storage_viewer" {
-  project  = google_project.my_project.project_id
-  role    = "roles/storage.objectViewer"
-  member  = "serviceAccount:service-${google_project.my_project.number}@gae-api-prod.google.com.iam.gserviceaccount.com"
 }
 
 resource "google_storage_bucket" "bucket" {
