@@ -185,7 +185,7 @@ async:
   target_occurrences: <%= object.async.target_occurrences %>
 <%      end -%>
 <%    end -%>
-  actions: ['<%= object.async.actions.join('\',\'') %>']
+  actions: ['<%= object.async.actions.join('\', \'') %>']
 <%    if object.async.is_a? Api::OpAsync -%>
   type: 'OpAsync'
 <% #async.operation %>
