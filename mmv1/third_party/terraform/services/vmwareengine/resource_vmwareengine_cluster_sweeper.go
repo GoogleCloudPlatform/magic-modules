@@ -69,7 +69,13 @@ func testSweepVmwareengineCluster(region string) error {
 			// Change on each loop, so new value used in tpgresource.ReplaceVars
 			d.Set("parent", parent)
 
-			listUrl := "https://vmwareengine.googleapis.com/v1/{{parent}}/clusters"
+			listTemplate := "https://vmwareengine.googleapis.com/v1/{{parent}}/clusters"
+			listUrl, err := tpgresource.ReplaceVars(d, config, listTemplate)
+			if err != nil {
+				log.Printf("[INFO][SWEEPER_LOG] error preparing sweeper list url: %s", err)
+				continue
+			}
+
 			res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 				Config:    config,
 				Method:    "GET",
