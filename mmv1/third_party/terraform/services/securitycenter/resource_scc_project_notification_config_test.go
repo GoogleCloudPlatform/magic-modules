@@ -61,22 +61,3 @@ resource "google_scc_project_notification_config" "custom_notification_config" {
 }
 `, context)
 }
-
-func testAccSecurityCenterProjectNotificationConfig_sccProjectNotificationConfigBasicExample(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_pubsub_topic" "scc_project_notification" {
-  name = "tf-test-my-topic%{random_suffix}"
-}
-
-resource "google_scc_project_notification_config" "custom_notification_config" {
-  config_id    = "tf-test-my-config%{random_suffix}"
-  project      = "%{project}"
-  description  = "My custom Cloud Security Command Center Finding Notification Configuration"
-  pubsub_topic = google_pubsub_topic.scc_project_notification.id
-
-  streaming_config {
-    filter = "category = \"OPEN_FIREWALL\" AND state = \"ACTIVE\""
-  }
-}
-`, context)
-}
