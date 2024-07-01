@@ -164,6 +164,7 @@ properties:
     name: bigqueryDataset
     description: Shared dataset i.e. BigQuery dataset source.
     required: true
+    immutable: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'dataset'
