@@ -1,0 +1,33 @@
+resource "google_monitoring_uptime_check_config" "<%= ctx[:primary_resource_id] %>" {
+  display_name = "<%= ctx[:vars]["display_name"] %>"
+  timeout      = "60s"
+  user_labels  = {
+    example-key = "example-value"
+  }
+
+  http_check {
+    path = "some-path"
+    port = "443"
+  }
+
+  monitored_resource {
+    type = "cloud_run_revision"
+    labels = {
+      location     = google_cloud_run_v2_service.default.location
+      project_id   = google_cloud_run_v2_service.default.project
+      service_name = google_cloud_run_v2_service.default.name
+    }
+  }
+}
+
+resource "google_cloud_run_v2_service" "default" {
+  name     = "<%= ctx[:vars]["cloud_run_service_name"] %>"
+  location = "us-central1"
+  ingress = "INGRESS_TRAFFIC_ALL"
+  
+  template {
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+    }
+  }
+}
