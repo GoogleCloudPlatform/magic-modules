@@ -38,7 +38,7 @@ func testSweepVmwareengineExternalAccessRule(region string) error {
 	// List of location values includes:
 	//   * zones used for this resource type's acc tests in the past
 	//   * the 'region' passed to the sweeper
-	locations := []string{region, "us-central1-a", "us-central1-b", "southamerica-west1-a", "southamerica-west1-b", "me-west1-a", "me-west1-b"}
+	locations := []string{region, "us-central1", "southamerica-west1", "me-west1"}
 	log.Printf("[INFO][SWEEPER_LOG] Sweeping will include these locations: %v.", locations)
 	for _, location := range locations {
 
@@ -55,8 +55,8 @@ func testSweepVmwareengineExternalAccessRule(region string) error {
 
 		log.Printf("[INFO][SWEEPER_LOG] looking for parent resources in location '%s'.", location)
 
-		parentResponseField := "privateClouds"
-		parentListUrlTemplate := "https://vmwareengine.googleapis.com/v1/projects/{{project}}/locations/{{location}}/privateClouds"
+		parentResponseField := "networkPolicies"
+		parentListUrlTemplate := "https://vmwareengine.googleapis.com/v1/projects/{{project}}/locations/{{location}}/networkPolicies"
 		parentNames, err := sweeper.ListParentResourcesInLocation(d, config, parentListUrlTemplate, parentResponseField)
 		if err != nil {
 			log.Printf("[INFO][SWEEPER_LOG] error finding parental resources in location %s: %s", location, err)
