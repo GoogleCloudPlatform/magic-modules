@@ -1,3 +1,4 @@
+# [START cloudloadbalancing_target_https_proxy_http_keep_alive_timeout]
 resource "google_compute_target_https_proxy" "{{$.PrimaryResourceId}}" {
   name                        = "{{index $.Vars "target_https_proxy_name"}}"
   http_keep_alive_timeout_sec = 610
@@ -49,3 +50,4 @@ resource "google_compute_http_health_check" "default" {
   check_interval_sec = 1
   timeout_sec        = 1
 }
+# [END cloudloadbalancing_target_https_proxy_http_keep_alive_timeout]

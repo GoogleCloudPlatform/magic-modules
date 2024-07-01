@@ -1,5 +1,6 @@
 # External SSL proxy load balancer with managed instance group backend
 
+# [START cloudloadbalancing_ext_ssl_proxy_lb]
 # VPC
 resource "google_compute_network" "default" {
   name                    = "{{index $.Vars "ssl_proxy_xlb_network"}}"
@@ -183,4 +184,5 @@ resource "google_compute_firewall" "default" {
   }
   target_tags = ["allow-health-check"]
 }
+# [END cloudloadbalancing_ext_ssl_proxy_lb]
 

@@ -1,3 +1,4 @@
+# [START cloud_sql_postgres_instance_80_db_n1_s2]
 
 resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
   name             = "{{index $.Vars "database_instance_name"}}"
@@ -8,7 +9,9 @@ resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
   }
   deletion_protection =  "{{index $.Vars "deletion_protection"}}"
 }
+# [END cloud_sql_postgres_instance_80_db_n1_s2]
 
+# [START cloud_sql_postgres_instance_user]
 resource "random_password" "pwd" {
     length = 16
     special = false
@@ -19,3 +22,4 @@ resource "google_sql_user" "user" {
     instance = google_sql_database_instance.instance.name
     password = random_password.pwd.result
 }
+# [END cloud_sql_postgres_instance_user]

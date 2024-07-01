@@ -668,6 +668,10 @@ func getLabelsFieldNote(title string) string {
 		title, title, title)
 }
 
+func (r Resource) StateMigrationFile() string {
+	return fmt.Sprintf("templates/terraform/state_migrations/go/%s_%s.go.tmpl", google.Underscore(r.ProductMetadata.Name), google.Underscore(r.Name))
+}
+
 // ====================
 // Version-related methods
 // ====================
@@ -1491,7 +1495,14 @@ func (r Resource) PropertiesByCustomUpdateGroups() []UpdateGroup {
 		}
 		updateGroups = append(updateGroups, groupedProperty)
 	}
-	sort.Slice(updateGroups, func(i, j int) bool { return updateGroups[i].UpdateId < updateGroups[i].UpdateId })
+	sort.Slice(updateGroups, func(i, j int) bool {
+		a := updateGroups[i]
+		b := updateGroups[j]
+		if a.UpdateVerb != b.UpdateVerb {
+			return a.UpdateVerb > b.UpdateVerb
+		}
+		return a.UpdateId < b.UpdateId
+	})
 	return updateGroups
 }
 
@@ -1534,4 +1545,12 @@ func (r Resource) VersionedProvider(exampleVersion string) bool {
 		vp = exampleVersion
 	}
 	return vp != "" && vp != "ga"
+}
+
+func (r Resource) StateUpgradersCount() []int {
+	var nums []int
+	for i := r.StateUpgradeBaseSchemaVersion; i < r.SchemaVersion; i++ {
+		nums = append(nums, i)
+	}
+	return nums
 }

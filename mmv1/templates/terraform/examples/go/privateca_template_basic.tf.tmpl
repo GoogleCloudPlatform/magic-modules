@@ -1,3 +1,4 @@
+# [START privateca_create_certificate_template]
 resource "google_privateca_certificate_template" "{{$.PrimaryResourceId}}" {
   name = "{{index $.Vars "name"}}"
   location = "us-central1"
@@ -70,3 +71,4 @@ resource "google_privateca_certificate_template" "{{$.PrimaryResourceId}}" {
     label-one = "value-one"
   }
 }
+# [END privateca_create_certificate_template]

@@ -132,6 +132,7 @@ properties:
           of replicas.
         api_name: maxNumReplicas
         required: true
+        send_empty_value: true
       - name: 'cooldownPeriod'
         type: Integer
         description: |
