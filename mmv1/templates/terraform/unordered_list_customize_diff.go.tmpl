@@ -1,0 +1,41 @@
+{{- define "UnorderedListCustomizeDiff" -}}
+keys := diff.GetChangedKeysPrefix("{{ underscore $.Name }}")
+if len(keys) == 0 {
+    return nil
+}
+oldCount, newCount := diff.GetChange("{{ underscore $.Name }}.#")
+var count int
+// There could be duplicates - worth continuing even if the counts are unequal.
+if oldCount.(int) < newCount.(int) {
+    count = newCount.(int)
+} else {
+    count = oldCount.(int)
+}
+
+if count < 1 {
+    return nil
+}
+old := make([]interface{}, count)
+new := make([]interface{}, count)
+for i := 0; i < count; i++ {
+    o, n := diff.GetChange(fmt.Sprintf("{{ underscore $.Name }}.%d", i))
+
+    if o != nil {
+        old = append(old, o)
+    }
+    if n != nil {
+        new = append(new, n)
+    }
+}
+
+oldSet := schema.NewSet(schema.HashResource(Resource{{ $.ResourceMetadata.ResourceName }}().Schema["{{ underscore $.Name }}"].Elem.(*schema.Resource)), old)
+newSet := schema.NewSet(schema.HashResource(Resource{{ $.ResourceMetadata.ResourceName }}().Schema["{{ underscore $.Name }}"].Elem.(*schema.Resource)), new)
+
+if oldSet.Equal(newSet) {
+    if err := diff.Clear("{{ underscore $.Name }}"); err != nil {
+        return err
+    }
+}
+
+return nil
+{{- end }}

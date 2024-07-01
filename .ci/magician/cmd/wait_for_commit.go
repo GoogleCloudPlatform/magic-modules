@@ -48,43 +48,28 @@ func execWaitForCommit(syncBranchPrefix, baseBranch, sha string, runner source.R
 	fmt.Println("SYNC_BRANCH: ", syncBranch)
 
 	if syncBranchHasCommit(sha, syncBranch, runner) {
-		return fmt.Errorf("found %s in history of %s - dying to avoid double-generating that commit", sha, syncBranch)
+		fmt.Printf("found %s in history of %s - skipping wait\n", sha, syncBranch)
+		return nil
 	}
 
 	for {
-		if baseBranch != "main" {
-			output, err := gitRevParse("origin/"+syncBranch, runner)
-			if err != nil {
-				return err
-			}
-			syncHead := strings.TrimSpace(output)
-
-			output, err = gitRevParse(sha+"~", runner)
-			if err != nil {
-				return err
-			}
-			baseParent := strings.TrimSpace(output)
-			if syncHead == baseParent {
-				return nil
-			}
-			fmt.Println("sync branch is at: ", syncHead)
-			fmt.Println("current commit is: ", sha)
-		} else {
-			output, err := runner.Run("git", []string{"log", "--pretty=%H", "--reverse", fmt.Sprintf("origin/%s..origin/main", syncBranch)}, nil)
-			if err != nil {
-				return err
-			}
-			commits := strings.Split(output, "\n")
-			commit := ""
-			if len(commits) > 0 {
-				commit = strings.TrimSpace(commits[0])
-			}
-			if commit == sha {
-				return nil
-			}
-			fmt.Println("git log says waiting on: ", commit)
-			fmt.Println("command says waiting on: ", sha)
+		output, err := gitRevParse("origin/"+syncBranch, runner)
+		if err != nil {
+			return err
 		}
+		syncHead := strings.TrimSpace(output)
+
+		output, err = gitRevParse(sha+"~", runner)
+		if err != nil {
+			return err
+		}
+		baseParent := strings.TrimSpace(output)
+		if syncHead == baseParent {
+			return nil
+		}
+		fmt.Println("sync branch is at: ", syncHead)
+		fmt.Println("current commit is: ", sha)
+
 		if _, err := runner.Run("git", []string{"fetch", "origin", syncBranch}, nil); err != nil {
 			return err
 		}

@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/container"
 )
 
 func TestAccContainerCluster_basic(t *testing.T) {
@@ -595,6 +596,49 @@ func TestAccContainerCluster_withAuthenticatorGroupsConfig(t *testing.T) {
 			},
 		},
 	})
+}
+
+func TestUnitContainerCluster_Rfc3339TimeDiffSuppress(t *testing.T) {
+	cases := map[string]struct {
+		Old, New           string
+		ExpectDiffSuppress bool
+	}{
+		"same time, format changed to have leading zero": {
+			Old:                "2:00",
+			New:                "02:00",
+			ExpectDiffSuppress: true,
+		},
+		"same time, format changed not to have leading zero": {
+			Old:                "02:00",
+			New:                "2:00",
+			ExpectDiffSuppress: true,
+		},
+		"different time, both without leading zero": {
+			Old:                "2:00",
+			New:                "3:00",
+			ExpectDiffSuppress: false,
+		},
+		"different time, old with leading zero, new without": {
+			Old:                "02:00",
+			New:                "3:00",
+			ExpectDiffSuppress: false,
+		},
+		"different time, new with leading zero, oldwithout": {
+			Old:                "2:00",
+			New:                "03:00",
+			ExpectDiffSuppress: false,
+		},
+		"different time, both with leading zero": {
+			Old:                "02:00",
+			New:                "03:00",
+			ExpectDiffSuppress: false,
+		},
+	}
+	for tn, tc := range cases {
+		if container.Rfc3339TimeDiffSuppress("time", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+			t.Errorf("bad: %s, '%s' => '%s' expect DiffSuppress to return %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
+		}
+	}
 }
 
 <% unless version == 'ga' -%>
@@ -2059,7 +2103,7 @@ func TestAccContainerCluster_withNodePoolAutoscaling(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy: testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccContainerCluster_withNodePoolAutoscaling(clusterName, npName, networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.with_node_pool", "node_pool.0.autoscaling.0.min_node_count", "1"),
@@ -2072,7 +2116,7 @@ func TestAccContainerCluster_withNodePoolAutoscaling(t *testing.T) {
 				ImportStateVerify:	 true,
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
-			resource.TestStep{
+			{
 				Config: testAccContainerCluster_withNodePoolUpdateAutoscaling(clusterName, npName, networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.with_node_pool", "node_pool.0.autoscaling.0.min_node_count", "1"),
@@ -2085,7 +2129,7 @@ func TestAccContainerCluster_withNodePoolAutoscaling(t *testing.T) {
 				ImportStateVerify:	 true,
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
-			resource.TestStep{
+			{
 				Config: testAccContainerCluster_withNodePoolBasic(clusterName, npName, networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckNoResourceAttr("google_container_cluster.with_node_pool", "node_pool.0.autoscaling.0.min_node_count"),
@@ -2115,7 +2159,7 @@ func TestAccContainerCluster_withNodePoolCIA(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy: testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccContainerRegionalCluster_withNodePoolCIA(clusterName, npName, networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.with_node_pool", "node_pool.0.autoscaling.0.min_node_count", "0"),
@@ -2131,7 +2175,7 @@ func TestAccContainerCluster_withNodePoolCIA(t *testing.T) {
 				ImportStateVerify:	 true,
 				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
 			},
-			resource.TestStep{
+			{
 				Config: testAccContainerRegionalClusterUpdate_withNodePoolCIA(clusterName, npName, networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.with_node_pool", "node_pool.0.autoscaling.0.min_node_count", "0"),
@@ -2147,7 +2191,7 @@ func TestAccContainerCluster_withNodePoolCIA(t *testing.T) {
 				ImportStateVerify:	 true,
 				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
 			},
-			resource.TestStep{
+			{
 				Config: testAccContainerRegionalCluster_withNodePoolBasic(clusterName, npName, networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckNoResourceAttr("google_container_cluster.with_node_pool", "node_pool.0.autoscaling.0.min_node_count"),
@@ -10768,7 +10812,7 @@ func TestAccContainerCluster_privateRegistry(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccContainerCluster_privateRegistryEnabled(secretID, clusterName, networkName, subnetworkName),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(
@@ -10816,7 +10860,7 @@ func TestAccContainerCluster_privateRegistry(t *testing.T) {
 					),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccContainerCluster_withNodePoolPrivateRegistry(secretID, clusterName, nodePoolName, networkName, subnetworkName),
 			},
 			{
@@ -10825,7 +10869,7 @@ func TestAccContainerCluster_privateRegistry(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
-			resource.TestStep{
+			{
 				Config: testAccContainerCluster_withNodeConfigPrivateRegistry(secretID, clusterName, networkName, subnetworkName),
 			},
 			{

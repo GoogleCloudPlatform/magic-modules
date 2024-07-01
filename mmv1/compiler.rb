@@ -123,6 +123,14 @@ end
 
 if override_dir
   Google::LOGGER.info "Using override directory '#{override_dir}'"
+
+  # Normalize override dir to a path that is relative to the magic-modules directory
+  # This is needed for templates that concatenate pwd + override dir + path
+  if Pathname.new(override_dir).absolute?
+    override_dir = Pathname.new(override_dir).relative_path_from(__dir__).to_s
+    Google::LOGGER.info "Override directory normalized to relative path '#{override_dir}'"
+  end
+
   Dir["#{override_dir}/products/**/product.yaml"].each do |file_path|
     product = File.dirname(Pathname.new(file_path).relative_path_from(override_dir))
     all_product_files.push(product) unless all_product_files.include? product

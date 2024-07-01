@@ -167,6 +167,7 @@ properties:
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
+    send_empty_value: true
   - !ruby/object:Api::Type::Array
     name: 'destinationRanges'
     description: |
