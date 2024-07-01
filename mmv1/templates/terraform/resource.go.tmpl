@@ -408,10 +408,12 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{if $.GetAsync.IsA "PollAsync" -}}
     err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName -}}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncExistence -}}, "Creating {{ $.Name -}}", d.Timeout(schema.TimeoutCreate), {{ $.GetAsync.TargetOccurrences -}})
     if err != nil {
-{{if $.GetAsync.SuppressError -}}
+{{- if $.GetAsync.SuppressError -}}
+
         log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name }} %q finished updating: %q", d.Id(), err)
-{{-        else -}}
-{{if $.CustomCode.PostCreateFailure -}}
+
+{{-        else }}
+{{- if $.CustomCode.PostCreateFailure -}}
         resource{{ $.ResourceName -}}PostCreateFailure(d, meta)
 {{- end}}
         return fmt.Errorf("Error waiting to create {{ $.Name -}}: %s", err)
@@ -488,7 +490,7 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
         if err != nil {
             return res, err
         }
-{{- if or $.NestedQuery $.CustomCode.Decoder }}
+{{- if $.CustomCode.Decoder }}
 {{""}}
 {{- end }}
 {{- if $.NestedQuery }}
@@ -500,7 +502,9 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
         if res == nil {
             return nil, tpgresource.Fake404("nested", "{{ $.ResourceName }}")
         }
-
+{{- if not $.CustomCode.Decoder }}
+{{""}}
+{{- end }}
 {{- end -}}
 {{- if $.CustomCode.Decoder -}}
         res, err = resource{{ $.ResourceName -}}Decoder(d, meta, res)
