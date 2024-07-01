@@ -51,6 +51,7 @@ async:
   error:
     path: 'error'
     message: 'message'
+  include_project: true
 custom_code:
   pre_create: 'templates/terraform/pre_create/go/alloydb_instance.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/go/alloydb_instance.go.tmpl'
@@ -294,6 +295,8 @@ properties:
           These should be specified as project numbers only.
         item_type:
           type: String
+        item_validation:
+          regex: '^\d+$'
       - name: 'pscDnsName'
         type: String
         description: |
