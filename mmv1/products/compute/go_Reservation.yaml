@@ -232,7 +232,7 @@ properties:
                   description: |
                     The disk interface to use for attaching this disk.
                   immutable: true
-                  default_value: SCSI
+                  default_value: "SCSI"
                   enum_values:
                     - 'SCSI'
                     - 'NVME'
