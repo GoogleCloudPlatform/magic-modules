@@ -114,9 +114,6 @@ resource "google_privateca_certificate" "default" {
 		}
 	  }
 	  x509_config {
-		ca_options {
-		  is_ca = false
-		}
 		key_usage {
 		  base_key_usage {
 			crl_sign = false
@@ -202,9 +199,6 @@ resource "google_privateca_certificate" "default" {
 		}
 	  }
 	  x509_config {
-		ca_options {
-		  is_ca = false
-		}
 		key_usage {
 		  base_key_usage {
 			crl_sign = false
