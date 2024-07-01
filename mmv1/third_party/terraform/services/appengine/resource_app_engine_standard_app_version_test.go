@@ -65,16 +65,16 @@ resource "google_project" "my_project" {
   billing_account = "%{billing_account}"
 }
 
-resource "google_app_engine_application" "app" {
-  project     = google_project.my_project.project_id
-  location_id = "us-central"
-}
 
 resource "google_project_service" "project" {
   project = google_project.my_project.project_id
   service = "appengine.googleapis.com"
 
   disable_dependent_services = false
+resource "google_app_engine_application" "app" {
+  project     = google_project_service.gae.project
+  location_id = "us-central"
+}
 }
 
 resource "google_app_engine_standard_app_version" "foo" {
@@ -158,10 +158,6 @@ resource "google_project" "my_project" {
   billing_account = "%{billing_account}"
 }
 
-resource "google_app_engine_application" "app" {
-  project     = google_project.my_project.project_id
-  location_id = "us-central"
-}
 
 resource "google_project_service" "project" {
   project = google_project.my_project.project_id
@@ -195,6 +191,11 @@ resource "google_vpc_access_connector" "bar" {
   region = "us-central1"
   ip_cidr_range = "10.8.0.16/28"
   network = "default"
+}
+
+resource "google_app_engine_application" "app" {
+  project     = google_project_service.project.project
+  location_id = "us-central"
 }
 
 resource "google_app_engine_standard_app_version" "foo" {

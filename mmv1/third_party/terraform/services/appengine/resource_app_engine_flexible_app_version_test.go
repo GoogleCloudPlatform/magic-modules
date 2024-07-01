@@ -84,7 +84,7 @@ resource "google_compute_subnetwork" "subnetwork" {
 }
 
 resource "google_app_engine_application" "app" {
-  project     = google_project.my_project.project_id
+  project     = google_project_service.appengineflex.project
   location_id = "us-central"
 }
 
@@ -263,7 +263,7 @@ resource "google_compute_subnetwork" "subnetwork" {
 }
 
 resource "google_app_engine_application" "app" {
-  project     = google_project.my_project.project_id
+  project     = google_project_service.appengineflex.project
   location_id = "us-central"
 }
 
