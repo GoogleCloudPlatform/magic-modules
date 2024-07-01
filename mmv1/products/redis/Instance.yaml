@@ -423,9 +423,9 @@ properties:
   - !ruby/object:Api::Type::String
     name: redisVersion
     description: |
-      The version of Redis software. If not provided, latest supported
-      version will be used. Please check the API documentation linked
-      at the top for the latest valid values.
+      The version of Redis software. If not provided, the current recommended
+      version will be used for creation. For updates, a not provided version has no effect.
+      Please check the API documentation linked at the top for the latest valid values.
     default_from_api: true
     update_url: 'projects/{{project}}/locations/{{region}}/instances/{{name}}:upgrade'
     update_verb: :POST
