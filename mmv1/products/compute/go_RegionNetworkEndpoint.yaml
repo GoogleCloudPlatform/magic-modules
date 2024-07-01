@@ -34,7 +34,7 @@ read_verb: 'POST'
 delete_url: 'projects/{{project}}/regions/{{region}}/networkEndpointGroups/{{region_network_endpoint_group}}/detachNetworkEndpoints'
 delete_verb: 'POST'
 immutable: true
-mutex: networkEndpoint/{{project}}/{{region}}/{{region_network_endpoint_group}}
+mutex: 'networkEndpoint/{{project}}/{{region}}/{{region_network_endpoint_group}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
