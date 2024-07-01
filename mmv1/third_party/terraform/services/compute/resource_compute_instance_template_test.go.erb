@@ -1076,7 +1076,6 @@ func TestAccComputeInstanceTemplate_spot(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccComputeInstanceTemplate_spot_maxRunDuration_deleteTerminationAction(t *testing.T) {
 	t.Parallel()
 
@@ -1219,7 +1218,6 @@ func TestAccComputeInstanceTemplate_spot_maxRunDuration(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccComputeInstanceTemplate_localSsdRecoveryTimeout(t *testing.T) {
 	t.Parallel()
@@ -1770,7 +1768,6 @@ func testAccCheckComputeInstanceTemplateInstanceTerminationAction(instanceTempla
 }
 
 
-<% unless version == 'ga' -%>
 func testAccCheckComputeInstanceTemplateMaxRunDuration(instanceTemplate *compute.InstanceTemplate, instance_max_run_duration_want compute.Duration) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if !reflect.DeepEqual(*instanceTemplate.Properties.Scheduling.MaxRunDuration, instance_max_run_duration_want) {
@@ -1780,7 +1777,6 @@ func testAccCheckComputeInstanceTemplateMaxRunDuration(instanceTemplate *compute
 		return nil
 	}
 }
-<% end -%>
 
 
 func testAccCheckComputeInstanceTemplateLocalSsdRecoveryTimeout(instanceTemplate *compute.InstanceTemplate, instance_local_ssd_recovery_timeout_want compute.Duration) resource.TestCheckFunc {
@@ -3846,12 +3842,10 @@ resource "google_compute_instance_template" "foobar" {
     automatic_restart = false
     provisioning_model = "SPOT"
     instance_termination_action = "%s"
-<% unless version == 'ga' -%>
     max_run_duration {
 	nanos = 123
 	seconds = 60
     }
-<% end -%>
 
   }
 
@@ -3866,7 +3860,6 @@ resource "google_compute_instance_template" "foobar" {
 `, suffix, instanceTerminationAction)
 }
 
-<% unless version == 'ga' -%>
 func testAccComputeInstanceTemplate_maxRunDuration_onInstanceStopAction(suffix string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -3914,7 +3907,6 @@ resource "google_compute_instance_template" "foobar" {
 }
 `, suffix)
 }
-<% end -%>
 
 func testAccComputeInstanceTemplate_localSsdRecoveryTimeout(suffix string) string {
 	return fmt.Sprintf(`
