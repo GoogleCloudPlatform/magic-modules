@@ -13,7 +13,7 @@ func TestAccSiteVerificationToken_siteverificationTokenSite(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"site": "https://example.com",
+		"site": "https://www.example.com",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -49,7 +49,7 @@ data "google_site_verification_token" "site_meta" {
   provider            = google.scoped
   type                = "SITE"
   identifier          = "%{site}"
-  verification_method = "META"
+  verification_method = "METAX"
 }
 `, context)
 }
