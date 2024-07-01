@@ -3,112 +3,112 @@ package gkeonprem_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccGkeonpremVmwareCluster_vmwareClusterUpdateBasic(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  context := map[string]interface{}{
-    "random_suffix": acctest.RandString(t, 10),
-  }
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    CheckDestroy:             testAccCheckGkeonpremVmwareClusterDestroyProducer(t),
-    Steps: []resource.TestStep{
-      {
-        Config: testAccGkeonpremVmwareCluster_vmwareClusterUpdateMetalLbStart(context),
-      },
-      {
-        ResourceName:      "google_gkeonprem_vmware_cluster.cluster",
-        ImportState:       true,
-        ImportStateVerify: true,
-        ImportStateVerifyIgnore: []string{"annotations"},
-      },
-      {
-        Config: testAccGkeonpremVmwareCluster_vmwareClusterUpdateMetalLb(context),
-      },
-      {
-        ResourceName:      "google_gkeonprem_vmware_cluster.cluster",
-        ImportState:       true,
-        ImportStateVerify: true,
-        ImportStateVerifyIgnore: []string{"annotations"},
-      },
-    },
-  })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckGkeonpremVmwareClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccGkeonpremVmwareCluster_vmwareClusterUpdateMetalLbStart(context),
+			},
+			{
+				ResourceName:            "google_gkeonprem_vmware_cluster.cluster",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"annotations"},
+			},
+			{
+				Config: testAccGkeonpremVmwareCluster_vmwareClusterUpdateMetalLb(context),
+			},
+			{
+				ResourceName:            "google_gkeonprem_vmware_cluster.cluster",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"annotations"},
+			},
+		},
+	})
 }
 
 func TestAccGkeonpremVmwareCluster_vmwareClusterUpdateF5Lb(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  context := map[string]interface{}{
-    "random_suffix": acctest.RandString(t, 10),
-  }
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    CheckDestroy:             testAccCheckGkeonpremVmwareClusterDestroyProducer(t),
-    Steps: []resource.TestStep{
-      {
-        Config: testAccGkeonpremVmwareCluster_vmwareClusterUpdateF5LbStart(context),
-      },
-      {
-        ResourceName:      "google_gkeonprem_vmware_cluster.cluster",
-        ImportState:       true,
-        ImportStateVerify: true,
-      },
-      {
-        Config: testAccGkeonpremVmwareCluster_vmwareClusterUpdateF5lb(context),
-      },
-      {
-        ResourceName:      "google_gkeonprem_vmware_cluster.cluster",
-        ImportState:       true,
-        ImportStateVerify: true,
-      },
-    },
-  })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckGkeonpremVmwareClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccGkeonpremVmwareCluster_vmwareClusterUpdateF5LbStart(context),
+			},
+			{
+				ResourceName:      "google_gkeonprem_vmware_cluster.cluster",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccGkeonpremVmwareCluster_vmwareClusterUpdateF5lb(context),
+			},
+			{
+				ResourceName:      "google_gkeonprem_vmware_cluster.cluster",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
 }
 
 func TestAccGkeonpremVmwareCluster_vmwareClusterUpdateManualLb(t *testing.T) {
-  // VCR fails to handle batched project services
-  acctest.SkipIfVcr(t)
-  t.Parallel()
+	// VCR fails to handle batched project services
+	acctest.SkipIfVcr(t)
+	t.Parallel()
 
-  context := map[string]interface{}{
-    "random_suffix": acctest.RandString(t, 10),
-  }
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    CheckDestroy:             testAccCheckGkeonpremVmwareClusterDestroyProducer(t),
-    Steps: []resource.TestStep{
-      {
-        Config: testAccGkeonpremVmwareCluster_vmwareClusterUpdateManualLbStart(context),
-      },
-      {
-        ResourceName:      "google_gkeonprem_vmware_cluster.cluster",
-        ImportState:       true,
-        ImportStateVerify: true,
-      },
-      {
-        Config: testAccGkeonpremVmwareCluster_vmwareClusterUpdateManualLb(context),
-      },
-      {
-        ResourceName:      "google_gkeonprem_vmware_cluster.cluster",
-        ImportState:       true,
-        ImportStateVerify: true,
-      },
-    },
-  })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckGkeonpremVmwareClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccGkeonpremVmwareCluster_vmwareClusterUpdateManualLbStart(context),
+			},
+			{
+				ResourceName:      "google_gkeonprem_vmware_cluster.cluster",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccGkeonpremVmwareCluster_vmwareClusterUpdateManualLb(context),
+			},
+			{
+				ResourceName:      "google_gkeonprem_vmware_cluster.cluster",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
 }
 
 func testAccGkeonpremVmwareCluster_vmwareClusterUpdateMetalLbStart(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 
   resource "google_gkeonprem_vmware_cluster" "cluster" {
     name = "tf-test-cluster-%{random_suffix}"
@@ -156,7 +156,7 @@ func testAccGkeonpremVmwareCluster_vmwareClusterUpdateMetalLbStart(context map[s
 }
 
 func testAccGkeonpremVmwareCluster_vmwareClusterUpdateMetalLb(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 
   resource "google_gkeonprem_vmware_cluster" "cluster" {
     name = "tf-test-cluster-%{random_suffix}"
@@ -204,7 +204,7 @@ func testAccGkeonpremVmwareCluster_vmwareClusterUpdateMetalLb(context map[string
 }
 
 func testAccGkeonpremVmwareCluster_vmwareClusterUpdateF5LbStart(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 
   resource "google_gkeonprem_vmware_cluster" "cluster" {
     name = "tf-test-cluster-%{random_suffix}"
@@ -251,7 +251,7 @@ func testAccGkeonpremVmwareCluster_vmwareClusterUpdateF5LbStart(context map[stri
 }
 
 func testAccGkeonpremVmwareCluster_vmwareClusterUpdateF5lb(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 
   resource "google_gkeonprem_vmware_cluster" "cluster" {
     name = "tf-test-cluster-%{random_suffix}"
@@ -298,7 +298,7 @@ func testAccGkeonpremVmwareCluster_vmwareClusterUpdateF5lb(context map[string]in
 }
 
 func testAccGkeonpremVmwareCluster_vmwareClusterUpdateManualLbStart(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 
   resource "google_gkeonprem_vmware_cluster" "cluster" {
     name = "tf-test-cluster-%{random_suffix}"
@@ -391,7 +391,7 @@ func testAccGkeonpremVmwareCluster_vmwareClusterUpdateManualLbStart(context map[
 }
 
 func testAccGkeonpremVmwareCluster_vmwareClusterUpdateManualLb(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 
   resource "google_gkeonprem_vmware_cluster" "cluster" {
     name = "tf-test-cluster-%{random_suffix}"

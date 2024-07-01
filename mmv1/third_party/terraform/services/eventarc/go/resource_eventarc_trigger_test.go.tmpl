@@ -12,11 +12,10 @@ import (
 
 	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
 	eventarc "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc{{ $.DCLVersion }}"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
-
 
 func TestAccEventarcTrigger_channel(t *testing.T) {
 	t.Parallel()
@@ -56,8 +55,8 @@ func TestAccEventarcTrigger_HttpDest(t *testing.T) {
 	t.Parallel()
 
 	region := envvar.GetTestRegionFromEnv()
-	
-        testNetworkName := acctest.BootstrapSharedTestNetwork(t, "attachment-network")
+
+	testNetworkName := acctest.BootstrapSharedTestNetwork(t, "attachment-network")
 	subnetName := acctest.BootstrapSubnet(t, "tf-test-subnet", testNetworkName)
 	networkAttachmentName := acctest.BootstrapNetworkAttachment(t, "tf-test-attachment", subnetName)
 
@@ -65,11 +64,11 @@ func TestAccEventarcTrigger_HttpDest(t *testing.T) {
 	fullFormNetworkAttachmentName := fmt.Sprintf("projects/%s/regions/%s/networkAttachments/%s", envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv(), networkAttachmentName)
 
 	context := map[string]interface{}{
-		"region":          region,
-		"project_name":    envvar.GetTestProjectFromEnv(),
-		"service_account": envvar.GetTestServiceAccountFromEnv(t),
-                "network_attachment": fullFormNetworkAttachmentName,
-                "random_suffix": acctest.RandString(t, 10),
+		"region":             region,
+		"project_name":       envvar.GetTestProjectFromEnv(),
+		"service_account":    envvar.GetTestServiceAccountFromEnv(t),
+		"network_attachment": fullFormNetworkAttachmentName,
+		"random_suffix":      acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

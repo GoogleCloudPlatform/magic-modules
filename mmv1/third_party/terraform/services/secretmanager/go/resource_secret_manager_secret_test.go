@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestAccSecretManagerSecret_import(t *testing.T) {
@@ -25,9 +25,9 @@ func TestAccSecretManagerSecret_import(t *testing.T) {
 				Config: testAccSecretManagerSecret_basic(context),
 			},
 			{
-				ResourceName:      "google_secret_manager_secret.secret-basic",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_secret_manager_secret.secret-basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"ttl", "labels", "terraform_labels"},
 			},
 		},
@@ -54,9 +54,9 @@ func TestAccSecretManagerSecret_cmek(t *testing.T) {
 				Config: testAccSecretMangerSecret_cmek(context1),
 			},
 			{
-				ResourceName:      "google_secret_manager_secret.secret-basic",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_secret_manager_secret.secret-basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"ttl", "labels", "terraform_labels"},
 			},
 		},
@@ -79,27 +79,27 @@ func TestAccSecretManagerSecret_annotationsUpdate(t *testing.T) {
 				Config: testAccSecretManagerSecret_annotationsBasic(context),
 			},
 			{
-				ResourceName:      "google_secret_manager_secret.secret-with-annotations",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_secret_manager_secret.secret-with-annotations",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"ttl", "labels", "terraform_labels", "annotations"},
 			},
 			{
 				Config: testAccSecretManagerSecret_annotationsUpdate(context),
 			},
 			{
-				ResourceName:      "google_secret_manager_secret.secret-with-annotations",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_secret_manager_secret.secret-with-annotations",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"ttl", "labels", "terraform_labels", "annotations"},
 			},
 			{
 				Config: testAccSecretManagerSecret_annotationsBasic(context),
 			},
 			{
-				ResourceName:      "google_secret_manager_secret.secret-with-annotations",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_secret_manager_secret.secret-with-annotations",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"ttl", "labels", "terraform_labels", "annotations"},
 			},
 		},
@@ -122,36 +122,36 @@ func TestAccSecretManagerSecret_versionAliasesUpdate(t *testing.T) {
 				Config: testAccSecretManagerSecret_basicWithSecretVersions(context),
 			},
 			{
-				ResourceName:      "google_secret_manager_secret.secret-basic",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_secret_manager_secret.secret-basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"ttl", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccSecretManagerSecret_versionAliasesBasic(context),
 			},
 			{
-				ResourceName:      "google_secret_manager_secret.secret-basic",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_secret_manager_secret.secret-basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"ttl", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccSecretManagerSecret_versionAliasesUpdate(context),
 			},
 			{
-				ResourceName:      "google_secret_manager_secret.secret-basic",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_secret_manager_secret.secret-basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"ttl", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccSecretManagerSecret_basicWithSecretVersions(context),
 			},
 			{
-				ResourceName:      "google_secret_manager_secret.secret-basic",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_secret_manager_secret.secret-basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"ttl", "labels", "terraform_labels"},
 			},
 		},

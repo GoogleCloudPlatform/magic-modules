@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -28,7 +28,7 @@ func TestAccDataprocCluster_missingZoneGlobalRegion1(t *testing.T) {
 
 	rnd := acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:  func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
@@ -44,7 +44,7 @@ func TestAccDataprocCluster_missingZoneGlobalRegion2(t *testing.T) {
 
 	rnd := acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:  func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
@@ -557,7 +557,6 @@ func TestAccDataprocCluster_spotWithAuxiliaryNodeGroups(t *testing.T) {
 					resource.TestCheckResourceAttr("google_dataproc_cluster.with_auxiliary_node_groups", "cluster_config.0.auxiliary_node_groups.0.node_group.0.node_group_config.0.accelerators.0.accelerator_count", "1"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.with_auxiliary_node_groups", "cluster_config.0.auxiliary_node_groups.0.node_group_id", "node-group-id"),
 					testAccCheckDataprocAuxiliaryNodeGroupAccelerator(&cluster, project),
-
 				),
 			},
 		},
@@ -705,7 +704,7 @@ func TestAccDataprocCluster_withServiceAcc(t *testing.T) {
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},
-		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
+		CheckDestroy: testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataprocCluster_withServiceAcc(sa, rnd, subnetworkName),
@@ -825,13 +824,13 @@ func TestAccDataprocCluster_withLifecycleConfigAutoDeletion(t *testing.T) {
 		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataprocCluster_withLifecycleConfigAutoDeletionTime(rnd, now.Add(time.Hour * 10).Format(fmtString), subnetworkName),
+				Config: testAccDataprocCluster_withLifecycleConfigAutoDeletionTime(rnd, now.Add(time.Hour*10).Format(fmtString), subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_lifecycle_config", &cluster),
 				),
 			},
 			{
-				Config: testAccDataprocCluster_withLifecycleConfigAutoDeletionTime(rnd, now.Add(time.Hour * 20).Format(fmtString), subnetworkName),
+				Config: testAccDataprocCluster_withLifecycleConfigAutoDeletionTime(rnd, now.Add(time.Hour*20).Format(fmtString), subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_lifecycle_config", &cluster),
 				),
@@ -1044,7 +1043,7 @@ func TestAccDataprocCluster_withMetastoreConfig(t *testing.T) {
 	updateServiceId := "tf-test-metastore-srv-update-" + acctest.RandString(t, 10)
 	msName_basic := fmt.Sprintf("projects/%s/locations/us-central1/services/%s", pid, basicServiceId)
 	msName_update := fmt.Sprintf("projects/%s/locations/us-central1/services/%s", pid, updateServiceId)
-	
+
 	var cluster dataproc.Cluster
 	clusterName := "tf-test-" + acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
@@ -1056,8 +1055,7 @@ func TestAccDataprocCluster_withMetastoreConfig(t *testing.T) {
 				Config: testAccDataprocCluster_withMetastoreConfig(clusterName, basicServiceId),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_metastore_config", &cluster),
-					resource.TestCheckResourceAttr("google_dataproc_cluster.with_metastore_config", "cluster_config.0.metastore_config.0.dataproc_metastore_service",msName_basic),
-					
+					resource.TestCheckResourceAttr("google_dataproc_cluster.with_metastore_config", "cluster_config.0.metastore_config.0.dataproc_metastore_service", msName_basic),
 				),
 			},
 			{
@@ -1065,7 +1063,6 @@ func TestAccDataprocCluster_withMetastoreConfig(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_metastore_config", &cluster),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.with_metastore_config", "cluster_config.0.metastore_config.0.dataproc_metastore_service", msName_update),
-					
 				),
 			},
 		},
@@ -2558,4 +2555,3 @@ resource "google_dataproc_metastore_service" "ms" {
 }
 `, clusterName, serviceId)
 }
-

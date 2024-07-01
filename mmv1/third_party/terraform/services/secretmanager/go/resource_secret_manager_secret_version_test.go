@@ -3,8 +3,8 @@ package secretmanager_test
 import (
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccSecretManagerSecretVersion_update(t *testing.T) {
@@ -31,9 +31,9 @@ func TestAccSecretManagerSecretVersion_update(t *testing.T) {
 				Config: testAccSecretManagerSecretVersion_disable(context),
 			},
 			{
-				ResourceName:            "google_secret_manager_secret_version.secret-version-basic",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_secret_manager_secret_version.secret-version-basic",
+				ImportState:       true,
+				ImportStateVerify: true,
 				// at this point the secret data is disabled and so reading the data on import will
 				// give an empty string
 				ImportStateVerifyIgnore: []string{"secret_data"},

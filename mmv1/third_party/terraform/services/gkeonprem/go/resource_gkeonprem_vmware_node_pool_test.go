@@ -3,46 +3,46 @@ package gkeonprem_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccGkeonpremVmwareNodePool_vmwareNodePoolUpdate(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  context := map[string]interface{}{
-    "random_suffix": acctest.RandString(t, 10),
-  }
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    CheckDestroy:             testAccCheckGkeonpremVmwareNodePoolDestroyProducer(t),
-    Steps: []resource.TestStep{
-      {
-        Config: testAccGkeonpremVmwareNodePool_vmwareNodePoolUpdateStart(context),
-      },
-      {
-        ResourceName:      "google_gkeonprem_vmware_node_pool.nodepool",
-        ImportState:       true,
-        ImportStateVerify: true,
-        ImportStateVerifyIgnore: []string{"annotations"},
-      },
-      {
-        Config: testAccGkeonpremVmwareNodePool_vmwareNodePoolUpdate(context),
-      },
-      {
-        ResourceName:      "google_gkeonprem_vmware_node_pool.nodepool",
-        ImportState:       true,
-        ImportStateVerify: true,
-        ImportStateVerifyIgnore: []string{"annotations"},
-      },
-    },
-  })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckGkeonpremVmwareNodePoolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccGkeonpremVmwareNodePool_vmwareNodePoolUpdateStart(context),
+			},
+			{
+				ResourceName:            "google_gkeonprem_vmware_node_pool.nodepool",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"annotations"},
+			},
+			{
+				Config: testAccGkeonpremVmwareNodePool_vmwareNodePoolUpdate(context),
+			},
+			{
+				ResourceName:            "google_gkeonprem_vmware_node_pool.nodepool",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"annotations"},
+			},
+		},
+	})
 }
 
 func testAccGkeonpremVmwareNodePool_vmwareNodePoolUpdateStart(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 
   resource "google_gkeonprem_vmware_cluster" "cluster" {
     name = "tf-test-cluster-%{random_suffix}"
@@ -127,7 +127,7 @@ func testAccGkeonpremVmwareNodePool_vmwareNodePoolUpdateStart(context map[string
 }
 
 func testAccGkeonpremVmwareNodePool_vmwareNodePoolUpdate(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 
   resource "google_gkeonprem_vmware_cluster" "cluster" {
     name = "tf-test-cluster-%{random_suffix}"
