@@ -211,7 +211,7 @@ properties:
       attachment.
     is_set: true
     send_empty_value: true
-    set_hash_func: 'computeServiceAttachmentConsumerAcceptListsHash'
+    set_hash_func: computeServiceAttachmentConsumerAcceptListsHash
     item_type:
       type: NestedObject
       properties:
