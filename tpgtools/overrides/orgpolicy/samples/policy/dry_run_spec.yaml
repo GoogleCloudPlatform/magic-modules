@@ -1,3 +1,0 @@
-variables:
-  - name: "org_id"
-    type: "org_id"
