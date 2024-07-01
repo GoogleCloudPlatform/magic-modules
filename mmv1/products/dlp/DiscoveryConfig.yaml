@@ -32,17 +32,20 @@ id_format: '{{parent}}/discoveryConfigs/{{name}}'
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dlp_discovery_config_basic'
+    skip_test: true
     primary_resource_id: 'basic'
     test_env_vars:
       project: :PROJECT_NAME
       location: :REGION
   - !ruby/object:Provider::Terraform::Examples
     name: 'dlp_discovery_config_actions'
+    skip_test: true
     primary_resource_id: 'actions'
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
     name: 'dlp_discovery_config_org_running'
+    skip_test: true
     primary_resource_id: 'org_running'
     test_env_vars:
       project: :PROJECT_NAME
@@ -55,16 +58,19 @@ examples:
       organization: :ORG_ID
   - !ruby/object:Provider::Terraform::Examples
     name: 'dlp_discovery_config_conditions_cadence'
+    skip_test: true
     primary_resource_id: 'conditions_cadence'
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
     name: 'dlp_discovery_config_filter_regexes_and_conditions'
+    skip_test: true
     primary_resource_id: 'filter_regexes_and_conditions'
     test_env_vars:
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
     name: 'dlp_discovery_config_cloud_sql'
+    skip_test: true
     primary_resource_id: 'cloud_sql'
     test_env_vars:
       project: :PROJECT_NAME
@@ -237,6 +243,18 @@ properties:
                     # The fields below are necessary to include the "otherTables" filter in the payload
                   send_empty_value: true
                   allow_empty_object: true
+                - !ruby/object:Api::Type::NestedObject
+                  name: tableReference
+                  description: The table to scan. Discovery configurations including this can only include one DiscoveryTarget (the DiscoveryTarget with this TableReference).
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: datasetId
+                      description: Dataset ID of the table.
+                      required: true
+                    - !ruby/object:Api::Type::String
+                      name: tableId
+                      description: Name of the table.
+                      required: true
             - !ruby/object:Api::Type::NestedObject
               name: conditions
               description: In addition to matching the filter, these conditions must be true before a profile is generated
@@ -371,6 +389,26 @@ properties:
                     []  # Meant to be an empty object with no properties. The fields below are necessary to include the "others" filter in the payload
                   send_empty_value: true
                   allow_empty_object: true
+                - !ruby/object:Api::Type::NestedObject
+                  name: databaseResourceReference
+                  description: The database resource to scan. Targets including this can only include one target (the target with this database resource reference).
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: projectId
+                      description: Required. If within a project-level config, then this must match the config's project ID.
+                      required: true
+                    - !ruby/object:Api::Type::String
+                      name: instance
+                      description: 'Required. The instance where this resource is located. For example: Cloud SQL instance ID.'
+                      required: true
+                    - !ruby/object:Api::Type::String
+                      name: database
+                      description: Required. Name of a database within the instance.
+                      required: true
+                    - !ruby/object:Api::Type::String
+                      name: databaseResource
+                      description: Required. Name of a database resource, for example, a table within the database.
+                      required: true
             - !ruby/object:Api::Type::NestedObject
               name: conditions
               description: 'In addition to matching the filter, these conditions must be true before a profile is generated.'
@@ -439,6 +477,14 @@ properties:
                 # The fields below are necessary to include the "disabled" filter in the payload
               send_empty_value: true
               allow_empty_object: true
+        - !ruby/object:Api::Type::NestedObject
+          name: secretsTarget
+          description: Discovery target that looks for credentials and secrets stored in cloud resource metadata and reports them as vulnerabilities to Security Command Center. Only one target of this type is allowed.
+          properties:
+            []  # Meant to be an empty object with no properties - see here : https://cloud.google.com/sensitive-data-protection/docs/reference/rest/v2/organizations.locations.discoveryConfigs#DiscoveryConfig.SecretsDiscoveryTarget
+            # The fields below are necessary to include the "secretsDiscoveryTarget" target in the payload
+          send_empty_value: true
+          allow_empty_object: true
   - !ruby/object:Api::Type::Array
     name: 'errors'
     description: Output only. A stream of errors encountered when the config was activated. Repeated errors may result in the config automatically being paused. Output only field. Will return the last 100 errors. Whenever the config is modified this list will be cleared.

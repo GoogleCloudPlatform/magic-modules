@@ -53,7 +53,7 @@ resource "google_sql_database_instance" "main" {
     tier = "db-f1-micro"
 
     database_flags {
-      name  = "cloudsql.iam_authentication"
+      name  = "cloudsql_iam_authentication"
       value = "on"
     }
   }
@@ -89,7 +89,7 @@ resource "google_sql_database_instance" "main" {
     tier = "db-f1-micro"
 
     database_flags {
-      name  = "cloudsql.iam_authentication"
+      name  = "cloudsql_iam_authentication"
       value = "on"
     }
   }
@@ -119,12 +119,14 @@ The following arguments are supported:
 
 * `type` - (Optional) The user type. It determines the method to authenticate the
     user during login. The default is the database's built-in user type. Flags
-    include "BUILT_IN", "CLOUD_IAM_USER", "CLOUD_IAM_GROUP" or "CLOUD_IAM_SERVICE_ACCOUNT".
+    include "BUILT_IN", "CLOUD_IAM_USER", and "CLOUD_IAM_SERVICE_ACCOUNT" for both 
+    [Postgres](https://cloud.google.com/sql/docs/postgres/admin-api/rest/v1beta4/users#sqlusertype) and [MySQL](https://cloud.google.com/sql/docs/mysql/admin-api/rest/v1beta4/users#sqlusertype).
+    MySQL also includes "CLOUD_IAM_GROUP", "CLOUD_IAM_GROUP_USER" and "CLOUD_IAM_GROUP_SERVICE_ACCOUNT".
 
 * `deletion_policy` - (Optional) The deletion policy for the user.
     Setting `ABANDON` allows the resource to be abandoned rather than deleted. This is useful
     for Postgres, where users cannot be deleted from the API if they have been granted SQL roles.
-    
+
     Possible values are: `ABANDON`.
 
 - - -

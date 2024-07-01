@@ -135,6 +135,7 @@ properties:
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
       - !ruby/object:Api::Type::Array
         name: acceleratorConfigs
+        diff_suppress_func: WorkbenchInstanceAcceleratorDiffSuppress
         description: |
           The hardware accelerators used on this instance. If you use accelerators, make sure that your configuration has
           [enough vCPUs and memory to support the `machine_type` you have selected](https://cloud.google.com/compute/docs/gpus/#gpus-list).
@@ -270,12 +271,10 @@ properties:
         name: bootDisk
         default_from_api: true
         description: The definition of a boot disk.
-        immutable: true
         properties:
           - !ruby/object:Api::Type::String
             name: diskSizeGb
             default_from_api: true
-            immutable: true
             description: |
               Optional. The size of the boot disk in GB attached to this instance,
               up to a maximum of 64000 GB (64 TB). If not specified, this defaults to the
@@ -314,13 +313,11 @@ properties:
         description: Data disks attached to the VM instance. Currently supports only one data disk.
         max_size: 1
         default_from_api: true
-        immutable: true
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::String
               name: diskSizeGb
               default_from_api: true
-              immutable: true
               description: |
                 Optional. The size of the disk in GB attached to this VM instance,
                 up to a maximum of 64000 GB (64 TB). If not specified, this defaults to
@@ -367,7 +364,6 @@ properties:
               name: network
               description: 'Optional. The name of the VPC that this VM instance is in.'
               immutable: true
-              custom_expand: templates/terraform/custom_expand/network_full_url.erb
               diff_suppress_func: tpgresource.CompareSelfLinkRelativePaths
               default_from_api: true
             - !ruby/object:Api::Type::String

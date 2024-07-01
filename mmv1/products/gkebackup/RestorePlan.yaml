@@ -134,6 +134,54 @@ examples:
       subnetwork_name: 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       deletion_protection: 'false'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'gkebackup_restoreplan_gitops_mode'
+    primary_resource_id: 'gitops_mode'
+    vars:
+      name: 'gitops-mode'
+      network_name: 'default'
+      subnetwork_name: 'default'
+    test_env_vars:
+      project: :PROJECT_NAME
+      deletion_protection: 'true'
+    test_vars_overrides:
+      deletion_protection: 'false'
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      subnetwork_name: 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+    oics_vars_overrides:
+      deletion_protection: 'false'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'gkebackup_restoreplan_restore_order'
+    primary_resource_id: 'restore_order'
+    vars:
+      name: 'restore-order'
+      network_name: 'default'
+      subnetwork_name: 'default'
+    test_env_vars:
+      project: :PROJECT_NAME
+      deletion_protection: 'true'
+    test_vars_overrides:
+      deletion_protection: 'false'
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      subnetwork_name: 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+    oics_vars_overrides:
+      deletion_protection: 'false'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'gkebackup_restoreplan_volume_res'
+    primary_resource_id: 'volume_res'
+    vars:
+      name: 'volume-res'
+      network_name: 'default'
+      subnetwork_name: 'default'
+    test_env_vars:
+      project: :PROJECT_NAME
+      deletion_protection: 'true'
+    test_vars_overrides:
+      deletion_protection: 'false'
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      subnetwork_name: 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+    oics_vars_overrides:
+      deletion_protection: 'false'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
@@ -285,6 +333,9 @@ properties:
         values:
           - :DELETE_AND_RESTORE
           - :FAIL_ON_CONFLICT
+          - :MERGE_SKIP_ON_CONFLICT
+          - :MERGE_REPLACE_VOLUME_ON_CONFLICT
+          - :MERGE_REPLACE_ON_CONFLICT
       - !ruby/object:Api::Type::Enum
         name: volumeDataRestorePolicy
         description: |
@@ -496,6 +547,85 @@ properties:
                     description: |
                       A string that specifies the desired value in string format
                       to use for transformation.
+      - !ruby/object:Api::Type::Array
+        name: volumeDataRestorePolicyBindings
+        description: |
+          A table that binds volumes by their scope to a restore policy. Bindings
+          must have a unique scope. Any volumes not scoped in the bindings are
+          subject to the policy defined in volume_data_restore_policy.
+        item_type: !ruby/object:Api::Type::NestedObject
+          required: true
+          properties:
+            - !ruby/object:Api::Type::Enum
+              name: policy
+              required: true
+              description: |
+                Specifies the mechanism to be used to restore this volume data.
+                See https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke/reference/rest/v1/RestoreConfig#VolumeDataRestorePolicy
+                for more information on each policy option.
+              values:
+                - :RESTORE_VOLUME_DATA_FROM_BACKUP
+                - :REUSE_VOLUME_HANDLE_FROM_BACKUP
+                - :NO_VOLUME_DATA_RESTORATION
+            - !ruby/object:Api::Type::Enum
+              name: volumeType
+              required: true
+              description: |
+                The volume type, as determined by the PVC's
+                bound PV, to apply the policy to.
+              values:
+                - :GCE_PERSISTENT_DISK
+      - !ruby/object:Api::Type::NestedObject
+        name: restoreOrder
+        description: |
+          It contains custom ordering to use on a Restore.
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: groupKindDependencies
+            required: true
+            description: |
+              A list of group kind dependency pairs
+              that is used by Backup for GKE to
+              generate a group kind restore order.
+            item_type: !ruby/object:Api::Type::NestedObject
+              required: true
+              properties:
+                - !ruby/object:Api::Type::NestedObject
+                  name: satisfying
+                  required: true
+                  description: |
+                    The satisfying group kind must be restored first
+                    in order to satisfy the dependency.
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: resourceGroup
+                      description: |
+                        API Group of a Kubernetes resource, e.g.
+                        "apiextensions.k8s.io", "storage.k8s.io", etc.
+                        Use empty string for core group.
+                    - !ruby/object:Api::Type::String
+                      name: resourceKind
+                      description: |
+                        Kind of a Kubernetes resource, e.g.
+                        "CustomResourceDefinition", "StorageClass", etc.
+                - !ruby/object:Api::Type::NestedObject
+                  name: requiring
+                  required: true
+                  description: |
+                    The requiring group kind requires that the satisfying
+                    group kind be restored first.
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: resourceGroup
+                      description: |
+                        API Group of a Kubernetes resource, e.g.
+                        "apiextensions.k8s.io", "storage.k8s.io", etc.
+                        Use empty string for core group.
+                    - !ruby/object:Api::Type::String
+                      name: resourceKind
+                      description: |
+                        Kind of a Kubernetes resource, e.g.
+                        "CustomResourceDefinition", "StorageClass", etc.
   - !ruby/object:Api::Type::String
     name: state
     output: true

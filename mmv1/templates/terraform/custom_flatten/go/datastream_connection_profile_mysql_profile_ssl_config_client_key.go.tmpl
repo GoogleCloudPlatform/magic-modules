@@ -1,4 +1,4 @@
-{{- /*
+{{/*
 	The license inside this block applies to this file
 	Copyright 2024 Google Inc.
 	Licensed under the Apache License, Version 2.0 (the "License");
@@ -9,8 +9,8 @@
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	See the License for the specific language governing permissions and
 	limitations under the License.
-*/}}
-{{- /* Workaround for https://github.com/hashicorp/terraform-provider-google/issues/12410 */}}
+*/ -}}
+{{/* Workaround for https://github.com/hashicorp/terraform-provider-google/issues/12410 */}}
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return d.Get("mysql_profile.0.ssl_config.0.client_key")
 }
