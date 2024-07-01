@@ -97,7 +97,7 @@ func {{ $.ResourceName }}IamUpdaterProducer(d tpgresource.TerraformResourceData,
 		values["{{ $param }}"] = v.(string)
 	}
 
-{{-   end }}
+{{   end }}
 {{- end }}{{- /* range $param := $.IamResourceParams */}}
 
 	// We may have gotten either a long or short name, so attempt to parse long name if possible

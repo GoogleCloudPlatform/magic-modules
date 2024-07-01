@@ -32,7 +32,7 @@ create_verb: 'PATCH'
 update_url: 'projects/{{project}}/global/networks/{{network}}/updatePeering'
 update_verb: 'PATCH'
 skip_delete: true
-mutex: projects/{{project}}/global/networks/{{network}}/peerings
+mutex: 'projects/{{project}}/global/networks/{{network}}/peerings'
 import_format:
   - 'projects/{{project}}/global/networks/{{network}}/networkPeerings/{{peering}}'
 timeouts:

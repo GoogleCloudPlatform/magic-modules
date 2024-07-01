@@ -1,0 +1,15 @@
+resource "google_pubsub_topic" "scc_v2_organization_notification_config" {
+  name = "{{index $.Vars "topic_name"}}"
+}
+
+resource "google_scc_v2_organization_notification_config" "{{$.PrimaryResourceId}}" {
+  config_id    = "{{index $.Vars "config_id"}}"
+  organization = "{{index $.TestEnvVars "org_id"}}"
+  location     = "global"
+  description  = "My custom Cloud Security Command Center Finding Organization Notification Configuration"
+  pubsub_topic = google_pubsub_topic.scc_v2_organization_notification_config.id
+
+  streaming_config {
+    filter = "category = \"OPEN_FIREWALL\" AND state = \"ACTIVE\""
+  }
+}

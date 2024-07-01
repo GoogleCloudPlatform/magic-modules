@@ -136,7 +136,7 @@ properties:
     type: Enum
     description: |
       Type of network endpoints in this network endpoint group. Defaults to SERVERLESS.
-    default_value: SERVERLESS
+    default_value: "SERVERLESS"
     enum_values:
       - 'SERVERLESS'
       - 'PRIVATE_SERVICE_CONNECT'

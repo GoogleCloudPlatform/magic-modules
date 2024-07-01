@@ -396,7 +396,11 @@ module Api
     def convert_go_file(file)
       dir, base = File.split(file)
       base.slice! '.erb'
-      "#{dir}/go/#{base}.tmpl"
+      if dir.end_with?('terraform')
+        "#{dir}/#{base}.go.tmpl"
+      else
+        "#{dir}/go/#{base}.tmpl"
+      end
     end
 
     # All settable properties in the resource.

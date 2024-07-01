@@ -95,7 +95,7 @@ properties:
     description: |
       Specifies the type of proxy header to append before sending data to
       the backend.
-    default_value: NONE
+    default_value: "NONE"
     enum_values:
       - 'NONE'
       - 'PROXY_V1'

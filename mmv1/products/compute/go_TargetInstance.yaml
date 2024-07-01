@@ -130,7 +130,7 @@ properties:
       NAT option controlling how IPs are NAT'ed to the instance.
       Currently only NO_NAT (default value) is supported.
     immutable: true
-    default_value: NO_NAT
+    default_value: "NO_NAT"
     enum_values:
       - 'NO_NAT'
   - name: 'securityPolicy'

@@ -1,5 +1,5 @@
-{{- define "UnorderedListCustomizeDiff" }}
-keys := diff.GetChangedKeysPrefix({{ underscore $.Name }})
+{{- define "UnorderedListCustomizeDiff" -}}
+keys := diff.GetChangedKeysPrefix("{{ underscore $.Name }}")
 if len(keys) == 0 {
     return nil
 }
@@ -28,11 +28,11 @@ for i := 0; i < count; i++ {
     }
 }
 
-oldSet := schema.NewSet(schema.HashResource(Resource{{ $.ResourceMetadata.ResourceName }}().Schema[{{ underscore $.Name }}].Elem.(*schema.Resource)), old)
-newSet := schema.NewSet(schema.HashResource(Resource{{ $.ResourceMetadata.ResourceName }}().Schema[{{ underscore $.Name }}].Elem.(*schema.Resource)), new)
+oldSet := schema.NewSet(schema.HashResource(Resource{{ $.ResourceMetadata.ResourceName }}().Schema["{{ underscore $.Name }}"].Elem.(*schema.Resource)), old)
+newSet := schema.NewSet(schema.HashResource(Resource{{ $.ResourceMetadata.ResourceName }}().Schema["{{ underscore $.Name }}"].Elem.(*schema.Resource)), new)
 
 if oldSet.Equal(newSet) {
-    if err := diff.Clear({{ underscore $.Name }}); err != nil {
+    if err := diff.Clear("{{ underscore $.Name }}"); err != nil {
         return err
     }
 }

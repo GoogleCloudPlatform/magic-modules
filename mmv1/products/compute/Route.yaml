@@ -95,6 +95,7 @@ examples:
       backend_name: 'compute-backend'
       route_name: 'route-ilb'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/compute_route.go.erb
   decoder: templates/terraform/decoders/route.erb
   extra_schema_entry: templates/terraform/extra_schema_entry/route.erb
 docs: !ruby/object:Provider::Terraform::Docs
@@ -252,4 +253,4 @@ properties:
       - next_hop_ip
       - next_hop_vpn_tunnel
       - next_hop_ilb
-    diff_suppress_func: 'tpgresource.CompareIpAddressOrSelfLinkOrResourceName'
+    diff_suppress_func: 'CompareIpAddressOrSelfLinkOrResourceName'

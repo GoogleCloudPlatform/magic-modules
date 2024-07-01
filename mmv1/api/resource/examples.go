@@ -204,6 +204,7 @@ func (e *Examples) SetHCLText() {
 	}
 	e.TestEnvVars = docTestEnvVars
 	e.DocumentationHCLText = ExecuteTemplate(e, e.ConfigPath, true)
+	e.DocumentationHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(e.DocumentationHCLText, "\n")
 
 	// Remove region tags
 	re1 := regexp.MustCompile(`# \[[a-zA-Z_ ]+\]\n`)

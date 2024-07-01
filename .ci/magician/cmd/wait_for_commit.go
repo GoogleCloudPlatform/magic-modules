@@ -48,7 +48,8 @@ func execWaitForCommit(syncBranchPrefix, baseBranch, sha string, runner source.R
 	fmt.Println("SYNC_BRANCH: ", syncBranch)
 
 	if syncBranchHasCommit(sha, syncBranch, runner) {
-		return fmt.Errorf("found %s in history of %s - dying to avoid double-generating that commit", sha, syncBranch)
+		fmt.Printf("found %s in history of %s - skipping wait\n", sha, syncBranch)
+		return nil
 	}
 
 	for {
@@ -68,7 +69,7 @@ func execWaitForCommit(syncBranchPrefix, baseBranch, sha string, runner source.R
 		}
 		fmt.Println("sync branch is at: ", syncHead)
 		fmt.Println("current commit is: ", sha)
-		
+
 		if _, err := runner.Run("git", []string{"fetch", "origin", syncBranch}, nil); err != nil {
 			return err
 		}

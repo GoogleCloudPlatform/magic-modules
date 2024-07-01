@@ -134,7 +134,7 @@ properties:
                 description: |
                   Time within the window to start the operations.
                   It must be in an hourly format "HH:MM",
-                  where HH : [00-23] and MM : [00] GMT.
+                  where HH : [00-23] and MM : [00] GMT. eg: 21:00
                 required: true
                 validation:
                   function: 'verify.ValidateHourlyOnly'
@@ -215,7 +215,7 @@ properties:
             description: |
               Specifies the behavior to apply to scheduled snapshots when
               the source disk is deleted.
-            default_value: KEEP_AUTO_SNAPSHOTS
+            default_value: "KEEP_AUTO_SNAPSHOTS"
             enum_values:
               - 'KEEP_AUTO_SNAPSHOTS'
               - 'APPLY_RETENTION_POLICY'

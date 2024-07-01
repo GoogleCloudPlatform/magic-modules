@@ -689,6 +689,7 @@ func checkExceptionList(filePath string) bool {
 		"custom_flatten/bigquery_table_ref_copy_destinationtable.go",
 		"custom_flatten/bigquery_table_ref_extract_sourcetable.go",
 		"custom_flatten/bigquery_table_ref_query_destinationtable.go",
+		"constants/router_nat_validate_action_active_range.go",
 		"unordered_list_customize_diff",
 		"default_if_empty",
 

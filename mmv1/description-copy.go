@@ -161,5 +161,9 @@ func terminateText(line string) bool {
 		}
 	}
 
+	if regexp.MustCompile(`^\s*https:[\s$]*`).MatchString(line) {
+		return false
+	}
+
 	return regexp.MustCompile(`^\s*[a-z_]+:[\s$]*`).MatchString(line)
 }

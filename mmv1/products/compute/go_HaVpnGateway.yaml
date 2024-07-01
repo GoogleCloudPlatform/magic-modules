@@ -127,7 +127,7 @@ properties:
       If not specified, IPV4_ONLY will be used.
     immutable: true
     custom_flatten: 'templates/terraform/custom_flatten/go/default_if_empty.tmpl'
-    default_value: IPV4_ONLY
+    default_value: "IPV4_ONLY"
     enum_values:
       - 'IPV4_ONLY'
       - 'IPV4_IPV6'

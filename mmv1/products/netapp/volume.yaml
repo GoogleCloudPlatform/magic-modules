@@ -475,6 +475,18 @@ properties:
         name: 'scheduledBackupEnabled'
         description: |-
           When set to true, scheduled backup is enabled on the volume. Omit if no backup_policy is specified.
+  - !ruby/object:Api::Type::String
+    name: 'zone'
+    description: |
+      Specifies the active zone for regional volume.
+    output: true
+    min_version: beta
+  - !ruby/object:Api::Type::String
+    name: 'replicaZone'
+    description: |
+      Specifies the replica zone for regional volume.
+    output: true
+    min_version: beta
 virtual_fields:
   - !ruby/object:Api::Type::Enum
     name: 'deletion_policy'

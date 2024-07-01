@@ -1,0 +1,83 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'ManagedFolder'
+kind: 'storage#managedFolder'
+base_url: 'b/{{bucket}}/managedFolders'
+self_link: 'b/{{bucket}}/managedFolders/{{%name}}'
+id_format: '{{bucket}}/{{name}}'
+delete_url: 'b/{{bucket}}/managedFolders/{{%name}}'
+has_self_link: true
+immutable: true
+skip_sweeper: true # Skipping sweeper since this is a child resource.
+description: |
+  A Google Cloud Storage Managed Folder.
+
+  You can apply Identity and Access Management (IAM) policies to
+  managed folders to grant principals access only to the objects
+  within the managed folder, which lets you more finely control access
+  for specific data sets and tables within a bucket. You can nest
+  managed folders up to 15 levels deep, including the parent managed
+  folder.
+
+  Managed folders can only be created in buckets that have uniform
+  bucket-level access enabled.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Official Documentation': 'https://cloud.google.com/storage/docs/managed-folders'
+  api: 'https://cloud.google.com/storage/docs/json_api/v1/managedFolder'
+# iam_policy: handwritten in mmv1/third_party/terraform/services/storage/iam_storage_managed_folder.go
+import_format:
+  - '{{bucket}}/managedFolders/{{%name}}'
+  - '{{bucket}}/{{%name}}'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'storage_managed_folder_basic'
+    primary_resource_id: 'folder'
+    vars:
+      bucket_name: 'my-bucket'
+parameters:
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'bucket'
+    resource: 'Bucket'
+    imports: 'name'
+    description: 'The name of the bucket that contains the managed folder.'
+    required: true
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description: |
+      The name of the managed folder expressed as a path. Must include
+      trailing '/'. For example, `example_dir/example_dir2/`.
+    required: true
+    # The API returns values with trailing slashes, even if not
+    # provided. Enforcing trailing slashes prevents diffs and ensures
+    # consistent output.
+    validation: !ruby/object:Provider::Terraform::Validation
+      regex: '/$'
+properties:
+  - !ruby/object:Api::Type::String
+    name: createTime
+    description: |
+      The timestamp at which this managed folder was created.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: updateTime
+    description: |
+      The timestamp at which this managed folder was most recently updated.
+    output: true
+  - !ruby/object:Api::Type::String
+    name: metageneration
+    description: |
+      The metadata generation of the managed folder.
+    output: true

@@ -88,7 +88,7 @@ properties:
       the backend.
     update_url: 'projects/{{project}}/global/targetSslProxies/{{name}}/setProxyHeader'
     update_verb: 'POST'
-    default_value: NONE
+    default_value: "NONE"
     enum_values:
       - 'NONE'
       - 'PROXY_V1'

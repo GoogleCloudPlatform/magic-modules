@@ -149,7 +149,7 @@ properties:
     type: Enum
     description: |
       CPU overcommit.
-    default_value: NONE
+    default_value: "NONE"
     enum_values:
       - 'ENABLED'
       - 'NONE'

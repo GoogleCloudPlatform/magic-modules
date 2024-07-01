@@ -158,6 +158,7 @@ func Format2Regex(format string) string {
 		// TODO: the trims may not be needed with more effecient regex
 		word := strings.TrimPrefix(match, "{{")
 		word = strings.TrimSuffix(word, "}}")
+		word = strings.ReplaceAll(word, "%", "")
 		return fmt.Sprintf("(?P<%s>.+)", word)
 	})
 	re = regexp.MustCompile(`\{\{([[:word:]]+)\}\}`)

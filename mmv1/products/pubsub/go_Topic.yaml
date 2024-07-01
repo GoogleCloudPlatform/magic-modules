@@ -143,7 +143,7 @@ properties:
       - name: 'encoding'
         type: Enum
         description: The encoding of messages validated against schema.
-        default_value: ENCODING_UNSPECIFIED
+        default_value: "ENCODING_UNSPECIFIED"
         enum_values:
           - 'ENCODING_UNSPECIFIED'
           - 'JSON'

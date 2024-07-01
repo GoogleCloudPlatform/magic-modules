@@ -858,39 +858,6 @@ func (t Terraform) GetMmv1ServicesInVersion(products []*api.Product) []string {
 //
 // end
 //
-// # Returns an updated path for a given Terraform field path (e.g.
-// # 'a_field', 'parent_field.0.child_name'). Returns nil if the property
-// # is not included in the resource's properties and removes keys that have
-// # been flattened
-// # FYI: Fields that have been renamed should use the new name, however, flattened
-// # fields still need to be included, ie:
-// # flattenedField > newParent > renameMe should be passed to this function as
-// # flattened_field.0.new_parent.0.im_renamed
-// # TODO(emilymye): Change format of input for
-// # exactly_one_of/at_least_one_of/etc to use camelcase, MM properities and
-// # convert to snake in this method
-// def get_property_schema_path(schema_path, resource)
-//
-//	nested_props = resource.properties
-//	prop = nil
-//	path_tkns = schema_path.split('.0.').map do |pname|
-//	  camel_pname = pname.camelize(:lower)
-//	  prop = nested_props.find { |p| p.name == camel_pname }
-//	  # if we couldn't find it, see if it was renamed at the top level
-//	  prop = nested_props.find { |p| p.name == schema_path } if prop.nil?
-//	  return nil if prop.nil?
-//
-//	  nested_props = prop.nested_properties || []
-//	  prop.flatten_object ? nil : pname.underscore
-//	end
-//	if path_tkns.empty? || path_tkns[-1].nil?
-//	  nil
-//	else
-//	  path_tkns.compact.join('.0.')
-//	end
-//
-// end
-//
 // # Capitalize the first letter of a property name.
 // # E.g. "creationTimestamp" becomes "CreationTimestamp".
 // def titlelize_property(property)

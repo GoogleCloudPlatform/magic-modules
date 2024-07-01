@@ -137,6 +137,7 @@ properties:
           to. This is required when creating or updating an autoscaler. The
           maximum number of replicas should not be lower than minimal number
           of replicas.
+        send_empty_value: true
         required: true
       - !ruby/object:Api::Type::Integer
         name: 'cooldownPeriod'

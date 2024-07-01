@@ -130,7 +130,7 @@ skip_delete: <%= object.skip_delete %>
 immutable: <%= object.immutable %>
 <%  end -%>
 <%  unless object.mutex.nil? -%>
-mutex: <%= object.mutex %>
+mutex: '<%= object.mutex %>'
 <%  end -%>
 <%
 #import
@@ -184,8 +184,8 @@ async:
 <%      unless object.async.target_occurrences.nil? -%>
   target_occurrences: <%= object.async.target_occurrences %>
 <%      end -%>
-  actions: ['<%= object.async.actions.join('\',\'') %>']
 <%    end -%>
+  actions: ['<%= object.async.actions.join('\', \'') %>']
 <%    if object.async.is_a? Api::OpAsync -%>
   type: 'OpAsync'
 <% #async.operation %>
