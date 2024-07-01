@@ -108,9 +108,6 @@ module Api
       # Can only be overridden - we should never set this ourselves.
       attr_reader :new_type
 
-      # A pattern that maps expected user input to expected API input.
-      attr_reader :pattern
-
       # ====================
       # Terraform Overrides
       # ====================
@@ -238,7 +235,6 @@ module Api
       check :update_url, type: ::String
       check :update_id, type: ::String
       check :fingerprint_name, type: ::String
-      check :pattern, type: ::String
 
       check_default_value_property
       check_conflicts
