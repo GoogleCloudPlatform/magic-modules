@@ -19,7 +19,10 @@ func TestAccDataSourceComputeHaVpnGateway(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceComputeHaVpnGatewayConfig(gwName),
-				Check:  acctest.CheckDataSourceStateMatchesResourceState("data.google_compute_ha_vpn_gateway.ha_gateway", "google_compute_ha_vpn_gateway.ha_gateway"),
+				Check:  resource.ComposeTestCheckFunc(
+					acctest.CheckDataSourceStateMatchesResourceState("data.google_compute_ha_vpn_gateway.ha_gateway", "google_compute_ha_vpn_gateway.ha_gateway"),
+					resource.TestCheckResourceAttr("data.google_compute_ha_vpn_gateway.ha_gateway", "gateway_ip_version", "IPV4"),
+				),
 			},
 		},
 	})
@@ -30,8 +33,6 @@ func testAccDataSourceComputeHaVpnGatewayConfig(gwName string) string {
 resource "google_compute_ha_vpn_gateway" "ha_gateway" {
   name     = "%s"
   network  = google_compute_network.network1.id
-  stack_type = "IPV4_ONLY"
-  gateway_ip_version = "IPV4"
 }
 
 resource "google_compute_network" "network1" {
