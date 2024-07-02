@@ -84,8 +84,8 @@ var (
 		},
 		{
 			id:        "slevenick",
-			startDate: newDate(2024, 6, 5, pdtLoc),
-			endDate:   newDate(2024, 6, 16, pdtLoc),
+			startDate: newDate(2024, 7, 5, pdtLoc),
+			endDate:   newDate(2024, 7, 16, pdtLoc),
 		},
 	}
 )
