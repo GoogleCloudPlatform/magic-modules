@@ -37,26 +37,16 @@ func TestAccDataSourceGoogleGKEHub2MembershipBinding_basic(t *testing.T) {
 
 func testAccDataSourceGoogleGKEHub2MembershipBinding_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_project" "project" {
-  name            = "tf-test-gkehub%{random_suffix}"
-  project_id      = "tf-test-gkehub%{random_suffix}"
-  org_id          = "%{org_id}"
-  billing_account = "%{billing_account}"
-}
-
 resource "google_project_service" "compute" {
-  project = google_project.project.project_id
   service = "compute.googleapis.com"
   disable_on_destroy = false
 }
 
 resource "google_project_service" "anthos" {
-  project = google_project.project.project_id
   service = "anthos.googleapis.com"
 }
 
 resource "google_project_service" "gkehub" {
-  project = google_project.project.project_id
   service = "gkehub.googleapis.com"
   disable_on_destroy = false
 }
@@ -71,19 +61,16 @@ resource "time_sleep" "wait_for_gkehub_enablement" {
 }
 
 resource "google_gke_hub_membership" "example" {
-  project = google_project.project.project_id
   membership_id = "tf-test-membership%{random_suffix}"
   depends_on = [time_sleep.wait_for_gkehub_enablement]
 }
 
 resource "google_gke_hub_scope" "example" {
-  project = google_project.project.project_id
   scope_id = "tf-test-scope%{random_suffix}"
   depends_on = [time_sleep.wait_for_gkehub_enablement]
 }
 
 resource "google_gke_hub_membership_binding" "example" {
-  project = google_project.project.project_id
   membership_binding_id = "tf-test-membership-binding%{random_suffix}"
   scope = google_gke_hub_scope.example.name
   membership_id = "tf-test-membership%{random_suffix}"
@@ -101,7 +88,6 @@ resource "google_gke_hub_membership_binding" "example" {
 
 data "google_gke_hub_membership_binding" "example" {
   location = google_gke_hub_membership_binding.example.location
-  project  = google_gke_hub_membership_binding.example.project
   membership_id = google_gke_hub_membership_binding.example.membership_id
   membership_binding_id = google_gke_hub_membership_binding.example.membership_binding_id
 }
