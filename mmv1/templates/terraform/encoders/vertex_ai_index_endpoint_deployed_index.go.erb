@@ -1,0 +1,6 @@
+req := make(map[string]interface{})
+obj["id"] = d.Get("name")
+delete(obj, "name")
+delete(obj, "indexEndpoint")
+req["deployedIndex"] = obj
+return req, nil
