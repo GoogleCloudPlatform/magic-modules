@@ -61,6 +61,17 @@ examples:
     vars:
       name: 'example_feature_view_feature_registry'
   - !ruby/object:Provider::Terraform::Examples
+    name: 'vertex_ai_featureonlinestore_featureview_cross_project'
+    external_providers: ["time"]
+    primary_resource_id: 'cross_project_featureview'
+    ignore_read_extra:
+      - feature_registry_source.0.project_number
+    test_env_vars:
+      org_id: :ORG_ID
+      billing_account: :BILLING_ACCT
+    vars:
+      name: 'example_cross_project_featureview'
+  - !ruby/object:Provider::Terraform::Examples
     name: 'vertex_ai_featureonlinestore_featureview_with_vector_search'
     primary_resource_id: 'featureview_vector_search'
     vars:
@@ -160,6 +171,11 @@ properties:
               description: |
                 Identifiers of features under the feature group.
               item_type: Api::Type::String
+      - !ruby/object:Api::Type::String
+        name: 'projectNumber'
+        description: |
+          The project number of the parent project of the feature Groups.
+        custom_flatten: templates/terraform/custom_flatten/vertex_ai_feature_view_ignore_project_number.go.erb
   - !ruby/object:Api::Type::NestedObject
     name: 'vectorSearchConfig'
     description: |
