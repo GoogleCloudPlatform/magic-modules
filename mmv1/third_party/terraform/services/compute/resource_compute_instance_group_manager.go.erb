@@ -1529,12 +1529,12 @@ func expandAllInstancesConfig(old []interface{}, new []interface{}) *compute.Ins
 		for _, raw := range old {
 			if raw != nil {
 				data := raw.(map[string]interface{})
-				for k, _ := range data["metadata"].(map[string]interface{}) {
+				for k := range data["metadata"].(map[string]interface{}) {
 					if _, exist := properties.Metadata[k]; !exist {
 						properties.NullFields = append(properties.NullFields, fmt.Sprintf("Metadata.%s", k))
 					}
 				}
-				for k, _ := range data["labels"].(map[string]interface{}) {
+				for k := range data["labels"].(map[string]interface{}) {
 					if _, exist := properties.Labels[k]; !exist {
 						properties.NullFields = append(properties.NullFields, fmt.Sprintf("Labels.%s", k))
 					}
