@@ -72,6 +72,7 @@ class VcrDetails(private val providerName: String, private val buildId: String, 
                 terraformCoreBinaryTesting()
                 terraformShouldPanicForSchemaErrors()
                 readOnlySettings()
+                activeBranchSettings()
                 workingDirectory(path)
             }
 

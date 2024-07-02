@@ -12,6 +12,7 @@ import builds.AllContextParameters
 import builds.getBetaAcceptanceTestConfig
 import builds.getVcrAcceptanceTestConfig
 import builds.readOnlySettings
+import builds.activeBranchSettings
 import jetbrains.buildServer.configs.kotlin.Project
 import projects.reused.mmUpstream
 import projects.reused.nightlyTests
@@ -46,6 +47,7 @@ fun googleSubProjectBeta(allConfig: AllContextParameters): Project {
 
         params {
             readOnlySettings()
+            activeBranchSettings()
         }
     }
 }
