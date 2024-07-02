@@ -43,9 +43,7 @@ examples:
     primary_resource_id: 'default'
     vars:
       private_connection_id: 'my-connection'
-      network_name: 'my-network'
-    test_vars_overrides:
-      network_name: 'acctest.BootstrapSharedTestNetwork(t, "dbms-privateconnection")'
+      network_name: 'my-private-connection-network'
 parameters:
   - !ruby/object:Api::Type::String
     name: privateConnectionId
