@@ -83,7 +83,7 @@ resource "google_service_account" "custom_service_account" {
 
 resource "google_project_iam_member" "storage_viewer" {
   project = google_project.my_project.project_id
-  role    = "roles/storage.objectViewer"
+  role    = "roles/storage.admin"
   member  = "serviceAccount:${google_service_account.custom_service_account.email}"
 }
 
@@ -194,7 +194,7 @@ resource "google_service_account" "custom_service_account" {
 
 resource "google_project_iam_member" "storage_viewer" {
   project = google_project.my_project.project_id
-  role    = "roles/storage.objectViewer"
+  role    = "roles/storage.admin"
   member  = "serviceAccount:${google_service_account.custom_service_account.email}"
 }
 
@@ -315,7 +315,7 @@ resource "google_service_account" "custom_service_account" {
 
 resource "google_project_iam_member" "storage_viewer" {
   project = google_project.my_project.project_id
-  role    = "roles/storage.objectViewer"
+  role    = "roles/storage.admin"
   member  = "serviceAccount:${google_service_account.custom_service_account.email}"
 }
 
