@@ -336,7 +336,9 @@ module Provider
                        ['converters/google/resources/logging_project_bucket_config.go',
                         'third_party/tgc/logging_project_bucket_config.go'],
                        ['converters/google/resources/logging_billing_account_bucket_config.go',
-                        'third_party/tgc/logging_billing_account_bucket_config.go']
+                        'third_party/tgc/logging_billing_account_bucket_config.go'],
+                       ['converters/google/resources/appengine_standard_version.go',
+                        'third_party/tgc/appengine_standard_version.go']
                      ])
     end
 

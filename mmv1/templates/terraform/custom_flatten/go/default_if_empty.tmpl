@@ -9,12 +9,12 @@
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	See the License for the specific language governing permissions and
 	limitations under the License.
-*/}}
+*/ -}}
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil || tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
 		return {{$.GoLiteral $.DefaultValue}}
 	}
-{{ if $.IsA "Integer" }}
+{{ if $.IsA "Integer" -}}
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
 		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {

@@ -122,7 +122,7 @@ Default value: {{ .ItemType.DefaultValue -}}
         DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
         {{- end }}
     {{ else -}}
-        Type: schema.Type{{ .ItemTypeClass -}},
+        Type: {{ .TFType .ItemType.Type }},
     {{ end -}}
       },
   {{ end -}}
@@ -166,16 +166,16 @@ Default value: {{ .ItemType.DefaultValue -}}
     Default: {{ .GoLiteral .DefaultValue -}},
 {{ end -}}
 {{ if or .Conflicting .Conflicts -}}
-    ConflictsWith: {{ .GoLiteral .Conflicting  -}},
+    ConflictsWith: {{ .GoLiteral (.GetPropertySchemaPathList .Conflicting)  -}},
 {{ end -}}
 {{ if or .AtLeastOneOfList .AtLeastOneOf -}}
-    AtLeastOneOf: {{ .GoLiteral .AtLeastOneOfList  -}},
+    AtLeastOneOf: {{ .GoLiteral (.GetPropertySchemaPathList .AtLeastOneOfList) -}},
 {{ end -}}
 {{ if or .ExactlyOneOfList .ExactlyOneOf -}}
-    ExactlyOneOf: {{ .GoLiteral .ExactlyOneOfList  -}},
+    ExactlyOneOf: {{ .GoLiteral (.GetPropertySchemaPathList .ExactlyOneOfList) -}},
 {{ end -}}
 {{ if or .RequiredWithList .RequiredWith -}}
-    RequiredWith: {{ .GoLiteral .RequiredWithList  -}},
+    RequiredWith: {{ .GoLiteral (.GetPropertySchemaPathList .RequiredWithList) -}},
 {{ end -}}
 },
 {{- end -}}

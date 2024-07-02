@@ -98,10 +98,10 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 {{- if $.StateUpgraders }}
 
         StateUpgraders: []schema.StateUpgrader{
-{{-       range $v := $.SchemaVersions }}
+{{-       range $v := $.StateUpgradersCount }}
           {
-            Type:    resource{{$.PathType}}ResourceV{{$v}}().CoreConfigSchema().ImpliedType(),
-            Upgrade: Resource{{$.PathType}}UpgradeV{{$v}},
+            Type:    resource{{$.ResourceName}}ResourceV{{$v}}().CoreConfigSchema().ImpliedType(),
+            Upgrade: Resource{{$.ResourceName}}UpgradeV{{$v}},
             Version: {{$v}},
           },
 {{-       end }}
@@ -109,6 +109,11 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 {{- end }}
 {{- if or (and (or $.HasProject $.HasRegion $.HasZone) (not $.SkipDefaultCdiff)) $.CustomDiff }}
         CustomizeDiff: customdiff.All(
+{{-   if $.UnorderedListProperties }}
+{{-     range $prop := $.UnorderedListProperties }}
+        resource{{ $.ResourceName }}{{ camelize $prop.Name "upper" }}SetStyleDiff,
+{{-     end}}
+{{-   end}}
 {{- if $.CustomDiff -}}
 {{-          range $cdiff := $.CustomDiff }}
         {{ $cdiff }},
@@ -149,8 +154,10 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
             },
 {{-   end}}
 {{- end}}
-{{/* TODO Q2 function to compile custom code lines ($.CustomCode.extra_schema_entry) */}}
-{{- if $.HasProject -}}
+{{- if $.CustomCode.ExtraSchemaEntry }} 
+    {{ $.CustomTemplate $.CustomCode.ExtraSchemaEntry false -}}
+{{- end}}
+{{ if $.HasProject -}}
             "project": {
                 Type:     schema.TypeString,
                 Optional: true,
@@ -170,9 +177,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 }
 
 {{- range $prop := $.AllUserProperties }}
-{{if and (eq $prop.Type "Array") ($prop.IsSet) (eq $prop.ItemType.Type "NestedObject")}}
 {{template "SchemaSubResource" $prop}}
-{{end}}
 {{- end}}
 
 {{- range $prop := $.UnorderedListProperties }}
@@ -240,7 +245,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     if err != nil {
         return err
     }
-{{if $.UpdateMask -}}
+{{- if $.UpdateMask }}
     url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": "{{ join $.NestedQuery.Keys "." -}}"})
     if err != nil {
         return err
@@ -274,7 +279,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     }
 
     headers := make(http.Header)
-{{- if $.CustomCode.PreCreate }} 
+{{- if $.CustomCode.PreCreate }}
     {{ $.CustomTemplate $.CustomCode.PreCreate false -}}
 {{- end}}
     res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
@@ -299,10 +304,10 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{- end}}
         return fmt.Errorf("Error creating {{ $.Name -}}: %s", err)
     }
-{{/* # Set resource properties from create API response (unless it returns an Operation) */}}
-{{if and ($.GetAsync) (not ($.GetAsync.IsA "OpAsync")) }}
+{{- /* # Set resource properties from create API response (unless it returns an Operation) */}}
+{{- if not (and $.GetAsync ($.GetAsync.IsA "OpAsync")) }}
 {{- range $prop := $.GettableProperties }}
-{{  if and ($.IsInIdentity $prop) $prop.Output }}
+{{-  if and ($.IsInIdentity $prop) $prop.Output }}
     if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {
         return fmt.Errorf(`Error setting computed identity field "{{ underscore $prop.Name }}": %s`, err)
     }
@@ -403,10 +408,12 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{if $.GetAsync.IsA "PollAsync" -}}
     err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName -}}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncExistence -}}, "Creating {{ $.Name -}}", d.Timeout(schema.TimeoutCreate), {{ $.GetAsync.TargetOccurrences -}})
     if err != nil {
-{{if $.GetAsync.SuppressError -}}
+{{- if $.GetAsync.SuppressError -}}
+
         log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name }} %q finished updating: %q", d.Id(), err)
-{{-        else -}}
-{{if $.CustomCode.PostCreateFailure -}}
+
+{{-        else }}
+{{- if $.CustomCode.PostCreateFailure -}}
         resource{{ $.ResourceName -}}PostCreateFailure(d, meta)
 {{- end}}
         return fmt.Errorf("Error waiting to create {{ $.Name -}}: %s", err)
@@ -483,7 +490,10 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
         if err != nil {
             return res, err
         }
-{{if $.NestedQuery -}}
+{{- if $.CustomCode.Decoder }}
+{{""}}
+{{- end }}
+{{- if $.NestedQuery }}
         res, err = flattenNested{{ $.ResourceName -}}(d, meta, res)
         if err != nil {
             return nil, err
@@ -492,7 +502,9 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
         if res == nil {
             return nil, tpgresource.Fake404("nested", "{{ $.ResourceName }}")
         }
-
+{{- if not $.CustomCode.Decoder }}
+{{""}}
+{{- end }}
 {{- end -}}
 {{- if $.CustomCode.Decoder -}}
         res, err = resource{{ $.ResourceName -}}Decoder(d, meta, res)
@@ -502,7 +514,7 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
         if res == nil {
             return nil, tpgresource.Fake404("decoded", "{{ $.ResourceName }}")
         }
-{{- end -}}
+{{- end }}
         return res, nil
 {{    end  -}}
     }
@@ -568,9 +580,9 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
 {{- end}}
     })
     if err != nil {
-{{if $.ReadErrorTransform -}}
+{{- if $.ReadErrorTransform -}}
         return transport_tpg.HandleNotFoundError({{ $.ReadErrorTransform }}(err), d, fmt.Sprintf("{{ $.ResourceName }} %q", d.Id()))
-{{  else -}}
+{{-  else }}
         return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("{{ $.ResourceName }} %q", d.Id()))
 {{- end}}
     }
@@ -603,21 +615,20 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
         return nil
     }
 {{ end}}
-{{- if $.VirtualFields -}}
+{{- if $.VirtualFields }}
+
   // Explicitly set virtual fields to default values if unset
 {{- range $prop := $.VirtualFields }}
 {{      if not (eq $prop.DefaultValue nil) -}}
     if _, ok := d.GetOkExists("{{ $prop.Name -}}"); !ok {
-        if err := d.Set("{{ $prop.Name -}}", {{ $prop.DefaultValue -}}); err != nil {
+        if err := d.Set("{{ $prop.Name -}}", {{ $prop.GoLiteral $prop.DefaultValue -}}); err != nil {
             return fmt.Errorf("Error setting {{ $prop.Name -}}: %s", err)
         }
     }
 {{- end}}
 {{- end}}
 {{- end}}
-{{ if $.HasProject }}
-
-
+{{- if $.HasProject }}
     if err := d.Set("project", project); err != nil {
         return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
     }
@@ -752,9 +763,9 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
     log.Printf("[DEBUG] Updating {{ $.Name }} %q: %#v", d.Id(), obj)
 	headers := make(http.Header)
 {{-              if $.UpdateMask }}
-{{ template "UpdateMask" $ -}}
+{{ $.CustomTemplate "templates/terraform/update_mask.go.tmpl" false -}}
 {{              end}}
-{{             if $.CustomCode.PreUpdate -}}
+{{-             if $.CustomCode.PreUpdate -}}{{""}}
     {{ $.CustomTemplate $.CustomCode.PreUpdate true -}}
 {{              end}}
 {{              if $.NestedQuery -}}
@@ -813,7 +824,10 @@ if len(updateMask) > 0 {
     if err != nil {
         return err
     }
-{{                  else if $.GetAsync.IsA "PollAsync" -}}
+{{-             if not $.FieldSpecificUpdateMethods }}
+{{""}}
+{{-             end}}
+{{-                  else if $.GetAsync.IsA "PollAsync" -}}
     err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName -}}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncExistence -}}, "Updating {{ $.Name -}}", d.Timeout(schema.TimeoutUpdate), {{ $.GetAsync.TargetOccurrences -}})
     if err != nil {
 {{                      if $.GetAsync.SuppressError -}}
@@ -828,9 +842,9 @@ if len(updateMask) > 0 {
   }
 {{-             end}}
 {{-         end}}{{/*if not immutable*/}}
-{{          if $.FieldSpecificUpdateMethods }}
+{{-          if $.FieldSpecificUpdateMethods }}
     d.Partial(true)
-{{             $CustomUpdateProps := $.PropertiesByCustomUpdate }}
+{{             $CustomUpdateProps := $.PropertiesByCustomUpdate $.RootProperties }}
 {{             range $group := $.PropertiesByCustomUpdateGroups }}
 if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $group)) "\") || d.HasChange(\""}}") {
         obj := make(map[string]interface{})
@@ -864,13 +878,13 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 {{-                     end}}
         })
         if err != nil {
-            return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("{{ $.ResourceName -}} %q", d.Id()))
+            return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("{{ $.ResourceName }} %q", d.Id()))
         }
 
         obj["{{ $group.FingerprintName }}"] = getRes["{{ $group.FingerprintName }}"]
 
 {{                  end  }}{{/*if FingerprintName*/}}
-{{                  range $propsByKey := $.CustomUpdatePropertiesByKey $group.UpdateUrl $group.UpdateId $group.FingerprintName $group.UpdateVerb }}
+{{                  range $propsByKey := $.CustomUpdatePropertiesByKey $.AllUserProperties $group.UpdateUrl $group.UpdateId $group.FingerprintName $group.UpdateVerb }}
         {{ $propsByKey.ApiName -}}Prop, err := expand{{ if $.NestedQuery -}}Nested{{ end }}{{ $.ResourceName -}}{{ camelize $propsByKey.Name "upper"  -}}({{ if $propsByKey.FlattenObject }}nil{{else}}d.Get("{{underscore $propsByKey.Name}}"){{ end }}, d, config)
         if err != nil {
             return err
@@ -980,7 +994,8 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 {{-                     end}}
 {{-                 end}}
     } 
-{{             end  }}{{/*range PropertiesByCustomUpdate*/}}
+{{-             end  }}{{/*range PropertiesByCustomUpdate*/}}
+{{ "" }}
   d.Partial(false)
 {{-         end  }}{{/*if FieldSpecificUpdateMethods*/}}
 
@@ -1053,7 +1068,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
         return transport_tpg.HandleNotFoundError(err, d, "{{ $.Name }}")
     }
         {{- if $.UpdateMask }}
-    url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": "{{- join $.NestedQuery.Keys "," -}}"})
+    url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": "{{- join $.NestedQuery.Keys "." -}}"})
     if err != nil {
         return err
     }
@@ -1150,7 +1165,7 @@ func resource{{ $.ResourceName }}Import(d *schema.ResourceData, meta interface{}
     // Explicitly set virtual fields to default values on import
             {{- range $vf := $.VirtualFields }}
                 {{- if not (eq $vf.DefaultValue nil) }}
-    if err := d.Set("{{ $vf.Name }}", {{ $vf.DefaultValue }}); err != nil {
+    if err := d.Set("{{ $vf.Name }}", {{ $vf.GoLiteral $vf.DefaultValue }}); err != nil {
         return nil, fmt.Errorf("Error setting {{ $vf.Name }}: %s", err)
     }
                 {{- end }}
@@ -1187,6 +1202,9 @@ func resource{{ $.ResourceName -}}UpdateEncoder(d *schema.ResourceData, meta int
     {{ template "NestedQuery" $ }}
 {{- end }}
 {{- if $.CustomCode.Decoder }}
+{{- if and $.CustomCode.UpdateEncoder (not $.NestedQuery ) }}
+{{ "" }}
+{{- end }}
 func resource{{ $.ResourceName -}}Decoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
     {{ $.CustomTemplate $.CustomCode.Decoder false -}}
 }
@@ -1196,4 +1214,6 @@ func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta
     {{- $.CustomTemplate $.CustomCode.PostCreateFailure false -}}
 }
 {{- end }}
-{{/* TODO state upgraders */}}
+{{- if and $.SchemaVersion $.StateUpgraders }}
+    {{ $.CustomTemplate $.StateMigrationFile false -}}
+{{- end }}
