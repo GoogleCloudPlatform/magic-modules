@@ -49,7 +49,7 @@ data "google_site_verification_token" "site_meta" {
   provider            = google.scoped
   type                = "SITE"
   identifier          = "%{site}"
-  verification_method = "METAX"
+  verification_method = "META"
 }
 `, context)
 }
