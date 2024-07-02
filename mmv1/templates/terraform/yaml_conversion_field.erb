@@ -151,7 +151,7 @@
 <%  end -%>
 <%  end -%>
 <%  unless property.default_value.nil? -%>
-    default_value: <%= property.default_value %>
+    default_value: <%= go_literal(property.default_value) %>
 <%  end -%>
 <%  unless property.deprecation_message.nil? -%>
     deprecation_message: '<%= property.deprecation_message %>'
