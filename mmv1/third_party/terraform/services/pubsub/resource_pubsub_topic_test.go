@@ -94,6 +94,9 @@ func TestAccPubsubTopic_schema(t *testing.T) {
 				Config: testAccPubsubTopic_updateWithNewSchema(topic, schema2),
 			},
 			{
+				Config: testAccPubsubTopic_updateWithNewSchema(topic, ""),
+			},
+			{
 				ResourceName:      "google_pubsub_topic.bar",
 				ImportStateId:     topic,
 				ImportState:       true,
@@ -228,7 +231,8 @@ resource "google_pubsub_topic" "bar" {
 }
 
 func testAccPubsubTopic_updateWithNewSchema(topic, schema string) string {
-	return fmt.Sprintf(`
+	if schema != "" {
+		return fmt.Sprintf(`
 resource "google_pubsub_schema" "foo" {
 	name = "%s"
 	type = "PROTOCOL_BUFFER"
@@ -243,6 +247,13 @@ resource "google_pubsub_topic" "bar" {
   }
 }
 `, schema, topic)
+	} else {
+		return fmt.Sprintf(`
+		resource "google_pubsub_topic" "bar" {
+			name = "%s"
+		}
+		`, topic)
+	}
 }
 
 func testAccPubsubTopic_updateWithKinesisIngestionSettings(topic string) string {

@@ -124,7 +124,6 @@ properties:
     name: 'schemaSettings'
     description: |
       Settings for validating messages published against a schema.
-    default_from_api: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'schema'
