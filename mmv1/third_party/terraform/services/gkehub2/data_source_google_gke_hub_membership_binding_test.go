@@ -44,6 +44,7 @@ resource "google_project_service" "compute" {
 
 resource "google_project_service" "anthos" {
   service = "anthos.googleapis.com"
+  disable_on_destroy = false
 }
 
 resource "google_project_service" "gkehub" {
