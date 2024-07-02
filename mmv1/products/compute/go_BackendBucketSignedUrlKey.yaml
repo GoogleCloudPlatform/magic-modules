@@ -28,7 +28,7 @@ create_url: 'projects/{{project}}/global/backendBuckets/{{backend_bucket}}/addSi
 delete_url: 'projects/{{project}}/global/backendBuckets/{{backend_bucket}}/deleteSignedUrlKey?keyName={{name}}'
 delete_verb: 'POST'
 immutable: true
-mutex: signedUrlKey/{{project}}/backendBuckets/{{backend_bucket}}/
+mutex: 'signedUrlKey/{{project}}/backendBuckets/{{backend_bucket}}/'
 exclude_import: true
 timeouts:
   insert_minutes: 20
