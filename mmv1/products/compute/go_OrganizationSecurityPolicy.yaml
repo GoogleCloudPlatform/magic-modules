@@ -88,6 +88,6 @@ properties:
       is "FIREWALL".
     min_version: 'beta'
     immutable: true
-    default_value: FIREWALL
+    default_value: "FIREWALL"
     enum_values:
       - 'FIREWALL'

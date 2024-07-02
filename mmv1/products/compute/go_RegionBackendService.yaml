@@ -149,7 +149,7 @@ properties:
             for an explanation of load balancing modes.
 
             From version 6.0.0 default value will be UTILIZATION to match default GCP value.
-          default_value: CONNECTION
+          default_value: "CONNECTION"
           enum_values:
             - 'UTILIZATION'
             - 'RATE'
@@ -777,7 +777,7 @@ properties:
       balancing cannot be used with the other(s). For more information, refer to
       [Choosing a load balancer](https://cloud.google.com/load-balancing/docs/backend-service).
     immutable: true
-    default_value: INTERNAL
+    default_value: "INTERNAL"
     enum_values:
       - 'EXTERNAL'
       - 'EXTERNAL_MANAGED'
@@ -1188,7 +1188,7 @@ properties:
 
           `PER_SESSION`: The Connection Tracking is performed as per the
           configured Session Affinity. It matches the configured Session Affinity.
-        default_value: PER_CONNECTION
+        default_value: "PER_CONNECTION"
         enum_values:
           - 'PER_CONNECTION'
           - 'PER_SESSION'
@@ -1211,7 +1211,7 @@ properties:
           If set to `ALWAYS_PERSIST`, existing connections always persist on
           unhealthy backends regardless of protocol and session affinity. It is
           generally not recommended to use this mode overriding the default.
-        default_value: DEFAULT_FOR_PROTOCOL
+        default_value: "DEFAULT_FOR_PROTOCOL"
         enum_values:
           - 'DEFAULT_FOR_PROTOCOL'
           - 'NEVER_PERSIST'

@@ -1,4 +1,3 @@
-# [START compute_flask_quickstart_vm]
 # Create a single Compute Engine instance
 resource "google_compute_instance" "<%= ctx[:primary_resource_id] %>" {
   name         = "<%= ctx[:vars]['flask_vm'] %>"
@@ -26,9 +25,7 @@ resource "google_compute_instance" "<%= ctx[:primary_resource_id] %>" {
     }
   }
 }
-# [END compute_flask_quickstart_vm]
 
-# [START vpc_flask_quickstart_ssh_fw]
 resource "google_compute_firewall" "ssh" {
   name = "<%= ctx[:vars]['allow_ssh'] %>"
   allow {
@@ -41,10 +38,8 @@ resource "google_compute_firewall" "ssh" {
   source_ranges = ["0.0.0.0/0"]
   target_tags   = ["ssh"]
 }
-# [END vpc_flask_quickstart_ssh_fw]
 
 
-# [START vpc_flask_quickstart_5000_fw]
 resource "google_compute_firewall" "flask" {
   name    = "<%= ctx[:vars]['flask_app_firewall'] %>"
   network = "default"
@@ -55,12 +50,10 @@ resource "google_compute_firewall" "flask" {
   }
   source_ranges = ["0.0.0.0/0"]
 }
-# [END vpc_flask_quickstart_5000_fw]
 
 # Create new multi-region storage bucket in the US
 # with versioning enabled
 
-# [START storage_bucket_tf_with_versioning]
 resource "google_storage_bucket" "default" {
   name          = "<%= ctx[:vars]['bucket_tfstate'] %>"
   force_destroy = false
@@ -70,4 +63,3 @@ resource "google_storage_bucket" "default" {
     enabled = true
   }
 }
-# [END storage_bucket_tf_with_versioning]
