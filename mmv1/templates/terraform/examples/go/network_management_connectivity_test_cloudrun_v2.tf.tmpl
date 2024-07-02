@@ -1,0 +1,61 @@
+# [START networkmanagement_test_cloudrun_v2]
+resource "google_network_management_connectivity_test" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "primary_resource_name"}}"
+  source {
+    cloud_run_revision {
+      uri = google_cloud_run_v2_service.source.id
+    }
+  }
+
+  destination {
+    cloud_run_revision {
+      uri = google_cloud_run_v2_service.dest.id
+    }
+  }
+
+  protocol = "TCP"
+  labels = {
+    env = "test"
+  }
+}
+
+resource "google_compute_network" "vpc" {
+  name = "{{index $.Vars "network_name"}}"
+}
+
+resource "google_cloud_run_v2_service" "source" {
+  name     = "{{index $.Vars "source_cloudrun"}}"
+  location = "us-central1"
+  ingress = "INGRESS_TRAFFIC_ALL"
+
+  template {
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+    }
+
+    vpc_access {
+      network_interfaces {
+        network = google_compute_network.vpc.id
+      }
+    }
+  }
+}
+
+resource "google_cloud_run_v2_service" "dest" {
+  name     = "{{index $.Vars "dest_cloudrun"}}"
+  location = "us-central1"
+  ingress = "INGRESS_TRAFFIC_ALL"
+
+  template {
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+    }
+
+    vpc_access {
+      network_interfaces {
+        network = google_compute_network.vpc.id
+      }
+    }
+  }
+}
+# [END networkmanagement_test_cloudrun_v2]

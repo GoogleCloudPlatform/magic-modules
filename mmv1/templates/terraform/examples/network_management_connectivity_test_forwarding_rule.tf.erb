@@ -1,0 +1,37 @@
+# [START networkmanagement_test_forwarding_rule]
+resource "google_network_management_connectivity_test" "<%= ctx[:primary_resource_id] %>" {
+  name = "<%= ctx[:vars]['primary_resource_name'] %>"
+  source {
+    forwarding_rule = google_compute_forwarding_rule.source.id
+  }
+
+  destination {
+    forwarding_rule = google_compute_forwarding_rule.dest.id
+  }
+
+  protocol = "TCP"
+  labels = {
+    env = "test"
+  }
+}
+
+resource "google_compute_target_pool" "source" {
+  name = "<%= ctx[:vars]['source_forwarding_rule'] %>"
+}
+
+resource "google_compute_forwarding_rule" "source" {
+  name        = "<%= ctx[:vars]['source_forwarding_rule'] %>"
+  target     = google_compute_target_pool.source.id
+  port_range = "80"
+}
+
+resource "google_compute_target_pool" "dest" {
+  name = "<%= ctx[:vars]['dest_forwarding_rule'] %>"
+}
+
+resource "google_compute_forwarding_rule" "dest" {
+  name        = "<%= ctx[:vars]['dest_forwarding_rule'] %>"
+  target     = google_compute_target_pool.dest.id
+  port_range = "80"
+}
+# [END networkmanagement_test_forwarding_rule]
