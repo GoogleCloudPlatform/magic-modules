@@ -22,7 +22,7 @@ class NightlyTriggerConfiguration(
     var daysOfWeek: String = DefaultDaysOfWeek,
     val daysOfMonth: String = DefaultDaysOfMonth
 ){
-    public fun clone(): NightlyTriggerConfiguration{
+    fun clone(): NightlyTriggerConfiguration{
         return NightlyTriggerConfiguration(
             this.branch,
             this.nightlyTestsEnabled,
@@ -31,7 +31,7 @@ class NightlyTriggerConfiguration(
             this.daysOfMonth
         )
     }
-})
+}
 
 fun Triggers.runNightly(config: NightlyTriggerConfiguration) {
 
