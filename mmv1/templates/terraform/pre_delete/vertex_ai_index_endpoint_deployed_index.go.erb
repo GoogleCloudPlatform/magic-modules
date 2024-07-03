@@ -1,8 +1,3 @@
-deployedIndexId, err := expandVertexAIIndexEndpointDeployedIndexName(d.Get("name"), d, config)
-if err != nil {
-	return err
-}
-
 obj = map[string]interface{}{
-	"deployedIndexId": deployedIndexId,
+	"deployedIndexId": d.Get("deployed_index_id"),
 } 

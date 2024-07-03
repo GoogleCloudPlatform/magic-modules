@@ -1,5 +1,6 @@
 req := make(map[string]interface{})
-obj["id"] = d.Get("name")
+obj["id"] = d.Get("deployed_index_id")
+delete(obj, "deployedIndexId")
 delete(obj, "name")
 delete(obj, "indexEndpoint")
 req["deployedIndex"] = obj

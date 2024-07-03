@@ -19,7 +19,9 @@ update_url: 'projects/{{project}}/locations/{{region}}/indexEndpoints/{{index_en
 delete_url: 'projects/{{project}}/locations/{{region}}/indexEndpoints/{{index_endpoint}}:undeployIndex'
 self_link: 'projects/{{project}}/locations/{{region}}/indexEndpoints/{{index_endpoint}}'
 import_format: ['projects/{{project}}/locations/{{region}}/indexEndpoints/{{index_endpoint}}/deployedIndex/{{deployed_index_id}}']
-update_mask: true
+id_format: 'projects/{{project}}/locations/{{region}}/indexEndpoints/{{index_endpoint}}/deployedIndex/{{deployed_index_id}}'
+update_verb: :POST
+delete_verb: :POST
 references: !ruby/object:Api::Resource::ReferenceLinks
   api: https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.indexEndpoints#DeployedIndex
 async: !ruby/object:Api::OpAsync
@@ -77,8 +79,9 @@ autogen_async: false
 #       network_name: 'acctest.BootstrapSharedTestNetwork(t, "vertex-ai-index-endpoint")'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/vertex_ai_index_endpoint_deployed_index.go.erb
+  update_encoder: templates/terraform/update_encoder/vertex_ai_index_endpoint_deployed_index.go.erb
   decoder: templates/terraform/decoders/vertex_ai_index_endpoint_deployed_index.go.erb
-  # pre_delete: templates/terraform/pre_delete/vertex_ai_index_endpoint_deployed_index.go.erb
+  pre_delete: templates/terraform/pre_delete/vertex_ai_index_endpoint_deployed_index.go.erb
 parameters:
   - !ruby/object:Api::Type::String
     name: region
@@ -158,15 +161,18 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: automaticResources
     description: A description of resources that the DeployedIndex uses, which to large degree are decided by Vertex AI, and optionally allows only a modest additional configuration.
+    ignore_read: true
     properties:
       - !ruby/object:Api::Type::Integer
         name: 'minReplicaCount'
         description: The minimum number of replicas this DeployedModel will be always deployed on.
         immutable: true
+        default_value: 2
       - !ruby/object:Api::Type::Integer
         name: 'maxReplicaCount'
         description: The maximum number of replicas this DeployedModel may be deployed on when the traffic against it increases.
         immutable: true
+        custom_expand: templates/terraform/custom_expand/vertex_ai_endpoint_deployed_index.go.erb
   - !ruby/object:Api::Type::NestedObject
     name: dedicatedResources
     description: A description of resources that are dedicated to the DeployedIndex, and that need a higher degree of manual configuration.
@@ -235,6 +241,7 @@ properties:
   - !ruby/object:Api::Type::Boolean
     name: enableAccessLogging
     description: If true, private endpoint's access logs are sent to Cloud Logging.
+    default_value: false
   - !ruby/object:Api::Type::NestedObject
     name: deploymentIndexAuthConfig
     description: If set, the authentication is enabled for the private endpoint.
@@ -258,6 +265,7 @@ properties:
     name: reservedIpRanges
     description: A list of reserved ip ranges under the VPC network that can be used for this DeployedIndex.
     item_type: Api::Type::String
+    ignore_read: true
   - !ruby/object:Api::Type::String
     name: deploymentGroup
     output: true

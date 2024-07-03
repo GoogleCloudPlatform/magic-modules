@@ -1,7 +1,7 @@
 func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-    indexEndpoint, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{region}}/indexes/{{index}}")
-    	if err != nil {
-    		return nil, err
-    	}
-    return indexEndpoint, nil
+    if v, ok := d.GetOk("automatic_resources.max_replica_count"); ok {
+        return v, nil
+    }
+    d.Get("automatic_resources.min_replica_count")
+    return d.Get("automatic_resources.min_replica_count"), nil
 }
