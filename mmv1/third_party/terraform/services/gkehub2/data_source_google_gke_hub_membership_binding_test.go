@@ -37,30 +37,6 @@ func TestAccDataSourceGoogleGKEHub2MembershipBinding_basic(t *testing.T) {
 
 func testAccDataSourceGoogleGKEHub2MembershipBinding_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_project_service" "compute" {
-  service = "compute.googleapis.com"
-  disable_on_destroy = false
-}
-
-resource "google_project_service" "anthos" {
-  service = "anthos.googleapis.com"
-  disable_on_destroy = false
-}
-
-resource "google_project_service" "gkehub" {
-  service = "gkehub.googleapis.com"
-  disable_on_destroy = false
-}
-
-resource "time_sleep" "wait_for_gkehub_enablement" {
-  create_duration = "150s"
-  depends_on = [
-  google_project_service.gkehub, 
-  google_project_service.compute,
-  google_project_service.anthos
-  ]
-}
-
 resource "google_gke_hub_membership" "example" {
   membership_id = "tf-test-membership%{random_suffix}"
   depends_on = [time_sleep.wait_for_gkehub_enablement]
