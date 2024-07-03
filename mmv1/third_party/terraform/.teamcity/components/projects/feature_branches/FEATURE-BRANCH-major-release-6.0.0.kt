@@ -40,7 +40,7 @@ fun featureBranchMajorRelease600_Project(allConfig: AllContextParameters): Proje
     val gaProjectId = replaceCharsId(projectId + "_GA")
     val betaProjectId= replaceCharsId(projectId + "_BETA")
 
-    // Get config for using the GA and VCR identities
+    // Get config for using the GA and Beta identities
     val gaConfig = getGaAcceptanceTestConfig(allConfig)
     val betaConfig = getBetaAcceptanceTestConfig(allConfig)
 
