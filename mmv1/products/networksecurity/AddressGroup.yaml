@@ -146,6 +146,7 @@ properties:
     name: "purpose"
     description: |
       List of supported purposes of the Address Group.
+    default_from_api: true
     item_type: !ruby/object:Api::Type::Enum
       name: 'undefined'
       description: |
