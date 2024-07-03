@@ -28,7 +28,7 @@ create_url: 'projects/{{project}}/global/backendServices/{{backend_service}}/add
 delete_url: 'projects/{{project}}/global/backendServices/{{backend_service}}/deleteSignedUrlKey?keyName={{name}}'
 delete_verb: 'POST'
 immutable: true
-mutex: signedUrlKey/{{project}}/backendServices/{{backend_service}}/
+mutex: 'signedUrlKey/{{project}}/backendServices/{{backend_service}}/'
 exclude_import: true
 timeouts:
   insert_minutes: 20
