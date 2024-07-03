@@ -107,6 +107,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'index'
     description: The name of the Index this is the deployment of.
+    ignore_read: true
     required: true
   - !ruby/object:Api::Type::String
     name: 'displayName'
