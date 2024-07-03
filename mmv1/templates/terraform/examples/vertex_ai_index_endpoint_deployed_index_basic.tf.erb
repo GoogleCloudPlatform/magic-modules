@@ -2,9 +2,9 @@ resource "google_vertex_ai_index_endpoint_deployed_index" "<%= ctx[:primary_reso
   depends_on = [ google_vertex_ai_index_endpoint.vertex_endpoint, google_compute_global_address.vertex_range ]
   index_endpoint = google_vertex_ai_index_endpoint.vertex_endpoint.name
   index = google_vertex_ai_index.index.id // this is the index that will be deployed onto an endpoint
-  deployed_index_id = "deployed-index-test" //deployed index id
+  deployed_index_id = "deployed_index_basic_test" //deployed index id
   region= "us-central1"
-  reserved_ip_ranges = ['<%= ctx[:vars]['address_name'] %>']
+  reserved_ip_ranges = ["<%= ctx[:vars]['address_name'] %>"]
   enable_access_logging = false
   display_name = "<%= ctx[:vars]['display_name'] %>"
   automatic_resources {
