@@ -64,7 +64,7 @@ fun featureBranchMajorRelease600_Project(allConfig: AllContextParameters): Proje
                         ProviderNameGa,
                         HashicorpVCSRootGa_featureBranchMajorRelease600,
                         gaConfig,
-                        NightlyTriggerConfiguration(),
+                        NightlyTriggerConfiguration(daysOfWeek="5"), // Thursday for GA, TeamCity numbers days Sun=1...Sat=7
                     )
                 )
             }
@@ -81,7 +81,7 @@ fun featureBranchMajorRelease600_Project(allConfig: AllContextParameters): Proje
                         ProviderNameBeta,
                         HashicorpVCSRootBeta_featureBranchMajorRelease600,
                         betaConfig,
-                        NightlyTriggerConfiguration(),
+                        NightlyTriggerConfiguration(daysOfWeek="6"), // Friday for Beta, TeamCity numbers days Sun=1...Sat=7
                     )
                 )
             }
