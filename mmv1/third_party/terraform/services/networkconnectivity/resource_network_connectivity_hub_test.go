@@ -32,7 +32,7 @@ func TestAccNetworkConnectivityHub_BasicHubLongForm(t *testing.T) {
 				ResourceName:            "google_network_connectivity_hub.primary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "project"},
 			},
 			{
 				Config: testAccNetworkConnectivityHub_BasicHubLongFormUpdate0(context),
