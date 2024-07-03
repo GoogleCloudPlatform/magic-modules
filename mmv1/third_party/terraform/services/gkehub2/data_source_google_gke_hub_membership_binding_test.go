@@ -39,12 +39,10 @@ func testAccDataSourceGoogleGKEHub2MembershipBinding_basic(context map[string]in
 	return acctest.Nprintf(`
 resource "google_gke_hub_membership" "example" {
   membership_id = "tf-test-membership%{random_suffix}"
-  depends_on = [time_sleep.wait_for_gkehub_enablement]
 }
 
 resource "google_gke_hub_scope" "example" {
   scope_id = "tf-test-scope%{random_suffix}"
-  depends_on = [time_sleep.wait_for_gkehub_enablement]
 }
 
 resource "google_gke_hub_membership_binding" "example" {
