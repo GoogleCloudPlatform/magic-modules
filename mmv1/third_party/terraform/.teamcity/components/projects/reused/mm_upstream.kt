@@ -46,7 +46,7 @@ fun mmUpstream(parentProject: String, providerName: String, vcsRoot: GitVcsRoot,
         else -> throw Exception("Provider name not supplied when generating a nightly test subproject")
     }
 
-    // This build is for manually-initialed runs of sweepers, to test changes to sweepers from the upstream repo
+    // This build is for manually-initiated runs of sweepers, to test changes to sweepers from the upstream repo
     val serviceSweeperManualConfig = BuildConfigurationForServiceSweeper(providerName, ServiceSweeperManualName, sweepersList, projectId, vcsRoot, sharedResources, config)
 
     // This build runs on a schedule to do actual sweeping of the VCR project, using the downstream repo's code
