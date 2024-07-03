@@ -32,6 +32,9 @@ async: !ruby/object:Api::OpAsync
     path: 'name'
     base_url: '{{op_id}}'
     wait_ms: 1000
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 45
+      update_minutes: 45
   result: !ruby/object:Api::OpAsync::Result
     path: 'response'
     resource_inside_response: true
@@ -54,12 +57,14 @@ examples:
     vars:
       project: 'vertex-ai'
       endpoint_name: 'endpoint-name'
-      address_name: 'address-name'
-      kms_key_name: 'kms-name'
       network_name: 'network-name'
       display_name: "vertex-deployed-index"
       display_name_index: 'test-index'
       bucket_name: "bucket-name"
+      address_name: 'vertex-ai-range'
+    test_vars_overrides:
+      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
+      address_name: 'acctest.BootstrapSharedTestGlobalAddress(t, "vpc-network-1", acctest.AddressWithPrefixLength(8))'
   - !ruby/object:Provider::Terraform::Examples
     name: "vertex_ai_index_endpoint_deployed_index_dedicated_resources"
     primary_resource_id: "dedicated_resources"
