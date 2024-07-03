@@ -52,6 +52,7 @@ import_format:
 taint_resource_on_failed_create: true
 autogen_async: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: 'templates/terraform/constants/cloudfunctions2_function.go.erb'
   encoder: 'templates/terraform/encoders/cloudfunctions2_runtime_update_policy.go.erb'
 examples:
   - !ruby/object:Provider::Terraform::Examples
@@ -559,6 +560,7 @@ properties:
         description:
           'Environment variables that shall be available during function
           execution.'
+        diff_suppress_func: 'environmentVariablesDiffSuppress'
       - !ruby/object:Api::Type::Integer
         name: 'maxInstanceCount'
         description: |
