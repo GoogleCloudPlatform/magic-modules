@@ -41,7 +41,7 @@ func TestAccNetworkConnectivityHub_BasicHubLongForm(t *testing.T) {
 				ResourceName:            "google_network_connectivity_hub.primary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels, "project"},
 			},
 		},
 	})
@@ -84,9 +84,9 @@ func TestAccNetworkConnectivityHub_BasicHub(t *testing.T) {
 func testAccNetworkConnectivityHub_BasicHubLongForm(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_network_connectivity_hub" "primary" {
-  name        = "long/form/tf-test-hub%{random_suffix}"
+  name        = "tf-test-hub%{random_suffix}"
   description = "A sample hub"
-  project     = "long/form/%{project_name}"
+  project     = "projects/%{project_name}"
 
   labels = {
     label-one = "value-one"
@@ -100,9 +100,9 @@ resource "google_network_connectivity_hub" "primary" {
 func testAccNetworkConnectivityHub_BasicHubLongFormUpdate0(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_network_connectivity_hub" "primary" {
-  name        = "long/form/tf-test-hub%{random_suffix}"
+  name        = "tf-test-hub%{random_suffix}"
   description = "An updated sample hub"
-  project     = "long/form/%{project_name}"
+  project     = "projects/%{project_name}"
 
   labels = {
     label-two = "value-one"
