@@ -17,6 +17,7 @@ resource "google_vertex_ai_index_endpoint_deployed_index" "<%= ctx[:primary_reso
     }
     max_replica_count = 3
     min_replica_count = 2
+  }
 }
 
 resource "google_storage_bucket" "bucket" {
@@ -60,6 +61,7 @@ resource "google_vertex_ai_index" "index" {
   }
   index_update_method = "BATCH_UPDATE"
 }
+
 
 resource "google_vertex_ai_index_endpoint" "vertex_endpoint" {
   display_name = "sample-endpoint"
