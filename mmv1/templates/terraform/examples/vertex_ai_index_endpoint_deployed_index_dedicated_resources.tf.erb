@@ -70,11 +70,7 @@ resource "google_vertex_ai_index_endpoint" "vertex_endpoint" {
   labels       = {
     label-one = "value-one"
   }
-  network      = "projects/${data.google_project.project.number}/global/networks/${data.google_compute_network.vertex_network.name}"
-}
-
-data "google_compute_network" "vertex_network" {
-  name       = "<%= ctx[:vars]['network_name'] %>"
+  public_endpoint_enabled = true
 }
 
 data "google_project" "project" {}
