@@ -194,7 +194,7 @@ properties:
               - TPU_V3
               - TPU_V4_POD
               - TPU_V5_LITEPOD
-          - ! ruby/object:Api::Type::Integer
+          - !ruby/object:Api::Type::Integer
             name: 'acceleratorCount'
             description: The number of accelerators to attach to the machine.
           - !ruby/object:Api::Type::String
