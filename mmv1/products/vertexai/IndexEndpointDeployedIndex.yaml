@@ -47,36 +47,25 @@ async: !ruby/object:Api::OpAsync
 description: |-
   An endpoint indexes are deployed into. An index endpoint can have multiple deployed indexes.
 autogen_async: false
-# examples:
-#   - !ruby/object:Provider::Terraform::Examples
-#     name: "vertex_ai_index_endpoint_deployed_index"
-#     primary_resource_id: "index_endpoint"
-#     vars:
-#       address_name: "address-name"
-#       network_name: "network-name"
-#     skip_test: true
-#   - !ruby/object:Provider::Terraform::Examples
-#     name: "vertex_ai_index_endpoint_deployed_index_test"
-#     primary_resource_id: "index_endpoint"
-#     vars:
-#       network_name: "network-name"
-#     test_vars_overrides:
-#       network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
-#     skip_docs: true
-#   - !ruby/object:Provider::Terraform::Examples
-#     name: "vertex_ai_index_endpoint_deployed_index_with_psc"
-#     primary_resource_id: "index_endpoint"
-#   - !ruby/object:Provider::Terraform::Examples
-#     name: "vertex_ai_index_endpoint_with_false_psc"
-#     primary_resource_id: "index_endpoint"
-#     # It's not distinguishable if the psc is false or not set, so we need to skip the test.
-#     skip_import_test: true
-#     skip_docs: true
-#   - !ruby/object:Provider::Terraform::Examples
-#     name: "vertex_ai_index_endpoint_deployed_index_with_public_endpoint"
-#     primary_resource_id: "index_endpoint"
-#     test_vars_overrides:
-#       network_name: 'acctest.BootstrapSharedTestNetwork(t, "vertex-ai-index-endpoint")'
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "vertex_ai_index_endpoint_deployed_index_basic"
+    primary_resource_id: "basic_deployed_index"
+    vars:
+      network_name: "network-name"
+      display_name: "vertex-deployed-index"
+      display_name_index: 'test-index'
+      bucket_name: "bucket-name"
+    skip_test: true
+  - !ruby/object:Provider::Terraform::Examples
+    name: "vertex_ai_index_endpoint_deployed_index_dedicated_resources"
+    primary_resource_id: "dedicated_resources"
+    vars:
+      network_name: "network-name"
+      display_name_index: 'test-index'
+      bucket_name: "bucket-name"
+      display_name: "vertex-deployed-index"
+    skip_docs: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/vertex_ai_index_endpoint_deployed_index.go.erb
   update_encoder: templates/terraform/update_encoder/vertex_ai_index_endpoint_deployed_index.go.erb
