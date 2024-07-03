@@ -240,6 +240,9 @@ async:
     message: '<%= object.async.error.message %>'
 <%      end -%>
 <%    end -%>
+<%    unless !object.async.include_project -%>
+  include_project: <%= object.async.include_project %>
+<%    end -%>
 <%    end -%>
 <%  end -%>
 <%
