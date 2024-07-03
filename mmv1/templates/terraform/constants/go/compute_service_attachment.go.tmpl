@@ -46,3 +46,11 @@ func computeServiceAttachmentConsumerAcceptListsHash(v interface{}) int {
 	log.Printf("[DEBUG] computed hash value of %v from %v", tpgresource.Hashcode(buf.String()), buf.String())
 	return tpgresource.Hashcode(buf.String())
 }
+
+// Suppress all diff for the field Service Project
+func TargetServiceDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+	oldSwp := s[strings.LastIndex(old, "/")+1:]
+	newSwp := s[strings.LastIndex(new, "/")+1:]
+	
+	return oldSwp == newSwp
+}
