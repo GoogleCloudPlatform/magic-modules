@@ -51,8 +51,9 @@ fun nightlyTests(parentProject:String, providerName: String, vcsRoot: GitVcsRoot
         else -> throw Exception("Provider name not supplied when generating a nightly test subproject")
     }
     val serviceSweeperConfig = BuildConfigurationForServiceSweeper(providerName, ServiceSweeperName, sweepersList, projectId, vcsRoot, sharedResources, config)
-    val sweeperTrigger  = NightlyTriggerConfiguration(startHour=11)  // Override hour
-    serviceSweeperConfig.addTrigger(sweeperTrigger)
+    val sweeperCron = accTestTrigger.clone()
+    sweeperCron.startHour += 5  // Ensure triggered after the package test builds are triggered
+    serviceSweeperConfig.addTrigger(sweeperCron)
 
     return Project {
         id(projectId)
