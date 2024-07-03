@@ -8,10 +8,7 @@
 package projects
 
 import ProviderNameBeta
-import builds.AllContextParameters
-import builds.getBetaAcceptanceTestConfig
-import builds.getVcrAcceptanceTestConfig
-import builds.readOnlySettings
+import builds.*
 import jetbrains.buildServer.configs.kotlin.Project
 import projects.reused.mmUpstream
 import projects.reused.nightlyTests
@@ -23,7 +20,7 @@ import vcs_roots.ModularMagicianVCSRootBeta
 // googleSubProjectBeta returns a subproject that is used for testing terraform-provider-google-beta (Beta)
 fun googleSubProjectBeta(allConfig: AllContextParameters): Project {
 
-    var betaId = replaceCharsId("GOOGLE_BETA")
+    val betaId = replaceCharsId("GOOGLE_BETA")
 
     // Get config for using the Beta and VCR identities
     val betaConfig = getBetaAcceptanceTestConfig(allConfig)

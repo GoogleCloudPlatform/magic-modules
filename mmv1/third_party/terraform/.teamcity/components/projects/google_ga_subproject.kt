@@ -8,10 +8,7 @@
 package projects
 
 import ProviderNameGa
-import builds.AllContextParameters
-import builds.getGaAcceptanceTestConfig
-import builds.getVcrAcceptanceTestConfig
-import builds.readOnlySettings
+import builds.*
 import jetbrains.buildServer.configs.kotlin.Project
 import projects.reused.mmUpstream
 import projects.reused.nightlyTests
@@ -22,7 +19,7 @@ import vcs_roots.ModularMagicianVCSRootGa
 // googleSubProjectGa returns a subproject that is used for testing terraform-provider-google (GA)
 fun googleSubProjectGa(allConfig: AllContextParameters): Project {
 
-    var gaId = replaceCharsId("GOOGLE")
+    val gaId = replaceCharsId("GOOGLE")
 
     // Get config for using the GA and VCR identities
     val gaConfig = getGaAcceptanceTestConfig(allConfig)
