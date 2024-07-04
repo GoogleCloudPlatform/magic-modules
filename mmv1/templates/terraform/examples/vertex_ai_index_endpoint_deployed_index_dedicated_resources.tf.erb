@@ -7,12 +7,12 @@ resource "google_vertex_ai_index_endpoint_deployed_index" "<%= ctx[:primary_reso
   dedicated_resources {
     autoscaling_metric_specs {
       metric_name = "aiplatform.googleapis.com/prediction/online/accelerator/duty_cycle"
-      target      = 20
+      target      = 60
     }
     machine_spec {
       accelerator_count = 1
       accelerator_type  = "NVIDIA_TESLA_P100"
-      machine_type      = "e2-standard-2"
+      machine_type      = "n1-standard-2"
       tpu_topology      = "2x2x1"
     }
     max_replica_count = 3
