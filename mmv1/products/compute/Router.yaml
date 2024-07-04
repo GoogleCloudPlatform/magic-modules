@@ -55,6 +55,7 @@ examples:
       network_name: 'my-network'
     ignore_read_extra:
       - advertisedIpRanges
+      - customLearnedIpRanges
   - !ruby/object:Provider::Terraform::Examples
     name: 'compute_router_encrypted_interconnect'
     primary_resource_id: 'encrypted-interconnect-router'
@@ -63,6 +64,7 @@ examples:
       network_name: 'test-network'
     ignore_read_extra:
       - advertisedIpRanges
+      - customLearnedIpRanges
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/router.go.erb
 custom_diff: [
@@ -178,6 +180,25 @@ properties:
               description: |
                 User-specified description for the IP range.
               send_empty_value: true
+       - !ruby/object:Api::Type::Array
+         name: customLearnedIpRanges
+         description: |
+           A list of user-defined custom learned route IP address ranges for a BGP session.
+         send_empty_value: true
+         custom_flatten: 'templates/terraform/custom_flatten/compute_router_range_learned.go.erb'
+         item_type: !ruby/object:Api::Type::NestedObject
+           properties:
+             - !ruby/object:Api::Type::String
+               name: range
+               required: true
+               description: |
+                 The custom learned route IP address range. The value must be a
+                 CIDR-formatted string.
+               send_empty_value: true
+      - !ruby/object:Api::Type::Integer
+        name: customLearnedRoutePriority
+        description: "The user-defined custom learned route priority for a BGP session.This value is applied \nto all custom learned route ranges for the session. You can choose a value from 0 to 65335.\n"
+        default_from_api: true
       - !ruby/object:Api::Type::Integer
         name: keepaliveInterval
         description: |
