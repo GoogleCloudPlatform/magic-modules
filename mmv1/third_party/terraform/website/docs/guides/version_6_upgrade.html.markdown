@@ -113,3 +113,17 @@ Description of the change and how users should adjust their configuration (if ne
 ### `settings.ip_configuration.require_ssl` is now removed
 
 Removed in favor of field `settings.ip_configuration.ssl_mode`.
+
+## Resource: `google_vpc_access_connector`
+
+### Default values removed for `min_throughput` and `max_throughput`
+
+The fields `min_throughput` and `max_throughput` no longer have default values set by the provider. This was necessary to add conflicting field validation. described in the next section.
+
+No configuration changes are needed for existing resources as these fields' values will default to values present in data returned from the API.
+
+### Conflicting field validation add for `min_throughput` and `min_instances`, and `min_throughput` and `max_throughput`
+
+The provider will now enforce that `google_vpc_access_connector` resources can only include one of `min_throughput` and `min_instances` and one of `min_throughput` and `max_throughput`. Previously if a user included all four fields in a resource block they would experience a permadiff. This is a result of how `min_instances` and `max_instances` fields' values take precedence in the API, and how the API calculates values for `min_throughput` and `max_throughput` that match the number of instances.
+
+Users will need to check any `google_vpc_access_connector` resource blocks that include those pairs of fields and remove one set. The fields that are removed from the configuration will still have Computed values, that are derived from the API.
