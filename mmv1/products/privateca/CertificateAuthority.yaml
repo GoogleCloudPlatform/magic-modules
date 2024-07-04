@@ -113,6 +113,7 @@ examples:
       - 'deletion_protection'
   - !ruby/object:Provider::Terraform::Examples
     name: 'privateca_certificate_authority_custom_ski'
+    min_version: beta
     primary_resource_id: 'default'
     # Multiple IAM bindings on the same key cause non-determinism
     skip_vcr: true
