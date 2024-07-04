@@ -882,7 +882,7 @@ func TestAccStorageBucket_update(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
+				ImportStateVerifyIgnore: []string{"force_destroy","lifecycle_rule.0.condition.0.send_age_if_zero"},
 			},
 			{
 				Config: testAccStorageBucket_customAttributes(bucketName),

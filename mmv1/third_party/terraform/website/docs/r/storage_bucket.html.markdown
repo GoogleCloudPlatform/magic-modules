@@ -69,8 +69,8 @@ resource "google_storage_bucket" "auto-expire" {
 }
 ```
 
-## Example Usage - Life cycle settings for storage bucket objects with `no_age` enabled
-When creating a life cycle condition that does not also include an `age` field, a default `age` of 0 will be set. Set the `no_age` flag to `true` to prevent this and avoid any potentially unintended interactions.
+## Example Usage - Life cycle settings for storage bucket objects with `send_age_if_zero` disabled
+When creating a life cycle condition that does not also include an `age` field, a default `age` of 0 will be set. Set the `send_age_if_zero` flag to `false` to prevent this and avoid any potentially unintended interactions.
 
 ```hcl
 resource "google_storage_bucket" "no-age-enabled" {
@@ -85,7 +85,7 @@ resource "google_storage_bucket" "no-age-enabled" {
     }
     condition {
       days_since_noncurrent_time = 3
-      no_age = true
+      send_age_if_zero = false
     }
   }
 }
@@ -193,7 +193,7 @@ The following arguments are supported:
 
 * `days_since_custom_time` - (Optional)	Days since the date set in the `customTime` metadata for the object. This condition is satisfied when the current date and time is at least the specified number of days after the `customTime`. Due to a current bug you are unable to set this value to `0` within Terraform. When set to `0` it will be ignored, and your state will treat it as though you supplied no `days_since_custom_time` condition.
 
-* `send_age_if_zero` - (Optional) While set true, `age` value will be sent in the request even for zero value of the field. This field is only useful for setting 0 value to the `age` field. It can be used alone or together with `age`.
+* `send_age_if_zero` - (Optional, Default: true) While set true, `age` value will be sent in the request even for zero value of the field. This field is only useful and required for setting 0 value to the `age` field. It can be used alone or together with `age` attribute. **NOTE** `age` attibute with `0` value will be ommitted from the API request if `send_age_if_zero` field is having `false` value.
 
 * `send_days_since_custom_time_if_zero` - (Optional) While set true, `days_since_custom_time` value will be sent in the request even for zero value of the field. This field is only useful for setting 0 value to the `days_since_custom_time` field. It can be used alone or together with `days_since_custom_time`.
 
