@@ -10,7 +10,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-!ruby/object:Api::Resource
+--- !ruby/object:Api::Resource
 name: Spoke
 base_url: projects/{{project}}/locations/{{location}}/spokes
 create_url: projects/{{project}}/locations/{{location}}/spokes?spokeId={{name}}
