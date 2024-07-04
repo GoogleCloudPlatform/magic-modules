@@ -46,7 +46,14 @@
 <% end -%>
 
 <%
-  Dir["third_party/terraform/provider/**/*.go"].each do |file_path|
+  Dir["third_party/terraform/provider/*.go"].each do |file_path|
+    fname = file_path.delete_prefix("third_party/terraform/provider")
+-%>
+'<%= dir -%>/provider/<%= fname -%>': 'third_party/terraform/provider/<%= fname -%>'
+<% end -%>
+
+<%
+  Dir["third_party/terraform/provider/universe/*.go"].each do |file_path|
     fname = file_path.delete_prefix("third_party/terraform/provider")
 -%>
 '<%= dir -%>/provider/<%= fname -%>': 'third_party/terraform/provider/<%= fname -%>'
@@ -130,12 +137,21 @@
 <% end -%>
 
 <%
-  Dir["third_party/terraform/scripts/**/*.*"].each do |file_path|
+  Dir["third_party/terraform/scripts/*.*"].each do |file_path|
     next if file_path.end_with?('.erb')
     fname = file_path.delete_prefix('third_party/terraform/')
 -%>
 '<%= fname -%>': '<%= file_path -%>'
 <% end -%>
+
+<%
+  Dir["third_party/terraform/scripts/affectedtests/*.*"].each do |file_path|
+    next if file_path.end_with?('.erb')
+    fname = file_path.delete_prefix('third_party/terraform/')
+-%>
+'<%= fname -%>': '<%= file_path -%>'
+<% end -%>
+
 '<%= dir -%>/test-fixtures/': 'third_party/terraform/test-fixtures'
 <% end -%>
 <% if generate_docs -%>

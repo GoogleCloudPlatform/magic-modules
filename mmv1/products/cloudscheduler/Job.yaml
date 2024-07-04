@@ -343,7 +343,7 @@ properties:
         description: |
           The full URI path that the request will be sent to.
         required: true
-        diff_suppress_func: 'tpgresource.LastSlashDiffSuppress'
+        diff_suppress_func: 'LastSlashDiffSuppress'
       - !ruby/object:Api::Type::String
         name: httpMethod
         description: |

@@ -141,6 +141,7 @@ properties:
         description: |
           Type of sharing for this shared-reservation
         default_from_api: true
+        immutable: true
       - !ruby/object:Api::Type::Map
         name: 'projectMap'
         description: |

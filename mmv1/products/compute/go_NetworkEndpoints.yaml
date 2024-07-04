@@ -42,7 +42,7 @@ update_verb: 'POST'
 read_verb: 'POST'
 delete_url: 'projects/{{project}}/zones/{{zone}}/networkEndpointGroups/{{network_endpoint_group}}/detachNetworkEndpoints'
 delete_verb: 'POST'
-mutex: networkEndpoint/{{project}}/{{zone}}/{{network_endpoint_group}}
+mutex: 'networkEndpoint/{{project}}/{{zone}}/{{network_endpoint_group}}'
 import_format:
   - 'projects/{{project}}/zones/{{zone}}/networkEndpointGroups/{{network_endpoint_group}}'
 timeouts:

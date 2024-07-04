@@ -1,7 +1,7 @@
 ---
-page_title: "Terraform Google Provider 6.0.0 Upgrade Guide"
+page_title: "Terraform provider for Google Cloud 6.0.0 Upgrade Guide"
 description: |-
-  Terraform Google Provider 6.0.0 Upgrade Guide
+  Terraform provider for Google Cloud 6.0.0 Upgrade Guide
 ---
 
 # Terraform Google Provider 6.0.0 Upgrade Guide
@@ -114,16 +114,34 @@ Description of the change and how users should adjust their configuration (if ne
 
 Removed in favor of field `settings.ip_configuration.ssl_mode`.
 
+## Resource: `google_pubsub_topic`
+
+### `schema_settings` no longer has a default value
+
+An empty value means the setting should be cleared.
+
 ## Resource: `google_vpc_access_connector`
 
-### Default values removed for `min_throughput` and `max_throughput`
+### Fields `min_throughput` and `max_throughput` no longer have default values
 
-The fields `min_throughput` and `max_throughput` no longer have default values set by the provider. This was necessary to add conflicting field validation. described in the next section.
+The fields `min_throughput` and `max_throughput` no longer have default values 
+set by the provider. This was necessary to add conflicting field validation, also
+described in this guide.
 
-No configuration changes are needed for existing resources as these fields' values will default to values present in data returned from the API.
+No configuration changes are needed for existing resources as these fields' values
+will default to values present in data returned from the API.
 
 ### Conflicting field validation add for `min_throughput` and `min_instances`, and `min_throughput` and `max_throughput`
 
-The provider will now enforce that `google_vpc_access_connector` resources can only include one of `min_throughput` and `min_instances` and one of `min_throughput` and `max_throughput`. Previously if a user included all four fields in a resource block they would experience a permadiff. This is a result of how `min_instances` and `max_instances` fields' values take precedence in the API, and how the API calculates values for `min_throughput` and `max_throughput` that match the number of instances.
+The provider will now enforce that `google_vpc_access_connector` resources can only
+include one of `min_throughput` and `min_instances` and one of `min_throughput`and 
+`max_throughput`. Previously if a user included all four fields in a resource block
+they would experience a permadiff. This is a result of how `min_instances` and
+`max_instances` fields' values take precedence in the API, and how the API calculates
+values for `min_throughput` and `max_throughput` that match the number of instances.
 
-Users will need to check any `google_vpc_access_connector` resource blocks that include those pairs of fields and remove one set. The fields that are removed from the configuration will still have Computed values, that are derived from the API.
+Users will need to check their configuration for any `google_vpc_access_connector`
+resource blocks that contain both fields in a conflicting pair, and remove one of those fields.
+The fields that are removed from the configuration will still have Computed values,
+that are derived from the API.
+
