@@ -55,7 +55,8 @@ examples:
       org_id: :ORG_ID
       billing_account: :BILLING_ACCT
   - !ruby/object:Provider::Terraform::Examples
-    name: 'network_attachment_instance_usage'
+  - name: 'network_attachment_instance_usage'
+    min_version: beta
     primary_resource_id: 'default'
     vars:
       resource_name: 'basic-network-attachment'
