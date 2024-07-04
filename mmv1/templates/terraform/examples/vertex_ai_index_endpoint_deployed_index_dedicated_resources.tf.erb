@@ -10,7 +10,7 @@ resource "google_vertex_ai_index_endpoint_deployed_index" "<%= ctx[:primary_reso
       target      = 60
     }
     machine_spec {
-      accelerator_count = 0
+      accelerator_count = 1
       accelerator_type  = "NVIDIA_TESLA_P100"
       machine_type      = "n1-standard-32"
       tpu_topology      = "2x2x1"
