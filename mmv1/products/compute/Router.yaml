@@ -188,13 +188,13 @@ properties:
         custom_flatten: 'templates/terraform/custom_flatten/compute_router_range_learned.go.erb'
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
-           - !ruby/object:Api::Type::String
-             name: range
-             required: true
-             description: |
-               The custom learned route IP address range. The value must be a
-               CIDR-formatted string.
-             send_empty_value: true
+            - !ruby/object:Api::Type::String
+              name: range
+              required: true
+              description: |
+                The custom learned route IP address range. The value must be a
+                CIDR-formatted string.
+              send_empty_value: true
       - !ruby/object:Api::Type::Integer
         name: customLearnedRoutePriority
         description: "The user-defined custom learned route priority for a BGP session.This value is applied \nto all custom learned route ranges for the session. You can choose a value from 0 to 65335.\n"
