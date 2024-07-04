@@ -49,8 +49,17 @@ func computeServiceAttachmentConsumerAcceptListsHash(v interface{}) int {
 
 // Suppress all diff for the field Service Project
 func TargetServiceDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
-	oldSwp := old[strings.LastIndex(old, "/")+1:]
-	newSwp := new[strings.LastIndex(new, "/")+1:]
-	
+	defer func() {
+		if err := recover(); err != nil {
+			return
+		}
+	}()
+
+	oldArray := strings.Split(old, "/")
+	newArray := strings.Split(new, "/")
+
+	oldSwp := fmt.Sprintf("%s/%s", oldArray[len(oldArray)-2], oldArray[len(oldArray)-1])
+	newSwp := fmt.Sprintf("%s/%s", newArray[len(newArray)-2], newArray[len(newArray)-1])
+
 	return oldSwp == newSwp
 }
