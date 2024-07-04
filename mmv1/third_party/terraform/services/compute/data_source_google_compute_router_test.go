@@ -41,6 +41,13 @@ resource "google_compute_router" "foobar" {
   network = google_compute_network.foobar.name
   bgp {
     asn = 64514
+    custom_learned_ip_ranges {
+      range = "1.2.3.4"
+    }
+    custom_learned_ip_ranges {
+      range = "6.7.0.0/16"
+    }
+	custom_learned_route_priority= 200
   }
 }
 
