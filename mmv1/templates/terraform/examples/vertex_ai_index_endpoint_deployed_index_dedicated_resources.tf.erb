@@ -9,14 +9,15 @@ resource "google_vertex_ai_index_endpoint_deployed_index" "<%= ctx[:primary_reso
       metric_name = "aiplatform.googleapis.com/prediction/online/accelerator/duty_cycle"
       target      = 60
     }
+    // machine spec comes from: https://cloud.google.com/vertex-ai/docs/training/configure-compute#tpu_v2_and_v3
     machine_spec {
-      accelerator_count = 1
-      accelerator_type  = "NVIDIA_TESLA_P100"
-      machine_type      = "n1-standard-2"
+      accelerator_count = 8
+      accelerator_type  = "TPU_V2"
+      machine_type      = "cloud-tpu"
       tpu_topology      = "2x2x1"
     }
     max_replica_count = 3
-    min_replica_count = 2
+    min_replica_count = 1
   }
 }
 
