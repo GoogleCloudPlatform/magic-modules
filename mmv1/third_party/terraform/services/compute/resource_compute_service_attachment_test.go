@@ -267,7 +267,7 @@ resource "google_compute_service_attachment" "default" {
   enable_proxy_protocol    = false
   connection_preference    = "ACCEPT_AUTOMATIC"
   nat_subnets              = [google_compute_subnetwork.psc.id]
-  target_service           = "//networkservices.googleapis.com/${google_network_services_gateway.foobar.id}"
+  target_service           = google_network_services_gateway.foobar.self_link
 }
 
 resource "google_certificate_manager_certificate" "default" {
