@@ -1117,6 +1117,26 @@ properties:
                       table. The BigQuery Service Account associated with your project requires access to this
                       encryption key. i.e. projects/{project}/locations/{location}/keyRings/{key_ring}/cryptoKeys/{cryptoKey}.
                       See https://cloud.google.com/bigquery/docs/customer-managed-encryption for more information.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'merge'
+            send_empty_value: true
+            allow_empty_object: true
+            exactly_one_of:
+              - destination_config.0.bigquery_destination_config.0.merge
+              - destination_config.0.bigquery_destination_config.0.append_only
+            description: |
+              Merge mode defines that all changes to a table will be merged at the destination Google BigQuery table.
+            properties: []
+          - !ruby/object:Api::Type::NestedObject
+            name: 'appendOnly'
+            send_empty_value: true
+            allow_empty_object: true
+            exactly_one_of:
+              - destination_config.0.bigquery_destination_config.0.merge
+              - destination_config.0.bigquery_destination_config.0.append_only
+            description: |
+              AppendOnly mode defines that all changes to a table will be written to the destination Google BigQuery table.
+            properties: []
   - !ruby/object:Api::Type::String
     name: 'state'
     description: The state of the stream.
