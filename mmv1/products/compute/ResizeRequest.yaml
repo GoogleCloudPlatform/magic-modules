@@ -35,25 +35,13 @@ min_version: beta
 base_url: 'projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instanceGroupManager}}/resizeRequests'
 self_link: 'projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instanceGroupManager}}/resizeRequests/{{resizeRequest}}'
 
-
-# If true, the resource and all its fields are considered immutable - that is,
-# only creatable, not updatable. Individual fields can override this if they
-# have a custom update method in the API.
-# immutable: true
-
-create_url: 'projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instanceGroupManager}}/resizeRequests?requestId={{requestId}}'
+#create_url: 'projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instanceGroupManager}}/resizeRequests?requestId={{requestId}}'
 create_verb: :POST
+immutable: true
 
-# Overrides the URL for the resource's standard Update method. (If unset, the
-# self_link URL is used by default.) https://google.aip.dev/134
-# Terraform field names enclosed in double curly braces are replaced with
-# the field values from the resource at runtime.
-# update_url: 'projects/{{project}}/locations/{{location}}/resourcenames/{{name}}'
-# The HTTP verb used to update a resource. Allowed values: :POST, :PUT, :PATCH. Default: :PUT.
-##update_verb: :PATCH
-# If true, the resource sets an `updateMask` query parameter listing modified
-# fields when updating the resource. If false, it does not.
-##update_mask: true
+# TODO: don't allow cancel. but be able to delete but have to cancel first.
+# TODO: do we need a mutex for a MIG resource?
+
 
 # Overrides the URL for the resource's standard Delete method. (If unset, the
 # self_link URL is used by default.) https://google.aip.dev/135
@@ -90,97 +78,78 @@ async: !ruby/object:Api::OpAsync
     path: 'error/errors'
     message: 'message'
 
-  # If true, the provider sets the resource's Terraform ID after the resource is created,
-  # taking into account values that are set by the API at create time. This is only possible
-  # when the completed operation's JSON includes the created resource in the "response" field.
-  # If false (or unset), the provider sets the resource's Terraform ID before the resource is
-  # created, based only on the resource configuration.
-  # result: !ruby/object:Api::OpAsync::Result
-  #   resource_inside_response: true
-
-# All resources (of all kinds) that share a mutex value block rather than
-# executing concurrent API requests.
-# Terraform field names enclosed in double curly braces are replaced with
-# the field values from the resource at runtime.
-# mutex: RESOURCE_NAME/{{name}}
-
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'zone'
     resource: 'Zone'
-    imports: 'name'
     description: |
-      Zone where the containing instance group manager is located
-    required: false
+      Name of the compute zone scoping this request. Name should conform to RFC1035.
+    # TODO: Do we have non-zonal resize requests?
+    required: true
     url_param_only: true
-    immutable: true
-    ignore_read: true
-    default_from_api: true
   - !ruby/object:Api::Type::ResourceRef
     name: 'instanceGroupManager'
     resource: 'InstanceGroupManager'
-    imports: 'name'
     description: |
-      The instance group manager this instance config is part of.
+      The name of the managed instance group. The name should conform to RFC1035 or be a resource ID.
+
+      Authorization requires the following IAM permission on the specified resource instanceGroupManager:
+      *compute.instanceGroupManagers.update
     required: true
     url_param_only: true
-    immutable: true
   - !ruby/object:Api::Type::ResourceRef
     name: 'resizeRequest'
-    resource: 'resizeRequest'
-    imports: 'name'
+    resource: 'ResizeRequest'
     description: |
-      The resizeRequest to get
-    required: true
+      The name of an existing resize request. The name should conform to RFC1035 or be a resource ID.
     url_param_only: true
-    immutable: true
 
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
-    description: 'Creation timestamp in RFC3339 text format.'
+    description: |
+      The creation timestamp for this resize request in RFC3339 text format.
     output: true
   - !ruby/object:Api::Type::String
     name: 'name'
     description: |
-      Name of the resize-request.
+      The name of this resize request. The name must be 1-63 characters long, and comply with RFC1035.
     required: true
-    immutable: true
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
       An optional description of this resize-request.
+    # TODO: how to deal with zone being both a url only param on get and body param in CUD?
+  - !ruby/object:Api::Type::String
+    name: 'zone'
+    description: |
+      The URL of a zone where the resize request is located. Populated only for zonal resize requests.
+    output: true
   - !ruby/object:Api::Type::Integer
     name: 'count'
     description: |
-      TBD.
-    required: true
+      This field is deprecated, please use resizeBy instead. The count of instances to create as part of this resize request.
+    conflicts:
+    - 'resizeBy'
   - !ruby/object:Api::Type::Integer
     name: 'resizeBy'
     description: |
-      The maximum number of instances to scale to.
-    required: true
+      The number of instances to be created by this resize request. The group's target size will be increased by this number.
+    conflicts:
+    - 'count'
+    # TODO: Can you update a resize request to be longer? There is no update CRUD method so probably not
   - !ruby/object:Api::Type::NestedObject
       name: 'requestedRunDuration'
       description: |
-        How long the instances should be provisioned for.
-      required: true
+        Requested run duration for instances that will be created by this request. At the end of the run duration instance will be deleted.
       properties:
         - !ruby/object:Api::Type::String
           name: 'seconds'
           description: |
-            Seconds
+            Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive. Note: these bounds are computed from: 60 sec/min * 60 min/hr * 24 hr/day * 365.25 days/year * 10000 years
+          required: true
         - !ruby/object:Api::Type::Integer
           name: 'nanos'
-          api_name: minNumReplicas
           description: |
-            nanos
-  - !ruby/object:Api::Type::Enum
-    name: 'state'
-    api_name: 'utilizationTargetType'
-    description: |
-      State of the resize request
-    values:
-      - :GAUGE
-      - :DELTA_PER_SECOND
-      - :DELTA_PER_MINUTE
+            Span of time that's a fraction of a second at nanosecond resolution. Durations less than one second are represented with a 0 seconds field and a positive nanos field. Must be from 0 to 999,999,999 inclusive.
+
