@@ -1059,7 +1059,7 @@ properties:
           - destination_config.0.gcs_destination_config
           - destination_config.0.bigquery_destination_config
         description: |
-          A configuration for how data should be loaded to Cloud Storage.
+          A configuration for how data should be loaded to Google BigQuery.
         properties:
           - !ruby/object:Api::Type::String
             name: 'dataFreshness'
