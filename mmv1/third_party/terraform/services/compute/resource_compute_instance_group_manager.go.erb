@@ -311,7 +311,7 @@ func ResourceComputeInstanceGroupManager() *schema.Resource {
 							ConflictsWith: []string{"update_policy.0.max_unavailable_percent"},
 							Description:   `Specifies a fixed number of VM instances. This must be a positive integer.`,
 						},
-						// do changes
+						
 						"max_unavailable_percent": {
 							Type:          schema.TypeInt,
 							Optional:      true,
