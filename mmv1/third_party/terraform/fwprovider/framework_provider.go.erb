@@ -162,12 +162,6 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
                     transport_tpg.CustomEndpointValidator(),
                 },
             },
-            "composer_custom_endpoint": &schema.StringAttribute{
-                Optional:     true,
-                Validators: []validator.String{
-                    transport_tpg.CustomEndpointValidator(),
-                },
-            },
             "container_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
                 Validators: []validator.String{
@@ -201,12 +195,6 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
             },
             <% end -%>
             "iam_custom_endpoint": &schema.StringAttribute{
-                Optional:     true,
-                Validators: []validator.String{
-                    transport_tpg.CustomEndpointValidator(),
-                },
-            },
-            "service_networking_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
                 Validators: []validator.String{
                     transport_tpg.CustomEndpointValidator(),
