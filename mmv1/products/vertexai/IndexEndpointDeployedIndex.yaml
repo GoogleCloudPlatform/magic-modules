@@ -13,13 +13,13 @@
 
 --- !ruby/object:Api::Resource
 name: IndexEndpointDeployedIndex
-base_url: 'projects/{{project}}/locations/{{region}}/indexEndpoints/{{index_endpoint}}'
-create_url: projects/{{project}}/locations/{{region}}/indexEndpoints/{{index_endpoint}}:deployIndex
-update_url: 'projects/{{project}}/locations/{{region}}/indexEndpoints/{{index_endpoint}}:mutateDeployedIndex'
-delete_url: 'projects/{{project}}/locations/{{region}}/indexEndpoints/{{index_endpoint}}:undeployIndex'
-self_link: 'projects/{{project}}/locations/{{region}}/indexEndpoints/{{index_endpoint}}'
+base_url: '{{index_endpoint}}'
+create_url: '{{index_endpoint}}:deployIndex'
+update_url: '{{index_endpoint}}:mutateDeployedIndex'
+delete_url: '{{index_endpoint}}:undeployIndex'
+self_link: '{{index_endpoint}}'
 import_format: ['projects/{{project}}/locations/{{region}}/indexEndpoints/{{index_endpoint}}/deployedIndex/{{deployed_index_id}}']
-id_format: 'projects/{{project}}/locations/{{region}}/indexEndpoints/{{index_endpoint}}/deployedIndex/{{deployed_index_id}}'
+id_format: '{{index_endpoint}}/deployedIndex/{{deployed_index_id}}'
 update_verb: :POST
 delete_verb: :POST
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -47,6 +47,7 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: 'error'
     message: 'message'
+  include_project: true
 description: |-
   An endpoint indexes are deployed into. An index endpoint can have multiple deployed indexes.
 autogen_async: false
@@ -55,7 +56,6 @@ examples:
     name: "vertex_ai_index_endpoint_deployed_index_basic"
     primary_resource_id: "basic_deployed_index"
     vars:
-      project: 'vertex-ai'
       endpoint_name: 'endpoint-name'
       network_name: 'network-name'
       display_name: "vertex-deployed-index"
@@ -78,12 +78,9 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   update_encoder: templates/terraform/update_encoder/vertex_ai_index_endpoint_deployed_index.go.erb
   decoder: templates/terraform/decoders/vertex_ai_index_endpoint_deployed_index.go.erb
   pre_delete: templates/terraform/pre_delete/vertex_ai_index_endpoint_deployed_index.go.erb
+  custom_import: templates/terraform/custom_import/vertex_ai_index_endpoint_deployed_index.go.erb
+
 parameters:
-  - !ruby/object:Api::Type::String
-    name: region
-    description: The region of the index endpoint. eg us-central1
-    url_param_only: true
-    immutable: true
   - !ruby/object:Api::Type::ResourceRef
     name: 'indexEndpoint'
     description: |
