@@ -871,9 +871,6 @@ properties:
       Settings controlling eviction of unhealthy hosts from the load balancing pool.
       This field is applicable only when the `load_balancing_scheme` is set
       to INTERNAL_MANAGED and the `protocol` is set to HTTP, HTTPS, or HTTP2.
-
-      From version 6.0.0 outlierDetection default terraform values will be removed to match default GCP value.
-      Default values are enforce by GCP without providing them.
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'baseEjectionTime'
@@ -908,7 +905,6 @@ properties:
               `nanos` field. Must be from 0 to 999,999,999 inclusive.
       - !ruby/object:Api::Type::Integer
         name: 'consecutiveErrors'
-        default_value: 5
         at_least_one_of:
           - outlier_detection.0.base_ejection_time
           - outlier_detection.0.consecutive_errors
@@ -927,7 +923,6 @@ properties:
           Defaults to 5.
       - !ruby/object:Api::Type::Integer
         name: 'consecutiveGatewayFailure'
-        default_value: 5
         at_least_one_of:
           - outlier_detection.0.base_ejection_time
           - outlier_detection.0.consecutive_errors
@@ -946,7 +941,6 @@ properties:
           gateway failure ejection occurs. Defaults to 5.
       - !ruby/object:Api::Type::Integer
         name: 'enforcingConsecutiveErrors'
-        default_value: 100
         at_least_one_of:
           - outlier_detection.0.base_ejection_time
           - outlier_detection.0.consecutive_errors
@@ -965,7 +959,6 @@ properties:
           ejection or to ramp it up slowly. Defaults to 100.
       - !ruby/object:Api::Type::Integer
         name: 'enforcingConsecutiveGatewayFailure'
-        default_value: 0
         at_least_one_of:
           - outlier_detection.0.base_ejection_time
           - outlier_detection.0.consecutive_errors
@@ -984,7 +977,6 @@ properties:
           used to disable ejection or to ramp it up slowly. Defaults to 0.
       - !ruby/object:Api::Type::Integer
         name: 'enforcingSuccessRate'
-        default_value: 100
         at_least_one_of:
           - outlier_detection.0.base_ejection_time
           - outlier_detection.0.consecutive_errors
@@ -1033,7 +1025,6 @@ properties:
               `nanos` field. Must be from 0 to 999,999,999 inclusive.
       - !ruby/object:Api::Type::Integer
         name: 'maxEjectionPercent'
-        default_value: 10
         at_least_one_of:
           - outlier_detection.0.base_ejection_time
           - outlier_detection.0.consecutive_errors
@@ -1051,7 +1042,6 @@ properties:
           that can be ejected. Defaults to 10%.
       - !ruby/object:Api::Type::Integer
         name: 'successRateMinimumHosts'
-        default_value: 5
         at_least_one_of:
           - outlier_detection.0.base_ejection_time
           - outlier_detection.0.consecutive_errors
@@ -1071,7 +1061,6 @@ properties:
           cluster. Defaults to 5.
       - !ruby/object:Api::Type::Integer
         name: 'successRateRequestVolume'
-        default_value: 100
         at_least_one_of:
           - outlier_detection.0.base_ejection_time
           - outlier_detection.0.consecutive_errors
@@ -1092,7 +1081,6 @@ properties:
           to 100.
       - !ruby/object:Api::Type::Integer
         name: 'successRateStdevFactor'
-        default_value: 1900
         at_least_one_of:
           - outlier_detection.0.base_ejection_time
           - outlier_detection.0.consecutive_errors

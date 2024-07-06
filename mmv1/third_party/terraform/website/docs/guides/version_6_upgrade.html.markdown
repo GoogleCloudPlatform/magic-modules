@@ -120,7 +120,17 @@ Removed in favor of field `settings.ip_configuration.ssl_mode`.
 
 An empty value means the setting should be cleared.
 
+## Resource: `google_compute_backend_service`
+
+### `outlier_detection` subfields default values removed
+
+Empty values mean the setting should be cleared.
+
 ## Resource: `google_compute_region_backend_service`
+
+### `outlier_detection` subfields default values removed
+
+Empty values mean the setting should be cleared.
 
 ### `connection_draining_timeout_sec` default value changed
 
