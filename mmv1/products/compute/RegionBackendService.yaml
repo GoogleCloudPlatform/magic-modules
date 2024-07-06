@@ -653,13 +653,11 @@ properties:
       - !ruby/object:Api::Type::Integer
         name: 'connection_draining_timeout_sec'
         api_name: drainingTimeoutSec
-        default_value: 0
+        default_value: 300
         send_empty_value: true
         description: |
           Time for which instance will be drained (not accept new
           connections, but still work to finish started).
-
-          From version 6.0.0 ConnectionDrainingTimeoutSec default value will be 300 to match default GCP value.
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
     description: |
