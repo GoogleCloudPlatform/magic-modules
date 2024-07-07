@@ -582,7 +582,7 @@ properties:
                       description: |
                         The BCP-47 language code, such as en-US or sr-Latn. For more information, see https://www.unicode.org/reports/tr35/#Unicode_locale_identifier.
                     - !ruby/object:Api::Type::String
-                      name: "languageCode"
+                      name: "displayName"
                       description: |
                         The name for this particular audio stream that will be added to the HLS/DASH manifest.
                 - !ruby/object:Api::Type::NestedObject
