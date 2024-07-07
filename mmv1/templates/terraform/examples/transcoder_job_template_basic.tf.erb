@@ -1,5 +1,4 @@
 resource "google_transcoder_job_template" "<%= ctx[:primary_resource_id] %>" {
-  provider    = google-beta
   name        = "<%= ctx[:vars]['job_template_name'] %>"
   location = "us-central1"
 
