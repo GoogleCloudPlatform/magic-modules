@@ -382,328 +382,323 @@ properties:
                 Encoding of a video stream.
               properties:
                 - !ruby/object:Api::Type::NestedObject
-                  name: "videoStream"
+                  name: "h264"
                   description: |
-                    Encoding of a video stream.
+                    H264 codec settings
                   properties:
-                    - !ruby/object:Api::Type::NestedObject
-                      name: "h264"
+                    - !ruby/object:Api::Type::Integer
+                      name: "widthPixels"
                       description: |
-                        H264 codec settings
-                      properties:
-                        - !ruby/object:Api::Type::Integer
-                          name: "widthPixels"
-                          description: |
-                            The width of the video in pixels.
-                        - !ruby/object:Api::Type::Integer
-                          name: "heightPixels"
-                          description: |
-                            The height of the video in pixels.
-                        - !ruby/object:Api::Type::Integer
-                          name: "frameRate"
-                          description: The target video frame rate in frames per second (FPS).
-                          required: true
-                        - !ruby/object:Api::Type::Enum
-                          name: "frameRateConversionStrategy"
-                          description: |
-                            Frame rate conversion strategy for desired frame rate.
-                          values:
-                            - :FRAME_RATE_CONVERSION_STRATEGY_UNSPECIFIED
-                            - :DOWNSAMPLE
-                            - :DROP_DUPLICATE
-                        - !ruby/object:Api::Type::Integer
-                          name: "bitrateBps"
-                          description: The video bitrate in bits per second.
-                          required: true
-                        - !ruby/object:Api::Type::String
-                          name: "pixelFormat"
-                          description: Pixel format to use.
-                        - !ruby/object:Api::Type::String
-                          name: "rateControlMode"
-                          description: Specify the mode.
-                        - !ruby/object:Api::Type::Integer
-                          name: "crfLevel"
-                          description: Target CRF level.
-                          default_from_api: true
-                        - !ruby/object:Api::Type::Boolean
-                          name: "allowOpenGop"
-                          description: Specifies whether an open Group of Pictures (GOP) structure should be allowed or not.
-                        - !ruby/object:Api::Type::Boolean
-                          name: "enableTwoPass"
-                          description: Use two-pass encoding strategy to achieve better video quality.
-                        - !ruby/object:Api::Type::Integer
-                          name: "vbvSizeBits"
-                          description: Size of the Video Buffering Verifier (VBV) buffer in bits.
-                          default_from_api: true
-                        - !ruby/object:Api::Type::Integer
-                          name: "vbvFullnessBits"
-                          description: Initial fullness of the Video Buffering Verifier (VBV) buffer in bits.
-                          default_from_api: true
-                        - !ruby/object:Api::Type::String
-                          name: "entropyCoder"
-                          description: The entropy coder to use.
-                          default_from_api: true
-                        - !ruby/object:Api::Type::Boolean
-                          name: "bPyramid"
-                          description: Allow B-pyramid for reference frame selection.
-                        - !ruby/object:Api::Type::Integer
-                          name: "bFrameCount"
-                          description: The number of consecutive B-frames.
-                          default_from_api: true
-                        - !ruby/object:Api::Type::Integer
-                          name: "aqStrength"
-                          description: Specify the intensity of the adaptive quantizer (AQ).
-                          default_from_api: true
-                        - !ruby/object:Api::Type::String
-                          name: "profile"
-                          description: Enforces the specified codec profile.
-                          default_from_api: true
-                        - !ruby/object:Api::Type::String
-                          name: "tune"
-                          description: Enforces the specified codec tune.
-                        - !ruby/object:Api::Type::String
-                          name: "preset"
-                          description: Enforces the specified codec preset.
-                          default_from_api: true
-                        - !ruby/object:Api::Type::Integer
-                          name: "gopFrameCount"
-                          description: Select the GOP size based on the specified frame count.
-                        - !ruby/object:Api::Type::Time
-                          name: "gopDuration"
-                          description: Select the GOP size based on the specified duration.
-                    - !ruby/object:Api::Type::NestedObject
-                      name: "h265"
+                        The width of the video in pixels.
+                    - !ruby/object:Api::Type::Integer
+                      name: "heightPixels"
                       description: |
-                        H265 codec settings
-                      properties:
-                        - !ruby/object:Api::Type::Integer
-                          name: "widthPixels"
-                          description: |
-                            The width of the video in pixels.
-                        - !ruby/object:Api::Type::Integer
-                          name: "heightPixels"
-                          description: |
-                            The height of the video in pixels.
-                        - !ruby/object:Api::Type::Integer
-                          name: "frameRate"
-                          description: The target video frame rate in frames per second (FPS).
-                          required: true
-                        - !ruby/object:Api::Type::Enum
-                          name: "frameRateConversionStrategy"
-                          description: |
-                            Frame rate conversion strategy for desired frame rate.
-                          values:
-                            - :FRAME_RATE_CONVERSION_STRATEGY_UNSPECIFIED
-                            - :DOWNSAMPLE
-                            - :DROP_DUPLICATE
-                        - !ruby/object:Api::Type::Integer
-                          name: "bitrateBps"
-                          description: The video bitrate in bits per second.
-                          required: true
-                        - !ruby/object:Api::Type::String
-                          name: "pixelFormat"
-                          description: Pixel format to use.
-                        - !ruby/object:Api::Type::String
-                          name: "rateControlMode"
-                          description: Specify the mode.
-                          default_from_api: true
-                        - !ruby/object:Api::Type::Integer
-                          name: "crfLevel"
-                          description: Target CRF level.
-                          default_from_api: true
-                        - !ruby/object:Api::Type::Boolean
-                          name: "allowOpenGop"
-                          description: Specifies whether an open Group of Pictures (GOP) structure should be allowed or not.
-                        - !ruby/object:Api::Type::Boolean
-                          name: "enableTwoPass"
-                          description: Use two-pass encoding strategy to achieve better video quality.
-                        - !ruby/object:Api::Type::Integer
-                          name: "vbvSizeBits"
-                          description: Size of the Video Buffering Verifier (VBV) buffer in bits.
-                          default_from_api: true
-                        - !ruby/object:Api::Type::Integer
-                          name: "vbvFullnessBits"
-                          description: Initial fullness of the Video Buffering Verifier (VBV) buffer in bits.
-                          default_from_api: true
-                        - !ruby/object:Api::Type::String
-                          name: "entropyCoder"
-                          description: The entropy coder to use.
-                        - !ruby/object:Api::Type::Boolean
-                          name: "bPyramid"
-                          description: Allow B-pyramid for reference frame selection.
-                        - !ruby/object:Api::Type::Integer
-                          name: "bFrameCount"
-                          description: The number of consecutive B-frames.
-                          default_from_api: true
-                        - !ruby/object:Api::Type::Integer
-                          name: "aqStrength"
-                          description: Specify the intensity of the adaptive quantizer (AQ).
-                          default_from_api: true
-                        - !ruby/object:Api::Type::String
-                          name: "profile"
-                          description: Enforces the specified codec profile.
-                          default_from_api: true
-                        - !ruby/object:Api::Type::String
-                          name: "tune"
-                          description: Enforces the specified codec tune.
-                        - !ruby/object:Api::Type::String
-                          name: "preset"
-                          description: Enforces the specified codec preset.
-                          default_from_api: true
-                        - !ruby/object:Api::Type::Integer
-                          name: "gopFrameCount"
-                          description: Select the GOP size based on the specified frame count.
-                        - !ruby/object:Api::Type::Time
-                          name: "gopDuration"
-                          description: Select the GOP size based on the specified duration.
-                    - !ruby/object:Api::Type::NestedObject
-                      name: "vp9"
+                        The height of the video in pixels.
+                    - !ruby/object:Api::Type::Integer
+                      name: "frameRate"
+                      description: The target video frame rate in frames per second (FPS).
+                      required: true
+                    - !ruby/object:Api::Type::Enum
+                      name: "frameRateConversionStrategy"
                       description: |
-                        VP9 codec settings
-                      properties:
-                        - !ruby/object:Api::Type::Integer
-                          name: "widthPixels"
-                          description: |
-                            The width of the video in pixels.
-                        - !ruby/object:Api::Type::Integer
-                          name: "heightPixels"
-                          description: |
-                            The height of the video in pixels.
-                        - !ruby/object:Api::Type::Integer
-                          name: "frameRate"
-                          description: The target video frame rate in frames per second (FPS).
-                          required: true
-                        - !ruby/object:Api::Type::Enum
-                          name: "frameRateConversionStrategy"
-                          description: |
-                            Frame rate conversion strategy for desired frame rate.
-                          values:
-                            - :FRAME_RATE_CONVERSION_STRATEGY_UNSPECIFIED
-                            - :DOWNSAMPLE
-                            - :DROP_DUPLICATE
-                        - !ruby/object:Api::Type::Integer
-                          name: "bitrateBps"
-                          description: The video bitrate in bits per second.
-                          required: true
-                        - !ruby/object:Api::Type::String
-                          name: "pixelFormat"
-                          description: Pixel format to use.
-                          default_from_api: true
-                        - !ruby/object:Api::Type::String
-                          name: "profile"
-                          description: Enforces the specified codec profile.
-                          default_from_api: true
-                        - !ruby/object:Api::Type::Integer
-                          name: "gopFrameCount"
-                          description: Select the GOP size based on the specified frame count.
-                        - !ruby/object:Api::Type::Time
-                          name: "gopDuration"
-                          description: Select the GOP size based on the specified duration.
-                - !ruby/object:Api::Type::NestedObject
-                  name: "audioStream"
-                  description: |
-                    Encoding of an audio stream.
-                  properties:
-                    - !ruby/object:Api::Type::String
-                      name: "codec"
-                      description: The codec for this audio stream.
-                      default_from_api: true
+                        Frame rate conversion strategy for desired frame rate.
+                      values:
+                        - :FRAME_RATE_CONVERSION_STRATEGY_UNSPECIFIED
+                        - :DOWNSAMPLE
+                        - :DROP_DUPLICATE
                     - !ruby/object:Api::Type::Integer
                       name: "bitrateBps"
-                      description: Audio bitrate in bits per second.
+                      description: The video bitrate in bits per second.
                       required: true
-                    - !ruby/object:Api::Type::Integer
-                      name: "channelCount"
-                      description: Number of audio channels.
-                      default_from_api: true
-                    - !ruby/object:Api::Type::Array
-                      name: "channelLayout"
-                      item_type: Api::Type::String
-                      description: |
-                        A list of channel names specifying layout of the audio channels.
-                      default_from_api: true
-                    - !ruby/object:Api::Type::NestedObject
-                      name: "mapping"
-                      description: |
-                        The mapping for the JobConfig.edit_list atoms with audio EditAtom.inputs.
-                      properties:
-                        - !ruby/object:Api::Type::String
-                          name: "atomKey"
-                          description: |
-                            The EditAtom.key that references the atom with audio inputs in the JobConfig.edit_list.
-                          required: true
-                        - !ruby/object:Api::Type::String
-                          name: "inputKey"
-                          description: |
-                            The Input.key that identifies the input file.
-                          required: true
-                        - !ruby/object:Api::Type::Integer
-                          name: "inputTrack"
-                          description: |
-                            The zero-based index of the track in the input file.
-                          required: true
-                        - !ruby/object:Api::Type::Integer
-                          name: "inputChannel"
-                          description: |
-                            The zero-based index of the channel in the input audio stream.
-                          required: true
-                        - !ruby/object:Api::Type::Integer
-                          name: "outputChannel"
-                          description: |
-                            The zero-based index of the channel in the output audio stream.
-                          required: true
-                        - !ruby/object:Api::Type::Integer
-                          name: "gainDb"
-                          description: |
-                            Audio volume control in dB. Negative values decrease volume, positive values increase.
-                    - !ruby/object:Api::Type::Integer
-                      name: "sampleRateHertz"
-                      description: |
-                        The audio sample rate in Hertz.
                     - !ruby/object:Api::Type::String
-                      name: "languageCode"
-                      description: |
-                        The BCP-47 language code, such as en-US or sr-Latn. For more information, see https://www.unicode.org/reports/tr35/#Unicode_locale_identifier.
+                      name: "pixelFormat"
+                      description: Pixel format to use.
                     - !ruby/object:Api::Type::String
-                      name: "displayName"
-                      description: |
-                        The name for this particular audio stream that will be added to the HLS/DASH manifest.
+                      name: "rateControlMode"
+                      description: Specify the mode.
+                    - !ruby/object:Api::Type::Integer
+                      name: "crfLevel"
+                      description: Target CRF level.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::Boolean
+                      name: "allowOpenGop"
+                      description: Specifies whether an open Group of Pictures (GOP) structure should be allowed or not.
+                    - !ruby/object:Api::Type::Boolean
+                      name: "enableTwoPass"
+                      description: Use two-pass encoding strategy to achieve better video quality.
+                    - !ruby/object:Api::Type::Integer
+                      name: "vbvSizeBits"
+                      description: Size of the Video Buffering Verifier (VBV) buffer in bits.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::Integer
+                      name: "vbvFullnessBits"
+                      description: Initial fullness of the Video Buffering Verifier (VBV) buffer in bits.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::String
+                      name: "entropyCoder"
+                      description: The entropy coder to use.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::Boolean
+                      name: "bPyramid"
+                      description: Allow B-pyramid for reference frame selection.
+                    - !ruby/object:Api::Type::Integer
+                      name: "bFrameCount"
+                      description: The number of consecutive B-frames.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::Integer
+                      name: "aqStrength"
+                      description: Specify the intensity of the adaptive quantizer (AQ).
+                      default_from_api: true
+                    - !ruby/object:Api::Type::String
+                      name: "profile"
+                      description: Enforces the specified codec profile.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::String
+                      name: "tune"
+                      description: Enforces the specified codec tune.
+                    - !ruby/object:Api::Type::String
+                      name: "preset"
+                      description: Enforces the specified codec preset.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::Integer
+                      name: "gopFrameCount"
+                      description: Select the GOP size based on the specified frame count.
+                    - !ruby/object:Api::Type::Time
+                      name: "gopDuration"
+                      description: Select the GOP size based on the specified duration.
                 - !ruby/object:Api::Type::NestedObject
-                  name: "textStream"
+                  name: "h265"
                   description: |
-                    Encoding of a text stream.
+                    H265 codec settings
+                  properties:
+                    - !ruby/object:Api::Type::Integer
+                      name: "widthPixels"
+                      description: |
+                        The width of the video in pixels.
+                    - !ruby/object:Api::Type::Integer
+                      name: "heightPixels"
+                      description: |
+                        The height of the video in pixels.
+                    - !ruby/object:Api::Type::Integer
+                      name: "frameRate"
+                      description: The target video frame rate in frames per second (FPS).
+                      required: true
+                    - !ruby/object:Api::Type::Enum
+                      name: "frameRateConversionStrategy"
+                      description: |
+                        Frame rate conversion strategy for desired frame rate.
+                      values:
+                        - :FRAME_RATE_CONVERSION_STRATEGY_UNSPECIFIED
+                        - :DOWNSAMPLE
+                        - :DROP_DUPLICATE
+                    - !ruby/object:Api::Type::Integer
+                      name: "bitrateBps"
+                      description: The video bitrate in bits per second.
+                      required: true
+                    - !ruby/object:Api::Type::String
+                      name: "pixelFormat"
+                      description: Pixel format to use.
+                    - !ruby/object:Api::Type::String
+                      name: "rateControlMode"
+                      description: Specify the mode.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::Integer
+                      name: "crfLevel"
+                      description: Target CRF level.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::Boolean
+                      name: "allowOpenGop"
+                      description: Specifies whether an open Group of Pictures (GOP) structure should be allowed or not.
+                    - !ruby/object:Api::Type::Boolean
+                      name: "enableTwoPass"
+                      description: Use two-pass encoding strategy to achieve better video quality.
+                    - !ruby/object:Api::Type::Integer
+                      name: "vbvSizeBits"
+                      description: Size of the Video Buffering Verifier (VBV) buffer in bits.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::Integer
+                      name: "vbvFullnessBits"
+                      description: Initial fullness of the Video Buffering Verifier (VBV) buffer in bits.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::String
+                      name: "entropyCoder"
+                      description: The entropy coder to use.
+                    - !ruby/object:Api::Type::Boolean
+                      name: "bPyramid"
+                      description: Allow B-pyramid for reference frame selection.
+                    - !ruby/object:Api::Type::Integer
+                      name: "bFrameCount"
+                      description: The number of consecutive B-frames.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::Integer
+                      name: "aqStrength"
+                      description: Specify the intensity of the adaptive quantizer (AQ).
+                      default_from_api: true
+                    - !ruby/object:Api::Type::String
+                      name: "profile"
+                      description: Enforces the specified codec profile.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::String
+                      name: "tune"
+                      description: Enforces the specified codec tune.
+                    - !ruby/object:Api::Type::String
+                      name: "preset"
+                      description: Enforces the specified codec preset.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::Integer
+                      name: "gopFrameCount"
+                      description: Select the GOP size based on the specified frame count.
+                    - !ruby/object:Api::Type::Time
+                      name: "gopDuration"
+                      description: Select the GOP size based on the specified duration.
+                - !ruby/object:Api::Type::NestedObject
+                  name: "vp9"
+                  description: |
+                    VP9 codec settings
+                  properties:
+                    - !ruby/object:Api::Type::Integer
+                      name: "widthPixels"
+                      description: |
+                        The width of the video in pixels.
+                    - !ruby/object:Api::Type::Integer
+                      name: "heightPixels"
+                      description: |
+                        The height of the video in pixels.
+                    - !ruby/object:Api::Type::Integer
+                      name: "frameRate"
+                      description: The target video frame rate in frames per second (FPS).
+                      required: true
+                    - !ruby/object:Api::Type::Enum
+                      name: "frameRateConversionStrategy"
+                      description: |
+                        Frame rate conversion strategy for desired frame rate.
+                      values:
+                        - :FRAME_RATE_CONVERSION_STRATEGY_UNSPECIFIED
+                        - :DOWNSAMPLE
+                        - :DROP_DUPLICATE
+                    - !ruby/object:Api::Type::Integer
+                      name: "bitrateBps"
+                      description: The video bitrate in bits per second.
+                      required: true
+                    - !ruby/object:Api::Type::String
+                      name: "pixelFormat"
+                      description: Pixel format to use.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::String
+                      name: "profile"
+                      description: Enforces the specified codec profile.
+                      default_from_api: true
+                    - !ruby/object:Api::Type::Integer
+                      name: "gopFrameCount"
+                      description: Select the GOP size based on the specified frame count.
+                    - !ruby/object:Api::Type::Time
+                      name: "gopDuration"
+                      description: Select the GOP size based on the specified duration.
+            - !ruby/object:Api::Type::NestedObject
+              name: "audioStream"
+              description: |
+                Encoding of an audio stream.
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: "codec"
+                  description: The codec for this audio stream.
+                  default_from_api: true
+                - !ruby/object:Api::Type::Integer
+                  name: "bitrateBps"
+                  description: Audio bitrate in bits per second.
+                  required: true
+                - !ruby/object:Api::Type::Integer
+                  name: "channelCount"
+                  description: Number of audio channels.
+                  default_from_api: true
+                - !ruby/object:Api::Type::Array
+                  name: "channelLayout"
+                  item_type: Api::Type::String
+                  description: |
+                    A list of channel names specifying layout of the audio channels.
+                  default_from_api: true
+                - !ruby/object:Api::Type::NestedObject
+                  name: "mapping"
+                  description: |
+                    The mapping for the JobConfig.edit_list atoms with audio EditAtom.inputs.
                   properties:
                     - !ruby/object:Api::Type::String
-                      name: "codec"
-                      description: The codec for this text stream.
-                      default_from_api: true
-                    - !ruby/object:Api::Type::String
-                      name: "languageCode"
-                      description: The BCP-47 language code, such as en-US or sr-Latn. For more information, see https://www.unicode.org/reports/tr35/#Unicode_locale_identifier.
-                    - !ruby/object:Api::Type::NestedObject
-                      name: "mapping"
+                      name: "atomKey"
                       description: |
-                        The mapping for the JobConfig.edit_list atoms with text EditAtom.inputs.
-                      properties:
-                        - !ruby/object:Api::Type::String
-                          name: "atomKey"
-                          description: |
-                            The EditAtom.key that references atom with text inputs in the JobConfig.edit_list.
-                          required: true
-                        - !ruby/object:Api::Type::String
-                          name: "inputKey"
-                          description: |
-                            The Input.key that identifies the input file.
-                          required: true
-                        - !ruby/object:Api::Type::Integer
-                          name: "inputTrack"
-                          description: |
-                            The zero-based index of the track in the input file.
-                          required: true
+                        The EditAtom.key that references the atom with audio inputs in the JobConfig.edit_list.
+                      required: true
                     - !ruby/object:Api::Type::String
-                      name: "displayName"
+                      name: "inputKey"
                       description: |
-                        The name for this particular text stream that will be added to the HLS/DASH manifest.
+                        The Input.key that identifies the input file.
+                      required: true
+                    - !ruby/object:Api::Type::Integer
+                      name: "inputTrack"
+                      description: |
+                        The zero-based index of the track in the input file.
+                      required: true
+                    - !ruby/object:Api::Type::Integer
+                      name: "inputChannel"
+                      description: |
+                        The zero-based index of the channel in the input audio stream.
+                      required: true
+                    - !ruby/object:Api::Type::Integer
+                      name: "outputChannel"
+                      description: |
+                        The zero-based index of the channel in the output audio stream.
+                      required: true
+                    - !ruby/object:Api::Type::Integer
+                      name: "gainDb"
+                      description: |
+                        Audio volume control in dB. Negative values decrease volume, positive values increase.
+                - !ruby/object:Api::Type::Integer
+                  name: "sampleRateHertz"
+                  description: |
+                    The audio sample rate in Hertz.
+                - !ruby/object:Api::Type::String
+                  name: "languageCode"
+                  description: |
+                    The BCP-47 language code, such as en-US or sr-Latn. For more information, see https://www.unicode.org/reports/tr35/#Unicode_locale_identifier.
+                - !ruby/object:Api::Type::String
+                  name: "displayName"
+                  description: |
+                    The name for this particular audio stream that will be added to the HLS/DASH manifest.
+            - !ruby/object:Api::Type::NestedObject
+              name: "textStream"
+              description: |
+                Encoding of a text stream.
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: "codec"
+                  description: The codec for this text stream.
+                  default_from_api: true
+                - !ruby/object:Api::Type::String
+                  name: "languageCode"
+                  description: The BCP-47 language code, such as en-US or sr-Latn. For more information, see https://www.unicode.org/reports/tr35/#Unicode_locale_identifier.
+                - !ruby/object:Api::Type::NestedObject
+                  name: "mapping"
+                  description: |
+                    The mapping for the JobConfig.edit_list atoms with text EditAtom.inputs.
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: "atomKey"
+                      description: |
+                        The EditAtom.key that references atom with text inputs in the JobConfig.edit_list.
+                      required: true
+                    - !ruby/object:Api::Type::String
+                      name: "inputKey"
+                      description: |
+                        The Input.key that identifies the input file.
+                      required: true
+                    - !ruby/object:Api::Type::Integer
+                      name: "inputTrack"
+                      description: |
+                        The zero-based index of the track in the input file.
+                      required: true
+                - !ruby/object:Api::Type::String
+                  name: "displayName"
+                  description: |
+                    The name for this particular text stream that will be added to the HLS/DASH manifest.
       - !ruby/object:Api::Type::Array
         name: "muxStreams"
         description: |
