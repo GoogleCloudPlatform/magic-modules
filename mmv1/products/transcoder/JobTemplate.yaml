@@ -44,10 +44,7 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: "error"
     message: "message"
-import_format:
-  [
-    "projects/{{project}}/locations/{{location}}/jobTemplates/{{job_template_id}}",
-  ]
+import_format: ["projects/{{project}}/locations/{{location}}/jobTemplates/{{job_template_id}}"]
 autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
@@ -511,6 +508,17 @@ properties:
                     - !ruby/object:Api::Type::Time
                       name: "gopDuration"
                       description: Select the GOP size based on the specified duration.
+                    - !ruby/object:Api::Type::Integer
+                      name: crfLevel
+                      description: |-
+                        Target CRF level. Must be between 10 and 36, where 10 is the highest
+                        quality and 36 is the most efficient compression. The default is 21.
+                        **Note:** This field is not supported.
+                    - !ruby/object:Api::Type::String
+                      name: rateControlMode
+                      description: |-
+                        Specify the mode. The default is `vbr`. Supported rate control modes: -
+                        `vbr` - variable bitrate
             - !ruby/object:Api::Type::NestedObject
               name: "audioStream"
               description: |
@@ -870,15 +878,6 @@ properties:
                         description: |
                           Normalized coordinates based on output video resolution.
                         properties:
-                          - !ruby/object:Api::Type::Enum
-                            name: "fadeType"
-                            description: |
-                              Type of fade animation.
-                            values:
-                              - :FADE_TYPE_UNSPECIFIED
-                              - :FADE_IN
-                              - :FADE_OUT
-                            required: true
                           - !ruby/object:Api::Type::Integer
                             name: "x"
                             description: |
@@ -897,6 +896,22 @@ properties:
                         description: |
                           The time to end the fade animation, in seconds.
                         default_from_api: true
+                      - !ruby/object:Api::Type::Enum
+                        name: fadeType
+                        description: |
+                          Required. Type of fade animation: `FADE_IN` or `FADE_OUT`.
+                          The possible values are:
+
+                          * `FADE_TYPE_UNSPECIFIED`: The fade type is not specified.
+
+                          * `FADE_IN`: Fade the overlay object into view.
+
+                          * `FADE_OUT`: Fade the overlay object out of view.
+                        required: true
+                        values:
+                          - :FADE_TYPE_UNSPECIFIED
+                          - :FADE_IN
+                          - :FADE_OUT
                   - !ruby/object:Api::Type::NestedObject
                     name: "animationEnd"
                     description: |
