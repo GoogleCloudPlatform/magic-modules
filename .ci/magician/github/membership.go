@@ -63,11 +63,6 @@ var (
 			endDate:   newDate(2024, 6, 14, pdtLoc),
 		},
 		{
-			id:        "slevenick",
-			startDate: newDate(2024, 4, 20, pdtLoc),
-			endDate:   newDate(2024, 4, 27, pdtLoc),
-		},
-		{
 			id:        "ScottSuarez",
 			startDate: newDate(2024, 4, 30, pdtLoc),
 			endDate:   newDate(2024, 7, 31, pdtLoc),
@@ -86,6 +81,11 @@ var (
 			id:        "melinath",
 			startDate: newDate(2024, 6, 26, pdtLoc),
 			endDate:   newDate(2024, 7, 22, pdtLoc),
+		},
+		{
+			id:        "slevenick",
+			startDate: newDate(2024, 7, 5, pdtLoc),
+			endDate:   newDate(2024, 7, 16, pdtLoc),
 		},
 	}
 )

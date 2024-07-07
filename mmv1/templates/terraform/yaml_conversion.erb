@@ -184,8 +184,8 @@ async:
 <%      unless object.async.target_occurrences.nil? -%>
   target_occurrences: <%= object.async.target_occurrences %>
 <%      end -%>
-  actions: ['<%= object.async.actions.join('\',\'') %>']
 <%    end -%>
+  actions: ['<%= object.async.actions.join('\', \'') %>']
 <%    if object.async.is_a? Api::OpAsync -%>
   type: 'OpAsync'
 <% #async.operation %>
@@ -239,6 +239,9 @@ async:
 <%      unless object.async.error.message.nil? -%>
     message: '<%= object.async.error.message %>'
 <%      end -%>
+<%    end -%>
+<%    unless !object.async.include_project -%>
+  include_project: <%= object.async.include_project %>
 <%    end -%>
 <%    end -%>
 <%  end -%>
