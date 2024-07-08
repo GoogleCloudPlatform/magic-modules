@@ -52,6 +52,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
@@ -69,6 +70,7 @@ iam_policy:
   allowed_iam_role: 'roles/compute.networkUser'
   parent_resource_attribute: 'subnetwork'
   iam_conditions_request_type: 'QUERY_PARAM'
+  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
 custom_code:
   extra_schema_entry: 'templates/terraform/extra_schema_entry/go/subnetwork.tmpl'
   constants: 'templates/terraform/constants/go/subnetwork.tmpl'

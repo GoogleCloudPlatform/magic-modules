@@ -2139,7 +2139,7 @@ resource "google_compute_region_instance_template" "foobar" {
 func testAccComputeRegionInstanceTemplate_with18TbScratchDisk(suffix string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-	family  = "debian-12"
+	family  ="debian-12"
 	project = "debian-cloud"
 }
 

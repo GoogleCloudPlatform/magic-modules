@@ -35,6 +35,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/global/operations/{{op_id}}'
@@ -50,6 +51,7 @@ async:
 collection_url_key: 'items'
 iam_policy:
   parent_resource_attribute: 'name'
+  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/global/backendBuckets/{{name}}'
     - '{{name}}'
