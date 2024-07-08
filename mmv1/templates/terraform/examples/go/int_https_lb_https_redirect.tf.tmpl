@@ -1,6 +1,5 @@
 # Internal HTTPS load balancer with HTTP-to-HTTPS redirect
 
-# [START cloudloadbalancing_int_https_with_redirect]
 
 # VPC network
 resource "google_compute_network" "default" {
@@ -283,4 +282,3 @@ resource "google_compute_region_url_map" "{{$.PrimaryResourceId}}" {
     }
   }
 }
-# [END cloudloadbalancing_int_https_with_redirect]
