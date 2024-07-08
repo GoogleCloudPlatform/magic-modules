@@ -11,21 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# TODO: Special behaviors
-# re-applying aftere the 14 day clean-up window will create a new resource
-# cancellation is not currently available
-# deletion can be either deletion or cancellation then deletion
-# docs should mention target size in MIG should be left unset
-
-# TODO: do we need a mutex for a MIG resource?
-# TODO: how to deal with zone being both a url only param on get and body param in CUD?
-# TODO: Do we have non-zonal resize requests?
-
-# TODO: Finish all property fields (1 hr)
-# TODO: Custom Go tweaks (3hr)
-# TODO: Finish unit test cases (3hr)
-# TODO: Manual testing (1-2hr)
-
 ---
 !ruby/object:Api::Resource
 name: "ResizeRequest"
