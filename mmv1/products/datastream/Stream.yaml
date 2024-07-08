@@ -159,6 +159,25 @@ examples:
         'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     oics_vars_overrides:
       deletion_protection: 'false'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'datastream_stream_bigquery_append_only'
+    external_providers: ["random", "time"]
+    primary_resource_id:
+      'default'
+      # Random provider
+    skip_vcr: true
+    vars:
+      stream_id: 'my-stream'
+      private_connection_id: 'my-connection'
+      network_name: 'my-network'
+      source_connection_profile_id: 'source-profile'
+      database_instance_name: 'my-instance'
+      deletion_protection: 'true'
+      destination_connection_profile_id: 'destination-profile'
+    test_vars_overrides:
+      deletion_protection: 'false'
+    oics_vars_overrides:
+      deletion_protection: 'false'
 parameters:
   - !ruby/object:Api::Type::String
     name: streamId
