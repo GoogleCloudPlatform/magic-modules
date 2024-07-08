@@ -58,6 +58,7 @@ examples:
     vars:
       endpoint_name: 'endpoint-name'
       network_name: 'network-name'
+      deployed_index_id: 'deployed-index-id'
       display_name: "vertex-deployed-index"
       display_name_index: 'test-index'
       bucket_name: "bucket-name"
@@ -72,6 +73,7 @@ examples:
       display_name_index: 'test-index'
       bucket_name: "bucket-name"
       display_name: "vertex-deployed-index"
+      deployed_index_id: 'deployed-index-id'
     skip_docs: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/vertex_ai_index_endpoint_deployed_index.go.erb
