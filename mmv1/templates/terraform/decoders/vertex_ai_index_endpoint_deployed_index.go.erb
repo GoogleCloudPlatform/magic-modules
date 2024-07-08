@@ -10,6 +10,7 @@ for _, v := range v.([]interface{}) {
 	if dpI["id"] == d.Get("deployed_index_id").(string) {
 		dpI["indexEndpoint"] = d.Get("index_endpoint")
 		dpI["deployedIndexId"] = d.Get("deployed_index_id")
+        dpI["index"] = d.Get("index")
 		dpIndex = dpI
 		break
 	}
