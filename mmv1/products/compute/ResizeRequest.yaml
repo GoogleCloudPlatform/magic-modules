@@ -101,6 +101,7 @@ parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'zone'
     resource: 'Zone'
+    imports: 'name'
     description: |
       Name of the compute zone scoping this request. Name should conform to RFC1035.
     required: true
@@ -108,6 +109,7 @@ parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'instanceGroupManager'
     resource: 'InstanceGroupManager'
+    imports: 'name'
     description: |
       The name of the managed instance group. The name should conform to RFC1035 or be a resource ID.
 
@@ -118,6 +120,7 @@ parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'resizeRequest'
     resource: 'ResizeRequest'
+    imports: 'name'
     description: |
       The name of an existing resize request. The name should conform to RFC1035 or be a resource ID.
     url_param_only: true
@@ -173,7 +176,7 @@ properties:
 # Examples for testing
 examples:
   - !ruby/object:Provider::Terraform::Examples
-    name: "test_resize_request"
+    name: "compute_mig_resize_request"
     primary_resource_id: "a3_resize_request"
     vars:
       resize_by: 2
