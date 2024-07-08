@@ -1,6 +1,6 @@
 resource "google_vertex_ai_index_endpoint_deployed_index" "<%= ctx[:primary_resource_id] %>" {
   depends_on = [ google_vertex_ai_index_endpoint.vertex_endpoint ]
-  index_endpoint = google_vertex_ai_index_endpoint.vertex_endpoint.name
+  index_endpoint = google_vertex_ai_index_endpoint.vertex_endpoint.id
   index = google_vertex_ai_index.index.id // this is the index that will be deployed onto an endpoint
   deployed_index_id = "index_endpoint_deployed_index_dedicated_resources_test" //deployed index id
   display_name = "<%= ctx[:vars]['display_name'] %>"
