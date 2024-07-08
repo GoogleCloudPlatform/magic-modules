@@ -45,25 +45,30 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   # Link to the REST API reference for the resource. For example,
   # https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.backups
   api: 'https://cloud.google.com/compute/docs/reference/rest/beta/instanceGroupManagerResizeRequests'
-# Marks the resource as beta-only. Ensure a beta version block is present in
-# provider.yaml.
-min_version: beta
-base_url: 'projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instanceGroupManager}}/resizeRequests'
-self_link: 'projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instanceGroupManager}}/resizeRequests/{{resizeRequest}}'
 
-#create_url: 'projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instanceGroupManager}}/resizeRequests?requestId={{requestId}}'
-create_verb: :POST
+### Adjust when ready for GA ###
+min_version: beta
 immutable: true
 
+### List Method ###
+base_url: 'projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instanceGroupManager}}/resizeRequests'
 
-# Overrides the URL for the resource's standard Delete method. (If unset, the
-# self_link URL is used by default.) https://google.aip.dev/135
-# Terraform field names enclosed in double curly braces are replaced with
-# the field values from the resource at runtime.
-# delete_url: 'projects/{{project}}/locations/{{location}}/resourcenames/{{name}}'
-# Overrides the HTTP verb used to delete a resource.
-# Allowed values: :POST, :PUT, :PATCH, :DELETE. Default: :DELETE
-# delete_verb: :DELETE
+### Get Method
+self_link: 'projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instanceGroupManager}}/resizeRequests/{{resizeRequest}}'
+
+### Create Method ###
+# Get method with a post
+create_verb: :POST
+
+### Update method ###
+# Resize requests are currently not update-able
+
+### Delete Method ###
+# Custom delete method to handle resize request cancellations vs. deletions.
+# If a resize request is in the ACCEPTED state, it must be canceled before it can be
+# deleted. If a resize request is NOT in the ACCEPTED state, it can be directly deleted.
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  custom_delete: templates/terraform/custom_delete/compute_mig_resize_request_delete.go.erb
 
 # If true, code for handling long-running operations is generated along with
 # the resource. If false, that code is not generated.
@@ -91,6 +96,7 @@ async: !ruby/object:Api::OpAsync
     path: 'error/errors'
     message: 'message'
 
+# Resize request parameters injected via URL
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'zone'
@@ -116,6 +122,7 @@ parameters:
       The name of an existing resize request. The name should conform to RFC1035 or be a resource ID.
     url_param_only: true
 
+# Resize request parameters sent in the body of the CRUD action
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -163,3 +170,12 @@ properties:
           description: |
             Span of time that's a fraction of a second at nanosecond resolution. Durations less than one second are represented with a 0 seconds field and a positive nanos field. Must be from 0 to 999,999,999 inclusive.
 
+# Examples for testing
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "test_resize_request"
+    primary_resource_id: "a3_resize_request"
+    vars:
+      resize_by: 2
+      duration_seconds: 14400
+      duration_nanos: 0
