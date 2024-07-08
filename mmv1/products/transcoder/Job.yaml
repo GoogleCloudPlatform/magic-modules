@@ -14,9 +14,9 @@
 ---
 !ruby/object:Api::Resource
 name: "Job"
-self_link: "projects/{{project}}/locations/{{location}}/jobs/{{job_id}}"
+self_link: "projects/{{project}}/locations/{{location}}/jobs/{{name}}"
 base_url: "projects/{{project}}/locations/{{location}}/jobs"
-create_url: "projects/{{project}}/locations/{{location}}/jobs?jobId={{job_id}}"
+create_url: "projects/{{project}}/locations/{{location}}/jobs"
 update_verb: :PATCH
 update_mask: true
 description: "Transcoding Job Resource"
@@ -44,7 +44,7 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: "error"
     message: "message"
-import_format: ["projects/{{project}}/locations/{{location}}/jobs/{{job_id}}"]
+import_format: ["projects/{{project}}/locations/{{location}}/jobs/{{name}}"]
 autogen_async: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
@@ -53,13 +53,6 @@ examples:
     vars:
       job_name: "job"
 parameters:
-  - !ruby/object:Api::Type::String
-    name: "jobId"
-    required: true
-    immutable: true
-    url_param_only: true
-    description: |
-      ID to use for the Transcoding job.
   - !ruby/object:Api::Type::String
     name: "location"
     immutable: true
@@ -72,6 +65,7 @@ properties:
     name: "name"
     description: |
       The resource name of the job.
+    required: true
   - !ruby/object:Api::Type::String
     name: "inputUri"
     description: |
