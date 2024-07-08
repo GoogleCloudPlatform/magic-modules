@@ -16,4 +16,5 @@ resource "google_scc_v2_project_mute_config" "<%= ctx[:primary_resource_id] %>" 
   description    = "My custom Cloud Security Command Center Project Mute Configuration"
   filter         = "severity = \"HIGH\""
   type           =  "STATIC"
+  depends_on = [google_project_iam_member.scc_project_mute_config]
 }

@@ -15,7 +15,7 @@
 name: 'projectMuteConfig'
 base_url: '{{project}}/locations/{{location}}/muteConfigs'
 self_link: '{{name}}'
-create_url: '{{project}}/locations/{{location}}/muteConfigs?muteConfigId={{name}}'
+create_url: '{{project}}/locations/{{location}}/muteConfigs?muteConfigId={{mute_config_id}}'
 update_verb: :PATCH
 update_mask: true
 description: |

@@ -126,6 +126,7 @@ resource "google_scc_v2_folder_mute_config" "folder_mute_test2" {
   location             = "%{location}"
   folder               = "${google_folder.folder.folder_id}"
   type                 =  "STATIC"
+  depends_on   = [google_folder_iam_member.folder_test2_binding
 }
 `, context)
 }

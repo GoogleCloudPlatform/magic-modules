@@ -4,7 +4,7 @@ resource "google_folder" "folder" {
 }
 
 resource "google_folder_iam_member" "scc_folder_mute_config" {
-  folder = google_folder.default.id
+  folder = google_folder.folder.id
   role   = "roles/securitycenter.admin"
   member = "serviceAccount:<%= ctx[:vars]['service_account_email'] %>"
 }

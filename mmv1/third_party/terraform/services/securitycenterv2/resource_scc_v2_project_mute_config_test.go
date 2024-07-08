@@ -101,6 +101,7 @@ resource "google_scc_v2_project_mute_config" "project_mute_test1" {
   location             = "%{location}"
   project              = "${google_project.project.project_id}"
   type                 =  "STATIC"
+  depends_on   = [google_project_iam_member.project1_iam_member]
 }
 `, context)
 }

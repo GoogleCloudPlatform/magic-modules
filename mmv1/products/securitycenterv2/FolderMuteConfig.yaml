@@ -15,7 +15,7 @@
 name: 'FolderMuteConfig'
 base_url: 'folders/{{folder}}/locations/{{location}}/muteConfigs'
 self_link: '{{name}}'
-create_url: 'folders/{{folder}}/locations/{{location}}/muteConfigs?muteConfigId={{name}}'
+create_url: 'folders/{{folder}}/locations/{{location}}/muteConfigs?muteConfigId={{mute_config_id}}'
 update_verb: :PATCH
 update_mask: true
 description: |
