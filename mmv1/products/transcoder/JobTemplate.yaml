@@ -51,7 +51,8 @@ properties:
   - !ruby/object:Api::Type::String
     name: "name"
     description: |
-      The resource name of the job template. Format: projects/{project_number}/locations/{location}/jobTemplates/{jobTemplate}
+      The resource name of the job template.
+    default_from_api: true
   - !ruby/object:Api::Type::KeyValueLabels
     name: "labels"
     description: |
