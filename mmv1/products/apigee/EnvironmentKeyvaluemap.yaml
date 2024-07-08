@@ -74,9 +74,3 @@ properties:
       Required. ID of the key value map.
     required: true
     immutable: true
-  - !ruby/object:Api::Type::Boolean
-    name: 'encrypted'
-    description: |
-      Required. Flag that specifies whether entry values will be encrypted. This field is retained for backward compatibility and the value of encrypted will always be true. Apigee X and hybrid do not support unencrypted key value maps.
-    required: true
-    immutable: true
