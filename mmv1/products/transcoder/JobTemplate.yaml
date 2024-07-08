@@ -296,6 +296,7 @@ properties:
                       name: "frameRateConversionStrategy"
                       description: |
                         Frame rate conversion strategy for desired frame rate.
+                      default_from_api: true
                       values:
                         - :FRAME_RATE_CONVERSION_STRATEGY_UNSPECIFIED
                         - :DOWNSAMPLE
@@ -381,6 +382,7 @@ properties:
                       name: "frameRateConversionStrategy"
                       description: |
                         Frame rate conversion strategy for desired frame rate.
+                      default_from_api: true
                       values:
                         - :FRAME_RATE_CONVERSION_STRATEGY_UNSPECIFIED
                         - :DOWNSAMPLE
@@ -466,6 +468,7 @@ properties:
                       name: "frameRateConversionStrategy"
                       description: |
                         Frame rate conversion strategy for desired frame rate.
+                      default_from_api: true
                       values:
                         - :FRAME_RATE_CONVERSION_STRATEGY_UNSPECIFIED
                         - :DOWNSAMPLE
@@ -691,6 +694,7 @@ properties:
                   name: "segmentReferenceScheme"
                   description: |
                     The segment reference scheme for a DASH manifest.
+                  default_from_api: true
                   values:
                     - :SEGMENT_REFERENCE_SCHEME_UNSPECIFIED
                     - :SEGMENT_LIST
