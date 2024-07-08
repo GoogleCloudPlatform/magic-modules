@@ -28,8 +28,7 @@ func TestAccSecurityCenterProjectNotificationConfig_updateStreamingConfigFilter(
 				ResourceName:            "google_scc_project_notification_config.custom_notification_config",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"project", "config_id"},
-				IgnoreReadExtra: 		 []string{"project"},
+				ImportStateVerifyIgnore: []string{"project", "config_id"},				
 			},
 			{
 				Config: testAccSecurityCenterProjectNotificationConfig_updateStreamingConfigFilter(context),
@@ -39,7 +38,6 @@ func TestAccSecurityCenterProjectNotificationConfig_updateStreamingConfigFilter(
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"project", "config_id"},
-				IgnoreReadExtra: 		 []string{"project"},
 			},
 		},
 	})
