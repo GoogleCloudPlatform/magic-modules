@@ -53,13 +53,13 @@ resource "google_compute_instance_group_manager" "a3_dws" {
 }
 
 resource "google_compute_resize_request" "<%= ctx[:primary_resource_id] %>" {
-  provider = google-beta
-  name   = "<%= ctx[:vars]['resize_request_name'] %>"
+  provider               = google-beta
+  name                   = "<%= ctx[:vars]['resize_request_name'] %>"
   instance_group_manager = "google_compute_instance_group_manager.a3_dws"
-  zone = "us-central1-a"
-  description "Test resize request resource"
-  resize_by = "<%= ctx[:vars]['resize_by'] %>"
-  requested_run_duration { 
+  zone                   = "us-central1-a"
+  description            = "Test resize request resource"
+  resize_by              = "<%= ctx[:vars]['resize_by'] %>"
+  requested_run_duration {
     seconds = "<%= ctx[:vars]['duration_seconds'] %>"
     nanos   = "<%= ctx[:vars]['duration_nanos'] %>"
   }
