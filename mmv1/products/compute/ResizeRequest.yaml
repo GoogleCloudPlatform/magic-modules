@@ -26,11 +26,10 @@
 # TODO: Finish unit test cases (3hr)
 # TODO: Manual testing (1-2hr)
 
-
---- !ruby/object:Api::Resource
-# API resource name
-name: 'ResizeRequest'
-kind: 'compute#instanceGroupManagerResizeRequest'
+---
+!ruby/object:Api::Resource # API resource name
+name: "ResizeRequest"
+kind: "compute#instanceGroupManagerResizeRequest"
 description: |
   Represents a Managed Instance Group Resize Request
 
@@ -39,22 +38,22 @@ description: |
   With Dynamic Workload Scheduler in Flex Start mode, you submit a GPU capacity request for your AI/ML jobs by indicating how many you need, a duration, and your preferred region. Dynamic Workload Scheduler intelligently persists the request; once the capacity becomes available, it automatically provisions your VMs enabling your workloads to run continuously for the entire duration of the capacity allocation.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-   # Link to quickstart in the API's Guides section. For example:
-   # 'Create and connect to a database': 'https://cloud.google.com/alloydb/docs/quickstart/create-and-connect'
-    'QUICKSTART_TITLE': 'https://cloud.google.com/compute/docs/instance-groups/create-resize-requests-mig'
+    # Link to quickstart in the API's Guides section. For example:
+    # 'Create and connect to a database': 'https://cloud.google.com/alloydb/docs/quickstart/create-and-connect'
+    "QUICKSTART_TITLE": "https://cloud.google.com/compute/docs/instance-groups/create-resize-requests-mig"
   # Link to the REST API reference for the resource. For example,
   # https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.backups
-  api: 'https://cloud.google.com/compute/docs/reference/rest/beta/instanceGroupManagerResizeRequests'
+  api: "https://cloud.google.com/compute/docs/reference/rest/beta/instanceGroupManagerResizeRequests"
 
 ### Adjust when ready for GA ###
 min_version: beta
 immutable: true
 
 ### List Method ###
-base_url: 'projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instanceGroupManager}}/resizeRequests'
+base_url: "projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instanceGroupManager}}/resizeRequests"
 
 ### Get Method
-self_link: 'projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instanceGroupManager}}/resizeRequests/{{resizeRequest}}'
+self_link: "projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instanceGroupManager}}/resizeRequests/{{resizeRequest}}"
 
 ### Create Method ###
 # Get method with a post
@@ -79,37 +78,37 @@ async: !ruby/object:Api::OpAsync
   # 'update', 'delete']
   # actions: ['create', 'update', 'delete']
   operation: !ruby/object:Api::OpAsync::Operation
-    kind: 'compute#operation'
-    path: 'name'
-    base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+    kind: "compute#operation"
+    path: "name"
+    base_url: "projects/{{project}}/zones/{{zone}}/operations/{{op_id}}"
     wait_ms: 1000
   result: !ruby/object:Api::OpAsync::Result
-    path: 'targetLink'
+    path: "targetLink"
   status: !ruby/object:Api::OpAsync::Status
-    path: 'status'
-    complete: 'DONE'
+    path: "status"
+    complete: "DONE"
     allowed:
-      - 'PENDING'
-      - 'RUNNING'
-      - 'DONE'
+      - "PENDING"
+      - "RUNNING"
+      - "DONE"
   error: !ruby/object:Api::OpAsync::Error
-    path: 'error/errors'
-    message: 'message'
+    path: "error/errors"
+    message: "message"
 
 # Resize request parameters injected via URL
 parameters:
   - !ruby/object:Api::Type::ResourceRef
-    name: 'zone'
-    resource: 'Zone'
-    imports: 'name'
+    name: "zone"
+    resource: "Zone"
+    imports: "name"
     description: |
       Name of the compute zone scoping this request. Name should conform to RFC1035.
     required: true
     url_param_only: true
   - !ruby/object:Api::Type::ResourceRef
-    name: 'instanceGroupManager'
-    resource: 'InstanceGroupManager'
-    imports: 'name'
+    name: "instanceGroupManager"
+    resource: "InstanceGroupManager"
+    imports: "name"
     description: |
       The name of the managed instance group. The name should conform to RFC1035 or be a resource ID.
 
@@ -118,9 +117,9 @@ parameters:
     required: true
     url_param_only: true
   - !ruby/object:Api::Type::ResourceRef
-    name: 'resizeRequest'
-    resource: 'ResizeRequest'
-    imports: 'name'
+    name: "resizeRequest"
+    resource: "ResizeRequest"
+    imports: "name"
     description: |
       The name of an existing resize request. The name should conform to RFC1035 or be a resource ID.
     url_param_only: true
@@ -128,50 +127,50 @@ parameters:
 # Resize request parameters sent in the body of the CRUD action
 properties:
   - !ruby/object:Api::Type::Time
-    name: 'creationTimestamp'
+    name: "creationTimestamp"
     description: |
       The creation timestamp for this resize request in RFC3339 text format.
     output: true
   - !ruby/object:Api::Type::String
-    name: 'name'
+    name: "name"
     description: |
       The name of this resize request. The name must be 1-63 characters long, and comply with RFC1035.
     required: true
   - !ruby/object:Api::Type::String
-    name: 'description'
+    name: "description"
     description: |
       An optional description of this resize-request.
   - !ruby/object:Api::Type::String
-    name: 'zone'
+    name: "zone"
     description: |
       The URL of a zone where the resize request is located. Populated only for zonal resize requests.
     output: true
   - !ruby/object:Api::Type::Integer
-    name: 'count'
+    name: "count"
     description: |
       This field is deprecated, please use resizeBy instead. The count of instances to create as part of this resize request.
     conflicts:
-    - 'resizeBy'
+      - "resizeBy"
   - !ruby/object:Api::Type::Integer
-    name: 'resizeBy'
+    name: "resizeBy"
     description: |
       The number of instances to be created by this resize request. The group's target size will be increased by this number.
     conflicts:
-    - 'count'
+      - "count"
   - !ruby/object:Api::Type::NestedObject
-      name: 'requestedRunDuration'
-      description: |
-        Requested run duration for instances that will be created by this request. At the end of the run duration instance will be deleted.
-      properties:
-        - !ruby/object:Api::Type::String
-          name: 'seconds'
-          description: |
-            Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive. Note: these bounds are computed from: 60 sec/min * 60 min/hr * 24 hr/day * 365.25 days/year * 10000 years
-          required: true
-        - !ruby/object:Api::Type::Integer
-          name: 'nanos'
-          description: |
-            Span of time that's a fraction of a second at nanosecond resolution. Durations less than one second are represented with a 0 seconds field and a positive nanos field. Must be from 0 to 999,999,999 inclusive.
+    name: "requestedRunDuration"
+    description: |
+      Requested run duration for instances that will be created by this request. At the end of the run duration instance will be deleted.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: "seconds"
+        description: |
+          Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive. Note: these bounds are computed from: 60 sec/min * 60 min/hr * 24 hr/day * 365.25 days/year * 10000 years
+        required: true
+      - !ruby/object:Api::Type::Integer
+        name: "nanos"
+        description: |
+          Span of time that's a fraction of a second at nanosecond resolution. Durations less than one second are represented with a 0 seconds field and a positive nanos field. Must be from 0 to 999,999,999 inclusive.
 
 # Examples for testing
 examples:
