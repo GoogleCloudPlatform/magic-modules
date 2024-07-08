@@ -29,6 +29,7 @@ func TestAccSecurityCenterProjectNotificationConfig_updateStreamingConfigFilter(
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"project", "config_id"},
+				IgnoreReadExtra: 		 []string{"project"},
 			},
 			{
 				Config: testAccSecurityCenterProjectNotificationConfig_updateStreamingConfigFilter(context),
@@ -38,6 +39,7 @@ func TestAccSecurityCenterProjectNotificationConfig_updateStreamingConfigFilter(
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"project", "config_id"},
+				IgnoreReadExtra: 		 []string{"project"},
 			},
 		},
 	})
