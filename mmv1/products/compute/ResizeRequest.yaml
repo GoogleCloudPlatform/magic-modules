@@ -56,7 +56,7 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
 
 # If true, code for handling long-running operations is generated along with
 # the resource. If false, that code is not generated.
-autogen_async: true
+autogen_async: false
 # Sets parameters for handling operations returned by the API.
 async: !ruby/object:Api::OpAsync
   # Overrides which API calls return operations. Default: ['create',
@@ -157,12 +157,8 @@ properties:
         description: |
           Span of time that's a fraction of a second at nanosecond resolution. Durations less than one second are represented with a 0 seconds field and a positive nanos field. Must be from 0 to 999,999,999 inclusive.
 
-# Examples for testing
+#Examples for testing
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "compute_mig_resize_request"
     primary_resource_id: "a3_resize_request"
-    vars:
-      resize_by: 2
-      duration_seconds: 14400
-      duration_nanos: 0
