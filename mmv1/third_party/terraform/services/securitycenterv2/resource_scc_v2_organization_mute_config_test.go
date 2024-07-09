@@ -5,12 +5,12 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	 "github.com/hashicorp/terraform-provider-google/google"
 	"google.golang.org/api/googleapi"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func TestAccSecurityCenterOrganizationMuteConfig_createUpdateDelete(t *testing.T) {
@@ -27,7 +27,6 @@ func TestAccSecurityCenterOrganizationMuteConfig_createUpdateDelete(t *testing.T
 		ProtoV5ProviderFactories: map[string]func() (*schema.Provider, error){
 
 			"google": provider.Provider,
-
 		},
 		CheckDestroy: testAccCheckSecurityCenterOrganizationMuteConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
