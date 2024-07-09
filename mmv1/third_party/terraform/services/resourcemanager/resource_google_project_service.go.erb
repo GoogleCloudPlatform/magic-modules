@@ -285,7 +285,7 @@ func resourceGoogleProjectServiceUpdate(d *schema.ResourceData, meta interface{}
 }
 
 // Disables a project service.
-<% unless version == "ga" -%>
+<% unless version == 'ga' -%>
 func disableServiceUsageProjectService(service, project string, d *schema.ResourceData, config *transport_tpg.Config, disableDependentServices bool, checkUsage bool) error {
 <% else -%>
 func disableServiceUsageProjectService(service, project string, d *schema.ResourceData, config *transport_tpg.Config, disableDependentServices bool) error {
