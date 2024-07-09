@@ -1024,7 +1024,6 @@ func TestAccComputeRegionInstanceTemplate_spot(t *testing.T) {
 	})
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeRegionInstanceTemplate_spot_maxRunDuration(t *testing.T) {
 	t.Parallel()
 
@@ -1092,7 +1091,6 @@ func TestAccComputeRegionInstanceTemplate_maxRunDuration_onInstanceStopAction(t 
 		},
 	})
 }
-{{- end }}
 
 func TestAccComputeRegionInstanceTemplate_localSsdRecoveryTimeout(t *testing.T) {
 	t.Parallel()
@@ -1484,7 +1482,6 @@ func testAccCheckComputeRegionInstanceTemplateInstanceTerminationAction(instance
 	}
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func testAccCheckComputeRegionInstanceTemplateMaxRunDuration(instanceTemplate *compute.InstanceTemplate, instance_max_run_duration_want compute.Duration) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if !reflect.DeepEqual(*instanceTemplate.Properties.Scheduling.MaxRunDuration, instance_max_run_duration_want) {
@@ -1494,7 +1491,6 @@ func testAccCheckComputeRegionInstanceTemplateMaxRunDuration(instanceTemplate *c
 		return nil
 	}
 }
-{{- end }}
 
 func testAccCheckComputeRegionInstanceTemplateLocalSsdRecoveryTimeout(instanceTemplate *compute.InstanceTemplate, instance_local_ssd_recovery_timeout_want compute.Duration) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -2143,7 +2139,7 @@ resource "google_compute_region_instance_template" "foobar" {
 func testAccComputeRegionInstanceTemplate_with18TbScratchDisk(suffix string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-	family  = "debian-12"
+	family  ="debian-12"
 	project = "debian-cloud"
 }
 
@@ -3387,13 +3383,10 @@ resource "google_compute_region_instance_template" "foobar" {
     automatic_restart = false
     provisioning_model = "SPOT"
     instance_termination_action = "DELETE"
-{{- if ne $.TargetVersionName "ga" }}
     max_run_duration {
 	nanos = 123
 	seconds = 60
     }
-{{- end }}
-
   }
 
   metadata = {
@@ -3407,7 +3400,6 @@ resource "google_compute_region_instance_template" "foobar" {
 `, suffix)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeRegionInstanceTemplate_maxRunDuration_onInstanceStopAction(suffix string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -3456,7 +3448,6 @@ resource "google_compute_region_instance_template" "foobar" {
 }
 `, suffix)
 }
-{{- end }}
 
 func testAccComputeRegionInstanceTemplate_localSsdRecoveryTimeout(suffix string) string {
 	return fmt.Sprintf(`
