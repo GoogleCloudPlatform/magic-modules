@@ -2635,7 +2635,6 @@ func TestAccComputeInstance_spotVM_update(t *testing.T) {
 	})
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeInstance_maxRunDuration_update(t *testing.T) {
 	t.Parallel()
 
@@ -2823,7 +2822,6 @@ func TestAccComputeInstance_spotVM_maxRunDuration_update(t *testing.T) {
 		},
 	})
 }
-{{- end }}
 
 func TestAccComputeInstance_localSsdRecoveryTimeout(t *testing.T) {
 	t.Parallel()
@@ -3779,7 +3777,6 @@ func testAccCheckComputeResourcePolicy(instance *compute.Instance, scheduleName 
 	}
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func testAccCheckComputeInstanceMaxRunDuration(instance *compute.Instance, instanceMaxRunDurationWant compute.Duration) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if instance == nil {
@@ -3796,7 +3793,6 @@ func testAccCheckComputeInstanceMaxRunDuration(instance *compute.Instance, insta
 		return nil
 	}
 }
-{{- end }}
 
 func testAccCheckComputeInstanceLocalSsdRecoveryTimeout(instance *compute.Instance, instanceLocalSsdRecoveryTiemoutWant compute.Duration) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -6468,7 +6464,7 @@ resource "google_compute_instance" "foobar" {
 func testAccComputeInstance_advancedMachineFeatures(instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-10"
+  family  = "debian-12"
   project = "debian-cloud"
 }
 
@@ -6496,7 +6492,7 @@ resource "google_compute_instance" "foobar" {
 func testAccComputeInstance_advancedMachineFeaturesUpdated(instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-10"
+  family  = "debian-12"
   project = "debian-cloud"
 }
 
@@ -7619,8 +7615,8 @@ resource "google_compute_instance" "foobar" {
 func testAccComputeInstance_shieldedVmConfig(instance string, enableSecureBoot bool, enableVtpm bool, enableIntegrityMonitoring bool) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "centos-7"
-  project = "centos-cloud"
+  family  = "debian-12"
+  project = "debian-cloud"
 }
 
 resource "google_compute_instance" "foobar" {
@@ -7920,8 +7916,8 @@ resource "google_compute_instance" "foobar" {
 func testAccComputeInstance_enableDisplay(instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "centos-7"
-  project = "centos-cloud"
+  family  = "debian-12"
+  project = "debian-cloud"
 }
 
 resource "google_compute_instance" "foobar" {
@@ -7949,8 +7945,8 @@ resource "google_compute_instance" "foobar" {
 func testAccComputeInstance_enableDisplayUpdated(instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "centos-7"
-  project = "centos-cloud"
+  family  = "debian-12"
+  project = "debian-cloud"
 }
 
 resource "google_compute_instance" "foobar" {
@@ -8344,7 +8340,6 @@ resource "google_compute_instance" "foobar" {
 `, instance)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeInstance_standardVM_maxRunDuration(instance string, instanceTerminationAction string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -8455,7 +8450,6 @@ resource "google_compute_instance" "foobar" {
 }
 `, instance, instanceTerminationAction)
 }
-{{- end }}
 
 
 func testAccComputeInstance_spotVM_maxRunDuration(instance string, instanceTerminationAction string) string {
@@ -8485,12 +8479,10 @@ resource "google_compute_instance" "foobar" {
     automatic_restart = false
     preemptible = true
     instance_termination_action = "%s"
-{{- if ne $.TargetVersionName "ga" }}
     max_run_duration {
         nanos = 123
         seconds = 60
     }
-{{- end }}
   }
 }
 `, instance, instanceTerminationAction)

@@ -393,7 +393,6 @@ resource "google_workstations_workstation_config" "default" {
 	gce_pd {
  	      disk_type = "pd-standard"
 	      source_image = google_compute_image.test_source_image.id
-	      read_only  = true
     	}
   }
 
