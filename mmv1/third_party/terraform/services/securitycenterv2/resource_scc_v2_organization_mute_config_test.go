@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	"github.com/hashicorp/terraform-provider-google-beta/google-beta/provider"
+	 "github.com/hashicorp/terraform-provider-google/google"
 	"google.golang.org/api/googleapi"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
