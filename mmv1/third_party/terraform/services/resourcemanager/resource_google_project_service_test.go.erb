@@ -169,10 +169,10 @@ func TestAccProjectService_renamedService(t *testing.T) {
 				ResourceName:            "google_project_service.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				<% if version == "ga" -%>
-          ImportStateVerifyIgnore: []string{"disable_on_destroy", "disable_dependent_services"},
+				<% unless version == "ga" -%>
+        ImportStateVerifyIgnore: []string{"disable_on_destroy", "disable_dependent_services"},
         <% else -%>
-          ImportStateVerifyIgnore: []string{"disable_on_destroy", "check_if_service_has_usage_on_destroy", "disable_dependent_services"},
+        ImportStateVerifyIgnore: []string{"disable_on_destroy", "check_if_service_has_usage_on_destroy", "disable_dependent_services"},
         <% end -%>
 			},
 		},

@@ -266,11 +266,9 @@ func resourceGoogleProjectServiceDelete(d *schema.ResourceData, meta interface{}
 	disableDependencies := d.Get("disable_dependent_services").(bool)
 	<% unless version == 'ga' -%>
 	checkUsage := d.Get("check_if_service_has_usage_on_destroy").(bool)
-	<% end -%>
-	<% if version == "ga" -%>
-	  err = disableServiceUsageProjectService(service, project, d, config, disableDependencies)
+	err = disableServiceUsageProjectService(service, project, d, config, disableDependencies,checkUsage)
 	<% else -%>
-    err = disableServiceUsageProjectService(service, project, d, config, disableDependencies,checkUsage)
+	err = disableServiceUsageProjectService(service, project, d, config, disableDependencies)
   <% end -%>
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Project Service %s", d.Id()))
@@ -287,7 +285,7 @@ func resourceGoogleProjectServiceUpdate(d *schema.ResourceData, meta interface{}
 }
 
 // Disables a project service.
-<% if version == "ga" -%>
+<% unless version == "ga" -%>
 func disableServiceUsageProjectService(service, project string, d *schema.ResourceData, config *transport_tpg.Config, disableDependentServices bool) error {
 <% else -%>
 func disableServiceUsageProjectService(service, project string, d *schema.ResourceData, config *transport_tpg.Config, disableDependentServices bool, checkUsage bool) error {
