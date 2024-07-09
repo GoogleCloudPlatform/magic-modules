@@ -10,12 +10,6 @@ if err != nil {
 } else if v, ok := d.GetOkExists("name"); !tpgresource.IsEmptyValue(reflect.ValueOf(nameProp)) && (ok || !reflect.DeepEqual(v, nameProp)) {
 	obj["name"] = nameProp
 }
-encryptedProp, err := expandApigeeEnvironmentKeyvaluemapsEncrypted(d.Get("encrypted"), d, config)
-if err != nil {
-	return err
-} else if v, ok := d.GetOkExists("encrypted"); !tpgresource.IsEmptyValue(reflect.ValueOf(encryptedProp)) && (ok || !reflect.DeepEqual(v, encryptedProp)) {
-	obj["encrypted"] = encryptedProp
-}
 
 url, err := tpgresource.ReplaceVars(d, config, "{{ApigeeBasePath}}{{env_id}}/keyvaluemaps")
 if err != nil {
