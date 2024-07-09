@@ -106,8 +106,8 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'index'
     description: The name of the Index this is the deployment of.
-    ignore_read: true
     required: true
+    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
   - !ruby/object:Api::Type::String
     name: 'displayName'
     description: The display name of the Index. The name can be up to 128 characters long and can consist of any UTF-8 characters.
