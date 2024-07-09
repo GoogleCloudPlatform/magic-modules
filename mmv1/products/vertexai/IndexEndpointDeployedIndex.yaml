@@ -259,7 +259,6 @@ properties:
     name: reservedIpRanges
     description: A list of reserved ip ranges under the VPC network that can be used for this DeployedIndex.
     item_type: Api::Type::String
-    ignore_read: true
   - !ruby/object:Api::Type::String
     name: deploymentGroup
     output: true
