@@ -131,11 +131,11 @@ described in this guide.
 No configuration changes are needed for existing resources as these fields' values
 will default to values present in data returned from the API.
 
-### Conflicting field validation add for `min_throughput` and `min_instances`, and `min_throughput` and `max_throughput`
+### Conflicting field validation added for `min_throughput` and `min_instances`, and `max_throughput` and `max_instances`
 
 The provider will now enforce that `google_vpc_access_connector` resources can only
-include one of `min_throughput` and `min_instances` and one of `min_throughput`and 
-`max_throughput`. Previously if a user included all four fields in a resource block
+include one of `min_throughput` and `min_instances` and one of `max_throughput`and 
+`max_instances`. Previously if a user included all four fields in a resource block
 they would experience a permadiff. This is a result of how `min_instances` and
 `max_instances` fields' values take precedence in the API, and how the API calculates
 values for `min_throughput` and `max_throughput` that match the number of instances.
