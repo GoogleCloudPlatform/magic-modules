@@ -65,7 +65,7 @@ func TestAccNetworkConnectivitySpoke_LinkedVPCNetworkHandWrittenLongForm(t *test
 		CheckDestroy:             testAccCheckNetworkConnectivitySpokeDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkConnectivitySpoke_LinkedVPCNetworkHandWrittenLongForm((context),
+				Config: testAccNetworkConnectivitySpoke_LinkedVPCNetworkHandWrittenLongForm(context),
 			},
 			{
 				ResourceName:            "google_network_connectivity_spoke.primary",
@@ -74,7 +74,7 @@ func TestAccNetworkConnectivitySpoke_LinkedVPCNetworkHandWrittenLongForm(t *test
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			{
-				Config: testAccNetworkConnectivitySpoke_LinkedVPCNetworkHandWrittenUpdate0LongForm((context),
+				Config: testAccNetworkConnectivitySpoke_LinkedVPCNetworkHandWrittenUpdate0LongForm(context),
 			},
 			{
 				ResourceName:            "google_network_connectivity_spoke.primary",
@@ -122,7 +122,7 @@ func TestAccNetworkConnectivitySpoke_RouterApplianceHandWritten(t *testing.T) {
 		},
 	})
 }
-unc TestAccNetworkConnectivitySpoke_RouterApplianceHandWrittenLongForm(t *testing.T) {
+func TestAccNetworkConnectivitySpoke_RouterApplianceHandWrittenLongForm(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
