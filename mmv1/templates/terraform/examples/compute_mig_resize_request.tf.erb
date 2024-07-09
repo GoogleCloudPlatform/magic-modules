@@ -1,5 +1,5 @@
 resource "google_compute_region_instance_template" "a3_dws" {
-  name                 = "a3_dws"
+  name                 = "a3-dws"
   region               = "us-central1"
   description          = "This template is used to create a mig instance that is compatible with DWS resize requests."
   instance_description = "A3 GPU"
@@ -33,10 +33,14 @@ resource "google_compute_region_instance_template" "a3_dws" {
     enable_vtpm                 = true
     enable_integrity_monitoring = true
   }
+
+  network_interface {
+    network = "default"
+  }
 }
 
 resource "google_compute_instance_group_manager" "a3_dws" {
-  name               = "a3_dws"
+  name               = "a3-dws"
   base_instance_name = "a3-dws"
   zone               = "us-central1-a"
 
@@ -55,7 +59,7 @@ resource "google_compute_instance_group_manager" "a3_dws" {
 resource "google_compute_resize_request" "<%= ctx[:primary_resource_id] %>" {
   provider               = google-beta
   name                   = "<%= ctx[:vars]['resize_request_name'] %>"
-  instance_group_manager = "google_compute_instance_group_manager.a3_dws"
+  instance_group_manager = google_compute_instance_group_manager.a3_dws.name
   zone                   = "us-central1-a"
   description            = "Test resize request resource"
   resize_by              = 2

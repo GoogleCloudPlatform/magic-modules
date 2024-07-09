@@ -11,8 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
-!ruby/object:Api::Resource
+--- !ruby/object:Api::Resource
 name: "ResizeRequest"
 kind: "compute#instanceGroupManagerResizeRequest"
 description: |
@@ -35,10 +34,10 @@ min_version: beta
 immutable: true
 
 ### List Method ###
-base_url: "projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instanceGroupManager}}/resizeRequests"
+base_url: "projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}/resizeRequests"
 
 ### Get Method
-self_link: "projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instanceGroupManager}}/resizeRequests/{{resizeRequest}}"
+self_link: "projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}/resizeRequests/{{resize_request}}"
 
 ### Create Method ###
 # Get method with a post
@@ -96,7 +95,6 @@ parameters:
     imports: "name"
     description: |
       The name of the managed instance group. The name should conform to RFC1035 or be a resource ID.
-
       Authorization requires the following IAM permission on the specified resource instanceGroupManager:
       *compute.instanceGroupManagers.update
     required: true
@@ -125,23 +123,11 @@ properties:
     name: "description"
     description: |
       An optional description of this resize-request.
-  - !ruby/object:Api::Type::String
-    name: "zone"
-    description: |
-      The URL of a zone where the resize request is located. Populated only for zonal resize requests.
-    output: true
-  - !ruby/object:Api::Type::Integer
-    name: "count"
-    description: |
-      This field is deprecated, please use resizeBy instead. The count of instances to create as part of this resize request.
-    conflicts:
-      - "resizeBy"
   - !ruby/object:Api::Type::Integer
     name: "resizeBy"
     description: |
       The number of instances to be created by this resize request. The group's target size will be increased by this number.
-    conflicts:
-      - "count"
+    required: true
   - !ruby/object:Api::Type::NestedObject
     name: "requestedRunDuration"
     description: |
