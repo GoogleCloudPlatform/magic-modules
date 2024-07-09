@@ -170,9 +170,9 @@ func TestAccProjectService_renamedService(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				<% unless version == "ga" -%>
-        ImportStateVerifyIgnore: []string{"disable_on_destroy", "disable_dependent_services"},
+				ImportStateVerifyIgnore: []string{"disable_on_destroy", "check_if_service_has_usage_on_destroy", "disable_dependent_services"},
         <% else -%>
-        ImportStateVerifyIgnore: []string{"disable_on_destroy", "check_if_service_has_usage_on_destroy", "disable_dependent_services"},
+        ImportStateVerifyIgnore: []string{"disable_on_destroy", "disable_dependent_services"},
         <% end -%>
 			},
 		},
