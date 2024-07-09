@@ -1,4 +1,3 @@
-# [START cloudloadbalancing_target_ssl_proxy_basic]
 resource "google_compute_target_ssl_proxy" "default" {
   name             = "<%= ctx[:vars]['target_ssl_proxy_name'] %>"
   backend_service  = google_compute_backend_service.default.id
@@ -25,4 +24,3 @@ resource "google_compute_health_check" "default" {
     port = "443"
   }
 }
-# [END cloudloadbalancing_target_ssl_proxy_basic]
