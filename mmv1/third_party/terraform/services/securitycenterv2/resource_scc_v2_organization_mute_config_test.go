@@ -26,7 +26,7 @@ func TestAccSecurityCenterOrganizationMuteConfig_createUpdateDelete(t *testing.T
 		PreCheck: func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: map[string]func() (*schema.Provider, error){
 
-			"google": provider.Provider,
+			"google": google.Provider,
 		},
 		CheckDestroy: testAccCheckSecurityCenterOrganizationMuteConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -34,19 +34,19 @@ func TestAccSecurityCenterOrganizationMuteConfig_createUpdateDelete(t *testing.T
 				Config: testAccSecurityCenterOrganizationMuteConfig(context),
 			},
 			{
-				ResourceName:            "google_scc_organization_mute_config.default",
+				ResourceName:            "google_scc_v2_organization_mute_config.primary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"organizationmuteConfigId", "parent"},
+				ImportStateVerifyIgnore: []string{"organizationmute_ConfigId", "parent"},
 			},
 			{
 				Config: testAccSecurityCenterOrganizationMuteConfig_update(context),
 			},
 			{
-				ResourceName:            "google_scc_organization_mute_config.default",
+				ResourceName:            "google_scc_v2_organization_mute_config.primary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"organizationmuteConfigId", "parent"},
+				ImportStateVerifyIgnore: []string{"organizationmute_ConfigId", "parent"},
 			},
 			{
 				Config: testAccSecurityCenterOrganizationMuteConfig_delete(context),
@@ -57,7 +57,7 @@ func TestAccSecurityCenterOrganizationMuteConfig_createUpdateDelete(t *testing.T
 
 func testAccSecurityCenterOrganizationMuteConfig(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_scc_organization_mute_config" "default" {
+resource "google_scc_v2_organization_mute_config" "primary" {
   mute_config_id = "tf-test-my-config-%{random_suffix}"
   parent         = "organizations/%{org_id}"
   filter         = "category: \"OS_VULNERABILITY\""
@@ -70,7 +70,7 @@ resource "google_scc_organization_mute_config" "default" {
 
 func testAccSecurityCenterOrganizationMuteConfig_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_scc_organization_mute_config" "default" {
+resource "google_scc_v2_organization_mute_config" "primary" {
   mute_config_id = "tf-test-my-config-%{random_suffix}"
   parent         = "organizations/%{org_id}"
   filter         = "category: \"WEB_SECURITY\""
@@ -83,7 +83,7 @@ resource "google_scc_organization_mute_config" "default" {
 
 func testAccSecurityCenterOrganizationMuteConfig_delete(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_scc_organization_mute_config" "default" {
+resource "google_scc_v2_organization_mute_config" "primary" {
   mute_config_id = "tf-test-my-config-%{random_suffix}"
   parent         = "organizations/%{org_id}"
   filter         = "category: \"OS_VULNERABILITY\""
@@ -97,10 +97,10 @@ resource "google_scc_organization_mute_config" "default" {
 func testAccCheckSecurityCenterOrganizationMuteConfigDestroyProducer(t *testing.T) resource.TestCheckFunc {
 
 	return func(s *terraform.State) error {
-		config := acctest.Provider.Meta().(*Config)
+		config := acctest.Provider.Meta().(*google.Config)
 		client := config.SecurityCenterClientV2
 		for _, rs := range s.RootModule().Resources {
-			if rs.Type != "google_scc_organization_mute_config" {
+			if rs.Type != "google_scc_v2_organization_mute_config" {
 				continue
 			}
 
