@@ -26,7 +26,7 @@ func TestAccSCCV2OrganizationSourceIamBinding(t *testing.T) {
 				Config: testAccSCCV2OrganizationSourceIamBindingExample(orgId, sourceId),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_scc_v2_organization_source_iam_binding.custom_binding", "organization", orgId),
-					resource.TestCheckResourceAttr("google_scc_v2_organization_source_iam_binding.custom_binding", "source", sourceId),
+					resource.TestCheckResourceAttr("google_scc_v2_organization_source_iam_binding.custom_binding", "source", fmt.Sprintf("organizations/%s/sources/%s", orgId, sourceId)),
 					resource.TestCheckResourceAttr("google_scc_v2_organization_source_iam_binding.custom_binding", "role", "roles/editor"),
 				),
 			},
@@ -44,6 +44,7 @@ resource "google_scc_v2_organization_source" "custom_source" {
 }
 
 resource "google_scc_v2_organization_source_iam_binding" "custom_binding" {
+  depends_on = [google_scc_v2_organization_source.custom_source]
   organization = google_scc_v2_organization_source.custom_source.organization
   source       = google_scc_v2_organization_source.custom_source.canonical_name
   role         = "roles/editor"

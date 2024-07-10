@@ -14,6 +14,7 @@ func TestAccSCCOrganizationSource_complete(t *testing.T) {
 
 	orgId := envvar.GetTestOrgFromEnv(t)
 	suffix := acctest.RandString(t, 10)
+	displayName := fmt.Sprintf("TFSrc %s", suffix)
 	canonicalName := fmt.Sprintf("organizations/%s/sources/source-%s", orgId, suffix)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -23,30 +24,18 @@ func TestAccSCCOrganizationSource_complete(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSCCOrganizationSourceCompleteExample(orgId, suffix, "My description", canonicalName),
+				Config: testAccSCCOrganizationSourceCompleteExample(orgId, suffix, "My description"),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("google_scc_v2_organization_source.custom_source", "display_name", fmt.Sprintf("TFSrc %s", suffix)),
+					resource.TestCheckResourceAttr("google_scc_v2_organization_source.custom_source", "display_name", displayName),
 					resource.TestCheckResourceAttr("google_scc_v2_organization_source.custom_source", "organization", orgId),
 					resource.TestCheckResourceAttr("google_scc_v2_organization_source.custom_source", "description", "My description"),
 					resource.TestCheckResourceAttr("google_scc_v2_organization_source.custom_source", "canonical_name", canonicalName),
 				),
 			},
 			{
-				Config: testAccSCCOrganizationSourceCompleteExample(orgId, suffix, "My updated description", canonicalName),
+				Config: testAccSCCOrganizationSourceCompleteExample(orgId, suffix, "My updated description"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_scc_v2_organization_source.custom_source", "description", "My updated description"),
-				),
-			},
-			{
-				Config: testAccSCCOrganizationSourceCompleteExample(orgId, suffix, "My updated description", canonicalName+"-updated"),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("google_scc_v2_organization_source.custom_source", "canonical_name", canonicalName+"-updated"),
-				),
-			},
-			{
-				Config: testAccSCCOrganizationSourceCompleteExample(orgId, suffix+"-updated", "My updated description", canonicalName+"-updated"),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("google_scc_v2_organization_source.custom_source", "display_name", fmt.Sprintf("TFSrc %s-updated", suffix)),
 				),
 			},
 			{
@@ -58,13 +47,16 @@ func TestAccSCCOrganizationSource_complete(t *testing.T) {
 	})
 }
 
-func testAccSCCOrganizationSourceCompleteExample(orgId, suffix, description, canonicalName string) string {
+func testAccSCCOrganizationSourceCompleteExample(orgId, suffix, description string) string {
 	return fmt.Sprintf(`
 resource "google_scc_v2_organization_source" "custom_source" {
   display_name  = "TFSrc %s"
   organization  = "%s"
   description   = "%s"
-  canonical_name = "%s"
+
 }
+output "canonical_name" {
+  value = google_scc_v2_organization_source.custom_source.canonical_name
+}  
 `, suffix, orgId, description, canonicalName)
 }

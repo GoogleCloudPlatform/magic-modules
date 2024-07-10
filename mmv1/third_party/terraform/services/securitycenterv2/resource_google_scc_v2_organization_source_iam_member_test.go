@@ -18,7 +18,7 @@ func TestAccSCCV2OrganizationSourceIAMMember(t *testing.T) {
 	member := "user:test@example.com"
 	conditionTitle := "Title"
 	conditionDescription := "Description"
-	conditionExpression := `request.time < timestamp(\"2023-12-31T00:00:00Z\")`
+	conditionExpression := `request.time < timestamp("2023-12-31T00:00:00Z")`
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -47,7 +47,7 @@ func TestAccSCCV2OrganizationSourceIAMMember(t *testing.T) {
 	})
 }
 
-func testAccSCCV2OrganizationSourceIAMMember(suffix, orgId, canonicalName, role, member, title, description string) string {
+func testAccSCCV2OrganizationSourceIAMMember(orgId, suffix, role, member, title, description,expression string) string {
 	return fmt.Sprintf(`
 resource "google_scc_v2_organization_source" "custom_source" {
   display_name  = "TFSrc %s"
@@ -62,7 +62,8 @@ resource "google_scc_v2_organization_source_iam_member" "custom_member" {
   condition {
     title       = "%s"
     description = "%s"
+	expression  = "%s"
   }
 }
-`, suffix, orgId, canonicalName, suffix, orgId, role, member, title, description)
+`, suffix, orgId, orgId, suffix, orgId, role, member, title, description,expression)
 }
