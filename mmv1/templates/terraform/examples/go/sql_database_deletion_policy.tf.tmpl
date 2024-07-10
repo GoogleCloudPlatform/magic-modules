@@ -1,10 +1,8 @@
-# [START cloud_sql_database_create]
 resource "google_sql_database" "{{$.PrimaryResourceId}}" {
   name     = "{{index $.Vars "database_name"}}"
   instance = google_sql_database_instance.instance.name
   deletion_policy = "ABANDON"
 }
-# [END cloud_sql_database_create]
 
 # See versions at https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/sql_database_instance#database_version
 resource "google_sql_database_instance" "instance" {

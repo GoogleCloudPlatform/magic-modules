@@ -1,4 +1,3 @@
-# [START compute_spot_instance_create]
 
 resource "google_compute_instance" "{{$.PrimaryResourceId}}" {
   name         = "{{index $.Vars "spot_instance_name"}}"
@@ -10,7 +9,6 @@ resource "google_compute_instance" "{{$.PrimaryResourceId}}" {
       image = "debian-cloud/debian-11"
     }
   }
-  
   scheduling {
       preemptible = true
       automatic_restart = false
@@ -26,4 +24,3 @@ resource "google_compute_instance" "{{$.PrimaryResourceId}}" {
   }
 }
 
-# [END compute_spot_instance_create]
