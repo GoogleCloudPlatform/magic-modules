@@ -240,6 +240,9 @@ async:
     message: '<%= object.async.error.message %>'
 <%      end -%>
 <%    end -%>
+<%    unless !object.async.include_project -%>
+  include_project: <%= object.async.include_project %>
+<%    end -%>
 <%    end -%>
 <%  end -%>
 <%
@@ -321,6 +324,9 @@ iam_policy:
 <%    end -%>
 <%    unless object.iam_policy.base_url.nil? -%>
   base_url: '<%= object.iam_policy.base_url %>'
+<%    end -%>
+<%    unless object.iam_policy.example_config_body.nil? -%>
+  example_config_body: '<%= object.convert_go_file( object.iam_policy.example_config_body ) %>'
 <%    end -%>
 <%    unless object.iam_policy.self_link.nil? -%>
   self_link: '<%= object.iam_policy.self_link %>'

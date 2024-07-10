@@ -208,6 +208,15 @@
 <%    unless property.max_size.nil? -%>
     max_size: <%= property.max_size %>
 <%    end -%>
+<%    unless property.item_validation.nil? -%>
+    item_validation:
+<%  unless property.item_validation.regex.nil? -%>
+      regex: '<%= property.item_validation.regex %>'
+<%  end -%>
+<%  unless property.item_validation.function.nil? -%>
+      function: '<%= property.item_validation.function %>'
+<%  end -%>
+<%    end -%>
 <%  end -%>
 <%  if property.is_a?(Api::Type::ResourceRef) -%>
 <%    unless property.resource.nil? -%>
