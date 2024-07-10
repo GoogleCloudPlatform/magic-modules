@@ -35,11 +35,11 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_reservation_bi_reservation_basic'
-    pull_external: true
+    external_providers: ["random", "time"]
     primary_resource_id: 'reservation'
   - !ruby/object:Provider::Terraform::Examples
     name: 'bigquery_reservation_bi_reservation_full'
-    pull_external: true
+    external_providers: ["random", "time"]
     skip_docs: true
     primary_resource_id: 'reservation'
     test_env_vars:

@@ -87,7 +87,7 @@ examples:
       # Resource creation race
     skip_vcr: true
   - !ruby/object:Provider::Terraform::Examples
-    name: 'apigee_environment_type_test'
+    name: 'apigee_environment_patch_update_test'
     primary_resource_id: 'apigee_environment'
     primary_resource_name: "fmt.Sprintf(\"organizations/tf-test%s\",
       context[\"random_suffix\"\
@@ -96,8 +96,7 @@ examples:
       org_id: :ORG_ID
       billing_account: :BILLING_ACCT
     skip_docs: true
-    min_version:
-      beta
+    min_version: beta
       # Resource creation race
     skip_vcr: true
 timeouts: !ruby/object:Api::Timeouts
@@ -197,3 +196,8 @@ properties:
       - 'BASE'
       - 'INTERMEDIATE'
       - 'COMPREHENSIVE'
+  - !ruby/object:Api::Type::String
+    name: 'forwardProxyUri'
+    description: |
+      Optional. URI of the forward proxy to be applied to the runtime instances in this environment. Must be in the format of {scheme}://{hostname}:{port}. Note that the scheme must be one of "http" or "https", and the port must be supplied.
+    required: false

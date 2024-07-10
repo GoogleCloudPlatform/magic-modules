@@ -13,7 +13,6 @@
 
 --- !ruby/object:Api::Resource
 name: 'Federation'
-min_version: beta
 base_url: 'projects/{{project}}/locations/{{location}}/federations'
 create_url: 'projects/{{project}}/locations/{{location}}/federations?federationId={{federation_id}}'
 self_link: 'projects/{{project}}/locations/{{location}}/federations/{{federation_id}}'
@@ -53,7 +52,6 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataproc_metastore_federation_basic'
     primary_resource_id: 'default'
-    min_version: beta
     primary_resource_name:
       'fmt.Sprintf("tf-test-metastore-fed%s", context["random_suffix"])'
     vars:
@@ -62,7 +60,6 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dataproc_metastore_federation_bigquery'
     primary_resource_id: 'default'
-    min_version: beta
     primary_resource_name:
       'fmt.Sprintf("tf-test-metastore-fed%s", context["random_suffix"])'
     vars:

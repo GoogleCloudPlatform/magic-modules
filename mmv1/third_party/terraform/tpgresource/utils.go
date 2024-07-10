@@ -58,15 +58,14 @@ type TerraformResourceDiff interface {
 // Contains functions that don't really belong anywhere else.
 
 // GetRegionFromZone returns the region from a zone for Google cloud.
-// This is by removing the last two chars from the zone name to leave the region
-// If there aren't enough characters in the input string, an empty string is returned
+// This is by removing the characters after the last '-'.
 // e.g. southamerica-west1-a => southamerica-west1
 func GetRegionFromZone(zone string) string {
-	if zone != "" && len(zone) > 2 {
-		region := zone[:len(zone)-2]
-		return region
+	zoneParts := strings.Split(zone, "-")
+	if len(zoneParts) < 3 {
+		return ""
 	}
-	return ""
+	return strings.Join(zoneParts[:len(zoneParts)-1], "-")
 }
 
 // Infers the region based on the following (in order of priority):
@@ -613,31 +612,6 @@ func Fake404(reasonResourceType, resourceName string) *googleapi.Error {
 		Code:    404,
 		Message: fmt.Sprintf("%v object %v not found", reasonResourceType, resourceName),
 	}
-}
-
-// validate name of the gcs bucket. Guidelines are located at https://cloud.google.com/storage/docs/naming-buckets
-// this does not attempt to check for IP addresses or close misspellings of "google"
-func CheckGCSName(name string) error {
-	if strings.HasPrefix(name, "goog") {
-		return fmt.Errorf("error: bucket name %s cannot start with %q", name, "goog")
-	}
-
-	if strings.Contains(name, "google") {
-		return fmt.Errorf("error: bucket name %s cannot contain %q", name, "google")
-	}
-
-	valid, _ := regexp.MatchString("^[a-z0-9][a-z0-9_.-]{1,220}[a-z0-9]$", name)
-	if !valid {
-		return fmt.Errorf("error: bucket name validation failed %v. See https://cloud.google.com/storage/docs/naming-buckets", name)
-	}
-
-	for _, str := range strings.Split(name, ".") {
-		valid, _ := regexp.MatchString("^[a-z0-9_-]{1,63}$", str)
-		if !valid {
-			return fmt.Errorf("error: bucket name validation failed %v", str)
-		}
-	}
-	return nil
 }
 
 // CheckGoogleIamPolicy makes assertions about the contents of a google_iam_policy data source's policy_data attribute

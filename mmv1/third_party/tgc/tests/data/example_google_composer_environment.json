@@ -1,0 +1,132 @@
+[
+    {
+        "name": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+        "asset_type": "cloudresourcemanager.googleapis.com/Project",
+        "iam_policy": {
+            "bindings": [
+                {
+                    "role": "roles/composer.worker",
+                    "members": [
+                        ""
+                    ]
+                }
+            ]
+        },
+        "ancestors": ["organizations/{{.OrgID}}"],
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"
+    },
+    {
+        "name": "//compute.googleapis.com/projects/{{.Provider.project}}/global/networks/composer-test-network3",
+        "asset_type": "compute.googleapis.com/Network",
+        "resource": {
+            "version": "beta",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
+            "discovery_name": "Network",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "autoCreateSubnetworks": false,
+                "name": "composer-test-network3",
+                "networkFirewallPolicyEnforcementOrder": "AFTER_CLASSIC_FIREWALL"
+            }
+        },
+        "ancestors": ["organizations/{{.OrgID}}"],
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"
+    },
+    {
+        "name": "//compute.googleapis.com/projects/{{.Provider.project}}/locations/placeholder-iZKnWdRs/environments/example-composer-env-tf-c2",
+        "asset_type": "composer.googleapis.com/Environment",
+        "resource": {
+            "version": "v1",
+            "discovery_document_uri": "https://composer.googleapis.com/$discovery/rest?version=v1",
+            "discovery_name": "Environment",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "config": {
+                    "softwareConfig": [
+                        {
+                            "airflow_config_overrides": {},
+                            "cloud_data_lineage_integration": [],
+                            "env_variables": {},
+                            "image_version": "composer-2-airflow-2",
+                            "pypi_packages": {},
+                            "python_version": "",
+                            "scheduler_count": 0,
+                            "web_server_plugins_mode": ""
+                        }
+                    ],
+                    "workloadsConfig": [
+                        {
+                            "dag_processor": [],
+                            "scheduler": [
+                                {
+                                    "count": 1,
+                                    "cpu": 0.5,
+                                    "memory_gb": 1.875,
+                                    "storage_gb": 1
+                                }
+                            ],
+                            "triggerer": [],
+                            "web_server": [
+                                {
+                                    "cpu": 0.5,
+                                    "memory_gb": 1.875,
+                                    "storage_gb": 1
+                                }
+                            ],
+                            "worker": [
+                                {
+                                    "cpu": 0.5,
+                                    "max_count": 3,
+                                    "memory_gb": 1.875,
+                                    "min_count": 1,
+                                    "storage_gb": 1
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "name": "example-composer-env-tf-c2",
+                "region": "us-central1"
+            }
+        },
+        "ancestors": ["organizations/{{.OrgID}}"],
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"
+    },
+    {
+        "name": "//compute.googleapis.com/projects/{{.Provider.project}}/regions/us-central1/subnetworks/composer-new-subnetwork",
+        "asset_type": "compute.googleapis.com/Subnetwork",
+        "resource": {
+            "version": "beta",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
+            "discovery_name": "Subnetwork",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "ipCidrRange": "10.2.0.0/16",
+                "logConfig": {
+                    "enable": false
+                },
+                "name": "composer-new-subnetwork",
+                "region": "projects/{{.Provider.project}}/global/regions/us-central1"
+            }
+        },
+        "ancestors": ["organizations/{{.OrgID}}"],
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"
+    },
+    {
+        "name": "//iam.googleapis.com/projects/{{.Provider.project}}/serviceAccounts/placeholder-CbHGiox0",
+        "asset_type": "iam.googleapis.com/ServiceAccount",
+        "resource": {
+            "version": "v1",
+            "discovery_document_uri": "https://iam.googleapis.com/$discovery/rest",
+            "discovery_name": "ServiceAccount",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "displayName": "Test Service Account for Composer Environment",
+                "email": "composer-new-account@{{.Provider.project}}.iam.gserviceaccount.com",
+                "projectId": "{{.Provider.project}}"
+            }
+        },
+        "ancestors": ["organizations/{{.OrgID}}"],
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"
+    }
+]

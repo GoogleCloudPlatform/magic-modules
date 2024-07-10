@@ -25,9 +25,22 @@ description: |
  The capacity of the pool can be split up and assigned to volumes within the pool. Storage pools are a billable
  component of NetApp Volumes. Billing is based on the location, service level, and capacity allocated to a pool
  independent of consumption at the volume level.
+
+ Storage pools of service level Flex are available as zonal (single zone) or regional (two zones in same region) pools.
+ Zonal and regional pools are high-available within the zone. On top of that, regional pools have `replica_zone` as
+ hot standby zone. All volume access is served from the `zone`. If `zone` fails, `replica_zone`
+ automatically becomes the active zone. This will cause state drift in your configuration.
+ If a zone switch (manual or automatic) is triggered outside of Terraform, you need to adjust the `zone`
+ and `replica_zone` values to reflect the current state, or Terraform will initiate a zone switch when running
+ the next apply. You can trigger a manual
+ [zone switch](https://cloud.google.com/netapp/volumes/docs/configure-and-use/storage-pools/edit-or-delete-storage-pool#switch_active_and_replica_zones)
+ via Terraform by swapping the value of the `zone` and `replica_zone` parameters in your HCL code.
+ Note : Regional FLEX storage pool are supported in beta provider currently.
+
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
-    'QUICKSTART_TITLE': 'https://cloud.google.com/netapp/volumes/docs/get-started/quickstarts/create-storage-pool'
+    'Quickstart documentation': 'https://cloud.google.com/netapp/volumes/docs/get-started/quickstarts/create-storage-pool'
+    'Regional Flex zone switch': 'https://cloud.google.com/netapp/volumes/docs/configure-and-use/storage-pools/edit-or-delete-storage-pool#switch_active_and_replica_zones'
   api: 'https://cloud.google.com/netapp/volumes/docs/reference/rest/v1/projects.locations.storagePools'
 base_url: projects/{{project}}/locations/{{location}}/storagePools
 self_link: projects/{{project}}/locations/{{location}}/storagePools/{{name}}
@@ -49,11 +62,11 @@ parameters:
     immutable: true
     url_param_only: true
     description: |
-      Name of the location. Usually a region name, expect for some STANDARD service level pools which require a zone name.
+      Name of the location. For zonal Flex pools specify a zone name, in all other cases a region name.
   - !ruby/object:Api::Type::String
     name: 'name'
     description:
-      The resource name of the storage pool. Needs to be unique per location.
+      The resource name of the storage pool. Needs to be unique per location/region.
     required: true
     immutable: true
     url_param_only: true
@@ -74,6 +87,7 @@ properties:
       - :PREMIUM
       - :EXTREME
       - :STANDARD
+      - :FLEX
     required: true
     immutable: true
   - !ruby/object:Api::Type::String
@@ -132,3 +146,18 @@ properties:
       - :SERVICE_MANAGED
       - :CLOUD_KMS
     output: true
+  - !ruby/object:Api::Type::String
+    name: 'zone'
+    description: |
+      Specifies the active zone for regional Flex pools. `zone` and `replica_zone` values can be swapped to initiate a
+      [zone switch](https://cloud.google.com/netapp/volumes/docs/configure-and-use/storage-pools/edit-or-delete-storage-pool#switch_active_and_replica_zones).
+      If you want to create a zonal Flex pool, specify a zone name for `location` and omit `zone`.
+    min_version: beta
+  - !ruby/object:Api::Type::String
+    name: 'replicaZone'
+    description: |
+      Specifies the replica zone for regional Flex pools. `zone` and `replica_zone` values can be swapped to initiate a
+      [zone switch](https://cloud.google.com/netapp/volumes/docs/configure-and-use/storage-pools/edit-or-delete-storage-pool#switch_active_and_replica_zones).
+    min_version: beta
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_update: templates/terraform/pre_update/netapp_storagepool.go.erb

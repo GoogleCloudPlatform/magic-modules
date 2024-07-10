@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
-	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/reader"
+	"github.com/GoogleCloudPlatform/magic-modules/tools/test-reader/reader"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -20,11 +20,34 @@ func TestGetChangedFieldsFromSchemaDiff(t *testing.T) {
 			schemaDiff: diff.SchemaDiff{
 				"covered_resource": diff.ResourceDiff{
 					Fields: map[string]diff.FieldDiff{
-						"field_one": {},
+						"field_one": {
+							New: &schema.Schema{},
+						},
 						"field_two.field_three": {
+							New: &schema.Schema{},
 							Old: &schema.Schema{},
 						},
-						"field_four.field_five.field_six": {},
+						"field_four": {
+							New: &schema.Schema{
+								Elem: &schema.Resource{},
+							},
+						},
+						"field_four.field_five.field_six": {
+							New: &schema.Schema{},
+						},
+						"field_seven": {
+							New: &schema.Schema{Computed: true},
+						},
+						"project": {
+							New: &schema.Schema{},
+						},
+					},
+				},
+				"iam_resource": diff.ResourceDiff{
+					Fields: map[string]diff.FieldDiff{
+						"condition": {
+							New: &schema.Schema{},
+						},
 					},
 				},
 			},
@@ -45,7 +68,7 @@ func TestGetChangedFieldsFromSchemaDiff(t *testing.T) {
 }
 
 func TestGetMissingTestsForChanges(t *testing.T) {
-	allTests, errs := reader.ReadAllTests("../reader/testdata")
+	allTests, errs := reader.ReadAllTests("../../test-reader/reader/testdata")
 	if len(errs) > 0 {
 		t.Errorf("errors reading tests before testing detect missing tests: %v", errs)
 	}

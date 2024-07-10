@@ -53,7 +53,7 @@ description: |-
 <%= indent(object.description.first_sentence, 2) %>
 ---
 
-# <%= terraform_name.gsub("_", "\\_") %>
+# <%= terraform_name %>
 <% if object.deprecation_message -%>
 ~> **Warning:** <%= object.deprecation_message %>
 <% end -%>
@@ -73,7 +73,7 @@ To get more information about <%= object.name -%>, see:
 <%   end # object...api.nil? -%>
 <%   if !object.references.guides.empty? -%>
 * How-to Guides
-<%     object.references.guides.each do |title, link| -%>
+<%     object.references.guides.sort.each do |title, link| -%>
     * [<%= title -%>](<%= link -%>)
 <%     end # object...guides.each -%>
 <%   end # object...guides.empty? -%>

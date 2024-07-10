@@ -25,23 +25,13 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 import_format: ['{{%parent}}/locations/{{location}}/postureDeployments/{{posture_deployment_id}}']
 base_url: '{{parent}}/locations/{{location}}/postureDeployments'
 self_link: '{{parent}}/locations/{{location}}/postureDeployments/{{posture_deployment_id}}'
-
 create_url: '{{parent}}/locations/{{location}}/postureDeployments?postureDeploymentId={{posture_deployment_id}}'
 update_verb: :PATCH
 update_mask: true
-
-
 autogen_async: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     base_url: '{{op_id}}'
-examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'securityposture_posture_deployment_basic'
-    primary_resource_id: 'postureDeployment'
-    test_env_vars:
-      org_id: :ORG_ID
-      project_number: :PROJECT_NUMBER
 
 parameters:
   - !ruby/object:Api::Type::String
@@ -65,7 +55,6 @@ parameters:
     immutable: true
     required: true
     url_param_only: true
-
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'

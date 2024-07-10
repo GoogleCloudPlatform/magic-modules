@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -223,93 +222,6 @@ func TestConvertStringMap(t *testing.T) {
 
 	if !reflect.DeepEqual(expected, actual) {
 		t.Fatalf("%s did not match expected value: %s", actual, expected)
-	}
-}
-
-func TestIpCidrRangeDiffSuppress(t *testing.T) {
-	cases := map[string]struct {
-		Old, New           string
-		ExpectDiffSuppress bool
-	}{
-		"single ip address": {
-			Old:                "10.2.3.4",
-			New:                "10.2.3.5",
-			ExpectDiffSuppress: false,
-		},
-		"cidr format string": {
-			Old:                "10.1.2.0/24",
-			New:                "10.1.3.0/24",
-			ExpectDiffSuppress: false,
-		},
-		"netmask same mask": {
-			Old:                "10.1.2.0/24",
-			New:                "/24",
-			ExpectDiffSuppress: true,
-		},
-		"netmask different mask": {
-			Old:                "10.1.2.0/24",
-			New:                "/32",
-			ExpectDiffSuppress: false,
-		},
-		"add netmask": {
-			Old:                "",
-			New:                "/24",
-			ExpectDiffSuppress: false,
-		},
-		"remove netmask": {
-			Old:                "/24",
-			New:                "",
-			ExpectDiffSuppress: false,
-		},
-	}
-
-	for tn, tc := range cases {
-		if tpgresource.IpCidrRangeDiffSuppress("ip_cidr_range", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
-			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
-		}
-	}
-}
-
-func TestRfc3339TimeDiffSuppress(t *testing.T) {
-	cases := map[string]struct {
-		Old, New           string
-		ExpectDiffSuppress bool
-	}{
-		"same time, format changed to have leading zero": {
-			Old:                "2:00",
-			New:                "02:00",
-			ExpectDiffSuppress: true,
-		},
-		"same time, format changed not to have leading zero": {
-			Old:                "02:00",
-			New:                "2:00",
-			ExpectDiffSuppress: true,
-		},
-		"different time, both without leading zero": {
-			Old:                "2:00",
-			New:                "3:00",
-			ExpectDiffSuppress: false,
-		},
-		"different time, old with leading zero, new without": {
-			Old:                "02:00",
-			New:                "3:00",
-			ExpectDiffSuppress: false,
-		},
-		"different time, new with leading zero, oldwithout": {
-			Old:                "2:00",
-			New:                "03:00",
-			ExpectDiffSuppress: false,
-		},
-		"different time, both with leading zero": {
-			Old:                "02:00",
-			New:                "03:00",
-			ExpectDiffSuppress: false,
-		},
-	}
-	for tn, tc := range cases {
-		if tpgresource.Rfc3339TimeDiffSuppress("time", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
-			t.Errorf("bad: %s, '%s' => '%s' expect DiffSuppress to return %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
-		}
 	}
 }
 
@@ -1252,46 +1164,5 @@ func TestReplaceVars(t *testing.T) {
 				t.Errorf("bad: %s; expected %q, got %q", tn, tc.Expected, v)
 			}
 		})
-	}
-}
-
-func TestCheckGCSName(t *testing.T) {
-	valid63 := acctest.RandString(t, 63)
-	cases := map[string]bool{
-		// Valid
-		"foobar":       true,
-		"foobar1":      true,
-		"12345":        true,
-		"foo_bar_baz":  true,
-		"foo-bar-baz":  true,
-		"foo-bar_baz1": true,
-		"foo--bar":     true,
-		"foo__bar":     true,
-		"foo-goog":     true,
-		"foo.goog":     true,
-		valid63:        true,
-		fmt.Sprintf("%s.%s.%s", valid63, valid63, valid63): true,
-
-		// Invalid
-		"goog-foobar":             false,
-		"foobar-google":           false,
-		"-foobar":                 false,
-		"foobar-":                 false,
-		"_foobar":                 false,
-		"foobar_":                 false,
-		"fo":                      false,
-		"foo$bar":                 false,
-		"foo..bar":                false,
-		acctest.RandString(t, 64): false,
-		fmt.Sprintf("%s.%s.%s.%s", valid63, valid63, valid63, valid63): false,
-	}
-
-	for bucketName, valid := range cases {
-		err := tpgresource.CheckGCSName(bucketName)
-		if valid && err != nil {
-			t.Errorf("The bucket name %s was expected to pass validation and did not pass.", bucketName)
-		} else if !valid && err == nil {
-			t.Errorf("The bucket name %s was NOT expected to pass validation and passed.", bucketName)
-		}
 	}
 }
