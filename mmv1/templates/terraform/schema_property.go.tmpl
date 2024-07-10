@@ -66,7 +66,7 @@
   {{- if .ItemType.DefaultValue -}}
 Default value: {{ .ItemType.DefaultValue -}}
   {{- end -}}
-Possible values: [{{- .EnumValuesToString "\"" false -}}]
+{{- " "}}Possible values: [{{- .ItemType.EnumValuesToString "\"" false -}}]
   {{- else if and (eq .Type "Enum") (not .Output) -}}
     {{- if .DefaultValue -}}
       {{- " "}}Default value: "{{ .DefaultValue -}}"
@@ -106,18 +106,26 @@ Possible values: [{{- .EnumValuesToString "\"" false -}}]
   {{ else if eq .ItemType.Type "String" -}}
       Elem: &schema.Schema{
         Type: schema.Type{{ .ItemTypeClass -}},
+        {{ template "ItemValidation" . -}}
       },
   {{ else if eq .ItemType.Type "Enum" -}}
       Elem: &schema.Schema{
-        Type: schema.Type{{ .ItemTypeClass -}},
-        ValidateFunc: verify.ValidateEnum([]string{ {{- .ItemType.EnumValuesToString "\"" true -}} }),
+        Type: schema.TypeString,
+        {{- if not .Output }}
+        ValidateFunc: verify.ValidateEnum([]string{ {{- .ItemType.EnumValuesToString "\"" false -}} }),
+        {{- end }}
       },
   {{ else -}}
       Elem: &schema.Schema{
-        Type: schema.Type{{ .ItemTypeClass -}},
     {{ if eq .ItemType.Type "ResourceRef" -}}
+        Type: schema.TypeString,
+        {{- if not .Output }}
         DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
+        {{- end }}
+    {{ else -}}
+        Type: {{ .TFType .ItemType.Type }},
     {{ end -}}
+    {{ template "ItemValidation" . -}}
       },
   {{ end -}}
   {{ if .IsSet -}}
@@ -160,17 +168,28 @@ Possible values: [{{- .EnumValuesToString "\"" false -}}]
     Default: {{ .GoLiteral .DefaultValue -}},
 {{ end -}}
 {{ if or .Conflicting .Conflicts -}}
-    ConflictsWith: {{ .GoLiteral .Conflicting  -}},
+    ConflictsWith: {{ .GoLiteral (.GetPropertySchemaPathList .Conflicting)  -}},
 {{ end -}}
 {{ if or .AtLeastOneOfList .AtLeastOneOf -}}
-    AtLeastOneOf: {{ .GoLiteral .AtLeastOneOfList  -}},
+    AtLeastOneOf: {{ .GoLiteral (.GetPropertySchemaPathList .AtLeastOneOfList) -}},
 {{ end -}}
 {{ if or .ExactlyOneOfList .ExactlyOneOf -}}
-    ExactlyOneOf: {{ .GoLiteral .ExactlyOneOfList  -}},
+    ExactlyOneOf: {{ .GoLiteral (.GetPropertySchemaPathList .ExactlyOneOfList) -}},
 {{ end -}}
 {{ if or .RequiredWithList .RequiredWith -}}
-    RequiredWith: {{ .GoLiteral .RequiredWithList  -}},
+    RequiredWith: {{ .GoLiteral (.GetPropertySchemaPathList .RequiredWithList) -}},
 {{ end -}}
 },
 {{- end -}}
+{{- end -}}
+{{- define "ItemValidation" -}}
+  {{ if not .Output -}}
+    {{ if .ItemValidation -}}
+      {{ if .ItemValidation.Regex -}}
+      ValidateFunc: verify.ValidateRegexp(`{{ .ItemValidation.Regex -}}`),
+      {{ else if .ItemValidation.Function -}}
+      ValidateFunc: {{ .ItemValidation.Function -}},
+      {{ end  -}}
+    {{ end -}}
+  {{- end }}
 {{- end -}}

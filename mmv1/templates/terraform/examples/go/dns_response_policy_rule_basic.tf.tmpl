@@ -1,4 +1,3 @@
-# [START dns_response_policy_rule_basic]
 resource "google_compute_network" "network-1" {
   name                    = "{{index $.Vars "network_1_name"}}"
   auto_create_subnetworks = false
@@ -35,4 +34,3 @@ resource "google_dns_response_policy_rule" "{{$.PrimaryResourceId}}" {
   }
 
 }
-# [END dns_response_policy_rule_basic]

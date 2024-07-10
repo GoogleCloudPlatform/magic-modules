@@ -14,7 +14,6 @@ resource "google_compute_region_autoscaler" "{{$.PrimaryResourceId}}" {
   }
 }
 
-# [START compute_instance_template_basic]
 resource "google_compute_instance_template" "foobar" {
   name         = "{{index $.Vars "instance_template_name"}}"
   machine_type = "e2-standard-4"
@@ -46,7 +45,6 @@ resource "google_compute_instance_template" "foobar" {
     ]
   }
 }
-# [END compute_instance_template_basic]
 
 resource "google_compute_target_pool" "foobar" {
   name = "{{index $.Vars "target_pool_name"}}"
