@@ -692,6 +692,7 @@ func checkExceptionList(filePath string) bool {
 		"constants/router_nat_validate_action_active_range.go",
 		"unordered_list_customize_diff",
 		"default_if_empty",
+		"iam/example_config_body/api_gateway_api_config.tf.erb",
 
 		// TODO: remove the following files from the exception list after all of the services are migrated to Go
 		// It will generate diffs when partial services are migrated.

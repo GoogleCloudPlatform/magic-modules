@@ -1,4 +1,3 @@
-# [START privateca_create_ca_pool_all_fields]
 resource "google_privateca_ca_pool" "{{$.PrimaryResourceId}}" {
   name = "{{index $.Vars "name"}}"
   location = "us-central1"
@@ -88,4 +87,3 @@ resource "google_privateca_ca_pool" "{{$.PrimaryResourceId}}" {
     }
   }
 }
-# [END privateca_create_ca_pool_all_fields]
