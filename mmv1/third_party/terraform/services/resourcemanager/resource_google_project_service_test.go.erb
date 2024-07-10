@@ -105,11 +105,11 @@ func TestAccProjectService_disableDependentServices(t *testing.T) {
 				ResourceName:            "google_project_service.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-			<% if version == "ga" -%>
-				ImportStateVerifyIgnore: []string{"disable_on_destroy"},
-			<% else -%>
+			  <% unless version == "ga" -%>
 			  ImportStateVerifyIgnore: []string{"disable_on_destroy", "check_if_service_has_usage_on_destroy"},
-			<% end -%>
+			  <% else -%>
+			  ImportStateVerifyIgnore: []string{"disable_on_destroy"},
+			  <% end -%>
 			},
 			{
 				Config:             testAccProjectService_dependencyRemoved(services, pid, org, billingId),
