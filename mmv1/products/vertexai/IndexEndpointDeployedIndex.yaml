@@ -181,32 +181,6 @@ properties:
             name: 'machineType'
             description: The type of the machine.
             immutable: true
-          # - !ruby/object:Api::Type::Enum
-          #   name: 'acceleratorType'
-          #   description: The name of the service attachment resource. Populated if private service connect is enabled.
-          #   immutable: true
-          #   values:
-          #     - NVIDIA_TESLA_K80
-          #     - NVIDIA_TESLA_P100
-          #     - NVIDIA_TESLA_V100
-          #     - NVIDIA_TESLA_P4
-          #     - NVIDIA_TESLA_T4
-          #     - NVIDIA_TESLA_A100
-          #     - NVIDIA_A100_80GB
-          #     - NVIDIA_L4
-          #     - NVIDIA_H100_80GB
-          #     - TPU_V2
-          #     - TPU_V3
-          #     - TPU_V4_POD
-          #     - TPU_V5_LITEPOD
-          # - !ruby/object:Api::Type::Integer
-          #   name: 'acceleratorCount'
-          #   description: The number of accelerators to attach to the machine.
-          # - !ruby/object:Api::Type::String
-          #   name: 'tpuTopology'
-          #   immutable: true
-          #   description: |
-          #     The topology of the TPUs. Corresponds to the TPU topologies available from GKE. (Example: tpuTopology: "2x2x1").
       - !ruby/object:Api::Type::Integer
         name: 'minReplicaCount'
         description: The minimum number of machine replicas this DeployedModel will be always deployed on. This value must be greater than or equal to 1.
@@ -216,22 +190,6 @@ properties:
         name: 'maxReplicaCount'
         description: The maximum number of replicas this DeployedModel may be deployed on when the traffic against it increases.
         immutable: true
-      # - !ruby/object:Api::Type::Array
-      #   name: 'autoscalingMetricSpecs'
-      #   description: The metric specifications that overrides a resource utilization metric (CPU utilization, accelerator's duty cycle, and so on) target value (default to 60 if not set). At most one entry is allowed per metric.
-      #   immutable: true
-      #   item_type: !ruby/object:Api::Type::NestedObject
-      #     properties:
-      #       - !ruby/object:Api::Type::String
-      #         name: metricName
-      #         required: true
-      #         description: |
-      #           The resource metric name.
-      #       - !ruby/object:Api::Type::String
-      #         name: target
-      #         default_value: "60"
-      #         description: |
-      #           The target resource utilization in percentage (1% - 100%) for the given metric; once the real usage deviates from the target by a certain percentage, the machine replicas change. The default value is 60 (representing 60%) if not provided.
   - !ruby/object:Api::Type::Boolean
     name: enableAccessLogging
     description: If true, private endpoint's access logs are sent to Cloud Logging.
