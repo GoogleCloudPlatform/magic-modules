@@ -2,17 +2,11 @@
 package networkconnectivity_test
 
 import (
-	"context"
-	"fmt"
-	
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccNetworkConnectivitySpoke_LinkedVPCNetworkHandWritten(t *testing.T) {
