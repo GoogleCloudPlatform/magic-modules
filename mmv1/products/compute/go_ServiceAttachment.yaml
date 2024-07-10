@@ -30,6 +30,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
@@ -211,7 +212,7 @@ properties:
       attachment.
     is_set: true
     send_empty_value: true
-    set_hash_func: 'computeServiceAttachmentConsumerAcceptListsHash'
+    set_hash_func: computeServiceAttachmentConsumerAcceptListsHash
     item_type:
       type: NestedObject
       properties:

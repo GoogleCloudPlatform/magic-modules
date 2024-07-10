@@ -43,6 +43,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
@@ -57,6 +58,7 @@ async:
     message: 'message'
 collection_url_key: 'items'
 custom_code:
+  constants: 'templates/terraform/constants/go/compute_network_endpoint_group.go.tmpl'
 examples:
   - name: 'network_endpoint_group'
     primary_resource_id: 'neg'
@@ -111,7 +113,7 @@ properties:
       CONNECTION balancing modes.
 
       Possible values include: GCE_VM_IP, GCE_VM_IP_PORT, NON_GCP_PRIVATE_IP_PORT, INTERNET_IP_PORT, INTERNET_FQDN_PORT, SERVERLESS, and PRIVATE_SERVICE_CONNECT.
-    default_value: GCE_VM_IP_PORT
+    default_value: "GCE_VM_IP_PORT"
     enum_values:
       - 'GCE_VM_IP'
       - 'GCE_VM_IP_PORT'
@@ -137,7 +139,7 @@ properties:
     type: ResourceRef
     description: |
       Optional subnetwork to which all network endpoints in the NEG belong.
-    diff_suppress_func: 'tpgresource.CompareOptionalSubnet'
+    diff_suppress_func: 'compareOptionalSubnet'
     custom_expand: 'templates/terraform/custom_expand/go/resourceref_with_validation.go.tmpl'
     resource: 'Subnetwork'
     imports: 'selfLink'

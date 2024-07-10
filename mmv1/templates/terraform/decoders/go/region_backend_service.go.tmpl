@@ -22,7 +22,7 @@ if ok && m["enabled"] == false {
 	delete(res, "iap")
 }
 
-{{- if ne $.TargetVersionName "ga" }}
+{{ if ne $.TargetVersionName `ga` -}}
 // Since we add in a NONE subsetting policy, we need to remove it in some
 // cases for backwards compatibility with the config
 v, ok = res["subsetting"]

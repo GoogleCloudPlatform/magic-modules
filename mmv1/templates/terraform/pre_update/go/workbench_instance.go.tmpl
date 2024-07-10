@@ -1,5 +1,41 @@
+// Build custom mask since the notebooks API does not support gce_setup as a valid mask
+stopInstance := false
+newUpdateMask := []string{}
+if d.HasChange("gce_setup.0.machine_type") {
+    newUpdateMask = append(newUpdateMask, "gce_setup.machine_type")
+    stopInstance = true
+}
+if d.HasChange("gce_setup.0.accelerator_configs") {
+    newUpdateMask = append(newUpdateMask, "gce_setup.accelerator_configs")
+    stopInstance = true
+}
+if d.HasChange("gce_setup.0.shielded_instance_config.0.enable_secure_boot") {
+    newUpdateMask = append(newUpdateMask, "gce_setup.shielded_instance_config.enable_secure_boot")
+    stopInstance = true
+}
+if d.HasChange("gce_setup.0.shielded_instance_config.0.enable_vtpm") {
+  newUpdateMask = append(newUpdateMask, "gce_setup.shielded_instance_config.enable_vtpm")
+  stopInstance = true
+}
+if d.HasChange("gce_setup.0.shielded_instance_config.0.enable_integrity_monitoring") {
+  newUpdateMask = append(newUpdateMask, "gce_setup.shielded_instance_config.enable_integrity_monitoring")
+  stopInstance = true
+}
+if d.HasChange("gce_setup.0.metadata") {
+    newUpdateMask = append(newUpdateMask, "gceSetup.metadata")
+}
+if d.HasChange("effective_labels") {
+    newUpdateMask = append(newUpdateMask, "labels")
+}
+updateMask = newUpdateMask
+// Overwrite the previously set mask.
+url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(newUpdateMask, ",")})
+if err != nil {
+    return err
+}
+
 name := d.Get("name").(string)
-if d.HasChange("gce_setup.0.machine_type") || d.HasChange("gce_setup.0.accelerator_configs")  || d.HasChange("gce_setup.0.shielded_instance_config"){
+if stopInstance{
   state := d.Get("state").(string)
 
   if state != "STOPPED" {
@@ -20,26 +56,9 @@ if d.HasChange("gce_setup.0.machine_type") || d.HasChange("gce_setup.0.accelerat
   log.Printf("[DEBUG] Workbench Instance %q need not be stopped for the update.", name)
 }
 
-// Build custom mask since the notebooks API does not support gce_setup as a valid mask
-newUpdateMask := []string{}
-if d.HasChange("gce_setup.0.machine_type") {
-    newUpdateMask = append(newUpdateMask, "gce_setup.machine_type")
+if d.HasChange("gce_setup.0.boot_disk.0.disk_size_gb") {
+  resizeWorkbenchInstanceDisk(config, d, project, userAgent, true)
 }
-if d.HasChange("gce_setup.0.accelerator_configs") {
-    newUpdateMask = append(newUpdateMask, "gce_setup.accelerator_configs")
-}
-if d.HasChange("gce_setup.0.shielded_instance_config") {
-    newUpdateMask = append(newUpdateMask, "gce_setup.shielded_instance_config")
-}
-if d.HasChange("gce_setup.0.metadata") {
-    newUpdateMask = append(newUpdateMask, "gceSetup.metadata")
-}
-if d.HasChange("effective_labels") {
-    newUpdateMask = append(newUpdateMask, "labels")
-}
-
-// Overwrite the previously set mask.
-url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(newUpdateMask, ",")})
-if err != nil {
-    return err
+if d.HasChange("gce_setup.0.data_disks.0.disk_size_gb") {
+  resizeWorkbenchInstanceDisk(config, d, project, userAgent, false)
 }

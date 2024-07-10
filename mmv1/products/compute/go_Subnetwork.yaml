@@ -52,6 +52,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
@@ -69,6 +70,7 @@ iam_policy:
   allowed_iam_role: 'roles/compute.networkUser'
   parent_resource_attribute: 'subnetwork'
   iam_conditions_request_type: 'QUERY_PARAM'
+  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
 custom_code:
   extra_schema_entry: 'templates/terraform/extra_schema_entry/go/subnetwork.tmpl'
   constants: 'templates/terraform/constants/go/subnetwork.tmpl'
@@ -292,7 +294,7 @@ properties:
           - 'log_config.0.flow_sampling'
           - 'log_config.0.metadata'
           - 'log_config.0.filterExpr'
-        default_value: INTERVAL_5_SEC
+        default_value: "INTERVAL_5_SEC"
         enum_values:
           - 'INTERVAL_5_SEC'
           - 'INTERVAL_30_SEC'
@@ -325,7 +327,7 @@ properties:
           - 'log_config.0.flow_sampling'
           - 'log_config.0.metadata'
           - 'log_config.0.filterExpr'
-        default_value: INCLUDE_ALL_METADATA
+        default_value: "INCLUDE_ALL_METADATA"
         enum_values:
           - 'EXCLUDE_ALL_METADATA'
           - 'INCLUDE_ALL_METADATA'
@@ -342,12 +344,14 @@ properties:
         type: String
         description: |
           Export filter used to define which VPC flow logs should be logged, as as CEL expression. See
+          https://cloud.google.com/vpc/docs/flow-logs#filtering for details on how to format this field.
+          The default value is 'true', which evaluates to include everything.
         at_least_one_of:
           - 'log_config.0.aggregation_interval'
           - 'log_config.0.flow_sampling'
           - 'log_config.0.metadata'
           - 'log_config.0.filterExpr'
-        default_value: true
+        default_value: "true"
   - name: 'stackType'
     type: Enum
     description: |
