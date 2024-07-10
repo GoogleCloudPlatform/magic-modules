@@ -88,7 +88,7 @@ resource "google_kms_crypto_key_iam_member" "gcf_cmek_keyuser_5" {
   crypto_key_id = "<%= ctx[:vars]['kms_key_name'] %>"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 
-  member = "serviceAccount:${google_project_service_identity.ea_sa.email}"
+  member = google_project_service_identity.ea_sa.member
 }
 
 resource "google_artifact_registry_repository" "encoded-ar-repo" {
