@@ -338,7 +338,8 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{-          if not $.TaintResourceOnFailedCreate -}}
         // The resource didn't actually create
         d.SetId("")
-{{ end}}
+
+{{ end -}}
         return fmt.Errorf("Error waiting to create {{ $.Name -}}: %s", err)
     }
 
