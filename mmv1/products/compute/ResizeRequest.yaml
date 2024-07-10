@@ -106,7 +106,7 @@ parameters:
       The name of an existing resize request. The name should conform to RFC1035 or be a resource ID.
     url_param_only: true
 
-# Resize request parameters sent in the body of the CRUD action
+# Non-URL parameters including input and output parameters
 properties:
   - !ruby/object:Api::Type::Time
     name: "creationTimestamp"
