@@ -27,17 +27,16 @@ references: !ruby/object:Api::Resource::ReferenceLinks
     "QUICKSTART_TITLE": "https://cloud.google.com/compute/docs/instance-groups/create-resize-requests-mig"
   # Link to the REST API reference for the resource. For example,
   # https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.backups
-  api: "https://cloud.google.com/compute/docs/reference/rest/beta/instanceGroupManagerResizeRequests"
+  api: "https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroupManagerResizeRequests"
 
 ### Adjust when ready for GA ###
-min_version: beta
 immutable: true
 
 ### List Method ###
 base_url: "projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}/resizeRequests"
 
 ### Get Method
-self_link: "projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}/resizeRequests/{{resize_request}}"
+self_link: "projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}/resizeRequests/{{name}}"
 
 ### Create Method ###
 # Get method with a post
@@ -113,6 +112,17 @@ properties:
     name: "creationTimestamp"
     description: |
       The creation timestamp for this resize request in RFC3339 text format.
+    output: true
+  - !ruby/object:Api::Type::Enum
+    name: "state"
+    description: |
+      TODO: state description
+    values:
+      - :CREATING
+      - :ACCEPTED
+      - :FAILED
+      - :SUCCEEDED
+      - :CANCELLED
     output: true
   - !ruby/object:Api::Type::String
     name: "name"
