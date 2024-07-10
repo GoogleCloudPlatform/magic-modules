@@ -21,7 +21,7 @@ resource "google_kms_crypto_key_iam_member" "crypto_key" {
   crypto_key_id = google_kms_crypto_key.key.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 
-  member = "serviceAccount:${google_project_service_identity.gcp_sa_cloud_sql.email}"
+  member = google_project_service_identity.gcp_sa_cloud_sql.member
 }
 
 resource "google_sql_database_instance" "mysql_instance_with_cmek" {
