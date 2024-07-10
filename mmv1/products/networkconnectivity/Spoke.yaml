@@ -148,6 +148,7 @@ properties:
               name: virtualMachine
               description: The URI of the virtual machine resource
               min_version: ga
+              diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
               immutable: true
             - !ruby/object:Api::Type::String
               name: ipAddress
@@ -169,6 +170,7 @@ properties:
         name: uri
         description: The URI of the VPC network resource.
         min_version: ga
+        diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
         required: true
         immutable: true
       - !ruby/object:Api::Type::Array
