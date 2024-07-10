@@ -10,16 +10,6 @@ resource "google_compute_subnetwork" "my_subnetwork" {
   ip_cidr_range = "10.0.1.0/24"
 }
 
-resource "google_kms_key_ring" "keyring" {
-  name = "<%= ctx[:vars]['keyring_name'] %>"
-  location = "global"
-}
-
-resource "google_kms_crypto_key" "crypto-key" {
-  name     = "<%= ctx[:vars]['key_name'] %>"
-  key_ring = google_kms_key_ring.keyring.id
-}
-
 resource "google_workbench_instance" "<%= ctx[:primary_resource_id] %>" {
   name = "<%= ctx[:vars]['instance_name'] %>"
   location = "us-central1-a"
@@ -31,6 +21,12 @@ resource "google_workbench_instance" "<%= ctx[:primary_resource_id] %>" {
       core_count   = 1
     }
 
+    shielded_instance_config {
+      enable_secure_boot = true
+      enable_vtpm = true
+      enable_integrity_monitoring = true
+    }
+
     disable_public_ip = false
 
     service_accounts {
@@ -40,15 +36,15 @@ resource "google_workbench_instance" "<%= ctx[:primary_resource_id] %>" {
     boot_disk {
       disk_size_gb  = 310
       disk_type = "PD_SSD"
-      disk_encryption = "GMEK"
-      kms_key = google_kms_crypto_key.crypto-key.id
+      disk_encryption = "CMEK"
+      kms_key = "<%= ctx[:vars]['key_name'] %>"
     }
 
     data_disks {
       disk_size_gb  = 330
       disk_type = "PD_SSD"
-      disk_encryption = "GMEK"
-      kms_key = google_kms_crypto_key.crypto-key.id
+      disk_encryption = "CMEK"
+      kms_key = "<%= ctx[:vars]['key_name'] %>"
     }
 
     network_interfaces {
@@ -74,5 +70,7 @@ resource "google_workbench_instance" "<%= ctx[:primary_resource_id] %>" {
   labels = {
     k = "val"
   }
+
+  desired_state = "ACTIVE"
 
 }

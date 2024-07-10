@@ -165,7 +165,6 @@ properties:
       configure Private Service Connect. Only global internal addresses can use
       this purpose.
 
-
       This should only be set when using an Internal address.
     default_from_api: true
   - !ruby/object:Api::Type::Enum

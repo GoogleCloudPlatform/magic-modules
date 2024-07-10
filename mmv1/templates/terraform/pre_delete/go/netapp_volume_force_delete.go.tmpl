@@ -1,0 +1,4 @@
+// Delete volume even when nested snapshots do exist
+if deletionPolicy := d.Get("deletion_policy"); deletionPolicy == "FORCE" {
+    url = url + "?force=true"
+}

@@ -123,8 +123,6 @@ module Provider
   class ProductFileTemplate < Provider::FileTemplate
     # The name of the resource
     attr_accessor :name
-    # The namespace of the product.
-    attr_accessor :product_ns
     # The resource itself.
     attr_accessor :object
     # The entire API object.
@@ -144,7 +142,6 @@ module Provider
 
       @name = name
       @product = product
-      @product_ns = product.name
       @output_folder = output_folder
       @version = version
       @env = env

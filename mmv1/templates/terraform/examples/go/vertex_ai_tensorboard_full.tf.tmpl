@@ -1,0 +1,21 @@
+resource "google_vertex_ai_tensorboard" "{{$.PrimaryResourceId}}" {
+  display_name = "{{index $.Vars "display_name"}}"
+  description  = "sample description"
+  labels       = {
+    "key1" : "value1",
+    "key2" : "value2"
+  }
+  region       = "us-central1"
+  encryption_spec {
+    kms_key_name = "{{index $.Vars "kms_key_name"}}"
+  }
+  depends_on = [google_kms_crypto_key_iam_member.crypto_key]
+}
+
+resource "google_kms_crypto_key_iam_member" "crypto_key" {
+  crypto_key_id = "{{index $.Vars "kms_key_name"}}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+}
+
+data "google_project" "project" {}

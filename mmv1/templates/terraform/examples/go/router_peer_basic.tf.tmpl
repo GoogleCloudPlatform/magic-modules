@@ -1,0 +1,8 @@
+resource "google_compute_router_peer" "{{$.PrimaryResourceId}}" {
+  name                      = "{{index $.Vars "peer_name"}}"
+  router                    = "{{index $.Vars "router_name"}}"
+  region                    = "us-central1"
+  peer_asn                  = 65513
+  advertised_route_priority = 100
+  interface                 = "interface-1"
+}

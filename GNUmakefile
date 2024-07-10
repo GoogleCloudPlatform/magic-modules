@@ -59,7 +59,6 @@ terraform build provider:
 	@make validate_environment;
 	make mmv1
 	make tpgtools
-	make teamcity-servicemap-generate
 
 mmv1:
 	cd mmv1;\
@@ -75,13 +74,6 @@ tpgtools:
 	make serialize
 	cd tpgtools;\
 		go run . --output $(OUTPUT_PATH) --version $(VERSION) $(tpgtools_compile)
-
-# This should be removed when all DCL resources are migrated to MMv1; service map generation should be
-# controlled inside MMv1, like originally implemented in this PR: https://github.com/GoogleCloudPlatform/magic-modules/pull/8254
-teamcity-servicemap-generate:
-	cd tools/teamcity-generator;\
-		go run . --output $(OUTPUT_PATH) --version $(VERSION)
-
 
 clean-provider:
 	cd $(OUTPUT_PATH);\
@@ -141,3 +133,9 @@ doctor:
 	./scripts/doctor
 
 .PHONY: mmv1 tpgtools test
+
+refresh-go:
+	cd mmv1;\
+		bundle exec compiler.rb -e terraform -o $(OUTPUT_PATH) -v $(VERSION) $(mmv1_compile) --go-yaml; \
+		go run . --yaml --template; \
+		go run . --yaml --handwritten

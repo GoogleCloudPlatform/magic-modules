@@ -10,4 +10,4 @@
 - type: DIFF_SUPPRESS_FUNC
   field: logging_config.component_config.enable_components
   details:
-    diffsuppressfunc: tpgresource.CompareCaseInsensitive
+    diffsuppressfunc: tpgresource.CaseDiffSuppress

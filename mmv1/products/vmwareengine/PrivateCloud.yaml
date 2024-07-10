@@ -49,6 +49,7 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   decoder: "templates/terraform/decoders/private_cloud.go.erb"
   post_update: "templates/terraform/post_update/private_cloud.go.erb"
   update_encoder: "templates/terraform/update_encoder/private_cloud.go.erb"
+  constants: templates/terraform/constants/vmwareengine_private_cloud_type.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "vmware_engine_private_cloud_basic"
@@ -198,6 +199,20 @@ properties:
                 This number must always be one of `nodeType.availableCustomCoreCounts`.
                 If zero is provided max value from `nodeType.availableCustomCoreCounts` will be used.
                 This cannot be changed once the PrivateCloud is created.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'stretchedClusterConfig'
+        description: |
+          The stretched cluster configuration for the private cloud.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'preferredLocation'
+            description: |
+              Zone that will remain operational when connection between the two zones is lost.
+          - !ruby/object:Api::Type::String
+            name: 'secondaryLocation'
+            description: |
+              Additional zone for a higher level of availability and load balancing.
+
 
   - !ruby/object:Api::Type::NestedObject
     name: 'hcx'
@@ -292,7 +307,8 @@ properties:
       Initial type of the private cloud.
     immutable: true
     ignore_read: true
+    diff_suppress_func: vmwareenginePrivateCloudStandardTypeDiffSuppressFunc
     values:
       - :STANDARD
       - :TIME_LIMITED
-    default_value: :STANDARD
+      - :STRETCHED

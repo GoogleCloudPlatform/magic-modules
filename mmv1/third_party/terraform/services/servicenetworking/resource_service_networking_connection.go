@@ -13,6 +13,7 @@ import (
 
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"google.golang.org/api/servicenetworking/v1"
 )
 
@@ -57,6 +58,12 @@ func ResourceServiceNetworkingConnection() *schema.Resource {
 				Required:    true,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Description: `Named IP address range(s) of PEERING type reserved for this service provider. Note that invoking this method with a different range when connection is already established will not reallocate already provisioned service producer subnetworks.`,
+			},
+			"deletion_policy": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{"ABANDON", ""}, false),
+				Description:  `When set to ABANDON, terraform will abandon management of the resource instead of deleting it. Prevents terraform apply failures with CloudSQL. Note: The resource will still exist.`,
 			},
 			"peering": {
 				Type:     schema.TypeString,
@@ -110,7 +117,7 @@ func resourceServiceNetworkingConnectionCreate(d *schema.ResourceData, meta inte
 		return err
 	}
 
-	if err := ServiceNetworkingOperationWaitTime(config, op, "Create Service Networking Connection", userAgent, project, d.Timeout(schema.TimeoutCreate)); err != nil {
+	if err := ServiceNetworkingOperationWaitTimeHW(config, op, "Create Service Networking Connection", userAgent, project, d.Timeout(schema.TimeoutCreate)); err != nil {
 		return err
 	}
 
@@ -239,7 +246,7 @@ func resourceServiceNetworkingConnectionUpdate(d *schema.ResourceData, meta inte
 		if err != nil {
 			return err
 		}
-		if err := ServiceNetworkingOperationWaitTime(config, op, "Update Service Networking Connection", userAgent, project, d.Timeout(schema.TimeoutUpdate)); err != nil {
+		if err := ServiceNetworkingOperationWaitTimeHW(config, op, "Update Service Networking Connection", userAgent, project, d.Timeout(schema.TimeoutUpdate)); err != nil {
 			return err
 		}
 	}
@@ -248,6 +255,12 @@ func resourceServiceNetworkingConnectionUpdate(d *schema.ResourceData, meta inte
 
 func resourceServiceNetworkingConnectionDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
+
+	if deletionPolicy := d.Get("deletion_policy"); deletionPolicy == "ABANDON" {
+		log.Printf("[WARN] The service networking connection has been abandoned")
+		return nil
+	}
+
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
@@ -284,7 +297,7 @@ func resourceServiceNetworkingConnectionDelete(d *schema.ResourceData, meta inte
 		return err
 	}
 
-	if err := ServiceNetworkingOperationWaitTime(config, op, "Delete Service Networking Connection", userAgent, project, d.Timeout(schema.TimeoutCreate)); err != nil {
+	if err := ServiceNetworkingOperationWaitTimeHW(config, op, "Delete Service Networking Connection", userAgent, project, d.Timeout(schema.TimeoutCreate)); err != nil {
 		return errwrap.Wrapf("Unable to remove Service Networking Connection, err: {{err}}", err)
 	}
 

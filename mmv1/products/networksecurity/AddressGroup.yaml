@@ -71,11 +71,14 @@ examples:
       resource_name: "my-address-groups"
     test_env_vars:
       project: :PROJECT_NAME
-custom_code:
-  !ruby/object:Provider::Terraform::CustomCode  # Calling custom operation that are different from other network security resources.
-  pre_create: templates/terraform/pre_create/network_security_address_group_operation.go.erb
-  pre_update: templates/terraform/pre_update/network_security_address_group_operation.go.erb
-  pre_delete: templates/terraform/pre_delete/network_security_address_group_operation.go.erb
+  - !ruby/object:Provider::Terraform::Examples
+    min_version: "beta"
+    name: "network_security_address_groups_cloud_armor"
+    primary_resource_id: "default"
+    vars:
+      resource_name: "my-address-groups"
+    test_env_vars:
+      project: :PROJECT_NAME
 parameters:
   - !ruby/object:Api::Type::String
     name: parent
@@ -138,3 +141,17 @@ properties:
     required: true
     description: |
       Capacity of the Address Group.
+  - !ruby/object:Api::Type::Array
+    min_version: "beta"
+    name: "purpose"
+    description: |
+      List of supported purposes of the Address Group.
+    default_from_api: true
+    item_type: !ruby/object:Api::Type::Enum
+      name: 'undefined'
+      description: |
+        This field only has a name and description because of MM
+        limitations. It should not appear in downstreams.
+      values:
+        - :DEFAULT
+        - :CLOUD_ARMOR

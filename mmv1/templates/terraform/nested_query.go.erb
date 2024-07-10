@@ -1,5 +1,5 @@
 <% unless object.nested_query.nil? -%>
-func flattenNested<%= resource_name -%>(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
+func flattenNested<%= object.resource_name -%>(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
   var v interface{}
   var ok bool
 
@@ -26,24 +26,24 @@ func flattenNested<%= resource_name -%>(d *schema.ResourceData, meta interface{}
     return nil, fmt.Errorf("expected list or map for value <%= object.nested_query.keys.join(".") -%>. Actual value: %v", v)
   }
 
-  _, item, err := resource<%=resource_name%>FindNestedObjectInList(d, meta, v.([]interface{}))
+  _, item, err := resource<%=object.resource_name%>FindNestedObjectInList(d, meta, v.([]interface{}))
   if err != nil {
     return nil, err
   }
   return item, nil
 }
 
-func resource<%=resource_name%>FindNestedObjectInList(d *schema.ResourceData, meta interface{}, items []interface{}) (index int, item map[string]interface{}, err error) {
+func resource<%=object.resource_name%>FindNestedObjectInList(d *schema.ResourceData, meta interface{}, items []interface{}) (index int, item map[string]interface{}, err error) {
   <% object.identity.each do |id_prop| -%>
   <%   if settable_properties.include?(id_prop) -%>
-  expected<%= titlelize_property(id_prop) -%>, err := expandNested<%= resource_name -%><%= titlelize_property(id_prop) -%>(d.Get("<%= id_prop.name.underscore -%>"), d, meta.(*transport_tpg.Config))
+  expected<%= titlelize_property(id_prop) -%>, err := expandNested<%= object.resource_name -%><%= titlelize_property(id_prop) -%>(d.Get("<%= id_prop.name.underscore -%>"), d, meta.(*transport_tpg.Config))
   if err != nil {
     return -1, nil, err
   }
   <%   else -%>
   expected<%= titlelize_property(id_prop) -%> := d.Get("<%= id_prop.name.underscore -%>")
   <%   end # settable_properties.include?(id_prop)-%>
-  expectedFlattened<%= titlelize_property(id_prop) -%> := flattenNested<%= resource_name -%><%= titlelize_property(id_prop) -%>(expected<%= titlelize_property(id_prop) -%>, d, meta.(*transport_tpg.Config))
+  expectedFlattened<%= titlelize_property(id_prop) -%> := flattenNested<%= object.resource_name -%><%= titlelize_property(id_prop) -%>(expected<%= titlelize_property(id_prop) -%>, d, meta.(*transport_tpg.Config))
   <% end # object.identity.each -%>
 
   // Search list for this resource.
@@ -62,14 +62,14 @@ func resource<%=resource_name%>FindNestedObjectInList(d *schema.ResourceData, me
 
     <% if object.custom_code.decoder -%>
     // Decode list item before comparing.
-    item, err := resource<%= resource_name -%>Decoder(d, meta, item)
+    item, err := resource<%= object.resource_name -%>Decoder(d, meta, item)
     if err != nil {
         return -1, nil, err
     }
     <% end -%>
 
     <% object.identity.each do |prop| -%>
-    item<%= titlelize_property(prop) -%> := flattenNested<%= resource_name -%><%= titlelize_property(prop) -%>(item["<%= prop.api_name %>"], d, meta.(*transport_tpg.Config))
+    item<%= titlelize_property(prop) -%> := flattenNested<%= object.resource_name -%><%= titlelize_property(prop) -%>(item["<%= prop.api_name %>"], d, meta.(*transport_tpg.Config))
     // IsEmptyValue check so that if one is nil and the other is "", that's considered a match
     if !(tpgresource.IsEmptyValue(reflect.ValueOf(item<%= titlelize_property(prop) -%>)) && tpgresource.IsEmptyValue(reflect.ValueOf(expectedFlattened<%= titlelize_property(prop) -%>))) && !reflect.DeepEqual(item<%= titlelize_property(prop) -%>, expectedFlattened<%= titlelize_property(prop) -%>) {
       log.Printf("[DEBUG] Skipping item with <%= prop.api_name %>= %#v, looking for %#v)", item<%= titlelize_property(prop) -%>, expectedFlattened<%= titlelize_property(prop) -%>)
@@ -88,13 +88,13 @@ func resource<%=resource_name%>FindNestedObjectInList(d *schema.ResourceData, me
 %>
 // PatchCreateEncoder handles creating request data to PATCH parent resource
 // with list including new object.
-func resource<%= resource_name -%>PatchCreateEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
-  currItems, err := resource<%= resource_name -%>ListForPatch(d, meta)
+func resource<%= object.resource_name -%>PatchCreateEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+  currItems, err := resource<%= object.resource_name -%>ListForPatch(d, meta)
   if err != nil {
     return nil, err
   }
 
-  _, found, err := resource<%=resource_name%>FindNestedObjectInList(d, meta, currItems)
+  _, found, err := resource<%=object.resource_name%>FindNestedObjectInList(d, meta, currItems)
   if err != nil {
     return nil, err
   }
@@ -145,13 +145,13 @@ func resource<%= resource_name -%>PatchCreateEncoder(d *schema.ResourceData, met
 <% if updatable?(object, object.root_properties) -%>
 // PatchUpdateEncoder handles creating request data to PATCH parent resource
 // with list including updated object.
-func resource<%= resource_name -%>PatchUpdateEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
-  items, err := resource<%= resource_name -%>ListForPatch(d, meta)
+func resource<%= object.resource_name -%>PatchUpdateEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+  items, err := resource<%= object.resource_name -%>ListForPatch(d, meta)
   if err != nil {
     return nil, err
   }
 
-  idx, item, err := resource<%=resource_name%>FindNestedObjectInList(d, meta, items)
+  idx, item, err := resource<%=object.resource_name%>FindNestedObjectInList(d, meta, items)
   if err != nil {
     return nil, err
   }
@@ -185,19 +185,19 @@ func resource<%= resource_name -%>PatchUpdateEncoder(d *schema.ResourceData, met
 
 // PatchDeleteEncoder handles creating request data to PATCH parent resource
 // with list excluding object to delete.
-func resource<%= resource_name -%>PatchDeleteEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
-  currItems, err := resource<%= resource_name -%>ListForPatch(d, meta)
+func resource<%= object.resource_name -%>PatchDeleteEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+  currItems, err := resource<%= object.resource_name -%>ListForPatch(d, meta)
   if err != nil {
     return nil, err
   }
 
-  idx, item, err := resource<%=resource_name%>FindNestedObjectInList(d, meta, currItems)
+  idx, item, err := resource<%=object.resource_name%>FindNestedObjectInList(d, meta, currItems)
   if err != nil {
     return nil, err
   }
   if item == nil {
     // Spoof 404 error for proper handling by Delete (i.e. no-op)
-    return nil, tpgresource.Fake404("nested", "<%= resource_name%>")
+    return nil, tpgresource.Fake404("nested", "<%= object.resource_name%>")
   }
 
   updatedItems := append(currItems[:idx], currItems[idx+1:]...)
@@ -224,7 +224,7 @@ func resource<%= resource_name -%>PatchDeleteEncoder(d *schema.ResourceData, met
   # 2) returns the full list of other resources, rather than just the
   #    matching resource
 -%>
-func resource<%= resource_name -%>ListForPatch(d *schema.ResourceData, meta interface{}) ([]interface{}, error) {
+func resource<%= object.resource_name -%>ListForPatch(d *schema.ResourceData, meta interface{}) ([]interface{}, error) {
   config := meta.(*transport_tpg.Config)
   url, err := tpgresource.ReplaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
   if err != nil {

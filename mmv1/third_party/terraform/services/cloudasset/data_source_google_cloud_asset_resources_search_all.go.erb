@@ -4,7 +4,6 @@ package cloudasset
 <% unless version == 'ga' -%>
 import (
 	"fmt"
-	"net/url"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -102,7 +101,7 @@ func datasourceGoogleCloudAssetResourcesSearchAllRead(d *schema.ResourceData, me
 	url := fmt.Sprintf("https://cloudasset.googleapis.com/v1p1beta1/%s/resources:searchAll", scope)
 	params["query"] = query
 
-	url, err = addArrayQueryParam(url, "asset_types", assetTypes)
+	url, err = transport_tpg.AddArrayQueryParams(url, "asset_types", assetTypes)
 	if err != nil {
 		return fmt.Errorf("Error setting asset_types: %s", err)
 	}
@@ -113,8 +112,14 @@ func datasourceGoogleCloudAssetResourcesSearchAllRead(d *schema.ResourceData, me
 			return err
 		}
 
+		var project string
+		if config.UserProjectOverride && config.BillingProject != "" {
+			project = config.BillingProject
+		}
+
 		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config: config,
+			Project: project,
 			Method: "GET",
 			RawURL: url,
 			UserAgent: userAgent,
@@ -123,7 +128,7 @@ func datasourceGoogleCloudAssetResourcesSearchAllRead(d *schema.ResourceData, me
 			return fmt.Errorf("Error searching resources: %s", err)
 		}
 
-		pageResults := flattenDatasourceGoogleCloudAssetResourcesList(res["results"])
+		pageResults := vflattenDatasourceGoogleCloudAssetResourcesSearchAllList(res["results"])
 		results = append(results, pageResults...)
 
 		pToken, ok := res["nextPageToken"]
@@ -151,7 +156,7 @@ func datasourceGoogleCloudAssetResourcesSearchAllRead(d *schema.ResourceData, me
 	return nil
 }
 
-func flattenDatasourceGoogleCloudAssetResourcesList(v interface{}) []map[string]interface{} {
+func vflattenDatasourceGoogleCloudAssetResourcesSearchAllList(v interface{}) []map[string]interface{} {
 	if v == nil {
 		return make([]map[string]interface{}, 0)
 	}
@@ -203,19 +208,6 @@ func flattenDatasourceGoogleCloudAssetResourcesList(v interface{}) []map[string]
 	}
 
 	return results
-}
-
-func addArrayQueryParam(rawurl string, param string, values []interface{}) (string, error) {
-	u, err := url.Parse(rawurl)
-	if err != nil {
-		return "", err
-	}
-	q := u.Query()
-	for _, v := range values {
-		q.Add(param, v.(string))
-	}
-	u.RawQuery = q.Encode()
-	return u.String(), nil
 }
 
 <% end -%>

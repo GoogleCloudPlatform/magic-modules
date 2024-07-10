@@ -141,9 +141,13 @@ if [[ "$run_full_VCR" = true ]]; then
 
   test_exit_code=$?
 else
+  # clear GOOGLE_TEST_DIRECTORY
+  GOOGLE_TEST_DIRECTORY=""
   affected_services_comment="<ul>"
   for service in "${!affected_services[@]}"
   do
+    # append affected service package path
+    GOOGLE_TEST_DIRECTORY+=" ./google-beta/services/$service"
     echo "run VCR tests in $service"
     TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/replaying/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta/services/$service -parallel $ACCTEST_PARALLELISM -v -run=TestAcc -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" >> replaying_test.log # append logs into file
 
@@ -304,11 +308,13 @@ if [[ -n $FAILED_TESTS_PATTERN ]]; then
     comment+="$\textcolor{red}{\textsf{Tests failed during RECORDING mode:}}$ ${NEWLINE} $RECORDING_FAILED_TESTS ${NEWLINE}${NEWLINE}"
     RECORDING_FAILED_TESTS_COUNT=$(echo "$RECORDING_FAILED_TESTS" | wc -l)
     if [[ $RECORDING_PASSED_TESTS_COUNT+$RECORDING_FAILED_TESTS_COUNT -lt $FAILED_TESTS_COUNT ]]; then
+      test_exit_code=1
       comment+="$\textcolor{red}{\textsf{Several tests got terminated during RECORDING mode.}}$ ${NEWLINE}"
     fi
     comment+="$\textcolor{red}{\textsf{Please fix these to complete your PR.}}$ ${NEWLINE}"
   else
     if [[ $RECORDING_PASSED_TESTS_COUNT+$RECORDING_FAILED_TESTS_COUNT -lt $FAILED_TESTS_COUNT ]]; then
+      test_exit_code=1
       comment+="$\textcolor{red}{\textsf{Several tests got terminated during RECORDING mode.}}$ ${NEWLINE}"
     elif [[ $test_exit_code -ne 0 ]]; then
       # check for any uncaught errors in RECORDING mode

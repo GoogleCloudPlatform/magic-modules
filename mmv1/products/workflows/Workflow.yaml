@@ -96,7 +96,7 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'sourceContents'
     description: |
-      Workflow code to be executed. The size limit is 32KB.
+      Workflow code to be executed. The size limit is 128KB.
   - !ruby/object:Api::Type::String
     name: 'revisionId'
     output: true
@@ -108,7 +108,18 @@ properties:
       The KMS key used to encrypt workflow and execution data.
 
       Format: projects/{project}/locations/{location}/keyRings/{keyRing}/cryptoKeys/{cryptoKey}
+  - !ruby/object:Api::Type::Enum
+    name: 'callLogLevel'
+    description: |
+      Describes the level of platform logging to apply to calls and call responses during
+      executions of this workflow. If both the workflow and the execution specify a logging level,
+      the execution level takes precedence.
+    values:
+      - :CALL_LOG_LEVEL_UNSPECIFIED
+      - :LOG_ALL_CALLS
+      - :LOG_ERRORS_ONLY
+      - :LOG_NONE
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'userEnvVars'
     description: |
-      User-defined environment variables associated with this workflow revision. This map has a maximum length of 20. Each string can take up to 40KiB. Keys cannot be empty strings and cannot start with “GOOGLE” or “WORKFLOWS".
+      User-defined environment variables associated with this workflow revision. This map has a maximum length of 20. Each string can take up to 4KiB. Keys cannot be empty strings and cannot start with “GOOGLE” or “WORKFLOWS".

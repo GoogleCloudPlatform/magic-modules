@@ -1,6 +1,6 @@
 ---
 steps:
-    - name: 'golang:1.20'
+    - name: 'golang:1.21'
       args:
         - '-c'
         - |

@@ -1,0 +1,18 @@
+
+resource "google_compute_reservation" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "gce_reservation_local"}}"
+  zone = "us-central1-c"
+  project = "{{index $.TestEnvVars "project"}}"
+
+  share_settings {
+    share_type = "LOCAL"
+  }
+
+  specific_reservation {
+    count = 1
+    instance_properties {
+      machine_type     = "n2-standard-2"
+    }
+  }
+}
+

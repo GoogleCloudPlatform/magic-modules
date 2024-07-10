@@ -38,6 +38,6 @@ if isDefaultStartFlow || isDefaultWelcomeIntent || isDefaultNegativeIntent {
     d.SetId(id)
 
     // and defer to the Update method:
-    log.Printf("[DEBUG] Updating default <%= resource_name -%>")
-    return resource<%= resource_name -%>Update(d, meta)
+    log.Printf("[DEBUG] Updating default <%= object.resource_name -%>")
+    return resource<%= object.resource_name -%>Update(d, meta)
 }
