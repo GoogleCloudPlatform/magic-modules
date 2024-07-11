@@ -374,3 +374,5 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: "compute_mig_resize_request"
     primary_resource_id: "a3_resize_request"
+    vars:
+      resize_request_name: a3_dws
