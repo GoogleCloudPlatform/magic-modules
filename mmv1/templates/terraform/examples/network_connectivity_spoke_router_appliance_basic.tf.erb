@@ -6,7 +6,7 @@ resource "google_compute_network" "network" {
 resource "google_compute_subnetwork" "subnetwork" {
   name          = "tf-test-subnet%{random_suffix}"
   ip_cidr_range = "10.0.0.0/28"
-  region        = "%{region}"
+  region        = "us-central1"
   network       = google_compute_network.network.self_link
 }
 
@@ -14,7 +14,7 @@ resource "google_compute_instance" "instance" {
   name         = "tf-test-instance%{random_suffix}"
   machine_type = "e2-medium"
   can_ip_forward = true
-  zone         = "%{zone}"
+  zone         = "us-central1-a"
 
   boot_disk {
     initialize_params {
@@ -41,7 +41,7 @@ resource "google_network_connectivity_hub" "basic_hub" {
 
 resource "google_network_connectivity_spoke" "primary" {
   name = "tf-test-name%{random_suffix}"
-  location = "%{region}"
+  location = "us-central1"
   description = "A sample spoke with a linked routher appliance instance"
   labels = {
     label-one = "value-one"
