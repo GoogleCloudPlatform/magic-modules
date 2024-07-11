@@ -466,7 +466,11 @@ resource "google_bigtable_app_profile" "ap" {
 
   single_cluster_routing {
     cluster_id                 = %q
-    allow_transactional_writes = true
+    allow_transactional_writes = false
+  }
+
+  standard_isolation {
+    priority = "PRIORITY_MEDIUM"
   }
 
   ignore_warnings               = true
@@ -508,7 +512,7 @@ resource "google_bigtable_app_profile" "ap" {
 
   single_cluster_routing {
     cluster_id                 = %q
-    allow_transactional_writes = true
+    allow_transactional_writes = false
   }
 
   data_boost_isolation_read_only {
