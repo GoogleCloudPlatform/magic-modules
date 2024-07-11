@@ -1,7 +1,6 @@
 func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-    if v, ok := d.GetOk("automatic_resources.max_replica_count"); ok {
+    if v, ok := d.GetOk("dedicated_resources.max_replica_count"); ok {
         return v, nil
     }
-    d.Get("automatic_resources.min_replica_count")
-    return d.Get("automatic_resources.min_replica_count"), nil
+    return d.Get("dedicated_resources.min_replica_count"), nil
 }
