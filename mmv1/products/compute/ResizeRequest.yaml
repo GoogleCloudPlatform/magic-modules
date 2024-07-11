@@ -110,7 +110,7 @@ properties:
   - !ruby/object:Api::Type::Enum
     name: "state"
     description: |
-      TODO: state description
+      [Output only] Current state of the request.
     values:
       - :CREATING
       - :ACCEPTED
