@@ -151,7 +151,7 @@ properties:
       [Output only] Status of the request.
     output: true
     properties:
-    # Status.lastAttempt
+    # Status.error
     - !ruby/object:Api::Type::NestedObject
       name: "error"
       description: |
