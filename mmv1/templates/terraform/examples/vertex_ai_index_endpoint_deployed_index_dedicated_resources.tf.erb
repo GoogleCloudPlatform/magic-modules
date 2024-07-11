@@ -1,5 +1,4 @@
 resource "google_service_account" "sa" {
-  project      = google_project.project.project_id
   account_id   = "hashicorp-test-runner"
   display_name = "HashiCorp Test Runner"
 }
