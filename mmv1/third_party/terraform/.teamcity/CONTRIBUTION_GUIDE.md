@@ -89,7 +89,9 @@ If you want to test a feature branch on a schedule ahead of a release you can up
 
 First, make sure that the feature branch `FEATURE-BRANCH-major-release-X.0.0` is created in the downstream TPG and TPGB repositories, where X is the major version.
 
-Create a new file at `.teamcity/components/projects/feature_branches/FEATURE-BRANCH-major-release-X.0.0.kt` (replacing `X`). This file will define a new project that will contain all the builds run against the feature branch. Here is the equivalent file used to test the v6.0.0 release: [.teamcity/components/projects/feature_branches/FEATURE-BRANCH-major-release-6.0.0.kt](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/.teamcity/components/projects/feature_branches/FEATURE-BRANCH-major-release-6.0.0.kt)
+See this PR as an example of adding a major release testing project: https://github.com/SarahFrench/magic-modules/pull/9/files
+
+That PR creates a new file at `.teamcity/components/projects/feature_branches/FEATURE-BRANCH-major-release-X.0.0.kt` (replacing `X` with the version number). This file defines a new project that will contain all the builds run against the feature branch. See [FEATURE-BRANCH-major-release-6.0.0.kt](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/.teamcity/components/projects/feature_branches/FEATURE-BRANCH-major-release-6.0.0.kt) as an example.
 
 This file must:
 
@@ -105,6 +107,8 @@ This file must:
         * Trigger tests on the Beta version of the [feature branch on Fridays](https://github.com/GoogleCloudPlatform/magic-modules/blob/30ab2a2eea61cc34f439ddfe7cf840abf746ab1f/mmv1/third_party/terraform/.teamcity/components/projects/feature_branches/FEATURE-BRANCH-major-release-6.0.0.kt#L92)
         * The non-feature branch projects will need to be updated to run on all days except these!
     * You'll also need to [pass the feature branch name into the CRON trigger config class](https://github.com/GoogleCloudPlatform/magic-modules/blob/2778e6b73d802c6709d10d56fc3b8a3891168e6e/mmv1/third_party/terraform/.teamcity/components/projects/feature_branches/FEATURE-BRANCH-major-release-6.0.0.kt#L71). Note that the string needs to start with `refs/heads/`.
+* Don't forget to update the files that define the long-lived nightly test projects, making their CRON schedules the opposite of what's described for the feature branch testing projects:
+
 
 ```diff
 // .teamcity/components/projects/google_ga_subproject.kt
@@ -118,10 +122,7 @@ This file must:
 + subProject(nightlyTests(betaId, ProviderNameBeta, HashiCorpVCSRootBeta, betaConfig, NightlyTriggerConfiguration(daysOfWeek="1-5,7"))) // All nights except Friday (6) for Beta; feature branch testing happens on Fridays and TeamCity numbers days Sun=1...Sat=7
 ```
 
-
-You then need to register the new feature branch testing project in [the root "Google Cloud" project](https://hashicorp.teamcity.com/project/TerraformProviders_GoogleCloud) that contains all our TeamCity resources:
-
-Finally, Update [root_project.kt](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/.teamcity/components/projects/root_project.kt) to import code from your feature branch specific file, and [register a new sub project in the root project](https://github.com/GoogleCloudPlatform/magic-modules/blob/30ab2a2eea61cc34f439ddfe7cf840abf746ab1f/mmv1/third_party/terraform/.teamcity/components/projects/root_project.kt#L67-L68):
+Finally, you need to register the new feature branch testing project in [the root "Google Cloud" project](https://hashicorp.teamcity.com/project/TerraformProviders_GoogleCloud). Update [root_project.kt](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/.teamcity/components/projects/root_project.kt) to import code from your feature branch specific file, and [register a new sub project in the root project](https://github.com/GoogleCloudPlatform/magic-modules/blob/fd1a2272507d09214cf225b2ac05dfb363d3fb98/mmv1/third_party/terraform/.teamcity/components/projects/root_project.kt#L67-L68):
 
 ```java
 Project {
