@@ -220,4 +220,4 @@ properties:
     name: deploymentGroup
     output: true
     description: |
-      The deployment group can be no longer than 64 characters (eg: 'test', 'prod'). If not set, we will use the 'default' deployment group. Note: we only support up to 5 deployment groups(not including 'default').
+      The deployment group can be no longer than 64 characters (eg: 'test', 'prod'). If not set, we will use the 'default' deployment group. Note: we only support up to 5 deployment groups (not including 'default').
