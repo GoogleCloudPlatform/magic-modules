@@ -4,10 +4,7 @@ resource "google_vertex_ai_index_endpoint_deployed_index" "<%= ctx[:primary_reso
   index = google_vertex_ai_index.index.id // this is the index that will be deployed onto an endpoint
   deployed_index_id = "<%= ctx[:vars]['deployed_index_id'] %>"
   display_name = "<%= ctx[:vars]['display_name'] %>"
-  dedicated_resources {
-    machine_spec {
-      machine_type      = "n1-standard-32"
-    }
+  automatic_resources{
     max_replica_count = 3
     min_replica_count = 1
   }
