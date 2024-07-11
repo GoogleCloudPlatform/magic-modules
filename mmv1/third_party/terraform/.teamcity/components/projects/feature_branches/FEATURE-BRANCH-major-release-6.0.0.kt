@@ -24,7 +24,8 @@ object HashicorpVCSRootGa_featureBranchMajorRelease600: GitVcsRoot({
     url = "https://github.com/hashicorp/terraform-provider-${ProviderNameGa}"
     branch = "refs/heads/${branchName}"
     branchSpec = """
-        +:refs/heads/FEATURE-BRANCH-major-release-6*
+        +:(refs/heads/*)
+        -:refs/pulls/*
     """.trimIndent()
 })
 
@@ -33,7 +34,8 @@ object HashicorpVCSRootBeta_featureBranchMajorRelease600: GitVcsRoot({
     url = "https://github.com/hashicorp/terraform-provider-${ProviderNameBeta}"
     branch = "refs/heads/${branchName}"
     branchSpec = """
-        +:refs/heads/FEATURE-BRANCH-major-release-6*
+        +:(refs/heads/*)
+        -:refs/pulls/*
     """.trimIndent()
 })
 
