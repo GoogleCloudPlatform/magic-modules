@@ -1,10 +1,5 @@
-resource "google_service_account" "sa" {
-  account_id   = "hashicorp-test-runner"
-  display_name = "HashiCorp Test Runner"
-}
-
 resource "google_vertex_ai_index_endpoint_deployed_index" "<%= ctx[:primary_resource_id] %>" {
-  depends_on = [ google_vertex_ai_index_endpoint.vertex_endpoint, google_service_account.sa ]
+  depends_on = [ google_vertex_ai_index_endpoint.vertex_endpoint ]
   index_endpoint = google_vertex_ai_index_endpoint.vertex_endpoint.id
   index = google_vertex_ai_index.index.id // this is the index that will be deployed onto an endpoint
   deployed_index_id = "<%= ctx[:vars]['deployed_index_id'] %>"
@@ -19,13 +14,6 @@ resource "google_vertex_ai_index_endpoint_deployed_index" "<%= ctx[:primary_reso
   automatic_resources{
     max_replica_count = 3
     min_replica_count = 1
-  }
-
-  deployed_index_auth_config{
-    auth_provider{
-      audiences = ["123456-my-app"]
-      allowed_issuers = ["${google_service_account.sa.email}"]
-    }
   }
 }
 
