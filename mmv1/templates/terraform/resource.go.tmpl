@@ -338,7 +338,8 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{-          if not $.TaintResourceOnFailedCreate -}}
         // The resource didn't actually create
         d.SetId("")
-{{ end}}
+
+{{ end -}}
         return fmt.Errorf("Error waiting to create {{ $.Name -}}: %s", err)
     }
 
@@ -562,7 +563,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
     }
 
     headers := make(http.Header)
-    {{- if $.CustomCode.PreRead -}}
+    {{- if $.CustomCode.PreRead }}
         {{ $.CustomTemplate $.CustomCode.PreRead false -}}
     {{- end }}
     res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
