@@ -211,6 +211,11 @@ func ResourceDnsRecordSet() *schema.Resource {
 							ExactlyOneOf:  []string{"routing_policy.0.wrr", "routing_policy.0.geo", "routing_policy.0.primary_backup"},
 							ConflictsWith: []string{"routing_policy.0.enable_geo_fencing"},
 						},
+						"health_check": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The configuration used to health check public IP addresses in this routing policy.",
+						},
 					},
 				},
 				ExactlyOneOf: []string{"rrdatas", "routing_policy"},
@@ -255,11 +260,12 @@ var geoPolicySchema *schema.Resource = &schema.Resource{
 			},
 		},
 		"health_checked_targets": {
-			Type:        schema.TypeList,
-			Optional:    true,
-			Description: "For A and AAAA types only. The list of targets to be health checked. These can be specified along with `rrdatas` within this item.",
-			MaxItems:    1,
-			Elem:        healthCheckedTargetSchema,
+			Type:         schema.TypeList,
+			Optional:     true,
+			Description:  "For A and AAAA types only. The list of targets to be health checked. These can be specified along with `rrdatas` within this item.",
+			MaxItems:     1,
+			Elem:         healthCheckedTargetSchema,
+			ExactlyOneOf: []string{"routing_policy.0.wrr", "routing_policy.0.geo", "routing_policy.0.primary_backup"},
 		},
 	},
 }
@@ -268,7 +274,7 @@ var healthCheckedTargetSchema *schema.Resource = &schema.Resource{
 	Schema: map[string]*schema.Schema{
 		"internal_load_balancers": {
 			Type:        schema.TypeList,
-			Required:    true,
+			Optional:    true,
 			Description: "The list of internal load balancers to health check.",
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
@@ -312,6 +318,14 @@ var healthCheckedTargetSchema *schema.Resource = &schema.Resource{
 						Description: "The region of the load balancer. Only needed for regional load balancers.",
 					},
 				},
+			},
+		},
+		"external_endpoints": {
+			Type:        schema.TypeList,
+			Optional:    true,
+			Description: "The list of public IP addresses to health check.",
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
 			},
 		},
 	},
@@ -664,17 +678,23 @@ func expandDnsRecordSetRoutingPolicy(configured []interface{}, d tpgresource.Ter
 	wrrRawItems, _ := data["wrr"].([]interface{})
 	geoRawItems, _ := data["geo"].([]interface{})
 	rawPrimaryBackup, _ := data["primary_backup"].([]interface{})
+	healthCheck, _ := data["health_check"].(string)
+
+	routingPolicy := &dns.RRSetRoutingPolicy{}
+
+	if healthCheck != "" {
+		routingPolicy.HealthCheck = healthCheck
+	}
 
 	if len(wrrRawItems) > 0 {
 		wrrItems, err := expandDnsRecordSetRoutingPolicyWrrItems(wrrRawItems, d, config)
 		if err != nil {
 			return nil, err
 		}
-		return &dns.RRSetRoutingPolicy{
-			Wrr: &dns.RRSetRoutingPolicyWrrPolicy{
-				Items: wrrItems,
-			},
-		}, nil
+		routingPolicy.Wrr = &dns.RRSetRoutingPolicyWrrPolicy{
+			Items: wrrItems,
+		}
+		return routingPolicy, nil
 	}
 
 	if len(geoRawItems) > 0 {
@@ -682,12 +702,11 @@ func expandDnsRecordSetRoutingPolicy(configured []interface{}, d tpgresource.Ter
 		if err != nil {
 			return nil, err
 		}
-		return &dns.RRSetRoutingPolicy{
-			Geo: &dns.RRSetRoutingPolicyGeoPolicy{
-				Items:         geoItems,
-				EnableFencing: data["enable_geo_fencing"].(bool),
-			},
-		}, nil
+		routingPolicy.Geo = &dns.RRSetRoutingPolicyGeoPolicy{
+			Items:         geoItems,
+			EnableFencing: data["enable_geo_fencing"].(bool),
+		}
+		return routingPolicy, nil
 	}
 
 	if len(rawPrimaryBackup) > 0 {
@@ -695,9 +714,8 @@ func expandDnsRecordSetRoutingPolicy(configured []interface{}, d tpgresource.Ter
 		if err != nil {
 			return nil, err
 		}
-		return &dns.RRSetRoutingPolicy{
-			PrimaryBackup: primaryBackup,
-		}, nil
+		routingPolicy.PrimaryBackup = primaryBackup
+		return routingPolicy, nil
 	}
 
 	return nil, nil // unreachable here if ps is valid data
@@ -759,16 +777,59 @@ func expandDnsRecordSetHealthCheckedTargets(configured []interface{}, d tpgresou
 	}
 
 	data := configured[0].(map[string]interface{})
+
 	internalLoadBalancers, err := expandDnsRecordSetHealthCheckedTargetsInternalLoadBalancers(data["internal_load_balancers"].([]interface{}), d, config)
 	if err != nil {
 		return nil, err
 	}
-	return &dns.RRSetRoutingPolicyHealthCheckTargets{
-		InternalLoadBalancers: internalLoadBalancers,
-	}, nil
+	if internalLoadBalancers != nil {
+		return &dns.RRSetRoutingPolicyHealthCheckTargets{
+			InternalLoadBalancers: internalLoadBalancers,
+		}, nil
+	}
+
+	externalEndpoints, err := expandDnsRecordSetHealthCheckedTargetsExternalEndpoints(data["external_endpoints"].([]interface{}), d, config)
+	if err != nil {
+		return nil, err
+	}
+	if externalEndpoints != nil {
+		return &dns.RRSetRoutingPolicyHealthCheckTargets{
+			ExternalEndpoints: externalEndpoints,
+		}, nil
+	}
+
+	return nil, nil // unreachable for valid data
+}
+
+func expandDnsRecordSetHealthCheckedTargetsExternalEndpoints(configured []interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]string, error) {
+	if len(configured) == 0 {
+		return nil, nil
+	}
+
+	external_endpoints := make([]string, 0, len(configured))
+	for _, raw := range configured {
+		endpoint, err := expandDnsRecordSetHealthCheckedTargetsExternalEndpoint(raw, d, config)
+		if err != nil {
+			return nil, err
+		}
+		external_endpoints = append(external_endpoints, endpoint)
+	}
+	return external_endpoints, nil
+}
+
+func expandDnsRecordSetHealthCheckedTargetsExternalEndpoint(configured interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (string, error) {
+	endpoint, ok := configured.(string)
+	if !ok {
+		return "", fmt.Errorf("invalid string value %v", configured)
+	}
+	return endpoint, nil
 }
 
 func expandDnsRecordSetHealthCheckedTargetsInternalLoadBalancers(configured []interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]*dns.RRSetRoutingPolicyLoadBalancerTarget, error) {
+	if len(configured) == 0 {
+		return nil, nil
+	}
+
 	ilbs := make([]*dns.RRSetRoutingPolicyLoadBalancerTarget, 0, len(configured))
 	for _, raw := range configured {
 		ilb, err := expandDnsRecordSetHealthCheckedTargetsInternalLoadBalancer(raw, d, config)

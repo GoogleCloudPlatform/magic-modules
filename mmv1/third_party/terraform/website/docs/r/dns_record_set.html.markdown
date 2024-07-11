@@ -241,6 +241,54 @@ resource "google_compute_network" "prod" {
 }
 ```
 
+#### Health-checked public IP addresses
+
+```hcl
+resource "google_dns_record_set" "a" {
+  name         = "backend.${google_dns_managed_zone.prod.dns_name}"
+  managed_zone = google_dns_managed_zone.zone.name
+  type         = "A"
+  ttl          = 300
+
+  routing_policy {
+    health_check = google_compute_health_check.health_check.self_link
+    primary_backup {
+      trickle_ratio = 0.1
+
+      primary {
+        external_endpoints = ["8.8.8.8"]
+      }
+
+      backup_geo {
+        location = "asia-east1"
+        rrdatas  = ["1.2.3.4"]
+      }
+
+      backup_geo {
+        location = "us-west1"
+        rrdatas  = ["5.6.7.8"]
+      }
+    }
+  }
+}
+
+resource "google_dns_managed_zone" "zone" {
+  name     = "prod-zone"
+  dns_name = "prod.mydomain.com."
+  visibility  = "public"
+}
+
+resource "google_compute_health_check" "health_check" {
+  provider            = "google-beta"
+  name                = "health-check"
+  check_interval_sec  = 30
+  source_regions      = ["us-central1", "us-east1", "asia-south1"]
+  http_health_check {
+    port          = "80"
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -279,6 +327,8 @@ The following arguments are supported:
 * `primary_backup` - (Optional) The configuration for a failover policy with global to regional failover. Queries are responded to with the global primary targets, but if none of the primary targets are healthy, then we fallback to a regional failover policy.
     Structure is [documented below](#nested_primary_backup).
 
+* `health_check` - (Optional) The health check to use for public IP address health checking. This should only be specified for record sets in a publicly accessible managed zone, and it must belong to the same project as the managed zone. This should be formatted like `projects/{project}/global/healthChecks/{healthCheck}` or `https://www.googleapis.com/compute/v1/projects/{project}/global/healthChecks/{healthCheck}`.
+
 <a name="nested_wrr"></a>The `wrr` block supports:
 
 * `weight`  - (Required) The ratio of traffic routed to the target.
@@ -311,8 +361,10 @@ The following arguments are supported:
 
 <a name="nested_health_checked_targets"></a>The `health_checked_targets` block supports:
 
-* `internal_load_balancers` - (Required) The list of internal load balancers to health check.
+* `internal_load_balancers` - (Optional) The list of internal load balancers to health check.
     Structure is [documented below](#nested_internal_load_balancers).
+
+* `external_endpoints` - (Optional) The list of external (i.e. publicly accessible) IP addresses to health check.
 
 <a name="nested_internal_load_balancers"></a>The `internal_load_balancers` block supports:
 

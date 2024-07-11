@@ -346,6 +346,15 @@ func TestAccDNSRecordSet_routingPolicy(t *testing.T) {
 				ImportState:   true,
 				ImportStateVerify: true,
 			},
+			{
+				Config: testAccDnsRecordSet_routingPolicyInternetPrimaryBackup(httpHealthCheckName, zoneName, 300),
+			},
+			{
+				ResourceName:  "google_dns_record_set.foobar",
+				ImportStateId: fmt.Sprintf("%s/%s/test-record.%s.hashicorptest.com./A", envvar.GetTestProjectFromEnv(), zoneName, zoneName),
+				ImportState:   true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -1295,6 +1304,57 @@ resource "google_dns_record_set" "foobar" {
   }
 }
 `, networkName, backendSubnetName, proxySubnetName, healthCheckName, backendName, urlMapName, httpProxyName, forwardingRuleName, zoneName, zoneName, zoneName, ttl)
+}
+
+func testAccDnsRecordSet_routingPolicyInternetPrimaryBackup(healthCheckName, zoneName string, ttl int) string {
+	return fmt.Sprintf(`
+
+resource "google_compute_health_check" "health_check" {
+    name                = "%s"
+    description         = "Resource created for Terraform acceptance testing"
+    check_interval_sec  = 30
+    source_regions      = ["us-central1", "us-east1", "asia-south1"]
+    http_health_check {
+        port          = "80"
+    }
+}
+
+resource "google_dns_managed_zone" "parent-zone" {
+  name        = "%s"
+  dns_name    = "%s.hashicorptest-com."
+  description = "Test Description"
+  visibility  = "public"
+}
+
+resource "google_dns_record_set" "foobar" {
+  managed_zone = google_dns_managed_zone.parent-zone.name
+  name         = "test-record.%s.hashicorptest-com."
+  type         = "A"
+  ttl          = %d
+
+  routing_policy {
+    health_check = google_compute_health_check.health_check.self_link
+    primary_backup {
+      trickle_ratio                  = 0.1
+      enable_geo_fencing_for_backups = true
+
+      primary {
+        external_endpoints = ["8.8.8.8"]
+      }
+
+      backup_geo {
+        location = "us-west1"
+        rrdatas  = ["1.2.3.4"]
+      }
+
+      backup_geo {
+        location = "asia-east1"
+        rrdatas  = ["5.6.7.8"]
+      }
+    }
+  }
+}
+`, healthCheckName, zoneName, zoneName, zoneName, ttl)
 }
 
 func testAccDnsRecordSet_interpolated(zoneName string) string {
