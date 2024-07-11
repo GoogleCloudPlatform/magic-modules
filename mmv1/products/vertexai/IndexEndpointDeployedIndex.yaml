@@ -196,7 +196,7 @@ properties:
     description: If true, private endpoint's access logs are sent to Cloud Logging.
     default_value: false
   - !ruby/object:Api::Type::NestedObject
-    name: deploymentIndexAuthConfig
+    name: deployedIndexAuthConfig
     description: If set, the authentication is enabled for the private endpoint.
     properties:
       - !ruby/object:Api::Type::NestedObject
