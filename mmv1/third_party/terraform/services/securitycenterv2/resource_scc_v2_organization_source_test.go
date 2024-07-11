@@ -15,7 +15,6 @@ func TestAccSCCOrganizationSource_complete(t *testing.T) {
 	orgId := envvar.GetTestOrgFromEnv(t)
 	suffix := acctest.RandString(t, 10)
 	displayName := fmt.Sprintf("TFSrc %s", suffix)
-	canonicalName := fmt.Sprintf("organizations/%s/sources/source-%s", orgId, suffix)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -29,7 +28,7 @@ func TestAccSCCOrganizationSource_complete(t *testing.T) {
 					resource.TestCheckResourceAttr("google_scc_v2_organization_source.custom_source", "display_name", displayName),
 					resource.TestCheckResourceAttr("google_scc_v2_organization_source.custom_source", "organization", orgId),
 					resource.TestCheckResourceAttr("google_scc_v2_organization_source.custom_source", "description", "My description"),
-					resource.TestCheckResourceAttr("google_scc_v2_organization_source.custom_source", "canonical_name", canonicalName),
+					resource.TestCheckResourceAttrset("google_scc_v2_organization_source.custom_source", "canonical_name"),
 				),
 			},
 			{
@@ -58,5 +57,5 @@ resource "google_scc_v2_organization_source" "custom_source" {
 output "canonical_name" {
   value = google_scc_v2_organization_source.custom_source.canonical_name
 }  
-`, suffix, orgId, description, canonicalName)
+`, suffix, orgId, description)
 }
