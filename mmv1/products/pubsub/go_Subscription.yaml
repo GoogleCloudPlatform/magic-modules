@@ -141,7 +141,7 @@ properties:
       - name: 'table'
         type: String
         description: |
-          The name of the table to which to write data, of the form {projectId}:{datasetId}.{tableId}
+          The name of the table to which to write data, of the form {projectId}.{datasetId}.{tableId}
         required: true
       - name: 'useTopicSchema'
         type: Boolean
@@ -207,7 +207,7 @@ properties:
           The maximum duration that can elapse before a new Cloud Storage file is created. Min 1 minute, max 10 minutes, default 5 minutes.
           May not exceed the subscription's acknowledgement deadline.
           A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
-        default_value: 300s
+        default_value: "300s"
       - name: 'maxBytes'
         type: Integer
         description: |
@@ -353,7 +353,7 @@ properties:
 
       A duration in seconds with up to nine fractional digits, terminated
       by 's'. Example: `"600.5s"`.
-    default_value: 604800s
+    default_value: "604800s"
   - name: 'retainAckedMessages'
     type: Boolean
     description: |
