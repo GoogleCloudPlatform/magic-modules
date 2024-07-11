@@ -355,7 +355,7 @@ resource "google_compute_network" "network" {
 }
 
 resource "google_network_connectivity_hub" "basic_hub" {
-  name        = "long/form/tf-test-hub%{random_suffix}"
+  name        = "tf-test-hub%{random_suffix}"
   description = "A sample hub"
   labels = {
     label-two = "value-one"
@@ -363,7 +363,7 @@ resource "google_network_connectivity_hub" "basic_hub" {
 }
 
 resource "google_network_connectivity_spoke" "primary" {
-  name = "long/form/tf-test-name%{random_suffix}"
+  name = "tf-test-name%{random_suffix}"
   location = "global"
   description = "A sample spoke with a linked routher appliance instance"
   labels = {
