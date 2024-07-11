@@ -204,12 +204,10 @@ properties:
         properties:
           - !ruby/object:Api::Type::Array
             name: audiences
-            output: true
             description: The list of JWT audiences. that are allowed to access. A JWT containing any of these audiences will be accepted.
             item_type: Api::Type::String
           - !ruby/object:Api::Type::Array
             name: allowedIssuers
-            output: true
             description: |
               A list of allowed JWT issuers. Each entry must be a valid Google service account, in the following format: service-account-name@project-id.iam.gserviceaccount.com
             item_type: Api::Type::String
