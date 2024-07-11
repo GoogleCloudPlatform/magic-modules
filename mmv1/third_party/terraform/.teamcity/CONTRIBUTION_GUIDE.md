@@ -135,7 +135,9 @@ Project {
 }
 ```
 
-Don't forget to check that the code builds by running `make test` in the `.teamcity` folder while you're making these changes. To test your changes before merging a PR in magic-modules to update the TeamCity configuration, you can create a new TeamCity project that pulls its config from [the `auto-pr-N` branch for your PR in the modular-magician/terraform-provider-google repo](https://github.com/GoogleCloudPlatform/magic-modules/pull/11104#issuecomment-2206785710).
+Don't forget to check that the code builds by running `make test` in the `.teamcity` folder while you're making these changes.
+
+To test your changes before merging a PR in magic-modules to update the TeamCity configuration, you can create a new TeamCity project that pulls its config from [the `auto-pr-N` branch for your PR in the modular-magician/terraform-provider-google repo](https://github.com/GoogleCloudPlatform/magic-modules/pull/11104#issuecomment-2206785710). See [USE_CONFIG_WITH_TEAMCITY.md](./USE_CONFIG_WITH_TEAMCITY.md) for details on creating new projects.
 
 #### Removing a test project, after a major release
 
