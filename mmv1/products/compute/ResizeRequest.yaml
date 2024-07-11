@@ -98,13 +98,6 @@ parameters:
       *compute.instanceGroupManagers.update
     required: true
     url_param_only: true
-  - !ruby/object:Api::Type::ResourceRef
-    name: "resizeRequest"
-    resource: "ResizeRequest"
-    imports: "name"
-    description: |
-      The name of an existing resize request. The name should conform to RFC1035 or be a resource ID.
-    url_param_only: true
 
 # Non-URL parameters including input and output parameters
 properties:
