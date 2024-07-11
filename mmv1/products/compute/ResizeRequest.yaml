@@ -30,7 +30,6 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   # https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.backups
   api: "https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroupManagerResizeRequests"
 
-### Adjust when ready for GA ###
 immutable: true
 
 ### List Method ###
