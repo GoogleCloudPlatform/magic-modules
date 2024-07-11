@@ -432,7 +432,7 @@ resource "google_bigtable_app_profile" "ap" {
 `, instanceName, instanceName, instanceName, instanceName, instanceName, instanceName)
 }
 
-func testAccBigtableAppProfile_updateSSD(instanceName string) string {
+func testAccBigtableAppProfile_updateSSDWithPriority(instanceName string) string {
 	return fmt.Sprintf(`
 resource "google_bigtable_instance" "instance" {
   name = "%s"
@@ -537,7 +537,7 @@ func TestAccBigtableAppProfile_updateStandardIsolationToDataBoost(t *testing.T) 
 		CheckDestroy:             testAccCheckBigtableAppProfileDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBigtableAppProfile_updateSSD(instanceName),
+				Config: testAccBigtableAppProfile_updateSSDWithPriority(instanceName),
 			},
 			{
 				ResourceName:            "google_bigtable_app_profile.ap",
@@ -547,6 +547,40 @@ func TestAccBigtableAppProfile_updateStandardIsolationToDataBoost(t *testing.T) 
 			},
 			{
 				Config: testAccBigtableAppProfile_updateDataBoost(instanceName),
+			},
+			{
+				ResourceName:            "google_bigtable_app_profile.ap",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"ignore_warnings"},
+			},
+		},
+	})
+}
+
+func TestAccBigtableAppProfile_updateDataBoostToStandardIsolation(t *testing.T) {
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigtableAppProfileDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigtableAppProfile_updateDataBoost(instanceName),
+			},
+			{
+				ResourceName:            "google_bigtable_app_profile.ap",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"ignore_warnings"},
+			},
+			{
+				Config: testAccBigtableAppProfile_updateSSDWithPriority(instanceName),
 			},
 			{
 				ResourceName:            "google_bigtable_app_profile.ap",

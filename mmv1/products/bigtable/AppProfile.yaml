@@ -181,7 +181,7 @@ properties:
       - standardIsolation
     properties:
       - !ruby/object:Api::Type::Enum
-        name: 'compute_billing_owner'
+        name: 'computeBillingOwner'
         required: true
         description: |
           The Compute Billing Owner for this Data Boost App Profile.
