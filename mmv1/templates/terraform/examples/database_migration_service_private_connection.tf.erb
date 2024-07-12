@@ -13,6 +13,7 @@ resource "google_database_migration_service_private_connection" "<%= ctx[:primar
 	}
 }
 
-data "google_compute_network" "default" {
+resource "google_compute_network" "default" {
   name = "<%= ctx[:vars]['network_name'] %>"
 }
+
