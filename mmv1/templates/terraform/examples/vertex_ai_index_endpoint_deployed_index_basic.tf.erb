@@ -1,6 +1,5 @@
 resource "google_service_account" "sa" {
-  account_id   = "hashicorp-vertex-test-runner"
-  display_name = "HashiCorp Test Runner"
+  account_id   = "<%= ctx[:vars]['service_account_id'] %>"
 }
 
 resource "google_vertex_ai_index_endpoint_deployed_index" "<%= ctx[:primary_resource_id] %>" {

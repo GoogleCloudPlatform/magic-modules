@@ -62,6 +62,7 @@ examples:
       display_name: "vertex-deployed-index"
       display_name_index: 'test-index'
       bucket_name: "bucket-name"
+      service_account_id: 'vertex-sa'
       address_name: 'vertex-ai-range'
     test_vars_overrides:
       network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'

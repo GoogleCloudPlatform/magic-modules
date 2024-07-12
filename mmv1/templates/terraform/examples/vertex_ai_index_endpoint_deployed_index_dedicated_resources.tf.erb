@@ -8,7 +8,7 @@ resource "google_vertex_ai_index_endpoint_deployed_index" "<%= ctx[:primary_reso
     machine_spec {
       machine_type      = "n1-standard-32"
     }
-    max_replica_count = 3
+    max_replica_count = 2
     min_replica_count = 1
   }
 }
