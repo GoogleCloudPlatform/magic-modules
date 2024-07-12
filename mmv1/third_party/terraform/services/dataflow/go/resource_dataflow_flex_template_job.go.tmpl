@@ -311,7 +311,7 @@ func resourceDataflowFlexTemplateJobCreate(d *schema.ResourceData, meta interfac
 func resourceDataflowFlexJobSetupEnv(d *schema.ResourceData, config *transport_tpg.Config) (dataflow.FlexTemplateRuntimeEnvironment, map[string]string, error) {
 
 	updatedParameters := tpgresource.ExpandStringMap(d, "parameters")
-	if err := hasIllegalParametersErr(d); err != nil {
+    if err := hasIllegalParametersErr(d); err != nil {
         return dataflow.FlexTemplateRuntimeEnvironment{}, updatedParameters, err
     }
 
