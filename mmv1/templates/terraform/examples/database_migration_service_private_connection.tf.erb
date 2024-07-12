@@ -15,5 +15,6 @@ resource "google_database_migration_service_private_connection" "<%= ctx[:primar
 
 resource "google_compute_network" "default" {
   name = "<%= ctx[:vars]['network_name'] %>"
+  auto_create_subnetworks = false
 }
 
