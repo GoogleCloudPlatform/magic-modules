@@ -554,31 +554,6 @@ func TestAccBigtableAppProfile_updateStandardIsolationToDataBoost(t *testing.T) 
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"ignore_warnings"},
 			},
-		},
-	})
-}
-
-func TestAccBigtableAppProfile_updateDataBoostToStandardIsolation(t *testing.T) {
-	// bigtable instance does not use the shared HTTP client, this test creates an instance
-	acctest.SkipIfVcr(t)
-	t.Parallel()
-
-	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckBigtableAppProfileDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccBigtableAppProfile_updateDataBoost(instanceName),
-			},
-			{
-				ResourceName:            "google_bigtable_app_profile.ap",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"ignore_warnings"},
-			},
 			{
 				Config: testAccBigtableAppProfile_updateSSDWithPriority(instanceName),
 			},
