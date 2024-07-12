@@ -1,10 +1,10 @@
-
 package networkconnectivity_test
 
 import (
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"testing"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
@@ -516,7 +516,7 @@ resource "google_compute_instance" "instance" {
 }
 
 resource "google_network_connectivity_hub" "basic_hub" {
-  name        = "tf-test-hub%{random_suffix}"
+  name        = tf-test-hub%{random_suffix}"
   description = "A sample hub"
   labels = {
     label-two = "value-one"
