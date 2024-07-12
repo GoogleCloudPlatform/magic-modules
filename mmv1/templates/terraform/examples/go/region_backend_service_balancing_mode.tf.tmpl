@@ -7,12 +7,12 @@ resource "google_compute_region_backend_service" "default" {
     capacity_scaler = 1.0
   }
 
-  region      = "us-central1"
-  name        = "{{index $.Vars "region_backend_service_name"}}"
-  protocol    = "HTTP"
-  timeout_sec = 10
-
-  health_checks = [google_compute_region_health_check.default.id]
+  region                          = "us-central1"
+  name                            = "{{index $.Vars "region_backend_service_name"}}"
+  protocol                        = "HTTP"
+  timeout_sec                     = 10
+  connection_draining_timeout_sec = 0
+  health_checks                   = [google_compute_region_health_check.default.id]
 }
 
 data "google_compute_image" "debian_image" {
