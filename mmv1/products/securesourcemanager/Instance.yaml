@@ -85,6 +85,32 @@ examples:
       instance_id: 'my-instance'
       ca_pool_id: 'ca-pool'
       root_ca_id: 'root-ca'
+  # - !ruby/object:Provider::Terraform::Examples
+  #   name: 'secure_source_manager_instance_private_psc'
+  #   #external_providers: ["random", "time"]
+  #   primary_resource_id: 'default'
+  #   primary_resource_name: "fmt.Sprintf(\"tf-test-my-instance%s\",
+  #     context[\"random_suffix\"\
+  #     ])"
+  #   vars:
+  #     network1_id: 'my-network'
+  #     subnet1_id: 'my-subnet'
+  #     neg_id: 'my-neg'
+  #     backend_id: 'my-backend-service'
+  #     proxy_subnet_id: 'my-proxy-subnet'
+  #     target_proxy_id: 'my-target-proxy'
+  #     fw_rule_to_target_proxy_id: 'fw-rule-target-proxy'
+  #     psc_subnet_id: 'my-psc-subnet'
+  #     service_attachment_id: 'my-service-attachment'
+  #     network2_id: 'my-other-network'
+  #     subnet2_id: 'my-other-subnet'
+  #     address_id: 'my-address'
+  #     fw_rule_to_service_attachment_id: 'fw-rule-service-attachment'
+  #     dns_zone_id: 'my-dns-zone'
+  #     compute_instance_id: 'my-compute-instance'
+      # instance_id: 'my-instance'
+      # ca_pool_id: 'ca-pool'
+      # root_ca_id: 'root-ca'
 parameters:
   - !ruby/object:Api::Type::String
     name: 'location'
