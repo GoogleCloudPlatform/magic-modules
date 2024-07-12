@@ -162,7 +162,7 @@ properties:
       The URL of a service serving the endpoint identified by this service attachment.
     required: true
     immutable: true
-    diff_suppress_func: 'TargetServiceDiffSuppress'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - name: 'natSubnets'
     type: Array
     description: |
