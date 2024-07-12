@@ -1,4 +1,3 @@
-# [START trafficdirector_url_map_traffic_director_route]
 resource "google_compute_url_map" "<%= ctx[:primary_resource_id] %>" {
   name        = "<%= ctx[:vars]['url_map_name'] %>"
   description = "a description"
@@ -82,4 +81,3 @@ resource "google_compute_health_check" "default" {
     port = 80
   }
 }
-# [END trafficdirector_url_map_traffic_director_route]

@@ -1,4 +1,3 @@
-# [START cloud_sql_sqlserver_instance_source]
 resource "google_sql_database_instance" "source" {
   name             = "{{index $.Vars "sqlserver_instance_source_name"}}"
   region           = "us-central1"
@@ -9,9 +8,7 @@ resource "google_sql_database_instance" "source" {
   }
   deletion_protection =  "{{index $.Vars "deletion_protection"}}"
 }
-# [END cloud_sql_sqlserver_instance_source]
 
-# [START cloud_sql_sqlserver_instance_clone]
 resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
   name             = "{{index $.Vars "sqlserver_instance_clone_name"}}"
   region           = "us-central1"
@@ -22,4 +19,3 @@ resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
   }
   deletion_protection =  "{{index $.Vars "deletion_protection"}}"
 }
-# [END cloud_sql_sqlserver_instance_clone]
