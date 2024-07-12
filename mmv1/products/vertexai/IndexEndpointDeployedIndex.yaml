@@ -68,6 +68,21 @@ examples:
       network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
       address_name: 'acctest.BootstrapSharedTestGlobalAddress(t, "vpc-network-1", acctest.AddressWithPrefixLength(8))'
   - !ruby/object:Provider::Terraform::Examples
+    name: "vertex_ai_index_endpoint_deployed_index_basic_two"
+    primary_resource_id: "basic_deployed_index"
+    vars:
+      endpoint_name: 'endpoint-name'
+      network_name: 'network-name'
+      deployed_index_id: 'deployed_index_id'
+      display_name: "vertex-deployed-index"
+      display_name_index: 'test-index'
+      bucket_name: "bucket-name"
+      service_account_id: 'vertex-sa'
+      address_name: 'vertex-ai-range'
+    test_vars_overrides:
+      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
+      address_name: 'acctest.BootstrapSharedTestGlobalAddress(t, "vpc-network-1", acctest.AddressWithPrefixLength(8))'
+  - !ruby/object:Provider::Terraform::Examples
     name: "vertex_ai_index_endpoint_deployed_index_dedicated_resources"
     primary_resource_id: "dedicated_resources"
     vars:
