@@ -57,8 +57,8 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
   - name: 'network_attachment_instance_usage'
-    min_version: beta
     primary_resource_id: 'default'
+    min_version: 'beta'
     vars:
       resource_name: 'basic-network-attachment'
       network_name: 'basic-network'
