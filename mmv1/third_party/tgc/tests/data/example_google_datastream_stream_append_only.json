@@ -119,9 +119,9 @@
                 "backfillNone": null,
                 "destinationConfig": {
                     "bigqueryDestinationConfig": {
-                        "appendOnly": null,
+                        "appendOnly": {},
                         "dataFreshness": "900s",
-                        "merge": {}
+                        "merge": null
                     }
                 },
                 "displayName": "postgres to bigQuery",

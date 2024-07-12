@@ -1,58 +1,8 @@
-terraform {
-  required_providers {
-    google = {
-      source = "hashicorp/google-beta"
-      version = "~> {{.Provider.version}}"
-    }
-  }
-}
-
-provider "google" {
-  {{if .Provider.credentials }}credentials = "{{.Provider.credentials}}"{{end}}
-}
-
-resource "google_bigquery_dataset" "postgres" {
-  dataset_id    = "stpostgres"
-  friendly_name = "stpostgres"
-  description   = "Database of postgres"
-  location      = "us-central1"
-}
-
-resource "google_datastream_stream" "default" {
-  display_name  = "postgres to bigQuery"
-  location      = "us-central1"
-  stream_id     = "postgres-bigquery"
-
-   source_config {
-    source_connection_profile = google_datastream_connection_profile.source_connection_profile.id
-    mysql_source_config {}
-  }
-
-  destination_config {
-    destination_connection_profile = google_datastream_connection_profile.destination_connection_profile2.id
-    bigquery_destination_config {
-      data_freshness = "900s"
-      single_target_dataset {
-        dataset_id = google_bigquery_dataset.postgres.id
-      }
-      merge {}
-    }
-  }
-
-  backfill_all {
-  }
-
-}
-
-resource "google_datastream_connection_profile" "destination_connection_profile2" {
-    display_name          = "Connection profile"
-    location              = "us-central1"
-    connection_profile_id = "dest-st-profile"
-    bigquery_profile {}
+data "google_project" "project" {
 }
 
 resource "google_sql_database_instance" "instance" {
-    name             = "instance-stream-name"
+    name             = "<%= ctx[:vars]['database_instance_name'] %>"
     database_version = "MYSQL_8_0"
     region           = "us-central1"
     settings {
@@ -63,6 +13,7 @@ resource "google_sql_database_instance" "instance" {
         }
 
         ip_configuration {
+
             // Datastream IPs will vary by region.
             authorized_networks {
                 value = "34.71.242.81"
@@ -86,7 +37,7 @@ resource "google_sql_database_instance" "instance" {
         }
     }
 
-    deletion_protection  = false
+    deletion_protection  = <%= ctx[:vars]['deletion_protection'] %>
 }
 
 resource "google_sql_database" "db" {
@@ -100,7 +51,7 @@ resource "random_password" "pwd" {
 }
 
 resource "google_sql_user" "user" {
-    name     = "my-user"
+    name     = "user"
     instance = google_sql_database_instance.instance.name
     host     = "%"
     password = random_password.pwd.result
@@ -109,11 +60,43 @@ resource "google_sql_user" "user" {
 resource "google_datastream_connection_profile" "source_connection_profile" {
     display_name          = "Source connection profile"
     location              = "us-central1"
-    connection_profile_id = "source-profile-st"
+    connection_profile_id = "<%= ctx[:vars]['source_connection_profile_id'] %>"
 
     mysql_profile {
         hostname = google_sql_database_instance.instance.public_ip_address
         username = google_sql_user.user.name
         password = google_sql_user.user.password
+    }
+}
+
+resource "google_datastream_connection_profile" "destination_connection_profile" {
+    display_name          = "Connection profile"
+    location              = "us-central1"
+    connection_profile_id = "<%= ctx[:vars]['destination_connection_profile_id'] %>"
+
+    bigquery_profile {}
+}
+
+resource "google_datastream_stream" "<%= ctx[:primary_resource_id] %>" {
+    stream_id = "<%= ctx[:vars]['stream_id'] %>"
+    location = "us-central1"
+    display_name = "my stream"
+    source_config {
+        source_connection_profile = google_datastream_connection_profile.source_connection_profile.id
+        mysql_source_config {}
+    }
+    destination_config {
+        destination_connection_profile = google_datastream_connection_profile.destination_connection_profile.id
+        bigquery_destination_config {
+            source_hierarchy_datasets {
+                dataset_template {
+                    location = "us-central1"
+                }
+            }
+            append_only {}
+        }
+    }
+
+    backfill_none {
     }
 }
