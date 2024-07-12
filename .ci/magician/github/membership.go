@@ -87,6 +87,11 @@ var (
 			startDate: newDate(2024, 7, 5, pdtLoc),
 			endDate:   newDate(2024, 7, 16, pdtLoc),
 		},
+		{
+			id:        "c2thorn",
+			startDate: newDate(2024, 7, 10, pdtLoc),
+			endDate:   newDate(2024, 7, 16, pdtLoc),
+		},
 	}
 )
 
