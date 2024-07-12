@@ -165,6 +165,7 @@ examples:
     primary_resource_id:
       'default'
       # Random provider
+    skip_vcr: true
     vars:
       stream_id: 'my-stream'
       private_connection_id: 'my-connection'
