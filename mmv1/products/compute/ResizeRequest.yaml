@@ -52,9 +52,6 @@ create_verb: :POST
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_delete: templates/terraform/custom_delete/compute_mig_resize_request_delete.go.erb
 
-# If true, code for handling long-running operations is generated along with
-# the resource. If false, that code is not generated.
-autogen_async: false
 # Sets parameters for handling operations returned by the API.
 async: !ruby/object:Api::OpAsync
   # Overrides which API calls return operations. Default: ['create',
