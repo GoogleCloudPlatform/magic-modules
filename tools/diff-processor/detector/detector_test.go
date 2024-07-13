@@ -2,10 +2,12 @@ package detector
 
 import (
 	"reflect"
+	"slices"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
 	"github.com/GoogleCloudPlatform/magic-modules/tools/test-reader/reader"
+	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -198,6 +200,65 @@ func TestGetMissingTestsForChanges(t *testing.T) {
 			} else {
 				t.Errorf("found unexpected number of missing tests in %s: %d", test.name, len(missingTests))
 			}
+		}
+	}
+}
+
+func TestAddedFieldsFromSchemaDiff(t *testing.T) {
+	for _, test := range []struct {
+		name       string
+		schemaDiff diff.SchemaDiff
+		want       map[string][]string
+	}{
+		{
+			name: "covered-resource",
+			schemaDiff: diff.SchemaDiff{
+				"covered_resource": diff.ResourceDiff{
+					Fields: map[string]diff.FieldDiff{
+						"field_one": {
+							New: &schema.Schema{},
+						},
+						"field_two.field_three": {
+							New: &schema.Schema{},
+							Old: &schema.Schema{},
+						},
+						"field_four": {
+							New: &schema.Schema{
+								Elem: &schema.Resource{},
+							},
+						},
+						"field_four.field_five.field_six": {
+							New: &schema.Schema{},
+						},
+						"field_seven": {
+							New: &schema.Schema{Computed: true},
+						},
+						"project": {
+							New: &schema.Schema{},
+						},
+					},
+				},
+				"iam_resource": diff.ResourceDiff{
+					Fields: map[string]diff.FieldDiff{
+						"condition": {
+							New: &schema.Schema{},
+						},
+					},
+				},
+			},
+			want: map[string][]string{
+				"covered_resource": {"field_four", "field_four.field_five.field_six", "field_one", "field_seven", "project"},
+				"iam_resource":     {"condition"},
+			},
+		},
+	} {
+		got := addedFieldsFromSchemaDiff(test.schemaDiff)
+		for r, fields := range got {
+			slices.Sort(fields)
+			got[r] = fields
+		}
+		if diff := cmp.Diff(test.want, got); diff != "" {
+			t.Errorf("got unexpected added fields: %v, expected %v", got, test.want)
 		}
 	}
 }

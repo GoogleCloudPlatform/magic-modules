@@ -1,6 +1,9 @@
 package detector
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -151,4 +154,49 @@ func suggestedTest(resourceName string, untested []string) string {
 		}
 	}
 	return strings.ReplaceAll(string(f.Bytes()), `"VALUE"`, "# value needed")
+}
+
+func DetectMissingDocs(schemaDiff diff.SchemaDiff, repoPath string) map[string][]string {
+	missingDocFields := make(map[string][]string)
+	addedFields := addedFieldsFromSchemaDiff(schemaDiff)
+	for resource, fields := range addedFields {
+		docFilePath := resourceToDocFile(resource, repoPath)
+		content, err := os.ReadFile(docFilePath)
+		if err != nil {
+			missingDocFields[resource] = fields
+			continue
+		}
+		for _, field := range fields {
+			exist := fieldExistInDoc(field, string(content))
+			if !exist {
+				missingDocFields[resource] = append(missingDocFields[resource], field)
+			}
+		}
+	}
+	return missingDocFields
+}
+
+func addedFieldsFromSchemaDiff(schemaDiff diff.SchemaDiff) map[string][]string {
+	ret := make(map[string][]string)
+	for resource, resourceDiff := range schemaDiff {
+		for field, fieldDiff := range resourceDiff.Fields {
+			if isNewField(fieldDiff) {
+				ret[resource] = append(ret[resource], field)
+			}
+		}
+	}
+	return ret
+}
+
+func isNewField(d diff.FieldDiff) bool {
+	return d.Old == nil && d.New != nil
+}
+
+func resourceToDocFile(resource string, repoPath string) string {
+	fileBaseName := strings.TrimPrefix(resource, "google_") + ".html.markdown"
+	return filepath.Join(repoPath, "website", "docs", "r", fileBaseName)
+}
+
+func fieldExistInDoc(field string, content string) bool {
+	return strings.Contains(content, fmt.Sprintf("* `%s`", field))
 }
