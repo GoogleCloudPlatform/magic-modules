@@ -42,7 +42,7 @@ resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
   settings {
     tier              = "db-custom-2-7680"
     ip_configuration {
-      ssl_mode = "TRUSTED_CLIENT_CERTIFICATE_REQUIRED"
+      ssl_mode = "ENCRYPTED_ONLY"
     }
   }
   deletion_protection = "{{index $.Vars "deletion_protection"}}"
