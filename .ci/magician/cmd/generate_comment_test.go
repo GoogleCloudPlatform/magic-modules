@@ -16,6 +16,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"reflect"
 	"testing"
@@ -83,10 +84,12 @@ func TestExecGenerateComment(t *testing.T) {
 			{"/mock/dir/tfoics", "git", []string{"diff", "origin/auto-pr-123456-old", "origin/auto-pr-123456", "--shortstat"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/tools/diff-processor", "make", []string{"build"}, diffProcessorEnv},
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"breaking-changes"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"detect-missing-docs", "/mock/dir/magic-modules/tools/diff-processor/new"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"changed-schema-resources"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/tools/diff-processor", "make", []string{"build"}, diffProcessorEnv},
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"breaking-changes"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"detect-missing-tests", "/mock/dir/tpgb/google-beta/services"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"detect-missing-docs", "/mock/dir/magic-modules/tools/diff-processor/new"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"changed-schema-resources"}, map[string]string(nil)},
 		},
 	} {
@@ -105,7 +108,7 @@ func TestExecGenerateComment(t *testing.T) {
 
 	for method, expectedCalls := range map[string][][]any{
 		"PostBuildStatus": {{"123456", "terraform-provider-breaking-change-test", "success", "https://console.cloud.google.com/cloud-build/builds;region=global/build1;step=17?project=project1", "sha1"}},
-		"PostComment":     {{"123456", "Hi there, I'm the Modular magician. I've detected the following information about your changes:\n\n## Diff report\n\nYour PR generated some diffs in downstreams - here they are.\n\n`google` provider: [Diff](https://github.com/modular-magician/terraform-provider-google/compare/auto-pr-123456-old..auto-pr-123456) ( 2 files changed, 40 insertions(+))\n`google-beta` provider: [Diff](https://github.com/modular-magician/terraform-provider-google-beta/compare/auto-pr-123456-old..auto-pr-123456) ( 2 files changed, 40 insertions(+))\n`terraform-google-conversion`: [Diff](https://github.com/modular-magician/terraform-google-conversion/compare/auto-pr-123456-old..auto-pr-123456) ( 1 file changed, 10 insertions(+))\n\n\n\n## Missing test report\nYour PR includes resource fields which are not covered by any test.\n\nResource: `google_folder_access_approval_settings` (3 total tests)\nPlease add an acceptance test which includes these fields. The test should include the following:\n\n```hcl\nresource \"google_folder_access_approval_settings\" \"primary\" {\n  uncovered_field = # value needed\n}\n\n```\n"}},
+		"PostComment":     {{"123456", "Hi there, I'm the Modular magician. I've detected the following information about your changes:\n\n## Diff report\n\nYour PR generated some diffs in downstreams - here they are.\n\n`google` provider: [Diff](https://github.com/modular-magician/terraform-provider-google/compare/auto-pr-123456-old..auto-pr-123456) ( 2 files changed, 40 insertions(+))\n`google-beta` provider: [Diff](https://github.com/modular-magician/terraform-provider-google-beta/compare/auto-pr-123456-old..auto-pr-123456) ( 2 files changed, 40 insertions(+))\n`terraform-google-conversion`: [Diff](https://github.com/modular-magician/terraform-google-conversion/compare/auto-pr-123456-old..auto-pr-123456) ( 1 file changed, 10 insertions(+))\n\n\n\n## Missing test report\nYour PR includes resource fields which are not covered by any test.\n\nResource: `google_folder_access_approval_settings` (3 total tests)\nPlease add an acceptance test which includes these fields. The test should include the following:\n\n```hcl\nresource \"google_folder_access_approval_settings\" \"primary\" {\n  uncovered_field = # value needed\n}\n\n```\n\n\n"}},
 		"AddLabels":       {{"123456", []string{"service/alloydb"}}},
 	} {
 		if actualCalls, ok := gh.calledMethods[method]; !ok {
@@ -115,6 +118,10 @@ func TestExecGenerateComment(t *testing.T) {
 		} else {
 			for i, actualParams := range actualCalls {
 				if expectedParams := expectedCalls[i]; !reflect.DeepEqual(actualParams, expectedParams) {
+					fmt.Println("expected")
+					fmt.Println(expectedParams)
+					fmt.Println("actual")
+					fmt.Println(actualParams)
 					t.Fatalf("Wrong params for call %d to %s, got %v, expected %v", i, method, actualParams, expectedParams)
 				}
 			}
@@ -224,6 +231,39 @@ func TestFormatDiffComment(t *testing.T) {
 			expectedStrings: []string{
 				"## Diff report",
 				"## Missing test report",
+			},
+			notExpectedStrings: []string{
+				"generated some diffs",
+				"## Breaking Change(s) Detected",
+				"## Errors",
+			},
+		},
+		"missing docs are displayed": {
+			data: diffCommentData{
+				MissingDocs: []MissingDocsInfo{
+					{
+						Repo: "tpgb",
+						Resources: []MissingDocsResource{
+							{
+								Resource: "x",
+								Fields:   []string{"a", "b"},
+							},
+						},
+					},
+					{
+						Repo: "tpg",
+						Resources: []MissingDocsResource{
+							{
+								Resource: "x",
+								Fields:   []string{"a", "b"},
+							},
+						},
+					},
+				},
+			},
+			expectedStrings: []string{
+				"## Diff report",
+				"## Missing documentation report",
 			},
 			notExpectedStrings: []string{
 				"generated some diffs",

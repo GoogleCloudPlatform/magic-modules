@@ -70,7 +70,18 @@ type diffCommentData struct {
 	Diffs           []Diff
 	BreakingChanges []BreakingChange
 	MissingTests    map[string]*MissingTestInfo
+	MissingDocs     []MissingDocsInfo
 	Errors          []Errors
+}
+
+type MissingDocsInfo struct {
+	Repo      string
+	Resources []MissingDocsResource
+}
+
+type MissingDocsResource struct {
+	Resource string
+	Fields   []string
 }
 
 const allowBreakingChangesLabel = "override-breaking-change"
@@ -282,6 +293,19 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			data.MissingTests = missingTests
 		}
 
+		// new branch is copied to diff-processor/new folder during its build
+		missingDocs, err := detectMissingDocs(diffProcessorPath, filepath.Join(diffProcessorPath, "new"), rnr)
+		if err != nil {
+			fmt.Println("Error running missing test detector: ", err)
+			errors[repo.Title] = append(errors[repo.Title], "The missing test detector failed to run.")
+		}
+		if len(missingDocs) > 0 {
+			data.MissingDocs = append(data.MissingDocs, MissingDocsInfo{
+				Repo:      repo.Name,
+				Resources: missingDocs,
+			})
+		}
+
 		affectedResources, err := changedSchemaResources(diffProcessorPath, rnr)
 		if err != nil {
 			fmt.Println("computing changed resource schemas: ", err)
@@ -480,6 +504,24 @@ func detectMissingTests(diffProcessorPath, tpgbLocalPath string, rnr ExecRunner)
 		return nil, err
 	}
 	return missingTests, rnr.PopDir()
+}
+
+// Run the missing docs detector and return the results.
+func detectMissingDocs(diffProcessorPath, newBranchPath string, rnr ExecRunner) ([]MissingDocsResource, error) {
+	if err := rnr.PushDir(diffProcessorPath); err != nil {
+		return nil, err
+	}
+
+	output, err := rnr.Run("bin/diff-processor", []string{"detect-missing-docs", newBranchPath}, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var missingDocs []MissingDocsResource
+	if err = json.Unmarshal([]byte(output), &missingDocs); err != nil {
+		return nil, err
+	}
+	return missingDocs, rnr.PopDir()
 }
 
 func formatDiffComment(data diffCommentData) (string, error) {

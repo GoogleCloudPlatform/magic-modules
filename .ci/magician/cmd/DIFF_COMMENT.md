@@ -40,6 +40,20 @@ Please add an acceptance test which includes these fields. The test should inclu
 {{- end }}
 {{end}}
 
+{{if gt (len .MissingDocs) 0}}
+## Missing documentation report
+Your PR includes resource fields which are not covered by documentations.
+{{ range $missingDocsInfo := .MissingDocs }}
+Repo: `{{.Repo}}`
+{{range .Resources}}
+- Resource: `{{.Resource}}`
+{{range .Fields}}{{. | printf "  - `%s`\n"}}{{end}}
+{{end}}
+{{- end }}
+
+Please add corresponding docs to includes these fields.
+{{end}}
+
 {{- $errorsLength := len .Errors}}
 {{- if gt $errorsLength 0}}
 ## Errors
