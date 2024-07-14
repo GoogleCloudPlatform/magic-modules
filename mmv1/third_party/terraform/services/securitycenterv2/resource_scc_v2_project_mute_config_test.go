@@ -20,6 +20,7 @@ func TestAccSecurityCenterV2ProjectMuteConfig_basic(t *testing.T) {
 		"random_suffix": acctest.RandString(t, 10),
 		"location":      "global",
 		"parent_org":    os.Getenv("TEST_ORG_ID"),
+		"service_account": envvar.GetTestServiceAccountFromEnv(t),
 	}
 
 	contextHighSeverity := map[string]interface{}{
@@ -92,6 +93,7 @@ resource "google_project" "project" {
 resource "google_project_iam_member" "project1_iam_member" {
 	project = google_project.project.project_id
 	role    = "roles/securitycenter.admin"
+	member = "serviceAccount:%{service_account}"
 }  
 
 resource "google_scc_v2_project_mute_config" "project_mute_test1" {
@@ -118,6 +120,7 @@ resource "google_project" "project" {
 resource "google_project_iam_member" "project2_iam_member" {
 	project = google_project.project.project_id
 	role    = "roles/securitycenter.admin" 
+	member = "serviceAccount:%{service_account}"
 }
 
 resource "google_scc_v2_project_mute_config" "project_mute_test2" {

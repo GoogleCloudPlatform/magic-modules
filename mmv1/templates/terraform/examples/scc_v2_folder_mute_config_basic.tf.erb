@@ -1,6 +1,6 @@
 resource "google_folder" "folder" {
 	display_name = "A test folder mute config"
-	parent       = "organizations/${var.org_id}"
+	parent       = "organizations/<%= ctx[:vars]['org_id'] %>"
 }
 
 resource "google_folder_iam_member" "scc_folder_mute_config" {

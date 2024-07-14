@@ -89,7 +89,7 @@ resource "google_folder_iam_binding" "folder_test1_binding" {
 	folder = google_folder.folder.folder_id
 	role    = "roles/securitycenter.admin"
 	members = [
-	  "serviceAccount: %{service_account}",
+	  "serviceAccount:%{service_account}",
 	]
 }
 
@@ -115,7 +115,7 @@ resource "google_folder_iam_binding" "folder_test2_binding" {
 	folder = google_folder.folder.folder_id
 	role    = "roles/securitycenter.admin"
 	members = [
-	  "serviceAccount: %{service_account}",
+	  "serviceAccount:%{service_account}",
 	]
 }
 
