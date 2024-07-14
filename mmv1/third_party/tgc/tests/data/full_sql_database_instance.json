@@ -64,7 +64,7 @@
               }
             ],
             "ipv4Enabled": true,
-            "requireSsl": true
+            "sslMode": "TRUSTED_CLIENT_CERTIFICATE_REQUIRED"
           },
           "locationPreference": {
             "followGaeApplication": "test-follow_gae_application",

@@ -59,7 +59,7 @@
                             }
                         ],
                         "ipv4Enabled": true,
-                        "requireSsl": false
+                        "sslMode": "TRUSTED_CLIENT_CERTIFICATE_REQUIRED"
                     },
                     "pricingPlan": "PER_USE",
                     "storageAutoResize": true,
