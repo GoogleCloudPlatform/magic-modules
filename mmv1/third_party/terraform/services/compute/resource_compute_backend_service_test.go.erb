@@ -858,6 +858,28 @@ func TestAccComputeBackendService_withPrivateOriginAuth(t *testing.T) {
 	})
 }
 
+func TestAccComputeBackendService_withClientTlsPolicy(t *testing.T) {
+	t.Parallel()
+
+	randomSuffix := acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeBackendServiceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeBackendService_clientTlsPolicy(randomSuffix),
+			},
+			{
+				ResourceName:      "google_compute_backend_service.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 <% unless version == 'ga' -%>
 func TestAccComputeBackendService_regionNegBackend(t *testing.T) {
 	t.Parallel()
@@ -2099,6 +2121,28 @@ resource "google_compute_global_network_endpoint" "networkendpoint" {
 resource "google_compute_global_network_endpoint_group" "group" {
   name         = "tf-test-neg-%s"
   network_endpoint_type = "INTERNET_IP_PORT"
+}
+`, randomSuffix, randomSuffix)
+}
+
+func testAccComputeBackendService_clientTlsPolicy(randomSuffix string) string {
+	return fmt.Sprintf(`
+resource "google_compute_backend_service" "foobar" {
+  name                  = "tf-test-backend-service-%s"
+  load_balancing_scheme = "INTERNAL_SELF_MANAGED"
+  security_settings {
+    client_tls_policy = google_network_security_client_tls_policy.default.id
+    subject_alt_names = ["test-ca"]
+  }
+}
+
+resource "google_network_security_client_tls_policy" "default" {
+  name           = "tf-test-client-tls-policy-%s"
+  labels         = {
+    foo = "bar"
+  }
+  description    = "example description"
+  sni            = "secure.example.com"
 }
 `, randomSuffix, randomSuffix)
 }
