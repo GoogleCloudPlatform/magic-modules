@@ -287,7 +287,7 @@ resource "google_compute_router_route_policy" "rp-export" {
       description = "acceptance expression for export"
     }
     actions {
-	    expression = "accept()"
+      expression = "accept()"
     }
   }
   depends_on = [
@@ -309,7 +309,7 @@ resource "google_compute_router_route_policy" "rp-import" {
       description = "acceptance expression for import"
 	  }
     actions {
-		  expression = "accept()"
+      expression = "accept()"
     }
   }
   depends_on = [
