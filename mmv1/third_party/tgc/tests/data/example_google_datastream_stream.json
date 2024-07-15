@@ -59,7 +59,7 @@
                             }
                         ],
                         "ipv4Enabled": true,
-                        "requireSsl": nil,
+                        "requireSsl": null,
                         "sslMode": "ALLOW_UNENCRYPTED_AND_ENCRYPTED"
                     },
                     "pricingPlan": "PER_USE",
