@@ -76,7 +76,7 @@ examples:
       key_name: 'my-key'
   - !ruby/object:Provider::Terraform::Examples
     name: 'secure_source_manager_instance_private'
-    external_providers: ["random", "time"]
+    external_providers: ["time"]
     primary_resource_id: 'default'
     primary_resource_name: "fmt.Sprintf(\"tf-test-my-instance%s\",
       context[\"random_suffix\"\
@@ -87,7 +87,7 @@ examples:
       root_ca_id: 'root-ca'
   - !ruby/object:Provider::Terraform::Examples
     name: 'secure_source_manager_instance_private_psc_backend'
-    external_providers: ["random", "time"]
+    external_providers: ["time"]
     primary_resource_id: 'default'
     primary_resource_name: "fmt.Sprintf(\"tf-test-my-instance%s\",
       context[\"random_suffix\"\
@@ -106,7 +106,7 @@ examples:
       root_ca_id: 'root-ca'
   - !ruby/object:Provider::Terraform::Examples
     name: 'secure_source_manager_instance_private_psc_endpoint'
-    external_providers: ["random", "time"]
+    external_providers: ["time"]
     primary_resource_id: 'default'
     primary_resource_name: "fmt.Sprintf(\"tf-test-my-instance%s\",
       context[\"random_suffix\"\
