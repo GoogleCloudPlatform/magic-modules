@@ -64,6 +64,7 @@
               }
             ],
             "ipv4Enabled": true,
+            "requireSsl": null,
             "sslMode": "TRUSTED_CLIENT_CERTIFICATE_REQUIRED"
           },
           "locationPreference": {
