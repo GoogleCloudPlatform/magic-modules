@@ -7,9 +7,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/hashicorp/terraform-provider-google/google"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta"
+    "github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
+    "github.com/hashicorp/terraform-provider-google-beta/google-beta/envvar"
 	"google.golang.org/api/googleapi"
 )
 
@@ -24,11 +24,8 @@ func TestAccSecurityCenterOrganizationMuteConfig_createUpdateDelete(t *testing.T
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck: func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: map[string]func() (*schema.Provider, error){
-
-			"google": google.Provider,
-		},
-		CheckDestroy: testAccCheckSecurityCenterOrganizationMuteConfigDestroyProducer(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckSecurityCenterOrganizationMuteConfigDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSecurityCenterOrganizationMuteConfig(context),
@@ -94,9 +91,7 @@ resource "google_scc_v2_organization_mute_config" "primary" {
 `, context)
 }
 
-func testAccCheckSecurityCenterOrganizationMuteConfigDestroyProducer(t *testing.T) resource.TestCheckFunc {
-
-	return func(s *terraform.State) error {
+func testAccCheckSecurityCenterOrganizationMuteConfigDestroy(s *terraform.State) error {
 		config := acctest.Provider.Meta().(*google.Config)
 		client := config.SecurityCenterClientV2
 		for _, rs := range s.RootModule().Resources {
@@ -115,7 +110,6 @@ func testAccCheckSecurityCenterOrganizationMuteConfigDestroyProducer(t *testing.
 		}
 
 		return nil
-	}
 }
 
 func isGoogleAPIErrorWithCode(err error, code int) bool {
