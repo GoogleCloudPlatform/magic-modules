@@ -64,7 +64,7 @@ func ResourceGoogleProject() *schema.Resource {
 				Required:     true,
 				ForceNew:     true,
 				ValidateFunc: verify.ValidateProjectID(),
-				Description:  `The project ID. Changing this forces a new project to be created.`,
+				Description:  `The project unique ID. Changing this forces a new project to be created.`,
 			},
 			"skip_delete": {
 				Type:        schema.TypeBool,
@@ -130,9 +130,19 @@ func ResourceGoogleProject() *schema.Resource {
 				Description: `All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.`,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
+			"tags": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				ForceNew:    true,
+				Description: `A map of resource manager tags. Resource manager tag keys and values have the same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/456. The field is ignored (both PUT & PATCH) when empty.`,
+			},
 		},
 		UseJSONNumber: true,
 	}
+}
+
+func expandTags(d TerraformResourceData) map[string]string {
+	return tpgresource.ExpandStringMap(d, "tags")
 }
 
 func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error {
@@ -161,6 +171,10 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 
 	if _, ok := d.GetOk("effective_labels"); ok {
 		project.Labels = tpgresource.ExpandEffectiveLabels(d)
+	}
+
+	if _, ok := d.GetOk("tags"); ok {
+		project.Tags = expandTags(d)
 	}
 
 	var op *cloudresourcemanager.Operation
