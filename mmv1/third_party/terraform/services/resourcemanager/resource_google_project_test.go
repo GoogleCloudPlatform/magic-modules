@@ -158,6 +158,49 @@ func TestAccProject_labels(t *testing.T) {
 	})
 }
 
+// Test that a Project resource can be created with tags
+func TestAccProject_tags(t *testing.T) {
+	t.Parallel()
+
+	org := envvar.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("%s-%d", TestPrefix, acctest.RandInt(t))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccProject_tags(pid, org, map[string]string{"test": "that"}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleProjectHasTags(t, "google_project.acceptance", pid, map[string]string{"test": "that"}),
+				),
+			},
+			// Make sure import supports labels
+			{
+				ResourceName:            "google_project.acceptance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"skip_delete", "tags"},
+			},
+			// update project with labels
+			// {
+			// 	Config: testAccProject_labels(pid, org, map[string]string{"label": "label-value"}),
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		testAccCheckGoogleProjectExists("google_project.acceptance", pid),
+			// 		testAccCheckGoogleProjectHasLabels(t, "google_project.acceptance", pid, map[string]string{"label": "label-value"}),
+			// 	),
+			// },
+			// // update project delete labels
+			// {
+			// 	Config: testAccProject_create(pid, org),
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		testAccCheckGoogleProjectExists("google_project.acceptance", pid),
+			// 		testAccCheckGoogleProjectHasNoLabels(t, "google_project.acceptance", pid),
+			// 	),
+			// },
+		},
+	})
+}
+
 func TestAccProject_deleteDefaultNetwork(t *testing.T) {
 	t.Parallel()
 
@@ -274,6 +317,49 @@ func testAccCheckGoogleProjectHasBillingAccount(t *testing.T, r, pid, billingId 
 		}
 		if billingId != strings.TrimPrefix(ba.BillingAccountName, "billingAccounts/") {
 			return fmt.Errorf("Billing ID returned by API (%s) did not match expected value (%s)", ba.BillingAccountName, billingId)
+		}
+		return nil
+	}
+}
+
+func testAccCheckGoogleProjectHasTags(t *testing.T, r, pid string, expected map[string]string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		return fmt.Errorf("Expected %d tags, got %s", len(expected), rs.Primary.Attributes["tags.%"])
+		rs, ok := s.RootModule().Resources[r]
+		if !ok {
+			return fmt.Errorf("Not found: %s", r)
+		}
+
+		// State should have the same number of tags
+		if rs.Primary.Attributes["tags.%"] != strconv.Itoa(len(expected)) {
+			return fmt.Errorf("Expected %d tags, got %s", len(expected), rs.Primary.Attributes["tags.%"])
+		}
+
+		// Actual value in API should match state and expected
+		config := acctest.GoogleProviderConfig(t)
+
+		found, err := config.NewResourceManagerClient(config.UserAgent).Projects.Get(pid).Do()
+		if err != nil {
+			return err
+		}
+
+		actual := found.tags
+		if !reflect.DeepEqual(actual, expected) {
+			// Determine only the different attributes
+			for k, v := range expected {
+				if av, ok := actual[k]; ok && v == av {
+					delete(expected, k)
+					delete(actual, k)
+				}
+			}
+
+			spewConf := spew.NewDefaultConfig()
+			spewConf.SortKeys = true
+			return fmt.Errorf(
+				"Tags not equivalent. Difference is shown below. Top is actual, bottom is expected."+
+					"\n\n%s\n\n%s",
+				spewConf.Sdump(actual), spewConf.Sdump(expected),
+			)
 		}
 		return nil
 	}
