@@ -108,7 +108,7 @@ properties:
     required: true
     immutable: true
     item_type: !ruby/object:Api::Type::NestedObject
-      properties: 
+      properties:
         - !ruby/object:Api::Type::Integer
           name: priority
           description: |
@@ -143,7 +143,7 @@ properties:
           description: |
             'CEL expressions to evaluate to modify a route when this term matches.'\
           item_type: !ruby/object:Api::Type::NestedObject
-            properties: 
+            properties:
               - !ruby/object:Api::Type::String
                 name: 'expression'
                 required: true
