@@ -1,0 +1,108 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'ServiceProjectAttachment'
+description: |
+  Represents a Service project attachment to the Host Project.
+docs:
+id_format: 'projects/{{project}}/locations/global/serviceProjectAttachments/{{service_project_attachment_id}}'
+base_url: 'projects/{{project}}/locations/global/serviceProjectAttachments'
+self_link: 'projects/{{project}}/locations/global/serviceProjectAttachments/{{service_project_attachment_id}}'
+create_url: 'projects/{{project}}/locations/global/serviceProjectAttachments?serviceProjectAttachmentId={{service_project_attachment_id}}'
+immutable: true
+import_format:
+  - 'projects/{{project}}/locations/global/serviceProjectAttachments/{{service_project_attachment_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+  constants: 'templates/terraform/constants/go/apphub_service_project.go.tmpl'
+examples:
+  - name: 'service_project_attachment_basic'
+    config_path: 'templates/terraform/examples/go/apphub_service_project_attachment_basic.tf.tmpl'
+    primary_resource_id: 'example'
+    vars:
+      service_project_attachment_id: 'project-1'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      host_project: 'PROJECT_NAME'
+    external_providers: ["random", "time"]
+  - name: 'service_project_attachment_full'
+    config_path: 'templates/terraform/examples/go/apphub_service_project_attachment_full.tf.tmpl'
+    primary_resource_id: 'example2'
+    vars:
+      service_project_attachment_id: 'project-1'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      host_project: 'PROJECT_NAME'
+    external_providers: ["random", "time"]
+parameters:
+  - name: 'serviceProjectAttachmentId'
+    type: String
+    description: "Required. The service project attachment identifier must contain the
+      project_id of the service project specified in the service_project_attachment.service_project
+      field. Hint: \"projects/{project_id}\""
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      "Identifier. The resource name of a ServiceProjectAttachment. Format:\"projects/{host-project-id}/locations/global/serviceProjectAttachments/{service-project-id}.\""
+    output: true
+  - name: 'serviceProject'
+    type: String
+    description: |
+      "Immutable. Service project name in the format: \"projects/abc\"
+      or \"projects/123\". As input, project name with either project id or number
+      are accepted. As output, this field will contain project number."
+    immutable: true
+    diff_suppress_func: 'ServiceProjectDiffSuppress'
+    custom_flatten: 'templates/terraform/custom_flatten/go/apphub_service_project.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/go/apphub_service_project.go.tmpl'
+  - name: 'createTime'
+    type: String
+    description: 'Output only. Create time.'
+    output: true
+  - name: 'uid'
+    type: String
+    description: "Output only. A globally unique identifier (in UUID4 format) for the `ServiceProjectAttachment`."
+    output: true
+  - name: 'state'
+    type: Enum
+    description: |
+      ServiceProjectAttachment state.
+    output: true
+    enum_values:
+      - 'STATE_UNSPECIFIED'
+      - 'CREATING'
+      - 'ACTIVE'
+      - 'DELETING'
