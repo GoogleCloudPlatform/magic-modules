@@ -14,12 +14,12 @@ func TestAccSecurityCenterV2ProjectMuteConfig_basic(t *testing.T) {
 	t.Parallel()
 
 	contextBasic := map[string]interface{}{
-		"org_id":        envvar.GetTestOrgFromEnv(t),
-		"folder_name":   acctest.RandString(t, 10),
-		"project_id":    fmt.Sprintf("tf-test-project-%s", acctest.RandString(t, 10)),
-		"random_suffix": acctest.RandString(t, 10),
-		"location":      "global",
-		"parent_org":    os.Getenv("TEST_ORG_ID"),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"folder_name":     acctest.RandString(t, 10),
+		"project_id":      fmt.Sprintf("tf-test-project-%s", acctest.RandString(t, 10)),
+		"random_suffix":   acctest.RandString(t, 10),
+		"location":        "global",
+		"parent_org":      os.Getenv("TEST_ORG_ID"),
 		"service_account": envvar.GetTestServiceAccountFromEnv(t),
 	}
 
