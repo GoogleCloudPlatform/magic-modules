@@ -68,7 +68,6 @@ properties:
   - !ruby/object:Api::Type::String
     name: name
     description: Immutable. The name of the spoke. Spoke names must be unique.
-    default_from_api: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     required: true
     immutable: true
@@ -97,6 +96,10 @@ properties:
     name: linkedVpnTunnels
     description: The URIs of linked VPN tunnel resources
     immutable: true
+    conflicts:
+      - linked_interconnect_attachments
+      - linked_router_appliance_instances
+      - linked_vpc_network
     properties:
       - !ruby/object:Api::Type::Array
         name: uris
@@ -115,6 +118,10 @@ properties:
     name: linkedInterconnectAttachments
     description: A collection of VLAN attachment resources. These resources should be redundant attachments that all advertise the same prefixes to Google Cloud. Alternatively, in active/passive configurations, all attachments should be capable of advertising the same prefixes.
     immutable: true
+    conflicts:
+      - linked_vpn_tunnels
+      - linked_router_appliance_instances
+      - linked_vpc_network
     properties:
       - !ruby/object:Api::Type::Array
         name: uris
@@ -133,6 +140,10 @@ properties:
     name: linkedRouterApplianceInstances
     description: The URIs of linked Router appliance resources
     immutable: true
+    conflicts:
+      - linked_interconnect_attachments
+      - linked_vpn_tunnels
+      - linked_vpc_network
     properties:
       - !ruby/object:Api::Type::Array
         name: instances
@@ -165,6 +176,10 @@ properties:
     name: linkedVpcNetwork
     description: VPC network that is associated with the spoke.
     immutable: true
+    conflicts:
+      - linked_interconnect_attachments
+      - linked_router_appliance_instances
+      - linked_vpn_tunnels
     properties:
       - !ruby/object:Api::Type::String
         name: uri
