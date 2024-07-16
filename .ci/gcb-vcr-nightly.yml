@@ -7,6 +7,7 @@ steps:
       env:
         - "GOOGLE_REGION=us-central1"
         - "GOOGLE_ZONE=us-central1-a"
+        - "USER=magician"
       args:
         - 'vcr-cassette-update'
         - $BUILD_ID
