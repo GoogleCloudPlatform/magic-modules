@@ -367,7 +367,7 @@ func TestExecVCRCassetteUpdate(t *testing.T) {
 						"VCR_MODE":                       "RECORDING",
 						"VCR_PATH":                       "/mock/dir/magic-modules/.ci/magician/cassettes/beta",
 					}},
-					{"/mock/dir/magic-modules/.ci/magician", "gsutil", []string{"-m", "-q", "cp", "/mock/dir/magic-modules/.ci/magician/cassettes/beta", "gs://ci-vcr-cassettes/beta/fixtures/"}, map[string]string(nil)},
+					{"/mock/dir/magic-modules/.ci/magician", "gsutil", []string{"-m", "-q", "cp", "/mock/dir/magic-modules/.ci/magician/cassettes/beta", "gs://vcr-nightly/beta/2024-07-08/buildID/pr_recording_cassettes_backup/fixtures/"}, map[string]string(nil)},
 					{"/mock/dir/magic-modules/.ci/magician", "gsutil", []string{"-h", "Content-Type:text/plain", "-q", "cp", "-r", "/mock/dir/magic-modules/.ci/magician/testlogs/recording_test.log", "gs://vcr-nightly/beta/2024-07-08/buildID/logs/recording/"}, map[string]string(nil)},
 					{"/mock/dir/magic-modules/.ci/magician", "gsutil", []string{"-h", "Content-Type:text/plain", "-q", "cp", "-r", "/mock/dir/magic-modules/.ci/magician/testlogs/recording/beta/*", "gs://vcr-nightly/beta/2024-07-08/buildID/logs/build-log/"}, map[string]string(nil)},
 				},
