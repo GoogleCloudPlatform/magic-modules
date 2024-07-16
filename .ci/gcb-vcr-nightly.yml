@@ -2,10 +2,11 @@
 steps:
     - name: 'gcr.io/graphite-docker-images/go-plus'
       id: gcb-vcr-nightly
-      entrypoint: '/workspace/.ci/scripts/go-plus/vcr-cassette-update/vcr_cassette_update.sh'
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       secretEnv: ["GOOGLE_BILLING_ACCOUNT", "GOOGLE_CUST_ID", "GOOGLE_FIRESTORE_PROJECT", "GOOGLE_IDENTITY_USER", "GOOGLE_MASTER_BILLING_ACCOUNT", "GOOGLE_ORG", "GOOGLE_ORG_2", "GOOGLE_ORG_DOMAIN", "GOOGLE_PROJECT", "GOOGLE_PROJECT_NUMBER", "GOOGLE_SERVICE_ACCOUNT", "SA_KEY", "GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION"]
       args:
-          - $BUILD_ID
+        - 'vcr-cassette-update'
+        - $BUILD_ID
 
 # Long timeout to enable waiting on VCR test
 timeout: 20000s

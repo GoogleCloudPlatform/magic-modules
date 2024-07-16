@@ -161,7 +161,7 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 		recordingResult, recordingErr := vt.RunParallel(Recording, provider.Beta, nil, replayingResult.FailedTests)
 
 		cassettesPath := vt.CassettePath(provider.Beta)
-		if _, err := uploadCassettesToGCS(cassettesPath, "gs://ci-vcr-cassettes/beta/fixtures/", rnr); err != nil {
+		if _, err := uploadCassettesToGCS(cassettesPath, bucketPrefix + "/pr_recording_cassettes_backup/fixtures/", rnr); err != nil {
 			return fmt.Errorf("error uploading cassettes: %w", err)
 		}
 
