@@ -1,0 +1,653 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Repository'
+description: A repository for storing artifacts
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/artifact-registry/docs/overview'
+  api: 'https://cloud.google.com/artifact-registry/docs/reference/rest/v1/projects.locations.repositories'
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/repositories'
+self_link: 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/repositories?repository_id={{repository_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}'
+  - '{{repository_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+iam_policy:
+  method_name_separator: ':'
+  allowed_iam_role: 'roles/artifactregistry.reader'
+  parent_resource_attribute: 'repository'
+  base_url: 'projects/{{project}}/locations/{{location}}/repositories/{{name}}'
+  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  self_link: 'projects/{{project}}/locations/{{location}}/repositories/{{name}}'
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/repositories/{{repository}}'
+    - '{{repository}}'
+custom_code:
+  constants: 'templates/terraform/constants/go/artifact_registry_repository.go.tmpl'
+  encoder: 'templates/terraform/encoders/go/location_from_region.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/go/artifact_registry_remote_repository.go.tmpl'
+examples:
+  - name: 'artifact_registry_repository_basic'
+    primary_resource_id: 'my-repo'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-repository%s", context["random_suffix"])'
+    vars:
+      repository_id: 'my-repository'
+      description: 'example docker repository'
+  - name: 'artifact_registry_repository_docker'
+    primary_resource_id: 'my-repo'
+    vars:
+      repository_id: 'my-repository'
+      description: 'example docker repository'
+  - name: 'artifact_registry_repository_cmek'
+    primary_resource_id: 'my-repo'
+    vars:
+      repository_id: 'my-repository'
+      kms_key_name: 'kms-key'
+    test_vars_overrides:
+      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+  - name: 'artifact_registry_repository_virtual'
+    primary_resource_id: 'my-repo'
+    vars:
+      repository_id: 'my-repository'
+      description: 'example virtual docker repository'
+      upstream_repository_id: 'my-repository-upstream'
+      upstream_description: 'example docker repository (upstream source)'
+      upstream_policy_id: 'my-repository-upstream'
+  - name: 'artifact_registry_repository_remote'
+    primary_resource_id: 'my-repo'
+    vars:
+      repository_id: 'my-repository'
+      description: 'example remote docker repository'
+  - name: 'artifact_registry_repository_remote_apt'
+    primary_resource_id: 'my-repo'
+    vars:
+      repository_id: 'debian-buster'
+      description: 'example remote apt repository'
+  - name: 'artifact_registry_repository_remote_yum'
+    primary_resource_id: 'my-repo'
+    vars:
+      repository_id: 'rocky-9'
+      description: 'example remote yum repository'
+  - name: 'artifact_registry_repository_cleanup'
+    primary_resource_id: 'my-repo'
+    vars:
+      repository_id: 'my-repository'
+      description: 'example docker repository with cleanup policies'
+  - name: 'artifact_registry_repository_remote_dockerhub_auth'
+    primary_resource_id: 'my-repo'
+    vars:
+      repository_id: 'example-dockerhub-remote'
+      description: 'example remote dockerhub repository with credentials'
+      secret_id: 'example-secret'
+      secret_resource_id: 'example-remote-secret'
+      username: 'remote-username'
+      secret_data: 'remote-password'
+    ignore_read_extra:
+      - 'remote_repository_config.0.disable_upstream_validation'
+  - name: 'artifact_registry_repository_remote_docker_custom_with_auth'
+    primary_resource_id: 'my-repo'
+    vars:
+      repository_id: 'example-docker-custom-remote'
+      description: 'example remote custom docker repository with credentials'
+      secret_id: 'example-secret'
+      secret_resource_id: 'example-remote-secret'
+      username: 'remote-username'
+      secret_data: 'remote-password'
+    ignore_read_extra:
+      - 'remote_repository_config.0.disable_upstream_validation'
+  - name: 'artifact_registry_repository_remote_maven_custom_with_auth'
+    primary_resource_id: 'my-repo'
+    vars:
+      repository_id: 'example-maven-custom-remote'
+      description: 'example remote custom maven repository with credentials'
+      secret_id: 'example-secret'
+      secret_resource_id: 'example-remote-secret'
+      username: 'remote-username'
+      secret_data: 'remote-password'
+    ignore_read_extra:
+      - 'remote_repository_config.0.disable_upstream_validation'
+  - name: 'artifact_registry_repository_remote_npm_custom_with_auth'
+    primary_resource_id: 'my-repo'
+    vars:
+      repository_id: 'example-npm-custom-remote'
+      description: 'example remote custom npm repository with credentials'
+      secret_id: 'example-secret'
+      secret_resource_id: 'example-remote-secret'
+      username: 'remote-username'
+      secret_data: 'remote-password'
+    ignore_read_extra:
+      - 'remote_repository_config.0.disable_upstream_validation'
+  - name: 'artifact_registry_repository_remote_python_custom_with_auth'
+    primary_resource_id: 'my-repo'
+    vars:
+      repository_id: 'example-python-custom-remote'
+      description: 'example remote custom python repository with credentials'
+      secret_id: 'example-secret'
+      secret_resource_id: 'example-remote-secret'
+      username: 'remote-username'
+      secret_data: 'remote-password'
+    ignore_read_extra:
+      - 'remote_repository_config.0.disable_upstream_validation'
+parameters:
+properties:
+  - name: 'name'
+    type: String
+    description: |-
+      The name of the repository, for example:
+      "repo1"
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/go/shortname_to_url.go.tmpl'
+  - name: 'repository_id'
+    type: String
+    description: |-
+      The last part of the repository name, for example:
+      "repo1"
+    url_param_only: true
+    required: true
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+  - name: 'location'
+    type: String
+    description: |
+      The name of the location this repository is located in.
+    url_param_only: true
+    required: false
+    immutable: true
+    default_from_api: true
+  - name: 'format'
+    type: String
+    description: |-
+      The format of packages that are stored in the repository. Supported formats
+      can be found [here](https://cloud.google.com/artifact-registry/docs/supported-formats).
+      You can only create alpha formats if you are a member of the
+      [alpha user group](https://cloud.google.com/artifact-registry/docs/supported-formats#alpha-access).
+    required: true
+    immutable: true
+    diff_suppress_func: 'tpgresource.CaseDiffSuppress'
+  - name: 'description'
+    type: String
+    description: |-
+      The user-provided description of the repository.
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      Labels with user-defined metadata.
+      This field may contain up to 64 entries. Label keys and values may be no
+      longer than 63 characters. Label keys must begin with a lowercase letter
+      and may only contain lowercase letters, numeric characters, underscores,
+      and dashes.
+    immutable: false
+  - name: 'kmsKeyName'
+    type: String
+    description: |-
+      The Cloud KMS resource name of the customer managed encryption key that’s
+      used to encrypt the contents of the Repository. Has the form:
+      `projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key`.
+      This value may not be changed after the Repository has been created.
+    immutable: true
+  - name: 'createTime'
+    type: Time
+    description: The time when the repository was created.
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: The time when the repository was last updated.
+    output: true
+  - name: 'dockerConfig'
+    type: NestedObject
+    description: |-
+      Docker repository config contains repository level configuration for the repositories of docker type.
+    allow_empty_object: true
+    properties:
+      - name: 'immutableTags'
+        type: Boolean
+        description: |-
+          The repository which enabled this flag prevents all tags from being modified, moved or deleted. This does not prevent tags from being created.
+  - name: 'mavenConfig'
+    type: NestedObject
+    description: |-
+      MavenRepositoryConfig is maven related repository details.
+      Provides additional configuration details for repositories of the maven
+      format type.
+    allow_empty_object: true
+    properties:
+      - name: 'allowSnapshotOverwrites'
+        type: Boolean
+        description: |-
+          The repository with this flag will allow publishing the same
+          snapshot versions.
+        immutable: true
+      - name: 'versionPolicy'
+        type: Enum
+        description: |-
+          Version policy defines the versions that the registry will accept.
+        immutable: true
+        custom_flatten: 'templates/terraform/custom_flatten/go/default_if_empty.tmpl'
+        default_value: "VERSION_POLICY_UNSPECIFIED"
+        enum_values:
+          - 'VERSION_POLICY_UNSPECIFIED'
+          - 'RELEASE'
+          - 'SNAPSHOT'
+  - name: 'mode'
+    type: Enum
+    description: |-
+      The mode configures the repository to serve artifacts from different sources.
+    immutable: true
+    default_value: "STANDARD_REPOSITORY"
+    enum_values:
+      - 'STANDARD_REPOSITORY'
+      - 'VIRTUAL_REPOSITORY'
+      - 'REMOTE_REPOSITORY'
+  - name: 'virtualRepositoryConfig'
+    type: NestedObject
+    description: |-
+      Configuration specific for a Virtual Repository.
+    conflicts:
+      - remote_repository_config
+    properties:
+      - name: 'upstreamPolicies'
+        type: Array
+        description: |-
+          Policies that configure the upstream artifacts distributed by the Virtual
+          Repository. Upstream policies cannot be set on a standard repository.
+        diff_suppress_func: 'upstreamPoliciesDiffSuppress'
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'id'
+              type: String
+              description: |-
+                The user-provided ID of the upstream policy.
+            - name: 'repository'
+              type: String
+              description: |
+                A reference to the repository resource, for example:
+                "projects/p1/locations/us-central1/repository/repo1".
+            - name: 'priority'
+              type: Integer
+              description: |-
+                Entries with a greater priority value take precedence in the pull order.
+  - name: 'cleanupPolicies'
+    type: Map
+    description: |-
+      Cleanup policies for this repository. Cleanup policies indicate when
+      certain package versions can be automatically deleted.
+      Map keys are policy IDs supplied by users during policy creation. They must
+      unique within a repository and be under 128 characters in length.
+    key_name: 'id'
+    key_description: |-
+      The policy ID. Must be unique within a repository.
+    value_type:
+      type: NestedObject
+      properties:
+        - name: 'action'
+          type: Enum
+          description: |-
+            Policy action.
+          enum_values:
+            - 'DELETE'
+            - 'KEEP'
+        - name: 'condition'
+          type: NestedObject
+          description: |-
+            Policy condition for matching versions.
+          # TODO (jrsb): exactly_one_of: condition, mostRecentVersions
+          properties:
+            - name: 'tagState'
+              type: Enum
+              description: |-
+                Match versions by tag status.
+              default_value: "ANY"
+              enum_values:
+                - 'TAGGED'
+                - 'UNTAGGED'
+                - 'ANY'
+            - name: 'tagPrefixes'
+              type: Array
+              description: |-
+                Match versions by tag prefix. Applied on any prefix match.
+              item_type:
+                type: String
+            - name: 'versionNamePrefixes'
+              type: Array
+              description: |-
+                Match versions by version name prefix. Applied on any prefix match.
+              item_type:
+                type: String
+            - name: 'packageNamePrefixes'
+              type: Array
+              description: |-
+                Match versions by package prefix. Applied on any prefix match.
+              item_type:
+                type: String
+            - name: 'olderThan'
+              type: String
+              description: |-
+                Match versions older than a duration.
+              diff_suppress_func: 'tpgresource.DurationDiffSuppress'
+            - name: 'newerThan'
+              type: String
+              description: |-
+                Match versions newer than a duration.
+              diff_suppress_func: 'tpgresource.DurationDiffSuppress'
+        - name: 'mostRecentVersions'
+          type: NestedObject
+          description: |-
+            Policy condition for retaining a minimum number of versions. May only be
+            specified with a Keep action.
+          # TODO (jrsb): exactly_one_of: condition, mostRecentVersions
+          properties:
+            - name: 'packageNamePrefixes'
+              type: Array
+              description: |-
+                Match versions by package prefix. Applied on any prefix match.
+              item_type:
+                type: String
+            - name: 'keepCount'
+              type: Integer
+              description: |-
+                Minimum number of versions to keep.
+  - name: 'remoteRepositoryConfig'
+    type: NestedObject
+    description: |-
+      Configuration specific for a Remote Repository.
+    immutable: true
+    conflicts:
+      - virtual_repository_config
+    properties:
+      - name: 'description'
+        type: String
+        description: |-
+          The description of the remote source.
+        immutable: true
+      - name: 'aptRepository'
+        type: NestedObject
+        description: |-
+          Specific settings for an Apt remote repository.
+        immutable: true
+        exactly_one_of:
+          - 'remoteRepositoryConfig.0.apt_repository'
+          - 'remoteRepositoryConfig.0.docker_repository'
+          - 'remoteRepositoryConfig.0.maven_repository'
+          - 'remoteRepositoryConfig.0.npm_repository'
+          - 'remoteRepositoryConfig.0.python_repository'
+          - 'remoteRepositoryConfig.0.yum_repository'
+        properties:
+          - name: 'publicRepository'
+            type: NestedObject
+            description: |-
+              One of the publicly available Apt repositories supported by Artifact Registry.
+            immutable: true
+            properties:
+              - name: 'repositoryBase'
+                type: Enum
+                description: |-
+                  A common public repository base for Apt, e.g. `"debian/dists/buster"`
+                required: true
+                immutable: true
+                enum_values:
+                  - 'DEBIAN'
+                  - 'UBUNTU'
+              - name: 'repositoryPath'
+                type: String
+                description: |-
+                  Specific repository from the base.
+                required: true
+                immutable: true
+      - name: 'dockerRepository'
+        type: NestedObject
+        description: |-
+          Specific settings for a Docker remote repository.
+        immutable: true
+        exactly_one_of:
+          - 'remoteRepositoryConfig.0.apt_repository'
+          - 'remoteRepositoryConfig.0.docker_repository'
+          - 'remoteRepositoryConfig.0.maven_repository'
+          - 'remoteRepositoryConfig.0.npm_repository'
+          - 'remoteRepositoryConfig.0.python_repository'
+          - 'remoteRepositoryConfig.0.yum_repository'
+        properties:
+          - name: 'publicRepository'
+            type: Enum
+            description: |-
+              Address of the remote repository.
+            immutable: true
+            conflicts:
+              - remoteRepositoryConfig.0.docker_repository.0.custom_repository
+            custom_flatten: 'templates/terraform/custom_flatten/go/default_if_empty.tmpl'
+            default_value: "DOCKER_HUB"
+            enum_values:
+              - 'DOCKER_HUB'
+          - name: 'customRepository'
+            type: NestedObject
+            description: |-
+              Settings for a remote repository with a custom uri.
+            immutable: true
+            conflicts:
+              - remoteRepositoryConfig.0.docker_repository.0.public_repository
+            properties:
+              - name: 'uri'
+                type: String
+                description: |-
+                  Specific uri to the registry, e.g. `"https://registry-1.docker.io"`
+                immutable: true
+      - name: 'mavenRepository'
+        type: NestedObject
+        description: |-
+          Specific settings for a Maven remote repository.
+        immutable: true
+        exactly_one_of:
+          - 'remoteRepositoryConfig.0.apt_repository'
+          - 'remoteRepositoryConfig.0.docker_repository'
+          - 'remoteRepositoryConfig.0.maven_repository'
+          - 'remoteRepositoryConfig.0.npm_repository'
+          - 'remoteRepositoryConfig.0.python_repository'
+          - 'remoteRepositoryConfig.0.yum_repository'
+        properties:
+          - name: 'publicRepository'
+            type: Enum
+            description: |-
+              Address of the remote repository.
+            immutable: true
+            conflicts:
+              - remoteRepositoryConfig.0.maven_repository.0.custom_repository
+            custom_flatten: 'templates/terraform/custom_flatten/go/default_if_empty.tmpl'
+            default_value: "MAVEN_CENTRAL"
+            enum_values:
+              - 'MAVEN_CENTRAL'
+          - name: 'customRepository'
+            type: NestedObject
+            description: |-
+              Settings for a remote repository with a custom uri.
+            immutable: true
+            conflicts:
+              - remoteRepositoryConfig.0.maven_repository.0.public_repository
+            properties:
+              - name: 'uri'
+                type: String
+                description: |-
+                  Specific uri to the registry, e.g. `"https://repo.maven.apache.org/maven2"`
+                immutable: true
+      - name: 'npmRepository'
+        type: NestedObject
+        description: |-
+          Specific settings for an Npm remote repository.
+        immutable: true
+        exactly_one_of:
+          - 'remoteRepositoryConfig.0.apt_repository'
+          - 'remoteRepositoryConfig.0.docker_repository'
+          - 'remoteRepositoryConfig.0.maven_repository'
+          - 'remoteRepositoryConfig.0.npm_repository'
+          - 'remoteRepositoryConfig.0.python_repository'
+          - 'remoteRepositoryConfig.0.yum_repository'
+        properties:
+          - name: 'publicRepository'
+            type: Enum
+            description: |-
+              Address of the remote repository.
+            immutable: true
+            conflicts:
+              - remoteRepositoryConfig.0.npm_repository.0.custom_repository
+            custom_flatten: 'templates/terraform/custom_flatten/go/default_if_empty.tmpl'
+            default_value: "NPMJS"
+            enum_values:
+              - 'NPMJS'
+          - name: 'customRepository'
+            type: NestedObject
+            description: |-
+              Settings for a remote repository with a custom uri.
+            immutable: true
+            conflicts:
+              - remoteRepositoryConfig.0.npm_repository.0.public_repository
+            properties:
+              - name: 'uri'
+                type: String
+                description: |-
+                  Specific uri to the registry, e.g. `"https://registry.npmjs.org"`
+                immutable: true
+      - name: 'pythonRepository'
+        type: NestedObject
+        description: |-
+          Specific settings for a Python remote repository.
+        immutable: true
+        exactly_one_of:
+          - 'remoteRepositoryConfig.0.apt_repository'
+          - 'remoteRepositoryConfig.0.docker_repository'
+          - 'remoteRepositoryConfig.0.maven_repository'
+          - 'remoteRepositoryConfig.0.npm_repository'
+          - 'remoteRepositoryConfig.0.python_repository'
+          - 'remoteRepositoryConfig.0.yum_repository'
+        properties:
+          - name: 'publicRepository'
+            type: Enum
+            description: |-
+              Address of the remote repository.
+            immutable: true
+            conflicts:
+              - remoteRepositoryConfig.0.python_repository.0.custom_repository
+            custom_flatten: 'templates/terraform/custom_flatten/go/default_if_empty.tmpl'
+            default_value: "PYPI"
+            enum_values:
+              - 'PYPI'
+          - name: 'customRepository'
+            type: NestedObject
+            description: |-
+              Settings for a remote repository with a custom uri.
+            immutable: true
+            conflicts:
+              - remoteRepositoryConfig.0.python_repository.0.public_repository
+            properties:
+              - name: 'uri'
+                type: String
+                description: |-
+                  Specific uri to the registry, e.g. `"https://pypi.io"`
+                immutable: true
+      - name: 'yumRepository'
+        type: NestedObject
+        description: |-
+          Specific settings for an Yum remote repository.
+        immutable: true
+        exactly_one_of:
+          - 'remoteRepositoryConfig.0.apt_repository'
+          - 'remoteRepositoryConfig.0.docker_repository'
+          - 'remoteRepositoryConfig.0.maven_repository'
+          - 'remoteRepositoryConfig.0.npm_repository'
+          - 'remoteRepositoryConfig.0.python_repository'
+          - 'remoteRepositoryConfig.0.yum_repository'
+        properties:
+          - name: 'publicRepository'
+            type: NestedObject
+            description: |-
+              One of the publicly available Yum repositories supported by Artifact Registry.
+            immutable: true
+            properties:
+              - name: 'repositoryBase'
+                type: Enum
+                description: |-
+                  A common public repository base for Yum.
+                required: true
+                immutable: true
+                enum_values:
+                  - 'CENTOS'
+                  - 'CENTOS_DEBUG'
+                  - 'CENTOS_VAULT'
+                  - 'CENTOS_STREAM'
+                  - 'ROCKY'
+                  - 'EPEL'
+              - name: 'repositoryPath'
+                type: String
+                description: |-
+                  Specific repository from the base, e.g. `"pub/rocky/9/BaseOS/x86_64/os"`
+                required: true
+                immutable: true
+      - name: 'upstreamCredentials'
+        type: NestedObject
+        description: |-
+          The credentials used to access the remote repository.
+        immutable: true
+        properties:
+          - name: 'usernamePasswordCredentials'
+            type: NestedObject
+            description: |-
+              Use username and password to access the remote repository.
+            immutable: true
+            properties:
+              - name: 'username'
+                type: String
+                description: |-
+                  The username to access the remote repository.
+                immutable: true
+              - name: 'passwordSecretVersion'
+                type: String
+                description: |-
+                  The Secret Manager key version that holds the password to access the
+                  remote repository. Must be in the format of
+                  `projects/{project}/secrets/{secret}/versions/{version}`.
+                immutable: true
+      - name: 'disableUpstreamValidation'
+        type: Boolean
+        description: |-
+          If true, the remote repository upstream and upstream credentials will
+          not be validated.
+        custom_flatten: 'templates/terraform/custom_flatten/go/artifactregistry_rr_disable_upstream_validation.go.tmpl'
+  - name: 'cleanupPolicyDryRun'
+    type: Boolean
+    description: |-
+      If true, the cleanup pipeline is prevented from deleting versions in this
+      repository.
