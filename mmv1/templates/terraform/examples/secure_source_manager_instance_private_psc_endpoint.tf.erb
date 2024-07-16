@@ -1,70 +1,4 @@
-// Connect SSM private instance with endpoint.
-resource "google_compute_network" "network" {
-  name = "<%= ctx[:vars]['network_id'] %>"
-  auto_create_subnetworks = false
-}
-
-resource "google_compute_subnetwork" "subnet" {
-  name = "<%= ctx[:vars]['subnet_id'] %>"
-  region = "us-central1"
-  network = google_compute_network.network.id
-  ip_cidr_range = "10.0.60.0/24"
-  private_ip_google_access = true # needed for "gcloud auth print-access-token" to work
-}
-
-resource "google_compute_address" "address" {
-  name = "<%= ctx[:vars]['address_id'] %>"
-  region = "us-central1"
-  address = "10.0.60.100"
-  address_type = "INTERNAL"
-  subnetwork = google_compute_subnetwork.subnet.id
-}
-
-resource "google_compute_forwarding_rule" "fw_rule_service_attachment" {
-  name = "<%= ctx[:vars]['fw_rule_to_service_attachment_id'] %>"
-  region = "us-central1"
-
-  load_balancing_scheme = ""
-  ip_address = google_compute_address.address.id
-  network = google_compute_network.network.id
-
-  target = google_secure_source_manager_instance.<%= ctx[:primary_resource_id] %>.private_config.0.http_service_attachment
-}
-
-resource "google_dns_managed_zone" "private_zone" {
-  name = "<%= ctx[:vars]['dns_zone_id'] %>"
-  dns_name = "p.sourcemanager.dev."
-  visibility = "private"
-  private_visibility_config {
-    networks {
-      network_url = google_compute_network.network.id
-    }
-  }
-}
-
-resource "google_dns_record_set" "ssm_instance_html_record" {
-  name = "${google_secure_source_manager_instance.<%= ctx[:primary_resource_id] %>.host_config.0.html}."
-  type = "A"
-  ttl = 300
-  managed_zone = google_dns_managed_zone.private_zone.name
-  rrdatas = [google_compute_forwarding_rule.fw_rule_service_attachment.ip_address]
-}
-
-resource "google_dns_record_set" "ssm_instance_api_record" {
-  name = "${google_secure_source_manager_instance.<%= ctx[:primary_resource_id] %>.host_config.0.api}."
-  type = "A"
-  ttl = 300
-  managed_zone = google_dns_managed_zone.private_zone.name
-  rrdatas = [google_compute_forwarding_rule.fw_rule_service_attachment.ip_address]
-}
-
-resource "google_dns_record_set" "ssm_instance_git_record" {
-  name = "${google_secure_source_manager_instance.<%= ctx[:primary_resource_id] %>.host_config.0.git_http}."
-  type = "A"
-  ttl = 300
-  managed_zone = google_dns_managed_zone.private_zone.name
-  rrdatas = [google_compute_forwarding_rule.fw_rule_service_attachment.ip_address]
-}
+data "google_project" "project" {}
 
 resource "google_privateca_ca_pool" "ca_pool" {
   name     = "<%= ctx[:vars]['ca_pool_id'] %>"
@@ -142,4 +76,70 @@ resource "time_sleep" "wait_120_seconds" {
   create_duration = "120s"
 }
 
-data "google_project" "project" {}
+// Connect SSM private instance with endpoint.
+resource "google_compute_network" "network" {
+  name = "<%= ctx[:vars]['network_id'] %>"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "subnet" {
+  name = "<%= ctx[:vars]['subnet_id'] %>"
+  region = "us-central1"
+  network = google_compute_network.network.id
+  ip_cidr_range = "10.0.60.0/24"
+  private_ip_google_access = true
+}
+
+resource "google_compute_address" "address" {
+  name = "<%= ctx[:vars]['address_id'] %>"
+  region = "us-central1"
+  address = "10.0.60.100"
+  address_type = "INTERNAL"
+  subnetwork = google_compute_subnetwork.subnet.id
+}
+
+resource "google_compute_forwarding_rule" "fw_rule_service_attachment" {
+  name = "<%= ctx[:vars]['fw_rule_to_service_attachment_id'] %>"
+  region = "us-central1"
+
+  load_balancing_scheme = ""
+  ip_address = google_compute_address.address.id
+  network = google_compute_network.network.id
+
+  target = google_secure_source_manager_instance.<%= ctx[:primary_resource_id] %>.private_config.0.http_service_attachment
+}
+
+resource "google_dns_managed_zone" "private_zone" {
+  name = "<%= ctx[:vars]['dns_zone_id'] %>"
+  dns_name = "p.sourcemanager.dev."
+  visibility = "private"
+  private_visibility_config {
+    networks {
+      network_url = google_compute_network.network.id
+    }
+  }
+}
+
+resource "google_dns_record_set" "ssm_instance_html_record" {
+  name = "${google_secure_source_manager_instance.<%= ctx[:primary_resource_id] %>.host_config.0.html}."
+  type = "A"
+  ttl = 300
+  managed_zone = google_dns_managed_zone.private_zone.name
+  rrdatas = [google_compute_forwarding_rule.fw_rule_service_attachment.ip_address]
+}
+
+resource "google_dns_record_set" "ssm_instance_api_record" {
+  name = "${google_secure_source_manager_instance.<%= ctx[:primary_resource_id] %>.host_config.0.api}."
+  type = "A"
+  ttl = 300
+  managed_zone = google_dns_managed_zone.private_zone.name
+  rrdatas = [google_compute_forwarding_rule.fw_rule_service_attachment.ip_address]
+}
+
+resource "google_dns_record_set" "ssm_instance_git_record" {
+  name = "${google_secure_source_manager_instance.<%= ctx[:primary_resource_id] %>.host_config.0.git_http}."
+  type = "A"
+  ttl = 300
+  managed_zone = google_dns_managed_zone.private_zone.name
+  rrdatas = [google_compute_forwarding_rule.fw_rule_service_attachment.ip_address]
+}
