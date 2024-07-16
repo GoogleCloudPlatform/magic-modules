@@ -28,7 +28,7 @@ func TestAccSCCOrganizationSource_complete(t *testing.T) {
 					resource.TestCheckResourceAttr("google_scc_v2_organization_source.custom_source", "display_name", displayName),
 					resource.TestCheckResourceAttr("google_scc_v2_organization_source.custom_source", "organization", orgId),
 					resource.TestCheckResourceAttr("google_scc_v2_organization_source.custom_source", "description", "My description"),
-					resource.TestCheckResourceAttrset("google_scc_v2_organization_source.custom_source", "canonical_name"),
+					resource.TestCheckResourceAttrSet("google_scc_v2_organization_source.custom_source", "canonical_name"),
 				),
 			},
 			{
