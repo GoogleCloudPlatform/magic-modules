@@ -60,7 +60,6 @@
                         ],
                         "ipv4Enabled": true,
                         "requireSsl": null,
-                        "sslMode": "ALLOW_UNENCRYPTED_AND_ENCRYPTED"
                     },
                     "pricingPlan": "PER_USE",
                     "storageAutoResize": true,
