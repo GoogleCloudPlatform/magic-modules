@@ -21,152 +21,9 @@ import_format:
 name: Application
 description: 'Application is a functional grouping of Services and Workloads that helps achieve a desired end-to-end business functionality.
   Services and Workloads are owned by the Application.'
+update_verb: :PATCH
+update_mask: true
 autogen_async: true
-examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: "application_basic"
-    primary_resource_id: "example"
-    config_path: "templates/terraform/examples/apphub_application_basic.tf.erb"
-    vars:
-      application_id: "example-application"
-  - !ruby/object:Provider::Terraform::Examples
-    name: "application_full"
-    primary_resource_id: "example2"
-    config_path: "templates/terraform/examples/apphub_application_full.tf.erb"
-    vars:
-      application_id: "example-application"
-      display_name: "Application Full"
-      description: "Application for testing"
-      business_name: "Alice"
-      business_email: "alice@google.com"
-      developer_name: "Bob"
-      developer_email: "bob@google.com"
-      operator_name: "Charlie"
-      operator_email: "charlie@google.com"
-properties:
-  - !ruby/object:Api::Type::String
-    name: name
-    output: true
-    description: "Identifier. The resource name of an Application. Format:\n\"projects/{host-project-id}/locations/{location}/applications/{application-id}\" "
-  - !ruby/object:Api::Type::String
-    name: displayName
-    description: 'Optional. User-defined name for the Application. '
-  - !ruby/object:Api::Type::String
-    name: description
-    description: 'Optional. User-defined description of an Application. '
-  - !ruby/object:Api::Type::NestedObject
-    properties:
-      - !ruby/object:Api::Type::NestedObject
-        properties:
-          - !ruby/object:Api::Type::Enum
-            name: type
-            description: 'Criticality type. '
-            required: true
-            values:
-              - :MISSION_CRITICAL
-              - :HIGH
-              - :MEDIUM
-              - :LOW
-        name: criticality
-        description: 'Criticality of the Application, Service, or Workload '
-      - !ruby/object:Api::Type::NestedObject
-        properties:
-          - !ruby/object:Api::Type::Enum
-            name: type
-            description: 'Environment type. '
-            required: true
-            values:
-              - :PRODUCTION
-              - :STAGING
-              - :TEST
-              - :DEVELOPMENT
-        name: environment
-        description: 'Environment of the Application, Service, or Workload '
-      - !ruby/object:Api::Type::Array
-        name: developerOwners
-        item_type: !ruby/object:Api::Type::NestedObject
-          properties:
-            - !ruby/object:Api::Type::String
-              name: displayName
-              description: 'Optional. Contact''s name. '
-            - !ruby/object:Api::Type::String
-              name: email
-              required: true
-              description: 'Required. Email address of the contacts. '
-        description: 'Optional. Developer team that owns development and coding. '
-      - !ruby/object:Api::Type::Array
-        name: operatorOwners
-        item_type: !ruby/object:Api::Type::NestedObject
-          properties:
-            - !ruby/object:Api::Type::String
-              name: displayName
-              description: 'Optional. Contact''s name. '
-            - !ruby/object:Api::Type::String
-              name: email
-              required: true
-              description: 'Required. Email address of the contacts. '
-        description: 'Optional. Operator team that ensures runtime and operations. '
-      - !ruby/object:Api::Type::Array
-        name: businessOwners
-        item_type: !ruby/object:Api::Type::NestedObject
-          properties:
-            - !ruby/object:Api::Type::String
-              name: displayName
-              description: 'Optional. Contact''s name. '
-            - !ruby/object:Api::Type::String
-              name: email
-              required: true
-              description: 'Required. Email address of the contacts. '
-        description: 'Optional. Business team that ensures user needs are met and value
-          is delivered '
-    name: attributes
-    description: 'Consumer provided attributes. '
-  - !ruby/object:Api::Type::String
-    name: createTime
-    description: 'Output only. Create time. '
-    output: true
-  - !ruby/object:Api::Type::String
-    name: updateTime
-    description: 'Output only. Update time. '
-    output: true
-  - !ruby/object:Api::Type::NestedObject
-    properties:
-      - !ruby/object:Api::Type::Enum
-        name: type
-        description: "Required. Scope Type. \n Possible values:\nREGIONAL"
-        required: true
-        values:
-          - :REGIONAL
-    name: scope
-    description: 'Scope of an application. '
-    required: true
-  - !ruby/object:Api::Type::String
-    name: uid
-    description: 'Output only. A universally unique identifier (in UUID4 format) for
-      the `Application`. '
-    output: true
-  - !ruby/object:Api::Type::Enum
-    name: state
-    description: "Output only. Application state. \n Possible values:\n STATE_UNSPECIFIED\nCREATING\nACTIVE\nDELETING"
-    output: true
-    values:
-      - :STATE_UNSPECIFIED
-      - :CREATING
-      - :ACTIVE
-      - :DELETING
-parameters:
-  - !ruby/object:Api::Type::String
-    name: location
-    description: 'Part of `parent`. See documentation of `projectsId`. '
-    url_param_only: true
-    required: true
-    immutable: true
-  - !ruby/object:Api::Type::String
-    name: applicationId
-    description: 'Required. The Application identifier. '
-    url_param_only: true
-    required: true
-    immutable: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: name
@@ -185,5 +42,148 @@ async: !ruby/object:Api::OpAsync
   error: !ruby/object:Api::OpAsync::Error
     path: error
     message: message
-update_verb: :PATCH
-update_mask: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "application_basic"
+    primary_resource_id: "example"
+    config_path: "templates/terraform/examples/apphub_application_basic.tf.erb"
+    vars:
+      application_id: "example-application"
+  - !ruby/object:Provider::Terraform::Examples
+    name: "application_full"
+    primary_resource_id: "example2"
+    config_path: "templates/terraform/examples/apphub_application_full.tf.erb"
+    vars:
+      application_id: "example-application"
+      display_name: "Application Full"
+      description: 'Application for testing'
+      business_name: "Alice"
+      business_email: "alice@google.com"
+      developer_name: "Bob"
+      developer_email: "bob@google.com"
+      operator_name: "Charlie"
+      operator_email: "charlie@google.com"
+parameters:
+  - !ruby/object:Api::Type::String
+    name: location
+    description: 'Part of `parent`. See documentation of `projectsId`.'
+    url_param_only: true
+    required: true
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: applicationId
+    description: 'Required. The Application identifier.'
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - !ruby/object:Api::Type::String
+    name: name
+    output: true
+    description: "Identifier. The resource name of an Application. Format:\n\"projects/{host-project-id}/locations/{location}/applications/{application-id}\""
+  - !ruby/object:Api::Type::String
+    name: displayName
+    description: 'Optional. User-defined name for the Application.'
+  - !ruby/object:Api::Type::String
+    name: description
+    description: 'Optional. User-defined description of an Application.'
+  - !ruby/object:Api::Type::NestedObject
+    name: attributes
+    description: 'Consumer provided attributes.'
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: criticality
+        description: 'Criticality of the Application, Service, or Workload'
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: type
+            description: 'Criticality type.'
+            required: true
+            values:
+              - :MISSION_CRITICAL
+              - :HIGH
+              - :MEDIUM
+              - :LOW
+      - !ruby/object:Api::Type::NestedObject
+        name: environment
+        description: 'Environment of the Application, Service, or Workload'
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: type
+            description: 'Environment type.'
+            required: true
+            values:
+              - :PRODUCTION
+              - :STAGING
+              - :TEST
+              - :DEVELOPMENT
+      - !ruby/object:Api::Type::Array
+        name: developerOwners
+        description: 'Optional. Developer team that owns development and coding.'
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: displayName
+              description: 'Optional. Contact''s name.'
+            - !ruby/object:Api::Type::String
+              name: email
+              required: true
+              description: 'Required. Email address of the contacts.'
+      - !ruby/object:Api::Type::Array
+        name: operatorOwners
+        description: 'Optional. Operator team that ensures runtime and operations.'
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: displayName
+              description: 'Optional. Contact''s name.'
+            - !ruby/object:Api::Type::String
+              name: email
+              required: true
+              description: 'Required. Email address of the contacts.'
+      - !ruby/object:Api::Type::Array
+        name: businessOwners
+        description: 'Optional. Business team that ensures user needs are met and value
+          is delivered'
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: displayName
+              description: 'Optional. Contact''s name.'
+            - !ruby/object:Api::Type::String
+              name: email
+              required: true
+              description: 'Required. Email address of the contacts.'
+  - !ruby/object:Api::Type::String
+    name: createTime
+    description: 'Output only. Create time.'
+    output: true
+  - !ruby/object:Api::Type::String
+    name: updateTime
+    description: 'Output only. Update time.'
+    output: true
+  - !ruby/object:Api::Type::NestedObject
+    name: scope
+    description: 'Scope of an application.'
+    required: true
+    properties:
+      - !ruby/object:Api::Type::Enum
+        name: type
+        description: "Required. Scope Type. \n Possible values:\nREGIONAL"
+        required: true
+        values:
+          - :REGIONAL
+  - !ruby/object:Api::Type::String
+    name: uid
+    description: 'Output only. A universally unique identifier (in UUID4 format) for
+      the `Application`.'
+    output: true
+  - !ruby/object:Api::Type::Enum
+    name: state
+    description: "Output only. Application state. \n Possible values:\n STATE_UNSPECIFIED\nCREATING\nACTIVE\nDELETING"
+    output: true
+    values:
+      - :STATE_UNSPECIFIED
+      - :CREATING
+      - :ACTIVE
+      - :DELETING
