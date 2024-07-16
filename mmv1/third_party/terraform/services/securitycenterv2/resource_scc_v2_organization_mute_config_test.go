@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestAccSecurityCenterV2OrganizationMuteConfig_basic(t *testing.T) {
+func TestAccSecurityCenterV2OrganizationMuteConfig_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
