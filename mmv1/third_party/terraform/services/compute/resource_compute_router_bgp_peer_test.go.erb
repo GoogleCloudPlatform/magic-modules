@@ -738,11 +738,13 @@ func testAccComputeRouterPeerWithMd5AuthKey(routerName string) string {
 func testAccComputeRouterWithRoutePolicies(routerName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "foobar" {
+  provider = google-beta
   name = "%s-net"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "foobar" {
+  provider = google-beta
   name          = "%s-subnet"
   network       = google_compute_network.foobar.self_link
   ip_cidr_range = "10.0.0.0/16"
@@ -750,17 +752,20 @@ resource "google_compute_subnetwork" "foobar" {
 }
 
 resource "google_compute_address" "foobar" {
+  provider = google-beta
   name   = "%s"
   region = google_compute_subnetwork.foobar.region
 }
 
 resource "google_compute_ha_vpn_gateway" "foobar" {
+  provider = google-beta
   name    = "%s-gateway"
   network = google_compute_network.foobar.self_link
   region  = google_compute_subnetwork.foobar.region
 }
 
 resource "google_compute_external_vpn_gateway" "external_gateway" {
+  provider = google-beta
   name            = "%s-external-gateway"
   redundancy_type = "SINGLE_IP_INTERNALLY_REDUNDANT"
   description     = "An externally managed VPN gateway"
@@ -771,6 +776,7 @@ resource "google_compute_external_vpn_gateway" "external_gateway" {
 }
 
 resource "google_compute_router" "foobar" {
+  provider = google-beta
   name    = "%s"
   region  = google_compute_subnetwork.foobar.region
   network = google_compute_network.foobar.self_link
@@ -780,6 +786,7 @@ resource "google_compute_router" "foobar" {
 }
 
 resource "google_compute_vpn_tunnel" "foobar" {
+  provider = google-beta
   name               = "%s"
   region             = google_compute_subnetwork.foobar.region
   vpn_gateway = google_compute_ha_vpn_gateway.foobar.id
@@ -791,6 +798,7 @@ resource "google_compute_vpn_tunnel" "foobar" {
 }
 
 resource "google_compute_router_interface" "foobar" {
+  provider = google-beta
   name       = "%s"
   router     = google_compute_router.foobar.name
   region     = google_compute_router.foobar.region
@@ -798,6 +806,7 @@ resource "google_compute_router_interface" "foobar" {
 }
 
 resource "google_compute_router_route_policy" "rp-export" {
+  provider = google-beta
 	name = "%s-rp-export"
   router = google_compute_router.foobar.name
   region = google_compute_router.foobar.region
@@ -823,6 +832,7 @@ resource "google_compute_router_route_policy" "rp-export" {
 }
 
 resource "google_compute_router_route_policy" "rp-import" {
+  provider = google-beta
   name = "%s-rp-import"
   router = google_compute_router.foobar.name
   region = google_compute_router.foobar.region
@@ -848,6 +858,7 @@ resource "google_compute_router_route_policy" "rp-import" {
 }
 
 resource "google_compute_router_peer" "foobar" {
+  provider = google-beta
   name                      = "%s-peer"
   router                    = google_compute_router.foobar.name
   region                    = google_compute_router.foobar.region
