@@ -817,9 +817,13 @@ resource "google_compute_router_route_policy" "rp-export" {
       expression = "destination == '10.0.0.0/12'"
       title      = "export_expression"
       description = "acceptance expression for export"
+      location = "location of the expression"
     }
     actions {
-	    expression = "accept()"
+      expression = "accept()"
+      title      = "export_action"
+      description = "acceptance action for export"
+      location = "location of the expression"
     }
   }
   depends_on = [
@@ -839,9 +843,13 @@ resource "google_compute_router_route_policy" "rp-import" {
       expression = "destination == '10.0.0.0/12'"
       title      = "import_expression"
       description = "acceptance expression for import"
+      location = "location of the expression"
 	  }
     actions {
-		  expression = "accept()"
+      expression = "accept()"
+      title      = "import_action"
+      description = "acceptance action for import"
+      location = "location of the expression"
     }
   }
   depends_on = [
