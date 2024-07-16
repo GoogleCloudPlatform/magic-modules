@@ -175,7 +175,6 @@ properties:
   - !ruby/object:Api::Type::Enum
     name: type
     required: true
-    immutable: true
     description: |
       The type of the database.
       See https://cloud.google.com/datastore/docs/firestore-or-datastore
