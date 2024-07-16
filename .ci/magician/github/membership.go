@@ -92,6 +92,11 @@ var (
 			startDate: newDate(2024, 7, 10, pdtLoc),
 			endDate:   newDate(2024, 7, 16, pdtLoc),
 		},
+		{
+			id:        "rileykarson",
+			startDate: newDate(2024, 7, 18, pdtLoc),
+			endDate:   newDate(2024, 8, 10, pdtLoc),
+		},
 	}
 )
 
