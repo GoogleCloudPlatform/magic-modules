@@ -1,9 +1,11 @@
 resource "google_compute_network" "default" {
+    provider = google-beta
     name = "{{index $.Vars "network_name"}}"
     auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
+    provider = google-beta
     name   = "{{index $.Vars "subnetwork_name"}}"
     region = "us-central1"
 
@@ -12,6 +14,7 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_compute_network_attachment" "{{$.PrimaryResourceId}}" {
+    provider = google-beta
     name   = "{{index $.Vars "resource_name"}}"
     region = "us-central1"
     description = "my basic network attachment"
@@ -21,6 +24,7 @@ resource "google_compute_network_attachment" "{{$.PrimaryResourceId}}" {
 }
 
 resource "google_compute_instance" "default" {
+    provider = google-beta
     name         = "{{index $.Vars "instance_name"}}"
     zone         = "us-central1-a"
     machine_type = "e2-micro"

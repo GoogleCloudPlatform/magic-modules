@@ -1,4 +1,3 @@
-# [START privateca_create_ca]
 resource "google_privateca_certificate_authority" "<%= ctx[:primary_resource_id] %>" {
  // This example assumes this pool already exists.
  // Pools cannot be deleted in normal test circumstances, so we depend on static pools
@@ -50,4 +49,3 @@ resource "google_privateca_certificate_authority" "<%= ctx[:primary_resource_id]
     cloud_kms_key_version = "<%= ctx[:vars]["kms_key_name"] %>/cryptoKeyVersions/1"
   }
 }
-# [END privateca_create_ca]

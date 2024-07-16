@@ -94,7 +94,7 @@ resource "google_dataplex_datascan" "{{$.PrimaryResourceId}}" {
         sql_expression = "COUNT(*) > 0"
       }
     }
-    
+
     rules {
       dimension = "VALIDITY"
       sql_assertion {
