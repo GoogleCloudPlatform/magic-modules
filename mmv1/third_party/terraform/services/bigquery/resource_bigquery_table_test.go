@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package bigquery_test
 
 import (
@@ -1584,24 +1583,23 @@ func TestAccBigQueryTable_TableReplicationInfo_WithReplicationInterval(t *testin
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccBigQueryTable_ResourceTags(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_id": envvar.GetTestProjectFromEnv(),
-		"dataset_id": fmt.Sprintf("tf_test_dataset_%s", acctest.RandString(t, 10)),
-		"table_id"  : fmt.Sprintf("tf_test_table_%s", acctest.RandString(t, 10)),
-		"tag_key_name1": fmt.Sprintf("tf_test_tag_key1_%s", acctest.RandString(t, 10)),
+		"project_id":      envvar.GetTestProjectFromEnv(),
+		"dataset_id":      fmt.Sprintf("tf_test_dataset_%s", acctest.RandString(t, 10)),
+		"table_id":        fmt.Sprintf("tf_test_table_%s", acctest.RandString(t, 10)),
+		"tag_key_name1":   fmt.Sprintf("tf_test_tag_key1_%s", acctest.RandString(t, 10)),
 		"tag_value_name1": fmt.Sprintf("tf_test_tag_value1_%s", acctest.RandString(t, 10)),
-		"tag_key_name2": fmt.Sprintf("tf_test_tag_key2_%s", acctest.RandString(t, 10)),
+		"tag_key_name2":   fmt.Sprintf("tf_test_tag_key2_%s", acctest.RandString(t, 10)),
 		"tag_value_name2": fmt.Sprintf("tf_test_tag_value2_%s", acctest.RandString(t, 10)),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigQueryTableWithResourceTags(context),
@@ -1635,7 +1633,6 @@ func TestAccBigQueryTable_ResourceTags(t *testing.T) {
 	})
 }
 
-<% end -%>
 func testAccCheckBigQueryExtData(t *testing.T, expectedQuoteChar string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
@@ -4076,32 +4073,23 @@ resource "time_sleep" "wait_10_seconds_last" {
 `, sourceDatasetID, sourceTableID, sourceMVJobID, sourceDatasetID, sourceMVID, sourceDatasetID, sourceTableID, projectID, sourceMVID, replicaDatasetID, replicaMVID, projectID, sourceMVID, replicationIntervalExpr, dropMVJobID, sourceDatasetID, sourceMVID)
 }
 
-<% unless version == 'ga' -%>
 func testAccBigQueryTableWithResourceTags(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_tags_tag_key" "key1" {
-  provider = google-beta
-
   parent = "projects/%{project_id}"
   short_name = "%{tag_key_name1}"
 }
 
 resource "google_tags_tag_value" "value1" {
-  provider = google-beta
-
   parent = "tagKeys/${google_tags_tag_key.key1.name}"
   short_name = "%{tag_value_name1}"
 }
 
 resource "google_bigquery_dataset" "test" {
-  provider = google-beta
-
   dataset_id = "%{dataset_id}"
 }
 
 resource "google_bigquery_table" "test" {
-  provider = google-beta
-
   deletion_protection = false
   allow_resource_tags_on_deletion = true
   dataset_id = "${google_bigquery_dataset.test.dataset_id}"
@@ -4116,42 +4104,30 @@ resource "google_bigquery_table" "test" {
 func testAccBigQueryTableWithResourceTagsUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_tags_tag_key" "key1" {
-  provider = google-beta
-
   parent = "projects/%{project_id}"
   short_name = "%{tag_key_name1}"
 }
 
 resource "google_tags_tag_value" "value1" {
-  provider = google-beta
-
   parent = "tagKeys/${google_tags_tag_key.key1.name}"
   short_name = "%{tag_value_name1}"
 }
 
 resource "google_tags_tag_key" "key2" {
-  provider = google-beta
-
   parent = "projects/%{project_id}"
   short_name = "%{tag_key_name2}"
 }
 
 resource "google_tags_tag_value" "value2" {
-  provider = google-beta
-
   parent = "tagKeys/${google_tags_tag_key.key2.name}"
   short_name = "%{tag_value_name2}"
 }
 
 resource "google_bigquery_dataset" "test" {
-  provider = google-beta
-
   dataset_id = "%{dataset_id}"
 }
 
 resource "google_bigquery_table" "test" {
-  provider = google-beta
-
   deletion_protection = false
   allow_resource_tags_on_deletion = true
   dataset_id = "${google_bigquery_dataset.test.dataset_id}"
@@ -4167,42 +4143,30 @@ resource "google_bigquery_table" "test" {
 func testAccBigQueryTableWithResourceTagsDestroy(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_tags_tag_key" "key1" {
-  provider = google-beta
-
   parent = "projects/%{project_id}"
   short_name = "%{tag_key_name1}"
 }
 
 resource "google_tags_tag_value" "value1" {
-  provider = google-beta
-
   parent = "tagKeys/${google_tags_tag_key.key1.name}"
   short_name = "%{tag_value_name1}"
 }
 
 resource "google_tags_tag_key" "key2" {
-  provider = google-beta
-
   parent = "projects/%{project_id}"
   short_name = "%{tag_key_name2}"
 }
 
 resource "google_tags_tag_value" "value2" {
-  provider = google-beta
-
   parent = "tagKeys/${google_tags_tag_key.key2.name}"
   short_name = "%{tag_value_name2}"
 }
 
 resource "google_bigquery_dataset" "test" {
-  provider = google-beta
-
   dataset_id = "%{dataset_id}"
 }
 
 resource "google_bigquery_table" "test" {
-  provider = google-beta
-
   deletion_protection = false
   allow_resource_tags_on_deletion = true
   dataset_id = "${google_bigquery_dataset.test.dataset_id}"
@@ -4212,7 +4176,6 @@ resource "google_bigquery_table" "test" {
 `, context)
 }
 
-<% end -%>
 var TEST_CSV = `lifelock,LifeLock,,web,Tempe,AZ,1-May-07,6850000,USD,b
 lifelock,LifeLock,,web,Tempe,AZ,1-Oct-06,6000000,USD,a
 lifelock,LifeLock,,web,Tempe,AZ,1-Jan-08,25000000,USD,c
