@@ -211,6 +211,7 @@ properties:
         - :SHOW_PREVIOUS_VERSIONS
         - :ACCESS_BASED_ENUMERATION
         - :CONTINUOUSLY_AVAILABLE
+    default_from_api: true
   - !ruby/object:Api::Type::String
     name: 'unixPermissions'
     description: |
