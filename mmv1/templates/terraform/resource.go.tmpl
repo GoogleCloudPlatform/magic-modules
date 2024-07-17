@@ -1173,7 +1173,7 @@ func resource{{ $.ResourceName }}Import(d *schema.ResourceData, meta interface{}
             {{- end }}
         {{- end }}
         {{- if $.CustomCode.PostImport }}
-            {{- $.CustomTemplate $.CustomCode.PostImport false -}}
+            {{ $.CustomTemplate $.CustomCode.PostImport false -}}
         {{- end }}
 
     return []*schema.ResourceData{d}, nil
