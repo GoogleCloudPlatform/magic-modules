@@ -69,15 +69,6 @@ resource "google_datastream_connection_profile" "source_connection_profile" {
     }
 }
 
-data "google_bigquery_default_service_account" "bq_sa" {
-}
-
-resource "google_kms_crypto_key_iam_member" "bigquery_key_user" {
-  crypto_key_id = "{{index $.Vars "bigquery_destination_table_kms_key_name"}}"
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:${data.google_bigquery_default_service_account.bq_sa.email}"
-}
-
 resource "google_datastream_connection_profile" "destination_connection_profile" {
     display_name          = "Connection profile"
     location              = "us-central1"
@@ -87,9 +78,6 @@ resource "google_datastream_connection_profile" "destination_connection_profile"
 }
 
 resource "google_datastream_stream" "{{$.PrimaryResourceId}}" {
-    depends_on = [
-        google_kms_crypto_key_iam_member.bigquery_key_user
-    ]
     stream_id = "{{index $.Vars "stream_id"}}"
     location = "us-central1"
     display_name = "my stream"
@@ -103,10 +91,9 @@ resource "google_datastream_stream" "{{$.PrimaryResourceId}}" {
             source_hierarchy_datasets {
                 dataset_template {
                     location = "us-central1"
-                    kms_key_name = "{{index $.Vars "bigquery_destination_table_kms_key_name"}}"
                 }
             }
-            merge {}
+            append_only {}
         }
     }
 
