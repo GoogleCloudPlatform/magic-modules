@@ -515,7 +515,7 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
         if res == nil {
             return nil, tpgresource.Fake404("decoded", "{{ $.ResourceName }}")
         }
-{{- end }}
+{{ end }}
         return res, nil
 {{    end  -}}
     }
