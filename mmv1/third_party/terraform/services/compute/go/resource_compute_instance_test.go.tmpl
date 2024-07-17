@@ -3150,6 +3150,8 @@ func TestAccComputeInstance_proactiveAttributionLabel(t *testing.T) {
 // The tests related to security_policy use network_edge_security_service resource
 // which can only exist one per region. Because of that, all the following tests must run serially.
 func TestAccComputeInstanceNetworkIntefaceWithSecurityPolicy(t *testing.T) {
+	// Consistently failing - https://github.com/hashicorp/terraform-provider-google/issues/17838
+	acctest.SkipIfVcr(t)
 	testCases := map[string]func(t *testing.T){
 		"two_access_config": testAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigs,
 		"two_nics_access_config_with_empty_nil_security_policy":   testAccComputeInstance_nic_securityPolicyCreateWithEmptyAndNullSecurityPolicies,
