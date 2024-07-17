@@ -480,7 +480,7 @@ examples:
 <%    object.examples.each do |example| -%>
   - name: '<%= example.name %>'
 <%      unless example.config_path == "templates/terraform/examples/#{example.name}.tf.erb" -%>
-    config_path: '<%= example.config_path %>'
+    config_path: '<%= object.convert_go_file(example.config_path) %>'
 <%      end -%>
 <%      unless example.primary_resource_id.nil? -%>
     primary_resource_id: '<%= example.primary_resource_id %>'
@@ -490,6 +490,9 @@ examples:
 <%      end -%>
 <%      unless example.min_version.nil? -%>
     min_version: '<%= example.min_version %>'
+<%      end -%>
+<%      unless example.region_override.nil? -%>
+    region_override: '<%= example.region_override %>'
 <%      end -%>
 <%      unless example.vars.nil? -%>
 <%      unless example.vars.empty? -%>

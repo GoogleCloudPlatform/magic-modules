@@ -6,7 +6,6 @@ resource "google_vmwareengine_private_cloud" "{{$.PrimaryResourceId}}" {
     management_cidr       = "192.168.30.0/24"
     vmware_engine_network = google_vmwareengine_network.pc-nw.id
   }
-
   management_cluster {
     cluster_id = "{{index $.Vars "management_cluster_id"}}"
     node_type_configs {

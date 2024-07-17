@@ -13,18 +13,20 @@
 
 --- !ruby/object:Api::Resource
 name: 'OrganizationMuteConfig'
-base_url: '{{organization}}/locations/{{location}}/muteConfigs'
-self_link: '{{name}}'
-create_url: '{{organization}}/locations/{{location}}/muteConfigs?muteConfigId={{mute_config_id}}'
+base_url: organizations/{{organization}}/locations/{{location}}/muteConfigs
+self_link: 'organizations/{{organization}}/locations/{{location}}/muteConfigs/{{mute_config_id}}'
+create_url: organizations/{{organization}}/locations/{{location}}/muteConfigs?muteConfigId={{mute_config_id}}
 update_verb: :PATCH
 update_mask: true
+import_format:
+  - 'organizations/{{organization}}/locations/{{location}}/muteConfigs/{{mute_config_id}}'
 description: |
   Mute Findings is a volume management feature in Security Command Center
   that lets you manually or programmatically hide irrelevant findings,
   and create filters to automatically silence existing and future
   findings based on criteria you specify.
 references: !ruby/object:Api::Resource::ReferenceLinks
-  api: 'https://cloud.google.com/security-command-center/docs/reference/rest/v2/organizations.locations.muteConfigs'
+  api: 'https://cloud.google.com/security-command-center/docs/reference/rest/v2/organizations.muteConfigs'
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'scc_v2_organization_mute_config_basic'
@@ -33,30 +35,17 @@ examples:
       mute_config_id: 'my-config'
     test_env_vars:
       org_id: :ORG_ID
-# Skipping sweeper since this is a child resource
-skip_sweeper: true
-import_format: ['{{name}}']
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_import: templates/terraform/custom_import/scc_mute_config.go.erb
 parameters:
-  - !ruby/object:Api::Type::String
-    name: muteConfigId
-    required: true
-    immutable: true
-    url_param_only: true
-    description: |
-      Unique identifier provided by the client within the parent scope.
   - !ruby/object:Api::Type::String
     name: organization
     required: true
     immutable: true
     url_param_only: true
     description: |
-      Resource name of the new organization mute configs's parent. Its format is
-      "organizations/[organization_id]"
+      The organization whose Cloud Security Command Center the Mute
+      Config lives in.
   - !ruby/object:Api::Type::String
     name: location
-    required: false
     immutable: true
     url_param_only: true
     default_value: global
@@ -67,11 +56,13 @@ properties:
     name: 'name'
     output: true
     description: |
-      Name of the Organization mute config. Its format is
-      organizations/{organization}/muteConfigs/{muteConfigId},
+      Name of the mute config. Its format is
+      organizations/{organization}/locations/global/muteConfigs/{configId},
+      folders/{folder}/locations/global/muteConfigs/{configId},
+      or projects/{project}/locations/global/muteConfigs/{configId}
   - !ruby/object:Api::Type::String
     name: 'description'
-    description: A description of the Organization mute config.
+    description: A description of the mute config.
   - !ruby/object:Api::Type::String
     name: 'filter'
     description: |
@@ -101,12 +92,8 @@ properties:
       field is set by the server and will be ignored if provided on
       config creation or update.
     output: true
-  - !ruby/object:Api::Type::Enum
+  - !ruby/object:Api::Type::String
     name: 'type'
-    required: true
     description: |
-      Required. The type of the mute config,
-      which determines what type of mute state the config affects. Immutable after creation.
-    values:
-      - :MUTE_CONFIG_TYPE_UNSPECIFIED
-      - :STATIC
+      The type of the mute config.
+    required: true

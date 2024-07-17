@@ -1323,7 +1323,7 @@ func (r Resource) IamImportQualifiersForTest() string {
 			if example.RegionOverride == "" {
 				importQualifiers = append(importQualifiers, "envvar.GetTestRegionFromEnv()")
 			} else {
-				importQualifiers = append(importQualifiers, example.RegionOverride)
+				importQualifiers = append(importQualifiers, fmt.Sprintf("\"%s\"", example.RegionOverride))
 			}
 		} else if param == "universe_domain" {
 			importQualifiers = append(importQualifiers, "envvar.GetTestUniverseDomainFromEnv()")

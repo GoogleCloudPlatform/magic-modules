@@ -693,6 +693,7 @@ func checkExceptionList(filePath string) bool {
 		"unordered_list_customize_diff",
 		"default_if_empty",
 		"iam/example_config_body/api_gateway_api_config.tf.erb",
+		"pre_update/bigtable_app_profile.go.erb",
 
 		// TODO: remove the following files from the exception list after all of the services are migrated to Go
 		// It will generate diffs when partial services are migrated.
