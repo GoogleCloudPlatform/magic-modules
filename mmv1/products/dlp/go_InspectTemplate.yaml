@@ -611,7 +611,7 @@ properties:
               send_empty_value: true
               allow_empty_object: true
               properties:
-                  []
+                []
             - name: 'storedType'
               type: NestedObject
               description: A reference to a StoredInfoType to use with scanning.

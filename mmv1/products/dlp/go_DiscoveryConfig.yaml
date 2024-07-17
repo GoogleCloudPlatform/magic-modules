@@ -247,7 +247,7 @@ properties:
                   send_empty_value: true
                   allow_empty_object: true
                   properties:
-                      []
+                    []
                 - name: 'tableReference'
                   type: NestedObject
                   description: The table to scan. Discovery configurations including this can only include one DiscoveryTarget (the DiscoveryTarget with this TableReference).
@@ -351,7 +351,7 @@ properties:
               send_empty_value: true
               allow_empty_object: true
               properties:
-                  []
+                []
         - name: 'cloudSqlTarget'
           type: NestedObject
           description: 'Cloud SQL target for Discovery. The first target to match a table will be the one applied.'
@@ -393,7 +393,7 @@ properties:
                   send_empty_value: true
                   allow_empty_object: true
                   properties:
-                      []
+                    []
                 - name: 'databaseResourceReference'
                   type: NestedObject
                   description: The database resource to scan. Targets including this can only include one target (the target with this database resource reference).
@@ -480,14 +480,14 @@ properties:
               send_empty_value: true
               allow_empty_object: true
               properties:
-                  []
+                []
         - name: 'secretsTarget'
           type: NestedObject
           description: Discovery target that looks for credentials and secrets stored in cloud resource metadata and reports them as vulnerabilities to Security Command Center. Only one target of this type is allowed.
           send_empty_value: true
           allow_empty_object: true
           properties:
-              []
+            []
         - name: 'cloudStorageTarget'
           type: NestedObject
           description: Cloud Storage target for Discovery. The first target to match a bucket will be the one applied.
@@ -537,7 +537,7 @@ properties:
                   send_empty_value: true
                   allow_empty_object: true
                   properties:
-                      []
+                    []
             - name: 'conditions'
               type: NestedObject
               description: In addition to matching the filter, these conditions must be true before a profile is generated.
@@ -609,7 +609,7 @@ properties:
               send_empty_value: true
               allow_empty_object: true
               properties:
-                  []
+                []
   - name: 'errors'
     type: Array
     description: Output only. A stream of errors encountered when the config was activated. Repeated errors may result in the config automatically being paused. Output only field. Will return the last 100 errors. Whenever the config is modified this list will be cleared.

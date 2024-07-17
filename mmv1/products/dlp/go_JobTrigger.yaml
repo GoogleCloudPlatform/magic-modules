@@ -206,7 +206,7 @@ properties:
           send_empty_value: true
           allow_empty_object: true
           properties:
-              []
+            []
   - name: 'inspectJob'
     type: NestedObject
     description: Controls what and how to inspect for findings.
@@ -728,7 +728,7 @@ properties:
                   send_empty_value: true
                   allow_empty_object: true
                   properties:
-                      []
+                    []
       - name: 'storageConfig'
         type: NestedObject
         description: Information on where to inspect
@@ -1125,7 +1125,7 @@ properties:
               send_empty_value: true
               allow_empty_object: true
               properties:
-                  []
+                []
             - name: 'publishFindingsToCloudDataCatalog'
               type: NestedObject
               description: |
@@ -1133,7 +1133,7 @@ properties:
               send_empty_value: true
               allow_empty_object: true
               properties:
-                  []
+                []
             - name: 'jobNotificationEmails'
               type: NestedObject
               description: |
@@ -1141,7 +1141,7 @@ properties:
               send_empty_value: true
               allow_empty_object: true
               properties:
-                  []
+                []
             - name: 'deidentify'
               type: NestedObject
               description: |
@@ -1229,4 +1229,4 @@ properties:
               send_empty_value: true
               allow_empty_object: true
               properties:
-                  []
+                []

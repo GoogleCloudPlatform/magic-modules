@@ -272,7 +272,7 @@
 <%    unless property.properties.nil? -%>
     properties:
 <%          if property.properties.length == 0 -%>
-        []
+      []
 <%          end -%>
 <%      property.properties.each do |prop| -%>
 <%= lines(indent(build_newyaml_field(prop, object, pwd), 4)) -%>

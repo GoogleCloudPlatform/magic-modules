@@ -190,7 +190,7 @@ properties:
                   send_empty_value: true
                   allow_empty_object: true
                   properties:
-                      []
+                    []
                 - name: 'allText'
                   type: NestedObject
                   description:
@@ -199,7 +199,7 @@ properties:
                   send_empty_value: true
                   allow_empty_object: true
                   properties:
-                      []
+                    []
       - name: 'infoTypeTransformations'
         type: NestedObject
         description:
@@ -1049,7 +1049,7 @@ properties:
                       send_empty_value: true
                       allow_empty_object: true
                       properties:
-                          []
+                        []
                     - name: 'cryptoHashConfig'
                       type: NestedObject
                       description: |
@@ -1410,7 +1410,7 @@ properties:
                       send_empty_value: true
                       allow_empty_object: true
                       properties:
-                          []
+                        []
                     - name: 'characterMaskConfig'
                       type: NestedObject
                       description: |
@@ -2469,7 +2469,7 @@ properties:
                                 send_empty_value: true
                                 allow_empty_object: true
                                 properties:
-                                    []
+                                  []
                               - name: 'characterMaskConfig'
                                 type: NestedObject
                                 description: |
@@ -2994,7 +2994,7 @@ properties:
                                 send_empty_value: true
                                 allow_empty_object: true
                                 properties:
-                                    []
+                                  []
                               - name: 'timePartConfig'
                                 type: NestedObject
                                 description:
