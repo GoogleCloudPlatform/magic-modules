@@ -1,0 +1,33 @@
+func vmwareenginePrivateCloudStandardTypeDiffSuppressFunc(_, old, new string, d *schema.ResourceData) bool {
+	if (old == "STANDARD" && new == "") || (old == "" && new == "STANDARD") {
+		return true
+	}
+    if (isMultiNodePrivateCloud(d) && old == "TIME_LIMITED" && new == "STANDARD") {
+        log.Printf("[DEBUG] Multinode Private Cloud found, facilitating TYPE change to STANDARD")
+        return true
+    }
+	return false
+}
+
+func isMultiNodePrivateCloud(d *schema.ResourceData) bool {
+    nodeConfigMap := d.Get("management_cluster.0.node_type_configs").(*schema.Set).List()
+    totalNodeCount := 0
+    for _, nodeConfig := range nodeConfigMap {
+        configMap, ok := nodeConfig.(map[string]interface{})
+        if !ok {
+            log.Printf("[DEBUG] Invalid node configuration format for private cloud.")
+            continue 
+        }
+        nodeCount, ok := configMap["node_count"].(int)
+        if !ok {
+            log.Printf("[DEBUG] Invalid node_count format for private cloud.")
+            continue 
+        }
+        totalNodeCount += nodeCount
+    }
+    log.Printf("[DEBUG] The node count of the private cloud is found to be %v nodes.", totalNodeCount)
+    if totalNodeCount > 2 {
+        return true
+    }
+    return false
+}
