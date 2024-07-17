@@ -97,7 +97,6 @@ examples:
   - name: 'bigquery_dataset_resource_tags'
     primary_resource_id: 'dataset'
     primary_resource_name: 'fmt.Sprintf("tf_test_dataset%s", context["random_suffix"])'
-    min_version: 'beta'
     vars:
       dataset_id: 'dataset'
       tag_key1: 'tag_key1'
@@ -404,4 +403,3 @@ properties:
       ID of the parent organization or project resource for this tag key. Tag value is expected
       to be the short name, for example "Production". See [Tag definitions](/iam/docs/tags-access-control#definitions)
       for more details.
-    min_version: 'beta'
