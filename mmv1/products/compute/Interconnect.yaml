@@ -59,6 +59,8 @@ examples:
     primary_resource_id: 'example-interconnect'
     vars:
       interconnect_name: 'example-interconnect'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  constants: templates/terraform/constants/interconnect.go.erb
 properties:
   - !ruby/object:Api::Type::String
     name: 'description'
@@ -120,6 +122,7 @@ properties:
       - :IT_PRIVATE
     required: true
     immutable: true
+    diff_suppress_func: InterconnectTypeDiffSuppress
   - !ruby/object:Api::Type::Boolean
     name: 'adminEnabled'
     send_empty_value: true
