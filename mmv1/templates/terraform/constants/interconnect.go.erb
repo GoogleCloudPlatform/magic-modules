@@ -1,0 +1,5 @@
+func InterconnectTypeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+    log.Printf("[DEBUG]zhenhuatest old %s, new %s", old, new)
+
+    return old == "IT_PRIVATE" && new == "DEDICATED"
+}
