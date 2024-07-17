@@ -398,6 +398,7 @@ func TestAccComputeRouterPeer_UpdateMd5AuthenticationKey(t *testing.T) {
 	})
 }
 
+<% unless version == "ga" -%>
 func TestAccComputeRouterPeer_addImportAndExportPolicy(t *testing.T) {
   t.Parallel()
 
@@ -420,6 +421,7 @@ func TestAccComputeRouterPeer_addImportAndExportPolicy(t *testing.T) {
     },
   })
 }
+<% end -%>
 
 func testAccCheckComputeRouterPeerDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
@@ -735,6 +737,7 @@ func testAccComputeRouterPeerWithMd5AuthKey(routerName string) string {
 		routerName, routerName)
 }
 
+<% unless version == "ga" -%>
 func testAccComputeRouterWithRoutePolicies(routerName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "foobar" {
@@ -878,6 +881,7 @@ resource "google_compute_router_peer" "foobar" {
   `, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName, routerName,
 		routerName, routerName, routerName, routerName)
 }
+<% end -%>
 
 func testAccComputeRouterPeerWithMd5AuthKeyUpdate(routerName string) string {
 	return fmt.Sprintf(`
