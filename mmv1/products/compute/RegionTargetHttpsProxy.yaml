@@ -204,3 +204,8 @@ properties:
       INTERNAL_SELF_MANAGED and which with EXTERNAL, EXTERNAL_MANAGED
       loadBalancingScheme consult ServerTlsPolicy documentation.
       If left blank, communications are not encrypted.
+    update_id: 'serverTlsPolicy'
+    fingerprint_name: 'fingerprint'
+    update_verb: :PATCH
+    update_url:
+      'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}'
