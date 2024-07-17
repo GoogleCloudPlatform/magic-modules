@@ -72,7 +72,7 @@ resource "google_workbench_instance" "<%= ctx[:primary_resource_id] %>" {
 
   disable_proxy_access = "true"
 
-  instance_owners  = "example@example.com"
+  instance_owners  = ["example@example.com"]
 
   labels = {
     k = "val"
