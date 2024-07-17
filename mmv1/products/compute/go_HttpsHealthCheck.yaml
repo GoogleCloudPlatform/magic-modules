@@ -19,7 +19,6 @@ description: |
   An HttpsHealthCheck resource. This resource defines a template for how
   individual VMs should be checked for health, via HTTPS.
 
-
   ~> **Note:** google_compute_https_health_check is a legacy health check.
   The newer [google_compute_health_check](/docs/providers/google/r/compute_health_check.html)
   should be preferred for all uses except
@@ -37,6 +36,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/global/operations/{{op_id}}'
@@ -108,7 +108,7 @@ properties:
     description: |
       The request path of the HTTPS health check request.
       The default value is /.
-    default_value: /
+    default_value: "/"
   - name: 'timeoutSec'
     type: Integer
     description: |

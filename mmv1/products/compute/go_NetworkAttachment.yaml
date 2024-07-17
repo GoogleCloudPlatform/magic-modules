@@ -17,7 +17,6 @@ name: 'NetworkAttachment'
 kind: 'compute#networkAttachment'
 description: |
   A network attachment is a resource that lets a producer Virtual Private Cloud (VPC) network initiate connections to a consumer VPC network through a Private Service Connect interface.
-min_version: 'beta'
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/vpc/docs/about-network-attachments'
@@ -30,6 +29,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
@@ -58,6 +58,7 @@ examples:
       billing_account: 'BILLING_ACCT'
   - name: 'network_attachment_instance_usage'
     primary_resource_id: 'default'
+    min_version: 'beta'
     vars:
       resource_name: 'basic-network-attachment'
       network_name: 'basic-network'
@@ -68,13 +69,11 @@ parameters:
     type: String
     description: |
       Name of the resource. Provided by the client when the resource is created. The name must be 1-63 characters long, and comply with RFC1035. Specifically, the name must be 1-63 characters long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])? which means the first character must be a lowercase letter, and all following characters must be a dash, lowercase letter, or digit, except the last character, which cannot be a dash.
-    min_version: 'beta'
     required: true
   - name: 'region'
     type: ResourceRef
     description: |
       URL of the region where the network attachment resides. This field applies only to the region resource. You must specify this field as part of the HTTP request URL. It is not settable as a field in the request body.
-    min_version: 'beta'
     required: true
     immutable: true
     default_from_api: true
@@ -85,39 +84,32 @@ properties:
   - name: 'kind'
     type: String
     description: 'Type of the resource.'
-    min_version: 'beta'
     output: true
   - name: 'id'
     type: String
     description: 'The unique identifier for the resource type. The server generates this identifier.'
-    min_version: 'beta'
     output: true
   - name: 'creationTimestamp'
     type: Time
     description: 'Creation timestamp in RFC3339 text format.'
-    min_version: 'beta'
     output: true
   - name: 'description'
     type: String
     description: |
       An optional description of this resource. Provide this property when you create the resource.
-    min_version: 'beta'
   - name: 'selfLink'
     type: String
     description: 'Server-defined URL for the resource.'
-    min_version: 'beta'
     output: true
   - name: 'selfLinkWithId'
     type: String
     description: |
       Server-defined URL for this resource's resource id.
-    min_version: 'beta'
     output: true
   - name: 'connectionPreference'
     type: Enum
     description: |
       The connection preference of service attachment. The value can be set to ACCEPT_AUTOMATIC. An ACCEPT_AUTOMATIC service attachment is one that always accepts the connection from consumer forwarding rules.
-    min_version: 'beta'
     required: true
     enum_values:
       - 'ACCEPT_AUTOMATIC'
@@ -127,7 +119,6 @@ properties:
     type: Array
     description: |
       An array of connections for all the producers connected to this network attachment.
-    min_version: 'beta'
     output: true
     item_type:
       type: NestedObject
@@ -136,37 +127,31 @@ properties:
           type: String
           description: |
             The status of a connected endpoint to this network attachment.
-          min_version: 'beta'
           output: true
         - name: 'projectIdOrNum'
           type: String
           description: |
             The project id or number of the interface to which the IP was assigned.
-          min_version: 'beta'
           output: true
         - name: 'subnetwork'
           type: String
           description: |
             The subnetwork used to assign the IP to the producer instance network interface.
-          min_version: 'beta'
           output: true
         - name: 'ipAddress'
           type: String
           description: |
             The IPv4 address assigned to the producer instance network interface. This value will be a range in case of Serverless.
-          min_version: 'beta'
           output: true
         - name: 'secondaryIpCidrRanges'
           type: String
           description: |
             Alias IP ranges from the same subnetwork.
-          min_version: 'beta'
           output: true
   - name: 'subnetworks'
     type: Array
     description: |
       An array of URLs where each entry is the URL of a subnet provided by the service consumer to use for endpoints in the producers that connect to this network attachment.
-    min_version: 'beta'
     required: true
     custom_expand: 'templates/terraform/custom_expand/go/array_resourceref_with_validation.go.tmpl'
     item_type:
@@ -180,14 +165,12 @@ properties:
     type: Array
     description: |
       Projects that are not allowed to connect to this network attachment. The project can be specified using its id or number.
-    min_version: 'beta'
     item_type:
       type: String
   - name: 'producerAcceptLists'
     type: Array
     description: |
       Projects that are allowed to connect to this network attachment. The project can be specified using its id or number.
-    min_version: 'beta'
     item_type:
       type: String
   - name: 'fingerprint'
@@ -195,12 +178,10 @@ properties:
     description: |
       Fingerprint of this resource. A hash of the contents stored in this object. This
       field is used in optimistic locking. An up-to-date fingerprint must be provided in order to patch.
-    min_version: 'beta'
     output: true
   - name: 'network'
     type: String
     description: |
       The URL of the network which the Network Attachment belongs to. Practically it is inferred by fetching the network of the first subnetwork associated.
       Because it is required that all the subnetworks must be from the same network, it is assured that the Network Attachment belongs to the same network as all the subnetworks.
-    min_version: 'beta'
     output: true

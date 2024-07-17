@@ -1,0 +1,83 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Catalog'
+description: |
+  Catalogs are top-level containers for Databases and Tables.
+references:
+  guides:
+    'Manage open source metadata with BigLake Metastore': 'https://cloud.google.com/bigquery/docs/manage-open-source-metadata#create_catalogs'
+  api: 'https://cloud.google.com/bigquery/docs/reference/biglake/rest/v1/projects.locations.catalogs'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/catalogs'
+self_link: 'projects/{{project}}/locations/{{location}}/catalogs/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/catalogs?catalogId={{name}}'
+immutable: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+examples:
+  - name: 'bigquery_biglake_catalog'
+    primary_resource_id: 'default'
+    vars:
+      name: 'my_catalog'
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The geographic location where the Catalog should reside.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'name'
+    type: String
+    description: |
+      The name of the Catalog. Format:
+      projects/{project_id_or_number}/locations/{locationId}/catalogs/{catalogId}
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'createTime'
+    type: String
+    description: |
+      Output only. The creation time of the catalog. A timestamp in RFC3339 UTC
+      "Zulu" format, with nanosecond resolution and up to nine fractional
+      digits.
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: |
+      Output only. The last modification time of the catalog. A timestamp in
+      RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine
+      fractional digits.
+    output: true
+  - name: 'deleteTime'
+    type: String
+    description: |
+      Output only. The deletion time of the catalog. Only set after the catalog
+      is deleted. A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
+      resolution and up to nine fractional digits.
+    output: true
+  - name: 'expireTime'
+    type: String
+    description: |
+      Output only. The time when this catalog is considered expired. Only set
+      after the catalog is deleted. Only set after the catalog is deleted.
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and
+      up to nine fractional digits.
+    output: true

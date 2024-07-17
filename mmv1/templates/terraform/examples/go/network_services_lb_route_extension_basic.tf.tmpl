@@ -1,5 +1,4 @@
 # Internal HTTP load balancer with a managed instance group backend
-# [START cloudloadbalancing_int_http_gce]
 # VPC network
 resource "google_compute_network" "ilb_network" {
   name                    = "{{index $.Vars "ilb_network_name"}}"
@@ -101,7 +100,7 @@ resource "google_compute_instance_template" "instance_template" {
   }
 
   disk {
-    source_image = "debian-cloud/debian-10"
+    source_image = "debian-cloud/debian-12"
     auto_delete  = true
     boot         = true
   }
@@ -188,9 +187,7 @@ resource "google_compute_firewall" "fw_ilb_to_backends" {
     google_compute_firewall.fw_iap
   ]
 }
-# [END cloudloadbalancing_int_http_gce]
 
-# [START lb_route_extension]
 resource "google_network_services_lb_route_extension" "{{$.PrimaryResourceId}}" {
   name                  = "{{index $.Vars "lb_route_extension_name"}}"
   description           = "my route extension"
@@ -349,4 +346,3 @@ resource "google_compute_region_backend_service" "callouts_backend" {
     google_compute_region_backend_service.default
   ]
 }
-# [END lb_route_extension]

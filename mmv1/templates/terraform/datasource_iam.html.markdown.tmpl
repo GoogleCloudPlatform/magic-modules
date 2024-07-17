@@ -56,10 +56,11 @@ description: |-
 
 # `{{ $.IamTerraformName }}_policy`
 Retrieves the current IAM policy data for {{ lower $.Name }}
-{{ if or (eq $.MinVersionObj.Name "beta") (eq $.IamPolicy.MinVersion "beta") }}
+{{- if or (eq $.MinVersionObj.Name "beta") (eq $.IamPolicy.MinVersion "beta") }}
 ~> **Warning:** This datasource is in beta, and should be used with the terraform-provider-google-beta provider.
 See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
 {{- end }}
+
 
 ## example
 
@@ -75,11 +76,10 @@ data "{{ $.IamTerraformName }}_policy" "policy" {
 ## Argument Reference
 
 The following arguments are supported:
-
 {{ range $param := $.IamSelfLinkProperties }}
-{{-   if eq $param.Name "name" -}}
+{{-   if eq $param.Name "name" }}
 * `{{if $.IamPolicy.ParentResourceAttribute}}{{$.IamPolicy.ParentResourceAttribute}}{{else}}{{underscore $.Name}}{{end}}` - (Required) Used to find the parent resource to bind the IAM policy to
-{{-   else if or (eq (underscore $param.Name) "region") (eq (underscore $param.Name) "zone") }}
+{{-   else if or (or (eq (underscore $param.Name) "region") (eq (underscore $param.Name) "zone")) (eq (underscore $param.Name) "location") }}
 * `{{ underscore $param.Name }}` - (Optional) {{ $param.Description }} Used to find the parent resource to bind the IAM policy to. If not specified,
   the value will be parsed from the identifier of the parent resource. If no {{ underscore $param.Name }} is provided in the parent identifier and no
   {{ underscore $param.Name }} is specified, it is taken from the provider configuration.

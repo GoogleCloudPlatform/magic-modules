@@ -135,6 +135,7 @@ properties:
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
       - !ruby/object:Api::Type::Array
         name: acceleratorConfigs
+        diff_suppress_func: WorkbenchInstanceAcceleratorDiffSuppress
         description: |
           The hardware accelerators used on this instance. If you use accelerators, make sure that your configuration has
           [enough vCPUs and memory to support the `machine_type` you have selected](https://cloud.google.com/compute/docs/gpus/#gpus-list).
@@ -270,12 +271,10 @@ properties:
         name: bootDisk
         default_from_api: true
         description: The definition of a boot disk.
-        immutable: true
         properties:
           - !ruby/object:Api::Type::String
             name: diskSizeGb
             default_from_api: true
-            immutable: true
             description: |
               Optional. The size of the boot disk in GB attached to this instance,
               up to a maximum of 64000 GB (64 TB). If not specified, this defaults to the
@@ -314,13 +313,11 @@ properties:
         description: Data disks attached to the VM instance. Currently supports only one data disk.
         max_size: 1
         default_from_api: true
-        immutable: true
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::String
               name: diskSizeGb
               default_from_api: true
-              immutable: true
               description: |
                 Optional. The size of the disk in GB attached to this VM instance,
                 up to a maximum of 64000 GB (64 TB). If not specified, this defaults to
@@ -384,6 +381,27 @@ properties:
               values:
                 - VIRTIO_NET
                 - GVNIC
+            - !ruby/object:Api::Type::Array
+              name: accessConfigs
+              immutable: true
+              default_from_api: true
+              description: |
+                Optional. An array of configurations for this interface. Currently, only one access
+                config, ONE_TO_ONE_NAT, is supported. If no accessConfigs specified, the
+                instance will have an external internet access through an ephemeral
+                external IP address.
+              item_type: !ruby/object:Api::Type::NestedObject
+                properties:
+                  - !ruby/object:Api::Type::String
+                    name: externalIp
+                    immutable: true
+                    required: true
+                    description: |
+                      An external IP address associated with this instance. Specify an unused
+                      static external IP address available to the project or leave this field
+                      undefined to use an IP from a shared ephemeral IP address pool. If you
+                      specify a static external IP address, it must live in the same region as
+                      the zone of the instance.
           description: Optional. The network interfaces for the VM. Supports only one interface.
       - !ruby/object:Api::Type::Boolean
         name: disablePublicIp

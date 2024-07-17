@@ -16,6 +16,7 @@ import (
 	"fmt"
 	"maps"
 	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
@@ -558,6 +559,15 @@ func (r *Resource) addLabelsFields(props []*Type, parent *Type, labels *Type) []
 	return props
 }
 
+func (r *Resource) HasLabelsField() bool {
+	for _, p := range r.Properties {
+		if p.Name == "labels" {
+			return true
+		}
+	}
+	return false
+}
+
 // def add_annotations_fields(props, parent, annotations)
 func (r *Resource) addAnnotationsFields(props []*Type, parent *Type, annotations *Type) []*Type {
 
@@ -583,9 +593,6 @@ func buildEffectiveLabelsField(name string, labels *Type) *Type {
 		"including the %s configured through Terraform, other clients and services.", name, name)
 
 	t := "KeyValueEffectiveLabels"
-	if name == "annotations" {
-		t = "KeyValueEffectiveAnnotations"
-	}
 
 	n := fmt.Sprintf("effective%s", strings.Title(name))
 
@@ -659,6 +666,10 @@ func getLabelsFieldNote(title string) string {
 			"in your configuration.\n"+
 			"Please refer to the field `effective_%s` for all of the %s present on the resource.",
 		title, title, title)
+}
+
+func (r Resource) StateMigrationFile() string {
+	return fmt.Sprintf("templates/terraform/state_migrations/go/%s_%s.go.tmpl", google.Underscore(r.ProductMetadata.Name), google.Underscore(r.Name))
 }
 
 // ====================
@@ -878,8 +889,11 @@ func (r Resource) HasZone() bool {
 // resource functions needed for template that previously existed in terraform.go but due to how files are being inherited here it was easier to put in here
 // taken wholesale from tpgtools
 func (r Resource) Updatable() bool {
+	if !r.Immutable {
+		return true
+	}
 	for _, p := range r.AllProperties() {
-		if !p.Immutable && !(p.Required && p.DefaultFromApi) {
+		if p.UpdateUrl != "" {
 			return true
 		}
 	}
@@ -907,6 +921,11 @@ func (r Resource) TerraformName() string {
 }
 
 func (r Resource) ImportIdFormatsFromResource() []string {
+
+	var ids []string
+	for _, id := range r.GetIdentity() {
+		ids = append(ids, google.Underscore(id.Name))
+	}
 	return ImportIdFormats(r.ImportFormat, r.Identity, r.BaseUrl)
 }
 
@@ -930,10 +949,7 @@ func ImportIdFormats(importFormat, identity []string, baseUrl string) []string {
 	var idFormats []string
 	if len(importFormat) == 0 {
 		underscoredBaseUrl := baseUrl
-		// TODO Q2: underscore base url needed?
-		// underscored_base_url = base_url.gsub(
-		//     /{{[[:word:]]+}}/, &:underscore
-		//   )
+
 		if len(identity) == 0 {
 			idFormats = []string{fmt.Sprintf("%s/{{name}}", underscoredBaseUrl)}
 		} else {
@@ -942,7 +958,7 @@ func ImportIdFormats(importFormat, identity []string, baseUrl string) []string {
 				transformedIdentity = append(transformedIdentity, fmt.Sprintf("{{%s}}", id))
 			}
 			identityPath := strings.Join(transformedIdentity, "/")
-			idFormats = []string{fmt.Sprintf("%s/{{name}}", identityPath)}
+			idFormats = []string{fmt.Sprintf("%s/%s", underscoredBaseUrl, google.Underscore(identityPath))}
 		}
 	} else {
 		idFormats = importFormat
@@ -967,15 +983,9 @@ func ImportIdFormats(importFormat, identity []string, baseUrl string) []string {
 	// `{{project}}/{{%name}}` as there is no way to differentiate between
 	// project-name/resource-name and resource-name/with-slash
 	if !strings.Contains(idFormats[0], "%") {
-		idFormats = append(idFormats, shortIdFormat, shortIdDefaultProjectFormat)
-		if shortIdDefaultProjectFormat != shortIdDefaultFormat {
-			idFormats = append(idFormats, shortIdDefaultFormat)
-		}
+		idFormats = append(idFormats, shortIdFormat, shortIdDefaultProjectFormat, shortIdDefaultFormat)
 	}
 
-	idFormats = google.Reject(slices.Compact(idFormats), func(i string) bool {
-		return i == ""
-	})
 	slices.SortFunc(idFormats, func(a, b string) int {
 		i := strings.Count(a, "/")
 		j := strings.Count(b, "/")
@@ -985,26 +995,62 @@ func ImportIdFormats(importFormat, identity []string, baseUrl string) []string {
 		return i - j
 	})
 	slices.Reverse(idFormats)
-	return idFormats
+
+	// Remove duplicates from idFormats
+	uniq := make([]string, len(idFormats))
+	uniq[0] = idFormats[0]
+	i := 1
+	j := 1
+	for j < len(idFormats) {
+		format := idFormats[j]
+		if format != uniq[i-1] {
+			uniq[i] = format
+			i++
+		}
+		j++
+	}
+
+	uniq = google.Reject(slices.Compact(uniq), func(i string) bool {
+		return i == ""
+	})
+	return uniq
 }
 
 func (r Resource) IgnoreReadPropertiesToString(e resource.Examples) string {
 	var props []string
 	for _, tp := range r.AllUserProperties() {
-		if tp.UrlParamOnly || tp.IgnoreRead || tp.IsA("ResourceRef") {
+		if tp.UrlParamOnly || tp.IsA("ResourceRef") {
 			props = append(props, fmt.Sprintf("\"%s\"", google.Underscore(tp.Name)))
 		}
 	}
 	for _, tp := range e.IgnoreReadExtra {
-		props = append(props, fmt.Sprintf("\"%s\"", google.Underscore(tp)))
+		props = append(props, fmt.Sprintf("\"%s\"", tp))
 	}
 	for _, tp := range r.IgnoreReadLabelsFields(r.PropertiesWithExcluded()) {
 		props = append(props, fmt.Sprintf("\"%s\"", google.Underscore(tp)))
 	}
+	for _, tp := range ignoreReadFields(r.AllUserProperties()) {
+		props = append(props, fmt.Sprintf("\"%s\"", tp))
+	}
 
 	slices.Sort(props)
 
-	return fmt.Sprintf("[]string{%s}", strings.Join(props, ", "))
+	if len(props) > 0 {
+		return fmt.Sprintf("[]string{%s}", strings.Join(props, ", "))
+	}
+	return ""
+}
+
+func ignoreReadFields(props []*Type) []string {
+	var fields []string
+	for _, tp := range props {
+		if tp.IgnoreRead && !tp.UrlParamOnly && !tp.IsA("ResourceRef") {
+			fields = append(fields, tp.TerraformLineage())
+		} else if tp.IsA("NestedObject") && tp.AllProperties() != nil {
+			fields = append(fields, ignoreReadFields(tp.AllProperties())...)
+		}
+	}
+	return fields
 }
 
 func (r *Resource) SetCompiler(t string) {
@@ -1277,7 +1323,7 @@ func (r Resource) IamImportQualifiersForTest() string {
 			if example.RegionOverride == "" {
 				importQualifiers = append(importQualifiers, "envvar.GetTestRegionFromEnv()")
 			} else {
-				importQualifiers = append(importQualifiers, example.RegionOverride)
+				importQualifiers = append(importQualifiers, fmt.Sprintf("\"%s\"", example.RegionOverride))
 			}
 		} else if param == "universe_domain" {
 			importQualifiers = append(importQualifiers, "envvar.GetTestUniverseDomainFromEnv()")
@@ -1342,19 +1388,29 @@ func (r Resource) GetPropertyUpdateMasksGroups(properties []*Type, maskPrefix st
 }
 
 // Formats whitespace in the style of the old Ruby generator's descriptions in documentation
-func (r Resource) FormatDocDescription(desc string) string {
-	returnString := strings.ReplaceAll(desc, "\n\n", "\n")
+func (r Resource) FormatDocDescription(desc string, indent bool) string {
+	if desc == "" {
+		return ""
+	}
+	returnString := desc
+	if indent {
+		returnString = strings.ReplaceAll(returnString, "\n\n", "\n")
+		returnString = strings.ReplaceAll(returnString, "\n", "\n  ")
 
-	returnString = strings.ReplaceAll(returnString, "\n", "\n  ")
+		// fix removing for ruby -> go transition diffs
+		returnString = strings.ReplaceAll(returnString, "\n  \n  **Note**: This field is non-authoritative,", "\n\n  **Note**: This field is non-authoritative,")
 
-	// fix removing for ruby -> go transition diffs
-	returnString = strings.ReplaceAll(returnString, "\n  \n  **Note**: This field is non-authoritative,", "\n\n  **Note**: This field is non-authoritative,")
-
-	return strings.TrimSuffix(returnString, "\n  ")
+		return fmt.Sprintf("\n  %s", strings.TrimSuffix(returnString, "\n  "))
+	}
+	return strings.TrimSuffix(returnString, "\n")
 }
 
 func (r Resource) CustomTemplate(templatePath string, appendNewline bool) string {
-	return resource.ExecuteTemplate(&r, templatePath, appendNewline)
+	output := resource.ExecuteTemplate(&r, templatePath, appendNewline)
+	if !appendNewline {
+		output = strings.TrimSuffix(output, "\n")
+	}
+	return output
 }
 
 // Returns the key of the list of resources in the List API response
@@ -1407,12 +1463,13 @@ type UpdateGroup struct {
 // def properties_without_custom_update(properties)
 func (r Resource) propertiesWithCustomUpdate(properties []*Type) []*Type {
 	return google.Reject(properties, func(p *Type) bool {
-		return p.UpdateUrl == "" || p.UpdateVerb == "" || p.UpdateVerb == "NOOP"
+		return p.UpdateUrl == "" || p.UpdateVerb == "" || p.UpdateVerb == "NOOP" ||
+			p.IsA("KeyValueTerraformLabels") || p.IsA("KeyValueLabels")
 	})
 }
 
-func (r Resource) PropertiesByCustomUpdate() map[UpdateGroup][]*Type {
-	customUpdateProps := r.propertiesWithCustomUpdate(r.RootProperties())
+func (r Resource) PropertiesByCustomUpdate(properties []*Type) map[UpdateGroup][]*Type {
+	customUpdateProps := r.propertiesWithCustomUpdate(properties)
 	groupedCustomUpdateProps := map[UpdateGroup][]*Type{}
 	for _, prop := range customUpdateProps {
 		groupedProperty := UpdateGroup{UpdateUrl: prop.UpdateUrl,
@@ -1424,12 +1481,37 @@ func (r Resource) PropertiesByCustomUpdate() map[UpdateGroup][]*Type {
 	return groupedCustomUpdateProps
 }
 
-func (r Resource) FieldSpecificUpdateMethods() bool {
-	return (len(r.PropertiesByCustomUpdate()) > 0)
+func (r Resource) PropertiesByCustomUpdateGroups() []UpdateGroup {
+	customUpdateProps := r.propertiesWithCustomUpdate(r.RootProperties())
+	var updateGroups []UpdateGroup
+	for _, prop := range customUpdateProps {
+		groupedProperty := UpdateGroup{UpdateUrl: prop.UpdateUrl,
+			UpdateVerb:      prop.UpdateVerb,
+			UpdateId:        prop.UpdateId,
+			FingerprintName: prop.FingerprintName}
+
+		if slices.Contains(updateGroups, groupedProperty) {
+			continue
+		}
+		updateGroups = append(updateGroups, groupedProperty)
+	}
+	sort.Slice(updateGroups, func(i, j int) bool {
+		a := updateGroups[i]
+		b := updateGroups[j]
+		if a.UpdateVerb != b.UpdateVerb {
+			return a.UpdateVerb > b.UpdateVerb
+		}
+		return a.UpdateId < b.UpdateId
+	})
+	return updateGroups
 }
 
-func (r Resource) CustomUpdatePropertiesByKey(updateUrl string, updateId string, fingerprintName string, updateVerb string) []*Type {
-	groupedProperties := r.PropertiesByCustomUpdate()
+func (r Resource) FieldSpecificUpdateMethods() bool {
+	return (len(r.PropertiesByCustomUpdate(r.RootProperties())) > 0)
+}
+
+func (r Resource) CustomUpdatePropertiesByKey(properties []*Type, updateUrl string, updateId string, fingerprintName string, updateVerb string) []*Type {
+	groupedProperties := r.PropertiesByCustomUpdate(properties)
 	groupedProperty := UpdateGroup{UpdateUrl: updateUrl,
 		UpdateVerb:      updateVerb,
 		UpdateId:        updateId,
@@ -1447,4 +1529,28 @@ func (r Resource) PropertyNamesToStrings(properties []*Type) []string {
 
 func (r Resource) IsExcluded() bool {
 	return r.Exclude || r.ExcludeResource
+}
+
+func (r Resource) TestExamples() []resource.Examples {
+	return google.Reject(google.Reject(r.Examples, func(e resource.Examples) bool {
+		return e.SkipTest
+	}), func(e resource.Examples) bool {
+		return e.MinVersion != "" && slices.Index(product.ORDER, r.TargetVersionName) < slices.Index(product.ORDER, e.MinVersion)
+	})
+}
+
+func (r Resource) VersionedProvider(exampleVersion string) bool {
+	vp := r.MinVersion
+	if exampleVersion != "" {
+		vp = exampleVersion
+	}
+	return vp != "" && vp != "ga"
+}
+
+func (r Resource) StateUpgradersCount() []int {
+	var nums []int
+	for i := r.StateUpgradeBaseSchemaVersion; i < r.SchemaVersion; i++ {
+		nums = append(nums, i)
+	}
+	return nums
 }

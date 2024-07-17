@@ -30,12 +30,13 @@ update_url: 'projects/{{project}}/regions/{{region}}/routers/{{router}}'
 update_verb: 'PATCH'
 delete_url: 'projects/{{project}}/regions/{{region}}/routers/{{router}}'
 delete_verb: 'PATCH'
-mutex: router/{{region}}/{{router}}
+mutex: 'router/{{region}}/{{router}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/regions/{{regions}}/operations/{{op_id}}'
@@ -150,7 +151,7 @@ properties:
       is set to MANUAL_ONLY.
     is_set: true
     send_empty_value: true
-    set_hash_func: 'computeRouterNatIPsHash'
+    set_hash_func: computeRouterNatIPsHash
     custom_expand: 'templates/terraform/custom_expand/go/array_resourceref_with_validation.go.tmpl'
     item_type:
       name: 'address'
@@ -198,7 +199,7 @@ properties:
     api_name: subnetworks
     is_set: true
     send_empty_value: true
-    set_hash_func: 'computeRouterNatSubnetworkHash'
+    set_hash_func: computeRouterNatSubnetworkHash
     item_type:
       type: NestedObject
       properties:
@@ -323,7 +324,7 @@ properties:
     description: 'A list of rules associated with this NAT.'
     is_set: true
     send_empty_value: true
-    set_hash_func: 'computeRouterNatRulesHash'
+    set_hash_func: computeRouterNatRulesHash
     item_type:
       type: NestedObject
       properties:
@@ -368,7 +369,7 @@ properties:
                 These IP addresses must be valid static external IP addresses assigned to the project.
                 This field is used for public NAT.
               is_set: true
-              set_hash_func: 'computeRouterNatIPsHash'
+              set_hash_func: computeRouterNatIPsHash
               custom_flatten: 'templates/terraform/custom_flatten/go/nat_rules_ip_set.tmpl'
               custom_expand: 'templates/terraform/custom_expand/go/array_resourceref_with_validation.go.tmpl'
               item_type:
@@ -386,7 +387,7 @@ properties:
                 These IPs should be used for updating/patching a NAT rule only.
                 This field is used for public NAT.
               is_set: true
-              set_hash_func: 'computeRouterNatIPsHash'
+              set_hash_func: computeRouterNatIPsHash
               custom_flatten: 'templates/terraform/custom_flatten/go/nat_rules_ip_set.tmpl'
               custom_expand: 'templates/terraform/custom_expand/go/array_resourceref_with_validation.go.tmpl'
               item_type:
@@ -404,7 +405,7 @@ properties:
                   This field is used for private NAT.
               is_set: true
               min_version: 'beta'
-              set_hash_func: 'computeRouterNatRulesSubnetHash'
+              set_hash_func: computeRouterNatRulesSubnetHash
               custom_flatten: 'templates/terraform/custom_flatten/go/nat_rules_subnets_set.tmpl'
               custom_expand: 'templates/terraform/custom_expand/go/array_resourceref_with_validation.go.tmpl'
               item_type:
@@ -422,7 +423,7 @@ properties:
                 This field is used for private NAT.
               is_set: true
               min_version: 'beta'
-              set_hash_func: 'computeRouterNatRulesSubnetHash'
+              set_hash_func: computeRouterNatRulesSubnetHash
               custom_flatten: 'templates/terraform/custom_flatten/go/nat_rules_subnets_set.tmpl'
               custom_expand: 'templates/terraform/custom_expand/go/array_resourceref_with_validation.go.tmpl'
               item_type:
@@ -448,7 +449,7 @@ properties:
       If `PRIVATE` NAT used for private IP translation.
     min_version: 'beta'
     immutable: true
-    default_value: PUBLIC
+    default_value: "PUBLIC"
     enum_values:
       - 'PUBLIC'
       - 'PRIVATE'

@@ -31,6 +31,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
@@ -138,7 +139,7 @@ properties:
       - name: 'direction'
         type: Enum
         description: Direction of traffic to mirror.
-        default_value: BOTH
+        default_value: "BOTH"
         enum_values:
           - 'INGRESS'
           - 'EGRESS'

@@ -22,9 +22,9 @@ references:
   guides:
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/targetVpnGateways'
 docs:
-  warning: 'Classic VPN is deprecating certain functionality on October 31, 2021. For more information,
-see the [Classic VPN partial deprecation page](https://cloud.google.com/network-connectivity/docs/vpn/deprecations/classic-vpn-deprecation).
-'
+  warning: |
+    Classic VPN is deprecating certain functionality on October 31, 2021. For more information,
+    see the [Classic VPN partial deprecation page](https://cloud.google.com/network-connectivity/docs/vpn/deprecations/classic-vpn-deprecation).
 base_url: 'projects/{{project}}/regions/{{region}}/targetVpnGateways'
 has_self_link: true
 immutable: true
@@ -33,6 +33,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
