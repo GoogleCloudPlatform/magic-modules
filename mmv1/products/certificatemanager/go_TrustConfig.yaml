@@ -1,0 +1,146 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'TrustConfig'
+description: |
+  TrustConfig represents a resource that represents your Public Key Infrastructure (PKI) configuration in Certificate Manager for use in mutual TLS authentication scenarios.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/certificate-manager/docs'
+  api: 'https://cloud.google.com/certificate-manager/docs/reference/certificate-manager/rest/v1/projects.locations.trustConfigs/create'
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/trustConfigs/{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/trustConfigs'
+self_link: 'projects/{{project}}/locations/{{location}}/trustConfigs/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/trustConfigs?trustConfigId={{name}}'
+update_verb: 'PATCH'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/trustConfigs/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+examples:
+  - name: 'certificate_manager_trust_config'
+    primary_resource_id: 'default'
+    vars:
+      trust_config_name: 'trust-config'
+  - name: 'certificate_manager_trust_config_allowlisted_certificates'
+    primary_resource_id: 'default'
+    vars:
+      trust_config_name: 'trust-config'
+parameters:
+  - name: 'name'
+    type: String
+    description: |
+      A user-defined name of the trust config. Trust config names must be unique globally.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'location'
+    type: String
+    description: |
+      The trust config location.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'createTime'
+    type: Time
+    description: |
+      The creation timestamp of a TrustConfig.
+
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      The last update timestamp of a TrustConfig.
+
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: 'Set of label tags associated with the trust config.'
+    immutable: false
+  - name: 'description'
+    type: String
+    description: |
+      One or more paragraphs of text description of a trust config.
+  - name: 'trustStores'
+    type: Array
+    description: |
+      Set of trust stores to perform validation against.
+      This field is supported when TrustConfig is configured with Load Balancers, currently not supported for SPIFFE certificate validation.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'trustAnchors'
+          type: Array
+          description: |
+            List of Trust Anchors to be used while performing validation against a given TrustStore.
+          item_type:
+            type: NestedObject
+            properties:
+              - name: 'pemCertificate'
+                type: String
+                description: |
+                  PEM root certificate of the PKI used for validation.
+                  Each certificate provided in PEM format may occupy up to 5kB.
+                sensitive: true
+        - name: 'intermediateCas'
+          type: Array
+          description: |
+            Set of intermediate CA certificates used for the path building phase of chain validation.
+            The field is currently not supported if trust config is used for the workload certificate feature.
+          item_type:
+            type: NestedObject
+            properties:
+              - name: 'pemCertificate'
+                type: String
+                description: |
+                  PEM intermediate certificate used for building up paths for validation.
+                  Each certificate provided in PEM format may occupy up to 5kB.
+                sensitive: true
+  - name: 'allowlistedCertificates'
+    type: Array
+    description: |
+       Allowlisted PEM-encoded certificates. A certificate matching an allowlisted certificate is always considered valid as long as
+       the certificate is parseable, proof of private key possession is established, and constraints on the certificate's SAN field are met.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'pemCertificate'
+          type: String
+          description: |
+            PEM certificate that is allowlisted. The certificate can be up to 5k bytes, and must be a parseable X.509 certificate.
+          required: true
