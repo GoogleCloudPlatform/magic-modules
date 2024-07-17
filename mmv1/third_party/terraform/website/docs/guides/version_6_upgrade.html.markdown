@@ -119,3 +119,10 @@ Removed in favor of field `settings.ip_configuration.ssl_mode`.
 ### `schema_settings` no longer has a default value
 
 An empty value means the setting should be cleared.
+
+## Resource: `google_cloud_run_v2_service`
+
+### `liveness_probe` no longer has a default value from API side
+
+Cloud Run does not provide a default value for liveness probe. Now removing this field
+from Terraform configuration will remove it from the Cloud Run service.
