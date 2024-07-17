@@ -1,5 +1,5 @@
-# Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -10,104 +10,121 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
---- !ruby/object:Api::Resource
-name: "BareMetalAdminCluster"
-base_url: "projects/{{project}}/locations/{{location}}/bareMetalAdminClusters"
-create_url: "projects/{{project}}/locations/{{location}}/bareMetalAdminClusters?bare_metal_admin_cluster_id={{name}}"
-update_url: "projects/{{project}}/locations/{{location}}/bareMetalAdminClusters/{{name}}"
-self_link: "projects/{{project}}/locations/{{location}}/bareMetalAdminClusters/{{name}}"
-update_verb: :PATCH
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'BareMetalAdminCluster'
+description: "A Google Bare Metal Admin Cluster."
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/bareMetalAdminClusters/{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/bareMetalAdminClusters'
+self_link: 'projects/{{project}}/locations/{{location}}/bareMetalAdminClusters/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/bareMetalAdminClusters?bare_metal_admin_cluster_id={{name}}'
+update_url: 'projects/{{project}}/locations/{{location}}/bareMetalAdminClusters/{{name}}'
+update_verb: 'PATCH'
 update_mask: true
-autogen_async: false
-id_format: "projects/{{project}}/locations/{{location}}/bareMetalAdminClusters/{{name}}"
-import_format: ["projects/{{project}}/locations/{{location}}/bareMetalAdminClusters/{{name}}"]
 skip_delete: true
-taint_resource_on_failed_create: true
-timeouts: !ruby/object:Api::Timeouts
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/bareMetalAdminClusters/{{name}}'
+timeouts:
   insert_minutes: 60
   update_minutes: 60
-description: "A Google Bare Metal Admin Cluster."
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    kind: 'gkeonprem#operation'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+taint_resource_on_failed_create: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: "gkeonprem_bare_metal_admin_cluster_basic"
-    primary_resource_id: "admin-cluster-basic"
+  - name: 'gkeonprem_bare_metal_admin_cluster_basic'
+    primary_resource_id: 'admin-cluster-basic'
     vars:
-      name: "my-cluster"
+      name: 'my-cluster'
     test_env_vars:
-      project: "fake-backend-360322"
-  - !ruby/object:Provider::Terraform::Examples
-    name: "gkeonprem_bare_metal_admin_cluster_full"
-    primary_resource_id: "admin-cluster-basic"
+      project: 'fake-backend-360322'
+  - name: 'gkeonprem_bare_metal_admin_cluster_full'
+    primary_resource_id: 'admin-cluster-basic'
     vars:
-      name: "my-cluster"
+      name: 'my-cluster'
     test_env_vars:
-      project: "fake-backend-360322"
+      project: 'fake-backend-360322'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: "name"
+  - name: 'name'
+    type: String
     description: The bare metal admin cluster name.
-    immutable: true
     url_param_only: true
     required: true
-  - !ruby/object:Api::Type::String
-    name: "location"
+    immutable: true
+  - name: 'location'
+    type: String
     description: The location of the resource.
-    immutable: true
     url_param_only: true
     required: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: "description"
+  - name: 'description'
+    type: String
     description: |
       A human readable description of this Bare Metal Admin Cluster.
-  - !ruby/object:Api::Type::String
-    name: "bareMetalVersion"
+  - name: 'bareMetalVersion'
+    type: String
     description: |
       A human readable description of this Bare Metal Admin Cluster.
-  - !ruby/object:Api::Type::String
-    name: "uid"
+  - name: 'uid'
+    type: String
     description: |
       The unique identifier of the Bare Metal Admin Cluster.
     output: true
-  - !ruby/object:Api::Type::Enum
-    name: "state"
+  - name: 'state'
+    type: Enum
     description: The current state of this cluster.
     output: true
-    values:
-      - STATE_UNSPECIFIED
-      - PROVISIONING
-      - RUNNING
-      - RECONCILING
-      - STOPPING
-      - ERROR
-      - DEGRADED
-  - !ruby/object:Api::Type::String
-    name: "endpoint"
+    enum_values:
+      - 'STATE_UNSPECIFIED'
+      - 'PROVISIONING'
+      - 'RUNNING'
+      - 'RECONCILING'
+      - 'STOPPING'
+      - 'ERROR'
+      - 'DEGRADED'
+  - name: 'endpoint'
+    type: String
     description: |
       The IP address name of Bare Metal Admin Cluster's API server.
     output: true
-  - !ruby/object:Api::Type::Boolean
-    name: "reconciling"
+  - name: 'reconciling'
+    type: Boolean
     description: |
       If set, there are currently changes in flight to the Bare Metal Admin Cluster.
     output: true
-  - !ruby/object:Api::Type::Time
-    name: "createTime"
+  - name: 'createTime'
+    type: Time
     description: |
       The time the cluster was created, in RFC3339 text format.
     output: true
-  - !ruby/object:Api::Type::Time
-    name: "updateTime"
+  - name: 'updateTime'
+    type: Time
     description: |
       The time the cluster was last updated, in RFC3339 text format.
     output: true
-  - !ruby/object:Api::Type::Time
-    name: "deleteTime"
+  - name: 'deleteTime'
+    type: Time
     description: |
       The time the cluster was deleted, in RFC3339 text format.
     output: true
-  - !ruby/object:Api::Type::String
-    name: "localName"
+  - name: 'localName'
+    type: String
     description: |
       The object name of the Bare Metal Admin Cluster custom resource on the
       associated admin cluster. This field is used to support conflicting
@@ -120,8 +137,8 @@ properties:
       kubectl and should expect to see the local name when viewing admin
       cluster controller logs.
     output: true
-  - !ruby/object:Api::Type::String
-    name: "etag"
+  - name: 'etag'
+    type: String
     description: |
       This checksum is computed by the server based on the value of other
       fields, and may be sent on update and delete requests to ensure the
@@ -129,8 +146,8 @@ properties:
       Allows clients to perform consistent read-modify-writes
       through optimistic concurrency control.
     output: true
-  - !ruby/object:Api::Type::KeyValueAnnotations
-    name: 'annotations'
+  - name: 'annotations'
+    type: KeyValueAnnotations
     description: |
       Annotations on the Bare Metal Admin Cluster.
       This field has the same restrictions as Kubernetes annotations.
@@ -140,57 +157,60 @@ properties:
       Prefix must be a DNS subdomain.
       Name must be 63 characters or less, begin and end with alphanumerics,
       with dashes (-), underscores (_), dots (.), and alphanumerics between.
-  - !ruby/object:Api::Type::NestedObject
-    name: "networkConfig"
+  - name: 'networkConfig'
+    type: NestedObject
     description: |
       Network configuration.
     properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: "islandModeCidr"
+      - name: 'islandModeCidr'
+        type: NestedObject
         exactly_one_of:
-          - network_config.0.island_mode_cidr
+          - 'network_config.0.island_mode_cidr'
         properties:
-          - !ruby/object:Api::Type::Array
-            name: "serviceAddressCidrBlocks"
-            item_type: Api::Type::String
-            required: true
+          - name: 'serviceAddressCidrBlocks'
+            type: Array
             description: |
               All services in the cluster are assigned an RFC1918 IPv4 address from these ranges. This field cannot be changed after creation.
-          - !ruby/object:Api::Type::Array
-            name: "podAddressCidrBlocks"
-            item_type: Api::Type::String
             required: true
+            item_type:
+              type: String
+          - name: 'podAddressCidrBlocks'
+            type: Array
             description: |
               All pods in the cluster are assigned an RFC1918 IPv4 address from these ranges. This field cannot be changed after creation.
-  - !ruby/object:Api::Type::NestedObject
-    name: "controlPlane"
+            required: true
+            item_type:
+              type: String
+  - name: 'controlPlane'
+    type: NestedObject
     description: |
       Specifies the control plane configuration.
     properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: "controlPlaneNodePoolConfig"
-        required: true
+      - name: 'controlPlaneNodePoolConfig'
+        type: NestedObject
         description: |
           Configures the node pool running the control plane. If specified the corresponding NodePool will be created for the cluster's control plane. The NodePool will have the same name and namespace as the cluster.
+        required: true
         properties:
-          - !ruby/object:Api::Type::NestedObject
-            name: "nodePoolConfig"
-            required: true
+          - name: 'nodePoolConfig'
+            type: NestedObject
             description: |
               The generic configuration for a node pool running the control plane.
+            required: true
             properties:
-              - !ruby/object:Api::Type::Array
-                name: "nodeConfigs"
+              - name: 'nodeConfigs'
+                type: Array
                 description: The list of machine addresses in the Bare Metal Node Pool.
-                item_type: !ruby/object:Api::Type::NestedObject
+                item_type:
+                  type: NestedObject
                   properties:
-                    - !ruby/object:Api::Type::String
-                      name: "nodeIp"
+                    - name: 'nodeIp'
+                      type: String
                       description: |
                         The default IPv4 address for SSH access and Kubernetes node.
                         Example: 192.168.0.1
-                    - !ruby/object:Api::Type::KeyValuePairs
-                      name: 'labels'
+                    - name: 'labels'
+                      type: KeyValuePairs
                       description: |
                         The map of Kubernetes labels (key/value pairs) to be applied to
                         each node. These will added in addition to any default label(s)
@@ -202,34 +222,35 @@ properties:
                           - http://kubernetes.io/v1.1/docs/user-guide/labels.html
                         An object containing a list of "key": value pairs.
                         For example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
-              - !ruby/object:Api::Type::String
-                name: "operatingSystem"
+              - name: 'operatingSystem'
+                type: String
                 description: |
                   Specifies the nodes operating system (default: LINUX).
-              - !ruby/object:Api::Type::Array
-                name: "taints"
+              - name: 'taints'
+                type: Array
                 description: |
                   The initial taints assigned to nodes of this node pool.
-                item_type: !ruby/object:Api::Type::NestedObject
+                item_type:
+                  type: NestedObject
                   properties:
-                    - !ruby/object:Api::Type::String
-                      name: "key"
+                    - name: 'key'
+                      type: String
                       description: |
                         Key associated with the effect.
-                    - !ruby/object:Api::Type::String
-                      name: "value"
+                    - name: 'value'
+                      type: String
                       description: |
                         Value associated with the effect.
-                    - !ruby/object:Api::Type::Enum
-                      name: "effect"
+                    - name: 'effect'
+                      type: Enum
                       description: |
                         Specifies the nodes operating system (default: LINUX).
-                      values:
-                        - EFFECT_UNSPECIFIED
-                        - PREFER_NO_SCHEDULE
-                        - NO_EXECUTE
-              - !ruby/object:Api::Type::KeyValuePairs
-                name: 'labels'
+                      enum_values:
+                        - 'EFFECT_UNSPECIFIED'
+                        - 'PREFER_NO_SCHEDULE'
+                        - 'NO_EXECUTE'
+              - name: 'labels'
+                type: KeyValuePairs
                 description: |
                   The map of Kubernetes labels (key/value pairs) to be applied to
                   each node. These will added in addition to any default label(s)
@@ -241,165 +262,167 @@ properties:
                     - http://kubernetes.io/v1.1/docs/user-guide/labels.html
                   An object containing a list of "key": value pairs.
                   For example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
-      - !ruby/object:Api::Type::Array
-        name: "apiServerArgs"
+      - name: 'apiServerArgs'
+        type: Array
         description: |
           Customizes the default API server args. Only a subset of
           customized flags are supported. Please refer to the API server
           documentation below to know the exact format:
           https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/
-        item_type: !ruby/object:Api::Type::NestedObject
+        item_type:
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::String
-              name: "argument"
-              required: true
+            - name: 'argument'
+              type: String
               description: |
                 The argument name as it appears on the API Server command line please make sure to remove the leading dashes.
-            - !ruby/object:Api::Type::String
-              name: "value"
               required: true
+            - name: 'value'
+              type: String
               description: |
                 The value of the arg as it will be passed to the API Server command line.
-  - !ruby/object:Api::Type::NestedObject
-    name: "loadBalancer"
+              required: true
+  - name: 'loadBalancer'
+    type: NestedObject
     description: |
       Specifies the load balancer configuration.
     properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: "vipConfig"
-        required: true
+      - name: 'vipConfig'
+        type: NestedObject
         description: |
           Specified the Bare Metal Load Balancer Config
-        properties:
-          - !ruby/object:Api::Type::String
-            name: "controlPlaneVip"
-            required: true
-            description: The VIP which you previously set aside for the Kubernetes API of this Bare Metal Admin Cluster.
-      - !ruby/object:Api::Type::NestedObject
-        name: "portConfig"
         required: true
+        properties:
+          - name: 'controlPlaneVip'
+            type: String
+            description: The VIP which you previously set aside for the Kubernetes API of this Bare Metal Admin Cluster.
+            required: true
+      - name: 'portConfig'
+        type: NestedObject
         description: |
           Specifies the load balancer ports.
+        required: true
         properties:
-          - !ruby/object:Api::Type::Integer
-            name: "controlPlaneLoadBalancerPort"
-            required: true
+          - name: 'controlPlaneLoadBalancerPort'
+            type: Integer
             description: |
               The port that control plane hosted load balancers will listen on.
-      - !ruby/object:Api::Type::NestedObject
-        name: "manualLbConfig"
-        properties:
-          - !ruby/object:Api::Type::Boolean
-            name: "enabled"
             required: true
+      - name: 'manualLbConfig'
+        type: NestedObject
+        properties:
+          - name: 'enabled'
+            type: Boolean
             description: |
               Whether manual load balancing is enabled.
-  - !ruby/object:Api::Type::NestedObject
-    name: "storage"
+            required: true
+  - name: 'storage'
+    type: NestedObject
     description: |
       Specifies the cluster storage configuration.
     properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: "lvpShareConfig"
-        required: true
+      - name: 'lvpShareConfig'
+        type: NestedObject
         description: |
           Specifies the config for local PersistentVolumes backed by
           subdirectories in a shared filesystem. These subdirectores are
           automatically created during cluster creation.
+        required: true
         properties:
-          - !ruby/object:Api::Type::NestedObject
-            name: "lvpConfig"
-            required: true
+          - name: 'lvpConfig'
+            type: NestedObject
             description: |
               Defines the machine path and storage class for the LVP Share.
+            required: true
             properties:
-              - !ruby/object:Api::Type::String
-                name: "path"
-                required: true
+              - name: 'path'
+                type: String
                 description: |
                   The host machine path.
-              - !ruby/object:Api::Type::String
-                name: "storageClass"
                 required: true
+              - name: 'storageClass'
+                type: String
                 description: |
                   The StorageClass name that PVs will be created with.
-          - !ruby/object:Api::Type::Integer
-            name: "sharedPathPvCount"
+                required: true
+          - name: 'sharedPathPvCount'
+            type: Integer
             description: |
               The number of subdirectories to create under path.
-      - !ruby/object:Api::Type::NestedObject
-        name: "lvpNodeMountsConfig"
-        required: true
+      - name: 'lvpNodeMountsConfig'
+        type: NestedObject
         description: |
           Specifies the config for local PersistentVolumes backed
           by mounted node disks. These disks need to be formatted and mounted by the
           user, which can be done before or after cluster creation.
+        required: true
         properties:
-          - !ruby/object:Api::Type::String
-            name: "path"
-            required: true
+          - name: 'path'
+            type: String
             description: |
               The host machine path.
-          - !ruby/object:Api::Type::String
-            name: "storageClass"
             required: true
+          - name: 'storageClass'
+            type: String
             description: |
               The StorageClass name that PVs will be created with.
-  - !ruby/object:Api::Type::NestedObject
-    name: "proxy"
+            required: true
+  - name: 'proxy'
+    type: NestedObject
     description: |
       Specifies the cluster proxy configuration.
     properties:
-      - !ruby/object:Api::Type::String
-        name: "uri"
-        required: true
+      - name: 'uri'
+        type: String
         description: |
           Specifies the address of your proxy server.
           For Example: http://domain
           WARNING: Do not provide credentials in the format
           of http://(username:password@)domain these will be rejected by the server.
-      - !ruby/object:Api::Type::Array
-        name: "noProxy"
-        item_type: Api::Type::String
+        required: true
+      - name: 'noProxy'
+        type: Array
         description: |
           A list of IPs, hostnames, and domains that should skip the proxy.
           For example: ["127.0.0.1", "example.com", ".corp", "localhost"].
-  - !ruby/object:Api::Type::NestedObject
-    name: "clusterOperations"
+        item_type:
+          type: String
+  - name: 'clusterOperations'
+    type: NestedObject
     description: |
       Specifies the Admin Cluster's observability infrastructure.
     properties:
-      - !ruby/object:Api::Type::Boolean
-        name: "enableApplicationLogs"
+      - name: 'enableApplicationLogs'
+        type: Boolean
         description: |
           Whether collection of application logs/metrics should be enabled (in addition to system logs/metrics).
-  - !ruby/object:Api::Type::NestedObject
-    name: "maintenanceConfig"
+  - name: 'maintenanceConfig'
+    type: NestedObject
     description: |
       Specifies the workload node configurations.
     properties:
-      - !ruby/object:Api::Type::Array
-        name: "maintenanceAddressCidrBlocks"
-        required: true
-        item_type: Api::Type::String
+      - name: 'maintenanceAddressCidrBlocks'
+        type: Array
         description: |
           All IPv4 address from these ranges will be placed into maintenance mode.
           Nodes in maintenance mode will be cordoned and drained. When both of these
           are true, the "baremetal.cluster.gke.io/maintenance" annotation will be set
           on the node resource.
-  - !ruby/object:Api::Type::NestedObject
-    name: "nodeConfig"
+        required: true
+        item_type:
+          type: String
+  - name: 'nodeConfig'
+    type: NestedObject
     description: |
       Specifies the workload node configurations.
     properties:
-      - !ruby/object:Api::Type::Integer
-        name: "maxPodsPerNode"
+      - name: 'maxPodsPerNode'
+        type: Integer
         description: |
           The maximum number of pods a node can run. The size of the CIDR range
           assigned to the node will be derived from this parameter.
-  - !ruby/object:Api::Type::NestedObject
-    name: "fleet"
-    output: true
+  - name: 'fleet'
+    type: NestedObject
     description: |
       Fleet related configuration.
       Fleets are a Google Cloud concept for logically organizing clusters,
@@ -407,22 +430,23 @@ properties:
       consistent policies across your systems.
       See [Anthos Fleets](https://cloud.google.com/anthos/multicluster-management/fleets) for
       more details on Anthos multi-cluster capabilities using Fleets.
+    output: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: "membership"
+      - name: 'membership'
+        type: String
         description: |
           The name of the managed Hub Membership resource associated to this cluster.
           Membership names are formatted as
           `projects/<project-number>/locations/<location>/memberships/<cluster-id>`.
         output: true
-  - !ruby/object:Api::Type::NestedObject
-    name: "status"
-    output: true
+  - name: 'status'
+    type: NestedObject
     description: |
       Specifies detailed cluster status.
+    output: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: "errorMessage"
+      - name: 'errorMessage'
+        type: String
         description: |
           Human-friendly representation of the error message from the admin cluster
           controller. The error message can be temporary as the admin cluster
@@ -430,134 +454,137 @@ properties:
           for a longer period of time, it can be used to surface error message to
           indicate real problems requiring user intervention.
         output: true
-      - !ruby/object:Api::Type::Array
-        name: "conditions"
+      - name: 'conditions'
+        type: Array
         description: |
           ResourceConditions provide a standard mechanism for higher-level status reporting from admin cluster controller.
         output: true
-        item_type: !ruby/object:Api::Type::NestedObject
+        item_type:
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::String
-              name: "type"
+            - name: 'type'
+              type: String
               description: |
                 Type of the condition.
                 (e.g., ClusterRunning, NodePoolRunning or ServerSidePreflightReady)
-            - !ruby/object:Api::Type::String
-              name: "reason"
+            - name: 'reason'
+              type: String
               description: |
                 Machine-readable message indicating details about last transition.
-            - !ruby/object:Api::Type::String
-              name: "message"
+            - name: 'message'
+              type: String
               description: |
                 Human-readable message indicating details about last transition.
-            - !ruby/object:Api::Type::Time
-              name: "lastTransitionTime"
+            - name: 'lastTransitionTime'
+              type: Time
               description: |
                 Last time the condition transit from one status to another.
               output: true
-            - !ruby/object:Api::Type::Enum
-              name: "state"
+            - name: 'state'
+              type: Enum
               description: The lifecycle state of the condition.
               output: true
-              values:
-                - STATE_UNSPECIFIED
-                - STATE_TRUE
-                - STATE_FALSE
-                - STATE_UNKNOWN
-  - !ruby/object:Api::Type::NestedObject
-    name: "validationCheck"
-    output: true
+              enum_values:
+                - 'STATE_UNSPECIFIED'
+                - 'STATE_TRUE'
+                - 'STATE_FALSE'
+                - 'STATE_UNKNOWN'
+  - name: 'validationCheck'
+    type: NestedObject
     description: |
       Specifies the security related settings for the Bare Metal Admin Cluster.
+    output: true
     properties:
-      - !ruby/object:Api::Type::Enum
-        name: "options"
+      - name: 'options'
+        type: Enum
         description: Options used for the validation check.
         output: true
-        values:
-          - OPTIONS_UNSPECIFIED
-          - SKIP_VALIDATION_CHECK_BLOCKING
-          - SKIP_VALIDATION_ALL
-      - !ruby/object:Api::Type::NestedObject
-        name: "status"
-        output: true
+        enum_values:
+          - 'OPTIONS_UNSPECIFIED'
+          - 'SKIP_VALIDATION_CHECK_BLOCKING'
+          - 'SKIP_VALIDATION_ALL'
+      - name: 'status'
+        type: NestedObject
         description: |
           Specifies the detailed validation check status
+        output: true
         properties:
-          - !ruby/object:Api::Type::Array
-            name: "result"
+          - name: 'result'
+            type: Array
             description: Individual checks which failed as part of the Preflight check execution.
             output: true
-            item_type: !ruby/object:Api::Type::NestedObject
+            item_type:
+              type: NestedObject
               properties:
-                - !ruby/object:Api::Type::Enum
-                  name: "options"
+                - name: 'options'
+                  type: Enum
                   description: Options used for the validation check.
                   output: true
-                  values:
-                    - STATE_UNKNOWN
-                    - STATE_FAILURE
-                    - STATE_SKIPPED
-                    - STATE_UNKNOWN
-                    - STATE_FATAL
-                    - STATE_WARNING
-                - !ruby/object:Api::Type::String
-                  name: "description"
+                  enum_values:
+                    - 'STATE_UNKNOWN'
+                    - 'STATE_FAILURE'
+                    - 'STATE_SKIPPED'
+                    - 'STATE_UNKNOWN'
+                    - 'STATE_FATAL'
+                    - 'STATE_WARNING'
+                - name: 'description'
+                  type: String
                   description: |
                     The description of the validation check.
                   output: true
-                - !ruby/object:Api::Type::String
-                  name: "category"
+                - name: 'category'
+                  type: String
                   description: |
                     The category of the validation.
                   output: true
-                - !ruby/object:Api::Type::String
-                  name: "reason"
+                - name: 'reason'
+                  type: String
                   description: |
                     A human-readable message of the check failure.
                   output: true
-                - !ruby/object:Api::Type::String
-                  name: "details"
+                - name: 'details'
+                  type: String
                   description: |
                     Detailed failure information, which might be unformatted.
                   output: true
-      - !ruby/object:Api::Type::Enum
-        name: "scenario"
+      - name: 'scenario'
+        type: Enum
         description: The scenario when the preflight checks were run..
         output: true
-        values:
-          - SCENARIO_UNSPECIFIED
-          - CREATE
-          - UPDATE
-  - !ruby/object:Api::Type::NestedObject
-    name: "nodeAccessConfig"
+        enum_values:
+          - 'SCENARIO_UNSPECIFIED'
+          - 'CREATE'
+          - 'UPDATE'
+  - name: 'nodeAccessConfig'
+    type: NestedObject
     description: |
       Specifies the node access related settings for the bare metal user cluster.
     properties:
-      - !ruby/object:Api::Type::String
-        name: "loginUser"
-        required: false
+      - name: 'loginUser'
+        type: String
         description: |
           LoginUser is the user name used to access node machines.
           It defaults to "root" if not set.
-  - !ruby/object:Api::Type::NestedObject
-    name: "securityConfig"
+        required: false
+  - name: 'securityConfig'
+    type: NestedObject
     description: |
       Specifies the security related settings for the Bare Metal User Cluster.
     properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: "authorization"
+      - name: 'authorization'
+        type: NestedObject
         description: |
           Configures user access to the Bare Metal User cluster.
         properties:
-          - !ruby/object:Api::Type::Array
-            name: "adminUsers"
-            required: true
+          - name: 'adminUsers'
+            type: Array
             description: Users that will be granted the cluster-admin role on the cluster, providing full access to the cluster.
-            item_type: !ruby/object:Api::Type::NestedObject
+            required: true
+            item_type:
+              type: NestedObject
               properties:
-                - !ruby/object:Api::Type::String
-                  name: "username"
-                  required: true
+                - name: 'username'
+                  type: String
                   description: |
                     The name of the user, e.g. `my-gcp-id@gmail.com`.
+                  required: true
