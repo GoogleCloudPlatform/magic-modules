@@ -10,6 +10,7 @@ import (
 
 	<% if version == 'ga' -%>
 	"github.com/hashicorp/terraform-provider-google/google/services/composer"
+	"github.com/hashicorp/terraform-provider-google/google/services/siteverification"
 	<% end -%>
 	"github.com/hashicorp/terraform-provider-google/google/services/container"
 	"github.com/hashicorp/terraform-provider-google/google/services/containeraws"
@@ -183,6 +184,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_service_account_id_token":                  resourcemanager.DataSourceGoogleServiceAccountIdToken(),
 	"google_service_account_jwt":                       resourcemanager.DataSourceGoogleServiceAccountJwt(),
 	"google_service_account_key":                       resourcemanager.DataSourceGoogleServiceAccountKey(),
+	"google_site_verification_token":                   siteverification.DataSourceSiteVerificationToken(),
 	"google_sourcerepo_repository":                     sourcerepo.DataSourceGoogleSourceRepoRepository(),
 	"google_spanner_instance":                          spanner.DataSourceSpannerInstance(),
 	"google_sql_ca_certs":                              sql.DataSourceGoogleSQLCaCerts(),

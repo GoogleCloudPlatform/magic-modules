@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package bigquery
 
 import (
@@ -1251,7 +1250,6 @@ func ResourceBigQueryTable() *schema.Resource {
 				Description: `Whether Terraform will be prevented from destroying the instance. When the field is set to true or unset in Terraform state, a terraform apply or terraform destroy that would delete the table will fail. When the field is set to false, deleting the table is allowed.`,
 			},
 
-			<% unless version == 'ga' -%>
 			"allow_resource_tags_on_deletion": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -1259,7 +1257,6 @@ func ResourceBigQueryTable() *schema.Resource {
 				Description: `Whether or not to allow table deletion when there are still resource tags attached.`,
 			},
 
-			<% end -%>
 			// TableConstraints: [Optional] Defines the primary key and foreign keys.
 			"table_constraints": {
 				Type:        schema.TypeList,
@@ -1409,14 +1406,12 @@ func ResourceBigQueryTable() *schema.Resource {
 					},
 				},
 			},
-			<% unless version == 'ga' -%>
 			"resource_tags": {
 				Type:        schema.TypeMap,
 				Optional:    true,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Description: `The tags attached to this table. Tag keys are globally unique. Tag key is expected to be in the namespaced format, for example "123456789012/environment" where 123456789012 is the ID of the parent organization or project resource for this tag key. Tag value is expected to be the short name, for example "Production".`,
 			},
-			<% end -%>
 		},
 		UseJSONNumber: true,
 	}
@@ -1531,10 +1526,8 @@ func resourceTable(d *schema.ResourceData, meta interface{}) (*bigquery.Table, e
 		table.TableConstraints = tableConstraints
 	}
 
-  <% unless version == 'ga' -%>
 	table.ResourceTags = tpgresource.ExpandStringMap(d, "resource_tags")
 
-	<% end -%>
 	return table, nil
 }
 
@@ -1808,12 +1801,10 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	<% unless version == 'ga' -%>
 	if err := d.Set("resource_tags", res.ResourceTags); err != nil {
 		return fmt.Errorf("Error setting resource tags: %s", err)
 	}
 
-  <% end -%>
 	// TODO: Update when the Get API fields for TableReplicationInfo are available in the client library.
 	url, err := tpgresource.ReplaceVars(d, config, "{{BigQueryBasePath}}projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}")
 	if err != nil {
@@ -1935,7 +1926,6 @@ func resourceBigQueryTableDelete(d *schema.ResourceData, meta interface{}) error
 	if d.Get("deletion_protection").(bool) {
 		return fmt.Errorf("cannot destroy table %v without setting deletion_protection=false and running `terraform apply`", d.Id())
 	}
-	<% unless version == 'ga' -%>
 	if v, ok := d.GetOk("resource_tags"); ok {
 		if !d.Get("allow_resource_tags_on_deletion").(bool) {
 			var resourceTags []string
@@ -1948,7 +1938,6 @@ func resourceBigQueryTableDelete(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
-	<% end -%>
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -2446,7 +2435,7 @@ func expandBigtableColumn(configured interface{}) *bigquery.BigtableColumn {
 	raw := configured.(map[string]interface{})
 
 	opts := &bigquery.BigtableColumn{}
-	
+
 	if v, ok := raw["qualifier_encoded"]; ok {
 		opts.QualifierEncoded = v.(string)
 	}
@@ -2945,11 +2934,9 @@ func resourceBigQueryTableImport(d *schema.ResourceData, meta interface{}) ([]*s
 	if err := d.Set("deletion_protection", true); err != nil {
 		return nil, fmt.Errorf("Error setting deletion_protection: %s", err)
 	}
-	<% unless version == 'ga' -%>
 	if err := d.Set("allow_resource_tags_on_deletion", false); err != nil {
 		return nil, fmt.Errorf("Error setting allow_resource_tags_on_deletion: %s", err)
 	}
-	<% end -%>
 
 	// Replace import id for the resource id
 	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}")
