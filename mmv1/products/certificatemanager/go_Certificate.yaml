@@ -1,0 +1,282 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Certificate'
+description: |
+  Certificate represents a HTTP-reachable backend for a Certificate.
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/certificates/{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/certificates'
+self_link: 'projects/{{project}}/locations/{{location}}/certificates/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/certificates?certificateId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/certificates/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+  constants: 'templates/terraform/constants/go/cert_manager.tmpl'
+schema_version: 1
+state_upgraders: true
+examples:
+  - name: 'certificate_manager_google_managed_certificate_dns'
+    primary_resource_id: 'default'
+    vars:
+      dns_auth_name: 'dns-auth'
+      dns_auth_subdomain: 'subdomain'
+      dns_auth_name2: 'dns-auth2'
+      dns_auth_subdomain2: 'subdomain2'
+      cert_name: 'dns-cert'
+  - name: 'certificate_manager_google_managed_certificate_issuance_config'
+    primary_resource_id: 'default'
+    vars:
+      cert_name: 'issuance-config-cert'
+      ca_name: 'ca-authority'
+      pool_name: 'ca-pool'
+      issuance_config_name: 'issuance-config'
+  - name: 'certificate_manager_self_managed_certificate'
+    primary_resource_id: 'default'
+    vars:
+      cert_name: 'self-managed-cert'
+  - name: 'certificate_manager_self_managed_certificate_regional'
+    primary_resource_id: 'default'
+    vars:
+      cert_name: 'self-managed-cert'
+  - name: 'certificate_manager_google_managed_certificate_issuance_config_all_regions'
+    primary_resource_id: 'default'
+    vars:
+      cert_name: 'issuance-config-cert'
+      ca_name: 'ca-authority'
+      pool_name: 'ca-pool'
+      issuance_config_name: 'issuance-config'
+  - name: 'certificate_manager_google_managed_certificate_dns_all_regions'
+    primary_resource_id: 'default'
+    vars:
+      dns_auth_name: 'dns-auth'
+      dns_auth_subdomain: 'subdomain'
+      dns_auth_name2: 'dns-auth2'
+      dns_auth_subdomain2: 'subdomain2'
+      cert_name: 'dns-cert'
+  - name: 'certificate_manager_google_managed_regional_certificate_dns_auth'
+    primary_resource_id: 'default'
+    vars:
+      dns_auth_name: 'dns-auth'
+      dns_auth_subdomain: 'subdomain'
+      cert_name: 'dns-cert'
+parameters:
+  - name: 'name'
+    type: String
+    description: |
+      A user-defined name of the certificate. Certificate names must be unique
+      The name must be 1-64 characters long, and match the regular expression [a-zA-Z][a-zA-Z0-9_-]* which means the first character must be a letter,
+      and all following characters must be a dash, underscore, letter or digit.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'location'
+    type: String
+    description: |
+      The Certificate Manager location. If not specified, "global" is used.
+    url_param_only: true
+    immutable: true
+    default_value: "global"
+properties:
+  - name: 'description'
+    type: String
+    description: |
+      A human-readable description of the resource.
+  - name: 'labels'
+    type: KeyValueLabels
+    description: 'Set of label tags associated with the Certificate resource.'
+    immutable: false
+  - name: 'scope'
+    type: String
+    description: |
+      The scope of the certificate.
+
+      DEFAULT: Certificates with default scope are served from core Google data centers.
+      If unsure, choose this option.
+
+      EDGE_CACHE: Certificates with scope EDGE_CACHE are special-purposed certificates, served from Edge Points of Presence.
+      See https://cloud.google.com/vpc/docs/edge-locations.
+
+      ALL_REGIONS: Certificates with ALL_REGIONS scope are served from all GCP regions (You can only use ALL_REGIONS with global certs).
+      See https://cloud.google.com/compute/docs/regions-zones
+    immutable: true
+    diff_suppress_func: 'certManagerDefaultScopeDiffSuppress'
+    default_value: "DEFAULT"
+  - name: 'selfManaged'
+    type: NestedObject
+    description: |
+      Certificate data for a SelfManaged Certificate.
+      SelfManaged Certificates are uploaded by the user. Updating such
+      certificates before they expire remains the user's responsibility.
+    immutable: true
+    ignore_read: true
+    exactly_one_of:
+      - 'self_managed'
+      - 'managed'
+    properties:
+      - name: 'certificatePem'
+        type: String
+        description: |
+          The certificate chain in PEM-encoded form.
+
+          Leaf certificate comes first, followed by intermediate ones if any.
+        immutable: true
+        sensitive: true
+        exactly_one_of:
+          - 'self_managed.0.certificate_pem'
+          - 'self_managed.0.pem_certificate'
+        deprecation_message: '`certificate_pem` is deprecated and will be removed in a future major release. Use `pem_certificate` instead.'
+      - name: 'privateKeyPem'
+        type: String
+        description: |
+          The private key of the leaf certificate in PEM-encoded form.
+        immutable: true
+        sensitive: true
+        exactly_one_of:
+          - 'self_managed.0.private_key_pem'
+          - 'self_managed.0.pem_private_key'
+        deprecation_message: '`private_key_pem` is deprecated and will be removed in a future major release. Use `pem_private_key` instead.'
+      - name: 'pemCertificate'
+        type: String
+        description: |
+          The certificate chain in PEM-encoded form.
+
+          Leaf certificate comes first, followed by intermediate ones if any.
+        immutable: true
+        exactly_one_of:
+          - 'self_managed.0.certificate_pem'
+          - 'self_managed.0.pem_certificate'
+      - name: 'pemPrivateKey'
+        type: String
+        description: |
+          The private key of the leaf certificate in PEM-encoded form.
+        immutable: true
+        sensitive: true
+        exactly_one_of:
+          - 'self_managed.0.private_key_pem'
+          - 'self_managed.0.pem_private_key'
+  - name: 'managed'
+    type: NestedObject
+    description: |
+      Configuration and state of a Managed Certificate.
+      Certificate Manager provisions and renews Managed Certificates
+      automatically, for as long as it's authorized to do so.
+    immutable: true
+    exactly_one_of:
+      - 'self_managed'
+      - 'managed'
+    properties:
+      - name: 'domains'
+        type: Array
+        description: |
+          The domains for which a managed SSL certificate will be generated.
+          Wildcard domains are only supported with DNS challenge resolution
+        immutable: true
+        item_type:
+          type: String
+      - name: 'dnsAuthorizations'
+        type: Array
+        description: |
+          Authorizations that will be used for performing domain authorization. Either issuanceConfig or dnsAuthorizations should be specificed, but not both.
+        immutable: true
+        diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+        item_type:
+          type: String
+      - name: 'issuanceConfig'
+        type: String
+        description: |
+          The resource name for a CertificateIssuanceConfig used to configure private PKI certificates in the format projects/*/locations/*/certificateIssuanceConfigs/*.
+          If this field is not set, the certificates will instead be publicly signed as documented at https://cloud.google.com/load-balancing/docs/ssl-certificates/google-managed-certs#caa.
+          Either issuanceConfig or dnsAuthorizations should be specificed, but not both.
+
+        # when the certificate is created with issuanceConfig in the format "projects/{{project_id}}/locations/global/certificateIssuanceConfigs/{{CICName}}", the
+        # format changes in the response message to "projects/{{project_number}}/locations/global/certificateIssuanceConfigs/{{CICName}}". That causes the tests to fail
+        # that's why "tpgresource.CompareResourceNames" is needed.
+        immutable: true
+        diff_suppress_func: 'tpgresource.CompareResourceNames'
+      - name: 'state'
+        type: String
+        description: |
+          A state of this Managed Certificate.
+        output: true
+      - name: 'provisioningIssue'
+        type: NestedObject
+        description: |
+          Information about issues with provisioning this Managed Certificate.
+        output: true
+        properties:
+          - name: 'reason'
+            type: String
+            description: |
+              Reason for provisioning failures.
+            output: true
+          - name: 'details'
+            type: String
+            description: |
+              Human readable explanation about the issue. Provided to help address
+              the configuration issues.
+              Not guaranteed to be stable. For programmatic access use `reason` field.
+            output: true
+      - name: 'authorizationAttemptInfo'
+        type: Array
+        description: |
+          Detailed state of the latest authorization attempt for each domain
+          specified for this Managed Certificate.
+        output: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'domain'
+              type: String
+              description: |
+                Domain name of the authorization attempt.
+              output: true
+            - name: 'state'
+              type: String
+              description: |
+                State of the domain for managed certificate issuance.
+              output: true
+            - name: 'failureReason'
+              type: String
+              description: |
+                Reason for failure of the authorization attempt for the domain.
+              output: true
+            - name: 'details'
+              type: String
+              description: |
+                Human readable explanation for reaching the state. Provided to help
+                address the configuration issues.
+                Not guaranteed to be stable. For programmatic access use `failure_reason` field.
+              output: true
