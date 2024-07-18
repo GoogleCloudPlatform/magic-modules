@@ -149,6 +149,10 @@ func ResourceGoogleProject() *schema.Resource {
 	}
 }
 
+func expandTags(d TerraformResourceData) map[string]string {
+	return tpgresource.ExpandStringMap(d, "tags")
+}
+
 func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
@@ -178,7 +182,11 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 	}
 
 	if _, ok := d.GetOk("tags"); ok {
+<<<<<<< HEAD
 		project.Tags = tpgresource.ExpandStringMap(d, "tags")
+=======
+		project.Tags = expandTags(d)
+>>>>>>> 418d186a75dfd9c8c5b57124d9c97415498671b6
 	}
 
 	var op *cloudresourcemanager.Operation
