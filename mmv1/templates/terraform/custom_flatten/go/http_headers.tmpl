@@ -27,7 +27,7 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
     }
   }
   r := regexp.MustCompile(`(X-Google-|X-AppEngine-|Content-Length).*`)
-  for key, _ := range headers { 
+  for key := range headers { 
     if r.MatchString(key) {
       delete(headers, key)
     }
