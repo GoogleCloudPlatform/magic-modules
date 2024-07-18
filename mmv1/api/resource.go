@@ -1027,7 +1027,7 @@ func (r Resource) IgnoreReadPropertiesToString(e resource.Examples) string {
 		props = append(props, fmt.Sprintf("\"%s\"", tp))
 	}
 	for _, tp := range r.IgnoreReadLabelsFields(r.PropertiesWithExcluded()) {
-		props = append(props, fmt.Sprintf("\"%s\"", google.Underscore(tp)))
+		props = append(props, fmt.Sprintf("\"%s\"", tp))
 	}
 	for _, tp := range ignoreReadFields(r.AllUserProperties()) {
 		props = append(props, fmt.Sprintf("\"%s\"", tp))
@@ -1293,6 +1293,21 @@ func (r Resource) IamParentSourceType() string {
 		t = r.TerraformName()
 	}
 	return t
+}
+
+func (r Resource) IamImportFormat() string {
+	var importFormat string
+	if len(r.IamPolicy.ImportFormat) > 0 {
+		importFormat = r.IamPolicy.ImportFormat[0]
+	} else {
+		importFormat = r.IamPolicy.SelfLink
+		if importFormat == "" {
+			importFormat = r.SelfLinkUrl()
+		}
+	}
+
+	importFormat = regexp.MustCompile(`\{\{%?(\w+)\}\}`).ReplaceAllString(importFormat, "%s")
+	return strings.ReplaceAll(importFormat, r.ProductMetadata.BaseUrl, "")
 }
 
 func (r Resource) IamImportQualifiersForTest() string {
