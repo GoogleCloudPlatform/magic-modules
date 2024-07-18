@@ -74,6 +74,7 @@ examples:
       instance_name: 'workbench-instance'
       network_name: 'wbi-test-default'
     test_env_vars:
+      project_name: :PROJECT_NAME
       service_account: :SERVICE_ACCT
     ignore_read_extra:
       - 'desired_state'
