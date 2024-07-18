@@ -3,46 +3,46 @@ package gkeonprem_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccGkeonpremBareMetalNodePool_bareMetalNodePoolUpdate(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  context := map[string]interface{}{
-    "random_suffix": acctest.RandString(t, 10),
-  }
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    CheckDestroy:             testAccCheckGkeonpremBareMetalNodePoolDestroyProducer(t),
-    Steps: []resource.TestStep{
-      {
-        Config: testAccGkeonpremBareMetalNodePool_bareMetalNodePoolUpdateStart(context),
-      },
-      {
-        ResourceName:      "google_gkeonprem_bare_metal_node_pool.nodepool",
-        ImportState:       true,
-        ImportStateVerify: true,
-        ImportStateVerifyIgnore: []string{"annotations"},
-      },
-      {
-        Config: testAccGkeonpremBareMetalNodePool_bareMetalNodePoolUpdate(context),
-      },
-      {
-        ResourceName:      "google_gkeonprem_bare_metal_node_pool.nodepool",
-        ImportState:       true,
-        ImportStateVerify: true,
-        ImportStateVerifyIgnore: []string{"annotations"},
-      },
-    },
-  })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckGkeonpremBareMetalNodePoolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccGkeonpremBareMetalNodePool_bareMetalNodePoolUpdateStart(context),
+			},
+			{
+				ResourceName:            "google_gkeonprem_bare_metal_node_pool.nodepool",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"annotations"},
+			},
+			{
+				Config: testAccGkeonpremBareMetalNodePool_bareMetalNodePoolUpdate(context),
+			},
+			{
+				ResourceName:            "google_gkeonprem_bare_metal_node_pool.nodepool",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"annotations"},
+			},
+		},
+	})
 }
 
 func testAccGkeonpremBareMetalNodePool_bareMetalNodePoolUpdateStart(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 
   resource "google_gkeonprem_bare_metal_cluster" "cluster" {
     name = "tf-test-cluster-%{random_suffix}"
@@ -134,7 +134,7 @@ func testAccGkeonpremBareMetalNodePool_bareMetalNodePoolUpdateStart(context map[
 }
 
 func testAccGkeonpremBareMetalNodePool_bareMetalNodePoolUpdate(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 
   resource "google_gkeonprem_bare_metal_cluster" "cluster" {
     name = "tf-test-cluster-%{random_suffix}"
