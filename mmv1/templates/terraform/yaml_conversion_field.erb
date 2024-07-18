@@ -168,6 +168,9 @@
       type: <%= property.item_type.type.to_s.gsub("Api::Type::", "") %>
 <%        unless property.item_type.properties.nil? -%>
       properties:
+<%          if property.item_type.properties.length == 0 -%>
+        []
+<%          end -%>
 <%          property.item_type.properties.each do |prop| -%>
 <%=   lines(indent(build_newyaml_field(prop, object, pwd), 6)) -%>
 <%          end -%>
@@ -253,6 +256,9 @@
       type: <%= property.value_type.type.to_s.gsub("Api::Type::", "") %>
 <%        unless property.value_type.properties.nil? -%>
       properties:
+<%          if property.value_type.properties.length == 0 -%>
+        []
+<%          end -%>
 <%          property.value_type.properties.each do |prop| -%>
 <%=   lines(indent(build_newyaml_field(prop, object, pwd), 6)) -%>
 <%          end -%>
@@ -265,6 +271,9 @@
 <%  if property.is_a?(Api::Type::NestedObject) -%>
 <%    unless property.properties.nil? -%>
     properties:
+<%          if property.properties.length == 0 -%>
+      []
+<%          end -%>
 <%      property.properties.each do |prop| -%>
 <%= lines(indent(build_newyaml_field(prop, object, pwd), 4)) -%>
 <%      end -%>

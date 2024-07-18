@@ -28,9 +28,19 @@ func TestAccProjectServiceIdentity_basic(t *testing.T) {
 						}
 						return fmt.Errorf("hc_sa service identity email value was %s, expected a valid email", value)
 					}),
+					// Member field for healthcare service account should be non-empty, start with "serviceAccount:" and contain at least an "@".
+					resource.TestCheckResourceAttrWith("google_project_service_identity.hc_sa", "member", func(value string) error {
+						if strings.HasPrefix(value, "serviceAccount:") && strings.Contains(value, "@") {
+							return nil
+						}
+						return fmt.Errorf("hc_sa service identity member value was %s, expected a valid email with prefix serviceAccount:", value)
+					}),
 					// Email field for logging service identity will be empty for as long as
 					// `gcloud beta services identity create --service=logging.googleapis.com` doesn't return an email address
 					resource.TestCheckNoResourceAttr("google_project_service_identity.log_sa", "email"),
+					// Member field for logging service identity will be empty for as long as
+					// `gcloud beta services identity create --service=logging.googleapis.com` doesn't return an email address
+					resource.TestCheckNoResourceAttr("google_project_service_identity.log_sa", "member"),
 				),
 			},
 		},

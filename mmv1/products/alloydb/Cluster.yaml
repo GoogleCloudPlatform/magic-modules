@@ -18,6 +18,13 @@ docs: !ruby/object:Provider::Terraform::Docs
     Users can promote a secondary cluster to a primary cluster with the help of `cluster_type`.
     To promote, users have to set the `cluster_type` property as `PRIMARY` and remove the `secondary_config` field from cluster configuration.
     [See Example](https://github.com/hashicorp/terraform-provider-google/pull/16413).
+
+    Switchover is supported in terraform by refreshing the state of the terraform configurations.
+    The switchover operation still needs to be called outside of terraform.
+    After the switchover operation is completed successfully:
+      1. Refresh the state of the AlloyDB resources by running `terraform apply -refresh-only --auto-approve` .
+      2. Manually update the terraform configuration file(s) to match the actual state of the resources by modifying the `cluster_type` and `secondary_config` fields.
+      3. Verify the sync of terraform state by running `terraform plan` and ensure that the infrastructure matches the configuration and no changes are required.
 self_link: 'projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/clusters'
 create_url: 'projects/{{project}}/locations/{{location}}/clusters?clusterId={{cluster_id}}'

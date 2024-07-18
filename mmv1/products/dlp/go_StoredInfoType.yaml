@@ -1,0 +1,239 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'StoredInfoType'
+description: |
+  Allows creation of custom info types.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/dlp/docs/creating-stored-infotypes'
+  api: 'https://cloud.google.com/dlp/docs/reference/rest/v2/projects.storedInfoTypes'
+docs:
+id_format: '{{parent}}/storedInfoTypes/{{name}}'
+base_url: '{{parent}}/storedInfoTypes'
+self_link: '{{parent}}/storedInfoTypes/{{name}}'
+create_url: '{{parent}}/storedInfoTypes'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  type: 'PollAsync'
+  check_response_func_existence: 'transport_tpg.PollCheckForExistence'
+  check_response_func_absence: 'transport_tpg.PollCheckForAbsence'
+  suppress_error: false
+  target_occurrences: 1
+  actions: ['create']
+custom_code:
+  constants: 'templates/terraform/constants/go/dlp_stored_info_type.go.tmpl'
+  encoder: 'templates/terraform/encoders/go/dlp_stored_info_type.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/go/dlp_stored_info_type.go.tmpl'
+  decoder: 'templates/terraform/decoders/go/dlp_stored_info_type.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/go/dlp_import.go.tmpl'
+custom_diff:
+  - 'storedInfoTypeCustomizeDiff'
+skip_sweeper: true
+examples:
+  - name: 'dlp_stored_info_type_basic'
+    primary_resource_id: 'basic'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+  - name: 'dlp_stored_info_type_dictionary'
+    primary_resource_id: 'dictionary'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+  - name: 'dlp_stored_info_type_large_custom_dictionary'
+    primary_resource_id: 'large'
+    vars:
+      bucket_name: 'tf-test-bucket'
+      object_name: 'tf-test-object'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+  - name: 'dlp_stored_info_type_with_id'
+    primary_resource_id: 'with_stored_info_type_id'
+    vars:
+      name: 'id-'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+parameters:
+  - name: 'parent'
+    type: String
+    description: |
+      The parent of the info type in any of the following formats:
+
+      * `projects/{{project}}`
+      * `projects/{{project}}/locations/{{location}}`
+      * `organizations/{{organization_id}}`
+      * `organizations/{{organization_id}}/locations/{{location}}`
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The resource name of the info type. Set by the server.
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+  - name: 'description'
+    type: String
+    description: |
+      A description of the info type.
+  - name: 'displayName'
+    type: String
+    description: |
+      User set display name of the info type.
+  - name: 'storedInfoTypeId'
+    type: String
+    description: |
+      The storedInfoType ID can contain uppercase and lowercase letters, numbers, and hyphens;
+      that is, it must match the regular expression: [a-zA-Z\d-_]+. The maximum length is 100
+      characters. Can be empty to allow the system to generate one.
+    url_param_only: true
+    immutable: true
+    default_from_api: true
+  - name: 'regex'
+    type: NestedObject
+    description: Regular expression which defines the rule.
+    exactly_one_of:
+      - 'dictionary'
+      - 'regex'
+      - 'large_custom_dictionary'
+    properties:
+      - name: 'pattern'
+        type: String
+        description: |
+          Pattern defining the regular expression.
+          Its syntax (https://github.com/google/re2/wiki/Syntax) can be found under the google/re2 repository on GitHub.
+        required: true
+      - name: 'groupIndexes'
+        type: Array
+        description: |
+          The index of the submatch to extract as findings. When not specified, the entire match is returned. No more than 3 may be included.
+        item_type:
+          type: Integer
+  - name: 'dictionary'
+    type: NestedObject
+    description: Dictionary which defines the rule.
+    exactly_one_of:
+      - 'dictionary'
+      - 'regex'
+      - 'large_custom_dictionary'
+    properties:
+      - name: 'wordList'
+        type: NestedObject
+        description: List of words or phrases to search for.
+        exactly_one_of:
+          - 'dictionary.0.word_list'
+          - 'dictionary.0.cloud_storage_path'
+        properties:
+          - name: 'words'
+            type: Array
+            description: |
+              Words or phrases defining the dictionary. The dictionary must contain at least one
+              phrase and every phrase must contain at least 2 characters that are letters or digits.
+            required: true
+            item_type:
+              type: String
+      - name: 'cloudStoragePath'
+        type: NestedObject
+        description:
+          Newline-delimited file of words in Cloud Storage. Only a single file
+          is accepted.
+        exactly_one_of:
+          - 'dictionary.0.word_list'
+          - 'dictionary.0.cloud_storage_path'
+        properties:
+          - name: 'path'
+            type: String
+            description: |
+              A url representing a file or path (no wildcards) in Cloud Storage. Example: `gs://[BUCKET_NAME]/dictionary.txt`
+            required: true
+  - name: 'largeCustomDictionary'
+    type: NestedObject
+    description: Dictionary which defines the rule.
+    exactly_one_of:
+      - 'dictionary'
+      - 'regex'
+      - 'large_custom_dictionary'
+    properties:
+      - name: 'outputPath'
+        type: NestedObject
+        description: |
+          Location to store dictionary artifacts in Google Cloud Storage. These files will only be accessible by project owners and the DLP API.
+          If any of these artifacts are modified, the dictionary is considered invalid and can no longer be used.
+        required: true
+        properties:
+          - name: 'path'
+            type: String
+            description: |
+              A url representing a file or path (no wildcards) in Cloud Storage. Example: `gs://[BUCKET_NAME]/dictionary.txt`
+            required: true
+      - name: 'cloudStorageFileSet'
+        type: NestedObject
+        description:
+          Set of files containing newline-delimited lists of dictionary phrases.
+        exactly_one_of:
+          - 'large_custom_dictionary.0.cloud_storage_file_set'
+          - 'large_custom_dictionary.0.big_query_field'
+        properties:
+          - name: 'url'
+            type: String
+            description: |
+              The url, in the format `gs://<bucket>/<path>`. Trailing wildcard in the path is allowed.
+            required: true
+      - name: 'bigQueryField'
+        type: NestedObject
+        description:
+          Field in a BigQuery table where each cell represents a dictionary
+          phrase.
+        exactly_one_of:
+          - 'large_custom_dictionary.0.cloud_storage_file_set'
+          - 'large_custom_dictionary.0.big_query_field'
+        properties:
+          - name: 'table'
+            type: NestedObject
+            description:
+              Field in a BigQuery table where each cell represents a dictionary
+              phrase.
+            required: true
+            properties:
+              - name: 'projectId'
+                type: String
+                description: |
+                  The Google Cloud Platform project ID of the project containing the table.
+                required: true
+              - name: 'datasetId'
+                type: String
+                description: |
+                  The dataset ID of the table.
+                required: true
+              - name: 'tableId'
+                type: String
+                description: |
+                  The name of the table.
+                required: true
+          - name: 'field'
+            type: NestedObject
+            description: Designated field in the BigQuery table.
+            required: true
+            properties:
+              - name: 'name'
+                type: String
+                description: |
+                  Name describing the field.
+                required: true

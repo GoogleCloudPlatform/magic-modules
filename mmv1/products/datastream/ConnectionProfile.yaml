@@ -74,7 +74,6 @@ examples:
     skip_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'datastream_connection_profile_sql_server'
-    min_version: beta
     primary_resource_id: 'default'
     skip_test: true
     vars:
@@ -321,7 +320,6 @@ properties:
           Database for the PostgreSQL connection.
   - !ruby/object:Api::Type::NestedObject
     name: 'sqlServerProfile'
-    min_version: beta
     exactly_one_of:
       - oracle_profile
       - gcs_profile

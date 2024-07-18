@@ -69,8 +69,8 @@ var (
 		},
 		{
 			id:        "SarahFrench",
-			startDate: newDate(2024, 5, 17, bstLoc),
-			endDate:   newDate(2024, 5, 19, bstLoc),
+			startDate: newDate(2024, 7, 10, bstLoc),
+			endDate:   newDate(2024, 7, 28, bstLoc),
 		},
 		{
 			id:        "shuyama1",
@@ -86,6 +86,16 @@ var (
 			id:        "slevenick",
 			startDate: newDate(2024, 7, 5, pdtLoc),
 			endDate:   newDate(2024, 7, 16, pdtLoc),
+		},
+		{
+			id:        "c2thorn",
+			startDate: newDate(2024, 7, 10, pdtLoc),
+			endDate:   newDate(2024, 7, 16, pdtLoc),
+		},
+		{
+			id:        "rileykarson",
+			startDate: newDate(2024, 7, 18, pdtLoc),
+			endDate:   newDate(2024, 8, 10, pdtLoc),
 		},
 	}
 )
