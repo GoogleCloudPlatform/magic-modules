@@ -1,11 +1,11 @@
 package orgpolicy_test
 
 import (
-	"testing"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestAccOrgPolicyCustomConstraint_update(t *testing.T) {
@@ -74,4 +74,3 @@ resource "google_org_policy_custom_constraint" "constraint" {
 }
 `, context)
 }
-
