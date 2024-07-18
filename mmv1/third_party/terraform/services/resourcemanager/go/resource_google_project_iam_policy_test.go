@@ -11,8 +11,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
@@ -55,7 +55,7 @@ func TestAccProjectIamPolicy_emptyMembers(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
 	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:  func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
@@ -72,7 +72,7 @@ func TestAccProjectIamPolicy_expanded(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
 	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:  func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
@@ -92,7 +92,7 @@ func TestAccProjectIamPolicy_basicAuditConfig(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
 	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:  func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			// Create a new project
@@ -122,7 +122,7 @@ func TestAccProjectIamPolicy_expandedAuditConfig(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
 	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:  func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
@@ -141,7 +141,7 @@ func TestAccProjectIamPolicy_withCondition(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
 	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:  func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			// Create a new project
@@ -176,7 +176,7 @@ func TestAccProjectIamPolicy_invalidMembers(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProjectAssociatePolicyBasic(pid, org, "admin@hashicorptest.com"),
+				Config:      testAccProjectAssociatePolicyBasic(pid, org, "admin@hashicorptest.com"),
 				ExpectError: regexp.MustCompile("invalid value for bindings\\.1\\.members\\.0 \\(IAM members must have one of the values outlined here: https://cloud.google.com/billing/docs/reference/rest/v1/Policy#Binding\\)"),
 			},
 			{

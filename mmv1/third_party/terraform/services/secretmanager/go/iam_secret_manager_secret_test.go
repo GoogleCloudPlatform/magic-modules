@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -15,7 +15,7 @@ func TestAccSecretManagerSecretIam_iamMemberConditionUpdate(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"role": "roles/secretmanager.secretAccessor",
+		"role":          "roles/secretmanager.secretAccessor",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
