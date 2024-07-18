@@ -1,0 +1,78 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'MonitoredProject'
+description: "A [project being monitored](https://cloud.google.com/monitoring/settings/multiple-projects#create-multi) by a Metrics Scope."
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/monitoring/settings/manage-api'
+  api: 'https://cloud.google.com/monitoring/api/ref_v3/rest/v1/locations.global.metricsScopes.projects'
+docs:
+id_format: 'locations/global/metricsScopes/{{metrics_scope}}/projects/{{name}}'
+base_url: 'v1/locations/global/metricsScopes'
+self_link: 'v1/locations/global/metricsScopes/{{metrics_scope}}'
+create_url: 'v1/locations/global/metricsScopes/{{metrics_scope}}/projects'
+delete_url: 'v1/{{name}}'
+immutable: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  constants: 'templates/terraform/constants/go/monitoring_monitored_project.go.tmpl'
+  encoder: 'templates/terraform/encoders/go/monitoring_monitored_project.go.tmpl'
+  decoder: 'templates/terraform/decoders/go/monitoring_monitored_project.go.tmpl'
+  pre_read: 'templates/terraform/pre_read/go/monitoring_monitored_project.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/go/monitoring_monitored_project.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/go/monitoring_monitored_project.go.tmpl'
+error_retry_predicates:
+
+  - 'transport_tpg.IsMonitoringPermissionError'
+schema_version: 1
+state_upgraders: true
+examples:
+  - name: 'monitoring_monitored_project_basic'
+    primary_resource_id: 'primary'
+    vars:
+      monitored_project: 'm-id'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      project_id: 'PROJECT_NAME'
+  - name: 'monitoring_monitored_project_long_form'
+    primary_resource_id: 'primary'
+    vars:
+      monitored_project: 'm-id'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      project_id: 'PROJECT_NAME'
+    skip_docs: true
+parameters:
+  - name: 'metricsScope'
+    type: String
+    description: 'Required. The resource name of the existing Metrics Scope that will monitor this project. Example: locations/global/metricsScopes/{SCOPING_PROJECT_ID_OR_NUMBER}'
+    url_param_only: true
+    required: true
+    ignore_read: true
+    diff_suppress_func: 'tpgresource.CompareResourceNames'
+properties:
+  - name: 'name'
+    type: String
+    description: 'Immutable. The resource name of the `MonitoredProject`. On input, the resource name includes the scoping project ID and monitored project ID. On output, it contains the equivalent project numbers. Example: `locations/global/metricsScopes/{SCOPING_PROJECT_ID_OR_NUMBER}/projects/{MONITORED_PROJECT_ID_OR_NUMBER}`'
+    required: true
+    diff_suppress_func: 'resourceMonitoringMonitoredProjectNameDiffSuppress'
+  - name: 'createTime'
+    type: String
+    description: Output only. The time when this `MonitoredProject` was created.
+    output: true

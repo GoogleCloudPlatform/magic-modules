@@ -294,7 +294,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{if $.ErrorRetryPredicates -}}
         ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
 {{- end}}
-{{- if $.ErrorAbortPredicates -}}
+{{- if $.ErrorAbortPredicates }}
         ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{ join $.ErrorAbortPredicates "," -}}{{"}"}},
 {{- end}}
     })
@@ -484,7 +484,7 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
 {{if $.ErrorRetryPredicates -}}
             ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
 {{- end}}
-{{- if $.ErrorAbortPredicates -}}
+{{- if $.ErrorAbortPredicates }}
             ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorAbortPredicates "," -}}{{"}"}},
 {{- end}}
         })
@@ -576,7 +576,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
 {{if $.ErrorRetryPredicates -}}
         ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
 {{- end}}
-{{- if $.ErrorAbortPredicates -}}
+{{- if $.ErrorAbortPredicates }}
         ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorAbortPredicates "," -}}{{"}"}},
 {{- end}}
     })
@@ -805,7 +805,7 @@ if len(updateMask) > 0 {
 {{              if $.ErrorRetryPredicates -}}
         ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
 {{-             end}}
-{{-             if $.ErrorAbortPredicates -}}
+{{-             if $.ErrorAbortPredicates }}
         ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorAbortPredicates "," -}}{{"}"}},
 {{-             end}}
     })
@@ -1216,5 +1216,6 @@ func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta
 }
 {{- end }}
 {{- if and $.SchemaVersion $.StateUpgraders }}
+
     {{ $.CustomTemplate $.StateMigrationFile false -}}
 {{- end }}
