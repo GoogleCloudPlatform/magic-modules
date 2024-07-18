@@ -1891,10 +1891,10 @@ func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 
 	var instance compute.Instance
 	var instance2 compute.Instance
-	<% unless version == "ga" %>
+	<% unless version == "ga" -%>
 	var instance3 compute.Instance
 	var instance4 compute.Instance
-	<% end %>
+	<% end -%>
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1909,12 +1909,12 @@ func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance, true, "SEV"),
 					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar2", &instance2),
 					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance2, true, ""),
-					<% unless version == "ga" %>
+					<% unless version == "ga" -%>
 					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar3", &instance3),
 					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance3, true, "SEV"),
 					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar4", &instance4),
 					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance4, true, ""),
-					<% end %>
+					<% end -%>
 				),
 			},
 			{
@@ -7716,7 +7716,7 @@ resource "google_compute_instance" "foobar2" {
 
 }
 
-<% unless version == "ga" %>
+<% unless version == "ga" -%>
 resource "google_compute_instance" "foobar3" {
   name         = "%s3"
   machine_type = "c3d-standard-4"
@@ -7769,7 +7769,7 @@ resource "google_compute_instance" "foobar4" {
 }
 `, instance, confidentialInstanceType, instance)
 }
-<% end %>
+<% end -%>
 
 func testAccComputeInstanceConfidentialInstanceConfigNoEnable(instance string, minCpuPlatform, confidentialInstanceType string) string {
 	return fmt.Sprintf(`
