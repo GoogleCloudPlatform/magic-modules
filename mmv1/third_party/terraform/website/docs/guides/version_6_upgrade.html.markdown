@@ -131,3 +131,14 @@ Terraform from destroying or recreating the project. In 6.0.0, existing projects
 **`deletion_policy` does NOT prevent deletion outside of Terraform.**
 
 Setting `deletion_policy` to `ABANDON` allows the resource to be abandoned rather than deleted. To disable any kind of deletion protection, explicitly set this field to `NONE` in configuration and then run `terraform apply` to apply the change.
+## Resource: `google_compute_backend_service`
+
+### `iap.enabled` is now required in the `iap` block
+
+To apply the IAP settings to the backend service, `true` needs to be set for `enabled` field.
+
+## Resource: `google_compute_region_backend_service`
+
+### `iap.enabled` is now required in the `iap` block
+
+To apply the IAP settings to the backend service, `true` needs to be set for `enabled` field.
