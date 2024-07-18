@@ -170,7 +170,7 @@ func TestAccProject_tags(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProject_tags(pid, org, map[string]string{"735183260412/env": "test"}),
+				Config: testAccProject_tags(pid, org, map[string]string{org + "/env": "test"}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleProjectExists("google_project.acceptance", pid),
 				),
@@ -182,13 +182,13 @@ func TestAccProject_tags(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"skip_delete", "tags", "deletion_protection"}, // we don't read tags back
 			},
-			// Update tags tries to create new project
+			// Update tags tries to replace project but fails due to deletion protection
 			{
-				Config:      testAccProject_tags(pid, org, map[string]string{"735183260412/env": "staging"}),
+				Config:      testAccProject_tags(pid, org, map[string]string{org + "/env": "staging"}),
 				ExpectError: regexp.MustCompile("deletion_protection"),
 			},
 			{
-				Config: testAccProject_tagsAllowDestroy(pid, org, map[string]string{"735183260412/env": "test"}),
+				Config: testAccProject_tagsAllowDestroy(pid, org, map[string]string{org + "/env": "test"}),
 			},
 		},
 	})
