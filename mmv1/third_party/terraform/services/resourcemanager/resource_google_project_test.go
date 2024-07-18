@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"regexp"
 	"strconv"
 	"strings"
 	"testing"
@@ -59,7 +60,7 @@ func TestAccProject_create(t *testing.T) {
 		Steps: []resource.TestStep{
 			// This step creates a new project
 			{
-				Config: testAccProject_create(pid, org),
+				Config: testAccProject(pid, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleProjectExists("google_project.acceptance", pid),
 				),
@@ -95,7 +96,7 @@ func TestAccProject_billing(t *testing.T) {
 				ResourceName:            "google_project.acceptance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"skip_delete"},
+				ImportStateVerifyIgnore: []string{"skip_delete", "deletion_protection"},
 			},
 			// Update to a different  billing account
 			{
@@ -106,7 +107,7 @@ func TestAccProject_billing(t *testing.T) {
 			},
 			// Unlink the billing account
 			{
-				Config: testAccProject_create(pid, org),
+				Config: testAccProject(pid, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleProjectHasBillingAccount(t, "google_project.acceptance", pid, ""),
 				),
@@ -136,7 +137,7 @@ func TestAccProject_labels(t *testing.T) {
 				ResourceName:            "google_project.acceptance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"skip_delete", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"skip_delete", "labels", "terraform_labels", "deletion_protection"},
 			},
 			// update project with labels
 			{
@@ -148,7 +149,7 @@ func TestAccProject_labels(t *testing.T) {
 			},
 			// update project delete labels
 			{
-				Config: testAccProject_create(pid, org),
+				Config: testAccProject(pid, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleProjectExists("google_project.acceptance", pid),
 					testAccCheckGoogleProjectHasNoLabels(t, "google_project.acceptance", pid),
@@ -169,34 +170,26 @@ func TestAccProject_tags(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProject_tags(pid, org, map[string]string{"test": "that"}),
+				Config: testAccProject_tags(pid, org, map[string]string{"735183260412/env": "test"}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGoogleProjectHasTags(t, "google_project.acceptance", pid, map[string]string{"test": "that"}),
+					testAccCheckGoogleProjectExists("google_project.acceptance", pid),
 				),
 			},
-			// Make sure import supports labels
+			// Make sure import supports tags
 			{
 				ResourceName:            "google_project.acceptance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"skip_delete", "tags"},
+				ImportStateVerifyIgnore: []string{"skip_delete", "tags", "deletion_protection"}, // we don't read tags back
 			},
-			// update project with labels
-			// {
-			// 	Config: testAccProject_labels(pid, org, map[string]string{"label": "label-value"}),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheckGoogleProjectExists("google_project.acceptance", pid),
-			// 		testAccCheckGoogleProjectHasLabels(t, "google_project.acceptance", pid, map[string]string{"label": "label-value"}),
-			// 	),
-			// },
-			// // update project delete labels
-			// {
-			// 	Config: testAccProject_create(pid, org),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheckGoogleProjectExists("google_project.acceptance", pid),
-			// 		testAccCheckGoogleProjectHasNoLabels(t, "google_project.acceptance", pid),
-			// 	),
-			// },
+			// Update tags tries to create new project
+			{
+				Config:      testAccProject_tags(pid, org, map[string]string{"735183260412/env": "staging"}),
+				ExpectError: regexp.MustCompile("deletion_protection"),
+			},
+			{
+				Config: testAccProject_tagsAllowDestroy(pid, org, map[string]string{"735183260412/env": "test"}),
+			},
 		},
 	})
 }
@@ -252,7 +245,7 @@ func TestAccProject_migrateParent(t *testing.T) {
 				ResourceName:            "google_project.acceptance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"skip_delete"},
+				ImportStateVerifyIgnore: []string{"skip_delete", "deletion_protection"},
 			},
 			{
 				Config: testAccProject_migrateParentOrg(pid, folderDisplayName, org),
@@ -261,7 +254,7 @@ func TestAccProject_migrateParent(t *testing.T) {
 				ResourceName:            "google_project.acceptance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"skip_delete"},
+				ImportStateVerifyIgnore: []string{"skip_delete", "deletion_protection"},
 			},
 			{
 				Config: testAccProject_migrateParentFolder(pid, folderDisplayName, org),
@@ -270,7 +263,37 @@ func TestAccProject_migrateParent(t *testing.T) {
 				ResourceName:            "google_project.acceptance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"skip_delete"},
+				ImportStateVerifyIgnore: []string{"skip_delete", "deletion_protection"},
+			},
+		},
+	})
+}
+
+func TestAccProject_noAllowDestroy(t *testing.T) {
+	t.Parallel()
+
+	org := envvar.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("%s-%d", TestPrefix, acctest.RandInt(t))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccProject_noAllowDestroy(pid, org),
+			},
+			{
+				ResourceName:            "google_project.acceptance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "skip_delete"},
+			},
+			{
+				Config:      testAccProject_noAllowDestroy(pid, org),
+				Destroy:     true,
+				ExpectError: regexp.MustCompile("deletion_protection"),
+			},
+			{
+				Config: testAccProject(pid, org),
 			},
 		},
 	})
@@ -317,49 +340,6 @@ func testAccCheckGoogleProjectHasBillingAccount(t *testing.T, r, pid, billingId 
 		}
 		if billingId != strings.TrimPrefix(ba.BillingAccountName, "billingAccounts/") {
 			return fmt.Errorf("Billing ID returned by API (%s) did not match expected value (%s)", ba.BillingAccountName, billingId)
-		}
-		return nil
-	}
-}
-
-func testAccCheckGoogleProjectHasTags(t *testing.T, r, pid string, expected map[string]string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		return fmt.Errorf("Expected %d tags, got %s", len(expected), rs.Primary.Attributes["tags.%"])
-		rs, ok := s.RootModule().Resources[r]
-		if !ok {
-			return fmt.Errorf("Not found: %s", r)
-		}
-
-		// State should have the same number of tags
-		if rs.Primary.Attributes["tags.%"] != strconv.Itoa(len(expected)) {
-			return fmt.Errorf("Expected %d tags, got %s", len(expected), rs.Primary.Attributes["tags.%"])
-		}
-
-		// Actual value in API should match state and expected
-		config := acctest.GoogleProviderConfig(t)
-
-		found, err := config.NewResourceManagerClient(config.UserAgent).Projects.Get(pid).Do()
-		if err != nil {
-			return err
-		}
-
-		actual := found.tags
-		if !reflect.DeepEqual(actual, expected) {
-			// Determine only the different attributes
-			for k, v := range expected {
-				if av, ok := actual[k]; ok && v == av {
-					delete(expected, k)
-					delete(actual, k)
-				}
-			}
-
-			spewConf := spew.NewDefaultConfig()
-			spewConf.SortKeys = true
-			return fmt.Errorf(
-				"Tags not equivalent. Difference is shown below. Top is actual, bottom is expected."+
-					"\n\n%s\n\n%s",
-				spewConf.Sdump(actual), spewConf.Sdump(expected),
-			)
 		}
 		return nil
 	}
@@ -436,11 +416,33 @@ func testAccCheckGoogleProjectHasNoLabels(t *testing.T, r, pid string) resource.
 	}
 }
 
+func testAccProject(pid, org string) string {
+	return fmt.Sprintf(`
+resource "google_project" "acceptance" {
+  project_id = "%s"
+  name       = "%s"
+  org_id = "%s"
+  deletion_protection = false
+}
+`, pid, pid, org)
+}
+
+func testAccProject_noAllowDestroy(pid, org string) string {
+	return fmt.Sprintf(`
+resource "google_project" "acceptance" {
+  project_id = "%s"
+  name       = "%s"
+  org_id = "%s"
+}
+`, pid, pid, org)
+}
+
 func testAccProject_createWithoutOrg(pid string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
   project_id = "%s"
   name       = "%s"
+  deletion_protection = false
 }
 `, pid, pid)
 }
@@ -452,8 +454,44 @@ resource "google_project" "acceptance" {
   name            = "%s"
   org_id          = "%s"
   billing_account = "%s"
+  deletion_protection = false
 }
 `, pid, pid, org, billing)
+}
+
+func testAccProject_tags(pid, org string, tags map[string]string) string {
+	r := fmt.Sprintf(`
+resource "google_project" "acceptance" {
+  project_id = "%s"
+  name       = "%s"
+  org_id     = "%s"
+  tags = {`, pid, pid, org)
+
+	l := ""
+	for key, value := range tags {
+		l += fmt.Sprintf("%q = %q\n", key, value)
+	}
+
+	l += fmt.Sprintf("}\n}")
+	return r + l
+}
+
+func testAccProject_tagsAllowDestroy(pid, org string, tags map[string]string) string {
+	r := fmt.Sprintf(`
+  resource "google_project" "acceptance" {
+  project_id = "%s"
+  name       = "%s"
+  org_id     = "%s"
+  deletion_protection = false
+  tags = {`, pid, pid, org)
+
+	l := ""
+	for key, value := range tags {
+		l += fmt.Sprintf("%q = %q\n", key, value)
+	}
+
+	l += fmt.Sprintf("}\n}")
+	return r + l
 }
 
 func testAccProject_labels(pid, org string, labels map[string]string) string {
@@ -462,6 +500,7 @@ resource "google_project" "acceptance" {
   project_id = "%s"
   name       = "%s"
   org_id     = "%s"
+  deletion_protection = false
   labels = {`, pid, pid, org)
 
 	l := ""
@@ -480,6 +519,7 @@ resource "google_project" "acceptance" {
   name                = "%s"
   org_id              = "%s"
   billing_account     = "%s" # requires billing to enable compute API
+  deletion_protection = false
   auto_create_network = false
 }
 `, pid, pid, org, billing)
@@ -490,6 +530,7 @@ func testAccProject_parentFolder(pid, folderName, org string) string {
 resource "google_project" "acceptance" {
   project_id = "%s"
   name       = "%s"
+  deletion_protection = false
 
   folder_id = google_folder.folder1.id
 }
@@ -506,6 +547,7 @@ func testAccProject_migrateParentFolder(pid, folderName, org string) string {
 resource "google_project" "acceptance" {
   project_id = "%s"
   name       = "%s"
+  deletion_protection = false
 
   folder_id = google_folder.folder1.id
 }
@@ -522,7 +564,7 @@ func testAccProject_migrateParentOrg(pid, folderName, org string) string {
 resource "google_project" "acceptance" {
   project_id = "%s"
   name       = "%s"
-
+  deletion_protection = false
   org_id = "%s"
 }
 

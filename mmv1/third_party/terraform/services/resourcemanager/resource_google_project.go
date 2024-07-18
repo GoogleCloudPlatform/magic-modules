@@ -134,15 +134,19 @@ func ResourceGoogleProject() *schema.Resource {
 				Type:        schema.TypeMap,
 				Optional:    true,
 				ForceNew:    true,
-				Description: `A map of resource manager tags. Resource manager tag keys and values have the same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/456. The field is ignored (both PUT & PATCH) when empty.`,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Description: `A map of resource manager tags_. Resource manager tag keys and values have the same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/456. The field is ignored (both PUT & PATCH) when empty.`,
+			},
+
+			"deletion_protection": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     true,
+				Description: `When the field is set to true or unset in Terraform state, a terraform apply or terraform destroy that would delete the instance will fail. When the field is set to false, deleting the instance is allowed.`,
 			},
 		},
 		UseJSONNumber: true,
 	}
-}
-
-func expandTags(d TerraformResourceData) map[string]string {
-	return tpgresource.ExpandStringMap(d, "tags")
 }
 
 func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error {
@@ -174,7 +178,7 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 	}
 
 	if _, ok := d.GetOk("tags"); ok {
-		project.Tags = expandTags(d)
+		project.Tags = tpgresource.ExpandStringMap(d, "tags")
 	}
 
 	var op *cloudresourcemanager.Operation
@@ -511,6 +515,9 @@ func resourceGoogleProjectDelete(d *schema.ResourceData, meta interface{}) error
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
+	}
+	if d.Get("deletion_protection").(bool) {
+		return fmt.Errorf("cannot destroy project without setting deletion_protection=false and running `terraform apply`")
 	}
 	// Only delete projects if skip_delete isn't set
 	if !d.Get("skip_delete").(bool) {
