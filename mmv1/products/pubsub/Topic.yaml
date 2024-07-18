@@ -14,7 +14,7 @@
 --- !ruby/object:Api::Resource
 name: 'Topic'
 description: |
-  Updated: A named resource to which messages are sent by publishers.
+  A named resource to which messages are sent by publishers.
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Managing Topics': 'https://cloud.google.com/pubsub/docs/admin#managing_topics'
