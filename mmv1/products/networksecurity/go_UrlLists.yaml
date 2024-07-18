@@ -1,0 +1,102 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'UrlLists'
+description: |
+  UrlList proto helps users to set reusable, independently manageable lists of hosts, host patterns, URLs, URL patterns.
+references:
+  guides:
+    'Use UrlLists': ' https://cloud.google.com/secure-web-proxy/docs/use-url-list'
+  api: 'https://cloud.google.com/secure-web-proxy/docs/reference/network-security/rest/v1/projects.locations.urlLists'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/urlLists'
+self_link: 'projects/{{project}}/locations/{{location}}/urlLists/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/urlLists?urlListId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/urlLists/{{name}}'
+timeouts:
+  insert_minutes: 30
+  update_minutes: 30
+  delete_minutes: 30
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+    timeouts:
+      insert_minutes: 30
+      update_minutes: 30
+      delete_minutes: 30
+  result:
+    path: 'response'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+examples:
+  - name: 'network_security_url_lists_basic'
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-url-lists'
+  - name: 'network_security_url_lists_advanced'
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-url-lists'
+parameters:
+  - name: 'name'
+    type: String
+    description: |
+      Short name of the UrlList resource to be created.
+      This value should be 1-63 characters long, containing only letters, numbers, hyphens, and underscores, and should not start with a number. E.g. 'urlList'.
+    url_param_only: true
+    required: true
+  - name: 'location'
+    type: String
+    description: |
+      The location of the url lists.
+    url_param_only: true
+    required: true
+properties:
+  - name: 'createTime'
+    type: Time
+    description: |
+      Output only. Time when the security policy was created.
+      A timestamp in RFC3339 UTC 'Zulu' format, with nanosecond resolution and up to nine fractional digits.
+      Examples: '2014-10-02T15:01:23Z' and '2014-10-02T15:01:23.045123456Z'
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      Output only. Time when the security policy was updated.
+      A timestamp in RFC3339 UTC 'Zulu' format, with nanosecond resolution and up to nine fractional digits.
+      Examples: '2014-10-02T15:01:23Z' and '2014-10-02T15:01:23.045123456Z'.
+    output: true
+  - name: 'description'
+    type: String
+    description: |
+      Free-text description of the resource.
+  - name: 'values'
+    type: Array
+    description: |
+      FQDNs and URLs.
+    required: true
+    item_type:
+      type: String

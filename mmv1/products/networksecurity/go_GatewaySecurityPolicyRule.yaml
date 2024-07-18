@@ -1,0 +1,144 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'GatewaySecurityPolicyRule'
+description: |
+  The GatewaySecurityPolicyRule resource is in a nested collection within a GatewaySecurityPolicy and represents
+  a traffic matching condition and associated action to perform.
+references:
+  guides:
+  api: 'https://cloud.google.com/secure-web-proxy/docs/reference/network-security/rest/v1/projects.locations.gatewaySecurityPolicies.rules'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/gatewaySecurityPolicies/{{gateway_security_policy}}/rules'
+self_link: 'projects/{{project}}/locations/{{location}}/gatewaySecurityPolicies/{{gateway_security_policy}}/rules/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/gatewaySecurityPolicies/{{gateway_security_policy}}/rules?gatewaySecurityPolicyRuleId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/gatewaySecurityPolicies/{{gateway_security_policy}}/rules/{{name}}'
+timeouts:
+  insert_minutes: 30
+  update_minutes: 30
+  delete_minutes: 30
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+    timeouts:
+      insert_minutes: 30
+      update_minutes: 30
+      delete_minutes: 30
+  result:
+    path: 'response'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+examples:
+  - name: 'network_security_gateway_security_policy_rules_basic'
+    primary_resource_id: 'default'
+    vars:
+      gateway_security_policy_id: 'my-gateway-security-policy'
+      resource_name: 'my-gateway-security-policy-rule'
+  - name: 'network_security_gateway_security_policy_rules_advanced'
+    primary_resource_id: 'default'
+    vars:
+      gateway_security_policy_id: 'my-gateway-security-policy'
+      resource_name: 'my-gateway-security-policy-rule'
+parameters:
+  - name: 'name'
+    type: String
+    description: |
+      Name of the resource. ame is the full resource name so projects/{project}/locations/{location}/gatewaySecurityPolicies/{gateway_security_policy}/rules/{rule}
+      rule should match the pattern: (^a-z?$).
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'location'
+    type: String
+    description: |
+      The location of the gateway security policy.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'gateway_security_policy'
+    type: String
+    description: |
+      The name of the gatewat security policy this rule belongs to.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'selfLink'
+    type: String
+    description: |
+      Server-defined URL of this resource.
+    output: true
+  - name: 'createTime'
+    type: Time
+    description: |
+      The timestamp when the resource was created.
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z"
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      The timestamp when the resource was updated.
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+    output: true
+  - name: 'enabled'
+    type: Boolean
+    description: |
+      Whether the rule is enforced.
+    required: true
+  - name: 'priority'
+    type: Integer
+    description: |
+      Priority of the rule. Lower number corresponds to higher precedence.
+    required: true
+  - name: 'description'
+    type: String
+    description: |
+      Free-text description of the resource.
+  - name: 'sessionMatcher'
+    type: String
+    description: |
+      CEL expression for matching on session criteria.
+    required: true
+  - name: 'applicationMatcher'
+    type: String
+    description: |
+      CEL expression for matching on L7/application level criteria.
+  - name: 'tlsInspectionEnabled'
+    type: Boolean
+    description: |
+      Flag to enable TLS inspection of traffic matching on. Can only be true if the
+      parent GatewaySecurityPolicy references a TLSInspectionConfig.
+  - name: 'basicProfile'
+    type: Enum
+    description: |
+      Profile which tells what the primitive action should be. Possible values are: * ALLOW * DENY.
+    required: true
+    enum_values:
+      - 'BASIC_PROFILE_UNSPECIFIED'
+      - 'ALLOW'
+      - 'DENY'
