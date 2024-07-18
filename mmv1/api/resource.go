@@ -1392,7 +1392,7 @@ func (r Resource) GetPropertyUpdateMasksGroups(properties []*Type, maskPrefix st
 	maskGroups := map[string][]string{}
 	for _, prop := range properties {
 		if prop.FlattenObject {
-			maps.Copy(maskGroups, r.GetPropertyUpdateMasksGroups(prop.Properties, prop.ApiName))
+			maps.Copy(maskGroups, r.GetPropertyUpdateMasksGroups(prop.Properties, prop.ApiName+"."))
 		} else if len(prop.UpdateMaskFields) > 0 {
 			maskGroups[google.Underscore(prop.Name)] = prop.UpdateMaskFields
 		} else {
