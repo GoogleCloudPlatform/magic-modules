@@ -345,49 +345,6 @@ func testAccCheckGoogleProjectHasBillingAccount(t *testing.T, r, pid, billingId 
 	}
 }
 
-func testAccCheckGoogleProjectHasTags(t *testing.T, r, pid string, expected map[string]string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		return fmt.Errorf("Expected %d tags, got %s", len(expected), rs.Primary.Attributes["tags.%"])
-		rs, ok := s.RootModule().Resources[r]
-		if !ok {
-			return fmt.Errorf("Not found: %s", r)
-		}
-
-		// State should have the same number of tags
-		if rs.Primary.Attributes["tags.%"] != strconv.Itoa(len(expected)) {
-			return fmt.Errorf("Expected %d tags, got %s", len(expected), rs.Primary.Attributes["tags.%"])
-		}
-
-		// Actual value in API should match state and expected
-		config := acctest.GoogleProviderConfig(t)
-
-		found, err := config.NewResourceManagerClient(config.UserAgent).Projects.Get(pid).Do()
-		if err != nil {
-			return err
-		}
-
-		actual := found.tags
-		if !reflect.DeepEqual(actual, expected) {
-			// Determine only the different attributes
-			for k, v := range expected {
-				if av, ok := actual[k]; ok && v == av {
-					delete(expected, k)
-					delete(actual, k)
-				}
-			}
-
-			spewConf := spew.NewDefaultConfig()
-			spewConf.SortKeys = true
-			return fmt.Errorf(
-				"Tags not equivalent. Difference is shown below. Top is actual, bottom is expected."+
-					"\n\n%s\n\n%s",
-				spewConf.Sdump(actual), spewConf.Sdump(expected),
-			)
-		}
-		return nil
-	}
-}
-
 func testAccCheckGoogleProjectHasLabels(t *testing.T, r, pid string, expected map[string]string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[r]
