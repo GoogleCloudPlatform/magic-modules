@@ -1,0 +1,92 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'DebugToken'
+description: |
+  A debug token is a secret used during the development or integration testing of
+  an app. It essentially allows the development or integration testing to bypass
+  app attestation while still allowing App Check to enforce protection on supported
+  production Firebase services.
+references:
+  guides:
+    'Official Documentation': 'https://firebase.google.com/docs/app-check'
+  api: 'https://firebase.google.com/docs/reference/appcheck/rest/v1/projects.apps.debugTokens'
+docs:
+base_url: 'projects/{{project}}/apps/{{app_id}}/debugTokens'
+self_link: 'projects/{{project}}/apps/{{app_id}}/debugTokens/{{debug_token_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/apps/{{app_id}}/debugTokens/{{debug_token_id}}'
+  - '{{project}}/{{app_id}}/{{debug_token_id}}'
+  - '{{app_id}}/{{debug_token_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+identity:
+  - debugTokenId
+custom_code:
+examples:
+  - name: 'firebase_app_check_debug_token_basic'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      display_name: 'Debug Token'
+      token: '00000000-AAAA-BBBB-CCCC-000000000000'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      'token': '"5E728315-E121-467F-BCA1-1FE71130BB98"'
+    external_providers: ["random", "time"]
+parameters:
+  - name: 'app_id'
+    type: String
+    description: |
+      The ID of a
+      [Web App](https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects.webApps#WebApp.FIELDS.app_id),
+      [Apple App](https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects.iosApps#IosApp.FIELDS.app_id),
+      or [Android App](https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects.androidApps#AndroidApp.FIELDS.app_id)
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'debugTokenId'
+    type: String
+    description: |
+      The last segment of the resource name of the debug token.
+    api_name: name
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/go/name_from_self_link.tmpl'
+  - name: 'displayName'
+    type: String
+    description: |
+      A human readable display name used to identify this debug token.
+    required: true
+  - name: 'token'
+    type: String
+    description: |
+      The secret token itself. Must be provided during creation, and must be a UUID4,
+      case insensitive. You may use a method of your choice such as random/random_uuid
+      to generate the token.
+
+      This field is immutable once set, and cannot be updated. You can, however, delete
+      this debug token to revoke it.
+
+      For security reasons, this field will never be populated in any response.
+    required: true
+    immutable: true
+    ignore_read: true
+    sensitive: true
