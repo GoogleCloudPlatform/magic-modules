@@ -574,11 +574,3 @@ properties:
                   name: nanos
                   description: |
                     Fractions of seconds in nanoseconds. Currently, only the value 0 is supported.
-  - !ruby/object:Api::Type::Enum
-    name: 'subscriptionType'
-    values:
-      - :TRIAL
-      - :STANDARD
-    default_from_api: true
-    description: |
-      The subscrition type of cluster.
