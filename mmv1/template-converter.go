@@ -695,6 +695,7 @@ func checkExceptionList(filePath string) bool {
 		"iam/example_config_body/api_gateway_api_config.tf.erb",
 		"networksecurity_project_address_group.tf.erb",
 		"pre_update/bigtable_app_profile.go.erb",
+		"pre_update/datastream_stream.go.erb",
 		"containeranalysis_occurrence",
 		"containeranalysis_attestation",
 
