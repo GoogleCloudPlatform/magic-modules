@@ -1,0 +1,281 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'Settings'
+description: |
+  gcloud iap settings - manage IAP settings
+base_url: '{{name}}:iapSettings'
+self_link: '{{name}}:iapSettings'
+create_verb: :PATCH
+update_verb: :PATCH
+update_url: '{{name}}:iapSettings'
+import_format: ['{{name}}:iapSettings']
+#Skipping the sweeper because instances will be deleted during cluster sweeps
+skip_sweeper: true
+
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description: |
+      The resource name of the IAP protected resource.
+    required: true
+  - !ruby/object:Api::Type::NestedObject
+    name: 'accessSettings'
+    description: |
+      Top level wrapper for all access related setting in IAP.
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: 'gcipSettings'
+        description: |
+          GCIP claims and endpoint configurations for 3p identity providers.
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: 'tenantIds'
+            description: |
+              GCIP tenant ids that are linked to the IAP resource. tenantIds could be a string
+              beginning with a number character to indicate authenticating with GCIP tenant flow, 
+              or in the format of _ to indicate authenticating with GCIP agent flow. If agent flow 
+              is used, tenantIds should only contain one single element, while for tenant flow, 
+              tenantIds can contain multiple elements.
+            item_type: Api::Type::String
+          - !ruby/object:Api::Type::String
+            name: 'loginPageUri'
+            description: |
+              Login page URI associated with the GCIP tenants. Typically, all resources within
+              the same project share the same login page, though it could be overridden at the
+              sub resource level.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'corsSettings'
+        description: |
+          Configuration to allow cross-origin requests via IAP.
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'allowHttpOptions'
+            description: |
+              Configuration to allow HTTP OPTIONS calls to skip authorization.
+              If undefined, IAP will not apply any special logic to OPTIONS requests.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'oauthSettings'
+        description: |
+          Settings to configure IAP's OAuth behavior.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'loginHint'
+            description: |
+              Domain hint to send as hd=? parameter in OAuth request flow. 
+              Enables redirect to primary IDP by skipping Google's login screen.
+              (https://developers.google.com/identity/protocols/OpenIDConnect#hd-param) 
+              Note: IAP does not verify that the id token's hd claim matches this value 
+              since access behavior is managed by IAM policies.
+          - !ruby/object:Api::Type::Array
+            name: 'programmaticClients'
+            description: |
+              List of client ids allowed to use IAP programmatically.
+            item_type: Api::Type::String
+      - !ruby/object:Api::Type::NestedObject
+        name: 'reauthSettings'
+        description: |
+          Settings to configure reauthentication policies in IAP.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'method'
+            required: true
+            description: |
+              Reauth method requested. The possible values are:
+              
+              * `METHOD_UNSPECIFIED`: Reauthentication disabled.
+              * `LOGIN`: Prompts the user to log in again.
+              * `SECURE_KEY`: User must use their secure key 2nd factor device.
+              * `ENROLLED_SECOND_FACTORS`: User can use any enabled 2nd factor.
+            values:
+              - :METHOD_UNSPECIFIED
+              - :LOGIN
+              - :SECURE_KEY
+              - :ENROLLED_SECOND_FACTORS
+          - !ruby/object:Api::Type::String
+            name: 'maxAge'
+            required: true
+            description: |
+              Reauth session lifetime, how long before a user has to reauthenticate again.
+              A duration in seconds with up to nine fractional digits, ending with 's'. 
+              Example: "3.5s".
+          - !ruby/object:Api::Type::Enum
+            name: 'policyType'
+            required: true
+            values:
+              - :POLICY_TYPE_UNSPECIFIED
+              - :MINIMUM
+              - :DEFAULT
+            description: |
+              How IAP determines the effective policy in cases of hierarchical policies.
+              Policies are merged from higher in the hierarchy to lower in the hierarchy.
+              The possible values are:
+              
+              * `POLICY_TYPE_UNSPECIFIED`: Default value. This value is unused.
+              * `MINIMUM`: This policy acts as a minimum to other policies, lower in the hierarchy. 
+              		   Effective policy may only be the same or stricter.
+              * `DEFAULT`: This policy acts as a default if no other reauth policy is set.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'allowedDomainsSettings'
+        description: |
+          Settings to configure and enable allowed domains.
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: 'domains'
+            description: |
+              List of trusted domains.
+            item_type: Api::Type::String
+          - !ruby/object:Api::Type::Boolean
+            name: 'enable'
+            description: |
+              Configuration for customers to opt in for the feature.   
+      - !ruby/object:Api::Type::NestedObject
+        name: 'workforceIdentitySettings'
+        description: |
+          Settings to configure the workforce identity federation, including workforce pools
+          and OAuth 2.0 settings.     
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: 'workforcePools'
+            max_size: 1
+            description: |
+              The workforce pool resources. Only one workforce pool is accepted.
+            item_type: Api::Type::String
+          - !ruby/object:Api::Type::NestedObject
+            name: 'oauth2'
+            description: |
+              OAuth 2.0 settings for IAP to perform OIDC flow with workforce identity
+              federation services. 
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'clientId'
+                description: |
+                  The OAuth 2.0 client ID registered in the workforce identity 
+                  federation OAuth 2.0 Server.   
+              - !ruby/object:Api::Type::String
+                name: 'clientSecret'
+                sensitive: true
+                description: |
+                  Input only. The OAuth 2.0 client secret created while registering
+                  the client ID.  
+              - !ruby/object:Api::Type::String
+                name: 'clientSecretSha256'
+                output: true
+                description: |
+                  Output only. SHA256 hash value for the client secret. This field 
+                  is returned by IAP when the settings are retrieved.                         
+      - !ruby/object:Api::Type::Enum
+        name: 'identitySources'
+        values:
+          - :IDENTITY_SOURCE_UNSPECIFIED
+          - :WORKFORCE_IDENTITY_FEDERATION
+        description: |
+          Identity sources that IAP can use to authenticate the end user. 
+          Only one identity source can be configured. The possible values are:
+          
+          * `IDENTITY_SOURCE_UNSPECIFIED`: IdentitySource Unspecified. When selected, IAP relies on
+                                           which identity settings are fully configured to redirect 
+                                           the traffic to. The precedence order is 
+                                           WorkforceIdentitySettings > GcipSettings. If none is set, 
+                                           default to use Google identity.
+          * `WORKFORCE_IDENTITY_FEDERATION`: Use external identities set up on Google Cloud Workforce 
+          				     Identity Federation.
+  - !ruby/object:Api::Type::NestedObject
+    name: 'applicationSettings'
+    description: |
+      Top level wrapper for all application related settings in IAP.
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: 'csmSettings'
+        description: |
+          Settings to configure IAP's behavior for a service mesh.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'rctokenAud'
+            description: |
+              Audience claim set in the generated RCToken. This value is not validated by IAP.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'accessDeniedPageSettings'
+        description: |
+          Customization for Access Denied page. IAP allows customers to define a custom URI 
+          to use as the error page when access is denied to users. If IAP prevents access 
+          to this page, the default IAP error page will be displayed instead.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'accessDeniedPageUri'
+            description: |
+              The URI to be redirected to when access is denied.
+          - !ruby/object:Api::Type::Boolean
+            name: 'generateTroubleshootingUri'
+            description: |
+              Whether to generate a troubleshooting URL on access denied events to this application.
+          - !ruby/object:Api::Type::Boolean
+            name: 'remediationTokenGenerationEnabled'
+            description: |
+              Whether to generate remediation token on access denied events to this application.
+      - !ruby/object:Api::Type::String
+        name: 'cookieDomain'
+        description: |
+          The Domain value to set for cookies generated by IAP. This value is not validated by the API, 
+          but will be ignored at runtime if invalid.  
+      - !ruby/object:Api::Type::NestedObject
+        name: 'attributePropagationSettings'
+        description: |
+          Settings to configure attribute propagation.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'outputCredentials'
+            description: |
+              Which output credentials attributes selected by the CEL expression should be propagated in. 
+              All attributes will be fully duplicated in each selected output credential.
+              Possible values are:
+              
+              * `OUTPUT_CREDENTIALS_UNSPECIFIED`: An output credential is required.
+              * `HEADER`: Propagate attributes in the headers with "x-goog-iap-attr-" prefix.
+              * `JWT`: Propagate attributes in the JWT of the form: 
+                       "additional_claims": { "my_attribute": ["value1", "value2"] }
+              * `RCTOKEN`: Propagate attributes in the RCToken of the form: "
+                           additional_claims": { "my_attribute": ["value1", "value2"] }
+            values: 
+              - :OUTPUT_CREDENTIALS_UNSPECIFIED
+              - :HEADER
+              - :JWT
+              - :RCTOKEN
+          - !ruby/object:Api::Type::String
+            name: 'expression'
+            description: |
+              Raw string CEL expression. Must return a list of attributes. A maximum of 45 attributes can 
+              be selected. Expressions can select different attribute types from attributes: 
+              attributes.saml_attributes, attributes.iap_attributes.
+          - !ruby/object:Api::Type::Boolean
+            name: 'enable'
+            description: |
+              Whether the provided attribute propagation settings should be evaluated on user requests. 
+              If set to true, attributes returned from the expression will be propagated in the set output credentials.
+  
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  custom_delete: templates/terraform/custom_delete/clear_iap_settings.go.erb
+  test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
+
+
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'iap_settings_basic'
+    primary_resource_id: 'default'
+
+      
+      
+
+
+
