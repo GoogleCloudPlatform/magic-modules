@@ -2,10 +2,10 @@ package compute_test
 
 import (
 	"fmt"
-	"testing"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestAccComputeRegionUrlMap_update_path_matcher(t *testing.T) {

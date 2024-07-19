@@ -1,11 +1,12 @@
 package compute_test
+
 import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccComputeGlobalNetworkEndpoint_networkEndpointsBasic(t *testing.T) {
