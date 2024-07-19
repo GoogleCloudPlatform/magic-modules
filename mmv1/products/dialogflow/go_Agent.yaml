@@ -1,0 +1,141 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Agent'
+description: |
+  A Dialogflow agent is a virtual agent that handles conversations with your end-users. It is a natural language
+  understanding module that understands the nuances of human language. Dialogflow translates end-user text or audio
+  during a conversation to structured data that your apps and services can understand. You design and build a Dialogflow
+  agent to handle the types of conversations required for your system.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/dialogflow/docs/'
+  api: 'https://cloud.google.com/dialogflow/docs/reference/rest/v2/projects/agent'
+docs:
+id_format: '{{project}}'
+base_url: 'projects/{{project}}/agent'
+self_link: 'projects/{{project}}/agent'
+update_verb: 'POST'
+import_format:
+  - '{{project}}'
+timeouts:
+  insert_minutes: 40
+  update_minutes: 40
+  delete_minutes: 20
+custom_code:
+skip_sweeper: true
+examples:
+  - name: 'dialogflow_agent_full'
+    primary_resource_id: 'full_agent'
+    vars:
+      agent_name: 'dialogflow-agent'
+parameters:
+properties:
+  - name: 'displayName'
+    type: String
+    description: |
+      The name of this agent.
+    required: true
+  - name: 'defaultLanguageCode'
+    type: String
+    description: |
+      The default language of the agent as a language tag. [See Language Support](https://cloud.google.com/dialogflow/docs/reference/language)
+      for a list of the currently supported language codes. This field cannot be updated after creation.
+    required: true
+    immutable: true
+  - name: 'supportedLanguageCodes'
+    type: Array
+    description: |
+      The list of all languages supported by this agent (except for the defaultLanguageCode).
+    item_type:
+      type: String
+  - name: 'timeZone'
+    type: String
+    description: |
+      The time zone of this agent from the [time zone database](https://www.iana.org/time-zones), e.g., America/New_York,
+      Europe/Paris.
+    required: true
+  - name: 'description'
+    type: String
+    description: |
+      The description of this agent. The maximum length is 500 characters. If exceeded, the request is rejected.
+    validation:
+      function: 'validation.StringLenBetween(0, 500)'
+  - name: 'avatarUri'
+    type: String
+    description: |
+      The URI of the agent's avatar, which are used throughout the Dialogflow console. When an image URL is entered
+      into this field, the Dialogflow will save the image in the backend. The address of the backend image returned
+      from the API will be shown in the [avatarUriBackend] field.
+    ignore_read: true
+  - name: 'avatarUriBackend'
+    type: String
+    description: |
+      The URI of the agent's avatar as returned from the API. Output only. To provide an image URL for the agent avatar,
+      the [avatarUri] field can be used.
+    api_name: avatarUri
+    output: true
+  - name: 'enableLogging'
+    type: Boolean
+    description: |
+      Determines whether this agent should log conversation queries.
+  - name: 'matchMode'
+    type: Enum
+    description: |
+      Determines how intents are detected from user queries.
+      * MATCH_MODE_HYBRID: Best for agents with a small number of examples in intents and/or wide use of templates
+      syntax and composite entities.
+      * MATCH_MODE_ML_ONLY: Can be used for agents with a large number of examples in intents, especially the ones
+      using @sys.any or very large developer entities.
+    default_from_api: true
+    enum_values:
+      - 'MATCH_MODE_HYBRID'
+      - 'MATCH_MODE_ML_ONLY'
+  - name: 'classificationThreshold'
+    type: Double
+    description: |
+      To filter out false positive results and still get variety in matched natural language inputs for your agent,
+      you can tune the machine learning classification threshold. If the returned score value is less than the threshold
+      value, then a fallback intent will be triggered or, if there are no fallback intents defined, no intent will be
+      triggered. The score values range from 0.0 (completely uncertain) to 1.0 (completely certain). If set to 0.0, the
+      default of 0.3 is used.
+  - name: 'apiVersion'
+    type: Enum
+    description: |
+      API version displayed in Dialogflow console. If not specified, V2 API is assumed. Clients are free to query
+      different service endpoints for different API versions. However, bots connectors and webhook calls will follow
+      the specified API version.
+      * API_VERSION_V1: Legacy V1 API.
+      * API_VERSION_V2: V2 API.
+      * API_VERSION_V2_BETA_1: V2beta1 API.
+    default_from_api: true
+    enum_values:
+      - 'API_VERSION_V1'
+      - 'API_VERSION_V2'
+      - 'API_VERSION_V2_BETA_1'
+  - name: 'tier'
+    type: Enum
+    description: |
+      The agent tier. If not specified, TIER_STANDARD is assumed.
+      * TIER_STANDARD: Standard tier.
+      * TIER_ENTERPRISE: Enterprise tier (Essentials).
+      * TIER_ENTERPRISE_PLUS: Enterprise tier (Plus).
+      NOTE: Due to consistency issues, the provider will not read this field from the API. Drift is possible between
+      the Terraform state and Dialogflow if the agent tier is changed outside of Terraform.
+    ignore_read: true
+    enum_values:
+      - 'TIER_STANDARD'
+      - 'TIER_ENTERPRISE'
+      - 'TIER_ENTERPRISE_PLUS'
