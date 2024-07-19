@@ -253,6 +253,9 @@
 <%        unless property.value_type.description.nil? || property.value_type.description == "A nested object resource"  -%>
       description:
 <%        end -%>
+<%        unless property.value_type.name.nil? -%>
+      name: <%= property.value_type.name %>
+<%        end -%>
       type: <%= property.value_type.type.to_s.gsub("Api::Type::", "") %>
 <%        unless property.value_type.properties.nil? -%>
       properties:
