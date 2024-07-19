@@ -876,6 +876,14 @@ func TestAccComputeBackendService_withClientTlsPolicy(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+      			{
+				Config: testAccComputeBackendService_clientTlsPolicyUpdate(randomSuffix),
+			},
+			{
+				ResourceName:      "google_compute_backend_service.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -2131,18 +2139,79 @@ resource "google_compute_backend_service" "foobar" {
   name                  = "tf-test-backend-service-%s"
   load_balancing_scheme = "INTERNAL_SELF_MANAGED"
   security_settings {
-    client_tls_policy = google_network_security_client_tls_policy.default.id
+    client_tls_policy = "//networksecurity.googleapis.com/${google_network_security_client_tls_policy.foobar.id}"
     subject_alt_names = ["test-ca"]
   }
 }
 
-resource "google_network_security_client_tls_policy" "default" {
+resource "google_network_security_client_tls_policy" "foobar" {
   name           = "tf-test-client-tls-policy-%s"
   labels         = {
     foo = "bar"
   }
   description    = "example description"
   sni            = "secure.example.com"
+  client_certificate {
+    certificate_provider_instance {
+      plugin_instance = "google_cloud_private_spiffe"
+    }
+  }
+  server_validation_ca {
+    certificate_provider_instance {
+      plugin_instance = "google_cloud_private_spiffe"
+    }
+	}
 }
 `, randomSuffix, randomSuffix)
+}
+
+func testAccComputeBackendService_clientTlsPolicyUpdate(randomSuffix string) string {
+	return fmt.Sprintf(`
+resource "google_compute_backend_service" "foobar" {
+  name                  = "tf-test-backend-service-%s"
+  load_balancing_scheme = "INTERNAL_SELF_MANAGED"
+  security_settings {
+    client_tls_policy = "//networksecurity.googleapis.com/${google_network_security_client_tls_policy.foobar2.id}"
+    subject_alt_names = ["test-ca", "test-ca-2"]
+  }
+}
+
+resource "google_network_security_client_tls_policy" "foobar" {
+  name           = "tf-test-client-tls-policy-%s"
+  labels         = {
+    foo = "bar"
+  }
+  description    = "example description"
+  sni            = "secure.example.com"
+  client_certificate {
+    certificate_provider_instance {
+      plugin_instance = "google_cloud_private_spiffe"
+    }
+  }
+  server_validation_ca {
+    certificate_provider_instance {
+      plugin_instance = "google_cloud_private_spiffe"
+    }
+	}
+}
+
+resource "google_network_security_client_tls_policy" "foobar2" {
+  name           = "tf-test-client-tls-policy-the-second-%s"
+  labels         = {
+    foo = "bar"
+  }
+  description    = "example description of the second policy"
+  sni            = "secure.example2.com"
+  client_certificate {
+    certificate_provider_instance {
+      plugin_instance = "google_cloud_private_spiffe"
+    }
+  }
+  server_validation_ca {
+    certificate_provider_instance {
+      plugin_instance = "google_cloud_private_spiffe"
+    }
+	}
+}
+`, randomSuffix, randomSuffix, randomSuffix)
 }

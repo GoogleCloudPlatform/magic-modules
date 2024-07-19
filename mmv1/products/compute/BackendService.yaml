@@ -1257,7 +1257,7 @@ properties:
           ClientTlsPolicy is a resource that specifies how a client should authenticate
           connections to backends of a service. This resource itself does not affect
           configuration unless it is attached to a backend service resource.
-        # custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
+        diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
       - !ruby/object:Api::Type::Array
         name: 'subjectAltNames'
         description: |
