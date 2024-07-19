@@ -19,28 +19,19 @@ resource "google_compute_health_check" "default" {
 resource "google_iap_settings" "<%= ctx[:primary_resource_id] %>" {
   name = "projects/test_project_id/iap_web/compute-us-central1/services/${google_compute_region_backend_service.default.name}"
   access_settings {
-    gcip_settings {
-      tenant_ids = ["tenant-id-1234"]
-      login_page_uri = "test_uri"
-    }
     cors_settings {
       allow_http_options = "true"
     }
-    oauth_settings {
-      login_hint = "test"
-      programmatic_clients = ["client-ids"]
-    }
     reauth_settings {
-      method = ["LOGIN"]
-      max_age = "3.5s"
-      policy_type = ["MINIMUM"]
+      method = "LOGIN"
+      max_age = "405s"
+      policy_type = "MINIMUM"
     }
   }
   application_settings {
-    cms_settings {
+    csm_settings {
       rctoken_aud = "audience"
-    }
-    cookie_domain = "site-cookie" 
+    } 
     access_denied_page_settings {
       access_denied_page_uri = "access-denied-uri"
       generate_troubleshooting_uri = true
