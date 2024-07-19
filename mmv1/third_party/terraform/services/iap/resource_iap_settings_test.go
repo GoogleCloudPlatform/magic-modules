@@ -73,28 +73,19 @@ resource "google_compute_health_check" "default" {
 resource "google_iap_settings" "default" {
   name = "projects/test_project_id/iap_web/compute-us-central1/services/${google_compute_region_backend_service.default.name}"
   access_settings {
-    gcip_settings {
-      tenant_ids = ["tenant-id-1234"]
-      login_page_uri = "test_uri"
-    }
     cors_settings {
       allow_http_options = "true"
     }
-    oauth_settings {
-      login_hint = "test"
-      programmatic_clients = ["client-ids"]
-    }
     reauth_settings {
       method = "LOGIN"
-      max_age = "3.5s"
+      max_age = "405s"
       policy_type = "MINIMUM"
     }
   }
   application_settings {
-    cms_settings {
+    csm_settings {
       rctoken_aud = "audience"
-    }
-    cookie_domain = "site-cookie" 
+    } 
     access_denied_page_settings {
       access_denied_page_uri = "access-denied-uri"
       generate_troubleshooting_uri = true
@@ -114,27 +105,18 @@ resource "google_iap_settings" "default" {
     cors_settings {
       allow_http_options = "false"
     }
-    allowed_domain_settings {
-      domains = ["domains-list"]
-      enable = true
+    reauth_settings {
+      method = "SECURE_KEY"
+      max_age = "600s"
+      policy_type = "DEFAULT"
     }
-    workforce_identity_settings {
-      workforce_pools = ["wif-resource"]
-      oauth2 {
-        client_id = "test-client-id"
-        client_Secret = "test-client-secret"
-      }
-    }
-    identity_source = "IDENTITY_SOURCE_UNSPECIFIED"
   }
   application_settings {
-    attribute_propagation_settings {
-      output_credentials = "HEADER"
-      enable = true
-    }  
+    csm_settings {
+      rctoken_aud = "updated-aud"
+    }   
   }
 }
-
 `, context)
 }
 
@@ -143,12 +125,6 @@ func testAccIapSettings_delete(context map[string]interface{}) string {
 
 resource "google_iap_settings" "default" {
   name = "projects/test_project_id/iap_web/compute-us-central1/services/${google_compute_region_backend_service.default.name}"
-  access_settings {
-    gcip_settings {
-      tenant_ids = ["tenant-id-1234"]
-      login_page_uri = "test_uri"
-    }
-  }
 }
 `, context)
 }
