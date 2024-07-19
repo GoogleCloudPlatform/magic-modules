@@ -5,6 +5,9 @@ import (
 	"regexp"
 	"testing"
 
+	"regexp"
+	"testing"
+
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 

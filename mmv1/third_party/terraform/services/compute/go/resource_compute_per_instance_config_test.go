@@ -2,9 +2,9 @@ package compute_test
 
 import (
 	"fmt"
+	"testing"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -688,9 +688,9 @@ func testAccComputePerInstanceConfigListInstances(t *testing.T, igmId string) (m
 
 	url := fmt.Sprintf("%s%s/listManagedInstances", config.ComputeBasePath, igmId)
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:    config,
-		Method:    "POST",
-		RawURL:    url,
+		Config: config,
+		Method: "POST",
+		RawURL: url,
 		UserAgent: config.UserAgent,
 	})
 	if err != nil {
@@ -715,9 +715,9 @@ func testAccComputePerInstanceConfigListNames(t *testing.T, igmId string) (map[s
 
 	url := fmt.Sprintf("%s%s/listPerInstanceConfigs", config.ComputeBasePath, igmId)
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:    config,
-		Method:    "POST",
-		RawURL:    url,
+		Config: config,
+		Method: "POST",
+		RawURL: url,
 		UserAgent: config.UserAgent,
 	})
 	if err != nil {

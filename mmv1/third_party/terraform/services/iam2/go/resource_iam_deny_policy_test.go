@@ -76,7 +76,7 @@ func TestAccIAM2DenyPolicy_iamDenyPolicyFolderParent(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"name", "parent"},
 			},
-			{
+      {
 				Config: testAccIAM2DenyPolicy_iamDenyPolicyFolderUpdate(context),
 			},
 			{
