@@ -1,190 +1,190 @@
 package workbench_test
 
 import (
-	"testing"
+  "testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+  "github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
+  "github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccWorkbenchInstance_shielded_config_update(t *testing.T) {
-	t.Parallel()
+  t.Parallel()
 
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-	}
+  context := map[string]interface{}{
+    "random_suffix": acctest.RandString(t, 10),
+  }
 
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccWorkbenchInstance_shielded_config_false(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"google_workbench_instance.instance", "state", "ACTIVE"),
-				),
-			},
-			{
-				ResourceName:            "google_workbench_instance.instance",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels"},
-			},
-			{
-				Config: testAccWorkbenchInstance_shielded_config_true(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"google_workbench_instance.instance", "state", "ACTIVE"),
-				),
-			},
-			{
-				ResourceName:            "google_workbench_instance.instance",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels"},
-			},
-		},
-	})
+  acctest.VcrTest(t, resource.TestCase{
+    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccWorkbenchInstance_shielded_config_false(context),
+        Check: resource.ComposeTestCheckFunc(
+                resource.TestCheckResourceAttr(
+                        "google_workbench_instance.instance", "state", "ACTIVE"),
+                ),
+      },
+      {
+        ResourceName:            "google_workbench_instance.instance",
+        ImportState:             true,
+        ImportStateVerify:       true,
+        ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels"},
+      },
+      {
+        Config: testAccWorkbenchInstance_shielded_config_true(context),
+        Check: resource.ComposeTestCheckFunc(
+                resource.TestCheckResourceAttr(
+                        "google_workbench_instance.instance", "state", "ACTIVE"),
+                ),
+      },
+      {
+        ResourceName:            "google_workbench_instance.instance",
+        ImportState:             true,
+        ImportStateVerify:       true,
+        ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels"},
+      },
+    },
+  })
 }
 
 func TestAccWorkbenchInstance_shielded_config_remove(t *testing.T) {
-	t.Parallel()
+  t.Parallel()
 
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-	}
+  context := map[string]interface{}{
+    "random_suffix": acctest.RandString(t, 10),
+  }
 
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccWorkbenchInstance_shielded_config_true(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"google_workbench_instance.instance", "state", "ACTIVE"),
-				),
-			},
-			{
-				ResourceName:            "google_workbench_instance.instance",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels"},
-			},
-			{
-				Config: testAccWorkbenchInstance_shielded_config_none(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"google_workbench_instance.instance", "state", "ACTIVE"),
-				),
-			},
-			{
-				ResourceName:            "google_workbench_instance.instance",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels"},
-			},
-		},
-	})
+  acctest.VcrTest(t, resource.TestCase{
+    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccWorkbenchInstance_shielded_config_true(context),
+        Check: resource.ComposeTestCheckFunc(
+                resource.TestCheckResourceAttr(
+                        "google_workbench_instance.instance", "state", "ACTIVE"),
+                ),
+      },
+      {
+        ResourceName:            "google_workbench_instance.instance",
+        ImportState:             true,
+        ImportStateVerify:       true,
+        ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels"},
+      },
+      {
+        Config: testAccWorkbenchInstance_shielded_config_none(context),
+        Check: resource.ComposeTestCheckFunc(
+                resource.TestCheckResourceAttr(
+                        "google_workbench_instance.instance", "state", "ACTIVE"),
+                ),
+      },
+      {
+        ResourceName:            "google_workbench_instance.instance",
+        ImportState:             true,
+        ImportStateVerify:       true,
+        ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels"},
+      },
+    },
+  })
 }
 
 func TestAccWorkbenchInstance_shielded_config_double_apply(t *testing.T) {
-	t.Parallel()
+  t.Parallel()
 
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-	}
+  context := map[string]interface{}{
+    "random_suffix": acctest.RandString(t, 10),
+  }
 
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccWorkbenchInstance_shielded_config_none(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"google_workbench_instance.instance", "state", "ACTIVE"),
-				),
-			},
-			{
-				ResourceName:            "google_workbench_instance.instance",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels"},
-			},
-			{
-				Config: testAccWorkbenchInstance_shielded_config_none(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"google_workbench_instance.instance", "state", "ACTIVE"),
-				),
-			},
-			{
-				ResourceName:            "google_workbench_instance.instance",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels"},
-			},
-			{
-				Config: testAccWorkbenchInstance_shielded_config_false(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"google_workbench_instance.instance", "state", "ACTIVE"),
-				),
-			},
-			{
-				ResourceName:            "google_workbench_instance.instance",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels"},
-			},
-			{
-				Config: testAccWorkbenchInstance_shielded_config_false(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"google_workbench_instance.instance", "state", "ACTIVE"),
-				),
-			},
-			{
-				ResourceName:            "google_workbench_instance.instance",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels"},
-			},
-			{
-				Config: testAccWorkbenchInstance_shielded_config_true(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"google_workbench_instance.instance", "state", "ACTIVE"),
-				),
-			},
-			{
-				ResourceName:            "google_workbench_instance.instance",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels"},
-			},
-			{
-				Config: testAccWorkbenchInstance_shielded_config_true(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"google_workbench_instance.instance", "state", "ACTIVE"),
-				),
-			},
-			{
-				ResourceName:            "google_workbench_instance.instance",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels"},
-			},
-		},
-	})
+  acctest.VcrTest(t, resource.TestCase{
+    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccWorkbenchInstance_shielded_config_none(context),
+        Check: resource.ComposeTestCheckFunc(
+                resource.TestCheckResourceAttr(
+                        "google_workbench_instance.instance", "state", "ACTIVE"),
+                ),
+      },
+      {
+        ResourceName:            "google_workbench_instance.instance",
+        ImportState:             true,
+        ImportStateVerify:       true,
+        ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels"},
+      },
+      {
+        Config: testAccWorkbenchInstance_shielded_config_none(context),
+        Check: resource.ComposeTestCheckFunc(
+                resource.TestCheckResourceAttr(
+                        "google_workbench_instance.instance", "state", "ACTIVE"),
+                ),
+      },
+      {
+        ResourceName:            "google_workbench_instance.instance",
+        ImportState:             true,
+        ImportStateVerify:       true,
+        ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels"},
+      },
+      {
+        Config: testAccWorkbenchInstance_shielded_config_false(context),
+        Check: resource.ComposeTestCheckFunc(
+                resource.TestCheckResourceAttr(
+                        "google_workbench_instance.instance", "state", "ACTIVE"),
+                ),
+      },
+      {
+        ResourceName:            "google_workbench_instance.instance",
+        ImportState:             true,
+        ImportStateVerify:       true,
+        ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels"},
+      },
+      {
+        Config: testAccWorkbenchInstance_shielded_config_false(context),
+        Check: resource.ComposeTestCheckFunc(
+                resource.TestCheckResourceAttr(
+                        "google_workbench_instance.instance", "state", "ACTIVE"),
+                ),
+      },
+      {
+        ResourceName:            "google_workbench_instance.instance",
+        ImportState:             true,
+        ImportStateVerify:       true,
+        ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels"},
+      },
+      {
+        Config: testAccWorkbenchInstance_shielded_config_true(context),
+        Check: resource.ComposeTestCheckFunc(
+                resource.TestCheckResourceAttr(
+                        "google_workbench_instance.instance", "state", "ACTIVE"),
+                ),
+      },
+      {
+        ResourceName:            "google_workbench_instance.instance",
+        ImportState:             true,
+        ImportStateVerify:       true,
+        ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels"},
+      },
+      {
+        Config: testAccWorkbenchInstance_shielded_config_true(context),
+        Check: resource.ComposeTestCheckFunc(
+                resource.TestCheckResourceAttr(
+                        "google_workbench_instance.instance", "state", "ACTIVE"),
+                ),
+      },
+      {
+        ResourceName:            "google_workbench_instance.instance",
+        ImportState:             true,
+        ImportStateVerify:       true,
+        ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels"},
+      },
+    },
+  })
 }
 
 func testAccWorkbenchInstance_shielded_config_true(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+  return acctest.Nprintf(`
 resource "google_workbench_instance" "instance" {
   name = "tf-test-workbench-instance%{random_suffix}"
   location = "us-central1-a"
@@ -201,7 +201,7 @@ resource "google_workbench_instance" "instance" {
 }
 
 func testAccWorkbenchInstance_shielded_config_false(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+  return acctest.Nprintf(`
 resource "google_workbench_instance" "instance" {
   name = "tf-test-workbench-instance%{random_suffix}"
   location = "us-central1-a"
@@ -219,7 +219,7 @@ resource "google_workbench_instance" "instance" {
 }
 
 func testAccWorkbenchInstance_shielded_config_none(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+  return acctest.Nprintf(`
 resource "google_workbench_instance" "instance" {
   name = "tf-test-workbench-instance%{random_suffix}"
   location = "us-central1-a"

@@ -1,0 +1,423 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Endpoint'
+description:
+  'Models are deployed into it, and afterwards Endpoint is called to obtain
+  predictions and explanations.'
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.endpoints'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/endpoints'
+self_link: 'projects/{{project}}/locations/{{location}}/endpoints/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/endpoints?endpointId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+iam_policy:
+  method_name_separator: ':'
+  fetch_iam_policy_verb: 'POST'
+  parent_resource_attribute: 'endpoint'
+  example_config_body: 'templates/terraform/iam/example_config_body/go/vertex_ai_endpoint.tf.tmpl'
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/endpoints/{{name}}'
+    - '{{name}}'
+  min_version: 'beta'
+custom_code:
+examples:
+  - name: 'vertex_ai_endpoint_network'
+    primary_resource_id: 'endpoint'
+    vars:
+      name: 'vertex_ai_endpoint'
+      project: 'vertex-ai'
+      endpoint_name: 'endpoint-name'
+      address_name: 'address-name'
+      kms_key_name: 'kms-name'
+      network_name: 'network-name'
+    skip_test: true
+parameters:
+  - name: 'location'
+    type: String
+    description: The location for the resource
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'region'
+    type: String
+    description: The region for the resource
+    url_param_only: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description:
+      The resource name of the Endpoint. The name must be numeric with no
+      leading zeros and can be at most 10 digits.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'displayName'
+    type: String
+    description:
+      Required. The display name of the Endpoint. The name can be up to 128
+      characters long and can consist of any UTF-8 characters.
+    required: true
+  - name: 'description'
+    type: String
+    description: The description of the Endpoint.
+  - name: 'deployedModels'
+    type: Array
+    description:
+      Output only. The models deployed in this Endpoint. To add or remove
+      DeployedModels use EndpointService.DeployModel and
+      EndpointService.UndeployModel respectively. Models can also be deployed
+      and undeployed using the [Cloud
+      Console](https://console.cloud.google.com/vertex-ai/).
+    output: true
+    item_type:
+      description:
+        Output only. The models deployed in this Endpoint. To add or remove
+        DeployedModels use EndpointService.DeployModel and
+        EndpointService.UndeployModel respectively. Models can also be deployed
+        and undeployed using the [Cloud
+        Console](https://console.cloud.google.com/vertex-ai/).
+      type: NestedObject
+      properties:
+        - name: 'dedicatedResources'
+          type: NestedObject
+          description:
+            A description of resources that are dedicated to the DeployedModel,
+            and that need a higher degree of manual configuration.
+          output: true
+          properties:
+            - name: 'machineSpec'
+              type: NestedObject
+              description:
+                The specification of a single machine used by the prediction.
+              output: true
+              properties:
+                - name: 'machineType'
+                  type: String
+                  description:
+                    'The type of the machine. See the [list of machine types
+                    supported for
+                    prediction](https://cloud.google.com/vertex-ai/docs/predictions/configure-compute#machine-types)
+                    See the [list of machine types supported for custom
+                    training](https://cloud.google.com/vertex-ai/docs/training/configure-compute#machine-types).
+                    For DeployedModel this field is optional, and the default
+                    value is `n1-standard-2`. For BatchPredictionJob or as part
+                    of WorkerPoolSpec this field is required. TODO(rsurowka):
+                    Try to better unify the required vs optional.'
+                  output: true
+                - name: 'acceleratorType'
+                  type: String
+                  description:
+                    The type of accelerator(s) that may be attached to the
+                    machine as per accelerator_count. See possible values
+                    [here](https://cloud.google.com/vertex-ai/docs/reference/rest/v1/MachineSpec#AcceleratorType).
+                  output: true
+                - name: 'acceleratorCount'
+                  type: Integer
+                  description:
+                    The number of accelerators to attach to the machine.
+                  output: true
+            - name: 'minReplicaCount'
+              type: Integer
+              description:
+                The minimum number of machine replicas this DeployedModel will
+                be always deployed on. This value must be greater than or equal
+                to 1. If traffic against the DeployedModel increases, it may
+                dynamically be deployed onto more replicas, and as traffic
+                decreases, some of these extra replicas may be freed.
+              output: true
+            - name: 'maxReplicaCount'
+              type: Integer
+              description:
+                The maximum number of replicas this DeployedModel may be
+                deployed on when the traffic against it increases. If the
+                requested value is too large, the deployment will error, but if
+                deployment succeeds then the ability to scale the model to that
+                many replicas is guaranteed (barring service outages). If
+                traffic against the DeployedModel increases beyond what its
+                replicas at maximum may handle, a portion of the traffic will be
+                dropped. If this value is not provided, will use
+                min_replica_count as the default value. The value of this field
+                impacts the charge against Vertex CPU and GPU quotas.
+                Specifically, you will be charged for max_replica_count * number
+                of cores in the selected machine type) and (max_replica_count *
+                number of GPUs per replica in the selected machine type).
+              output: true
+            - name: 'autoscalingMetricSpecs'
+              type: Array
+              description:
+                The metric specifications that overrides a resource utilization
+                metric (CPU utilization, accelerator's duty cycle, and so on)
+                target value (default to 60 if not set). At most one entry is
+                allowed per metric. If machine_spec.accelerator_count is above
+                0, the autoscaling will be based on both CPU utilization and
+                accelerator's duty cycle metrics and scale up when either
+                metrics exceeds its target value while scale down if both
+                metrics are under their target value. The default target value
+                is 60 for both metrics. If machine_spec.accelerator_count is 0,
+                the autoscaling will be based on CPU utilization metric only
+                with default target value 60 if not explicitly set. For example,
+                in the case of Online Prediction, if you want to override target
+                CPU utilization to 80, you should set
+                autoscaling_metric_specs.metric_name to
+                `aiplatform.googleapis.com/prediction/online/cpu/utilization`
+                and autoscaling_metric_specs.target to `80`.
+              output: true
+              item_type:
+                description:
+                  The metric specifications that overrides a resource
+                  utilization metric (CPU utilization, accelerator's duty cycle,
+                  and so on) target value (default to 60 if not set). At most
+                  one entry is allowed per metric. If
+                  machine_spec.accelerator_count is above 0, the autoscaling
+                  will be based on both CPU utilization and accelerator's duty
+                  cycle metrics and scale up when either metrics exceeds its
+                  target value while scale down if both metrics are under their
+                  target value. The default target value is 60 for both metrics.
+                  If machine_spec.accelerator_count is 0, the autoscaling will
+                  be based on CPU utilization metric only with default target
+                  value 60 if not explicitly set. For example, in the case of
+                  Online Prediction, if you want to override target CPU
+                  utilization to 80, you should set
+                  autoscaling_metric_specs.metric_name to
+                  `aiplatform.googleapis.com/prediction/online/cpu/utilization`
+                  and autoscaling_metric_specs.target to `80`.
+                type: NestedObject
+                properties:
+                  - name: 'metricName'
+                    type: String
+                    description:
+                      'The resource metric name. Supported metrics: * For Online
+                      Prediction: *
+                      `aiplatform.googleapis.com/prediction/online/accelerator/duty_cycle`
+                      *
+                      `aiplatform.googleapis.com/prediction/online/cpu/utilization`'
+                    output: true
+                  - name: 'target'
+                    type: Integer
+                    description:
+                      The target resource utilization in percentage (1% - 100%)
+                      for the given metric; once the real usage deviates from
+                      the target by a certain percentage, the machine replicas
+                      change. The default value is 60 (representing 60%) if not
+                      provided.
+                    output: true
+        - name: 'automaticResources'
+          type: NestedObject
+          description:
+            A description of resources that to large degree are decided by
+            Vertex AI, and require only a modest additional configuration.
+          output: true
+          properties:
+            - name: 'minReplicaCount'
+              type: Integer
+              description:
+                The minimum number of replicas this DeployedModel will be always
+                deployed on. If traffic against it increases, it may dynamically
+                be deployed onto more replicas up to max_replica_count, and as
+                traffic decreases, some of these extra replicas may be freed. If
+                the requested value is too large, the deployment will error.
+              output: true
+            - name: 'maxReplicaCount'
+              type: Integer
+              description:
+                The maximum number of replicas this DeployedModel may be
+                deployed on when the traffic against it increases. If the
+                requested value is too large, the deployment will error, but if
+                deployment succeeds then the ability to scale the model to that
+                many replicas is guaranteed (barring service outages). If
+                traffic against the DeployedModel increases beyond what its
+                replicas at maximum may handle, a portion of the traffic will be
+                dropped. If this value is not provided, a no upper bound for
+                scaling under heavy traffic will be assume, though Vertex AI may
+                be unable to scale beyond certain replica number.
+              output: true
+        - name: 'id'
+          type: String
+          description:
+            The ID of the DeployedModel. If not provided upon deployment, Vertex
+            AI will generate a value for this ID. This value should be 1-10
+            characters, and valid characters are /[0-9]/.
+          output: true
+        - name: 'model'
+          type: String
+          description:
+            The name of the Model that this is the deployment of. Note that the
+            Model may be in a different location than the DeployedModel's
+            Endpoint.
+          output: true
+        - name: 'modelVersionId'
+          type: String
+          description:
+            Output only. The version ID of the model that is deployed.
+          output: true
+        - name: 'displayName'
+          type: String
+          description:
+            The display name of the DeployedModel. If not provided upon
+            creation, the Model's display_name is used.
+          output: true
+        - name: 'createTime'
+          type: String
+          description:
+            Output only. Timestamp when the DeployedModel was created.
+          output: true
+        - name: 'serviceAccount'
+          type: String
+          description:
+            The service account that the DeployedModel's container runs as.
+            Specify the email address of the service account. If this service
+            account is not specified, the container runs as a service account
+            that doesn't have access to the resource project. Users deploying
+            the Model must have the `iam.serviceAccounts.actAs` permission on
+            this service account.
+          output: true
+        - name: 'enableAccessLogging'
+          type: Boolean
+          description:
+            These logs are like standard server access logs, containing
+            information like timestamp and latency for each prediction request.
+            Note that Stackdriver logs may incur a cost, especially if your
+            project receives prediction requests at a high queries per second
+            rate (QPS). Estimate your costs before enabling this option.
+          output: true
+        - name: 'privateEndpoints'
+          type: NestedObject
+          description:
+            Output only. Provide paths for users to send predict/explain/health
+            requests directly to the deployed model services running on Cloud
+            via private services access. This field is populated if network is
+            configured.
+          output: true
+          properties:
+            - name: 'predictHttpUri'
+              type: String
+              description:
+                Output only. Http(s) path to send prediction requests.
+              output: true
+            - name: 'explainHttpUri'
+              type: String
+              description: Output only. Http(s) path to send explain requests.
+              output: true
+            - name: 'healthHttpUri'
+              type: String
+              description:
+                Output only. Http(s) path to send health check requests.
+              output: true
+            - name: 'serviceAttachment'
+              type: String
+              description:
+                Output only. The name of the service attachment resource.
+                Populated if private service connect is enabled.
+              output: true
+        - name: 'sharedResources'
+          type: String
+          description:
+            'The resource name of the shared DeploymentResourcePool to deploy
+            on. Format:
+            projects/{project}/locations/{location}/deploymentResourcePools/{deployment_resource_pool}'
+          output: true
+        - name: 'enableContainerLogging'
+          type: Boolean
+          description:
+            If true, the container of the DeployedModel instances will send
+            `stderr` and `stdout` streams to Stackdriver Logging. Only supported
+            for custom-trained Models and AutoML Tabular Models.
+          output: true
+  - name: 'etag'
+    type: String
+    description:
+      Used to perform consistent read-modify-write updates. If not set, a blind
+      "overwrite" update happens.
+    ignore_read: true
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description:
+      The labels with user-defined metadata to organize your Endpoints. Label
+      keys and values can be no longer than 64 characters (Unicode codepoints),
+      can only contain lowercase letters, numeric characters, underscores and
+      dashes. International characters are allowed. See https://goo.gl/xmQnxf
+      for more information and examples of labels.
+    immutable: false
+  - name: 'createTime'
+    type: String
+    description: Output only. Timestamp when this Endpoint was created.
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: Output only. Timestamp when this Endpoint was last updated.
+    output: true
+  - name: 'encryptionSpec'
+    type: NestedObject
+    description:
+      Customer-managed encryption key spec for an Endpoint. If set, this
+      Endpoint and all sub-resources of this Endpoint will be secured by this
+      key.
+    immutable: true
+    properties:
+      - name: 'kmsKeyName'
+        type: String
+        description:
+          'Required. The Cloud KMS resource identifier of the customer managed
+          encryption key used to protect a resource. Has the form:
+          `projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key`.
+          The key needs to be in the same region as where the compute resource
+          is created.'
+        required: true
+        immutable: true
+  - name: 'network'
+    type: String
+    description:
+      'The full name of the Google Compute Engine
+      [network](https://cloud.google.com//compute/docs/networks-and-firewalls#networks)
+      to which the Endpoint should be peered. Private services access must
+      already be configured for the network. If left unspecified, the Endpoint
+      is not peered with any network. Only one of the fields, network or
+      enable_private_service_connect, can be set.
+      [Format](https://cloud.google.com/compute/docs/reference/rest/v1/networks/insert):
+      `projects/{project}/global/networks/{network}`. Where `{project}` is a
+      project number, as in `12345`, and `{network}` is network name.'
+    immutable: true
+  - name: 'modelDeploymentMonitoringJob'
+    type: String
+    description:
+      'Output only. Resource name of the Model Monitoring job associated with
+      this Endpoint if monitoring is enabled by
+      CreateModelDeploymentMonitoringJob. Format:
+      `projects/{project}/locations/{location}/modelDeploymentMonitoringJobs/{model_deployment_monitoring_job}`'
+    output: true

@@ -1,0 +1,63 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Bucket'
+description: |
+  An association between a Firebase project and a Google Cloud Storage bucket.
+  This association enables integration of Cloud Storage buckets with Firebase such as Firebase SDKS, Authentication, and Security Rules.
+min_version: 'beta'
+references:
+  guides:
+    'Official Documentation': 'https://firebase.google.com/docs/storage/'
+  api: 'https://firebase.google.com/docs/reference/rest/storage/rest/v1beta/projects.buckets'
+docs:
+base_url: 'projects/{{project}}/buckets'
+self_link: 'projects/{{project}}/buckets/{{bucket_id}}'
+create_url: 'projects/{{project}}/buckets/{{bucket_id}}:addFirebase'
+delete_url: 'projects/{{project}}/buckets/{{bucket_id}}:removeFirebase'
+delete_verb: 'POST'
+immutable: true
+import_format:
+  - 'projects/{{project}}/buckets/{{bucket_id}}'
+  - '{{project}}/{{bucket_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+examples:
+  - name: 'firebasestorage_bucket_basic'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      bucket_id: 'test_bucket'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+parameters:
+  - name: 'bucket_id'
+    type: String
+    description:
+      Required. Immutable. The ID of the underlying Google Cloud Storage bucket
+    min_version: 'beta'
+    url_param_only: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description:
+      Resource name of the bucket in the format
+      projects/PROJECT_IDENTIFIER/buckets/BUCKET_ID
+    min_version: 'beta'
+    output: true
