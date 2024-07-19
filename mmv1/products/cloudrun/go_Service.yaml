@@ -1,0 +1,1080 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'Service'
+kind: 'Service'
+description: |-
+  A Cloud Run service has a unique endpoint and autoscales containers.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/run/docs/'
+  api: 'https://cloud.google.com/run/docs/reference/rest/v1/namespaces.services'
+docs:
+  warning: |
+    We recommend using the `google_cloud_run_v2_service` resource which offers a better
+    developer experience and broader support of Cloud Run features.
+id_format: 'locations/{{location}}/namespaces/{{project}}/services/{{name}}'
+base_url: 'apis/serving.knative.dev/v1/namespaces/{{project}}/services'
+cai_base_url: 'projects/{{project}}/locations/{{location}}/services'
+import_format:
+  - 'locations/{{location}}/namespaces/{{project}}/services/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  type: 'PollAsync'
+  check_response_func_existence: 'PollCheckKnativeStatusFunc(res)'
+  check_response_func_absence: 'transport_tpg.PollCheckForAbsence'
+  suppress_error: false
+  target_occurrences: 1
+  actions: ['create', 'update']
+iam_policy:
+  method_name_separator: ':'
+  parent_resource_attribute: 'service'
+  base_url: 'v1/projects/{{project}}/locations/{{location}}/services/{{service}}'
+  example_config_body: 'templates/terraform/iam/go/iam_attributes.go.tmpl'
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/services/{{service}}'
+    - '{{service}}'
+custom_code:
+  constants: 'templates/terraform/constants/go/cloud_run_service.go.tmpl'
+  encoder: 'templates/terraform/encoders/go/cloud_run_service.go.tmpl'
+  decoder: 'templates/terraform/decoders/go/cloud_run.go.tmpl'
+custom_diff:
+  - 'revisionNameCustomizeDiff'
+error_retry_predicates:
+
+  - 'transport_tpg.IsCloudRunCreationConflict'
+schema_version: 2
+state_upgrade_base_schema_version: 1
+state_upgraders: true
+examples:
+  - name: 'cloud_run_service_basic'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
+    vars:
+      cloud_run_service_name: 'cloudrun-srv'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+  - name: 'cloud_run_service_sql'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
+    vars:
+      cloud_run_service_name: 'cloudrun-srv'
+      cloud_run_sql_name: 'cloudrun-sql'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+    ignore_read_extra:
+      - 'autogenerate_revision_name'
+  - name: 'cloud_run_service_noauth'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
+    vars:
+      cloud_run_service_name: 'cloudrun-srv'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+  - name: 'cloud_run_service_multiple_environment_variables'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
+    vars:
+      cloud_run_service_name: 'cloudrun-srv'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+    ignore_read_extra:
+      - 'autogenerate_revision_name'
+    skip_docs: true
+  - name: 'cloud_run_service_secret_environment_variables'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
+    vars:
+      cloud_run_service_name: 'cloudrun-srv'
+      secret_id: 'secret'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+    ignore_read_extra:
+      - 'autogenerate_revision_name'
+    skip_docs: true
+  - name: 'cloud_run_service_secret_volumes'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
+    vars:
+      cloud_run_service_name: 'cloudrun-srv'
+      secret_id: 'secret'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+    ignore_read_extra:
+      - 'autogenerate_revision_name'
+    skip_docs: true
+  - name: 'cloud_run_service_probes'
+    primary_resource_id: 'default'
+    vars:
+      cloud_run_service_name: 'cloudrun-srv'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+  - name: 'cloud_run_service_multicontainer'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      cloud_run_service_name: 'cloudrun-srv'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+virtual_fields:
+  - name: 'autogenerate_revision_name'
+    description: |
+      If set to `true`, the revision name (template.metadata.name) will be omitted and
+      autogenerated by Cloud Run. This cannot be set to `true` while `template.metadata.name`
+      is also set.
+      (For legacy support, if `template.metadata.name` is unset in state while
+      this field is set to false, the revision name will still autogenerate.)
+    type: Boolean
+    default_value: false
+parameters:
+  - name: 'location'
+    type: String
+    description: The location of the cloud run instance. eg us-central1
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |-
+      Name must be unique within a Google Cloud project and region.
+      Is required when creating resources. Name is primarily intended
+      for creation idempotence and configuration definition. Cannot be updated.
+      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'spec'
+    type: NestedObject
+    description: Spec holds the desired state of the Service (from the client).
+    required: true
+    flatten_object: true
+    properties:
+      - name: 'traffic'
+        type: Array
+        description: |-
+          Traffic specifies how to distribute traffic over a collection of Knative Revisions
+          and Configurations
+        default_from_api: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'revisionName'
+              type: String
+              description: |-
+                RevisionName of a specific revision to which to send this portion of traffic.
+            - name: 'percent'
+              type: Integer
+              description: |-
+                Percent specifies percent of the traffic to this Revision or Configuration.
+              required: true
+            - name: 'tag'
+              type: String
+              description: |-
+                Tag is optionally used to expose a dedicated url for referencing this target exclusively.
+            - name: 'latestRevision'
+              type: Boolean
+              description: |-
+                LatestRevision may be optionally provided to indicate that the latest ready
+                Revision of the Configuration should be used for this traffic target. When
+                provided LatestRevision must be true if RevisionName is empty; it must be
+                false when RevisionName is non-empty.
+            - name: 'url'
+              type: String
+              description: |-
+                URL displays the URL for accessing tagged traffic targets. URL is displayed in status,
+                and is disallowed on spec. URL must contain a scheme (e.g. http://) and a hostname,
+                but may not contain anything else (e.g. basic auth, url path, etc.)
+              output: true
+      - name: 'template'
+        type: NestedObject
+        description: |-
+          template holds the latest specification for the Revision to
+          be stamped out. The template references the container image, and may also
+          include labels and annotations that should be attached to the Revision.
+          To correlate a Revision, and/or to force a Revision to be created when the
+          spec doesn't otherwise change, a nonce label may be provided in the
+          template metadata. For more details, see:
+          https://github.com/knative/serving/blob/main/docs/client-conventions.md#associate-modifications-with-revisions
+
+          Cloud Run does not currently support referencing a build that is
+          responsible for materializing the container image from source.
+        properties:
+          - name: 'metadata'
+            type: NestedObject
+            description: |-
+              Optional metadata for this Revision, including labels and annotations.
+              Name will be generated by the Configuration. To set minimum instances
+              for this revision, use the "autoscaling.knative.dev/minScale" annotation
+              key. To set maximum instances for this revision, use the
+              "autoscaling.knative.dev/maxScale" annotation key. To set Cloud SQL
+              connections for the revision, use the "run.googleapis.com/cloudsql-instances"
+              annotation key.
+            default_from_api: true
+            properties:
+              - name: 'labels'
+                type: KeyValuePairs
+                description: |-
+                  Map of string keys and values that can be used to organize and categorize
+                  (scope and select) objects.
+                default_from_api: true
+                diff_suppress_func: 'cloudrunTemplateLabelDiffSuppress'
+              - name: 'generation'
+                type: Integer
+                description: |-
+                  A sequence number representing a specific generation of the desired state.
+                output: true
+              - name: 'resourceVersion'
+                type: String
+                description: |-
+                  An opaque value that represents the internal version of this object that
+                  can be used by clients to determine when objects have changed. May be used
+                  for optimistic concurrency, change detection, and the watch operation on a
+                  resource or set of resources. They may only be valid for a
+                  particular resource or set of resources.
+                output: true
+              - name: 'selfLink'
+                type: String
+                description: |-
+                  SelfLink is a URL representing this object.
+                output: true
+              - name: 'uid'
+                type: String
+                description: |-
+                  UID is a unique id generated by the server on successful creation of a resource and is not
+                  allowed to change on PUT operations.
+                output: true
+              - name: 'namespace'
+                type: String
+                description: |-
+                  In Cloud Run the namespace must be equal to either the
+                  project ID or project number. It will default to the resource's project.
+                default_from_api: true
+                custom_expand: 'templates/terraform/custom_expand/go/default_to_project.go.tmpl'
+              - name: 'annotations'
+                type: KeyValuePairs
+                description: |-
+                  Annotations is a key value map stored with a resource that
+                  may be set by external tools to store and retrieve arbitrary metadata. More
+                  info: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations
+
+                  **Note**: The Cloud Run API may add additional annotations that were not provided in your config.
+                  If terraform plan shows a diff where a server-side annotation is added, you can add it to your config
+                  or apply the lifecycle.ignore_changes rule to the metadata.0.annotations field.
+
+                  Annotations with `run.googleapis.com/` and `autoscaling.knative.dev` are restricted. Use the following annotation
+                  keys to configure features on a Revision template:
+
+                  - `autoscaling.knative.dev/maxScale` sets the [maximum number of container
+                    instances](https://cloud.google.com/sdk/gcloud/reference/run/deploy#--max-instances) of the Revision to run.
+                  - `autoscaling.knative.dev/minScale` sets the [minimum number of container
+                    instances](https://cloud.google.com/sdk/gcloud/reference/run/deploy#--min-instances) of the Revision to run.
+                  - `run.googleapis.com/client-name` sets the client name calling the Cloud Run API.
+                  - `run.googleapis.com/cloudsql-instances` sets the [Cloud SQL
+                    instances](https://cloud.google.com/sdk/gcloud/reference/run/deploy#--add-cloudsql-instances) the Revision connects to.
+                  - `run.googleapis.com/cpu-throttling` sets whether to throttle the CPU when the container is not actively serving
+                    requests. See https://cloud.google.com/sdk/gcloud/reference/run/deploy#--[no-]cpu-throttling.
+                  - `run.googleapis.com/encryption-key-shutdown-hours` sets the number of hours to wait before an automatic shutdown
+                    server after CMEK key revocation is detected.
+                  - `run.googleapis.com/encryption-key` sets the [CMEK key](https://cloud.google.com/run/docs/securing/using-cmek)
+                    reference to encrypt the container with.
+                  - `run.googleapis.com/execution-environment` sets the [execution
+                    environment](https://cloud.google.com/sdk/gcloud/reference/run/deploy#--execution-environment)
+                    where the application will run.
+                  - `run.googleapis.com/post-key-revocation-action-type` sets the
+                    [action type](https://cloud.google.com/sdk/gcloud/reference/run/deploy#--post-key-revocation-action-type)
+                    after CMEK key revocation.
+                  - `run.googleapis.com/secrets` sets a list of key-value pairs to set as
+                    [secrets](https://cloud.google.com/run/docs/configuring/secrets#yaml).
+                  - `run.googleapis.com/sessionAffinity` sets whether to enable
+                    [session affinity](https://cloud.google.com/sdk/gcloud/reference/beta/run/deploy#--[no-]session-affinity)
+                    for connections to the Revision.
+                  - `run.googleapis.com/startup-cpu-boost` sets whether to allocate extra CPU to containers on startup.
+                    See https://cloud.google.com/sdk/gcloud/reference/run/deploy#--[no-]cpu-boost.
+                  - `run.googleapis.com/vpc-access-connector` sets a [VPC connector](https://cloud.google.com/run/docs/configuring/connecting-vpc#terraform_1)
+                    for the Revision.
+                  - `run.googleapis.com/vpc-access-egress` sets the outbound traffic to send through the VPC connector for this resource.
+                    See https://cloud.google.com/sdk/gcloud/reference/run/deploy#--vpc-egress.
+                default_from_api: true
+                diff_suppress_func: 'cloudrunTemplateAnnotationDiffSuppress'
+              - name: 'name'
+                type: String
+                description: |-
+                  Name must be unique within a Google Cloud project and region.
+                  Is required when creating resources. Name is primarily intended
+                  for creation idempotence and configuration definition. Cannot be updated.
+                default_from_api: true
+                custom_expand: 'templates/terraform/custom_expand/go/cloud_run_service_revision_name.tmpl'
+          - name: 'spec'
+            type: NestedObject
+            description:
+              RevisionSpec holds the desired state of the Revision (from the
+              client).
+            required: true
+            default_from_api: true
+            properties:
+              - name: 'containers'
+                type: Array
+                description: |-
+                  Containers defines the unit of execution for this Revision.
+                required: true
+                default_from_api: true
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: 'name'
+                      type: String
+                      description: Name of the container
+                      default_from_api: true
+                    - name: 'workingDir'
+                      type: String
+                      description: |-
+                        Container's working directory.
+                        If not specified, the container runtime's default will be used, which
+                        might be configured in the container image.
+                      immutable: true
+                      deprecation_message: '`working_dir` is deprecated and will be removed in a future major release. This field is not supported by the Cloud Run API.'
+                    - name: 'args'
+                      type: Array
+                      description: |-
+                        Arguments to the entrypoint.
+                        The docker image's CMD is used if this is not provided.
+                      item_type:
+                        type: String
+                    - name: 'envFrom'
+                      type: Array
+                      description: |-
+                        List of sources to populate environment variables in the container.
+                        All invalid keys will be reported as an event when the container is starting.
+                        When a key exists in multiple sources, the value associated with the last source will
+                        take precedence. Values defined by an Env with a duplicate key will take
+                        precedence.
+                      immutable: true
+                      deprecation_message: '`env_from` is deprecated and will be removed in a future major release. This field is not supported by the Cloud Run API.'
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - name: 'prefix'
+                            type: String
+                            description: |-
+                              An optional identifier to prepend to each key in the ConfigMap.
+                          - name: 'configMapRef'
+                            type: NestedObject
+                            description: |-
+                              The ConfigMap to select from.
+                            properties:
+                              - name: 'optional'
+                                type: Boolean
+                                description: |-
+                                  Specify whether the ConfigMap must be defined
+                              - name: 'localObjectReference'
+                                type: NestedObject
+                                description: The ConfigMap to select from.
+                                properties:
+                                  - name: 'name'
+                                    type: String
+                                    description: |-
+                                      Name of the referent.
+                                    required: true
+                          - name: 'secretRef'
+                            type: NestedObject
+                            description: |-
+                              The Secret to select from.
+                            properties:
+                              - name: 'localObjectReference'
+                                type: NestedObject
+                                description: The Secret to select from.
+                                properties:
+                                  - name: 'name'
+                                    type: String
+                                    description: |-
+                                      Name of the referent.
+                                    required: true
+                              - name: 'optional'
+                                type: Boolean
+                                description: |-
+                                  Specify whether the Secret must be defined
+                    - name: 'image'
+                      type: String
+                      description: |-
+                        Docker image name. This is most often a reference to a container located
+                        in the container registry, such as gcr.io/cloudrun/hello
+                      required: true
+                    - name: 'command'
+                      type: Array
+                      description: |-
+                        Entrypoint array. Not executed within a shell.
+                        The docker image's ENTRYPOINT is used if this is not provided.
+                      item_type:
+                        type: String
+                    - name: 'env'
+                      type: Array
+                      description: |-
+                        List of environment variables to set in the container.
+                      is_set: true
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - name: 'name'
+                            type: String
+                            description: Name of the environment variable.
+                          - name: 'value'
+                            type: String
+                            description: |-
+                              Defaults to "".
+                          - name: 'valueFrom'
+                            type: NestedObject
+                            description: |-
+                              Source for the environment variable's value. Only supports secret_key_ref.
+                            properties:
+                              - name: 'secretKeyRef'
+                                type: NestedObject
+                                description: |-
+                                  Selects a key (version) of a secret in Secret Manager.
+                                required: true
+                                properties:
+                                  - name: 'key'
+                                    type: String
+                                    description: |-
+                                      A Cloud Secret Manager secret version. Must be 'latest' for the latest
+                                      version or an integer for a specific version.
+                                    required: true
+                                  - name: 'name'
+                                    type: String
+                                    description: |-
+                                      The name of the secret in Cloud Secret Manager. By default, the secret is assumed to be in the same project.
+                                      If the secret is in another project, you must define an alias.
+                                      An alias definition has the form: :projects/{project-id|project-number}/secrets/.
+                                      If multiple alias definitions are needed, they must be separated by commas.
+                                      The alias definitions must be set on the run.googleapis.com/secrets annotation.
+                                    required: true
+                    - name: 'ports'
+                      type: Array
+                      description: |-
+                        List of open ports in the container.
+                      default_from_api: true
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - name: 'name'
+                            type: String
+                            description:
+                              If specified, used to specify which protocol to
+                              use. Allowed values are "http1" (HTTP/1) and "h2c"
+                              (HTTP/2 end-to-end). Defaults to "http1".
+                            default_from_api: true
+                          - name: 'protocol'
+                            type: String
+                            description:
+                              Protocol for port. Must be "TCP". Defaults to
+                              "TCP".
+                          - name: 'containerPort'
+                            type: Integer
+                            description:
+                              Port number the container listens on. This must be
+                              a valid port number (between 1 and 65535).
+                              Defaults to "8080".
+                    - name: 'resources'
+                      type: NestedObject
+                      description: |-
+                        Compute Resources required by this container. Used to set values such as max memory
+                      default_from_api: true
+                      properties:
+                        - name: 'limits'
+                          type: KeyValuePairs
+                          description: |-
+                            Limits describes the maximum amount of compute resources allowed.
+                            The values of the map is string form of the 'quantity' k8s type:
+                            https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
+                          default_from_api: true
+                        - name: 'requests'
+                          type: KeyValuePairs
+                          description: |-
+                            Requests describes the minimum amount of compute resources required.
+                            If Requests is omitted for a container, it defaults to Limits if that is
+                            explicitly specified, otherwise to an implementation-defined value.
+                            The values of the map is string form of the 'quantity' k8s type:
+                            https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
+                    - name: 'volumeMounts'
+                      type: Array
+                      description: |-
+                        Volume to mount into the container's filesystem.
+                        Only supports SecretVolumeSources.
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - name: 'mountPath'
+                            type: String
+                            description: |-
+                              Path within the container at which the volume should be mounted.  Must
+                              not contain ':'.
+                            required: true
+                          - name: 'name'
+                            type: String
+                            description: |-
+                              This must match the Name of a Volume.
+                            required: true
+                    - name: 'startupProbe'
+                      type: NestedObject
+                      description: |-
+                        Startup probe of application within the container.
+                        All other probes are disabled if a startup probe is provided, until it
+                        succeeds. Container will not be added to service endpoints if the probe fails.
+                      default_from_api: true
+                      properties:
+                        - name: 'initialDelaySeconds'
+                          type: Integer
+                          description: |-
+                            Number of seconds after the container has started before the probe is
+                            initiated.
+                            Defaults to 0 seconds. Minimum value is 0. Maximum value is 240.
+                          default_value: 0
+                        - name: 'timeoutSeconds'
+                          type: Integer
+                          description: |-
+                            Number of seconds after which the probe times out.
+                            Defaults to 1 second. Minimum value is 1. Maximum value is 3600.
+                            Must be smaller than periodSeconds.
+                          default_value: 1
+                        - name: 'periodSeconds'
+                          type: Integer
+                          description: |-
+                            How often (in seconds) to perform the probe.
+                            Default to 10 seconds. Minimum value is 1. Maximum value is 240.
+                          default_value: 10
+                        - name: 'failureThreshold'
+                          type: Integer
+                          description: |-
+                            Minimum consecutive failures for the probe to be considered failed after
+                            having succeeded. Defaults to 3. Minimum value is 1.
+                          default_value: 3
+                        - name: 'tcpSocket'
+                          type: NestedObject
+                          description: |-
+                            TcpSocket specifies an action involving a TCP port.
+                          send_empty_value: true
+                          allow_empty_object: true
+                          exactly_one_of:
+                            - 'template.0.spec.0.containers.0.startup_probe.0.tcp_socket'
+                            - 'template.0.spec.0.containers.0.startup_probe.0.http_get'
+                            - 'template.0.spec.0.containers.0.startup_probe.0.grpc'
+                          properties:
+                            - name: 'port'
+                              type: Integer
+                              description: |-
+                                Port number to access on the container. Number must be in the range 1 to 65535.
+                                If not specified, defaults to the same value as container.ports[0].containerPort.
+                              default_from_api: true
+                        - name: 'httpGet'
+                          type: NestedObject
+                          description: |-
+                            HttpGet specifies the http request to perform.
+                          send_empty_value: true
+                          allow_empty_object: true
+                          exactly_one_of:
+                            - 'template.0.spec.0.containers.0.startup_probe.0.tcp_socket'
+                            - 'template.0.spec.0.containers.0.startup_probe.0.http_get'
+                            - 'template.0.spec.0.containers.0.startup_probe.0.grpc'
+                          properties:
+                            - name: 'path'
+                              type: String
+                              description: |-
+                                Path to access on the HTTP server. If set, it should not be empty string.
+                              default_value: "/"
+                            - name: 'port'
+                              type: Integer
+                              description: |-
+                                Port number to access on the container. Number must be in the range 1 to 65535.
+                                If not specified, defaults to the same value as container.ports[0].containerPort.
+                              default_from_api: true
+                            - name: 'httpHeaders'
+                              type: Array
+                              description: |-
+                                Custom headers to set in the request. HTTP allows repeated headers.
+                              item_type:
+                                type: NestedObject
+                                properties:
+                                  - name: 'name'
+                                    type: String
+                                    description: |-
+                                      The header field name.
+                                    required: true
+                                  - name: 'value'
+                                    type: String
+                                    description: |-
+                                      The header field value.
+                                    send_empty_value: true
+                                    default_value: ""
+                        - name: 'grpc'
+                          type: NestedObject
+                          description: |-
+                            GRPC specifies an action involving a GRPC port.
+                          send_empty_value: true
+                          allow_empty_object: true
+                          exactly_one_of:
+                            - 'template.0.spec.0.containers.0.startup_probe.0.tcp_socket'
+                            - 'template.0.spec.0.containers.0.startup_probe.0.http_get'
+                            - 'template.0.spec.0.containers.0.startup_probe.0.grpc'
+                          properties:
+                            - name: 'port'
+                              type: Integer
+                              description: |-
+                                Port number to access on the container. Number must be in the range 1 to 65535.
+                                If not specified, defaults to the same value as container.ports[0].containerPort.
+                              default_from_api: true
+                            - name: 'service'
+                              type: String
+                              description: |-
+                                The name of the service to place in the gRPC HealthCheckRequest
+                                (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
+                                If this is not specified, the default behavior is defined by gRPC.
+                    - name: 'livenessProbe'
+                      type: NestedObject
+                      description: |-
+                        Periodic probe of container liveness. Container will be restarted if the probe fails.
+                      properties:
+                        - name: 'initialDelaySeconds'
+                          type: Integer
+                          description: |-
+                            Number of seconds after the container has started before the probe is
+                            initiated.
+                            Defaults to 0 seconds. Minimum value is 0. Maximum value is 3600.
+                          default_value: 0
+                        - name: 'timeoutSeconds'
+                          type: Integer
+                          description: |-
+                            Number of seconds after which the probe times out.
+                            Defaults to 1 second. Minimum value is 1. Maximum value is 3600.
+                            Must be smaller than period_seconds.
+                          default_value: 1
+                        - name: 'periodSeconds'
+                          type: Integer
+                          description: |-
+                            How often (in seconds) to perform the probe.
+                            Default to 10 seconds. Minimum value is 1. Maximum value is 3600.
+                          default_value: 10
+                        - name: 'failureThreshold'
+                          type: Integer
+                          description: |-
+                            Minimum consecutive failures for the probe to be considered failed after
+                            having succeeded. Defaults to 3. Minimum value is 1.
+                          default_value: 3
+                        - name: 'httpGet'
+                          type: NestedObject
+                          description: |-
+                            HttpGet specifies the http request to perform.
+                          send_empty_value: true
+                          allow_empty_object: true
+                          exactly_one_of:
+                            - 'template.0.spec.0.containers.0.liveness_probe.0.http_get'
+                            - 'template.0.spec.0.containers.0.liveness_probe.0.grpc'
+                          properties:
+                            - name: 'path'
+                              type: String
+                              description: |-
+                                Path to access on the HTTP server. If set, it should not be empty string.
+                              default_value: "/"
+                            - name: 'port'
+                              type: Integer
+                              description: |-
+                                Port number to access on the container. Number must be in the range 1 to 65535.
+                                If not specified, defaults to the same value as container.ports[0].containerPort.
+                              default_from_api: true
+                            - name: 'httpHeaders'
+                              type: Array
+                              description: |-
+                                Custom headers to set in the request. HTTP allows repeated headers.
+                              item_type:
+                                type: NestedObject
+                                properties:
+                                  - name: 'name'
+                                    type: String
+                                    description: |-
+                                      The header field name.
+                                    required: true
+                                  - name: 'value'
+                                    type: String
+                                    description: |-
+                                      The header field value.
+                                    send_empty_value: true
+                                    default_value: ""
+                        - name: 'grpc'
+                          type: NestedObject
+                          description: |-
+                            GRPC specifies an action involving a GRPC port.
+                          send_empty_value: true
+                          allow_empty_object: true
+                          exactly_one_of:
+                            - 'template.0.spec.0.containers.0.liveness_probe.0.http_get'
+                            - 'template.0.spec.0.containers.0.liveness_probe.0.grpc'
+                          properties:
+                            - name: 'port'
+                              type: Integer
+                              description: |-
+                                Port number to access on the container. Number must be in the range 1 to 65535.
+                                If not specified, defaults to the same value as container.ports[0].containerPort.
+                              default_from_api: true
+                            - name: 'service'
+                              type: String
+                              description: |-
+                                The name of the service to place in the gRPC HealthCheckRequest
+                                (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
+                                If this is not specified, the default behavior is defined by gRPC.
+
+              - name: 'containerConcurrency'
+                type: Integer
+                description: |-
+                  ContainerConcurrency specifies the maximum allowed in-flight (concurrent)
+                  requests per container of the Revision. Values are:
+                  - `0` thread-safe, the system should manage the max concurrency. This is
+                      the default value.
+                  - `1` not-thread-safe. Single concurrency
+                  - `2-N` thread-safe, max concurrency of N
+                default_from_api: true
+              - name: 'timeoutSeconds'
+                type: Integer
+                description: |-
+                  TimeoutSeconds holds the max duration the instance is allowed for responding to a request.
+                default_from_api: true
+              - name: 'serviceAccountName'
+                type: String
+                description: |-
+                  Email address of the IAM service account associated with the revision of the
+                  service. The service account represents the identity of the running revision,
+                  and determines what permissions the revision has. If not provided, the revision
+                  will use the project's default service account.
+                default_from_api: true
+              - name: 'volumes'
+                type: Array
+                description: |-
+                  Volume represents a named volume in a container.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: 'name'
+                      type: String
+                      description: |-
+                        Volume's name.
+                      required: true
+                    - name: 'secret'
+                      type: NestedObject
+                      description: |-
+                        The secret's value will be presented as the content of a file whose
+                        name is defined in the item path. If no items are defined, the name of
+                        the file is the secret_name.
+                      properties:
+                        - name: 'secretName'
+                          type: String
+                          description: |-
+                            The name of the secret in Cloud Secret Manager. By default, the secret
+                            is assumed to be in the same project.
+                            If the secret is in another project, you must define an alias.
+                            An alias definition has the form:
+                            {alias}:projects/{project-id|project-number}/secrets/{secret-name}.
+                            If multiple alias definitions are needed, they must be separated by
+                            commas.
+                            The alias definitions must be set on the run.googleapis.com/secrets
+                            annotation.
+                          required: true
+                        - name: 'defaultMode'
+                          type: Integer
+                          description: |-
+                            Mode bits to use on created files by default. Must be a value between 0000
+                            and 0777. Defaults to 0644. Directories within the path are not affected by
+                            this setting. This might be in conflict with other options that affect the
+                            file mode, like fsGroup, and the result can be other mode bits set.
+                        - name: 'items'
+                          type: Array
+                          description: |-
+                            If unspecified, the volume will expose a file whose name is the
+                            secret_name.
+                            If specified, the key will be used as the version to fetch from Cloud
+                            Secret Manager and the path will be the name of the file exposed in the
+                            volume. When items are defined, they must specify a key and a path.
+                          item_type:
+                            type: NestedObject
+                            properties:
+                              - name: 'key'
+                                type: String
+                                description: |-
+                                  The Cloud Secret Manager secret version.
+                                  Can be 'latest' for the latest value or an integer for a specific version.
+                                required: true
+                              - name: 'path'
+                                type: String
+                                description: |-
+                                  The relative path of the file to map the key to.
+                                  May not be an absolute path.
+                                  May not contain the path element '..'.
+                                  May not start with the string '..'.
+                                required: true
+                              - name: 'mode'
+                                type: Integer
+                                description: |-
+                                  Mode bits to use on this file, must be a value between 0000 and 0777. If
+                                  not specified, the volume defaultMode will be used. This might be in
+                                  conflict with other options that affect the file mode, like fsGroup, and
+                                  the result can be other mode bits set.
+                    - name: 'emptyDir'
+                      type: NestedObject
+                      description: |-
+                        Ephemeral storage which can be backed by real disks (HD, SSD), network storage or memory (i.e. tmpfs). For now only in memory (tmpfs) is supported. It is ephemeral in the sense that when the sandbox is taken down, the data is destroyed with it (it does not persist across sandbox runs).
+                      min_version: 'beta'
+                      properties:
+                        - name: 'medium'
+                          type: String
+                          description: |-
+                            The medium on which the data is stored. The default is "" which means to use the node's default medium. Must be an empty string (default) or Memory.
+                        - name: 'sizeLimit'
+                          type: String
+                          description: |-
+                            Limit on the storage usable by this EmptyDir volume. The size limit is also applicable for memory medium. The maximum usage on memory medium EmptyDir would be the minimum value between the SizeLimit specified here and the sum of memory limits of all containers in a pod. This field's values are of the 'Quantity' k8s type: https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/. The default is nil which means that the limit is undefined. More info: https://kubernetes.io/docs/concepts/storage/volumes/#emptydir.
+                    - name: 'csi'
+                      type: NestedObject
+                      description: |-
+                        A filesystem specified by the Container Storage Interface (CSI).
+                      min_version: 'beta'
+                      properties:
+                        - name: 'driver'
+                          type: String
+                          description: |-
+                            Unique name representing the type of file system to be created. Cloud Run supports the following values:
+                              * gcsfuse.run.googleapis.com: Mount a Google Cloud Storage bucket using GCSFuse. This driver requires the
+                                run.googleapis.com/execution-environment annotation to be set to "gen2" and
+                                run.googleapis.com/launch-stage set to "BETA" or "ALPHA".
+                          required: true
+                        - name: 'readOnly'
+                          type: Boolean
+                          description: |-
+                            If true, all mounts created from this volume will be read-only.
+                          default_from_api: true
+                        - name: 'volumeAttributes'
+                          type: KeyValuePairs
+                          description: |-
+                            Driver-specific attributes. The following options are supported for available drivers:
+                              * gcsfuse.run.googleapis.com
+                                * bucketName: The name of the Cloud Storage Bucket that backs this volume. The Cloud Run Service identity must have access to this bucket.
+                    - name: 'nfs'
+                      type: NestedObject
+                      description: |-
+                        A filesystem backed by a Network File System share. This filesystem requires the
+                        run.googleapis.com/execution-environment annotation to be set to "gen2" and
+                        run.googleapis.com/launch-stage set to "BETA" or "ALPHA".
+                      min_version: 'beta'
+                      properties:
+                        - name: 'server'
+                          type: String
+                          description: |-
+                            IP address or hostname of the NFS server
+                          required: true
+                        - name: 'path'
+                          type: String
+                          description: |-
+                            Path exported by the NFS server
+                          required: true
+                        - name: 'readOnly'
+                          type: Boolean
+                          description: |-
+                            If true, mount the NFS volume as read only in all mounts. Defaults to false.
+              - name: 'servingState'
+                type: Enum
+                description: |-
+                  ServingState holds a value describing the state the resources
+                  are in for this Revision.
+                  It is expected
+                  that the system will manipulate this based on routability and load.
+                output: true
+                deprecation_message: '`serving_state` is deprecated and will be removed in a future major release. This field is not supported by the Cloud Run API.'
+                enum_values:
+                  - 'ACTIVE'
+                  - 'RESERVE'
+                  - 'RETIRED'
+  - name: 'status'
+    type: NestedObject
+    description: The current status of the Service.
+    output: true
+    properties:
+      - name: 'conditions'
+        type: Array
+        description: |-
+          Array of observed Service Conditions, indicating the current ready state of the service.
+        output: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'message'
+              type: String
+              description: |-
+                Human readable message indicating details about the current status.
+              output: true
+            - name: 'status'
+              type: String
+              description: Status of the condition, one of True, False, Unknown.
+              output: true
+            - name: 'reason'
+              type: String
+              description: |-
+                One-word CamelCase reason for the condition's current status.
+              output: true
+            - name: 'type'
+              type: String
+              description: Type of domain mapping condition.
+              output: true
+      - name: 'url'
+        type: String
+        description: |-
+          From RouteStatus. URL holds the url that will distribute traffic over the provided traffic
+          targets. It generally has the form
+          https://{route-hash}-{project-hash}-{cluster-level-suffix}.a.run.app
+        output: true
+      - name: 'observedGeneration'
+        type: Integer
+        description: |-
+          ObservedGeneration is the 'Generation' of the Route that was last processed by the
+          controller.
+
+          Clients polling for completed reconciliation should poll until observedGeneration =
+          metadata.generation and the Ready condition's status is True or False.
+        output: true
+      - name: 'latestCreatedRevisionName'
+        type: String
+        description: |-
+          From ConfigurationStatus. LatestCreatedRevisionName is the last revision that was created
+          from this Service's Configuration. It might not be ready yet, for that use
+          LatestReadyRevisionName.
+        output: true
+      - name: 'latestReadyRevisionName'
+        type: String
+        description: |-
+          From ConfigurationStatus. LatestReadyRevisionName holds the name of the latest Revision
+          stamped out from this Service's Configuration that has had its "Ready" condition become
+          "True".
+        output: true
+      - name: 'traffic'
+        type: Array
+        description: |-
+          Traffic specifies how to distribute traffic over a collection of Knative Revisions
+          and Configurations
+        output: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'revisionName'
+              type: String
+              description: |-
+                RevisionName of a specific revision to which to send this portion of traffic.
+              output: true
+            - name: 'percent'
+              type: Integer
+              description: |-
+                Percent specifies percent of the traffic to this Revision or Configuration.
+              output: true
+            - name: 'tag'
+              type: String
+              description: |-
+                Tag is optionally used to expose a dedicated url for referencing this target exclusively.
+              output: true
+            - name: 'latestRevision'
+              type: Boolean
+              description: |-
+                LatestRevision may be optionally provided to indicate that the latest ready
+                Revision of the Configuration should be used for this traffic target. When
+                provided LatestRevision must be true if RevisionName is empty; it must be
+                false when RevisionName is non-empty.
+              output: true
+            - name: 'url'
+              type: String
+              description: |-
+                URL displays the URL for accessing tagged traffic targets. URL is displayed in status,
+                and is disallowed on spec. URL must contain a scheme (e.g. http://) and a hostname,
+                but may not contain anything else (e.g. basic auth, url path, etc.)
+
+              output: true
+  - name: 'metadata'
+    type: NestedObject
+    description: |-
+      Metadata associated with this Service, including name, namespace, labels,
+      and annotations.
+    required: false
+    default_from_api: true
+    properties:
+      - name: 'labels'
+        type: KeyValueLabels
+        description: |-
+          Map of string keys and values that can be used to organize and categorize
+          (scope and select) objects. May match selectors of replication controllers
+          and routes.
+      - name: 'generation'
+        type: Integer
+        description: |-
+          A sequence number representing a specific generation of the desired state.
+        output: true
+      - name: 'resourceVersion'
+        type: String
+        description: |-
+          An opaque value that represents the internal version of this object that
+          can be used by clients to determine when objects have changed. May be used
+          for optimistic concurrency, change detection, and the watch operation on a
+          resource or set of resources. They may only be valid for a
+          particular resource or set of resources.
+        output: true
+      - name: 'selfLink'
+        type: String
+        description: |-
+          SelfLink is a URL representing this object.
+        output: true
+      - name: 'uid'
+        type: String
+        description: |-
+          UID is a unique id generated by the server on successful creation of a resource and is not
+          allowed to change on PUT operations.
+        output: true
+      - name: 'namespace'
+        type: String
+        description: |-
+          In Cloud Run the namespace must be equal to either the
+          project ID or project number.
+        required: false
+        default_from_api: true
+        custom_flatten: 'templates/terraform/custom_flatten/go/set_to_project.go.tmpl'
+        custom_expand: 'templates/terraform/custom_expand/go/default_to_project.go.tmpl'
+      - name: 'annotations'
+        type: KeyValueAnnotations
+        description: |-
+          Annotations is a key value map stored with a resource that
+          may be set by external tools to store and retrieve arbitrary metadata. More
+          info: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations
+
+          **Note**: The Cloud Run API may add additional annotations that were not provided in your config.
+          If terraform plan shows a diff where a server-side annotation is added, you can add it to your config
+          or apply the lifecycle.ignore_changes rule to the metadata.0.annotations field.
+
+          Annotations with `run.googleapis.com/` and `autoscaling.knative.dev` are restricted. Use the following annotation
+          keys to configure features on a Service:
+
+          - `run.googleapis.com/binary-authorization-breakglass` sets the [Binary Authorization breakglass](https://cloud.google.com/sdk/gcloud/reference/run/deploy#--breakglass).
+          - `run.googleapis.com/binary-authorization` sets the [Binary Authorization](https://cloud.google.com/sdk/gcloud/reference/run/deploy#--binary-authorization).
+          - `run.googleapis.com/client-name` sets the client name calling the Cloud Run API.
+          - `run.googleapis.com/custom-audiences` sets the [custom audiences](https://cloud.google.com/sdk/gcloud/reference/alpha/run/deploy#--add-custom-audiences)
+            that can be used in the audience field of ID token for authenticated requests.
+          - `run.googleapis.com/description` sets a user defined description for the Service.
+          - `run.googleapis.com/ingress` sets the [ingress settings](https://cloud.google.com/sdk/gcloud/reference/run/deploy#--ingress)
+            for the Service. For example, `"run.googleapis.com/ingress" = "all"`.
+          - `run.googleapis.com/launch-stage` sets the [launch stage](https://cloud.google.com/run/docs/troubleshooting#launch-stage-validation)
+            when a preview feature is used. For example, `"run.googleapis.com/launch-stage": "BETA"`

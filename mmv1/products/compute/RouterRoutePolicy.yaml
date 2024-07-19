@@ -1,0 +1,172 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Resource
+name: 'RouterRoutePolicy'
+base_url: projects/{{project}}/regions/{{region}}/routers/{{router}}
+self_link: projects/{{project}}/regions/{{region}}/routers/{{router}}/getRoutePolicy?policy={{name}}
+create_url: projects/{{project}}/regions/{{region}}/routers/{{router}}/updateRoutePolicy
+update_url: projects/{{project}}/regions/{{region}}/routers/{{router}}/updateRoutePolicy
+delete_url: projects/{{project}}/regions/{{region}}/routers/{{router}}/deleteRoutePolicy?policy={{name}}
+create_verb: :POST
+update_verb: :POST
+update_mask: true
+delete_verb: :POST
+description: A route policy created in a router
+min_version: 'beta'
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Google Cloud Router': 'https://cloud.google.com/router/docs/'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/routers'
+async: !ruby/object:Api::OpAsync
+  operation: !ruby/object:Api::OpAsync::Operation
+    kind: 'compute#operation'
+    path: 'name'
+    base_url: 'projects/{{project}}/regions/{{regions}}/operations/{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::OpAsync::Result
+    path: 'targetLink'
+  status: !ruby/object:Api::OpAsync::Status
+    path: 'status'
+    complete: 'DONE'
+    allowed:
+      - 'PENDING'
+      - 'RUNNING'
+      - 'DONE'
+  error: !ruby/object:Api::OpAsync::Error
+    path: 'error/errors'
+    message: 'message'
+id_format: '{{project}}/{{region}}/{{router}}/routePolicies/{{name}}'
+import_format: ['{{project}}/{{region}}/{{router}}/routePolicies/{{name}}']
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'router_route_policy_export'
+    primary_resource_id: 'rp-export'
+    vars:
+      router_name: 'my-router'
+      network_name: 'my-network'
+      subnet_name: 'my-subnetwork'
+      route_policy_name: 'my-rp1'
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'router_route_policy_import'
+    primary_resource_id: 'rp-import'
+    vars:
+      router_name: 'my-router'
+      network_name: 'my-network'
+      subnet_name: 'my-subnetwork'
+      route_policy_name: 'my-rp2'
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  decoder: templates/terraform/decoders/unwrap_route_policy_resource.go.erb
+parameters:
+  - !ruby/object:Api::Type::ResourceRef
+    name: 'router'
+    resource: 'Router'
+    imports: name
+    description: |
+      The name of the Cloud Router in which this route policy will be configured.
+    required: true
+    immutable: true
+    url_param_only: true
+  - !ruby/object:Api::Type::ResourceRef
+    name: region
+    resource: Region
+    imports: name
+    description: Region where the router and NAT reside.
+    immutable: true
+    required: false
+    url_param_only: true
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+  - !ruby/object:Api::Type::String
+    name: name
+    description: |
+      Name of the route policy. This policy's name, which must be a resource ID segment and unique within all policies owned by the Router
+    required: true
+    immutable: true
+properties:
+  - !ruby/object:Api::Type::Enum
+    name: type
+    description: |
+      This is policy's type, which is one of IMPORT or EXPORT
+    values:
+      - :ROUTE_POLICY_TYPE_IMPORT
+      - :ROUTE_POLICY_TYPE_EXPORT
+  - !ruby/object:Api::Type::Array
+    name: terms
+    description: |
+      List of terms (the order in the list is not important, they are evaluated in order of priority).
+    required: true
+    immutable: true
+    item_type: !ruby/object:Api::Type::NestedObject
+      properties:
+        - !ruby/object:Api::Type::Integer
+          name: priority
+          description: |
+            The evaluation priority for this term, which must be between 0 (inclusive) and 231 (exclusive), and unique within the list.
+          required: true
+        - !ruby/object:Api::Type::NestedObject
+          name: match
+          description: |
+            CEL expression evaluated against a route to determine if this term applies (see Policy Language). When not set, the term applies to all routes.
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'expression'
+              required: true
+              description:
+                Textual representation of an expression in Common Expression
+                Language syntax.
+            - !ruby/object:Api::Type::String
+              name: 'title'
+              description:
+                Title for the expression, i.e. a short string describing its
+                purpose.
+            - !ruby/object:Api::Type::String
+              name: 'description'
+              description: Description of the expression
+            - !ruby/object:Api::Type::String
+              name: 'location'
+              description:
+                String indicating the location of the expression for error
+                reporting, e.g. a file name and a position in the file
+        - !ruby/object:Api::Type::Array
+          name: actions
+          description: |
+            'CEL expressions to evaluate to modify a route when this term matches.'\
+          item_type: !ruby/object:Api::Type::NestedObject
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'expression'
+                required: true
+                description: |
+                  Textual representation of an expression in Common Expression
+                  Language syntax.
+              - !ruby/object:Api::Type::String
+                name: 'title'
+                description: |
+                  Title for the expression, i.e. a short string describing its
+                  purpose.
+              - !ruby/object:Api::Type::String
+                name: 'description'
+                description: |
+                  Description of the expression
+              - !ruby/object:Api::Type::String
+                name: 'location'
+                description: |
+                  String indicating the location of the expression for error
+                  reporting, e.g. a file name and a position in the file
+  - !ruby/object:Api::Type::Fingerprint
+    name: 'fingerprint'
+    description: |
+      The fingerprint used for optimistic locking of this resource.  Used
+      internally during updates.
+    output: true

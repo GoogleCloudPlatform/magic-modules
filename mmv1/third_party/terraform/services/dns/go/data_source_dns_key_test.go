@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -32,7 +32,6 @@ func TestAccDataSourceDNSKeys_basic(t *testing.T) {
 		},
 	})
 }
-
 
 func TestAccDataSourceDNSKeys_noDnsSec(t *testing.T) {
 	t.Parallel()

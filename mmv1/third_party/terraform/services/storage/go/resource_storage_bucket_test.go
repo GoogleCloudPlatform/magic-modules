@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -133,7 +133,7 @@ func TestAccStorageBucket_AutoclassDiffSupress(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
 			{
-				Config: testAccStorageBucket_basicWithAutoclass(bucketName,false),
+				Config: testAccStorageBucket_basicWithAutoclass(bucketName, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckStorageBucketExists(
 						t, "google_storage_bucket.bucket", bucketName, &bucket),
@@ -146,7 +146,7 @@ func TestAccStorageBucket_AutoclassDiffSupress(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
 			{
-				Config: testAccStorageBucket_basicWithAutoclass(bucketName,true),
+				Config: testAccStorageBucket_basicWithAutoclass(bucketName, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckStorageBucketExists(
 						t, "google_storage_bucket.bucket", bucketName, &bucket),
@@ -346,7 +346,7 @@ func TestAccStorageBucket_dualLocation_rpo(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
 			{
-				Config: testAccStorageBucket_dualLocation_rpo(bucketName,"ASYNC_TURBO"),
+				Config: testAccStorageBucket_dualLocation_rpo(bucketName, "ASYNC_TURBO"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"google_storage_bucket.bucket", "rpo", "ASYNC_TURBO"),
@@ -359,7 +359,7 @@ func TestAccStorageBucket_dualLocation_rpo(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
 			{
-				Config: testAccStorageBucket_dualLocation_rpo(bucketName,"DEFAULT"),
+				Config: testAccStorageBucket_dualLocation_rpo(bucketName, "DEFAULT"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"google_storage_bucket.bucket", "rpo", "DEFAULT"),
@@ -399,7 +399,7 @@ func TestAccStorageBucket_multiLocation_rpo(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
 			{
-				Config: testAccStorageBucket_multiLocation_rpo(bucketName,"DEFAULT"),
+				Config: testAccStorageBucket_multiLocation_rpo(bucketName, "DEFAULT"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"google_storage_bucket.bucket", "rpo", "DEFAULT"),
@@ -653,7 +653,7 @@ func TestAccStorageBucket_lifecycleRulesVirtualFields(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy","lifecycle_rule.1.condition.0.no_age","lifecycle_rule.1.condition.0.send_days_since_noncurrent_time_if_zero","lifecycle_rule.2.condition.0.send_days_since_noncurrent_time_if_zero","lifecycle_rule.1.condition.0.send_days_since_custom_time_if_zero","lifecycle_rule.2.condition.0.send_days_since_custom_time_if_zero","lifecycle_rule.1.condition.0.send_num_newer_versions_if_zero","lifecycle_rule.2.condition.0.send_num_newer_versions_if_zero"},
+				ImportStateVerifyIgnore: []string{"force_destroy", "lifecycle_rule.1.condition.0.no_age", "lifecycle_rule.1.condition.0.send_days_since_noncurrent_time_if_zero", "lifecycle_rule.2.condition.0.send_days_since_noncurrent_time_if_zero", "lifecycle_rule.1.condition.0.send_days_since_custom_time_if_zero", "lifecycle_rule.2.condition.0.send_days_since_custom_time_if_zero", "lifecycle_rule.1.condition.0.send_num_newer_versions_if_zero", "lifecycle_rule.2.condition.0.send_num_newer_versions_if_zero"},
 			},
 			{
 				Config: testAccStorageBucket_customAttributes_withLifecycleVirtualFieldsUpdate2(bucketName),
@@ -667,7 +667,7 @@ func TestAccStorageBucket_lifecycleRulesVirtualFields(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy","lifecycle_rule.1.condition.0.no_age","lifecycle_rule.0.condition.0.send_days_since_noncurrent_time_if_zero","lifecycle_rule.0.condition.0.send_days_since_custom_time_if_zero","lifecycle_rule.0.condition.0.send_num_newer_versions_if_zero"},
+				ImportStateVerifyIgnore: []string{"force_destroy", "lifecycle_rule.1.condition.0.no_age", "lifecycle_rule.0.condition.0.send_days_since_noncurrent_time_if_zero", "lifecycle_rule.0.condition.0.send_days_since_custom_time_if_zero", "lifecycle_rule.0.condition.0.send_num_newer_versions_if_zero"},
 			},
 			{
 				Config: testAccStorageBucket_customAttributes_withLifecycle1(bucketName),
@@ -1510,7 +1510,7 @@ func TestAccStorageBucket_SoftDeletePolicy(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
 			{
-				Config: testAccStorageBucket_SoftDeletePolicy(bucketName,7776000),
+				Config: testAccStorageBucket_SoftDeletePolicy(bucketName, 7776000),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckStorageBucketExists(
 						t, "google_storage_bucket.bucket", bucketName, &bucket),
@@ -1525,7 +1525,7 @@ func TestAccStorageBucket_SoftDeletePolicy(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
 			{
-				Config: testAccStorageBucket_SoftDeletePolicy(bucketName,0),
+				Config: testAccStorageBucket_SoftDeletePolicy(bucketName, 0),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckStorageBucketExists(
 						t, "google_storage_bucket.bucket", bucketName, &bucket),
@@ -1801,7 +1801,7 @@ resource "google_storage_bucket" "bucket" {
 `, bucketName)
 }
 
-func testAccStorageBucket_dualLocation_rpo(bucketName string,rpo string) string {
+func testAccStorageBucket_dualLocation_rpo(bucketName string, rpo string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
   name          = "%s"
@@ -1812,10 +1812,10 @@ resource "google_storage_bucket" "bucket" {
   }
   rpo = "%s"
 }
-`, bucketName,rpo)
+`, bucketName, rpo)
 }
 
-func testAccStorageBucket_multiLocation_rpo(bucketName string,rpo string) string {
+func testAccStorageBucket_multiLocation_rpo(bucketName string, rpo string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
   name          = "%s"
@@ -1823,7 +1823,7 @@ resource "google_storage_bucket" "bucket" {
   force_destroy = true
   rpo = "%s"
 }
-`, bucketName,rpo)
+`, bucketName, rpo)
 }
 
 func testAccStorageBucket_customAttributes(bucketName string) string {
@@ -2543,7 +2543,7 @@ resource "google_storage_bucket" "bucket" {
 }
 
 func testAccStorageBucket_SoftDeletePolicy(bucketName string, duration int) string {
-  return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
   name          = "%s"
   location      = "US"

@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestAccWorkstationsWorkstationConfig_basic(t *testing.T) {
@@ -392,7 +392,6 @@ resource "google_workstations_workstation_config" "default" {
 	gce_pd {
  	      disk_type = "pd-standard"
 	      source_image = google_compute_image.test_source_image.id
-	      read_only  = true
     	}
   }
 
@@ -767,6 +766,7 @@ resource "google_tags_tag_value" "tag_value1" {
   parent = "tagKeys/${google_tags_tag_key.tag_key1.name}"
   short_name = "%{value_short_name}"
 }
+
 resource "google_compute_network" "default" {
   provider                = google-beta
   name                    = "tf-test-workstation-cluster%{random_suffix}"
@@ -1337,7 +1337,7 @@ func TestAccWorkstationsWorkstationConfig_vmTags(t *testing.T) {
 }
 
 func testAccWorkstationsWorkstationConfig_vmTags(context map[string]interface{}) string {
-return acctest.Nprintf(`
+	return acctest.Nprintf(`
 data "google_project" "project" {
   provider = google-beta
 }

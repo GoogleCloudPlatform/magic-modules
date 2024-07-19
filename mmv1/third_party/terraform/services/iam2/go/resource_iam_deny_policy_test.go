@@ -6,7 +6,7 @@ import (
 
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestAccIAM2DenyPolicy_iamDenyPolicyUpdate(t *testing.T) {
@@ -76,7 +76,7 @@ func TestAccIAM2DenyPolicy_iamDenyPolicyFolderParent(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"name", "parent"},
 			},
-      {
+			{
 				Config: testAccIAM2DenyPolicy_iamDenyPolicyFolderUpdate(context),
 			},
 			{

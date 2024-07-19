@@ -2,12 +2,12 @@ package compute_test
 
 import (
 	"fmt"
-	"testing"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccComputeRegionPerInstanceConfig_statefulBasic(t *testing.T) {
@@ -406,7 +406,6 @@ resource "google_compute_region_instance_group_manager" "rigm" {
 }
 `, context)
 }
-
 
 func testAccComputeRegionPerInstanceConfig_removeInstanceOnDestroyBefore(context map[string]interface{}) string {
 	return acctest.Nprintf(`

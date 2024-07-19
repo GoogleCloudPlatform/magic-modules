@@ -93,7 +93,6 @@ properties:
       Labels to apply to this address.  A list of key->value pairs.
     update_verb: :POST
     update_url: 'projects/{{project}}/global/addresses/{{name}}/setLabels'
-    min_version: beta
   - !ruby/object:Api::Type::Fingerprint
     name: 'labelFingerprint'
     description: |
