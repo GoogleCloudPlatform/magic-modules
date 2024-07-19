@@ -42,7 +42,7 @@ resource "google_workbench_instance" "<%= ctx[:primary_resource_id] %>" {
     disable_public_ip = false
 
     service_accounts {
-      email = "<%= ctx[:test_env_vars]["service_account"] %>"
+      email = "<%= ctx[:test_env_vars]['service_account'] %>"
     }
 
     boot_disk {
