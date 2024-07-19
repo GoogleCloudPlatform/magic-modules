@@ -698,6 +698,7 @@ func checkExceptionList(filePath string) bool {
 		"containeranalysis_occurrence",
 		"containeranalysis_attestation",
 		"iam/example_config_body/privateca",
+		"iam/example_config_body/vertex_ai",
 
 		// TODO: remove the following files from the exception list after all of the services are migrated to Go
 		// It will generate diffs when partial services are migrated.
