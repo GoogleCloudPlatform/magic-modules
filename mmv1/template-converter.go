@@ -37,7 +37,7 @@ func convertTemplates() {
 	for _, folder := range folders {
 		counts += convertTemplate(folder)
 	}
-	log.Printf("%d template files in %d subfolders total", counts, len(folders))
+	// log.Printf("%d template files in %d subfolders total", counts, len(folders))
 }
 
 func convertTemplate(folder string) int {
@@ -49,7 +49,7 @@ func convertTemplate(folder string) int {
 	}
 
 	templates := find(rubyDir, ".erb")
-	log.Printf("%d template files in folder %s", len(templates), folder)
+	// log.Printf("%d template files in folder %s", len(templates), folder)
 
 	for _, file := range templates {
 		filePath := path.Join(rubyDir, file)
@@ -107,7 +107,7 @@ func convertAllHandwrittenFiles() int {
 	for _, folder := range folders {
 		counts += convertHandwrittenFiles(folder)
 	}
-	log.Printf("%d handwritten files in total", counts)
+	// log.Printf("%d handwritten files in total", counts)
 
 	return counts
 }
@@ -120,7 +120,7 @@ func convertHandwrittenFiles(folder string) int {
 	}
 
 	files := find(folder, ".erb")
-	log.Printf("%d handwritten files in folder %s", len(files), folder)
+	// log.Printf("%d handwritten files in folder %s", len(files), folder)
 
 	for _, file := range files {
 		filePath := path.Join(folder, file)
@@ -142,7 +142,7 @@ func convertHandwrittenFiles(folder string) int {
 		if err != nil {
 			glog.Exit(err)
 		}
-		log.Printf("Converting %s to %s", file, goTemplate)
+		// log.Printf("Converting %s to %s", file, goTemplate)
 	}
 
 	return len(files)
