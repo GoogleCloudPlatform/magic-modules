@@ -268,7 +268,6 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_delete: templates/terraform/custom_delete/clear_iap_settings.go.erb
   test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
 
-
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'iap_settings_basic'
