@@ -75,6 +75,10 @@ properties:
       The IPv4 address range, in CIDR format, represented by this public
       advertised prefix.
     required: true
+  - !ruby/object:Api::Type::Enum
+    name: 'status'
+    description: |
+      The status of the public advertised prefix. Possible values include: INITIAL, PTR_CONFIGURED, VALIDATED, REVERSE_DNS_LOOKUP_FAILED, PREFIX_CONFIGURATION_IN_PROGRESS, PREFIX_CONFIGURATION_COMPLETE, PREFIX_REMOVAL_IN_PROGRESS
   - !ruby/object:Api::Type::String
     name: 'sharedSecret'
     output: true
