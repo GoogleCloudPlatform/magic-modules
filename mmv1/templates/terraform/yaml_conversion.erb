@@ -433,6 +433,10 @@ exclude_tgc: <%= object.exclude_tgc %>
 <%  unless !object.skip_sweeper -%>
 skip_sweeper: <%= object.skip_sweeper %>
 <%  end -%>
+<%    if !object.sweeper.nil? && !object.sweeper.sweepable_identifier_field.nil? -%>
+sweeper:
+  sweepable_identifier_field: <%= object.sweeper.sweepable_identifier_field %>
+<%  end -%>
 <%  unless object.error_retry_predicates.nil? -%>
 error_retry_predicates:
 <%    object.error_retry_predicates.each do |erpred| %>
