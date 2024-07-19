@@ -31,13 +31,11 @@ var vcuEnvironmentVariables = [...]string{
 	"GOOGLE_SERVICE_ACCOUNT",
 	"GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION",
 	"GOOGLE_ZONE",
-	"GOOGLE_REGION",
 	"HOME",
 	"PATH",
 	"SA_KEY",
 	"USER",
 	"GITHUB_TOKEN_CLASSIC",
-	"BASE_BRANCH",
 }
 
 var (
