@@ -2160,7 +2160,7 @@ resource "google_network_security_client_tls_policy" "foobar" {
     certificate_provider_instance {
       plugin_instance = "google_cloud_private_spiffe"
     }
-	}
+  }
 }
 `, randomSuffix, randomSuffix)
 }
@@ -2192,7 +2192,7 @@ resource "google_network_security_client_tls_policy" "foobar" {
     certificate_provider_instance {
       plugin_instance = "google_cloud_private_spiffe"
     }
-	}
+  }
 }
 
 resource "google_network_security_client_tls_policy" "foobar2" {
@@ -2211,7 +2211,7 @@ resource "google_network_security_client_tls_policy" "foobar2" {
     certificate_provider_instance {
       plugin_instance = "google_cloud_private_spiffe"
     }
-	}
+  }
 }
 `, randomSuffix, randomSuffix, randomSuffix)
 }
