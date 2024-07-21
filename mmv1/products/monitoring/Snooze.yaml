@@ -12,14 +12,11 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-# API resource name
 name: 'Snooze'
-# Resource description for the provider documentation.
 description: |
   A Snooze will prevent any alerts from being opened, and close any that are already open.
   The Snooze will work on alerts that match the criteria defined in the Snooze.
   The Snooze will be active from interval start time through interval end time.
-
 
   ~> **Note:** Monitoring Snoozes cannot be deleted from the Google Cloud Platform.
   Destroying a Terraform-managed Snooze will cancel the snooze and remove it from state but
@@ -28,13 +25,6 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/monitoring/alerts/snooze'
   api: 'https://cloud.google.com/monitoring/api/ref_v3/rest#rest-resource:-v3.projects.snoozes'
-# Marks the resource as beta-only. Ensure a beta version block is present in
-# provider.yaml.
-# min_version: beta
-
-# URL for the resource's standard List method. https://google.aip.dev/132
-# Terraform field names enclosed in double curly braces are replaced with
-# the field values from the resource at runtime.
 base_url: 'v3/projects/{{project}}/snoozes'
 self_link: 'v3/{{name}}'
 create_url: 'v3/projects/{{project}}/snoozes'
