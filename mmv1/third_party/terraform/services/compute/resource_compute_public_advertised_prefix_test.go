@@ -196,3 +196,58 @@ func testAccCheckComputePublicAdvertisedPrefixDestroyProducer(t *testing.T) func
 		return nil
 	}
 }
+
+
+func testAccComputePublicAdvertisedPrefix_publicAdvertisedPrefixesStatusUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_public_advertised_prefix" "prefix" {
+  name                = "tf-test-my-prefix%{random_suffix}"
+  description         = "%{description}"
+  dns_verification_ip = "127.127.0.0"
+  ip_cidr_range       = "127.127.0.0/16"
+  status              = "%{random_suffix}"
+}
+`, context)
+}
+
+func TestAccComputePublicAdvertisedPrefix_publicAdvertisedPrefixesStatusUpdate(t *testing.T) {
+	t.Parallel()
+
+	context_1 := map[string]interface{}{
+		"description":   envvar.GetTestPublicAdvertisedPrefixDescriptionFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+		"status":        "INITIAL",
+	}
+
+	context_2 := map[string]interface{}{
+		"description":   context_1["description"],
+		"random_suffix": context_1["random_suffix"],
+		"status":        "PTR_CONFIGURED",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputePublicAdvertisedPrefixDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputePublicAdvertisedPrefix_publicAdvertisedPrefixesStatusUpdate(context_1),
+			},
+			{
+				ResourceName:      "google_compute_public_advertised_prefix.prefix",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputePublicAdvertisedPrefix_publicAdvertisedPrefixesStatusUpdate(context_2),
+			},
+			{
+				ResourceName:      "google_compute_public_advertised_prefix.prefix",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+
