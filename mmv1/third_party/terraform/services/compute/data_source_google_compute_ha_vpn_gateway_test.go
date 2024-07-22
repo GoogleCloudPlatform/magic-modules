@@ -24,14 +24,14 @@ func TestAccDataSourceComputeHaVpnGateway(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					acctest.CheckDataSourceStateMatchesResourceState("data.google_compute_ha_vpn_gateway.ha_gateway", "google_compute_ha_vpn_gateway.ha_gateway"),
 					resource.TestCheckResourceAttr("data.google_compute_ha_vpn_gateway.ha_gateway", "gateway_ip_version", "IPV4"),
-					resource.TestCheckResourceAttr("data.googlecompute_ha_vpn_gateway.ha_gateway", "stack_type", "IPV4_ONLY"),
+					resource.TestCheckResourceAttr("data.google_compute_ha_vpn_gateway.ha_gateway", "stack_type", "IPV4_ONLY"),
 				),
 			}, {
 				Config: testAccDataSourceComputeHaVpnGatewayFields(fmt.Sprintf("%s-2", gwName), gatewayIpVersion, stackType),
 				Check: resource.ComposeTestCheckFunc(
 					acctest.CheckDataSourceStateMatchesResourceState("data.google_compute_ha_vpn_gateway.ha_gateway", "google_compute_ha_vpn_gateway.ha_gateway"),
 					resource.TestCheckResourceAttr("data.google_compute_ha_vpn_gateway.ha_gateway", "gateway_ip_version", gatewayIpVersion),
-					resource.TestCheckResourceAttr("data.googlecompute_ha_vpn_gateway.ha_gateway", "stack_type", stackType),
+					resource.TestCheckResourceAttr("data.google_compute_ha_vpn_gateway.ha_gateway", "stack_type", stackType),
 				),
 			},
 		},
@@ -56,7 +56,7 @@ data "google_compute_ha_vpn_gateway" "ha_gateway" {
 `, gwName, gwName)
 }
 
-func testAccDataSourceComputeHaVpnGatewayFields(gwName, gateway_ip_version, stack_type string) string {
+func testAccDataSourceComputeHaVpnGatewayFields(gwName, gatewayIpVersion, stackType string) string {
 	return fmt.Sprintf(`
 resource "google_compute_ha_vpn_gateway" "ha_gateway" {
   name     			 = "%s"
