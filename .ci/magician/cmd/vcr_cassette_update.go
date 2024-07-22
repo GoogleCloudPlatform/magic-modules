@@ -158,12 +158,8 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 
 		recordingResult, recordingErr := vt.RunParallel(Recording, provider.Beta, nil, replayingResult.FailedTests)
 
-		cassettesPath := vt.CassettePath(provider.Beta)
-		if _, err := uploadCassettesToGCS(cassettesPath, "gs://ci-vcr-cassettes/beta/fixtures/", rnr); err != nil {
-			return fmt.Errorf("error uploading cassettes: %w", err)
-		}
-
-		// upload build and test logs, slightly different log structure than original
+		// upload build and test logs first to preserve debugging logs in case
+		// uploading cassettes failed because recording not work
 		buildLogPath := filepath.Join(rnr.GetCWD(), "testlogs", fmt.Sprintf("%s_test.log", Recording.Lower()))
 		if _, err := uploadLogsToGCS(buildLogPath, bucketPrefix+"/logs/recording/", rnr); err != nil {
 			return fmt.Errorf("error uploading recording test log: %w", err)
@@ -172,6 +168,11 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 		testLogPath := vt.LogPath(Recording, provider.Beta)
 		if _, err := uploadLogsToGCS(filepath.Join(testLogPath, "*"), bucketPrefix+"/logs/build-log/", rnr); err != nil {
 			return fmt.Errorf("error uploading recording build log: %w", err)
+		}
+
+		cassettesPath := vt.CassettePath(provider.Beta)
+		if _, err := uploadCassettesToGCS(cassettesPath, "gs://ci-vcr-cassettes/beta/fixtures/", rnr); err != nil {
+			return fmt.Errorf("error uploading cassettes: %w", err)
 		}
 
 		hasTerminatedTests := (len(recordingResult.PassedTests) + len(recordingResult.FailedTests)) < len(replayingResult.FailedTests)
